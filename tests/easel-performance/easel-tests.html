@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport"
+          content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+
+    <!-- runs in full-screen mode on iOS devices -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <title>Easel Performance Tests</title>
+    <link rel="stylesheet" type="text/css" href="reset.css"/>
+    
+    <link rel="stylesheet" href="../../contrib/jquery.mobile-1.2.0.min.css" />
+    <script src="../../contrib/jquery-1.8.3.min.js"></script>
+    <script src="../../contrib/jquery.mobile-1.2.0.min.js"></script>
+    <script src="../../contrib/underscore-1.4.3-min.js"></script>
+    <script src="../../contrib/easeljs-0.5.0.min.js"></script>
+    <script src="../../phet-scene-min.js"></script>
+    
+    <script type="text/javascript" src="js/easel-tests.js"></script>
+    <style type="text/css">
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            overflow: hidden;
+        }
+
+        canvas {
+            position: absolute;
+        }
+
+        #topleft {
+            position: absolute;
+            left: 0;
+            top: 0;
+            padding: 0.25em;
+            font-size: 12px;
+        }
+
+    </style>
+</head>
+
+<body id="home">
+
+<div id="main">
+</div>
+
+<canvas id="mainCanvas" width="1024" height="768" style="z-index:0;">
+    Your browser appears to not support the HTML5 <code>&lt;canvas&gt;</code> element!
+</canvas>
+
+<canvas id="uiCanvas" width="1024" height="768" style="z-index:1;">
+    Your browser appears to not support the HTML5 <code>&lt;canvas&gt;</code> element!
+</canvas>
+
+<div id="topleft">
+    <h1 style="font-size: 20px; float: left; line-height: 33px; margin: 0 20px;">Easel Performance Tests</h1>
+    
+    <div style="float: left;">
+        <span data-role="controlgroup" data-type="horizontal" data-mini="true" style="padding-right: 20px;">
+            <a id="type-easel" href="#" data-role="button" class="ui-btn-active">Easel</a>
+            <a id="type-custom" href="#" data-role="button">Custom</a>
+        </span>
+        <span data-role="controlgroup" data-type="horizontal" data-mini="true" style="padding-right: 20px;">
+            <a id="test-boxes" href="#" data-role="button" class="ui-btn-active">Boxes</a>
+            <a id="test-text" href="#" data-role="button">Text</a>
+        </span>
+    </div>
+    
+    <div style="font-size: 20px; float: left; line-height: 33px;">
+        <span style="font-size: 16px;">FPS (avg): <span id="fps-readout"></span></span>
+    </div>
+</div>
+
+</body>
+</html>
