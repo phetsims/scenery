@@ -4,6 +4,7 @@ phet.tests = phet.tests || {};
 
 // TODO:
 // consider clearRect under transformed bounds. may be more optimal
+// optimizations from http://www.html5rocks.com/en/tutorials/canvas/performance/
 
 $(document).ready( function() {
     // the main div where all testing content is rendered
