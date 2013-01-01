@@ -3,7 +3,6 @@ var phet = phet || {};
 phet.tests = phet.tests || {};
 
 // TODO:
-// add a "blank" test?
 // consider clearRect under transformed bounds. may be more optimal
 
 $(document).ready( function() {
