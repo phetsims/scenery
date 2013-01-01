@@ -1,5 +1,6 @@
 
-var phet = {};
+var phet = phet || {};
+phet.tests = phet.tests || {};
 
 $(document).ready( function() {
     // constants
@@ -87,10 +88,42 @@ $(document).ready( function() {
                 };
             }
         } else {
+            var baseCanvas = document.createElement( 'canvas' );
+            baseCanvas.id = 'base-canvas';
+            baseCanvas.width = main.width();
+            baseCanvas.height = main.height();
+            main.append( baseCanvas );
+            var baseContext = phet.canvas.initCanvas( baseCanvas );
+            
             if( test == 'test-boxes' ) {
-                
+                var x = main.width() / 2;
+                var y = main.height() / 2;
+                var rotation = 0;
+                baseContext.fillStyle = 'rgba(255,0,0,1)';
+                step = function( timeElapsed ) {
+                    // clear old location
+                    baseContext.clearRect( x - 150, y - 150, 300, 300 );
+                    // TODO: consider whether clearRect is faster if it's not under a transform!
+                    
+                    baseContext.save();
+                    rotation += timeElapsed;
+                    baseContext.translate( x, y );
+                    baseContext.rotate( rotation );
+                    
+                    baseContext.beginPath();
+                    baseContext.moveTo( 0, 0 );
+                    baseContext.lineTo( 100, 0 );
+                    baseContext.lineTo( 100, 100 );
+                    baseContext.lineTo( 0, 100 );
+                    baseContext.closePath();
+                    baseContext.fill();
+                    
+                    baseContext.restore();
+                };
             } else if( test == 'test-text' ) {
-                
+                step = function( timeElapsed ) {
+                    
+                };
             }
         }
     }
