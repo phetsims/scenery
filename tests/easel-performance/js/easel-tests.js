@@ -2,105 +2,53 @@
 var phet = phet || {};
 phet.tests = phet.tests || {};
 
+// TODO:
+// add a "blank" test?
+// consider clearRect under transformed bounds. may be more optimal
+
 $(document).ready( function() {
+    // the main div where all testing content is rendered
+    var main = $('#main');
+    var buttonRow = $('#buttonrow');
+    
     // constants
     var activeClass = 'ui-btn-active';
     
-    var type = "type-easel";
-    var test = "test-boxes";
-    
-    // hook up activity changes so we can toggle sets of buttons
-    _.each( [
-        [ 'type-easel', 'type-custom' ], // Easel / Custom
-        [ 'test-boxes', 'test-text' ] // Separate tests
-    ], function( list ) {
-        _.each( list, function( selector ) {
-            // set up initial buttons
-            if( selector == type || selector == test ) {
-                $( '#' + selector ).addClass( activeClass );
-            }
-            
-            // handle toggling for each button
-            $( '#' + selector ).on( 'click', function( event, ui ) {
-                // update the button highlights
-                _.each( list, function( button ) {
-                    if( button == selector ) {
-                        // select this button as active
-                        $( '#' + button ).addClass( activeClass );
-                    } else {
-                        // and set others as inactive
-                        $( '#' + button ).removeClass( activeClass );
-                    }
-                } );
+    // all of the individual test code and data is here
+    var tests = [{
+        testName: 'Boxes',
+        testId: 'test-boxes',
+        types: [{
+            typeName: 'Easel',
+            typeId: 'easel',
+            init: function( main ) {
+                var stage = buildEaselStage();
                 
-                // change the test
-                if( selector.substring( 0, 4 ) == "type" ) {
-                    type = selector;
-                } else {
-                    test = selector;
-                }
-                changeTest();
-            } );
-        } );
-    } );
-    
-    var main = $('#main');
-    
-    // closure used over this for running steps
-    var step = function( timeElapsed ) {
-        
-    };
-    
-    // called whenever the test is supposed to change
-    function changeTest() {
-        // clear the main area
-        main.empty();
-        
-        if( type == 'type-easel' ) {
-            var canvas = document.createElement( 'canvas' );
-            canvas.id = 'easel-canvas';
-            canvas.width = main.width();
-            canvas.height = main.height();
-            main.append( canvas );
-
-            var stage = new createjs.Stage(canvas);
-            
-            if( test == 'test-boxes' ) {
                 var shape = new createjs.Shape();
                 shape.graphics.beginFill('rgba(255,0,0,1)').drawRect( 0, 0, 100, 100 );
                 shape.x = main.width() / 2;
                 shape.y = main.height() / 2;
                 stage.addChild(shape);
                 
-                step = function( timeElapsed ) {
+                // return step function
+                return function( timeElapsed ) {
                     shape.rotation += timeElapsed * 180 / Math.PI;
                     stage.update();
-                };
-            } else if( test == 'test-text' ) {
-                var text = new createjs.Text( 'Test String', '20px Arial', '#555555' );
-                stage.addChild( text );
-                text.x = 100;
-                text.y = 100;
-                
-                step = function( timeElapsed ) {
-                    text.rotation += timeElapsed * 180 / Math.PI;
-                    stage.update();
-                };
+                }
             }
-        } else {
-            var baseCanvas = document.createElement( 'canvas' );
-            baseCanvas.id = 'base-canvas';
-            baseCanvas.width = main.width();
-            baseCanvas.height = main.height();
-            main.append( baseCanvas );
-            var baseContext = phet.canvas.initCanvas( baseCanvas );
-            
-            if( test == 'test-boxes' ) {
+        },{
+            typeName: 'Custom',
+            typeId: 'custom',
+            init: function( main ) {
+                var baseContext = buildBaseContext();
+                
                 var x = main.width() / 2;
                 var y = main.height() / 2;
                 var rotation = 0;
                 baseContext.fillStyle = 'rgba(255,0,0,1)';
-                step = function( timeElapsed ) {
+                
+                // return step function
+                return function( timeElapsed ) {
                     // clear old location
                     baseContext.clearRect( x - 150, y - 150, 300, 300 );
                     // TODO: consider whether clearRect is faster if it's not under a transform!
@@ -119,13 +67,159 @@ $(document).ready( function() {
                     baseContext.fill();
                     
                     baseContext.restore();
-                };
-            } else if( test == 'test-text' ) {
-                step = function( timeElapsed ) {
-                    
-                };
+                }
             }
-        }
+        }]
+    },{
+        testName: 'Text',
+        testId: 'test-text',
+        types: [{
+            typeName: 'Bounds Test',
+            typeId: 'boundsTest',
+            init: function( main ) {
+                // TODO: change to actual canvas testing
+                var stage = buildEaselStage();
+                
+                var text = new createjs.Text( 'Test String', '20px Arial', '#555555' );
+                stage.addChild( text );
+                text.x = 100;
+                text.y = 100;
+                
+                // return step function
+                return function( timeElapsed ) {
+                    text.rotation += timeElapsed * 180 / Math.PI;
+                    stage.update();
+                }
+            }
+        }]
+    }];
+    
+    function buildEaselStage() {
+        var canvas = document.createElement( 'canvas' );
+        canvas.id = 'easel-canvas';
+        canvas.width = main.width();
+        canvas.height = main.height();
+        main.append( canvas );
+
+        return new createjs.Stage( canvas );
+    }
+    
+    function buildBaseContext() {
+        var baseCanvas = document.createElement( 'canvas' );
+        baseCanvas.id = 'base-canvas';
+        baseCanvas.width = main.width();
+        baseCanvas.height = main.height();
+        main.append( baseCanvas );
+        
+        return phet.canvas.initCanvas( baseCanvas );
+    }
+    
+    var currentTest = tests[0];
+    var currentType = tests[0].types[0];
+    
+    function createButtonGroup() {
+        var result = $( document.createElement( 'span' ) );
+        result.attr( 'data-role', 'controlgroup' );
+        result.attr( 'data-type', 'horizontal' );
+        result.attr( 'data-mini', 'true' );
+        result.css( 'padding-right', '20px' );   
+        return result;
+    }
+    
+    function createButton( title ) {
+        var result = $( document.createElement( 'a' ) );
+        result.attr( 'data-role', 'button' );
+        result.attr( 'href', '#' );
+        result.text( title );
+        return result;
+    }
+    
+    function updateHighlights() {
+        // update the button highlights
+        _.each( tests, function( otherTest ) {
+            if( otherTest == currentTest ) {
+                // select this button as active
+                $( '#' + otherTest.testId ).addClass( activeClass );
+                
+                // display its types
+                $( '#types-' + otherTest.testId ).css( 'display', 'inline' );
+                
+                // set the type selected
+                _.each( otherTest.types, function( otherType ) {
+                    if( otherType == currentType ) {
+                        $( '#' + otherTest.testId + '-' + otherType.typeId ).addClass( activeClass );
+                    } else {
+                        $( '#' + otherTest.testId + '-' + otherType.typeId ).removeClass( activeClass );
+                    }
+                } );
+            } else {
+                // and set others as inactive
+                $( '#' + otherTest.testId ).removeClass( activeClass );
+                
+                // hide their types
+                $( '#types-' + otherTest.testId ).css( 'display', 'none' );
+            }
+        } );
+    }
+    
+    // first group of buttons, one for each major test
+    var testButtons = createButtonGroup();
+    testButtons.attr( 'id', 'test-buttons' );
+    buttonRow.append( testButtons );
+    
+    _.each( tests, function( test ) {
+        // make a button for each test
+        var testButton = createButton( test.testName );
+        testButton.attr( 'id', test.testId );
+        testButtons.append( testButton );
+        
+        testButton.on( 'click', function( event, ui ) {
+            currentTest = test;
+            currentType = test.types[0];
+            
+            updateHighlights();            
+            changeTest();            
+        } );
+        
+        // group of buttons to the right for each test
+        var typeButtons = createButtonGroup();
+        typeButtons.attr( 'id', 'types-' + test.testId );
+        buttonRow.append( typeButtons );
+        
+        _.each( test.types, function( type ) {
+            // add a type button for each type
+            var typeButton = createButton( type.typeName );
+            typeButton.attr( 'id', test.testId + '-' + type.typeId );
+            typeButtons.append( typeButton );
+            
+            typeButton.on( 'click', function( event, ui ) {
+                currentType = type;
+                
+                updateHighlights();
+                changeTest();
+            } );
+        } );
+        
+        // don't show the type buttons at the start
+        typeButtons.css( 'display', 'none' );
+    } );
+    
+    buttonRow.trigger('create');
+    
+    updateHighlights();
+    
+    // closure used over this for running steps
+    var step = function( timeElapsed ) {
+        
+    };
+    
+    // called whenever the test is supposed to change
+    function changeTest() {
+        // clear the main area
+        main.empty();
+        
+        // run the initialization and change the step function
+        step = currentType.init( main );
     }
     
     // set up averaging FPS meter and calling of the step() function
