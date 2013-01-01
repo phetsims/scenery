@@ -63,19 +63,7 @@ $(document).ready( function() {
             typeName: 'Bounds Test',
             typeId: 'boundsTest',
             init: function( main ) {
-                // TODO: change to actual canvas testing
-                var stage = buildEaselStage();
-                
-                var text = new createjs.Text( 'Test String', '20px Arial', '#555555' );
-                stage.addChild( text );
-                text.x = 100;
-                text.y = 100;
-                
-                // return step function
-                return function( timeElapsed ) {
-                    text.rotation += timeElapsed * 180 / Math.PI;
-                    stage.update();
-                }
+                return phet.tests.textBounds( main )
             }
         }]
     },{
@@ -267,8 +255,5 @@ $(document).ready( function() {
     };
     $( window ).resize( resizer );
     resizer();
-    
-    // for text testing: see http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#2dcontext
-    // context: font, textAlign, textBaseline, direction
-    // metrics: width, actualBoundingBoxLeft, actualBoundingBoxRight, etc.
+
 } );
