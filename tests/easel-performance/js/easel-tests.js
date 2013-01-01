@@ -13,61 +13,48 @@ $(document).ready( function() {
     
     // constants
     var activeClass = 'ui-btn-active';
+    var boxSizeRatio = 0.75;
+    var boxTotalSize = 200;
     
     // all of the individual test code and data is here
     var tests = [{
         testName: 'Boxes',
         testId: 'test-boxes',
         types: [{
-            typeName: 'Easel',
-            typeId: 'easel',
+            typeName: 'Easel 5',
+            typeId: 'easel5',
             init: function( main ) {
-                var stage = buildEaselStage();
-                
-                var shape = new createjs.Shape();
-                shape.graphics.beginFill('rgba(255,0,0,1)').drawRect( 0, 0, 100, 100 );
-                shape.x = main.width() / 2;
-                shape.y = main.height() / 2;
-                stage.addChild(shape);
-                
-                // return step function
-                return function( timeElapsed ) {
-                    shape.rotation += timeElapsed * 180 / Math.PI;
-                    stage.update();
-                }
+                return easelVariableBox( 5 );
             }
         },{
-            typeName: 'Custom',
-            typeId: 'custom',
+            typeName: 'Custom 5',
+            typeId: 'custom5',
             init: function( main ) {
-                var baseContext = buildBaseContext();
-                
-                var x = main.width() / 2;
-                var y = main.height() / 2;
-                var rotation = 0;
-                baseContext.fillStyle = 'rgba(255,0,0,1)';
-                
-                // return step function
-                return function( timeElapsed ) {
-                    // clear old location
-                    baseContext.clearRect( x - 150, y - 150, 300, 300 );
-                    // TODO: consider whether clearRect is faster if it's not under a transform!
-                    
-                    baseContext.save();
-                    rotation += timeElapsed;
-                    baseContext.translate( x, y );
-                    baseContext.rotate( rotation );
-                    
-                    baseContext.beginPath();
-                    baseContext.moveTo( 0, 0 );
-                    baseContext.lineTo( 100, 0 );
-                    baseContext.lineTo( 100, 100 );
-                    baseContext.lineTo( 0, 100 );
-                    baseContext.closePath();
-                    baseContext.fill();
-                    
-                    baseContext.restore();
-                }
+                return customVariableBox( 5 );
+            }
+        },{
+            typeName: 'Easel 50',
+            typeId: 'easel50',
+            init: function( main ) {
+                return easelVariableBox( 50 );
+            }
+        },{
+            typeName: 'Custom 50',
+            typeId: 'custom50',
+            init: function( main ) {
+                return customVariableBox( 50 );
+            }
+        },{
+            typeName: 'Easel 100',
+            typeId: 'easel100',
+            init: function( main ) {
+                return easelVariableBox( 100 );
+            }
+        },{
+            typeName: 'Custom 100',
+            typeId: 'custom100',
+            init: function( main ) {
+                return customVariableBox( 100 );
             }
         }]
     },{
@@ -92,7 +79,97 @@ $(document).ready( function() {
                 }
             }
         }]
+    },{
+        testName: 'Placebo',
+        testId: 'test-placebo',
+        types: [{
+            typeName: 'Nothing Done',
+            typeId: 'nothingDone',
+            init: function( main ) {
+                return function( timeElapsed ) {};
+            }
+        }]
     }];
+    
+    // Easel "Boxes" test base
+    function easelVariableBox( resolution ) {
+        var stage = buildEaselStage();
+        var grid = new createjs.Container();
+        
+        var size = boxTotalSize;
+        
+        var boxRadius = 0.5 * boxSizeRatio * size / resolution;
+        
+        for( var row = 0; row < resolution; row++ ) {
+            for( var col = 0; col < resolution; col++ ) {
+                var shape = new createjs.Shape();
+                shape.graphics.beginFill('rgba(255,0,0,1)').drawRect( -boxRadius, -boxRadius, boxRadius * 2, boxRadius * 2 );
+                
+                shape.x = ( col - ( resolution - 1 ) / 2 ) * size / resolution;
+                shape.y = ( row - ( resolution - 1 ) / 2 ) * size / resolution;
+                
+                grid.addChild( shape );
+            }
+        }
+
+        // center the grid        
+        grid.x = main.width() / 2;
+        grid.y = main.height() / 2;
+        stage.addChild( grid );
+        
+        // return step function
+        return function( timeElapsed ) {
+            grid.rotation += timeElapsed * 180 / Math.PI;
+            stage.update();
+        }
+    }
+    
+    function customVariableBox( resolution ) {
+        var baseContext = buildBaseContext();
+        
+        var xCenter = main.width() / 2;
+        var yCenter = main.height() / 2;
+        var rotation = 0;
+        baseContext.fillStyle = 'rgba(255,0,0,1)';
+        
+        var size = boxTotalSize;
+        
+        var boxRadius = 0.5 * boxSizeRatio / resolution;
+        var spotWidth = 1 / resolution;
+        
+        // TODO: optimize this
+        var halfIshResolution = ( resolution - 1 ) / 2;
+        
+        // return step function
+        return function( timeElapsed ) {
+            // clear old location
+            baseContext.clearRect( xCenter - 150, yCenter - 150, 300, 300 );
+            // TODO: consider whether clearRect is faster if it's not under a transform!
+            
+            baseContext.save();
+            rotation += timeElapsed;
+            baseContext.translate( xCenter, yCenter );
+            baseContext.rotate( rotation );
+            baseContext.scale( size, size );
+            
+            baseContext.beginPath();
+            
+            for( var row = 0; row < resolution; row++ ) {
+                var baseY = ( row - halfIshResolution ) / resolution;
+                for( var col = 0; col < resolution; col++ ) {
+                    var baseX = ( col - halfIshResolution ) / resolution;
+                    baseContext.moveTo( baseX - boxRadius, baseY - boxRadius );
+                    baseContext.lineTo( baseX + boxRadius, baseY - boxRadius );
+                    baseContext.lineTo( baseX + boxRadius, baseY + boxRadius );
+                    baseContext.lineTo( baseX - boxRadius, baseY + boxRadius );
+                    baseContext.lineTo( baseX - boxRadius, baseY - boxRadius );
+                }
+            }
+            baseContext.fill();
+            
+            baseContext.restore();
+        }
+    }
     
     function buildEaselStage() {
         var canvas = document.createElement( 'canvas' );
