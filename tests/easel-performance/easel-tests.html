@@ -28,9 +28,12 @@
             background-color: #000;
             overflow: hidden;
         }
-
-        canvas {
+        
+        #main {
             position: absolute;
+            left: 0;
+            top: 0;
+            background-color: white;
         }
 
         #topleft {
@@ -46,34 +49,29 @@
 
 <body id="home">
 
-<div id="main">
-</div>
-
-<canvas id="mainCanvas" width="1024" height="768" style="z-index:0;">
-    Your browser appears to not support the HTML5 <code>&lt;canvas&gt;</code> element!
-</canvas>
-
-<canvas id="uiCanvas" width="1024" height="768" style="z-index:1;">
-    Your browser appears to not support the HTML5 <code>&lt;canvas&gt;</code> element!
-</canvas>
-
-<div id="topleft">
-    <h1 style="font-size: 20px; float: left; line-height: 33px; margin: 0 20px;">Easel Performance Tests</h1>
-    
-    <div style="float: left;">
-        <span data-role="controlgroup" data-type="horizontal" data-mini="true" style="padding-right: 20px;">
-            <a id="type-easel" href="#" data-role="button" class="ui-btn-active">Easel</a>
-            <a id="type-custom" href="#" data-role="button">Custom</a>
-        </span>
-        <span data-role="controlgroup" data-type="horizontal" data-mini="true" style="padding-right: 20px;">
-            <a id="test-boxes" href="#" data-role="button" class="ui-btn-active">Boxes</a>
-            <a id="test-text" href="#" data-role="button">Text</a>
-        </span>
+<div data-role="page">
+    <div id="main" data-role="content">
     </div>
-    
+
+    <div id="topleft">
+        <h1 style="font-size: 20px; float: left; line-height: 33px; margin: 0 20px;">Easel Performance Tests</h1>
+        
+        <div style="float: left;">
+            <span data-role="controlgroup" data-type="horizontal" data-mini="true" style="padding-right: 20px;">
+                <a id="type-easel" href="#" data-role="button">Easel</a>
+                <a id="type-custom" href="#" data-role="button">Custom</a>
+            </span>
+            <span data-role="controlgroup" data-type="horizontal" data-mini="true" style="padding-right: 20px;">
+                <a id="test-boxes" href="#" data-role="button">Boxes</a>
+                <a id="test-text" href="#" data-role="button">Text</a>
+            </span>
+        </div>
+        
     <div style="font-size: 20px; float: left; line-height: 33px;">
         <span style="font-size: 16px;">FPS (avg): <span id="fps-readout"></span></span>
     </div>
+</div>
+
 </div>
 
 </body>
