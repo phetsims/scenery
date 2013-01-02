@@ -105,6 +105,9 @@ phet.math = phet.math || {};
                             0, 0, 1,
                             Types.OTHER );
     };
+    
+    // standard 2d rotation
+    Matrix3.rotation2 = Matrix3.rotationZ;
 
     // aspect == width / height
     Matrix3.gluPerspective = function ( fovYRadians, aspect, zNear, zFar ) {
