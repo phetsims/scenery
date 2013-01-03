@@ -360,7 +360,10 @@ phet.math = phet.math || {};
     };
 
     // create an immutable
-    Matrix3.IDENTITY = new Matrix3();
+    Matrix3.IDENTITY = new Matrix3( 1, 0, 0,
+                                    0, 1, 0,
+                                    0, 0, 1,
+                                    Types.IDENTITY );
     Matrix3.IDENTITY.makeImmutable();
 
 })();

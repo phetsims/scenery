@@ -33,6 +33,12 @@ $(document).ready( function() {
                 return phet.tests.customVariableBox( main, 5 );
             }
         },{
+            typeName: 'Scene 5',
+            typeId: 'scene5',
+            init: function( main ) {
+                return phet.tests.sceneVariableBox( main, 5 );
+            }
+        },{
             typeName: 'Easel 50',
             typeId: 'easel50',
             init: function( main ) {
@@ -45,6 +51,12 @@ $(document).ready( function() {
                 return phet.tests.customVariableBox( main, 50 );
             }
         },{
+            typeName: 'Scene 50',
+            typeId: 'scene50',
+            init: function( main ) {
+                return phet.tests.sceneVariableBox( main, 50 );
+            }
+        },{
             typeName: 'Easel 100',
             typeId: 'easel100',
             init: function( main ) {
@@ -55,6 +67,12 @@ $(document).ready( function() {
             typeId: 'custom100',
             init: function( main ) {
                 return phet.tests.customVariableBox( main, 100 );
+            }
+        },{
+            typeName: 'Scene 100',
+            typeId: 'scene100',
+            init: function( main ) {
+                return phet.tests.sceneVariableBox( main, 100 );
             }
         }]
     },{

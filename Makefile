@@ -30,7 +30,9 @@ src/js/webgl/Sphere.js \
 src/js/webgl/Cylinder.js \
 src/js/canvas/common.js \
 src/js/scene/common.js \
-src/js/scene/Node.js
+src/js/scene/Node.js \
+src/js/scene/RenderState.js \
+src/js/scene/nodes/Rectangle.js
 
 phet-scene.js: concatenated.js
 	java -jar bin/closure-compiler.jar --compilation_level WHITESPACE_ONLY --formatting PRETTY_PRINT --js concatenated.js --js_output_file phet-scene.js

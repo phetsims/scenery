@@ -93,18 +93,53 @@ phet.tests = phet.tests || {};
                 var baseY = ( row - halfIshResolution ) / resolution;
                 for( var col = 0; col < resolution; col++ ) {
                     var baseX = ( col - halfIshResolution ) / resolution;
-                    baseContext.moveTo( baseX - boxRadius, baseY - boxRadius );
-                    baseContext.lineTo( baseX + boxRadius, baseY - boxRadius );
-                    baseContext.lineTo( baseX + boxRadius, baseY + boxRadius );
-                    baseContext.lineTo( baseX - boxRadius, baseY + boxRadius );
-                    baseContext.lineTo( baseX - boxRadius, baseY - boxRadius );
+                    baseContext.fillRect( baseX - boxRadius, baseY - boxRadius, boxRadius * 2, boxRadius * 2 );
+                    // baseContext.moveTo( baseX - boxRadius, baseY - boxRadius );
+                    // baseContext.lineTo( baseX + boxRadius, baseY - boxRadius );
+                    // baseContext.lineTo( baseX + boxRadius, baseY + boxRadius );
+                    // baseContext.lineTo( baseX - boxRadius, baseY + boxRadius );
+                    // baseContext.lineTo( baseX - boxRadius, baseY - boxRadius );
                 }
             }
-            baseContext.fill();
+            // baseContext.fill();
             
             baseContext.restore();
         }
     }
+    
+    phet.tests.sceneVariableBox = function( main, resolution ) {
+        var baseContext = buildBaseContext( main );
+        
+        var size = boxTotalSize;
+        
+        var boxRadius = 0.5 * boxSizeRatio * size / resolution;
+        
+        var grid = new phet.scene.Node();
+        
+        for( var row = 0; row < resolution; row++ ) {
+            for( var col = 0; col < resolution; col++ ) {
+                grid.addChild( new phet.scene.nodes.Rectangle({
+                    x: ( col - ( resolution - 1 ) / 2 ) * size / resolution - boxRadius,
+                    y: ( row - ( resolution - 1 ) / 2 ) * size / resolution - boxRadius,
+                    width: boxRadius * 2,
+                    height: boxRadius * 2,
+                    fill: 'rgba(255,0,0,1)'
+                }) );
+            }
+        }
+        
+        // center the grid
+        grid.translate( main.width() / 2, main.height() / 2 );
 
-
+        // return step function
+        return function( timeElapsed ) {
+            grid.rotate( timeElapsed );
+            
+            baseContext.clearRect( main.width() / 2 - 150, main.height() / 2 - 150, 300, 300 );
+            // baseContext.clearRect( 0, 0, main.width(), main.height() );
+            var state = new phet.scene.RenderState();
+            state.context = baseContext;
+            grid.render( state );
+        }
+    }
 })();

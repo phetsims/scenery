@@ -14,46 +14,72 @@ phet.scene = phet.scene || {};
 	var Node = phet.scene.Node;
     var Matrix3 = phet.math.Matrix3;
     
-    Node.RenderState = function () {
-        this.transform = new phet.math.Transform3();
-    };
-
 	Node.prototype = {
 		constructor: Node,
         
-        render: function( args ) {
+        render: function( state ) {
             if ( !this.transform.isIdentity() ) {
-                args.transform.append( this.transform.matrix );
+                //state.transform.append( this.transform.matrix );
+                state.context.transform( 
+                    // TODO: consider inlining for performance (depending on profiling)
+                    // this.transform.matrix.m00(),
+                    // this.transform.matrix.m10(),
+                    // this.transform.matrix.m01(),
+                    // this.transform.matrix.m11(),
+                    // this.transform.matrix.m02(),
+                    // this.transform.matrix.m12()
+                    this.transform.matrix.entries[0],
+                    this.transform.matrix.entries[1],
+                    this.transform.matrix.entries[3],
+                    this.transform.matrix.entries[4],
+                    this.transform.matrix.entries[6],
+                    this.transform.matrix.entries[7]
+                );
             }
 
-            this.preRender( args );
+            this.preRender( state );
 
             // TODO: consider allowing render passes here?
-            this.renderSelf( args );
-            this.renderChildren( args );
+            this.renderSelf( state );
+            this.renderChildren( state );
 
-            this.postRender( args );
+            this.postRender( state );
 
             if ( !this.transform.isIdentity() ) {
-                args.transform.append( this.transform.inverse );
+                //state.transform.append( this.transform.inverse );
+                state.context.transform( 
+                    // TODO: consider inlining for performance (depending on profiling)
+                    // this.transform.inverse.m00(),
+                    // this.transform.inverse.m10(),
+                    // this.transform.inverse.m01(),
+                    // this.transform.inverse.m11(),
+                    // this.transform.inverse.m02(),
+                    // this.transform.inverse.m12()
+                    this.transform.inverse.entries[0],
+                    this.transform.inverse.entries[1],
+                    this.transform.inverse.entries[3],
+                    this.transform.inverse.entries[4],
+                    this.transform.inverse.entries[6],
+                    this.transform.inverse.entries[7]
+                );
             }
         },
         
-        renderSelf: function ( args ) {
+        renderSelf: function ( state ) {
 
         },
 
-        renderChildren: function ( args ) {
+        renderChildren: function ( state ) {
             for ( var i = 0; i < this.children.length; i++ ) {
-                this.children[i].render( args );
+                this.children[i].render( state );
             }
         },
 
-        preRender: function ( args ) {
+        preRender: function ( state ) {
             
         },
 
-        postRender: function ( args ) {
+        postRender: function ( state ) {
             
         },
 
