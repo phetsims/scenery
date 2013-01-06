@@ -148,7 +148,7 @@ phet.tests = phet.tests || {};
             
             baseContext.clearRect( main.width() / 2 - 150, main.height() / 2 - 150, 300, 300 );
             // baseContext.clearRect( 0, 0, main.width(), main.height() );
-            var state = new phet.scene.RenderState();
+            var state = new phet.scene.CanvasState();
             state.context = baseContext;
             grid.render( state );
         }

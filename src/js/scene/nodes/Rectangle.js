@@ -25,13 +25,15 @@ phet.scene.nodes = phet.scene.nodes || {};
     Rectangle.prototype.constructor = Rectangle;
     
     Rectangle.prototype.renderSelf = function ( state ) {
-        if( this.fill ) {
-            state.setFillStyle( this.fill );
-            state.context.fillRect( this.x, this.y, this.width, this.height );
-        }
-        if( this.stroke ) {
-            state.setStrokeStyle( this.stroke );
-            state.context.strokeRect( this.x, this.y, this.width, this.height );
+        if( state.isCanvasState ) {
+            if( this.fill ) {
+                state.setFillStyle( this.fill );
+                state.context.fillRect( this.x, this.y, this.width, this.height );
+            }
+            if( this.stroke ) {
+                state.setStrokeStyle( this.stroke );
+                state.context.strokeRect( this.x, this.y, this.width, this.height );
+            }
         }
     };
 })();

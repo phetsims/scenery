@@ -19,7 +19,7 @@ phet.scene = phet.scene || {};
         
         render: function( state ) {
             if ( !this.transform.isIdentity() ) {
-                //state.transform.append( this.transform.matrix );
+                state.transform.append( this.transform.matrix );
                 state.context.transform( 
                     // inlined array entries
                     this.transform.matrix.entries[0],
@@ -40,7 +40,7 @@ phet.scene = phet.scene || {};
             this.postRender( state );
 
             if ( !this.transform.isIdentity() ) {
-                //state.transform.append( this.transform.inverse );
+                state.transform.append( this.transform.inverse );
                 state.context.transform( 
                     // inlined array entries
                     this.transform.inverse.entries[0],

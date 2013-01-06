@@ -4,17 +4,18 @@ var phet = phet || {};
 phet.scene = phet.scene || {};
 
 (function(){
-    phet.scene.RenderState = function( name ) {
+    phet.scene.CanvasState = function( name ) {
         this.transform = new phet.math.Transform3();
         this.context = null;
         this.fillStyle = null;
         this.strokeStyle = null;
+        this.isCanvasState = true;
     }
 
-    var RenderState = phet.scene.RenderState;
+    var CanvasState = phet.scene.CanvasState;
 
-    RenderState.prototype = {
-        constructor: RenderState,
+    CanvasState.prototype = {
+        constructor: CanvasState,
         
         setFillStyle: function( style ) {
             if( this.fillStyle != style ) {
