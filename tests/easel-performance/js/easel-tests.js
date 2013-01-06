@@ -80,6 +80,27 @@ $(document).ready( function() {
             }
         }]
     },{
+        testName: 'Misc',
+        testId: 'test-misc',
+        types: [{
+            typeName: '50x Canvas Creation',
+            typeId: 'canvasCreation',
+            init: function( main ) {
+                return function( timeElapsed ) {
+                    for( var i = 0; i < 50; i++ ) {
+                        main.empty();
+                        
+                        var canvas = document.createElement( 'canvas' );
+                        canvas.width = main.width();
+                        canvas.height = main.height();
+                        main.append( canvas );
+                        
+                        var context = phet.canvas.initCanvas( canvas );
+                    }
+                };
+            }
+        }]
+    },{
         testName: 'Placebo',
         testId: 'test-placebo',
         types: [{
