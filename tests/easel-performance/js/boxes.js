@@ -7,6 +7,10 @@ phet.tests = phet.tests || {};
     var boxSizeRatio = 0.75;
     var boxTotalSize = 200;
     
+    var Matrix3 = phet.math.Matrix3;
+    
+    var svgNS = 'http://www.w3.org/2000/svg';
+    
     function buildEaselStage( main ) {
         var canvas = document.createElement( 'canvas' );
         canvas.id = 'easel-canvas';
@@ -25,7 +29,15 @@ phet.tests = phet.tests || {};
         main.append( baseCanvas );
         
         return phet.canvas.initCanvas( baseCanvas );
-    }    
+    }
+    
+    function buildSVG( main ) {
+        var svg = document.createElementNS( svgNS, 'svg' );
+        svg.width = main.width();
+        svg.height = main.height();
+        main.append( svg );
+        return svg;
+    }
     
     phet.tests.easelVariableBox = function( main, resolution ) {
         var stage = buildEaselStage( main );
@@ -57,7 +69,7 @@ phet.tests = phet.tests || {};
             grid.rotation += timeElapsed * 180 / Math.PI;
             stage.update();
         }
-    }
+    };
 
     phet.tests.customVariableBox = function( main, resolution ) {
         var baseContext = buildBaseContext( main );
@@ -105,13 +117,12 @@ phet.tests = phet.tests || {};
             
             baseContext.restore();
         }
-    }
+    };
     
     phet.tests.sceneVariableBox = function( main, resolution ) {
         var baseContext = buildBaseContext( main );
         
         var size = boxTotalSize;
-        
         var boxRadius = 0.5 * boxSizeRatio * size / resolution;
         
         var grid = new phet.scene.Node();
@@ -141,5 +152,39 @@ phet.tests = phet.tests || {};
             state.context = baseContext;
             grid.render( state );
         }
-    }
+    };
+    
+    phet.tests.svgVariableBox = function( main, resolution ) {
+        var size = boxTotalSize;
+        var boxRadius = 0.5 * boxSizeRatio * size / resolution;
+        
+        var svg = $( buildSVG( main ) );
+        var group = $( document.createElementNS( svgNS, 'g' ) );
+        group.attr( 'id', 'main-group' );
+        group.attr( 'transform', 'translate(0,0)' );
+        svg.append( group );
+        
+        for( var row = 0; row < resolution; row++ ) {
+            for( var col = 0; col < resolution; col++ ) {
+                var rect = $( document.createElementNS( svgNS, 'rect' ) );
+                rect.attr( 'x', ( col - ( resolution - 1 ) / 2 ) * size / resolution - boxRadius );
+                rect.attr( 'y', ( row - ( resolution - 1 ) / 2 ) * size / resolution - boxRadius );
+                rect.attr( 'height', boxRadius * 2 );
+                rect.attr( 'width', boxRadius * 2 );
+                rect.css( 'fill', 'rgba(255,0,0,1)' );
+                group.append( rect );
+            }
+        }
+        
+        var matrix = Matrix3.translation( main.width() / 2, main.height() / 2 );
+        
+        group[0].transform.baseVal.getItem( 0 ).setMatrix( matrix.toSVGMatrix() );
+        
+        // return step function
+        return function( timeElapsed ) {
+            matrix = matrix.timesMatrix( Matrix3.rotation2( timeElapsed ) );
+            group[0].transform.baseVal.getItem( 0 ).setMatrix( matrix.toSVGMatrix() );
+        }
+    };
+    
 })();

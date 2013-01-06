@@ -39,6 +39,12 @@ $(document).ready( function() {
                 return phet.tests.sceneVariableBox( main, 5 );
             }
         },{
+            typeName: 'SVG 5',
+            typeId: 'svg5',
+            init: function( main ) {
+                return phet.tests.svgVariableBox( main, 5 );
+            }
+        },{
             typeName: 'Easel 50',
             typeId: 'easel50',
             init: function( main ) {
@@ -57,22 +63,10 @@ $(document).ready( function() {
                 return phet.tests.sceneVariableBox( main, 50 );
             }
         },{
-            typeName: 'Easel 100',
-            typeId: 'easel100',
+            typeName: 'SVG 50',
+            typeId: 'svg50',
             init: function( main ) {
-                return phet.tests.easelVariableBox( main, 100 );
-            }
-        },{
-            typeName: 'Custom 100',
-            typeId: 'custom100',
-            init: function( main ) {
-                return phet.tests.customVariableBox( main, 100 );
-            }
-        },{
-            typeName: 'Scene 100',
-            typeId: 'scene100',
-            init: function( main ) {
-                return phet.tests.sceneVariableBox( main, 100 );
+                return phet.tests.svgVariableBox( main, 50 );
             }
         }]
     },{

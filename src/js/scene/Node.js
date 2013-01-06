@@ -21,13 +21,7 @@ phet.scene = phet.scene || {};
             if ( !this.transform.isIdentity() ) {
                 //state.transform.append( this.transform.matrix );
                 state.context.transform( 
-                    // TODO: consider inlining for performance (depending on profiling)
-                    // this.transform.matrix.m00(),
-                    // this.transform.matrix.m10(),
-                    // this.transform.matrix.m01(),
-                    // this.transform.matrix.m11(),
-                    // this.transform.matrix.m02(),
-                    // this.transform.matrix.m12()
+                    // inlined array entries
                     this.transform.matrix.entries[0],
                     this.transform.matrix.entries[1],
                     this.transform.matrix.entries[3],
@@ -48,13 +42,7 @@ phet.scene = phet.scene || {};
             if ( !this.transform.isIdentity() ) {
                 //state.transform.append( this.transform.inverse );
                 state.context.transform( 
-                    // TODO: consider inlining for performance (depending on profiling)
-                    // this.transform.inverse.m00(),
-                    // this.transform.inverse.m10(),
-                    // this.transform.inverse.m01(),
-                    // this.transform.inverse.m11(),
-                    // this.transform.inverse.m02(),
-                    // this.transform.inverse.m12()
+                    // inlined array entries
                     this.transform.inverse.entries[0],
                     this.transform.inverse.entries[1],
                     this.transform.inverse.entries[3],

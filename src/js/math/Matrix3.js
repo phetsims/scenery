@@ -108,15 +108,12 @@ phet.math = phet.math || {};
     
     // standard 2d rotation
     Matrix3.rotation2 = Matrix3.rotationZ;
-
-    // aspect == width / height
-    Matrix3.gluPerspective = function ( fovYRadians, aspect, zNear, zFar ) {
-        var cotangent = Math.cos( fovYRadians ) / Math.sin( fovYRadians );
-
-        return new Matrix3( cotangent / aspect, 0, 0, 0,
-                            0, cotangent, 0, 0,
-                            0, 0, ( zFar + zNear ) / ( zNear - zFar ), ( 2 * zFar * zNear ) / ( zNear - zFar ),
-                            0, 0, -1, 0 );
+    
+    Matrix3.fromSVGMatrix = function ( svgMatrix ) {
+        return new Matrix3( svgMatrix.a, svgMatrix.c, svgMatrix.e,
+                            svgMatrix.b, svgMatrix.d, svgMatrix.f,
+                            0, 0, 1,
+                            Types.OTHER );
     };
 
     // a rotation matrix that rotates A to B, by rotating about the axis A.cross( B ) -- Shortest path. ideally should be unit vectors
@@ -356,6 +353,20 @@ phet.math = phet.math || {};
             this.rowMajor = function () {
                 throw new Error( "Cannot modify immutable matrix" );
             }
+        },
+        
+        toSVGMatrix: function () {
+            var result = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' ).createSVGMatrix();
+            
+            // top two rows
+            result.a = this.m00();
+            result.b = this.m10();
+            result.c = this.m01();
+            result.d = this.m11();
+            result.e = this.m02();
+            result.f = this.m12();
+            
+            return result;
         }
     };
 
