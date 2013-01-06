@@ -7,10 +7,13 @@ phet.scene = phet.scene || {};
 	phet.scene.Node = function( name ) {
         // user-editable properties
         this.visible = true;
+        this.layerType = null; // null indicates there is no layer root here. otherwise should be a layer constructor function
         
         this.children = [];
         this.transform = new phet.math.Transform3();
         this.parent = null;
+        
+        // layer-specific data, currently updated in the rebuildLayers step
 	}
 
 	var Node = phet.scene.Node;
@@ -88,6 +91,10 @@ phet.scene = phet.scene || {};
         isChild: function ( potentialChild ) {
             phet.assert( (potentialChild.parent === this ) === (this.children.indexOf( potentialChild ) != -1) );
             return potentialChild.parent === this;
+        },
+        
+        isLayerRoot: function() {
+            return this.layerType != null;
         },
 
         translate: function ( x, y ) {
