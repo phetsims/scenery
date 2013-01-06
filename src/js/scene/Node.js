@@ -5,10 +5,12 @@ phet.scene = phet.scene || {};
 
 (function(){
 	phet.scene.Node = function( name ) {
-		this.children = [];
-		this.transform = new phet.math.Transform3();
-        this.parent = null;
+        // user-editable properties
         this.visible = true;
+        
+        this.children = [];
+        this.transform = new phet.math.Transform3();
+        this.parent = null;
 	}
 
 	var Node = phet.scene.Node;
@@ -19,16 +21,8 @@ phet.scene = phet.scene || {};
         
         render: function( state ) {
             if ( !this.transform.isIdentity() ) {
-                state.transform.append( this.transform.matrix );
-                state.context.transform( 
-                    // inlined array entries
-                    this.transform.matrix.entries[0],
-                    this.transform.matrix.entries[1],
-                    this.transform.matrix.entries[3],
-                    this.transform.matrix.entries[4],
-                    this.transform.matrix.entries[6],
-                    this.transform.matrix.entries[7]
-                );
+                // TODO: consider a stack-based model for transforms?
+                state.applyTransformationMatrix( this.transform.matrix );
             }
 
             this.preRender( state );
@@ -40,16 +34,7 @@ phet.scene = phet.scene || {};
             this.postRender( state );
 
             if ( !this.transform.isIdentity() ) {
-                state.transform.append( this.transform.inverse );
-                state.context.transform( 
-                    // inlined array entries
-                    this.transform.inverse.entries[0],
-                    this.transform.inverse.entries[1],
-                    this.transform.inverse.entries[3],
-                    this.transform.inverse.entries[4],
-                    this.transform.inverse.entries[6],
-                    this.transform.inverse.entries[7]
-                );
+                state.applyTransformationMatrix( this.transform.inverse );
             }
         },
         

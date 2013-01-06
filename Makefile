@@ -32,6 +32,7 @@ src/js/canvas/common.js \
 src/js/scene/common.js \
 src/js/scene/Node.js \
 src/js/scene/CanvasState.js \
+src/js/scene/layers/CanvasLayer.js \
 src/js/scene/nodes/Rectangle.js
 
 phet-scene.js: concatenated.js
