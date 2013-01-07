@@ -154,6 +154,7 @@ phet.tests = phet.tests || {};
             grid.rotate( timeElapsed );
             grid.validateBounds();
             
+            // show a background behind the boxes that highlights the bounds
             bounds = grid.getBounds();
             var context = grid._layerBeforeRender.context;
             var tmpStyle = context.fillStyle;
