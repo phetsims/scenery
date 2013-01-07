@@ -163,6 +163,7 @@ phet.util = phet.util || {};
     };
 })();
 
+// some polyfills or workarounds
 (function () {
     // Object.create polyfill
     if ( !Object.create ) {
@@ -176,4 +177,10 @@ phet.util = phet.util || {};
             return new F();
         };
     }
+    
+    // IE9 does not support Float32Array, so we back it up by a standard array
+    if( !window.Float32Array ) {
+        window.Float32Array = Array;
+    }
 })();
+
