@@ -84,6 +84,10 @@ phet.math = phet.math || {};
         transformDeltaY: function ( y ) {
             return this.transformDelta2( new Vector2( 0, y ) ).y;
         },
+        
+        transformBounds2: function ( bounds2 ) {
+            return bounds2.transformed( this.matrix );
+        },
 
         /*---------------------------------------------------------------------------*
          * inverse transforms (for Vector2 or scalar)
@@ -108,6 +112,10 @@ phet.math = phet.math || {};
 
         inverseDeltaY: function ( y ) {
             return this.inverseDelta2( new Vector2( 0, y ) ).y;
+        },
+        
+        inverseBounds2: function ( bounds2 ) {
+            return bounds2.transformed( this.inverse );
         }
     };
 })();

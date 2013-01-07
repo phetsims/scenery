@@ -12,6 +12,8 @@ phet.math = phet.math || {};
 
 // create a new scope
 (function () {
+    var Vector2 = phet.math.Vector2;
+    
     // not using x,y,width,height so that it can handle infinity-based cases in a better way
     phet.math.Bounds2 = function( xMin, yMin, xMax, yMax ) {
         this.xMin = xMin;
@@ -52,6 +54,32 @@ phet.math = phet.math || {};
             );
         },
         // TODO: difference should be well-defined, but more logic is needed to compute
+        
+        // like a union with a point-sized bounding box
+        withPoint: function( point ) {
+            return new Bounds2(
+                Math.min( this.xMin, point.x ),
+                Math.min( this.yMin, point.y ),
+                Math.max( this.xMax, point.x ),
+                Math.max( this.yMax, point.y )
+            );
+        },
+        
+        // transform a bounding box.
+        // NOTE that box.transformed( matrix ).transformed( inverse ) may be larger than the original box
+        transformed: function( matrix ) {
+            if( this.isEmpty() ) {
+                return Bounds2.NOTHING;
+            }
+            var result = Bounds2.NOTHING;
+            
+            // make sure all 4 corners are inside this transformed bounding box
+            result = result.withPoint( matrix.timesVector2( new Vector2( this.xMin, this.yMin ) ) );
+            result = result.withPoint( matrix.timesVector2( new Vector2( this.xMin, this.yMax ) ) );
+            result = result.withPoint( matrix.timesVector2( new Vector2( this.xMax, this.yMin ) ) );
+            result = result.withPoint( matrix.timesVector2( new Vector2( this.xMax, this.yMax ) ) );
+            return result;
+        },
 
         toString: function () {
             return '[x:(' + this.xMin + ',' + this.xMax + '),y:(' + this.yMin + ',' + this.yMax + ')]';

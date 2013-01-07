@@ -147,12 +147,24 @@ phet.tests = phet.tests || {};
 
         // return step function
         return function( timeElapsed ) {
+            var bounds = grid.getBounds();
+            // clear around another pixel or so, for antialiasing!
+            grid._layerBeforeRender.context.clearRect( bounds.x() - 1, bounds.y() - 1, bounds.width() + 2, bounds.height() + 2 );
+            
             grid.rotate( timeElapsed );
+            grid.validateBounds();
+            
+            bounds = grid.getBounds();
+            var context = grid._layerBeforeRender.context;
+            var tmpStyle = context.fillStyle;
+            context.fillStyle = '#000';
+            context.fillRect( bounds.x(), bounds.y(), bounds.width(), bounds.height() );
+            context.fillStyle = tmpStyle;
             
             // TODO: dead region handling (this is a hack)
-            grid._layerBeforeRender.context.clearRect( main.width() / 2 - 150, main.height() / 2 - 150, 300, 300 );
+            // grid._layerBeforeRender.context.clearRect( main.width() / 2 - 150, main.height() / 2 - 150, 300, 300 );
             // baseContext.clearRect( 0, 0, main.width(), main.height() );
-            grid.render( new phet.scene.RenderState() );
+            grid.renderFull();
         }
     };
     

@@ -5,6 +5,8 @@ phet.scene = phet.scene || {};
 phet.scene.layers = phet.scene.layers || {};
 
 (function(){
+    var Bounds2 = phet.math.Bounds2;
+    
     // assumes main is wrapped with JQuery
     phet.scene.layers.CanvasLayer = function ( main ) {
         this.canvas = document.createElement( 'canvas' );
@@ -15,6 +17,8 @@ phet.scene.layers = phet.scene.layers || {};
         this.context = phet.canvas.initCanvas( this.canvas );
         
         this.isCanvasLayer = true;
+        
+        this.dirtyBounds = Bounds2.NOTHING;
     };
 
     var CanvasLayer = phet.scene.layers.CanvasLayer;
@@ -46,6 +50,11 @@ phet.scene.layers = phet.scene.layers || {};
                 matrix.entries[6],
                 matrix.entries[7]
             );
+        },
+        
+        markDirtyRegion: function( bounds ) {
+            // TODO: for performance, consider more than just a single dirty bounding box
+            this.dirtyBounds = this.dirtyBounds.union( bounds );
         },
         
         setFillStyle: function( style ) {

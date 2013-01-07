@@ -32,6 +32,9 @@ phet.scene.nodes = phet.scene.nodes || {};
         this.height = args.height === undefined ? this.height : args.height;
         this.stroke = args.stroke === undefined ? this.stroke : args.stroke;
         this.fill = args.fill === undefined ? this.fill : args.fill;
+        
+        // TODO: bounds handling for stroke widths / caps, etc.
+        this.setSelfBounds( new phet.math.Bounds2( this.x, this.y, this.x + this.width, this.y + this.height ) );
     };
     
     Rectangle.prototype.renderSelf = function ( state ) {
