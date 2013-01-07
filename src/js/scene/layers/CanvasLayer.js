@@ -13,6 +13,8 @@ phet.scene.layers = phet.scene.layers || {};
         main.append( this.canvas );
         
         this.context = phet.canvas.initCanvas( this.canvas );
+        
+        this.isCanvasLayer = true;
     };
 
     var CanvasLayer = phet.scene.layers.CanvasLayer;
@@ -20,16 +22,44 @@ phet.scene.layers = phet.scene.layers || {};
     CanvasLayer.prototype = {
         constructor: CanvasLayer,
         
-        createState: function( otherState ) {
-            var state = new phet.scene.CanvasState();
-            
-            // rely on all states having an instance of Transform3
-            state.transform = otherState.transform;
-            
-            // use this layer's context
-            state.context = this.context;
-            
-            return state;
+        initialize: function( matrix ) {
+            // set the context's transform to the current transformation matrix
+            this.context.setTransform(
+                // inlined array entries
+                matrix.entries[0],
+                matrix.entries[1],
+                matrix.entries[3],
+                matrix.entries[4],
+                matrix.entries[6],
+                matrix.entries[7]
+            );
+        },
+        
+        // TODO: consider a stack-based model for transforms?
+        applyTransformationMatrix: function( matrix ) {
+            this.context.transform( 
+                // inlined array entries
+                matrix.entries[0],
+                matrix.entries[1],
+                matrix.entries[3],
+                matrix.entries[4],
+                matrix.entries[6],
+                matrix.entries[7]
+            );
+        },
+        
+        setFillStyle: function( style ) {
+            if( this.fillStyle != style ) {
+                this.fillStyle = style;
+                this.context.fillStyle = style;
+            }
+        },
+        
+        setStrokeStyle: function( style ) {
+            if( this.strokeStyle != style ) {
+                this.strokeStyle = style;
+                this.context.strokeStyle = style;
+            }
         }
     };
 })();

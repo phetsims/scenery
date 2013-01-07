@@ -120,12 +120,12 @@ phet.tests = phet.tests || {};
     };
     
     phet.tests.sceneVariableBox = function( main, resolution ) {
-        var baseContext = buildBaseContext( main );
-        
         var size = boxTotalSize;
         var boxRadius = 0.5 * boxSizeRatio * size / resolution;
         
         var grid = new phet.scene.Node();
+        
+        grid.layerType = phet.scene.layers.CanvasLayer;
         
         for( var row = 0; row < resolution; row++ ) {
             for( var col = 0; col < resolution; col++ ) {
@@ -141,16 +141,18 @@ phet.tests = phet.tests || {};
         
         // center the grid
         grid.translate( main.width() / 2, main.height() / 2 );
+        
+        // generate the layers
+        grid.rebuildLayers( main );
 
         // return step function
         return function( timeElapsed ) {
             grid.rotate( timeElapsed );
             
-            baseContext.clearRect( main.width() / 2 - 150, main.height() / 2 - 150, 300, 300 );
+            // TODO: dead region handling (this is a hack)
+            grid._layerBeforeRender.context.clearRect( main.width() / 2 - 150, main.height() / 2 - 150, 300, 300 );
             // baseContext.clearRect( 0, 0, main.width(), main.height() );
-            var state = new phet.scene.CanvasState();
-            state.context = baseContext;
-            grid.render( state );
+            grid.render( new phet.scene.RenderState() );
         }
     };
     

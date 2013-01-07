@@ -14,6 +14,8 @@ phet.scene = phet.scene || {};
         this.parent = null;
         
         // layer-specific data, currently updated in the rebuildLayers step
+        this._layerBeforeRender = null; // for layer changes
+        this._layerAfterRender = null;
 	}
 
 	var Node = phet.scene.Node;
@@ -23,6 +25,10 @@ phet.scene = phet.scene || {};
 		constructor: Node,
         
         render: function( state ) {
+            if( this._layerBeforeRender ) {
+                state.switchToLayer( this._layerBeforeRender );
+            }
+            
             if ( !this.transform.isIdentity() ) {
                 // TODO: consider a stack-based model for transforms?
                 state.applyTransformationMatrix( this.transform.matrix );
@@ -38,6 +44,10 @@ phet.scene = phet.scene || {};
 
             if ( !this.transform.isIdentity() ) {
                 state.applyTransformationMatrix( this.transform.inverse );
+            }
+            
+            if( this._layerAfterRender ) {
+                state.switchToLayer( this._layerAfterRender );
             }
         },
         
@@ -108,6 +118,61 @@ phet.scene = phet.scene || {};
 
         rotate: function ( angle ) {
             this.transform.append( Matrix3.rotation2( angle ) );
+        },
+        
+        rebuildLayers: function( main ) {
+            // verify that this node is the effective root
+            phet.assert( this.parent == null );
+            
+            // root needs to contain a layer type reference
+            phet.assert( this.layerType != null );
+            
+            main.empty();
+            
+            function recursiveRebuild( node, baseLayerType ) {
+                var hasLayer = node.layerType != null;
+                if( !hasLayer ) {
+                    // sanity checks, in case a layerType was removed
+                    node._layerBeforeRender = null;
+                    node._layerAfterRender = null;
+                } else {
+                    // create the layers for before/after
+                    node._layerBeforeRender = new node.layerType( main );
+                    node._layerAfterRender = new baseLayerType( main );
+                    
+                    // change the base layer type for the layer children
+                    baseLayerType = node.layerType;
+                }
+                
+                // for stacking, add the "before" layer before recursion
+                if( hasLayer ) {
+                    main.append( node._layerBeforeRender );
+                }
+                
+                // handle layers for children
+                _.each( node.children, function( child ) {
+                    recursiveRebuild( child, baseLayerType );
+                } );
+                
+                // and the "after" layer after recursion, on top of any child layers
+                if( hasLayer ) {
+                    main.append( node._layerAfterRender );
+                }
+            }
+            
+            // get the layer constructor
+            var rootLayerType = this.layerType;
+            
+            // create the first layer (will be the only layer if no other nodes have a layerType)
+            var startingLayer = new rootLayerType( main );
+            main.append( startingLayer );
+            this._layerBeforeRender = startingLayer;
+            // no "after" layer needed for the root, since nothing is rendered after it
+            this._layerAfterRender = null;
+            
+            _.each( this.children, function( child ) {
+                recursiveRebuild( child, rootLayerType );
+            } );
         }
 	};
 })();

@@ -31,7 +31,7 @@ src/js/webgl/Cylinder.js \
 src/js/canvas/common.js \
 src/js/scene/common.js \
 src/js/scene/Node.js \
-src/js/scene/CanvasState.js \
+src/js/scene/RenderState.js \
 src/js/scene/layers/CanvasLayer.js \
 src/js/scene/nodes/Rectangle.js
 
