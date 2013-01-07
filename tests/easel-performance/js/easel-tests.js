@@ -70,16 +70,6 @@ $(document).ready( function() {
             }
         }]
     },{
-        testName: 'Text',
-        testId: 'test-text',
-        types: [{
-            typeName: 'Bounds Test',
-            typeId: 'boundsTest',
-            init: function( main ) {
-                return phet.tests.textBounds( main )
-            }
-        }]
-    },{
         testName: 'Misc',
         testId: 'test-misc',
         types: [{
@@ -99,12 +89,18 @@ $(document).ready( function() {
                     }
                 };
             }
+        },{
+            typeName: 'Text Bounds',
+            typeId: 'boundsTest',
+            init: function( main ) {
+                return phet.tests.textBounds( main )
+            }
         }]
     },{
         testName: 'Placebo',
         testId: 'test-placebo',
         types: [{
-            typeName: 'Nothing Done',
+            typeName: 'FPS "Control": empty step function',
             typeId: 'nothingDone',
             init: function( main ) {
                 return function( timeElapsed ) {};
