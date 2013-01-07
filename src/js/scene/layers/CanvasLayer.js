@@ -1,5 +1,15 @@
 // Copyright 2002-2012, University of Colorado
 
+/**
+ * A layer in the scene graph. Each layer handles dirty-region handling separately,
+ * and corresponds to a single canvas / svg element / DOM element in the main container.
+ * Importantly, it does not contain rendered content from a subtree of the main
+ * scene graph. It only will render a contiguous block of nodes visited in a depth-first
+ * manner.
+ *
+ * @author Jonathan Olson
+ */
+
 var phet = phet || {};
 phet.scene = phet.scene || {};
 phet.scene.layers = phet.scene.layers || {};

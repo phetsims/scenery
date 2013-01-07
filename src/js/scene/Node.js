@@ -1,5 +1,15 @@
 // Copyright 2002-2012, University of Colorado
 
+/**
+ * A node for the phet-scene scene graph. Supports only tree-style graphs at the moment.
+ * Handles multiple layers with assorted types (canvas, svg, DOM, etc.), and bounds
+ * computation
+ *
+ * TODO: investigate handling DAGs (directed acyclic graphs)
+ *
+ * @author Jonathan Olson
+ */
+
 var phet = phet || {};
 phet.scene = phet.scene || {};
 
@@ -7,22 +17,25 @@ phet.scene = phet.scene || {};
     var Bounds2 = phet.math.Bounds2;
     
 	phet.scene.Node = function( name ) {
-        // user-editable properties
+        // TODO: actually handle visibility!
         this.visible = true;
-        this.layerType = null; // null indicates there is no layer root here. otherwise should be a layer constructor function
+        
+        // type of layer to be created for content under this node.
+        // if non-null, this node is a layer root, and layerType should be a layer constructor function
+        this.layerType = null;
         
         this.children = [];
         this.transform = new phet.math.Transform3();
         this.parent = null;
         
         // layer-specific data, currently updated in the rebuildLayers step
-        this._layerBeforeRender = null; // for layer changes
-        this._layerAfterRender = null;
+        this._layerBeforeRender = null; // layer to swap to before rendering this node
+        this._layerAfterRender = null; // layer to swap to after rendering this node
         
         // bounds handling
-        this._bounds = Bounds2.NOTHING; // in "parent" coordinates
-        this._selfBounds = Bounds2.NOTHING; // in "local" coordinates
-        this._childBounds = Bounds2.NOTHING; // in "local" coordinates
+        this._bounds = Bounds2.NOTHING; // for this node and its children, in "parent" coordinates
+        this._selfBounds = Bounds2.NOTHING; // just for this node, in "local" coordinates
+        this._childBounds = Bounds2.NOTHING; // just for children, in "local" coordinates
         this._boundsDirty = true;
         this._selfBoundsDirty = true;
         this._childBoundsDirty = true;
@@ -39,6 +52,7 @@ phet.scene = phet.scene || {};
             phet.assert( this.parent == null );
             phet.assert( this.isLayerRoot() );
             
+            // validating bounds, similar to Piccolo2d
             this.validateBounds();
             
             // TODO: render only dirty regions
@@ -46,50 +60,58 @@ phet.scene = phet.scene || {};
         },
         
         render: function( state ) {
+            // switch layers if needed
             if( this._layerBeforeRender ) {
                 state.switchToLayer( this._layerBeforeRender );
             }
             
+            // apply this node's transform
             if ( !this.transform.isIdentity() ) {
                 // TODO: consider a stack-based model for transforms?
                 state.applyTransformationMatrix( this.transform.matrix );
             }
-
+            
+            // handle any pre-render tasks
             this.preRender( state );
-
-            // TODO: consider allowing render passes here?
+            
             this.renderSelf( state );
             this.renderChildren( state );
-
+            
+            // handle any post-render tasks
             this.postRender( state );
-
+            
+            // apply the inverse of this node's transform
             if ( !this.transform.isIdentity() ) {
                 state.applyTransformationMatrix( this.transform.inverse );
             }
             
+            // switch layers if needed
             if( this._layerAfterRender ) {
                 state.switchToLayer( this._layerAfterRender );
             }
         },
         
+        // override to render typical leaf behavior (although possible to use for non-leaf nodes also)
         renderSelf: function ( state ) {
 
         },
-
+        
+        // override to run before rendering of this node is done
+        preRender: function ( state ) {
+            
+        },
+        
+        // override to run just after this node and its children are rendered
+        postRender: function ( state ) {
+            
+        },
+        
         renderChildren: function ( state ) {
             for ( var i = 0; i < this.children.length; i++ ) {
                 this.children[i].render( state );
             }
         },
-
-        preRender: function ( state ) {
-            
-        },
-
-        postRender: function ( state ) {
-            
-        },
-
+        
         addChild: function ( node ) {
             phet.assert( node !== null && node !== undefined );
             if ( this.isChild( node ) ) {
@@ -104,56 +126,61 @@ phet.scene = phet.scene || {};
             this.invalidateBounds();
             this._childBoundsDirty = true;
         },
-
+        
         removeChild: function ( node ) {
             phet.assert( this.isChild( node ) );
-
+            
             node.parent = null;
             this.children.splice( this.children.indexOf( node ), 1 );
             
             this.invalidateBounds();
         },
-
+        
         hasParent: function () {
             return this.parent !== null && this.parent !== undefined;
         },
-
+        
+        // remove this node from its parent
         detach: function () {
             if ( this.hasParent() ) {
                 this.parent.removeChild( this );
             }
         },
-
+        
         isChild: function ( potentialChild ) {
             phet.assert( (potentialChild.parent === this ) === (this.children.indexOf( potentialChild ) != -1) );
             return potentialChild.parent === this;
         },
         
+        // does this node have an associated layerType (are the contents of this node rendered separately from its ancestors)
         isLayerRoot: function() {
             return this.layerType != null;
         },
         
+        // the first layer associated with this node (can be multiple layers if children of this node are also layer roots)
         getLayer: function() {
             phet.assert( this.isLayerRoot() );
             return this._layerBeforeRender;
         },
-
+        
         translate: function ( x, y ) {
             this.transform.append( Matrix3.translation( x, y ) );
             this.invalidateBounds();
         },
-
+        
         // scale( s ) is also supported
         scale: function ( x, y ) {
             this.transform.append( Matrix3.scaling( x, y ) );
             this.invalidateBounds();
         },
-
+        
         rotate: function ( angle ) {
             this.transform.append( Matrix3.rotation2( angle ) );
             this.invalidateBounds();
         },
         
+        // called on the root node when any layer-relevant changes are made
+        // TODO: add flags for this to happen, and call during renderFull. set flags on necessary functions
         rebuildLayers: function( main ) {
             // verify that this node is the effective root
             phet.assert( this.parent == null );
@@ -161,8 +188,10 @@ phet.scene = phet.scene || {};
             // root needs to contain a layer type reference
             phet.assert( this.layerType != null );
             
+            // remove everything from our container, so we can fill it in with fresh layers
             main.empty();
             
+            // for handling layers in depth-first fashion
             function recursiveRebuild( node, baseLayerType ) {
                 var hasLayer = node.layerType != null;
                 if( !hasLayer ) {
@@ -219,15 +248,18 @@ phet.scene = phet.scene || {};
             }
         },
         
+        // the bounds for content in renderSelf(), in "local" coordinates
         getSelfBounds: function() {
             return this._selfBounds;
         },
         
+        // the bounds for content in render(), in "parent" coordinates
         getBounds: function() {
             this.validateBounds();
             return this._bounds;
         },
         
+        // ensure that cached bounds stored on this node (and all children) are accurate
         validateBounds: function() {
             // TODO: why is _selfBoundsDirty even needed?
             if( this._selfBoundsDirty ) {
@@ -275,6 +307,7 @@ phet.scene = phet.scene || {};
             }
         },
         
+        // find the first layer root of which this node is an ancestor.
         findLayerRoot: function() {
             var node = this;
             while( node != null ) {
@@ -288,11 +321,13 @@ phet.scene = phet.scene || {};
             return null;
         },
         
+        // find the layer that this node will be rendered to
         findLayer: function() {
             var root = this.findLayerRoot();
             return root != null ? root.getLayer() : null;
         },
         
+        // mark the bounds of this node as invalid, so it is recomputed before it is accessed again
         invalidateBounds: function() {
             this._boundsDirty = true;
             
@@ -305,6 +340,7 @@ phet.scene = phet.scene || {};
             }
         },
         
+        // sets the bounds of the content rendered by renderSelf()
         setSelfBounds: function( newBounds ) {
             // if these bounds are different than current self bounds
             if( !this._selfBounds.equals( newBounds ) ) {

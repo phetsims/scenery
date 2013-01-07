@@ -1,5 +1,11 @@
 // Copyright 2002-2012, University of Colorado
 
+/**
+ * A rectangle shape, with an optional stroke or fill
+ *
+ * @author Jonathan Olson
+ */
+
 var phet = phet || {};
 phet.scene = phet.scene || {};
 phet.scene.nodes = phet.scene.nodes || {};

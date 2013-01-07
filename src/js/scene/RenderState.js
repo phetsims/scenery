@@ -1,5 +1,12 @@
 // Copyright 2002-2012, University of Colorado
 
+/**
+ * Mutable state passed through the scene graph rendering process that stores
+ * the current transformation and layer.
+ *
+ * @author Jonathan Olson
+ */
+
 var phet = phet || {};
 phet.scene = phet.scene || {};
 
