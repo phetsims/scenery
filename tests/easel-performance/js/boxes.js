@@ -152,6 +152,8 @@ phet.tests = phet.tests || {};
             grid._layerBeforeRender.context.clearRect( bounds.x() - 1, bounds.y() - 1, bounds.width() + 2, bounds.height() + 2 );
             
             grid.rotate( timeElapsed );
+            
+            // bounds validation here only necessary so we can show the black background behind it before rendering
             grid.validateBounds();
             
             // show a background behind the boxes that highlights the bounds
