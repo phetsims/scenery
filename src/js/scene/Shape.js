@@ -107,7 +107,7 @@ phet.scene = phet.scene || {};
             this.pieces.push( piece );
         },
         
-        // write out this shape's path to a canvas 2d context
+        // write out this shape's path to a canvas 2d context. does NOT include the beginPath()!
         writeToContext: function( context ) {
             _.each( this.pieces, function( piece ) {
                 switch( piece.type ) {

@@ -36,8 +36,9 @@ phet.scene.layers = phet.scene.layers || {};
     CanvasLayer.prototype = {
         constructor: CanvasLayer,
         
-        initialize: function( matrix ) {
+        initialize: function( renderState ) {
             // set the context's transform to the current transformation matrix
+            var matrix = renderState.transform.matrix;
             this.context.setTransform(
                 // inlined array entries
                 matrix.entries[0],

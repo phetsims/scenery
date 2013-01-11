@@ -25,8 +25,8 @@ phet.scene = phet.scene || {};
         switchToLayer: function( layer ) {
             this.layer = layer;
             
-            // give the layer the current transformation matrix
-            layer.initialize( this.transform.matrix );
+            // give the layer the current state so it can initialize itself properly
+            layer.initialize( this );
         },
         
         isCanvasState: function() {
