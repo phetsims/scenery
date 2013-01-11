@@ -1,39 +1,9 @@
+# requires GNU Make
 
 all: phet-scene.js phet-scene-min.js
-	
-JS_FILES= \
-src/js/common.js \
-src/js/model/Property.js \
-src/js/model/Notifier.js \
-src/js/math/Utils.js \
-src/js/math/Vector2.js \
-src/js/math/Vector3.js \
-src/js/math/Vector4.js \
-src/js/math/Matrix3.js \
-src/js/math/Matrix4.js \
-src/js/math/Ray3.js \
-src/js/math/Transform3.js \
-src/js/math/Transform4.js \
-src/js/math/Permutation.js \
-src/js/math/Matrix.js \
-src/js/math/LUDecomposition.js \
-src/js/math/QRDecomposition.js \
-src/js/math/SingularValueDecomposition.js \
-src/js/math/CanvasTransform.js \
-src/js/math/Dimension2.js \
-src/js/math/Bounds2.js \
-src/js/ui/Color.js \
-src/js/webgl/common.js \
-src/js/webgl/GLNode.js \
-src/js/webgl/Quad.js \
-src/js/webgl/Sphere.js \
-src/js/webgl/Cylinder.js \
-src/js/canvas/common.js \
-src/js/scene/common.js \
-src/js/scene/Node.js \
-src/js/scene/RenderState.js \
-src/js/scene/layers/CanvasLayer.js \
-src/js/scene/nodes/Rectangle.js
+
+# depends on having GNU Make, according to http://stackoverflow.com/questions/6767413/create-a-variable-in-a-makefile-by-reading-contents-of-another-file
+JS_FILES := $(shell cat build/file-list.txt | xargs)
 
 phet-scene.js: concatenated.js
 	java -jar bin/closure-compiler.jar --compilation_level WHITESPACE_ONLY --formatting PRETTY_PRINT --js concatenated.js --js_output_file phet-scene.js
