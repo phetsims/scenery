@@ -171,6 +171,54 @@ $(document).ready( function() {
                     
                 }
             }
+        },{
+            typeName: 'Clip',
+            typeId: 'clipTest',
+            init: function( main ) {
+                var baseCanvas = document.createElement( 'canvas' );
+                baseCanvas.id = 'base-canvas';
+                baseCanvas.width = main.width();
+                baseCanvas.height = main.height();
+                main.append( baseCanvas );
+                
+                var context = phet.canvas.initCanvas( baseCanvas );
+                
+                var x = baseCanvas.width / 2;
+                var y = baseCanvas.height / 2;
+                
+                var timer = { total: 0 };
+                
+                return function( timeElapsed ) {
+                    timer.total += timeElapsed;
+                    
+                    context.save();
+                    
+                    // context.resetTransform(); // TODO: why is this not working?
+                    context.setTransform( 1, 0, 0, 1, 0, 0 );
+                    context.clearRect( 0, 0, baseCanvas.width, baseCanvas.height );
+                    
+                    context.setTransform( 1, 0, 0, 1, x - 100, y - 100 );
+                    
+                    context.beginPath();
+                    context.rect( 90, 0, 20, 200 );
+                    context.clip();
+                    
+                    context.transform( 1, 0, 0, 1, Math.sin( timer.total ) * 100, 0 );
+                    
+                    context.beginPath();
+                    context.arc( 200, 200, 200, 0, 2 * Math.PI, true );
+                    context.clip();
+                    context.beginPath();
+                    context.arc( 0, 0, 200, 0, 2 * Math.PI, true );
+                    context.clip();
+                    context.beginPath();
+                    context.rect( 0, 0, 200, 200 );
+                    context.fillStyle = '#000000';
+                    context.fill();
+                    
+                    context.restore();
+                };
+            }
         }]
     },{
         testName: 'Placebo',
@@ -204,10 +252,10 @@ $(document).ready( function() {
         return phet.canvas.initCanvas( baseCanvas );
     }
     
-    var currentTest = tests[0];
-    var currentType = tests[0].types[0];
-    // var currentTest = tests[1];
-    // var currentType = tests[1].types[2];
+    // var currentTest = tests[0];
+    // var currentType = tests[0].types[0];
+    var currentTest = tests[1];
+    var currentType = tests[1].types[3];
     
     function createButtonGroup() {
         var result = $( document.createElement( 'span' ) );
