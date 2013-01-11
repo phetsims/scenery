@@ -127,6 +127,11 @@ phet.tests = phet.tests || {};
         
         grid.layerType = phet.scene.layers.CanvasLayer;
         
+        var background = new phet.scene.Node();
+        background.setShape( phet.scene.Shape.rectangle( -50, -50, 100, 100 ) );
+        background.fill = '#00FF00';
+        grid.addChild( background );
+        
         for( var row = 0; row < resolution; row++ ) {
             for( var col = 0; col < resolution; col++ ) {
                 grid.addChild( new phet.scene.nodes.Rectangle({

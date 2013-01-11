@@ -15,8 +15,10 @@ phet.scene = phet.scene || {};
 
 (function(){
     var Bounds2 = phet.math.Bounds2;
+    var Shape = phet.scene.Shape;
     
-    phet.scene.Node = function( name ) {
+    // TODO: consider an args-style constructor here!
+    phet.scene.Node = function() {
         // TODO: actually handle visibility!
         this.visible = true;
         
@@ -39,6 +41,14 @@ phet.scene = phet.scene || {};
         this._boundsDirty = true;
         this._selfBoundsDirty = true;
         this._childBoundsDirty = true;
+        
+        // shape used for rendering
+        this._shape = null;
+        // fill/stroke for shapes
+        this.stroke = null;
+        this.fill = null;
+        
+        this._lineDrawingStyles = new Shape.LineStyles();
     }
     
     var Node = phet.scene.Node;
@@ -94,6 +104,26 @@ phet.scene = phet.scene || {};
         // override to render typical leaf behavior (although possible to use for non-leaf nodes also)
         renderSelf: function ( state ) {
             
+            // by default, render a shape if it exists
+            if( this.hasShape() ) {
+                if( state.isCanvasState() ) {
+                    var layer = state.layer;
+                    var context = layer.context;
+                    
+                    // TODO: fill/stroke delay optimizations?
+                    context.beginPath();
+                    this._shape.writeToContext( context );
+                    
+                    if( this.fill ) {
+                        layer.setFillStyle( this.fill );
+                        context.fill();
+                    }
+                    if( this.stroke ) {
+                        layer.setStrokeStyle( this.stroke );
+                        context.stroke();
+                    }
+                }
+            }
         },
         
         // override to run before rendering of this node is done
@@ -461,6 +491,17 @@ phet.scene = phet.scene || {};
         // override for computation of whether a point is inside the content rendered in renderSelf
         containsPointSelf: function( point ) {
             return false;
+        },
+        
+        hasShape: function() {
+            return this._shape != null;
+        },
+        
+        // sets the shape drawn, or null to remove the shape
+        setShape: function( shape ) {
+            this._shape = shape;
+            
+            this.setSelfBounds( shape.computeBounds( ) );
         }
     };
 })();

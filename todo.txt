@@ -1,2 +1,16 @@
 
-Flesh out Shape, with decomposition and other handling routines
+
+User interaction
+Flesh out Shape, with decomposition, bounds, hit regions (including strokes), etc.
+Clipping => Dead region handling (clipping needs to be stored in a shape array since it can only be intersected or reset in Canvas)
+AnimateTo-style animation
+Caching nodes with off-screen canvases for performance
+"Lifting" of DOM nodes to top layer if selected
+flags for whether text / strokes are considered for hit regions
+Implement Bouncy example from the wishlist
+Retina-screen handling
+Ability to update size of canvas, etc.
+Unit tests using canvas pixel querying
+Investigate getImageData for fonts (both hit regions and bounds)
+Accessibility and shadow DOM see html5 scene graph google doc
+Fill/Stroke/BeginPath delaying depending on last style, in CanvasLayer. SET fill-stroke beforehand

@@ -13,8 +13,8 @@ phet.scene = phet.scene || {};
     
     var Vector2 = phet.math.Vector2;
     
-    phet.scene.Shape = function() {
-        this.pieces = [];
+    phet.scene.Shape = function( pieces ) {
+        this.pieces = pieces !== undefined ? pieces : [];
     }
     
     var Shape = phet.scene.Shape;
@@ -34,6 +34,31 @@ phet.scene = phet.scene || {};
     Shape.PIECE_ARC = 7;
     Shape.PIECE_RECT = 8;
     // TODO: simplify arc/ellipse/cubic/quadratic parts?
+    
+    // line caps
+    Shape.CAP_BUTT = 0;
+    Shape.CAP_ROUND = 1;
+    Shape.CAP_SQUARE = 2;
+    
+    // line joins
+    Shape.JOIN_ROUND = 0;
+    Shape.JOIN_BEVEL = 1;
+    Shape.JOIN_MITER = 2;
+    
+    Shape.LineStyles = function( args ) {
+        if( args === undefined ) {
+            args = {};
+        }
+        return {
+            lineWidth: args.lineWidth !== undefined ? args.lineWidth : 1,
+            lineCap: args.lineCap !== undefined ? args.lineCap : Shape.CAP_BUTT,
+            lineJoin: args.lineJoin !== undefined ? args.lineJoin : Shape.JOIN_MITER,
+            miterLimit: args.miterLimit !== undefined ? args.miterLimit : 10 // see https://svgwg.org/svg2-draft/painting.html for miterLimit computations
+        };
+    }
+    
+    // default canvas styles according to spec
+    Shape.DEFAULT_STYLES = new Shape.LineStyles();
     
     Shape.Piece = function( type, points, args ) {
         this.type = type;
@@ -67,7 +92,13 @@ phet.scene = phet.scene || {};
         return new Piece( Shape.PIECE_RECT, [ new Vector2( x, y ), new Vector2( x + width, y + height ) ] );
     };
     
-    // TODO: convenience functions for other types
+    // TODO: convenience functions for other piece types
+    
+    
+    Shape.rectangle = function( x, y, width, height ) {
+        return new Shape( [ Piece.rect( x, y, width, height ) ] );
+    };
+    
     
     Shape.prototype = {
         constructor: Shape,
@@ -101,6 +132,19 @@ phet.scene = phet.scene || {};
         
         decompose: function() {
             // TODO: will return a Shape using simple piece types
+        },
+        
+        // returns the bounds. 
+        computeBounds: function( lineDrawingStyles ) {
+            
+            // TODO: consider null => no stroke?
+            if( lineDrawingStyles === undefined ) {
+                lineDrawingStyles = Shape.DEFAULT_STYLES;
+            }
+            
+            // TODO: return Bounds2
+            return phet.math.Bounds2.NOTHING;
         }
     };
+    
 })();
