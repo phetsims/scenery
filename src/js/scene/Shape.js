@@ -144,6 +144,10 @@ phet.scene = phet.scene || {};
             
             // TODO: return Bounds2
             return phet.math.Bounds2.NOTHING;
+        },
+        
+        traced: function( lineDrawingStyles ) {
+            // TODO: return a shape that is this current shape's traced form with a stroke. see http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#trace-a-path
         }
     };
     

@@ -95,6 +95,82 @@ $(document).ready( function() {
             init: function( main ) {
                 return phet.tests.textBounds( main )
             }
+        },{
+            typeName: 'Winding', // pure black and lighter blue will appear if the fillRule property exists in the Canvas 2d context
+            typeId: 'winding',
+            init: function( main ) {
+                var baseCanvas = document.createElement( 'canvas' );
+                baseCanvas.id = 'base-canvas';
+                baseCanvas.width = main.width();
+                baseCanvas.height = main.height();
+                main.append( baseCanvas );
+                
+                var context = phet.canvas.initCanvas( baseCanvas );
+                
+                var x = baseCanvas.width / 2;
+                var y = baseCanvas.height / 2;
+                
+                context.fillStyle = '#666666';
+                var canvasPadding = 30;
+                context.fillRect( canvasPadding, canvasPadding, baseCanvas.width - 2 * canvasPadding, baseCanvas.height - 2 * canvasPadding );
+                
+                function drawPattern( callbackAfterClose ) {
+                    context.beginPath();
+                    context.arc( x + 50, y, 100, 0, 2 * Math.PI, true );
+                    context.arc( x + 100, y, 25, 0, 2 * Math.PI, true );
+                    context.closePath();
+                    if( callbackAfterClose ) { callbackAfterClose( '#FF0000' ); }
+                    
+                    context.arc( x - 50, y, 100, 2 * Math.PI, 0, false );
+                    context.arc( x - 100, y, 25, 0, 2 * Math.PI, true );
+                    context.closePath();
+                    if( callbackAfterClose ) { callbackAfterClose( '#FFFF00' ); }
+                    
+                    context.arc( x + 200, y, 100, 2 * Math.PI, 0, false );
+                    context.closePath();
+                    if( callbackAfterClose ) { callbackAfterClose( '#00FF00' ); }
+                    
+                    context.arc( x - 200, y, 100, 0, 2 * Math.PI, true );
+                    context.closePath();
+                    if( callbackAfterClose ) { callbackAfterClose( '#FF0000' ); }
+                    
+                    context.arc( x, y - 100, 100, 0, 2 * Math.PI, true );
+                    context.closePath();
+                    if( callbackAfterClose ) { callbackAfterClose( '#FF0000' ); }
+                    
+                    context.arc( x, y - 100, 50, 2 * Math.PI, 0, false );
+                    context.closePath();
+                    if( callbackAfterClose ) { callbackAfterClose( '#00FF00' ); }
+                    
+                    context.arc( x, y + 100, 100, 2 * Math.PI, 0, false );
+                    context.closePath();
+                    if( callbackAfterClose ) { callbackAfterClose( '#00FF00' ); }
+                    
+                    context.arc( x, y + 100, 50, 2 * Math.PI, 0, false );
+                    context.closePath();
+                    if( callbackAfterClose ) { callbackAfterClose( '#00FF00' ); }
+                }
+                
+                drawPattern();
+                context.fillRule = 'nonzero';
+                context.fillStyle = '#000000';
+                context.fill();
+                
+                drawPattern();
+                context.fillRule = 'evenodd';
+                context.fillStyle = 'rgba( 0, 0, 255, 0.25 )';
+                context.fill();
+                
+                drawPattern( function( style ) {
+                    context.strokeStyle = style;
+                    context.stroke();
+                    context.beginPath();
+                } );
+                
+                return function( timeElapsed ) {
+                    
+                }
+            }
         }]
     },{
         testName: 'Placebo',
@@ -130,6 +206,8 @@ $(document).ready( function() {
     
     var currentTest = tests[0];
     var currentType = tests[0].types[0];
+    // var currentTest = tests[1];
+    // var currentType = tests[1].types[2];
     
     function createButtonGroup() {
         var result = $( document.createElement( 'span' ) );
