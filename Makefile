@@ -1,4 +1,4 @@
-# requires GNU Make
+# requires GNU Make. for Windows, use build.bat instead
 
 all: phet-scene.js phet-scene-min.js
 
