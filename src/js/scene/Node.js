@@ -16,7 +16,7 @@ phet.scene = phet.scene || {};
 (function(){
     var Bounds2 = phet.math.Bounds2;
     
-	phet.scene.Node = function( name ) {
+    phet.scene.Node = function( name ) {
         // TODO: actually handle visibility!
         this.visible = true;
         
@@ -40,12 +40,12 @@ phet.scene = phet.scene || {};
         this._selfBoundsDirty = true;
         this._childBoundsDirty = true;
     }
-
-	var Node = phet.scene.Node;
+    
+    var Node = phet.scene.Node;
     var Matrix3 = phet.math.Matrix3;
     
-	Node.prototype = {
-		constructor: Node,
+    Node.prototype = {
+        constructor: Node,
         
         // main render function for the root
         renderFull: function() {
@@ -93,7 +93,7 @@ phet.scene = phet.scene || {};
         
         // override to render typical leaf behavior (although possible to use for non-leaf nodes also)
         renderSelf: function ( state ) {
-
+            
         },
         
         // override to run before rendering of this node is done
@@ -425,6 +425,42 @@ phet.scene = phet.scene || {};
                 bounds = transforms[i].inverseBounds2( bounds );
             }
             return bounds;
+        },
+        
+        // checking for whether a point (in parent coordinates) is contained in this sub-tree
+        containsPoint: function( point ) {
+            // update bounds for pruning
+            this.validateBounds();
+            
+            // bail quickly if this doesn't hit our computed bounds
+            if( !this._bounds.containsPoint( point ) ) { return false; }
+            
+            // point in the local coordinate frame. computed after the main bounds check, so we can bail out there efficiently
+            var localPoint = this.transform.inversePosition2( point );
+            
+            // check children first, since they are rendered later
+            if( this.children.length > 0 && this._childBounds.containsPoint( localPoint ) ) {
+                
+                // manual iteration here so we can return directly, and so we can iterate backwards (last node is in front)
+                for( var i = this.children.length - 1; i >= 0; i-- ) {
+                    var child = this.children[i];
+                    
+                    // the child will have the point in its parent's coordinate frame (i.e. this node's frame)
+                    if( child.containsPoint( localPoint ) ) {
+                        return true;
+                    }
+                }
+            }
+            
+            // didn't hit our children, so check ourself as a last resort
+            if( this._selfBounds.containsPoint( point ) ) {
+                return this.containsPointSelf( point );
+            }
+        },
+        
+        // override for computation of whether a point is inside the content rendered in renderSelf
+        containsPointSelf: function( point ) {
+            return false;
         }
-	};
+    };
 })();

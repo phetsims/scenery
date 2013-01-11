@@ -18,11 +18,11 @@ phet.scene.nodes = phet.scene.nodes || {};
         
         this.update( args );
     };
-
+    
     var Rectangle = phet.scene.nodes.Rectangle;
     
     Rectangle.parameters = [ 'x', 'y', 'width', 'height', 'stroke', 'fill' ];
-
+    
     Rectangle.prototype = Object.create( phet.scene.Node.prototype );
     Rectangle.prototype.constructor = Rectangle;
     
@@ -41,6 +41,17 @@ phet.scene.nodes = phet.scene.nodes || {};
         
         // TODO: bounds handling for stroke widths / caps, etc.
         this.setSelfBounds( new phet.math.Bounds2( this.x, this.y, this.x + this.width, this.y + this.height ) );
+    };
+    
+    // whether this node's rendering contains a specific point in local coordinates
+    Rectangle.prototype.containsPointSelf = function( point ) {
+        // TODO: consider stroke width!
+        return point.x >= this.x && point.y >= this.y && point.x <= this.x + this.width && point.y <= this.y + this.height;
+    };
+    
+    // whether the bounding box intersects this node
+    Rectangle.prototype.intersectsBoundsSelf = function( bounds ) {
+        return !this.getSelfBounds().intersection( bounds ).isEmpty();
     };
     
     Rectangle.prototype.renderSelf = function ( state ) {

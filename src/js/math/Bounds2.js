@@ -65,6 +65,11 @@ phet.math = phet.math || {};
             );
         },
         
+        // whether the point is inside the bounding box
+        containsPoint: function( point ) {
+            return this.xMin <= point.x && point.x <= this.xMax && this.yMin <= point.y && point.y <= this.yMax;
+        },
+        
         // transform a bounding box.
         // NOTE that box.transformed( matrix ).transformed( inverse ) may be larger than the original box
         transformed: function( matrix ) {
