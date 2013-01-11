@@ -4,9 +4,12 @@
 
 setlocal enableextensions enabledelayedexpansion
 
+del concatenated.js
+del phet-scene.js
+del phet-scene-min.js
+
 :: rebuild concatenated.js from the file list by appending
 echo Building concatenated.js
-del concatenated.js
 for /f %%k in (build/file-list.txt) DO (
 	:: call out to the inside of our loop. it's a separate file because of how the for loop is expanded. see http://www.robvanderwoude.com/for.php (section 7)
 	call build\sub-build.bat %%k
