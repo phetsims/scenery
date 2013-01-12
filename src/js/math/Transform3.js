@@ -88,6 +88,10 @@ phet.math = phet.math || {};
         transformBounds2: function ( bounds2 ) {
             return bounds2.transformed( this.matrix );
         },
+        
+        transformShape: function( shape ) {
+            return shape.transformed( this.matrix );
+        },
 
         /*---------------------------------------------------------------------------*
          * inverse transforms (for Vector2 or scalar)
@@ -116,6 +120,10 @@ phet.math = phet.math || {};
         
         inverseBounds2: function ( bounds2 ) {
             return bounds2.transformed( this.inverse );
+        },
+        
+        inverseShape: function( shape ) {
+            return shape.transformed( this.inverse );
         }
     };
 })();

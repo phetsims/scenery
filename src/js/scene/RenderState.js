@@ -15,6 +15,9 @@ phet.scene = phet.scene || {};
         this.transform = new phet.math.Transform3();
         
         this.layer = null;
+        
+        // clipping shapes should be added in reference to the global coordinate frame
+        this.clipping = [];
     }
 
     var RenderState = phet.scene.RenderState;

@@ -60,6 +60,7 @@ phet.scene = phet.scene || {};
     // default canvas styles according to spec
     Shape.DEFAULT_STYLES = new Shape.LineStyles();
     
+    // Pieces should be considered immutable
     Shape.Piece = function( type, points, args ) {
         this.type = type;
         this.points = points;
@@ -118,6 +119,7 @@ phet.scene = phet.scene || {};
                     case Shape.PIECE_CUBIC: context.bezierCurveTo( piece.points[0].x, piece.points[0].y, piece.points[1].x, piece.points[1].y, piece.points[2].x, piece.points[2].y ); break;
                     case Shape.PIECE_ELLIPSE: context.ellipse( piece.points[0].x, piece.points[0].y, piece.args.radiusX, piece.args.radiusY, piece.args.rotation, piece.args.startAngle, piece.args.endAngle, piece.args.anticlockwise ); break;
                     case Shape.PIECE_ARC_TO:
+                        // TODO: consider splitting ARC_TO into two separate piece types
                         if( piece.args.radius !== undefined ) {
                             context.ellipse( piece.points[0].x, piece.points[0].y, piece.points[1].x, piece.points[1].y, piece.args.radius );
                         } else {
@@ -132,6 +134,52 @@ phet.scene = phet.scene || {};
         
         decompose: function() {
             // TODO: will return a Shape using simple piece types
+        },
+        
+        // return a new Shape that is transformed by the associated matrix
+        transformed: function( matrix ) {
+            return new Shape( _.map( this.pieces, function( piece ) {
+                var transformedPoints = _.map( piece.points, matrix.timesVector2 );
+                var args = piece.args;
+                switch( piece.type ) {
+                    case Shape.PIECE_MOVE:
+                    case Shape.PIECE_LINE:
+                    case Shape.PIECE_CLOSE:
+                    case Shape.PIECE_QUADRATIC:
+                    case Shape.PIECE_CUBIC:
+                    case Shape.PIECE_RECT:
+                        return new Piece( piece.type, transformedPoints, args );
+                    case Shape.PIECE_ELLIPSE:
+                        return new Piece( Shape.PIECE_ELLIPSE, transformedPoints, {
+                            // TODO: more convenient way of handling one-param modifications, like args.with( { rotation: <blah> } )
+                            radiusX: args.radiusX,
+                            radiusY: args.radiusY,
+                            rotation: args.rotation + matrix.rotation(),
+                            startAngle: args.startAngle,
+                            endAngle: args.endAngle,
+                            anticlockwise: args.anticlockwise
+                        } );
+                    case Shape.PIECE_ARC_TO:
+                        if( args.radius !== undefined ) {
+                            return new Piece( Shape.PIECE_ARC_TO, transformedPoints, args );
+                        } else {
+                            return new Piece( Shape.PIECE_ARC_TO, transformedPoints, {
+                                radiusX: args.radiusX,
+                                radiusY: args.radiusY,
+                                rotation: args.rotation + matrix.rotation()
+                            } );
+                        }
+                        break;
+                    case Shape.PIECE_ARC:
+                        var extraRotation = matrix.rotation();
+                        return new Piece( Shape.PIECE_ARC, transformedPoints, {
+                            radius: args.radius,
+                            startAngle: args.startAngle + extraRotation,
+                            endAngle: args.endAngle + extraRotation,
+                            anticlockwise: args.anticlockwise
+                        } );
+                }
+            } ));
         },
         
         // returns the bounds. 

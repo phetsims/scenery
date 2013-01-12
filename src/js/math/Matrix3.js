@@ -348,6 +348,12 @@ phet.math = phet.math || {};
 
         translation: function () { return new phet.math.Vector2( this.m02(), this.m12() ); },
         scaling: function () { return new phet.math.Vector3( this.m00(), this.m11(), this.m22() );},
+        
+        // angle in radians for the 2d rotation from this matrix, between pi, -pi
+        rotation: function() {
+            var transformedVector = this.timesVector2( Vector2.X_UNIT ).minus( this.timesVector2( Vector2.ZERO ) );
+            return Math.atan2( transformedVector.y, transformedVector.x );
+        },
 
         makeImmutable: function () {
             this.rowMajor = function () {
