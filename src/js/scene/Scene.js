@@ -38,7 +38,6 @@ phet.scene = phet.scene || {};
         },
         
         clearLayers: function() {
-            console.log( this.main );
             this.main.empty();
             this.layers = [];
         },

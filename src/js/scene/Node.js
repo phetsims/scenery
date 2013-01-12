@@ -19,7 +19,6 @@ phet.scene = phet.scene || {};
     
     // TODO: consider an args-style constructor here!
     phet.scene.Node = function() {
-        // TODO: actually handle visibility!
         this.visible = true;
         
         // type of layer to be created for content under this node.
@@ -61,7 +60,7 @@ phet.scene = phet.scene || {};
     Node.prototype = {
         constructor: Node,
         
-        render: function( state ) {
+        enterState: function( state ) {
             // switch layers if needed
             if( this._layerBeforeRender ) {
                 state.switchToLayer( this._layerBeforeRender );
@@ -76,16 +75,9 @@ phet.scene = phet.scene || {};
             if( this.clipShape ) {
                 state.pushClipShape( this.clipShape );
             }
-            
-            // handle any pre-render tasks
-            this.preRender( state );
-            
-            this.renderSelf( state );
-            this.renderChildren( state );
-            
-            // handle any post-render tasks
-            this.postRender( state );
-            
+        },
+        
+        leaveState: function( state ) {
             if( this.clipShape ) {
                 state.popClipShape();
             }
@@ -99,6 +91,23 @@ phet.scene = phet.scene || {};
             if( this._layerAfterRender ) {
                 state.switchToLayer( this._layerAfterRender );
             }
+        },
+        
+        render: function( state ) {
+            this.enterState( state );
+            
+            if( this.visible ) {
+                // handle any pre-render tasks
+                this.preRender( state );
+                
+                this.renderSelf( state );
+                this.renderChildren( state );
+                
+                // handle any post-render tasks
+                this.postRender( state );
+            }
+            
+            this.leaveState( state );
         },
         
         // override to render typical leaf behavior (although possible to use for non-leaf nodes also)
@@ -443,6 +452,24 @@ phet.scene = phet.scene || {};
             this._shape = shape;
             
             this.setSelfBounds( shape.computeBounds( ) );
+        },
+        
+        // returns a list of ancestors of this node, with the root first
+        ancestors: function() {
+            return this.parent ? this.parent.pathToRoot() : [];
+        },
+        
+        // like ancestors(), but includes the current node as well
+        pathToRoot: function() {
+            var result = [];
+            var node = this;
+            
+            while( node != null ) {
+                result.unshift( node );
+                node = node.parent;
+            }
+            
+            return result;
         }
     };
 })();
