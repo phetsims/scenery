@@ -169,7 +169,6 @@ phet.scene = phet.scene || {};
                                 rotation: args.rotation + matrix.rotation()
                             } );
                         }
-                        break;
                     case Shape.PIECE_ARC:
                         var extraRotation = matrix.rotation();
                         return new Piece( Shape.PIECE_ARC, transformedPoints, {
