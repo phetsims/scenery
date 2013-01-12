@@ -26,6 +26,10 @@ phet.scene = phet.scene || {};
         // if non-null, this node is a layer root, and layerType should be a layer constructor function
         this.layerType = null;
         
+        // This node and all children will be clipped by this shape (in addition to any other clipping shapes).
+        // The shape should be in the local coordinate frame
+        this.clipShape = null;
+        
         this.children = [];
         this.transform = new phet.math.Transform3();
         this.parent = null;
@@ -81,6 +85,10 @@ phet.scene = phet.scene || {};
                 state.applyTransformationMatrix( this.transform.matrix );
             }
             
+            if( this.clipShape ) {
+                state.pushClipShape( this.clipShape );
+            }
+            
             // handle any pre-render tasks
             this.preRender( state );
             
@@ -89,6 +97,10 @@ phet.scene = phet.scene || {};
             
             // handle any post-render tasks
             this.postRender( state );
+            
+            if( this.clipShape ) {
+                state.popClipShape();
+            }
             
             // apply the inverse of this node's transform
             if ( !this.transform.isIdentity() ) {

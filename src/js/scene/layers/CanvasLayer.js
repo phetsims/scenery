@@ -36,7 +36,21 @@ phet.scene.layers = phet.scene.layers || {};
     CanvasLayer.prototype = {
         constructor: CanvasLayer,
         
+        // called when rendering switches to this layer
         initialize: function( renderState ) {
+            // first, switch to an identity matrix so we can apply the global coordinate clipping shapes
+            this.context.setTransform( 1, 0, 0, 1, 0, 0 );
+            
+            // save now, so that we can clear the clipping shapes later
+            this.context.save();
+            
+            // apply clipping shapes in the global coordinate frame
+            _.each( renderState.clipShapes, function( shape ) {
+                this.context.beginPath();
+                shape.writeToContext( this.context );
+                this.context.clip();
+            } );
+            
             // set the context's transform to the current transformation matrix
             var matrix = renderState.transform.matrix;
             this.context.setTransform(
@@ -50,6 +64,11 @@ phet.scene.layers = phet.scene.layers || {};
             );
         },
         
+        // called when rendering switches away from this layer
+        cooldown: function() {
+            
+        },
+        
         // TODO: consider a stack-based model for transforms?
         applyTransformationMatrix: function( matrix ) {
             this.context.transform( 
@@ -61,6 +80,20 @@ phet.scene.layers = phet.scene.layers || {};
                 matrix.entries[6],
                 matrix.entries[7]
             );
+        },
+        
+        pushClipShape: function( shape ) {
+            // store the current state, since browser support for context.resetClip() is not yet in the stable browser versions
+            this.context.save();
+            
+            // set up the clipping
+            this.context.beginPath();
+            shape.writeToContext( this.context );
+            this.context.clip();
+        },
+        
+        popClipShape: function() {
+            this.context.restore();
         },
         
         markDirtyRegion: function( bounds ) {

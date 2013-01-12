@@ -17,7 +17,7 @@ phet.scene = phet.scene || {};
         this.layer = null;
         
         // clipping shapes should be added in reference to the global coordinate frame
-        this.clipping = [];
+        this.clipShapes = [];
     }
 
     var RenderState = phet.scene.RenderState;
@@ -25,7 +25,25 @@ phet.scene = phet.scene || {};
     RenderState.prototype = {
         constructor: RenderState,
         
+        // add a clipping region in the local coordinate frame
+        pushClipShape: function( shape ) {
+            // transform the shape into global coordinates
+            this.clipShapes.push( this.transform.transformShape( shape ) );
+            
+            // notify the layer to actually do the clipping
+            this.layer.pushClipShape( shape );
+        },
+        
+        popClipShape: function() {
+            this.clipShapes.pop();
+            this.layer.popClipShape();
+        },
+        
         switchToLayer: function( layer ) {
+            if( this.layer ) {
+                this.layer.cooldown();
+            }
+            
             this.layer = layer;
             
             // give the layer the current state so it can initialize itself properly
