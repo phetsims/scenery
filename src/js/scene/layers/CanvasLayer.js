@@ -30,6 +30,9 @@ phet.scene.layers = phet.scene.layers || {};
         
         // initialize to fully dirty so we draw everything the first time
         this.dirtyBounds = Bounds2.EVERYTHING;
+        
+        this.fillStyle = null;
+        this.strokeStyle = null;
     };
     
     var CanvasLayer = phet.scene.layers.CanvasLayer;
@@ -63,6 +66,10 @@ phet.scene.layers = phet.scene.layers || {};
                 matrix.entries[6],
                 matrix.entries[7]
             );
+            
+            // reset the styles so that they are re-done
+            this.fillStyle = null;
+            this.strokeStyle = null;
         },
         
         // called when rendering switches away from this layer

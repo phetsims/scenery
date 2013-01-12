@@ -93,6 +93,7 @@ phet.scene = phet.scene || {};
             }
         },
         
+        // Renders this node and all of its children. NOTE: this is not the only way rendering happens, but it is the clearest expression of the order of operations
         render: function( state ) {
             this.enterState( state );
             
@@ -146,9 +147,9 @@ phet.scene = phet.scene || {};
         },
         
         renderChildren: function ( state ) {
-            for ( var i = 0; i < this.children.length; i++ ) {
-                this.children[i].render( state );
-            }
+            _.each( this.children, function( child ) {
+                child.render( state );
+            } );
         },
         
         addChild: function ( node ) {
@@ -452,6 +453,10 @@ phet.scene = phet.scene || {};
             this._shape = shape;
             
             this.setSelfBounds( shape.computeBounds( ) );
+        },
+        
+        getShape: function() {
+            return this._shape;
         },
         
         // returns a list of ancestors of this node, with the root first

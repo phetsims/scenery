@@ -221,6 +221,16 @@ $(document).ready( function() {
             }
         }]
     },{
+        testName: 'Layers',
+        testId: 'test-layers',
+        types: [{
+            typeName: 'Demo',
+            typeId: 'demo',
+            init: function( main ) {
+                return phet.tests.layeringTests( main );
+            }
+        }]
+    },{
         testName: 'Placebo',
         testId: 'test-placebo',
         types: [{

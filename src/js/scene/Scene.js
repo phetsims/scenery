@@ -34,7 +34,9 @@ phet.scene = phet.scene || {};
             this.root.validateBounds();
             
             // TODO: render only dirty regions
-            this.root.render( new phet.scene.RenderState() );
+            var state = new phet.scene.RenderState();
+            this.root.render( state );
+            state.finish(); // handle cleanup for the last layer
         },
         
         clearLayers: function() {

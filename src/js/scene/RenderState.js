@@ -4,6 +4,8 @@
  * Mutable state passed through the scene graph rendering process that stores
  * the current transformation and layer.
  *
+ * A fresh RenderState should be used for each render pass.
+ *
  * @author Jonathan Olson
  */
 
@@ -48,6 +50,12 @@ phet.scene = phet.scene || {};
             
             // give the layer the current state so it can initialize itself properly
             layer.initialize( this );
+        },
+        
+        finish: function() {
+            if( this.layer ) {
+                this.layer.cooldown();
+            }
         },
         
         isCanvasState: function() {

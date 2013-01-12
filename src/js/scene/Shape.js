@@ -13,8 +13,11 @@ phet.scene = phet.scene || {};
     
     var Vector2 = phet.math.Vector2;
     
-    phet.scene.Shape = function( pieces ) {
+    phet.scene.Shape = function( pieces, optionalClose ) {
         this.pieces = pieces !== undefined ? pieces : [];
+        if( optionalClose ) {
+            this.addPiece( Piece.closePath() );
+        }
     }
     
     var Shape = phet.scene.Shape;
@@ -177,6 +180,8 @@ phet.scene = phet.scene || {};
                             endAngle: args.endAngle + extraRotation,
                             anticlockwise: args.anticlockwise
                         } );
+                    default:
+                        throw new Error( 'transformed unimplemented for piece type' + piece.type );
                 }
             } ));
         },
@@ -189,12 +194,47 @@ phet.scene = phet.scene || {};
                 lineDrawingStyles = Shape.DEFAULT_STYLES;
             }
             
-            // TODO: return Bounds2
-            return phet.math.Bounds2.NOTHING;
+            var bounds = phet.math.Bounds2.NOTHING;
+            
+            // TODO: improve bounds constraints (not as tight as possible yet)
+            _.each( this.pieces, function( piece ) {
+                // set bounding box to contain all control points
+                _.each( piece.points, function( point ) {
+                    bounds = bounds.withPoint( point );
+                } );
+                
+                switch( piece.type ) {
+                    case Shape.PIECE_MOVE:
+                    case Shape.PIECE_LINE:
+                    case Shape.PIECE_CLOSE:
+                    case Shape.PIECE_QUADRATIC:
+                    case Shape.PIECE_CUBIC:
+                    case Shape.PIECE_RECT:
+                        break; // already handled by the points. TODO implement tighter on curves due to control points not being bounds
+                    case Shape.PIECE_ELLIPSE:
+                        var x = piece.points[0].x;
+                        var y = piece.points[0].y;
+                        var maxRadius = Math.max( piece.args.radiusX, piece.args.radiusY );
+                        bounds = bounds.union( new phet.math.Bounds2( x - maxRadius, y - maxRadius, x + maxRadius, y - maxRadius ) );
+                        break;
+                    case Shape.PIECE_ARC_TO:
+                        throw new Error( 'arcTo computeBounds not implemented yet' );
+                    case Shape.PIECE_ARC:
+                        var x = piece.points[0].x;
+                        var y = piece.points[0].y;
+                        var radius = piece.args.radius;
+                        bounds = bounds.union( new phet.math.Bounds2( x - radius, y - radius, x + radius, y - radius ) );
+                        break;
+                    default:
+                        throw new Error( 'computeBounds unimplemented for piece type: ' + piece.type );
+                }
+            } );
+            return bounds;
         },
         
         traced: function( lineDrawingStyles ) {
             // TODO: return a shape that is this current shape's traced form with a stroke. see http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#trace-a-path
+            throw new Error( 'Shape traced unimplemented' );
         }
     };
     
