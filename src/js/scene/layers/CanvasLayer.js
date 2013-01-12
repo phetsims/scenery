@@ -31,7 +31,7 @@ phet.scene.layers = phet.scene.layers || {};
         // initialize to fully dirty so we draw everything the first time
         this.dirtyBounds = Bounds2.EVERYTHING;
     };
-
+    
     var CanvasLayer = phet.scene.layers.CanvasLayer;
     
     CanvasLayer.prototype = {
@@ -67,7 +67,7 @@ phet.scene.layers = phet.scene.layers || {};
         
         // called when rendering switches away from this layer
         cooldown: function() {
-            
+            this.context.restore();
         },
         
         // TODO: consider a stack-based model for transforms?
