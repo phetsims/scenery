@@ -1,5 +1,5 @@
 
-Transform Shape with a Transform3 / Matrix
+
 User interaction
 Flesh out Shape, with decomposition, bounds, hit regions (including strokes), etc.
 Clipping => Dead region handling (clipping needs to be stored in a shape array since it can only be intersected or reset in Canvas)

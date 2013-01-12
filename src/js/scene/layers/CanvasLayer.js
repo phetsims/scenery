@@ -28,7 +28,8 @@ phet.scene.layers = phet.scene.layers || {};
         
         this.isCanvasLayer = true;
         
-        this.dirtyBounds = Bounds2.NOTHING;
+        // initialize to fully dirty so we draw everything the first time
+        this.dirtyBounds = Bounds2.EVERYTHING;
     };
 
     var CanvasLayer = phet.scene.layers.CanvasLayer;
