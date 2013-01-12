@@ -61,18 +61,6 @@ phet.scene = phet.scene || {};
     Node.prototype = {
         constructor: Node,
         
-        // main render function for the root
-        renderFull: function() {
-            phet.assert( this.parent == null );
-            phet.assert( this.isLayerRoot() );
-            
-            // validating bounds, similar to Piccolo2d
-            this.validateBounds();
-            
-            // TODO: render only dirty regions
-            this.render( new phet.scene.RenderState() );
-        },
-        
         render: function( state ) {
             // switch layers if needed
             if( this._layerBeforeRender ) {

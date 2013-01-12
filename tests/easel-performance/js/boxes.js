@@ -123,7 +123,9 @@ phet.tests = phet.tests || {};
         var size = boxTotalSize;
         var boxRadius = 0.5 * boxSizeRatio * size / resolution;
         
-        var grid = new phet.scene.Node();
+        var scene = new phet.scene.Scene();
+        
+        var grid = scene.root;
         
         grid.layerType = phet.scene.layers.CanvasLayer;
         
@@ -172,7 +174,7 @@ phet.tests = phet.tests || {};
             // TODO: dead region handling (this is a hack)
             // grid._layerBeforeRender.context.clearRect( main.width() / 2 - 150, main.height() / 2 - 150, 300, 300 );
             // baseContext.clearRect( 0, 0, main.width(), main.height() );
-            grid.renderFull();
+            scene.renderScene();
         }
     };
     
