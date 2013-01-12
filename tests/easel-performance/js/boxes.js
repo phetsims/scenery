@@ -123,7 +123,7 @@ phet.tests = phet.tests || {};
         var size = boxTotalSize;
         var boxRadius = 0.5 * boxSizeRatio * size / resolution;
         
-        var scene = new phet.scene.Scene();
+        var scene = new phet.scene.Scene( main );
         
         var grid = scene.root;
         
@@ -150,7 +150,7 @@ phet.tests = phet.tests || {};
         grid.translate( main.width() / 2, main.height() / 2 );
         
         // generate the layers
-        grid.rebuildLayers( main );
+        scene.rebuildLayers();
 
         // return step function
         return function( timeElapsed ) {

@@ -209,65 +209,6 @@ phet.scene = phet.scene || {};
             this.invalidateBounds();
         },
         
-        // called on the root node when any layer-relevant changes are made
-        // TODO: add flags for this to happen, and call during renderFull. set flags on necessary functions
-        rebuildLayers: function( main ) {
-            // verify that this node is the effective root
-            phet.assert( this.parent == null );
-            
-            // root needs to contain a layer type reference
-            phet.assert( this.layerType != null );
-            
-            // remove everything from our container, so we can fill it in with fresh layers
-            main.empty();
-            
-            // for handling layers in depth-first fashion
-            function recursiveRebuild( node, baseLayerType ) {
-                var hasLayer = node.layerType != null;
-                if( !hasLayer ) {
-                    // sanity checks, in case a layerType was removed
-                    node._layerBeforeRender = null;
-                    node._layerAfterRender = null;
-                } else {
-                    // create the layers for before/after
-                    node._layerBeforeRender = new node.layerType( main );
-                    node._layerAfterRender = new baseLayerType( main );
-                    
-                    // change the base layer type for the layer children
-                    baseLayerType = node.layerType;
-                }
-                
-                // for stacking, add the "before" layer before recursion
-                if( hasLayer ) {
-                    main.append( node._layerBeforeRender );
-                }
-                
-                // handle layers for children
-                _.each( node.children, function( child ) {
-                    recursiveRebuild( child, baseLayerType );
-                } );
-                
-                // and the "after" layer after recursion, on top of any child layers
-                if( hasLayer ) {
-                    main.append( node._layerAfterRender );
-                }
-            }
-            
-            // get the layer constructor
-            var rootLayerType = this.layerType;
-            
-            // create the first layer (will be the only layer if no other nodes have a layerType)
-            var startingLayer = new rootLayerType( main );
-            main.append( startingLayer );
-            this._layerBeforeRender = startingLayer;
-            // no "after" layer needed for the root, since nothing is rendered after it
-            this._layerAfterRender = null;
-            
-            _.each( this.children, function( child ) {
-                recursiveRebuild( child, rootLayerType );
-            } );
-        },
-        
         // bounds assumed to be in the local coordinate frame, below this node's transform
         markDirtyRegion: function( bounds ) {
             var layer = this.findLayer();

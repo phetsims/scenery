@@ -10,11 +10,15 @@ var phet = phet || {};
 phet.scene = phet.scene || {};
 
 (function(){
-    phet.scene.Scene = function() {
+    phet.scene.Scene = function( main ) {
         this.root = new phet.scene.Node();
         
         // default to a canvas layer type, but this can be changed
         this.root.layerType = phet.scene.layers.CanvasLayer;
+        
+        this.layers = [];
+        
+        this.main = main;
     }
 
     var Scene = phet.scene.Scene;
@@ -31,6 +35,76 @@ phet.scene = phet.scene || {};
             
             // TODO: render only dirty regions
             this.root.render( new phet.scene.RenderState() );
+        },
+        
+        clearLayers: function() {
+            console.log( this.main );
+            this.main.empty();
+            this.layers = [];
+        },
+        
+        addLayer: function( layer ) {
+            this.main.append( layer );
+            this.layers.push( layer );
+        },
+        
+        // called on the root node when any layer-relevant changes are made
+        // TODO: add flags for this to happen, and call during renderFull. set flags on necessary functions
+        rebuildLayers: function() {
+            // verify that this node is the effective root
+            phet.assert( this.root.parent == null );
+            
+            // root needs to contain a layer type reference
+            phet.assert( this.root.layerType != null );
+            
+            // remove everything from our container, so we can fill it in with fresh layers
+            this.clearLayers();
+            
+            // for handling layers in depth-first fashion
+            function recursiveRebuild( node, baseLayerType ) {
+                var hasLayer = node.layerType != null;
+                if( !hasLayer ) {
+                    // sanity checks, in case a layerType was removed
+                    node._layerBeforeRender = null;
+                    node._layerAfterRender = null;
+                } else {
+                    // layers created in order, later
+                    
+                    // change the base layer type for the layer children
+                    baseLayerType = node.layerType;
+                }
+                
+                // for stacking, add the "before" layer before recursion
+                if( hasLayer ) {
+                    node._layerBeforeRender = new node.layerType( this.main );
+                    this.addLayer( node._layerBeforeRender );
+                }
+                
+                // handle layers for children
+                _.each( node.children, function( child ) {
+                    recursiveRebuild( child, baseLayerType );
+                } );
+                
+                // and the "after" layer after recursion, on top of any child layers
+                if( hasLayer ) {
+                    node._layerAfterRender = new baseLayerType( this.main );
+                    this.addLayer( node._layerAfterRender );
+                }
+            }
+            
+            // get the layer constructor
+            var rootLayerType = this.root.layerType;
+            
+            // create the first layer (will be the only layer if no other nodes have a layerType)
+            var startingLayer = new rootLayerType( this.main );
+            this.main.append( startingLayer );
+            this.root._layerBeforeRender = startingLayer;
+            // no "after" layer needed for the root, since nothing is rendered after it
+            this.root._layerAfterRender = null;
+            
+            _.each( this.root.children, function( child ) {
+                recursiveRebuild( child, rootLayerType );
+            } );
         }
     };
 })();
