@@ -7,8 +7,9 @@ phet.tests = phet.tests || {};
     var Piece = phet.scene.Shape.Piece;
     
     var backgroundSize = 300;
+    var count = 500;
     
-    phet.tests.layeringTests = function( main, useLayers ) {
+    phet.tests.sceneLayeringTests = function( main, useLayers ) {
         var radius = 15;
         var scene = new phet.scene.Scene( main );
         var root = scene.root;
@@ -20,7 +21,7 @@ phet.tests = phet.tests || {};
             if( useLayers ) {
                 background.layerType = phet.scene.layers.CanvasLayer;
             }
-            for( var i = 0; i < 500; i++ ) {
+            for( var i = 0; i < count; i++ ) {
                 var node = new phet.scene.Node();
                 var radius = 10;
                 
@@ -68,6 +69,54 @@ phet.tests = phet.tests || {};
             scene.updateScene();
         }
     };
+    
+    phet.tests.easelLayeringTests = function( main ) {
+        var radius = 15;
+        
+        var canvas = document.createElement( 'canvas' );
+        canvas.id = 'easel-canvas';
+        canvas.width = main.width();
+        canvas.height = main.height();
+        main.append( canvas );
+
+        var stage = new createjs.Stage( canvas );
+        
+        function buildShapes( color ) {
+            var background = new createjs.Container();
+            stage.addChild( background );
+            
+            for( var i = 0; i < count; i++ ) {
+                var shape = new createjs.Shape();
+                var radius = 10;
+                
+                shape.graphics.beginFill( color ).beginStroke( '#000000' ).drawPolyStar( 0, 0, radius, 6, 0, 0 );
+                
+                shape.x = ( Math.random() - 0.5 ) * backgroundSize;
+                shape.y = ( Math.random() - 0.5 ) * backgroundSize;
+                
+                background.addChild( shape );
+            }
+            
+            background.x = main.width() / 2;
+            background.y = main.height() / 2;
+            
+            return background;
+        }
+        
+        var reds = buildShapes( 'rgba(255,0,0,0.7)' );
+        var greens = buildShapes( 'rgba(0,255,0,0.7)' );
+        var blues = buildShapes( 'rgba(0,0,255,0.7)' );
+        
+        stage.addChild( reds );
+        stage.addChild( greens );
+        stage.addChild( blues );
+        
+        // return step function
+        return function( timeElapsed ) {
+            greens.rotation += timeElapsed * 180 / Math.PI;
+            stage.update();
+        }
+    }
     
 })();
 

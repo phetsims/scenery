@@ -227,13 +227,19 @@ $(document).ready( function() {
             typeName: 'Scene With',
             typeId: 'sceneWith',
             init: function( main ) {
-                return phet.tests.layeringTests( main, true );
+                return phet.tests.sceneLayeringTests( main, true );
             }
         },{
             typeName: 'Scene Without',
             typeId: 'sceneWithout',
             init: function( main ) {
-                return phet.tests.layeringTests( main, false );
+                return phet.tests.sceneLayeringTests( main, false );
+            }
+        },{
+            typeName: 'Easel',
+            typeId: 'easel',
+            init: function( main ) {
+                return phet.tests.easelLayeringTests( main, false );
             }
         }]
     },{
