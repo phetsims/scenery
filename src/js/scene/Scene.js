@@ -37,6 +37,10 @@ phet.scene = phet.scene || {};
             var state = new phet.scene.RenderState();
             this.root.render( state );
             state.finish(); // handle cleanup for the last layer
+            
+            _.each( this.layers, function( layer ) {
+                layer.clearDirtyRegions();
+            } );
         },
         
         clearLayers: function() {

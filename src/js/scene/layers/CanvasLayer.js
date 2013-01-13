@@ -116,6 +116,10 @@ phet.scene.layers = phet.scene.layers || {};
             this.dirtyBounds = this.dirtyBounds.union( bounds );
         },
         
+        clearDirtyRegions: function() {
+            this.dirtyBounds = Bounds2.NOTHING;
+        },
+        
         setFillStyle: function( style ) {
             if( this.fillStyle != style ) {
                 this.fillStyle = style;
