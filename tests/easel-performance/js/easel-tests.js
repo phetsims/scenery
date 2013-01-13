@@ -241,6 +241,12 @@ $(document).ready( function() {
             init: function( main ) {
                 return phet.tests.easelLayeringTests( main, false );
             }
+        },{
+            typeName: 'Custom',
+            typeId: 'custom',
+            init: function( main ) {
+                return phet.tests.customLayeringTests( main, false );
+            }
         }]
     },{
         testName: 'Placebo',
@@ -388,7 +394,7 @@ $(document).ready( function() {
     (function(){
         // records the last #fpsCount timestamps, and displays the average FPS over that time
         var fpsReadout = $('#fps-readout');
-        var fpsCount = 10;
+        var fpsCount = 20;
         var fpsIndex = 0;
         // stuffs timestamps in a round-robin fashion into here
         var timeEntries = _.map( _.range( fpsCount ), function( a ) { return 0; } );
@@ -397,7 +403,7 @@ $(document).ready( function() {
             timeEntries[ fpsIndex ] = timestamp;
             fpsIndex = ( fpsIndex + 1 ) % fpsCount;
             var timeChange = ( timestamp - timeEntries[ fpsIndex ] ) / 1000;
-            var fps = 10 / timeChange;
+            var fps = fpsCount / timeChange;
             if( fps < 1 ) {
                 fpsReadout.text( "-" );
             } else {
