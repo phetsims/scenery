@@ -127,11 +127,11 @@ phet.webgl = phet.webgl || {};
         }
 
         if ( args.transformAttribute !== null ) {
-            gl.uniformMatrix4fv( args.transformAttribute, false, args.transform.matrix.entries );
+            gl.uniformMatrix4fv( args.transformAttribute, false, args.transform.getMatrix().entries );
         }
 
         if ( args.inverseTransposeAttribute !== null ) {
-            gl.uniformMatrix4fv( args.inverseTransposeAttribute, false, args.transform.inverseTransposed.entries );
+            gl.uniformMatrix4fv( args.inverseTransposeAttribute, false, args.transform.getInverseTransposed().entries );
         }
 
         gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer );

@@ -69,7 +69,7 @@ phet.scene = phet.scene || {};
             // apply this node's transform
             if ( !this.transform.isIdentity() ) {
                 // TODO: consider a stack-based model for transforms?
-                state.applyTransformationMatrix( this.transform.matrix );
+                state.applyTransformationMatrix( this.transform.getMatrix() );
             }
             
             if( this.clipShape ) {
@@ -84,7 +84,7 @@ phet.scene = phet.scene || {};
             
             // apply the inverse of this node's transform
             if ( !this.transform.isIdentity() ) {
-                state.applyTransformationMatrix( this.transform.inverse );
+                state.applyTransformationMatrix( this.transform.getInverse() );
             }
             
             // switch layers if needed

@@ -68,7 +68,7 @@ phet.scene.layers = phet.scene.layers || {};
             } );
             
             // set the context's transform to the current transformation matrix
-            var matrix = renderState.transform.matrix;
+            var matrix = renderState.transform.getMatrix();
             this.context.setTransform(
                 // inlined array entries
                 matrix.entries[0],

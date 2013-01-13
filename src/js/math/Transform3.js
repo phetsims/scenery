@@ -28,10 +28,36 @@ phet.math = phet.math || {};
 
         set: function ( matrix ) {
             this.matrix = matrix;
-            this.inverse = matrix.inverted();
-
-            this.matrixTransposed = matrix.transposed();
-            this.inverseTransposed = this.inverse.transposed();
+            
+            // compute these lazily
+            this.inverse = null;
+            this.matrixTransposed = null;
+            this.inverseTransposed = null;
+        },
+        
+        getMatrix: function() {
+            return this.matrix;
+        },
+        
+        getInverse: function() {
+            if( this.inverse == null ) {
+                this.inverse = this.matrix.inverted();
+            }
+            return this.inverse;
+        },
+        
+        getMatrixTransposed: function() {
+            if( this.matrixTransposed == null ) {
+                this.matrixTransposed = this.matrix.transposed();
+            }
+            return this.matrixTransposed;
+        },
+        
+        getInverseTransposed: function() {
+            if( this.inverseTransposed == null ) {
+                this.inverseTransposed = this.getInverse().transposed();
+            }
+            return this.inverseTransposed;
         },
 
         prepend: function ( matrix ) {
@@ -74,7 +100,7 @@ phet.math = phet.math || {};
 
         // transform a normal vector (different than a normal vector)
         transformNormal2: function ( vec2 ) {
-            return this.inverse.timesTransposeVector2( vec2 );
+            return this.getInverse().timesTransposeVector2( vec2 );
         },
 
         transformDeltaX: function ( x ) {
@@ -98,7 +124,7 @@ phet.math = phet.math || {};
          *----------------------------------------------------------------------------*/
 
         inversePosition2: function ( vec2 ) {
-            return this.inverse.timesVector2( vec2 );
+            return this.getInverse().timesVector2( vec2 );
         },
 
         inverseDelta2: function ( vec2 ) {
@@ -119,11 +145,11 @@ phet.math = phet.math || {};
         },
         
         inverseBounds2: function ( bounds2 ) {
-            return bounds2.transformed( this.inverse );
+            return bounds2.transformed( this.getInverse() );
         },
         
         inverseShape: function( shape ) {
-            return shape.transformed( this.inverse );
+            return shape.transformed( this.getInverse() );
         }
     };
 })();

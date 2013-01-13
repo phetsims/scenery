@@ -47,7 +47,7 @@ phet.webgl = phet.webgl || {};
         //    transform: Transform4 indicating current transform
         render: function ( args ) {
             if ( !this.transform.isIdentity() ) {
-                args.transform.append( this.transform.matrix );
+                args.transform.append( this.transform.getMatrix() );
             }
 
             this.preRender( args );
@@ -59,7 +59,7 @@ phet.webgl = phet.webgl || {};
             this.postRender( args );
 
             if ( !this.transform.isIdentity() ) {
-                args.transform.append( this.transform.inverse );
+                args.transform.append( this.transform.getInverse() );
             }
         },
 

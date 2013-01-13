@@ -28,11 +28,36 @@ phet.math = phet.math || {};
 
         set: function ( matrix ) {
             this.matrix = matrix;
-            this.inverse = matrix.inverted();
-
-            // since WebGL won't allow transpose == true
-            this.matrixTransposed = matrix.transposed();
-            this.inverseTransposed = this.inverse.transposed();
+            
+            // compute these lazily
+            this.inverse = null;
+            this.matrixTransposed = null; // since WebGL won't allow transpose == true
+            this.inverseTransposed = null;
+        },
+        
+        getMatrix: function() {
+            return this.matrix;
+        },
+        
+        getInverse: function() {
+            if( this.inverse == null ) {
+                this.inverse = this.matrix.inverted();
+            }
+            return this.inverse;
+        },
+        
+        getMatrixTransposed: function() {
+            if( this.matrixTransposed == null ) {
+                this.matrixTransposed = this.matrix.transposed();
+            }
+            return this.matrixTransposed;
+        },
+        
+        getInverseTransposed: function() {
+            if( this.inverseTransposed == null ) {
+                this.inverseTransposed = this.getInverse().transposed();
+            }
+            return this.inverseTransposed;
         },
 
         prepend: function ( matrix ) {
@@ -76,7 +101,7 @@ phet.math = phet.math || {};
 
         // transform a normal vector (different than a normal vector)
         transformNormal3: function ( vec3 ) {
-            return this.inverse.timesTransposeVector3( vec3 );
+            return this.getInverse().timesTransposeVector3( vec3 );
         },
 
         transformDeltaX: function ( x ) {
@@ -102,7 +127,7 @@ phet.math = phet.math || {};
          *----------------------------------------------------------------------------*/
 
         inversePosition3: function ( vec3 ) {
-            return this.inverse.timesVector3( vec3 );
+            return this.getInverse().timesVector3( vec3 );
         },
 
         inverseDelta3: function ( vec3 ) {
