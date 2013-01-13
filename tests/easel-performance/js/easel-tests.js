@@ -398,7 +398,17 @@ $(document).ready( function() {
         var fpsIndex = 0;
         // stuffs timestamps in a round-robin fashion into here
         var timeEntries = _.map( _.range( fpsCount ), function( a ) { return 0; } );
+        
+        // stored, so we can reset the FPS meter on a change
+        var lastType = null;
+        
         function updateFps() {
+            // wipe the meter until we have all fresh readings whenever a test's type changes
+            if( lastType != currentType ) {
+                timeEntries = _.map( timeEntries, function( a ) { return 0; } );
+                lastType = currentType;
+            }
+            
             var timestamp = Date.now();
             timeEntries[ fpsIndex ] = timestamp;
             fpsIndex = ( fpsIndex + 1 ) % fpsCount;
