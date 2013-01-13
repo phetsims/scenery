@@ -48,9 +48,11 @@ phet.scene = phet.scene || {};
             this.layers = [];
         },
         
-        addLayer: function( layer ) {
-            this.main.append( layer );
+        // handles creation and adds it to our internal list
+        createLayer: function( constructor, args ) {
+            var layer = new constructor( args );
             this.layers.push( layer );
+            return layer;
         },
         
         // called on the root node when any layer-relevant changes are made
@@ -66,6 +68,10 @@ phet.scene = phet.scene || {};
             var main = this.main;
             var scene = this;
             
+            // used so we can give each layer a "start" and "end" node
+            
+            var lastLayer = null;
+            
             // mutable layer arguments (since z-indexing needs to be increased, etc.)
             var layerArgs = {
                 main: main,
@@ -74,6 +80,25 @@ phet.scene = phet.scene || {};
             
             // remove everything from our container, so we can fill it in with fresh layers
             this.clearLayers();
+            
+            function layerChange( node, isBeforeRender ) {
+                // the previous layer ends at this node, so mark that down
+                lastLayer.endNode = node;
+                
+                // create the new layer, and give it the proper node reference
+                var newLayer = scene.createLayer( node.layerType, layerArgs );
+                if( isBeforeRender ) {
+                    node._layerBeforeRender = newLayer;
+                } else {
+                    node._layerAfterRender = newLayer;
+                }
+                
+                // mark this node as the beginning of the layer
+                newLayer.startNode = node;
+                
+                // and prepare for the next call
+                lastLayer = newLayer;
+            }
             
             // for handling layers in depth-first fashion
             function recursiveRebuild( node, baseLayerType ) {
@@ -91,8 +116,7 @@ phet.scene = phet.scene || {};
                 
                 // for stacking, add the "before" layer before recursion
                 if( hasLayer ) {
-                    node._layerBeforeRender = new node.layerType( layerArgs );
-                    scene.addLayer( node._layerBeforeRender );
+                    layerChange( node, true );
                 }
                 
                 // handle layers for children
@@ -102,8 +126,7 @@ phet.scene = phet.scene || {};
                 
                 // and the "after" layer after recursion, on top of any child layers
                 if( hasLayer ) {
-                    node._layerAfterRender = new baseLayerType( layerArgs );
-                    scene.addLayer( node._layerAfterRender );
+                    layerChange( node, false );
                 }
             }
             
@@ -111,15 +134,21 @@ phet.scene = phet.scene || {};
             var rootLayerType = this.root.layerType;
             
             // create the first layer (will be the only layer if no other nodes have a layerType)
-            var startingLayer = new rootLayerType( layerArgs );
-            this.root._layerBeforeRender = startingLayer;
-            scene.addLayer( startingLayer );
+            var startingLayer = scene.createLayer( rootLayerType, layerArgs );
+            
             // no "after" layer needed for the root, since nothing is rendered after it
+            this.root._layerBeforeRender = startingLayer;
             this.root._layerAfterRender = null;
             
+            startingLayer.startNode = this.root;
+            lastLayer = startingLayer;
+            
+            // step through the recursion
             _.each( this.root.children, function( child ) {
                 recursiveRebuild( child, rootLayerType );
             } );
+            
+            lastLayer.endNode = this.root;
         }
     };
 })();

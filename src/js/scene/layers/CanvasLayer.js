@@ -40,6 +40,10 @@ phet.scene.layers = phet.scene.layers || {};
         
         this.fillStyle = null;
         this.strokeStyle = null;
+        
+        // filled in after construction by an external source (currently Scene.rebuildLayers).
+        this.startNode = null;
+        this.endNode = null;
     };
     
     var CanvasLayer = phet.scene.layers.CanvasLayer;
