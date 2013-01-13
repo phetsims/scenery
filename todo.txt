@@ -1,4 +1,7 @@
 
+Bugs:
+    2x transform on certain updateLayer configurations
+
 Move render / renderChildren, etc. from Node to Scene, since that is where the related logic exists
 
 Bounds checking on updateScene
