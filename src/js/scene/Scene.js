@@ -64,7 +64,7 @@ phet.scene = phet.scene || {};
             
             // a few variables for the closurelayer
             var main = this.main;
-            var layer = this;
+            var scene = this;
             
             // mutable layer arguments (since z-indexing needs to be increased, etc.)
             var layerArgs = {
@@ -92,7 +92,7 @@ phet.scene = phet.scene || {};
                 // for stacking, add the "before" layer before recursion
                 if( hasLayer ) {
                     node._layerBeforeRender = new node.layerType( layerArgs );
-                    layer.addLayer( node._layerBeforeRender );
+                    scene.addLayer( node._layerBeforeRender );
                 }
                 
                 // handle layers for children
@@ -103,7 +103,7 @@ phet.scene = phet.scene || {};
                 // and the "after" layer after recursion, on top of any child layers
                 if( hasLayer ) {
                     node._layerAfterRender = new baseLayerType( layerArgs );
-                    layer.addLayer( node._layerAfterRender );
+                    scene.addLayer( node._layerAfterRender );
                 }
             }
             
@@ -113,7 +113,7 @@ phet.scene = phet.scene || {};
             // create the first layer (will be the only layer if no other nodes have a layerType)
             var startingLayer = new rootLayerType( layerArgs );
             this.root._layerBeforeRender = startingLayer;
-            layer.addLayer( startingLayer );
+            scene.addLayer( startingLayer );
             // no "after" layer needed for the root, since nothing is rendered after it
             this.root._layerAfterRender = null;
             
