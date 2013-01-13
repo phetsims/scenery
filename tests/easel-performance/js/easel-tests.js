@@ -402,6 +402,10 @@ $(document).ready( function() {
         // stored, so we can reset the FPS meter on a change
         var lastType = null;
         
+        // only change the readout so often
+        var msReadoutDelay = 250;
+        var lastTimeReadoutUpdated = 0;
+        
         function updateFps() {
             // wipe the meter until we have all fresh readings whenever a test's type changes
             if( lastType != currentType ) {
@@ -414,10 +418,14 @@ $(document).ready( function() {
             fpsIndex = ( fpsIndex + 1 ) % fpsCount;
             var timeChange = ( timestamp - timeEntries[ fpsIndex ] ) / 1000;
             var fps = fpsCount / timeChange;
-            if( fps < 1 ) {
-                fpsReadout.text( "-" );
-            } else {
-                fpsReadout.text( fps.toFixed( 1 ) );
+            
+            if( fps < 1 || timestamp - lastTimeReadoutUpdated > msReadoutDelay ) {
+                lastTimeReadoutUpdated = timestamp;
+                if( fps < 1 ) {
+                    fpsReadout.text( "-" );
+                } else {
+                    fpsReadout.text( fps.toFixed( 1 ) );
+                }
             }
         }
         
