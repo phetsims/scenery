@@ -262,10 +262,10 @@ $(document).ready( function() {
         return phet.canvas.initCanvas( baseCanvas );
     }
     
-    var currentTest = tests[0];
-    var currentType = tests[0].types[0];
-    // var currentTest = tests[1];
-    // var currentType = tests[1].types[3];
+    // var currentTest = tests[0];
+    // var currentType = tests[0].types[0];
+    var currentTest = tests[2];
+    var currentType = tests[2].types[0];
     
     function createButtonGroup() {
         var result = $( document.createElement( 'span' ) );

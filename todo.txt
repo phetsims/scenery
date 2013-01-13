@@ -1,4 +1,6 @@
 
+Automated benchmarks
+Combining fills and strokes
 Investigate whether bounding boxes can be smaller based on clip shapes
 User interaction
 Flesh out Shape, with decomposition, bounds, hit regions (including strokes), etc.

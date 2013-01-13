@@ -9,38 +9,48 @@ phet.tests = phet.tests || {};
     var backgroundSize = 500;
     
     phet.tests.layeringTests = function( main ) {
+        var radius = 15;
         var scene = new phet.scene.Scene( main );
-        
         var root = scene.root;
-        
         root.layerType = phet.scene.layers.CanvasLayer;
         
-        var background = new phet.scene.Node();
-        root.addChild( background );
-        for( var i = 0; i < 1000; i++ ) {
-            var node = new phet.scene.Node();
-            var n = 6;
-            var radius = 15;
-            
-            // regular polygon
-            node.setShape( new phet.scene.Shape( _.map( _.range( n ), function( k ) {
-                var theta = 2 * Math.PI * k / n;
-                return Piece.lineTo( radius * Math.cos( theta ), radius * Math.sin( theta ) );
-            } ), true ) );
-            
-            node.fill = 'rgba(255,255,255,0.8)';
-            node.stroke = '#000000';
-            
-            node.translate( ( Math.random() - 0.5 ) * 500, ( Math.random() - 0.5 ) * 500 );
-            
-            background.addChild( node );
-        }
+        _.each( ['rgba(255,0,0,0.7)', 'rgba(0,255,0,0.7)', 'rgba(0,0,255,0.7)'], function( color ) {
+            var background = new phet.scene.Node();
+            root.addChild( background );
+            background.layerType = phet.scene.layers.CanvasLayer;
+            for( var i = 0; i < 500; i++ ) {
+                var node = new phet.scene.Node();
+                var radius = 15;
+                
+                // regular polygon
+                node.setShape( phet.scene.Shape.regularPolygon( 6, radius ) );
+                
+                node.fill = color;
+                node.stroke = '#000000';
+                
+                node.translate( ( Math.random() - 0.5 ) * 500, ( Math.random() - 0.5 ) * 500 );
+                
+                background.addChild( node );
+            }
+        } );
         
         // center the root
         root.translate( main.width() / 2, main.height() / 2 );
         
+        // var pickedNode = background.children[ _.random( background.children.length - 1 ) ];
+        // pickedNode.fill = 'rgba(255,0,0,1)';
+        // pickedNode.layerType = phet.scene.layers.CanvasLayer;
+        
         // generate the layers
         scene.rebuildLayers();
+        
+        // TODO: remove after debugging
+        for( var i = 0; i < scene.layers.length; i++ ) {
+            scene.layers[i].z = i;
+        }
+        window.f = function(boo) { return [boo._layerBeforeRender ? boo._layerBeforeRender.z : '-',boo._layerAfterRender ? boo._layerAfterRender.z : '-']; }
+        window.scene = scene;
+        window.root = root;
         
         // return step function
         return function( timeElapsed ) {

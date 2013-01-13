@@ -132,6 +132,8 @@ phet.scene = phet.scene || {};
                         layer.setStrokeStyle( this.stroke );
                         context.stroke();
                     }
+                } else {
+                    throw new Error( 'layer type shape rendering not implemented' );
                 }
             }
         },

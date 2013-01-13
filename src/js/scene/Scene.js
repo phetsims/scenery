@@ -58,6 +58,10 @@ phet.scene = phet.scene || {};
             // root needs to contain a layer type reference
             phet.assert( this.root.layerType != null );
             
+            // a few variables for the closurelayer
+            var main = this.main;
+            var layer = this;
+            
             // remove everything from our container, so we can fill it in with fresh layers
             this.clearLayers();
             
@@ -77,8 +81,8 @@ phet.scene = phet.scene || {};
                 
                 // for stacking, add the "before" layer before recursion
                 if( hasLayer ) {
-                    node._layerBeforeRender = new node.layerType( this.main );
-                    this.addLayer( node._layerBeforeRender );
+                    node._layerBeforeRender = new node.layerType( main );
+                    layer.addLayer( node._layerBeforeRender );
                 }
                 
                 // handle layers for children
@@ -88,8 +92,8 @@ phet.scene = phet.scene || {};
                 
                 // and the "after" layer after recursion, on top of any child layers
                 if( hasLayer ) {
-                    node._layerAfterRender = new baseLayerType( this.main );
-                    this.addLayer( node._layerAfterRender );
+                    node._layerAfterRender = new baseLayerType( main );
+                    layer.addLayer( node._layerAfterRender );
                 }
             }
             
@@ -97,9 +101,9 @@ phet.scene = phet.scene || {};
             var rootLayerType = this.root.layerType;
             
             // create the first layer (will be the only layer if no other nodes have a layerType)
-            var startingLayer = new rootLayerType( this.main );
-            this.main.append( startingLayer );
+            var startingLayer = new rootLayerType( main );
             this.root._layerBeforeRender = startingLayer;
+            layer.addLayer( startingLayer );
             // no "after" layer needed for the root, since nothing is rendered after it
             this.root._layerAfterRender = null;
             

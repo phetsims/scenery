@@ -238,4 +238,11 @@ phet.scene = phet.scene || {};
         }
     };
     
+    Shape.regularPolygon = function( sides, radius ) {
+        return new phet.scene.Shape( _.map( _.range( sides ), function( k ) {
+            var theta = 2 * Math.PI * k / sides;
+            return Piece.lineTo( radius * Math.cos( theta ), radius * Math.sin( theta ) );
+        } ), true );
+    };
+    
 })();
