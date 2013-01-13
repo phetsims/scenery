@@ -36,6 +36,7 @@ phet.scene.layers = phet.scene.layers || {};
         this.isCanvasLayer = true;
         
         // initialize to fully dirty so we draw everything the first time
+        // bounds in global coordinate frame
         this.dirtyBounds = Bounds2.EVERYTHING;
         
         this.fillStyle = null;
@@ -124,8 +125,24 @@ phet.scene.layers = phet.scene.layers || {};
             this.dirtyBounds = this.dirtyBounds.union( bounds );
         },
         
-        clearDirtyRegions: function() {
+        resetDirtyRegions: function() {
             this.dirtyBounds = Bounds2.NOTHING;
+        },
+        
+        prepareBounds: function( globalBounds ) {
+            // don't let the bounds of the clearing go outside of the canvas
+            var clearBounds = globalBounds.intersection( new phet.math.Bounds2( 0, 0, this.canvas.width, this.canvas.height ) );
+            
+            if( !clearBounds.isEmpty() ) {
+                this.context.save();
+                this.context.setTransform( 1, 0, 0, 1, 0, 0 );
+                this.context.clearRect( clearBounds.x(), clearBounds.y(), clearBounds.width(), clearBounds.height() );
+                this.context.restore();
+            }
+        },
+        
+        prepareDirtyRegions: function() {
+            this.prepareBounds( this.dirtyBounds );
         },
         
         setFillStyle: function( style ) {

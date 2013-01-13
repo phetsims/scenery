@@ -39,7 +39,7 @@ phet.scene = phet.scene || {};
             state.finish(); // handle cleanup for the last layer
             
             _.each( this.layers, function( layer ) {
-                layer.clearDirtyRegions();
+                layer.resetDirtyRegions();
             } );
         },
         
@@ -185,8 +185,8 @@ phet.scene = phet.scene || {};
                 state.finish();
             }
             
-            // we are done rendering, so clear the layer's dirty regions
-            layer.clearDirtyRegions();
+            // we are done rendering, so reset the layer's dirty regions
+            layer.resetDirtyRegions();
         },
         
         clearLayers: function() {

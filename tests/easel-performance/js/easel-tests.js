@@ -224,10 +224,16 @@ $(document).ready( function() {
         testName: 'Layers',
         testId: 'test-layers',
         types: [{
-            typeName: 'Demo',
-            typeId: 'demo',
+            typeName: 'Scene With',
+            typeId: 'sceneWith',
             init: function( main ) {
-                return phet.tests.layeringTests( main );
+                return phet.tests.layeringTests( main, true );
+            }
+        },{
+            typeName: 'Scene Without',
+            typeId: 'sceneWithout',
+            init: function( main ) {
+                return phet.tests.layeringTests( main, false );
             }
         }]
     },{

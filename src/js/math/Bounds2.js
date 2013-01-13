@@ -85,6 +85,16 @@ phet.math = phet.math || {};
             result = result.withPoint( matrix.timesVector2( new Vector2( this.xMax, this.yMax ) ) );
             return result;
         },
+        
+        // returns copy expanded on all sides by length d
+        dilated: function( d ) {
+            return new Bounds2( this.xMin - d, this.yMin - d, this.xMax + d, this.yMax + d );
+        },
+        
+        // returns copy contracted on all sides by length d
+        eroded: function( d ) {
+            return this.dilated( -d );
+        },
 
         toString: function () {
             return '[x:(' + this.xMin + ',' + this.xMax + '),y:(' + this.yMin + ',' + this.yMax + ')]';

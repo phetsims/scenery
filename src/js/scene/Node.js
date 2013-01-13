@@ -166,6 +166,8 @@ phet.scene = phet.scene || {};
         removeChild: function ( node ) {
             phet.assert( this.isChild( node ) );
             
+            this.markDirtyRegion( node.getBounds() );
+            
             node.parent = null;
             this.children.splice( this.children.indexOf( node ), 1 );
             
@@ -238,9 +240,11 @@ phet.scene = phet.scene || {};
         
         // ensure that cached bounds stored on this node (and all children) are accurate
         validateBounds: function() {
-            // TODO: why is _selfBoundsDirty even needed?
             if( this._selfBoundsDirty ) {
                 this._selfBoundsDirty = false;
+                
+                // if our self bounds changed, make sure to paint the area where our new bounds are
+                this.markDirtyRegion( this._selfBounds );
             }
             
             // validate bounds of children if necessary

@@ -9,6 +9,9 @@ Visibility interaction with dirty paint / bounds, and events based on that
 
 Re-evaluate pre/post rendering and its uses - they can execute on different layers if they wrap children!
     * instead ideally override enter/leave state and write data to state
+
+Cleanup of dirty-paint marking
+
 Automated benchmarks
 Combining fills and strokes
 Investigate whether bounding boxes can be smaller based on clip shapes
