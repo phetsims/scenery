@@ -1,6 +1,6 @@
 
 Bugs:
-    2x transform on certain updateLayer configurations
+    2x rendering in updateLayer of non-standard layer forests
 
 Move render / renderChildren, etc. from Node to Scene, since that is where the related logic exists
 

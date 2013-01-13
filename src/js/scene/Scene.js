@@ -98,8 +98,10 @@ phet.scene = phet.scene || {};
                         break;
                     }
                     
-                    // apply transforms, clips, etc.
-                    startPath[depth].enterState( state );
+                    // apply transforms, clips, etc. that wouldn't be applied later
+                    if( depth > 1 ) {
+                        startPath[depth-1].enterState( state );
+                    }
                 }
                 
                 // now, our depth is the index of the first difference between startPath and endPath.

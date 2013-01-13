@@ -17,7 +17,7 @@ phet.tests = phet.tests || {};
         function buildShapes( color ) {
             var background = new phet.scene.Node();
             root.addChild( background );
-            if( useLayers ) {
+            if( useLayers && color == 'rgba(0,255,0,0.7)' ) {
                 background.layerType = phet.scene.layers.CanvasLayer;
             }
             for( var i = 0; i < count; i++ ) {
@@ -46,6 +46,9 @@ phet.tests = phet.tests || {};
         
         // generate the layers
         scene.rebuildLayers();
+        
+        window.root = root;
+        window.scene = scene;
         
         // return step function
         return function( timeElapsed ) {
