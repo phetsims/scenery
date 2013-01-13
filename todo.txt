@@ -1,4 +1,14 @@
 
+Move render / renderChildren, etc. from Node to Scene, since that is where the related logic exists
+
+Bounds checking on updateScene
+
+Visibility interaction with dirty paint / bounds, and events based on that
+    * revert to setter/getter ?
+    * Scene.updateLayer handling
+
+Re-evaluate pre/post rendering and its uses - they can execute on different layers if they wrap children!
+    * instead ideally override enter/leave state and write data to state
 Automated benchmarks
 Combining fills and strokes
 Investigate whether bounding boxes can be smaller based on clip shapes

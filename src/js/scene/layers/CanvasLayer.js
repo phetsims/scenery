@@ -88,6 +88,10 @@ phet.scene.layers = phet.scene.layers || {};
             this.context.restore();
         },
         
+        isDirty: function() {
+            return !this.dirtyBounds.isEmpty();
+        },
+        
         // TODO: consider a stack-based model for transforms?
         applyTransformationMatrix: function( matrix ) {
             this.context.transform( 

@@ -20,6 +20,8 @@ phet.scene = phet.scene || {};
         
         // clipping shapes should be added in reference to the global coordinate frame
         this.clipShapes = [];
+        
+        this.multiLayerRender = true;
     }
 
     var RenderState = phet.scene.RenderState;
@@ -42,6 +44,11 @@ phet.scene = phet.scene || {};
         },
         
         switchToLayer: function( layer ) {
+            // don't change layers if it's not supported (gracefully handles single-layer rendering at a time)
+            if( this.layer && !this.multiLayerRender ) {
+                return;
+            }
+            
             if( this.layer ) {
                 this.layer.cooldown();
             }

@@ -77,7 +77,7 @@ phet.scene = phet.scene || {};
             }
         },
         
-        leaveState: function( state ) {
+        exitState: function( state ) {
             if( this.clipShape ) {
                 state.popClipShape();
             }
@@ -98,17 +98,11 @@ phet.scene = phet.scene || {};
             this.enterState( state );
             
             if( this.visible ) {
-                // handle any pre-render tasks
-                this.preRender( state );
-                
                 this.renderSelf( state );
                 this.renderChildren( state );
-                
-                // handle any post-render tasks
-                this.postRender( state );
             }
             
-            this.leaveState( state );
+            this.exitState( state );
         },
         
         // override to render typical leaf behavior (although possible to use for non-leaf nodes also)

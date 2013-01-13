@@ -46,10 +46,10 @@ phet.tests = phet.tests || {};
             // clear around another pixel or so, for antialiasing!
             _.each( scene.layers, function( layer ) {
                 // TODO: dead regions!
-                layer.context.clearRect( bounds.x() - 1, bounds.y() - 1, bounds.width() + 2, bounds.height() + 2 );
+                //layer.context.clearRect( bounds.x() - 1, bounds.y() - 1, bounds.width() + 2, bounds.height() + 2 );
             } );
             
-            scene.renderScene();
+            scene.updateScene();
         }
     };
     
