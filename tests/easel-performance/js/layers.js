@@ -37,26 +37,17 @@ phet.tests = phet.tests || {};
         // center the root
         root.translate( main.width() / 2, main.height() / 2 );
         
-        // var pickedNode = background.children[ _.random( background.children.length - 1 ) ];
-        // pickedNode.fill = 'rgba(255,0,0,1)';
-        // pickedNode.layerType = phet.scene.layers.CanvasLayer;
-        
         // generate the layers
         scene.rebuildLayers();
-        
-        // TODO: remove after debugging
-        for( var i = 0; i < scene.layers.length; i++ ) {
-            scene.layers[i].z = i;
-        }
-        window.f = function(boo) { return [boo._layerBeforeRender ? boo._layerBeforeRender.z : '-',boo._layerAfterRender ? boo._layerAfterRender.z : '-']; }
-        window.scene = scene;
-        window.root = root;
         
         // return step function
         return function( timeElapsed ) {
             var bounds = root.getBounds();
             // clear around another pixel or so, for antialiasing!
-            root._layerBeforeRender.context.clearRect( bounds.x() - 1, bounds.y() - 1, bounds.width() + 2, bounds.height() + 2 );
+            _.each( scene.layers, function( layer ) {
+                // TODO: dead regions!
+                layer.context.clearRect( bounds.x() - 1, bounds.y() - 1, bounds.width() + 2, bounds.height() + 2 );
+            } );
             
             scene.renderScene();
         }

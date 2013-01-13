@@ -18,13 +18,20 @@ phet.scene.layers = phet.scene.layers || {};
     var Bounds2 = phet.math.Bounds2;
     
     // assumes main is wrapped with JQuery
-    phet.scene.layers.CanvasLayer = function ( main ) {
-        this.canvas = document.createElement( 'canvas' );
-        this.canvas.width = main.width();
-        this.canvas.height = main.height();
-        main.append( this.canvas );
+    phet.scene.layers.CanvasLayer = function( args ) {
+        var main = args.main;
+        var canvas = document.createElement( 'canvas' );
+        canvas.width = main.width();
+        canvas.height = main.height();
+        $( canvas ).css( 'z-index', args.zIndex );
+        $( canvas ).css( 'position', 'absolute' );
+        args.zIndex += 1;
         
-        this.context = phet.canvas.initCanvas( this.canvas );
+        // add this layer on top (importantly, the constructors of the layers are called in order)
+        main.append( canvas );
+        
+        this.canvas = canvas;
+        this.context = phet.canvas.initCanvas( canvas );
         
         this.isCanvasLayer = true;
         

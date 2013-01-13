@@ -62,6 +62,12 @@ phet.scene = phet.scene || {};
             var main = this.main;
             var layer = this;
             
+            // mutable layer arguments (since z-indexing needs to be increased, etc.)
+            var layerArgs = {
+                main: main,
+                zIndex: 1 // needs to be incremented by the canvas
+            };
+            
             // remove everything from our container, so we can fill it in with fresh layers
             this.clearLayers();
             
@@ -81,7 +87,7 @@ phet.scene = phet.scene || {};
                 
                 // for stacking, add the "before" layer before recursion
                 if( hasLayer ) {
-                    node._layerBeforeRender = new node.layerType( main );
+                    node._layerBeforeRender = new node.layerType( layerArgs );
                     layer.addLayer( node._layerBeforeRender );
                 }
                 
@@ -92,7 +98,7 @@ phet.scene = phet.scene || {};
                 
                 // and the "after" layer after recursion, on top of any child layers
                 if( hasLayer ) {
-                    node._layerAfterRender = new baseLayerType( main );
+                    node._layerAfterRender = new baseLayerType( layerArgs );
                     layer.addLayer( node._layerAfterRender );
                 }
             }
@@ -101,7 +107,7 @@ phet.scene = phet.scene || {};
             var rootLayerType = this.root.layerType;
             
             // create the first layer (will be the only layer if no other nodes have a layerType)
-            var startingLayer = new rootLayerType( main );
+            var startingLayer = new rootLayerType( layerArgs );
             this.root._layerBeforeRender = startingLayer;
             layer.addLayer( startingLayer );
             // no "after" layer needed for the root, since nothing is rendered after it
