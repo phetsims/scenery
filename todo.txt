@@ -13,6 +13,10 @@ Re-evaluate pre/post rendering and its uses - they can execute on different laye
 Cleanup of dirty-paint marking
 
 Automated benchmarks
+
+Non-automated performance tests:
+    Compare Matrix3 Float32Array v. Array (Array seems slightly faster possibly?)
+
 Combining fills and strokes
 Investigate whether bounding boxes can be smaller based on clip shapes
 User interaction

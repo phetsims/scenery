@@ -11,11 +11,11 @@ phet.math = phet.math || {};
 
 // create a new scope
 (function () {
-
+    
     phet.math.Matrix3 = function ( v00, v01, v02, v10, v11, v12, v20, v21, v22, type ) {
 
         // entries stored in column-major format
-        this.entries = new Float32Array( 9 );
+        this.entries = new Array( 9 );
 
         this.rowMajor( v00 === undefined ? 1 : v00, v01 || 0, v02 || 0,
                        v10 || 0, v11 === undefined ? 1 : v11, v12 || 0,
