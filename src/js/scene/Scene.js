@@ -61,7 +61,6 @@ phet.scene = phet.scene || {};
         },
         
         updateLayer: function( layer ) {
-            // TODO: visibility handling for entire function
             // TODO: only render in dirty rectangles (modify state and checks?)
             var state = new phet.scene.RenderState();
             
