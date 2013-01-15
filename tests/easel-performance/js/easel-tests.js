@@ -467,5 +467,30 @@ $(document).ready( function() {
     };
     $( window ).resize( resizer );
     resizer();
+    
+    
+    /*---------------------------------------------------------------------------*
+    * other miscellaneous functions used for testing
+    *----------------------------------------------------------------------------*/        
+    
+    phet.tests.themeColor = function( alpha, blend ) {
+        var scale = Math.floor( 511 * Math.random() ) - 255;
 
+        var red = 255;
+        var green = ( scale > 0 ? scale : 0 );
+        var blue = ( scale < 0 ? -scale : 0 );
+
+        if( alpha !== undefined ) {
+            if( blend !== undefined ) {
+                function combine( main, backup ) {
+                    return Math.floor( main * ( 1 - blend ) + backup * blend );
+                }
+                return "rgba(" + combine( red, green ) + "," + combine( green, blue ) + "," + combine( blue, red ) + "," + alpha + ")";
+            } else {
+                return "rgba(" + red + "," + green + "," + blue + "," + alpha + ")";
+            }
+        } else {
+            return "rgb(" + red + "," + green + "," + blue + ")";
+        }
+    };
 } );
