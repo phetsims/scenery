@@ -22,6 +22,22 @@ phet.scene = phet.scene || {};
     }
 
     var Scene = phet.scene.Scene;
+    
+    function fullRender( node, state ) {
+        node.enterState( state );
+        
+        if( node.visible ) {
+            node.renderSelf( state );
+            
+            //var childList = state.childRestrictedBounds ? node.childrenWithinBounds( node.globalToLocalBounds( state.childRestrictedBounds ) ) : node.children;
+            var childList = node.children;
+            _.each( childList, function( child ) {
+                fullRender( child, state );
+            } );
+        }
+        
+        node.exitState( state );
+    }
 
     Scene.prototype = {
         constructor: Scene,
@@ -35,7 +51,7 @@ phet.scene = phet.scene || {};
             
             // TODO: render only dirty regions
             var state = new phet.scene.RenderState();
-            this.root.render( state );
+            fullRender( this.root, state );
             state.finish(); // handle cleanup for the last layer
             
             _.each( this.layers, function( layer ) {
@@ -82,7 +98,7 @@ phet.scene = phet.scene || {};
                 } );
                 
                 // then render the node and its children
-                node.render( state );
+                fullRender( node, state );
                 
                 // cooldown on the layer. we don't have to walk the state back down to the root
                 state.finish();
@@ -132,7 +148,7 @@ phet.scene = phet.scene || {};
                 function recursivePartialRender( node, depth, hasLowBound, hasHighBound ) {
                     if( !hasLowBound && !hasHighBound ) {
                         // if there are no bounds restrictions on children, just do a straight rendering
-                        node.render( state );
+                        fullRender( node, state );
                         return;
                     }
                     
@@ -182,7 +198,7 @@ phet.scene = phet.scene || {};
                             }
                             
                             // we should now be in-between both the high and low bounds with no further restrictions, so just carry out the rendering
-                            child.render( state );
+                            fullRender( child, state );
                         }
                     }
                     

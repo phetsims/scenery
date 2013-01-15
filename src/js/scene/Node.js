@@ -99,16 +99,16 @@ phet.scene = phet.scene || {};
         },
         
         // Renders this node and all of its children. NOTE: this is not the only way rendering happens, but it is the clearest expression of the order of operations
-        render: function( state ) {
-            this.enterState( state );
+        // render: function( state ) {
+        //     this.enterState( state );
             
-            if( this.visible ) {
-                this.renderSelf( state );
-                this.renderChildren( state );
-            }
+        //     if( this.visible ) {
+        //         this.renderSelf( state );
+        //         this.renderChildren( state );
+        //     }
             
-            this.exitState( state );
-        },
+        //     this.exitState( state );
+        // },
         
         // override to render typical leaf behavior (although possible to use for non-leaf nodes also)
         renderSelf: function ( state ) {
@@ -147,11 +147,12 @@ phet.scene = phet.scene || {};
             
         },
         
-        renderChildren: function ( state ) {
-            _.each( this.children, function( child ) {
-                child.render( state );
-            } );
-        },
+        // renderChildren: function ( state ) {
+        //     var childList = state.childRestrictedBounds ? this.childrenWithinBounds( this.globalToLocalBounds( state.childRestrictedBounds ) ) : this.children;
+        //     _.each( childList, function( child ) {
+        //         child.render( state );
+        //     } );
+        // },
         
         addChild: function ( node ) {
             phet.assert( node !== null && node !== undefined );
@@ -390,7 +391,7 @@ phet.scene = phet.scene || {};
         },
         
         childrenWithinBounds: function( bounds ) {
-            return _.filter( this.children, function( child ) { !child._bounds.intersection( bounds ).isEmpty(); } );
+            return _.filter( this.children, function( child ) { return !child._bounds.intersection( bounds ).isEmpty(); } );
         },
         
         // override for computation of whether a point is inside the content rendered in renderSelf

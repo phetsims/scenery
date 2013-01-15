@@ -21,7 +21,11 @@ phet.scene = phet.scene || {};
         // clipping shapes should be added in reference to the global coordinate frame
         this.clipShapes = [];
         
+        // whether to allow switching layers mid-render
         this.multiLayerRender = true;
+        
+        // when non-null, only children intersecting the particular bounds should be rendered. assumed to be global
+        this.childRestrictedBounds = null;
     }
 
     var RenderState = phet.scene.RenderState;
