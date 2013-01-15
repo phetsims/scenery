@@ -15,12 +15,12 @@ phet.tests = phet.tests || {};
         background.stroke = '#000000';
         root.addChild( background );
         
-        for( var i = 0; i < 10000; i++ ) {
+        for( var i = 0; i < 5000; i++ ) {
             var node = new phet.scene.Node();
             var radius = 10;
             
             // regular polygon
-            node.setShape( phet.scene.Shape.regularPolygon( 3, radius ) );
+            node.setShape( phet.scene.Shape.regularPolygon( 6, radius ) );
             
             node.fill = phet.tests.themeColor( 0.5 );
             node.stroke = '#000000';

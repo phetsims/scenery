@@ -76,6 +76,10 @@ phet.scene = phet.scene || {};
                 // walk up from the root to the node, applying transforms, clips, etc.
                 _.each( node.ancestors(), function( ancestor ) {
                     ancestor.enterState( state );
+                    
+                    if( !ancestor.visible ) {
+                        return; // completely bail
+                    }
                 } );
                 
                 // then render the node and its children
@@ -96,6 +100,10 @@ phet.scene = phet.scene || {};
                     // bail on the first difference
                     if( startPath[depth] != endPath[depth] ) {
                         break;
+                    }
+                    
+                    if( !startPath[depth].visible ) {
+                        return; // none of our layer visible, bail
                     }
                     
                     // apply transforms, clips, etc. that wouldn't be applied later

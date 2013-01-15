@@ -12,6 +12,7 @@ Incomplete:
     Visibility interaction with dirty paint / bounds, and events based on that
         * revert to setter/getter ?
         * Scene.updateLayer handling
+    Don't send mark updates on invisible layers? Visibility change causes repaint?
 
 Performance:
     Dirty regions
