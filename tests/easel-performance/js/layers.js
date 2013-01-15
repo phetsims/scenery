@@ -16,7 +16,6 @@ phet.tests = phet.tests || {};
         
         function buildShapes( color ) {
             var background = new phet.scene.Node();
-            root.addChild( background );
             if( useLayers && color == 'rgba(0,255,0,0.7)' ) {
                 background.layerType = phet.scene.layers.CanvasLayer;
             }
@@ -40,6 +39,10 @@ phet.tests = phet.tests || {};
         var reds = buildShapes( 'rgba(255,0,0,0.7)' );
         var greens = buildShapes( 'rgba(0,255,0,0.7)' );
         var blues = buildShapes( 'rgba(0,0,255,0.7)' );
+        
+        root.addChild( reds );
+        root.addChild( greens );
+        root.addChild( blues );
         
         // center the root
         root.translate( main.width() / 2, main.height() / 2 );
