@@ -35,12 +35,17 @@ phet.scene = phet.scene || {};
             this.clipShapes.push( this.transform.transformShape( shape ) );
             
             // notify the layer to actually do the clipping
-            this.layer.pushClipShape( shape );
+            if( this.layer ) {
+                this.layer.pushClipShape( shape );
+            }
         },
         
         popClipShape: function() {
             this.clipShapes.pop();
-            this.layer.popClipShape();
+            
+            if( this.layer ) {
+                this.layer.popClipShape();
+            }
         },
         
         switchToLayer: function( layer ) {
