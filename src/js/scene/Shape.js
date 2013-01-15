@@ -102,6 +102,7 @@ phet.scene = phet.scene || {};
     Shape.rectangle = function( x, y, width, height ) {
         return new Shape( [ Piece.rect( x, y, width, height ) ] );
     };
+    Shape.rect = Shape.rectangle;
     
     
     Shape.prototype = {
@@ -142,7 +143,7 @@ phet.scene = phet.scene || {};
         // return a new Shape that is transformed by the associated matrix
         transformed: function( matrix ) {
             return new Shape( _.map( this.pieces, function( piece ) {
-                var transformedPoints = _.map( piece.points, matrix.timesVector2 );
+                var transformedPoints = _.map( piece.points, function( point ) { return matrix.timesVector2( point ); } );
                 var args = piece.args;
                 switch( piece.type ) {
                     case Shape.PIECE_MOVE:

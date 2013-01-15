@@ -32,7 +32,6 @@ Features:
     Clipping => Dead region handling (clipping needs to be stored in a shape array since it can only be intersected or reset in Canvas)
 
 Cleanliness / Debugging:
-    Move render / renderChildren, etc. from Node to Scene, since that is where the related logic exists
     Ability to create a debugging dump of scene graph
     Unit tests using canvas pixel querying
 
