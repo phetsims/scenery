@@ -57,6 +57,7 @@ phet.tests = phet.tests || {};
             greens.rotate( timeElapsed );
             
             root.validateBounds();
+            
             var newBounds = root.getBounds();
             var combinedBounds = oldBounds.union( newBounds ).dilated( 1 );
             

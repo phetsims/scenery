@@ -99,8 +99,9 @@ phet.scene = phet.scene || {};
                     }
                     
                     // apply transforms, clips, etc. that wouldn't be applied later
-                    if( depth > 1 ) {
-                        startPath[depth-1].enterState( state );
+                    // -2, since we will start rendering at [depth-1], and this will include everything
+                    if( depth > 2 ) {
+                        startPath[depth-2].enterState( state );
                     }
                 }
                 
@@ -217,7 +218,6 @@ phet.scene = phet.scene || {};
             var scene = this;
             
             // used so we can give each layer a "start" and "end" node
-            
             var lastLayer = null;
             
             // mutable layer arguments (since z-indexing needs to be increased, etc.)
@@ -267,6 +267,9 @@ phet.scene = phet.scene || {};
                     layerChange( node, true );
                 }
                 
+                // let the node know what layer it's self will render inside of
+                node._layerReference = lastLayer;
+                
                 // handle layers for children
                 _.each( node.children, function( child ) {
                     recursiveRebuild( child, baseLayerType );
@@ -290,6 +293,7 @@ phet.scene = phet.scene || {};
             
             startingLayer.startNode = this.root;
             lastLayer = startingLayer;
+            this.root._layerReference = startingLayer;
             
             // step through the recursion
             _.each( this.root.children, function( child ) {

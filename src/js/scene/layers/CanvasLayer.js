@@ -24,6 +24,7 @@ phet.scene.layers = phet.scene.layers || {};
         canvas.width = main.width();
         canvas.height = main.height();
         $( canvas ).css( 'z-index', args.zIndex );
+        this.zIndex = args.zIndex;
         $( canvas ).css( 'position', 'absolute' );
         args.zIndex += 1;
         
@@ -45,6 +46,10 @@ phet.scene.layers = phet.scene.layers || {};
         // filled in after construction by an external source (currently Scene.rebuildLayers).
         this.startNode = null;
         this.endNode = null;
+        
+        // references to surrounding layers, filled by rebuildLayers
+        this.nextLayer = null;
+        this.previousLayer = null;
     };
     
     var CanvasLayer = phet.scene.layers.CanvasLayer;

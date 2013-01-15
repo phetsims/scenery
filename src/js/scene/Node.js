@@ -36,6 +36,7 @@ phet.scene = phet.scene || {};
         // layer-specific data, currently updated in the rebuildLayers step
         this._layerBeforeRender = null; // layer to swap to before rendering this node
         this._layerAfterRender = null; // layer to swap to after rendering this node
+        this._layerReference = null; // stores a reference to this node's corresponding layer (the one used to render it's self content)
         
         // bounds handling
         this._bounds = Bounds2.NOTHING; // for this node and its children, in "parent" coordinates
@@ -44,6 +45,10 @@ phet.scene = phet.scene || {};
         this._boundsDirty = true;
         this._selfBoundsDirty = true;
         this._childBoundsDirty = true;
+        
+        // dirty region handling
+        this._paintDirty = false;
+        this._childPaintDirty = false;
         
         // shape used for rendering
         this._shape = null;
@@ -202,29 +207,35 @@ phet.scene = phet.scene || {};
         },
         
         translate: function ( x, y ) {
-            this.transform.append( Matrix3.translation( x, y ) );
+            this.appendMatrix( Matrix3.translation( x, y ) );
             this.invalidateBounds();
         },
         
         // scale( s ) is also supported
         scale: function ( x, y ) {
-            this.transform.append( Matrix3.scaling( x, y ) );
+            this.appendMatrix( Matrix3.scaling( x, y ) );
             this.invalidateBounds();
         },
         
         rotate: function ( angle ) {
-            this.transform.append( Matrix3.rotation2( angle ) );
+            this.appendMatrix( Matrix3.rotation2( angle ) );
             this.invalidateBounds();
+        },
+        
+        // append a transformation matrix to our local transform
+        appendMatrix: function( matrix ) {
+            // invalidate paint TODO improve methods for this
+            this.markDirtyRegion( this.parentToLocalBounds( this._bounds ) );
+            
+            this.transform.append( matrix );
         },
         
         // bounds assumed to be in the local coordinate frame, below this node's transform
         markDirtyRegion: function( bounds ) {
-            var layer = this.findLayer();
-            
-            // if there is no layer, ignore the markDirtyRegion call
-            if( layer != null ) {
-                layer.markDirtyRegion( this.localToGlobalBounds( bounds ) );
-            }
+            var globalBounds = this.localToGlobalBounds( bounds );
+            _.each( this.findDescendantLayers(), function( layer ) {
+                layer.markDirtyRegion( globalBounds );
+            } );
         },
         
         // the bounds for content in renderSelf(), in "local" coordinates
@@ -279,7 +290,7 @@ phet.scene = phet.scene || {};
                     if( this.parent != null ) {
                         this.parent.invalidateBounds();
                     }
-                    this.markDirtyRegion( this.parentToLocalBounds( oldBounds ) );
+                    // this.markDirtyRegion( this.parentToLocalBounds( oldBounds ) );
                     
                     // TODO: fire off event listeners?
                 }
@@ -288,24 +299,34 @@ phet.scene = phet.scene || {};
             }
         },
         
-        // find the first layer root of which this node is an ancestor.
-        findLayerRoot: function() {
-            var node = this;
-            while( node != null ) {
-                if( node.isLayerRoot() ) {
-                    return node;
-                }
-                node = node.parent;
-            }
-            
-            // no layer root found
-            return null;
+        // find the layer to which this node will be rendered
+        findLayer: function() {
+            return this._layerReference;
         },
         
-        // find the layer that this node will be rendered to
-        findLayer: function() {
-            var root = this.findLayerRoot();
-            return root != null ? root.getLayer() : null;
+        // find all layers for which this node (and all its descendants) will be rendered
+        findDescendantLayers: function() {
+            var firstLayer = this.findLayer();
+            
+            if( firstLayer == null ) {
+                return [];
+            }
+            
+            // run a node out to the last child until we reach a leaf, to find the last layer we will render to in this subtree
+            var node = this;
+            while( node.children.length != 0 ) {
+                node = _.last( node.children );
+            }
+            var lastLayer = node.findLayer();
+            
+            // collect all layers between the first and last layers
+            var layers = [firstLayer];
+            var layer = firstLayer;
+            while( layer != lastLayer && layer.nextLayer != null ) {
+                layer = layer.nextLayer;
+                layers.push( layer );
+            }
+            return layers;
         },
         
         // mark the bounds of this node as invalid, so it is recomputed before it is accessed again
@@ -336,6 +357,82 @@ phet.scene = phet.scene || {};
                 this._selfBounds = newBounds;
             }
         },
+        
+        // checking for whether a point (in parent coordinates) is contained in this sub-tree
+        containsPoint: function( point ) {
+            // update bounds for pruning
+            this.validateBounds();
+            
+            // bail quickly if this doesn't hit our computed bounds
+            if( !this._bounds.containsPoint( point ) ) { return false; }
+            
+            // point in the local coordinate frame. computed after the main bounds check, so we can bail out there efficiently
+            var localPoint = this.transform.inversePosition2( point );
+            
+            // check children first, since they are rendered later
+            if( this.children.length > 0 && this._childBounds.containsPoint( localPoint ) ) {
+                
+                // manual iteration here so we can return directly, and so we can iterate backwards (last node is in front)
+                for( var i = this.children.length - 1; i >= 0; i-- ) {
+                    var child = this.children[i];
+                    
+                    // the child will have the point in its parent's coordinate frame (i.e. this node's frame)
+                    if( child.containsPoint( localPoint ) ) {
+                        return true;
+                    }
+                }
+            }
+            
+            // didn't hit our children, so check ourself as a last resort
+            if( this._selfBounds.containsPoint( point ) ) {
+                return this.containsPointSelf( point );
+            }
+        },
+        
+        // override for computation of whether a point is inside the content rendered in renderSelf
+        containsPointSelf: function( point ) {
+            return false;
+        },
+        
+        hasShape: function() {
+            return this._shape != null;
+        },
+        
+        // sets the shape drawn, or null to remove the shape
+        setShape: function( shape ) {
+            this._shape = shape;
+            
+            this.setSelfBounds( shape.computeBounds( ) );
+        },
+        
+        getShape: function() {
+            return this._shape;
+        },
+        
+        
+        
+        
+        // returns a list of ancestors of this node, with the root first
+        ancestors: function() {
+            return this.parent ? this.parent.pathToRoot() : [];
+        },
+        
+        // like ancestors(), but includes the current node as well
+        pathToRoot: function() {
+            var result = [];
+            var node = this;
+            
+            while( node != null ) {
+                result.unshift( node );
+                node = node.parent;
+            }
+            
+            return result;
+        },
+        
+        /*---------------------------------------------------------------------------*
+        * Coordinate transform methods
+        *----------------------------------------------------------------------------*/        
         
         // apply this node's transform to the point
         localToParentPoint: function( point ) {
@@ -406,75 +503,6 @@ phet.scene = phet.scene || {};
                 bounds = transforms[i].inverseBounds2( bounds );
             }
             return bounds;
-        },
-        
-        // checking for whether a point (in parent coordinates) is contained in this sub-tree
-        containsPoint: function( point ) {
-            // update bounds for pruning
-            this.validateBounds();
-            
-            // bail quickly if this doesn't hit our computed bounds
-            if( !this._bounds.containsPoint( point ) ) { return false; }
-            
-            // point in the local coordinate frame. computed after the main bounds check, so we can bail out there efficiently
-            var localPoint = this.transform.inversePosition2( point );
-            
-            // check children first, since they are rendered later
-            if( this.children.length > 0 && this._childBounds.containsPoint( localPoint ) ) {
-                
-                // manual iteration here so we can return directly, and so we can iterate backwards (last node is in front)
-                for( var i = this.children.length - 1; i >= 0; i-- ) {
-                    var child = this.children[i];
-                    
-                    // the child will have the point in its parent's coordinate frame (i.e. this node's frame)
-                    if( child.containsPoint( localPoint ) ) {
-                        return true;
-                    }
-                }
-            }
-            
-            // didn't hit our children, so check ourself as a last resort
-            if( this._selfBounds.containsPoint( point ) ) {
-                return this.containsPointSelf( point );
-            }
-        },
-        
-        // override for computation of whether a point is inside the content rendered in renderSelf
-        containsPointSelf: function( point ) {
-            return false;
-        },
-        
-        hasShape: function() {
-            return this._shape != null;
-        },
-        
-        // sets the shape drawn, or null to remove the shape
-        setShape: function( shape ) {
-            this._shape = shape;
-            
-            this.setSelfBounds( shape.computeBounds( ) );
-        },
-        
-        getShape: function() {
-            return this._shape;
-        },
-        
-        // returns a list of ancestors of this node, with the root first
-        ancestors: function() {
-            return this.parent ? this.parent.pathToRoot() : [];
-        },
-        
-        // like ancestors(), but includes the current node as well
-        pathToRoot: function() {
-            var result = [];
-            var node = this;
-            
-            while( node != null ) {
-                result.unshift( node );
-                node = node.parent;
-            }
-            
-            return result;
         }
     };
 })();
