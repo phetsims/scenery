@@ -14,6 +14,10 @@ phet.tests = phet.tests || {};
         var root = scene.root;
         root.layerType = phet.scene.layers.CanvasLayer;
         
+        function randomizeTranslation( node ) {
+            node.setTranslation( ( Math.random() - 0.5 ) * backgroundSize, ( Math.random() - 0.5 ) * backgroundSize );
+        }
+        
         function buildShapes( color ) {
             var background = new phet.scene.Node();
             if( useLayers && color == 'rgba(0,255,0,0.7)' ) {
@@ -29,7 +33,7 @@ phet.tests = phet.tests || {};
                 node.fill = color;
                 node.stroke = '#000000';
                 
-                node.translate( ( Math.random() - 0.5 ) * backgroundSize, ( Math.random() - 0.5 ) * backgroundSize );
+                randomizeTranslation( node );
                 
                 background.addChild( node );
             }

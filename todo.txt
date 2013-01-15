@@ -39,6 +39,7 @@ Features:
 
 Cleanliness / Debugging:
     *** Debug layer
+    x,y vs point handling for translation etc. since we lack overriding?
     Bounds2: rename styling from xMin to minX
     Ability to create a debugging dump of scene graph
     Unit tests using canvas pixel querying

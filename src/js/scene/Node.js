@@ -189,18 +189,25 @@ phet.scene = phet.scene || {};
             return this._layerBeforeRender;
         },
         
-        translate: function ( x, y ) {
+        // TODO: how to handle point vs x,y
+        translate: function( x, y ) {
             // mark old bounds as needing a repaint
             this.appendMatrix( Matrix3.translation( x, y ) );
         },
         
         // scale( s ) is also supported
-        scale: function ( x, y ) {
+        scale: function( x, y ) {
             this.appendMatrix( Matrix3.scaling( x, y ) );
         },
         
-        rotate: function ( angle ) {
+        rotate: function( angle ) {
             this.appendMatrix( Matrix3.rotation2( angle ) );
+        },
+        
+        // TODO: how to handle x,y?
+        setTranslation: function( x, y ) {
+            var translation = this.getTranslation();
+            this.translate( x - translation.x, y - translation.y );
         },
         
         // append a transformation matrix to our local transform
@@ -471,6 +478,26 @@ phet.scene = phet.scene || {};
             }
             
             return result;
+        },
+        
+        getTranslation: function() {
+            return this.transform.getMatrix().translation();
+        },
+        
+        getScaling: function() {
+            return this.transform.getMatrix().scaling();
+        },
+        
+        getRotation: function() {
+            return this.transform.getMatrix().rotation();
+        },
+        
+        getX: function() {
+            return getTranslation().x;
+        },
+        
+        getY: function() {
+            return getTranslation().y;
         },
         
         /*---------------------------------------------------------------------------*

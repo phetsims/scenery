@@ -9,11 +9,18 @@ phet.tests = phet.tests || {};
         var root = scene.root;
         root.layerType = phet.scene.layers.CanvasLayer;
         
+        var sceneWidth = 1000;
+        var sceneHeight = 500;
+        var borderFactor = 6 / 5;
+        
         var background = new phet.scene.Node();
-        background.setShape( phet.scene.Shape.rectangle( -600, -300, 1200, 600 ) );
+        background.setShape( phet.scene.Shape.rectangle( -sceneWidth / 2 * borderFactor, -sceneHeight / 2 * borderFactor, sceneWidth * borderFactor, sceneHeight * borderFactor ) );
         background.fill = '#333333';
         background.stroke = '#000000';
         root.addChild( background );
+        
+        var nodes = new phet.scene.Node();
+        root.addChild( nodes );
         
         for( var i = 0; i < 5000; i++ ) {
             var node = new phet.scene.Node();
@@ -25,9 +32,9 @@ phet.tests = phet.tests || {};
             node.fill = phet.tests.themeColor( 0.5 );
             node.stroke = '#000000';
             
-            node.translate( ( Math.random() - 0.5 ) * 1000, ( Math.random() - 0.5 ) * 500 );
+            node.setTranslation( ( Math.random() - 0.5 ) * sceneWidth, ( Math.random() - 0.5 ) * sceneHeight );
             
-            root.addChild( node );
+            nodes.addChild( node );
         }
         
         // center the root
@@ -36,28 +43,13 @@ phet.tests = phet.tests || {};
         // generate the layers
         scene.rebuildLayers();
         
-        scene.updateScene();
-        
         // return step function
         return function( timeElapsed ) {
-            // var oldBounds = root.getBounds();
+            // tweak a random node
+            var node = nodes.children[_.random( 0, nodes.children.length - 1)];
+            node.translate( ( Math.random() - 0.5 ) * 20, ( Math.random() - 0.5 ) * 20 );
             
-            // greens.rotate( timeElapsed );
-            
-            // root.validateBounds();
-            
-            // var newBounds = root.getBounds();
-            // var combinedBounds = oldBounds.union( newBounds ).dilated( 1 );
-            
-            // if( useLayers ) {
-            //     greens._layerBeforeRender.prepareBounds( combinedBounds );
-            // } else {
-            //     _.each( scene.layers, function( layer ) {
-            //         layer.prepareBounds( combinedBounds );
-            //     } );
-            // }
-            
-            // scene.updateScene();
+            scene.updateScene();
         }
     };
     
