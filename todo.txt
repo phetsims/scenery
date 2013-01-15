@@ -1,44 +1,43 @@
 
-Dirty regions
 
 Bugs:
-    2x rendering in updateLayer of non-standard layer forests
 
-Move render / renderChildren, etc. from Node to Scene, since that is where the related logic exists
+Incomplete:
+    Flesh out Shape, with decomposition, bounds, hit regions (including strokes), etc.
+    Flags for whether text / strokes are considered for hit regions
+    Investigate getImageData for fonts (both hit regions and bounds)
+    How to handle the mutable transforms and paint-invalidation / events?
+        * increment transform ID and check?
+        * getTransform() with a delegate?
+    Visibility interaction with dirty paint / bounds, and events based on that
+        * revert to setter/getter ?
+        * Scene.updateLayer handling
 
-Bounds checking on updateScene
+Performance:
+    Dirty regions
+    Caching nodes with off-screen canvases for performance
+    Combining fills and strokes (or other state optimization -- fills require ensuring CCW/CW stays the same, so we need flags to whitelist)
+    Automated benchmarks
+    Investigate whether bounding boxes can be smaller based on clip shapes
+    Non-automated performance tests:
+        * Compare Matrix3 Float32Array v. Array (Array seems slightly faster possibly?)
+        * Consider a Canvas 2D context delegate to examine drawing calls for Easel / Scene / Custom / etc.
 
-Visibility interaction with dirty paint / bounds, and events based on that
-    * revert to setter/getter ?
-    * Scene.updateLayer handling
+Features:
+    * User interaction
+    Accessibility and shadow DOM see html5 scene graph google doc
+    Retina-screen handling
+    "Lifting" of DOM nodes to top layer if selected
+    AnimateTo-style animation
+    Clipping => Dead region handling (clipping needs to be stored in a shape array since it can only be intersected or reset in Canvas)
 
-Re-evaluate pre/post rendering and its uses - they can execute on different layers if they wrap children!
-    * instead ideally override enter/leave state and write data to state
-
-Cleanup of dirty-paint marking
-
-Automated benchmarks
-
-Non-automated performance tests:
-    Compare Matrix3 Float32Array v. Array (Array seems slightly faster possibly?)
-
-Combining fills and strokes
-Investigate whether bounding boxes can be smaller based on clip shapes
-User interaction
-Flesh out Shape, with decomposition, bounds, hit regions (including strokes), etc.
-Clipping => Dead region handling (clipping needs to be stored in a shape array since it can only be intersected or reset in Canvas)
-AnimateTo-style animation
-Caching nodes with off-screen canvases for performance
-"Lifting" of DOM nodes to top layer if selected
-flags for whether text / strokes are considered for hit regions
-Implement Bouncy example from the wishlist
-Retina-screen handling
-Ability to update size of canvas, etc.
-Unit tests using canvas pixel querying
-Investigate getImageData for fonts (both hit regions and bounds)
-Accessibility and shadow DOM see html5 scene graph google doc
-Fill/Stroke/BeginPath delaying depending on last style, in CanvasLayer. SET fill-stroke beforehand
-Report rgba alpha precision "bug"
+Cleanliness / Debugging:
+    Move render / renderChildren, etc. from Node to Scene, since that is where the related logic exists
+    Ability to create a debugging dump of scene graph
+    Unit tests using canvas pixel querying
 
 Other:
-Highlighting and indexing of TODO items
+    Implement Bouncy example from the wishlist
+    Ability to update size of canvas, etc.
+    Report rgba alpha precision "bug" - spec says rgba(255,255,255,0.1112049520495820495802495) should not lose any digits on inspection after setting on context
+    Highlighting and indexing of TODO items
