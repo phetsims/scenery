@@ -244,6 +244,10 @@ phet.scene = phet.scene || {};
                 // mark this node as the beginning of the layer
                 newLayer.startNode = node;
                 
+                // hook the layers together so they know about each other
+                lastLayer.nextLayer = newLayer;
+                newLayer.previousLayer = lastLayer;
+                
                 // and prepare for the next call
                 lastLayer = newLayer;
             }
