@@ -18,6 +18,7 @@ Performance:
     Dirty regions
     Caching nodes with off-screen canvases for performance
     Combining fills and strokes (or other state optimization -- fills require ensuring CCW/CW stays the same, so we need flags to whitelist)
+    Efficiency checks for fullRender using the functional style => imperative
     Automated benchmarks
     Investigate whether bounding boxes can be smaller based on clip shapes
     Add quadtree / Kd-tree / bounding acceleration tests if child count is high?
@@ -35,6 +36,7 @@ Features:
 
 Cleanliness / Debugging:
     *** Debug layer
+    Bounds2: rename styling from xMin to minX
     Ability to create a debugging dump of scene graph
     Unit tests using canvas pixel querying
     Debugging traces removed with Closure compiler?

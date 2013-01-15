@@ -29,9 +29,19 @@ phet.scene = phet.scene || {};
         if( node.visible ) {
             node.renderSelf( state );
             
-            //var childList = state.childRestrictedBounds ? node.childrenWithinBounds( node.globalToLocalBounds( state.childRestrictedBounds ) ) : node.children;
-            var childList = node.children;
-            _.each( childList, function( child ) {
+            var children = node.children;
+            
+            // check if we need to filter the children we render
+            if( state.childRestrictedBounds ) {
+                var localRestrictedBounds = node.globalToLocalBounds( state.childRestrictedBounds );
+                
+                // don't filter if every child is inside the bounds
+                if( !localRestrictedBounds.containsBounds( node.parentToLocalBounds( node._bounds ) ) ) {
+                    children = node.childrenWithinBounds( localRestrictedBounds );
+                }
+            }
+            
+            _.each( children, function( child ) {
                 fullRender( child, state );
             } );
         }
@@ -163,9 +173,23 @@ phet.scene = phet.scene || {};
                         
                         var passedLowBound = !hasLowBound;
                         
+                        // check to see if we need to filter what children are rendered based on restricted bounds
+                        var localRestrictedBounds;
+                        var filterChildren = false; 
+                        if( state.childRestrictedBounds ) {
+                            localRestrictedBounds = node.globalToLocalBounds( state.childRestrictedBounds );
+                            
+                            // don't filter if all children will be inside the bounds
+                            filterChildren = !localRestrictedBounds.containsBounds( node.parentToLocalBounds( node._bounds ) )
+                        }
+                        
                         // uses a classic for loop so we can bail out early
                         for( var i = 0; i < node.children.length; i++ ) {
                             var child = node.children[i];
+                            
+                            if( filterChildren && !localRestrictedBounds.intersectsBounds( child._bounds ) ) {
+                                continue;
+                            }
                             
                             // due to the calling conditions, we should be assured that startPath[depth] != endPath[depth]
                             

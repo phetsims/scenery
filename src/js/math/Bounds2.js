@@ -70,6 +70,16 @@ phet.math = phet.math || {};
             return this.xMin <= point.x && point.x <= this.xMax && this.yMin <= point.y && point.y <= this.yMax;
         },
         
+        // whether this bounding box completely contains the argument bounding box
+        containsBounds: function( bounds ) {
+            return this.xMin <= bounds.xMin && this.xMax >= bounds.xMax && this.yMin <= bounds.yMin && this.yMax >= bounds.yMax;
+        },
+        
+        intersectsBounds: function( bounds ) {
+            // TODO: more efficient way of doing this?
+            return !this.intersection( bounds ).isEmpty();
+        },
+        
         // transform a bounding box.
         // NOTE that box.transformed( matrix ).transformed( inverse ) may be larger than the original box
         transformed: function( matrix ) {

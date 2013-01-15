@@ -24,7 +24,7 @@ phet.scene = phet.scene || {};
         // whether to allow switching layers mid-render
         this.multiLayerRender = true;
         
-        // when non-null, only children intersecting the particular bounds should be rendered. assumed to be global
+        // when non-null, children not intersecting the global bounds here may not be rendered for efficiency
         this.childRestrictedBounds = null;
     }
 
