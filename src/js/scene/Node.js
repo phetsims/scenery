@@ -49,6 +49,7 @@ phet.scene = phet.scene || {};
         // dirty region handling
         this._paintDirty = false;
         this._childPaintDirty = false;
+        this._oldPaintMarked = false; // flag indicates the last rendered bounds of this node and all descendants are marked for a repaint already
         
         // shape used for rendering
         this._shape = null;
@@ -98,18 +99,6 @@ phet.scene = phet.scene || {};
             }
         },
         
-        // Renders this node and all of its children. NOTE: this is not the only way rendering happens, but it is the clearest expression of the order of operations
-        // render: function( state ) {
-        //     this.enterState( state );
-            
-        //     if( this.visible ) {
-        //         this.renderSelf( state );
-        //         this.renderChildren( state );
-        //     }
-            
-        //     this.exitState( state );
-        // },
-        
         // override to render typical leaf behavior (although possible to use for non-leaf nodes also)
         renderSelf: function ( state ) {
             
@@ -147,13 +136,6 @@ phet.scene = phet.scene || {};
             
         },
         
-        // renderChildren: function ( state ) {
-        //     var childList = state.childRestrictedBounds ? this.childrenWithinBounds( this.globalToLocalBounds( state.childRestrictedBounds ) ) : this.children;
-        //     _.each( childList, function( child ) {
-        //         child.render( state );
-        //     } );
-        // },
-        
         addChild: function ( node ) {
             phet.assert( node !== null && node !== undefined );
             if ( this.isChild( node ) ) {
@@ -165,14 +147,14 @@ phet.scene = phet.scene || {};
             node.parent = this;
             this.children.push( node );
             
-            this.invalidateBounds();
-            this._childBoundsDirty = true;
+            node.invalidateBounds();
+            node.invalidatePaint();
         },
         
         removeChild: function ( node ) {
             phet.assert( this.isChild( node ) );
             
-            this.markDirtyRegion( node.getBounds() );
+            node.markOldPaint();
             
             node.parent = null;
             this.children.splice( this.children.indexOf( node ), 1 );
@@ -208,27 +190,28 @@ phet.scene = phet.scene || {};
         },
         
         translate: function ( x, y ) {
+            // mark old bounds as needing a repaint
             this.appendMatrix( Matrix3.translation( x, y ) );
-            this.invalidateBounds();
         },
         
         // scale( s ) is also supported
         scale: function ( x, y ) {
             this.appendMatrix( Matrix3.scaling( x, y ) );
-            this.invalidateBounds();
         },
         
         rotate: function ( angle ) {
             this.appendMatrix( Matrix3.rotation2( angle ) );
-            this.invalidateBounds();
         },
         
         // append a transformation matrix to our local transform
         appendMatrix: function( matrix ) {
             // invalidate paint TODO improve methods for this
-            this.markDirtyRegion( this.parentToLocalBounds( this._bounds ) );
+            this.markOldPaint();
             
             this.transform.append( matrix );
+            
+            this.invalidateBounds();
+            this.invalidatePaint();
         },
         
         // bounds assumed to be in the local coordinate frame, below this node's transform
@@ -237,6 +220,30 @@ phet.scene = phet.scene || {};
             _.each( this.findDescendantLayers(), function( layer ) {
                 layer.markDirtyRegion( globalBounds );
             } );
+        },
+        
+        markOldSelfPaint: function() {
+            this.markOldPaint( true );
+        },
+        
+        // marks the last-rendered bounds of this node and optionally all of its descendants as needing a repaint
+        markOldPaint: function( justSelf ) {
+            var node = this;
+            var alreadyMarked = this._oldPaintMarked;
+            while( !alreadyMarked && node.parent != null ) {
+                node = node.parent;
+                alreadyMarked = node._oldPaintMarked; 
+            }
+            
+            // we want to not do this marking if possible multiple times for the same sub-tree, so we check flags first
+            if( !alreadyMarked ) {
+                if( justSelf ) {
+                    this.markDirtyRegion( this._selfBounds );
+                } else {
+                    this.markDirtyRegion( this.parentToLocalBounds( this._bounds ) );
+                    this._oldPaintMarked = true; // don't mark this in self calls, because we don't use the full bounds
+                }
+            }
         },
         
         // the bounds for content in renderSelf(), in "local" coordinates
@@ -300,6 +307,24 @@ phet.scene = phet.scene || {};
             }
         },
         
+        validatePaint: function() {
+            // if dirty, mark the region
+            if( this._paintDirty ) {
+                this.markDirtyRegion( this.parentToLocalBounds( this._bounds ) );
+                this._paintDirty = false;
+            }
+            
+            // clear flags and recurse
+            if( this._childPaintDirty || this._oldPaintMarked ) {
+                this._childPaintDirty = false;
+                this._oldPaintMarked = false;
+                
+                _.each( this.children, function( child ) {
+                    child.validatePaint();
+                } );
+            }
+        },
+        
         // find the layer to which this node will be rendered
         findLayer: function() {
             return this._layerReference;
@@ -336,20 +361,31 @@ phet.scene = phet.scene || {};
             
             // and set flags for all ancestors
             var node = this.parent;
-            while( node != null ) {
-                // TODO: for performance, consider cutting this once we detect a node with this as true
+            while( node != null && !node._childBoundsDirty ) {
                 node._childBoundsDirty = true;
                 node = node.parent;
             }
         },
         
-        // sets the bounds of the content rendered by renderSelf()
-        setSelfBounds: function( newBounds ) {
+        // mark the paint of this node as invalid, so its new region will be painted
+        invalidatePaint: function() {
+            this._paintDirty = true;
+            
+            // and set flags for all ancestors (but bail if already marked, since this guarantees lower nodes will be marked)
+            var node = this.parent;
+            while( node != null && !node._childPaintDirty ) {
+                node._childPaintDirty = true;
+                node = node.parent;
+            }
+        },
+        
+        // called to notify that renderSelf will display different paint, with possibly different bounds
+        invalidateSelf: function( newBounds ) {
+            // mark the old region to be repainted, regardless of whether the actual bounds change
+            this.markOldSelfPaint();
+            
             // if these bounds are different than current self bounds
             if( !this._selfBounds.equals( newBounds ) ) {
-                // mark the old region to be repainted
-                this.markDirtyRegion( this._selfBounds );
-                
                 // set repaint flags
                 this._selfBoundsDirty = true;
                 this.invalidateBounds();
@@ -357,6 +393,8 @@ phet.scene = phet.scene || {};
                 // record the new bounds
                 this._selfBounds = newBounds;
             }
+            
+            this.invalidatePaint();
         },
         
         // checking for whether a point (in parent coordinates) is contained in this sub-tree
@@ -407,7 +445,7 @@ phet.scene = phet.scene || {};
         setShape: function( shape ) {
             this._shape = shape;
             
-            this.setSelfBounds( shape.computeBounds( ) );
+            this.invalidateSelf( shape.computeBounds( ) );
         },
         
         getShape: function() {

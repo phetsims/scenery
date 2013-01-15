@@ -104,6 +104,9 @@ phet.scene = phet.scene || {};
     };
     Shape.rect = Shape.rectangle;
     
+    Shape.bounds = function( bounds ) {
+        return new Shape( [ Piece.rect( bounds.x(), bounds.y(), bounds.width(), bounds.height() ) ] );
+    };
     
     Shape.prototype = {
         constructor: Shape,

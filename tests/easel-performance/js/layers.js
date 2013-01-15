@@ -55,23 +55,7 @@ phet.tests = phet.tests || {};
         
         // return step function
         return function( timeElapsed ) {
-            var oldBounds = root.getBounds();
-            
             greens.rotate( timeElapsed );
-            
-            root.validateBounds();
-            
-            var newBounds = root.getBounds();
-            var combinedBounds = oldBounds.union( newBounds ).dilated( 1 );
-            
-            if( useLayers ) {
-                greens._layerBeforeRender.prepareBounds( combinedBounds );
-            } else {
-                _.each( scene.layers, function( layer ) {
-                    layer.prepareBounds( combinedBounds );
-                } );
-            }
-            
             scene.updateScene();
         }
     };

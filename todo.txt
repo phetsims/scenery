@@ -3,6 +3,8 @@
 Bugs:
 
 Incomplete:
+    Ability to update size of canvas, etc.
+    validateBounds() after self-changes could sneak by paint validation
     Flesh out Shape, with decomposition, bounds, hit regions (including strokes), etc.
     Flags for whether text / strokes are considered for hit regions
     Investigate getImageData for fonts (both hit regions and bounds)
@@ -13,6 +15,7 @@ Incomplete:
         * revert to setter/getter ?
         * Scene.updateLayer handling
     Don't send mark updates on invisible layers? Visibility change causes repaint?
+    General optimization and organization so we can extract "self" from child rendering bounds, what is repainted, etc. better.
 
 Performance:
     Dirty regions
@@ -43,6 +46,5 @@ Cleanliness / Debugging:
 
 Other:
     Implement Bouncy example from the wishlist
-    Ability to update size of canvas, etc.
     Report rgba alpha precision "bug" - spec says rgba(255,255,255,0.1112049520495820495802495) should not lose any digits on inspection after setting on context
     Highlighting and indexing of TODO items

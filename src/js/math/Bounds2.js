@@ -65,6 +65,26 @@ phet.math = phet.math || {};
             );
         },
         
+        // copy rounded to integral values, expanding where necessary
+        roundedOut: function() {
+            return new Bounds2(
+                Math.floor( this.xMin ),
+                Math.floor( this.yMin ),
+                Math.ceil( this.xMax ),
+                Math.ceil( this.yMax )
+            );
+        },
+        
+        // copy rounded to integral values, contracting where necessary
+        roundedIn: function() {
+            return new Bounds2(
+                Math.ceil( this.xMin ),
+                Math.ceil( this.yMin ),
+                Math.floor( this.xMax ),
+                Math.floor( this.yMax )
+            );
+        },
+        
         // whether the point is inside the bounding box
         containsPoint: function( point ) {
             return this.xMin <= point.x && point.x <= this.xMax && this.yMin <= point.y && point.y <= this.yMax;

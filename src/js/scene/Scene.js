@@ -19,6 +19,8 @@ phet.scene = phet.scene || {};
         this.layers = [];
         
         this.main = main;
+        
+        this.sceneBounds = new phet.math.Bounds2( 0, 0, main.width(), main.height() );
     }
 
     var Scene = phet.scene.Scene;
@@ -75,6 +77,7 @@ phet.scene = phet.scene || {};
             
             // validating bounds, similar to Piccolo2d
             this.root.validateBounds();
+            this.root.validatePaint();
             
             var scene = this;
             
@@ -91,6 +94,10 @@ phet.scene = phet.scene || {};
             var state = new phet.scene.RenderState();
             
             // switches to (and initializes) the layer
+            var dirtyBounds = layer.getDirtyBounds();
+            layer.prepareDirtyRegions();
+            state.pushClipShape( phet.scene.Shape.bounds( layer.getDirtyBounds().intersection( this.sceneBounds ) ) );
+            // state.childRestrictedBounds = layer.getDirtyBounds();
             state.switchToLayer( layer );
             state.multiLayerRender = false; // don't allow it to switch layers at the start / end nodes
             

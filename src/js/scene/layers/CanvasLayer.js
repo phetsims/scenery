@@ -65,11 +65,13 @@ phet.scene.layers = phet.scene.layers || {};
             // save now, so that we can clear the clipping shapes later
             this.context.save();
             
+            var context = this.context;
+            
             // apply clipping shapes in the global coordinate frame
             _.each( renderState.clipShapes, function( shape ) {
-                this.context.beginPath();
-                shape.writeToContext( this.context );
-                this.context.clip();
+                context.beginPath();
+                shape.writeToContext( context );
+                context.clip();
             } );
             
             // set the context's transform to the current transformation matrix
@@ -127,7 +129,7 @@ phet.scene.layers = phet.scene.layers || {};
         
         markDirtyRegion: function( bounds ) {
             // TODO: for performance, consider more than just a single dirty bounding box
-            this.dirtyBounds = this.dirtyBounds.union( bounds );
+            this.dirtyBounds = this.dirtyBounds.union( bounds.dilated( 1 ).roundedOut() );
         },
         
         resetDirtyRegions: function() {
@@ -148,6 +150,10 @@ phet.scene.layers = phet.scene.layers || {};
         
         prepareDirtyRegions: function() {
             this.prepareBounds( this.dirtyBounds );
+        },
+        
+        getDirtyBounds: function() {
+            return this.dirtyBounds;
         },
         
         setFillStyle: function( style ) {

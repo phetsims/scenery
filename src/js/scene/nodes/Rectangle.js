@@ -40,7 +40,7 @@ phet.scene.nodes = phet.scene.nodes || {};
         this.fill = args.fill === undefined ? this.fill : args.fill;
         
         // TODO: bounds handling for stroke widths / caps, etc.
-        this.setSelfBounds( new phet.math.Bounds2( this.x, this.y, this.x + this.width, this.y + this.height ) );
+        this.invalidateSelf( new phet.math.Bounds2( this.x, this.y, this.x + this.width, this.y + this.height ) );
     };
     
     // whether this node's rendering contains a specific point in local coordinates

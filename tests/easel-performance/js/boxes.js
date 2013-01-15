@@ -129,11 +129,6 @@ phet.tests = phet.tests || {};
         
         grid.layerType = phet.scene.layers.CanvasLayer;
         
-        var background = new phet.scene.Node();
-        background.setShape( phet.scene.Shape.rectangle( -50, -50, 100, 100 ) );
-        background.fill = '#00FF00';
-        grid.addChild( background );
-        
         for( var row = 0; row < resolution; row++ ) {
             for( var col = 0; col < resolution; col++ ) {
                 grid.addChild( new phet.scene.nodes.Rectangle({
@@ -154,27 +149,8 @@ phet.tests = phet.tests || {};
 
         // return step function
         return function( timeElapsed ) {
-            var bounds = grid.getBounds();
-            // clear around another pixel or so, for antialiasing!
-            grid._layerBeforeRender.context.clearRect( bounds.x() - 1, bounds.y() - 1, bounds.width() + 2, bounds.height() + 2 );
-            
             grid.rotate( timeElapsed );
-            
-            // bounds validation here only necessary so we can show the black background behind it before rendering
-            grid.validateBounds();
-            
-            // show a background behind the boxes that highlights the bounds
-            bounds = grid.getBounds();
-            var context = grid._layerBeforeRender.context;
-            var tmpStyle = context.fillStyle;
-            context.fillStyle = '#000';
-            context.fillRect( bounds.x(), bounds.y(), bounds.width(), bounds.height() );
-            context.fillStyle = tmpStyle;
-            
-            // TODO: dead region handling (this is a hack)
-            // grid._layerBeforeRender.context.clearRect( main.width() / 2 - 150, main.height() / 2 - 150, 300, 300 );
-            // baseContext.clearRect( 0, 0, main.width(), main.height() );
-            scene.renderScene();
+            scene.updateScene();
         }
     };
     
