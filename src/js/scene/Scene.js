@@ -33,8 +33,8 @@ phet.scene = phet.scene || {};
             
             var children = node.children;
             
-            // check if we need to filter the children we render
-            if( state.childRestrictedBounds ) {
+            // check if we need to filter the children we render, and ignore nodes with few children (but allow 2, since that may prevent branches)
+            if( state.childRestrictedBounds && children.length > 1 ) {
                 var localRestrictedBounds = node.globalToLocalBounds( state.childRestrictedBounds );
                 
                 // don't filter if every child is inside the bounds
@@ -71,7 +71,7 @@ phet.scene = phet.scene || {};
             } );
         },
         
-        updateScene: function() {
+        updateScene: function( args ) {
             phet.assert( this.root.parent == null );
             phet.assert( this.root.isLayerRoot() );
             
@@ -84,20 +84,21 @@ phet.scene = phet.scene || {};
             _.each( this.layers, function( layer ) {
                 // don't repaint clean layers
                 if( layer.isDirty() ) {
-                    scene.updateLayer( layer );
+                    scene.updateLayer( layer, args );
                 }
             } );
         },
         
-        updateLayer: function( layer ) {
+        updateLayer: function( layer, args ) {
             // TODO: only render in dirty rectangles (modify state and checks?)
             var state = new phet.scene.RenderState();
             
             // switches to (and initializes) the layer
             var dirtyBounds = layer.getDirtyBounds();
+            var visibleDirtyBounds = layer.getDirtyBounds().intersection( this.sceneBounds );
             layer.prepareDirtyRegions();
-            state.pushClipShape( phet.scene.Shape.bounds( layer.getDirtyBounds().intersection( this.sceneBounds ) ) );
-            // state.childRestrictedBounds = layer.getDirtyBounds();
+            state.pushClipShape( phet.scene.Shape.bounds( visibleDirtyBounds ) );
+            state.childRestrictedBounds = visibleDirtyBounds;
             state.switchToLayer( layer );
             state.multiLayerRender = false; // don't allow it to switch layers at the start / end nodes
             

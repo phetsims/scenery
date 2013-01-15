@@ -29,10 +29,13 @@ phet.tests = phet.tests || {};
             // regular polygon
             node.setShape( phet.scene.Shape.regularPolygon( 6, radius ) );
             
-            node.fill = phet.tests.themeColor( 0.5 );
+            var xFactor = Math.random();
+            
+            node.setTranslation( ( xFactor - 0.5 ) * sceneWidth, ( Math.random() - 0.5 ) * sceneHeight );
+            
+            node.fill = phet.tests.themeColor( 0.5, xFactor );
             node.stroke = '#000000';
             
-            node.setTranslation( ( Math.random() - 0.5 ) * sceneWidth, ( Math.random() - 0.5 ) * sceneHeight );
             
             nodes.addChild( node );
         }
@@ -47,7 +50,7 @@ phet.tests = phet.tests || {};
         return function( timeElapsed ) {
             // tweak a random node
             var node = nodes.children[_.random( 0, nodes.children.length - 1)];
-            node.translate( ( Math.random() - 0.5 ) * 20, ( Math.random() - 0.5 ) * 20 );
+            node.translate( ( Math.random() - 0.5 ) * 50, ( Math.random() - 0.5 ) * 50 );
             
             scene.updateScene();
         }

@@ -18,13 +18,15 @@ Incomplete:
     General optimization and organization so we can extract "self" from child rendering bounds, what is repainted, etc. better.
 
 Performance:
-    Dirty regions
+    Improved Dirty regions
+        * Thresholding for bounds restriction - restrictBounds flag is clunky, but allows override over this?
+        * not full union of bounding boxes
+        * Kd-tree / quadtree acceleration if child count is high? 
     Caching nodes with off-screen canvases for performance
     Combining fills and strokes (or other state optimization -- fills require ensuring CCW/CW stays the same, so we need flags to whitelist)
     Efficiency checks for fullRender using the functional style => imperative
     Automated benchmarks
     Investigate whether bounding boxes can be smaller based on clip shapes
-    Add quadtree / Kd-tree / bounding acceleration tests if child count is high?
     Non-automated performance tests:
         * Compare Matrix3 Float32Array v. Array (Array seems slightly faster possibly?)
         * Consider a Canvas 2D context delegate to examine drawing calls for Easel / Scene / Custom / etc.
@@ -32,6 +34,7 @@ Performance:
 Features:
     * User interaction
     Accessibility and shadow DOM see html5 scene graph google doc
+    Non-canvas handling
     Retina-screen handling
     "Lifting" of DOM nodes to top layer if selected
     AnimateTo-style animation
