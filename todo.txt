@@ -20,6 +20,7 @@ Performance:
     Combining fills and strokes (or other state optimization -- fills require ensuring CCW/CW stays the same, so we need flags to whitelist)
     Automated benchmarks
     Investigate whether bounding boxes can be smaller based on clip shapes
+    Add quadtree / Kd-tree / bounding acceleration tests if child count is high?
     Non-automated performance tests:
         * Compare Matrix3 Float32Array v. Array (Array seems slightly faster possibly?)
         * Consider a Canvas 2D context delegate to examine drawing calls for Easel / Scene / Custom / etc.
