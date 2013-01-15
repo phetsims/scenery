@@ -389,6 +389,10 @@ phet.scene = phet.scene || {};
             }
         },
         
+        childrenWithinBounds: function( bounds ) {
+            return _.filter( this.children, function( child ) { !child._bounds.intersection( bounds ).isEmpty(); } );
+        },
+        
         // override for computation of whether a point is inside the content rendered in renderSelf
         containsPointSelf: function( point ) {
             return false;
