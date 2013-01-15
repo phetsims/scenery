@@ -249,6 +249,16 @@ $(document).ready( function() {
             }
         }]
     },{
+        testName: 'Dirty',
+        testId: 'test-dirty',
+        types: [{
+            typeName: 'Scene',
+            typeId: 'Scene',
+            init: function( main ) {
+                return phet.tests.sceneDirtyRegions( main, true );
+            }
+        }]
+    },{
         testName: 'Placebo',
         testId: 'test-placebo',
         types: [{
