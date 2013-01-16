@@ -22,6 +22,7 @@ Incomplete:
     General optimization and organization so we can extract "self" from child rendering bounds, what is repainted, etc. better.
 
 Performance:
+    Piece improvements with direct piece.render calls instead of switch? -- profile
     Improved Dirty regions
         * not full union of bounding boxes
         * Kd-tree / quadtree acceleration if child count is high? 
