@@ -56,7 +56,6 @@ phet.scene = phet.scene || {};
         // fill/stroke for shapes
         this.stroke = null;
         this.fill = null;
-        this.lineWidth = 1; // TODO: ability to observer changes!
         
         this._lineDrawingStyles = new Shape.LineStyles();
     }
@@ -119,7 +118,7 @@ phet.scene = phet.scene || {};
                     }
                     if( this.stroke ) {
                         layer.setStrokeStyle( this.stroke );
-                        layer.setLineWidth( this.lineWidth );
+                        layer.setLineWidth( this.getLineWidth() );
                         context.stroke();
                     }
                 } else {
@@ -221,6 +220,21 @@ phet.scene = phet.scene || {};
             
             this.invalidateBounds();
             this.invalidatePaint();
+        },
+        
+        getLineWidth: function() {
+            return this._lineDrawingStyles.lineWidth;
+        },
+        
+        setLineWidth: function( lineWidth ) {
+            if( this.getLineWidth() != lineWidth ) {
+                this.markOldSelfPaint(); // since the previous line width may have been wider
+                
+                this._lineDrawingStyles.lineWidth = lineWidth;
+                
+                this.invalidateBounds();
+                this.invalidatePaint();
+            }
         },
         
         // bounds assumed to be in the local coordinate frame, below this node's transform

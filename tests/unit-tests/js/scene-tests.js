@@ -178,8 +178,8 @@
                 var node = new phet.scene.Node();
                 node.setShape( phet.scene.Shape.rectangle( 15, 15, canvasWidth / 2, canvasHeight / 2 ) );
                 node.fill = '#ff0000';
-                node.stroke = '#000000';
-                node.lineWidth = 10;
+                node.stroke = '#000000'; // TODO: invalidate bounds/paint on these changes
+                node.setLineWidth( 10 );
                 scene.root.addChild( node );
                 
                 scene.rebuildLayers();

@@ -4,6 +4,7 @@ Bugs:
 
 Incomplete:
     ***!*!* addChild / removeChild handling of certain layer attributes
+        Layer Reference only needs to be recursively applied if it is different (if not, we are assured they are all correct?) unless their is a layerType
     
     Test-based-dev? for Update vs Render
         
@@ -35,6 +36,8 @@ Performance:
     Non-automated performance tests:
         * Compare Matrix3 Float32Array v. Array (Array seems slightly faster possibly?)
         * Consider a Canvas 2D context delegate to examine drawing calls for Easel / Scene / Custom / etc.
+    Optimizing for V8:
+        http://floitsch.blogspot.com/2012/03/optimizing-for-v8-introduction.html
 
 Features:
     * User interaction
