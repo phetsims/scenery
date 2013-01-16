@@ -3,9 +3,6 @@
 Bugs:
 
 Incomplete:
-    ***!*!* addChild / removeChild handling of certain layer attributes
-        Layer Reference only needs to be recursively applied if it is different (if not, we are assured they are all correct?) unless their is a layerType
-    
     Test-based-dev? for Update vs Render
         
     Ability to update size of canvas, etc.
