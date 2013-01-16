@@ -30,8 +30,8 @@ phet.tests = phet.tests || {};
                 // regular polygon
                 node.setShape( phet.scene.Shape.regularPolygon( 6, radius ) );
                 
-                node.fill = color;
-                node.stroke = '#000000';
+                node.setFill( color );
+                node.setStroke( '#000000' );
                 
                 randomizeTranslation( node );
                 

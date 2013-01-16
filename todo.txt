@@ -4,16 +4,13 @@ Bugs:
 
 Incomplete:
     Test-based-dev? for Update vs Render
+    Remove deprecated Rectangle 'class' - but copy over other non-completed function calls
         
     Ability to update size of canvas, etc.
     Handling rebuilding of layers when needed
-    validateBounds() after self-changes could sneak by paint validation
     Flesh out Shape, with decomposition, bounds, hit regions (including strokes), etc.
     Flags for whether text / strokes are considered for hit regions
     Investigate getImageData for fonts (both hit regions and bounds)
-    How to handle the mutable transforms and paint-invalidation / events?
-        * increment transform ID and check?
-        * getTransform() with a delegate?
     Visibility interaction with dirty paint / bounds, and events based on that
         * revert to setter/getter ?
         * Scene.updateLayer handling

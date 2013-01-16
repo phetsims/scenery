@@ -18,8 +18,8 @@ phet.tests = phet.tests || {};
         
         var background = new phet.scene.Node();
         background.setShape( phet.scene.Shape.rectangle( -sceneWidth / 2 * borderFactor, -sceneHeight / 2 * borderFactor, sceneWidth * borderFactor, sceneHeight * borderFactor ) );
-        background.fill = '#333333';
-        background.stroke = '#000000';
+        background.setFill( '#333333' );
+        background.setStroke( '#000000' );
         root.addChild( background );
         
         var nodes = new phet.scene.Node();
@@ -34,8 +34,9 @@ phet.tests = phet.tests || {};
             var xFactor = Math.random();
             node.setTranslation( ( xFactor - 0.5 ) * sceneWidth, ( Math.random() - 0.5 ) * sceneHeight );
             
-            node.fill = phet.tests.themeColor( 0.5, xFactor );
-            node.stroke = '#000000';
+            // TODO: better way of specifying initial parameters here would be ideal
+            node.setFill( phet.tests.themeColor( 0.5, xFactor ) );
+            node.setStroke( '#000000' );
             
             nodes.addChild( node );
         }

@@ -54,8 +54,8 @@ phet.scene = phet.scene || {};
         // shape used for rendering
         this._shape = null;
         // fill/stroke for shapes
-        this.stroke = null;
-        this.fill = null;
+        this._stroke = null;
+        this._fill = null;
         
         this._lineDrawingStyles = new Shape.LineStyles();
     }
@@ -112,12 +112,12 @@ phet.scene = phet.scene || {};
                     context.beginPath();
                     this._shape.writeToContext( context );
                     
-                    if( this.fill ) {
-                        layer.setFillStyle( this.fill );
+                    if( this._fill ) {
+                        layer.setFillStyle( this._fill );
                         context.fill();
                     }
-                    if( this.stroke ) {
-                        layer.setStrokeStyle( this.stroke );
+                    if( this._stroke ) {
+                        layer.setStrokeStyle( this._stroke );
                         layer.setLineWidth( this.getLineWidth() );
                         context.stroke();
                     }
@@ -242,6 +242,32 @@ phet.scene = phet.scene || {};
                 
                 this.invalidateBounds();
                 this.invalidatePaint();
+            }
+        },
+        
+        getFill: function() {
+            return this._fill;
+        },
+        
+        setFill: function( fill ) {
+            if( this.getFill() != fill ) {
+                this._fill = fill;
+                this.invalidatePaint();
+            }
+        },
+        
+        getStroke: function() {
+            return this._stroke;
+        },
+        
+        setStroke: function( stroke ) {
+            if( this.getStroke() != stroke ) {
+                // since this can actually change the bounds, we need to handle a few things differently than the fill
+                this.markOldSelfPaint();
+                
+                this._stroke = stroke;
+                this.invalidatePaint();
+                this.invalidateBounds();
             }
         },
         

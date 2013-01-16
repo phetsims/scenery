@@ -174,8 +174,8 @@
             function( scene ) {
                 var node = new phet.scene.Node();
                 node.setShape( phet.scene.Shape.rectangle( 0, 0, canvasWidth / 3, canvasHeight / 3 ) );
-                node.fill = '#ff0000';
-                node.stroke = '#000000'; // TODO: invalidate bounds/paint on these changes
+                node.setFill( '#ff0000' );
+                node.setStroke( '#000000' );
                 scene.root.addChild( node );
                 
                 scene.rebuildLayers();
@@ -193,8 +193,8 @@
                 // TODO: clearer way of specifying parameters
                 var node = new phet.scene.Node();
                 node.setShape( phet.scene.Shape.rectangle( 15, 15, canvasWidth / 2, canvasHeight / 2 ) );
-                node.fill = '#ff0000';
-                node.stroke = '#000000'; // TODO: invalidate bounds/paint on these changes
+                node.setFill( '#ff0000' );
+                node.setStroke( '#000000' );
                 node.setLineWidth( 10 );
                 scene.root.addChild( node );
                 
@@ -202,7 +202,7 @@
             }, function( scene ) {
                 scene.root.children[0].translate( canvasWidth / 4, canvasHeight / 4 );
             }
-        ], true );
+        ] );
     } );
     
     /*---------------------------------------------------------------------------*
