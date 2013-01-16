@@ -4,9 +4,10 @@
 
 setlocal enableextensions enabledelayedexpansion
 
-del concatenated.js
-del phet-scene.js
-del phet-scene-min.js
+del /q concatenated.js 2> NUL
+del /q phet-scene.js 2> NUL
+del /q phet-scene-min.js 2> NUL
+del /q phet-scene-min.js.map 2> NUL
 
 :: rebuild concatenated.js from the file list by appending
 echo Building concatenated.js
@@ -16,9 +17,10 @@ for /f %%k in (build/file-list.txt) DO (
 )
 
 :: build phet-scene.js
-echo Building phet-scene.js
-java -jar bin/closure-compiler.jar --compilation_level WHITESPACE_ONLY --formatting PRETTY_PRINT --js concatenated.js --js_output_file phet-scene.js
+:: echo Building phet-scene.js
+:: java -jar bin/closure-compiler.jar --compilation_level WHITESPACE_ONLY --formatting PRETTY_PRINT --js concatenated.js --js_output_file phet-scene.js
 
 :: build phet-scene-min.js
 echo Building phet-scene-min.js
-java -jar bin/closure-compiler.jar --compilation_level SIMPLE_OPTIMIZATIONS --js concatenated.js --js_output_file phet-scene-min.js
+java -jar bin/closure-compiler.jar --compilation_level SIMPLE_OPTIMIZATIONS --js concatenated.js --js_output_file phet-scene-min.js --create_source_map ./phet-scene-min.js.map --source_map_format=V3
+type build\source-map-appendix.js >> phet-scene-min.js

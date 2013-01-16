@@ -4,6 +4,8 @@ Bugs:
 
 Incomplete:
     ***!*!* addChild / removeChild handling of certain layer attributes
+    
+    Test-based-dev? for Update vs Render
         
     Ability to update size of canvas, etc.
     Handling rebuilding of layers when needed
