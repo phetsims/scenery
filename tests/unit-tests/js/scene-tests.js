@@ -53,6 +53,7 @@
             
             secondaryScene.clearAllLayers();
             action( secondaryScene );
+            secondaryScene.rebuildLayers();
             secondaryScene.renderScene();
             
             if( debugFlag ) {
