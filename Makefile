@@ -10,7 +10,7 @@ phet-scene.js: concatenated.js
 
 phet-scene-min.js: concatenated.js
 	java -jar bin/closure-compiler.jar --compilation_level SIMPLE_OPTIMIZATIONS --js concatenated.js --js_output_file phet-scene-min.js \
-		--create_source_map ./phet-scene-min.js.map --source_map_format=V3
+		--create_source_map ./phet-scene-min.js.map --source_map_format=V3 --define=phetDebug=false
 	cat build/source-map-appendix.js >> phet-scene-min.js
 
 concatenated.js: $(JS_FILES)

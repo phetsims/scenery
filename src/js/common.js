@@ -1,5 +1,8 @@
 // Copyright 2002-2012, University of Colorado
 
+/** @define {boolean} */
+var phetDebug = true;
+
 var phet = phet || {};
 
 phet.assert = function ( predicate, msg ) {
