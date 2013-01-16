@@ -247,6 +247,14 @@ phet.scene = phet.scene || {};
             layer.resetDirtyRegions();
         },
         
+        // attempt to render everything currently visible in the scene to an external canvas. allows copying from canvas layers straight to the other canvas
+        renderToCanvas: function( canvas, context ) {
+            context.clearRect( 0, 0, canvas.width, canvas.height );
+            _.each( this.layers, function( layer ) {
+                layer.renderToCanvas( canvas, context );
+            } );
+        },
+        
         clearLayers: function() {
             this.main.empty();
             this.layers = [];

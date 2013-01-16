@@ -3,7 +3,7 @@
 Bugs:
 
 Incomplete:
-    * Testing / benchmark harness, with ability to pixel-compare renderScene and updateScene (and verify layer correctness, etc).
+    ***!*!* addChild / removeChild handling of certain layer attributes
         
     Ability to update size of canvas, etc.
     Handling rebuilding of layers when needed

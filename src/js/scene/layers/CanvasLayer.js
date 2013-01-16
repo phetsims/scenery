@@ -168,6 +168,11 @@ phet.scene.layers = phet.scene.layers || {};
                 this.strokeStyle = style;
                 this.context.strokeStyle = style;
             }
+        },
+        
+        // TODO: note for DOM we can do https://developer.mozilla.org/en-US/docs/HTML/Canvas/Drawing_DOM_objects_into_a_canvas
+        renderToCanvas: function( canvas, context ) {
+            context.drawImage( this.canvas, 0, 0 );
         }
     };
 })();
