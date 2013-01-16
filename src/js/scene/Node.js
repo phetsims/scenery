@@ -150,6 +150,14 @@ phet.scene = phet.scene || {};
             
             node.invalidateBounds();
             node.invalidatePaint();
+            
+            // synchronize layer references for adding subtrees without layer types.
+            if( node._layerReference != this._layerReference ) {
+                var layerReference = this._layerReference;
+                node.walkDepthFirst( function( child ) {
+                    child._layerReference = layerReference;
+                } );
+            }
         },
         
         removeChild: function ( node ) {
@@ -475,6 +483,12 @@ phet.scene = phet.scene || {};
             return this._shape;
         },
         
+        walkDepthFirst: function( callback ) {
+            callback( this );
+            _.each( this.children, function( child ) {
+                child.walkDepthFirst( callback );
+            } );
+        },
         
         
         
