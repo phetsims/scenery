@@ -3,6 +3,8 @@
 Bugs:
 
 Incomplete:
+    * Testing / benchmark harness, with ability to pixel-compare renderScene and updateScene (and verify layer correctness, etc).
+        
     Ability to update size of canvas, etc.
     Handling rebuilding of layers when needed
     validateBounds() after self-changes could sneak by paint validation
