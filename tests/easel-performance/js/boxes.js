@@ -127,8 +127,6 @@ phet.tests = phet.tests || {};
         
         var grid = scene.root;
         
-        grid.layerType = phet.scene.layers.CanvasLayer;
-        
         for( var row = 0; row < resolution; row++ ) {
             for( var col = 0; col < resolution; col++ ) {
                 // var rect = new phet.scene.Node();

@@ -14,7 +14,7 @@ phet.scene = phet.scene || {};
         this.root = new phet.scene.Node();
         
         // default to a canvas layer type, but this can be changed
-        this.root.layerType = phet.scene.layers.CanvasLayer;
+        this.root._layerType = phet.scene.layers.CanvasLayer;
         
         this.layers = [];
         
@@ -274,7 +274,7 @@ phet.scene = phet.scene || {};
             phet.assert( this.root.parent == null );
             
             // root needs to contain a layer type reference
-            phet.assert( this.root.layerType != null );
+            phet.assert( this.root.isLayerRoot() );
             
             // a few variables for the closurelayer
             var main = this.main;
@@ -297,7 +297,7 @@ phet.scene = phet.scene || {};
                 lastLayer.endNode = node;
                 
                 // create the new layer, and give it the proper node reference
-                var newLayer = scene.createLayer( node.layerType, layerArgs );
+                var newLayer = scene.createLayer( node._layerType, layerArgs );
                 if( isBeforeRender ) {
                     node._layerBeforeRender = newLayer;
                 } else {
@@ -317,7 +317,7 @@ phet.scene = phet.scene || {};
             
             // for handling layers in depth-first fashion
             function recursiveRebuild( node, baseLayerType ) {
-                var hasLayer = node.layerType != null;
+                var hasLayer = node._layerType != null;
                 if( !hasLayer ) {
                     // sanity checks, in case a layerType was removed
                     node._layerBeforeRender = null;
@@ -326,7 +326,7 @@ phet.scene = phet.scene || {};
                     // layers created in order, later
                     
                     // change the base layer type for the layer children
-                    baseLayerType = node.layerType;
+                    baseLayerType = node._layerType;
                 }
                 
                 // for stacking, add the "before" layer before recursion
@@ -349,7 +349,7 @@ phet.scene = phet.scene || {};
             }
             
             // get the layer constructor
-            var rootLayerType = this.root.layerType;
+            var rootLayerType = this.root._layerType;
             
             // create the first layer (will be the only layer if no other nodes have a layerType)
             var startingLayer = scene.createLayer( rootLayerType, layerArgs );

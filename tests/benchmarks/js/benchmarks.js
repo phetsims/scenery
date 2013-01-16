@@ -16,7 +16,6 @@
     } ).add( 'simple scene creation and iteration', function() {
         var scene = new phet.scene.Scene( $( '#main' ) );
         var root = scene.root;
-        root.layerType = phet.scene.layers.CanvasLayer;
         
         scene.rebuildLayers();
         scene.updateScene();

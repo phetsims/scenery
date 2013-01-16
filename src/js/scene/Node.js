@@ -23,7 +23,7 @@ phet.scene = phet.scene || {};
         
         // type of layer to be created for content under this node.
         // if non-null, this node is a layer root, and layerType should be a layer constructor function
-        this.layerType = null;
+        this._layerType = null;
         
         // This node and all children will be clipped by this shape (in addition to any other clipping shapes).
         // The shape should be in the local coordinate frame
@@ -37,6 +37,7 @@ phet.scene = phet.scene || {};
         this._layerBeforeRender = null; // layer to swap to before rendering this node
         this._layerAfterRender = null; // layer to swap to after rendering this node
         this._layerReference = null; // stores a reference to this node's corresponding layer (the one used to render it's self content)
+        this._hasLayerBelow = false;
         
         // bounds handling
         this._bounds = Bounds2.NOTHING; // for this node and its children, in "parent" coordinates
@@ -190,7 +191,7 @@ phet.scene = phet.scene || {};
         
         // does this node have an associated layerType (are the contents of this node rendered separately from its ancestors)
         isLayerRoot: function() {
-            return this.layerType != null;
+            return this._layerType != null;
         },
         
         // the first layer associated with this node (can be multiple layers if children of this node are also layer roots)
@@ -413,6 +414,10 @@ phet.scene = phet.scene || {};
             return layers;
         },
         
+        setLayerType: function( layerType ) {
+            this._layerType = layerType;
+            // TODO: more events here, like rebuilding or incremental!
+        },
         
         
         // mark the bounds of this node as invalid, so it is recomputed before it is accessed again

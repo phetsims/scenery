@@ -14,7 +14,6 @@ phet.tests = phet.tests || {};
     phet.tests.sceneDirtyRegions = function( main, moveCount ) {
         var scene = new phet.scene.Scene( main );
         var root = scene.root;
-        root.layerType = phet.scene.layers.CanvasLayer;
         
         var background = new phet.scene.Node();
         background.setShape( phet.scene.Shape.rectangle( -sceneWidth / 2 * borderFactor, -sceneHeight / 2 * borderFactor, sceneWidth * borderFactor, sceneHeight * borderFactor ) );

@@ -12,7 +12,6 @@ phet.tests = phet.tests || {};
     phet.tests.sceneLayeringTests = function( main, useLayers ) {
         var scene = new phet.scene.Scene( main );
         var root = scene.root;
-        root.layerType = phet.scene.layers.CanvasLayer;
         
         function randomizeTranslation( node ) {
             node.setTranslation( ( Math.random() - 0.5 ) * backgroundSize, ( Math.random() - 0.5 ) * backgroundSize );
@@ -21,7 +20,7 @@ phet.tests = phet.tests || {};
         function buildShapes( color ) {
             var background = new phet.scene.Node();
             if( useLayers && color == 'rgba(0,255,0,0.7)' ) {
-                background.layerType = phet.scene.layers.CanvasLayer;
+                background.setLayerType( phet.scene.layers.CanvasLayer );
             }
             for( var i = 0; i < count; i++ ) {
                 var node = new phet.scene.Node();

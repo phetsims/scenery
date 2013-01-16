@@ -43,9 +43,6 @@
         var mainRoot = mainScene.root;
         var secondaryRoot = secondaryScene.root;
         
-        mainRoot.layerType = phet.scene.layers.CanvasLayer;
-        secondaryRoot.layerType = phet.scene.layers.CanvasLayer;
-        
         for( var i = 0; i < actions.length; i++ ) {
             var action = actions[i];
             action( mainScene );
@@ -119,7 +116,6 @@
     test( 'Checking Layers and external canvas', function() {
         var scene = new phet.scene.Scene( $( '#main' ) );
         var root = scene.root;
-        root.layerType = phet.scene.layers.CanvasLayer;
         
         root.addChild( new phet.scene.nodes.Rectangle( {
             x: 0,
@@ -136,7 +132,7 @@
             height: canvasHeight / 2,
             fill: '#00ff00'
         } );
-        middleRect.layerType = phet.scene.layers.CanvasLayer;
+        middleRect.setLayerType( phet.scene.layers.CanvasLayer );
         
         root.addChild( middleRect );
         
