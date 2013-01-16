@@ -54,6 +54,7 @@ Cleanliness / Debugging:
     Debugging traces removed with Closure compiler?
 
 Other:
+    Pull requests to underscore.js for FunctionalUtils wishlist
     Implement Bouncy example from the wishlist
     Report rgba alpha precision "bug" - spec says rgba(255,255,255,0.1112049520495820495802495) should not lose any digits on inspection after setting on context
     Highlighting and indexing of TODO items
