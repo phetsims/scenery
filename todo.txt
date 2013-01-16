@@ -10,6 +10,8 @@ Incomplete:
         
     Ability to update size of canvas, etc.
     Handling rebuilding of layers when needed
+        * Incremental style, change layer linked list then reissue zIndices
+        * Inserting children
     Flesh out Shape, with decomposition, bounds, hit regions (including strokes), etc.
     Flags for whether text / strokes are considered for hit regions
     Investigate getImageData for fonts (both hit regions and bounds)
@@ -21,7 +23,6 @@ Incomplete:
 
 Performance:
     Improved Dirty regions
-        * Thresholding for bounds restriction - restrictBounds flag is clunky, but allows override over this?
         * not full union of bounding boxes
         * Kd-tree / quadtree acceleration if child count is high? 
     Caching nodes with off-screen canvases for performance
