@@ -4,6 +4,7 @@ Bugs:
     addChild layerReference handling
 
 Incomplete:
+    Layers and multiple views
 
     Test-based-dev? for Update vs Render
     Don't remove deprecated Rectangle 'class' - but copy over other non-completed function calls
@@ -20,6 +21,7 @@ Incomplete:
         * Scene.updateLayer handling
     Don't send mark updates on invisible layers? Visibility change causes repaint?
     General optimization and organization so we can extract "self" from child rendering bounds, what is repainted, etc. better.
+    Handle CanvasGradient / CanvasPattern nicely! -- Is it valuable to abstract across SVG also?
 
 Performance:
     Piece improvements with direct piece.render calls instead of switch? -- profile
@@ -45,6 +47,7 @@ Features:
     "Lifting" of DOM nodes to top layer if selected
     AnimateTo-style animation
     Clipping => Dead region handling (clipping needs to be stored in a shape array since it can only be intersected or reset in Canvas)
+    Color handling?
 
 Cleanliness / Debugging:
     *** Debug layer
