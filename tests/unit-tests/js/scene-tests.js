@@ -157,10 +157,13 @@
                 scene.root.addChild( new phet.scene.nodes.Rectangle( {
                     x: 0,
                     y: 0,
-                    width: canvasHeight / 2,
+                    width: canvasWidth / 2,
                     height: canvasHeight / 2,
                     fill: '#000000'
                 } ) );
+                scene.rebuildLayers();
+            }, function( scene ) {
+                scene.root.children[0].translate( 20, 20 );
             }
         ] );
     } );
