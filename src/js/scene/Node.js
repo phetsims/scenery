@@ -153,6 +153,7 @@ phet.scene = phet.scene || {};
             
             // synchronize layer references for adding subtrees without layer types.
             if( node._layerReference != this._layerReference ) {
+                // TODO: THIS CODE IS BROKEN - adding in a "valley" layer will cause layering issues and breaks, along with other undefined behavior
                 var layerReference = this._layerReference;
                 node.walkDepthFirst( function( child ) {
                     child._layerReference = layerReference;
@@ -411,6 +412,8 @@ phet.scene = phet.scene || {};
             }
             return layers;
         },
+        
+        
         
         // mark the bounds of this node as invalid, so it is recomputed before it is accessed again
         invalidateBounds: function() {

@@ -1,10 +1,12 @@
 
 
 Bugs:
+    addChild layerReference handling
 
 Incomplete:
+
     Test-based-dev? for Update vs Render
-    Remove deprecated Rectangle 'class' - but copy over other non-completed function calls
+    Don't remove deprecated Rectangle 'class' - but copy over other non-completed function calls
         
     Ability to update size of canvas, etc.
     Handling rebuilding of layers when needed

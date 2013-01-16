@@ -131,6 +131,17 @@ phet.tests = phet.tests || {};
         
         for( var row = 0; row < resolution; row++ ) {
             for( var col = 0; col < resolution; col++ ) {
+                // var rect = new phet.scene.Node();
+                // rect.setShape( phet.scene.Shape.rectangle(
+                //     ( col - ( resolution - 1 ) / 2 ) * size / resolution - boxRadius,
+                //     ( row - ( resolution - 1 ) / 2 ) * size / resolution - boxRadius,
+                //     boxRadius * 2,
+                //     boxRadius * 2
+                // ) );
+                // rect.setFill( 'rgba(255,0,0,1)' );
+                // grid.addChild( rect );
+                
+                // TODO: standard way of handling args
                 grid.addChild( new phet.scene.nodes.Rectangle({
                     x: ( col - ( resolution - 1 ) / 2 ) * size / resolution - boxRadius,
                     y: ( row - ( resolution - 1 ) / 2 ) * size / resolution - boxRadius,
