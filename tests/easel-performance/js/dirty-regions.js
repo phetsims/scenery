@@ -11,7 +11,7 @@ phet.tests = phet.tests || {};
     var itemCount = 5000;
     var radius = 10;
     
-    phet.tests.sceneDirtyRegions = function( main ) {
+    phet.tests.sceneDirtyRegions = function( main, moveCount ) {
         var scene = new phet.scene.Scene( main );
         var root = scene.root;
         root.layerType = phet.scene.layers.CanvasLayer;
@@ -48,15 +48,23 @@ phet.tests = phet.tests || {};
         
         // return step function
         return function( timeElapsed ) {
-            // tweak a random node
-            var node = nodes.children[_.random( 0, nodes.children.length - 1)];
-            node.translate( ( Math.random() - 0.5 ) * 50, ( Math.random() - 0.5 ) * 50 );
+            if( moveCount == 0 ) {
+                for( var i = 0; i < itemCount; i++ ) {
+                    nodes.children[i].translate( ( Math.random() - 0.5 ) * 50, ( Math.random() - 0.5 ) * 50 );
+                }
+            } else {
+                for( var j = 0; j < moveCount; j++ ) {
+                // tweak a random node
+                    var node = nodes.children[_.random( 0, nodes.children.length - 1)];
+                    node.translate( ( Math.random() - 0.5 ) * 50, ( Math.random() - 0.5 ) * 50 );
+                }
+            }
             
             scene.updateScene();
         }
     };
     
-    phet.tests.easelDirtyRegions = function( main ) {
+    phet.tests.easelDirtyRegions = function( main, moveCount ) {
         var canvas = document.createElement( 'canvas' );
         canvas.id = 'easel-canvas';
         canvas.width = main.width();
@@ -90,9 +98,20 @@ phet.tests = phet.tests || {};
         
         // return step function
         return function( timeElapsed ) {
-            var shape = nodes.children[_.random( 0, nodes.children.length - 1)];
-            shape.x += ( Math.random() - 0.5 ) * 50;
-            shape.y += ( Math.random() - 0.5 ) * 50;
+            if( moveCount == 0 ) {
+                for( var i = 0; i < itemCount; i++ ) {
+                    var shape = nodes.children[i];
+                    shape.x += ( Math.random() - 0.5 ) * 50;
+                    shape.y += ( Math.random() - 0.5 ) * 50;
+                }
+            } else {
+                for( var j = 0; j < moveCount; j++ ) {
+                    var shape = nodes.children[_.random( 0, nodes.children.length - 1)];
+                    shape.x += ( Math.random() - 0.5 ) * 50;
+                    shape.y += ( Math.random() - 0.5 ) * 50;
+                }
+            }
+            
             stage.update();
         }
     };  

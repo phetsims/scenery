@@ -4,6 +4,7 @@ Bugs:
 
 Incomplete:
     Ability to update size of canvas, etc.
+    Handling rebuilding of layers when needed
     validateBounds() after self-changes could sneak by paint validation
     Flesh out Shape, with decomposition, bounds, hit regions (including strokes), etc.
     Flags for whether text / strokes are considered for hit regions

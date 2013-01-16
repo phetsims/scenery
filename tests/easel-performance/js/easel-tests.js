@@ -252,16 +252,40 @@ $(document).ready( function() {
         testName: 'Dirty',
         testId: 'test-dirty',
         types: [{
-            typeName: 'Scene',
-            typeId: 'Scene',
+            typeName: 'Scene 1',
+            typeId: 'scene1',
             init: function( main ) {
-                return phet.tests.sceneDirtyRegions( main );
+                return phet.tests.sceneDirtyRegions( main, 1 );
             }
         },{
-            typeName: 'Easel',
-            typeId: 'easel',
+            typeName: 'Scene 50',
+            typeId: 'Scene50',
             init: function( main ) {
-                return phet.tests.easelDirtyRegions( main );
+                return phet.tests.sceneDirtyRegions( main, 50 );
+            }
+        },{
+            typeName: 'Scene All',
+            typeId: 'Sceneall',
+            init: function( main ) {
+                return phet.tests.sceneDirtyRegions( main, 0 );
+            }
+        },{
+            typeName: 'Easel 1',
+            typeId: 'easel1',
+            init: function( main ) {
+                return phet.tests.easelDirtyRegions( main, 1 );
+            }
+        },{
+            typeName: 'Easel 50',
+            typeId: 'easel50',
+            init: function( main ) {
+                return phet.tests.easelDirtyRegions( main, 50 );
+            }
+        },{
+            typeName: 'Easel All',
+            typeId: 'easelall',
+            init: function( main ) {
+                return phet.tests.easelDirtyRegions( main, 0 );
             }
         }]
     },{
