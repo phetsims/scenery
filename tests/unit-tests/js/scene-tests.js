@@ -2,18 +2,21 @@
 
 (function(){
     
-    var canvasWidth = 640;
-    var canvasHeight = 480;
+    var canvasWidth = 320;
+    var canvasHeight = 240;
     
     // takes a snapshot of a scene and stores the pixel data, so that we can compare them
-    function snapshot( scene ) {
+    function snapshot( scene, debugFlag ) {
         var canvas = document.createElement( 'canvas' );
         canvas.width = canvasWidth;
         canvas.height = canvasHeight;
         var context = phet.canvas.initCanvas( canvas );
         scene.renderToCanvas( canvas, context );
         var data = context.getImageData( 0, 0, canvasWidth, canvasHeight );
-        // $( '#display' ).append( canvas );
+        if( debugFlag ) {
+            $( '#display' ).append( canvas );
+            $( canvas ).css( 'border', '1px solid black' );
+        }
         return data;
     }
     
@@ -33,7 +36,7 @@
     }
     
     // compares the "update" render against a full render in-between a series of steps
-    function updateVsFullRender( actions ) {
+    function updateVsFullRender( actions, debugFlag ) {
         var mainScene = new phet.scene.Scene( $( '#main' ) );
         var secondaryScene = new phet.scene.Scene( $( '#secondary' ) );
         
@@ -52,7 +55,13 @@
             action( secondaryScene );
             secondaryScene.renderScene();
             
-            var isEqual = snapshotEquals( snapshot( mainScene ), snapshot( secondaryScene ), 0, 'action #' + i );
+            if( debugFlag ) {
+                var note = document.createElement( 'div' );
+                $( note ).text( 'Action ' + i );
+                $( '#display' ).append( note );
+            }
+            
+            var isEqual = snapshotEquals( snapshot( mainScene, debugFlag ), snapshot( secondaryScene, debugFlag ), 0, 'action #' + i );
             if( !isEqual ) {
                 break;
             }
@@ -63,7 +72,7 @@
     * TESTS BELOW
     *----------------------------------------------------------------------------*/     
     
-    module( 'Canvas Scene tests' );
+    module( 'Canvas Scene Regression' );
     
     test( 'Canvas 2D Context and Features', function() {
         var canvas = document.createElement( 'canvas' );
@@ -140,8 +149,6 @@
         scene.rebuildLayers();
         scene.updateScene();
         
-        snapshot( scene );
-        
         equal( scene.layers.length, 3, 'simple layer check' );
     } );
     
@@ -160,6 +167,26 @@
                 scene.root.children[0].translate( 20, 20 );
             }
         ] );
+    } );
+    
+    module( 'Canvas Scene TODO' );
+    
+    test( 'Update vs Full Stroke Repaint', function() {
+        updateVsFullRender( [
+            function( scene ) {
+                // TODO: clearer way of specifying parameters
+                var node = new phet.scene.Node();
+                node.setShape( phet.scene.Shape.rectangle( 15, 15, canvasWidth / 2, canvasHeight / 2 ) );
+                node.fill = '#ff0000';
+                node.stroke = '#000000';
+                node.lineWidth = 10;
+                scene.root.addChild( node );
+                
+                scene.rebuildLayers();
+            }, function( scene ) {
+                scene.root.children[0].translate( canvasWidth / 4, canvasHeight / 4 );
+            }
+        ], true );
     } );
     
     /*---------------------------------------------------------------------------*
