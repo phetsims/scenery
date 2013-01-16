@@ -91,6 +91,7 @@
             'fill',
             'fillRect',
             'fillStyle',
+            'isPointInPath',
             'lineTo',
             'moveTo',
             'rect',
