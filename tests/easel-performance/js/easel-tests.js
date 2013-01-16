@@ -255,7 +255,13 @@ $(document).ready( function() {
             typeName: 'Scene',
             typeId: 'Scene',
             init: function( main ) {
-                return phet.tests.sceneDirtyRegions( main, true );
+                return phet.tests.sceneDirtyRegions( main );
+            }
+        },{
+            typeName: 'Easel',
+            typeId: 'easel',
+            init: function( main ) {
+                return phet.tests.easelDirtyRegions( main );
             }
         }]
     },{

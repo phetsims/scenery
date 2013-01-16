@@ -4,14 +4,17 @@ phet.tests = phet.tests || {};
 
 (function(){
     
+    var sceneWidth = 1000;
+    var sceneHeight = 500;
+    var borderFactor = 6 / 5;
+    
+    var itemCount = 5000;
+    var radius = 10;
+    
     phet.tests.sceneDirtyRegions = function( main ) {
         var scene = new phet.scene.Scene( main );
         var root = scene.root;
         root.layerType = phet.scene.layers.CanvasLayer;
-        
-        var sceneWidth = 1000;
-        var sceneHeight = 500;
-        var borderFactor = 6 / 5;
         
         var background = new phet.scene.Node();
         background.setShape( phet.scene.Shape.rectangle( -sceneWidth / 2 * borderFactor, -sceneHeight / 2 * borderFactor, sceneWidth * borderFactor, sceneHeight * borderFactor ) );
@@ -22,20 +25,17 @@ phet.tests = phet.tests || {};
         var nodes = new phet.scene.Node();
         root.addChild( nodes );
         
-        for( var i = 0; i < 5000; i++ ) {
+        for( var i = 0; i < itemCount; i++ ) {
             var node = new phet.scene.Node();
-            var radius = 10;
             
             // regular polygon
             node.setShape( phet.scene.Shape.regularPolygon( 6, radius ) );
             
             var xFactor = Math.random();
-            
             node.setTranslation( ( xFactor - 0.5 ) * sceneWidth, ( Math.random() - 0.5 ) * sceneHeight );
             
             node.fill = phet.tests.themeColor( 0.5, xFactor );
             node.stroke = '#000000';
-            
             
             nodes.addChild( node );
         }
@@ -55,6 +55,47 @@ phet.tests = phet.tests || {};
             scene.updateScene();
         }
     };
+    
+    phet.tests.easelDirtyRegions = function( main ) {
+        var canvas = document.createElement( 'canvas' );
+        canvas.id = 'easel-canvas';
+        canvas.width = main.width();
+        canvas.height = main.height();
+        main.append( canvas );
+
+        var stage = new createjs.Stage( canvas );
+        
+        var background = new createjs.Shape();
+        background.graphics.beginFill( '#333333').beginStroke( '#000000' ).drawRect(  -sceneWidth / 2 * borderFactor, -sceneHeight / 2 * borderFactor, sceneWidth * borderFactor, sceneHeight * borderFactor );
+        stage.addChild( background );
+        
+        var nodes = new createjs.Container();
+        stage.addChild( nodes );
+        
+        for( var i = 0; i < itemCount; i++ ) {
+            var shape = new createjs.Shape();
+            
+            var xFactor = Math.random();
+            
+            shape.graphics.beginFill( phet.tests.themeColor( 0.5, xFactor ) ).beginStroke( '#000000' ).drawPolyStar( 0, 0, radius, 6, 0, 0 );
+            
+            shape.x = ( xFactor - 0.5 ) * sceneWidth;
+            shape.y = ( Math.random() - 0.5 ) * sceneHeight;
+            
+            nodes.addChild( shape );
+        }
+        
+        stage.x = main.width() / 2;
+        stage.y = main.height() / 2;
+        
+        // return step function
+        return function( timeElapsed ) {
+            var shape = nodes.children[_.random( 0, nodes.children.length - 1)];
+            shape.x += ( Math.random() - 0.5 ) * 50;
+            shape.y += ( Math.random() - 0.5 ) * 50;
+            stage.update();
+        }
+    };  
     
 })();
 

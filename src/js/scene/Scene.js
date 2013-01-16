@@ -184,7 +184,7 @@ phet.scene = phet.scene || {};
                         // check to see if we need to filter what children are rendered based on restricted bounds
                         var localRestrictedBounds;
                         var filterChildren = false; 
-                        if( state.childRestrictedBounds ) {
+                        if( state.childRestrictedBounds && node.children.length > 1 ) {
                             localRestrictedBounds = node.globalToLocalBounds( state.childRestrictedBounds );
                             
                             // don't filter if all children will be inside the bounds
