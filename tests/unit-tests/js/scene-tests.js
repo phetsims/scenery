@@ -13,7 +13,7 @@
         var context = phet.canvas.initCanvas( canvas );
         scene.renderToCanvas( canvas, context );
         var data = context.getImageData( 0, 0, canvasWidth, canvasHeight );
-        console.log( data );
+        // $( '#display' ).append( canvas );
         return data;
     }
     
@@ -46,7 +46,11 @@
         for( var i = 0; i < actions.length; i++ ) {
             var action = actions[i];
             action( mainScene );
+            mainScene.updateScene();
+            
+            secondaryScene.clearAllLayers();
             action( secondaryScene );
+            secondaryScene.renderScene();
             
             var isEqual = snapshotEquals( snapshot( mainScene ), snapshot( secondaryScene ), 0, 'action #' + i );
             if( !isEqual ) {
@@ -139,19 +143,9 @@
         snapshot( scene );
         
         equal( scene.layers.length, 3, 'simple layer check' );
-        
-        var canvas = document.createElement( 'canvas' );
-        canvas.width = canvasWidth;
-        canvas.height = canvasHeight;
-        var context = phet.canvas.initCanvas( canvas );
-        $( '#display' ).empty();
-        $( '#display' ).append( canvas );
-        scene.renderToCanvas( canvas, context );
-        
-        $( '#display' ).empty();
     } );
     
-    test( 'Update vs Full Sequence A', function() {
+    test( 'Update vs Full Basic Clearing Check', function() {
         updateVsFullRender( [
             function( scene ) {
                 scene.root.addChild( new phet.scene.nodes.Rectangle( {

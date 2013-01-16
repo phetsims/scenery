@@ -368,6 +368,12 @@ phet.scene = phet.scene || {};
             } );
             
             lastLayer.endNode = this.root;
+        },
+        
+        clearAllLayers: function() {
+            _.each( this.layers, function( layer ) {
+                layer.prepareBounds( phet.math.Bounds2.EVERYTHING );
+            } );
         }
     };
 })();

@@ -40,8 +40,7 @@ phet.scene.layers = phet.scene.layers || {};
         // bounds in global coordinate frame
         this.dirtyBounds = Bounds2.EVERYTHING;
         
-        this.fillStyle = null;
-        this.strokeStyle = null;
+        this.resetStyles();
         
         // filled in after construction by an external source (currently Scene.rebuildLayers).
         this.startNode = null;
@@ -87,8 +86,7 @@ phet.scene.layers = phet.scene.layers || {};
             );
             
             // reset the styles so that they are re-done
-            this.fillStyle = null;
-            this.strokeStyle = null;
+            this.resetStyles();
         },
         
         // called when rendering switches away from this layer
@@ -111,6 +109,15 @@ phet.scene.layers = phet.scene.layers || {};
                 matrix.entries[6],
                 matrix.entries[7]
             );
+        },
+        
+        resetStyles: function() {
+            this.fillStyle = null;
+            this.strokeStyle = null;
+            this.lineWidth = 1;
+            this.lineCap = 'butt'; // default 'butt';
+            this.lineJoin = 'miter';
+            this.miterLimit = 10;
         },
         
         pushClipShape: function( shape ) {
@@ -167,6 +174,27 @@ phet.scene.layers = phet.scene.layers || {};
             if( this.strokeStyle != style ) {
                 this.strokeStyle = style;
                 this.context.strokeStyle = style;
+            }
+        },
+        
+        setLineWidth: function( width ) {
+            if( this.lineWidth != width ) {
+                this.lineWidth = width;
+                this.context.lineWidth = width;
+            }
+        },
+        
+        setLineCap: function( cap ) {
+            if( this.lineCap != cap ) {
+                this.lineCap = cap;
+                this.context.lineCap = cap;
+            }
+        },
+        
+        setLineJoin: function( join ) {
+            if( this.lineJoin != join ) {
+                this.lineJoin = join;
+                this.context.lineJoin = join;
             }
         },
         
