@@ -113,6 +113,29 @@
         ok( metrics.width, 'metrics.width' );
     } );
     
+    test( 'Sceneless node handling', function() {
+        var a = new phet.scene.Node();
+        var b = new phet.scene.Node();
+        var c = new phet.scene.Node();
+        
+        a.setShape( phet.scene.Shape.rectangle( 0, 0, 20, 20 ) );
+        c.setShape( phet.scene.Shape.rectangle( 10, 10, 30, 30 ) );
+        
+        a.addChild( b );
+        b.addChild( c );
+        
+        a.validateBounds();
+        
+        a.removeChild( b );
+        c.addChild( a );
+        
+        b.validateBounds();
+        
+        ok( !a.isRooted() );
+        
+        a.invalidatePaint();
+    } );
+    
     test( 'Checking Layers and external canvas', function() {
         var scene = new phet.scene.Scene( $( '#main' ) );
         var root = scene.root;

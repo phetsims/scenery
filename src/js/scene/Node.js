@@ -32,6 +32,7 @@ phet.scene = phet.scene || {};
         this.children = [];
         this.transform = new phet.math.Transform3();
         this.parent = null;
+        this._isRoot = false;
         
         // layer-specific data, currently updated in the rebuildLayers step
         this._layerBeforeRender = null; // layer to swap to before rendering this node
@@ -154,7 +155,7 @@ phet.scene = phet.scene || {};
                 // TODO: here!
             } else {
                 // no layer changes are necessary, however we need to synchronize layer references in the new subtree if applicable
-                if( node._layerReference != this._layerReference ) {
+                if( this.isRooted() && node._layerReference != this._layerReference ) {
                     var layerReference = this._layerReference;
                     node.walkDepthFirst( function( child ) {
                         child._layerReference = layerReference;
@@ -488,6 +489,24 @@ phet.scene = phet.scene || {};
                 layers.push( layer );
             }
             return layers;
+        },
+        
+        // returns the ancestor node of this node that has no parent
+        getBaseNode: function() {
+            if( this.parent ) {
+                return this.parent.getBaseNode();
+            } else {
+                return this;
+            }
+        },
+        
+        isRoot: function() {
+            return this._isRoot;
+        },
+        
+        // returns true if this node is a descendant of a scene root
+        isRooted: function() {
+            return this.getBaseNode().isRoot();
         },
         
         // checking for whether a point (in parent coordinates) is contained in this sub-tree

@@ -15,6 +15,7 @@ phet.scene = phet.scene || {};
         
         // default to a canvas layer type, but this can be changed
         this.root._layerType = phet.scene.layers.CanvasLayer;
+        this.root._isRoot = true;
         
         this.layers = [];
         
