@@ -135,12 +135,10 @@ phet.scene = phet.scene || {};
                         break;
                     case Shape.PIECE_ARC: context.arc( piece.points[0].x, piece.points[0].y, piece.args.radius, piece.args.startAngle, piece.args.endAngle, piece.args.anticlockwise ); break;
                     case Shape.PIECE_RECT: context.rect( piece.points[0].x, piece.points[0].y, piece.points[1].x - piece.points[0].x, piece.points[1].y - piece.points[0].y ); break;
+                    default:
+                        throw new Error( 'writeToContext unimplemented for piece type' + piece.type );
                 }
             } );
-        },
-        
-        decompose: function() {
-            // TODO: will return a Shape using simple piece types
         },
         
         // return a new Shape that is transformed by the associated matrix
