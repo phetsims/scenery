@@ -19,6 +19,7 @@ phet.scene = phet.scene || {};
     
     // TODO: consider an args-style constructor here!
     phet.scene.Node = function() {
+        // TODO: hide as _visible, add setter/getter
         this.visible = true;
         
         // type of layer to be created for content under this node.
@@ -149,10 +150,13 @@ phet.scene = phet.scene || {};
                     ancestor._hasLayerBelow = true;
                     ancestor = ancestor.parent;
                 }
+                
+                this.markLayerRefreshNeeded();
             }
             
             if( this._hasLayerBelow ) {
-                // TODO: here!
+                // TODO: if we don't automatically construct "valley" layers in refreshLayers, add this back in. other cases are handled above
+                //this.markLayerRefreshNeeded();
             } else {
                 // no layer changes are necessary, however we need to synchronize layer references in the new subtree if applicable
                 if( this.isRooted() && node._layerReference != this._layerReference ) {
@@ -189,20 +193,25 @@ phet.scene = phet.scene || {};
                         break;
                     }
                 }
+                
+                this.markLayerRefreshNeeded();
             }
         },
         
+        // set to null to remove a layer type
         setLayerType: function( layerType ) {
-            this._layerType = layerType;
-            
-            // keep _hasLayerBelow consistent
-            var node = this.parent;
-            while( node != null ) {
-                node._hasLayerBelow = true;
-                node = node.parent;
+            if( this._layerType != layerType ) {
+                this._layerType = layerType;
+                
+                // keep _hasLayerBelow consistent
+                var node = this.parent;
+                while( node != null ) {
+                    node._hasLayerBelow = true;
+                    node = node.parent;
+                }
+                
+                this.markLayerRefreshNeeded();
             }
-            
-            // TODO: more events here, like rebuilding or incremental!
         },
         
         // remove this node from its parent
@@ -418,6 +427,12 @@ phet.scene = phet.scene || {};
             this.markOldPaint( true );
         },
         
+        markLayerRefreshNeeded: function() {
+            if( this.isRooted() ) {
+                this.getScene().layersDirtyUnder( this );
+            }
+        },
+        
         // marks the last-rendered bounds of this node and optionally all of its descendants as needing a repaint
         markOldPaint: function( justSelf ) {
             var node = this;
@@ -515,7 +530,7 @@ phet.scene = phet.scene || {};
         
         // either undefined (if not rooted), or the scene it is attached to
         getScene: function() {
-            return getBaseNode().scene;
+            return this.getBaseNode().scene;
         },
         
         // checking for whether a point (in parent coordinates) is contained in this sub-tree

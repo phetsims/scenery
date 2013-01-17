@@ -13,8 +13,6 @@ phet.scene = phet.scene || {};
     phet.scene.Scene = function( main ) {
         this.root = new phet.scene.Node();
         
-        // default to a canvas layer type, but this can be changed
-        this.root._layerType = phet.scene.layers.CanvasLayer;
         this.root._isRoot = true;
         this.root.scene = this;
         
@@ -26,6 +24,10 @@ phet.scene = phet.scene || {};
         this.main = main;
         
         this.sceneBounds = new phet.math.Bounds2( 0, 0, main.width(), main.height() );
+        
+        // default to a canvas layer type, but this can be changed
+        // called here AFTER the root is initialized, so that we set the correct dirtyLayerPath and get a layer rebuild / refresh as necessary
+        this.root.setLayerType( phet.scene.layers.CanvasLayer ); 
     }
 
     var Scene = phet.scene.Scene;
@@ -392,7 +394,7 @@ phet.scene = phet.scene || {};
             } );
         },
         
-        layerRefreshDirty: function( node ) {
+        layersDirtyUnder: function( node ) {
             if( !this.dirtyLayerPath ) {
                 this.dirtyLayerPath = node.getPathToRoot();
             } else {
@@ -409,7 +411,25 @@ phet.scene = phet.scene || {};
         },
         
         refreshLayers: function() {
-            // TODO
+            // TODO: THIS FUNCTION: refreshLayers
+            
+            /*
+                PSEUDOCODE:
+                
+                identify pre,post layers
+                remove [pre+1,post] from scene
+                if content:
+                    relayer starting with pre
+                reassign "post" nodes to last content layer (could be pre, if so check if post==pre => reassignment not necessary)
+                reattach pre <==> pre+1, last <==> post.next, and set up before/after handling
+                reindex
+            */
+            
+            // TODO: ensure that "valley" layers are created, even if currently unnecessary. this allows more efficient insertChild handling
+            this.rebuildLayers();
+            
+            // reset the dirty layer path
+            this.dirtyLayerPath = null;
         }
     };
 })();
