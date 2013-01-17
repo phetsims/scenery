@@ -235,6 +235,13 @@ phet.scene = phet.scene || {};
         },
         
         traced: function( lineDrawingStyles ) {
+            if( lineDrawingStyles === undefined ) {
+                lineDrawingStyles = Shape.DEFAULT_STYLES;
+            }
+            
+            var path = [];
+            var subpath = [];
+            
             // TODO: return a shape that is this current shape's traced form with a stroke. see http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#trace-a-path
             throw new Error( 'Shape traced unimplemented' );
         }
