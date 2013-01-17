@@ -127,16 +127,6 @@ phet.scene = phet.scene || {};
             }
         },
         
-        // override to run before rendering of this node is done
-        preRender: function ( state ) {
-            
-        },
-        
-        // override to run just after this node and its children are rendered
-        postRender: function ( state ) {
-            
-        },
-        
         addChild: function ( node ) {
             phet.assert( node !== null && node !== undefined );
             if ( this.isChild( node ) ) {
