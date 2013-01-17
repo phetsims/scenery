@@ -108,6 +108,10 @@ phet.scene = phet.scene || {};
         return new Shape( [ Piece.rect( bounds.x(), bounds.y(), bounds.width(), bounds.height() ) ] );
     };
     
+    Shape.lineSegment = function( a, b ) {
+        return new Shape( [ Piece.moveToPoint( a ), Piece.lineToPoint( b ) ] );
+    };
+    
     Shape.prototype = {
         constructor: Shape,
         

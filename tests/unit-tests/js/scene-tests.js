@@ -240,18 +240,14 @@
         module( 'Shapes' );
         
         var Shape = phet.scene.Shape;
-        var Piece = Shape.Piece;
+        
+        function p( x, y ) { return new phet.math.Vector2( x, y ); }
     
         test( 'Verifying Line/Rect', function() {
             var lineWidth = 50;
             // /shapeToStroke, shapeToFill, strokeNodeSetup, message, debugFlag
-            var strokeShape = new Shape();
-            var fillShape = new Shape();
-            
-            strokeShape.addPiece( Piece.moveTo( 100, 100 ) );
-            strokeShape.addPiece( Piece.lineTo( 300, 100 ) );
-            
-            fillShape.addPiece( Piece.rect( 100, 100 - lineWidth / 2, 200, lineWidth ) );
+            var strokeShape = Shape.lineSegment( p( 100, 100 ), p( 300, 100 ) );
+            var fillShape = Shape.rectangle( 100, 100 - lineWidth / 2, 200, lineWidth );
             
             strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineWidth( lineWidth ); }, QUnit.config.current.testName );
         } );

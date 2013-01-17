@@ -4,8 +4,6 @@ phet.tests = phet.tests || {};
 
 (function(){
     
-    var Piece = phet.scene.Shape.Piece;
-    
     var backgroundSize = 300;
     var count = 500;
     
