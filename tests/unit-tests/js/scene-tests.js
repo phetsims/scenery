@@ -167,7 +167,6 @@
             fill: '#0000ff'
         } ) );
         
-        scene.rebuildLayers();
         scene.updateScene();
         
         equal( scene.layers.length, 3, 'simple layer check' );
@@ -183,7 +182,6 @@
                     height: canvasHeight / 2,
                     fill: '#000000'
                 } ) );
-                scene.rebuildLayers();
             }, function( scene ) {
                 scene.root.children[0].translate( 20, 20 );
             }
@@ -198,8 +196,6 @@
                 node.setFill( '#ff0000' );
                 node.setStroke( '#000000' );
                 scene.root.addChild( node );
-                
-                scene.rebuildLayers();
             }, function( scene ) {
                 scene.root.children[0].setShape( phet.scene.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ) );
             }
@@ -218,8 +214,6 @@
                 node.setStroke( '#000000' );
                 node.setLineWidth( 10 );
                 scene.root.addChild( node );
-                
-                scene.rebuildLayers();
             }, function( scene ) {
                 scene.root.children[0].translate( canvasWidth / 4, canvasHeight / 4 );
             }

@@ -153,9 +153,6 @@ phet.tests = phet.tests || {};
         // center the grid
         grid.translate( main.width() / 2, main.height() / 2 );
         
-        // generate the layers
-        scene.rebuildLayers();
-
         // return step function
         return function( timeElapsed ) {
             grid.rotate( timeElapsed );

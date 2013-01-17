@@ -50,9 +50,6 @@ phet.tests = phet.tests || {};
         // center the root
         root.translate( main.width() / 2, main.height() / 2 );
         
-        // generate the layers
-        scene.rebuildLayers();
-        
         window.root = root;
         window.scene = scene;
         

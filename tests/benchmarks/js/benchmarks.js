@@ -17,7 +17,6 @@
         var scene = new phet.scene.Scene( $( '#main' ) );
         var root = scene.root;
         
-        scene.rebuildLayers();
         scene.updateScene();
     }, {
         'onCycle': function() {
