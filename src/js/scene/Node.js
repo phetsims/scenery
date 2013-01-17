@@ -67,6 +67,33 @@ phet.scene = phet.scene || {};
     Node.prototype = {
         constructor: Node,
         
+        // override to render typical leaf behavior (although possible to use for non-leaf nodes also)
+        renderSelf: function ( state ) {
+            // by default, render a shape if it exists
+            if( this.hasShape() ) {
+                if( state.isCanvasState() ) {
+                    var layer = state.layer;
+                    var context = layer.context;
+                    
+                    // TODO: fill/stroke delay optimizations?
+                    context.beginPath();
+                    this._shape.writeToContext( context );
+                    
+                    if( this._fill ) {
+                        layer.setFillStyle( this._fill );
+                        context.fill();
+                    }
+                    if( this._stroke ) {
+                        layer.setStrokeStyle( this._stroke );
+                        layer.setLineWidth( this.getLineWidth() );
+                        context.stroke();
+                    }
+                } else {
+                    throw new Error( 'layer type shape rendering not implemented' );
+                }
+            }
+        },
+        
         enterState: function( state ) {
             // switch layers if needed
             if( this._layerBeforeRender ) {
@@ -97,33 +124,6 @@ phet.scene = phet.scene || {};
             // switch layers if needed
             if( this._layerAfterRender ) {
                 state.switchToLayer( this._layerAfterRender );
-            }
-        },
-        
-        // override to render typical leaf behavior (although possible to use for non-leaf nodes also)
-        renderSelf: function ( state ) {
-            // by default, render a shape if it exists
-            if( this.hasShape() ) {
-                if( state.isCanvasState() ) {
-                    var layer = state.layer;
-                    var context = layer.context;
-                    
-                    // TODO: fill/stroke delay optimizations?
-                    context.beginPath();
-                    this._shape.writeToContext( context );
-                    
-                    if( this._fill ) {
-                        layer.setFillStyle( this._fill );
-                        context.fill();
-                    }
-                    if( this._stroke ) {
-                        layer.setStrokeStyle( this._stroke );
-                        layer.setLineWidth( this.getLineWidth() );
-                        context.stroke();
-                    }
-                } else {
-                    throw new Error( 'layer type shape rendering not implemented' );
-                }
             }
         },
         
@@ -197,10 +197,6 @@ phet.scene = phet.scene || {};
             // TODO: more events here, like rebuilding or incremental!
         },
         
-        hasParent: function () {
-            return this.parent !== null;
-        },
-        
         // remove this node from its parent
         detach: function () {
             if ( this.hasParent() ) {
@@ -208,20 +204,114 @@ phet.scene = phet.scene || {};
             }
         },
         
-        isChild: function ( potentialChild ) {
-            phet.assert( (potentialChild.parent === this ) === (this.children.indexOf( potentialChild ) != -1) );
-            return potentialChild.parent === this;
+        // ensure that cached bounds stored on this node (and all children) are accurate
+        validateBounds: function() {
+            if( this._selfBoundsDirty ) {
+                this._selfBoundsDirty = false;
+                
+                // if our self bounds changed, make sure to paint the area where our new bounds are
+                this.markDirtyRegion( this._selfBounds );
+            }
+            
+            // validate bounds of children if necessary
+            if( this._childBoundsDirty ) {
+                // have each child validate their own bounds
+                _.each( this.children, function( child ) {
+                    child.validateBounds();
+                } );
+                
+                // and recompute our _childBounds
+                this._childBounds = Bounds2.NOTHING;
+                var that = this;
+                _.each( this.children, function( child ) {
+                    that._childBounds = that._childBounds.union( child._bounds );
+                } );
+                
+                this._childBoundsDirty = false;
+            }
+            
+            // TODO: layout here?
+            
+            if( this._boundsDirty ) {
+                var oldBounds = this._bounds;
+                
+                var that = this;
+                
+                var newBounds = this.localToParentBounds( this._selfBounds ).union( that.localToParentBounds( this._childBounds ) );
+                
+                if( !newBounds.equals( oldBounds ) ) {
+                    this._bounds = newBounds;
+                    
+                    if( this.parent != null ) {
+                        this.parent.invalidateBounds();
+                    }
+                    // this.markDirtyRegion( this.parentToLocalBounds( oldBounds ) );
+                    
+                    // TODO: fire off event listeners?
+                }
+                
+                this._boundsDirty = false;
+            }
         },
         
-        // does this node have an associated layerType (are the contents of this node rendered separately from its ancestors)
-        isLayerRoot: function() {
-            return this._layerType != null;
+        validatePaint: function() {
+            // if dirty, mark the region
+            if( this._paintDirty ) {
+                this.markDirtyRegion( this.parentToLocalBounds( this._bounds ) );
+                this._paintDirty = false;
+            }
+            
+            // clear flags and recurse
+            if( this._childPaintDirty || this._oldPaintMarked ) {
+                this._childPaintDirty = false;
+                this._oldPaintMarked = false;
+                
+                _.each( this.children, function( child ) {
+                    child.validatePaint();
+                } );
+            }
         },
         
-        // the first layer associated with this node (can be multiple layers if children of this node are also layer roots)
-        getLayer: function() {
-            phet.assert( this.isLayerRoot() );
-            return this._layerBeforeRender;
+        // mark the bounds of this node as invalid, so it is recomputed before it is accessed again
+        invalidateBounds: function() {
+            this._boundsDirty = true;
+            
+            // and set flags for all ancestors
+            var node = this.parent;
+            while( node != null && !node._childBoundsDirty ) {
+                node._childBoundsDirty = true;
+                node = node.parent;
+            }
+        },
+        
+        // mark the paint of this node as invalid, so its new region will be painted
+        invalidatePaint: function() {
+            this._paintDirty = true;
+            
+            // and set flags for all ancestors (but bail if already marked, since this guarantees lower nodes will be marked)
+            var node = this.parent;
+            while( node != null && !node._childPaintDirty ) {
+                node._childPaintDirty = true;
+                node = node.parent;
+            }
+        },
+        
+        // called to notify that renderSelf will display different paint, with possibly different bounds
+        invalidateSelf: function( newBounds ) {
+            // mark the old region to be repainted, regardless of whether the actual bounds change
+            this.markOldSelfPaint();
+            
+            // if these bounds are different than current self bounds
+            if( !this._selfBounds.equals( newBounds ) ) {
+                // set repaint flags
+                this._selfBoundsDirty = true;
+                this.invalidateBounds();
+                
+                // record the new bounds
+                this._selfBounds = newBounds;
+            }
+            
+            this.invalidatePaint();
         },
         
         // TODO: how to handle point vs x,y
@@ -254,6 +344,17 @@ phet.scene = phet.scene || {};
             
             this.invalidateBounds();
             this.invalidatePaint();
+        },
+        
+        // sets the shape drawn, or null to remove the shape
+        setShape: function( shape ) {
+            this._shape = shape;
+            
+            this.invalidateSelf( shape.computeBounds( ) );
+        },
+        
+        getShape: function() {
+            return this._shape;
         },
         
         getLineWidth: function() {
@@ -329,6 +430,22 @@ phet.scene = phet.scene || {};
             }
         },
         
+        isChild: function ( potentialChild ) {
+            phet.assert( (potentialChild.parent === this ) === (this.children.indexOf( potentialChild ) != -1) );
+            return potentialChild.parent === this;
+        },
+        
+        // does this node have an associated layerType (are the contents of this node rendered separately from its ancestors)
+        isLayerRoot: function() {
+            return this._layerType != null;
+        },
+        
+        // the first layer associated with this node (can be multiple layers if children of this node are also layer roots)
+        getLayer: function() {
+            phet.assert( this.isLayerRoot() );
+            return this._layerBeforeRender;
+        },
+        
         // the bounds for content in renderSelf(), in "local" coordinates
         getSelfBounds: function() {
             return this._selfBounds;
@@ -338,74 +455,6 @@ phet.scene = phet.scene || {};
         getBounds: function() {
             this.validateBounds();
             return this._bounds;
-        },
-        
-        // ensure that cached bounds stored on this node (and all children) are accurate
-        validateBounds: function() {
-            if( this._selfBoundsDirty ) {
-                this._selfBoundsDirty = false;
-                
-                // if our self bounds changed, make sure to paint the area where our new bounds are
-                this.markDirtyRegion( this._selfBounds );
-            }
-            
-            // validate bounds of children if necessary
-            if( this._childBoundsDirty ) {
-                // have each child validate their own bounds
-                _.each( this.children, function( child ) {
-                    child.validateBounds();
-                } );
-                
-                // and recompute our _childBounds
-                this._childBounds = Bounds2.NOTHING;
-                var that = this;
-                _.each( this.children, function( child ) {
-                    that._childBounds = that._childBounds.union( child._bounds );
-                } );
-                
-                this._childBoundsDirty = false;
-            }
-            
-            // TODO: layout here?
-            
-            if( this._boundsDirty ) {
-                var oldBounds = this._bounds;
-                
-                var that = this;
-                
-                var newBounds = this.localToParentBounds( this._selfBounds ).union( that.localToParentBounds( this._childBounds ) );
-                
-                if( !newBounds.equals( oldBounds ) ) {
-                    this._bounds = newBounds;
-                    
-                    if( this.parent != null ) {
-                        this.parent.invalidateBounds();
-                    }
-                    // this.markDirtyRegion( this.parentToLocalBounds( oldBounds ) );
-                    
-                    // TODO: fire off event listeners?
-                }
-                
-                this._boundsDirty = false;
-            }
-        },
-        
-        validatePaint: function() {
-            // if dirty, mark the region
-            if( this._paintDirty ) {
-                this.markDirtyRegion( this.parentToLocalBounds( this._bounds ) );
-                this._paintDirty = false;
-            }
-            
-            // clear flags and recurse
-            if( this._childPaintDirty || this._oldPaintMarked ) {
-                this._childPaintDirty = false;
-                this._oldPaintMarked = false;
-                
-                _.each( this.children, function( child ) {
-                    child.validatePaint();
-                } );
-            }
         },
         
         // find the layer to which this node will be rendered
@@ -436,48 +485,6 @@ phet.scene = phet.scene || {};
                 layers.push( layer );
             }
             return layers;
-        },
-        
-        // mark the bounds of this node as invalid, so it is recomputed before it is accessed again
-        invalidateBounds: function() {
-            this._boundsDirty = true;
-            
-            // and set flags for all ancestors
-            var node = this.parent;
-            while( node != null && !node._childBoundsDirty ) {
-                node._childBoundsDirty = true;
-                node = node.parent;
-            }
-        },
-        
-        // mark the paint of this node as invalid, so its new region will be painted
-        invalidatePaint: function() {
-            this._paintDirty = true;
-            
-            // and set flags for all ancestors (but bail if already marked, since this guarantees lower nodes will be marked)
-            var node = this.parent;
-            while( node != null && !node._childPaintDirty ) {
-                node._childPaintDirty = true;
-                node = node.parent;
-            }
-        },
-        
-        // called to notify that renderSelf will display different paint, with possibly different bounds
-        invalidateSelf: function( newBounds ) {
-            // mark the old region to be repainted, regardless of whether the actual bounds change
-            this.markOldSelfPaint();
-            
-            // if these bounds are different than current self bounds
-            if( !this._selfBounds.equals( newBounds ) ) {
-                // set repaint flags
-                this._selfBoundsDirty = true;
-                this.invalidateBounds();
-                
-                // record the new bounds
-                this._selfBounds = newBounds;
-            }
-            
-            this.invalidatePaint();
         },
         
         // checking for whether a point (in parent coordinates) is contained in this sub-tree
@@ -524,15 +531,8 @@ phet.scene = phet.scene || {};
             return this._shape != null;
         },
         
-        // sets the shape drawn, or null to remove the shape
-        setShape: function( shape ) {
-            this._shape = shape;
-            
-            this.invalidateSelf( shape.computeBounds( ) );
-        },
-        
-        getShape: function() {
-            return this._shape;
+        hasParent: function () {
+            return this.parent !== null;
         },
         
         walkDepthFirst: function( callback ) {
@@ -541,8 +541,6 @@ phet.scene = phet.scene || {};
                 child.walkDepthFirst( callback );
             } );
         },
-        
-        
         
         // returns a list of ancestors of this node, with the root first
         ancestors: function() {
