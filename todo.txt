@@ -23,6 +23,7 @@ Incomplete:
     Handle CanvasGradient / CanvasPattern nicely! -- Is it valuable to abstract across SVG also?
 
 Performance:
+    Consider child counts, so that we can decide which layers to keep in a layer rebuild?
     Piece improvements with direct piece.render calls instead of switch? -- profile
     Improved Dirty regions
         * not full union of bounding boxes

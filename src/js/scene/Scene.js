@@ -20,6 +20,9 @@ phet.scene = phet.scene || {};
         
         this.layers = [];
         
+        // the greatest common "path" of nodes, i.e. ancestors arrays. after modifications, this will tell us the smallest subtree needed to re-layer
+        this.dirtyLayerPath = null;
+        
         this.main = main;
         
         this.sceneBounds = new phet.math.Bounds2( 0, 0, main.width(), main.height() );
@@ -387,6 +390,26 @@ phet.scene = phet.scene || {};
             _.each( this.layers, function( layer ) {
                 layer.prepareBounds( phet.math.Bounds2.EVERYTHING );
             } );
+        },
+        
+        layerRefreshDirty: function( node ) {
+            if( !this.dirtyLayerPath ) {
+                this.dirtyLayerPath = node.getPathToRoot();
+            } else {
+                var nodePath = node.getPathToRoot();
+                var maxIndex = Math.min( nodePath.length, this.dirtyLayerPath.length );
+                for( var i = 0; i < maxIndex; i++ ) {
+                    // cut the dirty layer path off before the first discrepancy
+                    if( nodePath[i] != this.dirtyLayerPath[i] ) {
+                        this.dirtyLayerPath = _.first( this.dirtyLayerPath, i );
+                        break;
+                    }
+                }
+            }
+        },
+        
+        refreshLayers: function() {
+            // TODO
         }
     };
 })();
