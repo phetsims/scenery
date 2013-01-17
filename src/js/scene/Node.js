@@ -549,10 +549,6 @@ phet.scene = phet.scene || {};
             }
         },
         
-        childrenWithinBounds: function( bounds ) {
-            return _.filter( this.children, function( child ) { return !child._bounds.intersection( bounds ).isEmpty(); } );
-        },
-        
         // override for computation of whether a point is inside the content rendered in renderSelf
         containsPointSelf: function( point ) {
             return false;
@@ -573,13 +569,17 @@ phet.scene = phet.scene || {};
             } );
         },
         
-        // returns a list of ancestors of this node, with the root first
-        ancestors: function() {
-            return this.parent ? this.parent.pathToRoot() : [];
+        getChildrenWithinBounds: function( bounds ) {
+            return _.filter( this.children, function( child ) { return !child._bounds.intersection( bounds ).isEmpty(); } );
         },
         
-        // like ancestors(), but includes the current node as well
-        pathToRoot: function() {
+        // returns a list of ancestors of this node, with the root first
+        getAncestors: function() {
+            return this.parent ? this.parent.getPathToRoot() : [];
+        },
+        
+        // like getAncestors(), but includes the current node as well
+        getPathToRoot: function() {
             var result = [];
             var node = this;
             
@@ -589,6 +589,39 @@ phet.scene = phet.scene || {};
             }
             
             return result;
+        },
+        
+        // node that would be rendered previously, before this node
+        getPreviousRenderedNode: function() {
+            // we are the root (or base of a subtree)
+            if( this.parent == null ) {
+                return null;
+            }
+            var index = _.indexOf( this.parent.children, this );
+            if( index - 1 < 0 ) {
+                // first child under a parent, so the parent would be rendered first
+                return this.parent;
+            } else {
+                // otherwise, walk up the previous sibling's tree
+                var node = this.parent.children[index-1];
+                while( node.children.length > 0 ) {
+                    node = _.last( node.children );
+                }
+            }
+        },
+        
+        // node that would be rendered next, after it's self AND all children (ignores visibility). if this node has a next sibling, it will be returned
+        getNextRenderedNode: function() {
+            var node = this.parent;
+            while( node != null ) {
+                var index = _.indexOf( node.children, this );
+                if( index + 1 < node.children.length ) {
+                    return node.children[index + 1];
+                }
+            }
+            
+            // we were the last node rendered
+            return null;
         },
         
         getTranslation: function() {

@@ -41,7 +41,7 @@ phet.scene = phet.scene || {};
                 
                 // don't filter if every child is inside the bounds
                 if( !localRestrictedBounds.containsBounds( node.parentToLocalBounds( node._bounds ) ) ) {
-                    children = node.childrenWithinBounds( localRestrictedBounds );
+                    children = node.getChildrenWithinBounds( localRestrictedBounds );
                 }
             }
             
@@ -109,7 +109,7 @@ phet.scene = phet.scene || {};
                 var node = layer.startNode;
                 
                 // walk up from the root to the node, applying transforms, clips, etc.
-                _.each( node.ancestors(), function( ancestor ) {
+                _.each( node.getAncestors(), function( ancestor ) {
                     ancestor.enterState( state );
                     
                     if( !ancestor.visible ) {
@@ -123,8 +123,8 @@ phet.scene = phet.scene || {};
                 // cooldown on the layer. we don't have to walk the state back down to the root
                 state.finish();
             } else {
-                var startPath = layer.startNode.pathToRoot();
-                var endPath = layer.endNode.pathToRoot();
+                var startPath = layer.startNode.getPathToRoot();
+                var endPath = layer.endNode.getPathToRoot();
                 
                 var minLength = Math.min( startPath.length, endPath.length );
                 
