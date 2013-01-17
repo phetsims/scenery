@@ -48,6 +48,7 @@ Features:
     AnimateTo-style animation
     Clipping => Dead region handling (clipping needs to be stored in a shape array since it can only be intersected or reset in Canvas)
     Color handling?
+    Investigate DAG version?
 
 Cleanliness / Debugging:
     *** Debug layer
