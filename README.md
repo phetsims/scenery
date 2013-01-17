@@ -12,3 +12,7 @@ For testing purposes, the following are currently being worked on:
 * [Unit Tests](http://phet.colorado.edu/files/phet-scene/tests/unit-tests/unit-tests.html)
 * [Benchmarks](http://phet.colorado.edu/files/phet-scene/tests/benchmarks/benchmarks.html)
 * [WebGL Prototype](http://phet.colorado.edu/files/phet-scene/tests/webgl-test/webgl-test.html)
+
+jsPerf tests for various purposes:
+* [http://jsperf.com/overloading-options](http://jsperf.com/overloading-options)
+* [http://jsperf.com/small-operation-testing](http://jsperf.com/small-operation-testing)
