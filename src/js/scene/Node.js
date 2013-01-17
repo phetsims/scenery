@@ -150,13 +150,16 @@ phet.scene = phet.scene || {};
                 }
             }
             
-            // TODO: fill in with actual layer handling code
-            // synchronize layer references for adding subtrees without layer types.
-            if( this._hasLayerBelow && node._layerReference != this._layerReference ) {
-                var layerReference = this._layerReference;
-                node.walkDepthFirst( function( child ) {
-                    child._layerReference = layerReference;
-                } );
+            if( this._hasLayerBelow ) {
+                // TODO: here!
+            } else {
+                // no layer changes are necessary, however we need to synchronize layer references in the new subtree if applicable
+                if( node._layerReference != this._layerReference ) {
+                    var layerReference = this._layerReference;
+                    node.walkDepthFirst( function( child ) {
+                        child._layerReference = layerReference;
+                    } );
+                }
             }
         },
         

@@ -286,6 +286,7 @@ phet.scene = phet.scene || {};
             // mutable layer arguments (since z-indexing needs to be increased, etc.)
             var layerArgs = {
                 main: main,
+                scene: this,
                 zIndex: 1 // needs to be incremented by the canvas
             };
             

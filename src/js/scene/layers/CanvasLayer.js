@@ -33,6 +33,7 @@ phet.scene.layers = phet.scene.layers || {};
         
         this.canvas = canvas;
         this.context = phet.canvas.initCanvas( canvas );
+        this.scene = args.scene;
         
         this.isCanvasLayer = true;
         
