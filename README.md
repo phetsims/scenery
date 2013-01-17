@@ -16,3 +16,4 @@ For testing purposes, the following are currently being worked on:
 jsPerf tests for various purposes:
 * [http://jsperf.com/overloading-options](http://jsperf.com/overloading-options)
 * [http://jsperf.com/small-operation-testing](http://jsperf.com/small-operation-testing)
+* [http://jsperf.com/small-operation-testing-2](http://jsperf.com/small-operation-testing-2)
