@@ -558,8 +558,12 @@ phet.scene = phet.scene || {};
             return this._shape != null;
         },
         
-        hasParent: function () {
+        hasParent: function() {
             return this.parent !== null;
+        },
+        
+        hasChildren: function() {
+            return this.children.length > 0;
         },
         
         walkDepthFirst: function( callback ) {
@@ -622,6 +626,38 @@ phet.scene = phet.scene || {};
             
             // we were the last node rendered
             return null;
+        },
+        
+        // the layer that would be in the render state before this node and its children are rendered, and before _layerBeforeRender
+        getLayerBeforeNodeRendered: function() {
+            if( this._layerBeforeRender ) {
+                if( this.parent == null ) {
+                    return this._layerBeforeRender;
+                } else {
+                    var index = _.indexOf( this.parent.children, this );
+                    if( index - 1 < 0 ) {
+                        return this.parent._layerReference;
+                    } else {
+                        return this.parent.children[index-1].getLayerAfterNodeRendered();
+                    }
+                }
+            } else {
+                return this._layerReference;
+            }
+        },
+        
+        // the layer that would be in the render state, after this node and its children are rendered, and after _layerAfterRender is processed
+        getLayerAfterNodeRendered: function() {
+            // this would happen after any children are rendered, so shortcut it
+            if( this._layerAfterRender ) {
+                return this._layerAfterRender;
+            }
+            
+            if( this.hasChildren() ) {
+                return _.last( this.children ).getLayerAfterNodeRendered();
+            } else {
+                return this._layerReference;
+            }
         },
         
         getTranslation: function() {
