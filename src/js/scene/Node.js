@@ -509,6 +509,11 @@ phet.scene = phet.scene || {};
             return this.getBaseNode().isRoot();
         },
         
+        // either undefined (if not rooted), or the scene it is attached to
+        getScene: function() {
+            return getBaseNode().scene;
+        },
+        
         // checking for whether a point (in parent coordinates) is contained in this sub-tree
         containsPoint: function( point ) {
             // update bounds for pruning
