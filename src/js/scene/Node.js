@@ -128,7 +128,7 @@ phet.scene = phet.scene || {};
             }
         },
         
-        addChild: function ( node ) {
+        insertChild: function( node, index ) {
             phet.assert( node !== null && node !== undefined );
             if ( this.isChild( node ) ) {
                 return;
@@ -137,7 +137,7 @@ phet.scene = phet.scene || {};
                 node.parent.removeChild( node );
             }
             node.parent = this;
-            this.children.push( node );
+            this.children.splice( index, 0, node );
             
             node.invalidateBounds();
             node.invalidatePaint();
@@ -162,6 +162,10 @@ phet.scene = phet.scene || {};
                     } );
                 }
             }
+        },
+        
+        addChild: function( node ) {
+            this.insertChild( node, this.children.length );
         },
         
         removeChild: function ( node ) {
