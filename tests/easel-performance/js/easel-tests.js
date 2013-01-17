@@ -219,6 +219,42 @@ $(document).ready( function() {
                     context.restore();
                 };
             }
+        },{
+            typeName: 'Strokes',
+            typeId: 'strokes',
+            init: function( main ) {
+                var baseCanvas = document.createElement( 'canvas' );
+                baseCanvas.id = 'base-canvas';
+                baseCanvas.width = main.width();
+                baseCanvas.height = main.height();
+                main.append( baseCanvas );
+                
+                var context = phet.canvas.initCanvas( baseCanvas );
+                
+                var angle = 0;
+                
+                return function( timeElapsed ) {
+                    angle += timeElapsed;
+                    
+                    context.clearRect( 0, 0, baseCanvas.width, baseCanvas.height );
+                    
+                    context.lineWidth = 20;
+                    
+                    function example( join, x ) {
+                        context.beginPath();
+                        context.moveTo( x, 100 );
+                        context.lineTo( x, 150 );
+                        context.lineTo( x + Math.cos( angle ) * 50, 150 + Math.sin( angle ) * 50 );
+                        context.lineJoin = join;
+                        context.stroke();
+                    }
+                    
+                    example( 'miter', 100 );
+                    example( 'bevel', 250 );
+                    example( 'round', 400 );
+                    
+                };
+            }
         }]
     },{
         testName: 'Layers',
