@@ -66,6 +66,36 @@
         }
     }
     
+    function sceneEquals( constructionA, constructionB, message, debugFlag ) {
+        var sceneA = new phet.scene.Scene( $( '#main' ) );
+        var sceneB = new phet.scene.Scene( $( '#secondary' ) );
+        
+        constructionA( sceneA );
+        constructionB( sceneB );
+        
+        sceneA.renderScene();
+        sceneB.renderScene();
+        
+        var isEqual = snapshotEquals( snapshot( sceneA, debugFlag ), snapshot( sceneB, debugFlag ), 0, message );
+        
+        // TODO: consider showing if tests fail
+    }
+    
+    function strokeEqualsFill( shapeToStroke, shapeToFill, strokeNodeSetup, message, debugFlag ) {
+        sceneEquals( function( scene ) {
+            var node = new phet.scene.Node();
+            node.setShape( shapeToStroke );
+            node.setStroke( '#000000' );
+            if( strokeNodeSetup ) { strokeNodeSetup( node ); }
+            scene.root.addChild( node );
+        }, function( scene ) {
+            var node = new phet.scene.Node();
+            node.setShape( shapeToFill );
+            node.setFill( '#000000' );
+            scene.root.addChild( node );
+        }, message, debugFlag );
+    }
+    
     /*---------------------------------------------------------------------------*
     * TESTS BELOW
     *----------------------------------------------------------------------------*/     
@@ -201,6 +231,35 @@
             }
         ] );
     } );
+    
+    /*---------------------------------------------------------------------------*
+    * Shapes
+    *----------------------------------------------------------------------------*/        
+    
+    (function(){
+        module( 'Shapes' );
+        
+        var Shape = phet.scene.Shape;
+        var Piece = Shape.Piece;
+    
+        test( 'Verifying Line/Rect', function() {
+            var lineWidth = 50;
+            // /shapeToStroke, shapeToFill, strokeNodeSetup, message, debugFlag
+            var strokeShape = new Shape();
+            var fillShape = new Shape();
+            
+            strokeShape.addPiece( Piece.moveTo( 100, 100 ) );
+            strokeShape.addPiece( Piece.lineTo( 300, 100 ) );
+            
+            fillShape.addPiece( Piece.rect( 100, 100 - lineWidth / 2, 200, lineWidth ) );
+            
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineWidth( lineWidth ); }, QUnit.config.current.testName );
+        } );
+    })();
+    
+    /*---------------------------------------------------------------------------*
+    * TODO
+    *----------------------------------------------------------------------------*/        
     
     module( 'Canvas Scene TODO' );
     

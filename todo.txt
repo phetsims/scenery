@@ -11,6 +11,8 @@ Incomplete:
         
     Ability to update size of canvas, etc.
     Flesh out Shape, with decomposition, bounds, hit regions (including strokes), etc.
+        * BEWARE: IE9 seems to have buggy miterLimit calculation, arcTo might be bad also
+        * See http://weblog.bocoup.com/canvas-in-ie9-too-good-to-be-true/
     Flags for whether text / strokes are considered for hit regions
     Investigate getImageData for fonts (both hit regions and bounds)
     Visibility interaction with dirty paint / bounds, and events based on that
