@@ -23,10 +23,7 @@ phet.scene.layers = phet.scene.layers || {};
         var canvas = document.createElement( 'canvas' );
         canvas.width = main.width();
         canvas.height = main.height();
-        $( canvas ).css( 'z-index', args.zIndex );
-        this.zIndex = args.zIndex;
         $( canvas ).css( 'position', 'absolute' );
-        args.zIndex += 1;
         
         // add this layer on top (importantly, the constructors of the layers are called in order)
         main.append( canvas );
@@ -119,6 +116,13 @@ phet.scene.layers = phet.scene.layers || {};
             this.lineCap = 'butt'; // default 'butt';
             this.lineJoin = 'miter';
             this.miterLimit = 10;
+        },
+        
+        // returns next zIndex in place. allows layers to take up more than one single zIndex
+        reindex: function( zIndex ) {
+            $( this.canvas ).css( 'z-index', zIndex );
+            this.zIndex = zIndex;
+            return zIndex + 1;
         },
         
         pushClipShape: function( shape ) {

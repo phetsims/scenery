@@ -286,8 +286,7 @@ phet.scene = phet.scene || {};
             // mutable layer arguments (since z-indexing needs to be increased, etc.)
             var layerArgs = {
                 main: main,
-                scene: this,
-                zIndex: 1 // needs to be incremented by the canvas
+                scene: this
             };
             
             // remove everything from our container, so we can fill it in with fresh layers
@@ -369,6 +368,17 @@ phet.scene = phet.scene || {};
             } );
             
             lastLayer.endNode = this.root;
+            
+            this.reindexLayers();
+        },
+        
+        // after layer changes, the layers should have their zIndex updated
+        reindexLayers: function() {
+            var index = 1;
+            _.each( this.layers, function( layer ) {
+                // layers increment indices as needed
+                index = layer.reindex( index );
+            } );
         },
         
         clearAllLayers: function() {
