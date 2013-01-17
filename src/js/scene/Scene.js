@@ -67,8 +67,9 @@ phet.scene = phet.scene || {};
             
             // validating bounds, similar to Piccolo2d
             this.root.validateBounds();
+            // no paint validation needed, since we render everything
+            this.refreshLayers();
             
-            // TODO: render only dirty regions
             var state = new phet.scene.RenderState();
             fullRender( this.root, state );
             state.finish(); // handle cleanup for the last layer
@@ -85,6 +86,9 @@ phet.scene = phet.scene || {};
             // validating bounds, similar to Piccolo2d
             this.root.validateBounds();
             this.root.validatePaint();
+            
+            // if the layer structure needs to be changed due to nodes above layers being changed, do so
+            this.refreshLayers();
             
             var scene = this;
             
@@ -411,6 +415,11 @@ phet.scene = phet.scene || {};
         },
         
         refreshLayers: function() {
+            // no layers dirty here
+            if( !this.dirtyLayerPath ) {
+                return;
+            }
+            
             // TODO: THIS FUNCTION: refreshLayers
             
             /*
