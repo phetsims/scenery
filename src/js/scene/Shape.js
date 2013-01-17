@@ -13,6 +13,11 @@ phet.scene = phet.scene || {};
     
     var Vector2 = phet.math.Vector2;
     
+    // for brevity
+    function p( x,y ) {
+        return new Vector2( x, y );
+    }
+    
     phet.scene.Shape = function( pieces, optionalClose ) {
         this.pieces = pieces !== undefined ? pieces : [];
         if( optionalClose ) {

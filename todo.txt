@@ -3,6 +3,8 @@
 Bugs:
 
 Incomplete:
+    Merge in pieces / shape modifications
+    
     refreshLayers implementation
     Think about multiple view implementations!
 
