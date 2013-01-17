@@ -37,7 +37,7 @@ phet.scene = phet.scene || {};
         this._layerBeforeRender = null; // layer to swap to before rendering this node
         this._layerAfterRender = null; // layer to swap to after rendering this node
         this._layerReference = null; // stores a reference to this node's corresponding layer (the one used to render it's self content)
-        this._hasLayerBelow = false;
+        this._hasLayerBelow = false; // whether any descendants are also layer roots
         
         // bounds handling
         this._bounds = Bounds2.NOTHING; // for this node and its children, in "parent" coordinates
@@ -102,7 +102,6 @@ phet.scene = phet.scene || {};
         
         // override to render typical leaf behavior (although possible to use for non-leaf nodes also)
         renderSelf: function ( state ) {
-            
             // by default, render a shape if it exists
             if( this.hasShape() ) {
                 if( state.isCanvasState() ) {
@@ -152,9 +151,18 @@ phet.scene = phet.scene || {};
             node.invalidateBounds();
             node.invalidatePaint();
             
+            // keep _hasLayerBelow consistent
+            if( node._hasLayerBelow || node.isLayerRoot() ) {
+                var ancestor = this;
+                while( ancestor != null && !ancestor._hasLayerBelow ) {
+                    ancestor._hasLayerBelow = true;
+                    ancestor = ancestor.parent;
+                }
+            }
+            
+            // TODO: fill in with actual layer handling code
             // synchronize layer references for adding subtrees without layer types.
-            if( node._layerReference != this._layerReference ) {
-                // TODO: THIS CODE IS BROKEN - adding in a "valley" layer will cause layering issues and breaks, along with other undefined behavior
+            if( this._hasLayerBelow && node._layerReference != this._layerReference ) {
                 var layerReference = this._layerReference;
                 node.walkDepthFirst( function( child ) {
                     child._layerReference = layerReference;
@@ -171,10 +179,36 @@ phet.scene = phet.scene || {};
             this.children.splice( this.children.indexOf( node ), 1 );
             
             this.invalidateBounds();
+            
+            // keep _hasLayerBelow consistent
+            if( node._hasLayerBelow || node.isLayerRoot() ) {
+                
+                // walk up the tree removing _hasLayerBelow flags until one is still set
+                var ancestor = this;
+                while( ancestor != null ) {
+                    ancestor._hasLayerBelow = _.some( ancestor.children, function( child ) { return child._hasLayerBelow; } );
+                    if( ancestor._hasLayerBelow ) {
+                        break;
+                    }
+                }
+            }
+        },
+        
+        setLayerType: function( layerType ) {
+            this._layerType = layerType;
+            
+            // keep _hasLayerBelow consistent
+            var node = this.parent;
+            while( node != null ) {
+                node._hasLayerBelow = true;
+                node = node.parent;
+            }
+            
+            // TODO: more events here, like rebuilding or incremental!
         },
         
         hasParent: function () {
-            return this.parent !== null && this.parent !== undefined;
+            return this.parent !== null;
         },
         
         // remove this node from its parent
@@ -413,12 +447,6 @@ phet.scene = phet.scene || {};
             }
             return layers;
         },
-        
-        setLayerType: function( layerType ) {
-            this._layerType = layerType;
-            // TODO: more events here, like rebuilding or incremental!
-        },
-        
         
         // mark the bounds of this node as invalid, so it is recomputed before it is accessed again
         invalidateBounds: function() {

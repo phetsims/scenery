@@ -1,7 +1,6 @@
 
 
 Bugs:
-    addChild layerReference handling * consider multiple views?
 
 Incomplete:
     Layers and multiple views
