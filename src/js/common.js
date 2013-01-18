@@ -11,9 +11,19 @@ phet.assert = function ( predicate, msg ) {
     }
 };
 
+// an assertion that is removed for the optimized (minified) form
+phet.debugAssert = function( predicateFunction, msg ) {
+    if( phetDebug && !predicateFunction() ) {
+        throw new Error( "Assertion failed: " + msg );
+    }
+};
+
 // util
 phet.util = phet.util || {};
 (function () {
+    
+    // TODO: convert most of these usages to underscore.js, and consider pull requests for the rest
+    
     phet.util.remove = function ( array, ob ) {
         array.splice( array.indexOf( ob ), 1 );
     };
