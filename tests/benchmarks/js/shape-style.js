@@ -13,15 +13,15 @@ opts.I = 8;
 
 opts.Super = function( type ) { this.type = type; };
 
-opts.fA = function( args ) { opts.Super.call( this, opts.A ); this.a = args.a; }; opts.fA.prototype = Object.create( opts.Super.prototype ); opts.fA.prototype.constructor = opts.fA; opts.fA.prototype.op = function( context ) { context.add( this.a ); };
-opts.fB = function( args ) { opts.Super.call( this, opts.B ); this.b = args.b; }; opts.fB.prototype = Object.create( opts.Super.prototype ); opts.fB.prototype.constructor = opts.fB; opts.fB.prototype.op = function( context ) { context.add( this.b ); };
-opts.fC = function( args ) { opts.Super.call( this, opts.C ); this.c = args.c; }; opts.fC.prototype = Object.create( opts.Super.prototype ); opts.fC.prototype.constructor = opts.fC; opts.fC.prototype.op = function( context ) { context.add( this.c ); };
-opts.fD = function( args ) { opts.Super.call( this, opts.D ); this.d = args.d; }; opts.fD.prototype = Object.create( opts.Super.prototype ); opts.fD.prototype.constructor = opts.fD; opts.fD.prototype.op = function( context ) { context.add( this.d ); };
-opts.fE = function( args ) { opts.Super.call( this, opts.E ); this.e = args.e; }; opts.fE.prototype = Object.create( opts.Super.prototype ); opts.fE.prototype.constructor = opts.fE; opts.fE.prototype.op = function( context ) { context.add( this.e ); };
-opts.fF = function( args ) { opts.Super.call( this, opts.F ); this.f = args.f; }; opts.fF.prototype = Object.create( opts.Super.prototype ); opts.fF.prototype.constructor = opts.fF; opts.fF.prototype.op = function( context ) { context.add( this.f ); };
-opts.fG = function( args ) { opts.Super.call( this, opts.G ); this.g = args.g; }; opts.fG.prototype = Object.create( opts.Super.prototype ); opts.fG.prototype.constructor = opts.fG; opts.fG.prototype.op = function( context ) { context.add( this.g ); };
-opts.fH = function( args ) { opts.Super.call( this, opts.H ); this.h = args.h; }; opts.fH.prototype = Object.create( opts.Super.prototype ); opts.fH.prototype.constructor = opts.fH; opts.fH.prototype.op = function( context ) { context.add( this.h ); };
-opts.fI = function( args ) { opts.Super.call( this, opts.I ); this.i = args.i; }; opts.fI.prototype = Object.create( opts.Super.prototype ); opts.fI.prototype.constructor = opts.fI; opts.fI.prototype.op = function( context ) { context.add( this.i ); };
+opts.fA = function( args ) { opts.Super.call( this, opts.A ); this.args = args; this.a = args.a; }; opts.fA.prototype = Object.create( opts.Super.prototype ); opts.fA.prototype.constructor = opts.fA; opts.fA.prototype.op = function( context ) { context.add( this.a ); };
+opts.fB = function( args ) { opts.Super.call( this, opts.B ); this.args = args; this.b = args.b; }; opts.fB.prototype = Object.create( opts.Super.prototype ); opts.fB.prototype.constructor = opts.fB; opts.fB.prototype.op = function( context ) { context.add( this.b ); };
+opts.fC = function( args ) { opts.Super.call( this, opts.C ); this.args = args; this.c = args.c; }; opts.fC.prototype = Object.create( opts.Super.prototype ); opts.fC.prototype.constructor = opts.fC; opts.fC.prototype.op = function( context ) { context.add( this.c ); };
+opts.fD = function( args ) { opts.Super.call( this, opts.D ); this.args = args; this.d = args.d; }; opts.fD.prototype = Object.create( opts.Super.prototype ); opts.fD.prototype.constructor = opts.fD; opts.fD.prototype.op = function( context ) { context.add( this.d ); };
+opts.fE = function( args ) { opts.Super.call( this, opts.E ); this.args = args; this.e = args.e; }; opts.fE.prototype = Object.create( opts.Super.prototype ); opts.fE.prototype.constructor = opts.fE; opts.fE.prototype.op = function( context ) { context.add( this.e ); };
+opts.fF = function( args ) { opts.Super.call( this, opts.F ); this.args = args; this.f = args.f; }; opts.fF.prototype = Object.create( opts.Super.prototype ); opts.fF.prototype.constructor = opts.fF; opts.fF.prototype.op = function( context ) { context.add( this.f ); };
+opts.fG = function( args ) { opts.Super.call( this, opts.G ); this.args = args; this.g = args.g; }; opts.fG.prototype = Object.create( opts.Super.prototype ); opts.fG.prototype.constructor = opts.fG; opts.fG.prototype.op = function( context ) { context.add( this.g ); };
+opts.fH = function( args ) { opts.Super.call( this, opts.H ); this.args = args; this.h = args.h; }; opts.fH.prototype = Object.create( opts.Super.prototype ); opts.fH.prototype.constructor = opts.fH; opts.fH.prototype.op = function( context ) { context.add( this.h ); };
+opts.fI = function( args ) { opts.Super.call( this, opts.I ); this.args = args; this.i = args.i; }; opts.fI.prototype = Object.create( opts.Super.prototype ); opts.fI.prototype.constructor = opts.fI; opts.fI.prototype.op = function( context ) { context.add( this.i ); };
 
 var Context = function() {
     this.n = 0;
