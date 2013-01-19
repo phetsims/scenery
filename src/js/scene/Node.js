@@ -88,6 +88,8 @@ phet.scene = phet.scene || {};
                     if( this._stroke ) {
                         layer.setStrokeStyle( this._stroke );
                         layer.setLineWidth( this.getLineWidth() );
+                        layer.setLineCap( this.getLineCap() );
+                        layer.setLineJoin( this.getLineJoin() );
                         context.stroke();
                     }
                 } else {
@@ -387,6 +389,44 @@ phet.scene = phet.scene || {};
                 this.invalidateBounds();
                 this.invalidatePaint();
             }
+        },
+        
+        getLineCap: function() {
+            return this._lineDrawingStyles.lineCap;
+        },
+        
+        setLineCap: function( lineCap ) {
+            if( this._lineDrawingStyles.lineCap != lineCap ) {
+                this.markOldSelfPaint();
+                
+                this._lineDrawingStyles.lineCap = lineCap;
+                
+                this.invalidateBounds();
+                this.invalidatePaint();
+            }
+        },
+        
+        getLineJoin: function() {
+            return this._lineDrawingStyles.lineJoin;
+        },
+        
+        setLineJoin: function( lineJoin ) {
+            if( this._lineDrawingStyles.lineJoin != lineJoin ) {
+                this.markOldSelfPaint();
+                
+                this._lineDrawingStyles.lineJoin = lineJoin;
+                
+                this.invalidateBounds();
+                this.invalidatePaint();
+            }
+        },
+        
+        setLineStyles: function( lineStyles ) {
+            this._lineDrawingStyles = lineStyles;
+        },
+        
+        getLineStyles: function() {
+            return _lineDrawingStyles;
         },
         
         getFill: function() {

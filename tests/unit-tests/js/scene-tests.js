@@ -2,6 +2,8 @@
 
 (function(){
     
+    // $( '#display' ).hide();
+    
     var canvasWidth = 320;
     var canvasHeight = 240;
     
@@ -82,6 +84,11 @@
     }
     
     function strokeEqualsFill( shapeToStroke, shapeToFill, strokeNodeSetup, message, debugFlag ) {
+        if( debugFlag ) {
+            var div = document.createElement( 'div' );
+            $( div ).text( message );
+            $( '#display' ).append( div );
+        }
         sceneEquals( function( scene ) {
             var node = new phet.scene.Node();
             node.setShape( shapeToStroke );
@@ -94,6 +101,9 @@
             node.setFill( '#000000' );
             scene.root.addChild( node );
         }, message, debugFlag );
+        if( debugFlag ) {
+            $( '#display' ).append( document.createElement( 'div' ) );
+        }
     }
     
     /*---------------------------------------------------------------------------*
@@ -250,6 +260,116 @@
             var fillShape = Shape.rectangle( 100, 100 - lineWidth / 2, 200, lineWidth );
             
             strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineWidth( lineWidth ); }, QUnit.config.current.testName );
+        } );
+        
+        test( 'Line Segment - butt', function() {
+            var styles = new Shape.LineStyles();
+            styles.lineWidth = 50;
+            
+            var strokeShape = Shape.lineSegment( p( 100, 100 ), p( 300, 100 ) );
+            var fillShape = strokeShape.getStrokedShape( styles );
+            
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
+        } );
+        
+        test( 'Line Segment - square', function() {
+            var styles = new Shape.LineStyles();
+            styles.lineWidth = 50;
+            styles.lineCap = 'square';
+            
+            var strokeShape = Shape.lineSegment( p( 100, 100 ), p( 300, 100 ) );
+            var fillShape = strokeShape.getStrokedShape( styles );
+            
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
+        } );
+        
+        test( 'Line Join - Miter', function() {
+            var styles = new Shape.LineStyles();
+            styles.lineWidth = 30;
+            styles.lineJoin = 'miter';
+            
+            var strokeShape = new Shape();
+            strokeShape.moveTo( 70, 70 );
+            strokeShape.lineTo( 140, 200 );
+            strokeShape.lineTo( 210, 70 );
+            var fillShape = strokeShape.getStrokedShape( styles );
+            
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
+        } );
+        
+        test( 'Line Join - Miter - Closed', function() {
+            var styles = new Shape.LineStyles();
+            styles.lineWidth = 30;
+            styles.lineJoin = 'miter';
+            
+            var strokeShape = new Shape();
+            strokeShape.moveTo( 70, 70 );
+            strokeShape.lineTo( 140, 200 );
+            strokeShape.lineTo( 210, 70 );
+            strokeShape.close();
+            var fillShape = strokeShape.getStrokedShape( styles );
+            
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
+        } );
+        
+        test( 'Line Join - Bevel - Closed', function() {
+            var styles = new Shape.LineStyles();
+            styles.lineWidth = 30;
+            styles.lineJoin = 'bevel';
+            
+            var strokeShape = new Shape();
+            strokeShape.moveTo( 70, 70 );
+            strokeShape.lineTo( 140, 200 );
+            strokeShape.lineTo( 210, 70 );
+            strokeShape.close();
+            var fillShape = strokeShape.getStrokedShape( styles );
+            
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
+        } );
+        
+        test( 'Rect', function() {
+            var styles = new Shape.LineStyles();
+            styles.lineWidth = 30;
+            
+            var strokeShape = Shape.rectangle( 40, 40, 150, 150 );
+            var fillShape = strokeShape.getStrokedShape( styles );
+            
+            console.log( strokeShape );
+            console.log( fillShape );
+            
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
+        } );
+        
+        test( 'Manual Rect', function() {
+            var styles = new Shape.LineStyles();
+            styles.lineWidth = 30;
+            
+            var strokeShape = new Shape();
+            strokeShape.moveTo( 40, 40 );
+            strokeShape.lineTo( 190, 40 );
+            strokeShape.lineTo( 190, 190 );
+            strokeShape.lineTo( 40, 190 );
+            strokeShape.lineTo( 40, 40 );
+            strokeShape.close();
+            var fillShape = strokeShape.getStrokedShape( styles );
+            
+            console.log( strokeShape );
+            console.log( fillShape );
+            
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
+        } );
+        
+        test( 'Hex', function() {
+            var styles = new Shape.LineStyles();
+            styles.lineWidth = 30;
+            
+            var strokeShape = Shape.regularPolygon( 6, 100 ).transformed( phet.math.Matrix3.translation( 130, 130 ) );
+            var fillShape = strokeShape.getStrokedShape( styles );
+            
+            console.log( strokeShape );
+            console.log( fillShape );
+            
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
         } );
     })();
     

@@ -1,6 +1,8 @@
 
 
 Bugs:
+    Consider setting self bounds on shape change?
+        * recalculated stroked bounds -- add flag for that
 
 Incomplete:
     Merge in pieces / shape modifications

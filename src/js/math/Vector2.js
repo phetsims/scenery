@@ -34,7 +34,7 @@ phet.math = phet.math || {};
         },
 
         magnitudeSquared: function () {
-            this.dot( this );
+            return this.dot( this );
         },
 
         dot: function ( v ) {
