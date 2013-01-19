@@ -367,6 +367,36 @@
             
             strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
         } );
+        
+        test( 'Overlap', function() {
+            var styles = new Shape.LineStyles();
+            styles.lineWidth = 30;
+            
+            var strokeShape = new Shape();
+            strokeShape.moveTo( 40, 40 );
+            strokeShape.lineTo( 200, 200 );
+            strokeShape.lineTo( 40, 200 );
+            strokeShape.lineTo( 200, 40 );
+            strokeShape.lineTo( 100, 0 );
+            strokeShape.close();
+            var fillShape = strokeShape.getStrokedShape( styles );
+            
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
+        } );
+        
+        test( 'Miter limit', function() {
+            var styles = new Shape.LineStyles();
+            styles.lineWidth = 30;
+            
+            var strokeShape = new Shape();
+            strokeShape.moveTo( 40, 40 );
+            strokeShape.lineTo( 200, 70 );
+            strokeShape.lineTo( 40, 100 );
+            console.log( new phet.math.Vector2( 160, 30 ).normalized().angleBetween( new phet.math.Vector2( 160, -30 ) ) * 180 / Math.PI );
+            var fillShape = strokeShape.getStrokedShape( styles );
+            
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
+        } );
     })();
     
     /*---------------------------------------------------------------------------*
