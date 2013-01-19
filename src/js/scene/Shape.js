@@ -201,7 +201,7 @@ phet.scene = phet.scene || {};
                     if( alreadyClosed ) {
                         join( _.last( segments ).end, _.last( segments ).endTangent, _.first( segments ).startTangent );
                         shape.addPiece( new Piece.Close() );
-                        shape.addPiece( new Piece.MoveTo( segmentStartRight( _.first( segments ) ) ) );
+                        shape.addPiece( new Piece.MoveTo( segmentStartRight( _.first( segments ), lineWidth ) ) );
                         join( _.last( segments ).end, _.first( segments ).startTangent.negated(), _.last( segments ).endTangent.negated() );
                     } else {
                         join( closingSegment.start, _.last( segments ).endTangent, closingSegment.startTangent );
@@ -210,7 +210,7 @@ phet.scene = phet.scene || {};
                         // TODO: similar here to other block of if.
                         join( closingSegment.end, closingSegment.endTangent, _.first( segments ).startTangent );
                         shape.addPiece( new Piece.Close() );
-                        shape.addPiece( new Piece.MoveTo( segmentStartRight( _.first( segments ) ) ) );
+                        shape.addPiece( new Piece.MoveTo( segmentStartRight( _.first( segments ), lineWidth ) ) );
                         join( closingSegment.end, _.first( segments ).startTangent.negated(), closingSegment.endTangent.negated() );
                         
                         shape.addPiece( closingSegment.strokeRight( lineWidth ) );
@@ -483,7 +483,7 @@ phet.scene = phet.scene || {};
         },
         
         strokeLeft: function( lineWidth ) {
-            return new Piece.LineTo( this.end.plus( this.endTangent.perpendicular().ne`gated().times( lineWidth / 2 ) ) );
+            return new Piece.LineTo( this.end.plus( this.endTangent.perpendicular().negated().times( lineWidth / 2 ) ) );
         },
         
         strokeRight: function( lineWidth ) {
@@ -493,18 +493,22 @@ phet.scene = phet.scene || {};
     
     // TODO: performance / cleanliness to have these as methods instead?
     function segmentStartLeft( segment, lineWidth ) {
+        phet.assert( lineWidth !== undefined );
         return segment.start.plus( segment.startTangent.perpendicular().negated().times( lineWidth / 2 ) );
     }
     
     function segmentEndLeft( segment, lineWidth ) {
+        phet.assert( lineWidth !== undefined );
         return segment.end.plus( segment.endTangent.perpendicular().negated().times( lineWidth / 2 ) );
     }
     
     function segmentStartRight( segment, lineWidth ) {
+        phet.assert( lineWidth !== undefined );
         return segment.start.plus( segment.startTangent.perpendicular().times( lineWidth / 2 ) );
     }
     
     function segmentEndRight( segment, lineWidth ) {
+        phet.assert( lineWidth !== undefined );
         return segment.end.plus( segment.endTangent.perpendicular().times( lineWidth / 2 ) );
     }
     

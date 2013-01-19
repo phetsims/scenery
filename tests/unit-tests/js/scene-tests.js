@@ -28,6 +28,7 @@
         if( isEqual ) {
             for( var i = 0; i < a.data.length; i++ ) {
                 if( a.data[i] != b.data[i] && Math.abs( a.data[i] - b.data[i] ) > threshold ) {
+                    // console.log( message + ": " + Math.abs( a.data[i] - b.data[i] ) );
                     isEqual = false;
                     break;
                 }
@@ -68,7 +69,11 @@
         }
     }
     
-    function sceneEquals( constructionA, constructionB, message, debugFlag ) {
+    function sceneEquals( constructionA, constructionB, message, debugFlag, threshold ) {
+        if( threshold === undefined ) {
+            threshold = 0;
+        }
+        
         var sceneA = new phet.scene.Scene( $( '#main' ) );
         var sceneB = new phet.scene.Scene( $( '#secondary' ) );
         
@@ -78,7 +83,7 @@
         sceneA.renderScene();
         sceneB.renderScene();
         
-        var isEqual = snapshotEquals( snapshot( sceneA, debugFlag ), snapshot( sceneB, debugFlag ), 0, message );
+        var isEqual = snapshotEquals( snapshot( sceneA, debugFlag ), snapshot( sceneB, debugFlag ), threshold, message );
         
         // TODO: consider showing if tests fail
     }
@@ -100,7 +105,7 @@
             node.setShape( shapeToFill );
             node.setFill( '#000000' );
             scene.root.addChild( node );
-        }, message, debugFlag );
+        }, message, debugFlag, 20 ); // threshold of 20 due to antialiasing differences between fill and stroke... :(
         if( debugFlag ) {
             $( '#display' ).append( document.createElement( 'div' ) );
         }
@@ -269,7 +274,7 @@
             var strokeShape = Shape.lineSegment( p( 100, 100 ), p( 300, 100 ) );
             var fillShape = strokeShape.getStrokedShape( styles );
             
-            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
         } );
         
         test( 'Line Segment - square', function() {
@@ -280,7 +285,7 @@
             var strokeShape = Shape.lineSegment( p( 100, 100 ), p( 300, 100 ) );
             var fillShape = strokeShape.getStrokedShape( styles );
             
-            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
         } );
         
         test( 'Line Join - Miter', function() {
@@ -294,7 +299,7 @@
             strokeShape.lineTo( 210, 70 );
             var fillShape = strokeShape.getStrokedShape( styles );
             
-            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
         } );
         
         test( 'Line Join - Miter - Closed', function() {
@@ -309,7 +314,7 @@
             strokeShape.close();
             var fillShape = strokeShape.getStrokedShape( styles );
             
-            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
         } );
         
         test( 'Line Join - Bevel - Closed', function() {
@@ -324,7 +329,7 @@
             strokeShape.close();
             var fillShape = strokeShape.getStrokedShape( styles );
             
-            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
         } );
         
         test( 'Rect', function() {
@@ -334,10 +339,7 @@
             var strokeShape = Shape.rectangle( 40, 40, 150, 150 );
             var fillShape = strokeShape.getStrokedShape( styles );
             
-            console.log( strokeShape );
-            console.log( fillShape );
-            
-            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
         } );
         
         test( 'Manual Rect', function() {
@@ -353,10 +355,7 @@
             strokeShape.close();
             var fillShape = strokeShape.getStrokedShape( styles );
             
-            console.log( strokeShape );
-            console.log( fillShape );
-            
-            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
         } );
         
         test( 'Hex', function() {
@@ -366,10 +365,7 @@
             var strokeShape = Shape.regularPolygon( 6, 100 ).transformed( phet.math.Matrix3.translation( 130, 130 ) );
             var fillShape = strokeShape.getStrokedShape( styles );
             
-            console.log( strokeShape );
-            console.log( fillShape );
-            
-            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
         } );
     })();
     
