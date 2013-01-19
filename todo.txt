@@ -1,12 +1,8 @@
 
 
 Bugs:
-    Consider setting self bounds on shape change?
-        * recalculated stroked bounds -- add flag for that
 
 Incomplete:
-    Merge in pieces / shape modifications
-    
     refreshLayers implementation
     Think about multiple view implementations!
 
@@ -14,7 +10,7 @@ Incomplete:
     Don't remove deprecated Rectangle 'class' - but copy over other non-completed function calls
         
     Ability to update size of canvas, etc.
-    Flesh out Shape, with decomposition, bounds, hit regions (including strokes), etc.
+    Shape hit regions, fix miterLimit?
         * BEWARE: IE9 seems to have buggy miterLimit calculation, arcTo might be bad also
         * See http://weblog.bocoup.com/canvas-in-ie9-too-good-to-be-true/
     Flags for whether text / strokes are considered for hit regions
