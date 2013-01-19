@@ -397,6 +397,19 @@
             
             strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
         } );
+        
+        test( 'Overlapping rectangles', function() {
+            var styles = new Shape.LineStyles();
+            styles.lineWidth = 30;
+            
+            var strokeShape = new Shape();
+            strokeShape.rect( 40, 40, 100, 100 );
+            strokeShape.rect( 50, 50, 100, 100 );
+            strokeShape.rect( 80, 80, 100, 100 );
+            var fillShape = strokeShape.getStrokedShape( styles );
+            
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
+        } );
     })();
     
     /*---------------------------------------------------------------------------*
