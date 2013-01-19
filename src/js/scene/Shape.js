@@ -3,6 +3,11 @@
 /**
  * Shape handling
  *
+ * Shapes are internally made up of pieces (generally individual Canvas calls),
+ * which for simplicity of stroking and hit testing are then broken up into
+ * individual segments stored in subpaths. Familiarity with how Canvas handles
+ * subpaths is helpful for understanding this code.
+ *
  * TODO: add nonzero / evenodd support when browsers support it
  *
  * @author Jonathan Olson
@@ -19,17 +24,21 @@ phet.scene = phet.scene || {};
     function p( x,y ) { return new Vector2( x, y ); }
     
     phet.scene.Shape = function( pieces, optionalClose ) {
+        // higher-level Canvas-esque drawing commands 
         this.pieces = [];
         
+        // lower-level piecewise mathematical description using segments
+        this.subpaths = [];
+        
+        // computed bounds for all pieces added so far
+        this.bounds = phet.math.Bounds2.NOTHING;
+        
+        // cached stroked shape (so hit testing can be done quickly on stroked shapes)
         this._strokedShape = null;
         this._strokedShapeComputed = false;
         this._strokedShapeStyles = null;
         
-        this.subpaths = [];
-        this.bounds = phet.math.Bounds2.NOTHING;
-        
         var that = this;
-        
         // initialize with pieces passed in
         if( pieces !== undefined ) {
             _.each( pieces, function( piece ) {
@@ -110,6 +119,7 @@ phet.scene = phet.scene || {};
             }
         },
         
+        // returns a new Shape that is an outline of the stroked path of this current Shape. currently not intended to be nested (doesn't do intersection computations yet)
         getStrokedShape: function( lineStyles ) {
             if( lineStyles === undefined ) {
                 lineStyles = Shape.DEFAULT_STYLES;
@@ -120,16 +130,21 @@ phet.scene = phet.scene || {};
                 return this._strokedShape;
             }
             
+            // filter out subpaths where nothing would be drawn
             var subpaths = _.filter( this.subpaths, function( subpath ) { return subpath.isDrawable(); } );
             
             var shape = new Shape();
             
             var lineWidth = lineStyles.lineWidth;
             
+            // joins two segments together on the logical "left" side, at 'center' (where they meet), and normalized tangent vectors in the direction of the stroking
+            // to join on the "right" side, switch the tangent order and negate them
             function join( center, fromTangent, toTangent ) {
+                // where our join path starts and ends
                 var fromPoint = center.plus( fromTangent.perpendicular().negated().times( lineWidth / 2 ) );
                 var toPoint = center.plus( toTangent.perpendicular().negated().times( lineWidth / 2 ) );
                 
+                // only insert a join on the non-acute-angle side
                 if( fromTangent.perpendicular().dot( toTangent ) > 0 ) {
                     switch( lineStyles.lineJoin ) {
                         case 'round':
@@ -158,6 +173,7 @@ phet.scene = phet.scene || {};
                 }
             }
             
+            // draws the necessary line cap from the endpoint 'center' in the direction of the tangent
             function cap( center, tangent ) {
                 switch( lineStyles.lineCap ) {
                     case 'butt':
@@ -181,6 +197,9 @@ phet.scene = phet.scene || {};
                 var i;
                 var segments = subpath.segments;
                 
+                // TODO: shortcuts for _.first( segments ) and _.last( segments ),
+                
+                // we don't need to insert an implicit closing segment if the start and end points are the same
                 var alreadyClosed = _.last( segments ).end.equals( _.first( segments ).start );
                 // if there is an implicit closing segment
                 var closingSegment = alreadyClosed ? null : new Segment.Line( segments[segments.length-1].end, segments[0].start );
@@ -204,6 +223,7 @@ phet.scene = phet.scene || {};
                         shape.addPiece( new Piece.MoveTo( segmentStartRight( _.first( segments ), lineWidth ) ) );
                         join( _.last( segments ).end, _.first( segments ).startTangent.negated(), _.last( segments ).endTangent.negated() );
                     } else {
+                        // logical "left" stroke on the implicit closing segment
                         join( closingSegment.start, _.last( segments ).endTangent, closingSegment.startTangent );
                         shape.addPiece( closingSegment.strokeLeft( lineWidth ) );
                         
@@ -213,6 +233,7 @@ phet.scene = phet.scene || {};
                         shape.addPiece( new Piece.MoveTo( segmentStartRight( _.first( segments ), lineWidth ) ) );
                         join( closingSegment.end, _.first( segments ).startTangent.negated(), closingSegment.endTangent.negated() );
                         
+                        // logical "right" stroke on the implicit closing segment
                         shape.addPiece( closingSegment.strokeRight( lineWidth ) );
                         join( closingSegment.start, closingSegment.startTangent.negated(), _.last( segments ).endTangent.negated() );
                     }
@@ -237,6 +258,10 @@ phet.scene = phet.scene || {};
                     shape.addPiece( new Piece.Close() );
                 }
             } );
+            
+            this._strokedShape = shape;
+            this._strokedShapeComputed = true;
+            this._strokedShapeStyles = lineStyles;
             
             return shape;
         },
@@ -290,6 +315,9 @@ phet.scene = phet.scene || {};
         } ), true );
     };
     
+    /*---------------------------------------------------------------------------*
+    * Line styles used in rendering the shape. Affects the stroked shape
+    *----------------------------------------------------------------------------*/        
     
     Shape.LineStyles = function( args ) {
         if( args === undefined ) {
