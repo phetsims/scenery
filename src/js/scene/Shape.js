@@ -25,6 +25,11 @@ phet.scene = phet.scene || {};
         if( optionalClose ) {
             this.addPiece( new Piece.Close() );
         }
+        
+        // flag to see whether we have 
+        this.computed = false;
+        
+        this.subpaths = [];
     }
     var Shape = phet.scene.Shape;
     
@@ -41,55 +46,67 @@ phet.scene = phet.scene || {};
     }
     var LineStyles = Shape.LineStyles;
     
-    // Pieces should be considered immutable
-    Shape.Piece = function( points ) {
-        this.points = points;
-    };
+    Shape.Piece = {};
     var Piece = Shape.Piece;
     
-    Piece.prototype = {
-        constructor: Piece,
+    Piece.Close = function() {};
+    Piece.Close.prototype = {
+        constructor: Piece.Close,
         
-        // override for more specific transforms. 
+        writeToContext: function( context ) {
+            context.closePath();
+        },
+        
         transformed: function( matrix ) {
-            // TODO: implement transformations! -- and verify with unit tests
-            return this;
+            return [this];
         },
         
         applyPiece: function( shapeState ) {
-            _.each( this.points, function( point ) {
-                shapeState.bounds = shapeState.bounds.withPoint( point );
-            } );
+            
         }
     };
     
-    // TODO: make a canonical CLOSE?
-    Piece.Close = function() {
-        Piece.call( this, [] );
-    };
-    Piece.Close.prototype = Object.create( Piece.prototype );
-    Piece.Close.prototype.constructor = Piece.Close;
-    Piece.Close.prototype.writeToContext = function( context ) { context.closePath(); };
-    
     Piece.MoveTo = function( point ) {
-        Piece.call( this, [ point ] );
         this.point = point;
     };
-    Piece.MoveTo.prototype = Object.create( Piece.prototype );
-    Piece.MoveTo.prototype.constructor = Piece.MoveTo;
-    Piece.MoveTo.prototype.writeToContext = function( context ) { context.moveTo( this.point.x, this.point.y ); };
+    Piece.MoveTo.prototype = {
+        constructor: Piece.MoveTo,
+        
+        writeToContext: function( context ) {
+            context.moveTo( this.point.x, this.point.y );
+        },
+        
+        transformed: function( matrix ) {
+            return [new Piece.MoveTo( matrix.timesVector2( this.point ) )];
+        },
+        
+        applyPiece: function( shapeState ) {
+            // TODO: technically, nothing here! - moveTos in a row could cause problems
+            shapeState.bounds = shapeState.bounds.withPoint( this.point );
+        }
+    };
     
     Piece.LineTo = function( point ) {
-        Piece.call( this, [ point ] );
         this.point = point;
     };
-    Piece.LineTo.prototype = Object.create( Piece.prototype );
-    Piece.LineTo.prototype.constructor = Piece.LineTo;
-    Piece.LineTo.prototype.writeToContext = function( context ) { context.lineTo( this.point.x, this.point.y ); };
+    Piece.LineTo.prototype = {
+        constructor: Piece.LineTo,
+        
+        writeToContext: function( context ) {
+            context.lineTo( this.point.x, this.point.y );
+        },
+        
+        transformed: function( matrix ) {
+            return [new Piece.LineTo( matrix.timesVector2( this.point ) )];
+        },
+        
+        applyPiece: function( shapeState ) {
+            // TODO: start and end points!
+            shapeState.bounds = shapeState.bounds.withPoint( this.point );
+        }
+    };
     
-    // TODO: transforms for rect are different!!!
     Piece.Rect = function( upperLeft, lowerRight ) {
-        Piece.call( this, [ upperLeft, lowerRight ] );
         this.upperLeft = upperLeft;
         this.lowerRight = lowerRight;
         this.x = this.upperLeft.x;
@@ -97,9 +114,25 @@ phet.scene = phet.scene || {};
         this.width = this.lowerRight.x - this.x;
         this.height = this.lowerRight.y - this.y;
     };
-    Piece.Rect.prototype = Object.create( Piece.prototype );
-    Piece.Rect.prototype.constructor = Piece.Rect;
-    Piece.Rect.prototype.writeToContext = function( context ) { context.rect( this.x, this.y, this.width, this.height ); };
+    Piece.Rect.prototype = {
+        constructor: Piece.Rect,
+        
+        writeToContext: function( context ) {
+            context.rect( this.x, this.y, this.width, this.height );
+        },
+        
+        transformed: function( matrix ) {
+            var a = matrix.timesVector2( p( this.x, this.y ) );
+            var b = matrix.timesVector2( p( this.x + this.width, this.y ) );
+            var c = matrix.timesVector2( p( this.x + this.width, this.y + this.height ) );
+            var d = matrix.timesVector2( p( this.x, this.y + this.height ) );
+            return [new Piece.MoveTo( a ), new Piece.LineTo( b ), new Piece.LineTo( c ), new Piece.LineTo( d ), new Piece.Close(), new Piece.MoveTo( a )];
+        },
+        
+        applyPiece: function( shapeState ) {
+            shapeState.bounds = shapeState.bounds.withPoint( this.upperLeft ).withPoint( this.lowerRight );
+        }
+    };
     
     
     Shape.ShapeState = function() {
