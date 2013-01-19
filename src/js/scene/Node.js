@@ -317,6 +317,8 @@ phet.scene = phet.scene || {};
         
         // called to notify that renderSelf will display different paint, with possibly different bounds
         invalidateSelf: function( newBounds ) {
+            phet.assert( !isNaN( newBounds.x() ) );
+            
             // mark the old region to be repainted, regardless of whether the actual bounds change
             this.markOldSelfPaint();
             
@@ -331,6 +333,15 @@ phet.scene = phet.scene || {};
             }
             
             this.invalidatePaint();
+        },
+        
+        invalidateShape: function() {
+            this.markOldSelfPaint();
+            
+            if( this.hasShape() ) {
+                this.invalidateSelf( this._shape.computeBounds( this._stroke ? this._lineDrawingStyles : null ) );
+                this.invalidatePaint();
+            }
         },
         
         // TODO: how to handle point vs x,y
@@ -367,9 +378,10 @@ phet.scene = phet.scene || {};
         
         // sets the shape drawn, or null to remove the shape
         setShape: function( shape ) {
-            this._shape = shape;
-            
-            this.invalidateSelf( shape.computeBounds( ) );
+            if( this._shape != shape ) {
+                this._shape = shape;
+                this.invalidateShape();
+            }
         },
         
         getShape: function() {
@@ -386,8 +398,7 @@ phet.scene = phet.scene || {};
                 
                 this._lineDrawingStyles.lineWidth = lineWidth;
                 
-                this.invalidateBounds();
-                this.invalidatePaint();
+                this.invalidateShape();
             }
         },
         
@@ -401,8 +412,7 @@ phet.scene = phet.scene || {};
                 
                 this._lineDrawingStyles.lineCap = lineCap;
                 
-                this.invalidateBounds();
-                this.invalidatePaint();
+                this.invalidateShape();
             }
         },
         
@@ -416,17 +426,20 @@ phet.scene = phet.scene || {};
                 
                 this._lineDrawingStyles.lineJoin = lineJoin;
                 
-                this.invalidateBounds();
-                this.invalidatePaint();
+                this.invalidateShape();
             }
         },
         
         setLineStyles: function( lineStyles ) {
+            // TODO: since we have been using lineStyles as mutable for now, lack of change check is good here?
+            this.markOldSelfPaint();
+            
             this._lineDrawingStyles = lineStyles;
+            this.invalidateShape();
         },
         
         getLineStyles: function() {
-            return _lineDrawingStyles;
+            return this._lineDrawingStyles;
         },
         
         getFill: function() {
@@ -450,8 +463,7 @@ phet.scene = phet.scene || {};
                 this.markOldSelfPaint();
                 
                 this._stroke = stroke;
-                this.invalidatePaint();
-                this.invalidateBounds();
+                this.invalidateShape();
             }
         },
         

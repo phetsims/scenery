@@ -104,7 +104,7 @@ phet.scene = phet.scene || {};
         // TODO: consider renaming to getBounds()?
         computeBounds: function( lineStyles ) {
             if( lineStyles ) {
-                return this.bounds.union( this.getStrokedShape( lineStyles ) );
+                return this.bounds.union( this.getStrokedShape( lineStyles ).bounds );
             } else {
                 return this.bounds;
             }
@@ -416,6 +416,7 @@ phet.scene = phet.scene || {};
                 shape.getLastSubpath().addSegment( line );
                 shape.getLastSubpath().addPoint( end );
                 shape.bounds = shape.bounds.withPoint( start ).withPoint( end );
+                phet.assert( !isNaN( shape.bounds.x() ) );
             } else {
                 shape.ensure( this.point );
             }
@@ -459,6 +460,7 @@ phet.scene = phet.scene || {};
             shape.addSubpath( new Subpath() );
             shape.getLastSubpath().addPoint( p( this.x, this.y ) );
             shape.bounds = shape.bounds.withPoint( this.upperLeft ).withPoint( this.lowerRight );
+            phet.assert( !isNaN( shape.bounds.x() ) );
         }
     };
     
