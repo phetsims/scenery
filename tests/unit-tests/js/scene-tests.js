@@ -112,7 +112,7 @@
             node.setShape( shapeToFill );
             node.setFill( '#000000' );
             scene.root.addChild( node );
-        }, message, debugFlag, 20 ); // threshold of 20 due to antialiasing differences between fill and stroke... :(
+        }, message, debugFlag, 128 ); // threshold of 128 due to antialiasing differences between fill and stroke... :(
         if( debugFlag ) {
             $( '#display' ).append( document.createElement( 'div' ) );
         }
