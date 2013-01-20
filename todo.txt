@@ -1,6 +1,9 @@
 
 
 Bugs:
+    Browser bugs?:
+        miterLimit off in Chrome 24.0.1312.52 m
+        bevel instead of miter on the "close" part of the hex: Firefox 18.0.1
 
 Incomplete:
     refreshLayers implementation

@@ -96,6 +96,7 @@
     }
     
     function strokeEqualsFill( shapeToStroke, shapeToFill, strokeNodeSetup, message, debugFlag ) {
+        debugFlag = true;
         if( debugFlag ) {
             var div = document.createElement( 'h2' );
             $( div ).text( message );
@@ -407,31 +408,53 @@
             strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
         } );
         
-        test( 'Miter limit angle: ' + ( new phet.math.Vector2( 160, 30 ).normalized().angleBetween( new phet.math.Vector2( 160, -30 ) ) * 180 / Math.PI ), function() {
-            var styles = new Shape.LineStyles();
-            styles.lineWidth = 30;
-            
-            var strokeShape = new Shape();
-            strokeShape.moveTo( 40, 40 );
-            strokeShape.lineTo( 200, 70 );
-            strokeShape.lineTo( 40, 100 );
-            var fillShape = strokeShape.getStrokedShape( styles );
-            
-            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
+        var miterMagnitude = 160;
+        var miterAnglesInDegrees = [5, 8, 10, 11.5, 13, 20, 24, 30, 45];
+        
+        _.each( miterAnglesInDegrees, function( miterAngle ) {
+            var miterAngleRadians = miterAngle * Math.PI / 180;
+            test( 'Miter limit angle (degrees): ' + miterAngle + ' would change at ' + 1 / Math.sin( miterAngleRadians / 2 ), function() {
+                var styles = new Shape.LineStyles();
+                styles.lineWidth = 30;
+                
+                var strokeShape = new Shape();
+                var point = new phet.math.Vector2( 40, 100 );
+                strokeShape.moveTo( point );
+                point = point.plus( phet.math.Vector2.X_UNIT.times( miterMagnitude ) );
+                strokeShape.lineTo( point );
+                point = point.plus( phet.math.Vector2.createPolar( miterMagnitude, miterAngleRadians ).negated() );
+                strokeShape.lineTo( point );
+                var fillShape = strokeShape.getStrokedShape( styles );
+                
+                strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
+            } );
         } );
         
-        test( 'Miter limit angle: ' + ( new phet.math.Vector2( 160, 10 ).normalized().angleBetween( new phet.math.Vector2( 160, -10 ) ) * 180 / Math.PI ), function() {
-            var styles = new Shape.LineStyles();
-            styles.lineWidth = 30;
+        // test( 'Miter limit angle: ' + ( new phet.math.Vector2( 160, 30 ).normalized().angleBetween( new phet.math.Vector2( 160, -30 ) ) * 180 / Math.PI ), function() {
+        //     var styles = new Shape.LineStyles();
+        //     styles.lineWidth = 30;
             
-            var strokeShape = new Shape();
-            strokeShape.moveTo( 40, 40 );
-            strokeShape.lineTo( 200, 50 );
-            strokeShape.lineTo( 40, 60 );
-            var fillShape = strokeShape.getStrokedShape( styles );
+        //     var strokeShape = new Shape();
+        //     strokeShape.moveTo( 40, 40 );
+        //     strokeShape.lineTo( 200, 70 );
+        //     strokeShape.lineTo( 40, 100 );
+        //     var fillShape = strokeShape.getStrokedShape( styles );
             
-            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
-        } );
+        //     strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
+        // } );
+        
+        // test( 'Miter limit angle: ' + ( new phet.math.Vector2( 160, 10 ).normalized().angleBetween( new phet.math.Vector2( 160, -10 ) ) * 180 / Math.PI ), function() {
+        //     var styles = new Shape.LineStyles();
+        //     styles.lineWidth = 30;
+            
+        //     var strokeShape = new Shape();
+        //     strokeShape.moveTo( 40, 40 );
+        //     strokeShape.lineTo( 200, 50 );
+        //     strokeShape.lineTo( 40, 60 );
+        //     var fillShape = strokeShape.getStrokedShape( styles );
+            
+        //     strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
+        // } );
         
         test( 'Overlapping rectangles', function() {
             var styles = new Shape.LineStyles();
