@@ -381,7 +381,7 @@
             var strokeShape = Shape.regularPolygon( 6, 100 ).transformed( phet.math.Matrix3.translation( 130, 130 ) );
             var fillShape = strokeShape.getStrokedShape( styles );
             
-            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
         } );
         
         test( 'Overlap', function() {
@@ -397,7 +397,7 @@
             strokeShape.close();
             var fillShape = strokeShape.getStrokedShape( styles );
             
-            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
         } );
         
         test( 'Miter limit', function() {
