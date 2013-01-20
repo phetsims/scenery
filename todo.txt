@@ -20,7 +20,8 @@ Incomplete:
         * Scene.updateLayer handling
     Don't send mark updates on invisible layers? Visibility change causes repaint?
     General optimization and organization so we can extract "self" from child rendering bounds, what is repainted, etc. better.
-    Handle CanvasGradient / CanvasPattern nicely! -- Is it valuable to abstract across SVG also?
+    Canvas fill gradients / patterns
+        * Can we abstract this across SVG also?
 
 Performance:
     Consider child counts, so that we can decide which layers to keep in a layer rebuild?

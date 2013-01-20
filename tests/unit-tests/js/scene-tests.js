@@ -260,7 +260,7 @@
             }, function( scene ) {
                 scene.root.children[0].translate( canvasWidth / 4, canvasHeight / 4 );
             }
-        ], true );
+        ] );
     } );
     
     /*---------------------------------------------------------------------------*

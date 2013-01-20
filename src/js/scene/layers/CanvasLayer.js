@@ -204,7 +204,7 @@ phet.scene.layers = phet.scene.layers || {};
         },
         
         // TODO: note for DOM we can do https://developer.mozilla.org/en-US/docs/HTML/Canvas/Drawing_DOM_objects_into_a_canvas
-        renderToCanvas: function( canvas, context ) {
+        renderToCanvas: function( canvas, context, delayCounts ) {
             context.drawImage( this.canvas, 0, 0 );
         }
     };
