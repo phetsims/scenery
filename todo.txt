@@ -4,8 +4,10 @@ Bugs:
     Browser bugs?:
         miterLimit off in Chrome 24.0.1312.52 m
         bevel instead of miter on the "close" part of the hex: Firefox 18.0.1
+        Chrome 24.0.1312.52 m bug in zooming fillText() -- mobile Safari OK (maybe different from webkit, since it's not antialiased?)
 
 Incomplete:
+    xMin => minX in Bounds2!
     refreshLayers implementation
     Think about multiple view implementations!
 

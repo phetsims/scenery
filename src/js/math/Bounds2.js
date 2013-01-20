@@ -65,6 +65,11 @@ phet.math = phet.math || {};
             );
         },
         
+        withMinX: function( minX ) { return new Bounds2( minX, this.yMin, this.xMax, this.yMax ); },
+        withMinY: function( minY ) { return new Bounds2( this.xMin, minY, this.xMax, this.yMax ); },
+        withMaxX: function( maxX ) { return new Bounds2( this.xMin, this.yMin, maxX, this.yMax ); },
+        withMaxY: function( maxY ) { return new Bounds2( this.xMin, this.yMin, this.xMax, maxY ); },
+        
         // copy rounded to integral values, expanding where necessary
         roundedOut: function() {
             return new Bounds2(
