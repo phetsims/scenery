@@ -8,22 +8,28 @@
     var canvasHeight = 240;
     
     // takes a snapshot of a scene and stores the pixel data, so that we can compare them
-    function snapshot( scene, debugFlag ) {
+    function snapshot( scene ) {
         var canvas = document.createElement( 'canvas' );
         canvas.width = canvasWidth;
         canvas.height = canvasHeight;
         var context = phet.canvas.initCanvas( canvas );
         scene.renderToCanvas( canvas, context );
         var data = context.getImageData( 0, 0, canvasWidth, canvasHeight );
-        if( debugFlag ) {
-            $( '#display' ).append( canvas );
-            $( canvas ).css( 'border', '1px solid black' );
-        }
         return data;
     }
     
+    function snapshotToCanvas( snapshot ) {
+        var canvas = document.createElement( 'canvas' );
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+        var context = phet.canvas.initCanvas( canvas );
+        context.putImageData( snapshot, 0, 0 );
+        $( canvas ).css( 'border', '1px solid black' );
+        return canvas;
+    }
+    
     // compares two pixel snapshots and uses the qunit's assert to verify they are the same
-    function snapshotEquals( a, b, threshold, message, debugFlag ) {
+    function snapshotEquals( a, b, threshold, message ) {
         var isEqual = a.width == b.width && a.height == b.height;
         var largestDifference = 0;
         if( isEqual ) {
@@ -36,17 +42,29 @@
                 }
             }
         }
-        if( debugFlag && largestDifference > 0 ) {
+        if( largestDifference > 0 ) {
+            var display = $( '#display' );
+            // header
+            var note = document.createElement( 'h2' );
+            $( note ).text( message );
+            display.append( note );
             var differenceDiv = document.createElement( 'div' );
             $( differenceDiv ).text( 'Largest pixel color-channel difference: ' + largestDifference );
-            $( '#display' ).append( differenceDiv );
+            display.append( differenceDiv );
+            
+            display.append( snapshotToCanvas( a ) );
+            display.append( snapshotToCanvas( b ) );
+            
+            // for a line-break
+            display.append( document.create( 'div' ) );
+            
         }
         ok( isEqual, message );
         return isEqual;
     }
     
     // compares the "update" render against a full render in-between a series of steps
-    function updateVsFullRender( actions, debugFlag ) {
+    function updateVsFullRender( actions ) {
         var mainScene = new phet.scene.Scene( $( '#main' ) );
         var secondaryScene = new phet.scene.Scene( $( '#secondary' ) );
         
@@ -63,20 +81,14 @@
             secondaryScene.rebuildLayers();
             secondaryScene.renderScene();
             
-            if( debugFlag ) {
-                var note = document.createElement( 'h2' );
-                $( note ).text( 'Action ' + i );
-                $( '#display' ).append( note );
-            }
-            
-            var isEqual = snapshotEquals( snapshot( mainScene, debugFlag ), snapshot( secondaryScene, debugFlag ), 0, 'action #' + i, debugFlag );
+            var isEqual = snapshotEquals( snapshot( mainScene ), snapshot( secondaryScene ), 0, 'action #' + i );
             if( !isEqual ) {
                 break;
             }
         }
     }
     
-    function sceneEquals( constructionA, constructionB, message, debugFlag, threshold ) {
+    function sceneEquals( constructionA, constructionB, message, threshold ) {
         if( threshold === undefined ) {
             threshold = 0;
         }
@@ -90,18 +102,13 @@
         sceneA.renderScene();
         sceneB.renderScene();
         
-        var isEqual = snapshotEquals( snapshot( sceneA, debugFlag ), snapshot( sceneB, debugFlag ), threshold, message, debugFlag );
+        var isEqual = snapshotEquals( snapshot( sceneA ), snapshot( sceneB ), threshold, message );
         
         // TODO: consider showing if tests fail
+        return isEqual;
     }
     
-    function strokeEqualsFill( shapeToStroke, shapeToFill, strokeNodeSetup, message, debugFlag ) {
-        debugFlag = true;
-        if( debugFlag ) {
-            var div = document.createElement( 'h2' );
-            $( div ).text( message );
-            $( '#display' ).append( div );
-        }
+    function strokeEqualsFill( shapeToStroke, shapeToFill, strokeNodeSetup, message ) {
         sceneEquals( function( scene ) {
             var node = new phet.scene.Node();
             node.setShape( shapeToStroke );
@@ -113,10 +120,7 @@
             node.setShape( shapeToFill );
             node.setFill( '#000000' );
             scene.root.addChild( node );
-        }, message, debugFlag, 128 ); // threshold of 128 due to antialiasing differences between fill and stroke... :(
-        if( debugFlag ) {
-            $( '#display' ).append( document.createElement( 'div' ) );
-        }
+        }, message, 128 ); // threshold of 128 due to antialiasing differences between fill and stroke... :(
     }
     
     /*---------------------------------------------------------------------------*
@@ -389,7 +393,7 @@
             var strokeShape = Shape.regularPolygon( 6, 100 ).transformed( phet.math.Matrix3.translation( 130, 130 ) );
             var fillShape = strokeShape.getStrokedShape( styles );
             
-            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
         } );
         
         test( 'Overlap', function() {
@@ -405,7 +409,7 @@
             strokeShape.close();
             var fillShape = strokeShape.getStrokedShape( styles );
             
-            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
         } );
         
         var miterMagnitude = 160;
@@ -426,7 +430,7 @@
                 strokeShape.lineTo( point );
                 var fillShape = strokeShape.getStrokedShape( styles );
                 
-                strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
+                strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
             } );
         } );
         
@@ -463,7 +467,7 @@
                 domNode.setLayerType( phet.scene.layers.DOMLayer );
                 node.addChild( domNode );
             }
-        ], true );
+        ] );
     } );
     
     /*---------------------------------------------------------------------------*
