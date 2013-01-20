@@ -259,9 +259,10 @@ phet.scene = phet.scene || {};
                 }
             } );
             
-            this._strokedShape = shape;
-            this._strokedShapeComputed = true;
-            this._strokedShapeStyles = lineStyles;
+            // TODO: git bisect determined that caching was causing regressions. disabled for now
+            // this._strokedShape = shape;
+            // this._strokedShapeComputed = true;
+            // this._strokedShapeStyles = lineStyles;
             
             return shape;
         },
