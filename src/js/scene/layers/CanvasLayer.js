@@ -72,16 +72,7 @@ phet.scene.layers = phet.scene.layers || {};
             } );
             
             // set the context's transform to the current transformation matrix
-            var matrix = renderState.transform.getMatrix();
-            this.context.setTransform(
-                // inlined array entries
-                matrix.entries[0],
-                matrix.entries[1],
-                matrix.entries[3],
-                matrix.entries[4],
-                matrix.entries[6],
-                matrix.entries[7]
-            );
+            var matrix = renderState.transform.getMatrix().canvasSetTransform( this.context );
             
             // reset the styles so that they are re-done
             this.resetStyles();
@@ -98,15 +89,7 @@ phet.scene.layers = phet.scene.layers || {};
         
         // TODO: consider a stack-based model for transforms?
         applyTransformationMatrix: function( matrix ) {
-            this.context.transform( 
-                // inlined array entries
-                matrix.entries[0],
-                matrix.entries[1],
-                matrix.entries[3],
-                matrix.entries[4],
-                matrix.entries[6],
-                matrix.entries[7]
-            );
+            matrix.canvasAppendTransform( this.context );
         },
         
         resetStyles: function() {

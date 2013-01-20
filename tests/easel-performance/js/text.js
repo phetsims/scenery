@@ -38,5 +38,10 @@ phet.tests = phet.tests || {};
         return function( timeElapsed ) {
             
         }
-    }
+    };
+    
+    phet.tests.textBoundTesting = function( main ) {
+        // maybe getBoundingClientRect(), after appending with position: absolute top: 0, left: 0?
+        // offsetWidth / offsetHeight? -- try positioning absolutely, left0top0, then also check offsetLeft, offsetTop -- similar to getBoundingClientRect()
+    };
 })();

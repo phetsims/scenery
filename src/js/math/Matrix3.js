@@ -373,6 +373,32 @@ phet.math = phet.math || {};
             result.f = this.m12();
             
             return result;
+        },
+        
+        // sets the transform of a Canvas 2D rendering context to the affine part of this matrix
+        canvasSetTransform: function( context ) {
+            context.setTransform(
+                // inlined array entries
+                this.entries[0],
+                this.entries[1],
+                this.entries[3],
+                this.entries[4],
+                this.entries[6],
+                this.entries[7]
+            );
+        },
+        
+        // appends the affine part of this matrix to the Canvas 2D rendering context
+        canvasAppendTransform: function( context ) {
+            context.transform(
+                // inlined array entries
+                this.entries[0],
+                this.entries[1],
+                this.entries[3],
+                this.entries[4],
+                this.entries[6],
+                this.entries[7]
+            );
         }
     };
 
