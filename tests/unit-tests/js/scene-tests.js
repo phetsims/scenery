@@ -407,7 +407,7 @@
             strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
         } );
         
-        test( 'Miter limit', function() {
+        test( 'Miter limit angle: ' + ( new phet.math.Vector2( 160, 30 ).normalized().angleBetween( new phet.math.Vector2( 160, -30 ) ) * 180 / Math.PI ), function() {
             var styles = new Shape.LineStyles();
             styles.lineWidth = 30;
             
@@ -415,7 +415,19 @@
             strokeShape.moveTo( 40, 40 );
             strokeShape.lineTo( 200, 70 );
             strokeShape.lineTo( 40, 100 );
-            //console.log( new phet.math.Vector2( 160, 30 ).normalized().angleBetween( new phet.math.Vector2( 160, -30 ) ) * 180 / Math.PI );
+            var fillShape = strokeShape.getStrokedShape( styles );
+            
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
+        } );
+        
+        test( 'Miter limit angle: ' + ( new phet.math.Vector2( 160, 10 ).normalized().angleBetween( new phet.math.Vector2( 160, -10 ) ) * 180 / Math.PI ), function() {
+            var styles = new Shape.LineStyles();
+            styles.lineWidth = 30;
+            
+            var strokeShape = new Shape();
+            strokeShape.moveTo( 40, 40 );
+            strokeShape.lineTo( 200, 50 );
+            strokeShape.lineTo( 40, 60 );
             var fillShape = strokeShape.getStrokedShape( styles );
             
             strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );
