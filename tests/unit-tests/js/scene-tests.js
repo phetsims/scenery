@@ -23,16 +23,23 @@
     }
     
     // compares two pixel snapshots and uses the qunit's assert to verify they are the same
-    function snapshotEquals( a, b, threshold, message ) {
+    function snapshotEquals( a, b, threshold, message, debugFlag ) {
         var isEqual = a.width == b.width && a.height == b.height;
+        var largestDifference = 0;
         if( isEqual ) {
             for( var i = 0; i < a.data.length; i++ ) {
                 if( a.data[i] != b.data[i] && Math.abs( a.data[i] - b.data[i] ) > threshold ) {
                     // console.log( message + ": " + Math.abs( a.data[i] - b.data[i] ) );
+                    largestDifference = Math.max( largestDifference, Math.abs( a.data[i] - b.data[i] ) );
                     isEqual = false;
-                    break;
+                    // break;
                 }
             }
+        }
+        if( debugFlag && largestDifference > 0 ) {
+            var differenceDiv = document.createElement( 'div' );
+            $( differenceDiv ).text( 'Largest pixel color-channel difference: ' + largestDifference );
+            $( '#display' ).append( differenceDiv );
         }
         ok( isEqual, message );
         return isEqual;
@@ -57,12 +64,12 @@
             secondaryScene.renderScene();
             
             if( debugFlag ) {
-                var note = document.createElement( 'div' );
+                var note = document.createElement( 'h2' );
                 $( note ).text( 'Action ' + i );
                 $( '#display' ).append( note );
             }
             
-            var isEqual = snapshotEquals( snapshot( mainScene, debugFlag ), snapshot( secondaryScene, debugFlag ), 0, 'action #' + i );
+            var isEqual = snapshotEquals( snapshot( mainScene, debugFlag ), snapshot( secondaryScene, debugFlag ), 0, 'action #' + i, debugFlag );
             if( !isEqual ) {
                 break;
             }
@@ -83,14 +90,14 @@
         sceneA.renderScene();
         sceneB.renderScene();
         
-        var isEqual = snapshotEquals( snapshot( sceneA, debugFlag ), snapshot( sceneB, debugFlag ), threshold, message );
+        var isEqual = snapshotEquals( snapshot( sceneA, debugFlag ), snapshot( sceneB, debugFlag ), threshold, message, debugFlag );
         
         // TODO: consider showing if tests fail
     }
     
     function strokeEqualsFill( shapeToStroke, shapeToFill, strokeNodeSetup, message, debugFlag ) {
         if( debugFlag ) {
-            var div = document.createElement( 'div' );
+            var div = document.createElement( 'h2' );
             $( div ).text( message );
             $( '#display' ).append( div );
         }
