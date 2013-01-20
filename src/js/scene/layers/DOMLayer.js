@@ -112,14 +112,12 @@ phet.scene.layers = phet.scene.layers || {};
             var url = DOMURL.createObjectURL( svg );
             delayCounts.increment();
             img.onload = function() {
-                console.log( 'onload' );
                 context.drawImage( img, 0, 0 );
                 // TODO: this loading is delayed!!! ... figure out a solution to potentially delay?
                 DOMURL.revokeObjectURL( url );
                 delayCounts.decrement();
             };
             img.src = url;
-            console.log( 'afterURL' );
         }
     };
 })();

@@ -408,7 +408,7 @@
             strokeShape.moveTo( 40, 40 );
             strokeShape.lineTo( 200, 70 );
             strokeShape.lineTo( 40, 100 );
-            console.log( new phet.math.Vector2( 160, 30 ).normalized().angleBetween( new phet.math.Vector2( 160, -30 ) ) * 180 / Math.PI );
+            //console.log( new phet.math.Vector2( 160, 30 ).normalized().angleBetween( new phet.math.Vector2( 160, -30 ) ) * 180 / Math.PI );
             var fillShape = strokeShape.getStrokedShape( styles );
             
             strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName, true );

@@ -29,8 +29,6 @@ phet.tests = phet.tests || {};
         context.font = '30px Arial';
         var metrics = context.measureText( str );
         context.fillStyle = '#ccc';
-        console.log( metrics );
-        console.log( metrics.actualBoundingBoxAscent );
         context.fillRect( x - metrics.actualBoundingBoxLeft, y - metrics.actualBoundingBoxAscent,
             x + metrics.actualBoundingBoxRight, y + metrics.actualBoundingBoxDescent );
         context.fillStyle = '#000';
