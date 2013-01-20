@@ -10,6 +10,9 @@ Incomplete:
     xMin => minX in Bounds2!
     refreshLayers implementation
     Think about multiple view implementations!
+    
+    phet.scene.canvasAccurateBounds should have non-important dimensions scaled each run for more accurately determined bounds
+        * Work around Chrome issue for text? Seems to be working fine for other shapes
 
     Test-based-dev? for Update vs Render
     Don't remove deprecated Rectangle 'class' - but copy over other non-completed function calls
