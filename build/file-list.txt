@@ -31,4 +31,5 @@ src/js/scene/Node.js
 src/js/scene/Scene.js
 src/js/scene/RenderState.js
 src/js/scene/layers/CanvasLayer.js
+src/js/scene/layers/DOMLayer.js
 src/js/scene/nodes/Rectangle.js

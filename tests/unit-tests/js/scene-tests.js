@@ -247,6 +247,22 @@
         ] );
     } );
     
+    test( 'Update vs Full Stroke Repaint', function() {
+        updateVsFullRender( [
+            function( scene ) {
+                // TODO: clearer way of specifying parameters
+                var node = new phet.scene.Node();
+                node.setShape( phet.scene.Shape.rectangle( 15, 15, canvasWidth / 2, canvasHeight / 2 ) );
+                node.setFill( '#ff0000' );
+                node.setStroke( '#000000' );
+                node.setLineWidth( 10 );
+                scene.root.addChild( node );
+            }, function( scene ) {
+                scene.root.children[0].translate( canvasWidth / 4, canvasHeight / 4 );
+            }
+        ], true );
+    } );
+    
     /*---------------------------------------------------------------------------*
     * Shapes
     *----------------------------------------------------------------------------*/        
@@ -413,23 +429,23 @@
     })();
     
     /*---------------------------------------------------------------------------*
-    * TODO
+    * DOM
     *----------------------------------------------------------------------------*/        
     
-    module( 'Canvas Scene TODO' );
+    module( 'DOM Layers' );
     
-    test( 'Update vs Full Stroke Repaint', function() {
+    test( 'DOM Test', function() {
         updateVsFullRender( [
             function( scene ) {
-                // TODO: clearer way of specifying parameters
                 var node = new phet.scene.Node();
-                node.setShape( phet.scene.Shape.rectangle( 15, 15, canvasWidth / 2, canvasHeight / 2 ) );
+                node.setShape( phet.scene.Shape.rectangle( 0, 0, canvasWidth / 3, canvasHeight / 3 ) );
                 node.setFill( '#ff0000' );
                 node.setStroke( '#000000' );
-                node.setLineWidth( 10 );
                 scene.root.addChild( node );
-            }, function( scene ) {
-                scene.root.children[0].translate( canvasWidth / 4, canvasHeight / 4 );
+                
+                var domNode = new phet.scene.Node();
+                domNode.setLayerType( phet.scene.layers.DOMLayer );
+                node.addChild( domNode );
             }
         ] );
     } );
