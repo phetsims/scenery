@@ -447,7 +447,7 @@
                 domNode.setLayerType( phet.scene.layers.DOMLayer );
                 node.addChild( domNode );
             }
-        ] );
+        ], true );
     } );
     
     /*---------------------------------------------------------------------------*
