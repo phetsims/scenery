@@ -23,6 +23,11 @@ Incomplete:
     Canvas fill gradients / patterns
         * Can we abstract this across SVG also?
 
+User interaction Design:
+    Can swipe "through" an object to start dragging it
+    Can simultaneously move multiple objects / controls
+    Can zoom / pan -- how to determine when user gestures can do this?
+
 Performance:
     Consider child counts, so that we can decide which layers to keep in a layer rebuild?
     Piece improvements with direct piece.render calls instead of switch? -- profile
