@@ -7,6 +7,8 @@ Bugs:
         Chrome 24.0.1312.52 m bug in zooming fillText() -- mobile Safari OK (maybe different from webkit, since it's not antialiased?)
 
 Incomplete:
+    * Layering proof-of-concepts, advantages (performance, DOM integration, etc.)
+    
     refreshLayers implementation
     Think about multiple view implementations!
     Static analysis - linter - integrated into build?
