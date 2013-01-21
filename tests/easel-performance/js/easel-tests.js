@@ -96,6 +96,12 @@ $(document).ready( function() {
                 return phet.tests.textBounds( main )
             }
         },{
+            typeName: 'Scene Text',
+            typeId: 'texty',
+            init: function( main ) {
+                return phet.tests.textBoundTesting( main )
+            }
+        },{
             typeName: 'Winding', // pure black and lighter blue will appear if the fillRule property exists in the Canvas 2d context
             typeId: 'winding',
             init: function( main ) {

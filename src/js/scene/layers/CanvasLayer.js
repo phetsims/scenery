@@ -99,6 +99,11 @@ phet.scene.layers = phet.scene.layers || {};
             this.lineCap = 'butt'; // default 'butt';
             this.lineJoin = 'miter';
             this.miterLimit = 10;
+            
+            this.font = '10px sans-serif';
+            this.textAlign = 'start';
+            this.textBaseline = 'alphabetic';
+            this.direction = 'inherit';
         },
         
         // returns next zIndex in place. allows layers to take up more than one single zIndex
@@ -183,6 +188,34 @@ phet.scene.layers = phet.scene.layers || {};
             if( this.lineJoin != join ) {
                 this.lineJoin = join;
                 this.context.lineJoin = join;
+            }
+        },
+        
+        setFont: function( font ) {
+            if( this.font != font ) {
+                this.font = font;
+                this.context.font = font;
+            }
+        },
+        
+        setTextAlign: function( textAlign ) {
+            if( this.textAlign != textAlign ) {
+                this.textAlign = textAlign;
+                this.context.textAlign = textAlign;
+            }
+        },
+        
+        setTextBaseline: function( textBaseline ) {
+            if( this.textBaseline != textBaseline ) {
+                this.textBaseline = textBaseline;
+                this.context.textBaseline = textBaseline;
+            }
+        },
+        
+        setDirection: function( direction ) {
+            if( this.direction != direction ) {
+                this.direction = direction;
+                this.context.direction = direction;
             }
         },
         

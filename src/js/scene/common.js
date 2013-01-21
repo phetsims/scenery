@@ -24,6 +24,7 @@ phet.scene = phet.scene || {};
     // drawingStyles should include font, textAlign, textBaseline, direction
     // textAlign = 'left', textBaseline = 'alphabetic' and direction = 'ltr' are recommended
 	phet.scene.canvasTextBoundsAccurate = function( text, fontDrawingStyles ) {
+        phet.assert( fontDrawingStyles !== undefined );
         return phet.scene.canvasAccurateBounds( function( context ) {
             // TODO: way to apply font drawing styles?
             context.font = fontDrawingStyles.font;

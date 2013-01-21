@@ -617,8 +617,24 @@ phet.scene = phet.scene || {};
         },
         
         // override for computation of whether a point is inside the content rendered in renderSelf
+        // point is considered to be in the local coordinate frame
         containsPointSelf: function( point ) {
-            return false;
+            if( this.hasShape() ) {
+                return this._shape.containsPoint( point );
+            } else {
+                // if self bounds are not null default to checking self bounds
+                return this._selfBounds.containsPoint( point );
+            }
+        },
+        
+        // whether this node's self intersects the specified bounds, in the local coordinate frame
+        intersectsBoundsSelf: function( bounds ) {
+            if( this.hasShape() ) {
+                return this._shape.intersectsBounds( bounds );
+            } else {
+                // if self bounds are not null, child should override this
+                return this._selfBounds.intersectsBounds( bounds );
+            }
         },
         
         hasShape: function() {

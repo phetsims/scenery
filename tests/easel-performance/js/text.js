@@ -48,5 +48,22 @@ phet.tests = phet.tests || {};
     phet.tests.textBoundTesting = function( main ) {
         // maybe getBoundingClientRect(), after appending with position: absolute top: 0, left: 0?
         // offsetWidth / offsetHeight? -- try positioning absolutely, left0top0, then also check offsetLeft, offsetTop -- similar to getBoundingClientRect()
+        
+        var scene = new phet.scene.Scene( main );
+        var root = scene.root;
+        
+        var text = new phet.scene.nodes.Text( "Now with text!" );
+        text.fill = '#000000';
+        root.addChild( text );
+        
+        // center the root
+        root.translate( main.width() / 2, main.height() / 2 );
+        
+        // return step function
+        return function( timeElapsed ) {
+            text.rotate( timeElapsed );
+            
+            scene.updateScene();
+        }
     };
 })();

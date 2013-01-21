@@ -119,6 +119,16 @@ phet.scene = phet.scene || {};
             }
         },
         
+        containsPoint: function( point ) {
+            // TODO:
+            return false;
+        },
+        
+        intersectsBounds: function( bounds ) {
+            // TODO:
+            return false;
+        },
+        
         // returns a new Shape that is an outline of the stroked path of this current Shape. currently not intended to be nested (doesn't do intersection computations yet)
         getStrokedShape: function( lineStyles ) {
             if( lineStyles === undefined ) {

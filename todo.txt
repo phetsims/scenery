@@ -9,10 +9,11 @@ Bugs:
 Next:
     * Layering proof-of-concepts, advantages (performance, DOM integration, etc.)
     * Text nodes (use current "slow-but-accurate" method for bounds)
+        * How to handle multi-ling strings? SVG for that?
     * Image nodes
     * DOM nodes
     * Events
-        * Shape hit regions
+        * Shape hit regions (containsPoint/intersectsBounds)
         * Flags for whether strokes are considered for hit regions (use full text bounds as hit for now)
         * Investigate hit testing against DOM nodes
     * Accessibility / shadow DOM
@@ -21,6 +22,7 @@ Incomplete:
     refreshLayers implementation
     Think about multiple view implementations!
     Static analysis - linter - integrated into build?
+    Vet recursive bounds code against empty area
     
     Test-based-dev? for Update vs Render
     Don't remove deprecated Rectangle 'class' - but copy over other non-completed function calls
