@@ -275,6 +275,22 @@
         ] );
     } );
     
+    test( 'Correct bounds on rectangle', function() {
+        var rectBounds = phet.scene.canvasAccurateBounds( function( context ) { context.fillRect( 100, 100, 200, 200 ); } );
+        ok( Math.abs( rectBounds.xMin - 100 ) < 0.01, rectBounds.xMin );
+        ok( Math.abs( rectBounds.yMin - 100 ) < 0.01, rectBounds.yMin );
+        ok( Math.abs( rectBounds.xMax - 300 ) < 0.01, rectBounds.xMax );
+        ok( Math.abs( rectBounds.yMax - 300 ) < 0.01, rectBounds.yMax );
+    } );
+    
+    test( 'Consistent and precise bounds range on Text', function() {
+        var textBounds = phet.scene.canvasAccurateBounds( function( context ) { context.fillText( 'test string', 0, 0 ); } );
+        ok( textBounds.isConsistent, textBounds.toString() );
+        
+        // precision of 0.001 (or lower given different parameters) is possible on non-Chome browsers (Firefox, IE9, Opera)
+        ok( textBounds.precision < 0.15, 'precision: ' + textBounds.precision );
+    } );
+    
     /*---------------------------------------------------------------------------*
     * Shapes
     *----------------------------------------------------------------------------*/        
