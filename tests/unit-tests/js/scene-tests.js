@@ -7,6 +7,23 @@
     var canvasWidth = 320;
     var canvasHeight = 240;
     
+    var unicodeTestStrings = [
+        "This is a test",
+        "Newline\nJaggies?",
+        "\u222b",
+        "\ufdfa",
+        "\u00a7",
+        "\u00C1",
+        "\u00FF",
+        "\u03A9",
+        "\u0906",
+        "\u79C1",
+        "\u9054",
+        "A\u030a\u0352\u0333\u0325\u0353\u035a\u035e\u035e",
+        "0\u0489",
+        "\u2588"
+    ];
+    
     // takes a snapshot of a scene and stores the pixel data, so that we can compare them
     function snapshot( scene ) {
         var canvas = document.createElement( 'canvas' );
@@ -121,6 +138,54 @@
             node.setFill( '#000000' );
             scene.root.addChild( node );
         }, message, 128 ); // threshold of 128 due to antialiasing differences between fill and stroke... :(
+    }
+    
+    function testTextBounds( getBoundsOfText, fontDrawingStyles, message ) {
+        var precision = 1;
+        var title = document.createElement( 'h2' );
+        $( title ).text( message );
+        $( '#display' ).append( title );
+        _.each( unicodeTestStrings, function( testString ) {
+            var testBounds = getBoundsOfText( testString, fontDrawingStyles );
+            var bestBounds = phet.scene.canvasTextBoundsAccurate( testString, fontDrawingStyles );
+            
+            var widthOk = Math.abs( testBounds.width() - bestBounds.width() ) < precision;
+            var heightOk = Math.abs( testBounds.height() - bestBounds.height() ) < precision;
+            var xOk = Math.abs( testBounds.x() - bestBounds.x() ) < precision;
+            var yOk = Math.abs( testBounds.y() - bestBounds.y() ) < precision;
+            
+            var allOk = widthOk && heightOk && xOk && yOk;
+            
+            ok( widthOk, testString + ' width error: ' + Math.abs( testBounds.width() - bestBounds.width() ) );
+            ok( heightOk, testString + ' height error: ' + Math.abs( testBounds.height() - bestBounds.height() ) );
+            ok( xOk, testString + ' x error: ' + Math.abs( testBounds.x() - bestBounds.x() ) );
+            ok( yOk, testString + ' y error: ' + Math.abs( testBounds.y() - bestBounds.y() ) );
+            
+            // show any failures
+            var pad = 5;
+            var scaling = 4; // scale it for display accuracy
+            var canvas = document.createElement( 'canvas' );
+            canvas.width = Math.ceil( bestBounds.width() + pad * 2 ) * scaling;
+            canvas.height = Math.ceil( bestBounds.height() + pad * 2 ) * scaling;
+            var context = phet.canvas.initCanvas( canvas );
+            context.scale( scaling, scaling );
+            context.translate( pad - bestBounds.x(), pad - bestBounds.y() ); // center the text in our bounds
+            
+            // background bounds
+            context.fillStyle = allOk ? '#ccffcc' : '#ffcccc'; // red/green depending on whether it passed
+            context.fillRect( testBounds.x(), testBounds.y(), testBounds.width(), testBounds.height() );
+            
+            // text on top
+            context.fillStyle = 'rgba(0,0,0,0.7)';
+            context.font = fontDrawingStyles.font;
+            context.textAlign = fontDrawingStyles.textAlign;
+            context.textBaseline = fontDrawingStyles.textBaseline;
+            context.direction = fontDrawingStyles.direction;
+            context.fillText( testString, 0, 0 );
+            
+            $( canvas ).css( 'border', '1px solid black' );
+            $( '#display' ).append( canvas );
+        } );
     }
     
     /*---------------------------------------------------------------------------*
@@ -463,6 +528,21 @@
             strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
         } );
     })();
+    
+    /*---------------------------------------------------------------------------*
+    * Text
+    *----------------------------------------------------------------------------*/        
+    
+    module( 'Text' );
+    
+    test( 'Canvas Accurate Text Bounds', function() {
+        testTextBounds( phet.scene.canvasTextBoundsAccurate, {
+            font: '10px sans-serif',
+            textAlign: 'left', // left is not the default, 'start' is
+            textBaseline: 'alphabetic',
+            direction: 'ltr'
+        }, QUnit.config.current.testName );
+    } );
     
     /*---------------------------------------------------------------------------*
     * DOM

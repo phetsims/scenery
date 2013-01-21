@@ -24,7 +24,8 @@ phet.tests = phet.tests || {};
         
         var x = 10;
         var y = 100;
-        var str = "This is a test string";
+        // var str = "This is a test string";
+        var str = "This is a test string \u222b \ufdfa \u00a7 \u00C1 \u00FF \u03A9 \u0906 \u79C1 \u9054 A\u030a\u0352\u0333\u0325\u0353\u035a\u035e\u035e 0\u0489 \u2588";
         
         context.font = '30px Arial';
         var metrics = context.measureText( str );
@@ -32,7 +33,7 @@ phet.tests = phet.tests || {};
         context.fillRect( x - metrics.actualBoundingBoxLeft, y - metrics.actualBoundingBoxAscent,
             x + metrics.actualBoundingBoxRight, y + metrics.actualBoundingBoxDescent );
         context.fillStyle = '#000';
-        context.fillText( str, x, y, 500 );
+        context.fillText( str, x, y );
         
         var testTransform = phet.math.Matrix3.translation( 50, 150 ).timesMatrix( phet.math.Matrix3.scaling( 10, 0.1 ) );
         testTransform.canvasSetTransform( context );

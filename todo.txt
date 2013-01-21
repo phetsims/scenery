@@ -11,16 +11,11 @@ Incomplete:
     Think about multiple view implementations!
     Static analysis - linter - integrated into build?
     
-    phet.scene.canvasAccurateBounds should have non-important dimensions scaled each run for more accurately determined bounds
-        * Work around Chrome issue for text? Seems to be working fine for other shapes
-
     Test-based-dev? for Update vs Render
     Don't remove deprecated Rectangle 'class' - but copy over other non-completed function calls
         
     Ability to update size of canvas, etc.
-    Shape hit regions, fix miterLimit?
-        * BEWARE: IE9 seems to have buggy miterLimit calculation, arcTo might be bad also
-        * See http://weblog.bocoup.com/canvas-in-ie9-too-good-to-be-true/
+    Shape hit regions
     Flags for whether text / strokes are considered for hit regions
     Investigate getImageData for fonts (both hit regions and bounds)
     Visibility interaction with dirty paint / bounds, and events based on that
@@ -63,6 +58,7 @@ Features:
     Clipping => Dead region handling (clipping needs to be stored in a shape array since it can only be intersected or reset in Canvas)
     Color handling?
     Investigate DAG version?
+    Include MathJax text?
 
 Cleanliness / Debugging:
     *** Debug layer
