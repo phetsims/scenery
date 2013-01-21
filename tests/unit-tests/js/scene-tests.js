@@ -277,10 +277,10 @@
     
     test( 'Correct bounds on rectangle', function() {
         var rectBounds = phet.scene.canvasAccurateBounds( function( context ) { context.fillRect( 100, 100, 200, 200 ); } );
-        ok( Math.abs( rectBounds.xMin - 100 ) < 0.01, rectBounds.xMin );
-        ok( Math.abs( rectBounds.yMin - 100 ) < 0.01, rectBounds.yMin );
-        ok( Math.abs( rectBounds.xMax - 300 ) < 0.01, rectBounds.xMax );
-        ok( Math.abs( rectBounds.yMax - 300 ) < 0.01, rectBounds.yMax );
+        ok( Math.abs( rectBounds.minX - 100 ) < 0.01, rectBounds.minX );
+        ok( Math.abs( rectBounds.minY - 100 ) < 0.01, rectBounds.minY );
+        ok( Math.abs( rectBounds.maxX - 300 ) < 0.01, rectBounds.maxX );
+        ok( Math.abs( rectBounds.maxY - 300 ) < 0.01, rectBounds.maxY );
     } );
     
     test( 'Consistent and precise bounds range on Text', function() {

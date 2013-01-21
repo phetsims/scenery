@@ -301,7 +301,7 @@ phet.scene = phet.scene || {};
     Shape.rect = Shape.rectangle;
     
     Shape.bounds = function( bounds ) {
-        return new Shape().rect( p( bounds.xMin, bounds.yMin ), p( bounds.xMax, bounds.yMax ) );
+        return new Shape().rect( p( bounds.minX, bounds.minY ), p( bounds.maxX, bounds.maxY ) );
     };
     
     Shape.lineSegment = function( a, b ) {

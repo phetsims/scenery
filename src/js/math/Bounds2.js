@@ -15,11 +15,11 @@ phet.math = phet.math || {};
     var Vector2 = phet.math.Vector2;
     
     // not using x,y,width,height so that it can handle infinity-based cases in a better way
-    phet.math.Bounds2 = function( xMin, yMin, xMax, yMax ) {
-        this.xMin = xMin;
-        this.yMin = yMin;
-        this.xMax = xMax;
-        this.yMax = yMax;
+    phet.math.Bounds2 = function( minX, minY, maxX, maxY ) {
+        this.minX = minX;
+        this.minY = minY;
+        this.maxX = maxX;
+        this.maxY = maxY;
     };
 
     var Bounds2 = phet.math.Bounds2;
@@ -28,29 +28,29 @@ phet.math = phet.math || {};
         constructor: Bounds2,
         
         // properties of this bounding box
-        width: function() { return this.xMax - this.xMin; },
-        height: function() { return this.yMax - this.yMin; },
-        x: function() { return this.xMin; },
-        y: function() { return this.yMin; },
-        centerX: function() { return ( this.xMax + this.xMin ) / 2; },
-        centerY: function() { return ( this.yMax + this.yMin ) / 2; },
+        width: function() { return this.maxX - this.minX; },
+        height: function() { return this.maxY - this.minY; },
+        x: function() { return this.minX; },
+        y: function() { return this.minY; },
+        centerX: function() { return ( this.maxX + this.minX ) / 2; },
+        centerY: function() { return ( this.maxY + this.minY ) / 2; },
         isEmpty: function() { return this.width() <= 0 || this.height() <= 0; },
         
         // immutable operations (bounding-box style handling, so that the relevant bounds contain everything)
         union: function( other ) {
             return new Bounds2(
-                Math.min( this.xMin, other.xMin ),
-                Math.min( this.yMin, other.yMin ),
-                Math.max( this.xMax, other.xMax ),
-                Math.max( this.yMax, other.yMax )
+                Math.min( this.minX, other.minX ),
+                Math.min( this.minY, other.minY ),
+                Math.max( this.maxX, other.maxX ),
+                Math.max( this.maxY, other.maxY )
             );
         },
         intersection: function( other ) {
             return new Bounds2(
-                Math.max( this.xMin, other.xMin ),
-                Math.max( this.yMin, other.yMin ),
-                Math.min( this.xMax, other.xMax ),
-                Math.min( this.yMax, other.yMax )
+                Math.max( this.minX, other.minX ),
+                Math.max( this.minY, other.minY ),
+                Math.min( this.maxX, other.maxX ),
+                Math.min( this.maxY, other.maxY )
             );
         },
         // TODO: difference should be well-defined, but more logic is needed to compute
@@ -58,46 +58,46 @@ phet.math = phet.math || {};
         // like a union with a point-sized bounding box
         withPoint: function( point ) {
             return new Bounds2(
-                Math.min( this.xMin, point.x ),
-                Math.min( this.yMin, point.y ),
-                Math.max( this.xMax, point.x ),
-                Math.max( this.yMax, point.y )
+                Math.min( this.minX, point.x ),
+                Math.min( this.minY, point.y ),
+                Math.max( this.maxX, point.x ),
+                Math.max( this.maxY, point.y )
             );
         },
         
-        withMinX: function( minX ) { return new Bounds2( minX, this.yMin, this.xMax, this.yMax ); },
-        withMinY: function( minY ) { return new Bounds2( this.xMin, minY, this.xMax, this.yMax ); },
-        withMaxX: function( maxX ) { return new Bounds2( this.xMin, this.yMin, maxX, this.yMax ); },
-        withMaxY: function( maxY ) { return new Bounds2( this.xMin, this.yMin, this.xMax, maxY ); },
+        withMinX: function( minX ) { return new Bounds2( minX, this.minY, this.maxX, this.maxY ); },
+        withMinY: function( minY ) { return new Bounds2( this.minX, minY, this.maxX, this.maxY ); },
+        withMaxX: function( maxX ) { return new Bounds2( this.minX, this.minY, maxX, this.maxY ); },
+        withMaxY: function( maxY ) { return new Bounds2( this.minX, this.minY, this.maxX, maxY ); },
         
         // copy rounded to integral values, expanding where necessary
         roundedOut: function() {
             return new Bounds2(
-                Math.floor( this.xMin ),
-                Math.floor( this.yMin ),
-                Math.ceil( this.xMax ),
-                Math.ceil( this.yMax )
+                Math.floor( this.minX ),
+                Math.floor( this.minY ),
+                Math.ceil( this.maxX ),
+                Math.ceil( this.maxY )
             );
         },
         
         // copy rounded to integral values, contracting where necessary
         roundedIn: function() {
             return new Bounds2(
-                Math.ceil( this.xMin ),
-                Math.ceil( this.yMin ),
-                Math.floor( this.xMax ),
-                Math.floor( this.yMax )
+                Math.ceil( this.minX ),
+                Math.ceil( this.minY ),
+                Math.floor( this.maxX ),
+                Math.floor( this.maxY )
             );
         },
         
         // whether the point is inside the bounding box
         containsPoint: function( point ) {
-            return this.xMin <= point.x && point.x <= this.xMax && this.yMin <= point.y && point.y <= this.yMax;
+            return this.minX <= point.x && point.x <= this.maxX && this.minY <= point.y && point.y <= this.maxY;
         },
         
         // whether this bounding box completely contains the argument bounding box
         containsBounds: function( bounds ) {
-            return this.xMin <= bounds.xMin && this.xMax >= bounds.xMax && this.yMin <= bounds.yMin && this.yMax >= bounds.yMax;
+            return this.minX <= bounds.minX && this.maxX >= bounds.maxX && this.minY <= bounds.minY && this.maxY >= bounds.maxY;
         },
         
         intersectsBounds: function( bounds ) {
@@ -114,16 +114,16 @@ phet.math = phet.math || {};
             var result = Bounds2.NOTHING;
             
             // make sure all 4 corners are inside this transformed bounding box
-            result = result.withPoint( matrix.timesVector2( new Vector2( this.xMin, this.yMin ) ) );
-            result = result.withPoint( matrix.timesVector2( new Vector2( this.xMin, this.yMax ) ) );
-            result = result.withPoint( matrix.timesVector2( new Vector2( this.xMax, this.yMin ) ) );
-            result = result.withPoint( matrix.timesVector2( new Vector2( this.xMax, this.yMax ) ) );
+            result = result.withPoint( matrix.timesVector2( new Vector2( this.minX, this.minY ) ) );
+            result = result.withPoint( matrix.timesVector2( new Vector2( this.minX, this.maxY ) ) );
+            result = result.withPoint( matrix.timesVector2( new Vector2( this.maxX, this.minY ) ) );
+            result = result.withPoint( matrix.timesVector2( new Vector2( this.maxX, this.maxY ) ) );
             return result;
         },
         
         // returns copy expanded on all sides by length d
         dilated: function( d ) {
-            return new Bounds2( this.xMin - d, this.yMin - d, this.xMax + d, this.yMax + d );
+            return new Bounds2( this.minX - d, this.minY - d, this.maxX + d, this.maxY + d );
         },
         
         // returns copy contracted on all sides by length d
@@ -132,11 +132,11 @@ phet.math = phet.math || {};
         },
 
         toString: function () {
-            return '[x:(' + this.xMin + ',' + this.xMax + '),y:(' + this.yMin + ',' + this.yMax + ')]';
+            return '[x:(' + this.minX + ',' + this.maxX + '),y:(' + this.minY + ',' + this.maxY + ')]';
         },
 
         equals: function ( other ) {
-            return this.xMin === other.xMin && this.yMin === other.yMin && this.xMax === other.xMax && this.yMax === other.yMax;
+            return this.minX === other.minX && this.minY === other.minY && this.maxX === other.maxX && this.maxY === other.maxY;
         }
     };
     

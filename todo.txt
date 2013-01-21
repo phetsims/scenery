@@ -7,7 +7,6 @@ Bugs:
         Chrome 24.0.1312.52 m bug in zooming fillText() -- mobile Safari OK (maybe different from webkit, since it's not antialiased?)
 
 Incomplete:
-    xMin => minX in Bounds2!
     refreshLayers implementation
     Think about multiple view implementations!
     Static analysis - linter - integrated into build?
@@ -68,7 +67,7 @@ Features:
 Cleanliness / Debugging:
     *** Debug layer
     x,y vs point handling for translation etc. since we lack overriding?
-    Bounds2: rename styling from xMin to minX
+    Bounds2: rename styling from minX to minX
     Ability to create a debugging dump of scene graph
     Unit tests using canvas pixel querying
     Debugging traces removed with Closure compiler?

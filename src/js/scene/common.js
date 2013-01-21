@@ -140,10 +140,10 @@ phet.scene = phet.scene || {};
             // so that the bounds-edge doesn't land squarely on the boundary
             var borderSize = 2;
             
-            var scaleX = ( resolution - borderSize * 2 ) / ( bounds.xMax - bounds.xMin );
-            var scaleY = ( resolution - borderSize * 2 ) / ( bounds.yMax - bounds.yMin );
-            var translationX = -scaleX * bounds.xMin + borderSize;
-            var translationY = -scaleY * bounds.yMin + borderSize;
+            var scaleX = ( resolution - borderSize * 2 ) / ( bounds.maxX - bounds.minX );
+            var scaleY = ( resolution - borderSize * 2 ) / ( bounds.maxY - bounds.minY );
+            var translationX = -scaleX * bounds.minX + borderSize;
+            var translationY = -scaleY * bounds.minY + borderSize;
             
             return new Transform3( Matrix3.translation( translationX, translationY ).timesMatrix( Matrix3.scaling( scaleX, scaleY ) ) );
         }
@@ -160,82 +160,82 @@ phet.scene = phet.scene || {};
         
         var tempMin, tempMax;
         
-        // xMin
-        tempMin = maxBounds.yMin;
-        tempMax = maxBounds.yMax;
-        while( isFinite( minBounds.xMin ) && isFinite( maxBounds.xMin ) && Math.abs( minBounds.xMin - maxBounds.xMin ) > precision ) {
+        // minX
+        tempMin = maxBounds.minY;
+        tempMax = maxBounds.maxY;
+        while( isFinite( minBounds.minX ) && isFinite( maxBounds.minX ) && Math.abs( minBounds.minX - maxBounds.minX ) > precision ) {
             // use maximum bounds except for the x direction, so we don't miss things that we are looking for
-            var refinedBounds = scan( idealTransform( new Bounds2( maxBounds.xMin, tempMin, minBounds.xMin, tempMax ) ) );
+            var refinedBounds = scan( idealTransform( new Bounds2( maxBounds.minX, tempMin, minBounds.minX, tempMax ) ) );
             
-            if( minBounds.xMin <= refinedBounds.minBounds.xMin && maxBounds.xMin >= refinedBounds.maxBounds.xMin ) {
+            if( minBounds.minX <= refinedBounds.minBounds.minX && maxBounds.minX >= refinedBounds.maxBounds.minX ) {
                 // sanity check - break out of an infinite loop!
                 console.log( 'warning, exiting infinite loop!' );
-                console.log( 'transformed "min" xMin: ' + idealTransform( new Bounds2( maxBounds.xMin, maxBounds.yMin, minBounds.xMin, maxBounds.yMax ) ).transformPosition2( p( minBounds.xMin, 0 ) ) );
-                console.log( 'transformed "max" xMin: ' + idealTransform( new Bounds2( maxBounds.xMin, maxBounds.yMin, minBounds.xMin, maxBounds.yMax ) ).transformPosition2( p( maxBounds.xMin, 0 ) ) );
+                console.log( 'transformed "min" minX: ' + idealTransform( new Bounds2( maxBounds.minX, maxBounds.minY, minBounds.minX, maxBounds.maxY ) ).transformPosition2( p( minBounds.minX, 0 ) ) );
+                console.log( 'transformed "max" minX: ' + idealTransform( new Bounds2( maxBounds.minX, maxBounds.minY, minBounds.minX, maxBounds.maxY ) ).transformPosition2( p( maxBounds.minX, 0 ) ) );
                 break;
             }
             
-            minBounds = minBounds.withMinX( Math.min( minBounds.xMin, refinedBounds.minBounds.xMin ) );
-            maxBounds = maxBounds.withMinX( Math.max( maxBounds.xMin, refinedBounds.maxBounds.xMin ) );
-            tempMin = Math.max( tempMin, refinedBounds.maxBounds.yMin );
-            tempMax = Math.min( tempMax, refinedBounds.maxBounds.yMax );
+            minBounds = minBounds.withMinX( Math.min( minBounds.minX, refinedBounds.minBounds.minX ) );
+            maxBounds = maxBounds.withMinX( Math.max( maxBounds.minX, refinedBounds.maxBounds.minX ) );
+            tempMin = Math.max( tempMin, refinedBounds.maxBounds.minY );
+            tempMax = Math.min( tempMax, refinedBounds.maxBounds.maxY );
         }
         
-        // xMax
-        tempMin = maxBounds.yMin;
-        tempMax = maxBounds.yMax;
-        while( isFinite( minBounds.xMax ) && isFinite( maxBounds.xMax ) && Math.abs( minBounds.xMax - maxBounds.xMax ) > precision ) {
+        // maxX
+        tempMin = maxBounds.minY;
+        tempMax = maxBounds.maxY;
+        while( isFinite( minBounds.maxX ) && isFinite( maxBounds.maxX ) && Math.abs( minBounds.maxX - maxBounds.maxX ) > precision ) {
             // use maximum bounds except for the x direction, so we don't miss things that we are looking for
-            var refinedBounds = scan( idealTransform( new Bounds2( minBounds.xMax, tempMin, maxBounds.xMax, tempMax ) ) );
+            var refinedBounds = scan( idealTransform( new Bounds2( minBounds.maxX, tempMin, maxBounds.maxX, tempMax ) ) );
             
-            if( minBounds.xMax >= refinedBounds.minBounds.xMax && maxBounds.xMax <= refinedBounds.maxBounds.xMax ) {
+            if( minBounds.maxX >= refinedBounds.minBounds.maxX && maxBounds.maxX <= refinedBounds.maxBounds.maxX ) {
                 // sanity check - break out of an infinite loop!
                 console.log( 'warning, exiting infinite loop!' );
                 break;
             }
             
-            minBounds = minBounds.withMaxX( Math.max( minBounds.xMax, refinedBounds.minBounds.xMax ) );
-            maxBounds = maxBounds.withMaxX( Math.min( maxBounds.xMax, refinedBounds.maxBounds.xMax ) );
-            tempMin = Math.max( tempMin, refinedBounds.maxBounds.yMin );
-            tempMax = Math.min( tempMax, refinedBounds.maxBounds.yMax );
+            minBounds = minBounds.withMaxX( Math.max( minBounds.maxX, refinedBounds.minBounds.maxX ) );
+            maxBounds = maxBounds.withMaxX( Math.min( maxBounds.maxX, refinedBounds.maxBounds.maxX ) );
+            tempMin = Math.max( tempMin, refinedBounds.maxBounds.minY );
+            tempMax = Math.min( tempMax, refinedBounds.maxBounds.maxY );
         }
         
-        // yMin
-        tempMin = maxBounds.xMin;
-        tempMax = maxBounds.xMax;
-        while( isFinite( minBounds.yMin ) && isFinite( maxBounds.yMin ) && Math.abs( minBounds.yMin - maxBounds.yMin ) > precision ) {
+        // minY
+        tempMin = maxBounds.minX;
+        tempMax = maxBounds.maxX;
+        while( isFinite( minBounds.minY ) && isFinite( maxBounds.minY ) && Math.abs( minBounds.minY - maxBounds.minY ) > precision ) {
             // use maximum bounds except for the y direction, so we don't miss things that we are looking for
-            var refinedBounds = scan( idealTransform( new Bounds2( tempMin, maxBounds.yMin, tempMax, minBounds.yMin ) ) );
+            var refinedBounds = scan( idealTransform( new Bounds2( tempMin, maxBounds.minY, tempMax, minBounds.minY ) ) );
             
-            if( minBounds.yMin <= refinedBounds.minBounds.yMin && maxBounds.yMin >= refinedBounds.maxBounds.yMin ) {
+            if( minBounds.minY <= refinedBounds.minBounds.minY && maxBounds.minY >= refinedBounds.maxBounds.minY ) {
                 // sanity check - break out of an infinite loop!
                 console.log( 'warning, exiting infinite loop!' );
                 break;
             }
             
-            minBounds = minBounds.withMinY( Math.min( minBounds.yMin, refinedBounds.minBounds.yMin ) );
-            maxBounds = maxBounds.withMinY( Math.max( maxBounds.yMin, refinedBounds.maxBounds.yMin ) );
-            tempMin = Math.max( tempMin, refinedBounds.maxBounds.xMin );
-            tempMax = Math.min( tempMax, refinedBounds.maxBounds.xMax );
+            minBounds = minBounds.withMinY( Math.min( minBounds.minY, refinedBounds.minBounds.minY ) );
+            maxBounds = maxBounds.withMinY( Math.max( maxBounds.minY, refinedBounds.maxBounds.minY ) );
+            tempMin = Math.max( tempMin, refinedBounds.maxBounds.minX );
+            tempMax = Math.min( tempMax, refinedBounds.maxBounds.maxX );
         }
         
-        // yMax
-        tempMin = maxBounds.xMin;
-        tempMax = maxBounds.xMax;
-        while( isFinite( minBounds.yMax ) && isFinite( maxBounds.yMax ) && Math.abs( minBounds.yMax - maxBounds.yMax ) > precision ) {
+        // maxY
+        tempMin = maxBounds.minX;
+        tempMax = maxBounds.maxX;
+        while( isFinite( minBounds.maxY ) && isFinite( maxBounds.maxY ) && Math.abs( minBounds.maxY - maxBounds.maxY ) > precision ) {
             // use maximum bounds except for the y direction, so we don't miss things that we are looking for
-            var refinedBounds = scan( idealTransform( new Bounds2( tempMin, minBounds.yMax, tempMax, maxBounds.yMax ) ) );
+            var refinedBounds = scan( idealTransform( new Bounds2( tempMin, minBounds.maxY, tempMax, maxBounds.maxY ) ) );
             
-            if( minBounds.yMax >= refinedBounds.minBounds.yMax && maxBounds.yMax <= refinedBounds.maxBounds.yMax ) {
+            if( minBounds.maxY >= refinedBounds.minBounds.maxY && maxBounds.maxY <= refinedBounds.maxBounds.maxY ) {
                 // sanity check - break out of an infinite loop!
                 console.log( 'warning, exiting infinite loop!' );
                 break;
             }
             
-            minBounds = minBounds.withMaxY( Math.max( minBounds.yMax, refinedBounds.minBounds.yMax ) );
-            maxBounds = maxBounds.withMaxY( Math.min( maxBounds.yMax, refinedBounds.maxBounds.yMax ) );
-            tempMin = Math.max( tempMin, refinedBounds.maxBounds.xMin );
-            tempMax = Math.min( tempMax, refinedBounds.maxBounds.xMax );
+            minBounds = minBounds.withMaxY( Math.max( minBounds.maxY, refinedBounds.minBounds.maxY ) );
+            maxBounds = maxBounds.withMaxY( Math.min( maxBounds.maxY, refinedBounds.maxBounds.maxY ) );
+            tempMin = Math.max( tempMin, refinedBounds.maxBounds.minX );
+            tempMax = Math.min( tempMax, refinedBounds.maxBounds.maxX );
         }
         
         if( debugChromeBoundsScanning ) {
@@ -244,10 +244,10 @@ phet.scene = phet.scene || {};
         }
         
         var result = new Bounds2(
-            ( minBounds.xMin + maxBounds.xMin ) / 2,
-            ( minBounds.yMin + maxBounds.yMin ) / 2,
-            ( minBounds.xMax + maxBounds.xMax ) / 2,
-            ( minBounds.yMax + maxBounds.yMax ) / 2
+            ( minBounds.minX + maxBounds.minX ) / 2,
+            ( minBounds.minY + maxBounds.minY ) / 2,
+            ( minBounds.maxX + maxBounds.maxX ) / 2,
+            ( minBounds.maxY + maxBounds.maxY ) / 2
         );
         
         // extra data about our bounds
@@ -255,10 +255,10 @@ phet.scene = phet.scene || {};
         result.maxBounds = maxBounds;
         result.isConsistent = maxBounds.containsBounds( minBounds );
         result.precision = Math.max(
-            Math.abs( minBounds.xMin - maxBounds.xMin ),
-            Math.abs( minBounds.yMin - maxBounds.yMin ),
-            Math.abs( minBounds.xMax - maxBounds.xMax ),
-            Math.abs( minBounds.yMax - maxBounds.yMax )
+            Math.abs( minBounds.minX - maxBounds.minX ),
+            Math.abs( minBounds.minY - maxBounds.minY ),
+            Math.abs( minBounds.maxX - maxBounds.maxX ),
+            Math.abs( minBounds.maxY - maxBounds.maxY )
         );
         
         // return the average
