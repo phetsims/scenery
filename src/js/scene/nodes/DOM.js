@@ -10,6 +10,8 @@ var phet = phet || {};
 phet.scene = phet.scene || {};
 
 (function(){
+    "use strict";
+    
     phet.scene.DOM = function( node ) {
         phet.scene.Node.call( this );
         this.node = node;

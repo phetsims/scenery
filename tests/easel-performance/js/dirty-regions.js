@@ -3,6 +3,7 @@ var phet = phet || {};
 phet.tests = phet.tests || {};
 
 (function(){
+    "use strict";
     
     var sceneWidth = 1000;
     var sceneHeight = 500;

@@ -3,6 +3,8 @@ var phet = phet || {};
 phet.tests = phet.tests || {};
 
 (function(){
+    "use strict";
+    
     function buildBaseContext( main ) {
         var baseCanvas = document.createElement( 'canvas' );
         baseCanvas.id = 'base-canvas';

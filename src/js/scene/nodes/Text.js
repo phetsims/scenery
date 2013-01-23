@@ -10,6 +10,8 @@ var phet = phet || {};
 phet.scene = phet.scene || {};
 
 (function(){
+    "use strict";
+    
     phet.scene.Text = function( text ) {
         this._text = '';
         

@@ -11,6 +11,8 @@ phet.model = phet.model || {};
 
 // create a new scope
 (function () {
+    "use strict";
+    
     phet.model.Notifier = function () {
         this.listeners = [];
     };

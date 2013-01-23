@@ -3,6 +3,8 @@ var phet = phet || {};
 phet.tests = phet.tests || {};
 
 (function(){
+    "use strict";
+    
     // constants
     var boxSizeRatio = 0.75;
     var boxTotalSize = 200;

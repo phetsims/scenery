@@ -14,6 +14,8 @@ var phet = phet || {};
 phet.scene = phet.scene || {};
 
 (function(){
+    "use strict";
+    
     var Bounds2 = phet.math.Bounds2;
     
     // assumes main is wrapped with JQuery

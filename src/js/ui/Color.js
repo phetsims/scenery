@@ -13,6 +13,7 @@ phet.ui = phet.ui || {};
 
 // create a new scope
 (function () {
+    "use strict";
 
     // integer-based constructor
     phet.ui.Color = function ( r, g, b, a ) {

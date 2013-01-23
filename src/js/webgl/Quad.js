@@ -11,6 +11,8 @@ phet.webgl = phet.webgl || {};
 
 // create a new scope
 (function () {
+    "use strict";
+    
     phet.webgl.Quad = function ( gl, width, height, xOffset, yOffset ) {
         phet.webgl.GLNode.call( this );
 

@@ -4,6 +4,7 @@ var phet = phet || {};
 phet.scene = phet.scene || {};
 
 (function(){
+    "use strict";
     
     // TODO: remove flag and tests after we're done
     var debugChromeBoundsScanning = false;
@@ -115,9 +116,7 @@ phet.scene = phet.scene || {};
             var data = context.getImageData( 0, 0, resolution, resolution );
             var minMaxBounds = phet.scene.scanBounds( data, resolution, transform );
             
-            // TODO: remove after debug
-            if( debugChromeBoundsScanning ) {
-                function snapshotToCanvas( snapshot ) {
+            function snapshotToCanvas( snapshot ) {
                     var canvas = document.createElement( 'canvas' );
                     canvas.width = resolution;
                     canvas.height = resolution;
@@ -129,6 +128,9 @@ phet.scene = phet.scene || {};
                         $( '#display' ).append( canvas );
                     } );
                 }
+            
+            // TODO: remove after debug
+            if( debugChromeBoundsScanning ) {
                 snapshotToCanvas( data );
             }
             

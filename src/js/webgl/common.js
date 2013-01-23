@@ -4,6 +4,8 @@ var phet = phet || {};
 phet.webgl = phet.webgl || {};
 
 (function () {
+    "use strict";
+    
     phet.webgl.getShaderFromDOM = function ( gl, id ) {
         var shaderScript = document.getElementById( id );
         if ( !shaderScript ) {

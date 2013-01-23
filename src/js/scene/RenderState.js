@@ -13,6 +13,8 @@ var phet = phet || {};
 phet.scene = phet.scene || {};
 
 (function(){
+    "use strict";
+    
     phet.scene.RenderState = function( scene ) {
         this.transform = new phet.math.Transform3();
         

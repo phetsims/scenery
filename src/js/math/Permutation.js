@@ -12,6 +12,7 @@ phet.math = phet.math || {};
 
 // create a new scope
 (function () {
+    "use strict";
 
     // Creates a permutation that will rearrange a list so that newList[i] = oldList[permutation[i]]
     phet.math.Permutation = function ( indices ) {

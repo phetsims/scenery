@@ -11,6 +11,7 @@ phet.math = phet.math || {};
 
 // create a new scope
 (function () {
+    "use strict";
 
     var Matrix3 = phet.math.Matrix3;
     var Vector2 = phet.math.Vector2;

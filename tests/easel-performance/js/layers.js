@@ -3,6 +3,7 @@ var phet = phet || {};
 phet.tests = phet.tests || {};
 
 (function(){
+    "use strict";
     
     var backgroundSize = 300;
     var count = 500;

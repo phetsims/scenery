@@ -11,6 +11,8 @@ phet.webgl = phet.webgl || {};
 
 // create a new scope
 (function () {
+    "use strict";
+    
     phet.webgl.GLNode = function () {
         this.parent = null;
         this.children = [];

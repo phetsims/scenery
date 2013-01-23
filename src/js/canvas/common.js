@@ -4,6 +4,8 @@ var phet = phet || {};
 phet.canvas = phet.canvas || {};
 
 (function () {
+    "use strict";
+    
     phet.canvas.initCanvas = function ( canvas ) {
         // Initialize the variable context to null.
         var context = null;

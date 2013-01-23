@@ -7,6 +7,8 @@ phet.tests = phet.tests || {};
 // optimizations from http://www.html5rocks.com/en/tutorials/canvas/performance/
 
 $(document).ready( function() {
+    "use strict";
+    
     // the main div where all testing content is rendered
     var main = $('#main');
     var buttonRow = $('#buttonrow');
@@ -654,12 +656,13 @@ $(document).ready( function() {
         var red = 255;
         var green = ( scale > 0 ? scale : 0 );
         var blue = ( scale < 0 ? -scale : 0 );
+        
+        function combine( main, backup ) {
+            return Math.floor( main * ( 1 - blend ) + backup * blend );
+        }
 
         if( alpha !== undefined ) {
             if( blend !== undefined ) {
-                function combine( main, backup ) {
-                    return Math.floor( main * ( 1 - blend ) + backup * blend );
-                }
                 return "rgba(" + combine( red, green ) + "," + combine( green, blue ) + "," + combine( blue, red ) + "," + alpha + ")";
             } else {
                 return "rgba(" + red + "," + green + "," + blue + "," + alpha + ")";

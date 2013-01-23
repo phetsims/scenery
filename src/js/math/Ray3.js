@@ -12,6 +12,7 @@ phet.math = phet.math || {};
 
 // create a new scope
 (function () {
+    "use strict";
 
     phet.math.Ray3 = function ( pos, dir ) {
         this.pos = pos;

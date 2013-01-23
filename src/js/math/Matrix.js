@@ -11,6 +11,8 @@ phet.math = phet.math || {};
 
 // create a new scope
 (function () {
+    "use strict";
+    
     phet.math.Matrix = function ( m, n, filler, fast ) {
         this.m = m;
         this.n = n;

@@ -12,6 +12,8 @@ phet.math = phet.math || {};
 
 // create a new scope
 (function () {
+    "use strict";
+    
     phet.math.Dimension2 = function ( width, height ) {
         this.width = width;
         this.height = height;

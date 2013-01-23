@@ -12,6 +12,7 @@ phet.math = phet.math || {};
 
 // create a new scope
 (function () {
+    "use strict";
 
     phet.math.Vector3 = function ( x, y, z ) {
         // allow optional parameters

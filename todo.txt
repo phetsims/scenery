@@ -25,7 +25,6 @@ Incomplete:
     refreshLayers implementation
     Think about multiple view implementations!
     Static analysis - linter - integrated into build?
-        * Strict mode
     Vet recursive bounds code against empty area
     
     Test-based-dev? for Update vs Render

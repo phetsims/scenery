@@ -21,6 +21,7 @@ phet.debugAssert = function( predicateFunction, msg ) {
 // util
 phet.util = phet.util || {};
 (function () {
+    "use strict";
     
     // TODO: convert most of these usages to underscore.js, and consider pull requests for the rest
     

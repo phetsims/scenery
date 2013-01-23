@@ -10,6 +10,8 @@ var phet = phet || {};
 phet.scene = phet.scene || {};
 
 (function(){
+    "use strict";
+    
     phet.scene.Scene = function( main ) {
         this.root = new phet.scene.Node();
         
@@ -139,130 +141,134 @@ phet.scene = phet.scene || {};
                 // cooldown on the layer. we don't have to walk the state back down to the root
                 state.finish();
             } else {
-                var startPath = layer.startNode.getPathToRoot();
-                var endPath = layer.endNode.getPathToRoot();
-                
-                var minLength = Math.min( startPath.length, endPath.length );
-                
-                var depth;
-                
-                // run through parts that are the same start and end, since everything we want is under here
-                for( depth = 0; depth < minLength; depth++ ) {
-                    // bail on the first difference
-                    if( startPath[depth] != endPath[depth] ) {
-                        break;
-                    }
-                    
-                    if( !startPath[depth].visible ) {
-                        return; // none of our layer visible, bail
-                    }
-                    
-                    // apply transforms, clips, etc. that wouldn't be applied later
-                    // -2, since we will start rendering at [depth-1], and this will include everything
-                    if( depth > 2 ) {
-                        startPath[depth-2].enterState( state );
-                    }
-                }
-                
-                // now, our depth is the index of the first difference between startPath and endPath.
-                
-                /* Rendering partial contents under this node, with depth indexing into the startPath/endPath.
-                 * 
-                 * Since we want to render just a single layer (and only nodes inside that layer), we need to handle children in one of three cases:
-                 * a) outside of bounds (none of child or its descendants in our layer):
-                 *          don't render it at all
-                 * b) at a boundary (some of the child or its descendants are in our layer):
-                 *          continue our recursive partial render through this child, but ONLY if the boundary is compatible (low bound <==> beforeRender, high bound <==> afterRender)
-                 * c) inside of bounds (all of the child and descendants are in our layer):
-                 *          render it like normally for greater efficiency
-                 * 
-                 * Our startPath and endPath are the paths in the scene-graph from the root to both the nodes that mark the start and end of our layer.
-                 * Any node that is rendered must have a path that is essentially "between" these two.
-                 *
-                 * Depth is masked as a parameter here from the outside scope.
-                 */ 
-                function recursivePartialRender( node, depth, hasLowBound, hasHighBound ) {
-                    if( !hasLowBound && !hasHighBound ) {
-                        // if there are no bounds restrictions on children, just do a straight rendering
-                        fullRender( node, state );
-                        return;
-                    }
-                    
-                    // we are now assured that startPath[depth] != endPath[depth], so each child is either high-bounded or low-bounded
-                    
-                    node.enterState( state );
-            
-                    if( node.visible ) {
-                        if( !hasLowBound ) {
-                            node.renderSelf( state );
-                        }
-                        
-                        var passedLowBound = !hasLowBound;
-                        
-                        // check to see if we need to filter what children are rendered based on restricted bounds
-                        var localRestrictedBounds;
-                        var filterChildren = false; 
-                        if( state.childRestrictedBounds && node.children.length > 1 ) {
-                            localRestrictedBounds = node.globalToLocalBounds( state.childRestrictedBounds );
-                            
-                            // don't filter if all children will be inside the bounds
-                            filterChildren = !localRestrictedBounds.containsBounds( node.parentToLocalBounds( node._bounds ) )
-                        }
-                        
-                        // uses a classic for loop so we can bail out early
-                        for( var i = 0; i < node.children.length; i++ ) {
-                            var child = node.children[i];
-                            
-                            if( filterChildren && !localRestrictedBounds.intersectsBounds( child._bounds ) ) {
-                                continue;
-                            }
-                            
-                            // due to the calling conditions, we should be assured that startPath[depth] != endPath[depth]
-                            
-                            if( !passedLowBound ) {
-                                // if we haven't passed the low bound, it MUST exist, and we are either (a) not rendered, or (b) low-bounded
-                                
-                                if( startPath[depth] == child ) {
-                                    // only recursively render if the switch is "before" the node
-                                    if( startPath[depth]._layerBeforeRender == layer ) {
-                                        recursivePartialRender( child, depth + 1, startPath.length != depth, false ); // if it has a low-bound, it can't have a high bound
-                                    }
-                                
-                                    // for later children, we have passed the low bound.
-                                    passedLowBound = true;
-                                }
-                                
-                                // either way, go on to the next nodes
-                                continue;
-                            }
-                            
-                            if( hasHighBound && endPath[depth] == child ) {
-                                // only recursively render if the switch is "after" the node
-                                if( endPath[depth]._layerAfterRender == layer ) {
-                                    // high-bounded here
-                                    recursivePartialRender( child, depth + 1, false, endPath.length != depth ); // if it has a high-bound, it can't have a low bound
-                                }
-                                
-                                // don't render any more children, since we passed the high bound
-                                break;
-                            }
-                            
-                            // we should now be in-between both the high and low bounds with no further restrictions, so just carry out the rendering
-                            fullRender( child, state );
-                        }
-                    }
-                    
-                    node.exitState( state );
-                }
-                
-                recursivePartialRender( startPath[depth-1], depth, startPath.length != depth, endPath.length != depth );
-                
-                // for layer cooldown
-                state.finish();
+                this.partialUpdateLayer( state, layer, args );
             }
             
             // we are done rendering, so reset the layer's dirty regions
             layer.resetDirtyRegions();
+        },
+        
+        partialUpdateLayer: function( state, layer, args ) {
+            var startPath = layer.startNode.getPathToRoot();
+            var endPath = layer.endNode.getPathToRoot();
+            
+            var minLength = Math.min( startPath.length, endPath.length );
+            
+            var depth;
+            
+            // run through parts that are the same start and end, since everything we want is under here
+            for( depth = 0; depth < minLength; depth++ ) {
+                // bail on the first difference
+                if( startPath[depth] != endPath[depth] ) {
+                    break;
+                }
+                
+                if( !startPath[depth].visible ) {
+                    return; // none of our layer visible, bail
+                }
+                
+                // apply transforms, clips, etc. that wouldn't be applied later
+                // -2, since we will start rendering at [depth-1], and this will include everything
+                if( depth > 2 ) {
+                    startPath[depth-2].enterState( state );
+                }
+            }
+            
+            // now, our depth is the index of the first difference between startPath and endPath.
+            
+            /* Rendering partial contents under this node, with depth indexing into the startPath/endPath.
+             * 
+             * Since we want to render just a single layer (and only nodes inside that layer), we need to handle children in one of three cases:
+             * a) outside of bounds (none of child or its descendants in our layer):
+             *          don't render it at all
+             * b) at a boundary (some of the child or its descendants are in our layer):
+             *          continue our recursive partial render through this child, but ONLY if the boundary is compatible (low bound <==> beforeRender, high bound <==> afterRender)
+             * c) inside of bounds (all of the child and descendants are in our layer):
+             *          render it like normally for greater efficiency
+             * 
+             * Our startPath and endPath are the paths in the scene-graph from the root to both the nodes that mark the start and end of our layer.
+             * Any node that is rendered must have a path that is essentially "between" these two.
+             *
+             * Depth is masked as a parameter here from the outside scope.
+             */ 
+            function recursivePartialRender( node, depth, hasLowBound, hasHighBound ) {
+                if( !hasLowBound && !hasHighBound ) {
+                    // if there are no bounds restrictions on children, just do a straight rendering
+                    fullRender( node, state );
+                    return;
+                }
+                
+                // we are now assured that startPath[depth] != endPath[depth], so each child is either high-bounded or low-bounded
+                
+                node.enterState( state );
+        
+                if( node.visible ) {
+                    if( !hasLowBound ) {
+                        node.renderSelf( state );
+                    }
+                    
+                    var passedLowBound = !hasLowBound;
+                    
+                    // check to see if we need to filter what children are rendered based on restricted bounds
+                    var localRestrictedBounds;
+                    var filterChildren = false; 
+                    if( state.childRestrictedBounds && node.children.length > 1 ) {
+                        localRestrictedBounds = node.globalToLocalBounds( state.childRestrictedBounds );
+                        
+                        // don't filter if all children will be inside the bounds
+                        filterChildren = !localRestrictedBounds.containsBounds( node.parentToLocalBounds( node._bounds ) )
+                    }
+                    
+                    // uses a classic for loop so we can bail out early
+                    for( var i = 0; i < node.children.length; i++ ) {
+                        var child = node.children[i];
+                        
+                        if( filterChildren && !localRestrictedBounds.intersectsBounds( child._bounds ) ) {
+                            continue;
+                        }
+                        
+                        // due to the calling conditions, we should be assured that startPath[depth] != endPath[depth]
+                        
+                        if( !passedLowBound ) {
+                            // if we haven't passed the low bound, it MUST exist, and we are either (a) not rendered, or (b) low-bounded
+                            
+                            if( startPath[depth] == child ) {
+                                // only recursively render if the switch is "before" the node
+                                if( startPath[depth]._layerBeforeRender == layer ) {
+                                    recursivePartialRender( child, depth + 1, startPath.length != depth, false ); // if it has a low-bound, it can't have a high bound
+                                }
+                            
+                                // for later children, we have passed the low bound.
+                                passedLowBound = true;
+                            }
+                            
+                            // either way, go on to the next nodes
+                            continue;
+                        }
+                        
+                        if( hasHighBound && endPath[depth] == child ) {
+                            // only recursively render if the switch is "after" the node
+                            if( endPath[depth]._layerAfterRender == layer ) {
+                                // high-bounded here
+                                recursivePartialRender( child, depth + 1, false, endPath.length != depth ); // if it has a high-bound, it can't have a low bound
+                            }
+                            
+                            // don't render any more children, since we passed the high bound
+                            break;
+                        }
+                        
+                        // we should now be in-between both the high and low bounds with no further restrictions, so just carry out the rendering
+                        fullRender( child, state );
+                    }
+                }
+                
+                node.exitState( state );
+            }
+            
+            recursivePartialRender( startPath[depth-1], depth, startPath.length != depth, endPath.length != depth );
+            
+            // for layer cooldown
+            state.finish();
         },
         
         // attempt to render everything currently visible in the scene to an external canvas. allows copying from canvas layers straight to the other canvas

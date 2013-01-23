@@ -11,6 +11,8 @@ phet.webgl = phet.webgl || {};
 
 // create a new scope
 (function () {
+    "use strict";
+    
     phet.webgl.Sphere = function ( gl, radius, latitudeStrips, longitudeStrips ) {
         phet.webgl.GLNode.call( this );
 

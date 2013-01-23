@@ -11,6 +11,8 @@ phet.math = phet.math || {};
 
 // create a new scope
 (function () {
+    "use strict";
+    
     var Matrix = phet.math.Matrix;
 
     phet.math.SingularValueDecomposition = function ( matrix ) {

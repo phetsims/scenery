@@ -10,6 +10,8 @@ var phet = phet || {};
 phet.scene = phet.scene || {};
 
 (function(){
+    "use strict";
+    
     phet.scene.Rectangle = function ( args ) {
         phet.scene.Node.call( this );
         

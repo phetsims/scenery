@@ -12,6 +12,8 @@ phet.math = phet.math || {};
 
 // create a new scope
 (function () {
+    "use strict";
+    
     var Vector2 = phet.math.Vector2;
     
     // not using x,y,width,height so that it can handle infinity-based cases in a better way

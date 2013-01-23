@@ -11,6 +11,8 @@ phet.webgl = phet.webgl || {};
 
 // create a new scope
 (function () {
+    "use strict";
+    
     phet.webgl.Cylinder = function ( gl, radius, length, radialStrips, axisStrips ) {
         phet.webgl.GLNode.call( this );
 

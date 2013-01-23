@@ -17,6 +17,7 @@ var phet = phet || {};
 phet.scene = phet.scene || {};
 
 (function(){
+    "use strict";
     
     var Vector2 = phet.math.Vector2;
     
