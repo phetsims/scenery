@@ -43,6 +43,7 @@ phet.scene.nodes = phet.scene.nodes || {};
             '-o-transform': cssTransform,
             'transform': cssTransform,
             'transform-origin': 'top left', // at the origin of the component. consider 0px 0px instead. Critical, since otherwise this defaults to 50% 50%!!! see https://developer.mozilla.org/en-US/docs/CSS/transform-origin
+            '-ms-transform-origin': 'top left',
             position: 'absolute',
             left: 0,
             top: 0
