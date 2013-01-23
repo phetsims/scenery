@@ -52,7 +52,7 @@ phet.tests = phet.tests || {};
         var scene = new phet.scene.Scene( main );
         var root = scene.root;
         
-        var text = new phet.scene.nodes.Text( "Now with text!" );
+        var text = new phet.scene.Text( "Now with text!" );
         text.fill = '#000000';
         root.addChild( text );
         

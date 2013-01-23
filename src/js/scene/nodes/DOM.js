@@ -8,10 +8,9 @@
 
 var phet = phet || {};
 phet.scene = phet.scene || {};
-phet.scene.nodes = phet.scene.nodes || {};
 
 (function(){
-    phet.scene.nodes.DOM = function( node ) {
+    phet.scene.DOM = function( node ) {
         phet.scene.Node.call( this );
         this.node = node;
         
@@ -20,7 +19,7 @@ phet.scene.nodes = phet.scene.nodes || {};
         // can this node be interacted with? if set to true, it will not be layered like normal, but will be placed on top
         this.interactive = false;
     };
-    var DOM = phet.scene.nodes.DOM;
+    var DOM = phet.scene.DOM;
     
     DOM.prototype = Object.create( phet.scene.Node.prototype );
     DOM.prototype.constructor = DOM;

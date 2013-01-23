@@ -20,7 +20,7 @@ phet.scene = phet.scene || {};
         this.layers = [];
         
         // UI DOM layer for DOM elements that need to be interacted with
-        this.uiLayer = new phet.scene.layers.DOMLayer( {
+        this.uiLayer = new phet.scene.DOMLayer( {
             scene: this,
             main: main
         } );
@@ -34,7 +34,7 @@ phet.scene = phet.scene || {};
         
         // default to a canvas layer type, but this can be changed
         // called here AFTER the root is initialized, so that we set the correct dirtyLayerPath and get a layer rebuild / refresh as necessary
-        this.root.setLayerType( phet.scene.layers.CanvasLayer ); 
+        this.root.setLayerType( phet.scene.CanvasLayer ); 
     }
 
     var Scene = phet.scene.Scene;

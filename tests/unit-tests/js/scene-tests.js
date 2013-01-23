@@ -262,7 +262,7 @@
         var scene = new phet.scene.Scene( $( '#main' ) );
         var root = scene.root;
         
-        root.addChild( new phet.scene.nodes.Rectangle( {
+        root.addChild( new phet.scene.Rectangle( {
             x: 0,
             y: 0,
             width: canvasWidth / 2,
@@ -270,18 +270,18 @@
             fill: '#ff0000'
         } ) );
         
-        var middleRect = new phet.scene.nodes.Rectangle( {
+        var middleRect = new phet.scene.Rectangle( {
             x: canvasWidth / 4,
             y: canvasHeight / 4,
             width: canvasWidth / 2,
             height: canvasHeight / 2,
             fill: '#00ff00'
         } );
-        middleRect.setLayerType( phet.scene.layers.CanvasLayer );
+        middleRect.setLayerType( phet.scene.CanvasLayer );
         
         root.addChild( middleRect );
         
-        root.addChild( new phet.scene.nodes.Rectangle( {
+        root.addChild( new phet.scene.Rectangle( {
             x: canvasWidth / 2,
             y: canvasHeight / 2,
             width: canvasWidth / 2,
@@ -297,7 +297,7 @@
     test( 'Update vs Full Basic Clearing Check', function() {
         updateVsFullRender( [
             function( scene ) {
-                scene.root.addChild( new phet.scene.nodes.Rectangle( {
+                scene.root.addChild( new phet.scene.Rectangle( {
                     x: 0,
                     y: 0,
                     width: canvasWidth / 2,
@@ -560,7 +560,7 @@
                 scene.root.addChild( node );
                 
                 var domNode = new phet.scene.Node();
-                domNode.setLayerType( phet.scene.layers.DOMLayer );
+                domNode.setLayerType( phet.scene.DOMLayer );
                 node.addChild( domNode );
             }
         ] );

@@ -8,17 +8,16 @@
 
 var phet = phet || {};
 phet.scene = phet.scene || {};
-phet.scene.nodes = phet.scene.nodes || {};
 
 (function(){
-    phet.scene.nodes.Image = function( image ) {
+    phet.scene.Image = function( image ) {
         phet.scene.Node.call( this );
         
         this.image = image;
         
         this.invalidateSelf( new phet.math.Bounds2( 0, 0, image.width, image.height ) );
     };
-    var Image = phet.scene.nodes.Image;
+    var Image = phet.scene.Image;
     
     Image.prototype = Object.create( phet.scene.Node.prototype );
     Image.prototype.constructor = Image;

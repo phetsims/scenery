@@ -12,13 +12,12 @@
 
 var phet = phet || {};
 phet.scene = phet.scene || {};
-phet.scene.layers = phet.scene.layers || {};
 
 (function(){
     var Bounds2 = phet.math.Bounds2;
     
     // assumes main is wrapped with JQuery
-    phet.scene.layers.DOMLayer = function( args ) {
+    phet.scene.DOMLayer = function( args ) {
         var main = args.main;
         this.main = main;
         
@@ -39,7 +38,7 @@ phet.scene.layers = phet.scene.layers || {};
         this.previousLayer = null;
     };
     
-    var DOMLayer = phet.scene.layers.DOMLayer;
+    var DOMLayer = phet.scene.DOMLayer;
     
     DOMLayer.prototype = {
         constructor: DOMLayer,

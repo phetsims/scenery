@@ -140,7 +140,7 @@ phet.tests = phet.tests || {};
                 // grid.addChild( rect );
                 
                 // TODO: standard way of handling args
-                grid.addChild( new phet.scene.nodes.Rectangle({
+                grid.addChild( new phet.scene.Rectangle({
                     x: ( col - ( resolution - 1 ) / 2 ) * size / resolution - boxRadius,
                     y: ( row - ( resolution - 1 ) / 2 ) * size / resolution - boxRadius,
                     width: boxRadius * 2,

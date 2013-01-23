@@ -8,10 +8,9 @@
 
 var phet = phet || {};
 phet.scene = phet.scene || {};
-phet.scene.nodes = phet.scene.nodes || {};
 
 (function(){
-    phet.scene.nodes.Text = function( text ) {
+    phet.scene.Text = function( text ) {
         this._text = '';
         
         this.fontStyles = new Text.FontStyles(); // will be filled in later, due to dependency resolution
@@ -22,7 +21,7 @@ phet.scene.nodes = phet.scene.nodes || {};
             this.setText( text );
         }
     };
-    var Text = phet.scene.nodes.Text;
+    var Text = phet.scene.Text;
     
     Text.prototype = Object.create( phet.scene.Node.prototype );
     Text.prototype.constructor = Text;

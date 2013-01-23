@@ -8,10 +8,9 @@
 
 var phet = phet || {};
 phet.scene = phet.scene || {};
-phet.scene.nodes = phet.scene.nodes || {};
 
 (function(){
-    phet.scene.nodes.Rectangle = function ( args ) {
+    phet.scene.Rectangle = function ( args ) {
         phet.scene.Node.call( this );
         
         this.args = {};
@@ -19,7 +18,7 @@ phet.scene.nodes = phet.scene.nodes || {};
         this.update( args );
     };
     
-    var Rectangle = phet.scene.nodes.Rectangle;
+    var Rectangle = phet.scene.Rectangle;
     
     Rectangle.parameters = [ 'x', 'y', 'width', 'height', 'stroke', 'fill' ];
     

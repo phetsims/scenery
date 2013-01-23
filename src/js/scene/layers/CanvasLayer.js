@@ -12,13 +12,12 @@
 
 var phet = phet || {};
 phet.scene = phet.scene || {};
-phet.scene.layers = phet.scene.layers || {};
 
 (function(){
     var Bounds2 = phet.math.Bounds2;
     
     // assumes main is wrapped with JQuery
-    phet.scene.layers.CanvasLayer = function( args ) {
+    phet.scene.CanvasLayer = function( args ) {
         var main = args.main;
         var canvas = document.createElement( 'canvas' );
         canvas.width = main.width();
@@ -49,7 +48,7 @@ phet.scene.layers = phet.scene.layers || {};
         this.previousLayer = null;
     };
     
-    var CanvasLayer = phet.scene.layers.CanvasLayer;
+    var CanvasLayer = phet.scene.CanvasLayer;
     
     CanvasLayer.prototype = {
         constructor: CanvasLayer,

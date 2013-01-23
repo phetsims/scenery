@@ -18,7 +18,7 @@ phet.tests = phet.tests || {};
         function buildShapes( color ) {
             var background = new phet.scene.Node();
             if( useLayers && color == 'rgba(0,255,0,0.7)' ) {
-                background.setLayerType( phet.scene.layers.CanvasLayer );
+                background.setLayerType( phet.scene.CanvasLayer );
             }
             for( var i = 0; i < count; i++ ) {
                 var node = new phet.scene.Node();

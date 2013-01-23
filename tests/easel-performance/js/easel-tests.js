@@ -233,7 +233,7 @@ $(document).ready( function() {
                 
                 var imageSource = document.createElement( 'img' );
                 imageSource.onload = function( e ) {
-                    var image = new phet.scene.nodes.Image( imageSource );
+                    var image = new phet.scene.Image( imageSource );
                     image.translate( -image.getSelfBounds().width() / 2, -image.getSelfBounds().height() / 2 );
                     scene.root.addChild( image );
                 };
@@ -269,23 +269,23 @@ $(document).ready( function() {
                 bigForm.innerHTML = 'And now scalable!<br><input type="text" name="stuff">';
                 
                 var container = new phet.scene.Node();
-                container.setLayerType( phet.scene.layers.DOMLayer );
+                container.setLayerType( phet.scene.DOMLayer );
                 
-                var videoNode = new phet.scene.nodes.DOM( element );
+                var videoNode = new phet.scene.DOM( element );
                 videoNode.translate( -560 / 2, -315 / 2 );
                 videoNode.interactive = true;
                 container.addChild( videoNode );
                 
-                // var unclickableFormNode = new phet.scene.nodes.DOM( unclickableForm );
+                // var unclickableFormNode = new phet.scene.DOM( unclickableForm );
                 // unclickableFormNode.translate( 0, 160 );
                 // container.addChild( unclickableFormNode );
                 
-                var clickableFormNode = new phet.scene.nodes.DOM( clickableForm );
+                var clickableFormNode = new phet.scene.DOM( clickableForm );
                 clickableFormNode.translate( -560 / 2, 160 );
                 clickableFormNode.interactive = true;
                 container.addChild( clickableFormNode );
                 
-                var bigFormNode = new phet.scene.nodes.DOM( bigForm );
+                var bigFormNode = new phet.scene.DOM( bigForm );
                 bigFormNode.translate( 0, 160 );
                 bigFormNode.scale( 4 );
                 bigFormNode.interactive = true;
