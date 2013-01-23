@@ -15,6 +15,7 @@ Next:
         * Shape hit regions (containsPoint/intersectsBounds)
         * Flags for whether strokes are considered for hit regions (use full text bounds as hit for now)
         * Investigate hit testing against DOM nodes
+    * IE9 Performance
     * Accessibility / shadow DOM
     * WebGL Layer?
 
