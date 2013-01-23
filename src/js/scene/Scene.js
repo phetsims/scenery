@@ -304,12 +304,12 @@ phet.scene = phet.scene || {};
             // remove everything from our container, so we can fill it in with fresh layers
             this.clearLayers();
             
-            function layerChange( node, isBeforeRender ) {
+            function layerChange( node, layerType, isBeforeRender ) {
                 // the previous layer ends at this node, so mark that down
                 lastLayer.endNode = node;
                 
                 // create the new layer, and give it the proper node reference
-                var newLayer = scene.createLayer( node._layerType, layerArgs );
+                var newLayer = scene.createLayer( layerType, layerArgs );
                 if( isBeforeRender ) {
                     node._layerBeforeRender = newLayer;
                 } else {
@@ -338,12 +338,12 @@ phet.scene = phet.scene || {};
                     // layers created in order, later
                     
                     // change the base layer type for the layer children
-                    baseLayerType = node._layerType;
+                    // baseLayerType = node._layerType;
                 }
                 
                 // for stacking, add the "before" layer before recursion
                 if( hasLayer ) {
-                    layerChange( node, true );
+                    layerChange( node, node._layerType, true );
                 }
                 
                 // let the node know what layer it's self will render inside of
@@ -356,7 +356,7 @@ phet.scene = phet.scene || {};
                 
                 // and the "after" layer after recursion, on top of any child layers
                 if( hasLayer ) {
-                    layerChange( node, false );
+                    layerChange( node, baseLayerType, false );
                 }
             }
             
