@@ -17,6 +17,9 @@ phet.scene.layers = phet.scene.layers || {};
 (function(){
     var Bounds2 = phet.math.Bounds2;
     
+    // TODO: remove after hoisting is in place
+    var MAGIC_SCARY_CONSTANT = 50000;
+    
     // assumes main is wrapped with JQuery
     phet.scene.layers.DOMLayer = function( args ) {
         var main = args.main;
@@ -70,7 +73,7 @@ phet.scene.layers = phet.scene.layers || {};
         
         // returns next zIndex in place. allows layers to take up more than one single zIndex
         reindex: function( zIndex ) {
-            $( this.div ).css( 'z-index', zIndex );
+            $( this.div ).css( 'z-index', zIndex + MAGIC_SCARY_CONSTANT );
             this.zIndex = zIndex;
             return zIndex + 1;
         },
