@@ -33,6 +33,7 @@ phet.scene.nodes = phet.scene.nodes || {};
     };
     
     Text.prototype.invalidateText = function() {
+        // TODO: faster bounds determination? getBBox()?
         this.invalidateSelf( phet.scene.canvasTextBoundsAccurate( this._text, this.fontStyles ) );
     };
     

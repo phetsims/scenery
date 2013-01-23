@@ -64,6 +64,10 @@ phet.scene.layers = phet.scene.layers || {};
             
         },
         
+        getContainer: function() {
+            return this.div;
+        },
+        
         // returns next zIndex in place. allows layers to take up more than one single zIndex
         reindex: function( zIndex ) {
             $( this.div ).css( 'z-index', zIndex );

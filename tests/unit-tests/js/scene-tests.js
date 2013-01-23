@@ -73,7 +73,7 @@
             display.append( snapshotToCanvas( b ) );
             
             // for a line-break
-            display.append( document.create( 'div' ) );
+            display.append( document.createElement( 'div' ) );
             
         }
         ok( isEqual, message );

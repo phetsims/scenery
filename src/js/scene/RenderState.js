@@ -78,6 +78,10 @@ phet.scene = phet.scene || {};
             return this.layer.isCanvasLayer;
         },
         
+        isDOMState: function() {
+            return this.layer.isDOMLayer;
+        },
+        
         // TODO: consider a stack-based model for transforms?
         applyTransformationMatrix: function( matrix ) {
             this.transform.append( matrix );

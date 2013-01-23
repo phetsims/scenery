@@ -226,6 +226,55 @@ $(document).ready( function() {
                 };
             }
         },{
+            typeName: 'Images',
+            typeId: 'images',
+            init: function( main ) {
+                var scene = new phet.scene.Scene( main );
+                
+                var imageSource = document.createElement( 'img' );
+                imageSource.onload = function( e ) {
+                    var image = new phet.scene.nodes.Image( imageSource );
+                    image.translate( -image.getSelfBounds().width() / 2, -image.getSelfBounds().height() / 2 );
+                    scene.root.addChild( image );
+                };
+                imageSource.src = 'http://phet.colorado.edu/images/phet-logo.gif';
+                
+                // center it
+                scene.root.translate( main.width() / 2, main.height() / 2 );
+                
+                return function( timeElapsed ) {
+                    scene.root.rotate( timeElapsed );
+                    scene.updateScene();
+                };
+            }
+        },{
+            typeName: 'DOM',
+            typeId: 'dom',
+            init: function( main ) {
+                var scene = new phet.scene.Scene( main );
+                
+                var element = document.createElement( 'iframe' );
+                $( element ).attr( 'width', '560' );
+                $( element ).attr( 'height', '315' );
+                $( element ).attr( 'src', 'http://www.youtube.com/embed/N17IM7LspU8' );
+                $( element ).attr( 'frameborder', '0' );
+                
+                var node = new phet.scene.nodes.DOM( element );
+                node.setLayerType( phet.scene.layers.DOMLayer );
+                node.translate( -560 / 2, -315 / 2 );
+                scene.root.addChild( node );
+                
+                // center it
+                scene.root.translate( main.width() / 2, main.height() / 2 );
+                
+                return function( timeElapsed ) {
+                    scene.root.rotate( timeElapsed );
+                    
+                    // TODO: get updateScene to work with this
+                    scene.renderScene();
+                };
+            }
+        },{
             typeName: 'Strokes',
             typeId: 'strokes',
             init: function( main ) {

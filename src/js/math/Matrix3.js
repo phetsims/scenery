@@ -351,7 +351,7 @@ phet.math = phet.math || {};
         
         // angle in radians for the 2d rotation from this matrix, between pi, -pi
         rotation: function() {
-            var transformedVector = this.timesVector2( Vector2.X_UNIT ).minus( this.timesVector2( Vector2.ZERO ) );
+            var transformedVector = this.timesVector2( phet.math.Vector2.X_UNIT ).minus( this.timesVector2( phet.math.Vector2.ZERO ) );
             return Math.atan2( transformedVector.y, transformedVector.x );
         },
 
@@ -399,6 +399,12 @@ phet.math = phet.math || {};
                 this.entries[6],
                 this.entries[7]
             );
+        },
+        
+        cssTransform: function() {
+            // the inner part of a CSS3 transform, but remember to add the browser-specific parts!
+            // TODO: do we need 'px' units on the last two (transform) attributes?
+            return 'matrix(' + this.entries[0] + ',' + this.entries[1] + ',' + this.entries[3] + ',' + this.entries[4] + ',' + this.entries[6] + ',' + this.entries[7] + ')';
         }
     };
 
