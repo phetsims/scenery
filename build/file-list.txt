@@ -7,6 +7,7 @@ src/js/math/Vector3.js
 src/js/math/Vector4.js
 src/js/math/Matrix3.js
 src/js/math/Matrix4.js
+src/js/math/Ray2.js
 src/js/math/Ray3.js
 src/js/math/Transform3.js
 src/js/math/Transform4.js
