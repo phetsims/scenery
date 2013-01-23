@@ -540,7 +540,7 @@ phet.scene = phet.scene || {};
             var start = this.start;
             var end = this.end;
             
-            var intersection = linelineIntersection( start, end, ray.pos, ray.pos.plus( ray.dir ) );
+            var intersection = lineLineIntersection( start, end, ray.pos, ray.pos.plus( ray.dir ) );
             
             if( !isFinite( intersection.x ) || !isFinite( intersection.y ) ) {
                 // lines must be parallel
@@ -548,10 +548,10 @@ phet.scene = phet.scene || {};
             }
             
             // check to make sure our point is in our line segment (specifically, in the bounds (start,end], not including the start point so we don't double-count intersections)
-            if( start.x != end.x && ( start.x > end.x ? ( intersection.x >= start.x && intersection.x < end.x ) : ( intersection.x <= start.x && intersection.x > end.x ) ) ) {
+            if( start.x != end.x && ( start.x > end.x ? ( intersection.x >= start.x || intersection.x < end.x ) : ( intersection.x <= start.x || intersection.x > end.x ) ) ) {
                 return 0;
             }
-            if( start.y != end.y && ( start.y > end.y ? ( intersection.y >= start.y && intersection.y < end.y ) : ( intersection.y <= start.y && intersection.y > end.y ) ) ) {
+            if( start.y != end.y && ( start.y > end.y ? ( intersection.y >= start.y || intersection.y < end.y ) : ( intersection.y <= start.y || intersection.y > end.y ) ) ) {
                 return 0;
             }
             

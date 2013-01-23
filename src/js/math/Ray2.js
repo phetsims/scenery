@@ -17,6 +17,10 @@ phet.math = phet.math || {};
     phet.math.Ray2 = function ( pos, dir ) {
         this.pos = pos;
         this.dir = dir;
+        
+        phet.debugAssert( function() {
+            return Math.abs( dir.magnitude() - 1 ) < 0.01;
+        } );
     };
 
     var Ray2 = phet.math.Ray2;

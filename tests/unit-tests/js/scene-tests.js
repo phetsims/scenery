@@ -528,6 +528,16 @@
             
             strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
         } );
+        
+        test( 'Line segment winding', function() {
+            var line = new Shape.Segment.Line( p( 0, 0 ), p( 2, 2 ) );
+            
+            equal( line.windingIntersection( new phet.math.Ray2( p( 0, 1 ), p( 1, 0 ) ) ), 1 );
+            equal( line.windingIntersection( new phet.math.Ray2( p( 0, 5 ), p( 1, 0 ) ) ), 0 );
+            equal( line.windingIntersection( new phet.math.Ray2( p( 1, 0 ), p( 0, 1 ) ) ), -1 );
+            equal( line.windingIntersection( new phet.math.Ray2( p( 0, 0 ), p( 1, 1 ).normalized() ) ), 0 );
+            equal( line.windingIntersection( new phet.math.Ray2( p( 0, 1 ), p( 1, 1 ).normalized() ) ), 0 );
+        } );
     })();
     
     /*---------------------------------------------------------------------------*
