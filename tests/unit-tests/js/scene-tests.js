@@ -538,6 +538,15 @@
             equal( line.windingIntersection( new phet.math.Ray2( p( 0, 0 ), p( 1, 1 ).normalized() ) ), 0 );
             equal( line.windingIntersection( new phet.math.Ray2( p( 0, 1 ), p( 1, 1 ).normalized() ) ), 0 );
         } );
+        
+        test( 'Rectangle hit testing', function() {
+            var shape = Shape.rectangle( 0, 0, 1, 1 );
+            
+            equal( shape.containsPoint( p( 0.2, 0.3 ) ), true, '0.2, 0.3' );
+            equal( shape.containsPoint( p( 0.5, 0.5 ) ), true, '0.5, 0.5' );
+            equal( shape.containsPoint( p( 1.5, 0.5 ) ), false, '1.5, 0.5' );
+            equal( shape.containsPoint( p( -0.5, 0.5 ) ), false, '-0.5, 0.5' );
+        } );
     })();
     
     /*---------------------------------------------------------------------------*

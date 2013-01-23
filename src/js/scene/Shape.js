@@ -24,6 +24,9 @@ phet.scene = phet.scene || {};
     // for brevity
     function p( x,y ) { return new Vector2( x, y ); }
     
+    // a normalized vector for non-zero winding checks
+    // var weirdDir = p( Math.PI, 22 / 7 );
+    
     phet.scene.Shape = function( pieces, optionalClose ) {
         // higher-level Canvas-esque drawing commands 
         this.pieces = [];
@@ -121,13 +124,42 @@ phet.scene = phet.scene || {};
         },
         
         containsPoint: function( point ) {
-            // TODO:
-            return false;
+            var wind = 0;
+            
+            // we pick a ray, and determine the winding number over that ray. if the number of segments crossing it CCW == number of segments crossing it CW, then the point is contained in the shape
+            var ray = new phet.math.Ray2( point, p( 1, 0 ) );
+            
+            _.each( this.subpaths, function( subpath ) {
+                if( subpath.isDrawable() ) {
+                    _.each( subpath.segments, function( segment ) {
+                        wind += segment.windingIntersection( ray );
+                    } );
+                    
+                    // handle the implicit closing line segment
+                    if( subpath.hasClosingSegment() ) {
+                        wind += subpath.getClosingSegment().windingIntersection( ray );
+                    }
+                }
+            } );
+            return wind != 0;
         },
         
         intersectsBounds: function( bounds ) {
-            // TODO:
-            return false;
+            var intersects = false;
+            // TODO: break-out-early optimizations
+            _.each( this.subpaths, function( subpath ) {
+                if( subpath.isDrawable() ) {
+                    _.each( subpath.segments, function( segment ) {
+                        intersects = intersects && segment.intersectsBounds( bounds );
+                    } );
+                    
+                    // handle the implicit closing line segment
+                    if( subpath.hasClosingSegment() ) {
+                        intersects = intersects && subpath.getClosingSegment().intersectsBounds( bounds );
+                    }
+                }
+            } );
+            return intersects;
         },
         
         // returns a new Shape that is an outline of the stroked path of this current Shape. currently not intended to be nested (doesn't do intersection computations yet)
@@ -379,6 +411,19 @@ phet.scene = phet.scene || {};
         
         isDrawable: function() {
             return this.segments.length > 0;
+        },
+        
+        isClosed: function() {
+            return this.closed;
+        },
+        
+        hasClosingSegment: function() {
+            return !this.getFirstPoint().equals( this.getLastPoint() );
+        },
+        
+        getClosingSegment: function() {
+            phet.assert( this.isClosed() );
+            return new Segment.Line( this.getLastPoint(), this.getFirstPoint() );
         }
     };
     
@@ -533,6 +578,10 @@ phet.scene = phet.scene || {};
         
         strokeRight: function( lineWidth ) {
             return new Piece.LineTo( this.start.plus( this.startTangent.perpendicular().times( lineWidth / 2 ) ) );
+        },
+        
+        intersectsBounds: function( bounds ) {
+            throw new Error( 'Segment.Line.intersectsBounds unimplemented' ); // TODO: implement
         },
         
         // returns the resultant winding number of this ray intersecting this segment.
