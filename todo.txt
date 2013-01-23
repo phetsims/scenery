@@ -9,7 +9,6 @@ Bugs:
 Next:
     * Layering proof-of-concepts, advantages (performance, DOM integration, etc.)
     * DOM nodes
-        * Should DOM nodes under a non-DOM layer actually render? Maybe those would get hoisted in the z-index?
         * Handle correct layering of DOM nodes inside a layer, etc.
     * Events
         * Shape hit regions (containsPoint/intersectsBounds)
@@ -76,6 +75,7 @@ Features:
     Color handling?
     Investigate DAG version?
     Include MathJax text?
+    WebGL Layers
 
 Cleanliness / Debugging:
     *** Debug layer
