@@ -13,10 +13,11 @@ var phet = phet || {};
 phet.scene = phet.scene || {};
 
 (function(){
-    phet.scene.RenderState = function() {
+    phet.scene.RenderState = function( scene ) {
         this.transform = new phet.math.Transform3();
         
         this.layer = null;
+        this.scene = scene;
         
         // clipping shapes should be added in reference to the global coordinate frame
         this.clipShapes = [];

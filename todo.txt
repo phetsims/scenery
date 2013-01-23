@@ -65,6 +65,7 @@ Performance:
 
 Features:
     * User interaction
+    Subtree opacity?
     Accessibility and shadow DOM see html5 scene graph google doc
     Non-canvas handling
     Retina-screen handling

@@ -113,6 +113,11 @@ phet.scene.layers = phet.scene.layers || {};
             return zIndex + 1;
         },
         
+        // called if it needs to be added back to the main element after elements are removed
+        recreate: function() {
+            this.main.append( this.canvas );
+        },
+        
         pushClipShape: function( shape ) {
             // store the current state, since browser support for context.resetClip() is not yet in the stable browser versions
             this.context.save();

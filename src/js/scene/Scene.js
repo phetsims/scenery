@@ -16,7 +16,14 @@ phet.scene = phet.scene || {};
         this.root._isRoot = true;
         this.root.scene = this;
         
+        // main layers in a scene
         this.layers = [];
+        
+        // UI DOM layer for DOM elements that need to be interacted with
+        this.uiLayer = new phet.scene.layers.DOMLayer( {
+            scene: this,
+            main: main
+        } );
         
         // the greatest common "path" of nodes, i.e. ancestors arrays. after modifications, this will tell us the smallest subtree needed to re-layer
         this.dirtyLayerPath = null;
@@ -70,7 +77,7 @@ phet.scene = phet.scene || {};
             // no paint validation needed, since we render everything
             this.refreshLayers();
             
-            var state = new phet.scene.RenderState();
+            var state = new phet.scene.RenderState( this );
             fullRender( this.root, state );
             state.finish(); // handle cleanup for the last layer
             
@@ -102,7 +109,7 @@ phet.scene = phet.scene || {};
         
         updateLayer: function( layer, args ) {
             // TODO: only render in dirty rectangles (modify state and checks?)
-            var state = new phet.scene.RenderState();
+            var state = new phet.scene.RenderState( this );
             
             // switches to (and initializes) the layer
             var dirtyBounds = layer.getDirtyBounds();
@@ -270,6 +277,9 @@ phet.scene = phet.scene || {};
         clearLayers: function() {
             this.main.empty();
             this.layers = [];
+            
+            // recreate any needed layers
+            this.uiLayer.recreate();
         },
         
         // handles creation and adds it to our internal list
@@ -391,12 +401,19 @@ phet.scene = phet.scene || {};
                 // layers increment indices as needed
                 index = layer.reindex( index );
             } );
+            
+            // place the UI layer on top
+            index = this.uiLayer.reindex( index );
         },
         
         clearAllLayers: function() {
             _.each( this.layers, function( layer ) {
                 layer.prepareBounds( phet.math.Bounds2.EVERYTHING );
             } );
+        },
+        
+        getUILayer: function() {
+            return this.uiLayer;
         },
         
         layersDirtyUnder: function( node ) {

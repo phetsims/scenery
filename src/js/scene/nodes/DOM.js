@@ -16,6 +16,9 @@ phet.scene.nodes = phet.scene.nodes || {};
         this.node = node;
         
         this.invalidateDOM();
+        
+        // can this node be interacted with? if set to true, it will not be layered like normal, but will be placed on top
+        this.interactive = false;
     };
     var DOM = phet.scene.nodes.DOM;
     
@@ -40,20 +43,18 @@ phet.scene.nodes = phet.scene.nodes || {};
             '-o-transform': cssTransform,
             'transform': cssTransform,
             'transform-origin': 'top left', // at the origin of the component. consider 0px 0px instead. Critical, since otherwise this defaults to 50% 50%!!! see https://developer.mozilla.org/en-US/docs/CSS/transform-origin
-            position: 'relative',
+            position: 'absolute',
             left: 0,
             top: 0
         } );
         
-        if( state.isDOMState() ) {
-            var layer = state.layer;
-            
-            var container = layer.getContainer();
-            
-            if( this.node.parentNode !== container ) {
-                // TODO: correct layering of DOM nodes inside the container
-                $( container ).append( this.node );
-            }
+        var layer = ( state.isDOMState() && !this.interactive ) ? state.layer : state.scene.getUILayer();
+        
+        var container = layer.getContainer();
+        
+        if( this.node.parentNode !== container ) {
+            // TODO: correct layering of DOM nodes inside the container
+            $( container ).append( this.node );
         }
     };
 })();

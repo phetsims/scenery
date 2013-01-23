@@ -259,16 +259,50 @@ $(document).ready( function() {
                 $( element ).attr( 'src', 'http://www.youtube.com/embed/N17IM7LspU8' );
                 $( element ).attr( 'frameborder', '0' );
                 
-                var node = new phet.scene.nodes.DOM( element );
-                node.setLayerType( phet.scene.layers.DOMLayer );
-                node.translate( -560 / 2, -315 / 2 );
-                scene.root.addChild( node );
+                // var unclickableForm = document.createElement( 'form' );
+                // unclickableForm.innerHTML = 'Unclickable<br>First name: <input type="text" name="firstname"><br>Last name: <input type="text" name="lastname">';
+                
+                var clickableForm = document.createElement( 'form' );
+                clickableForm.innerHTML = 'Clickable<br>First name: <input type="text" name="firstname"><br>Last name: <input type="text" name="lastname">';
+                
+                var bigForm = document.createElement( 'form' );
+                bigForm.innerHTML = 'And now scalable!<br><input type="text" name="stuff">';
+                
+                var container = new phet.scene.Node();
+                container.setLayerType( phet.scene.layers.DOMLayer );
+                
+                var videoNode = new phet.scene.nodes.DOM( element );
+                videoNode.translate( -560 / 2, -315 / 2 );
+                videoNode.interactive = true;
+                container.addChild( videoNode );
+                
+                // var unclickableFormNode = new phet.scene.nodes.DOM( unclickableForm );
+                // unclickableFormNode.translate( 0, 160 );
+                // container.addChild( unclickableFormNode );
+                
+                var clickableFormNode = new phet.scene.nodes.DOM( clickableForm );
+                clickableFormNode.translate( -560 / 2, 160 );
+                clickableFormNode.interactive = true;
+                container.addChild( clickableFormNode );
+                
+                var bigFormNode = new phet.scene.nodes.DOM( bigForm );
+                bigFormNode.translate( 0, 160 );
+                bigFormNode.scale( 4 );
+                bigFormNode.interactive = true;
+                container.addChild( bigFormNode );
+                
+                scene.root.addChild( container );
+                
+                // var background = new phet.scene.Node();
+                // background.setShape( phet.scene.Shape.rectangle( -400, -400, 800, 800 ) );
+                // background.setFill( 'rgba(230,255,230,0.5)' );
+                // scene.root.addChild( background );
                 
                 // center it
                 scene.root.translate( main.width() / 2, main.height() / 2 );
                 
                 return function( timeElapsed ) {
-                    scene.root.rotate( timeElapsed );
+                    scene.root.rotate( timeElapsed / 3 );
                     
                     // TODO: get updateScene to work with this
                     scene.renderScene();
