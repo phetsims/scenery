@@ -173,9 +173,11 @@ phet.scene = phet.scene || {};
             
             if( minBounds.minX <= refinedBounds.minBounds.minX && maxBounds.minX >= refinedBounds.maxBounds.minX ) {
                 // sanity check - break out of an infinite loop!
-                console.log( 'warning, exiting infinite loop!' );
-                console.log( 'transformed "min" minX: ' + idealTransform( new Bounds2( maxBounds.minX, maxBounds.minY, minBounds.minX, maxBounds.maxY ) ).transformPosition2( p( minBounds.minX, 0 ) ) );
-                console.log( 'transformed "max" minX: ' + idealTransform( new Bounds2( maxBounds.minX, maxBounds.minY, minBounds.minX, maxBounds.maxY ) ).transformPosition2( p( maxBounds.minX, 0 ) ) );
+                if( debugChromeBoundsScanning ) {
+                    console.log( 'warning, exiting infinite loop!' );
+                    console.log( 'transformed "min" minX: ' + idealTransform( new Bounds2( maxBounds.minX, maxBounds.minY, minBounds.minX, maxBounds.maxY ) ).transformPosition2( p( minBounds.minX, 0 ) ) );
+                    console.log( 'transformed "max" minX: ' + idealTransform( new Bounds2( maxBounds.minX, maxBounds.minY, minBounds.minX, maxBounds.maxY ) ).transformPosition2( p( maxBounds.minX, 0 ) ) );
+                }
                 break;
             }
             
@@ -194,7 +196,9 @@ phet.scene = phet.scene || {};
             
             if( minBounds.maxX >= refinedBounds.minBounds.maxX && maxBounds.maxX <= refinedBounds.maxBounds.maxX ) {
                 // sanity check - break out of an infinite loop!
-                console.log( 'warning, exiting infinite loop!' );
+                if( debugChromeBoundsScanning ) {
+                    console.log( 'warning, exiting infinite loop!' );
+                }
                 break;
             }
             
@@ -213,7 +217,9 @@ phet.scene = phet.scene || {};
             
             if( minBounds.minY <= refinedBounds.minBounds.minY && maxBounds.minY >= refinedBounds.maxBounds.minY ) {
                 // sanity check - break out of an infinite loop!
-                console.log( 'warning, exiting infinite loop!' );
+                if( debugChromeBoundsScanning ) {
+                    console.log( 'warning, exiting infinite loop!' );
+                }
                 break;
             }
             
@@ -232,7 +238,9 @@ phet.scene = phet.scene || {};
             
             if( minBounds.maxY >= refinedBounds.minBounds.maxY && maxBounds.maxY <= refinedBounds.maxBounds.maxY ) {
                 // sanity check - break out of an infinite loop!
-                console.log( 'warning, exiting infinite loop!' );
+                if( debugChromeBoundsScanning ) {
+                    console.log( 'warning, exiting infinite loop!' );
+                }
                 break;
             }
             

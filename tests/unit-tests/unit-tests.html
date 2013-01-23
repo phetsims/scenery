@@ -9,8 +9,14 @@
     <script src="../../contrib/underscore-1.4.3-min.js"></script>
     <script src="../../contrib/benchmark-1.0.0.js"></script>
     <script src="../../concatenated.js"></script>
+    <script>
+        function collapseTests() {
+            $( '#qunit-tests .fail ol' ).css( 'display', 'none' );
+        }
+    </script>
 </head>
 <body>
+    <!-- <div style="position: fixed; top: 0; right: 50%; background-color: #fff; padding: 5px;"><a href="#" style="color: #000;" onclick="collapseTests();">Collapse All</a></div> -->
     <div id="qunit"></div>
     <div id="qunit-fixture">
         <div id="main" style="position: absolute; left: 0; top: 0; background-color: white; z-index: 1; width: 640px; height: 480px;"></div>
@@ -19,6 +25,11 @@
     <div id="display"></div>
     <div id="profiling-results"></div>
     <script src="../../contrib/qunit-1.10.0.js"></script>
+    <script>
+        QUnit.moduleDone( function( details ) {
+            collapseTests();
+        } );
+    </script>
     <script src="js/scene-tests.js"></script>
 </body>
 </html>
