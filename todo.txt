@@ -11,7 +11,6 @@ Next:
     * DOM nodes
         * Handle correct layering of DOM nodes inside a layer, etc.
     * Events
-        * Flags for whether strokes are considered for hit regions (use full text bounds as hit for now)
         * Investigate hit testing against DOM nodes
     * IE9 Performance
         * Create 'delegate' context to examine -- self time dominated by fill() and stroke(), so it is probably IE9-canvas-specific
