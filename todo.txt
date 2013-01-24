@@ -11,7 +11,6 @@ Next:
     * DOM nodes
         * Handle correct layering of DOM nodes inside a layer, etc.
     * Events
-        * Shape hit regions (containsPoint/intersectsBounds)
         * Flags for whether strokes are considered for hit regions (use full text bounds as hit for now)
         * Investigate hit testing against DOM nodes
     * IE9 Performance
@@ -39,6 +38,7 @@ Incomplete:
     General optimization and organization so we can extract "self" from child rendering bounds, what is repainted, etc. better.
     Canvas fill gradients / patterns
         * Can we abstract this across SVG also?
+    Use $.extend where helpful
 
 User interaction Design:
     Can swipe "through" an object to start dragging it

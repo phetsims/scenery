@@ -98,7 +98,7 @@ phet.scene = phet.scene || {};
         addPiece: function( piece ) {
             this.pieces.push( piece );
             piece.applyPiece( this );
-            this._strokedShapeComputed = false;
+            this.invalidate();
         },
         
         // write out this shape's path to a canvas 2d context. does NOT include the beginPath()!
@@ -162,10 +162,15 @@ phet.scene = phet.scene || {};
             return intersects;
         },
         
+        invalidate: function() {
+            this._strokedShapeComputed = false;
+        },
+        
         // returns a new Shape that is an outline of the stroked path of this current Shape. currently not intended to be nested (doesn't do intersection computations yet)
         getStrokedShape: function( lineStyles ) {
+            
             if( lineStyles === undefined ) {
-                lineStyles = Shape.DEFAULT_STYLES;
+                lineStyles = new LineStyles();
             }
             
             // return a cached version if possible
@@ -302,10 +307,9 @@ phet.scene = phet.scene || {};
                 }
             } );
             
-            // TODO: git bisect determined that caching was causing regressions. disabled for now
-            // this._strokedShape = shape;
-            // this._strokedShapeComputed = true;
-            // this._strokedShapeStyles = lineStyles;
+            this._strokedShape = shape;
+            this._strokedShapeComputed = true;
+            this._strokedShapeStyles = new LineStyles( lineStyles ); // shallow copy, since we consider linestyles to be mutable
             
             return shape;
         },
