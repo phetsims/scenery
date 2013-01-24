@@ -37,6 +37,9 @@ phet.scene = phet.scene || {};
         this.parent = null;
         this._isRoot = false;
         
+        // TODO: add getter/setters that will be able to invalidate whether this node is under any fingers, etc.
+        this._includeStrokeInHitRegion = false;
+        
         // layer-specific data, currently updated in the rebuildLayers step
         this._layerBeforeRender = null; // layer to swap to before rendering this node
         this._layerAfterRender = null; // layer to swap to after rendering this node
@@ -622,7 +625,13 @@ phet.scene = phet.scene || {};
         // point is considered to be in the local coordinate frame
         containsPointSelf: function( point ) {
             if( this.hasShape() ) {
-                return this._shape.containsPoint( point );
+                var result = this._shape.containsPoint( point );
+                
+                // also include the stroked region in the hit area if applicable
+                if( !result && _includeStrokeInHitRegion && this.hasStroke() ) {
+                    result = this._shape.getStrokedShape( this._lineDrawingStyles ).containsPoint( point );
+                }
+                return result;
             } else {
                 // if self bounds are not null default to checking self bounds
                 return this._selfBounds.containsPoint( point );
@@ -632,6 +641,7 @@ phet.scene = phet.scene || {};
         // whether this node's self intersects the specified bounds, in the local coordinate frame
         intersectsBoundsSelf: function( bounds ) {
             if( this.hasShape() ) {
+                // TODO: should a shape's stroke be included?
                 return this._shape.intersectsBounds( bounds );
             } else {
                 // if self bounds are not null, child should override this
@@ -641,6 +651,14 @@ phet.scene = phet.scene || {};
         
         hasShape: function() {
             return this._shape != null;
+        },
+        
+        hasFill: function() {
+            return this._fill != null;
+        },
+        
+        hasStroke: function() {
+            return this._stroke != null;
         },
         
         hasParent: function() {
