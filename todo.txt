@@ -7,6 +7,9 @@ Bugs:
         Chrome 24.0.1312.52 m bug in zooming fillText() -- mobile Safari OK (maybe different from webkit, since it's not antialiased?)
 
 Next:
+    * Event dispatch
+        * Add listeners directly to Finger instances?
+        * For up/down events, is enter/exit necessary?
     * Layering proof-of-concepts, advantages (performance, DOM integration, etc.)
     * DOM nodes
         * Handle correct layering of DOM nodes inside a layer, etc.
@@ -40,7 +43,9 @@ Incomplete:
     Use $.extend where helpful
 
 User interaction Design:
+    * Do invisible nodes get picked?
     * Mouse enter/exit needs to trigger for node add/remove
+        * Does it make sense to hit-test every frame for this?
     Can swipe "through" an object to start dragging it
     Can simultaneously move multiple objects / controls
     Can zoom / pan -- how to determine when user gestures can do this?

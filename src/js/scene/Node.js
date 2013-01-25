@@ -37,6 +37,8 @@ phet.scene = phet.scene || {};
         this.parent = null;
         this._isRoot = false;
         
+        this._inputListeners = [];
+        
         // TODO: add getter/setters that will be able to invalidate whether this node is under any fingers, etc.
         this._includeStrokeInHitRegion = false;
         
@@ -590,13 +592,13 @@ phet.scene = phet.scene || {};
             return this.getBaseNode().scene;
         },
         
-        // checking for whether a point (in parent coordinates) is contained in this sub-tree
-        containsPoint: function( point ) {
+        // return the top node (if any, otherwise null) whose self-rendered area contains the point (in parent coordinates).
+        nodeUnderPoint: function( point ) {
             // update bounds for pruning
             this.validateBounds();
             
             // bail quickly if this doesn't hit our computed bounds
-            if( !this._bounds.containsPoint( point ) ) { return false; }
+            if( !this._bounds.containsPoint( point ) ) { return null; }
             
             // point in the local coordinate frame. computed after the main bounds check, so we can bail out there efficiently
             var localPoint = this.transform.inversePosition2( point );
@@ -608,17 +610,27 @@ phet.scene = phet.scene || {};
                 for( var i = this.children.length - 1; i >= 0; i-- ) {
                     var child = this.children[i];
                     
+                    var childHit = child.nodeUnderPoint( localPoint );
+                    
                     // the child will have the point in its parent's coordinate frame (i.e. this node's frame)
-                    if( child.containsPoint( localPoint ) ) {
-                        return true;
+                    if( childHit ) {
+                        return childHit;
                     }
                 }
             }
             
             // didn't hit our children, so check ourself as a last resort
-            if( this._selfBounds.containsPoint( point ) ) {
-                return this.containsPointSelf( point );
+            if( this._selfBounds.containsPoint( point ) && this.containsPointSelf( point ) ) {
+                return this;
             }
+            
+            // signal no hit
+            return null;
+        },
+        
+        // checking for whether a point (in parent coordinates) is contained in this sub-tree
+        containsPoint: function( point ) {
+            return this.nodeUnderPoint( point ) !== null;
         },
         
         // override for computation of whether a point is inside the content rendered in renderSelf
@@ -761,6 +773,24 @@ phet.scene = phet.scene || {};
             } else {
                 return this._layerReference;
             }
+        },
+        
+        addInputListener: function( listener ) {
+            // don't allow listeners to be added multiple times
+            phet.assert( _.indexOf( this._inputListeners, listener ) === -1 );
+            
+            this._inputListeners.push( listener );
+        },
+        
+        removeInputListener: function( listener ) {
+            // ensure the listener is in our list
+            phet.assert( _.indexOf( this._inputListeners, listener ) !== -1 );
+            
+            this._inputListeners.splice( _.indexOf( this._inputListeners, listener ), 1 );
+        },
+        
+        getInputListeners: function() {
+            return this._inputListeners;
         },
         
         getTranslation: function() {
