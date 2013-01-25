@@ -40,6 +40,7 @@ Incomplete:
     Use $.extend where helpful
 
 User interaction Design:
+    * Mouse enter/exit needs to trigger for node add/remove
     Can swipe "through" an object to start dragging it
     Can simultaneously move multiple objects / controls
     Can zoom / pan -- how to determine when user gestures can do this?

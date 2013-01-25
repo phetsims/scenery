@@ -281,6 +281,7 @@ phet.scene = phet.scene || {};
         },
         
         clearLayers: function() {
+            // TODO: reconsider a layer.cleanup() function so that we don't have to empty main() every time
             this.main.empty();
             this.layers = [];
             
