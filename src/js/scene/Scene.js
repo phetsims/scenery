@@ -62,7 +62,7 @@ phet.scene = phet.scene || {};
     function fullRender( node, state ) {
         node.enterState( state );
         
-        if( node.visible ) {
+        if( node._visible ) {
             node.renderSelf( state );
             
             var children = node.children;
@@ -153,7 +153,7 @@ phet.scene = phet.scene || {};
                 _.each( node.getAncestors(), function( ancestor ) {
                     ancestor.enterState( state );
                     
-                    if( !ancestor.visible ) {
+                    if( !ancestor._visible ) {
                         return; // completely bail
                     }
                 } );
@@ -186,7 +186,7 @@ phet.scene = phet.scene || {};
                     break;
                 }
                 
-                if( !startPath[depth].visible ) {
+                if( !startPath[depth]._visible ) {
                     return; // none of our layer visible, bail
                 }
                 
@@ -225,7 +225,7 @@ phet.scene = phet.scene || {};
                 
                 node.enterState( state );
         
-                if( node.visible ) {
+                if( node._visible ) {
                     if( !hasLowBound ) {
                         node.renderSelf( state );
                     }

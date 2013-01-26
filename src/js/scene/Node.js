@@ -22,7 +22,7 @@ phet.scene = phet.scene || {};
     // TODO: consider an args-style constructor here!
     phet.scene.Node = function() {
         // TODO: hide as _visible, add setter/getter
-        this.visible = true;
+        this._visible = true;
         
         // type of layer to be created for content under this node.
         // if non-null, this node is a layer root, and layerType should be a layer constructor function

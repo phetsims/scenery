@@ -8,6 +8,7 @@ Bugs:
 
 Next:
     * Debug events on iPad
+        -- waiting on Mountain Lion upgrade to download / install
     
     * Event dispatch
         * Add listeners directly to Finger instances?
