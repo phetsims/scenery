@@ -98,9 +98,9 @@ phet.scene = phet.scene || {};
         
         
         upEvent: function( finger, event ) {
-            var target = this.scene.nodeUnderPoint( finger.point );
-            var newPath = target.getPathToRoot();
-            var oldPath = finger.path;
+            var target = this.scene.root.nodeUnderPoint( finger.point );
+            var newPath = target !== null ? target.getPathToRoot() : [];
+            var oldPath = finger.path || [];
             
             this.dispatchEvent( newPath, 'up', finger, event );
             
@@ -108,9 +108,9 @@ phet.scene = phet.scene || {};
         },
         
         downEvent: function( finger, event ) {
-            var target = this.scene.nodeUnderPoint( finger.point );
-            var newPath = target.getPathToRoot();
-            var oldPath = finger.path;
+            var target = this.scene.root.nodeUnderPoint( finger.point );
+            var newPath = target !== null ? target.getPathToRoot() : [];
+            var oldPath = finger.path || [];
             
             this.dispatchEvent( newPath, 'down', finger, event );
             
@@ -118,9 +118,9 @@ phet.scene = phet.scene || {};
         },
         
         moveEvent: function( finger, event ) {
-            var target = this.scene.nodeUnderPoint( finger.point );
-            var newPath = target.getPathToRoot();
-            var oldPath = finger.path;
+            var target = this.scene.root.nodeUnderPoint( finger.point );
+            var newPath = target !== null ? target.getPathToRoot() : [];
+            var oldPath = finger.path || [];
             
             var branchIndex;
             
@@ -144,9 +144,9 @@ phet.scene = phet.scene || {};
         },
         
         cancelEvent: function( finger, event ) {
-            var target = this.scene.nodeUnderPoint( finger.point );
-            var newPath = target.getPathToRoot();
-            var oldPath = finger.path;
+            var target = this.scene.root.nodeUnderPoint( finger.point );
+            var newPath = target !== null ? target.getPathToRoot() : [];
+            var oldPath = finger.path || [];
             
             this.dispatchEvent( newPath, 'cancel', finger, event );
             

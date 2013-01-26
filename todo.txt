@@ -7,9 +7,14 @@ Bugs:
         Chrome 24.0.1312.52 m bug in zooming fillText() -- mobile Safari OK (maybe different from webkit, since it's not antialiased?)
 
 Next:
+    * Debug events on iPad
+    
     * Event dispatch
         * Add listeners directly to Finger instances?
         * For up/down events, is enter/exit necessary?
+        * Should all events hit through the root / scene? How to add listeners to all events?
+        * Best pattern for handling drags / more persistence? Add listeners directly to finger?
+            * Probably
     * Layering proof-of-concepts, advantages (performance, DOM integration, etc.)
     * DOM nodes
         * Handle correct layering of DOM nodes inside a layer, etc.

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport"
+          content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+
+    <!-- runs in full-screen mode on iOS devices -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <title></title>
+    
+    <link rel="stylesheet" href="../contrib/bootstrap-2.2.2.css">
+    
+    <script src="../contrib/jquery-1.8.3.min.js"></script>
+    <script src="../contrib/underscore-1.4.3-min.js"></script>
+    <script src="../contrib/bootstrap-2.2.2.js"></script>
+    <!--<script src="../concatenated.js"></script>-->
+    <script src="../concatenated.js"></script>
+    <!--<script src="../phet-scene-min.js"></script>-->
+    <style type="text/css">
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: #ff0;
+            overflow: hidden;
+        }
+        
+        #main {
+            position: absolute;
+            left: 0;
+            top: 0;
+            background-color: #fff;
+            z-index: 0;
+            padding: none !important;
+        }
+
+    </style>
+</head>
+
+<body id="home">
+
+<div>
+    <div id="main" >
+    </div>
+</div>
+
+<script>
+
+var main = $( '#main' );
+
+var scene = new phet.scene.Scene( main );
+
+var container = new phet.scene.Node();
+scene.root.addChild( container );
+
+for( var i = 0; i < 100; i++ ) {
+    (function(){
+        // TODO: declarative syntax
+        var testNode = new phet.scene.Node();
+        testNode.setShape( phet.scene.Shape.regularPolygon( 6, 22 ) );
+        testNode.setFill( '#ff0000' );
+        testNode.setStroke( '#000000' );
+        container.addChild( testNode );
+        
+        testNode.translate( Math.random() * 500, Math.random() * 500 );
+
+        testNode.addInputListener( {
+            // up: function( finger, event ) { testNode.setFill( '#ff0000' ); testNode.removeInputListener( fillListener ); },
+            // cancel: function( finger, event ) { testNode.setFill( '#ff0000' ); testNode.removeInputListener( fillListener ); }
+            
+            // down: function( finger, event ) { testNode.setFill( '#ff00ff' ); },
+            
+            enter: function( finger, event ) { testNode.setLineWidth( 5 ); },
+            exit: function( finger, event ) { testNode.setLineWidth( 1 ); }
+        } );
+    })();
+}
+
+var input = new phet.scene.Input( scene );
+
+function pointFromEvent( evt ) {
+    // scrolling should not be possible, use pageX/pageY
+    return new phet.math.Vector2( evt.pageX, evt.pageY );
+}
+
+$( document ).on( 'mousedown', function( evt ) {
+    input.mouseDown( pointFromEvent( evt ), evt );
+    evt.preventDefault();
+} );
+$( document ).on( 'mouseup', function( evt ) {
+    input.mouseUp( pointFromEvent( evt ), evt );
+    evt.preventDefault();
+} );
+$( document ).on( 'mousemove', function( evt ) {
+    input.mouseMove( pointFromEvent( evt ), evt );
+    evt.preventDefault();
+} );
+$( document ).on( 'mouseover', function( evt ) {
+    input.mouseOver( pointFromEvent( evt ), evt );
+    evt.preventDefault();
+} );
+$( document ).on( 'mouseout', function( evt ) {
+    input.mouseOut( pointFromEvent( evt ), evt );
+    evt.preventDefault();
+} );
+
+function forEachChangedTouch( evt, callback ) {
+    for( var i = 0; i < evt.changedTouches.length; i++ ) {
+        // according to spec (http://www.w3.org/TR/touch-events/), this is not an Array, but a TouchList
+        var touch = evt.changedTouches.item( i );
+        
+        callback( touch.identifier, pointFromEvent( touch ) );
+    }
+}
+
+$( document ).on( 'touchstart', function( evt ) {
+    evt.preventDefault();
+    forEachChangedTouch( evt, function( id, point ) {
+        input.touchStart( id, point, evt );
+    } );
+} );
+$( document ).on( 'touchend', function( evt ) {
+    evt.preventDefault();
+    forEachChangedTouch( evt, function( id, point ) {
+        input.touchEnd( id, point, evt );
+    } );
+} );
+$( document ).on( 'touchmove', function( evt ) {
+    evt.preventDefault();
+    forEachChangedTouch( evt, function( id, point ) {
+        input.touchMove( id, point, evt );
+    } );
+} );
+$( document ).on( 'touchcancel', function( evt ) {
+    evt.preventDefault();
+    forEachChangedTouch( evt, function( id, point ) {
+        input.touchCancel( id, point, evt );
+    } );
+} );
+
+// consider using document.elementFromPoint to determine if it needs to prevent default, etc.
+
+// handle window resizing
+var resizer = function () {
+    scene.resize( window.innerWidth, window.innerHeight );
+    scene.renderScene();
+};
+$( window ).resize( resizer );
+resizer();
+
+
+var lastTime = 0;
+var timeElapsed = 0;
+function tick() {
+    window.requestAnimationFrame( tick, main[0] );
+    
+    var timeNow = new Date().getTime();
+    if ( lastTime != 0 ) {
+        timeElapsed = (timeNow - lastTime) / 1000.0;
+    }
+    lastTime = timeNow;
+    
+    scene.updateScene();
+}
+window.requestAnimationFrame( tick, main[0] );
+
+
+</script>
+
+</body>
+</html>

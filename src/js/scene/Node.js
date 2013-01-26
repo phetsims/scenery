@@ -620,7 +620,7 @@ phet.scene = phet.scene || {};
             }
             
             // didn't hit our children, so check ourself as a last resort
-            if( this._selfBounds.containsPoint( point ) && this.containsPointSelf( point ) ) {
+            if( this._selfBounds.containsPoint( localPoint ) && this.containsPointSelf( localPoint ) ) {
                 return this;
             }
             
@@ -640,7 +640,7 @@ phet.scene = phet.scene || {};
                 var result = this._shape.containsPoint( point );
                 
                 // also include the stroked region in the hit area if applicable
-                if( !result && _includeStrokeInHitRegion && this.hasStroke() ) {
+                if( !result && this._includeStrokeInHitRegion && this.hasStroke() ) {
                     result = this._shape.getStrokedShape( this._lineDrawingStyles ).containsPoint( point );
                 }
                 return result;
@@ -777,9 +777,9 @@ phet.scene = phet.scene || {};
         
         addInputListener: function( listener ) {
             // don't allow listeners to be added multiple times
-            phet.assert( _.indexOf( this._inputListeners, listener ) === -1 );
-            
-            this._inputListeners.push( listener );
+            if( _.indexOf( this._inputListeners, listener ) === -1 ) {
+                this._inputListeners.push( listener );
+            }
         },
         
         removeInputListener: function( listener ) {

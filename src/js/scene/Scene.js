@@ -37,6 +37,24 @@ phet.scene = phet.scene || {};
         // default to a canvas layer type, but this can be changed
         // called here AFTER the root is initialized, so that we set the correct dirtyLayerPath and get a layer rebuild / refresh as necessary
         this.root.setLayerType( phet.scene.CanvasLayer ); 
+        
+        // some css hacks (inspired from https://github.com/EightMedia/hammer.js/blob/master/hammer.js)
+        (function() {
+            var prefixes = [ '-webkit-', '-moz-', '-ms-', '-o-', '' ];
+            var properties = {
+                userSelect: 'none',
+                touchCallout: 'none',
+                touchAction: 'none',
+                userDrag: 'none',
+                tapHighlightColor: 'rgba(0,0,0,0)'
+            };
+            
+            _.each( prefixes, function( prefix ) {
+                _.each( properties, function( propertyValue, propertyName ) {
+                    main.css( prefix + propertyName, propertyValue );
+                } );
+            } );
+        })();
     }
 
     var Scene = phet.scene.Scene;
@@ -104,7 +122,12 @@ phet.scene = phet.scene || {};
             _.each( this.layers, function( layer ) {
                 // don't repaint clean layers
                 if( layer.isDirty() ) {
-                    scene.updateLayer( layer, args );
+                    var dirtyBounds = layer.getDirtyBounds();
+                    var visibleDirtyBounds = layer.getDirtyBounds().intersection( scene.sceneBounds );
+                    
+                    if( !visibleDirtyBounds.isEmpty() ) {
+                        scene.updateLayer( layer, args );
+                    }
                 }
             } );
         },
@@ -294,6 +317,13 @@ phet.scene = phet.scene || {};
             var layer = new constructor( args );
             this.layers.push( layer );
             return layer;
+        },
+        
+        resize: function( width, height ) {
+            this.main.width( width );
+            this.main.height( height );
+            this.sceneBounds = new phet.math.Bounds2( 0, 0, width, height );
+            this.rebuildLayers();
         },
         
         // called on the root node when any layer-relevant changes are made
