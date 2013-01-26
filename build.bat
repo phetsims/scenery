@@ -22,5 +22,5 @@ for /f %%k in (build/file-list.txt) DO (
 
 :: build phet-scene-min.js
 echo Building phet-scene-min.js
-java -jar bin/closure-compiler.jar --compilation_level SIMPLE_OPTIMIZATIONS --js concatenated.js --js_output_file phet-scene-min.js --create_source_map ./phet-scene-min.js.map --source_map_format=V3 --define=phetDebug=false
+java -jar bin/closure-compiler.jar --compilation_level SIMPLE_OPTIMIZATIONS --js concatenated.js --js_output_file phet-scene-min.js --create_source_map ./phet-scene-min.js.map --source_map_format=V3 --define=phetDebug=false --language_in ECMASCRIPT5_STRICT
 type build\source-map-appendix.js >> phet-scene-min.js

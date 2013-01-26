@@ -357,6 +357,18 @@
         ok( textBounds.precision < 0.15, 'precision: ' + textBounds.precision );
     } );
     
+    test( 'ES5 Setter / Getter tests', function() {
+        var node = new phet.scene.Node();
+        var fill = '#abcdef';
+        node.fill = fill;
+        equal( node.fill, fill );
+        equal( node.getFill(), fill );
+        
+        var otherNode = new phet.scene.Node( { fill: fill, shape: phet.scene.Shape.rectangle( 0, 0, 10, 10 ) } );
+        
+        equal( otherNode.fill, fill );
+    } );
+    
     /*---------------------------------------------------------------------------*
     * Shapes
     *----------------------------------------------------------------------------*/        

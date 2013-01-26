@@ -20,7 +20,7 @@ phet.scene = phet.scene || {};
     var Shape = phet.scene.Shape;
     
     // TODO: consider an args-style constructor here!
-    phet.scene.Node = function() {
+    phet.scene.Node = function( params ) {
         // TODO: hide as _visible, add setter/getter
         this._visible = true;
         
@@ -30,7 +30,7 @@ phet.scene = phet.scene || {};
         
         // This node and all children will be clipped by this shape (in addition to any other clipping shapes).
         // The shape should be in the local coordinate frame
-        this.clipShape = null;
+        this._clipShape = null;
         
         this.children = [];
         this.transform = new phet.math.Transform3();
@@ -68,6 +68,10 @@ phet.scene = phet.scene || {};
         this._fill = null;
         
         this._lineDrawingStyles = new Shape.LineStyles();
+        
+        if( params ) {
+            this.mutate( params );
+        }
     }
     
     var Node = phet.scene.Node;
@@ -117,13 +121,13 @@ phet.scene = phet.scene || {};
                 state.applyTransformationMatrix( this.transform.getMatrix() );
             }
             
-            if( this.clipShape ) {
-                state.pushClipShape( this.clipShape );
+            if( this._clipShape ) {
+                state.pushClipShape( this._clipShape );
             }
         },
         
         exitState: function( state ) {
-            if( this.clipShape ) {
+            if( this._clipShape ) {
                 state.popClipShape();
             }
             
@@ -221,6 +225,10 @@ phet.scene = phet.scene || {};
                 
                 this.markLayerRefreshNeeded();
             }
+        },
+        
+        getLayerType: function() {
+            return this._layerType;
         },
         
         // remove this node from its parent
@@ -370,6 +378,7 @@ phet.scene = phet.scene || {};
         setTranslation: function( x, y ) {
             var translation = this.getTranslation();
             this.translate( x - translation.x, y - translation.y );
+            return this;
         },
         
         // append a transformation matrix to our local transform
@@ -389,6 +398,7 @@ phet.scene = phet.scene || {};
                 this._shape = shape;
                 this.invalidateShape();
             }
+            return this;
         },
         
         getShape: function() {
@@ -407,6 +417,7 @@ phet.scene = phet.scene || {};
                 
                 this.invalidateShape();
             }
+            return this;
         },
         
         getLineCap: function() {
@@ -421,6 +432,7 @@ phet.scene = phet.scene || {};
                 
                 this.invalidateShape();
             }
+            return this;
         },
         
         getLineJoin: function() {
@@ -435,6 +447,7 @@ phet.scene = phet.scene || {};
                 
                 this.invalidateShape();
             }
+            return this;
         },
         
         setLineStyles: function( lineStyles ) {
@@ -443,6 +456,7 @@ phet.scene = phet.scene || {};
             
             this._lineDrawingStyles = lineStyles;
             this.invalidateShape();
+            return this;
         },
         
         getLineStyles: function() {
@@ -458,6 +472,7 @@ phet.scene = phet.scene || {};
                 this._fill = fill;
                 this.invalidatePaint();
             }
+            return this;
         },
         
         getStroke: function() {
@@ -472,6 +487,26 @@ phet.scene = phet.scene || {};
                 this._stroke = stroke;
                 this.invalidateShape();
             }
+            return this;
+        },
+        
+        isVisible: function() {
+            return this._visible;
+        },
+        
+        setVisible: function( visible ) {
+            if( visible != this._visible ) {
+                if( this._visible ) {
+                    this.markOldSelfPaint();
+                }
+                
+                this._visible = visible;
+                
+                if( visible ) {
+                    this.invalidatePaint();
+                }
+            }
+            return this;
         },
         
         // bounds assumed to be in the local coordinate frame, below this node's transform
@@ -886,6 +921,46 @@ phet.scene = phet.scene || {};
                 bounds = transforms[i].inverseBounds2( bounds );
             }
             return bounds;
+        },
+        
+        /*---------------------------------------------------------------------------*
+        * ES5 get/set
+        *----------------------------------------------------------------------------*/        
+        
+        set stroke( value ) { this.setStroke( value ); },
+        get stroke() { return this.getStroke(); },
+        
+        set fill( value ) { this.setFill( value ); },
+        get fill() { return this.getFill(); },
+        
+        set shape( value ) { this.setShape( value ); },
+        get shape() { return this.getShape(); },
+        
+        set lineWidth( value ) { this.setLineWidth( value ); },
+        get lineWidth() { return this.getLineWidth(); },
+        
+        set lineCap( value ) { this.setLineCap( value ); },
+        get lineCap() { return this.getLineCap(); },
+         
+        set lineJoin( value ) { this.setLineJoin( value ); },
+        get lineJoin() { return this.getLineJoin(); },
+         
+        set layerType( value ) { this.setLayerType( value ); },
+        get layerType() { return this.getLayerType(); }, 
+        
+        set visible( value ) { this.setVisible( value ); },
+        get visible() { return this.isVisible(); },
+        
+        mutate: function( params ) {
+            var setterKeys = [ 'stroke', 'fill', 'shape', 'lineWidth', 'lineCap', 'lineJoin', 'layerType', 'visible' ];
+            
+            var node = this;
+            
+            _.each( setterKeys, function( key ) {
+                if( params[key] !== undefined ) {
+                    node[key] = params[key];
+                }
+            } );
         }
     };
 })();
