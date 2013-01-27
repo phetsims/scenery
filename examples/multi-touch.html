@@ -61,16 +61,14 @@ scene.root.addChild( container );
 
 for( var i = 0; i < 100; i++ ) {
     (function(){
-        // TODO: declarative syntax
-        var node = new phet.scene.Node();
-        node.setShape( phet.scene.Shape.regularPolygon( 6, 22 ) );
-        node.setFill( '#ff0000' );
-        node.setStroke( '#000000' );
+        var node = new phet.scene.Node( {
+            shape: phet.scene.Shape.regularPolygon( 6, 22 ),
+            fill: '#ff0000',
+            stroke: '#000000'
+        } );
         container.addChild( node );
         
         node.translate( Math.random() * 500, Math.random() * 500 );
-        
-        
         
         var dragging = false;
         var lastDragPoint = null;
