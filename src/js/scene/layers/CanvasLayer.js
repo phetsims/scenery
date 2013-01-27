@@ -30,6 +30,7 @@ phet.scene = phet.scene || {};
         main.append( canvas );
         
         this.canvas = canvas;
+        // this.context = new phet.scene.DebugContext( phet.canvas.initCanvas( canvas ) );
         this.context = phet.canvas.initCanvas( canvas );
         this.scene = args.scene;
         

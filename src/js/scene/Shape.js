@@ -357,9 +357,16 @@ phet.scene = phet.scene || {};
     };
     
     Shape.regularPolygon = function( sides, radius ) {
+        var first = true;
         return new Shape( _.map( _.range( sides ), function( k ) {
             var theta = 2 * Math.PI * k / sides;
-            return new Piece.LineTo( p( radius * Math.cos( theta ), radius * Math.sin( theta ) ) );
+            if( first ) {
+                first = false
+                // first segment should be a moveTo
+                return new Piece.MoveTo( p( radius * Math.cos( theta ), radius * Math.sin( theta ) ) );
+            } else {
+                return new Piece.LineTo( p( radius * Math.cos( theta ), radius * Math.sin( theta ) ) );
+            }
         } ), true );
     };
     
