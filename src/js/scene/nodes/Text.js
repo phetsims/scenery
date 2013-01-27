@@ -12,12 +12,12 @@ phet.scene = phet.scene || {};
 (function(){
     "use strict";
     
-    phet.scene.Text = function( text ) {
+    phet.scene.Text = function( text, params ) {
         this._text = '';
         
         this.fontStyles = new Text.FontStyles(); // will be filled in later, due to dependency resolution
         
-        phet.scene.Node.call( this );
+        phet.scene.Node.call( this, params );
         
         if( text !== undefined ) {
             this.setText( text );
@@ -43,8 +43,8 @@ phet.scene = phet.scene || {};
         if( state.isCanvasState() ) {
             var layer = state.layer;
             var context = layer.context;
-            if( this.fill ) {
-                layer.setFillStyle( this.fill );
+            if( this.hasFill() ) {
+                layer.setFillStyle( this.getFill() );
                 layer.setFont( this.fontStyles.font );
                 layer.setTextAlign( this.fontStyles.textAlign );
                 layer.setTextBaseline( this.fontStyles.textBaseline );

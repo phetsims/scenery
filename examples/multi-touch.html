@@ -66,6 +66,12 @@
     var container = new phet.scene.Node();
     scene.root.addChild( container );
     
+    container.addChild( new phet.scene.Text( 'Try dragging the hexagons. If you are on a touch-screen', {
+        x: 20,
+        y: 50,
+        fill: '#000000'
+    } ) );
+    
     // add 100 random hexagons
     for( var i = 0; i < 100; i++ ) {
         // anonymous function so the closure variables aren't shared between iterations
@@ -75,7 +81,7 @@
                 fill: '#ff0000',
                 stroke: '#000000',
                 x: Math.random() * 500,
-                y: Math.random() * 500
+                y: Math.random() * 500 + 100
             } );
             container.addChild( node );
             
