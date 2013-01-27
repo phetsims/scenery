@@ -3,6 +3,8 @@
 /**
  * Text
  *
+ * TODO: newlines
+ *
  * @author Jonathan Olson
  */
 
@@ -13,15 +15,11 @@ phet.scene = phet.scene || {};
     "use strict";
     
     phet.scene.Text = function( text, params ) {
-        this._text = '';
-        
         this.fontStyles = new Text.FontStyles(); // will be filled in later, due to dependency resolution
         
         phet.scene.Node.call( this, params );
         
-        if( text !== undefined ) {
-            this.setText( text );
-        }
+        this.setText( text );
     };
     var Text = phet.scene.Text;
     
@@ -31,6 +29,10 @@ phet.scene = phet.scene || {};
     Text.prototype.setText = function( text ) {
         this._text = text;
         this.invalidateText();
+    };
+    
+    Text.prototype.getText = function() {
+        return this._text;
     };
     
     Text.prototype.invalidateText = function() {
@@ -60,9 +62,17 @@ phet.scene = phet.scene || {};
         this.invalidateText();
     };
     
+    Text.prototype.getFont = function() {
+        return this.fontStyles.font;
+    };
+    
     Text.prototype.setTextAlign = function( textAlign ) {
         this.fontStyles.textAlign = textAlign;
         this.invalidateText();
+    };
+    
+    Text.prototype.getTextAlign = function() {
+        return this.fontStyles.textAlign;
     };
     
     Text.prototype.setTextBaseline = function( textBaseline ) {
@@ -70,10 +80,38 @@ phet.scene = phet.scene || {};
         this.invalidateText();
     };
     
+    Text.prototype.getTextBaseline = function() {
+        return this.fontStyles.textBaseline;
+    };
+    
     Text.prototype.setDirection = function( direction ) {
         this.fontStyles.direction = direction;
         this.invalidateText();
     };
+    
+    Text.prototype.getDirection = function() {
+        return this.fontStyles.direction;
+    };
+    
+    Text.prototype.mutate = function( params ) {
+        var setterKeys = [ 'text', 'font', 'textAlign', 'textBaseline', 'direction' ];
+        
+        var node = this;
+        
+        _.each( setterKeys, function( key ) {
+            if( params[key] !== undefined ) {
+                node[key] = params[key];
+            }
+        } );
+        
+        phet.scene.Node.prototype.mutate.call( this, params );
+    };
+    
+    Object.defineProperty( Text.prototype, 'text', { set: Text.prototype.setText, get: Text.prototype.getText } );
+    Object.defineProperty( Text.prototype, 'font', { set: Text.prototype.setFont, get: Text.prototype.getFont } );
+    Object.defineProperty( Text.prototype, 'textAlign', { set: Text.prototype.setTextAlign, get: Text.prototype.getTextAlign } );
+    Object.defineProperty( Text.prototype, 'textBaseline', { set: Text.prototype.setTextBaseline, get: Text.prototype.getTextBaseline } );
+    Object.defineProperty( Text.prototype, 'direction', { set: Text.prototype.setDirection, get: Text.prototype.getDirection } );
     
     Text.FontStyles = function( args ) {
         if( args === undefined ) {

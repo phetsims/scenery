@@ -21,8 +21,9 @@
     <!-- For the pop-up FPS meter -->
     <script src="../contrib/stats.min.js"></script>
     
-    <!-- Our code -->
-    <script src="../phet-scene-min.js"></script>
+    <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
+    <script src="../concatenated.js"></script>
+    <!-- <script src="../phet-scene-min.js"></script> -->
     
     <style type="text/css">
         /* Let content go to the edges */
@@ -66,10 +67,11 @@
     var container = new phet.scene.Node();
     scene.root.addChild( container );
     
-    container.addChild( new phet.scene.Text( 'Try dragging the hexagons. If you are on a touch-screen', {
+    container.addChild( new phet.scene.Text( 'Try dragging the hexagons. On a touch-screen, dragging will pick up the first hexagon.', {
         x: 20,
         y: 50,
-        fill: '#000000'
+        fill: '#000000',
+        font: '20px sans-serif'
     } ) );
     
     // add 100 random hexagons

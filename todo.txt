@@ -9,6 +9,7 @@ Bugs:
 Questions:
     Pre-rotate or post-rotate translation?
     Invisible nodes included in: {bounds, hit testing / enter / exit events}?
+    _.extend will hopefully work on ES5 setter/getter pairs in the future?
 
 Next:
     * Event dispatch
