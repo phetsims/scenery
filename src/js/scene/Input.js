@@ -177,8 +177,37 @@ phet.scene = phet.scene || {};
         }
     };
     
+    Input.Finger = function() {
+        this.listeners = [];
+    };
+    var Finger = Input.Finger;
+    Finger.prototype = {
+        constructor: Finger,
+        
+        addListener: function( listener ) {
+            phet.assert( !_.contains( this.listeners, listener ) );
+            
+            this.listeners.push( listener );
+        },
+        
+        removeListener: function( listener ) {
+            var index = _.indexOf( this.listeners, listener );
+            phet.assert( index !== -1 );
+            
+            this.listeners.splice( index, 1 );
+        },
+        
+        notifyListeners: function( name, parameters ) {
+            _.each( this.listeners, function( listener ) {
+                listener[name]( parameters );
+            } );
+        }
+    };
+    
     // track the mouse state
     Input.Mouse = function() {
+        Finger.call( this );
+        
         this.point = null;
         
         this.leftDown = false;
@@ -190,7 +219,7 @@ phet.scene = phet.scene || {};
         this.path = null;
     };    
     var Mouse = Input.Mouse;
-    Mouse.prototype = {
+    Mouse.prototype = _.extend( {}, Finger.prototype, {
         constructor: Mouse,
         
         down: function( point, event ) {
@@ -200,6 +229,7 @@ phet.scene = phet.scene || {};
                 case 1: this.middleDown = true; break;
                 case 2: this.rightDown = true; break;
             }
+            this.notifyListeners( 'down', { point: point, event: event } );
         },
         
         up: function( point, event ) {
@@ -209,57 +239,64 @@ phet.scene = phet.scene || {};
                 case 1: this.middleDown = false; break;
                 case 2: this.rightDown = false; break;
             }
+            this.notifyListeners( 'up', { point: point, event: event, finger: this } );
         },
         
         move: function( point, event ) {
             this.point = point;
+            this.notifyListeners( 'move', { point: point, event: event, finger: this } );
         },
         
         over: function( point, event ) {
             this.point = point;
+            this.notifyListeners( 'over', { point: point, event: event, finger: this } );
         },
         
         out: function( point, event ) {
             // TODO: how to handle the mouse out-of-bounds
             this.point = null;
+            this.notifyListeners( 'out', { point: point, event: event, finger: this } );
         }
-    };
+    } );
     
     Input.Touch = function( id, point, event ) {
+        Finger.call( this );
+        
         this.id = id;
         this.point = point;
-        
         this.isTouch = true;
-        
         this.path = null;
     };
     var Touch = Input.Touch;
-    Touch.prototype = {
+    Touch.prototype = _.extend( {}, Finger.prototype, {
         constructor: Touch,
         
         move: function( point, event ) {
             this.point = point;
+            this.notifyListeners( 'move', { point: point, event: event, finger: this } );
         },
         
         end: function( point, event ) {
             this.point = point;
+            this.notifyListeners( 'end', { point: point, event: event, finger: this } );
         },
         
         cancel: function( point, event ) {
             this.point = point;
+            this.notifyListeners( 'cancel', { point: point, event: event, finger: this } );
         }
-    };
+    } );
     
     Input.Key = function( key, event ) {
+        Finger.call( this );
+        
         this.key = key;
-        
         this.isKey = true;
-        
         this.path = null;
     };
     var Key = Input.Key;
-    Key.prototype = {
+    Key.prototype = _.extend( {}, Finger.prototype, {
         constructor: Key
-    };
+    } );
     
 })();
