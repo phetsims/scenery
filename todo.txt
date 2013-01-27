@@ -67,6 +67,7 @@ User interaction Design:
     * with DOM elements, can we essentially "PSwing" the event forwarding and emulate mouse/touch behavior? will CSS :hover work?
 
 Performance:
+    Framebuffer with context.drawImage( bufferContext, 0, 0 );
     Consider child counts, so that we can decide which layers to keep in a layer rebuild?
     Piece improvements with direct piece.render calls instead of switch? -- profile
     Improved Dirty regions
