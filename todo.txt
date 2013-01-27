@@ -6,13 +6,12 @@ Bugs:
         bevel instead of miter on the "close" part of the hex: Firefox 18.0.1
         Chrome 24.0.1312.52 m bug in zooming fillText() -- mobile Safari OK (maybe different from webkit, since it's not antialiased?)
 
+Questions:
+    Pre-rotate or post-rotate translation?
+    Invisible nodes included in: {bounds, hit testing / enter / exit events}?
+
 Next:
-    * Debug events on iPad
-        -- waiting on Mountain Lion upgrade to download / install
-    
     * Event dispatch
-        * API cleanup, current differences between touch / mouse events
-        * Add listeners directly to Finger instances?
         * For up/down events, is enter/exit necessary?
         * Should all events hit through the root / scene? How to add listeners to all events?
         * Best pattern for handling drags / more persistence? Add listeners directly to finger?
@@ -39,7 +38,6 @@ Incomplete:
     Test-based-dev? for Update vs Render
     Don't remove deprecated Rectangle 'class' - but copy over other non-completed function calls
         
-    Ability to update size of canvas, etc.
     Visibility interaction with dirty paint / bounds, and events based on that
         * revert to setter/getter ?
         * Scene.updateLayer handling
