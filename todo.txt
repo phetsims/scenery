@@ -79,6 +79,8 @@ Performance:
     Non-automated performance tests:
         * Compare Matrix3 Float32Array v. Array (Array seems slightly faster possibly?)
         * Consider a Canvas 2D context delegate to examine drawing calls for Easel / Scene / Custom / etc.
+    Checklists:
+        http://www.html5rocks.com/en/tutorials/canvas/performance/
 
 Features:
     * User interaction
