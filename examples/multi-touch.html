@@ -108,9 +108,9 @@ $( document ).on( 'mouseout', function( evt ) {
 } );
 
 function forEachChangedTouch( evt, callback ) {
-    for( var i = 0; i < evt.changedTouches.length; i++ ) {
+    for( var i = 0; i < evt.originalEvent.changedTouches.length; i++ ) {
         // according to spec (http://www.w3.org/TR/touch-events/), this is not an Array, but a TouchList
-        var touch = evt.changedTouches.item( i );
+        var touch = evt.originalEvent.changedTouches.item( i );
         
         callback( touch.identifier, pointFromEvent( touch ) );
     }

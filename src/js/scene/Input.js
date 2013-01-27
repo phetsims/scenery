@@ -85,7 +85,8 @@ phet.scene = phet.scene || {};
         },
         
         touchMove: function( id, point, event ) {
-            this.findTouchById( id ).move( point, event );
+            var touch = this.findTouchById( id );
+            touch.move( point, event );
             this.moveEvent( touch, event );
         },
         
@@ -225,6 +226,7 @@ phet.scene = phet.scene || {};
     };
     
     Input.Touch = function( id, point, event ) {
+        this.id = id;
         this.point = point;
         
         this.isTouch = true;
