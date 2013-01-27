@@ -136,6 +136,7 @@ phet.tests = phet.tests || {};
         var blueContext = addCanvas();
         
         function drawShapes( context, color, seed, rotation ) {
+            // context = new phet.scene.DebugContext( context );
             // center the transform
             context.setTransform( 1, 0, 0, 1, main.width() / 2, main.height() / 2 );
             
