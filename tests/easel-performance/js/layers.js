@@ -21,15 +21,16 @@ phet.tests = phet.tests || {};
             if( useLayers && color == 'rgba(0,255,0,0.7)' ) {
                 background.setLayerType( phet.scene.CanvasLayer );
             }
+            
+            var radius = 10;
+            var shape = phet.scene.Shape.regularPolygon( 6, radius );
+            
             for( var i = 0; i < count; i++ ) {
-                var node = new phet.scene.Node();
-                var radius = 10;
-                
-                // regular polygon
-                node.setShape( phet.scene.Shape.regularPolygon( 6, radius ) );
-                
-                node.setFill( color );
-                node.setStroke( '#000000' );
+                var node = new phet.scene.Node( {
+                    shape: shape, // regular polygon
+                    fill: color,
+                    stroke: '#000000'
+                } );
                 
                 randomizeTranslation( node );
                 
