@@ -38,3 +38,4 @@ src/js/scene/nodes/Rectangle.js
 src/js/scene/nodes/Text.js
 src/js/scene/nodes/DOM.js
 src/js/scene/nodes/Image.js
+src/js/scene/debug/DebugContext.js
