@@ -5,19 +5,22 @@ Bugs:
         miterLimit off in Chrome 24.0.1312.52 m
         bevel instead of miter on the "close" part of the hex: Firefox 18.0.1
         Chrome 24.0.1312.52 m bug in zooming fillText() -- mobile Safari OK (maybe different from webkit, since it's not antialiased?)
-    Report rgba alpha precision "bug" - spec says rgba(255,255,255,0.1112049520495820495802495) should not lose any digits on inspection after setting on context
+        Report rgba alpha precision "bug" - spec says rgba(255,255,255,0.1112049520495820495802495) should not lose any digits on inspection after setting on context
 
 Questions:
+    ** for the following, determine Piccolo behavior
+    
     Pre-rotate or post-rotate translation?
     Invisible nodes included in: {bounds, hit testing / enter / exit events}?
     _.extend will hopefully work on ES5 setter/getter pairs in the future?
         * try #.extend?
     Is any form of sub-tree opacity desired? (set opacity on X and everything below it has its opacity multiplied times that?)
+    Should enter / exit events be fired before / after touch up/down events, or never?
+    Best way to add an event listener that will pick up any non-handled events? Ability to add a listener to the scene?
 
 Next:
     * Event dispatch
         * For up/down events, is enter/exit necessary?
-        * Should all events hit through the root / scene? How to add listeners to all events?
         * Best pattern for handling drags / more persistence? Add listeners directly to finger?
             * Standard flags on fingers for whether they are performing an operation? dragging, etc.
             * A way to 'cancel' the operation a finger is currently doing, so it can switch to a different one?
@@ -29,7 +32,7 @@ Next:
     * IE9 Performance
         * Create 'delegate' context to examine -- self time dominated by fill() and stroke(), so it is probably IE9-canvas-specific
     * Accessibility / shadow DOM
-    * WebGL Layer?
+    * WebGL Layer (we can get even faster rendering for shapes here, if it exists)
 
 Incomplete:
     * Text node issues:
