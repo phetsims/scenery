@@ -67,7 +67,7 @@ for( var i = 0; i < 100; i++ ) {
         container.addChild( testNode );
         
         testNode.translate( Math.random() * 500, Math.random() * 500 );
-
+        
         testNode.addInputListener( {
             // up: function( finger, event ) { testNode.setFill( '#ff0000' ); testNode.removeInputListener( fillListener ); },
             // cancel: function( finger, event ) { testNode.setFill( '#ff0000' ); testNode.removeInputListener( fillListener ); }
@@ -87,56 +87,65 @@ function pointFromEvent( evt ) {
     return new phet.math.Vector2( evt.pageX, evt.pageY );
 }
 
-$( document ).on( 'mousedown', function( evt ) {
+$( document ).on( 'mousedown', function( jEvent ) {
+    var evt = jEvent.originalEvent;
+    jEvent.preventDefault();
     input.mouseDown( pointFromEvent( evt ), evt );
-    evt.preventDefault();
 } );
-$( document ).on( 'mouseup', function( evt ) {
+$( document ).on( 'mouseup', function( jEvent ) {
+    var evt = jEvent.originalEvent;
+    jEvent.preventDefault();
     input.mouseUp( pointFromEvent( evt ), evt );
-    evt.preventDefault();
 } );
-$( document ).on( 'mousemove', function( evt ) {
+$( document ).on( 'mousemove', function( jEvent ) {
+    var evt = jEvent.originalEvent;
+    jEvent.preventDefault();
     input.mouseMove( pointFromEvent( evt ), evt );
-    evt.preventDefault();
 } );
-$( document ).on( 'mouseover', function( evt ) {
+$( document ).on( 'mouseover', function( jEvent ) {
+    var evt = jEvent.originalEvent;
+    jEvent.preventDefault();
     input.mouseOver( pointFromEvent( evt ), evt );
-    evt.preventDefault();
 } );
-$( document ).on( 'mouseout', function( evt ) {
+$( document ).on( 'mouseout', function( jEvent ) {
+    var evt = jEvent.originalEvent;
+    jEvent.preventDefault();
     input.mouseOut( pointFromEvent( evt ), evt );
-    evt.preventDefault();
 } );
 
 function forEachChangedTouch( evt, callback ) {
-    for( var i = 0; i < evt.originalEvent.changedTouches.length; i++ ) {
+    for( var i = 0; i < evt.changedTouches.length; i++ ) {
         // according to spec (http://www.w3.org/TR/touch-events/), this is not an Array, but a TouchList
-        var touch = evt.originalEvent.changedTouches.item( i );
+        var touch = evt.changedTouches.item( i );
         
         callback( touch.identifier, pointFromEvent( touch ) );
     }
 }
 
-$( document ).on( 'touchstart', function( evt ) {
-    evt.preventDefault();
+$( document ).on( 'touchstart', function( jEvent ) {
+    var evt = jEvent.originalEvent;
+    jEvent.preventDefault();
     forEachChangedTouch( evt, function( id, point ) {
         input.touchStart( id, point, evt );
     } );
 } );
-$( document ).on( 'touchend', function( evt ) {
-    evt.preventDefault();
+$( document ).on( 'touchend', function( jEvent ) {
+    var evt = jEvent.originalEvent;
+    jEvent.preventDefault();
     forEachChangedTouch( evt, function( id, point ) {
         input.touchEnd( id, point, evt );
     } );
 } );
-$( document ).on( 'touchmove', function( evt ) {
-    evt.preventDefault();
+$( document ).on( 'touchmove', function( jEvent ) {
+    var evt = jEvent.originalEvent;
+    jEvent.preventDefault();
     forEachChangedTouch( evt, function( id, point ) {
         input.touchMove( id, point, evt );
     } );
 } );
-$( document ).on( 'touchcancel', function( evt ) {
-    evt.preventDefault();
+$( document ).on( 'touchcancel', function( jEvent ) {
+    var evt = jEvent.originalEvent;
+    jEvent.preventDefault();
     forEachChangedTouch( evt, function( id, point ) {
         input.touchCancel( id, point, evt );
     } );
