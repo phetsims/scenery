@@ -17,7 +17,7 @@ phet.math = phet.math || {};
     var Vector2 = phet.math.Vector2;
 
     // takes a 4x4 matrix
-    phet.math.Transform3 = function ( matrix ) {
+    phet.math.Transform3 = function( matrix ) {
         // using immutable version for now. change it to the mutable identity copy if we need mutable operations on the matrices
         this.set( matrix === undefined ? Matrix3.IDENTITY : matrix );
     };
@@ -26,8 +26,12 @@ phet.math = phet.math || {};
 
     Transform3.prototype = {
         constructor: Transform3,
-
-        set: function ( matrix ) {
+        
+        /*---------------------------------------------------------------------------*
+        * mutators
+        *----------------------------------------------------------------------------*/        
+        
+        set: function( matrix ) {
             this.matrix = matrix;
             
             // compute these lazily
@@ -35,6 +39,30 @@ phet.math = phet.math || {};
             this.matrixTransposed = null;
             this.inverseTransposed = null;
         },
+        
+        prepend: function ( matrix ) {
+            this.set( matrix.timesMatrix( this.matrix ) );
+        },
+
+        append: function ( matrix ) {
+            this.set( this.matrix.timesMatrix( matrix ) );
+        },
+
+        prependTransform: function ( transform ) {
+            this.prepend( transform.matrix );
+        },
+
+        appendTransform: function ( transform ) {
+            this.append( transform.matrix );
+        },
+
+        applyToCanvasContext: function ( context ) {
+            context.setTransform( this.matrix.m00(), this.matrix.m10(), this.matrix.m01(), this.matrix.m11(), this.matrix.m02(), this.matrix.m12() );
+        },
+        
+        /*---------------------------------------------------------------------------*
+        * getters
+        *----------------------------------------------------------------------------*/        
         
         getMatrix: function() {
             return this.matrix;
@@ -60,29 +88,9 @@ phet.math = phet.math || {};
             }
             return this.inverseTransposed;
         },
-
-        prepend: function ( matrix ) {
-            this.set( matrix.timesMatrix( this.matrix ) );
-        },
-
-        append: function ( matrix ) {
-            this.set( this.matrix.timesMatrix( matrix ) );
-        },
-
-        prependTransform: function ( transform ) {
-            this.prepend( transform.matrix );
-        },
-
-        appendTransform: function ( transform ) {
-            this.append( transform.matrix );
-        },
-
+        
         isIdentity: function () {
             return this.matrix.type == Matrix3.Types.IDENTITY;
-        },
-
-        applyToCanvasContext: function ( context ) {
-            context.setTransform( this.matrix.m00(), this.matrix.m10(), this.matrix.m01(), this.matrix.m11(), this.matrix.m02(), this.matrix.m12() );
         },
 
         /*---------------------------------------------------------------------------*

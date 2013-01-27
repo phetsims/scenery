@@ -3,6 +3,8 @@
 /**
  * A rectangle shape, with an optional stroke or fill
  *
+ * TODO: consider for deprecation / removal if the regular rectangle performance can be satisfactory
+ *
  * @author Jonathan Olson
  */
 
@@ -22,7 +24,7 @@ phet.scene = phet.scene || {};
     
     var Rectangle = phet.scene.Rectangle;
     
-    Rectangle.parameters = [ 'x', 'y', 'width', 'height', 'stroke', 'fill' ];
+    Rectangle.parameters = [ 'x', 'y', 'width', 'height' ];
     
     Rectangle.prototype = Object.create( phet.scene.Node.prototype );
     Rectangle.prototype.constructor = Rectangle;
@@ -33,21 +35,14 @@ phet.scene = phet.scene || {};
             this.args[key] = args[key];
         }
         
-        this.x = args.x === undefined ? this.x : args.x;
-        this.y = args.y === undefined ? this.y : args.y;
-        this.width = args.width === undefined ? this.width : args.width;
-        this.height = args.height === undefined ? this.height : args.height;
-        this.stroke = args.stroke === undefined ? this.stroke : args.stroke;
-        this.fill = args.fill === undefined ? this.fill : args.fill;
-        
         // TODO: bounds handling for stroke widths / caps, etc.
-        this.invalidateSelf( new phet.math.Bounds2( this.x, this.y, this.x + this.width, this.y + this.height ) );
+        this.invalidateSelf( new phet.math.Bounds2( this.args.x, this.args.y, this.args.x + this.args.width, this.args.y + this.args.height ) );
     };
     
     // whether this node's rendering contains a specific point in local coordinates
     Rectangle.prototype.containsPointSelf = function( point ) {
         // TODO: consider stroke width!
-        return point.x >= this.x && point.y >= this.y && point.x <= this.x + this.width && point.y <= this.y + this.height;
+        return point.x >= this.args.x && point.y >= this.args.y && point.x <= this.args.x + this.args.width && point.y <= this.args.y + this.args.height;
     };
     
     // whether the bounding box intersects this node
@@ -59,14 +54,12 @@ phet.scene = phet.scene || {};
         if( state.isCanvasState() ) {
             var layer = state.layer;
             var context = layer.context;
-            if( this.fill ) {
-                layer.setFillStyle( this.fill );
-                context.fillRect( this.x, this.y, this.width, this.height );
+            if( this.hasFill() ) {
+                layer.setFillStyle( this.getFill() );
+                context.fillRect( this.args.x, this.args.y, this.args.width, this.args.height );
             }
-            if( this.stroke ) {
-                layer.setStrokeStyle( this.stroke );
-                context.strokeRect( this.x, this.y, this.width, this.height );
-            }
+            
+            // stroke deprecated, since the bounds are unused. use Shape instead for rectangles
         }
     };
 })();

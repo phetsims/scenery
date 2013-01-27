@@ -355,7 +355,7 @@ phet.math = phet.math || {};
             var transformedVector = this.timesVector2( phet.math.Vector2.X_UNIT ).minus( this.timesVector2( phet.math.Vector2.ZERO ) );
             return Math.atan2( transformedVector.y, transformedVector.x );
         },
-
+        
         makeImmutable: function () {
             this.rowMajor = function () {
                 throw new Error( "Cannot modify immutable matrix" );

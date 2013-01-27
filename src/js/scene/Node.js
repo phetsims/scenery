@@ -359,156 +359,6 @@ phet.scene = phet.scene || {};
             }
         },
         
-        // TODO: how to handle point vs x,y
-        translate: function( x, y ) {
-            // mark old bounds as needing a repaint
-            this.appendMatrix( Matrix3.translation( x, y ) );
-        },
-        
-        // scale( s ) is also supported
-        scale: function( x, y ) {
-            this.appendMatrix( Matrix3.scaling( x, y ) );
-        },
-        
-        rotate: function( angle ) {
-            this.appendMatrix( Matrix3.rotation2( angle ) );
-        },
-        
-        // TODO: how to handle x,y?
-        setTranslation: function( x, y ) {
-            var translation = this.getTranslation();
-            this.translate( x - translation.x, y - translation.y );
-            return this;
-        },
-        
-        // append a transformation matrix to our local transform
-        appendMatrix: function( matrix ) {
-            // invalidate paint TODO improve methods for this
-            this.markOldPaint();
-            
-            this.transform.append( matrix );
-            
-            this.invalidateBounds();
-            this.invalidatePaint();
-        },
-        
-        // sets the shape drawn, or null to remove the shape
-        setShape: function( shape ) {
-            if( this._shape != shape ) {
-                this._shape = shape;
-                this.invalidateShape();
-            }
-            return this;
-        },
-        
-        getShape: function() {
-            return this._shape;
-        },
-        
-        getLineWidth: function() {
-            return this._lineDrawingStyles.lineWidth;
-        },
-        
-        setLineWidth: function( lineWidth ) {
-            if( this.getLineWidth() != lineWidth ) {
-                this.markOldSelfPaint(); // since the previous line width may have been wider
-                
-                this._lineDrawingStyles.lineWidth = lineWidth;
-                
-                this.invalidateShape();
-            }
-            return this;
-        },
-        
-        getLineCap: function() {
-            return this._lineDrawingStyles.lineCap;
-        },
-        
-        setLineCap: function( lineCap ) {
-            if( this._lineDrawingStyles.lineCap != lineCap ) {
-                this.markOldSelfPaint();
-                
-                this._lineDrawingStyles.lineCap = lineCap;
-                
-                this.invalidateShape();
-            }
-            return this;
-        },
-        
-        getLineJoin: function() {
-            return this._lineDrawingStyles.lineJoin;
-        },
-        
-        setLineJoin: function( lineJoin ) {
-            if( this._lineDrawingStyles.lineJoin != lineJoin ) {
-                this.markOldSelfPaint();
-                
-                this._lineDrawingStyles.lineJoin = lineJoin;
-                
-                this.invalidateShape();
-            }
-            return this;
-        },
-        
-        setLineStyles: function( lineStyles ) {
-            // TODO: since we have been using lineStyles as mutable for now, lack of change check is good here?
-            this.markOldSelfPaint();
-            
-            this._lineDrawingStyles = lineStyles;
-            this.invalidateShape();
-            return this;
-        },
-        
-        getLineStyles: function() {
-            return this._lineDrawingStyles;
-        },
-        
-        getFill: function() {
-            return this._fill;
-        },
-        
-        setFill: function( fill ) {
-            if( this.getFill() != fill ) {
-                this._fill = fill;
-                this.invalidatePaint();
-            }
-            return this;
-        },
-        
-        getStroke: function() {
-            return this._stroke;
-        },
-        
-        setStroke: function( stroke ) {
-            if( this.getStroke() != stroke ) {
-                // since this can actually change the bounds, we need to handle a few things differently than the fill
-                this.markOldSelfPaint();
-                
-                this._stroke = stroke;
-                this.invalidateShape();
-            }
-            return this;
-        },
-        
-        isVisible: function() {
-            return this._visible;
-        },
-        
-        setVisible: function( visible ) {
-            if( visible != this._visible ) {
-                if( this._visible ) {
-                    this.markOldSelfPaint();
-                }
-                
-                this._visible = visible;
-                
-                if( visible ) {
-                    this.invalidatePaint();
-                }
-            }
-            return this;
-        },
-        
         // bounds assumed to be in the local coordinate frame, below this node's transform
         markDirtyRegion: function( bounds ) {
             var globalBounds = this.localToGlobalBounds( bounds );
@@ -828,24 +678,225 @@ phet.scene = phet.scene || {};
             return this._inputListeners;
         },
         
-        getTranslation: function() {
-            return this.transform.getMatrix().translation();
+        // TODO: how to handle point vs x,y. also consider renaming to translateBy
+        translate: function( x, y ) {
+            // mark old bounds as needing a repaint
+            this.appendMatrix( Matrix3.translation( x, y ) );
         },
         
-        getScaling: function() {
+        // scaleBy( s ) is also supported, which will scale both dimensions by the same amount. renamed from 'scale' to satisfy the setter/getter
+        scaleBy: function( x, y ) {
+            this.appendMatrix( Matrix3.scaling( x, y ) );
+        },
+        
+        // TODO: consider naming to rotateBy to match scaleBy (due to scale property / method name conflict)
+        rotate: function( angle ) {
+            this.appendMatrix( Matrix3.rotation2( angle ) );
+        },
+        
+        getX: function() {
+            return this.getTranslation().x;
+        },
+        
+        setX: function( x ) {
+            this.setTranslation( x, this.getY() );
+            return this;
+        },
+        
+        getY: function() {
+            return this.getTranslation().y;
+        },
+        
+        setY: function( y ) {
+            this.setTranslation( this.getX(), y );
+            return this;
+        },
+        
+        // returns a vector with an entry for each axis
+        getScale: function() {
             return this.transform.getMatrix().scaling();
+        },
+        
+        // supports setScale( 5 ) for both dimensions, setScale( 5, 3 ) for each dimension separately, or setScale( new phet.math.Vector2( x, y ) )
+        setScale: function( a, b ) {
+            var currentScale = this.getScale();
+            
+            if( typeof a === 'number' ) {
+                if( b === undefined ) {
+                    b = a;
+                }
+                this.appendMatrix( phet.scene.Matrix3.scaling( a / currentScale.x, b / currentScale.y ) );
+            } else {
+                // assume it's an object, or fail out
+                this.appendMatrix( phet.scene.Matrix3.scaling( a.x / currentScale.x, a.y / currentScale.y ) );
+            }
+            return this;
         },
         
         getRotation: function() {
             return this.transform.getMatrix().rotation();
         },
         
-        getX: function() {
-            return getTranslation().x;
+        setRotation: function( rotation ) {
+            this.appendMatrix( phet.math.Matrix3.rotation2( rotation - this.getRotation() ) );
+            return this;
         },
         
-        getY: function() {
-            return getTranslation().y;
+        // supports setTranslation( x, y ) or setTranslation( new phet.math.Vector2( x, y ) ) .. or technically setTranslation( { x: x, y: y } )
+        setTranslation: function( a, b ) {
+            var translation = this.getTranslation();
+            
+            if( typeof a === 'number' ) {
+                this.translate( a - translation.x, b - translation.y );
+            } else {
+                this.translate( a.x - translation.x, a.y - translation.y );
+            }
+            return this;
+        },
+        
+        getTranslation: function() {
+            return this.transform.getMatrix().translation();
+        },
+        
+        // append a transformation matrix to our local transform
+        appendMatrix: function( matrix ) {
+            // invalidate paint TODO improve methods for this
+            this.markOldPaint();
+            
+            this.transform.append( matrix );
+            
+            this.invalidateBounds();
+            this.invalidatePaint();
+        },
+        
+        setMatrix: function( matrix ) {
+            this.markOldPaint();
+            
+            this.transform.set( matrix );
+            
+            this.invalidateBounds();
+            this.invalidatePaint();
+        },
+        
+        getMatrix: function() {
+            return this.transform.getMatrix();
+        },
+        
+        // sets the shape drawn, or null to remove the shape
+        setShape: function( shape ) {
+            if( this._shape != shape ) {
+                this._shape = shape;
+                this.invalidateShape();
+            }
+            return this;
+        },
+        
+        getShape: function() {
+            return this._shape;
+        },
+        
+        getLineWidth: function() {
+            return this._lineDrawingStyles.lineWidth;
+        },
+        
+        setLineWidth: function( lineWidth ) {
+            if( this.getLineWidth() != lineWidth ) {
+                this.markOldSelfPaint(); // since the previous line width may have been wider
+                
+                this._lineDrawingStyles.lineWidth = lineWidth;
+                
+                this.invalidateShape();
+            }
+            return this;
+        },
+        
+        getLineCap: function() {
+            return this._lineDrawingStyles.lineCap;
+        },
+        
+        setLineCap: function( lineCap ) {
+            if( this._lineDrawingStyles.lineCap != lineCap ) {
+                this.markOldSelfPaint();
+                
+                this._lineDrawingStyles.lineCap = lineCap;
+                
+                this.invalidateShape();
+            }
+            return this;
+        },
+        
+        getLineJoin: function() {
+            return this._lineDrawingStyles.lineJoin;
+        },
+        
+        setLineJoin: function( lineJoin ) {
+            if( this._lineDrawingStyles.lineJoin != lineJoin ) {
+                this.markOldSelfPaint();
+                
+                this._lineDrawingStyles.lineJoin = lineJoin;
+                
+                this.invalidateShape();
+            }
+            return this;
+        },
+        
+        setLineStyles: function( lineStyles ) {
+            // TODO: since we have been using lineStyles as mutable for now, lack of change check is good here?
+            this.markOldSelfPaint();
+            
+            this._lineDrawingStyles = lineStyles;
+            this.invalidateShape();
+            return this;
+        },
+        
+        getLineStyles: function() {
+            return this._lineDrawingStyles;
+        },
+        
+        getFill: function() {
+            return this._fill;
+        },
+        
+        setFill: function( fill ) {
+            if( this.getFill() != fill ) {
+                this._fill = fill;
+                this.invalidatePaint();
+            }
+            return this;
+        },
+        
+        getStroke: function() {
+            return this._stroke;
+        },
+        
+        setStroke: function( stroke ) {
+            if( this.getStroke() != stroke ) {
+                // since this can actually change the bounds, we need to handle a few things differently than the fill
+                this.markOldSelfPaint();
+                
+                this._stroke = stroke;
+                this.invalidateShape();
+            }
+            return this;
+        },
+        
+        isVisible: function() {
+            return this._visible;
+        },
+        
+        setVisible: function( visible ) {
+            if( visible != this._visible ) {
+                if( this._visible ) {
+                    this.markOldSelfPaint();
+                }
+                
+                this._visible = visible;
+                
+                if( visible ) {
+                    this.invalidatePaint();
+                }
+            }
+            return this;
         },
         
         /*---------------------------------------------------------------------------*
@@ -951,8 +1002,28 @@ phet.scene = phet.scene || {};
         set visible( value ) { this.setVisible( value ); },
         get visible() { return this.isVisible(); },
         
+        set matrix( value ) { this.setMatrix( value ); },
+        get matrix() { return this.isMatrix(); },
+        
+        set translation( value ) { this.setTranslation( value ); },
+        get translation() { return this.isTranslation(); },
+        
+        set rotation( value ) { this.setRotation( value ); },
+        get rotation() { return this.isRotation(); },
+        
+        set scale( value ) { this.setScale( value ); },
+        get scale() { return this.isScale(); },
+        
+        set x( value ) { this.setX( value ); },
+        get x() { return this.isX(); },
+        
+        set y( value ) { this.setY( value ); },
+        get y() { return this.isY(); },
+        
         mutate: function( params ) {
-            var setterKeys = [ 'stroke', 'fill', 'shape', 'lineWidth', 'lineCap', 'lineJoin', 'layerType', 'visible' ];
+            // NOTE: translation-based mutators come first, since typically we think of their operations occuring "after" the rotation / scaling
+            var setterKeys = [ 'stroke', 'fill', 'shape', 'lineWidth', 'lineCap', 'lineJoin', 'layerType', 'visible',
+                               'translation', 'x', 'y', 'rotation', 'scale' ];
             
             var node = this;
             
