@@ -5,18 +5,22 @@ Bugs:
         miterLimit off in Chrome 24.0.1312.52 m
         bevel instead of miter on the "close" part of the hex: Firefox 18.0.1
         Chrome 24.0.1312.52 m bug in zooming fillText() -- mobile Safari OK (maybe different from webkit, since it's not antialiased?)
+    Report rgba alpha precision "bug" - spec says rgba(255,255,255,0.1112049520495820495802495) should not lose any digits on inspection after setting on context
 
 Questions:
     Pre-rotate or post-rotate translation?
     Invisible nodes included in: {bounds, hit testing / enter / exit events}?
     _.extend will hopefully work on ES5 setter/getter pairs in the future?
+        * try #.extend?
+    Is any form of sub-tree opacity desired? (set opacity on X and everything below it has its opacity multiplied times that?)
 
 Next:
     * Event dispatch
         * For up/down events, is enter/exit necessary?
         * Should all events hit through the root / scene? How to add listeners to all events?
         * Best pattern for handling drags / more persistence? Add listeners directly to finger?
-            * Probably
+            * Standard flags on fingers for whether they are performing an operation? dragging, etc.
+            * A way to 'cancel' the operation a finger is currently doing, so it can switch to a different one?
     * Layering proof-of-concepts, advantages (performance, DOM integration, etc.)
     * DOM nodes
         * Handle correct layering of DOM nodes inside a layer, etc.
@@ -30,14 +34,13 @@ Next:
 Incomplete:
     * Text node issues:
         * How to handle multi-ling strings? SVG for that?
-    Remove the "nodes" subpackage, this causes more verbosity than is needed in common code
     refreshLayers implementation
     Think about multiple view implementations!
     Static analysis - linter - integrated into build?
     Vet recursive bounds code against empty area
     
-    Test-based-dev? for Update vs Render
-    Don't remove deprecated Rectangle 'class' - but copy over other non-completed function calls
+    Consider Rectangle deprecated?
+    Refactor fill / stroke code in Node so that it can be used by subclasses, e.g. Rectangle, Text, etc.
         
     Visibility interaction with dirty paint / bounds, and events based on that
         * revert to setter/getter ?
@@ -46,7 +49,7 @@ Incomplete:
     General optimization and organization so we can extract "self" from child rendering bounds, what is repainted, etc. better.
     Canvas fill gradients / patterns
         * Can we abstract this across SVG also?
-    Use $.extend where helpful
+    Shape completeness of operations: arc and bezier quadratic / cubic
 
 User interaction Design:
     * Do invisible nodes get picked?
@@ -71,16 +74,11 @@ Performance:
     Non-automated performance tests:
         * Compare Matrix3 Float32Array v. Array (Array seems slightly faster possibly?)
         * Consider a Canvas 2D context delegate to examine drawing calls for Easel / Scene / Custom / etc.
-    Optimizing for V8:
-        http://floitsch.blogspot.com/2012/03/optimizing-for-v8-introduction.html
 
 Features:
     * User interaction
-    Subtree opacity?
     Accessibility and shadow DOM see html5 scene graph google doc
-    Non-canvas handling
     Retina-screen handling
-    "Lifting" of DOM nodes to top layer if selected
     AnimateTo-style animation
     Clipping => Dead region handling (clipping needs to be stored in a shape array since it can only be intersected or reset in Canvas)
     Color handling?
@@ -91,14 +89,9 @@ Features:
 
 Cleanliness / Debugging:
     *** Debug layer
-    x,y vs point handling for translation etc. since we lack overriding?
-    Bounds2: rename styling from minX to minX
     Ability to create a debugging dump of scene graph
-    Unit tests using canvas pixel querying
-    Debugging traces removed with Closure compiler?
 
 Other:
     Pull requests to underscore.js for FunctionalUtils wishlist
     Implement Bouncy example from the wishlist
-    Report rgba alpha precision "bug" - spec says rgba(255,255,255,0.1112049520495820495802495) should not lose any digits on inspection after setting on context
     Highlighting and indexing of TODO items
