@@ -29,6 +29,7 @@ phet.scene = phet.scene || {};
     Text.prototype.setText = function( text ) {
         this._text = text;
         this.invalidateText();
+        return this;
     };
     
     Text.prototype.getText = function() {
@@ -60,6 +61,7 @@ phet.scene = phet.scene || {};
     Text.prototype.setFont = function( font ) {
         this.fontStyles.font = font;
         this.invalidateText();
+        return this;
     };
     
     Text.prototype.getFont = function() {
@@ -69,6 +71,7 @@ phet.scene = phet.scene || {};
     Text.prototype.setTextAlign = function( textAlign ) {
         this.fontStyles.textAlign = textAlign;
         this.invalidateText();
+        return this;
     };
     
     Text.prototype.getTextAlign = function() {
@@ -78,6 +81,7 @@ phet.scene = phet.scene || {};
     Text.prototype.setTextBaseline = function( textBaseline ) {
         this.fontStyles.textBaseline = textBaseline;
         this.invalidateText();
+        return this;
     };
     
     Text.prototype.getTextBaseline = function() {
@@ -87,6 +91,7 @@ phet.scene = phet.scene || {};
     Text.prototype.setDirection = function( direction ) {
         this.fontStyles.direction = direction;
         this.invalidateText();
+        return this;
     };
     
     Text.prototype.getDirection = function() {
