@@ -53,6 +53,7 @@
 var main = $( '#main' );
 
 var scene = new phet.scene.Scene( main );
+scene.initializeFullscreenEvents();
 
 var container = new phet.scene.Node();
 scene.root.addChild( container );
@@ -79,77 +80,6 @@ for( var i = 0; i < 100; i++ ) {
         } );
     })();
 }
-
-var input = new phet.scene.Input( scene );
-
-function pointFromEvent( evt ) {
-    // scrolling should not be possible, use pageX/pageY
-    return new phet.math.Vector2( evt.pageX, evt.pageY );
-}
-
-$( document ).on( 'mousedown', function( jEvent ) {
-    var evt = jEvent.originalEvent;
-    jEvent.preventDefault();
-    input.mouseDown( pointFromEvent( evt ), evt );
-} );
-$( document ).on( 'mouseup', function( jEvent ) {
-    var evt = jEvent.originalEvent;
-    jEvent.preventDefault();
-    input.mouseUp( pointFromEvent( evt ), evt );
-} );
-$( document ).on( 'mousemove', function( jEvent ) {
-    var evt = jEvent.originalEvent;
-    jEvent.preventDefault();
-    input.mouseMove( pointFromEvent( evt ), evt );
-} );
-$( document ).on( 'mouseover', function( jEvent ) {
-    var evt = jEvent.originalEvent;
-    jEvent.preventDefault();
-    input.mouseOver( pointFromEvent( evt ), evt );
-} );
-$( document ).on( 'mouseout', function( jEvent ) {
-    var evt = jEvent.originalEvent;
-    jEvent.preventDefault();
-    input.mouseOut( pointFromEvent( evt ), evt );
-} );
-
-function forEachChangedTouch( evt, callback ) {
-    for( var i = 0; i < evt.changedTouches.length; i++ ) {
-        // according to spec (http://www.w3.org/TR/touch-events/), this is not an Array, but a TouchList
-        var touch = evt.changedTouches.item( i );
-        
-        callback( touch.identifier, pointFromEvent( touch ) );
-    }
-}
-
-$( document ).on( 'touchstart', function( jEvent ) {
-    var evt = jEvent.originalEvent;
-    jEvent.preventDefault();
-    forEachChangedTouch( evt, function( id, point ) {
-        input.touchStart( id, point, evt );
-    } );
-} );
-$( document ).on( 'touchend', function( jEvent ) {
-    var evt = jEvent.originalEvent;
-    jEvent.preventDefault();
-    forEachChangedTouch( evt, function( id, point ) {
-        input.touchEnd( id, point, evt );
-    } );
-} );
-$( document ).on( 'touchmove', function( jEvent ) {
-    var evt = jEvent.originalEvent;
-    jEvent.preventDefault();
-    forEachChangedTouch( evt, function( id, point ) {
-        input.touchMove( id, point, evt );
-    } );
-} );
-$( document ).on( 'touchcancel', function( jEvent ) {
-    var evt = jEvent.originalEvent;
-    jEvent.preventDefault();
-    forEachChangedTouch( evt, function( id, point ) {
-        input.touchCancel( id, point, evt );
-    } );
-} );
 
 // consider using document.elementFromPoint to determine if it needs to prevent default, etc.
 
