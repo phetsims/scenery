@@ -582,6 +582,10 @@ phet.scene = phet.scene || {};
             return this.parent ? this.parent.getPathToRoot() : [];
         },
         
+        getChildren: function() {
+            return this.children.slice( 0 ); // create a defensive copy
+        },
+        
         // like getAncestors(), but includes the current node as well
         getPathToRoot: function() {
             var result = [];

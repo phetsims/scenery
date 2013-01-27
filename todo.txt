@@ -86,6 +86,7 @@ Features:
     Investigate DAG version?
     Include MathJax text?
     WebGL Layers
+    Property change events for nodes?
 
 Cleanliness / Debugging:
     *** Debug layer
