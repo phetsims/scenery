@@ -197,9 +197,12 @@ phet.scene = phet.scene || {};
             this.listeners.splice( index, 1 );
         },
         
-        notifyListeners: function( name, parameters ) {
+        notifyListeners: function( name, event ) {
+            var finger = this;
             _.each( this.listeners, function( listener ) {
-                listener[name]( parameters );
+                if( listener[name] ) {
+                    listener[name]( finger, event );
+                }
             } );
         }
     };
@@ -229,7 +232,7 @@ phet.scene = phet.scene || {};
                 case 1: this.middleDown = true; break;
                 case 2: this.rightDown = true; break;
             }
-            this.notifyListeners( 'down', { point: point, event: event } );
+            this.notifyListeners( 'down', event );
         },
         
         up: function( point, event ) {
@@ -239,23 +242,23 @@ phet.scene = phet.scene || {};
                 case 1: this.middleDown = false; break;
                 case 2: this.rightDown = false; break;
             }
-            this.notifyListeners( 'up', { point: point, event: event, finger: this } );
+            this.notifyListeners( 'up', event );
         },
         
         move: function( point, event ) {
             this.point = point;
-            this.notifyListeners( 'move', { point: point, event: event, finger: this } );
+            this.notifyListeners( 'move', event );
         },
         
         over: function( point, event ) {
             this.point = point;
-            this.notifyListeners( 'over', { point: point, event: event, finger: this } );
+            this.notifyListeners( 'over', event );
         },
         
         out: function( point, event ) {
             // TODO: how to handle the mouse out-of-bounds
             this.point = null;
-            this.notifyListeners( 'out', { point: point, event: event, finger: this } );
+            this.notifyListeners( 'out', event );
         }
     } );
     
@@ -273,17 +276,17 @@ phet.scene = phet.scene || {};
         
         move: function( point, event ) {
             this.point = point;
-            this.notifyListeners( 'move', { point: point, event: event, finger: this } );
+            this.notifyListeners( 'move', event );
         },
         
         end: function( point, event ) {
             this.point = point;
-            this.notifyListeners( 'end', { point: point, event: event, finger: this } );
+            this.notifyListeners( 'end', event );
         },
         
         cancel: function( point, event ) {
             this.point = point;
-            this.notifyListeners( 'cancel', { point: point, event: event, finger: this } );
+            this.notifyListeners( 'cancel', event );
         }
     } );
     

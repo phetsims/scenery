@@ -62,22 +62,71 @@ scene.root.addChild( container );
 for( var i = 0; i < 100; i++ ) {
     (function(){
         // TODO: declarative syntax
-        var testNode = new phet.scene.Node();
-        testNode.setShape( phet.scene.Shape.regularPolygon( 6, 22 ) );
-        testNode.setFill( '#ff0000' );
-        testNode.setStroke( '#000000' );
-        container.addChild( testNode );
+        var node = new phet.scene.Node();
+        node.setShape( phet.scene.Shape.regularPolygon( 6, 22 ) );
+        node.setFill( '#ff0000' );
+        node.setStroke( '#000000' );
+        container.addChild( node );
         
-        testNode.translate( Math.random() * 500, Math.random() * 500 );
+        node.translate( Math.random() * 500, Math.random() * 500 );
         
-        testNode.addInputListener( {
-            // up: function( finger, event ) { testNode.setFill( '#ff0000' ); testNode.removeInputListener( fillListener ); },
-            // cancel: function( finger, event ) { testNode.setFill( '#ff0000' ); testNode.removeInputListener( fillListener ); }
+        
+        
+        var dragging = false;
+        var lastDragPoint = null;
+        var beforeDragTranslation = node.translation;
+        
+        var dragListener = {
+            up: function( finger, event ) {
+                endDrag( finger );
+            },
             
-            // down: function( finger, event ) { testNode.setFill( '#ff00ff' ); },
+            cancel: function( finger, event ) {
+                endDrag( finger );
+                
+                // since it's a cancel event, go back!
+                node.translation = beforeDragTranslation;
+            },
             
-            enter: function( finger, event ) { testNode.setLineWidth( 5 ); },
-            exit: function( finger, event ) { testNode.setLineWidth( 1 ); }
+            move: function( finger, event ) {
+                node.translate( finger.point.minus( lastDragPoint ) );
+                lastDragPoint = finger.point;
+            }
+        };
+        
+        function startDrag( finger ) {
+            node.setFill( '#0000ff' );
+            
+            finger.dragging = true;
+            
+            finger.addListener( dragListener );
+            
+            beforeDragTranslation = node.translation;
+            lastDragPoint = finger.point;
+        }
+        
+        function endDrag( finger ) {
+            node.setFill( '#ff0000' );
+            
+            finger.removeListener( dragListener );
+            finger.dragging = false;
+        }
+        
+        function tryToSnag( finger ) {
+            // only start dragging if the finger isn't dragging anything, we aren't being dragged, and if it's a mouse it's button is down
+            if( !dragging && !finger.dragging && ( !finger.isMouse || finger.leftDown ) ) {
+                startDrag( finger );
+            }
+        }
+        
+        node.addInputListener( {
+            down: function( finger, event ) {
+                tryToSnag( finger );
+            },
+            
+            enter: function( finger, event ) {
+                tryToSnag( finger );
+            }
         } );
     })();
 }

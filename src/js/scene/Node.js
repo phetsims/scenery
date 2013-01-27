@@ -678,10 +678,14 @@ phet.scene = phet.scene || {};
             return this._inputListeners;
         },
         
-        // TODO: how to handle point vs x,y. also consider renaming to translateBy
+        // TODO: consider renaming to translateBy
         translate: function( x, y ) {
-            // mark old bounds as needing a repaint
-            this.appendMatrix( Matrix3.translation( x, y ) );
+            if( typeof x === 'number' ) {
+                this.appendMatrix( Matrix3.translation( x, y ) );
+            } else {
+                var point = x;
+                this.appendMatrix( Matrix3.translation( point.x, point.y ) );
+            }
         },
         
         // scaleBy( s ) is also supported, which will scale both dimensions by the same amount. renamed from 'scale' to satisfy the setter/getter
@@ -725,10 +729,10 @@ phet.scene = phet.scene || {};
                 if( b === undefined ) {
                     b = a;
                 }
-                this.appendMatrix( phet.scene.Matrix3.scaling( a / currentScale.x, b / currentScale.y ) );
+                this.appendMatrix( phet.math.Matrix3.scaling( a / currentScale.x, b / currentScale.y ) );
             } else {
                 // assume it's an object, or fail out
-                this.appendMatrix( phet.scene.Matrix3.scaling( a.x / currentScale.x, a.y / currentScale.y ) );
+                this.appendMatrix( phet.math.Matrix3.scaling( a.x / currentScale.x, a.y / currentScale.y ) );
             }
             return this;
         },
@@ -1003,22 +1007,22 @@ phet.scene = phet.scene || {};
         get visible() { return this.isVisible(); },
         
         set matrix( value ) { this.setMatrix( value ); },
-        get matrix() { return this.isMatrix(); },
+        get matrix() { return this.getMatrix(); },
         
         set translation( value ) { this.setTranslation( value ); },
-        get translation() { return this.isTranslation(); },
+        get translation() { return this.getTranslation(); },
         
         set rotation( value ) { this.setRotation( value ); },
-        get rotation() { return this.isRotation(); },
+        get rotation() { return this.getRotation(); },
         
         set scale( value ) { this.setScale( value ); },
-        get scale() { return this.isScale(); },
+        get scale() { return this.getScale(); },
         
         set x( value ) { this.setX( value ); },
-        get x() { return this.isX(); },
+        get x() { return this.getX(); },
         
         set y( value ) { this.setY( value ); },
-        get y() { return this.isY(); },
+        get y() { return this.getY(); },
         
         mutate: function( params ) {
             // NOTE: translation-based mutators come first, since typically we think of their operations occuring "after" the rotation / scaling
