@@ -11,6 +11,7 @@ Next:
         -- waiting on Mountain Lion upgrade to download / install
     
     * Event dispatch
+        * API cleanup, current differences between touch / mouse events
         * Add listeners directly to Finger instances?
         * For up/down events, is enter/exit necessary?
         * Should all events hit through the root / scene? How to add listeners to all events?

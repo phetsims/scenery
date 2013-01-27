@@ -156,6 +156,20 @@ phet.scene = phet.scene || {};
         
         // targets should be a subpath from a node to an ancestor
         dispatchEvent: function( targets, type, finger, event ) {
+            // first run through the finger's listeners to see if one of them will handle the event
+            for( var i = 0; i < finger.listeners.length; i++ ) {
+                var listener = finger.listeners[i];
+                
+                if( listener[type] ) {
+                    // if a listener returns true, don't handle any more
+                    var handled = !!( listener[type]( finger, event ) );
+                    
+                    if( handled ) {
+                        return;
+                    }
+                }
+            }
+            
             for( var i = targets.length - 1; i >= 0; i-- ) {
                 var target = targets[i];
                 
@@ -195,15 +209,6 @@ phet.scene = phet.scene || {};
             phet.assert( index !== -1 );
             
             this.listeners.splice( index, 1 );
-        },
-        
-        notifyListeners: function( name, event ) {
-            var finger = this;
-            _.each( this.listeners, function( listener ) {
-                if( listener[name] ) {
-                    listener[name]( finger, event );
-                }
-            } );
         }
     };
     
@@ -232,7 +237,6 @@ phet.scene = phet.scene || {};
                 case 1: this.middleDown = true; break;
                 case 2: this.rightDown = true; break;
             }
-            this.notifyListeners( 'down', event );
         },
         
         up: function( point, event ) {
@@ -242,23 +246,19 @@ phet.scene = phet.scene || {};
                 case 1: this.middleDown = false; break;
                 case 2: this.rightDown = false; break;
             }
-            this.notifyListeners( 'up', event );
         },
         
         move: function( point, event ) {
             this.point = point;
-            this.notifyListeners( 'move', event );
         },
         
         over: function( point, event ) {
             this.point = point;
-            this.notifyListeners( 'over', event );
         },
         
         out: function( point, event ) {
             // TODO: how to handle the mouse out-of-bounds
             this.point = null;
-            this.notifyListeners( 'out', event );
         }
     } );
     
@@ -276,17 +276,14 @@ phet.scene = phet.scene || {};
         
         move: function( point, event ) {
             this.point = point;
-            this.notifyListeners( 'move', event );
         },
         
         end: function( point, event ) {
             this.point = point;
-            this.notifyListeners( 'end', event );
         },
         
         cancel: function( point, event ) {
             this.point = point;
-            this.notifyListeners( 'cancel', event );
         }
     } );
     
