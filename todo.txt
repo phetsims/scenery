@@ -8,7 +8,7 @@ Bugs:
         Report rgba alpha precision "bug" - spec says rgba(255,255,255,0.1112049520495820495802495) should not lose any digits on inspection after setting on context
 
 Questions:
-    ** for the following, determine Piccolo behavior
+    ** for many of the following, determine Piccolo behavior
     
     Pre-rotate or post-rotate translation?
     Invisible nodes included in: {bounds, hit testing / enter / exit events}?
@@ -17,10 +17,12 @@ Questions:
     Is any form of sub-tree opacity desired? (set opacity on X and everything below it has its opacity multiplied times that?)
     Should enter / exit events be fired before / after touch up/down events, or never?
     Best way to add an event listener that will pick up any non-handled events? Ability to add a listener to the scene?
+    Name? Scenery?
 
 Next:
     * Event dispatch
         * For up/down events, is enter/exit necessary?
+        * Freeze event handlers, a la the DOM 3 Events spec?
         * Best pattern for handling drags / more persistence? Add listeners directly to finger?
             * Standard flags on fingers for whether they are performing an operation? dragging, etc.
             * A way to 'cancel' the operation a finger is currently doing, so it can switch to a different one?
