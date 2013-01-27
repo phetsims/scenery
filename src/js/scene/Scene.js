@@ -569,6 +569,14 @@ phet.scene = phet.scene || {};
                     input.touchCancel( id, point, evt );
                 } );
             } );
+        },
+        
+        resizeOnWindowResize: function() {
+            var resizer = function () {
+                scene.resize( window.innerWidth, window.innerHeight );
+            };
+            $( window ).resize( resizer );
+            resizer();
         }
     };
 })();

@@ -54,6 +54,7 @@ var main = $( '#main' );
 
 var scene = new phet.scene.Scene( main );
 scene.initializeFullscreenEvents();
+scene.resizeOnWindowResize();
 
 var container = new phet.scene.Node();
 scene.root.addChild( container );
@@ -80,17 +81,6 @@ for( var i = 0; i < 100; i++ ) {
         } );
     })();
 }
-
-// consider using document.elementFromPoint to determine if it needs to prevent default, etc.
-
-// handle window resizing
-var resizer = function () {
-    scene.resize( window.innerWidth, window.innerHeight );
-    scene.renderScene();
-};
-$( window ).resize( resizer );
-resizer();
-
 
 var stats = new Stats();
 stats.setMode( 0 ); // 0: fps, 1: ms
