@@ -716,16 +716,24 @@ phet.scene = phet.scene || {};
             return this.control.minus( this.start ).times( 2 * ( 1 - t ) ).plus( this.end.minus( this.control ).times( 2 * t ) );
         },
         
+        offsetTo: function( r ) {
+            return new Segment.Quadratic(
+                this.start.plus( this.control.minus( this.start ).perpendicular().times( 2 * r ) ),
+                this.control.plus( this.end.minus( this.start ).perpendicular().times( r ) ),
+                this.end.plus( this.end.minus( this.control ).perpendicular.times( 2 * r ) )
+            );
+        },
+        
         toPiece: function() {
             return new Piece.Quadratic( this.control, this.end );
         },
         
         strokeLeft: function( lineWidth ) {
-            throw new Error( 'Segment.Quadratic.strokeLeft unimplemented' ); // TODO: implement
+            return this.offsetTo( -lineWidth / 2 ).toPiece();
         },
         
         strokeRight: function( lineWidth ) {
-            throw new Error( 'Segment.Quadratic.strokeRight unimplemented' ); // TODO: implement
+            return this.offsetTo( lineWidth / 2 ).toPiece();
         },
         
         intersectsBounds: function( bounds ) {
