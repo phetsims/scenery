@@ -363,6 +363,40 @@
         equal( otherNode.fill, fill );
     } );
     
+    test( 'Layer change stability', function() {
+        var scene = new phet.scene.Scene( $( '#main' ) );
+        var root = scene.root;
+        
+        root.addChild( new phet.scene.Node( {
+            shape: phet.scene.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
+            fill: '#ff0000'
+        } ) );
+        
+        var middleRect = new phet.scene.Node( {
+            shape: phet.scene.Shape.rectangle( canvasWidth / 4, canvasHeight / 4, canvasWidth / 2, canvasHeight / 2 ),
+            fill: '#00ff00'
+        } );
+        
+        
+        root.addChild( middleRect );
+        
+        root.addChild( new phet.scene.Node( {
+            shape: phet.scene.Shape.rectangle( canvasWidth / 2, canvasHeight / 2, canvasWidth / 2, canvasHeight / 2 ),
+            fill: '#0000ff'
+        } ) );
+        
+        scene.updateScene();
+        
+        var snapshotA = snapshot( scene );
+        
+        middleRect.setLayerType( phet.scene.CanvasLayer );
+        scene.updateScene();
+        
+        var snapshotB = snapshot( scene );
+        
+        snapshotEquals( snapshotA, snapshotB, 0, 'Layer change stability' );
+    } );
+    
     /*---------------------------------------------------------------------------*
     * Shapes
     *----------------------------------------------------------------------------*/        

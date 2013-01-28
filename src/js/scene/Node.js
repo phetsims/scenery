@@ -213,7 +213,7 @@ phet.scene = phet.scene || {};
         
         // set to null to remove a layer type
         setLayerType: function( layerType ) {
-            if( this._layerType != layerType ) {
+            if( this._layerType !== layerType ) {
                 this._layerType = layerType;
                 
                 // keep _hasLayerBelow consistent
