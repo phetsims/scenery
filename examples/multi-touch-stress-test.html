@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+
+    <!-- runs in full-screen mode on iOS devices -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <title>Multi-touch Example</title>
+    
+    <link rel="stylesheet" href="../contrib/bootstrap-2.2.2.css">
+    
+    <!-- jQuery and underscore.js are dependencies -->
+    <script src="../contrib/jquery-1.8.3.min.js"></script>
+    <script src="../contrib/underscore-1.4.3-min.js"></script>
+    
+    <!-- Bootstrap not necessarily needed -->
+    <script src="../contrib/bootstrap-2.2.2.js"></script>
+    
+    <!-- For the pop-up FPS meter -->
+    <script src="../contrib/stats.min.js"></script>
+    
+    <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
+    <script src="../concatenated.js"></script>
+    <!-- <script src="../phet-scene-min.js"></script> -->
+    
+    <style type="text/css">
+        /* Let content go to the edges */
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: #ff0;
+            overflow: hidden;
+        }
+        
+        /* Have the #main div cover the entire viewport */
+        #main {
+            position: absolute;
+            left: 0;
+            top: 0;
+            background-color: #fff;
+            z-index: 0;
+            padding: none !important; /* in case we add jQuery Mobile back in */
+        }
+
+    </style>
+</head>
+
+<body>
+    
+    <!-- our scene graph will be in this div -->
+    <div id="main" >
+    </div>
+
+    <script>
+    
+    var main = $( '#main' );
+
+    // initialize our scene
+    var scene = new phet.scene.Scene( main );
+    scene.initializeFullscreenEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
+    scene.resizeOnWindowResize(); // the scene gets resized to the full screen size
+    
+    var container = new phet.scene.Node();
+    scene.root.addChild( container );
+    
+    container.addChild( new phet.scene.Text( 'Try dragging the hexagons. On a touch-screen, dragging will pick up the first hexagon.', {
+        x: 20,
+        y: 50,
+        fill: '#000000',
+        font: '20px sans-serif'
+    } ) );
+    
+    var count = 3000;
+    
+    var normalColor = 'rgba(255,0,0,0.4)';
+    var dragColor = 'rgba(0,0,255,1)';
+    
+    // add #count random hexagons
+    for( var i = 0; i < count; i++ ) {
+        // anonymous function so the closure variables aren't shared between iterations
+        (function(){
+            var node = new phet.scene.Node( {
+                shape: phet.scene.Shape.regularPolygon( 6, 22 ),
+                fill: normalColor,
+                stroke: '#000000',
+                x: Math.random() * 500,
+                y: Math.random() * 500 + 100
+            } );
+            container.addChild( node );
+            
+            /*---------------------------------------------------------------------------*
+            * dragging logic (will be shareable code at some point)
+            *----------------------------------------------------------------------------*/        
+            
+            var dragging = false; // whether this node is being dragged
+            var lastDragPoint = null; // the location of the drag at the previous event (so we can calculate a delta)
+            var beforeDragTranslation = node.translation; // the location at the start of the drag, so we can reset on a touch cancel
+            
+            // this listener gets added to the finger when it starts dragging our node
+            var dragListener = {
+                // mouse/touch up
+                up: function( finger, event ) {
+                    endDrag( finger );
+                    
+                    // prevents hit region testing by handling the event in the finger listener
+                    return true;
+                },
+                
+                // touch cancel
+                cancel: function( finger, event ) {
+                    endDrag( finger );
+                    
+                    // since it's a cancel event, go back!
+                    node.translation = beforeDragTranslation;
+                    
+                    // prevents hit region testing by handling the event in the finger listener
+                    return true;
+                },
+                
+                // mouse/touch move
+                move: function( finger, event ) {
+                    // move by the delta between the previous point
+                    node.translate( finger.point.minus( lastDragPoint ) );
+                    lastDragPoint = finger.point;
+                    
+                    // prevents hit region testing by handling the event in the finger listener
+                    return true;
+                },
+                
+                enter: function( finger, event ) {
+                    // prevents hit region testing by handling the event in the finger listener
+                    return true;
+                },
+                
+                exit: function( finger, event ) {
+                    // prevents hit region testing by handling the event in the finger listener
+                    return true;
+                }
+            };
+            
+            function startDrag( finger ) {
+                node.setFill( dragColor );
+                
+                // set a flag on the finger so it won't pick up other nodes
+                finger.dragging = true;
+                finger.addListener( dragListener );
+                dragging = true;
+                
+                beforeDragTranslation = node.translation;
+                lastDragPoint = finger.point;
+                
+                node.setLayerType( phet.scene.CanvasLayer );
+            }
+            
+            function endDrag( finger ) {
+                node.setFill( normalColor );
+                
+                finger.dragging = false;
+                finger.removeListener( dragListener );
+                dragging = false;
+                
+                node.setLayerType( null );
+            }
+            
+            function tryToSnag( finger ) {
+                // only start dragging if the finger isn't dragging anything, we aren't being dragged, and if it's a mouse it's button is down
+                if( !dragging && !finger.dragging ) {
+                    startDrag( finger );
+                }
+            }
+            
+            // on a down or enter event on this node, attempt to start dragging
+            node.addInputListener( {
+                // mouse/touch down on this node
+                down: function( finger, event ) {
+                    tryToSnag( finger );
+                },
+                
+                // mouse/touch enters this node
+                enter: function( finger, event ) {
+                    // allow touches to start a drag by moving "over" this node
+                    if( !finger.isMouse ) {
+                        tryToSnag( finger );
+                    }
+                }
+            } );
+        })();
+    }
+    
+    
+    /*---------------------------------------------------------------------------*
+    * FPS meter
+    *----------------------------------------------------------------------------*/        
+    
+    var stats = new Stats();
+    stats.setMode( 0 ); // 0: fps, 1: ms
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.right = '0';
+    stats.domElement.style.top = '0';
+    document.body.appendChild( stats.domElement );
+    
+    
+    /*---------------------------------------------------------------------------*
+    * main loop
+    *----------------------------------------------------------------------------*/        
+    
+    var lastTime = 0;
+    var timeElapsed = 0;
+    function tick() {
+        window.requestAnimationFrame( tick, main[0] );
+        
+        var timeNow = new Date().getTime();
+        if ( lastTime != 0 ) {
+            timeElapsed = (timeNow - lastTime) / 1000.0;
+        }
+        lastTime = timeNow;
+        
+        stats.begin();
+        scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
+        stats.end();
+    }
+    window.requestAnimationFrame( tick, main[0] );
+
+
+    </script>
+
+</body>
+</html>
