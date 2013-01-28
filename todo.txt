@@ -30,6 +30,7 @@ Next:
     * Layering proof-of-concepts, advantages (performance, DOM integration, etc.)
     * DOM nodes
         * Handle correct layering of DOM nodes inside a layer, etc.
+        * How to get the size before adding to the document tree? Impossible?
     * Events
         * Investigate hit testing against DOM nodes
     * IE9 Performance

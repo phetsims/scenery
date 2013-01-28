@@ -16,10 +16,10 @@ phet.scene = phet.scene || {};
         phet.scene.Node.call( this );
         this.node = node;
         
-        this.invalidateDOM();
-        
         // can this node be interacted with? if set to true, it will not be layered like normal, but will be placed on top
         this.interactive = false;
+        
+        this.invalidateDOM();
     };
     var DOM = phet.scene.DOM;
     
@@ -30,7 +30,7 @@ phet.scene = phet.scene || {};
         // TODO: do we need to reset the CSS transform to get the proper bounds?
         
         // TODO: reset with the proper bounds here
-        this.invalidateSelf( phet.math.Bounds2.NOTHING );
+        this.invalidateSelf( new phet.math.Bounds2( 0, 0, $( this.node ).width(), $( this.node ).height() ) );
     },
     
     DOM.prototype.renderSelf = function( state ) {
@@ -58,6 +58,9 @@ phet.scene = phet.scene || {};
             // TODO: correct layering of DOM nodes inside the container
             $( container ).append( this.node );
         }
+        
+        // TODO: this will only reset bounds after rendering the first time. this might never render in the first place?
+        this.invalidateDOM();
     };
 })();
 

@@ -134,11 +134,15 @@
         $( actualButton ).attr( 'class', 'btn' );
         $( actualButton ).text( text );
         $( actualButton ).on( 'click', onclick );
+        
+        // for responsive touch handling without 300ms delay
+        $( actualButton ).on( 'touchstart', function( event ) { onclick( event ); event.preventDefault(); } );
+        
         element.appendChild( actualButton );
     }
     addButton( 'Scale down', function( event ) { container.scaleBy( Math.pow( 0.5, 0.25 ) ); } );
     addButton( 'Scale up', function( event ) { container.scaleBy( Math.pow( 2, 0.25 ) ); } );
-    addButton( 'Rotate', function( event ) { container.rotateAround( new phet.math.Vector2( 200, 200 ), Math.PI / 8 ); } );
+    addButton( 'Rotate', function( event ) { container.rotateAround( new phet.math.Vector2( 200, 200 ), Math.PI / 16 ); } );
     
     // TODO: object parameters on DOM node
     var domNode = new phet.scene.DOM( element );
