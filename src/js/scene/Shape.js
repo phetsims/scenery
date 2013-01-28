@@ -58,6 +58,7 @@ phet.scene = phet.scene || {};
     Shape.prototype = {
         constructor: Shape,
         
+        // TODO: what about moveTo( { x: <x>, y: <y> } )?
         moveTo: function( x, y ) {
             // moveTo( point )
             if( y === undefined && x instanceof Vector2 ) {
@@ -76,6 +77,18 @@ phet.scene = phet.scene || {};
                 this.addPiece( new Piece.LineTo( point ) );
             } else { // lineTo( x, y )
                 this.addPiece( new Piece.LineTo( p( x, y ) ) );
+            }
+            return this;
+        },
+        
+        quadraticCurveTo: function( cpx, cpy, x, y ) {
+            // quadraticCurveTo( control, point )
+            if( x === undefined && cpx instanceof Vector2 ) {
+                var controlPoint = cpx;
+                var point = cpy;
+                this.addPiece( new Piece.QuadraticCurveTo( controlPoint, point ) );
+            } else { // quadraticCurveTo( cpx, cpy, x, y )
+                this.addPiece( new Piece.QuadraticCurveTo( p( cpx, cpy ), p( x, y ) ) );
             }
             return this;
         },
@@ -505,6 +518,7 @@ phet.scene = phet.scene || {};
         },
         
         applyPiece: function( shape ) {
+            // see http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-lineto
             if( shape.hasSubpaths() ) {
                 var start = shape.getLastSubpath().getLastPoint();
                 var end = this.point;
@@ -516,6 +530,32 @@ phet.scene = phet.scene || {};
             } else {
                 shape.ensure( this.point );
             }
+        }
+    };
+    
+    Piece.QuadraticCurveTo = function( controlPoint, point ) {
+        this.controlPoint = controlPoint;
+        this.point = point;
+    };
+    Piece.QuadraticCurveTo.prototype = {
+        constructor: Piece.QuadraticCurveTo,
+        
+        writeToContext: function( context ) {
+            context.quadraticCurveTo( this.controlPoint.x, this.controlPoint.y, this.point.x, this.point.y );
+        },
+        
+        transformed: function( matrix ) {
+            return [new Piece.QuadraticCurveTo( matrix.timesVector2( this.controlPoint ), matrix.timesVector2( this.point ) )];
+        },
+        
+        applyPiece: function( shape ) {
+            // see http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-quadraticcurveto
+            shape.ensure( this.controlPoint );
+            var start = shape.getLastSubpath().getLastPoint();
+            var quadratic = new Segment.Quadratic( start, this.controlPoint, this.point );
+            shape.getLastSubpath().addSegment( quadratic );
+            shape.getLastSubpath().addPoint( this.point );
+            shape.bounds = shape.bounds.union( quadratic.bounds );
         }
     };
     
@@ -575,7 +615,7 @@ phet.scene = phet.scene || {};
         
         // acceleration for intersection
         this.bounds = new phet.math.Bounds2().withPoint( start ).withPoint( end );
-    }
+    };
     Segment.Line.prototype = {
         constructor: Segment.Line,
         
@@ -623,6 +663,78 @@ phet.scene = phet.scene || {};
             
             // return the proper winding direction depending on what way our line intersection is "pointed"
             return ray.dir.perpendicular().dot( end.minus( start ) ) < 0 ? 1 : -1;
+        }
+    };
+    
+    Segment.Quadratic = function( start, control, end ) {
+        this.start = start;
+        this.control = control;
+        this.end = end;
+        
+        var controlIsStart = start.equals( control );
+        var controlIsEnd = end.equals( control );
+        // ensure the points are distinct
+        phet.assert( !controlIsStart || !controlIsEnd );
+        
+        // allow either the start or end point to be the same as the control point (necessary if you do a quadraticCurveTo on an empty path)
+        // tangents go through the control point, which simplifies things
+        this.startTangent = controlIsStart ? end.minus( start ).normalized() : control.minus( start ).normalized();
+        this.endTangent = controlIsEnd ? end.minus( start ).normalized() : end.minus( control ).normalized();
+        
+        // calculate our temporary guaranteed lower bounds based on the end points
+        this.bounds = new phet.math.Bounds2( Math.min( start.x, end.x ), Math.min( start.y, end.y ), Math.max( start.x, end.x ), Math.max( start.y, end.y ) );
+        
+        // compute x and y where the derivative is 0, so we can include this in the bounds
+        var divisorX = 2 * ( end.x - 2 * control.x + start.x );
+        if( divisorX !== 0 ) {
+            var t = -2 * ( control.x - start.x ) / divisorX;
+            
+            if( t > 0 && t < 1 ) {
+                this.bounds = this.bounds.withPoint( this.positionAt( t ) );
+            }
+        }
+        var divisorY = 2 * ( end.y - 2 * control.y + start.y );
+        if( divisorY !== 0 ) {
+            var t = -2 * ( control.y - start.y ) / divisorY;
+            
+            if( t > 0 && t < 1 ) {
+                this.bounds = this.bounds.withPoint( this.positionAt( t ) );
+            }
+        }
+    };
+    Segment.Quadratic.prototype = {
+        constructor: Segment.Quadratic,
+        
+        // can be described from t=[0,1] as: (1-t)^2 start + 2(1-t)t control + t^2 end
+        positionAt: function( t ) {
+            var mt = 1 - t;
+            return this.start.times( mt * mt ).plus( this.control.times( 2 * mt * t ) ).plus( this.end.times( t * t ) );
+        },
+        
+        // derivative: 2(1-t)( control - start ) + 2t( end - control )
+        derivativeAt: function( t ) {
+            return this.control.minus( this.start ).times( 2 * ( 1 - t ) ).plus( this.end.minus( this.control ).times( 2 * t ) );
+        },
+        
+        toPiece: function() {
+            return new Piece.Quadratic( this.control, this.end );
+        },
+        
+        strokeLeft: function( lineWidth ) {
+            throw new Error( 'Segment.Quadratic.strokeLeft unimplemented' ); // TODO: implement
+        },
+        
+        strokeRight: function( lineWidth ) {
+            throw new Error( 'Segment.Quadratic.strokeRight unimplemented' ); // TODO: implement
+        },
+        
+        intersectsBounds: function( bounds ) {
+            throw new Error( 'Segment.Quadratic.intersectsBounds unimplemented' ); // TODO: implement
+        },
+        
+        // returns the resultant winding number of this ray intersecting this segment.
+        windingIntersection: function( ray ) {
+            throw new Error( 'Segment.Quadratic.windingIntersection unimplemented' ); // TODO: implement
         }
     };
     
