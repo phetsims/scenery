@@ -6,6 +6,7 @@ Bugs:
         bevel instead of miter on the "close" part of the hex: Firefox 18.0.1
         Chrome 24.0.1312.52 m bug in zooming fillText() -- mobile Safari OK (maybe different from webkit, since it's not antialiased?)
         Report rgba alpha precision "bug" - spec says rgba(255,255,255,0.1112049520495820495802495) should not lose any digits on inspection after setting on context
+    * for canvas, create a drawing function that exhibits all differences?
 
 Questions:
     ** for many of the following, determine Piccolo behavior
@@ -21,8 +22,8 @@ Questions:
 
 Next:
     * Event dispatch
-        * For up/down events, is enter/exit necessary?
-        * Freeze event handlers, a la the DOM 3 Events spec?
+        * For up/down events, is enter/exit necessary? -- see Question above
+        * Freeze event handlers, a la the DOM 3 Events spec? Or copy Piccolo?
         * Best pattern for handling drags / more persistence? Add listeners directly to finger?
             * Standard flags on fingers for whether they are performing an operation? dragging, etc.
             * A way to 'cancel' the operation a finger is currently doing, so it can switch to a different one?
@@ -38,25 +39,32 @@ Next:
     * WebGL Layer (we can get even faster rendering for shapes here, if it exists)
 
 Incomplete:
-    Quadratic curve offsets!
-    * Text node issues:
-        * How to handle multi-ling strings? SVG for that?
-    refreshLayers implementation
-    Think about multiple view implementations!
-    Static analysis - linter - integrated into build?
-    Vet recursive bounds code against empty area
-    
-    Consider Rectangle deprecated?
-    Refactor fill / stroke code in Node so that it can be used by subclasses, e.g. Rectangle, Text, etc.
-        
-    Visibility interaction with dirty paint / bounds, and events based on that
-        * revert to setter/getter ?
-        * Scene.updateLayer handling
-    Don't send mark updates on invisible layers? Visibility change causes repaint?
-    General optimization and organization so we can extract "self" from child rendering bounds, what is repainted, etc. better.
-    Canvas fill gradients / patterns
-        * Can we abstract this across SVG also?
-    Shape completeness of operations: arc and bezier quadratic / cubic
+    Node:
+        Canvas fill gradients / patterns
+            Can this be abstracted across SVG / WebGL layers also? -- probably WebGL _much_ more efficiently with shaders
+        Refactor fill / stroke code in Node so that it can be used by subclasses, e.g. Text, etc.
+        Visibility interaction with dirty paint / bounds, and events based on that
+            Scene.updateLayer shouldn't be called if only invisible nodes were changed
+        Don't send mark updates on invisible layers? Visibility change causes repaint?
+        General optimization and organization so we can extract "self" from child rendering bounds, what is repainted, etc. better.
+    Shapes:
+        Quadratic curve offsets need implementation improvement (32 sub-quadratics is too costly)
+        Not implemented: arc, arcTo, ellipse, cubic bezier
+        Features not implemented: precise intersection with bounding box (not just intersection of bounds)
+        Nonzero/evenodd support (not yet implemented in browsers)
+        Shape.moveTo( { x: 1, y: 2 } ) doesn't work because of instanceof check
+        Self-intersection in 'stroked' path
+        SVG / WebGL
+    Text:
+        Handling multi-line strings
+        SVG / WebGL / DOM options
+    Scene:
+        refreshLayers() implementation (currently rebuilds all layers, but should be optimized so it doesn't need to redraw as much)
+        Foundation for multiple view implementations
+    Build:
+        Static analysis - linter (add into dev tools?)
+    Misc:
+        Vet recursive bounds code against empty area
 
 User interaction Design:
     * Do invisible nodes get picked?
