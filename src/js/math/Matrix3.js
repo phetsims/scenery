@@ -403,9 +403,14 @@ phet.math = phet.math || {};
         },
         
         cssTransform: function() {
+            // we need to prevent the numbers from being in an exponential toString form, since the CSS transform does not support that
+            function cssNumber( number ) {
+                // largest guaranteed number of digits according to https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Number/toFixed
+                return number.toFixed( 20 );
+            }
             // the inner part of a CSS3 transform, but remember to add the browser-specific parts!
             // TODO: do we need 'px' units on the last two (transform) attributes?
-            return 'matrix(' + this.entries[0] + ',' + this.entries[1] + ',' + this.entries[3] + ',' + this.entries[4] + ',' + this.entries[6] + ',' + this.entries[7] + ')';
+            return 'matrix(' + cssNumber( this.entries[0] ) + ',' + cssNumber( this.entries[1] ) + ',' + cssNumber( this.entries[3] ) + ',' + cssNumber( this.entries[4] ) + ',' + cssNumber( this.entries[6] ) + ',' + cssNumber( this.entries[7] ) + ')';
         }
     };
 
