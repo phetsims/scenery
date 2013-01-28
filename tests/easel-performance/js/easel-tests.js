@@ -333,7 +333,7 @@ $(document).ready( function() {
                 
                 var bigFormNode = new phet.scene.DOM( bigForm );
                 bigFormNode.translate( 0, 160 );
-                bigFormNode.scale( 4 );
+                bigFormNode.scaleBy( 4 );
                 bigFormNode.interactive = true;
                 container.addChild( bigFormNode );
                 
