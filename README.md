@@ -8,6 +8,7 @@ Since the concatenated / minified JS is under .gitignore, please either use the
 associated Makefile (with 'make') or the Windows batch script 'build.bat'.
 
 Examples:
+* [Node types](http://phet.colorado.edu/files/phet-scene/examples/nodes.html)
 * [Multi-touch and Drag-by-touchover](http://phet.colorado.edu/files/phet-scene/examples/multi-touch.html)
 
 For testing purposes, the following are currently being worked on:
