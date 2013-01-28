@@ -836,15 +836,16 @@ phet.scene = phet.scene || {};
         }
     };
     
-    // Segment.Cubic = function( start, control1, control2, end ) {
-    //     this.start = start;
-    //     this.control1 = control1;
-    //     this.control2 = control2;
-    //     this.end = end;
-    // };
-    // Segment.Cubic.prototype = {
-        
-    // };
+    Segment.Cubic = function( start, control1, control2, end ) {
+        this.start = start;
+        this.control1 = control1;
+        this.control2 = control2;
+        this.end = end;
+    };
+    Segment.Cubic.prototype = {
+        // position: (1 - t)^3*p0 + 3*(1 - t)^2*t*p1 + 3*(1 - t) t^2*p2 + t^3*p3
+        // derivative: -3 p0 (1 - t)^2 + 3 p1 (1 - t)^2 - 6 p1 (1 - t) t + 6 p2 (1 - t) t - 3 p2 t^2 + 3 p3 t^2
+    };
     
     // TODO: performance / cleanliness to have these as methods instead?
     function segmentStartLeft( segment, lineWidth ) {
