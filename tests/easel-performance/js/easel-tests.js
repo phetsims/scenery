@@ -104,6 +104,56 @@ $(document).ready( function() {
                 return phet.tests.textBoundTesting( main )
             }
         },{
+            typeName: 'Bezier',
+            typeId: 'bezier',
+            init: function( main ) {
+                var scene = new phet.scene.Scene( main );
+                
+                var mainCurve = new phet.scene.Shape.Segment.Quadratic(
+                    new phet.math.Vector2( 100, 100 ),
+                    new phet.math.Vector2( 200, 150 ),
+                    new phet.math.Vector2( 150, 250 )
+                );
+                
+                // TODO: a way to pass an array and run commands without explicitly adding pieces?
+                scene.root.addChild( new phet.scene.Node( {
+                    shape: new phet.scene.Shape( [
+                        new phet.scene.Shape.Piece.MoveTo( mainCurve.start ),
+                        new phet.scene.Shape.Piece.LineTo( mainCurve.control ),
+                        new phet.scene.Shape.Piece.LineTo( mainCurve.end )
+                    ] ),
+                    stroke: '#ff0000'
+                } ) );
+                
+                scene.root.addChild( new phet.scene.Node( {
+                    shape: new phet.scene.Shape( [
+                        new phet.scene.Shape.Piece.MoveTo( mainCurve.start ),
+                        new phet.scene.Shape.Piece.QuadraticCurveTo( mainCurve.control, mainCurve.end )
+                    ] ),
+                    stroke: '#000000'
+                } ) );
+                
+                _.each( [ -50, -40, -30, -20, -10, 5, 10, 15, 20, 25, 30, 60 ], function( offset ) {
+                    var offsetCurve = mainCurve.offsetTo( offset );
+                    
+                    console.log( mainCurve.positionAt( 0 ).minus( offsetCurve.positionAt( 0 ) ).magnitude() );
+                    console.log( mainCurve.positionAt( 0.5 ).minus( offsetCurve.positionAt( 0.5 ) ).magnitude() );
+                    console.log( mainCurve.positionAt( 1 ).minus( offsetCurve.positionAt( 1 ) ).magnitude() );
+                    
+                    scene.root.addChild( new phet.scene.Node( {
+                        shape: new phet.scene.Shape( [
+                            new phet.scene.Shape.Piece.MoveTo( offsetCurve.start ),
+                            new phet.scene.Shape.Piece.QuadraticCurveTo( offsetCurve.control, offsetCurve.end )
+                        ] ),
+                        stroke: '#0000ff'
+                    } ) );
+                } );
+                
+                return function( timeElapsed ) {
+                    scene.updateScene();
+                };
+            }
+        },{
             typeName: 'Winding', // pure black and lighter blue will appear if the fillRule property exists in the Canvas 2d context
             typeId: 'winding',
             init: function( main ) {

@@ -718,14 +718,14 @@ phet.scene = phet.scene || {};
         
         offsetTo: function( r ) {
             return new Segment.Quadratic(
-                this.start.plus( this.control.minus( this.start ).perpendicular().times( 2 * r ) ),
-                this.control.plus( this.end.minus( this.start ).perpendicular().times( r ) ),
-                this.end.plus( this.end.minus( this.control ).perpendicular.times( 2 * r ) )
+                this.start.plus( this.control.minus( this.start ).perpendicular().normalized().times( r ) ),
+                this.control.plus( this.end.minus( this.start ).perpendicular().normalized().times( r ) ),
+                this.end.plus( this.end.minus( this.control ).perpendicular().normalized().times( r ) )
             );
         },
         
         toPiece: function() {
-            return new Piece.Quadratic( this.control, this.end );
+            return new Piece.QuadraticCurveTo( this.control, this.end );
         },
         
         strokeLeft: function( lineWidth ) {
