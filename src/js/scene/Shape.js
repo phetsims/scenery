@@ -729,13 +729,13 @@ phet.scene = phet.scene || {};
             return this.control.minus( this.start ).times( 2 * ( 1 - t ) ).plus( this.end.minus( this.control ).times( 2 * t ) );
         },
         
-        offsetTo: function( r, includeMove ) {
+        offsetTo: function( r, includeMove, reverse ) {
             // TODO: implement more accurate method at http://www.antigrain.com/research/adaptive_bezier/index.html
             // TODO: or more recently (and relevantly): http://www.cis.usouthal.edu/~hain/general/Publications/Bezier/BezierFlattening.pdf
             var curves = [this];
             
             // subdivide this curve
-            var depth = 4; // generates 2^depth curves
+            var depth = 5; // generates 2^depth curves
             for( var i = 0; i < depth; i++ ) {
                 curves = _.flatten( _.map( curves, function( curve ) {
                     return curve.subdivided( true );
@@ -743,6 +743,11 @@ phet.scene = phet.scene || {};
             }
             
             var offsetCurves = _.map( curves, function( curve ) { return curve.approximateOffset( r ); } );
+            
+            if( reverse ) {
+                offsetCurves.reverse();
+                offsetCurves = _.map( offsetCurves, function( curve ) { return curve.reversed( true ); } );
+            }
             
             var result = _.map( offsetCurves, function( curve ) {
                 return new Piece.QuadraticCurveTo( curve.control, curve.end );
@@ -762,6 +767,10 @@ phet.scene = phet.scene || {};
             ];
         },
         
+        reversed: function( skipComputations ) {
+            return new Segment.Quadratic( this.end, this.control, this.start );
+        },
+        
         approximateOffset: function( r ) {
             return new Segment.Quadratic(
                 this.start.plus( ( this.start.equals( this.control ) ? this.end.minus( this.start ) : this.control.minus( this.start ) ).perpendicular().normalized().times( r ) ),
@@ -775,11 +784,11 @@ phet.scene = phet.scene || {};
         },
         
         strokeLeft: function( lineWidth ) {
-            return this.offsetTo( -lineWidth / 2 );
+            return this.offsetTo( -lineWidth / 2, false, false );
         },
         
         strokeRight: function( lineWidth ) {
-            return this.offsetTo( lineWidth / 2 );
+            return this.offsetTo( lineWidth / 2, false, true );
         },
         
         intersectsBounds: function( bounds ) {

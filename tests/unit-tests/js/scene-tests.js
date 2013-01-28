@@ -137,6 +137,7 @@
             var node = new phet.scene.Node();
             node.setShape( shapeToFill );
             node.setFill( '#000000' );
+            // node.setStroke( '#ff0000' ); // for debugging strokes
             scene.root.addChild( node );
         }, message, 128 ); // threshold of 128 due to antialiasing differences between fill and stroke... :(
     }
@@ -546,6 +547,34 @@
             equal( shape.containsPoint( p( 0.5, 0.5 ) ), true, '0.5, 0.5' );
             equal( shape.containsPoint( p( 1.5, 0.5 ) ), false, '1.5, 0.5' );
             equal( shape.containsPoint( p( -0.5, 0.5 ) ), false, '-0.5, 0.5' );
+        } );
+        
+        test( 'Bezier Offset', function() {
+            var styles = new Shape.LineStyles();
+            styles.lineWidth = 30;
+            
+            var strokeShape = new Shape();
+            strokeShape.moveTo( 40, 40 );
+            strokeShape.quadraticCurveTo( 100, 200, 160, 40 );
+            // strokeShape.close();
+            var fillShape = strokeShape.getStrokedShape( styles );
+            
+            console.log( fillShape );
+            
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
+        } );
+        
+        test( 'Bezier Edge Case (literally)', function() {
+            var styles = new Shape.LineStyles();
+            styles.lineWidth = 30;
+            
+            var strokeShape = new Shape();
+            strokeShape.moveTo( 40, 40 );
+            strokeShape.quadraticCurveTo( 200, 200, 200, 180 );
+            // strokeShape.close();
+            var fillShape = strokeShape.getStrokedShape( styles );
+            
+            strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
         } );
     })();
     

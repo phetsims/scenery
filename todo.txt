@@ -38,6 +38,7 @@ Next:
     * WebGL Layer (we can get even faster rendering for shapes here, if it exists)
 
 Incomplete:
+    Quadratic curve offsets!
     * Text node issues:
         * How to handle multi-ling strings? SVG for that?
     refreshLayers implementation
@@ -74,6 +75,7 @@ Performance:
         * not full union of bounding boxes
         * Kd-tree / quadtree acceleration if child count is high? 
     Caching nodes with off-screen canvases for performance
+    Improve quadratic bezier offset curve computation
     Combining fills and strokes (or other state optimization -- fills require ensuring CCW/CW stays the same, so we need flags to whitelist)
     Efficiency checks for fullRender using the functional style => imperative
     Automated benchmarks
