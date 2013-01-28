@@ -731,6 +731,7 @@ phet.scene = phet.scene || {};
         
         offsetTo: function( r, includeMove ) {
             // TODO: implement more accurate method at http://www.antigrain.com/research/adaptive_bezier/index.html
+            // TODO: or more recently (and relevantly): http://www.cis.usouthal.edu/~hain/general/Publications/Bezier/BezierFlattening.pdf
             var curves = [this];
             
             // subdivide this curve
@@ -787,7 +788,42 @@ phet.scene = phet.scene || {};
         
         // returns the resultant winding number of this ray intersecting this segment.
         windingIntersection: function( ray ) {
-            throw new Error( 'Segment.Quadratic.windingIntersection unimplemented' ); // TODO: implement
+            // TODO: optimization
+            
+            // find the rotation that will put our ray in the direction of the x-axis so we can only solve for y=0 for intersections
+            var inverseMatrix = phet.math.Matrix3.rotation2( -ray.dir.angle() );
+            phet.assert( inverseMatrix.timesVector2( ray.dir ).x > 0.99 ); // verify that we transform the unit vector to the x-unit
+            
+            var p0 = inverseMatrix.timesVector2( this.start );
+            var p1 = inverseMatrix.timesVector2( this.control );
+            var p2 = inverseMatrix.timesVector2( this.end );
+            
+            var det = p1.y * p1.y - p0.y * p2.y;
+            if( det < 0.00000001 ) {
+                return 0; // no intersection with the mathematical (extended) curve
+            }
+            
+            // the two t values, which should be valid in our regular coordinate system
+            var ta = ( p0.y - p1.y + Math.sqrt( det ) ) / ( p0.y - 2 * p1.y + p2.y );
+            var tb = ( p0.y - p1.y - Math.sqrt( det ) ) / ( p0.y - 2 * p1.y + p2.y );
+            
+            var da = this.positionAt( ta ).minus( ray.pos );
+            var db = this.positionAt( tb ).minus( ray.pos );
+            
+            var aValid = ta > 0 && da.dot( ray.dir ) > 0;
+            var bValid = tb > 0 && db.dot( ray.dir ) > 0;
+            
+            var result = 0;
+            
+            if( aValid ) {
+                result += ray.dir.perpendicular().dot( this.derivativeAt( ta ) ) < 0 ? 1 : -1;
+            }
+            
+            if( bValid ) {
+                result += ray.dir.perpendicular().dot( this.derivativeAt( tb ) ) < 0 ? 1 : -1;
+            }
+            
+            return result;
         }
     };
     
