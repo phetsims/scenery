@@ -273,7 +273,9 @@ phet.scene = phet.scene || {};
                     if( i > 0 ) {
                         join( segments[i].start, segments[i-1].endTangent, segments[i].startTangent, true );
                     }
-                    shape.addPiece( segments[i].strokeLeft( lineWidth ) );
+                    _.each( segments[i].strokeLeft( lineWidth ), function( piece ) {
+                        shape.addPiece( piece );
+                    } );
                 }
                 
                 // handle the "endpoint"
@@ -286,7 +288,9 @@ phet.scene = phet.scene || {};
                     } else {
                         // logical "left" stroke on the implicit closing segment
                         join( closingSegment.start, _.last( segments ).endTangent, closingSegment.startTangent );
-                        shape.addPiece( closingSegment.strokeLeft( lineWidth ) );
+                        _.each( closingSegment.strokeLeft( lineWidth ), function( piece ) {
+                            shape.addPiece( piece );
+                        } );
                         
                         // TODO: similar here to other block of if.
                         join( closingSegment.end, closingSegment.endTangent, _.first( segments ).startTangent );
@@ -295,7 +299,9 @@ phet.scene = phet.scene || {};
                         join( closingSegment.end, _.first( segments ).startTangent.negated(), closingSegment.endTangent.negated() );
                         
                         // logical "right" stroke on the implicit closing segment
-                        shape.addPiece( closingSegment.strokeRight( lineWidth ) );
+                        _.each( closingSegment.strokeRight( lineWidth ), function( piece ) {
+                            shape.addPiece( piece );
+                        } );
                         join( closingSegment.start, closingSegment.startTangent.negated(), _.last( segments ).endTangent.negated() );
                     }
                 } else {
@@ -307,7 +313,9 @@ phet.scene = phet.scene || {};
                     if( i < segments.length - 1 ) {
                         join( segments[i].end, segments[i+1].startTangent.negated(), segments[i].endTangent.negated(), false );
                     }
-                    shape.addPiece( segments[i].strokeRight( lineWidth ) );
+                    _.each( segments[i].strokeRight( lineWidth ), function( piece ) {
+                        shape.addPiece( piece );
+                    } );
                 }
                 
                 // handle the start point
@@ -619,16 +627,16 @@ phet.scene = phet.scene || {};
     Segment.Line.prototype = {
         constructor: Segment.Line,
         
-        toPiece: function() {
-            return new Piece.LineTo( this.end );
+        toPieces: function() {
+            return [ new Piece.LineTo( this.end ) ];
         },
         
         strokeLeft: function( lineWidth ) {
-            return new Piece.LineTo( this.end.plus( this.endTangent.perpendicular().negated().times( lineWidth / 2 ) ) );
+            return [ new Piece.LineTo( this.end.plus( this.endTangent.perpendicular().negated().times( lineWidth / 2 ) ) ) ];
         },
         
         strokeRight: function( lineWidth ) {
-            return new Piece.LineTo( this.start.plus( this.startTangent.perpendicular().times( lineWidth / 2 ) ) );
+            return [ new Piece.LineTo( this.start.plus( this.startTangent.perpendicular().times( lineWidth / 2 ) ) ) ];
         },
         
         intersectsBounds: function( bounds ) {
@@ -666,10 +674,15 @@ phet.scene = phet.scene || {};
         }
     };
     
-    Segment.Quadratic = function( start, control, end ) {
+    Segment.Quadratic = function( start, control, end, skipComputations ) {
         this.start = start;
         this.control = control;
         this.end = end;
+        
+        // allows us to skip unnecessary computation in the subdivision steps
+        if( skipComputations ) {
+            return;
+        }
         
         var controlIsStart = start.equals( control );
         var controlIsEnd = end.equals( control );
@@ -716,24 +729,56 @@ phet.scene = phet.scene || {};
             return this.control.minus( this.start ).times( 2 * ( 1 - t ) ).plus( this.end.minus( this.control ).times( 2 * t ) );
         },
         
-        offsetTo: function( r ) {
+        offsetTo: function( r, includeMove ) {
+            // TODO: implement more accurate method at http://www.antigrain.com/research/adaptive_bezier/index.html
+            var curves = [this];
+            
+            // subdivide this curve
+            var depth = 4; // generates 2^depth curves
+            for( var i = 0; i < depth; i++ ) {
+                curves = _.flatten( _.map( curves, function( curve ) {
+                    return curve.subdivided( true );
+                } ));
+            }
+            
+            var offsetCurves = _.map( curves, function( curve ) { return curve.approximateOffset( r ); } );
+            
+            var result = _.map( offsetCurves, function( curve ) {
+                return new Piece.QuadraticCurveTo( curve.control, curve.end );
+            } );
+            
+            return includeMove ? ( [ new Piece.MoveTo( offsetCurves[0].start ) ].concat( result ) ) : result;
+        },
+        
+        subdivided: function( skipComputations ) {
+            // de Casteljau method
+            var leftMid = this.start.plus( this.control ).times( 0.5 );
+            var rightMid = this.control.plus( this.end ).times( 0.5 );
+            var mid = leftMid.plus( rightMid ).times( 0.5 );
+            return [
+                new Segment.Quadratic( this.start, leftMid, mid, skipComputations ),
+                new Segment.Quadratic( mid, rightMid, this.end, skipComputations )
+            ];
+        },
+        
+        approximateOffset: function( r ) {
             return new Segment.Quadratic(
-                this.start.plus( this.control.minus( this.start ).perpendicular().normalized().times( r ) ),
+                this.start.plus( ( this.start.equals( this.control ) ? this.end.minus( this.start ) : this.control.minus( this.start ) ).perpendicular().normalized().times( r ) ),
                 this.control.plus( this.end.minus( this.start ).perpendicular().normalized().times( r ) ),
-                this.end.plus( this.end.minus( this.control ).perpendicular().normalized().times( r ) )
+                this.end.plus( ( this.end.equals( this.control ) ? this.end.minus( this.start ) : this.end.minus( this.control ) ).perpendicular().normalized().times( r ) )
             );
         },
         
-        toPiece: function() {
-            return new Piece.QuadraticCurveTo( this.control, this.end );
+        toPieces: function() {
+            return [ new Piece.QuadraticCurveTo( this.control, this.end ) ];
         },
         
         strokeLeft: function( lineWidth ) {
-            return this.offsetTo( -lineWidth / 2 ).toPiece();
+            return this.offsetTo( -lineWidth / 2 );
         },
         
         strokeRight: function( lineWidth ) {
-            return this.offsetTo( lineWidth / 2 ).toPiece();
+            return this.offsetTo( lineWidth / 2 );
         },
         
         intersectsBounds: function( bounds ) {
@@ -745,6 +790,16 @@ phet.scene = phet.scene || {};
             throw new Error( 'Segment.Quadratic.windingIntersection unimplemented' ); // TODO: implement
         }
     };
+    
+    // Segment.Cubic = function( start, control1, control2, end ) {
+    //     this.start = start;
+    //     this.control1 = control1;
+    //     this.control2 = control2;
+    //     this.end = end;
+    // };
+    // Segment.Cubic.prototype = {
+        
+    // };
     
     // TODO: performance / cleanliness to have these as methods instead?
     function segmentStartLeft( segment, lineWidth ) {

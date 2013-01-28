@@ -107,23 +107,24 @@ $(document).ready( function() {
             typeName: 'Bezier',
             typeId: 'bezier',
             init: function( main ) {
+                // TODO: cusps at (100, 100), (300, 200), (200, 200), (200, 100) for cubic
                 var scene = new phet.scene.Scene( main );
                 
                 var mainCurve = new phet.scene.Shape.Segment.Quadratic(
                     new phet.math.Vector2( 100, 100 ),
-                    new phet.math.Vector2( 200, 150 ),
-                    new phet.math.Vector2( 150, 250 )
+                    new phet.math.Vector2( 230, 100 ),
+                    new phet.math.Vector2( 150, 350 )
                 );
                 
                 // TODO: a way to pass an array and run commands without explicitly adding pieces?
-                scene.root.addChild( new phet.scene.Node( {
-                    shape: new phet.scene.Shape( [
-                        new phet.scene.Shape.Piece.MoveTo( mainCurve.start ),
-                        new phet.scene.Shape.Piece.LineTo( mainCurve.control ),
-                        new phet.scene.Shape.Piece.LineTo( mainCurve.end )
-                    ] ),
-                    stroke: '#ff0000'
-                } ) );
+                // scene.root.addChild( new phet.scene.Node( {
+                //     shape: new phet.scene.Shape( [
+                //         new phet.scene.Shape.Piece.MoveTo( mainCurve.start ),
+                //         new phet.scene.Shape.Piece.LineTo( mainCurve.control ),
+                //         new phet.scene.Shape.Piece.LineTo( mainCurve.end )
+                //     ] ),
+                //     stroke: '#ff0000'
+                // } ) );
                 
                 scene.root.addChild( new phet.scene.Node( {
                     shape: new phet.scene.Shape( [
@@ -133,18 +134,11 @@ $(document).ready( function() {
                     stroke: '#000000'
                 } ) );
                 
-                _.each( [ -50, -40, -30, -20, -10, 5, 10, 15, 20, 25, 30, 60 ], function( offset ) {
-                    var offsetCurve = mainCurve.offsetTo( offset );
-                    
-                    console.log( mainCurve.positionAt( 0 ).minus( offsetCurve.positionAt( 0 ) ).magnitude() );
-                    console.log( mainCurve.positionAt( 0.5 ).minus( offsetCurve.positionAt( 0.5 ) ).magnitude() );
-                    console.log( mainCurve.positionAt( 1 ).minus( offsetCurve.positionAt( 1 ) ).magnitude() );
+                _.each( [ -55, -40, -30, -15, -5, 5, 15, 30, 40, 55 ], function( offset ) {
+                    var offsetPieces = mainCurve.offsetTo( offset, true );
                     
                     scene.root.addChild( new phet.scene.Node( {
-                        shape: new phet.scene.Shape( [
-                            new phet.scene.Shape.Piece.MoveTo( offsetCurve.start ),
-                            new phet.scene.Shape.Piece.QuadraticCurveTo( offsetCurve.control, offsetCurve.end )
-                        ] ),
+                        shape: new phet.scene.Shape( offsetPieces ),
                         stroke: '#0000ff'
                     } ) );
                 } );
