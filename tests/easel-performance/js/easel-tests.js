@@ -277,9 +277,11 @@ $(document).ready( function() {
             init: function( main ) {
                 var scene = new phet.scene.Scene( main );
                 
+                var image;
+                
                 var imageSource = document.createElement( 'img' );
                 imageSource.onload = function( e ) {
-                    var image = new phet.scene.Image( imageSource );
+                    image = new phet.scene.Image( imageSource );
                     image.translate( -image.getSelfBounds().width() / 2, -image.getSelfBounds().height() / 2 );
                     scene.root.addChild( image );
                 };
@@ -289,7 +291,9 @@ $(document).ready( function() {
                 scene.root.translate( main.width() / 2, main.height() / 2 );
                 
                 return function( timeElapsed ) {
-                    scene.root.rotate( timeElapsed );
+                    if( image ) {
+                        image.rotate( timeElapsed );
+                    }
                     scene.updateScene();
                 };
             }
@@ -348,7 +352,7 @@ $(document).ready( function() {
                 scene.root.translate( main.width() / 2, main.height() / 2 );
                 
                 return function( timeElapsed ) {
-                    scene.root.rotate( timeElapsed / 3 );
+                    container.rotate( timeElapsed / 3 );
                     
                     // TODO: get updateScene to work with this
                     scene.renderScene();

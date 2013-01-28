@@ -683,23 +683,32 @@ phet.scene = phet.scene || {};
         },
         
         // TODO: consider renaming to translateBy
+        // TODO: should we be prepending these instead?
         translate: function( x, y ) {
             if( typeof x === 'number' ) {
-                this.appendMatrix( Matrix3.translation( x, y ) );
+                this.prependMatrix( Matrix3.translation( x, y ) );
             } else {
                 var point = x;
-                this.appendMatrix( Matrix3.translation( point.x, point.y ) );
+                this.prependMatrix( Matrix3.translation( point.x, point.y ) );
             }
         },
         
         // scaleBy( s ) is also supported, which will scale both dimensions by the same amount. renamed from 'scale' to satisfy the setter/getter
         scaleBy: function( x, y ) {
-            this.appendMatrix( Matrix3.scaling( x, y ) );
+            this.prependMatrix( Matrix3.scaling( x, y ) );
         },
         
         // TODO: consider naming to rotateBy to match scaleBy (due to scale property / method name conflict)
         rotate: function( angle ) {
-            this.appendMatrix( Matrix3.rotation2( angle ) );
+            this.prependMatrix( Matrix3.rotation2( angle ) );
+        },
+        
+        // point should be in the parent coordinate frame
+        rotateAround: function( point, angle ) {
+            var matrix = Matrix3.translation( -point.x, -point.y );
+            matrix = Matrix3.rotation2( angle ).timesMatrix( matrix );
+            matrix = Matrix3.translation( point.x, point.y ).timesMatrix( matrix );
+            this.prependMatrix( matrix );
         },
         
         getX: function() {
@@ -772,6 +781,17 @@ phet.scene = phet.scene || {};
             this.markOldPaint();
             
             this.transform.append( matrix );
+            
+            this.invalidateBounds();
+            this.invalidatePaint();
+        },
+        
+        // prepend a transformation matrix to our local transform
+        prependMatrix: function( matrix ) {
+            // invalidate paint TODO improve methods for this
+            this.markOldPaint();
+            
+            this.transform.prepend( matrix );
             
             this.invalidateBounds();
             this.invalidatePaint();
@@ -1029,9 +1049,9 @@ phet.scene = phet.scene || {};
         get y() { return this.getY(); },
         
         mutate: function( params ) {
-            // NOTE: translation-based mutators come first, since typically we think of their operations occuring "after" the rotation / scaling
+            // NOTE: translation-based mutators come last, since typically we think of their operations occuring "after" the rotation / scaling
             var setterKeys = [ 'stroke', 'fill', 'shape', 'lineWidth', 'lineCap', 'lineJoin', 'layerType', 'visible',
-                               'translation', 'x', 'y', 'rotation', 'scale' ];
+                               'rotation', 'scale', 'x', 'y', 'translation' ];
             
             var node = this;
             
