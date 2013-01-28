@@ -139,6 +139,11 @@
             node.setFill( '#000000' );
             // node.setStroke( '#ff0000' ); // for debugging strokes
             scene.root.addChild( node );
+            // node.validateBounds();
+            // scene.root.addChild( new phet.scene.Node( {
+            //     shape: phet.scene.Shape.bounds( node.getSelfBounds() ),
+            //     fill: 'rgba(0,0,255,0.5)'
+            // } ) );
         }, message, 128 ); // threshold of 128 due to antialiasing differences between fill and stroke... :(
     }
     
