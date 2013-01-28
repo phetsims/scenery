@@ -35,11 +35,11 @@ phet.scene = phet.scene || {};
     
     DOM.prototype.renderSelf = function( state ) {
         // something of the form matrix(...) as a String, with a Z translation to trigger hardware acceleration (hopefully)
-        var cssTransform = 'translateZ(0) ' + state.transform.getMatrix().cssTransform();
+        var cssTransform = state.transform.getMatrix().cssTransform();
         
         $( this.node ).css( {
-            '-webkit-transform': cssTransform,
-            '-moz-transform': cssTransform,
+            '-webkit-transform': cssTransform + ' translateZ(0)', // trigger hardware acceleration if possible
+            '-moz-transform': cssTransform + ' translateZ(0)', // trigger hardware acceleration if possible
             '-ms-transform': cssTransform,
             '-o-transform': cssTransform,
             'transform': cssTransform,
