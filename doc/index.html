@@ -10,6 +10,8 @@
     <title>phet-scene Documentation</title>
     
     <link rel="stylesheet" href="../contrib/bootstrap-2.2.2.css">
+    <link rel="stylesheet" href="../contrib/syntaxhighlighter-3.0.83/shCore.css">
+    <link rel="stylesheet" href="../contrib/syntaxhighlighter-3.0.83/shThemeDefault.css">
     
     <!-- jQuery and underscore.js are dependencies -->
     <script src="../contrib/jquery-1.8.3.min.js"></script>
@@ -18,6 +20,15 @@
     <!-- For the styling -->
     <script src="../contrib/bootstrap-2.2.2.js"></script>
     
+    <script src="../contrib/syntaxhighlighter-3.0.83/shCore.js"></script>
+    <script src="../contrib/syntaxhighlighter-3.0.83/shBrushJScript.js"></script>
+    
+    <!-- MathJax config -->
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+    </script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
     <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
     <script src="../concatenated.js"></script>
     <!-- <script src="../phet-scene-min.js"></script> -->
@@ -25,6 +36,33 @@
 </head>
 
 <body>
-    <h1>Testing</h1>
+    <div class="row-fluid">
+        <div class="span2"></div>
+        <div class="span8">
+            <h1>Documentation</h1>
+            <p class="text-warning">TODO: organization and style</p>
+            <pre class="brush: js">
+$( 'probably jQuery, but...' ); $( 'does MathJax know this?' );
+
+container.addChild( new phet.scene.Text( 'This is a Text node', {
+    x: 20,
+    y: 50,
+    fill: '#000000',
+    font: '20px sans-serif'
+} ) );
+            </pre>
+            <p>
+                Now this contains some math: $f(\theta)^2$
+            </p>
+        </div>
+        <div class="span2"></div>
+    </div>
+    
+    
+
+    
+    <script type="text/javascript">
+        SyntaxHighlighter.all();
+    </script>
 </body>
 </html>
