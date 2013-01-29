@@ -683,7 +683,7 @@ phet.scene = phet.scene || {};
         },
         
         // TODO: consider renaming to translateBy
-        // TODO: should we be prepending these instead?
+        // TODO: add option to prepend or append
         translate: function( x, y ) {
             if( typeof x === 'number' ) {
                 this.appendMatrix( Matrix3.translation( x, y ) );
@@ -694,11 +694,18 @@ phet.scene = phet.scene || {};
         },
         
         // scaleBy( s ) is also supported, which will scale both dimensions by the same amount. renamed from 'scale' to satisfy the setter/getter
+        // TODO: add option to prepend or append
         scaleBy: function( x, y ) {
-            this.appendMatrix( Matrix3.scaling( x, y ) );
+            if( typeof x === 'number' ) {
+                this.appendMatrix( Matrix3.scaling( x, y ) );
+            } else {
+                var point = x;
+                this.appendMatrix( Matrix3.scaling( point.x, point.y ) );
+            }
         },
         
         // TODO: consider naming to rotateBy to match scaleBy (due to scale property / method name conflict)
+        // TODO: add option to prepend or append
         rotate: function( angle ) {
             this.appendMatrix( Matrix3.rotation2( angle ) );
         },

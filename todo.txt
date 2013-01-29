@@ -42,6 +42,7 @@ Incomplete:
     Node:
         Canvas fill gradients / patterns
             Can this be abstracted across SVG / WebGL layers also? -- probably WebGL _much_ more efficiently with shaders
+        Add prepend/append option to transform mutators
         Refactor fill / stroke code in Node so that it can be used by subclasses, e.g. Text, etc.
         Visibility interaction with dirty paint / bounds, and events based on that
             Scene.updateLayer shouldn't be called if only invisible nodes were changed
