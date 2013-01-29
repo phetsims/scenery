@@ -61,7 +61,8 @@ phet.scene = phet.scene || {};
         moveTo: function( x, y ) {
             // moveTo( point )
             if( y === undefined && typeof x === 'object' ) {
-                var point = x;
+                // wrap it in a Vector2 if the class doesn't match
+                var point = x instanceof Vector2 ? x : new Vector2( x.x, x.y );
                 this.addPiece( new Piece.MoveTo( point ) );
             } else { // moveTo( x, y )
                 this.addPiece( new Piece.MoveTo( p( x, y ) ) );
@@ -72,7 +73,8 @@ phet.scene = phet.scene || {};
         lineTo: function( x, y ) {
             // lineTo( point )
             if( y === undefined && typeof x === 'object' ) {
-                var point = x;
+                // wrap it in a Vector2 if the class doesn't match
+                var point = x instanceof Vector2 ? x : new Vector2( x.x, x.y );
                 this.addPiece( new Piece.LineTo( point ) );
             } else { // lineTo( x, y )
                 this.addPiece( new Piece.LineTo( p( x, y ) ) );
@@ -83,8 +85,9 @@ phet.scene = phet.scene || {};
         quadraticCurveTo: function( cpx, cpy, x, y ) {
             // quadraticCurveTo( control, point )
             if( x === undefined && typeof cpx === 'object' ) {
-                var controlPoint = cpx;
-                var point = cpy;
+                // wrap it in a Vector2 if the class doesn't match
+                var controlPoint = cpx instanceof Vector2 ? cpx : new Vector2( cpx.x, cpx.y );
+                var point = cpy instanceof Vector2 ? cpy : new Vector2( cpy.x, cpy.y );
                 this.addPiece( new Piece.QuadraticCurveTo( controlPoint, point ) );
             } else { // quadraticCurveTo( cpx, cpy, x, y )
                 this.addPiece( new Piece.QuadraticCurveTo( p( cpx, cpy ), p( x, y ) ) );
@@ -95,7 +98,10 @@ phet.scene = phet.scene || {};
         rect: function( a, b, c, d ) {
             // rect( upperLeft, lowerRight )
             if( c === undefined && typeof a === 'object' && typeof b === 'object' ) {
-                this.addPiece( new Piece.Rect( a, b ) );
+                // wrap it in a Vector2 if the class doesn't match
+                var upperLeft = a instanceof Vector2 ? a : new Vector2( a.x, a.y );
+                var lowerRight = b instanceof Vector2 ? b : new Vector2( b.x, b.y );
+                this.addPiece( new Piece.Rect( upperLeft, lowerRight ) );
             } else {
                 // rect( x, y, width, height )
                 this.addPiece( new Piece.Rect( p( a, b ), p( a + c, b + d ) ) );
