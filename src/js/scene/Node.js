@@ -682,32 +682,48 @@ phet.scene = phet.scene || {};
             return this._inputListeners;
         },
         
-        // TODO: consider renaming to translateBy
-        // TODO: add option to prepend or append
-        translate: function( x, y ) {
+        // TODO: consider renaming to translateBy to match scaleBy
+        translate: function( x, y, prependInstead ) {
             if( typeof x === 'number' ) {
-                this.appendMatrix( Matrix3.translation( x, y ) );
+                // translate( x, y, prependInstead )
+                if( prependInstead ) {
+                    this.prependMatrix( Matrix3.translation( x, y ) );
+                } else {
+                    this.appendMatrix( Matrix3.translation( x, y ) );
+                }
             } else {
-                var point = x;
-                this.appendMatrix( Matrix3.translation( point.x, point.y ) );
+                // translate( vector, prependInstead )
+                this.translate( point.x, point.y, y ); // forward to full version
             }
         },
         
         // scaleBy( s ) is also supported, which will scale both dimensions by the same amount. renamed from 'scale' to satisfy the setter/getter
-        // TODO: add option to prepend or append
-        scaleBy: function( x, y ) {
+        scaleBy: function( x, y, prependInstead ) {
             if( typeof x === 'number' ) {
-                this.appendMatrix( Matrix3.scaling( x, y ) );
+                if( y === undefined ) {
+                    // scaleBy( scale )
+                    this.appendMatrix( Matrix3.scaling( x, x ) );
+                } else {
+                    // scaleBy( x, y, prependInstead )
+                    if( prependInstead ) {
+                        this.prependMatrix( Matrix3.scaling( x, y ) );
+                    } else {
+                        this.appendMatrix( Matrix3.scaling( x, y ) );
+                    }
+                }
             } else {
-                var point = x;
-                this.appendMatrix( Matrix3.scaling( point.x, point.y ) );
+                // scaleBy( vector, prependInstead )
+                this.scaleBy( point.x, point.y, y ); // forward to full version
             }
         },
         
         // TODO: consider naming to rotateBy to match scaleBy (due to scale property / method name conflict)
-        // TODO: add option to prepend or append
-        rotate: function( angle ) {
-            this.appendMatrix( Matrix3.rotation2( angle ) );
+        rotate: function( angle, prependInstead ) {
+            if( prependInstead ) {
+                this.prependMatrix( Matrix3.rotation2( angle ) );
+            } else {
+                this.appendMatrix( Matrix3.rotation2( angle ) );
+            }
         },
         
         // point should be in the parent coordinate frame
