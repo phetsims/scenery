@@ -397,6 +397,27 @@
         snapshotEquals( snapshotA, snapshotB, 0, 'Layer change stability' );
     } );
     
+    test( 'Piccolo-like behavior', function() {
+        var node = new phet.scene.Node();
+        
+        node.scaleBy( 2 );
+        console.log( node.getMatrix().toString() );
+        
+        // TODO: change to translateBy?
+        node.translate( 1, 3 );
+        console.log( node.getMatrix().toString() );
+        
+        // TODO: change to rotateBy?
+        node.rotate( Math.PI / 2 );
+        console.log( node.getMatrix().toString() );
+        
+        // TODO: change to translateBy?
+        node.translate( -3, 2 );
+        console.log( node.getMatrix().toString() );
+        
+        expect( 0 );
+    } );
+    
     /*---------------------------------------------------------------------------*
     * Shapes
     *----------------------------------------------------------------------------*/        
@@ -597,8 +618,6 @@
             strokeShape.quadraticCurveTo( 100, 200, 160, 40 );
             // strokeShape.close();
             var fillShape = strokeShape.getStrokedShape( styles );
-            
-            console.log( fillShape );
             
             strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
         } );
