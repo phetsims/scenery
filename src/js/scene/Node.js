@@ -790,9 +790,9 @@ phet.scene = phet.scene || {};
             var translation = this.getTranslation();
             
             if( typeof a === 'number' ) {
-                this.translate( a - translation.x, b - translation.y );
+                this.translate( a - translation.x, b - translation.y, true );
             } else {
-                this.translate( a.x - translation.x, a.y - translation.y );
+                this.translate( a.x - translation.x, a.y - translation.y, true );
             }
             return this;
         },

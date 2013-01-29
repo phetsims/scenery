@@ -196,7 +196,7 @@
     }
     
     function equalsApprox( a, b, message ) {
-        ok( Math.abs( a - b ) < 0.0000001, message );
+        ok( Math.abs( a - b ) < 0.0000001, ( message ? message + ': ' : '' ) + a + ' =? ' + b );
     }
     
     /*---------------------------------------------------------------------------*
@@ -419,6 +419,13 @@
         equalsApprox( node.x, -40 );
         equalsApprox( node.y, -56 );
         equalsApprox( node.rotation, Math.PI / 2 );
+        
+        node.translation = new phet.math.Vector2( -5, 7 );
+        
+        console.log( node.getMatrix().toString() );
+        
+        equalsApprox( node.getMatrix().m02(), -5 );
+        equalsApprox( node.getMatrix().m12(), 7 );
     } );
     
     /*---------------------------------------------------------------------------*
