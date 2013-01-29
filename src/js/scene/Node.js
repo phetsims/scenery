@@ -846,6 +846,7 @@ phet.scene = phet.scene || {};
         // shifts this node horizontally so that its left bound (in the parent coordinate frame) is 'left'
         setLeft: function( left ) {
             this.translate( left - this.getLeft(), 0, true );
+            return this; // allow chaining
         },
         
         // the right bound of this node, in the parent coordinate frame
@@ -856,6 +857,25 @@ phet.scene = phet.scene || {};
         // shifts this node horizontally so that its right bound (in the parent coordinate frame) is 'right'
         setRight: function( right ) {
             this.translate( right - this.getRight(), 0, true );
+            return this; // allow chaining
+        },
+        
+        getCenterX: function() {
+            return this.getBounds().centerX();
+        },
+        
+        setCenterX: function( x ) {
+            this.translate( x - this.getCenterX(), 0, true );
+            return this; // allow chaining
+        },
+        
+        getCenterY: function() {
+            return this.getBounds().centerY();
+        },
+        
+        setCenterY: function( y ) {
+            this.translate( 0, y - this.getCenterY(), true );
+            return this; // allow chaining
         },
         
         // the top bound of this node, in the parent coordinate frame
@@ -866,6 +886,7 @@ phet.scene = phet.scene || {};
         // shifts this node vertically so that its top bound (in the parent coordinate frame) is 'top'
         setTop: function( top ) {
             this.translate( 0, top - this.getTop(), true );
+            return this; // allow chaining
         },
         
         // the bottom bound of this node, in the parent coordinate frame
@@ -876,6 +897,7 @@ phet.scene = phet.scene || {};
         // shifts this node vertically so that its bottom bound (in the parent coordinate frame) is 'bottom'
         setBottom: function( bottom ) {
             this.translate( 0, bottom - this.getBottom(), true );
+            return this; // allow chaining
         },
         
         // sets the shape drawn, or null to remove the shape
@@ -1128,12 +1150,18 @@ phet.scene = phet.scene || {};
         set bottom( value ) { this.setBottom( value ); },
         get bottom() { return this.getBottom(); },
         
+        set centerX( value ) { this.setCenterX( value ); },
+        get centerX() { return this.getCenterX(); },
+        
+        set centerY( value ) { this.setCenterY( value ); },
+        get centerY() { return this.getCenterY(); },
+        
         mutate: function( params ) {
             // NOTE: translation-based mutators come before rotation/scale, since typically we think of their operations occuring "after" the rotation / scaling
-            // NOTE: left/right/top/bottom are at the end, since they rely potentially on rotation / scaling changes of bounds that may happen beforehand
-            // TODO: using more than one of {translation,x,left,right} or {translation,y,top,bottom} should be considered an error
+            // NOTE: left/right/top/bottom/centerX/centerY are at the end, since they rely potentially on rotation / scaling changes of bounds that may happen beforehand
+            // TODO: using more than one of {translation,x,left,right,centerX} or {translation,y,top,bottom,centerY} should be considered an error
             var setterKeys = [ 'stroke', 'fill', 'shape', 'lineWidth', 'lineCap', 'lineJoin', 'layerType', 'visible',
-                               'translation', 'x', 'y', 'rotation', 'scale', 'left', 'right', 'top', 'bottom' ];
+                               'translation', 'x', 'y', 'rotation', 'scale', 'left', 'right', 'top', 'bottom', 'centerX', 'centerY' ];
             
             var node = this;
             

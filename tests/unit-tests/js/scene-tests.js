@@ -452,6 +452,11 @@
         node.right = 10;
         equalsApprox( node.left, -90 );
         equalsApprox( node.right, 10 );
+        
+        node.centerX = 5;
+        equalsApprox( node.centerX, 5 );
+        equalsApprox( node.left, -45 );
+        equalsApprox( node.right, 55 );
     } );
     
     /*---------------------------------------------------------------------------*
