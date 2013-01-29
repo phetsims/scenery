@@ -291,9 +291,7 @@ $(document).ready( function() {
                 scene.root.translate( main.width() / 2, main.height() / 2 );
                 
                 return function( timeElapsed ) {
-                    if( image ) {
-                        image.rotate( timeElapsed );
-                    }
+                    scene.root.rotate( timeElapsed );
                     scene.updateScene();
                 };
             }

@@ -686,24 +686,25 @@ phet.scene = phet.scene || {};
         // TODO: should we be prepending these instead?
         translate: function( x, y ) {
             if( typeof x === 'number' ) {
-                this.prependMatrix( Matrix3.translation( x, y ) );
+                this.appendMatrix( Matrix3.translation( x, y ) );
             } else {
                 var point = x;
-                this.prependMatrix( Matrix3.translation( point.x, point.y ) );
+                this.appendMatrix( Matrix3.translation( point.x, point.y ) );
             }
         },
         
         // scaleBy( s ) is also supported, which will scale both dimensions by the same amount. renamed from 'scale' to satisfy the setter/getter
         scaleBy: function( x, y ) {
-            this.prependMatrix( Matrix3.scaling( x, y ) );
+            this.appendMatrix( Matrix3.scaling( x, y ) );
         },
         
         // TODO: consider naming to rotateBy to match scaleBy (due to scale property / method name conflict)
         rotate: function( angle ) {
-            this.prependMatrix( Matrix3.rotation2( angle ) );
+            this.appendMatrix( Matrix3.rotation2( angle ) );
         },
         
         // point should be in the parent coordinate frame
+        // TODO: determine whether this should use the appendMatrix method
         rotateAround: function( point, angle ) {
             var matrix = Matrix3.translation( -point.x, -point.y );
             matrix = Matrix3.rotation2( angle ).timesMatrix( matrix );
@@ -1049,9 +1050,9 @@ phet.scene = phet.scene || {};
         get y() { return this.getY(); },
         
         mutate: function( params ) {
-            // NOTE: translation-based mutators come last, since typically we think of their operations occuring "after" the rotation / scaling
+            // NOTE: translation-based mutators come first, since typically we think of their operations occuring "after" the rotation / scaling
             var setterKeys = [ 'stroke', 'fill', 'shape', 'lineWidth', 'lineCap', 'lineJoin', 'layerType', 'visible',
-                               'rotation', 'scale', 'x', 'y', 'translation' ];
+                               'translation', 'x', 'y', 'rotation', 'scale' ];
             
             var node = this;
             

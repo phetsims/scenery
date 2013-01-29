@@ -195,6 +195,10 @@
         } );
     }
     
+    function equalsApprox( a, b, message ) {
+        ok( Math.abs( a - b ) < 0.0000001, message );
+    }
+    
     /*---------------------------------------------------------------------------*
     * TESTS BELOW
     *----------------------------------------------------------------------------*/     
@@ -401,21 +405,16 @@
         var node = new phet.scene.Node();
         
         node.scaleBy( 2 );
-        console.log( node.getMatrix().toString() );
-        
-        // TODO: change to translateBy?
         node.translate( 1, 3 );
-        console.log( node.getMatrix().toString() );
-        
-        // TODO: change to rotateBy?
         node.rotate( Math.PI / 2 );
-        console.log( node.getMatrix().toString() );
-        
-        // TODO: change to translateBy?
         node.translate( -3, 2 );
-        console.log( node.getMatrix().toString() );
         
-        expect( 0 );
+        equalsApprox( node.getMatrix().m00(), 0 );
+        equalsApprox( node.getMatrix().m01(), -2 );
+        equalsApprox( node.getMatrix().m02(), -2 );
+        equalsApprox( node.getMatrix().m10(), 2 );
+        equalsApprox( node.getMatrix().m11(), 0 );
+        equalsApprox( node.getMatrix().m12(), 0 );
     } );
     
     /*---------------------------------------------------------------------------*
