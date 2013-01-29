@@ -11,14 +11,6 @@ Bugs:
 Questions:
     ** for many of the following, determine Piccolo behavior
     
-    Pre-rotate or post-rotate translation? (General transform behavior?)
-        Piccolo / Java graphics uses the append-transform model
-        GDI+ / .Net seems to use row-vector * matrix, which seems to be equivalent to the append-transform model here
-            "Why Transformation Order Is Significant": http://msdn.microsoft.com/en-us/library/eews39w7.aspx
-            "Matrix Representation of Transformations": http://msdn.microsoft.com/en-us/library/8667dchf.aspx
-            and Matrix reference showing the "prepend": http://msdn.microsoft.com/en-us/library/system.drawing.drawing2d.matrix.aspx
-            Confirmed as append-style if you use column vectors: http://www.c-sharpcorner.com/UploadFile/mahesh/Transformations0712192005034808AM/Transformations07.aspx
-        SVG also operates with the append-transform model
     RotateAround point: copy CSS3 transform model with transform-origin? http://www.w3.org/TR/css3-transforms/
     Invisible nodes included in: {bounds, hit testing / enter / exit events}?
     _.extend will hopefully work on ES5 setter/getter pairs in the future?
