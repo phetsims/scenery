@@ -7,6 +7,9 @@ This is under active prototyping, so please expect any sort of API to change. Co
 Since the concatenated / minified JS is under .gitignore, please either use the
 associated Makefile (with 'make') or the Windows batch script 'build.bat'.
 
+Documentation of phet-scene is available at:
+* [Main Documentation](http://phet.colorado.edu/files/phet-scene/doc/)
+
 Examples:
 * [Node types](http://phet.colorado.edu/files/phet-scene/examples/nodes.html)
 * [Multi-touch and Drag-by-touchover](http://phet.colorado.edu/files/phet-scene/examples/multi-touch.html)
