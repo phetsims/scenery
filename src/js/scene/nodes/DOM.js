@@ -12,8 +12,8 @@ phet.scene = phet.scene || {};
 (function(){
     "use strict";
     
-    phet.scene.DOM = function( node ) {
-        phet.scene.Node.call( this );
+    phet.scene.DOM = function( node, params ) {
+        phet.scene.Node.call( this, params );
         this.node = node;
         
         // can this node be interacted with? if set to true, it will not be layered like normal, but will be placed on top

@@ -12,8 +12,8 @@ phet.scene = phet.scene || {};
 (function(){
     "use strict";
     
-    phet.scene.Image = function( image ) {
-        phet.scene.Node.call( this );
+    phet.scene.Image = function( image, params ) {
+        phet.scene.Node.call( this, params );
         
         this.image = image;
         
