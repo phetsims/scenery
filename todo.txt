@@ -19,6 +19,9 @@ Questions:
     Name? Scenery?
 
 Next:
+    * Docs:
+        GitHub Pages-style?
+            Consider http://stackoverflow.com/questions/5807459/github-mirroring-gh-pages-to-master
     * Event dispatch
         * For up/down events, is enter/exit necessary? -- see Question above
         * Freeze event handlers, a la the DOM 3 Events spec? Or copy Piccolo?
