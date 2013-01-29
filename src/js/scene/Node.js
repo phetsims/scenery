@@ -1131,7 +1131,7 @@ phet.scene = phet.scene || {};
         mutate: function( params ) {
             // NOTE: translation-based mutators come first, since typically we think of their operations occuring "after" the rotation / scaling
             var setterKeys = [ 'stroke', 'fill', 'shape', 'lineWidth', 'lineCap', 'lineJoin', 'layerType', 'visible',
-                               'translation', 'x', 'y', 'left', 'right', 'top', 'bottom', 'rotation', 'scale' ];
+                               'translation', 'x', 'y', 'rotation', 'scale', 'left', 'right', 'top', 'bottom' ];
             
             var node = this;
             
