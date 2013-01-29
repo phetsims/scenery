@@ -21,6 +21,9 @@ phet.scene = phet.scene || {};
         // main layers in a scene
         this.layers = [];
         
+        // listeners that will be triggered by input events if they are not handled by the associated finger or on the pick path
+        this.inputListeners = [];
+        
         // UI DOM layer for DOM elements that need to be interacted with
         this.uiLayer = new phet.scene.DOMLayer( {
             scene: this,
@@ -494,6 +497,23 @@ phet.scene = phet.scene || {};
             
             // reset the dirty layer path
             this.dirtyLayerPath = null;
+        },
+        
+        addInputListener: function( listener ) {
+            phet.assert( !_.contains( this.inputListeners, listener ) );
+            
+            this.inputListeners.push( listener );
+        },
+        
+        removeInputListener: function( listener ) {
+            var index = _.indexOf( this.inputListeners, listener );
+            phet.assert( index !== -1 );
+            
+            this.inputListeners.splice( index, 1 );
+        },
+        
+        getInputListeners: function() {
+            return this.inputListeners.slice( 0 ); // defensive copy
         },
         
         initializeFullscreenEvents: function() {

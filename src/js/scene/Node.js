@@ -679,7 +679,7 @@ phet.scene = phet.scene || {};
         },
         
         getInputListeners: function() {
-            return this._inputListeners;
+            return this._inputListeners.slice( 0 ); // defensive copy
         },
         
         // TODO: consider renaming to translateBy to match scaleBy
@@ -693,6 +693,7 @@ phet.scene = phet.scene || {};
                 }
             } else {
                 // translate( vector, prependInstead )
+                var point = x;
                 this.translate( point.x, point.y, y ); // forward to full version
             }
         },
@@ -713,6 +714,7 @@ phet.scene = phet.scene || {};
                 }
             } else {
                 // scaleBy( vector, prependInstead )
+                var point = x;
                 this.scaleBy( point.x, point.y, y ); // forward to full version
             }
         },
