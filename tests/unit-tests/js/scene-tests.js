@@ -436,6 +436,24 @@
         // console.log( node.getMatrix().toString() );
     } );
     
+    test( 'Setting left/right of node', function() {
+        var node = new phet.scene.Node( {
+            shape: phet.scene.Shape.rectangle( -20, -20, 50, 50 ),
+            scale: 2
+        } );
+        
+        equalsApprox( node.left, -40 );
+        equalsApprox( node.right, 60 );
+        
+        node.left = 10;
+        equalsApprox( node.left, 10 );
+        equalsApprox( node.right, 110 );
+        
+        node.right = 10;
+        equalsApprox( node.left, -90 );
+        equalsApprox( node.right, 10 );
+    } );
+    
     /*---------------------------------------------------------------------------*
     * Shapes
     *----------------------------------------------------------------------------*/        

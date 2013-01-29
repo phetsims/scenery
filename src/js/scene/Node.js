@@ -838,6 +838,46 @@ phet.scene = phet.scene || {};
             return this.transform.getMatrix();
         },
         
+        // the left bound of this node, in the parent coordinate frame
+        getLeft: function() {
+            return this.getBounds().minX;
+        },
+        
+        // shifts this node horizontally so that its left bound (in the parent coordinate frame) is 'left'
+        setLeft: function( left ) {
+            this.translate( left - this.getLeft(), 0, true );
+        },
+        
+        // the right bound of this node, in the parent coordinate frame
+        getRight: function() {
+            return this.getBounds().maxX;
+        },
+        
+        // shifts this node horizontally so that its right bound (in the parent coordinate frame) is 'right'
+        setRight: function( right ) {
+            this.translate( right - this.getRight(), 0, true );
+        },
+        
+        // the top bound of this node, in the parent coordinate frame
+        getTop: function() {
+            return this.getBounds().minY;
+        },
+        
+        // shifts this node vertically so that its top bound (in the parent coordinate frame) is 'top'
+        setTop: function( top ) {
+            this.translate( 0, top - this.getTop(), true );
+        },
+        
+        // the bottom bound of this node, in the parent coordinate frame
+        getBottom: function() {
+            return this.getBounds().maxY;
+        },
+        
+        // shifts this node vertically so that its bottom bound (in the parent coordinate frame) is 'bottom'
+        setBottom: function( bottom ) {
+            this.translate( 0, bottom - this.getBottom(), true );
+        },
+        
         // sets the shape drawn, or null to remove the shape
         setShape: function( shape ) {
             if( this._shape != shape ) {
@@ -1076,10 +1116,22 @@ phet.scene = phet.scene || {};
         set y( value ) { this.setY( value ); },
         get y() { return this.getY(); },
         
+        set left( value ) { this.setLeft( value ); },
+        get left() { return this.getLeft(); },
+        
+        set right( value ) { this.setRight( value ); },
+        get right() { return this.getRight(); },
+        
+        set top( value ) { this.setTop( value ); },
+        get top() { return this.getTop(); },
+        
+        set bottom( value ) { this.setBottom( value ); },
+        get bottom() { return this.getBottom(); },
+        
         mutate: function( params ) {
             // NOTE: translation-based mutators come first, since typically we think of their operations occuring "after" the rotation / scaling
             var setterKeys = [ 'stroke', 'fill', 'shape', 'lineWidth', 'lineCap', 'lineJoin', 'layerType', 'visible',
-                               'translation', 'x', 'y', 'rotation', 'scale' ];
+                               'translation', 'x', 'y', 'left', 'right', 'top', 'bottom', 'rotation', 'scale' ];
             
             var node = this;
             
