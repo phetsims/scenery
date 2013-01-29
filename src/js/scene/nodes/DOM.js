@@ -13,11 +13,12 @@ phet.scene = phet.scene || {};
     "use strict";
     
     phet.scene.DOM = function( element, params ) {
-        phet.scene.Node.call( this, params );
-        this._element = element;
-        
         // can this node be interacted with? if set to true, it will not be layered like normal, but will be placed on top
         this._interactive = false;
+        
+        this._element = element;
+        
+        phet.scene.Node.call( this, params );
         
         this.invalidateDOM();
     };
@@ -89,6 +90,7 @@ phet.scene = phet.scene || {};
     };
     
     DOM.prototype.mutate = function( params ) {
+        // TODO: just append these to a new list in the prototype, and have the super method work off of that?
         var setterKeys = [ 'element', 'interactive' ];
         
         var node = this;

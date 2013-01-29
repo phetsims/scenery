@@ -319,25 +319,28 @@ $(document).ready( function() {
                 var container = new phet.scene.Node();
                 container.setLayerType( phet.scene.DOMLayer );
                 
-                var videoNode = new phet.scene.DOM( element );
-                videoNode.translate( -560 / 2, -315 / 2 );
-                videoNode.interactive = true;
-                container.addChild( videoNode );
+                container.addChild( new phet.scene.DOM( element, {
+                    x: -560 / 2,
+                    y: -315 / 2,
+                    interactive: true
+                } ) );
                 
                 // var unclickableFormNode = new phet.scene.DOM( unclickableForm );
                 // unclickableFormNode.translate( 0, 160 );
                 // container.addChild( unclickableFormNode );
                 
-                var clickableFormNode = new phet.scene.DOM( clickableForm );
-                clickableFormNode.translate( -560 / 2, 160 );
-                clickableFormNode.interactive = true;
-                container.addChild( clickableFormNode );
+                container.addChild( new phet.scene.DOM( clickableForm, {
+                    x: -560 / 2,
+                    y: 160,
+                    interactive: true
+                } ) );
                 
-                var bigFormNode = new phet.scene.DOM( bigForm );
-                bigFormNode.translate( 0, 160 );
-                bigFormNode.scaleBy( 4 );
-                bigFormNode.interactive = true;
-                container.addChild( bigFormNode );
+                container.addChild( new phet.scene.DOM( bigForm, {
+                    x: 0,
+                    y: 160,
+                    scale: 4,
+                    interactive: true
+                } ) );
                 
                 scene.root.addChild( container );
                 
