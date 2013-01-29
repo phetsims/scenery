@@ -106,8 +106,6 @@ phet.scene = phet.scene || {};
     };
     
     Text.prototype.mutate = function( params ) {
-        phet.scene.Node.prototype.mutate.call( this, params );
-        
         var setterKeys = [ 'text', 'font', 'textAlign', 'textBaseline', 'direction' ];
         
         var node = this;
@@ -117,6 +115,8 @@ phet.scene = phet.scene || {};
                 node[key] = params[key];
             }
         } );
+        
+        phet.scene.Node.prototype.mutate.call( this, params );
     };
     
     Object.defineProperty( Text.prototype, 'text', { set: Text.prototype.setText, get: Text.prototype.getText } );
