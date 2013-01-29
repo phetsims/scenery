@@ -407,14 +407,18 @@
         node.scaleBy( 2 );
         node.translate( 1, 3 );
         node.rotate( Math.PI / 2 );
-        node.translate( -3, 2 );
+        node.translate( -31, 21 );
         
         equalsApprox( node.getMatrix().m00(), 0 );
         equalsApprox( node.getMatrix().m01(), -2 );
-        equalsApprox( node.getMatrix().m02(), -2 );
+        equalsApprox( node.getMatrix().m02(), -40 );
         equalsApprox( node.getMatrix().m10(), 2 );
         equalsApprox( node.getMatrix().m11(), 0 );
-        equalsApprox( node.getMatrix().m12(), 0 );
+        equalsApprox( node.getMatrix().m12(), -56 );
+        
+        equalsApprox( node.x, -40 );
+        equalsApprox( node.y, -56 );
+        equalsApprox( node.rotation, Math.PI / 2 );
     } );
     
     /*---------------------------------------------------------------------------*
