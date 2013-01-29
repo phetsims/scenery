@@ -693,8 +693,8 @@ phet.scene = phet.scene || {};
                 }
             } else {
                 // translate( vector, prependInstead )
-                var point = x;
-                this.translate( point.x, point.y, y ); // forward to full version
+                var vector = x;
+                this.translate( vector.x, vector.y, y ); // forward to full version
             }
         },
         
@@ -714,8 +714,8 @@ phet.scene = phet.scene || {};
                 }
             } else {
                 // scaleBy( vector, prependInstead )
-                var point = x;
-                this.scaleBy( point.x, point.y, y ); // forward to full version
+                var vector = x;
+                this.scaleBy( vector.x, vector.y, y ); // forward to full version
             }
         },
         
