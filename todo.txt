@@ -11,10 +11,9 @@ Bugs:
 Questions:
     ** for many of the following, determine Piccolo behavior
     
-    RotateAround point: copy CSS3 transform model with transform-origin? http://www.w3.org/TR/css3-transforms/
     Invisible nodes included in: {bounds, hit testing / enter / exit events}?
     _.extend will hopefully work on ES5 setter/getter pairs in the future?
-        * try #.extend?
+        * try $.extend?
     Is any form of sub-tree opacity desired? (set opacity on X and everything below it has its opacity multiplied times that?)
     Should enter / exit events be fired before / after touch up/down events, or never?
     Best way to add an event listener that will pick up any non-handled events? Ability to add a listener to the scene?
