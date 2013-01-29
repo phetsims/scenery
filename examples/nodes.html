@@ -113,12 +113,12 @@
     * Image
     *----------------------------------------------------------------------------*/        
     
-    // TODO: object parameters on DOM node
     var imageSource = document.createElement( 'img' );
     imageSource.onload = function( e ) {
-        var image = new phet.scene.Image( imageSource );
-        image.translate( 20, 200 );
-        container.addChild( image );
+        container.addChild( new phet.scene.Image( imageSource, {
+            x: 20,
+            y: 200
+        } ) );
     };
     imageSource.src = 'http://phet.colorado.edu/images/phet-logo.gif';
     
@@ -144,10 +144,10 @@
     addButton( 'Scale up', function( event ) { container.scaleBy( Math.pow( 2, 0.25 ) ); } );
     addButton( 'Rotate', function( event ) { container.rotateAround( new phet.math.Vector2( 200, 200 ), Math.PI / 16 ); } );
     
-    // TODO: object parameters on DOM node
-    var domNode = new phet.scene.DOM( element );
-    domNode.translate( 20, 350 );
-    container.addChild( domNode );
+    container.addChild( new phet.scene.DOM( element, {
+        x: 20,
+        y: 350
+    } ) );
     
     /*---------------------------------------------------------------------------*
     * FPS meter
