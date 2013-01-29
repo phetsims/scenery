@@ -22,6 +22,7 @@
     
     <script src="../contrib/syntaxhighlighter-3.0.83/shCore.js"></script>
     <script src="../contrib/syntaxhighlighter-3.0.83/shBrushJScript.js"></script>
+    <script src="../contrib/syntaxhighlighter-3.0.83/shBrushXml.js"></script>
     
     <!-- MathJax config -->
     <script type="text/x-mathjax-config">
@@ -33,6 +34,15 @@
     <script src="../concatenated.js"></script>
     <!-- <script src="../phet-scene-min.js"></script> -->
     
+    <style type="text/css">
+        
+        .exampleScene {
+            margin: 15px auto;
+            border: 1px solid black;
+        }
+
+    </style>
+    
 </head>
 
 <body>
@@ -41,18 +51,54 @@
         <div class="span8">
             <h1>Documentation</h1>
             <p class="text-warning">TODO: organization and style</p>
-            <pre class="brush: js">
-$( 'probably jQuery, but...' ); $( 'does MathJax know this?' );
-
-container.addChild( new phet.scene.Text( 'This is a Text node', {
-    x: 20,
-    y: 50,
-    fill: '#000000',
-    font: '20px sans-serif'
-} ) );
-            </pre>
+            
+            <h2>Hello World</h2>
+            
+            <div id="hello-world-scene" style="width: 400px; height: 100px;" class="exampleScene"></div>
+            
+            <script type="text/javascript">
+                $( window ).ready( function() {
+                    var scene = new phet.scene.Scene( $( '#hello-world-scene' ) );
+                    
+                    scene.root.addChild( new phet.scene.Text( 'Hello World', {
+                        centerY: 50,
+                        centerX: 200,
+                        font: '25px sans-serif'
+                    } ) );
+                    
+                    scene.updateScene();
+                } );
+            </script>
+            
             <p>
-                Now this contains some math: $f(\theta)^2$
+                Include the phet-scene script in the page, and create a block-level element (like a div) that has a fixed width and height:
+            </p>
+            
+            <pre class="brush: html">
+&lt;div id="hello-world-scene" style="width: 400px; height: 100px;"&gt;&lt;/div&gt;
+            </pre>
+            
+            <p>
+                The following JS code will initialize a scene graph, add some centered text into the scene, and paint it into the div.
+            </p>
+            
+            <pre class="brush: js">
+var scene = new phet.scene.Scene( $( '#hello-world-scene' ) );
+
+scene.root.addChild( new phet.scene.Text( 'Hello World', {
+    centerY: 50,
+    centerX: 200,
+    font: '25px sans-serif'
+} ) );
+
+scene.updateScene();
+            </pre>
+            
+            
+            <h2>Appendix (to be completed later)</h2>
+            
+            <p>
+                An example of math with MathJax, verifying it doesn't trample dollar signs in pre tags: $f(\theta)^2$
             </p>
         </div>
         <div class="span2"></div>
