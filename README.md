@@ -8,7 +8,7 @@ Since the concatenated / minified JS is under .gitignore, please either use the
 associated Makefile (with 'make') or the Windows batch script 'build.bat'.
 
 Documentation of phet-scene is available at:
-* [Main Documentation](http://phet.colorado.edu/files/phet-scene/doc/)
+* [Main Documentation](http://phet.colorado.edu/files/phet-scene/doc/) (up-to-date version is checked in at phet-scene/doc/index.html)
 
 Examples:
 * [Node types](http://phet.colorado.edu/files/phet-scene/examples/nodes.html)
