@@ -696,23 +696,23 @@
     * DOM
     *----------------------------------------------------------------------------*/        
     
-    module( 'DOM Layers' );
+    // module( 'DOM Layers' );
     
-    test( 'DOM Test', function() {
-        updateVsFullRender( [
-            function( scene ) {
-                var node = new phet.scene.Node();
-                node.setShape( phet.scene.Shape.rectangle( 0, 0, canvasWidth / 3, canvasHeight / 3 ) );
-                node.setFill( '#ff0000' );
-                node.setStroke( '#000000' );
-                scene.root.addChild( node );
+    // test( 'DOM Test', function() {
+    //     updateVsFullRender( [
+    //         function( scene ) {
+    //             var node = new phet.scene.Node();
+    //             node.setShape( phet.scene.Shape.rectangle( 0, 0, canvasWidth / 3, canvasHeight / 3 ) );
+    //             node.setFill( '#ff0000' );
+    //             node.setStroke( '#000000' );
+    //             scene.root.addChild( node );
                 
-                var domNode = new phet.scene.Node();
-                domNode.setLayerType( phet.scene.DOMLayer );
-                node.addChild( domNode );
-            }
-        ] );
-    } );
+    //             var domNode = new phet.scene.Node();
+    //             domNode.setLayerType( phet.scene.DOMLayer );
+    //             node.addChild( domNode );
+    //         }
+    //     ] );
+    // } );
     
     /*---------------------------------------------------------------------------*
     * Miscellaneous HTML / JS
