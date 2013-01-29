@@ -755,7 +755,7 @@ phet.scene = phet.scene || {};
             return this;
         },
         
-        // returns a vector with an entry for each axis
+        // returns a vector with an entry for each axis, e.g. (5,2) for an Affine-style matrix with rows ((5,0,0),(0,2,0),(0,0,1))
         getScale: function() {
             return this.transform.getMatrix().scaling();
         },
@@ -766,11 +766,13 @@ phet.scene = phet.scene || {};
             
             if( typeof a === 'number' ) {
                 if( b === undefined ) {
+                    // to map setScale( scale ) => setScale( scale, scale )
                     b = a;
                 }
+                // setScale( x, y )
                 this.appendMatrix( phet.math.Matrix3.scaling( a / currentScale.x, b / currentScale.y ) );
             } else {
-                // assume it's an object, or fail out
+                // setScale( vector ), where we set the x-scale to vector.x and y-scale to vector.y
                 this.appendMatrix( phet.math.Matrix3.scaling( a.x / currentScale.x, a.y / currentScale.y ) );
             }
             return this;
