@@ -51,6 +51,7 @@
         <div class="span8">
             <h1>Documentation</h1>
             <p class="text-warning">TODO: organization and style</p>
+            <p class="text-warning">Note about building JS before docs will work locally</p>
             
             <h2>Hello World</h2>
             
@@ -58,14 +59,17 @@
             
             <script type="text/javascript">
                 $( window ).ready( function() {
+                    // Create a scene graph over the block-level element. Everything inside is replaced
                     var scene = new phet.scene.Scene( $( '#hello-world-scene' ) );
                     
+                    // Add our text
                     scene.root.addChild( new phet.scene.Text( 'Hello World', {
-                        centerY: 50,
-                        centerX: 200,
+                        centerX: 200, // the center of our text's bounds is at x = 200
+                        centerY: 50, // the center of our text's bounds is at y = 50
                         font: '25px sans-serif'
                     } ) );
                     
+                    // Paint any changes (in this case, our text).
                     scene.updateScene();
                 } );
             </script>
@@ -83,17 +87,104 @@
             </p>
             
             <pre class="brush: js">
+// Create a scene graph over the block-level element. Everything inside is replaced
 var scene = new phet.scene.Scene( $( '#hello-world-scene' ) );
 
+// Add our text
 scene.root.addChild( new phet.scene.Text( 'Hello World', {
-    centerY: 50,
-    centerX: 200,
+    centerX: 200, // the center of our text's bounds is at x = 200
+    centerY: 50, // the center of our text's bounds is at y = 50
     font: '25px sans-serif'
 } ) );
 
+// Paint any changes (in this case, our text).
 scene.updateScene();
             </pre>
             
+            <h2>Shapes</h2>
+            
+            <div id="shapes-scene" style="width: 220px; height: 100px;" class="exampleScene"></div>
+            
+            <script type="text/javascript">
+                $( window ).ready( function() {
+                    var scene = new phet.scene.Scene( $( '#shapes-scene' ) );
+                    
+                    // A rectangle at (10,10) with a width of 50 and height of 80
+                    scene.root.addChild( new phet.scene.Node( {
+                        shape: phet.scene.Shape.rectangle( 10, 10, 50, 80 ),
+                        fill: '#ff0000'
+                    } ) );
+                    
+                    // An octogon, with a radius of 30
+                    scene.root.addChild( new phet.scene.Node( {
+                        shape: phet.scene.Shape.regularPolygon( 8, 30 ),
+                        fill: '#00ff00',
+                        stroke: '#000000',
+                        x: 100,
+                        y: 50
+                    } ) );
+                    
+                    // Custom shapes can also be created
+                    var customShape = new phet.scene.Shape();
+                    customShape.moveTo( 0, 0 );
+                    customShape.lineTo( 40, 40 );
+                    customShape.quadraticCurveTo( 80, 0, 40, -40 );
+                    customShape.lineTo( 40, 0 );
+                    customShape.close();
+                    // NOTE: this can also be chained, like shape.moveTo( ... ).lineTo( ... ).close()
+                    
+                    scene.root.addChild( new phet.scene.Node( {
+                        shape: customShape,
+                        fill: '#0000ff',
+                        stroke: '#000000',
+                        lineWidth: 3,
+                        x: 150,
+                        y: 50
+                    } ) );
+                    
+                    scene.updateScene();
+                } );
+            </script>
+            
+            <p>
+                Nodes are the basic structure of the scene graph, and can be given shapes. Shapes can be built from convenience
+                functions, or from Canvas-style calls. Exact bounding boxes of shapes are calculated, including any strokes.
+            </p>
+            
+            <pre class="brush: js">
+// A rectangle at (10,10) with a width of 50 and height of 80
+scene.root.addChild( new phet.scene.Node( {
+    shape: phet.scene.Shape.rectangle( 10, 10, 50, 80 ),
+    fill: '#ff0000'
+} ) );
+
+// An octogon, with a radius of 30
+scene.root.addChild( new phet.scene.Node( {
+    shape: phet.scene.Shape.regularPolygon( 8, 30 ),
+    fill: '#00ff00',
+    stroke: '#000000',
+    x: 100,
+    y: 50
+} ) );
+
+// Custom shapes can also be created
+var customShape = new phet.scene.Shape();
+customShape.moveTo( 0, 0 );
+customShape.lineTo( 40, 40 );
+customShape.quadraticCurveTo( 80, 0, 40, -40 );
+customShape.lineTo( 40, 0 );
+customShape.close();
+// NOTE: this can also be chained, like shape.moveTo( ... ).lineTo( ... ).close()
+
+scene.root.addChild( new phet.scene.Node( {
+    shape: customShape,
+    fill: '#0000ff',
+    stroke: '#000000',
+    lineWidth: 3,
+    x: 150,
+    y: 50
+} ) );
+            </pre>
             
             <h2>Appendix (to be completed later)</h2>
             
