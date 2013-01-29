@@ -17,10 +17,15 @@ phet.scene = phet.scene || {};
     phet.scene.Text = function( text, params ) {
         this.fontStyles = new Text.FontStyles(); // will be filled in later, due to dependency resolution
         
+        // ensure we have a parameter object
+        params = params || {};
+        
+        // default to black filled text
+        if( params.fill === undefined ) {
+            params.fill = '#000000';
+        }
+        
         if( text !== undefined ) {
-            // ensure that we have parameters
-            params = params || {};
-            
             // set the text parameter so that setText( text ) is effectively called in the mutator from the super call
             params.text = text;
         }
