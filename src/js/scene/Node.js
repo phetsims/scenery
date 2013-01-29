@@ -1129,7 +1129,9 @@ phet.scene = phet.scene || {};
         get bottom() { return this.getBottom(); },
         
         mutate: function( params ) {
-            // NOTE: translation-based mutators come first, since typically we think of their operations occuring "after" the rotation / scaling
+            // NOTE: translation-based mutators come before rotation/scale, since typically we think of their operations occuring "after" the rotation / scaling
+            // NOTE: left/right/top/bottom are at the end, since they rely potentially on rotation / scaling changes of bounds that may happen beforehand
+            // TODO: using more than one of {translation,x,left,right} or {translation,y,top,bottom} should be considered an error
             var setterKeys = [ 'stroke', 'fill', 'shape', 'lineWidth', 'lineCap', 'lineJoin', 'layerType', 'visible',
                                'translation', 'x', 'y', 'rotation', 'scale', 'left', 'right', 'top', 'bottom' ];
             
