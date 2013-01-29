@@ -14,7 +14,6 @@ Questions:
     Invisible nodes included in: {bounds, hit testing / enter / exit events}?
     _.extend will hopefully work on ES5 setter/getter pairs in the future?
         * try $.extend?
-    Is any form of sub-tree opacity desired? (set opacity on X and everything below it has its opacity multiplied times that?)
     Should enter / exit events be fired before / after touch up/down events, or never?
     Name? Scenery?
 
@@ -42,6 +41,7 @@ Next:
 
 Incomplete:
     Node:
+        Sub-tree opacity (like setTransparency in Piccolo)
         Add centerX, centerY as ES5 getters/setters like left/right/top/bottom?
         Canvas fill gradients / patterns
             Can this be abstracted across SVG / WebGL layers also? -- probably WebGL _much_ more efficiently with shaders
