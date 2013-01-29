@@ -120,7 +120,7 @@ scene.updateScene();
                         shape: phet.scene.Shape.regularPolygon( 8, 30 ),
                         fill: '#00ff00',
                         stroke: '#000000',
-                        x: 100,
+                        x: 100, // the shape is centered at the origin, so offset it by this x and y
                         y: 50
                     } ) );
                     
@@ -163,7 +163,7 @@ scene.root.addChild( new phet.scene.Node( {
     shape: phet.scene.Shape.regularPolygon( 8, 30 ),
     fill: '#00ff00',
     stroke: '#000000',
-    x: 100,
+    x: 100, // the shape is centered at the origin, so offset it by this x and y
     y: 50
 } ) );
 
