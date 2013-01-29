@@ -58,10 +58,9 @@ phet.scene = phet.scene || {};
     Shape.prototype = {
         constructor: Shape,
         
-        // TODO: what about moveTo( { x: <x>, y: <y> } )?
         moveTo: function( x, y ) {
             // moveTo( point )
-            if( y === undefined && x instanceof Vector2 ) {
+            if( y === undefined && typeof x === 'object' ) {
                 var point = x;
                 this.addPiece( new Piece.MoveTo( point ) );
             } else { // moveTo( x, y )
@@ -72,7 +71,7 @@ phet.scene = phet.scene || {};
         
         lineTo: function( x, y ) {
             // lineTo( point )
-            if( y === undefined && x instanceof Vector2 ) {
+            if( y === undefined && typeof x === 'object' ) {
                 var point = x;
                 this.addPiece( new Piece.LineTo( point ) );
             } else { // lineTo( x, y )
@@ -83,7 +82,7 @@ phet.scene = phet.scene || {};
         
         quadraticCurveTo: function( cpx, cpy, x, y ) {
             // quadraticCurveTo( control, point )
-            if( x === undefined && cpx instanceof Vector2 ) {
+            if( x === undefined && typeof cpx === 'object' ) {
                 var controlPoint = cpx;
                 var point = cpy;
                 this.addPiece( new Piece.QuadraticCurveTo( controlPoint, point ) );
@@ -95,7 +94,7 @@ phet.scene = phet.scene || {};
         
         rect: function( a, b, c, d ) {
             // rect( upperLeft, lowerRight )
-            if( c === undefined && a instanceof Vector2 && b instanceof Vector2 ) {
+            if( c === undefined && typeof a === 'object' && typeof b === 'object' ) {
                 this.addPiece( new Piece.Rect( a, b ) );
             } else {
                 // rect( x, y, width, height )

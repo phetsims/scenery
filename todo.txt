@@ -53,7 +53,6 @@ Incomplete:
         Not implemented: arc, arcTo, ellipse, cubic bezier
         Features not implemented: precise intersection with bounding box (not just intersection of bounds)
         Nonzero/evenodd support (not yet implemented in browsers)
-        Shape.moveTo( { x: 1, y: 2 } ) doesn't work because of instanceof check
         Self-intersection in 'stroked' path
         SVG / WebGL
     Text:
