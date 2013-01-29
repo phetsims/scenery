@@ -17,9 +17,16 @@ phet.scene = phet.scene || {};
     phet.scene.Text = function( text, params ) {
         this.fontStyles = new Text.FontStyles(); // will be filled in later, due to dependency resolution
         
+        if( text !== undefined ) {
+            // ensure that we have parameters
+            params = params || {};
+            
+            // set the text parameter so that setText( text ) is effectively called in the mutator from the super call
+            params.text = text;
+        }
         phet.scene.Node.call( this, params );
         
-        this.setText( text );
+        // this.setText( text );
     };
     var Text = phet.scene.Text;
     
@@ -99,6 +106,8 @@ phet.scene = phet.scene || {};
     };
     
     Text.prototype.mutate = function( params ) {
+        phet.scene.Node.prototype.mutate.call( this, params );
+        
         var setterKeys = [ 'text', 'font', 'textAlign', 'textBaseline', 'direction' ];
         
         var node = this;
@@ -108,8 +117,6 @@ phet.scene = phet.scene || {};
                 node[key] = params[key];
             }
         } );
-        
-        phet.scene.Node.prototype.mutate.call( this, params );
     };
     
     Object.defineProperty( Text.prototype, 'text', { set: Text.prototype.setText, get: Text.prototype.getText } );

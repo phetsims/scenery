@@ -90,6 +90,8 @@ phet.scene = phet.scene || {};
     };
     
     DOM.prototype.mutate = function( params ) {
+        phet.scene.Node.prototype.mutate.call( this, params );
+        
         // TODO: just append these to a new list in the prototype, and have the super method work off of that?
         var setterKeys = [ 'element', 'interactive' ];
         
@@ -100,8 +102,6 @@ phet.scene = phet.scene || {};
                 node[key] = params[key];
             }
         } );
-        
-        phet.scene.Node.prototype.mutate.call( this, params );
     };
     
     Object.defineProperty( DOM.prototype, 'element', { set: DOM.prototype.setElement, get: DOM.prototype.getElement } );
