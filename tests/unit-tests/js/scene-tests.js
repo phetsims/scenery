@@ -422,10 +422,18 @@
         
         node.translation = new phet.math.Vector2( -5, 7 );
         
-        console.log( node.getMatrix().toString() );
-        
         equalsApprox( node.getMatrix().m02(), -5 );
         equalsApprox( node.getMatrix().m12(), 7 );
+        
+        node.rotation = 1.2;
+        
+        equalsApprox( node.getMatrix().m01(), -1.864078171934453 );
+        
+        node.rotation = -0.7;
+        
+        equalsApprox( node.getMatrix().m10(), -1.288435374475382 );
+        
+        // console.log( node.getMatrix().toString() );
     } );
     
     /*---------------------------------------------------------------------------*
