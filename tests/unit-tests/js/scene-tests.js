@@ -5,6 +5,8 @@
     
     // $( '#display' ).hide();
     
+    var includeBleedingEdgeCanvasTests = false;
+    
     var canvasWidth = 320;
     var canvasHeight = 240;
     
@@ -748,36 +750,38 @@
     * Canvas V5 (NEW)
     *----------------------------------------------------------------------------*/        
     
-    // v5 canvas additions
-    module( 'Bleeding Edge Canvas Support' );
-    
-    test( 'Canvas 2D v5 Features', function() {
-        var canvas = document.createElement( 'canvas' );
-        var context = phet.canvas.initCanvas( canvas );
+    if( includeBleedingEdgeCanvasTests ) {
+        // v5 canvas additions
+        module( 'Bleeding Edge Canvas Support' );
         
-        var neededMethods = [
-            'addHitRegion',
-            'ellipse',
-            'resetClip',
-            'resetTransform'
-        ];
-        _.each( neededMethods, function( method ) {
-            ok( context[method] !== undefined, 'context.' + method );
+        test( 'Canvas 2D v5 Features', function() {
+            var canvas = document.createElement( 'canvas' );
+            var context = phet.canvas.initCanvas( canvas );
+            
+            var neededMethods = [
+                'addHitRegion',
+                'ellipse',
+                'resetClip',
+                'resetTransform'
+            ];
+            _.each( neededMethods, function( method ) {
+                ok( context[method] !== undefined, 'context.' + method );
+            } );
         } );
-    } );
-    
-    test( 'Path object support', function() {
-        var path = new Path();
-    } );
-       
-    test( 'Text width measurement in canvas', function() {
-        var canvas = document.createElement( 'canvas' );
-        var context = phet.canvas.initCanvas( canvas );
-        var metrics = context.measureText('Hello World');
-        _.each( [ 'actualBoundingBoxLeft', 'actualBoundingBoxRight', 'actualBoundingBoxAscent', 'actualBoundingBoxDescent' ], function( method ) {
-            ok( metrics[method] !== undefined, 'metrics.' + method );
+        
+        test( 'Path object support', function() {
+            var path = new Path();
         } );
-    } );
+           
+        test( 'Text width measurement in canvas', function() {
+            var canvas = document.createElement( 'canvas' );
+            var context = phet.canvas.initCanvas( canvas );
+            var metrics = context.measureText('Hello World');
+            _.each( [ 'actualBoundingBoxLeft', 'actualBoundingBoxRight', 'actualBoundingBoxAscent', 'actualBoundingBoxDescent' ], function( method ) {
+                ok( metrics[method] !== undefined, 'metrics.' + method );
+            } );
+        } );
+    }
     
 })();
 
