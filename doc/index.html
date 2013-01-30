@@ -504,10 +504,151 @@ function tick() {
 window.requestAnimationFrame( tick, div[0] );
             </pre>
             
+            <h3>Input Events</h3>
+            
+            <p>
+                The input event system is somewhat different from many other scene graphs, since it hopes to accomodate
+                multi-touch interaction with the mouse. It comes with a low-level event system of which then gestures and
+                behavior can be built on top. For instance, what if in some cases you want a zoom-pinch to be interrupted
+                by another finger manipulating a control? When are fingers interacting with elements individually
+                (sliders, dragging objects, etc.), when are they acting together (zooming, rotating, etc.), and how does
+                this behavior change?
+            </p>
+            
+            <p>
+                An instance of phet.scene.Input is created and hooked to an event source with functions like Scene.initializeFullscreenEvents()
+                and Scene.initializeStandaloneEvents(). The Input object tracks the principal abstraction of a <strong>finger</strong>. A
+                finger represents either the mouse or a single touch as it is tracked across the screen. The mouse 'finger' always exists, but
+                touch fingers are transient, created when an actual finger is pressed on a touchscreen and detached when it is lifted (or
+                canceled). Input event listeners can be added to nodes, the scene, or actual fingers themselves. Attaching a listener to a finger
+                allows tracking of that finger's state, and when combined with behavioral flags can create advanced input handling systems.
+                Also to note: preventDefault (triggered on events by default) will prevent touch events from being re-fired as mouse events, so
+                we only see them once.
+            </p>
+            
+            <p>
+                Events can be handled by any input listener (return true from the callback) and it will not fire any subsequent input listeners for
+                that event. For a single touchmove event, individual fingers generate their own events, so each input event will have a single
+                associated finger. The order of listeners visited for each event is as follows:
+            </p>
+            
+            <ol>
+                <li>Listeners attached to the associated finger</li>
+                <li>For move/up/down/cancel events, listeners for the node directly beneath the event, and subsequently for all parent (ancestor) nodes in order up to the root node</li>
+                <li>For enter/exit events, listeners similar to move/up/down/cancel events, but only up to (and not including) the common parent before/after the action. TODO: better explanation</li>
+                <li>Listeners attached to the scene</li>
+            </ol>
+            
+            <p>
+                DOM interaction with the event system is still being worked on. Gesture listeners and full finger-list access will be added.
+            </p>
+            
+            <p>
+                Below are a series of examples that will hopefully show off the current system.
+            </p>
+            
+            <h4>Colored by quantity of fingers inside shape</h4>
+            
+            <p>
+                Pending decision of whether enter/exit occurs for touchstart or touchend. Seems currently to not handle drags from outside of the bounds! (TODO: investigate).
+                Also not including mouseout or mouseover yet (TODO: decide on how this should work)
+                <strong>Try to get 8 fingers in the hexagon on the iPad!</strong>
+            </p>
+            
+            <p id="hex-finger-count" style="text-align: center; font-size: 20px;">Fingers in hexagon: 0</p>
+            <div id="input-mouseover" style="width: 400px; height: 400px;" class="exampleScene"></div>
+            
+            <script type="text/javascript">
+                $( window ).ready( function() {
+                    var scene = new phet.scene.Scene( $( '#input-mouseover' ) );
+                    
+                    // hook up event listeners just on this scene (not the whole document)
+                    scene.initializeStandaloneEvents();
+                    
+                    var count = 0;
+                    var colors = [ '000000', 'ff0000', '00ff00', '0000ff', 'ffff00', '00ffff', 'ff00ff', 'ffffff' ];
+                    var maxColor = colors.length - 1;
+                    
+                    // TODO: get faster text bounds detection. it's too slow right now on the iPad
+                    var labelPrefix = 'Fingers in hexagon: ';
+                    // var label = new phet.scene.Text( labelPrefix + count, {
+                    //     left: 20,
+                    //     top: 20,
+                    //     font: '20px sans-serif'
+                    // } );
+                    // scene.root.addChild( label );
+                    
+                    // a big hexagon in the center. stroke not included in the hit region by default
+                    var node = new phet.scene.Node( {
+                        shape: phet.scene.Shape.regularPolygon( 6, 150 ),
+                        fill: colors[count],
+                        stroke: '#000000',
+                        centerX: 200,
+                        centerY: 200
+                    } );
+                    scene.root.addChild( node );
+                    
+                    // update our label and color
+                    function updateFingers() {
+                        node.fill = colors[ Math.min( count, maxColor ) ];
+                        // label.setText( labelPrefix + count );
+                        $( '#hex-finger-count' ).text( labelPrefix + count );
+                    }
+                    
+                    // listener fired whenever the event occurs over the node
+                    // below are the main 6 input events that are fired
+                    node.addInputListener( {
+                        // mousedown or touchstart (finger pressed down over the node)
+                        down: function( finger, event ) {
+                            count++;
+                            updateFingers();
+                        },
+                        
+                        // mouseup or touchend (finger lifted from over the node)
+                        up: function( finger, event ) {
+                            count--;
+                            updateFingers();
+                        },
+                        
+                        // triggered from mousemove or touchmove (finger moved over the node from outside)
+                        enter: function( finger, event ) {
+                            count++;
+                            updateFingers();
+                        },
+                        
+                        // triggered from mousemove or touchmove (finger moved outside the node from inside)
+                        exit: function( finger, event ) {
+                            count--;
+                            updateFingers();
+                        },
+                        
+                        // platform-specific trigger.
+                        // on iPad Safari, cancel can by triggered by putting 4 fingers down and then dragging with all 4
+                        cancel: function( finger, event ) {
+                            count--;
+                            updateFingers();
+                        },
+                        
+                        // mousemove (fired AFTER enter/exit events if applicable)
+                        move: function( finger, event ) {
+                            // do nothing
+                        }
+                    } );
+                    
+                    // repaint loop.
+                    function tick() {
+                        window.requestAnimationFrame( tick, scene.main[0] );
+                        scene.updateScene();
+                    }
+                    window.requestAnimationFrame( tick, scene.main[0] );
+                } );
+            </script>
+            
             <h2>Appendix (to be completed later)</h2>
             
             <p>
-                An example of math with MathJax, verifying it doesn't trample dollar signs in pre tags: $f(\theta)^2$
+                An example of math with MathJax, verifying it doesn't trample dollar signs in pre tags: $f(\theta)^2$, so we'll able to include the
+                necessary discussions using matrix algebra, etc.
             </p>
         </div>
         <div class="span2"></div>

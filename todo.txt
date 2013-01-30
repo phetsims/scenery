@@ -22,6 +22,7 @@ Questions:
 Next:
     * More documentation
     * Event dispatch
+        * Add pickable flag?
         * For up/down events, is enter/exit necessary? -- see Question above
         * Freeze event handlers, a la the DOM 3 Events spec? Or copy Piccolo?
         * Best pattern for handling drags / more persistence? Add listeners directly to finger?
