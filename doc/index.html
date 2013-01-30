@@ -236,6 +236,113 @@ var node4 = new phet.scene.Node().setShape( someShape ).setFill( '#000000' ).set
 node2.rotation === node3.getRotation();
             </pre>
             
+            <p>
+                Similarly to Piccolo2d, nodes have their 'self' paint/bounds and the paint/bounds of their children, where the node's
+                self is rendered first (below), and then children are painted one-by-one on top. Additionally, it borrows Piccolo's
+                coordinate frames where there are local, parent, and global coordinate frames. The example below will hopefully
+                be illustrative.
+            </p>
+            
+            <div id="self-and-children" style="width: 400px; height: 200px;" class="exampleScene"></div>
+            
+            <script type="text/javascript">
+                $( window ).ready( function() {
+                    var scene = new phet.scene.Scene( $( '#self-and-children' ) );
+                    
+                    // create a node that will have child nodes.
+                    var container = new phet.scene.Node( {
+                        // we'll add a background shape (300x100 rectangle) that will render on this node (it will be rendered below any child nodes)
+                        shape: phet.scene.Shape.rectangle( 0, 0, 300, 100 ),
+                        fill: '#888888',
+                        x: 20, // this node and all of its children will be offset by (20,20)
+                        y: 20
+                    } );
+                    scene.root.addChild( container );
+                    
+                    // bounding box of the container (and its children so far) in its parent's coordinate system.
+                    // translated by (20,20 due to the x,y parameters)
+                    container.getBounds(); // x between [20, 320], y between [20, 120]
+                    
+                    // bounding box of the container's own rendering/paint (the rectangle) in its local coordinate frame (without applying other transforms)
+                    container.getSelfBounds(); // x between [0, 300], y between [0, 100]
+                    
+                    // add a green rectangle to the container, which will be above the gray background
+                    var child1 = new phet.scene.Node( {
+                        shape: phet.scene.Shape.rectangle( 0, 0, 25, 25 ), // a 25x25 rectangle
+                        fill: '#00ff00',
+                        scale: 2, // but scaled so it is effectively a 50x50 rectangle to its parents
+                        left: 10, // 10px to the right of our parent's left bound
+                        centerY: container.height // vertically center us on the container's bottom bound
+                    } );
+                    container.addChild( child1 );
+                    
+                    // bounding box of the child in its parent's coordinate frame (the container's local coordinate frame)
+                    // note that since it is scaled 2x, its dimensions appear to be 50x50
+                    child1.getBounds(); // x between [10, 60], y between [75, 125], (with a left of 10 and centered vertically on 100)
+                    
+                    child1.getSelfBounds(); // x between [0, 25], y between [0, 25] -- just bounds of its shape
+                    
+                    // but now that we have added a child, getBounds() on the container (which contains the bounds of its children) has changed:
+                    container.getBounds(); // x between [20, 320], y between [20, 145] -- bottom bound of 145 since it has an x offset of 20 plus its child's bottom of 125
+                    
+                    // and some text to the same container, which will be on top of both the background and green rectangle
+                    var child2 = new phet.scene.Text( 'On Top?', {
+                        left: child1.centerX,
+                        centerY: child1.centerY,
+                        font: '20px sans-serif'
+                    } );
+                    container.addChild( child2 );
+                    
+                    scene.updateScene();
+                } );
+            </script>
+            
+            <pre class="brush: js">
+// create a node that will have child nodes.
+var container = new phet.scene.Node( {
+    // we'll add a background shape (300x100 rectangle) that will render on this node (it will be rendered below any child nodes)
+    shape: phet.scene.Shape.rectangle( 0, 0, 300, 100 ),
+    fill: '#888888',
+    x: 20, // this node and all of its children will be offset by (20,20)
+    y: 20
+} );
+scene.root.addChild( container );
+
+// bounding box of the container (and its children so far) in its parent's coordinate system.
+// translated by (20,20 due to the x,y parameters)
+container.getBounds(); // x between [20, 320], y between [20, 120]
+
+// bounding box of the container's own rendering/paint (the rectangle) in its local coordinate frame (without applying other transforms)
+container.getSelfBounds(); // x between [0, 300], y between [0, 100]
+
+// add a green rectangle to the container, which will be above the gray background
+var child1 = new phet.scene.Node( {
+    shape: phet.scene.Shape.rectangle( 0, 0, 25, 25 ), // a 25x25 rectangle
+    fill: '#00ff00',
+    scale: 2, // but scaled so it is effectively a 50x50 rectangle to its parents
+    left: 10, // 10px to the right of our parent's left bound
+    centerY: container.height // vertically center us on the container's bottom bound
+} );
+container.addChild( child1 );
+
+// bounding box of the child in its parent's coordinate frame (the container's local coordinate frame)
+// note that since it is scaled 2x, its dimensions appear to be 50x50
+child1.getBounds(); // x between [10, 60], y between [75, 125], (with a left of 10 and centered vertically on 100)
+
+child1.getSelfBounds(); // x between [0, 25], y between [0, 25] -- just bounds of its shape
+
+// but now that we have added a child, getBounds() on the container (which contains the bounds of its children) has changed:
+container.getBounds(); // x between [20, 320], y between [20, 145] -- bottom bound of 145 since it has an x offset of 20 plus its child's bottom of 125
+
+// and some text to the same container, which will be on top of both the background and green rectangle
+var child2 = new phet.scene.Text( 'On Top?', {
+    left: child1.centerX,
+    centerY: child1.centerY,
+    font: '20px sans-serif'
+} );
+container.addChild( child2 );
+            </pre>
+            
             <h2>Appendix (to be completed later)</h2>
             
             <p>
