@@ -457,13 +457,16 @@ scene.root.addChild( new phet.scene.DOM( element, {
                     function tick() {
                         window.requestAnimationFrame( tick, div[0] );
                         
+                        // calculate how much time has elapsed since we rendered the last frame
                         var timeNow = new Date().getTime();
                         if ( lastTime != 0 ) {
                             timeElapsed = (timeNow - lastTime) / 1000.0;
                         }
                         lastTime = timeNow;
                         
+                        // rotate the node proportionally to how much time has elapsed, so it rotates at a constant real-time rate
                         node.rotate( timeElapsed );
+                        
                         scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
                     }
                     window.requestAnimationFrame( tick, div[0] );
