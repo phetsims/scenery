@@ -458,6 +458,11 @@ scene.root.addChild( new phet.scene.DOM( element, {
                         centerX: 100,
                         centerY: 100
                     } );
+                    // a marker so pauses on the iPad animation (since requestAnimationFrame doesn't trigger while scrolling) are visible
+                    node.addChild( new phet.scene.Node( {
+                        shape: phet.scene.Shape.rectangle( 0, -3, 60, 6 ),
+                        fill: '#ff0000'
+                    } ) );
                     scene.root.addChild( node );
                     
                     // keep track of how much time elapsed over the last frame
@@ -493,6 +498,11 @@ var node = new phet.scene.Node( {
     centerX: 100,
     centerY: 100
 } );
+// a marker so pauses on the iPad animation (since requestAnimationFrame doesn't trigger while scrolling) are visible
+node.addChild( new phet.scene.Node( {
+    shape: phet.scene.Shape.rectangle( 0, -3, 60, 6 ),
+    fill: '#ff0000'
+} ) );
 scene.root.addChild( node );
 
 // keep track of how much time elapsed over the last frame
