@@ -6,6 +6,9 @@
  * A 'finger' is an abstract way of describing either the mouse, a single touch point, or a key being pressed.
  * touch points and key presses go away after being released, whereas the mouse 'finger' is persistent.
  *
+ * DOM Level 3 events spec: http://www.w3.org/TR/DOM-Level-3-Events/
+ * Touch events spec: http://www.w3.org/TR/touch-events/
+ *
  * @author Jonathan Olson
  */
 

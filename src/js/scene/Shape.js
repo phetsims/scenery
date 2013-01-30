@@ -8,6 +8,11 @@
  * individual segments stored in subpaths. Familiarity with how Canvas handles
  * subpaths is helpful for understanding this code.
  *
+ * Canvas spec: http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html
+ * SVG spec: http://www.w3.org/TR/SVG/expanded-toc.html
+ * Notes for elliptical arcs: http://www.w3.org/TR/SVG/implnote.html#PathElementImplementationNotes
+ * Notes for painting strokes: https://svgwg.org/svg2-draft/painting.html
+ *
  * TODO: add nonzero / evenodd support when browsers support it
  *
  * @author Jonathan Olson

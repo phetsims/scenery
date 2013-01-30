@@ -38,6 +38,8 @@ phet.scene = phet.scene || {};
         // something of the form matrix(...) as a String, with a Z translation to trigger hardware acceleration (hopefully)
         var cssTransform = state.transform.getMatrix().cssTransform();
         
+        // notes on triggering hardware acceleration: http://creativejs.com/2011/12/day-2-gpu-accelerate-your-dom-elements/
+        
         $( this._element ).css( {
             '-webkit-transform': cssTransform + ' translateZ(0)', // trigger hardware acceleration if possible
             '-moz-transform': cssTransform + ' translateZ(0)', // trigger hardware acceleration if possible

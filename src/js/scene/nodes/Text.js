@@ -50,6 +50,7 @@ phet.scene = phet.scene || {};
     
     Text.prototype.invalidateText = function() {
         // TODO: faster bounds determination? getBBox()?
+        // investigate http://mudcu.be/journal/2011/01/html5-typographic-metrics/
         this.invalidateSelf( phet.scene.canvasTextBoundsAccurate( this._text, this.fontStyles ) );
     };
     

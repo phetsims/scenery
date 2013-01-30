@@ -24,6 +24,7 @@ phet.scene = phet.scene || {};
     
     // drawingStyles should include font, textAlign, textBaseline, direction
     // textAlign = 'left', textBaseline = 'alphabetic' and direction = 'ltr' are recommended
+    // TODO: for speed, also investigate http://mudcu.be/journal/2011/01/html5-typographic-metrics/
 	phet.scene.canvasTextBoundsAccurate = function( text, fontDrawingStyles ) {
         phet.assert( fontDrawingStyles !== undefined );
         return phet.scene.canvasAccurateBounds( function( context ) {
