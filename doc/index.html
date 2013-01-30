@@ -387,6 +387,46 @@ thumbnailImage.onload = function( e ) {
 thumbnailImage.src = 'http://phet.colorado.edu/sims/energy-skate-park/energy-skate-park-basics-thumbnail.png';
             </pre>
             
+            <h3>DOM Elements</h3>
+            
+            <p>
+                DOM elements can be added in (they are transformed with CSS transforms). Currently, bounds-based modifiers
+                may be buggy.
+            </p>
+            
+            <div id="dom-simple" style="width: 400px; height: 200px;" class="exampleScene"></div>
+            
+            <script type="text/javascript">
+                $( window ).ready( function() {
+                    var scene = new phet.scene.Scene( $( '#dom-simple' ) );
+                    
+                    var element = document.createElement( 'form' );
+                    element.innerHTML = '<label>Type in me:</label><input type="text">';
+                    
+                    scene.root.addChild( new phet.scene.DOM( element, {
+                        x: 50,
+                        rotation: Math.PI / 4
+                    } ) );
+                    
+                    scene.updateScene();
+                } );
+            </script>
+            
+            <pre class="brush: js">
+var element = document.createElement( 'form' );
+element.innerHTML = '<label>Type in me:</label><input type="text">';
+
+scene.root.addChild( new phet.scene.DOM( element, {
+    x: 50,
+    rotation: Math.PI / 4
+} ) );
+            </pre>
+            
+            <p>
+                When added in the above manner, the DOM element will be lifted in front of any other non-lifted elements by default.
+                It is possible to have the DOM elements reside where they would normally be rendered.
+            </p>
+            
             <h2>Appendix (to be completed later)</h2>
             
             <p>
