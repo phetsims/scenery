@@ -343,6 +343,50 @@ var child2 = new phet.scene.Text( 'On Top?', {
 container.addChild( child2 );
             </pre>
             
+            <h3>Images</h3>
+            
+            <p>
+                For now, pass in a valid image and it will be rendered with its upper-left corner at 0,0 in the local coordinate frame.
+            </p>
+            
+            <div id="image-scene" style="width: 400px; height: 200px;" class="exampleScene"></div>
+            
+            <script type="text/javascript">
+                $( window ).ready( function() {
+                    var scene = new phet.scene.Scene( $( '#image-scene' ) );
+                    
+                    // TODO: support different ways of handling the asynchronous load
+                    var thumbnailImage = document.createElement( 'img' );
+                    thumbnailImage.onload = function( e ) {
+                        scene.root.addChild( new phet.scene.Image( thumbnailImage ) );
+                        scene.root.addChild( new phet.scene.Image( thumbnailImage, {
+                            x: 200,
+                            y: 25,
+                            scale: 1.5,
+                            rotation: Math.PI / 4
+                        } ) );
+                        scene.updateScene();
+                    };
+                    thumbnailImage.src = 'http://phet.colorado.edu/sims/energy-skate-park/energy-skate-park-basics-thumbnail.png';
+                } );
+            </script>
+            
+            <pre class="brush: js">
+// TODO: support different ways of handling the asynchronous load
+var thumbnailImage = document.createElement( 'img' );
+thumbnailImage.onload = function( e ) {
+    scene.root.addChild( new phet.scene.Image( thumbnailImage ) );
+    scene.root.addChild( new phet.scene.Image( thumbnailImage, {
+        x: 200,
+        y: 25,
+        scale: 1.5,
+        rotation: Math.PI / 4
+    } ) );
+    scene.updateScene();
+};
+thumbnailImage.src = 'http://phet.colorado.edu/sims/energy-skate-park/energy-skate-park-basics-thumbnail.png';
+            </pre>
+            
             <h2>Appendix (to be completed later)</h2>
             
             <p>
