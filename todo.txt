@@ -13,6 +13,7 @@ Bugs:
 Questions / Open Topics:
     Event handling for DOM events, etc.
     Persistent (DOM,SVG) painting and updates for nodes
+    JSDoc?
     
     Something like _.extend that will work on ES5 setter/getter pairs in the future? Maybe $.extend?
     Should enter / exit events be fired before / after touch up/down events, or never?
