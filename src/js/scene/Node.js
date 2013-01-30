@@ -900,6 +900,14 @@ phet.scene = phet.scene || {};
             return this; // allow chaining
         },
         
+        getWidth: function() {
+            return this.getBounds().width();
+        },
+        
+        getHeight: function() {
+            return this.getBounds().height();
+        },
+        
         // sets the shape drawn, or null to remove the shape
         setShape: function( shape ) {
             if( this._shape != shape ) {
@@ -1155,6 +1163,9 @@ phet.scene = phet.scene || {};
         
         set centerY( value ) { this.setCenterY( value ); },
         get centerY() { return this.getCenterY(); },
+        
+        get width() { return this.getWidth(); },
+        get height() { return this.getHeight(); },
         
         mutate: function( params ) {
             // NOTE: translation-based mutators come before rotation/scale, since typically we think of their operations occuring "after" the rotation / scaling
