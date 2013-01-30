@@ -10,14 +10,15 @@ Bugs:
         Report rgba alpha precision "bug" - spec says rgba(255,255,255,0.1112049520495820495802495) should not lose any digits on inspection after setting on context
     * for canvas, create a drawing function that exhibits all differences?
 
-Questions:
-    ** for many of the following, determine Piccolo behavior
+Questions / Open Topics:
+    Event handling for DOM events, etc.
+    Persistent (DOM,SVG) painting and updates for nodes
     
-    Invisible nodes included in: {bounds, hit testing / enter / exit events}?
-    _.extend will hopefully work on ES5 setter/getter pairs in the future?
-        * try $.extend?
+    Something like _.extend that will work on ES5 setter/getter pairs in the future? Maybe $.extend?
     Should enter / exit events be fired before / after touch up/down events, or never?
-    Name? Scenery?
+    Name? Scenery? Artist names?
+    
+    Packing everything into 1 HTML file -- is it possible with data URLs? If there are size limits, can we split images/audio and recombine?
 
 Next:
     * More documentation
