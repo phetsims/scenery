@@ -427,6 +427,80 @@ scene.root.addChild( new phet.scene.DOM( element, {
                 It is possible to have the DOM elements reside where they would normally be rendered.
             </p>
             
+            
+            <h3>Animation</h3>
+            
+            <p>
+                It is recommended to use scene.updateScene() inside of requestAnimationFrame(), since updateScene() attempts to only
+                re-paint content that is inside of changed areas. This type of pattern may be refactored out soon.
+            </p>
+            
+            <div id="animation-simple" style="width: 200px; height: 200px;" class="exampleScene"></div>
+            
+            <script type="text/javascript">
+                $( window ).ready( function() {
+                    var div = $( '#animation-simple' );
+                    var scene = new phet.scene.Scene( div );
+                    
+                    // a hexagon to rotate
+                    var node = new phet.scene.Node( {
+                        shape: phet.scene.Shape.regularPolygon( 6, 90 ),
+                        fill: '#000000',
+                        centerX: 100,
+                        centerY: 100
+                    } );
+                    scene.root.addChild( node );
+                    
+                    // keep track of how much time elapsed over the last frame
+                    var lastTime = 0;
+                    var timeElapsed = 0;
+                    function tick() {
+                        window.requestAnimationFrame( tick, div[0] );
+                        
+                        var timeNow = new Date().getTime();
+                        if ( lastTime != 0 ) {
+                            timeElapsed = (timeNow - lastTime) / 1000.0;
+                        }
+                        lastTime = timeNow;
+                        
+                        node.rotate( timeElapsed );
+                        scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
+                    }
+                    window.requestAnimationFrame( tick, div[0] );
+                } );
+            </script>
+            
+            <pre class="brush: js">
+var div = $( '#animation-simple' );
+var scene = new phet.scene.Scene( div );
+
+// a hexagon to rotate
+var node = new phet.scene.Node( {
+    shape: phet.scene.Shape.regularPolygon( 6, 90 ),
+    fill: '#000000',
+    centerX: 100,
+    centerY: 100
+} );
+scene.root.addChild( node );
+
+// keep track of how much time elapsed over the last frame
+var lastTime = 0;
+var timeElapsed = 0;
+function tick() {
+    window.requestAnimationFrame( tick, div[0] );
+    
+    var timeNow = new Date().getTime();
+    if ( lastTime != 0 ) {
+        timeElapsed = (timeNow - lastTime) / 1000.0;
+    }
+    lastTime = timeNow;
+    
+    node.rotate( timeElapsed );
+    scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
+}
+window.requestAnimationFrame( tick, div[0] );
+            </pre>
+            
             <h2>Appendix (to be completed later)</h2>
             
             <p>
