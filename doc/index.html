@@ -50,10 +50,13 @@
         <div class="span2"></div>
         <div class="span8">
             <h1>Documentation</h1>
+            <p class="text-warning">Currently, this is written as if the user has experience with other scene graphs. Will include more information later.</p>
             <p class="text-warning">TODO: organization and style</p>
             <p class="text-warning">Note about building JS before docs will work locally</p>
             
-            <h2>Hello World</h2>
+            <h2>A Brief Tour</h2>
+            
+            <h3>Hello World</h3>
             
             <div id="hello-world-scene" style="width: 400px; height: 100px;" class="exampleScene"></div>
             
@@ -101,7 +104,12 @@ scene.root.addChild( new phet.scene.Text( 'Hello World', {
 scene.updateScene();
             </pre>
             
-            <h2>Shapes</h2>
+            <h3>Shapes</h3>
+            
+            <p>
+                Nodes are the basic structure of the scene graph, and can be given shapes. Shapes can be built from convenience
+                functions, or from Canvas-style calls. Exact bounding boxes of shapes are calculated, including any strokes.
+            </p>
             
             <div id="shapes-scene" style="width: 220px; height: 100px;" class="exampleScene"></div>
             
@@ -146,11 +154,6 @@ scene.updateScene();
                 } );
             </script>
             
-            <p>
-                Nodes are the basic structure of the scene graph, and can be given shapes. Shapes can be built from convenience
-                functions, or from Canvas-style calls. Exact bounding boxes of shapes are calculated, including any strokes.
-            </p>
-            
             <pre class="brush: js">
 // A rectangle at (10,10) with a width of 50 and height of 80
 scene.root.addChild( new phet.scene.Node( {
@@ -184,6 +187,53 @@ scene.root.addChild( new phet.scene.Node( {
     x: 150,
     y: 50
 } ) );
+            </pre>
+            
+            <h3>Nodes</h3>
+            
+            <p>
+                Nodes can be created and modified currently in a few different ways:
+            </p>
+
+            <pre class="brush: js">
+// The following are all equivalent ways to create a node, listed in approximate order of increasing performance (if it is relevant).
+
+var someShape = ...; // a shape used for brevity in the following calls, otherwise setting the bottom of the node makes no sense
+
+// Declarative pattern. NOTE: the parameters are executed in a specific order which is particularly important
+// for transformation and bounds-based parameters. Using translations like 'x' or 'bottom' do not change the
+// point around which rotation or scaling is done in the local coordinate frame, and bounds-based modifiers
+// like 'bottom' (which moves the bottom of the node's bounds to the specific y-value) are handled after other
+// modifiers have been run.
+var node1 = new phet.scene.Node( {
+    shape: someShape,
+    fill: '#000000',
+    rotation: Math.PI / 2,
+    x: 10,
+    bottom: 200
+} );
+
+// ES5-setter style, called internally by the declarative paramter object style above
+var node2 = new phet.scene.Node();
+node2.shape = someShape;
+node2.fill = '#000000';
+node2.x = 10; // note the reordering, as this is precisely how the declarative style is executed
+node2.rotation = Math.PI / 2;
+node2.bottom = 200;
+
+// Java-style setters, called internally from the ES5-setter style above
+var node3 = new phet.scene.Node();
+node3.setShape( someShape );
+node3.setFill( '#000000' );
+node3.setX( 10 );
+node3.setRotation( Math.PI / 2 );
+node3.setBottom( 200 );
+
+// Chained style, since setters return a this-reference.
+var node4 = new phet.scene.Node().setShape( someShape ).setFill( '#000000' ).setX( 10 ).setRotation( Math.PI / 2 ).setBottom( 200 );
+
+// Additionally, parameters can be accessed by two styles:
+node2.rotation === node3.getRotation();
             </pre>
             
             <h2>Appendix (to be completed later)</h2>

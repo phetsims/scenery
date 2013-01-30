@@ -3,6 +3,8 @@
 Bugs:
     Browser bugs?:
         miterLimit off in Chrome 24.0.1312.52 m
+            SVG miterLimit calculation in https://svgwg.org/svg2-draft/painting.html
+            Canvas spec note at http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#trace-a-path
         bevel instead of miter on the "close" part of the hex: Firefox 18.0.1
         Chrome 24.0.1312.52 m bug in zooming fillText() -- mobile Safari OK (maybe different from webkit, since it's not antialiased?)
         Report rgba alpha precision "bug" - spec says rgba(255,255,255,0.1112049520495820495802495) should not lose any digits on inspection after setting on context
@@ -40,6 +42,7 @@ Next:
 Incomplete:
     Node:
         Sub-tree opacity (like setTransparency in Piccolo)
+            'transparency', 'opacity', or 'alpha'?
         Add centerX, centerY as ES5 getters/setters like left/right/top/bottom?
         Canvas fill gradients / patterns
             Can this be abstracted across SVG / WebGL layers also? -- probably WebGL _much_ more efficiently with shaders
