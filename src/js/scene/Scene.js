@@ -516,39 +516,61 @@ phet.scene = phet.scene || {};
             return this.inputListeners.slice( 0 ); // defensive copy
         },
         
+        initializeStandaloneEvents: function() {
+            var element = this.main[0];
+            this.initializeEvents( {
+                preventDefault: true,
+                listenerTarget: element,
+                pointFromEvent: function( evt ) {
+                    var mainBounds = element.getBoundingClientRect();
+                    return new phet.math.Vector2( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
+                }
+            } );
+        },
+        
         initializeFullscreenEvents: function() {
+            this.initializeEvents( {
+                preventDefault: true,
+                listenerTarget: document,
+                pointFromEvent: function( evt ) {
+                    return new phet.math.Vector2( evt.pageX, evt.pageY );
+                }
+            } );
+        },
+        
+        initializeEvents: function( parameters ) {
             var scene = this;
             
-            var input = new phet.scene.Input( scene );
-
-            function pointFromEvent( evt ) {
-                // scrolling should not be possible, use pageX/pageY
-                return new phet.math.Vector2( evt.pageX, evt.pageY );
-            }
+            // TODO: come up with more parameter names that have the same string length, so it looks creepier
+            var pointFromEvent = parameters.pointFromEvent;
+            var listenerTarget = parameters.listenerTarget;
+            var preventDefault = parameters.preventDefault;
             
-            $( document ).on( 'mousedown', function( jEvent ) {
+            var input = new phet.scene.Input( scene );
+            
+            $( listenerTarget ).on( 'mousedown', function( jEvent ) {
                 var evt = jEvent.originalEvent;
-                jEvent.preventDefault();
+                if( preventDefault ) { jEvent.preventDefault(); }
                 input.mouseDown( pointFromEvent( evt ), evt );
             } );
-            $( document ).on( 'mouseup', function( jEvent ) {
+            $( listenerTarget ).on( 'mouseup', function( jEvent ) {
                 var evt = jEvent.originalEvent;
-                jEvent.preventDefault();
+                if( preventDefault ) { jEvent.preventDefault(); }
                 input.mouseUp( pointFromEvent( evt ), evt );
             } );
-            $( document ).on( 'mousemove', function( jEvent ) {
+            $( listenerTarget ).on( 'mousemove', function( jEvent ) {
                 var evt = jEvent.originalEvent;
-                jEvent.preventDefault();
+                if( preventDefault ) { jEvent.preventDefault(); }
                 input.mouseMove( pointFromEvent( evt ), evt );
             } );
-            $( document ).on( 'mouseover', function( jEvent ) {
+            $( listenerTarget ).on( 'mouseover', function( jEvent ) {
                 var evt = jEvent.originalEvent;
-                jEvent.preventDefault();
+                if( preventDefault ) { jEvent.preventDefault(); }
                 input.mouseOver( pointFromEvent( evt ), evt );
             } );
-            $( document ).on( 'mouseout', function( jEvent ) {
+            $( listenerTarget ).on( 'mouseout', function( jEvent ) {
                 var evt = jEvent.originalEvent;
-                jEvent.preventDefault();
+                if( preventDefault ) { jEvent.preventDefault(); }
                 input.mouseOut( pointFromEvent( evt ), evt );
             } );
 
@@ -561,30 +583,30 @@ phet.scene = phet.scene || {};
                 }
             }
 
-            $( document ).on( 'touchstart', function( jEvent ) {
+            $( listenerTarget ).on( 'touchstart', function( jEvent ) {
                 var evt = jEvent.originalEvent;
-                jEvent.preventDefault();
+                if( preventDefault ) { jEvent.preventDefault(); }
                 forEachChangedTouch( evt, function( id, point ) {
                     input.touchStart( id, point, evt );
                 } );
             } );
-            $( document ).on( 'touchend', function( jEvent ) {
+            $( listenerTarget ).on( 'touchend', function( jEvent ) {
                 var evt = jEvent.originalEvent;
-                jEvent.preventDefault();
+                if( preventDefault ) { jEvent.preventDefault(); }
                 forEachChangedTouch( evt, function( id, point ) {
                     input.touchEnd( id, point, evt );
                 } );
             } );
-            $( document ).on( 'touchmove', function( jEvent ) {
+            $( listenerTarget ).on( 'touchmove', function( jEvent ) {
                 var evt = jEvent.originalEvent;
-                jEvent.preventDefault();
+                if( preventDefault ) { jEvent.preventDefault(); }
                 forEachChangedTouch( evt, function( id, point ) {
                     input.touchMove( id, point, evt );
                 } );
             } );
-            $( document ).on( 'touchcancel', function( jEvent ) {
+            $( listenerTarget ).on( 'touchcancel', function( jEvent ) {
                 var evt = jEvent.originalEvent;
-                jEvent.preventDefault();
+                if( preventDefault ) { jEvent.preventDefault(); }
                 forEachChangedTouch( evt, function( id, point ) {
                     input.touchCancel( id, point, evt );
                 } );
