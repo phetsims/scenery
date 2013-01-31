@@ -69,21 +69,21 @@ phet.math = phet.math || {};
         },
         
         getInverse: function() {
-            if( this.inverse == null ) {
+            if( this.inverse === null ) {
                 this.inverse = this.matrix.inverted();
             }
             return this.inverse;
         },
         
         getMatrixTransposed: function() {
-            if( this.matrixTransposed == null ) {
+            if( this.matrixTransposed === null ) {
                 this.matrixTransposed = this.matrix.transposed();
             }
             return this.matrixTransposed;
         },
         
         getInverseTransposed: function() {
-            if( this.inverseTransposed == null ) {
+            if( this.inverseTransposed === null ) {
                 this.inverseTransposed = this.getInverse().transposed();
             }
             return this.inverseTransposed;

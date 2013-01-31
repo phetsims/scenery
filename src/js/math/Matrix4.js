@@ -192,7 +192,7 @@ phet.math = phet.math || {};
             return new Matrix4( this.m00(), this.m10(), this.m20(), this.m30(),
                                 this.m01(), this.m11(), this.m21(), this.m31(),
                                 this.m02(), this.m12(), this.m22(), this.m32(),
-                                this.m03(), this.m13(), this.m23(), this.m33() )
+                                this.m03(), this.m13(), this.m23(), this.m33() );
         },
 
         negated: function () {
@@ -207,7 +207,7 @@ phet.math = phet.math || {};
 
             var det = this.determinant();
 
-            if ( det != 0 ) {
+            if ( det !== 0 ) {
                 return new Matrix4(
                         ( -this.m31() * this.m22() * this.m13() + this.m21() * this.m32() * this.m13() + this.m31() * this.m12() * this.m23() - this.m11() * this.m32() * this.m23() - this.m21() * this.m12() * this.m33() + this.m11() * this.m22() * this.m33() ) / det,
                         ( this.m31() * this.m22() * this.m03() - this.m21() * this.m32() * this.m03() - this.m31() * this.m02() * this.m23() + this.m01() * this.m32() * this.m23() + this.m21() * this.m02() * this.m33() - this.m01() * this.m22() * this.m33() ) / det,
@@ -297,30 +297,30 @@ phet.math = phet.math || {};
         },
 
         determinant: function () {
-            return this.m03() * this.m12() * this.m21() * this.m30()
-                           - this.m02() * this.m13() * this.m21() * this.m30()
-                           - this.m03() * this.m11() * this.m22() * this.m30()
-                           + this.m01() * this.m13() * this.m22() * this.m30()
-                           + this.m02() * this.m11() * this.m23() * this.m30()
-                           - this.m01() * this.m12() * this.m23() * this.m30()
-                           - this.m03() * this.m12() * this.m20() * this.m31()
-                           + this.m02() * this.m13() * this.m20() * this.m31()
-                           + this.m03() * this.m10() * this.m22() * this.m31()
-                           - this.m00() * this.m13() * this.m22() * this.m31()
-                           - this.m02() * this.m10() * this.m23() * this.m31()
-                           + this.m00() * this.m12() * this.m23() * this.m31()
-                           + this.m03() * this.m11() * this.m20() * this.m32()
-                           - this.m01() * this.m13() * this.m20() * this.m32()
-                           - this.m03() * this.m10() * this.m21() * this.m32()
-                           + this.m00() * this.m13() * this.m21() * this.m32()
-                           + this.m01() * this.m10() * this.m23() * this.m32()
-                           - this.m00() * this.m11() * this.m23() * this.m32()
-                           - this.m02() * this.m11() * this.m20() * this.m33()
-                           + this.m01() * this.m12() * this.m20() * this.m33()
-                           + this.m02() * this.m10() * this.m21() * this.m33()
-                           - this.m00() * this.m12() * this.m21() * this.m33()
-                           - this.m01() * this.m10() * this.m22() * this.m33()
-                    + this.m00() * this.m11() * this.m22() * this.m33();
+            return this.m03() * this.m12() * this.m21() * this.m30() -
+                    this.m02() * this.m13() * this.m21() * this.m30() -
+                    this.m03() * this.m11() * this.m22() * this.m30() +
+                    this.m01() * this.m13() * this.m22() * this.m30() +
+                    this.m02() * this.m11() * this.m23() * this.m30() -
+                    this.m01() * this.m12() * this.m23() * this.m30() -
+                    this.m03() * this.m12() * this.m20() * this.m31() +
+                    this.m02() * this.m13() * this.m20() * this.m31() +
+                    this.m03() * this.m10() * this.m22() * this.m31() -
+                    this.m00() * this.m13() * this.m22() * this.m31() -
+                    this.m02() * this.m10() * this.m23() * this.m31() +
+                    this.m00() * this.m12() * this.m23() * this.m31() +
+                    this.m03() * this.m11() * this.m20() * this.m32() -
+                    this.m01() * this.m13() * this.m20() * this.m32() -
+                    this.m03() * this.m10() * this.m21() * this.m32() +
+                    this.m00() * this.m13() * this.m21() * this.m32() +
+                    this.m01() * this.m10() * this.m23() * this.m32() -
+                    this.m00() * this.m11() * this.m23() * this.m32() -
+                    this.m02() * this.m11() * this.m20() * this.m33() +
+                    this.m01() * this.m12() * this.m20() * this.m33() +
+                    this.m02() * this.m10() * this.m21() * this.m33() -
+                    this.m00() * this.m12() * this.m21() * this.m33() -
+                    this.m01() * this.m10() * this.m22() * this.m33() +
+                    this.m00() * this.m11() * this.m22() * this.m33();
         },
 
         toString: function () {
@@ -336,7 +336,7 @@ phet.math = phet.math || {};
         makeImmutable: function () {
             this.rowMajor = function () {
                 throw new Error( "Cannot modify immutable matrix" );
-            }
+            };
         }
     };
 

@@ -48,13 +48,16 @@ phet.model = phet.model || {};
         Notifier.call( this );
 
         this.notifiers = notifiers;
+        
+        var that = this;
+        function updateListener( value ) {
+            that.updateListeners( value );
+        }
 
         // when one of these notifiers fires, fire ourself
-        var that = this;
+        
         for ( var i = 0; i < notifiers.length; i++ ) {
-            notifiers[i].addListener( function ( value ) {
-                that.updateListeners( value );
-            } );
+            notifiers[i].addListener( updateListener );
         }
     };
 

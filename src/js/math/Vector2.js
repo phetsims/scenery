@@ -52,7 +52,7 @@ phet.math = phet.math || {};
 
         normalized: function () {
             var mag = this.magnitude();
-            if ( mag == 0 ) {
+            if ( mag === 0 ) {
                 throw new Error( "Cannot normalize a zero-magnitude vector" );
             }
             else {
@@ -210,7 +210,7 @@ phet.math = phet.math || {};
     Immutable.mutableOverrideHelper = function ( mutableFunctionName ) {
         Immutable.prototype[mutableFunctionName] = function () {
             throw new Error( "Cannot call mutable method '" + mutableFunctionName + "' on immutable Vector2" );
-        }
+        };
     };
 
     // TODO: better way to handle this list?

@@ -69,10 +69,10 @@ phet.webgl = phet.webgl || {};
             0, 1
         ];
 
-        console.log( normalData );
-        console.log( textureData );
-        console.log( positionData );
-        console.log( indexData );
+        // console.log( normalData );
+        // console.log( textureData );
+        // console.log( positionData );
+        // console.log( indexData );
 
         gl.bindBuffer( gl.ARRAY_BUFFER, this.normalBuffer );
         gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( normalData ), gl.STATIC_DRAW );

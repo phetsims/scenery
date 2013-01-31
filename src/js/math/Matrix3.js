@@ -247,7 +247,7 @@ phet.math = phet.math || {};
         transposed: function () {
             return new Matrix3( this.m00(), this.m10(), this.m20(),
                                 this.m01(), this.m11(), this.m21(),
-                                this.m02(), this.m12(), this.m22() )
+                                this.m02(), this.m12(), this.m22() );
         },
 
         negated: function () {
@@ -261,7 +261,7 @@ phet.math = phet.math || {};
 
             var det = this.determinant();
 
-            if ( det != 0 ) {
+            if ( det !== 0 ) {
                 return new Matrix3(
                         ( -this.m12() * this.m21() + this.m11() * this.m22() ) / det,
                         ( this.m02() * this.m21() - this.m01() * this.m22() ) / det,
@@ -359,7 +359,7 @@ phet.math = phet.math || {};
         makeImmutable: function () {
             this.rowMajor = function () {
                 throw new Error( "Cannot modify immutable matrix" );
-            }
+            };
         },
         
         toSVGMatrix: function () {

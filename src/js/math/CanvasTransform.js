@@ -32,7 +32,7 @@ phet.math = phet.math || {};
     StageCenteringCanvasTransform.fieldOfViewYFactor = function ( canvasSize, stageSize ) {
         var sx = canvasSize.width / stageSize.width;
         var sy = canvasSize.height / stageSize.height;
-        if ( sx == 0 || sy == 0 ) {
+        if ( sx === 0 || sy === 0 ) {
             return 1;
         }
         return sy > sx ? sy / sx : 1;

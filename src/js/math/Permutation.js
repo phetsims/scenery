@@ -34,7 +34,7 @@ phet.math = phet.math || {};
 
     // lists all permutations that have a given size
     Permutation.permutations = function ( size ) {
-        var result = new Array();
+        var result = [];
         Permutation.forEachPermutation( phet.util.rangeInclusive( 0, size - 1 ), function ( integers ) {
             result.push( new Permutation( integers ) );
         } );
@@ -49,7 +49,7 @@ phet.math = phet.math || {};
      * @param callback Function to call
      */
     function recursiveForEachPermutation( array, prefix, callback ) {
-        if ( array.length == 0 ) {
+        if ( array.length === 0 ) {
             callback.call( undefined, prefix );
         }
         else {
@@ -70,7 +70,7 @@ phet.math = phet.math || {};
     }
 
     Permutation.forEachPermutation = function ( array, callback ) {
-        recursiveForEachPermutation( array, new Array(), callback );
+        recursiveForEachPermutation( array, [], callback );
     };
 
     phet.math.Permutation.prototype = {
@@ -83,7 +83,7 @@ phet.math = phet.math || {};
         apply: function ( arrayOrInt ) {
             if ( phet.util.isArray( arrayOrInt ) ) {
                 if ( arrayOrInt.length != this.size() ) {
-                    throw new Error( "Permutation length " + this.size() + " not equal to list length " + arrayOrInt.length )
+                    throw new Error( "Permutation length " + this.size() + " not equal to list length " + arrayOrInt.length );
                 }
 
                 // permute it as an array
@@ -109,7 +109,7 @@ phet.math = phet.math || {};
         },
 
         withIndicesPermuted: function ( indices ) {
-            var result = new Array();
+            var result = [];
             var that = this;
             Permutation.forEachPermutation( indices, function ( integers ) {
                 var oldIndices = that.indices;
@@ -128,7 +128,7 @@ phet.math = phet.math || {};
         }
     };
 
-    Permutation.testMe = function () {
+    Permutation.testMe = function( console ) {
         var a = new Permutation( [ 1, 4, 3, 2, 0 ] );
         console.log( a.toString() );
 
@@ -138,5 +138,5 @@ phet.math = phet.math || {};
         console.log( b.withIndicesPermuted( [ 0, 3, 4 ] ).toString() );
 
         console.log( Permutation.permutations( 4 ).toString() );
-    }
+    };
 })();

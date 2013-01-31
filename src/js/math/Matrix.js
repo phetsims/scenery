@@ -56,7 +56,7 @@ phet.math = phet.math || {};
             r = b / a;
             r = Math.abs( a ) * Math.sqrt( 1 + r * r );
         }
-        else if ( b != 0 ) {
+        else if ( b !== 0 ) {
             r = a / b;
             r = Math.abs( b ) * Math.sqrt( 1 + r * r );
         }
@@ -169,7 +169,7 @@ phet.math = phet.math || {};
             var f = 0;
             for ( var i = 0; i < this.m; i++ ) {
                 for ( var j = 0; j < this.n; j++ ) {
-                    f = hypot( f, this.entries[ this.index( i, j ) ] );
+                    f = Matrix.hypot( f, this.entries[ this.index( i, j ) ] );
                 }
             }
             return f;
@@ -199,6 +199,7 @@ phet.math = phet.math || {};
 
         plusEquals: function ( matrix ) {
             this.checkMatrixDimensions( matrix );
+            var result = new Matrix( this.m, this.n );
             for ( var i = 0; i < this.m; i++ ) {
                 for ( var j = 0; j < this.n; j++ ) {
                     var index = result.index( i, j );

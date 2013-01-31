@@ -38,7 +38,7 @@ phet.math = phet.math || {};
                 nrm = Matrix.hypot( nrm, QR[this.matrix.index( i, k )] );
             }
 
-            if ( nrm != 0.0 ) {
+            if ( nrm !== 0.0 ) {
                 // Form k-th Householder vector.
                 if ( QR[this.matrix.index( k, k )] < 0 ) {
                     nrm = -nrm;
@@ -71,7 +71,7 @@ phet.math = phet.math || {};
 
         isFullRank: function () {
             for ( var j = 0; j < this.n; j++ ) {
-                if ( this.Rdiag[j] == 0 ) {
+                if ( this.Rdiag[j] === 0 ) {
                     return false;
                 }
             }
@@ -120,7 +120,7 @@ phet.math = phet.math || {};
                 }
                 result.entries[result.index( k, k )] = 1.0;
                 for ( j = k; j < this.n; j++ ) {
-                    if ( this.QR[this.matrix.index( k, k )] != 0 ) {
+                    if ( this.QR[this.matrix.index( k, k )] !== 0 ) {
                         var s = 0.0;
                         for ( i = k; i < this.m; i++ ) {
                             s += this.QR[this.matrix.index( i, k )] * result.entries[result.index( i, j )];
@@ -176,5 +176,5 @@ phet.math = phet.math || {};
             }
             return new Matrix( X, this.n, nx ).getMatrix( 0, this.n - 1, 0, nx - 1 );
         }
-    }
+    };
 })();

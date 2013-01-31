@@ -82,7 +82,7 @@ phet.math = phet.math || {};
 
             // Compute multipliers.
 
-            if ( j < m && LU[this.matrix.index( j, j )] != 0.0 ) {
+            if ( j < m && LU[this.matrix.index( j, j )] !== 0.0 ) {
                 for ( i = j + 1; i < m; i++ ) {
                     LU[matrix.index( i, j )] /= LU[matrix.index( j, j )];
                 }
@@ -98,7 +98,7 @@ phet.math = phet.math || {};
         isNonsingular: function () {
             for ( var j = 0; j < this.n; j++ ) {
                 var index = this.matrix.index( j, j );
-                if ( this.LU[index] == 0 ) {
+                if ( this.LU[index] === 0 ) {
                     return false;
                 }
             }
@@ -167,7 +167,7 @@ phet.math = phet.math || {};
 
         solve: function ( matrix ) {
             var i, j, k;
-            if ( matrix.getRowDimension() != m ) {
+            if ( matrix.getRowDimension() != this.m ) {
                 throw new Error( "Matrix row dimensions must agree." );
             }
             if ( !this.isNonsingular() ) {
@@ -200,5 +200,5 @@ phet.math = phet.math || {};
             }
             return Xmat;
         }
-    }
+    };
 })();

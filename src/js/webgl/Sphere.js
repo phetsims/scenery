@@ -203,5 +203,5 @@ phet.webgl = phet.webgl || {};
                 fromOutside: true
             };
         }
-    }
+    };
 })();
