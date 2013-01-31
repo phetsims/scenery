@@ -172,7 +172,7 @@ phet.scene = phet.scene || {};
                 //this.markLayerRefreshNeeded();
             } else {
                 // no layer changes are necessary, however we need to synchronize layer references in the new subtree if applicable
-                if( this.isRooted() && node._layerReference != this._layerReference ) {
+                if( this.isRooted() && node._layerReference !== this._layerReference ) {
                     var layerReference = this._layerReference;
                     node.walkDepthFirst( function( child ) {
                         child._layerReference = layerReference;
@@ -398,7 +398,7 @@ phet.scene = phet.scene || {};
         },
         
         isChild: function ( potentialChild ) {
-            phet.assert( (potentialChild.parent === this ) === (this.children.indexOf( potentialChild ) != -1) );
+            phet.assert( (potentialChild.parent === this ) === (this.children.indexOf( potentialChild ) !== -1) );
             return potentialChild.parent === this;
         },
         
@@ -447,7 +447,7 @@ phet.scene = phet.scene || {};
             // collect all layers between the first and last layers
             var layers = [firstLayer];
             var layer = firstLayer;
-            while( layer != lastLayer && layer.nextLayer !== null ) {
+            while( layer !== lastLayer && layer.nextLayer !== null ) {
                 layer = layer.nextLayer;
                 layers.push( layer );
             }
@@ -910,7 +910,7 @@ phet.scene = phet.scene || {};
         
         // sets the shape drawn, or null to remove the shape
         setShape: function( shape ) {
-            if( this._shape != shape ) {
+            if( this._shape !== shape ) {
                 this._shape = shape;
                 this.invalidateShape();
             }
@@ -926,7 +926,7 @@ phet.scene = phet.scene || {};
         },
         
         setLineWidth: function( lineWidth ) {
-            if( this.getLineWidth() != lineWidth ) {
+            if( this.getLineWidth() !== lineWidth ) {
                 this.markOldSelfPaint(); // since the previous line width may have been wider
                 
                 this._lineDrawingStyles.lineWidth = lineWidth;
@@ -941,7 +941,7 @@ phet.scene = phet.scene || {};
         },
         
         setLineCap: function( lineCap ) {
-            if( this._lineDrawingStyles.lineCap != lineCap ) {
+            if( this._lineDrawingStyles.lineCap !== lineCap ) {
                 this.markOldSelfPaint();
                 
                 this._lineDrawingStyles.lineCap = lineCap;
@@ -956,7 +956,7 @@ phet.scene = phet.scene || {};
         },
         
         setLineJoin: function( lineJoin ) {
-            if( this._lineDrawingStyles.lineJoin != lineJoin ) {
+            if( this._lineDrawingStyles.lineJoin !== lineJoin ) {
                 this.markOldSelfPaint();
                 
                 this._lineDrawingStyles.lineJoin = lineJoin;
@@ -984,7 +984,7 @@ phet.scene = phet.scene || {};
         },
         
         setFill: function( fill ) {
-            if( this.getFill() != fill ) {
+            if( this.getFill() !== fill ) {
                 this._fill = fill;
                 this.invalidatePaint();
             }
@@ -996,7 +996,7 @@ phet.scene = phet.scene || {};
         },
         
         setStroke: function( stroke ) {
-            if( this.getStroke() != stroke ) {
+            if( this.getStroke() !== stroke ) {
                 // since this can actually change the bounds, we need to handle a few things differently than the fill
                 this.markOldSelfPaint();
                 
@@ -1011,7 +1011,7 @@ phet.scene = phet.scene || {};
         },
         
         setVisible: function( visible ) {
-            if( visible != this._visible ) {
+            if( visible !== this._visible ) {
                 if( this._visible ) {
                     this.markOldSelfPaint();
                 }

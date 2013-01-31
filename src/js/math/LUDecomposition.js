@@ -66,7 +66,7 @@ phet.math = phet.math || {};
                     p = i;
                 }
             }
-            if ( p != j ) {
+            if ( p !== j ) {
                 for ( k = 0; k < n; k++ ) {
                     var pk = matrix.index( p, k );
                     var jk = matrix.index( j, k );
@@ -112,7 +112,7 @@ phet.math = phet.math || {};
                     if ( i > j ) {
                         result.entries[result.index( i, j )] = this.LU[this.matrix.index( i, j )];
                     }
-                    else if ( i == j ) {
+                    else if ( i === j ) {
                         result.entries[result.index( i, j )] = 1.0;
                     }
                     else {
@@ -155,7 +155,7 @@ phet.math = phet.math || {};
         },
 
         det: function () {
-            if ( this.m != this.n ) {
+            if ( this.m !== this.n ) {
                 throw new Error( "Matrix must be square." );
             }
             var d = this.pivsign;
@@ -167,7 +167,7 @@ phet.math = phet.math || {};
 
         solve: function ( matrix ) {
             var i, j, k;
-            if ( matrix.getRowDimension() != this.m ) {
+            if ( matrix.getRowDimension() !== this.m ) {
                 throw new Error( "Matrix row dimensions must agree." );
             }
             if ( !this.isNonsingular() ) {

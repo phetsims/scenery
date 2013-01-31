@@ -82,7 +82,7 @@ phet.math = phet.math || {};
 
         apply: function ( arrayOrInt ) {
             if ( phet.util.isArray( arrayOrInt ) ) {
-                if ( arrayOrInt.length != this.size() ) {
+                if ( arrayOrInt.length !== this.size() ) {
                     throw new Error( "Permutation length " + this.size() + " not equal to list length " + arrayOrInt.length );
                 }
 

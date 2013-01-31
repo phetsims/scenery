@@ -148,7 +148,7 @@ phet.scene = phet.scene || {};
             state.switchToLayer( layer );
             state.multiLayerRender = false; // don't allow it to switch layers at the start / end nodes
             
-            if( layer.startNode == layer.endNode ) {
+            if( layer.startNode === layer.endNode ) {
                 // the node and all of its descendants can just be rendered
                 var node = layer.startNode;
                 
@@ -185,7 +185,7 @@ phet.scene = phet.scene || {};
             // run through parts that are the same start and end, since everything we want is under here
             for( depth = 0; depth < minLength; depth++ ) {
                 // bail on the first difference
-                if( startPath[depth] != endPath[depth] ) {
+                if( startPath[depth] !== endPath[depth] ) {
                     break;
                 }
                 
@@ -224,7 +224,7 @@ phet.scene = phet.scene || {};
                     return;
                 }
                 
-                // we are now assured that startPath[depth] != endPath[depth], so each child is either high-bounded or low-bounded
+                // we are now assured that startPath[depth] !== endPath[depth], so each child is either high-bounded or low-bounded
                 
                 node.enterState( state );
         
@@ -253,15 +253,15 @@ phet.scene = phet.scene || {};
                             continue;
                         }
                         
-                        // due to the calling conditions, we should be assured that startPath[depth] != endPath[depth]
+                        // due to the calling conditions, we should be assured that startPath[depth] !== endPath[depth]
                         
                         if( !passedLowBound ) {
                             // if we haven't passed the low bound, it MUST exist, and we are either (a) not rendered, or (b) low-bounded
                             
-                            if( startPath[depth] == child ) {
+                            if( startPath[depth] === child ) {
                                 // only recursively render if the switch is "before" the node
-                                if( startPath[depth]._layerBeforeRender == layer ) {
-                                    recursivePartialRender( child, depth + 1, startPath.length != depth, false ); // if it has a low-bound, it can't have a high bound
+                                if( startPath[depth]._layerBeforeRender === layer ) {
+                                    recursivePartialRender( child, depth + 1, startPath.length !== depth, false ); // if it has a low-bound, it can't have a high bound
                                 }
                             
                                 // for later children, we have passed the low bound.
@@ -272,11 +272,11 @@ phet.scene = phet.scene || {};
                             continue;
                         }
                         
-                        if( hasHighBound && endPath[depth] == child ) {
+                        if( hasHighBound && endPath[depth] === child ) {
                             // only recursively render if the switch is "after" the node
-                            if( endPath[depth]._layerAfterRender == layer ) {
+                            if( endPath[depth]._layerAfterRender === layer ) {
                                 // high-bounded here
-                                recursivePartialRender( child, depth + 1, false, endPath.length != depth ); // if it has a high-bound, it can't have a low bound
+                                recursivePartialRender( child, depth + 1, false, endPath.length !== depth ); // if it has a high-bound, it can't have a low bound
                             }
                             
                             // don't render any more children, since we passed the high bound
@@ -291,7 +291,7 @@ phet.scene = phet.scene || {};
                 node.exitState( state );
             }
             
-            recursivePartialRender( startPath[depth-1], depth, startPath.length != depth, endPath.length != depth );
+            recursivePartialRender( startPath[depth-1], depth, startPath.length !== depth, endPath.length !== depth );
             
             // for layer cooldown
             state.finish();
@@ -464,7 +464,7 @@ phet.scene = phet.scene || {};
                 var maxIndex = Math.min( nodePath.length, this.dirtyLayerPath.length );
                 for( var i = 0; i < maxIndex; i++ ) {
                     // cut the dirty layer path off before the first discrepancy
-                    if( nodePath[i] != this.dirtyLayerPath[i] ) {
+                    if( nodePath[i] !== this.dirtyLayerPath[i] ) {
                         this.dirtyLayerPath = _.first( this.dirtyLayerPath, i );
                         break;
                     }

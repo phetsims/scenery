@@ -7,6 +7,11 @@
     
     // adjust with options from http://www.jshint.com/docs/
     var options = {
+        // enforcing options
+        curly: true, // brackets for conditionals
+        eqeqeq: true,
+        
+        // relaxing options
         es5: true, // we use ES5 getters and setters for now
         loopfunc: true // we know how not to shoot ourselves in the foot, and this is useful for _.each
     };

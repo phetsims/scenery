@@ -119,7 +119,7 @@ phet.webgl = phet.webgl || {};
         },
 
         isChild: function ( potentialChild ) {
-            phet.assert( (potentialChild.parent === this ) === (this.children.indexOf( potentialChild ) != -1) );
+            phet.assert( (potentialChild.parent === this ) === (this.children.indexOf( potentialChild ) !== -1) );
             return potentialChild.parent === this;
         },
 

@@ -15,17 +15,17 @@ phet.webgl = phet.webgl || {};
         var str = "";
         var k = shaderScript.firstChild;
         while ( k ) {
-            if ( k.nodeType == 3 ) {
+            if ( k.nodeType === 3 ) {
                 str += k.textContent;
             }
             k = k.nextSibling;
         }
 
         var shader;
-        if ( shaderScript.type == "x-shader/x-fragment" ) {
+        if ( shaderScript.type === "x-shader/x-fragment" ) {
             shader = gl.createShader( gl.FRAGMENT_SHADER );
         }
-        else if ( shaderScript.type == "x-shader/x-vertex" ) {
+        else if ( shaderScript.type === "x-shader/x-vertex" ) {
             shader = gl.createShader( gl.VERTEX_SHADER );
         }
         else {

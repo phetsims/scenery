@@ -100,7 +100,7 @@ phet.math = phet.math || {};
                     if ( i < j ) {
                         result.entries[result.index( i, j )] = this.QR[this.matrix.index( i, j )];
                     }
-                    else if ( i == j ) {
+                    else if ( i === j ) {
                         result.entries[result.index( i, j )] = this.Rdiag[i];
                     }
                     else {
@@ -136,7 +136,7 @@ phet.math = phet.math || {};
         },
 
         solve: function ( matrix ) {
-            if ( matrix.getRowDimension() != this.m ) {
+            if ( matrix.getRowDimension() !== this.m ) {
                 throw new Error( "Matrix row dimensions must agree." );
             }
             if ( !this.isFullRank() ) {

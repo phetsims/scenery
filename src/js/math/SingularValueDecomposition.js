@@ -257,7 +257,7 @@ phet.math = phet.math || {};
             // kase = 4     if e(p-1) is negligible (convergence).
 
             for ( k = p - 2; k >= -1; k-- ) {
-                if ( k == -1 ) {
+                if ( k === -1 ) {
                     break;
                 }
                 if ( abs( e[k] ) <=
@@ -266,26 +266,26 @@ phet.math = phet.math || {};
                     break;
                 }
             }
-            if ( k == p - 2 ) {
+            if ( k === p - 2 ) {
                 kase = 4;
             }
             else {
                 var ks;
                 for ( ks = p - 1; ks >= k; ks-- ) {
-                    if ( ks == k ) {
+                    if ( ks === k ) {
                         break;
                     }
-                    t = (ks != p ? abs( e[ks] ) : 0) +
-                        (ks != k + 1 ? abs( e[ks - 1] ) : 0);
+                    t = (ks !== p ? abs( e[ks] ) : 0) +
+                        (ks !== k + 1 ? abs( e[ks - 1] ) : 0);
                     if ( abs( s[ks] ) <= tiny + eps * t ) {
                         s[ks] = 0.0;
                         break;
                     }
                 }
-                if ( ks == k ) {
+                if ( ks === k ) {
                     kase = 3;
                 }
-                else if ( ks == p - 1 ) {
+                else if ( ks === p - 1 ) {
                     kase = 1;
                 }
                 else {
@@ -310,7 +310,7 @@ phet.math = phet.math || {};
                         cs = s[j] / t;
                         sn = f / t;
                         s[j] = t;
-                        if ( j != k ) {
+                        if ( j !== k ) {
                             f = -sn * e[j - 1];
                             e[j - 1] = cs * e[j - 1];
                         }
@@ -383,7 +383,7 @@ phet.math = phet.math || {};
                         t = hypot( f, g );
                         cs = f / t;
                         sn = g / t;
-                        if ( j != k ) {
+                        if ( j !== k ) {
                             e[j - 1] = t;
                         }
                         f = cs * s[j] + sn * e[j];

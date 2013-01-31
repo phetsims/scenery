@@ -164,63 +164,63 @@ phet.scene = phet.scene || {};
         },
         
         setFillStyle: function( style ) {
-            if( this.fillStyle != style ) {
+            if( this.fillStyle !== style ) {
                 this.fillStyle = style;
                 this.context.fillStyle = style;
             }
         },
         
         setStrokeStyle: function( style ) {
-            if( this.strokeStyle != style ) {
+            if( this.strokeStyle !== style ) {
                 this.strokeStyle = style;
                 this.context.strokeStyle = style;
             }
         },
         
         setLineWidth: function( width ) {
-            if( this.lineWidth != width ) {
+            if( this.lineWidth !== width ) {
                 this.lineWidth = width;
                 this.context.lineWidth = width;
             }
         },
         
         setLineCap: function( cap ) {
-            if( this.lineCap != cap ) {
+            if( this.lineCap !== cap ) {
                 this.lineCap = cap;
                 this.context.lineCap = cap;
             }
         },
         
         setLineJoin: function( join ) {
-            if( this.lineJoin != join ) {
+            if( this.lineJoin !== join ) {
                 this.lineJoin = join;
                 this.context.lineJoin = join;
             }
         },
         
         setFont: function( font ) {
-            if( this.font != font ) {
+            if( this.font !== font ) {
                 this.font = font;
                 this.context.font = font;
             }
         },
         
         setTextAlign: function( textAlign ) {
-            if( this.textAlign != textAlign ) {
+            if( this.textAlign !== textAlign ) {
                 this.textAlign = textAlign;
                 this.context.textAlign = textAlign;
             }
         },
         
         setTextBaseline: function( textBaseline ) {
-            if( this.textBaseline != textBaseline ) {
+            if( this.textBaseline !== textBaseline ) {
                 this.textBaseline = textBaseline;
                 this.context.textBaseline = textBaseline;
             }
         },
         
         setDirection: function( direction ) {
-            if( this.direction != direction ) {
+            if( this.direction !== direction ) {
                 this.direction = direction;
                 this.context.direction = direction;
             }

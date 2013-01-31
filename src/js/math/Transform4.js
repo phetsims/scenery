@@ -78,7 +78,7 @@ phet.math = phet.math || {};
         },
 
         isIdentity: function () {
-            return this.matrix.type == Matrix4.Types.IDENTITY;
+            return this.matrix.type === Matrix4.Types.IDENTITY;
         },
 
         // applies the 2D affine transform part of the transformation

@@ -90,7 +90,7 @@ phet.math = phet.math || {};
         },
         
         isIdentity: function () {
-            return this.matrix.type == Matrix3.Types.IDENTITY;
+            return this.matrix.type === Matrix3.Types.IDENTITY;
         },
 
         /*---------------------------------------------------------------------------*

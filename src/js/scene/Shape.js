@@ -421,7 +421,7 @@ phet.scene = phet.scene || {};
         constructor: LineStyles,
         
         equals: function( other ) {
-            return this.lineWidth == other.lineWidth && this.lineCap == other.lineCap && this.lineJoin == other.lineJoin && this.miterLimit == other.miterLimit;
+            return this.lineWidth === other.lineWidth && this.lineCap === other.lineCap && this.lineJoin === other.lineJoin && this.miterLimit === other.miterLimit;
         }
     };
     
@@ -668,10 +668,10 @@ phet.scene = phet.scene || {};
             }
             
             // check to make sure our point is in our line segment (specifically, in the bounds (start,end], not including the start point so we don't double-count intersections)
-            if( start.x != end.x && ( start.x > end.x ? ( intersection.x >= start.x || intersection.x < end.x ) : ( intersection.x <= start.x || intersection.x > end.x ) ) ) {
+            if( start.x !== end.x && ( start.x > end.x ? ( intersection.x >= start.x || intersection.x < end.x ) : ( intersection.x <= start.x || intersection.x > end.x ) ) ) {
                 return 0;
             }
-            if( start.y != end.y && ( start.y > end.y ? ( intersection.y >= start.y || intersection.y < end.y ) : ( intersection.y <= start.y || intersection.y > end.y ) ) ) {
+            if( start.y !== end.y && ( start.y > end.y ? ( intersection.y >= start.y || intersection.y < end.y ) : ( intersection.y <= start.y || intersection.y > end.y ) ) ) {
                 return 0;
             }
             

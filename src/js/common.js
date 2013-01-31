@@ -162,7 +162,7 @@ phet.util = phet.util || {};
 
     // a list with all elements of the minuend that are not in the subtrahend
     phet.util.subtract = function ( minuend, subtrahend ) {
-        return phet.util.filter( minuend, function ( item ) { return subtrahend.indexOf( item ) == -1;} );
+        return phet.util.filter( minuend, function ( item ) { return subtrahend.indexOf( item ) === -1;} );
     };
 
     // Returns the number of items in the collection for which the predicate returns true
@@ -204,12 +204,12 @@ phet.util = phet.util || {};
     (function() {
         var lastTime = 0;
         var vendors = ['ms', 'moz', 'webkit', 'o'];
-        for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+        for( var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x ) {
             window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
             window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
         }
      
-        if (!window.requestAnimationFrame)
+        if ( !window.requestAnimationFrame ) {
             window.requestAnimationFrame = function(callback, element) {
                 var currTime = new Date().getTime();
                 var timeToCall = Math.max(0, 16 - (currTime - lastTime));
@@ -218,11 +218,13 @@ phet.util = phet.util || {};
                 lastTime = currTime + timeToCall;
                 return id;
             };
+        }
      
-        if (!window.cancelAnimationFrame)
+        if ( !window.cancelAnimationFrame ) {
             window.cancelAnimationFrame = function(id) {
                 clearTimeout(id);
             };
+        }
     }());
 })();
 

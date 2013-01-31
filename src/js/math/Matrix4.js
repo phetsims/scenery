@@ -115,7 +115,7 @@ phet.math = phet.math || {};
                             Types.OTHER );
     };
 
-    // aspect == width / height
+    // aspect === width / height
     Matrix4.gluPerspective = function ( fovYRadians, aspect, zNear, zFar ) {
         var cotangent = Math.cos( fovYRadians ) / Math.sin( fovYRadians );
 
@@ -228,22 +228,22 @@ phet.math = phet.math || {};
                 );
             }
             else {
-                throw new Error( "Matrix could not be inverted, determinant == 0" );
+                throw new Error( "Matrix could not be inverted, determinant === 0" );
             }
         },
 
         timesMatrix: function ( m ) {
             var newType = Types.OTHER;
-            if ( this.type == Types.TRANSLATION_3D && m.type == Types.TRANSLATION_3D ) {
+            if ( this.type === Types.TRANSLATION_3D && m.type === Types.TRANSLATION_3D ) {
                 newType = Types.TRANSLATION_3D;
             }
-            if ( this.type == Types.SCALING && m.type == Types.SCALING ) {
+            if ( this.type === Types.SCALING && m.type === Types.SCALING ) {
                 newType = Types.SCALING;
             }
-            if ( this.type == Types.IDENTITY ) {
+            if ( this.type === Types.IDENTITY ) {
                 newType = m.type;
             }
-            if ( m.type == Types.IDENTITY ) {
+            if ( m.type === Types.IDENTITY ) {
                 newType = this.type;
             }
             return new Matrix4( this.m00() * m.m00() + this.m01() * m.m10() + this.m02() * m.m20() + this.m03() * m.m30(),

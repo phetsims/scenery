@@ -33,7 +33,7 @@ phet.math = phet.math || {};
             this.entries = new Float32Array( size );
 
             if ( phet.util.isArray( filler ) ) {
-                phet.assert( filler.length == size );
+                phet.assert( filler.length === size );
 
                 for ( i = 0; i < size; i++ ) {
                     this.entries[i] = filler[i];
@@ -307,7 +307,7 @@ phet.math = phet.math || {};
             var matrix;
             if ( matrixOrScalar.isMatrix ) {
                 matrix = matrixOrScalar;
-                if ( matrix.m != this.n ) {
+                if ( matrix.m !== this.n ) {
                     throw new Error( "Matrix inner dimensions must agree." );
                 }
                 result = new Matrix( this.m, matrix.n );
@@ -349,7 +349,7 @@ phet.math = phet.math || {};
         },
 
         solve: function ( matrix ) {
-            return (this.m == this.n ? (new phet.math.LUDecomposition( this )).solve( matrix ) :
+            return (this.m === this.n ? (new phet.math.LUDecomposition( this )).solve( matrix ) :
                     (new phet.math.QRDecomposition( this )).solve( matrix ));
         },
 
@@ -382,7 +382,7 @@ phet.math = phet.math || {};
         },
 
         checkMatrixDimensions: function ( matrix ) {
-            if ( matrix.m != this.m || matrix.n != this.n ) {
+            if ( matrix.m !== this.m || matrix.n !== this.n ) {
                 throw new Error( "Matrix dimensions must agree." );
             }
         },
@@ -401,19 +401,19 @@ phet.math = phet.math || {};
 
         // returns a vector that is contained in the specified column
         extractVector2: function ( column ) {
-            phet.assert( this.m == 2 ); // rows should match vector dimension
+            phet.assert( this.m === 2 ); // rows should match vector dimension
             return new phet.math.Vector2( this.get( 0, column ), this.get( 1, column ) );
         },
 
         // returns a vector that is contained in the specified column
         extractVector3: function ( column ) {
-            phet.assert( this.m == 3 ); // rows should match vector dimension
+            phet.assert( this.m === 3 ); // rows should match vector dimension
             return new phet.math.Vector3( this.get( 0, column ), this.get( 1, column ), this.get( 2, column ) );
         },
 
         // returns a vector that is contained in the specified column
         extractVector4: function ( column ) {
-            phet.assert( this.m == 4 ); // rows should match vector dimension
+            phet.assert( this.m === 4 ); // rows should match vector dimension
             return new phet.math.Vector4( this.get( 0, column ), this.get( 1, column ), this.get( 2, column ), this.get( 3, column ) );
         },
 
@@ -424,7 +424,7 @@ phet.math = phet.math || {};
         var result = new Matrix( m, n );
         for ( var i = 0; i < m; i++ ) {
             for ( var j = 0; j < n; j++ ) {
-                result.entries[result.index( i, j )] = (i == j ? 1.0 : 0.0);
+                result.entries[result.index( i, j )] = (i === j ? 1.0 : 0.0);
             }
         }
         return result;
