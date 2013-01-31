@@ -45,8 +45,6 @@
     };
     
     qHint.sendRequest( '../../build/file-list.txt', function( req ) {
-        console.log( req );
-        
         test( 'File list OK', function() {
             equal( req.status, 200 );
         } );
