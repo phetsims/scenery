@@ -63,7 +63,6 @@ Incomplete:
     Node:
         Sub-tree opacity (like setTransparency in Piccolo)
             'transparency', 'opacity', or 'alpha'?
-        Add centerX, centerY as ES5 getters/setters like left/right/top/bottom?
         Canvas fill gradients / patterns
             Can this be abstracted across SVG / WebGL layers also? -- probably WebGL _much_ more efficiently with shaders
         For prepend-flags, set in parameter object instead of boolean flag? (somewhat hard-to-read code)
