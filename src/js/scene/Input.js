@@ -257,7 +257,7 @@ phet.scene = phet.scene || {};
         this.isMouse = true;
         
         this.path = null;
-    };    
+    };
     var Mouse = Input.Mouse;
     Mouse.prototype = _.extend( {}, Finger.prototype, {
         constructor: Mouse,

@@ -39,7 +39,7 @@ phet.scene = phet.scene || {};
         
         // default to a canvas layer type, but this can be changed
         // called here AFTER the root is initialized, so that we set the correct dirtyLayerPath and get a layer rebuild / refresh as necessary
-        this.root.setLayerType( phet.scene.CanvasLayer ); 
+        this.root.setLayerType( phet.scene.CanvasLayer );
         
         // some css hacks (inspired from https://github.com/EightMedia/hammer.js/blob/master/hammer.js)
         (function() {
@@ -203,7 +203,7 @@ phet.scene = phet.scene || {};
             // now, our depth is the index of the first difference between startPath and endPath.
             
             /* Rendering partial contents under this node, with depth indexing into the startPath/endPath.
-             * 
+             *
              * Since we want to render just a single layer (and only nodes inside that layer), we need to handle children in one of three cases:
              * a) outside of bounds (none of child or its descendants in our layer):
              *          don't render it at all
@@ -211,12 +211,12 @@ phet.scene = phet.scene || {};
              *          continue our recursive partial render through this child, but ONLY if the boundary is compatible (low bound <==> beforeRender, high bound <==> afterRender)
              * c) inside of bounds (all of the child and descendants are in our layer):
              *          render it like normally for greater efficiency
-             * 
+             *
              * Our startPath and endPath are the paths in the scene-graph from the root to both the nodes that mark the start and end of our layer.
              * Any node that is rendered must have a path that is essentially "between" these two.
              *
              * Depth is masked as a parameter here from the outside scope.
-             */ 
+             */
             function recursivePartialRender( node, depth, hasLowBound, hasHighBound ) {
                 if( !hasLowBound && !hasHighBound ) {
                     // if there are no bounds restrictions on children, just do a straight rendering
@@ -237,7 +237,7 @@ phet.scene = phet.scene || {};
                     
                     // check to see if we need to filter what children are rendered based on restricted bounds
                     var localRestrictedBounds;
-                    var filterChildren = false; 
+                    var filterChildren = false;
                     if( state.childRestrictedBounds && node.children.length > 1 ) {
                         localRestrictedBounds = node.globalToLocalBounds( state.childRestrictedBounds );
                         

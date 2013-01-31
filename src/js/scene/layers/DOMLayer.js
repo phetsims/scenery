@@ -47,7 +47,6 @@ phet.scene = phet.scene || {};
         
         // called when rendering switches to this layer
         initialize: function( renderState ) {
-            // TODO: initialize transform
             // TODO: clipping
         },
         
@@ -113,7 +112,7 @@ phet.scene = phet.scene || {};
         renderToCanvas: function( canvas, context, delayCounts ) {
             var data = "<svg xmlns='http://www.w3.org/2000/svg' width='" + this.main.width() + "' height='" + this.main.height() + "'>" +
                 "<foreignObject width='100%' height='100%'>" +
-                $( this.div ).html() + 
+                $( this.div ).html() +
                 "</foreignObject></svg>";
             
             var DOMURL = window.URL || window.webkitURL || window;

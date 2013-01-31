@@ -33,7 +33,7 @@ phet.scene = phet.scene || {};
     // var weirdDir = p( Math.PI, 22 / 7 );
     
     phet.scene.Shape = function( pieces, optionalClose ) {
-        // higher-level Canvas-esque drawing commands 
+        // higher-level Canvas-esque drawing commands
         this.pieces = [];
         
         // lower-level piecewise mathematical description using segments
@@ -349,7 +349,7 @@ phet.scene = phet.scene || {};
         
         /*---------------------------------------------------------------------------*
         * Internal subpath computations
-        *----------------------------------------------------------------------------*/        
+        *----------------------------------------------------------------------------*/
         
         ensure: function( point ) {
             if( !this.hasSubpaths() ) {
@@ -373,7 +373,7 @@ phet.scene = phet.scene || {};
     
     /*---------------------------------------------------------------------------*
     * Shape shortcuts
-    *----------------------------------------------------------------------------*/        
+    *----------------------------------------------------------------------------*/
     
     Shape.rectangle = function( x, y, width, height ) {
         return new Shape().rect( x, y, width, height );
@@ -405,7 +405,7 @@ phet.scene = phet.scene || {};
     
     /*---------------------------------------------------------------------------*
     * Line styles used in rendering the shape. Affects the stroked shape
-    *----------------------------------------------------------------------------*/        
+    *----------------------------------------------------------------------------*/
     
     Shape.LineStyles = function( args ) {
         if( args === undefined ) {
@@ -473,7 +473,7 @@ phet.scene = phet.scene || {};
     
     /*---------------------------------------------------------------------------*
     * Pieces
-    *----------------------------------------------------------------------------*/        
+    *----------------------------------------------------------------------------*/
     
     Shape.Piece = {};
     var Piece = Shape.Piece;
@@ -622,7 +622,7 @@ phet.scene = phet.scene || {};
     
     /*---------------------------------------------------------------------------*
     * Segments
-    *----------------------------------------------------------------------------*/        
+    *----------------------------------------------------------------------------*/
     
     Shape.Segment = {};
     var Segment = Shape.Segment;

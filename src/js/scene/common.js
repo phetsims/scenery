@@ -20,7 +20,7 @@ phet.scene = phet.scene || {};
     
     /*---------------------------------------------------------------------------*
     * Slow-but-accurate text bounds
-    *----------------------------------------------------------------------------*/        
+    *----------------------------------------------------------------------------*/
     
     // drawingStyles should include font, textAlign, textBaseline, direction
     // textAlign = 'left', textBaseline = 'alphabetic' and direction = 'ltr' are recommended

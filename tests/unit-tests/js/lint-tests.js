@@ -10,6 +10,17 @@
         // enforcing options
         curly: true, // brackets for conditionals
         eqeqeq: true,
+        immed: true,
+        latedef: true,
+        newcap: true,
+        noarg: true,
+        // noempty: true,
+        nonew: true,
+        // quotmark: 'single',
+        undef: true,
+        // unused: true, // certain layer APIs not used in cases
+        // strict: true,
+        trailing: true,
         
         // relaxing options
         es5: true, // we use ES5 getters and setters for now
@@ -24,6 +35,7 @@
         $: false,
         _: false,
         console: false,
+        clearTimeout: false,
         
         // for DOM.js
         Image: false,

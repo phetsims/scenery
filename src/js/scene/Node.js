@@ -383,7 +383,7 @@ phet.scene = phet.scene || {};
             var alreadyMarked = this._oldPaintMarked;
             while( !alreadyMarked && node.parent !== null ) {
                 node = node.parent;
-                alreadyMarked = node._oldPaintMarked; 
+                alreadyMarked = node._oldPaintMarked;
             }
             
             // we want to not do this marking if possible multiple times for the same sub-tree, so we check flags first
@@ -1027,7 +1027,7 @@ phet.scene = phet.scene || {};
         
         /*---------------------------------------------------------------------------*
         * Coordinate transform methods
-        *----------------------------------------------------------------------------*/        
+        *----------------------------------------------------------------------------*/
         
         // apply this node's transform to the point
         localToParentPoint: function( point ) {
@@ -1102,7 +1102,7 @@ phet.scene = phet.scene || {};
         
         /*---------------------------------------------------------------------------*
         * ES5 get/set
-        *----------------------------------------------------------------------------*/        
+        *----------------------------------------------------------------------------*/
         
         set stroke( value ) { this.setStroke( value ); },
         get stroke() { return this.getStroke(); },
@@ -1123,7 +1123,7 @@ phet.scene = phet.scene || {};
         get lineJoin() { return this.getLineJoin(); },
          
         set layerType( value ) { this.setLayerType( value ); },
-        get layerType() { return this.getLayerType(); }, 
+        get layerType() { return this.getLayerType(); },
         
         set visible( value ) { this.setVisible( value ); },
         get visible() { return this.isVisible(); },
