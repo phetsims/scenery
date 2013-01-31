@@ -57,7 +57,7 @@ phet.scene = phet.scene || {};
         if( optionalClose ) {
             this.addPiece( new Piece.Close() );
         }
-    }
+    };
     var Shape = phet.scene.Shape;
     
     Shape.prototype = {
@@ -164,7 +164,7 @@ phet.scene = phet.scene || {};
                     }
                 }
             } );
-            return wind != 0;
+            return wind !== 0;
         },
         
         intersectsBounds: function( bounds ) {
@@ -220,7 +220,7 @@ phet.scene = phet.scene || {};
                     switch( lineStyles.lineJoin ) {
                         case 'round':
                             throw new Error( 'stroked round lineJoin not implemented .. add arc/arcTo' );
-                            break;
+                            // break;
                         case 'miter':
                             var theta = fromTangent.angleBetween( toTangent.negated() );
                             if( 1 / Math.sin( theta / 2 ) <= lineStyles.miterLimit ) {
@@ -228,9 +228,11 @@ phet.scene = phet.scene || {};
                                 var miterPoint = lineLineIntersection( fromPoint, fromPoint.plus( fromTangent ), toPoint, toPoint.plus( toTangent ) );
                                 shape.addPiece( new Piece.LineTo( miterPoint ) );
                                 shape.addPiece( new Piece.LineTo( toPoint ) );
-                                break;
+                            } else {
+                                // angle too steep, use bevel instead. same as below, but copied for linter
+                                shape.addPiece( new Piece.LineTo( toPoint ) );
                             }
-                            // angle too steep, use bevel instead
+                            break;
                         case 'bevel':
                             shape.addPiece( new Piece.LineTo( toPoint ) );
                             break;
@@ -252,7 +254,7 @@ phet.scene = phet.scene || {};
                         break;
                     case 'round':
                         throw new Error( 'stroked round lineCap not implemented .. add arc/arcTo' );
-                        break;
+                        // break;
                     case 'square':
                         var toLeft = tangent.perpendicular().negated().times( lineWidth / 2 );
                         var toRight = tangent.perpendicular().times( lineWidth / 2 );
@@ -392,7 +394,7 @@ phet.scene = phet.scene || {};
         return new Shape( _.map( _.range( sides ), function( k ) {
             var theta = 2 * Math.PI * k / sides;
             if( first ) {
-                first = false
+                first = false;
                 // first segment should be a moveTo
                 return new Piece.MoveTo( p( radius * Math.cos( theta ), radius * Math.sin( theta ) ) );
             } else {
@@ -409,11 +411,11 @@ phet.scene = phet.scene || {};
         if( args === undefined ) {
             args = {};
         }
-        this.lineWidth = args.lineWidth !== undefined ? args.lineWidth : 1,
-        this.lineCap = args.lineCap !== undefined ? args.lineCap : 'butt', // butt, round, square
-        this.lineJoin = args.lineJoin !== undefined ? args.lineJoin : 'miter', // miter, round, bevel
-        this.miterLimit = args.miterLimit !== undefined ? args.miterLimit : 10 // see https://svgwg.org/svg2-draft/painting.html for miterLimit computations
-    }
+        this.lineWidth = args.lineWidth !== undefined ? args.lineWidth : 1;
+        this.lineCap = args.lineCap !== undefined ? args.lineCap : 'butt'; // butt, round, square
+        this.lineJoin = args.lineJoin !== undefined ? args.lineJoin : 'miter'; // miter, round, bevel
+        this.miterLimit = args.miterLimit !== undefined ? args.miterLimit : 10; // see https://svgwg.org/svg2-draft/painting.html for miterLimit computations
+    };
     var LineStyles = Shape.LineStyles;
     LineStyles.prototype = {
         constructor: LineStyles,
@@ -689,6 +691,8 @@ phet.scene = phet.scene || {};
         this.control = control;
         this.end = end;
         
+        var t;
+        
         // allows us to skip unnecessary computation in the subdivision steps
         if( skipComputations ) {
             return;
@@ -710,7 +714,7 @@ phet.scene = phet.scene || {};
         // compute x and y where the derivative is 0, so we can include this in the bounds
         var divisorX = 2 * ( end.x - 2 * control.x + start.x );
         if( divisorX !== 0 ) {
-            var t = -2 * ( control.x - start.x ) / divisorX;
+            t = -2 * ( control.x - start.x ) / divisorX;
             
             if( t > 0 && t < 1 ) {
                 this.bounds = this.bounds.withPoint( this.positionAt( t ) );
@@ -718,7 +722,7 @@ phet.scene = phet.scene || {};
         }
         var divisorY = 2 * ( end.y - 2 * control.y + start.y );
         if( divisorY !== 0 ) {
-            var t = -2 * ( control.y - start.y ) / divisorY;
+            t = -2 * ( control.y - start.y ) / divisorY;
             
             if( t > 0 && t < 1 ) {
                 this.bounds = this.bounds.withPoint( this.positionAt( t ) );

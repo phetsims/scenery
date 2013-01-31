@@ -135,11 +135,11 @@ phet.scene = phet.scene || {};
         if( args === undefined ) {
             args = {};
         }
-        this.font = args.font !== undefined ? args.font : '10px sans-serif',
-        this.textAlign = args.textAlign !== undefined ? args.textAlign : 'start', // start, end, left, right, center
-        this.textBaseline = args.textBaseline !== undefined ? args.textBaseline : 'alphabetic', // top, hanging, middle, alphabetic, ideographic, bottom
-        this.direction = args.direction !== undefined ? args.direction : 'ltr' // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
-    }
+        this.font = args.font !== undefined ? args.font : '10px sans-serif';
+        this.textAlign = args.textAlign !== undefined ? args.textAlign : 'start'; // start, end, left, right, center
+        this.textBaseline = args.textBaseline !== undefined ? args.textBaseline : 'alphabetic'; // top, hanging, middle, alphabetic, ideographic, bottom
+        this.direction = args.direction !== undefined ? args.direction : 'ltr'; // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
+    };
 })();
 
 

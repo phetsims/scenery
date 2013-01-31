@@ -53,7 +53,7 @@ phet.scene = phet.scene || {};
     
     phet.scene.DebugContext = function( context ) {
         this._context = context;
-    }
+    };
     var DebugContext = phet.scene.DebugContext;
     DebugContext.prototype = {
         constructor: DebugContext,

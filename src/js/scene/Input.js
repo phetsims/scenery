@@ -24,7 +24,7 @@ phet.scene = phet.scene || {};
         this.mouse = new Mouse();
         
         this.fingers = [ this.mouse ];
-    }
+    };
     
     var Input = phet.scene.Input;
     
@@ -160,6 +160,16 @@ phet.scene = phet.scene || {};
         // targets should be a subpath from a node to an ancestor
         dispatchEvent: function( targets, type, finger, event ) {
             // first run through the finger's listeners to see if one of them will handle the event
+            this.dispatchToFinger( type, finger, event );
+            
+            // if not yet handled, run through the list of targets in order to see if one of them will handle the event
+            this.dispatchToTargets( targets, type, finger, event );
+            
+            // if not yet handled, run through the scene's listeners
+            this.dispatchToScene( type, finger, event );
+        },
+        
+        dispatchToFinger: function( type, finger, event ) {
             var fingerListeners = finger.listeners.slice( 0 ); // defensive copy
             for( var i = 0; i < fingerListeners.length; i++ ) {
                 var listener = fingerListeners[i];
@@ -173,8 +183,9 @@ phet.scene = phet.scene || {};
                     }
                 }
             }
-            
-            // if not yet handled, run through the list of targets in order to see if one of them will handle the event
+        },
+        
+        dispatchToTargets: function( targets, type, finger, event ) {
             for( var i = targets.length - 1; i >= 0; i-- ) {
                 var target = targets[i];
                 
@@ -193,8 +204,9 @@ phet.scene = phet.scene || {};
                     }
                 }
             }
-            
-            // if not yet handled, run through the scene's listeners
+        },
+        
+        dispatchToScene: function( type, finger, event ) {
             var sceneListeners = this.scene.getInputListeners();
             for( var i = 0; i < sceneListeners.length; i++ ) {
                 var listener = sceneListeners[i];
@@ -208,7 +220,7 @@ phet.scene = phet.scene || {};
                     }
                 }
             }
-        }
+        },
     };
     
     Input.Finger = function() {

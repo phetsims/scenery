@@ -29,7 +29,7 @@ phet.scene = phet.scene || {};
         
         // when non-null, children not intersecting the global bounds here may not be rendered for efficiency
         this.childRestrictedBounds = null;
-    }
+    };
 
     var RenderState = phet.scene.RenderState;
 

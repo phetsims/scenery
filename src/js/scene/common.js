@@ -49,7 +49,7 @@ phet.scene = phet.scene || {};
         for( var x = 0; x < resolution; x++ ) {
             for( var y = 0; y < resolution; y++ ) {
                 var offset = 4 * ( y * resolution + x );
-                if( imageData.data[offset] != 0 || imageData.data[offset+1] != 0 || imageData.data[offset+2] != 0 || imageData.data[offset+3] != 0 ) {
+                if( imageData.data[offset] !== 0 || imageData.data[offset+1] !== 0 || imageData.data[offset+2] !== 0 || imageData.data[offset+3] !== 0 ) {
                     dirtyX[x] = true;
                     dirtyY[y] = true;
                 }
@@ -163,14 +163,14 @@ phet.scene = phet.scene || {};
         minBounds = minBounds.union( coarseBounds.minBounds );
         maxBounds = maxBounds.intersection( coarseBounds.maxBounds );
         
-        var tempMin, tempMax;
+        var tempMin, tempMax, refinedBounds;
         
         // minX
         tempMin = maxBounds.minY;
         tempMax = maxBounds.maxY;
         while( isFinite( minBounds.minX ) && isFinite( maxBounds.minX ) && Math.abs( minBounds.minX - maxBounds.minX ) > precision ) {
             // use maximum bounds except for the x direction, so we don't miss things that we are looking for
-            var refinedBounds = scan( idealTransform( new Bounds2( maxBounds.minX, tempMin, minBounds.minX, tempMax ) ) );
+            refinedBounds = scan( idealTransform( new Bounds2( maxBounds.minX, tempMin, minBounds.minX, tempMax ) ) );
             
             if( minBounds.minX <= refinedBounds.minBounds.minX && maxBounds.minX >= refinedBounds.maxBounds.minX ) {
                 // sanity check - break out of an infinite loop!
@@ -193,7 +193,7 @@ phet.scene = phet.scene || {};
         tempMax = maxBounds.maxY;
         while( isFinite( minBounds.maxX ) && isFinite( maxBounds.maxX ) && Math.abs( minBounds.maxX - maxBounds.maxX ) > precision ) {
             // use maximum bounds except for the x direction, so we don't miss things that we are looking for
-            var refinedBounds = scan( idealTransform( new Bounds2( minBounds.maxX, tempMin, maxBounds.maxX, tempMax ) ) );
+            refinedBounds = scan( idealTransform( new Bounds2( minBounds.maxX, tempMin, maxBounds.maxX, tempMax ) ) );
             
             if( minBounds.maxX >= refinedBounds.minBounds.maxX && maxBounds.maxX <= refinedBounds.maxBounds.maxX ) {
                 // sanity check - break out of an infinite loop!
@@ -214,7 +214,7 @@ phet.scene = phet.scene || {};
         tempMax = maxBounds.maxX;
         while( isFinite( minBounds.minY ) && isFinite( maxBounds.minY ) && Math.abs( minBounds.minY - maxBounds.minY ) > precision ) {
             // use maximum bounds except for the y direction, so we don't miss things that we are looking for
-            var refinedBounds = scan( idealTransform( new Bounds2( tempMin, maxBounds.minY, tempMax, minBounds.minY ) ) );
+            refinedBounds = scan( idealTransform( new Bounds2( tempMin, maxBounds.minY, tempMax, minBounds.minY ) ) );
             
             if( minBounds.minY <= refinedBounds.minBounds.minY && maxBounds.minY >= refinedBounds.maxBounds.minY ) {
                 // sanity check - break out of an infinite loop!
@@ -235,7 +235,7 @@ phet.scene = phet.scene || {};
         tempMax = maxBounds.maxX;
         while( isFinite( minBounds.maxY ) && isFinite( maxBounds.maxY ) && Math.abs( minBounds.maxY - maxBounds.maxY ) > precision ) {
             // use maximum bounds except for the y direction, so we don't miss things that we are looking for
-            var refinedBounds = scan( idealTransform( new Bounds2( tempMin, minBounds.maxY, tempMax, maxBounds.maxY ) ) );
+            refinedBounds = scan( idealTransform( new Bounds2( tempMin, minBounds.maxY, tempMax, maxBounds.maxY ) ) );
             
             if( minBounds.maxY >= refinedBounds.minBounds.maxY && maxBounds.maxY <= refinedBounds.maxBounds.maxY ) {
                 // sanity check - break out of an infinite loop!

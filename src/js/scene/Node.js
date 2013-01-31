@@ -72,7 +72,7 @@ phet.scene = phet.scene || {};
         if( params ) {
             this.mutate( params );
         }
-    }
+    };
     
     var Node = phet.scene.Node;
     var Matrix3 = phet.math.Matrix3;
@@ -159,7 +159,7 @@ phet.scene = phet.scene || {};
             // keep _hasLayerBelow consistent
             if( node._hasLayerBelow || node.isLayerRoot() ) {
                 var ancestor = this;
-                while( ancestor != null && !ancestor._hasLayerBelow ) {
+                while( ancestor !== null && !ancestor._hasLayerBelow ) {
                     ancestor._hasLayerBelow = true;
                     ancestor = ancestor.parent;
                 }
@@ -200,7 +200,7 @@ phet.scene = phet.scene || {};
                 
                 // walk up the tree removing _hasLayerBelow flags until one is still set
                 var ancestor = this;
-                while( ancestor != null ) {
+                while( ancestor !== null ) {
                     ancestor._hasLayerBelow = _.some( ancestor.children, function( child ) { return child._hasLayerBelow; } );
                     if( ancestor._hasLayerBelow ) {
                         break;
@@ -218,7 +218,7 @@ phet.scene = phet.scene || {};
                 
                 // keep _hasLayerBelow consistent
                 var node = this.parent;
-                while( node != null ) {
+                while( node !== null ) {
                     node._hasLayerBelow = true;
                     node = node.parent;
                 }
@@ -240,6 +240,8 @@ phet.scene = phet.scene || {};
         
         // ensure that cached bounds stored on this node (and all children) are accurate
         validateBounds: function() {
+            var that = this;
+            
             if( this._selfBoundsDirty ) {
                 this._selfBoundsDirty = false;
                 
@@ -256,7 +258,7 @@ phet.scene = phet.scene || {};
                 
                 // and recompute our _childBounds
                 this._childBounds = Bounds2.NOTHING;
-                var that = this;
+                
                 _.each( this.children, function( child ) {
                     that._childBounds = that._childBounds.union( child._bounds );
                 } );
@@ -269,14 +271,12 @@ phet.scene = phet.scene || {};
             if( this._boundsDirty ) {
                 var oldBounds = this._bounds;
                 
-                var that = this;
-                
                 var newBounds = this.localToParentBounds( this._selfBounds ).union( that.localToParentBounds( this._childBounds ) );
                 
                 if( !newBounds.equals( oldBounds ) ) {
                     this._bounds = newBounds;
                     
-                    if( this.parent != null ) {
+                    if( this.parent !== null ) {
                         this.parent.invalidateBounds();
                     }
                     // this.markDirtyRegion( this.parentToLocalBounds( oldBounds ) );
@@ -312,7 +312,7 @@ phet.scene = phet.scene || {};
             
             // and set flags for all ancestors
             var node = this.parent;
-            while( node != null && !node._childBoundsDirty ) {
+            while( node !== null && !node._childBoundsDirty ) {
                 node._childBoundsDirty = true;
                 node = node.parent;
             }
@@ -324,7 +324,7 @@ phet.scene = phet.scene || {};
             
             // and set flags for all ancestors (but bail if already marked, since this guarantees lower nodes will be marked)
             var node = this.parent;
-            while( node != null && !node._childPaintDirty ) {
+            while( node !== null && !node._childPaintDirty ) {
                 node._childPaintDirty = true;
                 node = node.parent;
             }
@@ -381,7 +381,7 @@ phet.scene = phet.scene || {};
         markOldPaint: function( justSelf ) {
             var node = this;
             var alreadyMarked = this._oldPaintMarked;
-            while( !alreadyMarked && node.parent != null ) {
+            while( !alreadyMarked && node.parent !== null ) {
                 node = node.parent;
                 alreadyMarked = node._oldPaintMarked; 
             }
@@ -404,7 +404,7 @@ phet.scene = phet.scene || {};
         
         // does this node have an associated layerType (are the contents of this node rendered separately from its ancestors)
         isLayerRoot: function() {
-            return this._layerType != null;
+            return this._layerType !== null;
         },
         
         // the first layer associated with this node (can be multiple layers if children of this node are also layer roots)
@@ -433,13 +433,13 @@ phet.scene = phet.scene || {};
         findDescendantLayers: function() {
             var firstLayer = this.findLayer();
             
-            if( firstLayer == null ) {
+            if( firstLayer === null ) {
                 return [];
             }
             
             // run a node out to the last child until we reach a leaf, to find the last layer we will render to in this subtree
             var node = this;
-            while( node.children.length != 0 ) {
+            while( node.children.length !== 0 ) {
                 node = _.last( node.children );
             }
             var lastLayer = node.findLayer();
@@ -447,7 +447,7 @@ phet.scene = phet.scene || {};
             // collect all layers between the first and last layers
             var layers = [firstLayer];
             var layer = firstLayer;
-            while( layer != lastLayer && layer.nextLayer != null ) {
+            while( layer != lastLayer && layer.nextLayer !== null ) {
                 layer = layer.nextLayer;
                 layers.push( layer );
             }
@@ -547,15 +547,15 @@ phet.scene = phet.scene || {};
         },
         
         hasShape: function() {
-            return this._shape != null;
+            return this._shape !== null;
         },
         
         hasFill: function() {
-            return this._fill != null;
+            return this._fill !== null;
         },
         
         hasStroke: function() {
-            return this._stroke != null;
+            return this._stroke !== null;
         },
         
         hasParent: function() {
@@ -591,7 +591,7 @@ phet.scene = phet.scene || {};
             var result = [];
             var node = this;
             
-            while( node != null ) {
+            while( node !== null ) {
                 result.unshift( node );
                 node = node.parent;
             }
@@ -602,7 +602,7 @@ phet.scene = phet.scene || {};
         // node that would be rendered previously, before this node
         getPreviousRenderedNode: function() {
             // we are the root (or base of a subtree)
-            if( this.parent == null ) {
+            if( this.parent === null ) {
                 return null;
             }
             var index = _.indexOf( this.parent.children, this );
@@ -621,7 +621,7 @@ phet.scene = phet.scene || {};
         // node that would be rendered next, after it's self AND all children (ignores visibility). if this node has a next sibling, it will be returned
         getNextRenderedNode: function() {
             var node = this.parent;
-            while( node != null ) {
+            while( node !== null ) {
                 var index = _.indexOf( node.children, this );
                 if( index + 1 < node.children.length ) {
                     return node.children[index + 1];
@@ -635,7 +635,7 @@ phet.scene = phet.scene || {};
         // the layer that would be in the render state before this node and its children are rendered, and before _layerBeforeRender
         getLayerBeforeNodeRendered: function() {
             if( this._layerBeforeRender ) {
-                if( this.parent == null ) {
+                if( this.parent === null ) {
                     return this._layerBeforeRender;
                 } else {
                     var index = _.indexOf( this.parent.children, this );
@@ -1050,7 +1050,7 @@ phet.scene = phet.scene || {};
         // apply this node's transform (and then all of its parents' transforms) to the point
         localToGlobalPoint: function( point ) {
             var node = this;
-            while( node != null ) {
+            while( node !== null ) {
                 point = node.transform.transformPosition2( point );
                 node = node.parent;
             }
@@ -1059,7 +1059,7 @@ phet.scene = phet.scene || {};
         
         localToGlobalBounds: function( bounds ) {
             var node = this;
-            while( node != null ) {
+            while( node !== null ) {
                 bounds = node.transform.transformBounds2( bounds );
                 node = node.parent;
             }
@@ -1071,7 +1071,7 @@ phet.scene = phet.scene || {};
             
             // we need to apply the transformations in the reverse order, so we temporarily store them
             var transforms = [];
-            while( node != null ) {
+            while( node !== null ) {
                 transforms.push( node.transform );
                 node = node.parent;
             }
@@ -1088,7 +1088,7 @@ phet.scene = phet.scene || {};
             
             // we need to apply the transformations in the reverse order, so we temporarily store them
             var transforms = [];
-            while( node != null ) {
+            while( node !== null ) {
                 transforms.push( node.transform );
                 node = node.parent;
             }

@@ -6,11 +6,24 @@
     module( 'JSHint' );
     
     // adjust with options from http://www.jshint.com/docs/
-    var options = {};
+    var options = {
+        es5: true, // we use ES5 getters and setters for now
+        loopfunc: true // we know how not to shoot ourselves in the foot, and this is useful for _.each
+    };
+    
     var globals = {
         document: false,
         Uint16Array: false,
         Uint32Array: false,
+        window: false,
+        $: false,
+        _: false,
+        console: false,
+        
+        // for DOM.js
+        Image: false,
+        Blob: false,
+        
         Float32Array: true // we actually polyfill this, so allow it to be set
     };
     

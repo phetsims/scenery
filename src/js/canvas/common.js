@@ -33,5 +33,5 @@ phet.canvas = phet.canvas || {};
             }
         }
         return 1;
-    }
+    };
 })();

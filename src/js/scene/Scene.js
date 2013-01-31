@@ -58,7 +58,7 @@ phet.scene = phet.scene || {};
                 } );
             } );
         })();
-    }
+    };
 
     var Scene = phet.scene.Scene;
     
@@ -92,7 +92,7 @@ phet.scene = phet.scene || {};
         constructor: Scene,
         
         renderScene: function() {
-            phet.assert( this.root.parent == null );
+            phet.assert( this.root.parent === null );
             phet.assert( this.root.isLayerRoot() );
             
             // validating bounds, similar to Piccolo2d
@@ -110,7 +110,7 @@ phet.scene = phet.scene || {};
         },
         
         updateScene: function( args ) {
-            phet.assert( this.root.parent == null );
+            phet.assert( this.root.parent === null );
             phet.assert( this.root.isLayerRoot() );
             
             // validating bounds, similar to Piccolo2d
@@ -242,7 +242,7 @@ phet.scene = phet.scene || {};
                         localRestrictedBounds = node.globalToLocalBounds( state.childRestrictedBounds );
                         
                         // don't filter if all children will be inside the bounds
-                        filterChildren = !localRestrictedBounds.containsBounds( node.parentToLocalBounds( node._bounds ) )
+                        filterChildren = !localRestrictedBounds.containsBounds( node.parentToLocalBounds( node._bounds ) );
                     }
                     
                     // uses a classic for loop so we can bail out early
@@ -316,8 +316,8 @@ phet.scene = phet.scene || {};
         },
         
         // handles creation and adds it to our internal list
-        createLayer: function( constructor, args ) {
-            var layer = new constructor( args );
+        createLayer: function( Constructor, args ) {
+            var layer = new Constructor( args );
             this.layers.push( layer );
             return layer;
         },
@@ -333,7 +333,7 @@ phet.scene = phet.scene || {};
         // TODO: add flags for this to happen, and call during renderFull. set flags on necessary functions
         rebuildLayers: function() {
             // verify that this node is the effective root
-            phet.assert( this.root.parent == null );
+            phet.assert( this.root.parent === null );
             
             // root needs to contain a layer type reference
             phet.assert( this.root.isLayerRoot() );
@@ -379,7 +379,7 @@ phet.scene = phet.scene || {};
             
             // for handling layers in depth-first fashion
             function recursiveRebuild( node, baseLayerType ) {
-                var hasLayer = node._layerType != null;
+                var hasLayer = node._layerType !== null;
                 if( !hasLayer ) {
                     // sanity checks, in case a layerType was removed
                     node._layerBeforeRender = null;
@@ -614,6 +614,8 @@ phet.scene = phet.scene || {};
         },
         
         resizeOnWindowResize: function() {
+            var scene = this;
+            
             var resizer = function () {
                 scene.resize( window.innerWidth, window.innerHeight );
             };

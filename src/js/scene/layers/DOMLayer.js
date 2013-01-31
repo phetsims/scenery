@@ -116,7 +116,7 @@ phet.scene = phet.scene || {};
                 $( this.div ).html() + 
                 "</foreignObject></svg>";
             
-            var DOMURL = self.URL || self.webkitURL || self;
+            var DOMURL = window.URL || window.webkitURL || window;
             var img = new Image();
             var svg = new Blob( [ data ] , { type: "image/svg+xml;charset=utf-8" } );
             var url = DOMURL.createObjectURL( svg );
