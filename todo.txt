@@ -13,6 +13,8 @@ Bugs:
 Questions / Open Topics:
     Re-evaluate ES5 getter/setter
     
+    https://travis-ci.org/ for continuous integration?
+    
     Event handling for DOM events, etc.
     Persistent (DOM,SVG) painting and updates for nodes
     JSDoc?
@@ -82,9 +84,7 @@ Incomplete:
         refreshLayers() implementation (currently rebuilds all layers, but should be optimized so it doesn't need to redraw as much)
         Foundation for multiple view implementations
     Build:
-        Static analysis - linter (add into dev tools?)
-            * gjslint? https://developers.google.com/closure/utilities/docs/linter_howto
-            * JSHint recommended
+        Add JSHint into Sublime Text with plugin?
     Misc:
         Vet recursive bounds code against empty area
         License on files
