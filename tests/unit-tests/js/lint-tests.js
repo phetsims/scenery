@@ -20,7 +20,7 @@
         
         _.each( filenames, function( filename ) {
             if( filename ) {
-                qHint( filename, '../../' + filename, options, globals );
+                qHint( filename, '../../' + filename + '?random=' + Math.random().toFixed( 20 ), options, globals );
             }
         } );
     } );
