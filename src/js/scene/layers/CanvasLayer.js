@@ -34,6 +34,10 @@ phet.scene = phet.scene || {};
         this.context = phet.canvas.initCanvas( canvas );
         this.scene = args.scene;
         
+        // workaround for Chrome miterLimit bug
+        this.context.miterLimit = 20;
+        this.context.miterLimit = 10;
+        
         this.isCanvasLayer = true;
         
         // initialize to fully dirty so we draw everything the first time
