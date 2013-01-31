@@ -1,7 +1,7 @@
 
 
 Bugs:
-    Browser bugs?:
+    Browser bugs? (get Canary / Aurora):
         miterLimit off in Chrome 24.0.1312.52 m
             SVG miterLimit calculation in https://svgwg.org/svg2-draft/painting.html
             Canvas spec note at http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#trace-a-path
@@ -11,19 +11,28 @@ Bugs:
     * for canvas, create a drawing function that exhibits all differences?
 
 Questions / Open Topics:
+    Re-evaluate ES5 getter/setter
+    
     Event handling for DOM events, etc.
     Persistent (DOM,SVG) painting and updates for nodes
     JSDoc?
     
     Something like _.extend that will work on ES5 setter/getter pairs in the future? Maybe $.extend?
     Should enter / exit events be fired before / after touch up/down events, or never?
+        Follow DOM convention
+        Add click event
     Name? Scenery? Artist names?
     
     Packing everything into 1 HTML file -- is it possible with data URLs? If there are size limits, can we split images/audio and recombine?
 
 Next:
     * More documentation
+    * Switch underscore.js to LoDash? see http://lodash.com/
+    * Switch to jQuery 2?
+    * Examine Raphael JS for SVG support and code
+    * Try switching off of "strict mode" for IE9 performance (check)
     * Event dispatch
+        * Examine Kinect event system, delegate events, pointer events spec, jQuery .on with bind / capture
         * Add pickable flag?
         * For up/down events, is enter/exit necessary? -- see Question above
         * Freeze event handlers, a la the DOM 3 Events spec? Or copy Piccolo?
@@ -34,6 +43,7 @@ Next:
     * DOM nodes
         * Handle correct layering of DOM nodes inside a layer, etc.
         * How to get the size before adding to the document tree? Impossible?
+            * Document fragments (test this)
     * Events
         * Investigate hit testing against DOM nodes
     * IE9 Performance
@@ -43,6 +53,7 @@ Next:
         see http://www.paciellogroup.com/blog/2011/12/html5-canvas-accessibility-discussions-2009-2011/
     * WebGL Layer (we can get even faster rendering for shapes here, if it exists)
     * Benchmarks using http://benchmarkjs.com/
+    * Modularization if possible (extract out math, others)
 
 Incomplete:
     Node:
@@ -73,6 +84,7 @@ Incomplete:
     Build:
         Static analysis - linter (add into dev tools?)
             * gjslint? https://developers.google.com/closure/utilities/docs/linter_howto
+            * JSHint recommended
     Misc:
         Vet recursive bounds code against empty area
         License on files
