@@ -34,7 +34,6 @@ Next:
     * Switch underscore.js to LoDash? see http://lodash.com/
     * Switch to jQuery 2?
     * Examine Raphael JS for SVG support and code
-    * Try switching off of "strict mode" for IE9 performance (check)
     * Event dispatch
         * Examine Kinect event system, delegate events, pointer events spec, jQuery .on with bind / capture
         * Add pickable flag?
@@ -53,6 +52,7 @@ Next:
     * IE9 Performance
         * Get DebugContext to work with Easel for performance comparison?
             * Or just test Scene vs Custom here ... huge performance drop
+        * "strict mode" removal wasn't effective
     * Accessibility / shadow DOM
         see http://www.paciellogroup.com/blog/2011/12/html5-canvas-accessibility-discussions-2009-2011/
     * WebGL Layer (we can get even faster rendering for shapes here, if it exists)
