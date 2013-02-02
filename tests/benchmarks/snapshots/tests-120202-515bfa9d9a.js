@@ -3,11 +3,14 @@
     
     var main = $( '#main' );
     
-    sceneBench( 'Fast On Current', function( deferred ) {
-        var f = 1;
-        for( var i = 1; i < 100; i++ ) {
-            f = f * i;
-        }
+    sceneBench( 'Fast On Current', function( deferrer ) {
+        var arb = deferrer;
+        setTimeout( function() {
+            arb.resolve();
+        }, 50 );
+    } );
+    
+    sceneBench( 'Slow On Current', function( deferred ) {
         deferred.resolve();
     } );
     

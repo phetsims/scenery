@@ -26,7 +26,9 @@
         var bench = new Benchmark( name, fn, {
             defer: true,
             
-            minTime: 20,
+            maxTime: 60,
+            
+            delay: 0.01,
             
             onCycle: function( event ) {
                 $( '#main' ).empty();
@@ -137,7 +139,7 @@
                         var testHz = test.hz;
                         tr.append( progressBar( currentHz, testHz ) );
                         tr.append( $( document.createElement( 'td' ) ).text( ( testHz / currentHz ).toFixed( 3 ) ) );
-                        tr.append( $( document.createElement( 'td' ) ).text( testHz.toFixed( 1 ) ) );
+                        tr.append( $( document.createElement( 'td' ) ).text( testHz.toFixed( 3 ) ) );
                     } else {
                         tr.append( document.createElement( 'td' ) );
                         tr.append( document.createElement( 'td' ) );
@@ -152,8 +154,34 @@
     
     nextVersion();
     
-    // loadScript( '../../phet-scene-min.js', function() {
-    //     console.log( new phet.scene.Node() );
-    //     loadScript( 'js/current.js', function() {} );
+    // window.bencher = function( name, fn ) {
+    //     var bench = new Benchmark( name, fn, {
+    //         defer: true,
+            
+    //         minTime: 20,
+            
+    //         onCycle: function( event ) {
+    //             $( '#main' ).empty();
+    //         },
+            
+    //         onComplete: function( event ) {
+    //             console.log( event );
+    //         }
+    //     } );
+        
+    //     bench.run( {
+    //         async: true
+    //     } );
+    // };
+    
+    // bencher( 'fast', function( deferrer ) {
+    //     deferrer.resolve();
+    // } );
+    
+    // bencher( 'slow', function( deferrer ) {
+    //     var arb = deferrer;
+    //     setTimeout( function() {
+    //         arb.resolve();
+    //     }, 500 );
     // } );
 })();

@@ -74,6 +74,7 @@ Incomplete:
         Don't send mark updates on invisible layers? Visibility change causes repaint?
         General optimization and organization so we can extract "self" from child rendering bounds, what is repainted, etc. better.
     Shapes:
+        Finiteness checks
         Quadratic curve offsets need implementation improvement (32 sub-quadratics is too costly)
         Not implemented: arc, arcTo, ellipse, cubic bezier
         Features not implemented: precise intersection with bounding box (not just intersection of bounds)
@@ -83,6 +84,7 @@ Incomplete:
     Text:
         Handling multi-line strings
         SVG / WebGL / DOM options
+        Beware: miterLimit and joins seem to change stroking of text (if the bounds of that is ever to be included).
     Scene:
         refreshLayers() implementation (currently rebuilds all layers, but should be optimized so it doesn't need to redraw as much)
         Foundation for multiple view implementations
