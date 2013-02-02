@@ -4,6 +4,10 @@
     var main = $( '#main' );
     
     sceneBench( 'Fast On Current', function( deferred ) {
+        var f = 1;
+        for( var i = 1; i < 100; i++ ) {
+            f = f * i;
+        }
         deferred.resolve();
     } );
     
