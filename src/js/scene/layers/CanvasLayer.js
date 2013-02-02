@@ -35,8 +35,8 @@ phet.scene = phet.scene || {};
         this.scene = args.scene;
         
         // workaround for Chrome miterLimit bug
-        // this.context.miterLimit = 20;
-        // this.context.miterLimit = 10;
+        this.context.miterLimit = 20;
+        this.context.miterLimit = 10;
         
         this.isCanvasLayer = true;
         
