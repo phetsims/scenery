@@ -30,6 +30,8 @@ Questions / Open Topics:
     Packing everything into 1 HTML file -- is it possible with data URLs? If there are size limits, can we split images/audio and recombine?
 
 Next:
+    * Layers: preferredLayerType -- layer factories instead of types?
+    * Polyfills into own namespace
     * More documentation
     * Switch underscore.js to LoDash? see http://lodash.com/
     * Switch to jQuery 2?
