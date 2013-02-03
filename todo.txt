@@ -13,118 +13,143 @@ Bugs:
         [FIXED IN UPDATE] bevel instead of miter on the "close" part of the hex: Firefox 18.0.1
         [PENDING MAJOR WORK] Chrome 24.0.1312.52 m bug in zooming fillText() -- mobile Safari OK (maybe different from webkit, since it's not antialiased?)
         [TODO] Report rgba alpha precision "bug" - spec says rgba(255,255,255,0.1112049520495820495802495) should not lose any digits on inspection after setting on context
-    * for canvas, create a drawing function that exhibits all differences?
+    For canvas, create a drawing function that exhibits all differences?
 
 Questions for SB (or others):
     Way to side-by-side install Firefox and Aurora?
+    Preferred mixin styles?
 
-General
+Questions for team:
+    Re-evaluate ES5 getter/setter
+    https://travis-ci.org/ for continuous integration?
+    Should enter / exit events be fired before / after touch up/down events?
+        Note: check DOM convention?
+    Name? Scenery? Artist names?
+
+General:
+    DOM events => benchmarks => create Path => layer changes
     Documentation and Examples (always an item)
     Take extension mechanism from Backbone.js: https://github.com/documentcloud/backbone/blob/master/backbone.js#L1471-L1502
 
-Benchmarks
+Benchmarks: (***)
     If we can, handle both synchronous and asynchronous tests. Maybe this is possible to wrap with a deferred so that we can handle both without specifying a flag?
         Consider forking Benchmark.js and submitting a pull request if this is easy
         Reason for this is the issue where in asynchronous tests, immediate calls to deferred.resolve() do not allow us to measure performance if it is slow
             See http://jsperf.com/asynchronous-limit
         Ask John David Dalton maybe?
+        Synchronous: for checking phet-scene overhead
+        Asynchronous - requestAnimationFrame loops
+            We need to verify that these tests are fully taxing the system (maybe 20% less FPS than an empty loop in requestAnimationFrame?)
     Consider using Local Storage to show previous results?
+    Benchmarks:
+        Examine subclass penalty for Shape in Path instead of Node
 
-Libraries
-    Switch to LoDash (http://lodash.com), main build (not underscore compatibility)
+Layers:
+    Each node can have acceptable layer types (e.g. for Shape, Canvas, WebGL, SVG, and for DOM: just DOM), and possibly a preferred layer type to trigger if there is a conflict.
+        fallbackLayerType?
+    Use Layer factories instead of passing constructors for more generality
+    Consider making nodes aware of when their layer type changes (i.e. Canvas => SVG) since it may have to do DOM / SVG operations on add/remove
+    --- have node.buildLayerBefore() and node.buildLayerAfter() and other operations, passed a LayerState, during layer rebuild as a general form
+        Default behavior checks flags like layerSplit and layerHint (or combine those) in combination with the supported layer types to figure out what is needed
+        State could possibly remove unnecessary inbetween layers then?
+    Consider: layerHint that would trigger it and its children to be rendered in WebGL / Canvas / etc. if acceptable. Separate from:
+        Split before/after a node to indicate a layer change (for performance)
+    Collapse unnecessary layers (split next to split, or hints). refreshing layers between nodes after insertion should be able to add in suppressed layers
+    Proof-of-concept for performance and DOM integration
+
+Code:
+    * Switch to LoDash (http://lodash.com), main build (not underscore compatibility)
     Switch to jQuery 2 (wait for a stable build?)
-
-Questions / Open Topics:
-    Re-evaluate ES5 getter/setter
-    
-    https://travis-ci.org/ for continuous integration?
-    
-    Event handling for DOM events, etc.
-    Persistent (DOM,SVG) painting and updates for nodes
-    JSDoc?
-    
-    Something like _.extend that will work on ES5 setter/getter pairs in the future? Maybe $.extend?
-    Should enter / exit events be fired before / after touch up/down events, or never?
-        Follow DOM convention
-        Add click event
-    Name? Scenery? Artist names?
-    
-    Packing everything into 1 HTML file -- is it possible with data URLs? If there are size limits, can we split images/audio and recombine?
-
-Next:
-    * Layers: preferredLayerType -- layer factories instead of types?
     * Polyfills into own namespace
-    * Examine Raphael JS for SVG support and code
-    * Event dispatch
-        * Examine Kinect event system, delegate events, pointer events spec, jQuery .on with bind / capture
-            Pointer Events spec: https://dvcs.w3.org/hg/pointerevents/raw-file/tip/pointerEvents.html
-            Possibly relevant HTML5 spec for default behaviors: http://www.w3.org/html/wg/drafts/html/master/Overview.html
-        * Add pickable flag?
-        * For up/down events, is enter/exit necessary? -- see Question above
-        * Freeze event handlers, a la the DOM 3 Events spec? Or copy Piccolo?
-        * Best pattern for handling drags / more persistence? Add listeners directly to finger?
-            * Standard flags on fingers for whether they are performing an operation? dragging, etc.
-            * A way to 'cancel' the operation a finger is currently doing, so it can switch to a different one?
-    * Layering proof-of-concepts, advantages (performance, DOM integration, etc.)
-    * DOM nodes
-        * Handle correct layering of DOM nodes inside a layer, etc.
-        * How to get the size before adding to the document tree? Impossible?
-            * Document fragments (test this)
-    * Events
-        * Investigate hit testing against DOM nodes
-    * IE9 Performance
-        * Get DebugContext to work with Easel for performance comparison?
-            * Or just test Scene vs Custom here ... huge performance drop
-        * "strict mode" removal wasn't effective
-    * Accessibility / shadow DOM
-        see http://www.paciellogroup.com/blog/2011/12/html5-canvas-accessibility-discussions-2009-2011/
-    * WebGL Layer (we can get even faster rendering for shapes here, if it exists)
-    * Benchmarks using http://benchmarkjs.com/
-    * Modularization if possible (extract out math, others)
+    * Move Shape handling from Node to subclass Path.
+        Mixin-style handling so we can add fill / stroke properties to different subclasses (i.e. Text and Path will both need fill handling)
+            Examine mixin options like http://javascriptweblog.wordpress.com/2011/05/31/a-fresh-look-at-javascript-mixins/
+        Benchmark this first to see if there are regressions in inner-loop code
+    * Add a flag to Matrix3 to note that it is an affine transformation. This will help us speed up matrix-vector and matrix-matrix multiplications.
+    _.extend that works on ES5 setter/getter pairs? Check $.extend? Check ES5 spec?
+    Modularization of support code (math?)
+    Vet recursive bounds code against empty area
+    License on files
+    Handling of retina displays (and other backingScale differences)
 
-Incomplete:
-    Node:
-        Sub-tree opacity (like setTransparency in Piccolo)
-            'transparency', 'opacity', or 'alpha'?
-        Canvas fill gradients / patterns
-            Can this be abstracted across SVG / WebGL layers also? -- probably WebGL _much_ more efficiently with shaders
-        For prepend-flags, set in parameter object instead of boolean flag? (somewhat hard-to-read code)
-        Refactor fill / stroke code in Node so that it can be used by subclasses, e.g. Text, etc.
-        Visibility interaction with dirty paint / bounds, and events based on that
-            Scene.updateLayer shouldn't be called if only invisible nodes were changed
-        Don't send mark updates on invisible layers? Visibility change causes repaint?
-        General optimization and organization so we can extract "self" from child rendering bounds, what is repainted, etc. better.
-    Shapes:
-        Finiteness checks
-        Quadratic curve offsets need implementation improvement (32 sub-quadratics is too costly)
-        Not implemented: arc, arcTo, ellipse, cubic bezier
-        Features not implemented: precise intersection with bounding box (not just intersection of bounds)
-        Nonzero/evenodd support (not yet implemented in browsers)
-        Self-intersection in 'stroked' path
-        SVG / WebGL
-    Text:
-        Handling multi-line strings
-        SVG / WebGL / DOM options
-        Beware: miterLimit and joins seem to change stroking of text (if the bounds of that is ever to be included).
-    Scene:
-        refreshLayers() implementation (currently rebuilds all layers, but should be optimized so it doesn't need to redraw as much)
-        Foundation for multiple view implementations
-    Build:
-        Add JSHint into Sublime Text with plugin?
-    Misc:
-        Vet recursive bounds code against empty area
-        License on files
+SVG:
+    Examine Raphael JS for SVG support and Code.
+    Layering on SVG and the persistence that it will require have some interesting effects:
+        Nodes will map to one (or more) <g> elements. Multiple <g> elements necessary if there is a layer change in children, etc.
+        Path nodes may need to be aware of layer type changes to create/destroy SVG elements
 
-User interaction Design:
-    * Do invisible nodes get picked?
-    * Mouse enter/exit needs to trigger for node add/remove
-        * Does it make sense to hit-test every frame for this?
-    Can swipe "through" an object to start dragging it
-    Can simultaneously move multiple objects / controls
-    Can zoom / pan -- how to determine when user gestures can do this?
-    * with DOM elements, can we essentially "PSwing" the event forwarding and emulate mouse/touch behavior? will CSS :hover work?
+WebGL:
+    Use display lists?
+    Examine test code for considerations for implementing Shape.
+
+DOM nodes:
+    Handle correct layering of DOM nodes inside a layer, etc.
+    How to get the size before adding to the document tree? Impossible?
+        Document fragments (test this)
+
+* Event dispatch:
+    * Examine Kinect event system, delegate events, pointer events spec, jQuery .on with bind / capture
+        Pointer Events spec: https://dvcs.w3.org/hg/pointerevents/raw-file/tip/pointerEvents.html
+        Possibly relevant HTML5 spec for default behaviors: http://www.w3.org/html/wg/drafts/html/master/Overview.html
+    with DOM elements, can we essentially "PSwing" the event forwarding and emulate mouse/touch behavior? will CSS :hover work?        
+    Picking:
+        Add a flag? Check Piccolo behavior
+        Invisible nodes get picked? Check Piccolo behavior, but consider a parameter for this somewhere?
+    Enter/Exit events on up/down? - see question above
+    Freeze event handlers, a la the DOM 3 Events spec? Or copy Piccolo?
+    Best pattern for handling drags / more persistence? Add listeners directly to finger?
+        Standard flags on fingers for whether they are performing an operation? dragging, etc.
+        A way to 'cancel' the operation a finger is currently doing, so it can switch to a different one?
+    Mouse enter/exit needs to trigger for node add/remove
+        Does it make sense to hit-test every frame for this?
+    How to hit test against DOM nodes?
+
+Accessibility / shadow DOM:
+    see http://www.paciellogroup.com/blog/2011/12/html5-canvas-accessibility-discussions-2009-2011/
+    see html5 scene graph google doc
+
+Node:
+    Sub-tree opacity (like setTransparency in Piccolo)
+        'transparency', 'opacity', or 'alpha'?
+    Canvas fill gradients / patterns
+        Can this be abstracted across SVG / WebGL layers also? -- probably WebGL _much_ more efficiently with shaders
+    For prepend-flags, set in parameter object instead of boolean flag? (somewhat hard-to-read code)
+    Refactor fill / stroke code in Node so that it can be used by subclasses, e.g. Text, etc.
+    Visibility interaction with dirty paint / bounds, and events based on that
+        Scene.updateLayer shouldn't be called if only invisible nodes were changed
+    Don't send mark updates on invisible layers? Visibility change causes repaint?
+    General optimization and organization so we can extract "self" from child rendering bounds, what is repainted, etc. better.
+    Function for higher-performance possibly-expanded bounds for redraw?
+        Should we have an option so that selfBounds uses this?
+    For bounds checking during rendering, isInGlobalBounds( globalBounds, currentTransform ) would help, and shapes could be more specific
+
+Shapes:
+    Finiteness checks
+    Quadratic curve offsets need implementation improvement (32 sub-quadratics is too costly)
+    Not implemented: arc, arcTo, ellipse, cubic bezier
+    Features not implemented: precise intersection with bounding box (not just intersection of bounds)
+    Nonzero/evenodd support (not yet implemented in browsers)
+    Self-intersection in 'stroked' path
+    SVG / WebGL
+    Function for higher-performance possibly-expanded bounds for redraw?
+    Consider bounding box handling for an arbitrary transform, for use with Node's isInGlobalBounds( globalBounds, currentTransform ).
+
+Text:
+    Handling multi-line strings
+    SVG / WebGL / DOM options
+    Beware: miterLimit and joins seem to change stroking of text (if the bounds of that is ever to be included).
+
+Scene:
+    refreshLayers() implementation (currently rebuilds all layers, but should be optimized so it doesn't need to redraw as much)
+    Foundation for multiple view implementations
+
+Build:
+    Add JSHint into Sublime Text with plugin?
 
 Performance:
+    * IE9 performance (possible regression?)
+        Get DebugContext to work with Easel for a comparison? Or just compare against vanilla Canvas code
+        "strict mode" removal wasn't effective
     Framebuffer with context.drawImage( bufferContext, 0, 0 );
     Consider child counts, so that we can decide which layers to keep in a layer rebuild?
     Piece improvements with direct piece.render calls instead of switch? -- profile
@@ -132,6 +157,8 @@ Performance:
         * not full union of bounding boxes
         * Kd-tree / quadtree acceleration if child count is high? 
     Caching nodes with off-screen canvases for performance
+        Global-bounds based. Store global transform, so we can (each frame) compare the current transform and see if it is just an
+        approximately integer-offset transformation. Then we can render quickly on integer boundaries with no transforms / scaling for speed.
     Improve quadratic bezier offset curve computation
     Combining fills and strokes (or other state optimization -- fills require ensuring CCW/CW stays the same, so we need flags to whitelist)
     Efficiency checks for fullRender using the functional style => imperative
@@ -144,15 +171,11 @@ Performance:
         http://www.html5rocks.com/en/tutorials/canvas/performance/
 
 Features:
-    * User interaction
-    Accessibility and shadow DOM see html5 scene graph google doc
-    Retina-screen handling
     AnimateTo-style animation
     Clipping => Dead region handling (clipping needs to be stored in a shape array since it can only be intersected or reset in Canvas)
     Color handling?
     Investigate DAG version?
     Include MathJax text?
-    WebGL Layers
     Property change events for nodes?
 
 Cleanliness / Debugging:
