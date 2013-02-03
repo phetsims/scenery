@@ -58,7 +58,6 @@ Layers:
     Proof-of-concept for performance and DOM integration
 
 Code:
-    * Switch to LoDash (http://lodash.com), main build (not underscore compatibility)
     Switch to jQuery 2 (wait for a stable build?)
     * Polyfills into own namespace
     * Move Shape handling from Node to subclass Path.
@@ -184,6 +183,6 @@ Cleanliness / Debugging:
     Code style should match https://github.com/rwldrn/idiomatic.js
 
 Other:
-    Pull requests to underscore.js for FunctionalUtils wishlist
+    Pull requests to underscore.js / LoDash? for FunctionalUtils wishlist ... or fork
     Implement Bouncy example from the wishlist
     Highlighting and indexing of TODO items

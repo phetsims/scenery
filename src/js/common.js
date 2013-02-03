@@ -23,7 +23,7 @@ phet.util = phet.util || {};
 (function () {
     "use strict";
     
-    // TODO: convert most of these usages to underscore.js, and consider pull requests for the rest
+    // TODO: convert most of these usages to LoDash, and consider pull requests for the rest
     
     phet.util.remove = function ( array, ob ) {
         array.splice( array.indexOf( ob ), 1 );
