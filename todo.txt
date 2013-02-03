@@ -90,7 +90,9 @@ DOM nodes:
     * Examine Kinect event system, delegate events, pointer events spec, jQuery .on with bind / capture
         Pointer Events spec: https://dvcs.w3.org/hg/pointerevents/raw-file/tip/pointerEvents.html
         Possibly relevant HTML5 spec for default behaviors: http://www.w3.org/html/wg/drafts/html/master/Overview.html
-    with DOM elements, can we essentially "PSwing" the event forwarding and emulate mouse/touch behavior? will CSS :hover work?        
+    with DOM elements, can we essentially "PSwing" the event forwarding and emulate mouse/touch behavior? will CSS :hover work?
+    Note in code about DOM4 (http://www.w3.org/TR/dom/#constructing-events) and Event Constructors. See http://www.w3.org/TR/DOM-Level-3-Events/#new-event-interface-initializers
+        * Use deprecated initMouseEvent for now, but feature detect on it?
     Picking:
         Add a flag? Check Piccolo behavior
         Invisible nodes get picked? Check Piccolo behavior, but consider a parameter for this somewhere?
