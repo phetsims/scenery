@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport"
+    content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+
+    <!-- runs in full-screen mode on iOS devices -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <title>Event Delegation Test</title>
+    
+    <link rel="stylesheet" href="../contrib/bootstrap-2.2.2.css">
+
+    <script src="../contrib/jquery-1.8.3.min.js"></script>
+    <script src="../contrib/bootstrap-2.2.2.js"></script>
+
+    <style type="text/css">
+        .fullWidth {
+            width: 320px;
+            height: 240px;
+        }
+        
+        .container {
+            /* including the border */
+            width: 322px;
+            height: 242px;
+            
+            margin-top: 10px;
+        }
+        
+        .containingBlock {
+            position: relative; /* so the positioned children are handled, but the containingBlock is still in the normal flow */
+            background-color: #ffffff;
+            border: 1px solid black;
+        }
+        
+        .below {
+            z-index: 0;
+            position: absolute;
+        }
+        
+        .above {
+            z-index: 1;
+            position: absolute;
+            background-color: rgba(255,0,0,0.2); /* slight red tint */
+        }
+        
+        .notDisplayed {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="containingBlock fullWidth">
+            <div class="below fullWidth">
+                <div class="dropdown">
+                    <a class="dropdown-toggle" id="dLabel" role="button" data-toggle="dropdown" data-target="#" href="/page.html">
+                        Dropdown
+                        <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                        <li><a tabindex="-1" href="#">Something</a></li>
+                        <li class="divider"></li>
+                        <li><a tabindex="-1" href="#">Nothing</a></li>
+                    </ul>
+                </div>
+                <label for="textBox">Text</label>
+                <input type="text" name="textBox" value="Type here" id="textBox">
+            </div>
+            <div class="above fullWidth">
+            </div>
+        </div>
+        
+        <p style="margin-top: 10px;">
+            <button class="btn btn-primary" type="button" id="toggleOverlay">Toggle Overlay</button>
+        </p>
+    </div>
+    
+    <script>
+        $( window ).ready( function() {
+            $('.dropdown-toggle').dropdown();
+        } );
+        
+        $( '#toggleOverlay' ).on( 'click', function( event ) {
+            $( '.above' ).toggleClass( 'notDisplayed' );
+        } );
+    </script>
+    
+</body>
+</html>
