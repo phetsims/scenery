@@ -34,7 +34,7 @@ phet.scene = phet.scene || {};
         this.context = phet.canvas.initCanvas( canvas );
         this.scene = args.scene;
         
-        // workaround for Chrome miterLimit bug
+        // workaround for Chrome (WebKit) miterLimit bug: https://bugs.webkit.org/show_bug.cgi?id=108763
         this.context.miterLimit = 20;
         this.context.miterLimit = 10;
         
