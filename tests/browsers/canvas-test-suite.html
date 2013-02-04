@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Canvas Test Suite</title>
+    
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="canvas" width="640" height="480"></canvas>
+
+<script type="text/javascript">    
+    var context = document.getElementById( 'canvas' ).getContext( '2d' );
+    
+    context.fillRect( 0, 0, 640, 480 );
+    
+    function demoPath( drawPath ) {
+        context.save();
+        
+        context.globalCompositeOperation = 'lighter';
+        
+        context.beginPath();
+        context.lineWidth = 30;
+        drawPath();
+        
+        context.lineCap = 'square';
+        context.strokeStyle = 'rgba(0,0,255,1)';
+        context.stroke();
+        
+        context.lineCap = 'round';
+        context.strokeStyle = 'rgba(0,255,0,1)';
+        context.stroke();
+        
+        context.lineCap = 'butt';
+        context.strokeStyle = 'rgba(255,0,0,1)';
+        context.stroke();
+        
+        context.globalCompositeOperation = 'source-over';
+        
+        context.lineWidth = 1;
+        context.strokeStyle = '#ff0000';
+        context.stroke();
+        
+        context.restore();
+    }
+    
+    function runPaths( context ) {
+        var i;
+        
+        demoPath( function() {
+            context.moveTo( -120, -120 );
+            context.quadraticCurveTo( 40, 40, 40, 20 );
+        } );
+        
+        demoPath( function() {
+            context.moveTo( -20, -120 );
+            context.quadraticCurveTo( 140, 40, 120, 20 );
+        } );
+        
+        demoPath( function() {
+            context.moveTo( 40, 80 );
+            context.bezierCurveTo( 42, 80, 42, 82, 44, 82 );
+        } );
+        
+        demoPath( function() {
+            var halfAngle = 7 * Math.PI / 180;
+            context.moveTo( 180, 20 );
+            context.lineTo( 180 + Math.cos( halfAngle ), 20 + Math.sin( halfAngle ) );
+            context.lineTo( 180, 20 + 2 * Math.sin( halfAngle ) );
+        } );
+        
+        demoPath( function() {
+            context.save();
+            context.translate( 75, 75 );
+            context.scale( 0.125, 0.125 );
+            context.moveTo( 102.6, 37.8 );
+            context.bezierCurveTo( 773.0, 708.2, 102.6, 708.2, 773.0,37.8 );
+            context.restore();
+        } );
+        
+        demoPath( function() {
+            context.save();
+            context.translate( 40, 120 );
+            context.scale( 1, 1 );
+            context.moveTo( 0, 0 );
+            context.bezierCurveTo( 1, 0, 0, 1, 1, 1 );
+            context.restore();
+        } );
+        
+        demoPath( function() {
+            context.save();
+            context.translate( 330, 20 );
+            context.scale( 1, 1 );
+            context.moveTo( 0, 0 );
+            context.bezierCurveTo( 100, 0, 101, 0, 101, 1 );
+            context.restore();
+        } );
+        
+        demoPath( function() {
+            context.save();
+            context.translate( 280, 60 );
+            context.scale( 1, 1 );
+            context.moveTo( 0, 0 );
+            var smallNumber = 0.0000000001;
+            context.bezierCurveTo( smallNumber, smallNumber, smallNumber, smallNumber, smallNumber, smallNumber );
+            context.restore();
+        } );
+        
+        demoPath( function() {
+            context.save();
+            context.translate( 330, 60 );
+            context.scale( 1, 1 );
+            context.moveTo( 0, 0 );
+            context.bezierCurveTo( 10, 0, 11, 0, 11, 1 );
+            context.restore();
+        } );
+        
+        demoPath( function() {
+            context.save();
+            context.translate( 380, 60 );
+            context.scale( 1, 1 );
+            context.moveTo( 0, 0 );
+            context.bezierCurveTo( 1, 0, 1, 1, 0, 0.5 );
+            context.restore();
+        } );
+        
+        demoPath( function() {
+            context.save();
+            context.translate( 430, 60 );
+            context.scale( 1, 1 );
+            context.moveTo( 0, 0 );
+            context.bezierCurveTo( -1, 0, 1, 0, 0, 0 );
+            context.restore();
+        } );
+        
+        demoPath( function() {
+            context.save();
+            context.translate( 480, 60 );
+            context.scale( 1, 1 );
+            context.moveTo( 0, 0 );
+            context.bezierCurveTo( -1, 0, 1, 0, 0, 0.1 );
+            context.restore();
+        } );
+        
+        demoPath( function() {
+            context.save();
+            context.translate( 530, 60 );
+            context.scale( 1, 1 );
+            context.moveTo( 0, 0 );
+            context.bezierCurveTo( -1, 0, 1, 0, 0.1, 0 );
+            context.restore();
+        } );
+        
+        demoPath( function() {
+            context.save();
+            context.translate( 580, 60 );
+            context.scale( 1, 1 );
+            context.moveTo( 0, 0 );
+            context.bezierCurveTo( 1, 1, 1, 1, 0, 0 );
+            context.restore();
+        } );
+        
+        
+        context.save();
+        context.lineJoin = 'round';
+        context.strokeStyle = 'rgba(255,255,255,0.5)';
+        context.fillStyle = '#0000ff';
+        context.translate( 640 - 80, 480 - 10 );
+        context.scale( 5000, 5000 );
+        context.font = '1px Arial';
+        context.fillText( 'X', 0, 0 );
+        context.lineWidth = 1 / 500;
+        context.strokeText( 'X', 0, 0 );
+        context.restore();
+        
+        context.save();
+        context.strokeStyle = '#ffffff';
+        context.fillStyle = '#ff0000';
+        context.translate( 640 - 80, 480 - 10 );
+        context.scale( 10000, 10000 );
+        context.font = '1px Arial';
+        context.fillText( 'X', 0, 0 );
+        context.restore();
+        
+        function scaledMessage( msg, font, fill, x, y, sx, sy ) {
+            context.save();
+            context.font = font;
+            context.fillStyle = fill;
+            context.translate( x, y );
+            context.scale( sx, sy );
+            context.fillText( msg, 0, 0 );
+            context.restore();
+        }
+        
+        scaledMessage( 'This is a test message', '1px Arial', '#ffffff', 0, 170, 25, 10 );
+        scaledMessage( 'Some are hard to read', '10px Arial', '#ff0000', 0, 180, 5, 0.1 );
+        scaledMessage( 'Some are hard to read', '10px Arial', '#00ff00', 0, 185, 5, 0.01 );
+        for( var i = 0; i < 255; i++ ) {
+            scaledMessage( 'Some are hard to read', '10px Arial', '#0000ff', 0, 190, 5, 0.05 );
+        }
+        
+        for( var i = 0; i < 20; i++ ) {
+            context.save();
+            context.font = '20px Arial';
+            context.fillStyle = '#ffffff';
+            context.translate( i, 200 );
+            context.transform( 1, 50 + i^2, 0, 1, 0, 0 );
+            context.fillText( 'G', 0, 0 );
+            context.fillText( 'G', 0, 0 );
+            context.fillText( 'G', 0, 0 );
+            context.restore();
+        }
+        
+        
+        
+        
+        
+        
+        // TODO: zigzag fine
+        // TODO: minimum viable alpha
+        // TODO: drawing with minor pixel offsets
+        // TODO: microscopic linewidths
+    }
+    
+    runPaths( context );
+    
+</script>
+
+</body>
+</html>

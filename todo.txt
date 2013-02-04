@@ -14,6 +14,7 @@ Browsers
         [PENDING MAJOR WORK] Chrome 24.0.1312.52 m bug in zooming fillText() -- mobile Safari OK (maybe different from webkit, since it's not antialiased?)
         [TODO] Report rgba alpha precision "bug" - spec says rgba(255,255,255,0.1112049520495820495802495) should not lose any digits on inspection after setting on context
         [UNKNOWN] Firefox quadratic stroke precision handling, and definition of "inflated path" at http://www.whatwg.org/specs/web-apps/current-work/#trace-a-path
+            See http://jsfiddle.net/pGrSN/2/ or stroke-endpoint.html
     For canvas, create a drawing function that exhibits all differences?
     measureText for webkit?
 
@@ -29,6 +30,7 @@ Questions for team:
     Name? Scenery? Artist names?
 
 General:
+    *** shape strokes happen with linewidth at global scale???
     DOM events => benchmarks => create Path => layer changes
     Documentation and Examples (always an item)
     Take extension mechanism from Backbone.js: https://github.com/documentcloud/backbone/blob/master/backbone.js#L1471-L1502
@@ -127,6 +129,7 @@ Node:
     Function for higher-performance possibly-expanded bounds for redraw?
         Should we have an option so that selfBounds uses this?
     For bounds checking during rendering, isInGlobalBounds( globalBounds, currentTransform ) would help, and shapes could be more specific
+    Canvas: masking with sub-canvas rendering using globalCompositeOperation. CSG should be possible, and hit tests should be better. Bounds might be harder
 
 Shapes:
     Finiteness checks
