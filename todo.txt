@@ -92,6 +92,7 @@ DOM nodes:
         Document fragments (test this)
 
 * Event dispatch:
+    ***: can we handle DOM nodes without default behaviors? -- patch bootstrap for .phethover instead of :hover
     * Examine Kinect event system, delegate events, pointer events spec, jQuery .on with bind / capture
         Pointer Events spec: https://dvcs.w3.org/hg/pointerevents/raw-file/tip/pointerEvents.html
         Possibly relevant HTML5 spec for default behaviors: http://www.w3.org/html/wg/drafts/html/master/Overview.html
