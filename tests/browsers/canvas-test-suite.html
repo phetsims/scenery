@@ -218,6 +218,7 @@
         
         function zig( x, y, count, height, space, offset ) {
             context.save();
+            context.beginPath();
             context.fillStyle = '#ffffff';
             context.translate( x, y );
             context.moveTo( 0, 0 );
@@ -238,14 +239,33 @@
         zig( 90, 220, 10, 50, 2, 5 );
         zig( 110, 220, 10, 100, 2.5, 10 );
         zig( 135, 220, 10, 100, 2.5, 10 );
-        zig( 160, 220, 10, 100, Math.PI, 10 );
+        zig( 160, 220, 20, 100, Math.PI, 10 );
+        
+        function zag( x, y, count, height, space, offset ) {
+            context.save();
+            context.beginPath();
+            context.fillStyle = '#ff0000';
+            context.translate( x, y + 120 );
+            context.moveTo( 0, 0 );
+            for( i = 0; i < count; i++ ) {
+                context.quadraticCurveTo( space * ( i - 0.5 ), height, space * i, 0 );
+            }
+            for( i = count - 1; i >= 0; i-- ) {
+                context.quadraticCurveTo( space * i, offset, space * ( i - 0.5 ), height + offset );
+            }
+            context.fill();
+            context.restore();
+        }
+        zag( 50, 220, 10, 100, 1, 10 );
+        zag( 60, 220, 10, 100, 1, 5 );
+        zag( 70, 220, 10, 100, 2, 5 );
         
         context.strokeStyle = 'rgba(255,255,255,0.005)';
         for( i = 0; i < 1000; i++ ) {
             context.beginPath();
             var ka = Math.PI * i / 100
-            context.moveTo( 200 + ka, 220 );
-            context.lineTo( 200 + ka, 320 - Math.sin( ka ) * 10 );
+            context.moveTo( 250 + ka, 220 );
+            context.lineTo( 250 + ka, 320 - Math.sin( ka ) * 10 );
             context.stroke();
         }
     }
