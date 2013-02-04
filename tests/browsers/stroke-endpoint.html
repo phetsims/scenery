@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Stroke Endpoint Test</title>
+</head>
+<body>
+
+<canvas id="canvas" width="320" height="240" style="border: 1px solid black;"></canvas>
+
+<script type="text/javascript">    
+    var context = document.getElementById( 'canvas' ).getContext( '2d' );
+    
+    context.lineWidth = 30;
+    context.strokeStyle = '#000000';
+    context.moveTo( 40, 40 );
+    context.quadraticCurveTo( 200, 200, 200, 180 );
+    context.stroke();
+    context.lineWidth = 1;
+    context.strokeStyle = '#ff0000';
+    context.stroke();
+</script>
+
+</body>
+</html>

@@ -1,6 +1,6 @@
 
 
-Bugs:
+Browsers
     Browser bugs? (get Canary / Aurora):
         [PATCH CREATED] miterLimit off in Chrome 24.0.1312.52 m
             Submitted as https://bugs.webkit.org/show_bug.cgi?id=108763
@@ -13,7 +13,9 @@ Bugs:
         [FIXED IN UPDATE] bevel instead of miter on the "close" part of the hex: Firefox 18.0.1
         [PENDING MAJOR WORK] Chrome 24.0.1312.52 m bug in zooming fillText() -- mobile Safari OK (maybe different from webkit, since it's not antialiased?)
         [TODO] Report rgba alpha precision "bug" - spec says rgba(255,255,255,0.1112049520495820495802495) should not lose any digits on inspection after setting on context
+        [UNKNOWN] Firefox quadratic stroke precision handling, and definition of "inflated path" at http://www.whatwg.org/specs/web-apps/current-work/#trace-a-path
     For canvas, create a drawing function that exhibits all differences?
+    measureText for webkit?
 
 Questions for SB (or others):
     Way to side-by-side install Firefox and Aurora?
@@ -107,7 +109,9 @@ DOM nodes:
 
 Accessibility / shadow DOM:
     see http://www.paciellogroup.com/blog/2011/12/html5-canvas-accessibility-discussions-2009-2011/
+        and http://www.paciellogroup.com/blog/2012/09/html5-accessibility-september-2012/
     see html5 scene graph google doc
+    see http://www.html5accessibility.com/
 
 Node:
     Sub-tree opacity (like setTransparency in Piccolo)
