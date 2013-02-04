@@ -15,6 +15,9 @@
 <canvas id="canvas" width="640" height="480"></canvas>
 
 <script type="text/javascript">    
+
+    var enableDashes = false;
+    
     var context = document.getElementById( 'canvas' ).getContext( '2d' );
     
     context.fillRect( 0, 0, 640, 480 );
@@ -23,6 +26,18 @@
         context.save();
         
         context.globalCompositeOperation = 'lighter';
+        
+        if( enableDashes ) {
+            // var dash = [ 2, 2 ];
+            // var dash = [ 1, 20 ];
+            // var dash = [ 0.1, 0.1 ];
+            var dash = [ 0.01, 0.01 ];
+            if( context.setLineDash ) {
+                context.setLineDash( dash );
+            } else if( context.mozDash !== undefined ) {
+                context.mozDash = dash;
+            }
+        }
         
         context.beginPath();
         context.lineWidth = 30;
@@ -41,6 +56,9 @@
         context.stroke();
         
         context.globalCompositeOperation = 'source-over';
+        
+        context.fillStyle = 'rgba(127,127,127,0.5)';
+        context.fill();
         
         context.lineWidth = 1;
         context.strokeStyle = '#ff0000';
@@ -162,6 +180,30 @@
             context.scale( 1, 1 );
             context.moveTo( 0, 0 );
             context.bezierCurveTo( 1, 1, 1, 1, 0, 0 );
+            context.restore();
+        } );
+        
+        demoPath( function() {
+            context.save();
+            context.translate( 630, 60 );
+            context.scale( 1, 1 );
+            context.moveTo( 0, 0 );
+            context.lineTo( 0, 10 );
+            context.lineTo( 10, 10 );
+            context.clip();
+            context.lineTo( 0, 15 );
+            context.restore();
+        } );
+        
+        demoPath( function() {
+            context.save();
+            context.miterLimit = 1000000;
+            context.translate( 530, 100 );
+            context.scale( 1, 1 );
+            context.moveTo( 0, 0 );
+            context.lineTo( 10, 0 );
+            context.lineTo( 0, 5 );
+            context.lineTo( Number.MAX_VALUE, 5 );
             context.restore();
         } );
         
