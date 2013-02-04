@@ -200,11 +200,11 @@
         scaledMessage( 'This is a test message', '1px Arial', '#ffffff', 0, 170, 25, 10 );
         scaledMessage( 'Some are hard to read', '10px Arial', '#ff0000', 0, 180, 5, 0.1 );
         scaledMessage( 'Some are hard to read', '10px Arial', '#00ff00', 0, 185, 5, 0.01 );
-        for( var i = 0; i < 255; i++ ) {
+        for( i = 0; i < 255; i++ ) {
             scaledMessage( 'Some are hard to read', '10px Arial', '#0000ff', 0, 190, 5, 0.05 );
         }
         
-        for( var i = 0; i < 20; i++ ) {
+        for( i = 0; i < 20; i++ ) {
             context.save();
             context.font = '20px Arial';
             context.fillStyle = '#ffffff';
@@ -216,15 +216,38 @@
             context.restore();
         }
         
+        function zig( x, y, count, height, space, offset ) {
+            context.save();
+            context.fillStyle = '#ffffff';
+            context.translate( x, y );
+            context.moveTo( 0, 0 );
+            for( i = 0; i < count; i++ ) {
+                context.lineTo( space * ( i - 0.5 ), height );
+                context.lineTo( space * i, 0 );
+            }
+            for( i = count - 1; i >= 0; i-- ) {
+                context.lineTo( space * i, offset );
+                context.lineTo( space * ( i - 0.5 ), height + offset );
+            }
+            context.fill();
+            context.restore();
+        }
+        zig( 50, 220, 10, 100, 1, 10 );
+        zig( 60, 220, 10, 100, 1, 5 );
+        zig( 70, 220, 10, 100, 2, 5 );
+        zig( 90, 220, 10, 50, 2, 5 );
+        zig( 110, 220, 10, 100, 2.5, 10 );
+        zig( 135, 220, 10, 100, 2.5, 10 );
+        zig( 160, 220, 10, 100, Math.PI, 10 );
         
-        
-        
-        
-        
-        // TODO: zigzag fine
-        // TODO: minimum viable alpha
-        // TODO: drawing with minor pixel offsets
-        // TODO: microscopic linewidths
+        context.strokeStyle = 'rgba(255,255,255,0.005)';
+        for( i = 0; i < 1000; i++ ) {
+            context.beginPath();
+            var ka = Math.PI * i / 100
+            context.moveTo( 200 + ka, 220 );
+            context.lineTo( 200 + ka, 320 - Math.sin( ka ) * 10 );
+            context.stroke();
+        }
     }
     
     runPaths( context );
