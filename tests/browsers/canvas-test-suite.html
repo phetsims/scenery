@@ -70,6 +70,13 @@
     function runPaths( context ) {
         var i;
         
+        context.save();
+        context.translate( 350, 300 );
+        context.rotate( Math.PI / 4 );
+        context.transform( 1, 0.5, 0, 1, 0, 0 );
+        context.clearRect( 0, 0, 50, 50 );
+        context.restore();
+        
         demoPath( function() {
             context.moveTo( -120, -120 );
             context.quadraticCurveTo( 40, 40, 40, 20 );
@@ -198,7 +205,7 @@
         demoPath( function() {
             context.save();
             context.miterLimit = 1000000;
-            context.translate( 530, 100 );
+            context.translate( 280, 100 );
             context.scale( 1, 1 );
             context.moveTo( 0, 0 );
             context.lineTo( 10, 0 );
