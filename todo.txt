@@ -82,6 +82,7 @@ SVG:
         Nodes will map to one (or more) <g> elements. Multiple <g> elements necessary if there is a layer change in children, etc.
         Path nodes may need to be aware of layer type changes to create/destroy SVG elements
     Mixins for implementing SVG? might be useful if we have createSVGElement() for self-rendering, and some way of creating intermediate groups
+    Beware of alpha handling -- seems to have a different gamma or something on Windows.
 
 WebGL:
     Use display lists?
@@ -93,6 +94,7 @@ DOM nodes:
         Document fragments (test this)
 
 * Event dispatch:
+    Indie UI events should be tracked: https://dvcs.w3.org/hg/IndieUI/raw-file/default/src/indie-ui-events.html
     Can we handle DOM nodes without default behaviors? -- patch bootstrap for .phethover instead of :hover
         - yes technically, but we have to rebuild events like mouseover and mouseout
     Verify SVG stacking is practical with test
@@ -116,6 +118,7 @@ DOM nodes:
     How to hit test against DOM nodes?
 
 Accessibility / shadow DOM:
+    ARIA in general?
     see http://www.paciellogroup.com/blog/2011/12/html5-canvas-accessibility-discussions-2009-2011/
         and http://www.paciellogroup.com/blog/2012/09/html5-accessibility-september-2012/
     see html5 scene graph google doc
