@@ -12,7 +12,8 @@
     
     var versionNames = [];
     
-    window.sceneBench = function( name, fn ) {
+    // run async tests after other tests
+    window.sceneBench = function( name, fn, async ) {
         var version = window.currentTestVersionName;
         
         console.log( 'loading test ' + name + ' (' + version + ')' );
@@ -24,13 +25,12 @@
         currentRunCount = currentRunCount + 1;
         
         var bench = new Benchmark( name, fn, {
-            defer: true,
+            defer: !!async,
             
-            maxTime: 60,
-            
-            delay: 0.01,
+            // maxTime: 10,
             
             onCycle: function( event ) {
+                console.log( name + ' (' + version + ') cycle' );
                 $( '#main' ).empty();
             },
             
@@ -42,7 +42,8 @@
                 
                 currentRunCount = currentRunCount - 1;
                 
-                if( currentRunCount == 0 ) {
+                if( currentRunCount === 0 ) {
+                    console.log( 'completed async tests, moving to next version' );
                     nextVersion();
                 }
             }
@@ -73,7 +74,7 @@
                 callback();
             }
         };
-        script.src = src;
+        script.src = src + '?random=' + Math.random().toFixed( 10 );
         
         var other = document.getElementsByTagName( 'script' )[0];
         other.parentNode.insertBefore( script, other );
@@ -114,7 +115,9 @@
             data[version.name] = {};
             
             loadScript( version.lib, function() {
-                loadScript( version.test, function() {} );
+                loadScript( version.test, function() {
+                    
+                } );
             } );
         } else {
             // all done
@@ -153,35 +156,4 @@
     }
     
     nextVersion();
-    
-    // window.bencher = function( name, fn ) {
-    //     var bench = new Benchmark( name, fn, {
-    //         defer: true,
-            
-    //         minTime: 20,
-            
-    //         onCycle: function( event ) {
-    //             $( '#main' ).empty();
-    //         },
-            
-    //         onComplete: function( event ) {
-    //             console.log( event );
-    //         }
-    //     } );
-        
-    //     bench.run( {
-    //         async: true
-    //     } );
-    // };
-    
-    // bencher( 'fast', function( deferrer ) {
-    //     deferrer.resolve();
-    // } );
-    
-    // bencher( 'slow', function( deferrer ) {
-    //     var arb = deferrer;
-    //     setTimeout( function() {
-    //         arb.resolve();
-    //     }, 500 );
-    // } );
 })();

@@ -1,7 +1,7 @@
 
 
 Browsers
-    Browser bugs? (get Canary / Aurora):
+    Browser bugs? (get Canary / Aurora / IE10):
         [PATCH CREATED] miterLimit off in Chrome 24.0.1312.52 m
             Submitted as https://bugs.webkit.org/show_bug.cgi?id=108763
             Patch created, see http://www.webkit.org/coding/contributing.html
