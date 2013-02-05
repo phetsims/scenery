@@ -81,6 +81,7 @@ SVG:
     Layering on SVG and the persistence that it will require have some interesting effects:
         Nodes will map to one (or more) <g> elements. Multiple <g> elements necessary if there is a layer change in children, etc.
         Path nodes may need to be aware of layer type changes to create/destroy SVG elements
+    Mixins for implementing SVG? might be useful if we have createSVGElement() for self-rendering, and some way of creating intermediate groups
 
 WebGL:
     Use display lists?
@@ -95,6 +96,7 @@ DOM nodes:
     Can we handle DOM nodes without default behaviors? -- patch bootstrap for .phethover instead of :hover
         - yes technically, but we have to rebuild events like mouseover and mouseout
     Verify SVG stacking is practical with test
+        -- do we need pointer-events on every element, or just the top-level svg?
     * Examine Kinect event system, delegate events, pointer events spec, jQuery .on with bind / capture
         Pointer Events spec: https://dvcs.w3.org/hg/pointerevents/raw-file/tip/pointerEvents.html
         Possibly relevant HTML5 spec for default behaviors: http://www.w3.org/html/wg/drafts/html/master/Overview.html
