@@ -41,8 +41,16 @@
 		})();
 		
 		window.addEventListener( 'click', function( evt ) {
-			console.log( evt.target );
+			if( console && console.log ) {
+				console.log( evt.target );
+			}
 		}, true );
+		
+		$( document ).on( 'click', function( evt ) {
+			if( console && console.log ) {
+            	console.log( evt.target );
+			}
+        } );
 	} );
 
 	</script>
