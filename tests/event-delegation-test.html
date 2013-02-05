@@ -36,13 +36,18 @@
             border: 1px solid black;
         }
         
-        .below {
+        .fartherBelow {
             z-index: 0;
             position: absolute;
         }
         
-        .above {
+        .below {
             z-index: 1;
+            position: absolute;
+        }
+        
+        .above {
+            z-index: 2;
             position: absolute;
             background-color: rgba(255,0,0,0.2); /* slight red tint */
         }
@@ -67,6 +72,12 @@
 <body>
     <div class="container">
         <div class="containingBlock fullWidth" id="containingBlock">
+            <div class="fartherBelow fullWidth">
+                <button class="btn" type="button" id="clickable" style="position: absolute; right: 0;">Clickable?</button>
+                <p id="clickTest" style="position: absolute; right: 10px; top: 50px;">
+                    No?
+                </p>
+            </div>
             <div class="below fullWidth">
                 <div class="dropdown">
                     <a class="dropdown-toggle" id="dLabel" role="button" data-toggle="dropdown" data-target="#" href="/page.html">
@@ -217,6 +228,10 @@
         
         $( '#hoverTest' ).on( 'mousemove', function( event ) {
             $( '#mouseReport' ).text( 'mousemove on :hover: ' + event.clientX + ',' + event.clientY );
+        } );
+        
+        $( '#clickable' ).on( 'click', function( event ) {
+            $( '#clickTest' ).text( 'Clicked' );
         } );
     </script>
     
