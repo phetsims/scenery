@@ -260,9 +260,23 @@ var marks = marks || {};
             
             if( snapshot.name !== 'current' ) {
                 var currentMark = this.benchmarks[this.benchmarkRowNumbers[benchmark.name]][this.currentNameColumn];
-                if( Math.abs( currentMark.stats.mean - benchmark.stats.mean ) > currentMark.stats.moe + benchmark.stats.moe ) {
-                    cell.style.background = currentMark.stats.mean > benchmark.stats.mean ? '#ffcccc' : '#ccffcc';
-                    html = '<strong>' + ( -100 * ( currentMark.stats.mean - benchmark.stats.mean ) / benchmark.stats.mean ).toFixed( 2 ) + '%</strong> ' + html;
+                
+                var percentChange = ( -100 * ( currentMark.stats.mean - benchmark.stats.mean ) / benchmark.stats.mean ).toFixed( 2 );
+                var meanDifference = Math.abs( currentMark.stats.mean - benchmark.stats.mean );
+                var marginOfErrorAllowance = currentMark.stats.moe + benchmark.stats.moe;
+                var worse = currentMark.stats.mean > benchmark.stats.mean;
+                
+                // TODO: put these in different columns?
+                if( meanDifference > marginOfErrorAllowance ) {
+                    if( meanDifference > 10 * marginOfErrorAllowance ) {
+                        cell.style.background = worse ? '#ffcccc' : '#ccffcc';
+                    } else {
+                        cell.style.background = worse ? '#ffeeee' : '#eeffee';
+                    }
+                    html = '<strong>' + percentChange + '%</strong> ' + html;
+                } else {
+                    cell.style.background = '#ffffff';
+                    html = percentChange + '% ' + html;
                 }
             }
             
