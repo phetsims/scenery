@@ -45,7 +45,7 @@ var marks = marks || {};
                 args.delay = 0.1; // increased delay so hopefully we don't muck up things with our table displays, etc.
             }
             if( args.minTime === undefined ) {
-                // args.minTime = 1;
+                args.minTime = 1;
             }
             
             this.currentSuite.add( name, fn, args );
