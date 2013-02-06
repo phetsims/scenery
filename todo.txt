@@ -40,7 +40,8 @@ General:
     Take extension mechanism from Backbone.js: https://github.com/documentcloud/backbone/blob/master/backbone.js#L1471-L1502
 
 Benchmarks: (***)
-    * async vs defer vs queued
+    async vs defer vs queued
+    Ability to re-run tests to add precision? Or just a control for precision?
     If we can, handle both synchronous and asynchronous tests. Maybe this is possible to wrap with a deferred so that we can handle both without specifying a flag?
         Consider forking Benchmark.js and submitting a pull request if this is easy
         Reason for this is the issue where in asynchronous tests, immediate calls to deferred.resolve() do not allow us to measure performance if it is slow
