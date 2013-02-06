@@ -34,11 +34,13 @@ Questions for team:
 
 General:
     *** shape strokes happen with linewidth at global scale???
+    * idiomatic.js styling of conditionals and loops
     DOM events => benchmarks => create Path => layer changes
     Documentation and Examples (always an item)
     Take extension mechanism from Backbone.js: https://github.com/documentcloud/backbone/blob/master/backbone.js#L1471-L1502
 
 Benchmarks: (***)
+    * async vs defer vs queued
     If we can, handle both synchronous and asynchronous tests. Maybe this is possible to wrap with a deferred so that we can handle both without specifying a flag?
         Consider forking Benchmark.js and submitting a pull request if this is easy
         Reason for this is the issue where in asynchronous tests, immediate calls to deferred.resolve() do not allow us to measure performance if it is slow
@@ -50,6 +52,7 @@ Benchmarks: (***)
     Consider using Local Storage to show previous results?
     Benchmarks:
         Examine subclass penalty for Shape in Path instead of Node
+    Using xStats (https://github.com/bestiejs/xstats.js), also add memory output for verifying lack of memory leaks?
 
 Layers:
     Each node can have acceptable layer types (e.g. for Shape, Canvas, WebGL, SVG, and for DOM: just DOM), and possibly a preferred layer type to trigger if there is a conflict.
@@ -169,6 +172,7 @@ Performance:
     * IE9 performance (possible regression?)
         Get DebugContext to work with Easel for a comparison? Or just compare against vanilla Canvas code
         "strict mode" removal wasn't effective
+        Possible that it's the clipping that we are doing?
     Framebuffer with context.drawImage( bufferContext, 0, 0 );
     Consider child counts, so that we can decide which layers to keep in a layer rebuild?
     Piece improvements with direct piece.render calls instead of switch? -- profile

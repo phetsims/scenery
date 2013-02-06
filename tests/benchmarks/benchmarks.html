@@ -10,7 +10,9 @@
     <script src="../../contrib/lodash.min-1.0.0-rc.3.js"></script>
     <script src="../../contrib/benchmark-1.0.0.js"></script>
     <script src="../../contrib/bootstrap-2.2.2.js"></script>
+    
     <!-- <script src="../../phet-scene-min.js"></script> -->
+    <script src="js/marks.js"></script>
     
     <style>
         .result {
@@ -40,41 +42,40 @@
                     <th>Name</th>
                 </tr>
             </thead>
-            <tbody id="results">
-               <!--  <tr class="result error">
-                    <td class="name">A more descriptive test</td>
-                    <td>
-                        <div class="progress">
-                            <div class="bar bar-success" style="width: 35%;"></div>
-                            <div class="bar bar-warning" style="width: 20%;"></div>
-                            <div class="bar bar-danger" style="width: 10%;"></div>
-                        </div>
-                    </td>
-                </tr>
-                <tr class="result">
-                    <td class="name">A more descriptive test</td>
-                    <td>
-                        <div class="progress">
-                            <div class="bar bar-success" style="width: 35%;"></div>
-                            <div class="bar bar-warning" style="width: 20%;"></div>
-                            <div class="bar bar-danger" style="width: 10%;"></div>
-                        </div>
-                    </td>
-                </tr>
-                <tr class="result success">
-                    <td class="name">A more descriptive test</td>
-                    <td>
-                        <div class="progress">
-                            <div class="bar bar-success" style="width: 35%;"></div>
-                            <div class="bar bar-warning" style="width: 20%;"></div>
-                            <div class="bar bar-danger" style="width: 10%;"></div>
-                            <div class="bar" style="width: 10%;"></div>
-                        </div>
-                    </td>
-                </tr> -->
-            </tbody>
+            <tbody id="results"></tbody>
         </table>
     </div>
-    <script src="js/benchmarks.js"></script>
+    <script type="text/javascript">
+        (function(){
+            window.benchmarkTimer = new marks.Timer( {
+                onFinish: function() {
+                    console.log( 'Timer.onFinish' );
+                },
+                
+                onSnapshotAdd: function( snapshot ) {
+                    console.log( 'Timer.onSnapshotAdd: ' + snapshot.name );
+                },
+                
+                onSnapshotStart: function( snapshot ) {
+                    console.log( 'Timer.onSnapshotStart: ' + snapshot.name );
+                },
+                
+                onSnapshotEnd: function( snapshot ) {
+                    console.log( 'Timer.onSnapshotEnd: ' + snapshot.name );
+                },
+                
+                onBenchmarkComplete: function( snapshot, benchmark ) {
+                    console.log( 'Timer.onBenchmarkComplete: ' + snapshot.name );
+                    console.log( benchmark );
+                }
+            } );
+            
+            benchmarkTimer.compareSnapshots( [
+                { name: 'current', libs: [ '../../phet-scene-min.js' ], tests: [ 'js/current.js' ] },
+                { name: '120202-515bfa9d9a', libs: [ 'snapshots/phet-scene-min-120202-515bfa9d9a.js' ], tests: [ 'snapshots/tests-120202-515bfa9d9a.js' ] },
+                { name: 'control', libs: [ '../../phet-scene-min.js' ], tests: [ 'js/current.js' ] }
+            ] );
+        })();
+    </script>
 </body>
 </html>
