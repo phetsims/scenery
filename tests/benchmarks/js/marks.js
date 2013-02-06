@@ -38,6 +38,19 @@ var marks = marks || {};
     Timer.prototype = {
         constructor: Timer,
         
+        add: function( name, fn, args ) {
+            args = args || {};
+            
+            if( args.delay === undefined ) {
+                args.delay = 0.1;
+            }
+            if( args.minTime === undefined ) {
+                args.minTime = 0.01;
+            }
+            
+            this.currentSuite.add( name, fn, args );
+        },
+        
         addSnapshot: function( snapshot ) {
             this.snapshots.push( snapshot );
             this.pendingSnapshots.push( snapshot );
@@ -87,13 +100,6 @@ var marks = marks || {};
                         } );
                     } else {
                         // all scripts have executed
-                        
-                        for( var i = 0; i < suite.length; i++ ) {
-                            // console.log( suite[i].minTime );
-                            // console.log( suite[i].delay );
-                            // suite[i].minTime = 0.1;
-                            // suite[i].delay = 0.1;
-                        }
                         
                         // TODO: determine whether queued is necessary
                         suite.run( { queued: true } );
@@ -209,7 +215,7 @@ var marks = marks || {};
         
         
         this.benchmarkNameColumn = this.numColumns;
-        this.addColumn( 'Name' );
+        this.addColumn( 'Benchmark Name' );
         
         this.currentNameColumn = this.numColumns;
     };
@@ -220,30 +226,47 @@ var marks = marks || {};
         
         addStats: function( snapshot, benchmark, cell ) {
             
+            var showPlusMinus = false;
+            
             function log10( x ) {
                 return Math.LOG10E * Math.log( x );
             }
             
-            var text;
-            if( benchmark.stats.mean === 0 ) {
-                text = '0ms';
+            var multiplier;
+            var units;
+            if( benchmark.stats.mean >= 1 ) {
+                multiplier = 1;
+                units = 's';
+            } else if( benchmark.stats.mean >= 0.001 ) {
+                multiplier = 1000;
+                units = 'ms';
+            } else if( benchmark.stats.mean >= 0.000001 ) {
+                multiplier = 1000000;
+                units = '&#xb5;s';
             } else {
-                var ms = 1000 * benchmark.stats.mean;
-                var moe = 1000 * benchmark.stats.moe;
-                
-                var digits = -Math.min( 0, Math.floor( log10( moe ) ) - 1 ); // add another digit over significant figures
-                
-                text = ms.toFixed( digits ) + 'ms +/- ' + moe.toFixed( digits );
-                
-                if( snapshot.name !== 'current' ) {
-                    var currentMark = this.benchmarks[this.benchmarkRowNumbers[benchmark.name]][this.currentNameColumn];
-                    if( Math.abs( currentMark.stats.mean - benchmark.stats.mean ) > currentMark.stats.moe + benchmark.stats.moe ) {
-                        cell.style.background = currentMark.stats.mean > benchmark.stats.mean ? '#ffcccc' : '#ccffcc';
-                    }
+                multiplier = 1000000000;
+                units = 'ns';
+            }
+            
+            var ms = multiplier * benchmark.stats.mean;
+            var moe = multiplier * benchmark.stats.moe;
+            
+            var digits = Math.min( 20, -Math.min( 0, Math.floor( log10( moe ) ) + ( showPlusMinus ? -1 : 1 ) ) ); // add another digit over significant figures
+            if( ms === 0 ) {
+                digits = 0;
+            }
+            
+            var html = ms.toFixed( digits ) + ( !showPlusMinus || moe === 0 ? '' : '&#xb1' + moe.toFixed( digits ) ) + units;
+            
+            if( snapshot.name !== 'current' ) {
+                var currentMark = this.benchmarks[this.benchmarkRowNumbers[benchmark.name]][this.currentNameColumn];
+                if( Math.abs( currentMark.stats.mean - benchmark.stats.mean ) > currentMark.stats.moe + benchmark.stats.moe ) {
+                    cell.style.background = currentMark.stats.mean > benchmark.stats.mean ? '#ffcccc' : '#ccffcc';
+                    html = '<strong>' + ( -100 * ( currentMark.stats.mean - benchmark.stats.mean ) / benchmark.stats.mean ).toFixed( 2 ) + '%</strong> ' + html;
                 }
             }
             
-            cell.appendChild( document.createTextNode( text ) );
+            cell.innerHTML = html;
         },
         
         addSnapshot: function( snapshot ) {
