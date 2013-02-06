@@ -208,13 +208,43 @@ var marks = marks || {};
         this.snapshotColumnNumbers = {}; // indexed by snapshot
         
         
-        this.benchmarkNameColumn = this.numRows;
+        this.benchmarkNameColumn = this.numColumns;
         this.addColumn( 'Name' );
+        
+        this.currentNameColumn = this.numColumns;
     };
     var TableReport = marks.TableReport;
     
     TableReport.prototype = {
         constructor: TableReport,
+        
+        addStats: function( snapshot, benchmark, cell ) {
+            
+            function log10( x ) {
+                return Math.LOG10E * Math.log( x );
+            }
+            
+            var text;
+            if( benchmark.stats.mean === 0 ) {
+                text = '0ms';
+            } else {
+                var ms = 1000 * benchmark.stats.mean;
+                var moe = 1000 * benchmark.stats.moe;
+                
+                var digits = -Math.min( 0, Math.floor( log10( moe ) ) - 1 ); // add another digit over significant figures
+                
+                text = ms.toFixed( digits ) + 'ms +/- ' + moe.toFixed( digits );
+                
+                if( snapshot.name !== 'current' ) {
+                    var currentMark = this.benchmarks[this.benchmarkRowNumbers[benchmark.name]][this.currentNameColumn];
+                    if( Math.abs( currentMark.stats.mean - benchmark.stats.mean ) > currentMark.stats.moe + benchmark.stats.moe ) {
+                        cell.style.background = currentMark.stats.mean > benchmark.stats.mean ? '#ffcccc' : '#ccffcc';
+                    }
+                }
+            }
+            
+            cell.appendChild( document.createTextNode( text ) );
+        },
         
         addSnapshot: function( snapshot ) {
             this.snapshotColumnNumbers[snapshot] = this.numColumns;
@@ -238,7 +268,7 @@ var marks = marks || {};
             
             this.benchmarks[row][column] = benchmark;
             
-            this.cells[row][column].appendChild( document.createTextNode( ( 1000 * benchmark.stats.mean ) + 'ms +/- ' + ( benchmark.stats.moe * 1000 ) ) );
+            this.addStats( snapshot, benchmark, this.cells[row][column] );
         },
         
         addRow: function() {
