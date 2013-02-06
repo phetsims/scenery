@@ -71,49 +71,4 @@
         }
     } );
     
-    // marks.run( [
-    //     new Benchmark( 'Canvas creation', function() {
-    //         document.createElement( 'canvas' );
-    //     } ),
-        
-    //     new Benchmark( 'Canvas/context creation', function() {
-    //         var canvas = document.createElement( 'canvas' );
-    //         var context = phet.canvas.initCanvas( canvas );
-    //     } ),
-        
-    //     new Benchmark( 'Fast on current version', function() {
-    //         var count = 0;
-    //         for( var i = 0; i < 100; i++ ) {
-    //             count = count * i + Math.sin( i );
-    //         }
-    //     } );
-        
-    //     new Benchmark( 'Slow on current version', function() {
-            
-    //     } );
-    // ] );
-    
-    
-    
-    
-    // sceneBench( 'canvas creation', function( deferred ) {
-    //     var canvas = document.createElement( 'canvas' );
-    // } );
-    
-    // sceneBench( 'canvas/context creation', function( deferred ) {
-    //     var canvas = document.createElement( 'canvas' );
-    //     var context = phet.canvas.initCanvas( canvas );
-    // } );
-    
-    // sceneBench( 'Fast On Current', function( deferrer ) {
-    //     var arb = deferrer;
-    //     setTimeout( function() {
-    //         arb.resolve();
-    //     }, 50 );
-    // }, true );
-    
-    // sceneBench( 'Slow On Current', function( deferred ) {
-    //     deferred.resolve();
-    // }, true );
-    
 })();

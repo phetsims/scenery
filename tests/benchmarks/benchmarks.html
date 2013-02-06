@@ -36,39 +36,18 @@
     <div id="main" style="position: absolute; left: 0; top: 0; background-color: white; z-index: 0;">
     </div>
     <div id="profiling-results">
-        <table class="table table-condensed">
+        <!-- <table class="table table-condensed">
             <thead>
                 <tr id="versions">
                     <th>Name</th>
                 </tr>
             </thead>
             <tbody id="results"></tbody>
-        </table>
+        </table> -->
     </div>
     <script type="text/javascript">
         (function(){
-            window.benchmarkTimer = new marks.Timer( {
-                onFinish: function() {
-                    console.log( 'Timer.onFinish' );
-                },
-                
-                onSnapshotAdd: function( snapshot ) {
-                    console.log( 'Timer.onSnapshotAdd: ' + snapshot.name );
-                },
-                
-                onSnapshotStart: function( snapshot ) {
-                    console.log( 'Timer.onSnapshotStart: ' + snapshot.name );
-                },
-                
-                onSnapshotEnd: function( snapshot ) {
-                    console.log( 'Timer.onSnapshotEnd: ' + snapshot.name );
-                },
-                
-                onBenchmarkComplete: function( snapshot, benchmark ) {
-                    console.log( 'Timer.onBenchmarkComplete: ' + snapshot.name );
-                    console.log( benchmark );
-                }
-            } );
+            window.benchmarkTimer = new marks.Timer( new marks.TableReport( $( '#profiling-results' )[0] ) );
             
             benchmarkTimer.compareSnapshots( [
                 { name: 'current', libs: [ '../../phet-scene-min.js' ], tests: [ 'js/current.js' ] },

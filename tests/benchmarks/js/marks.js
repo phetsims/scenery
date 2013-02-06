@@ -68,6 +68,8 @@ var marks = marks || {};
                 
                 this.currentSuite = this.createSuite( snapshot );
                 
+                var suite = this.currentSuite;
+                
                 if( this.options.onSnapshotStart ) {
                     this.options.onSnapshotStart( snapshot );
                 }
@@ -86,8 +88,15 @@ var marks = marks || {};
                     } else {
                         // all scripts have executed
                         
+                        for( var i = 0; i < suite.length; i++ ) {
+                            // console.log( suite[i].minTime );
+                            // console.log( suite[i].delay );
+                            // suite[i].minTime = 0.1;
+                            // suite[i].delay = 0.1;
+                        }
+                        
                         // TODO: determine whether queued is necessary
-                        that.currentSuite.run( { queued: true } );
+                        suite.run( { queued: true } );
                     }
                 }
                 
@@ -165,6 +174,129 @@ var marks = marks || {};
             
         }
     }
+    
+    // passed to marks.Timer constructor as an options object. container is a block-level element that the report is placed in
+    marks.TableReport = function( container ) {
+        this.container = container;
+        
+        this.table = document.createElement( 'table' );
+        this.table.className = 'table table-condensed';
+        
+        this.thead = document.createElement( 'thead' );
+        this.table.appendChild( this.thead );
+        this.headRow = document.createElement( 'tr' );
+        this.thead.appendChild( this.headRow );
+        
+        this.tbody = document.createElement( 'tbody' );
+        this.table.appendChild( this.tbody );
+        
+        this.container.appendChild( this.table );
+        
+        // 2-d array that stores table cells (TD elements)
+        this.cells = [];
+        
+        // TR elements
+        this.rows = [];
+        
+        // 2-d array that is benchmarks[row][column]
+        this.benchmarks = [];
+        
+        this.numRows = 0;
+        this.numColumns = 0;
+        
+        this.benchmarkRowNumbers = {}; // indexed by benchmark name
+        this.snapshotColumnNumbers = {}; // indexed by snapshot
+        
+        
+        this.benchmarkNameColumn = this.numRows;
+        this.addColumn( 'Name' );
+    };
+    var TableReport = marks.TableReport;
+    
+    TableReport.prototype = {
+        constructor: TableReport,
+        
+        addSnapshot: function( snapshot ) {
+            this.snapshotColumnNumbers[snapshot] = this.numColumns;
+            
+            this.addColumn( snapshot.name );
+        },
+        
+        addBenchmark: function( snapshot, benchmark ) {
+            if( !( benchmark.name in this.benchmarkRowNumbers ) ) {
+                var rowNumber = this.numRows;
+                this.benchmarkRowNumbers[benchmark.name] = rowNumber;
+                this.benchmarks.push( [] );
+                
+                this.addRow();
+                
+                this.cells[rowNumber][this.benchmarkNameColumn].appendChild( document.createTextNode( benchmark.name ) );
+            }
+            
+            var row = this.benchmarkRowNumbers[benchmark.name];
+            var column = this.snapshotColumnNumbers[snapshot];
+            
+            this.benchmarks[row][column] = benchmark;
+            
+            this.cells[row][column].appendChild( document.createTextNode( ( 1000 * benchmark.stats.mean ) + 'ms +/- ' + ( benchmark.stats.moe * 1000 ) ) );
+        },
+        
+        addRow: function() {
+            this.numRows++;
+            
+            var row = document.createElement( 'tr' );
+            this.table.appendChild( row );
+            this.rows.push( row );
+            
+            // append row with the requisite number of columns
+            var rowElements = [];
+            for( var i = 0; i < this.numColumns; i++ ) {
+                var td = document.createElement( 'td' );
+                row.appendChild( td );
+                rowElements.push( td );
+            }
+            this.cells.push( rowElements );
+        },
+        
+        addColumn: function( name ) {
+            var header = document.createElement( 'th' );
+            header.appendChild( document.createTextNode( name ) );
+            this.headRow.appendChild( header );
+            
+            this.numColumns++;
+            
+            // append column to each row
+            for( var i = 0; i < this.numRows; i++ ) {
+                var td = document.createElement( 'td' );
+                this.rows[i].appendChild( td );
+                this.cells[i].push( td );
+            }
+        },
+        
+        onFinish: function() {
+            console.log( 'Timer.onFinish' );
+        },
+        
+        onSnapshotAdd: function( snapshot ) {
+            console.log( 'Timer.onSnapshotAdd: ' + snapshot.name );
+        },
+        
+        onSnapshotStart: function( snapshot ) {
+            console.log( 'Timer.onSnapshotStart: ' + snapshot.name );
+            console.log( 'BOO' );
+            this.addSnapshot( snapshot );
+        },
+        
+        onSnapshotEnd: function( snapshot ) {
+            console.log( 'Timer.onSnapshotEnd: ' + snapshot.name );
+        },
+        
+        onBenchmarkComplete: function( snapshot, benchmark ) {
+            console.log( 'Timer.onBenchmarkComplete: ' + snapshot.name + ' ' + benchmark.name );
+            console.log( benchmark );
+            this.addBenchmark( snapshot, benchmark );
+        }
+    };
     
     function debug( msg ) {
         if ( console && console.log ) {
