@@ -36,17 +36,9 @@
     <div id="main" style="position: absolute; left: 0; top: 0; background-color: white; z-index: 0;">
     </div>
     <div id="profiling-results">
-        <!-- <table class="table table-condensed">
-            <thead>
-                <tr id="versions">
-                    <th>Name</th>
-                </tr>
-            </thead>
-            <tbody id="results"></tbody>
-        </table> -->
     </div>
     <script type="text/javascript">
-        (function(){
+        $( window ).load( function() {
             window.benchmarkTimer = new marks.Timer( new marks.TableReport( $( '#profiling-results' )[0] ) );
             
             benchmarkTimer.compareSnapshots( [
@@ -54,7 +46,7 @@
                 { name: '120202-515bfa9d9a', libs: [ 'snapshots/phet-scene-min-120202-515bfa9d9a.js' ], tests: [ 'snapshots/tests-120202-515bfa9d9a.js' ] },
                 { name: 'control', libs: [ '../../phet-scene-min.js' ], tests: [ 'js/current.js' ] }
             ] );
-        })();
+        } );
     </script>
 </body>
 </html>
