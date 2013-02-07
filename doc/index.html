@@ -127,13 +127,13 @@ scene.updateScene();
           var scene = new phet.scene.Scene( $( '#shapes-scene' ) );
           
           // A rectangle at (10,10) with a width of 50 and height of 80
-          scene.root.addChild( new phet.scene.Node( {
+          scene.root.addChild( new phet.scene.Path( {
             shape: phet.scene.Shape.rectangle( 10, 10, 50, 80 ),
             fill: '#ff0000'
           } ) );
           
           // An octogon, with a radius of 30
-          scene.root.addChild( new phet.scene.Node( {
+          scene.root.addChild( new phet.scene.Path( {
             shape: phet.scene.Shape.regularPolygon( 8, 30 ),
             fill: '#00ff00',
             stroke: '#000000',
@@ -150,7 +150,7 @@ scene.updateScene();
           customShape.close();
           // NOTE: this can also be chained, like shape.moveTo( ... ).lineTo( ... ).close()
           
-          scene.root.addChild( new phet.scene.Node( {
+          scene.root.addChild( new phet.scene.Path( {
             shape: customShape,
             fill: '#0000ff',
             stroke: '#000000',
@@ -165,13 +165,13 @@ scene.updateScene();
       
       <pre class="brush: js">
 // A rectangle at (10,10) with a width of 50 and height of 80
-scene.root.addChild( new phet.scene.Node( {
+scene.root.addChild( new phet.scene.Path( {
   shape: phet.scene.Shape.rectangle( 10, 10, 50, 80 ),
   fill: '#ff0000'
 } ) );
 
 // An octogon, with a radius of 30
-scene.root.addChild( new phet.scene.Node( {
+scene.root.addChild( new phet.scene.Path( {
   shape: phet.scene.Shape.regularPolygon( 8, 30 ),
   fill: '#00ff00',
   stroke: '#000000',
@@ -188,7 +188,7 @@ customShape.lineTo( 40, 0 );
 customShape.close();
 // NOTE: this can also be chained, like shape.moveTo( ... ).lineTo( ... ).close()
 
-scene.root.addChild( new phet.scene.Node( {
+scene.root.addChild( new phet.scene.Path( {
   shape: customShape,
   fill: '#0000ff',
   stroke: '#000000',
@@ -214,7 +214,7 @@ var someShape = ...; // a shape used for brevity in the following calls, otherwi
 // point around which rotation or scaling is done in the local coordinate frame, and bounds-based modifiers
 // like 'bottom' (which moves the bottom of the node's bounds to the specific y-value) are handled after other
 // modifiers have been run.
-var node1 = new phet.scene.Node( {
+var node1 = new phet.scene.Path( {
   shape: someShape,
   fill: '#000000',
   rotation: Math.PI / 2,
@@ -223,7 +223,7 @@ var node1 = new phet.scene.Node( {
 } );
 
 // ES5-setter style, called internally by the declarative paramter object style above
-var node2 = new phet.scene.Node();
+var node2 = new phet.scene.Path();
 node2.shape = someShape;
 node2.fill = '#000000';
 node2.x = 10; // note the reordering, as this is precisely how the declarative style is executed
@@ -231,7 +231,7 @@ node2.rotation = Math.PI / 2;
 node2.bottom = 200;
 
 // Java-style setters, called internally from the ES5-setter style above
-var node3 = new phet.scene.Node();
+var node3 = new phet.scene.Path();
 node3.setShape( someShape );
 node3.setFill( '#000000' );
 node3.setX( 10 );
@@ -239,7 +239,7 @@ node3.setRotation( Math.PI / 2 );
 node3.setBottom( 200 );
 
 // Chained style, since setters return a this-reference.
-var node4 = new phet.scene.Node().setShape( someShape ).setFill( '#000000' ).setX( 10 ).setRotation( Math.PI / 2 ).setBottom( 200 );
+var node4 = new phet.scene.Path().setShape( someShape ).setFill( '#000000' ).setX( 10 ).setRotation( Math.PI / 2 ).setBottom( 200 );
 
 // Additionally, parameters can be accessed by two styles:
 node2.rotation === node3.getRotation();
@@ -259,7 +259,7 @@ node2.rotation === node3.getRotation();
           var scene = new phet.scene.Scene( $( '#self-and-children' ) );
           
           // create a node that will have child nodes.
-          var container = new phet.scene.Node( {
+          var container = new phet.scene.Path( {
             // we'll add a background shape (300x100 rectangle) that will render on this node (it will be rendered below any child nodes)
             shape: phet.scene.Shape.rectangle( 0, 0, 300, 100 ),
             fill: '#888888',
@@ -276,7 +276,7 @@ node2.rotation === node3.getRotation();
           container.getSelfBounds(); // x between [0, 300], y between [0, 100]
           
           // add a green rectangle to the container, which will be above the gray background
-          var child1 = new phet.scene.Node( {
+          var child1 = new phet.scene.Path( {
             shape: phet.scene.Shape.rectangle( 0, 0, 25, 25 ), // a 25x25 rectangle
             fill: '#00ff00',
             scale: 2, // but scaled so it is effectively a 50x50 rectangle to its parents
@@ -308,7 +308,7 @@ node2.rotation === node3.getRotation();
       
       <pre class="brush: js">
 // create a node that will have child nodes.
-var container = new phet.scene.Node( {
+var container = new phet.scene.Path( {
   // we'll add a background shape (300x100 rectangle) that will render on this node (it will be rendered below any child nodes)
   shape: phet.scene.Shape.rectangle( 0, 0, 300, 100 ),
   fill: '#888888',
@@ -325,7 +325,7 @@ container.getBounds(); // x between [20, 320], y between [20, 120]
 container.getSelfBounds(); // x between [0, 300], y between [0, 100]
 
 // add a green rectangle to the container, which will be above the gray background
-var child1 = new phet.scene.Node( {
+var child1 = new phet.scene.Path( {
   shape: phet.scene.Shape.rectangle( 0, 0, 25, 25 ), // a 25x25 rectangle
   fill: '#00ff00',
   scale: 2, // but scaled so it is effectively a 50x50 rectangle to its parents
@@ -452,14 +452,14 @@ scene.root.addChild( new phet.scene.DOM( element, {
           var scene = new phet.scene.Scene( div );
           
           // a hexagon to rotate
-          var node = new phet.scene.Node( {
+          var node = new phet.scene.Path( {
             shape: phet.scene.Shape.regularPolygon( 6, 90 ),
             fill: '#000000',
             centerX: 100,
             centerY: 100
           } );
           // a marker so pauses on the iPad animation (since requestAnimationFrame doesn't trigger while scrolling) are visible
-          node.addChild( new phet.scene.Node( {
+          node.addChild( new phet.scene.Path( {
             shape: phet.scene.Shape.rectangle( 0, -3, 60, 6 ),
             fill: '#ff0000'
           } ) );
@@ -492,14 +492,14 @@ var div = $( '#animation-simple' );
 var scene = new phet.scene.Scene( div );
 
 // a hexagon to rotate
-var node = new phet.scene.Node( {
+var node = new phet.scene.Path( {
   shape: phet.scene.Shape.regularPolygon( 6, 90 ),
   fill: '#000000',
   centerX: 100,
   centerY: 100
 } );
 // a marker so pauses on the iPad animation (since requestAnimationFrame doesn't trigger while scrolling) are visible
-node.addChild( new phet.scene.Node( {
+node.addChild( new phet.scene.Path( {
   shape: phet.scene.Shape.rectangle( 0, -3, 60, 6 ),
   fill: '#ff0000'
 } ) );
@@ -598,7 +598,7 @@ window.requestAnimationFrame( tick, div[0] );
           // scene.root.addChild( label );
           
           // a big hexagon in the center. stroke not included in the hit region by default
-          var node = new phet.scene.Node( {
+          var node = new phet.scene.Path( {
             shape: phet.scene.Shape.regularPolygon( 6, 150 ),
             fill: colors[count],
             stroke: '#000000',
@@ -683,7 +683,7 @@ var labelPrefix = 'Fingers in hexagon: ';
 // scene.root.addChild( label );
 
 // a big hexagon in the center. stroke not included in the hit region by default
-var node = new phet.scene.Node( {
+var node = new phet.scene.Path( {
   shape: phet.scene.Shape.regularPolygon( 6, 150 ),
   fill: colors[count],
   stroke: '#000000',

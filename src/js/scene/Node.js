@@ -61,8 +61,6 @@ phet.scene = phet.scene || {};
     this._childPaintDirty = false;
     this._oldPaintMarked = false; // flag indicates the last rendered bounds of this node and all descendants are marked for a repaint already
     
-    // shape used for rendering
-    this._shape = null;
     // fill/stroke for shapes
     this._stroke = null;
     this._fill = null;
@@ -80,33 +78,8 @@ phet.scene = phet.scene || {};
   Node.prototype = {
     constructor: Node,
     
-    // override to render typical leaf behavior (although possible to use for non-leaf nodes also)
     renderSelf: function ( state ) {
-      // by default, render a shape if it exists
-      if ( this.hasShape() ) {
-        if ( state.isCanvasState() ) {
-          var layer = state.layer;
-          var context = layer.context;
-          
-          // TODO: fill/stroke delay optimizations?
-          context.beginPath();
-          this._shape.writeToContext( context );
-          
-          if ( this._fill ) {
-            layer.setFillStyle( this._fill );
-            context.fill();
-          }
-          if ( this._stroke ) {
-            layer.setStrokeStyle( this._stroke );
-            layer.setLineWidth( this.getLineWidth() );
-            layer.setLineCap( this.getLineCap() );
-            layer.setLineJoin( this.getLineJoin() );
-            context.stroke();
-          }
-        } else {
-          throw new Error( 'layer type shape rendering not implemented' );
-        }
-      }
+      // override to render typical leaf behavior (although possible to use for non-leaf nodes also)
     },
     
     enterState: function( state ) {
@@ -350,13 +323,12 @@ phet.scene = phet.scene || {};
       this.invalidatePaint();
     },
     
-    invalidateShape: function() {
-      this.markOldSelfPaint();
-      
-      if ( this.hasShape() ) {
-        this.invalidateSelf( this._shape.computeBounds( this._stroke ? this._lineDrawingStyles : null ) );
-        this.invalidatePaint();
-      }
+    invalidateFill: function() {
+      // override if fill handling is necessary (TODO: mixins!)
+    },
+    
+    invalidateStroke: function() {
+      // override if stroke handling is necessary (TODO: mixins!)
     },
     
     // bounds assumed to be in the local coordinate frame, below this node's transform
@@ -521,33 +493,14 @@ phet.scene = phet.scene || {};
     // override for computation of whether a point is inside the content rendered in renderSelf
     // point is considered to be in the local coordinate frame
     containsPointSelf: function( point ) {
-      if ( this.hasShape() ) {
-        var result = this._shape.containsPoint( point );
-        
-        // also include the stroked region in the hit area if applicable
-        if ( !result && this._includeStrokeInHitRegion && this.hasStroke() ) {
-          result = this._shape.getStrokedShape( this._lineDrawingStyles ).containsPoint( point );
-        }
-        return result;
-      } else {
-        // if self bounds are not null default to checking self bounds
-        return this._selfBounds.containsPoint( point );
-      }
+      // if self bounds are not null default to checking self bounds
+      return this._selfBounds.containsPoint( point );
     },
     
     // whether this node's self intersects the specified bounds, in the local coordinate frame
     intersectsBoundsSelf: function( bounds ) {
-      if ( this.hasShape() ) {
-        // TODO: should a shape's stroke be included?
-        return this._shape.intersectsBounds( bounds );
-      } else {
-        // if self bounds are not null, child should override this
-        return this._selfBounds.intersectsBounds( bounds );
-      }
-    },
-    
-    hasShape: function() {
-      return this._shape !== null;
+      // if self bounds are not null, child should override this
+      return this._selfBounds.intersectsBounds( bounds );
     },
     
     hasFill: function() {
@@ -908,19 +861,6 @@ phet.scene = phet.scene || {};
       return this.getBounds().height();
     },
     
-    // sets the shape drawn, or null to remove the shape
-    setShape: function( shape ) {
-      if ( this._shape !== shape ) {
-        this._shape = shape;
-        this.invalidateShape();
-      }
-      return this;
-    },
-    
-    getShape: function() {
-      return this._shape;
-    },
-    
     getLineWidth: function() {
       return this._lineDrawingStyles.lineWidth;
     },
@@ -931,7 +871,7 @@ phet.scene = phet.scene || {};
         
         this._lineDrawingStyles.lineWidth = lineWidth;
         
-        this.invalidateShape();
+        this.invalidateStroke();
       }
       return this;
     },
@@ -946,7 +886,7 @@ phet.scene = phet.scene || {};
         
         this._lineDrawingStyles.lineCap = lineCap;
         
-        this.invalidateShape();
+        this.invalidateStroke();
       }
       return this;
     },
@@ -961,7 +901,7 @@ phet.scene = phet.scene || {};
         
         this._lineDrawingStyles.lineJoin = lineJoin;
         
-        this.invalidateShape();
+        this.invalidateStroke();
       }
       return this;
     },
@@ -971,7 +911,7 @@ phet.scene = phet.scene || {};
       this.markOldSelfPaint();
       
       this._lineDrawingStyles = lineStyles;
-      this.invalidateShape();
+      this.invalidateStroke();
       return this;
     },
     
@@ -987,6 +927,8 @@ phet.scene = phet.scene || {};
       if ( this.getFill() !== fill ) {
         this._fill = fill;
         this.invalidatePaint();
+        
+        this.invalidateFill();
       }
       return this;
     },
@@ -1001,7 +943,7 @@ phet.scene = phet.scene || {};
         this.markOldSelfPaint();
         
         this._stroke = stroke;
-        this.invalidateShape();
+        this.invalidateStroke();
       }
       return this;
     },
@@ -1110,9 +1052,6 @@ phet.scene = phet.scene || {};
     set fill( value ) { this.setFill( value ); },
     get fill() { return this.getFill(); },
     
-    set shape( value ) { this.setShape( value ); },
-    get shape() { return this.getShape(); },
-    
     set lineWidth( value ) { this.setLineWidth( value ); },
     get lineWidth() { return this.getLineWidth(); },
     
@@ -1171,7 +1110,8 @@ phet.scene = phet.scene || {};
       // NOTE: translation-based mutators come before rotation/scale, since typically we think of their operations occuring "after" the rotation / scaling
       // NOTE: left/right/top/bottom/centerX/centerY are at the end, since they rely potentially on rotation / scaling changes of bounds that may happen beforehand
       // TODO: using more than one of {translation,x,left,right,centerX} or {translation,y,top,bottom,centerY} should be considered an error
-      var setterKeys = [ 'stroke', 'fill', 'shape', 'lineWidth', 'lineCap', 'lineJoin', 'layerType', 'visible',
+      // TODO: move fill / stroke setting to mixins
+      var setterKeys = [ 'stroke', 'fill', 'lineWidth', 'lineCap', 'lineJoin', 'layerType', 'visible',
                  'translation', 'x', 'y', 'rotation', 'scale', 'left', 'right', 'top', 'bottom', 'centerX', 'centerY' ];
       
       var node = this;

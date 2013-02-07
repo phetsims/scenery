@@ -81,7 +81,7 @@
   * Rectangle
   *----------------------------------------------------------------------------*/    
   
-  container.addChild( new phet.scene.Node( {
+  container.addChild( new phet.scene.Path( {
     shape: phet.scene.Shape.rectangle( 0, 0, 44, 44 ),
     x: 20.5,
     y: 100.5,
@@ -100,7 +100,7 @@
   customShape.lineTo( 0, 25 );
   customShape.close();
   
-  container.addChild( new phet.scene.Node( {
+  container.addChild( new phet.scene.Path( {
     shape: customShape,
     x: 120.5,
     y: 100.5,

@@ -130,19 +130,19 @@
   
   function strokeEqualsFill( shapeToStroke, shapeToFill, strokeNodeSetup, message ) {
     sceneEquals( function( scene ) {
-      var node = new phet.scene.Node();
+      var node = new phet.scene.Path();
       node.setShape( shapeToStroke );
       node.setStroke( '#000000' );
       if ( strokeNodeSetup ) { strokeNodeSetup( node ); }
       scene.root.addChild( node );
     }, function( scene ) {
-      var node = new phet.scene.Node();
+      var node = new phet.scene.Path();
       node.setShape( shapeToFill );
       node.setFill( '#000000' );
       // node.setStroke( '#ff0000' ); // for debugging strokes
       scene.root.addChild( node );
       // node.validateBounds();
-      // scene.root.addChild( new phet.scene.Node( {
+      // scene.root.addChild( new phet.scene.Path( {
       //   shape: phet.scene.Shape.bounds( node.getSelfBounds() ),
       //   fill: 'rgba(0,0,255,0.5)'
       // } ) );
@@ -249,9 +249,9 @@
   } );
   
   test( 'Sceneless node handling', function() {
-    var a = new phet.scene.Node();
-    var b = new phet.scene.Node();
-    var c = new phet.scene.Node();
+    var a = new phet.scene.Path();
+    var b = new phet.scene.Path();
+    var c = new phet.scene.Path();
     
     a.setShape( phet.scene.Shape.rectangle( 0, 0, 20, 20 ) );
     c.setShape( phet.scene.Shape.rectangle( 10, 10, 30, 30 ) );
@@ -275,12 +275,12 @@
     var scene = new phet.scene.Scene( $( '#main' ) );
     var root = scene.root;
     
-    root.addChild( new phet.scene.Node( {
+    root.addChild( new phet.scene.Path( {
       shape: phet.scene.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
       fill: '#ff0000'
     } ) );
     
-    var middleRect = new phet.scene.Node( {
+    var middleRect = new phet.scene.Path( {
       shape: phet.scene.Shape.rectangle( canvasWidth / 4, canvasHeight / 4, canvasWidth / 2, canvasHeight / 2 ),
       fill: '#00ff00'
     } );
@@ -288,7 +288,7 @@
     
     root.addChild( middleRect );
     
-    root.addChild( new phet.scene.Node( {
+    root.addChild( new phet.scene.Path( {
       shape: phet.scene.Shape.rectangle( canvasWidth / 2, canvasHeight / 2, canvasWidth / 2, canvasHeight / 2 ),
       fill: '#0000ff'
     } ) );
@@ -301,7 +301,7 @@
   test( 'Update vs Full Basic Clearing Check', function() {
     updateVsFullRender( [
       function( scene ) {
-        scene.root.addChild( new phet.scene.Node( {
+        scene.root.addChild( new phet.scene.Path( {
           shape: phet.scene.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
           fill: '#000000'
         } ) );
@@ -314,7 +314,7 @@
   test( 'Update vs Full Self-Bounds increase', function() {
     updateVsFullRender( [
       function( scene ) {
-        var node = new phet.scene.Node();
+        var node = new phet.scene.Path();
         node.setShape( phet.scene.Shape.rectangle( 0, 0, canvasWidth / 3, canvasHeight / 3 ) );
         node.setFill( '#ff0000' );
         node.setStroke( '#000000' );
@@ -329,7 +329,7 @@
     updateVsFullRender( [
       function( scene ) {
         // TODO: clearer way of specifying parameters
-        var node = new phet.scene.Node();
+        var node = new phet.scene.Path();
         node.setShape( phet.scene.Shape.rectangle( 15, 15, canvasWidth / 2, canvasHeight / 2 ) );
         node.setFill( '#ff0000' );
         node.setStroke( '#000000' );
@@ -358,13 +358,13 @@
   } );
   
   test( 'ES5 Setter / Getter tests', function() {
-    var node = new phet.scene.Node();
+    var node = new phet.scene.Path();
     var fill = '#abcdef';
     node.fill = fill;
     equal( node.fill, fill );
     equal( node.getFill(), fill );
     
-    var otherNode = new phet.scene.Node( { fill: fill, shape: phet.scene.Shape.rectangle( 0, 0, 10, 10 ) } );
+    var otherNode = new phet.scene.Path( { fill: fill, shape: phet.scene.Shape.rectangle( 0, 0, 10, 10 ) } );
     
     equal( otherNode.fill, fill );
   } );
@@ -373,12 +373,12 @@
     var scene = new phet.scene.Scene( $( '#main' ) );
     var root = scene.root;
     
-    root.addChild( new phet.scene.Node( {
+    root.addChild( new phet.scene.Path( {
       shape: phet.scene.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
       fill: '#ff0000'
     } ) );
     
-    var middleRect = new phet.scene.Node( {
+    var middleRect = new phet.scene.Path( {
       shape: phet.scene.Shape.rectangle( canvasWidth / 4, canvasHeight / 4, canvasWidth / 2, canvasHeight / 2 ),
       fill: '#00ff00'
     } );
@@ -386,7 +386,7 @@
     
     root.addChild( middleRect );
     
-    root.addChild( new phet.scene.Node( {
+    root.addChild( new phet.scene.Path( {
       shape: phet.scene.Shape.rectangle( canvasWidth / 2, canvasHeight / 2, canvasWidth / 2, canvasHeight / 2 ),
       fill: '#0000ff'
     } ) );
@@ -439,7 +439,7 @@
   } );
   
   test( 'Setting left/right of node', function() {
-    var node = new phet.scene.Node( {
+    var node = new phet.scene.Path( {
       shape: phet.scene.Shape.rectangle( -20, -20, 50, 50 ),
       scale: 2
     } );
@@ -703,7 +703,7 @@
   // test( 'DOM Test', function() {
   //   updateVsFullRender( [
   //     function( scene ) {
-  //       var node = new phet.scene.Node();
+  //       var node = new phet.scene.Path();
   //       node.setShape( phet.scene.Shape.rectangle( 0, 0, canvasWidth / 3, canvasHeight / 3 ) );
   //       node.setFill( '#ff0000' );
   //       node.setStroke( '#000000' );

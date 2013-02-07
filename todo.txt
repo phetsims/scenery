@@ -79,7 +79,7 @@ Layers:
 Code:
     Switch to jQuery 2 (wait for a stable build?)
     * Move Shape handling from Node to subclass Path.
-        Mixin-style handling so we can add fill / stroke properties to different subclasses (i.e. Text and Path will both need fill handling)
+        * Mixin-style handling so we can add fill / stroke properties to different subclasses (i.e. Text and Path will both need fill handling)
             Examine mixin options like http://javascriptweblog.wordpress.com/2011/05/31/a-fresh-look-at-javascript-mixins/
         Benchmark this first to see if there are regressions in inner-loop code
     * Add a flag to Matrix3 to note that it is an affine transformation. This will help us speed up matrix-vector and matrix-matrix multiplications.

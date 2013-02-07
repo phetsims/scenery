@@ -16,7 +16,7 @@ phet.tests = phet.tests || {};
     var scene = new phet.scene.Scene( main );
     var root = scene.root;
     
-    var background = new phet.scene.Node();
+    var background = new phet.scene.Path();
     background.setShape( phet.scene.Shape.rectangle( -sceneWidth / 2 * borderFactor, -sceneHeight / 2 * borderFactor, sceneWidth * borderFactor, sceneHeight * borderFactor ) );
     background.setFill( '#333333' );
     background.setStroke( '#000000' );
@@ -26,7 +26,7 @@ phet.tests = phet.tests || {};
     root.addChild( nodes );
     
     for ( var i = 0; i < itemCount; i++ ) {
-      var node = new phet.scene.Node();
+      var node = new phet.scene.Path();
       
       // regular polygon
       node.setShape( phet.scene.Shape.regularPolygon( 6, radius ) );

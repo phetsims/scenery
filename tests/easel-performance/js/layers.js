@@ -26,7 +26,7 @@ phet.tests = phet.tests || {};
       var shape = phet.scene.Shape.regularPolygon( 6, radius );
       
       for ( var i = 0; i < count; i++ ) {
-        var node = new phet.scene.Node( {
+        var node = new phet.scene.Path( {
           shape: shape, // regular polygon
           fill: color,
           stroke: '#000000'

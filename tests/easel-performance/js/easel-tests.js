@@ -117,7 +117,7 @@ $(document).ready( function() {
         );
         
         // TODO: a way to pass an array and run commands without explicitly adding pieces?
-        // scene.root.addChild( new phet.scene.Node( {
+        // scene.root.addChild( new phet.scene.Path( {
         //   shape: new phet.scene.Shape( [
         //     new phet.scene.Shape.Piece.MoveTo( mainCurve.start ),
         //     new phet.scene.Shape.Piece.LineTo( mainCurve.control ),
@@ -126,7 +126,7 @@ $(document).ready( function() {
         //   stroke: '#ff0000'
         // } ) );
         
-        scene.root.addChild( new phet.scene.Node( {
+        scene.root.addChild( new phet.scene.Path( {
           shape: new phet.scene.Shape( [
             new phet.scene.Shape.Piece.MoveTo( mainCurve.start ),
             new phet.scene.Shape.Piece.QuadraticCurveTo( mainCurve.control, mainCurve.end )
@@ -137,7 +137,7 @@ $(document).ready( function() {
         _.each( [ -55, -40, -30, -15, -5, 5, 15, 30, 40, 55 ], function( offset ) {
           var offsetPieces = mainCurve.offsetTo( offset, true );
           
-          scene.root.addChild( new phet.scene.Node( {
+          scene.root.addChild( new phet.scene.Path( {
             shape: new phet.scene.Shape( offsetPieces ),
             stroke: '#0000ff'
           } ) );
@@ -344,7 +344,7 @@ $(document).ready( function() {
         
         scene.root.addChild( container );
         
-        // var background = new phet.scene.Node();
+        // var background = new phet.scene.Path();
         // background.setShape( phet.scene.Shape.rectangle( -400, -400, 800, 800 ) );
         // background.setFill( 'rgba(230,255,230,0.5)' );
         // scene.root.addChild( background );
