@@ -12,7 +12,7 @@
   <script src="../../contrib/bootstrap-2.2.2.js"></script>
   
   <!-- <script src="../../phet-scene-min.js"></script> -->
-  <!-- <script src="js/marks.js"></script> -->
+  <script src="js/performance.js"></script>
   
   <style>
     .table {
@@ -26,99 +26,36 @@
   <div id="profiling-results">
   </div>
   <script type="text/javascript">
-    // $( window ).load( function() {
-    //   window.benchmarkTimer = new marks.Timer( new marks.TableReport( $( '#profiling-results' )[0] ) );
+    // not ready, but load. we want everything to be fully loaded so it doesn't affect performance
+    $( window ).load( function() {
+      var snapshots = [
+        { name: 'current', libs: [ '../../phet-scene-min.js' ], tests: [ 'js/perf-current.js' ] },
+        { name: 'control', libs: [ '../../phet-scene-min.js' ], tests: [ 'js/perf-current.js' ] }
+        // { name: '120202-515bfa9d9a', libs: [ 'snapshots/phet-scene-min-120202-515bfa9d9a.js' ], tests: [ 'snapshots/tests-120202-515bfa9d9a.js' ] }
+      ];
       
-    //   benchmarkTimer.compareSnapshots( [
-    //     { name: 'current', libs: [ '../../phet-scene-min.js' ], tests: [ 'js/current.js' ] },
-    //     { name: '120202-515bfa9d9a', libs: [ 'snapshots/phet-scene-min-120202-515bfa9d9a.js' ], tests: [ 'snapshots/tests-120202-515bfa9d9a.js' ] },
-    //     { name: 'control', libs: [ '../../phet-scene-min.js' ], tests: [ 'js/current.js' ] }
-    //   ] );
-    // } );
-    
-    mainLoop();
-    
-    function mainLoop() {
-      loadScript( '../../phet-scene-min.js', function() {
-        testA( 20, function( msElapsed ) {
-          console.log( 'a: ' + msElapsed );
-          mainLoop();
-        } );
-      } );
-    }
-    
-    function testA( maxCount, finished ) {
-      var width = 1024;
-      var height = 768;
-      
-      var main = $( '#main' );
-      main.width( width );
-      main.height( height );
-      var scene = new phet.scene.Scene( main );
-      for( var i = 0; i < 2000; i++ ) {
-        scene.root.addChild( new phet.scene.Node( {
-          shape: phet.scene.Shape.rectangle( ( Math.PI * i ) % width, ( 27 * i ) % height, 20, 20 ),
-          fill: 'rgba(255,0,0,0.3)',
-          stroke: '#000000'
-        } ) );
-      }
-      
-      var count = 0;
-      
-      function tick() {
-        if( count++ === maxCount ) {
-          finished( new Date - startTime );
-        } else {
-          window.requestAnimationFrame( tick, main[0] );
+      var performance = new marks.Performance( {
+        onMark: function( snapshot, mark, score ) {
+          if( !snapshot.times ) {
+            snapshot.times = {};
+          }
+          if( !snapshot.times[mark.name] ) {
+            snapshot.times[mark.name] = {
+              total: 0,
+              count: 0
+            };
+          }
           
-          scene.root.rotateAround( new phet.math.Vector2( width / 2, height / 2 ), 0.01 );
-          scene.updateScene();
+          var time = snapshot.times[mark.name];
+          time.total += score;
+          time.count += 1;
+          
+          console.log( snapshot.name + ' ' + mark.name + ': ' + ( time.total / time.count ) );
         }
-      }
-      window.requestAnimationFrame( tick, main[0] );
+      } );
       
-      var startTime = new Date;
-    }
-    
-    function debug( msg ) {
-      if ( console && console.log ) {
-        console.log( msg );
-      }
-    }
-    
-    function info( msg ) {
-      if ( console && console.log ) {
-        console.log( msg );
-      }
-    }
-    
-    function loadScript( src, callback ) {
-      debug( 'requesting script ' + src );
-      
-      var called = false;
-      
-      var script = document.createElement( 'script' );
-      script.type = 'text/javascript';
-      script.async = true;
-      script.onload = script.onreadystatechange = function() {
-        var state = this.readyState;
-        if ( state && state != "complete" && state != "loaded" ) {
-          return;
-        }
-        
-        if ( !called ) {
-          debug( 'completed script ' + src );
-          called = true;
-          callback();
-        }
-      };
-      
-      // make sure things aren't cached, just in case
-      script.src = src + '?random=' + Math.random().toFixed( 10 );
-      
-      var other = document.getElementsByTagName( 'script' )[0];
-      other.parentNode.insertBefore( script, other );
-    }
+      performance.compareSnapshots( snapshots );
+    } );
   </script>
 </body>
 </html>
