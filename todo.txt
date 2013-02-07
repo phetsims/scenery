@@ -34,7 +34,6 @@ Questions for team:
 
 General:
     *** shape strokes happen with linewidth at global scale???
-    * idiomatic.js styling of conditionals and loops
     Copy over Molecule Shapes efficiency improvement code from ~/
     DOM events => benchmarks => create Path => layer changes
     Documentation and Examples (always an item)
@@ -85,7 +84,7 @@ Code:
     _.extend that works on ES5 setter/getter pairs? Check $.extend? Check ES5 spec?
     Modularization of support code (math?)
     Vet recursive bounds code against empty area
-    License on files
+    * Code headers and copyright? Licenses?
     Handling of retina displays (and other backingScale differences)
 
 SVG:
