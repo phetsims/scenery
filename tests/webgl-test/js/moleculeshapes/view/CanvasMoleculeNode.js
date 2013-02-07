@@ -22,6 +22,6 @@ phet.moleculeshapes.view = phet.moleculeshapes.view || {};
 
     var CanvasMoleculeNode = phet.moleculeshapes.view.CanvasMoleculeNode;
 
-    CanvasMoleculeNode.prototype = Object.create( phet.webgl.GLNode.prototype );
+    CanvasMoleculeNode.prototype = phet.Object.create( phet.webgl.GLNode.prototype );
     CanvasMoleculeNode.prototype.constructor = CanvasMoleculeNode;
 })();

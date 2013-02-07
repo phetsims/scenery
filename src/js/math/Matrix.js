@@ -13,6 +13,8 @@ phet.math = phet.math || {};
 (function () {
   "use strict";
   
+  var Float32Array = phet.Float32Array;
+  
   phet.math.Matrix = function ( m, n, filler, fast ) {
     this.m = m;
     this.n = n;

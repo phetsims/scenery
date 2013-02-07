@@ -180,22 +180,19 @@ phet.util = phet.util || {};
 // some polyfills or workarounds
 (function () {
   // Object.create polyfill
-  if ( !Object.create ) {
-    Object.create = function ( o ) {
-      if ( arguments.length > 1 ) {
-        throw new Error( 'Object.create implementation only accepts the first parameter.' );
-      }
-      function F() {}
+  phet.Object = phet.Object || {};
+  phet.Object.create = Object.create || function ( o ) {
+    if ( arguments.length > 1 ) {
+      throw new Error( 'Object.create implementation only accepts the first parameter.' );
+    }
+    function F() {}
 
-      F.prototype = o;
-      return new F();
-    };
-  }
+    F.prototype = o;
+    return new F();
+  };
   
   // IE9 does not support Float32Array, so we back it up by a standard array
-  if ( !window.Float32Array ) {
-    window.Float32Array = Array;
-  }
+  phet.Float32Array = window.Float32Array || Array;
   
   /*---------------------------------------------------------------------------*
    * window.requestAnimationFrame polyfill, by Erik Moller (http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating)
@@ -203,10 +200,10 @@ phet.util = phet.util || {};
    *----------------------------------------------------------------------------*/
   (function() {
     var lastTime = 0;
-    var vendors = ['ms', 'moz', 'webkit', 'o'];
+    var vendors = [ 'ms', 'moz', 'webkit', 'o' ];
     for ( var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x ) {
       window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
-      window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
+      phet.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
     }
    
     if ( !window.requestAnimationFrame ) {
@@ -220,8 +217,8 @@ phet.util = phet.util || {};
       };
     }
    
-    if ( !window.cancelAnimationFrame ) {
-      window.cancelAnimationFrame = function(id) {
+    if ( !phet.cancelAnimationFrame ) {
+      phet.cancelAnimationFrame = function(id) {
         clearTimeout(id);
       };
     }

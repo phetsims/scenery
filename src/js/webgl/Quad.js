@@ -13,6 +13,8 @@ phet.webgl = phet.webgl || {};
 (function () {
   "use strict";
   
+  var Float32Array = phet.Float32Array;
+  
   phet.webgl.Quad = function ( gl, width, height, xOffset, yOffset ) {
     phet.webgl.GLNode.call( this );
 
@@ -27,7 +29,7 @@ phet.webgl = phet.webgl || {};
 
   var Quad = phet.webgl.Quad;
 
-  Quad.prototype = Object.create( phet.webgl.GLNode.prototype );
+  Quad.prototype = phet.Object.create( phet.webgl.GLNode.prototype );
   Quad.prototype.constructor = Quad;
 
   // TODO: should we allow buffer parameters to change?

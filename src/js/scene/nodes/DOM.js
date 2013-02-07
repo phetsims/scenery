@@ -24,7 +24,7 @@ phet.scene = phet.scene || {};
     };
     var DOM = phet.scene.DOM;
     
-    DOM.prototype = Object.create( phet.scene.Node.prototype );
+    DOM.prototype = phet.Object.create( phet.scene.Node.prototype );
     DOM.prototype.constructor = DOM;
     
     DOM.prototype.invalidateDOM = function() {

@@ -14,6 +14,7 @@ phet.math = phet.math || {};
   "use strict";
   
   var Matrix = phet.math.Matrix;
+  var Float32Array = phet.Float32Array;
 
   phet.math.QRDecomposition = function ( matrix ) {
     this.matrix = matrix;

@@ -78,7 +78,7 @@ phet.moleculeshapes.model = phet.moleculeshapes.model || {};
 
   // essentially inheritance
   var RealMolecule = phet.moleculeshapes.model.RealMolecule;
-  RealMolecule.prototype = Object.create( model.Molecule.prototype );
+  RealMolecule.prototype = phet.Object.create( model.Molecule.prototype );
   RealMolecule.prototype.constructor = RealMolecule;
 
   RealMolecule.prototype.update = function ( tpf ) {

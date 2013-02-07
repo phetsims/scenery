@@ -35,7 +35,7 @@ phet.scene = phet.scene || {};
     };
     var Text = phet.scene.Text;
     
-    Text.prototype = Object.create( phet.scene.Node.prototype );
+    Text.prototype = phet.Object.create( phet.scene.Node.prototype );
     Text.prototype.constructor = Text;
     
     Text.prototype.setText = function( text ) {

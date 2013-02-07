@@ -63,6 +63,6 @@ phet.model = phet.model || {};
 
   // essentially inheritance
   var CompositeNotifier = phet.model.CompositeNotifier;
-  CompositeNotifier.prototype = Object.create( Notifier.prototype );
+  CompositeNotifier.prototype = phet.Object.create( Notifier.prototype );
   CompositeNotifier.prototype.constructor = CompositeNotifier;
 })();

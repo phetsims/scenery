@@ -21,7 +21,7 @@ phet.scene = phet.scene || {};
     };
     var Image = phet.scene.Image;
     
-    Image.prototype = Object.create( phet.scene.Node.prototype );
+    Image.prototype = phet.Object.create( phet.scene.Node.prototype );
     Image.prototype.constructor = Image;
     
     Image.prototype.renderSelf = function( state ) {

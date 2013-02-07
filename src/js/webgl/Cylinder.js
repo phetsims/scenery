@@ -13,6 +13,8 @@ phet.webgl = phet.webgl || {};
 (function () {
   "use strict";
   
+  var Float32Array = phet.Float32Array;
+  
   phet.webgl.Cylinder = function ( gl, radius, length, radialStrips, axisStrips ) {
     phet.webgl.GLNode.call( this );
 
@@ -27,7 +29,7 @@ phet.webgl = phet.webgl || {};
 
   var Cylinder = phet.webgl.Cylinder;
 
-  Cylinder.prototype = Object.create( phet.webgl.GLNode.prototype );
+  Cylinder.prototype = phet.Object.create( phet.webgl.GLNode.prototype );
   Cylinder.prototype.constructor = Cylinder;
 
   // TODO: should we allow buffer parameters to change?

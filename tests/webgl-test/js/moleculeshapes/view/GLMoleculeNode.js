@@ -81,7 +81,7 @@ phet.moleculeshapes.view = phet.moleculeshapes.view || {};
 
   var GLMoleculeNode = phet.moleculeshapes.view.GLMoleculeNode;
 
-  GLMoleculeNode.prototype = Object.create( phet.webgl.GLNode.prototype );
+  GLMoleculeNode.prototype = phet.Object.create( phet.webgl.GLNode.prototype );
   GLMoleculeNode.prototype.constructor = GLMoleculeNode;
 
   GLMoleculeNode.prototype.addAtom = function ( atom ) {

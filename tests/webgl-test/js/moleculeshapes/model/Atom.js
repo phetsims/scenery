@@ -23,6 +23,6 @@ phet.moleculeshapes.model = phet.moleculeshapes.model || {};
 
   var Atom = phet.moleculeshapes.model.Atom;
 
-  Atom.prototype = Object.create( phet.chemistry.Atom.prototype );
+  Atom.prototype = phet.Object.create( phet.chemistry.Atom.prototype );
   Atom.prototype.constructor = Atom;
 })();

@@ -23,7 +23,7 @@ phet.moleculeshapes.model = phet.moleculeshapes.model || {};
 
   // essentially inheritance
   var VSEPRMolecule = phet.moleculeshapes.model.VSEPRMolecule;
-  VSEPRMolecule.prototype = Object.create( model.Molecule.prototype );
+  VSEPRMolecule.prototype = phet.Object.create( model.Molecule.prototype );
   VSEPRMolecule.prototype.constructor = VSEPRMolecule;
 
   VSEPRMolecule.prototype.update = function ( tpf ) {
