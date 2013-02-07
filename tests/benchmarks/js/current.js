@@ -1,7 +1,105 @@
 
+var phet = phet || {};
+phet.benchmark = phet.benchmark || {};
+
 (function(){
   
-  var main = $( '#main' );
+  phet.benchmark.createDetachedScene = function( width, height ) {
+    width = width || 640;
+    height = height || 480;
+    
+    var main = $( '#main' );
+    main.width( 640 );
+    main.height( 480 );
+    return new phet.scene.Scene( main );
+  }
+  
+  benchmarkTimer.add( 'Rotating Square 100x', function() {
+    for( var i = 0; i < 100; i++ ) {
+      scene.root.rotate( Math.sin( i ) );
+      scene.updateScene();
+    }
+  }, {
+    setup: function() {
+      var scene = phet.benchmark.createDetachedScene( 256, 256 );
+      scene.root.addChild( new phet.scene.Node( {
+        shape: phet.scene.Shape.rectangle( 0, 0, 20, 20 ),
+        centerX: 128,
+        centerY: 128,
+        fill: 'rgba(255,0,0,1)'
+      } ) );
+    }
+  } );
+  
+  benchmarkTimer.add( 'Rotating Many Squares (with stroke) 100x', function() {
+    for( var i = 0; i < 100; i++ ) {
+      scene.root.rotate( Math.sin( i ) );
+      scene.updateScene();
+    }
+  }, {
+    setup: function() {
+      var scene = phet.benchmark.createDetachedScene( 256, 256 );
+      for( var i = 0; i < 200; i++ ) {
+        scene.root.addChild( new phet.scene.Node( {
+          shape: phet.scene.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ),
+          fill: 'rgba(255,0,0,1)',
+          stroke: '#000000'
+        } ) );
+      }
+    }
+  } );
+  
+  benchmarkTimer.add( 'Square rotating over background squares 100x', function() {
+    for( var i = 0; i < 100; i++ ) {
+      node.rotate( Math.sin( i ) );
+      scene.updateScene();
+    }
+  }, {
+    setup: function() {
+      var scene = phet.benchmark.createDetachedScene( 256, 256 );
+      for( var i = 0; i < 200; i++ ) {
+        scene.root.addChild( new phet.scene.Node( {
+          shape: phet.scene.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ),
+          fill: 'rgba(255,0,0,1)',
+          stroke: '#000000'
+        } ) );
+      }
+      var node = new phet.scene.Node( {
+        shape: phet.scene.Shape.rectangle( 0, 0, 20, 20 ),
+        centerX: 128,
+        centerY: 128,
+        fill: 'rgba(255,0,0,1)',
+        stroke: '#000000'
+      } );
+      scene.root.addChild( node );
+    }
+  } );
+  
+  benchmarkTimer.add( 'Static updateScene() over background squares 100x', function() {
+    for( var i = 0; i < 100; i++ ) {
+      scene.updateScene();
+    }
+  }, {
+    setup: function() {
+      var scene = phet.benchmark.createDetachedScene( 256, 256 );
+      for( var i = 0; i < 200; i++ ) {
+        scene.root.addChild( new phet.scene.Node( {
+          shape: phet.scene.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ),
+          fill: 'rgba(255,0,0,1)',
+          stroke: '#000000'
+        } ) );
+      }
+      var node = new phet.scene.Node( {
+        shape: phet.scene.Shape.rectangle( 0, 0, 20, 20 ),
+        centerX: 128,
+        centerY: 128,
+        fill: 'rgba(255,0,0,1)',
+        stroke: '#000000'
+      } );
+      scene.root.addChild( node );
+      scene.updateScene();
+    }
+  } );
   
   benchmarkTimer.add( 'Canvas creation', function() {
     document.createElement( 'canvas' );
