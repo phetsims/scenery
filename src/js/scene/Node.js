@@ -1107,20 +1107,29 @@ phet.scene = phet.scene || {};
     get height() { return this.getHeight(); },
     
     mutate: function( params ) {
-      // NOTE: translation-based mutators come before rotation/scale, since typically we think of their operations occuring "after" the rotation / scaling
-      // NOTE: left/right/top/bottom/centerX/centerY are at the end, since they rely potentially on rotation / scaling changes of bounds that may happen beforehand
-      // TODO: using more than one of {translation,x,left,right,centerX} or {translation,y,top,bottom,centerY} should be considered an error
-      // TODO: move fill / stroke setting to mixins
-      var setterKeys = [ 'stroke', 'fill', 'lineWidth', 'lineCap', 'lineJoin', 'layerType', 'visible',
-                 'translation', 'x', 'y', 'rotation', 'scale', 'left', 'right', 'top', 'bottom', 'centerX', 'centerY' ];
       
       var node = this;
       
-      _.each( setterKeys, function( key ) {
+      _.each( this._mutatorKeys, function( key ) {
         if ( params[key] !== undefined ) {
           node[key] = params[key];
         }
       } );
     }
   };
+  
+  /*
+   * This is an array of property (setter) names for Node.mutate(), which are also used when creating nodes with parameter objects.
+   *
+   * E.g. new phet.scene.Node( { x: 5, rotation: 20 } ) will create a Path, and apply setters in the order below (node.x = 5; node.rotation = 20)
+   *
+   * The order below is important! Don't change this without knowing the implications.
+   * NOTE: translation-based mutators come before rotation/scale, since typically we think of their operations occuring "after" the rotation / scaling
+   * NOTE: left/right/top/bottom/centerX/centerY are at the end, since they rely potentially on rotation / scaling changes of bounds that may happen beforehand
+   * TODO: using more than one of {translation,x,left,right,centerX} or {translation,y,top,bottom,centerY} should be considered an error
+   * TODO: move fill / stroke setting to mixins
+   */
+  Node.prototype._mutatorKeys = [ 'stroke', 'fill', 'lineWidth', 'lineCap', 'lineJoin', 'layerType', 'visible',
+                                  'translation', 'x', 'y', 'rotation', 'scale', 'left', 'right', 'top', 'bottom',
+                                  'centerX', 'centerY' ];
 })();

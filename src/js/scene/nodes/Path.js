@@ -108,19 +108,8 @@ phet.scene = phet.scene || {};
     return this.hasShape() ? this._shape.intersectsBounds( bounds ) : false;
   };
   
-  Path.prototype.mutate = function( params ) {
-    var setterKeys = [ 'shape' ];
-    
-    var node = this;
-    
-    _.each( setterKeys, function( key ) {
-      if ( params[key] !== undefined ) {
-        node[key] = params[key];
-      }
-    } );
-    
-    phet.scene.Node.prototype.mutate.call( this, params );
-  };
+  // TODO: stroke / fill mixins
+  Path.prototype._mutatorKeys = [ 'shape' ].concat( phet.scene.Node.prototype._mutatorKeys );
   
   Object.defineProperty( Path.prototype, 'shape', { set: Path.prototype.setShape, get: Path.prototype.getShape } );
   

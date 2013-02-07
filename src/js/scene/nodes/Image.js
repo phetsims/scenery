@@ -3,6 +3,8 @@
 /**
  * Images
  *
+ * TODO: setImage / getImage and the whole toolchain that uses that
+ *
  * @author Jonathan Olson
  */
 

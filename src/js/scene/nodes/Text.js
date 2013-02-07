@@ -111,19 +111,8 @@ phet.scene = phet.scene || {};
     return this.fontStyles.direction;
   };
   
-  Text.prototype.mutate = function( params ) {
-    var setterKeys = [ 'text', 'font', 'textAlign', 'textBaseline', 'direction' ];
-    
-    var node = this;
-    
-    _.each( setterKeys, function( key ) {
-      if ( params[key] !== undefined ) {
-        node[key] = params[key];
-      }
-    } );
-    
-    phet.scene.Node.prototype.mutate.call( this, params );
-  };
+  // TODO: mixins for fill!
+  Text.prototype._mutatorKeys = [ 'text', 'font', 'textAlign', 'textBaseline', 'direction' ].concat( phet.scene.Node.prototype._mutatorKeys );
   
   Object.defineProperty( Text.prototype, 'text', { set: Text.prototype.setText, get: Text.prototype.getText } );
   Object.defineProperty( Text.prototype, 'font', { set: Text.prototype.setFont, get: Text.prototype.getFont } );

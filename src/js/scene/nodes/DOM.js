@@ -91,20 +91,7 @@ phet.scene = phet.scene || {};
     return this._interactive;
   };
   
-  DOM.prototype.mutate = function( params ) {
-    // TODO: just append these to a new list in the prototype, and have the super method work off of that?
-    var setterKeys = [ 'element', 'interactive' ];
-    
-    var node = this;
-    
-    _.each( setterKeys, function( key ) {
-      if ( params[key] !== undefined ) {
-        node[key] = params[key];
-      }
-    } );
-    
-    phet.scene.Node.prototype.mutate.call( this, params );
-  };
+  DOM.prototype._mutatorKeys = [ 'element', 'interactive' ].concat( phet.scene.Node.prototype._mutatorKeys );
   
   Object.defineProperty( DOM.prototype, 'element', { set: DOM.prototype.setElement, get: DOM.prototype.getElement } );
   Object.defineProperty( DOM.prototype, 'interactive', { set: DOM.prototype.setInteractive, get: DOM.prototype.isInteractive } );
