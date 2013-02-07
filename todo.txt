@@ -1,5 +1,4 @@
 
-
 Browsers
     Browser bugs? (get Canary / Aurora / IE10):
         [PATCH CREATED] miterLimit off in Chrome 24.0.1312.52 m
@@ -39,24 +38,25 @@ General:
     Documentation and Examples (always an item)
     Take extension mechanism from Backbone.js: https://github.com/documentcloud/backbone/blob/master/backbone.js#L1471-L1502
 
-Benchmarks: (***)
-    async vs defer vs queued
-    Ability to re-run tests to add precision? Or just a control for precision?
-        Add a flag for the tests being run (or null for all tests)
-        Store results[][] instead of benchmarks[][], and add benchmarks to the result (combining statistics, etc).
-        Add ability to scrap statistics
-        Have an updateResult function that will handle the updating
-        Benchmark cycling feedback?
-    If we can, handle both synchronous and asynchronous tests. Maybe this is possible to wrap with a deferred so that we can handle both without specifying a flag?
-        Consider forking Benchmark.js and submitting a pull request if this is easy
-        Reason for this is the issue where in asynchronous tests, immediate calls to deferred.resolve() do not allow us to measure performance if it is slow
-            See http://jsperf.com/asynchronous-limit
-        Ask John David Dalton maybe?
-        Synchronous: for checking phet-scene overhead
-        Asynchronous - requestAnimationFrame loops
-            We need to verify that these tests are fully taxing the system (maybe 20% less FPS than an empty loop in requestAnimationFrame?)
-    Consider using Local Storage to show previous results?
-    Benchmarks:
+Benchmarks:
+    (deprecate?) Benchmark.js-based:
+        async vs defer vs queued
+        Ability to re-run tests to add precision? Or just a control for precision?
+            Add a flag for the tests being run (or null for all tests)
+            Store results[][] instead of benchmarks[][], and add benchmarks to the result (combining statistics, etc).
+            Add ability to scrap statistics
+            Have an updateResult function that will handle the updating
+            Benchmark cycling feedback?
+        If we can, handle both synchronous and asynchronous tests. Maybe this is possible to wrap with a deferred so that we can handle both without specifying a flag?
+            Consider forking Benchmark.js and submitting a pull request if this is easy
+            Reason for this is the issue where in asynchronous tests, immediate calls to deferred.resolve() do not allow us to measure performance if it is slow
+                See http://jsperf.com/asynchronous-limit
+            Ask John David Dalton maybe?
+            Synchronous: for checking phet-scene overhead
+            Asynchronous - requestAnimationFrame loops
+                We need to verify that these tests are fully taxing the system (maybe 20% less FPS than an empty loop in requestAnimationFrame?)
+    Performance based:
+        Consider using Local Storage to show previous results?
         Examine subclass penalty for Shape in Path instead of Node
     Using xStats (https://github.com/bestiejs/xstats.js), also add memory output for verifying lack of memory leaks?
 
@@ -87,7 +87,7 @@ Code:
     * Code headers and copyright? Licenses?
     Handling of retina displays (and other backingScale differences)
 
-SVG:
+** SVG: -- important because we can layer DOM nodes properly under SVG
     Examine Raphael JS for SVG support and Code.
     Layering on SVG and the persistence that it will require have some interesting effects:
         Nodes will map to one (or more) <g> elements. Multiple <g> elements necessary if there is a layer change in children, etc.
@@ -115,7 +115,7 @@ DOM nodes:
         Possibly relevant HTML5 spec for default behaviors: http://www.w3.org/html/wg/drafts/html/master/Overview.html
     with DOM elements, can we essentially "PSwing" the event forwarding and emulate mouse/touch behavior? will CSS :hover work?
     Note in code about DOM4 (http://www.w3.org/TR/dom/#constructing-events) and Event Constructors. See http://www.w3.org/TR/DOM-Level-3-Events/#new-event-interface-initializers
-        * Use deprecated initMouseEvent for now, but feature detect on it?
+        Use deprecated initMouseEvent for now, but feature detect on it?
     Picking:
         Add a flag? Check Piccolo behavior
         Invisible nodes get picked? Check Piccolo behavior, but consider a parameter for this somewhere?
@@ -153,6 +153,7 @@ Node:
 
 Shapes:
     Finiteness checks
+    Investigate shear / scale effects on stroking -- important for bounds
     Quadratic curve offsets need implementation improvement (32 sub-quadratics is too costly)
     Not implemented: arc, arcTo, ellipse, cubic bezier
     Features not implemented: precise intersection with bounding box (not just intersection of bounds)
