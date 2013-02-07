@@ -60,7 +60,9 @@ var marks = marks || {};
             that.markNames = _.map( marks.currentMarks, function( mark ) { return mark.name; } );
           }
           
-          that.runMark();
+          setTimeout( function() {
+            that.runMark();
+          }, 250 );
         }
       }
       
@@ -84,11 +86,13 @@ var marks = marks || {};
         if( count++ === mark.count ) {
           var time = new Date - startTime;
           if( that.options.onMark ) {
-            that.options.onMark( that.currentSnapshot, mark, time / mark.count );
+            that.options.onMark( that.currentSnapshot, mark, time / mark.count, that );
           }
           mark.after && mark.after();
           
-          that.runSnapshots();
+          setTimeout( function() {
+            that.runSnapshots();
+          }, 500 );
         } else {
           window.requestAnimationFrame( tick, main[0] );
           
@@ -98,6 +102,69 @@ var marks = marks || {};
       window.requestAnimationFrame( tick, main[0] );
       
       var startTime = new Date;
+    }
+  };
+  
+  // passed to marks.Performance constructor as an options object. container is a block-level element that the report is placed in
+  marks.PerformanceTableReport = function( container ) {
+    this.table = new marks.TableBase( container );
+    
+    this.initialized = false;
+    
+    this.snapshotColumnMap = {};
+    this.markNameRowMap = {};
+  };
+  var PerformanceTableReport = marks.PerformanceTableReport;
+  
+  PerformanceTableReport.prototype =  {
+    constructor: PerformanceTableReport,
+    
+    initializeTable: function( performance ) {
+      var that = this;
+      this.initialized = true;
+      
+      this.table.addColumn( 'Benchmark Name' );
+      
+      _.each( performance.snapshots, function( snapshot ) {
+        that.snapshotColumnMap[snapshot.name] = that.table.numColumns;
+        that.table.addColumn( snapshot.name, 2 );
+      } );
+      
+      _.each( performance.markNames, function( markName ) {
+        var rowNumber = that.table.addRow();
+        that.markNameRowMap[markName] = rowNumber;
+        that.table.cells[rowNumber][0].innerHTML = markName;
+      } );
+    },
+    
+    onMark: function( snapshot, mark, ms, performance ) {
+      if( !this.initialized ) {
+        this.initializeTable( performance );
+      }
+      
+      if( !snapshot.times ) {
+        snapshot.times = {};
+      }
+      if( !snapshot.times[mark.name] ) {
+        snapshot.times[mark.name] = {
+          total: 0,
+          count: 0
+        };
+      }
+      
+      var time = snapshot.times[mark.name];
+      time.total += ms;
+      time.count += 1;
+      
+      var average = time.total / time.count;
+      this.table.cells[this.markNameRowMap[mark.name]][this.snapshotColumnMap[snapshot.name]].innerHTML = average.toFixed( 1 );
+      if( snapshot.name !== 'current' ) {
+        var currentTime = performance.snapshots[0].times[mark.name];
+        var currentAverage = currentTime.total / currentTime.count;
+        var percentageChange = 100 * ( currentAverage - average ) / average;
+        this.table.cells[this.markNameRowMap[mark.name]][this.snapshotColumnMap[snapshot.name]+1].innerHTML = percentageChange.toFixed( 2 ) + '%';
+      }
+      // console.log( snapshot.name + ' ' + mark.name + ': ' + average );
     }
   };
   

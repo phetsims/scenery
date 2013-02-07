@@ -12,6 +12,7 @@
   <script src="../../contrib/bootstrap-2.2.2.js"></script>
   
   <!-- <script src="../../phet-scene-min.js"></script> -->
+  <script src="js/table-report.js"></script>
   <script src="js/performance.js"></script>
   
   <style>
@@ -42,25 +43,7 @@
         // { name: '120202-515bfa9d9a', libs: [ 'snapshots/phet-scene-min-120202-515bfa9d9a.js' ], tests: [ 'snapshots/tests-120202-515bfa9d9a.js' ] }
       ];
       
-      var performance = new marks.Performance( {
-        onMark: function( snapshot, mark, score ) {
-          if( !snapshot.times ) {
-            snapshot.times = {};
-          }
-          if( !snapshot.times[mark.name] ) {
-            snapshot.times[mark.name] = {
-              total: 0,
-              count: 0
-            };
-          }
-          
-          var time = snapshot.times[mark.name];
-          time.total += score;
-          time.count += 1;
-          
-          console.log( snapshot.name + ' ' + mark.name + ': ' + ( time.total / time.count ) );
-        }
-      } );
+      var performance = new marks.Performance( new marks.PerformanceTableReport( $( '#profiling-results' )[0] ) );
       
       performance.compareSnapshots( snapshots );
     } );
