@@ -26,6 +26,7 @@ var marks = marks || {};
     },
     
     runSnapshots: function() {
+      // TODO: load in other direction?
       var that = this;
       
       // guard on markNames so we don't trample over the first run
