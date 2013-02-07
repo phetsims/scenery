@@ -393,6 +393,12 @@ $(document).ready( function() {
           example( 'bevel', 250 );
           example( 'round', 400 );
           
+          context.scale( 0.5, 0.5 );
+          example( 'miter', 100 );
+          example( 'bevel', 250 );
+          example( 'round', 400 );
+          context.scale( 2, 2 );
+          
         };
       }
     },{

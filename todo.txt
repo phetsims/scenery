@@ -32,7 +32,7 @@ Questions for team:
     Name? Scenery? Artist names?
 
 General:
-    *** shape strokes happen with linewidth at global scale???
+    
     Copy over Molecule Shapes efficiency improvement code from ~/
     DOM events => benchmarks => create Path => layer changes
     Documentation and Examples (always an item)
@@ -56,6 +56,7 @@ Benchmarks:
             Asynchronous - requestAnimationFrame loops
                 We need to verify that these tests are fully taxing the system (maybe 20% less FPS than an empty loop in requestAnimationFrame?)
     Performance based:
+        * submodules of self?
         Consider using Local Storage to show previous results?
         Examine subclass penalty for Shape in Path instead of Node
     Using xStats (https://github.com/bestiejs/xstats.js), also add memory output for verifying lack of memory leaks?
@@ -191,6 +192,7 @@ Performance:
         approximately integer-offset transformation. Then we can render quickly on integer boundaries with no transforms / scaling for speed.
     Improve quadratic bezier offset curve computation
     Combining fills and strokes (or other state optimization -- fills require ensuring CCW/CW stays the same, so we need flags to whitelist)
+        ! shape strokes happen with linewidth scaled by current transform -- if transforms change scale (or possibly shear), this will break
     Efficiency checks for fullRender using the functional style => imperative
     Automated benchmarks
     Investigate whether bounding boxes can be smaller based on clip shapes
