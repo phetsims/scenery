@@ -12,32 +12,32 @@ phet.math = phet.math || {};
 
 // create a new scope
 (function () {
-    "use strict";
+  "use strict";
 
-    phet.math.Ray2 = function ( pos, dir ) {
-        this.pos = pos;
-        this.dir = dir;
-        
-        phet.debugAssert( function() {
-            return Math.abs( dir.magnitude() - 1 ) < 0.01;
-        } );
-    };
+  phet.math.Ray2 = function ( pos, dir ) {
+    this.pos = pos;
+    this.dir = dir;
+    
+    phet.debugAssert( function() {
+      return Math.abs( dir.magnitude() - 1 ) < 0.01;
+    } );
+  };
 
-    var Ray2 = phet.math.Ray2;
+  var Ray2 = phet.math.Ray2;
 
-    Ray2.prototype = {
-        constructor: Ray2,
+  Ray2.prototype = {
+    constructor: Ray2,
 
-        shifted: function ( distance ) {
-            return new Ray2( this.pointAtDistance( distance ), this.dir );
-        },
+    shifted: function ( distance ) {
+      return new Ray2( this.pointAtDistance( distance ), this.dir );
+    },
 
-        pointAtDistance: function ( distance ) {
-            return this.pos.plus( this.dir.timesScalar( distance ) );
-        },
+    pointAtDistance: function ( distance ) {
+      return this.pos.plus( this.dir.timesScalar( distance ) );
+    },
 
-        toString: function () {
-            return this.pos.toString() + " => " + this.dir.toString();
-        }
-    };
+    toString: function () {
+      return this.pos.toString() + " => " + this.dir.toString();
+    }
+  };
 })();

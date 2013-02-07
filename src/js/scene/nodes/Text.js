@@ -21,11 +21,11 @@ phet.scene = phet.scene || {};
         params = params || {};
         
         // default to black filled text
-        if( params.fill === undefined ) {
+        if ( params.fill === undefined ) {
             params.fill = '#000000';
         }
         
-        if( text !== undefined ) {
+        if ( text !== undefined ) {
             // set the text parameter so that setText( text ) is effectively called in the mutator from the super call
             params.text = text;
         }
@@ -56,10 +56,10 @@ phet.scene = phet.scene || {};
     
     Text.prototype.renderSelf = function( state ) {
         // TODO: add SVG / DOM support
-        if( state.isCanvasState() ) {
+        if ( state.isCanvasState() ) {
             var layer = state.layer;
             var context = layer.context;
-            if( this.hasFill() ) {
+            if ( this.hasFill() ) {
                 layer.setFillStyle( this.getFill() );
                 layer.setFont( this.fontStyles.font );
                 layer.setTextAlign( this.fontStyles.textAlign );
@@ -117,7 +117,7 @@ phet.scene = phet.scene || {};
         var node = this;
         
         _.each( setterKeys, function( key ) {
-            if( params[key] !== undefined ) {
+            if ( params[key] !== undefined ) {
                 node[key] = params[key];
             }
         } );
@@ -132,7 +132,7 @@ phet.scene = phet.scene || {};
     Object.defineProperty( Text.prototype, 'direction', { set: Text.prototype.setDirection, get: Text.prototype.getDirection } );
     
     Text.FontStyles = function( args ) {
-        if( args === undefined ) {
+        if ( args === undefined ) {
             args = {};
         }
         this.font = args.font !== undefined ? args.font : '10px sans-serif';

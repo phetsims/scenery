@@ -11,60 +11,60 @@ phet.math = phet.math || {};
 
 // create a new scope
 (function () {
-    "use strict";
+  "use strict";
 
-    var Matrix4 = phet.math.Matrix4;
+  var Matrix4 = phet.math.Matrix4;
 
-    phet.math.StageCenteringCanvasTransform = function ( canvasSizeProperty, stageSize ) {
-        this.canvasSizeProperty = canvasSizeProperty;
-        this.stageSize = stageSize;
-        this.transform = new phet.model.Property( null ); // updated by the listener below
+  phet.math.StageCenteringCanvasTransform = function ( canvasSizeProperty, stageSize ) {
+    this.canvasSizeProperty = canvasSizeProperty;
+    this.stageSize = stageSize;
+    this.transform = new phet.model.Property( null ); // updated by the listener below
 
-        var that = this;
-        canvasSizeProperty.addObserver( function () {
-            that.updateTransform();
-        }, true );
-    };
+    var that = this;
+    canvasSizeProperty.addObserver( function () {
+      that.updateTransform();
+    }, true );
+  };
 
-    var StageCenteringCanvasTransform = phet.math.StageCenteringCanvasTransform;
+  var StageCenteringCanvasTransform = phet.math.StageCenteringCanvasTransform;
 
-    // due to various scaling intricacies and the default way of constructing a perspective projection matrix
-    StageCenteringCanvasTransform.fieldOfViewYFactor = function ( canvasSize, stageSize ) {
-        var sx = canvasSize.width / stageSize.width;
-        var sy = canvasSize.height / stageSize.height;
-        if ( sx === 0 || sy === 0 ) {
-            return 1;
-        }
-        return sy > sx ? sy / sx : 1;
-    };
+  // due to various scaling intricacies and the default way of constructing a perspective projection matrix
+  StageCenteringCanvasTransform.fieldOfViewYFactor = function ( canvasSize, stageSize ) {
+    var sx = canvasSize.width / stageSize.width;
+    var sy = canvasSize.height / stageSize.height;
+    if ( sx === 0 || sy === 0 ) {
+      return 1;
+    }
+    return sy > sx ? sy / sx : 1;
+  };
 
-    // returns a 4x4 matrix
-    StageCenteringCanvasTransform.compute = function ( canvasSize, stageSize ) {
-        var sx = canvasSize.width / stageSize.width;
-        var sy = canvasSize.height / stageSize.height;
+  // returns a 4x4 matrix
+  StageCenteringCanvasTransform.compute = function ( canvasSize, stageSize ) {
+    var sx = canvasSize.width / stageSize.width;
+    var sy = canvasSize.height / stageSize.height;
 
-        //use the smaller and maintain aspect ratio so that circles don't become ellipses
-        var scale = sx < sy ? sx : sy;
-        scale = scale <= 0 ? 1.0 : scale;//if scale is negative or zero, just use scale=1
+    //use the smaller and maintain aspect ratio so that circles don't become ellipses
+    var scale = sx < sy ? sx : sy;
+    scale = scale <= 0 ? 1.0 : scale;//if scale is negative or zero, just use scale=1
 
-        var scaledStageWidth = scale * stageSize.width;
-        var scaledStageHeight = scale * stageSize.height;
+    var scaledStageWidth = scale * stageSize.width;
+    var scaledStageHeight = scale * stageSize.height;
 
-        //center it in width and height
-        return Matrix4.translation( canvasSize.width / 2 - scaledStageWidth / 2, canvasSize.height / 2 - scaledStageHeight / 2 ).timesMatrix( Matrix4.scaling( scale ) );
-    };
+    //center it in width and height
+    return Matrix4.translation( canvasSize.width / 2 - scaledStageWidth / 2, canvasSize.height / 2 - scaledStageHeight / 2 ).timesMatrix( Matrix4.scaling( scale ) );
+  };
 
-    StageCenteringCanvasTransform.prototype = {
-        constructor: StageCenteringCanvasTransform,
+  StageCenteringCanvasTransform.prototype = {
+    constructor: StageCenteringCanvasTransform,
 
-        fieldOfViewYFactor: function () {
-            return StageCenteringCanvasTransform.fieldOfViewYFactor( this.canvasSizeProperty.get(), this.stageSize );
-        },
+    fieldOfViewYFactor: function () {
+      return StageCenteringCanvasTransform.fieldOfViewYFactor( this.canvasSizeProperty.get(), this.stageSize );
+    },
 
-        updateTransform: function () {
-            var matrix4 = StageCenteringCanvasTransform.compute( this.canvasSizeProperty.get(), this.stageSize );
+    updateTransform: function () {
+      var matrix4 = StageCenteringCanvasTransform.compute( this.canvasSizeProperty.get(), this.stageSize );
 
-            this.transform.set( new phet.math.Transform4( matrix4 ) );
-        }
-    };
+      this.transform.set( new phet.math.Transform4( matrix4 ) );
+    }
+  };
 })();

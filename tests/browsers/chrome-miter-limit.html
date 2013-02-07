@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <title>Chrome Miter Limit Test Case</title>
+  <meta charset="utf-8"/>
+  <title>Chrome Miter Limit Test Case</title>
 </head>
 <body>
 
@@ -11,20 +11,20 @@
 
 <!-- SVG with the default miterLimit of 4, rendering correctly -->
 <!-- <svg width="320px" height="240px" viewBox="0 0 320 240">
-    <polyline points="40 100, 200 100, 54.990754074136021 32.381078121488088" style="stroke: blue; stroke-width: 30; fill: none;"/>
+  <polyline points="40 100, 200 100, 54.990754074136021 32.381078121488088" style="stroke: blue; stroke-width: 30; fill: none;"/>
 </svg> -->
 
 <script type="text/javascript">
 var context = document.getElementById( 'canvas' ).getContext( '2d' );
 
 function drawAngle( degrees, strokeStyle ) {
-    var angle = degrees * Math.PI / 180;
-    context.lineWidth = 30;
-    context.strokeStyle = strokeStyle;
-    context.moveTo( 40, 100 );
-    context.lineTo( 200, 100 );
-    context.lineTo( 200 - Math.cos( angle ) * 160, 100 - Math.sin( angle ) * 160 );
-    context.stroke();
+  var angle = degrees * Math.PI / 180;
+  context.lineWidth = 30;
+  context.strokeStyle = strokeStyle;
+  context.moveTo( 40, 100 );
+  context.lineTo( 200, 100 );
+  context.lineTo( 200 - Math.cos( angle ) * 160, 100 - Math.sin( angle ) * 160 );
+  context.stroke();
 }
 
 // According to the miterLimit handling (at least in the SVG spec), we skip drawing the mitered joint (and fall back to bevel)

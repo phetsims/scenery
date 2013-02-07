@@ -1,182 +1,182 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 
-    <!-- runs in full-screen mode on iOS devices -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
+  <!-- runs in full-screen mode on iOS devices -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
 
-    <title>phet-scene Documentation</title>
+  <title>phet-scene Documentation</title>
+  
+  <link rel="stylesheet" href="../contrib/bootstrap-2.2.2.css">
+  <link rel="stylesheet" href="../contrib/syntaxhighlighter-3.0.83/shCore.css">
+  <link rel="stylesheet" href="../contrib/syntaxhighlighter-3.0.83/shThemeDefault.css">
+  
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../contrib/jquery-1.8.3.min.js"></script>
+  <script src="../contrib/lodash.min-1.0.0-rc.3.js"></script>
+  
+  <!-- For the styling -->
+  <script src="../contrib/bootstrap-2.2.2.js"></script>
+  
+  <script src="../contrib/syntaxhighlighter-3.0.83/shCore.js"></script>
+  <script src="../contrib/syntaxhighlighter-3.0.83/shBrushJScript.js"></script>
+  <script src="../contrib/syntaxhighlighter-3.0.83/shBrushXml.js"></script>
+  
+  <!-- MathJax config -->
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+  </script>
+  <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+  <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
+  <script src="../concatenated.js"></script>
+  <!-- <script src="../phet-scene-min.js"></script> -->
+  
+  <style type="text/css">
     
-    <link rel="stylesheet" href="../contrib/bootstrap-2.2.2.css">
-    <link rel="stylesheet" href="../contrib/syntaxhighlighter-3.0.83/shCore.css">
-    <link rel="stylesheet" href="../contrib/syntaxhighlighter-3.0.83/shThemeDefault.css">
-    
-    <!-- jQuery and LoDash are dependencies -->
-    <script src="../contrib/jquery-1.8.3.min.js"></script>
-    <script src="../contrib/lodash.min-1.0.0-rc.3.js"></script>
-    
-    <!-- For the styling -->
-    <script src="../contrib/bootstrap-2.2.2.js"></script>
-    
-    <script src="../contrib/syntaxhighlighter-3.0.83/shCore.js"></script>
-    <script src="../contrib/syntaxhighlighter-3.0.83/shBrushJScript.js"></script>
-    <script src="../contrib/syntaxhighlighter-3.0.83/shBrushXml.js"></script>
-    
-    <!-- MathJax config -->
-    <script type="text/x-mathjax-config">
-    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
-    </script>
-    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
-    <script src="../concatenated.js"></script>
-    <!-- <script src="../phet-scene-min.js"></script> -->
-    
-    <style type="text/css">
-        
-        .exampleScene {
-            margin: 15px auto;
-            border: 1px solid black;
-        }
+    .exampleScene {
+      margin: 15px auto;
+      border: 1px solid black;
+    }
 
-    </style>
-    
+  </style>
+  
 </head>
 
 <body>
-    <div class="row-fluid">
-        <div class="span2"></div>
-        <div class="span8">
-            <h1>Documentation</h1>
-            
-            <p>Currently, this is written as if the user has experience with other scene graphs. Will include more information later.</p>
-            <p>If viewing this documentation from checked-out code, please build phet-scene with either the Makefile or build.bat to see inline examples.</p>
-            
-            <ul class="text-warning">
-                <li>TODO: Clean up this very rough draft and improve organization (possibly into separate pages, using Jekyll for the build?)</li>
-                <li>TODO: Syntax Highlighter seems to be having issues with JS single quotes. Find other solution or submit pull request for fix</li>
-            </ul>
-            
-            <h2>A Brief Tour</h2>
-            
-            <h3>Hello World</h3>
-            
-            <div id="hello-world-scene" style="width: 400px; height: 100px;" class="exampleScene"></div>
-            
-            <script type="text/javascript">
-                $( window ).ready( function() {
-                    // Create a scene graph over the block-level element. Everything inside is replaced
-                    var scene = new phet.scene.Scene( $( '#hello-world-scene' ) );
-                    
-                    // Add our text
-                    scene.root.addChild( new phet.scene.Text( 'Hello World', {
-                        centerX: 200, // the center of our text's bounds is at x = 200
-                        centerY: 50, // the center of our text's bounds is at y = 50
-                        font: '25px sans-serif'
-                    } ) );
-                    
-                    // Paint any changes (in this case, our text).
-                    scene.updateScene();
-                } );
-            </script>
-            
-            <p>
-                Include the phet-scene script in the page after jQuery and LoDash, and create a block-level element (like a div) that has a width and height that won't change with its contents:
-            </p>
-            
-            <pre class="brush: html">
+  <div class="row-fluid">
+    <div class="span2"></div>
+    <div class="span8">
+      <h1>Documentation</h1>
+      
+      <p>Currently, this is written as if the user has experience with other scene graphs. Will include more information later.</p>
+      <p>If viewing this documentation from checked-out code, please build phet-scene with either the Makefile or build.bat to see inline examples.</p>
+      
+      <ul class="text-warning">
+        <li>TODO: Clean up this very rough draft and improve organization (possibly into separate pages, using Jekyll for the build?)</li>
+        <li>TODO: Syntax Highlighter seems to be having issues with JS single quotes. Find other solution or submit pull request for fix</li>
+      </ul>
+      
+      <h2>A Brief Tour</h2>
+      
+      <h3>Hello World</h3>
+      
+      <div id="hello-world-scene" style="width: 400px; height: 100px;" class="exampleScene"></div>
+      
+      <script type="text/javascript">
+        $( window ).ready( function() {
+          // Create a scene graph over the block-level element. Everything inside is replaced
+          var scene = new phet.scene.Scene( $( '#hello-world-scene' ) );
+          
+          // Add our text
+          scene.root.addChild( new phet.scene.Text( 'Hello World', {
+            centerX: 200, // the center of our text's bounds is at x = 200
+            centerY: 50, // the center of our text's bounds is at y = 50
+            font: '25px sans-serif'
+          } ) );
+          
+          // Paint any changes (in this case, our text).
+          scene.updateScene();
+        } );
+      </script>
+      
+      <p>
+        Include the phet-scene script in the page after jQuery and LoDash, and create a block-level element (like a div) that has a width and height that won't change with its contents:
+      </p>
+      
+      <pre class="brush: html">
 &lt;div id="hello-world-scene" style="width: 400px; height: 100px;"&gt;&lt;/div&gt;
-            </pre>
-            
-            <p>
-                The following JS code will initialize a scene graph, add some centered text into the scene, and paint it into the div.
-            </p>
-            
-            <pre class="brush: js">
+      </pre>
+      
+      <p>
+        The following JS code will initialize a scene graph, add some centered text into the scene, and paint it into the div.
+      </p>
+      
+      <pre class="brush: js">
 // Create a scene graph over the block-level element. Everything inside is replaced
 var scene = new phet.scene.Scene( $( '#hello-world-scene' ) );
 
 // Add our text
 scene.root.addChild( new phet.scene.Text( 'Hello World', {
-    centerX: 200, // the center of our text's bounds is at x = 200
-    centerY: 50, // the center of our text's bounds is at y = 50
-    font: '25px sans-serif'
+  centerX: 200, // the center of our text's bounds is at x = 200
+  centerY: 50, // the center of our text's bounds is at y = 50
+  font: '25px sans-serif'
 } ) );
 
 // Paint any changes (in this case, our text).
 scene.updateScene();
-            </pre>
-            
-            <p>
-                There is a <a href="../examples/hello-world.html">standalone example</a> of this Hello World demo.
-            </p>
-            
-            <h3>Shapes</h3>
-            
-            <p>
-                Nodes are the basic structure of the scene graph, and can be given shapes. Shapes can be built from convenience
-                functions, or from Canvas-style calls. Exact bounding boxes of shapes are calculated, including any strokes.
-            </p>
-            
-            <div id="shapes-scene" style="width: 220px; height: 100px;" class="exampleScene"></div>
-            
-            <script type="text/javascript">
-                $( window ).ready( function() {
-                    var scene = new phet.scene.Scene( $( '#shapes-scene' ) );
-                    
-                    // A rectangle at (10,10) with a width of 50 and height of 80
-                    scene.root.addChild( new phet.scene.Node( {
-                        shape: phet.scene.Shape.rectangle( 10, 10, 50, 80 ),
-                        fill: '#ff0000'
-                    } ) );
-                    
-                    // An octogon, with a radius of 30
-                    scene.root.addChild( new phet.scene.Node( {
-                        shape: phet.scene.Shape.regularPolygon( 8, 30 ),
-                        fill: '#00ff00',
-                        stroke: '#000000',
-                        x: 100, // the shape is centered at the origin, so offset it by this x and y
-                        y: 50
-                    } ) );
-                    
-                    // Custom shapes can also be created
-                    var customShape = new phet.scene.Shape();
-                    customShape.moveTo( 0, 0 );
-                    customShape.lineTo( 40, 40 );
-                    customShape.quadraticCurveTo( 80, 0, 40, -40 );
-                    customShape.lineTo( 40, 0 );
-                    customShape.close();
-                    // NOTE: this can also be chained, like shape.moveTo( ... ).lineTo( ... ).close()
-                    
-                    scene.root.addChild( new phet.scene.Node( {
-                        shape: customShape,
-                        fill: '#0000ff',
-                        stroke: '#000000',
-                        lineWidth: 3,
-                        x: 150,
-                        y: 50
-                    } ) );
-                    
-                    scene.updateScene();
-                } );
-            </script>
-            
-            <pre class="brush: js">
+      </pre>
+      
+      <p>
+        There is a <a href="../examples/hello-world.html">standalone example</a> of this Hello World demo.
+      </p>
+      
+      <h3>Shapes</h3>
+      
+      <p>
+        Nodes are the basic structure of the scene graph, and can be given shapes. Shapes can be built from convenience
+        functions, or from Canvas-style calls. Exact bounding boxes of shapes are calculated, including any strokes.
+      </p>
+      
+      <div id="shapes-scene" style="width: 220px; height: 100px;" class="exampleScene"></div>
+      
+      <script type="text/javascript">
+        $( window ).ready( function() {
+          var scene = new phet.scene.Scene( $( '#shapes-scene' ) );
+          
+          // A rectangle at (10,10) with a width of 50 and height of 80
+          scene.root.addChild( new phet.scene.Node( {
+            shape: phet.scene.Shape.rectangle( 10, 10, 50, 80 ),
+            fill: '#ff0000'
+          } ) );
+          
+          // An octogon, with a radius of 30
+          scene.root.addChild( new phet.scene.Node( {
+            shape: phet.scene.Shape.regularPolygon( 8, 30 ),
+            fill: '#00ff00',
+            stroke: '#000000',
+            x: 100, // the shape is centered at the origin, so offset it by this x and y
+            y: 50
+          } ) );
+          
+          // Custom shapes can also be created
+          var customShape = new phet.scene.Shape();
+          customShape.moveTo( 0, 0 );
+          customShape.lineTo( 40, 40 );
+          customShape.quadraticCurveTo( 80, 0, 40, -40 );
+          customShape.lineTo( 40, 0 );
+          customShape.close();
+          // NOTE: this can also be chained, like shape.moveTo( ... ).lineTo( ... ).close()
+          
+          scene.root.addChild( new phet.scene.Node( {
+            shape: customShape,
+            fill: '#0000ff',
+            stroke: '#000000',
+            lineWidth: 3,
+            x: 150,
+            y: 50
+          } ) );
+          
+          scene.updateScene();
+        } );
+      </script>
+      
+      <pre class="brush: js">
 // A rectangle at (10,10) with a width of 50 and height of 80
 scene.root.addChild( new phet.scene.Node( {
-    shape: phet.scene.Shape.rectangle( 10, 10, 50, 80 ),
-    fill: '#ff0000'
+  shape: phet.scene.Shape.rectangle( 10, 10, 50, 80 ),
+  fill: '#ff0000'
 } ) );
 
 // An octogon, with a radius of 30
 scene.root.addChild( new phet.scene.Node( {
-    shape: phet.scene.Shape.regularPolygon( 8, 30 ),
-    fill: '#00ff00',
-    stroke: '#000000',
-    x: 100, // the shape is centered at the origin, so offset it by this x and y
-    y: 50
+  shape: phet.scene.Shape.regularPolygon( 8, 30 ),
+  fill: '#00ff00',
+  stroke: '#000000',
+  x: 100, // the shape is centered at the origin, so offset it by this x and y
+  y: 50
 } ) );
 
 // Custom shapes can also be created
@@ -189,22 +189,22 @@ customShape.close();
 // NOTE: this can also be chained, like shape.moveTo( ... ).lineTo( ... ).close()
 
 scene.root.addChild( new phet.scene.Node( {
-    shape: customShape,
-    fill: '#0000ff',
-    stroke: '#000000',
-    lineWidth: 3,
-    x: 150,
-    y: 50
+  shape: customShape,
+  fill: '#0000ff',
+  stroke: '#000000',
+  lineWidth: 3,
+  x: 150,
+  y: 50
 } ) );
-            </pre>
-            
-            <h3>Nodes</h3>
-            
-            <p>
-                Nodes can be created and modified currently in a few different ways:
-            </p>
+      </pre>
+      
+      <h3>Nodes</h3>
+      
+      <p>
+        Nodes can be created and modified currently in a few different ways:
+      </p>
 
-            <pre class="brush: js">
+      <pre class="brush: js">
 // The following are all equivalent ways to create a node, listed in approximate order of increasing performance (if it is relevant).
 
 var someShape = ...; // a shape used for brevity in the following calls, otherwise setting the bottom of the node makes no sense
@@ -215,11 +215,11 @@ var someShape = ...; // a shape used for brevity in the following calls, otherwi
 // like 'bottom' (which moves the bottom of the node's bounds to the specific y-value) are handled after other
 // modifiers have been run.
 var node1 = new phet.scene.Node( {
-    shape: someShape,
-    fill: '#000000',
-    rotation: Math.PI / 2,
-    x: 10,
-    bottom: 200
+  shape: someShape,
+  fill: '#000000',
+  rotation: Math.PI / 2,
+  x: 10,
+  bottom: 200
 } );
 
 // ES5-setter style, called internally by the declarative paramter object style above
@@ -243,77 +243,77 @@ var node4 = new phet.scene.Node().setShape( someShape ).setFill( '#000000' ).set
 
 // Additionally, parameters can be accessed by two styles:
 node2.rotation === node3.getRotation();
-            </pre>
-            
-            <p>
-                Similarly to Piccolo2d, nodes have their 'self' paint/bounds and the paint/bounds of their children, where the node's
-                self is rendered first (below), and then children are painted one-by-one on top. Additionally, it borrows Piccolo's
-                coordinate frames where there are local, parent, and global coordinate frames. The example below will hopefully
-                be illustrative.
-            </p>
-            
-            <div id="self-and-children" style="width: 400px; height: 200px;" class="exampleScene"></div>
-            
-            <script type="text/javascript">
-                $( window ).ready( function() {
-                    var scene = new phet.scene.Scene( $( '#self-and-children' ) );
-                    
-                    // create a node that will have child nodes.
-                    var container = new phet.scene.Node( {
-                        // we'll add a background shape (300x100 rectangle) that will render on this node (it will be rendered below any child nodes)
-                        shape: phet.scene.Shape.rectangle( 0, 0, 300, 100 ),
-                        fill: '#888888',
-                        x: 20, // this node and all of its children will be offset by (20,20)
-                        y: 20
-                    } );
-                    scene.root.addChild( container );
-                    
-                    // bounding box of the container (and its children so far) in its parent's coordinate system.
-                    // translated by (20,20 due to the x,y parameters)
-                    container.getBounds(); // x between [20, 320], y between [20, 120]
-                    
-                    // bounding box of the container's own rendering/paint (the rectangle) in its local coordinate frame (without applying other transforms)
-                    container.getSelfBounds(); // x between [0, 300], y between [0, 100]
-                    
-                    // add a green rectangle to the container, which will be above the gray background
-                    var child1 = new phet.scene.Node( {
-                        shape: phet.scene.Shape.rectangle( 0, 0, 25, 25 ), // a 25x25 rectangle
-                        fill: '#00ff00',
-                        scale: 2, // but scaled so it is effectively a 50x50 rectangle to its parents
-                        left: 10, // 10px to the right of our parent's left bound
-                        centerY: container.height // vertically center us on the container's bottom bound
-                    } );
-                    container.addChild( child1 );
-                    
-                    // bounding box of the child in its parent's coordinate frame (the container's local coordinate frame)
-                    // note that since it is scaled 2x, its dimensions appear to be 50x50
-                    child1.getBounds(); // x between [10, 60], y between [75, 125], (with a left of 10 and centered vertically on 100)
-                    
-                    child1.getSelfBounds(); // x between [0, 25], y between [0, 25] -- just bounds of its shape
-                    
-                    // but now that we have added a child, getBounds() on the container (which contains the bounds of its children) has changed:
-                    container.getBounds(); // x between [20, 320], y between [20, 145] -- bottom bound of 145 since it has an x offset of 20 plus its child's bottom of 125
-                    
-                    // and some text to the same container, which will be on top of both the background and green rectangle
-                    var child2 = new phet.scene.Text( 'On Top?', {
-                        left: child1.centerX,
-                        centerY: child1.centerY,
-                        font: '20px sans-serif'
-                    } );
-                    container.addChild( child2 );
-                    
-                    scene.updateScene();
-                } );
-            </script>
-            
-            <pre class="brush: js">
+      </pre>
+      
+      <p>
+        Similarly to Piccolo2d, nodes have their 'self' paint/bounds and the paint/bounds of their children, where the node's
+        self is rendered first (below), and then children are painted one-by-one on top. Additionally, it borrows Piccolo's
+        coordinate frames where there are local, parent, and global coordinate frames. The example below will hopefully
+        be illustrative.
+      </p>
+      
+      <div id="self-and-children" style="width: 400px; height: 200px;" class="exampleScene"></div>
+      
+      <script type="text/javascript">
+        $( window ).ready( function() {
+          var scene = new phet.scene.Scene( $( '#self-and-children' ) );
+          
+          // create a node that will have child nodes.
+          var container = new phet.scene.Node( {
+            // we'll add a background shape (300x100 rectangle) that will render on this node (it will be rendered below any child nodes)
+            shape: phet.scene.Shape.rectangle( 0, 0, 300, 100 ),
+            fill: '#888888',
+            x: 20, // this node and all of its children will be offset by (20,20)
+            y: 20
+          } );
+          scene.root.addChild( container );
+          
+          // bounding box of the container (and its children so far) in its parent's coordinate system.
+          // translated by (20,20 due to the x,y parameters)
+          container.getBounds(); // x between [20, 320], y between [20, 120]
+          
+          // bounding box of the container's own rendering/paint (the rectangle) in its local coordinate frame (without applying other transforms)
+          container.getSelfBounds(); // x between [0, 300], y between [0, 100]
+          
+          // add a green rectangle to the container, which will be above the gray background
+          var child1 = new phet.scene.Node( {
+            shape: phet.scene.Shape.rectangle( 0, 0, 25, 25 ), // a 25x25 rectangle
+            fill: '#00ff00',
+            scale: 2, // but scaled so it is effectively a 50x50 rectangle to its parents
+            left: 10, // 10px to the right of our parent's left bound
+            centerY: container.height // vertically center us on the container's bottom bound
+          } );
+          container.addChild( child1 );
+          
+          // bounding box of the child in its parent's coordinate frame (the container's local coordinate frame)
+          // note that since it is scaled 2x, its dimensions appear to be 50x50
+          child1.getBounds(); // x between [10, 60], y between [75, 125], (with a left of 10 and centered vertically on 100)
+          
+          child1.getSelfBounds(); // x between [0, 25], y between [0, 25] -- just bounds of its shape
+          
+          // but now that we have added a child, getBounds() on the container (which contains the bounds of its children) has changed:
+          container.getBounds(); // x between [20, 320], y between [20, 145] -- bottom bound of 145 since it has an x offset of 20 plus its child's bottom of 125
+          
+          // and some text to the same container, which will be on top of both the background and green rectangle
+          var child2 = new phet.scene.Text( 'On Top?', {
+            left: child1.centerX,
+            centerY: child1.centerY,
+            font: '20px sans-serif'
+          } );
+          container.addChild( child2 );
+          
+          scene.updateScene();
+        } );
+      </script>
+      
+      <pre class="brush: js">
 // create a node that will have child nodes.
 var container = new phet.scene.Node( {
-    // we'll add a background shape (300x100 rectangle) that will render on this node (it will be rendered below any child nodes)
-    shape: phet.scene.Shape.rectangle( 0, 0, 300, 100 ),
-    fill: '#888888',
-    x: 20, // this node and all of its children will be offset by (20,20)
-    y: 20
+  // we'll add a background shape (300x100 rectangle) that will render on this node (it will be rendered below any child nodes)
+  shape: phet.scene.Shape.rectangle( 0, 0, 300, 100 ),
+  fill: '#888888',
+  x: 20, // this node and all of its children will be offset by (20,20)
+  y: 20
 } );
 scene.root.addChild( container );
 
@@ -326,11 +326,11 @@ container.getSelfBounds(); // x between [0, 300], y between [0, 100]
 
 // add a green rectangle to the container, which will be above the gray background
 var child1 = new phet.scene.Node( {
-    shape: phet.scene.Shape.rectangle( 0, 0, 25, 25 ), // a 25x25 rectangle
-    fill: '#00ff00',
-    scale: 2, // but scaled so it is effectively a 50x50 rectangle to its parents
-    left: 10, // 10px to the right of our parent's left bound
-    centerY: container.height // vertically center us on the container's bottom bound
+  shape: phet.scene.Shape.rectangle( 0, 0, 25, 25 ), // a 25x25 rectangle
+  fill: '#00ff00',
+  scale: 2, // but scaled so it is effectively a 50x50 rectangle to its parents
+  left: 10, // 10px to the right of our parent's left bound
+  centerY: container.height // vertically center us on the container's bottom bound
 } );
 container.addChild( child1 );
 
@@ -345,163 +345,163 @@ container.getBounds(); // x between [20, 320], y between [20, 145] -- bottom bou
 
 // and some text to the same container, which will be on top of both the background and green rectangle
 var child2 = new phet.scene.Text( 'On Top?', {
-    left: child1.centerX,
-    centerY: child1.centerY,
-    font: '20px sans-serif'
+  left: child1.centerX,
+  centerY: child1.centerY,
+  font: '20px sans-serif'
 } );
 container.addChild( child2 );
-            </pre>
-            
-            <h3>Images</h3>
-            
-            <p>
-                For now, pass in a valid image and it will be rendered with its upper-left corner at 0,0 in the local coordinate frame.
-            </p>
-            
-            <div id="image-scene" style="width: 400px; height: 200px;" class="exampleScene"></div>
-            
-            <script type="text/javascript">
-                $( window ).ready( function() {
-                    var scene = new phet.scene.Scene( $( '#image-scene' ) );
-                    
-                    // TODO: support different ways of handling the asynchronous load
-                    var thumbnailImage = document.createElement( 'img' );
-                    thumbnailImage.onload = function( e ) {
-                        scene.root.addChild( new phet.scene.Image( thumbnailImage ) );
-                        scene.root.addChild( new phet.scene.Image( thumbnailImage, {
-                            x: 200,
-                            y: 25,
-                            scale: 1.5,
-                            rotation: Math.PI / 4
-                        } ) );
-                        scene.updateScene();
-                    };
-                    thumbnailImage.src = 'http://phet.colorado.edu/sims/energy-skate-park/energy-skate-park-basics-thumbnail.png';
-                } );
-            </script>
-            
-            <pre class="brush: js">
+      </pre>
+      
+      <h3>Images</h3>
+      
+      <p>
+        For now, pass in a valid image and it will be rendered with its upper-left corner at 0,0 in the local coordinate frame.
+      </p>
+      
+      <div id="image-scene" style="width: 400px; height: 200px;" class="exampleScene"></div>
+      
+      <script type="text/javascript">
+        $( window ).ready( function() {
+          var scene = new phet.scene.Scene( $( '#image-scene' ) );
+          
+          // TODO: support different ways of handling the asynchronous load
+          var thumbnailImage = document.createElement( 'img' );
+          thumbnailImage.onload = function( e ) {
+            scene.root.addChild( new phet.scene.Image( thumbnailImage ) );
+            scene.root.addChild( new phet.scene.Image( thumbnailImage, {
+              x: 200,
+              y: 25,
+              scale: 1.5,
+              rotation: Math.PI / 4
+            } ) );
+            scene.updateScene();
+          };
+          thumbnailImage.src = 'http://phet.colorado.edu/sims/energy-skate-park/energy-skate-park-basics-thumbnail.png';
+        } );
+      </script>
+      
+      <pre class="brush: js">
 // TODO: support different ways of handling the asynchronous load
 var thumbnailImage = document.createElement( 'img' );
 thumbnailImage.onload = function( e ) {
-    scene.root.addChild( new phet.scene.Image( thumbnailImage ) );
-    scene.root.addChild( new phet.scene.Image( thumbnailImage, {
-        x: 200,
-        y: 25,
-        scale: 1.5,
-        rotation: Math.PI / 4
-    } ) );
-    scene.updateScene();
+  scene.root.addChild( new phet.scene.Image( thumbnailImage ) );
+  scene.root.addChild( new phet.scene.Image( thumbnailImage, {
+    x: 200,
+    y: 25,
+    scale: 1.5,
+    rotation: Math.PI / 4
+  } ) );
+  scene.updateScene();
 };
 thumbnailImage.src = 'http://phet.colorado.edu/sims/energy-skate-park/energy-skate-park-basics-thumbnail.png';
-            </pre>
-            
-            <h3>DOM Elements</h3>
-            
-            <p>
-                DOM elements can be added in (they are transformed with CSS transforms). Currently, bounds-based modifiers
-                may be buggy.
-            </p>
-            
-            <div id="dom-simple" style="width: 400px; height: 200px;" class="exampleScene"></div>
-            
-            <script type="text/javascript">
-                $( window ).ready( function() {
-                    var scene = new phet.scene.Scene( $( '#dom-simple' ) );
-                    
-                    var element = document.createElement( 'form' );
-                    element.innerHTML = '<label>Type in me:</label><input type="text">';
-                    
-                    scene.root.addChild( new phet.scene.DOM( element, {
-                        x: 50,
-                        rotation: Math.PI / 4
-                    } ) );
-                    
-                    scene.updateScene();
-                } );
-            </script>
-            
-            <pre class="brush: js">
+      </pre>
+      
+      <h3>DOM Elements</h3>
+      
+      <p>
+        DOM elements can be added in (they are transformed with CSS transforms). Currently, bounds-based modifiers
+        may be buggy.
+      </p>
+      
+      <div id="dom-simple" style="width: 400px; height: 200px;" class="exampleScene"></div>
+      
+      <script type="text/javascript">
+        $( window ).ready( function() {
+          var scene = new phet.scene.Scene( $( '#dom-simple' ) );
+          
+          var element = document.createElement( 'form' );
+          element.innerHTML = '<label>Type in me:</label><input type="text">';
+          
+          scene.root.addChild( new phet.scene.DOM( element, {
+            x: 50,
+            rotation: Math.PI / 4
+          } ) );
+          
+          scene.updateScene();
+        } );
+      </script>
+      
+      <pre class="brush: js">
 var element = document.createElement( 'form' );
 element.innerHTML = '<label>Type in me:</label><input type="text">';
 
 scene.root.addChild( new phet.scene.DOM( element, {
-    x: 50,
-    rotation: Math.PI / 4
+  x: 50,
+  rotation: Math.PI / 4
 } ) );
-            </pre>
+      </pre>
+      
+      <p>
+        When added in the above manner, the DOM element will be lifted in front of any other non-lifted elements by default.
+        It is possible to have the DOM elements reside where they would normally be rendered.
+      </p>
+      
+      
+      <h3>Animation</h3>
+      
+      <p>
+        It is recommended to use scene.updateScene() inside of requestAnimationFrame(), since updateScene() attempts to only
+        re-paint content that is inside of changed areas. This type of pattern may be refactored out soon.
+      </p>
+      
+      <div id="animation-simple" style="width: 200px; height: 200px;" class="exampleScene"></div>
+      
+      <script type="text/javascript">
+        $( window ).ready( function() {
+          var div = $( '#animation-simple' );
+          var scene = new phet.scene.Scene( div );
+          
+          // a hexagon to rotate
+          var node = new phet.scene.Node( {
+            shape: phet.scene.Shape.regularPolygon( 6, 90 ),
+            fill: '#000000',
+            centerX: 100,
+            centerY: 100
+          } );
+          // a marker so pauses on the iPad animation (since requestAnimationFrame doesn't trigger while scrolling) are visible
+          node.addChild( new phet.scene.Node( {
+            shape: phet.scene.Shape.rectangle( 0, -3, 60, 6 ),
+            fill: '#ff0000'
+          } ) );
+          scene.root.addChild( node );
+          
+          // keep track of how much time elapsed over the last frame
+          var lastTime = 0;
+          var timeElapsed = 0;
+          function tick() {
+            window.requestAnimationFrame( tick, div[0] );
             
-            <p>
-                When added in the above manner, the DOM element will be lifted in front of any other non-lifted elements by default.
-                It is possible to have the DOM elements reside where they would normally be rendered.
-            </p>
+            // calculate how much time has elapsed since we rendered the last frame
+            var timeNow = new Date().getTime();
+            if ( lastTime != 0 ) {
+              timeElapsed = (timeNow - lastTime) / 1000.0;
+            }
+            lastTime = timeNow;
             
+            // rotate the node proportionally to how much time has elapsed, so it rotates at a constant real-time rate
+            node.rotate( timeElapsed );
             
-            <h3>Animation</h3>
-            
-            <p>
-                It is recommended to use scene.updateScene() inside of requestAnimationFrame(), since updateScene() attempts to only
-                re-paint content that is inside of changed areas. This type of pattern may be refactored out soon.
-            </p>
-            
-            <div id="animation-simple" style="width: 200px; height: 200px;" class="exampleScene"></div>
-            
-            <script type="text/javascript">
-                $( window ).ready( function() {
-                    var div = $( '#animation-simple' );
-                    var scene = new phet.scene.Scene( div );
-                    
-                    // a hexagon to rotate
-                    var node = new phet.scene.Node( {
-                        shape: phet.scene.Shape.regularPolygon( 6, 90 ),
-                        fill: '#000000',
-                        centerX: 100,
-                        centerY: 100
-                    } );
-                    // a marker so pauses on the iPad animation (since requestAnimationFrame doesn't trigger while scrolling) are visible
-                    node.addChild( new phet.scene.Node( {
-                        shape: phet.scene.Shape.rectangle( 0, -3, 60, 6 ),
-                        fill: '#ff0000'
-                    } ) );
-                    scene.root.addChild( node );
-                    
-                    // keep track of how much time elapsed over the last frame
-                    var lastTime = 0;
-                    var timeElapsed = 0;
-                    function tick() {
-                        window.requestAnimationFrame( tick, div[0] );
-                        
-                        // calculate how much time has elapsed since we rendered the last frame
-                        var timeNow = new Date().getTime();
-                        if ( lastTime != 0 ) {
-                            timeElapsed = (timeNow - lastTime) / 1000.0;
-                        }
-                        lastTime = timeNow;
-                        
-                        // rotate the node proportionally to how much time has elapsed, so it rotates at a constant real-time rate
-                        node.rotate( timeElapsed );
-                        
-                        scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
-                    }
-                    window.requestAnimationFrame( tick, div[0] );
-                } );
-            </script>
-            
-            <pre class="brush: js">
+            scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
+          }
+          window.requestAnimationFrame( tick, div[0] );
+        } );
+      </script>
+      
+      <pre class="brush: js">
 var div = $( '#animation-simple' );
 var scene = new phet.scene.Scene( div );
 
 // a hexagon to rotate
 var node = new phet.scene.Node( {
-    shape: phet.scene.Shape.regularPolygon( 6, 90 ),
-    fill: '#000000',
-    centerX: 100,
-    centerY: 100
+  shape: phet.scene.Shape.regularPolygon( 6, 90 ),
+  fill: '#000000',
+  centerX: 100,
+  centerY: 100
 } );
 // a marker so pauses on the iPad animation (since requestAnimationFrame doesn't trigger while scrolling) are visible
 node.addChild( new phet.scene.Node( {
-    shape: phet.scene.Shape.rectangle( 0, -3, 60, 6 ),
-    fill: '#ff0000'
+  shape: phet.scene.Shape.rectangle( 0, -3, 60, 6 ),
+  fill: '#ff0000'
 } ) );
 scene.root.addChild( node );
 
@@ -509,161 +509,161 @@ scene.root.addChild( node );
 var lastTime = 0;
 var timeElapsed = 0;
 function tick() {
-    window.requestAnimationFrame( tick, div[0] );
-    
-    var timeNow = new Date().getTime();
-    if ( lastTime != 0 ) {
-        timeElapsed = (timeNow - lastTime) / 1000.0;
-    }
-    lastTime = timeNow;
-    
-    node.rotate( timeElapsed );
-    scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
+  window.requestAnimationFrame( tick, div[0] );
+  
+  var timeNow = new Date().getTime();
+  if ( lastTime != 0 ) {
+    timeElapsed = (timeNow - lastTime) / 1000.0;
+  }
+  lastTime = timeNow;
+  
+  node.rotate( timeElapsed );
+  scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
 }
 window.requestAnimationFrame( tick, div[0] );
-            </pre>
+      </pre>
+      
+      <h3>Input Events</h3>
+      
+      <p>
+        The input event system is somewhat different from many other scene graphs, since it hopes to accomodate
+        multi-touch interaction with the mouse. It comes with a low-level event system of which then gestures and
+        behavior can be built on top. For instance, what if in some cases you want a zoom-pinch to be interrupted
+        by another finger manipulating a control? When are fingers interacting with elements individually
+        (sliders, dragging objects, etc.), when are they acting together (zooming, rotating, etc.), and how does
+        this behavior change?
+      </p>
+      
+      <p>
+        An instance of phet.scene.Input is created and hooked to an event source with functions like Scene.initializeFullscreenEvents()
+        and Scene.initializeStandaloneEvents(). The Input object tracks the principal abstraction of a <strong>finger</strong>. A
+        finger represents either the mouse or a single touch as it is tracked across the screen. The mouse 'finger' always exists, but
+        touch fingers are transient, created when an actual finger is pressed on a touchscreen and detached when it is lifted (or
+        canceled). Input event listeners can be added to nodes, the scene, or actual fingers themselves. Attaching a listener to a finger
+        allows tracking of that finger's state, and when combined with behavioral flags can create advanced input handling systems.
+        Also to note: preventDefault (triggered on events by default) will prevent touch events from being re-fired as mouse events, so
+        we only see them once.
+      </p>
+      
+      <p>
+        Events can be handled by any input listener (return true from the callback) and it will not fire any subsequent input listeners for
+        that event. For a single touchmove event, individual fingers generate their own events, so each input event will have a single
+        associated finger. The order of listeners visited for each event is as follows:
+      </p>
+      
+      <ol>
+        <li>Listeners attached to the associated finger</li>
+        <li>For move/up/down/cancel events, listeners for the node directly beneath the event, and subsequently for all parent (ancestor) nodes in order up to the root node</li>
+        <li>For enter/exit events, listeners similar to move/up/down/cancel events, but only up to (and not including) the common parent before/after the action. TODO: better explanation</li>
+        <li>Listeners attached to the scene</li>
+      </ol>
+      
+      <p>
+        DOM interaction with the event system is still being worked on. Gesture listeners and full finger-list access will be added.
+      </p>
+      
+      <p>
+        Below are a series of examples that will hopefully show off the current system.
+      </p>
+      
+      <h4>Colored by quantity of fingers inside shape</h4>
+      
+      <p>
+        Pending decision of whether enter/exit occurs for touchstart or touchend. Seems currently to not handle drags from outside of the bounds! (TODO: investigate).
+        Also not including mouseout or mouseover yet (TODO: decide on how this should work)
+        <strong>Try to get 10 fingers in the hexagon on the iPad!</strong>
+      </p>
+      
+      <p id="hex-finger-count" style="text-align: center; font-size: 20px;">Fingers in hexagon: 0</p>
+      <div id="input-mouseover" style="width: 400px; height: 400px;" class="exampleScene"></div>
+      
+      <script type="text/javascript">
+        $( window ).ready( function() {
+          var scene = new phet.scene.Scene( $( '#input-mouseover' ) );
+          
+          // hook up event listeners just on this scene (not the whole document)
+          scene.initializeStandaloneEvents();
+          
+          var count = 0;
+          var colors = [ '000000', 'ff0000', '00ff00', '0000ff', 'ffff00', '00ffff', 'ff00ff', 'ffffff' ];
+          var maxColor = colors.length - 1;
+          
+          // TODO: get faster text bounds detection. it's too slow right now on the iPad
+          var labelPrefix = 'Fingers in hexagon: ';
+          // var label = new phet.scene.Text( labelPrefix + count, {
+          //   left: 20,
+          //   top: 20,
+          //   font: '20px sans-serif'
+          // } );
+          // scene.root.addChild( label );
+          
+          // a big hexagon in the center. stroke not included in the hit region by default
+          var node = new phet.scene.Node( {
+            shape: phet.scene.Shape.regularPolygon( 6, 150 ),
+            fill: colors[count],
+            stroke: '#000000',
+            centerX: 200,
+            centerY: 200
+          } );
+          scene.root.addChild( node );
+          
+          // update our label and color
+          function updateFingers() {
+            node.fill = colors[ Math.min( count, maxColor ) ];
+            // label.setText( labelPrefix + count );
+            $( '#hex-finger-count' ).text( labelPrefix + count );
+          }
+          
+          // listener fired whenever the event occurs over the node
+          // below are the main 6 input events that are fired
+          node.addInputListener( {
+            // mousedown or touchstart (finger pressed down over the node)
+            down: function( finger, event ) {
+              count++;
+              updateFingers();
+            },
             
-            <h3>Input Events</h3>
+            // mouseup or touchend (finger lifted from over the node)
+            up: function( finger, event ) {
+              count--;
+              updateFingers();
+            },
             
-            <p>
-                The input event system is somewhat different from many other scene graphs, since it hopes to accomodate
-                multi-touch interaction with the mouse. It comes with a low-level event system of which then gestures and
-                behavior can be built on top. For instance, what if in some cases you want a zoom-pinch to be interrupted
-                by another finger manipulating a control? When are fingers interacting with elements individually
-                (sliders, dragging objects, etc.), when are they acting together (zooming, rotating, etc.), and how does
-                this behavior change?
-            </p>
+            // triggered from mousemove or touchmove (finger moved over the node from outside)
+            enter: function( finger, event ) {
+              count++;
+              updateFingers();
+            },
             
-            <p>
-                An instance of phet.scene.Input is created and hooked to an event source with functions like Scene.initializeFullscreenEvents()
-                and Scene.initializeStandaloneEvents(). The Input object tracks the principal abstraction of a <strong>finger</strong>. A
-                finger represents either the mouse or a single touch as it is tracked across the screen. The mouse 'finger' always exists, but
-                touch fingers are transient, created when an actual finger is pressed on a touchscreen and detached when it is lifted (or
-                canceled). Input event listeners can be added to nodes, the scene, or actual fingers themselves. Attaching a listener to a finger
-                allows tracking of that finger's state, and when combined with behavioral flags can create advanced input handling systems.
-                Also to note: preventDefault (triggered on events by default) will prevent touch events from being re-fired as mouse events, so
-                we only see them once.
-            </p>
+            // triggered from mousemove or touchmove (finger moved outside the node from inside)
+            exit: function( finger, event ) {
+              count--;
+              updateFingers();
+            },
             
-            <p>
-                Events can be handled by any input listener (return true from the callback) and it will not fire any subsequent input listeners for
-                that event. For a single touchmove event, individual fingers generate their own events, so each input event will have a single
-                associated finger. The order of listeners visited for each event is as follows:
-            </p>
+            // platform-specific trigger.
+            // on iPad Safari, cancel can by triggered by putting 4 fingers down and then dragging with all 4
+            cancel: function( finger, event ) {
+              count--;
+              updateFingers();
+            },
             
-            <ol>
-                <li>Listeners attached to the associated finger</li>
-                <li>For move/up/down/cancel events, listeners for the node directly beneath the event, and subsequently for all parent (ancestor) nodes in order up to the root node</li>
-                <li>For enter/exit events, listeners similar to move/up/down/cancel events, but only up to (and not including) the common parent before/after the action. TODO: better explanation</li>
-                <li>Listeners attached to the scene</li>
-            </ol>
-            
-            <p>
-                DOM interaction with the event system is still being worked on. Gesture listeners and full finger-list access will be added.
-            </p>
-            
-            <p>
-                Below are a series of examples that will hopefully show off the current system.
-            </p>
-            
-            <h4>Colored by quantity of fingers inside shape</h4>
-            
-            <p>
-                Pending decision of whether enter/exit occurs for touchstart or touchend. Seems currently to not handle drags from outside of the bounds! (TODO: investigate).
-                Also not including mouseout or mouseover yet (TODO: decide on how this should work)
-                <strong>Try to get 10 fingers in the hexagon on the iPad!</strong>
-            </p>
-            
-            <p id="hex-finger-count" style="text-align: center; font-size: 20px;">Fingers in hexagon: 0</p>
-            <div id="input-mouseover" style="width: 400px; height: 400px;" class="exampleScene"></div>
-            
-            <script type="text/javascript">
-                $( window ).ready( function() {
-                    var scene = new phet.scene.Scene( $( '#input-mouseover' ) );
-                    
-                    // hook up event listeners just on this scene (not the whole document)
-                    scene.initializeStandaloneEvents();
-                    
-                    var count = 0;
-                    var colors = [ '000000', 'ff0000', '00ff00', '0000ff', 'ffff00', '00ffff', 'ff00ff', 'ffffff' ];
-                    var maxColor = colors.length - 1;
-                    
-                    // TODO: get faster text bounds detection. it's too slow right now on the iPad
-                    var labelPrefix = 'Fingers in hexagon: ';
-                    // var label = new phet.scene.Text( labelPrefix + count, {
-                    //     left: 20,
-                    //     top: 20,
-                    //     font: '20px sans-serif'
-                    // } );
-                    // scene.root.addChild( label );
-                    
-                    // a big hexagon in the center. stroke not included in the hit region by default
-                    var node = new phet.scene.Node( {
-                        shape: phet.scene.Shape.regularPolygon( 6, 150 ),
-                        fill: colors[count],
-                        stroke: '#000000',
-                        centerX: 200,
-                        centerY: 200
-                    } );
-                    scene.root.addChild( node );
-                    
-                    // update our label and color
-                    function updateFingers() {
-                        node.fill = colors[ Math.min( count, maxColor ) ];
-                        // label.setText( labelPrefix + count );
-                        $( '#hex-finger-count' ).text( labelPrefix + count );
-                    }
-                    
-                    // listener fired whenever the event occurs over the node
-                    // below are the main 6 input events that are fired
-                    node.addInputListener( {
-                        // mousedown or touchstart (finger pressed down over the node)
-                        down: function( finger, event ) {
-                            count++;
-                            updateFingers();
-                        },
-                        
-                        // mouseup or touchend (finger lifted from over the node)
-                        up: function( finger, event ) {
-                            count--;
-                            updateFingers();
-                        },
-                        
-                        // triggered from mousemove or touchmove (finger moved over the node from outside)
-                        enter: function( finger, event ) {
-                            count++;
-                            updateFingers();
-                        },
-                        
-                        // triggered from mousemove or touchmove (finger moved outside the node from inside)
-                        exit: function( finger, event ) {
-                            count--;
-                            updateFingers();
-                        },
-                        
-                        // platform-specific trigger.
-                        // on iPad Safari, cancel can by triggered by putting 4 fingers down and then dragging with all 4
-                        cancel: function( finger, event ) {
-                            count--;
-                            updateFingers();
-                        },
-                        
-                        // mousemove (fired AFTER enter/exit events if applicable)
-                        move: function( finger, event ) {
-                            // do nothing
-                        }
-                    } );
-                    
-                    // repaint loop.
-                    function tick() {
-                        window.requestAnimationFrame( tick, scene.main[0] );
-                        scene.updateScene();
-                    }
-                    window.requestAnimationFrame( tick, scene.main[0] );
-                } );
-            </script>
-            
-            <pre class="brush: js">
+            // mousemove (fired AFTER enter/exit events if applicable)
+            move: function( finger, event ) {
+              // do nothing
+            }
+          } );
+          
+          // repaint loop.
+          function tick() {
+            window.requestAnimationFrame( tick, scene.main[0] );
+            scene.updateScene();
+          }
+          window.requestAnimationFrame( tick, scene.main[0] );
+        } );
+      </script>
+      
+      <pre class="brush: js">
 var scene = new phet.scene.Scene( $( '#input-mouseover' ) );
 
 // hook up event listeners just on this scene (not the whole document)
@@ -676,99 +676,99 @@ var maxColor = colors.length - 1;
 // TODO: get faster text bounds detection. it's too slow right now on the iPad
 var labelPrefix = 'Fingers in hexagon: ';
 // var label = new phet.scene.Text( labelPrefix + count, {
-//     left: 20,
-//     top: 20,
-//     font: '20px sans-serif'
+//   left: 20,
+//   top: 20,
+//   font: '20px sans-serif'
 // } );
 // scene.root.addChild( label );
 
 // a big hexagon in the center. stroke not included in the hit region by default
 var node = new phet.scene.Node( {
-    shape: phet.scene.Shape.regularPolygon( 6, 150 ),
-    fill: colors[count],
-    stroke: '#000000',
-    centerX: 200,
-    centerY: 200
+  shape: phet.scene.Shape.regularPolygon( 6, 150 ),
+  fill: colors[count],
+  stroke: '#000000',
+  centerX: 200,
+  centerY: 200
 } );
 scene.root.addChild( node );
 
 // update our label and color
 function updateFingers() {
-    node.fill = colors[ Math.min( count, maxColor ) ];
-    // label.setText( labelPrefix + count );
-    $( '#hex-finger-count' ).text( labelPrefix + count );
+  node.fill = colors[ Math.min( count, maxColor ) ];
+  // label.setText( labelPrefix + count );
+  $( '#hex-finger-count' ).text( labelPrefix + count );
 }
 
 // listener fired whenever the event occurs over the node
 // below are the main 6 input events that are fired
 node.addInputListener( {
-    // mousedown or touchstart (finger pressed down over the node)
-    down: function( finger, event ) {
-        count++;
-        updateFingers();
-    },
-    
-    // mouseup or touchend (finger lifted from over the node)
-    up: function( finger, event ) {
-        count--;
-        updateFingers();
-    },
-    
-    // triggered from mousemove or touchmove (finger moved over the node from outside)
-    enter: function( finger, event ) {
-        count++;
-        updateFingers();
-    },
-    
-    // triggered from mousemove or touchmove (finger moved outside the node from inside)
-    exit: function( finger, event ) {
-        count--;
-        updateFingers();
-    },
-    
-    // platform-specific trigger.
-    // on iPad Safari, cancel can by triggered by putting 4 fingers down and then dragging with all 4
-    cancel: function( finger, event ) {
-        count--;
-        updateFingers();
-    },
-    
-    // mousemove (fired AFTER enter/exit events if applicable)
-    move: function( finger, event ) {
-        // do nothing
-    }
+  // mousedown or touchstart (finger pressed down over the node)
+  down: function( finger, event ) {
+    count++;
+    updateFingers();
+  },
+  
+  // mouseup or touchend (finger lifted from over the node)
+  up: function( finger, event ) {
+    count--;
+    updateFingers();
+  },
+  
+  // triggered from mousemove or touchmove (finger moved over the node from outside)
+  enter: function( finger, event ) {
+    count++;
+    updateFingers();
+  },
+  
+  // triggered from mousemove or touchmove (finger moved outside the node from inside)
+  exit: function( finger, event ) {
+    count--;
+    updateFingers();
+  },
+  
+  // platform-specific trigger.
+  // on iPad Safari, cancel can by triggered by putting 4 fingers down and then dragging with all 4
+  cancel: function( finger, event ) {
+    count--;
+    updateFingers();
+  },
+  
+  // mousemove (fired AFTER enter/exit events if applicable)
+  move: function( finger, event ) {
+    // do nothing
+  }
 } );
 
 // repaint loop.
 function tick() {
-    window.requestAnimationFrame( tick, scene.main[0] );
-    scene.updateScene();
+  window.requestAnimationFrame( tick, scene.main[0] );
+  scene.updateScene();
 }
 window.requestAnimationFrame( tick, scene.main[0] );
-            </pre>
-            
-            <h4>Node Dragging with Swipe-across-to-start-drag</h4>
-            
-            <p>
-                Visit <a href="../examples/multi-touch.html">this standalone example</a>, and you can drag multiple hexagons with multiple fingers,
-                and sliding a finger across a touch-screen (i.e not the mouse) will pick up the first hexagon it slides across, into a drag.
-            </p>
-            
-            <h2>Appendix (to be completed later)</h2>
-            
-            <p>
-                An example of math with MathJax, verifying it doesn't trample dollar signs in pre tags: $f(\theta)^2$, so we'll able to include the
-                necessary discussions using matrix algebra, etc.
-            </p>
-        </div>
-        <div class="span2"></div>
+      </pre>
+      
+      <h4>Node Dragging with Swipe-across-to-start-drag</h4>
+      
+      <p>
+        Visit <a href="../examples/multi-touch.html">this standalone example</a>, and you can drag multiple hexagons with multiple fingers,
+        and sliding a finger across a touch-screen (i.e not the mouse) will pick up the first hexagon it slides across, into a drag.
+      </p>
+      
+      <h2>Appendix (to be completed later)</h2>
+      
+      <p>
+        An example of math with MathJax, verifying it doesn't trample dollar signs in pre tags: $f(\theta)^2$, so we'll able to include the
+        necessary discussions using matrix algebra, etc.
+      </p>
     </div>
-    
-    
+    <div class="span2"></div>
+  </div>
+  
+  
 
-    
-    <script type="text/javascript">
-        SyntaxHighlighter.all();
-    </script>
+  
+  <script type="text/javascript">
+    SyntaxHighlighter.all();
+  </script>
 </body>
 </html>

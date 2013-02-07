@@ -1,189 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 
-    <!-- runs in full-screen mode on iOS devices -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
+  <!-- runs in full-screen mode on iOS devices -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
 
-    <title>Node Examples</title>
+  <title>Node Examples</title>
+  
+  <link rel="stylesheet" href="../contrib/bootstrap-2.2.2.css">
+  
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../contrib/jquery-1.8.3.min.js"></script>
+  <script src="../contrib/lodash.min-1.0.0-rc.3.js"></script>
+  
+  <!-- Bootstrap not necessarily needed -->
+  <script src="../contrib/bootstrap-2.2.2.js"></script>
+  
+  <!-- For the pop-up FPS meter -->
+  <script src="../contrib/stats.min.js"></script>
+  
+  <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
+  <script src="../concatenated.js"></script>
+  <!-- <script src="../phet-scene-min.js"></script> -->
+  
+  <style type="text/css">
+    /* Let content go to the edges */
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #ff0;
+      overflow: hidden;
+    }
     
-    <link rel="stylesheet" href="../contrib/bootstrap-2.2.2.css">
-    
-    <!-- jQuery and LoDash are dependencies -->
-    <script src="../contrib/jquery-1.8.3.min.js"></script>
-    <script src="../contrib/lodash.min-1.0.0-rc.3.js"></script>
-    
-    <!-- Bootstrap not necessarily needed -->
-    <script src="../contrib/bootstrap-2.2.2.js"></script>
-    
-    <!-- For the pop-up FPS meter -->
-    <script src="../contrib/stats.min.js"></script>
-    
-    <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
-    <script src="../concatenated.js"></script>
-    <!-- <script src="../phet-scene-min.js"></script> -->
-    
-    <style type="text/css">
-        /* Let content go to the edges */
-        html, body {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            background-color: #ff0;
-            overflow: hidden;
-        }
-        
-        /* Have the #main div cover the entire viewport */
-        #main {
-            position: absolute;
-            left: 0;
-            top: 0;
-            background-color: #fff;
-            z-index: 0;
-            padding: none !important; /* in case we add jQuery Mobile back in */
-        }
+    /* Have the #main div cover the entire viewport */
+    #main {
+      position: absolute;
+      left: 0;
+      top: 0;
+      background-color: #fff;
+      z-index: 0;
+      padding: none !important; /* in case we add jQuery Mobile back in */
+    }
 
-    </style>
+  </style>
 </head>
 
 <body>
-    
-    <!-- our scene graph will be in this div -->
-    <div id="main" >
-    </div>
+  
+  <!-- our scene graph will be in this div -->
+  <div id="main" >
+  </div>
 
-    <script>
-    
-    var main = $( '#main' );
+  <script>
+  
+  var main = $( '#main' );
 
-    // initialize our scene
-    var scene = new phet.scene.Scene( main );
-    scene.resizeOnWindowResize(); // the scene gets resized to the full screen size
-    
-    var container = new phet.scene.Node();
-    scene.root.addChild( container );
-    
-    /*---------------------------------------------------------------------------*
-    * Text
-    *----------------------------------------------------------------------------*/        
-    
-    container.addChild( new phet.scene.Text( 'This is a Text node', {
-        x: 20,
-        y: 50,
-        fill: '#000000',
-        font: '20px sans-serif'
+  // initialize our scene
+  var scene = new phet.scene.Scene( main );
+  scene.resizeOnWindowResize(); // the scene gets resized to the full screen size
+  
+  var container = new phet.scene.Node();
+  scene.root.addChild( container );
+  
+  /*---------------------------------------------------------------------------*
+  * Text
+  *----------------------------------------------------------------------------*/    
+  
+  container.addChild( new phet.scene.Text( 'This is a Text node', {
+    x: 20,
+    y: 50,
+    fill: '#000000',
+    font: '20px sans-serif'
+  } ) );
+  
+  /*---------------------------------------------------------------------------*
+  * Rectangle
+  *----------------------------------------------------------------------------*/    
+  
+  container.addChild( new phet.scene.Node( {
+    shape: phet.scene.Shape.rectangle( 0, 0, 44, 44 ),
+    x: 20.5,
+    y: 100.5,
+    fill: '#ff0000',
+    stroke: '#000000'
+  } ) );
+  
+  /*---------------------------------------------------------------------------*
+  * Custom Shape
+  *----------------------------------------------------------------------------*/    
+  
+  var customShape = new phet.scene.Shape();
+  customShape.moveTo( 0, 0 );
+  customShape.quadraticCurveTo( 200, 0, 100, 50 );
+  customShape.lineTo( 100, 25 );
+  customShape.lineTo( 0, 25 );
+  customShape.close();
+  
+  container.addChild( new phet.scene.Node( {
+    shape: customShape,
+    x: 120.5,
+    y: 100.5,
+    fill: '#ff0000',
+    stroke: '#000000',
+    lineWidth: 3
+  } ) );
+  
+  /*---------------------------------------------------------------------------*
+  * Image
+  *----------------------------------------------------------------------------*/    
+  
+  var imageSource = document.createElement( 'img' );
+  imageSource.onload = function( e ) {
+    container.addChild( new phet.scene.Image( imageSource, {
+      x: 20,
+      y: 200
     } ) );
+  };
+  imageSource.src = 'http://phet.colorado.edu/images/phet-logo.gif';
+  
+  /*---------------------------------------------------------------------------*
+  * DOM
+  *----------------------------------------------------------------------------*/    
+  
+  var element = document.createElement( 'div' );
+  $( element ).attr( 'class', 'btn-group' );
+  
+  function addButton( text, onclick ) {
+    var actualButton = document.createElement( 'button' );
+    $( actualButton ).attr( 'class', 'btn' );
+    $( actualButton ).text( text );
+    $( actualButton ).on( 'click', onclick );
     
-    /*---------------------------------------------------------------------------*
-    * Rectangle
-    *----------------------------------------------------------------------------*/        
+    // for responsive touch handling without 300ms delay
+    $( actualButton ).on( 'touchstart', function( event ) { onclick( event ); event.preventDefault(); } );
     
-    container.addChild( new phet.scene.Node( {
-        shape: phet.scene.Shape.rectangle( 0, 0, 44, 44 ),
-        x: 20.5,
-        y: 100.5,
-        fill: '#ff0000',
-        stroke: '#000000'
-    } ) );
-    
-    /*---------------------------------------------------------------------------*
-    * Custom Shape
-    *----------------------------------------------------------------------------*/        
-    
-    var customShape = new phet.scene.Shape();
-    customShape.moveTo( 0, 0 );
-    customShape.quadraticCurveTo( 200, 0, 100, 50 );
-    customShape.lineTo( 100, 25 );
-    customShape.lineTo( 0, 25 );
-    customShape.close();
-    
-    container.addChild( new phet.scene.Node( {
-        shape: customShape,
-        x: 120.5,
-        y: 100.5,
-        fill: '#ff0000',
-        stroke: '#000000',
-        lineWidth: 3
-    } ) );
-    
-    /*---------------------------------------------------------------------------*
-    * Image
-    *----------------------------------------------------------------------------*/        
-    
-    var imageSource = document.createElement( 'img' );
-    imageSource.onload = function( e ) {
-        container.addChild( new phet.scene.Image( imageSource, {
-            x: 20,
-            y: 200
-        } ) );
-    };
-    imageSource.src = 'http://phet.colorado.edu/images/phet-logo.gif';
-    
-    /*---------------------------------------------------------------------------*
-    * DOM
-    *----------------------------------------------------------------------------*/        
-    
-    var element = document.createElement( 'div' );
-    $( element ).attr( 'class', 'btn-group' );
-    
-    function addButton( text, onclick ) {
-        var actualButton = document.createElement( 'button' );
-        $( actualButton ).attr( 'class', 'btn' );
-        $( actualButton ).text( text );
-        $( actualButton ).on( 'click', onclick );
-        
-        // for responsive touch handling without 300ms delay
-        $( actualButton ).on( 'touchstart', function( event ) { onclick( event ); event.preventDefault(); } );
-        
-        element.appendChild( actualButton );
-    }
-    addButton( 'Scale down', function( event ) { container.scaleBy( Math.pow( 0.5, 0.25 ) ); } );
-    addButton( 'Scale up', function( event ) { container.scaleBy( Math.pow( 2, 0.25 ) ); } );
-    addButton( 'Rotate', function( event ) { container.rotateAround( new phet.math.Vector2( 200, 200 ), Math.PI / 16 ); } );
-    
-    container.addChild( new phet.scene.DOM( element, {
-        x: 20,
-        y: 350
-    } ) );
-    
-    /*---------------------------------------------------------------------------*
-    * FPS meter
-    *----------------------------------------------------------------------------*/        
-    
-    var stats = new Stats();
-    stats.setMode( 0 ); // 0: fps, 1: ms
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.right = '0';
-    stats.domElement.style.top = '0';
-    document.body.appendChild( stats.domElement );
-    
-    
-    /*---------------------------------------------------------------------------*
-    * main loop
-    *----------------------------------------------------------------------------*/        
-    
-    var lastTime = 0;
-    var timeElapsed = 0;
-    function tick() {
-        window.requestAnimationFrame( tick, main[0] );
-        
-        var timeNow = new Date().getTime();
-        if ( lastTime != 0 ) {
-            timeElapsed = (timeNow - lastTime) / 1000.0;
-        }
-        lastTime = timeNow;
-        
-        stats.begin();
-        scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
-        stats.end();
-    }
+    element.appendChild( actualButton );
+  }
+  addButton( 'Scale down', function( event ) { container.scaleBy( Math.pow( 0.5, 0.25 ) ); } );
+  addButton( 'Scale up', function( event ) { container.scaleBy( Math.pow( 2, 0.25 ) ); } );
+  addButton( 'Rotate', function( event ) { container.rotateAround( new phet.math.Vector2( 200, 200 ), Math.PI / 16 ); } );
+  
+  container.addChild( new phet.scene.DOM( element, {
+    x: 20,
+    y: 350
+  } ) );
+  
+  /*---------------------------------------------------------------------------*
+  * FPS meter
+  *----------------------------------------------------------------------------*/    
+  
+  var stats = new Stats();
+  stats.setMode( 0 ); // 0: fps, 1: ms
+  stats.domElement.style.position = 'absolute';
+  stats.domElement.style.right = '0';
+  stats.domElement.style.top = '0';
+  document.body.appendChild( stats.domElement );
+  
+  
+  /*---------------------------------------------------------------------------*
+  * main loop
+  *----------------------------------------------------------------------------*/    
+  
+  var lastTime = 0;
+  var timeElapsed = 0;
+  function tick() {
     window.requestAnimationFrame( tick, main[0] );
+    
+    var timeNow = new Date().getTime();
+    if ( lastTime != 0 ) {
+      timeElapsed = (timeNow - lastTime) / 1000.0;
+    }
+    lastTime = timeNow;
+    
+    stats.begin();
+    scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
+    stats.end();
+  }
+  window.requestAnimationFrame( tick, main[0] );
 
 
-    </script>
+  </script>
 
 </body>
 </html>

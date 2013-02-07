@@ -1,239 +1,239 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport"
-    content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta charset="utf-8"/>
+  <meta name="viewport"
+  content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 
-    <!-- runs in full-screen mode on iOS devices -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
+  <!-- runs in full-screen mode on iOS devices -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
 
-    <title>Event Delegation Test</title>
+  <title>Event Delegation Test</title>
+  
+  <link rel="stylesheet" href="../contrib/bootstrap-2.2.2.css">
+
+  <script src="../contrib/jquery-1.8.3.min.js"></script>
+  <script src="../contrib/lodash.min-1.0.0-rc.3.js"></script>
+  <script src="../contrib/bootstrap-2.2.2.js"></script>
+
+  <style type="text/css">
+    .fullWidth {
+      width: 320px;
+      height: 240px;
+    }
     
-    <link rel="stylesheet" href="../contrib/bootstrap-2.2.2.css">
-
-    <script src="../contrib/jquery-1.8.3.min.js"></script>
-    <script src="../contrib/lodash.min-1.0.0-rc.3.js"></script>
-    <script src="../contrib/bootstrap-2.2.2.js"></script>
-
-    <style type="text/css">
-        .fullWidth {
-            width: 320px;
-            height: 240px;
-        }
-        
-        .container {
-            /* including the border */
-            width: 322px;
-            height: 242px;
-            
-            margin-top: 10px;
-        }
-        
-        .containingBlock {
-            position: relative; /* so the positioned children are handled, but the containingBlock is still in the normal flow */
-            background-color: #ffffff;
-            border: 1px solid black;
-        }
-        
-        .fartherBelow {
-            z-index: 0;
-            position: absolute;
-        }
-        
-        .below {
-            z-index: 1;
-            position: absolute;
-        }
-        
-        .above {
-            z-index: 2;
-            position: absolute;
-            background-color: rgba(255,0,0,0.2); /* slight red tint */
-        }
-        
-        .notDisplayed {
-            display: none;
-        }
-        
-        #hoverTest {
-            margin: 10px;
-            border: 10px solid gray;
-            padding: 10px;
-        }
-        
-        #hoverTest:hover {
-            background-color: #000000;
-            color: #ffffff;
-        }
-    </style>
+    .container {
+      /* including the border */
+      width: 322px;
+      height: 242px;
+      
+      margin-top: 10px;
+    }
+    
+    .containingBlock {
+      position: relative; /* so the positioned children are handled, but the containingBlock is still in the normal flow */
+      background-color: #ffffff;
+      border: 1px solid black;
+    }
+    
+    .fartherBelow {
+      z-index: 0;
+      position: absolute;
+    }
+    
+    .below {
+      z-index: 1;
+      position: absolute;
+    }
+    
+    .above {
+      z-index: 2;
+      position: absolute;
+      background-color: rgba(255,0,0,0.2); /* slight red tint */
+    }
+    
+    .notDisplayed {
+      display: none;
+    }
+    
+    #hoverTest {
+      margin: 10px;
+      border: 10px solid gray;
+      padding: 10px;
+    }
+    
+    #hoverTest:hover {
+      background-color: #000000;
+      color: #ffffff;
+    }
+  </style>
 </head>
 
 <body>
-    <div class="container">
-        <div class="containingBlock fullWidth" id="containingBlock">
-            <div class="fartherBelow fullWidth">
-                <button class="btn" type="button" id="clickable" style="position: absolute; right: 0;">Clickable?</button>
-                <p id="clickTest" style="position: absolute; right: 10px; top: 50px;">
-                    No?
-                </p>
-            </div>
-            <div class="below fullWidth">
-                <div class="dropdown">
-                    <a class="dropdown-toggle" id="dLabel" role="button" data-toggle="dropdown" data-target="#" href="/page.html">
-                        Dropdown
-                        <b class="caret"></b>
-                    </a>
-                    <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" id="thatMenu">
-                        <li><a tabindex="-1" href="#">Something</a></li>
-                        <li class="divider"></li>
-                        <li><a tabindex="-1" href="#">Nothing</a></li>
-                    </ul>
-                </div>
-                <label for="textBox">Text</label>
-                <input type="text" name="textBox" value="Type here" id="textBox">
-                <p>
-                    <button class="btn" type="button" id="tryMe">Try Me</button>
-                    <span id="targetSpan"></span>
-                </p>
-                <p id="hoverTest">
-                    This is a :hover test
-                </p>
-                <p id="mouseReport">
-                </p>
-            </div>
-            <div class="above fullWidth">
-            </div>
-        </div>
-        
-        <p style="margin-top: 10px;">
-            <button class="btn btn-primary" type="button" id="toggleOverlay">Toggle Overlay</button>
+  <div class="container">
+    <div class="containingBlock fullWidth" id="containingBlock">
+      <div class="fartherBelow fullWidth">
+        <button class="btn" type="button" id="clickable" style="position: absolute; right: 0;">Clickable?</button>
+        <p id="clickTest" style="position: absolute; right: 10px; top: 50px;">
+          No?
         </p>
+      </div>
+      <div class="below fullWidth">
+        <div class="dropdown">
+          <a class="dropdown-toggle" id="dLabel" role="button" data-toggle="dropdown" data-target="#" href="/page.html">
+            Dropdown
+            <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" id="thatMenu">
+            <li><a tabindex="-1" href="#">Something</a></li>
+            <li class="divider"></li>
+            <li><a tabindex="-1" href="#">Nothing</a></li>
+          </ul>
+        </div>
+        <label for="textBox">Text</label>
+        <input type="text" name="textBox" value="Type here" id="textBox">
+        <p>
+          <button class="btn" type="button" id="tryMe">Try Me</button>
+          <span id="targetSpan"></span>
+        </p>
+        <p id="hoverTest">
+          This is a :hover test
+        </p>
+        <p id="mouseReport">
+        </p>
+      </div>
+      <div class="above fullWidth">
+      </div>
     </div>
     
-    <script>
-        var aboveVisible = true;
-        
-        function write( msg ) {
-            if( console && console.log ) {
-                console.log( msg );
-            }
+    <p style="margin-top: 10px;">
+      <button class="btn btn-primary" type="button" id="toggleOverlay">Toggle Overlay</button>
+    </p>
+  </div>
+  
+  <script>
+    var aboveVisible = true;
+    
+    function write( msg ) {
+      if ( console && console.log ) {
+        console.log( msg );
+      }
+    }
+  
+    $( window ).ready( function() {
+      $( '.dropdown-toggle' ).dropdown();
+      
+      var container = document.getElementById( 'containingBlock' );
+      
+      var elements = _.map( [ 'thatMenu', 'textBox', 'tryMe', 'hoverTest' ], function( id ) { return document.getElementById( id ); } );
+      
+      function elementUnderEvent( event ) {
+        return _.find( elements, function( element ) {
+          var bounds = element.getBoundingClientRect();
+          return event.clientX >= bounds.left && event.clientX <= bounds.right && event.clientY >= bounds.top && event.clientY <= bounds.bottom;
+        } );
+      }
+      
+      function dispatchToElementUnderEvent( event ) {
+        if ( event.eventPhase === Event.NONE || !event.isTrusted ) {
+          var element = elementUnderEvent( event );
+          
+          if ( element ) {
+            // dispatch the original event after it has gone through
+            element.dispatchEvent( event );
+            write( 'dispatching ' + event.type + ' to ' + element );
+          } else {
+            write( '-' );
+          }
+        } else {
+          write( 'Event should have stopped by now!' );
         }
+      }
+      
+      function forwardMouseEventWithDelay( type ) {
+        container.addEventListener( type, function( event ) {
+          event.stopPropagation();
+          // event.preventDefault();
+          setTimeout( function() {
+            dispatchToElementUnderEvent( event );
+          }, 4 ); // 4 is the minimum number of ms that will occur
+        }, true ); // capture the event
+      }
+      
+      function forwardSynthesizedMouseEvent( type ) {
+        container.addEventListener( type, function( event ) {
+          if ( !event.phetSynthesized && aboveVisible ) {
+            event.stopPropagation();
+            event.preventDefault();
+            
+            var newEvent = document.createEvent( 'MouseEvent' ); // not 'MouseEvents' according to DOM Level 3 spec
+            
+            // technically deprecated, but DOM4 event constructors not out yet. people on #whatwg said to use it
+            newEvent.initMouseEvent( type, event.bubbles, event.cancelable, window, event.detail,
+              event.screenX, event.screenY, event.clientX, event.clientY,
+              event.ctrlKey, event.altKey, event.shiftKey, event.metaKey, event.button, event.relatedTarget );
+            
+            newEvent.phetSynthesized = true;
+            
+            dispatchToElementUnderEvent( newEvent );
+          }
+        } );
+      }
+      
+      function forwardSynthesizedTouchEvent( type ) {
+        container.addEventListener( type, function( event ) {
+          if ( !event.phetSynthesized && aboveVisible ) {
+            event.stopPropagation();
+            event.preventDefault();
+            
+            var newEvent = document.createEvent( 'TouchEvent' ); // not 'MouseEvents' according to DOM Level 3 spec
+            
+            // see http://developer.apple.com/library/safari/#documentation/UserExperience/Reference/TouchEventClassReference/TouchEvent/TouchEvent.html
+            newEvent.initTouchEvent( type, event.bubbles, event.cancelable, window, event.detail,
+              event.screenX, event.screenY, event.clientX, event.clientY,
+              event.ctrlKey, event.altKey, event.shiftKey, event.metaKey,
+              event.touches, event.targetTouches, event.changedTouches, event.scale, event.rotation );
+            
+            newEvent.phetSynthesized = true;
+            
+            dispatchToElementUnderEvent( newEvent );
+          }
+        } );
+      }
+      
+      forwardSynthesizedMouseEvent( 'mousedown' );
+      forwardSynthesizedMouseEvent( 'mouseup' );
+      forwardSynthesizedMouseEvent( 'click' );
+      forwardSynthesizedMouseEvent( 'dblclick' );
+      forwardSynthesizedMouseEvent( 'mousemove' );
+      forwardSynthesizedMouseEvent( 'mouseover' );
+      forwardSynthesizedMouseEvent( 'mouseout' );
+      forwardSynthesizedMouseEvent( 'mouseenter' );
+      forwardSynthesizedMouseEvent( 'mouseleave' );
+      
+      forwardSynthesizedTouchEvent( 'touchstart' );
+      forwardSynthesizedTouchEvent( 'touchend' );
+      forwardSynthesizedTouchEvent( 'touchmove' );
+      forwardSynthesizedTouchEvent( 'touchcancel' );
+    } );
     
-        $( window ).ready( function() {
-            $( '.dropdown-toggle' ).dropdown();
-            
-            var container = document.getElementById( 'containingBlock' );
-            
-            var elements = _.map( [ 'thatMenu', 'textBox', 'tryMe', 'hoverTest' ], function( id ) { return document.getElementById( id ); } );
-            
-            function elementUnderEvent( event ) {
-                return _.find( elements, function( element ) {
-                    var bounds = element.getBoundingClientRect();
-                    return event.clientX >= bounds.left && event.clientX <= bounds.right && event.clientY >= bounds.top && event.clientY <= bounds.bottom;
-                } );
-            }
-            
-            function dispatchToElementUnderEvent( event ) {
-                if( event.eventPhase === Event.NONE || !event.isTrusted ) {
-                    var element = elementUnderEvent( event );
-                    
-                    if( element ) {
-                        // dispatch the original event after it has gone through
-                        element.dispatchEvent( event );
-                        write( 'dispatching ' + event.type + ' to ' + element );
-                    } else {
-                        write( '-' );
-                    }
-                } else {
-                    write( 'Event should have stopped by now!' );
-                }
-            }
-            
-            function forwardMouseEventWithDelay( type ) {
-                container.addEventListener( type, function( event ) {
-                    event.stopPropagation();
-                    // event.preventDefault();
-                    setTimeout( function() {
-                        dispatchToElementUnderEvent( event );
-                    }, 4 ); // 4 is the minimum number of ms that will occur
-                }, true ); // capture the event
-            }
-            
-            function forwardSynthesizedMouseEvent( type ) {
-                container.addEventListener( type, function( event ) {
-                    if( !event.phetSynthesized && aboveVisible ) {
-                        event.stopPropagation();
-                        event.preventDefault();
-                        
-                        var newEvent = document.createEvent( 'MouseEvent' ); // not 'MouseEvents' according to DOM Level 3 spec
-                        
-                        // technically deprecated, but DOM4 event constructors not out yet. people on #whatwg said to use it
-                        newEvent.initMouseEvent( type, event.bubbles, event.cancelable, window, event.detail,
-                            event.screenX, event.screenY, event.clientX, event.clientY,
-                            event.ctrlKey, event.altKey, event.shiftKey, event.metaKey, event.button, event.relatedTarget );
-                        
-                        newEvent.phetSynthesized = true;
-                        
-                        dispatchToElementUnderEvent( newEvent );
-                    }
-                } );
-            }
-            
-            function forwardSynthesizedTouchEvent( type ) {
-                container.addEventListener( type, function( event ) {
-                    if( !event.phetSynthesized && aboveVisible ) {
-                        event.stopPropagation();
-                        event.preventDefault();
-                        
-                        var newEvent = document.createEvent( 'TouchEvent' ); // not 'MouseEvents' according to DOM Level 3 spec
-                        
-                        // see http://developer.apple.com/library/safari/#documentation/UserExperience/Reference/TouchEventClassReference/TouchEvent/TouchEvent.html
-                        newEvent.initTouchEvent( type, event.bubbles, event.cancelable, window, event.detail,
-                            event.screenX, event.screenY, event.clientX, event.clientY,
-                            event.ctrlKey, event.altKey, event.shiftKey, event.metaKey,
-                            event.touches, event.targetTouches, event.changedTouches, event.scale, event.rotation );
-                        
-                        newEvent.phetSynthesized = true;
-                        
-                        dispatchToElementUnderEvent( newEvent );
-                    }
-                } );
-            }
-            
-            forwardSynthesizedMouseEvent( 'mousedown' );
-            forwardSynthesizedMouseEvent( 'mouseup' );
-            forwardSynthesizedMouseEvent( 'click' );
-            forwardSynthesizedMouseEvent( 'dblclick' );
-            forwardSynthesizedMouseEvent( 'mousemove' );
-            forwardSynthesizedMouseEvent( 'mouseover' );
-            forwardSynthesizedMouseEvent( 'mouseout' );
-            forwardSynthesizedMouseEvent( 'mouseenter' );
-            forwardSynthesizedMouseEvent( 'mouseleave' );
-            
-            forwardSynthesizedTouchEvent( 'touchstart' );
-            forwardSynthesizedTouchEvent( 'touchend' );
-            forwardSynthesizedTouchEvent( 'touchmove' );
-            forwardSynthesizedTouchEvent( 'touchcancel' );
-        } );
-        
-        $( '#toggleOverlay' ).on( 'click', function( event ) {
-            $( '.above' ).toggleClass( 'notDisplayed' );
-            aboveVisible = !aboveVisible;
-        } );
-        
-        $( '#tryMe' ).on( 'click', function( event ) {
-            $( '#targetSpan' ).text( Math.random().toFixed( 10 ) );
-        } );
-        
-        $( '#hoverTest' ).on( 'mousemove', function( event ) {
-            $( '#mouseReport' ).text( 'mousemove on :hover: ' + event.clientX + ',' + event.clientY );
-        } );
-        
-        $( '#clickable' ).on( 'click', function( event ) {
-            $( '#clickTest' ).text( 'Clicked' );
-        } );
-    </script>
+    $( '#toggleOverlay' ).on( 'click', function( event ) {
+      $( '.above' ).toggleClass( 'notDisplayed' );
+      aboveVisible = !aboveVisible;
+    } );
     
+    $( '#tryMe' ).on( 'click', function( event ) {
+      $( '#targetSpan' ).text( Math.random().toFixed( 10 ) );
+    } );
+    
+    $( '#hoverTest' ).on( 'mousemove', function( event ) {
+      $( '#mouseReport' ).text( 'mousemove on :hover: ' + event.clientX + ',' + event.clientY );
+    } );
+    
+    $( '#clickable' ).on( 'click', function( event ) {
+      $( '#clickTest' ).text( 'Clicked' );
+    } );
+  </script>
+  
 </body>
 </html>

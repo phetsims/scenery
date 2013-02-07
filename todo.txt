@@ -35,6 +35,7 @@ Questions for team:
 General:
     *** shape strokes happen with linewidth at global scale???
     * idiomatic.js styling of conditionals and loops
+    Copy over Molecule Shapes efficiency improvement code from ~/
     DOM events => benchmarks => create Path => layer changes
     Documentation and Examples (always an item)
     Take extension mechanism from Backbone.js: https://github.com/documentcloud/backbone/blob/master/backbone.js#L1471-L1502

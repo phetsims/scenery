@@ -12,28 +12,28 @@ phet.math = phet.math || {};
 
 // create a new scope
 (function () {
-    "use strict";
+  "use strict";
 
-    phet.math.Ray3 = function ( pos, dir ) {
-        this.pos = pos;
-        this.dir = dir;
-    };
+  phet.math.Ray3 = function ( pos, dir ) {
+    this.pos = pos;
+    this.dir = dir;
+  };
 
-    var Ray3 = phet.math.Ray3;
+  var Ray3 = phet.math.Ray3;
 
-    Ray3.prototype = {
-        constructor: Ray3,
+  Ray3.prototype = {
+    constructor: Ray3,
 
-        shifted: function ( distance ) {
-            return new Ray3( this.pointAtDistance( distance ), this.dir );
-        },
+    shifted: function ( distance ) {
+      return new Ray3( this.pointAtDistance( distance ), this.dir );
+    },
 
-        pointAtDistance: function ( distance ) {
-            return this.pos.plus( this.dir.timesScalar( distance ) );
-        },
+    pointAtDistance: function ( distance ) {
+      return this.pos.plus( this.dir.timesScalar( distance ) );
+    },
 
-        toString: function () {
-            return this.pos.toString() + " => " + this.dir.toString();
-        }
-    };
+    toString: function () {
+      return this.pos.toString() + " => " + this.dir.toString();
+    }
+  };
 })();

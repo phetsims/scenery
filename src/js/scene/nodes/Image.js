@@ -26,7 +26,7 @@ phet.scene = phet.scene || {};
     
     Image.prototype.renderSelf = function( state ) {
         // TODO: add SVG / DOM support
-        if( state.isCanvasState() ) {
+        if ( state.isCanvasState() ) {
             var layer = state.layer;
             var context = layer.context;
             context.drawImage( this.image, 0, 0 );

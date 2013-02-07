@@ -57,7 +57,7 @@ phet.scene = phet.scene || {};
         
         var container = layer.getContainer();
         
-        if( this._element.parentNode !== container ) {
+        if ( this._element.parentNode !== container ) {
             // TODO: correct layering of DOM nodes inside the container
             $( container ).append( this._element );
         }
@@ -98,7 +98,7 @@ phet.scene = phet.scene || {};
         var node = this;
         
         _.each( setterKeys, function( key ) {
-            if( params[key] !== undefined ) {
+            if ( params[key] !== undefined ) {
                 node[key] = params[key];
             }
         } );

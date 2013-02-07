@@ -12,24 +12,24 @@ phet.math = phet.math || {};
 
 // create a new scope
 (function () {
-    "use strict";
-    
-    phet.math.Dimension2 = function ( width, height ) {
-        this.width = width;
-        this.height = height;
-    };
+  "use strict";
+  
+  phet.math.Dimension2 = function ( width, height ) {
+    this.width = width;
+    this.height = height;
+  };
 
-    var Dimension2 = phet.math.Dimension2;
+  var Dimension2 = phet.math.Dimension2;
 
-    Dimension2.prototype = {
-        constructor: Dimension2,
+  Dimension2.prototype = {
+    constructor: Dimension2,
 
-        toString: function () {
-            return "[" + this.width + "w, " + this.height + "h]";
-        },
+    toString: function () {
+      return "[" + this.width + "w, " + this.height + "h]";
+    },
 
-        equals: function ( other ) {
-            return this.width === other.width && this.height === other.height;
-        }
-    };
+    equals: function ( other ) {
+      return this.width === other.width && this.height === other.height;
+    }
+  };
 })();

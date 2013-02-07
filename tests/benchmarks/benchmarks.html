@@ -1,52 +1,52 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>Benchmarks for phet-scene</title>
+  <meta charset="utf-8">
+  <title>Benchmarks for phet-scene</title>
+  
+  <link rel="stylesheet" href="../../contrib/bootstrap-2.2.2.css">
+  
+  <script src="../../contrib/jquery-1.8.3.min.js"></script>
+  <script src="../../contrib/lodash.min-1.0.0-rc.3.js"></script>
+  <script src="../../contrib/benchmark-1.0.0.js"></script>
+  <script src="../../contrib/bootstrap-2.2.2.js"></script>
+  
+  <!-- <script src="../../phet-scene-min.js"></script> -->
+  <script src="js/marks.js"></script>
+  
+  <style>
+    .result {
+    }
     
-    <link rel="stylesheet" href="../../contrib/bootstrap-2.2.2.css">
+    .name {
+      font-size: 14px;
+    }
     
-    <script src="../../contrib/jquery-1.8.3.min.js"></script>
-    <script src="../../contrib/lodash.min-1.0.0-rc.3.js"></script>
-    <script src="../../contrib/benchmark-1.0.0.js"></script>
-    <script src="../../contrib/bootstrap-2.2.2.js"></script>
+    .progress {
+      width: 300px;
+      margin-bottom: 0;
+    }
     
-    <!-- <script src="../../phet-scene-min.js"></script> -->
-    <script src="js/marks.js"></script>
-    
-    <style>
-        .result {
-        }
-        
-        .name {
-            font-size: 14px;
-        }
-        
-        .progress {
-            width: 300px;
-            margin-bottom: 0;
-        }
-        
-        .table {
-            width: auto !important;
-        }
-    </style>
+    .table {
+      width: auto !important;
+    }
+  </style>
 </head>
 <body>
-    <div id="main" style="position: absolute; left: 0; top: 0; background-color: white; z-index: 0;">
-    </div>
-    <div id="profiling-results">
-    </div>
-    <script type="text/javascript">
-        $( window ).load( function() {
-            window.benchmarkTimer = new marks.Timer( new marks.TableReport( $( '#profiling-results' )[0] ) );
-            
-            benchmarkTimer.compareSnapshots( [
-                { name: 'current', libs: [ '../../phet-scene-min.js' ], tests: [ 'js/current.js' ] },
-                { name: '120202-515bfa9d9a', libs: [ 'snapshots/phet-scene-min-120202-515bfa9d9a.js' ], tests: [ 'snapshots/tests-120202-515bfa9d9a.js' ] },
-                { name: 'control', libs: [ '../../phet-scene-min.js' ], tests: [ 'js/current.js' ] }
-            ] );
-        } );
-    </script>
+  <div id="main" style="position: absolute; left: 0; top: 0; background-color: white; z-index: 0;">
+  </div>
+  <div id="profiling-results">
+  </div>
+  <script type="text/javascript">
+    $( window ).load( function() {
+      window.benchmarkTimer = new marks.Timer( new marks.TableReport( $( '#profiling-results' )[0] ) );
+      
+      benchmarkTimer.compareSnapshots( [
+        { name: 'current', libs: [ '../../phet-scene-min.js' ], tests: [ 'js/current.js' ] },
+        { name: '120202-515bfa9d9a', libs: [ 'snapshots/phet-scene-min-120202-515bfa9d9a.js' ], tests: [ 'snapshots/tests-120202-515bfa9d9a.js' ] },
+        { name: 'control', libs: [ '../../phet-scene-min.js' ], tests: [ 'js/current.js' ] }
+      ] );
+    } );
+  </script>
 </body>
 </html>

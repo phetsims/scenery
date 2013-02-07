@@ -1,328 +1,328 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <title>Canvas Test Suite</title>
-    
-    <style>
-        canvas {
-            border: 1px solid black;
-        }
-    </style>
+  <meta charset="utf-8"/>
+  <title>Canvas Test Suite</title>
+  
+  <style>
+    canvas {
+      border: 1px solid black;
+    }
+  </style>
 </head>
 <body>
 
 <canvas id="canvas" width="640" height="480"></canvas>
 
-<script type="text/javascript">    
+<script type="text/javascript">  
 
-    var enableDashes = false;
+  var enableDashes = false;
+  
+  var context = document.getElementById( 'canvas' ).getContext( '2d' );
+  
+  context.fillRect( 0, 0, 640, 480 );
+  
+  function demoPath( drawPath ) {
+    context.save();
     
-    var context = document.getElementById( 'canvas' ).getContext( '2d' );
+    context.globalCompositeOperation = 'lighter';
     
-    context.fillRect( 0, 0, 640, 480 );
-    
-    function demoPath( drawPath ) {
-        context.save();
-        
-        context.globalCompositeOperation = 'lighter';
-        
-        if( enableDashes ) {
-            // var dash = [ 2, 2 ];
-            // var dash = [ 1, 20 ];
-            // var dash = [ 0.1, 0.1 ];
-            var dash = [ 0.01, 0.01 ];
-            if( context.setLineDash ) {
-                context.setLineDash( dash );
-            } else if( context.mozDash !== undefined ) {
-                context.mozDash = dash;
-            }
-        }
-        
-        context.beginPath();
-        context.lineWidth = 30;
-        drawPath();
-        
-        context.lineCap = 'square';
-        context.strokeStyle = 'rgba(0,0,255,1)';
-        context.stroke();
-        
-        context.lineCap = 'round';
-        context.strokeStyle = 'rgba(0,255,0,1)';
-        context.stroke();
-        
-        context.lineCap = 'butt';
-        context.strokeStyle = 'rgba(255,0,0,1)';
-        context.stroke();
-        
-        context.globalCompositeOperation = 'source-over';
-        
-        context.fillStyle = 'rgba(127,127,127,0.5)';
-        context.fill();
-        
-        context.lineWidth = 1;
-        context.strokeStyle = '#ff0000';
-        context.stroke();
-        
-        context.restore();
+    if ( enableDashes ) {
+      // var dash = [ 2, 2 ];
+      // var dash = [ 1, 20 ];
+      // var dash = [ 0.1, 0.1 ];
+      var dash = [ 0.01, 0.01 ];
+      if ( context.setLineDash ) {
+        context.setLineDash( dash );
+      } else if ( context.mozDash !== undefined ) {
+        context.mozDash = dash;
+      }
     }
     
-    function runPaths( context ) {
-        var i;
-        
-        context.save();
-        context.translate( 350, 300 );
-        context.rotate( Math.PI / 4 );
-        context.transform( 1, 0.5, 0, 1, 0, 0 );
-        context.clearRect( 0, 0, 50, 50 );
-        context.restore();
-        
-        demoPath( function() {
-            context.moveTo( -120, -120 );
-            context.quadraticCurveTo( 40, 40, 40, 20 );
-        } );
-        
-        demoPath( function() {
-            context.moveTo( -20, -120 );
-            context.quadraticCurveTo( 140, 40, 120, 20 );
-        } );
-        
-        demoPath( function() {
-            context.moveTo( 40, 80 );
-            context.bezierCurveTo( 42, 80, 42, 82, 44, 82 );
-        } );
-        
-        demoPath( function() {
-            var halfAngle = 7 * Math.PI / 180;
-            context.moveTo( 180, 20 );
-            context.lineTo( 180 + Math.cos( halfAngle ), 20 + Math.sin( halfAngle ) );
-            context.lineTo( 180, 20 + 2 * Math.sin( halfAngle ) );
-        } );
-        
-        demoPath( function() {
-            context.save();
-            context.translate( 75, 75 );
-            context.scale( 0.125, 0.125 );
-            context.moveTo( 102.6, 37.8 );
-            context.bezierCurveTo( 773.0, 708.2, 102.6, 708.2, 773.0,37.8 );
-            context.restore();
-        } );
-        
-        demoPath( function() {
-            context.save();
-            context.translate( 40, 120 );
-            context.scale( 1, 1 );
-            context.moveTo( 0, 0 );
-            context.bezierCurveTo( 1, 0, 0, 1, 1, 1 );
-            context.restore();
-        } );
-        
-        demoPath( function() {
-            context.save();
-            context.translate( 330, 20 );
-            context.scale( 1, 1 );
-            context.moveTo( 0, 0 );
-            context.bezierCurveTo( 100, 0, 101, 0, 101, 1 );
-            context.restore();
-        } );
-        
-        demoPath( function() {
-            context.save();
-            context.translate( 280, 60 );
-            context.scale( 1, 1 );
-            context.moveTo( 0, 0 );
-            var smallNumber = 0.0000000001;
-            context.bezierCurveTo( smallNumber, smallNumber, smallNumber, smallNumber, smallNumber, smallNumber );
-            context.restore();
-        } );
-        
-        demoPath( function() {
-            context.save();
-            context.translate( 330, 60 );
-            context.scale( 1, 1 );
-            context.moveTo( 0, 0 );
-            context.bezierCurveTo( 10, 0, 11, 0, 11, 1 );
-            context.restore();
-        } );
-        
-        demoPath( function() {
-            context.save();
-            context.translate( 380, 60 );
-            context.scale( 1, 1 );
-            context.moveTo( 0, 0 );
-            context.bezierCurveTo( 1, 0, 1, 1, 0, 0.5 );
-            context.restore();
-        } );
-        
-        demoPath( function() {
-            context.save();
-            context.translate( 430, 60 );
-            context.scale( 1, 1 );
-            context.moveTo( 0, 0 );
-            context.bezierCurveTo( -1, 0, 1, 0, 0, 0 );
-            context.restore();
-        } );
-        
-        demoPath( function() {
-            context.save();
-            context.translate( 480, 60 );
-            context.scale( 1, 1 );
-            context.moveTo( 0, 0 );
-            context.bezierCurveTo( -1, 0, 1, 0, 0, 0.1 );
-            context.restore();
-        } );
-        
-        demoPath( function() {
-            context.save();
-            context.translate( 530, 60 );
-            context.scale( 1, 1 );
-            context.moveTo( 0, 0 );
-            context.bezierCurveTo( -1, 0, 1, 0, 0.1, 0 );
-            context.restore();
-        } );
-        
-        demoPath( function() {
-            context.save();
-            context.translate( 580, 60 );
-            context.scale( 1, 1 );
-            context.moveTo( 0, 0 );
-            context.bezierCurveTo( 1, 1, 1, 1, 0, 0 );
-            context.restore();
-        } );
-        
-        demoPath( function() {
-            context.save();
-            context.translate( 630, 60 );
-            context.scale( 1, 1 );
-            context.moveTo( 0, 0 );
-            context.lineTo( 0, 10 );
-            context.lineTo( 10, 10 );
-            context.clip();
-            context.lineTo( 0, 15 );
-            context.restore();
-        } );
-        
-        demoPath( function() {
-            context.save();
-            context.miterLimit = 1000000;
-            context.translate( 280, 100 );
-            context.scale( 1, 1 );
-            context.moveTo( 0, 0 );
-            context.lineTo( 10, 0 );
-            context.lineTo( 0, 5 );
-            context.lineTo( Number.MAX_VALUE, 5 );
-            context.restore();
-        } );
-        
-        
-        context.save();
-        context.lineJoin = 'round';
-        context.strokeStyle = 'rgba(255,255,255,0.5)';
-        context.fillStyle = '#0000ff';
-        context.translate( 640 - 80, 480 - 10 );
-        context.scale( 5000, 5000 );
-        context.font = '1px Arial';
-        context.fillText( 'X', 0, 0 );
-        context.lineWidth = 1 / 500;
-        context.strokeText( 'X', 0, 0 );
-        context.restore();
-        
-        context.save();
-        context.strokeStyle = '#ffffff';
-        context.fillStyle = '#ff0000';
-        context.translate( 640 - 80, 480 - 10 );
-        context.scale( 10000, 10000 );
-        context.font = '1px Arial';
-        context.fillText( 'X', 0, 0 );
-        context.restore();
-        
-        function scaledMessage( msg, font, fill, x, y, sx, sy ) {
-            context.save();
-            context.font = font;
-            context.fillStyle = fill;
-            context.translate( x, y );
-            context.scale( sx, sy );
-            context.fillText( msg, 0, 0 );
-            context.restore();
-        }
-        
-        scaledMessage( 'This is a test message', '1px Arial', '#ffffff', 0, 170, 25, 10 );
-        scaledMessage( 'Some are hard to read', '10px Arial', '#ff0000', 0, 180, 5, 0.1 );
-        scaledMessage( 'Some are hard to read', '10px Arial', '#00ff00', 0, 185, 5, 0.01 );
-        for( i = 0; i < 255; i++ ) {
-            scaledMessage( 'Some are hard to read', '10px Arial', '#0000ff', 0, 190, 5, 0.05 );
-        }
-        
-        for( i = 0; i < 20; i++ ) {
-            context.save();
-            context.font = '20px Arial';
-            context.fillStyle = '#ffffff';
-            context.translate( i, 200 );
-            context.transform( 1, 50 + i^2, 0, 1, 0, 0 );
-            context.fillText( 'G', 0, 0 );
-            context.fillText( 'G', 0, 0 );
-            context.fillText( 'G', 0, 0 );
-            context.restore();
-        }
-        
-        function zig( x, y, count, height, space, offset ) {
-            context.save();
-            context.beginPath();
-            context.fillStyle = '#ffffff';
-            context.translate( x, y );
-            context.moveTo( 0, 0 );
-            for( i = 0; i < count; i++ ) {
-                context.lineTo( space * ( i - 0.5 ), height );
-                context.lineTo( space * i, 0 );
-            }
-            for( i = count - 1; i >= 0; i-- ) {
-                context.lineTo( space * i, offset );
-                context.lineTo( space * ( i - 0.5 ), height + offset );
-            }
-            context.fill();
-            context.restore();
-        }
-        zig( 50, 220, 10, 100, 1, 10 );
-        zig( 60, 220, 10, 100, 1, 5 );
-        zig( 70, 220, 10, 100, 2, 5 );
-        zig( 90, 220, 10, 50, 2, 5 );
-        zig( 110, 220, 10, 100, 2.5, 10 );
-        zig( 135, 220, 10, 100, 2.5, 10 );
-        zig( 160, 220, 20, 100, Math.PI, 10 );
-        
-        function zag( x, y, count, height, space, offset ) {
-            context.save();
-            context.beginPath();
-            context.fillStyle = '#ff0000';
-            context.translate( x, y + 120 );
-            context.moveTo( 0, 0 );
-            for( i = 0; i < count; i++ ) {
-                context.quadraticCurveTo( space * ( i - 0.5 ), height, space * i, 0 );
-            }
-            for( i = count - 1; i >= 0; i-- ) {
-                context.quadraticCurveTo( space * i, offset, space * ( i - 0.5 ), height + offset );
-            }
-            context.fill();
-            context.restore();
-        }
-        zag( 50, 220, 10, 100, 1, 10 );
-        zag( 60, 220, 10, 100, 1, 5 );
-        zag( 70, 220, 10, 100, 2, 5 );
-        
-        context.strokeStyle = 'rgba(255,255,255,0.005)';
-        for( i = 0; i < 1000; i++ ) {
-            context.beginPath();
-            var ka = Math.PI * i / 100
-            context.moveTo( 250 + ka, 220 );
-            context.lineTo( 250 + ka, 320 - Math.sin( ka ) * 10 );
-            context.stroke();
-        }
+    context.beginPath();
+    context.lineWidth = 30;
+    drawPath();
+    
+    context.lineCap = 'square';
+    context.strokeStyle = 'rgba(0,0,255,1)';
+    context.stroke();
+    
+    context.lineCap = 'round';
+    context.strokeStyle = 'rgba(0,255,0,1)';
+    context.stroke();
+    
+    context.lineCap = 'butt';
+    context.strokeStyle = 'rgba(255,0,0,1)';
+    context.stroke();
+    
+    context.globalCompositeOperation = 'source-over';
+    
+    context.fillStyle = 'rgba(127,127,127,0.5)';
+    context.fill();
+    
+    context.lineWidth = 1;
+    context.strokeStyle = '#ff0000';
+    context.stroke();
+    
+    context.restore();
+  }
+  
+  function runPaths( context ) {
+    var i;
+    
+    context.save();
+    context.translate( 350, 300 );
+    context.rotate( Math.PI / 4 );
+    context.transform( 1, 0.5, 0, 1, 0, 0 );
+    context.clearRect( 0, 0, 50, 50 );
+    context.restore();
+    
+    demoPath( function() {
+      context.moveTo( -120, -120 );
+      context.quadraticCurveTo( 40, 40, 40, 20 );
+    } );
+    
+    demoPath( function() {
+      context.moveTo( -20, -120 );
+      context.quadraticCurveTo( 140, 40, 120, 20 );
+    } );
+    
+    demoPath( function() {
+      context.moveTo( 40, 80 );
+      context.bezierCurveTo( 42, 80, 42, 82, 44, 82 );
+    } );
+    
+    demoPath( function() {
+      var halfAngle = 7 * Math.PI / 180;
+      context.moveTo( 180, 20 );
+      context.lineTo( 180 + Math.cos( halfAngle ), 20 + Math.sin( halfAngle ) );
+      context.lineTo( 180, 20 + 2 * Math.sin( halfAngle ) );
+    } );
+    
+    demoPath( function() {
+      context.save();
+      context.translate( 75, 75 );
+      context.scale( 0.125, 0.125 );
+      context.moveTo( 102.6, 37.8 );
+      context.bezierCurveTo( 773.0, 708.2, 102.6, 708.2, 773.0,37.8 );
+      context.restore();
+    } );
+    
+    demoPath( function() {
+      context.save();
+      context.translate( 40, 120 );
+      context.scale( 1, 1 );
+      context.moveTo( 0, 0 );
+      context.bezierCurveTo( 1, 0, 0, 1, 1, 1 );
+      context.restore();
+    } );
+    
+    demoPath( function() {
+      context.save();
+      context.translate( 330, 20 );
+      context.scale( 1, 1 );
+      context.moveTo( 0, 0 );
+      context.bezierCurveTo( 100, 0, 101, 0, 101, 1 );
+      context.restore();
+    } );
+    
+    demoPath( function() {
+      context.save();
+      context.translate( 280, 60 );
+      context.scale( 1, 1 );
+      context.moveTo( 0, 0 );
+      var smallNumber = 0.0000000001;
+      context.bezierCurveTo( smallNumber, smallNumber, smallNumber, smallNumber, smallNumber, smallNumber );
+      context.restore();
+    } );
+    
+    demoPath( function() {
+      context.save();
+      context.translate( 330, 60 );
+      context.scale( 1, 1 );
+      context.moveTo( 0, 0 );
+      context.bezierCurveTo( 10, 0, 11, 0, 11, 1 );
+      context.restore();
+    } );
+    
+    demoPath( function() {
+      context.save();
+      context.translate( 380, 60 );
+      context.scale( 1, 1 );
+      context.moveTo( 0, 0 );
+      context.bezierCurveTo( 1, 0, 1, 1, 0, 0.5 );
+      context.restore();
+    } );
+    
+    demoPath( function() {
+      context.save();
+      context.translate( 430, 60 );
+      context.scale( 1, 1 );
+      context.moveTo( 0, 0 );
+      context.bezierCurveTo( -1, 0, 1, 0, 0, 0 );
+      context.restore();
+    } );
+    
+    demoPath( function() {
+      context.save();
+      context.translate( 480, 60 );
+      context.scale( 1, 1 );
+      context.moveTo( 0, 0 );
+      context.bezierCurveTo( -1, 0, 1, 0, 0, 0.1 );
+      context.restore();
+    } );
+    
+    demoPath( function() {
+      context.save();
+      context.translate( 530, 60 );
+      context.scale( 1, 1 );
+      context.moveTo( 0, 0 );
+      context.bezierCurveTo( -1, 0, 1, 0, 0.1, 0 );
+      context.restore();
+    } );
+    
+    demoPath( function() {
+      context.save();
+      context.translate( 580, 60 );
+      context.scale( 1, 1 );
+      context.moveTo( 0, 0 );
+      context.bezierCurveTo( 1, 1, 1, 1, 0, 0 );
+      context.restore();
+    } );
+    
+    demoPath( function() {
+      context.save();
+      context.translate( 630, 60 );
+      context.scale( 1, 1 );
+      context.moveTo( 0, 0 );
+      context.lineTo( 0, 10 );
+      context.lineTo( 10, 10 );
+      context.clip();
+      context.lineTo( 0, 15 );
+      context.restore();
+    } );
+    
+    demoPath( function() {
+      context.save();
+      context.miterLimit = 1000000;
+      context.translate( 280, 100 );
+      context.scale( 1, 1 );
+      context.moveTo( 0, 0 );
+      context.lineTo( 10, 0 );
+      context.lineTo( 0, 5 );
+      context.lineTo( Number.MAX_VALUE, 5 );
+      context.restore();
+    } );
+    
+    
+    context.save();
+    context.lineJoin = 'round';
+    context.strokeStyle = 'rgba(255,255,255,0.5)';
+    context.fillStyle = '#0000ff';
+    context.translate( 640 - 80, 480 - 10 );
+    context.scale( 5000, 5000 );
+    context.font = '1px Arial';
+    context.fillText( 'X', 0, 0 );
+    context.lineWidth = 1 / 500;
+    context.strokeText( 'X', 0, 0 );
+    context.restore();
+    
+    context.save();
+    context.strokeStyle = '#ffffff';
+    context.fillStyle = '#ff0000';
+    context.translate( 640 - 80, 480 - 10 );
+    context.scale( 10000, 10000 );
+    context.font = '1px Arial';
+    context.fillText( 'X', 0, 0 );
+    context.restore();
+    
+    function scaledMessage( msg, font, fill, x, y, sx, sy ) {
+      context.save();
+      context.font = font;
+      context.fillStyle = fill;
+      context.translate( x, y );
+      context.scale( sx, sy );
+      context.fillText( msg, 0, 0 );
+      context.restore();
     }
     
-    runPaths( context );
+    scaledMessage( 'This is a test message', '1px Arial', '#ffffff', 0, 170, 25, 10 );
+    scaledMessage( 'Some are hard to read', '10px Arial', '#ff0000', 0, 180, 5, 0.1 );
+    scaledMessage( 'Some are hard to read', '10px Arial', '#00ff00', 0, 185, 5, 0.01 );
+    for ( i = 0; i < 255; i++ ) {
+      scaledMessage( 'Some are hard to read', '10px Arial', '#0000ff', 0, 190, 5, 0.05 );
+    }
     
-    document.write( '<img src="' + canvas.toDataURL( 'image/png' ) + '"/>' );
+    for ( i = 0; i < 20; i++ ) {
+      context.save();
+      context.font = '20px Arial';
+      context.fillStyle = '#ffffff';
+      context.translate( i, 200 );
+      context.transform( 1, 50 + i^2, 0, 1, 0, 0 );
+      context.fillText( 'G', 0, 0 );
+      context.fillText( 'G', 0, 0 );
+      context.fillText( 'G', 0, 0 );
+      context.restore();
+    }
     
+    function zig( x, y, count, height, space, offset ) {
+      context.save();
+      context.beginPath();
+      context.fillStyle = '#ffffff';
+      context.translate( x, y );
+      context.moveTo( 0, 0 );
+      for ( i = 0; i < count; i++ ) {
+        context.lineTo( space * ( i - 0.5 ), height );
+        context.lineTo( space * i, 0 );
+      }
+      for ( i = count - 1; i >= 0; i-- ) {
+        context.lineTo( space * i, offset );
+        context.lineTo( space * ( i - 0.5 ), height + offset );
+      }
+      context.fill();
+      context.restore();
+    }
+    zig( 50, 220, 10, 100, 1, 10 );
+    zig( 60, 220, 10, 100, 1, 5 );
+    zig( 70, 220, 10, 100, 2, 5 );
+    zig( 90, 220, 10, 50, 2, 5 );
+    zig( 110, 220, 10, 100, 2.5, 10 );
+    zig( 135, 220, 10, 100, 2.5, 10 );
+    zig( 160, 220, 20, 100, Math.PI, 10 );
+    
+    function zag( x, y, count, height, space, offset ) {
+      context.save();
+      context.beginPath();
+      context.fillStyle = '#ff0000';
+      context.translate( x, y + 120 );
+      context.moveTo( 0, 0 );
+      for ( i = 0; i < count; i++ ) {
+        context.quadraticCurveTo( space * ( i - 0.5 ), height, space * i, 0 );
+      }
+      for ( i = count - 1; i >= 0; i-- ) {
+        context.quadraticCurveTo( space * i, offset, space * ( i - 0.5 ), height + offset );
+      }
+      context.fill();
+      context.restore();
+    }
+    zag( 50, 220, 10, 100, 1, 10 );
+    zag( 60, 220, 10, 100, 1, 5 );
+    zag( 70, 220, 10, 100, 2, 5 );
+    
+    context.strokeStyle = 'rgba(255,255,255,0.005)';
+    for ( i = 0; i < 1000; i++ ) {
+      context.beginPath();
+      var ka = Math.PI * i / 100
+      context.moveTo( 250 + ka, 220 );
+      context.lineTo( 250 + ka, 320 - Math.sin( ka ) * 10 );
+      context.stroke();
+    }
+  }
+  
+  runPaths( context );
+  
+  document.write( '<img src="' + canvas.toDataURL( 'image/png' ) + '"/>' );
+  
 </script>
 
 </body>
