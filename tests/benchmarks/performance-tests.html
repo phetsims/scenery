@@ -39,8 +39,8 @@
     $( window ).load( function() {
       var snapshots = [
         { name: 'current', libs: [ '../../phet-scene-min.js' ], tests: [ 'js/perf-current.js' ] },
-        { name: 'control', libs: [ '../../phet-scene-min.js' ], tests: [ 'js/perf-current.js' ] }
-        // { name: '120202-515bfa9d9a', libs: [ 'snapshots/phet-scene-min-120202-515bfa9d9a.js' ], tests: [ 'snapshots/tests-120202-515bfa9d9a.js' ] }
+        // { name: 'control', libs: [ '../../phet-scene-min.js' ], tests: [ 'js/perf-current.js' ] }
+        { name: '120202-515bfa9d9a', libs: [ 'snapshots/phet-scene-min-120202-515bfa9d9a.js' ], tests: [ 'snapshots/perf-120202-515bfa9d9a.js' ] }
       ];
       
       var performance = new marks.Performance( new marks.PerformanceTableReport( $( '#profiling-results' )[0] ) );

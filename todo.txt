@@ -57,6 +57,7 @@ Benchmarks:
                 We need to verify that these tests are fully taxing the system (maybe 20% less FPS than an empty loop in requestAnimationFrame?)
     Performance based:
         * submodules of self?
+        Add exception handling
         Consider using Local Storage to show previous results?
         Examine subclass penalty for Shape in Path instead of Node
     Using xStats (https://github.com/bestiejs/xstats.js), also add memory output for verifying lack of memory leaks?
