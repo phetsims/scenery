@@ -14,6 +14,23 @@ phet.benchmark = phet.benchmark || {};
     return new phet.scene.Scene( main );
   }
   
+  // manual testing to see if we can do better than benchmark.js
+  var scene = phet.benchmark.createDetachedScene( 256, 256 );
+  for( var i = 0; i < 200; i++ ) {
+    scene.root.addChild( new phet.scene.Node( {
+      shape: phet.scene.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ),
+      fill: 'rgba(255,0,0,1)',
+      stroke: '#000000'
+    } ) );
+  }
+  var start = new Date;
+  for( var i = 0; i < 100; i++ ) {
+    scene.root.rotate( Math.sin( i ) );
+    scene.updateScene();
+  }
+  var end = new Date;
+  console.log( benchmarkTimer.currentSnapshot.name + '!!!!!!!!: ' + ( end - start ) );
+  
   benchmarkTimer.add( 'Rotating Square 100x', function() {
     for( var i = 0; i < 100; i++ ) {
       scene.root.rotate( Math.sin( i ) );
