@@ -28,14 +28,15 @@ Questions for SB (or others):
     Preferred mixin styles?
 
 Questions for team:
-    Re-evaluate ES5 getter/setter
     https://travis-ci.org/ for continuous integration?
     Should enter / exit events be fired before / after touch up/down events?
         Note: check DOM convention?
-    Name? Scenery? Artist names?
 
 General:
-    
+    ** Update phet-scene references to Scenery / scenery.
+    * Extract phet-math code to separate repo
+    * Extract phet-general code to separate repo (that would be shared also inside the scene graph?) -- or should we duplicate this small bit of functionality?
+    * Extract molecule-shapes code to separate repo
     Copy over Molecule Shapes efficiency improvement code from ~/
     DOM events => benchmarks => create Path => layer changes
     Documentation and Examples (always an item)
