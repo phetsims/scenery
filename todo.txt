@@ -1,4 +1,7 @@
 
+Bugs:
+    Check Firefox/Safari on Mac event handling on multiple touch events
+
 Browsers
     Browser bugs? (get Canary / Aurora / IE10):
         [PATCH CREATED] miterLimit off in Chrome 24.0.1312.52 m
