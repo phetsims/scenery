@@ -37,6 +37,7 @@ General:
     * Extract phet-math code to separate repo
     * Extract phet-general code to separate repo (that would be shared also inside the scene graph?) -- or should we duplicate this small bit of functionality?
     * Extract molecule-shapes code to separate repo
+    * Executables of scenery.js and scenery-min.js instead of current names?
     Copy over Molecule Shapes efficiency improvement code from ~/
     DOM events => benchmarks => create Path => layer changes
     Documentation and Examples (always an item)
