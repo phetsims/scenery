@@ -33,6 +33,7 @@ Questions for team:
         Note: check DOM convention?
 
 General:
+    * Email OIT about phet.colorado.edu/scenery
     ** Update phet-scene references to Scenery / scenery.
     * Extract phet-math code to separate repo
     * Extract phet-general code to separate repo (that would be shared also inside the scene graph?) -- or should we duplicate this small bit of functionality?
@@ -95,6 +96,7 @@ Code:
     Handling of retina displays (and other backingScale differences)
 
 ** SVG: -- important because we can layer DOM nodes properly under SVG
+    Canvg for SVG=>Canvas? http://code.google.com/p/canvg/
     Examine Raphael JS for SVG support and Code.
     Layering on SVG and the persistence that it will require have some interesting effects:
         Nodes will map to one (or more) <g> elements. Multiple <g> elements necessary if there is a layer change in children, etc.
@@ -112,6 +114,7 @@ DOM nodes:
         Document fragments (test this)
 
 * Event dispatch:
+    Consider finger.isDown for checking general (but possibly mouse related) events
     Indie UI events should be tracked: https://dvcs.w3.org/hg/IndieUI/raw-file/default/src/indie-ui-events.html
     Can we handle DOM nodes without default behaviors? -- patch bootstrap for .phethover instead of :hover
         - yes technically, but we have to rebuild events like mouseover and mouseout
