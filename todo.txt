@@ -69,6 +69,14 @@ Benchmarks:
     Using xStats (https://github.com/bestiejs/xstats.js), also add memory output for verifying lack of memory leaks?
 
 Layers:
+    * Consider caching / layering modification as separate nodes added in (i.e. like a renamed CanvasLayer, or CachingLayer, or something like that)
+        Or use mixins to add to instances? - sketchy and hard to remove
+        ** Or is it possible to detect runtime hotspots based on elapsed time rendering, how much it is being rendered,
+            what transforms it is under (are those changing), and possibly number of children.
+    Consider having a layerStrategy which is responsible for handling how a node handles the layering (i.e. splitting, caching, layer type, etc.)
+        Would allow more specialized cases
+        Caching could still be separated into a separate node if we want
+        Allows a default layerStrategy. Would access into allowed layer types of the node?
     * Does it make sense to handle caching of nodes to an image => draw in different layer type?
     Each node can have acceptable layer types (e.g. for Shape, Canvas, WebGL, SVG, and for DOM: just DOM), and possibly a preferred layer type to trigger if there is a conflict.
         fallbackLayerType?
@@ -155,6 +163,8 @@ Accessibility / shadow DOM:
     see http://www.html5accessibility.com/
 
 Node:
+    Add a way to determine the supported layer types of a node
+        Note also that "conversion" is possible
     Iteration in layer-specific orders? With or without hitting node exits
     Sub-tree opacity (like setTransparency in Piccolo)
         'transparency', 'opacity', or 'alpha'?
@@ -197,6 +207,7 @@ Build:
     Add JSHint into Sublime Text with plugin?
 
 Performance:
+    Ensure that we are triggering the hardware acceleration for CSS3 transforms
     Consider model changes in setInterval: http://www.chandlerprall.com/2012/06/requestanimationframe-is-not-your-logics-friend/
     * IE9 performance (possible regression?)
         Get DebugContext to work with Easel for a comparison? Or just compare against vanilla Canvas code
@@ -211,6 +222,8 @@ Performance:
     Caching nodes with off-screen canvases for performance
         Global-bounds based. Store global transform, so we can (each frame) compare the current transform and see if it is just an
         approximately integer-offset transformation. Then we can render quickly on integer boundaries with no transforms / scaling for speed.
+        Consider CSS3 transforms for possibly increased performance compared to drawImage( x, 0, 0 ), as we can do this with anything
+        Add RenderState flag that allows using cached handling, or forces a full redraw
     Improve quadratic bezier offset curve computation
     Combining fills and strokes (or other state optimization -- fills require ensuring CCW/CW stays the same, so we need flags to whitelist)
         ! shape strokes happen with linewidth scaled by current transform -- if transforms change scale (or possibly shear), this will break
