@@ -190,6 +190,7 @@ Build:
     Add JSHint into Sublime Text with plugin?
 
 Performance:
+    Consider model changes in setInterval: http://www.chandlerprall.com/2012/06/requestanimationframe-is-not-your-logics-friend/
     * IE9 performance (possible regression?)
         Get DebugContext to work with Easel for a comparison? Or just compare against vanilla Canvas code
         "strict mode" removal wasn't effective
