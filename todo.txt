@@ -148,6 +148,7 @@ Accessibility / shadow DOM:
     see http://www.html5accessibility.com/
 
 Node:
+    Iteration in layer-specific orders? With or without hitting node exits
     Sub-tree opacity (like setTransparency in Piccolo)
         'transparency', 'opacity', or 'alpha'?
     Canvas fill gradients / patterns
