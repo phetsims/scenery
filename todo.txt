@@ -98,6 +98,7 @@ Code:
 
 ** SVG: -- important because we can layer DOM nodes properly under SVG
     Canvg for SVG=>Canvas? http://code.google.com/p/canvg/
+    Or SVG straight from image as in http://jsfiddle.net/estelle/SJjJb/ (as data-url for an image)
     Examine Raphael JS for SVG support and Code.
     Layering on SVG and the persistence that it will require have some interesting effects:
         Nodes will map to one (or more) <g> elements. Multiple <g> elements necessary if there is a layer change in children, etc.
