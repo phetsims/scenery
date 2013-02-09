@@ -83,6 +83,8 @@ Layers:
     Proof-of-concept for performance and DOM integration
 
 Code:
+    Either use Require.js or bake in support. Probably good to do for reducing code size with simulations.
+        Almond for fallbacks?
     Add email to header @author so people can ask about bugs
     Switch to jQuery 2 (wait for a stable build?)
     * Move Shape handling from Node to subclass Path.
@@ -140,6 +142,10 @@ DOM nodes:
     Mouse enter/exit needs to trigger for node add/remove
         Does it make sense to hit-test every frame for this?
     How to hit test against DOM nodes?
+    Use cases:
+        Zoom / Pinch / Drag with interrupts
+        Increased hit areas for touch
+        Showing where the fingers are with a display (for projectors)
 
 Accessibility / shadow DOM:
     ARIA in general?
@@ -181,6 +187,7 @@ Text:
     Handling multi-line strings
     SVG / WebGL / DOM options
     Beware: miterLimit and joins seem to change stroking of text (if the bounds of that is ever to be included).
+    Allow stroking of text.
 
 Scene:
     refreshLayers() implementation (currently rebuilds all layers, but should be optimized so it doesn't need to redraw as much)
@@ -215,6 +222,22 @@ Performance:
         Consider a Canvas 2D context delegate to examine drawing calls for Easel / Scene / Custom / etc.
     Checklists:
         http://www.html5rocks.com/en/tutorials/canvas/performance/
+
+Property / Notifiers:
+    Add the listeners, etc. straight to the object?
+        Investigate:
+            WatchJS - https://github.com/melanke/Watch.JS
+            Backbone - a la sidebar.set( { color: 'white' } ); -- but not property specific
+                or Embed or Angular?
+            Bacon.js?
+    Possibly use jQuery events?
+
+Math:
+    Add mutable style, and possibly a flag to see whether something has been modified?
+    Investigate math library alternatives, like Numeric JS
+
+Color:
+    Should use JS style color definitions instead
 
 Features:
     AnimateTo-style animation
