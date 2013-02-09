@@ -83,6 +83,7 @@ Layers:
     Proof-of-concept for performance and DOM integration
 
 Code:
+    Add email to header @author so people can ask about bugs
     Switch to jQuery 2 (wait for a stable build?)
     * Move Shape handling from Node to subclass Path.
         * Mixin-style handling so we can add fill / stroke properties to different subclasses (i.e. Text and Path will both need fill handling)
