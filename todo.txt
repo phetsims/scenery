@@ -111,6 +111,7 @@ WebGL:
     Examine test code for considerations for implementing Shape.
 
 DOM nodes:
+    *** CSS3 transforms look amazing See if we can do more in DOM nodes with transforms
     Handle correct layering of DOM nodes inside a layer, etc.
     How to get the size before adding to the document tree? Impossible?
         Document fragments (test this)
