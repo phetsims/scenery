@@ -10,8 +10,7 @@
  * @author Jonathan Olson
  */
 
-var phet = phet || {};
-phet.scene = phet.scene || {};
+var scenery = scenery || {};
 
 (function(){
   "use strict";
@@ -19,7 +18,7 @@ phet.scene = phet.scene || {};
   var Bounds2 = phet.math.Bounds2;
   
   // assumes main is wrapped with JQuery
-  phet.scene.DOMLayer = function( args ) {
+  scenery.DOMLayer = function( args ) {
     var main = args.main;
     this.main = main;
     
@@ -40,7 +39,7 @@ phet.scene = phet.scene || {};
     this.previousLayer = null;
   };
   
-  var DOMLayer = phet.scene.DOMLayer;
+  var DOMLayer = scenery.DOMLayer;
   
   DOMLayer.prototype = {
     constructor: DOMLayer,

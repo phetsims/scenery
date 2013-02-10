@@ -6,25 +6,24 @@
  * @author Jonathan Olson
  */
 
-var phet = phet || {};
-phet.scene = phet.scene || {};
+var scenery = scenery || {};
 
 (function(){
   "use strict";
   
-  phet.scene.DOM = function( element, params ) {
+  scenery.DOM = function( element, params ) {
     // can this node be interacted with? if set to true, it will not be layered like normal, but will be placed on top
     this._interactive = false;
     
     this._element = element;
     
-    phet.scene.Node.call( this, params );
+    scenery.Node.call( this, params );
     
     this.invalidateDOM();
   };
-  var DOM = phet.scene.DOM;
+  var DOM = scenery.DOM;
   
-  DOM.prototype = phet.Object.create( phet.scene.Node.prototype );
+  DOM.prototype = phet.Object.create( scenery.Node.prototype );
   DOM.prototype.constructor = DOM;
   
   DOM.prototype.invalidateDOM = function() {
@@ -91,7 +90,7 @@ phet.scene = phet.scene || {};
     return this._interactive;
   };
   
-  DOM.prototype._mutatorKeys = [ 'element', 'interactive' ].concat( phet.scene.Node.prototype._mutatorKeys );
+  DOM.prototype._mutatorKeys = [ 'element', 'interactive' ].concat( scenery.Node.prototype._mutatorKeys );
   
   Object.defineProperty( DOM.prototype, 'element', { set: DOM.prototype.setElement, get: DOM.prototype.getElement } );
   Object.defineProperty( DOM.prototype, 'interactive', { set: DOM.prototype.setInteractive, get: DOM.prototype.isInteractive } );

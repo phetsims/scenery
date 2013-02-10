@@ -18,8 +18,7 @@
  * @author Jonathan Olson
  */
 
-var phet = phet || {};
-phet.scene = phet.scene || {};
+var scenery = scenery || {};
 
 (function(){
   "use strict";
@@ -32,7 +31,7 @@ phet.scene = phet.scene || {};
   // a normalized vector for non-zero winding checks
   // var weirdDir = p( Math.PI, 22 / 7 );
   
-  phet.scene.Shape = function( pieces, optionalClose ) {
+  scenery.Shape = function( pieces, optionalClose ) {
     // higher-level Canvas-esque drawing commands
     this.pieces = [];
     
@@ -58,7 +57,7 @@ phet.scene = phet.scene || {};
       this.addPiece( new Piece.Close() );
     }
   };
-  var Shape = phet.scene.Shape;
+  var Shape = scenery.Shape;
   
   Shape.prototype = {
     constructor: Shape,

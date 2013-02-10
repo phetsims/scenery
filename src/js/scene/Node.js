@@ -10,17 +10,16 @@
  * @author Jonathan Olson
  */
 
-var phet = phet || {};
-phet.scene = phet.scene || {};
+var scenery = scenery || {};
 
 (function(){
   "use strict";
   
   var Bounds2 = phet.math.Bounds2;
-  var Shape = phet.scene.Shape;
+  var Shape = scenery.Shape;
   
   // TODO: consider an args-style constructor here!
-  phet.scene.Node = function( params ) {
+  scenery.Node = function( params ) {
     // TODO: hide as _visible, add setter/getter
     this._visible = true;
     
@@ -72,7 +71,7 @@ phet.scene = phet.scene || {};
     }
   };
   
-  var Node = phet.scene.Node;
+  var Node = scenery.Node;
   var Matrix3 = phet.math.Matrix3;
   
   Node.prototype = {
@@ -1121,7 +1120,7 @@ phet.scene = phet.scene || {};
   /*
    * This is an array of property (setter) names for Node.mutate(), which are also used when creating nodes with parameter objects.
    *
-   * E.g. new phet.scene.Node( { x: 5, rotation: 20 } ) will create a Path, and apply setters in the order below (node.x = 5; node.rotation = 20)
+   * E.g. new scenery.Node( { x: 5, rotation: 20 } ) will create a Path, and apply setters in the order below (node.x = 5; node.rotation = 20)
    *
    * The order below is important! Don't change this without knowing the implications.
    * NOTE: translation-based mutators come before rotation/scale, since typically we think of their operations occuring "after" the rotation / scaling

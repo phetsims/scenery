@@ -6,14 +6,13 @@
  * @author Jonathan Olson
  */
 
-var phet = phet || {};
-phet.scene = phet.scene || {};
+var scenery = scenery || {};
 
 (function(){
   "use strict";
   
-  phet.scene.Scene = function( main ) {
-    this.root = new phet.scene.Node();
+  scenery.Scene = function( main ) {
+    this.root = new scenery.Node();
     
     this.root._isRoot = true;
     this.root.scene = this;
@@ -25,7 +24,7 @@ phet.scene = phet.scene || {};
     this.inputListeners = [];
     
     // UI DOM layer for DOM elements that need to be interacted with
-    this.uiLayer = new phet.scene.DOMLayer( {
+    this.uiLayer = new scenery.DOMLayer( {
       scene: this,
       main: main
     } );
@@ -39,7 +38,7 @@ phet.scene = phet.scene || {};
     
     // default to a canvas layer type, but this can be changed
     // called here AFTER the root is initialized, so that we set the correct dirtyLayerPath and get a layer rebuild / refresh as necessary
-    this.root.setLayerType( phet.scene.CanvasLayer );
+    this.root.setLayerType( scenery.CanvasLayer );
     
     // some css hacks (inspired from https://github.com/EightMedia/hammer.js/blob/master/hammer.js)
     (function() {
@@ -60,7 +59,7 @@ phet.scene = phet.scene || {};
     })();
   };
 
-  var Scene = phet.scene.Scene;
+  var Scene = scenery.Scene;
   
   function fullRender( node, state ) {
     node.enterState( state );
@@ -100,7 +99,7 @@ phet.scene = phet.scene || {};
       // no paint validation needed, since we render everything
       this.refreshLayers();
       
-      var state = new phet.scene.RenderState( this );
+      var state = new scenery.RenderState( this );
       fullRender( this.root, state );
       state.finish(); // handle cleanup for the last layer
       
@@ -137,13 +136,13 @@ phet.scene = phet.scene || {};
     
     updateLayer: function( layer, args ) {
       // TODO: only render in dirty rectangles (modify state and checks?)
-      var state = new phet.scene.RenderState( this );
+      var state = new scenery.RenderState( this );
       
       // switches to (and initializes) the layer
       var dirtyBounds = layer.getDirtyBounds();
       var visibleDirtyBounds = layer.getDirtyBounds().intersection( this.sceneBounds );
       layer.prepareDirtyRegions();
-      state.pushClipShape( phet.scene.Shape.bounds( visibleDirtyBounds ) );
+      state.pushClipShape( scenery.Shape.bounds( visibleDirtyBounds ) );
       state.childRestrictedBounds = visibleDirtyBounds;
       state.switchToLayer( layer );
       state.multiLayerRender = false; // don't allow it to switch layers at the start / end nodes
@@ -546,7 +545,7 @@ phet.scene = phet.scene || {};
       var listenerTarget = parameters.listenerTarget;
       var preventDefault = parameters.preventDefault;
       
-      var input = new phet.scene.Input( scene );
+      var input = new scenery.Input( scene );
       
       $( listenerTarget ).on( 'mousedown', function( jEvent ) {
         var evt = jEvent.originalEvent;

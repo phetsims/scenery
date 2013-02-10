@@ -8,13 +8,12 @@
  * @author Jonathan Olson
  */
 
-var phet = phet || {};
-phet.scene = phet.scene || {};
+var scenery = scenery || {};
 
 (function(){
   "use strict";
   
-  phet.scene.Text = function( text, params ) {
+  scenery.Text = function( text, params ) {
     this.fontStyles = new Text.FontStyles(); // will be filled in later, due to dependency resolution
     
     // ensure we have a parameter object
@@ -29,13 +28,13 @@ phet.scene = phet.scene || {};
       // set the text parameter so that setText( text ) is effectively called in the mutator from the super call
       params.text = text;
     }
-    phet.scene.Node.call( this, params );
+    scenery.Node.call( this, params );
     
     // this.setText( text );
   };
-  var Text = phet.scene.Text;
+  var Text = scenery.Text;
   
-  Text.prototype = phet.Object.create( phet.scene.Node.prototype );
+  Text.prototype = phet.Object.create( scenery.Node.prototype );
   Text.prototype.constructor = Text;
   
   Text.prototype.setText = function( text ) {
@@ -51,7 +50,7 @@ phet.scene = phet.scene || {};
   Text.prototype.invalidateText = function() {
     // TODO: faster bounds determination? getBBox()?
     // investigate http://mudcu.be/journal/2011/01/html5-typographic-metrics/
-    this.invalidateSelf( phet.scene.canvasTextBoundsAccurate( this._text, this.fontStyles ) );
+    this.invalidateSelf( scenery.canvasTextBoundsAccurate( this._text, this.fontStyles ) );
   };
   
   Text.prototype.renderSelf = function( state ) {
@@ -112,7 +111,7 @@ phet.scene = phet.scene || {};
   };
   
   // TODO: mixins for fill!
-  Text.prototype._mutatorKeys = [ 'text', 'font', 'textAlign', 'textBaseline', 'direction' ].concat( phet.scene.Node.prototype._mutatorKeys );
+  Text.prototype._mutatorKeys = [ 'text', 'font', 'textAlign', 'textBaseline', 'direction' ].concat( scenery.Node.prototype._mutatorKeys );
   
   Object.defineProperty( Text.prototype, 'text', { set: Text.prototype.setText, get: Text.prototype.getText } );
   Object.defineProperty( Text.prototype, 'font', { set: Text.prototype.setFont, get: Text.prototype.getFont } );

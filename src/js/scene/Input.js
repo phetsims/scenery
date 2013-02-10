@@ -12,13 +12,12 @@
  * @author Jonathan Olson
  */
 
-var phet = phet || {};
-phet.scene = phet.scene || {};
+var scenery = scenery || {};
 
 (function(){
   "use strict";
   
-  phet.scene.Input = function( scene ) {
+  scenery.Input = function( scene ) {
     this.scene = scene;
     
     this.mouse = new Mouse();
@@ -26,7 +25,7 @@ phet.scene = phet.scene || {};
     this.fingers = [ this.mouse ];
   };
   
-  var Input = phet.scene.Input;
+  var Input = scenery.Input;
   
   Input.prototype = {
     constructor: Input,

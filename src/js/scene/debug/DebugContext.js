@@ -8,14 +8,12 @@
  * Wrapping of the CanvasRenderingContext2D interface as of January 27th, 2013 (but not other interfaces like TextMetrics and Path)
  *
  * Shortcut to create:
- *    var context = new phet.scene.DebugContext( document.createElement( 'canvas' ).getContext( '2d' ) );
+ *    var context = new scenery.DebugContext( document.createElement( 'canvas' ).getContext( '2d' ) );
  *
  * @author Jonathan Olson
  */
 
-var phet = phet || {};
-phet.scene = phet.scene || {};
-phet.scene = phet.scene || {};
+var scenery = scenery || {};
 
 (function(){
   "use strict";
@@ -51,10 +49,10 @@ phet.scene = phet.scene || {};
     }
   }
   
-  phet.scene.DebugContext = function( context ) {
+  scenery.DebugContext = function( context ) {
     this._context = context;
   };
-  var DebugContext = phet.scene.DebugContext;
+  var DebugContext = scenery.DebugContext;
   DebugContext.prototype = {
     constructor: DebugContext,
     

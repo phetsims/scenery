@@ -8,24 +8,23 @@
  * @author Jonathan Olson
  */
 
-var phet = phet || {};
-phet.scene = phet.scene || {};
+var scenery = scenery || {};
 
 (function(){
   "use strict";
   
-  phet.scene.Path = function( params ) {
+  scenery.Path = function( params ) {
     // TODO: consider directly passing in a shape object (or at least handling that case)
     this._shape = null;
     
     // ensure we have a parameter object
     params = params || {};
     
-    phet.scene.Node.call( this, params );
+    scenery.Node.call( this, params );
   };
-  var Path = phet.scene.Path;
+  var Path = scenery.Path;
   
-  Path.prototype = phet.Object.create( phet.scene.Node.prototype );
+  Path.prototype = phet.Object.create( scenery.Node.prototype );
   Path.prototype.constructor = Path;
   
   // sets the shape drawn, or null to remove the shape
@@ -109,7 +108,7 @@ phet.scene = phet.scene || {};
   };
   
   // TODO: stroke / fill mixins
-  Path.prototype._mutatorKeys = [ 'shape' ].concat( phet.scene.Node.prototype._mutatorKeys );
+  Path.prototype._mutatorKeys = [ 'shape' ].concat( scenery.Node.prototype._mutatorKeys );
   
   Object.defineProperty( Path.prototype, 'shape', { set: Path.prototype.setShape, get: Path.prototype.getShape } );
   

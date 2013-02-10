@@ -13,23 +13,23 @@ phet.tests = phet.tests || {};
   var radius = 10;
   
   phet.tests.sceneDirtyRegions = function( main, moveCount ) {
-    var scene = new phet.scene.Scene( main );
+    var scene = new scenery.Scene( main );
     var root = scene.root;
     
-    var background = new phet.scene.Path();
-    background.setShape( phet.scene.Shape.rectangle( -sceneWidth / 2 * borderFactor, -sceneHeight / 2 * borderFactor, sceneWidth * borderFactor, sceneHeight * borderFactor ) );
+    var background = new scenery.Path();
+    background.setShape( scenery.Shape.rectangle( -sceneWidth / 2 * borderFactor, -sceneHeight / 2 * borderFactor, sceneWidth * borderFactor, sceneHeight * borderFactor ) );
     background.setFill( '#333333' );
     background.setStroke( '#000000' );
     root.addChild( background );
     
-    var nodes = new phet.scene.Node();
+    var nodes = new scenery.Node();
     root.addChild( nodes );
     
     for ( var i = 0; i < itemCount; i++ ) {
-      var node = new phet.scene.Path();
+      var node = new scenery.Path();
       
       // regular polygon
-      node.setShape( phet.scene.Shape.regularPolygon( 6, radius ) );
+      node.setShape( scenery.Shape.regularPolygon( 6, radius ) );
       
       var xFactor = Math.random();
       node.setTranslation( ( xFactor - 0.5 ) * sceneWidth, ( Math.random() - 0.5 ) * sceneHeight );

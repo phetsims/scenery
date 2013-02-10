@@ -28,6 +28,7 @@
   };
   
   var globals = {
+    phet: true,
     document: false,
     Uint16Array: false,
     Uint32Array: false,

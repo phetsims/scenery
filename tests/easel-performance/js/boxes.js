@@ -125,15 +125,15 @@ phet.tests = phet.tests || {};
     var size = boxTotalSize;
     var boxRadius = 0.5 * boxSizeRatio * size / resolution;
     
-    var scene = new phet.scene.Scene( main );
+    var scene = new scenery.Scene( main );
     
-    var grid = new phet.scene.Node();
+    var grid = new scenery.Node();
     scene.root.addChild( grid );
     
     for ( var row = 0; row < resolution; row++ ) {
       for ( var col = 0; col < resolution; col++ ) {
-        var rect = new phet.scene.Path( {
-          shape: phet.scene.Shape.rectangle(
+        var rect = new scenery.Path( {
+          shape: scenery.Shape.rectangle(
             ( col - ( resolution - 1 ) / 2 ) * size / resolution - boxRadius,
             ( row - ( resolution - 1 ) / 2 ) * size / resolution - boxRadius,
             boxRadius * 2,

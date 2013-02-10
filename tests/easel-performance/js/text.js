@@ -51,10 +51,10 @@ phet.tests = phet.tests || {};
     // maybe getBoundingClientRect(), after appending with position: absolute top: 0, left: 0?
     // offsetWidth / offsetHeight? -- try positioning absolutely, left0top0, then also check offsetLeft, offsetTop -- similar to getBoundingClientRect()
     
-    var scene = new phet.scene.Scene( main );
+    var scene = new scenery.Scene( main );
     var root = scene.root;
     
-    var text = new phet.scene.Text( "Now with text!" );
+    var text = new scenery.Text( "Now with text!" );
     text.fill = '#000000';
     root.addChild( text );
     

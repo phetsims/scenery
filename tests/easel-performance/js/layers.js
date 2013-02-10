@@ -9,7 +9,7 @@ phet.tests = phet.tests || {};
   var count = 500;
   
   phet.tests.sceneLayeringTests = function( main, useLayers ) {
-    var scene = new phet.scene.Scene( main );
+    var scene = new scenery.Scene( main );
     var root = scene.root;
     
     function randomizeTranslation( node ) {
@@ -17,16 +17,16 @@ phet.tests = phet.tests || {};
     }
     
     function buildShapes( color ) {
-      var background = new phet.scene.Node();
+      var background = new scenery.Node();
       if ( useLayers && color == 'rgba(0,255,0,0.7)' ) {
-        background.setLayerType( phet.scene.CanvasLayer );
+        background.setLayerType( scenery.CanvasLayer );
       }
       
       var radius = 10;
-      var shape = phet.scene.Shape.regularPolygon( 6, radius );
+      var shape = scenery.Shape.regularPolygon( 6, radius );
       
       for ( var i = 0; i < count; i++ ) {
-        var node = new phet.scene.Path( {
+        var node = new scenery.Path( {
           shape: shape, // regular polygon
           fill: color,
           stroke: '#000000'
@@ -136,7 +136,7 @@ phet.tests = phet.tests || {};
     var blueContext = addCanvas();
     
     function drawShapes( context, color, seed, rotation ) {
-      // context = new phet.scene.DebugContext( context );
+      // context = new scenery.DebugContext( context );
       // center the transform
       context.setTransform( 1, 0, 0, 1, main.width() / 2, main.height() / 2 );
       

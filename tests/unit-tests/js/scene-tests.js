@@ -85,8 +85,8 @@
   
   // compares the "update" render against a full render in-between a series of steps
   function updateVsFullRender( actions ) {
-    var mainScene = new phet.scene.Scene( $( '#main' ) );
-    var secondaryScene = new phet.scene.Scene( $( '#secondary' ) );
+    var mainScene = new scenery.Scene( $( '#main' ) );
+    var secondaryScene = new scenery.Scene( $( '#secondary' ) );
     
     var mainRoot = mainScene.root;
     var secondaryRoot = secondaryScene.root;
@@ -113,8 +113,8 @@
       threshold = 0;
     }
     
-    var sceneA = new phet.scene.Scene( $( '#main' ) );
-    var sceneB = new phet.scene.Scene( $( '#secondary' ) );
+    var sceneA = new scenery.Scene( $( '#main' ) );
+    var sceneB = new scenery.Scene( $( '#secondary' ) );
     
     constructionA( sceneA );
     constructionB( sceneB );
@@ -130,20 +130,20 @@
   
   function strokeEqualsFill( shapeToStroke, shapeToFill, strokeNodeSetup, message ) {
     sceneEquals( function( scene ) {
-      var node = new phet.scene.Path();
+      var node = new scenery.Path();
       node.setShape( shapeToStroke );
       node.setStroke( '#000000' );
       if ( strokeNodeSetup ) { strokeNodeSetup( node ); }
       scene.root.addChild( node );
     }, function( scene ) {
-      var node = new phet.scene.Path();
+      var node = new scenery.Path();
       node.setShape( shapeToFill );
       node.setFill( '#000000' );
       // node.setStroke( '#ff0000' ); // for debugging strokes
       scene.root.addChild( node );
       // node.validateBounds();
-      // scene.root.addChild( new phet.scene.Path( {
-      //   shape: phet.scene.Shape.bounds( node.getSelfBounds() ),
+      // scene.root.addChild( new scenery.Path( {
+      //   shape: scenery.Shape.bounds( node.getSelfBounds() ),
       //   fill: 'rgba(0,0,255,0.5)'
       // } ) );
     }, message, 128 ); // threshold of 128 due to antialiasing differences between fill and stroke... :(
@@ -156,7 +156,7 @@
     $( '#display' ).append( title );
     _.each( unicodeTestStrings, function( testString ) {
       var testBounds = getBoundsOfText( testString, fontDrawingStyles );
-      var bestBounds = phet.scene.canvasTextBoundsAccurate( testString, fontDrawingStyles );
+      var bestBounds = scenery.canvasTextBoundsAccurate( testString, fontDrawingStyles );
       
       var widthOk = Math.abs( testBounds.width() - bestBounds.width() ) < precision;
       var heightOk = Math.abs( testBounds.height() - bestBounds.height() ) < precision;
@@ -249,12 +249,12 @@
   } );
   
   test( 'Sceneless node handling', function() {
-    var a = new phet.scene.Path();
-    var b = new phet.scene.Path();
-    var c = new phet.scene.Path();
+    var a = new scenery.Path();
+    var b = new scenery.Path();
+    var c = new scenery.Path();
     
-    a.setShape( phet.scene.Shape.rectangle( 0, 0, 20, 20 ) );
-    c.setShape( phet.scene.Shape.rectangle( 10, 10, 30, 30 ) );
+    a.setShape( scenery.Shape.rectangle( 0, 0, 20, 20 ) );
+    c.setShape( scenery.Shape.rectangle( 10, 10, 30, 30 ) );
     
     a.addChild( b );
     b.addChild( c );
@@ -272,24 +272,24 @@
   } );
   
   test( 'Checking Layers and external canvas', function() {
-    var scene = new phet.scene.Scene( $( '#main' ) );
+    var scene = new scenery.Scene( $( '#main' ) );
     var root = scene.root;
     
-    root.addChild( new phet.scene.Path( {
-      shape: phet.scene.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
+    root.addChild( new scenery.Path( {
+      shape: scenery.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
       fill: '#ff0000'
     } ) );
     
-    var middleRect = new phet.scene.Path( {
-      shape: phet.scene.Shape.rectangle( canvasWidth / 4, canvasHeight / 4, canvasWidth / 2, canvasHeight / 2 ),
+    var middleRect = new scenery.Path( {
+      shape: scenery.Shape.rectangle( canvasWidth / 4, canvasHeight / 4, canvasWidth / 2, canvasHeight / 2 ),
       fill: '#00ff00'
     } );
-    middleRect.setLayerType( phet.scene.CanvasLayer );
+    middleRect.setLayerType( scenery.CanvasLayer );
     
     root.addChild( middleRect );
     
-    root.addChild( new phet.scene.Path( {
-      shape: phet.scene.Shape.rectangle( canvasWidth / 2, canvasHeight / 2, canvasWidth / 2, canvasHeight / 2 ),
+    root.addChild( new scenery.Path( {
+      shape: scenery.Shape.rectangle( canvasWidth / 2, canvasHeight / 2, canvasWidth / 2, canvasHeight / 2 ),
       fill: '#0000ff'
     } ) );
     
@@ -301,8 +301,8 @@
   test( 'Update vs Full Basic Clearing Check', function() {
     updateVsFullRender( [
       function( scene ) {
-        scene.root.addChild( new phet.scene.Path( {
-          shape: phet.scene.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
+        scene.root.addChild( new scenery.Path( {
+          shape: scenery.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
           fill: '#000000'
         } ) );
       }, function( scene ) {
@@ -314,13 +314,13 @@
   test( 'Update vs Full Self-Bounds increase', function() {
     updateVsFullRender( [
       function( scene ) {
-        var node = new phet.scene.Path();
-        node.setShape( phet.scene.Shape.rectangle( 0, 0, canvasWidth / 3, canvasHeight / 3 ) );
+        var node = new scenery.Path();
+        node.setShape( scenery.Shape.rectangle( 0, 0, canvasWidth / 3, canvasHeight / 3 ) );
         node.setFill( '#ff0000' );
         node.setStroke( '#000000' );
         scene.root.addChild( node );
       }, function( scene ) {
-        scene.root.children[0].setShape( phet.scene.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ) );
+        scene.root.children[0].setShape( scenery.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ) );
       }
     ] );
   } );
@@ -329,8 +329,8 @@
     updateVsFullRender( [
       function( scene ) {
         // TODO: clearer way of specifying parameters
-        var node = new phet.scene.Path();
-        node.setShape( phet.scene.Shape.rectangle( 15, 15, canvasWidth / 2, canvasHeight / 2 ) );
+        var node = new scenery.Path();
+        node.setShape( scenery.Shape.rectangle( 15, 15, canvasWidth / 2, canvasHeight / 2 ) );
         node.setFill( '#ff0000' );
         node.setStroke( '#000000' );
         node.setLineWidth( 10 );
@@ -342,7 +342,7 @@
   } );
   
   test( 'Correct bounds on rectangle', function() {
-    var rectBounds = phet.scene.canvasAccurateBounds( function( context ) { context.fillRect( 100, 100, 200, 200 ); } );
+    var rectBounds = scenery.canvasAccurateBounds( function( context ) { context.fillRect( 100, 100, 200, 200 ); } );
     ok( Math.abs( rectBounds.minX - 100 ) < 0.01, rectBounds.minX );
     ok( Math.abs( rectBounds.minY - 100 ) < 0.01, rectBounds.minY );
     ok( Math.abs( rectBounds.maxX - 300 ) < 0.01, rectBounds.maxX );
@@ -350,7 +350,7 @@
   } );
   
   test( 'Consistent and precise bounds range on Text', function() {
-    var textBounds = phet.scene.canvasAccurateBounds( function( context ) { context.fillText( 'test string', 0, 0 ); } );
+    var textBounds = scenery.canvasAccurateBounds( function( context ) { context.fillText( 'test string', 0, 0 ); } );
     ok( textBounds.isConsistent, textBounds.toString() );
     
     // precision of 0.001 (or lower given different parameters) is possible on non-Chome browsers (Firefox, IE9, Opera)
@@ -358,36 +358,36 @@
   } );
   
   test( 'ES5 Setter / Getter tests', function() {
-    var node = new phet.scene.Path();
+    var node = new scenery.Path();
     var fill = '#abcdef';
     node.fill = fill;
     equal( node.fill, fill );
     equal( node.getFill(), fill );
     
-    var otherNode = new phet.scene.Path( { fill: fill, shape: phet.scene.Shape.rectangle( 0, 0, 10, 10 ) } );
+    var otherNode = new scenery.Path( { fill: fill, shape: scenery.Shape.rectangle( 0, 0, 10, 10 ) } );
     
     equal( otherNode.fill, fill );
   } );
   
   test( 'Layer change stability', function() {
-    var scene = new phet.scene.Scene( $( '#main' ) );
+    var scene = new scenery.Scene( $( '#main' ) );
     var root = scene.root;
     
-    root.addChild( new phet.scene.Path( {
-      shape: phet.scene.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
+    root.addChild( new scenery.Path( {
+      shape: scenery.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
       fill: '#ff0000'
     } ) );
     
-    var middleRect = new phet.scene.Path( {
-      shape: phet.scene.Shape.rectangle( canvasWidth / 4, canvasHeight / 4, canvasWidth / 2, canvasHeight / 2 ),
+    var middleRect = new scenery.Path( {
+      shape: scenery.Shape.rectangle( canvasWidth / 4, canvasHeight / 4, canvasWidth / 2, canvasHeight / 2 ),
       fill: '#00ff00'
     } );
     
     
     root.addChild( middleRect );
     
-    root.addChild( new phet.scene.Path( {
-      shape: phet.scene.Shape.rectangle( canvasWidth / 2, canvasHeight / 2, canvasWidth / 2, canvasHeight / 2 ),
+    root.addChild( new scenery.Path( {
+      shape: scenery.Shape.rectangle( canvasWidth / 2, canvasHeight / 2, canvasWidth / 2, canvasHeight / 2 ),
       fill: '#0000ff'
     } ) );
     
@@ -395,7 +395,7 @@
     
     var snapshotA = snapshot( scene );
     
-    middleRect.setLayerType( phet.scene.CanvasLayer );
+    middleRect.setLayerType( scenery.CanvasLayer );
     scene.updateScene();
     
     var snapshotB = snapshot( scene );
@@ -404,7 +404,7 @@
   } );
   
   test( 'Piccolo-like behavior', function() {
-    var node = new phet.scene.Node();
+    var node = new scenery.Node();
     
     node.scaleBy( 2 );
     node.translate( 1, 3 );
@@ -439,8 +439,8 @@
   } );
   
   test( 'Setting left/right of node', function() {
-    var node = new phet.scene.Path( {
-      shape: phet.scene.Shape.rectangle( -20, -20, 50, 50 ),
+    var node = new scenery.Path( {
+      shape: scenery.Shape.rectangle( -20, -20, 50, 50 ),
       scale: 2
     } );
     
@@ -468,7 +468,7 @@
   (function(){
     module( 'Shapes' );
     
-    var Shape = phet.scene.Shape;
+    var Shape = scenery.Shape;
     
     function p( x, y ) { return new phet.math.Vector2( x, y ); }
   
@@ -686,7 +686,7 @@
   module( 'Text' );
   
   test( 'Canvas Accurate Text Bounds', function() {
-    testTextBounds( phet.scene.canvasTextBoundsAccurate, {
+    testTextBounds( scenery.canvasTextBoundsAccurate, {
       font: '10px sans-serif',
       textAlign: 'left', // left is not the default, 'start' is
       textBaseline: 'alphabetic',
@@ -703,14 +703,14 @@
   // test( 'DOM Test', function() {
   //   updateVsFullRender( [
   //     function( scene ) {
-  //       var node = new phet.scene.Path();
-  //       node.setShape( phet.scene.Shape.rectangle( 0, 0, canvasWidth / 3, canvasHeight / 3 ) );
+  //       var node = new scenery.Path();
+  //       node.setShape( scenery.Shape.rectangle( 0, 0, canvasWidth / 3, canvasHeight / 3 ) );
   //       node.setFill( '#ff0000' );
   //       node.setStroke( '#000000' );
   //       scene.root.addChild( node );
         
-  //       var domNode = new phet.scene.Node();
-  //       domNode.setLayerType( phet.scene.DOMLayer );
+  //       var domNode = new scenery.Node();
+  //       domNode.setLayerType( scenery.DOMLayer );
   //       node.addChild( domNode );
   //     }
   //   ] );

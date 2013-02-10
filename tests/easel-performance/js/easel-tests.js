@@ -108,28 +108,28 @@ $(document).ready( function() {
       typeId: 'bezier',
       init: function( main ) {
         // TODO: cusps at (100, 100), (300, 200), (200, 200), (200, 100) for cubic
-        var scene = new phet.scene.Scene( main );
+        var scene = new scenery.Scene( main );
         
-        var mainCurve = new phet.scene.Shape.Segment.Quadratic(
+        var mainCurve = new scenery.Shape.Segment.Quadratic(
           new phet.math.Vector2( 100, 100 ),
           new phet.math.Vector2( 230, 100 ),
           new phet.math.Vector2( 150, 350 )
         );
         
         // TODO: a way to pass an array and run commands without explicitly adding pieces?
-        // scene.root.addChild( new phet.scene.Path( {
-        //   shape: new phet.scene.Shape( [
-        //     new phet.scene.Shape.Piece.MoveTo( mainCurve.start ),
-        //     new phet.scene.Shape.Piece.LineTo( mainCurve.control ),
-        //     new phet.scene.Shape.Piece.LineTo( mainCurve.end )
+        // scene.root.addChild( new scenery.Path( {
+        //   shape: new scenery.Shape( [
+        //     new scenery.Shape.Piece.MoveTo( mainCurve.start ),
+        //     new scenery.Shape.Piece.LineTo( mainCurve.control ),
+        //     new scenery.Shape.Piece.LineTo( mainCurve.end )
         //   ] ),
         //   stroke: '#ff0000'
         // } ) );
         
-        scene.root.addChild( new phet.scene.Path( {
-          shape: new phet.scene.Shape( [
-            new phet.scene.Shape.Piece.MoveTo( mainCurve.start ),
-            new phet.scene.Shape.Piece.QuadraticCurveTo( mainCurve.control, mainCurve.end )
+        scene.root.addChild( new scenery.Path( {
+          shape: new scenery.Shape( [
+            new scenery.Shape.Piece.MoveTo( mainCurve.start ),
+            new scenery.Shape.Piece.QuadraticCurveTo( mainCurve.control, mainCurve.end )
           ] ),
           stroke: '#000000'
         } ) );
@@ -137,8 +137,8 @@ $(document).ready( function() {
         _.each( [ -55, -40, -30, -15, -5, 5, 15, 30, 40, 55 ], function( offset ) {
           var offsetPieces = mainCurve.offsetTo( offset, true );
           
-          scene.root.addChild( new phet.scene.Path( {
-            shape: new phet.scene.Shape( offsetPieces ),
+          scene.root.addChild( new scenery.Path( {
+            shape: new scenery.Shape( offsetPieces ),
             stroke: '#0000ff'
           } ) );
         } );
@@ -275,13 +275,13 @@ $(document).ready( function() {
       typeName: 'Images',
       typeId: 'images',
       init: function( main ) {
-        var scene = new phet.scene.Scene( main );
+        var scene = new scenery.Scene( main );
         
         var image;
         
         var imageSource = document.createElement( 'img' );
         imageSource.onload = function( e ) {
-          image = new phet.scene.Image( imageSource );
+          image = new scenery.Image( imageSource );
           image.translate( -image.getSelfBounds().width() / 2, -image.getSelfBounds().height() / 2 );
           scene.root.addChild( image );
         };
@@ -299,7 +299,7 @@ $(document).ready( function() {
       typeName: 'DOM',
       typeId: 'dom',
       init: function( main ) {
-        var scene = new phet.scene.Scene( main );
+        var scene = new scenery.Scene( main );
         
         var element = document.createElement( 'iframe' );
         $( element ).attr( 'width', '560' );
@@ -316,26 +316,26 @@ $(document).ready( function() {
         var bigForm = document.createElement( 'form' );
         bigForm.innerHTML = 'And now scalable!<br><input type="text" name="stuff">';
         
-        var container = new phet.scene.Node();
-        container.setLayerType( phet.scene.DOMLayer );
+        var container = new scenery.Node();
+        container.setLayerType( scenery.DOMLayer );
         
-        container.addChild( new phet.scene.DOM( element, {
+        container.addChild( new scenery.DOM( element, {
           x: -560 / 2,
           y: -315 / 2,
           interactive: true
         } ) );
         
-        // var unclickableFormNode = new phet.scene.DOM( unclickableForm );
+        // var unclickableFormNode = new scenery.DOM( unclickableForm );
         // unclickableFormNode.translate( 0, 160 );
         // container.addChild( unclickableFormNode );
         
-        container.addChild( new phet.scene.DOM( clickableForm, {
+        container.addChild( new scenery.DOM( clickableForm, {
           x: -560 / 2,
           y: 160,
           interactive: true
         } ) );
         
-        container.addChild( new phet.scene.DOM( bigForm, {
+        container.addChild( new scenery.DOM( bigForm, {
           x: 0,
           y: 160,
           scale: 4,
@@ -344,8 +344,8 @@ $(document).ready( function() {
         
         scene.root.addChild( container );
         
-        // var background = new phet.scene.Path();
-        // background.setShape( phet.scene.Shape.rectangle( -400, -400, 800, 800 ) );
+        // var background = new scenery.Path();
+        // background.setShape( scenery.Shape.rectangle( -400, -400, 800, 800 ) );
         // background.setFill( 'rgba(230,255,230,0.5)' );
         // scene.root.addChild( background );
         

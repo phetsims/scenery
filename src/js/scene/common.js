@@ -1,7 +1,6 @@
 // Copyright 2002-2012, University of Colorado
 
-var phet = phet || {};
-phet.scene = phet.scene || {};
+var scenery = scenery || {};
 
 (function(){
   "use strict";
@@ -25,9 +24,9 @@ phet.scene = phet.scene || {};
   // drawingStyles should include font, textAlign, textBaseline, direction
   // textAlign = 'left', textBaseline = 'alphabetic' and direction = 'ltr' are recommended
   // TODO: for speed, also investigate http://mudcu.be/journal/2011/01/html5-typographic-metrics/
-	phet.scene.canvasTextBoundsAccurate = function( text, fontDrawingStyles ) {
+	scenery.canvasTextBoundsAccurate = function( text, fontDrawingStyles ) {
     phet.assert( fontDrawingStyles !== undefined );
-    return phet.scene.canvasAccurateBounds( function( context ) {
+    return scenery.canvasAccurateBounds( function( context ) {
       // TODO: way to apply font drawing styles?
       context.font = fontDrawingStyles.font;
       context.textAlign = fontDrawingStyles.textAlign;
@@ -40,7 +39,7 @@ phet.scene = phet.scene || {};
   // given a data snapshot and transform, calculate range on how large / small the bounds can be
   // very conservative, with an effective 1px extra range to allow for differences in anti-aliasing
   // for performance concerns, this does not support skews / rotations / anything but translation and scaling
-  phet.scene.scanBounds = function( imageData, resolution, transform ) {
+  scenery.scanBounds = function( imageData, resolution, transform ) {
     
     // entry will be true if any pixel with the given x or y value is non-rgba(0,0,0,0)
     var dirtyX = _.map( _.range( resolution ), function() { return false; } );
@@ -80,7 +79,7 @@ phet.scene = phet.scene || {};
     };
   };
   
-  phet.scene.canvasAccurateBounds = function( renderToContext, options ) {
+  scenery.canvasAccurateBounds = function( renderToContext, options ) {
     // how close to the actual bounds do we need to be?
     var precision = ( options && options.precision ) ? options.precision : 0.001;
     
@@ -115,7 +114,7 @@ phet.scene = phet.scene || {};
       context.restore();
       
       var data = context.getImageData( 0, 0, resolution, resolution );
-      var minMaxBounds = phet.scene.scanBounds( data, resolution, transform );
+      var minMaxBounds = scenery.scanBounds( data, resolution, transform );
       
       function snapshotToCanvas( snapshot ) {
           var canvas = document.createElement( 'canvas' );

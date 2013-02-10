@@ -11,14 +11,14 @@ phet.benchmark = phet.benchmark || {};
     var main = $( '#main' );
     main.width( 640 );
     main.height( 480 );
-    return new phet.scene.Scene( main );
+    return new scenery.Scene( main );
   }
   
   // manual testing to see if we can do better than benchmark.js
   var scene = phet.benchmark.createDetachedScene( 256, 256 );
   for( var i = 0; i < 200; i++ ) {
-    scene.root.addChild( new phet.scene.Node( {
-      shape: phet.scene.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ),
+    scene.root.addChild( new scenery.Node( {
+      shape: scenery.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ),
       fill: 'rgba(255,0,0,1)',
       stroke: '#000000'
     } ) );
@@ -39,8 +39,8 @@ phet.benchmark = phet.benchmark || {};
   }, {
     setup: function() {
       var scene = phet.benchmark.createDetachedScene( 256, 256 );
-      scene.root.addChild( new phet.scene.Node( {
-        shape: phet.scene.Shape.rectangle( 0, 0, 20, 20 ),
+      scene.root.addChild( new scenery.Node( {
+        shape: scenery.Shape.rectangle( 0, 0, 20, 20 ),
         centerX: 128,
         centerY: 128,
         fill: 'rgba(255,0,0,1)'
@@ -57,8 +57,8 @@ phet.benchmark = phet.benchmark || {};
     setup: function() {
       var scene = phet.benchmark.createDetachedScene( 256, 256 );
       for( var i = 0; i < 200; i++ ) {
-        scene.root.addChild( new phet.scene.Node( {
-          shape: phet.scene.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ),
+        scene.root.addChild( new scenery.Node( {
+          shape: scenery.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ),
           fill: 'rgba(255,0,0,1)',
           stroke: '#000000'
         } ) );
@@ -75,14 +75,14 @@ phet.benchmark = phet.benchmark || {};
     setup: function() {
       var scene = phet.benchmark.createDetachedScene( 256, 256 );
       for( var i = 0; i < 200; i++ ) {
-        scene.root.addChild( new phet.scene.Node( {
-          shape: phet.scene.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ),
+        scene.root.addChild( new scenery.Node( {
+          shape: scenery.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ),
           fill: 'rgba(255,0,0,1)',
           stroke: '#000000'
         } ) );
       }
-      var node = new phet.scene.Node( {
-        shape: phet.scene.Shape.rectangle( 0, 0, 20, 20 ),
+      var node = new scenery.Node( {
+        shape: scenery.Shape.rectangle( 0, 0, 20, 20 ),
         centerX: 128,
         centerY: 128,
         fill: 'rgba(255,0,0,1)',
@@ -100,14 +100,14 @@ phet.benchmark = phet.benchmark || {};
     setup: function() {
       var scene = phet.benchmark.createDetachedScene( 256, 256 );
       for( var i = 0; i < 200; i++ ) {
-        scene.root.addChild( new phet.scene.Node( {
-          shape: phet.scene.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ),
+        scene.root.addChild( new scenery.Node( {
+          shape: scenery.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ),
           fill: 'rgba(255,0,0,1)',
           stroke: '#000000'
         } ) );
       }
-      var node = new phet.scene.Node( {
-        shape: phet.scene.Shape.rectangle( 0, 0, 20, 20 ),
+      var node = new scenery.Node( {
+        shape: scenery.Shape.rectangle( 0, 0, 20, 20 ),
         centerX: 128,
         centerY: 128,
         fill: 'rgba(255,0,0,1)',
@@ -128,21 +128,21 @@ phet.benchmark = phet.benchmark || {};
   } );
   
   benchmarkTimer.add( 'Node creation', function() {
-    var node = new phet.scene.Node();
+    var node = new scenery.Node();
   } );
   
   benchmarkTimer.add( 'Node creation with inline parameters', function() {
-    var node = new phet.scene.Node( { x: 5, y: 10 } );
+    var node = new scenery.Node( { x: 5, y: 10 } );
   } );
   
   benchmarkTimer.add( 'Node creation with ES5 setters', function() {
-    var node = new phet.scene.Node();
+    var node = new scenery.Node();
     node.x = 5;
     node.y = 10;
   } );
   
   benchmarkTimer.add( 'Node creation with setters', function() {
-    var node = new phet.scene.Node();
+    var node = new scenery.Node();
     node.setX( 5 );
     node.setY( 10 );
   } );
@@ -151,14 +151,14 @@ phet.benchmark = phet.benchmark || {};
     node.x = 5;
     node.y = 10;
   }, { setup: function() {
-    var node = new phet.scene.Node();
+    var node = new scenery.Node();
   } } );
   
   benchmarkTimer.add( 'Node mutation with setters', function() {
     node.setX( 5 );
     node.setY( 10 );
   }, { setup: function() {
-    var node = new phet.scene.Node();
+    var node = new scenery.Node();
   } } );
   
   // benchmarkTimer.add( 'Fast on current version', function() {

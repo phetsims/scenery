@@ -9,13 +9,12 @@
  * @author Jonathan Olson
  */
 
-var phet = phet || {};
-phet.scene = phet.scene || {};
+var scenery = scenery || {};
 
 (function(){
   "use strict";
   
-  phet.scene.RenderState = function( scene ) {
+  scenery.RenderState = function( scene ) {
     this.transform = new phet.math.Transform3();
     
     this.layer = null;
@@ -31,7 +30,7 @@ phet.scene = phet.scene || {};
     this.childRestrictedBounds = null;
   };
 
-  var RenderState = phet.scene.RenderState;
+  var RenderState = scenery.RenderState;
 
   RenderState.prototype = {
     constructor: RenderState,

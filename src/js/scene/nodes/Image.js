@@ -8,22 +8,21 @@
  * @author Jonathan Olson
  */
 
-var phet = phet || {};
-phet.scene = phet.scene || {};
+var scenery = scenery || {};
 
 (function(){
   "use strict";
   
-  phet.scene.Image = function( image, params ) {
-    phet.scene.Node.call( this, params );
+  scenery.Image = function( image, params ) {
+    scenery.Node.call( this, params );
     
     this.image = image;
     
     this.invalidateSelf( new phet.math.Bounds2( 0, 0, image.width, image.height ) );
   };
-  var Image = phet.scene.Image;
+  var Image = scenery.Image;
   
-  Image.prototype = phet.Object.create( phet.scene.Node.prototype );
+  Image.prototype = phet.Object.create( scenery.Node.prototype );
   Image.prototype.constructor = Image;
   
   Image.prototype.renderSelf = function( state ) {

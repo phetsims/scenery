@@ -22,10 +22,10 @@
   <div id="hello-world-scene" style="width: 400px; height: 100px;"></div>
   <script type="text/javascript">
     // Create a scene graph over the block-level element. Everything inside is replaced
-    var scene = new phet.scene.Scene( $( '#hello-world-scene' ) );
+    var scene = new scenery.Scene( $( '#hello-world-scene' ) );
      
     // Add our text
-    scene.root.addChild( new phet.scene.Text( 'Hello World', {
+    scene.root.addChild( new scenery.Text( 'Hello World', {
       centerX: 200, // the center of our text's bounds is at x = 200
       centerY: 50, // the center of our text's bounds is at y = 50
       font: '25px sans-serif'

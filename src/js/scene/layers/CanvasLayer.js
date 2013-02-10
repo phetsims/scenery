@@ -10,8 +10,7 @@
  * @author Jonathan Olson
  */
 
-var phet = phet || {};
-phet.scene = phet.scene || {};
+var scenery = scenery || {};
 
 (function(){
   "use strict";
@@ -19,7 +18,7 @@ phet.scene = phet.scene || {};
   var Bounds2 = phet.math.Bounds2;
   
   // assumes main is wrapped with JQuery
-  phet.scene.CanvasLayer = function( args ) {
+  scenery.CanvasLayer = function( args ) {
     var main = args.main;
     var canvas = document.createElement( 'canvas' );
     canvas.width = main.width();
@@ -30,7 +29,7 @@ phet.scene = phet.scene || {};
     main.append( canvas );
     
     this.canvas = canvas;
-    // this.context = new phet.scene.DebugContext( phet.canvas.initCanvas( canvas ) );
+    // this.context = new scenery.DebugContext( phet.canvas.initCanvas( canvas ) );
     this.context = phet.canvas.initCanvas( canvas );
     this.scene = args.scene;
     
@@ -55,7 +54,7 @@ phet.scene = phet.scene || {};
     this.previousLayer = null;
   };
   
-  var CanvasLayer = phet.scene.CanvasLayer;
+  var CanvasLayer = scenery.CanvasLayer;
   
   CanvasLayer.prototype = {
     constructor: CanvasLayer,

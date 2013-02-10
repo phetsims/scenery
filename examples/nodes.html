@@ -60,17 +60,17 @@
   var main = $( '#main' );
 
   // initialize our scene
-  var scene = new phet.scene.Scene( main );
+  var scene = new scenery.Scene( main );
   scene.resizeOnWindowResize(); // the scene gets resized to the full screen size
   
-  var container = new phet.scene.Node();
+  var container = new scenery.Node();
   scene.root.addChild( container );
   
   /*---------------------------------------------------------------------------*
   * Text
   *----------------------------------------------------------------------------*/    
   
-  container.addChild( new phet.scene.Text( 'This is a Text node', {
+  container.addChild( new scenery.Text( 'This is a Text node', {
     x: 20,
     y: 50,
     fill: '#000000',
@@ -81,8 +81,8 @@
   * Rectangle
   *----------------------------------------------------------------------------*/    
   
-  container.addChild( new phet.scene.Path( {
-    shape: phet.scene.Shape.rectangle( 0, 0, 44, 44 ),
+  container.addChild( new scenery.Path( {
+    shape: scenery.Shape.rectangle( 0, 0, 44, 44 ),
     x: 20.5,
     y: 100.5,
     fill: '#ff0000',
@@ -93,14 +93,14 @@
   * Custom Shape
   *----------------------------------------------------------------------------*/    
   
-  var customShape = new phet.scene.Shape();
+  var customShape = new scenery.Shape();
   customShape.moveTo( 0, 0 );
   customShape.quadraticCurveTo( 200, 0, 100, 50 );
   customShape.lineTo( 100, 25 );
   customShape.lineTo( 0, 25 );
   customShape.close();
   
-  container.addChild( new phet.scene.Path( {
+  container.addChild( new scenery.Path( {
     shape: customShape,
     x: 120.5,
     y: 100.5,
@@ -115,7 +115,7 @@
   
   var imageSource = document.createElement( 'img' );
   imageSource.onload = function( e ) {
-    container.addChild( new phet.scene.Image( imageSource, {
+    container.addChild( new scenery.Image( imageSource, {
       x: 20,
       y: 200
     } ) );
@@ -144,7 +144,7 @@
   addButton( 'Scale up', function( event ) { container.scaleBy( Math.pow( 2, 0.25 ) ); } );
   addButton( 'Rotate', function( event ) { container.rotateAround( new phet.math.Vector2( 200, 200 ), Math.PI / 16 ); } );
   
-  container.addChild( new phet.scene.DOM( element, {
+  container.addChild( new scenery.DOM( element, {
     x: 20,
     y: 350
   } ) );
