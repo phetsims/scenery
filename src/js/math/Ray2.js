@@ -3,7 +3,7 @@
 /**
  * 2-dimensional ray
  *
- * @author Jonathan Olson
+ * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
 // ensure proper namespace

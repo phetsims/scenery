@@ -3,7 +3,7 @@
 /**
  * Displays a 3D atom
  *
- * @author Jonathan Olson
+ * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
 var phet = phet || {};

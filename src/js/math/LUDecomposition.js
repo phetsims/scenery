@@ -3,7 +3,7 @@
 /**
  * LU decomposition, based on Jama
  *
- * @author Jonathan Olson
+ * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
 var phet = phet || {};

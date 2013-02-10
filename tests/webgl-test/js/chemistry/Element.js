@@ -3,7 +3,7 @@
 /**
  * Object for actual element properties (symbol, radius, etc.)
  *
- * @author Jonathan Olson
+ * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
 var phet = phet || {};

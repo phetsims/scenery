@@ -3,7 +3,7 @@
 /**
  * Bond between atoms
  *
- * @author Jonathan Olson
+ * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
 var phet = phet || {};

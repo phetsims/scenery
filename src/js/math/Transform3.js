@@ -3,7 +3,7 @@
 /**
  * Forward and inverse transforms with 3x3 matrices
  *
- * @author Jonathan Olson
+ * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
 var phet = phet || {};

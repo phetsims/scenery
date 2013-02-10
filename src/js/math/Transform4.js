@@ -3,7 +3,7 @@
 /**
  * Forward and inverse transforms with 4x4 matrices, allowing flexibility including affine and perspective transformations.
  *
- * @author Jonathan Olson
+ * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
 var phet = phet || {};

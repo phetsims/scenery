@@ -3,7 +3,7 @@
 /**
  * An immutable permutation that can permute an array
  *
- * @author Jonathan Olson
+ * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
 // ensure proper namespace

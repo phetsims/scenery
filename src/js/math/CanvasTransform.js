@@ -3,7 +3,7 @@
 /**
  * Handles the stage to canvas transforms that allow scaling based on how large the canvas is to a fixed stage size.
  *
- * @author Jonathan Olson
+ * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
 var phet = phet || {};

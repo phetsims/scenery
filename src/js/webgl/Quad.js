@@ -3,7 +3,7 @@
 /**
  * Renderable Quad (4-vertex rectangle)
  *
- * @author Jonathan Olson
+ * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
 var phet = phet || {};

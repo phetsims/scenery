@@ -9,7 +9,7 @@
  * DOM Level 3 events spec: http://www.w3.org/TR/DOM-Level-3-Events/
  * Touch events spec: http://www.w3.org/TR/touch-events/
  *
- * @author Jonathan Olson
+ * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
 var scenery = scenery || {};

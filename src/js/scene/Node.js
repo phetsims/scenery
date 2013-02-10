@@ -7,7 +7,7 @@
  *
  * TODO: investigate handling DAGs (directed acyclic graphs)
  *
- * @author Jonathan Olson
+ * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
 var scenery = scenery || {};

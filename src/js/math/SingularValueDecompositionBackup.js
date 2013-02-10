@@ -3,7 +3,7 @@
 /**
  * SVD decomposition, based on Jama
  *
- * @author Jonathan Olson
+ * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
 var phet = phet || {};
@@ -526,7 +526,7 @@ phet.math = phet.math || {};
 ///**
 //* SVD decomposition, based on Jama
 //*
-//* @author Jonathan Olson
+//* @author Jonathan Olson <olsonsjc@gmail.com>
 //*/
 //
 //var phet = phet || {};

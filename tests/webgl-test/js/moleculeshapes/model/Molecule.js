@@ -4,7 +4,7 @@
  * Model of a single-atom-centered molecule which has a certain number of pair groups
  * surrounding it.
  *
- * @author Jonathan Olson
+ * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
 var phet = phet || {};

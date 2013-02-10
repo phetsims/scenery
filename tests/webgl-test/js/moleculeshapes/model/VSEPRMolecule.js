@@ -3,7 +3,7 @@
 /**
  * A molecule that behaves with a behavior that doesn't discriminate between bond or atom types (only lone pairs vs bonds)
  *
- * @author Jonathan Olson
+ * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
 var phet = phet || {};

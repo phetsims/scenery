@@ -10,7 +10,7 @@
  * Shortcut to create:
  *    var context = new scenery.DebugContext( document.createElement( 'canvas' ).getContext( '2d' ) );
  *
- * @author Jonathan Olson
+ * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
 var scenery = scenery || {};

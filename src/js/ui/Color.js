@@ -5,7 +5,7 @@
  *
  * Consider it immutable!
  *
- * @author Jonathan Olson
+ * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
 var phet = phet || {};

@@ -3,7 +3,7 @@
 /**
  * An immutable rectangle-shaped bounded area (bounding box) in 2D
  *
- * @author Jonathan Olson
+ * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
 // ensure proper namespace

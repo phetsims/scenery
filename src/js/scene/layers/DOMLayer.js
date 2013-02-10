@@ -7,7 +7,7 @@
  * scene graph. It only will render a contiguous block of nodes visited in a depth-first
  * manner.
  *
- * @author Jonathan Olson
+ * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
 var scenery = scenery || {};
