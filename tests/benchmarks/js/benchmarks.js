@@ -81,9 +81,9 @@
   }
   
   var versionsRemaining = [
-    { name: 'control', lib: '../../phet-scene-min.js', test: 'js/current.js' },
-    { name: '120202-515bfa9d9a', lib: 'snapshots/phet-scene-min-120202-515bfa9d9a.js', test: 'snapshots/tests-120202-515bfa9d9a.js' },
-    { name: 'current', lib: '../../phet-scene-min.js', test: 'js/current.js' }
+    { name: 'control', lib: '../../scenery-min.js', test: 'js/current.js' },
+    { name: '120202-515bfa9d9a', lib: 'snapshots/scenery-min-120202-515bfa9d9a.js', test: 'snapshots/tests-120202-515bfa9d9a.js' },
+    { name: 'current', lib: '../../scenery-min.js', test: 'js/current.js' }
   ];
   
   function progressBar( currentHz, testHz ) {

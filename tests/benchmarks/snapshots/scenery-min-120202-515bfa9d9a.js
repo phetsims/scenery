@@ -269,4 +269,4 @@ get lineDashOffset(){c("lineDashOffset");return this._context.lineDashOffset},se
 a},get direction(){c("direction");return this._context.direction},set direction(a){b("direction",a);this._context.direction=a},closePath:function(){a("closePath");this._context.closePath()},moveTo:function(b,c){a("moveTo",[b,c]);this._context.moveTo(b,c)},lineTo:function(b,c){a("lineTo",[b,c]);this._context.lineTo(b,c)},quadraticCurveTo:function(b,c,e,g){a("quadraticCurveTo",[b,c,e,g]);this._context.quadraticCurveTo(b,c,e,g)},bezierCurveTo:function(b,c,e,g,h,k){a("bezierCurveTo",[b,c,e,g,h,k]);this._context.bezierCurveTo(b,
 c,e,g,h,k)},arcTo:function(b,c,e,g,h,k,p){a("arcTo",void 0!==k?[b,c,e,g,h,k,p]:[b,c,e,g,h]);this._context.arcTo(b,c,e,g,h,k,p)},rect:function(b,c,e,g){a("rect",[b,c,e,g]);this._context.rect(b,c,e,g)},arc:function(b,c,e,g,h,k){a("arc",[b,c,e,g,h,k]);this._context.arc(b,c,e,g,h,k)},ellipse:function(b,c,e,g,h,k,p,s){a("ellipse",[b,c,e,g,h,k,p,s]);this._context.ellipse(b,c,e,g,h,k,p,s)}}})();
 
-//@ sourceMappingURL=phet-scene-min.js.map
+//@ sourceMappingURL=scenery-min.js.map

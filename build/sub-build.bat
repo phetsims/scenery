@@ -8,4 +8,4 @@ set t=%1
 set u=!t:/=\!
 
 :: append the referenced file to our main JS file
-type !u! >> concatenated.js
+type !u! >> scenery.js

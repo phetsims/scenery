@@ -11,7 +11,7 @@
   <script src="../../contrib/benchmark-1.0.0.js"></script>
   <script src="../../contrib/bootstrap-2.2.2.js"></script>
   
-  <!-- <script src="../../phet-scene-min.js"></script> -->
+  <!-- <script src="../../scenery-min.js"></script> -->
   <script src="js/marks.js"></script>
   
   <style>
@@ -42,9 +42,9 @@
       window.benchmarkTimer = new marks.Timer( new marks.TableReport( $( '#profiling-results' )[0] ) );
       
       benchmarkTimer.compareSnapshots( [
-        { name: 'current', libs: [ '../../phet-scene-min.js' ], tests: [ 'js/current.js' ] },
-        { name: '120202-515bfa9d9a', libs: [ 'snapshots/phet-scene-min-120202-515bfa9d9a.js' ], tests: [ 'snapshots/tests-120202-515bfa9d9a.js' ] },
-        { name: 'control', libs: [ '../../phet-scene-min.js' ], tests: [ 'js/current.js' ] }
+        { name: 'current', libs: [ '../../scenery-min.js' ], tests: [ 'js/current.js' ] },
+        { name: '120202-515bfa9d9a', libs: [ 'snapshots/scenery-min-120202-515bfa9d9a.js' ], tests: [ 'snapshots/tests-120202-515bfa9d9a.js' ] },
+        { name: 'control', libs: [ '../../scenery-min.js' ], tests: [ 'js/current.js' ] }
       ] );
     } );
   </script>

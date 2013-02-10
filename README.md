@@ -10,8 +10,8 @@ This is under active prototyping, so please expect any sort of API to change. Co
 Since the concatenated / minified JS is under .gitignore, please either use the
 associated Makefile (with 'make') or the Windows batch script 'build.bat'.
 
-Documentation of phet-scene is available at:
-* [Main Documentation](http://phet.colorado.edu/files/scenery/doc/) (up-to-date version is checked in at phet-scene/doc/index.html)
+Documentation of Scenery is available at:
+* [Main Documentation](http://phet.colorado.edu/files/scenery/doc/) (up-to-date version is checked in at scenery/doc/index.html)
 
 Examples:
 * [Node types](http://phet.colorado.edu/files/scenery/examples/nodes.html)

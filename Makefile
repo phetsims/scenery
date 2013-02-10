@@ -1,21 +1,18 @@
 # requires GNU Make. for Windows, use build.bat instead
 
-all: phet-scene-min.js
+all: scenery-min.js
 
 # depends on having GNU Make, according to http://stackoverflow.com/questions/6767413/create-a-variable-in-a-makefile-by-reading-contents-of-another-file
 JS_FILES := $(shell cat build/file-list.txt | xargs)
 
-phet-scene.js: concatenated.js
-	java -jar bin/closure-compiler.jar --compilation_level WHITESPACE_ONLY --formatting PRETTY_PRINT --js concatenated.js --js_output_file phet-scene.js
+scenery-min.js: scenery.js
+	java -jar bin/closure-compiler.jar --compilation_level SIMPLE_OPTIMIZATIONS --js scenery.js --js_output_file scenery-min.js \
+		--create_source_map ./scenery-min.js.map --source_map_format=V3 --define=phetDebug=false --language_in ECMASCRIPT5_STRICT
+	cat build/source-map-appendix.js >> scenery-min.js
 
-phet-scene-min.js: concatenated.js
-	java -jar bin/closure-compiler.jar --compilation_level SIMPLE_OPTIMIZATIONS --js concatenated.js --js_output_file phet-scene-min.js \
-		--create_source_map ./phet-scene-min.js.map --source_map_format=V3 --define=phetDebug=false --language_in ECMASCRIPT5_STRICT
-	cat build/source-map-appendix.js >> phet-scene-min.js
-
-concatenated.js: $(JS_FILES)
-	cat $(JS_FILES) > concatenated.js
+scenery.js: $(JS_FILES)
+	cat $(JS_FILES) > scenery.js
 
 clean:
-	rm -f phet-scene.js phet-scene-min.js phet-scene-min.js.map concatenated.js
+	rm -f concatenated.js phet-scene-min.js phet-scene-min.js.map scenery-min.js scenery-min.js.map scenery.js
 

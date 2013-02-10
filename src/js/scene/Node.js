@@ -1,7 +1,7 @@
 // Copyright 2002-2012, University of Colorado
 
 /**
- * A node for the phet-scene scene graph. Supports only tree-style graphs at the moment.
+ * A node for the Scenery scene graph. Supports only tree-style graphs at the moment.
  * Handles multiple layers with assorted types (canvas, svg, DOM, etc.), and bounds
  * computation
  *

@@ -9,7 +9,7 @@ Browsers
             Patch created, see http://www.webkit.org/coding/contributing.html
                 * running WebKit layout tests
                     Causes failure in bad-test of WebKit/LayoutTests/fast/canvas/canvas-incremental-repaint.html
-                * then bugs + references to http://phet.colorado.edu/files/phet-scene/tests/browsers/chrome-miter-limit.html
+                * then bugs + references to http://phet.colorado.edu/files/scenery/tests/browsers/chrome-miter-limit.html
             SVG miterLimit calculation in https://svgwg.org/svg2-draft/painting.html
             Canvas spec note at http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#trace-a-path
         [FIXED IN UPDATE] bevel instead of miter on the "close" part of the hex: Firefox 18.0.1
@@ -59,7 +59,7 @@ Benchmarks:
             Reason for this is the issue where in asynchronous tests, immediate calls to deferred.resolve() do not allow us to measure performance if it is slow
                 See http://jsperf.com/asynchronous-limit
             Ask John David Dalton maybe?
-            Synchronous: for checking phet-scene overhead
+            Synchronous: for checking Scenery overhead
             Asynchronous - requestAnimationFrame loops
                 We need to verify that these tests are fully taxing the system (maybe 20% less FPS than an empty loop in requestAnimationFrame?)
     Performance based:
@@ -108,6 +108,7 @@ Code:
     Handling of retina displays (and other backingScale differences)
 
 ** SVG: -- important because we can layer DOM nodes properly under SVG
+    Also for DOM => Canvas: http://pbakaus.github.com/domvas/
     Canvg for SVG=>Canvas? http://code.google.com/p/canvg/
     Or SVG straight from image as in http://jsfiddle.net/estelle/SJjJb/ (as data-url for an image)
     Examine Raphael JS for SVG support and Code.

@@ -1,2 +1,2 @@
 
-//@ sourceMappingURL=phet-scene-min.js.map
+//@ sourceMappingURL=scenery-min.js.map
