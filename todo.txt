@@ -34,6 +34,7 @@ Questions for team:
 
 General:
     * Email OIT about phet.colorado.edu/scenery
+        Investigate GitHub pages instead? See http://forrst.com/posts/GitHub_Pages_gh_pages_branch_as_a_subfolder_wi-4ZT
     ** Update phet-scene references to Scenery / scenery.
     * Extract phet-math code to separate repo
     * Extract phet-general code to separate repo (that would be shared also inside the scene graph?) -- or should we duplicate this small bit of functionality?
