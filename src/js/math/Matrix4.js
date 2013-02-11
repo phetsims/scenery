@@ -3,6 +3,8 @@
 /**
  * 4-dimensional Matrix
  *
+ * TODO: consider adding affine flag if it will help performance (a la Matrix3)
+ *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 

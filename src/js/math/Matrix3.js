@@ -25,10 +25,14 @@ phet.math = phet.math || {};
   };
 
   phet.math.Matrix3.Types = {
+    // NOTE: if an inverted matrix of a type is not that type, change inverted()!
+    // NOTE: if two matrices with identical types are multiplied, the result should have the same type. if not, changed timesMatrix()!
+    // NOTE: on adding a type, exaustively check all type usage
     OTHER: 0, // default
     IDENTITY: 1,
     TRANSLATION_2D: 2,
-    SCALING: 3
+    SCALING: 3,
+    AFFINE: 4
 
     // TODO: possibly add rotations
   };
@@ -104,7 +108,7 @@ phet.math = phet.math || {};
     return new Matrix3( c, -s, 0,
               s, c, 0,
               0, 0, 1,
-              Types.OTHER );
+              Types.AFFINE );
   };
   
   // standard 2d rotation
@@ -114,7 +118,7 @@ phet.math = phet.math || {};
     return new Matrix3( svgMatrix.a, svgMatrix.c, svgMatrix.e,
               svgMatrix.b, svgMatrix.d, svgMatrix.f,
               0, 0, 1,
-              Types.OTHER );
+              Types.AFFINE );
   };
 
   // a rotation matrix that rotates A to B, by rotating about the axis A.cross( B ) -- Shortest path. ideally should be unit vectors
@@ -210,7 +214,9 @@ phet.math = phet.math || {};
       this.entries[6] = v02;
       this.entries[7] = v12;
       this.entries[8] = v22;
-      this.type = type === undefined ? Types.OTHER : type;
+      
+      // TODO: consider performance of the affine check here
+      this.type = type === undefined ? ( ( v20 === 0 && v21 === 0 && v22 === 1 ) ? Types.AFFINE : Types.OTHER ) : type;
     },
 
     columnMajor: function ( v00, v10, v20, v01, v11, v21, v02, v12, v22, type ) {
@@ -247,7 +253,7 @@ phet.math = phet.math || {};
     transposed: function () {
       return new Matrix3( this.m00(), this.m10(), this.m20(),
                 this.m01(), this.m11(), this.m21(),
-                this.m02(), this.m12(), this.m22() );
+                this.m02(), this.m12(), this.m22(), ( this.type === Types.IDENTITY || this.type === Types.SCALING ) ? this.type : undefined );
     },
 
     negated: function () {
@@ -260,7 +266,7 @@ phet.math = phet.math || {};
       // TODO: optimizations for matrix types (like identity)
 
       var det = this.determinant();
-
+      
       if ( det !== 0 ) {
         return new Matrix3(
             ( -this.m12() * this.m21() + this.m11() * this.m22() ) / det,
@@ -271,7 +277,8 @@ phet.math = phet.math || {};
             ( this.m02() * this.m10() - this.m00() * this.m12() ) / det,
             ( -this.m11() * this.m20() + this.m10() * this.m21() ) / det,
             ( this.m01() * this.m20() - this.m00() * this.m21() ) / det,
-            ( -this.m01() * this.m10() + this.m00() * this.m11() ) / det
+            ( -this.m01() * this.m10() + this.m00() * this.m11() ) / det,
+            this.type // for identity, translation, scaling and affine matrices, the type should be preserved
         );
       }
       else {
@@ -280,29 +287,49 @@ phet.math = phet.math || {};
     },
 
     timesMatrix: function ( m ) {
-      var newType = Types.OTHER;
-      if ( this.type === Types.TRANSLATION_2D && m.type === Types.TRANSLATION_2D ) {
-        newType = Types.TRANSLATION_2D;
+      // I * M === M * I === I (the identity)
+      if( this.type === Types.IDENTITY || m.type === Types.IDENTITY ) {
+        return this.type === Types.IDENTITY ? m : this;
       }
-      if ( this.type === Types.SCALING && m.type === Types.SCALING ) {
-        newType = Types.SCALING;
+      
+      if ( this.type === m.type ) {
+        // currently two matrices of the same type will result in the same result type
+        if ( this.type === Types.TRANSLATION_2D ) {
+          // faster combination of translations
+          return new Matrix3( 1, 0, this.m02() + m.m02(),
+                              0, 1, this.m12() + m.m12(),
+                              0, 0, 1, Types.TRANSLATION_2D );
+        } else if ( this.type === Types.SCALING ) {
+          // faster combination of scaling
+          return new Matrix3( this.m00() * m.m00(), 0, 0,
+                              0, this.m11() * m.m11(), 0,
+                              0, 0, 1, Types.SCALING );
+        }
       }
-      if ( this.type === Types.IDENTITY ) {
-        newType = m.type;
+      
+      if ( this.type !== Types.OTHER && m.type !== Types.OTHER ) {
+        // currently two matrices that are anything but "other" are technically affine, and the result will be affine
+        
+        // affine case
+        return new Matrix3( this.m00() * m.m00() + this.m01() * m.m10(),
+                            this.m00() * m.m01() + this.m01() * m.m11(),
+                            this.m00() * m.m02() + this.m01() * m.m12() + this.m02(),
+                            this.m10() * m.m00() + this.m11() * m.m10(),
+                            this.m10() * m.m01() + this.m11() * m.m11(),
+                            this.m10() * m.m02() + this.m11() * m.m12() + this.m12(),
+                            0, 0, 1, Types.AFFINE );
       }
-      if ( m.type === Types.IDENTITY ) {
-        newType = this.type;
-      }
+      
+      // general case
       return new Matrix3( this.m00() * m.m00() + this.m01() * m.m10() + this.m02() * m.m20(),
-                this.m00() * m.m01() + this.m01() * m.m11() + this.m02() * m.m21(),
-                this.m00() * m.m02() + this.m01() * m.m12() + this.m02() * m.m22(),
-                this.m10() * m.m00() + this.m11() * m.m10() + this.m12() * m.m20(),
-                this.m10() * m.m01() + this.m11() * m.m11() + this.m12() * m.m21(),
-                this.m10() * m.m02() + this.m11() * m.m12() + this.m12() * m.m22(),
-                this.m20() * m.m00() + this.m21() * m.m10() + this.m22() * m.m20(),
-                this.m20() * m.m01() + this.m21() * m.m11() + this.m22() * m.m21(),
-                this.m20() * m.m02() + this.m21() * m.m12() + this.m22() * m.m22(),
-                newType );
+                          this.m00() * m.m01() + this.m01() * m.m11() + this.m02() * m.m21(),
+                          this.m00() * m.m02() + this.m01() * m.m12() + this.m02() * m.m22(),
+                          this.m10() * m.m00() + this.m11() * m.m10() + this.m12() * m.m20(),
+                          this.m10() * m.m01() + this.m11() * m.m11() + this.m12() * m.m21(),
+                          this.m10() * m.m02() + this.m11() * m.m12() + this.m12() * m.m22(),
+                          this.m20() * m.m00() + this.m21() * m.m10() + this.m22() * m.m20(),
+                          this.m20() * m.m01() + this.m21() * m.m11() + this.m22() * m.m21(),
+                          this.m20() * m.m02() + this.m21() * m.m12() + this.m22() * m.m22() );
     },
 
     timesVector2: function( v ) {
@@ -332,6 +359,10 @@ phet.math = phet.math || {};
 
     determinant: function () {
       return this.m00() * this.m11() * this.m22() + this.m01() * this.m12() * this.m20() + this.m02() * this.m10() * this.m21() - this.m02() * this.m11() * this.m20() - this.m01() * this.m10() * this.m22() - this.m00() * this.m12() * this.m21();
+    },
+    
+    isAffine: function() {
+      return this.type === Types.AFFINE || ( this.m20() === 0 && this.m21() === 0 && this.m22() === 1 );
     },
 
     toString: function () {
@@ -403,6 +434,8 @@ phet.math = phet.math || {};
     },
     
     cssTransform: function() {
+      // TODO: allow more specific CSS transforms to be applied?
+      
       // we need to prevent the numbers from being in an exponential toString form, since the CSS transform does not support that
       function cssNumber( number ) {
         // largest guaranteed number of digits according to https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Number/toFixed

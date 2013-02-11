@@ -93,7 +93,6 @@ Code:
     Either use Require.js or bake in support. Probably good to do for reducing code size with simulations.
         Almond for fallbacks?
     Switch to jQuery 2 (wait for a stable build?)
-    * Add a flag to Matrix3 to note that it is an affine transformation. This will help us speed up matrix-vector and matrix-matrix multiplications.
     _.extend that works on ES5 setter/getter pairs? Check $.extend? Check ES5 spec?
     Modularization of support code (math?)
     Vet recursive bounds code against empty area
