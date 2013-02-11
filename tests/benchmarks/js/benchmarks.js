@@ -82,7 +82,7 @@
   
   var versionsRemaining = [
     { name: 'control', lib: '../../scenery-min.js', test: 'js/current.js' },
-    { name: '120202-515bfa9d9a', lib: 'snapshots/scenery-min-120202-515bfa9d9a.js', test: 'snapshots/tests-120202-515bfa9d9a.js' },
+    { name: '130202-515bfa9d9a', lib: 'snapshots/scenery-min-130202-515bfa9d9a.js', test: 'snapshots/tests-130202-515bfa9d9a.js' },
     { name: 'current', lib: '../../scenery-min.js', test: 'js/current.js' }
   ];
   
