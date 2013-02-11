@@ -116,6 +116,7 @@ WebGL:
     Examine test code for considerations for implementing Shape.
 
 DOM nodes:
+    * Test that scenery and dom nodes can be nested many times
     *** CSS3 transforms look amazing See if we can do more in DOM nodes with transforms
         Example: http://www.clicktorelease.com/code/css3dclouds/
     Handle correct layering of DOM nodes inside a layer, etc.
@@ -244,6 +245,7 @@ Property / Notifiers:
     Possibly use jQuery events?
 
 Math:
+    Output SVGMatrix easily
     Separate out into separate repo
         For submodule: git submodule foreach --recursive 'git pull origin master && git checkout master'
             with "git push --recurse-submodules=on-demand" to commit?
