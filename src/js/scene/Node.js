@@ -60,9 +60,6 @@ var scenery = scenery || {};
     this._childPaintDirty = false;
     this._oldPaintMarked = false; // flag indicates the last rendered bounds of this node and all descendants are marked for a repaint already
     
-    // fill/stroke for shapes
-    this._fill = null;
-    
     if ( params ) {
       this.mutate( params );
     }
@@ -319,10 +316,6 @@ var scenery = scenery || {};
       this.invalidatePaint();
     },
     
-    invalidateFill: function() {
-      // override if fill handling is necessary (TODO: mixins!)
-    },
-    
     // bounds assumed to be in the local coordinate frame, below this node's transform
     markDirtyRegion: function( bounds ) {
       var globalBounds = this.localToGlobalBounds( bounds );
@@ -493,10 +486,6 @@ var scenery = scenery || {};
     intersectsBoundsSelf: function( bounds ) {
       // if self bounds are not null, child should override this
       return this._selfBounds.intersectsBounds( bounds );
-    },
-    
-    hasFill: function() {
-      return this._fill !== null;
     },
     
     hasParent: function() {
@@ -850,20 +839,6 @@ var scenery = scenery || {};
       return this.getBounds().height();
     },
     
-    getFill: function() {
-      return this._fill;
-    },
-    
-    setFill: function( fill ) {
-      if ( this.getFill() !== fill ) {
-        this._fill = fill;
-        this.invalidatePaint();
-        
-        this.invalidateFill();
-      }
-      return this;
-    },
-    
     isVisible: function() {
       return this._visible;
     },
@@ -962,9 +937,6 @@ var scenery = scenery || {};
     * ES5 get/set
     *----------------------------------------------------------------------------*/
     
-    set fill( value ) { this.setFill( value ); },
-    get fill() { return this.getFill(); },
-    
     set layerType( value ) { this.setLayerType( value ); },
     get layerType() { return this.getLayerType(); },
     
@@ -1033,7 +1005,6 @@ var scenery = scenery || {};
    * TODO: using more than one of {translation,x,left,right,centerX} or {translation,y,top,bottom,centerY} should be considered an error
    * TODO: move fill / stroke setting to mixins
    */
-  Node.prototype._mutatorKeys = [ 'fill', 'layerType', 'visible',
-                                  'translation', 'x', 'y', 'rotation', 'scale', 'left', 'right', 'top', 'bottom',
-                                  'centerX', 'centerY' ];
+  Node.prototype._mutatorKeys = [ 'layerType', 'visible', 'translation', 'x', 'y', 'rotation', 'scale',
+                                  'left', 'right', 'top', 'bottom', 'centerX', 'centerY' ];
 })();

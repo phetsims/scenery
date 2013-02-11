@@ -114,8 +114,9 @@ var scenery = scenery || {};
   
   Object.defineProperty( Path.prototype, 'shape', { set: Path.prototype.setShape, get: Path.prototype.getShape } );
   
-  // mix in stroke handling code. for now, this is done after 'shape' is added to the mutatorKeys so that stroke parameters
+  // mix in fill/stroke handling code. for now, this is done after 'shape' is added to the mutatorKeys so that stroke parameters
   // get set first
+  scenery.Fillable( Path );
   scenery.Strokable( Path );
   
 })();

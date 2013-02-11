@@ -119,6 +119,9 @@ var scenery = scenery || {};
   Object.defineProperty( Text.prototype, 'textBaseline', { set: Text.prototype.setTextBaseline, get: Text.prototype.getTextBaseline } );
   Object.defineProperty( Text.prototype, 'direction', { set: Text.prototype.setDirection, get: Text.prototype.getDirection } );
   
+  // mix in support for fills
+  scenery.Fillable( Text );
+  
   Text.FontStyles = function( args ) {
     if ( args === undefined ) {
       args = {};
