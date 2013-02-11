@@ -18,6 +18,7 @@ Browsers
         [UNKNOWN] Firefox quadratic stroke precision handling, and definition of "inflated path" at http://www.whatwg.org/specs/web-apps/current-work/#trace-a-path
             See http://jsfiddle.net/pGrSN/2/ or stroke-endpoint.html
         [UNKNOWN] Firefox Win clearRect seems to be off when transformed (rotation)
+            Not present in Ubuntu 12.04 v18 or nightly
         [UNKNOWN] IE9 will take click events on an SVG element with "pointer-events: none", but only if there is nothing "clickable" behind that point
             What is considered "clickable", and will it affect us?
     For canvas, create a drawing function that exhibits all differences?
