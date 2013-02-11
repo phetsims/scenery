@@ -20,6 +20,8 @@ var scenery = scenery || {};
     // ensure we have a parameter object
     params = params || {};
     
+    this.initializeStrokable();
+    
     scenery.Node.call( this, params );
   };
   var Path = scenery.Path;
@@ -111,6 +113,10 @@ var scenery = scenery || {};
   Path.prototype._mutatorKeys = [ 'shape' ].concat( scenery.Node.prototype._mutatorKeys );
   
   Object.defineProperty( Path.prototype, 'shape', { set: Path.prototype.setShape, get: Path.prototype.getShape } );
+  
+  // mix in stroke handling code. for now, this is done after 'shape' is added to the mutatorKeys so that stroke parameters
+  // get set first
+  scenery.Strokable( Path );
   
 })();
 

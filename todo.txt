@@ -161,6 +161,7 @@ Accessibility / shadow DOM:
     see http://www.html5accessibility.com/
 
 Node:
+    Mix-in notifier for listeners
     Add a way to determine the supported layer types of a node
         Note also that "conversion" is possible
     Iteration in layer-specific orders? With or without hitting node exits
@@ -205,6 +206,7 @@ Build:
     Add JSHint into Sublime Text with plugin?
 
 Performance:
+    Not re-rasterizing objects immediately during dragging or other features? (Auto-detect as hotspot maybe?)
     Ensure that we are triggering the hardware acceleration for CSS3 transforms
     Consider model changes in setInterval: http://www.chandlerprall.com/2012/06/requestanimationframe-is-not-your-logics-friend/
     * IE9 performance (possible regression?)
@@ -244,6 +246,9 @@ Property / Notifiers:
     Possibly use jQuery events?
 
 Math:
+    Separate out into separate repo
+        For submodule: git submodule foreach --recursive 'git pull origin master && git checkout master'
+            with "git push --recurse-submodules=on-demand" to commit?
     Add mutable style, and possibly a flag to see whether something has been modified?
     Investigate math library alternatives, like Numeric JS
 

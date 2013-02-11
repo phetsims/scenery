@@ -61,10 +61,7 @@ var scenery = scenery || {};
     this._oldPaintMarked = false; // flag indicates the last rendered bounds of this node and all descendants are marked for a repaint already
     
     // fill/stroke for shapes
-    this._stroke = null;
     this._fill = null;
-    
-    this._lineDrawingStyles = new Shape.LineStyles();
     
     if ( params ) {
       this.mutate( params );
@@ -326,10 +323,6 @@ var scenery = scenery || {};
       // override if fill handling is necessary (TODO: mixins!)
     },
     
-    invalidateStroke: function() {
-      // override if stroke handling is necessary (TODO: mixins!)
-    },
-    
     // bounds assumed to be in the local coordinate frame, below this node's transform
     markDirtyRegion: function( bounds ) {
       var globalBounds = this.localToGlobalBounds( bounds );
@@ -506,10 +499,6 @@ var scenery = scenery || {};
       return this._fill !== null;
     },
     
-    hasStroke: function() {
-      return this._stroke !== null;
-    },
-    
     hasParent: function() {
       return this.parent !== null;
     },
@@ -616,6 +605,7 @@ var scenery = scenery || {};
       }
     },
     
+    // TODO: set this up with a mix-in for a generic notifier?
     addInputListener: function( listener ) {
       // don't allow listeners to be added multiple times
       if ( _.indexOf( this._inputListeners, listener ) === -1 ) {
@@ -860,64 +850,6 @@ var scenery = scenery || {};
       return this.getBounds().height();
     },
     
-    getLineWidth: function() {
-      return this._lineDrawingStyles.lineWidth;
-    },
-    
-    setLineWidth: function( lineWidth ) {
-      if ( this.getLineWidth() !== lineWidth ) {
-        this.markOldSelfPaint(); // since the previous line width may have been wider
-        
-        this._lineDrawingStyles.lineWidth = lineWidth;
-        
-        this.invalidateStroke();
-      }
-      return this;
-    },
-    
-    getLineCap: function() {
-      return this._lineDrawingStyles.lineCap;
-    },
-    
-    setLineCap: function( lineCap ) {
-      if ( this._lineDrawingStyles.lineCap !== lineCap ) {
-        this.markOldSelfPaint();
-        
-        this._lineDrawingStyles.lineCap = lineCap;
-        
-        this.invalidateStroke();
-      }
-      return this;
-    },
-    
-    getLineJoin: function() {
-      return this._lineDrawingStyles.lineJoin;
-    },
-    
-    setLineJoin: function( lineJoin ) {
-      if ( this._lineDrawingStyles.lineJoin !== lineJoin ) {
-        this.markOldSelfPaint();
-        
-        this._lineDrawingStyles.lineJoin = lineJoin;
-        
-        this.invalidateStroke();
-      }
-      return this;
-    },
-    
-    setLineStyles: function( lineStyles ) {
-      // TODO: since we have been using lineStyles as mutable for now, lack of change check is good here?
-      this.markOldSelfPaint();
-      
-      this._lineDrawingStyles = lineStyles;
-      this.invalidateStroke();
-      return this;
-    },
-    
-    getLineStyles: function() {
-      return this._lineDrawingStyles;
-    },
-    
     getFill: function() {
       return this._fill;
     },
@@ -928,21 +860,6 @@ var scenery = scenery || {};
         this.invalidatePaint();
         
         this.invalidateFill();
-      }
-      return this;
-    },
-    
-    getStroke: function() {
-      return this._stroke;
-    },
-    
-    setStroke: function( stroke ) {
-      if ( this.getStroke() !== stroke ) {
-        // since this can actually change the bounds, we need to handle a few things differently than the fill
-        this.markOldSelfPaint();
-        
-        this._stroke = stroke;
-        this.invalidateStroke();
       }
       return this;
     },
@@ -1045,21 +962,9 @@ var scenery = scenery || {};
     * ES5 get/set
     *----------------------------------------------------------------------------*/
     
-    set stroke( value ) { this.setStroke( value ); },
-    get stroke() { return this.getStroke(); },
-    
     set fill( value ) { this.setFill( value ); },
     get fill() { return this.getFill(); },
     
-    set lineWidth( value ) { this.setLineWidth( value ); },
-    get lineWidth() { return this.getLineWidth(); },
-    
-    set lineCap( value ) { this.setLineCap( value ); },
-    get lineCap() { return this.getLineCap(); },
-     
-    set lineJoin( value ) { this.setLineJoin( value ); },
-    get lineJoin() { return this.getLineJoin(); },
-     
     set layerType( value ) { this.setLayerType( value ); },
     get layerType() { return this.getLayerType(); },
     
@@ -1128,7 +1033,7 @@ var scenery = scenery || {};
    * TODO: using more than one of {translation,x,left,right,centerX} or {translation,y,top,bottom,centerY} should be considered an error
    * TODO: move fill / stroke setting to mixins
    */
-  Node.prototype._mutatorKeys = [ 'stroke', 'fill', 'lineWidth', 'lineCap', 'lineJoin', 'layerType', 'visible',
+  Node.prototype._mutatorKeys = [ 'fill', 'layerType', 'visible',
                                   'translation', 'x', 'y', 'rotation', 'scale', 'left', 'right', 'top', 'bottom',
                                   'centerX', 'centerY' ];
 })();
