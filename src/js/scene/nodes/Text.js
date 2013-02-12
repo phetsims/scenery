@@ -110,8 +110,14 @@ var scenery = scenery || {};
     return this.fontStyles.direction;
   };
   
+  Text.prototype.hasSelf = function() {
+    return true;
+  };
+  
   // TODO: mixins for fill!
   Text.prototype._mutatorKeys = [ 'text', 'font', 'textAlign', 'textBaseline', 'direction' ].concat( scenery.Node.prototype._mutatorKeys );
+  
+  Text.prototype._supportedLayerTypes = [ scenery.LayerType.Canvas ];
   
   Object.defineProperty( Text.prototype, 'text', { set: Text.prototype.setText, get: Text.prototype.getText } );
   Object.defineProperty( Text.prototype, 'font', { set: Text.prototype.setFont, get: Text.prototype.getFont } );

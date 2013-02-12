@@ -34,6 +34,9 @@ src/js/scene/Input.js
 src/js/scene/RenderState.js
 src/js/scene/layers/CanvasLayer.js
 src/js/scene/layers/DOMLayer.js
+src/js/scene/layers/LayerType.js
+src/js/scene/layers/LayerState.js
+src/js/scene/layers/DefaultLayerStrategy.js
 src/js/scene/nodes/Strokable.js
 src/js/scene/nodes/Fillable.js
 src/js/scene/nodes/Path.js

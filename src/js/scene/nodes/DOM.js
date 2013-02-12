@@ -65,6 +65,10 @@ var scenery = scenery || {};
     this.invalidateDOM();
   };
   
+  DOM.prototype.hasSelf = function() {
+    return true;
+  };
+  
   DOM.prototype.setElement = function( element ) {
     this._element = element;
     
@@ -91,6 +95,8 @@ var scenery = scenery || {};
   };
   
   DOM.prototype._mutatorKeys = [ 'element', 'interactive' ].concat( scenery.Node.prototype._mutatorKeys );
+  
+  DOM.prototype._supportedLayerTypes = [ scenery.LayerType.DOM ];
   
   Object.defineProperty( DOM.prototype, 'element', { set: DOM.prototype.setElement, get: DOM.prototype.getElement } );
   Object.defineProperty( DOM.prototype, 'interactive', { set: DOM.prototype.setInteractive, get: DOM.prototype.isInteractive } );

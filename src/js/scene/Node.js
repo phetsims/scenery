@@ -23,10 +23,6 @@ var scenery = scenery || {};
     // TODO: hide as _visible, add setter/getter
     this._visible = true;
     
-    // type of layer to be created for content under this node.
-    // if non-null, this node is a layer root, and layerType should be a layer constructor function
-    this._layerType = null;
-    
     // This node and all children will be clipped by this shape (in addition to any other clipping shapes).
     // The shape should be in the local coordinate frame
     this._clipShape = null;
@@ -486,6 +482,10 @@ var scenery = scenery || {};
     intersectsBoundsSelf: function( bounds ) {
       // if self bounds are not null, child should override this
       return this._selfBounds.intersectsBounds( bounds );
+    },
+    
+    hasSelf: function() {
+      return false;
     },
     
     hasParent: function() {
@@ -1007,4 +1007,8 @@ var scenery = scenery || {};
    */
   Node.prototype._mutatorKeys = [ 'layerType', 'visible', 'translation', 'x', 'y', 'rotation', 'scale',
                                   'left', 'right', 'top', 'bottom', 'centerX', 'centerY' ];
+  
+  Node.prototype._supportedLayerTypes = [];
+  
+  Node.prototype.layerStrategy = scenery.DefaultLayerStrategy;
 })();

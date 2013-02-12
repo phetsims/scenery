@@ -32,16 +32,12 @@ LayerState:
   - compacts layers as necessary (don't instantiate until something hasSelf())
   push/pop preferredLayerType
   switchToType()
-  self() -- when node hasSelf(), ensure that we finalize a layer switch
+  markSelf() -- when node hasSelf(), ensure that we finalize a layer switch
   query current layer type
   other queries
 
 Node:
-  LayerStrategy (called during layering from each relevant scene)
-    enter()
-      afterSelf() ?
-      betweenChildren() ?
-    exit()
+  LayerStrategy (called during layering from each relevant scene), default uses node._supportedLayerTypes
 
 DOM:
   Hoisting of interactive DOM nodes
@@ -61,7 +57,7 @@ API Usage
 // implicit layering switches due to node types
 
 // force SVG layer(s) under node where possible
-node.layerStrategy.setPreferredLayerType( scenery.SVGLayer );
+node.layerStrategy.setPreferredLayerType( scenery.LayerType.SVG );
 
 // force a layer split before / after
 node.layerStrategy.setSplitBefore( true );
