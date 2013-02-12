@@ -30,7 +30,11 @@ LayerFactory? -- more general, possible advantages
 
 LayerState:
   - compacts layers as necessary (don't instantiate until something hasSelf())
-  preferredLayerType
+  push/pop preferredLayerType
+  switchToType()
+  self() -- when node hasSelf(), ensure that we finalize a layer switch
+  query current layer type
+  other queries
 
 Node:
   LayerStrategy (called during layering from each relevant scene)
@@ -39,15 +43,22 @@ Node:
       betweenChildren() ?
     exit()
 
-
-Issues
-======
-
-Hoisting of interactive DOM nodes
+DOM:
+  Hoisting of interactive DOM nodes
+    - HoistedDOMLayer that adds (2147483647/2) to its z-index
+      Pro:
+        layering will work in the browser
+      Con:
+        have to add a listener in the capture phase of the listener to flag the event as hitting the interactive node?
+        need to check for 'interactive' flag?
+        Events system may need to discard anything in the region of an interactive node's bounds?
+    - Either delegate (just set transform) or have inline with just SVG over (with pointer-events)
 
 
 API Usage
 =========
+
+// implicit layering switches due to node types
 
 // force SVG layer(s) under node where possible
 node.layerStrategy.setPreferredLayerType( scenery.SVGLayer );
@@ -64,4 +75,5 @@ var cacheNode = new CanvasLayerCache( node ) {{
     preferredLayerType = CacheLayer( ... domElement ... )?
   }};
 }} // paints into canvas(es), with custom layer type
+
 
