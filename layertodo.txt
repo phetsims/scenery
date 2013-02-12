@@ -1,0 +1,67 @@
+
+Just for the layering branch!
+=============================
+
+
+
+Default layer types, so that we can specify "svg under here if possible" - in LayerState
+
+DAG support
+  Multiple views for free
+    Support possibly for multiple scene roots?
+  For node actions that involve the layer reference, instead just fire off events to listeners
+  DOM is an issue for DAG support - unless we can duplicate it?
+
+
+Node:
+  Self can be rendered to different layers
+    Children for even more layers
+    On an event that changes potential layering, fire an event somehow that reaches all applicable scenes
+  
+  Has LayerStrategy: called during layering from each relevant scene.
+
+
+
+
+Design
+======
+
+LayerFactory? -- more general, possible advantages
+
+LayerState:
+  - compacts layers as necessary (don't instantiate until something hasSelf())
+  preferredLayerType
+
+Node:
+  LayerStrategy (called during layering from each relevant scene)
+    enter()
+      afterSelf() ?
+      betweenChildren() ?
+    exit()
+
+
+Issues
+======
+
+Hoisting of interactive DOM nodes
+
+
+API Usage
+=========
+
+// force SVG layer(s) under node where possible
+node.layerStrategy.setPreferredLayerType( scenery.SVGLayer );
+
+// force a layer split before / after
+node.layerStrategy.setSplitBefore( true );
+node.layerStrategy.setSplitAfter( true );
+
+// performance caching (new node, so we can do render path changes?)
+var cacheNode = new CanvasLayerCache( node ) {{
+  // internal to CanvasLayerCache:
+  cacheNode.layerStrategy = new CanvasCachingStrategy( ... ) {{
+    // internal to CanvasCachingStrategy
+    preferredLayerType = CacheLayer( ... domElement ... )?
+  }};
+}} // paints into canvas(es), with custom layer type
+
