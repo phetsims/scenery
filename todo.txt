@@ -1,6 +1,7 @@
 
 Bugs:
     Check Firefox/Safari on Mac event handling on multiple touch events
+    UILayer updates are not firing
 
 Browsers
     Browser bugs? (get Canary / Aurora / IE10):
@@ -124,6 +125,8 @@ DOM nodes:
         Document fragments (test this)
 
 * Event dispatch:
+    addListener vs addInputListener
+    remove listener callback?
     Consider finger.isDown for checking general (but possibly mouse related) events
     Indie UI events should be tracked: https://dvcs.w3.org/hg/IndieUI/raw-file/default/src/indie-ui-events.html
     Can we handle DOM nodes without default behaviors? -- patch bootstrap for .phethover instead of :hover
