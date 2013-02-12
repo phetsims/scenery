@@ -9,12 +9,13 @@ var scenery = scenery || {};
     enter: function( node, layerState ) {
       // check if we need to change layer types
       if ( node.hasSelf() && !layerState.getCurrentLayerType().supportsNode( node ) ) {
+        var supportedTypes = node._supportedLayerTypes;
         
-        var preferredType = layerState.getPreferredLayerType();
-        if ( preferredType && preferredType.supportsNode( node ) ) {
+        var preferredType = layerState.bestPreferredLayerTypeFor( supportedTypes );
+        if ( preferredType ) {
           layerState.switchToType( preferredType );
         } else {
-          layerState.switchToType( node._supportedLayerTypes[0] );
+          layerState.switchToType( supportedTypes[0] );
         }
       }
     },

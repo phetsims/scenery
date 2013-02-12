@@ -4,21 +4,16 @@ var scenery = scenery || {};
 
 (function(){
   scenery.LayerState = function() {
-    this.layers = [];
-    this.lastLayer = null;
+    this.preferredLayerTypes = [];
+    
+    this.typeDirty = true;
+    this.nextLayerType = null;
     
     /*
       TODO:
       
       compact layers as necessary
       hook them up as a linked list
-    
-      - compacts layers as necessary (don't instantiate until something hasSelf())
-      push/pop preferredLayerType
-      switchToType()
-      self() -- when node hasSelf(), ensure that we finalize a layer switch
-      query current layer type
-      other queries
     */
   }
   
@@ -27,15 +22,19 @@ var scenery = scenery || {};
     constructor: LayerState,
     
     pushPreferredLayerType: function( layerType ) {
-      // TODO
+      this.preferredLayerTypes.push( layerType );
     },
     
     popPreferredLayerType: function( layerType ) {
-      // TODO
+      this.preferredLayerTypes.pop();
     },
     
     getPreferredLayerType: function() {
-      // TODO
+      if ( this.preferredLayerTypes.length !== 0 ) {
+        return this.preferredLayerTypes[this.preferredLayerTypes.length - 1];
+      } else {
+        return null;
+      }
     },
     
     switchToType: function( layerType ) {
@@ -49,6 +48,18 @@ var scenery = scenery || {};
     
     getCurrentLayerType: function() {
       // TODO
+    },
+    
+    bestPreferredLayerTypeFor: function( defaultTypeOptions ) {
+      for ( var i = this.preferredLayerTypes.length - 1; i >= 0; i-- ) {
+        var preferredType = this.preferredLayerTypes[i];
+        if ( _.some( defaultTypeOptions, function( defaultType ) { return preferredType.supports( defaultType ); } ) ) {
+          return preferredType;
+        }
+      }
+      
+      // none of our stored preferred layer types are able to support any of the default type options
+      return null;
     }
   };
 })();
