@@ -96,18 +96,11 @@ var scenery = scenery || {};
           for ( var i = 0; i < node.children.length; i++ ) {
             var child = node.children[i];
             
-            
-            
-            
-            
             if ( !passedLowBound ) {
               // if we haven't passed the low bound, it MUST exist, and we are either (a) not rendered, or (b) low-bounded
               
-              if ( startPath[depth] === child ) {
-                // only recursively render if the switch is "before" the node
-                if ( startPath[depth]._layerBeforeRender === layer ) {
-                  recursivePartialRender( child, depth + 1, startPath.length !== depth, false ); // if it has a low-bound, it can't have a high bound
-                }
+              if ( minPath.nodes[depth] === child ) {
+                recurse( child, depth + 1, minPath.nodes.length !== depth, false ); // if it has a low-bound, it can't have a high bound
               
                 // for later children, we have passed the low bound.
                 passedLowBound = true;
@@ -117,22 +110,14 @@ var scenery = scenery || {};
               continue;
             }
             
-            if ( hasHighBound && endPath[depth] === child ) {
-              // only recursively render if the switch is "after" the node
-              if ( endPath[depth]._layerAfterRender === layer ) {
-                // high-bounded here
-                recursivePartialRender( child, depth + 1, false, endPath.length !== depth ); // if it has a high-bound, it can't have a low bound
-              }
+            if ( hasHighBound && maxPath.nodes[depth] === child ) {
+              recurse( child, depth + 1, false, maxPath.nodes.length !== depth ); // if it has a high-bound, it can't have a low bound
               
-              // don't render any more children, since we passed the high bound
+              // don't handle any more children, since we passed the high bound
               break;
             }
-            
-            
-            
-            
-            
           }
+          
           if ( !hasHighBound ) {
             listener.exit( node );
           }
