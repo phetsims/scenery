@@ -23,12 +23,15 @@ Node:
 In Progress
 ===========
 GraphPath next, previous. improve eachBetween using these. Consider a 'GraphPointer' that has a GraphPath reference and BEFORE / AFTER
+  Also consider a GraphRange which has a start/end GraphPointer?
+  Add ability to "index" a GraphPath
 
 
 Issues
 ======
 
 DAG handling for SVG (how to duplicate) or DOM
+
 
 Design
 ======
@@ -45,9 +48,11 @@ DAG:
   Layer
     store pick paths (with indices of each child for disambiguation? - not necessary if we disallow duplicate children) of beginning and end?
   Scene
-    accelerated indexing of layers (find a layer given a pick path)
+    accelerated indexing of layers (find a layer given a pick path) - thus we can update layers as changes in the scene occur
     add listeners to 'root' to pick up invalidations, etc.
     scene responsible for knowing layer start/end, handles drawing with this in mind
+    
+    spread out z-indices and be adaptive so we don't have to change as many indices where possible
     
     IMPLEMENTATION NOTES:
       
@@ -70,6 +75,7 @@ DOM:
       Pro:
         layering will work in the browser
       Con:
+        splits more layers than necessary
         have to add a listener in the capture phase of the listener to flag the event as hitting the interactive node?
         need to check for 'interactive' flag?
         Events system may need to discard anything in the region of an interactive node's bounds?
