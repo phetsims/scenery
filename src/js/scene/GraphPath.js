@@ -74,7 +74,7 @@ var scenery = scenery || {};
       return this.nodeFromTop( 0 );
     },
     
-    // in the order of self-rendering
+    // returns the previous graph path in the order of self-rendering
     previous: function() {
       if ( this.nodes.length <= 1 ) {
         return null;
@@ -104,7 +104,36 @@ var scenery = scenery || {};
     
     // in the order of self-rendering
     next: function() {
-      throw new Error( 'unimplemented' );
+      var arr = this.nodes.slice( 0 );
+      
+      var top = this.nodeFromTop( 0 );
+      if ( top.children.length > 0 ) {
+        // if we have children, return the first child
+        arr.push( top.children[0] );
+        return new GraphPath( arr );
+      } else {
+        // walk down and attempt to find the next parent
+        var depth = this.nodes.length - 1;
+        
+        while ( depth > 0 ) {
+          var node = this.nodes[depth];
+          var parent = this.nodes[depth-1];
+          
+          arr.pop(); // take off the node so we can add the next sibling if it exists
+          
+          var index = _.indexOf( parent.children, node );
+          if ( index !== parent.children.length - 1 ) {
+            // there is another (later) sibling. use that!
+            arr.push( parent.children[index+1] );
+            return new GraphPath( arr );
+          } else {
+            depth--;
+          }
+        }
+        
+        // if we didn't reach a later sibling by now, it doesn't exist
+        return null;
+      }
     },
     
     /*
