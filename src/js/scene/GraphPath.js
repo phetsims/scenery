@@ -52,13 +52,71 @@ var scenery = scenery || {};
       return true;
     },
     
+    isSubpath: function( other ) {
+      if ( this.nodes.length <= other.nodes.length ) {
+        return false;
+      }
+      
+      for ( var i = 0; i < other.nodes.length; i++ ) {
+        if ( this.nodes[i] !== other.nodes[i] ) {
+          return false;
+        }
+      }
+      
+      return true;
+    },
+    
+    nodeFromTop: function( offset ) {
+      return this.nodes[this.nodes.length - 1 - offset];
+    },
+    
+    lastNode: function() {
+      return this.nodeFromTop( 0 );
+    },
+    
+    // in the order of self-rendering
+    previous: function() {
+      if ( this.nodes.length <= 1 ) {
+        return null;
+      }
+      
+      var top = this.nodeFromTop( 0 );
+      var parent = this.nodeFromTop( 1 );
+      
+      var parentIndex = _.indexOf( parent.children, top );
+      var arr = this.nodes.slice( 0, this.nodes.length - 1 );
+      if ( parentIndex === 0 ) {
+        // we were the first child, so give it the path to the parent
+        return new GraphPath( arr );
+      } else {
+        // previous child
+        arr.push( parent.children[parentIndex-1] );
+        
+        // and find its last terminal
+        while( arr[arr.length-1].children.length !== 0 ) {
+          var last = arr[arr.length-1];
+          arr.push( last.children[last.children.length-1] );
+        }
+        
+        return new GraphPath( arr );
+      }
+    },
+    
+    // in the order of self-rendering
+    next: function() {
+      throw new Error( 'unimplemented' );
+    },
+    
     /*
      * Iterates between this graph path and the other one, calling listener.enter( node ) and listener.exit( node ).
-     * This will be bounded by listener.exit( startNode ) and listener.enter( endNode )
+     * This will be bounded by listener.exit( startNode ) and listener.enter( endNode ),
+     * unless the inclusive flag is true, then it will be bounded by listener.enter( startNode ) and listener.exit( endNode ).
      */
-    eachBetweenExclusive: function( other, listener, reverseIfNecessary ) {
+    eachBetween: function( other, listener, inclusive, reverseIfNecessary ) {
       var minPath = this;
       var maxPath = other;
+      
+      var exclusive = !inclusive;
       
       if ( reverseIfNecessary ) {
         var comparison = this.compare( other );
@@ -78,12 +136,13 @@ var scenery = scenery || {};
       }
       
       // bail out since one is a subpath of the other (there is no 'between' from the above definition)
-      if ( splitIndex === minSharedLength ) {
+      if ( exclusive && splitIndex === minSharedLength ) {
         return;
       }
       
       // console.log( 'splitIndex: ' + splitIndex );
       
+      // TODO: remove after debugging
       function dumpstr( node ) {
         var result = '|';
         while ( node.parents.length !== 0 ) {
@@ -94,7 +153,7 @@ var scenery = scenery || {};
       }
       
       function recurse( node, depth, hasLowBound, hasHighBound ) {
-        // console.log( 'recurse: ' + dumpstr( node ) + ' ' + hasLowBound + ', ' + hasHighBound + ', ' + depth );
+        console.log( 'recurse: ' + dumpstr( node ) + ' ' + hasLowBound + ', ' + hasHighBound + ', ' + depth );
         if ( !hasLowBound && !hasHighBound ) {
           listener.enter( node );
           _.each( node.children, function( child ) {
@@ -113,7 +172,7 @@ var scenery = scenery || {};
           phet.assert( lowIndex !== -1, 'no low index' );
           phet.assert( highIndex !== -1, 'no high index' );
           
-          // console.log( 'lowIndex: ' + lowIndex + ', highIndex: ' + highIndex + ', depth: ' + depth + ', minPath.nodes.length: ' + minPath.nodes.length );
+          console.log( 'lowIndex: ' + lowIndex + ', highIndex: ' + highIndex + ', depth: ' + depth + ', minPath.nodes.length: ' + minPath.nodes.length );
           for ( var i = lowIndex; i <= highIndex; i++ ) {
             var child = node.children[i];
             

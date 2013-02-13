@@ -20,6 +20,10 @@ Node:
   
   Has LayerStrategy: called during layering from each relevant scene.
 
+In Progress
+===========
+GraphPath next, previous. improve eachBetween using these. Consider a 'GraphPointer' that has a GraphPath reference and BEFORE / AFTER
+
 
 Issues
 ======
