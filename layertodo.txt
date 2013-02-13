@@ -46,7 +46,10 @@ DAG:
     constructor wraps parameters as children for convenience
       as children get/set? risky, but possibly useful
   Layer
+    *** create base layer prototype
     store pick paths (with indices of each child for disambiguation? - not necessary if we disallow duplicate children) of beginning and end?
+    startPath
+    endPath
   Scene
     accelerated indexing of layers (find a layer given a pick path) - thus we can update layers as changes in the scene occur
     add listeners to 'root' to pick up invalidations, etc.
