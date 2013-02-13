@@ -54,28 +54,6 @@ LayerState:
 
 Node:
   LayerStrategy (called during layering from each relevant scene), default uses node._supportedLayerTypes
-  stale:
-    _layerType
-    isLayerRoot()
-    setLayerType()
-    getLayerType()
-  metadata:
-    _layerBeforeRender = null; // layer to swap to before rendering this node
-    _layerAfterRender = null; // layer to swap to after rendering this node
-    _layerReference = null; // stores a reference to this node's corresponding layer (the one used to render it's self content)
-    _hasLayerBelow = false; // whether any descendants are also layer roots
-  uses metadata:
-    enterState() / exitState() -- before / after
-    getLayer()
-    getLayerBeforeNodeRendered()
-    getLayerAfterNodeRendered()
-    insertChild()
-      synchronizes layer references if rooted
-      synchronizes _hasLayerBelow
-    removeChild()
-      synchronizes _hasLayerBelow
-      marks layer refreshes as needed
-    findLayer()
 
 DOM:
   Hoisting of interactive DOM nodes

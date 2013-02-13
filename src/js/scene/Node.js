@@ -37,12 +37,6 @@ var scenery = scenery || {};
     // TODO: add getter/setters that will be able to invalidate whether this node is under any fingers, etc.
     this._includeStrokeInHitRegion = false;
     
-    // layer-specific data, currently updated in the rebuildLayers step
-    this._layerBeforeRender = null; // layer to swap to before rendering this node
-    this._layerAfterRender = null; // layer to swap to after rendering this node
-    this._layerReference = null; // stores a reference to this node's corresponding layer (the one used to render it's self content)
-    this._hasLayerBelow = false; // whether any descendants are also layer roots
-    
     // bounds handling
     this._bounds = Bounds2.NOTHING; // for this node and its children, in "parent" coordinates
     this._selfBounds = Bounds2.NOTHING; // just for this node, in "local" coordinates
@@ -72,11 +66,6 @@ var scenery = scenery || {};
     },
     
     enterState: function( state ) {
-      // switch layers if needed
-      if ( this._layerBeforeRender ) {
-        state.switchToLayer( this._layerBeforeRender );
-      }
-      
       // apply this node's transform
       if ( !this.transform.isIdentity() ) {
         // TODO: consider a stack-based model for transforms?
@@ -97,11 +86,6 @@ var scenery = scenery || {};
       if ( !this.transform.isIdentity() ) {
         state.applyTransformationMatrix( this.transform.getInverse() );
       }
-      
-      // switch layers if needed
-      if ( this._layerAfterRender ) {
-        state.switchToLayer( this._layerAfterRender );
-      }
     },
     
     insertChild: function( node, index ) {
@@ -118,29 +102,7 @@ var scenery = scenery || {};
       node.invalidateBounds();
       node.invalidatePaint();
       
-      // keep _hasLayerBelow consistent
-      if ( node._hasLayerBelow || node.isLayerRoot() ) {
-        var ancestor = this;
-        while ( ancestor !== null && !ancestor._hasLayerBelow ) {
-          ancestor._hasLayerBelow = true;
-          ancestor = ancestor.parent;
-        }
-        
-        this.markLayerRefreshNeeded();
-      }
-      
-      if ( this._hasLayerBelow ) {
-        // TODO: if we don't automatically construct "valley" layers in refreshLayers, add this back in. other cases are handled above
-        //this.markLayerRefreshNeeded();
-      } else {
-        // no layer changes are necessary, however we need to synchronize layer references in the new subtree if applicable
-        if ( this.isRooted() && node._layerReference !== this._layerReference ) {
-          var layerReference = this._layerReference;
-          node.walkDepthFirst( function( child ) {
-            child._layerReference = layerReference;
-          } );
-        }
-      }
+      throw new Error( 'insertChild notifications not implemented' );
     },
     
     addChild: function( node ) {
@@ -157,40 +119,7 @@ var scenery = scenery || {};
       
       this.invalidateBounds();
       
-      // keep _hasLayerBelow consistent
-      if ( node._hasLayerBelow || node.isLayerRoot() ) {
-        
-        // walk up the tree removing _hasLayerBelow flags until one is still set
-        var ancestor = this;
-        while ( ancestor !== null ) {
-          ancestor._hasLayerBelow = _.some( ancestor.children, function( child ) { return child._hasLayerBelow; } );
-          if ( ancestor._hasLayerBelow ) {
-            break;
-          }
-        }
-        
-        this.markLayerRefreshNeeded();
-      }
-    },
-    
-    // set to null to remove a layer type
-    setLayerType: function( layerType ) {
-      if ( this._layerType !== layerType ) {
-        this._layerType = layerType;
-        
-        // keep _hasLayerBelow consistent
-        var node = this.parent;
-        while ( node !== null ) {
-          node._hasLayerBelow = true;
-          node = node.parent;
-        }
-        
-        this.markLayerRefreshNeeded();
-      }
-    },
-    
-    getLayerType: function() {
-      return this._layerType;
+      throw new Error( 'removeChild notifications not implemented' );
     },
     
     // remove this node from its parent
@@ -355,17 +284,6 @@ var scenery = scenery || {};
       return potentialChild.parent === this;
     },
     
-    // does this node have an associated layerType (are the contents of this node rendered separately from its ancestors)
-    isLayerRoot: function() {
-      return this._layerType !== null;
-    },
-    
-    // the first layer associated with this node (can be multiple layers if children of this node are also layer roots)
-    getLayer: function() {
-      phet.assert( this.isLayerRoot() );
-      return this._layerBeforeRender;
-    },
-    
     // the bounds for content in renderSelf(), in "local" coordinates
     getSelfBounds: function() {
       return this._selfBounds;
@@ -375,11 +293,6 @@ var scenery = scenery || {};
     getBounds: function() {
       this.validateBounds();
       return this._bounds;
-    },
-    
-    // find the layer to which this node will be rendered
-    findLayer: function() {
-      return this._layerReference;
     },
     
     // find all layers for which this node (and all its descendants) will be rendered
@@ -560,38 +473,6 @@ var scenery = scenery || {};
       
       // we were the last node rendered
       return null;
-    },
-    
-    // the layer that would be in the render state before this node and its children are rendered, and before _layerBeforeRender
-    getLayerBeforeNodeRendered: function() {
-      if ( this._layerBeforeRender ) {
-        if ( this.parent === null ) {
-          return this._layerBeforeRender;
-        } else {
-          var index = _.indexOf( this.parent.children, this );
-          if ( index - 1 < 0 ) {
-            return this.parent._layerReference;
-          } else {
-            return this.parent.children[index-1].getLayerAfterNodeRendered();
-          }
-        }
-      } else {
-        return this._layerReference;
-      }
-    },
-    
-    // the layer that would be in the render state, after this node and its children are rendered, and after _layerAfterRender is processed
-    getLayerAfterNodeRendered: function() {
-      // this would happen after any children are rendered, so shortcut it
-      if ( this._layerAfterRender ) {
-        return this._layerAfterRender;
-      }
-      
-      if ( this.hasChildren() ) {
-        return _.last( this.children ).getLayerAfterNodeRendered();
-      } else {
-        return this._layerReference;
-      }
     },
     
     // TODO: set this up with a mix-in for a generic notifier?
@@ -937,9 +818,6 @@ var scenery = scenery || {};
     * ES5 get/set
     *----------------------------------------------------------------------------*/
     
-    set layerType( value ) { this.setLayerType( value ); },
-    get layerType() { return this.getLayerType(); },
-    
     set visible( value ) { this.setVisible( value ); },
     get visible() { return this.isVisible(); },
     
@@ -1005,7 +883,7 @@ var scenery = scenery || {};
    * TODO: using more than one of {translation,x,left,right,centerX} or {translation,y,top,bottom,centerY} should be considered an error
    * TODO: move fill / stroke setting to mixins
    */
-  Node.prototype._mutatorKeys = [ 'layerType', 'visible', 'translation', 'x', 'y', 'rotation', 'scale',
+  Node.prototype._mutatorKeys = [ 'visible', 'translation', 'x', 'y', 'rotation', 'scale',
                                   'left', 'right', 'top', 'bottom', 'centerX', 'centerY' ];
   
   Node.prototype._supportedLayerTypes = [];
