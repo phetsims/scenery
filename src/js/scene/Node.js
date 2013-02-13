@@ -288,10 +288,10 @@ var scenery = scenery || {};
     // marks the last-rendered bounds of this node and optionally all of its descendants as needing a repaint
     markOldPaint: function( justSelf ) {
       function ancestorHasOldPaint( node ) {
-        if( this._oldPaintMarked ) {
+        if( node._oldPaintMarked ) {
           return true;
         }
-        return _.some( this.parents, function( parent ) {
+        return _.some( node.parents, function( parent ) {
           return ancestorHasOldPaint( parent );
         } );
       }
