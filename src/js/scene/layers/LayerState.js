@@ -7,7 +7,7 @@ var scenery = scenery || {};
     this.preferredLayerTypes = [];
     
     this.resetInternalState();
-  }
+  };
   
   var LayerState = scenery.LayerState;
   LayerState.prototype = {

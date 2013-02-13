@@ -38,6 +38,6 @@ var scenery = scenery || {};
     exit: function( node, layerState ) {
       // currently a no-op
     }
-  }
+  };
   
 })();

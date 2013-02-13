@@ -310,8 +310,8 @@ var scenery = scenery || {};
     },
     
     isChild: function ( potentialChild ) {
-      var ourChild = !_.contains( this.children, node );
-      var itsParent = !_.contains( node.parents, this );
+      var ourChild = _.contains( this.children, potentialChild );
+      var itsParent = _.contains( potentialChild.parents, this );
       phet.assert( ourChild === itsParent );
       return ourChild;
     },
@@ -451,8 +451,6 @@ var scenery = scenery || {};
       var node = this;
       var path = new scenery.GraphPath();
       
-      recursiveEventDispatch( this );
-      
       function recursiveEventDispatch( node ) {
         path.addAncestor( node );
         
@@ -470,6 +468,8 @@ var scenery = scenery || {};
         
         path.removeAncestor();
       }
+      
+      recursiveEventDispatch( this );
     },
     
     // dispatches events with the transform computed from parent of the "root" to the local frame
@@ -478,12 +478,10 @@ var scenery = scenery || {};
       var path = new scenery.GraphPath();
       var transformStack = [ new phet.math.Transform3() ];
       
-      recursiveEventDispatch( this );
-      
       function recursiveEventDispatch( node ) {
         path.addAncestor( node );
         
-        transformStack.push( transformStack[transformStack.length-1].prepend( node.getMatrix() ) );
+        transformStack.push( new phet.math.Transform3( transformStack[transformStack.length-1].getMatrix().timesMatrix( node.getMatrix() ) ) );
         args.transform = transformStack[transformStack.length-1];
         args.path = path;
         
@@ -493,7 +491,7 @@ var scenery = scenery || {};
           }
         } );
         
-        _.each( this.parents, function( parent ) {
+        _.each( node.parents, function( parent ) {
           recursiveEventDispatch( parent );
         } );
         
@@ -501,6 +499,8 @@ var scenery = scenery || {};
         
         path.removeAncestor();
       }
+      
+      recursiveEventDispatch( this );
     },
     
     // TODO: consider renaming to translateBy to match scaleBy

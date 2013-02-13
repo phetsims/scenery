@@ -225,7 +225,7 @@ var scenery = scenery || {};
               continue;
             }
             
-            recurse( child, depth + 1, hasLowBound && i === lowIndex, hasHighBound && i === highIndex )
+            recurse( child, depth + 1, hasLowBound && i === lowIndex, hasHighBound && i === highIndex );
           }
           
           if ( !hasHighBound ) {

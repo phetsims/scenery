@@ -344,38 +344,38 @@
       var enterCount = 0;
       var exitCount = 0;
       
-      // start.eachBetween( end, {
-      //   enter: function( node ) {
-      //     // console.log( '- enter: ' + dumpstr( node ) );
-      //     enterCount++;
-      //   },
-        
-      //   exit: function( node ) {
-      //     // console.log( '- exit: ' + dumpstr( node ) );
-      //     exitCount++;
-      //   }
-      // } );
-      
-      // equal( enterCount, ancitipatedEnter, msg + ' (exclusive enter)' );
-      // equal( exitCount, anticipatedExit, msg + ' (exclusive exit)' );
-      
-      enterCount = 0;
-      exitCount = 0;
-      
       start.eachBetween( end, {
         enter: function( node ) {
-          console.log( '- enter: ' + dumpstr( node ) );
+          // console.log( '- enter: ' + dumpstr( node ) );
           enterCount++;
         },
         
         exit: function( node ) {
-          console.log( '- exit: ' + dumpstr( node ) );
+          // console.log( '- exit: ' + dumpstr( node ) );
           exitCount++;
         }
-      }, true );
+      } );
       
-      equal( enterCount, anticipatedInclusiveEnter, msg + ' (inclusive enter)' );
-      equal( exitCount, anticipatedInclusiveExit, msg + ' (inclusive exit)' );
+      equal( enterCount, ancitipatedEnter, msg + ' (exclusive enter)' );
+      equal( exitCount, anticipatedExit, msg + ' (exclusive exit)' );
+      
+      // enterCount = 0;
+      // exitCount = 0;
+      
+      // start.eachBetween( end, {
+      //   enter: function( node ) {
+      //     console.log( '- enter: ' + dumpstr( node ) );
+      //     enterCount++;
+      //   },
+        
+      //   exit: function( node ) {
+      //     console.log( '- exit: ' + dumpstr( node ) );
+      //     exitCount++;
+      //   }
+      // }, true );
+      
+      // equal( enterCount, anticipatedInclusiveEnter, msg + ' (inclusive enter)' );
+      // equal( exitCount, anticipatedInclusiveExit, msg + ' (inclusive exit)' );
     }
     
     count( new scenery.GraphPath( [
@@ -387,66 +387,66 @@
       node.children[1]
     ] ), 7, 8, 9, 10, 'Path 1' );
     
-    // count( new scenery.GraphPath( [
-    //   node,
-    //   node.children[0]
-    // ] ), new scenery.GraphPath( [
-    //   node,
-    //   node.children[1]
-    // ] ), 1, 1, 11, 11, 'Path 2' );
+    count( new scenery.GraphPath( [
+      node,
+      node.children[0]
+    ] ), new scenery.GraphPath( [
+      node,
+      node.children[1]
+    ] ), 1, 1, 11, 11, 'Path 2' );
     
-    // count( new scenery.GraphPath( [
-    //   node,
-    //   node.children[0],
-    //   node.children[0].children[1]
-    // ] ), new scenery.GraphPath( [
-    //   node,
-    //   node.children[0],
-    //   node.children[0].children[3]
-    // ] ), 2, 2, 7, 7, 'Path 3' );
+    count( new scenery.GraphPath( [
+      node,
+      node.children[0],
+      node.children[0].children[1]
+    ] ), new scenery.GraphPath( [
+      node,
+      node.children[0],
+      node.children[0].children[3]
+    ] ), 2, 2, 7, 7, 'Path 3' );
     
-    // count( new scenery.GraphPath( [
-    //   node,
-    //   node.children[0],
-    //   node.children[0].children[1]
-    // ] ), new scenery.GraphPath( [
-    //   node,
-    //   node.children[0],
-    //   node.children[0].children[4]
-    // ] ), 6, 6, 8, 8, 'Path 4' );
+    count( new scenery.GraphPath( [
+      node,
+      node.children[0],
+      node.children[0].children[1]
+    ] ), new scenery.GraphPath( [
+      node,
+      node.children[0],
+      node.children[0].children[4]
+    ] ), 6, 6, 8, 8, 'Path 4' );
     
-    // count( new scenery.GraphPath( [
-    //   node,
-    //   node.children[0]
-    // ] ), new scenery.GraphPath( [
-    //   node,
-    //   node.children[0],
-    //   node.children[0].children[3],
-    //   node.children[0].children[3].children[0]
-    // ] ), 0, 0, 8, 6, 'Subpath 1' );
+    count( new scenery.GraphPath( [
+      node,
+      node.children[0]
+    ] ), new scenery.GraphPath( [
+      node,
+      node.children[0],
+      node.children[0].children[3],
+      node.children[0].children[3].children[0]
+    ] ), 0, 0, 8, 6, 'Subpath 1' );
     
-    // count( new scenery.GraphPath( [
-    //   node
-    // ] ), new scenery.GraphPath( [
-    //   node
-    // ] ), 0, 0, 13, 13, 'Same Root' );
+    count( new scenery.GraphPath( [
+      node
+    ] ), new scenery.GraphPath( [
+      node
+    ] ), 0, 0, 13, 13, 'Same Root' );
     
-    // count( new scenery.GraphPath( [
-    //   node,
-    //   node.children[0]
-    // ] ), new scenery.GraphPath( [
-    //   node,
-    //   node.children[0]
-    // ] ), 0, 0, 10, 10, 'Same Path' );
+    count( new scenery.GraphPath( [
+      node,
+      node.children[0]
+    ] ), new scenery.GraphPath( [
+      node,
+      node.children[0]
+    ] ), 0, 0, 10, 10, 'Same Path' );
     
-    // count( new scenery.GraphPath( [
-    //   node,
-    //   node.children[0]
-    // ] ), new scenery.GraphPath( [
-    //   node,
-    //   node.children[0],
-    //   node.children[0].children[1]
-    // ] ), 0, 0, 4, 3, 'Subpath' );
+    count( new scenery.GraphPath( [
+      node,
+      node.children[0]
+    ] ), new scenery.GraphPath( [
+      node,
+      node.children[0],
+      node.children[0].children[1]
+    ] ), 0, 0, 4, 3, 'Subpath' );
   } );
   
   test( 'Text width measurement in canvas', function() {
@@ -474,9 +474,9 @@
     
     b.validateBounds();
     
-    ok( !a.isRooted() );
-    
     a.invalidatePaint();
+    
+    expect( 0 );
   } );
   
   test( 'Checking Layers and external canvas', function() {
