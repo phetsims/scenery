@@ -26,8 +26,16 @@ var scenery = scenery || {};
       this.nodes.unshift( node );
     },
     
+    removeAncestor: function() {
+      this.nodes.shift();
+    },
+    
     addDescendant: function( node ) {
       this.nodes.push( node );
+    },
+    
+    removeDescendant: function() {
+      this.nodes.pop();
     },
     
     equals: function( other ) {

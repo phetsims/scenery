@@ -33,7 +33,8 @@ var scenery = scenery || {};
     
     this.transform = new phet.math.Transform3();
     
-    this._inputListeners = [];
+    this._inputListeners = []; // for user input handling (mouse/touch)
+    this._eventListeners = []; // for internal events like paint invalidation, layer invalidation, etc.
     
     // TODO: add getter/setters that will be able to invalidate whether this node is under any fingers, etc.
     this._includeStrokeInHitRegion = false;
@@ -98,7 +99,11 @@ var scenery = scenery || {};
       node.invalidateBounds();
       node.invalidatePaint();
       
-      throw new Error( 'insertChild notifications not implemented' );
+      this.dispatchEvent( 'insertChild', {
+        parent: this,
+        child: node,
+        index: index
+      } );
     },
     
     addChild: function( node ) {
@@ -110,12 +115,19 @@ var scenery = scenery || {};
       
       node.markOldPaint();
       
-      node.parents.splice( _.indexOf( node.parents, this ), 1 );
-      this.children.splice( _.indexOf( this.children, node ), 1 );
+      var indexOfParent = _.indexOf( node.parents, this );
+      var indexOfChild = _.indexOf( this.children, node );
+      
+      node.parents.splice( indexOfParent, 1 );
+      this.children.splice( indexOfChild, 1 );
       
       this.invalidateBounds();
       
-      throw new Error( 'removeChild notifications not implemented' );
+      this.dispatchEvent( 'removeChild', {
+        parent: this,
+        child: node,
+        index: indexOfChild
+      } );
     },
     
     // remove this node from its parents
@@ -256,18 +268,21 @@ var scenery = scenery || {};
     
     // bounds assumed to be in the local coordinate frame, below this node's transform
     markDirtyRegion: function( bounds ) {
-      var globalBounds = this.localToGlobalBounds( bounds );
-      
-      throw new Error( 'unimplemented markDirtyRegion event firing for all relevant layers to see' );
-      // TODO: remember to fire for each graph path!
+      this.dispatchEventWithTransform( 'dirtyBounds', {
+        node: this,
+        bounds: bounds
+      } );
     },
     
     markOldSelfPaint: function() {
       this.markOldPaint( true );
     },
     
+    // should be called whenever something triggers changes for how this node is layered
     markLayerRefreshNeeded: function() {
-      throw new Error( 'unimplemented markLayerRefreshNeeded with new style' );
+      this.dispatchEvent( 'layerRefresh', {
+        node: this
+      } );
     },
     
     // marks the last-rendered bounds of this node and optionally all of its descendants as needing a repaint
@@ -410,6 +425,82 @@ var scenery = scenery || {};
     
     getInputListeners: function() {
       return this._inputListeners.slice( 0 ); // defensive copy
+    },
+    
+    // TODO: set this up with a mix-in for a generic notifier?
+    addEventListener: function( listener ) {
+      // don't allow listeners to be added multiple times
+      if ( _.indexOf( this._eventListeners, listener ) === -1 ) {
+        this._eventListeners.push( listener );
+      }
+    },
+    
+    removeEventListener: function( listener ) {
+      // ensure the listener is in our list
+      phet.assert( _.indexOf( this._eventListeners, listener ) !== -1 );
+      
+      this._eventListeners.splice( _.indexOf( this._eventListeners, listener ), 1 );
+    },
+    
+    getEventListeners: function() {
+      return this._eventListeners.slice( 0 ); // defensive copy
+    },
+    
+    // dispatches an event across all possible GraphPaths ending in this node
+    dispatchEvent: function( type, args ) {
+      var node = this;
+      var path = new GraphPath();
+      
+      recursiveEventDispatch( this );
+      
+      function recursiveEventDispatch( node ) {
+        path.addAncestor( node );
+        
+        args.path = path;
+        
+        _.each( node.getEventListeners(), function( eventListener ) {
+          if ( eventListener[type] ) {
+            eventListener[type]( args );
+          }
+        } );
+        
+        _.each( this.parents, function( parent ) {
+          recursiveEventDispatch( parent );
+        } );
+        
+        path.removeAncestor();
+      }
+    },
+    
+    // dispatches events with the transform computed from parent of the "root" to the local frame
+    dispatchEventWithTransform: function( type, args ) {
+      var node = this;
+      var path = new GraphPath();
+      var transformStack = [ new phet.math.Transform3() ];
+      
+      recursiveEventDispatch( this );
+      
+      function recursiveEventDispatch( node ) {
+        path.addAncestor( node );
+        
+        transformStack.push( transformStack[transformStack.length-1].prepend( node.getMatrix() ) );
+        args.transform = transformStack[transformStack.length-1];
+        args.path = path;
+        
+        _.each( node.getEventListeners(), function( eventListener ) {
+          if ( eventListener[type] ) {
+            eventListener[type]( args );
+          }
+        } );
+        
+        _.each( this.parents, function( parent ) {
+          recursiveEventDispatch( parent );
+        } );
+        
+        transformStack.pop();
+        
+        path.removeAncestor();
+      }
     },
     
     // TODO: consider renaming to translateBy to match scaleBy
