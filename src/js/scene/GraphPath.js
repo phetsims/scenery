@@ -56,7 +56,7 @@ var scenery = scenery || {};
      * Iterates between this graph path and the other one, calling listener.enter( node ) and listener.exit( node ).
      * This will be bounded by listener.exit( startNode ) and listener.enter( endNode )
      */
-    eachBetween: function( other, listener, reverseIfNecessary ) {
+    eachBetweenExclusive: function( other, listener, reverseIfNecessary ) {
       var minPath = this;
       var maxPath = other;
       
@@ -77,7 +77,24 @@ var scenery = scenery || {};
         }
       }
       
+      // bail out since one is a subpath of the other (there is no 'between' from the above definition)
+      if ( splitIndex === minSharedLength ) {
+        return;
+      }
+      
+      // console.log( 'splitIndex: ' + splitIndex );
+      
+      function dumpstr( node ) {
+        var result = '|';
+        while ( node.parents.length !== 0 ) {
+          result = _.indexOf( node.parents[0].children, node ) + ',' + result;
+          node = node.parents[0];
+        }
+        return result;
+      }
+      
       function recurse( node, depth, hasLowBound, hasHighBound ) {
+        // console.log( 'recurse: ' + dumpstr( node ) + ' ' + hasLowBound + ', ' + hasHighBound + ', ' + depth );
         if ( !hasLowBound && !hasHighBound ) {
           listener.enter( node );
           _.each( node.children, function( child ) {
@@ -91,31 +108,31 @@ var scenery = scenery || {};
             listener.enter( node );
           }
           
-          var passedLowBound = !hasLowBound;
+          var lowIndex = hasLowBound ? _.indexOf( node.children, minPath.nodes[depth] ) : 0;
+          var highIndex = hasHighBound ? _.indexOf( node.children, maxPath.nodes[depth] ) : node.children.length - 1;
+          phet.assert( lowIndex !== -1, 'no low index' );
+          phet.assert( highIndex !== -1, 'no high index' );
           
-          for ( var i = 0; i < node.children.length; i++ ) {
+          // console.log( 'lowIndex: ' + lowIndex + ', highIndex: ' + highIndex + ', depth: ' + depth + ', minPath.nodes.length: ' + minPath.nodes.length );
+          for ( var i = lowIndex; i <= highIndex; i++ ) {
             var child = node.children[i];
             
-            if ( !passedLowBound ) {
-              // if we haven't passed the low bound, it MUST exist, and we are either (a) not rendered, or (b) low-bounded
-              
-              if ( minPath.nodes[depth] === child ) {
-                recurse( child, depth + 1, minPath.nodes.length !== depth, false ); // if it has a low-bound, it can't have a high bound
-              
-                // for later children, we have passed the low bound.
-                passedLowBound = true;
-              }
-              
-              // either way, go on to the next nodes
+            var isOnLowPath = hasLowBound && i === lowIndex;
+            var isOnHighPath = hasHighBound && i === highIndex;
+            
+            // don't follow the subtree of a start node
+            if ( isOnLowPath && minPath.nodes.length - 1 === depth ) {
+              listener.exit( child );
               continue;
             }
             
-            if ( hasHighBound && maxPath.nodes[depth] === child ) {
-              recurse( child, depth + 1, false, maxPath.nodes.length !== depth ); // if it has a high-bound, it can't have a low bound
-              
-              // don't handle any more children, since we passed the high bound
-              break;
+            // don't follow the subtree of an end node
+            if ( isOnHighPath && maxPath.nodes.length - 1 === depth ) {
+              listener.enter( child );
+              continue;
             }
+            
+            recurse( child, depth + 1, hasLowBound && i === lowIndex, hasHighBound && i === highIndex )
           }
           
           if ( !hasHighBound ) {
@@ -124,7 +141,7 @@ var scenery = scenery || {};
         }
       }
       
-      recurse( minPath[splitIndex-1], splitIndex, minPath.nodes.length !== splitIndex, maxPath.nodes.length !== splitIndex );
+      recurse( minPath.nodes[splitIndex-1], splitIndex, minPath.nodes.length !== splitIndex, maxPath.nodes.length !== splitIndex );
     },
     
     /* Standard Java-style compare. -1 means this graph path is before (under) the other path, 0 means equal, and 1 means this path is

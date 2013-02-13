@@ -241,6 +241,127 @@
     } );
   } );
   
+  test( 'Node traversal testing', function() {
+    // TODO: test edge cases?
+    
+    // build a structure
+    var node = new scenery.Node();
+    node.addChild( new scenery.Node() );
+    node.addChild( new scenery.Node() );
+    node.addChild( new scenery.Node() );
+    
+    node.children[0].addChild( new scenery.Node() );
+    node.children[0].addChild( new scenery.Node() );
+    node.children[0].addChild( new scenery.Node() );
+    node.children[0].addChild( new scenery.Node() );
+    node.children[0].addChild( new scenery.Node() );
+    
+    node.children[0].children[1].addChild( new scenery.Node() );
+    node.children[0].children[3].addChild( new scenery.Node() );
+    node.children[0].children[3].addChild( new scenery.Node() );
+    
+    node.children[0].children[3].children[0].addChild( new scenery.Node() );
+    
+    function dumpstr( node ) {
+      var result = '';
+      while ( node.parents.length !== 0 ) {
+        result = _.indexOf( node.parents[0].children, node ) + ',' + result;
+        node = node.parents[0];
+      }
+      return result;
+    }
+    
+    function count( start, end, ancitipatedEnter, anticipatedExit, msg ) {
+      var enterCount = 0;
+      var exitCount = 0;
+      
+      start.eachBetweenExclusive( end, {
+        enter: function( node ) {
+          // console.log( '- enter: ' + dumpstr( node ) );
+          enterCount++;
+        },
+        
+        exit: function( node ) {
+          // console.log( '- exit: ' + dumpstr( node ) );
+          exitCount++;
+        }
+      } );
+      
+      equal( enterCount, ancitipatedEnter, msg + ' (enter)' );
+      equal( exitCount, anticipatedExit, msg + ' (exit)' );
+    }
+    
+    count( new scenery.GraphPath( [
+      node,
+      node.children[0],
+      node.children[0].children[1]
+    ] ), new scenery.GraphPath( [
+      node,
+      node.children[1]
+    ] ), 7, 8, 'Path 1' );
+    
+    count( new scenery.GraphPath( [
+      node,
+      node.children[0]
+    ] ), new scenery.GraphPath( [
+      node,
+      node.children[1]
+    ] ), 1, 1, 'Path 2' );
+    
+    count( new scenery.GraphPath( [
+      node,
+      node.children[0],
+      node.children[0].children[1]
+    ] ), new scenery.GraphPath( [
+      node,
+      node.children[0],
+      node.children[0].children[3]
+    ] ), 2, 2, 'Path 3' );
+    
+    count( new scenery.GraphPath( [
+      node,
+      node.children[0],
+      node.children[0].children[1]
+    ] ), new scenery.GraphPath( [
+      node,
+      node.children[0],
+      node.children[0].children[4]
+    ] ), 6, 6, 'Path 4' );
+    
+    count( new scenery.GraphPath( [
+      node,
+      node.children[0]
+    ] ), new scenery.GraphPath( [
+      node,
+      node.children[0],
+      node.children[0].children[3],
+      node.children[0].children[3].children[0]
+    ] ), 0, 0, 'Subpath 1' );
+    
+    count( new scenery.GraphPath( [
+      node
+    ] ), new scenery.GraphPath( [
+      node
+    ] ), 0, 0, 'Same Root' );
+    
+    count( new scenery.GraphPath( [
+      node,
+      node.children[0]
+    ] ), new scenery.GraphPath( [
+      node,
+      node.children[0]
+    ] ), 0, 0, 'Same Path' );
+    
+    count( new scenery.GraphPath( [
+      node,
+      node.children[0]
+    ] ), new scenery.GraphPath( [
+      node,
+      node.children[0],
+      node.children[0].children[1]
+    ] ), 0, 0, 'Subpath' );
+  } );
+  
   test( 'Text width measurement in canvas', function() {
     var canvas = document.createElement( 'canvas' );
     var context = phet.canvas.initCanvas( canvas );

@@ -9,7 +9,7 @@ var scenery = scenery || {};
     enter: function( node, layerState ) {
       
       // if the node isn't self-rendering, we can skip it completely
-      if ( node.hasSelf() &&  ) {
+      if ( node.hasSelf() ) {
         // check if we need to change layer types
         if ( !layerState.getCurrentLayerType() || !layerState.getCurrentLayerType().supportsNode( node ) ) {
           var supportedTypes = node._supportedLayerTypes;

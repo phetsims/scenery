@@ -449,7 +449,7 @@ var scenery = scenery || {};
     // dispatches an event across all possible GraphPaths ending in this node
     dispatchEvent: function( type, args ) {
       var node = this;
-      var path = new GraphPath();
+      var path = new scenery.GraphPath();
       
       recursiveEventDispatch( this );
       
@@ -464,7 +464,7 @@ var scenery = scenery || {};
           }
         } );
         
-        _.each( this.parents, function( parent ) {
+        _.each( node.parents, function( parent ) {
           recursiveEventDispatch( parent );
         } );
         
@@ -475,7 +475,7 @@ var scenery = scenery || {};
     // dispatches events with the transform computed from parent of the "root" to the local frame
     dispatchEventWithTransform: function( type, args ) {
       var node = this;
-      var path = new GraphPath();
+      var path = new scenery.GraphPath();
       var transformStack = [ new phet.math.Transform3() ];
       
       recursiveEventDispatch( this );
