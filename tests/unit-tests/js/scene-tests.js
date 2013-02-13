@@ -201,6 +201,27 @@
     ok( Math.abs( a - b ) < 0.0000001, ( message ? message + ': ' : '' ) + a + ' =? ' + b );
   }
   
+  function createTestNodeTree() {
+    var node = new scenery.Node();
+    node.addChild( new scenery.Node() );
+    node.addChild( new scenery.Node() );
+    node.addChild( new scenery.Node() );
+    
+    node.children[0].addChild( new scenery.Node() );
+    node.children[0].addChild( new scenery.Node() );
+    node.children[0].addChild( new scenery.Node() );
+    node.children[0].addChild( new scenery.Node() );
+    node.children[0].addChild( new scenery.Node() );
+    
+    node.children[0].children[1].addChild( new scenery.Node() );
+    node.children[0].children[3].addChild( new scenery.Node() );
+    node.children[0].children[3].addChild( new scenery.Node() );
+    
+    node.children[0].children[3].children[0].addChild( new scenery.Node() );
+    
+    return node;
+  }
+  
   /*---------------------------------------------------------------------------*
   * TESTS BELOW
   *----------------------------------------------------------------------------*/   
@@ -241,26 +262,74 @@
     } );
   } );
   
+  test( 'GraphPath next/previous', function() {
+    var node = createTestNodeTree();
+    
+    // walk it forward
+    var path = new scenery.GraphPath( [ node ] );
+    equal( 1, path.getLength() );
+    path = path.next();
+    equal( 2, path.getLength() );
+    path = path.next();
+    equal( 3, path.getLength() );
+    path = path.next();
+    equal( 3, path.getLength() );
+    path = path.next();
+    equal( 4, path.getLength() );
+    path = path.next();
+    equal( 3, path.getLength() );
+    path = path.next();
+    equal( 3, path.getLength() );
+    path = path.next();
+    equal( 4, path.getLength() );
+    path = path.next();
+    equal( 5, path.getLength() );
+    path = path.next();
+    equal( 4, path.getLength() );
+    path = path.next();
+    equal( 3, path.getLength() );
+    path = path.next();
+    equal( 2, path.getLength() );
+    path = path.next();
+    equal( 2, path.getLength() );
+    
+    // make sure walking off the end gives us null
+    equal( null, path.next() );
+    
+    path = path.previous();
+    equal( 2, path.getLength() );
+    path = path.previous();
+    equal( 3, path.getLength() );
+    path = path.previous();
+    equal( 4, path.getLength() );
+    path = path.previous();
+    equal( 5, path.getLength() );
+    path = path.previous();
+    equal( 4, path.getLength() );
+    path = path.previous();
+    equal( 3, path.getLength() );
+    path = path.previous();
+    equal( 3, path.getLength() );
+    path = path.previous();
+    equal( 4, path.getLength() );
+    path = path.previous();
+    equal( 3, path.getLength() );
+    path = path.previous();
+    equal( 3, path.getLength() );
+    path = path.previous();
+    equal( 2, path.getLength() );
+    path = path.previous();
+    equal( 1, path.getLength() );
+    
+    // make sure walking off the start gives us null
+    equal( null, path.previous() );
+  } );
+  
   test( 'Node traversal testing', function() {
     // TODO: test edge cases?
     
     // build a structure
-    var node = new scenery.Node();
-    node.addChild( new scenery.Node() );
-    node.addChild( new scenery.Node() );
-    node.addChild( new scenery.Node() );
-    
-    node.children[0].addChild( new scenery.Node() );
-    node.children[0].addChild( new scenery.Node() );
-    node.children[0].addChild( new scenery.Node() );
-    node.children[0].addChild( new scenery.Node() );
-    node.children[0].addChild( new scenery.Node() );
-    
-    node.children[0].children[1].addChild( new scenery.Node() );
-    node.children[0].children[3].addChild( new scenery.Node() );
-    node.children[0].children[3].addChild( new scenery.Node() );
-    
-    node.children[0].children[3].children[0].addChild( new scenery.Node() );
+    var node = createTestNodeTree();
     
     function dumpstr( node ) {
       var result = '';

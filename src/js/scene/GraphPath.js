@@ -6,6 +6,7 @@ var scenery = scenery || {};
   "use strict";
   
   scenery.GraphPath = function( nodes ) {
+    // TODO: consider ability to pass in just a root node
     // TODO: consider adding index information
     this.nodes = nodes || [];
   };
@@ -20,6 +21,10 @@ var scenery = scenery || {};
     
     isEmpty: function() {
       return this.nodes.length === 0;
+    },
+    
+    getLength: function() {
+      return this.nodes.length;
     },
     
     addAncestor: function( node ) {
