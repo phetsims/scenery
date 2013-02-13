@@ -106,6 +106,25 @@ var scenery = scenery || {};
       
     },
     
+    layerLookup: function( path ) {
+      // TODO: add tree form for optimization
+      
+      phet.assert( !( path.isEmpty() || path.nodes[0] !== this.root ), 'layerLookup root matches' );
+      
+      if ( this.layers.length === 0 ) {
+        throw new Error( 'no layers in the scene' );
+      }
+      
+      for ( var i = 0; i < this.layers.length; i++ ) {
+        var layer = this.layers[i];
+        if ( path.compare( layer.endPath ) !== 1 ) {
+          return layer;
+        }
+      }
+      
+      throw new Error( 'node not contained in a layer' );
+    },
+    
     renderScene: function() {
       // validating bounds, similar to Piccolo2d
       this.root.validateBounds();
