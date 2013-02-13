@@ -8,13 +8,6 @@ var scenery = scenery || {};
     
     this.typeDirty = true;
     this.nextLayerType = null;
-    
-    /*
-      TODO:
-      
-      compact layers as necessary
-      hook them up as a linked list
-    */
   }
   
   var LayerState = scenery.LayerState;
@@ -38,16 +31,19 @@ var scenery = scenery || {};
     },
     
     switchToType: function( layerType ) {
-      // TODO
+      this.typeDirty = true;
+      this.nextLayerType = layerType;
     },
     
     // called so that we can finalize a layer switch (instead of collapsing unneeded layers)
     markSelf: function() {
-      // TODO
+      if ( this.typeDirty ) {
+        this.layerChange();
+      }
     },
     
     getCurrentLayerType: function() {
-      // TODO
+      return this.nextLayerType;
     },
     
     bestPreferredLayerTypeFor: function( defaultTypeOptions ) {
@@ -60,6 +56,10 @@ var scenery = scenery || {};
       
       // none of our stored preferred layer types are able to support any of the default type options
       return null;
+    },
+    
+    layerChange: function() {
+      throw new Error( 'not implemented: create and hook up layers, and we need to handle layer metadata' );
     }
   };
 })();
