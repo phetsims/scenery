@@ -21,12 +21,28 @@ Node:
   Has LayerStrategy: called during layering from each relevant scene.
 
 
+Issues
+======
 
+DAG handling for SVG (how to duplicate) or DOM
 
 Design
 ======
 
-LayerFactory? -- more general, possible advantages
+DAG:
+  * fewer checks needed during render for layers
+  * lighter weight nodes
+  Node
+    store list of parents -- prevent duplicates, with Set
+    disallow duplicates in children (they would be same position and everything)
+    allow listeners from scenes (or others), that trigger for any descendants (i.e. invalidate a finger and you have 20 region invalidations to scene)
+    constructor wraps parameters as children for convenience
+  Layer
+    store pick paths (with indices of each child for disambiguation? - not necessary if we disallow duplicate children) of beginning and end?
+  Scene
+    accelerated indexing of layers (find a layer given a pick path)
+    add listeners to 'root' to pick up invalidations, etc.
+    scene responsible for knowing layer start/end, handles drawing with this in mind
 
 LayerState:
   - compacts layers as necessary (don't instantiate until something hasSelf())
@@ -38,6 +54,28 @@ LayerState:
 
 Node:
   LayerStrategy (called during layering from each relevant scene), default uses node._supportedLayerTypes
+  stale:
+    _layerType
+    isLayerRoot()
+    setLayerType()
+    getLayerType()
+  metadata:
+    _layerBeforeRender = null; // layer to swap to before rendering this node
+    _layerAfterRender = null; // layer to swap to after rendering this node
+    _layerReference = null; // stores a reference to this node's corresponding layer (the one used to render it's self content)
+    _hasLayerBelow = false; // whether any descendants are also layer roots
+  uses metadata:
+    enterState() / exitState() -- before / after
+    getLayer()
+    getLayerBeforeNodeRendered()
+    getLayerAfterNodeRendered()
+    insertChild()
+      synchronizes layer references if rooted
+      synchronizes _hasLayerBelow
+    removeChild()
+      synchronizes _hasLayerBelow
+      marks layer refreshes as needed
+    findLayer()
 
 DOM:
   Hoisting of interactive DOM nodes
