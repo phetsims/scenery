@@ -6,13 +6,28 @@ var scenery = scenery || {};
   scenery.LayerState = function() {
     this.preferredLayerTypes = [];
     
-    this.typeDirty = true;
-    this.nextLayerType = null;
+    this.resetInternalState();
   }
   
   var LayerState = scenery.LayerState;
   LayerState.prototype = {
     constructor: LayerState,
+    
+    /*
+     * Construct a list of layer entries between two GraphPaths (inclusive).
+     * Each element of the returned array will have { type: <layer type>, start: <start path>, end: <end path> }
+     */
+    buildLayers: function( startPath, endPath ) {
+      this.resetInternalState();
+      
+      throw new Error( 'unimplemented' ); // use GraphPath.eachBetween
+    },
+    
+    resetInternalState: function() {
+      this.layerEntries = [];
+      this.typeDirty = true;
+      this.nextLayerType = null;
+    },
     
     pushPreferredLayerType: function( layerType ) {
       this.preferredLayerTypes.push( layerType );

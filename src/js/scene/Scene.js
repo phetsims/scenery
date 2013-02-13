@@ -12,9 +12,10 @@ var scenery = scenery || {};
   "use strict";
   
   scenery.Scene = function( main ) {
-    this.root = new scenery.Node();
+    var that = this;
     
-    this.root._isRoot = true;
+    // TODO: support changing the root
+    this.root = new scenery.Node();
     this.root.scene = this;
     
     // main layers in a scene
@@ -29,34 +30,45 @@ var scenery = scenery || {};
       main: main
     } );
     
-    // the greatest common "path" of nodes, i.e. ancestors arrays. after modifications, this will tell us the smallest subtree needed to re-layer
-    this.dirtyLayerPath = null;
-    
     this.main = main;
     
     this.sceneBounds = new phet.math.Bounds2( 0, 0, main.width(), main.height() );
     
     // default to a canvas layer type, but this can be changed
-    // called here AFTER the root is initialized, so that we set the correct dirtyLayerPath and get a layer rebuild / refresh as necessary
-    this.root.setLayerType( scenery.CanvasLayer );
+    this.preferredLayerType = scenery.LayerType.Canvas;
     
-    // some css hacks (inspired from https://github.com/EightMedia/hammer.js/blob/master/hammer.js)
-    (function() {
-      var prefixes = [ '-webkit-', '-moz-', '-ms-', '-o-', '' ];
-      var properties = {
-        userSelect: 'none',
-        touchCallout: 'none',
-        touchAction: 'none',
-        userDrag: 'none',
-        tapHighlightColor: 'rgba(0,0,0,0)'
-      };
+    applyCSSHacks( main );
+    
+    // note, arguments to the functions are mutable. don't destroy them
+    this.eventListener = {
+      insertChild: function( args ) {
+        var parent = args.parent;
+        var child = args.child;
+        var index = args.index;
+        var path = args.path;
+      },
       
-      _.each( prefixes, function( prefix ) {
-        _.each( properties, function( propertyValue, propertyName ) {
-          main.css( prefix + propertyName, propertyValue );
-        } );
-      } );
-    })();
+      removeChild: function( args ) {
+        var parent = args.parent;
+        var child = args.child;
+        var index = args.index;
+        var path = args.path;
+      },
+      
+      dirtyBounds: function( args ) {
+        var node = args.node;
+        var localBounds = args.bounds;
+        var transform = args.transform;
+        var path = args.path;
+      },
+      
+      layerRefresh: function( args ) {
+        var node = args.node;
+        var path = args.path;
+      }
+    };
+    
+    this.root.addEventListener( this.eventListener );
   };
 
   var Scene = scenery.Scene;
@@ -90,10 +102,11 @@ var scenery = scenery || {};
   Scene.prototype = {
     constructor: Scene,
     
-    renderScene: function() {
-      phet.assert( this.root.parent === null );
-      phet.assert( this.root.isLayerRoot() );
+    fullRenderCore: function() {
       
+    },
+    
+    renderScene: function() {
       // validating bounds, similar to Piccolo2d
       this.root.validateBounds();
       // no paint validation needed, since we render everything
@@ -109,9 +122,6 @@ var scenery = scenery || {};
     },
     
     updateScene: function( args ) {
-      phet.assert( this.root.parent === null );
-      phet.assert( this.root.isLayerRoot() );
-      
       // validating bounds, similar to Piccolo2d
       this.root.validateBounds();
       this.root.validatePaint();
@@ -331,12 +341,6 @@ var scenery = scenery || {};
     // called on the root node when any layer-relevant changes are made
     // TODO: add flags for this to happen, and call during renderFull. set flags on necessary functions
     rebuildLayers: function() {
-      // verify that this node is the effective root
-      phet.assert( this.root.parent === null );
-      
-      // root needs to contain a layer type reference
-      phet.assert( this.root.isLayerRoot() );
-      
       // a few variables for the closurelayer
       var main = this.main;
       var scene = this;
@@ -622,4 +626,24 @@ var scenery = scenery || {};
       resizer();
     }
   };
+  
+  function applyCSSHacks( main ) {
+    // some css hacks (inspired from https://github.com/EightMedia/hammer.js/blob/master/hammer.js)
+    (function() {
+      var prefixes = [ '-webkit-', '-moz-', '-ms-', '-o-', '' ];
+      var properties = {
+        userSelect: 'none',
+        touchCallout: 'none',
+        touchAction: 'none',
+        userDrag: 'none',
+        tapHighlightColor: 'rgba(0,0,0,0)'
+      };
+      
+      _.each( prefixes, function( prefix ) {
+        _.each( properties, function( propertyValue, propertyName ) {
+          main.css( prefix + propertyName, propertyValue );
+        } );
+      } );
+    })();
+  }
 })();

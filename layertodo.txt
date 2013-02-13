@@ -37,12 +37,16 @@ DAG:
     |disallow duplicates in children (they would be same position and everything)
     allow listeners from scenes (or others), that trigger for any descendants (i.e. invalidate a finger and you have 20 region invalidations to scene)
     constructor wraps parameters as children for convenience
+      as children get/set? risky, but possibly useful
   Layer
     store pick paths (with indices of each child for disambiguation? - not necessary if we disallow duplicate children) of beginning and end?
   Scene
     accelerated indexing of layers (find a layer given a pick path)
     add listeners to 'root' to pick up invalidations, etc.
     scene responsible for knowing layer start/end, handles drawing with this in mind
+    
+    IMPLEMENTATION NOTES:
+      
 
 LayerState:
   - compacts layers as necessary (don't instantiate until something hasSelf())
