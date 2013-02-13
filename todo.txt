@@ -203,6 +203,7 @@ Text:
 Scene:
     refreshLayers() implementation (currently rebuilds all layers, but should be optimized so it doesn't need to redraw as much)
     Foundation for multiple view implementations
+    spread out z-indices and be adaptive so we don't have to change as many indices where possible
 
 Build:
     Add JSHint into Sublime Text with plugin?
