@@ -5,14 +5,18 @@ var scenery = scenery || {};
 (function(){
   "use strict";
   
-  scenery.GraphPath = function() {
+  scenery.GraphPath = function( nodes ) {
     // TODO: consider adding index information
-    this.nodes = [];
+    this.nodes = nodes || [];
   };
   var GraphPath = scenery.GraphPath;
   
   GraphPath.prototype = {
     constructor: GraphPath,
+    
+    copy: function() {
+      return new scenery.GraphPath( this.nodes.slice( 0 ) );
+    },
     
     isEmpty: function() {
       return this.nodes.length === 0;

@@ -54,6 +54,7 @@ LayerState:
 
 Node:
   LayerStrategy (called during layering from each relevant scene), default uses node._supportedLayerTypes
+  ability to fire an event with a callback that all registered layers / scenes will respond to (so you can technically get singleton scene references)
 
 DOM:
   Hoisting of interactive DOM nodes
