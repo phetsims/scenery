@@ -21,7 +21,7 @@ var scenery = scenery || {};
     
     // return the equivalent pointer that swaps before and after (may return null if it doesn't exist)
     getSwappedPointer: function() {
-      var newTrail = this.isBefore ? trail.previous() : trail.next();
+      var newTrail = this.isBefore ? this.trail.previous() : this.trail.next();
       
       if ( newTrail === null ) {
         return null;
