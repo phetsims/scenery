@@ -28,6 +28,41 @@ var scenery = scenery || {};
       } else {
         return new TrailPointer( newTrail, !this.isBefore );
       }
+    },
+    
+    getBeforePointer: function() {
+      return this.isBefore ? this : this.getSwappedPointer();
+    },
+    
+    getAfterPointer: function() {
+      return this.isAfter ? this : this.getSwappedPointer();
+    },
+    
+    /* 
+     * In the render order, will return 0 if the pointers are equivalent, -1 if this pointer is before the
+     * other pointer, and 1 if this pointer is after the other pointer.
+     */
+    compare: function( other ) {
+      phet.assert( other !== null );
+      
+      var a = this.getBeforePointer();
+      var b = other.getBeforePointer();
+      
+      if ( a !== null && b !== null ) {
+        // normal (non-degenerate) case
+        return a.trail.compare( b.trail );
+      } else {
+        // null "before" point is equivalent to the "after" pointer on the last rendered node.
+        if ( a === b ) {
+          return 0; // uniqueness guarantees they were the same
+        } else {
+          return a === null ? 1 : -1;
+        }
+      }
+    },
+    
+    eachNodeBetween: function( other, callback ) {
+      var comparison = this.trail.compare( other.trail );
     }
   };
   
