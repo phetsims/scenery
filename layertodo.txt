@@ -36,6 +36,7 @@ Trail:
   Cleanup of nestedForwards/nestedBackwards, possibly based on a Side-like implementation. Decent code duplication!
   
   Better name for copy() ?
+  eachPointerBetween should possibly have option for defensive copies? hrm
 
 
 Issues
