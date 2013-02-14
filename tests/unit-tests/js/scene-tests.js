@@ -325,6 +325,30 @@
     equal( null, trail.previous() );
   } );
   
+  test( 'Trail comparison', function() {
+    var node = createTestNodeTree();
+    
+    // get a list of all trails in render order
+    var trails = [];
+    var currentTrail = new scenery.Trail( node ); // start at the first node
+    
+    while ( currentTrail ) {
+      trails.push( currentTrail );
+      currentTrail = currentTrail.next();
+    }
+    
+    equal( 13, trails.length, 'Trail for each node' );
+    
+    for ( var i = 0; i < trails.length; i++ ) {
+      for ( var j = i; j < trails.length; j++ ) {
+        var comparison = trails[i].compare( trails[j] );
+        
+        // make sure that every trail compares as expected (0 and they are equal, -1 and i < j)
+        equal( i === j ? 0 : ( i < j ? -1 : 1 ), comparison, i + ',' + j );
+      }
+    }
+  } );
+  
   test( 'Node traversal testing', function() {
     // TODO: test edge cases?
     
