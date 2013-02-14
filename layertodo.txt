@@ -27,9 +27,13 @@ GraphPath next, previous. improve eachBetween using these. Consider a 'GraphPoin
   Add ability to "index" a GraphPath
 
 Trail:
-  Use indices where possible
+  Use indices where possible (next and previous!)
   DO we need indices in Node.dispatchEvent? May be bottleneck
   Copy constructor!
+  Build TrailPointer iteration based on indices
+  Remove Trail's EachBetween!
+  Consider extending array for performance? Is it possible or recommended?
+  Consider adding negative index handling for Trail
 
 
 Issues
