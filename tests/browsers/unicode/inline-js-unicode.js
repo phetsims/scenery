@@ -56,13 +56,13 @@ $( window ).ready( function () {
   string( 'Encoded' );
   string( '---' );
   string( '\u0628\u064A\u0631\u0648\u0643\u0633\u064A\u062F \u0627\u0644\u0647\u064A\u062F\u0631\u0648\u062C\u064A\u0646' ); // ar
-  string( 'Peròxid d\'hidrogen' ); // ca
+  string( 'Per\u00F2xid d\'hidrogen' ); // ca
   string( '\u03A5\u03C0\u03B5\u03C1\u03BF\u03BE\u03B5\u03AF\u03B4\u03B9\u03BF \u03C5\u03B4\u03C1\u03BF\u03B3\u03CC\u03BD\u03BF\u03C5' ); // el
   string( 'per\u00F3xido de hidr\u00F3geno' ); // es
   string( '\u0647\u06CC\u062F\u0631\u0648\u0698\u0646 \u067E\u0631\u0627\u06A9\u0633\u06CC\u062F' ); // fa
-  string( 'Peroxyde d\'hydrogène' ); // fr
-  string( 'Peróxido de Hidróxeno' ); // gl
-  string( 'Hidrogén-peroxid' ); // hu
+  string( 'Peroxyde d\'hydrog\u00E8ne' ); // fr
+  string( 'Per\u00F3xido de Hidr\u00F3xeno' ); // gl
+  string( 'Hidrog\u00E9n-peroxid' ); // hu
   string( '\u05DE\u05D9 \u05D7\u05DE\u05E6\u05DF' ); // iw
   string( '\u904E\u9178\u5316\u6C34\u7D20' ); // ja
   string( '\u17A2\u17CA\u17B8\u178A\u17D2\u179A\u17BC\u179F\u17C2\u1793\u1796\u17C2\u17A2\u17BB\u1780\u179F\u17CA\u17B8\u178F' ); // km
