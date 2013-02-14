@@ -21,7 +21,7 @@ var scenery = scenery || {};
     this.length = 0;
     
     // indices[x] stores the index of nodes[x] in nodes[x-1]'s children
-    this.indices = null;
+    this.indices = [];
     
     var trail = this;
     if ( nodes ) {
@@ -51,8 +51,13 @@ var scenery = scenery || {};
       return this.nodes.length === 0;
     },
     
-    addAncestor: function( node ) {
+    addAncestor: function( node, index ) {
+      var oldRoot = this.nodes[0];
+      
       this.nodes.unshift( node );
+      if ( oldRoot ) {
+        this.indices.unshift( index === undefined ? _.indexOf( node.children, oldRoot ) : index );
+      }
       
       // mimic an Array
       this.length++;
@@ -63,6 +68,9 @@ var scenery = scenery || {};
     
     removeAncestor: function() {
       this.nodes.shift();
+      if ( this.indices.length ) {
+        this.indices.shift();
+      }
       
       // mimic an Array
       this.length--;
@@ -72,8 +80,13 @@ var scenery = scenery || {};
       }
     },
     
-    addDescendant: function( node ) {
+    addDescendant: function( node, index ) {
+      var parent = this.lastNode();
+      
       this.nodes.push( node );
+      if ( parent ) {
+        this.indices.push( index === undefined ? _.indexOf( parent.children, node ) : index );
+      }
       
       // mimic an Array
       this.length++;
@@ -82,13 +95,16 @@ var scenery = scenery || {};
     
     removeDescendant: function() {
       this.nodes.pop();
+      if ( this.indices.length ) {
+        this.indices.pop();
+      }
       
       // mimic an Array
       this.length--;
       delete this[this.length];
     },
     
-    // updates the indices array so that operations can depend on child indices
+    // refreshes the internal index references (important if any children arrays were modified!)
     reindex: function() {
       this.indices = [];
       for ( var i = 1; i < this.length; i++ ) {
