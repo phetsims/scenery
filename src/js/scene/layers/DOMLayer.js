@@ -17,31 +17,23 @@ var scenery = scenery || {};
   
   var Bounds2 = phet.math.Bounds2;
   
-  // assumes main is wrapped with JQuery
   scenery.DOMLayer = function( args ) {
-    var main = args.main;
-    this.main = main;
+    scenery.Layer.call( this, args );
     
     this.div = document.createElement( 'div' );
-    $( this.div ).width( main.width() );
-    $( this.div ).height( main.height() );
+    $( this.div ).width( this.main.width() );
+    $( this.div ).height( this.main.height() );
     $( this.div ).css( 'position', 'absolute' );
-    main.append( this.div );
+    this.main.append( this.div );
     
     this.scene = args.scene;
     
-    this.dirtyBounds = Bounds2.NOTHING;
-    
     this.isDOMLayer = true;
-    
-    // references to surrounding layers, filled by rebuildLayers
-    this.nextLayer = null;
-    this.previousLayer = null;
   };
   
   var DOMLayer = scenery.DOMLayer;
   
-  DOMLayer.prototype = {
+  DOMLayer.prototype = _.extend( {}, scenery.Layer.prototype, {
     constructor: DOMLayer,
     
     // called when rendering switches to this layer
@@ -50,17 +42,8 @@ var scenery = scenery || {};
     },
     
     // called when rendering switches away from this layer
-    cooldown: function() {
+    cooldown: function( renderState ) {
       
-    },
-    
-    // called if it needs to be added back to the main element after elements are removed
-    recreate: function() {
-      this.main.append( this.div );
-    },
-    
-    isDirty: function() {
-      return false;
     },
     
     // TODO: consider a stack-based model for transforms?
@@ -87,24 +70,8 @@ var scenery = scenery || {};
       // TODO: clipping
     },
     
-    markDirtyRegion: function( bounds ) {
-      // null op, always clean
-    },
-    
-    resetDirtyRegions: function() {
-      this.dirtyBounds = Bounds2.NOTHING;
-    },
-    
     prepareBounds: function( globalBounds ) {
       // null op
-    },
-    
-    prepareDirtyRegions: function() {
-      this.prepareBounds( this.dirtyBounds );
-    },
-    
-    getDirtyBounds: function() {
-      return this.dirtyBounds;
     },
     
     // TODO: note for DOM we can do https://developer.mozilla.org/en-US/docs/HTML/Canvas/Drawing_DOM_objects_into_a_canvas
@@ -127,7 +94,7 @@ var scenery = scenery || {};
       };
       img.src = url;
     }
-  };
+  } );
 })();
 
 

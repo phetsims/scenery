@@ -19,14 +19,15 @@ var scenery = scenery || {};
   
   // assumes main is wrapped with JQuery
   scenery.CanvasLayer = function( args ) {
-    var main = args.main;
+    scenery.Layer.call( this, args );
+    
     var canvas = document.createElement( 'canvas' );
-    canvas.width = main.width();
-    canvas.height = main.height();
+    canvas.width = this.main.width();
+    canvas.height = this.main.height();
     $( canvas ).css( 'position', 'absolute' );
     
     // add this layer on top (importantly, the constructors of the layers are called in order)
-    main.append( canvas );
+    this.main.append( canvas );
     
     this.canvas = canvas;
     // this.context = new scenery.DebugContext( phet.canvas.initCanvas( canvas ) );
@@ -39,24 +40,12 @@ var scenery = scenery || {};
     
     this.isCanvasLayer = true;
     
-    // initialize to fully dirty so we draw everything the first time
-    // bounds in global coordinate frame
-    this.dirtyBounds = Bounds2.EVERYTHING;
-    
     this.resetStyles();
-    
-    // filled in after construction by an external source (currently Scene.rebuildLayers).
-    this.startNode = null;
-    this.endNode = null;
-    
-    // references to surrounding layers, filled by rebuildLayers
-    this.nextLayer = null;
-    this.previousLayer = null;
   };
   
   var CanvasLayer = scenery.CanvasLayer;
   
-  CanvasLayer.prototype = {
+  CanvasLayer.prototype = _.extend( {}, scenery.Layer.prototype, {
     constructor: CanvasLayer,
     
     // called when rendering switches to this layer
@@ -84,12 +73,8 @@ var scenery = scenery || {};
     },
     
     // called when rendering switches away from this layer
-    cooldown: function() {
+    cooldown: function( renderState ) {
       this.context.restore();
-    },
-    
-    isDirty: function() {
-      return !this.dirtyBounds.isEmpty();
     },
     
     // TODO: consider a stack-based model for transforms?
@@ -118,11 +103,6 @@ var scenery = scenery || {};
       return zIndex + 1;
     },
     
-    // called if it needs to be added back to the main element after elements are removed
-    recreate: function() {
-      this.main.append( this.canvas );
-    },
-    
     pushClipShape: function( shape ) {
       // store the current state, since browser support for context.resetClip() is not yet in the stable browser versions
       this.context.save();
@@ -137,15 +117,6 @@ var scenery = scenery || {};
       this.context.restore();
     },
     
-    markDirtyRegion: function( bounds ) {
-      // TODO: for performance, consider more than just a single dirty bounding box
-      this.dirtyBounds = this.dirtyBounds.union( bounds.dilated( 1 ).roundedOut() );
-    },
-    
-    resetDirtyRegions: function() {
-      this.dirtyBounds = Bounds2.NOTHING;
-    },
-    
     prepareBounds: function( globalBounds ) {
       // don't let the bounds of the clearing go outside of the canvas
       var clearBounds = globalBounds.intersection( new phet.math.Bounds2( 0, 0, this.canvas.width, this.canvas.height ) );
@@ -156,14 +127,6 @@ var scenery = scenery || {};
         this.context.clearRect( clearBounds.x(), clearBounds.y(), clearBounds.width(), clearBounds.height() );
         this.context.restore();
       }
-    },
-    
-    prepareDirtyRegions: function() {
-      this.prepareBounds( this.dirtyBounds );
-    },
-    
-    getDirtyBounds: function() {
-      return this.dirtyBounds;
     },
     
     setFillStyle: function( style ) {
@@ -233,7 +196,7 @@ var scenery = scenery || {};
     renderToCanvas: function( canvas, context, delayCounts ) {
       context.drawImage( this.canvas, 0, 0 );
     }
-  };
+  } );
 })();
 
 

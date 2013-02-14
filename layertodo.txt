@@ -47,6 +47,7 @@ DAG:
       as children get/set? risky, but possibly useful
   Layer
     *** create base layer prototype
+    extract dirty bounds and redrawing
     store pick paths (with indices of each child for disambiguation? - not necessary if we disallow duplicate children) of beginning and end?
     startPath
     endPath
