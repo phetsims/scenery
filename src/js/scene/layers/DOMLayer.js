@@ -46,6 +46,10 @@ var scenery = scenery || {};
       
     },
     
+    dispose: function() {
+      $( this.div ).detach();
+    },
+    
     // TODO: consider a stack-based model for transforms?
     applyTransformationMatrix: function( matrix ) {
       

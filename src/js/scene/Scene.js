@@ -106,6 +106,22 @@ var scenery = scenery || {};
       
     },
     
+    rebuildLayers: function() {
+      // remove all of our tracked layers from the container, so we can fill it with fresh layers
+      this.disposeLayers();
+      
+      
+    },
+    
+    disposeLayers: function() {
+      var scene = this;
+      
+      _.each( this.layers.slice( 0 ), function( layer ) {
+        layer.dispose();
+        scene.layers.splice( _.indexOf( scene.layers, layer ), 1 ); // TODO: better removal code!
+      } );
+    },
+    
     layerLookup: function( path ) {
       // TODO: add tree form for optimization
       
@@ -334,15 +350,6 @@ var scenery = scenery || {};
       } );
     },
     
-    clearLayers: function() {
-      // TODO: reconsider a layer.cleanup() function so that we don't have to empty main() every time
-      this.main.empty();
-      this.layers = [];
-      
-      // recreate any needed layers
-      this.uiLayer.recreate();
-    },
-    
     // handles creation and adds it to our internal list
     createLayer: function( Constructor, args ) {
       var layer = new Constructor( args );
@@ -359,7 +366,7 @@ var scenery = scenery || {};
     
     // called on the root node when any layer-relevant changes are made
     // TODO: add flags for this to happen, and call during renderFull. set flags on necessary functions
-    rebuildLayers: function() {
+    oldRebuildLayers: function() {
       // a few variables for the closurelayer
       var main = this.main;
       var scene = this;
@@ -466,12 +473,6 @@ var scenery = scenery || {};
       
       // place the UI layer on top
       index = this.uiLayer.reindex( index );
-    },
-    
-    clearAllLayers: function() {
-      _.each( this.layers, function( layer ) {
-        layer.prepareBounds( phet.math.Bounds2.EVERYTHING );
-      } );
     },
     
     getUILayer: function() {

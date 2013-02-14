@@ -76,6 +76,10 @@ var scenery = scenery || {};
       throw new Error( 'Layer.renderToCanvas unimplemented' );
     },
     
+    dispose: function() {
+      throw new Error( 'Layer.dispose unimplemented' );
+    },
+    
     /*---------------------------------------------------------------------------*
     * Implementation
     *----------------------------------------------------------------------------*/

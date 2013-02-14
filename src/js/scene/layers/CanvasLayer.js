@@ -77,6 +77,10 @@ var scenery = scenery || {};
       this.context.restore();
     },
     
+    dispose: function() {
+      $( this.canvas ).detach();
+    },
+    
     // TODO: consider a stack-based model for transforms?
     applyTransformationMatrix: function( matrix ) {
       matrix.canvasAppendTransform( this.context );
