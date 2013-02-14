@@ -17,16 +17,28 @@ var scenery = scenery || {};
      * Construct a list of layer entries between two Trails (inclusive).
      * Each element of the returned array will have { type: <layer type>, start: <start trail>, end: <end trail> }
      */
-    buildLayers: function( startTrail, endTrail ) {
+    buildLayers: function( startPointer, endPointer, args ) {
+      // TODO: accept initial layer in args?
       this.resetInternalState();
       
-      throw new Error( 'unimplemented' ); // use Trail.eachBetween
+      var state = this;
+      
+      startPointer.eachPointerBetween( endPointer, function( pointer ) {
+        var node = pointer.lastNode();
+        
+        if ( pointer.isBefore ) {
+          node.layerStrategy.enter( pointer.trail, state );
+        } else {
+          node.layerStrategy.exit( pointer.trail, state );
+        }
+      }, false ); // include endpoints
     },
     
     resetInternalState: function() {
       this.layerEntries = [];
       this.typeDirty = true;
       this.nextLayerType = null;
+      this.nextTrail = null;
     },
     
     pushPreferredLayerType: function( layerType ) {
@@ -45,9 +57,10 @@ var scenery = scenery || {};
       }
     },
     
-    switchToType: function( layerType ) {
+    switchToType: function( trail, layerType ) {
       this.typeDirty = true;
       this.nextLayerType = layerType;
+      this.nextTrail = trail;
     },
     
     // called so that we can finalize a layer switch (instead of collapsing unneeded layers)
@@ -74,6 +87,9 @@ var scenery = scenery || {};
     },
     
     layerChange: function() {
+      this.typeDirty = false;
+      var nextLayerType = this.nextLayerType;
+      var nextTrail = this.nextTrail;
       throw new Error( 'not implemented: create and hook up layers, and we need to handle layer metadata' );
     }
   };

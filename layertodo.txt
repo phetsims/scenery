@@ -38,6 +38,7 @@ Trail:
   Better name for copy() ?
   eachPointerBetween should possibly have option for defensive copies? hrm
 
+Organize unit tests
 
 Issues
 ======

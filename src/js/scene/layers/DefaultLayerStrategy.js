@@ -6,7 +6,8 @@ var scenery = scenery || {};
   
   // specified as such, since there is no needed shared state (we can have node.layerStrategy = scenery.DefaultLayerStrategy for many nodes)
   scenery.DefaultLayerStrategy = {
-    enter: function( node, layerState ) {
+    enter: function( trail, layerState ) {
+      var node = trail.lastNode();
       
       // if the node isn't self-rendering, we can skip it completely
       if ( node.hasSelf() ) {
@@ -16,9 +17,9 @@ var scenery = scenery || {};
           
           var preferredType = layerState.bestPreferredLayerTypeFor( supportedTypes );
           if ( preferredType ) {
-            layerState.switchToType( preferredType );
+            layerState.switchToType( trail, preferredType );
           } else {
-            layerState.switchToType( supportedTypes[0] );
+            layerState.switchToType( trail, supportedTypes[0] );
           }
         }
         
@@ -27,15 +28,15 @@ var scenery = scenery || {};
       }
     },
     
-    afterSelf: function( node, layerState ) {
+    afterSelf: function( trail, layerState ) {
       // no-op, and possibly not used
     },
     
-    betweenChildren: function( node, layerState ) {
+    betweenChildren: function( trail, layerState ) {
       // no-op, and possibly not used
     },
     
-    exit: function( node, layerState ) {
+    exit: function( trail, layerState ) {
       // currently a no-op
     }
   };
