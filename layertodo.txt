@@ -26,6 +26,8 @@ GraphPath next, previous. improve eachBetween using these. Consider a 'GraphPoin
   Also consider a GraphRange which has a start/end GraphPointer?
   Add ability to "index" a GraphPath
 
+TrailPointer: consider versions for the Render / Nesting orders? - maybe Depth First order instead of Nesting?
+
 
 Issues
 ======
