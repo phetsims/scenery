@@ -328,7 +328,7 @@ var scenery = scenery || {};
     },
     
     // return the top node (if any, otherwise null) whose self-rendered area contains the point (in parent coordinates).
-    nodeUnderPoint: function( point ) {
+    trailUnderPoint: function( point ) {
       // update bounds for pruning
       this.validateBounds();
       
@@ -345,7 +345,7 @@ var scenery = scenery || {};
         for ( var i = this.children.length - 1; i >= 0; i-- ) {
           var child = this.children[i];
           
-          var childHit = child.nodeUnderPoint( localPoint );
+          var childHit = child.trailUnderPoint( localPoint );
           
           // the child will have the point in its parent's coordinate frame (i.e. this node's frame)
           if ( childHit ) {
@@ -365,7 +365,7 @@ var scenery = scenery || {};
     
     // checking for whether a point (in parent coordinates) is contained in this sub-tree
     containsPoint: function( point ) {
-      return this.nodeUnderPoint( point ) !== null;
+      return this.trailUnderPoint( point ) !== null;
     },
     
     // override for computation of whether a point is inside the content rendered in renderSelf

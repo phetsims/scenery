@@ -5,6 +5,7 @@ var scenery = scenery || {};
 (function(){
   "use strict";
   
+  // TODO: allow direct array access?
   scenery.Trail = function( nodes ) {
     // TODO: consider ability to pass in just a root node
     // TODO: consider adding index information

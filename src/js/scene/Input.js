@@ -101,68 +101,63 @@ var scenery = scenery || {};
     
     
     upEvent: function( finger, event ) {
-      var target = this.scene.root.nodeUnderPoint( finger.point );
-      var newPath = target !== null ? target.getPathToRoot() : [];
-      var oldPath = finger.path || [];
+      var trail = this.scene.root.trailUnderPoint( finger.point );
+      var oldTrail = finger.trail || [];
       
-      this.dispatchEvent( newPath, 'up', finger, event );
+      this.dispatchEvent( trail, 'up', finger, event );
       
-      finger.path = newPath;
+      finger.trail = trail;
     },
     
     downEvent: function( finger, event ) {
-      var target = this.scene.root.nodeUnderPoint( finger.point );
-      var newPath = target !== null ? target.getPathToRoot() : [];
-      var oldPath = finger.path || [];
+      var trail = this.scene.root.trailUnderPoint( finger.point );
+      var oldTrail = finger.trail || [];
       
-      this.dispatchEvent( newPath, 'down', finger, event );
+      this.dispatchEvent( trail, 'down', finger, event );
       
-      finger.path = newPath;
+      finger.trail = trail;
     },
     
     moveEvent: function( finger, event ) {
-      var target = this.scene.root.nodeUnderPoint( finger.point );
-      var newPath = target !== null ? target.getPathToRoot() : [];
-      var oldPath = finger.path || [];
+      var trail = this.scene.root.trailUnderPoint( finger.point );
+      var oldTrail = finger.trail || [];
       
       var branchIndex;
       
-      for ( branchIndex = 0; branchIndex < Math.min( newPath.length, oldPath.length ); branchIndex++ ) {
-        if ( newPath[branchIndex] !== oldPath[branchIndex] ) {
+      for ( branchIndex = 0; branchIndex < Math.min( trail.getLength(), oldTrail.getLength() ); branchIndex++ ) {
+        if ( trail.nodes[branchIndex] !== oldTrail.nodes[branchIndex] ) {
           break;
         }
       }
       
       // TODO: if a node gets moved down 1 depth, it may see both an exit and enter?
-      if ( oldPath.length > branchIndex ) {
-        this.dispatchEvent( oldPath.slice( branchIndex ), 'exit', finger, event );
+      if ( oldTrail.getLength() > branchIndex ) {
+        this.dispatchEvent( oldTrail.slice( branchIndex ), 'exit', finger, event );
       }
-      if ( newPath.length > branchIndex ) {
-        this.dispatchEvent( newPath.slice( branchIndex ), 'enter', finger, event );
+      if ( trail.getLength() > branchIndex ) {
+        this.dispatchEvent( trail.slice( branchIndex ), 'enter', finger, event );
       }
       
-      this.dispatchEvent( newPath, 'move', finger, event );
+      this.dispatchEvent( trail, 'move', finger, event );
       
-      finger.path = newPath;
+      finger.trail = trail;
     },
     
     cancelEvent: function( finger, event ) {
-      var target = this.scene.root.nodeUnderPoint( finger.point );
-      var newPath = target !== null ? target.getPathToRoot() : [];
-      var oldPath = finger.path || [];
+      var trail = this.scene.root.trailUnderPoint( finger.point );
+      var oldTrail = finger.trail || [];
       
-      this.dispatchEvent( newPath, 'cancel', finger, event );
+      this.dispatchEvent( trail, 'cancel', finger, event );
       
-      finger.path = newPath;
+      finger.trail = trail;
     },
     
-    // targets should be a subpath from a node to an ancestor
-    dispatchEvent: function( targets, type, finger, event ) {
+    dispatchEvent: function( trail, type, finger, event ) {
       // first run through the finger's listeners to see if one of them will handle the event
       this.dispatchToFinger( type, finger, event );
       
-      // if not yet handled, run through the list of targets in order to see if one of them will handle the event
-      this.dispatchToTargets( targets, type, finger, event );
+      // if not yet handled, run through the trail in order to see if one of them will handle the event
+      this.dispatchToTargets( trail, type, finger, event );
       
       // if not yet handled, run through the scene's listeners
       this.dispatchToScene( type, finger, event );
@@ -184,9 +179,9 @@ var scenery = scenery || {};
       }
     },
     
-    dispatchToTargets: function( targets, type, finger, event ) {
-      for ( var i = targets.length - 1; i >= 0; i-- ) {
-        var target = targets[i];
+    dispatchToTargets: function( trail, type, finger, event ) {
+      for ( var i = trail.getLength() - 1; i >= 0; i-- ) {
+        var target = trail.nodes[i];
         
         var listeners = target.getInputListeners();
         
@@ -255,7 +250,7 @@ var scenery = scenery || {};
     
     this.isMouse = true;
     
-    this.path = null;
+    this.trail = null;
   };
   var Mouse = Input.Mouse;
   Mouse.prototype = _.extend( {}, Finger.prototype, {
@@ -299,7 +294,7 @@ var scenery = scenery || {};
     this.id = id;
     this.point = point;
     this.isTouch = true;
-    this.path = null;
+    this.trail = null;
   };
   var Touch = Input.Touch;
   Touch.prototype = _.extend( {}, Finger.prototype, {
@@ -323,7 +318,7 @@ var scenery = scenery || {};
     
     this.key = key;
     this.isKey = true;
-    this.path = null;
+    this.trail = null;
   };
   var Key = Input.Key;
   Key.prototype = _.extend( {}, Finger.prototype, {
