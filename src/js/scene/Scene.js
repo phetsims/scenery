@@ -110,7 +110,10 @@ var scenery = scenery || {};
       // remove all of our tracked layers from the container, so we can fill it with fresh layers
       this.disposeLayers();
       
+      var state = new scenery.LayerState();
+      var layerEntries = state.buildLayers( new scenery.TrailPointer( this.root, true ), new scenery.TrailPointer( this.root, false ), null );
       
+      throw new Error( 'rebuildLayers unimplemented' );
     },
     
     disposeLayers: function() {

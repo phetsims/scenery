@@ -16,10 +16,15 @@ var scenery = scenery || {};
     /*
      * Construct a list of layer entries between two Trails (inclusive).
      * Each element of the returned array will have { type: <layer type>, start: <start trail>, end: <end trail> }
+     * startingLayerType can be null to signify there is no preceeding layer
      */
-    buildLayers: function( startPointer, endPointer, args ) {
+    buildLayers: function( startPointer, endPointer, startingLayerType ) {
       // TODO: accept initial layer in args?
       this.resetInternalState();
+      
+      if ( startingLayerType ) {
+        this.nextLayerType = startingLayerType;
+      }
       
       var state = this;
       
@@ -31,14 +36,15 @@ var scenery = scenery || {};
         } else {
           node.layerStrategy.exit( pointer.trail, state );
         }
-      }, false ); // include endpoints
+      }, false ); // don't exclude endpoints
+      
+      return this.layerEntries;
     },
     
     resetInternalState: function() {
       this.layerEntries = [];
       this.typeDirty = true;
       this.nextLayerType = null;
-      this.nextTrail = null;
     },
     
     pushPreferredLayerType: function( layerType ) {
@@ -60,16 +66,16 @@ var scenery = scenery || {};
     switchToType: function( trail, layerType ) {
       this.typeDirty = true;
       this.nextLayerType = layerType;
-      this.nextTrail = trail;
     },
     
     // called so that we can finalize a layer switch (instead of collapsing unneeded layers)
-    markSelf: function() {
+    markSelf: function( trail ) {
       if ( this.typeDirty ) {
-        this.layerChange();
+        this.layerChange( trail );
       }
     },
     
+    // can be null to indicate that there is no current layer type
     getCurrentLayerType: function() {
       return this.nextLayerType;
     },
@@ -86,10 +92,14 @@ var scenery = scenery || {};
       return null;
     },
     
-    layerChange: function() {
+    layerChange: function( firstSelfTrail ) {
       this.typeDirty = false;
-      var nextLayerType = this.nextLayerType;
-      var nextTrail = this.nextTrail;
+      
+      this.layerEntries.push( {
+        type: this.nextLayerType,
+        startTrail: firstSelfTrail
+      } );
+      
       throw new Error( 'not implemented: create and hook up layers, and we need to handle layer metadata' );
     }
   };
