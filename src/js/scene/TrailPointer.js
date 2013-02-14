@@ -23,8 +23,7 @@ var scenery = scenery || {};
   scenery.TrailPointer = function( trail, isBefore ) {
     this.trail = trail;
     
-    this.isBefore = isBefore;
-    this.isAfter = !isBefore;
+    this.setBefore( isBefore );
   };
   var TrailPointer = scenery.TrailPointer;
   
@@ -35,9 +34,9 @@ var scenery = scenery || {};
       return new TrailPointer( this.trail.copy(), this.isBefore );
     },
     
-    toggleBeforeAfter: function() {
-      this.isBefore = !this.isBefore;
-      this.isAfter = !this.isAfter;
+    setBefore: function( isBefore ) {
+      this.isBefore = isBefore;
+      this.isAfter = !isBefore;
     },
     
     // return the equivalent pointer that swaps before and after (may return null if it doesn't exist)
@@ -120,6 +119,7 @@ var scenery = scenery || {};
       return this.compareNested( other ) === 0;
     },
     
+    // TODO: refactor with "Side"-like handling
     // moves this pointer forwards one step in the nested order
     nestedForwards: function() {
       if ( this.isBefore ) {
@@ -128,16 +128,55 @@ var scenery = scenery || {};
           this.trail.addDescendant( this.trail.lastNode().children[0], 0 );
         } else {
           // stay on the same node, but switch to after
-          this.toggleBeforeAfter();
+          this.setBefore( false );
         }
       } else {
-        throw new Error( 'unimplemented! finish Trail changes first' );
+        if ( this.trail.indices.length === 0 ) {
+          // nothing else to jump to below, so indicate the lack of existence
+          return null;
+        } else {
+          var index = this.trail.indices[this.trail.indices.length - 1];
+          this.trail.removeDescendant();
+          
+          if ( this.trail.lastNode().children.length > index + 1 ) {
+            // more siblings, switch to the beginning of the next one
+            this.trail.addDescendant( this.trail.lastNode().children[index+1], index + 1 );
+            this.setBefore( true );
+          } else {
+            // no more siblings. exit on parent. nothing else needed since we're already isAfter
+          }
+        }
       }
     },
     
     // moves this pointer backwards one step in the nested order
     nestedBackwards: function() {
-      
+      if ( this.isBefore ) {
+        if ( this.trail.indices.length === 0 ) {
+          // jumping off the front
+          return null;
+        } else {
+          var index = this.trail.indices[this.trail.indices.length - 1];
+          this.trail.removeDescendant();
+          
+          if ( index - 1 >= 0 ) {
+            // more siblings, switch to the beginning of the previous one and switch to isAfter
+            this.trail.addDescendant( this.trail.lastNode().children[index-1], index - 1 );
+            this.setBefore( false );
+          } else {
+            // no more siblings. enter on parent. nothing else needed since we're already isBefore
+          }
+        }
+      } else {
+        if ( this.trail.lastNode().children.length > 0 ) {
+          // stay isAfter, but walk to the last child
+          var children = this.trail.lastNode().children;
+          this.trail.addDescendant( children[children.length-1], children.length - 1 );
+        } else {
+          // switch to isBefore, since this is a leaf node
+          this.setBefore( true );
+        }
+      }
     },
     
     // treats the pointer as render-ordered
