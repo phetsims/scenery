@@ -749,6 +749,20 @@ var scenery = scenery || {};
       return this;
     },
     
+    // returns a unique trail (if it exists) where each node in the ancestor chain has 0 or 1 parents
+    getUniqueTrail: function() {
+      var trail = new scenery.Trail();
+      var node = this;
+      
+      while ( node ) {
+        trail.addAncestor( node );
+        phet.assert( node.parents.length <= 1 );
+        node = node.parents[0]; // should be undefined if there aren't any parents
+      }
+      
+      return trail;
+    },
+    
     /*---------------------------------------------------------------------------*
     * Coordinate transform methods
     *----------------------------------------------------------------------------*/

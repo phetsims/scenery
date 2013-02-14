@@ -1,5 +1,15 @@
 // Copyright 2002-2012, University of Colorado
 
+/**
+ * Points to a specific node (with a trail), and whether it is conceptually before or after the node.
+ *
+ * There are two orderings:
+ * - rendering order: the order that node selves would be rendered, matching the Trail implicit order
+ * - nesting order:   the order in depth first with entering a node being "before" and exiting a node being "after"
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
 var scenery = scenery || {};
 
 (function(){
@@ -20,7 +30,7 @@ var scenery = scenery || {};
     constructor: TrailPointer,
     
     // return the equivalent pointer that swaps before and after (may return null if it doesn't exist)
-    getSwappedPointer: function() {
+    getRenderSwappedPointer: function() {
       var newTrail = this.isBefore ? this.trail.previous() : this.trail.next();
       
       if ( newTrail === null ) {
@@ -30,23 +40,23 @@ var scenery = scenery || {};
       }
     },
     
-    getBeforePointer: function() {
-      return this.isBefore ? this : this.getSwappedPointer();
+    getRenderBeforePointer: function() {
+      return this.isBefore ? this : this.getRenderSwappedPointer();
     },
     
-    getAfterPointer: function() {
-      return this.isAfter ? this : this.getSwappedPointer();
+    getRenderAfterPointer: function() {
+      return this.isAfter ? this : this.getRenderSwappedPointer();
     },
     
-    /* 
+    /*
      * In the render order, will return 0 if the pointers are equivalent, -1 if this pointer is before the
      * other pointer, and 1 if this pointer is after the other pointer.
      */
-    compare: function( other ) {
+    compareRender: function( other ) {
       phet.assert( other !== null );
       
-      var a = this.getBeforePointer();
-      var b = other.getBeforePointer();
+      var a = this.getRenderBeforePointer();
+      var b = other.getRenderBeforePointer();
       
       if ( a !== null && b !== null ) {
         // normal (non-degenerate) case
@@ -61,8 +71,12 @@ var scenery = scenery || {};
       }
     },
     
+    equalsRender: function( other ) {
+      return this.compareRender( other ) === 0;
+    },
+    
     eachNodeBetween: function( other, callback ) {
-      var comparison = this.trail.compare( other.trail );
+      
     }
   };
   

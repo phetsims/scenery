@@ -226,7 +226,7 @@
   * TESTS BELOW
   *----------------------------------------------------------------------------*/   
   
-  module( 'Canvas Scene Regression' );
+  module( 'Scene Regression' );
   
   test( 'Canvas 2D Context and Features', function() {
     var canvas = document.createElement( 'canvas' );
@@ -347,6 +347,16 @@
         equal( i === j ? 0 : ( i < j ? -1 : 1 ), comparison, i + ',' + j );
       }
     }
+  } );
+  
+  test( 'TrailPointer comparison', function() {
+    var node = createTestNodeTree();
+    
+    equal( 0, new scenery.TrailPointer( node.getUniqueTrail(), true ).compareRender( new scenery.TrailPointer( node.getUniqueTrail(), true ) ), 'Same before pointer' );
+    equal( 0, new scenery.TrailPointer( node.getUniqueTrail(), false ).compareRender( new scenery.TrailPointer( node.getUniqueTrail(), false ) ), 'Same after pointer' );
+    equal( -1, new scenery.TrailPointer( node.getUniqueTrail(), true ).compareRender( new scenery.TrailPointer( node.getUniqueTrail(), false ) ), 'Same node before/after root' );
+    equal( -1, new scenery.TrailPointer( node.children[0].getUniqueTrail(), true ).compareRender( new scenery.TrailPointer( node.children[0].getUniqueTrail(), false ) ), 'Same node before/after nonroot' );
+    equal( 0, new scenery.TrailPointer( node.children[0].children[1].getUniqueTrail(), false ).compareRender( new scenery.TrailPointer( node.children[0].children[2].getUniqueTrail(), true ) ), 'Equivalence of before/after' );
   } );
   
   test( 'Node traversal testing', function() {
