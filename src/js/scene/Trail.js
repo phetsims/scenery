@@ -1,15 +1,41 @@
 // Copyright 2002-2012, University of Colorado
 
+/**
+ * Represents a trail (path in the graph) from a "root" node down to a descendant node.
+ * In a DAG, or with different views, there can be more than one trail up from a node,
+ * even to the same root node!
+ *
+ * This trail also mimics an Array, so trail[0] will be the root, and trail[trail.length-1]
+ * will be the end node of the trail.
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
 var scenery = scenery || {};
 
 (function(){
   "use strict";
   
-  // TODO: allow direct array access?
   scenery.Trail = function( nodes ) {
     // TODO: consider ability to pass in just a root node
     // TODO: consider adding index information
-    this.nodes = nodes || [];
+    this.nodes = [];
+    this.length = 0;
+    
+    var trail = this;
+    if ( nodes ) {
+      if ( nodes instanceof scenery.Node ) {
+        var node = nodes;
+        
+        // add just a single node in
+        trail.addDescendant( node );
+      } else {
+        // process it as an array
+        _.each( nodes, function( node ) {
+          trail.addDescendant( node );
+        } );
+      }
+    }
   };
   var Trail = scenery.Trail;
   
@@ -24,24 +50,41 @@ var scenery = scenery || {};
       return this.nodes.length === 0;
     },
     
-    getLength: function() {
-      return this.nodes.length;
-    },
-    
     addAncestor: function( node ) {
       this.nodes.unshift( node );
+      
+      // mimic an Array
+      this.length++;
+      for ( var i = 0; i < this.length; i++ ) {
+        this[i] = this.nodes[i];
+      }
     },
     
     removeAncestor: function() {
       this.nodes.shift();
+      
+      // mimic an Array
+      this.length--;
+      delete this[this.length];
+      for ( var i = 0; i < this.length; i++ ) {
+        this[i] = this.nodes[i];
+      }
     },
     
     addDescendant: function( node ) {
       this.nodes.push( node );
+      
+      // mimic an Array
+      this.length++;
+      this[this.length-1] = node;
     },
     
     removeDescendant: function() {
       this.nodes.pop();
+      
+      // mimic an Array
+      this.length--;
+      delete this[this.length];
     },
     
     equals: function( other ) {

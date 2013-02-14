@@ -267,59 +267,59 @@
     
     // walk it forward
     var trail = new scenery.Trail( [ node ] );
-    equal( 1, trail.getLength() );
+    equal( 1, trail.length );
     trail = trail.next();
-    equal( 2, trail.getLength() );
+    equal( 2, trail.length );
     trail = trail.next();
-    equal( 3, trail.getLength() );
+    equal( 3, trail.length );
     trail = trail.next();
-    equal( 3, trail.getLength() );
+    equal( 3, trail.length );
     trail = trail.next();
-    equal( 4, trail.getLength() );
+    equal( 4, trail.length );
     trail = trail.next();
-    equal( 3, trail.getLength() );
+    equal( 3, trail.length );
     trail = trail.next();
-    equal( 3, trail.getLength() );
+    equal( 3, trail.length );
     trail = trail.next();
-    equal( 4, trail.getLength() );
+    equal( 4, trail.length );
     trail = trail.next();
-    equal( 5, trail.getLength() );
+    equal( 5, trail.length );
     trail = trail.next();
-    equal( 4, trail.getLength() );
+    equal( 4, trail.length );
     trail = trail.next();
-    equal( 3, trail.getLength() );
+    equal( 3, trail.length );
     trail = trail.next();
-    equal( 2, trail.getLength() );
+    equal( 2, trail.length );
     trail = trail.next();
-    equal( 2, trail.getLength() );
+    equal( 2, trail.length );
     
     // make sure walking off the end gives us null
     equal( null, trail.next() );
     
     trail = trail.previous();
-    equal( 2, trail.getLength() );
+    equal( 2, trail.length );
     trail = trail.previous();
-    equal( 3, trail.getLength() );
+    equal( 3, trail.length );
     trail = trail.previous();
-    equal( 4, trail.getLength() );
+    equal( 4, trail.length );
     trail = trail.previous();
-    equal( 5, trail.getLength() );
+    equal( 5, trail.length );
     trail = trail.previous();
-    equal( 4, trail.getLength() );
+    equal( 4, trail.length );
     trail = trail.previous();
-    equal( 3, trail.getLength() );
+    equal( 3, trail.length );
     trail = trail.previous();
-    equal( 3, trail.getLength() );
+    equal( 3, trail.length );
     trail = trail.previous();
-    equal( 4, trail.getLength() );
+    equal( 4, trail.length );
     trail = trail.previous();
-    equal( 3, trail.getLength() );
+    equal( 3, trail.length );
     trail = trail.previous();
-    equal( 3, trail.getLength() );
+    equal( 3, trail.length );
     trail = trail.previous();
-    equal( 2, trail.getLength() );
+    equal( 2, trail.length );
     trail = trail.previous();
-    equal( 1, trail.getLength() );
+    equal( 1, trail.length );
     
     // make sure walking off the start gives us null
     equal( null, trail.previous() );

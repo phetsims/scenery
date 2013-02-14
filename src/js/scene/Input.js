@@ -124,17 +124,17 @@ var scenery = scenery || {};
       
       var branchIndex;
       
-      for ( branchIndex = 0; branchIndex < Math.min( trail.getLength(), oldTrail.getLength() ); branchIndex++ ) {
+      for ( branchIndex = 0; branchIndex < Math.min( trail.length, oldTrail.length ); branchIndex++ ) {
         if ( trail.nodes[branchIndex] !== oldTrail.nodes[branchIndex] ) {
           break;
         }
       }
       
       // TODO: if a node gets moved down 1 depth, it may see both an exit and enter?
-      if ( oldTrail.getLength() > branchIndex ) {
+      if ( oldTrail.length > branchIndex ) {
         this.dispatchEvent( oldTrail.slice( branchIndex ), 'exit', finger, event );
       }
-      if ( trail.getLength() > branchIndex ) {
+      if ( trail.length > branchIndex ) {
         this.dispatchEvent( trail.slice( branchIndex ), 'enter', finger, event );
       }
       
@@ -180,7 +180,7 @@ var scenery = scenery || {};
     },
     
     dispatchToTargets: function( trail, type, finger, event ) {
-      for ( var i = trail.getLength() - 1; i >= 0; i-- ) {
+      for ( var i = trail.length - 1; i >= 0; i-- ) {
         var target = trail.nodes[i];
         
         var listeners = target.getInputListeners();
