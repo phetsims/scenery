@@ -459,6 +459,24 @@
       backwardsCopy.nestedBackwards();
       equal( backwardsCopy.compareNested( a ), 0, 'backwardsPointerCheck ' + i + ' to ' + ( i - 1 ) );
     }
+    
+    // including endpoints
+    (function(){
+      var others = [];
+      pointers[0].eachPointerBetween( pointers[pointers.length-1], function( pointer ) {
+        others.push( pointer );
+      }, false );
+      equal( pointers.length, others.length, 'eachPointerBetween for entire graph (inclusive)' );
+    })();
+    
+    // excluding endpoints
+    (function(){
+      var others = [];
+      pointers[0].eachPointerBetween( pointers[pointers.length-1], function( pointer ) {
+        others.push( pointer );
+      }, true );
+      equal( pointers.length - 2, others.length, 'eachPointerBetween for entire graph (exclusive)' );
+    })();
   } );
   
   test( 'Node traversal testing', function() {
