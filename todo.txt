@@ -23,6 +23,8 @@ Browsers
         [UNKNOWN] IE9 will take click events on an SVG element with "pointer-events: none", but only if there is nothing "clickable" behind that point
             What is considered "clickable", and will it affect us?
         [UNKNOWN] Chrome seems to cache the charset of loaded JS (unable to override)
+            Firefox OK
+            Try using a unicode-escaped quote?
     For canvas, create a drawing function that exhibits all differences?
     measureText for webkit?
 
