@@ -5,18 +5,18 @@ var scenery = scenery || {};
 (function(){
   "use strict";
   
-  scenery.GraphPath = function( nodes ) {
+  scenery.Trail = function( nodes ) {
     // TODO: consider ability to pass in just a root node
     // TODO: consider adding index information
     this.nodes = nodes || [];
   };
-  var GraphPath = scenery.GraphPath;
+  var Trail = scenery.Trail;
   
-  GraphPath.prototype = {
-    constructor: GraphPath,
+  Trail.prototype = {
+    constructor: Trail,
     
     copy: function() {
-      return new scenery.GraphPath( this.nodes.slice( 0 ) );
+      return new scenery.Trail( this.nodes.slice( 0 ) );
     },
     
     isEmpty: function() {
@@ -57,7 +57,7 @@ var scenery = scenery || {};
       return true;
     },
     
-    isSubpath: function( other ) {
+    isSubtrail: function( other ) {
       if ( this.nodes.length <= other.nodes.length ) {
         return false;
       }
@@ -79,7 +79,7 @@ var scenery = scenery || {};
       return this.nodeFromTop( 0 );
     },
     
-    // returns the previous graph path in the order of self-rendering
+    // returns the previous graph trail in the order of self-rendering
     previous: function() {
       if ( this.nodes.length <= 1 ) {
         return null;
@@ -91,8 +91,8 @@ var scenery = scenery || {};
       var parentIndex = _.indexOf( parent.children, top );
       var arr = this.nodes.slice( 0, this.nodes.length - 1 );
       if ( parentIndex === 0 ) {
-        // we were the first child, so give it the path to the parent
-        return new GraphPath( arr );
+        // we were the first child, so give it the trail to the parent
+        return new Trail( arr );
       } else {
         // previous child
         arr.push( parent.children[parentIndex-1] );
@@ -103,7 +103,7 @@ var scenery = scenery || {};
           arr.push( last.children[last.children.length-1] );
         }
         
-        return new GraphPath( arr );
+        return new Trail( arr );
       }
     },
     
@@ -115,7 +115,7 @@ var scenery = scenery || {};
       if ( top.children.length > 0 ) {
         // if we have children, return the first child
         arr.push( top.children[0] );
-        return new GraphPath( arr );
+        return new Trail( arr );
       } else {
         // walk down and attempt to find the next parent
         var depth = this.nodes.length - 1;
@@ -130,7 +130,7 @@ var scenery = scenery || {};
           if ( index !== parent.children.length - 1 ) {
             // there is another (later) sibling. use that!
             arr.push( parent.children[index+1] );
-            return new GraphPath( arr );
+            return new Trail( arr );
           } else {
             depth--;
           }
@@ -142,7 +142,7 @@ var scenery = scenery || {};
     },
     
     /*
-     * Iterates between this graph path and the other one, calling listener.enter( node ) and listener.exit( node ).
+     * Iterates between this trail and the other one, calling listener.enter( node ) and listener.exit( node ).
      * This will be bounded by listener.exit( startNode ) and listener.enter( endNode ),
      * unless the inclusive flag is true, then it will be bounded by listener.enter( startNode ) and listener.exit( endNode ).
      */
@@ -169,7 +169,7 @@ var scenery = scenery || {};
         }
       }
       
-      // bail out since one is a subpath of the other (there is no 'between' from the above definition)
+      // bail out since one is a subtrail of the other (there is no 'between' from the above definition)
       if ( exclusive && splitIndex === minSharedLength ) {
         return;
       }
@@ -195,7 +195,7 @@ var scenery = scenery || {};
           } );
           listener.exit( node );
         } else {
-          // we are now assured that minPath.nodes[depth] !== maxPath.nodes[depth] (at least as subpaths), so each child is either high-bounded or low-bounded
+          // we are now assured that minPath.nodes[depth] !== maxPath.nodes[depth] (at least as subtrails), so each child is either high-bounded or low-bounded
           
           if ( !hasLowBound ) {
             listener.enter( node );
@@ -237,9 +237,9 @@ var scenery = scenery || {};
       recurse( minPath.nodes[splitIndex-1], splitIndex, minPath.nodes.length !== splitIndex, maxPath.nodes.length !== splitIndex );
     },
     
-    /* Standard Java-style compare. -1 means this graph path is before (under) the other path, 0 means equal, and 1 means this path is
-     * after (on top of) the other path.
-     * A shorter subpath will compare as -1.
+    /* Standard Java-style compare. -1 means this trail is before (under) the other trail, 0 means equal, and 1 means this trail is
+     * after (on top of) the other trail.
+     * A shorter subtrail will compare as -1.
      */
     compare: function( other ) {
       phet.assert( !this.isEmpty() );
@@ -260,7 +260,7 @@ var scenery = scenery || {};
         }
       }
       
-      // we scanned through and no nodes were different (one is a subpath of the other)
+      // we scanned through and no nodes were different (one is a subtrail of the other)
       if ( this.nodes.length < other.nodes.length ) {
         return -1;
       } else if ( this.nodes.length > other.nodes.length ) {

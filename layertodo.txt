@@ -59,6 +59,7 @@ DAG:
     spread out z-indices and be adaptive so we don't have to change as many indices where possible
     
     IMPLEMENTATION NOTES:
+      Convert Input to Trail
       
 
 LayerState:

@@ -21,7 +21,7 @@ var scenery = scenery || {};
     // main layers in a scene
     this.layers = [];
     
-    // listeners that will be triggered by input events if they are not handled by the associated finger or on the pick path
+    // listeners that will be triggered by input events if they are not handled by the associated finger or on the trail
     this.inputListeners = [];
     
     // UI DOM layer for DOM elements that need to be interacted with
@@ -45,26 +45,26 @@ var scenery = scenery || {};
         var parent = args.parent;
         var child = args.child;
         var index = args.index;
-        var path = args.path;
+        var trail = args.trail;
       },
       
       removeChild: function( args ) {
         var parent = args.parent;
         var child = args.child;
         var index = args.index;
-        var path = args.path;
+        var trail = args.trail;
       },
       
       dirtyBounds: function( args ) {
         var node = args.node;
         var localBounds = args.bounds;
         var transform = args.transform;
-        var path = args.path;
+        var trail = args.trail;
       },
       
       layerRefresh: function( args ) {
         var node = args.node;
-        var path = args.path;
+        var trail = args.trail;
       }
     };
     
@@ -122,10 +122,10 @@ var scenery = scenery || {};
       } );
     },
     
-    layerLookup: function( path ) {
+    layerLookup: function( trail ) {
       // TODO: add tree form for optimization
       
-      phet.assert( !( path.isEmpty() || path.nodes[0] !== this.root ), 'layerLookup root matches' );
+      phet.assert( !( trail.isEmpty() || trail.nodes[0] !== this.root ), 'layerLookup root matches' );
       
       if ( this.layers.length === 0 ) {
         throw new Error( 'no layers in the scene' );
@@ -133,7 +133,7 @@ var scenery = scenery || {};
       
       for ( var i = 0; i < this.layers.length; i++ ) {
         var layer = this.layers[i];
-        if ( path.compare( layer.endPath ) !== 1 ) {
+        if ( trail.compare( layer.endPath ) !== 1 ) {
           return layer;
         }
       }

@@ -14,13 +14,13 @@ var scenery = scenery || {};
     constructor: LayerState,
     
     /*
-     * Construct a list of layer entries between two GraphPaths (inclusive).
-     * Each element of the returned array will have { type: <layer type>, start: <start path>, end: <end path> }
+     * Construct a list of layer entries between two Trails (inclusive).
+     * Each element of the returned array will have { type: <layer type>, start: <start trail>, end: <end trail> }
      */
-    buildLayers: function( startPath, endPath ) {
+    buildLayers: function( startTrail, endTrail ) {
       this.resetInternalState();
       
-      throw new Error( 'unimplemented' ); // use GraphPath.eachBetween
+      throw new Error( 'unimplemented' ); // use Trail.eachBetween
     },
     
     resetInternalState: function() {

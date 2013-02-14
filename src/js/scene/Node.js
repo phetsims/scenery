@@ -446,15 +446,15 @@ var scenery = scenery || {};
       return this._eventListeners.slice( 0 ); // defensive copy
     },
     
-    // dispatches an event across all possible GraphPaths ending in this node
+    // dispatches an event across all possible Trails ending in this node
     dispatchEvent: function( type, args ) {
       var node = this;
-      var path = new scenery.GraphPath();
+      var trail = new scenery.Trail();
       
       function recursiveEventDispatch( node ) {
-        path.addAncestor( node );
+        trail.addAncestor( node );
         
-        args.path = path;
+        args.trail = trail;
         
         _.each( node.getEventListeners(), function( eventListener ) {
           if ( eventListener[type] ) {
@@ -466,7 +466,7 @@ var scenery = scenery || {};
           recursiveEventDispatch( parent );
         } );
         
-        path.removeAncestor();
+        trail.removeAncestor();
       }
       
       recursiveEventDispatch( this );
@@ -475,15 +475,15 @@ var scenery = scenery || {};
     // dispatches events with the transform computed from parent of the "root" to the local frame
     dispatchEventWithTransform: function( type, args ) {
       var node = this;
-      var path = new scenery.GraphPath();
+      var trail = new scenery.Trail();
       var transformStack = [ new phet.math.Transform3() ];
       
       function recursiveEventDispatch( node ) {
-        path.addAncestor( node );
+        trail.addAncestor( node );
         
         transformStack.push( new phet.math.Transform3( transformStack[transformStack.length-1].getMatrix().timesMatrix( node.getMatrix() ) ) );
         args.transform = transformStack[transformStack.length-1];
-        args.path = path;
+        args.trail = trail;
         
         _.each( node.getEventListeners(), function( eventListener ) {
           if ( eventListener[type] ) {
@@ -497,7 +497,7 @@ var scenery = scenery || {};
         
         transformStack.pop();
         
-        path.removeAncestor();
+        trail.removeAncestor();
       }
       
       recursiveEventDispatch( this );

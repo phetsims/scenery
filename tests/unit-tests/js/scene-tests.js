@@ -262,67 +262,67 @@
     } );
   } );
   
-  test( 'GraphPath next/previous', function() {
+  test( 'Trail next/previous', function() {
     var node = createTestNodeTree();
     
     // walk it forward
-    var path = new scenery.GraphPath( [ node ] );
-    equal( 1, path.getLength() );
-    path = path.next();
-    equal( 2, path.getLength() );
-    path = path.next();
-    equal( 3, path.getLength() );
-    path = path.next();
-    equal( 3, path.getLength() );
-    path = path.next();
-    equal( 4, path.getLength() );
-    path = path.next();
-    equal( 3, path.getLength() );
-    path = path.next();
-    equal( 3, path.getLength() );
-    path = path.next();
-    equal( 4, path.getLength() );
-    path = path.next();
-    equal( 5, path.getLength() );
-    path = path.next();
-    equal( 4, path.getLength() );
-    path = path.next();
-    equal( 3, path.getLength() );
-    path = path.next();
-    equal( 2, path.getLength() );
-    path = path.next();
-    equal( 2, path.getLength() );
+    var trail = new scenery.Trail( [ node ] );
+    equal( 1, trail.getLength() );
+    trail = trail.next();
+    equal( 2, trail.getLength() );
+    trail = trail.next();
+    equal( 3, trail.getLength() );
+    trail = trail.next();
+    equal( 3, trail.getLength() );
+    trail = trail.next();
+    equal( 4, trail.getLength() );
+    trail = trail.next();
+    equal( 3, trail.getLength() );
+    trail = trail.next();
+    equal( 3, trail.getLength() );
+    trail = trail.next();
+    equal( 4, trail.getLength() );
+    trail = trail.next();
+    equal( 5, trail.getLength() );
+    trail = trail.next();
+    equal( 4, trail.getLength() );
+    trail = trail.next();
+    equal( 3, trail.getLength() );
+    trail = trail.next();
+    equal( 2, trail.getLength() );
+    trail = trail.next();
+    equal( 2, trail.getLength() );
     
     // make sure walking off the end gives us null
-    equal( null, path.next() );
+    equal( null, trail.next() );
     
-    path = path.previous();
-    equal( 2, path.getLength() );
-    path = path.previous();
-    equal( 3, path.getLength() );
-    path = path.previous();
-    equal( 4, path.getLength() );
-    path = path.previous();
-    equal( 5, path.getLength() );
-    path = path.previous();
-    equal( 4, path.getLength() );
-    path = path.previous();
-    equal( 3, path.getLength() );
-    path = path.previous();
-    equal( 3, path.getLength() );
-    path = path.previous();
-    equal( 4, path.getLength() );
-    path = path.previous();
-    equal( 3, path.getLength() );
-    path = path.previous();
-    equal( 3, path.getLength() );
-    path = path.previous();
-    equal( 2, path.getLength() );
-    path = path.previous();
-    equal( 1, path.getLength() );
+    trail = trail.previous();
+    equal( 2, trail.getLength() );
+    trail = trail.previous();
+    equal( 3, trail.getLength() );
+    trail = trail.previous();
+    equal( 4, trail.getLength() );
+    trail = trail.previous();
+    equal( 5, trail.getLength() );
+    trail = trail.previous();
+    equal( 4, trail.getLength() );
+    trail = trail.previous();
+    equal( 3, trail.getLength() );
+    trail = trail.previous();
+    equal( 3, trail.getLength() );
+    trail = trail.previous();
+    equal( 4, trail.getLength() );
+    trail = trail.previous();
+    equal( 3, trail.getLength() );
+    trail = trail.previous();
+    equal( 3, trail.getLength() );
+    trail = trail.previous();
+    equal( 2, trail.getLength() );
+    trail = trail.previous();
+    equal( 1, trail.getLength() );
     
     // make sure walking off the start gives us null
-    equal( null, path.previous() );
+    equal( null, trail.previous() );
   } );
   
   test( 'Node traversal testing', function() {
@@ -378,71 +378,71 @@
       // equal( exitCount, anticipatedInclusiveExit, msg + ' (inclusive exit)' );
     }
     
-    count( new scenery.GraphPath( [
+    count( new scenery.Trail( [
       node,
       node.children[0],
       node.children[0].children[1]
-    ] ), new scenery.GraphPath( [
+    ] ), new scenery.Trail( [
       node,
       node.children[1]
     ] ), 7, 8, 9, 10, 'Path 1' );
     
-    count( new scenery.GraphPath( [
+    count( new scenery.Trail( [
       node,
       node.children[0]
-    ] ), new scenery.GraphPath( [
+    ] ), new scenery.Trail( [
       node,
       node.children[1]
     ] ), 1, 1, 11, 11, 'Path 2' );
     
-    count( new scenery.GraphPath( [
+    count( new scenery.Trail( [
       node,
       node.children[0],
       node.children[0].children[1]
-    ] ), new scenery.GraphPath( [
+    ] ), new scenery.Trail( [
       node,
       node.children[0],
       node.children[0].children[3]
     ] ), 2, 2, 7, 7, 'Path 3' );
     
-    count( new scenery.GraphPath( [
+    count( new scenery.Trail( [
       node,
       node.children[0],
       node.children[0].children[1]
-    ] ), new scenery.GraphPath( [
+    ] ), new scenery.Trail( [
       node,
       node.children[0],
       node.children[0].children[4]
     ] ), 6, 6, 8, 8, 'Path 4' );
     
-    count( new scenery.GraphPath( [
+    count( new scenery.Trail( [
       node,
       node.children[0]
-    ] ), new scenery.GraphPath( [
+    ] ), new scenery.Trail( [
       node,
       node.children[0],
       node.children[0].children[3],
       node.children[0].children[3].children[0]
     ] ), 0, 0, 8, 6, 'Subpath 1' );
     
-    count( new scenery.GraphPath( [
+    count( new scenery.Trail( [
       node
-    ] ), new scenery.GraphPath( [
+    ] ), new scenery.Trail( [
       node
     ] ), 0, 0, 13, 13, 'Same Root' );
     
-    count( new scenery.GraphPath( [
+    count( new scenery.Trail( [
       node,
       node.children[0]
-    ] ), new scenery.GraphPath( [
+    ] ), new scenery.Trail( [
       node,
       node.children[0]
     ] ), 0, 0, 10, 10, 'Same Path' );
     
-    count( new scenery.GraphPath( [
+    count( new scenery.Trail( [
       node,
       node.children[0]
-    ] ), new scenery.GraphPath( [
+    ] ), new scenery.Trail( [
       node,
       node.children[0],
       node.children[0].children[1]

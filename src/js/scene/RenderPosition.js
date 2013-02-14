@@ -5,7 +5,9 @@ var scenery = scenery || {};
 (function(){
   "use strict";
   
-  scenery.RenderPosition = function( path, side ) {
+  scenery.RenderPosition = function( trail, side ) {
+    this.trail = trail;
+    this.side = side;
   };
   var RenderPosition = scenery.RenderPosition;
   
@@ -19,5 +21,3 @@ var scenery = scenery || {};
   
 })();
 
-
-    this.nodes = nodes || [];
