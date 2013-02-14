@@ -7,6 +7,8 @@
  * - rendering order: the order that node selves would be rendered, matching the Trail implicit order
  * - nesting order:   the order in depth first with entering a node being "before" and exiting a node being "after"
  *
+ * TODO: more seamless handling of the orders. or just exclusively use the nesting order
+ *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
@@ -71,11 +73,51 @@ var scenery = scenery || {};
       }
     },
     
+    /*
+     * Like compareRender, but for the nested (depth-first) order
+     *
+     * TODO: optimization?
+     */
+    compareNested: function( other ) {
+      phet.assert( other !== null );
+      
+      var comparison = this.trail.compare( other.trail );
+      
+      if ( comparison === 0 ) {
+        // if trails are equal, just compare before/after
+        if ( this.isBefore === other.isBefore ) {
+          return 0;
+        } else {
+          return this.isBefore ? -1 : 1;
+        }
+      } else {
+        // if one is an extension of the other, the shorter isBefore flag determines the order completely
+        if ( this.trail.isExtensionOf( other.trail ) ) {
+          return other.isBefore ? 1 : -1;
+        } else if ( other.trail.isExtensionOf( this.trail ) ) {
+          return this.isBefore ? -1 : 1;
+        } else {
+          // neither is a subtrail of the other, so a straight trail comparison should give the answer
+          return comparison;
+        }
+      }
+    },
+    
     equalsRender: function( other ) {
       return this.compareRender( other ) === 0;
     },
     
+    equalsNested: function( other ) {
+      return this.compareNested( other ) === 0;
+    },
+    
+    // treats the pointer as render-ordered
     eachNodeBetween: function( other, callback ) {
+      
+    },
+    
+    // treats the pointer as nesting-ordered
+    eachBetween: function( other, callbacks, includeEndpoints ) {
       
     }
   };

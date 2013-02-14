@@ -110,7 +110,8 @@ var scenery = scenery || {};
       return true;
     },
     
-    isSubtrail: function( other ) {
+    // whether this trail contains the complete 'other' trail, but with added descendants afterwards
+    isExtensionOf: function( other ) {
       if ( this.length <= other.length ) {
         return false;
       }

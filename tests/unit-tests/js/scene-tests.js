@@ -356,7 +356,7 @@
     equal( 0, new scenery.TrailPointer( node.getUniqueTrail(), false ).compareRender( new scenery.TrailPointer( node.getUniqueTrail(), false ) ), 'Same after pointer' );
     equal( -1, new scenery.TrailPointer( node.getUniqueTrail(), true ).compareRender( new scenery.TrailPointer( node.getUniqueTrail(), false ) ), 'Same node before/after root' );
     equal( -1, new scenery.TrailPointer( node.children[0].getUniqueTrail(), true ).compareRender( new scenery.TrailPointer( node.children[0].getUniqueTrail(), false ) ), 'Same node before/after nonroot' );
-    equal( 0, new scenery.TrailPointer( node.children[0].children[1].getUniqueTrail(), false ).compareRender( new scenery.TrailPointer( node.children[0].children[2].getUniqueTrail(), true ) ), 'Equivalence of before/after' );
+    equal( 0, new scenery.TrailPointer( node.children[0].children[1].children[0].getUniqueTrail(), false ).compareRender( new scenery.TrailPointer( node.children[0].children[2].getUniqueTrail(), true ) ), 'Equivalence of before/after' );
   } );
   
   test( 'Node traversal testing', function() {
