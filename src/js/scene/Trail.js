@@ -17,6 +17,16 @@ var scenery = scenery || {};
   "use strict";
   
   scenery.Trail = function( nodes ) {
+    if ( nodes instanceof scenery.Trail ) {
+      // copy constructor (takes advantage of already built index information)
+      var otherTrail = nodes;
+      
+      this.nodes = otherTrail.nodes.slice( 0 );
+      this.length = otherTrail.length;
+      this.indices = otherTrail.indices.slice( 0 );
+      return;
+    }
+    
     this.nodes = [];
     this.length = 0;
     
@@ -44,7 +54,7 @@ var scenery = scenery || {};
     constructor: Trail,
     
     copy: function() {
-      return new scenery.Trail( this.nodes.slice( 0 ) );
+      return new Trail( this );
     },
     
     isEmpty: function() {
