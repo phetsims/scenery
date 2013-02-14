@@ -181,18 +181,58 @@ var scenery = scenery || {};
     
     // treats the pointer as render-ordered
     eachNodeBetween: function( other, callback ) {
+      phet.assert( this.compareRender( other ) === -1, 'TrailPointer.eachNodeBetween pointers out of order, possibly in both meanings of the phrase!' );
+      phet.assert( this.trail[0] === other.trail[0], 'TrailPointer.eachNodeBetween takes pointers with the same root' );
+      
+      // sanity check TODO: remove later
+      this.trail.reindex();
+      other.trail.reindex();
+      
       throw new Error( 'eachNodeBetween unimplemented' );
+    },
+    
+    eachPointerBetween: function( other, callback, excludeEndpoints ) {
+      // make sure this pointer is before the other
+      phet.assert( this.compareNested( other ) === -1, 'TrailPointer.eachBetween pointers out of order, possibly in both meanings of the phrase!' );
+      phet.assert( this.trail[0] === other.trail[0], 'TrailPointer.eachBetween takes pointers with the same root' );
+      
+      // sanity check TODO: remove later
+      this.trail.reindex();
+      other.trail.reindex();
+      
+      var pointer = this.copy();
+      
+      var first = true;
+      
+      while ( !pointer.equalsNested( other ) ) {
+        if ( first ) {
+          // start point
+          if ( !excludeEndpoints ) {
+            callback( pointer );
+          }
+          first = false;
+        } else {
+          // between point
+          callback( pointer );
+        }
+        pointer.nestedForwards();
+      }
+      
+      // end point
+      if ( !excludeEndpoints ) {
+        callback( pointer );
+      }
     },
     
     // TODO: try next/previous handling as an easier case!
     // TODO: get rid of this monstrosity!
     // treats the pointer as nesting-ordered. assumes that they are properly ordered
-    eachBetween: function( other, callbacks, excludeEndpoints ) {
+    oldEachBetween: function( other, callbacks, excludeEndpoints ) {
       // make sure this pointer is before the other
       phet.assert( this.compareNested( other ) === -1, 'TrailPointer.eachBetween pointers out of order, possibly in both meanings of the phrase!' );
       phet.assert( this.trail[0] === other.trail[0], 'TrailPointer.eachBetween takes pointers with the same root' );
       
-      // for speed
+      // sanity check TODO: remove later
       this.trail.reindex();
       other.trail.reindex();
       

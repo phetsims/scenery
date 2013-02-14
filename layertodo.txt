@@ -34,6 +34,8 @@ Trail:
   Consider extending array for performance? Is it possible or recommended?
   Consider adding negative index handling for Trail
   Cleanup of nestedForwards/nestedBackwards, possibly based on a Side-like implementation. Decent code duplication!
+  
+  Better name for copy() ?
 
 
 Issues
