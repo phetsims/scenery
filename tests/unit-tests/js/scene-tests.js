@@ -403,7 +403,7 @@
     }
   } );
   
-  test( 'TrailPointer nested comparison', function() {
+  test( 'TrailPointer nested comparison and fowards/backwards', function() {
     var node = createTestNodeTree();
     
     // all pointers in the nested order
@@ -442,8 +442,22 @@
         var comparison = pointers[i].compareNested( pointers[j] );
         
         // make sure that every pointer compares as expected (0 and they are equal, -1 and i < j)
-        equal( comparison, i === j ? 0 : ( i < j ? -1 : 1 ), i + ',' + j );
+        equal( comparison, i === j ? 0 : ( i < j ? -1 : 1 ), 'compareNested: ' + i + ',' + j );
       }
+    }
+    
+    // verify forwards and backwards, as well as copy constructors
+    for ( var i = 1; i < pointers.length; i++ ) {
+      var a = pointers[i-1];
+      var b = pointers[i];
+      
+      var forwardsCopy = a.copy();
+      forwardsCopy.nestedForwards();
+      equal( forwardsCopy.compareNested( b ), 0, 'forwardsPointerCheck ' + ( i - 1 ) + ' to ' + i );
+      
+      var backwardsCopy = b.copy();
+      backwardsCopy.nestedBackwards();
+      equal( backwardsCopy.compareNested( a ), 0, 'backwardsPointerCheck ' + i + ' to ' + ( i - 1 ) );
     }
   } );
   
