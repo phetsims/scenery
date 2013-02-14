@@ -117,7 +117,7 @@ var scenery = scenery || {};
     },
     
     // treats the pointer as nesting-ordered
-    eachBetween: function( other, callbacks, includeEndpoints ) {
+    eachBetween: function( other, callbacks, excludeEndpoints ) {
       
     }
   };
