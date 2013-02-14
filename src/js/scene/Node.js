@@ -349,7 +349,7 @@ var scenery = scenery || {};
           
           // the child will have the point in its parent's coordinate frame (i.e. this node's frame)
           if ( childHit ) {
-            childHit.addAncestor( this );
+            childHit.addAncestor( this, i );
             return childHit;
           }
         }

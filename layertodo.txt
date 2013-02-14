@@ -26,6 +26,11 @@ GraphPath next, previous. improve eachBetween using these. Consider a 'GraphPoin
   Also consider a GraphRange which has a start/end GraphPointer?
   Add ability to "index" a GraphPath
 
+Trail:
+  Use indices where possible
+  DO we need indices in Node.dispatchEvent? May be bottleneck
+  Copy constructor!
+
 
 Issues
 ======

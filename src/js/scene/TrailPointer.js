@@ -125,7 +125,7 @@ var scenery = scenery || {};
       if ( this.isBefore ) {
         if ( this.trail.lastNode().children.length > 0 ) {
           // stay as before, just walk to the first child
-          this.trail.addDescendant( this.trail.lastNode().children[0] );
+          this.trail.addDescendant( this.trail.lastNode().children[0], 0 );
         } else {
           // stay on the same node, but switch to after
           this.toggleBeforeAfter();
