@@ -28,12 +28,12 @@ src/js/webgl/Cylinder.js
 src/js/canvas/common.js
 src/js/scene/common.js
 src/js/scene/Trail.js
+src/js/scene/TrailPointer.js
 src/js/scene/Shape.js
 src/js/scene/Node.js
 src/js/scene/Scene.js
 src/js/scene/Input.js
 src/js/scene/RenderState.js
-src/js/scene/RenderPosition.js
 src/js/scene/layers/Layer.js
 src/js/scene/layers/CanvasLayer.js
 src/js/scene/layers/DOMLayer.js
