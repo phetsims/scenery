@@ -349,6 +349,7 @@ var scenery = scenery || {};
           
           // the child will have the point in its parent's coordinate frame (i.e. this node's frame)
           if ( childHit ) {
+            childHit.addAncestor( this );
             return childHit;
           }
         }
@@ -356,7 +357,7 @@ var scenery = scenery || {};
       
       // didn't hit our children, so check ourself as a last resort
       if ( this._selfBounds.containsPoint( localPoint ) && this.containsPointSelf( localPoint ) ) {
-        return this;
+        return new scenery.Trail( [ this ] );
       }
       
       // signal no hit
