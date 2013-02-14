@@ -349,7 +349,7 @@
     }
   } );
   
-  test( 'TrailPointer comparison', function() {
+  test( 'TrailPointer render comparison', function() {
     var node = createTestNodeTree();
     
     equal( 0, new scenery.TrailPointer( node.getUniqueTrail(), true ).compareRender( new scenery.TrailPointer( node.getUniqueTrail(), true ) ), 'Same before pointer' );
@@ -357,6 +357,94 @@
     equal( -1, new scenery.TrailPointer( node.getUniqueTrail(), true ).compareRender( new scenery.TrailPointer( node.getUniqueTrail(), false ) ), 'Same node before/after root' );
     equal( -1, new scenery.TrailPointer( node.children[0].getUniqueTrail(), true ).compareRender( new scenery.TrailPointer( node.children[0].getUniqueTrail(), false ) ), 'Same node before/after nonroot' );
     equal( 0, new scenery.TrailPointer( node.children[0].children[1].children[0].getUniqueTrail(), false ).compareRender( new scenery.TrailPointer( node.children[0].children[2].getUniqueTrail(), true ) ), 'Equivalence of before/after' );
+    
+    // all pointers in the render order
+    var pointers = [
+      new scenery.TrailPointer( node.getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[0].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[0].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[1].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[1].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[1].children[0].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[1].children[0].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[2].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[2].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[3].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[3].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[3].children[0].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[3].children[0].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[3].children[0].children[0].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[3].children[0].children[0].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[3].children[1].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[3].children[1].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[4].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[4].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[1].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[1].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[2].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[2].getUniqueTrail(), false )
+    ];
+    
+    // compare the pointers. different ones can be equal if they represent the same place, so we only check if they compare differently
+    for ( var i = 0; i < pointers.length; i++ ) {
+      for ( var j = i; j < pointers.length; j++ ) {
+        var comparison = pointers[i].compareRender( pointers[j] );
+        
+        if ( comparison === -1 ) {
+          ok( i < j, i + ',' + j );
+        }
+        if ( comparison === 1 ) {
+          ok( i > j, i + ',' + j );
+        }
+      }
+    }
+  } );
+  
+  test( 'TrailPointer nested comparison', function() {
+    var node = createTestNodeTree();
+    
+    // all pointers in the nested order
+    var pointers = [
+      new scenery.TrailPointer( node.getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[0].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[0].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[1].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[1].children[0].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[1].children[0].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[1].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[2].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[2].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[3].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[3].children[0].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[3].children[0].children[0].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[3].children[0].children[0].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[3].children[0].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[3].children[1].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[3].children[1].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[3].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[4].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[4].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[1].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[1].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[2].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[2].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.getUniqueTrail(), false )
+    ];
+    
+    // exhaustively verify the ordering between each ordered pair
+    for ( var i = 0; i < pointers.length; i++ ) {
+      for ( var j = i; j < pointers.length; j++ ) {
+        var comparison = pointers[i].compareNested( pointers[j] );
+        
+        // make sure that every pointer compares as expected (0 and they are equal, -1 and i < j)
+        equal( comparison, i === j ? 0 : ( i < j ? -1 : 1 ), i + ',' + j );
+      }
+    }
   } );
   
   test( 'Node traversal testing', function() {
