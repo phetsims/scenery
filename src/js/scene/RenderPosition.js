@@ -20,3 +20,4 @@ var scenery = scenery || {};
 })();
 
 
+    this.nodes = nodes || [];
