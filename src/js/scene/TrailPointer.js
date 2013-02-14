@@ -181,7 +181,7 @@ var scenery = scenery || {};
     
     // treats the pointer as render-ordered
     eachNodeBetween: function( other, callback ) {
-      
+      throw new Error( 'eachNodeBetween unimplemented' );
     },
     
     // TODO: try next/previous handling as an easier case!
@@ -322,6 +322,9 @@ var scenery = scenery || {};
       while ( !exited ) {
         next( true );
       }
+      
+      // TODO: test speed and correctness against simple version
+      throw new Error( 'Probably horribly broken!' );
     }
   };
   
