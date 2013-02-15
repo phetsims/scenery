@@ -38,6 +38,15 @@ Trail:
   Better name for copy() ?
   eachPointerBetween should possibly have option for defensive copies? hrm
 
+
+Rendering:
+  Dirty bounds
+  Restricted bounds
+  Visibility checks
+  state.finish()
+Layers:
+  reindex
+
 Organize unit tests
 
 Issues

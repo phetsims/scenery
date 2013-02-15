@@ -21,6 +21,7 @@ var scenery = scenery || {};
    * isBefore: whether this points to before the node (and its children) have been rendered, or after
    */
   scenery.TrailPointer = function( trail, isBefore ) {
+    phet.assert( trail instanceof scenery.Trail, 'trail is not a trail' );
     this.trail = trail;
     
     this.setBefore( isBefore );
@@ -87,7 +88,7 @@ var scenery = scenery || {};
      * TODO: optimization?
      */
     compareNested: function( other ) {
-      phet.assert( other !== null );
+      phet.assert( other );
       
       var comparison = this.trail.compare( other.trail );
       

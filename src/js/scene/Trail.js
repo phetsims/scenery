@@ -348,6 +348,11 @@ var scenery = scenery || {};
       } else {
         return 0;
       }
+    },
+    
+    toString: function() {
+      this.reindex();
+      return this.indices.join( ',' );
     }
   };
   

@@ -232,12 +232,14 @@
     var sceneA = new scenery.Scene( $( '#main' ) );
     var sceneB = new scenery.Scene( $( '#secondary' ) );
     
-    var node = new scenery.Node();
-    var child = new scenery.Node();
+    var node = new scenery.Path();
+    var child = new scenery.Path();
     node.addChild( child );
     
     sceneA.root.addChild( node );
     sceneB.root.addChild( child );
+    
+    sceneA.rebuildLayers();
     
     
     var a = new scenery.Scene( $( '#main' ) );

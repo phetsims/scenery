@@ -5,8 +5,9 @@ var scenery = scenery || {};
 (function(){
   "use strict";
   
-  scenery.LayerType = function( Constructor ) {
+  scenery.LayerType = function( Constructor, name ) {
     this.Constructor = Constructor;
+    this.name = name;
   };
   var LayerType = scenery.LayerType;
   
@@ -21,7 +22,7 @@ var scenery = scenery || {};
     supportsNode: function( node ) {
       var that = this;
       return _.some( node._supportedLayerTypes, function( layerType ) {
-        that.supports( layerType );
+        return that.supports( layerType );
       } );
     },
     
@@ -31,8 +32,8 @@ var scenery = scenery || {};
     }
   };
   
-  LayerType.Canvas = new scenery.LayerType( scenery.CanvasLayer );
-  LayerType.DOM = new scenery.LayerType( scenery.DOMLayer );
+  LayerType.Canvas = new scenery.LayerType( scenery.CanvasLayer, 'canvas' );
+  LayerType.DOM = new scenery.LayerType( scenery.DOMLayer, 'dom' );
   
 })();
 

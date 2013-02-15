@@ -29,7 +29,7 @@ var scenery = scenery || {};
       var state = this;
       
       startPointer.eachPointerBetween( endPointer, function( pointer ) {
-        var node = pointer.lastNode();
+        var node = pointer.trail.lastNode();
         
         if ( pointer.isBefore ) {
           node.layerStrategy.enter( pointer.trail, state );
@@ -99,8 +99,6 @@ var scenery = scenery || {};
         type: this.nextLayerType,
         startTrail: firstSelfTrail
       } );
-      
-      throw new Error( 'not implemented: create and hook up layers, and we need to handle layer metadata' );
     }
   };
 })();
