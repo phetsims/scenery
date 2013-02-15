@@ -101,7 +101,7 @@ var scenery = scenery || {};
     
     
     upEvent: function( finger, event ) {
-      var trail = this.scene.root.trailUnderPoint( finger.point );
+      var trail = this.scene.trailUnderPoint( finger.point );
       var oldTrail = finger.trail || [];
       
       this.dispatchEvent( trail, 'up', finger, event );
@@ -110,7 +110,7 @@ var scenery = scenery || {};
     },
     
     downEvent: function( finger, event ) {
-      var trail = this.scene.root.trailUnderPoint( finger.point );
+      var trail = this.scene.trailUnderPoint( finger.point );
       var oldTrail = finger.trail || [];
       
       this.dispatchEvent( trail, 'down', finger, event );
@@ -119,7 +119,7 @@ var scenery = scenery || {};
     },
     
     moveEvent: function( finger, event ) {
-      var trail = this.scene.root.trailUnderPoint( finger.point );
+      var trail = this.scene.trailUnderPoint( finger.point );
       var oldTrail = finger.trail || [];
       
       var branchIndex;
@@ -144,7 +144,7 @@ var scenery = scenery || {};
     },
     
     cancelEvent: function( finger, event ) {
-      var trail = this.scene.root.trailUnderPoint( finger.point );
+      var trail = this.scene.trailUnderPoint( finger.point );
       var oldTrail = finger.trail || [];
       
       this.dispatchEvent( trail, 'cancel', finger, event );

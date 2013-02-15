@@ -11,12 +11,10 @@ var scenery = scenery || {};
 (function(){
   "use strict";
   
-  scenery.Scene = function( main ) {
-    var that = this;
+  scenery.Scene = function( main, params ) {
+    scenery.Node.call( this, params );
     
-    // TODO: support changing the root
-    this.root = new scenery.Node();
-    this.root.scene = this;
+    var that = this;
     
     // main layers in a scene
     this.layers = [];
@@ -29,12 +27,12 @@ var scenery = scenery || {};
     this.sceneBounds = new phet.math.Bounds2( 0, 0, main.width(), main.height() );
     
     // default to a canvas layer type, but this can be changed
-    this.preferredLayerType = scenery.LayerType.Canvas;
+    this.preferredSceneLayerType = scenery.LayerType.Canvas;
     
     applyCSSHacks( main );
     
     // note, arguments to the functions are mutable. don't destroy them
-    this.eventListener = {
+    this.sceneEventListener = {
       insertChild: function( args ) {
         var parent = args.parent;
         var child = args.child;
@@ -62,7 +60,7 @@ var scenery = scenery || {};
       }
     };
     
-    this.root.addEventListener( this.eventListener );
+    this.addEventListener( this.sceneEventListener );
   };
 
   var Scene = scenery.Scene;
@@ -106,7 +104,12 @@ var scenery = scenery || {};
       
       // TODO: internal API rethink
       var state = new scenery.LayerState();
-      var layerEntries = state.buildLayers( new scenery.TrailPointer( new scenery.Trail( this.root ), true ), new scenery.TrailPointer( new scenery.Trail( this.root ), false ), null );
+      
+      if ( this.preferredSceneLayerType ) {
+        state.pushPreferredLayerType( this.preferredSceneLayerType );
+      }
+      
+      var layerEntries = state.buildLayers( new scenery.TrailPointer( new scenery.Trail( this ), true ), new scenery.TrailPointer( new scenery.Trail( this ), false ), null );
       
       var layerArgs = {
         main: this.main,
@@ -137,7 +140,7 @@ var scenery = scenery || {};
     layerLookup: function( trail ) {
       // TODO: add tree form for optimization
       
-      phet.assert( !( trail.isEmpty() || trail.nodes[0] !== this.root ), 'layerLookup root matches' );
+      phet.assert( !( trail.isEmpty() || trail.nodes[0] !== this ), 'layerLookup root matches' );
       
       if ( this.layers.length === 0 ) {
         throw new Error( 'no layers in the scene' );
@@ -155,12 +158,12 @@ var scenery = scenery || {};
     
     renderScene: function() {
       // validating bounds, similar to Piccolo2d
-      this.root.validateBounds();
+      this.validateBounds();
       // no paint validation needed, since we render everything
       this.refreshLayers();
       
       var state = new scenery.RenderState( this );
-      fullRender( this.root, state );
+      fullRender( this. state );
       state.finish(); // handle cleanup for the last layer
       
       _.each( this.layers, function( layer ) {
@@ -170,8 +173,8 @@ var scenery = scenery || {};
     
     updateScene: function( args ) {
       // validating bounds, similar to Piccolo2d
-      this.root.validateBounds();
-      this.root.validatePaint();
+      this.validateBounds();
+      this.validatePaint();
       
       // if the layer structure needs to be changed due to nodes above layers being changed, do so
       this.refreshLayers();
