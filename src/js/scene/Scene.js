@@ -364,7 +364,7 @@ var scenery = scenery || {};
       this.main.width( width );
       this.main.height( height );
       this.sceneBounds = new phet.math.Bounds2( 0, 0, width, height );
-      this.rebuildLayers();
+      this.rebuildLayers(); // TODO: why?
     },
     
     // called on the root node when any layer-relevant changes are made

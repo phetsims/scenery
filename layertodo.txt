@@ -112,13 +112,26 @@ node.layerStrategy.setPreferredLayerType( scenery.LayerType.SVG );
 node.layerStrategy.setSplitBefore( true );
 node.layerStrategy.setSplitAfter( true );
 
+node.layerStrategy = new SomethingLayerStrategy();
+
 // performance caching (new node, so we can do render path changes?)
 var cacheNode = new CanvasLayerCache( node ) {{
+  var domNode = <svg, dom, canvas, ...>
+
   // internal to CanvasLayerCache:
-  cacheNode.layerStrategy = new CanvasCachingStrategy( ... ) {{
+  cacheNode.layerStrategy = new CanvasCachingStrategy( domNode, ... ) {{
     // internal to CanvasCachingStrategy
     preferredLayerType = CacheLayer( ... domElement ... )?
+    
+    .. handle CSS3 transforms here
   }};
 }} // paints into canvas(es), with custom layer type
 
 
+
+var node = scenery.SVG( '<svg>....</svg>' | $( SVGEelement ) );
+node.x = (etc.)
+
+
+
+scene resize listeners?
