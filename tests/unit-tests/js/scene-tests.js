@@ -228,6 +228,27 @@
   
   module( 'Scene Regression' );
   
+  test( 'Scene Layer test 1', function() {
+    var sceneA = new scenery.Scene( $( '#main' ) );
+    var sceneB = new scenery.Scene( $( '#secondary' ) );
+    
+    var node = new scenery.Node();
+    var child = new scenery.Node();
+    node.addChild( child );
+    
+    sceneA.root.addChild( node );
+    sceneB.root.addChild( child );
+    
+    
+    var a = new scenery.Scene( $( '#main' ) );
+    var b = new scenery.Scene( $( '#secondary' ) );
+    var c = new scenery.Node();
+    
+    b.addChild( c );
+    a.addChild( b );
+    a.addChild( c );
+  } );
+  
   test( 'Canvas 2D Context and Features', function() {
     var canvas = document.createElement( 'canvas' );
     var context = phet.canvas.initCanvas( canvas );
