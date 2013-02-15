@@ -58,6 +58,8 @@ Move snapshots to high-level dir so we can do SARs on the test directory easier
 
 Test zooming on browsers
 
+Possibly SVG Safari issues if bounds aren't whole-pixel?
+
 
 Design
 ======
