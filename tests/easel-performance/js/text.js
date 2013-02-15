@@ -52,14 +52,13 @@ phet.tests = phet.tests || {};
     // offsetWidth / offsetHeight? -- try positioning absolutely, left0top0, then also check offsetLeft, offsetTop -- similar to getBoundingClientRect()
     
     var scene = new scenery.Scene( main );
-    var root = scene.root;
     
     var text = new scenery.Text( "Now with text!" );
     text.fill = '#000000';
-    root.addChild( text );
+    scene.addChild( text );
     
-    // center the root
-    root.translate( main.width() / 2, main.height() / 2 );
+    // center the scene
+    scene.translate( main.width() / 2, main.height() / 2 );
     
     // return step function
     return function( timeElapsed ) {

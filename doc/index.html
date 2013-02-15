@@ -71,7 +71,7 @@
           var scene = new scenery.Scene( $( '#hello-world-scene' ) );
           
           // Add our text
-          scene.root.addChild( new scenery.Text( 'Hello World', {
+          scene.addChild( new scenery.Text( 'Hello World', {
             centerX: 200, // the center of our text's bounds is at x = 200
             centerY: 50, // the center of our text's bounds is at y = 50
             font: '25px sans-serif'
@@ -99,7 +99,7 @@
 var scene = new scenery.Scene( $( '#hello-world-scene' ) );
 
 // Add our text
-scene.root.addChild( new scenery.Text( 'Hello World', {
+scene.addChild( new scenery.Text( 'Hello World', {
   centerX: 200, // the center of our text's bounds is at x = 200
   centerY: 50, // the center of our text's bounds is at y = 50
   font: '25px sans-serif'
@@ -127,13 +127,13 @@ scene.updateScene();
           var scene = new scenery.Scene( $( '#shapes-scene' ) );
           
           // A rectangle at (10,10) with a width of 50 and height of 80
-          scene.root.addChild( new scenery.Path( {
+          scene.addChild( new scenery.Path( {
             shape: scenery.Shape.rectangle( 10, 10, 50, 80 ),
             fill: '#ff0000'
           } ) );
           
           // An octogon, with a radius of 30
-          scene.root.addChild( new scenery.Path( {
+          scene.addChild( new scenery.Path( {
             shape: scenery.Shape.regularPolygon( 8, 30 ),
             fill: '#00ff00',
             stroke: '#000000',
@@ -150,7 +150,7 @@ scene.updateScene();
           customShape.close();
           // NOTE: this can also be chained, like shape.moveTo( ... ).lineTo( ... ).close()
           
-          scene.root.addChild( new scenery.Path( {
+          scene.addChild( new scenery.Path( {
             shape: customShape,
             fill: '#0000ff',
             stroke: '#000000',
@@ -165,13 +165,13 @@ scene.updateScene();
       
       <pre class="brush: js">
 // A rectangle at (10,10) with a width of 50 and height of 80
-scene.root.addChild( new scenery.Path( {
+scene.addChild( new scenery.Path( {
   shape: scenery.Shape.rectangle( 10, 10, 50, 80 ),
   fill: '#ff0000'
 } ) );
 
 // An octogon, with a radius of 30
-scene.root.addChild( new scenery.Path( {
+scene.addChild( new scenery.Path( {
   shape: scenery.Shape.regularPolygon( 8, 30 ),
   fill: '#00ff00',
   stroke: '#000000',
@@ -188,7 +188,7 @@ customShape.lineTo( 40, 0 );
 customShape.close();
 // NOTE: this can also be chained, like shape.moveTo( ... ).lineTo( ... ).close()
 
-scene.root.addChild( new scenery.Path( {
+scene.addChild( new scenery.Path( {
   shape: customShape,
   fill: '#0000ff',
   stroke: '#000000',
@@ -266,7 +266,7 @@ node2.rotation === node3.getRotation();
             x: 20, // this node and all of its children will be offset by (20,20)
             y: 20
           } );
-          scene.root.addChild( container );
+          scene.addChild( container );
           
           // bounding box of the container (and its children so far) in its parent's coordinate system.
           // translated by (20,20 due to the x,y parameters)
@@ -315,7 +315,7 @@ var container = new scenery.Path( {
   x: 20, // this node and all of its children will be offset by (20,20)
   y: 20
 } );
-scene.root.addChild( container );
+scene.addChild( container );
 
 // bounding box of the container (and its children so far) in its parent's coordinate system.
 // translated by (20,20 due to the x,y parameters)
@@ -367,8 +367,8 @@ container.addChild( child2 );
           // TODO: support different ways of handling the asynchronous load
           var thumbnailImage = document.createElement( 'img' );
           thumbnailImage.onload = function( e ) {
-            scene.root.addChild( new scenery.Image( thumbnailImage ) );
-            scene.root.addChild( new scenery.Image( thumbnailImage, {
+            scene.addChild( new scenery.Image( thumbnailImage ) );
+            scene.addChild( new scenery.Image( thumbnailImage, {
               x: 200,
               y: 25,
               scale: 1.5,
@@ -384,8 +384,8 @@ container.addChild( child2 );
 // TODO: support different ways of handling the asynchronous load
 var thumbnailImage = document.createElement( 'img' );
 thumbnailImage.onload = function( e ) {
-  scene.root.addChild( new scenery.Image( thumbnailImage ) );
-  scene.root.addChild( new scenery.Image( thumbnailImage, {
+  scene.addChild( new scenery.Image( thumbnailImage ) );
+  scene.addChild( new scenery.Image( thumbnailImage, {
     x: 200,
     y: 25,
     scale: 1.5,
@@ -412,7 +412,7 @@ thumbnailImage.src = 'http://phet.colorado.edu/sims/energy-skate-park/energy-ska
           var element = document.createElement( 'form' );
           element.innerHTML = '<label>Type in me:</label><input type="text">';
           
-          scene.root.addChild( new scenery.DOM( element, {
+          scene.addChild( new scenery.DOM( element, {
             x: 50,
             rotation: Math.PI / 4
           } ) );
@@ -425,7 +425,7 @@ thumbnailImage.src = 'http://phet.colorado.edu/sims/energy-skate-park/energy-ska
 var element = document.createElement( 'form' );
 element.innerHTML = '<label>Type in me:</label><input type="text">';
 
-scene.root.addChild( new scenery.DOM( element, {
+scene.addChild( new scenery.DOM( element, {
   x: 50,
   rotation: Math.PI / 4
 } ) );
@@ -463,7 +463,7 @@ scene.root.addChild( new scenery.DOM( element, {
             shape: scenery.Shape.rectangle( 0, -3, 60, 6 ),
             fill: '#ff0000'
           } ) );
-          scene.root.addChild( node );
+          scene.addChild( node );
           
           // keep track of how much time elapsed over the last frame
           var lastTime = 0;
@@ -503,7 +503,7 @@ node.addChild( new scenery.Path( {
   shape: scenery.Shape.rectangle( 0, -3, 60, 6 ),
   fill: '#ff0000'
 } ) );
-scene.root.addChild( node );
+scene.addChild( node );
 
 // keep track of how much time elapsed over the last frame
 var lastTime = 0;
@@ -595,7 +595,7 @@ window.requestAnimationFrame( tick, div[0] );
           //   top: 20,
           //   font: '20px sans-serif'
           // } );
-          // scene.root.addChild( label );
+          // scene.addChild( label );
           
           // a big hexagon in the center. stroke not included in the hit region by default
           var node = new scenery.Path( {
@@ -605,7 +605,7 @@ window.requestAnimationFrame( tick, div[0] );
             centerX: 200,
             centerY: 200
           } );
-          scene.root.addChild( node );
+          scene.addChild( node );
           
           // update our label and color
           function updateFingers() {
@@ -680,7 +680,7 @@ var labelPrefix = 'Fingers in hexagon: ';
 //   top: 20,
 //   font: '20px sans-serif'
 // } );
-// scene.root.addChild( label );
+// scene.addChild( label );
 
 // a big hexagon in the center. stroke not included in the hit region by default
 var node = new scenery.Path( {
@@ -690,7 +690,7 @@ var node = new scenery.Path( {
   centerX: 200,
   centerY: 200
 } );
-scene.root.addChild( node );
+scene.addChild( node );
 
 // update our label and color
 function updateFingers() {

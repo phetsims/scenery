@@ -88,9 +88,6 @@
     var mainScene = new scenery.Scene( $( '#main' ) );
     var secondaryScene = new scenery.Scene( $( '#secondary' ) );
     
-    var mainRoot = mainScene.root;
-    var secondaryRoot = secondaryScene.root;
-    
     for ( var i = 0; i < actions.length; i++ ) {
       var action = actions[i];
       action( mainScene );
@@ -134,15 +131,15 @@
       node.setShape( shapeToStroke );
       node.setStroke( '#000000' );
       if ( strokeNodeSetup ) { strokeNodeSetup( node ); }
-      scene.root.addChild( node );
+      scene.addChild( node );
     }, function( scene ) {
       var node = new scenery.Path();
       node.setShape( shapeToFill );
       node.setFill( '#000000' );
       // node.setStroke( '#ff0000' ); // for debugging strokes
-      scene.root.addChild( node );
+      scene.addChild( node );
       // node.validateBounds();
-      // scene.root.addChild( new scenery.Path( {
+      // scene.addChild( new scenery.Path( {
       //   shape: scenery.Shape.bounds( node.getSelfBounds() ),
       //   fill: 'rgba(0,0,255,0.5)'
       // } ) );
@@ -236,8 +233,8 @@
     var child = new scenery.Path();
     node.addChild( child );
     
-    sceneA.root.addChild( node );
-    sceneB.root.addChild( child );
+    sceneA.addChild( node );
+    sceneB.addChild( child );
     
     sceneA.rebuildLayers();
     
@@ -249,6 +246,8 @@
     b.addChild( c );
     a.addChild( b );
     a.addChild( c );
+    
+    expect( 0 );
   } );
   
   test( 'Canvas 2D Context and Features', function() {
@@ -682,7 +681,7 @@
   
   test( 'Checking Layers and external canvas', function() {
     var scene = new scenery.Scene( $( '#main' ) );
-    var root = scene.root;
+    var root = scene;
     
     root.addChild( new scenery.Path( {
       shape: scenery.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
@@ -710,12 +709,12 @@
   test( 'Update vs Full Basic Clearing Check', function() {
     updateVsFullRender( [
       function( scene ) {
-        scene.root.addChild( new scenery.Path( {
+        scene.addChild( new scenery.Path( {
           shape: scenery.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
           fill: '#000000'
         } ) );
       }, function( scene ) {
-        scene.root.children[0].translate( 20, 20 );
+        scene.children[0].translate( 20, 20 );
       }
     ] );
   } );
@@ -727,9 +726,9 @@
         node.setShape( scenery.Shape.rectangle( 0, 0, canvasWidth / 3, canvasHeight / 3 ) );
         node.setFill( '#ff0000' );
         node.setStroke( '#000000' );
-        scene.root.addChild( node );
+        scene.addChild( node );
       }, function( scene ) {
-        scene.root.children[0].setShape( scenery.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ) );
+        scene.children[0].setShape( scenery.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ) );
       }
     ] );
   } );
@@ -743,9 +742,9 @@
         node.setFill( '#ff0000' );
         node.setStroke( '#000000' );
         node.setLineWidth( 10 );
-        scene.root.addChild( node );
+        scene.addChild( node );
       }, function( scene ) {
-        scene.root.children[0].translate( canvasWidth / 4, canvasHeight / 4 );
+        scene.children[0].translate( canvasWidth / 4, canvasHeight / 4 );
       }
     ] );
   } );
@@ -780,7 +779,7 @@
   
   test( 'Layer change stability', function() {
     var scene = new scenery.Scene( $( '#main' ) );
-    var root = scene.root;
+    var root = scene;
     
     root.addChild( new scenery.Path( {
       shape: scenery.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
@@ -1116,7 +1115,7 @@
   //       node.setShape( scenery.Shape.rectangle( 0, 0, canvasWidth / 3, canvasHeight / 3 ) );
   //       node.setFill( '#ff0000' );
   //       node.setStroke( '#000000' );
-  //       scene.root.addChild( node );
+  //       scene.addChild( node );
         
   //       var domNode = new scenery.Node();
   //       domNode.setLayerType( scenery.DOMLayer );

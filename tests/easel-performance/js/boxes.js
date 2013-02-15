@@ -128,7 +128,7 @@ phet.tests = phet.tests || {};
     var scene = new scenery.Scene( main );
     
     var grid = new scenery.Node();
-    scene.root.addChild( grid );
+    scene.addChild( grid );
     
     for ( var row = 0; row < resolution; row++ ) {
       for ( var col = 0; col < resolution; col++ ) {
@@ -146,7 +146,7 @@ phet.tests = phet.tests || {};
     }
     
     // center everything
-    scene.root.translate( main.width() / 2, main.height() / 2 );
+    scene.translate( main.width() / 2, main.height() / 2 );
     
     // return step function
     return function( timeElapsed ) {

@@ -54,6 +54,10 @@ Issues
 
 DAG handling for SVG (how to duplicate) or DOM
 
+Move snapshots to high-level dir so we can do SARs on the test directory easier
+
+Test zooming on browsers
+
 
 Design
 ======

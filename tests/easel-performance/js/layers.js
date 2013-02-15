@@ -10,7 +10,6 @@ phet.tests = phet.tests || {};
   
   phet.tests.sceneLayeringTests = function( main, useLayers ) {
     var scene = new scenery.Scene( main );
-    var root = scene.root;
     
     function randomizeTranslation( node ) {
       node.setTranslation( ( Math.random() - 0.5 ) * backgroundSize, ( Math.random() - 0.5 ) * backgroundSize );
@@ -43,14 +42,14 @@ phet.tests = phet.tests || {};
     var greens = buildShapes( 'rgba(0,255,0,0.7)' );
     var blues = buildShapes( 'rgba(0,0,255,0.7)' );
     
-    root.addChild( reds );
-    root.addChild( greens );
-    root.addChild( blues );
+    scene.addChild( reds );
+    scene.addChild( greens );
+    scene.addChild( blues );
     
-    // center the root
-    root.translate( main.width() / 2, main.height() / 2 );
+    // center the scene
+    scene.translate( main.width() / 2, main.height() / 2 );
     
-    window.root = root;
+    window.scene = scene;
     window.scene = scene;
     
     // return step function
