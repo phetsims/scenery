@@ -18,7 +18,7 @@ phet.tests = phet.tests || {};
     function buildShapes( color ) {
       var background = new scenery.Node();
       if ( useLayers && color == 'rgba(0,255,0,0.7)' ) {
-        background.setLayerType( scenery.CanvasLayer );
+        background.layerStrategy = scenery.SeparateLayerStrategy;
       }
       
       var radius = 10;

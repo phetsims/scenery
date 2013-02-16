@@ -94,7 +94,19 @@ var scenery = scenery || {};
     },
     
     recursiveRender: function( state, args ) {
-      this.getStartPointer().depthFirstUntil( this.getEndPointer(), function( pointer ) {
+      var i;
+      var startPointer = this.getStartPointer();
+      var endPointer = this.getEndPointer();
+      
+      // first, we need to walk the state up to before our pointer (as far as the recursive handling is concerned)
+      // if the pointer is 'before' the node, don't call its enterState since this will be taken care of as the first step.
+      // if the pointer is 'after' the node, call enterState since it will call exitState immediately inside the loop
+      var startWalkLength = startPointer.trail.length - ( startPointer.isBefore ? 1 : 0 );
+      for ( i = 0; i < startWalkLength; i++ ) {
+        startPointer.trail.nodes[i].enterState( state );
+      }
+      
+      startPointer.depthFirstUntil( endPointer, function( pointer ) {
         // handle render here
         
         var node = pointer.trail.lastNode();
@@ -130,6 +142,14 @@ var scenery = scenery || {};
         }
         
       }, false ); // include endpoints (for now)
+      
+      // then walk the state back so we don't muck up any context saving that is going on, similar to how we walked it at the start
+      // if the pointer is 'before' the node, call exitState since it called enterState inside the loop on it
+      // if the pointer is 'after' the node, don't call its exitState since this was already done
+      var endWalkLength = endPointer.trail.length - ( endPointer.isAfter ? 1 : 0 );
+      for ( i = endWalkLength - 1; i >= 0; i-- ) {
+        endPointer.trail.nodes[i].exitState( state );
+      }
     },
     
     dispose: function() {
