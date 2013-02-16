@@ -50,11 +50,20 @@ var scenery = scenery || {};
     
     /*
      * Renders the canvas layer from the scene
-     * 
-     * Supported args:
-     
+     *
+     * Supported args: {
+     *   fullRender: true, // disables drawing to just dirty rectangles
+     *   TODO: pruning with bounds and flag to disable
+     * }
      */
     render: function( scene, args ) {
+      args = args || {};
+      
+      // bail out quickly if possible
+      if ( !args.fullRender && this.dirtyBounds.isEmpty() ) {
+        return;
+      }
+      
       var state = new scenery.RenderState( scene );
       state.layer = this;
       
@@ -64,18 +73,27 @@ var scenery = scenery || {};
       // reset the internal styles so they match the defaults that should be present
       this.resetStyles();
       
-      var visibleDirtyBounds = this.dirtyBounds.intersection( scene.sceneBounds );
+      var visibleDirtyBounds = args.fullRender ? scene.sceneBounds : this.dirtyBounds.intersection( scene.sceneBounds );
+      this.clearGlobalBounds( visibleDirtyBounds );
       
-      if ( !window.thisDoesNotExist ) {
-        throw new Error( 'add bounds and clip handling here, args should allow for all relevant variations' );
+      if ( !args.fullRender ) {
+        state.pushClipShape( scenery.Shape.bounds( visibleDirtyBounds ) );
       }
       
       // dirty bounds (clear, possibly set restricted bounds and handling for that)
       // visibility checks
-      this.recursiveRender( state );
+      this.recursiveRender( state, args );
+      
+      // exists for now so that we pop the necessary context state
+      if ( !args.fullRender ) {
+        state.popClipShape();
+      }
+      
+      // we rendered everything, no more dirty bounds
+      this.dirtyBounds = Bounds2.NOTHING;
     },
     
-    recursiveRender: function( state ) {
+    recursiveRender: function( state, args ) {
       console.log( 'canvas recursive render from ' + this.getStartPointer().toString() + ' => ' + this.getEndPointer().toString() );
       console.log( this.getStartPointer() );
       console.log( this.getEndPointer() );
@@ -154,6 +172,10 @@ var scenery = scenery || {};
       this.writeClipShape( shape );
     },
     
+    popClipShape: function() {
+      this.context.restore();
+    },
+    
     // canvas-specific
     writeClipShape: function( shape ) {
       // set up the clipping
@@ -162,18 +184,11 @@ var scenery = scenery || {};
       this.context.clip();
     },
     
-    popClipShape: function() {
-      this.context.restore();
-    },
-    
-    prepareBounds: function( globalBounds ) {
-      // don't let the bounds of the clearing go outside of the canvas
-      var clearBounds = globalBounds.intersection( new phet.math.Bounds2( 0, 0, this.canvas.width, this.canvas.height ) );
-      
-      if ( !clearBounds.isEmpty() ) {
+    clearGlobalBounds: function( bounds ) {
+      if ( !bounds.isEmpty() ) {
         this.context.save();
         this.context.setTransform( 1, 0, 0, 1, 0, 0 );
-        this.context.clearRect( clearBounds.x(), clearBounds.y(), clearBounds.width(), clearBounds.height() );
+        this.context.clearRect( bounds.x(), bounds.y(), bounds.width(), bounds.height() );
         this.context.restore();
       }
     },
@@ -246,27 +261,11 @@ var scenery = scenery || {};
       context.drawImage( this.canvas, 0, 0 );
     },
     
-    isDirty: function() {
-      return !this.dirtyBounds.isEmpty();
-    },
-    
     markDirtyRegion: function( node, localBounds, transform, trail ) {
       var bounds = transform.transformBounds2( localBounds );
       
       // TODO: for performance, consider more than just a single dirty bounding box
       this.dirtyBounds = this.dirtyBounds.union( bounds.dilated( 1 ).roundedOut() );
-    },
-    
-    resetDirtyRegions: function() {
-      this.dirtyBounds = Bounds2.NOTHING;
-    },
-    
-    prepareDirtyRegions: function() {
-      this.prepareBounds( this.dirtyBounds );
-    },
-    
-    getDirtyBounds: function() {
-      return this.dirtyBounds;
     },
     
     getName: function() {

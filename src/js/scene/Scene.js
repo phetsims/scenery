@@ -90,7 +90,7 @@ var scenery = scenery || {};
     var scene = this;
     
     _.each( this.layers, function( layer ) {
-      layer.render( this, args );
+      layer.render( scene, args );
     } );
   };
   
