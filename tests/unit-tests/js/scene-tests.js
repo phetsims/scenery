@@ -227,6 +227,18 @@
   
   module( 'Scene Regression' );
   
+  test( 'Dirty bounds propagation test', function() {
+    var node = createTestNodeTree();
+    
+    node.validateBounds();
+    
+    ok( !node._childBoundsDirty );
+    
+    node.children[0].children[3].children[0].invalidateBounds();
+    
+    ok( node._childBoundsDirty );
+  } );
+  
   test( 'Scene Layer test 1', function() {
     var sceneA = new scenery.Scene( $( '#main' ) );
     var sceneB = new scenery.Scene( $( '#secondary' ) );

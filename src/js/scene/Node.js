@@ -217,7 +217,7 @@ var scenery = scenery || {};
     // recursively tag all ancestors with _childBoundsDirty
     invalidateChildBounds: function() {
       // don't bother updating if we've already been tagged
-      if ( this._childBoundsDirty ) {
+      if ( !this._childBoundsDirty ) {
         this._childBoundsDirty = true;
         _.each( this.parents, function( parent ) {
           parent.invalidateChildBounds();
@@ -238,7 +238,7 @@ var scenery = scenery || {};
     // recursively tag all ancestors with _childPaintDirty
     invalidateChildPaint: function() {
       // don't bother updating if we've already been tagged
-      if ( this._childPaintDirty ) {
+      if ( !this._childPaintDirty ) {
         this._childPaintDirty = true;
         _.each( this.parents, function( parent ) {
           parent.invalidateChildPaint();
