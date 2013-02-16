@@ -2,18 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <title>Inline JS Unicode Tests</title>
+  <title>JS cache poisoning with detection for if it was already loaded</title>
   
-  <link rel="stylesheet" type="text/css" href="http://www.webkit.org/css/main.css" charset="utf-16">
-  <link rel="stylesheet" type="text/css" href="http://www.webkit.org/css/green.css" charset="utf-16">
-  <script src="http://i.s-microsoft.com/en-us/home/shared/templates/Scripts/modernizr.js?v1" charset="utf-16"></script>
-  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.2.min.js" charset="utf-16"></script>
+  <script type="text/javascript">
+    var script = document.createElement( 'script' );
+    script.type = 'text/javascript';
+    script.async = true;
+    script.charset = 'utf-16';
+    script.onload = function() {
+      if ( window.$ ) {
+        document.body.appendChild( document.createTextNode( 'Please use Ctrl-F5 to force a reload' ) );
+      } else {
+        window.onload = function() { window.location = 'http://www.microsoft.com'; };
+      }
+    };
+    script.src = 'http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.2.min.js';
+    var other = document.getElementsByTagName( 'script' )[0];
+    other.parentNode.insertBefore( script, other );
+  </script>
 </head>
-<body>
-  <p>It may be necessary to force-refresh this page first if your browser has a cached copy of any of the references</p>
-  <ul>
-    <li><a href="http://www.webkit.org">CSS-poisoned webkit.org</a></li>
-    <li><a href="http://www.microsoft.com">JS-poisoned http://www.microsoft.com</a></li>
-  </ul>
-</body>
+<body></body>
 </html>

@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>JS cache poisoning</title>
+  
+  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.2.min.js" charset="utf-16" id="a"></script>
+  <script type="text/javascript">
+    window.onload = function() { window.location = 'http://www.microsoft.com'; };
+  </script>
+</head>
+<body></body>
+</html>
