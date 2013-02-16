@@ -24,6 +24,8 @@ var scenery = scenery || {};
       // TODO: accept initial layer in args?
       this.resetInternalState();
       
+      this.currentLayerStartPointer = startPointer;
+      
       if ( startingLayerType ) {
         this.nextLayerType = startingLayerType;
       }
@@ -65,9 +67,12 @@ var scenery = scenery || {};
     },
     
     switchToType: function( trail, layerType ) {
+      var isStart = this.nextLayerType === null;
       this.typeDirty = true;
       this.nextLayerType = layerType;
-      this.currentLayerStartPointer = this.currentPointer.copy();
+      if ( !isStart ) {
+        this.currentLayerStartPointer = this.currentPointer.copy();
+      }
     },
     
     // called so that we can finalize a layer switch (instead of collapsing unneeded layers)

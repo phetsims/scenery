@@ -226,9 +226,9 @@ var scenery = scenery || {};
      * A shorter subtrail will compare as -1.
      */
     compare: function( other ) {
-      phet.assert( !this.isEmpty() );
-      phet.assert( !other.isEmpty() );
-      phet.assert( this.nodes[0] === other.nodes[0] );
+      phet.assert( !this.isEmpty(), 'cannot compare with an empty trail' );
+      phet.assert( !other.isEmpty(), 'cannot compare with an empty trail' );
+      phet.assert( this.nodes[0] === other.nodes[0], 'for Trail comparison, trails must have the same root node' );
       
       var minIndex = Math.min( this.nodes.length, other.nodes.length );
       for ( var i = 1; i < minIndex; i++ ) {
@@ -256,7 +256,10 @@ var scenery = scenery || {};
     
     toString: function() {
       this.reindex();
-      return this.indices.join( ',' );
+      if ( !this.length ) {
+        return 'Empty Trail';
+      }
+      return '[Trail ' + this.indices.join( '.' ) + ']';
     }
   };
   

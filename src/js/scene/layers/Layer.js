@@ -22,8 +22,8 @@ var scenery = scenery || {};
     this.dirtyBounds = Bounds2.EVERYTHING;
     
     // filled in after construction by an external source (currently Scene.rebuildLayers).
-    this.startPath = null;
-    this.endPath = null;
+    this.startSelfTrail = null;
+    this.endSelfTrail = null;
     
     // references to surrounding layers, filled by rebuildLayers
     this.nextLayer = null;
@@ -36,11 +36,15 @@ var scenery = scenery || {};
     constructor: Layer,
     
     getStartPointer: function() {
-      throw new Error( 'Layer.getStartPointer unimplemented' );
+      return this.startPointer;
     },
     
     getEndPointer: function() {
-      throw new Error( 'Layer.getStartPointer unimplemented' );
+      return this.endPointer;
+    },
+    
+    toString: function() {
+      return this.getName() + ' ' + ( this.startPointer ? this.startPointer.toString() : '!' ) + ' (' + ( this.startSelfTrail ? this.startSelfTrail.toString() : '!' ) + ') => ' + ( this.endPointer ? this.endPointer.toString() : '!' ) + ' (' + ( this.endSelfTrail ? this.endSelfTrail.toString() : '!' ) + ')';
     },
     
     /*---------------------------------------------------------------------------*
@@ -80,6 +84,10 @@ var scenery = scenery || {};
     
     markDirtyRegion: function( node, localBounds, transform, trail ) {
       throw new Error( 'Layer.markDirtyRegion unimplemented' );
+    },
+    
+    getName: function() {
+      throw new Error( 'Layer.getName unimplemented' );
     }
   };
 })();

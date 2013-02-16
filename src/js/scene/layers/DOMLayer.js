@@ -96,6 +96,10 @@ var scenery = scenery || {};
         delayCounts.decrement();
       };
       img.src = url;
+    },
+    
+    getName: function() {
+      return 'dom';
     }
   } );
 })();

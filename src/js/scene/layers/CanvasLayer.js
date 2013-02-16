@@ -69,6 +69,9 @@ var scenery = scenery || {};
     },
     
     recursiveRender: function( state ) {
+      console.log( 'canvas recursive render from ' + this.getStartPointer().toString() + ' => ' + this.getEndPointer().toString() );
+      console.log( this.getStartPointer() );
+      console.log( this.getEndPointer() );
       this.getStartPointer().depthFirstUntil( this.getEndPointer(), function( pointer ) {
         // handle render here
         
@@ -260,6 +263,10 @@ var scenery = scenery || {};
     
     getDirtyBounds: function() {
       return this.dirtyBounds;
+    },
+    
+    getName: function() {
+      return 'canvas';
     }
   } );
 })();
