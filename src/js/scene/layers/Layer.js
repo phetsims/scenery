@@ -40,16 +40,7 @@ var scenery = scenery || {};
     *----------------------------------------------------------------------------*/
     
     render: function( state ) {
-      state.layer = this;
-      
-      this.initialize( state );
-      
-      // do stuff in the middle here
-      
-      // dirty bounds (clear, possibly set restricted bounds and handling for that)
-      // visibility checks
-      
-      this.cooldown();
+      throw new Error( 'Layer.render unimplemented' );
     },
     
     // TODO: consider a stack-based model for transforms?
