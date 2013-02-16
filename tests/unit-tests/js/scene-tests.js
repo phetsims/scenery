@@ -93,18 +93,18 @@
       action( mainScene );
       mainScene.updateScene();
       
-      secondaryScene.clearAllLayers();
-      action( secondaryScene );
-      secondaryScene.rebuildLayers();
-      secondaryScene.renderScene();
+      secondaryScene.dispose();
+      secondaryScene = new scenery.Scene( $( '#secondary' ) );
+      for ( var j = 0; j <= i; j++ ) {
+        actions[j]( secondaryScene );
+      }
+      secondaryScene.updateScene();
       
       var isEqual = snapshotEquals( snapshot( mainScene ), snapshot( secondaryScene ), 0, 'action #' + i );
       if ( !isEqual ) {
         break;
       }
     }
-    
-    throw new Error( 'rewrite this so we flush all of the changes to the full render each step' );
   }
   
   function sceneEquals( constructionA, constructionB, message, threshold ) {

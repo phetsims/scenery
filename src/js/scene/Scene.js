@@ -145,7 +145,8 @@ var scenery = scenery || {};
   Scene.prototype.dispose = function() {
     this.disposeLayers();
     
-    throw new Error( 'unimplemented dispose: clear event handlers if added' );
+    // TODO: clear event handlers if added
+    //throw new Error( 'unimplemented dispose: clear event handlers if added' );
   };
   
   Scene.prototype.disposeLayers = function() {
