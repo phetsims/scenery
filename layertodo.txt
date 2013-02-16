@@ -52,6 +52,8 @@ Organize unit tests
 Issues
 ======
 
+Update tests for rendering comparison, so for each step we either apply all changes and render, then one at a time rendering inbetween
+
 DAG handling for SVG (how to duplicate) or DOM
 
 Move snapshots to high-level dir so we can do SARs on the test directory easier

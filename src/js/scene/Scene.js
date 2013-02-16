@@ -68,33 +68,11 @@ var scenery = scenery || {};
   Scene.prototype = phet.Object.create( scenery.Node.prototype );
   Scene.prototype.constructor = Scene;
   
-  function fullRender( node, state ) {
-    node.enterState( state );
+  Scene.prototype.updateScene = function() {
+    // validating bounds, similar to Piccolo2d
+    this.validateBounds();
+    this.validatePaint();
     
-    if ( node._visible ) {
-      node.renderSelf( state );
-      
-      var children = node.children;
-      
-      // check if we need to filter the children we render, and ignore nodes with few children (but allow 2, since that may prevent branches)
-      if ( state.childRestrictedBounds && children.length > 1 ) {
-        var localRestrictedBounds = node.globalToLocalBounds( state.childRestrictedBounds );
-        
-        // don't filter if every child is inside the bounds
-        if ( !localRestrictedBounds.containsBounds( node.parentToLocalBounds( node._bounds ) ) ) {
-          children = node.getChildrenWithinBounds( localRestrictedBounds );
-        }
-      }
-      
-      _.each( children, function( child ) {
-        fullRender( child, state );
-      } );
-    }
-    
-    node.exitState( state );
-  }
-  
-  Scene.prototype.fullRenderCore = function() {
     // bail if there are no layers. consider a warning?
     if ( !this.layers.length ) {
       return;
@@ -105,6 +83,11 @@ var scenery = scenery || {};
     _.each( this.layers, function( layer ) {
       layer.render( state );
     } );
+  };
+  
+  Scene.prototype.renderScene = function() {
+    // TODO: for now, go with the same path. possibly add options later
+    this.updateScene();
   };
   
   Scene.prototype.rebuildLayers = function() {
@@ -137,6 +120,15 @@ var scenery = scenery || {};
     // } );
   };
   
+  // after layer changes, the layers should have their zIndex updated
+  Scene.prototype.reindexLayers = function() {
+    var index = 1;
+    _.each( this.layers, function( layer ) {
+      // layers increment indices as needed
+      index = layer.reindex( index );
+    } );
+  };
+  
   Scene.prototype.disposeLayers = function() {
     var scene = this;
     
@@ -165,44 +157,6 @@ var scenery = scenery || {};
     throw new Error( 'node not contained in a layer' );
   };
   
-  Scene.prototype.renderScene = function() {
-    // validating bounds, similar to Piccolo2d
-    this.validateBounds();
-    // no paint validation needed, since we render everything
-    this.refreshLayers();
-    
-    var state = new scenery.RenderState( this );
-    fullRender( this. state );
-    state.finish(); // handle cleanup for the last layer
-    
-    _.each( this.layers, function( layer ) {
-      layer.resetDirtyRegions();
-    } );
-  };
-  
-  Scene.prototype.updateScene = function( args ) {
-    // validating bounds, similar to Piccolo2d
-    this.validateBounds();
-    this.validatePaint();
-    
-    // if the layer structure needs to be changed due to nodes above layers being changed, do so
-    this.refreshLayers();
-    
-    var scene = this;
-    
-    _.each( this.layers, function( layer ) {
-      // don't repaint clean layers
-      if ( layer.isDirty() ) {
-        var dirtyBounds = layer.getDirtyBounds();
-        var visibleDirtyBounds = layer.getDirtyBounds().intersection( scene.sceneBounds );
-        
-        if ( !visibleDirtyBounds.isEmpty() ) {
-          scene.updateLayer( layer, args );
-        }
-      }
-    } );
-  };
-  
   // attempt to render everything currently visible in the scene to an external canvas. allows copying from canvas layers straight to the other canvas
   // delayCounts will have increment() and decrement() called on it if asynchronous completion is needed.
   Scene.prototype.renderToCanvas = function( canvas, context, delayCounts ) {
@@ -212,27 +166,11 @@ var scenery = scenery || {};
     } );
   };
   
-  // handles creation and adds it to our internal list
-  Scene.prototype.createLayer = function( Constructor, args ) {
-    var layer = new Constructor( args );
-    this.layers.push( layer );
-    return layer;
-  };
-  
   Scene.prototype.resize = function( width, height ) {
     this.main.width( width );
     this.main.height( height );
     this.sceneBounds = new phet.math.Bounds2( 0, 0, width, height );
     this.rebuildLayers(); // TODO: why?
-  };
-  
-  // after layer changes, the layers should have their zIndex updated
-  Scene.prototype.reindexLayers = function() {
-    var index = 1;
-    _.each( this.layers, function( layer ) {
-      // layers increment indices as needed
-      index = layer.reindex( index );
-    } );
   };
   
   Scene.prototype.addInputListener = function( listener ) {

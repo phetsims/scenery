@@ -48,6 +48,32 @@ var scenery = scenery || {};
   CanvasLayer.prototype = _.extend( {}, scenery.Layer.prototype, {
     constructor: CanvasLayer,
     
+    // function fullRender( node, state ) {
+    //   node.enterState( state );
+      
+    //   if ( node._visible ) {
+    //     node.renderSelf( state );
+        
+    //     var children = node.children;
+        
+    //     // check if we need to filter the children we render, and ignore nodes with few children (but allow 2, since that may prevent branches)
+    //     if ( state.childRestrictedBounds && children.length > 1 ) {
+    //       var localRestrictedBounds = node.globalToLocalBounds( state.childRestrictedBounds );
+          
+    //       // don't filter if every child is inside the bounds
+    //       if ( !localRestrictedBounds.containsBounds( node.parentToLocalBounds( node._bounds ) ) ) {
+    //         children = node.getChildrenWithinBounds( localRestrictedBounds );
+    //       }
+    //     }
+        
+    //     _.each( children, function( child ) {
+    //       fullRender( child, state );
+    //     } );
+    //   }
+      
+    //   node.exitState( state );
+    // }
+    
     render: function( state ) {
       state.layer = this;
       var context = this.context;
