@@ -66,6 +66,10 @@ var scenery = scenery || {};
       }
     },
     
+    slice: function( startIndex, endIndex ) {
+      return new Trail( this.nodes.slice( startIndex, endIndex ) );
+    },
+    
     isEmpty: function() {
       return this.nodes.length === 0;
     },
