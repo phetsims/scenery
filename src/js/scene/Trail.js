@@ -62,7 +62,7 @@ var scenery = scenery || {};
         return this.nodes[index];
       } else {
         // negative index goes from the end of the array
-        return this.nodes[this.nodes.length + index]
+        return this.nodes[this.nodes.length + index];
       }
     },
     
