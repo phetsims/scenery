@@ -35,6 +35,14 @@ var scenery = scenery || {};
   Layer.prototype = {
     constructor: Layer,
     
+    getStartPointer: function() {
+      throw new Error( 'Layer.getStartPointer unimplemented' );
+    },
+    
+    getEndPointer: function() {
+      throw new Error( 'Layer.getStartPointer unimplemented' );
+    },
+    
     /*---------------------------------------------------------------------------*
     * Abstract
     *----------------------------------------------------------------------------*/

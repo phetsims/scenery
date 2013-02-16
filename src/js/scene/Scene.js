@@ -78,10 +78,10 @@ var scenery = scenery || {};
       return;
     }
     
-    var state = new scenery.RenderState( this );
+    var scene = this;
     
     _.each( this.layers, function( layer ) {
-      layer.render( state );
+      layer.render( this );
     } );
   };
   

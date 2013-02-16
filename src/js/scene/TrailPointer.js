@@ -192,6 +192,15 @@ var scenery = scenery || {};
       throw new Error( 'eachNodeBetween unimplemented' );
     },
     
+    // TODO: consider rename to depthFirstBetween
+    /*
+     * Recursively (depth-first) iterates over all pointers between this pointer and 'other', calling
+     * callback( pointer ) for each pointer. If excludeEndpoints is truthy, the callback will not be
+     * called if pointer is equivalent to this pointer or 'other'.
+     *
+     * If the callback returns a truthy value, the subtree for the current pointer will be skipped
+     * (applies only to before-pointers)
+     */
     eachPointerBetween: function( other, callback, excludeEndpoints ) {
       // make sure this pointer is before the other
       phet.assert( this.compareNested( other ) === -1, 'TrailPointer.eachBetween pointers out of order, possibly in both meanings of the phrase!' );
@@ -206,166 +215,31 @@ var scenery = scenery || {};
       var first = true;
       
       while ( !pointer.equalsNested( other ) ) {
+        var skipSubtree = false;
+        
         if ( first ) {
           // start point
           if ( !excludeEndpoints ) {
-            callback( pointer );
+            skipSubtree = callback( pointer );
           }
           first = false;
         } else {
           // between point
-          callback( pointer );
+          skipSubtree = callback( pointer );
         }
-        pointer.nestedForwards();
+        
+        if ( skipSubtree && pointer.isBefore ) {
+          // to skip the subtree, we just change to isAfter
+          pointer.setBefore( false );
+        } else {
+          pointer.nestedForwards();
+        }
       }
       
       // end point
       if ( !excludeEndpoints ) {
         callback( pointer );
       }
-    },
-    
-    // TODO: try next/previous handling as an easier case!
-    // TODO: get rid of this monstrosity!
-    // treats the pointer as nesting-ordered. assumes that they are properly ordered
-    oldEachBetween: function( other, callbacks, excludeEndpoints ) {
-      // make sure this pointer is before the other
-      phet.assert( this.compareNested( other ) === -1, 'TrailPointer.eachBetween pointers out of order, possibly in both meanings of the phrase!' );
-      phet.assert( this.trail[0] === other.trail[0], 'TrailPointer.eachBetween takes pointers with the same root' );
-      
-      // sanity check TODO: remove later
-      this.trail.reindex();
-      other.trail.reindex();
-      
-      // our state
-      var indexStack = [];
-      var nodeStack = [ this.trail[0] ];
-      var enterAfterNext = false;
-      var exitAfterNext = false;
-      var entered = false;
-      var exited = false;
-      var match = 0;
-      
-      function enter( node ) {
-        if ( !exited ) {
-          var depth = indexStack.length - 1;
-          
-          // don't fully match if other.isAfter
-          if ( depth === match && ( other.isBefore || match + 1 !== other.trail.indices.length ) ) {
-            if ( other.trail.indices[match] === indexStack[depth] ) {
-              match++;
-              
-              // once we have matched
-              if ( match === other.trail.indices.length ) {
-                exited = true;
-                if ( !excludeEndpoints ) {
-                  callbacks.enter( node );
-                }
-                return;
-              }
-            }
-          }
-        }
-        
-        if ( entered && !exited ) {
-          callbacks.enter( node );
-        }
-        
-        // technically dead code, but left here in case we change things in the future
-        // if ( !entered && enterAfterNext ) {
-        //   entered = true;
-        // }
-        if ( !exited && exitAfterNext ) {
-          exited = true;
-        }
-      }
-      
-      function exit( node ) {
-        if ( !exited && other.isAfter ) {
-          var depth = indexStack.length - 1;
-          if ( depth === match && match + 1 === other.trail.indices.length ) {
-            if ( other.trail.indices[match] === indexStack[depth] ) {
-              match++;
-              
-              // once we have matched
-              exited = true;
-              if ( !excludeEndpoints ) {
-                callbacks.exit( node );
-              }
-              return;
-            }
-          }
-        }
-        
-        if ( entered && !exited ) {
-          callbacks.exit( node );
-        }
-        
-        if ( !entered && enterAfterNext ) {
-          entered = true;
-        }
-        if ( !exited && exitAfterNext ) {
-          exited = true;
-        }
-      }
-      
-      function push( index ) {
-        var node = topNode().children[index];
-        indexStack.push( index );
-        nodeStack.push( node );
-        enter( node );
-      }
-      
-      function pop() {
-        var index = indexStack.pop();
-        var node = nodeStack.pop();
-        exit( node );
-        return index;
-      }
-      
-      function topNode() {
-        return nodeStack[nodeStack.length - 1];
-      }
-      
-      function next( childrenOk ) {
-        if ( childrenOk && topNode().children.length > 0 ) {
-          // if there are children, walk to the first one
-          push( 0 );
-        } else {
-          while ( indexStack.length > 0 ) {
-            var index = pop();
-            if ( topNode().children.length > index + 1 ) {
-              push( index + 1 );
-              break;
-            }
-          }
-        }
-      }
-      
-      // walk the starting trail
-      for ( var i = 1; i < this.trail.length; i++ ) {
-        push( this.trail.indices( i - 1 ) );
-      }
-      
-      if ( this.isBefore ) {
-        entered = true;
-        if ( !excludeEndpoints ) {
-          callbacks.enter( topNode() );
-        }
-      } else {
-        if ( excludeEndpoints ) {
-          enterAfterNext = true;
-        } else {
-          entered = true;
-        }
-      }
-      next( this.isBefore );
-      while ( !exited ) {
-        next( true );
-      }
-      
-      // TODO: test speed and correctness against simple version
-      throw new Error( 'Probably horribly broken!' );
     }
   };
   

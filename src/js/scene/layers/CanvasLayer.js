@@ -48,67 +48,66 @@ var scenery = scenery || {};
   CanvasLayer.prototype = _.extend( {}, scenery.Layer.prototype, {
     constructor: CanvasLayer,
     
-    // function fullRender( node, state ) {
-    //   node.enterState( state );
-      
-    //   if ( node._visible ) {
-    //     node.renderSelf( state );
-        
-    //     var children = node.children;
-        
-    //     // check if we need to filter the children we render, and ignore nodes with few children (but allow 2, since that may prevent branches)
-    //     if ( state.childRestrictedBounds && children.length > 1 ) {
-    //       var localRestrictedBounds = node.globalToLocalBounds( state.childRestrictedBounds );
-          
-    //       // don't filter if every child is inside the bounds
-    //       if ( !localRestrictedBounds.containsBounds( node.parentToLocalBounds( node._bounds ) ) ) {
-    //         children = node.getChildrenWithinBounds( localRestrictedBounds );
-    //       }
-    //     }
-        
-    //     _.each( children, function( child ) {
-    //       fullRender( child, state );
-    //     } );
-    //   }
-      
-    //   node.exitState( state );
-    // }
-    
-    render: function( state ) {
+    // state should be fresh, with nothing applied yet
+    render: function( scene ) {
+      var state = new scenery.RenderState( scene );
       state.layer = this;
-      var context = this.context;
-      var layer = this;
       
-      // if there are no clip shapes right now, we can skip the save/restore, since it will happen on the push/pop of clip shapes
-      var needsStateRestoration = state.clipShapes.length > 0;
-      
-      // first, switch to an identity matrix so we can apply the global coordinate clipping shapes
-      context.setTransform( 1, 0, 0, 1, 0, 0 );
-      
-      if ( needsStateRestoration ) {
-        context.save();
-      }
-      
-      _.each( state.clipShapes, function( shape ) {
-        layer.writeClipShape( shape );
-      } );
-      
-      // set the context's transform to the current transformation matrix (after we apply the clipping shapes in the global bounds)
-      state.transform.getMatrix().canvasSetTransform( this.context );
+      // switch to an identity transform
+      this.context.setTransform( 1, 0, 0, 1, 0, 0 );
       
       // reset the internal styles so they match the defaults that should be present
       this.resetStyles();
       
       // dirty bounds (clear, possibly set restricted bounds and handling for that)
       // visibility checks
+      this.recursiveRender( state );
       
       if ( !window.thisBetterNotExistItIsJustBecauseClosureWarnsAboutUnreachableCode ) {
         throw new Error( 'CanvasLayer.render needs to be flushed out more. render everything here' );
       }
-      
-      if ( needsStateRestoration ) {
-        context.restore();
-      }
+    },
+    
+    recursiveRender: function( state ) {
+      this.getStartPointer().eachPointerBetween( this.getEndPointer(), function( pointer ) {
+        // handle render here
+        
+        var node = pointer.trail.lastNode();
+        
+        if ( pointer.isBefore ) {
+          node.enterState( state );
+          
+          if ( node._visible ) {
+            if ( !window.letmecompile ) {
+              throw new Error( 'this is bad, we just need to be able to skip an entire subtree in the iteration. how else to handle restricted bounds also?' );
+            }
+            node.renderSelf( state );
+            
+            // TODO: restricted bounds rendering, and possibly generalize eachPointerBetween
+            // var children = node.children;
+            
+            // check if we need to filter the children we render, and ignore nodes with few children (but allow 2, since that may prevent branches)
+            // if ( state.childRestrictedBounds && children.length > 1 ) {
+            //   var localRestrictedBounds = node.globalToLocalBounds( state.childRestrictedBounds );
+              
+            //   // don't filter if every child is inside the bounds
+            //   if ( !localRestrictedBounds.containsBounds( node.parentToLocalBounds( node._bounds ) ) ) {
+            //     children = node.getChildrenWithinBounds( localRestrictedBounds );
+            //   }
+            // }
+            
+            // _.each( children, function( child ) {
+            //   fullRender( child, state );
+            // } );
+          } else {
+            // not visible, so don't render the entire subtree
+            return true;
+          }
+        } else {
+          node.exitState( state );
+        }
+        
+      }, false ); // include endpoints (for now)
     },
     
     dispose: function() {

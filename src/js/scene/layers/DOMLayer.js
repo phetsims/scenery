@@ -36,7 +36,8 @@ var scenery = scenery || {};
   DOMLayer.prototype = _.extend( {}, scenery.Layer.prototype, {
     constructor: DOMLayer,
     
-    render: function( state ) {
+    render: function( scene ) {
+      var state = new scenery.RenderState( scene );
       state.layer = this;
       
       // TODO: clipping?
