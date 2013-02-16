@@ -24,7 +24,7 @@ var scenery = scenery || {};
         }
         
         // trigger actual layer creation if necessary (allow collapsing of layers otherwise)
-        layerState.markSelf( trail );
+        layerState.markSelf();
       }
     },
     

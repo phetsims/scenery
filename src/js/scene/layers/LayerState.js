@@ -31,7 +31,7 @@ var scenery = scenery || {};
       var state = this;
       
       startPointer.depthFirstUntil( endPointer, function( pointer ) {
-        this.currentPointer = pointer;
+        state.currentPointer = pointer;
         var node = pointer.trail.lastNode();
         
         if ( pointer.isBefore ) {
@@ -67,11 +67,13 @@ var scenery = scenery || {};
     switchToType: function( trail, layerType ) {
       this.typeDirty = true;
       this.nextLayerType = layerType;
-      this.currentLayerStartPointer = currentPointer.copy();
+      this.currentLayerStartPointer = this.currentPointer.copy();
     },
     
     // called so that we can finalize a layer switch (instead of collapsing unneeded layers)
-    markSelf: function( trail ) {
+    markSelf: function() {
+      var trail = this.currentPointer.trail;
+      
       if ( this.typeDirty ) {
         this.layerChange( trail );
       }
