@@ -24,10 +24,6 @@ var scenery = scenery || {};
     // filled in after construction by an external source (currently Scene.rebuildLayers).
     this.startSelfTrail = null;
     this.endSelfTrail = null;
-    
-    // references to surrounding layers, filled by rebuildLayers
-    this.nextLayer = null;
-    this.previousLayer = null;
   };
   
   var Layer = scenery.Layer;
