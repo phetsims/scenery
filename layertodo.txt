@@ -75,6 +75,8 @@ Possibly SVG Safari issues if bounds aren't whole-pixel?
 
 DragHandler - mouse buttons
 
+Bounds after rotation seems to be a bit too wide
+
 SVG:
   SVGLayer needs have CSS transform with a scale of 1, apply scale to containing group instead?
 

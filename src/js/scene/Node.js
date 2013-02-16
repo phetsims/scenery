@@ -482,7 +482,7 @@ var scenery = scenery || {};
       function recursiveEventDispatch( node ) {
         trail.addAncestor( node );
         
-        transformStack.push( new phet.math.Transform3( transformStack[transformStack.length-1].getMatrix().timesMatrix( node.getMatrix() ) ) );
+        transformStack.push( new phet.math.Transform3( node.getMatrix().timesMatrix( transformStack[transformStack.length-1].getMatrix() ) ) );
         args.transform = transformStack[transformStack.length-1];
         args.trail = trail;
         
