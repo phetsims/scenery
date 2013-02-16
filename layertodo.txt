@@ -60,6 +60,17 @@ Test zooming on browsers
 
 Possibly SVG Safari issues if bounds aren't whole-pixel?
 
+DragHandler - mouse buttons
+
+SVG:
+  SVGLayer needs have CSS transform with a scale of 1, apply scale to containing group instead?
+
+
+Node:
+  param arg { cursor: 'hand' } and mouse cursor handling
+
+Appended $ to jquery-wrapped elements or lists
+
 
 Design
 ======
