@@ -101,8 +101,7 @@ var scenery = scenery || {};
     
     
     upEvent: function( finger, event ) {
-      var trail = this.scene.trailUnderPoint( finger.point );
-      var oldTrail = finger.trail || [];
+      var trail = this.scene.trailUnderPoint( finger.point ) || new scenery.Trail( this.scene );
       
       this.dispatchEvent( trail, 'up', finger, event );
       
@@ -110,8 +109,7 @@ var scenery = scenery || {};
     },
     
     downEvent: function( finger, event ) {
-      var trail = this.scene.trailUnderPoint( finger.point );
-      var oldTrail = finger.trail || [];
+      var trail = this.scene.trailUnderPoint( finger.point ) || new scenery.Trail( this.scene );
       
       this.dispatchEvent( trail, 'down', finger, event );
       
@@ -119,8 +117,8 @@ var scenery = scenery || {};
     },
     
     moveEvent: function( finger, event ) {
-      var trail = this.scene.trailUnderPoint( finger.point );
-      var oldTrail = finger.trail || [];
+      var trail = this.scene.trailUnderPoint( finger.point ) || new scenery.Trail( this.scene );
+      var oldTrail = finger.trail || new scenery.Trail( this.scene );
       
       var branchIndex;
       
@@ -145,7 +143,6 @@ var scenery = scenery || {};
     
     cancelEvent: function( finger, event ) {
       var trail = this.scene.trailUnderPoint( finger.point );
-      var oldTrail = finger.trail || [];
       
       this.dispatchEvent( trail, 'cancel', finger, event );
       
@@ -157,10 +154,11 @@ var scenery = scenery || {};
       this.dispatchToFinger( type, finger, event );
       
       // if not yet handled, run through the trail in order to see if one of them will handle the event
+      // at the base of the trail should be the scene node, so the scene will be notified last
       this.dispatchToTargets( trail, type, finger, event );
       
       // if not yet handled, run through the scene's listeners
-      this.dispatchToScene( type, finger, event );
+      // this.dispatchToScene( type, finger, event );
     },
     
     dispatchToFinger: function( type, finger, event ) {
@@ -198,23 +196,23 @@ var scenery = scenery || {};
           }
         }
       }
-    },
+    }
     
-    dispatchToScene: function( type, finger, event ) {
-      var sceneListeners = this.scene.getInputListeners();
-      for ( var i = 0; i < sceneListeners.length; i++ ) {
-        var listener = sceneListeners[i];
+    // dispatchToScene: function( type, finger, event ) {
+    //   var sceneListeners = this.scene.getInputListeners();
+    //   for ( var i = 0; i < sceneListeners.length; i++ ) {
+    //     var listener = sceneListeners[i];
         
-        if ( listener[type] ) {
-          // if a listener returns true, don't handle any more
-          var handled = !!( listener[type]( finger, event ) );
+    //     if ( listener[type] ) {
+    //       // if a listener returns true, don't handle any more
+    //       var handled = !!( listener[type]( finger, event ) );
           
-          if ( handled ) {
-            return;
-          }
-        }
-      }
-    },
+    //       if ( handled ) {
+    //         return;
+    //       }
+    //     }
+    //   }
+    // },
   };
   
   Input.Finger = function() {

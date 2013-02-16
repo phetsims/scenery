@@ -357,7 +357,7 @@ var scenery = scenery || {};
       
       // didn't hit our children, so check ourself as a last resort
       if ( this._selfBounds.containsPoint( localPoint ) && this.containsPointSelf( localPoint ) ) {
-        return new scenery.Trail( [ this ] );
+        return new scenery.Trail( this );
       }
       
       // signal no hit
