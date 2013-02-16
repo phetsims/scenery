@@ -19,9 +19,6 @@ var scenery = scenery || {};
     // main layers in a scene
     this.layers = [];
     
-    // listeners that will be triggered by input events if they are not handled by the associated finger or on the trail
-    this.inputListeners = [];
-    
     this.main = main;
     
     this.sceneBounds = new phet.math.Bounds2( 0, 0, main.width(), main.height() );
@@ -200,23 +197,6 @@ var scenery = scenery || {};
     this.main.height( height );
     this.sceneBounds = new phet.math.Bounds2( 0, 0, width, height );
     this.rebuildLayers(); // TODO: why?
-  };
-  
-  Scene.prototype.addInputListener = function( listener ) {
-    phet.assert( !_.contains( this.inputListeners, listener ) );
-    
-    this.inputListeners.push( listener );
-  };
-  
-  Scene.prototype.removeInputListener = function( listener ) {
-    var index = _.indexOf( this.inputListeners, listener );
-    phet.assert( index !== -1 );
-    
-    this.inputListeners.splice( index, 1 );
-  };
-  
-  Scene.prototype.getInputListeners = function() {
-    return this.inputListeners.slice( 0 ); // defensive copy
   };
   
   Scene.prototype.initializeStandaloneEvents = function() {
