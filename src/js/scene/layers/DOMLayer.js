@@ -36,7 +36,7 @@ var scenery = scenery || {};
   DOMLayer.prototype = _.extend( {}, scenery.Layer.prototype, {
     constructor: DOMLayer,
     
-    render: function( scene ) {
+    render: function( scene, args ) {
       var state = new scenery.RenderState( scene );
       state.layer = this;
       

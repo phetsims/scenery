@@ -77,7 +77,7 @@ var scenery = scenery || {};
   Scene.prototype = phet.Object.create( scenery.Node.prototype );
   Scene.prototype.constructor = Scene;
   
-  Scene.prototype.updateScene = function() {
+  Scene.prototype.updateScene = function( args ) {
     // validating bounds, similar to Piccolo2d
     this.validateBounds();
     this.validatePaint();
@@ -90,7 +90,7 @@ var scenery = scenery || {};
     var scene = this;
     
     _.each( this.layers, function( layer ) {
-      layer.render( this );
+      layer.render( this, args );
     } );
   };
   

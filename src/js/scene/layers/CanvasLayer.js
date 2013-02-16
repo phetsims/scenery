@@ -48,8 +48,13 @@ var scenery = scenery || {};
   CanvasLayer.prototype = _.extend( {}, scenery.Layer.prototype, {
     constructor: CanvasLayer,
     
-    // state should be fresh, with nothing applied yet
-    render: function( scene ) {
+    /*
+     * Renders the canvas layer from the scene
+     * 
+     * Supported args:
+     
+     */
+    render: function( scene, args ) {
       var state = new scenery.RenderState( scene );
       state.layer = this;
       
@@ -58,6 +63,12 @@ var scenery = scenery || {};
       
       // reset the internal styles so they match the defaults that should be present
       this.resetStyles();
+      
+      var visibleDirtyBounds = this.dirtyBounds.intersection( scene.sceneBounds );
+      
+      if ( !window.thisDoesNotExist ) {
+        throw new Error( 'add bounds and clip handling here, args should allow for all relevant variations' );
+      }
       
       // dirty bounds (clear, possibly set restricted bounds and handling for that)
       // visibility checks
