@@ -28,16 +28,34 @@ var scenery = scenery || {};
       }
     },
     
-    afterSelf: function( trail, layerState ) {
-      // no-op, and possibly not used
-    },
+    // afterSelf: function( trail, layerState ) {
+    //   // no-op, and possibly not used
+    // },
     
-    betweenChildren: function( trail, layerState ) {
-      // no-op, and possibly not used
-    },
+    // betweenChildren: function( trail, layerState ) {
+    //   // no-op, and possibly not used
+    // },
     
     exit: function( trail, layerState ) {
       // currently a no-op
+    }
+  };
+  
+  scenery.SeparateLayerStrategy = {
+    enter: function( trail, layerState ) {
+      // trigger a switch to what we already have
+      layerState.switchToType( trail, layerState.getCurrentLayerType() );
+      
+      // execute the default strategy afterwards
+      scenery.DefaultLayerStrategy.enter( trail, layerState );
+    },
+    
+    exit: function( trail, layerState ) {
+      // trigger a switch to what we already have
+      layerState.switchToType( trail, layerState.getCurrentLayerType() );
+      
+      // execute the default strategy afterwards
+      scenery.DefaultLayerStrategy.exit( trail, layerState );
     }
   };
   
