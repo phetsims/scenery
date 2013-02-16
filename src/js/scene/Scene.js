@@ -145,6 +145,12 @@ var scenery = scenery || {};
     } );
   };
   
+  Scene.prototype.dispose = function() {
+    this.disposeLayers();
+    
+    throw new Error( 'unimplemented dispose: clear event handlers if added' );
+  };
+  
   Scene.prototype.disposeLayers = function() {
     var scene = this;
     
