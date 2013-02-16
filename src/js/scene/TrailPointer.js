@@ -183,7 +183,7 @@ var scenery = scenery || {};
     // treats the pointer as render-ordered
     eachNodeBetween: function( other, callback ) {
       phet.assert( this.compareRender( other ) === -1, 'TrailPointer.eachNodeBetween pointers out of order, possibly in both meanings of the phrase!' );
-      phet.assert( this.trail[0] === other.trail[0], 'TrailPointer.eachNodeBetween takes pointers with the same root' );
+      phet.assert( this.trail.rootNode() === other.trail.rootNode(), 'TrailPointer.eachNodeBetween takes pointers with the same root' );
       
       // sanity check TODO: remove later
       this.trail.reindex();
@@ -203,10 +203,7 @@ var scenery = scenery || {};
     depthFirstUntil: function( other, callback, excludeEndpoints ) {
       // make sure this pointer is before the other
       phet.assert( this.compareNested( other ) === -1, 'TrailPointer.depthFirstUntil pointers out of order, possibly in both meanings of the phrase!' );
-      if ( this.trail[0] !== other.trail[0] ) {
-        debugger;
-      }
-      phet.assert( this.trail[0] === other.trail[0], 'TrailPointer.depthFirstUntil takes pointers with the same root' );
+      phet.assert( this.trail.rootNode() === other.trail.rootNode(), 'TrailPointer.depthFirstUntil takes pointers with the same root' );
       
       // sanity check TODO: remove later
       this.trail.reindex();

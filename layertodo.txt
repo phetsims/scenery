@@ -52,7 +52,9 @@ Organize unit tests
 Issues
 ======
 
-Next: Trail function as a replacement for the indexing of the current strategy (and negative indices). probably better perf
+Canvas: proper rendering with clearing and all missing features
+DOM: rendering
+
 Next: LayerBoundaries prototype? Might be useful as a toString(), and for handling queries
 
 For canvas rendering, how to handle restricted bounds in depthFirstUntil? Generalize, and allow a return flag to indicate not hitting children?

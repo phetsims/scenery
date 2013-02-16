@@ -62,10 +62,6 @@ var scenery = scenery || {};
       // dirty bounds (clear, possibly set restricted bounds and handling for that)
       // visibility checks
       this.recursiveRender( state );
-      
-      if ( !window.thisBetterNotExistItIsJustBecauseClosureWarnsAboutUnreachableCode ) {
-        throw new Error( 'CanvasLayer.render needs to be flushed out more. render everything here' );
-      }
     },
     
     recursiveRender: function( state ) {
@@ -81,9 +77,6 @@ var scenery = scenery || {};
           node.enterState( state );
           
           if ( node._visible ) {
-            if ( !window.letmecompile ) {
-              throw new Error( 'this is bad, we just need to be able to skip an entire subtree in the iteration. how else to handle restricted bounds also?' );
-            }
             node.renderSelf( state );
             
             // TODO: restricted bounds rendering, and possibly generalize depthFirstUntil

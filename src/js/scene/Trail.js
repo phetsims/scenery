@@ -57,6 +57,15 @@ var scenery = scenery || {};
       return new Trail( this );
     },
     
+    get: function( index ) {
+      if ( index >= 0 ) {
+        return this.nodes[index];
+      } else {
+        // negative index goes from the end of the array
+        return this.nodes[this.nodes.length + index]
+      }
+    },
+    
     isEmpty: function() {
       return this.nodes.length === 0;
     },
@@ -151,12 +160,17 @@ var scenery = scenery || {};
       return true;
     },
     
+    // TODO: phase out in favor of get()
     nodeFromTop: function( offset ) {
       return this.nodes[this.length - 1 - offset];
     },
     
     lastNode: function() {
       return this.nodeFromTop( 0 );
+    },
+    
+    rootNode: function() {
+      return this.nodes[0];
     },
     
     // returns the previous graph trail in the order of self-rendering
