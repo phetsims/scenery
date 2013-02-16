@@ -28,7 +28,7 @@ var scenery = scenery || {};
       
       var state = this;
       
-      startPointer.eachPointerBetween( endPointer, function( pointer ) {
+      startPointer.depthFirstUntil( endPointer, function( pointer ) {
         var node = pointer.trail.lastNode();
         
         if ( pointer.isBefore ) {

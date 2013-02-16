@@ -69,7 +69,7 @@ var scenery = scenery || {};
     },
     
     recursiveRender: function( state ) {
-      this.getStartPointer().eachPointerBetween( this.getEndPointer(), function( pointer ) {
+      this.getStartPointer().depthFirstUntil( this.getEndPointer(), function( pointer ) {
         // handle render here
         
         var node = pointer.trail.lastNode();
@@ -83,7 +83,7 @@ var scenery = scenery || {};
             }
             node.renderSelf( state );
             
-            // TODO: restricted bounds rendering, and possibly generalize eachPointerBetween
+            // TODO: restricted bounds rendering, and possibly generalize depthFirstUntil
             // var children = node.children;
             
             // check if we need to filter the children we render, and ignore nodes with few children (but allow 2, since that may prevent branches)

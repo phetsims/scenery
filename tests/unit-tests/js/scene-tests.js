@@ -486,45 +486,45 @@
       equal( backwardsCopy.compareNested( a ), 0, 'backwardsPointerCheck ' + i + ' to ' + ( i - 1 ) );
     }
     
-    // exhaustively check eachPointerBetween inclusive
+    // exhaustively check depthFirstUntil inclusive
     for ( var i = 0; i < pointers.length; i++ ) {
       for ( var j = i + 1; j < pointers.length; j++ ) {
         // i < j guaranteed
         var contents = [];
-        pointers[i].eachPointerBetween( pointers[j], function( pointer ) { contents.push( pointer.copy() ); }, false );
-        equal( contents.length, j - i + 1, 'eachPointerBetween inclusive ' + i + ',' + j + ' count check' );
+        pointers[i].depthFirstUntil( pointers[j], function( pointer ) { contents.push( pointer.copy() ); }, false );
+        equal( contents.length, j - i + 1, 'depthFirstUntil inclusive ' + i + ',' + j + ' count check' );
         
         // do an actual pointer to pointer comparison
         var isOk = true;
         for ( var k = 0; k < contents.length; k++ ) {
           var comparison = contents[k].compareNested( pointers[i+k] );
           if ( comparison !== 0 ) {
-            equal( comparison, 0, 'eachPointerBetween inclusive ' + i + ',' + j + ',' + k + ' comparison check ' + contents[k].trail.indices.join() + ' - ' + pointers[i+k].trail.indices.join() );
+            equal( comparison, 0, 'depthFirstUntil inclusive ' + i + ',' + j + ',' + k + ' comparison check ' + contents[k].trail.indices.join() + ' - ' + pointers[i+k].trail.indices.join() );
             isOk = false;
           }
         }
-        ok( isOk, 'eachPointerBetween inclusive ' + i + ',' + j + ' comparison check' );
+        ok( isOk, 'depthFirstUntil inclusive ' + i + ',' + j + ' comparison check' );
       }
     }
     
-    // exhaustively check eachPointerBetween exclusive
+    // exhaustively check depthFirstUntil exclusive
     for ( var i = 0; i < pointers.length; i++ ) {
       for ( var j = i + 1; j < pointers.length; j++ ) {
         // i < j guaranteed
         var contents = [];
-        pointers[i].eachPointerBetween( pointers[j], function( pointer ) { contents.push( pointer.copy() ); }, true );
-        equal( contents.length, j - i - 1, 'eachPointerBetween exclusive ' + i + ',' + j + ' count check' );
+        pointers[i].depthFirstUntil( pointers[j], function( pointer ) { contents.push( pointer.copy() ); }, true );
+        equal( contents.length, j - i - 1, 'depthFirstUntil exclusive ' + i + ',' + j + ' count check' );
         
         // do an actual pointer to pointer comparison
         var isOk = true;
         for ( var k = 0; k < contents.length; k++ ) {
           var comparison = contents[k].compareNested( pointers[i+k+1] );
           if ( comparison !== 0 ) {
-            equal( comparison, 0, 'eachPointerBetween exclusive ' + i + ',' + j + ',' + k + ' comparison check ' + contents[k].trail.indices.join() + ' - ' + pointers[i+k].trail.indices.join() );
+            equal( comparison, 0, 'depthFirstUntil exclusive ' + i + ',' + j + ',' + k + ' comparison check ' + contents[k].trail.indices.join() + ' - ' + pointers[i+k].trail.indices.join() );
             isOk = false;
           }
         }
-        ok( isOk, 'eachPointerBetween exclusive ' + i + ',' + j + ' comparison check' );
+        ok( isOk, 'depthFirstUntil exclusive ' + i + ',' + j + ' comparison check' );
       }
     }
   } );

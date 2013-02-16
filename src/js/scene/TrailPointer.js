@@ -192,7 +192,6 @@ var scenery = scenery || {};
       throw new Error( 'eachNodeBetween unimplemented' );
     },
     
-    // TODO: consider rename to depthFirstBetween
     /*
      * Recursively (depth-first) iterates over all pointers between this pointer and 'other', calling
      * callback( pointer ) for each pointer. If excludeEndpoints is truthy, the callback will not be
@@ -201,7 +200,7 @@ var scenery = scenery || {};
      * If the callback returns a truthy value, the subtree for the current pointer will be skipped
      * (applies only to before-pointers)
      */
-    eachPointerBetween: function( other, callback, excludeEndpoints ) {
+    depthFirstUntil: function( other, callback, excludeEndpoints ) {
       // make sure this pointer is before the other
       phet.assert( this.compareNested( other ) === -1, 'TrailPointer.eachBetween pointers out of order, possibly in both meanings of the phrase!' );
       phet.assert( this.trail[0] === other.trail[0], 'TrailPointer.eachBetween takes pointers with the same root' );

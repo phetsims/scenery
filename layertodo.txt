@@ -36,7 +36,7 @@ Trail:
   Cleanup of nestedForwards/nestedBackwards, possibly based on a Side-like implementation. Decent code duplication!
   
   Better name for copy() ?
-  eachPointerBetween should possibly have option for defensive copies? hrm
+  depthFirstUntil should possibly have option for defensive copies? hrm
 
 
 Rendering:
@@ -52,7 +52,7 @@ Organize unit tests
 Issues
 ======
 
-For canvas rendering, how to handle restricted bounds in eachPointerBetween? Generalize, and allow a return flag to indicate not hitting children?
+For canvas rendering, how to handle restricted bounds in depthFirstUntil? Generalize, and allow a return flag to indicate not hitting children?
 
 Update tests for rendering comparison, so for each step we either apply all changes and render, then one at a time rendering inbetween
 
