@@ -186,6 +186,9 @@ var scenery = scenery || {};
         this.context.save();
         this.context.setTransform( 1, 0, 0, 1, 0, 0 );
         this.context.clearRect( bounds.x(), bounds.y(), bounds.width(), bounds.height() );
+        // use this for debugging cleared (dirty) regions for now
+        // this.context.fillStyle = '#' + Math.floor( Math.random() * 0xffffff ).toString( 16 );
+        // this.context.fillRect( bounds.x(), bounds.y(), bounds.width(), bounds.height() );
         this.context.restore();
       }
     },
