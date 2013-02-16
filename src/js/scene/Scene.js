@@ -14,7 +14,7 @@ var scenery = scenery || {};
   scenery.Scene = function( main, params ) {
     scenery.Node.call( this, params );
     
-    var that = this;
+    var scene = this;
     
     // main layers in a scene
     this.layers = [];
@@ -38,6 +38,9 @@ var scenery = scenery || {};
         var child = args.child;
         var index = args.index;
         var trail = args.trail;
+        
+        // TODO: improve later
+        scene.rebuildLayers();
       },
       
       removeChild: function( args ) {
@@ -45,6 +48,8 @@ var scenery = scenery || {};
         var child = args.child;
         var index = args.index;
         var trail = args.trail;
+        
+        scene.rebuildLayers();
       },
       
       dirtyBounds: function( args ) {
@@ -52,11 +57,15 @@ var scenery = scenery || {};
         var localBounds = args.bounds;
         var transform = args.transform;
         var trail = args.trail;
+        
+        scene.layerLookup( trail ).markDirtyRegion( node, localBounds, transform, trail );
       },
       
       layerRefresh: function( args ) {
         var node = args.node;
         var trail = args.trail;
+        
+        scene.rebuildLayers();
       }
     };
     
@@ -110,7 +119,10 @@ var scenery = scenery || {};
     
     this.layers = _.map( layerEntries, function( entry ) {
       var layer = entry.type.createLayer( layerArgs );
-      layer.startTrail = entry.startTrail;
+      layer.startPointer = entry.startPointer;
+      layer.endPointer = entry.endPointer;
+      layer.startSelfTrail = entry.startSelfTrail;
+      layer.endSelfTrail = entry.endSelfTrail;
       return layer;
     } );
     

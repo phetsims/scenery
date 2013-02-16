@@ -3,6 +3,8 @@
 var scenery = scenery || {};
 
 (function(){
+  
+  // TODO: remove rats-nest of mutable shared state that we have here, or clearly doc what are transient instances vs immutable
   scenery.LayerState = function() {
     this.preferredLayerTypes = [];
     
@@ -29,6 +31,7 @@ var scenery = scenery || {};
       var state = this;
       
       startPointer.depthFirstUntil( endPointer, function( pointer ) {
+        this.currentPointer = pointer;
         var node = pointer.trail.lastNode();
         
         if ( pointer.isBefore ) {
@@ -38,13 +41,19 @@ var scenery = scenery || {};
         }
       }, false ); // don't exclude endpoints
       
-      return this.layerEntries;
+      this.currentPointer = endPointer;
+      this.finishLayer( endPointer );
+      
+      return this.layerChangeEntries;
     },
     
     resetInternalState: function() {
-      this.layerEntries = [];
+      this.layerChangeEntries = [];
       this.typeDirty = true;
       this.nextLayerType = null;
+      
+      this.currentLayerStartPointer = null;
+      this.lastSelfTrail = null;
     },
     
     pushPreferredLayerType: function( layerType ) {
@@ -55,17 +64,10 @@ var scenery = scenery || {};
       this.preferredLayerTypes.pop();
     },
     
-    getPreferredLayerType: function() {
-      if ( this.preferredLayerTypes.length !== 0 ) {
-        return this.preferredLayerTypes[this.preferredLayerTypes.length - 1];
-      } else {
-        return null;
-      }
-    },
-    
     switchToType: function( trail, layerType ) {
       this.typeDirty = true;
       this.nextLayerType = layerType;
+      this.currentLayerStartPointer = currentPointer.copy();
     },
     
     // called so that we can finalize a layer switch (instead of collapsing unneeded layers)
@@ -73,11 +75,42 @@ var scenery = scenery || {};
       if ( this.typeDirty ) {
         this.layerChange( trail );
       }
+      this.lastSelfTrail = trail.copy();
     },
     
     // can be null to indicate that there is no current layer type
     getCurrentLayerType: function() {
       return this.nextLayerType;
+    },
+    
+    finishLayer: function( endPointer ) {
+      if ( this.layerChangeEntries.length ) {
+        var entry = this.layerChangeEntries[this.layerChangeEntries.length-1];
+        entry.endSelfTrail = this.lastSelfTrail;
+        entry.endPointer = endPointer;
+      }
+    },
+    
+    layerChange: function( firstSelfTrail ) {
+      this.typeDirty = false;
+      
+      var previousPointer = this.currentLayerStartPointer.copy();
+      previousPointer.nestedBackwards();
+      this.finishLayer( previousPointer );
+      
+      this.layerChangeEntries.push( {
+        type: this.nextLayerType,
+        startPointer: this.currentLayerStartPointer.copy(),
+        startSelfTrail: firstSelfTrail,
+      } );
+    },
+    
+    getPreferredLayerType: function() {
+      if ( this.preferredLayerTypes.length !== 0 ) {
+        return this.preferredLayerTypes[this.preferredLayerTypes.length - 1];
+      } else {
+        return null;
+      }
     },
     
     bestPreferredLayerTypeFor: function( defaultTypeOptions ) {
@@ -90,15 +123,6 @@ var scenery = scenery || {};
       
       // none of our stored preferred layer types are able to support any of the default type options
       return null;
-    },
-    
-    layerChange: function( firstSelfTrail ) {
-      this.typeDirty = false;
-      
-      this.layerEntries.push( {
-        type: this.nextLayerType,
-        startTrail: firstSelfTrail
-      } );
     }
   };
 })();

@@ -77,6 +77,10 @@ var scenery = scenery || {};
     dispose: function() {
       throw new Error( 'Layer.dispose unimplemented' );
     },
+    
+    markDirtyRegion: function( node, localBounds, transform, trail ) {
+      throw new Error( 'Layer.markDirtyRegion unimplemented' );
+    }
   };
 })();
 

@@ -243,7 +243,9 @@ var scenery = scenery || {};
       return !this.dirtyBounds.isEmpty();
     },
     
-    markDirtyRegion: function( bounds ) {
+    markDirtyRegion: function( node, localBounds, transform, trail ) {
+      var bounds = transform.transformBounds2( localBounds );
+      
       // TODO: for performance, consider more than just a single dirty bounding box
       this.dirtyBounds = this.dirtyBounds.union( bounds.dilated( 1 ).roundedOut() );
     },
