@@ -48,33 +48,41 @@ var scenery = scenery || {};
   CanvasLayer.prototype = _.extend( {}, scenery.Layer.prototype, {
     constructor: CanvasLayer,
     
-    // called when rendering switches to this layer
-    initialize: function( renderState ) {
-      // first, switch to an identity matrix so we can apply the global coordinate clipping shapes
-      this.context.setTransform( 1, 0, 0, 1, 0, 0 );
-      
-      // save now, so that we can clear the clipping shapes later
-      this.context.save();
-      
+    render: function( state ) {
+      state.layer = this;
       var context = this.context;
+      var layer = this;
       
-      // apply clipping shapes in the global coordinate frame
-      _.each( renderState.clipShapes, function( shape ) {
-        context.beginPath();
-        shape.writeToContext( context );
-        context.clip();
+      // if there are no clip shapes right now, we can skip the save/restore, since it will happen on the push/pop of clip shapes
+      var needsStateRestoration = state.clipShapes.length > 0;
+      
+      // first, switch to an identity matrix so we can apply the global coordinate clipping shapes
+      context.setTransform( 1, 0, 0, 1, 0, 0 );
+      
+      if ( needsStateRestoration ) {
+        context.save();
+      }
+      
+      _.each( state.clipShapes, function( shape ) {
+        layer.writeClipShape( shape );
       } );
       
-      // set the context's transform to the current transformation matrix
-      var matrix = renderState.transform.getMatrix().canvasSetTransform( this.context );
+      // set the context's transform to the current transformation matrix (after we apply the clipping shapes in the global bounds)
+      state.transform.getMatrix().canvasSetTransform( this.context );
       
-      // reset the styles so that they are re-done
+      // reset the internal styles so they match the defaults that should be present
       this.resetStyles();
-    },
-    
-    // called when rendering switches away from this layer
-    cooldown: function( renderState ) {
-      this.context.restore();
+      
+      // dirty bounds (clear, possibly set restricted bounds and handling for that)
+      // visibility checks
+      
+      if ( !window.thisBetterNotExistItIsJustBecauseClosureWarnsAboutUnreachableCode ) {
+        throw new Error( 'CanvasLayer.render needs to be flushed out more. render everything here' );
+      }
+      
+      if ( needsStateRestoration ) {
+        context.restore();
+      }
     },
     
     dispose: function() {
@@ -111,6 +119,11 @@ var scenery = scenery || {};
       // store the current state, since browser support for context.resetClip() is not yet in the stable browser versions
       this.context.save();
       
+      this.writeClipShape( shape );
+    },
+    
+    // canvas-specific
+    writeClipShape: function( shape ) {
       // set up the clipping
       this.context.beginPath();
       shape.writeToContext( this.context );
@@ -199,6 +212,27 @@ var scenery = scenery || {};
     // TODO: note for DOM we can do https://developer.mozilla.org/en-US/docs/HTML/Canvas/Drawing_DOM_objects_into_a_canvas
     renderToCanvas: function( canvas, context, delayCounts ) {
       context.drawImage( this.canvas, 0, 0 );
+    },
+    
+    isDirty: function() {
+      return !this.dirtyBounds.isEmpty();
+    },
+    
+    markDirtyRegion: function( bounds ) {
+      // TODO: for performance, consider more than just a single dirty bounding box
+      this.dirtyBounds = this.dirtyBounds.union( bounds.dilated( 1 ).roundedOut() );
+    },
+    
+    resetDirtyRegions: function() {
+      this.dirtyBounds = Bounds2.NOTHING;
+    },
+    
+    prepareDirtyRegions: function() {
+      this.prepareBounds( this.dirtyBounds );
+    },
+    
+    getDirtyBounds: function() {
+      return this.dirtyBounds;
     }
   } );
 })();

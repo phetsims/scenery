@@ -238,6 +238,8 @@
     
     sceneA.rebuildLayers();
     
+    // console.log( sceneA.layers );
+    
     
     var a = new scenery.Scene( $( '#main' ) );
     var b = new scenery.Scene( $( '#secondary' ) );

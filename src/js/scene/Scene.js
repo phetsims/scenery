@@ -95,7 +95,16 @@ var scenery = scenery || {};
   }
   
   Scene.prototype.fullRenderCore = function() {
-    throw new Error( 'unimplemented fullRenderCore' );
+    // bail if there are no layers. consider a warning?
+    if ( !this.layers.length ) {
+      return;
+    }
+    
+    var state = new scenery.RenderState( this );
+    
+    _.each( this.layers, function( layer ) {
+      layer.render( state );
+    } );
   };
   
   Scene.prototype.rebuildLayers = function() {

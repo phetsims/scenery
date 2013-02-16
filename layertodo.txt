@@ -71,6 +71,11 @@ Node:
 
 Appended $ to jquery-wrapped elements or lists
 
+RenderState - consider stack-based transforms
+
+Clip shapes that are nested are probably broken
+CanvasLayer styles are probably broken - resetStyles seems fishy if not in sync (i.e. lineCap)
+
 
 Design
 ======

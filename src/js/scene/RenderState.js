@@ -23,9 +23,6 @@ var scenery = scenery || {};
     // clipping shapes should be added in reference to the global coordinate frame
     this.clipShapes = [];
     
-    // whether to allow switching layers mid-render
-    this.multiLayerRender = true;
-    
     // when non-null, children not intersecting the global bounds here may not be rendered for efficiency
     this.childRestrictedBounds = null;
   };
@@ -51,28 +48,6 @@ var scenery = scenery || {};
       
       if ( this.layer ) {
         this.layer.popClipShape();
-      }
-    },
-    
-    switchToLayer: function( layer ) {
-      // don't change layers if it's not supported (gracefully handles single-layer rendering at a time)
-      if ( this.layer && !this.multiLayerRender ) {
-        return;
-      }
-      
-      if ( this.layer ) {
-        this.layer.cooldown();
-      }
-      
-      this.layer = layer;
-      
-      // give the layer the current state so it can initialize itself properly
-      layer.initialize( this );
-    },
-    
-    finish: function() {
-      if ( this.layer ) {
-        this.layer.cooldown();
       }
     },
     

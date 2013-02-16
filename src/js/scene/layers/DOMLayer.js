@@ -36,14 +36,12 @@ var scenery = scenery || {};
   DOMLayer.prototype = _.extend( {}, scenery.Layer.prototype, {
     constructor: DOMLayer,
     
-    // called when rendering switches to this layer
-    initialize: function( renderState ) {
-      // TODO: clipping
-    },
-    
-    // called when rendering switches away from this layer
-    cooldown: function( renderState ) {
+    render: function( state ) {
+      state.layer = this;
       
+      // TODO: clipping?
+      
+      throw new Error( 'DOMLayer.render needs to be flushed out more' );
     },
     
     dispose: function() {
@@ -72,10 +70,6 @@ var scenery = scenery || {};
     
     popClipShape: function() {
       // TODO: clipping
-    },
-    
-    prepareBounds: function( globalBounds ) {
-      // null op
     },
     
     // TODO: note for DOM we can do https://developer.mozilla.org/en-US/docs/HTML/Canvas/Drawing_DOM_objects_into_a_canvas

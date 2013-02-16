@@ -39,17 +39,21 @@ var scenery = scenery || {};
     * Abstract
     *----------------------------------------------------------------------------*/
     
-    // called before the layer is rendered to, with a specific render state
-    initialize: function( renderState ) {
-      throw new Error( 'Layer.initialize unimplemented' );
-    },
-    
-    // called when rendering switches away from this layer
-    cooldown: function( renderState ) {
-      throw new Error( 'Layer.cooldown unimplemented' );
+    render: function( state ) {
+      state.layer = this;
+      
+      this.initialize( state );
+      
+      // do stuff in the middle here
+      
+      // dirty bounds (clear, possibly set restricted bounds and handling for that)
+      // visibility checks
+      
+      this.cooldown();
     },
     
     // TODO: consider a stack-based model for transforms?
+    // TODO: is this necessary? verify with the render state
     applyTransformationMatrix: function( matrix ) {
       throw new Error( 'Layer.applyTransformationMatrix unimplemented' );
     },
@@ -67,11 +71,6 @@ var scenery = scenery || {};
       throw new Error( 'Layer.popClipShape unimplemented' );
     },
     
-    // prepare a specific region for redrawing. this should clear the region with transparency if it makes sense
-    prepareBounds: function( globalBounds ) {
-      throw new Error( 'Layer.prepareBounds unimplemented' );
-    },
-    
     renderToCanvas: function( canvas, context, delayCounts ) {
       throw new Error( 'Layer.renderToCanvas unimplemented' );
     },
@@ -79,34 +78,6 @@ var scenery = scenery || {};
     dispose: function() {
       throw new Error( 'Layer.dispose unimplemented' );
     },
-    
-    /*---------------------------------------------------------------------------*
-    * Implementation
-    *----------------------------------------------------------------------------*/
-    
-    // TODO: reconsider having the dirty bounds baked into the base class!
-    
-    isDirty: function() {
-      return !this.dirtyBounds.isEmpty();
-    },
-    
-    markDirtyRegion: function( bounds ) {
-      // TODO: for performance, consider more than just a single dirty bounding box
-      this.dirtyBounds = this.dirtyBounds.union( bounds.dilated( 1 ).roundedOut() );
-    },
-    
-    resetDirtyRegions: function() {
-      this.dirtyBounds = Bounds2.NOTHING;
-    },
-    
-    prepareDirtyRegions: function() {
-      this.prepareBounds( this.dirtyBounds );
-    },
-    
-    getDirtyBounds: function() {
-      return this.dirtyBounds;
-    }
-    
   };
 })();
 
