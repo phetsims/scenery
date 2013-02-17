@@ -60,7 +60,6 @@ Code:
     Organize unit tests into separate files, etc.
         Lint unit tests
     Validation of example HTML, CSS, etc.
-    * Move snapshots into upper-level directory to make code search-and-replace easier
     Either use Require.js or bake in support. Probably good to do for reducing code size with simulations.
         Almond for fallbacks?
     Switch to jQuery 2 (wait for a stable build?)

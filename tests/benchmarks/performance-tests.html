@@ -40,8 +40,8 @@
       var snapshots = [
         { name: 'current', libs: [ '../../scenery-min.js' ], tests: [ 'js/perf-current.js' ] },
         // { name: 'control', libs: [ '../../scenery-min.js' ], tests: [ 'js/perf-current.js' ] }
-        { name: '130210-7dbc7292b6', libs: [ 'snapshots/scenery-min-130210-7dbc7292b6.js' ], tests: [ 'snapshots/perf-130210-7dbc7292b6.js' ] },
-        { name: '130202-515bfa9d9a', libs: [ 'snapshots/scenery-min-130202-515bfa9d9a.js' ], tests: [ 'snapshots/perf-130202-515bfa9d9a.js' ] }
+        { name: '130210-7dbc7292b6', libs: [ '../../snapshots/scenery-min-130210-7dbc7292b6.js' ], tests: [ '../../snapshots/perf-130210-7dbc7292b6.js' ] },
+        { name: '130202-515bfa9d9a', libs: [ '../../snapshots/scenery-min-130202-515bfa9d9a.js' ], tests: [ '../../snapshots/perf-130202-515bfa9d9a.js' ] }
       ];
       
       var performance = new marks.Performance( new marks.PerformanceTableReport( $( '#profiling-results' )[0] ) );
