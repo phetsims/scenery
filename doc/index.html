@@ -579,7 +579,8 @@ window.requestAnimationFrame( tick, div[0] );
       
       <script type="text/javascript">
         $( window ).ready( function() {
-          var scene = new scenery.Scene( $( '#input-mouseover' ) );
+          var $main = $( '#input-mouseover' );
+          var scene = new scenery.Scene( $main );
           
           // hook up event listeners just on this scene (not the whole document)
           scene.initializeStandaloneEvents();
@@ -656,95 +657,98 @@ window.requestAnimationFrame( tick, div[0] );
           
           // repaint loop.
           function tick() {
-            window.requestAnimationFrame( tick, scene.main[0] );
+            window.requestAnimationFrame( tick, $main[0] );
             scene.updateScene();
           }
-          window.requestAnimationFrame( tick, scene.main[0] );
+          window.requestAnimationFrame( tick, $main[0] );
         } );
       </script>
       
       <pre class="brush: js">
-var scene = new scenery.Scene( $( '#input-mouseover' ) );
-
-// hook up event listeners just on this scene (not the whole document)
-scene.initializeStandaloneEvents();
-
-var count = 0;
-var colors = [ '000000', 'ff0000', '00ff00', '0000ff', 'ffff00', '00ffff', 'ff00ff', 'ffffff' ];
-var maxColor = colors.length - 1;
-
-// TODO: get faster text bounds detection. it's too slow right now on the iPad
-var labelPrefix = 'Fingers in hexagon: ';
-// var label = new scenery.Text( labelPrefix + count, {
-//   left: 20,
-//   top: 20,
-//   font: '20px sans-serif'
-// } );
-// scene.addChild( label );
-
-// a big hexagon in the center. stroke not included in the hit region by default
-var node = new scenery.Path( {
-  shape: scenery.Shape.regularPolygon( 6, 150 ),
-  fill: colors[count],
-  stroke: '#000000',
-  centerX: 200,
-  centerY: 200
-} );
-scene.addChild( node );
-
-// update our label and color
-function updateFingers() {
-  node.fill = colors[ Math.min( count, maxColor ) ];
-  // label.setText( labelPrefix + count );
-  $( '#hex-finger-count' ).text( labelPrefix + count );
-}
-
-// listener fired whenever the event occurs over the node
-// below are the main 6 input events that are fired
-node.addInputListener( {
-  // mousedown or touchstart (finger pressed down over the node)
-  down: function( finger, event ) {
-    count++;
-    updateFingers();
-  },
+$( window ).ready( function() {
+  var $main = $( '#input-mouseover' );
+  var scene = new scenery.Scene( $main );
   
-  // mouseup or touchend (finger lifted from over the node)
-  up: function( finger, event ) {
-    count--;
-    updateFingers();
-  },
+  // hook up event listeners just on this scene (not the whole document)
+  scene.initializeStandaloneEvents();
   
-  // triggered from mousemove or touchmove (finger moved over the node from outside)
-  enter: function( finger, event ) {
-    count++;
-    updateFingers();
-  },
+  var count = 0;
+  var colors = [ '000000', 'ff0000', '00ff00', '0000ff', 'ffff00', '00ffff', 'ff00ff', 'ffffff' ];
+  var maxColor = colors.length - 1;
   
-  // triggered from mousemove or touchmove (finger moved outside the node from inside)
-  exit: function( finger, event ) {
-    count--;
-    updateFingers();
-  },
+  // TODO: get faster text bounds detection. it's too slow right now on the iPad
+  var labelPrefix = 'Fingers in hexagon: ';
+  // var label = new scenery.Text( labelPrefix + count, {
+  //   left: 20,
+  //   top: 20,
+  //   font: '20px sans-serif'
+  // } );
+  // scene.addChild( label );
   
-  // platform-specific trigger.
-  // on iPad Safari, cancel can by triggered by putting 4 fingers down and then dragging with all 4
-  cancel: function( finger, event ) {
-    count--;
-    updateFingers();
-  },
+  // a big hexagon in the center. stroke not included in the hit region by default
+  var node = new scenery.Path( {
+    shape: scenery.Shape.regularPolygon( 6, 150 ),
+    fill: colors[count],
+    stroke: '#000000',
+    centerX: 200,
+    centerY: 200
+  } );
+  scene.addChild( node );
   
-  // mousemove (fired AFTER enter/exit events if applicable)
-  move: function( finger, event ) {
-    // do nothing
+  // update our label and color
+  function updateFingers() {
+    node.fill = colors[ Math.min( count, maxColor ) ];
+    // label.setText( labelPrefix + count );
+    $( '#hex-finger-count' ).text( labelPrefix + count );
   }
+  
+  // listener fired whenever the event occurs over the node
+  // below are the main 6 input events that are fired
+  node.addInputListener( {
+    // mousedown or touchstart (finger pressed down over the node)
+    down: function( finger, event ) {
+      count++;
+      updateFingers();
+    },
+    
+    // mouseup or touchend (finger lifted from over the node)
+    up: function( finger, event ) {
+      count--;
+      updateFingers();
+    },
+    
+    // triggered from mousemove or touchmove (finger moved over the node from outside)
+    enter: function( finger, event ) {
+      count++;
+      updateFingers();
+    },
+    
+    // triggered from mousemove or touchmove (finger moved outside the node from inside)
+    exit: function( finger, event ) {
+      count--;
+      updateFingers();
+    },
+    
+    // platform-specific trigger.
+    // on iPad Safari, cancel can by triggered by putting 4 fingers down and then dragging with all 4
+    cancel: function( finger, event ) {
+      count--;
+      updateFingers();
+    },
+    
+    // mousemove (fired AFTER enter/exit events if applicable)
+    move: function( finger, event ) {
+      // do nothing
+    }
+  } );
+  
+  // repaint loop.
+  function tick() {
+    window.requestAnimationFrame( tick, $main[0] );
+    scene.updateScene();
+  }
+  window.requestAnimationFrame( tick, $main[0] );
 } );
-
-// repaint loop.
-function tick() {
-  window.requestAnimationFrame( tick, scene.main[0] );
-  scene.updateScene();
-}
-window.requestAnimationFrame( tick, scene.main[0] );
       </pre>
       
       <h4>Node Dragging with Swipe-across-to-start-drag</h4>

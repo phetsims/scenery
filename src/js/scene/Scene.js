@@ -11,7 +11,7 @@ var scenery = scenery || {};
 (function(){
   "use strict";
   
-  scenery.Scene = function( main, params ) {
+  scenery.Scene = function( $main, params ) {
     scenery.Node.call( this, params );
     
     var scene = this;
@@ -19,14 +19,14 @@ var scenery = scenery || {};
     // main layers in a scene
     this.layers = [];
     
-    this.main = main;
+    this.$main = $main;
     
-    this.sceneBounds = new phet.math.Bounds2( 0, 0, main.width(), main.height() );
+    this.sceneBounds = new phet.math.Bounds2( 0, 0, $main.width(), $main.height() );
     
     // default to a canvas layer type, but this can be changed
     this.preferredSceneLayerType = scenery.LayerType.Canvas;
     
-    applyCSSHacks( main );
+    applyCSSHacks( $main );
     
     // note, arguments to the functions are mutable. don't destroy them
     this.sceneEventListener = {
@@ -113,7 +113,7 @@ var scenery = scenery || {};
     var layerEntries = state.buildLayers( new scenery.TrailPointer( new scenery.Trail( this ), true ), new scenery.TrailPointer( new scenery.Trail( this ), false ), null );
     
     var layerArgs = {
-      main: this.main,
+      $main: this.$main,
       scene: this
     };
     
@@ -194,14 +194,14 @@ var scenery = scenery || {};
   };
   
   Scene.prototype.resize = function( width, height ) {
-    this.main.width( width );
-    this.main.height( height );
+    this.$main.width( width );
+    this.$main.height( height );
     this.sceneBounds = new phet.math.Bounds2( 0, 0, width, height );
     this.rebuildLayers(); // TODO: why?
   };
   
   Scene.prototype.initializeStandaloneEvents = function() {
-    var element = this.main[0];
+    var element = this.$main[0];
     this.initializeEvents( {
       preventDefault: true,
       listenerTarget: element,

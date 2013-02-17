@@ -13,9 +13,8 @@ var scenery = scenery || {};
   
   var Bounds2 = phet.math.Bounds2;
   
-  // assumes main is wrapped with JQuery
   scenery.Layer = function( args ) {
-    this.main = args.main;
+    this.$main = args.$main;
     
     // initialize to fully dirty so we draw everything the first time
     // bounds in global coordinate frame

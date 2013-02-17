@@ -22,12 +22,12 @@ var scenery = scenery || {};
     scenery.Layer.call( this, args );
     
     var canvas = document.createElement( 'canvas' );
-    canvas.width = this.main.width();
-    canvas.height = this.main.height();
+    canvas.width = this.$main.width();
+    canvas.height = this.$main.height();
     $( canvas ).css( 'position', 'absolute' );
     
     // add this layer on top (importantly, the constructors of the layers are called in order)
-    this.main.append( canvas );
+    this.$main.append( canvas );
     
     this.canvas = canvas;
     // this.context = new scenery.DebugContext( phet.canvas.initCanvas( canvas ) );
