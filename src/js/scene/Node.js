@@ -131,6 +131,19 @@ var scenery = scenery || {};
       } );
     },
     
+    // TODO: efficiency by batching calls?
+    setChildren: function( children ) {
+      var node = this;
+      if ( this.children !== children ) {
+        _.each( this.children.slice( 0 ), function( child ) {
+          node.removeChild( node );
+        } );
+        _.each( children, function( child ) {
+          node.addChild( node );
+        } );
+      }
+    },
+    
     // remove this node from its parents
     detach: function () {
       var that = this;
