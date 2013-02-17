@@ -1,7 +1,9 @@
 
 Bugs:
     Check Firefox/Safari on Mac event handling on multiple touch events
-    UILayer updates are not firing
+    Doc multitouch example handles down/up improperly for the mouse
+    Failing test cases:
+        LayerState bug for single hasSelf node with enter and exit both switching layer types followed immediately by a node also hasSelf
 
 Browsers
     Browser bugs? (get Canary / Aurora / IE10):
@@ -40,63 +42,24 @@ Questions for team:
         Note: check DOM convention?
 
 General:
+    *** Split renderSelf into renderSelfCanvas, renderSelfSVG, since DOM has no real use for this
     * Email OIT about phet.colorado.edu/scenery
         Investigate GitHub pages instead? See http://forrst.com/posts/GitHub_Pages_gh_pages_branch_as_a_subfolder_wi-4ZT
     * Extract phet-math (phet.math namespace) code to separate repo
     * Extract phet-general code to separate repo (that would be shared also inside the scene graph?) -- or should we duplicate this small bit of functionality?
     * Extract molecule-shapes code to separate repo
+    Test zooming on browsers
+    RenderState - consider stack-based transforms
     Copy over Molecule Shapes efficiency improvement code from ~/
     DOM events => benchmarks => create Path => layer changes
     Documentation and Examples (always an item)
     Take extension mechanism from Backbone.js: https://github.com/documentcloud/backbone/blob/master/backbone.js#L1471-L1502
 
-Benchmarks:
-    (deprecate?) Benchmark.js-based:
-        async vs defer vs queued
-        Ability to re-run tests to add precision? Or just a control for precision?
-            Add a flag for the tests being run (or null for all tests)
-            Store results[][] instead of benchmarks[][], and add benchmarks to the result (combining statistics, etc).
-            Add ability to scrap statistics
-            Have an updateResult function that will handle the updating
-            Benchmark cycling feedback?
-        If we can, handle both synchronous and asynchronous tests. Maybe this is possible to wrap with a deferred so that we can handle both without specifying a flag?
-            Consider forking Benchmark.js and submitting a pull request if this is easy
-            Reason for this is the issue where in asynchronous tests, immediate calls to deferred.resolve() do not allow us to measure performance if it is slow
-                See http://jsperf.com/asynchronous-limit
-            Ask John David Dalton maybe?
-            Synchronous: for checking Scenery overhead
-            Asynchronous - requestAnimationFrame loops
-                We need to verify that these tests are fully taxing the system (maybe 20% less FPS than an empty loop in requestAnimationFrame?)
-    Performance based:
-        * submodules of self?
-        Add exception handling
-        Consider using Local Storage to show previous results?
-        Examine subclass penalty for Shape in Path instead of Node
-    Using xStats (https://github.com/bestiejs/xstats.js), also add memory output for verifying lack of memory leaks?
-
-Layers:
-    * Consider caching / layering modification as separate nodes added in (i.e. like a renamed CanvasLayer, or CachingLayer, or something like that)
-        Or use mixins to add to instances? - sketchy and hard to remove
-        ** Or is it possible to detect runtime hotspots based on elapsed time rendering, how much it is being rendered,
-            what transforms it is under (are those changing), and possibly number of children.
-    Consider having a layerStrategy which is responsible for handling how a node handles the layering (i.e. splitting, caching, layer type, etc.)
-        Would allow more specialized cases
-        Caching could still be separated into a separate node if we want
-        Allows a default layerStrategy. Would access into allowed layer types of the node?
-    * Does it make sense to handle caching of nodes to an image => draw in different layer type?
-    Each node can have acceptable layer types (e.g. for Shape, Canvas, WebGL, SVG, and for DOM: just DOM), and possibly a preferred layer type to trigger if there is a conflict.
-        fallbackLayerType?
-    Use Layer factories instead of passing constructors for more generality
-    Consider making nodes aware of when their layer type changes (i.e. Canvas => SVG) since it may have to do DOM / SVG operations on add/remove
-    --- have node.buildLayerBefore() and node.buildLayerAfter() and other operations, passed a LayerState, during layer rebuild as a general form
-        Default behavior checks flags like layerSplit and layerHint (or combine those) in combination with the supported layer types to figure out what is needed
-        State could possibly remove unnecessary inbetween layers then?
-    Consider: layerHint that would trigger it and its children to be rendered in WebGL / Canvas / etc. if acceptable. Separate from:
-        Split before/after a node to indicate a layer change (for performance)
-    Collapse unnecessary layers (split next to split, or hints). refreshing layers between nodes after insertion should be able to add in suppressed layers
-    Proof-of-concept for performance and DOM integration
-
 Code:
+    Appended $ to jquery-wrapped elements or lists
+    Verify Input correctness with Scene now being a Node, and with trails
+    Organize unit tests into separate files, etc.
+    * Move snapshots into upper-level directory to make code search-and-replace easier
     Either use Require.js or bake in support. Probably good to do for reducing code size with simulations.
         Almond for fallbacks?
     Switch to jQuery 2 (wait for a stable build?)
@@ -106,7 +69,36 @@ Code:
     * Code headers and copyright? Licenses?
     Handling of retina displays (and other backingScale differences)
 
+Canvas:
+    Check reindexing, there may be bugs
+    Restricted bounds intersection pruning (also see performance)
+        For canvas rendering, how to handle restricted bounds in depthFirstUntil? Generalize, and allow a return flag to indicate not hitting children?
+    Clip shapes that are nested are probably broken
+    CanvasLayer styles are probably broken - resetStyles seems fishy if not in sync (i.e. lineCap)
+
+DOM:
+    DOMLayer would work better if we send a transformChanged event with the node, since it only needs to update the transform
+    * DOM bounds failure on construction, for x and y setters (or something is wrong with easel-tests DOM example, investigate?)
+    * Test that scenery and dom nodes can be nested many times
+    *** CSS3 transforms look amazing See if we can do more in DOM nodes with transforms
+        Example: http://www.clicktorelease.com/code/css3dclouds/
+    Handle correct layering of DOM nodes inside a layer, etc.
+    How to get the size before adding to the document tree? Impossible?
+        Document fragments (test this)
+    [IMPLEMENTATION REMOVED] Hoisting of interactive DOM nodes
+        - HoistedDOMLayer that adds (2147483647/2) to its z-index
+            Pro:
+                layering will work in the browser
+            Con:
+                splits more layers than necessary
+                have to add a listener in the capture phase of the listener to flag the event as hitting the interactive node?
+                need to check for 'interactive' flag?
+                Events system may need to discard anything in the region of an interactive node's bounds?
+        - Either delegate (just set transform) or have inline with just SVG over (with pointer-events)
+
 ** SVG: -- important because we can layer DOM nodes properly under SVG
+    SVGLayer needs have CSS transform with a scale of 1, apply scale to containing group instead?
+    DAG handling for SVG (how to duplicate) or DOM
     Also for DOM => Canvas: http://pbakaus.github.com/domvas/
     Canvg for SVG=>Canvas? http://code.google.com/p/canvg/
     Or SVG straight from image as in http://jsfiddle.net/estelle/SJjJb/ (as data-url for an image)
@@ -116,21 +108,24 @@ Code:
         Path nodes may need to be aware of layer type changes to create/destroy SVG elements
     Mixins for implementing SVG? might be useful if we have createSVGElement() for self-rendering, and some way of creating intermediate groups
     Beware of alpha handling -- seems to have a different gamma or something on Windows.
+    Possible SVG Safari issues if bounds aren't whole-pixel?
 
 WebGL:
     Use display lists?
     Examine test code for considerations for implementing Shape.
 
-DOM nodes:
-    * Test that scenery and dom nodes can be nested many times
-    *** CSS3 transforms look amazing See if we can do more in DOM nodes with transforms
-        Example: http://www.clicktorelease.com/code/css3dclouds/
-    Handle correct layering of DOM nodes inside a layer, etc.
-    How to get the size before adding to the document tree? Impossible?
-        Document fragments (test this)
+Layers:
+    LayerBoundaries prototype? Might be useful as a toString(), and for handling queries
+    * Consider caching / layering modification as separate nodes added in (i.e. like a renamed CanvasLayer, or CachingLayer, or something like that)
+        Or use mixins to add to instances? - sketchy and hard to remove
+        ** Or is it possible to detect runtime hotspots based on elapsed time rendering, how much it is being rendered,
+            what transforms it is under (are those changing), and possibly number of children.
+    * Does it make sense to handle caching of nodes to an image => draw in different layer type?
+    Proof-of-concept for performance and DOM integration
 
 * Event dispatch:
-    addListener vs addInputListener
+    DragHandler - mouse buttons handling (left/middle/right can cause drag issues)
+    addListener vs addInputListener discrepancy
     remove listener callback?
     Consider finger.isDown for checking general (but possibly mouse related) events
     Indie UI events should be tracked: https://dvcs.w3.org/hg/IndieUI/raw-file/default/src/indie-ui-events.html
@@ -168,6 +163,11 @@ Accessibility / shadow DOM:
     see http://www.html5accessibility.com/
 
 Node:
+    constructor wraps parameters as children for convenience?
+        as children get/set? risky, but possibly useful
+    param arg { cursor: 'hand' } and mouse cursor handling
+    Bounds after rotation seems to be a bit too wide
+    * Fire event on change of layerStrategy, and possibly rethink layerStrategy design
     Mix-in notifier for listeners
     Add a way to determine the supported layer types of a node
         Note also that "conversion" is possible
@@ -206,14 +206,25 @@ Text:
     Allow stroking of text.
 
 Scene:
+    Acceleration of layer lookup
+    Spread out z-indices and be adaptive so we don't have to change as many indices where possible
     refreshLayers() implementation (currently rebuilds all layers, but should be optimized so it doesn't need to redraw as much)
     Foundation for multiple view implementations
     spread out z-indices and be adaptive so we don't have to change as many indices where possible
+
+Trail:
+    ** Verify current indexing handling (is it sufficient to just reindex trails on layer refreshes?)
+    Use indices where possible (next and previous!)
+    DO we need indices in Node.dispatchEvent? May be bottleneck
+    Cleanup of nestedForwards/nestedBackwards, possibly based on a Side-like implementation. Decent code duplication!
+    Better name for copy()? clone()? getCopy()? Possibly use a copy constructor?
+    depthFirstUntil should possibly have option for defensive copies of the pointers?
 
 Build:
     Add JSHint into Sublime Text with plugin?
 
 Performance:
+    * Prune node rendering based on visible dirty bounds
     Not re-rasterizing objects immediately during dragging or other features? (Auto-detect as hotspot maybe?)
     Ensure that we are triggering the hardware acceleration for CSS3 transforms
     Consider model changes in setInterval: http://www.chandlerprall.com/2012/06/requestanimationframe-is-not-your-logics-friend/
@@ -243,6 +254,30 @@ Performance:
         Consider a Canvas 2D context delegate to examine drawing calls for Easel / Scene / Custom / etc.
     Checklists:
         http://www.html5rocks.com/en/tutorials/canvas/performance/
+
+Benchmarks:
+    (deprecate?) Benchmark.js-based:
+        async vs defer vs queued
+        Ability to re-run tests to add precision? Or just a control for precision?
+            Add a flag for the tests being run (or null for all tests)
+            Store results[][] instead of benchmarks[][], and add benchmarks to the result (combining statistics, etc).
+            Add ability to scrap statistics
+            Have an updateResult function that will handle the updating
+            Benchmark cycling feedback?
+        If we can, handle both synchronous and asynchronous tests. Maybe this is possible to wrap with a deferred so that we can handle both without specifying a flag?
+            Consider forking Benchmark.js and submitting a pull request if this is easy
+            Reason for this is the issue where in asynchronous tests, immediate calls to deferred.resolve() do not allow us to measure performance if it is slow
+                See http://jsperf.com/asynchronous-limit
+            Ask John David Dalton maybe?
+            Synchronous: for checking Scenery overhead
+            Asynchronous - requestAnimationFrame loops
+                We need to verify that these tests are fully taxing the system (maybe 20% less FPS than an empty loop in requestAnimationFrame?)
+    Performance based:
+        * submodules of self?
+        Add exception handling
+        Consider using Local Storage to show previous results?
+        Examine subclass penalty for Shape in Path instead of Node
+    Using xStats (https://github.com/bestiejs/xstats.js), also add memory output for verifying lack of memory leaks?
 
 Property / Notifiers:
     Add the listeners, etc. straight to the object?
@@ -281,3 +316,36 @@ Other:
     Pull requests to underscore.js / LoDash? for FunctionalUtils wishlist ... or fork
     Implement Bouncy example from the wishlist
     Highlighting and indexing of TODO items
+
+API Usage:
+
+// implicit layering switches due to node types
+
+// force SVG layer(s) under node where possible
+node.layerStrategy.setPreferredLayerType( scenery.LayerType.SVG );
+
+// force a layer split before / after
+node.layerStrategy.setSplitBefore( true );
+node.layerStrategy.setSplitAfter( true );
+
+node.layerStrategy = new SomethingLayerStrategy();
+
+// performance caching (new node, so we can do render path changes?)
+var cacheNode = new CanvasLayerCache( node ) {{
+  var domNode = <svg, dom, canvas, ...>
+
+  // internal to CanvasLayerCache:
+  cacheNode.layerStrategy = new CanvasCachingStrategy( domNode, ... ) {{
+    // internal to CanvasCachingStrategy
+    preferredLayerType = CacheLayer( ... domElement ... )?
+    
+    .. handle CSS3 transforms here
+  }};
+}} // paints into canvas(es), with custom layer type
+
+
+
+var node = scenery.SVG( '<svg>....</svg>' | $( SVGEelement ) );
+node.x = (etc.)
+
+scene resize listeners?
