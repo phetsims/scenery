@@ -317,7 +317,6 @@ $(document).ready( function() {
         bigForm.innerHTML = 'And now scalable!<br><input type="text" name="stuff">';
         
         var container = new scenery.Node();
-        container.setLayerType( scenery.DOMLayer );
         
         container.addChild( new scenery.DOM( element, {
           x: -560 / 2,
