@@ -63,11 +63,6 @@ var scenery = scenery || {};
   Node.prototype = {
     constructor: Node,
     
-    renderSelf: function ( state ) {
-      // TODO: renderSelf only really useful for Canvas / WebGL, extract this out
-      // override to render typical leaf behavior (although possible to use for non-leaf nodes also)
-    },
-    
     enterState: function( state ) {
       // apply this node's transform
       if ( !this.transform.isIdentity() ) {
@@ -260,7 +255,7 @@ var scenery = scenery || {};
       }
     },
     
-    // called to notify that renderSelf will display different paint, with possibly different bounds
+    // called to notify that self rendering will display different paint, with possibly different bounds
     invalidateSelf: function( newBounds ) {
       phet.assert( !isNaN( newBounds.x() ) );
       
@@ -330,7 +325,7 @@ var scenery = scenery || {};
       return ourChild;
     },
     
-    // the bounds for content in renderSelf(), in "local" coordinates
+    // the bounds for self content in "local" coordinates
     getSelfBounds: function() {
       return this._selfBounds;
     },
@@ -383,7 +378,7 @@ var scenery = scenery || {};
       return this.trailUnderPoint( point ) !== null;
     },
     
-    // override for computation of whether a point is inside the content rendered in renderSelf
+    // override for computation of whether a point is inside the self content
     // point is considered to be in the local coordinate frame
     containsPointSelf: function( point ) {
       // if self bounds are not null default to checking self bounds

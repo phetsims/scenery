@@ -52,22 +52,24 @@ var scenery = scenery || {};
     // investigate http://mudcu.be/journal/2011/01/html5-typographic-metrics/
     this.invalidateSelf( scenery.canvasTextBoundsAccurate( this._text, this.fontStyles ) );
   };
-  
-  Text.prototype.renderSelf = function( state ) {
-    // TODO: add SVG / DOM support
-    if ( state.isCanvasState() ) {
-      var layer = state.layer;
-      var context = layer.context;
-      if ( this.hasFill() ) {
-        layer.setFillStyle( this.getFill() );
-        layer.setFont( this.fontStyles.font );
-        layer.setTextAlign( this.fontStyles.textAlign );
-        layer.setTextBaseline( this.fontStyles.textBaseline );
-        layer.setDirection( this.fontStyles.direction );
-        
-        context.fillText( this._text, 0, 0 );
-      }
+
+  // TODO: add SVG / DOM support
+  Text.prototype.paintCanvas = function( state ) {
+    var layer = state.layer;
+    var context = layer.context;
+    if ( this.hasFill() ) {
+      layer.setFillStyle( this.getFill() );
+      layer.setFont( this.fontStyles.font );
+      layer.setTextAlign( this.fontStyles.textAlign );
+      layer.setTextBaseline( this.fontStyles.textBaseline );
+      layer.setDirection( this.fontStyles.direction );
+
+      context.fillText( this._text, 0, 0 );
     }
+  };
+  
+  Text.prototype.paintWebGL = function( state ) {
+    throw new Error( 'Text.prototype.paintWebGL unimplemented' );
   };
   
   Text.prototype.setFont = function( font ) {

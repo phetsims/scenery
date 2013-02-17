@@ -115,7 +115,9 @@ var scenery = scenery || {};
           node.enterState( state );
           
           if ( node._visible ) {
-            node.renderSelf( state );
+            if ( node.hasSelf() ) {
+              node.paintCanvas( state );
+            }
             
             // TODO: restricted bounds rendering, and possibly generalize depthFirstUntil
             // var children = node.children;

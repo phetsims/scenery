@@ -60,38 +60,38 @@ var scenery = scenery || {};
     return this._shape !== null;
   };
   
-  Path.prototype.renderSelf = function( state ) {
+  Path.prototype.paintCanvas = function( state ) {
     if ( this.hasShape() ) {
-      if ( state.isCanvasState() ) {
-        var layer = state.layer;
-        var context = layer.context;
-        
-        // TODO: fill/stroke delay optimizations?
-        context.beginPath();
-        this._shape.writeToContext( context );
-        
-        if ( this._fill ) {
-          layer.setFillStyle( this._fill );
-          context.fill();
-        }
-        if ( this._stroke ) {
-          layer.setStrokeStyle( this._stroke );
-          layer.setLineWidth( this.getLineWidth() );
-          layer.setLineCap( this.getLineCap() );
-          layer.setLineJoin( this.getLineJoin() );
-          context.stroke();
-        }
-      } else {
-        throw new Error( 'layer type shape rendering not implemented' );
+      var layer = state.layer;
+      var context = layer.context;
+
+      // TODO: fill/stroke delay optimizations?
+      context.beginPath();
+      this._shape.writeToContext( context );
+
+      if ( this._fill ) {
+        layer.setFillStyle( this._fill );
+        context.fill();
+      }
+      if ( this._stroke ) {
+        layer.setStrokeStyle( this._stroke );
+        layer.setLineWidth( this.getLineWidth() );
+        layer.setLineCap( this.getLineCap() );
+        layer.setLineJoin( this.getLineJoin() );
+        context.stroke();
       }
     }
+  };
+  
+  Path.prototype.paintWebGL = function( state ) {
+    throw new Error( 'Path.prototype.paintWebGL unimplemented' );
   };
   
   Path.prototype.hasSelf = function() {
     return true;
   };
   
-  // override for computation of whether a point is inside the content rendered in renderSelf
+  // override for computation of whether a point is inside the self content
   // point is considered to be in the local coordinate frame
   Path.prototype.containsPointSelf = function( point ) {
     if ( !this.hasShape() ) {
