@@ -450,7 +450,6 @@ var scenery = scenery || {};
     
     // dispatches an event across all possible Trails ending in this node
     dispatchEvent: function( type, args ) {
-      var node = this;
       var trail = new scenery.Trail();
       
       function recursiveEventDispatch( node ) {
@@ -476,7 +475,6 @@ var scenery = scenery || {};
     
     // dispatches events with the transform computed from parent of the "root" to the local frame
     dispatchEventWithTransform: function( type, args ) {
-      var node = this;
       var trail = new scenery.Trail();
       var transformStack = [ new phet.math.Transform3() ];
       
