@@ -55,7 +55,10 @@ var scenery = scenery || {};
         var transform = args.transform;
         var trail = args.trail;
         
-        scene.layerLookup( trail ).markDirtyRegion( node, localBounds, transform, trail );
+        // if there are no layers, no nodes would actually render, so don't do the lookup
+        if ( scene.layers.length ) {
+          scene.layerLookup( trail ).markDirtyRegion( node, localBounds, transform, trail );
+        }
       },
       
       layerRefresh: function( args ) {
