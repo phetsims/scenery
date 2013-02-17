@@ -153,7 +153,9 @@
         beforeDragTranslation = node.translation;
         lastDragPoint = finger.point;
         
-        node.setLayerType( scenery.CanvasLayer );
+        // TODO: this should fire a layer refresh
+        node.layerStrategy = scenery.SeparateLayerStrategy;
+        node.markLayerRefreshNeeded();
       }
       
       function endDrag( finger ) {
@@ -163,7 +165,9 @@
         finger.removeListener( dragListener );
         dragging = false;
         
-        node.setLayerType( null );
+        // TODO: this should fire a layer refresh
+        node.layerStrategy = scenery.DefaultLayerStrategy;
+        node.markLayerRefreshNeeded();
       }
       
       function tryToSnag( finger ) {

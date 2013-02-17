@@ -57,6 +57,7 @@ Canvas: proper rendering with clearing and all missing features
   Restricted bounds intersection pruning
 DOM: rendering
 
+Fire event on change of layerStrategy
 DOM bounds failure on construction, for x and y setters (or something is wrong with easel-tests DOM example, investigate?)
 !! Split renderSelf into renderSelfCanvas, renderSelfSVG, since DOM has no real use for this
 

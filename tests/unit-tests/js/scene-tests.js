@@ -1010,7 +1010,6 @@
   //       scene.addChild( node );
         
   //       var domNode = new scenery.Node();
-  //       domNode.setLayerType( scenery.DOMLayer );
   //       node.addChild( domNode );
   //     }
   //   ] );
