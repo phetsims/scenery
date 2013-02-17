@@ -573,9 +573,8 @@
   
   test( 'Checking Layers and external canvas', function() {
     var scene = new scenery.Scene( $( '#main' ) );
-    var root = scene;
     
-    root.addChild( new scenery.Path( {
+    scene.addChild( new scenery.Path( {
       shape: scenery.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
       fill: '#ff0000'
     } ) );
@@ -586,9 +585,9 @@
     } );
     middleRect.layerStrategy = scenery.SeparateLayerStrategy;
     
-    root.addChild( middleRect );
+    scene.addChild( middleRect );
     
-    root.addChild( new scenery.Path( {
+    scene.addChild( new scenery.Path( {
       shape: scenery.Shape.rectangle( canvasWidth / 2, canvasHeight / 2, canvasWidth / 2, canvasHeight / 2 ),
       fill: '#0000ff'
     } ) );
