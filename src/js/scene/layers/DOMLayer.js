@@ -17,55 +17,62 @@ var scenery = scenery || {};
   
   var Bounds2 = phet.math.Bounds2;
   
-  // assumes main is wrapped with JQuery
   scenery.DOMLayer = function( args ) {
-    var main = args.main;
-    this.main = main;
+    scenery.Layer.call( this, args );
     
     this.div = document.createElement( 'div' );
-    $( this.div ).width( main.width() );
-    $( this.div ).height( main.height() );
-    $( this.div ).css( 'position', 'absolute' );
-    main.append( this.div );
+    this.$div = $( this.div );
+    this.$div.width( this.main.width() );
+    this.$div.height( this.main.height() );
+    this.$div.css( 'position', 'absolute' );
+    this.main.append( this.div );
     
     this.scene = args.scene;
     
-    this.dirtyBounds = Bounds2.NOTHING;
-    
     this.isDOMLayer = true;
-    
-    // references to surrounding layers, filled by rebuildLayers
-    this.nextLayer = null;
-    this.previousLayer = null;
   };
   
   var DOMLayer = scenery.DOMLayer;
   
-  DOMLayer.prototype = {
+  DOMLayer.prototype = _.extend( {}, scenery.Layer.prototype, {
     constructor: DOMLayer,
     
-    // called when rendering switches to this layer
-    initialize: function( renderState ) {
-      // TODO: clipping
-    },
-    
-    // called when rendering switches away from this layer
-    cooldown: function() {
+    updateBoundaries: function( entry ) {
+      scenery.Layer.prototype.updateBoundaries.call( this, entry );
       
+      var layer = this;
+      
+      // TODO: assumes that nodes under this are in a tree, not a DAG
+      this.startPointer.eachNodeBetween( this.endPointer, function( node ) {
+        // all nodes should have DOM support if node.hasSelf()
+        if ( node.hasSelf() ) {
+          node.addToDOMLayer( layer );
+        }
+      } );
     },
     
-    // called if it needs to be added back to the main element after elements are removed
-    recreate: function() {
-      this.main.append( this.div );
+    render: function( scene, args ) {
+      // nothing at all needed here, CSS transforms taken care of when dirty regions are notified
     },
     
-    isDirty: function() {
-      return false;
+    dispose: function() {
+      // TODO: consider node.removeFromDOMLayer( layer );
+      this.$div.detach();
+    },
+    
+    markDirtyRegion: function( node, localBounds, transform, trail ) {
+      // for now, update the transforms for the node and any children in the layer that it may have
+      // TODO: should we catch a separate event, transform-change?
+      new scenery.TrailPointer( trail, true ).eachNodeBetween( new scenery.TrailPointer( trail, false ), function( node ) {
+        if ( node.hasSelf() ) {
+          node.updateCSSTransform( transform );
+        }
+      } );
     },
     
     // TODO: consider a stack-based model for transforms?
     applyTransformationMatrix: function( matrix ) {
-      
+      // nothing at all needed here
     },
     
     getContainer: function() {
@@ -74,7 +81,7 @@ var scenery = scenery || {};
     
     // returns next zIndex in place. allows layers to take up more than one single zIndex
     reindex: function( zIndex ) {
-      $( this.div ).css( 'z-index', zIndex );
+      this.$div.css( 'z-index', zIndex );
       this.zIndex = zIndex;
       return zIndex + 1;
     },
@@ -85,26 +92,6 @@ var scenery = scenery || {};
     
     popClipShape: function() {
       // TODO: clipping
-    },
-    
-    markDirtyRegion: function( bounds ) {
-      // null op, always clean
-    },
-    
-    resetDirtyRegions: function() {
-      this.dirtyBounds = Bounds2.NOTHING;
-    },
-    
-    prepareBounds: function( globalBounds ) {
-      // null op
-    },
-    
-    prepareDirtyRegions: function() {
-      this.prepareBounds( this.dirtyBounds );
-    },
-    
-    getDirtyBounds: function() {
-      return this.dirtyBounds;
     },
     
     // TODO: note for DOM we can do https://developer.mozilla.org/en-US/docs/HTML/Canvas/Drawing_DOM_objects_into_a_canvas
@@ -126,8 +113,12 @@ var scenery = scenery || {};
         delayCounts.decrement();
       };
       img.src = url;
+    },
+    
+    getName: function() {
+      return 'dom';
     }
-  };
+  } );
 })();
 
 

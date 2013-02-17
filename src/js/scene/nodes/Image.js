@@ -33,6 +33,12 @@ var scenery = scenery || {};
       context.drawImage( this.image, 0, 0 );
     }
   };
+  
+  Image.prototype.hasSelf = function() {
+    return true;
+  };
+  
+  Image.prototype._supportedLayerTypes = [ scenery.LayerType.Canvas ];
 })();
 
 

@@ -17,7 +17,7 @@ phet.benchmark = phet.benchmark || {};
   // manual testing to see if we can do better than benchmark.js
   var scene = phet.benchmark.createDetachedScene( 256, 256 );
   for( var i = 0; i < 200; i++ ) {
-    scene.root.addChild( new scenery.Path( {
+    scene.addChild( new scenery.Path( {
       shape: scenery.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ),
       fill: 'rgba(255,0,0,1)',
       stroke: '#000000'
@@ -25,7 +25,7 @@ phet.benchmark = phet.benchmark || {};
   }
   var start = new Date;
   for( var i = 0; i < 100; i++ ) {
-    scene.root.rotate( Math.sin( i ) );
+    scene.rotate( Math.sin( i ) );
     scene.updateScene();
   }
   var end = new Date;
@@ -33,13 +33,13 @@ phet.benchmark = phet.benchmark || {};
   
   benchmarkTimer.add( 'Rotating Square 100x', function() {
     for( var i = 0; i < 100; i++ ) {
-      scene.root.rotate( Math.sin( i ) );
+      scene.rotate( Math.sin( i ) );
       scene.updateScene();
     }
   }, {
     setup: function() {
       var scene = phet.benchmark.createDetachedScene( 256, 256 );
-      scene.root.addChild( new scenery.Path( {
+      scene.addChild( new scenery.Path( {
         shape: scenery.Shape.rectangle( 0, 0, 20, 20 ),
         centerX: 128,
         centerY: 128,
@@ -50,14 +50,14 @@ phet.benchmark = phet.benchmark || {};
   
   benchmarkTimer.add( 'Rotating Many Squares (with stroke) 100x', function() {
     for( var i = 0; i < 100; i++ ) {
-      scene.root.rotate( Math.sin( i ) );
+      scene.rotate( Math.sin( i ) );
       scene.updateScene();
     }
   }, {
     setup: function() {
       var scene = phet.benchmark.createDetachedScene( 256, 256 );
       for( var i = 0; i < 200; i++ ) {
-        scene.root.addChild( new scenery.Path( {
+        scene.addChild( new scenery.Path( {
           shape: scenery.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ),
           fill: 'rgba(255,0,0,1)',
           stroke: '#000000'
@@ -75,7 +75,7 @@ phet.benchmark = phet.benchmark || {};
     setup: function() {
       var scene = phet.benchmark.createDetachedScene( 256, 256 );
       for( var i = 0; i < 200; i++ ) {
-        scene.root.addChild( new scenery.Path( {
+        scene.addChild( new scenery.Path( {
           shape: scenery.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ),
           fill: 'rgba(255,0,0,1)',
           stroke: '#000000'
@@ -88,7 +88,7 @@ phet.benchmark = phet.benchmark || {};
         fill: 'rgba(255,0,0,1)',
         stroke: '#000000'
       } );
-      scene.root.addChild( node );
+      scene.addChild( node );
     }
   } );
   
@@ -100,7 +100,7 @@ phet.benchmark = phet.benchmark || {};
     setup: function() {
       var scene = phet.benchmark.createDetachedScene( 256, 256 );
       for( var i = 0; i < 200; i++ ) {
-        scene.root.addChild( new scenery.Path( {
+        scene.addChild( new scenery.Path( {
           shape: scenery.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ),
           fill: 'rgba(255,0,0,1)',
           stroke: '#000000'
@@ -113,7 +113,7 @@ phet.benchmark = phet.benchmark || {};
         fill: 'rgba(255,0,0,1)',
         stroke: '#000000'
       } );
-      scene.root.addChild( node );
+      scene.addChild( node );
       scene.updateScene();
     }
   } );

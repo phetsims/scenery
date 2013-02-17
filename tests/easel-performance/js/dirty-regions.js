@@ -14,16 +14,15 @@ phet.tests = phet.tests || {};
   
   phet.tests.sceneDirtyRegions = function( main, moveCount ) {
     var scene = new scenery.Scene( main );
-    var root = scene.root;
     
     var background = new scenery.Path();
     background.setShape( scenery.Shape.rectangle( -sceneWidth / 2 * borderFactor, -sceneHeight / 2 * borderFactor, sceneWidth * borderFactor, sceneHeight * borderFactor ) );
     background.setFill( '#333333' );
     background.setStroke( '#000000' );
-    root.addChild( background );
+    scene.addChild( background );
     
     var nodes = new scenery.Node();
-    root.addChild( nodes );
+    scene.addChild( nodes );
     
     for ( var i = 0; i < itemCount; i++ ) {
       var node = new scenery.Path();
@@ -41,8 +40,8 @@ phet.tests = phet.tests || {};
       nodes.addChild( node );
     }
     
-    // center the root
-    root.translate( main.width() / 2, main.height() / 2 );
+    // center the scene
+    scene.translate( main.width() / 2, main.height() / 2 );
     
     // return step function
     return function( timeElapsed ) {

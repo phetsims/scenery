@@ -12,10 +12,13 @@ var scenery = scenery || {};
   "use strict";
   
   scenery.DOM = function( element, params ) {
-    // can this node be interacted with? if set to true, it will not be layered like normal, but will be placed on top
-    this._interactive = false;
+    // unwrap from jQuery if that is passed in, for consistency
+    if ( element && element.jquery ) {
+      element = element[0];
+    }
     
     this._element = element;
+    this._$element = $( element );
     
     scenery.Node.call( this, params );
     
@@ -26,16 +29,28 @@ var scenery = scenery || {};
   DOM.prototype = phet.Object.create( scenery.Node.prototype );
   DOM.prototype.constructor = DOM;
   
+  DOM.prototype.invalidatePaint = function( bounds ) {
+    scenery.Node.prototype.invalidatePaint.call( this, bounds );
+  };
+  
   DOM.prototype.invalidateDOM = function() {
     // TODO: do we need to reset the CSS transform to get the proper bounds?
     
     // TODO: reset with the proper bounds here
-    this.invalidateSelf( new phet.math.Bounds2( 0, 0, $( this._element ).width(), $( this._element ).height() ) );
-  },
+    this.invalidateSelf( new phet.math.Bounds2( 0, 0, this._$element.width(), this._$element.height() ) );
+  };
   
-  DOM.prototype.renderSelf = function( state ) {
+  DOM.prototype.addToDOMLayer = function( domLayer ) {
+    // TODO: find better way to handle non-jquery and jquery-wrapped getters for the container. direct access for now ()
+    domLayer.$div.append( this._element );
+    
+    // recompute the bounds
+    this.invalidateDOM();
+  };
+  
+  DOM.prototype.updateCSSTransform = function( transform ) {
     // something of the form matrix(...) as a String, with a Z translation to trigger hardware acceleration (hopefully)
-    var cssTransform = state.transform.getMatrix().cssTransform();
+    var cssTransform = transform.getMatrix().cssTransform();
     
     // notes on triggering hardware acceleration: http://creativejs.com/2011/12/day-2-gpu-accelerate-your-dom-elements/
     
@@ -51,18 +66,10 @@ var scenery = scenery || {};
       left: 0,
       top: 0
     } );
-    
-    var layer = ( state.isDOMState() && !this._interactive ) ? state.layer : state.scene.getUILayer();
-    
-    var container = layer.getContainer();
-    
-    if ( this._element.parentNode !== container ) {
-      // TODO: correct layering of DOM nodes inside the container
-      $( container ).append( this._element );
-    }
-    
-    // TODO: this will only reset bounds after rendering the first time. this might never render in the first place?
-    this.invalidateDOM();
+  };
+  
+  DOM.prototype.hasSelf = function() {
+    return true;
   };
   
   DOM.prototype.setElement = function( element ) {
@@ -78,22 +85,11 @@ var scenery = scenery || {};
     return this._element;
   };
   
-  DOM.prototype.setInteractive = function( interactive ) {
-    this._interactive = interactive;
-    
-    this.invalidatePaint();
-    
-    return this; // allow chaining
-  };
+  DOM.prototype._mutatorKeys = [ 'element' ].concat( scenery.Node.prototype._mutatorKeys );
   
-  DOM.prototype.isInteractive = function() {
-    return this._interactive;
-  };
-  
-  DOM.prototype._mutatorKeys = [ 'element', 'interactive' ].concat( scenery.Node.prototype._mutatorKeys );
+  DOM.prototype._supportedLayerTypes = [ scenery.LayerType.DOM ];
   
   Object.defineProperty( DOM.prototype, 'element', { set: DOM.prototype.setElement, get: DOM.prototype.getElement } );
-  Object.defineProperty( DOM.prototype, 'interactive', { set: DOM.prototype.setInteractive, get: DOM.prototype.isInteractive } );
   
 })();
 

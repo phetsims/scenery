@@ -117,7 +117,7 @@ $(document).ready( function() {
         );
         
         // TODO: a way to pass an array and run commands without explicitly adding pieces?
-        // scene.root.addChild( new scenery.Path( {
+        // scene.addChild( new scenery.Path( {
         //   shape: new scenery.Shape( [
         //     new scenery.Shape.Piece.MoveTo( mainCurve.start ),
         //     new scenery.Shape.Piece.LineTo( mainCurve.control ),
@@ -126,7 +126,7 @@ $(document).ready( function() {
         //   stroke: '#ff0000'
         // } ) );
         
-        scene.root.addChild( new scenery.Path( {
+        scene.addChild( new scenery.Path( {
           shape: new scenery.Shape( [
             new scenery.Shape.Piece.MoveTo( mainCurve.start ),
             new scenery.Shape.Piece.QuadraticCurveTo( mainCurve.control, mainCurve.end )
@@ -137,7 +137,7 @@ $(document).ready( function() {
         _.each( [ -55, -40, -30, -15, -5, 5, 15, 30, 40, 55 ], function( offset ) {
           var offsetPieces = mainCurve.offsetTo( offset, true );
           
-          scene.root.addChild( new scenery.Path( {
+          scene.addChild( new scenery.Path( {
             shape: new scenery.Shape( offsetPieces ),
             stroke: '#0000ff'
           } ) );
@@ -283,15 +283,15 @@ $(document).ready( function() {
         imageSource.onload = function( e ) {
           image = new scenery.Image( imageSource );
           image.translate( -image.getSelfBounds().width() / 2, -image.getSelfBounds().height() / 2 );
-          scene.root.addChild( image );
+          scene.addChild( image );
         };
         imageSource.src = 'http://phet.colorado.edu/images/phet-logo.gif';
         
         // center it
-        scene.root.translate( main.width() / 2, main.height() / 2 );
+        scene.translate( main.width() / 2, main.height() / 2 );
         
         return function( timeElapsed ) {
-          scene.root.rotate( timeElapsed );
+          scene.rotate( timeElapsed );
           scene.updateScene();
         };
       }
@@ -317,12 +317,10 @@ $(document).ready( function() {
         bigForm.innerHTML = 'And now scalable!<br><input type="text" name="stuff">';
         
         var container = new scenery.Node();
-        container.setLayerType( scenery.DOMLayer );
         
         container.addChild( new scenery.DOM( element, {
           x: -560 / 2,
-          y: -315 / 2,
-          interactive: true
+          y: -315 / 2
         } ) );
         
         // var unclickableFormNode = new scenery.DOM( unclickableForm );
@@ -331,26 +329,24 @@ $(document).ready( function() {
         
         container.addChild( new scenery.DOM( clickableForm, {
           x: -560 / 2,
-          y: 160,
-          interactive: true
+          y: 160
         } ) );
         
         container.addChild( new scenery.DOM( bigForm, {
           x: 0,
           y: 160,
-          scale: 4,
-          interactive: true
+          scale: 4
         } ) );
         
-        scene.root.addChild( container );
+        scene.addChild( container );
         
         // var background = new scenery.Path();
         // background.setShape( scenery.Shape.rectangle( -400, -400, 800, 800 ) );
         // background.setFill( 'rgba(230,255,230,0.5)' );
-        // scene.root.addChild( background );
+        // scene.addChild( background );
         
         // center it
-        scene.root.translate( main.width() / 2, main.height() / 2 );
+        scene.translate( main.width() / 2, main.height() / 2 );
         
         return function( timeElapsed ) {
           container.rotate( timeElapsed / 3 );

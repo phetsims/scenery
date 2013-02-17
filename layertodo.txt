@@ -1,0 +1,183 @@
+
+Just for the layering branch!
+=============================
+
+
+
+Default layer types, so that we can specify "svg under here if possible" - in LayerState
+
+DAG support
+  Multiple views for free
+    Support possibly for multiple scene roots?
+  For node actions that involve the layer reference, instead just fire off events to listeners
+  DOM is an issue for DAG support - unless we can duplicate it?
+
+
+Node:
+  Self can be rendered to different layers
+    Children for even more layers
+    On an event that changes potential layering, fire an event somehow that reaches all applicable scenes
+  
+  Has LayerStrategy: called during layering from each relevant scene.
+
+In Progress
+===========
+GraphPath next, previous. improve eachBetween using these. Consider a 'GraphPointer' that has a GraphPath reference and BEFORE / AFTER
+  Also consider a GraphRange which has a start/end GraphPointer?
+  Add ability to "index" a GraphPath
+
+Trail:
+  Use indices where possible (next and previous!)
+  DO we need indices in Node.dispatchEvent? May be bottleneck
+  Build TrailPointer iteration based on indices
+  Remove Trail's EachBetween!
+  Consider extending array for performance? Is it possible or recommended?
+  Consider adding negative index handling for Trail
+  Cleanup of nestedForwards/nestedBackwards, possibly based on a Side-like implementation. Decent code duplication!
+  
+  Better name for copy() ?
+  depthFirstUntil should possibly have option for defensive copies? hrm
+
+
+Rendering:
+  Dirty bounds
+  Restricted bounds
+  Visibility checks
+  state.finish()
+Layers:
+  reindex
+
+Organize unit tests
+
+Issues
+======
+
+Canvas: proper rendering with clearing and all missing features
+  !! reindex layers? - bugs lurking there?
+  Restricted bounds intersection pruning
+DOM: rendering
+
+LayerState bug for single hasSelf node with enter and exit both switching layer types followed immediately by a node also hasSelf
+
+Fire event on change of layerStrategy
+DOM bounds failure on construction, for x and y setters (or something is wrong with easel-tests DOM example, investigate?)
+!! Split renderSelf into renderSelfCanvas, renderSelfSVG, since DOM has no real use for this
+
+
+DOMLayer would work better if we send a transformChanged event with the node, since it only needs to update the transform
+Verify Input correctness with Scene now being a Node, and with trails
+Next: LayerBoundaries prototype? Might be useful as a toString(), and for handling queries
+For canvas rendering, how to handle restricted bounds in depthFirstUntil? Generalize, and allow a return flag to indicate not hitting children?
+Update tests for rendering comparison, so for each step we either apply all changes and render, then one at a time rendering inbetween
+DAG handling for SVG (how to duplicate) or DOM
+Move snapshots to high-level dir so we can do SARs on the test directory easier
+Test zooming on browsers
+Possibly SVG Safari issues if bounds aren't whole-pixel?
+DragHandler - mouse buttons
+Bounds after rotation seems to be a bit too wide
+
+
+SVG:
+  SVGLayer needs have CSS transform with a scale of 1, apply scale to containing group instead?
+
+
+Node:
+  param arg { cursor: 'hand' } and mouse cursor handling
+
+Appended $ to jquery-wrapped elements or lists
+
+RenderState - consider stack-based transforms
+
+Clip shapes that are nested are probably broken
+CanvasLayer styles are probably broken - resetStyles seems fishy if not in sync (i.e. lineCap)
+
+
+Design
+======
+
+DAG:
+  * fewer checks needed during render for layers
+  * lighter weight nodes
+  Node
+    |store list of parents -- prevent duplicates, with Set
+    |disallow duplicates in children (they would be same position and everything)
+    allow listeners from scenes (or others), that trigger for any descendants (i.e. invalidate a finger and you have 20 region invalidations to scene)
+    constructor wraps parameters as children for convenience
+      as children get/set? risky, but possibly useful
+  Layer
+    *** create base layer prototype
+    extract dirty bounds and redrawing
+    store pick paths (with indices of each child for disambiguation? - not necessary if we disallow duplicate children) of beginning and end?
+    startPath
+    endPath
+  Scene
+    accelerated indexing of layers (find a layer given a pick path) - thus we can update layers as changes in the scene occur
+    add listeners to 'root' to pick up invalidations, etc.
+    scene responsible for knowing layer start/end, handles drawing with this in mind
+    
+    spread out z-indices and be adaptive so we don't have to change as many indices where possible
+    
+    IMPLEMENTATION NOTES:
+      Convert Input to Trail
+      
+
+LayerState:
+  - compacts layers as necessary (don't instantiate until something hasSelf())
+  push/pop preferredLayerType
+  switchToType()
+  markSelf() -- when node hasSelf(), ensure that we finalize a layer switch
+  query current layer type
+  other queries
+
+Node:
+  LayerStrategy (called during layering from each relevant scene), default uses node._supportedLayerTypes
+  ability to fire an event with a callback that all registered layers / scenes will respond to (so you can technically get singleton scene references)
+
+DOM:
+  [IMPLEMENTATION REMOVED] Hoisting of interactive DOM nodes
+    - HoistedDOMLayer that adds (2147483647/2) to its z-index
+      Pro:
+        layering will work in the browser
+      Con:
+        splits more layers than necessary
+        have to add a listener in the capture phase of the listener to flag the event as hitting the interactive node?
+        need to check for 'interactive' flag?
+        Events system may need to discard anything in the region of an interactive node's bounds?
+    - Either delegate (just set transform) or have inline with just SVG over (with pointer-events)
+
+
+API Usage
+=========
+
+// implicit layering switches due to node types
+
+// force SVG layer(s) under node where possible
+node.layerStrategy.setPreferredLayerType( scenery.LayerType.SVG );
+
+// force a layer split before / after
+node.layerStrategy.setSplitBefore( true );
+node.layerStrategy.setSplitAfter( true );
+
+node.layerStrategy = new SomethingLayerStrategy();
+
+// performance caching (new node, so we can do render path changes?)
+var cacheNode = new CanvasLayerCache( node ) {{
+  var domNode = <svg, dom, canvas, ...>
+
+  // internal to CanvasLayerCache:
+  cacheNode.layerStrategy = new CanvasCachingStrategy( domNode, ... ) {{
+    // internal to CanvasCachingStrategy
+    preferredLayerType = CacheLayer( ... domElement ... )?
+    
+    .. handle CSS3 transforms here
+  }};
+}} // paints into canvas(es), with custom layer type
+
+
+
+var node = scenery.SVG( '<svg>....</svg>' | $( SVGEelement ) );
+node.x = (etc.)
+
+
+
+scene resize listeners?

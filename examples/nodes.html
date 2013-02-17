@@ -64,7 +64,7 @@
   scene.resizeOnWindowResize(); // the scene gets resized to the full screen size
   
   var container = new scenery.Node();
-  scene.root.addChild( container );
+  scene.addChild( container );
   
   /*---------------------------------------------------------------------------*
   * Text
@@ -168,7 +168,7 @@
   var lastTime = 0;
   var timeElapsed = 0;
   function tick() {
-    window.requestAnimationFrame( tick, main[0] );
+    var id = window.requestAnimationFrame( tick, main[0] );
     
     var timeNow = new Date().getTime();
     if ( lastTime != 0 ) {
@@ -177,7 +177,12 @@
     lastTime = timeNow;
     
     stats.begin();
-    scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
+    try {
+      scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
+    } catch( e ) {
+      window.cancelAnimationFrame( id );
+      throw e;
+    }
     stats.end();
   }
   window.requestAnimationFrame( tick, main[0] );

@@ -19,14 +19,15 @@ var scenery = scenery || {};
   
   // assumes main is wrapped with JQuery
   scenery.CanvasLayer = function( args ) {
-    var main = args.main;
+    scenery.Layer.call( this, args );
+    
     var canvas = document.createElement( 'canvas' );
-    canvas.width = main.width();
-    canvas.height = main.height();
+    canvas.width = this.main.width();
+    canvas.height = this.main.height();
     $( canvas ).css( 'position', 'absolute' );
     
     // add this layer on top (importantly, the constructors of the layers are called in order)
-    main.append( canvas );
+    this.main.append( canvas );
     
     this.canvas = canvas;
     // this.context = new scenery.DebugContext( phet.canvas.initCanvas( canvas ) );
@@ -39,57 +40,120 @@ var scenery = scenery || {};
     
     this.isCanvasLayer = true;
     
-    // initialize to fully dirty so we draw everything the first time
-    // bounds in global coordinate frame
-    this.dirtyBounds = Bounds2.EVERYTHING;
-    
     this.resetStyles();
-    
-    // filled in after construction by an external source (currently Scene.rebuildLayers).
-    this.startNode = null;
-    this.endNode = null;
-    
-    // references to surrounding layers, filled by rebuildLayers
-    this.nextLayer = null;
-    this.previousLayer = null;
   };
   
   var CanvasLayer = scenery.CanvasLayer;
   
-  CanvasLayer.prototype = {
+  CanvasLayer.prototype = _.extend( {}, scenery.Layer.prototype, {
     constructor: CanvasLayer,
     
-    // called when rendering switches to this layer
-    initialize: function( renderState ) {
-      // first, switch to an identity matrix so we can apply the global coordinate clipping shapes
+    /*
+     * Renders the canvas layer from the scene
+     *
+     * Supported args: {
+     *   fullRender: true, // disables drawing to just dirty rectangles
+     *   TODO: pruning with bounds and flag to disable
+     * }
+     */
+    render: function( scene, args ) {
+      args = args || {};
+      
+      // bail out quickly if possible
+      if ( !args.fullRender && this.dirtyBounds.isEmpty() ) {
+        return;
+      }
+      
+      var state = new scenery.RenderState( scene );
+      state.layer = this;
+      
+      // switch to an identity transform
       this.context.setTransform( 1, 0, 0, 1, 0, 0 );
       
-      // save now, so that we can clear the clipping shapes later
-      this.context.save();
-      
-      var context = this.context;
-      
-      // apply clipping shapes in the global coordinate frame
-      _.each( renderState.clipShapes, function( shape ) {
-        context.beginPath();
-        shape.writeToContext( context );
-        context.clip();
-      } );
-      
-      // set the context's transform to the current transformation matrix
-      var matrix = renderState.transform.getMatrix().canvasSetTransform( this.context );
-      
-      // reset the styles so that they are re-done
+      // reset the internal styles so they match the defaults that should be present
       this.resetStyles();
+      
+      var visibleDirtyBounds = args.fullRender ? scene.sceneBounds : this.dirtyBounds.intersection( scene.sceneBounds );
+      this.clearGlobalBounds( visibleDirtyBounds );
+      
+      if ( !args.fullRender ) {
+        state.pushClipShape( scenery.Shape.bounds( visibleDirtyBounds ) );
+      }
+      
+      // dirty bounds (clear, possibly set restricted bounds and handling for that)
+      // visibility checks
+      this.recursiveRender( state, args );
+      
+      // exists for now so that we pop the necessary context state
+      if ( !args.fullRender ) {
+        state.popClipShape();
+      }
+      
+      // we rendered everything, no more dirty bounds
+      this.dirtyBounds = Bounds2.NOTHING;
     },
     
-    // called when rendering switches away from this layer
-    cooldown: function() {
-      this.context.restore();
+    recursiveRender: function( state, args ) {
+      var i;
+      var startPointer = this.getStartPointer();
+      var endPointer = this.getEndPointer();
+      
+      // first, we need to walk the state up to before our pointer (as far as the recursive handling is concerned)
+      // if the pointer is 'before' the node, don't call its enterState since this will be taken care of as the first step.
+      // if the pointer is 'after' the node, call enterState since it will call exitState immediately inside the loop
+      var startWalkLength = startPointer.trail.length - ( startPointer.isBefore ? 1 : 0 );
+      for ( i = 0; i < startWalkLength; i++ ) {
+        startPointer.trail.nodes[i].enterState( state );
+      }
+      
+      startPointer.depthFirstUntil( endPointer, function( pointer ) {
+        // handle render here
+        
+        var node = pointer.trail.lastNode();
+        
+        if ( pointer.isBefore ) {
+          node.enterState( state );
+          
+          if ( node._visible ) {
+            node.renderSelf( state );
+            
+            // TODO: restricted bounds rendering, and possibly generalize depthFirstUntil
+            // var children = node.children;
+            
+            // check if we need to filter the children we render, and ignore nodes with few children (but allow 2, since that may prevent branches)
+            // if ( state.childRestrictedBounds && children.length > 1 ) {
+            //   var localRestrictedBounds = node.globalToLocalBounds( state.childRestrictedBounds );
+              
+            //   // don't filter if every child is inside the bounds
+            //   if ( !localRestrictedBounds.containsBounds( node.parentToLocalBounds( node._bounds ) ) ) {
+            //     children = node.getChildrenWithinBounds( localRestrictedBounds );
+            //   }
+            // }
+            
+            // _.each( children, function( child ) {
+            //   fullRender( child, state );
+            // } );
+          } else {
+            // not visible, so don't render the entire subtree
+            return true;
+          }
+        } else {
+          node.exitState( state );
+        }
+        
+      }, false ); // include endpoints (for now)
+      
+      // then walk the state back so we don't muck up any context saving that is going on, similar to how we walked it at the start
+      // if the pointer is 'before' the node, call exitState since it called enterState inside the loop on it
+      // if the pointer is 'after' the node, don't call its exitState since this was already done
+      var endWalkLength = endPointer.trail.length - ( endPointer.isAfter ? 1 : 0 );
+      for ( i = endWalkLength - 1; i >= 0; i-- ) {
+        endPointer.trail.nodes[i].exitState( state );
+      }
     },
     
-    isDirty: function() {
-      return !this.dirtyBounds.isEmpty();
+    dispose: function() {
+      $( this.canvas ).detach();
     },
     
     // TODO: consider a stack-based model for transforms?
@@ -118,52 +182,35 @@ var scenery = scenery || {};
       return zIndex + 1;
     },
     
-    // called if it needs to be added back to the main element after elements are removed
-    recreate: function() {
-      this.main.append( this.canvas );
-    },
-    
     pushClipShape: function( shape ) {
       // store the current state, since browser support for context.resetClip() is not yet in the stable browser versions
       this.context.save();
       
-      // set up the clipping
-      this.context.beginPath();
-      shape.writeToContext( this.context );
-      this.context.clip();
+      this.writeClipShape( shape );
     },
     
     popClipShape: function() {
       this.context.restore();
     },
     
-    markDirtyRegion: function( bounds ) {
-      // TODO: for performance, consider more than just a single dirty bounding box
-      this.dirtyBounds = this.dirtyBounds.union( bounds.dilated( 1 ).roundedOut() );
+    // canvas-specific
+    writeClipShape: function( shape ) {
+      // set up the clipping
+      this.context.beginPath();
+      shape.writeToContext( this.context );
+      this.context.clip();
     },
     
-    resetDirtyRegions: function() {
-      this.dirtyBounds = Bounds2.NOTHING;
-    },
-    
-    prepareBounds: function( globalBounds ) {
-      // don't let the bounds of the clearing go outside of the canvas
-      var clearBounds = globalBounds.intersection( new phet.math.Bounds2( 0, 0, this.canvas.width, this.canvas.height ) );
-      
-      if ( !clearBounds.isEmpty() ) {
+    clearGlobalBounds: function( bounds ) {
+      if ( !bounds.isEmpty() ) {
         this.context.save();
         this.context.setTransform( 1, 0, 0, 1, 0, 0 );
-        this.context.clearRect( clearBounds.x(), clearBounds.y(), clearBounds.width(), clearBounds.height() );
+        this.context.clearRect( bounds.x(), bounds.y(), bounds.width(), bounds.height() );
+        // use this for debugging cleared (dirty) regions for now
+        // this.context.fillStyle = '#' + Math.floor( Math.random() * 0xffffff ).toString( 16 );
+        // this.context.fillRect( bounds.x(), bounds.y(), bounds.width(), bounds.height() );
         this.context.restore();
       }
-    },
-    
-    prepareDirtyRegions: function() {
-      this.prepareBounds( this.dirtyBounds );
-    },
-    
-    getDirtyBounds: function() {
-      return this.dirtyBounds;
     },
     
     setFillStyle: function( style ) {
@@ -232,8 +279,19 @@ var scenery = scenery || {};
     // TODO: note for DOM we can do https://developer.mozilla.org/en-US/docs/HTML/Canvas/Drawing_DOM_objects_into_a_canvas
     renderToCanvas: function( canvas, context, delayCounts ) {
       context.drawImage( this.canvas, 0, 0 );
+    },
+    
+    markDirtyRegion: function( node, localBounds, transform, trail ) {
+      var bounds = transform.transformBounds2( localBounds );
+      
+      // TODO: for performance, consider more than just a single dirty bounding box
+      this.dirtyBounds = this.dirtyBounds.union( bounds.dilated( 1 ).roundedOut() );
+    },
+    
+    getName: function() {
+      return 'canvas';
     }
-  };
+  } );
 })();
 
 

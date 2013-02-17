@@ -23,29 +23,21 @@ var scenery = scenery || {};
     // TODO: hide as _visible, add setter/getter
     this._visible = true;
     
-    // type of layer to be created for content under this node.
-    // if non-null, this node is a layer root, and layerType should be a layer constructor function
-    this._layerType = null;
-    
     // This node and all children will be clipped by this shape (in addition to any other clipping shapes).
     // The shape should be in the local coordinate frame
     this._clipShape = null;
     
-    this.children = [];
-    this.transform = new phet.math.Transform3();
-    this.parent = null;
-    this._isRoot = false;
+    // TODO: consider defensive copy getters?
+    this.children = []; // ordered
+    this.parents = []; // unordered
     
-    this._inputListeners = [];
+    this.transform = new phet.math.Transform3();
+    
+    this._inputListeners = []; // for user input handling (mouse/touch)
+    this._eventListeners = []; // for internal events like paint invalidation, layer invalidation, etc.
     
     // TODO: add getter/setters that will be able to invalidate whether this node is under any fingers, etc.
     this._includeStrokeInHitRegion = false;
-    
-    // layer-specific data, currently updated in the rebuildLayers step
-    this._layerBeforeRender = null; // layer to swap to before rendering this node
-    this._layerAfterRender = null; // layer to swap to after rendering this node
-    this._layerReference = null; // stores a reference to this node's corresponding layer (the one used to render it's self content)
-    this._hasLayerBelow = false; // whether any descendants are also layer roots
     
     // bounds handling
     this._bounds = Bounds2.NOTHING; // for this node and its children, in "parent" coordinates
@@ -72,15 +64,11 @@ var scenery = scenery || {};
     constructor: Node,
     
     renderSelf: function ( state ) {
+      // TODO: renderSelf only really useful for Canvas / WebGL, extract this out
       // override to render typical leaf behavior (although possible to use for non-leaf nodes also)
     },
     
     enterState: function( state ) {
-      // switch layers if needed
-      if ( this._layerBeforeRender ) {
-        state.switchToLayer( this._layerBeforeRender );
-      }
-      
       // apply this node's transform
       if ( !this.transform.isIdentity() ) {
         // TODO: consider a stack-based model for transforms?
@@ -101,50 +89,22 @@ var scenery = scenery || {};
       if ( !this.transform.isIdentity() ) {
         state.applyTransformationMatrix( this.transform.getInverse() );
       }
-      
-      // switch layers if needed
-      if ( this._layerAfterRender ) {
-        state.switchToLayer( this._layerAfterRender );
-      }
     },
     
     insertChild: function( node, index ) {
-      phet.assert( node !== null && node !== undefined );
-      if ( this.isChild( node ) ) {
-        return;
-      }
-      if ( node.parent !== null ) {
-        node.parent.removeChild( node );
-      }
-      node.parent = this;
+      phet.assert( node !== null && node !== undefined && !_.contains( this.children, node ) );
+      
+      node.parents.push( this );
       this.children.splice( index, 0, node );
       
       node.invalidateBounds();
       node.invalidatePaint();
       
-      // keep _hasLayerBelow consistent
-      if ( node._hasLayerBelow || node.isLayerRoot() ) {
-        var ancestor = this;
-        while ( ancestor !== null && !ancestor._hasLayerBelow ) {
-          ancestor._hasLayerBelow = true;
-          ancestor = ancestor.parent;
-        }
-        
-        this.markLayerRefreshNeeded();
-      }
-      
-      if ( this._hasLayerBelow ) {
-        // TODO: if we don't automatically construct "valley" layers in refreshLayers, add this back in. other cases are handled above
-        //this.markLayerRefreshNeeded();
-      } else {
-        // no layer changes are necessary, however we need to synchronize layer references in the new subtree if applicable
-        if ( this.isRooted() && node._layerReference !== this._layerReference ) {
-          var layerReference = this._layerReference;
-          node.walkDepthFirst( function( child ) {
-            child._layerReference = layerReference;
-          } );
-        }
-      }
+      this.dispatchEvent( 'insertChild', {
+        parent: this,
+        child: node,
+        index: index
+      } );
     },
     
     addChild: function( node ) {
@@ -156,52 +116,27 @@ var scenery = scenery || {};
       
       node.markOldPaint();
       
-      node.parent = null;
-      this.children.splice( this.children.indexOf( node ), 1 );
+      var indexOfParent = _.indexOf( node.parents, this );
+      var indexOfChild = _.indexOf( this.children, node );
+      
+      node.parents.splice( indexOfParent, 1 );
+      this.children.splice( indexOfChild, 1 );
       
       this.invalidateBounds();
       
-      // keep _hasLayerBelow consistent
-      if ( node._hasLayerBelow || node.isLayerRoot() ) {
-        
-        // walk up the tree removing _hasLayerBelow flags until one is still set
-        var ancestor = this;
-        while ( ancestor !== null ) {
-          ancestor._hasLayerBelow = _.some( ancestor.children, function( child ) { return child._hasLayerBelow; } );
-          if ( ancestor._hasLayerBelow ) {
-            break;
-          }
-        }
-        
-        this.markLayerRefreshNeeded();
-      }
+      this.dispatchEvent( 'removeChild', {
+        parent: this,
+        child: node,
+        index: indexOfChild
+      } );
     },
     
-    // set to null to remove a layer type
-    setLayerType: function( layerType ) {
-      if ( this._layerType !== layerType ) {
-        this._layerType = layerType;
-        
-        // keep _hasLayerBelow consistent
-        var node = this.parent;
-        while ( node !== null ) {
-          node._hasLayerBelow = true;
-          node = node.parent;
-        }
-        
-        this.markLayerRefreshNeeded();
-      }
-    },
-    
-    getLayerType: function() {
-      return this._layerType;
-    },
-    
-    // remove this node from its parent
+    // remove this node from its parents
     detach: function () {
-      if ( this.hasParent() ) {
-        this.parent.removeChild( this );
-      }
+      var that = this;
+      _.each( this.parents.slice( 0 ), function( parent ) {
+        parent.removeChild( that );
+      } );
     },
     
     // ensure that cached bounds stored on this node (and all children) are accurate
@@ -242,11 +177,9 @@ var scenery = scenery || {};
         if ( !newBounds.equals( oldBounds ) ) {
           this._bounds = newBounds;
           
-          if ( this.parent !== null ) {
-            this.parent.invalidateBounds();
-          }
-          // this.markDirtyRegion( this.parentToLocalBounds( oldBounds ) );
-          
+          _.each( this.parents, function( parent ) {
+            parent.invalidateBounds();
+          } );
           // TODO: fire off event listeners?
         }
         
@@ -277,10 +210,19 @@ var scenery = scenery || {};
       this._boundsDirty = true;
       
       // and set flags for all ancestors
-      var node = this.parent;
-      while ( node !== null && !node._childBoundsDirty ) {
-        node._childBoundsDirty = true;
-        node = node.parent;
+      _.each( this.parents, function( parent ) {
+        parent.invalidateChildBounds();
+      } );
+    },
+    
+    // recursively tag all ancestors with _childBoundsDirty
+    invalidateChildBounds: function() {
+      // don't bother updating if we've already been tagged
+      if ( !this._childBoundsDirty ) {
+        this._childBoundsDirty = true;
+        _.each( this.parents, function( parent ) {
+          parent.invalidateChildBounds();
+        } );
       }
     },
     
@@ -288,11 +230,20 @@ var scenery = scenery || {};
     invalidatePaint: function() {
       this._paintDirty = true;
       
-      // and set flags for all ancestors (but bail if already marked, since this guarantees lower nodes will be marked)
-      var node = this.parent;
-      while ( node !== null && !node._childPaintDirty ) {
-        node._childPaintDirty = true;
-        node = node.parent;
+      // and set flags for all ancestors
+      _.each( this.parents, function( parent ) {
+        parent.invalidateChildPaint();
+      } );
+    },
+    
+    // recursively tag all ancestors with _childPaintDirty
+    invalidateChildPaint: function() {
+      // don't bother updating if we've already been tagged
+      if ( !this._childPaintDirty ) {
+        this._childPaintDirty = true;
+        _.each( this.parents, function( parent ) {
+          parent.invalidateChildPaint();
+        } );
       }
     },
     
@@ -318,9 +269,9 @@ var scenery = scenery || {};
     
     // bounds assumed to be in the local coordinate frame, below this node's transform
     markDirtyRegion: function( bounds ) {
-      var globalBounds = this.localToGlobalBounds( bounds );
-      _.each( this.findDescendantLayers(), function( layer ) {
-        layer.markDirtyRegion( globalBounds );
+      this.dispatchEventWithTransform( 'dirtyBounds', {
+        node: this,
+        bounds: bounds
       } );
     },
     
@@ -328,20 +279,25 @@ var scenery = scenery || {};
       this.markOldPaint( true );
     },
     
+    // should be called whenever something triggers changes for how this node is layered
     markLayerRefreshNeeded: function() {
-      if ( this.isRooted() ) {
-        this.getScene().layersDirtyUnder( this );
-      }
+      this.dispatchEvent( 'layerRefresh', {
+        node: this
+      } );
     },
     
     // marks the last-rendered bounds of this node and optionally all of its descendants as needing a repaint
     markOldPaint: function( justSelf ) {
-      var node = this;
-      var alreadyMarked = this._oldPaintMarked;
-      while ( !alreadyMarked && node.parent !== null ) {
-        node = node.parent;
-        alreadyMarked = node._oldPaintMarked;
+      function ancestorHasOldPaint( node ) {
+        if( node._oldPaintMarked ) {
+          return true;
+        }
+        return _.some( node.parents, function( parent ) {
+          return ancestorHasOldPaint( parent );
+        } );
       }
+      
+      var alreadyMarked = ancestorHasOldPaint( this );
       
       // we want to not do this marking if possible multiple times for the same sub-tree, so we check flags first
       if ( !alreadyMarked ) {
@@ -355,19 +311,10 @@ var scenery = scenery || {};
     },
     
     isChild: function ( potentialChild ) {
-      phet.assert( (potentialChild.parent === this ) === (this.children.indexOf( potentialChild ) !== -1) );
-      return potentialChild.parent === this;
-    },
-    
-    // does this node have an associated layerType (are the contents of this node rendered separately from its ancestors)
-    isLayerRoot: function() {
-      return this._layerType !== null;
-    },
-    
-    // the first layer associated with this node (can be multiple layers if children of this node are also layer roots)
-    getLayer: function() {
-      phet.assert( this.isLayerRoot() );
-      return this._layerBeforeRender;
+      var ourChild = _.contains( this.children, potentialChild );
+      var itsParent = _.contains( potentialChild.parents, this );
+      phet.assert( ourChild === itsParent );
+      return ourChild;
     },
     
     // the bounds for content in renderSelf(), in "local" coordinates
@@ -381,61 +328,8 @@ var scenery = scenery || {};
       return this._bounds;
     },
     
-    // find the layer to which this node will be rendered
-    findLayer: function() {
-      return this._layerReference;
-    },
-    
-    // find all layers for which this node (and all its descendants) will be rendered
-    findDescendantLayers: function() {
-      var firstLayer = this.findLayer();
-      
-      if ( firstLayer === null ) {
-        return [];
-      }
-      
-      // run a node out to the last child until we reach a leaf, to find the last layer we will render to in this subtree
-      var node = this;
-      while ( node.children.length !== 0 ) {
-        node = _.last( node.children );
-      }
-      var lastLayer = node.findLayer();
-      
-      // collect all layers between the first and last layers
-      var layers = [firstLayer];
-      var layer = firstLayer;
-      while ( layer !== lastLayer && layer.nextLayer !== null ) {
-        layer = layer.nextLayer;
-        layers.push( layer );
-      }
-      return layers;
-    },
-    
-    // returns the ancestor node of this node that has no parent
-    getBaseNode: function() {
-      if ( this.parent ) {
-        return this.parent.getBaseNode();
-      } else {
-        return this;
-      }
-    },
-    
-    isRoot: function() {
-      return this._isRoot;
-    },
-    
-    // returns true if this node is a descendant of a scene root
-    isRooted: function() {
-      return this.getBaseNode().isRoot();
-    },
-    
-    // either undefined (if not rooted), or the scene it is attached to
-    getScene: function() {
-      return this.getBaseNode().scene;
-    },
-    
     // return the top node (if any, otherwise null) whose self-rendered area contains the point (in parent coordinates).
-    nodeUnderPoint: function( point ) {
+    trailUnderPoint: function( point ) {
       // update bounds for pruning
       this.validateBounds();
       
@@ -452,10 +346,11 @@ var scenery = scenery || {};
         for ( var i = this.children.length - 1; i >= 0; i-- ) {
           var child = this.children[i];
           
-          var childHit = child.nodeUnderPoint( localPoint );
+          var childHit = child.trailUnderPoint( localPoint );
           
           // the child will have the point in its parent's coordinate frame (i.e. this node's frame)
           if ( childHit ) {
+            childHit.addAncestor( this, i );
             return childHit;
           }
         }
@@ -463,7 +358,7 @@ var scenery = scenery || {};
       
       // didn't hit our children, so check ourself as a last resort
       if ( this._selfBounds.containsPoint( localPoint ) && this.containsPointSelf( localPoint ) ) {
-        return this;
+        return new scenery.Trail( this );
       }
       
       // signal no hit
@@ -472,7 +367,7 @@ var scenery = scenery || {};
     
     // checking for whether a point (in parent coordinates) is contained in this sub-tree
     containsPoint: function( point ) {
-      return this.nodeUnderPoint( point ) !== null;
+      return this.trailUnderPoint( point ) !== null;
     },
     
     // override for computation of whether a point is inside the content rendered in renderSelf
@@ -488,8 +383,12 @@ var scenery = scenery || {};
       return this._selfBounds.intersectsBounds( bounds );
     },
     
+    hasSelf: function() {
+      return false;
+    },
+    
     hasParent: function() {
-      return this.parent !== null;
+      return this.parents.length !== 0;
     },
     
     hasChildren: function() {
@@ -507,91 +406,8 @@ var scenery = scenery || {};
       return _.filter( this.children, function( child ) { return !child._bounds.intersection( bounds ).isEmpty(); } );
     },
     
-    // returns a list of ancestors of this node, with the root first
-    getAncestors: function() {
-      return this.parent ? this.parent.getPathToRoot() : [];
-    },
-    
     getChildren: function() {
       return this.children.slice( 0 ); // create a defensive copy
-    },
-    
-    // like getAncestors(), but includes the current node as well
-    getPathToRoot: function() {
-      var result = [];
-      var node = this;
-      
-      while ( node !== null ) {
-        result.unshift( node );
-        node = node.parent;
-      }
-      
-      return result;
-    },
-    
-    // node that would be rendered previously, before this node
-    getPreviousRenderedNode: function() {
-      // we are the root (or base of a subtree)
-      if ( this.parent === null ) {
-        return null;
-      }
-      var index = _.indexOf( this.parent.children, this );
-      if ( index - 1 < 0 ) {
-        // first child under a parent, so the parent would be rendered first
-        return this.parent;
-      } else {
-        // otherwise, walk up the previous sibling's tree
-        var node = this.parent.children[index-1];
-        while ( node.children.length > 0 ) {
-          node = _.last( node.children );
-        }
-      }
-    },
-    
-    // node that would be rendered next, after it's self AND all children (ignores visibility). if this node has a next sibling, it will be returned
-    getNextRenderedNode: function() {
-      var node = this.parent;
-      while ( node !== null ) {
-        var index = _.indexOf( node.children, this );
-        if ( index + 1 < node.children.length ) {
-          return node.children[index + 1];
-        }
-      }
-      
-      // we were the last node rendered
-      return null;
-    },
-    
-    // the layer that would be in the render state before this node and its children are rendered, and before _layerBeforeRender
-    getLayerBeforeNodeRendered: function() {
-      if ( this._layerBeforeRender ) {
-        if ( this.parent === null ) {
-          return this._layerBeforeRender;
-        } else {
-          var index = _.indexOf( this.parent.children, this );
-          if ( index - 1 < 0 ) {
-            return this.parent._layerReference;
-          } else {
-            return this.parent.children[index-1].getLayerAfterNodeRendered();
-          }
-        }
-      } else {
-        return this._layerReference;
-      }
-    },
-    
-    // the layer that would be in the render state, after this node and its children are rendered, and after _layerAfterRender is processed
-    getLayerAfterNodeRendered: function() {
-      // this would happen after any children are rendered, so shortcut it
-      if ( this._layerAfterRender ) {
-        return this._layerAfterRender;
-      }
-      
-      if ( this.hasChildren() ) {
-        return _.last( this.children ).getLayerAfterNodeRendered();
-      } else {
-        return this._layerReference;
-      }
     },
     
     // TODO: set this up with a mix-in for a generic notifier?
@@ -611,6 +427,82 @@ var scenery = scenery || {};
     
     getInputListeners: function() {
       return this._inputListeners.slice( 0 ); // defensive copy
+    },
+    
+    // TODO: set this up with a mix-in for a generic notifier?
+    addEventListener: function( listener ) {
+      // don't allow listeners to be added multiple times
+      if ( _.indexOf( this._eventListeners, listener ) === -1 ) {
+        this._eventListeners.push( listener );
+      }
+    },
+    
+    removeEventListener: function( listener ) {
+      // ensure the listener is in our list
+      phet.assert( _.indexOf( this._eventListeners, listener ) !== -1 );
+      
+      this._eventListeners.splice( _.indexOf( this._eventListeners, listener ), 1 );
+    },
+    
+    getEventListeners: function() {
+      return this._eventListeners.slice( 0 ); // defensive copy
+    },
+    
+    // dispatches an event across all possible Trails ending in this node
+    dispatchEvent: function( type, args ) {
+      var node = this;
+      var trail = new scenery.Trail();
+      
+      function recursiveEventDispatch( node ) {
+        trail.addAncestor( node );
+        
+        args.trail = trail;
+        
+        _.each( node.getEventListeners(), function( eventListener ) {
+          if ( eventListener[type] ) {
+            eventListener[type]( args );
+          }
+        } );
+        
+        _.each( node.parents, function( parent ) {
+          recursiveEventDispatch( parent );
+        } );
+        
+        trail.removeAncestor();
+      }
+      
+      recursiveEventDispatch( this );
+    },
+    
+    // dispatches events with the transform computed from parent of the "root" to the local frame
+    dispatchEventWithTransform: function( type, args ) {
+      var node = this;
+      var trail = new scenery.Trail();
+      var transformStack = [ new phet.math.Transform3() ];
+      
+      function recursiveEventDispatch( node ) {
+        trail.addAncestor( node );
+        
+        transformStack.push( new phet.math.Transform3( node.getMatrix().timesMatrix( transformStack[transformStack.length-1].getMatrix() ) ) );
+        args.transform = transformStack[transformStack.length-1];
+        args.trail = trail;
+        
+        _.each( node.getEventListeners(), function( eventListener ) {
+          if ( eventListener[type] ) {
+            eventListener[type]( args );
+          }
+        } );
+        
+        _.each( node.parents, function( parent ) {
+          recursiveEventDispatch( parent );
+        } );
+        
+        transformStack.pop();
+        
+        trail.removeAncestor();
+      }
+      
+      recursiveEventDispatch( this );
     },
     
     // TODO: consider renaming to translateBy to match scaleBy
@@ -858,6 +750,20 @@ var scenery = scenery || {};
       return this;
     },
     
+    // returns a unique trail (if it exists) where each node in the ancestor chain has 0 or 1 parents
+    getUniqueTrail: function() {
+      var trail = new scenery.Trail();
+      var node = this;
+      
+      while ( node ) {
+        trail.addAncestor( node );
+        phet.assert( node.parents.length <= 1 );
+        node = node.parents[0]; // should be undefined if there aren't any parents
+      }
+      
+      return trail;
+    },
+    
     /*---------------------------------------------------------------------------*
     * Coordinate transform methods
     *----------------------------------------------------------------------------*/
@@ -880,65 +786,9 @@ var scenery = scenery || {};
       return this.transform.inverseBounds2( bounds );
     },
     
-    // apply this node's transform (and then all of its parents' transforms) to the point
-    localToGlobalPoint: function( point ) {
-      var node = this;
-      while ( node !== null ) {
-        point = node.transform.transformPosition2( point );
-        node = node.parent;
-      }
-      return point;
-    },
-    
-    localToGlobalBounds: function( bounds ) {
-      var node = this;
-      while ( node !== null ) {
-        bounds = node.transform.transformBounds2( bounds );
-        node = node.parent;
-      }
-      return bounds;
-    },
-    
-    globalToLocalPoint: function( point ) {
-      var node = this;
-      
-      // we need to apply the transformations in the reverse order, so we temporarily store them
-      var transforms = [];
-      while ( node !== null ) {
-        transforms.push( node.transform );
-        node = node.parent;
-      }
-      
-      // iterate from the back forwards (from the root node to here)
-      for ( var i = transforms.length - 1; i >=0; i-- ) {
-        point = transforms[i].inversePosition2( point );
-      }
-      return point;
-    },
-    
-    globalToLocalBounds: function( bounds ) {
-      var node = this;
-      
-      // we need to apply the transformations in the reverse order, so we temporarily store them
-      var transforms = [];
-      while ( node !== null ) {
-        transforms.push( node.transform );
-        node = node.parent;
-      }
-      
-      // iterate from the back forwards (from the root node to here)
-      for ( var i = transforms.length - 1; i >=0; i-- ) {
-        bounds = transforms[i].inverseBounds2( bounds );
-      }
-      return bounds;
-    },
-    
     /*---------------------------------------------------------------------------*
     * ES5 get/set
     *----------------------------------------------------------------------------*/
-    
-    set layerType( value ) { this.setLayerType( value ); },
-    get layerType() { return this.getLayerType(); },
     
     set visible( value ) { this.setVisible( value ); },
     get visible() { return this.isVisible(); },
@@ -1005,6 +855,10 @@ var scenery = scenery || {};
    * TODO: using more than one of {translation,x,left,right,centerX} or {translation,y,top,bottom,centerY} should be considered an error
    * TODO: move fill / stroke setting to mixins
    */
-  Node.prototype._mutatorKeys = [ 'layerType', 'visible', 'translation', 'x', 'y', 'rotation', 'scale',
+  Node.prototype._mutatorKeys = [ 'visible', 'translation', 'x', 'y', 'rotation', 'scale',
                                   'left', 'right', 'top', 'bottom', 'centerX', 'centerY' ];
+  
+  Node.prototype._supportedLayerTypes = [];
+  
+  Node.prototype.layerStrategy = scenery.DefaultLayerStrategy;
 })();

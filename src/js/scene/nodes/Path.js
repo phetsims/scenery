@@ -87,6 +87,10 @@ var scenery = scenery || {};
     }
   };
   
+  Path.prototype.hasSelf = function() {
+    return true;
+  };
+  
   // override for computation of whether a point is inside the content rendered in renderSelf
   // point is considered to be in the local coordinate frame
   Path.prototype.containsPointSelf = function( point ) {
@@ -111,6 +115,8 @@ var scenery = scenery || {};
   
   // TODO: stroke / fill mixins
   Path.prototype._mutatorKeys = [ 'shape' ].concat( scenery.Node.prototype._mutatorKeys );
+  
+  Path.prototype._supportedLayerTypes = [ scenery.LayerType.Canvas ];
   
   Object.defineProperty( Path.prototype, 'shape', { set: Path.prototype.setShape, get: Path.prototype.getShape } );
   

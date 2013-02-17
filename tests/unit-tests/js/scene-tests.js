@@ -88,18 +88,17 @@
     var mainScene = new scenery.Scene( $( '#main' ) );
     var secondaryScene = new scenery.Scene( $( '#secondary' ) );
     
-    var mainRoot = mainScene.root;
-    var secondaryRoot = secondaryScene.root;
-    
     for ( var i = 0; i < actions.length; i++ ) {
       var action = actions[i];
       action( mainScene );
       mainScene.updateScene();
       
-      secondaryScene.clearAllLayers();
-      action( secondaryScene );
-      secondaryScene.rebuildLayers();
-      secondaryScene.renderScene();
+      secondaryScene.dispose();
+      secondaryScene = new scenery.Scene( $( '#secondary' ) );
+      for ( var j = 0; j <= i; j++ ) {
+        actions[j]( secondaryScene );
+      }
+      secondaryScene.updateScene();
       
       var isEqual = snapshotEquals( snapshot( mainScene ), snapshot( secondaryScene ), 0, 'action #' + i );
       if ( !isEqual ) {
@@ -134,15 +133,15 @@
       node.setShape( shapeToStroke );
       node.setStroke( '#000000' );
       if ( strokeNodeSetup ) { strokeNodeSetup( node ); }
-      scene.root.addChild( node );
+      scene.addChild( node );
     }, function( scene ) {
       var node = new scenery.Path();
       node.setShape( shapeToFill );
       node.setFill( '#000000' );
       // node.setStroke( '#ff0000' ); // for debugging strokes
-      scene.root.addChild( node );
+      scene.addChild( node );
       // node.validateBounds();
-      // scene.root.addChild( new scenery.Path( {
+      // scene.addChild( new scenery.Path( {
       //   shape: scenery.Shape.bounds( node.getSelfBounds() ),
       //   fill: 'rgba(0,0,255,0.5)'
       // } ) );
@@ -201,11 +200,71 @@
     ok( Math.abs( a - b ) < 0.0000001, ( message ? message + ': ' : '' ) + a + ' =? ' + b );
   }
   
+  function createTestNodeTree() {
+    var node = new scenery.Node();
+    node.addChild( new scenery.Node() );
+    node.addChild( new scenery.Node() );
+    node.addChild( new scenery.Node() );
+    
+    node.children[0].addChild( new scenery.Node() );
+    node.children[0].addChild( new scenery.Node() );
+    node.children[0].addChild( new scenery.Node() );
+    node.children[0].addChild( new scenery.Node() );
+    node.children[0].addChild( new scenery.Node() );
+    
+    node.children[0].children[1].addChild( new scenery.Node() );
+    node.children[0].children[3].addChild( new scenery.Node() );
+    node.children[0].children[3].addChild( new scenery.Node() );
+    
+    node.children[0].children[3].children[0].addChild( new scenery.Node() );
+    
+    return node;
+  }
+  
   /*---------------------------------------------------------------------------*
   * TESTS BELOW
   *----------------------------------------------------------------------------*/   
   
-  module( 'Canvas Scene Regression' );
+  module( 'Scene Regression' );
+  
+  test( 'Dirty bounds propagation test', function() {
+    var node = createTestNodeTree();
+    
+    node.validateBounds();
+    
+    ok( !node._childBoundsDirty );
+    
+    node.children[0].children[3].children[0].invalidateBounds();
+    
+    ok( node._childBoundsDirty );
+  } );
+  
+  test( 'Scene Layer test 1', function() {
+    var sceneA = new scenery.Scene( $( '#main' ) );
+    var sceneB = new scenery.Scene( $( '#secondary' ) );
+    
+    var node = new scenery.Path();
+    var child = new scenery.Path();
+    node.addChild( child );
+    
+    sceneA.addChild( node );
+    sceneB.addChild( child );
+    
+    sceneA.rebuildLayers();
+    
+    // console.log( sceneA.layers );
+    
+    
+    var a = new scenery.Scene( $( '#main' ) );
+    var b = new scenery.Scene( $( '#secondary' ) );
+    var c = new scenery.Node();
+    
+    b.addChild( c );
+    a.addChild( b );
+    a.addChild( c );
+    
+    expect( 0 );
+  } );
   
   test( 'Canvas 2D Context and Features', function() {
     var canvas = document.createElement( 'canvas' );
@@ -241,6 +300,247 @@
     } );
   } );
   
+  test( 'Trail next/previous', function() {
+    var node = createTestNodeTree();
+    
+    // walk it forward
+    var trail = new scenery.Trail( [ node ] );
+    equal( 1, trail.length );
+    trail = trail.next();
+    equal( 2, trail.length );
+    trail = trail.next();
+    equal( 3, trail.length );
+    trail = trail.next();
+    equal( 3, trail.length );
+    trail = trail.next();
+    equal( 4, trail.length );
+    trail = trail.next();
+    equal( 3, trail.length );
+    trail = trail.next();
+    equal( 3, trail.length );
+    trail = trail.next();
+    equal( 4, trail.length );
+    trail = trail.next();
+    equal( 5, trail.length );
+    trail = trail.next();
+    equal( 4, trail.length );
+    trail = trail.next();
+    equal( 3, trail.length );
+    trail = trail.next();
+    equal( 2, trail.length );
+    trail = trail.next();
+    equal( 2, trail.length );
+    
+    // make sure walking off the end gives us null
+    equal( null, trail.next() );
+    
+    trail = trail.previous();
+    equal( 2, trail.length );
+    trail = trail.previous();
+    equal( 3, trail.length );
+    trail = trail.previous();
+    equal( 4, trail.length );
+    trail = trail.previous();
+    equal( 5, trail.length );
+    trail = trail.previous();
+    equal( 4, trail.length );
+    trail = trail.previous();
+    equal( 3, trail.length );
+    trail = trail.previous();
+    equal( 3, trail.length );
+    trail = trail.previous();
+    equal( 4, trail.length );
+    trail = trail.previous();
+    equal( 3, trail.length );
+    trail = trail.previous();
+    equal( 3, trail.length );
+    trail = trail.previous();
+    equal( 2, trail.length );
+    trail = trail.previous();
+    equal( 1, trail.length );
+    
+    // make sure walking off the start gives us null
+    equal( null, trail.previous() );
+  } );
+  
+  test( 'Trail comparison', function() {
+    var node = createTestNodeTree();
+    
+    // get a list of all trails in render order
+    var trails = [];
+    var currentTrail = new scenery.Trail( node ); // start at the first node
+    
+    while ( currentTrail ) {
+      trails.push( currentTrail );
+      currentTrail = currentTrail.next();
+    }
+    
+    equal( 13, trails.length, 'Trail for each node' );
+    
+    for ( var i = 0; i < trails.length; i++ ) {
+      for ( var j = i; j < trails.length; j++ ) {
+        var comparison = trails[i].compare( trails[j] );
+        
+        // make sure that every trail compares as expected (0 and they are equal, -1 and i < j)
+        equal( i === j ? 0 : ( i < j ? -1 : 1 ), comparison, i + ',' + j );
+      }
+    }
+  } );
+  
+  test( 'TrailPointer render comparison', function() {
+    var node = createTestNodeTree();
+    
+    equal( 0, new scenery.TrailPointer( node.getUniqueTrail(), true ).compareRender( new scenery.TrailPointer( node.getUniqueTrail(), true ) ), 'Same before pointer' );
+    equal( 0, new scenery.TrailPointer( node.getUniqueTrail(), false ).compareRender( new scenery.TrailPointer( node.getUniqueTrail(), false ) ), 'Same after pointer' );
+    equal( -1, new scenery.TrailPointer( node.getUniqueTrail(), true ).compareRender( new scenery.TrailPointer( node.getUniqueTrail(), false ) ), 'Same node before/after root' );
+    equal( -1, new scenery.TrailPointer( node.children[0].getUniqueTrail(), true ).compareRender( new scenery.TrailPointer( node.children[0].getUniqueTrail(), false ) ), 'Same node before/after nonroot' );
+    equal( 0, new scenery.TrailPointer( node.children[0].children[1].children[0].getUniqueTrail(), false ).compareRender( new scenery.TrailPointer( node.children[0].children[2].getUniqueTrail(), true ) ), 'Equivalence of before/after' );
+    
+    // all pointers in the render order
+    var pointers = [
+      new scenery.TrailPointer( node.getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[0].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[0].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[1].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[1].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[1].children[0].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[1].children[0].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[2].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[2].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[3].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[3].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[3].children[0].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[3].children[0].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[3].children[0].children[0].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[3].children[0].children[0].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[3].children[1].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[3].children[1].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[4].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[4].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[1].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[1].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[2].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[2].getUniqueTrail(), false )
+    ];
+    
+    // compare the pointers. different ones can be equal if they represent the same place, so we only check if they compare differently
+    for ( var i = 0; i < pointers.length; i++ ) {
+      for ( var j = i; j < pointers.length; j++ ) {
+        var comparison = pointers[i].compareRender( pointers[j] );
+        
+        if ( comparison === -1 ) {
+          ok( i < j, i + ',' + j );
+        }
+        if ( comparison === 1 ) {
+          ok( i > j, i + ',' + j );
+        }
+      }
+    }
+  } );
+  
+  test( 'TrailPointer nested comparison and fowards/backwards', function() {
+    var node = createTestNodeTree();
+    
+    // all pointers in the nested order
+    var pointers = [
+      new scenery.TrailPointer( node.getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[0].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[0].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[1].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[1].children[0].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[1].children[0].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[1].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[2].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[2].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[3].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[3].children[0].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[3].children[0].children[0].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[3].children[0].children[0].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[3].children[0].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[3].children[1].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[3].children[1].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[3].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].children[4].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[0].children[4].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[0].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[1].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[1].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.children[2].getUniqueTrail(), true ),
+      new scenery.TrailPointer( node.children[2].getUniqueTrail(), false ),
+      new scenery.TrailPointer( node.getUniqueTrail(), false )
+    ];
+    
+    // exhaustively verify the ordering between each ordered pair
+    for ( var i = 0; i < pointers.length; i++ ) {
+      for ( var j = i; j < pointers.length; j++ ) {
+        var comparison = pointers[i].compareNested( pointers[j] );
+        
+        // make sure that every pointer compares as expected (0 and they are equal, -1 and i < j)
+        equal( comparison, i === j ? 0 : ( i < j ? -1 : 1 ), 'compareNested: ' + i + ',' + j );
+      }
+    }
+    
+    // verify forwards and backwards, as well as copy constructors
+    for ( var i = 1; i < pointers.length; i++ ) {
+      var a = pointers[i-1];
+      var b = pointers[i];
+      
+      var forwardsCopy = a.copy();
+      forwardsCopy.nestedForwards();
+      equal( forwardsCopy.compareNested( b ), 0, 'forwardsPointerCheck ' + ( i - 1 ) + ' to ' + i );
+      
+      var backwardsCopy = b.copy();
+      backwardsCopy.nestedBackwards();
+      equal( backwardsCopy.compareNested( a ), 0, 'backwardsPointerCheck ' + i + ' to ' + ( i - 1 ) );
+    }
+    
+    // exhaustively check depthFirstUntil inclusive
+    for ( var i = 0; i < pointers.length; i++ ) {
+      for ( var j = i + 1; j < pointers.length; j++ ) {
+        // i < j guaranteed
+        var contents = [];
+        pointers[i].depthFirstUntil( pointers[j], function( pointer ) { contents.push( pointer.copy() ); }, false );
+        equal( contents.length, j - i + 1, 'depthFirstUntil inclusive ' + i + ',' + j + ' count check' );
+        
+        // do an actual pointer to pointer comparison
+        var isOk = true;
+        for ( var k = 0; k < contents.length; k++ ) {
+          var comparison = contents[k].compareNested( pointers[i+k] );
+          if ( comparison !== 0 ) {
+            equal( comparison, 0, 'depthFirstUntil inclusive ' + i + ',' + j + ',' + k + ' comparison check ' + contents[k].trail.indices.join() + ' - ' + pointers[i+k].trail.indices.join() );
+            isOk = false;
+          }
+        }
+        ok( isOk, 'depthFirstUntil inclusive ' + i + ',' + j + ' comparison check' );
+      }
+    }
+    
+    // exhaustively check depthFirstUntil exclusive
+    for ( var i = 0; i < pointers.length; i++ ) {
+      for ( var j = i + 1; j < pointers.length; j++ ) {
+        // i < j guaranteed
+        var contents = [];
+        pointers[i].depthFirstUntil( pointers[j], function( pointer ) { contents.push( pointer.copy() ); }, true );
+        equal( contents.length, j - i - 1, 'depthFirstUntil exclusive ' + i + ',' + j + ' count check' );
+        
+        // do an actual pointer to pointer comparison
+        var isOk = true;
+        for ( var k = 0; k < contents.length; k++ ) {
+          var comparison = contents[k].compareNested( pointers[i+k+1] );
+          if ( comparison !== 0 ) {
+            equal( comparison, 0, 'depthFirstUntil exclusive ' + i + ',' + j + ',' + k + ' comparison check ' + contents[k].trail.indices.join() + ' - ' + pointers[i+k].trail.indices.join() );
+            isOk = false;
+          }
+        }
+        ok( isOk, 'depthFirstUntil exclusive ' + i + ',' + j + ' comparison check' );
+      }
+    }
+  } );
+  
   test( 'Text width measurement in canvas', function() {
     var canvas = document.createElement( 'canvas' );
     var context = phet.canvas.initCanvas( canvas );
@@ -266,16 +566,15 @@
     
     b.validateBounds();
     
-    ok( !a.isRooted() );
-    
     a.invalidatePaint();
+    
+    expect( 0 );
   } );
   
   test( 'Checking Layers and external canvas', function() {
     var scene = new scenery.Scene( $( '#main' ) );
-    var root = scene.root;
     
-    root.addChild( new scenery.Path( {
+    scene.addChild( new scenery.Path( {
       shape: scenery.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
       fill: '#ff0000'
     } ) );
@@ -284,11 +583,11 @@
       shape: scenery.Shape.rectangle( canvasWidth / 4, canvasHeight / 4, canvasWidth / 2, canvasHeight / 2 ),
       fill: '#00ff00'
     } );
-    middleRect.setLayerType( scenery.CanvasLayer );
+    middleRect.layerStrategy = scenery.SeparateLayerStrategy;
     
-    root.addChild( middleRect );
+    scene.addChild( middleRect );
     
-    root.addChild( new scenery.Path( {
+    scene.addChild( new scenery.Path( {
       shape: scenery.Shape.rectangle( canvasWidth / 2, canvasHeight / 2, canvasWidth / 2, canvasHeight / 2 ),
       fill: '#0000ff'
     } ) );
@@ -301,12 +600,12 @@
   test( 'Update vs Full Basic Clearing Check', function() {
     updateVsFullRender( [
       function( scene ) {
-        scene.root.addChild( new scenery.Path( {
+        scene.addChild( new scenery.Path( {
           shape: scenery.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
           fill: '#000000'
         } ) );
       }, function( scene ) {
-        scene.root.children[0].translate( 20, 20 );
+        scene.children[0].translate( 20, 20 );
       }
     ] );
   } );
@@ -318,9 +617,9 @@
         node.setShape( scenery.Shape.rectangle( 0, 0, canvasWidth / 3, canvasHeight / 3 ) );
         node.setFill( '#ff0000' );
         node.setStroke( '#000000' );
-        scene.root.addChild( node );
+        scene.addChild( node );
       }, function( scene ) {
-        scene.root.children[0].setShape( scenery.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ) );
+        scene.children[0].setShape( scenery.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ) );
       }
     ] );
   } );
@@ -334,9 +633,9 @@
         node.setFill( '#ff0000' );
         node.setStroke( '#000000' );
         node.setLineWidth( 10 );
-        scene.root.addChild( node );
+        scene.addChild( node );
       }, function( scene ) {
-        scene.root.children[0].translate( canvasWidth / 4, canvasHeight / 4 );
+        scene.children[0].translate( canvasWidth / 4, canvasHeight / 4 );
       }
     ] );
   } );
@@ -371,7 +670,7 @@
   
   test( 'Layer change stability', function() {
     var scene = new scenery.Scene( $( '#main' ) );
-    var root = scene.root;
+    var root = scene;
     
     root.addChild( new scenery.Path( {
       shape: scenery.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
@@ -395,7 +694,7 @@
     
     var snapshotA = snapshot( scene );
     
-    middleRect.setLayerType( scenery.CanvasLayer );
+    middleRect.layerStrategy = scenery.SeparateLayerStrategy;
     scene.updateScene();
     
     var snapshotB = snapshot( scene );
@@ -707,10 +1006,9 @@
   //       node.setShape( scenery.Shape.rectangle( 0, 0, canvasWidth / 3, canvasHeight / 3 ) );
   //       node.setFill( '#ff0000' );
   //       node.setStroke( '#000000' );
-  //       scene.root.addChild( node );
+  //       scene.addChild( node );
         
   //       var domNode = new scenery.Node();
-  //       domNode.setLayerType( scenery.DOMLayer );
   //       node.addChild( domNode );
   //     }
   //   ] );

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+
+  <!-- runs in full-screen mode on iOS devices -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <title>Debugging Test</title>
+  
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../contrib/jquery-1.8.3.min.js"></script>
+  <script src="../contrib/lodash.min-1.0.0-rc.3.js"></script>
+  
+  <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
+  <script src="../scenery.js"></script>
+  <!-- <script src="../scenery-min.js"></script> -->
+  
+  <style type="text/css">
+    /* Let content go to the edges */
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #ff0;
+      overflow: hidden;
+    }
+    
+    /* Have the #main div cover the entire viewport */
+    #main {
+      position: absolute;
+      left: 0;
+      top: 0;
+      background-color: #fff;
+      z-index: 0;
+      padding: none !important; /* in case we add jQuery Mobile back in */
+    }
+
+  </style>
+</head>
+
+<body>
+  
+  <!-- our scene graph will be in this div -->
+  <div id="main" >
+  </div>
+
+  <script>
+  
+  var main = $( '#main' );
+
+  // initialize our scene
+  var scene = new scenery.Scene( main );
+  scene.resizeOnWindowResize(); // the scene gets resized to the full screen size
+  console.log( 'scene created' );
+  
+  var container = new scenery.Node();
+  console.log( 'adding container' );
+  scene.addChild( container );
+  
+  /*---------------------------------------------------------------------------*
+  * Text
+  *----------------------------------------------------------------------------*/    
+  
+  // container.addChild( new scenery.Text( 'This is a Text node', {
+  //   x: 20,
+  //   y: 50,
+  //   fill: '#000000',
+  //   font: '20px sans-serif'
+  // } ) );
+  
+  /*---------------------------------------------------------------------------*
+  * Rectangle
+  *----------------------------------------------------------------------------*/    
+  
+  console.log( 'adding rectangle' );
+  container.addChild( new scenery.Path( {
+    shape: scenery.Shape.rectangle( 0, 0, 44, 44 ),
+    x: 20.5,
+    y: 100.5,
+    fill: '#ff0000',
+    stroke: '#000000'
+  } ) );
+  
+  console.log( 'updating scene' );
+  scene.updateScene();
+  
+  /*---------------------------------------------------------------------------*
+  * Custom Shape
+  *----------------------------------------------------------------------------*/    
+  
+  // var customShape = new scenery.Shape();
+  // customShape.moveTo( 0, 0 );
+  // customShape.quadraticCurveTo( 200, 0, 100, 50 );
+  // customShape.lineTo( 100, 25 );
+  // customShape.lineTo( 0, 25 );
+  // customShape.close();
+  
+  // container.addChild( new scenery.Path( {
+  //   shape: customShape,
+  //   x: 120.5,
+  //   y: 100.5,
+  //   fill: '#ff0000',
+  //   stroke: '#000000',
+  //   lineWidth: 3
+  // } ) );
+  
+  /*---------------------------------------------------------------------------*
+  * Image
+  *----------------------------------------------------------------------------*/    
+  
+  // var imageSource = document.createElement( 'img' );
+  // imageSource.onload = function( e ) {
+  //   container.addChild( new scenery.Image( imageSource, {
+  //     x: 20,
+  //     y: 200
+  //   } ) );
+  // };
+  // imageSource.src = 'http://phet.colorado.edu/images/phet-logo.gif';
+  
+  /*---------------------------------------------------------------------------*
+  * DOM
+  *----------------------------------------------------------------------------*/    
+  
+  // var element = document.createElement( 'div' );
+  // $( element ).attr( 'class', 'btn-group' );
+  
+  // function addButton( text, onclick ) {
+  //   var actualButton = document.createElement( 'button' );
+  //   $( actualButton ).attr( 'class', 'btn' );
+  //   $( actualButton ).text( text );
+  //   $( actualButton ).on( 'click', onclick );
+    
+  //   // for responsive touch handling without 300ms delay
+  //   $( actualButton ).on( 'touchstart', function( event ) { onclick( event ); event.preventDefault(); } );
+    
+  //   element.appendChild( actualButton );
+  // }
+  // addButton( 'Scale down', function( event ) { container.scaleBy( Math.pow( 0.5, 0.25 ) ); } );
+  // addButton( 'Scale up', function( event ) { container.scaleBy( Math.pow( 2, 0.25 ) ); } );
+  // addButton( 'Rotate', function( event ) { container.rotateAround( new phet.math.Vector2( 200, 200 ), Math.PI / 16 ); } );
+  
+  // container.addChild( new scenery.DOM( element, {
+  //   x: 20,
+  //   y: 350
+  // } ) );
+
+  </script>
+
+</body>
+</html>
