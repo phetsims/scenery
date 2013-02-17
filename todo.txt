@@ -50,7 +50,6 @@ General:
     * Extract molecule-shapes code to separate repo
     Test zooming on browsers
     RenderState - consider stack-based transforms
-    Copy over Molecule Shapes efficiency improvement code from ~/
     DOM events => benchmarks => create Path => layer changes
     Documentation and Examples (always an item)
     Take extension mechanism from Backbone.js: https://github.com/documentcloud/backbone/blob/master/backbone.js#L1471-L1502
