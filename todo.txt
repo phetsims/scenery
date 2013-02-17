@@ -143,7 +143,7 @@ Layers:
     Note in code about DOM4 (http://www.w3.org/TR/dom/#constructing-events) and Event Constructors. See http://www.w3.org/TR/DOM-Level-3-Events/#new-event-interface-initializers
         Use deprecated initMouseEvent for now, but feature detect on it?
     Picking:
-        Add a flag? Check Piccolo behavior
+        Add a flag (pickable)? Check Piccolo behavior
         Invisible nodes get picked? Check Piccolo behavior, but consider a parameter for this somewhere?
     Enter/Exit events on up/down? - see question above
     Freeze event handlers, a la the DOM 3 Events spec? Or copy Piccolo?
@@ -177,12 +177,13 @@ Node:
     Mix-in notifier for listeners
     Sub-tree opacity (like setTransparency in Piccolo)
         'transparency', 'opacity', or 'alpha'?
+        Canvas: globalAlpha?
+        SVG: how to handle?
     Canvas fill gradients / patterns
         Can this be abstracted across SVG / WebGL layers also? -- probably WebGL _much_ more efficiently with shaders
     For prepend-flags, set in parameter object instead of boolean flag? (somewhat hard-to-read code)
-    Refactor fill / stroke code in Node so that it can be used by subclasses, e.g. Text, etc.
     Visibility interaction with dirty paint / bounds, and events based on that
-        Scene.updateLayer shouldn't be called if only invisible nodes were changed
+        Scene.updateLayer shouldn't be called if only invisible nodes were changed?
     Don't send mark updates on invisible layers? Visibility change causes repaint?
     General optimization and organization so we can extract "self" from child rendering bounds, what is repainted, etc. better.
     Function for higher-performance possibly-expanded bounds for redraw?
