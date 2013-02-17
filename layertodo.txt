@@ -57,25 +57,22 @@ Canvas: proper rendering with clearing and all missing features
   Restricted bounds intersection pruning
 DOM: rendering
 
+
+!! Split renderSelf into renderSelfCanvas, renderSelfSVG, since DOM has no real use for this
+
+
+DOMLayer would work better if we send a transformChanged event with the node, since it only needs to update the transform
 Verify Input correctness with Scene now being a Node, and with trails
-
 Next: LayerBoundaries prototype? Might be useful as a toString(), and for handling queries
-
 For canvas rendering, how to handle restricted bounds in depthFirstUntil? Generalize, and allow a return flag to indicate not hitting children?
-
 Update tests for rendering comparison, so for each step we either apply all changes and render, then one at a time rendering inbetween
-
 DAG handling for SVG (how to duplicate) or DOM
-
 Move snapshots to high-level dir so we can do SARs on the test directory easier
-
 Test zooming on browsers
-
 Possibly SVG Safari issues if bounds aren't whole-pixel?
-
 DragHandler - mouse buttons
-
 Bounds after rotation seems to be a bit too wide
+
 
 SVG:
   SVGLayer needs have CSS transform with a scale of 1, apply scale to containing group instead?
@@ -134,7 +131,7 @@ Node:
   ability to fire an event with a callback that all registered layers / scenes will respond to (so you can technically get singleton scene references)
 
 DOM:
-  Hoisting of interactive DOM nodes
+  [IMPLEMENTATION REMOVED] Hoisting of interactive DOM nodes
     - HoistedDOMLayer that adds (2147483647/2) to its z-index
       Pro:
         layering will work in the browser

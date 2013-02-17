@@ -180,16 +180,27 @@ var scenery = scenery || {};
       }
     },
     
-    // treats the pointer as render-ordered
+    // treats the pointer as render-ordered (includes the start pointer 'before' if applicable, excludes the end pointer 'before' if applicable
     eachNodeBetween: function( other, callback ) {
-      phet.assert( this.compareRender( other ) === -1, 'TrailPointer.eachNodeBetween pointers out of order, possibly in both meanings of the phrase!' );
-      phet.assert( this.trail.rootNode() === other.trail.rootNode(), 'TrailPointer.eachNodeBetween takes pointers with the same root' );
+      this.eachTrailBetween( other, function( trail ) {
+        callback( trail.lastNode() );
+      } );
+    },
+    
+    // treats the pointer as render-ordered (includes the start pointer 'before' if applicable, excludes the end pointer 'before' if applicable
+    eachTrailBetween: function( other, callback ) {
+      // this should trigger on all pointers that have the 'before' flag, except a pointer equal to 'other'.
       
-      // sanity check TODO: remove later
-      this.trail.reindex();
-      other.trail.reindex();
+      // since we exclude endpoints in the depthFirstUntil call, we need to fire this off first
+      if ( this.isBefore ) {
+        callback( this.trail );
+      }
       
-      throw new Error( 'eachNodeBetween unimplemented' );
+      this.depthFirstUntil( other, function( pointer ) {
+        if ( pointer.isBefore ) {
+          callback( pointer.trail );
+        }
+      }, true ); // exclude the endpoints so we can ignore the ending 'before' case
     },
     
     /*

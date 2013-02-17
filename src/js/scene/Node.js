@@ -64,6 +64,7 @@ var scenery = scenery || {};
     constructor: Node,
     
     renderSelf: function ( state ) {
+      // TODO: renderSelf only really useful for Canvas / WebGL, extract this out
       // override to render typical leaf behavior (although possible to use for non-leaf nodes also)
     },
     

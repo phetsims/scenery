@@ -43,6 +43,15 @@ var scenery = scenery || {};
       return this.getName() + ' ' + ( this.startPointer ? this.startPointer.toString() : '!' ) + ' (' + ( this.startSelfTrail ? this.startSelfTrail.toString() : '!' ) + ') => ' + ( this.endPointer ? this.endPointer.toString() : '!' ) + ' (' + ( this.endSelfTrail ? this.endSelfTrail.toString() : '!' ) + ')';
     },
     
+    updateBoundaries: function( entry ) {
+      // TODO: tracking of nodes that changed?
+      // TODO: what needs to be reindexed?
+      this.startPointer = entry.startPointer;
+      this.endPointer = entry.endPointer;
+      this.startSelfTrail = entry.startSelfTrail;
+      this.endSelfTrail = entry.endSelfTrail;
+    },
+    
     /*---------------------------------------------------------------------------*
     * Abstract
     *----------------------------------------------------------------------------*/

@@ -321,8 +321,7 @@ $(document).ready( function() {
         
         container.addChild( new scenery.DOM( element, {
           x: -560 / 2,
-          y: -315 / 2,
-          interactive: true
+          y: -315 / 2
         } ) );
         
         // var unclickableFormNode = new scenery.DOM( unclickableForm );
@@ -331,15 +330,13 @@ $(document).ready( function() {
         
         container.addChild( new scenery.DOM( clickableForm, {
           x: -560 / 2,
-          y: 160,
-          interactive: true
+          y: 160
         } ) );
         
         container.addChild( new scenery.DOM( bigForm, {
           x: 0,
           y: 160,
-          scale: 4,
-          interactive: true
+          scale: 4
         } ) );
         
         scene.addChild( container );

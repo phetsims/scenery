@@ -116,10 +116,7 @@ var scenery = scenery || {};
     
     this.layers = _.map( layerEntries, function( entry ) {
       var layer = entry.type.createLayer( layerArgs );
-      layer.startPointer = entry.startPointer;
-      layer.endPointer = entry.endPointer;
-      layer.startSelfTrail = entry.startSelfTrail;
-      layer.endSelfTrail = entry.endSelfTrail;
+      layer.updateBoundaries( entry );
       return layer;
     } );
     
