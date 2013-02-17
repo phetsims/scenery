@@ -120,14 +120,14 @@ var scenery = scenery || {};
       return layer;
     } );
     
-    console.log( '---' );
-    console.log( 'layers rebuilt:' );
-    _.each( this.layers, function( layer ) {
-      console.log( layer.toString() );
-    } );
-    _.each( layerEntries, function( entry ) {
-      //console.log( entry.type.name + ' ' + ( this.startPointer ? this.startPointer.toString() : '!' ) + ' (' + ( this.startPath ? this.startPath.toString() : '!' ) + ') => ' + ( this.endPointer ? this.endPointer.toString() : '!' ) + ' (' + ( this.endPath ? this.endPath.toString() : '!' ) + ')' );
-    } );
+    // console.log( '---' );
+    // console.log( 'layers rebuilt:' );
+    // _.each( this.layers, function( layer ) {
+    //   console.log( layer.toString() );
+    // } );
+    // _.each( layerEntries, function( entry ) {
+    //   //console.log( entry.type.name + ' ' + ( this.startPointer ? this.startPointer.toString() : '!' ) + ' (' + ( this.startPath ? this.startPath.toString() : '!' ) + ') => ' + ( this.endPointer ? this.endPointer.toString() : '!' ) + ' (' + ( this.endPath ? this.endPath.toString() : '!' ) + ')' );
+    // } );
   };
   
   // after layer changes, the layers should have their zIndex updated
