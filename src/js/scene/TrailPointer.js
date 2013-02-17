@@ -212,8 +212,8 @@ var scenery = scenery || {};
      * (applies only to before-pointers)
      */
     depthFirstUntil: function( other, callback, excludeEndpoints ) {
-      // make sure this pointer is before the other
-      phet.assert( this.compareNested( other ) === -1, 'TrailPointer.depthFirstUntil pointers out of order, possibly in both meanings of the phrase!' );
+      // make sure this pointer is before the other, but allow start === end if we are not excluding endpoints
+      phet.assert( this.compareNested( other ) <= ( excludeEndpoints ? -1 : 0 ), 'TrailPointer.depthFirstUntil pointers out of order, possibly in both meanings of the phrase!' );
       phet.assert( this.trail.rootNode() === other.trail.rootNode(), 'TrailPointer.depthFirstUntil takes pointers with the same root' );
       
       // sanity check TODO: remove later
