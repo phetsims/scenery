@@ -166,8 +166,10 @@ Accessibility / shadow DOM:
     see http://www.html5accessibility.com/
 
 Node:
-    constructor wraps parameters as children for convenience?
-        as children get/set? risky, but possibly useful
+    Batching of insertions / removals, so that we could consider completely changing children, removing all children, etc. at the same time
+        Possibly consider batching these together until updateScene?
+        Then: add children mutator (setChildren, getChildren) so that it is convenient to set up trees of nodes?
+            Would require renaming node.children to node._children, and consider whether getChildren should have the slice precaution
     param arg { cursor: 'hand' } and mouse cursor handling
     Bounds after rotation seems to be a bit too wide
     * Fire event on change of layerStrategy, and possibly rethink layerStrategy design
