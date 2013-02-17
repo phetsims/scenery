@@ -59,6 +59,8 @@ Code:
     Appended $ to jquery-wrapped elements or lists
     Verify Input correctness with Scene now being a Node, and with trails
     Organize unit tests into separate files, etc.
+        Lint unit tests
+    Validation of example HTML, CSS, etc.
     * Move snapshots into upper-level directory to make code search-and-replace easier
     Either use Require.js or bake in support. Probably good to do for reducing code size with simulations.
         Almond for fallbacks?
@@ -109,6 +111,7 @@ DOM:
     Mixins for implementing SVG? might be useful if we have createSVGElement() for self-rendering, and some way of creating intermediate groups
     Beware of alpha handling -- seems to have a different gamma or something on Windows.
     Possible SVG Safari issues if bounds aren't whole-pixel?
+    Investigate SVG crispEdges to see whether it would be valuable for other backends
 
 WebGL:
     Use display lists?
