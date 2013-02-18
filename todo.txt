@@ -132,7 +132,6 @@ Layers:
 
 * Event dispatch:
     DragHandler - mouse buttons handling (left/middle/right can cause drag issues)
-    addListener vs addInputListener discrepancy
     remove listener callback?
     Consider finger.isDown for checking general (but possibly mouse related) events
     Indie UI events should be tracked: https://dvcs.w3.org/hg/IndieUI/raw-file/default/src/indie-ui-events.html

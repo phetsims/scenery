@@ -222,13 +222,13 @@ var scenery = scenery || {};
   Finger.prototype = {
     constructor: Finger,
     
-    addListener: function( listener ) {
+    addInputListener: function( listener ) {
       phet.assert( !_.contains( this.listeners, listener ) );
       
       this.listeners.push( listener );
     },
     
-    removeListener: function( listener ) {
+    removeInputListener: function( listener ) {
       var index = _.indexOf( this.listeners, listener );
       phet.assert( index !== -1 );
       

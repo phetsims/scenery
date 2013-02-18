@@ -147,7 +147,7 @@
         
         // set a flag on the finger so it won't pick up other nodes
         finger.dragging = true;
-        finger.addListener( dragListener );
+        finger.addInputListener( dragListener );
         dragging = true;
         
         beforeDragTranslation = node.translation;
@@ -162,7 +162,7 @@
         node.setFill( normalColor );
         
         finger.dragging = false;
-        finger.removeListener( dragListener );
+        finger.removeInputListener( dragListener );
         dragging = false;
         
         // TODO: this should fire a layer refresh
