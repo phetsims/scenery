@@ -170,6 +170,7 @@ Accessibility / shadow DOM:
     see http://www.html5accessibility.com/
 
 Node:
+    Since cursor might support data URLs, we can have custom cursors?
     Batching of insertions / removals, so that we could consider completely changing children, removing all children, etc. at the same time
         Possibly consider batching these together until updateScene?
         Then: add children mutator (setChildren, getChildren) so that it is convenient to set up trees of nodes?

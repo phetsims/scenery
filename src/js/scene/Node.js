@@ -27,7 +27,7 @@ var scenery = scenery || {};
     // The shape should be in the local coordinate frame
     this._clipShape = null;
     
-    // the cursor to be displayed over this node. null should be the default (inherit) value
+    // the CSS cursor to be displayed over this node. null should be the default (inherit) value
     this._cursor = null;
     
     // TODO: consider defensive copy getters?
@@ -759,6 +759,22 @@ var scenery = scenery || {};
       return this;
     },
     
+    setCursor: function( cursor ) {
+      // TODO: consider a mapping of types to set reasonable defaults
+      /*
+      auto default none inherit help pointer progress wait crosshair text vertical-text alias copy move no-drop not-allowed
+      e-resize n-resize w-resize s-resize nw-resize ne-resize se-resize sw-resize ew-resize ns-resize nesw-resize nwse-resize
+      context-menu cell col-resize row-resize all-scroll url( ... ) --> does it support data URLs?
+       */
+      
+      // allow the 'auto' cursor type to let the ancestors or scene pick the cursor type
+      this._cursor = cursor === "auto" ? null : cursor;
+    },
+    
+    getCursor: function() {
+      return this._cursor;
+    },
+    
     // returns a unique trail (if it exists) where each node in the ancestor chain has 0 or 1 parents
     getUniqueTrail: function() {
       var trail = new scenery.Trail();
@@ -798,6 +814,9 @@ var scenery = scenery || {};
     /*---------------------------------------------------------------------------*
     * ES5 get/set
     *----------------------------------------------------------------------------*/
+    
+    set cursor( value ) { this.setCursor( value ); },
+    get cursor() { return this.isCursor(); },
     
     set visible( value ) { this.setVisible( value ); },
     get visible() { return this.isVisible(); },
@@ -864,7 +883,7 @@ var scenery = scenery || {};
    * TODO: using more than one of {translation,x,left,right,centerX} or {translation,y,top,bottom,centerY} should be considered an error
    * TODO: move fill / stroke setting to mixins
    */
-  Node.prototype._mutatorKeys = [ 'visible', 'translation', 'x', 'y', 'rotation', 'scale',
+  Node.prototype._mutatorKeys = [ 'cursor', 'visible', 'translation', 'x', 'y', 'rotation', 'scale',
                                   'left', 'right', 'top', 'bottom', 'centerX', 'centerY' ];
   
   Node.prototype._supportedLayerTypes = [];

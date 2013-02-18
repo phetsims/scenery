@@ -226,12 +226,14 @@ var scenery = scenery || {};
     if ( this.input ) {
       var mouseTrail = this.trailUnderPoint( this.input.mouse.point );
       
-      for ( var i = mouseTrail.length - 1; i >= 0; i-- ) {
-        var cursor = mouseTrail.nodes[i].getCursor();
-        
-        if ( cursor ) {
-          this.setSceneCursor( cursor );
-          return;
+      if ( mouseTrail ) {
+        for ( var i = mouseTrail.length - 1; i >= 0; i-- ) {
+          var cursor = mouseTrail.nodes[i].getCursor();
+          
+          if ( cursor ) {
+            this.setSceneCursor( cursor );
+            return;
+          }
         }
       }
       
