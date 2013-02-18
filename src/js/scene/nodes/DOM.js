@@ -23,6 +23,10 @@ var scenery = scenery || {};
     scenery.Node.call( this, params );
     
     this.invalidateDOM();
+    
+    this._$element.css( 'position', 'absolute' );
+    this._$element.css( 'left', 0 );
+    this._$element.css( 'top', 0 );
   };
   var DOM = scenery.DOM;
   
@@ -61,10 +65,7 @@ var scenery = scenery || {};
       '-o-transform': cssTransform,
       'transform': cssTransform,
       'transform-origin': 'top left', // at the origin of the component. consider 0px 0px instead. Critical, since otherwise this defaults to 50% 50%!!! see https://developer.mozilla.org/en-US/docs/CSS/transform-origin
-      '-ms-transform-origin': 'top left', // TODO: do we need other platform-specific transform-origin styles?
-      position: 'absolute',
-      left: 0,
-      top: 0
+      '-ms-transform-origin': 'top left' // TODO: do we need other platform-specific transform-origin styles?
     } );
   };
   
