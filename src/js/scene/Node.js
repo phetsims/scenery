@@ -636,6 +636,14 @@ var scenery = scenery || {};
       return this.transform.getMatrix().translation();
     },
     
+    notifyTransformChange: function( matrix, type ) {
+      this.dispatchEvent( 'transform', {
+        node: this,
+        type: type,
+        matrix: matrix
+      } );
+    },
+    
     // append a transformation matrix to our local transform
     appendMatrix: function( matrix ) {
       // invalidate paint TODO improve methods for this
@@ -643,6 +651,7 @@ var scenery = scenery || {};
       
       this.transform.append( matrix );
       
+      this.notifyTransformChange( matrix, 'append' );
       this.invalidateBounds();
       this.invalidatePaint();
     },
@@ -654,6 +663,7 @@ var scenery = scenery || {};
       
       this.transform.prepend( matrix );
       
+      this.notifyTransformChange( matrix, 'prepend' );
       this.invalidateBounds();
       this.invalidatePaint();
     },
@@ -663,6 +673,7 @@ var scenery = scenery || {};
       
       this.transform.set( matrix );
       
+      this.notifyTransformChange( matrix, 'set' );
       this.invalidateBounds();
       this.invalidatePaint();
     },
