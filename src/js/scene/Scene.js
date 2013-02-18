@@ -217,26 +217,26 @@ var scenery = scenery || {};
     this.rebuildLayers(); // TODO: why?
   };
   
-  Scene.prototype.initializeStandaloneEvents = function() {
+  Scene.prototype.initializeStandaloneEvents = function( parameters ) {
     var element = this.$main[0];
-    this.initializeEvents( {
+    this.initializeEvents( _.extend( {}, parameters, {
       preventDefault: true,
       listenerTarget: element,
       pointFromEvent: function( evt ) {
         var mainBounds = element.getBoundingClientRect();
         return new phet.math.Vector2( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
       }
-    } );
+    } ) );
   };
   
-  Scene.prototype.initializeFullscreenEvents = function() {
-    this.initializeEvents( {
+  Scene.prototype.initializeFullscreenEvents = function( parameters ) {
+    this.initializeEvents( _.extend( {}, parameters, {
       preventDefault: true,
       listenerTarget: document,
       pointFromEvent: function( evt ) {
         return new phet.math.Vector2( evt.pageX, evt.pageY );
       }
-    } );
+    } ) );
   };
   
   Scene.prototype.initializeEvents = function( parameters ) {
