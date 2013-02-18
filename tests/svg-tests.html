@@ -48,10 +48,16 @@
     var xlinkns = 'http://www.w3.org/1999/xlink';
     
     var svg = document.createElementNS( svgns, 'svg' );
+    var $svg = $( svg );
     
     // TODO: auto-detect width/height for certain resources
     svg.setAttribute( 'width', 300 );
     svg.setAttribute( 'height', 212 );
+    svg.setAttribute( 'opacity', 0.5 );
+    $svg.css( 'display', 'block' );
+    $svg.css( 'position', 'absolute' );
+    $svg.css( 'left', 0 );
+    $svg.css( 'top', 0 );
     
     var image = document.createElementNS( svgns, 'image' );
     image.setAttributeNS( xlinkns, 'xlink:href', 'http://phet.colorado.edu/sims/molecule-shapes/molecule-shapes-screenshot.png' );
