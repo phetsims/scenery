@@ -11,7 +11,24 @@ var scenery = scenery || {};
 (function(){
   "use strict";
   
+  /*
+   * $main should be a block-level element with a defined width and height. scene.resize() should be called whenever
+   * it is resized.
+   *
+   * Valid parameters in the parameter object:
+   * {
+   *   allowSceneOverflow: false, // usually anything displayed outside of this $main (DOM/CSS3 transformed SVG) is hidden with CSS overflow
+   *   allowCSSHacks: true, // applies styling that prevents mobile browser graphical issues
+   * }
+   */
   scenery.Scene = function( $main, params ) {
+    // defaults
+    params = _.extend( {
+      allowSceneOverflow: false,
+      allowCSSHacks: true,
+      preferredSceneLayerType: scenery.LayerType.Canvas
+    }, params || {} );
+    
     scenery.Node.call( this, params );
     
     var scene = this;
@@ -24,9 +41,9 @@ var scenery = scenery || {};
     this.sceneBounds = new phet.math.Bounds2( 0, 0, $main.width(), $main.height() );
     
     // default to a canvas layer type, but this can be changed
-    this.preferredSceneLayerType = scenery.LayerType.Canvas;
+    this.preferredSceneLayerType = params.preferredSceneLayerType;
     
-    applyCSSHacks( $main );
+    applyCSSHacks( $main, params );
     
     // note, arguments to the functions are mutable. don't destroy them
     this.sceneEventListener = {
@@ -307,23 +324,30 @@ var scenery = scenery || {};
     resizer();
   };
     
-  function applyCSSHacks( main ) {
-    // some css hacks (inspired from https://github.com/EightMedia/hammer.js/blob/master/hammer.js)
-    (function() {
-      var prefixes = [ '-webkit-', '-moz-', '-ms-', '-o-', '' ];
-      var properties = {
-        userSelect: 'none',
-        touchCallout: 'none',
-        touchAction: 'none',
-        userDrag: 'none',
-        tapHighlightColor: 'rgba(0,0,0,0)'
-      };
-      
-      _.each( prefixes, function( prefix ) {
-        _.each( properties, function( propertyValue, propertyName ) {
-          main.css( prefix + propertyName, propertyValue );
+  function applyCSSHacks( $main, params ) {
+    // to use CSS3 transforms for performance, hide anything outside our bounds by default
+    if ( params.allowSceneOverflow ) {
+      $main.css( 'overflow', 'hidden' );
+    }
+    
+    if ( params.allowCSSHacks ) {
+      // some css hacks (inspired from https://github.com/EightMedia/hammer.js/blob/master/hammer.js)
+      (function() {
+        var prefixes = [ '-webkit-', '-moz-', '-ms-', '-o-', '' ];
+        var properties = {
+          userSelect: 'none',
+          touchCallout: 'none',
+          touchAction: 'none',
+          userDrag: 'none',
+          tapHighlightColor: 'rgba(0,0,0,0)'
+        };
+        
+        _.each( prefixes, function( prefix ) {
+          _.each( properties, function( propertyValue, propertyName ) {
+            $main.css( prefix + propertyName, propertyValue );
+          } );
         } );
-      } );
-    })();
+      })();
+    }
   }
 })();
