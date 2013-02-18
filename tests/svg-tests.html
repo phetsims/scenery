@@ -23,13 +23,17 @@
     background-color: #000;
     overflow: hidden;
   }
+  
+  svg {
+    display: block;
+  }
 
   </style>
 </head>
 
 <body>
   
-  <svg width="242px" height="820px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink">
+  <svg width="242px" height="127px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink">
     <image xlink:href="http://phet.colorado.edu/images/phet-logo.gif" x="0" y="0" width="242px" height="127px"/>
     <g transform="matrix(0,0.3,0.3,0,0,0)">
       <image xlink:href="http://upload.wikimedia.org/wikipedia/commons/c/cd/Carrot.svg" x="0" y="0" width="199px" height="817px"/>
@@ -40,7 +44,23 @@
   </svg>
   
   <script type="text/javascript">
+    var svgns = 'http://www.w3.org/2000/svg';
+    var xlinkns = 'http://www.w3.org/1999/xlink';
     
+    var svg = document.createElementNS( svgns, 'svg' );
+    
+    // TODO: auto-detect width/height for certain resources
+    svg.setAttribute( 'width', 300 );
+    svg.setAttribute( 'height', 212 );
+    
+    var image = document.createElementNS( svgns, 'image' );
+    image.setAttributeNS( xlinkns, 'xlink:href', 'http://phet.colorado.edu/sims/molecule-shapes/molecule-shapes-screenshot.png' );
+    image.setAttribute( 'width', 300 );
+    image.setAttribute( 'height', 212 );
+    svg.appendChild( image );
+    
+    document.body.appendChild( svg );
+
   </script>
 
 </body>
