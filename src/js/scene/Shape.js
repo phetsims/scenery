@@ -130,6 +130,11 @@ var scenery = scenery || {};
       } );
     },
     
+    // returns something like "M150 0 L75 200 L225 200 Z" for a triangle
+    getSVGPath: function() {
+      return _.map( this.pieces, function( piece ) { return piece.getSVGPathFragment(); } ).join( ' ' );
+    },
+    
     // return a new Shape that is transformed by the associated matrix
     transformed: function( matrix ) {
       return new Shape( _.flatten( _.map( this.pieces, function( piece ) { return piece.transformed( matrix ); } ), true ) );
@@ -485,6 +490,10 @@ var scenery = scenery || {};
       context.closePath();
     },
     
+    getSVGPathFragment: function() {
+      return 'Z';
+    },
+    
     transformed: function( matrix ) {
       return [this];
     },
@@ -511,6 +520,10 @@ var scenery = scenery || {};
       context.moveTo( this.point.x, this.point.y );
     },
     
+    getSVGPathFragment: function() {
+      return 'M ' + this.point.x + ' ' + this.point.y;
+    },
+    
     transformed: function( matrix ) {
       return [new Piece.MoveTo( matrix.timesVector2( this.point ) )];
     },
@@ -530,6 +543,10 @@ var scenery = scenery || {};
     
     writeToContext: function( context ) {
       context.lineTo( this.point.x, this.point.y );
+    },
+    
+    getSVGPathFragment: function() {
+      return 'L ' + this.point.x + ' ' + this.point.y;
     },
     
     transformed: function( matrix ) {
@@ -563,6 +580,10 @@ var scenery = scenery || {};
       context.quadraticCurveTo( this.controlPoint.x, this.controlPoint.y, this.point.x, this.point.y );
     },
     
+    getSVGPathFragment: function() {
+      return 'Q ' + this.controlPoint.x + ' ' + this.controlPoint.y + ' ' + this.point.x + ' ' + this.point.y;
+    },
+    
     transformed: function( matrix ) {
       return [new Piece.QuadraticCurveTo( matrix.timesVector2( this.controlPoint ), matrix.timesVector2( this.point ) )];
     },
@@ -591,6 +612,14 @@ var scenery = scenery || {};
     
     writeToContext: function( context ) {
       context.rect( this.x, this.y, this.width, this.height );
+    },
+    
+    getSVGPathFragment: function() {
+      return 'M ' + this.upperLeft.x + ' ' + this.upperLeft.y +
+             ' L ' + this.lowerRight.x + ' ' + this.upperLeft.y +
+             ' L ' + this.lowerRight.x + ' ' + this.lowerRight.y +
+             ' L ' + this.upperLeft.x + ' ' + this.lowerRight.y +
+             ' Z M ' + this.upperLeft.x + ' ' + this.upperLeft.y; // moveto at the end since in canvas spec we start a new subpath
     },
     
     transformed: function( matrix ) {

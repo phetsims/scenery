@@ -87,6 +87,32 @@ var scenery = scenery || {};
     throw new Error( 'Path.prototype.paintWebGL unimplemented' );
   };
   
+  Path.prototype.createSVGFragment = function() {
+    var path = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+    this.updateSVGFragment( path );
+    return path;
+  };
+  
+  Path.prototype.updateSVGFragment = function( path ) {
+    if ( this.hasShape() ) {
+      path.setAttribute( 'd', this._shape.getSVGPath() );
+    } else if ( path.hasAttribute( 'd' ) ) {
+      path.removeAttribute( 'd' );
+    }
+    
+    var style = '';
+    if ( this._fill ) {
+      style += 'fill: ' + this._fill + ';'; // TODO: handling patterns and gradients!
+    }
+    if ( this._stroke ) {
+      style += 'stroke: ' + this._stroke + ';';
+      // TODO: don't include unnecessary directives?
+      style += 'stroke-width: ' + this.getLineWidth() + ';';
+      style += 'stroke-linecap: ' + this.getLineCap() + ';';
+      style += 'stroke-linejoin: ' + this.getLineJoin() + ';';
+    }
+  };
+  
   Path.prototype.hasSelf = function() {
     return true;
   };
