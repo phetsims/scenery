@@ -27,6 +27,9 @@ var scenery = scenery || {};
     // The shape should be in the local coordinate frame
     this._clipShape = null;
     
+    // the cursor to be displayed over this node. null should be the default (inherit) value
+    this._cursor = null;
+    
     // TODO: consider defensive copy getters?
     this.children = []; // ordered
     this.parents = []; // unordered

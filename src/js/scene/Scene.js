@@ -36,6 +36,9 @@ var scenery = scenery || {};
     // main layers in a scene
     this.layers = [];
     
+    this.lastCursor = null;
+    this.defaultCursor = $main.css( 'cursor' );
+    
     this.$main = $main;
     
     this.sceneBounds = new phet.math.Bounds2( 0, 0, $main.width(), $main.height() );
@@ -109,6 +112,8 @@ var scenery = scenery || {};
     _.each( this.layers, function( layer ) {
       layer.render( scene, args );
     } );
+    
+    this.updateCursor();
   };
   
   Scene.prototype.renderScene = function() {
@@ -217,6 +222,31 @@ var scenery = scenery || {};
     this.rebuildLayers(); // TODO: why?
   };
   
+  Scene.prototype.updateCursor = function() {
+    if ( this.input ) {
+      var mouseTrail = this.trailUnderPoint( this.input.mouse.point );
+      
+      for ( var i = mouseTrail.length - 1; i >= 0; i-- ) {
+        var cursor = mouseTrail.nodes[i].getCursor();
+        
+        if ( cursor ) {
+          this.setSceneCursor( cursor );
+          return;
+        }
+      }
+      
+      // fallback case
+      this.setSceneCursor( this.defaultCursor );
+    }
+  };
+  
+  Scene.prototype.setSceneCursor = function( cursor ) {
+    if ( cursor !== this.lastCursor ) {
+      this.lastCursor = cursor;
+      this.$main.css( 'cursor', cursor );
+    }
+  };
+  
   Scene.prototype.initializeStandaloneEvents = function( parameters ) {
     var element = this.$main[0];
     this.initializeEvents( _.extend( {}, parameters, {
@@ -252,7 +282,6 @@ var scenery = scenery || {};
     var preventDefault = parameters.preventDefault;
     
     var input = new scenery.Input( scene );
-    
     scene.input = input;
     
     $( listenerTarget ).on( 'mousedown', function( jEvent ) {
