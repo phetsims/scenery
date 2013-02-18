@@ -341,6 +341,7 @@ var scenery = scenery || {};
     
     // return the top node (if any, otherwise null) whose self-rendered area contains the point (in parent coordinates).
     trailUnderPoint: function( point ) {
+      phet.assert( point, 'trailUnderPointer requires a point' );
       // update bounds for pruning
       this.validateBounds();
       

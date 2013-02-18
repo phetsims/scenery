@@ -223,7 +223,7 @@ var scenery = scenery || {};
   };
   
   Scene.prototype.updateCursor = function() {
-    if ( this.input ) {
+    if ( this.input && this.input.mouse.point ) {
       var mouseTrail = this.trailUnderPoint( this.input.mouse.point );
       
       if ( mouseTrail ) {
@@ -236,10 +236,10 @@ var scenery = scenery || {};
           }
         }
       }
-      
-      // fallback case
-      this.setSceneCursor( this.defaultCursor );
     }
+    
+    // fallback case
+    this.setSceneCursor( this.defaultCursor );
   };
   
   Scene.prototype.setSceneCursor = function( cursor ) {
