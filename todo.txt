@@ -96,6 +96,8 @@ DOM:
         - Either delegate (just set transform) or have inline with just SVG over (with pointer-events)
 
 ** SVG: -- important because we can layer DOM nodes properly under SVG
+    *** Highly recommend <image xlink:href="...">, since we can include URL / data URL, nesting works, and we don't pollute the id namespace
+        Direct nesting fails in IE9
     Need to be able to pull bounds out of SVG fragments.
         Should be specified in the SVG element.
     SVGLayer needs have CSS transform with a scale of 1, apply scale to containing group instead?
