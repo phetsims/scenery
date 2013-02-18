@@ -242,12 +242,18 @@ var scenery = scenery || {};
   Scene.prototype.initializeEvents = function( parameters ) {
     var scene = this;
     
+    if ( scene.input ) {
+      throw new Error( 'Attempt to attach events twice to the scene' );
+    }
+    
     // TODO: come up with more parameter names that have the same string length, so it looks creepier
     var pointFromEvent = parameters.pointFromEvent;
     var listenerTarget = parameters.listenerTarget;
     var preventDefault = parameters.preventDefault;
     
     var input = new scenery.Input( scene );
+    
+    scene.input = input;
     
     $( listenerTarget ).on( 'mousedown', function( jEvent ) {
       var evt = jEvent.originalEvent;
