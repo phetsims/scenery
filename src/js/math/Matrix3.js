@@ -434,7 +434,7 @@ phet.math = phet.math || {};
     },
     
     cssTransform: function() {
-      // TODO: allow more specific CSS transforms to be applied?
+      // TODO: allow more specific CSS transforms to be applied? SVG transform looks compatible with the CSS3 transform
       
       // we need to prevent the numbers from being in an exponential toString form, since the CSS transform does not support that
       function cssNumber( number ) {
@@ -444,6 +444,40 @@ phet.math = phet.math || {};
       // the inner part of a CSS3 transform, but remember to add the browser-specific parts!
       // TODO: do we need 'px' units on the last two (transform) attributes?
       return 'matrix(' + cssNumber( this.entries[0] ) + ',' + cssNumber( this.entries[1] ) + ',' + cssNumber( this.entries[3] ) + ',' + cssNumber( this.entries[4] ) + ',' + cssNumber( this.entries[6] ) + ',' + cssNumber( this.entries[7] ) + ')';
+    },
+    
+    svgTransform: function() {
+      // we need to prevent the numbers from being in an exponential toString form, since the CSS transform does not support that
+      function svgNumber( number ) {
+        // largest guaranteed number of digits according to https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Number/toFixed
+        return number.toFixed( 20 );
+      }
+      
+      switch( this.type ) {
+        case Types.IDENTITY:
+          return '';
+        case Types.TRANSLATION_2D:
+          return 'translate(' + svgNumber( this.entries[6] ) + ',' + this.entries[7] + ')';
+        case Types.SCALING:
+          return 'scale(' + svgNumber( this.entries[0] ) + ( this.entries[0] === this.entries[4] ? '' : ',' + svgNumber( this.entries[4] ) ) + ')';
+        default:
+          return 'matrix(' + svgNumber( this.entries[0] ) + ',' + svgNumber( this.entries[1] ) + ',' + svgNumber( this.entries[3] ) + ',' + svgNumber( this.entries[4] ) + ',' + svgNumber( this.entries[6] ) + ',' + svgNumber( this.entries[7] ) + ')';
+      }
+    },
+    
+    cssTransformStyles: function() {
+      var transformCSS = this.cssTransform();
+      
+      // notes on triggering hardware acceleration: http://creativejs.com/2011/12/day-2-gpu-accelerate-your-dom-elements/
+      return {
+        '-webkit-transform': transformCSS + ' translateZ(0)', // trigger hardware acceleration if possible
+        '-moz-transform': transformCSS + ' translateZ(0)', // trigger hardware acceleration if possible
+        '-ms-transform': transformCSS,
+        '-o-transform': transformCSS,
+        'transform': transformCSS,
+        'transform-origin': 'top left', // at the origin of the component. consider 0px 0px instead. Critical, since otherwise this defaults to 50% 50%!!! see https://developer.mozilla.org/en-US/docs/CSS/transform-origin
+        '-ms-transform-origin': 'top left' // TODO: do we need other platform-specific transform-origin styles?
+      };
     }
   };
 

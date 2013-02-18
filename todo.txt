@@ -221,6 +221,7 @@ Scene:
     spread out z-indices and be adaptive so we don't have to change as many indices where possible
 
 Trail:
+    ** Fast Trail lookup data structure (used in scenes to find where a trail is in terms of pointers, and also for Node-to-trail handling)
     ** Verify current indexing handling (is it sufficient to just reindex trails on layer refreshes?)
     Use indices where possible (next and previous!)
     DO we need indices in Node.dispatchEvent? May be bottleneck

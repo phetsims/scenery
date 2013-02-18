@@ -34,6 +34,7 @@ var scenery = scenery || {};
   
   LayerType.Canvas = new scenery.LayerType( scenery.CanvasLayer, 'canvas' );
   LayerType.DOM = new scenery.LayerType( scenery.DOMLayer, 'dom' );
+  LayerType.SVG = new scenery.LayerType( scenery.SVGLayer, 'svg' );
   
 })();
 

@@ -26,9 +26,9 @@ var scenery = scenery || {};
     this.svg = document.createElementNS( svgns, 'svg' );
     this.g = document.createElementNS( svgns, 'g' );
     this.$svg = $( this.svg );
-    
     this.svg.setAttribute( 'width', this.$main.width() );
     this.svg.setAttribute( 'height', this.$main.height() );
+    this.svg.setAttribute( 'stroke-miterlimit', 10 );
     this.$svg.css( 'position', 'absolute' );
     this.$main.append( this.svg );
     
@@ -42,6 +42,16 @@ var scenery = scenery || {};
   SVGLayer.prototype = _.extend( {}, scenery.Layer.prototype, {
     constructor: SVGLayer,
     
+    applyGroup: function( node, group ) {
+      if ( node.transform.isIdentity() ) {
+        if ( group.hasAttribute( 'transform' ) ) {
+          group.removeAttribute( 'transform' );
+        }
+      } else {
+        group.setAttribute( 'transform', node.transform.getMatrix().svgTransform() );
+      }
+    },
+    
     updateBoundaries: function( entry ) {
       scenery.Layer.prototype.updateBoundaries.call( this, entry );
       
@@ -51,7 +61,8 @@ var scenery = scenery || {};
       this.startPointer.eachNodeBetween( this.endPointer, function( node ) {
         // all nodes should have DOM support if node.hasSelf()
         if ( node.hasSelf() ) {
-          node.addToSVGLayer( layer );
+          var svgFragment = node.createSVGFragment();
+          //node.addToSVGLayer( layer );
         }
       } );
     },
@@ -67,11 +78,11 @@ var scenery = scenery || {};
     markDirtyRegion: function( node, localBounds, transform, trail ) {
       // for now, update the transforms for the node and any children in the layer that it may have
       // TODO: should we catch a separate event, transform-change?
-      new scenery.TrailPointer( trail, true ).eachNodeBetween( new scenery.TrailPointer( trail, false ), function( node ) {
-        if ( node.hasSelf() ) {
-          node.updateCSSTransform( transform );
-        }
-      } );
+      // new scenery.TrailPointer( trail, true ).eachNodeBetween( new scenery.TrailPointer( trail, false ), function( node ) {
+      //   if ( node.hasSelf() ) {
+      //     node.updateCSSTransform( transform );
+      //   }
+      // } );
     },
     
     // TODO: consider a stack-based model for transforms?

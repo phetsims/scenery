@@ -53,20 +53,7 @@ var scenery = scenery || {};
   };
   
   DOM.prototype.updateCSSTransform = function( transform ) {
-    // something of the form matrix(...) as a String, with a Z translation to trigger hardware acceleration (hopefully)
-    var cssTransform = transform.getMatrix().cssTransform();
-    
-    // notes on triggering hardware acceleration: http://creativejs.com/2011/12/day-2-gpu-accelerate-your-dom-elements/
-    
-    $( this._element ).css( {
-      '-webkit-transform': cssTransform + ' translateZ(0)', // trigger hardware acceleration if possible
-      '-moz-transform': cssTransform + ' translateZ(0)', // trigger hardware acceleration if possible
-      '-ms-transform': cssTransform,
-      '-o-transform': cssTransform,
-      'transform': cssTransform,
-      'transform-origin': 'top left', // at the origin of the component. consider 0px 0px instead. Critical, since otherwise this defaults to 50% 50%!!! see https://developer.mozilla.org/en-US/docs/CSS/transform-origin
-      '-ms-transform-origin': 'top left' // TODO: do we need other platform-specific transform-origin styles?
-    } );
+    this._$element.css( transform.getMatrix().cssTransformStyles() );
   };
   
   DOM.prototype.hasSelf = function() {
