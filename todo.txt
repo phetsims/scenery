@@ -96,6 +96,8 @@ DOM:
         - Either delegate (just set transform) or have inline with just SVG over (with pointer-events)
 
 ** SVG: -- important because we can layer DOM nodes properly under SVG
+    Need to be able to pull bounds out of SVG fragments.
+        Should be specified in the SVG element.
     SVGLayer needs have CSS transform with a scale of 1, apply scale to containing group instead?
     DAG handling for SVG (how to duplicate) or DOM
     Also for DOM => Canvas: http://pbakaus.github.com/domvas/
