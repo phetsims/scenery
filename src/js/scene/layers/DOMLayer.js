@@ -65,16 +65,14 @@ var scenery = scenery || {};
     
     transformChange: function( args ) {
       var trail = args.trail;
-      var baseTransform = args.transform;
       
-      // TODO: iterate only over nodes in this layer (sub-trees may not be contained!)
-      new scenery.TrailPointer( trail, true ).eachNodeBetween( new scenery.TrailPointer( trail, false ), function( node ) {
+      // TODO: efficiency! this computes way more matrix transforms than needed
+      this.startPointer.eachTrailBetween( this.endPointer, function( trail ) {
+        var node = trail.lastNode();
         if ( node.hasSelf() ) {
-          // TODO: mark that this is for DOM nodes?
-          node.updateCSSTransform( baseTransform );
+          node.updateCSSTransform( trail.getTransform() );
         }
       } );
-      throw new Error( 'FIXME: improper handling of the transform, since we are setting the transform to all children!' );
     },
     
     // TODO: consider a stack-based model for transforms?
