@@ -208,6 +208,7 @@ Shapes:
     Consider bounding box handling for an arbitrary transform, for use with Node's isInGlobalBounds( globalBounds, currentTransform ).
 
 Text:
+    ** Separate out font family, size, etc.
     *** Performance of text bounds!
         Comparison vs accurate bounds for all of the various text bounds methods
     Using SVG's textLength may help with calibration with Canvas?

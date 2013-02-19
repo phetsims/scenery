@@ -33,9 +33,17 @@
       top: 0;
       width: 1024px;
       height: 1024px;
-      z-index: 0;
-      padding: none !important; /* in case we add jQuery Mobile back in */
+      padding: 0 !important; /* in case we add jQuery Mobile back in */
+      margin: 0 !important;
       /*border: 1px solid black;*/
+    }
+    
+    #textSpan {
+      position: absolute;
+      padding: 0 !important;
+      margin: 0 !important;
+      font-family: Verdana;
+      font-size: 25px;
     }
 
   </style>
@@ -58,10 +66,19 @@
     </g>
   </svg>
   
+  <div id="textDiv" class="scene"><span id="textSpan">QuipTaQiy</span></div>
+  
+  <!-- <div class="scene"><span id="baselineSpan" style="font-family: Verdana; font-size: 25px;">QuipTaQiy</span><img style="vertical-align: baseline;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAH0CAYAAAD8PUeXAAAAKUlEQVRIS2P8z8Dwn3GUGA2D0XQwmg1Gi4LRknC0JBwtCUdLwqFUEgIActTmOjA3bkkAAAAASUVORK5CYII="/></div> -->
+  
+  <div style="position: absolute; left: 0; top: 0; padding: 0 !important; margin: 0 !important;"><span id="baselineSpan" style="font-family: Verdana; font-size: 25px;">QuipTaQiy</span><div style="vertical-align: baseline; display: inline-block; width: 0; height: 500px; margin: 0 important!; padding: 0 important!;"></div></div>
+  
   <!-- our scene graph will be in this div -->
   <div id="main" class="scene"></div>
   
   <script>
+  
+  // var str = 'QuipTaQiy';
+  var str = 'QuipTaQiy';
   
   /*
    * SVG's text-anchor 
@@ -91,7 +108,7 @@
     // preferredSceneLayerType: scenery.LayerType.SVG
   } );
   
-  var textA = new scenery.Text( 'QuipTaQiy', {
+  var textA = new scenery.Text( str, {
     x: 50,
     y: 50,
     fill: 'rgba(255,0,0,0.5)',
@@ -103,10 +120,57 @@
   console.log( 'canvas accurate A: ' + boundsA.toString() + ' (' + boundsA.width() + ',' + boundsA.height() + ')' );
   scene.updateScene();
   
+  /*---------------------------------------------------------------------------*
+  * Canvas-based width
+  *----------------------------------------------------------------------------*/
+  
+  var canvas = document.createElement( 'canvas' );
+  var context = canvas.getContext( '2d' );
+  context.font = '25px Verdana';
+  var canvasWidth = context.measureText( str ).width;
+  console.log( 'canvasWidth: ' + canvasWidth );
+  
+  canvas.width = 1;
+  canvas.height = 500;
+  context.fillStyle = '#ff0000';
+  context.fillRect( 0, 0, 500, 500 );
+  console.log( canvas.toDataURL() );
+  
+  /*---------------------------------------------------------------------------*
+  * DOM-based
+  *----------------------------------------------------------------------------*/
+  
+  var span = document.getElementById( 'textSpan' );
+  var spanRect = span.getBoundingClientRect();
+  var spanBounds = new phet.math.Bounds2( spanRect.left, spanRect.top, spanRect.right, spanRect.bottom );
+  console.log( 'DOM span A: ' + spanBounds.toString() + ' (' + spanBounds.width() + ',' + spanBounds.height() + ')' );
+  console.log( 'span.clientWidth: ' + span.clientWidth );
+  console.log( 'span.clientHeight: ' + span.clientHeight );
+  console.log( 'span.offsetWidth: ' + span.offsetWidth );
+  console.log( 'span.offsetHeight: ' + span.offsetHeight );
+  
+  var baselineSpan = document.getElementById( 'baselineSpan' );
+  var baselineSpanRect = baselineSpan.getBoundingClientRect();
+  var baselineSpanBounds = new phet.math.Bounds2( baselineSpanRect.left + 50, baselineSpanRect.top - 500 + 50, baselineSpanRect.right + 50, baselineSpanRect.bottom - 500 + 50 );
+  console.log( 'DOM baseline A: ' + baselineSpanBounds.toString() + ' (' + baselineSpanBounds.width() + ',' + baselineSpanBounds.height() + ')' );
+  console.log( 'baselineSpan.clientWidth: ' + baselineSpan.clientWidth );
+  console.log( 'baselineSpan.clientHeight: ' + baselineSpan.clientHeight );
+  console.log( 'baselineSpan.offsetWidth: ' + baselineSpan.offsetWidth );
+  console.log( 'baselineSpan.offsetHeight: ' + baselineSpan.offsetHeight );
+  console.log( '...: ' + baselineSpan.offsetTop );
+  
+  /*---------------------------------------------------------------------------*
+  * Displays of bounds for accuracy
+  *----------------------------------------------------------------------------*/
+  
   var boundsScene = new scenery.Scene( $( '#bounds' ) );
   boundsScene.addChild( new scenery.Path( {
     shape: scenery.Shape.bounds( svgBoundsA ),
     fill: 'rgba(255,0,0,0.1)'
+  } ) );
+  boundsScene.addChild( new scenery.Path( {
+    shape: scenery.Shape.bounds( baselineSpanBounds ),
+    fill: 'rgba(0,0,255,0.1)'
   } ) );
   boundsScene.addChild( new scenery.Path( {
     shape: scenery.Shape.bounds( boundsA ),
