@@ -43,10 +43,13 @@ var scenery = scenery || {};
       var layer = this;
       
       // TODO: assumes that nodes under this are in a tree, not a DAG
-      this.startPointer.eachNodeBetween( this.endPointer, function( node ) {
+      this.startPointer.eachTrailBetween( this.endPointer, function( trail ) {
+        var node = trail.lastNode();
+        
         // all nodes should have DOM support if node.hasSelf()
         if ( node.hasSelf() ) {
           node.addToDOMLayer( layer );
+          node.updateCSSTransform( trail.getTransform() );
         }
       } );
     },

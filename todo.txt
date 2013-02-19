@@ -1,6 +1,6 @@
 
 Bugs:
-    DOMLayer.transformChange has improper transform handling for children
+    Ability to click buttons in Nodes example
     Check Firefox/Safari on Mac event handling on multiple touch events
     Doc multitouch example handles down/up improperly for the mouse
     Failing test cases:
