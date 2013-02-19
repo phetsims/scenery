@@ -134,13 +134,10 @@ var scenery = scenery || {};
       var node = args.node;
       var trail = args.trail;
       
-      // TODO: find the associated group!
-      var group;
+      var group = this.idGroupMap[trail.getUniqueId()];
       
       // apply the transform to the group
       this.applyGroup( node, group );
-      
-      throw new Error( 'group lookup not implemented' );
     },
     
     // TODO: consider a stack-based model for transforms?
