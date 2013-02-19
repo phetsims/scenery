@@ -103,23 +103,24 @@ var scenery = scenery || {};
     
     // TODO: note for DOM we can do https://developer.mozilla.org/en-US/docs/HTML/Canvas/Drawing_DOM_objects_into_a_canvas
     renderToCanvas: function( canvas, context, delayCounts ) {
-      var data = "<svg xmlns='http://www.w3.org/2000/svg' width='" + this.$main.width() + "' height='" + this.$main.height() + "'>" +
-        "<foreignObject width='100%' height='100%'>" +
-        $( this.div ).html() +
-        "</foreignObject></svg>";
+      // TODO: consider not silently failing?
+      // var data = "<svg xmlns='http://www.w3.org/2000/svg' width='" + this.$main.width() + "' height='" + this.$main.height() + "'>" +
+      //   "<foreignObject width='100%' height='100%'>" +
+      //   $( this.div ).html() +
+      //   "</foreignObject></svg>";
       
-      var DOMURL = window.URL || window.webkitURL || window;
-      var img = new Image();
-      var svg = new Blob( [ data ] , { type: "image/svg+xml;charset=utf-8" } );
-      var url = DOMURL.createObjectURL( svg );
-      delayCounts.increment();
-      img.onload = function() {
-        context.drawImage( img, 0, 0 );
-        // TODO: this loading is delayed!!! ... figure out a solution to potentially delay?
-        DOMURL.revokeObjectURL( url );
-        delayCounts.decrement();
-      };
-      img.src = url;
+      // var DOMURL = window.URL || window.webkitURL || window;
+      // var img = new Image();
+      // var svg = new Blob( [ data ] , { type: "image/svg+xml;charset=utf-8" } );
+      // var url = DOMURL.createObjectURL( svg );
+      // delayCounts.increment();
+      // img.onload = function() {
+      //   context.drawImage( img, 0, 0 );
+      //   // TODO: this loading is delayed!!! ... figure out a solution to potentially delay?
+      //   DOMURL.revokeObjectURL( url );
+      //   delayCounts.decrement();
+      // };
+      // img.src = url;
     },
     
     getName: function() {

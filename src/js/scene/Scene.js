@@ -221,6 +221,7 @@ var scenery = scenery || {};
   // attempt to render everything currently visible in the scene to an external canvas. allows copying from canvas layers straight to the other canvas
   Scene.prototype.renderToCanvas = function( canvas, context, callback ) {
     var count = 0;
+    var started = false; // flag guards against asynchronous tests that call back synchronously (immediate increment and decrement)
     var delayCounts = {
       increment: function() {
         count++;
@@ -228,7 +229,7 @@ var scenery = scenery || {};
       
       decrement: function() {
         count--;
-        if ( count === 0 && callback ) {
+        if ( count === 0 && callback && started ) {
           callback();
         }
       }
@@ -237,6 +238,27 @@ var scenery = scenery || {};
     context.clearRect( 0, 0, canvas.width, canvas.height );
     _.each( this.layers, function( layer ) {
       layer.renderToCanvas( canvas, context, delayCounts );
+    } );
+    
+    if ( count === 0 ) {
+      // no asynchronous layers, callback immediately
+      if ( callback ) {
+        callback();
+      }
+    } else {
+      started = true;
+    }
+  };
+  
+  // renders what it can into a Canvas (so far, Canvas and SVG layers work fine)
+  Scene.prototype.snapshot = function( callback ) {
+    var canvas = document.createElement( 'canvas' );
+    canvas.width = this.sceneBounds.width();
+    canvas.height = this.sceneBounds.height();
+    
+    var context = phet.canvas.initCanvas( canvas );
+    this.renderToCanvas( canvas, context, function() {
+      callback( canvas, context.getImageData( 0, 0, canvas.width, canvas.height ) );
     } );
   };
   

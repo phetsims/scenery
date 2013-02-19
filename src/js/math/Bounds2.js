@@ -29,6 +29,7 @@ phet.math = phet.math || {};
   Bounds2.prototype = {
     constructor: Bounds2,
     
+    // TODO: consider moving these to ES5 getters. it is weird that we use 'width()'' instead of 'width'
     // properties of this bounding box
     width: function() { return this.maxX - this.minX; },
     height: function() { return this.maxY - this.minY; },
