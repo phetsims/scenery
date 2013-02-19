@@ -21,20 +21,29 @@ var scenery = scenery || {};
   var xlinkns = 'http://www.w3.org/1999/xlink';
   
   scenery.SVGLayer = function( args ) {
-    scenery.Layer.call( this, args );
-    
     this.svg = document.createElementNS( svgns, 'svg' );
     this.g = document.createElementNS( svgns, 'g' );
+    this.svg.appendChild( this.g );
     this.$svg = $( this.svg );
     this.svg.setAttribute( 'width', this.$main.width() );
     this.svg.setAttribute( 'height', this.$main.height() );
-    this.svg.setAttribute( 'stroke-miterlimit', 10 );
+    this.svg.setAttribute( 'stroke-miterlimit', 10 ); // to match our Canvas brethren so we have the same default behavior
     this.$svg.css( 'position', 'absolute' );
     this.$main.append( this.svg );
     
     this.scene = args.scene;
     
     this.isSVGLayer = true;
+    
+    // maps trail ID => SVG self fragment (that displays shapes, text, etc.)
+    this.idFragmentMap = {};
+    
+    // maps trail ID => SVG <g> that contains that node's self and everything under it
+    this.idGroupMap = {};
+    
+    this.temporaryDebugFlagSoWeDontUpdateBoundariesMoreThanOnce = false;
+    
+    scenery.Layer.call( this, args );
   };
   
   var SVGLayer = scenery.SVGLayer;
@@ -52,17 +61,57 @@ var scenery = scenery || {};
       }
     },
     
+    // FIXME: ordering of group trees is currently not guaranteed (this just appends right now, so they need to be ensured in the proper order)
+    ensureGroupTree: function( trail ) {
+      if ( !( trail.getUniqueId() in this.idGroupMap ) ) {
+        var subtrail = new scenery.Trail( trail.rootNode() );
+        var lastId = null;
+        
+        // walk a subtrail up from the root node all the way to the full trail, creating groups where necessary
+        while ( subtrail.length <= trail.length ) {
+          var id = subtrail.getUniqueId();
+          if ( !( id in this.idGroupMap ) ) {
+            var group = document.createElementNS( svgns, 'g' );
+            this.applyGroup( subtrail.lastNode(), group );
+            this.idGroupMap[id] = group;
+            if ( lastId ) {
+              // we have a parent group to which we need to be added
+              // TODO: handle the ordering here if we ensure group trees!
+              this.idGroupMap[lastId].appendChild( group );
+            } else {
+              // no parent, so append ourselves to the SVGLayer's master group
+              this.g.appendChild( group );
+            }
+          }
+          subtrail.addDescendant( trail.nodes[subtrail.length] );
+          lastId = id;
+        }
+      }
+    },
+    
     updateBoundaries: function( entry ) {
+      if ( this.temporaryDebugFlagSoWeDontUpdateBoundariesMoreThanOnce ) {
+        throw new Error( 'temporaryDebugFlagSoWeDontUpdateBoundariesMoreThanOnce!' );
+      }
+      this.temporaryDebugFlagSoWeDontUpdateBoundariesMoreThanOnce = true;
+      
       scenery.Layer.prototype.updateBoundaries.call( this, entry );
       
       var layer = this;
       
-      // TODO: assumes that nodes under this are in a tree, not a DAG
-      this.startPointer.eachNodeBetween( this.endPointer, function( node ) {
-        // all nodes should have DOM support if node.hasSelf()
+      // TODO: consider removing SVG fragments from our dictionary? if we burn through a lot of one-time fragments we will memory leak like crazy
+      // TODO: handle updates. insertion is helpful based on the trail, as we can find where to insert nodes
+      
+      this.startPointer.eachTrailBetween( this.endPointer, function( trail ) {
+        var node = trail.lastNode();
+        var trailId = trail.getUniqueId();
+        
+        layer.ensureGroupTree( trail );
+        
         if ( node.hasSelf() ) {
           var svgFragment = node.createSVGFragment();
-          //node.addToSVGLayer( layer );
+          layer.idFragmentMap[trailId] = svgFragment;
+          layer.idGroupMap[trailId].appendChild( svgFragment );
         }
       } );
     },

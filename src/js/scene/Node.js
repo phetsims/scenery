@@ -18,8 +18,13 @@ var scenery = scenery || {};
   var Bounds2 = phet.math.Bounds2;
   var Shape = scenery.Shape;
   
+  var globalIdCounter = 1;
+  
   // TODO: consider an args-style constructor here!
   scenery.Node = function( params ) {
+    // assign a unique ID to this node (allows trails to )
+    this._id = globalIdCounter++;
+    
     // TODO: hide as _visible, add setter/getter
     this._visible = true;
     
@@ -752,6 +757,10 @@ var scenery = scenery || {};
       return this.getBounds().height();
     },
     
+    getId: function() {
+      return this._id;
+    },
+    
     isVisible: function() {
       return this._visible;
     },
@@ -871,6 +880,7 @@ var scenery = scenery || {};
     
     get width() { return this.getWidth(); },
     get height() { return this.getHeight(); },
+    get id() { return this.getId(); },
     
     mutate: function( params ) {
       

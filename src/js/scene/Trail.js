@@ -272,6 +272,11 @@ var scenery = scenery || {};
       }
     },
     
+    // concatenates the unique IDs of nodes in the trail, so that we can do id-based lookups
+    getUniqueId: function() {
+      return _.map( this.nodes, function( node ) { return node.getId(); } ).join( '-' );
+    },
+    
     toString: function() {
       this.reindex();
       if ( !this.length ) {
