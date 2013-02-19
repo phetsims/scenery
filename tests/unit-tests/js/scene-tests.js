@@ -148,6 +148,10 @@
     }, message, 128 ); // threshold of 128 due to antialiasing differences between fill and stroke... :(
   }
   
+  function compareShapeBackends( shape, message ) {
+    
+  }
+  
   function testTextBounds( getBoundsOfText, fontDrawingStyles, message ) {
     var precision = 1;
     var title = document.createElement( 'h2' );
