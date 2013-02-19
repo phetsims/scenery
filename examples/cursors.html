@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+
+  <!-- runs in full-screen mode on iOS devices -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <title>Scenery Cursor Examples</title>
+  
+  <link rel="stylesheet" href="../contrib/bootstrap-2.2.2.css">
+  
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../contrib/jquery-1.8.3.min.js"></script>
+  <script src="../contrib/lodash.min-1.0.0-rc.3.js"></script>
+  
+  <!-- Bootstrap not necessarily needed -->
+  <script src="../contrib/bootstrap-2.2.2.js"></script>
+  
+  <!-- For the pop-up FPS meter -->
+  <script src="../contrib/stats.min.js"></script>
+  
+  <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
+  <script src="../scenery.js"></script>
+  <!-- <script src="../scenery-min.js"></script> -->
+  
+  <style type="text/css">
+    /* Let content go to the edges */
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #ff0;
+      overflow: hidden;
+    }
+    
+    /* Have the #main div cover the entire viewport */
+    #main {
+      position: absolute; /* position !== inherit is required so that Scenery's absolutely-positioned children are placed correctly */
+      left: 0;
+      top: 0;
+      background-color: #fff;
+    }
+
+  </style>
+</head>
+
+<body>
+  
+  <!-- our scene graph will be in this div -->
+  <div id="main">
+  </div>
+
+  <script>
+  
+  var $main = $( '#main' );
+
+  // initialize our scene
+  var scene = new scenery.Scene( $main );
+  scene.initializeFullscreenEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
+  scene.resizeOnWindowResize(); // the scene gets resized to the full screen size
+  
+  // our list of cursors to text
+  var cursors = [
+    'auto', 'default', 'none', 'inherit', 'help', 'pointer', 'progress', 'wait', 'crosshair', 'text', 'vertical-text', 'alias', 'copy', 'move',
+    'no-drop', 'not-allowed', 'e-resize', 'n-resize', 'w-resize', 's-resize', 'nw-resize', 'ne-resize', 'se-resize', 'sw-resize', 'ew-resize',
+    'ns-resize', 'nesw-resize', 'nwse-resize', 'context-menu', 'cell', 'col-resize', 'row-resize', 'all-scroll',
+    'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==) 2 2, auto',
+    'url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxNicgaGVpZ2h0PScxNic+PHBhdGggZD0nTSAwIDAgTCAxNiAwIEwgMTYgMTYgTCAwIDE2IFogTSAwIDAnIHN0eWxlPSdmaWxsOiAjZmYwMDAwO3N0cm9rZTogIzAwMDAwMDtzdHJva2Utd2lkdGg6IDE7c3Ryb2tlLWxpbmVjYXA6IGJ1dHQ7c3Ryb2tlLWxpbmVqb2luOiBtaXRlcjsnPjwvcGF0aD48L3N2Zz4=) 8 8, auto'
+  ];
+  
+  // explanatory text
+  scene.addChild( new scenery.Text( 'Some cursors may not be supported by your browser', {
+    x: 20,
+    y: 30,
+    fill: '#000000',
+    font: '20px sans-serif'
+  } ) );
+  
+  // offset by half pixel so our lines are sharp
+  var baseX = 70.5,
+      baseY = 70.5,
+      columns = 5,
+      columnWidth = 120,
+      rowHeight = 50,
+      padding = 10;
+  
+  for ( var i = 0; i < cursors.length; i++ ) {
+    var cursor = cursors[i];
+    
+    // position things as a table for now
+    var x = baseX + ( padding + columnWidth ) * ( i % columns );
+    var y = baseY + ( padding + rowHeight ) * Math.floor( i / columns );
+    
+    // we'll create a node that will contain text and a background
+    var group = new scenery.Node( {
+      // if the mouse is over this node, its cursor will be set to this,
+      // unless there is a descendant node that the mouse is over with a cursor specified
+      cursor: cursor
+    } );
+    
+    // a label for the cursor
+    var text = new scenery.Text( cursor.slice( 0, 3 ) === 'url' ? 'url( ' + cursor.slice( 15, 18 ) + ' )' : cursor, {
+      font: '16px sans-serif',
+      centerX: x,
+      centerY: y
+    } );
+    
+    // add background and text to our group
+    group.addChild( new scenery.Path( {
+      shape: scenery.Shape.rectangle( 0, 0, columnWidth, rowHeight ),
+      centerX: x,
+      centerY: y,
+      stroke: '#000000',
+      fill: '#eeeeee'
+    } ) );
+    group.addChild( text );
+    
+    // and our group to the scene
+    scene.addChild( group );
+  }
+  
+  /*---------------------------------------------------------------------------*
+  * FPS meter
+  *----------------------------------------------------------------------------*/    
+  
+  var stats = new Stats();
+  stats.setMode( 0 ); // 0: fps, 1: ms
+  stats.domElement.style.position = 'absolute';
+  stats.domElement.style.right = '0';
+  stats.domElement.style.top = '0';
+  document.body.appendChild( stats.domElement );
+  
+  
+  /*---------------------------------------------------------------------------*
+  * main loop
+  *----------------------------------------------------------------------------*/    
+  
+  function tick() {
+    window.requestAnimationFrame( tick, $main[0] );
+    
+    stats.begin();
+    scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
+    stats.end();
+  }
+  window.requestAnimationFrame( tick, $main[0] );
+
+
+  </script>
+
+</body>
+</html>

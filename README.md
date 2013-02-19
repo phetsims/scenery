@@ -21,6 +21,7 @@ Examples:
 * [Hello world](http://phet.colorado.edu/files/scenery/examples/hello-world.html)
 * [Node types](http://phet.colorado.edu/files/scenery/examples/nodes.html)
 * [Multi-touch and Drag-by-touchover](http://phet.colorado.edu/files/scenery/examples/multi-touch.html)
+* [Cursors](http://phet.colorado.edu/files/scenery/examples/cursors.html)
 
 For testing purposes, the following are currently being worked on:
 * [Scene Graph Comparisons and Experiments](http://phet.colorado.edu/files/scenery/tests/easel-performance/easel-tests.html)

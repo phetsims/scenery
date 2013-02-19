@@ -209,6 +209,7 @@ Shapes:
     Consider bounding box handling for an arbitrary transform, for use with Node's isInGlobalBounds( globalBounds, currentTransform ).
 
 Text:
+    *** Performance of text bounds!
     Handling multi-line strings
     SVG / WebGL / DOM options
     Beware: miterLimit and joins seem to change stroking of text (if the bounds of that is ever to be included).
