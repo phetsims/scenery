@@ -45,6 +45,7 @@ src/js/scene/layers/LayerState.js
 src/js/scene/nodes/Strokable.js
 src/js/scene/nodes/Fillable.js
 src/js/scene/nodes/Path.js
+src/js/scene/nodes/Font.js
 src/js/scene/nodes/Text.js
 src/js/scene/nodes/DOM.js
 src/js/scene/nodes/Image.js
