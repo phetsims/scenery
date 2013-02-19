@@ -16,7 +16,10 @@
   <style type="text/css">
     .testname {
       clear: both;
+      margin: 0;
+      padding: 0;
       padding-top: 20px;
+      padding-bottom: 5px;
     }
     
     .scene {
@@ -27,6 +30,22 @@
       z-index: 0;
       padding: none !important; /* in case we add jQuery Mobile back in */
       border: 1px solid black;
+    }
+    
+    .scene.canvas:after {
+      content: "Canvas";
+      position: absolute;
+      bottom: 0;
+      left: 2px;
+      opacity: 0.3;
+    }
+    
+    .scene.svg:after {
+      content: "SVG";
+      position: absolute;
+      bottom: 0;
+      left: 2px;
+      opacity: 0.3;
     }
 
   </style>
@@ -174,6 +193,7 @@
       _.each( backends, function( backend ) {
         var $container = $( document.createElement( 'div' ) );
         $container.addClass( 'scene' );
+        $container.addClass( backend.name );
         $container.width( testCase.width || 320 );
         $container.height( testCase.height || 240 );
         $( document.body ).append( $container );
