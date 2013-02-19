@@ -22,6 +22,7 @@ Examples:
 * [Node types](http://phet.colorado.edu/files/scenery/examples/nodes.html)
 * [Multi-touch and Drag-by-touchover](http://phet.colorado.edu/files/scenery/examples/multi-touch.html)
 * [Cursors](http://phet.colorado.edu/files/scenery/examples/cursors.html)
+* [Devious Dragging (handling of corner cases)](http://phet.colorado.edu/files/scenery/examples/devious-drag.html)
 
 For testing purposes, the following are currently being worked on:
 * [Scene Graph Comparisons and Experiments](http://phet.colorado.edu/files/scenery/tests/easel-performance/easel-tests.html)
