@@ -112,6 +112,7 @@ DOM:
         - Either delegate (just set transform) or have inline with just SVG over (with pointer-events)
 
 ** SVG: -- important because we can layer DOM nodes properly under SVG
+    Allow different options for splitting the root transform between CSS / SVG
     * Apply pointer-events: none
     *** Highly recommend <image xlink:href="...">, since we can include URL / data URL, nesting works, and we don't pollute the id namespace
         Direct nesting fails in IE9
