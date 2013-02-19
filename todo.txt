@@ -115,21 +115,13 @@ DOM:
         - Either delegate (just set transform) or have inline with just SVG over (with pointer-events)
 
 ** SVG: -- important because we can layer DOM nodes properly under SVG
+    * Apply pointer-events: none
     *** Highly recommend <image xlink:href="...">, since we can include URL / data URL, nesting works, and we don't pollute the id namespace
         Direct nesting fails in IE9
     * Need to be able to pull bounds out of SVG fragments.
         Should be specified in the SVG element.
     SVGLayer needs have CSS transform with a scale of 1, apply scale to containing group instead?
-    DAG handling for SVG (how to duplicate) or DOM
-    Also for DOM => Canvas: http://pbakaus.github.com/domvas/
-    Canvg for SVG=>Canvas? http://code.google.com/p/canvg/
-    Or SVG straight from image as in http://jsfiddle.net/estelle/SJjJb/ (as data-url for an image)
     Examine Raphael JS for SVG support and Code.
-    Layering on SVG and the persistence that it will require have some interesting effects:
-        Nodes will map to one (or more) <g> elements. Multiple <g> elements necessary if there is a layer change in children, etc.
-        Path nodes may need to be aware of layer type changes to create/destroy SVG elements
-    Mixins for implementing SVG? might be useful if we have createSVGElement() for self-rendering, and some way of creating intermediate groups
-    Beware of alpha handling -- seems to have a different gamma or something on Windows.
     Possible SVG Safari issues if bounds aren't whole-pixel?
     Investigate SVG crispEdges to see whether it would be valuable for other backends
 
@@ -151,22 +143,11 @@ Layers:
 * Event dispatch:
     *** - Drag Handler need to pass transform and/or trail in input events
     DragHandler - mouse buttons handling (left/middle/right can cause drag issues)
-    remove listener callback?
     Consider finger.isDown for checking general (but possibly mouse related) events
     Indie UI events should be tracked: https://dvcs.w3.org/hg/IndieUI/raw-file/default/src/indie-ui-events.html
-    Can we handle DOM nodes without default behaviors? -- patch bootstrap for .phethover instead of :hover
-        - yes technically, but we have to rebuild events like mouseover and mouseout
     Verify SVG stacking is practical with test
         -- do we need pointer-events on every element, or just the top-level svg?
-    * Examine Kinect event system, delegate events, pointer events spec, jQuery .on with bind / capture
-        Pointer Events spec: https://dvcs.w3.org/hg/pointerevents/raw-file/tip/pointerEvents.html
-        Possibly relevant HTML5 spec for default behaviors: http://www.w3.org/html/wg/drafts/html/master/Overview.html
-    with DOM elements, can we essentially "PSwing" the event forwarding and emulate mouse/touch behavior? will CSS :hover work?
-    Note in code about DOM4 (http://www.w3.org/TR/dom/#constructing-events) and Event Constructors. See http://www.w3.org/TR/DOM-Level-3-Events/#new-event-interface-initializers
-        Use deprecated initMouseEvent for now, but feature detect on it?
-    Picking:
-        Add a flag (pickable)? Check Piccolo behavior
-        Invisible nodes get picked? Check Piccolo behavior, but consider a parameter for this somewhere?
+    Picking - see TODO under Node
     Enter/Exit events on up/down? - see question above
     Freeze event handlers, a la the DOM 3 Events spec? Or copy Piccolo?
     Best pattern for handling drags / more persistence? Add listeners directly to finger?
@@ -189,6 +170,12 @@ Accessibility / shadow DOM:
     consider something like http://bl.ocks.org/mbostock/1276463
 
 Node:
+    Feature TODO:
+        Sub-tree opacity (like setTransparency in Piccolo)
+            'transparency', 'opacity', or 'alpha'?
+            Canvas: globalAlpha?
+            SVG: how to handle?
+        Pickable flag - check Piccolo behavior. consider flag for whether invisible nodes get picked or not (probably yes, for hit regions!)
     Since cursor might support data URLs, we can have custom cursors?
     Batching of insertions / removals, so that we could consider completely changing children, removing all children, etc. at the same time
         Possibly consider batching these together until updateScene?
@@ -198,10 +185,6 @@ Node:
     Bounds after rotation seems to be a bit too wide
     * Fire event on change of layerStrategy, and possibly rethink layerStrategy design
     Mix-in notifier for listeners
-    Sub-tree opacity (like setTransparency in Piccolo)
-        'transparency', 'opacity', or 'alpha'?
-        Canvas: globalAlpha?
-        SVG: how to handle?
     Canvas fill gradients / patterns
         Can this be abstracted across SVG / WebGL layers also? -- probably WebGL _much_ more efficiently with shaders
     For prepend-flags, set in parameter object instead of boolean flag? (somewhat hard-to-read code)
@@ -222,7 +205,7 @@ Shapes:
     Features not implemented: precise intersection with bounding box (not just intersection of bounds)
     Nonzero/evenodd support (not yet implemented in browsers)
     Self-intersection in 'stroked' path
-    SVG / WebGL
+    WebGL
     Function for higher-performance possibly-expanded bounds for redraw?
     Consider bounding box handling for an arbitrary transform, for use with Node's isInGlobalBounds( globalBounds, currentTransform ).
 

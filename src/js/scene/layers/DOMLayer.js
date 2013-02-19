@@ -109,6 +109,7 @@ var scenery = scenery || {};
     },
     
     // TODO: note for DOM we can do https://developer.mozilla.org/en-US/docs/HTML/Canvas/Drawing_DOM_objects_into_a_canvas
+    // TODO: note that http://pbakaus.github.com/domvas/ may work better, but lacks IE support
     renderToCanvas: function( canvas, context, delayCounts ) {
       // TODO: consider not silently failing?
       // var data = "<svg xmlns='http://www.w3.org/2000/svg' width='" + this.$main.width() + "' height='" + this.$main.height() + "'>" +

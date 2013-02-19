@@ -8,6 +8,7 @@
  *
  * DOM Level 3 events spec: http://www.w3.org/TR/DOM-Level-3-Events/
  * Touch events spec: http://www.w3.org/TR/touch-events/
+ * Pointer events spec draft: https://dvcs.w3.org/hg/pointerevents/raw-file/tip/pointerEvents.html
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
