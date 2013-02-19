@@ -5,6 +5,9 @@
  *
  * TODO: newlines
  *
+ * Useful specs:
+ * http://www.w3.org/TR/css3-text/
+ *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
