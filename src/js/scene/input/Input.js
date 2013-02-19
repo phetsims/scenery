@@ -152,24 +152,21 @@ var scenery = scenery || {};
     
     dispatchEvent: function( trail, type, finger, event ) {
       // first run through the finger's listeners to see if one of them will handle the event
-      this.dispatchToFinger( type, finger, event );
+      this.dispatchToFinger( trail, type, finger, event );
       
       // if not yet handled, run through the trail in order to see if one of them will handle the event
       // at the base of the trail should be the scene node, so the scene will be notified last
       this.dispatchToTargets( trail, type, finger, event );
-      
-      // if not yet handled, run through the scene's listeners
-      // this.dispatchToScene( type, finger, event );
     },
     
-    dispatchToFinger: function( type, finger, event ) {
+    dispatchToFinger: function( trail, type, finger, event ) {
       var fingerListeners = finger.listeners.slice( 0 ); // defensive copy
       for ( var i = 0; i < fingerListeners.length; i++ ) {
         var listener = fingerListeners[i];
         
         if ( listener[type] ) {
           // if a listener returns true, don't handle any more
-          var handled = !!( listener[type]( finger, event ) );
+          var handled = !!( listener[type]( finger, trail, event ) );
           
           if ( handled ) {
             return;
@@ -189,7 +186,7 @@ var scenery = scenery || {};
           
           if ( listener[type] ) {
             // if a listener returns true, don't handle any more
-            var handled = !!( listener[type]( finger, event ) );
+            var handled = !!( listener[type]( finger, trail, event, target ) );
             
             if ( handled ) {
               return;
@@ -198,24 +195,14 @@ var scenery = scenery || {};
         }
       }
     }
-    
-    // dispatchToScene: function( type, finger, event ) {
-    //   var sceneListeners = this.scene.getInputListeners();
-    //   for ( var i = 0; i < sceneListeners.length; i++ ) {
-    //     var listener = sceneListeners[i];
-        
-    //     if ( listener[type] ) {
-    //       // if a listener returns true, don't handle any more
-    //       var handled = !!( listener[type]( finger, event ) );
-          
-    //       if ( handled ) {
-    //         return;
-    //       }
-    //     }
-    //   }
-    // },
   };
   
+  /*
+   * Conventionally set flags on a finger: TODO: add this state tracking to finger for convenience
+   * dragging - whether the finger is dragging something
+   *
+   * TODO: consider an 'active' flag?
+   */
   Input.Finger = function() {
     this.listeners = [];
   };

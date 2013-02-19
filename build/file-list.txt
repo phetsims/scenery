@@ -33,7 +33,8 @@ src/js/scene/Shape.js
 src/js/scene/layers/LayerStrategies.js
 src/js/scene/Node.js
 src/js/scene/Scene.js
-src/js/scene/Input.js
+src/js/scene/input/Input.js
+src/js/scene/input/SimpleDragHandler.js
 src/js/scene/RenderState.js
 src/js/scene/layers/Layer.js
 src/js/scene/layers/CanvasLayer.js

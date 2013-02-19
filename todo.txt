@@ -141,6 +141,7 @@ Layers:
     Proof-of-concept for performance and DOM integration
 
 * Event dispatch:
+    *** - events should be more like parameter objects!
     *** - Drag Handler need to pass transform and/or trail in input events
     DragHandler - mouse buttons handling (left/middle/right can cause drag issues)
     Consider finger.isDown for checking general (but possibly mouse related) events

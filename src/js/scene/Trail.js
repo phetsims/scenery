@@ -70,8 +70,23 @@ var scenery = scenery || {};
       return new Trail( this.nodes.slice( startIndex, endIndex ) );
     },
     
+    subtrailTo: function( node, excludeNode ) {
+      return this.slice( 0, _.indexOf( this.nodes, node ) + ( excludeNode ? 0 : 1 ) );
+    },
+    
     isEmpty: function() {
       return this.nodes.length === 0;
+    },
+    
+    getTransform: function() {
+      var transform = new phet.math.Transform3();
+      
+      // from the root up
+      _.each( this.nodes, function( node ) {
+        transform.appendTransform( node.transform );
+      } );
+      
+      return transform;
     },
     
     addAncestor: function( node, index ) {
