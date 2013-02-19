@@ -3,8 +3,6 @@
 /**
  * Basic dragging for a node.
  *
- * TODO: stick node in place if ancestor changes transform (while dragging)
- *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
