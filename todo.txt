@@ -1,5 +1,6 @@
 
 Bugs:
+    SVG failure with devious drag DAG handling
     DOMLayer.transformChange has improper transform handling for children
     Check Firefox/Safari on Mac event handling on multiple touch events
     Doc multitouch example handles down/up improperly for the mouse
