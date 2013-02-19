@@ -36,16 +36,8 @@ var scenery = scenery || {};
     // if an ancestor is transformed, pin our node
     this.transformListener = {
       transform: function( args ) {
-        // if it's longer, it isn't a subtrail!
-        if ( args.trail.length > handler.trail.length ) {
+        if ( !handler.trail.isExtensionOf( args.trail, true ) ) {
           return;
-        }
-        
-        // make sure the nodes match
-        for ( var i = 0; i < args.trail.length; i++ ) {
-          if ( args.trail.nodes[i] !== handler.trail.nodes[i] ) {
-            return;
-          }
         }
         
         var newMatrix = args.trail.getTransform().getMatrix();
