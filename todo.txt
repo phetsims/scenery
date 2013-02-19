@@ -30,6 +30,8 @@ Browsers
             Chromium bug: https://code.google.com/p/chromium/issues/detail?id=176694
             WebKit bug: https://bugs.webkit.org/show_bug.cgi?id=110031
             Try using a unicode-escaped quote?
+        
+        [KNOWN] Chrome XMLSerializer.serializeToString dropping namespaces: https://code.google.com/p/chromium/issues/detail?id=88295
     For canvas, create a drawing function that exhibits all differences?
     measureText for webkit?
 

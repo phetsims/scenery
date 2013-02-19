@@ -63,6 +63,8 @@
     var svg = document.createElementNS( svgns, 'svg' );
     var $svg = $( svg );
     
+    svg.id = 'svg1';
+    
     // TODO: auto-detect width/height for certain resources
     svg.setAttribute( 'width', 300 );
     svg.setAttribute( 'height', 212 );
@@ -79,7 +81,7 @@
     svg.appendChild( image );
     
     document.body.appendChild( svg );
-
+    
   </script>
 
 </body>

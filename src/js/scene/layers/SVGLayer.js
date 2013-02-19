@@ -167,10 +167,58 @@ var scenery = scenery || {};
       // TODO: clipping
     },
     
+    getSVGString: function() {
+      // TODO: jQuery seems to be stripping namespaces, so figure that one out?
+      return $( '<div>' ).append( this.$svg.clone() ).html();
+      
+      // also note:
+      // var doc = document.implementation.createHTMLDocument("");
+      // doc.write(html);
+       
+      // // You must manually set the xmlns if you intend to immediately serialize the HTML
+      // // document to a string as opposed to appending it to a <foreignObject> in the DOM
+      // doc.documentElement.setAttribute("xmlns", doc.documentElement.namespaceURI);
+       
+      // // Get well-formed markup
+      // html = (new XMLSerializer).serializeToString(doc);
+    },
+    
     // TODO: note for DOM we can do https://developer.mozilla.org/en-US/docs/HTML/Canvas/Drawing_DOM_objects_into_a_canvas
     renderToCanvas: function( canvas, context, delayCounts ) {
-      // TODO: consider canvg?
-      throw new Error( 'SVGLayer.renderToCanvas unimplemented' );
+      if ( window.canvg ) {
+        delayCounts.increment();
+        
+        // TODO: if we are using CSS3 transforms, run that here
+        canvg( canvas, this.getSVGString(), {
+          ignoreMouse: true,
+          ignoreAnimation: true,
+          ignoreDimensions: true,
+          ignoreClear: true,
+          renderCallback: function() {
+            delayCounts.decrement();
+          }
+        } );
+      } else {
+        // will not work on Internet Explorer 9/10
+        
+        // TODO: very much not convinced that this is better than setting src of image
+        var DOMURL = window.URL || window.webkitURL || window;
+        var img = new Image();
+        var raw = this.getSVGString();
+        console.log( raw );
+        var svg = new Blob( [ raw ] , { type: "image/svg+xml;charset=utf-8" } );
+        var url = DOMURL.createObjectURL( svg );
+        delayCounts.increment();
+        img.onload = function() {
+          context.drawImage( img, 0, 0 );
+          // TODO: this loading is delayed!!! ... figure out a solution to potentially delay?
+          DOMURL.revokeObjectURL( url );
+          delayCounts.decrement();
+        };
+        img.src = url;
+        
+        throw new Error( 'this implementation hits Chrome bugs, won\'t work on IE9/10, etc. deprecated' );
+      }
     },
     
     getName: function() {

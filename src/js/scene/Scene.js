@@ -219,8 +219,21 @@ var scenery = scenery || {};
   };
   
   // attempt to render everything currently visible in the scene to an external canvas. allows copying from canvas layers straight to the other canvas
-  // delayCounts will have increment() and decrement() called on it if asynchronous completion is needed.
-  Scene.prototype.renderToCanvas = function( canvas, context, delayCounts ) {
+  Scene.prototype.renderToCanvas = function( canvas, context, callback ) {
+    var count = 0;
+    var delayCounts = {
+      increment: function() {
+        count++;
+      },
+      
+      decrement: function() {
+        count--;
+        if ( count === 0 && callback ) {
+          callback();
+        }
+      }
+    };
+    
     context.clearRect( 0, 0, canvas.width, canvas.height );
     _.each( this.layers, function( layer ) {
       layer.renderToCanvas( canvas, context, delayCounts );

@@ -42,6 +42,8 @@
     Image: false,
     Blob: false,
     
+    canvg: false,
+    
     Float32Array: true // we actually polyfill this, so allow it to be set
   };
   
