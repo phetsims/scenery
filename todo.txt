@@ -1,6 +1,5 @@
 
 Bugs:
-    (almost) DOMLayer's transformChange shouldn't iterate over nodes that are not under the trail
     Check Firefox/Safari on Mac event handling on multiple touch events
 
 Browsers
