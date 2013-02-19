@@ -86,8 +86,14 @@ var scenery = scenery || {};
       throw new Error( 'Layer.dispose unimplemented' );
     },
     
-    markDirtyRegion: function( node, localBounds, transform, trail ) {
+    // args should contain node, bounds (local bounds), transform, trail
+    markDirtyRegion: function( args ) {
       throw new Error( 'Layer.markDirtyRegion unimplemented' );
+    },
+    
+    // args should contain node, type (append, prepend, set), matrix, transform, trail
+    transformChange: function( args ) {
+      throw new Error( 'Layer.transformChange unimplemented' );
     },
     
     getName: function() {

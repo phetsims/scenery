@@ -637,7 +637,7 @@ var scenery = scenery || {};
     },
     
     notifyTransformChange: function( matrix, type ) {
-      this.dispatchEvent( 'transform', {
+      this.dispatchEventWithTransform( 'transform', {
         node: this,
         type: type,
         matrix: matrix

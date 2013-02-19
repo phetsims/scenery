@@ -76,13 +76,7 @@ var scenery = scenery || {};
     },
     
     markDirtyRegion: function( node, localBounds, transform, trail ) {
-      // for now, update the transforms for the node and any children in the layer that it may have
-      // TODO: should we catch a separate event, transform-change?
-      // new scenery.TrailPointer( trail, true ).eachNodeBetween( new scenery.TrailPointer( trail, false ), function( node ) {
-      //   if ( node.hasSelf() ) {
-      //     node.updateCSSTransform( transform );
-      //   }
-      // } );
+      // TODO?
     },
     
     // TODO: consider a stack-based model for transforms?

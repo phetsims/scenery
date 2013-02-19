@@ -51,39 +51,51 @@ var scenery = scenery || {};
     // note, arguments to the functions are mutable. don't destroy them
     this.sceneEventListener = {
       insertChild: function( args ) {
-        var parent = args.parent;
-        var child = args.child;
-        var index = args.index;
-        var trail = args.trail;
+        // var parent = args.parent;
+        // var child = args.child;
+        // var index = args.index;
+        // var trail = args.trail;
         
         // TODO: improve later
         scene.rebuildLayers();
       },
       
       removeChild: function( args ) {
-        var parent = args.parent;
-        var child = args.child;
-        var index = args.index;
-        var trail = args.trail;
+        // var parent = args.parent;
+        // var child = args.child;
+        // var index = args.index;
+        // var trail = args.trail;
         
         scene.rebuildLayers();
       },
       
       dirtyBounds: function( args ) {
-        var node = args.node;
-        var localBounds = args.bounds;
-        var transform = args.transform;
+        // var node = args.node;
+        // var localBounds = args.bounds;
+        // var transform = args.transform;
         var trail = args.trail;
         
         // if there are no layers, no nodes would actually render, so don't do the lookup
         if ( scene.layers.length ) {
-          scene.layerLookup( trail ).markDirtyRegion( node, localBounds, transform, trail );
+          scene.layerLookup( trail ).markDirtyRegion( args );
+        }
+      },
+      
+      transform: function( args ) {
+        // var node = args.node;
+        // var type = args.type;
+        // var matrix = args.matrix;
+        // var transform = args.transform;
+        var trail = args.trail;
+        
+        if ( scene.layers.length ) {
+          scene.layerLookup( trail ).transformChange( args );
         }
       },
       
       layerRefresh: function( args ) {
-        var node = args.node;
-        var trail = args.trail;
+        // var node = args.node;
+        // var trail = args.trail;
         
         scene.rebuildLayers();
       }

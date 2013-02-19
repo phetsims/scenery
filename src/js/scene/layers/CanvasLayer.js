@@ -283,11 +283,15 @@ var scenery = scenery || {};
       context.drawImage( this.canvas, 0, 0 );
     },
     
-    markDirtyRegion: function( node, localBounds, transform, trail ) {
-      var bounds = transform.transformBounds2( localBounds );
+    markDirtyRegion: function( args ) {
+      var bounds = args.transform.transformBounds2( args.bounds );
       
       // TODO: for performance, consider more than just a single dirty bounding box
       this.dirtyBounds = this.dirtyBounds.union( bounds.dilated( 1 ).roundedOut() );
+    },
+    
+    transformChange: function( args ) {
+      // currently no-op, since this is taken care of by markDirtyRegion
     },
     
     getName: function() {

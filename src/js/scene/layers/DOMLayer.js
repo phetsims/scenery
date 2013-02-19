@@ -59,14 +59,22 @@ var scenery = scenery || {};
       this.$div.detach();
     },
     
-    markDirtyRegion: function( node, localBounds, transform, trail ) {
-      // for now, update the transforms for the node and any children in the layer that it may have
-      // TODO: should we catch a separate event, transform-change?
+    markDirtyRegion: function( args ) {
+      // no-op for now, since it is not scenery's job to change DOM elements. transforms are handled with transformChange.
+    },
+    
+    transformChange: function( args ) {
+      var trail = args.trail;
+      var baseTransform = args.transform;
+      
+      // TODO: iterate only over nodes in this layer (sub-trees may not be contained!)
       new scenery.TrailPointer( trail, true ).eachNodeBetween( new scenery.TrailPointer( trail, false ), function( node ) {
         if ( node.hasSelf() ) {
-          node.updateCSSTransform( transform );
+          // TODO: mark that this is for DOM nodes?
+          node.updateCSSTransform( baseTransform );
         }
       } );
+      throw new Error( 'FIXME: improper handling of the transform, since we are setting the transform to all children!' );
     },
     
     // TODO: consider a stack-based model for transforms?
