@@ -7,6 +7,7 @@
  *
  * Useful specs:
  * http://www.w3.org/TR/css3-text/
+ * http://www.w3.org/TR/css3-fonts/
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
@@ -133,10 +134,25 @@ var scenery = scenery || {};
   // mix in support for fills
   scenery.Fillable( Text );
   
+  // NOTE: Canvas text drawing forces line-height to normal, font-size to CSS pixels
   Text.FontStyles = function( args ) {
     if ( args === undefined ) {
       args = {};
     }
+    
+    // $( div ).css( 'font', 'normal 125px Verdana' ) => $( div ).css( 'font-family' ) works!
+    
+    // options from http://www.w3.org/TR/css3-fonts/
+    // font-family      v ---
+    // font-weight      v normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900
+    // font-stretch     v normal | ultra-condensed | extra-condensed | condensed | semi-condensed | semi-expanded | expanded | extra-expanded | ultra-expanded
+    // font-style       v normal | italic | oblique
+    // font-size        v <absolute-size> | <relative-size> | <length> | <percentage>
+    // font-size-adjust v none | auto | <number>
+    // font             v [ [ <‘font-style’> || <font-variant-css21> || <‘font-weight’> || <‘font-stretch’> ]? <‘font-size’> [ / <‘line-height’> ]? <‘font-family’> ] | caption | icon | menu | message-box | small-caption | status-bar
+    //                    <font-variant-css21> = [normal | small-caps]
+    // font-synthesis   v none | [ weight || style ]
+    
     this.font = args.font !== undefined ? args.font : '10px sans-serif';
     this.textAlign = args.textAlign !== undefined ? args.textAlign : 'start'; // start, end, left, right, center
     this.textBaseline = args.textBaseline !== undefined ? args.textBaseline : 'alphabetic'; // top, hanging, middle, alphabetic, ideographic, bottom
