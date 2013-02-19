@@ -88,79 +88,17 @@
       } );
       container.addChild( node );
       
-      /*---------------------------------------------------------------------------*
-      * dragging logic (will be shareable code at some point)
-      *----------------------------------------------------------------------------*/    
-      
-      var dragging = false; // whether this node is being dragged
-      var lastDragPoint = null; // the location of the drag at the previous event (so we can calculate a delta)
-      var beforeDragTranslation = node.translation; // the location at the start of the drag, so we can reset on a touch cancel
-      
-      // this listener gets added to the finger when it starts dragging our node
-      var dragListener = {
-        // mouse/touch up
-        up: function( finger, event ) {
-          endDrag( finger );
+      node.addInputListener( new scenery.SimpleDragHandler( {
+        allowTouchSnag: true,
+        
+        start: function() {
+          node.setFill( '#0000ff' );
         },
         
-        // touch cancel
-        cancel: function( finger, event ) {
-          endDrag( finger );
-          
-          // since it's a cancel event, go back!
-          node.translation = beforeDragTranslation;
-        },
-        
-        // mouse/touch move
-        move: function( finger, event ) {
-          // move by the delta between the previous point
-          node.translate( finger.point.minus( lastDragPoint ) );
-          lastDragPoint = finger.point;
+        end: function() {
+          node.setFill( '#ff0000' );
         }
-      };
-      
-      function startDrag( finger ) {
-        node.setFill( '#0000ff' );
-        
-        // set a flag on the finger so it won't pick up other nodes
-        finger.dragging = true;
-        finger.addInputListener( dragListener );
-        dragging = true;
-        
-        beforeDragTranslation = node.translation;
-        lastDragPoint = finger.point;
-      }
-      
-      function endDrag( finger ) {
-        node.setFill( '#ff0000' );
-        
-        finger.dragging = false;
-        finger.removeInputListener( dragListener );
-        dragging = false;
-      }
-      
-      function tryToSnag( finger ) {
-        // only start dragging if the finger isn't dragging anything, we aren't being dragged, and if it's a mouse it's button is down
-        if ( !dragging && !finger.dragging ) {
-          startDrag( finger );
-        }
-      }
-      
-      // on a down or enter event on this node, attempt to start dragging
-      node.addInputListener( {
-        // mouse/touch down on this node
-        down: function( finger, event ) {
-          tryToSnag( finger );
-        },
-        
-        // mouse/touch enters this node
-        enter: function( finger, event ) {
-          // allow touches to start a drag by moving "over" this node
-          if ( !finger.isMouse ) {
-            tryToSnag( finger );
-          }
-        }
-      } );
+      } ) );
     })();
   }
   
