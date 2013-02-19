@@ -64,8 +64,6 @@ var scenery = scenery || {};
     },
     
     transformChange: function( args ) {
-      var trail = args.trail;
-      
       // TODO: efficiency! this computes way more matrix transforms than needed
       this.startPointer.eachTrailBetween( this.endPointer, function( trail ) {
         var node = trail.lastNode();
