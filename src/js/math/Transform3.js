@@ -32,6 +32,7 @@ phet.math = phet.math || {};
     *----------------------------------------------------------------------------*/
     
     set: function( matrix ) {
+      phet.assert( matrix instanceof phet.math.Matrix3 );
       this.matrix = matrix;
       
       // compute these lazily
