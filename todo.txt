@@ -170,6 +170,7 @@ Accessibility / shadow DOM:
         and http://www.paciellogroup.com/blog/2012/09/html5-accessibility-september-2012/
     see html5 scene graph google doc
     see http://www.html5accessibility.com/
+    consider something like http://bl.ocks.org/mbostock/1276463
 
 Node:
     Since cursor might support data URLs, we can have custom cursors?
