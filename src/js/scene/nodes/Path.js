@@ -111,6 +111,7 @@ var scenery = scenery || {};
       style += 'stroke-linecap: ' + this.getLineCap() + ';';
       style += 'stroke-linejoin: ' + this.getLineJoin() + ';';
     }
+    path.setAttribute( 'style', style );
   };
   
   Path.prototype.hasSelf = function() {
