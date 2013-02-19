@@ -194,8 +194,7 @@ Node:
         Possibly consider batching these together until updateScene?
         Then: add children mutator (setChildren, getChildren) so that it is convenient to set up trees of nodes?
             Would require renaming node.children to node._children, and consider whether getChildren should have the slice precaution
-    param arg { cursor: 'hand' } and mouse cursor handling
-        A system for cursor handling that also supports dragging or 'persistent' cursor handling
+    A system for cursor handling that also supports dragging or 'persistent' cursor handling
     Bounds after rotation seems to be a bit too wide
     * Fire event on change of layerStrategy, and possibly rethink layerStrategy design
     Mix-in notifier for listeners
