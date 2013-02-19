@@ -1,5 +1,6 @@
 
 Bugs:
+    (almost) DOMLayer's transformChange shouldn't iterate over nodes that are not under the trail
     Check Firefox/Safari on Mac event handling on multiple touch events
 
 Browsers
@@ -209,6 +210,8 @@ Shapes:
 
 Text:
     *** Performance of text bounds!
+        Comparison vs accurate bounds for all of the various text bounds methods
+    Ability to set baseline, etc., just like you can set top, bottom or y? -- wait isn't this like just setting y?
     Handling multi-line strings
     SVG / WebGL / DOM options
     Beware: miterLimit and joins seem to change stroking of text (if the bounds of that is ever to be included).
