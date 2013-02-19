@@ -79,6 +79,7 @@ var scenery = scenery || {};
     },
     
     getTransform: function() {
+      // always return a defensive copy of a transform
       var transform = new phet.math.Transform3();
       
       // from the root up

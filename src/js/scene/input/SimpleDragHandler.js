@@ -35,6 +35,32 @@ var scenery = scenery || {};
     this.mouseButton           = undefined; // tracks which mouse button was pressed, so we can handle that specifically
     // TODO: consider mouse buttons as separate fingers?
     
+    // if an ancestor is transformed, pin our node
+    this.transformListener = {
+      transform: function( args ) {
+        // if it's longer, it isn't a subtrail!
+        if ( args.trail.length > handler.trail.length ) {
+          return;
+        }
+        
+        // make sure the nodes match
+        for ( var i = 0; i < args.trail.length; i++ ) {
+          if ( args.trail.nodes[i] !== handler.trail.nodes[i] ) {
+            return;
+          }
+        }
+        
+        var newMatrix = args.trail.getTransform().getMatrix();
+        var oldMatrix = handler.transform.getMatrix();
+        
+        // if A was the trail's old transform, B is the trail's new transform, we need to apply (B^-1 A) to our node
+        handler.node.prependMatrix( newMatrix.inverted().timesMatrix( oldMatrix ) );
+        
+        // store the new matrix so we can do deltas using it now
+        handler.transform.set( newMatrix );
+      }
+    };
+    
     // this listener gets added to the finger when it starts dragging our node
     this.dragListener = {
       // mouse/touch up
@@ -73,6 +99,7 @@ var scenery = scenery || {};
       // set a flag on the finger so it won't pick up other nodes
       finger.dragging = true;
       finger.addInputListener( this.dragListener );
+      trail.rootNode().addEventListener( this.transformListener );
       
       // set all of our persistent information
       this.dragging = true;
@@ -92,6 +119,7 @@ var scenery = scenery || {};
     endDrag: function( event ) {
       this.finger.dragging = false;
       this.finger.removeInputListener( this.dragListener );
+      this.trail.rootNode().removeEventListener( this.transformListener );
       this.dragging = false;
       
       if ( this.options.end ) {
