@@ -250,8 +250,16 @@ var scenery = scenery || {};
     }
   };
   
+  // TODO: consider SVG data URLs
+  
+  Scene.prototype.canvasDataURL = function( callback ) {
+    this.canvasSnapshot( function( canvas ) {
+      callback( canvas.toDataURL() );
+    } );
+  };
+  
   // renders what it can into a Canvas (so far, Canvas and SVG layers work fine)
-  Scene.prototype.snapshot = function( callback ) {
+  Scene.prototype.canvasSnapshot = function( callback ) {
     var canvas = document.createElement( 'canvas' );
     canvas.width = this.sceneBounds.width();
     canvas.height = this.sceneBounds.height();

@@ -101,6 +101,13 @@ var scenery = scenery || {};
       // TODO: clipping
     },
     
+    getSVGString: function() {
+      var data = "<svg xmlns='http://www.w3.org/2000/svg' width='" + this.$main.width() + "' height='" + this.$main.height() + "'>" +
+        "<foreignObject width='100%' height='100%'>" +
+        $( this.div ).html() +
+        "</foreignObject></svg>";
+    },
+    
     // TODO: note for DOM we can do https://developer.mozilla.org/en-US/docs/HTML/Canvas/Drawing_DOM_objects_into_a_canvas
     renderToCanvas: function( canvas, context, delayCounts ) {
       // TODO: consider not silently failing?

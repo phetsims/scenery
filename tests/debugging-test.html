@@ -96,6 +96,10 @@
     // callback here
     console.log( canvas.getContext( '2d' ).getImageData( 0, 0, 10, 10 ) );
   } );
+  
+  scene.canvasDataURL( function( dataURL ) {
+    console.log( dataURL );
+  } );
 
   </script>
 

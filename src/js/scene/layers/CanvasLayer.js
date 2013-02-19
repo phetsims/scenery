@@ -278,6 +278,10 @@ var scenery = scenery || {};
       }
     },
     
+    getSVGString: function() {
+      return '<image xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="' + this.canvas.toDataURL() + '" x="0" y="0" height="' + this.canvas.height + 'px" width="' + this.canvas.width + 'px"/>';
+    },
+    
     // TODO: note for DOM we can do https://developer.mozilla.org/en-US/docs/HTML/Canvas/Drawing_DOM_objects_into_a_canvas
     renderToCanvas: function( canvas, context, delayCounts ) {
       context.drawImage( this.canvas, 0, 0 );
