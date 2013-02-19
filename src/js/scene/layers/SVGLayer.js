@@ -21,15 +21,17 @@ var scenery = scenery || {};
   var xlinkns = 'http://www.w3.org/1999/xlink';
   
   scenery.SVGLayer = function( args ) {
+    var $main = args.$main;
+    
     this.svg = document.createElementNS( svgns, 'svg' );
     this.g = document.createElementNS( svgns, 'g' );
     this.svg.appendChild( this.g );
     this.$svg = $( this.svg );
-    this.svg.setAttribute( 'width', this.$main.width() );
-    this.svg.setAttribute( 'height', this.$main.height() );
+    this.svg.setAttribute( 'width', $main.width() );
+    this.svg.setAttribute( 'height', $main.height() );
     this.svg.setAttribute( 'stroke-miterlimit', 10 ); // to match our Canvas brethren so we have the same default behavior
     this.$svg.css( 'position', 'absolute' );
-    this.$main.append( this.svg );
+    $main.append( this.svg );
     
     this.scene = args.scene;
     

@@ -142,7 +142,7 @@ var scenery = scenery || {};
   // TODO: stroke / fill mixins
   Path.prototype._mutatorKeys = [ 'shape' ].concat( scenery.Node.prototype._mutatorKeys );
   
-  Path.prototype._supportedLayerTypes = [ scenery.LayerType.Canvas ];
+  Path.prototype._supportedLayerTypes = [ scenery.LayerType.Canvas, scenery.LayerType.SVG ];
   
   Object.defineProperty( Path.prototype, 'shape', { set: Path.prototype.setShape, get: Path.prototype.getShape } );
   

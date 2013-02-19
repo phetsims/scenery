@@ -33,6 +33,8 @@
       position: absolute;
       left: 0;
       top: 0;
+      width: 512px;
+      height: 512px;
       background-color: #fff;
       z-index: 0;
       padding: none !important; /* in case we add jQuery Mobile back in */
@@ -52,8 +54,9 @@
   var main = $( '#main' );
 
   // initialize our scene
-  var scene = new scenery.Scene( main );
-  scene.resizeOnWindowResize(); // the scene gets resized to the full screen size
+  var scene = new scenery.Scene( main, {
+    preferredSceneLayerType: scenery.LayerType.SVG
+  } );
   console.log( 'scene created' );
   
   var container = new scenery.Node();
