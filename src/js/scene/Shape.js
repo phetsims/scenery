@@ -10,6 +10,7 @@
  *
  * Canvas spec: http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html
  * SVG spec: http://www.w3.org/TR/SVG/expanded-toc.html
+ *           http://www.w3.org/TR/SVG/paths.html#PathData (for paths)
  * Notes for elliptical arcs: http://www.w3.org/TR/SVG/implnote.html#PathElementImplementationNotes
  * Notes for painting strokes: https://svgwg.org/svg2-draft/painting.html
  *
