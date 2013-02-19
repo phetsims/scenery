@@ -51,7 +51,7 @@ var scenery = scenery || {};
         handler.endDrag( event );
         
         // since it's a cancel event, go back!
-        this.node.setMatrix( handler.startTransformMatrix );
+        handler.node.setMatrix( handler.startTransformMatrix );
       },
       
       // mouse/touch move
@@ -59,7 +59,7 @@ var scenery = scenery || {};
         phet.assert( finger === handler.finger );
         // move by the delta between the previous point, using the precomputed transform
         // prepend the translation on the node, so we can ignore whatever other transform state the node has
-        this.node.translate( handler.transform.inverseDelta2( finger.point.minus( handler.lastDragPoint ) ), true );
+        handler.node.translate( handler.transform.inverseDelta2( finger.point.minus( handler.lastDragPoint ) ), true );
         handler.lastDragPoint = finger.point;
       }
     };
