@@ -101,11 +101,9 @@ var scenery = scenery || {};
     }
     
     var style = '';
-    if ( this._fill ) {
-      style += 'fill: ' + this._fill + ';'; // TODO: handling patterns and gradients!
-    }
+    style += 'fill: ' + ( this._fill ? this._fill : 'none' ) + ';'; // TODO: handling patterns and gradients!
+    style += 'stroke: ' + ( this._stroke ? this._stroke : 'none' ) + ';';
     if ( this._stroke ) {
-      style += 'stroke: ' + this._stroke + ';';
       // TODO: don't include unnecessary directives?
       style += 'stroke-width: ' + this.getLineWidth() + ';';
       style += 'stroke-linecap: ' + this.getLineCap() + ';';

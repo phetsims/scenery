@@ -117,6 +117,45 @@
             lineWidth: 10
           } ) );
         }
+      },{
+        name: 'DAG support',
+        width: 256,
+        height: 128,
+        draw: function( scene ) {
+          var square = new scenery.Path( {
+            shape: scenery.Shape.rectangle( 0, 0, 50, 50 ),
+            x: 0.5,
+            y: 0.5,
+            fill: 'rgba(0,0,0,0.5)',
+            stroke: '#000000',
+            lineWidth: 3
+          } );
+          
+          var arrow = new scenery.Path( {
+            shape: scenery.Shape.regularPolygon( 3, 10 ),
+            fill: 'rgba(0,255,0,1)',
+            stroke: '#000000'
+          } );
+          
+          var combined = new scenery.Node();
+          combined.addChild( square );
+          var leftArrow = new scenery.Node( { x: 15, y: 25 } );
+          leftArrow.addChild( arrow );
+          combined.addChild( leftArrow );
+          var rightArrow = new scenery.Node( { x: 35, y: 25 } );
+          rightArrow.addChild( arrow );
+          combined.addChild( rightArrow );
+          
+          var a = new scenery.Node( { x: 20, y: 20 } );
+          a.addChild( combined );
+          var b = new scenery.Node( { x: 120, y: 30, rotation: Math.PI / 4 } );
+          b.addChild( combined );
+          var c = new scenery.Node( { x: 220, y: 40, rotation: Math.PI / 2 } );
+          c.addChild( combined );
+          scene.addChild( a );
+          scene.addChild( b );
+          scene.addChild( c );
+        }
       }
     ];
     
