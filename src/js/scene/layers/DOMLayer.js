@@ -67,8 +67,15 @@ var scenery = scenery || {};
     },
     
     transformChange: function( args ) {
+      var baseTrail = args.trail;
+      
       // TODO: efficiency! this computes way more matrix transforms than needed
       this.startPointer.eachTrailBetween( this.endPointer, function( trail ) {
+        // bail out quickly if the trails don't match
+        if ( !trail.isExtensionOf( baseTrail, true ) ) {
+          return;
+        }
+        
         var node = trail.lastNode();
         if ( node.hasSelf() ) {
           node.updateCSSTransform( trail.getTransform() );
