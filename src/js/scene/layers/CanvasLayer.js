@@ -74,19 +74,22 @@ var scenery = scenery || {};
       this.resetStyles();
       
       var visibleDirtyBounds = args.fullRender ? scene.sceneBounds : this.dirtyBounds.intersection( scene.sceneBounds );
-      this.clearGlobalBounds( visibleDirtyBounds );
       
-      if ( !args.fullRender ) {
-        state.pushClipShape( scenery.Shape.bounds( visibleDirtyBounds ) );
-      }
-      
-      // dirty bounds (clear, possibly set restricted bounds and handling for that)
-      // visibility checks
-      this.recursiveRender( state, args );
-      
-      // exists for now so that we pop the necessary context state
-      if ( !args.fullRender ) {
-        state.popClipShape();
+      if ( !visibleDirtyBounds.isEmpty() ) {
+        this.clearGlobalBounds( visibleDirtyBounds );
+        
+        if ( !args.fullRender ) {
+          state.pushClipShape( scenery.Shape.bounds( visibleDirtyBounds ) );
+        }
+        
+        // dirty bounds (clear, possibly set restricted bounds and handling for that)
+        // visibility checks
+        this.recursiveRender( state, args );
+        
+        // exists for now so that we pop the necessary context state
+        if ( !args.fullRender ) {
+          state.popClipShape();
+        }
       }
       
       // we rendered everything, no more dirty bounds
