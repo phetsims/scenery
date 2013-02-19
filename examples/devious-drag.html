@@ -139,6 +139,7 @@
     lastTime = timeNow;
     
     stats.begin();
+    container.rotate( timeElapsed * 0.1 );
     scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
     stats.end();
   }

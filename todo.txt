@@ -237,6 +237,7 @@ Build:
     Add JSHint into Sublime Text with plugin?
 
 Performance:
+    *** Garbage collection jitters!
     * Prune node rendering based on visible dirty bounds
     Not re-rasterizing objects immediately during dragging or other features? (Auto-detect as hotspot maybe?)
     Ensure that we are triggering the hardware acceleration for CSS3 transforms
