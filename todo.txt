@@ -38,6 +38,21 @@ Browsers
 Questions for SB (or others):
     Way to side-by-side install Firefox and Aurora?
     Preferred mixin styles?
+    Build style where:
+        Execution order is decided either by custom code or Closure compiler
+        Execution order (since it doesn't change often) is written out with a file that allows us to statically load all JS files in the correct order for development
+        Build is done with Closure, either using its dependency order or filtered by custom code
+            Allows us to do production builds and minification across all of our repos, a la the Require.js build
+        Run this JS after window load, to ensure all necessary resources are up? - preloader would be separate
+        Advantages:
+            Wouldn't have the import-style errors that we have had with Require.js and getting things running.
+            Can access code directly, instead of through the import
+            Closure can build a source map for the minified code
+            File list would also be usable by QUnit + qHint + JSHint for linting code in unit tests
+        Disadvantages:
+            Would have dependency issues if A depends on jQuery X, B depends on jQuery Y, and we can't reconcile it (Require.js could)
+            If using Closure's dependency handling, will have goog.requires and goog.provides in namespaces.
+            No plugins for images / html templates / i18n. Depends on how we are deploying translations whether rebuild is needed?
 
 Questions for team:
     https://travis-ci.org/ for continuous integration?
