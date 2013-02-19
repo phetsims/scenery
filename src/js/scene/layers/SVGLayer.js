@@ -76,7 +76,20 @@ var scenery = scenery || {};
     },
     
     markDirtyRegion: function( node, localBounds, transform, trail ) {
-      // TODO?
+      // not necessary, SVG takes care of handling this (or would just redraw everything anyways)
+    },
+    
+    transformChange: function( args ) {
+      var node = args.node;
+      var trail = args.trail;
+      
+      // TODO: find the associated group!
+      var group;
+      
+      // apply the transform to the group
+      this.applyGroup( node, group );
+      
+      throw new Error( 'group lookup not implemented' );
     },
     
     // TODO: consider a stack-based model for transforms?
