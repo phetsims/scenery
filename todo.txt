@@ -1,9 +1,6 @@
 
 Bugs:
     Check Firefox/Safari on Mac event handling on multiple touch events
-    Doc multitouch example handles down/up improperly for the mouse
-    Failing test cases:
-        LayerState bug for single hasSelf node with enter and exit both switching layer types followed immediately by a node also hasSelf
 
 Browsers
     Browser bugs? (get Canary / Aurora / IE10):

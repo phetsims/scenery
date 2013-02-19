@@ -620,14 +620,18 @@ window.requestAnimationFrame( tick, div[0] );
           node.addInputListener( {
             // mousedown or touchstart (finger pressed down over the node)
             down: function( finger, trail, event ) {
-              count++;
-              updateFingers();
+              if ( !finger.isMouse ) {
+                count++;
+                updateFingers();
+              }
             },
             
             // mouseup or touchend (finger lifted from over the node)
             up: function( finger, trail, event ) {
-              count--;
-              updateFingers();
+              if ( !finger.isMouse ) {
+                count--;
+                updateFingers();
+              }
             },
             
             // triggered from mousemove or touchmove (finger moved over the node from outside)
@@ -707,14 +711,18 @@ $( window ).ready( function() {
   node.addInputListener( {
     // mousedown or touchstart (finger pressed down over the node)
     down: function( finger, trail, event ) {
-      count++;
-      updateFingers();
+      if ( !finger.isMouse ) {
+        count++;
+        updateFingers();
+      }
     },
-    
+
     // mouseup or touchend (finger lifted from over the node)
     up: function( finger, trail, event ) {
-      count--;
-      updateFingers();
+      if ( !finger.isMouse ) {
+        count--;
+        updateFingers();
+      }
     },
     
     // triggered from mousemove or touchmove (finger moved over the node from outside)
