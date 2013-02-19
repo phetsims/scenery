@@ -77,7 +77,9 @@ var scenery = scenery || {};
         
         // if there are no layers, no nodes would actually render, so don't do the lookup
         if ( scene.layers.length ) {
-          scene.layerLookup( trail ).markDirtyRegion( args );
+          _.each( scene.affectedLayers( trail ), function( layer ) {
+            layer.markDirtyRegion( args );
+          } );
         }
       },
       
@@ -89,7 +91,9 @@ var scenery = scenery || {};
         var trail = args.trail;
         
         if ( scene.layers.length ) {
-          scene.layerLookup( trail ).transformChange( args );
+          _.each( scene.affectedLayers( trail ), function( layer ) {
+            layer.transformChange( args );
+          } );
         }
       },
       
@@ -192,6 +196,7 @@ var scenery = scenery || {};
     } );
   };
   
+  // what layer does this trail's terminal node render in?
   Scene.prototype.layerLookup = function( trail ) {
     // TODO: add tree form for optimization! this is slower than necessary, it shouldn't be O(n)!
     
@@ -216,6 +221,36 @@ var scenery = scenery || {};
     }
     
     throw new Error( 'node not contained in a layer' );
+  };
+  
+  // all layers whose start or end points lie inclusively in the range from the trail's before and after
+  Scene.prototype.affectedLayers = function( trail ) {
+    // TODO: add tree form for optimization! this is slower than necessary, it shouldn't be O(n)!
+    
+    var result = [];
+    
+    phet.assert( !( trail.isEmpty() || trail.nodes[0] !== this ), 'layerLookup root matches' );
+    
+    if ( this.layers.length === 0 ) {
+      throw new Error( 'no layers in the scene' );
+    }
+    
+    // point to the beginning of the node, right before it would be rendered
+    var startPointer = new scenery.TrailPointer( trail, true );
+    var endPointer = new scenery.TrailPointer( trail, false );
+    
+    for ( var i = 0; i < this.layers.length; i++ ) {
+      var layer = this.layers[i];
+      
+      var notBefore = endPointer.compareNested( layer.startPointer ) !== -1;
+      var notAfter = startPointer.compareNested( layer.endPointer ) !== 1;
+      
+      if ( notBefore && notAfter ) {
+        result.push( layer );
+      }
+    }
+    
+    return result;
   };
   
   // attempt to render everything currently visible in the scene to an external canvas. allows copying from canvas layers straight to the other canvas
