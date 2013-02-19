@@ -134,6 +134,7 @@ Layers:
     Proof-of-concept for performance and DOM integration
 
 * Event dispatch:
+    *** - Drag Handler need to pass transform and/or trail in input events
     DragHandler - mouse buttons handling (left/middle/right can cause drag issues)
     remove listener callback?
     Consider finger.isDown for checking general (but possibly mouse related) events
