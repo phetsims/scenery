@@ -79,36 +79,33 @@
     container.y = scene.sceneBounds.centerY();
   } );
   
+  // our path node for the shape
+  var path = new scenery.Path( {
+    shape: scenery.Shape.regularPolygon( 6, 22 ),
+    fill: '#ff0000',
+    stroke: '#000000',
+    cursor: 'pointer'
+  } );
+  
   var count = 50;
   // add 50 random hexagons
   for ( var i = 0; i < count; i++ ) {
     // anonymous function so the closure variables aren't shared between iterations
     (function(){
-      var node = new scenery.Path( {
-        shape: scenery.Shape.regularPolygon( 6, 22 ),
-        fill: '#ff0000',
-        stroke: '#000000',
+      var node = new scenery.Node( {
         x: ( Math.random() - 0.5 ) * 500,
-        y: ( Math.random() - 0.5 ) * 500,
-        cursor: 'pointer'
+        y: ( Math.random() - 0.5 ) * 500
       } );
-      node.rotate( Math.PI / 3 ); // a rotation on the node, just for fun!
+      
+      // point each node to the same path (DAG)
+      node.addChild( path );
+      node.rotate( Math.random() * 2 * Math.PI ); // a rotation on the node, just for fun!
       container.addChild( node );
       
       // add a drag handler to each node
       node.addInputListener( new scenery.SimpleDragHandler( {
         // allow moving a finger (touch) across a node to pick it up
-        allowTouchSnag: true,
-        
-        // called when a drag starts
-        start: function() {
-          node.setFill( '#0000ff' );
-        },
-        
-        // called when a drag ends
-        end: function() {
-          node.setFill( '#ff0000' );
-        }
+        allowTouchSnag: true
       } ) );
     })();
   }
