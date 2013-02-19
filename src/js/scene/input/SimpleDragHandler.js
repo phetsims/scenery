@@ -125,7 +125,7 @@ var scenery = scenery || {};
     },
     
     /*---------------------------------------------------------------------------*
-    * events called from the input listener
+    * events called from the node input listener
     *----------------------------------------------------------------------------*/
     
     // mouse/touch down on this node
