@@ -27,13 +27,12 @@
     }
     
     /* Have the #main div cover the entire viewport */
-    #main {
+    .scene {
       position: absolute;
       left: 0;
       top: 0;
-      width: 512px;
-      height: 2048px;
-      background-color: #fff;
+      width: 1024px;
+      height: 1024px;
       z-index: 0;
       padding: none !important; /* in case we add jQuery Mobile back in */
       /*border: 1px solid black;*/
@@ -44,18 +43,84 @@
 
 <body>
   
+  <div id="bounds" class="scene"></div>
+  
+  <svg width="1024px" height="1024px" xmlns="http://www.w3.org/2000/svg" version="1.1">
+    <g id="gA">
+      <text x="50" y="50" font-family="Verdana" font-size="25px" fill="blue">
+        QuipTaQiy
+      </text>
+    </g>
+    <g id="gB">
+      <text x="250" y="250" font-family="Verdana" font-size="125px" fill="blue">
+        QuipTaQiy
+      </text>
+    </g>
+  </svg>
+  
   <!-- our scene graph will be in this div -->
-  <div id="main">
-  </div>
+  <div id="main" class="scene"></div>
   
   <script>
   
+  /*
+   * SVG's text-anchor 
+   */
+  
+  /*---------------------------------------------------------------------------*
+  * SVG methods
+  *----------------------------------------------------------------------------*/
+  
+  var svgText = document.getElementById( 'gA' );
+  var svgBox = svgText.getBBox();
+  var svgBoundsA = new phet.math.Bounds2( svgBox.x, svgBox.y, svgBox.x + svgBox.width, svgBox.y + svgBox.height );
+  console.log( 'svg A: ' + svgBoundsA.toString() + ' (' + svgBoundsA.width() + ',' + svgBoundsA.height() + ')' );
+  svgText = document.getElementById( 'gB' );
+  svgBox = svgText.getBBox();
+  var svgBoundsB = new phet.math.Bounds2( svgBox.x / 5, svgBox.y / 5, ( svgBox.x + svgBox.width) / 5, ( svgBox.y + svgBox.height ) / 5 );
+  console.log( 'svg B: ' + svgBoundsB.toString() + ' (' + svgBoundsB.width() + ',' + svgBoundsB.height() + ')' );
+  
   var main = $( '#main' );
-
+  
+  /*---------------------------------------------------------------------------*
+  * Canvas-based (recursively accurate) methods
+  *----------------------------------------------------------------------------*/
+  
   // initialize our scene
   var scene = new scenery.Scene( main, {
     // preferredSceneLayerType: scenery.LayerType.SVG
   } );
+  
+  var textA = new scenery.Text( 'QuipTaQiy', {
+    x: 50,
+    y: 50,
+    fill: 'rgba(255,0,0,0.5)',
+    font: '25px Verdana'
+  } );
+  scene.addChild( textA );
+  
+  var boundsA = textA.getBounds();
+  console.log( 'canvas accurate A: ' + boundsA.toString() + ' (' + boundsA.width() + ',' + boundsA.height() + ')' );
+  scene.updateScene();
+  
+  var boundsScene = new scenery.Scene( $( '#bounds' ) );
+  boundsScene.addChild( new scenery.Path( {
+    shape: scenery.Shape.bounds( svgBoundsA ),
+    fill: 'rgba(255,0,0,0.1)'
+  } ) );
+  boundsScene.addChild( new scenery.Path( {
+    shape: scenery.Shape.bounds( boundsA ),
+    fill: 'rgba(0,255,0,0.1)'
+  } ) );
+  boundsScene.updateScene();
+  
+  // var accurateCanvasBounds = scenery.canvasTextBoundsAccurate( 'QuipTaQiy', {
+  //   font: '25px Verdana',
+  //   textAlign: 'start',
+  //   textBaseline: 'alphabetic',
+  //   direction: 'ltr'
+  // } );
+  // console.log( 'canvas accurate: ' + accurateCanvasBounds.toString() );
 
   </script>
 

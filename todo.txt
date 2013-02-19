@@ -82,7 +82,7 @@ Code:
     Modularization of support code (math?)
     Vet recursive bounds code against empty area
     * Code headers and copyright? Licenses?
-    Handling of retina displays (and other backingScale differences)
+    *** Handling of retina displays (and other backingScale differences)
 
 Canvas:
     Check reindexing, there may be bugs
@@ -210,6 +210,8 @@ Shapes:
 Text:
     *** Performance of text bounds!
         Comparison vs accurate bounds for all of the various text bounds methods
+    Using SVG's textLength may help with calibration with Canvas?
+    Investigate SVG's writing-mode for rtl/ltr handling (also direction and unicode-bidi)
     Ability to set baseline, etc., just like you can set top, bottom or y? -- wait isn't this like just setting y?
     Handling multi-line strings
     SVG / WebGL / DOM options
