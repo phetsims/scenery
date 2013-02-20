@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+
+  <title>Text Bounds Comparison - Scenery</title>
+  
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../contrib/jquery-1.8.3.min.js"></script>
+  <script src="../contrib/lodash.min-1.0.0-rc.3.js"></script>
+  
+  <!-- Canvg for SVG to Canvas -->
+  <script src="../contrib/canvg/rgbcolor.js"></script>
+  <script src="../contrib/canvg/canvg.js"></script>
+  
+  <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
+  <script src="../scenery.js"></script>
+  <!-- <script src="../scenery-min.js"></script> -->
+  
+  <style type="text/css">
+    /* Let content go to the edges */
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    
+    /* Have the #main div cover the entire viewport */
+    .scene {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1024px;
+      height: 1024px;
+      padding: 0 !important; /* in case we add jQuery Mobile back in */
+      margin: 0 !important;
+      /*border: 1px solid black;*/
+    }
+
+  </style>
+</head>
+
+<body>
+  
+  <div id="main" class="scene"></div>
+  
+  <script type="text/javascript">
+  
+  var scene = new scenery.Scene( $( '#main' ) );
+  
+  function boundsSnapshot( textNode ) {
+    var padding = 10;
+    
+    var canvasBounds = textNode.accurateCanvasBounds();
+    var svgBounds = textNode.approximateSVGBounds();
+    var domBounds = textNode.approximateDOMBounds();
+    
+    console.log( canvasBounds );
+    console.log( svgBounds );
+    console.log( domBounds );
+    
+    var unionBounds = canvasBounds.union( svgBounds ).union( domBounds );
+    
+    // align the container so that our upper-left corner of the union bounds is at 0,0
+    var container = new scenery.Node( {
+      x: -unionBounds.minX,
+      y: -unionBounds.minY
+    } );
+    
+    container.addChild( new scenery.Path( {
+      shape: scenery.Shape.bounds( canvasBounds ),
+      fill: '#aaaaaa'
+    } ) );
+    container.addChild( new scenery.Path( {
+      shape: scenery.Shape.bounds( svgBounds ),
+      fill: 'rgba(255,0,0,0.4)'
+    } ) );
+    container.addChild( new scenery.Path( {
+      shape: scenery.Shape.bounds( domBounds ),
+      fill: 'rgba(0,0,255,0.4)'
+    } ) );
+    container.addChild( textNode );
+    textNode.fill = '#ffffff';
+    
+    return container;
+  }
+  
+  // scene.addChild( boundsSnapshot( new scenery.Text( 'This is a test', { fontSize: 20 } ) ) );
+  scene.addChild( boundsSnapshot( new scenery.Text( 'QuipTaQiy', { fontSize: 60 } ) ) );
+  scene.updateScene();
+  
+  </script>
+
+</body>
+</html>
