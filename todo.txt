@@ -57,6 +57,9 @@ Questions for team:
     https://travis-ci.org/ for continuous integration?
     Should enter / exit events be fired before / after touch up/down events?
         Note: check DOM convention?
+    API for:
+        Shape shortcuts, and possible shape "classes"
+        Layering
 
 General:
     * Add toggle for Canvas / SVG in Devious Dragging example
@@ -147,8 +150,7 @@ Layers:
         Consider 'active' flag
         Need the ability to get a list of all fingers
     * SimpleDragHandler needs an option for increased hit areas for touch
-    *** - events should be more like parameter objects!
-    *** - Drag Handler need to pass transform and/or trail in input events
+    **** - events should be more like parameter objects!
     Consider finger.isDown for checking general (but possibly mouse related) events
     Indie UI events should be tracked: https://dvcs.w3.org/hg/IndieUI/raw-file/default/src/indie-ui-events.html
     Verify SVG stacking is practical with test
