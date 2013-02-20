@@ -185,6 +185,76 @@
   //   direction: 'ltr'
   // } );
   // console.log( 'canvas accurate: ' + accurateCanvasBounds.toString() );
+  
+  var textNode = new scenery.Text( 'QuipTaQiy' );
+  
+  function canvasAccurate( textNode ) {
+    return scenery.canvasTextBoundsAccurate( textNode.text, textNode );
+  }
+  
+  function svgApproximate( textNode ) {
+    var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+    svg.setAttribute( 'width', '1024' );
+    svg.setAttribute( 'height', '1024' );
+    svg.setAttribute( 'style', 'display: hidden;' ); // so we don't flash it in a visible way to the user
+    
+    var textElement = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
+    textElement.appendChild( document.createTextNode( textNode.text ) );
+    
+    svg.appendChild( textElement );
+    
+    document.body.appendChild( svg );
+    var rect = textElement.getBBox();
+    var result = new phet.math.Bounds2( rect.x, rect.y, rect.x + rect.width, rect.y + rect.height );
+    document.body.removeChild( svg );
+    
+    return result;
+  }
+  
+  function domApproximate( textNode ) {
+    var maxHeight = 1024; // technically this will fail if the font is taller than this!
+    
+    // <div style="position: absolute; left: 0; top: 0; padding: 0 !important; margin: 0 !important;"><span id="baselineSpan" style="font-family: Verdana; font-size: 25px;">QuipTaQiy</span><div style="vertical-align: baseline; display: inline-block; width: 0; height: 500px; margin: 0 important!; padding: 0 important!;"></div></div>
+    
+    var div = document.createElement( 'div' );
+    $( div ).css( {
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      padding: '0 !important',
+      margin: '0 !important',
+      display: 'hidden'
+    } );
+    
+    var span = document.createElement( 'span' );
+    $( span ).css( 'font', textNode.font );
+    span.appendChild( document.createTextNode( textNode.text ) );
+    
+    var fakeImage = document.createElement( 'div' );
+    $( fakeImage ).css( {
+      'vertical-align': 'baseline',
+      display: 'inline-block',
+      width: 0,
+      height: maxHeight + 'px',
+      margin: '0 !important',
+      padding: '0 !important'
+    } );
+    
+    div.appendChild( span );
+    div.appendChild( fakeImage );
+    
+    document.body.appendChild( div );
+    var rect = span.getBoundingClientRect();
+    var result = new phet.math.Bounds2( rect.left, rect.top - maxHeight, rect.right, rect.bottom - maxHeight );
+    document.body.removeChild( div );
+    
+    return result;
+  }
+  
+  console.log( canvasAccurate( textNode ) );
+  console.log( svgApproximate( textNode ) );
+  console.log( domApproximate( textNode ) );
+
 
   </script>
 
