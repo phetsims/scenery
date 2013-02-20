@@ -16,26 +16,7 @@ var scenery = scenery || {};
   function p( x, y ) {
     return new Vector2( x, y );
   }
-  
-  /*---------------------------------------------------------------------------*
-  * Slow-but-accurate text bounds
-  *----------------------------------------------------------------------------*/
-  
-  // drawingStyles should include font, textAlign, textBaseline, direction
-  // textAlign = 'left', textBaseline = 'alphabetic' and direction = 'ltr' are recommended
-  // TODO: for speed, also investigate http://mudcu.be/journal/2011/01/html5-typographic-metrics/
-	scenery.canvasTextBoundsAccurate = function( text, fontDrawingStyles ) {
-    phet.assert( fontDrawingStyles !== undefined );
-    return scenery.canvasAccurateBounds( function( context ) {
-      // TODO: way to apply font drawing styles?
-      context.font = fontDrawingStyles.font;
-      context.textAlign = fontDrawingStyles.textAlign;
-      context.textBaseline = fontDrawingStyles.textBaseline;
-      context.direction = fontDrawingStyles.direction;
-      context.fillText( text, 0, 0 );
-    } );
-  };
-  
+
   // given a data snapshot and transform, calculate range on how large / small the bounds can be
   // very conservative, with an effective 1px extra range to allow for differences in anti-aliasing
   // for performance concerns, this does not support skews / rotations / anything but translation and scaling

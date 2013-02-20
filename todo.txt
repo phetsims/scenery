@@ -41,6 +41,7 @@ Questions for SB (or others):
             Allows us to do production builds and minification across all of our repos, a la the Require.js build
         Run this JS after window load, to ensure all necessary resources are up? - preloader would be separate
         Advantages:
+            Could allow shortcuts like include( 'phet.X' ) to include a phet.X.Y, phet.X.Z, etc.
             Wouldn't have the import-style errors that we have had with Require.js and getting things running.
             Can access code directly, instead of through the import
             Closure can build a source map for the minified code
@@ -209,7 +210,7 @@ Shapes:
     Consider bounding box handling for an arbitrary transform, for use with Node's isInGlobalBounds( globalBounds, currentTransform ).
 
 Text:
-    ** Separate out font family, size, etc.
+    Unit tests
     *** Performance of text bounds!
         Comparison vs accurate bounds for all of the various text bounds methods
     Using SVG's textLength may help with calibration with Canvas?

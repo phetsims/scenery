@@ -178,18 +178,10 @@
   } ) );
   boundsScene.updateScene();
   
-  // var accurateCanvasBounds = scenery.canvasTextBoundsAccurate( 'QuipTaQiy', {
-  //   font: '25px Verdana',
-  //   textAlign: 'start',
-  //   textBaseline: 'alphabetic',
-  //   direction: 'ltr'
-  // } );
-  // console.log( 'canvas accurate: ' + accurateCanvasBounds.toString() );
-  
   var textNode = new scenery.Text( 'QuipTaQiy' );
   
   function canvasAccurate( textNode ) {
-    return scenery.canvasTextBoundsAccurate( textNode.text, textNode );
+    return textNode.accurateCanvasBounds();
   }
   
   function svgApproximate( textNode ) {
@@ -300,6 +292,10 @@
   console.log( canvasAccurate( textNode ) );
   console.log( svgApproximate( textNode ) );
   console.log( domApproximate( textNode ) );
+  
+  console.log( textNode.accurateCanvasBounds() );
+  console.log( textNode.approximateSVGBounds() );
+  console.log( textNode.approximateDOMBounds() );
 
 
   </script>

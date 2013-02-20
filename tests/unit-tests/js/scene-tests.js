@@ -198,6 +198,7 @@
       $( canvas ).css( 'border', '1px solid black' );
       $( '#display' ).append( canvas );
     } );
+    throw new Error( 'deprecated, use accurateCanvasBounds instead' );
   }
   
   function equalsApprox( a, b, message ) {
@@ -986,17 +987,8 @@
   * Text
   *----------------------------------------------------------------------------*/    
   
-  module( 'Text' );
-  
-  test( 'Canvas Accurate Text Bounds', function() {
-    testTextBounds( scenery.canvasTextBoundsAccurate, {
-      font: '10px sans-serif',
-      textAlign: 'left', // left is not the default, 'start' is
-      textBaseline: 'alphabetic',
-      direction: 'ltr'
-    }, QUnit.config.current.testName );
-  } );
-  
+//  module( 'Text' );
+
   /*---------------------------------------------------------------------------*
   * DOM
   *----------------------------------------------------------------------------*/    

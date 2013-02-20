@@ -8,6 +8,7 @@
  * Useful specs:
  * http://www.w3.org/TR/css3-text/
  * http://www.w3.org/TR/css3-fonts/
+ * http://www.w3.org/TR/SVG/text.html
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
@@ -56,7 +57,7 @@ var scenery = scenery || {};
   Text.prototype.invalidateText = function() {
     // TODO: faster bounds determination? getBBox()?
     // investigate http://mudcu.be/journal/2011/01/html5-typographic-metrics/
-    this.invalidateSelf( scenery.canvasTextBoundsAccurate( this._text, this ) );
+    this.invalidateSelf( this.accurateCanvasBounds() );
   };
 
   // TODO: add SVG / DOM support
@@ -76,6 +77,135 @@ var scenery = scenery || {};
   
   Text.prototype.paintWebGL = function( state ) {
     throw new Error( 'Text.prototype.paintWebGL unimplemented' );
+  };
+  
+  /*---------------------------------------------------------------------------*
+  * Bounds
+  *----------------------------------------------------------------------------*/
+  
+  Text.prototype.accurateCanvasBounds = function() {
+    var node = this;
+    return scenery.canvasAccurateBounds( function( context ) {
+      context.font = node.font;
+      context.textAlign = node.textAlign;
+      context.textBaseline = node.textBaseline;
+      context.direction = node.direction;
+      context.fillText( node.text, 0, 0 );
+    } );
+  };
+  
+  Text.prototype.approximateSVGBounds = function() {
+    var isRTL = this._direction === 'rtl';
+    
+    var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+    svg.setAttribute( 'width', '1024' );
+    svg.setAttribute( 'height', '1024' );
+    svg.setAttribute( 'style', 'display: hidden;' ); // so we don't flash it in a visible way to the user
+    
+    var textElement = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
+    textElement.appendChild( document.createTextNode( this._text ) );
+    switch ( this._textAlign ) {
+      case 'start':
+      case 'end':
+        textElement.setAttribute( 'text-anchor', this._textAlign ); break;
+      case 'left':
+        textElement.setAttribute( 'text-anchor', isRTL ? 'end' : 'start' ); break;
+      case 'right':
+        textElement.setAttribute( 'text-anchor', !isRTL ? 'end' : 'start' ); break;
+      case 'center':
+        textElement.setAttribute( 'text-anchor', 'middle' ); break;
+    }
+    switch ( this._textBaseline ) {
+      case 'alphabetic':
+      case 'ideographic':
+      case 'hanging':
+      case 'middle':
+        textElement.setAttribute( 'dominant-baseline', this._textBaseline ); break;
+      default:
+        throw new Error( 'impossible to get the SVG approximate bounds for textBaseline: ' + this._textBaseline );
+    }
+    textElement.setAttribute( 'direction', this._direction );
+    
+    // set all of the font attributes, since we can't use the combined one
+    textElement.setAttribute( 'font-family', this._font.getFamily() );
+    textElement.setAttribute( 'font-size', this._font.getSize() );
+    textElement.setAttribute( 'font-style', this._font.getStyle() );
+    textElement.setAttribute( 'font-weight', this._font.getWeight() );
+    if ( this._font.getStretch() ) {
+      textElement.setAttribute( 'font-stretch', this._font.getStretch() );
+    }
+    
+    svg.appendChild( textElement );
+    
+    document.body.appendChild( svg );
+    var rect = textElement.getBBox();
+    var result = new phet.math.Bounds2( rect.x, rect.y, rect.x + rect.width, rect.y + rect.height );
+    document.body.removeChild( svg );
+    
+    return result;
+  };
+  
+  Text.prototype.approximateDOMBounds = function() {
+    // TODO: we can also technically support 'top' using vertical-align: top and line-height: 0 with the image, but it won't usually render otherwise
+    phet.assert( this._textBaseline === 'alphabetic' );
+    
+    var maxHeight = 1024; // technically this will fail if the font is taller than this!
+    var isRTL = this.direction === 'rtl';
+    
+    // <div style="position: absolute; left: 0; top: 0; padding: 0 !important; margin: 0 !important;"><span id="baselineSpan" style="font-family: Verdana; font-size: 25px;">QuipTaQiy</span><div style="vertical-align: baseline; display: inline-block; width: 0; height: 500px; margin: 0 important!; padding: 0 important!;"></div></div>
+    
+    var div = document.createElement( 'div' );
+    $( div ).css( {
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      padding: '0 !important',
+      margin: '0 !important',
+      display: 'hidden'
+    } );
+    
+    var span = document.createElement( 'span' );
+    $( span ).css( 'font', this.getFont() );
+    span.appendChild( document.createTextNode( this.text ) );
+    span.setAttribute( 'direction', this._direction );
+    
+    var fakeImage = document.createElement( 'div' );
+    $( fakeImage ).css( {
+      'vertical-align': 'baseline',
+      display: 'inline-block',
+      width: 0,
+      height: maxHeight + 'px',
+      margin: '0 !important',
+      padding: '0 !important'
+    } );
+    
+    div.appendChild( span );
+    div.appendChild( fakeImage );
+    
+    document.body.appendChild( div );
+    var rect = span.getBoundingClientRect();
+    var result = new phet.math.Bounds2( rect.left, rect.top - maxHeight, rect.right, rect.bottom - maxHeight );
+    document.body.removeChild( div );
+    
+    var width = rect.right - rect.left;
+    switch ( this._textAlign ) {
+      case 'start':
+        result = result.shiftedX( isRTL ? -width : 0 );
+        break;
+      case 'end':
+        result = result.shiftedX( !isRTL ? -width : 0 );
+        break;
+      case 'left':
+        break;
+      case 'right':
+        result = result.shiftedX( -width );
+        break;
+      case 'center':
+        result = result.shiftedX( -width / 2 );
+        break;
+    }
+    
+    return result;
   };
   
   /*---------------------------------------------------------------------------*
