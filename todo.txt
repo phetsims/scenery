@@ -90,6 +90,7 @@ Code:
 
 Canvas:
     Consider adding layer strategies that enforce either a low-def or hi-def (if available) canvas backing store, so we can have crispness when desired
+        Different LayerTypes, flesh out supports()?
     Check reindexing, there may be bugs
     Restricted bounds intersection pruning (also see performance)
         For canvas rendering, how to handle restricted bounds in depthFirstUntil? Generalize, and allow a return flag to indicate not hitting children?
@@ -133,6 +134,7 @@ Layers:
     *** Consider certain conversions in layering, for instance an SVG tree could render as a DOM node (SVG would take care of the scaling transform).
         This could handle our caching issues
     * Consider caching / layering modification as separate nodes added in (i.e. like a renamed CanvasLayer, or CachingLayer, or something like that)
+        ** Would essentially need to be able to change the rendering process that is currently decided by CanvasLayer
         Or use mixins to add to instances? - sketchy and hard to remove
         ** Or is it possible to detect runtime hotspots based on elapsed time rendering, how much it is being rendered,
             what transforms it is under (are those changing), and possibly number of children.
@@ -205,6 +207,9 @@ Node:
     Canvas: masking with sub-canvas rendering using globalCompositeOperation. CSG should be possible, and hit tests should be better. Bounds might be harder
 
 Shapes:
+    * convenience functions on scenery namespace for common shapes
+    ** consider new scenery.Path( shape, args )
+        Maybe even new scenery.Rectangle( width, height, { ... } )? Ability to set width / height, and similar other attributes for RegularPolygon, etc?
     Finiteness checks
     Investigate shear / scale effects on stroking -- important for bounds
     Quadratic curve offsets need implementation improvement (32 sub-quadratics is too costly)
@@ -246,6 +251,7 @@ Build:
 
 Performance:
     *** Garbage collection jitters!
+    *** Performance regressions with layering
     * Prune node rendering based on visible dirty bounds
     Not re-rasterizing objects immediately during dragging or other features? (Auto-detect as hotspot maybe?)
     Ensure that we are triggering the hardware acceleration for CSS3 transforms
