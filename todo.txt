@@ -140,9 +140,14 @@ Layers:
     Proof-of-concept for performance and DOM integration
 
 * Event dispatch:
+    * Write a 2-finger pinch-to-zoom/rotate handler that is compatible with the drag handler
+        Option whether to rotate or not
+        Option whether to interrupt dragging
+        Consider 'active' flag
+        Need the ability to get a list of all fingers
+    * SimpleDragHandler needs an option for increased hit areas for touch
     *** - events should be more like parameter objects!
     *** - Drag Handler need to pass transform and/or trail in input events
-    DragHandler - mouse buttons handling (left/middle/right can cause drag issues)
     Consider finger.isDown for checking general (but possibly mouse related) events
     Indie UI events should be tracked: https://dvcs.w3.org/hg/IndieUI/raw-file/default/src/indie-ui-events.html
     Verify SVG stacking is practical with test
