@@ -18,6 +18,7 @@ var scenery = scenery || {};
   "use strict";
   
   scenery.Text = function( text, params ) {
+    this._text         = '';                 // filled in with mutator
     this._font         = new scenery.Font(); // default font, usually 10px sans-serif
     this._textAlign    = 'start';            // start, end, left, right, center
     this._textBaseline = 'alphabetic';       // top, hanging, middle, alphabetic, ideographic, bottom
