@@ -18,7 +18,10 @@ var scenery = scenery || {};
   "use strict";
   
   scenery.Text = function( text, params ) {
-    this.fontStyles = new Text.FontStyles(); // will be filled in later, due to dependency resolution
+    this._font         = new scenery.Font(); // default font, usually 10px sans-serif
+    this._textAlign    = 'start';            // start, end, left, right, center
+    this._textBaseline = 'alphabetic';       // top, hanging, middle, alphabetic, ideographic, bottom
+    this._direction    = 'ltr';              // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
     
     // ensure we have a parameter object
     params = params || {};
@@ -33,8 +36,6 @@ var scenery = scenery || {};
       params.text = text;
     }
     scenery.Node.call( this, params );
-    
-    // this.setText( text );
   };
   var Text = scenery.Text;
   
@@ -54,7 +55,7 @@ var scenery = scenery || {};
   Text.prototype.invalidateText = function() {
     // TODO: faster bounds determination? getBBox()?
     // investigate http://mudcu.be/journal/2011/01/html5-typographic-metrics/
-    this.invalidateSelf( scenery.canvasTextBoundsAccurate( this._text, this.fontStyles ) );
+    this.invalidateSelf( scenery.canvasTextBoundsAccurate( this._text, this ) );
   };
 
   // TODO: add SVG / DOM support
@@ -63,10 +64,10 @@ var scenery = scenery || {};
     var context = layer.context;
     if ( this.hasFill() ) {
       layer.setFillStyle( this.getFill() );
-      layer.setFont( this.fontStyles.font );
-      layer.setTextAlign( this.fontStyles.textAlign );
-      layer.setTextBaseline( this.fontStyles.textBaseline );
-      layer.setDirection( this.fontStyles.direction );
+      layer.setFont( this._font.getFont() );
+      layer.setTextAlign( this._textAlign );
+      layer.setTextBaseline( this._textBaseline );
+      layer.setDirection( this._direction );
 
       context.fillText( this._text, 0, 0 );
     }
@@ -76,88 +77,99 @@ var scenery = scenery || {};
     throw new Error( 'Text.prototype.paintWebGL unimplemented' );
   };
   
+  /*---------------------------------------------------------------------------*
+  * Self setters / getters
+  *----------------------------------------------------------------------------*/
+  
   Text.prototype.setFont = function( font ) {
-    this.fontStyles.font = font;
+    this._font = font instanceof scenery.Font ? font : new scenery.Font( font );
     this.invalidateText();
     return this;
   };
   
+  // NOTE: returns mutable copy for now, consider either immutable version, defensive copy, or note about invalidateText()
   Text.prototype.getFont = function() {
-    return this.fontStyles.font;
+    return this._font.getFont();
   };
   
   Text.prototype.setTextAlign = function( textAlign ) {
-    this.fontStyles.textAlign = textAlign;
+    this._textAlign = textAlign;
     this.invalidateText();
     return this;
   };
   
   Text.prototype.getTextAlign = function() {
-    return this.fontStyles.textAlign;
+    return this._textAlign;
   };
   
   Text.prototype.setTextBaseline = function( textBaseline ) {
-    this.fontStyles.textBaseline = textBaseline;
+    this._textBaseline = textBaseline;
     this.invalidateText();
     return this;
   };
   
   Text.prototype.getTextBaseline = function() {
-    return this.fontStyles.textBaseline;
+    return this._textBaseline;
   };
   
   Text.prototype.setDirection = function( direction ) {
-    this.fontStyles.direction = direction;
+    this._direction = direction;
     this.invalidateText();
     return this;
   };
   
   Text.prototype.getDirection = function() {
-    return this.fontStyles.direction;
+    return this._direction;
   };
+  
+  /*---------------------------------------------------------------------------*
+  * Font setters / getters
+  *----------------------------------------------------------------------------*/
+  
+  function addFontForwarding( propertyName, fullCapitalized, shortUncapitalized ) {
+    var getterName = 'get' + fullCapitalized;
+    var setterName = 'set' + fullCapitalized;
+    
+    Text.prototype[getterName] = function() {
+      // use the ES5 getter to retrieve the property. probably somewhat slow.
+      return this._font[ shortUncapitalized ];
+    };
+    
+    Text.prototype[setterName] = function( value ) {
+      // use the ES5 setter. probably somewhat slow.
+      this._font[ shortUncapitalized ] = value;
+      this.invalidateText();
+      return this;
+    };
+    
+    Object.defineProperty( Text.prototype, propertyName, { set: Text.prototype[setterName], get: Text.prototype[getterName] } );
+  }
+  
+  addFontForwarding( 'fontWeight', 'fontWeight', 'weight' );
+  addFontForwarding( 'fontFamily', 'fontFamily', 'family' );
+  addFontForwarding( 'fontStretch', 'fontStretch', 'stretch' );
+  addFontForwarding( 'fontStyle', 'fontStyle', 'style' );
+  addFontForwarding( 'fontSize', 'fontSize', 'size' );
+  addFontForwarding( 'lineHeight', 'LineHeight', 'lineHeight' );
   
   Text.prototype.hasSelf = function() {
     return true;
   };
   
-  // TODO: mixins for fill!
-  Text.prototype._mutatorKeys = [ 'text', 'font', 'textAlign', 'textBaseline', 'direction' ].concat( scenery.Node.prototype._mutatorKeys );
+  Text.prototype._mutatorKeys = [ 'text', 'font', 'fontWeight', 'fontFamily', 'fontStretch', 'fontStyle', 'fontSize', 'lineHeight',
+                                  'textAlign', 'textBaseline', 'direction' ].concat( scenery.Node.prototype._mutatorKeys );
   
   Text.prototype._supportedLayerTypes = [ scenery.LayerType.Canvas ];
   
-  Object.defineProperty( Text.prototype, 'text', { set: Text.prototype.setText, get: Text.prototype.getText } );
+  // font-specific ES5 setters and getters are defined using addFontForwarding above
   Object.defineProperty( Text.prototype, 'font', { set: Text.prototype.setFont, get: Text.prototype.getFont } );
+  Object.defineProperty( Text.prototype, 'text', { set: Text.prototype.setText, get: Text.prototype.getText } );
   Object.defineProperty( Text.prototype, 'textAlign', { set: Text.prototype.setTextAlign, get: Text.prototype.getTextAlign } );
   Object.defineProperty( Text.prototype, 'textBaseline', { set: Text.prototype.setTextBaseline, get: Text.prototype.getTextBaseline } );
   Object.defineProperty( Text.prototype, 'direction', { set: Text.prototype.setDirection, get: Text.prototype.getDirection } );
   
   // mix in support for fills
   scenery.Fillable( Text );
-  
-  // NOTE: Canvas text drawing forces line-height to normal, font-size to CSS pixels
-  Text.FontStyles = function( args ) {
-    if ( args === undefined ) {
-      args = {};
-    }
-    
-    // $( div ).css( 'font', 'normal 125px Verdana' ) => $( div ).css( 'font-family' ) works!
-    
-    // options from http://www.w3.org/TR/css3-fonts/
-    // font-family      v ---
-    // font-weight      v normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900
-    // font-stretch     v normal | ultra-condensed | extra-condensed | condensed | semi-condensed | semi-expanded | expanded | extra-expanded | ultra-expanded
-    // font-style       v normal | italic | oblique
-    // font-size        v <absolute-size> | <relative-size> | <length> | <percentage>
-    // font-size-adjust v none | auto | <number>
-    // font             v [ [ <‘font-style’> || <font-variant-css21> || <‘font-weight’> || <‘font-stretch’> ]? <‘font-size’> [ / <‘line-height’> ]? <‘font-family’> ] | caption | icon | menu | message-box | small-caption | status-bar
-    //                    <font-variant-css21> = [normal | small-caps]
-    // font-synthesis   v none | [ weight || style ]
-    
-    this.font = args.font !== undefined ? args.font : '10px sans-serif';
-    this.textAlign = args.textAlign !== undefined ? args.textAlign : 'start'; // start, end, left, right, center
-    this.textBaseline = args.textBaseline !== undefined ? args.textBaseline : 'alphabetic'; // top, hanging, middle, alphabetic, ideographic, bottom
-    this.direction = args.direction !== undefined ? args.direction : 'ltr'; // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
-  };
 })();
 
 

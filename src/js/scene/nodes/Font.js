@@ -28,6 +28,17 @@ var scenery = scenery || {};
 (function(){
   "use strict";
   
+  // options from http://www.w3.org/TR/css3-fonts/
+  // font-family      v ---
+  // font-weight      v normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900
+  // font-stretch     v normal | ultra-condensed | extra-condensed | condensed | semi-condensed | semi-expanded | expanded | extra-expanded | ultra-expanded
+  // font-style       v normal | italic | oblique
+  // font-size        v <absolute-size> | <relative-size> | <length> | <percentage>
+  // font-size-adjust v none | auto | <number>
+  // font             v [ [ <‘font-style’> || <font-variant-css21> || <‘font-weight’> || <‘font-stretch’> ]? <‘font-size’> [ / <‘line-height’> ]? <‘font-family’> ] | caption | icon | menu | message-box | small-caption | status-bar
+  //                    <font-variant-css21> = [normal | small-caps]
+  // font-synthesis   v none | [ weight || style ]
+  
   scenery.Font = function( params ) {
     // internal string representation
     this._font = '10px sans-serif';
@@ -83,6 +94,7 @@ var scenery = scenery || {};
     getSize: function() { return this.getProperty( 'font-size' ); },
     setSize: function( value ) { return this.setProperty( 'font-size', value ); },
     
+    // NOTE: Canvas spec forces line-height to normal
     getLineHeight: function() { return this.getProperty( 'line-height' ); },
     setLineHeight: function( value ) { return this.setProperty( 'line-height', value ); },
     
