@@ -13,8 +13,8 @@ var scenery = scenery || {};
 (function(){
   "use strict";
   
-  scenery.Image = function( image, params ) {
-    scenery.Node.call( this, params );
+  scenery.Image = function( image, options ) {
+    scenery.Node.call( this, options );
     
     this.image = image;
     

@@ -74,7 +74,6 @@ General:
     Take extension mechanism from Backbone.js: https://github.com/documentcloud/backbone/blob/master/backbone.js#L1471-L1502
 
 Code:
-    Rename 'params' to 'options'
     Rename 'main' to something else
     Verify Input correctness with Scene now being a Node, and with trails
     Organize unit tests into separate files, etc.

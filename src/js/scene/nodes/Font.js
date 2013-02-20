@@ -39,18 +39,18 @@ var scenery = scenery || {};
   //                    <font-variant-css21> = [normal | small-caps]
   // font-synthesis   v none | [ weight || style ]
   
-  scenery.Font = function( params ) {
+  scenery.Font = function( options ) {
     // internal string representation
     this._font = '10px sans-serif';
     
     // span for using the browser to compute font styles
     this.$span = $( document.createElement( 'span' ) );
     
-    var type = typeof params;
+    var type = typeof options;
     if ( type === 'string' ) {
-      this._font = params;
+      this._font = options;
     } else if ( type === 'object' ) {
-      this.mutate( params );
+      this.mutate( options );
     }
   };
   var Font = scenery.Font;
@@ -119,12 +119,13 @@ var scenery = scenery || {};
     set lineHeight( value ) { this.setLineHeight( value ); },
     get lineHeight() { return this.getLineHeight(); },
     
-    mutate: function( params ) {
+    // TODO: move this style of mutation out into more common code, if we use it again
+    mutate: function( options ) {
       var font = this;
       
       _.each( this._mutatorKeys, function( key ) {
-        if ( params[key] !== undefined ) {
-          font[key] = params[key];
+        if ( options[key] !== undefined ) {
+          font[key] = options[key];
         }
       } );
     }

@@ -25,20 +25,20 @@ var scenery = scenery || {};
    *   height: <current main height>,                     // override the main container's height
    * }
    */
-  scenery.Scene = function( $main, params ) {
+  scenery.Scene = function( $main, options ) {
     // defaults
-    params = _.extend( {
+    options = _.extend( {
       allowSceneOverflow: false,
       allowCSSHacks: true,
       allowDevicePixelRatioScaling: false,
       preferredSceneLayerType: scenery.LayerType.Canvas,
       width: $main.width(),
       height: $main.height()
-    }, params || {} );
+    }, options || {} );
     
-    this.backingScale = params.allowDevicePixelRatioScaling ? phet.canvas.backingScale( document.createElement( 'canvas' ).getContext( '2d' ) ) : 1;
+    this.backingScale = options.allowDevicePixelRatioScaling ? phet.canvas.backingScale( document.createElement( 'canvas' ).getContext( '2d' ) ) : 1;
     
-    scenery.Node.call( this, params );
+    scenery.Node.call( this, options );
     
     var scene = this;
     
@@ -50,15 +50,15 @@ var scenery = scenery || {};
     
     this.$main = $main;
     // resize the main container as a sanity check
-    this.$main.width( params.width );
-    this.$main.height( params.height );
+    this.$main.width( options.width );
+    this.$main.height( options.height );
     
     this.sceneBounds = new phet.math.Bounds2( 0, 0, $main.width(), $main.height() );
     
     // default to a canvas layer type, but this can be changed
-    this.preferredSceneLayerType = params.preferredSceneLayerType;
+    this.preferredSceneLayerType = options.preferredSceneLayerType;
     
-    applyCSSHacks( $main, params );
+    applyCSSHacks( $main, options );
     
     // note, arguments to the functions are mutable. don't destroy them
     this.sceneEventListener = {
@@ -463,13 +463,13 @@ var scenery = scenery || {};
     resizer();
   };
     
-  function applyCSSHacks( $main, params ) {
+  function applyCSSHacks( $main, options ) {
     // to use CSS3 transforms for performance, hide anything outside our bounds by default
-    if ( params.allowSceneOverflow ) {
+    if ( options.allowSceneOverflow ) {
       $main.css( 'overflow', 'hidden' );
     }
     
-    if ( params.allowCSSHacks ) {
+    if ( options.allowCSSHacks ) {
       // some css hacks (inspired from https://github.com/EightMedia/hammer.js/blob/master/hammer.js)
       (function() {
         var prefixes = [ '-webkit-', '-moz-', '-ms-', '-o-', '' ];

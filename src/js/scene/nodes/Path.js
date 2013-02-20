@@ -13,16 +13,16 @@ var scenery = scenery || {};
 (function(){
   "use strict";
   
-  scenery.Path = function( params ) {
+  scenery.Path = function( options ) {
     // TODO: consider directly passing in a shape object (or at least handling that case)
     this._shape = null;
     
     // ensure we have a parameter object
-    params = params || {};
+    options = options || {};
     
     this.initializeStrokable();
     
-    scenery.Node.call( this, params );
+    scenery.Node.call( this, options );
   };
   var Path = scenery.Path;
   

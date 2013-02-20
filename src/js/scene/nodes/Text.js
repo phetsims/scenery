@@ -18,7 +18,7 @@ var scenery = scenery || {};
 (function(){
   "use strict";
   
-  scenery.Text = function( text, params ) {
+  scenery.Text = function( text, options ) {
     this._text         = '';                 // filled in with mutator
     this._font         = new scenery.Font(); // default font, usually 10px sans-serif
     this._textAlign    = 'start';            // start, end, left, right, center
@@ -26,18 +26,18 @@ var scenery = scenery || {};
     this._direction    = 'ltr';              // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
     
     // ensure we have a parameter object
-    params = params || {};
+    options = options || {};
     
     // default to black filled text
-    if ( params.fill === undefined ) {
-      params.fill = '#000000';
+    if ( options.fill === undefined ) {
+      options.fill = '#000000';
     }
     
     if ( text !== undefined ) {
       // set the text parameter so that setText( text ) is effectively called in the mutator from the super call
-      params.text = text;
+      options.text = text;
     }
-    scenery.Node.call( this, params );
+    scenery.Node.call( this, options );
   };
   var Text = scenery.Text;
   

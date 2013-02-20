@@ -11,7 +11,7 @@ var scenery = scenery || {};
 (function(){
   "use strict";
   
-  scenery.DOM = function( element, params ) {
+  scenery.DOM = function( element, options ) {
     // unwrap from jQuery if that is passed in, for consistency
     if ( element && element.jquery ) {
       element = element[0];
@@ -24,7 +24,7 @@ var scenery = scenery || {};
     this._$element.css( 'top', 0 );
     
     // so that the mutator will call setElement()
-    params.element = element;
+    options.element = element;
     
     // create a temporary container attached to the DOM tree (not a fragment) so that we can properly set initial bounds
     var temporaryContainer = document.createElement( 'div' );
@@ -40,7 +40,7 @@ var scenery = scenery || {};
     document.body.appendChild( temporaryContainer );
     
     // will set the element after initializing
-    scenery.Node.call( this, params );
+    scenery.Node.call( this, options );
     
     // now don't memory-leak our container
     document.body.removeChild( temporaryContainer );

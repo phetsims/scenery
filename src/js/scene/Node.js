@@ -21,7 +21,7 @@ var scenery = scenery || {};
   var globalIdCounter = 1;
   
   // TODO: consider an args-style constructor here!
-  scenery.Node = function( params ) {
+  scenery.Node = function( options ) {
     // assign a unique ID to this node (allows trails to )
     this._id = globalIdCounter++;
     
@@ -60,8 +60,8 @@ var scenery = scenery || {};
     this._childPaintDirty = false;
     this._oldPaintMarked = false; // flag indicates the last rendered bounds of this node and all descendants are marked for a repaint already
     
-    if ( params ) {
-      this.mutate( params );
+    if ( options ) {
+      this.mutate( options );
     }
   };
   
@@ -882,13 +882,13 @@ var scenery = scenery || {};
     get height() { return this.getHeight(); },
     get id() { return this.getId(); },
     
-    mutate: function( params ) {
+    mutate: function( options ) {
       
       var node = this;
       
       _.each( this._mutatorKeys, function( key ) {
-        if ( params[key] !== undefined ) {
-          node[key] = params[key];
+        if ( options[key] !== undefined ) {
+          node[key] = options[key];
         }
       } );
     }
