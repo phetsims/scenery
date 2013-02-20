@@ -36,8 +36,7 @@ var scenery = scenery || {};
       height: $main.height()
     }, params || {} );
     
-    // this.backingScale = params.allowDevicePixelRatioScaling ? phet.canvas.backingScale( document.createElement( 'canvas' ).getContext( '2d' ) ) : 1;
-    this.backingScale = 2;
+    this.backingScale = params.allowDevicePixelRatioScaling ? phet.canvas.backingScale( document.createElement( 'canvas' ).getContext( '2d' ) ) : 1;
     
     scenery.Node.call( this, params );
     
