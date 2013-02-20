@@ -70,7 +70,7 @@
   
   <!-- <div class="scene"><span id="baselineSpan" style="font-family: Verdana; font-size: 25px;">QuipTaQiy</span><img style="vertical-align: baseline;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAH0CAYAAAD8PUeXAAAAKUlEQVRIS2P8z8Dwn3GUGA2D0XQwmg1Gi4LRknC0JBwtCUdLwqFUEgIActTmOjA3bkkAAAAASUVORK5CYII="/></div> -->
   
-  <div style="position: absolute; left: 0; top: 0; padding: 0 !important; margin: 0 !important;"><span id="baselineSpan" style="font-family: Verdana; font-size: 25px;">QuipTaQiy</span><div style="vertical-align: baseline; display: inline-block; width: 0; height: 500px; margin: 0 important!; padding: 0 important!;"></div></div>
+  <div style="position: absolute; left: 0; top: 0; padding: 0 !important; margin: 0 !important;"><span id="baselineSpan" style="font-family: Verdana; font-size: 25px; line-height: 0;">QuipTaQiy</span><div style="vertical-align: top; display: inline-block; width: 10px; height: 500px; margin: 0 important!; padding: 0 important!; background-color: black;"></div></div>
   
   <!-- our scene graph will be in this div -->
   <div id="main" class="scene"></div>
@@ -151,7 +151,7 @@
   
   var baselineSpan = document.getElementById( 'baselineSpan' );
   var baselineSpanRect = baselineSpan.getBoundingClientRect();
-  var baselineSpanBounds = new phet.math.Bounds2( baselineSpanRect.left + 50, baselineSpanRect.top - 500 + 50, baselineSpanRect.right + 50, baselineSpanRect.bottom - 500 + 50 );
+  var baselineSpanBounds = new phet.math.Bounds2( baselineSpanRect.left, baselineSpanRect.top, baselineSpanRect.right, baselineSpanRect.bottom );
   console.log( 'DOM baseline A: ' + baselineSpanBounds.toString() + ' (' + baselineSpanBounds.width() + ',' + baselineSpanBounds.height() + ')' );
   console.log( 'baselineSpan.clientWidth: ' + baselineSpan.clientWidth );
   console.log( 'baselineSpan.clientHeight: ' + baselineSpan.clientHeight );
@@ -235,7 +235,11 @@
   }
   
   function domApproximate( textNode ) {
+    // TODO: we can also technically support 'top' using vertical-align: top and line-height: 0 with the image, but it won't usually render otherwise
+    phet.assert( textNode.textBaseline === 'alphabetic' );
+    
     var maxHeight = 1024; // technically this will fail if the font is taller than this!
+    var isRTL = textNode.direction === 'rtl';
     
     // <div style="position: absolute; left: 0; top: 0; padding: 0 !important; margin: 0 !important;"><span id="baselineSpan" style="font-family: Verdana; font-size: 25px;">QuipTaQiy</span><div style="vertical-align: baseline; display: inline-block; width: 0; height: 500px; margin: 0 important!; padding: 0 important!;"></div></div>
     
@@ -252,6 +256,7 @@
     var span = document.createElement( 'span' );
     $( span ).css( 'font', textNode.font );
     span.appendChild( document.createTextNode( textNode.text ) );
+    span.setAttribute( 'direction', textNode.direction );
     
     var fakeImage = document.createElement( 'div' );
     $( fakeImage ).css( {
@@ -270,6 +275,24 @@
     var rect = span.getBoundingClientRect();
     var result = new phet.math.Bounds2( rect.left, rect.top - maxHeight, rect.right, rect.bottom - maxHeight );
     document.body.removeChild( div );
+    
+    var width = rect.right - rect.left;
+    switch ( textNode.textAlign ) {
+      case 'start':
+        result = result.shiftedX( isRTL ? -width : 0 );
+        break;
+      case 'end':
+        result = result.shiftedX( !isRTL ? -width : 0 );
+        break;
+      case 'left':
+        break;
+      case 'right':
+        result = result.shiftedX( -width );
+        break;
+      case 'center':
+        result = result.shiftedX( -width / 2 );
+        break;
+    }
     
     return result;
   }

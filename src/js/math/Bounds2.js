@@ -129,6 +129,22 @@ phet.math = phet.math || {};
       return new Bounds2( this.minX - d, this.minY - d, this.maxX + d, this.maxY + d );
     },
     
+    shiftedX: function( x ) {
+      return new Bounds2( this.minX + x, this.minY, this.maxX + x, this.maxY );
+    },
+    
+    shiftedY: function( y ) {
+      return new Bounds2( this.minX, this.minY + y, this.maxX, this.maxY + y );
+    },
+    
+    shifted: function( x, y ) {
+      if ( typeof x === 'object' ) {
+        y = x.y;
+        x = x.x;
+      }
+      return new Bounds2( this.minX + x, this.minY + y, this.maxX + x, this.maxY + y );
+    },
+    
     // returns copy contracted on all sides by length d
     eroded: function( d ) {
       return this.dilated( -d );
