@@ -19,14 +19,34 @@ var scenery = scenery || {};
     
     this._element = element;
     this._$element = $( element );
-    
-    scenery.Node.call( this, params );
-    
-    this.invalidateDOM();
-    
     this._$element.css( 'position', 'absolute' );
     this._$element.css( 'left', 0 );
     this._$element.css( 'top', 0 );
+    
+    // so that the mutator will call setElement()
+    params.element = element;
+    
+    // create a temporary container attached to the DOM tree (not a fragment) so that we can properly set initial bounds
+    var temporaryContainer = document.createElement( 'div' );
+    $( temporaryContainer ).css( {
+      display: 'hidden',
+      padding: '0 !important',
+      margin: '0 !important',
+      position: 'absolute',
+      left: 0,
+      top: 0
+    } );
+    temporaryContainer.appendChild( element );
+    document.body.appendChild( temporaryContainer );
+    
+    // will set the element after initializing
+    scenery.Node.call( this, params );
+    
+    // now don't memory-leak our container
+    document.body.removeChild( temporaryContainer );
+    if ( element.parentNode === temporaryContainer ) {
+      temporaryContainer.removeChild( element );
+    }
   };
   var DOM = scenery.DOM;
   

@@ -95,12 +95,9 @@ Canvas:
 
 DOM:
     * DOM bounds failure on construction, for x and y setters (or something is wrong with easel-tests DOM example, investigate?)
-    * Test that scenery and dom nodes can be nested many times
     *** CSS3 transforms look amazing See if we can do more in DOM nodes with transforms
         Example: http://www.clicktorelease.com/code/css3dclouds/
     Handle correct layering of DOM nodes inside a layer, etc.
-    How to get the size before adding to the document tree? Impossible?
-        Document fragments (test this)
     [IMPLEMENTATION REMOVED] Hoisting of interactive DOM nodes
         - HoistedDOMLayer that adds (2147483647/2) to its z-index
             Pro:

@@ -43,16 +43,6 @@
       padding: none !important; /* in case we add jQuery Mobile back in */
       /*border: 1px solid black;*/
     }
-    
-    #canvas {
-      position: absolute;
-      left: 512px;
-      top: 0;
-      width: 512px;
-      height: 512px;
-      background-color: #eee;
-      /*border: 1px solid black;*/
-    }
 
   </style>
 </head>
@@ -63,43 +53,24 @@
   <div id="main" >
   </div>
   
-  <canvas width="512" height="512" id="canvas"></canvas>
-
   <script>
   
   var main = $( '#main' );
 
   // initialize our scene
   var scene = new scenery.Scene( main, {
-    preferredSceneLayerType: scenery.LayerType.SVG
+    // preferredSceneLayerType: scenery.LayerType.SVG
   } );
-  console.log( 'scene created' );
   
-  var container = new scenery.Node();
-  console.log( 'adding container' );
-  scene.addChild( container );
+  var div = document.createElement( 'div' );
+  div.innerHTML = '<ul><li><a href="http://phet.colorado.edu">The PhET Website</a></li><li>Really?</li></ul>';
   
-  console.log( 'adding rectangle' );
-  container.addChild( new scenery.Path( {
-    shape: scenery.Shape.rectangle( 0, 0, 44, 44 ),
-    x: 20.5,
-    y: 100.5,
-    fill: '#ff0000',
-    stroke: '#000000'
+  scene.addChild( new scenery.DOM( div, {
+    centerX: 256,
+    centerY: 256
   } ) );
   
-  console.log( 'updating scene' );
   scene.updateScene();
-  
-  var canvas = document.getElementById( 'canvas' );
-  scene.renderToCanvas( canvas, canvas.getContext( '2d' ), function() {
-    // callback here
-    console.log( canvas.getContext( '2d' ).getImageData( 0, 0, 10, 10 ) );
-  } );
-  
-  scene.canvasDataURL( function( dataURL ) {
-    console.log( dataURL );
-  } );
 
   </script>
 
