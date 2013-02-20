@@ -28,14 +28,8 @@
     
     /* Have the #main div cover the entire viewport */
     .scene {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 1024px;
-      height: 1024px;
-      padding: 0 !important; /* in case we add jQuery Mobile back in */
-      margin: 0 !important;
-      /*border: 1px solid black;*/
+      position: relative;
+      float: left;
     }
 
   </style>
@@ -48,17 +42,13 @@
   <script type="text/javascript">
   
   var scene = new scenery.Scene( $( '#main' ) );
+  var padding = 2;
   
   function boundsSnapshot( textNode ) {
-    var padding = 10;
     
     var canvasBounds = textNode.accurateCanvasBounds();
     var svgBounds = textNode.approximateSVGBounds();
     var domBounds = textNode.approximateDOMBounds();
-    
-    console.log( canvasBounds );
-    console.log( svgBounds );
-    console.log( domBounds );
     
     var unionBounds = canvasBounds.union( svgBounds ).union( domBounds );
     
@@ -86,9 +76,65 @@
     return container;
   }
   
-  // scene.addChild( boundsSnapshot( new scenery.Text( 'This is a test', { fontSize: 20 } ) ) );
-  scene.addChild( boundsSnapshot( new scenery.Text( 'QuipTaQiy', { fontSize: 60 } ) ) );
-  scene.updateScene();
+  function wrapScene( node ) {
+    var $main = $( '<div>' );
+    $main.width( Math.ceil( node.width + 2 * padding ) );
+    $main.height( Math.ceil( node.height + 2 * padding ) );
+    
+    var scene = new scenery.Scene( $main );
+    scene.addChild( node );
+    node.x += padding;
+    node.y += padding;
+    scene.updateScene();
+    return $main.addClass( 'scene' )[0];
+  }
+  
+  var queue = [];
+  var started = false;
+  function process( string, options ) {
+    queue.push( {
+      string: string,
+      options: options
+    } );
+    if ( !started ) {
+      started = true;
+      var id = window.setInterval( function() {
+        if ( queue.length === 0 ) {
+          window.clearInterval( id );
+        } else {
+          var ob = queue.shift();
+          document.body.appendChild( wrapScene( boundsSnapshot( new scenery.Text( ob.string, ob.options ) ) ) );
+        }
+      }, 4 );
+    }
+  }
+  
+  var unicodeTestStrings = [
+    "A",
+    "b",
+    "m",
+    "x",
+    'Q',
+    "New\nLine?",
+    "New\r\nLine+?",
+    "Or\tTabs?",
+    "\u222b",
+    "\ufdfa",
+    "\u00a7",
+    "\u00C1",
+    "\u00FF",
+    "\u03A9",
+    "\u0906",
+    "\u79C1",
+    "\u9054",
+    "A\u030a\u0352\u0333\u0325\u0353\u035a\u035e\u035e",
+    "0\u0489",
+    "\u2588"
+  ];
+  
+  _.each( unicodeTestStrings, function( string ) {
+    process( string, { fontSize: 60 } );
+  } );
   
   </script>
 
