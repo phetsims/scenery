@@ -76,7 +76,6 @@ General:
 Code:
     Rename 'main' to something else
         container? domContainer?
-    Verify Input correctness with Scene now being a Node, and with trails
     Organize unit tests into separate files, etc.
         Lint unit tests
     Validation of example HTML, CSS, etc.
