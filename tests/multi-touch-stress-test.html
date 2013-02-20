@@ -154,7 +154,7 @@
         lastDragPoint = finger.point;
         
         // TODO: this should fire a layer refresh
-        node.layerStrategy = scenery.SeparateLayerStrategy;
+        node.layerStrategy = scenery.SeparateLayerStrategy( node.layerStrategy );
         node.markLayerRefreshNeeded();
       }
       

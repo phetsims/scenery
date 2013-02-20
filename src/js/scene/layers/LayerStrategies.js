@@ -41,22 +41,24 @@ var scenery = scenery || {};
     }
   };
   
-  scenery.SeparateLayerStrategy = {
-    enter: function( trail, layerState ) {
-      // trigger a switch to what we already have
-      layerState.switchToType( trail, layerState.getCurrentLayerType() );
+  scenery.SeparateLayerStrategy = function( strategy ) {
+    return {
+      enter: function( trail, layerState ) {
+        // trigger a switch to what we already have
+        layerState.switchToType( trail, layerState.getCurrentLayerType() );
+        
+        // execute the decorated strategy afterwards
+        strategy.enter( trail, layerState );
+      },
       
-      // execute the default strategy afterwards
-      scenery.DefaultLayerStrategy.enter( trail, layerState );
-    },
-    
-    exit: function( trail, layerState ) {
-      // trigger a switch to what we already have
-      layerState.switchToType( trail, layerState.getCurrentLayerType() );
-      
-      // execute the default strategy afterwards
-      scenery.DefaultLayerStrategy.exit( trail, layerState );
-    }
+      exit: function( trail, layerState ) {
+        // trigger a switch to what we already have
+        layerState.switchToType( trail, layerState.getCurrentLayerType() );
+        
+        // execute the decorated strategy afterwards
+        strategy.exit( trail, layerState );
+      }
+    };
   };
   
 })();
