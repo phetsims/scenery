@@ -184,7 +184,8 @@ var scenery = scenery || {};
     
     document.body.appendChild( div );
     var rect = span.getBoundingClientRect();
-    var result = new phet.math.Bounds2( rect.left, rect.top - maxHeight, rect.right, rect.bottom - maxHeight );
+    var divRect = div.getBoundingClientRect();
+    var result = new phet.math.Bounds2( rect.left, rect.top - maxHeight, rect.right, rect.bottom - maxHeight ).shifted( -divRect.left, -divRect.top );
     document.body.removeChild( div );
     
     var width = rect.right - rect.left;
