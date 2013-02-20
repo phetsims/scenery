@@ -175,6 +175,17 @@
           scene.addChild( b );
           scene.addChild( c );
         }
+      },{
+        name: 'Text',
+        width: 256,
+        height: 128,
+        draw: function( scene ) {
+          scene.addChild( new scenery.Text( 'Is this a test?', {
+            fontSize: 60,
+            top: 1.5,
+            left: 1.5
+          } ) );
+        }
       }
     ];
     
