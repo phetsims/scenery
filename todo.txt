@@ -214,12 +214,9 @@ Text:
     Unit tests
     *** Performance of text bounds!
         Comparison vs accurate bounds for all of the various text bounds methods
-    Using SVG's textLength may help with calibration with Canvas?
     Investigate SVG's writing-mode for rtl/ltr handling (also direction and unicode-bidi)
-    Ability to set baseline, etc., just like you can set top, bottom or y? -- wait isn't this like just setting y?
     Handling multi-line strings
-    SVG / WebGL / DOM options
-    Beware: miterLimit and joins seem to change stroking of text (if the bounds of that is ever to be included).
+    WebGL / DOM options
     Allow stroking of text.
 
 Scene:
