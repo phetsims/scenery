@@ -1,6 +1,7 @@
 
 Bugs:
     Check Firefox/Safari on Mac event handling on multiple touch events
+    Text direction 'rtl' bounds and display difference between canvas / SVG
 
 Browsers
     Browser bugs? (get Canary / Aurora / IE10):
