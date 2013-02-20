@@ -62,6 +62,7 @@ Questions for team:
         Layering
 
 General:
+    Molecule Shapes Canvas with CSS3 perspective transforms?
     * Add toggle for Canvas / SVG in Devious Dragging example
     * Email OIT about phet.colorado.edu/scenery
         Investigate GitHub pages instead? See http://forrst.com/posts/GitHub_Pages_gh_pages_branch_as_a_subfolder_wi-4ZT
@@ -133,19 +134,32 @@ WebGL:
 
 Layers:
     LayerBoundaries prototype? Might be useful as a toString(), and for handling queries
+    "Caching styles":
+        For top-level translation caching:
+            SVGCSSLayerStrategy?
+            CanvasCSSLayerStrategy?
+                Would essentially need to be able to change the rendering process that is currently decided by CanvasLayer
+                Possibly a different type of Canvas layer?
+        For nestable Canvas/WebGL caching:
+            ? possibly just a flag that CanvasLayer / WebGLLayer will examine?
+            Could be different cached material depending on render state? Or no?
+                Opacity isn't a problem, but will need this type of temporary rendering anyways
+            Seems right to offload the work to the CanvasLayer / WebGL Layer that is responsible?
+                ! Only that layer will know what portion of the subtree will be rendered to that layer
+                ! The caching (if we are doing it to global bounds) is specific to the Trail, not the Node (due to different trail transforms)
+        * Consider caching / layering modification as separate nodes added in (i.e. like a renamed CanvasLayer, or CachingLayer, or something like that)
+    ** Or is it possible to detect runtime hotspots based on elapsed time rendering, how much it is being rendered,
+        what transforms it is under (are those changing), and possibly number of children.
     *** Consider certain conversions in layering, for instance an SVG tree could render as a DOM node (SVG would take care of the scaling transform).
         This could handle our caching issues
-    * Consider caching / layering modification as separate nodes added in (i.e. like a renamed CanvasLayer, or CachingLayer, or something like that)
-        ** Would essentially need to be able to change the rendering process that is currently decided by CanvasLayer
-        Or use mixins to add to instances? - sketchy and hard to remove
-        ** Or is it possible to detect runtime hotspots based on elapsed time rendering, how much it is being rendered,
-            what transforms it is under (are those changing), and possibly number of children.
     * Does it make sense to handle caching of nodes to an image => draw in different layer type?
     Proof-of-concept for performance and DOM integration
 
 * Event dispatch:
-    * Write a 2-finger pinch-to-zoom/rotate handler that is compatible with the drag handler
-        Option whether to rotate or not
+    * Write a multi-finger pinch-to-zoom/rotate handler that is compatible with the drag handler
+        Use SVD finger point code for 3+ fingers -- also this could cause shears, so flag for whether 3+ fingers allowed and for shear
+        Option whether to rotate/translate/scale or not (for each)
+        Option for bounds restriction on dragged center point
         Option whether to interrupt dragging
         Consider 'active' flag
         Need the ability to get a list of all fingers
