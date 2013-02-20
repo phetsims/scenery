@@ -54,16 +54,16 @@ var scenery = scenery || {};
     // this listener gets added to the finger when it starts dragging our node
     this.dragListener = {
       // mouse/touch up
-      up: function( finger, trail, event ) {
-        phet.assert( finger === handler.finger );
-        if ( !finger.isMouse || event.button === handler.mouseButton ) {
+      up: function( event ) {
+        phet.assert( event.finger === handler.finger );
+        if ( !event.finger.isMouse || event.domEvent.button === handler.mouseButton ) {
           handler.endDrag( event );
         }
       },
       
       // touch cancel
-      cancel: function( finger, trail, event ) {
-        phet.assert( finger === handler.finger );
+      cancel: function( event ) {
+        phet.assert( event.finger === handler.finger );
         handler.endDrag( event );
         
         // since it's a cancel event, go back!
@@ -71,12 +71,12 @@ var scenery = scenery || {};
       },
       
       // mouse/touch move
-      move: function( finger, trail, event ) {
-        phet.assert( finger === handler.finger );
+      move: function( event ) {
+        phet.assert( event.finger === handler.finger );
         // move by the delta between the previous point, using the precomputed transform
         // prepend the translation on the node, so we can ignore whatever other transform state the node has
-        handler.node.translate( handler.transform.inverseDelta2( finger.point.minus( handler.lastDragPoint ) ), true );
-        handler.lastDragPoint = finger.point;
+        handler.node.translate( handler.transform.inverseDelta2( handler.finger.point.minus( handler.lastDragPoint ) ), true );
+        handler.lastDragPoint = handler.finger.point;
       }
     };
   };
@@ -85,24 +85,24 @@ var scenery = scenery || {};
   SimpleDragHandler.prototype = {
     constructor: SimpleDragHandler,
     
-    startDrag: function( finger, trail, event, currentTarget ) {
+    startDrag: function( event ) {
       // set a flag on the finger so it won't pick up other nodes
-      finger.dragging = true;
-      finger.addInputListener( this.dragListener );
-      trail.rootNode().addEventListener( this.transformListener );
+      event.finger.dragging = true;
+      event.finger.addInputListener( this.dragListener );
+      event.trail.rootNode().addEventListener( this.transformListener );
       
       // set all of our persistent information
       this.dragging = true;
-      this.finger = finger;
-      this.trail = trail.subtrailTo( currentTarget, true );
+      this.finger = event.finger;
+      this.trail = event.trail.subtrailTo( event.currentTarget, true );
       this.transform = this.trail.getTransform();
-      this.node = currentTarget;
-      this.lastDragPoint = finger.point;
-      this.startTransformMatrix = currentTarget.getMatrix();
-      this.mouseButton = event.button; // should be undefined for touch events
+      this.node = event.currentTarget;
+      this.lastDragPoint = event.finger.point;
+      this.startTransformMatrix = event.currentTarget.getMatrix();
+      this.mouseButton = event.domEvent.button; // should be undefined for touch events
       
       if ( this.options.start ) {
-        this.options.start( finger, this.trail, event );
+        this.options.start( event.finger, this.trail, event );
       }
     },
     
@@ -113,14 +113,14 @@ var scenery = scenery || {};
       this.dragging = false;
       
       if ( this.options.end ) {
-        this.options.end( this.finger, this.trail, event );
+        this.options.end( event );
       }
     },
     
-    tryToSnag: function( finger, trail, event, currentTarget ) {
+    tryToSnag: function( event ) {
       // only start dragging if the finger isn't dragging anything, we aren't being dragged, and if it's a mouse it's button is down
-      if ( !this.dragging && !finger.dragging ) {
-        this.startDrag( finger, trail, event, currentTarget );
+      if ( !this.dragging && !event.finger.dragging ) {
+        this.startDrag( event );
       }
     },
     
@@ -129,15 +129,15 @@ var scenery = scenery || {};
     *----------------------------------------------------------------------------*/
     
     // mouse/touch down on this node
-    down: function( finger, trail, event, currentTarget ) {
-      this.tryToSnag( finger, trail, event, currentTarget );
+    down: function( event ) {
+      this.tryToSnag( event );
     },
     
     // mouse/touch enters this node
-    enter: function( finger, trail, event, currentTarget ) {
+    enter: function( event ) {
       // allow touches to start a drag by moving "over" this node
-      if ( this.options.allowTouchSnag && !finger.isMouse ) {
-        this.tryToSnag( finger, trail, event, currentTarget );
+      if ( this.options.allowTouchSnag && !event.finger.isMouse ) {
+        this.tryToSnag( event );
       }
     }
   };

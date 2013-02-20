@@ -619,42 +619,42 @@ window.requestAnimationFrame( tick, div[0] );
           // below are the main 6 input events that are fired
           node.addInputListener( {
             // mousedown or touchstart (finger pressed down over the node)
-            down: function( finger, trail, event ) {
-              if ( !finger.isMouse ) {
+            down: function( event ) {
+              if ( !event.finger.isMouse ) {
                 count++;
                 updateFingers();
               }
             },
             
             // mouseup or touchend (finger lifted from over the node)
-            up: function( finger, trail, event ) {
-              if ( !finger.isMouse ) {
+            up: function( event ) {
+              if ( !event.finger.isMouse ) {
                 count--;
                 updateFingers();
               }
             },
             
             // triggered from mousemove or touchmove (finger moved over the node from outside)
-            enter: function( finger, trail, event ) {
+            enter: function( event ) {
               count++;
               updateFingers();
             },
             
             // triggered from mousemove or touchmove (finger moved outside the node from inside)
-            exit: function( finger, trail, event ) {
+            exit: function( event ) {
               count--;
               updateFingers();
             },
             
             // platform-specific trigger.
             // on iPad Safari, cancel can by triggered by putting 4 fingers down and then dragging with all 4
-            cancel: function( finger, trail, event ) {
+            cancel: function( event ) {
               count--;
               updateFingers();
             },
             
             // mousemove (fired AFTER enter/exit events if applicable)
-            move: function( finger, trail, event ) {
+            move: function( event ) {
               // do nothing
             }
           } );
@@ -710,42 +710,42 @@ $( window ).ready( function() {
   // below are the main 6 input events that are fired
   node.addInputListener( {
     // mousedown or touchstart (finger pressed down over the node)
-    down: function( finger, trail, event ) {
-      if ( !finger.isMouse ) {
+    down: function( event ) {
+      if ( !event.finger.isMouse ) {
         count++;
         updateFingers();
       }
     },
 
     // mouseup or touchend (finger lifted from over the node)
-    up: function( finger, trail, event ) {
-      if ( !finger.isMouse ) {
+    up: function( event ) {
+      if ( !event.finger.isMouse ) {
         count--;
         updateFingers();
       }
     },
     
     // triggered from mousemove or touchmove (finger moved over the node from outside)
-    enter: function( finger, trail, event ) {
+    enter: function( event ) {
       count++;
       updateFingers();
     },
     
     // triggered from mousemove or touchmove (finger moved outside the node from inside)
-    exit: function( finger, trail, event ) {
+    exit: function( event ) {
       count--;
       updateFingers();
     },
     
     // platform-specific trigger.
     // on iPad Safari, cancel can by triggered by putting 4 fingers down and then dragging with all 4
-    cancel: function( finger, trail, event ) {
+    cancel: function( event ) {
       count--;
       updateFingers();
     },
     
     // mousemove (fired AFTER enter/exit events if applicable)
-    move: function( finger, trail, event ) {
+    move: function( event ) {
       // do nothing
     }
   } );

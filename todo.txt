@@ -164,7 +164,6 @@ Layers:
         Consider 'active' flag
         Need the ability to get a list of all fingers
     * SimpleDragHandler needs an option for increased hit areas for touch
-    **** - events should be more like parameter objects!
     Consider finger.isDown for checking general (but possibly mouse related) events
     Indie UI events should be tracked: https://dvcs.w3.org/hg/IndieUI/raw-file/default/src/indie-ui-events.html
     Verify SVG stacking is practical with test

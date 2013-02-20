@@ -151,33 +151,52 @@ var scenery = scenery || {};
     },
     
     dispatchEvent: function( trail, type, finger, event ) {
+      // TODO: is there a way to make this event immutable?
+      var inputEvent = new Event( {
+        trail: trail,
+        type: type,
+        finger: finger,
+        domEvent: event,
+        currentTarget: null,
+        target: trail.lastNode()
+      } );
+      
       // first run through the finger's listeners to see if one of them will handle the event
-      this.dispatchToFinger( trail, type, finger, event );
+      this.dispatchToFinger( type, finger, inputEvent );
       
       // if not yet handled, run through the trail in order to see if one of them will handle the event
       // at the base of the trail should be the scene node, so the scene will be notified last
-      this.dispatchToTargets( trail, type, finger, event );
+      this.dispatchToTargets( trail, type, inputEvent );
     },
     
-    dispatchToFinger: function( trail, type, finger, event ) {
+    dispatchToFinger: function( type, finger, inputEvent ) {
+      if ( inputEvent.aborted || inputEvent.handled ) {
+        return;
+      }
+      
       var fingerListeners = finger.listeners.slice( 0 ); // defensive copy
       for ( var i = 0; i < fingerListeners.length; i++ ) {
         var listener = fingerListeners[i];
         
         if ( listener[type] ) {
           // if a listener returns true, don't handle any more
-          var handled = !!( listener[type]( finger, trail, event ) );
+          var aborted = !!( listener[type]( inputEvent ) ) || inputEvent.aborted;
           
-          if ( handled ) {
+          if ( aborted ) {
             return;
           }
         }
       }
     },
     
-    dispatchToTargets: function( trail, type, finger, event ) {
+    dispatchToTargets: function( trail, type, inputEvent ) {
+      if ( inputEvent.aborted || inputEvent.handled ) {
+        return;
+      }
+      
       for ( var i = trail.length - 1; i >= 0; i-- ) {
         var target = trail.nodes[i];
+        inputEvent.currentTarget = target;
         
         var listeners = target.getInputListeners();
         
@@ -186,14 +205,45 @@ var scenery = scenery || {};
           
           if ( listener[type] ) {
             // if a listener returns true, don't handle any more
-            var handled = !!( listener[type]( finger, trail, event, target ) );
+            var aborted = !!( listener[type]( inputEvent ) ) || inputEvent.aborted;
             
-            if ( handled ) {
+            if ( aborted ) {
               return;
             }
           }
         }
+        
+        // if the input event was handled, don't follow the trail down another level
+        if ( inputEvent.handled ) {
+          return;
+        }
       }
+    }
+  };
+  
+  scenery.Event = function( options ) {
+    this.handled = false;
+    this.aborted = false;
+    
+    // put all properties in the options object into this event
+    _.extend( this, options );
+    
+    // TODO: add extended information based on an event here?
+  };
+  var Event = scenery.Event;
+  
+  Event.prototype = {
+    constructor: Event,
+    
+    // like DOM Event.stopPropagation(), but named differently to indicate it doesn't fire that behavior on the underlying DOM event
+    handle: function() {
+      this.handled = true;
+    },
+    
+    // like DOM Event.stopImmediatePropagation(), but named differently to indicate it doesn't fire that behavior on the underlying DOM event
+    abort: function() {
+      this.handled = true;
+      this.aborted = true;
     }
   };
   
