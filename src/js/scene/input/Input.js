@@ -203,10 +203,10 @@ var scenery = scenery || {};
    *
    * TODO: consider an 'active' flag?
    */
-  Input.Finger = function() {
+  scenery.Finger = function() {
     this.listeners = [];
   };
-  var Finger = Input.Finger;
+  var Finger = scenery.Finger;
   Finger.prototype = {
     constructor: Finger,
     
@@ -225,7 +225,7 @@ var scenery = scenery || {};
   };
   
   // track the mouse state
-  Input.Mouse = function() {
+  scenery.Mouse = function() {
     Finger.call( this );
     
     this.point = null;
@@ -238,7 +238,7 @@ var scenery = scenery || {};
     
     this.trail = null;
   };
-  var Mouse = Input.Mouse;
+  var Mouse = scenery.Mouse;
   Mouse.prototype = _.extend( {}, Finger.prototype, {
     constructor: Mouse,
     
@@ -274,7 +274,7 @@ var scenery = scenery || {};
     }
   } );
   
-  Input.Touch = function( id, point, event ) {
+  scenery.Touch = function( id, point, event ) {
     Finger.call( this );
     
     this.id = id;
@@ -282,7 +282,7 @@ var scenery = scenery || {};
     this.isTouch = true;
     this.trail = null;
   };
-  var Touch = Input.Touch;
+  var Touch = scenery.Touch;
   Touch.prototype = _.extend( {}, Finger.prototype, {
     constructor: Touch,
     
@@ -299,14 +299,14 @@ var scenery = scenery || {};
     }
   } );
   
-  Input.Key = function( key, event ) {
+  scenery.Key = function( key, event ) {
     Finger.call( this );
     
     this.key = key;
     this.isKey = true;
     this.trail = null;
   };
-  var Key = Input.Key;
+  var Key = scenery.Key;
   Key.prototype = _.extend( {}, Finger.prototype, {
     constructor: Key
   } );
