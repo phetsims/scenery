@@ -79,6 +79,55 @@ var scenery = scenery || {};
     throw new Error( 'Text.prototype.paintWebGL unimplemented' );
   };
   
+  Text.prototype.createSVGFragment = function() {
+    var element = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
+    this.updateSVGFragment( element );
+    return element;
+  };
+  
+  Text.prototype.updateSVGFragment = function( element ) {
+    var isRTL = this._direction === 'rtl';
+    
+    // make the text the only child
+    while ( element.hasChildNodes() ) {
+      element.removeChild( element.lastChild );
+    }
+    element.appendChild( document.createTextNode( this._text ) );
+    
+    element.setAttribute( 'fill', this._fill );
+    
+    switch ( this._textAlign ) {
+      case 'start':
+      case 'end':
+        element.setAttribute( 'text-anchor', this._textAlign ); break;
+      case 'left':
+        element.setAttribute( 'text-anchor', isRTL ? 'end' : 'start' ); break;
+      case 'right':
+        element.setAttribute( 'text-anchor', !isRTL ? 'end' : 'start' ); break;
+      case 'center':
+        element.setAttribute( 'text-anchor', 'middle' ); break;
+    }
+    switch ( this._textBaseline ) {
+      case 'alphabetic':
+      case 'ideographic':
+      case 'hanging':
+      case 'middle':
+        element.setAttribute( 'dominant-baseline', this._textBaseline ); break;
+      default:
+        throw new Error( 'impossible to get the SVG approximate bounds for textBaseline: ' + this._textBaseline );
+    }
+    element.setAttribute( 'direction', this._direction );
+    
+    // set all of the font attributes, since we can't use the combined one
+    element.setAttribute( 'font-family', this._font.getFamily() );
+    element.setAttribute( 'font-size', this._font.getSize() );
+    element.setAttribute( 'font-style', this._font.getStyle() );
+    element.setAttribute( 'font-weight', this._font.getWeight() );
+    if ( this._font.getStretch() ) {
+      element.setAttribute( 'font-stretch', this._font.getStretch() );
+    }
+  };
+  
   /*---------------------------------------------------------------------------*
   * Bounds
   *----------------------------------------------------------------------------*/
@@ -103,37 +152,7 @@ var scenery = scenery || {};
     svg.setAttribute( 'style', 'display: hidden;' ); // so we don't flash it in a visible way to the user
     
     var textElement = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
-    textElement.appendChild( document.createTextNode( this._text ) );
-    switch ( this._textAlign ) {
-      case 'start':
-      case 'end':
-        textElement.setAttribute( 'text-anchor', this._textAlign ); break;
-      case 'left':
-        textElement.setAttribute( 'text-anchor', isRTL ? 'end' : 'start' ); break;
-      case 'right':
-        textElement.setAttribute( 'text-anchor', !isRTL ? 'end' : 'start' ); break;
-      case 'center':
-        textElement.setAttribute( 'text-anchor', 'middle' ); break;
-    }
-    switch ( this._textBaseline ) {
-      case 'alphabetic':
-      case 'ideographic':
-      case 'hanging':
-      case 'middle':
-        textElement.setAttribute( 'dominant-baseline', this._textBaseline ); break;
-      default:
-        throw new Error( 'impossible to get the SVG approximate bounds for textBaseline: ' + this._textBaseline );
-    }
-    textElement.setAttribute( 'direction', this._direction );
-    
-    // set all of the font attributes, since we can't use the combined one
-    textElement.setAttribute( 'font-family', this._font.getFamily() );
-    textElement.setAttribute( 'font-size', this._font.getSize() );
-    textElement.setAttribute( 'font-style', this._font.getStyle() );
-    textElement.setAttribute( 'font-weight', this._font.getWeight() );
-    if ( this._font.getStretch() ) {
-      textElement.setAttribute( 'font-stretch', this._font.getStretch() );
-    }
+    this.updateSVGFragment( textElement );
     
     svg.appendChild( textElement );
     
@@ -291,7 +310,7 @@ var scenery = scenery || {};
   Text.prototype._mutatorKeys = [ 'text', 'font', 'fontWeight', 'fontFamily', 'fontStretch', 'fontStyle', 'fontSize', 'lineHeight',
                                   'textAlign', 'textBaseline', 'direction' ].concat( scenery.Node.prototype._mutatorKeys );
   
-  Text.prototype._supportedLayerTypes = [ scenery.LayerType.Canvas ];
+  Text.prototype._supportedLayerTypes = [ scenery.LayerType.Canvas, scenery.LayerType.SVG ];
   
   // font-specific ES5 setters and getters are defined using addFontForwarding above
   Object.defineProperty( Text.prototype, 'font', { set: Text.prototype.setFont, get: Text.prototype.getFont } );

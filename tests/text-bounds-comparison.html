@@ -70,6 +70,8 @@
       shape: scenery.Shape.bounds( domBounds ),
       fill: 'rgba(0,0,255,0.4)'
     } ) );
+    var svgNode = new scenery.Node();
+    // svgNode.layerStrategy.
     container.addChild( textNode );
     textNode.fill = '#ffffff';
     
@@ -90,7 +92,9 @@
     $main.width( Math.ceil( node.width + 2 * padding ) );
     $main.height( Math.ceil( node.height + 2 * padding ) );
     
-    var scene = new scenery.Scene( $main );
+    var scene = new scenery.Scene( $main, {
+      preferredSceneLayerType: scenery.LayerType.SVG
+    } );
     scene.addChild( node );
     node.x += padding;
     node.y += padding;
