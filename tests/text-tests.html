@@ -193,6 +193,8 @@
   }
   
   function svgApproximate( textNode ) {
+    var isRTL = textNode.direction === 'rtl';
+    
     var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
     svg.setAttribute( 'width', '1024' );
     svg.setAttribute( 'height', '1024' );
@@ -200,6 +202,27 @@
     
     var textElement = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
     textElement.appendChild( document.createTextNode( textNode.text ) );
+    switch ( textNode.textAlign ) {
+      case 'start':
+      case 'end':
+        textElement.setAttribute( 'text-anchor', textNode.textAlign ); break;
+      case 'left':
+        textElement.setAttribute( 'text-anchor', isRTL ? 'end' : 'start' ); break;
+      case 'right':
+        textElement.setAttribute( 'text-anchor', !isRTL ? 'end' : 'start' ); break;
+      case 'center':
+        textElement.setAttribute( 'text-anchor', 'middle' ); break;
+    }
+    switch ( textNode.textBaseline ) {
+      case 'alphabetic':
+      case 'ideographic':
+      case 'hanging':
+      case 'middle':
+        textElement.setAttribute( 'dominant-baseline', textNode.textBaseline ); break;
+      default:
+        throw new Error( 'impossible to get the SVG approximate bounds for textBaseline: ' + textNode.textBaseline );
+    }
+    textElement.setAttribute( 'direction', textNode.direction );
     
     svg.appendChild( textElement );
     
