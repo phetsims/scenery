@@ -43,6 +43,8 @@ var scenery = scenery || {};
   
   scenery.SeparateLayerStrategy = function( strategy ) {
     return {
+      strategy: strategy,
+      
       enter: function( trail, layerState ) {
         // trigger a switch to what we already have
         layerState.switchToType( trail, layerState.getCurrentLayerType() );
