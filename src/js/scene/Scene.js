@@ -19,7 +19,7 @@ var scenery = scenery || {};
    * {
    *   allowSceneOverflow: false,                         // usually anything displayed outside of this $main (DOM/CSS3 transformed SVG) is hidden with CSS overflow
    *   allowCSSHacks: true,                               // applies styling that prevents mobile browser graphical issues
-   *   allowDevicePixelRatioScaling: true,                // allows underlying canvases (Canvas, WebGL) to increase in size to maintain sharpness on high-density displays
+   *   allowDevicePixelRatioScaling: false,               // allows underlying canvases (Canvas, WebGL) to increase in size to maintain sharpness on high-density displays
    *   preferredSceneLayerType: scenery.LayerType.Canvas, // sets the preferred type of layer to be created if there are multiple options
    *   width: <current main width>,                       // override the main container's width
    *   height: <current main height>,                     // override the main container's height
@@ -30,7 +30,7 @@ var scenery = scenery || {};
     params = _.extend( {
       allowSceneOverflow: false,
       allowCSSHacks: true,
-      allowDevicePixelRatioScaling: true,
+      allowDevicePixelRatioScaling: false,
       preferredSceneLayerType: scenery.LayerType.Canvas,
       width: $main.width(),
       height: $main.height()
