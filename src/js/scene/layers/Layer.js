@@ -15,6 +15,7 @@ var scenery = scenery || {};
   
   scenery.Layer = function( args ) {
     this.$main = args.$main;
+    this.scene = args.scene;
     
     // initialize to fully dirty so we draw everything the first time
     // bounds in global coordinate frame

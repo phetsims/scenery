@@ -7,6 +7,8 @@
  * scene graph. It only will render a contiguous block of nodes visited in a depth-first
  * manner.
  *
+ * Backing store pixel ratio info: http://www.html5rocks.com/en/tutorials/canvas/hidpi/
+ *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
@@ -21,9 +23,16 @@ var scenery = scenery || {};
   scenery.CanvasLayer = function( args ) {
     scenery.Layer.call( this, args );
     
+    this.backingScale = args.scene.backingScale;
+    
+    var logicalWidth = this.$main.width();
+    var logicalHeight = this.$main.height();
+    
     var canvas = document.createElement( 'canvas' );
-    canvas.width = this.$main.width();
-    canvas.height = this.$main.height();
+    canvas.width = logicalWidth * this.backingScale;
+    canvas.height = logicalHeight * this.backingScale;
+    $( canvas ).css( 'width', logicalWidth );
+    $( canvas ).css( 'height', logicalHeight );
     $( canvas ).css( 'position', 'absolute' );
     
     // add this layer on top (importantly, the constructors of the layers are called in order)
@@ -68,7 +77,7 @@ var scenery = scenery || {};
       state.layer = this;
       
       // switch to an identity transform
-      this.context.setTransform( 1, 0, 0, 1, 0, 0 );
+      this.context.setTransform( this.backingScale, 0, 0, this.backingScale, 0, 0 );
       
       // reset the internal styles so they match the defaults that should be present
       this.resetStyles();
@@ -209,7 +218,7 @@ var scenery = scenery || {};
     clearGlobalBounds: function( bounds ) {
       if ( !bounds.isEmpty() ) {
         this.context.save();
-        this.context.setTransform( 1, 0, 0, 1, 0, 0 );
+        this.context.setTransform( this.backingScale, 0, 0, this.backingScale, 0, 0 );
         this.context.clearRect( bounds.x(), bounds.y(), bounds.width(), bounds.height() );
         // use this for debugging cleared (dirty) regions for now
         // this.context.fillStyle = '#' + Math.floor( Math.random() * 0xffffff ).toString( 16 );

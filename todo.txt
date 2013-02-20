@@ -73,6 +73,8 @@ General:
     Take extension mechanism from Backbone.js: https://github.com/documentcloud/backbone/blob/master/backbone.js#L1471-L1502
 
 Code:
+    Rename 'params' to 'options'
+    Rename 'main' to something else
     Verify Input correctness with Scene now being a Node, and with trails
     Organize unit tests into separate files, etc.
         Lint unit tests
@@ -84,9 +86,9 @@ Code:
     Modularization of support code (math?)
     Vet recursive bounds code against empty area
     * Code headers and copyright? Licenses?
-    *** Handling of retina displays (and other backingScale differences)
 
 Canvas:
+    Consider adding layer strategies that enforce either a low-def or hi-def (if available) canvas backing store, so we can have crispness when desired
     Check reindexing, there may be bugs
     Restricted bounds intersection pruning (also see performance)
         For canvas rendering, how to handle restricted bounds in depthFirstUntil? Generalize, and allow a return flag to indicate not hitting children?
