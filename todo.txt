@@ -94,7 +94,6 @@ Canvas:
     CanvasLayer styles are probably broken - resetStyles seems fishy if not in sync (i.e. lineCap)
 
 DOM:
-    **** DOMLayer would work better if we send a transformChanged event with the node, since it only needs to update the transform
     * DOM bounds failure on construction, for x and y setters (or something is wrong with easel-tests DOM example, investigate?)
     * Test that scenery and dom nodes can be nested many times
     *** CSS3 transforms look amazing See if we can do more in DOM nodes with transforms
