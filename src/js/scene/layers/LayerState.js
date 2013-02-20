@@ -62,7 +62,7 @@ var scenery = scenery || {};
       this.preferredLayerTypes.push( layerType );
     },
     
-    popPreferredLayerType: function( layerType ) {
+    popPreferredLayerType: function() {
       this.preferredLayerTypes.pop();
     },
     

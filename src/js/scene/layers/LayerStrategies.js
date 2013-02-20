@@ -63,4 +63,29 @@ var scenery = scenery || {};
     };
   };
   
+  scenery.LayerTypeStrategy = function( strategy, preferredLayerType ) {
+    return {
+      strategy: strategy,
+      
+      enter: function( trail, layerState ) {
+        // push the preferred layer type
+        layerState.pushPreferredLayerType( preferredLayerType );
+        if ( !layerState.getCurrentLayerType().supports( preferredLayerType ) ) {
+          layerState.switchToType( trail, preferredLayerType );
+        }
+        
+        // execute the decorated strategy afterwards
+        strategy.enter( trail, layerState );
+      },
+      
+      exit: function( trail, layerState ) {
+        // pop the preferred layer type
+        layerState.popPreferredLayerType();
+        
+        // execute the decorated strategy afterwards
+        strategy.exit( trail, layerState );
+      }
+    };
+  };
+  
 })();

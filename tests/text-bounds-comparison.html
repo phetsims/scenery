@@ -70,10 +70,18 @@
       shape: scenery.Shape.bounds( domBounds ),
       fill: 'rgba(0,0,255,0.4)'
     } ) );
+    
+    // TODO: improve how layer strategies are used
     var svgNode = new scenery.Node();
-    // svgNode.layerStrategy.
-    container.addChild( textNode );
-    textNode.fill = '#ffffff';
+    svgNode.layerStrategy = scenery.LayerTypeStrategy( svgNode.layerStrategy, scenery.LayerType.SVG );
+    svgNode.addChild( textNode );
+    var canvasNode = new scenery.Node();
+    canvasNode.layerStrategy = scenery.LayerTypeStrategy( canvasNode.layerStrategy, scenery.LayerType.Canvas );
+    canvasNode.addChild( textNode );
+    
+    container.addChild( svgNode );
+    container.addChild( canvasNode );
+    textNode.fill = 'rgba(255,255,255,0.6)';
     
     container.addChild( new scenery.Path( {
       shape: scenery.Shape.lineSegment( new phet.math.Vector2( 5, 0.5 ), new phet.math.Vector2( -5, 0.5 ) ),
@@ -93,7 +101,7 @@
     $main.height( Math.ceil( node.height + 2 * padding ) );
     
     var scene = new scenery.Scene( $main, {
-      preferredSceneLayerType: scenery.LayerType.SVG
+      // preferredSceneLayerType: scenery.LayerType.SVG
     } );
     scene.addChild( node );
     node.x += padding;
