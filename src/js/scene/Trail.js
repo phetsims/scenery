@@ -154,6 +154,16 @@ var scenery = scenery || {};
       }
     },
     
+    areIndicesValid: function() {
+      for ( var i = 1; i < this.length; i++ ) {
+        var currentIndex = this.indices[i-1];
+        if ( this.nodes[i-1].children[currentIndex] !== this.nodes[i] ) {
+          return false;
+        }
+      }
+      return true;
+    },
+    
     equals: function( other ) {
       if ( this.length !== other.length ) {
         return false;
@@ -258,14 +268,27 @@ var scenery = scenery || {};
       }
     },
     
-    /* Standard Java-style compare. -1 means this trail is before (under) the other trail, 0 means equal, and 1 means this trail is
+    /*
+     * Standard Java-style compare. -1 means this trail is before (under) the other trail, 0 means equal, and 1 means this trail is
      * after (on top of) the other trail.
      * A shorter subtrail will compare as -1.
+     *
+     * Assumes that the Trails are properly indexed. If not, please reindex them!
      */
     compare: function( other ) {
+      var trail = this;
+      
       phet.assert( !this.isEmpty(), 'cannot compare with an empty trail' );
       phet.assert( !other.isEmpty(), 'cannot compare with an empty trail' );
       phet.assert( this.nodes[0] === other.nodes[0], 'for Trail comparison, trails must have the same root node' );
+      
+      // should be stripped out for the production version
+      phet.debugAssert( function() {
+        return trail.areIndicesValid();
+      }, 'Trail.compare this.areIndicesValid() failed' );
+      phet.debugAssert( function() {
+        return other.areIndicesValid();
+      }, 'Trail.compare other.areIndicesValid() failed' );
       
       var minIndex = Math.min( this.nodes.length, other.nodes.length );
       for ( var i = 1; i < minIndex; i++ ) {
