@@ -180,6 +180,15 @@ var scenery = scenery || {};
     
     // whether this trail contains the complete 'other' trail, but with added descendants afterwards
     isExtensionOf: function( other, allowSameTrail ) {
+      // should be stripped out for the production version
+      // var trail = this;
+      // phet.debugAssert( function() {
+      //   return trail.areIndicesValid();
+      // }, 'Trail.isExtensionOf this.areIndicesValid() failed' );
+      // phet.debugAssert( function() {
+      //   return other.areIndicesValid();
+      // }, 'Trail.isExtensionOf other.areIndicesValid() failed' );
+      
       if ( this.length <= other.length - ( allowSameTrail ? 1 : 0 ) ) {
         return false;
       }
@@ -290,13 +299,10 @@ var scenery = scenery || {};
         return other.areIndicesValid();
       }, 'Trail.compare other.areIndicesValid() failed' );
       
-      var minIndex = Math.min( this.nodes.length, other.nodes.length );
-      for ( var i = 1; i < minIndex; i++ ) {
-        if ( this.nodes[i] !== other.nodes[i] ) {
-          var myIndex = _.indexOf( this.nodes[i-1].children, this.nodes[i] );
-          var otherIndex = _.indexOf( other.nodes[i-1].children, other.nodes[i] );
-          phet.assert( myIndex !== otherIndex ); // they should be different if the nodes are different
-          if ( myIndex < otherIndex ) {
+      var minNodeIndex = Math.min( this.indices.length, other.indices.length );
+      for ( var i = 0; i < minNodeIndex; i++ ) {
+        if ( this.indices[i] !== other.indices[i] ) {
+          if ( this.indices[i] < other.indices[i] ) {
             return -1;
           } else {
             return 1;
