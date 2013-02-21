@@ -110,6 +110,10 @@ var scenery = scenery || {};
       var startPointer = this.getStartPointer();
       var endPointer = this.getEndPointer();
       
+      // sanity check, and allows us to get faster speed
+      startPointer.trail.reindex();
+      endPointer.trail.reindex();
+      
       // first, we need to walk the state up to before our pointer (as far as the recursive handling is concerned)
       // if the pointer is 'before' the node, don't call its enterState since this will be taken care of as the first step.
       // if the pointer is 'after' the node, call enterState since it will call exitState immediately inside the loop

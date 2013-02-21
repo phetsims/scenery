@@ -145,9 +145,12 @@ var scenery = scenery || {};
     
     // refreshes the internal index references (important if any children arrays were modified!)
     reindex: function() {
-      this.indices = [];
       for ( var i = 1; i < this.length; i++ ) {
-        this.indices.push( _.indexOf( this.nodes[i-1].children, this.nodes[i] ) );
+        // only replace indices where they have changed (this was a performance hotspot)
+        var currentIndex = this.indices[i-1];
+        if ( this.nodes[i-1].children[currentIndex] !== this.nodes[i] ) {
+          this.indices[i-1] = _.indexOf( this.nodes[i-1].children, this.nodes[i] );
+        }
       }
     },
     
