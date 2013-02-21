@@ -12,6 +12,8 @@ var scenery = scenery || {};
   "use strict";
   
   scenery.DOM = function( element, options ) {
+    options = options || {};
+    
     // unwrap from jQuery if that is passed in, for consistency
     if ( element && element.jquery ) {
       element = element[0];
