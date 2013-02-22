@@ -33,7 +33,6 @@ var scenery = scenery || {};
     this.lastDragPoint         = null;      // the location of the drag at the previous event (so we can calculate a delta)
     this.startTransformMatrix  = null;      // the node's transform at the start of the drag, so we can reset on a touch cancel
     this.mouseButton           = undefined; // tracks which mouse button was pressed, so we can handle that specifically
-    var simpleDragHandler      = this;
     // TODO: consider mouse buttons as separate fingers?
     
     // if an ancestor is transformed, pin our node
@@ -81,9 +80,9 @@ var scenery = scenery || {};
         handler.node.translate( handler.transform.inverseDelta2( handler.finger.point.minus( handler.lastDragPoint ) ), true );
         handler.lastDragPoint = handler.finger.point;
         
-        if ( simpleDragHandler.options.drag ) {
+        if ( handler.options.drag ) {
           // TODO: consider adding in a delta to the listener
-          simpleDragHandler.options.drag( handler.finger, handler.trail, event );
+          handler.options.drag( handler.finger, handler.trail, event );
         }
       }
     };
