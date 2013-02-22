@@ -21,7 +21,7 @@ var scenery = scenery || {};
   scenery.SimpleDragHandler = function( options ) {
     var handler = this;
     
-    this.options = options;
+    this.options = options || {};
     
     this.dragging              = false;     // whether a node is being dragged with this handler
     this.finger                = null;      // the finger doing the current dragging
