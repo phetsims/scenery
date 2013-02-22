@@ -130,11 +130,12 @@ var scenery = scenery || {};
       }
       
       // TODO: if a node gets moved down 1 depth, it may see both an exit and enter?
+      // TODO: Don't bubble these!
       if ( oldTrail.length > branchIndex ) {
-        this.dispatchEvent( oldTrail.slice( branchIndex ), 'exit', finger, event );
+        this.dispatchEvent( oldTrail.slice( 0, branchIndex + 1 ), 'exit', finger, event );
       }
       if ( trail.length > branchIndex ) {
-        this.dispatchEvent( trail.slice( branchIndex ), 'enter', finger, event );
+        this.dispatchEvent( trail.slice( 0, branchIndex + 1 ), 'enter', finger, event );
       }
       
       this.dispatchEvent( trail, 'move', finger, event );

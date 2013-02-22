@@ -157,6 +157,7 @@ Layers:
     Proof-of-concept for performance and DOM integration
 
 * Event dispatch:
+    **** Branchindex and handling for enter/exit events is broken. they should NOT bubble!
     ** Add 'drag' callback for SimpleDragHandler
     * Write a multi-finger pinch-to-zoom/rotate handler that is compatible with the drag handler
         Use SVD finger point code for 3+ fingers -- also this could cause shears, so flag for whether 3+ fingers allowed and for shear
