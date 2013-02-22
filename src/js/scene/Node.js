@@ -71,7 +71,7 @@ var scenery = scenery || {};
   Node.prototype = {
     constructor: Node,
     
-    enterState: function( state ) {
+    enterState: function( state, trail ) {
       // apply this node's transform
       if ( !this.transform.isIdentity() ) {
         // TODO: consider a stack-based model for transforms?
@@ -79,11 +79,12 @@ var scenery = scenery || {};
       }
       
       if ( this._clipShape ) {
-        state.pushClipShape( this._clipShape );
+        // push the clipping shape in the global coordinate frame (relative to the trail)
+        state.pushClipShape( trail.getTransform().transformShape( this._clipShape ) );
       }
     },
     
-    exitState: function( state ) {
+    exitState: function( state, trail ) {
       if ( this._clipShape ) {
         state.popClipShape();
       }

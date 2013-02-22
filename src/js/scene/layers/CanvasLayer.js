@@ -110,6 +110,8 @@ var scenery = scenery || {};
       var startPointer = this.getStartPointer();
       var endPointer = this.getEndPointer();
       
+      var boundaryTrail;
+      
       // sanity check, and allows us to get faster speed
       startPointer.trail.reindex();
       endPointer.trail.reindex();
@@ -118,8 +120,10 @@ var scenery = scenery || {};
       // if the pointer is 'before' the node, don't call its enterState since this will be taken care of as the first step.
       // if the pointer is 'after' the node, call enterState since it will call exitState immediately inside the loop
       var startWalkLength = startPointer.trail.length - ( startPointer.isBefore ? 1 : 0 );
+      boundaryTrail = new scenery.Trail();
       for ( i = 0; i < startWalkLength; i++ ) {
-        startPointer.trail.nodes[i].enterState( state );
+        boundaryTrail.addDescendant( startPointer.trail.nodes[i] );
+        startPointer.trail.nodes[i].enterState( state, boundaryTrail );
       }
       
       startPointer.depthFirstUntil( endPointer, function( pointer ) {
@@ -128,7 +132,7 @@ var scenery = scenery || {};
         var node = pointer.trail.lastNode();
         
         if ( pointer.isBefore ) {
-          node.enterState( state );
+          node.enterState( state, pointer.trail );
           
           if ( node._visible ) {
             if ( node.hasSelf() ) {
@@ -156,7 +160,7 @@ var scenery = scenery || {};
             return true;
           }
         } else {
-          node.exitState( state );
+          node.exitState( state, pointer.trail );
         }
         
       }, false ); // include endpoints (for now)
@@ -164,9 +168,11 @@ var scenery = scenery || {};
       // then walk the state back so we don't muck up any context saving that is going on, similar to how we walked it at the start
       // if the pointer is 'before' the node, call exitState since it called enterState inside the loop on it
       // if the pointer is 'after' the node, don't call its exitState since this was already done
+      boundaryTrail = endPointer.trail.copy();
       var endWalkLength = endPointer.trail.length - ( endPointer.isAfter ? 1 : 0 );
       for ( i = endWalkLength - 1; i >= 0; i-- ) {
-        endPointer.trail.nodes[i].exitState( state );
+        endPointer.trail.nodes[i].exitState( state, boundaryTrail );
+        boundaryTrail.removeDescendant();
       }
     },
     

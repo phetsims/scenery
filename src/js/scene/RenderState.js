@@ -15,7 +15,7 @@ var scenery = scenery || {};
   "use strict";
   
   scenery.RenderState = function( scene ) {
-    this.transform = new phet.math.Transform3();
+    // this.transform = new phet.math.Transform3();
     
     this.layer = null;
     this.scene = scene;
@@ -32,10 +32,10 @@ var scenery = scenery || {};
   RenderState.prototype = {
     constructor: RenderState,
     
-    // add a clipping region in the local coordinate frame
+    // add a clipping region in the global coordinate frame (relative to the root of a trail)
     pushClipShape: function( shape ) {
       // transform the shape into global coordinates
-      this.clipShapes.push( this.transform.transformShape( shape ) );
+      this.clipShapes.push( shape );
       
       // notify the layer to actually do the clipping
       if ( this.layer ) {
@@ -61,7 +61,7 @@ var scenery = scenery || {};
     
     // TODO: consider a stack-based model for transforms?
     applyTransformationMatrix: function( matrix ) {
-      this.transform.append( matrix );
+      // this.transform.append( matrix );
       this.layer.applyTransformationMatrix( matrix );
     }
   };
