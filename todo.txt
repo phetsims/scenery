@@ -78,6 +78,7 @@ General:
     Take extension mechanism from Backbone.js: https://github.com/documentcloud/backbone/blob/master/backbone.js#L1471-L1502
 
 Code:
+    Trail shouldn't create the 'indices' anymore!
     Rename 'main' to something else
         container? domContainer?
     Organize unit tests into separate files, etc.
