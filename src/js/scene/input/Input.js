@@ -104,7 +104,7 @@ var scenery = scenery || {};
     upEvent: function( finger, event ) {
       var trail = this.scene.trailUnderPoint( finger.point ) || new scenery.Trail( this.scene );
       
-      this.dispatchEvent( trail, 'up', finger, event );
+      this.dispatchEvent( trail, 'up', finger, event, true );
       
       finger.trail = trail;
     },
@@ -112,7 +112,7 @@ var scenery = scenery || {};
     downEvent: function( finger, event ) {
       var trail = this.scene.trailUnderPoint( finger.point ) || new scenery.Trail( this.scene );
       
-      this.dispatchEvent( trail, 'down', finger, event );
+      this.dispatchEvent( trail, 'down', finger, event, true );
       
       finger.trail = trail;
     },
@@ -120,6 +120,8 @@ var scenery = scenery || {};
     moveEvent: function( finger, event ) {
       var trail = this.scene.trailUnderPoint( finger.point ) || new scenery.Trail( this.scene );
       var oldTrail = finger.trail || new scenery.Trail( this.scene );
+      
+      var lastNodeChanged = oldTrail.lastNode() !== trail.lastNode();
       
       var branchIndex;
       
@@ -129,16 +131,29 @@ var scenery = scenery || {};
         }
       }
       
-      // TODO: if a node gets moved down 1 depth, it may see both an exit and enter?
-      // TODO: Don't bubble these!
-      if ( oldTrail.length > branchIndex ) {
-        this.dispatchEvent( oldTrail.slice( 0, branchIndex + 1 ), 'exit', finger, event );
-      }
-      if ( trail.length > branchIndex ) {
-        this.dispatchEvent( trail.slice( 0, branchIndex + 1 ), 'enter', finger, event );
+      if ( lastNodeChanged ) {
+        this.dispatchEvent( oldTrail, 'out', finger, event, true );
       }
       
-      this.dispatchEvent( trail, 'move', finger, event );
+      // we want to approximately mimic http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
+      // TODO: if a node gets moved down 1 depth, it may see both an exit and enter?
+      if ( oldTrail.length > branchIndex ) {
+        for ( var oldIndex = branchIndex; oldIndex < oldTrail.length; oldIndex++ ) {
+          this.dispatchEvent( oldTrail.slice( 0, oldIndex + 1 ), 'exit', finger, event, false );
+        }
+      }
+      if ( trail.length > branchIndex ) {
+        for ( var newIndex = branchIndex; newIndex < trail.length; newIndex++ ) {
+          this.dispatchEvent( trail.slice( 0, newIndex + 1 ), 'enter', finger, event, false );
+        }
+      }
+      
+      if ( lastNodeChanged ) {
+        this.dispatchEvent( trail, 'over', finger, event, true );
+      }
+      
+      // TODO: move the 'move' event to before the others, matching http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order ?
+      this.dispatchEvent( trail, 'move', finger, event, true );
       
       finger.trail = trail;
     },
@@ -146,12 +161,12 @@ var scenery = scenery || {};
     cancelEvent: function( finger, event ) {
       var trail = this.scene.trailUnderPoint( finger.point );
       
-      this.dispatchEvent( trail, 'cancel', finger, event );
+      this.dispatchEvent( trail, 'cancel', finger, event, true );
       
       finger.trail = trail;
     },
     
-    dispatchEvent: function( trail, type, finger, event ) {
+    dispatchEvent: function( trail, type, finger, event, bubbles ) {
       // TODO: is there a way to make this event immutable?
       var inputEvent = new Event( {
         trail: trail,
@@ -167,7 +182,7 @@ var scenery = scenery || {};
       
       // if not yet handled, run through the trail in order to see if one of them will handle the event
       // at the base of the trail should be the scene node, so the scene will be notified last
-      this.dispatchToTargets( trail, type, inputEvent );
+      this.dispatchToTargets( trail, type, inputEvent, bubbles );
     },
     
     dispatchToFinger: function( type, finger, inputEvent ) {
@@ -190,12 +205,12 @@ var scenery = scenery || {};
       }
     },
     
-    dispatchToTargets: function( trail, type, inputEvent ) {
+    dispatchToTargets: function( trail, type, inputEvent, bubbles ) {
       if ( inputEvent.aborted || inputEvent.handled ) {
         return;
       }
       
-      for ( var i = trail.length - 1; i >= 0; i-- ) {
+      for ( var i = trail.length - 1; i >= 0; bubbles ? i-- : i = -1 ) {
         var target = trail.nodes[i];
         inputEvent.currentTarget = target;
         
