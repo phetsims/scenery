@@ -15,7 +15,9 @@ var scenery = scenery || {};
    * Allowed options: {
    *    allowTouchSnag: false // allow touch swipes across an object to pick it up,
    *    start: null           // if non-null, called when a drag is started. start( finger, trail, event )
-   *    end: null             // if non-null, called when a drag is ended.   end( finger, trail, event )
+   *    drag:  null           // if non-null, called when the user moves something with a drag (not a start or end event).
+   *                                                                         drag( finger, trail, event )
+   *    end:   null           // if non-null, called when a drag is ended.   end( finger, trail, event )
    * }
    */
   scenery.SimpleDragHandler = function( options ) {
@@ -77,6 +79,11 @@ var scenery = scenery || {};
         // prepend the translation on the node, so we can ignore whatever other transform state the node has
         handler.node.translate( handler.transform.inverseDelta2( handler.finger.point.minus( handler.lastDragPoint ) ), true );
         handler.lastDragPoint = handler.finger.point;
+        
+        if ( this.options.drag ) {
+          // TODO: consider adding in a delta to the listener
+          this.options.drag( handler.finger, handler.trail, event );
+        }
       }
     };
   };
