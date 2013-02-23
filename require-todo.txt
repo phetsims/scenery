@@ -7,3 +7,6 @@ requestAnimationFrame
 Rename main.js to scenery.js so it's easy to pull require( 'SCENERY/scenery' ) for full API access
 
 'mangle' off for the standalone/development versions
+
+require() is failing silently if the dependency is circular. consider throwing an error in that case?
+require() || throw Error( 'bad dependency!' ); -- can't inline, otherwise discovery won't work
