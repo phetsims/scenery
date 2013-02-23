@@ -321,4 +321,5 @@ define( function( require ) {
     }
   };
   
+  return Util;
 } );
