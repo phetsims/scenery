@@ -1,0 +1,3 @@
+[submodule "common/dot"]
+	path = common/dot
+	url = https://github.com/phetsims/dot.git
