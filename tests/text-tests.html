@@ -14,8 +14,8 @@
   <script src="../contrib/canvg/canvg.js"></script>
   
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
-  <script src="../scenery.js"></script>
-  <!-- <script src="../scenery-min.js"></script> -->
+  <script src="../dist/standalone/scenery.js"></script>
+  <!-- <script src="../dist/standalone/scenery.min.js"></script> -->
   
   <style type="text/css">
     /* Let content go to the edges */
@@ -90,11 +90,11 @@
   
   var svgText = document.getElementById( 'gA' );
   var svgBox = svgText.getBBox();
-  var svgBoundsA = new phet.math.Bounds2( svgBox.x, svgBox.y, svgBox.x + svgBox.width, svgBox.y + svgBox.height );
+  var svgBoundsA = new dot.Bounds2( svgBox.x, svgBox.y, svgBox.x + svgBox.width, svgBox.y + svgBox.height );
   console.log( 'svg A: ' + svgBoundsA.toString() + ' (' + svgBoundsA.width() + ',' + svgBoundsA.height() + ')' );
   svgText = document.getElementById( 'gB' );
   svgBox = svgText.getBBox();
-  var svgBoundsB = new phet.math.Bounds2( svgBox.x / 5, svgBox.y / 5, ( svgBox.x + svgBox.width) / 5, ( svgBox.y + svgBox.height ) / 5 );
+  var svgBoundsB = new dot.Bounds2( svgBox.x / 5, svgBox.y / 5, ( svgBox.x + svgBox.width) / 5, ( svgBox.y + svgBox.height ) / 5 );
   console.log( 'svg B: ' + svgBoundsB.toString() + ' (' + svgBoundsB.width() + ',' + svgBoundsB.height() + ')' );
   
   var main = $( '#main' );
@@ -142,7 +142,7 @@
   
   var span = document.getElementById( 'textSpan' );
   var spanRect = span.getBoundingClientRect();
-  var spanBounds = new phet.math.Bounds2( spanRect.left, spanRect.top, spanRect.right, spanRect.bottom );
+  var spanBounds = new dot.Bounds2( spanRect.left, spanRect.top, spanRect.right, spanRect.bottom );
   console.log( 'DOM span A: ' + spanBounds.toString() + ' (' + spanBounds.width() + ',' + spanBounds.height() + ')' );
   console.log( 'span.clientWidth: ' + span.clientWidth );
   console.log( 'span.clientHeight: ' + span.clientHeight );
@@ -151,7 +151,7 @@
   
   var baselineSpan = document.getElementById( 'baselineSpan' );
   var baselineSpanRect = baselineSpan.getBoundingClientRect();
-  var baselineSpanBounds = new phet.math.Bounds2( baselineSpanRect.left, baselineSpanRect.top, baselineSpanRect.right, baselineSpanRect.bottom );
+  var baselineSpanBounds = new dot.Bounds2( baselineSpanRect.left, baselineSpanRect.top, baselineSpanRect.right, baselineSpanRect.bottom );
   console.log( 'DOM baseline A: ' + baselineSpanBounds.toString() + ' (' + baselineSpanBounds.width() + ',' + baselineSpanBounds.height() + ')' );
   console.log( 'baselineSpan.clientWidth: ' + baselineSpan.clientWidth );
   console.log( 'baselineSpan.clientHeight: ' + baselineSpan.clientHeight );
@@ -220,7 +220,7 @@
     
     document.body.appendChild( svg );
     var rect = textElement.getBBox();
-    var result = new phet.math.Bounds2( rect.x, rect.y, rect.x + rect.width, rect.y + rect.height );
+    var result = new dot.Bounds2( rect.x, rect.y, rect.x + rect.width, rect.y + rect.height );
     document.body.removeChild( svg );
     
     return result;
@@ -228,7 +228,7 @@
   
   function domApproximate( textNode ) {
     // TODO: we can also technically support 'top' using vertical-align: top and line-height: 0 with the image, but it won't usually render otherwise
-    phet.assert( textNode.textBaseline === 'alphabetic' );
+    // assert( textNode.textBaseline === 'alphabetic' );
     
     var maxHeight = 1024; // technically this will fail if the font is taller than this!
     var isRTL = textNode.direction === 'rtl';
@@ -265,7 +265,7 @@
     
     document.body.appendChild( div );
     var rect = span.getBoundingClientRect();
-    var result = new phet.math.Bounds2( rect.left, rect.top - maxHeight, rect.right, rect.bottom - maxHeight );
+    var result = new dot.Bounds2( rect.left, rect.top - maxHeight, rect.right, rect.bottom - maxHeight );
     document.body.removeChild( div );
     
     var width = rect.right - rect.left;

@@ -14,8 +14,8 @@
   <script src="../contrib/canvg/canvg.js"></script>
   
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
-  <script src="../scenery.js"></script>
-  <!-- <script src="../scenery-min.js"></script> -->
+  <script src="../dist/standalone/scenery.js"></script>
+  <!-- <script src="../dist/standalone/scenery.min.js"></script> -->
   
   <style type="text/css">
     /* Let content go to the edges */
@@ -84,11 +84,11 @@
     textNode.fill = 'rgba(255,255,255,0.6)';
     
     container.addChild( new scenery.Path( {
-      shape: scenery.Shape.lineSegment( new phet.math.Vector2( 5, 0.5 ), new phet.math.Vector2( -5, 0.5 ) ),
+      shape: scenery.Shape.lineSegment( new dot.Vector2( 5, 0.5 ), new dot.Vector2( -5, 0.5 ) ),
       stroke: 'rgba(0,0,0,0.5)'
     } ) );
     container.addChild( new scenery.Path( {
-      shape: scenery.Shape.lineSegment( new phet.math.Vector2( 0.5, 5 ), new phet.math.Vector2( 0.5, -5 ) ),
+      shape: scenery.Shape.lineSegment( new dot.Vector2( 0.5, 5 ), new dot.Vector2( 0.5, -5 ) ),
       stroke: 'rgba(0,0,0,0.5)'
     } ) );
     
