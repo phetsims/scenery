@@ -14,14 +14,14 @@ module.exports = function( grunt ) {
     
     concat: {
       standalone: {
-        src: [ "contrib/almond.js", "dist/standalone/scenery.min.js" ],
-        dest: "dist/standalone/scenery.min.js"
+        src: [ "contrib/almond.js", "dist/standalone/scenery.js" ],
+        dest: "dist/standalone/scenery.js"
       }
     },
     
     uglify: {
       standalone: {
-        src: [ 'dist/standalone/scenery.min.js' ],
+        src: [ 'dist/standalone/scenery.js' ],
         dest: 'dist/standalone/scenery.min.js'
       }
     },
@@ -30,9 +30,10 @@ module.exports = function( grunt ) {
       standalone: {
         options: {
           mainConfigFile: "js/config.js",
-          out: "dist/standalone/scenery.min.js",
+          out: "dist/standalone/scenery.js",
           name: "config",
-          optimize: 'uglify2',
+          // optimize: 'uglify2',
+          optimize: 'none',
           wrap: {
             start: "(function() {",
             end: " window.scenery = require( 'main' ); }());"
