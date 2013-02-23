@@ -20,15 +20,15 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  var Trail = require( 'SCENERY/Trail' );
-  var Mouse = require( 'SCENERY/Mouse' );
-  var Touch = require( 'SCENERY/Touch' );
-  var Event = require( 'SCENERY/Event' );
+  require( 'SCENERY/Trail' );
+  require( 'SCENERY/Mouse' );
+  require( 'SCENERY/Touch' );
+  require( 'SCENERY/Event' );
   
   scenery.Input = function( scene ) {
     this.scene = scene;
     
-    this.mouse = new Mouse();
+    this.mouse = new scenery.Mouse();
     
     this.fingers = [ this.mouse ];
   };
@@ -81,7 +81,7 @@ define( function( require ) {
     
     // called for each touch point
     touchStart: function( id, point, event ) {
-      var touch = new Touch( id, point, event );
+      var touch = new scenery.Touch( id, point, event );
       this.addFinger( touch );
       this.downEvent( touch, event );
     },
@@ -108,7 +108,7 @@ define( function( require ) {
     
     
     upEvent: function( finger, event ) {
-      var trail = this.scene.trailUnderPoint( finger.point ) || new Trail( this.scene );
+      var trail = this.scene.trailUnderPoint( finger.point ) || new scenery.Trail( this.scene );
       
       this.dispatchEvent( trail, 'up', finger, event, true );
       
@@ -116,7 +116,7 @@ define( function( require ) {
     },
     
     downEvent: function( finger, event ) {
-      var trail = this.scene.trailUnderPoint( finger.point ) || new Trail( this.scene );
+      var trail = this.scene.trailUnderPoint( finger.point ) || new scenery.Trail( this.scene );
       
       this.dispatchEvent( trail, 'down', finger, event, true );
       
@@ -124,8 +124,8 @@ define( function( require ) {
     },
     
     moveEvent: function( finger, event ) {
-      var trail = this.scene.trailUnderPoint( finger.point ) || new Trail( this.scene );
-      var oldTrail = finger.trail || new Trail( this.scene );
+      var trail = this.scene.trailUnderPoint( finger.point ) || new scenery.Trail( this.scene );
+      var oldTrail = finger.trail || new scenery.Trail( this.scene );
       
       var lastNodeChanged = oldTrail.lastNode() !== trail.lastNode();
       
@@ -174,7 +174,7 @@ define( function( require ) {
     
     dispatchEvent: function( trail, type, finger, event, bubbles ) {
       // TODO: is there a way to make this event immutable?
-      var inputEvent = new Event( {
+      var inputEvent = new scenery.Event( {
         trail: trail,
         type: type,
         finger: finger,

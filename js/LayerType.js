@@ -7,6 +7,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
+  // static references needed for type initialization
   var CanvasLayer = require( 'SCENERY/CanvasLayer' );
   var DOMLayer = require( 'SCENERY/DOMLayer' );
   var SVGLayer = require( 'SCENERY/SVGLayer' );

@@ -10,7 +10,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  var Finger = require( 'SCENERY/Finger' );
+  var Finger = require( 'SCENERY/Finger' ); // inherits from Finger
   
   scenery.Mouse = function() {
     Finger.call( this );

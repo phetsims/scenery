@@ -15,7 +15,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  var Node = require( 'SCENERY/Node' );
+  var Node = require( 'SCENERY/Node' ); // DOM inherits from Node
   var LayerType = require( 'SCENERY/LayerType' );
   var objectCreate = require( 'SCENERY/Util' ).objectCreate;
   

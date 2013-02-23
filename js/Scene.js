@@ -11,10 +11,11 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
-  var scenery = require( 'SCENERY/scenery' );
-  
   var Bounds2 = require( 'DOT/Bounds2' );
   var Vector2 = require( 'DOT/Vector2' );
+  
+  var scenery = require( 'SCENERY/scenery' );
+  
   var Node = require( 'SCENERY/Node' );
   var Trail = require( 'SCENERY/Trail' );
   var TrailPointer = require( 'SCENERY/TrailPointer' );

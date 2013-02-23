@@ -13,7 +13,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  var Finger = require( 'SCENERY/Finger' );
+  var Finger = require( 'SCENERY/Finger' ); // Inherits from Finger
   
   scenery.Key = function( key, event ) {
     Finger.call( this );

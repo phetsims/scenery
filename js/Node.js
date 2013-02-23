@@ -15,14 +15,13 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
-  var scenery = require( 'SCENERY/scenery' );
-  
   var Bounds2 = require( 'DOT/Bounds2' );
   var Transform3 = require( 'DOT/Transform3' );
   var Matrix3 = require( 'DOT/Matrix3' );
-  var Shape = require( 'SCENERY/Shape' );
+  
+  var scenery = require( 'SCENERY/scenery' );
+  var LayerStrategy = require( 'SCENERY/LayerStrategy' ); // used to set the default layer strategy on the prototype
   require( 'SCENERY/Trail' );
-  var LayerStrategy = require( 'SCENERY/LayerStrategy' );
   
   var globalIdCounter = 1;
   

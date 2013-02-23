@@ -17,8 +17,8 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  var Node = require( 'SCENERY/Node' );
-  var LayerType = require( 'SCENERY/LayerType' );
+  var Node = require( 'SCENERY/Node' ); // Image inherits from Node
+  var LayerType = require( 'SCENERY/LayerType' ); // we need to specify the LayerType in the prototype
   var objectCreate = require( 'SCENERY/Util' ).objectCreate;
   
   scenery.Image = function( image, options ) {

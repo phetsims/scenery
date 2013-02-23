@@ -21,10 +21,10 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  var Layer = require( 'SCENERY/Layer' );
-  var RenderState = require( 'SCENERY/RenderState' );
-  var Shape = require( 'SCENERY/Shape' );
-  var Trail = require( 'SCENERY/Trail' );
+  var Layer = require( 'SCENERY/Layer' ); // uses Layer's prototype for inheritance
+  require( 'SCENERY/RenderState' );
+  require( 'SCENERY/Shape' );
+  require( 'SCENERY/Trail' );
   
   // assumes main is wrapped with JQuery
   scenery.CanvasLayer = function( args ) {
@@ -79,7 +79,7 @@ define( function( require ) {
         return;
       }
       
-      var state = new RenderState( scene );
+      var state = new scenery.RenderState( scene );
       state.layer = this;
       
       // switch to an identity transform
@@ -94,7 +94,7 @@ define( function( require ) {
         this.clearGlobalBounds( visibleDirtyBounds );
         
         if ( !args.fullRender ) {
-          state.pushClipShape( Shape.bounds( visibleDirtyBounds ) );
+          state.pushClipShape( scenery.Shape.bounds( visibleDirtyBounds ) );
         }
         
         // dirty bounds (clear, possibly set restricted bounds and handling for that)
@@ -126,7 +126,7 @@ define( function( require ) {
       // if the pointer is 'before' the node, don't call its enterState since this will be taken care of as the first step.
       // if the pointer is 'after' the node, call enterState since it will call exitState immediately inside the loop
       var startWalkLength = startPointer.trail.length - ( startPointer.isBefore ? 1 : 0 );
-      boundaryTrail = new Trail();
+      boundaryTrail = new scenery.Trail();
       for ( i = 0; i < startWalkLength; i++ ) {
         boundaryTrail.addDescendant( startPointer.trail.nodes[i] );
         startPointer.trail.nodes[i].enterState( state, boundaryTrail );
