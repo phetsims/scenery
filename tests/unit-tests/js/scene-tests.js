@@ -32,7 +32,7 @@
     var canvas = document.createElement( 'canvas' );
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
-    var context = phet.canvas.initCanvas( canvas );
+    var context = canvas.getContext( '2d' );
     scene.renderToCanvas( canvas, context );
     var data = context.getImageData( 0, 0, canvasWidth, canvasHeight );
     return data;
@@ -42,7 +42,7 @@
     var canvas = document.createElement( 'canvas' );
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
-    var context = phet.canvas.initCanvas( canvas );
+    var context = canvas.getContext( '2d' );
     context.putImageData( snapshot, 0, 0 );
     $( canvas ).css( 'border', '1px solid black' );
     return canvas;
@@ -179,7 +179,7 @@
       var canvas = document.createElement( 'canvas' );
       canvas.width = Math.ceil( bestBounds.width() + pad * 2 ) * scaling;
       canvas.height = Math.ceil( bestBounds.height() + pad * 2 ) * scaling;
-      var context = phet.canvas.initCanvas( canvas );
+      var context = canvas.getContext( '2d' );
       context.scale( scaling, scaling );
       context.translate( pad - bestBounds.x(), pad - bestBounds.y() ); // center the text in our bounds
       
@@ -273,7 +273,7 @@
   
   test( 'Canvas 2D Context and Features', function() {
     var canvas = document.createElement( 'canvas' );
-    var context = phet.canvas.initCanvas( canvas );
+    var context = canvas.getContext( '2d' );
     
     ok( context, 'context' );
     
@@ -548,7 +548,7 @@
   
   test( 'Text width measurement in canvas', function() {
     var canvas = document.createElement( 'canvas' );
-    var context = phet.canvas.initCanvas( canvas );
+    var context = canvas.getContext( '2d' );
     var metrics = context.measureText('Hello World');
     ok( metrics.width, 'metrics.width' );
   } );
@@ -1050,7 +1050,7 @@
     
     test( 'Canvas 2D v5 Features', function() {
       var canvas = document.createElement( 'canvas' );
-      var context = phet.canvas.initCanvas( canvas );
+      var context = canvas.getContext( '2d' );
       
       var neededMethods = [
         'addHitRegion',
@@ -1069,7 +1069,7 @@
        
     test( 'Text width measurement in canvas', function() {
       var canvas = document.createElement( 'canvas' );
-      var context = phet.canvas.initCanvas( canvas );
+      var context = canvas.getContext( '2d' );
       var metrics = context.measureText('Hello World');
       _.each( [ 'actualBoundingBoxLeft', 'actualBoundingBoxRight', 'actualBoundingBoxAscent', 'actualBoundingBoxDescent' ], function( method ) {
         ok( metrics[method] !== undefined, 'metrics.' + method );

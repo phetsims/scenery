@@ -36,7 +36,7 @@ module.exports = function( grunt ) {
           optimize: 'none',
           wrap: {
             start: "(function() {",
-            end: " window.scenery = require( 'main' ); }());"
+            end: " window.scenery = require( 'main' ); window.dot = require( 'DOT/main' ); }());"
           }
         }
       },
