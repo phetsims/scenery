@@ -397,26 +397,6 @@ $(document).ready( function() {
           
         };
       }
-    },{
-      // should bog down in non-production versions
-      typeName: 'Debug Speed',
-      typeId: 'debugSpeed',
-      init: function( main ) {
-        return function( timeElapsed ) {
-          for ( var i = 0; i < 100; i++ ) {
-            phet.debugAssert( function() {
-              var array = [];
-              for ( var i = 0; i < 100; i++ ) {
-                array.push( Math.random() );
-              }
-              for ( var k = 0; k < 500; k++ ) {
-                _.shuffle( array );
-              }
-              return true;
-            }, 'Message Never Seen' );
-          }
-        };
-      }
     }]
   },{
     testName: 'Layers',
