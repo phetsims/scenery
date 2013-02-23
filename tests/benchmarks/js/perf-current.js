@@ -25,7 +25,7 @@
         this.scene = scene;
       },
       step: function() {
-        this.scene.rotateAround( new phet.math.Vector2( this.width / 2, this.height / 2 ), 0.1 );
+        this.scene.rotateAround( new dot.Vector2( this.width / 2, this.height / 2 ), 0.1 );
         this.scene.updateScene();
       },
       after: function() {
@@ -57,7 +57,7 @@
         this.scene = scene;
       },
       step: function() {
-        this.scene.rotateAround( new phet.math.Vector2( this.width / 2, this.height / 2 ), 0.1 );
+        this.scene.rotateAround( new dot.Vector2( this.width / 2, this.height / 2 ), 0.1 );
         this.scene.updateScene();
       },
       after: function() {

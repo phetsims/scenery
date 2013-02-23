@@ -2,8 +2,8 @@ $( document ).ready( function () {
   var model = phet.moleculeshapes.model;
 
   var Property = phet.model.Property;
-  var Dimension2 = phet.math.Dimension2;
-  var Vector3 = phet.math.Vector3;
+  var Dimension2 = dot.Dimension2;
+  var Vector3 = dot.Vector3;
 
   // whether we should attempt to use WebGL first
   var preferGL = true;
@@ -94,10 +94,10 @@ $( document ).ready( function () {
   // plain dimension
   var stageSize = new Dimension2( 1008, 676 ); // dimensions from the desktop Molecule Shapes version
 
-  var canvasTransform = new phet.math.StageCenteringCanvasTransform( canvasSize, stageSize );
+  var canvasTransform = new dot.StageCenteringCanvasTransform( canvasSize, stageSize );
 
   var scene = new phet.webgl.GLNode();
-  scene.transform.append( phet.math.Matrix4.translation( mainTranslation.x, mainTranslation.y, mainTranslation.z ) );
+  scene.transform.append( dot.Matrix4.translation( mainTranslation.x, mainTranslation.y, mainTranslation.z ) );
 
   var moleculeNode;
   if ( useGL ) {
@@ -127,7 +127,7 @@ $( document ).ready( function () {
     var fieldOfViewRadians = ( fieldOfViewDegrees / 180 * Math.PI );
     var correctedFieldOfViewRadians = Math.atan( canvasTransform.fieldOfViewYFactor() * Math.tan( fieldOfViewRadians ) );
 
-    return phet.math.Matrix4.gluPerspective( correctedFieldOfViewRadians,
+    return dot.Matrix4.gluPerspective( correctedFieldOfViewRadians,
                          canvasSize.get().width / canvasSize.get().height,
                          nearPlane, farPlane );
   }
@@ -163,7 +163,7 @@ $( document ).ready( function () {
       args.useGL = useGL;
       args.shaderProgram = shaderProgram;
 
-//      scene.transform.append( phet.math.Matrix4.rotationY( (Math.PI / 2 * timeElapsed) ) );
+//      scene.transform.append( dot.Matrix4.rotationY( (Math.PI / 2 * timeElapsed) ) );
 
       scene.render( args );
     }
@@ -207,8 +207,8 @@ $( document ).ready( function () {
     uiContext.strokeStyle = '#00FF00';
     uiContext.lineWidth = 1;
 
-    var topLeft = canvasTransform.transform.get().transformPosition3( new phet.math.Vector3( 0, 0, 0 ) );
-    var bottomRight = canvasTransform.transform.get().transformPosition3( new phet.math.Vector3( stageSize.width, stageSize.height, 0 ) );
+    var topLeft = canvasTransform.transform.get().transformPosition3( new dot.Vector3( 0, 0, 0 ) );
+    var bottomRight = canvasTransform.transform.get().transformPosition3( new dot.Vector3( stageSize.width, stageSize.height, 0 ) );
     uiContext.strokeRect( topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y );
   }
 

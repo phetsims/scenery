@@ -37,7 +37,7 @@ phet.tests = phet.tests || {};
     context.fillStyle = '#000';
     context.fillText( str, x, y );
     
-    var testTransform = phet.math.Matrix3.translation( 50, 150 ).timesMatrix( phet.math.Matrix3.scaling( 10, 0.1 ) );
+    var testTransform = dot.Matrix3.translation( 50, 150 ).timesMatrix( dot.Matrix3.scaling( 10, 0.1 ) );
     testTransform.canvasSetTransform( context );
     context.fillText( 'This is a test string', 0, 0 );
     

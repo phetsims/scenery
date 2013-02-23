@@ -22,7 +22,7 @@ phet.moleculeshapes.model = phet.moleculeshapes.model || {};
   var GeometryConfiguration = phet.moleculeshapes.model.GeometryConfiguration;
 
   var Strings = phet.moleculeshapes.strings;
-  var Vector3 = phet.math.Vector3;
+  var Vector3 = dot.Vector3;
 
   var geometries = {
     0: new GeometryConfiguration( Strings.GEOMETRY__EMPTY, [] ),

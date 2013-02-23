@@ -11,7 +11,7 @@ phet.moleculeshapes.model = phet.moleculeshapes.model || {};
 // create a new scope
 (function () {
   var Property = phet.model.Property;
-  var Vector3 = phet.math.Vector3;
+  var Vector3 = dot.Vector3;
 
   var nextId = 0;
 

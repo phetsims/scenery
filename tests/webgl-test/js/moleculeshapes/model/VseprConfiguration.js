@@ -99,7 +99,7 @@ phet.moleculeshapes.model = phet.moleculeshapes.model || {};
   var VseprConfiguration = phet.moleculeshapes.model.VseprConfiguration;
 
   var Strings = phet.moleculeshapes.strings;
-  var Vector3 = phet.math.Vector3;
+  var Vector3 = dot.Vector3;
 
   VseprConfiguration.prototype = {
     constructor: VseprConfiguration,
@@ -131,7 +131,7 @@ phet.moleculeshapes.model = phet.moleculeshapes.model || {};
       var idealModelBondVectors = this.getIdealBondUnitVectors();
 
       // currently only called when a real molecule is built, so we don't try to pass a lastPermutation in (not helpful)
-      return model.AttractorModel.findClosestMatchingConfiguration( model.AttractorModel.getOrientationsFromOrigin( groups ), idealModelBondVectors, phet.math.Permutation.permutations( idealModelBondVectors.length ) );
+      return model.AttractorModel.findClosestMatchingConfiguration( model.AttractorModel.getOrientationsFromOrigin( groups ), idealModelBondVectors, dot.Permutation.permutations( idealModelBondVectors.length ) );
     },
 
     equals: function ( other ) {

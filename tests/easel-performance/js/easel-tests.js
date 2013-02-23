@@ -111,9 +111,9 @@ $(document).ready( function() {
         var scene = new scenery.Scene( main );
         
         var mainCurve = new scenery.Shape.Segment.Quadratic(
-          new phet.math.Vector2( 100, 100 ),
-          new phet.math.Vector2( 230, 100 ),
-          new phet.math.Vector2( 150, 350 )
+          new dot.Vector2( 100, 100 ),
+          new dot.Vector2( 230, 100 ),
+          new dot.Vector2( 150, 350 )
         );
         
         // TODO: a way to pass an array and run commands without explicitly adding pieces?

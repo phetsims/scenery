@@ -61,16 +61,16 @@ phet.moleculeshapes.view = phet.moleculeshapes.view || {};
 //    var bondSq2 = bondDistance / Math.sqrt( 2 );
 //
 //    var sphere2 = new phet.webgl.Sphere( gl, defaultAtomRadius, 25, 25 );
-//    sphere2.transform.append( phet.math.Matrix4.translation( -bondSq2, bondSq2, 0 ) );
+//    sphere2.transform.append( dot.Matrix4.translation( -bondSq2, bondSq2, 0 ) );
 //    sphere2.wrappers.push( whiteColorWrapper );
 //
 //    var sphere3 = new phet.webgl.Sphere( gl, defaultAtomRadius, 25, 25 );
-//    sphere3.transform.append( phet.math.Matrix4.translation( bondSq2, -bondSq2, 0 ) );
+//    sphere3.transform.append( dot.Matrix4.translation( bondSq2, -bondSq2, 0 ) );
 //    sphere3.wrappers.push( whiteColorWrapper );
 //
 //    var cylinder = new phet.webgl.Cylinder( gl, defaultBondRadius, bondDistance * 2, 16, 1 );
-//    cylinder.transform.append( phet.math.Matrix4.rotationZ( Math.PI / 4 ) );
-//    cylinder.transform.append( phet.math.Matrix4.rotationX( Math.PI / 2 ) );
+//    cylinder.transform.append( dot.Matrix4.rotationZ( Math.PI / 4 ) );
+//    cylinder.transform.append( dot.Matrix4.rotationX( Math.PI / 2 ) );
 //    cylinder.wrappers.push( whiteColorWrapper );
 //
 //    this.addChild( sphere1 );
@@ -88,7 +88,7 @@ phet.moleculeshapes.view = phet.moleculeshapes.view || {};
     var sphere = new phet.webgl.Sphere( this.gl, defaultAtomRadius, 25, 25 );
 
     // if it's the center atom
-    if ( atom.position.get().equals( phet.math.Vector3.ZERO ) ) {
+    if ( atom.position.get().equals( dot.Vector3.ZERO ) ) {
       sphere.wrappers.push( centerColorWrapper );
     }
     else {
@@ -97,7 +97,7 @@ phet.moleculeshapes.view = phet.moleculeshapes.view || {};
 
     atom.position.addObserver( function () {
       var position = atom.position.get();
-      sphere.transform.set( phet.math.Matrix4.translation( position.x, position.y, position.z ) );
+      sphere.transform.set( dot.Matrix4.translation( position.x, position.y, position.z ) );
     }, true );
 
     this.addChild( sphere );

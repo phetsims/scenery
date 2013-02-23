@@ -36,7 +36,7 @@ phet.moleculeshapes.model = phet.moleculeshapes.model || {};
     } );
     var mapping = AttractorModel.findClosestMatchingConfiguration( currentOrientations, idealOrientations, allowablePermutations, lastPermutation );
 
-    var aroundCenterAtom = center.equals( new phet.math.Vector3() );
+    var aroundCenterAtom = center.equals( new dot.Vector3() );
 
     var totalDeltaMagnitude = 0;
     var i;
@@ -99,14 +99,14 @@ phet.moleculeshapes.model = phet.moleculeshapes.model || {};
         // desired orientations
         var aTarget = mapping.target.extractVector3( aIndex ).normalized();
         var bTarget = mapping.target.extractVector3( bIndex ).normalized();
-        var targetAngle = Math.acos( phet.math.clamp( aTarget.dot( bTarget ), -1, 1 ) );
-        var currentAngle = Math.acos( phet.math.clamp( aOrientation.dot( bOrientation ), -1, 1 ) );
+        var targetAngle = Math.acos( dot.clamp( aTarget.dot( bTarget ), -1, 1 ) );
+        var currentAngle = Math.acos( dot.clamp( aOrientation.dot( bOrientation ), -1, 1 ) );
         var angleDifference = ( targetAngle - currentAngle );
 
         var dirTowardsA = a.position.get().minus( b.position.get() ).normalized();
         var timeFactor = PairGroup.getTimescaleImpulseFactor( timeElapsed );
 
-        var extraClosePushFactor = phet.math.clamp( 3 * Math.pow( Math.PI - currentAngle, 2 ) / ( Math.PI * Math.PI ), 1, 3 );
+        var extraClosePushFactor = dot.clamp( 3 * Math.pow( Math.PI - currentAngle, 2 ) / ( Math.PI * Math.PI ), 1, 3 );
 
         var push = dirTowardsA.times( timeFactor
                             * angleDifference
@@ -146,13 +146,13 @@ phet.moleculeshapes.model = phet.moleculeshapes.model || {};
     var n = currentOrientations.length; // number of total pairs
 
     // y == electron pair positions
-    var y = phet.math.Matrix.fromVectors3( currentOrientations );
+    var y = dot.Matrix.fromVectors3( currentOrientations );
     var yTransposed = y.transpose();
 
     // closure over constant variables
     function calculateTarget( permutation ) {
       // x == configuration positions
-      var x = phet.math.Matrix.fromVectors3( permutation.apply( idealOrientations ) );
+      var x = dot.Matrix.fromVectors3( permutation.apply( idealOrientations ) );
 
       // compute the rotation matrix
       var rot = AttractorModel.computeRotationMatrixWithTranspose( x, yTransposed );
@@ -211,10 +211,10 @@ phet.moleculeshapes.model = phet.moleculeshapes.model || {};
 
     // this code will loop infinitely on NaN, so we want to double-check
     phet.assert( !isNaN( s.get( 0, 0 ) ) );
-    var svd = new phet.math.SingularValueDecomposition( s );
+    var svd = new dot.SingularValueDecomposition( s );
     var det = svd.getV().times( svd.getU().transpose() ).det();
 
-    return svd.getV().times( new phet.math.Matrix( 3, 3, [1, 0, 0, 0, 1, 0, 0, 0, det] ).times( svd.getU().transpose() ) );
+    return svd.getV().times( new dot.Matrix( 3, 3, [1, 0, 0, 0, 1, 0, 0, 0, det] ).times( svd.getU().transpose() ) );
   };
 
   // double error, Matrix target, Permutation permutation, Matrix rotation
@@ -229,7 +229,7 @@ phet.moleculeshapes.model = phet.moleculeshapes.model || {};
     constructor: AttractorModel.ResultMapping,
 
     rotateVector: function ( v ) {
-      var x = phet.math.Matrix.columnVector3( v );
+      var x = dot.Matrix.columnVector3( v );
       var rotated = this.rotation.times( x );
       return rotated.extractVector3( 0 );
     }

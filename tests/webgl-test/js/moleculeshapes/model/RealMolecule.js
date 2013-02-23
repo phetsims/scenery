@@ -14,7 +14,7 @@ phet.moleculeshapes.model = phet.moleculeshapes.model || {};
 (function () {
 
   var model = phet.moleculeshapes.model;
-  var Vector3 = phet.math.Vector3;
+  var Vector3 = dot.Vector3;
 
   phet.moleculeshapes.model.RealMolecule = function ( realMolecule ) {
     var i, group;

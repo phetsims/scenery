@@ -73,7 +73,7 @@ phet.moleculeshapes.model = phet.moleculeshapes.model || {};
   // NOTE: I recommended double or triple bonds being put in "higher repulsion" spots over single bonds, but this was specifically rejected. -JO
   LocalShape.vseprPermutations = function ( neighbors ) {
     var permutations = [];
-    permutations.push( phet.math.Permutation.identity( neighbors.length ) );
+    permutations.push( dot.Permutation.identity( neighbors.length ) );
 
     var indexOf = function ( group ) {
       return neighbors.indexOf( group );
@@ -98,7 +98,7 @@ phet.moleculeshapes.model = phet.moleculeshapes.model || {};
   // allow switching of lone pairs with each other, and all other types of bonds with the same type of element
   LocalShape.realPermutations = function ( neighbors ) {
     var permutations = [];
-    permutations.add( phet.math.Permutation.identity( neighbors.length ) );
+    permutations.add( dot.Permutation.identity( neighbors.length ) );
 
     var indexOf = function ( group ) {
       return neighbors.indexOf( group );

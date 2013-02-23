@@ -17,7 +17,7 @@ phet.moleculeshapes.model = phet.moleculeshapes.model || {};
 (function () {
 
   var model = phet.moleculeshapes.model;
-  var Vector3 = phet.math.Vector3;
+  var Vector3 = dot.Vector3;
 
   phet.moleculeshapes.model.RealMoleculeShape = function ( displayName, simplifiedBondLength ) {
     this.displayName = displayName;
@@ -138,7 +138,7 @@ phet.moleculeshapes.model = phet.moleculeshapes.model || {};
     shape.addCentralAtom( new Atom3D( B, new Vector3(), 1 ) );
     var axialBondLength = 1.689;
     var radialBondLength = 1.774;
-    var angle = phet.math.toRadians( 84.8 );
+    var angle = dot.toRadians( 84.8 );
     var radialDistance = Math.sin( angle ) * radialBondLength;
     var axialDistance = Math.cos( angle ) * radialBondLength;
     shape.addRadialAtom( new Atom3D( F, new Vector3( 0, -axialBondLength, 0 ), 3 ), 1 );
@@ -160,7 +160,7 @@ phet.moleculeshapes.model = phet.moleculeshapes.model || {};
   RealMoleculeShape.CHLORINE_TRIFLUORIDE = createMoleculeShape( "ClF3", 1.698, function ( shape ) {
     shape.addCentralAtom( new Atom3D( Cl, new Vector3(), 2 ) );
     shape.addRadialAtom( new Atom3D( F, new Vector3( 0, -1.598, 0 ), 3 ), 1 );
-    var radialAngle = phet.math.toRadians( 87.5 );
+    var radialAngle = dot.toRadians( 87.5 );
     var radialBondLength = 1.698;
     var radialDistance = Math.sin( radialAngle ) * radialBondLength;
     var axialDistance = Math.cos( radialAngle ) * radialBondLength;
@@ -177,7 +177,7 @@ phet.moleculeshapes.model = phet.moleculeshapes.model || {};
   RealMoleculeShape.WATER = createMoleculeShape( "H2O", 0.957, function ( shape ) {
     shape.addCentralAtom( new Atom3D( O, new Vector3(), 2 ) );
     var radialBondLength = 0.957;
-    var radialAngle = phet.math.toRadians( 104.5 ) / 2;
+    var radialAngle = dot.toRadians( 104.5 ) / 2;
     shape.addRadialAtom( new Atom3D( H, new Vector3( Math.sin( radialAngle ), -Math.cos( radialAngle ), 0 ).times( radialBondLength ) ), 1 );
     shape.addRadialAtom( new Atom3D( H, new Vector3( -( Math.sin( radialAngle ) ), -Math.cos( radialAngle ), 0 ).times( radialBondLength ) ), 1 );
   } );
@@ -209,8 +209,8 @@ phet.moleculeshapes.model = phet.moleculeshapes.model || {};
 
   RealMoleculeShape.SULFUR_TETRAFLUORIDE = createMoleculeShape( "SF4", 1.595, function ( shape ) {
     shape.addCentralAtom( new Atom3D( S, new Vector3(), 1 ) );
-    var largeAngle = phet.math.toRadians( 173.1 ) / 2;
-    var smallAngle = phet.math.toRadians( 101.6 ) / 2;
+    var largeAngle = dot.toRadians( 173.1 ) / 2;
+    var smallAngle = dot.toRadians( 101.6 ) / 2;
 
     shape.addRadialAtom( new Atom3D( F, new Vector3( Math.sin( largeAngle ), -Math.cos( largeAngle ), 0 ).times( 1.646 ), 3 ), 1 );
     shape.addRadialAtom( new Atom3D( F, new Vector3( -Math.sin( largeAngle ), -Math.cos( largeAngle ), 0 ).times( 1.646 ), 3 ), 1 );
@@ -227,7 +227,7 @@ phet.moleculeshapes.model = phet.moleculeshapes.model || {};
   } );
 
   RealMoleculeShape.SULFUR_DIOXIDE = createMoleculeShape( "SO2", 1.431, function ( shape ) {
-    var bondAngle = phet.math.toRadians( 119 ) / 2;
+    var bondAngle = dot.toRadians( 119 ) / 2;
     var bondLength = 1.431;
     shape.addCentralAtom( new Atom3D( S, new Vector3(), 1 ) );
     shape.addRadialAtom( new Atom3D( O, new Vector3( Math.sin( bondAngle ), -Math.cos( bondAngle ), 0 ).times( bondLength ), 2 ), 2 );

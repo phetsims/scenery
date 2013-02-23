@@ -111,7 +111,7 @@ phet.tests = phet.tests || {};
     
     var points = _.map( _.range( 6 ), function( n ) {
       var theta = 2 * Math.PI * n / 6;
-      return new phet.math.Vector2( radius * Math.cos( theta ), radius * Math.sin( theta ) );
+      return new dot.Vector2( radius * Math.cos( theta ), radius * Math.sin( theta ) );
     } );
     
     var redSeed = _.map( _.range( count * 2 ), function( boo ) { return ( Math.random() - 0.5 ) * backgroundSize; } );

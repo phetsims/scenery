@@ -269,7 +269,7 @@ phet.moleculeshapes.model = phet.moleculeshapes.model || {};
           // last vector should be lowest energy (best bond if ambiguous), and is negated for the proper coordinate frame
           [ atom.position.get().normalized() ], // TODO: why did this have to get changed to non-negated?
           [ lonePairOrientations.get( lonePairOrientations.size() - 1 ).negated() ],
-          [phet.math.Permutation.identity( 1 ) ]
+          [dot.Permutation.identity( 1 ) ]
       );
 
       for ( var i = 0; i < quantity; i++ ) {

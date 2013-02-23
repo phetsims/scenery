@@ -9,7 +9,7 @@ phet.tests = phet.tests || {};
   var boxSizeRatio = 0.75;
   var boxTotalSize = 200;
   
-  var Matrix3 = phet.math.Matrix3;
+  var Matrix3 = dot.Matrix3;
   
   var svgNS = 'http://www.w3.org/2000/svg';
   
