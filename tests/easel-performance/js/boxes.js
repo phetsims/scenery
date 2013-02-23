@@ -30,7 +30,7 @@ phet.tests = phet.tests || {};
     baseCanvas.height = main.height();
     main.append( baseCanvas );
     
-    return phet.canvas.initCanvas( baseCanvas );
+    return baseCanvas.getContext( '2d' );
   }
   
   function buildSVG( main ) {

@@ -87,7 +87,7 @@ $(document).ready( function() {
             canvas.height = main.height();
             main.append( canvas );
             
-            var context = phet.canvas.initCanvas( canvas );
+            var context = canvas.getContext( '2d' );
           }
         };
       }
@@ -157,7 +157,7 @@ $(document).ready( function() {
         baseCanvas.height = main.height();
         main.append( baseCanvas );
         
-        var context = phet.canvas.initCanvas( baseCanvas );
+        var context = baseCanvas.getContext( '2d' );
         
         var x = baseCanvas.width / 2;
         var y = baseCanvas.height / 2;
@@ -233,7 +233,7 @@ $(document).ready( function() {
         baseCanvas.height = main.height();
         main.append( baseCanvas );
         
-        var context = phet.canvas.initCanvas( baseCanvas );
+        var context = baseCanvas.getContext( '2d' );
         
         var x = baseCanvas.width / 2;
         var y = baseCanvas.height / 2;
@@ -365,7 +365,7 @@ $(document).ready( function() {
         baseCanvas.height = main.height();
         main.append( baseCanvas );
         
-        var context = phet.canvas.initCanvas( baseCanvas );
+        var context = baseCanvas.getContext( '2d' );
         
         var angle = 0;
         
@@ -515,7 +515,7 @@ $(document).ready( function() {
     baseCanvas.height = main.height();
     main.append( baseCanvas );
     
-    return phet.canvas.initCanvas( baseCanvas );
+    return baseCanvas.getContext( '2d' );
   }
   
   // var currentTest = tests[0];

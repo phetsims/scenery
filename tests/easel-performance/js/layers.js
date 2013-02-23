@@ -127,7 +127,7 @@ phet.tests = phet.tests || {};
       zIndex += 1;
       main.append( canvas );
       
-      return phet.canvas.initCanvas( canvas );
+      return canvas.getContext( '2d' );
     }
     
     var redContext = addCanvas();
