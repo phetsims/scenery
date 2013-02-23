@@ -14,12 +14,16 @@ define( function( require ) {
   "use strict";
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
   var Bounds2 = require( 'DOT/Bounds2' );
+  
+  var Layer = require( 'SCENERY/Layer' );
+  var Trail = require( 'SCENERY/Trail' );
   
   var svgns = 'http://www.w3.org/2000/svg';
   var xlinkns = 'http://www.w3.org/1999/xlink';
   
-  scenery.SVGLayer = function( args ) {
+  var SVGLayer = function( args ) {
     var $main = args.$main;
     
     this.svg = document.createElementNS( svgns, 'svg' );
@@ -44,12 +48,10 @@ define( function( require ) {
     
     this.temporaryDebugFlagSoWeDontUpdateBoundariesMoreThanOnce = false;
     
-    scenery.Layer.call( this, args );
+    Layer.call( this, args );
   };
   
-  var SVGLayer = scenery.SVGLayer;
-  
-  SVGLayer.prototype = _.extend( {}, scenery.Layer.prototype, {
+  SVGLayer.prototype = _.extend( {}, Layer.prototype, {
     constructor: SVGLayer,
     
     applyGroup: function( node, group ) {
@@ -65,7 +67,7 @@ define( function( require ) {
     // FIXME: ordering of group trees is currently not guaranteed (this just appends right now, so they need to be ensured in the proper order)
     ensureGroupTree: function( trail ) {
       if ( !( trail.getUniqueId() in this.idGroupMap ) ) {
-        var subtrail = new scenery.Trail( trail.rootNode() );
+        var subtrail = new Trail( trail.rootNode() );
         var lastId = null;
         
         // walk a subtrail up from the root node all the way to the full trail, creating groups where necessary
@@ -96,7 +98,7 @@ define( function( require ) {
       }
       this.temporaryDebugFlagSoWeDontUpdateBoundariesMoreThanOnce = true;
       
-      scenery.Layer.prototype.updateBoundaries.call( this, entry );
+      Layer.prototype.updateBoundaries.call( this, entry );
       
       var layer = this;
       
@@ -221,6 +223,8 @@ define( function( require ) {
       return 'svg';
     }
   } );
+  
+  return SVGLayer;
 } );
 
 

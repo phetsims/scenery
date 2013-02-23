@@ -20,6 +20,8 @@ define( function( require ) {
   var Bounds2 = require( 'DOT/Bounds2' );
   var Node = require( 'SCENERY/Node' );
   var Font = require( 'SCENERY/Font' );
+  var LayerType = require( 'SCENERY/LayerType' );
+  var Fillable = require( 'SCENERY/Fillable' );
   var objectCreate = require( 'SCENERY/Util' ).objectCreate; // i.e. Object.create
   var canvasAccurateBounds = require('SCENERY/Bounds').canvasAccurateBounds;
   
@@ -237,7 +239,7 @@ define( function( require ) {
   *----------------------------------------------------------------------------*/
   
   Text.prototype.setFont = function( font ) {
-    this._font = font instanceof scenery.Font ? font : new scenery.Font( font );
+    this._font = font instanceof Font ? font : new Font( font );
     this.invalidateText();
     return this;
   };
@@ -312,9 +314,9 @@ define( function( require ) {
   };
   
   Text.prototype._mutatorKeys = [ 'text', 'font', 'fontWeight', 'fontFamily', 'fontStretch', 'fontStyle', 'fontSize', 'lineHeight',
-                                  'textAlign', 'textBaseline', 'direction' ].concat( scenery.Node.prototype._mutatorKeys );
+                                  'textAlign', 'textBaseline', 'direction' ].concat( Node.prototype._mutatorKeys );
   
-  Text.prototype._supportedLayerTypes = [ scenery.LayerType.Canvas, scenery.LayerType.SVG ];
+  Text.prototype._supportedLayerTypes = [ LayerType.Canvas, LayerType.SVG ];
   
   // font-specific ES5 setters and getters are defined using addFontForwarding above
   Object.defineProperty( Text.prototype, 'font', { set: Text.prototype.setFont, get: Text.prototype.getFont } );
@@ -324,7 +326,7 @@ define( function( require ) {
   Object.defineProperty( Text.prototype, 'direction', { set: Text.prototype.setDirection, get: Text.prototype.getDirection } );
   
   // mix in support for fills
-  scenery.Fillable( Text );
+  Fillable( Text );
 } );
 
 

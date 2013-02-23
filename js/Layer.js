@@ -12,7 +12,7 @@ define( function( require ) {
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   var Bounds2 = require( 'DOT/Bounds2' );
   
-  scenery.Layer = function( args ) {
+  var Layer = function( args ) {
     this.$main = args.$main;
     this.scene = args.scene;
     
@@ -24,8 +24,6 @@ define( function( require ) {
     this.startSelfTrail = null;
     this.endSelfTrail = null;
   };
-  
-  var Layer = scenery.Layer;
   
   Layer.prototype = {
     constructor: Layer,
@@ -100,6 +98,8 @@ define( function( require ) {
       throw new Error( 'Layer.getName unimplemented' );
     }
   };
+  
+  return Layer;
 } );
 
 

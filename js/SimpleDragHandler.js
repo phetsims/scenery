@@ -20,7 +20,7 @@ define( function( require ) {
    *    end:   null           // if non-null, called when a drag is ended.   end( finger, trail, event )
    * }
    */
-  scenery.SimpleDragHandler = function( options ) {
+  var SimpleDragHandler = function( options ) {
     var handler = this;
     
     this.options = options || {};
@@ -87,7 +87,6 @@ define( function( require ) {
       }
     };
   };
-  var SimpleDragHandler = scenery.SimpleDragHandler;
   
   SimpleDragHandler.prototype = {
     constructor: SimpleDragHandler,
@@ -149,6 +148,7 @@ define( function( require ) {
     }
   };
   
+  return SimpleDragHandler;
 } );
 
 

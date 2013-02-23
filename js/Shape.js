@@ -35,7 +35,7 @@ define( function( require ) {
   // a normalized vector for non-zero winding checks
   // var weirdDir = p( Math.PI, 22 / 7 );
   
-  scenery.Shape = function( pieces, optionalClose ) {
+  var Shape = function( pieces, optionalClose ) {
     // higher-level Canvas-esque drawing commands
     this.pieces = [];
     
@@ -61,7 +61,6 @@ define( function( require ) {
       this.addPiece( new Piece.Close() );
     }
   };
-  var Shape = scenery.Shape;
   
   Shape.prototype = {
     constructor: Shape,
@@ -922,4 +921,5 @@ define( function( require ) {
     );
   }
   
+  return Shape;
 } );

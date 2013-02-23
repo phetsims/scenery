@@ -49,10 +49,10 @@ define( function( require ) {
     }
   }
   
-  scenery.DebugContext = function( context ) {
+  var DebugContext = function( context ) {
     this._context = context;
   };
-  var DebugContext = scenery.DebugContext;
+  
   DebugContext.prototype = {
     constructor: DebugContext,
     
@@ -513,8 +513,9 @@ define( function( require ) {
       command( 'ellipse', [ x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise ] );
       this._context.ellipse( x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise );
     }
-    
   };
+  
+  return DebugContext;
 } );
 
 

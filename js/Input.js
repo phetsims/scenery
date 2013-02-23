@@ -18,15 +18,18 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
-  scenery.Input = function( scene ) {
+  var Trail = require( 'SCENERY/Trail' );
+  var Mouse = require( 'SCENERY/Mouse' );
+  var Touch = require( 'SCENERY/Touch' );
+  var Event = require( 'SCENERY/Event' );
+  
+  var Input = function( scene ) {
     this.scene = scene;
     
     this.mouse = new Mouse();
     
     this.fingers = [ this.mouse ];
   };
-  
-  var Input = scenery.Input;
   
   Input.prototype = {
     constructor: Input,
@@ -102,7 +105,7 @@ define( function( require ) {
     
     
     upEvent: function( finger, event ) {
-      var trail = this.scene.trailUnderPoint( finger.point ) || new scenery.Trail( this.scene );
+      var trail = this.scene.trailUnderPoint( finger.point ) || new Trail( this.scene );
       
       this.dispatchEvent( trail, 'up', finger, event, true );
       
@@ -110,7 +113,7 @@ define( function( require ) {
     },
     
     downEvent: function( finger, event ) {
-      var trail = this.scene.trailUnderPoint( finger.point ) || new scenery.Trail( this.scene );
+      var trail = this.scene.trailUnderPoint( finger.point ) || new Trail( this.scene );
       
       this.dispatchEvent( trail, 'down', finger, event, true );
       
@@ -118,8 +121,8 @@ define( function( require ) {
     },
     
     moveEvent: function( finger, event ) {
-      var trail = this.scene.trailUnderPoint( finger.point ) || new scenery.Trail( this.scene );
-      var oldTrail = finger.trail || new scenery.Trail( this.scene );
+      var trail = this.scene.trailUnderPoint( finger.point ) || new Trail( this.scene );
+      var oldTrail = finger.trail || new Trail( this.scene );
       
       var lastNodeChanged = oldTrail.lastNode() !== trail.lastNode();
       
@@ -237,144 +240,5 @@ define( function( require ) {
     }
   };
   
-  scenery.Event = function( options ) {
-    this.handled = false;
-    this.aborted = false;
-    
-    // put all properties in the options object into this event
-    _.extend( this, options );
-    
-    // TODO: add extended information based on an event here?
-  };
-  var Event = scenery.Event;
-  
-  Event.prototype = {
-    constructor: Event,
-    
-    // like DOM Event.stopPropagation(), but named differently to indicate it doesn't fire that behavior on the underlying DOM event
-    handle: function() {
-      this.handled = true;
-    },
-    
-    // like DOM Event.stopImmediatePropagation(), but named differently to indicate it doesn't fire that behavior on the underlying DOM event
-    abort: function() {
-      this.handled = true;
-      this.aborted = true;
-    }
-  };
-  
-  /*
-   * Conventionally set flags on a finger: TODO: add this state tracking to finger for convenience
-   * dragging - whether the finger is dragging something
-   *
-   * TODO: consider an 'active' flag?
-   */
-  scenery.Finger = function() {
-    this.listeners = [];
-  };
-  var Finger = scenery.Finger;
-  Finger.prototype = {
-    constructor: Finger,
-    
-    addInputListener: function( listener ) {
-      assert && assert( !_.contains( this.listeners, listener ) );
-      
-      this.listeners.push( listener );
-    },
-    
-    removeInputListener: function( listener ) {
-      var index = _.indexOf( this.listeners, listener );
-      assert && assert( index !== -1 );
-      
-      this.listeners.splice( index, 1 );
-    }
-  };
-  
-  // track the mouse state
-  scenery.Mouse = function() {
-    Finger.call( this );
-    
-    this.point = null;
-    
-    this.leftDown = false;
-    this.middleDown = false;
-    this.rightDown = false;
-    
-    this.isMouse = true;
-    
-    this.trail = null;
-  };
-  var Mouse = scenery.Mouse;
-  Mouse.prototype = _.extend( {}, Finger.prototype, {
-    constructor: Mouse,
-    
-    down: function( point, event ) {
-      this.point = point;
-      switch( event.button ) {
-        case 0: this.leftDown = true; break;
-        case 1: this.middleDown = true; break;
-        case 2: this.rightDown = true; break;
-      }
-    },
-    
-    up: function( point, event ) {
-      this.point = point;
-      switch( event.button ) {
-        case 0: this.leftDown = false; break;
-        case 1: this.middleDown = false; break;
-        case 2: this.rightDown = false; break;
-      }
-    },
-    
-    move: function( point, event ) {
-      this.point = point;
-    },
-    
-    over: function( point, event ) {
-      this.point = point;
-    },
-    
-    out: function( point, event ) {
-      // TODO: how to handle the mouse out-of-bounds
-      this.point = null;
-    }
-  } );
-  
-  scenery.Touch = function( id, point, event ) {
-    Finger.call( this );
-    
-    this.id = id;
-    this.point = point;
-    this.isTouch = true;
-    this.trail = null;
-  };
-  var Touch = scenery.Touch;
-  Touch.prototype = _.extend( {}, Finger.prototype, {
-    constructor: Touch,
-    
-    move: function( point, event ) {
-      this.point = point;
-    },
-    
-    end: function( point, event ) {
-      this.point = point;
-    },
-    
-    cancel: function( point, event ) {
-      this.point = point;
-    }
-  } );
-  
-  scenery.Key = function( key, event ) {
-    Finger.call( this );
-    
-    this.key = key;
-    this.isKey = true;
-    this.trail = null;
-  };
-  var Key = scenery.Key;
-  Key.prototype = _.extend( {}, Finger.prototype, {
-    constructor: Key
-  } );
-  
+  return Input;
 } );

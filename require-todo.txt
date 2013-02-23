@@ -1,0 +1,4 @@
+
+LayerStrategy API Change
+Better packaging?
+

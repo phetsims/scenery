@@ -5,25 +5,6 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
-  phet.canvas.initCanvas = function ( canvas ) {
-    // Initialize the variable context to null.
-    var context = null;
-    
-    try {
-      // Try to grab the standard context. If it fails, fallback to experimental.
-      context = canvas.getContext( "2d" );
-    }
-    catch( e ) {}
-    
-    // If we don't have a canvas context, give up now
-    if ( !context ) {
-      // TODO: show a visual display
-      throw new Error( "Unable to initialize HTML5 canvas. Your browser may not support it." );
-    }
-    
-    return context;
-  };
-  
   phet.canvas.backingStorePixelRatio = function( context ) {
     return context.webkitBackingStorePixelRatio ||
            context.mozBackingStorePixelRatio ||

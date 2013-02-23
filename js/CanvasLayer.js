@@ -19,9 +19,14 @@ define( function( require ) {
   
   var Bounds2 = require( 'DOT/Bounds2' );
   
+  var Layer = require( 'SCENERY/Layer' );
+  var RenderState = require( 'SCENERY/RenderState' );
+  var Shape = require( 'SCENERY/Shape' );
+  var Trail = require( 'SCENERY/Trail' );
+  
   // assumes main is wrapped with JQuery
-  scenery.CanvasLayer = function( args ) {
-    scenery.Layer.call( this, args );
+  var CanvasLayer = function( args ) {
+    Layer.call( this, args );
     
     this.backingScale = args.scene.backingScale;
     
@@ -39,8 +44,8 @@ define( function( require ) {
     this.$main.append( canvas );
     
     this.canvas = canvas;
-    // this.context = new scenery.DebugContext( phet.canvas.initCanvas( canvas ) );
-    this.context = phet.canvas.initCanvas( canvas );
+    // this.context = new DebugContext( canvas.getContext( '2d' ) );
+    this.context = canvas.getContext( '2d' );
     this.scene = args.scene;
     
     // workaround for Chrome (WebKit) miterLimit bug: https://bugs.webkit.org/show_bug.cgi?id=108763
@@ -52,9 +57,7 @@ define( function( require ) {
     this.resetStyles();
   };
   
-  var CanvasLayer = scenery.CanvasLayer;
-  
-  CanvasLayer.prototype = _.extend( {}, scenery.Layer.prototype, {
+  CanvasLayer.prototype = _.extend( {}, Layer.prototype, {
     constructor: CanvasLayer,
     
     /*
@@ -73,7 +76,7 @@ define( function( require ) {
         return;
       }
       
-      var state = new scenery.RenderState( scene );
+      var state = new RenderState( scene );
       state.layer = this;
       
       // switch to an identity transform
@@ -88,7 +91,7 @@ define( function( require ) {
         this.clearGlobalBounds( visibleDirtyBounds );
         
         if ( !args.fullRender ) {
-          state.pushClipShape( scenery.Shape.bounds( visibleDirtyBounds ) );
+          state.pushClipShape( Shape.bounds( visibleDirtyBounds ) );
         }
         
         // dirty bounds (clear, possibly set restricted bounds and handling for that)
@@ -120,7 +123,7 @@ define( function( require ) {
       // if the pointer is 'before' the node, don't call its enterState since this will be taken care of as the first step.
       // if the pointer is 'after' the node, call enterState since it will call exitState immediately inside the loop
       var startWalkLength = startPointer.trail.length - ( startPointer.isBefore ? 1 : 0 );
-      boundaryTrail = new scenery.Trail();
+      boundaryTrail = new Trail();
       for ( i = 0; i < startWalkLength; i++ ) {
         boundaryTrail.addDescendant( startPointer.trail.nodes[i] );
         startPointer.trail.nodes[i].enterState( state, boundaryTrail );
@@ -324,6 +327,8 @@ define( function( require ) {
       return 'canvas';
     }
   } );
+  
+  return CanvasLayer;
 } );
 
 

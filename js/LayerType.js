@@ -5,11 +5,14 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
-  scenery.LayerType = function( Constructor, name ) {
+  var CanvasLayer = require( 'SCENERY/CanvasLayer' );
+  var DOMLayer = require( 'SCENERY/DOMLayer' );
+  var SVGLayer = require( 'SCENERY/SVGLayer' );
+  
+  var LayerType = function( Constructor, name ) {
     this.Constructor = Constructor;
     this.name = name;
   };
-  var LayerType = scenery.LayerType;
   
   LayerType.prototype = {
     constructor: LayerType,
@@ -32,10 +35,11 @@ define( function( require ) {
     }
   };
   
-  LayerType.Canvas = new scenery.LayerType( scenery.CanvasLayer, 'canvas' );
-  LayerType.DOM = new scenery.LayerType( scenery.DOMLayer, 'dom' );
-  LayerType.SVG = new scenery.LayerType( scenery.SVGLayer, 'svg' );
+  LayerType.Canvas = new LayerType( CanvasLayer, 'canvas' );
+  LayerType.DOM = new LayerType( DOMLayer, 'dom' );
+  LayerType.SVG = new LayerType( SVGLayer, 'svg' );
   
+  return LayerType;
 } );
 
 

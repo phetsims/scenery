@@ -5,6 +5,8 @@
  *
  * Consider it immutable!
  *
+ * TODO: support JS/CSS colors, color parsing, etc. Investigate Canvg's dependency for use?
+ *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
@@ -14,16 +16,16 @@ define( function( require ) {
   var assert = require( 'ASSERT/assert' )( 'scenery' );
 
   // integer-based constructor
-  phet.ui.Color = function ( r, g, b, a ) {
+  var Color = function( r, g, b, a ) {
 
     // alpha
     this.a = a === undefined ? 255 : a;
 
     // bitwise handling if 3 elements aren't defined
     if ( g === undefined || b === undefined ) {
-      this.r = (r >> 16 ) && 0xFF;
-      this.g = (r >> 8 ) && 0xFF;
-      this.b = (r >> 0 ) && 0xFF;
+      this.r = ( r >> 16 ) && 0xFF;
+      this.g = ( r >> 8 ) && 0xFF;
+      this.b = ( r >> 0 ) && 0xFF;
     }
     else {
       // otherwise, copy them over
@@ -32,8 +34,6 @@ define( function( require ) {
       this.b = b;
     }
   };
-
-  var Color = phet.ui.Color;
 
   Color.BLACK = new Color( 0, 0, 0 );
   Color.BLUE = new Color( 0, 0, 255 );
@@ -48,4 +48,6 @@ define( function( require ) {
   Color.RED = new Color( 255, 0, 0 );
   Color.WHITE = new Color( 255, 255, 255 );
   Color.YELLOW = new Color( 255, 255, 0 );
+  
+  return Color;
 } );

@@ -13,7 +13,7 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
-  scenery.Fillable = function( type ) {
+  var Fillable = function( type ) {
     var proto = type.prototype;
     
     // this should be called in the constructor to initialize
@@ -50,6 +50,8 @@ define( function( require ) {
       };
     }
   };
+  
+  return Fillable;
 } );
 
 

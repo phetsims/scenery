@@ -39,7 +39,7 @@ define( function( require ) {
   //                    <font-variant-css21> = [normal | small-caps]
   // font-synthesis   v none | [ weight || style ]
   
-  scenery.Font = function( options ) {
+  var Font = function( options ) {
     // internal string representation
     this._font = '10px sans-serif';
     
@@ -53,7 +53,6 @@ define( function( require ) {
       this.mutate( options );
     }
   };
-  var Font = scenery.Font;
   
   Font.prototype = {
     constructor: Font,
@@ -132,6 +131,6 @@ define( function( require ) {
   };
   
   Font.prototype._mutatorKeys = [ 'font', 'weight', 'family', 'stretch', 'style', 'size', 'lineHeight' ];
+  
+  return Font;
 } );
-
-

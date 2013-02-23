@@ -19,6 +19,8 @@ define( function( require ) {
   var Transform3 = require( 'DOT/Transform3' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Shape = require( 'SCENERY/Shape' );
+  var Trail = require( 'SCENERY/Trail' );
+  var LayerStrategy = require( 'SCENERY/LayerStrategy' );
   
   var globalIdCounter = 1;
   
@@ -375,7 +377,7 @@ define( function( require ) {
       
       // didn't hit our children, so check ourself as a last resort
       if ( this._selfBounds.containsPoint( localPoint ) && this.containsPointSelf( localPoint ) ) {
-        return new scenery.Trail( this );
+        return new Trail( this );
       }
       
       // signal no hit
@@ -467,7 +469,7 @@ define( function( require ) {
     
     // dispatches an event across all possible Trails ending in this node
     dispatchEvent: function( type, args ) {
-      var trail = new scenery.Trail();
+      var trail = new Trail();
       
       function recursiveEventDispatch( node ) {
         trail.addAncestor( node );
@@ -492,7 +494,7 @@ define( function( require ) {
     
     // dispatches events with the transform computed from parent of the "root" to the local frame
     dispatchEventWithTransform: function( type, args ) {
-      var trail = new scenery.Trail();
+      var trail = new Trail();
       var transformStack = [ new Transform3() ];
       
       function recursiveEventDispatch( node ) {
@@ -798,7 +800,7 @@ define( function( require ) {
     
     // returns a unique trail (if it exists) where each node in the ancestor chain has 0 or 1 parents
     getUniqueTrail: function() {
-      var trail = new scenery.Trail();
+      var trail = new Trail();
       var node = this;
       
       while ( node ) {
@@ -910,5 +912,5 @@ define( function( require ) {
   
   Node.prototype._supportedLayerTypes = [];
   
-  Node.prototype.layerStrategy = scenery.DefaultLayerStrategy;
+  Node.prototype.layerStrategy = LayerStrategy.DefaultLayerStrategy;
 } );

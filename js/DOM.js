@@ -10,9 +10,14 @@ define( function( require ) {
   "use strict";
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
   var Bounds2 = require( 'DOT/Bounds2' );
   
-  scenery.DOM = function( element, options ) {
+  var Node = require( 'SCENERY/Node' );
+  var LayerType = require( 'SCENERY/LayerType' );
+  var objectCreate = require( 'SCENERY/Util' ).objectCreate;
+  
+  var DOM = function( element, options ) {
     options = options || {};
     
     // unwrap from jQuery if that is passed in, for consistency
@@ -43,7 +48,7 @@ define( function( require ) {
     document.body.appendChild( temporaryContainer );
     
     // will set the element after initializing
-    scenery.Node.call( this, options );
+    Node.call( this, options );
     
     // now don't memory-leak our container
     document.body.removeChild( temporaryContainer );
@@ -51,13 +56,12 @@ define( function( require ) {
       temporaryContainer.removeChild( element );
     }
   };
-  var DOM = scenery.DOM;
   
-  DOM.prototype = phet.Object.create( scenery.Node.prototype );
+  DOM.prototype = objectCreate( Node.prototype );
   DOM.prototype.constructor = DOM;
   
   DOM.prototype.invalidatePaint = function( bounds ) {
-    scenery.Node.prototype.invalidatePaint.call( this, bounds );
+    Node.prototype.invalidatePaint.call( this, bounds );
   };
   
   DOM.prototype.invalidateDOM = function() {
@@ -96,12 +100,13 @@ define( function( require ) {
     return this._element;
   };
   
-  DOM.prototype._mutatorKeys = [ 'element' ].concat( scenery.Node.prototype._mutatorKeys );
+  DOM.prototype._mutatorKeys = [ 'element' ].concat( Node.prototype._mutatorKeys );
   
-  DOM.prototype._supportedLayerTypes = [ scenery.LayerType.DOM ];
+  DOM.prototype._supportedLayerTypes = [ LayerType.DOM ];
   
   Object.defineProperty( DOM.prototype, 'element', { set: DOM.prototype.setElement, get: DOM.prototype.getElement } );
   
+  return DOM;
 } );
 
 

@@ -10,8 +10,18 @@ define( function( require ) {
   "use strict";
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
   var Bounds2 = require( 'DOT/Bounds2' );
   var Vector2 = require( 'DOT/Vector2' );
+  var Node = require( 'DOT/Node' );
+  var Trail = require( 'DOT/Trail' );
+  var TrailPointer = require( 'DOT/TrailPointer' );
+  var Input = require( 'DOT/Input' );
+  var LayerState = require( 'DOT/LayerState' );
+  var LayerType = require( 'DOT/LayerType' );
+  
+  var Util = require( 'SCENERY/Util' );
+  var objectCreate = Util.objectCreate;
   
   /*
    * $main should be a block-level element with a defined width and height. scene.resize() should be called whenever
@@ -27,20 +37,20 @@ define( function( require ) {
    *   height: <current main height>,                     // override the main container's height
    * }
    */
-  scenery.Scene = function( $main, options ) {
+  var Scene = function( $main, options ) {
     // defaults
     options = _.extend( {
       allowSceneOverflow: false,
       allowCSSHacks: true,
       allowDevicePixelRatioScaling: false,
-      preferredSceneLayerType: scenery.LayerType.Canvas,
+      preferredSceneLayerType: LayerType.Canvas,
       width: $main.width(),
       height: $main.height()
     }, options || {} );
     
-    this.backingScale = options.allowDevicePixelRatioScaling ? phet.canvas.backingScale( document.createElement( 'canvas' ).getContext( '2d' ) ) : 1;
+    this.backingScale = options.allowDevicePixelRatioScaling ? Util.backingScale( document.createElement( 'canvas' ).getContext( '2d' ) ) : 1;
     
-    scenery.Node.call( this, options );
+    Node.call( this, options );
     
     var scene = this;
     
@@ -122,9 +132,7 @@ define( function( require ) {
     this.addEventListener( this.sceneEventListener );
   };
 
-  var Scene = scenery.Scene;
-  
-  Scene.prototype = phet.Object.create( scenery.Node.prototype );
+  Scene.prototype = objectCreate( Node.prototype );
   Scene.prototype.constructor = Scene;
   
   Scene.prototype.updateScene = function( args ) {
@@ -156,13 +164,13 @@ define( function( require ) {
     this.disposeLayers();
     
     // TODO: internal API rethink
-    var state = new scenery.LayerState();
+    var state = new LayerState();
     
     if ( this.preferredSceneLayerType ) {
       state.pushPreferredLayerType( this.preferredSceneLayerType );
     }
     
-    var layerEntries = state.buildLayers( new scenery.TrailPointer( new scenery.Trail( this ), true ), new scenery.TrailPointer( new scenery.Trail( this ), false ), null );
+    var layerEntries = state.buildLayers( new TrailPointer( new Trail( this ), true ), new TrailPointer( new Trail( this ), false ), null );
     
     var layerArgs = {
       $main: this.$main,
@@ -221,7 +229,7 @@ define( function( require ) {
     }
     
     // point to the beginning of the node, right before it would be rendered
-    var pointer = new scenery.TrailPointer( trail, true );
+    var pointer = new TrailPointer( trail, true );
     
     for ( var i = 0; i < this.layers.length; i++ ) {
       var layer = this.layers[i];
@@ -250,8 +258,8 @@ define( function( require ) {
     }
     
     // point to the beginning of the node, right before it would be rendered
-    var startPointer = new scenery.TrailPointer( trail, true );
-    var endPointer = new scenery.TrailPointer( trail, false );
+    var startPointer = new TrailPointer( trail, true );
+    var endPointer = new TrailPointer( trail, false );
     
     for ( var i = 0; i < this.layers.length; i++ ) {
       var layer = this.layers[i];
@@ -313,7 +321,7 @@ define( function( require ) {
     canvas.width = this.sceneBounds.width();
     canvas.height = this.sceneBounds.height();
     
-    var context = phet.canvas.initCanvas( canvas );
+    var context = canvas.getContext( '2d' );
     this.renderToCanvas( canvas, context, function() {
       callback( canvas, context.getImageData( 0, 0, canvas.width, canvas.height ) );
     } );
@@ -387,7 +395,7 @@ define( function( require ) {
     var listenerTarget = parameters.listenerTarget;
     var preventDefault = parameters.preventDefault;
     
-    var input = new scenery.Input( scene );
+    var input = new Input( scene );
     scene.input = input;
     
     $( listenerTarget ).on( 'mousedown', function( jEvent ) {
@@ -491,4 +499,6 @@ define( function( require ) {
       })();
     }
   }
+  
+  return Scene;
 } );

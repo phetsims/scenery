@@ -13,7 +13,13 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
-  scenery.Path = function( options ) {
+  var Node = require( 'SCENERY/Node' );
+  var LayerType = require( 'SCENERY/LayerType' );
+  var Fillable = require( 'SCENERY/Fillable' );
+  var Strokable = require( 'SCENERY/Strokable' );
+  var objectCreate = require( 'SCENERY/Util' ).objectCreate;
+  
+  var Path = function( options ) {
     // TODO: consider directly passing in a shape object (or at least handling that case)
     this._shape = null;
     
@@ -22,11 +28,10 @@ define( function( require ) {
     
     this.initializeStrokable();
     
-    scenery.Node.call( this, options );
+    Node.call( this, options );
   };
-  var Path = scenery.Path;
   
-  Path.prototype = phet.Object.create( scenery.Node.prototype );
+  Path.prototype = objectCreate( Node.prototype );
   Path.prototype.constructor = Path;
   
   // sets the shape drawn, or null to remove the shape
@@ -139,17 +144,18 @@ define( function( require ) {
   };
   
   // TODO: stroke / fill mixins
-  Path.prototype._mutatorKeys = [ 'shape' ].concat( scenery.Node.prototype._mutatorKeys );
+  Path.prototype._mutatorKeys = [ 'shape' ].concat( Node.prototype._mutatorKeys );
   
-  Path.prototype._supportedLayerTypes = [ scenery.LayerType.Canvas, scenery.LayerType.SVG ];
+  Path.prototype._supportedLayerTypes = [ LayerType.Canvas, LayerType.SVG ];
   
   Object.defineProperty( Path.prototype, 'shape', { set: Path.prototype.setShape, get: Path.prototype.getShape } );
   
   // mix in fill/stroke handling code. for now, this is done after 'shape' is added to the mutatorKeys so that stroke parameters
   // get set first
-  scenery.Fillable( Path );
-  scenery.Strokable( Path );
+  Fillable( Path );
+  Strokable( Path );
   
+  return Path;
 } );
 
 

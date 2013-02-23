@@ -13,13 +13,15 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
-  scenery.Strokable = function( type ) {
+  var Shape = require( 'SCENERY/Shape' );
+  
+  var Strokable = function( type ) {
     var proto = type.prototype;
     
     // this should be called in the constructor to initialize
     proto.initializeStrokable = function() {
       this._stroke = null;
-      this._lineDrawingStyles = new scenery.Shape.LineStyles();
+      this._lineDrawingStyles = new Shape.LineStyles();
     };
     
     proto.hasStroke = function() {
@@ -113,6 +115,8 @@ define( function( require ) {
       };
     }
   };
+  
+  return Strokable;
 } );
 
 

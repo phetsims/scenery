@@ -12,18 +12,22 @@ define( function( require ) {
   "use strict";
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
   var Bounds2 = require( 'DOT/Bounds2' );
   
-  scenery.Image = function( image, options ) {
-    scenery.Node.call( this, options );
+  var Node = require( 'SCENERY/Node' );
+  var LayerType = require( 'SCENERY/LayerType' );
+  var objectCreate = require( 'SCENERY/Util' ).objectCreate;
+  
+  var Image = function( image, options ) {
+    Node.call( this, options );
     
     this.image = image;
     
     this.invalidateSelf( new Bounds2( 0, 0, image.width, image.height ) );
   };
-  var Image = scenery.Image;
   
-  Image.prototype = phet.Object.create( scenery.Node.prototype );
+  Image.prototype = objectCreate( Node.prototype );
   Image.prototype.constructor = Image;
 
   // TODO: add SVG / DOM support
@@ -41,7 +45,9 @@ define( function( require ) {
     return true;
   };
   
-  Image.prototype._supportedLayerTypes = [ scenery.LayerType.Canvas ];
+  Image.prototype._supportedLayerTypes = [ LayerType.Canvas ];
+  
+  return Image;
 } );
 
 

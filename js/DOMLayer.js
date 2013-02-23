@@ -14,10 +14,13 @@ define( function( require ) {
   "use strict";
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
   var Bounds2 = require( 'DOT/Bounds2' );
   
-  scenery.DOMLayer = function( args ) {
-    scenery.Layer.call( this, args );
+  var Layer = require( 'SCENERY/Layer' );
+  
+  var DOMLayer = function( args ) {
+    Layer.call( this, args );
     
     this.div = document.createElement( 'div' );
     this.$div = $( this.div );
@@ -31,13 +34,11 @@ define( function( require ) {
     this.isDOMLayer = true;
   };
   
-  var DOMLayer = scenery.DOMLayer;
-  
-  DOMLayer.prototype = _.extend( {}, scenery.Layer.prototype, {
+  DOMLayer.prototype = _.extend( {}, Layer.prototype, {
     constructor: DOMLayer,
     
     updateBoundaries: function( entry ) {
-      scenery.Layer.prototype.updateBoundaries.call( this, entry );
+      Layer.prototype.updateBoundaries.call( this, entry );
       
       var layer = this;
       
@@ -140,6 +141,8 @@ define( function( require ) {
       return 'dom';
     }
   } );
+  
+  return DOMLayer;
 } );
 
 
