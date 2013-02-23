@@ -80,6 +80,8 @@ module.exports = function( grunt ) {
         es5: true, // we use ES5 getters and setters for now
         loopfunc: true, // we know how not to shoot ourselves in the foot, and this is useful for _.each
         
+        expr: true, // so we can use assert && assert( ... )
+        
         globals: {
           // for require.js
           define: true,

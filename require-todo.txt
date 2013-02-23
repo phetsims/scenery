@@ -2,5 +2,7 @@
 LayerStrategy API Change
 Better packaging?
 
+requestAnimationFrame
+
 Rename main.js to scenery.js so it's easy to pull require( 'SCENERY/scenery' ) for full API access
 

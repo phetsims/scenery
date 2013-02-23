@@ -15,8 +15,8 @@ define( function( require ) {
   
   var Node = require( 'SCENERY/Node' );
   var LayerType = require( 'SCENERY/LayerType' );
-  var Fillable = require( 'SCENERY/Fillable' );
-  var Strokable = require( 'SCENERY/Strokable' );
+  var fillable = require( 'SCENERY/Fillable' );
+  var strokable = require( 'SCENERY/Strokable' );
   var objectCreate = require( 'SCENERY/Util' ).objectCreate;
   
   var Path = function( options ) {
@@ -152,8 +152,8 @@ define( function( require ) {
   
   // mix in fill/stroke handling code. for now, this is done after 'shape' is added to the mutatorKeys so that stroke parameters
   // get set first
-  Fillable( Path );
-  Strokable( Path );
+  fillable( Path );
+  strokable( Path );
   
   return Path;
 } );

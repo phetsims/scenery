@@ -39,7 +39,7 @@ define( function( require ) {
       var vendors = [ 'ms', 'moz', 'webkit', 'o' ];
       for ( var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x ) {
         window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
-        phet.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
+        window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
       }
      
       if ( !window.requestAnimationFrame ) {
@@ -53,8 +53,8 @@ define( function( require ) {
         };
       }
      
-      if ( !phet.cancelAnimationFrame ) {
-        phet.cancelAnimationFrame = function(id) {
+      if ( !window.cancelAnimationFrame ) {
+        window.cancelAnimationFrame = function(id) {
           clearTimeout(id);
         };
       }

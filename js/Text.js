@@ -21,7 +21,7 @@ define( function( require ) {
   var Node = require( 'SCENERY/Node' );
   var Font = require( 'SCENERY/Font' );
   var LayerType = require( 'SCENERY/LayerType' );
-  var Fillable = require( 'SCENERY/Fillable' );
+  var fillable = require( 'SCENERY/Fillable' );
   var objectCreate = require( 'SCENERY/Util' ).objectCreate; // i.e. Object.create
   var canvasAccurateBounds = require('SCENERY/Bounds').canvasAccurateBounds;
   
@@ -326,7 +326,7 @@ define( function( require ) {
   Object.defineProperty( Text.prototype, 'direction', { set: Text.prototype.setDirection, get: Text.prototype.getDirection } );
   
   // mix in support for fills
-  Fillable( Text );
+  fillable( Text );
 } );
 
 

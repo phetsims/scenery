@@ -181,7 +181,7 @@ define( function( require ) {
     
     // whether this trail contains the complete 'other' trail, but with added descendants afterwards
     isExtensionOf: function( other, allowSameTrail ) {
-      assert && assert( trail.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed' );
+      assert && assert( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed' );
       assert && assert( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed' );
       
       if ( this.length <= other.length - ( allowSameTrail ? 1 : 0 ) ) {
@@ -280,12 +280,10 @@ define( function( require ) {
      * Assumes that the Trails are properly indexed. If not, please reindex them!
      */
     compare: function( other ) {
-      var trail = this;
-      
       assert && assert( !this.isEmpty(), 'cannot compare with an empty trail' );
       assert && assert( !other.isEmpty(), 'cannot compare with an empty trail' );
       assert && assert( this.nodes[0] === other.nodes[0], 'for Trail comparison, trails must have the same root node' );
-      assert && assert( trail.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed' );
+      assert && assert( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed' );
       assert && assert( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed' );
       
       var minNodeIndex = Math.min( this.indices.length, other.indices.length );

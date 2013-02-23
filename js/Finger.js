@@ -9,6 +9,8 @@
 
 define( function( require ) {
   
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
   var Finger = function() {
     this.listeners = [];
   };
