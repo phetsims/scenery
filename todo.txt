@@ -66,10 +66,8 @@ General:
     * Add toggle for Canvas / SVG in Devious Dragging example
     * Email OIT about phet.colorado.edu/scenery
         Investigate GitHub pages instead? See http://forrst.com/posts/GitHub_Pages_gh_pages_branch_as_a_subfolder_wi-4ZT
-    ** Extract phet-math (phet.math namespace) code to separate repo
     ** Way of not including SVD and other non-used phet-math parts in scenery (with dependencies).
         ** Prototype Closure compiler for dependency resolution, pick the discussion from email?
-    * Extract phet-general code to separate repo (that would be shared also inside the scene graph?) -- or should we duplicate this small bit of functionality?
     ** Extract molecule-shapes code to separate repo
     Test zooming on browsers
     RenderState - consider stack-based transforms
@@ -78,17 +76,23 @@ General:
     Take extension mechanism from Backbone.js: https://github.com/documentcloud/backbone/blob/master/backbone.js#L1471-L1502
 
 Code:
+    ** Require.js / Grunt:
+        ** Debug assertions, and performance handling
+            Decide on best way to include assert control
+        Better packaging?
+        * requestAnimationFrame - include by default, or no? run in require.js dynamic? run when compiled outside of scenery?
+        Rename main.js to namespace.js? so it's easy to pull require( 'SCENERY/namespace' ) for full API access
+        'mangle' off for the standalone/development versions
+        require() is failing silently if the dependency is circular. consider throwing an error in that case?
+        require() || throw Error( 'bad dependency!' ); -- can't inline, otherwise discovery won't work
+            See https://github.com/jrburke/almond/issues/8
     Trail shouldn't create the 'indices' anymore!
     Rename 'main' to something else
         container? domContainer?
     Organize unit tests into separate files, etc.
-        Lint unit tests
     Validation of example HTML, CSS, etc.
-    Either use Require.js or bake in support. Probably good to do for reducing code size with simulations.
-        Almond for fallbacks?
     Switch to jQuery 2 (wait for a stable build?)
     _.extend that works on ES5 setter/getter pairs? Check $.extend? Check ES5 spec?
-    Modularization of support code (math?)
     Vet recursive bounds code against empty area
     * Code headers and copyright? Licenses?
 
