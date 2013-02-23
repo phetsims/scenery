@@ -14,7 +14,7 @@ module.exports = function( grunt ) {
     
     concat: {
       standalone: {
-        src: [ "contrib/almond/almond.js", "dist/standalone/scenery.min.js" ],
+        src: [ "contrib/almond.js", "dist/standalone/scenery.min.js" ],
         dest: "dist/standalone/scenery.min.js"
       }
     },
