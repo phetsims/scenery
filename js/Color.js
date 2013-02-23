@@ -10,6 +10,8 @@
 
 define( function( require ) {
   "use strict";
+  
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
 
   // integer-based constructor
   phet.ui.Color = function ( r, g, b, a ) {

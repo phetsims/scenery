@@ -11,12 +11,15 @@
 define( function( require ) {
   "use strict";
   
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  var Bounds2 = require( 'DOT/Bounds2' );
+  
   scenery.Image = function( image, options ) {
     scenery.Node.call( this, options );
     
     this.image = image;
     
-    this.invalidateSelf( new phet.math.Bounds2( 0, 0, image.width, image.height ) );
+    this.invalidateSelf( new Bounds2( 0, 0, image.width, image.height ) );
   };
   var Image = scenery.Image;
   

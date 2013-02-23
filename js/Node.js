@@ -13,13 +13,17 @@
 define( function( require ) {
   "use strict";
   
-  var Bounds2 = phet.math.Bounds2;
-  var Shape = scenery.Shape;
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
+  var Bounds2 = require( 'DOT/Bounds2' );
+  var Transform3 = require( 'DOT/Transform3' );
+  var Matrix3 = require( 'DOT/Matrix3' );
+  var Shape = require( 'SCENERY/Shape' );
   
   var globalIdCounter = 1;
   
   // TODO: consider an args-style constructor here!
-  scenery.Node = function( options ) {
+  var Node = function( options ) {
     // assign a unique ID to this node (allows trails to )
     this._id = globalIdCounter++;
     
@@ -37,7 +41,7 @@ define( function( require ) {
     this.children = []; // ordered
     this.parents = []; // unordered
     
-    this.transform = new phet.math.Transform3();
+    this.transform = new Transform3();
     
     this._inputListeners = []; // for user input handling (mouse/touch)
     this._eventListeners = []; // for internal events like paint invalidation, layer invalidation, etc.
@@ -62,9 +66,6 @@ define( function( require ) {
       this.mutate( options );
     }
   };
-  
-  var Node = scenery.Node;
-  var Matrix3 = phet.math.Matrix3;
   
   Node.prototype = {
     constructor: Node,
@@ -94,7 +95,7 @@ define( function( require ) {
     },
     
     insertChild: function( node, index ) {
-      phet.assert( node !== null && node !== undefined && !_.contains( this.children, node ) );
+      assert && assert( node !== null && node !== undefined && !_.contains( this.children, node ) );
       
       node.parents.push( this );
       this.children.splice( index, 0, node );
@@ -114,7 +115,7 @@ define( function( require ) {
     },
     
     removeChild: function ( node ) {
-      phet.assert( this.isChild( node ) );
+      assert && assert( this.isChild( node ) );
       
       node.markOldPaint();
       
@@ -264,7 +265,7 @@ define( function( require ) {
     
     // called to notify that self rendering will display different paint, with possibly different bounds
     invalidateSelf: function( newBounds ) {
-      phet.assert( !isNaN( newBounds.x() ) );
+      assert && assert( !isNaN( newBounds.x() ) );
       
       // mark the old region to be repainted, regardless of whether the actual bounds change
       this.markOldSelfPaint();
@@ -328,7 +329,7 @@ define( function( require ) {
     isChild: function ( potentialChild ) {
       var ourChild = _.contains( this.children, potentialChild );
       var itsParent = _.contains( potentialChild.parents, this );
-      phet.assert( ourChild === itsParent );
+      assert && assert( ourChild === itsParent );
       return ourChild;
     },
     
@@ -345,7 +346,7 @@ define( function( require ) {
     
     // return the top node (if any, otherwise null) whose self-rendered area contains the point (in parent coordinates).
     trailUnderPoint: function( point ) {
-      phet.assert( point, 'trailUnderPointer requires a point' );
+      assert && assert( point, 'trailUnderPointer requires a point' );
       // update bounds for pruning
       this.validateBounds();
       
@@ -436,7 +437,7 @@ define( function( require ) {
     
     removeInputListener: function( listener ) {
       // ensure the listener is in our list
-      phet.assert( _.indexOf( this._inputListeners, listener ) !== -1 );
+      assert && assert( _.indexOf( this._inputListeners, listener ) !== -1 );
       
       this._inputListeners.splice( _.indexOf( this._inputListeners, listener ), 1 );
     },
@@ -455,7 +456,7 @@ define( function( require ) {
     
     removeEventListener: function( listener ) {
       // ensure the listener is in our list
-      phet.assert( _.indexOf( this._eventListeners, listener ) !== -1 );
+      assert && assert( _.indexOf( this._eventListeners, listener ) !== -1 );
       
       this._eventListeners.splice( _.indexOf( this._eventListeners, listener ), 1 );
     },
@@ -492,12 +493,12 @@ define( function( require ) {
     // dispatches events with the transform computed from parent of the "root" to the local frame
     dispatchEventWithTransform: function( type, args ) {
       var trail = new scenery.Trail();
-      var transformStack = [ new phet.math.Transform3() ];
+      var transformStack = [ new Transform3() ];
       
       function recursiveEventDispatch( node ) {
         trail.addAncestor( node );
         
-        transformStack.push( new phet.math.Transform3( node.getMatrix().timesMatrix( transformStack[transformStack.length-1].getMatrix() ) ) );
+        transformStack.push( new Transform3( node.getMatrix().timesMatrix( transformStack[transformStack.length-1].getMatrix() ) ) );
         args.transform = transformStack[transformStack.length-1];
         args.trail = trail;
         
@@ -597,7 +598,7 @@ define( function( require ) {
       return this.transform.getMatrix().scaling();
     },
     
-    // supports setScale( 5 ) for both dimensions, setScale( 5, 3 ) for each dimension separately, or setScale( new phet.math.Vector2( x, y ) )
+    // supports setScale( 5 ) for both dimensions, setScale( 5, 3 ) for each dimension separately, or setScale( new Vector2( x, y ) )
     setScale: function( a, b ) {
       var currentScale = this.getScale();
       
@@ -607,10 +608,10 @@ define( function( require ) {
           b = a;
         }
         // setScale( x, y )
-        this.appendMatrix( phet.math.Matrix3.scaling( a / currentScale.x, b / currentScale.y ) );
+        this.appendMatrix( Matrix3.scaling( a / currentScale.x, b / currentScale.y ) );
       } else {
         // setScale( vector ), where we set the x-scale to vector.x and y-scale to vector.y
-        this.appendMatrix( phet.math.Matrix3.scaling( a.x / currentScale.x, a.y / currentScale.y ) );
+        this.appendMatrix( Matrix3.scaling( a.x / currentScale.x, a.y / currentScale.y ) );
       }
       return this;
     },
@@ -620,11 +621,11 @@ define( function( require ) {
     },
     
     setRotation: function( rotation ) {
-      this.appendMatrix( phet.math.Matrix3.rotation2( rotation - this.getRotation() ) );
+      this.appendMatrix( Matrix3.rotation2( rotation - this.getRotation() ) );
       return this;
     },
     
-    // supports setTranslation( x, y ) or setTranslation( new phet.math.Vector2( x, y ) ) .. or technically setTranslation( { x: x, y: y } )
+    // supports setTranslation( x, y ) or setTranslation( new Vector2( x, y ) ) .. or technically setTranslation( { x: x, y: y } )
     setTranslation: function( a, b ) {
       var translation = this.getTranslation();
       
@@ -802,7 +803,7 @@ define( function( require ) {
       
       while ( node ) {
         trail.addAncestor( node );
-        phet.assert( node.parents.length <= 1 );
+        assert && assert( node.parents.length <= 1 );
         node = node.parents[0]; // should be undefined if there aren't any parents
       }
       

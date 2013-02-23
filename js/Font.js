@@ -26,6 +26,8 @@
 define( function( require ) {
   "use strict";
   
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
   // options from http://www.w3.org/TR/css3-fonts/
   // font-family      v ---
   // font-weight      v normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900

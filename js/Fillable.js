@@ -11,6 +11,8 @@
 define( function( require ) {
   "use strict";
   
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
   scenery.Fillable = function( type ) {
     var proto = type.prototype;
     

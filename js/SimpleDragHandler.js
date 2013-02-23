@@ -9,6 +9,8 @@
 define( function( require ) {
   "use strict";
   
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
   /*
    * Allowed options: {
    *    allowTouchSnag: false // allow touch swipes across an object to pick it up,
@@ -55,7 +57,7 @@ define( function( require ) {
     this.dragListener = {
       // mouse/touch up
       up: function( event ) {
-        phet.assert( event.finger === handler.finger );
+        assert && assert( event.finger === handler.finger );
         if ( !event.finger.isMouse || event.domEvent.button === handler.mouseButton ) {
           handler.endDrag( event );
         }
@@ -63,7 +65,7 @@ define( function( require ) {
       
       // touch cancel
       cancel: function( event ) {
-        phet.assert( event.finger === handler.finger );
+        assert && assert( event.finger === handler.finger );
         handler.endDrag( event );
         
         // since it's a cancel event, go back!
@@ -72,7 +74,7 @@ define( function( require ) {
       
       // mouse/touch move
       move: function( event ) {
-        phet.assert( event.finger === handler.finger );
+        assert && assert( event.finger === handler.finger );
         // move by the delta between the previous point, using the precomputed transform
         // prepend the translation on the node, so we can ignore whatever other transform state the node has
         handler.node.translate( handler.transform.inverseDelta2( handler.finger.point.minus( handler.lastDragPoint ) ), true );

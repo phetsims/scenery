@@ -13,7 +13,8 @@
 define( function( require ) {
   "use strict";
   
-  var Bounds2 = phet.math.Bounds2;
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  var Bounds2 = require( 'DOT/Bounds2' );
   
   var svgns = 'http://www.w3.org/2000/svg';
   var xlinkns = 'http://www.w3.org/1999/xlink';

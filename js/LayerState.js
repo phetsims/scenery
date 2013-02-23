@@ -3,6 +3,8 @@
 define( function( require ) {
   "use strict";
   
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
   // TODO: remove rats-nest of mutable shared state that we have here, or clearly doc what are transient instances vs immutable
   scenery.LayerState = function() {
     this.preferredLayerTypes = [];

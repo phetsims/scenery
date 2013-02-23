@@ -15,11 +15,14 @@
 define( function( require ) {
   "use strict";
   
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  var Trail = require( 'SCENERY/Trail' );
+  
   /*
    * isBefore: whether this points to before the node (and its children) have been rendered, or after
    */
   var TrailPointer = function( trail, isBefore ) {
-    phet.assert( trail instanceof scenery.Trail, 'trail is not a trail' );
+    assert && assert( trail instanceof Trail, 'trail is not a trail' );
     this.trail = trail;
     
     this.setBefore( isBefore );
@@ -61,7 +64,7 @@ define( function( require ) {
      * other pointer, and 1 if this pointer is after the other pointer.
      */
     compareRender: function( other ) {
-      phet.assert( other !== null );
+      assert && assert( other !== null );
       
       var a = this.getRenderBeforePointer();
       var b = other.getRenderBeforePointer();
@@ -85,7 +88,7 @@ define( function( require ) {
      * TODO: optimization?
      */
     compareNested: function( other ) {
-      phet.assert( other );
+      assert && assert( other );
       
       var comparison = this.trail.compare( other.trail );
       
@@ -210,8 +213,8 @@ define( function( require ) {
      */
     depthFirstUntil: function( other, callback, excludeEndpoints ) {
       // make sure this pointer is before the other, but allow start === end if we are not excluding endpoints
-      phet.assert( this.compareNested( other ) <= ( excludeEndpoints ? -1 : 0 ), 'TrailPointer.depthFirstUntil pointers out of order, possibly in both meanings of the phrase!' );
-      phet.assert( this.trail.rootNode() === other.trail.rootNode(), 'TrailPointer.depthFirstUntil takes pointers with the same root' );
+      assert && assert( this.compareNested( other ) <= ( excludeEndpoints ? -1 : 0 ), 'TrailPointer.depthFirstUntil pointers out of order, possibly in both meanings of the phrase!' );
+      assert && assert( this.trail.rootNode() === other.trail.rootNode(), 'TrailPointer.depthFirstUntil takes pointers with the same root' );
       
       // sanity check TODO: remove later
       this.trail.reindex();

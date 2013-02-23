@@ -22,7 +22,12 @@
 define( function( require ) {
   "use strict";
   
-  var Vector2 = phet.math.Vector2;
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
+  var Vector2 = require( 'DOT/Vector2' );
+  var Bounds2 = require( 'DOT/Bounds2' );
+  var Ray2 = require( 'DOT/Ray2' );
+  var Matrix3 = require( 'DOT/Matrix3' );
   
   // for brevity
   function p( x,y ) { return new Vector2( x, y ); }
@@ -38,7 +43,7 @@ define( function( require ) {
     this.subpaths = [];
     
     // computed bounds for all pieces added so far
-    this.bounds = phet.math.Bounds2.NOTHING;
+    this.bounds = Bounds2.NOTHING;
     
     // cached stroked shape (so hit testing can be done quickly on stroked shapes)
     this._strokedShape = null;
@@ -153,7 +158,7 @@ define( function( require ) {
       var wind = 0;
       
       // we pick a ray, and determine the winding number over that ray. if the number of segments crossing it CCW == number of segments crossing it CW, then the point is contained in the shape
-      var ray = new phet.math.Ray2( point, p( 1, 0 ) );
+      var ray = new Ray2( point, p( 1, 0 ) );
       
       _.each( this.subpaths, function( subpath ) {
         if ( subpath.isDrawable() ) {
@@ -469,7 +474,7 @@ define( function( require ) {
     },
     
     getClosingSegment: function() {
-      phet.assert( this.isClosed() );
+      assert && assert( this.isClosed() );
       return new Segment.Line( this.getLastPoint(), this.getFirstPoint() );
     }
   };
@@ -561,7 +566,7 @@ define( function( require ) {
         shape.getLastSubpath().addSegment( line );
         shape.getLastSubpath().addPoint( end );
         shape.bounds = shape.bounds.withPoint( start ).withPoint( end );
-        phet.assert( !isNaN( shape.bounds.x() ) );
+        assert && assert( !isNaN( shape.bounds.x() ) );
       } else {
         shape.ensure( this.point );
       }
@@ -643,7 +648,7 @@ define( function( require ) {
       shape.addSubpath( new Subpath() );
       shape.getLastSubpath().addPoint( p( this.x, this.y ) );
       shape.bounds = shape.bounds.withPoint( this.upperLeft ).withPoint( this.lowerRight );
-      phet.assert( !isNaN( shape.bounds.x() ) );
+      assert && assert( !isNaN( shape.bounds.x() ) );
     }
   };
   
@@ -661,7 +666,7 @@ define( function( require ) {
     this.endTangent = this.startTangent;
     
     // acceleration for intersection
-    this.bounds = new phet.math.Bounds2().withPoint( start ).withPoint( end );
+    this.bounds = new Bounds2().withPoint( start ).withPoint( end );
   };
   Segment.Line.prototype = {
     constructor: Segment.Line,
@@ -728,7 +733,7 @@ define( function( require ) {
     var controlIsStart = start.equals( control );
     var controlIsEnd = end.equals( control );
     // ensure the points are distinct
-    phet.assert( !controlIsStart || !controlIsEnd );
+    assert && assert( !controlIsStart || !controlIsEnd );
     
     // allow either the start or end point to be the same as the control point (necessary if you do a quadraticCurveTo on an empty path)
     // tangents go through the control point, which simplifies things
@@ -736,7 +741,7 @@ define( function( require ) {
     this.endTangent = controlIsEnd ? end.minus( start ).normalized() : end.minus( control ).normalized();
     
     // calculate our temporary guaranteed lower bounds based on the end points
-    this.bounds = new phet.math.Bounds2( Math.min( start.x, end.x ), Math.min( start.y, end.y ), Math.max( start.x, end.x ), Math.max( start.y, end.y ) );
+    this.bounds = new Bounds2( Math.min( start.x, end.x ), Math.min( start.y, end.y ), Math.max( start.x, end.x ), Math.max( start.y, end.y ) );
     
     // compute x and y where the derivative is 0, so we can include this in the bounds
     var divisorX = 2 * ( end.x - 2 * control.x + start.x );
@@ -841,8 +846,8 @@ define( function( require ) {
       // TODO: optimization
       
       // find the rotation that will put our ray in the direction of the x-axis so we can only solve for y=0 for intersections
-      var inverseMatrix = phet.math.Matrix3.rotation2( -ray.dir.angle() );
-      phet.assert( inverseMatrix.timesVector2( ray.dir ).x > 0.99 ); // verify that we transform the unit vector to the x-unit
+      var inverseMatrix = Matrix3.rotation2( -ray.dir.angle() );
+      assert && assert( inverseMatrix.timesVector2( ray.dir ).x > 0.99 ); // verify that we transform the unit vector to the x-unit
       
       var p0 = inverseMatrix.timesVector2( this.start );
       var p1 = inverseMatrix.timesVector2( this.control );
@@ -890,22 +895,22 @@ define( function( require ) {
   
   // TODO: performance / cleanliness to have these as methods instead?
   function segmentStartLeft( segment, lineWidth ) {
-    phet.assert( lineWidth !== undefined );
+    assert && assert( lineWidth !== undefined );
     return segment.start.plus( segment.startTangent.perpendicular().negated().times( lineWidth / 2 ) );
   }
   
   function segmentEndLeft( segment, lineWidth ) {
-    phet.assert( lineWidth !== undefined );
+    assert && assert( lineWidth !== undefined );
     return segment.end.plus( segment.endTangent.perpendicular().negated().times( lineWidth / 2 ) );
   }
   
   function segmentStartRight( segment, lineWidth ) {
-    phet.assert( lineWidth !== undefined );
+    assert && assert( lineWidth !== undefined );
     return segment.start.plus( segment.startTangent.perpendicular().times( lineWidth / 2 ) );
   }
   
   function segmentEndRight( segment, lineWidth ) {
-    phet.assert( lineWidth !== undefined );
+    assert && assert( lineWidth !== undefined );
     return segment.end.plus( segment.endTangent.perpendicular().times( lineWidth / 2 ) );
   }
   

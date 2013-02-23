@@ -14,8 +14,12 @@
 define( function( require ) {
   "use strict";
   
-  scenery.Trail = function( nodes ) {
-    if ( nodes instanceof scenery.Trail ) {
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  var Transform3 = require( 'DOT/Transform3' );
+  var Node = require( 'SCENERY/Node' );
+  
+  var Trail = function( nodes ) {
+    if ( nodes instanceof Trail ) {
       // copy constructor (takes advantage of already built index information)
       var otherTrail = nodes;
       
@@ -33,7 +37,7 @@ define( function( require ) {
     
     var trail = this;
     if ( nodes ) {
-      if ( nodes instanceof scenery.Node ) {
+      if ( nodes instanceof Node ) {
         var node = nodes;
         
         // add just a single node in
@@ -46,7 +50,6 @@ define( function( require ) {
       }
     }
   };
-  var Trail = scenery.Trail;
   
   Trail.prototype = {
     constructor: Trail,
@@ -78,7 +81,7 @@ define( function( require ) {
     
     getTransform: function() {
       // always return a defensive copy of a transform
-      var transform = new phet.math.Transform3();
+      var transform = new Transform3();
       
       // from the root up
       _.each( this.nodes, function( node ) {
@@ -178,14 +181,8 @@ define( function( require ) {
     
     // whether this trail contains the complete 'other' trail, but with added descendants afterwards
     isExtensionOf: function( other, allowSameTrail ) {
-      // should be stripped out for the production version
-      // var trail = this;
-      // phet.debugAssert( function() {
-      //   return trail.areIndicesValid();
-      // }, 'Trail.isExtensionOf this.areIndicesValid() failed' );
-      // phet.debugAssert( function() {
-      //   return other.areIndicesValid();
-      // }, 'Trail.isExtensionOf other.areIndicesValid() failed' );
+      assert && assert( trail.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed' );
+      assert && assert( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed' );
       
       if ( this.length <= other.length - ( allowSameTrail ? 1 : 0 ) ) {
         return false;
@@ -285,17 +282,11 @@ define( function( require ) {
     compare: function( other ) {
       var trail = this;
       
-      phet.assert( !this.isEmpty(), 'cannot compare with an empty trail' );
-      phet.assert( !other.isEmpty(), 'cannot compare with an empty trail' );
-      phet.assert( this.nodes[0] === other.nodes[0], 'for Trail comparison, trails must have the same root node' );
-      
-      // should be stripped out for the production version
-      phet.debugAssert( function() {
-        return trail.areIndicesValid();
-      }, 'Trail.compare this.areIndicesValid() failed' );
-      phet.debugAssert( function() {
-        return other.areIndicesValid();
-      }, 'Trail.compare other.areIndicesValid() failed' );
+      assert && assert( !this.isEmpty(), 'cannot compare with an empty trail' );
+      assert && assert( !other.isEmpty(), 'cannot compare with an empty trail' );
+      assert && assert( this.nodes[0] === other.nodes[0], 'for Trail comparison, trails must have the same root node' );
+      assert && assert( trail.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed' );
+      assert && assert( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed' );
       
       var minNodeIndex = Math.min( this.indices.length, other.indices.length );
       for ( var i = 0; i < minNodeIndex; i++ ) {
@@ -332,6 +323,7 @@ define( function( require ) {
     }
   };
   
+  return Trail;
 } );
 
 

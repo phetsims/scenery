@@ -16,9 +16,16 @@
 define( function( require ) {
   "use strict";
   
-  scenery.Text = function( text, options ) {
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  var Bounds2 = require( 'DOT/Bounds2' );
+  var Node = require( 'SCENERY/Node' );
+  var Font = require( 'SCENERY/Font' );
+  var objectCreate = require( 'SCENERY/Util' ).objectCreate; // i.e. Object.create
+  var canvasAccurateBounds = require('SCENERY/Bounds').canvasAccurateBounds;
+  
+  var Text = function( text, options ) {
     this._text         = '';                 // filled in with mutator
-    this._font         = new scenery.Font(); // default font, usually 10px sans-serif
+    this._font         = new Font(); // default font, usually 10px sans-serif
     this._textAlign    = 'start';            // start, end, left, right, center
     this._textBaseline = 'alphabetic';       // top, hanging, middle, alphabetic, ideographic, bottom
     this._direction    = 'ltr';              // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
@@ -35,11 +42,10 @@ define( function( require ) {
       // set the text parameter so that setText( text ) is effectively called in the mutator from the super call
       options.text = text;
     }
-    scenery.Node.call( this, options );
+    Node.call( this, options );
   };
-  var Text = scenery.Text;
   
-  Text.prototype = phet.Object.create( scenery.Node.prototype );
+  Text.prototype = objectCreate( Node.prototype );
   Text.prototype.constructor = Text;
   
   Text.prototype.setText = function( text ) {
@@ -132,7 +138,7 @@ define( function( require ) {
   
   Text.prototype.accurateCanvasBounds = function() {
     var node = this;
-    return scenery.canvasAccurateBounds( function( context ) {
+    return canvasAccurateBounds( function( context ) {
       context.font = node.font;
       context.textAlign = node.textAlign;
       context.textBaseline = node.textBaseline;
@@ -156,7 +162,7 @@ define( function( require ) {
     
     document.body.appendChild( svg );
     var rect = textElement.getBBox();
-    var result = new phet.math.Bounds2( rect.x, rect.y, rect.x + rect.width, rect.y + rect.height );
+    var result = new Bounds2( rect.x, rect.y, rect.x + rect.width, rect.y + rect.height );
     document.body.removeChild( svg );
     
     return result;
@@ -164,7 +170,7 @@ define( function( require ) {
   
   Text.prototype.approximateDOMBounds = function() {
     // TODO: we can also technically support 'top' using vertical-align: top and line-height: 0 with the image, but it won't usually render otherwise
-    phet.assert( this._textBaseline === 'alphabetic' );
+    assert && assert( this._textBaseline === 'alphabetic' );
     
     var maxHeight = 1024; // technically this will fail if the font is taller than this!
     var isRTL = this.direction === 'rtl';
@@ -202,7 +208,7 @@ define( function( require ) {
     document.body.appendChild( div );
     var rect = span.getBoundingClientRect();
     var divRect = div.getBoundingClientRect();
-    var result = new phet.math.Bounds2( rect.left, rect.top - maxHeight, rect.right, rect.bottom - maxHeight ).shifted( -divRect.left, -divRect.top );
+    var result = new Bounds2( rect.left, rect.top - maxHeight, rect.right, rect.bottom - maxHeight ).shifted( -divRect.left, -divRect.top );
     document.body.removeChild( div );
     
     var width = rect.right - rect.left;

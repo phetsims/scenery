@@ -16,6 +16,8 @@
 define( function( require ) {
   "use strict";
   
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
   scenery.Input = function( scene ) {
     this.scene = scene;
     
@@ -275,14 +277,14 @@ define( function( require ) {
     constructor: Finger,
     
     addInputListener: function( listener ) {
-      phet.assert( !_.contains( this.listeners, listener ) );
+      assert && assert( !_.contains( this.listeners, listener ) );
       
       this.listeners.push( listener );
     },
     
     removeInputListener: function( listener ) {
       var index = _.indexOf( this.listeners, listener );
-      phet.assert( index !== -1 );
+      assert && assert( index !== -1 );
       
       this.listeners.splice( index, 1 );
     }

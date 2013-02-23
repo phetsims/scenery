@@ -9,7 +9,8 @@
 define( function( require ) {
   "use strict";
   
-  var Bounds2 = phet.math.Bounds2;
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  var Bounds2 = require( 'DOT/Bounds2' );
   
   scenery.Layer = function( args ) {
     this.$main = args.$main;

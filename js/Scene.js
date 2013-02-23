@@ -9,6 +9,10 @@
 define( function( require ) {
   "use strict";
   
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  var Bounds2 = require( 'DOT/Bounds2' );
+  var Vector2 = require( 'DOT/Vector2' );
+  
   /*
    * $main should be a block-level element with a defined width and height. scene.resize() should be called whenever
    * it is resized.
@@ -51,7 +55,7 @@ define( function( require ) {
     this.$main.width( options.width );
     this.$main.height( options.height );
     
-    this.sceneBounds = new phet.math.Bounds2( 0, 0, $main.width(), $main.height() );
+    this.sceneBounds = new Bounds2( 0, 0, $main.width(), $main.height() );
     
     // default to a canvas layer type, but this can be changed
     this.preferredSceneLayerType = options.preferredSceneLayerType;
@@ -210,7 +214,7 @@ define( function( require ) {
   Scene.prototype.layerLookup = function( trail ) {
     // TODO: add tree form for optimization! this is slower than necessary, it shouldn't be O(n)!
     
-    phet.assert( !( trail.isEmpty() || trail.nodes[0] !== this ), 'layerLookup root matches' );
+    assert && assert( !( trail.isEmpty() || trail.nodes[0] !== this ), 'layerLookup root matches' );
     
     if ( this.layers.length === 0 ) {
       throw new Error( 'no layers in the scene' );
@@ -225,7 +229,7 @@ define( function( require ) {
       // the first layer whose end point is equal to or past our pointer should contain the trail
       if ( pointer.compareNested( layer.endPointer ) !== 1 ) {
         // TODO: consider removal for performance
-        phet.assert( pointer.compareNested( layer.startPointer ) !== -1, 'node not contained in a layer' );
+        assert && assert( pointer.compareNested( layer.startPointer ) !== -1, 'node not contained in a layer' );
         return layer;
       }
     }
@@ -239,7 +243,7 @@ define( function( require ) {
     
     var result = [];
     
-    phet.assert( !( trail.isEmpty() || trail.nodes[0] !== this ), 'layerLookup root matches' );
+    assert && assert( !( trail.isEmpty() || trail.nodes[0] !== this ), 'layerLookup root matches' );
     
     if ( this.layers.length === 0 ) {
       throw new Error( 'no layers in the scene' );
@@ -318,7 +322,7 @@ define( function( require ) {
   Scene.prototype.resize = function( width, height ) {
     this.$main.width( width );
     this.$main.height( height );
-    this.sceneBounds = new phet.math.Bounds2( 0, 0, width, height );
+    this.sceneBounds = new Bounds2( 0, 0, width, height );
     this.rebuildLayers(); // TODO: why?
   };
   
@@ -356,7 +360,7 @@ define( function( require ) {
       listenerTarget: element,
       pointFromEvent: function( evt ) {
         var mainBounds = element.getBoundingClientRect();
-        return new phet.math.Vector2( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
+        return new Vector2( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
       }
     } ) );
   };
@@ -366,7 +370,7 @@ define( function( require ) {
       preventDefault: true,
       listenerTarget: document,
       pointFromEvent: function( evt ) {
-        return new phet.math.Vector2( evt.pageX, evt.pageY );
+        return new Vector2( evt.pageX, evt.pageY );
       }
     } ) );
   };

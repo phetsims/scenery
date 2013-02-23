@@ -3,6 +3,8 @@
 define( function( require ) {
   "use strict";
   
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
   scenery.LayerType = function( Constructor, name ) {
     this.Constructor = Constructor;
     this.name = name;

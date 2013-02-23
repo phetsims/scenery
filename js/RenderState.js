@@ -12,9 +12,9 @@
 define( function( require ) {
   "use strict";
   
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
   scenery.RenderState = function( scene ) {
-    // this.transform = new phet.math.Transform3();
-    
     this.layer = null;
     this.scene = scene;
     
@@ -59,7 +59,6 @@ define( function( require ) {
     
     // TODO: consider a stack-based model for transforms?
     applyTransformationMatrix: function( matrix ) {
-      // this.transform.append( matrix );
       this.layer.applyTransformationMatrix( matrix );
     }
   };

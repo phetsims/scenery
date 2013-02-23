@@ -3,6 +3,8 @@
 define( function( require ) {
   "use strict";
   
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
   phet.canvas.initCanvas = function ( canvas ) {
     // Initialize the variable context to null.
     var context = null;

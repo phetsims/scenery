@@ -11,6 +11,8 @@
 define( function( require ) {
   "use strict";
   
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
   scenery.Path = function( options ) {
     // TODO: consider directly passing in a shape object (or at least handling that case)
     this._shape = null;

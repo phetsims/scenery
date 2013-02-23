@@ -5,7 +5,7 @@ var phetDebug = true;
 
 var phet = phet || {};
 
-phet.assert = function ( predicate, msg ) {
+assert && assert = function ( predicate, msg ) {
   if ( !predicate ) {
     throw new Error( "Assertion failed: " + msg );
   }

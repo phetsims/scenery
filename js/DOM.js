@@ -9,6 +9,9 @@
 define( function( require ) {
   "use strict";
   
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  var Bounds2 = require( 'DOT/Bounds2' );
+  
   scenery.DOM = function( element, options ) {
     options = options || {};
     
@@ -61,7 +64,7 @@ define( function( require ) {
     // TODO: do we need to reset the CSS transform to get the proper bounds?
     
     // TODO: reset with the proper bounds here
-    this.invalidateSelf( new phet.math.Bounds2( 0, 0, this._$element.width(), this._$element.height() ) );
+    this.invalidateSelf( new Bounds2( 0, 0, this._$element.width(), this._$element.height() ) );
   };
   
   DOM.prototype.addToDOMLayer = function( domLayer ) {
