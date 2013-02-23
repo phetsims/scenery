@@ -17,7 +17,7 @@ phet.webgl = phet.webgl || {};
     this.parent = null;
     this.children = [];
     this.visible = true;
-    this.transform = new phet.math.Transform4();
+    this.transform = new dot.Transform4();
 
     this.wrappers = []; // rendering functions executed before and after the main's execution
 
@@ -25,11 +25,11 @@ phet.webgl = phet.webgl || {};
   };
 
   var GLNode = phet.webgl.GLNode;
-  var Matrix4 = phet.math.Matrix4;
+  var Matrix4 = dot.Matrix4;
 
   // TODO: rename args to renderState throughout?
   GLNode.RenderState = function () {
-    this.transform = new phet.math.Transform4();
+    this.transform = new dot.Transform4();
 
     this.transformAttribute = null;
 

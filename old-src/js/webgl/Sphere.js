@@ -150,7 +150,7 @@ phet.webgl = phet.webgl || {};
     epsilon = epsilon === undefined ? 0.00001 : epsilon;
 
     // center is the origin for now, but leaving in computations so that we can change that in the future. optimize away if needed
-    var center = new phet.math.Vector3();
+    var center = new dot.Vector3();
 
     var rayDir = ray.dir;
     var pos = ray.pos;
