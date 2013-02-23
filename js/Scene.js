@@ -13,12 +13,12 @@ define( function( require ) {
   
   var Bounds2 = require( 'DOT/Bounds2' );
   var Vector2 = require( 'DOT/Vector2' );
-  var Node = require( 'DOT/Node' );
-  var Trail = require( 'DOT/Trail' );
-  var TrailPointer = require( 'DOT/TrailPointer' );
-  var Input = require( 'DOT/Input' );
-  var LayerState = require( 'DOT/LayerState' );
-  var LayerType = require( 'DOT/LayerType' );
+  var Node = require( 'SCENERY/Node' );
+  var Trail = require( 'SCENERY/Trail' );
+  var TrailPointer = require( 'SCENERY/TrailPointer' );
+  var Input = require( 'SCENERY/Input' );
+  var LayerState = require( 'SCENERY/LayerState' );
+  var LayerType = require( 'SCENERY/LayerType' );
   
   var Util = require( 'SCENERY/Util' );
   var objectCreate = Util.objectCreate;
