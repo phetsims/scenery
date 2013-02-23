@@ -10,3 +10,4 @@ Rename main.js to scenery.js so it's easy to pull require( 'SCENERY/scenery' ) f
 
 require() is failing silently if the dependency is circular. consider throwing an error in that case?
 require() || throw Error( 'bad dependency!' ); -- can't inline, otherwise discovery won't work
+  See https://github.com/jrburke/almond/issues/8
