@@ -1,8 +1,7 @@
 // Copyright 2002-2012, University of Colorado
 
-var scenery = scenery || {};
-
-(function(){
+define( function( require ) {
+  "use strict";
   
   // TODO: remove rats-nest of mutable shared state that we have here, or clearly doc what are transient instances vs immutable
   scenery.LayerState = function() {
@@ -132,4 +131,4 @@ var scenery = scenery || {};
       return null;
     }
   };
-})();
+} );

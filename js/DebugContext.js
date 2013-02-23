@@ -13,9 +13,7 @@
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-var scenery = scenery || {};
-
-(function(){
+define( function( require ) {
   "use strict";
   
   // used to serialize arguments so that it displays exactly like the call would be executed
@@ -515,6 +513,6 @@ var scenery = scenery || {};
     }
     
   };
-})();
+} );
 
 

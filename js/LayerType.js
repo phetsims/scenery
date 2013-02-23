@@ -1,8 +1,6 @@
 // Copyright 2002-2012, University of Colorado
 
-var scenery = scenery || {};
-
-(function(){
+define( function( require ) {
   "use strict";
   
   scenery.LayerType = function( Constructor, name ) {
@@ -36,6 +34,6 @@ var scenery = scenery || {};
   LayerType.DOM = new scenery.LayerType( scenery.DOMLayer, 'dom' );
   LayerType.SVG = new scenery.LayerType( scenery.SVGLayer, 'svg' );
   
-})();
+} );
 
 

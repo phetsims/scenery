@@ -1,9 +1,6 @@
 // Copyright 2002-2012, University of Colorado
 
-var phet = phet || {};
-phet.canvas = phet.canvas || {};
-
-(function () {
+define( function( require ) {
   "use strict";
   
   phet.canvas.initCanvas = function ( canvas ) {
@@ -43,4 +40,4 @@ phet.canvas = phet.canvas || {};
     }
     return 1;
   };
-})();
+} );

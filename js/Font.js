@@ -23,9 +23,7 @@
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-var scenery = scenery || {};
-
-(function(){
+define( function( require ) {
   "use strict";
   
   // options from http://www.w3.org/TR/css3-fonts/
@@ -132,6 +130,6 @@ var scenery = scenery || {};
   };
   
   Font.prototype._mutatorKeys = [ 'font', 'weight', 'family', 'stretch', 'style', 'size', 'lineHeight' ];
-})();
+} );
 
 

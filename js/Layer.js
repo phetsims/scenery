@@ -6,9 +6,7 @@
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-var scenery = scenery || {};
-
-(function(){
+define( function( require ) {
   "use strict";
   
   var Bounds2 = phet.math.Bounds2;
@@ -101,6 +99,6 @@ var scenery = scenery || {};
       throw new Error( 'Layer.getName unimplemented' );
     }
   };
-})();
+} );
 
 

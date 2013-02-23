@@ -13,9 +13,7 @@
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-var scenery = scenery || {};
-
-(function(){
+define( function( require ) {
   "use strict";
   
   scenery.Input = function( scene ) {
@@ -377,4 +375,4 @@ var scenery = scenery || {};
     constructor: Key
   } );
   
-})();
+} );

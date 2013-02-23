@@ -19,9 +19,7 @@
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-var scenery = scenery || {};
-
-(function(){
+define( function( require ) {
   "use strict";
   
   var Vector2 = phet.math.Vector2;
@@ -919,4 +917,4 @@ var scenery = scenery || {};
     );
   }
   
-})();
+} );

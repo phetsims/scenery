@@ -12,21 +12,18 @@
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-var scenery = scenery || {};
-
-(function(){
+define( function( require ) {
   "use strict";
   
   /*
    * isBefore: whether this points to before the node (and its children) have been rendered, or after
    */
-  scenery.TrailPointer = function( trail, isBefore ) {
+  var TrailPointer = function( trail, isBefore ) {
     phet.assert( trail instanceof scenery.Trail, 'trail is not a trail' );
     this.trail = trail;
     
     this.setBefore( isBefore );
   };
-  var TrailPointer = scenery.TrailPointer;
   
   TrailPointer.prototype = {
     constructor: TrailPointer,
@@ -257,5 +254,6 @@ var scenery = scenery || {};
     }
   };
   
-})();
+  return TrailPointer;
+} );
 

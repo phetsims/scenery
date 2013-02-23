@@ -8,9 +8,7 @@
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-var scenery = scenery || {};
-
-(function(){
+define( function( require ) {
   "use strict";
   
   scenery.Image = function( image, options ) {
@@ -41,6 +39,6 @@ var scenery = scenery || {};
   };
   
   Image.prototype._supportedLayerTypes = [ scenery.LayerType.Canvas ];
-})();
+} );
 
 

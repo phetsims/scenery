@@ -1,8 +1,7 @@
 // Copyright 2002-2012, University of Colorado
 
-var scenery = scenery || {};
-
-(function(){
+define( function( require ) {
+  "use strict";
   
   // specified as such, since there is no needed shared state (we can have node.layerStrategy = scenery.DefaultLayerStrategy for many nodes)
   scenery.DefaultLayerStrategy = {
@@ -88,4 +87,4 @@ var scenery = scenery || {};
     };
   };
   
-})();
+} );

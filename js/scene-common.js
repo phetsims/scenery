@@ -1,8 +1,6 @@
 // Copyright 2002-2012, University of Colorado
 
-var scenery = scenery || {};
-
-(function(){
+define( function( require ) {
   "use strict";
   
   // TODO: remove flag and tests after we're done
@@ -257,4 +255,4 @@ var scenery = scenery || {};
     // return the average
     return result;
   };
-})();
+} );

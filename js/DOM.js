@@ -6,9 +6,7 @@
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-var scenery = scenery || {};
-
-(function(){
+define( function( require ) {
   "use strict";
   
   scenery.DOM = function( element, options ) {
@@ -101,6 +99,6 @@ var scenery = scenery || {};
   
   Object.defineProperty( DOM.prototype, 'element', { set: DOM.prototype.setElement, get: DOM.prototype.getElement } );
   
-})();
+} );
 
 

@@ -8,11 +8,7 @@
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-var phet = phet || {};
-phet.ui = phet.ui || {};
-
-// create a new scope
-(function () {
+define( function( require ) {
   "use strict";
 
   // integer-based constructor
@@ -50,4 +46,4 @@ phet.ui = phet.ui || {};
   Color.RED = new Color( 255, 0, 0 );
   Color.WHITE = new Color( 255, 255, 255 );
   Color.YELLOW = new Color( 255, 255, 0 );
-})();
+} );

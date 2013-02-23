@@ -13,9 +13,7 @@
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-var scenery = scenery || {};
-
-(function(){
+define( function( require ) {
   "use strict";
   
   scenery.Text = function( text, options ) {
@@ -321,6 +319,6 @@ var scenery = scenery || {};
   
   // mix in support for fills
   scenery.Fillable( Text );
-})();
+} );
 
 
