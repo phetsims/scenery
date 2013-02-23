@@ -913,4 +913,6 @@ define( function( require ) {
   Node.prototype._supportedLayerTypes = [];
   
   Node.prototype.layerStrategy = LayerStrategy.DefaultLayerStrategy;
+  
+  return Node;
 } );
