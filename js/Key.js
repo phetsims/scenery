@@ -11,15 +11,18 @@
 
 define( function( require ) {
   
+  var scenery = require( 'SCENERY/scenery' );
+  
   var Finger = require( 'SCENERY/Finger' );
   
-  var Key = function( key, event ) {
+  scenery.Key = function( key, event ) {
     Finger.call( this );
     
     this.key = key;
     this.isKey = true;
     this.trail = null;
   };
+  var Key = scenery.Key;
   
   Key.prototype = _.extend( {}, Finger.prototype, {
     constructor: Key

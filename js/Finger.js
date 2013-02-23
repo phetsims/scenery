@@ -11,9 +11,12 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
-  var Finger = function() {
+  var scenery = require( 'SCENERY/scenery' );
+  
+  scenery.Finger = function() {
     this.listeners = [];
   };
+  var Finger = scenery.Finger;
   
   Finger.prototype = {
     constructor: Finger,

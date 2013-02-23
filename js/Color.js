@@ -14,9 +14,11 @@ define( function( require ) {
   "use strict";
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
+  var scenery = require( 'SCENERY/scenery' );
 
   // integer-based constructor
-  var Color = function( r, g, b, a ) {
+  scenery.Color = function( r, g, b, a ) {
 
     // alpha
     this.a = a === undefined ? 255 : a;
@@ -34,6 +36,7 @@ define( function( require ) {
       this.b = b;
     }
   };
+  var Color = scenery.Color;
 
   Color.BLACK = new Color( 0, 0, 0 );
   Color.BLUE = new Color( 0, 0, 255 );

@@ -17,13 +17,15 @@ define( function( require ) {
   
   var Bounds2 = require( 'DOT/Bounds2' );
   
+  var scenery = require( 'SCENERY/scenery' );
+  
   var Layer = require( 'SCENERY/Layer' );
   var Trail = require( 'SCENERY/Trail' );
   
   var svgns = 'http://www.w3.org/2000/svg';
   var xlinkns = 'http://www.w3.org/1999/xlink';
   
-  var SVGLayer = function( args ) {
+  scenery.SVGLayer = function( args ) {
     var $main = args.$main;
     
     this.svg = document.createElementNS( svgns, 'svg' );
@@ -50,6 +52,7 @@ define( function( require ) {
     
     Layer.call( this, args );
   };
+  var SVGLayer = scenery.SVGLayer;
   
   SVGLayer.prototype = _.extend( {}, Layer.prototype, {
     constructor: SVGLayer,

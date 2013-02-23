@@ -15,17 +15,19 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
+  var scenery = require( 'SCENERY/scenery' );
+  
   var Bounds2 = require( 'DOT/Bounds2' );
   var Transform3 = require( 'DOT/Transform3' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Shape = require( 'SCENERY/Shape' );
-  var Trail = require( 'SCENERY/Trail' );
+  require( 'SCENERY/Trail' );
   var LayerStrategy = require( 'SCENERY/LayerStrategy' );
   
   var globalIdCounter = 1;
   
   // TODO: consider an args-style constructor here!
-  var Node = function( options ) {
+  scenery.Node = function( options ) {
     // assign a unique ID to this node (allows trails to )
     this._id = globalIdCounter++;
     
@@ -68,6 +70,7 @@ define( function( require ) {
       this.mutate( options );
     }
   };
+  var Node = scenery.Node;
   
   Node.prototype = {
     constructor: Node,
@@ -377,7 +380,7 @@ define( function( require ) {
       
       // didn't hit our children, so check ourself as a last resort
       if ( this._selfBounds.containsPoint( localPoint ) && this.containsPointSelf( localPoint ) ) {
-        return new Trail( this );
+        return new scenery.Trail( this );
       }
       
       // signal no hit
@@ -469,7 +472,7 @@ define( function( require ) {
     
     // dispatches an event across all possible Trails ending in this node
     dispatchEvent: function( type, args ) {
-      var trail = new Trail();
+      var trail = new scenery.Trail();
       
       function recursiveEventDispatch( node ) {
         trail.addAncestor( node );
@@ -494,7 +497,7 @@ define( function( require ) {
     
     // dispatches events with the transform computed from parent of the "root" to the local frame
     dispatchEventWithTransform: function( type, args ) {
-      var trail = new Trail();
+      var trail = new scenery.Trail();
       var transformStack = [ new Transform3() ];
       
       function recursiveEventDispatch( node ) {
@@ -800,7 +803,7 @@ define( function( require ) {
     
     // returns a unique trail (if it exists) where each node in the ancestor chain has 0 or 1 parents
     getUniqueTrail: function() {
-      var trail = new Trail();
+      var trail = new scenery.Trail();
       var node = this;
       
       while ( node ) {

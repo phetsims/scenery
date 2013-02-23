@@ -16,17 +16,21 @@ define( function( require ) {
   "use strict";
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
+  var scenery = require( 'SCENERY/scenery' );
+  
   var Trail = require( 'SCENERY/Trail' );
   
   /*
    * isBefore: whether this points to before the node (and its children) have been rendered, or after
    */
-  var TrailPointer = function( trail, isBefore ) {
+  scenery.TrailPointer = function( trail, isBefore ) {
     assert && assert( trail instanceof Trail, 'trail is not a trail' );
     this.trail = trail;
     
     this.setBefore( isBefore );
   };
+  var TrailPointer = scenery.TrailPointer;
   
   TrailPointer.prototype = {
     constructor: TrailPointer,

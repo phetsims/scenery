@@ -14,7 +14,9 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
-  var RenderState = function( scene ) {
+  var scenery = require( 'SCENERY/scenery' );
+  
+  scenery.RenderState = function( scene ) {
     this.layer = null;
     this.scene = scene;
     
@@ -24,6 +26,7 @@ define( function( require ) {
     // when non-null, children not intersecting the global bounds here may not be rendered for efficiency
     this.childRestrictedBounds = null;
   };
+  var RenderState = scenery.RenderState;
 
   RenderState.prototype = {
     constructor: RenderState,

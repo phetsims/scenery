@@ -8,9 +8,11 @@
 
 define( function( require ) {
   
+  var scenery = require( 'SCENERY/scenery' );
+  
   var Finger = require( 'SCENERY/Finger' );
   
-  var Touch = function( id, point, event ) {
+  scenery.Touch = function( id, point, event ) {
     Finger.call( this );
     
     this.id = id;
@@ -18,6 +20,7 @@ define( function( require ) {
     this.isTouch = true;
     this.trail = null;
   };
+  var Touch = scenery.Touch;
   
   Touch.prototype = _.extend( {}, Finger.prototype, {
     constructor: Touch,

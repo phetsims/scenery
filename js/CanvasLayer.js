@@ -19,13 +19,15 @@ define( function( require ) {
   
   var Bounds2 = require( 'DOT/Bounds2' );
   
+  var scenery = require( 'SCENERY/scenery' );
+  
   var Layer = require( 'SCENERY/Layer' );
   var RenderState = require( 'SCENERY/RenderState' );
   var Shape = require( 'SCENERY/Shape' );
   var Trail = require( 'SCENERY/Trail' );
   
   // assumes main is wrapped with JQuery
-  var CanvasLayer = function( args ) {
+  scenery.CanvasLayer = function( args ) {
     Layer.call( this, args );
     
     this.backingScale = args.scene.backingScale;
@@ -56,6 +58,7 @@ define( function( require ) {
     
     this.resetStyles();
   };
+  var CanvasLayer = scenery.CanvasLayer;
   
   CanvasLayer.prototype = _.extend( {}, Layer.prototype, {
     constructor: CanvasLayer,

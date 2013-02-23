@@ -13,13 +13,15 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
+  var scenery = require( 'SCENERY/scenery' );
+  
   var Node = require( 'SCENERY/Node' );
   var LayerType = require( 'SCENERY/LayerType' );
   var fillable = require( 'SCENERY/Fillable' );
   var strokable = require( 'SCENERY/Strokable' );
   var objectCreate = require( 'SCENERY/Util' ).objectCreate;
   
-  var Path = function( options ) {
+  scenery.Path = function( options ) {
     // TODO: consider directly passing in a shape object (or at least handling that case)
     this._shape = null;
     
@@ -30,6 +32,7 @@ define( function( require ) {
     
     Node.call( this, options );
   };
+  var Path = scenery.Path;
   
   Path.prototype = objectCreate( Node.prototype );
   Path.prototype.constructor = Path;

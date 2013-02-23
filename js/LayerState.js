@@ -5,12 +5,15 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
+  var scenery = require( 'SCENERY/scenery' );
+  
   // TODO: remove rats-nest of mutable shared state that we have here, or clearly doc what are transient instances vs immutable
-  var LayerState = function() {
+  scenery.LayerState = function() {
     this.preferredLayerTypes = [];
     
     this.resetInternalState();
   };
+  var LayerState = scenery.LayerState;
   
   LayerState.prototype = {
     constructor: LayerState,

@@ -17,9 +17,11 @@ define( function( require ) {
   
   var Bounds2 = require( 'DOT/Bounds2' );
   
+  var scenery = require( 'SCENERY/scenery' );
+  
   var Layer = require( 'SCENERY/Layer' );
   
-  var DOMLayer = function( args ) {
+  scenery.DOMLayer = function( args ) {
     Layer.call( this, args );
     
     this.div = document.createElement( 'div' );
@@ -33,6 +35,7 @@ define( function( require ) {
     
     this.isDOMLayer = true;
   };
+  var DOMLayer = scenery.DOMLayer;
   
   DOMLayer.prototype = _.extend( {}, Layer.prototype, {
     constructor: DOMLayer,

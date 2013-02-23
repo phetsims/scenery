@@ -10,9 +10,12 @@ define( function( require ) {
   "use strict";
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
   var Bounds2 = require( 'DOT/Bounds2' );
   
-  var Layer = function( args ) {
+  var scenery = require( 'SCENERY/scenery' );
+  
+  scenery.Layer = function( args ) {
     this.$main = args.$main;
     this.scene = args.scene;
     
@@ -24,6 +27,7 @@ define( function( require ) {
     this.startSelfTrail = null;
     this.endSelfTrail = null;
   };
+  var Layer = scenery.Layer;
   
   Layer.prototype = {
     constructor: Layer,

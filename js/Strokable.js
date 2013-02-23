@@ -13,9 +13,11 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
+  var scenery = require( 'SCENERY/scenery' );
+  
   var Shape = require( 'SCENERY/Shape' );
   
-  var Strokable = function( type ) {
+  scenery.Strokable = function( type ) {
     var proto = type.prototype;
     
     // this should be called in the constructor to initialize
@@ -115,6 +117,7 @@ define( function( require ) {
       };
     }
   };
+  var Strokable = scenery.Strokable;
   
   return Strokable;
 } );

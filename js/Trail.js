@@ -15,10 +15,14 @@ define( function( require ) {
   "use strict";
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
-  var Transform3 = require( 'DOT/Transform3' );
-  var Node = require( 'SCENERY/Node' );
   
-  var Trail = function( nodes ) {
+  var Transform3 = require( 'DOT/Transform3' );
+  
+  var scenery = require( 'SCENERY/scenery' );
+  
+  require( 'SCENERY/Node' );
+  
+  scenery.Trail = function( nodes ) {
     if ( nodes instanceof Trail ) {
       // copy constructor (takes advantage of already built index information)
       var otherTrail = nodes;
@@ -37,7 +41,7 @@ define( function( require ) {
     
     var trail = this;
     if ( nodes ) {
-      if ( nodes instanceof Node ) {
+      if ( nodes instanceof scenery.Node ) {
         var node = nodes;
         
         // add just a single node in
@@ -50,6 +54,7 @@ define( function( require ) {
       }
     }
   };
+  var Trail = scenery.Trail;
   
   Trail.prototype = {
     constructor: Trail,

@@ -28,6 +28,8 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
+  var scenery = require( 'SCENERY/scenery' );
+  
   // options from http://www.w3.org/TR/css3-fonts/
   // font-family      v ---
   // font-weight      v normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900
@@ -39,7 +41,7 @@ define( function( require ) {
   //                    <font-variant-css21> = [normal | small-caps]
   // font-synthesis   v none | [ weight || style ]
   
-  var Font = function( options ) {
+  scenery.Font = function( options ) {
     // internal string representation
     this._font = '10px sans-serif';
     
@@ -53,6 +55,7 @@ define( function( require ) {
       this.mutate( options );
     }
   };
+  var Font = scenery.Font;
   
   Font.prototype = {
     constructor: Font,

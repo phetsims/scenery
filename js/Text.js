@@ -17,7 +17,11 @@ define( function( require ) {
   "use strict";
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
   var Bounds2 = require( 'DOT/Bounds2' );
+  
+  var scenery = require( 'SCENERY/scenery' );
+  
   var Node = require( 'SCENERY/Node' );
   var Font = require( 'SCENERY/Font' );
   var LayerType = require( 'SCENERY/LayerType' );
@@ -25,7 +29,7 @@ define( function( require ) {
   var objectCreate = require( 'SCENERY/Util' ).objectCreate; // i.e. Object.create
   var canvasAccurateBounds = require('SCENERY/Util').canvasAccurateBounds;
   
-  var Text = function( text, options ) {
+  scenery.Text = function( text, options ) {
     this._text         = '';                 // filled in with mutator
     this._font         = new Font(); // default font, usually 10px sans-serif
     this._textAlign    = 'start';            // start, end, left, right, center
@@ -46,6 +50,7 @@ define( function( require ) {
     }
     Node.call( this, options );
   };
+  var Text = scenery.Text;
   
   Text.prototype = objectCreate( Node.prototype );
   Text.prototype.constructor = Text;

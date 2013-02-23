@@ -29,7 +29,8 @@ define( [
     'SCENERY/Touch',
     'SCENERY/Trail',
     'SCENERY/TrailPointer',
-    'SCENERY/Util'
+    'SCENERY/Util',
+    'SCENERY/scenery'
   ], function(
     CanvasLayer,
     Color,
@@ -60,41 +61,9 @@ define( [
     Touch,
     Trail,
     TrailPointer,
-    Util
+    Util,
+    scenery
   ) {
-  
-  var scenery = {
-    CanvasLayer: CanvasLayer,
-    Color: Color,
-    DebugContext: DebugContext,
-    DOM: DOM,
-    DOMLayer: DOMLayer,
-    Event: Event,
-    Fillable: Fillable,
-    Finger: Finger,
-    Font: Font,
-    Image: Image,
-    Input: Input,
-    Key: Key,
-    Layer: Layer,
-    LayerState: LayerState,
-    LayerStrategy: LayerStrategy,
-    LayerType: LayerType,
-    Mouse: Mouse,
-    Node: Node,
-    Path: Path,
-    RenderState: RenderState,
-    Scene: Scene,
-    Shape: Shape,
-    SimpleDragHandler: SimpleDragHandler,
-    Strokable: Strokable,
-    SVGLayer: SVGLayer,
-    Text: Text,
-    Touch: Touch,
-    Trail: Trail,
-    TrailPointer: TrailPointer,
-    Util: Util
-  };
   
   return scenery;
 } );

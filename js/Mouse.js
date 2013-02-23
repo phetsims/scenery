@@ -8,9 +8,11 @@
 
 define( function( require ) {
   
+  var scenery = require( 'SCENERY/scenery' );
+  
   var Finger = require( 'SCENERY/Finger' );
   
-  var Mouse = function() {
+  scenery.Mouse = function() {
     Finger.call( this );
     
     this.point = null;
@@ -23,6 +25,7 @@ define( function( require ) {
     
     this.trail = null;
   };
+  var Mouse = scenery.Mouse;
   
   Mouse.prototype = _.extend( {}, Finger.prototype, {
     constructor: Mouse,

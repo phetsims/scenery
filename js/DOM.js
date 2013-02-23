@@ -13,11 +13,13 @@ define( function( require ) {
   
   var Bounds2 = require( 'DOT/Bounds2' );
   
+  var scenery = require( 'SCENERY/scenery' );
+  
   var Node = require( 'SCENERY/Node' );
   var LayerType = require( 'SCENERY/LayerType' );
   var objectCreate = require( 'SCENERY/Util' ).objectCreate;
   
-  var DOM = function( element, options ) {
+  scenery.DOM = function( element, options ) {
     options = options || {};
     
     // unwrap from jQuery if that is passed in, for consistency
@@ -56,6 +58,7 @@ define( function( require ) {
       temporaryContainer.removeChild( element );
     }
   };
+  var DOM = scenery.DOM;
   
   DOM.prototype = objectCreate( Node.prototype );
   DOM.prototype.constructor = DOM;

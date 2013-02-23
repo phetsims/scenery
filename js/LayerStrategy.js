@@ -5,8 +5,10 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
+  var scenery = require( 'SCENERY/scenery' );
+  
   // specified as such, since there is no needed shared state (we can have node.layerStrategy = scenery.DefaultLayerStrategy for many nodes)
-  var DefaultLayerStrategy = {
+  scenery.DefaultLayerStrategy = {
     enter: function( trail, layerState ) {
       var node = trail.lastNode();
       
@@ -41,8 +43,9 @@ define( function( require ) {
       // currently a no-op
     }
   };
+  var DefaultLayerStrategy = scenery.DefaultLayerStrategy;
   
-  var SeparateLayerStrategy = function( strategy ) {
+  scenery.SeparateLayerStrategy = function( strategy ) {
     return {
       strategy: strategy,
       
@@ -63,8 +66,9 @@ define( function( require ) {
       }
     };
   };
+  var SeparateLayerStrategy = scenery.SeparateLayerStrategy;
   
-  var LayerTypeStrategy = function( strategy, preferredLayerType ) {
+  scenery.LayerTypeStrategy = function( strategy, preferredLayerType ) {
     return {
       strategy: strategy,
       
@@ -88,6 +92,7 @@ define( function( require ) {
       }
     };
   };
+  var LayerTypeStrategy = scenery.LayerTypeStrategy;
   
   return {
     DefaultLayerStrategy: DefaultLayerStrategy,

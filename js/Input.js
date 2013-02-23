@@ -18,18 +18,21 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
+  var scenery = require( 'SCENERY/scenery' );
+  
   var Trail = require( 'SCENERY/Trail' );
   var Mouse = require( 'SCENERY/Mouse' );
   var Touch = require( 'SCENERY/Touch' );
   var Event = require( 'SCENERY/Event' );
   
-  var Input = function( scene ) {
+  scenery.Input = function( scene ) {
     this.scene = scene;
     
     this.mouse = new Mouse();
     
     this.fingers = [ this.mouse ];
   };
+  var Input = scenery.Input;
   
   Input.prototype = {
     constructor: Input,

@@ -15,17 +15,20 @@ define( function( require ) {
   
   var Bounds2 = require( 'DOT/Bounds2' );
   
+  var scenery = require( 'SCENERY/scenery' );
+  
   var Node = require( 'SCENERY/Node' );
   var LayerType = require( 'SCENERY/LayerType' );
   var objectCreate = require( 'SCENERY/Util' ).objectCreate;
   
-  var Image = function( image, options ) {
+  scenery.Image = function( image, options ) {
     Node.call( this, options );
     
     this.image = image;
     
     this.invalidateSelf( new Bounds2( 0, 0, image.width, image.height ) );
   };
+  var Image = scenery.Image;
   
   Image.prototype = objectCreate( Node.prototype );
   Image.prototype.constructor = Image;

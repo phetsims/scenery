@@ -11,6 +11,8 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
+  var scenery = require( 'SCENERY/scenery' );
+  
   var Bounds2 = require( 'DOT/Bounds2' );
   var Vector2 = require( 'DOT/Vector2' );
   var Node = require( 'SCENERY/Node' );
@@ -37,7 +39,7 @@ define( function( require ) {
    *   height: <current main height>,                     // override the main container's height
    * }
    */
-  var Scene = function( $main, options ) {
+  scenery.Scene = function( $main, options ) {
     // defaults
     options = _.extend( {
       allowSceneOverflow: false,
@@ -131,6 +133,7 @@ define( function( require ) {
     
     this.addEventListener( this.sceneEventListener );
   };
+  var Scene = scenery.Scene;
 
   Scene.prototype = objectCreate( Node.prototype );
   Scene.prototype.constructor = Scene;

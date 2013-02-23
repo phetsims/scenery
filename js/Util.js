@@ -5,6 +5,8 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
+  var scenery = require( 'SCENERY/scenery' );
+  
   var Matrix3 = require( 'DOT/Matrix3' );
   var Transform3 = require( 'DOT/Transform3' );
   var Bounds2 = require( 'DOT/Bounds2' );
@@ -18,7 +20,7 @@ define( function( require ) {
   // TODO: remove flag and tests after we're done
   var debugChromeBoundsScanning = false;
   
-  var Util = {
+  scenery.Util = {
     // Object.create polyfill
     objectCreate: Object.create || function ( o ) {
       if ( arguments.length > 1 ) {
@@ -320,6 +322,7 @@ define( function( require ) {
       return result;
     }
   };
+  var Util = scenery.Util;
   
   return Util;
 } );

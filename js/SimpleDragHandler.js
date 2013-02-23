@@ -11,6 +11,8 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
+  var scenery = require( 'SCENERY/scenery' );
+  
   /*
    * Allowed options: {
    *    allowTouchSnag: false // allow touch swipes across an object to pick it up,
@@ -20,7 +22,7 @@ define( function( require ) {
    *    end:   null           // if non-null, called when a drag is ended.   end( finger, trail, event )
    * }
    */
-  var SimpleDragHandler = function( options ) {
+  scenery.SimpleDragHandler = function( options ) {
     var handler = this;
     
     this.options = options || {};
@@ -87,6 +89,7 @@ define( function( require ) {
       }
     };
   };
+  var SimpleDragHandler = scenery.SimpleDragHandler;
   
   SimpleDragHandler.prototype = {
     constructor: SimpleDragHandler,

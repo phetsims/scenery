@@ -24,6 +24,8 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
+  var scenery = require( 'SCENERY/scenery' );
+  
   var Vector2 = require( 'DOT/Vector2' );
   var Bounds2 = require( 'DOT/Bounds2' );
   var Ray2 = require( 'DOT/Ray2' );
@@ -35,7 +37,7 @@ define( function( require ) {
   // a normalized vector for non-zero winding checks
   // var weirdDir = p( Math.PI, 22 / 7 );
   
-  var Shape = function( pieces, optionalClose ) {
+  scenery.Shape = function( pieces, optionalClose ) {
     // higher-level Canvas-esque drawing commands
     this.pieces = [];
     
@@ -61,6 +63,7 @@ define( function( require ) {
       this.addPiece( new Piece.Close() );
     }
   };
+  var Shape = scenery.Shape;
   
   Shape.prototype = {
     constructor: Shape,

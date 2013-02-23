@@ -5,14 +5,17 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
+  var scenery = require( 'SCENERY/scenery' );
+  
   var CanvasLayer = require( 'SCENERY/CanvasLayer' );
   var DOMLayer = require( 'SCENERY/DOMLayer' );
   var SVGLayer = require( 'SCENERY/SVGLayer' );
   
-  var LayerType = function( Constructor, name ) {
+  scenery.LayerType = function( Constructor, name ) {
     this.Constructor = Constructor;
     this.name = name;
   };
+  var LayerType = scenery.LayerType;
   
   LayerType.prototype = {
     constructor: LayerType,

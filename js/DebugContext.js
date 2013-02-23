@@ -18,6 +18,8 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
+  var scenery = require( 'SCENERY/scenery' );
+  
   // used to serialize arguments so that it displays exactly like the call would be executed
   function s( value ) {
     return JSON.stringify( value );
@@ -49,9 +51,10 @@ define( function( require ) {
     }
   }
   
-  var DebugContext = function( context ) {
+  scenery.DebugContext = function( context ) {
     this._context = context;
   };
+  var DebugContext = scenery.DebugContext;
   
   DebugContext.prototype = {
     constructor: DebugContext,

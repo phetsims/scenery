@@ -2,7 +2,9 @@
 
 define( function( require ) {
   
-  var Event = function( options ) {
+  var scenery = require( 'SCENERY/scenery' );
+  
+  scenery.Event = function( options ) {
     this.handled = false;
     this.aborted = false;
     
@@ -11,6 +13,7 @@ define( function( require ) {
     
     // TODO: add extended information based on an event here?
   };
+  var Event = scenery.Event;
   
   Event.prototype = {
     constructor: Event,
