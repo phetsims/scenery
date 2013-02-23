@@ -1,10 +1,13 @@
 
-LayerStrategy API Change
+
+** Debug assertions, and performance handling
+  Decide on best way to include assert control
+
 Better packaging?
 
 requestAnimationFrame
 
-Rename main.js to scenery.js so it's easy to pull require( 'SCENERY/scenery' ) for full API access
+Rename main.js to namespace.js? so it's easy to pull require( 'SCENERY/namespace' ) for full API access
 
 'mangle' off for the standalone/development versions
 
