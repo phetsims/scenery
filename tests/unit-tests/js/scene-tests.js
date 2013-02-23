@@ -646,7 +646,7 @@
   } );
   
   test( 'Correct bounds on rectangle', function() {
-    var rectBounds = scenery.canvasAccurateBounds( function( context ) { context.fillRect( 100, 100, 200, 200 ); } );
+    var rectBounds = scenery.Util.canvasAccurateBounds( function( context ) { context.fillRect( 100, 100, 200, 200 ); } );
     ok( Math.abs( rectBounds.minX - 100 ) < 0.01, rectBounds.minX );
     ok( Math.abs( rectBounds.minY - 100 ) < 0.01, rectBounds.minY );
     ok( Math.abs( rectBounds.maxX - 300 ) < 0.01, rectBounds.maxX );
@@ -654,7 +654,7 @@
   } );
   
   test( 'Consistent and precise bounds range on Text', function() {
-    var textBounds = scenery.canvasAccurateBounds( function( context ) { context.fillText( 'test string', 0, 0 ); } );
+    var textBounds = scenery.Util.canvasAccurateBounds( function( context ) { context.fillText( 'test string', 0, 0 ); } );
     ok( textBounds.isConsistent, textBounds.toString() );
     
     // precision of 0.001 (or lower given different parameters) is possible on non-Chome browsers (Firefox, IE9, Opera)
@@ -1036,7 +1036,7 @@
   
   test( 'Canvas WebGL Context and Features', function() {
     var canvas = document.createElement( 'canvas' );
-    var context = phet.webgl.initWebGL( canvas );
+    var context = canvas.getContext( "webgl" ) || canvas.getContext( "experimental-webgl" );
     ok( context, 'context' );
   } );
   
