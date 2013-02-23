@@ -15,7 +15,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  var Shape = require( 'SCENERY/Shape' );
+  require( 'SCENERY/Shape' );
   
   scenery.Strokable = function( type ) {
     var proto = type.prototype;
@@ -23,7 +23,7 @@ define( function( require ) {
     // this should be called in the constructor to initialize
     proto.initializeStrokable = function() {
       this._stroke = null;
-      this._lineDrawingStyles = new Shape.LineStyles();
+      this._lineDrawingStyles = new scenery.Shape.LineStyles();
     };
     
     proto.hasStroke = function() {

@@ -22,16 +22,16 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  var Node = require( 'SCENERY/Node' );
-  var Font = require( 'SCENERY/Font' );
+  var Node = require( 'SCENERY/Node' ); // inherits from Node
   var LayerType = require( 'SCENERY/LayerType' );
   var fillable = require( 'SCENERY/Fillable' );
   var objectCreate = require( 'SCENERY/Util' ).objectCreate; // i.e. Object.create
-  var canvasAccurateBounds = require('SCENERY/Util').canvasAccurateBounds;
+  require( 'SCENERY/Font' );
+  require( 'SCENERY/Util' ); // for canvasAccurateBounds
   
   scenery.Text = function( text, options ) {
     this._text         = '';                 // filled in with mutator
-    this._font         = new Font(); // default font, usually 10px sans-serif
+    this._font         = new scenery.Font(); // default font, usually 10px sans-serif
     this._textAlign    = 'start';            // start, end, left, right, center
     this._textBaseline = 'alphabetic';       // top, hanging, middle, alphabetic, ideographic, bottom
     this._direction    = 'ltr';              // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
@@ -145,7 +145,7 @@ define( function( require ) {
   
   Text.prototype.accurateCanvasBounds = function() {
     var node = this;
-    return canvasAccurateBounds( function( context ) {
+    return scenery.Util.canvasAccurateBounds( function( context ) {
       context.font = node.font;
       context.textAlign = node.textAlign;
       context.textBaseline = node.textBaseline;
@@ -244,7 +244,7 @@ define( function( require ) {
   *----------------------------------------------------------------------------*/
   
   Text.prototype.setFont = function( font ) {
-    this._font = font instanceof Font ? font : new Font( font );
+    this._font = font instanceof scenery.Font ? font : new scenery.Font( font );
     this.invalidateText();
     return this;
   };

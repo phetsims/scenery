@@ -19,9 +19,10 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  var Layer = require( 'SCENERY/Layer' );
-  var Trail = require( 'SCENERY/Trail' );
+  var Layer = require( 'SCENERY/Layer' ); // extends Layer
+  require( 'SCENERY/Trail' );
   
+  // used namespaces
   var svgns = 'http://www.w3.org/2000/svg';
   var xlinkns = 'http://www.w3.org/1999/xlink';
   
@@ -70,7 +71,7 @@ define( function( require ) {
     // FIXME: ordering of group trees is currently not guaranteed (this just appends right now, so they need to be ensured in the proper order)
     ensureGroupTree: function( trail ) {
       if ( !( trail.getUniqueId() in this.idGroupMap ) ) {
-        var subtrail = new Trail( trail.rootNode() );
+        var subtrail = new scenery.Trail( trail.rootNode() );
         var lastId = null;
         
         // walk a subtrail up from the root node all the way to the full trail, creating groups where necessary

@@ -16,12 +16,12 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  var Node = require( 'SCENERY/Node' );
-  var Trail = require( 'SCENERY/Trail' );
-  var TrailPointer = require( 'SCENERY/TrailPointer' );
-  var Input = require( 'SCENERY/Input' );
-  var LayerState = require( 'SCENERY/LayerState' );
-  var LayerType = require( 'SCENERY/LayerType' );
+  var Node = require( 'SCENERY/Node' ); // inherits from Node
+  require( 'SCENERY/Trail' );
+  require( 'SCENERY/TrailPointer' );
+  require( 'SCENERY/Input' );
+  require( 'SCENERY/LayerState' );
+  require( 'SCENERY/LayerType' );
   
   var Util = require( 'SCENERY/Util' );
   var objectCreate = Util.objectCreate;
@@ -46,7 +46,7 @@ define( function( require ) {
       allowSceneOverflow: false,
       allowCSSHacks: true,
       allowDevicePixelRatioScaling: false,
-      preferredSceneLayerType: LayerType.Canvas,
+      preferredSceneLayerType: scenery.LayerType.Canvas,
       width: $main.width(),
       height: $main.height()
     }, options || {} );
@@ -168,13 +168,13 @@ define( function( require ) {
     this.disposeLayers();
     
     // TODO: internal API rethink
-    var state = new LayerState();
+    var state = new scenery.LayerState();
     
     if ( this.preferredSceneLayerType ) {
       state.pushPreferredLayerType( this.preferredSceneLayerType );
     }
     
-    var layerEntries = state.buildLayers( new TrailPointer( new Trail( this ), true ), new TrailPointer( new Trail( this ), false ), null );
+    var layerEntries = state.buildLayers( new scenery.TrailPointer( new scenery.Trail( this ), true ), new scenery.TrailPointer( new scenery.Trail( this ), false ), null );
     
     var layerArgs = {
       $main: this.$main,
@@ -233,7 +233,7 @@ define( function( require ) {
     }
     
     // point to the beginning of the node, right before it would be rendered
-    var pointer = new TrailPointer( trail, true );
+    var pointer = new scenery.TrailPointer( trail, true );
     
     for ( var i = 0; i < this.layers.length; i++ ) {
       var layer = this.layers[i];
@@ -262,8 +262,8 @@ define( function( require ) {
     }
     
     // point to the beginning of the node, right before it would be rendered
-    var startPointer = new TrailPointer( trail, true );
-    var endPointer = new TrailPointer( trail, false );
+    var startPointer = new scenery.TrailPointer( trail, true );
+    var endPointer = new scenery.TrailPointer( trail, false );
     
     for ( var i = 0; i < this.layers.length; i++ ) {
       var layer = this.layers[i];
@@ -399,7 +399,7 @@ define( function( require ) {
     var listenerTarget = parameters.listenerTarget;
     var preventDefault = parameters.preventDefault;
     
-    var input = new Input( scene );
+    var input = new scenery.Input( scene );
     scene.input = input;
     
     $( listenerTarget ).on( 'mousedown', function( jEvent ) {
