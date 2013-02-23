@@ -21,7 +21,9 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   var LayerStrategy = require( 'SCENERY/LayerStrategy' ); // used to set the default layer strategy on the prototype
-  require( 'SCENERY/Trail' );
+  
+  // TODO: FIXME: Why do I have to comment out this dependency?
+  // require( 'SCENERY/Trail' );
   
   var globalIdCounter = 1;
   
