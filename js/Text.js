@@ -23,7 +23,7 @@ define( function( require ) {
   var LayerType = require( 'SCENERY/LayerType' );
   var fillable = require( 'SCENERY/Fillable' );
   var objectCreate = require( 'SCENERY/Util' ).objectCreate; // i.e. Object.create
-  var canvasAccurateBounds = require('SCENERY/Bounds').canvasAccurateBounds;
+  var canvasAccurateBounds = require('SCENERY/Util').canvasAccurateBounds;
   
   var Text = function( text, options ) {
     this._text         = '';                 // filled in with mutator
