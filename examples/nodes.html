@@ -22,8 +22,8 @@
   <script src="../contrib/stats.min.js"></script>
   
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
-  <script src="../scenery.js"></script>
-  <!-- <script src="../scenery-min.js"></script> -->
+  <script src="../dist/standalone/scenery.js"></script>
+  <!-- <script src="../dist/standalone/scenery.min.js"></script> -->
   
   <style type="text/css">
     /* Let content go to the edges */
@@ -142,7 +142,7 @@
   }
   addButton( 'Scale down', function( event ) { container.scaleBy( Math.pow( 0.5, 0.25 ) ); } );
   addButton( 'Scale up', function( event ) { container.scaleBy( Math.pow( 2, 0.25 ) ); } );
-  addButton( 'Rotate', function( event ) { container.rotateAround( new phet.math.Vector2( 200, 200 ), Math.PI / 16 ); } );
+  addButton( 'Rotate', function( event ) { container.rotateAround( new dot.Vector2( 200, 200 ), Math.PI / 16 ); } );
   
   container.addChild( new scenery.DOM( element, {
     x: 20,
