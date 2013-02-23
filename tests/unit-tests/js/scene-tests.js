@@ -726,7 +726,7 @@
     equalsApprox( node.y, -56 );
     equalsApprox( node.rotation, Math.PI / 2 );
     
-    node.translation = new phet.math.Vector2( -5, 7 );
+    node.translation = new dot.Vector2( -5, 7 );
     
     equalsApprox( node.getMatrix().m02(), -5 );
     equalsApprox( node.getMatrix().m12(), 7 );
@@ -774,7 +774,7 @@
     
     var Shape = scenery.Shape;
     
-    function p( x, y ) { return new phet.math.Vector2( x, y ); }
+    function p( x, y ) { return new dot.Vector2( x, y ); }
   
     test( 'Verifying Line/Rect', function() {
       var lineWidth = 50;
@@ -880,7 +880,7 @@
       var styles = new Shape.LineStyles();
       styles.lineWidth = 30;
       
-      var strokeShape = Shape.regularPolygon( 6, 100 ).transformed( phet.math.Matrix3.translation( 130, 130 ) );
+      var strokeShape = Shape.regularPolygon( 6, 100 ).transformed( dot.Matrix3.translation( 130, 130 ) );
       var fillShape = strokeShape.getStrokedShape( styles );
       
       strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
@@ -912,11 +912,11 @@
         styles.lineWidth = 30;
         
         var strokeShape = new Shape();
-        var point = new phet.math.Vector2( 40, 100 );
+        var point = new dot.Vector2( 40, 100 );
         strokeShape.moveTo( point );
-        point = point.plus( phet.math.Vector2.X_UNIT.times( miterMagnitude ) );
+        point = point.plus( dot.Vector2.X_UNIT.times( miterMagnitude ) );
         strokeShape.lineTo( point );
-        point = point.plus( phet.math.Vector2.createPolar( miterMagnitude, miterAngleRadians ).negated() );
+        point = point.plus( dot.Vector2.createPolar( miterMagnitude, miterAngleRadians ).negated() );
         strokeShape.lineTo( point );
         var fillShape = strokeShape.getStrokedShape( styles );
         
@@ -940,11 +940,11 @@
     test( 'Line segment winding', function() {
       var line = new Shape.Segment.Line( p( 0, 0 ), p( 2, 2 ) );
       
-      equal( line.windingIntersection( new phet.math.Ray2( p( 0, 1 ), p( 1, 0 ) ) ), 1 );
-      equal( line.windingIntersection( new phet.math.Ray2( p( 0, 5 ), p( 1, 0 ) ) ), 0 );
-      equal( line.windingIntersection( new phet.math.Ray2( p( 1, 0 ), p( 0, 1 ) ) ), -1 );
-      equal( line.windingIntersection( new phet.math.Ray2( p( 0, 0 ), p( 1, 1 ).normalized() ) ), 0 );
-      equal( line.windingIntersection( new phet.math.Ray2( p( 0, 1 ), p( 1, 1 ).normalized() ) ), 0 );
+      equal( line.windingIntersection( new dot.Ray2( p( 0, 1 ), p( 1, 0 ) ) ), 1 );
+      equal( line.windingIntersection( new dot.Ray2( p( 0, 5 ), p( 1, 0 ) ) ), 0 );
+      equal( line.windingIntersection( new dot.Ray2( p( 1, 0 ), p( 0, 1 ) ) ), -1 );
+      equal( line.windingIntersection( new dot.Ray2( p( 0, 0 ), p( 1, 1 ).normalized() ) ), 0 );
+      equal( line.windingIntersection( new dot.Ray2( p( 0, 1 ), p( 1, 1 ).normalized() ) ), 0 );
     } );
     
     test( 'Rectangle hit testing', function() {
