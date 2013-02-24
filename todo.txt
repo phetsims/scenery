@@ -1,5 +1,6 @@
 
 Bugs:
+    FAMB IE9 mouse handling - remember to check out Scenery copy
     Check Firefox/Safari on Mac event handling on multiple touch events
     Text direction 'rtl' bounds and display difference between canvas / SVG
 
@@ -133,11 +134,41 @@ DOM:
     Possible SVG Safari issues if bounds aren't whole-pixel?
     Investigate SVG crispEdges to see whether it would be valuable for other backends
 
-WebGL:
+** WebGL:
     Use display lists?
     Examine test code for considerations for implementing Shape.
 
+**** "Caching" Notes:
+    * Implement CSS in Layer first, for SVG that is properly bounded?
+    LayerStrategy:
+        LayerType strict equality is a good way to go. Store a reference if you need to collapse same-type layers together. Settings are different.
+        Using an API with quality levels seems cleaner, or just a general way to handle that.
+            PerformanceLayerStrategy - selects best from WebGL / Canvas / SVG / DOM based on whether quality or speed is desired?
+                Each Node would know how to best enhance its own performance?
+        Always switch to the top preferred layer type (from the stack) that is compatible with the current node, if that layer type is not already current
+            Supports the nesting that we need for caching layer strategies with a specific node picked out
+    Transform "caching" should be shared between the CSS / Canvas(local)-based methods
+        Deal with making sure we don't have "clipping" of the bounds
+    CSS for any layer type:
+        Parameter: Node where the transform is expected to change. Will handle splitting, etc.
+        Option flags: rotation, translation, scaling, (shearing/reflection?)
+        Typical options: none, translation, translation + rotation, translation + scaling, all 3. (investigate shearing / reflection)
+        Layer should provide something like getCSSTransform() and possibly an inverse or something like getTransformAfterCSS()
+    Canvas / WebGL:
+        drawImage is used instead of CSS transforms, but same general model, and we should take the same flags.
+        Have a scratch canvas stack for things like opacity
+            Function to determine whether a node needs to write to a global scratch canvas or just the top of the stack (i.e. opacity < 1 || flag)
+            Have a pool of canvases around for this specifically?
+        "Global":
+            Could combine with the Layer's canvas stack?
+            A full scratch canvas wouldn't be able to take care of translations, but would be extremely fast for re-rendering things that didn't change at all.
+        "Local":
+            Possible to have a single scratch canvas for a Node, even in DAG situations, since RenderState only tracks clipping / opacity (handled already)
+    ** WebGL: Caching SVG / Canvas as a texture would allow extremely fast dragging?
+
 Layers:
+    Preferred (or strict) layer types by node type?
+    SVG translation handling -- but layer type needs info about rotation/translation/scaling AND what the node is!
     LayerBoundaries prototype? Might be useful as a toString(), and for handling queries
     "Caching styles":
         For top-level translation caching:
@@ -214,7 +245,7 @@ Node:
     Bounds after rotation seems to be a bit too wide
     * Fire event on change of layerStrategy, and possibly rethink layerStrategy design
     Mix-in notifier for listeners
-    Canvas fill gradients / patterns
+    ** Canvas fill gradients / patterns
         Can this be abstracted across SVG / WebGL layers also? -- probably WebGL _much_ more efficiently with shaders
     For prepend-flags, set in parameter object instead of boolean flag? (somewhat hard-to-read code)
     Visibility interaction with dirty paint / bounds, and events based on that
