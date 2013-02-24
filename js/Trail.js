@@ -15,7 +15,7 @@ define( function( require ) {
   "use strict";
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
-  var assertExtra = require( 'ASSERT/assert' )( 'scenery.extra' );
+  var assertExtra = require( 'ASSERT/assert' )( 'scenery.extra', false );
   
   var Transform3 = require( 'DOT/Transform3' );
   
