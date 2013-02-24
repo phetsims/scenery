@@ -149,6 +149,8 @@ DOM:
             Supports the nesting that we need for caching layer strategies with a specific node picked out
     Transform "caching" should be shared between the CSS / Canvas(local)-based methods
         Deal with making sure we don't have "clipping" of the bounds
+    ** Slight bit of rounding if necessary to pixel-aligned integral numbers may get performance benefits
+        Option to disallow subpixel handling?
     CSS for any layer type:
         Parameter: Node where the transform is expected to change. Will handle splitting, etc.
         Option flags: rotation, translation, scaling, (shearing/reflection?)
