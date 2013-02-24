@@ -303,6 +303,7 @@ Build:
     Add JSHint into Sublime Text with plugin?
 
 Performance:
+    **** assertion levels
     *** Garbage collection jitters!
     *** Performance regressions with layering
     * Prune node rendering based on visible dirty bounds

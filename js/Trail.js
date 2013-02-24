@@ -15,6 +15,7 @@ define( function( require ) {
   "use strict";
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
+  var assertExtra = require( 'ASSERT/assert' )( 'scenery.extra' );
   
   var Transform3 = require( 'DOT/Transform3' );
   
@@ -186,8 +187,8 @@ define( function( require ) {
     
     // whether this trail contains the complete 'other' trail, but with added descendants afterwards
     isExtensionOf: function( other, allowSameTrail ) {
-      assert && assert( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed' );
-      assert && assert( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed' );
+      assertExtra && assertExtra( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed' );
+      assertExtra && assertExtra( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed' );
       
       if ( this.length <= other.length - ( allowSameTrail ? 1 : 0 ) ) {
         return false;
@@ -288,8 +289,8 @@ define( function( require ) {
       assert && assert( !this.isEmpty(), 'cannot compare with an empty trail' );
       assert && assert( !other.isEmpty(), 'cannot compare with an empty trail' );
       assert && assert( this.nodes[0] === other.nodes[0], 'for Trail comparison, trails must have the same root node' );
-      assert && assert( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed' );
-      assert && assert( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed' );
+      assertExtra && assertExtra( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed' );
+      assertExtra && assertExtra( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed' );
       
       var minNodeIndex = Math.min( this.indices.length, other.indices.length );
       for ( var i = 0; i < minNodeIndex; i++ ) {
