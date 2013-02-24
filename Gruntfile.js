@@ -1,6 +1,9 @@
 /*global module:false*/
 module.exports = function( grunt ) {
   
+  // print this immediately, so it is clear what project grunt is building
+  grunt.log.writeln( 'Scenery' );
+  
   // Project configuration.
   grunt.initConfig( {
     pkg: '<json:package.json>',
