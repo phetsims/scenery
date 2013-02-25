@@ -2,11 +2,6 @@
   "name": "scenery",
   "version": "0.0.0",
   "license": "MIT",
-  "dependencies": {
-    "grunt": "~0.4.0",
-    "grunt-contrib-requirejs": "~0.4.0",
-    "grunt-contrib-concat": "~0.1.2"
-  },
   "devDependencies": {
     "grunt": "~0.4.0",
     "grunt-contrib-requirejs": "~0.4.0",
