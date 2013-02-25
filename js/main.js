@@ -10,6 +10,7 @@ define( [
     'SCENERY/input/SimpleDragHandler',
     'SCENERY/input/Touch',
     
+    'SCENERY/layers/Backend',
     'SCENERY/layers/CanvasLayer',
     'SCENERY/layers/DOMLayer',
     'SCENERY/layers/Layer',
@@ -37,6 +38,7 @@ define( [
     'SCENERY/TrailPointer',
     'SCENERY/scenery'
   ], function(
+    Backend,
     CanvasLayer,
     Color,
     DebugContext,

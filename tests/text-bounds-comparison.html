@@ -73,10 +73,10 @@
     
     // TODO: improve how layer strategies are used
     var svgNode = new scenery.Node();
-    svgNode.layerStrategy = scenery.LayerTypeStrategy( svgNode.layerStrategy, scenery.LayerType.SVG );
+    svgNode.layerStrategy = scenery.LayerTypeStrategy( svgNode.layerStrategy, scenery.SVGDefaultLayerType );
     svgNode.addChild( textNode );
     var canvasNode = new scenery.Node();
-    canvasNode.layerStrategy = scenery.LayerTypeStrategy( canvasNode.layerStrategy, scenery.LayerType.Canvas );
+    canvasNode.layerStrategy = scenery.LayerTypeStrategy( canvasNode.layerStrategy, scenery.CanvasDefaultLayerType );
     canvasNode.addChild( textNode );
     
     container.addChild( svgNode );
@@ -101,7 +101,7 @@
     $main.height( Math.ceil( node.height + 2 * padding ) );
     
     var scene = new scenery.Scene( $main, {
-      // preferredSceneLayerType: scenery.LayerType.SVG
+      // preferredSceneLayerType: scenery.SVGDefaultLayerType
     } );
     scene.addChild( node );
     node.x += padding;

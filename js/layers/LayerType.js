@@ -7,42 +7,33 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  // static references needed for type initialization
-  var CanvasLayer = require( 'SCENERY/layers/CanvasLayer' );
-  var DOMLayer = require( 'SCENERY/layers/DOMLayer' );
-  var SVGLayer = require( 'SCENERY/layers/SVGLayer' );
-  
-  scenery.LayerType = function( Constructor, name ) {
+  scenery.LayerType = function( Constructor, name, backend, args ) {
     this.Constructor = Constructor;
     this.name = name;
+    this.backend = backend;
+    this.args = args;
   };
   var LayerType = scenery.LayerType;
   
   LayerType.prototype = {
     constructor: LayerType,
     
-    // able to override this for layer types that support the features but extend the abilities
-    supports: function( type ) {
-      return this === type;
+    supportsBackend: function( backend ) {
+      return this.backend === backend;
     },
     
     supportsNode: function( node ) {
       var that = this;
-      return _.some( node._supportedLayerTypes, function( layerType ) {
-        return that.supports( layerType );
+      return _.some( node._supportedBackends, function( backend ) {
+        return that.supportsBackend( backend );
       } );
     },
     
     createLayer: function( args ) {
       var Constructor = this.Constructor;
-      return new Constructor( args );
+      return new Constructor( _.extend( {}, this.args, args ) ); // allow overriding certain arguments if necessary
     }
   };
-  
-  // main types that should be supported
-  LayerType.Canvas = new LayerType( CanvasLayer, 'canvas' );
-  LayerType.DOM = new LayerType( DOMLayer, 'dom' );
-  LayerType.SVG = new LayerType( SVGLayer, 'svg' );
   
   return LayerType;
 } );

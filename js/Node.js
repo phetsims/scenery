@@ -914,7 +914,7 @@ define( function( require ) {
   Node.prototype._mutatorKeys = [ 'cursor', 'visible', 'translation', 'x', 'y', 'rotation', 'scale',
                                   'left', 'right', 'top', 'bottom', 'centerX', 'centerY' ];
   
-  Node.prototype._supportedLayerTypes = [];
+  Node.prototype._supportedBackends = [];
   
   Node.prototype.layerStrategy = LayerStrategy.DefaultLayerStrategy;
   

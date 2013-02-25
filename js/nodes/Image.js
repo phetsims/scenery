@@ -18,7 +18,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   var Node = require( 'SCENERY/Node' ); // Image inherits from Node
-  var LayerType = require( 'SCENERY/layers/LayerType' ); // we need to specify the LayerType in the prototype
+  var Backend = require( 'SCENERY/layers/Backend' ); // we need to specify the Backend in the prototype
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
   
   scenery.Image = function( image, options ) {
@@ -48,7 +48,7 @@ define( function( require ) {
     return true;
   };
   
-  Image.prototype._supportedLayerTypes = [ LayerType.Canvas ];
+  Image.prototype._supportedBackends = [ Backend.Canvas ];
   
   return Image;
 } );

@@ -14,8 +14,8 @@ define( function( require ) {
       
       // if the node isn't self-rendering, we can skip it completely
       if ( node.hasSelf() ) {
-        var supportedTypes = node._supportedLayerTypes;
-        var preferredType = layerState.bestPreferredLayerTypeFor( supportedTypes );
+        var supportedBackends = node._supportedBackends;
+        var preferredType = layerState.bestPreferredLayerTypeFor( supportedBackends );
         var currentType = layerState.getCurrentLayerType();
         
         // If any of the preferred types are compatible, use the top one. This allows us to support caching and hierarchical layer types
@@ -26,7 +26,7 @@ define( function( require ) {
         } else {
           // if no preferred types are compatible, only switch if the current type is also incompatible
           if ( !currentType.supportsNode( node ) ) {
-            layerState.switchToType( supportedTypes[0] );
+            layerState.switchToType( supportedBackends[0].defaultLayerType );
           }
         }
         
@@ -79,7 +79,7 @@ define( function( require ) {
       enter: function( trail, layerState ) {
         // push the preferred layer type
         layerState.pushPreferredLayerType( preferredLayerType );
-        if ( !layerState.getCurrentLayerType().supports( preferredLayerType ) ) {
+        if ( layerState.getCurrentLayerType() !== preferredLayerType ) {
           layerState.switchToType( trail, preferredLayerType );
         }
         
@@ -88,11 +88,11 @@ define( function( require ) {
       },
       
       exit: function( trail, layerState ) {
-        // pop the preferred layer type
-        layerState.popPreferredLayerType();
-        
         // execute the decorated strategy afterwards
         strategy.exit( trail, layerState );
+        
+        // pop the preferred layer type
+        layerState.popPreferredLayerType();
       }
     };
   };

@@ -123,10 +123,10 @@ define( function( require ) {
       }
     },
     
-    bestPreferredLayerTypeFor: function( defaultTypeOptions ) {
+    bestPreferredLayerTypeFor: function( backends ) {
       for ( var i = this.preferredLayerTypes.length - 1; i >= 0; i-- ) {
         var preferredType = this.preferredLayerTypes[i];
-        if ( _.some( defaultTypeOptions, function( defaultType ) { return preferredType.supports( defaultType ); } ) ) {
+        if ( _.some( backends, function( backend ) { return preferredType.supportsBackend( backend ); } ) ) {
           return preferredType;
         }
       }

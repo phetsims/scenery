@@ -23,7 +23,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   var Node = require( 'SCENERY/Node' ); // inherits from Node
-  var LayerType = require( 'SCENERY/layers/LayerType' );
+  var Backend = require( 'SCENERY/layers/Backend' );
   var fillable = require( 'SCENERY/nodes/Fillable' );
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate; // i.e. Object.create
   require( 'SCENERY/util/Font' );
@@ -321,7 +321,7 @@ define( function( require ) {
   Text.prototype._mutatorKeys = [ 'text', 'font', 'fontWeight', 'fontFamily', 'fontStretch', 'fontStyle', 'fontSize', 'lineHeight',
                                   'textAlign', 'textBaseline', 'direction' ].concat( Node.prototype._mutatorKeys );
   
-  Text.prototype._supportedLayerTypes = [ LayerType.Canvas, LayerType.SVG ];
+  Text.prototype._supportedBackends = [ Backend.Canvas, Backend.SVG ];
   
   // font-specific ES5 setters and getters are defined using addFontForwarding above
   Object.defineProperty( Text.prototype, 'font', { set: Text.prototype.setFont, get: Text.prototype.getFont } );

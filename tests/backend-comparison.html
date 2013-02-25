@@ -190,8 +190,8 @@
     ];
     
     var backends = [
-      scenery.LayerType.Canvas,
-      scenery.LayerType.SVG
+      scenery.Backend.Canvas,
+      scenery.Backend.SVG
       // TODO: add WebGL, and possibly DOM for things like text?
     ];
     
@@ -202,22 +202,23 @@
       $( document.body ).append( $testTitle );
       
       _.each( backends, function( backend ) {
+        var layerType = backend.defaultLayerType;
         var $container = $( document.createElement( 'div' ) );
         $container.addClass( 'scene' );
-        $container.addClass( backend.name );
+        $container.addClass( layerType.name );
         $container.width( testCase.width || 320 );
         $container.height( testCase.height || 240 );
         $( document.body ).append( $container );
         
         var scene = new scenery.Scene( $container, {
-          preferredSceneLayerType: backend
+          preferredSceneLayerType: layerType
         } );
         
         try {
           testCase.draw( scene );
         } catch( e ) {
           if ( console.log ) {
-            console.log( 'error encountered in test ' + testCase.name + ' with ' + backend.name );
+            console.log( 'error encountered in test ' + testCase.name + ' with ' + layerType.name );
           }
           throw e;
         }

@@ -16,7 +16,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   var Node = require( 'SCENERY/Node' );
-  var LayerType = require( 'SCENERY/layers/LayerType' );
+  var Backend = require( 'SCENERY/layers/Backend' );
   var fillable = require( 'SCENERY/nodes/Fillable' );
   var strokable = require( 'SCENERY/nodes/Strokable' );
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
@@ -149,7 +149,7 @@ define( function( require ) {
   // TODO: stroke / fill mixins
   Path.prototype._mutatorKeys = [ 'shape' ].concat( Node.prototype._mutatorKeys );
   
-  Path.prototype._supportedLayerTypes = [ LayerType.Canvas, LayerType.SVG ];
+  Path.prototype._supportedBackends = [ Backend.Canvas, Backend.SVG ];
   
   Object.defineProperty( Path.prototype, 'shape', { set: Path.prototype.setShape, get: Path.prototype.getShape } );
   
