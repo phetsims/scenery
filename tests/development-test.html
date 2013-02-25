@@ -9,7 +9,21 @@
   <script src="../contrib/lodash.min-1.0.0-rc.3.js"></script>
   
   <script data-main="../js/config.js" src="../contrib/require-2.1.4.js"></script>
+  
+  <script>
+  requirejs( [ 'main', '../common/dot/js/main' ], function( scenery, dot ) {
+    var scene = new scenery.Scene( $( '#main' ) );
+    scene.addChild( new scenery.Text( 'Dynamic loading test for Require.js', {
+      left: 10,
+      top: 10,
+      fontSize: 30
+    } ) );
+    
+    scene.updateScene();
+  } );
+  </script>
 </head>
 <body>
+  <div id="main" style="width: 512px; height: 128px;"></div>
 </body>
 </html>
