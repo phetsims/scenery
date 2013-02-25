@@ -1,6 +1,6 @@
 
 require.config( {
-  deps: [ 'SCENERY/main', 'DOT/main' ],
+  deps: [ 'main', 'DOT/main' ],
   
   paths: {
     underscore: '../contrib/lodash.min-1.0.0-rc.3',
