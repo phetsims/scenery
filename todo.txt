@@ -143,6 +143,8 @@ DOM:
     * Instead, have performance hints, like "this moves a lot", "have this be crisp, it's static", etc.
         backend: 'svg' / 'canvas' / 'webgl' / 'dom' ? or pass actual backend reference?
         movement: 'dynamic' / 'static' ? 'translation', 'affine', ...?
+        * might help to save an internal flag that signals whether this node "modifies layers", as above.
+        * or specify as render: { backend: 'svg', ... }, and track rendering settings separately (_render)?
     * Implement CSS in Layer first, for SVG that is properly bounded?
     LayerStrategy:
         LayerType strict equality is a good way to go. Store a reference if you need to collapse same-type layers together. Settings are different.
@@ -246,6 +248,8 @@ Node:
             SVG: how to handle?
                 group opacity ('opacity' attribute)
         Pickable flag - check Piccolo behavior. consider flag for whether invisible nodes get picked or not (probably yes, for hit regions!)
+    Support setting some settings in the mutator with other objects. e.g.:
+        new Node( { scale: { x: 1, y: 2 } } );
     Since cursor might support data URLs, we can have custom cursors?
     Batching of insertions / removals, so that we could consider completely changing children, removing all children, etc. at the same time
         Possibly consider batching these together until updateScene?
