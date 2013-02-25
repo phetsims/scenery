@@ -141,6 +141,8 @@ DOM:
 
 **** "Caching" Notes:
     * Instead, have performance hints, like "this moves a lot", "have this be crisp, it's static", etc.
+        backend: 'svg' / 'canvas' / 'webgl' / 'dom' ? or pass actual backend reference?
+        movement: 'dynamic' / 'static' ? 'translation', 'affine', ...?
     * Implement CSS in Layer first, for SVG that is properly bounded?
     LayerStrategy:
         LayerType strict equality is a good way to go. Store a reference if you need to collapse same-type layers together. Settings are different.
