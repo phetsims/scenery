@@ -2,11 +2,21 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Build test for dot.js</title>
+  <title>Development test - Scenery</title>
   
   <!-- jQuery and LoDash are dependencies -->
   <script src="../contrib/jquery-1.8.3.min.js"></script>
   <script src="../contrib/lodash.min-1.0.0-rc.3.js"></script>
+  <script src="../contrib/has.js"></script>
+  
+  <script type="text/javascript">
+  has.add( 'assert.scenery', function( global, document, anElement ) {
+    return false;
+  } );
+  has.add( 'assert.scenery.extra', function( global, document, anElement ) {
+    return false;
+  } );
+  </script>
   
   <script data-main="../js/config.js" src="../contrib/require-2.1.4.js"></script>
   
@@ -20,6 +30,9 @@
     } ) );
     
     scene.updateScene();
+    
+    console.log( scenery.Util.testAssert() );
+    console.log( scenery.Util.testAssertExtra() );
   } );
   </script>
 </head>

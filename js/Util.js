@@ -4,6 +4,7 @@ define( function( require ) {
   "use strict";
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
+  var assertExtra = require( 'ASSERT/assert' )( 'scenery.extra', true );
   
   var scenery = require( 'SCENERY/scenery' );
   
@@ -30,6 +31,14 @@ define( function( require ) {
 
       F.prototype = o;
       return new F();
+    },
+    
+    testAssert: function() {
+      return 'assert.scenery: ' + ( assert ? 'true' : 'false' );
+    },
+    
+    testAssertExtra: function() {
+      return 'assert.scenery.extra: ' + ( assertExtra ? 'true' : 'false' );
     },
     
     /*---------------------------------------------------------------------------*
