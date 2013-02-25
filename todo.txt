@@ -152,10 +152,13 @@ DOM:
     ** Slight bit of rounding if necessary to pixel-aligned integral numbers may get performance benefits
         Option to disallow subpixel handling?
     CSS for any layer type:
+        *** Prototype-level mix-in, where you create a new constructor + prototype from SVGLayer / CanvasLayer?
         Parameter: Node where the transform is expected to change. Will handle splitting, etc.
         Option flags: rotation, translation, scaling, (shearing/reflection?)
         Typical options: none, translation, translation + rotation, translation + scaling, all 3. (investigate shearing / reflection)
         Layer should provide something like getCSSTransform() and possibly an inverse or something like getTransformAfterCSS()
+            LayerType needs the Node, Layer needs the Trail? - maybe Layer doesn't need the trail, since the pointer contains a subtrail which is the trail. Nodes can't repeat.
+            How to enforce splits?
     Canvas / WebGL:
         drawImage is used instead of CSS transforms, but same general model, and we should take the same flags.
         Have a scratch canvas stack for things like opacity
