@@ -93,6 +93,7 @@ Code:
     Organize unit tests into separate files, etc.
     Validation of example HTML, CSS, etc.
     Switch to jQuery 2 (wait for a stable build?)
+        How necessary is jQuery? Everything we're doing shouldn't be hitting many edge cases.
     _.extend that works on ES5 setter/getter pairs? Check $.extend? Check ES5 spec?
     Vet recursive bounds code against empty area
     * Code headers and copyright? Licenses?
@@ -139,6 +140,7 @@ DOM:
     Examine test code for considerations for implementing Shape.
 
 **** "Caching" Notes:
+    * Instead, have performance hints, like "this moves a lot", "have this be crisp, it's static", etc.
     * Implement CSS in Layer first, for SVG that is properly bounded?
     LayerStrategy:
         LayerType strict equality is a good way to go. Store a reference if you need to collapse same-type layers together. Settings are different.
