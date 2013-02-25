@@ -21,9 +21,9 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   require( 'SCENERY/Trail' );
-  require( 'SCENERY/Mouse' );
-  require( 'SCENERY/Touch' );
-  require( 'SCENERY/Event' );
+  require( 'SCENERY/input/Mouse' );
+  require( 'SCENERY/input/Touch' );
+  require( 'SCENERY/input/Event' );
   
   scenery.Input = function( scene ) {
     this.scene = scene;

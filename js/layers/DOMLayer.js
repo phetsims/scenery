@@ -19,7 +19,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  var Layer = require( 'SCENERY/Layer' ); // DOMLayer inherits from Layer
+  var Layer = require( 'SCENERY/layers/Layer' ); // DOMLayer inherits from Layer
   
   scenery.DOMLayer = function( args ) {
     Layer.call( this, args );

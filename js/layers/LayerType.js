@@ -8,9 +8,9 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   // static references needed for type initialization
-  var CanvasLayer = require( 'SCENERY/CanvasLayer' );
-  var DOMLayer = require( 'SCENERY/DOMLayer' );
-  var SVGLayer = require( 'SCENERY/SVGLayer' );
+  var CanvasLayer = require( 'SCENERY/layers/CanvasLayer' );
+  var DOMLayer = require( 'SCENERY/layers/DOMLayer' );
+  var SVGLayer = require( 'SCENERY/layers/SVGLayer' );
   
   scenery.LayerType = function( Constructor, name ) {
     this.Constructor = Constructor;

@@ -20,7 +20,7 @@ define( function( require ) {
   var Matrix3 = require( 'DOT/Matrix3' );
   
   var scenery = require( 'SCENERY/scenery' );
-  var LayerStrategy = require( 'SCENERY/LayerStrategy' ); // used to set the default layer strategy on the prototype
+  var LayerStrategy = require( 'SCENERY/layers/LayerStrategy' ); // used to set the default layer strategy on the prototype
   
   // TODO: FIXME: Why do I have to comment out this dependency?
   // require( 'SCENERY/Trail' );

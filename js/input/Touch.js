@@ -10,7 +10,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  var Finger = require( 'SCENERY/Finger' ); // extends Finger
+  var Finger = require( 'SCENERY/input/Finger' ); // extends Finger
   
   scenery.Touch = function( id, point, event ) {
     Finger.call( this );

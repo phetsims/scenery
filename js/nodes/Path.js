@@ -16,10 +16,10 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   var Node = require( 'SCENERY/Node' );
-  var LayerType = require( 'SCENERY/LayerType' );
-  var fillable = require( 'SCENERY/Fillable' );
-  var strokable = require( 'SCENERY/Strokable' );
-  var objectCreate = require( 'SCENERY/Util' ).objectCreate;
+  var LayerType = require( 'SCENERY/layers/LayerType' );
+  var fillable = require( 'SCENERY/nodes/Fillable' );
+  var strokable = require( 'SCENERY/nodes/Strokable' );
+  var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
   
   scenery.Path = function( options ) {
     // TODO: consider directly passing in a shape object (or at least handling that case)

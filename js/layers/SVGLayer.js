@@ -19,7 +19,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  var Layer = require( 'SCENERY/Layer' ); // extends Layer
+  var Layer = require( 'SCENERY/layers/Layer' ); // extends Layer
   require( 'SCENERY/Trail' );
   
   // used namespaces

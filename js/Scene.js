@@ -19,11 +19,11 @@ define( function( require ) {
   var Node = require( 'SCENERY/Node' ); // inherits from Node
   require( 'SCENERY/Trail' );
   require( 'SCENERY/TrailPointer' );
-  require( 'SCENERY/Input' );
-  require( 'SCENERY/LayerState' );
-  require( 'SCENERY/LayerType' );
+  require( 'SCENERY/input/Input' );
+  require( 'SCENERY/layers/LayerState' );
+  require( 'SCENERY/layers/LayerType' );
   
-  var Util = require( 'SCENERY/Util' );
+  var Util = require( 'SCENERY/util/Util' );
   var objectCreate = Util.objectCreate;
   
   /*

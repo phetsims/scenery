@@ -23,11 +23,11 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   var Node = require( 'SCENERY/Node' ); // inherits from Node
-  var LayerType = require( 'SCENERY/LayerType' );
-  var fillable = require( 'SCENERY/Fillable' );
-  var objectCreate = require( 'SCENERY/Util' ).objectCreate; // i.e. Object.create
-  require( 'SCENERY/Font' );
-  require( 'SCENERY/Util' ); // for canvasAccurateBounds
+  var LayerType = require( 'SCENERY/layers/LayerType' );
+  var fillable = require( 'SCENERY/nodes/Fillable' );
+  var objectCreate = require( 'SCENERY/util/Util' ).objectCreate; // i.e. Object.create
+  require( 'SCENERY/util/Font' );
+  require( 'SCENERY/util/Util' ); // for canvasAccurateBounds
   
   scenery.Text = function( text, options ) {
     this._text         = '';                 // filled in with mutator
