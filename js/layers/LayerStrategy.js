@@ -25,7 +25,7 @@ define( function( require ) {
           }
         } else {
           // if no preferred types are compatible, only switch if the current type is also incompatible
-          if ( !currentType.supportsNode( node ) ) {
+          if ( !currentType || !currentType.supportsNode( node ) ) {
             layerState.switchToType( supportedBackends[0].defaultLayerType );
           }
         }
