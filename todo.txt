@@ -153,6 +153,7 @@ DOM:
         Option to disallow subpixel handling?
     CSS for any layer type:
         *** Prototype-level mix-in, where you create a new constructor + prototype from SVGLayer / CanvasLayer?
+            *** Write as separate class/prototype for now, decide reuse strategy later!
         Parameter: Node where the transform is expected to change. Will handle splitting, etc.
         Option flags: rotation, translation, scaling, (shearing/reflection?)
         Typical options: none, translation, translation + rotation, translation + scaling, all 3. (investigate shearing / reflection)
