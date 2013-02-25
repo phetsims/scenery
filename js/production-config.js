@@ -1,10 +1,10 @@
 
 if ( window.has ) {
   window.has.add( 'assert.scenery', function( global, document, anElement ) {
-    return true;
+    return false;
   } );
   window.has.add( 'assert.scenery.extra', function( global, document, anElement ) {
-    return true;
+    return false;
   } );
 }
 

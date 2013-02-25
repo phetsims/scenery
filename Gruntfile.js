@@ -32,9 +32,9 @@ module.exports = function( grunt ) {
     requirejs: {
       standalone: {
         options: {
-          mainConfigFile: "js/config.js",
+          mainConfigFile: "js/production-config.js",
           out: "dist/standalone/scenery.js",
-          name: "config",
+          name: "production-config",
           // optimize: 'uglify2',
           optimize: 'none',
           wrap: {
@@ -45,9 +45,9 @@ module.exports = function( grunt ) {
       },
       production: {
         options: {
-          mainConfigFile: "js/config.js",
+          mainConfigFile: "js/production-config.js",
           out: "dist/production/scenery.min.js",
-          name: "config",
+          name: "production-config",
           optimize: 'uglify2',
           generateSourceMaps: true,
           preserveLicenseComments: false,
