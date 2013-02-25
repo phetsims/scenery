@@ -40,11 +40,6 @@ module.exports = function( grunt ) {
           wrap: {
             start: "(function() {",
             end: " window.scenery = require( 'main' ); window.dot = require( 'DOT/main' ); scenery.Util.polyfillRequestAnimationFrame(); }());"
-          },
-          has: {
-            phetProduction: false,
-            'assert.scenery': false,
-            'assert.scenery.extra': false
           }
         }
       },
@@ -59,11 +54,6 @@ module.exports = function( grunt ) {
           wrap: {
             start: "(function() {",
             end: " window.scenery = require( 'main' ); }());"
-          },
-          has: {
-            phetProduction: true,
-            'assert.scenery': false,
-            'assert.scenery.extra': false
           }
         }
       }
