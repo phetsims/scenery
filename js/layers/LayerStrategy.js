@@ -14,15 +14,19 @@ define( function( require ) {
       
       // if the node isn't self-rendering, we can skip it completely
       if ( node.hasSelf() ) {
-        // check if we need to change layer types
-        if ( !layerState.getCurrentLayerType() || !layerState.getCurrentLayerType().supportsNode( node ) ) {
-          var supportedTypes = node._supportedLayerTypes;
-          
-          var preferredType = layerState.bestPreferredLayerTypeFor( supportedTypes );
-          if ( preferredType ) {
+        var supportedTypes = node._supportedLayerTypes;
+        var preferredType = layerState.bestPreferredLayerTypeFor( supportedTypes );
+        var currentType = layerState.getCurrentLayerType();
+        
+        // If any of the preferred types are compatible, use the top one. This allows us to support caching and hierarchical layer types
+        if ( preferredType ) {
+          if ( currentType !== preferredType ) {
             layerState.switchToType( trail, preferredType );
-          } else {
-            layerState.switchToType( trail, supportedTypes[0] );
+          }
+        } else {
+          // if no preferred types are compatible, only switch if the current type is also incompatible
+          if ( !currentType.supportsNode( node ) ) {
+            layerState.switchToType( supportedTypes[0] );
           }
         }
         

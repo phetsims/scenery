@@ -39,6 +39,7 @@ define( function( require ) {
     }
   };
   
+  // main types that should be supported
   LayerType.Canvas = new LayerType( CanvasLayer, 'canvas' );
   LayerType.DOM = new LayerType( DOMLayer, 'dom' );
   LayerType.SVG = new LayerType( SVGLayer, 'svg' );
