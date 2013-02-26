@@ -197,7 +197,7 @@ define( function( require ) {
         return;
       }
       
-      var specificType = finger.type + 'type'; // e.g. mouseup, touchup, keyup
+      var specificType = finger.type + type; // e.g. mouseup, touchup, keyup
       
       var fingerListeners = finger.listeners.slice( 0 ); // defensive copy
       for ( var i = 0; i < fingerListeners.length; i++ ) {
@@ -225,7 +225,7 @@ define( function( require ) {
         return;
       }
       
-      var specificType = finger.type + 'type'; // e.g. mouseup, touchup, keyup
+      var specificType = finger.type + type; // e.g. mouseup, touchup, keyup
       
       for ( var i = trail.length - 1; i >= 0; bubbles ? i-- : i = -1 ) {
         var target = trail.nodes[i];
