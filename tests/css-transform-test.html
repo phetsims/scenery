@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>CSS Transform test - Scenery</title>
+  
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../contrib/jquery-1.8.3.min.js"></script>
+  <script src="../contrib/lodash.min-1.0.0-rc.3.js"></script>
+  <script src="../contrib/has.js"></script>
+  
+  <script data-main="../js/config.js" src="../contrib/require-2.1.4.js"></script>
+  
+  <script>
+  requirejs( [ 'main', '../common/dot/js/main' ], function( scenery, dot ) {
+    var scene = new scenery.Scene( $( '#main' ) );
+    
+    var container = new scenery.Node( {
+      x: 20,
+      y: 20
+    } );
+    scene.addChild( container );
+    
+    var path = new scenery.Path( {
+      shape: scenery.Shape.rectangle( 0, 0, 50, 50 ),
+      fill: '#ff0000'
+    } );
+    var layerType = new scenery.LayerType( scenery.SVGLayer, 'svg', scenery.Backend.Canvas, {
+      cssTransform: true,
+      baseNode: path
+    } );
+    path.layerStrategy = scenery.SeparateLayerStrategy( scenery.LayerTypeStrategy( path.layerStrategy, layerType ) );
+    container.addChild( path );
+    
+    scene.updateScene();
+    
+    console.log( scenery.Util.testAssert() );
+    console.log( scenery.Util.testAssertExtra() );
+    
+    window.scene = scene;
+  } );
+  </script>
+</head>
+<body>
+  <div id="main" style="width: 512px; height: 512px;"></div>
+</body>
+</html>

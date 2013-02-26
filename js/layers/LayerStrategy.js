@@ -62,11 +62,11 @@ define( function( require ) {
       },
       
       exit: function( trail, layerState ) {
-        // trigger a switch to what we already have
-        layerState.switchToType( trail, layerState.getCurrentLayerType() );
-        
         // execute the decorated strategy afterwards
         strategy.exit( trail, layerState );
+        
+        // trigger a switch to what we already have
+        layerState.switchToType( trail, layerState.getCurrentLayerType() );
       }
     };
   };
