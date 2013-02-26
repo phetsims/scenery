@@ -368,24 +368,24 @@ define( function( require ) {
   
   Scene.prototype.initializeStandaloneEvents = function( parameters ) {
     var element = this.$main[0];
-    this.initializeEvents( _.extend( {}, parameters, {
+    this.initializeEvents( _.extend( {}, {
       preventDefault: true,
       listenerTarget: element,
       pointFromEvent: function( evt ) {
         var mainBounds = element.getBoundingClientRect();
         return new Vector2( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
       }
-    } ) );
+    }, parameters ) );
   };
   
   Scene.prototype.initializeFullscreenEvents = function( parameters ) {
-    this.initializeEvents( _.extend( {}, parameters, {
+    this.initializeEvents( _.extend( {}, {
       preventDefault: true,
       listenerTarget: document,
       pointFromEvent: function( evt ) {
         return new Vector2( evt.pageX, evt.pageY );
       }
-    } ) );
+    }, parameters ) );
   };
   
   Scene.prototype.initializeEvents = function( parameters ) {
