@@ -6,9 +6,9 @@ SR's list:
                 goButtonImage.invalidateSelf( new Bounds2( 0, 0, goButtonImage.image.width, goButtonImage.image.height ) );
     Mouse over/out for buttons on desktop vs touch
      Maybe add mouseOver handler and do that hover but not for touch events.
-    Use native pinch to zoom (don't prevent default)
     Arrow shape
     SimpleDragHandler was sending (finger,trail,event) for some messages but (event) for others.  Should they be changed?
+    * Use native pinch to zoom (don't prevent default)
 
 Bugs:
     FAMB IE9 mouse handling - remember to check out Scenery copy

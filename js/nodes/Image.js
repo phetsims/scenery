@@ -24,20 +24,36 @@ define( function( require ) {
   scenery.Image = function( image, options ) {
     Node.call( this, options );
     
-    this.image = image;
+    this._image = image;
     
-    this.invalidateSelf( new Bounds2( 0, 0, image.width, image.height ) );
+    this.invalidateImage();
   };
   var Image = scenery.Image;
   
   Image.prototype = objectCreate( Node.prototype );
   Image.prototype.constructor = Image;
+  
+  Image.prototype.invalidateImage = function() {
+    this.invalidateSelf( new Bounds2( 0, 0, this._image.width, this._image.height ) );
+  };
+  
+  Image.prototype.getImage = function() {
+    return this._image;
+  };
+  
+  Image.prototype.setImage = function( image ) {
+    if ( this._image !== image ) {
+      this._image = image;
+      this.invalidateImage();
+    }
+    return this;
+  };
 
   // TODO: add SVG / DOM support
   Image.prototype.paintCanvas = function( state ) {
     var layer = state.layer;
     var context = layer.context;
-    context.drawImage( this.image, 0, 0 );
+    context.drawImage( this._image, 0, 0 );
   };
   
   Image.prototype.paintWebGL = function( state ) {
@@ -48,7 +64,11 @@ define( function( require ) {
     return true;
   };
   
+  Image.prototype._mutatorKeys = [ 'image' ].concat( Node.prototype._mutatorKeys );
+  
   Image.prototype._supportedBackends = [ Backend.Canvas ];
+  
+  Object.defineProperty( Image.prototype, 'image', { set: Image.prototype.setImage, get: Image.prototype.getImage } );
   
   return Image;
 } );
