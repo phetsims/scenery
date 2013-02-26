@@ -895,6 +895,50 @@ define( function( require ) {
     // derivative: -3 p0 (1 - t)^2 + 3 p1 (1 - t)^2 - 6 p1 (1 - t) t + 6 p2 (1 - t) t - 3 p2 t^2 + 3 p3 t^2
   };
   
+  Segment.Arc = function( center, radius, startAngle, endAngle, anticlockwise ) {
+    this.center = center;
+    this.radius = radius;
+    this.startAngle = startAngle;
+    this.endAngle = endAngle;
+    this.anticlockwise = anticlockwise;
+    
+    this.start = center.plus( Vector2.createPolar( radius, startAngle ) );
+    this.end = center.plus( Vector2.createPolar( radius, endAngle ) );
+    // TODO: double-check the clockwiseness, since we have to reverse it from the mathematically-correct version
+    this.startTangent = Vector2.createPolar( 1, startAngle + anticlockwise ? Math.PI / 2 : -Math.PI / 2 );
+    this.endTangent = Vector2.createPolar( 1, endAngle + anticlockwise ? Math.PI / 2 : -Math.PI / 2 );
+    
+    // acceleration for intersection
+    // TODO: bounds!
+    this.bounds = null;
+    
+    throw new Error( 'Segment.Arc implementation not yet complete' );
+  };
+  Segment.Arc.prototype = {
+    constructor: Segment.Line,
+    
+    toPieces: function() {
+      throw new Error( 'Segment.toPieces unimplemented!' );
+    },
+    
+    strokeLeft: function( lineWidth ) {
+      throw new Error( 'Segment.strokeLeft unimplemented!' );
+    },
+    
+    strokeRight: function( lineWidth ) {
+      throw new Error( 'Segment.strokeRight unimplemented!' );
+    },
+    
+    intersectsBounds: function( bounds ) {
+      throw new Error( 'Segment.intersectsBounds unimplemented!' );
+    },
+    
+    // returns the resultant winding number of this ray intersecting this segment.
+    windingIntersection: function( ray ) {
+      throw new Error( 'Segment.windingIntersection unimplemented!' );
+    }
+  };
+  
   // TODO: performance / cleanliness to have these as methods instead?
   function segmentStartLeft( segment, lineWidth ) {
     assert && assert( lineWidth !== undefined );
