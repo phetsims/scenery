@@ -58,13 +58,6 @@ define( function( require ) {
     
     this.temporaryDebugFlagSoWeDontUpdateBoundariesMoreThanOnce = false;
     
-    // TODO: cleanup of flags!
-    this.usesPartialCSSTransforms = args.cssTranslation || args.cssRotation || args.cssScale;
-    this.cssTranslation = args.cssTranslation; // CSS for the translation
-    this.cssRotation = args.cssRotation;       // CSS for the rotation
-    this.cssScale = args.cssScale;             // CSS for the scaling
-    this.cssTransform = args.cssTransform;     // CSS for the entire base node (will ignore other partial transforms)
-    
     Layer.call( this, args, entry );
     
     this.initializeBoundaries();
@@ -251,6 +244,9 @@ define( function( require ) {
     
     // TODO: note for DOM we can do https://developer.mozilla.org/en-US/docs/HTML/Canvas/Drawing_DOM_objects_into_a_canvas
     renderToCanvas: function( canvas, context, delayCounts ) {
+      // temporarily put the full transform on the containing group so the rendering is correct (CSS transforms can take this away)
+      this.applyTransform( this.baseTrail.getTransform(), this.g );
+      
       if ( window.canvg ) {
         delayCounts.increment();
         
@@ -285,6 +281,9 @@ define( function( require ) {
         
         throw new Error( 'this implementation hits Chrome bugs, won\'t work on IE9/10, etc. deprecated' );
       }
+      
+      // revert the transform damage that we did to our base group
+      this.updateBaseTransform();
     },
     
     getName: function() {
