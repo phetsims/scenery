@@ -142,10 +142,10 @@ define( function( require ) {
       this.tryToSnag( event );
     },
     
-    // mouse/touch enters this node
-    enter: function( event ) {
+    // touch enters this node
+    touchenter: function( event ) {
       // allow touches to start a drag by moving "over" this node
-      if ( this.options.allowTouchSnag && !event.finger.isMouse ) {
+      if ( this.options.allowTouchSnag ) {
         this.tryToSnag( event );
       }
     }
