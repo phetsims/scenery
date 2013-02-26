@@ -188,33 +188,44 @@ define( function( require ) {
       
       // if not yet handled, run through the trail in order to see if one of them will handle the event
       // at the base of the trail should be the scene node, so the scene will be notified last
-      this.dispatchToTargets( trail, type, inputEvent, bubbles );
+      this.dispatchToTargets( trail, finger, type, inputEvent, bubbles );
     },
     
+    // TODO: reduce code sharing between here and dispatchToTargets!
     dispatchToFinger: function( type, finger, inputEvent ) {
       if ( inputEvent.aborted || inputEvent.handled ) {
         return;
       }
       
+      var specificType = finger.type + 'type'; // e.g. mouseup, touchup, keyup
+      
       var fingerListeners = finger.listeners.slice( 0 ); // defensive copy
       for ( var i = 0; i < fingerListeners.length; i++ ) {
         var listener = fingerListeners[i];
         
-        if ( listener[type] ) {
-          // if a listener returns true, don't handle any more
-          var aborted = !!( listener[type]( inputEvent ) ) || inputEvent.aborted;
-          
-          if ( aborted ) {
-            return;
-          }
+        // if a listener returns true, don't handle any more
+        var aborted = false;
+        
+        if ( !aborted && listener[type] ) {
+          aborted = !!( listener[type]( inputEvent ) ) || inputEvent.aborted;
+        }
+        if ( !aborted && listener[specificType] ) {
+          aborted = !!( listener[specificType]( inputEvent ) ) || inputEvent.aborted;
+        }
+        
+        // bail out if the event is aborted, so no other listeners are triggered
+        if ( aborted ) {
+          return;
         }
       }
     },
     
-    dispatchToTargets: function( trail, type, inputEvent, bubbles ) {
+    dispatchToTargets: function( trail, finger, type, inputEvent, bubbles ) {
       if ( inputEvent.aborted || inputEvent.handled ) {
         return;
       }
+      
+      var specificType = finger.type + 'type'; // e.g. mouseup, touchup, keyup
       
       for ( var i = trail.length - 1; i >= 0; bubbles ? i-- : i = -1 ) {
         var target = trail.nodes[i];
@@ -225,13 +236,19 @@ define( function( require ) {
         for ( var k = 0; k < listeners.length; k++ ) {
           var listener = listeners[k];
           
-          if ( listener[type] ) {
-            // if a listener returns true, don't handle any more
-            var aborted = !!( listener[type]( inputEvent ) ) || inputEvent.aborted;
-            
-            if ( aborted ) {
-              return;
-            }
+          // if a listener returns true, don't handle any more
+          var aborted = false;
+          
+          if ( !aborted && listener[type] ) {
+            aborted = !!( listener[type]( inputEvent ) ) || inputEvent.aborted;
+          }
+          if ( !aborted && listener[specificType] ) {
+            aborted = !!( listener[specificType]( inputEvent ) ) || inputEvent.aborted;
+          }
+          
+          // bail out if the event is aborted, so no other listeners are triggered
+          if ( aborted ) {
+            return;
           }
         }
         
