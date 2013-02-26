@@ -9,6 +9,8 @@
   <script src="../../contrib/lodash.min-1.0.0-rc.3.js"></script>
   <script src="../../contrib/jshint-r12.js"></script>
   <script src="../../dist/standalone/scenery.js"></script>
+  <script src="unit-tests.js"></script>
+  <script src="../../common/dot/tests/qunit/unit-tests.js"></script>
   <script>
     function collapseTests() {
       $( '#qunit-tests .fail ol' ).css( 'display', 'none' );
@@ -30,7 +32,12 @@
       collapseTests();
     } );
   </script>
-  <script src="js/scene-tests.js"></script>
-  <script src="js/lint-tests.js"></script>
+  <script>
+    
+    // TODO: handle construction of qunit-fixture parts for scenery
+    runSceneryTests( '.' );
+    runDotTests( '../../common/dot/tests/qunit' );
+    
+  </script>
 </body>
 </html>
