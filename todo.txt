@@ -148,6 +148,7 @@ DOM:
     Examine test code for considerations for implementing Shape.
 
 **** "Caching" Notes:
+    *** Clean up LayerState and decide on specifics. Right now we have both pointers and trails? Is that useful for stitching?
     * Instead, have performance hints, like "this moves a lot", "have this be crisp, it's static", etc.
         backend: 'svg' / 'canvas' / 'webgl' / 'dom' ? or pass actual backend reference?
         movement: 'dynamic' / 'static' ? 'translation', 'affine', ...?

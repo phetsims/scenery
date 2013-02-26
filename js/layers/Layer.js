@@ -41,10 +41,8 @@ define( function( require ) {
     if ( this.baseNode === this.scene ) {
       this.baseTrail = new scenery.Trail( this.scene );
     } else {
-      // debugger;
-      assertExtra && assertExtra( _.contains( this.startPointer.trail.nodes, this.baseNode ) );
-      assertExtra && assertExtra( _.contains( this.endPointer.trail.nodes, this.baseNode ) );
-      this.baseTrail = this.startPointer.trail.subtrailTo( this.baseNode );
+      this.baseTrail = entry.triggerTrail;
+      assert && assert( this.baseTrail.lastNode() === this.baseNode );
     }
   };
   var Layer = scenery.Layer;

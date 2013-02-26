@@ -53,12 +53,16 @@ define( function( require ) {
     },
     
     resetInternalState: function() {
+      // TODO: cleanup!
       this.layerChangeEntries = [];
       this.typeDirty = true;
       this.nextLayerType = null;
       
       this.currentLayerStartPointer = null;
       this.lastSelfTrail = null;
+      
+      // passed in the entry to layer creation. notes the trail on which the layer change was triggered
+      this.triggerTrail = null;
     },
     
     pushPreferredLayerType: function( layerType ) {
@@ -74,6 +78,7 @@ define( function( require ) {
       var isStart = this.nextLayerType === null;
       this.typeDirty = true;
       this.nextLayerType = layerType;
+      this.triggerTrail = trail.copy();
       if ( !isStart ) {
         this.currentLayerStartPointer = this.currentPointer.copy();
       }
@@ -113,6 +118,7 @@ define( function( require ) {
         type: this.nextLayerType,
         startPointer: this.currentLayerStartPointer.copy(),
         startSelfTrail: firstSelfTrail,
+        triggerTrail: this.triggerTrail
       } );
     },
     
