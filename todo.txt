@@ -3,7 +3,6 @@ SR's list:
     Add support for Shape.circle or Shape.ellipse
     Arrow shape
     SimpleDragHandler was sending (finger,trail,event) for some messages but (event) for others.  Should they be changed?
-    * Use native pinch to zoom (don't prevent default)
 
 Bugs:
     FAMB IE9 mouse handling - remember to check out Scenery copy
@@ -211,7 +210,7 @@ Layers:
 
 * Event dispatch:
     ** Handle the actual 'out/over' events properly
-    * Write a multi-finger pinch-to-zoom/rotate handler that is compatible with the drag handler
+    *** Write a multi-finger pinch-to-zoom/rotate handler that is compatible with the drag handler
         Use SVD finger point code for 3+ fingers -- also this could cause shears, so flag for whether 3+ fingers allowed and for shear
         Option whether to rotate/translate/scale or not (for each)
         Option for bounds restriction on dragged center point
