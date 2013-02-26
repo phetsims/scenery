@@ -24,6 +24,8 @@ define( function( require ) {
     this.isMouse = true;
     
     this.trail = null;
+    
+    this.type = 'mouse';
   };
   var Mouse = scenery.Mouse;
   

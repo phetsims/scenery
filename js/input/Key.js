@@ -21,6 +21,7 @@ define( function( require ) {
     this.key = key;
     this.isKey = true;
     this.trail = null;
+    this.type = 'key';
   };
   var Key = scenery.Key;
   

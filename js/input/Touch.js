@@ -19,6 +19,8 @@ define( function( require ) {
     this.point = point;
     this.isTouch = true;
     this.trail = null;
+    
+    this.type = 'touch';
   };
   var Touch = scenery.Touch;
   
