@@ -15,9 +15,16 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
+  /*
+   * Typical arguments:
+   * $main     - the jQuery-wrapped container for the scene
+   * scene     - the scene itself
+   * baseNode  - the base node for this layer
+   */
   scenery.Layer = function( args ) {
     this.$main = args.$main;
     this.scene = args.scene;
+    this.baseNode = args.baseNode;
     
     // initialize to fully dirty so we draw everything the first time
     // bounds in global coordinate frame

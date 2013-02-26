@@ -87,6 +87,7 @@ define( function( require ) {
               this.idGroupMap[lastId].appendChild( group );
             } else {
               // no parent, so append ourselves to the SVGLayer's master group
+              // ordering here not necessary, we should be the only child
               this.g.appendChild( group );
             }
           }

@@ -178,7 +178,8 @@ define( function( require ) {
     
     var layerArgs = {
       $main: this.$main,
-      scene: this
+      scene: this,
+      baseNode: this
     };
     
     this.layers = _.map( layerEntries, function( entry ) {
