@@ -29,7 +29,10 @@ define( function( require ) {
   scenery.SVGLayer = function( args ) {
     var $main = args.$main;
     
+    // main SVG element
     this.svg = document.createElementNS( svgns, 'svg' );
+    
+    // the SVG has a single group under it, which corresponds to the transform of the layer's base node
     this.g = document.createElementNS( svgns, 'g' );
     this.svg.appendChild( this.g );
     this.$svg = $( this.svg );
@@ -78,24 +81,28 @@ define( function( require ) {
     // FIXME: ordering of group trees is currently not guaranteed (this just appends right now, so they need to be ensured in the proper order)
     ensureGroupTree: function( trail ) {
       if ( !( trail.getUniqueId() in this.idGroupMap ) ) {
-        var subtrail = new scenery.Trail( trail.rootNode() );
+        var subtrail = this.baseTrail( trail ); // grab the trail up to (and including) the base node, so we don't create superfluous groups
         var lastId = null;
         
         // walk a subtrail up from the root node all the way to the full trail, creating groups where necessary
         while ( subtrail.length <= trail.length ) {
           var id = subtrail.getUniqueId();
           if ( !( id in this.idGroupMap ) ) {
-            var group = document.createElementNS( svgns, 'g' );
-            this.applyGroup( subtrail.lastNode(), group );
-            this.idGroupMap[id] = group;
             if ( lastId ) {
               // we have a parent group to which we need to be added
+              var group = lastId ? document.createElementNS( svgns, 'g' ) : this.g;
+              this.applyGroup( subtrail.lastNode(), group );
+              this.idGroupMap[id] = group;
+              
               // TODO: handle the ordering here if we ensure group trees!
               this.idGroupMap[lastId].appendChild( group );
             } else {
-              // no parent, so append ourselves to the SVGLayer's master group
-              // ordering here not necessary, we should be the only child
-              this.g.appendChild( group );
+              // we are ensuring the base group
+              assert && assert( subtrail.lastNode() === this.baseNode );
+              
+              // TODO: handle CSS transforms, etc.
+              this.applyGroup( subtrail.lastNode(), this.g );
+              this.idGroupMap[id] = this.g;
             }
           }
           subtrail.addDescendant( trail.nodes[subtrail.length] );
@@ -143,14 +150,29 @@ define( function( require ) {
       // not necessary, SVG takes care of handling this (or would just redraw everything anyways)
     },
     
+    updateBaseTransform: function( args ) {
+      if ( args.node !== this.baseNode ) {
+        throw new Error( 'updateBaseTransform not yet implemented, handle the base group!' );
+      }
+      
+      // TODO: handle for other cases!
+      this.applyGroup( this.baseNode, this.g );
+    },
+    
     transformChange: function( args ) {
       var node = args.node;
       var trail = args.trail;
       
-      var group = this.idGroupMap[trail.getUniqueId()];
-      
-      // apply the transform to the group
-      this.applyGroup( node, group );
+      if ( trail.lastNode() === this.baseNode ) {
+        // our trail points to the base node. handle this case as special
+      } else if ( _.contains( trail.nodes, this.baseNode ) ) {
+        var group = this.idGroupMap[trail.getUniqueId()];
+        
+        // apply the transform to the group
+        this.applyGroup( node, group );
+      } else {
+        throw new Error( 'transformChange not yet implemented, handle the base group!' );
+      }
     },
     
     // TODO: consider a stack-based model for transforms?
