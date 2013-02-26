@@ -29,9 +29,9 @@ define( function( require ) {
       } );
     },
     
-    createLayer: function( args ) {
+    createLayer: function( args, entry ) {
       var Constructor = this.Constructor;
-      return new Constructor( _.extend( {}, this.args, args ) ); // allow overriding certain arguments if necessary
+      return new Constructor( _.extend( {}, this.args, args ), entry ); // allow overriding certain arguments if necessary
     }
   };
   

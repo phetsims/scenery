@@ -26,14 +26,16 @@ define( function( require ) {
   var svgns = 'http://www.w3.org/2000/svg';
   var xlinkns = 'http://www.w3.org/1999/xlink';
   
-  scenery.SVGLayer = function( args ) {
+  scenery.SVGLayer = function( args, entry ) {
     var $main = args.$main;
     
     // main SVG element
     this.svg = document.createElementNS( svgns, 'svg' );
     
     // the SVG has a single group under it, which corresponds to the transform of the layer's base node
+    // TODO: consider renaming to 'this.baseGroup'
     this.g = document.createElementNS( svgns, 'g' );
+    
     this.svg.appendChild( this.g );
     this.$svg = $( this.svg );
     this.svg.setAttribute( 'width', $main.width() );
@@ -54,34 +56,36 @@ define( function( require ) {
     
     this.temporaryDebugFlagSoWeDontUpdateBoundariesMoreThanOnce = false;
     
-    Layer.call( this, args );
+    this.useFullCSSTransformFlag = !!args.cssTransform;
+    
+    Layer.call( this, args, entry );
+    
+    this.initializeBoundaries();
   };
   var SVGLayer = scenery.SVGLayer;
   
   SVGLayer.prototype = _.extend( {}, Layer.prototype, {
     constructor: SVGLayer,
     
-    applyGroup: function( node, group ) {
-      if ( node.transform.isIdentity() ) {
+    applyTransform: function( transform, group ) {
+      if ( transform.isIdentity() ) {
         if ( group.hasAttribute( 'transform' ) ) {
           group.removeAttribute( 'transform' );
         }
       } else {
-        group.setAttribute( 'transform', node.transform.getMatrix().svgTransform() );
+        group.setAttribute( 'transform', transform.getMatrix().svgTransform() );
       }
     },
     
-    // returns a Trail that goes from the trail's root node up to our baseNode
-    baseTrail: function( trail ) {
-      var index = _.indexOf( trail.nodes, this.baseNode );
-      assert && assert( index !== -1, 'Cannot baseTrail to a baseNode that is not in the trail' );
-      return trail.slice( 0, index + 1 );
+    // TODO: inline? doesn't add clarity
+    applyGroup: function( node, group ) {
+      this.applyTransform( node.transform, group );
     },
     
     // FIXME: ordering of group trees is currently not guaranteed (this just appends right now, so they need to be ensured in the proper order)
     ensureGroupTree: function( trail ) {
       if ( !( trail.getUniqueId() in this.idGroupMap ) ) {
-        var subtrail = this.baseTrail( trail ); // grab the trail up to (and including) the base node, so we don't create superfluous groups
+        var subtrail = this.baseTrail.copy(); // grab the trail up to (and including) the base node, so we don't create superfluous groups
         var lastId = null;
         
         // walk a subtrail up from the root node all the way to the full trail, creating groups where necessary
@@ -110,13 +114,11 @@ define( function( require ) {
       }
     },
     
-    updateBoundaries: function( entry ) {
+    initializeBoundaries: function() {
       if ( this.temporaryDebugFlagSoWeDontUpdateBoundariesMoreThanOnce ) {
         throw new Error( 'temporaryDebugFlagSoWeDontUpdateBoundariesMoreThanOnce!' );
       }
       this.temporaryDebugFlagSoWeDontUpdateBoundariesMoreThanOnce = true;
-      
-      Layer.prototype.updateBoundaries.call( this, entry );
       
       var layer = this;
       
@@ -150,8 +152,14 @@ define( function( require ) {
     },
     
     updateBaseTransform: function() {
-      // TODO: handle for other cases!
-      this.applyGroup( this.baseNode, this.g );
+      var transform = this.baseTrail.getTransform();
+      
+      if ( this.useFullCSSTransformFlag ) {
+        // set the full transform!
+        this.$svg.css( transform.getMatrix().cssTransformStyles() );
+      } else {
+        this.applyTransform( transform, this.g );
+      }
     },
     
     transformChange: function( args ) {
@@ -167,6 +175,7 @@ define( function( require ) {
         // apply the transform to the group
         this.applyGroup( node, group );
       } else {
+        // ancestor node changed a transform. rebuild the base transform
         this.updateBaseTransform();
       }
     },

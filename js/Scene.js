@@ -183,8 +183,7 @@ define( function( require ) {
     };
     
     this.layers = _.map( layerEntries, function( entry ) {
-      var layer = entry.type.createLayer( layerArgs );
-      layer.updateBoundaries( entry );
+      var layer = entry.type.createLayer( layerArgs, entry );
       return layer;
     } );
     

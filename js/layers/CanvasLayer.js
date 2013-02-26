@@ -27,8 +27,8 @@ define( function( require ) {
   require( 'SCENERY/Trail' );
   
   // assumes main is wrapped with JQuery
-  scenery.CanvasLayer = function( args ) {
-    Layer.call( this, args );
+  scenery.CanvasLayer = function( args, entry ) {
+    Layer.call( this, args, entry );
     
     this.backingScale = args.scene.backingScale;
     

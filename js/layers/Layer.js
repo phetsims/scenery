@@ -10,10 +10,12 @@ define( function( require ) {
   "use strict";
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
+  var assertExtra = require( 'ASSERT/assert' )( 'scenery.extra', true );
   
   var Bounds2 = require( 'DOT/Bounds2' );
   
   var scenery = require( 'SCENERY/scenery' );
+  require( 'SCENERY/Trail' );
   
   /*
    * Typical arguments:
@@ -21,7 +23,7 @@ define( function( require ) {
    * scene     - the scene itself
    * baseNode  - the base node for this layer
    */
-  scenery.Layer = function( args ) {
+  scenery.Layer = function( args, entry ) {
     this.$main = args.$main;
     this.scene = args.scene;
     this.baseNode = args.baseNode;
@@ -30,9 +32,19 @@ define( function( require ) {
     // bounds in global coordinate frame
     this.dirtyBounds = Bounds2.EVERYTHING;
     
-    // filled in after construction by an external source (currently Scene.rebuildLayers).
-    this.startSelfTrail = null;
-    this.endSelfTrail = null;
+    this.startPointer = entry.startPointer;
+    this.endPointer = entry.endPointer;
+    this.startSelfTrail = entry.startSelfTrail;
+    this.endSelfTrail = entry.endSelfTrail;
+    
+    // set baseTrail from the scene to our baseNode
+    if ( this.baseNode === this.scene ) {
+      this.baseTrail = new scenery.Trail( this.scene );
+    } else {
+      assertExtra && assertExtra( _.contains( this.startPointer.trail.nodes, this.baseNode ) );
+      assertExtra && assertExtra( _.contains( this.endPointer.trail.nodes, this.baseNode ) );
+      this.baseTrail = this.startPointer.trail.subtrailTo( this.baseNode );
+    }
   };
   var Layer = scenery.Layer;
   
@@ -49,15 +61,6 @@ define( function( require ) {
     
     toString: function() {
       return this.getName() + ' ' + ( this.startPointer ? this.startPointer.toString() : '!' ) + ' (' + ( this.startSelfTrail ? this.startSelfTrail.toString() : '!' ) + ') => ' + ( this.endPointer ? this.endPointer.toString() : '!' ) + ' (' + ( this.endSelfTrail ? this.endSelfTrail.toString() : '!' ) + ')';
-    },
-    
-    updateBoundaries: function( entry ) {
-      // TODO: tracking of nodes that changed?
-      // TODO: what needs to be reindexed?
-      this.startPointer = entry.startPointer;
-      this.endPointer = entry.endPointer;
-      this.startSelfTrail = entry.startSelfTrail;
-      this.endSelfTrail = entry.endSelfTrail;
     },
     
     /*---------------------------------------------------------------------------*

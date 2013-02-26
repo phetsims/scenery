@@ -21,8 +21,8 @@ define( function( require ) {
   
   var Layer = require( 'SCENERY/layers/Layer' ); // DOMLayer inherits from Layer
   
-  scenery.DOMLayer = function( args ) {
-    Layer.call( this, args );
+  scenery.DOMLayer = function( args, entry ) {
+    Layer.call( this, args, entry );
     
     this.div = document.createElement( 'div' );
     this.$div = $( this.div );
@@ -34,15 +34,15 @@ define( function( require ) {
     this.scene = args.scene;
     
     this.isDOMLayer = true;
+    
+    this.initializeBoundaries();
   };
   var DOMLayer = scenery.DOMLayer;
   
   DOMLayer.prototype = _.extend( {}, Layer.prototype, {
     constructor: DOMLayer,
     
-    updateBoundaries: function( entry ) {
-      Layer.prototype.updateBoundaries.call( this, entry );
-      
+    initializeBoundaries: function() {
       var layer = this;
       
       // TODO: assumes that nodes under this are in a tree, not a DAG
