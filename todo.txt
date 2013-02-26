@@ -147,35 +147,25 @@ DOM:
     Use display lists?
     Examine test code for considerations for implementing Shape.
 
-**** "Caching" Notes:
+Layers / caching:
     *** Clean up LayerState and decide on specifics. Right now we have both pointers and trails? Is that useful for stitching?
+    * SVG example bounds (clipping outside SVG rect) handling, since CSS transforms may change things?
     * Instead, have performance hints, like "this moves a lot", "have this be crisp, it's static", etc.
-        * Consolidate all regular layer strategy things into the default layer strategy
         backend: 'svg' / 'canvas' / 'webgl' / 'dom' ? or pass actual backend reference?
         movement: 'dynamic' / 'static' ? 'translation', 'affine', ...?
         * might help to save an internal flag that signals whether this node "modifies layers", as above.
         * or specify as render: { backend: 'svg', ... }, and track rendering settings separately (_render)?
-    * Implement CSS in Layer first, for SVG that is properly bounded?
+        Generalized performance flags, so that each node can vary is backend / settings based on desired appearance
+            quality: 'low' / 'medium' / 'high' ?
+            flags like 'moving' or 'stationary' could help for dynamic objects. Scenery would then decide whether to optimize the layers or not
     LayerStrategy:
-        LayerType strict equality is a good way to go. Store a reference if you need to collapse same-type layers together. Settings are different.
-        Using an API with quality levels seems cleaner, or just a general way to handle that.
-            PerformanceLayerStrategy - selects best from WebGL / Canvas / SVG / DOM based on whether quality or speed is desired?
-                Each Node would know how to best enhance its own performance?
-        Always switch to the top preferred layer type (from the stack) that is compatible with the current node, if that layer type is not already current
-            Supports the nesting that we need for caching layer strategies with a specific node picked out
+        Consolidate into one default strategy that handles everything common (CSS transforms, per-layer settings, etc)
+        Enforce splitting if the base node !== scene
+        Handle the correct LayerType with args specifying the node
     Transform "caching" should be shared between the CSS / Canvas(local)-based methods
         Deal with making sure we don't have "clipping" of the bounds
     ** Slight bit of rounding if necessary to pixel-aligned integral numbers may get performance benefits
         Option to disallow subpixel handling?
-    CSS for any layer type:
-        *** Prototype-level mix-in, where you create a new constructor + prototype from SVGLayer / CanvasLayer?
-            *** Write as separate class/prototype for now, decide reuse strategy later!
-        Parameter: Node where the transform is expected to change. Will handle splitting, etc.
-        Option flags: rotation, translation, scaling, (shearing/reflection?)
-        Typical options: none, translation, translation + rotation, translation + scaling, all 3. (investigate shearing / reflection)
-        Layer should provide something like getCSSTransform() and possibly an inverse or something like getTransformAfterCSS()
-            LayerType needs the Node, Layer needs the Trail? - maybe Layer doesn't need the trail, since the pointer contains a subtrail which is the trail. Nodes can't repeat.
-            How to enforce splits?
     Canvas / WebGL:
         drawImage is used instead of CSS transforms, but same general model, and we should take the same flags.
         Have a scratch canvas stack for things like opacity
@@ -187,30 +177,7 @@ DOM:
         "Local":
             Possible to have a single scratch canvas for a Node, even in DAG situations, since RenderState only tracks clipping / opacity (handled already)
     ** WebGL: Caching SVG / Canvas as a texture would allow extremely fast dragging?
-
-Layers:
-    Preferred (or strict) layer types by node type?
-    SVG translation handling -- but layer type needs info about rotation/translation/scaling AND what the node is!
-    LayerBoundaries prototype? Might be useful as a toString(), and for handling queries
-    "Caching styles":
-        For top-level translation caching:
-            SVGCSSLayerStrategy?
-            CanvasCSSLayerStrategy?
-                Would essentially need to be able to change the rendering process that is currently decided by CanvasLayer
-                Possibly a different type of Canvas layer?
-        For nestable Canvas/WebGL caching:
-            ? possibly just a flag that CanvasLayer / WebGLLayer will examine?
-            Could be different cached material depending on render state? Or no?
-                Opacity isn't a problem, but will need this type of temporary rendering anyways
-            Seems right to offload the work to the CanvasLayer / WebGL Layer that is responsible?
-                ! Only that layer will know what portion of the subtree will be rendered to that layer
-                ! The caching (if we are doing it to global bounds) is specific to the Trail, not the Node (due to different trail transforms)
-        * Consider caching / layering modification as separate nodes added in (i.e. like a renamed CanvasLayer, or CachingLayer, or something like that)
-    ** Or is it possible to detect runtime hotspots based on elapsed time rendering, how much it is being rendered,
-        what transforms it is under (are those changing), and possibly number of children.
-    *** Consider certain conversions in layering, for instance an SVG tree could render as a DOM node (SVG would take care of the scaling transform).
-        This could handle our caching issues
-    * Does it make sense to handle caching of nodes to an image => draw in different layer type?
+        How to allow children to render as a different backend (canvas?) to then transfer into a texture?
     Proof-of-concept for performance and DOM integration
 
 * Event dispatch:
@@ -329,6 +296,7 @@ Performance:
     *** Garbage collection jitters!
     *** Performance regressions with layering
     * Prune node rendering based on visible dirty bounds
+    Consider checking for hotspots and layer changes based on that
     Not re-rasterizing objects immediately during dragging or other features? (Auto-detect as hotspot maybe?)
     Ensure that we are triggering the hardware acceleration for CSS3 transforms
     Consider model changes in setInterval: http://www.chandlerprall.com/2012/06/requestanimationframe-is-not-your-logics-friend/
