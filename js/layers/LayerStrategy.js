@@ -26,7 +26,7 @@ define( function( require ) {
         } else {
           // if no preferred types are compatible, only switch if the current type is also incompatible
           if ( !currentType || !currentType.supportsNode( node ) ) {
-            layerState.switchToType( supportedBackends[0].defaultLayerType );
+            layerState.switchToType( trail, supportedBackends[0].defaultLayerType );
           }
         }
         

@@ -70,6 +70,7 @@ define( function( require ) {
     },
     
     switchToType: function( trail, layerType ) {
+      assert && assert( layerType !== undefined );
       var isStart = this.nextLayerType === null;
       this.typeDirty = true;
       this.nextLayerType = layerType;
