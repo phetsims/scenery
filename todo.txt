@@ -150,6 +150,7 @@ DOM:
 **** "Caching" Notes:
     *** Clean up LayerState and decide on specifics. Right now we have both pointers and trails? Is that useful for stitching?
     * Instead, have performance hints, like "this moves a lot", "have this be crisp, it's static", etc.
+        * Consolidate all regular layer strategy things into the default layer strategy
         backend: 'svg' / 'canvas' / 'webgl' / 'dom' ? or pass actual backend reference?
         movement: 'dynamic' / 'static' ? 'translation', 'affine', ...?
         * might help to save an internal flag that signals whether this node "modifies layers", as above.
