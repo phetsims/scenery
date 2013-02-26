@@ -16,6 +16,8 @@ define( function( require ) {
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
   var Bounds2 = require( 'DOT/Bounds2' );
+  var Transform3 = require( 'DOT/Transform3' );
+  var Matrix3 = require( 'DOT/Matrix3' );
   
   var scenery = require( 'SCENERY/scenery' );
   
@@ -56,7 +58,12 @@ define( function( require ) {
     
     this.temporaryDebugFlagSoWeDontUpdateBoundariesMoreThanOnce = false;
     
-    this.useFullCSSTransformFlag = !!args.cssTransform;
+    // TODO: cleanup of flags!
+    this.usesPartialCSSTransforms = args.cssTranslation || args.cssRotation || args.cssScale;
+    this.cssTranslation = args.cssTranslation; // CSS for the translation
+    this.cssRotation = args.cssRotation;       // CSS for the rotation
+    this.cssScale = args.cssScale;             // CSS for the scaling
+    this.cssTransform = args.cssTransform;     // CSS for the entire base node (will ignore other partial transforms)
     
     Layer.call( this, args, entry );
     
@@ -154,9 +161,31 @@ define( function( require ) {
     updateBaseTransform: function() {
       var transform = this.baseTrail.getTransform();
       
-      if ( this.useFullCSSTransformFlag ) {
+      if ( this.cssTransform ) {
         // set the full transform!
         this.$svg.css( transform.getMatrix().cssTransformStyles() );
+      } else if ( this.usesPartialCSSTransforms ) {
+        // calculate what our CSS transform should be
+        var cssTransform = new Transform3();
+        var matrix = transform.getMatrix();
+        if ( this.cssTranslation ) {
+          cssTransform.append( Matrix3.translation( matrix.m02(), matrix.m12() ) );
+        }
+        if ( this.cssRotation ) {
+          cssTransform.append( Matrix3.rotation2( matrix.rotation() ) );
+        }
+        if ( this.cssScale ) {
+          var scaling = matrix.scaling();
+          cssTransform.append( Matrix3.scaling( scaling.x, scaling.y ) );
+        }
+        
+        // take the CSS transform out of what we will apply to the group
+        transform.prepend( cssTransform.getInverse() );
+        
+        // apply the transforms
+        // TODO: checks to make sure we don't apply them in a row if one didn't change!
+        this.$svg.css( cssTransform.getMatrix().cssTransformStyles() );
+        this.applyTransform( transform, this.g );
       } else {
         this.applyTransform( transform, this.g );
       }
