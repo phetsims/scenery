@@ -68,6 +68,13 @@ define( function( require ) {
       }
     },
     
+    // returns a Trail that goes from the trail's root node up to our baseNode
+    baseTrail: function( trail ) {
+      var index = _.indexOf( trail.nodes, this.baseNode );
+      assert && assert( index !== -1, 'Cannot baseTrail to a baseNode that is not in the trail' );
+      return trail.slice( 0, index + 1 );
+    },
+    
     // FIXME: ordering of group trees is currently not guaranteed (this just appends right now, so they need to be ensured in the proper order)
     ensureGroupTree: function( trail ) {
       if ( !( trail.getUniqueId() in this.idGroupMap ) ) {
