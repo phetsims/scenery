@@ -100,8 +100,7 @@ define( function( require ) {
               // we are ensuring the base group
               assert && assert( subtrail.lastNode() === this.baseNode );
               
-              // TODO: handle CSS transforms, etc.
-              this.applyGroup( subtrail.lastNode(), this.g );
+              this.updateBaseTransform();
               this.idGroupMap[id] = this.g;
             }
           }
@@ -150,11 +149,7 @@ define( function( require ) {
       // not necessary, SVG takes care of handling this (or would just redraw everything anyways)
     },
     
-    updateBaseTransform: function( args ) {
-      if ( args.node !== this.baseNode ) {
-        throw new Error( 'updateBaseTransform not yet implemented, handle the base group!' );
-      }
-      
+    updateBaseTransform: function() {
       // TODO: handle for other cases!
       this.applyGroup( this.baseNode, this.g );
     },
@@ -165,13 +160,14 @@ define( function( require ) {
       
       if ( trail.lastNode() === this.baseNode ) {
         // our trail points to the base node. handle this case as special
+        this.updateBaseTransform();
       } else if ( _.contains( trail.nodes, this.baseNode ) ) {
         var group = this.idGroupMap[trail.getUniqueId()];
         
         // apply the transform to the group
         this.applyGroup( node, group );
       } else {
-        throw new Error( 'transformChange not yet implemented, handle the base group!' );
+        this.updateBaseTransform();
       }
     },
     
