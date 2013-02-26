@@ -21,8 +21,6 @@
   <!-- <div style="position: fixed; top: 0; right: 50%; background-color: #fff; padding: 5px;"><a href="#" style="color: #000;" onclick="collapseTests();">Collapse All</a></div> -->
   <div id="qunit"></div>
   <div id="qunit-fixture">
-    <div id="main" style="position: absolute; left: 0; top: 0; background-color: white; z-index: 1; width: 640px; height: 480px;"></div>
-    <div id="secondary" style="position: absolute; left: 0; top: 0; background-color: white; z-index: 0; width: 640px; height: 480px;"></div>
   </div>
   <div id="display"></div>
   <script src="../../contrib/qunit-1.10.0.js"></script>
@@ -34,7 +32,6 @@
   </script>
   <script>
     
-    // TODO: handle construction of qunit-fixture parts for scenery
     runSceneryTests( '.' );
     runDotTests( '../../common/dot/tests/qunit' );
     
