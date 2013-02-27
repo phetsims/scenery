@@ -160,6 +160,7 @@ define( function( require ) {
     
     close: function() {
       this.addPiece( new Piece.Close() );
+      return this;
     },
     
     addPiece: function( piece ) {
@@ -454,7 +455,7 @@ define( function( require ) {
   
   // supports both circle( centerX, centerY, radius ) and circle( center, radius )
   Shape.circle = function( centerX, centerY, radius ) {
-    return new Shape().circle( centerX, centerY, radius );
+    return new Shape().circle( centerX, centerY, radius ).close();
   };
   
   // supports both arc( centerX, centerY, radius, startAngle, endAngle, anticlockwise ) and arc( center, radius, startAngle, endAngle, anticlockwise )
