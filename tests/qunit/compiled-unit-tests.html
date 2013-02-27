@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Unit tests (compiled) for Scenery</title>
+  <link rel="stylesheet" href="../../contrib/qunit-1.10.0.css">
+  
+  <script src="../../contrib/jquery-1.8.3.min.js"></script>
+  <script src="../../contrib/lodash.min-1.0.0-rc.3.js"></script>
+  <script src="../../contrib/jshint-r12.js"></script>
+  <script src="../../contrib/qunit-1.10.0.js"></script>
+  <script src="../../contrib/qhint.js"></script>
+  
+  <script src="../../dist/standalone/scenery.js"></script>
+  
+  <script src="unit-tests.js"></script>
+  <script src="../../common/dot/tests/qunit/unit-tests.js"></script>
+  
+</head>
+<body>
+  <!-- <div style="position: fixed; top: 0; right: 50%; background-color: #fff; padding: 5px;"><a href="#" style="color: #000;" onclick="collapseTests();">Collapse All</a></div> -->
+  <div id="qunit"></div>
+  <div id="qunit-fixture">
+  </div>
+  <div id="display"></div>
+  
+  <!-- this needs to be run after the qunit-fixture is in the DOM, but before the document is loaded because QUnit scans the fixture then -->
+  <script src="prepare-fixture.js"></script>
+  <script>
+    function collapseTests() {
+      $( '#qunit-tests .fail ol' ).css( 'display', 'none' );
+    }
+    
+    QUnit.moduleDone( function( details ) {
+      collapseTests();
+    } );
+    
+    runSceneryTests( '.' );
+    runDotTests( '../../common/dot/tests/qunit' );
+    
+    if ( console.log ) {
+      console.log( scenery.Util.testAssert() );
+      console.log( scenery.Util.testAssertExtra() );
+    }
+  </script>
+</body>
+</html>
