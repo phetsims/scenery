@@ -3,6 +3,7 @@ SR's list:
     Add support for Shape.circle or Shape.ellipse
         * Shape should support just ignoring segments of certain types, or reducing them. e.g.:
             line with same start/end
+            Add isValid() and don't add segments who are invalid? Test and make sure that lines of 0 length, arcs of 0 radius, etc. don't stroke? If they stroke, keep them somehow
     Arrow shape
     SimpleDragHandler was sending (finger,trail,event) for some messages but (event) for others.  Should they be changed?
         Discuss options
