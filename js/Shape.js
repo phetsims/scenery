@@ -657,7 +657,7 @@ define( function( require ) {
         shape.getLastSubpath().addSegment( new Segment.Line( shape.getLastSubpath().getLastPoint(), startPoint ) );
       }
       
-      var arc = new Segment.Arc( center, radius, startAngle, endAngle, anticlockwise );
+      var arc = new Segment.Arc( this.center, this.radius, this.startAngle, this.endAngle, this.anticlockwise );
       shape.getLastSubpath().addSegment( arc );
       
       // technically the Canvas spec says to add the start point, so we do this even though it is probably completely unnecessary (there is no conditional)
@@ -960,9 +960,9 @@ define( function( require ) {
   };
   
   Segment.Arc = function( center, radius, startAngle, endAngle, anticlockwise ) {
-    if ( ( !anticlockwise && endAngle - startAngle <= -Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle <= -Math.PI * 2 ) ) {
-      throw new Error( 'Not handling arcs with start/end angles that show differences in-between browser handling' );
-    }
+    // constraints
+    assert && assert( !( ( !anticlockwise && endAngle - startAngle <= -Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle <= -Math.PI * 2 ) ), 'Not handling arcs with start/end angles that show differences in-between browser handling' );
+    assert && assert( !( ( !anticlockwise && endAngle - startAngle > Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle > -Math.PI * 2 ) ), 'Not handling arcs with start/end angles that show differences in-between browser handling' );
     
     var isFullPerimeter = ( !anticlockwise && endAngle - startAngle >= Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle >= Math.PI * 2 );
     
@@ -980,9 +980,45 @@ define( function( require ) {
     
     // acceleration for intersection
     // TODO: bounds!
-    this.bounds = null;
+    this.bounds = Bounds2.NOTHING;
+    this.bounds = this.bounds.withPoint( this.start );
+    this.bounds = this.bounds.withPoint( this.end );
     
-    throw new Error( 'Segment.Arc implementation not yet complete' );
+    var that = this;
+    function boundsAtAngle( difference, angle ) {
+      // transform the angle into the appropriate coordinate form
+      // TODO: check anticlockwise version!
+      var normalizedAngle = anticlockwise ? angle - endAngle : angle - startAngle;
+      
+      // get the angle between 0 and 2pi
+      var positiveMinAngle = normalizedAngle % ( Math.PI * 2 );
+      // check this because modular arithmetic with negative numbers reveal a negative number
+      if ( positiveMinAngle < 0 ) {
+        positiveMinAngle += Math.PI * 2;
+      }
+      
+      if ( positiveMinAngle <= difference ) {
+        // the boundary point is in the arc
+        that.bounds = that.bounds.withPoint( center.plus( Vector2.createPolar( radius, angle ) ) );
+      }
+    }
+    
+    // if the angles are different, check extrema points
+    if ( startAngle !== endAngle ) {
+      // we transform them into the 'clockwise' form and subtract off what is the 'startAngle' in that form, so that it is easy to check
+      var difference = anticlockwise ? startAngle - endAngle : endAngle - startAngle;
+      
+      if ( difference < 0 ) {
+        difference += Math.PI * 2;
+      }
+      assert && assert( difference >= 0 ); // now it should always be zero or positive
+      
+      // check all of the extrema points
+      boundsAtAngle( difference, 0 );
+      boundsAtAngle( difference, Math.PI / 2 );
+      boundsAtAngle( difference, Math.PI );
+      boundsAtAngle( difference, 3 * Math.PI / 2 );
+    }
   };
   Segment.Arc.prototype = {
     constructor: Segment.Arc,
