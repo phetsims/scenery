@@ -1,6 +1,8 @@
 
 SR's list:
     Add support for Shape.circle or Shape.ellipse
+        * Shape should support just ignoring segments of certain types, or reducing them. e.g.:
+            line with same start/end
     Arrow shape
     SimpleDragHandler was sending (finger,trail,event) for some messages but (event) for others.  Should they be changed?
         Discuss options
@@ -69,7 +71,6 @@ General:
     Take extension mechanism from Backbone.js: https://github.com/documentcloud/backbone/blob/master/backbone.js#L1471-L1502
 
 Code:
-    *** Unit tests should use dynamically-loaded require.js version (but also give the option for non-dynamically loaded)
     ** Require.js / Grunt:
         ** Debug assertions, and performance handling
             Decide on best way to include assert control
