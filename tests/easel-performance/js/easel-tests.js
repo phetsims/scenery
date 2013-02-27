@@ -397,6 +397,55 @@ $(document).ready( function() {
           
         };
       }
+    },{
+      typeName: 'Arcs',
+      typeId: 'arcs',
+      init: function( main ) {
+        var baseCanvas = document.createElement( 'canvas' );
+        baseCanvas.id = 'base-canvas';
+        baseCanvas.width = main.width();
+        baseCanvas.height = main.height();
+        main.append( baseCanvas );
+        
+        var context = baseCanvas.getContext( '2d' );
+        
+        context.clearRect( 0, 0, baseCanvas.width, baseCanvas.height );
+        
+        for ( var n = -6; n <= 6; n += 0.5 ) {
+          var x = ( n + 6 ) * 100;
+          
+          var startAngle = 0;
+          var endAngle = Math.PI * n;
+          
+          context.strokeStyle = '#000000';
+          context.fillStyle = '#eeeeee';
+          
+          context.beginPath();
+          context.arc( x, 100, 20, startAngle, endAngle, false );
+          context.fill();
+          context.stroke();
+          context.beginPath();
+          context.arc( x, 150, 20, startAngle, endAngle, true );
+          context.fill();
+          context.stroke();
+          
+          context.beginPath();
+          context.arc( x, 250, 20, endAngle, startAngle, false );
+          context.fill();
+          context.stroke();
+          context.beginPath();
+          context.arc( x, 300, 20, endAngle, startAngle, true );
+          context.fill();
+          context.stroke();
+          
+          context.fillStyle = '#000000';
+          var label = n + '\u03c0';
+          context.fillText( label, x - context.measureText( label ).width / 2, 200 );
+        }
+        
+        return function( timeElapsed ) {
+        };
+      }
     }]
   },{
     testName: 'Layers',
