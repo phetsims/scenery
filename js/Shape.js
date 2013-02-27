@@ -131,11 +131,11 @@ define( function( require ) {
     arc: function( centerX, centerY, radius, startAngle, endAngle, anticlockwise ) {
       if ( typeof centerX === 'object' ) {
         // arc( center, radius, startAngle, endAngle, anticlockwise )
-        var center = centerX;
-        radius = centerY;
-        startAngle = radius;
-        endAngle = startAngle;
         anticlockwise = endAngle;
+        endAngle = startAngle;
+        startAngle = radius;
+        radius = centerY;
+        var center = centerX;
         this.addPiece( new Piece.Arc( center, radius, startAngle, endAngle, anticlockwise ) );
       } else {
         // arc( centerX, centerY, radius, startAngle, endAngle, anticlockwise )
@@ -706,6 +706,10 @@ define( function( require ) {
         shape.getLastSubpath().addSegment( new Segment.Line( shape.getLastSubpath().getLastPoint(), startPoint ) );
       }
       
+      if ( !shape.hasSubpaths() ) {
+        shape.addSubpath( new Subpath() );
+      }
+      
       var arc = new Segment.Arc( this.center, this.radius, this.startAngle, this.endAngle, this.anticlockwise );
       shape.getLastSubpath().addSegment( arc );
       
@@ -1011,7 +1015,7 @@ define( function( require ) {
   Segment.Arc = function( center, radius, startAngle, endAngle, anticlockwise ) {
     // constraints
     assert && assert( !( ( !anticlockwise && endAngle - startAngle <= -Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle <= -Math.PI * 2 ) ), 'Not handling arcs with start/end angles that show differences in-between browser handling' );
-    assert && assert( !( ( !anticlockwise && endAngle - startAngle > Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle > -Math.PI * 2 ) ), 'Not handling arcs with start/end angles that show differences in-between browser handling' );
+    assert && assert( !( ( !anticlockwise && endAngle - startAngle > Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle > Math.PI * 2 ) ), 'Not handling arcs with start/end angles that show differences in-between browser handling' );
     
     var isFullPerimeter = ( !anticlockwise && endAngle - startAngle >= Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle >= Math.PI * 2 );
     
