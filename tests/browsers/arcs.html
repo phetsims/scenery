@@ -12,44 +12,11 @@
 </head>
 <body>
 
-<canvas id="canvas" width="1024" height="1024"></canvas>
+<canvas id="canvas" width="1024" height="525"></canvas>
 
 <script type="text/javascript">  
 
   var context = document.getElementById( 'canvas' ).getContext( '2d' );
-  
-  // a quick array of views at the top
-  for ( var n = -4; n <= 4; n += 0.5 ) {
-    var x = ( n + 4 ) * 100 + 100;
-    
-    var startAngle = 0;
-    var endAngle = Math.PI * n;
-    
-    context.strokeStyle = '#000000';
-    context.fillStyle = '#eeeeee';
-    
-    context.beginPath();
-    context.arc( x, 50, 20, startAngle, endAngle, false );
-    context.fill();
-    context.stroke();
-    context.beginPath();
-    context.arc( x, 100, 20, startAngle, endAngle, true );
-    context.fill();
-    context.stroke();
-    
-    context.beginPath();
-    context.arc( x, 200, 20, endAngle, startAngle, false );
-    context.fill();
-    context.stroke();
-    context.beginPath();
-    context.arc( x, 250, 20, endAngle, startAngle, true );
-    context.fill();
-    context.stroke();
-    
-    context.fillStyle = '#000000';
-    var label = n + '\u03c0';
-    context.fillText( label, x - context.measureText( label ).width / 2, 150 );
-  }
   
   function arcMap( anticlockwise ) {
     for ( var start = -4; start <= 4; start += 0.5 ) {
@@ -117,9 +84,9 @@
     context.restore();
   }
   
-  context.setTransform( 0.5, 0, 0, 0.5, 75, 400 );
+  context.setTransform( 0.5, 0, 0, 0.5, 75, 65 );
   arcMap( false );
-  context.setTransform( 0.5, 0, 0, 0.5, 575, 400 );
+  context.setTransform( 0.5, 0, 0, 0.5, 575, 65 );
   arcMap( true );
   
 </script>
