@@ -11,21 +11,26 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
+  var Matrix3 = require( 'DOT/Matrix3' );
+  
   var scenery = require( 'SCENERY/scenery' );
   
   /*
    * Allowed options: {
    *    allowTouchSnag: false // allow touch swipes across an object to pick it up,
    *    start: null           // if non-null, called when a drag is started. start( finger, trail, event )
-   *    drag:  null           // if non-null, called when the user moves something with a drag (not a start or end event).
+   *    drag: null            // if non-null, called when the user moves something with a drag (not a start or end event).
    *                                                                         drag( finger, trail, event )
-   *    end:   null           // if non-null, called when a drag is ended.   end( finger, trail, event )
+   *    end: null             // if non-null, called when a drag is ended.   end( finger, trail, event )
+   *    translate:            // if this exists, translate( { delta: _, oldPosition: _, newPosition: _ } ) will be called instead of directly translating the node
    * }
    */
   scenery.SimpleDragHandler = function( options ) {
     var handler = this;
     
-    this.options = options || {};
+    this.options = _.extend( {
+      allowTouchSnag: false,
+    }, options );
     
     this.dragging              = false;     // whether a node is being dragged with this handler
     this.finger                = null;      // the finger doing the current dragging
@@ -77,14 +82,27 @@ define( function( require ) {
       // mouse/touch move
       move: function( event ) {
         assert && assert( event.finger === handler.finger );
+        
+        var delta = handler.transform.inverseDelta2( handler.finger.point.minus( handler.lastDragPoint ) );
+        
         // move by the delta between the previous point, using the precomputed transform
         // prepend the translation on the node, so we can ignore whatever other transform state the node has
-        handler.node.translate( handler.transform.inverseDelta2( handler.finger.point.minus( handler.lastDragPoint ) ), true );
+        if ( this.options.translate ) {
+          var translation = handler.node.transform.getMatrix().translation();
+          this.options.translate( {
+            delta: delta,
+            oldPosition: translation,
+            newPosition: translation.plus( delta )
+          } );
+        } else {
+          handler.node.translate( delta, true );
+        }
         handler.lastDragPoint = handler.finger.point;
         
         if ( handler.options.drag ) {
           // TODO: consider adding in a delta to the listener
-          handler.options.drag( handler.finger, handler.trail, event );
+          // TODO: add the position in to the listener
+          handler.options.drag( handler.finger, handler.trail, event ); // new position (old position?) delta
         }
       }
     };
