@@ -70,7 +70,7 @@
   var rotatingContainer = new scenery.Node( {
     x: scene.sceneBounds.width() * 2 / 3,
     y: scene.sceneBounds.centerY(),
-    scale: 0.8,
+    scale: 0.8 / 0.707,
     rotation: Math.PI / 4
   } );
   scene.addChild( rotatingContainer );
@@ -78,7 +78,7 @@
   var miniContainer = new scenery.Node( {
     x: scene.sceneBounds.width() / 3,
     y: scene.sceneBounds.centerY(),
-    scale: 0.4
+    scale: 0.4 / 0.707
   } );
   scene.addChild( miniContainer );
   
