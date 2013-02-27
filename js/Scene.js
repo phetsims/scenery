@@ -41,6 +41,8 @@ define( function( require ) {
    * }
    */
   scenery.Scene = function( $main, options ) {
+    assert && assert( $main[0], 'A main container is required for a scene' );
+    
     // defaults
     options = _.extend( {
       allowSceneOverflow: false,
