@@ -452,6 +452,16 @@ define( function( require ) {
     } ), true );
   };
   
+  // supports both circle( centerX, centerY, radius ) and circle( center, radius )
+  Shape.circle = function( centerX, centerY, radius ) {
+    return new Shape().circle( centerX, centerY, radius );
+  };
+  
+  // supports both arc( centerX, centerY, radius, startAngle, endAngle, anticlockwise ) and arc( center, radius, startAngle, endAngle, anticlockwise )
+  Shape.arc = function( centerX, centerY, radius, startAngle, endAngle, anticlockwise ) {
+    return new Shape().arc( centerX, centerY, radius, startAngle, endAngle, anticlockwise );
+  };
+  
   /*---------------------------------------------------------------------------*
   * Line styles used in rendering the shape. Affects the stroked shape
   *----------------------------------------------------------------------------*/
