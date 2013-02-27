@@ -896,6 +896,9 @@ define( function( require ) {
   };
   
   Segment.Arc = function( center, radius, startAngle, endAngle, anticlockwise ) {
+    if ( ( !anticlockwise && endAngle - startAngle <= -Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle <= -Math.PI * 2 ) ) {
+      throw new Error( 'Not handling arcs with start/end angles that show differences in-between browser handling' );
+    }
     this.center = center;
     this.radius = radius;
     this.startAngle = startAngle;
@@ -915,7 +918,7 @@ define( function( require ) {
     throw new Error( 'Segment.Arc implementation not yet complete' );
   };
   Segment.Arc.prototype = {
-    constructor: Segment.Line,
+    constructor: Segment.Arc,
     
     toPieces: function() {
       throw new Error( 'Segment.toPieces unimplemented!' );
