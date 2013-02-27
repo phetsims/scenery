@@ -1036,11 +1036,38 @@ define( function( require ) {
     this.bounds = this.bounds.withPoint( this.start );
     this.bounds = this.bounds.withPoint( this.end );
     
+    // for bounds computations
     var that = this;
-    function boundsAtAngle( difference, angle ) {
+    function boundsAtAngle( angle ) {
+      if ( that.containsAngle( angle ) ) {
+        // the boundary point is in the arc
+        that.bounds = that.bounds.withPoint( center.plus( Vector2.createPolar( radius, angle ) ) );
+      }
+    }
+    
+    // if the angles are different, check extrema points
+    if ( startAngle !== endAngle ) {
+      // check all of the extrema points
+      boundsAtAngle( 0 );
+      boundsAtAngle( Math.PI / 2 );
+      boundsAtAngle( Math.PI );
+      boundsAtAngle( 3 * Math.PI / 2 );
+    }
+  };
+  Segment.Arc.prototype = {
+    constructor: Segment.Arc,
+    
+    containsAngle: function( angle ) {
+      var difference = this.anticlockwise ? this.startAngle - this.endAngle : this.endAngle - this.startAngle;
+      
+      if ( difference < 0 ) {
+        difference += Math.PI * 2;
+      }
+      assert && assert( difference >= 0 ); // now it should always be zero or positive
+      
       // transform the angle into the appropriate coordinate form
       // TODO: check anticlockwise version!
-      var normalizedAngle = anticlockwise ? angle - endAngle : angle - startAngle;
+      var normalizedAngle = this.anticlockwise ? angle - this.endAngle : angle - this.startAngle;
       
       // get the angle between 0 and 2pi
       var positiveMinAngle = normalizedAngle % ( Math.PI * 2 );
@@ -1049,31 +1076,8 @@ define( function( require ) {
         positiveMinAngle += Math.PI * 2;
       }
       
-      if ( positiveMinAngle <= difference ) {
-        // the boundary point is in the arc
-        that.bounds = that.bounds.withPoint( center.plus( Vector2.createPolar( radius, angle ) ) );
-      }
-    }
-    
-    // if the angles are different, check extrema points
-    if ( startAngle !== endAngle ) {
-      // we transform them into the 'clockwise' form and subtract off what is the 'startAngle' in that form, so that it is easy to check
-      var difference = anticlockwise ? startAngle - endAngle : endAngle - startAngle;
-      
-      if ( difference < 0 ) {
-        difference += Math.PI * 2;
-      }
-      assert && assert( difference >= 0 ); // now it should always be zero or positive
-      
-      // check all of the extrema points
-      boundsAtAngle( difference, 0 );
-      boundsAtAngle( difference, Math.PI / 2 );
-      boundsAtAngle( difference, Math.PI );
-      boundsAtAngle( difference, 3 * Math.PI / 2 );
-    }
-  };
-  Segment.Arc.prototype = {
-    constructor: Segment.Arc,
+      return positiveMinAngle <= difference;
+    },
     
     toPieces: function() {
       return [ new Piece.Arc( this.center, this.radius, this.startAngle, this.endAngle, this.anticlockwise ) ];
