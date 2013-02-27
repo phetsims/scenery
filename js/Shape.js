@@ -1097,7 +1097,55 @@ define( function( require ) {
     
     // returns the resultant winding number of this ray intersecting this segment.
     windingIntersection: function( ray ) {
-      throw new Error( 'Segment.windingIntersection unimplemented!' );
+      // left here, if in the future we want to better-handle boundary points
+      var epsilon = 0;
+      
+      // Run a general circle-intersection routine, then we can test the angles later.
+      // Solves for the two solutions t such that ray.pos + ray.dir * t is on the circle.
+      // Then we check whether the angle at each possible hit point is in our arc.
+      var centerToRay = ray.pos.minus( this.center );
+      var tmp = ray.dir.dot( centerToRay );
+      var centerToRayDistSq = centerToRay.magnitudeSquared();
+      var det = 4 * tmp * tmp - 4 * ( centerToRayDistSq - this.radius * this.radius );
+      if ( det < epsilon ) {
+        // ray misses circle entirely
+        return 0;
+      }
+      var base = ray.dir.dot( this.center ) - ray.dir.dot( ray.pos );
+      var sqt = Math.sqrt( det ) / 2;
+      var ta = base - sqt;
+      var tb = base + sqt;
+      
+      if ( tb < epsilon ) {
+        // circle is behind ray
+        return 0;
+      }
+      
+      var pointB = ray.pointAtDistance( tb );
+      var normalB = pointB.sub( this.center ).normalized();
+      
+      var wind = 0;
+      
+      if ( ta < epsilon ) {
+        // we are inside the circle, so only one intersection is possible
+        if ( this.containsAngle( normalB.angle() ) ) {
+          wind += this.anticlockwise ? 1 : -1; // since we are inside, wind this way
+        }
+      }
+      else {
+        // two possible hits (outside circle)
+        var pointA = ray.withDistance( ta );
+        var normalA = pointA.sub( this.center ).normalized();
+        
+        if ( this.containsAngle( normalA.angle() ) ) {
+          wind += this.anticlockwise ? -1 : 1; // hit from outside
+        }
+        if ( this.containsAngle( normalB.angle() ) ) {
+          wind += this.anticlockwise ? 1 : -1; // this is the far hit, which winds the opposite way
+        }
+      }
+      
+      return wind;
     }
   };
   
