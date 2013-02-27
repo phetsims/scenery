@@ -689,7 +689,7 @@ define( function( require ) {
       if ( matrix.scaling().x !== matrix.scaling().y ) {
         throw new Error( 'unimplemented asymmetric scaling of an arc - please implement ellipse' );
       } else {
-        radius = matrix.scaling().x * radius;
+        radius = matrix.scaling().x * this.radius;
       }
       return [new Piece.Arc( matrix.timesVector2( this.center ), radius, startAngle, endAngle, anticlockwise )];
     },
