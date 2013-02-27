@@ -605,6 +605,46 @@ define( function( require ) {
     }
   };
   
+  Piece.Arc = function( center, radius, startAngle, endAngle, anticlockwise ) {
+    this.center = center;
+    this.radius = radius;
+    this.startAngle = startAngle;
+    this.endAngle = endAngle;
+    this.anticlockwise = anticlockwise;
+  };
+  Piece.Arc.prototype = {
+    constructor: Piece.Arc,
+    
+    writeToContext: function( context ) {
+      context.arc( this.center.x, this.center.y, this.radius, this.startAngle, this.endAngle, this.anticlockwise );
+    },
+    
+    getSVGPathFragment: function() {
+      throw new Error( 'impossible to know without knowing the starting point, due to how SVG args are constructed' );
+    },
+    
+    transformed: function( matrix ) {
+      // so we can handle reflections in the transform, we do the general case handling for start/end angles
+      var startAngle = matrix.timesVector2( Vector2.createPolar( 1, this.startAngle ) ).minus( matrix.timesVector2( Vector2.ZERO ) ).angle();
+      var endAngle = matrix.timesVector2( Vector2.createPolar( 1, this.endAngle ) ).minus( matrix.timesVector2( Vector2.ZERO ) ).angle();
+      
+      // reverse the 'clockwiseness' if our transform includes a reflection
+      var anticlockwise = matrix.determinant() >= 0 ? this.anticlockwise : !this.anticlockwise;
+      
+      var radius;
+      if ( matrix.scaling().x !== matrix.scaling().y ) {
+        throw new Error( 'unimplemented asymmetric scaling of an arc - please implement ellipse' );
+      } else {
+        radius = matrix.scaling().x * radius;
+      }
+      return [new Piece.Arc( matrix.timesVector2( this.center ), radius, startAngle, endAngle, anticlockwise )];
+    },
+    
+    applyPiece: function( shape ) {
+      throw new Error( 'Piece.Arc.applyPiece unimplemented' );
+    }
+  };
+  
   Piece.Rect = function( upperLeft, lowerRight ) {
     this.upperLeft = upperLeft;
     this.lowerRight = lowerRight;
@@ -899,6 +939,9 @@ define( function( require ) {
     if ( ( !anticlockwise && endAngle - startAngle <= -Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle <= -Math.PI * 2 ) ) {
       throw new Error( 'Not handling arcs with start/end angles that show differences in-between browser handling' );
     }
+    
+    var isFullPerimeter = ( !anticlockwise && endAngle - startAngle >= Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle >= Math.PI * 2 );
+    
     this.center = center;
     this.radius = radius;
     this.startAngle = startAngle;
