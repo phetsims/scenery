@@ -32,6 +32,8 @@ define( function( require ) {
       allowTouchSnag: false,
     }, options );
     
+    console.log( options );
+    
     this.dragging              = false;     // whether a node is being dragged with this handler
     this.finger                = null;      // the finger doing the current dragging
     this.trail                 = null;      // stores the path to the node that is being dragged
@@ -87,9 +89,9 @@ define( function( require ) {
         
         // move by the delta between the previous point, using the precomputed transform
         // prepend the translation on the node, so we can ignore whatever other transform state the node has
-        if ( this.options.translate ) {
+        if ( handler.options.translate ) {
           var translation = handler.node.transform.getMatrix().translation();
-          this.options.translate( {
+          handler.options.translate( {
             delta: delta,
             oldPosition: translation,
             newPosition: translation.plus( delta )
