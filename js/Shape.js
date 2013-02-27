@@ -455,6 +455,10 @@ define( function( require ) {
       this.closed = true;
     },
     
+    getLength: function() {
+      return this.points.length;
+    },
+    
     getFirstPoint: function() {
       return _.first( this.points );
     },
@@ -623,6 +627,7 @@ define( function( require ) {
       throw new Error( 'impossible to know without knowing the starting point, due to how SVG args are constructed' );
     },
     
+    // TODO: test various transform types, especially rotations, scaling, shears, etc.
     transformed: function( matrix ) {
       // so we can handle reflections in the transform, we do the general case handling for start/end angles
       var startAngle = matrix.timesVector2( Vector2.createPolar( 1, this.startAngle ) ).minus( matrix.timesVector2( Vector2.ZERO ) ).angle();
@@ -641,7 +646,26 @@ define( function( require ) {
     },
     
     applyPiece: function( shape ) {
-      throw new Error( 'Piece.Arc.applyPiece unimplemented' );
+      // see http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-arc
+      
+      // we are assuming that the normal conditions were already met (or exceptioned out) so that these actually work with canvas
+      var startPoint = p( this.radius * Math.cos( this.startAngle ), this.radius * Math.sin( this.startAngle ) );
+      var endPoint =   p( this.radius * Math.cos( this.endAngle ),   this.radius * Math.sin( this.endAngle ) );
+      
+      // if there is already a point on the subpath, and it is different than our starting point, draw a line between them
+      if ( shape.hasSubpaths() && shape.getLastSubpath().getLength() > 0 && !startPoint.equals( shape.getLastSubpath().getLastPoint(), 0 ) ) {
+        shape.getLastSubpath().addSegment( new Segment.Line( shape.getLastSubpath().getLastPoint(), startPoint ) );
+      }
+      
+      var arc = new Segment.Arc( center, radius, startAngle, endAngle, anticlockwise );
+      shape.getLastSubpath().addSegment( arc );
+      
+      // technically the Canvas spec says to add the start point, so we do this even though it is probably completely unnecessary (there is no conditional)
+      shape.getLastSubpath().addPoint( startPoint );
+      shape.getLastSubpath().addPoint( endPoint );
+      
+      // and update the bounds
+      shape.bounds = shape.bounds.union( arc.bounds );
     }
   };
   
