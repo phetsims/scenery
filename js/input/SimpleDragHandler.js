@@ -22,7 +22,7 @@ define( function( require ) {
    *    drag: null            // if non-null, called when the user moves something with a drag (not a start or end event).
    *                                                                         drag( finger, trail, event )
    *    end: null             // if non-null, called when a drag is ended.   end( finger, trail, event )
-   *    translate:            // if this exists, translate( { delta: _, oldPosition: _, newPosition: _ } ) will be called instead of directly translating the node
+   *    translate:            // if this exists, translate( { delta: _, oldPosition: _, position: _ } ) will be called instead of directly translating the node
    * }
    */
   scenery.SimpleDragHandler = function( options ) {
@@ -92,7 +92,7 @@ define( function( require ) {
           handler.options.translate( {
             delta: delta,
             oldPosition: translation,
-            newPosition: translation.plus( delta )
+            position: translation.plus( delta )
           } );
         } else {
           handler.node.translate( delta, true );
