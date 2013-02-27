@@ -24,6 +24,7 @@ define( function( require ) {
   "use strict";
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
+  var assertExtra = require( 'ASSERT/assert' )( 'scenery.extra', true );
   
   var scenery = require( 'SCENERY/scenery' );
   
@@ -178,7 +179,23 @@ define( function( require ) {
     
     // returns something like "M150 0 L75 200 L225 200 Z" for a triangle
     getSVGPath: function() {
-      return _.map( this.pieces, function( piece ) { return piece.getSVGPathFragment(); } ).join( ' ' );
+      var subpathStrings = [];
+      _.each( this.subpaths, function( subpath ) {
+        if( subpath.isDrawable() ) {
+          // since the commands after this are relative to the previous 'point', we need to specify a move to the initial point
+          var startPoint = subpath.getFirstSegment().start;
+          assert && assert( startPoint.equals( subpath.getFirstPoint(), 0 ) ); // sanity check
+          var string = 'M ' + startPoint.x + ' ' + startPoint.y + ' ';
+          
+          string += _.map( subpath.segments, function( segment ) { return segment.getSVGPathFragment(); } );
+          
+          if ( subpath.isClosed() ) {
+            string += ' Z';
+          }
+          subpathStrings.push( string );
+        }
+      } );
+      return subpathStrings.join( ' ' );
     },
     
     // return a new Shape that is transformed by the associated matrix
@@ -517,6 +534,14 @@ define( function( require ) {
       return _.last( this.points );
     },
     
+    getFirstSegment: function() {
+      return _.first( this.segments );
+    },
+    
+    getLastSegment: function() {
+      return _.last( this.segments );
+    },
+    
     isDrawable: function() {
       return this.segments.length > 0;
     },
@@ -550,10 +575,6 @@ define( function( require ) {
       context.closePath();
     },
     
-    getSVGPathFragment: function() {
-      return 'Z';
-    },
-    
     transformed: function( matrix ) {
       return [this];
     },
@@ -580,10 +601,6 @@ define( function( require ) {
       context.moveTo( this.point.x, this.point.y );
     },
     
-    getSVGPathFragment: function() {
-      return 'M ' + this.point.x + ' ' + this.point.y;
-    },
-    
     transformed: function( matrix ) {
       return [new Piece.MoveTo( matrix.timesVector2( this.point ) )];
     },
@@ -603,10 +620,6 @@ define( function( require ) {
     
     writeToContext: function( context ) {
       context.lineTo( this.point.x, this.point.y );
-    },
-    
-    getSVGPathFragment: function() {
-      return 'L ' + this.point.x + ' ' + this.point.y;
     },
     
     transformed: function( matrix ) {
@@ -640,10 +653,6 @@ define( function( require ) {
       context.quadraticCurveTo( this.controlPoint.x, this.controlPoint.y, this.point.x, this.point.y );
     },
     
-    getSVGPathFragment: function() {
-      return 'Q ' + this.controlPoint.x + ' ' + this.controlPoint.y + ' ' + this.point.x + ' ' + this.point.y;
-    },
-    
     transformed: function( matrix ) {
       return [new Piece.QuadraticCurveTo( matrix.timesVector2( this.controlPoint ), matrix.timesVector2( this.point ) )];
     },
@@ -671,10 +680,6 @@ define( function( require ) {
     
     writeToContext: function( context ) {
       context.arc( this.center.x, this.center.y, this.radius, this.startAngle, this.endAngle, this.anticlockwise );
-    },
-    
-    getSVGPathFragment: function() {
-      throw new Error( 'impossible to know without knowing the starting point, due to how SVG args are constructed' );
     },
     
     // TODO: test various transform types, especially rotations, scaling, shears, etc.
@@ -738,14 +743,6 @@ define( function( require ) {
       context.rect( this.x, this.y, this.width, this.height );
     },
     
-    getSVGPathFragment: function() {
-      return 'M ' + this.upperLeft.x + ' ' + this.upperLeft.y +
-             ' L ' + this.lowerRight.x + ' ' + this.upperLeft.y +
-             ' L ' + this.lowerRight.x + ' ' + this.lowerRight.y +
-             ' L ' + this.upperLeft.x + ' ' + this.lowerRight.y +
-             ' Z M ' + this.upperLeft.x + ' ' + this.upperLeft.y; // moveto at the end since in canvas spec we start a new subpath
-    },
-    
     transformed: function( matrix ) {
       var a = matrix.timesVector2( p( this.x, this.y ) );
       var b = matrix.timesVector2( p( this.x + this.width, this.y ) );
@@ -776,8 +773,28 @@ define( function( require ) {
   * Segments
   *----------------------------------------------------------------------------*/
   
-  Shape.Segment = {};
+  Shape.Segment = {
+    /*
+     * Will contain:
+     * properties:
+     * start        - start point of this segment
+     * end          - end point of this segment
+     * startTangent - the tangent vector (normalized) to the segment at the start, pointing in the direction of motion (from start to end)
+     * endTangent   - the tangent vector (normalized) to the segment at the end, pointing in the direction of motion (from start to end)
+     * bounds       - the bounding box for the segment
+     *
+     * methods:
+     * toPieces            - returns an array of pieces that are equivalent to this segment, assuming start points are preserved
+     *                          TODO: is toPieces that valuable? it doesn't seem to have a strict guarantee on checking what the last segment did right now
+     * getSVGPathFragment  - returns a string containing the SVG path. assumes that the start point is already provided, so anything that calls this needs to put the M calls first
+     * strokeLeft          - returns an array of pieces that will draw an offset curve on the logical left side
+     * strokeRight         - returns an array of pieces that will draw an offset curve on the logical right side
+     * intersectsBounds    - whether this segment intersects the specified bounding box (not just the segment's bounding box, but the actual segment)
+     * windingIntersection - returns the winding number for intersection with a ray
+     */
+  };
   var Segment = Shape.Segment;
+  // TODO: consider actually using a segment prototype if we need it sometime
   
   Segment.Line = function( start, end ) {
     this.start = start;
@@ -793,6 +810,10 @@ define( function( require ) {
     
     toPieces: function() {
       return [ new Piece.LineTo( this.end ) ];
+    },
+    
+    getSVGPathFragment: function() {
+      return 'L ' + this.end.x + ' ' + this.end.y;
     },
     
     strokeLeft: function( lineWidth ) {
@@ -949,6 +970,10 @@ define( function( require ) {
       return [ new Piece.QuadraticCurveTo( this.control, this.end ) ];
     },
     
+    getSVGPathFragment: function() {
+      return 'Q ' + this.control.x + ' ' + this.control.y + ' ' + this.end.x + ' ' + this.end.y;
+    },
+    
     strokeLeft: function( lineWidth ) {
       return this.offsetTo( -lineWidth / 2, false, false );
     },
@@ -1032,6 +1057,13 @@ define( function( require ) {
     this.startTangent = Vector2.createPolar( 1, startAngle + anticlockwise ? Math.PI / 2 : -Math.PI / 2 );
     this.endTangent = Vector2.createPolar( 1, endAngle + anticlockwise ? Math.PI / 2 : -Math.PI / 2 );
     
+    // compute an angle difference that represents how "much" of the circle our arc covers
+    this.angleDifference = this.anticlockwise ? this.startAngle - this.endAngle : this.endAngle - this.startAngle;
+    if ( this.angleDifference < 0 ) {
+      this.angleDifference += Math.PI * 2;
+    }
+    assert && assert( this.angleDifference >= 0 ); // now it should always be zero or positive
+    
     // acceleration for intersection
     this.bounds = Bounds2.NOTHING;
     this.bounds = this.bounds.withPoint( this.start );
@@ -1059,13 +1091,6 @@ define( function( require ) {
     constructor: Segment.Arc,
     
     containsAngle: function( angle ) {
-      var difference = this.anticlockwise ? this.startAngle - this.endAngle : this.endAngle - this.startAngle;
-      
-      if ( difference < 0 ) {
-        difference += Math.PI * 2;
-      }
-      assert && assert( difference >= 0 ); // now it should always be zero or positive
-      
       // transform the angle into the appropriate coordinate form
       // TODO: check anticlockwise version!
       var normalizedAngle = this.anticlockwise ? angle - this.endAngle : angle - this.startAngle;
@@ -1077,11 +1102,26 @@ define( function( require ) {
         positiveMinAngle += Math.PI * 2;
       }
       
-      return positiveMinAngle <= difference;
+      return positiveMinAngle <= this.angleDifference;
     },
     
     toPieces: function() {
       return [ new Piece.Arc( this.center, this.radius, this.startAngle, this.endAngle, this.anticlockwise ) ];
+    },
+    
+    getSVGPathFragment: function() {
+      // see http://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands for more info
+      // rx ry x-axis-rotation large-arc-flag sweep-flag x y
+      
+      var epsilon = 0.001; // allow some leeway to render things as 'almost circles'
+      if ( this.angleDifference < Math.PI * 2 - epsilon ) {
+        var largeArcFlag = this.angleDifference < Math.PI ? '0' : '1';
+        var sweepFlag = this.anticlockwise ? '0' : '1';
+        return 'A ' + this.radius + ' ' + this.radius + ' 0 ' + largeArcFlag + ' ' + sweepFlag + ' ' + this.end.x + ' ' + this.end.y;
+      } else {
+        // circle (or almost-circle) case needs to be handled differently
+        throw new Error( 'SVG circle in path not implemented yet' );
+      }
     },
     
     strokeLeft: function( lineWidth ) {
