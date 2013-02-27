@@ -96,9 +96,15 @@
   }
   $( window ).resize( layout );
   
-  // our path node for the shape
-  var path = new scenery.Path( {
+  // our paths node for the shape
+  var hexagon = new scenery.Path( {
     shape: scenery.Shape.regularPolygon( 6, 18 ),
+    fill: '#dddddd',
+    stroke: '#000000',
+    cursor: 'pointer'
+  } );
+  var circle = new scenery.Path( {
+    shape: scenery.Shape.circle( 0, 0, 18 ),
     fill: '#dddddd',
     stroke: '#000000',
     cursor: 'pointer'
@@ -115,7 +121,7 @@
       } );
       
       // point each node to the same path (DAG)
-      node.addChild( path );
+      node.addChild( Math.random() < 0.5 ? hexagon : circle );
       node.rotate( Math.random() * 2 * Math.PI ); // a rotation on the node, just for fun!
       group.addChild( node );
       

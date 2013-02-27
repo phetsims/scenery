@@ -1122,7 +1122,7 @@ define( function( require ) {
       }
       
       var pointB = ray.pointAtDistance( tb );
-      var normalB = pointB.sub( this.center ).normalized();
+      var normalB = pointB.minus( this.center ).normalized();
       
       var wind = 0;
       
@@ -1135,7 +1135,7 @@ define( function( require ) {
       else {
         // two possible hits (outside circle)
         var pointA = ray.withDistance( ta );
-        var normalA = pointA.sub( this.center ).normalized();
+        var normalA = pointA.minus( this.center ).normalized();
         
         if ( this.containsAngle( normalA.angle() ) ) {
           wind += this.anticlockwise ? -1 : 1; // hit from outside
