@@ -8,6 +8,8 @@ if ( window.has ) {
   } );
 }
 
+window.loadedSceneryConfig = true;
+
 require.config( {
   deps: [ 'main', 'DOT/main' ],
   

@@ -8,14 +8,15 @@
   <script src="../../contrib/jquery-1.8.3.min.js"></script>
   <script src="../../contrib/lodash.min-1.0.0-rc.3.js"></script>
   <script src="../../contrib/jshint-r12.js"></script>
-  <script src="../../dist/standalone/scenery.js"></script>
+  <script src="../../contrib/qunit-1.10.0.js"></script>
+  <script src="../../contrib/qhint.js"></script>
+  
+  <script data-main="../../js/config.js" src="../../contrib/require-2.1.4.js"></script>
+  <!-- <script src="../../dist/standalone/scenery.js"></script> -->
+  
   <script src="unit-tests.js"></script>
   <script src="../../common/dot/tests/qunit/unit-tests.js"></script>
-  <script>
-    function collapseTests() {
-      $( '#qunit-tests .fail ol' ).css( 'display', 'none' );
-    }
-  </script>
+  
 </head>
 <body>
   <!-- <div style="position: fixed; top: 0; right: 50%; background-color: #fff; padding: 5px;"><a href="#" style="color: #000;" onclick="collapseTests();">Collapse All</a></div> -->
@@ -23,18 +24,153 @@
   <div id="qunit-fixture">
   </div>
   <div id="display"></div>
-  <script src="../../contrib/qunit-1.10.0.js"></script>
-  <script src="../../contrib/qhint.js"></script>
+  
+  <!-- this needs to be run after the qunit-fixture is in the DOM, but before the document is loaded because QUnit scans the fixture then -->
+  <script src="prepare-fixture.js"></script>
   <script>
+    function collapseTests() {
+      $( '#qunit-tests .fail ol' ).css( 'display', 'none' );
+    }
+    
     QUnit.moduleDone( function( details ) {
       collapseTests();
     } );
-  </script>
-  <script>
     
-    runSceneryTests( '.' );
-    runDotTests( '../../common/dot/tests/qunit' );
+    // we need to wait until our config file is loaded before our require statement. apparently this was not guaranteed
+    function check() {
+      if ( window.loadedSceneryConfig ) {
+        require( [ 'main', 'DOT/main' ], function( scenery, dot ) {
+          window.scenery = scenery;
+          window.dot = dot;
+          
+          runSceneryTests( '.' );
+          runDotTests( '../../common/dot/tests/qunit' );
+          
+          if ( console.log ) {
+            console.log( scenery.Util.testAssert() );
+            console.log( scenery.Util.testAssertExtra() );
+          }
+        } );
+      } else {
+        setTimeout( check, 4 );
+      }
+    }
+    setTimeout( check, 4 );
     
+    // $( window ).load( function() {
+    //   requirejs( [ 'main', 'DOT/main' ], function( scenery, dot ) {
+    //     window.scenery = scenery;
+    //     window.dot = dot;
+        
+    //     runSceneryTests( '.' );
+    //     runDotTests( '../../common/dot/tests/qunit' );
+        
+    //     console.log( scenery.Util.testAssert() );
+    //     console.log( scenery.Util.testAssertExtra() );
+    //   } );
+    // } );
+
+
+
+    
+    // function loadScript( src, dataMain, callback ) {
+    //   var called = false;
+      
+    //   var script = document.createElement( 'script' );
+    //   script.type = 'text/javascript';
+    //   script.async = true;
+    //   script.onload = script.onreadystatechange = function() {
+    //     var state = this.readyState;
+    //     if ( state && state != "complete" && state != "loaded" ) {
+    //       return;
+    //     }
+        
+    //     if ( !called ) {
+    //       called = true;
+    //       callback();
+    //     }
+    //   };
+      
+    //   // make sure things aren't cached, just in case
+    //   script.src = src;
+    //   script.setAttribute( 'data-main', dataMain );
+      
+    //   var other = document.getElementsByTagName( 'script' )[0];
+    //   other.parentNode.insertBefore( script, other );
+    // }
+    
+    // $( window ).load( function() {
+    //   loadScript( '../../contrib/require-2.1.4.js', '../../js/config.js', function() {
+    //     function check() {
+    //       if ( window.loadedSceneryConfig ) {
+    //         require( [ 'main', '../common/dot/js/main' ], function( scenery, dot ) {
+    //           window.scenery = scenery;
+    //           window.dot = dot;
+              
+    //           runSceneryTests( '.' );
+    //           runDotTests( '../../common/dot/tests/qunit' );
+              
+    //           console.log( scenery.Util.testAssert() );
+    //           console.log( scenery.Util.testAssertExtra() );
+    //         } );
+    //       } else {
+    //         setTimeout( check, 4 );
+    //       }
+    //     }
+    //     setTimeout( check, 4 );
+    //   } );
+    // } );
+    
+    
+    
+    
+    
+    // function loadScript( src, callback ) {
+    //   var called = false;
+      
+    //   var script = document.createElement( 'script' );
+    //   script.type = 'text/javascript';
+    //   script.async = true;
+    //   script.onload = script.onreadystatechange = function() {
+    //     var state = this.readyState;
+    //     if ( state && state != "complete" && state != "loaded" ) {
+    //       return;
+    //     }
+        
+    //     if ( !called ) {
+    //       called = true;
+    //       callback();
+    //     }
+    //   };
+      
+    //   // make sure things aren't cached, just in case
+    //   script.src = src;
+      
+    //   var other = document.getElementsByTagName( 'script' )[0];
+    //   other.parentNode.insertBefore( script, other );
+    // }
+    
+    // $( window ).load( function() {
+    //   loadScript( '../../contrib/require-2.1.4.js', function() {
+    //     require.config({
+    //       baseUrl: "../../js"
+    //     });
+        
+    //     loadScript( '../../js/config.js', function() {
+    //       require( [ 'main', '../common/dot/js/main' ], function( scenery, dot ) {
+    //         window.scenery = scenery;
+    //         window.dot = dot;
+            
+    //         runSceneryTests( '.' );
+    //         runDotTests( '../../common/dot/tests/qunit' );
+            
+    //         console.log( scenery.Util.testAssert() );
+    //         console.log( scenery.Util.testAssertExtra() );
+    //       } );
+    //     } );
+    //   } );
+    // } );
+
   </script>
 </body>
 </html>
