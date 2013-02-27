@@ -33,6 +33,9 @@
     testShape( scenery.Shape.circle( 50, 50, 25 ) );
     // testShape( scenery.Shape.arc( 150, 50, 50, Math.PI / 4, 3 * Math.PI / 4, false ) );
     testShape( scenery.Shape.arc( 150, 50, 50, Math.PI / 4, 3 * Math.PI / 4, false ).transformed( dot.Matrix3.rotation2( 0 ) ) );
+    testShape( scenery.Shape.arc( 150, 50, 50, Math.PI / 4, 3 * Math.PI / 4, false ).transformed( dot.Matrix3.rotation2( Math.PI / 8 ) ) );
+    console.log( scenery.Shape.arc( 150, 50, 50, Math.PI / 4, 3 * Math.PI / 4, false ) );
+    console.log( scenery.Shape.arc( 150, 50, 50, Math.PI / 4, 3 * Math.PI / 4, false ).transformed( dot.Matrix3.rotation2( Math.PI / 8 ) ) );
     
     scene.updateScene();
   } );
