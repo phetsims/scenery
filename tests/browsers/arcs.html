@@ -30,7 +30,10 @@
         context.beginPath();
         var startAngle = start * Math.PI;
         var endAngle = end * Math.PI;
+        var extraMag = 13;
+        context.moveTo( x + extraMag * Math.cos( startAngle ), y + extraMag * Math.sin( startAngle, 0 ) );
         context.arc( x, y, 20, startAngle, endAngle, anticlockwise );
+        context.lineTo( x + extraMag * Math.cos( endAngle ), y + extraMag * Math.sin( endAngle, 0 ) );
         context.fill();
         context.stroke();
         
