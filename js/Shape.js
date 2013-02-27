@@ -1135,7 +1135,7 @@ define( function( require ) {
       }
       else {
         // two possible hits (outside circle)
-        var pointA = ray.withDistance( ta );
+        var pointA = ray.pointAtDistance( ta );
         var normalA = pointA.minus( this.center ).normalized();
         
         if ( this.containsAngle( normalA.angle() ) ) {
