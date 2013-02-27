@@ -15,6 +15,7 @@
  * Notes for painting strokes: https://svgwg.org/svg2-draft/painting.html
  *
  * TODO: add nonzero / evenodd support when browsers support it
+ * TODO: docs
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
@@ -101,6 +102,44 @@ define( function( require ) {
         this.addPiece( new Piece.QuadraticCurveTo( controlPoint, point ) );
       } else { // quadraticCurveTo( cpx, cpy, x, y )
         this.addPiece( new Piece.QuadraticCurveTo( p( cpx, cpy ), p( x, y ) ) );
+      }
+      return this;
+    },
+    
+    /*
+     * Draws a circle using the arc() call with the following parameters:
+     * circle( center, radius ) // center is a Vector2
+     * circle( centerX, centerY, radius )
+     */
+    circle: function( centerX, centerY, radius ) {
+      if ( typeof centerX === 'object' ) {
+        // circle( center, radius )
+        var center = centerX;
+        radius = centerY;
+        return this.arc( center, radius, 0, Math.PI * 2, false );
+      } else {
+        // circle( centerX, centerY, radius )
+        return this.arc( p( centerX, centerY ), radius, 0, Math.PI * 2, false );
+      }
+    },
+    
+    /*
+     * Draws an arc using the Canvas 2D semantics, with the following parameters:
+     * arc( center, radius, startAngle, endAngle, anticlockwise )
+     * arc( centerX, centerY, radius, startAngle, endAngle, anticlockwise )
+     */
+    arc: function( centerX, centerY, radius, startAngle, endAngle, anticlockwise ) {
+      if ( typeof centerX === 'object' ) {
+        // arc( center, radius, startAngle, endAngle, anticlockwise )
+        var center = centerX;
+        radius = centerY;
+        startAngle = radius;
+        endAngle = startAngle;
+        anticlockwise = endAngle;
+        this.addPiece( new Piece.Arc( center, radius, startAngle, endAngle, anticlockwise ) );
+      } else {
+        // arc( centerX, centerY, radius, startAngle, endAngle, anticlockwise )
+        this.addPiece( new Piece.Arc( p( centerX, centerY ), radius, startAngle, endAngle, anticlockwise ) );
       }
       return this;
     },
@@ -1024,7 +1063,7 @@ define( function( require ) {
     constructor: Segment.Arc,
     
     toPieces: function() {
-      throw new Error( 'Segment.toPieces unimplemented!' );
+      return [ new Piece.Arc( this.center, this.radius, this.startAngle, this.endAngle, this.anticlockwise ) ];
     },
     
     strokeLeft: function( lineWidth ) {
