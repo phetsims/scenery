@@ -32,8 +32,6 @@ define( function( require ) {
       allowTouchSnag: false,
     }, options );
     
-    console.log( options );
-    
     this.dragging              = false;     // whether a node is being dragged with this handler
     this.finger                = null;      // the finger doing the current dragging
     this.trail                 = null;      // stores the path to the node that is being dragged
