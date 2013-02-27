@@ -1032,7 +1032,6 @@ define( function( require ) {
     this.endTangent = Vector2.createPolar( 1, endAngle + anticlockwise ? Math.PI / 2 : -Math.PI / 2 );
     
     // acceleration for intersection
-    // TODO: bounds!
     this.bounds = Bounds2.NOTHING;
     this.bounds = this.bounds.withPoint( this.start );
     this.bounds = this.bounds.withPoint( this.end );
@@ -1081,11 +1080,11 @@ define( function( require ) {
     },
     
     strokeLeft: function( lineWidth ) {
-      throw new Error( 'Segment.strokeLeft unimplemented!' );
+      return [ new Piece.Arc( this.center, this.radius + this.anticlockwise ? -lineWidth / 2 : lineWidth / 2, this.startAngle, this.endAngle, this.anticlockwise ) ];
     },
     
     strokeRight: function( lineWidth ) {
-      throw new Error( 'Segment.strokeRight unimplemented!' );
+      return [ new Piece.Arc( this.center, this.radius + this.anticlockwise ? lineWidth / 2 : -lineWidth / 2, this.startAngle, this.endAngle, this.anticlockwise ) ];
     },
     
     intersectsBounds: function( bounds ) {
