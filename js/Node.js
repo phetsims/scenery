@@ -18,6 +18,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   var LayerStrategy = require( 'SCENERY/layers/LayerStrategy' ); // used to set the default layer strategy on the prototype
+  require( 'SCENERY/Renderer' );
   
   // TODO: FIXME: Why do I have to comment out this dependency?
   // require( 'SCENERY/Trail' );
@@ -803,7 +804,12 @@ define( function( require ) {
     },
     
     setRenderer: function( renderer ) {
-      this._renderer = renderer;
+      if ( renderer instanceof scenery.Renderer ) {
+        this._renderer = renderer;
+      } else if ( typeof renderer === 'string' ) {
+        assert && assert( scenery.Renderer[renderer], 'unknown renderer in setRenderer: ' + renderer );
+        this._renderer = scenery.Renderer[renderer];
+      }
       this.markLayerRefreshNeeded();
     },
     
