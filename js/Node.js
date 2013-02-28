@@ -804,6 +804,7 @@ define( function( require ) {
     
     setRenderer: function( renderer ) {
       this._renderer = renderer;
+      this.markLayerRefreshNeeded();
     },
     
     getRenderer: function() {
