@@ -64,6 +64,9 @@ define( function( require ) {
     this._childPaintDirty = false;
     this._oldPaintMarked = false; // flag indicates the last rendered bounds of this node and all descendants are marked for a repaint already
     
+    // what type of renderer should be forced for this node.
+    this._renderer = null;
+    
     if ( options ) {
       this.mutate( options );
     }
@@ -799,6 +802,14 @@ define( function( require ) {
       return this._cursor;
     },
     
+    setRenderer: function( renderer ) {
+      this._renderer = renderer;
+    },
+    
+    getRenderer: function() {
+      return this._renderer;
+    },
+    
     // returns a unique trail (if it exists) where each node in the ancestor chain has 0 or 1 parents
     getUniqueTrail: function() {
       var trail = new scenery.Trail();
@@ -838,6 +849,9 @@ define( function( require ) {
     /*---------------------------------------------------------------------------*
     * ES5 get/set
     *----------------------------------------------------------------------------*/
+    
+    set renderer( value ) { this.setRenderer( value ); },
+    get renderer() { return this.getRenderer(); },
     
     set cursor( value ) { this.setCursor( value ); },
     get cursor() { return this.isCursor(); },
@@ -909,7 +923,7 @@ define( function( require ) {
    * TODO: move fill / stroke setting to mixins
    */
   Node.prototype._mutatorKeys = [ 'cursor', 'visible', 'translation', 'x', 'y', 'rotation', 'scale',
-                                  'left', 'right', 'top', 'bottom', 'centerX', 'centerY' ];
+                                  'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer' ];
   
   Node.prototype._supportedRenderers = [];
   
