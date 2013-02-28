@@ -3,7 +3,6 @@ SR's list:
     Arrow shape
 
 Bugs:
-    Doc's DOM element is broken
     FAMB IE9 mouse handling - remember to check out Scenery copy
     Check Firefox/Safari on Mac event handling on multiple touch events
     Text direction 'rtl' bounds and display difference between canvas / SVG
@@ -79,7 +78,6 @@ Code:
     Trail shouldn't create the 'indices' anymore!
     Rename 'main' to something else
         container? domContainer?
-    Organize unit tests into separate files, etc.
     Validation of example HTML, CSS, etc.
     Switch to jQuery 2 (wait for a stable build?)
         How necessary is jQuery? Everything we're doing shouldn't be hitting many edge cases.
