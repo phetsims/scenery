@@ -9,6 +9,7 @@ SR's list:
         Discuss options
 
 Bugs:
+    SVG handling for Firefox
     Doc's DOM element is broken
     FAMB IE9 mouse handling - remember to check out Scenery copy
     Check Firefox/Safari on Mac event handling on multiple touch events
