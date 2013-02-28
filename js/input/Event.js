@@ -1,5 +1,14 @@
 // Copyright 2002-2012, University of Colorado
 
+/*
+ * An event in Scenery that has similar event-handling characteristics to DOM events.
+ * The original DOM event (if any) is available as event.domEvent.
+ *
+ * Multiple events can be triggered by a single domEvent, so don't assume it is unique.
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+ 
 define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
