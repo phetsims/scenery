@@ -810,7 +810,7 @@ define( function( require ) {
         assert && assert( scenery.Renderer[renderer], 'unknown renderer in setRenderer: ' + renderer );
         this._renderer = scenery.Renderer[renderer];
       }
-      assert && assert( _.contains( this._supportedRenderers, this._renderer ), 'renderer ' + this._renderer + ' not supported by ' + this );
+      assert && assert( !this.hasSelf() || _.contains( this._supportedRenderers, this._renderer ), 'renderer ' + this._renderer + ' not supported by ' + this );
       this.markLayerRefreshNeeded();
     },
     
