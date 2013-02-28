@@ -515,7 +515,9 @@ define( function( require ) {
     },
     
     addSegment: function( segment ) {
-      this.segments.push( segment );
+      if ( segment !== InvalidZeroLengthSegment ) {
+        this.segments.push( segment );
+      }
     },
     
     close: function() {
@@ -664,7 +666,9 @@ define( function( require ) {
       var quadratic = new Segment.Quadratic( start, this.controlPoint, this.point );
       shape.getLastSubpath().addSegment( quadratic );
       shape.getLastSubpath().addPoint( this.point );
-      shape.bounds = shape.bounds.union( quadratic.bounds );
+      if ( !quadratic.invalid ) {
+        shape.bounds = shape.bounds.union( quadratic.bounds );
+      }
     }
   };
   
@@ -724,7 +728,9 @@ define( function( require ) {
       shape.getLastSubpath().addPoint( endPoint );
       
       // and update the bounds
-      shape.bounds = shape.bounds.union( arc.bounds );
+      if ( !arc.invalid ) {
+        shape.bounds = shape.bounds.union( arc.bounds );
+      }
     }
   };
   
@@ -796,7 +802,15 @@ define( function( require ) {
   var Segment = Shape.Segment;
   // TODO: consider actually using a segment prototype if we need it sometime
   
+  // for now, simple way of handling error cases internally
+  var InvalidZeroLengthSegment = {
+    invalid: true
+  };
+  
   Segment.Line = function( start, end ) {
+    if ( start.equals( end, 0 ) ) {
+      return InvalidZeroLengthSegment;
+    }
     this.start = start;
     this.end = end;
     this.startTangent = end.minus( start ).normalized();
@@ -860,6 +874,9 @@ define( function( require ) {
   };
   
   Segment.Quadratic = function( start, control, end, skipComputations ) {
+    if ( start.equals( end, 0 ) && start.equals( control, 0 ) ) {
+      return InvalidZeroLengthSegment;
+    }
     this.start = start;
     this.control = control;
     this.end = end;
@@ -1028,6 +1045,9 @@ define( function( require ) {
   };
   
   Segment.Cubic = function( start, control1, control2, end ) {
+    if ( start.equals( end, 0 ) && start.equals( control1, 0 ) && start.equals( control2, 0 ) ) {
+      return InvalidZeroLengthSegment;
+    }
     this.start = start;
     this.control1 = control1;
     this.control2 = control2;
@@ -1039,6 +1059,9 @@ define( function( require ) {
   };
   
   Segment.Arc = function( center, radius, startAngle, endAngle, anticlockwise ) {
+    if ( radius <= 0 ) {
+      return InvalidZeroLengthSegment;
+    }
     // constraints
     assert && assert( !( ( !anticlockwise && endAngle - startAngle <= -Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle <= -Math.PI * 2 ) ), 'Not handling arcs with start/end angles that show differences in-between browser handling' );
     assert && assert( !( ( !anticlockwise && endAngle - startAngle > Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle > Math.PI * 2 ) ), 'Not handling arcs with start/end angles that show differences in-between browser handling' );
