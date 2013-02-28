@@ -187,7 +187,7 @@ define( function( require ) {
           assert && assert( startPoint.equals( subpath.getFirstPoint(), 0.00001 ) ); // sanity check
           var string = 'M ' + startPoint.x + ' ' + startPoint.y + ' ';
           
-          string += _.map( subpath.segments, function( segment ) { return segment.getSVGPathFragment(); } );
+          string += _.map( subpath.segments, function( segment ) { return segment.getSVGPathFragment(); } ).join( ' ' );
           
           if ( subpath.isClosed() ) {
             string += ' Z';
