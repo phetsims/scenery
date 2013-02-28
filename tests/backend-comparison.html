@@ -190,18 +190,41 @@
         }
       },{
         name: 'Circles and Arcs',
-        width: 256,
+        width: 200,
         height: 64,
         draw: function( scene ) {
+          var x = 32;
           scene.addChild( new scenery.Path( {
-            shape: scenery.Shape.circle( 32, 25, 20 ),
+            shape: scenery.Shape.circle( x, 25, 20 ),
             fill: '#ff0000',
             stroke: '#000000',
             lineWidth: 3
           } ) );
           
+          x += 64;
           scene.addChild( new scenery.Path( {
-            shape: scenery.Shape.arc( 96, 25, 20 ),
+            shape: scenery.Shape.arc( x, 25, 20, Math.PI / 4, Math.PI * 3 / 2, false ),
+            fill: 'rgba(255,0,0,0.5)',
+            stroke: '#aa0000',
+            lineWidth: 3
+          } ) );
+          
+          scene.addChild( new scenery.Path( {
+            shape: scenery.Shape.arc( x, 25, 20, Math.PI / 4, Math.PI * 3 / 2, true ),
+            fill: 'rgba(0,0,255,0.5)',
+            stroke: '#0000aa',
+            lineWidth: 3
+          } ) );
+          
+          x += 64;
+          scene.addChild( new scenery.Path( {
+            x: x,
+            y: 25.5,
+            shape: new scenery.Shape()
+              .moveTo( 0, 0 )
+              .arc( 0, 0, 20, 0, Math.PI / 3, false )
+              .arc( 0, 0, 20, Math.PI / 3 + Math.PI, Math.PI, true )
+              .close(),
             fill: '#ff0000',
             stroke: '#000000',
             lineWidth: 3
