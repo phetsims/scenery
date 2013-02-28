@@ -18,21 +18,45 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  // specified as such, since there is no needed shared state (we can have node.layerStrategy = scenery.DefaultLayerStrategy for many nodes)
+  /*
+   * If the node specifies a renderer, we will always push a preferred type. That type will be fresh (if rendererOptions are specified), otherwise
+   * the top matching preferred type for that renderer will be used. This allows us to always pop in the exit().
+   *
+   * Specified as such, since there is no needed shared state (we can have node.layerStrategy = scenery.DefaultLayerStrategy for many nodes)
+   */
   scenery.DefaultLayerStrategy = {
     enter: function( trail, layerState ) {
       var node = trail.lastNode();
+      var preferredLayerType;
       
-      // if the node isn't self-rendering, we can skip it completely
-      if ( node.hasSelf() ) {
+      // if the node has a renderer, always push a layer type, so that we can pop on the exit() and ensure consistent behavior
+      if ( node.hasRenderer() ) {
+        if ( node.hasRendererLayerType() ) {
+          preferredLayerType = node.getRendererLayerType();
+        } else {
+          preferredLayerType = layerState.bestPreferredLayerTypeFor( [ node.getRenderer() ] );
+          if ( !preferredLayerType ) {
+            // there was no preferred layer type matching, just use the default
+            preferredLayerType = node.getRenderer().defaultLayerType;
+          }
+        }
+        
+        // push the preferred layer type
+        layerState.pushPreferredLayerType( preferredLayerType );
+        if ( layerState.getCurrentLayerType() !== preferredLayerType ) {
+          layerState.switchToType( trail, preferredLayerType );
+        }
+      } else if ( node.hasSelf() ) {
+        // node doesn't specify a renderer, but hasSelf.
+        
         var supportedRenderers = node._supportedRenderers;
-        var preferredType = layerState.bestPreferredLayerTypeFor( supportedRenderers );
         var currentType = layerState.getCurrentLayerType();
+        preferredLayerType = layerState.bestPreferredLayerTypeFor( supportedRenderers );
         
         // If any of the preferred types are compatible, use the top one. This allows us to support caching and hierarchical layer types
-        if ( preferredType ) {
-          if ( currentType !== preferredType ) {
-            layerState.switchToType( trail, preferredType );
+        if ( preferredLayerType ) {
+          if ( currentType !== preferredLayerType ) {
+            layerState.switchToType( trail, preferredLayerType );
           }
         } else {
           // if no preferred types are compatible, only switch if the current type is also incompatible
@@ -40,7 +64,9 @@ define( function( require ) {
             layerState.switchToType( trail, supportedRenderers[0].defaultLayerType );
           }
         }
-        
+      }
+      
+      if ( node.hasSelf() ) {
         // trigger actual layer creation if necessary (allow collapsing of layers otherwise)
         layerState.markSelf();
       }
@@ -55,7 +81,17 @@ define( function( require ) {
     // },
     
     exit: function( trail, layerState ) {
-      // currently a no-op
+      var node = trail.lastNode();
+      
+      if ( node.hasRenderer() ) {
+        layerState.popPreferredLayerType();
+        
+        // switch down to the next lowest preferred layer type, if any. if null, pass the null to switchToType
+        // this allows us to not 'leak' the renderer information, and the temporary layer type is most likely collapsed and ignored
+        if ( layerState.getCurrentLayerType() !== layerState.getPreferredLayerType() ) {
+          layerState.switchToType( trail, layerState.getPreferredLayerType() );
+        }
+      }
     }
   };
   var DefaultLayerStrategy = scenery.DefaultLayerStrategy;

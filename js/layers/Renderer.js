@@ -30,21 +30,27 @@ define( function( require ) {
   };
   var Renderer = scenery.Renderer;
   
-  // set these later so we have self references
-  Renderer.Canvas.defaultLayerType = new scenery.LayerType( scenery.CanvasLayer, 'canvas', scenery.Renderer.Canvas, {
-    // default arguments here
-  } );
-  Renderer.DOM.defaultLayerType = new scenery.LayerType( scenery.DOMLayer, 'dom', scenery.Renderer.DOM, {
-    // default arguments here
-  } );
-  Renderer.SVG.defaultLayerType = new scenery.LayerType( scenery.SVGLayer, 'svg', scenery.Renderer.SVG, {
-    // default arguments here
-  } );
+  // for now, use the basic Layer constructors. consider adding options for more advanced use in the future
+  Renderer.Canvas.createLayerType = function( rendererOptions ) {
+    return new scenery.LayerType( scenery.CanvasLayer, 'canvas', scenery.Renderer.Canvas, _.extend( {
+      // default arguments here
+    }, rendererOptions ) );
+  };
+  Renderer.DOM.createLayerType = function( rendererOptions ) {
+    return new scenery.LayerType( scenery.DOMLayer, 'dom', scenery.Renderer.DOM, _.extend( {
+      // default arguments here
+    }, rendererOptions ) );
+  };
+  Renderer.SVG.createLayerType = function( rendererOptions ) {
+    return new scenery.LayerType( scenery.SVGLayer, 'svg', scenery.Renderer.SVG, _.extend( {
+      // default arguments here
+    }, rendererOptions ) );
+  };
   
   // add shortcuts for the default layer types
-  scenery.CanvasDefaultLayerType = Renderer.Canvas.defaultLayerType;
-  scenery.DOMDefaultLayerType = Renderer.DOM.defaultLayerType;
-  scenery.SVGDefaultLayerType = Renderer.SVG.defaultLayerType;
+  scenery.CanvasDefaultLayerType = Renderer.Canvas.defaultLayerType = Renderer.Canvas.createLayerType( {} );
+  scenery.DOMDefaultLayerType    = Renderer.DOM.defaultLayerType    = Renderer.DOM.createLayerType( {} );
+  scenery.SVGDefaultLayerType    = Renderer.SVG.defaultLayerType    = Renderer.SVG.createLayerType( {} );
   
   // and shortcuts so we can index in with shorthands like 'svg', 'dom', etc.
   Renderer.canvas = Renderer.Canvas;

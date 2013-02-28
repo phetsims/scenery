@@ -67,7 +67,8 @@ define( function( require ) {
     
     // what type of renderer should be forced for this node.
     this._renderer = null;
-    this._rendererOptions = null;
+    this._rendererOptions = null; // options that will determine the layer type
+    this._rendererLayerType = null; // cached layer type that is used by the LayerStrategy
     
     if ( options ) {
       this.mutate( options );
@@ -804,6 +805,23 @@ define( function( require ) {
       return this._cursor;
     },
     
+    updateLayerType: function() {
+      if ( this._renderer && this._rendererOptions ) {
+        // if we set renderer and rendererOptions, only then do we want to trigger a specific layer type
+        this._rendererLayerType = this._renderer.createLayerType( this._rendererOptions );
+      } else {
+        this._rendererLayerType = null; // nothing signaled, since we want to support multiple layer types (including if we specify a renderer)
+      }
+    },
+    
+    getRendererLayerType: function() {
+      return this._rendererLayerType;
+    },
+    
+    hasRendererLayerType: function() {
+      return !!this._rendererLayerType;
+    },
+    
     setRenderer: function( renderer ) {
       if ( renderer instanceof scenery.Renderer ) {
         this._renderer = renderer;
@@ -817,6 +835,10 @@ define( function( require ) {
     
     getRenderer: function() {
       return this._renderer;
+    },
+    
+    hasRenderer: function() {
+      return !!this._renderer;
     },
     
     setRendererOptions: function( options ) {
