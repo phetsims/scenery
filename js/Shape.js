@@ -184,7 +184,7 @@ define( function( require ) {
         if( subpath.isDrawable() ) {
           // since the commands after this are relative to the previous 'point', we need to specify a move to the initial point
           var startPoint = subpath.getFirstSegment().start;
-          assert && assert( startPoint.equals( subpath.getFirstPoint(), 0 ) ); // sanity check
+          assert && assert( startPoint.equals( subpath.getFirstPoint(), 0.00001 ) ); // sanity check
           var string = 'M ' + startPoint.x + ' ' + startPoint.y + ' ';
           
           string += _.map( subpath.segments, function( segment ) { return segment.getSVGPathFragment(); } );
@@ -704,8 +704,8 @@ define( function( require ) {
       // see http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-arc
       
       // we are assuming that the normal conditions were already met (or exceptioned out) so that these actually work with canvas
-      var startPoint = p( this.radius * Math.cos( this.startAngle ), this.radius * Math.sin( this.startAngle ) );
-      var endPoint =   p( this.radius * Math.cos( this.endAngle ),   this.radius * Math.sin( this.endAngle ) );
+      var startPoint = this.center.plus( p( this.radius * Math.cos( this.startAngle ), this.radius * Math.sin( this.startAngle ) ) );
+      var endPoint =   this.center.plus( p( this.radius * Math.cos( this.endAngle ),   this.radius * Math.sin( this.endAngle ) ) );
       
       // if there is already a point on the subpath, and it is different than our starting point, draw a line between them
       if ( shape.hasSubpaths() && shape.getLastSubpath().getLength() > 0 && !startPoint.equals( shape.getLastSubpath().getLastPoint(), 0 ) ) {
@@ -1129,7 +1129,7 @@ define( function( require ) {
         
         largeArcFlag = '0'; // since we split it in 2, it's always the small arc
         
-        var firstArc = 'A ' + this.radius + ' ' + this.radius + ' 0 ' + largeArcFlag + ' ' + sweepFlag + ' ' + this.splitPoint.x + ' ' + this.splitPoint.y;
+        var firstArc = 'A ' + this.radius + ' ' + this.radius + ' 0 ' + largeArcFlag + ' ' + sweepFlag + ' ' + splitPoint.x + ' ' + splitPoint.y;
         var secondArc = 'A ' + this.radius + ' ' + this.radius + ' 0 ' + largeArcFlag + ' ' + sweepFlag + ' ' + this.end.x + ' ' + this.end.y;
         
         return firstArc + ' ' + secondArc;
