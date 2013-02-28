@@ -12,17 +12,44 @@
 </head>
 <body>
 
-<canvas id="canvas" width="512" height="512"></canvas>
+<canvas id="canvas" width="640" height="640"></canvas>
 
 <script type="text/javascript">  
 
   var context = document.getElementById( 'canvas' ).getContext( '2d' );
   
   context.beginPath();
+  context.moveTo( 0, 128 );
+  context.lineTo( 128, 128 );
+  context.arc( 128, 128, 0, Math.PI, -Math.PI, true );
+  context.lineTo( 128, 0 );
+  context.lineWidth = 100;
+  context.strokeStyle = '#000000';
+  context.stroke();
+  
+  context.beginPath();
   context.moveTo( 0, 256 );
   context.lineTo( 256, 256 );
   context.lineTo( 256, 256 );
   context.lineTo( 256, 0 );
+  context.lineWidth = 100;
+  context.strokeStyle = '#000000';
+  context.stroke();
+  
+  context.beginPath();
+  context.moveTo( 0, 384 );
+  context.lineTo( 384, 384 );
+  context.quadraticCurveTo( 384, 384, 384, 384 );
+  context.lineTo( 384, 0 );
+  context.lineWidth = 100;
+  context.strokeStyle = '#000000';
+  context.stroke();
+  
+  context.beginPath();
+  context.moveTo( 0, 512 );
+  context.lineTo( 512, 512 );
+  context.bezierCurveTo( 512, 512, 512, 512, 512, 512 );
+  context.lineTo( 512, 0 );
   context.lineWidth = 100;
   context.strokeStyle = '#000000';
   context.stroke();

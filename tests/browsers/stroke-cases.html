@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Stroke cases (Scenery)</title>
+  
+  <style>
+    canvas {
+      border: 1px solid black;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="canvas" width="1024" height="1024"></canvas>
+
+<script type="text/javascript">  
+
+  var context = document.getElementById( 'canvas' ).getContext( '2d' );
+  
+  context.beginPath();
+  context.moveTo( 0, 640 );
+  context.lineTo( 640, 640 );
+  context.arc( 640, 640, 20, Math.PI, -Math.PI, true );
+  context.lineTo( 640, 0 );
+  context.lineWidth = 100;
+  context.strokeStyle = 'rgba(0,0,0,0.5)';
+  context.stroke();
+  
+</script>
+
+</body>
+</html>
