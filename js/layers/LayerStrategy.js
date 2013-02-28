@@ -92,9 +92,10 @@ define( function( require ) {
         
         // switch down to the next lowest preferred layer type, if any. if null, pass the null to switchToType
         // this allows us to not 'leak' the renderer information, and the temporary layer type is most likely collapsed and ignored
-        if ( layerState.getCurrentLayerType() !== layerState.getPreferredLayerType() ) {
-          layerState.switchToType( trail, layerState.getPreferredLayerType() );
-        }
+        // NOTE: disabled for now, since this prevents us from having adjacent children sharing the same layer type
+        // if ( layerState.getCurrentLayerType() !== layerState.getPreferredLayerType() ) {
+        //   layerState.switchToType( trail, layerState.getPreferredLayerType() );
+        // }
       }
       
       if ( node.isLayerSplitAfter() ) {
