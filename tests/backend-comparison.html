@@ -8,9 +8,11 @@
   <!-- jQuery and LoDash are dependencies -->
   <script src="../contrib/jquery-1.8.3.min.js"></script>
   <script src="../contrib/lodash.min-1.0.0-rc.3.js"></script>
+  <script src="../contrib/has.js"></script>
   
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
-  <script src="../dist/standalone/scenery.js"></script>
+  <script data-main="../js/config.js" src="../contrib/require-2.1.4.js"></script>
+  <!-- <script src="../dist/standalone/scenery.js"></script> -->
   <!-- <script src="../dist/standalone/scenery.min.js"></script> -->
   
   <style type="text/css">
@@ -57,7 +59,7 @@
   
   <script>
   
-  $( window ).ready( function() {
+  require( [ 'main', '../common/dot/js/main' ], function( scenery, dot ) {
     var testCases = [
       {
         name: 'Rectangle',
@@ -194,7 +196,8 @@
           scene.addChild( new scenery.Path( {
             shape: scenery.Shape.circle( 32, 25, 20 ),
             fill: '#ff0000',
-            stroke: '#000000'
+            stroke: '#000000',
+            lineWidth: 3
           } ) );
         }
       }
