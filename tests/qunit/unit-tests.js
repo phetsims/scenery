@@ -15,5 +15,6 @@ function runSceneryTests( pathToTestBase ) {
   loadTestFile( 'js/test-utils.js' );
   loadTestFile( 'js/scene.js' );
   loadTestFile( 'js/shapes.js' );
+  loadTestFile( 'js/layering.js' );
   loadTestFile( 'js/miscellaneous.js' );
 };

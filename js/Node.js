@@ -827,11 +827,13 @@ define( function( require ) {
     },
     
     setRenderer: function( renderer ) {
-      if ( renderer instanceof scenery.Renderer ) {
-        this._renderer = renderer;
-      } else if ( typeof renderer === 'string' ) {
+      if ( typeof renderer === 'string' ) {
         assert && assert( scenery.Renderer[renderer], 'unknown renderer in setRenderer: ' + renderer );
         this._renderer = scenery.Renderer[renderer];
+      } else if ( renderer instanceof scenery.Renderer ) {
+        this._renderer = renderer;
+      } else {
+        throw new Error( 'unrecognized type of renderer: ' + renderer );
       }
       assert && assert( !this.hasSelf() || _.contains( this._supportedRenderers, this._renderer ), 'renderer ' + this._renderer + ' not supported by ' + this );
       this.markLayerRefreshNeeded();
