@@ -1,5 +1,9 @@
 
 (function(){
+  'use strict';
+  
+  var includeBleedingEdgeCanvasTests = false;
+  
   module( 'Miscellaneous' );
   
   test( 'ES5 Object.defineProperty get/set', function() {
@@ -13,4 +17,43 @@
     ob.key += 1;
     equal( ob._key, 6, 'incremented object value' );
   } );
+  
+  test( 'Canvas WebGL Context and Features', function() {
+    var canvas = document.createElement( 'canvas' );
+    var context = canvas.getContext( "webgl" ) || canvas.getContext( "experimental-webgl" );
+    ok( context, 'context' );
+  } );   
+  
+  if ( includeBleedingEdgeCanvasTests ) {
+    // v5 canvas additions
+    module( 'Bleeding Edge Canvas Support' );
+    
+    test( 'Canvas 2D v5 Features', function() {
+      var canvas = document.createElement( 'canvas' );
+      var context = canvas.getContext( '2d' );
+      
+      var neededMethods = [
+        'addHitRegion',
+        'ellipse',
+        'resetClip',
+        'resetTransform'
+      ];
+      _.each( neededMethods, function( method ) {
+        ok( context[method] !== undefined, 'context.' + method );
+      } );
+    } );
+    
+    test( 'Path object support', function() {
+      var path = new Path();
+    } );
+       
+    test( 'Text width measurement in canvas', function() {
+      var canvas = document.createElement( 'canvas' );
+      var context = canvas.getContext( '2d' );
+      var metrics = context.measureText('Hello World');
+      _.each( [ 'actualBoundingBoxLeft', 'actualBoundingBoxRight', 'actualBoundingBoxAscent', 'actualBoundingBoxDescent' ], function( method ) {
+        ok( metrics[method] !== undefined, 'metrics.' + method );
+      } );
+    } );
+  }
 })();

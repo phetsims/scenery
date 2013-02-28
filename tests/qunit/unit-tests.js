@@ -12,6 +12,8 @@ function runSceneryTests( pathToTestBase ) {
     document.getElementsByTagName( 'head' )[0].appendChild( script );
   }
   
-  loadTestFile( 'js/scene-tests.js' );
+  loadTestFile( 'js/test-utils.js' );
+  loadTestFile( 'js/scene.js' );
+  loadTestFile( 'js/shapes.js' );
   loadTestFile( 'js/miscellaneous.js' );
 };
