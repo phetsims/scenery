@@ -255,7 +255,7 @@
         $( document.body ).append( $container );
         
         var scene = new scenery.Scene( $container, {
-          preferredSceneLayerType: layerType
+          renderer: renderer
         } );
         
         try {

@@ -22,35 +22,31 @@ define( function( require ) {
   // cached defaults
   var defaults = {};
   
-  scenery.Renderer = {
-    Canvas: {},
-    DOM: {},
-    SVG: {},
-    WebGL: {}
+  scenery.Renderer = function( layerConstructor, name, defaultOptions ) {
+    this.layerConstructor = layerConstructor;
+    this.name = name;
+    this.defaultOptions = defaultOptions;
+    
+    this.defaultLayerType = this.createLayerType( {} ); // default options are handled in createLayerType
   };
   var Renderer = scenery.Renderer;
   
-  // for now, use the basic Layer constructors. consider adding options for more advanced use in the future
-  Renderer.Canvas.createLayerType = function( rendererOptions ) {
-    return new scenery.LayerType( scenery.CanvasLayer, 'canvas', scenery.Renderer.Canvas, _.extend( {
-      // default arguments here
-    }, rendererOptions ) );
-  };
-  Renderer.DOM.createLayerType = function( rendererOptions ) {
-    return new scenery.LayerType( scenery.DOMLayer, 'dom', scenery.Renderer.DOM, _.extend( {
-      // default arguments here
-    }, rendererOptions ) );
-  };
-  Renderer.SVG.createLayerType = function( rendererOptions ) {
-    return new scenery.LayerType( scenery.SVGLayer, 'svg', scenery.Renderer.SVG, _.extend( {
-      // default arguments here
-    }, rendererOptions ) );
+  Renderer.prototype = {
+    constructor: Renderer,
+    
+    createLayerType: function( rendererOptions ) {
+      return new scenery.LayerType( this.layerConstructor, this.name, this, _.extend( {}, this.defaultOptions, rendererOptions ) );
+    }
   };
   
+  Renderer.Canvas = new Renderer( scenery.CanvasLayer, 'canvas', {} );
+  Renderer.DOM = new Renderer( scenery.DOMLayer, 'dom', {} );
+  Renderer.SVG = new Renderer( scenery.SVGLayer, 'svg', {} );
+  
   // add shortcuts for the default layer types
-  scenery.CanvasDefaultLayerType = Renderer.Canvas.defaultLayerType = Renderer.Canvas.createLayerType( {} );
-  scenery.DOMDefaultLayerType    = Renderer.DOM.defaultLayerType    = Renderer.DOM.createLayerType( {} );
-  scenery.SVGDefaultLayerType    = Renderer.SVG.defaultLayerType    = Renderer.SVG.createLayerType( {} );
+  scenery.CanvasDefaultLayerType = Renderer.Canvas.defaultLayerType;
+  scenery.DOMDefaultLayerType    = Renderer.DOM.defaultLayerType;
+  scenery.SVGDefaultLayerType    = Renderer.SVG.defaultLayerType;
   
   // and shortcuts so we can index in with shorthands like 'svg', 'dom', etc.
   Renderer.canvas = Renderer.Canvas;
