@@ -70,6 +70,10 @@ define( function( require ) {
     this._rendererOptions = null; // options that will determine the layer type
     this._rendererLayerType = null; // cached layer type that is used by the LayerStrategy
     
+    // whether layers should be split before and/or after this node. setting both will put this node and its children into a separate layer
+    this._layerSplitBefore = false;
+    this._layerSplitAfter = false;
+    
     if ( options ) {
       this.mutate( options );
     }
@@ -851,6 +855,28 @@ define( function( require ) {
       return this._rendererOptions;
     },
     
+    setLayerSplitBefore: function( split ) {
+      if ( this._layerSplitBefore !== split ) {
+        this._layerSplitBefore = split;
+        this.markLayerRefreshNeeded();
+      }
+    },
+    
+    isLayerSplitBefore: function() {
+      return this._layerSplitBefore;
+    },
+    
+    setLayerSplitAfter: function( split ) {
+      if ( this._layerSplitAfter !== split ) {
+        this._layerSplitAfter = split;
+        this.markLayerRefreshNeeded();
+      }
+    },
+    
+    isLayerSplitAfter: function() {
+      return this._layerSplitAfter;
+    },
+    
     // returns a unique trail (if it exists) where each node in the ancestor chain has 0 or 1 parents
     getUniqueTrail: function() {
       var trail = new scenery.Trail();
@@ -890,6 +916,12 @@ define( function( require ) {
     /*---------------------------------------------------------------------------*
     * ES5 get/set
     *----------------------------------------------------------------------------*/
+    
+    set layerSplitBefore( value ) { this.setLayerSplitBefore( value ); },
+    get layerSplitBefore() { return this.isLayerSplitBefore(); },
+    
+    set layerSplitAfter( value ) { this.setLayerSplitAfter( value ); },
+    get layerSplitAfter() { return this.isLayerSplitAfter(); },
     
     set renderer( value ) { this.setRenderer( value ); },
     get renderer() { return this.getRenderer(); },
@@ -967,7 +999,8 @@ define( function( require ) {
    * TODO: move fill / stroke setting to mixins
    */
   Node.prototype._mutatorKeys = [ 'cursor', 'visible', 'translation', 'x', 'y', 'rotation', 'scale',
-                                  'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions' ];
+                                  'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
+                                  'layerSplitBefore', 'layerSplitAfter' ];
   
   Node.prototype._supportedRenderers = [];
   

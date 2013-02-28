@@ -66,6 +66,10 @@ define( function( require ) {
         }
       }
       
+      if ( node.isLayerSplitBefore() ) {
+        layerState.switchToType( trail, layerState.getCurrentLayerType() );
+      }
+      
       if ( node.hasSelf() ) {
         // trigger actual layer creation if necessary (allow collapsing of layers otherwise)
         layerState.markSelf();
@@ -91,6 +95,10 @@ define( function( require ) {
         if ( layerState.getCurrentLayerType() !== layerState.getPreferredLayerType() ) {
           layerState.switchToType( trail, layerState.getPreferredLayerType() );
         }
+      }
+      
+      if ( node.isLayerSplitAfter() ) {
+        layerState.switchToType( trail, layerState.getCurrentLayerType() );
       }
     }
   };
