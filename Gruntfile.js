@@ -113,7 +113,7 @@ module.exports = function( grunt ) {
   } );
   
   // Default task.
-  grunt.registerTask( 'default', [ 'jshint', 'production', 'standalone' ] );
+  grunt.registerTask( 'default', [ 'jshint', 'standalone' ] );
   grunt.registerTask( 'production', [ 'requirejs:production' ] );
   grunt.registerTask( 'standalone', [ 'requirejs:standalone', 'concat:standalone', 'uglify:standalone' ] );
   grunt.loadNpmTasks( 'grunt-contrib-requirejs' );
