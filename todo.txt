@@ -1,9 +1,5 @@
 
 SR's list:
-    Add support for Shape.circle or Shape.ellipse
-        * Shape should support just ignoring segments of certain types, or reducing them. e.g.:
-            line with same start/end
-            Add isValid() and don't add segments who are invalid? Test and make sure that lines of 0 length, arcs of 0 radius, etc. don't stroke? If they stroke, keep them somehow
     Arrow shape
     SimpleDragHandler was sending (finger,trail,event) for some messages but (event) for others.  Should they be changed?
         Discuss options
@@ -236,6 +232,10 @@ Node:
     Canvas: masking with sub-canvas rendering using globalCompositeOperation. CSG should be possible, and hit tests should be better. Bounds might be harder
 
 Shapes:
+    Add support Shape.ellipse
+    * Shape should support just ignoring segments of certain types, or reducing them. e.g.:
+        line with same start/end
+        Add isValid() and don't add segments who are invalid? Test and make sure that lines of 0 length, arcs of 0 radius, etc. don't stroke? If they stroke, keep them somehow
     * convenience functions on scenery namespace for common shapes
     ** consider new scenery.Path( shape, args )
         Maybe even new scenery.Rectangle( width, height, { ... } )? Ability to set width / height, and similar other attributes for RegularPolygon, etc?
