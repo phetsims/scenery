@@ -1113,14 +1113,26 @@ define( function( require ) {
       // see http://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands for more info
       // rx ry x-axis-rotation large-arc-flag sweep-flag x y
       
-      var epsilon = 0.001; // allow some leeway to render things as 'almost circles'
+      var epsilon = 0.01; // allow some leeway to render things as 'almost circles'
+      var sweepFlag = this.anticlockwise ? '0' : '1';
+      var largeArcFlag;
       if ( this.angleDifference < Math.PI * 2 - epsilon ) {
-        var largeArcFlag = this.angleDifference < Math.PI ? '0' : '1';
-        var sweepFlag = this.anticlockwise ? '0' : '1';
+        largeArcFlag = this.angleDifference < Math.PI ? '0' : '1';
         return 'A ' + this.radius + ' ' + this.radius + ' 0 ' + largeArcFlag + ' ' + sweepFlag + ' ' + this.end.x + ' ' + this.end.y;
       } else {
         // circle (or almost-circle) case needs to be handled differently
-        throw new Error( 'SVG circle in path not implemented yet' );
+        // since SVG will not be able to draw (or know how to draw) the correct circle if we just have a start and end, we need to split it into two circular arcs
+        
+        // get the angle that is between and opposite of both of the points
+        var splitOppositeAngle = ( this.startAngle + this.endAngle ) / 2; // this _should_ work for the modular case?
+        var splitPoint = this.center.plus( Vector2.createPolar( this.radius, splitOppositeAngle ) );
+        
+        largeArcFlag = '0'; // since we split it in 2, it's always the small arc
+        
+        var firstArc = 'A ' + this.radius + ' ' + this.radius + ' 0 ' + largeArcFlag + ' ' + sweepFlag + ' ' + this.splitPoint.x + ' ' + this.splitPoint.y;
+        var secondArc = 'A ' + this.radius + ' ' + this.radius + ' 0 ' + largeArcFlag + ' ' + sweepFlag + ' ' + this.end.x + ' ' + this.end.y;
+        
+        return firstArc + ' ' + secondArc;
       }
     },
     
