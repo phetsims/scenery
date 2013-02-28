@@ -18,40 +18,103 @@
 
   var context = document.getElementById( 'canvas' ).getContext( '2d' );
   
+  var zeroColor = '#000000';
+  var offZeroColor = 'rgba(0,255,255,0.5)';
+  
+  /*---------------------------------------------------------------------------*
+  * Arc with 0 radius as a 'join'
+  *----------------------------------------------------------------------------*/
+  
+  // exactly 0
   context.beginPath();
   context.moveTo( 0, 128 );
   context.lineTo( 128, 128 );
   context.arc( 128, 128, 0, Math.PI, -Math.PI, true );
   context.lineTo( 128, 0 );
   context.lineWidth = 100;
-  context.strokeStyle = '#000000';
+  context.strokeStyle = zeroColor;
   context.stroke();
   
+  // just off of 0
+  context.beginPath();
+  context.moveTo( 0, 128 );
+  context.lineTo( 128, 128 );
+  context.arc( 128, 128, 0.01, Math.PI, -Math.PI, true );
+  context.lineTo( 128, 0 );
+  context.lineWidth = 100;
+  context.strokeStyle = offZeroColor;
+  context.stroke();
+  
+  /*---------------------------------------------------------------------------*
+  * Line with 0 length as a 'join'
+  *----------------------------------------------------------------------------*/
+  
+  // exactly 0
   context.beginPath();
   context.moveTo( 0, 256 );
   context.lineTo( 256, 256 );
   context.lineTo( 256, 256 );
   context.lineTo( 256, 0 );
   context.lineWidth = 100;
-  context.strokeStyle = '#000000';
+  context.strokeStyle = zeroColor;
   context.stroke();
   
+  // just off of 0
+  context.beginPath();
+  context.moveTo( 0, 256 );
+  context.lineTo( 255.99, 256 );
+  context.lineTo( 256, 255.99 );
+  context.lineTo( 256, 0 );
+  context.lineWidth = 100;
+  context.strokeStyle = offZeroColor;
+  context.stroke();
+  
+  /*---------------------------------------------------------------------------*
+  * Quadratic with all control points the same
+  *----------------------------------------------------------------------------*/
+  
+  // exactly 0
   context.beginPath();
   context.moveTo( 0, 384 );
   context.lineTo( 384, 384 );
   context.quadraticCurveTo( 384, 384, 384, 384 );
   context.lineTo( 384, 0 );
   context.lineWidth = 100;
-  context.strokeStyle = '#000000';
+  context.strokeStyle = zeroColor;
   context.stroke();
   
+  // just off of 0
+  context.beginPath();
+  context.moveTo( 0, 384 );
+  context.lineTo( 383.99, 384 );
+  context.quadraticCurveTo( 384, 384, 384, 383.99 );
+  context.lineTo( 384, 0 );
+  context.lineWidth = 100;
+  context.strokeStyle = offZeroColor;
+  context.stroke();
+  
+  /*---------------------------------------------------------------------------*
+  * Cubic with all control points the same
+  *----------------------------------------------------------------------------*/
+  
+  // exactly 0
   context.beginPath();
   context.moveTo( 0, 512 );
   context.lineTo( 512, 512 );
   context.bezierCurveTo( 512, 512, 512, 512, 512, 512 );
   context.lineTo( 512, 0 );
   context.lineWidth = 100;
-  context.strokeStyle = '#000000';
+  context.strokeStyle = zeroColor;
+  context.stroke();
+  
+  // just off of 0
+  context.beginPath();
+  context.moveTo( 0, 512 );
+  context.lineTo( 511.99, 512 );
+  context.bezierCurveTo( 511.999, 512, 512, 511.999, 512, 511.99 );
+  context.lineTo( 512, 0 );
+  context.lineWidth = 100;
+  context.strokeStyle = offZeroColor;
   context.stroke();
   
 </script>
