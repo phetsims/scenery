@@ -131,6 +131,12 @@ DOM:
     Examine test code for considerations for implementing Shape.
 
 Layers / caching:
+    Refreshing / changes:
+        Think conceptually between 'self' nodes. Just refresh between the minimum bounding self nodes that were not affected by the change.
+            1) Walk up to the first unaffected self, copy layer type from active layer
+            2) Walk through to last unaffected self
+            3) Stitch together based on that information
+        SVG: ref-count groups by children, so that we can remove unused groups
     *** Clean up LayerState and decide on specifics. Right now we have both pointers and trails? Is that useful for stitching?
     * SVG example bounds (clipping outside SVG rect) handling, since CSS transforms may change things?
     * Instead, have performance hints, like "this moves a lot", "have this be crisp, it's static", etc.
@@ -283,6 +289,7 @@ Performance:
     *** Performance regressions with layering
     * Prune node rendering based on visible dirty bounds
     Consider checking for hotspots and layer changes based on that
+        Ref-count number of descendants? Should be fast for insert/remove child
     Not re-rasterizing objects immediately during dragging or other features? (Auto-detect as hotspot maybe?)
     Ensure that we are triggering the hardware acceleration for CSS3 transforms
     Consider model changes in setInterval: http://www.chandlerprall.com/2012/06/requestanimationframe-is-not-your-logics-friend/
