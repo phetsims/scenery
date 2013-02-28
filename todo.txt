@@ -1,8 +1,6 @@
 
 SR's list:
     Arrow shape
-    SimpleDragHandler was sending (finger,trail,event) for some messages but (event) for others.  Should they be changed?
-        Discuss options
 
 Bugs:
     Doc's DOM element is broken
