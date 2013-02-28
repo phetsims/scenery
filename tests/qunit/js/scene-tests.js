@@ -984,51 +984,6 @@
   })();
   
   /*---------------------------------------------------------------------------*
-  * Text
-  *----------------------------------------------------------------------------*/    
-  
-//  module( 'Text' );
-
-  /*---------------------------------------------------------------------------*
-  * DOM
-  *----------------------------------------------------------------------------*/    
-  
-  // module( 'DOM Layers' );
-  
-  // test( 'DOM Test', function() {
-  //   updateVsFullRender( [
-  //     function( scene ) {
-  //       var node = new scenery.Path();
-  //       node.setShape( scenery.Shape.rectangle( 0, 0, canvasWidth / 3, canvasHeight / 3 ) );
-  //       node.setFill( '#ff0000' );
-  //       node.setStroke( '#000000' );
-  //       scene.addChild( node );
-        
-  //       var domNode = new scenery.Node();
-  //       node.addChild( domNode );
-  //     }
-  //   ] );
-  // } );
-  
-  /*---------------------------------------------------------------------------*
-  * Miscellaneous HTML / JS
-  *----------------------------------------------------------------------------*/    
-  
-  module( 'Miscellaneous' );
-  
-  test( 'ES5 Object.defineProperty get/set', function() {
-    var ob = { _key: 5 };
-    Object.defineProperty( ob, 'key', {
-      enumerable: true,
-      configurable: true,
-      get: function() { return this._key; },
-      set: function( val ) { this._key = val; }
-    } );
-    ob.key += 1;
-    equal( ob._key, 6, 'incremented object value' );
-  } );
-  
-  /*---------------------------------------------------------------------------*
   * WebGL
   *----------------------------------------------------------------------------*/    
   
