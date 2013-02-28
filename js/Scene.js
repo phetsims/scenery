@@ -23,7 +23,7 @@ define( function( require ) {
   require( 'SCENERY/TrailPointer' );
   require( 'SCENERY/input/Input' );
   require( 'SCENERY/layers/LayerState' );
-  require( 'SCENERY/layers/Backend' );
+  require( 'SCENERY/layers/Renderer' );
   
   var Util = require( 'SCENERY/util/Util' );
   var objectCreate = Util.objectCreate;

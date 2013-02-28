@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
 
-  <title>Scenery Rendering Backend Comparison</title>
+  <title>Scenery Rendering Renderer Comparison</title>
   
   <!-- jQuery and LoDash are dependencies -->
   <script src="../contrib/jquery-1.8.3.min.js"></script>
@@ -55,7 +55,7 @@
 
 <body>
   
-  <h1>Scenery Rendering Backend Comparison</h1>
+  <h1>Scenery Rendering Renderer Comparison</h1>
   
   <script>
   
@@ -233,9 +233,9 @@
       }
     ];
     
-    var backends = [
-      scenery.Backend.Canvas,
-      scenery.Backend.SVG
+    var renderers = [
+      scenery.Renderer.Canvas,
+      scenery.Renderer.SVG
       // TODO: add WebGL, and possibly DOM for things like text?
     ];
     
@@ -245,8 +245,8 @@
       $testTitle.addClass( 'testname' );
       $( document.body ).append( $testTitle );
       
-      _.each( backends, function( backend ) {
-        var layerType = backend.defaultLayerType;
+      _.each( renderers, function( renderer ) {
+        var layerType = renderer.defaultLayerType;
         var $container = $( document.createElement( 'div' ) );
         $container.addClass( 'scene' );
         $container.addClass( layerType.name );

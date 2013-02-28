@@ -25,7 +25,7 @@
       shape: scenery.Shape.rectangle( 0, 0, 50, 50 ),
       fill: '#ff0000'
     } );
-    var layerType = new scenery.LayerType( scenery.SVGLayer, 'svg', scenery.Backend.Canvas, {
+    var layerType = new scenery.LayerType( scenery.SVGLayer, 'svg', scenery.Renderer.Canvas, {
       cssTransform: true,
       baseNode: path
     } );

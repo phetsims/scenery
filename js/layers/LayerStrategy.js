@@ -5,7 +5,7 @@
  * called in a depth-first order during the layer building process, and will modify a LayerState to signal any
  * layer-specific signals.
  *
- * This generally ensures that a layer containing the proper backend and settings to support its associated node
+ * This generally ensures that a layer containing the proper renderer and settings to support its associated node
  * will be created.
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
@@ -25,8 +25,8 @@ define( function( require ) {
       
       // if the node isn't self-rendering, we can skip it completely
       if ( node.hasSelf() ) {
-        var supportedBackends = node._supportedBackends;
-        var preferredType = layerState.bestPreferredLayerTypeFor( supportedBackends );
+        var supportedRenderers = node._supportedRenderers;
+        var preferredType = layerState.bestPreferredLayerTypeFor( supportedRenderers );
         var currentType = layerState.getCurrentLayerType();
         
         // If any of the preferred types are compatible, use the top one. This allows us to support caching and hierarchical layer types
@@ -37,7 +37,7 @@ define( function( require ) {
         } else {
           // if no preferred types are compatible, only switch if the current type is also incompatible
           if ( !currentType || !currentType.supportsNode( node ) ) {
-            layerState.switchToType( trail, supportedBackends[0].defaultLayerType );
+            layerState.switchToType( trail, supportedRenderers[0].defaultLayerType );
           }
         }
         

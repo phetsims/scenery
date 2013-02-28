@@ -138,10 +138,10 @@ define( function( require ) {
       }
     },
     
-    bestPreferredLayerTypeFor: function( backends ) {
+    bestPreferredLayerTypeFor: function( renderers ) {
       for ( var i = this.preferredLayerTypes.length - 1; i >= 0; i-- ) {
         var preferredType = this.preferredLayerTypes[i];
-        if ( _.some( backends, function( backend ) { return preferredType.supportsBackend( backend ); } ) ) {
+        if ( _.some( renderers, function( renderer ) { return preferredType.supportsRenderer( renderer ); } ) ) {
           return preferredType;
         }
       }

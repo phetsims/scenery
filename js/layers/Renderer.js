@@ -22,29 +22,29 @@ define( function( require ) {
   // cached defaults
   var defaults = {};
   
-  scenery.Backend = {
+  scenery.Renderer = {
     Canvas: {},
     DOM: {},
     SVG: {},
     WebGL: {}
   };
-  var Backend = scenery.Backend;
+  var Renderer = scenery.Renderer;
   
   // set these later so we have self references
-  Backend.Canvas.defaultLayerType = new scenery.LayerType( scenery.CanvasLayer, 'canvas', scenery.Backend.Canvas, {
+  Renderer.Canvas.defaultLayerType = new scenery.LayerType( scenery.CanvasLayer, 'canvas', scenery.Renderer.Canvas, {
     // default arguments here
   } );
-  Backend.DOM.defaultLayerType = new scenery.LayerType( scenery.DOMLayer, 'dom', scenery.Backend.DOM, {
+  Renderer.DOM.defaultLayerType = new scenery.LayerType( scenery.DOMLayer, 'dom', scenery.Renderer.DOM, {
     // default arguments here
   } );
-  Backend.SVG.defaultLayerType = new scenery.LayerType( scenery.SVGLayer, 'svg', scenery.Backend.SVG, {
+  Renderer.SVG.defaultLayerType = new scenery.LayerType( scenery.SVGLayer, 'svg', scenery.Renderer.SVG, {
     // default arguments here
   } );
   
   // add shortcuts for the default layer types
-  scenery.CanvasDefaultLayerType = Backend.Canvas.defaultLayerType;
-  scenery.DOMDefaultLayerType = Backend.DOM.defaultLayerType;
-  scenery.SVGDefaultLayerType = Backend.SVG.defaultLayerType;
+  scenery.CanvasDefaultLayerType = Renderer.Canvas.defaultLayerType;
+  scenery.DOMDefaultLayerType = Renderer.DOM.defaultLayerType;
+  scenery.SVGDefaultLayerType = Renderer.SVG.defaultLayerType;
   
-  return Backend;
+  return Renderer;
 } );

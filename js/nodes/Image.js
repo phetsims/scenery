@@ -18,7 +18,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   var Node = require( 'SCENERY/Node' ); // Image inherits from Node
-  var Backend = require( 'SCENERY/layers/Backend' ); // we need to specify the Backend in the prototype
+  var Renderer = require( 'SCENERY/layers/Renderer' ); // we need to specify the Renderer in the prototype
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
   
   scenery.Image = function( image, options ) {
@@ -66,7 +66,7 @@ define( function( require ) {
   
   Image.prototype._mutatorKeys = [ 'image' ].concat( Node.prototype._mutatorKeys );
   
-  Image.prototype._supportedBackends = [ Backend.Canvas ];
+  Image.prototype._supportedRenderers = [ Renderer.Canvas ];
   
   Object.defineProperty( Image.prototype, 'image', { set: Image.prototype.setImage, get: Image.prototype.getImage } );
   

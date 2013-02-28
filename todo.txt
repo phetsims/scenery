@@ -122,7 +122,7 @@ DOM:
     SVGLayer needs have CSS transform with a scale of 1, apply scale to containing group instead?
     Examine Raphael JS for SVG support and Code.
     Possible SVG Safari issues if bounds aren't whole-pixel?
-    Investigate SVG crispEdges to see whether it would be valuable for other backends
+    Investigate SVG crispEdges to see whether it would be valuable for other renderers
 
 ** WebGL:
     Use display lists?
@@ -138,11 +138,11 @@ Layers / caching:
     *** Clean up LayerState and decide on specifics. Right now we have both pointers and trails? Is that useful for stitching?
     * SVG example bounds (clipping outside SVG rect) handling, since CSS transforms may change things?
     * Instead, have performance hints, like "this moves a lot", "have this be crisp, it's static", etc.
-        backend: 'svg' / 'canvas' / 'webgl' / 'dom' ? or pass actual backend reference?
+        renderer: 'svg' / 'canvas' / 'webgl' / 'dom' ? or pass actual renderer reference?
         movement: 'dynamic' / 'static' ? 'translation', 'affine', ...?
         * might help to save an internal flag that signals whether this node "modifies layers", as above.
-        * or specify as render: { backend: 'svg', ... }, and track rendering settings separately (_render)?
-        Generalized performance flags, so that each node can vary is backend / settings based on desired appearance
+        * or specify as render: { renderer: 'svg', ... }, and track rendering settings separately (_render)?
+        Generalized performance flags, so that each node can vary is renderer / settings based on desired appearance
             quality: 'low' / 'medium' / 'high' ?
             flags like 'moving' or 'stationary' could help for dynamic objects. Scenery would then decide whether to optimize the layers or not
     LayerStrategy:
@@ -164,7 +164,7 @@ Layers / caching:
         "Local":
             Possible to have a single scratch canvas for a Node, even in DAG situations, since RenderState only tracks clipping / opacity (handled already)
     ** WebGL: Caching SVG / Canvas as a texture would allow extremely fast dragging?
-        How to allow children to render as a different backend (canvas?) to then transfer into a texture?
+        How to allow children to render as a different renderer (canvas?) to then transfer into a texture?
     Proof-of-concept for performance and DOM integration
 
 * Event dispatch:
@@ -421,11 +421,11 @@ scene resize listeners?
 Layering API
 ============
 
-backend: 'svg' / 'canvas' / 'webgl' / 'dom'
+renderer: 'svg' / 'canvas' / 'webgl' / 'dom'
 movement: 'dynamic' / 'static' ? 'translation', 'affine', ...?
 * might help to save an internal flag that signals whether this node "modifies layers", as above.
-* or specify as render: { backend: 'svg', ... }, and track rendering settings separately (_render)?
-Generalized performance flags, so that each node can vary is backend / settings based on desired appearance
+* or specify as render: { renderer: 'svg', ... }, and track rendering settings separately (_render)?
+Generalized performance flags, so that each node can vary is renderer / settings based on desired appearance
     quality: 'low' / 'medium' / 'high' ?
     flags like 'moving' or 'stationary' could help for dynamic objects. Scenery would then decide whether to optimize the layers or not
 

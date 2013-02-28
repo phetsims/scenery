@@ -14,10 +14,10 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  scenery.LayerType = function( Constructor, name, backend, args ) {
+  scenery.LayerType = function( Constructor, name, renderer, args ) {
     this.Constructor = Constructor;
     this.name = name;
-    this.backend = backend;
+    this.renderer = renderer;
     this.args = args;
   };
   var LayerType = scenery.LayerType;
@@ -25,14 +25,14 @@ define( function( require ) {
   LayerType.prototype = {
     constructor: LayerType,
     
-    supportsBackend: function( backend ) {
-      return this.backend === backend;
+    supportsRenderer: function( renderer ) {
+      return this.renderer === renderer;
     },
     
     supportsNode: function( node ) {
       var that = this;
-      return _.some( node._supportedBackends, function( backend ) {
-        return that.supportsBackend( backend );
+      return _.some( node._supportedRenderers, function( renderer ) {
+        return that.supportsRenderer( renderer );
       } );
     },
     

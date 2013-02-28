@@ -148,7 +148,7 @@
     }, message, 128 ); // threshold of 128 due to antialiasing differences between fill and stroke... :(
   }
   
-  function compareShapeBackends( shape, message ) {
+  function compareShapeRenderers( shape, message ) {
     
   }
   

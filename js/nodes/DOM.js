@@ -16,7 +16,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   var Node = require( 'SCENERY/Node' ); // DOM inherits from Node
-  var Backend = require( 'SCENERY/layers/Backend' );
+  var Renderer = require( 'SCENERY/layers/Renderer' );
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
   
   scenery.DOM = function( element, options ) {
@@ -105,7 +105,7 @@ define( function( require ) {
   
   DOM.prototype._mutatorKeys = [ 'element' ].concat( Node.prototype._mutatorKeys );
   
-  DOM.prototype._supportedBackends = [ Backend.DOM ];
+  DOM.prototype._supportedRenderers = [ Renderer.DOM ];
   
   Object.defineProperty( DOM.prototype, 'element', { set: DOM.prototype.setElement, get: DOM.prototype.getElement } );
   
