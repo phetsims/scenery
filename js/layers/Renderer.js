@@ -46,5 +46,11 @@ define( function( require ) {
   scenery.DOMDefaultLayerType = Renderer.DOM.defaultLayerType;
   scenery.SVGDefaultLayerType = Renderer.SVG.defaultLayerType;
   
+  // and shortcuts so we can index in with shorthands like 'svg', 'dom', etc.
+  Renderer.canvas = Renderer.Canvas;
+  Renderer.dom = Renderer.DOM;
+  Renderer.svg = Renderer.SVG;
+  Renderer.webgl = Renderer.WebGL;
+  
   return Renderer;
 } );
