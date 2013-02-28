@@ -50,15 +50,13 @@
     equal( scene.layerLookup( b.getUniqueTrail() ), scene.layers[1] );
     equal( scene.layerLookup( c.getUniqueTrail() ), scene.layers[1] );
     
-    // b.rendererOptions = {
-    //   someUniqueThingToThisLayer: 5
-    // };
+    b.rendererOptions = {
+      someUniqueThingToThisLayer: 5
+    };
     
-    // equal( scene.layers.length, 3, 'should be canvas, svg (with options), svg' );
-    // equal( scene.layerLookup( a.getUniqueTrail() ), scene.layers[0] );
-    // equal( scene.layerLookup( b.getUniqueTrail() ), scene.layers[1] );
-    // equal( scene.layerLookup( c.getUniqueTrail() ), scene.layers[2] );
-    
-    // window.debugScene = scene;
+    equal( scene.layers.length, 3, 'should be canvas, svg (with options), svg' );
+    equal( scene.layerLookup( a.getUniqueTrail() ), scene.layers[0] );
+    equal( scene.layerLookup( b.getUniqueTrail() ), scene.layers[1] );
+    equal( scene.layerLookup( c.getUniqueTrail() ), scene.layers[2] );
   } );
 })();

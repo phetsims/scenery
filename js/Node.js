@@ -839,6 +839,8 @@ define( function( require ) {
       if ( newRenderer !== this._renderer ) {
         assert && assert( !this.hasSelf() || _.contains( this._supportedRenderers, newRenderer ), 'renderer ' + newRenderer + ' not supported by ' + this );
         this._renderer = newRenderer;
+        
+        this.updateLayerType();
         this.markLayerRefreshNeeded();
       }
     },
@@ -854,6 +856,8 @@ define( function( require ) {
     setRendererOptions: function( options ) {
       // TODO: consider checking options based on the specified 'renderer'?
       this._rendererOptions = options;
+      
+      this.updateLayerType();
       this.markLayerRefreshNeeded();
     },
     
