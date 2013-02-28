@@ -411,3 +411,25 @@ var node = scenery.SVG( '<svg>....</svg>' | $( SVGEelement ) );
 node.x = (etc.)
 
 scene resize listeners?
+
+
+Layering API
+============
+
+backend: 'svg' / 'canvas' / 'webgl' / 'dom'
+movement: 'dynamic' / 'static' ? 'translation', 'affine', ...?
+* might help to save an internal flag that signals whether this node "modifies layers", as above.
+* or specify as render: { backend: 'svg', ... }, and track rendering settings separately (_render)?
+Generalized performance flags, so that each node can vary is backend / settings based on desired appearance
+    quality: 'low' / 'medium' / 'high' ?
+    flags like 'moving' or 'stationary' could help for dynamic objects. Scenery would then decide whether to optimize the layers or not
+
+SR: possibly have separate files for DOMImage, SVGImage, etc.
+    Advantages:
+        SVGImage.doRandomSVGThingToImage (that only works for SVG)
+            Or maybe we just have settings for a particular type?
+        Decoupled
+        Clear what combinations are supported
+    Problem:
+        At lot of shared code?
+            Factor out
