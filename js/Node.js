@@ -67,6 +67,7 @@ define( function( require ) {
     
     // what type of renderer should be forced for this node.
     this._renderer = null;
+    this._rendererOptions = null;
     
     if ( options ) {
       this.mutate( options );
@@ -818,6 +819,16 @@ define( function( require ) {
       return this._renderer;
     },
     
+    setRendererOptions: function( options ) {
+      // TODO: consider checking options based on the specified 'renderer'?
+      this._rendererOptions = options;
+      this.markLayerRefreshNeeded();
+    },
+    
+    getRendererOptions: function() {
+      return this._rendererOptions;
+    },
+    
     // returns a unique trail (if it exists) where each node in the ancestor chain has 0 or 1 parents
     getUniqueTrail: function() {
       var trail = new scenery.Trail();
@@ -860,6 +871,9 @@ define( function( require ) {
     
     set renderer( value ) { this.setRenderer( value ); },
     get renderer() { return this.getRenderer(); },
+    
+    set rendererOptions( value ) { this.setRendererOptions( value ); },
+    get rendererOptions() { return this.getRendererOptions(); },
     
     set cursor( value ) { this.setCursor( value ); },
     get cursor() { return this.isCursor(); },
@@ -931,7 +945,7 @@ define( function( require ) {
    * TODO: move fill / stroke setting to mixins
    */
   Node.prototype._mutatorKeys = [ 'cursor', 'visible', 'translation', 'x', 'y', 'rotation', 'scale',
-                                  'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer' ];
+                                  'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions' ];
   
   Node.prototype._supportedRenderers = [];
   
