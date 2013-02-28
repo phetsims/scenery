@@ -37,7 +37,7 @@ define( function( require ) {
   Backend.DOM.defaultLayerType = new scenery.LayerType( scenery.DOMLayer, 'dom', scenery.Backend.DOM, {
     // default arguments here
   } );
-  Backend.SVG.defaultLayerType = new scenery.LayerType( scenery.SVGLayer, 'canvas', scenery.Backend.SVG, {
+  Backend.SVG.defaultLayerType = new scenery.LayerType( scenery.SVGLayer, 'svg', scenery.Backend.SVG, {
     // default arguments here
   } );
   
