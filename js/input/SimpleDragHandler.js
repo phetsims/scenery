@@ -18,10 +18,10 @@ define( function( require ) {
   /*
    * Allowed options: {
    *    allowTouchSnag: false // allow touch swipes across an object to pick it up,
-   *    start: null           // if non-null, called when a drag is started. start( finger, trail, event )
+   *    start: null           // if non-null, called when a drag is started. start( event, trail )
    *    drag: null            // if non-null, called when the user moves something with a drag (not a start or end event).
-   *                                                                         drag( finger, trail, event )
-   *    end: null             // if non-null, called when a drag is ended.   end( finger, trail, event )
+   *                                                                         drag( event, trail )
+   *    end: null             // if non-null, called when a drag is ended.   end( event, trail )
    *    translate:            // if this exists, translate( { delta: _, oldPosition: _, position: _ } ) will be called instead of directly translating the node
    * }
    */
@@ -102,7 +102,7 @@ define( function( require ) {
         if ( handler.options.drag ) {
           // TODO: consider adding in a delta to the listener
           // TODO: add the position in to the listener
-          handler.options.drag( handler.finger, handler.trail, event ); // new position (old position?) delta
+          handler.options.drag( event, handler.trail ); // new position (old position?) delta
         }
       }
     };
@@ -129,7 +129,7 @@ define( function( require ) {
       this.mouseButton = event.domEvent.button; // should be undefined for touch events
       
       if ( this.options.start ) {
-        this.options.start( event.finger, this.trail, event );
+        this.options.start( event, this.trail );
       }
     },
     
@@ -140,7 +140,7 @@ define( function( require ) {
       this.dragging = false;
       
       if ( this.options.end ) {
-        this.options.end( event );
+        this.options.end( event, this.trail );
       }
     },
     
