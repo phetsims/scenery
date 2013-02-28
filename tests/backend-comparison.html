@@ -186,6 +186,17 @@
             left: 1.5
           } ) );
         }
+      },{
+        name: 'Circles',
+        width: 64,
+        height: 64,
+        draw: function( scene ) {
+          scene.addChild( new scenery.Path( {
+            shape: scenery.Shape.circle( 32, 25, 20 ),
+            fill: '#ff0000',
+            stroke: '#000000'
+          } ) );
+        }
       }
     ];
     
