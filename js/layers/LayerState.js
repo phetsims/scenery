@@ -1,5 +1,13 @@
 // Copyright 2002-2012, University of Colorado
 
+/**
+ * A layer state is used to construct layer information (and later, layers), and is a state machine
+ * that layer strategies from each node modify. Iterating through all of the nodes in a depth-first
+ * manner will modify the LayerState so that layer information can be retrieved.
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
 define( function( require ) {
   "use strict";
   

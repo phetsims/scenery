@@ -1,5 +1,11 @@
 // Copyright 2002-2012, University of Colorado
 
+/**
+ * General utility functions for Scenery
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
 define( function( require ) {
   "use strict";
   

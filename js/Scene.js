@@ -1,7 +1,9 @@
 // Copyright 2002-2012, University of Colorado
 
 /**
- * Main scene
+ * Main scene, that is also a Node.
+ *
+ * TODO: documentation!
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */

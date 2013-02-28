@@ -1,11 +1,8 @@
 // Copyright 2002-2012, University of Colorado
 
 /**
- * A node for the Scenery scene graph. Supports only tree-style graphs at the moment.
- * Handles multiple layers with assorted types (canvas, svg, DOM, etc.), and bounds
- * computation
- *
- * TODO: investigate handling DAGs (directed acyclic graphs)
+ * A node for the Scenery scene graph. Supports general directed acyclic graphics (DAGs).
+ * Handles multiple layers with assorted types (Canvas 2D, SVG, DOM, WebGL, etc.).
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */

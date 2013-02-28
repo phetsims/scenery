@@ -1,4 +1,12 @@
+// Copyright 2002-2012, University of Colorado
 
+/**
+ * Configuration file for development purposes, NOT for production deployments.
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+// if has.js is included, set assertion flags to true (so we can catch errors during development)
 if ( window.has ) {
   window.has.add( 'assert.scenery', function( global, document, anElement ) {
     return true;
@@ -8,9 +16,11 @@ if ( window.has ) {
   } );
 }
 
+// flag is set so we can ensure that the config has executed. This prevents various Require.js dynamic loading timeouts and script errors
 window.loadedSceneryConfig = true;
 
 require.config( {
+  // depends on all of Scenery and Dot
   deps: [ 'main', 'DOT/main' ],
   
   paths: {

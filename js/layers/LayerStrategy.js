@@ -1,5 +1,16 @@
 // Copyright 2002-2012, University of Colorado
 
+/**
+ * Controls the underlying layer behavior around a node. The node's LayerStrategy's enter() and exit() will be
+ * called in a depth-first order during the layer building process, and will modify a LayerState to signal any
+ * layer-specific signals.
+ *
+ * This generally ensures that a layer containing the proper backend and settings to support its associated node
+ * will be created.
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
 define( function( require ) {
   "use strict";
   

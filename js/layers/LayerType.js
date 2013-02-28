@@ -1,5 +1,12 @@
 // Copyright 2002-2012, University of Colorado
 
+/**
+ * A description of layer settings and the ability to create a layer with those settings.
+ * Used internally for the layer building process.
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
 define( function( require ) {
   "use strict";
   

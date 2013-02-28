@@ -1,4 +1,12 @@
+// Copyright 2002-2012, University of Colorado
 
+/**
+ * Configuration file for production deployment purposes, NOT for development (it currently excludes most assertions).
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+// if has.js is included, set assertion flags to false, for running speed.
 if ( window.has ) {
   window.has.add( 'assert.scenery', function( global, document, anElement ) {
     return false;
@@ -9,6 +17,7 @@ if ( window.has ) {
 }
 
 require.config( {
+  // depends on all of Scenery and Dot
   deps: [ 'main', 'DOT/main' ],
   
   paths: {

@@ -1,10 +1,12 @@
 // Copyright 2002-2012, University of Colorado
 
 /*
- * Conventionally set flags on a finger: TODO: add this state tracking to finger for convenience
- * dragging - whether the finger is dragging something
+ * A finger is an abstraction that includes a mouse and touch points (and possibly keys).
  *
+ * TODO: add state tracking (dragging/panning/etc.) to finger for convenience
  * TODO: consider an 'active' flag?
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
 define( function( require ) {
