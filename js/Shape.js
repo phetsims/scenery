@@ -470,8 +470,12 @@ define( function( require ) {
     } ), true );
   };
   
-  // supports both circle( centerX, centerY, radius ) and circle( center, radius )
+  // supports both circle( centerX, centerY, radius ), circle( center, radius ), and circle( radius ) with the center default to 0,0
   Shape.circle = function( centerX, centerY, radius ) {
+    if ( centerY === undefined ) {
+      // circle( radius ), center = 0,0
+      return new Shape().circle( 0, 0, centerX );
+    }
     return new Shape().circle( centerX, centerY, radius ).close();
   };
   
