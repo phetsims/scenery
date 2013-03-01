@@ -1260,6 +1260,10 @@ define( function( require ) {
       return InvalidZeroLengthSegment;
     }
     
+    if ( radiusX < radiusY ) {
+      throw new Error( 'Not verified to work if radiusX < radiusY' );
+    }
+    
     // constraints shared with Segment.Arc
     assert && assert( !( ( !anticlockwise && endAngle - startAngle <= -Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle <= -Math.PI * 2 ) ), 'Not handling elliptical arcs with start/end angles that show differences in-between browser handling' );
     assert && assert( !( ( !anticlockwise && endAngle - startAngle > Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle > Math.PI * 2 ) ), 'Not handling elliptical arcs with start/end angles that show differences in-between browser handling' );
