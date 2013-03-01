@@ -887,6 +887,14 @@ define( function( require ) {
       return this._layerSplitAfter;
     },
     
+    setLayerSplit: function( split ) {
+      if ( split !== this._layerSplitBefore || split !== this._layerSplitAfter ) {
+        this._layerSplitBefore = split;
+        this._layerSplitAfter = split;
+        this.markLayerRefreshNeeded();
+      }
+    },
+    
     // returns a unique trail (if it exists) where each node in the ancestor chain has 0 or 1 parents
     getUniqueTrail: function() {
       var trail = new scenery.Trail();
@@ -926,6 +934,9 @@ define( function( require ) {
     /*---------------------------------------------------------------------------*
     * ES5 get/set
     *----------------------------------------------------------------------------*/
+    
+    set layerSplit( value ) { this.setLayerSplit( value ); },
+    get layerSplit() { throw new Error( 'You can\'t get a layerSplit property, since it modifies two separate properties' ); },
     
     set layerSplitBefore( value ) { this.setLayerSplitBefore( value ); },
     get layerSplitBefore() { return this.isLayerSplitBefore(); },
@@ -1014,7 +1025,7 @@ define( function( require ) {
   
   Node.prototype._supportedRenderers = [];
   
-  Node.prototype.layerStrategy = LayerStrategy.DefaultLayerStrategy;
+  Node.prototype.layerStrategy = LayerStrategy;
   
   return Node;
 } );

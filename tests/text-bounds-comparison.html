@@ -72,11 +72,9 @@
     } ) );
     
     // TODO: improve how layer strategies are used
-    var svgNode = new scenery.Node();
-    svgNode.layerStrategy = scenery.LayerTypeStrategy( svgNode.layerStrategy, scenery.SVGDefaultLayerType );
+    var svgNode = new scenery.Node( { renderer: 'svg' } );
     svgNode.addChild( textNode );
-    var canvasNode = new scenery.Node();
-    canvasNode.layerStrategy = scenery.LayerTypeStrategy( canvasNode.layerStrategy, scenery.CanvasDefaultLayerType );
+    var canvasNode = new scenery.Node( { renderer: 'canvas' } );
     canvasNode.addChild( textNode );
     
     container.addChild( svgNode );

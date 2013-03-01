@@ -360,7 +360,7 @@
       shape: scenery.Shape.rectangle( canvasWidth / 4, canvasHeight / 4, canvasWidth / 2, canvasHeight / 2 ),
       fill: '#00ff00'
     } );
-    middleRect.layerStrategy = scenery.SeparateLayerStrategy( middleRect.layerStrategy );
+    middleRect.layerSplit = true;
     
     scene.addChild( middleRect );
     
@@ -471,7 +471,7 @@
     
     var snapshotA = snapshot( scene );
     
-    middleRect.layerStrategy = scenery.SeparateLayerStrategy( middleRect.layerStrategy );
+    middleRect.layerSplit = true;
     scene.updateScene();
     
     var snapshotB = snapshot( scene );

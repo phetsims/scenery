@@ -29,7 +29,8 @@
       cssTransform: true,
       baseNode: path
     } );
-    path.layerStrategy = scenery.SeparateLayerStrategy( scenery.LayerTypeStrategy( path.layerStrategy, layerType ) );
+    // TODO: make the splits implicit!
+    path.layerSplit = true;
     container.addChild( path );
     
     scene.updateScene();

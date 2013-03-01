@@ -22,9 +22,9 @@ define( function( require ) {
    * If the node specifies a renderer, we will always push a preferred type. That type will be fresh (if rendererOptions are specified), otherwise
    * the top matching preferred type for that renderer will be used. This allows us to always pop in the exit().
    *
-   * Specified as such, since there is no needed shared state (we can have node.layerStrategy = scenery.DefaultLayerStrategy for many nodes)
+   * Specified as such, since there is no needed shared state (we can have node.layerStrategy = scenery.LayerStrategy for many nodes)
    */
-  scenery.DefaultLayerStrategy = {
+  scenery.LayerStrategy = {
     enter: function( trail, layerState ) {
       var node = trail.lastNode();
       var preferredLayerType;
@@ -103,60 +103,7 @@ define( function( require ) {
       }
     }
   };
-  var DefaultLayerStrategy = scenery.DefaultLayerStrategy;
+  var LayerStrategy = scenery.LayerStrategy;
   
-  scenery.SeparateLayerStrategy = function( strategy ) {
-    return {
-      strategy: strategy,
-      
-      enter: function( trail, layerState ) {
-        // trigger a switch to what we already have
-        layerState.switchToType( trail, layerState.getCurrentLayerType() );
-        
-        // execute the decorated strategy afterwards
-        strategy.enter( trail, layerState );
-      },
-      
-      exit: function( trail, layerState ) {
-        // execute the decorated strategy afterwards
-        strategy.exit( trail, layerState );
-        
-        // trigger a switch to what we already have
-        layerState.switchToType( trail, layerState.getCurrentLayerType() );
-      }
-    };
-  };
-  var SeparateLayerStrategy = scenery.SeparateLayerStrategy;
-  
-  scenery.LayerTypeStrategy = function( strategy, preferredLayerType ) {
-    return {
-      strategy: strategy,
-      
-      enter: function( trail, layerState ) {
-        // push the preferred layer type
-        layerState.pushPreferredLayerType( preferredLayerType );
-        if ( layerState.getCurrentLayerType() !== preferredLayerType ) {
-          layerState.switchToType( trail, preferredLayerType );
-        }
-        
-        // execute the decorated strategy afterwards
-        strategy.enter( trail, layerState );
-      },
-      
-      exit: function( trail, layerState ) {
-        // execute the decorated strategy afterwards
-        strategy.exit( trail, layerState );
-        
-        // pop the preferred layer type
-        layerState.popPreferredLayerType();
-      }
-    };
-  };
-  var LayerTypeStrategy = scenery.LayerTypeStrategy;
-  
-  return {
-    DefaultLayerStrategy: DefaultLayerStrategy,
-    SeparateLayerStrategy: SeparateLayerStrategy,
-    LayerTypeStrategy: LayerTypeStrategy
-  };
+  return LayerStrategy;
 } );

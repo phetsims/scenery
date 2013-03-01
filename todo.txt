@@ -3,6 +3,7 @@ SR's list:
     Arrow shape
 
 Bugs:
+    Multi-touch stress test is flickery!
     FAMB IE9 mouse handling - remember to check out Scenery copy
     Check Firefox/Safari on Mac event handling on multiple touch events
     Text direction 'rtl' bounds and display difference between canvas / SVG
@@ -210,6 +211,7 @@ Node:
             SVG: how to handle?
                 group opacity ('opacity' attribute)
         Pickable flag - check Piccolo behavior. consider flag for whether invisible nodes get picked or not (probably yes, for hit regions!)
+    Ability to specify children in arg, i.e. setChildren, that will fail if there are any at all, so we can do Node( { children: ... } );
     Support setting some settings in the mutator with other objects. e.g.:
         new Node( { scale: { x: 1, y: 2 } } );
     Since cursor might support data URLs, we can have custom cursors?

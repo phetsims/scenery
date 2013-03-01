@@ -96,15 +96,11 @@
         allowTouchSnag: true,
         
         start: function( event ) {
-          // TODO: this should fire a layer refresh
-          node.layerStrategy = scenery.SeparateLayerStrategy( node.layerStrategy );
-          node.markLayerRefreshNeeded();
+          node.layerSplit = true;
         },
         
         end: function( event ) {
-          // TODO: this should fire a layer refresh
-          node.layerStrategy = scenery.DefaultLayerStrategy;
-          node.markLayerRefreshNeeded();
+          node.layerSplit = false;
         }
       } ) );
     })();
