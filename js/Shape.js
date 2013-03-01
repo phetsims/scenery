@@ -1087,7 +1087,7 @@ define( function( require ) {
   };
   
   Segment.Arc = function( center, radius, startAngle, endAngle, anticlockwise ) {
-    if ( radius <= 0 ) {
+    if ( radius <= 0 || startAngle === endAngle ) {
       return InvalidZeroLengthSegment;
     }
     // constraints
