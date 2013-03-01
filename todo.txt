@@ -212,6 +212,7 @@ Node:
     Ability to specify children in arg, i.e. setChildren, that will fail if there are any at all, so we can do Node( { children: ... } );
     Support setting some settings in the mutator with other objects. e.g.:
         new Node( { scale: { x: 1, y: 2 } } );
+    Support for setting listeners in the mutator?
     Since cursor might support data URLs, we can have custom cursors?
     Batching of insertions / removals, so that we could consider completely changing children, removing all children, etc. at the same time
         Possibly consider batching these together until updateScene?

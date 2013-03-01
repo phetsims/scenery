@@ -71,14 +71,16 @@
     x: scene.sceneBounds.width() * 2 / 3,
     y: scene.sceneBounds.centerY(),
     scale: 0.8 / 0.707,
-    rotation: Math.PI / 4
+    rotation: Math.PI / 4,
+    layerSplit: true
   } );
   scene.addChild( rotatingContainer );
   
   var miniContainer = new scenery.Node( {
     x: scene.sceneBounds.width() / 3,
     y: scene.sceneBounds.centerY(),
-    scale: 0.4 / 0.707
+    scale: 0.4 / 0.707,
+    layerSplit: true
   } );
   scene.addChild( miniContainer );
   
@@ -132,6 +134,77 @@
       } ) );
     })();
   }
+  
+  var options = [
+    {
+      label: 'Canvas Regular',
+      applySettings: function( node ) {
+        node.renderer = 'canvas';
+        node.rendererOptions = {
+          fullResolution: false
+        };
+      }
+    },{
+      label: 'Canvas Full',
+      applySettings: function( node ) {
+        node.renderer = 'canvas';
+        node.rendererOptions = {
+          fullResolution: true
+        };
+      }
+    },{
+      label: 'SVG Regular',
+      applySettings: function( node ) {
+        node.renderer = 'svg';
+        node.rendererOptions = {};
+      }
+    },{
+      label: 'SVG CSS',
+      applySettings: function( node ) {
+        node.renderer = 'svg';
+        node.rendererOptions = {
+          cssTransform: true
+        };
+      }
+    },
+  ];
+  
+  var x = 10;
+  var y = 10;
+  var buttons = [];
+  for ( var i = 0; i < options.length; i++ ) {
+    (function(){
+      var option = options[i];
+      var buttonLabel = new scenery.Text( option.label, {
+        left: x + 10,
+        top: y + 10,
+        fontSize: 20
+      } );
+      var button = new scenery.Path( {
+        shape: scenery.Shape.bounds( buttonLabel.getBounds().roundedOut().dilated( 10.5 ) ),
+        fill: '#dddddd',
+        stroke: '#000000',
+        cursor: 'pointer'
+      } );
+      buttons.push( button );
+      y = button.bottom + 10;
+      button.addChild( buttonLabel );
+      scene.addChild( button );
+      
+      button.addInputListener( {
+        down: function( event ) {
+          _.each( buttons, function( button ) {
+            button.fill = '#dddddd';
+          } );
+          button.fill = '#bbbbbb';
+          option.applySettings( miniContainer );
+          option.applySettings( rotatingContainer );
+          _.each( buttons, option.applySettings );
+        }
+      } );
+    })();
+  }
+  
   
   
   /*---------------------------------------------------------------------------*
