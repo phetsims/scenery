@@ -25,12 +25,20 @@ define( function( require ) {
   require( 'SCENERY/RenderState' );
   require( 'SCENERY/Shape' );
   require( 'SCENERY/Trail' );
+  require( 'SCENERY/util/Util' );
   
   // assumes main is wrapped with JQuery
+  /*
+   *
+   */
   scenery.CanvasLayer = function( args, entry ) {
     Layer.call( this, args, entry );
     
+    // TODO: deprecate Scene's backing scale, and handle this on a layer-by-layer option?
     this.backingScale = args.scene.backingScale;
+    if ( args.fullResolution !== undefined ) {
+      this.backingScale = args.fullResolution ? scenery.Util.backingScale( document.createElement( 'canvas' ).getContext( '2d' ) ) : 1;
+    }
     
     var logicalWidth = this.$main.width();
     var logicalHeight = this.$main.height();
