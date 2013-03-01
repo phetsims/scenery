@@ -353,14 +353,6 @@ Property / Notifiers:
             Bacon.js?
     Possibly use jQuery events?
 
-Math:
-    Output SVGMatrix easily
-    Separate out into separate repo
-        For submodule: git submodule foreach --recursive 'git pull origin master && git checkout master'
-            with "git push --recurse-submodules=on-demand" to commit?
-    Add mutable style, and possibly a flag to see whether something has been modified?
-    Investigate math library alternatives, like Numeric JS
-
 Color:
     Should use JS style color definitions instead
 
