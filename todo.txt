@@ -3,6 +3,7 @@ SR's list:
     Arrow shape
 
 Bugs:
+    Nexus 7 hidef scaling
     CSS transform bounds!
     Multi-touch stress test is flickery!
     FAMB IE9 mouse handling - remember to check out Scenery copy
