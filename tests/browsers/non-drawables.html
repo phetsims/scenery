@@ -12,7 +12,7 @@
 </head>
 <body>
 
-<canvas id="canvas" width="640" height="720"></canvas>
+<canvas id="canvas" width="768" height="848"></canvas>
 
 <script type="text/javascript">  
 
@@ -113,34 +113,47 @@
   context.stroke();
   
   /*---------------------------------------------------------------------------*
+  * Arc with same start/end angle
+  *----------------------------------------------------------------------------*/
+  
+  // exactly 0
+  context.beginPath();
+  context.moveTo( 0, 640 );
+  context.lineTo( 640, 640 );
+  context.arc( 320, 320, 320 * Math.sqrt( 2 ), Math.PI / 4, Math.PI / 4, false );
+  context.lineTo( 640, 0 );
+  context.strokeStyle = zeroColor;
+  context.stroke();
+  
+  /*---------------------------------------------------------------------------*
   * Individual (non-joined) zero-length segments that hopefully don't show anything. 
   *----------------------------------------------------------------------------*/
   
   // arc
   context.beginPath();
-  context.moveTo( 128, 640 );
-  context.arc( 128, 640, 0, Math.PI, -Math.PI, true );
+  context.moveTo( 128, 768 );
+  context.arc( 128, 768, 0, Math.PI, -Math.PI, true );
   context.strokeStyle = zeroColor;
   context.stroke();
   
   // lineTo
   context.beginPath();
-  context.moveTo( 256, 640 );
-  context.lineTo( 256, 640 );
+  context.moveTo( 256, 768 );
+  context.lineTo( 256, 768 );
   context.strokeStyle = zeroColor;
   context.stroke();
   
   // quadratic
   context.beginPath();
-  context.moveTo( 384, 640 );
-  context.quadraticCurveTo( 384, 640, 384, 640 );
+  context.moveTo( 384, 768 );
+  context.quadraticCurveTo( 384, 768, 384, 768 );
   context.strokeStyle = zeroColor;
   context.stroke();
   
   // cubic
   context.beginPath();
-  context.moveTo( 384, 640 );
-  context.bezierCurveTo( 384, 640, 384, 640, 384, 640 );
+  context.moveTo( 384, 768 );
+  context.bezierCurveTo( 384, 768, 384, 768, 384, 768 );
   context.strokeStyle = zeroColor;
   context.stroke();
   
