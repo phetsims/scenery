@@ -865,6 +865,10 @@ define( function( require ) {
       return this._rendererOptions;
     },
     
+    hasRendererOptions: function() {
+      return !!this._rendererOptions;
+    },
+    
     setLayerSplitBefore: function( split ) {
       if ( this._layerSplitBefore !== split ) {
         this._layerSplitBefore = split;

@@ -136,11 +136,9 @@ Layers / caching:
         SVG: ref-count groups by children, so that we can remove unused groups
     *** Clean up LayerState and decide on specifics. Right now we have both pointers and trails? Is that useful for stitching?
     * SVG example bounds (clipping outside SVG rect) handling, since CSS transforms may change things?
-    * Instead, have performance hints, like "this moves a lot", "have this be crisp, it's static", etc.
-        renderer: 'svg' / 'canvas' / 'webgl' / 'dom' ? or pass actual renderer reference?
+    Performance hints, like "this moves a lot", "have this be crisp, it's static", etc.
         movement: 'dynamic' / 'static' ? 'translation', 'affine', ...?
         * might help to save an internal flag that signals whether this node "modifies layers", as above.
-        * or specify as render: { renderer: 'svg', ... }, and track rendering settings separately (_render)?
         Generalized performance flags, so that each node can vary is renderer / settings based on desired appearance
             quality: 'low' / 'medium' / 'high' ?
             flags like 'moving' or 'stationary' could help for dynamic objects. Scenery would then decide whether to optimize the layers or not

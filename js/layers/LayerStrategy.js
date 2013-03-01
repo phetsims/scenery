@@ -66,7 +66,7 @@ define( function( require ) {
         }
       }
       
-      if ( node.isLayerSplitBefore() ) {
+      if ( node.isLayerSplitBefore() || this.hasSplitFlags( node ) ) {
         layerState.switchToType( trail, layerState.getCurrentLayerType() );
       }
       
@@ -98,9 +98,21 @@ define( function( require ) {
         // }
       }
       
-      if ( node.isLayerSplitAfter() ) {
+      if ( node.isLayerSplitAfter() || this.hasSplitFlags( node ) ) {
         layerState.switchToType( trail, layerState.getCurrentLayerType() );
       }
+    },
+    
+    // whether splitting before and after the node is required
+    hasSplitFlags: function( node ) {
+      // currently, only enforce splitting if we are using CSS transforms
+      var rendererOptions = node.getRendererOptions();
+      return node.hasRenderer() && rendererOptions && (
+        rendererOptions.cssTranslation ||
+        rendererOptions.cssRotation ||
+        rendererOptions.cssScale ||
+        rendererOptions.cssTransform
+      );
     }
   };
   var LayerStrategy = scenery.LayerStrategy;
