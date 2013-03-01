@@ -811,6 +811,12 @@ define( function( require ) {
     
     updateLayerType: function() {
       if ( this._renderer && this._rendererOptions ) {
+        // TODO: factor this check out! Make RendererOptions its own class?
+        // TODO: FIXME: support undoing this!
+        // ensure that if we are passing a CSS transform, we pass this node as the baseNode
+        if ( this._rendererOptions.cssTransform || this._rendererOptions.cssTranslation || this._rendererOptions.cssRotation || this._rendererOptions.cssScale ) {
+          this._rendererOptions.baseNode = this;
+        }
         // if we set renderer and rendererOptions, only then do we want to trigger a specific layer type
         this._rendererLayerType = this._renderer.createLayerType( this._rendererOptions );
       } else {
