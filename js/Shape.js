@@ -158,6 +158,22 @@ define( function( require ) {
       }
       return this;
     },
+
+    //Create a round rectangle. All arguments are number.
+    //Rounding is currently using quadraticCurveTo.  Please note, future versions may use arcTo
+    //TODO: rewrite with arcTo?
+    roundRect: function( x, y, width, height, arcw, arch ) {
+      this.moveTo( x + arcw, y ).
+          lineTo( x + width - arcw, y ).
+          quadraticCurveTo( x + width, y, x + width, y + arch ).
+          lineTo( x + width, y + height - arch ).
+          quadraticCurveTo( x + width, y + height, x + width - arcw, y + height ).
+          lineTo( x + arcw, y + height ).
+          quadraticCurveTo( x, y + height, x, y + height - arch ).
+          lineTo( x, y + arch ).
+          quadraticCurveTo( x, y, x + arcw, y );
+      return this;
+    },
     
     close: function() {
       this.addPiece( new Piece.Close() );
@@ -446,6 +462,14 @@ define( function( require ) {
     return new Shape().rect( x, y, width, height );
   };
   Shape.rect = Shape.rectangle;
+
+  //Create a round rectangle. All arguments are number.
+  //Rounding is currently using quadraticCurveTo.  Please note, future versions may use arcTo
+  //TODO: rewrite with arcTo?
+  Shape.roundRect = function( x, y, width, height, arcw, arch ) {
+    return new Shape().roundRect( x, y, width, height, arcw, arch );
+  };
+  Shape.roundRectangle = Shape.roundRect;
   
   Shape.bounds = function( bounds ) {
     return new Shape().rect( p( bounds.minX, bounds.minY ), p( bounds.maxX, bounds.maxY ) );
