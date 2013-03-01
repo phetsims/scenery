@@ -1253,6 +1253,67 @@ define( function( require ) {
     }
   };
   
+  // TODO: notes at http://www.w3.org/TR/SVG/implnote.html#PathElementImplementationNotes
+  // Canvas notes at http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-ellipse
+  Segment.EllipticalArc = function( center, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise ) {
+    if ( radiusX === 0 || radiusY === 0 || startAngle === endAngle ) {
+      return InvalidZeroLengthSegment;
+    }
+    
+    // constraints shared with Segment.Arc
+    assert && assert( !( ( !anticlockwise && endAngle - startAngle <= -Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle <= -Math.PI * 2 ) ), 'Not handling elliptical arcs with start/end angles that show differences in-between browser handling' );
+    assert && assert( !( ( !anticlockwise && endAngle - startAngle > Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle > Math.PI * 2 ) ), 'Not handling elliptical arcs with start/end angles that show differences in-between browser handling' );
+    
+    var isFullPerimeter = ( !anticlockwise && endAngle - startAngle >= Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle >= Math.PI * 2 );
+    
+    this.center = center;
+    this.radiusX = radiusX;
+    this.radiusY = radiusY;
+    this.rotation = rotation;
+    this.startAngle = startAngle;
+    this.endAngle = endAngle;
+    this.anticlockwise = anticlockwise;
+    
+    // TODO: start/end
+    // TODO: tangents
+    // TODO: bounds
+    throw new Error( 'Segment.EllipticalArc constructor unimplemented' );
+  };
+  Segment.EllipticalArc.prototype = {
+    constructor: Segment.EllipticalArc,
+    
+    containsAngle: function( angle ) {
+      throw new Error( 'Segment.EllipticalArc.containsAngle unimplemented' );
+    },
+    
+    toPieces: function() {
+      throw new Error( 'Segment.EllipticalArc.toPieces unimplemented' );
+    },
+    
+    getSVGPathFragment: function() {
+      // see http://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands for more info
+      // rx ry x-axis-rotation large-arc-flag sweep-flag x y
+      throw new Error( 'Segment.EllipticalArc.getSVGPathFragment unimplemented' );
+    },
+    
+    strokeLeft: function( lineWidth ) {
+      throw new Error( 'Segment.EllipticalArc.strokeLeft unimplemented' );
+    },
+    
+    strokeRight: function( lineWidth ) {
+      throw new Error( 'Segment.EllipticalArc.strokeRight unimplemented' );
+    },
+    
+    intersectsBounds: function( bounds ) {
+      throw new Error( 'Segment.EllipticalArc.intersectsBounds unimplemented' );
+    },
+    
+    // returns the resultant winding number of this ray intersecting this segment.
+    windingIntersection: function( ray ) {
+      throw new Error( 'Segment.EllipticalArc.windingIntersection unimplemented' );
+    }
+  };
+  
   // TODO: performance / cleanliness to have these as methods instead?
   function segmentStartLeft( segment, lineWidth ) {
     assert && assert( lineWidth !== undefined );
