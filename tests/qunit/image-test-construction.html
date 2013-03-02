@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+
+  <title>Image Test Construction</title>
+  
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../../contrib/jquery-1.8.3.min.js"></script>
+  <script src="../../contrib/lodash.min-1.0.0-rc.3.js"></script>
+  <script src="../../contrib/has.js"></script>
+  <script src="js/test-utils.js"></script>
+  
+  <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
+  <script data-main="../../js/config.js" src="../../contrib/require-2.1.4.js"></script>
+  <!-- <script src="../dist/standalone/scenery.js"></script> -->
+  <!-- <script src="../dist/standalone/scenery.min.js"></script> -->
+</head>
+
+<body>
+  
+  <script>
+  
+  require( [ 'main', '../common/dot/js/main' ], function( scenery, dot ) {
+    var width = 64;
+    var height = 64;
+    
+    var div = document.createElement( 'div' );
+    var $div = $( div );
+    $div.width( width );
+    $div.height( height );
+    document.body.appendChild( div );
+    
+    var scene = new scenery.Scene( $div );
+    
+    scene.addChild( new scenery.Path( {
+      shape: scenery.Shape.rectangle( 8, 8, 48, 48 ),
+      fill: '#000000',
+      stroke: '#ff0000',
+      lineWidth: 2
+    } ) );
+    
+    scene.updateScene();
+    
+    (function(){
+      var canvas = document.createElement( 'canvas' );
+      canvas.width = width;
+      canvas.height = height;
+      var context = canvas.getContext( '2d' );
+      scene.renderToCanvas( canvas, context, function() {
+        var dataURL = canvas.toDataURL();
+        console.log( dataURL );
+        console.log( 'length: ' + dataURL.length );
+        document.body.appendChild( canvas );
+      } );
+      
+    })();
+  } );
+  
+  </script>
+
+</body>
+</html>

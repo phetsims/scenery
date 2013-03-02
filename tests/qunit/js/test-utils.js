@@ -40,6 +40,31 @@ function snapshotToCanvas( snapshot ) {
   return canvas;
 }
 
+function imageFromDataURL( dataURL, callback ) {
+  var img = document.createElement( 'img' );
+  
+  img.onload = function() {
+    callback( img );
+  };
+
+  img.src = dataURL;
+}
+
+function snapshotFromImage( image ) {
+  var canvas = document.createElement( 'canvas' );
+  canvas.width = image.width;
+  canvas.height = image.height;
+  var context = canvas.getContext( '2d' );
+  context.drawImage( image, 0, 0, image.width, image.height );
+  return context.getImageData( 0, 0, image.width, image.height );
+}
+
+function snapshotFromDataURL( dataURL, callback ) {
+  imageFromDataURL( dataURL, function( image ) {
+    callback( imageDataFromImage( image ) );
+  } );
+}
+
 // compares two pixel snapshots and uses the qunit's assert to verify they are the same
 function snapshotEquals( a, b, threshold, message ) {
   var isEqual = a.width == b.width && a.height == b.height;

@@ -71,6 +71,7 @@ General:
     Take extension mechanism from Backbone.js: https://github.com/documentcloud/backbone/blob/master/backbone.js#L1471-L1502
 
 Code:
+    Move snapshot utilities from testbed into Scenery itself
     ** Require.js / Grunt:
         ** Debug assertions, and performance handling
             Decide on best way to include assert control

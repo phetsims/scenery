@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Static Image Data url testing</title>
+  
+  <style>
+  </style>
+</head>
+<body>
+  <script type="text/javascript">
+  
+  var dataURL = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAA1klEQVR4Xu3aQQ6EMAxD0XL/QzNIMOxAkbIyeRXLLhrXdfQjtjV8bcPrXwTggOEKeALDDfAegvtax5e/Dps/Ov31CRDgckBqUPzt23YAAUJjgAOui/MEul1ABsiATAWEoBA8FdAFdIEmDGmDmU3gZnkZIANkQG8iJASFYKYCWAALYAEwhAbhsHmAgQgaRINoEA0+0UzpBwk4nAmDZoJwGA7DYTgMh+EwHIbDcBgOw+EeDoey0H3sdgaMFSC98Mr5U2cdldpKewhQkunDmzjgw5dbKm28A34475JBLblQaQAAAABJRU5ErkJggg==";
+  
+  function imageFromDataURL( dataURL, callback ) {
+    var img = document.createElement( 'img' );
+    
+    img.onload = function() {
+      callback( img );
+    };
+
+    img.src = dataURL;
+  }
+  
+  function imageDataFromImage( image ) {
+    var canvas = document.createElement( 'canvas' );
+    canvas.width = image.width;
+    canvas.height = image.height;
+    var context = canvas.getContext( '2d' );
+    context.drawImage( image, 0, 0, image.width, image.height );
+    return context.getImageData( 0, 0, image.width, image.height );
+  }
+  
+  function imageDataFromDataURL( dataURL, callback ) {
+    imageFromDataURL( dataURL, function( image ) {
+      callback( imageDataFromImage( image ) );
+    } );
+  }
+  
+  imageDataFromDataURL( dataURL, function( data ) { console.log( data ); } );
+  
+  </script>
+
+</body>
+</html>
