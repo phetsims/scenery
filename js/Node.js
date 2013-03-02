@@ -527,11 +527,7 @@ define( function( require ) {
         
         args.trail = trail;
         
-        _.each( node.getEventListeners(), function( eventListener ) {
-          if ( eventListener[type] ) {
-            eventListener[type]( args );
-          }
-        } );
+        node.fireEvent( type, args );
         
         _.each( node.parents, function( parent ) {
           recursiveEventDispatch( parent );
@@ -555,11 +551,7 @@ define( function( require ) {
         args.transform = transformStack[transformStack.length-1];
         args.trail = trail;
         
-        _.each( node.getEventListeners(), function( eventListener ) {
-          if ( eventListener[type] ) {
-            eventListener[type]( args );
-          }
-        } );
+        node.fireEvent( type, args );
         
         _.each( node.parents, function( parent ) {
           recursiveEventDispatch( parent );
