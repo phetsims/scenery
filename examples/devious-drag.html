@@ -159,14 +159,31 @@
         node.rendererOptions = {};
       }
     },{
-      label: 'SVG CSS',
+      label: 'SVG CSS Full',
       applySettings: function( node ) {
         node.renderer = 'svg';
         node.rendererOptions = {
           cssTransform: true
         };
       }
-    },
+    },{
+      label: 'SVG CSS T+R',
+      applySettings: function( node ) {
+        node.renderer = 'svg';
+        node.rendererOptions = {
+          cssTranslation: true,
+          cssRotation: true
+        };
+      }
+    },{
+      label: 'SVG CSS T',
+      applySettings: function( node ) {
+        node.renderer = 'svg';
+        node.rendererOptions = {
+          cssTranslation: true
+        };
+      }
+    }
   ];
   
   var x = 10;
