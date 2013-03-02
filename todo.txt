@@ -4,6 +4,7 @@ SR's list:
 
 Bugs:
     SVG/CSS manipulation outisde the requestAnimationFrame loop in Mobile Safari causes major dropping of requestAnimationFrame
+    Switching renderers in Devious Drag example on iPad causes other objects being dragged to be "dropped"
     Nexus 7 hidef scaling
     CSS transform bounds!
     Multi-touch stress test is flickery!
