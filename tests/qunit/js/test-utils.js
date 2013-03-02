@@ -20,20 +20,37 @@ var unicodeTestStrings = [
 ];
 
 // takes a snapshot of a scene and stores the pixel data, so that we can compare them
-function snapshot( scene ) {
+function snapshot( scene, width, height ) {
+  width = width || canvasWidth;
+  height = height || canvasHeight;
+  
   var canvas = document.createElement( 'canvas' );
-  canvas.width = canvasWidth;
-  canvas.height = canvasHeight;
+  canvas.width = width;
+  canvas.height = height;
   var context = canvas.getContext( '2d' );
   scene.renderToCanvas( canvas, context );
   var data = context.getImageData( 0, 0, canvasWidth, canvasHeight );
   return data;
 }
 
+function asyncSnapshot( scene, callback, width, height ) {
+  width = width || canvasWidth;
+  height = height || canvasHeight;
+  
+  var canvas = document.createElement( 'canvas' );
+  canvas.width = width;
+  canvas.height = height;
+  var context = canvas.getContext( '2d' );
+  scene.renderToCanvas( canvas, context, function() {
+    var data = context.getImageData( 0, 0, width, height );
+    callback( data );
+  } );
+}
+
 function snapshotToCanvas( snapshot ) {
   var canvas = document.createElement( 'canvas' );
-  canvas.width = canvasWidth;
-  canvas.height = canvasHeight;
+  canvas.width = snapshot.width;
+  canvas.height = snapshot.height;
   var context = canvas.getContext( '2d' );
   context.putImageData( snapshot, 0, 0 );
   $( canvas ).css( 'border', '1px solid black' );
@@ -61,7 +78,7 @@ function snapshotFromImage( image ) {
 
 function snapshotFromDataURL( dataURL, callback ) {
   imageFromDataURL( dataURL, function( image ) {
-    callback( imageDataFromImage( image ) );
+    callback( snapshotFromImage( image ) );
   } );
 }
 
