@@ -104,8 +104,10 @@ define( function( require ) {
               // we are ensuring the base group
               assert && assert( subtrail.lastNode() === this.baseNode );
               
-              this.updateBaseTransform();
               this.idGroupMap[id] = this.g;
+              
+              // sets up the proper transform for the base
+              this.initializeBase();
             }
           }
           subtrail.addDescendant( trail.nodes[subtrail.length] );
@@ -151,12 +153,52 @@ define( function( require ) {
       // not necessary, SVG takes care of handling this (or would just redraw everything anyways)
     },
     
-    updateBaseTransform: function() {
+    initializeBase: function() {
+      // we don't want to call updateBaseTransform() twice, since baseNodeInternalBoundsChange() will call it if we use CSS transform
+      if ( this.fitToBounds ) {
+        this.baseNodeInternalBoundsChange();
+      } else {
+        this.updateBaseTransform();
+      }
+    },
+    
+    // called when the base node's "internal" (self or child) bounds change, but not when it is just from the base node's own transform changing
+    baseNodeInternalBoundsChange: function() {
+      if ( this.fitToBounds ) {
+        // we want to set the baseNodeTransform to a translation so that it maps the baseNode's self/children in the baseNode's local bounds to (0,0,w,h)
+        var internalBounds = this.baseNode.parentToLocalBounds( this.baseNode.getBounds() );
+        var padding = scenery.Layer.cssTransformPadding;
+        
+        // if there is nothing, or the bounds are empty for some reason, skip this!
+        if ( !internalBounds.isEmpty() ) {
+          this.baseNodeTransform.set( Matrix3.translation( Math.ceil( -internalBounds.minX + padding), Math.ceil( -internalBounds.minY + padding ) ) );
+          var baseNodeInteralBounds = this.baseNodeTransform.transformBounds2( internalBounds );
+          
+          // sanity check to ensure we are within that range
+          assert && assert( baseNodeInteralBounds.minX >= 0 && baseNodeInteralBounds.minY >= 0 );
+          
+          var containerWidth = Math.ceil( baseNodeInteralBounds.maxX + padding );
+          var containerHeight = Math.ceil( baseNodeInteralBounds.maxY + padding );
+          
+          this.svg.setAttribute( 'width', containerWidth );
+          this.svg.setAttribute( 'height', containerHeight );
+        }
+        
+        // if this gets removed, update initializeBase()
+        this.updateBaseTransform( true );
+      }
+    },
+    
+    updateBaseTransform: function( includesBaseTransformChange ) {
       var transform = this.baseTrail.getTransform();
       
       if ( this.cssTransform ) {
         // set the full transform!
-        this.$svg.css( transform.getMatrix().cssTransformStyles() );
+        this.$svg.css( transform.getMatrix().timesMatrix( this.baseNodeTransform.getInverse() ).cssTransformStyles() );
+        
+        if ( includesBaseTransformChange ) {
+          this.applyTransform( this.baseNodeTransform, this.g );
+        }
       } else if ( this.usesPartialCSSTransforms ) {
         // calculate what our CSS transform should be
         var cssTransform = new Transform3();
@@ -172,6 +214,9 @@ define( function( require ) {
           cssTransform.append( Matrix3.scaling( scaling.x, scaling.y ) );
         }
         
+        // add the inverse of our base transform to the CSS
+        cssTransform.append( this.baseNodeTransform.getInverse() );
+        
         // take the CSS transform out of what we will apply to the group
         transform.prepend( cssTransform.getInverse() );
         
@@ -179,6 +224,8 @@ define( function( require ) {
         // TODO: checks to make sure we don't apply them in a row if one didn't change!
         this.$svg.css( cssTransform.getMatrix().cssTransformStyles() );
         this.applyTransform( transform, this.g );
+        
+        throw new Error( 'partial CSS transforms buggy with the base transform - this might need to be handled on a case-by-case basis' );
       } else {
         this.applyTransform( transform, this.g );
       }

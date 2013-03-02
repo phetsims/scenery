@@ -13,6 +13,7 @@ define( function( require ) {
   var assertExtra = require( 'ASSERT/assert' )( 'scenery.extra', true );
   
   var Bounds2 = require( 'DOT/Bounds2' );
+  var Transform3 = require( 'DOT/Transform3' );
   
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/Trail' );
@@ -51,6 +52,27 @@ define( function( require ) {
       this.baseTrail = entry.triggerTrail;
       assert && assert( this.baseTrail.lastNode() === this.baseNode );
     }
+    
+    var layer = this;
+    
+    // whenever the base node's children or self change bounds, signal this. we want to explicitly ignore the base node's main bounds for
+    // CSS transforms, since the self / children bounds may not have changed
+    this.baseNode.addEventListener( {
+      selfBounds: function( bounds ) {
+        layer.baseNodeInternalBoundsChange();
+      },
+      
+      childBounds: function( bounds ) {
+        layer.baseNodeInternalBoundsChange();
+      }
+    } );
+    
+    this.fitToBounds = this.usesPartialCSSTransforms || this.cssTransform;
+    assert && assert( this.fitToBounds || this.baseNode === this.scene, 'If the baseNode is not the scene, we need to fit the bounds' );
+    
+    // used for CSS transforms where we need to transform our base node's bounds into the (0,0,w,h) bounds range
+    this.baseNodeTransform = new Transform3();
+    //this.baseNodeInteralBounds = Bounds2.NOTHING; // stores the bounds transformed into (0,0,w,h)
   };
   var Layer = scenery.Layer;
   
@@ -116,8 +138,15 @@ define( function( require ) {
     
     getName: function() {
       throw new Error( 'Layer.getName unimplemented' );
+    },
+    
+    // called when the base node's "internal" (self or child) bounds change, but not when it is just from the base node's own transform changing
+    baseNodeInternalBoundsChange: function() {
+      // no error, many times this doesn't need to be handled
     }
   };
+  
+  Layer.cssTransformPadding = 3;
   
   return Layer;
 } );

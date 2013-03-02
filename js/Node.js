@@ -173,10 +173,14 @@ define( function( require ) {
       var that = this;
       
       if ( this._selfBoundsDirty ) {
+        // note: this should only be triggered if the bounds were actually changed, since we have a guard in place at invalidateSelf()
         this._selfBoundsDirty = false;
         
         // if our self bounds changed, make sure to paint the area where our new bounds are
         this.markDirtyRegion( this._selfBounds );
+        
+        // TODO: consider changing to parameter object (that may be a problem for the GC overhead)
+        this.fireEvent( 'selfBounds', this._selfBounds );
       }
       
       // validate bounds of children if necessary
@@ -186,6 +190,8 @@ define( function( require ) {
           child.validateBounds();
         } );
         
+        var oldChildBounds = this._childBounds;
+        
         // and recompute our _childBounds
         this._childBounds = Bounds2.NOTHING;
         
@@ -194,6 +200,11 @@ define( function( require ) {
         } );
         
         this._childBoundsDirty = false;
+        
+        if ( !this._childBounds.equals( oldChildBounds ) ) {
+          // TODO: consider changing to parameter object (that may be a problem for the GC overhead)
+          this.fireEvent( 'childBounds', this._childBounds );
+        }
       }
       
       // TODO: layout here?
@@ -202,14 +213,17 @@ define( function( require ) {
         var oldBounds = this._bounds;
         
         var newBounds = this.localToParentBounds( this._selfBounds ).union( that.localToParentBounds( this._childBounds ) );
+        var changed = !newBounds.equals( oldBounds );
         
-        if ( !newBounds.equals( oldBounds ) ) {
+        if ( changed ) {
           this._bounds = newBounds;
           
           _.each( this.parents, function( parent ) {
             parent.invalidateBounds();
           } );
-          // TODO: fire off event listeners?
+          
+          // TODO: consider changing to parameter object (that may be a problem for the GC overhead)
+          this.fireEvent( 'bounds', this._bounds );
         }
         
         this._boundsDirty = false;
@@ -478,7 +492,33 @@ define( function( require ) {
       return this._eventListeners.slice( 0 ); // defensive copy
     },
     
-    // dispatches an event across all possible Trails ending in this node
+    /*
+     * Fires an event to all event listeners attached to this node. It does not bubble down to
+     * all ancestors with trails, like dispatchEvent does. Use fireEvent when you only want an event
+     * that is relevant for a specific node, and ancestors don't need to be notified.
+     */
+    fireEvent: function( type, args ) {
+      _.each( this.getEventListeners(), function( eventListener ) {
+        if ( eventListener[type] ) {
+          eventListener[type]( args );
+        }
+      } );
+    },
+    
+    /*
+     * Dispatches an event across all possible Trails ending in this node.
+     *
+     * For example, if the scene has two children A and B, and both of those nodes have X as a child,
+     * dispatching an event on X will fire the event with the following trails:
+     * on X     with trail [ X ]
+     * on A     with trail [ A, X ]
+     * on scene with trail [ scene, A, X ]
+     * on B     with trail [ B, X ]
+     * on scene with trail [ scene, B, X ]
+     *
+     * This allows you to add a listener on any node to get notifications for all of the trails that the
+     * event is relevant for (e.g. marks dirty paint region for both places X was on the scene).
+     */
     dispatchEvent: function( type, args ) {
       var trail = new scenery.Trail();
       
