@@ -155,7 +155,7 @@ define( function( require ) {
     
     initializeBase: function() {
       // we don't want to call updateBaseTransform() twice, since baseNodeInternalBoundsChange() will call it if we use CSS transform
-      if ( this.fitToBounds ) {
+      if ( this.cssTransform ) {
         this.baseNodeInternalBoundsChange();
       } else {
         this.updateBaseTransform();
@@ -164,7 +164,7 @@ define( function( require ) {
     
     // called when the base node's "internal" (self or child) bounds change, but not when it is just from the base node's own transform changing
     baseNodeInternalBoundsChange: function() {
-      if ( this.fitToBounds ) {
+      if ( this.cssTransform ) {
         // we want to set the baseNodeTransform to a translation so that it maps the baseNode's self/children in the baseNode's local bounds to (0,0,w,h)
         var internalBounds = this.baseNode.parentToLocalBounds( this.baseNode.getBounds() );
         var padding = scenery.Layer.cssTransformPadding;
@@ -177,16 +177,18 @@ define( function( require ) {
           // sanity check to ensure we are within that range
           assert && assert( baseNodeInteralBounds.minX >= 0 && baseNodeInteralBounds.minY >= 0 );
           
-          var containerWidth = Math.ceil( baseNodeInteralBounds.maxX + padding );
-          var containerHeight = Math.ceil( baseNodeInteralBounds.maxY + padding );
-          
-          this.svg.setAttribute( 'width', containerWidth );
-          this.svg.setAttribute( 'height', containerHeight );
+          this.updateContainerDimensions( Math.ceil( baseNodeInteralBounds.maxX + padding ),
+                                          Math.ceil( baseNodeInteralBounds.maxY + padding ) );
         }
         
         // if this gets removed, update initializeBase()
         this.updateBaseTransform( true );
       }
+    },
+    
+    updateContainerDimensions: function( width, height ) {
+      this.svg.setAttribute( 'width', width );
+      this.svg.setAttribute( 'height', height );
     },
     
     updateBaseTransform: function( includesBaseTransformChange ) {
@@ -214,18 +216,27 @@ define( function( require ) {
           cssTransform.append( Matrix3.scaling( scaling.x, scaling.y ) );
         }
         
-        // add the inverse of our base transform to the CSS
-        cssTransform.append( this.baseNodeTransform.getInverse() );
-        
         // take the CSS transform out of what we will apply to the group
         transform.prepend( cssTransform.getInverse() );
+        
+        // now we need to see where our baseNode bounds are mapped to with our transform,
+        // so that we can apply an extra translation and adjust dimensions as necessary
+        var padding = scenery.Layer.cssTransformPadding;
+        var internalBounds = this.baseNode.parentToLocalBounds( this.baseNode.getBounds() );
+        var mappedBounds = transform.transformBounds2( internalBounds );
+        var translation = Matrix3.translation( Math.ceil( -mappedBounds.minX + padding ), Math.ceil( -mappedBounds.minY + padding ) );
+        var inverseTranslation = translation.inverted();
+        this.updateContainerDimensions( Math.ceil( mappedBounds.width  + 2 * padding ),
+                                        Math.ceil( mappedBounds.height + 2 * padding ) );
+        
+        // put the translation adjustment and its inverse in-between the two transforms
+        cssTransform.append( inverseTranslation );
+        transform.prepend( translation );
         
         // apply the transforms
         // TODO: checks to make sure we don't apply them in a row if one didn't change!
         this.$svg.css( cssTransform.getMatrix().cssTransformStyles() );
         this.applyTransform( transform, this.g );
-        
-        throw new Error( 'partial CSS transforms buggy with the base transform - this might need to be handled on a case-by-case basis' );
       } else {
         this.applyTransform( transform, this.g );
       }

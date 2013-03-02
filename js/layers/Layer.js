@@ -35,6 +35,7 @@ define( function( require ) {
     this.cssRotation = args.cssRotation;       // CSS for the rotation
     this.cssScale = args.cssScale;             // CSS for the scaling
     this.cssTransform = args.cssTransform;     // CSS for the entire base node (will ignore other partial transforms)
+    assert && assert( !( this.usesPartialCSSTransforms && this.cssTransform ), 'Do not specify both partial and complete CSS transform arguments.' );
     
     // initialize to fully dirty so we draw everything the first time
     // bounds in global coordinate frame
