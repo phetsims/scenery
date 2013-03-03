@@ -56,6 +56,7 @@ Questions for team:
         Layering
 
 General:
+    Review IE10 developers guide: http://msdn.microsoft.com/en-us/library/ie/hh673549(v=vs.85).aspx
     Molecule Shapes Canvas with CSS3 perspective transforms?
         See http://www.paulrhayes.com/experiments/sphere/ for an example
     * Add toggle for Canvas / SVG in Devious Dragging example
