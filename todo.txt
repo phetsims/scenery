@@ -7,6 +7,7 @@ Bugs:
         translateZ( 0 )?
         memory issue?
             Consider option that would resize / position canvas/svg elements to smaller portions of the screen for lower memory usage (and possibly better performance?)
+            See http://developer.apple.com/library/safari/#documentation/AppleApplications/Reference/SafariWebContent/CreatingContentforSafarioniPhone/CreatingContentforSafarioniPhone.html#//apple_ref/doc/uid/TP40006482-SW15
     SVG/CSS manipulation outisde the requestAnimationFrame loop in Mobile Safari causes major dropping of requestAnimationFrame
     Switching renderers in Devious Drag example on iPad causes other objects being dragged to be "dropped"
     Nexus 7 hidef scaling
@@ -76,6 +77,9 @@ General:
     Take extension mechanism from Backbone.js: https://github.com/documentcloud/backbone/blob/master/backbone.js#L1471-L1502
 
 Code:
+    Debugging:
+        http://people.apache.org/~pmuellr/weinre-docs/latest/Home.html
+        Add wrapper check in requestAnimationFrame loops with a try{} and print e.stack if it is defined?
     Move snapshot utilities from testbed into Scenery itself
     ** Require.js / Grunt:
         ** Debug assertions, and performance handling
