@@ -57,21 +57,19 @@
   
   <script>
   
-  var main = $( '#main' );
+  var $main = $( '#main' );
 
   // initialize our scene
-  var scene = new scenery.Scene( main, {
-    // preferredSceneLayerType: scenery.SVGDefaultLayerType
-  } );
+  console.log( 'creating scene' );
+  var scene = new scenery.Scene( $main );
   
-  var div = document.createElement( 'div' );
-  div.innerHTML = '<ul><li><a href="http://phet.colorado.edu">The PhET Website</a></li><li>Really?</li></ul>';
+  console.log( 'creating node' );
+  var node = new scenery.Node();
   
-  scene.addChild( new scenery.DOM( div, {
-    centerX: 256,
-    centerY: 256
-  } ) );
+  console.log( 'attaching node' );
+  scene.addChild( node );
   
+  console.log( 'updating scene' );
   scene.updateScene();
 
   </script>
