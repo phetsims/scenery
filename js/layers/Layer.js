@@ -19,15 +19,22 @@ define( function( require ) {
   require( 'SCENERY/Trail' );
   
   /*
-   * Typical arguments:
+   * Required arguments:
    * $main     - the jQuery-wrapped container for the scene
    * scene     - the scene itself
    * baseNode  - the base node for this layer
+   *
+   * Optional arguments:
+   * batchDOMChanges: false - Only run DOM manipulation from within requestAnimationFrame calls
    */
   scenery.Layer = function( args ) {
     this.$main = args.$main;
     this.scene = args.scene;
     this.baseNode = args.baseNode;
+    
+    // DOM batching
+    this.batchDOMChanges = args.batchDOMChanges || false;
+    this.pendingDOMChanges = [];
     
     // TODO: cleanup of flags!
     this.usesPartialCSSTransforms = args.cssTranslation || args.cssRotation || args.cssScale;
@@ -91,6 +98,24 @@ define( function( require ) {
     
     getEndPointer: function() {
       return this.endPointer;
+    },
+    
+    flushDOMChanges: function() {
+      // TODO: consider a 'try' block, as things may now not exist? ideally we should only batch things that will always work
+      _.each( this.pendingDOMChanges, function( change ) {
+        change();
+      } );
+      
+      // removes all entries
+      this.pendingDOMChanges.splice( 0, this.pendingDOMChanges.length );
+    },
+    
+    domChange: function( callback ) {
+      if ( this.batchDOMChanges ) {
+        this.pendingDOMChanges.push( callback );
+      } else {
+        callback();
+      }
     },
     
     toString: function() {

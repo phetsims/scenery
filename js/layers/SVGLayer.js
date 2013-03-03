@@ -60,7 +60,12 @@ define( function( require ) {
     
     Layer.call( this, args );
     
+    this.baseTransformDirty = true;
+    this.baseTransformChange = true;
+    
     this.initializeBoundaries();
+    
+    console.log( this.batchDOMChanges );
   };
   var SVGLayer = scenery.SVGLayer;
   
@@ -77,11 +82,6 @@ define( function( require ) {
       }
     },
     
-    // TODO: inline? doesn't add clarity
-    applyGroup: function( node, group ) {
-      this.applyTransform( node.transform, group );
-    },
-    
     // FIXME: ordering of group trees is currently not guaranteed (this just appends right now, so they need to be ensured in the proper order)
     ensureGroupTree: function( trail ) {
       if ( !( trail.getUniqueId() in this.idGroupMap ) ) {
@@ -95,7 +95,7 @@ define( function( require ) {
             if ( lastId ) {
               // we have a parent group to which we need to be added
               var group = lastId ? document.createElementNS( svgns, 'g' ) : this.g;
-              this.applyGroup( subtrail.lastNode(), group );
+              this.applyTransform( subtrail.lastNode().transform, group );
               this.idGroupMap[id] = group;
               
               // TODO: handle the ordering here if we ensure group trees!
@@ -142,7 +142,13 @@ define( function( require ) {
     },
     
     render: function( scene, args ) {
-      // nothing at all needed here, CSS transforms taken care of when dirty regions are notified
+      this.flushDOMChanges();
+      if ( this.baseTransformDirty ) {
+        this.updateBaseTransform( this.baseTransformChange );
+        
+        this.baseTransformDirty = false;
+        this.baseTransformChange = false;
+      }
     },
     
     dispose: function() {
@@ -154,12 +160,21 @@ define( function( require ) {
       // not necessary, SVG takes care of handling this (or would just redraw everything anyways)
     },
     
+    markBaseTransformDirty: function( changed ) {
+      if ( this.batchDOMChanges ) {
+        this.baseTransformDirty = true;
+        this.baseTransformChange = !!changed;
+      } else {
+        this.updateBaseTransform( changed );
+      }
+    },
+    
     initializeBase: function() {
       // we don't want to call updateBaseTransform() twice, since baseNodeInternalBoundsChange() will call it if we use CSS transform
       if ( this.cssTransform ) {
         this.baseNodeInternalBoundsChange();
       } else {
-        this.updateBaseTransform();
+        this.markBaseTransformDirty();
       }
     },
     
@@ -183,13 +198,16 @@ define( function( require ) {
         }
         
         // if this gets removed, update initializeBase()
-        this.updateBaseTransform( true );
+        this.markBaseTransformDirty( true );
       }
     },
     
     updateContainerDimensions: function( width, height ) {
-      this.svg.setAttribute( 'width', width );
-      this.svg.setAttribute( 'height', height );
+      var layer = this;
+      this.domChange( function() {
+        layer.svg.setAttribute( 'width', width );
+        layer.svg.setAttribute( 'height', height );
+      } );
     },
     
     updateBaseTransform: function( includesBaseTransformChange ) {
@@ -244,20 +262,23 @@ define( function( require ) {
     },
     
     transformChange: function( args ) {
+      var layer = this;
       var node = args.node;
       var trail = args.trail;
       
       if ( trail.lastNode() === this.baseNode ) {
         // our trail points to the base node. handle this case as special
-        this.updateBaseTransform();
+        this.markBaseTransformDirty();
       } else if ( _.contains( trail.nodes, this.baseNode ) ) {
         var group = this.idGroupMap[trail.getUniqueId()];
         
         // apply the transform to the group
-        this.applyGroup( node, group );
+        this.domChange( function() {
+          layer.applyTransform( node.transform, group );
+        } );
       } else {
         // ancestor node changed a transform. rebuild the base transform
-        this.updateBaseTransform();
+        this.markBaseTransformDirty();
       }
     },
     

@@ -183,6 +183,33 @@
           cssTranslation: true
         };
       }
+    },{
+      label: 'SVG Batched',
+      applySettings: function( node ) {
+        node.renderer = 'svg';
+        node.rendererOptions = {
+          batchDOMChanges: true
+        };
+      }
+    },{
+      label: 'SVG CSS Full Batched',
+      applySettings: function( node ) {
+        node.renderer = 'svg';
+        node.rendererOptions = {
+          cssTransform: true,
+          batchDOMChanges: true
+        };
+      }
+    },{
+      label: 'SVG CSS T+R Batched',
+      applySettings: function( node ) {
+        node.renderer = 'svg';
+        node.rendererOptions = {
+          cssTranslation: true,
+          cssRotation: true,
+          batchDOMChanges: true
+        };
+      }
     }
   ];
   
