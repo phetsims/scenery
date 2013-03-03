@@ -24,7 +24,7 @@ define( function( require ) {
    * scene     - the scene itself
    * baseNode  - the base node for this layer
    */
-  scenery.Layer = function( args, entry ) {
+  scenery.Layer = function( args ) {
     this.$main = args.$main;
     this.scene = args.scene;
     this.baseNode = args.baseNode;
@@ -41,16 +41,20 @@ define( function( require ) {
     // bounds in global coordinate frame
     this.dirtyBounds = Bounds2.EVERYTHING;
     
-    this.startPointer = entry.startPointer;
-    this.endPointer = entry.endPointer;
-    this.startSelfTrail = entry.startSelfTrail;
-    this.endSelfTrail = entry.endSelfTrail;
+    this.startBoundary = args.startBoundary;
+    this.endBoundary = args.endBoundary;
+    
+    // TODO: deprecate these, use boundary references instead? or boundary convenience functions
+    this.startPointer = this.startBoundary.nextStartPointer;
+    this.endPointer = this.endBoundary.previousEndPointer;
+    this.startSelfTrail = this.startBoundary.nextSelfTrail;
+    this.endSelfTrail = this.endBoundary.previousSelfTrail;
     
     // set baseTrail from the scene to our baseNode
     if ( this.baseNode === this.scene ) {
       this.baseTrail = new scenery.Trail( this.scene );
     } else {
-      this.baseTrail = entry.triggerTrail;
+      this.baseTrail = this.startPointer.trail.copy();
       assert && assert( this.baseTrail.lastNode() === this.baseNode );
     }
     

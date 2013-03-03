@@ -21,8 +21,8 @@ define( function( require ) {
   
   var Layer = require( 'SCENERY/layers/Layer' ); // DOMLayer inherits from Layer
   
-  scenery.DOMLayer = function( args, entry ) {
-    Layer.call( this, args, entry );
+  scenery.DOMLayer = function( args ) {
+    Layer.call( this, args );
     
     this.div = document.createElement( 'div' );
     this.$div = $( this.div );

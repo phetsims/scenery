@@ -24,8 +24,6 @@ define( function( require ) {
    * previousLayerType should be null if there is no previous layer.
    */
   scenery.LayerBuilder = function( scene, previousLayerType, previousSelfTrail, nextSelfTrail ) {
-    var builder = this;
-    
     /*---------------------------------------------------------------------------*
     * Initial state
     *----------------------------------------------------------------------------*/
@@ -45,42 +43,26 @@ define( function( require ) {
     this.layerChangePending = previousSelfTrail === null;
     
     /*---------------------------------------------------------------------------*
-    * Iteration
+    * Start / End pointers
     *----------------------------------------------------------------------------*/
     
-    var startPointer;
     if ( previousSelfTrail ) {
       // Move our start pointer just past the previousSelfTrail, since our previousLayerType is presumably for that trail's node's self.
       // Anything after that self could have been collapsed, so we need to start there.
-      startPointer = new scenery.TrailPointer( previousSelfTrail.copy(), true );
-      startPointer.nestedForwards();
+      this.startPointer = new scenery.TrailPointer( previousSelfTrail.copy(), true );
+      this.startPointer.nestedForwards();
     } else {
-      startPointer = new scenery.TrailPointer( new scenery.Trail( scene ), true );
+      this.startPointer = new scenery.TrailPointer( new scenery.Trail( scene ), true );
     }
     
-    var endPointer;
     if ( nextSelfTrail ) {
       // include the nextSelfTrail's 'before' in our iteration, so we can stitch properly with the next layer
-      endPointer = new scenery.TrailPointer( nextSelfTrail.copy(), true );
+      this.endPointer = new scenery.TrailPointer( nextSelfTrail.copy(), true );
     } else {
-      endPointer = new scenery.TrailPointer( new scenery.Trail( scene ), false );
+      this.endPointer = new scenery.TrailPointer( new scenery.Trail( scene ), false );
     }
     
-    startPointer.depthFirstUntil( endPointer, function( pointer ) {
-      var node = pointer.trail.lastNode();
-      
-      if ( pointer.isBefore ) {
-        node.layerStrategy.enter( pointer, builder );
-      } else {
-        node.layerStrategy.exit( pointer, builder );
-      }
-    }, false ); // include the endpoints
-    
-    // special case handling if we are at the 'end' of the scene, so that we create another 'wrapping' boundary
-    if ( nextSelfTrail === null ) {
-      this.pendingBoundary.previousEndPointer = endPointer; // TODO: consider implications if we leave this null, to indicate that it is not ended?
-      this.layerChange( null );
-    }
+    this.includesEndTrail = nextSelfTrail !== null;
     
     /*
      * LayerBoundary properties and assurances:
@@ -102,6 +84,26 @@ define( function( require ) {
   
   LayerBuilder.prototype = {
     constructor: LayerBuilder,
+    
+    run: function() {
+      var builder = this;
+      
+      builder.startPointer.depthFirstUntil( builder.endPointer, function( pointer ) {
+        var node = pointer.trail.lastNode();
+        
+        if ( pointer.isBefore ) {
+          node.layerStrategy.enter( pointer, builder );
+        } else {
+          node.layerStrategy.exit( pointer, builder );
+        }
+      }, false ); // include the endpoints
+      
+      // special case handling if we are at the 'end' of the scene, so that we create another 'wrapping' boundary
+      if ( !this.includesEndTrail ) {
+        this.pendingBoundary.previousEndPointer = builder.endPointer; // TODO: consider implications if we leave this null, to indicate that it is not ended?
+        this.layerChange( null );
+      }
+    },
     
     switchToType: function( pointer, layerType ) {
       this.currentLayerType = layerType;

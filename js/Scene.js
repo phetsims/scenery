@@ -171,14 +171,15 @@ define( function( require ) {
     // remove all of our tracked layers from the container, so we can fill it with fresh layers
     this.disposeLayers();
     
-    // TODO: internal API rethink
-    var state = new scenery.LayerBuilder();
+    var builder = new scenery.LayerBuilder( this, null, null, null );
     
     if ( this.preferredSceneLayerType ) {
-      state.pushPreferredLayerType( this.preferredSceneLayerType );
+      builder.pushPreferredLayerType( this.preferredSceneLayerType );
     }
     
-    var layerEntries = state.buildLayers( new scenery.TrailPointer( new scenery.Trail( this ), true ), new scenery.TrailPointer( new scenery.Trail( this ), false ), null );
+    builder.run();
+    
+    var boundaries = builder.boundaries;
     
     var layerArgs = {
       $main: this.$main,
@@ -186,18 +187,30 @@ define( function( require ) {
       baseNode: this
     };
     
-    this.layers = _.map( layerEntries, function( entry ) {
-      var layer = entry.type.createLayer( _.extend( {}, layerArgs, entry.type.args ), entry );
-      return layer;
-    } );
+    this.layers = [];
+    
+    console.log( boundaries );
+    
+    for ( var i = 1; i < boundaries.length; i++ ) {
+      var startBoundary = boundaries[i-1];
+      var endBoundary = boundaries[i];
+      
+      assert && assert( startBoundary.nextLayerType === endBoundary.previousLayerType );
+      var layerType = startBoundary.nextLayerType;
+      
+      // LayerType is responsible for applying its own arguments in createLayer()
+      var layer = layerType.createLayer( _.extend( {
+        startBoundary: startBoundary,
+        endBoundary: endBoundary
+      }, layerArgs ) );
+      
+      this.layers.push( layer );
+    }
     
     // console.log( '---' );
     // console.log( 'layers rebuilt:' );
     // _.each( this.layers, function( layer ) {
     //   console.log( layer.toString() );
-    // } );
-    // _.each( layerEntries, function( entry ) {
-    //   //console.log( entry.type.name + ' ' + ( this.startPointer ? this.startPointer.toString() : '!' ) + ' (' + ( this.startPath ? this.startPath.toString() : '!' ) + ') => ' + ( this.endPointer ? this.endPointer.toString() : '!' ) + ' (' + ( this.endPath ? this.endPath.toString() : '!' ) + ')' );
     // } );
   };
   

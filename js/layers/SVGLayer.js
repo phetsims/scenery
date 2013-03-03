@@ -28,7 +28,7 @@ define( function( require ) {
   var svgns = 'http://www.w3.org/2000/svg';
   var xlinkns = 'http://www.w3.org/1999/xlink';
   
-  scenery.SVGLayer = function( args, entry ) {
+  scenery.SVGLayer = function( args ) {
     var $main = args.$main;
     
     // main SVG element
@@ -58,7 +58,7 @@ define( function( require ) {
     
     this.temporaryDebugFlagSoWeDontUpdateBoundariesMoreThanOnce = false;
     
-    Layer.call( this, args, entry );
+    Layer.call( this, args );
     
     this.initializeBoundaries();
   };
