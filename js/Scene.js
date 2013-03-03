@@ -37,6 +37,7 @@ define( function( require ) {
    *   allowSceneOverflow: false,           // usually anything displayed outside of this $main (DOM/CSS3 transformed SVG) is hidden with CSS overflow
    *   allowCSSHacks: true,                 // applies styling that prevents mobile browser graphical issues
    *   allowDevicePixelRatioScaling: false, // allows underlying canvases (Canvas, WebGL) to increase in size to maintain sharpness on high-density displays
+   *   enablePointerEvents: true,           // allows pointer events / MSPointerEvent to be used on supported platforms.
    *   preferredSceneLayerType: ...,        // sets the preferred type of layer to be created if there are multiple options
    *   width: <current main width>,         // override the main container's width
    *   height: <current main height>,       // override the main container's height
@@ -50,12 +51,14 @@ define( function( require ) {
       allowSceneOverflow: false,
       allowCSSHacks: true,
       allowDevicePixelRatioScaling: false,
+      enablePointerEvents: true,
       preferredSceneLayerType: scenery.CanvasDefaultLayerType,
       width: $main.width(),
       height: $main.height()
     }, options || {} );
     
     this.backingScale = options.allowDevicePixelRatioScaling ? Util.backingScale( document.createElement( 'canvas' ).getContext( '2d' ) ) : 1;
+    this.enablePointerEvents = options.enablePointerEvents;
     
     Node.call( this, options );
     
@@ -385,6 +388,7 @@ define( function( require ) {
   };
   
   Scene.prototype.initializeStandaloneEvents = function( parameters ) {
+    // TODO extract similarity between standalone and fullscreen!
     var element = this.$main[0];
     this.initializeEvents( _.extend( {}, {
       preventDefault: true,
@@ -425,7 +429,6 @@ define( function( require ) {
     
     // maps the current MS pointer types onto the pointer spec
     function msPointerType( evt ) {
-      console.log( 'actual pointer type: ' + evt.pointerType );
       if ( evt.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_TOUCH ) {
         return 'touch';
       } else if ( evt.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_PEN ) {
@@ -448,123 +451,102 @@ define( function( require ) {
     
     // TODO: massive boilerplate reduction! closures should help tons!
     
-    if ( window.navigator && window.navigator.pointerEnabled ) {
+    if ( this.enablePointerEvents && window.navigator && window.navigator.pointerEnabled ) {
       // accepts pointer events corresponding to the spec at http://www.w3.org/TR/pointerevents/
-      input.addListener( 'pointerdown', function( jEvent ) {
-        var evt = jEvent.originalEvent;
-        if ( preventDefault ) { jEvent.preventDefault(); }
+      input.addListener( 'pointerdown', function( evt ) {
         input.pointerDown( evt.pointerId, evt.pointerType, pointFromEvent( evt ), evt );
+        if ( preventDefault ) { evt.preventDefault(); }
       } );
-      input.addListener( 'pointerup', function( jEvent ) {
-        var evt = jEvent.originalEvent;
-        if ( preventDefault ) { jEvent.preventDefault(); }
+      input.addListener( 'pointerup', function( evt ) {
         input.pointerUp( evt.pointerId, evt.pointerType, pointFromEvent( evt ), evt );
+        if ( preventDefault ) { evt.preventDefault(); }
       } );
-      input.addListener( 'pointermove', function( jEvent ) {
-        var evt = jEvent.originalEvent;
-        if ( preventDefault ) { jEvent.preventDefault(); }
+      input.addListener( 'pointermove', function( evt ) {
         input.pointerMove( evt.pointerId, evt.pointerType, pointFromEvent( evt ), evt );
+        if ( preventDefault ) { evt.preventDefault(); }
       } );
-      input.addListener( 'pointerover', function( jEvent ) {
-        var evt = jEvent.originalEvent;
-        if ( preventDefault ) { jEvent.preventDefault(); }
+      input.addListener( 'pointerover', function( evt ) {
         input.pointerOver( evt.pointerId, evt.pointerType, pointFromEvent( evt ), evt );
+        if ( preventDefault ) { evt.preventDefault(); }
       } );
-      input.addListener( 'pointerout', function( jEvent ) {
-        var evt = jEvent.originalEvent;
-        if ( preventDefault ) { jEvent.preventDefault(); }
+      input.addListener( 'pointerout', function( evt ) {
         input.pointerOut( evt.pointerId, evt.pointerType, pointFromEvent( evt ), evt );
+        if ( preventDefault ) { evt.preventDefault(); }
       } );
-      input.addListener( 'pointercancel', function( jEvent ) {
-        var evt = jEvent.originalEvent;
-        if ( preventDefault ) { jEvent.preventDefault(); }
+      input.addListener( 'pointercancel', function( evt ) {
         input.pointerCancel( evt.pointerId, evt.pointerType, pointFromEvent( evt ), evt );
+        if ( preventDefault ) { evt.preventDefault(); }
       } );
-    } else if ( window.navigator && window.navigator.msPointerEnabled ) {
-      input.addListener( 'MSPointerDown', function( jEvent ) {
-        var evt = jEvent.originalEvent;
-        if ( preventDefault ) { jEvent.preventDefault(); }
-        input.pointerDown( evt.pointerId, msPointerType( evt.pointerType ), pointFromEvent( evt ), evt );
+    } else if ( this.enablePointerEvents && window.navigator && window.navigator.msPointerEnabled ) {
+      input.addListener( 'MSPointerDown', function( evt ) {
+        input.pointerDown( evt.pointerId, msPointerType( evt ), pointFromEvent( evt ), evt );
+        if ( preventDefault ) { evt.preventDefault(); }
       } );
-      input.addListener( 'MSPointerUp', function( jEvent ) {
-        var evt = jEvent.originalEvent;
-        if ( preventDefault ) { jEvent.preventDefault(); }
-        input.pointerUp( evt.pointerId, msPointerType( evt.pointerType ), pointFromEvent( evt ), evt );
+      input.addListener( 'MSPointerUp', function( evt ) {
+        input.pointerUp( evt.pointerId, msPointerType( evt ), pointFromEvent( evt ), evt );
+        if ( preventDefault ) { evt.preventDefault(); }
       } );
-      input.addListener( 'MSPointerMove', function( jEvent ) {
-        var evt = jEvent.originalEvent;
-        if ( preventDefault ) { jEvent.preventDefault(); }
-        input.pointerMove( evt.pointerId, msPointerType( evt.pointerType ), pointFromEvent( evt ), evt );
+      input.addListener( 'MSPointerMove', function( evt ) {
+        input.pointerMove( evt.pointerId, msPointerType( evt ), pointFromEvent( evt ), evt );
+        if ( preventDefault ) { evt.preventDefault(); }
       } );
-      input.addListener( 'MSPointerOver', function( jEvent ) {
-        var evt = jEvent.originalEvent;
-        if ( preventDefault ) { jEvent.preventDefault(); }
-        input.pointerOver( evt.pointerId, msPointerType( evt.pointerType ), pointFromEvent( evt ), evt );
+      input.addListener( 'MSPointerOver', function( evt ) {
+        input.pointerOver( evt.pointerId, msPointerType( evt ), pointFromEvent( evt ), evt );
+        if ( preventDefault ) { evt.preventDefault(); }
       } );
-      input.addListener( 'MSPointerOut', function( jEvent ) {
-        var evt = jEvent.originalEvent;
-        if ( preventDefault ) { jEvent.preventDefault(); }
-        input.pointerOut( evt.pointerId, msPointerType( evt.pointerType ), pointFromEvent( evt ), evt );
+      input.addListener( 'MSPointerOut', function( evt ) {
+        input.pointerOut( evt.pointerId, msPointerType( evt ), pointFromEvent( evt ), evt );
+        if ( preventDefault ) { evt.preventDefault(); }
       } );
-      input.addListener( 'MSPointerCancel', function( jEvent ) {
-        var evt = jEvent.originalEvent;
-        if ( preventDefault ) { jEvent.preventDefault(); }
-        input.pointerCancel( evt.pointerId, msPointerType( evt.pointerType ), pointFromEvent( evt ), evt );
+      input.addListener( 'MSPointerCancel', function( evt ) {
+        input.pointerCancel( evt.pointerId, msPointerType( evt ), pointFromEvent( evt ), evt );
+        if ( preventDefault ) { evt.preventDefault(); }
       } );
     } else {
-      input.addListener( 'mousedown', function( jEvent ) {
-        var evt = jEvent.originalEvent;
-        if ( preventDefault ) { jEvent.preventDefault(); }
+      input.addListener( 'mousedown', function( evt ) {
         input.mouseDown( pointFromEvent( evt ), evt );
+        if ( preventDefault ) { evt.preventDefault(); }
       } );
-      input.addListener( 'mouseup', function( jEvent ) {
-        var evt = jEvent.originalEvent;
-        if ( preventDefault ) { jEvent.preventDefault(); }
+      input.addListener( 'mouseup', function( evt ) {
         input.mouseUp( pointFromEvent( evt ), evt );
+        if ( preventDefault ) { evt.preventDefault(); }
       } );
-      input.addListener( 'mousemove', function( jEvent ) {
-        var evt = jEvent.originalEvent;
-        if ( preventDefault ) { jEvent.preventDefault(); }
+      input.addListener( 'mousemove', function( evt ) {
         input.mouseMove( pointFromEvent( evt ), evt );
+        if ( preventDefault ) { evt.preventDefault(); }
       } );
-      input.addListener( 'mouseover', function( jEvent ) {
-        var evt = jEvent.originalEvent;
-        if ( preventDefault ) { jEvent.preventDefault(); }
+      input.addListener( 'mouseover', function( evt ) {
         input.mouseOver( pointFromEvent( evt ), evt );
+        if ( preventDefault ) { evt.preventDefault(); }
       } );
-      input.addListener( 'mouseout', function( jEvent ) {
-        var evt = jEvent.originalEvent;
-        if ( preventDefault ) { jEvent.preventDefault(); }
+      input.addListener( 'mouseout', function( evt ) {
         input.mouseOut( pointFromEvent( evt ), evt );
+        if ( preventDefault ) { evt.preventDefault(); }
       } );
       
-      input.addListener( 'touchstart', function( jEvent ) {
-        var evt = jEvent.originalEvent;
-        if ( preventDefault ) { jEvent.preventDefault(); }
+      input.addListener( 'touchstart', function( evt ) {
         forEachChangedTouch( evt, function( id, point ) {
           input.touchStart( id, point, evt );
         } );
+        if ( preventDefault ) { evt.preventDefault(); }
       } );
-      input.addListener( 'touchend', function( jEvent ) {
-        var evt = jEvent.originalEvent;
-        if ( preventDefault ) { jEvent.preventDefault(); }
+      input.addListener( 'touchend', function( evt ) {
         forEachChangedTouch( evt, function( id, point ) {
           input.touchEnd( id, point, evt );
         } );
+        if ( preventDefault ) { evt.preventDefault(); }
       } );
-      input.addListener( 'touchmove', function( jEvent ) {
-        var evt = jEvent.originalEvent;
-        if ( preventDefault ) { jEvent.preventDefault(); }
+      input.addListener( 'touchmove', function( evt ) {
         forEachChangedTouch( evt, function( id, point ) {
           input.touchMove( id, point, evt );
         } );
+        if ( preventDefault ) { evt.preventDefault(); }
       } );
-      input.addListener( 'touchcancel', function( jEvent ) {
-        var evt = jEvent.originalEvent;
-        if ( preventDefault ) { jEvent.preventDefault(); }
+      input.addListener( 'touchcancel', function( evt ) {
         forEachChangedTouch( evt, function( id, point ) {
           input.touchCancel( id, point, evt );
         } );
+        if ( preventDefault ) { evt.preventDefault(); }
       } );
     }
   };
@@ -584,6 +566,9 @@ define( function( require ) {
     if ( options.allowSceneOverflow ) {
       $main.css( 'overflow', 'hidden' );
     }
+    
+    // forward all pointer events
+    $main.css( '-ms-touch-action', 'none' );
     
     if ( options.allowCSSHacks ) {
       // some css hacks (inspired from https://github.com/EightMedia/hammer.js/blob/master/hammer.js)

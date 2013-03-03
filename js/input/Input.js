@@ -110,7 +110,6 @@ define( function( require ) {
     },
     
     pointerDown: function( id, type, point, event ) {
-      console.log( 'pointerDown: ' + id + ', ' + type + ', ' + point.toString() );
       switch ( type ) {
         case 'mouse':
           this.mouseDown( point, event );
@@ -129,7 +128,6 @@ define( function( require ) {
     },
     
     pointerUp: function( id, type, point, event ) {
-      console.log( 'pointerUp: ' + id + ', ' + type + ', ' + point.toString() );
       switch ( type ) {
         case 'mouse':
           this.mouseUp( point, event );
@@ -147,8 +145,7 @@ define( function( require ) {
       }
     },
     
-    pointerMove: function( id, type, point, event ) {
-      console.log( 'pointerMove: ' + id + ', ' + type + ', ' + point.toString() );
+    pointerCancel: function( id, type, point, event ) {
       switch ( type ) {
         case 'mouse':
           // TODO: a mouse can cancel? no mapping yet for that
@@ -166,8 +163,7 @@ define( function( require ) {
       }
     },
     
-    pointerCancel: function( id, type, point, event ) {
-      console.log( 'pointerCancel: ' + id + ', ' + type + ', ' + point.toString() );
+    pointerMove: function( id, type, point, event ) {
       switch ( type ) {
         case 'mouse':
           this.mouseMove( point, event );
@@ -267,6 +263,15 @@ define( function( require ) {
     },
     
     dispatchEvent: function( trail, type, finger, event, bubbles ) {
+      if ( !trail ) {
+        try {
+          throw new Error( 'falsy trail for dispatchEvent' );
+        } catch ( e ) {
+          console.log( e.stack );
+          throw e;
+        }
+      }
+      
       // TODO: is there a way to make this event immutable?
       var inputEvent = new scenery.Event( {
         trail: trail,
@@ -354,14 +359,14 @@ define( function( require ) {
     },
     
     addListener: function( type, callback, useCapture ) {
-      $( this.listenerTarget ).on( type, callback, useCapture );
+      this.listenerTarget.addEventListener( type, callback, useCapture );
       this.listenerReferences.push( { type: type, callback: callback, useCapture: useCapture } );
     },
     
     diposeListeners: function() {
       var input = this;
       _.each( this.listenerReferences, function( ref ) {
-        $( input.listenerTarget ).off( ref.type, ref.callback, ref.useCapture );
+        input.listenerTarget.removeEventListener( ref.type, ref.callback, ref.useCapture );
       } );
     }
   };
