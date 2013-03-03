@@ -25,7 +25,7 @@ define( function( require ) {
    * Specified as such, since there is no needed shared state (we can have node.layerStrategy = scenery.LayerStrategy for many nodes)
    */
   scenery.LayerStrategy = {
-    enter: function( pointer, layerState ) {
+    enter: function( pointer, layerBuilder ) {
       var trail = pointer.trail;
       var node = trail.lastNode();
       var preferredLayerType;
@@ -35,7 +35,7 @@ define( function( require ) {
         if ( node.hasRendererLayerType() ) {
           preferredLayerType = node.getRendererLayerType();
         } else {
-          preferredLayerType = layerState.bestPreferredLayerTypeFor( [ node.getRenderer() ] );
+          preferredLayerType = layerBuilder.bestPreferredLayerTypeFor( [ node.getRenderer() ] );
           if ( !preferredLayerType ) {
             // there was no preferred layer type matching, just use the default
             preferredLayerType = node.getRenderer().defaultLayerType;
@@ -43,65 +43,65 @@ define( function( require ) {
         }
         
         // push the preferred layer type
-        layerState.pushPreferredLayerType( preferredLayerType );
-        if ( layerState.getCurrentLayerType() !== preferredLayerType ) {
-          layerState.switchToType( pointer, preferredLayerType );
+        layerBuilder.pushPreferredLayerType( preferredLayerType );
+        if ( layerBuilder.getCurrentLayerType() !== preferredLayerType ) {
+          layerBuilder.switchToType( pointer, preferredLayerType );
         }
       } else if ( node.hasSelf() ) {
         // node doesn't specify a renderer, but hasSelf.
         
         var supportedRenderers = node._supportedRenderers;
-        var currentType = layerState.getCurrentLayerType();
-        preferredLayerType = layerState.bestPreferredLayerTypeFor( supportedRenderers );
+        var currentType = layerBuilder.getCurrentLayerType();
+        preferredLayerType = layerBuilder.bestPreferredLayerTypeFor( supportedRenderers );
         
         // If any of the preferred types are compatible, use the top one. This allows us to support caching and hierarchical layer types
         if ( preferredLayerType ) {
           if ( currentType !== preferredLayerType ) {
-            layerState.switchToType( pointer, preferredLayerType );
+            layerBuilder.switchToType( pointer, preferredLayerType );
           }
         } else {
           // if no preferred types are compatible, only switch if the current type is also incompatible
           if ( !currentType || !currentType.supportsNode( node ) ) {
-            layerState.switchToType( pointer, supportedRenderers[0].defaultLayerType );
+            layerBuilder.switchToType( pointer, supportedRenderers[0].defaultLayerType );
           }
         }
       }
       
       if ( node.isLayerSplitBefore() || this.hasSplitFlags( node ) ) {
-        layerState.switchToType( pointer, layerState.getCurrentLayerType() );
+        layerBuilder.switchToType( pointer, layerBuilder.getCurrentLayerType() );
       }
       
       if ( node.hasSelf() ) {
         // trigger actual layer creation if necessary (allow collapsing of layers otherwise)
-        layerState.markSelf( pointer );
+        layerBuilder.markSelf( pointer );
       }
     },
     
-    // afterSelf: function( trail, layerState ) {
+    // afterSelf: function( trail, layerBuilder ) {
     //   // no-op, and possibly not used
     // },
     
-    // betweenChildren: function( trail, layerState ) {
+    // betweenChildren: function( trail, layerBuilder ) {
     //   // no-op, and possibly not used
     // },
     
-    exit: function( pointer, layerState ) {
+    exit: function( pointer, layerBuilder ) {
       var trail = pointer.trail;
       var node = trail.lastNode();
       
       if ( node.hasRenderer() ) {
-        layerState.popPreferredLayerType();
+        layerBuilder.popPreferredLayerType();
         
         // switch down to the next lowest preferred layer type, if any. if null, pass the null to switchToType
         // this allows us to not 'leak' the renderer information, and the temporary layer type is most likely collapsed and ignored
         // NOTE: disabled for now, since this prevents us from having adjacent children sharing the same layer type
-        // if ( layerState.getCurrentLayerType() !== layerState.getPreferredLayerType() ) {
-        //   layerState.switchToType( pointer, layerState.getPreferredLayerType() );
+        // if ( layerBuilder.getCurrentLayerType() !== layerBuilder.getPreferredLayerType() ) {
+        //   layerBuilder.switchToType( pointer, layerBuilder.getPreferredLayerType() );
         // }
       }
       
       if ( node.isLayerSplitAfter() || this.hasSplitFlags( node ) ) {
-        layerState.switchToType( pointer, layerState.getCurrentLayerType() );
+        layerBuilder.switchToType( pointer, layerBuilder.getCurrentLayerType() );
       }
     },
     
