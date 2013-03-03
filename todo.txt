@@ -3,12 +3,15 @@ SR's list:
     Arrow shape
 
 Bugs:
-    iPad crashing on devious drag:
+    **** iPad crashing on devious drag:
         translateZ( 0 )?
         memory issue?
             Consider option that would resize / position canvas/svg elements to smaller portions of the screen for lower memory usage (and possibly better performance?)
+                Tiling, possibly lock to every 16 pixels. Prevent back-and-forth every frame, and consider full size for animation vs changing
+                Would be setting position (layout change) and possibly width. If we can keep width the same, it may be faster?
             See http://developer.apple.com/library/safari/#documentation/AppleApplications/Reference/SafariWebContent/CreatingContentforSafarioniPhone/CreatingContentforSafarioniPhone.html#//apple_ref/doc/uid/TP40006482-SW15
-    SVG/CSS manipulation outisde the requestAnimationFrame loop in Mobile Safari causes major dropping of requestAnimationFrame
+    *** SVG/CSS manipulation outisde the requestAnimationFrame loop in Mobile Safari causes major dropping of requestAnimationFrame
+        Layer.domManipulation( callback ), either immediately calls or batches for next Layer.render()
     Switching renderers in Devious Drag example on iPad causes other objects being dragged to be "dropped"
     Nexus 7 hidef scaling
     CSS transform bounds!
@@ -16,6 +19,9 @@ Bugs:
     FAMB IE9 mouse handling - remember to check out Scenery copy
     Check Firefox/Safari on Mac event handling on multiple touch events
     Text direction 'rtl' bounds and display difference between canvas / SVG
+
+BAM:
+    Support portrait and landscape?
 
 Browsers
     Browser bugs? (get Canary / Aurora / IE10):
@@ -45,6 +51,7 @@ Browsers
         [KNOWN] Chrome XMLSerializer.serializeToString dropping namespaces: https://code.google.com/p/chromium/issues/detail?id=88295
         [KNOWN] overflow: hidden not working for SVG on IE
     For canvas, create a drawing function that exhibits all differences?
+        Canvas difference examples. Set up simple node.is server to keep track of snapshots.
     measureText for webkit?
 
 Questions for SB (or others):
@@ -127,6 +134,7 @@ DOM:
         - Either delegate (just set transform) or have inline with just SVG over (with pointer-events)
 
 ** SVG: -- important because we can layer DOM nodes properly under SVG
+    Domparser and xmlserializer are ie9 for avg fragment support
     Allow different options for splitting the root transform between CSS / SVG
     * Apply pointer-events: none
     *** Highly recommend <image xlink:href="...">, since we can include URL / data URL, nesting works, and we don't pollute the id namespace
@@ -183,14 +191,21 @@ Layers / caching:
     Proof-of-concept for performance and DOM integration
 
 * Event dispatch:
+    Add Pen support
+    * Hook into browser 'zoom' support? - pinch-to-zoom is different? Maybe we can detect?
+    Investigate Event.preventManipulation
+    ** MSPointerMove filter since location may not have changed while touch is down!!!
+        See http://blogs.msdn.com/b/ie/archive/2011/10/19/handling-multi-touch-and-mouse-input-in-all-browsers.aspx
     ** Handle the actual 'out/over' events properly
-    *** Write a multi-finger pinch-to-zoom/rotate handler that is compatible with the drag handler
+    **** Write a multi-finger pinch-to-zoom/rotate handler that is compatible with the drag handler
         Use SVD finger point code for 3+ fingers -- also this could cause shears, so flag for whether 3+ fingers allowed and for shear
         Option whether to rotate/translate/scale or not (for each)
         Option for bounds restriction on dragged center point
         Option whether to interrupt dragging
         Consider 'active' flag
         Need the ability to get a list of all fingers
+        How to deal with mouse-wheel events? Scroll if zoomed in?
+    Consider all elements under point: http://msdn.microsoft.com/en-us/library/hh673523.aspx
     * SimpleDragHandler needs an option for increased hit areas for touch
     Consider finger.isDown for checking general (but possibly mouse related) events
     Indie UI events should be tracked: https://dvcs.w3.org/hg/IndieUI/raw-file/default/src/indie-ui-events.html
@@ -217,6 +232,8 @@ Accessibility / shadow DOM:
     see html5 scene graph google doc
     see http://www.html5accessibility.com/
     consider something like http://bl.ocks.org/mbostock/1276463
+    shadow dom article: http://glazkov.com/2011/01/14/what-the-heck-is-shadow-dom/
+        spec: http://www.w3.org/TR/shadow-dom/
 
 Node:
     Feature TODO:
@@ -227,6 +244,7 @@ Node:
             SVG: how to handle?
                 group opacity ('opacity' attribute)
         Pickable flag - check Piccolo behavior. consider flag for whether invisible nodes get picked or not (probably yes, for hit regions!)
+    Consider assert to warn on nonexistent mutator key.
     Ability to specify children in arg, i.e. setChildren, that will fail if there are any at all, so we can do Node( { children: ... } );
     Support setting some settings in the mutator with other objects. e.g.:
         new Node( { scale: { x: 1, y: 2 } } );
