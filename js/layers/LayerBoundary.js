@@ -32,11 +32,11 @@ define( function( require ) {
     constructor: LayerBoundary,
     
     hasPrevious: function() {
-      return !!this.previousLayerType;
+      return !!this.previousSelfTrail;
     },
     
     hasNext: function() {
-      return !!this.nextLayerType;
+      return !!this.nextSelfTrail;
     }
   };
   
