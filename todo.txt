@@ -156,18 +156,11 @@ Layers / caching:
             2) Walk through to last unaffected self
             3) Stitch together based on that information
         SVG: ref-count groups by children, so that we can remove unused groups
-    *** Clean up LayerState and decide on specifics. Right now we have both pointers and trails? Is that useful for stitching?
-    * SVG example bounds (clipping outside SVG rect) handling, since CSS transforms may change things?
-    Performance hints, like "this moves a lot", "have this be crisp, it's static", etc.
-        movement: 'dynamic' / 'static' ? 'translation', 'affine', ...?
-        * might help to save an internal flag that signals whether this node "modifies layers", as above.
+    Performance hints
+        Dynamic, so we could set node.movement = 'dynamic' while moving, node.movement = 'static' while stationary?
         Generalized performance flags, so that each node can vary is renderer / settings based on desired appearance
             quality: 'low' / 'medium' / 'high' ?
             flags like 'moving' or 'stationary' could help for dynamic objects. Scenery would then decide whether to optimize the layers or not
-    LayerStrategy:
-        Consolidate into one default strategy that handles everything common (CSS transforms, per-layer settings, etc)
-        Enforce splitting if the base node !== scene
-        Handle the correct LayerType with args specifying the node
     Transform "caching" should be shared between the CSS / Canvas(local)-based methods
         Deal with making sure we don't have "clipping" of the bounds
     ** Slight bit of rounding if necessary to pixel-aligned integral numbers may get performance benefits
