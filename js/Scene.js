@@ -397,11 +397,13 @@ define( function( require ) {
   };
   
   Scene.prototype.initializeFullscreenEvents = function( parameters ) {
+    var element = this.$main[0];
     this.initializeEvents( _.extend( {}, {
       preventDefault: true,
       listenerTarget: document,
       pointFromEvent: function( evt ) {
-        return new Vector2( evt.pageX, evt.pageY );
+        var mainBounds = element.getBoundingClientRect();
+        return new Vector2( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
       }
     }, parameters ) );
   };
