@@ -242,23 +242,18 @@ define( function( require ) {
   // what layer does this trail's terminal node render in?
   Scene.prototype.layerLookup = function( trail ) {
     // TODO: add tree form for optimization! this is slower than necessary, it shouldn't be O(n)!
-    
     assert && assert( !( trail.isEmpty() || trail.nodes[0] !== this ), 'layerLookup root matches' );
+    assert && assert( trail.lastNode().hasSelf(), 'layerLookup only supports nodes with hasSelf(), as this guarantees an unambiguous answer' ); 
     
     if ( this.layers.length === 0 ) {
       throw new Error( 'no layers in the scene' );
     }
     
-    // point to the beginning of the node, right before it would be rendered
-    var pointer = new scenery.TrailPointer( trail, true );
-    
     for ( var i = 0; i < this.layers.length; i++ ) {
       var layer = this.layers[i];
       
-      // the first layer whose end point is equal to or past our pointer should contain the trail
-      if ( pointer.compareNested( layer.endPointer ) !== 1 ) {
-        // TODO: consider removal for performance
-        assert && assert( pointer.compareNested( layer.startPointer ) !== -1, 'node not contained in a layer' );
+      if ( trail.compare( layer.endSelfTrail ) <= 0 ) {
+        assert && assert( trail.compare( layer.startSelfTrail ) >= 0 );
         return layer;
       }
     }
