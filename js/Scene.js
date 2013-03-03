@@ -179,7 +179,7 @@ define( function( require ) {
     
     builder.run();
     
-    var boundaries = builder.boundaries;
+    this.boundaries = builder.boundaries;
     
     var layerArgs = {
       $main: this.$main,
@@ -189,11 +189,11 @@ define( function( require ) {
     
     this.layers = [];
     
-    console.log( boundaries );
+    console.log( this.boundaries );
     
-    for ( var i = 1; i < boundaries.length; i++ ) {
-      var startBoundary = boundaries[i-1];
-      var endBoundary = boundaries[i];
+    for ( var i = 1; i < this.boundaries.length; i++ ) {
+      var startBoundary = this.boundaries[i-1];
+      var endBoundary = this.boundaries[i];
       
       assert && assert( startBoundary.nextLayerType === endBoundary.previousLayerType );
       var layerType = startBoundary.nextLayerType;
@@ -207,11 +207,18 @@ define( function( require ) {
       this.layers.push( layer );
     }
     
-    // console.log( '---' );
-    // console.log( 'layers rebuilt:' );
-    // _.each( this.layers, function( layer ) {
-    //   console.log( layer.toString() );
-    // } );
+    console.log( '---' );
+    console.log( 'boundaries:' );
+    _.each( this.boundaries, function( boundary ) {
+      console.log( 'boundary:' );
+      console.log( '    types:    ' + ( boundary.hasPrevious() ? boundary.previousLayerType.name : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextLayerType.name : '' ) );
+      console.log( '    trails:   ' + ( boundary.hasPrevious() ? boundary.previousSelfTrail.getUniqueId() : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextSelfTrail.getUniqueId() : '' ) );
+      console.log( '    pointers: ' + ( boundary.hasPrevious() ? boundary.previousEndPointer.toString() : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextStartPointer.toString() : '' ) );
+    } );
+    console.log( 'layers:' );
+    _.each( this.layers, function( layer ) {
+      console.log( layer.toString() );
+    } );
   };
   
   // after layer changes, the layers should have their zIndex updated
