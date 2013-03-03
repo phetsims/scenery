@@ -62,7 +62,7 @@ define( function( require ) {
     
     // whenever the base node's children or self change bounds, signal this. we want to explicitly ignore the base node's main bounds for
     // CSS transforms, since the self / children bounds may not have changed
-    this.baseNode.addEventListener( {
+    this.baseNodeListener = {
       selfBounds: function( bounds ) {
         layer.baseNodeInternalBoundsChange();
       },
@@ -70,7 +70,8 @@ define( function( require ) {
       childBounds: function( bounds ) {
         layer.baseNodeInternalBoundsChange();
       }
-    } );
+    };
+    this.baseNode.addEventListener( this.baseNodeListener );
     
     this.fitToBounds = this.usesPartialCSSTransforms || this.cssTransform;
     assert && assert( this.fitToBounds || this.baseNode === this.scene, 'If the baseNode is not the scene, we need to fit the bounds' );
@@ -128,7 +129,7 @@ define( function( require ) {
     },
     
     dispose: function() {
-      throw new Error( 'Layer.dispose unimplemented' );
+      this.baseNode.removeEventListener( this.baseNodeListener );
     },
     
     // args should contain node, bounds (local bounds), transform, trail

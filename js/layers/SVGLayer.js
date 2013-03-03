@@ -146,6 +146,7 @@ define( function( require ) {
     },
     
     dispose: function() {
+      Layer.prototype.dispose.call( this );
       this.$svg.detach();
     },
     
