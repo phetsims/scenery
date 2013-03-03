@@ -6,6 +6,7 @@ Bugs:
     iPad crashing on devious drag:
         translateZ( 0 )?
         memory issue?
+            Consider option that would resize / position canvas/svg elements to smaller portions of the screen for lower memory usage (and possibly better performance?)
     SVG/CSS manipulation outisde the requestAnimationFrame loop in Mobile Safari causes major dropping of requestAnimationFrame
     Switching renderers in Devious Drag example on iPad causes other objects being dragged to be "dropped"
     Nexus 7 hidef scaling
