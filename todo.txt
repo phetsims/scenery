@@ -3,13 +3,6 @@ SR's list:
     Arrow shape
 
 Bugs:
-    **** iPad crashing on devious drag:
-        translateZ( 0 )?
-        memory issue?
-            Consider option that would resize / position canvas/svg elements to smaller portions of the screen for lower memory usage (and possibly better performance?)
-                Tiling, possibly lock to every 16 pixels. Prevent back-and-forth every frame, and consider full size for animation vs changing
-                Would be setting position (layout change) and possibly width. If we can keep width the same, it may be faster?
-            See http://developer.apple.com/library/safari/#documentation/AppleApplications/Reference/SafariWebContent/CreatingContentforSafarioniPhone/CreatingContentforSafarioniPhone.html#//apple_ref/doc/uid/TP40006482-SW15
     *** SVG/CSS manipulation outisde the requestAnimationFrame loop in Mobile Safari causes major dropping of requestAnimationFrame
         Layer.domManipulation( callback ), either immediately calls or batches for next Layer.render()
     Switching renderers in Devious Drag example on iPad causes other objects being dragged to be "dropped"
@@ -151,6 +144,9 @@ DOM:
     Examine test code for considerations for implementing Shape.
 
 Layers / caching:
+    Consider option that would resize / position canvas/svg elements to smaller portions of the screen for lower memory usage (and possibly better performance?)
+        Tiling, possibly lock to every 16 pixels. Prevent back-and-forth every frame, and consider full size for animation vs changing
+        Would be setting position (layout change) and possibly width. If we can keep width the same, it may be faster?
     * Move Trail / TrailPointer to util?
     Implications of last boundary's previousEndPointer being null? (vs scene.after)
     * Make RendererOptions its own class with utilities, that can be added?
