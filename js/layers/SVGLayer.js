@@ -64,8 +64,6 @@ define( function( require ) {
     this.baseTransformChange = true;
     
     this.initializeBoundaries();
-    
-    console.log( this.batchDOMChanges );
   };
   var SVGLayer = scenery.SVGLayer;
   
@@ -142,13 +140,17 @@ define( function( require ) {
     },
     
     render: function( scene, args ) {
-      this.flushDOMChanges();
+      var layer = this;
       if ( this.baseTransformDirty ) {
-        this.updateBaseTransform( this.baseTransformChange );
+        // this will be run either now or at the end of flushing changes
+        this.domChange( function() {
+          layer.updateBaseTransform( layer.baseTransformChange );
+        } );
         
         this.baseTransformDirty = false;
         this.baseTransformChange = false;
       }
+      this.flushDOMChanges();
     },
     
     dispose: function() {
