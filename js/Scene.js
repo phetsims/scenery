@@ -22,7 +22,7 @@ define( function( require ) {
   require( 'SCENERY/Trail' );
   require( 'SCENERY/TrailPointer' );
   require( 'SCENERY/input/Input' );
-  require( 'SCENERY/layers/LayerState' );
+  require( 'SCENERY/layers/LayerBuilder' );
   require( 'SCENERY/layers/Renderer' );
   
   var Util = require( 'SCENERY/util/Util' );
@@ -172,7 +172,7 @@ define( function( require ) {
     this.disposeLayers();
     
     // TODO: internal API rethink
-    var state = new scenery.LayerState();
+    var state = new scenery.LayerBuilder();
     
     if ( this.preferredSceneLayerType ) {
       state.pushPreferredLayerType( this.preferredSceneLayerType );

@@ -2,7 +2,7 @@
 
 /**
  * Controls the underlying layer behavior around a node. The node's LayerStrategy's enter() and exit() will be
- * called in a depth-first order during the layer building process, and will modify a LayerState to signal any
+ * called in a depth-first order during the layer building process, and will modify a LayerBuilder to signal any
  * layer-specific signals.
  *
  * This generally ensures that a layer containing the proper renderer and settings to support its associated node
@@ -25,7 +25,8 @@ define( function( require ) {
    * Specified as such, since there is no needed shared state (we can have node.layerStrategy = scenery.LayerStrategy for many nodes)
    */
   scenery.LayerStrategy = {
-    enter: function( trail, layerState ) {
+    enter: function( pointer, layerState ) {
+      var trail = pointer.trail;
       var node = trail.lastNode();
       var preferredLayerType;
       
@@ -44,7 +45,7 @@ define( function( require ) {
         // push the preferred layer type
         layerState.pushPreferredLayerType( preferredLayerType );
         if ( layerState.getCurrentLayerType() !== preferredLayerType ) {
-          layerState.switchToType( trail, preferredLayerType );
+          layerState.switchToType( pointer, preferredLayerType );
         }
       } else if ( node.hasSelf() ) {
         // node doesn't specify a renderer, but hasSelf.
@@ -56,23 +57,23 @@ define( function( require ) {
         // If any of the preferred types are compatible, use the top one. This allows us to support caching and hierarchical layer types
         if ( preferredLayerType ) {
           if ( currentType !== preferredLayerType ) {
-            layerState.switchToType( trail, preferredLayerType );
+            layerState.switchToType( pointer, preferredLayerType );
           }
         } else {
           // if no preferred types are compatible, only switch if the current type is also incompatible
           if ( !currentType || !currentType.supportsNode( node ) ) {
-            layerState.switchToType( trail, supportedRenderers[0].defaultLayerType );
+            layerState.switchToType( pointer, supportedRenderers[0].defaultLayerType );
           }
         }
       }
       
       if ( node.isLayerSplitBefore() || this.hasSplitFlags( node ) ) {
-        layerState.switchToType( trail, layerState.getCurrentLayerType() );
+        layerState.switchToType( pointer, layerState.getCurrentLayerType() );
       }
       
       if ( node.hasSelf() ) {
         // trigger actual layer creation if necessary (allow collapsing of layers otherwise)
-        layerState.markSelf();
+        layerState.markSelf( pointer );
       }
     },
     
@@ -84,7 +85,8 @@ define( function( require ) {
     //   // no-op, and possibly not used
     // },
     
-    exit: function( trail, layerState ) {
+    exit: function( pointer, layerState ) {
+      var trail = pointer.trail;
       var node = trail.lastNode();
       
       if ( node.hasRenderer() ) {
@@ -94,12 +96,12 @@ define( function( require ) {
         // this allows us to not 'leak' the renderer information, and the temporary layer type is most likely collapsed and ignored
         // NOTE: disabled for now, since this prevents us from having adjacent children sharing the same layer type
         // if ( layerState.getCurrentLayerType() !== layerState.getPreferredLayerType() ) {
-        //   layerState.switchToType( trail, layerState.getPreferredLayerType() );
+        //   layerState.switchToType( pointer, layerState.getPreferredLayerType() );
         // }
       }
       
       if ( node.isLayerSplitAfter() || this.hasSplitFlags( node ) ) {
-        layerState.switchToType( trail, layerState.getCurrentLayerType() );
+        layerState.switchToType( pointer, layerState.getCurrentLayerType() );
       }
     },
     

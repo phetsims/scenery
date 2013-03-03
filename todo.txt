@@ -134,6 +134,8 @@ DOM:
     Examine test code for considerations for implementing Shape.
 
 Layers / caching:
+    * Move Trail / TrailPointer to util?
+    Implications of last boundary's previousEndPointer being null? (vs scene.after)
     * Make RendererOptions its own class with utilities, that can be added?
     Refreshing / changes:
         Think conceptually between 'self' nodes. Just refresh between the minimum bounding self nodes that were not affected by the change.
