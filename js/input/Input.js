@@ -106,6 +106,93 @@ define( function( require ) {
       this.cancelEvent( touch, event );
     },
     
+    pointerDown: function( id, type, point, event ) {
+      switch ( type ) {
+        case 'mouse':
+          this.mouseDown( point, event );
+          break;
+        case 'touch':
+          this.touchStart( id, point, event );
+          break;
+        case 'pen':
+          // TODO: pen input
+          break;
+        default:
+          if ( console.log ) {
+            console.log( 'Unknown pointer type: ' + type );
+          }
+      }
+    },
+    
+    pointerUp: function( id, type, point, event ) {
+      switch ( type ) {
+        case 'mouse':
+          this.mouseUp( point, event );
+          break;
+        case 'touch':
+          this.touchEnd( id, point, event );
+          break;
+        case 'pen':
+          // TODO: pen input
+          break;
+        default:
+          if ( console.log ) {
+            console.log( 'Unknown pointer type: ' + type );
+          }
+      }
+    },
+    
+    pointerMove: function( id, type, point, event ) {
+      switch ( type ) {
+        case 'mouse':
+          // TODO: a mouse can cancel? no mapping yet for that
+          break;
+        case 'touch':
+          this.touchCancel( id, point, event );
+          break;
+        case 'pen':
+          // TODO: pen input
+          break;
+        default:
+          if ( console.log ) {
+            console.log( 'Unknown pointer type: ' + type );
+          }
+      }
+    },
+    
+    pointerCancel: function( id, type, point, event ) {
+      switch ( type ) {
+        case 'mouse':
+          this.mouseMove( point, event );
+          break;
+        case 'touch':
+          this.touchMove( id, point, event );
+          break;
+        case 'pen':
+          // TODO!
+          break;
+        default:
+          if ( console.log ) {
+            console.log( 'Unknown pointer type: ' + type );
+          }
+      }
+    },
+    
+    pointerOver: function( id, type, point, event ) {
+      
+    },
+    
+    pointerOut: function( id, type, point, event ) {
+      
+    },
+    
+    pointerEnter: function( id, type, point, event ) {
+      
+    },
+    
+    pointerLeave: function( id, type, point, event ) {
+      
+    },
     
     upEvent: function( finger, event ) {
       var trail = this.scene.trailUnderPoint( finger.point ) || new scenery.Trail( this.scene );
