@@ -32,7 +32,7 @@ define( function( require ) {
     
     this.layerTypeStack = [];
     this.boundaries = [];
-    this.pendingBoundary = new scenery.LayerBoundary(); // TODO: ensure all of the properties are set for the 'previous'
+    this.pendingBoundary = new scenery.LayerBoundary();
     this.pendingBoundary.previousLayerType = previousLayerType;
     this.pendingBoundary.previousSelfTrail = previousSelfTrail;
     
