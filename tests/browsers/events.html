@@ -44,9 +44,21 @@
   // see http://www.w3.org/TR/pointerevents/
   // see http://msdn.microsoft.com/en-us/library/ie/hh673557(v=vs.85).aspx
   var pointerEvents = [
-    // MSPointerMove
-    'MSPointerDown', 'MSPointerUp', 'MSPointerCancel', 'MSPointerMove', 'MSPointerOver', 'MSPointerOut', 'MSPointerEnter', 'MSPointerLeave', 'MSGotPointerCapture', 'MSLostPointerCapture',
-    'pointerdown', 'pointerup', 'pointercancel', 'pointermove', 'pointerover', 'pointerout', 'pointerenter', 'pointerleave', 'gotpointercapture', 'lostpointercapture'
+    // MSPointerMove (see http://msdn.microsoft.com/en-us/library/windows/apps/hh441233.aspx)
+    'MSPointerDown',
+    'MSPointerUp',
+    'MSPointerCancel',
+    'MSPointerMove',
+    'MSPointerOver',
+    'MSPointerOut',
+    'MSPointerEnter', // not seen
+    'MSPointerLeave', // not seen
+    'MSGotPointerCapture', // see http://msdn.microsoft.com/en-us/library/windows/apps/hh465850.aspx
+    'MSLostPointerCapture',
+    
+    'pointerdown', 'pointerup', 'pointercancel', 'pointermove', 'pointerover', 'pointerout', 'pointerenter', 'pointerleave', 'gotpointercapture', 'lostpointercapture',
+    
+    'MSPointerHover'
   ];
   
   _.each( mouseEvents, function( mouseEvent ) {
@@ -69,7 +81,23 @@
   
   _.each( pointerEvents, function( pointerEvent ) {
     document.addEventListener( pointerEvent, function( event ) {
-      addMessage( event.type + ' ' + event.pointerId + ' ' + event.pointerType + ' ' + event.isPrimary );
+      var pointerType = event.pointerType;
+      if ( window.navigator.msPointerEnabled ) {
+        if ( event.pointerType === event.MSPOINTER_TYPE_TOUCH ) {
+          pointerType = 'touch';
+        } else if ( event.pointerType === event.MSPOINTER_TYPE_PEN ) {
+          pointerType = 'pen';
+        } else if ( event.pointerType === event.MSPOINTER_TYPE_MOUSE ) {
+          pointerType = 'mouse';
+        }
+      }
+      
+      // pressure
+      // tiltX
+      // tiltY
+      // isPrimary
+      // use pointerId as the identifier!
+      addMessage( event.type + ' ' + event.pointerId + ' ' + pointerType + ' ' + event.isPrimary );
       event.preventDefault();
     } );
   } );
