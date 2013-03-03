@@ -25,12 +25,15 @@ define( function( require ) {
   require( 'SCENERY/input/Touch' );
   require( 'SCENERY/input/Event' );
   
-  scenery.Input = function( scene ) {
+  scenery.Input = function( scene, listenerTarget ) {
     this.scene = scene;
+    this.listenerTarget = listenerTarget;
     
     this.mouse = new scenery.Mouse();
     
     this.fingers = [ this.mouse ];
+    
+    this.listenerReferences = [];
   };
   var Input = scenery.Input;
   
@@ -107,6 +110,7 @@ define( function( require ) {
     },
     
     pointerDown: function( id, type, point, event ) {
+      console.log( 'pointerDown: ' + id + ', ' + type + ', ' + point.toString() );
       switch ( type ) {
         case 'mouse':
           this.mouseDown( point, event );
@@ -125,6 +129,7 @@ define( function( require ) {
     },
     
     pointerUp: function( id, type, point, event ) {
+      console.log( 'pointerUp: ' + id + ', ' + type + ', ' + point.toString() );
       switch ( type ) {
         case 'mouse':
           this.mouseUp( point, event );
@@ -143,6 +148,7 @@ define( function( require ) {
     },
     
     pointerMove: function( id, type, point, event ) {
+      console.log( 'pointerMove: ' + id + ', ' + type + ', ' + point.toString() );
       switch ( type ) {
         case 'mouse':
           // TODO: a mouse can cancel? no mapping yet for that
@@ -161,6 +167,7 @@ define( function( require ) {
     },
     
     pointerCancel: function( id, type, point, event ) {
+      console.log( 'pointerCancel: ' + id + ', ' + type + ', ' + point.toString() );
       switch ( type ) {
         case 'mouse':
           this.mouseMove( point, event );
@@ -344,6 +351,18 @@ define( function( require ) {
           return;
         }
       }
+    },
+    
+    addListener: function( type, callback, useCapture ) {
+      $( this.listenerTarget ).on( type, callback, useCapture );
+      this.listenerReferences.push( { type: type, callback: callback, useCapture: useCapture } );
+    },
+    
+    diposeListeners: function() {
+      var input = this;
+      _.each( this.listenerReferences, function( ref ) {
+        $( input.listenerTarget ).off( ref.type, ref.callback, ref.useCapture );
+      } );
     }
   };
   

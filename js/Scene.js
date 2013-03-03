@@ -418,35 +418,23 @@ define( function( require ) {
     var listenerTarget = parameters.listenerTarget;
     var preventDefault = parameters.preventDefault;
     
-    var input = new scenery.Input( scene );
+    var input = new scenery.Input( scene, listenerTarget );
     scene.input = input;
     
-    $( listenerTarget ).on( 'mousedown', function( jEvent ) {
-      var evt = jEvent.originalEvent;
-      if ( preventDefault ) { jEvent.preventDefault(); }
-      input.mouseDown( pointFromEvent( evt ), evt );
-    } );
-    $( listenerTarget ).on( 'mouseup', function( jEvent ) {
-      var evt = jEvent.originalEvent;
-      if ( preventDefault ) { jEvent.preventDefault(); }
-      input.mouseUp( pointFromEvent( evt ), evt );
-    } );
-    $( listenerTarget ).on( 'mousemove', function( jEvent ) {
-      var evt = jEvent.originalEvent;
-      if ( preventDefault ) { jEvent.preventDefault(); }
-      input.mouseMove( pointFromEvent( evt ), evt );
-    } );
-    $( listenerTarget ).on( 'mouseover', function( jEvent ) {
-      var evt = jEvent.originalEvent;
-      if ( preventDefault ) { jEvent.preventDefault(); }
-      input.mouseOver( pointFromEvent( evt ), evt );
-    } );
-    $( listenerTarget ).on( 'mouseout', function( jEvent ) {
-      var evt = jEvent.originalEvent;
-      if ( preventDefault ) { jEvent.preventDefault(); }
-      input.mouseOut( pointFromEvent( evt ), evt );
-    } );
-
+    // maps the current MS pointer types onto the pointer spec
+    function msPointerType( evt ) {
+      console.log( 'actual pointer type: ' + evt.pointerType );
+      if ( evt.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_TOUCH ) {
+        return 'touch';
+      } else if ( evt.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_PEN ) {
+        return 'pen';
+      } else if ( evt.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_MOUSE ) {
+        return 'mouse';
+      } else {
+        return evt.pointerType; // hope for the best
+      }
+    }
+    
     function forEachChangedTouch( evt, callback ) {
       for ( var i = 0; i < evt.changedTouches.length; i++ ) {
         // according to spec (http://www.w3.org/TR/touch-events/), this is not an Array, but a TouchList
@@ -455,35 +443,128 @@ define( function( require ) {
         callback( touch.identifier, pointFromEvent( touch ) );
       }
     }
-
-    $( listenerTarget ).on( 'touchstart', function( jEvent ) {
-      var evt = jEvent.originalEvent;
-      if ( preventDefault ) { jEvent.preventDefault(); }
-      forEachChangedTouch( evt, function( id, point ) {
-        input.touchStart( id, point, evt );
+    
+    // TODO: massive boilerplate reduction! closures should help tons!
+    
+    if ( window.navigator && window.navigator.pointerEnabled ) {
+      // accepts pointer events corresponding to the spec at http://www.w3.org/TR/pointerevents/
+      input.addListener( 'pointerdown', function( jEvent ) {
+        var evt = jEvent.originalEvent;
+        if ( preventDefault ) { jEvent.preventDefault(); }
+        input.pointerDown( evt.pointerId, evt.pointerType, pointFromEvent( evt ), evt );
       } );
-    } );
-    $( listenerTarget ).on( 'touchend', function( jEvent ) {
-      var evt = jEvent.originalEvent;
-      if ( preventDefault ) { jEvent.preventDefault(); }
-      forEachChangedTouch( evt, function( id, point ) {
-        input.touchEnd( id, point, evt );
+      input.addListener( 'pointerup', function( jEvent ) {
+        var evt = jEvent.originalEvent;
+        if ( preventDefault ) { jEvent.preventDefault(); }
+        input.pointerUp( evt.pointerId, evt.pointerType, pointFromEvent( evt ), evt );
       } );
-    } );
-    $( listenerTarget ).on( 'touchmove', function( jEvent ) {
-      var evt = jEvent.originalEvent;
-      if ( preventDefault ) { jEvent.preventDefault(); }
-      forEachChangedTouch( evt, function( id, point ) {
-        input.touchMove( id, point, evt );
+      input.addListener( 'pointermove', function( jEvent ) {
+        var evt = jEvent.originalEvent;
+        if ( preventDefault ) { jEvent.preventDefault(); }
+        input.pointerMove( evt.pointerId, evt.pointerType, pointFromEvent( evt ), evt );
       } );
-    } );
-    $( listenerTarget ).on( 'touchcancel', function( jEvent ) {
-      var evt = jEvent.originalEvent;
-      if ( preventDefault ) { jEvent.preventDefault(); }
-      forEachChangedTouch( evt, function( id, point ) {
-        input.touchCancel( id, point, evt );
+      input.addListener( 'pointerover', function( jEvent ) {
+        var evt = jEvent.originalEvent;
+        if ( preventDefault ) { jEvent.preventDefault(); }
+        input.pointerOver( evt.pointerId, evt.pointerType, pointFromEvent( evt ), evt );
       } );
-    } );
+      input.addListener( 'pointerout', function( jEvent ) {
+        var evt = jEvent.originalEvent;
+        if ( preventDefault ) { jEvent.preventDefault(); }
+        input.pointerOut( evt.pointerId, evt.pointerType, pointFromEvent( evt ), evt );
+      } );
+      input.addListener( 'pointercancel', function( jEvent ) {
+        var evt = jEvent.originalEvent;
+        if ( preventDefault ) { jEvent.preventDefault(); }
+        input.pointerCancel( evt.pointerId, evt.pointerType, pointFromEvent( evt ), evt );
+      } );
+    } else if ( window.navigator && window.navigator.msPointerEnabled ) {
+      input.addListener( 'MSPointerDown', function( jEvent ) {
+        var evt = jEvent.originalEvent;
+        if ( preventDefault ) { jEvent.preventDefault(); }
+        input.pointerDown( evt.pointerId, msPointerType( evt.pointerType ), pointFromEvent( evt ), evt );
+      } );
+      input.addListener( 'MSPointerUp', function( jEvent ) {
+        var evt = jEvent.originalEvent;
+        if ( preventDefault ) { jEvent.preventDefault(); }
+        input.pointerUp( evt.pointerId, msPointerType( evt.pointerType ), pointFromEvent( evt ), evt );
+      } );
+      input.addListener( 'MSPointerMove', function( jEvent ) {
+        var evt = jEvent.originalEvent;
+        if ( preventDefault ) { jEvent.preventDefault(); }
+        input.pointerMove( evt.pointerId, msPointerType( evt.pointerType ), pointFromEvent( evt ), evt );
+      } );
+      input.addListener( 'MSPointerOver', function( jEvent ) {
+        var evt = jEvent.originalEvent;
+        if ( preventDefault ) { jEvent.preventDefault(); }
+        input.pointerOver( evt.pointerId, msPointerType( evt.pointerType ), pointFromEvent( evt ), evt );
+      } );
+      input.addListener( 'MSPointerOut', function( jEvent ) {
+        var evt = jEvent.originalEvent;
+        if ( preventDefault ) { jEvent.preventDefault(); }
+        input.pointerOut( evt.pointerId, msPointerType( evt.pointerType ), pointFromEvent( evt ), evt );
+      } );
+      input.addListener( 'MSPointerCancel', function( jEvent ) {
+        var evt = jEvent.originalEvent;
+        if ( preventDefault ) { jEvent.preventDefault(); }
+        input.pointerCancel( evt.pointerId, msPointerType( evt.pointerType ), pointFromEvent( evt ), evt );
+      } );
+    } else {
+      input.addListener( 'mousedown', function( jEvent ) {
+        var evt = jEvent.originalEvent;
+        if ( preventDefault ) { jEvent.preventDefault(); }
+        input.mouseDown( pointFromEvent( evt ), evt );
+      } );
+      input.addListener( 'mouseup', function( jEvent ) {
+        var evt = jEvent.originalEvent;
+        if ( preventDefault ) { jEvent.preventDefault(); }
+        input.mouseUp( pointFromEvent( evt ), evt );
+      } );
+      input.addListener( 'mousemove', function( jEvent ) {
+        var evt = jEvent.originalEvent;
+        if ( preventDefault ) { jEvent.preventDefault(); }
+        input.mouseMove( pointFromEvent( evt ), evt );
+      } );
+      input.addListener( 'mouseover', function( jEvent ) {
+        var evt = jEvent.originalEvent;
+        if ( preventDefault ) { jEvent.preventDefault(); }
+        input.mouseOver( pointFromEvent( evt ), evt );
+      } );
+      input.addListener( 'mouseout', function( jEvent ) {
+        var evt = jEvent.originalEvent;
+        if ( preventDefault ) { jEvent.preventDefault(); }
+        input.mouseOut( pointFromEvent( evt ), evt );
+      } );
+      
+      input.addListener( 'touchstart', function( jEvent ) {
+        var evt = jEvent.originalEvent;
+        if ( preventDefault ) { jEvent.preventDefault(); }
+        forEachChangedTouch( evt, function( id, point ) {
+          input.touchStart( id, point, evt );
+        } );
+      } );
+      input.addListener( 'touchend', function( jEvent ) {
+        var evt = jEvent.originalEvent;
+        if ( preventDefault ) { jEvent.preventDefault(); }
+        forEachChangedTouch( evt, function( id, point ) {
+          input.touchEnd( id, point, evt );
+        } );
+      } );
+      input.addListener( 'touchmove', function( jEvent ) {
+        var evt = jEvent.originalEvent;
+        if ( preventDefault ) { jEvent.preventDefault(); }
+        forEachChangedTouch( evt, function( id, point ) {
+          input.touchMove( id, point, evt );
+        } );
+      } );
+      input.addListener( 'touchcancel', function( jEvent ) {
+        var evt = jEvent.originalEvent;
+        if ( preventDefault ) { jEvent.preventDefault(); }
+        forEachChangedTouch( evt, function( id, point ) {
+          input.touchCancel( id, point, evt );
+        } );
+      } );
+    }
   };
   
   Scene.prototype.resizeOnWindowResize = function() {
