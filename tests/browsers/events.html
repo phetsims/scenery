@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Events test - Scenery</title>
+  
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+
+  <!-- runs in full-screen mode on iOS devices -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  
+  <script src="../../contrib/jquery-1.8.3.min.js"></script>
+  <script src="../../contrib/lodash.min-1.0.0-rc.3.js"></script>
+  
+  <style>
+    html { 
+      -ms-touch-action: none; /* Direct all pointer events to JavaScript code. */
+    }
+  </style>
+</head>
+<body>
+  
+  <div id="output"></div>
+  
+  <script type="text/javascript">
+  
+  function addMessage( str ) {
+    var $output = $( '#output' );
+    while ( $output[0].children.length > 20 ) {
+      $output[0].removeChild( $output[0].children[0] );
+    }
+    $output.append( $( '<div>' ).text( new Date().getMilliseconds() + '  ' + str ) );
+  }
+  
+  addMessage( 'window.navigator.msPointerEnabled: ' + window.navigator.msPointerEnabled );
+  addMessage( 'window.navigator.msMaxTouchPoints: ' + window.navigator.msMaxTouchPoints );
+  
+  // see http://www.w3.org/TR/DOM-Level-3-Events/
+  var mouseEvents = [ 'mousedown', 'mouseup', 'mousemove', 'mouseover', 'mouseout' ];
+  
+  // see http://www.w3.org/TR/touch-events/
+  var touchEvents = [ 'touchstart', 'touchend', 'touchmove', 'touchcancel' ];
+  
+  // see http://www.w3.org/TR/pointerevents/
+  // see http://msdn.microsoft.com/en-us/library/ie/hh673557(v=vs.85).aspx
+  var pointerEvents = [
+    // MSPointerMove
+    'MSPointerDown', 'MSPointerUp', 'MSPointerCancel', 'MSPointerMove', 'MSPointerOver', 'MSPointerOut', 'MSPointerEnter', 'MSPointerLeave', 'MSGotPointerCapture', 'MSLostPointerCapture',
+    'pointerdown', 'pointerup', 'pointercancel', 'pointermove', 'pointerover', 'pointerout', 'pointerenter', 'pointerleave', 'gotpointercapture', 'lostpointercapture'
+  ];
+  
+  _.each( mouseEvents, function( mouseEvent ) {
+    document.addEventListener( mouseEvent, function( event ) {
+      addMessage( event.type );
+      event.preventDefault();
+    } );
+  } );
+  
+  _.each( touchEvents, function( touchEvent ) {
+    document.addEventListener( touchEvent, function( event ) {
+      var str = event.type;
+      for ( var i = 0; i < event.changedTouches.length; i++ ) {
+        str += ' ' + event.changedTouches.item( i ).identifier
+      }
+      addMessage( str );
+      event.preventDefault();
+    } );
+  } );
+  
+  _.each( pointerEvents, function( pointerEvent ) {
+    document.addEventListener( pointerEvent, function( event ) {
+      addMessage( event.type + ' ' + event.pointerId + ' ' + event.pointerType + ' ' + event.isPrimary );
+      event.preventDefault();
+    } );
+  } );
+  
+  </script>
+
+</body>
+</html>
