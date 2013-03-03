@@ -138,7 +138,7 @@ define( function( require ) {
       
       var confirmedBoundary = this.pendingBoundary;
       
-      confirmedBoundary.nextSelfTrail = selfPointer ? selfPointer.trail : null;
+      confirmedBoundary.nextSelfTrail = selfPointer ? selfPointer.trail.copy() : null;
       
       this.boundaries.push( confirmedBoundary );
       
