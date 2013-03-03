@@ -189,7 +189,7 @@ define( function( require ) {
     
     this.layers = [];
     
-    console.log( this.boundaries );
+    // console.log( this.boundaries );
     
     for ( var i = 1; i < this.boundaries.length; i++ ) {
       var startBoundary = this.boundaries[i-1];
@@ -207,18 +207,18 @@ define( function( require ) {
       this.layers.push( layer );
     }
     
-    console.log( '---' );
-    console.log( 'boundaries:' );
-    _.each( this.boundaries, function( boundary ) {
-      console.log( 'boundary:' );
-      console.log( '    types:    ' + ( boundary.hasPrevious() ? boundary.previousLayerType.name : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextLayerType.name : '' ) );
-      console.log( '    trails:   ' + ( boundary.hasPrevious() ? boundary.previousSelfTrail.getUniqueId() : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextSelfTrail.getUniqueId() : '' ) );
-      console.log( '    pointers: ' + ( boundary.hasPrevious() ? boundary.previousEndPointer.toString() : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextStartPointer.toString() : '' ) );
-    } );
-    console.log( 'layers:' );
-    _.each( this.layers, function( layer ) {
-      console.log( layer.toString() );
-    } );
+    // console.log( '---' );
+    // console.log( 'boundaries:' );
+    // _.each( this.boundaries, function( boundary ) {
+    //   console.log( 'boundary:' );
+    //   console.log( '    types:    ' + ( boundary.hasPrevious() ? boundary.previousLayerType.name : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextLayerType.name : '' ) );
+    //   console.log( '    trails:   ' + ( boundary.hasPrevious() ? boundary.previousSelfTrail.getUniqueId() : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextSelfTrail.getUniqueId() : '' ) );
+    //   console.log( '    pointers: ' + ( boundary.hasPrevious() ? boundary.previousEndPointer.toString() : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextStartPointer.toString() : '' ) );
+    // } );
+    // console.log( 'layers:' );
+    // _.each( this.layers, function( layer ) {
+    //   console.log( layer.toString() );
+    // } );
   };
   
   // after layer changes, the layers should have their zIndex updated
@@ -250,7 +250,7 @@ define( function( require ) {
   Scene.prototype.layerLookup = function( trail ) {
     // TODO: add tree form for optimization! this is slower than necessary, it shouldn't be O(n)!
     assert && assert( !( trail.isEmpty() || trail.nodes[0] !== this ), 'layerLookup root matches' );
-    assert && assert( trail.lastNode().hasSelf(), 'layerLookup only supports nodes with hasSelf(), as this guarantees an unambiguous answer' ); 
+    assert && assert( trail.lastNode().hasSelf(), 'layerLookup only supports nodes with hasSelf(), as this guarantees an unambiguous answer' );
     
     if ( this.layers.length === 0 ) {
       throw new Error( 'no layers in the scene' );
