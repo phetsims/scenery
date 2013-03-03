@@ -284,6 +284,8 @@ define( function( require ) {
      * A shorter subtrail will compare as -1.
      *
      * Assumes that the Trails are properly indexed. If not, please reindex them!
+     *
+     * Comparison is for the rendering order, so an ancestor is 'before' a descendant
      */
     compare: function( other ) {
       assert && assert( !this.isEmpty(), 'cannot compare with an empty trail' );
