@@ -147,6 +147,7 @@ Layers / caching:
     Consider option that would resize / position canvas/svg elements to smaller portions of the screen for lower memory usage (and possibly better performance?)
         Tiling, possibly lock to every 16 pixels. Prevent back-and-forth every frame, and consider full size for animation vs changing
         Would be setting position (layout change) and possibly width. If we can keep width the same, it may be faster?
+        * Also do this for CSS transforms on SVG. Resizing is causing slowness
     * Move Trail / TrailPointer to util?
     Implications of last boundary's previousEndPointer being null? (vs scene.after)
     * Make RendererOptions its own class with utilities, that can be added?
