@@ -4,6 +4,7 @@ SR's list:
 
 Bugs:
     Switching renderers in Devious Drag example on iPad causes other objects being dragged to be "dropped"
+        Probably causes some sort of enter/exit event?
     Nexus 7 hidef scaling
     CSS transform bounds!
     Multi-touch stress test is flickery!
@@ -75,6 +76,8 @@ General:
     Take extension mechanism from Backbone.js: https://github.com/documentcloud/backbone/blob/master/backbone.js#L1471-L1502
 
 Code:
+    Logging:
+        Desired remote logging!
     Debugging:
         http://people.apache.org/~pmuellr/weinre-docs/latest/Home.html
         Add wrapper check in requestAnimationFrame loops with a try{} and print e.stack if it is defined?
