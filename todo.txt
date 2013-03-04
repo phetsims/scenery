@@ -3,8 +3,6 @@ SR's list:
     Arrow shape
 
 Bugs:
-    *** SVG/CSS manipulation outisde the requestAnimationFrame loop in Mobile Safari causes major dropping of requestAnimationFrame
-        Layer.domManipulation( callback ), either immediately calls or batches for next Layer.render()
     Switching renderers in Devious Drag example on iPad causes other objects being dragged to be "dropped"
     Nexus 7 hidef scaling
     CSS transform bounds!
