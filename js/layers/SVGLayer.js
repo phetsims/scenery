@@ -143,8 +143,9 @@ define( function( require ) {
       var layer = this;
       if ( this.baseTransformDirty ) {
         // this will be run either now or at the end of flushing changes
+        var includesBaseTransformChange = this.baseTransformChange;
         this.domChange( function() {
-          layer.updateBaseTransform( layer.baseTransformChange );
+          layer.updateBaseTransform( includesBaseTransformChange );
         } );
         
         this.baseTransformDirty = false;
@@ -163,11 +164,12 @@ define( function( require ) {
     },
     
     markBaseTransformDirty: function( changed ) {
+      var baseTransformChange = this.baseTransformChange || !!changed;
       if ( this.batchDOMChanges ) {
         this.baseTransformDirty = true;
-        this.baseTransformChange = !!changed;
+        this.baseTransformChange = baseTransformChange;
       } else {
-        this.updateBaseTransform( changed );
+        this.updateBaseTransform( baseTransformChange );
       }
     },
     
@@ -176,7 +178,7 @@ define( function( require ) {
       if ( this.cssTransform ) {
         this.baseNodeInternalBoundsChange();
       } else {
-        this.markBaseTransformDirty();
+        this.markBaseTransformDirty( true );
       }
     },
     
@@ -200,6 +202,8 @@ define( function( require ) {
         }
         
         // if this gets removed, update initializeBase()
+        this.markBaseTransformDirty( true );
+      } else if ( this.usesPartialCSSTransforms ) {
         this.markBaseTransformDirty( true );
       }
     },
