@@ -38,6 +38,17 @@
     strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
   } );
   
+  test( 'Line Segment - round', function() {
+    var styles = new Shape.LineStyles();
+    styles.lineWidth = 50;
+    styles.lineCap = 'round';
+    
+    var strokeShape = Shape.lineSegment( p( 100, 100 ), p( 300, 100 ) );
+    var fillShape = strokeShape.getStrokedShape( styles );
+    
+    strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
+  } );
+  
   test( 'Line Join - Miter', function() {
     var styles = new Shape.LineStyles();
     styles.lineWidth = 30;
@@ -56,6 +67,35 @@
     var styles = new Shape.LineStyles();
     styles.lineWidth = 30;
     styles.lineJoin = 'miter';
+    
+    var strokeShape = new Shape();
+    strokeShape.moveTo( 70, 70 );
+    strokeShape.lineTo( 140, 200 );
+    strokeShape.lineTo( 210, 70 );
+    strokeShape.close();
+    var fillShape = strokeShape.getStrokedShape( styles );
+    
+    strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
+  } );
+  
+  test( 'Line Join - Round', function() {
+    var styles = new Shape.LineStyles();
+    styles.lineWidth = 30;
+    styles.lineJoin = 'round';
+    
+    var strokeShape = new Shape();
+    strokeShape.moveTo( 70, 70 );
+    strokeShape.lineTo( 140, 200 );
+    strokeShape.lineTo( 210, 70 );
+    var fillShape = strokeShape.getStrokedShape( styles );
+    
+    strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
+  } );
+  
+  test( 'Line Join - Round - Closed', function() {
+    var styles = new Shape.LineStyles();
+    styles.lineWidth = 30;
+    styles.lineJoin = 'round';
     
     var strokeShape = new Shape();
     strokeShape.moveTo( 70, 70 );
