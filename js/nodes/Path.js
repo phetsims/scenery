@@ -15,7 +15,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  var Node = require( 'SCENERY/Node' );
+  var Node = require( 'SCENERY/nodes/Node' );
   var Renderer = require( 'SCENERY/layers/Renderer' );
   var fillable = require( 'SCENERY/nodes/Fillable' );
   var strokable = require( 'SCENERY/nodes/Strokable' );

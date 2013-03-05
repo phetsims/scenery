@@ -18,9 +18,9 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  var Node = require( 'SCENERY/Node' ); // inherits from Node
-  require( 'SCENERY/Trail' );
-  require( 'SCENERY/TrailPointer' );
+  var Node = require( 'SCENERY/nodes/Node' ); // inherits from Node
+  require( 'SCENERY/util/Trail' );
+  require( 'SCENERY/util/TrailPointer' );
   require( 'SCENERY/input/Input' );
   require( 'SCENERY/layers/LayerBuilder' );
   require( 'SCENERY/layers/Renderer' );

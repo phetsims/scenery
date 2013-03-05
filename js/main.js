@@ -42,12 +42,12 @@ define( [
     'SCENERY/util/Font',
     'SCENERY/util/Util',
     
-    'SCENERY/Node',
-    'SCENERY/RenderState',
+    'SCENERY/nodes/Node',
+    'SCENERY/util/RenderState',
     'SCENERY/Scene',
     'SCENERY/Shape',
-    'SCENERY/Trail',
-    'SCENERY/TrailPointer',
+    'SCENERY/util/Trail',
+    'SCENERY/util/TrailPointer',
     'SCENERY/scenery'
   ], function(
     Renderer,

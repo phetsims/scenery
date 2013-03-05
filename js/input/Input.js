@@ -20,7 +20,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  require( 'SCENERY/Trail' );
+  require( 'SCENERY/util/Trail' );
   require( 'SCENERY/input/Mouse' );
   require( 'SCENERY/input/Touch' );
   require( 'SCENERY/input/Event' );

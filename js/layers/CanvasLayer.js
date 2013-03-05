@@ -22,9 +22,9 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   var Layer = require( 'SCENERY/layers/Layer' ); // uses Layer's prototype for inheritance
-  require( 'SCENERY/RenderState' );
+  require( 'SCENERY/util/RenderState' );
   require( 'SCENERY/Shape' );
-  require( 'SCENERY/Trail' );
+  require( 'SCENERY/util/Trail' );
   require( 'SCENERY/util/Util' );
   
   // assumes main is wrapped with JQuery

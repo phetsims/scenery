@@ -15,8 +15,8 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/layers/LayerBoundary' );
-  require( 'SCENERY/Trail' );
-  require( 'SCENERY/TrailPointer' );
+  require( 'SCENERY/util/Trail' );
+  require( 'SCENERY/util/TrailPointer' );
   
   /*
    * Builds layer information between trails

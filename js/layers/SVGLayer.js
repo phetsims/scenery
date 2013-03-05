@@ -22,7 +22,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   var Layer = require( 'SCENERY/layers/Layer' ); // extends Layer
-  require( 'SCENERY/Trail' );
+  require( 'SCENERY/util/Trail' );
   
   // used namespaces
   var svgns = 'http://www.w3.org/2000/svg';

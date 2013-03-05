@@ -17,7 +17,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  var Node = require( 'SCENERY/Node' ); // Image inherits from Node
+  var Node = require( 'SCENERY/nodes/Node' ); // Image inherits from Node
   var Renderer = require( 'SCENERY/layers/Renderer' ); // we need to specify the Renderer in the prototype
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
   

@@ -16,7 +16,7 @@ define( function( require ) {
   var Transform3 = require( 'DOT/Transform3' );
   
   var scenery = require( 'SCENERY/scenery' );
-  require( 'SCENERY/Trail' );
+  require( 'SCENERY/util/Trail' );
   
   /*
    * Required arguments:

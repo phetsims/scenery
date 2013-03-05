@@ -21,7 +21,7 @@ define( function( require ) {
   // require( 'SCENERY/layers/Renderer' ); // commented out so Require.js doesn't balk at the circular dependency
   
   // TODO: FIXME: Why do I have to comment out this dependency?
-  // require( 'SCENERY/Trail' );
+  // require( 'SCENERY/util/Trail' );
   
   var globalIdCounter = 1;
   

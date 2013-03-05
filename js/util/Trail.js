@@ -21,7 +21,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  require( 'SCENERY/Node' );
+  require( 'SCENERY/nodes/Node' );
   
   scenery.Trail = function( nodes ) {
     if ( nodes instanceof Trail ) {
