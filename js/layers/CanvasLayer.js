@@ -25,6 +25,7 @@ define( function( require ) {
   require( 'SCENERY/util/RenderState' );
   require( 'SCENERY/Shape' );
   require( 'SCENERY/util/Trail' );
+  require( 'SCENERY/util/TrailPointer' );
   require( 'SCENERY/util/Util' );
   
   // assumes main is wrapped with JQuery
@@ -121,8 +122,8 @@ define( function( require ) {
     
     recursiveRender: function( state, args ) {
       var i;
-      var startPointer = this.getStartPointer();
-      var endPointer = this.getEndPointer();
+      var startPointer = new scenery.TrailPointer( this.startSelfTrail, true );
+      var endPointer = new scenery.TrailPointer( this.endSelfTrail, true );
       
       var boundaryTrail;
       

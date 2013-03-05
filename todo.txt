@@ -197,6 +197,7 @@ Layers / caching:
     ** MSPointerMove filter since location may not have changed while touch is down!!!
         See http://blogs.msdn.com/b/ie/archive/2011/10/19/handling-multi-touch-and-mouse-input-in-all-browsers.aspx
     ** Handle the actual 'out/over' events properly
+    **** Restrict SimpleDragHandler to bounds?
     **** Write a multi-finger pinch-to-zoom/rotate handler that is compatible with the drag handler
         Use SVD finger point code for 3+ fingers -- also this could cause shears, so flag for whether 3+ fingers allowed and for shear
         Option whether to rotate/translate/scale or not (for each)
