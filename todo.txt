@@ -80,7 +80,6 @@ Code:
         For each 'class'
         * Hit every 'mutator'
         See http://jashkenas.github.com/docco/ for inspiration
-    'round' line-caps
     Fast text bounds
     Logging:
         Desired remote logging!
