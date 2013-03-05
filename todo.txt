@@ -79,8 +79,10 @@ Code:
     Documentation:
         For each 'class'
         * Hit every 'mutator'
+        See http://jashkenas.github.com/docco/ for inspiration
     Move Node under SCENERY/nodes/
-    Round line-caps
+    'round' line-caps
+    Fast text bounds
     Logging:
         Desired remote logging!
     Debugging:
