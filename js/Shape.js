@@ -302,8 +302,10 @@ define( function( require ) {
         if ( fromTangent.perpendicular().dot( toTangent ) > 0 ) {
           switch( lineStyles.lineJoin ) {
             case 'round':
-              throw new Error( 'stroked round lineJoin not implemented .. add arc/arcTo' );
-              // break;
+              var fromAngle = fromTangent.angle() + Math.PI / 2;
+              var toAngle = toTangent.angle() + Math.PI / 2;
+              shape.addPiece( new Piece.Arc( center, lineWidth / 2, fromAngle, toAngle, true ) );
+              break;
             case 'miter':
               var theta = fromTangent.angleBetween( toTangent.negated() );
               if ( 1 / Math.sin( theta / 2 ) <= lineStyles.miterLimit ) {
