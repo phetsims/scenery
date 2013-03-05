@@ -1085,8 +1085,17 @@ define( function( require ) {
     this.end = end;
   };
   Segment.Cubic.prototype = {
-    // position: (1 - t)^3*p0 + 3*(1 - t)^2*t*p1 + 3*(1 - t) t^2*p2 + t^3*p3
+    // position: (1 - t)^3*start + 3*(1 - t)^2*t*control1 + 3*(1 - t) t^2*control2 + t^3*end
+    positionAt: function( t ) {
+      var mt = 1 - t;
+      return this.start.times( mt * mt * mt ).plus( this.control1.times( 3 * mt * mt * t ) ).plus( this.control2.times( 3 * mt * t * t ) ).plus( this.end.times( t * t * t ) );
+    },
+    
     // derivative: -3 p0 (1 - t)^2 + 3 p1 (1 - t)^2 - 6 p1 (1 - t) t + 6 p2 (1 - t) t - 3 p2 t^2 + 3 p3 t^2
+    derivativeAt: function( t ) {
+      var mt = 1 - t;
+      return this.start.times( -3 * mt * mt ).plus( this.control1.times( 3 * mt * mt - 6 * mt * t ) ).plus( this.control2.times( 6 * mt * t - 3 * t * t ) ).plus( this.end.times( t * t ) );
+    },
   };
   
   Segment.Arc = function( center, radius, startAngle, endAngle, anticlockwise ) {
