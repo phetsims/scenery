@@ -7,12 +7,13 @@ Prototype HTML5 Scene Graph
 
 This is under active prototyping, so please expect any sort of API to change. Comments at this stage are very welcome.
 
-Since the concatenated / minified JS is under .gitignore, please either use the
-associated Makefile (with 'make') or the Windows batch script 'build.bat'.
+[Grunt](http://gruntjs.com/) is used to build the source ("npm install -g grunt-cli", "npm install" and "grunt" at the top level
+should build into dist/). [Node.js](http://nodejs.org/) is required for this process.
 
-You can also grab the development version [scenery.js](http://phet.colorado.edu/files/scenery/scenery.js) or production version
-[scenery-min.js](http://phet.colorado.edu/files/scenery/scenery-min.js). They are currently not versioned due to the accelerated
-development speed, but will be more stable soon.
+Currently, you can also grab the unminified [scenery.js](http://phet.colorado.edu/files/scenery/dist/standalone/scenery.js) or
+minified version [scenery-min.js](http://phet.colorado.edu/files/scenery/dist/standalone/scenery.min.js).
+They are currently not versioned due to the accelerated development speed, but will be more stable soon. A development version
+will be available soon that has assertions enabled.
 
 Documentation of Scenery is available at:
 * [Main Documentation](http://phet.colorado.edu/files/scenery/doc/) (up-to-date version is checked in at scenery/doc/index.html)
@@ -25,14 +26,8 @@ Examples:
 * [Devious Dragging (handling of corner cases)](http://phet.colorado.edu/files/scenery/examples/devious-drag.html)
 
 For testing purposes, the following are currently being worked on:
+* [Unit Tests / Linter](http://phet.colorado.edu/files/scenery/tests/qunit/compiled-unit-tests.html)
+* [Renderer Comparison](http://phet.colorado.edu/files/scenery/tests/renderer-comparison.html)
 * [Scene Graph Comparisons and Experiments](http://phet.colorado.edu/files/scenery/tests/easel-performance/easel-tests.html)
-* [Unit Tests / Linter](http://phet.colorado.edu/files/scenery/tests/unit-tests/unit-tests.html)
 * [Performance Improvement/Regression](http://phet.colorado.edu/files/scenery/tests/benchmarks/performance-tests.html)
-* [Benchmarks](http://phet.colorado.edu/files/scenery/tests/benchmarks/benchmarks.html)
-* [WebGL Prototype](http://phet.colorado.edu/files/scenery/tests/webgl-test/webgl-test.html)
-* [Canvas Browser Test Suite](http://phet.colorado.edu/files/scenery/tests/browsers/canvas-test-suite.html)
-
-jsPerf tests for various purposes:
-* [http://jsperf.com/overloading-options](http://jsperf.com/overloading-options)
-* [http://jsperf.com/small-operation-testing](http://jsperf.com/small-operation-testing)
-* [http://jsperf.com/small-operation-testing-2](http://jsperf.com/small-operation-testing-2)
+* [Canvas Browser Differences](http://jonathan-olson.com/canvas-diff/canvas-diff.html)
