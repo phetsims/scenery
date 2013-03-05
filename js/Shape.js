@@ -336,8 +336,9 @@ define( function( require ) {
             shape.addPiece( new Piece.LineTo( center.plus( tangent.perpendicular().times( lineWidth / 2 ) ) ) );
             break;
           case 'round':
-            throw new Error( 'stroked round lineCap not implemented .. add arc/arcTo' );
-            // break;
+            var tangentAngle = tangent.angle();
+            shape.addPiece( new Piece.Arc( center, lineWidth / 2, tangentAngle + Math.PI / 2, tangentAngle - Math.PI / 2, true ) );
+            break;
           case 'square':
             var toLeft = tangent.perpendicular().negated().times( lineWidth / 2 );
             var toRight = tangent.perpendicular().times( lineWidth / 2 );
