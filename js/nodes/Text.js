@@ -145,12 +145,17 @@ define( function( require ) {
   
   Text.prototype.accurateCanvasBounds = function() {
     var node = this;
+    var svgBounds = this.approximateSVGBounds();
     return scenery.Util.canvasAccurateBounds( function( context ) {
       context.font = node.font;
       context.textAlign = node.textAlign;
       context.textBaseline = node.textBaseline;
       context.direction = node.direction;
       context.fillText( node.text, 0, 0 );
+    }, {
+      precision: 0.5,
+      resolution: 128,
+      initialScale: 32 / Math.max( Math.abs( svgBounds.minX ), Math.abs( svgBounds.minY ), Math.abs( svgBounds.maxX ), Math.abs( svgBounds.maxY ) )
     } );
   };
   

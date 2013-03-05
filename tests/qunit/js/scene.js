@@ -433,6 +433,15 @@
     ok( textBounds.precision < 0.15, 'precision: ' + textBounds.precision );
   } );
   
+  test( 'Consistent and precise bounds range on Text', function() {
+    var text = new scenery.Text( '0\u0489' );
+    var textBounds = text.accurateCanvasBounds();
+    ok( textBounds.isConsistent, textBounds.toString() );
+    
+    // precision of 0.001 (or lower given different parameters) is possible on non-Chome browsers (Firefox, IE9, Opera)
+    ok( textBounds.precision < 1, 'precision: ' + textBounds.precision );
+  } );
+  
   test( 'ES5 Setter / Getter tests', function() {
     var node = new scenery.Path();
     var fill = '#abcdef';
