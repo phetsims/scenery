@@ -585,7 +585,7 @@ define( function( require ) {
     },
     
     getClosingSegment: function() {
-      assert && assert( this.isClosed() );
+      assert && assert( this.hasClosingSegment(), 'Implicit closing segment unnecessary on a fully closed path' );
       return new Segment.Line( this.getLastPoint(), this.getFirstPoint() );
     }
   };

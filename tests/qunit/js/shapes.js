@@ -188,6 +188,13 @@
     equal( shape.containsPoint( p( -0.5, 0.5 ) ), false, '-0.5, 0.5' );
   } );
   
+  test( 'Un-closed shape hit testing', function() {
+    var shape = new Shape().moveTo( 0, 0 ).lineTo( 10, 10 ).lineTo( 0, 10 );
+    
+    equal( shape.containsPoint( p( 1, 2 ) ), true, '1, 2' );
+    equal( shape.containsPoint( p( 10, 2 ) ), false, '10, 2' );
+  } );
+  
   test( 'Bezier Offset', function() {
     var styles = new Shape.LineStyles();
     styles.lineWidth = 30;
