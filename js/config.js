@@ -32,12 +32,8 @@ require.config( {
   },
   
   shim: {
-    underscore: {
-      exports: '_'
-    },
-    jquery: {
-      exports: '$'
-    }
+    underscore: { exports: '_' },
+    jquery: { exports: '$' }
   },
   
   urlArgs: new Date().getTime() // add cache buster query string to make browser refresh actually reload everything
