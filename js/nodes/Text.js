@@ -154,6 +154,16 @@ define( function( require ) {
     } );
   };
   
+  Text.prototype.approximateCanvasWidth = function() {
+    // TODO: consider caching a scratch 1x1 canvas for this purpose
+    var context = document.createElement( 'canvas' ).getContext( '2d' );
+    context.font = this.font;
+    context.textAlign = this.textAlign;
+    context.textBaseline = this.textBaseline;
+    context.direction = this.direction;
+    return context.measureText( this.text ).width;
+  };
+  
   Text.prototype.approximateSVGBounds = function() {
     var isRTL = this._direction === 'rtl';
     

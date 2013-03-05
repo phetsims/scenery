@@ -49,6 +49,7 @@
     var canvasBounds = textNode.accurateCanvasBounds();
     var svgBounds = textNode.approximateSVGBounds();
     var domBounds = textNode.approximateDOMBounds();
+    var width = textNode.approximateCanvasWidth();
     
     var unionBounds = canvasBounds.union( svgBounds ).union( domBounds );
     
@@ -69,6 +70,10 @@
     container.addChild( new scenery.Path( {
       shape: scenery.Shape.bounds( domBounds ),
       fill: 'rgba(0,0,255,0.4)'
+    } ) );
+    container.addChild( new scenery.Path( {
+      shape: scenery.Shape.lineSegment( new dot.Vector2( domBounds.minX + width, domBounds.minY ), new dot.Vector2( domBounds.minX + width, domBounds.maxY ) ),
+      stroke: '#00ff00'
     } ) );
     
     // TODO: improve how layer strategies are used
