@@ -3,6 +3,8 @@
 /**
  * A linear gradient that can be passed into the 'fill' or 'stroke' parameters.
  *
+ * SVG gradients, see http://www.w3.org/TR/SVG/pservers.html
+ *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
@@ -36,11 +38,17 @@ define( function( require ) {
     },
     
     // TODO: for performance, we should create a Canvas 'gradient' and keep it persistently
-    getCanvasGradient: function( context ) {
+    getCanvasFill: function( context ) {
       var gradient = context.createLinearGradient( this.start.x, this.start.y, this.end.x, this.end.y );
       _.each( this.stops, function( stop ) {
         gradient.addColorStop( stop.ratio, stop.color );
       } );
+    },
+    
+    // seems we need the defs: http://stackoverflow.com/questions/7614209/linear-gradients-in-svg-without-defs
+    // SVG: spreadMethod 'pad' 'reflect' 'repeat' - find Canvas usage
+    getSVGDef: function( id ) {
+      
     }
   };
   
