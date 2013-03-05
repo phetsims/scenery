@@ -360,6 +360,14 @@ define( function( require ) {
     this.rebuildLayers(); // TODO: why?
   };
   
+  Scene.prototype.getSceneWidth = function() {
+    return this.sceneBounds.width();
+  };
+  
+  Scene.prototype.getSceneHeight = function() {
+    return this.sceneBounds.height();
+  };
+  
   Scene.prototype.updateCursor = function() {
     if ( this.input && this.input.mouse.point ) {
       var mouseTrail = this.trailUnderPoint( this.input.mouse.point );

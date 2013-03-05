@@ -2,6 +2,8 @@
 Priorities:
     Cubic bezier
     Gradients
+    Text baseline 'middle'
+    Scene.sceneWidth Scene.sceneHeight
 
 Bugs:
     Switching renderers in Devious Drag example on iPad causes other objects being dragged to be "dropped"
