@@ -1,6 +1,7 @@
 
-SR's list:
-    Arrow shape
+Priorities:
+    Cubic bezier
+    Gradients
 
 Bugs:
     Switching renderers in Devious Drag example on iPad causes other objects being dragged to be "dropped"
