@@ -40,6 +40,7 @@ define( [
     
     'SCENERY/util/Color',
     'SCENERY/util/Font',
+    'SCENERY/util/LinearGradient',
     'SCENERY/util/Util',
     
     'SCENERY/nodes/Node',
@@ -68,6 +69,7 @@ define( [
     LayerBuilder,
     LayerStrategy,
     LayerType,
+    LinearGradient,
     Mouse,
     Node,
     Path,
