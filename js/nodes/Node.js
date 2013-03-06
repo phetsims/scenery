@@ -1065,7 +1065,7 @@ define( function( require ) {
    */
   Node.prototype._mutatorKeys = [ 'cursor', 'visible', 'translation', 'x', 'y', 'rotation', 'scale',
                                   'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
-                                  'layerSplitBefore', 'layerSplitAfter' ];
+                                  'layerSplit', 'layerSplitBefore', 'layerSplitAfter' ];
   
   Node.prototype._supportedRenderers = [];
   
