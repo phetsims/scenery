@@ -90,6 +90,25 @@
           } ) );
         }
       },{
+        name: 'Linear Gradients',
+        width: 64,
+        height: 64,
+        draw: function( scene ) {
+          var gradient = new scenery.LinearGradient( -22, 0, 22, 0 );
+          gradient.addColorStop( 0.1, '#ff0000' );
+          gradient.addColorStop( 0.5, '#00ff00' );
+          gradient.addColorStop( 0.6, 'rgba(0,255,0,0.3)' );
+          gradient.addColorStop( 0.9, '#000000' );
+          scene.addChild( new scenery.Path( {
+            shape: scenery.Shape.regularPolygon( 6, 22 ),
+            x: 32,
+            y: 32,
+            fill: gradient,
+            stroke: '#000000',
+            lineWidth: 3
+          } ) );
+        }
+      },{
         name: 'RGBA',
         width: 64,
         height: 64,
