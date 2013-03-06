@@ -89,6 +89,9 @@
     equal( hsl.r, 191, 'hsla red' );
     equal( hsl.g, 207, 'hsla green' );
     equal( hsl.b, 175, 'hsla blue' );
-    equal( hsl.a, 0.25, 'hsla alpha' );
+    equal( hsl.a, 0.25, 'hsla alpha 0.25' );
+    
+    hsl = new Color( 'hsla(90,25%,75%,.25)' ); // without leading 0
+    equal( hsl.a, 0.25, 'hsla alpha .25' );
   } );
 })();
