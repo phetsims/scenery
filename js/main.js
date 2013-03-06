@@ -41,6 +41,7 @@ define( [
     'SCENERY/util/Color',
     'SCENERY/util/Font',
     'SCENERY/util/LinearGradient',
+    'SCENERY/util/RadialGradient',
     'SCENERY/util/Util',
     
     'SCENERY/nodes/Node',
@@ -73,6 +74,7 @@ define( [
     Mouse,
     Node,
     Path,
+    RadialGradient,
     RenderState,
     Scene,
     Shape,
