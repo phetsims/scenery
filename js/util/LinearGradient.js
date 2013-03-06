@@ -36,6 +36,7 @@ define( function( require ) {
   LinearGradient.prototype = {
     constructor: LinearGradient,
     
+    // TODO: add color support here, instead of string?
     addColorStop: function( ratio, color ) {
       this.stops.push( { ratio: ratio, color: color } );
       this.canvasGradient.addColorStop( ratio, color );
@@ -66,9 +67,11 @@ define( function( require ) {
       definition.setAttribute( 'y1', this.end.y );
       
       _.each( this.stops, function( stop ) {
+        // TODO: store color in our stops array, so we don't have to create additional objects every time?
+        var color = new scenery.Color( stop.color );
         var stopElement = document.createElementNS( svgns, 'stop' );
         stopElement.setAttribute( 'offset', stop.ratio );
-        stopElement.setAttribute( 'style', 'stop-color: ' + stop.color.withAlpha( 1 ).getCSS() + '; stop-opacity: ' + stop.color.a.toFixed( 20 ) + ';' );
+        stopElement.setAttribute( 'style', 'stop-color: ' + color.withAlpha( 1 ).getCSS() + '; stop-opacity: ' + color.a.toFixed( 20 ) + ';' );
         definition.appendChild( stopElement );
       } );
       
