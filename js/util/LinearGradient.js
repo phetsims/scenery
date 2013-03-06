@@ -62,10 +62,10 @@ define( function( require ) {
       var definition = document.createElementNS( svgns, 'linearGradient' );
       definition.setAttribute( 'id', id );
       definition.setAttribute( 'gradientUnits', 'userSpaceOnUse' ); // so we don't depend on the bounds of the object being drawn with the gradient
-      definition.setAttribute( 'x0', this.start.x );
-      definition.setAttribute( 'y0', this.start.y );
-      definition.setAttribute( 'x1', this.end.x );
-      definition.setAttribute( 'y1', this.end.y );
+      definition.setAttribute( 'x1', this.start.x );
+      definition.setAttribute( 'y1', this.start.y );
+      definition.setAttribute( 'x2', this.end.x );
+      definition.setAttribute( 'y2', this.end.y );
       
       _.each( this.stops, function( stop ) {
         // TODO: store color in our stops array, so we don't have to create additional objects every time?
