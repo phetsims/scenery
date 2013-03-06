@@ -3,7 +3,7 @@ Priorities:
     Cubic bezier
     Gradients
     Text baseline 'middle'
-    Scene.sceneWidth Scene.sceneHeight
+    Dashed lines
 
 Bugs:
     SVG currently doesn't support changing the SVG element? updateSVGFragment unused

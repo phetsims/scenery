@@ -256,14 +256,14 @@ define( function( require ) {
     setFillStyle: function( style ) {
       if ( this.fillStyle !== style ) {
         this.fillStyle = style;
-        this.context.fillStyle = style;
+        this.context.fillStyle = style.getCanvasStyle ? style.getCanvasStyle() : style; // allow gradients / patterns
       }
     },
     
     setStrokeStyle: function( style ) {
       if ( this.strokeStyle !== style ) {
         this.strokeStyle = style;
-        this.context.strokeStyle = style;
+        this.context.strokeStyle = style.getCanvasStyle ? style.getCanvasStyle() : style; // allow gradients / patterns
       }
     },
     

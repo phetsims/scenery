@@ -27,6 +27,9 @@ define( function( require ) {
     this.end = usesVectors ? y0 : new Vector2( x1, y1 );
     
     this.stops = [];
+    
+    // TODO: make a global spot that will have a 'useless' context for these purposes?
+    this.canvasGradient = document.createElement( 'canvas' ).getContext( '2d' ).createLinearGradient( x0, y0, x1, y1 );
   };
   var LinearGradient = scenery.LinearGradient;
   
@@ -35,14 +38,12 @@ define( function( require ) {
     
     addColorStop: function( ratio, color ) {
       this.stops.push( { ratio: ratio, color: color } );
+      this.canvasGradient.addColorStop( ratio, color );
     },
     
     // TODO: for performance, we should create a Canvas 'gradient' and keep it persistently
-    getCanvasFill: function( context ) {
-      var gradient = context.createLinearGradient( this.start.x, this.start.y, this.end.x, this.end.y );
-      _.each( this.stops, function( stop ) {
-        gradient.addColorStop( stop.ratio, stop.color );
-      } );
+    getCanvasStyle: function() {
+      return this.canvasGradient;
     },
     
     // seems we need the defs: http://stackoverflow.com/questions/7614209/linear-gradients-in-svg-without-defs
