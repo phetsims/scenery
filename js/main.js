@@ -11,6 +11,7 @@
  */
 
 define( [
+    'SCENERY/scenery',
     'SCENERY/debug/DebugContext',
     
     'SCENERY/input/Event',
@@ -49,43 +50,8 @@ define( [
     'SCENERY/Scene',
     'SCENERY/Shape',
     'SCENERY/util/Trail',
-    'SCENERY/util/TrailPointer',
-    'SCENERY/scenery'
+    'SCENERY/util/TrailPointer'
   ], function(
-    Renderer,
-    CanvasLayer,
-    Color,
-    DebugContext,
-    DOM,
-    DOMLayer,
-    Event,
-    Fillable,
-    Finger,
-    Font,
-    Image,
-    Input,
-    Key,
-    Layer,
-    LayerBoundary,
-    LayerBuilder,
-    LayerStrategy,
-    LayerType,
-    LinearGradient,
-    Mouse,
-    Node,
-    Path,
-    RadialGradient,
-    RenderState,
-    Scene,
-    Shape,
-    SimpleDragHandler,
-    Strokable,
-    SVGLayer,
-    Text,
-    Touch,
-    Trail,
-    TrailPointer,
-    Util,
     scenery
   ) {
   
