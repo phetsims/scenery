@@ -3,7 +3,6 @@ Priorities:
     Performance
     Cubic bezier
     Gradients
-    Text baseline 'middle'
     Dashed lines
     Documentation
 
@@ -21,6 +20,7 @@ Bugs:
 
 Test:
     SVG invisible nodes?
+    Text baseline 'middle'
 
 BAM:
     Support portrait and landscape?
