@@ -91,20 +91,36 @@
         }
       },{
         name: 'Linear Gradients',
-        width: 64,
+        width: 128,
         height: 64,
         draw: function( scene ) {
-          var gradient = new scenery.LinearGradient( -22, 0, 22, 0 );
-          gradient.addColorStop( 0.1, '#ff0000' );
-          gradient.addColorStop( 0.5, '#00ff00' );
-          gradient.addColorStop( 0.6, 'rgba(0,255,0,0.3)' );
-          gradient.addColorStop( 0.9, '#000000' );
+          var fillGradient = new scenery.LinearGradient( -22, 0, 22, 0 );
+          fillGradient.addColorStop( 0.1, '#ff0000' );
+          fillGradient.addColorStop( 0.5, '#00ff00' );
+          fillGradient.addColorStop( 0.6, 'rgba(0,255,0,0.3)' );
+          fillGradient.addColorStop( 0.9, '#000000' );
+          
+          var strokeGradient = new scenery.LinearGradient( 0, -15, 0, 15 );
+          strokeGradient.addColorStop( 0, '#ff0000' );
+          strokeGradient.addColorStop( 0.5, '#00ff00' );
+          strokeGradient.addColorStop( 1, '#0000ff' );
+          
           scene.addChild( new scenery.Path( {
             shape: scenery.Shape.regularPolygon( 6, 22 ),
             x: 32,
             y: 32,
-            fill: gradient,
+            rotation: Math.PI / 4,
+            scale: 0.5,
+            fill: fillGradient,
             stroke: '#000000',
+            lineWidth: 3
+          } ) );
+          scene.addChild( new scenery.Path( {
+            shape: scenery.Shape.regularPolygon( 6, 22 ),
+            x: 32 + 64,
+            y: 32,
+            fill: fillGradient,
+            stroke: strokeGradient,
             lineWidth: 3
           } ) );
         }
