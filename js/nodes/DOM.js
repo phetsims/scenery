@@ -101,7 +101,9 @@ define( function( require ) {
       margin: '0 !important',
       position: 'absolute',
       left: 0,
-      top: 0
+      top: 0,
+      width: 65535,
+      height: 65535
     } );
     temporaryContainer.appendChild( this._element );
     document.body.appendChild( temporaryContainer );
