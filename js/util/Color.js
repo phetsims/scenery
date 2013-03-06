@@ -21,37 +21,26 @@ define( function( require ) {
   
   var clamp = require( 'DOT/Util' ).clamp;
   
-  var rgbNumber = '(-?\\d{1,3}%?)';
-  var aNumber = '(\\d|\\d\\.\\d+)';
-  var shortHexFormat = /^#(\w{1})(\w{1})(\w{1})$/;
-  var fullHexFormat = /^#(\w{2})(\w{2})(\w{2})$/;
-  var rgbFormat = new RegExp( '^rgb\\(' + rgbNumber + ',' + rgbNumber + ',' + rgbNumber + '\\)$' );
-  var rgbaFormat = new RegExp( '^rgba\\(' + rgbNumber + ',' + rgbNumber + ',' + rgbNumber + ',' + aNumber + '\\)$' );
-  var hslFormat = new RegExp( '^hsl\\(' + rgbNumber + ',' + rgbNumber + ',' + rgbNumber + '\\)$' );
-  var hslaFormat = new RegExp( '^hsla\\(' + rgbNumber + ',' + rgbNumber + ',' + rgbNumber + ',' + aNumber + '\\)$' );
-
-  // integer-based constructor
+  // r,g,b integers 0-255, 'a' float 0-1
   scenery.Color = function( r, g, b, a ) {
     
     if ( typeof r === 'string' ) {
       var str = r.replace( / /g, '' ).toLowerCase();
-      var match;
       
-      // short hex format, e.g. #f0e
-      match = shortHexFormat.exec( str );
-      if ( match ) {
-        this.setRedInt( parseInt( match[1] + match[1], 16 ) );
-        this.setGreenInt( parseInt( match[2] + match[2], 16 ) );
-        this.setBlueInt( parseInt( match[3] + match[3], 16 ) );
-        this.setAlphaInt( 255 );
-      } else {
-        // full hex format, e.g. #f0ade5
-        match = fullHexFormat.exec( str );
-        if ( match ) {
-          this.setRedInt( parseInt( match[1], 16 ) );
-          this.setGreenInt( parseInt( match[2], 16 ) );
-          this.setBlueInt( parseInt( match[3], 16 ) );
-          this.setAlphaInt( 255 );
+      // replace colors based on keywords
+      var keywordMatch = Color.colorKeywords[str];
+      if ( keywordMatch ) {
+        str = '#' + keywordMatch;
+      }
+      
+      // run through the available text formats
+      for ( var i = 0; i < Color.formatParsers.length; i++ ) {
+        var parser = Color.formatParsers[i];
+        
+        var matches = parser.regexp.exec( str );
+        if ( matches ) {
+          parser.apply( this, matches );
+          break;
         }
       }
     } else {
@@ -74,72 +63,120 @@ define( function( require ) {
   };
   var Color = scenery.Color;
   
+  // regex utilities
+  var rgbNumber = '(-?\\d{1,3}%?)'; // syntax allows negative integers and percentages
+  var aNumber = '(\\d+|\\d+\\.\\d+)'; // decimal point number. technically we allow for '255', even though this will be clamped to 1.
+  var rawNumber = '(\\d{1,3})'; // a 1-3 digit number
+  
+  // handles negative and percentage values
+  function parseRGBNumber( str ) {
+    var multiplier = 1;
+    
+    // if it's a percentage, strip it off and handle it that way
+    if ( str.charAt( str.length - 1 ) === '%' ) {
+      multiplier = 2.55;
+      str = str.slice( 0, str.length - 1 );
+    }
+    
+    return Math.round( parseInt( str, 10 ) * multiplier );
+  }
+  
+  Color.formatParsers = [
+    {
+      // 'transparent'
+      regexp: /^transparent$/,
+      apply: function( color, matches ) {
+        color.setRGBA( 0, 0, 0, 0 );
+      }
+    },{
+      // short hex form, a la '#fff'
+      regexp: /^#(\w{1})(\w{1})(\w{1})$/,
+      apply: function( color, matches ) {
+        color.setRGBA( parseInt( matches[1] + matches[1], 16 ),
+                       parseInt( matches[2] + matches[2], 16 ),
+                       parseInt( matches[3] + matches[3], 16 ),
+                       1 );
+      }
+    },{
+      // long hex form, a la '#ffffff'
+      regexp: /^#(\w{2})(\w{2})(\w{2})$/,
+      apply: function( color, matches ) {
+        color.setRGBA( parseInt( matches[1] + matches[1], 16 ),
+                       parseInt( matches[2] + matches[2], 16 ),
+                       parseInt( matches[3] + matches[3], 16 ),
+                       1 );
+      }
+    },{
+      // rgb(...)
+      regexp: new RegExp( '^rgb\\(' + rgbNumber + ',' + rgbNumber + ',' + rgbNumber + '\\)$' ),
+      apply: function( color, matches ) {
+        color.setRGBA( parseRGBNumber( matches[1] ),
+                       parseRGBNumber( matches[2] ),
+                       parseRGBNumber( matches[3] ),
+                       1 );
+      }
+    },{
+      // rgba(...)
+      regexp: new RegExp( '^rgba\\(' + rgbNumber + ',' + rgbNumber + ',' + rgbNumber + ',' + aNumber + '\\)$' ),
+      apply: function( color, matches ) {
+        color.setRGBA( parseRGBNumber( matches[1] ),
+                       parseRGBNumber( matches[2] ),
+                       parseRGBNumber( matches[3] ),
+                       parseFloat( matches[4] ) );
+      }
+    },{
+      // hsl(...)
+      regexp: new RegExp( '^hsl\\(' + rawNumber + ',' + rawNumber + '%,' + rawNumber + '%\\)$' ),
+      apply: function( color, matches ) {
+        color.setHSLA( parseInt( matches[1], 10 ),
+                       parseInt( matches[2], 10 ),
+                       parseInt( matches[3], 10 ),
+                       1 );
+      }
+    },{
+      // hsla(...)
+      regexp: new RegExp( '^hsla\\(' + rawNumber + ',' + rawNumber + '%,' + rawNumber + '%,' + aNumber + '\\)$' ),
+      apply: function( color, matches ) {
+        color.setHSLA( parseInt( matches[1], 10 ),
+                       parseInt( matches[2], 10 ),
+                       parseInt( matches[3], 10 ),
+                       parseFloat( matches[4] ) );
+      }
+    }
+  ];
+  
+  // see http://www.w3.org/TR/css3-color/
+  Color.hueToRGB = function( m1, m2, h ) {
+    if ( h < 0 ) {
+      h = h + 1;
+    }
+    if ( h > 1 ) {
+      h = h - 1;
+    }
+    if ( h * 6 < 1 ) {
+      return m1 + ( m2 - m1 ) * h * 6;
+    }
+    if ( h * 2 < 1 ) {
+      return m2;
+    }
+    if ( h * 3 < 2 ) {
+      return m1 * ( m2 - m1 ) * ( 2 / 3 - h ) * 6;
+    }
+    return m1;
+  };
+  
   Color.prototype = {
     constructor: Color,
     
-    /*---------------------------------------------------------------------------*
-    * Integers clamped to the range 0-255
-    *----------------------------------------------------------------------------*/
-    
-    setRedInt: function( value ) {
-      value = Math.round( clamp( value, 0, 255 ) );
-      this.r = value;
-      this.rRatio = value / 255;
+    // RGB integral between 0-255, alpha (float) between 0-1
+    setRGBA: function( red, green, blue, alpha ) {
+      this.r = Math.round( clamp( red, 0, 255 ) );
+      this.g = Math.round( clamp( green, 0, 255 ) );
+      this.b = Math.round( clamp( blue, 0, 255 ) );
+      this.a = clamp( alpha, 0, 1 );
     },
     
-    setGreenInt: function( value ) {
-      value = Math.round( clamp( value, 0, 255 ) );
-      this.g = value;
-      this.gRatio = value / 255;
-    },
-    
-    setBlueInt: function( value ) {
-      value = Math.round( clamp( value, 0, 255 ) );
-      this.b = value;
-      this.bRatio = value / 255;
-    },
-    
-    setAlphaInt: function( value ) {
-      value = Math.round( clamp( value, 0, 255 ) );
-      this.a = value;
-      this.aRatio = value / 255;
-    },
-    
-    /*---------------------------------------------------------------------------*
-    * Numbers clamped to the range 0-1
-    *----------------------------------------------------------------------------*/
-    
-    setRedRatio: function( value ) {
-      value = clamp( value, 0, 1 );
-      this.r = Math.round( value * 255 );
-      this.rRatio = value;
-    },
-    
-    setGreenRatio: function( value ) {
-      value = clamp( value, 0, 1 );
-      this.g = Math.round( value * 255 );
-      this.gRatio = value;
-    },
-    
-    setBlueRatio: function( value ) {
-      value = clamp( value, 0, 1 );
-      this.b = Math.round( value * 255 );
-      this.bRatio = value;
-    },
-    
-    setAlphaRatio: function( value ) {
-      value = clamp( value, 0, 1 );
-      this.a = Math.round( value * 255 );
-      this.aRatio = value;
-    }
-    
-  };
-  
-  // support: #aaaaaa, #aaa, rgb(...), rgba(...), hsl(...). numbers can be 0%-100%. clip 0-255. 0%-100%. Integer or percentage. Trim whitespace
-  // it is defined as sRGB
-  // hsl( ... ), hsla( ... )
-  
-  /*
+        /*
   HSL parse algorithm:
       HOW TO RETURN hsl.to.rgb(h, s, l):
        SELECT:
@@ -159,8 +196,28 @@ define( function( require ) {
        IF h*3<2: RETURN m1+(m2-m1)*(2/3-h)*6
        RETURN m1
   */
+    setHSLA: function( hue, saturation, lightness, alpha ) {
+      hue = hue % 360;                                   // integer modulo 360
+      saturation = Math.clamp( saturation / 100, 0, 1 ); // percentage
+      lightness = Math.clamp( lightness / 100, 0, 1 );   // percentage
+      
+      // see http://www.w3.org/TR/css3-color/
+      var m1, m2;
+      if ( lightness < 0.5 ) {
+        m2 = lightness * ( saturation + 1 );
+      } else {
+        m2 = lightness + saturation - lightness * saturation;
+      }
+      m1 = lightness * 2 - m2;
+      
+      this.r = Color.hueToRGB( m1, m2, hue + 1/3 );
+      this.g = Color.hueToRGB( m1, m2, hue );
+      this.b = Color.hueToRGB( m1, m2, hue - 1/3 );
+      this.a = clamp( alpha, 0, 1 );
+    }
+  };
   
-  var basicColorKeywords = {
+  Color.basicColorKeywords = {
     aqua: '00ffff',
     black: '000000',
     blue: '0000ff',
@@ -179,7 +236,7 @@ define( function( require ) {
     yellow: 'ffff00'
   };
   
-  var colorKeywords = {
+  Color.colorKeywords = {
     aliceblue: 'f0f8ff',
     antiquewhite: 'faebd7',
     aqua: '00ffff',
@@ -325,8 +382,7 @@ define( function( require ) {
     yellowgreen: '9acd32'
   };
   
-  // TODO: add support for 'transparent' support => rgba(0,0,0,0). see http://www.w3.org/TR/css3-color/#transparent-def
-
+  // JAVA compatibility TODO: remove after porting MS
   Color.BLACK = new Color( 0, 0, 0 );
   Color.BLUE = new Color( 0, 0, 255 );
   Color.CYAN = new Color( 0, 255, 255 );
