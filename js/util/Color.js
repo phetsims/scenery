@@ -180,6 +180,7 @@ define( function( require ) {
       this.a = clamp( alpha, 0, 1 );
     },
     
+    // TODO: on modification, cache this.
     getCSS: function() {
       if ( this.a === 1 ) {
         return 'rgb(' + this.r + ',' + this.g + ',' + this.b + ')';
