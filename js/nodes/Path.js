@@ -95,12 +95,15 @@ define( function( require ) {
     throw new Error( 'Path.prototype.paintWebGL unimplemented' );
   };
   
-  Path.prototype.createSVGFragment = function() {
+  // svg element, the <defs> block, and the associated group for this node's transform
+  Path.prototype.createSVGFragment = function( svg, defs, group ) {
     var path = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
     this.updateSVGFragment( path );
+    this.updateSVGDefs( svg, defs );
     return path;
   };
   
+  // TODO: this should be used!
   Path.prototype.updateSVGFragment = function( path ) {
     if ( this.hasShape() ) {
       path.setAttribute( 'd', this._shape.getSVGPath() );
@@ -109,8 +112,9 @@ define( function( require ) {
     }
     
     var style = '';
-    style += 'fill: ' + ( this._fill ? this._fill : 'none' ) + ';'; // TODO: handling patterns and gradients!
-    style += 'stroke: ' + ( this._stroke ? this._stroke : 'none' ) + ';';
+    // if the fill / style has an SVG definition, use that with a URL reference to it
+    style += 'fill: ' + ( this._fill ? ( this._fill.getSVGDefinition ? 'url(#fill' + this.getId() + ')' : this._fill ) : 'none' ) + ';';
+    style += 'stroke: ' + ( this._stroke ? ( this._stroke.getSVGDefinition ? 'url(#stroke' + this.getId() + ')' : this._stroke ) : 'none' ) + ';';
     if ( this._stroke ) {
       // TODO: don't include unnecessary directives?
       style += 'stroke-width: ' + this.getLineWidth() + ';';
@@ -118,6 +122,32 @@ define( function( require ) {
       style += 'stroke-linejoin: ' + this.getLineJoin() + ';';
     }
     path.setAttribute( 'style', style );
+  };
+  
+  // support patterns, gradients, and anything else we need to put in the <defs> block
+  Path.prototype.updateSVGDefs = function( svg, defs ) {
+    var stroke = this.getStroke();
+    var fill = this.getFill();
+    var strokeId = 'stroke' + this.getId();
+    var fillId = 'fill' + this.getId();
+    
+    // wipe away any old fill/stroke definitions
+    var oldStrokeDef = svg.getElementById( strokeId );
+    var oldFillDef = svg.getElementById( fillId );
+    if ( oldStrokeDef ) {
+      defs.removeChild( oldStrokeDef );
+    }
+    if ( oldFillDef ) {
+      defs.removeChild( oldFillDef );
+    }
+    
+    // add new definitions if necessary
+    if ( stroke && stroke.getSVGDefinition ) {
+      defs.appendChild( stroke.getSVGDefinition( strokeId ) );
+    }
+    if ( fill && fill.getSVGDefinition ) {
+      defs.appendChild( fill.getSVGDefinition( fillId ) );
+    }
   };
   
   Path.prototype.hasSelf = function() {

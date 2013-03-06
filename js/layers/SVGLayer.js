@@ -38,6 +38,9 @@ define( function( require ) {
     // TODO: consider renaming to 'this.baseGroup'
     this.g = document.createElementNS( svgns, 'g' );
     
+    // the <defs> block that we will be stuffing gradients and patterns into
+    this.defs = document.createElementNS( svgns, 'defs' );
+    
     this.svg.appendChild( this.g );
     this.$svg = $( this.svg );
     this.svg.setAttribute( 'width', $main.width() );
@@ -132,9 +135,10 @@ define( function( require ) {
         layer.ensureGroupTree( trail );
         
         if ( node.hasSelf() ) {
-          var svgFragment = node.createSVGFragment();
+          var group = layer.idGroupMap[trailId];
+          var svgFragment = node.createSVGFragment( layer.svg, layer.defs, group );
           layer.idFragmentMap[trailId] = svgFragment;
-          layer.idGroupMap[trailId].appendChild( svgFragment );
+          group.appendChild( svgFragment );
         }
       } );
     },

@@ -6,6 +6,8 @@ Priorities:
     Scene.sceneWidth Scene.sceneHeight
 
 Bugs:
+    SVG currently doesn't support changing the SVG element? updateSVGFragment unused
+        - add test case (comparison vs canvas with add then change style)
     Switching renderers in Devious Drag example on iPad causes other objects being dragged to be "dropped"
         Probably causes some sort of enter/exit event?
     Nexus 7 hidef scaling

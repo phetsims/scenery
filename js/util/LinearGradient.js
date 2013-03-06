@@ -47,8 +47,31 @@ define( function( require ) {
     
     // seems we need the defs: http://stackoverflow.com/questions/7614209/linear-gradients-in-svg-without-defs
     // SVG: spreadMethod 'pad' 'reflect' 'repeat' - find Canvas usage
-    getSVGDef: function( id ) {
+    getSVGDefinition: function( id ) {
+      /* Approximate example of what we are creating:
+      <linearGradient id="grad2" x1="0" y1="0" x2="100" y2="0" gradientUnits="userSpaceOnUse">
+        <stop offset="0" style="stop-color:rgb(255,255,0);stop-opacity:1" />
+        <stop offset="0.5" style="stop-color:rgba(255,255,0,0);stop-opacity:0" />
+        <stop offset="1" style="stop-color:rgb(255,0,0);stop-opacity:1" />
+      </linearGradient>
+      */
+      var svgns = 'http://www.w3.org/2000/svg'; // TODO: store this in a common place!
+      var definition = document.createElementNS( svgns, 'linearGradient' );
+      definition.setAttribute( 'id', id );
+      definition.setAttribute( 'gradientUnits', 'userSpaceOnUse' ); // so we don't depend on the bounds of the object being drawn with the gradient
+      definition.setAttribute( 'x0', this.start.x );
+      definition.setAttribute( 'y0', this.start.y );
+      definition.setAttribute( 'x1', this.end.x );
+      definition.setAttribute( 'y1', this.end.y );
       
+      _.each( this.stops, function( stop ) {
+        var stopElement = document.createElementNS( svgns, 'stop' );
+        stopElement.setAttribute( 'offset', stop.ratio );
+        stopElement.setAttribute( 'style', 'stop-color: ' + stop.color.withAlpha( 1 ).getCSS() + '; stop-opacity: ' + stop.color.a.toFixed( 20 ) + ';' );
+        definition.appendChild( stopElement );
+      } );
+      
+      return definition;
     }
   };
   

@@ -90,7 +90,7 @@ define( function( require ) {
     throw new Error( 'Text.prototype.paintWebGL unimplemented' );
   };
   
-  Text.prototype.createSVGFragment = function() {
+  Text.prototype.createSVGFragment = function( svg, defs, group ) {
     var element = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
     this.updateSVGFragment( element );
     return element;
