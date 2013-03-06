@@ -52,7 +52,7 @@ define( [
     'SCENERY/util/Trail',
     'SCENERY/util/TrailPointer'
   ], function(
-    scenery
+    scenery // note: we don't need any of the other parts, we just need to specify them as dependencies so they fill in the scenery namespace
   ) {
   
   return scenery;
