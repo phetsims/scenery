@@ -41,6 +41,7 @@ define( function( require ) {
     // the <defs> block that we will be stuffing gradients and patterns into
     this.defs = document.createElementNS( svgns, 'defs' );
     
+    this.svg.appendChild( this.defs );
     this.svg.appendChild( this.g );
     this.$svg = $( this.svg );
     this.svg.setAttribute( 'width', $main.width() );
