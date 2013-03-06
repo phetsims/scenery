@@ -247,17 +247,4 @@
     
     strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
   } );
-  
-  test( 'Bezier Edge Case (literally)', function() {
-    var styles = new Shape.LineStyles();
-    styles.lineWidth = 30;
-    
-    var strokeShape = new Shape();
-    strokeShape.moveTo( 40, 40 );
-    strokeShape.quadraticCurveTo( 200, 200, 200, 180 );
-    // strokeShape.close();
-    var fillShape = strokeShape.getStrokedShape( styles );
-    
-    strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
-  } );
 })();
