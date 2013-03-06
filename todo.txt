@@ -1,9 +1,11 @@
 
 Priorities:
+    Performance
     Cubic bezier
     Gradients
     Text baseline 'middle'
     Dashed lines
+    Documentation
 
 Bugs:
     SVG currently doesn't support changing the SVG element? updateSVGFragment unused
@@ -19,6 +21,7 @@ Bugs:
 
 BAM:
     Support portrait and landscape?
+    Backbone / model investigation
 
 Browsers
     Browser bugs? (get Canary / Aurora / IE10):
