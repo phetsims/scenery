@@ -16,7 +16,8 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   var Vector2 = require( 'DOT/Vector2' );
-
+  
+  // TODO: support canvas method as base, map to SVG method with color-stop scaling
   scenery.RadialGradient = function( x0, y0, r0, x1, y1, r1 ) {
     throw new Error( 'RadialGradient not implemented' );
   };
