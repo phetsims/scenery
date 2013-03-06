@@ -26,6 +26,7 @@ define( function( require ) {
     
     if ( typeof r === 'string' ) {
       var str = r.replace( / /g, '' ).toLowerCase();
+      var success = false;
       
       // replace colors based on keywords
       var keywordMatch = Color.colorKeywords[str];
@@ -40,8 +41,13 @@ define( function( require ) {
         var matches = parser.regexp.exec( str );
         if ( matches ) {
           parser.apply( this, matches );
+          success = true;
           break;
         }
+      }
+      
+      if ( !success ) {
+        throw new Error( 'scenery.Color unable to parse color string: ' + r );
       }
     } else {
       // alpha
@@ -197,9 +203,9 @@ define( function( require ) {
        RETURN m1
   */
     setHSLA: function( hue, saturation, lightness, alpha ) {
-      hue = hue % 360;                                   // integer modulo 360
-      saturation = Math.clamp( saturation / 100, 0, 1 ); // percentage
-      lightness = Math.clamp( lightness / 100, 0, 1 );   // percentage
+      hue = ( hue % 360 ) / 360;                    // integer modulo 360
+      saturation = clamp( saturation / 100, 0, 1 ); // percentage
+      lightness = clamp( lightness / 100, 0, 1 );   // percentage
       
       // see http://www.w3.org/TR/css3-color/
       var m1, m2;
