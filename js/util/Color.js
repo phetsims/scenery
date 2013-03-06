@@ -5,8 +5,6 @@
  *
  * Consider it immutable!
  *
- * TODO: add equals()
- *
  * See http://www.w3.org/TR/css3-color/
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
@@ -191,26 +189,6 @@ define( function( require ) {
       }
     },
     
-        /*
-  HSL parse algorithm:
-      HOW TO RETURN hsl.to.rgb(h, s, l):
-       SELECT:
-    l<=0.5: PUT l*(s+1) IN m2
-    ELSE: PUT l+s-l*s IN m2
-       PUT l*2-m2 IN m1
-       PUT hue.to.rgb(m1, m2, h+1/3) IN r
-       PUT hue.to.rgb(m1, m2, h    ) IN g
-       PUT hue.to.rgb(m1, m2, h-1/3) IN b
-       RETURN (r, g, b)
-
-    HOW TO RETURN hue.to.rgb(m1, m2, h):
-       IF h<0: PUT h+1 IN h
-       IF h>1: PUT h-1 IN h
-       IF h*6<1: RETURN m1+(m2-m1)*h*6
-       IF h*2<1: RETURN m2
-       IF h*3<2: RETURN m1+(m2-m1)*(2/3-h)*6
-       RETURN m1
-  */
     setHSLA: function( hue, saturation, lightness, alpha ) {
       hue = ( hue % 360 ) / 360;                    // integer modulo 360
       saturation = clamp( saturation / 100, 0, 1 ); // percentage
@@ -229,6 +207,10 @@ define( function( require ) {
       this.g = Math.round( Color.hueToRGB( m1, m2, hue ) * 255 );
       this.b = Math.round( Color.hueToRGB( m1, m2, hue - 1/3 ) * 255 );
       this.a = clamp( alpha, 0, 1 );
+    },
+    
+    equals: function( color ) {
+      return this.r === color.r && this.g === color.g && this.b === color.b && this.a === color.a;
     }
   };
   
