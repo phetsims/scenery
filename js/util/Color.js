@@ -5,7 +5,7 @@
  *
  * Consider it immutable!
  *
- * TODO: support JS/CSS colors, color parsing, etc. Investigate Canvg's dependency for use?
+ * TODO: add equals()
  *
  * See http://www.w3.org/TR/css3-color/
  *
@@ -107,9 +107,9 @@ define( function( require ) {
       // long hex form, a la '#ffffff'
       regexp: /^#(\w{2})(\w{2})(\w{2})$/,
       apply: function( color, matches ) {
-        color.setRGBA( parseInt( matches[1] + matches[1], 16 ),
-                       parseInt( matches[2] + matches[2], 16 ),
-                       parseInt( matches[3] + matches[3], 16 ),
+        color.setRGBA( parseInt( matches[1], 16 ),
+                       parseInt( matches[2], 16 ),
+                       parseInt( matches[3], 16 ),
                        1 );
       }
     },{
@@ -166,7 +166,7 @@ define( function( require ) {
       return m2;
     }
     if ( h * 3 < 2 ) {
-      return m1 * ( m2 - m1 ) * ( 2 / 3 - h ) * 6;
+      return m1 + ( m2 - m1 ) * ( 2 / 3 - h ) * 6;
     }
     return m1;
   };
@@ -180,6 +180,15 @@ define( function( require ) {
       this.g = Math.round( clamp( green, 0, 255 ) );
       this.b = Math.round( clamp( blue, 0, 255 ) );
       this.a = clamp( alpha, 0, 1 );
+    },
+    
+    getCSS: function() {
+      if ( this.a === 1 ) {
+        return 'rgb(' + this.r + ',' + this.g + ',' + this.b + ')';
+      } else {
+        var alphaString = this.a === 0 || this.a === 1 ? this.a : this.a.toFixed( 20 ); // toFixed prevents scientific notation
+        return 'rgba(' + this.r + ',' + this.g + ',' + this.b + ',' + alphaString + ')';
+      }
     },
     
         /*
@@ -216,9 +225,9 @@ define( function( require ) {
       }
       m1 = lightness * 2 - m2;
       
-      this.r = Color.hueToRGB( m1, m2, hue + 1/3 );
-      this.g = Color.hueToRGB( m1, m2, hue );
-      this.b = Color.hueToRGB( m1, m2, hue - 1/3 );
+      this.r = Math.round( Color.hueToRGB( m1, m2, hue + 1/3 ) * 255 );
+      this.g = Math.round( Color.hueToRGB( m1, m2, hue ) * 255 );
+      this.b = Math.round( Color.hueToRGB( m1, m2, hue - 1/3 ) * 255 );
       this.a = clamp( alpha, 0, 1 );
     }
   };
