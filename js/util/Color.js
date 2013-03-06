@@ -69,7 +69,7 @@ define( function( require ) {
   
   // regex utilities
   var rgbNumber = '(-?\\d{1,3}%?)'; // syntax allows negative integers and percentages
-  var aNumber = '(\\d+|\\d+\\.\\d+)'; // decimal point number. technically we allow for '255', even though this will be clamped to 1.
+  var aNumber = '(\\d+|\\d*\\.\\d+)'; // decimal point number. technically we allow for '255', even though this will be clamped to 1.
   var rawNumber = '(\\d{1,3})'; // a 1-3 digit number
   
   // handles negative and percentage values
