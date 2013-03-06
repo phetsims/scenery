@@ -2,7 +2,7 @@
 (function(){
   'use strict';
   
-  module( 'Color' );
+  module( 'Scenery: Color' );
   
   var Color = scenery.Color;
   

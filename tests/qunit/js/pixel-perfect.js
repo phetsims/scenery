@@ -2,7 +2,7 @@
 (function(){
   'use strict';
   
-  module( 'Pixel Perfect' );
+  module( 'Scenery: Pixel Perfect' );
   
   asyncTest( 'Rectangle with stroke', function() {
     function setup( scene ) {

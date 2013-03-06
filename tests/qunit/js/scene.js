@@ -2,7 +2,7 @@
 (function(){
   'use strict';
   
-  module( 'Scene' );
+  module( 'Scenery: Scene' );
   
   test( 'Dirty bounds propagation test', function() {
     var node = createTestNodeTree();

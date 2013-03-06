@@ -2,7 +2,7 @@
 (function(){
   'use strict';
   
-  module( 'Layering' );
+  module( 'Scenery: Layering' );
   
   test( 'Layer quantity check', function() {
     var scene = new scenery.Scene( $( '#main' ) );

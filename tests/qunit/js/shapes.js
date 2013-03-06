@@ -2,7 +2,7 @@
 (function(){
   'use strict';
   
-  module( 'Shapes' );
+  module( 'Scenery: Shapes' );
   
   var Shape = scenery.Shape;
   

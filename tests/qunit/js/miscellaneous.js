@@ -4,7 +4,7 @@
   
   var includeBleedingEdgeCanvasTests = false;
   
-  module( 'Miscellaneous' );
+  module( 'Scenery: Miscellaneous' );
   
   test( 'ES5 Object.defineProperty get/set', function() {
     var ob = { _key: 5 };
