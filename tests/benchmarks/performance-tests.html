@@ -38,7 +38,7 @@
     // not ready, but load. we want everything to be fully loaded so it doesn't affect performance
     $( window ).load( function() {
       var snapshots = [
-        { name: 'current', libs: [ '../../scenery-min.js' ], tests: [ 'js/perf-current.js' ] },
+        { name: 'current', libs: [ '../../dist/standalone/scenery.min.js' ], tests: [ 'js/perf-current.js' ] },
         // { name: 'control', libs: [ '../../scenery-min.js' ], tests: [ 'js/perf-current.js' ] }
         { name: '130220-7f1ee38930', libs: [ '../../snapshots/scenery-min-130220-7f1ee38930.js' ], tests: [ '../../snapshots/perf-130220-7f1ee38930.js' ] },
         { name: '130210-7dbc7292b6', libs: [ '../../snapshots/scenery-min-130210-7dbc7292b6.js' ], tests: [ '../../snapshots/perf-130210-7dbc7292b6.js' ] },
