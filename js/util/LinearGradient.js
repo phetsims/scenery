@@ -40,6 +40,7 @@ define( function( require ) {
     addColorStop: function( ratio, color ) {
       this.stops.push( { ratio: ratio, color: color } );
       this.canvasGradient.addColorStop( ratio, color );
+      return this;
     },
     
     // TODO: for performance, we should create a Canvas 'gradient' and keep it persistently
