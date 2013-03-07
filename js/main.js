@@ -43,6 +43,7 @@ define( [
     'SCENERY/util/Font',
     'SCENERY/util/LinearGradient',
     'SCENERY/util/RadialGradient',
+    'SCENERY/util/SceneImage',
     'SCENERY/util/Util',
     
     'SCENERY/nodes/Node',

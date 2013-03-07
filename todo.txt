@@ -2,7 +2,6 @@
 Priorities:
     Performance
     Cubic bezier
-    Gradient / pattern transforms!
     Dashed lines
     Documentation
 
@@ -120,6 +119,11 @@ Code:
     _.extend that works on ES5 setter/getter pairs? Check $.extend? Check ES5 spec?
     Vet recursive bounds code against empty area
     * Code headers and copyright? Licenses?
+
+Patterns:
+    Ideally, we wouldn't just be able to specify an image that is repeated, but a Scene should work.
+        SVG supports arbitrary SVG content under a pattern
+        Canvas supports its union type (CanvasImageSource) which includes <img> or <canvas>
 
 Canvas:
     Consider adding layer strategies that enforce either a low-def or hi-def (if available) canvas backing store, so we can have crispness when desired
