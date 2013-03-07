@@ -372,6 +372,49 @@
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
       },{
+        name: 'Ellipses and Elliptical Arcs',
+        width: 200,
+        height: 64,
+        draw: function( scene ) {
+          var x = 32;
+          scene.addChild( new scenery.Path( {
+            shape: scenery.Shape.ellipse( x, 25, 20, 10 ),
+            fill: '#ff0000',
+            stroke: '#000000',
+            lineWidth: 3
+          } ) );
+          
+          x += 64;
+          scene.addChild( new scenery.Path( {
+            shape: new scenery.Shape().ellipticalArc( x, 25, 20, 10, Math.PI / 6, Math.PI / 4, Math.PI * 3 / 2, false ),
+            fill: 'rgba(255,0,0,0.5)',
+            stroke: '#aa0000',
+            lineWidth: 3
+          } ) );
+          
+          scene.addChild( new scenery.Path( {
+            shape: new scenery.Shape().ellipticalArc( x, 25, 20, 10, Math.PI / 6, Math.PI / 4, Math.PI * 3 / 2, true ),
+            fill: 'rgba(0,0,255,0.5)',
+            stroke: '#0000aa',
+            lineWidth: 3
+          } ) );
+          
+          x += 64;
+          scene.addChild( new scenery.Path( {
+            x: x,
+            y: 25.5,
+            shape: new scenery.Shape()
+              .moveTo( 0, 0 )
+              .ellipticalArc( 0, 0, 20, 10, 0, 0, Math.PI / 3, false )
+              .ellipticalArc( 0, 0, 20, 10, 0, Math.PI / 3 + Math.PI, Math.PI, true )
+              .close(),
+            fill: '#ff0000',
+            stroke: '#000000',
+            lineWidth: 3
+          } ) );
+        },
+        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+      },{
         name: 'DOM Elements',
         width: 200,
         height: 200,

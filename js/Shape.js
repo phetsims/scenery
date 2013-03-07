@@ -560,9 +560,9 @@ define( function( require ) {
     // TODO: Ellipse/EllipticalArc has a mess of parameters. Consider parameter object, or double-check parameter handling
     if ( radiusX === undefined ) {
       // ellipse( radiusX, radiusY ), center = 0,0
-      return new Shape().ellipticalArc( 0, 0, centerX, centerY );
+      return new Shape().ellipse( 0, 0, centerX, centerY );
     }
-    return new Shape().ellipticalArc( centerX, centerY, radiusX, radiusY ).close();
+    return new Shape().ellipse( centerX, centerY, radiusX, radiusY ).close();
   };
   
   // supports both arc( centerX, centerY, radius, startAngle, endAngle, anticlockwise ) and arc( center, radius, startAngle, endAngle, anticlockwise )
