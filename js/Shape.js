@@ -1306,8 +1306,32 @@ define( function( require ) {
     // a unit arg segment that we can map to our ellipse. useful for hit testing and such.
     this.unitArcSegment = new Segment.Arc( center, 1, startAngle, endAngle, anticlockwise );
     
-    // TODO: bounds
-    throw new Error( 'Segment.EllipticalArc constructor unimplemented' );
+    this.bounds = Bounds2.NOTHING;
+    this.bounds = this.bounds.withPoint( this.start );
+    this.bounds = this.bounds.withPoint( this.end );
+    
+    // for bounds computations
+    var that = this;
+    function boundsAtAngle( angle ) {
+      if ( that.containsAngle( angle ) ) {
+        // the boundary point is in the arc
+        that.bounds = that.bounds.withPoint( that.pointAtAngle( angle ) );
+      }
+    }
+    
+    // if the angles are different, check extrema points
+    if ( startAngle !== endAngle ) {
+      // solve the mapping from the unit circle, find locations where a coordinate of the gradient is zero.
+      // we find one extrema point for both x and y, since the other two are just rotated by pi from them.
+      var xAngle = Math.atan( -( radiusY / radiusX ) * Math.tan( rotation ) );
+      var yAngle = Math.atan( ( radiusY / radiusX ) / Math.tan( rotation ) );
+      
+      // check all of the extrema points
+      boundsAtAngle( xAngle );
+      boundsAtAngle( xAngle + Math.PI );
+      boundsAtAngle( yAngle );
+      boundsAtAngle( yAngle + Math.PI );
+    }
   };
   Segment.EllipticalArc.prototype = {
     constructor: Segment.EllipticalArc,
