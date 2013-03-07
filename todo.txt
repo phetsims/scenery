@@ -25,6 +25,7 @@ Test:
     Elliptical arc / arc transforms, including scale and shear. Especially shear! + reflections
     Shapes:
         animated test rotation/scaling/shearing/reflection on segments, showing start/end points, tangents, bounds
+        Consider moving spline knowledge, circle intersection, etc. into dot.
 
 BAM:
     Support portrait and landscape?
