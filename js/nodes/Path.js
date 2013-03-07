@@ -79,7 +79,14 @@ define( function( require ) {
 
       if ( this._fill ) {
         layer.setFillStyle( this._fill );
+        if ( this._fill.transformMatrix ) {
+          context.save();
+          this._fill.transformMatrix.canvasAppendTransform( context );
+        }
         context.fill();
+        if ( this._fill.transformMatrix ) {
+          context.restore();
+        }
       }
       if ( this._stroke ) {
         layer.setStrokeStyle( this._stroke );

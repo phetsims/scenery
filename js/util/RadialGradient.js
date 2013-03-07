@@ -39,6 +39,8 @@ define( function( require ) {
     
     // TODO: make a global spot that will have a 'useless' context for these purposes?
     this.canvasGradient = document.createElement( 'canvas' ).getContext( '2d' ).createRadialGradient( x0, y0, r0, x1, y1, r1 );
+    
+    this.transformMatrix = null;
   };
   var RadialGradient = scenery.RadialGradient;
   
@@ -56,6 +58,10 @@ define( function( require ) {
       this.stops.push( { ratio: ratio, color: color } );
       this.canvasGradient.addColorStop( ratio, color );
       return this;
+    },
+    
+    setTransformMatrix: function( transformMatrix ) {
+      this.transformMatrix = transformMatrix;
     },
     
     getCanvasStyle: function() {
@@ -80,6 +86,9 @@ define( function( require ) {
       definition.setAttribute( 'r', maxRadius );
       definition.setAttribute( 'fx', this.focalPoint.x );
       definition.setAttribute( 'fy', this.focalPoint.y );
+      if ( this.transformMatrix ) {
+        definition.setAttribute( 'gradientTransform', this.transformMatrix.svgTransform() );
+      }
       
       // maps x linearly from [a0,b0] => [a1,b1]
       function linearMap( a0, b0, a1, b1, x ) {

@@ -33,6 +33,8 @@ define( function( require ) {
     
     // TODO: make a global spot that will have a 'useless' context for these purposes?
     this.canvasGradient = document.createElement( 'canvas' ).getContext( '2d' ).createLinearGradient( x0, y0, x1, y1 );
+    
+    this.transformMatrix = null;
   };
   var LinearGradient = scenery.LinearGradient;
   
@@ -51,6 +53,10 @@ define( function( require ) {
       this.stops.push( { ratio: ratio, color: color } );
       this.canvasGradient.addColorStop( ratio, color );
       return this;
+    },
+    
+    setTransformMatrix: function( transformMatrix ) {
+      this.transformMatrix = transformMatrix;
     },
     
     // TODO: for performance, we should create a Canvas 'gradient' and keep it persistently
