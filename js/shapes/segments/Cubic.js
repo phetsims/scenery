@@ -74,6 +74,7 @@ define( function( require ) {
     this.bounds = this.bounds.withPoint( this.start );
     this.bounds = this.bounds.withPoint( this.end );
     
+    throw new Error( 'bounds not complete' );
   };
   Segment.Cubic.prototype = {
     hasCusp: function() {
