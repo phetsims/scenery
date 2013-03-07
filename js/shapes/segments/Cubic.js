@@ -20,6 +20,7 @@ define( function( require ) {
   
   var Segment = require( 'SCENERY/shapes/segments/Segment' );
   var Piece = require( 'SCENERY/shapes/pieces/Piece' );
+  require( 'SCENERY/shapes/segments/Quadratic' );
 
   Segment.Cubic = function( start, control1, control2, end, skipComputations ) {
     this.start = start;
@@ -59,6 +60,14 @@ define( function( require ) {
       var sqrtDet = Math.sqrt( this.tDeterminant );
       this.tInflection1 = this.tCusp - sqrtDet;
       this.tInflection2 = this.tCusp + sqrtDet;
+    }
+    
+    if ( this.hasCusp() ) {
+      // if there is a cusp, we'll split at the cusp into two quadratic bezier curves.
+      // see http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.94.8088&rep=rep1&type=pdf (Singularities of rational Bezier curves - J Monterde, 2001)
+      var subdividedAtCusp = this.subdivided( this.tCusp, true );
+      this.startQuadratic = new Segment.Quadratic( subdividedAtCusp[0].start, subdividedAtCusp[0].control1, subdividedAtCusp[0].end, false );
+      this.endQuadratic = new Segment.Quadratic( subdividedAtCusp[1].start, subdividedAtCusp[1].control2, subdividedAtCusp[1].end, false );
     }
     
     this.bounds = Bounds2.NOTHING;
