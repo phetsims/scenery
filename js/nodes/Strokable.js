@@ -15,7 +15,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  require( 'SCENERY/Shape' );
+  require( 'SCENERY/shapes/Shape' );
   
   scenery.Strokable = function( type ) {
     var proto = type.prototype;

@@ -50,7 +50,7 @@ define( [
     'SCENERY/nodes/Node',
     'SCENERY/util/RenderState',
     'SCENERY/Scene',
-    'SCENERY/Shape',
+    'SCENERY/shapes/Shape',
     'SCENERY/util/Trail',
     'SCENERY/util/TrailPointer'
   ], function(
