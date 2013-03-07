@@ -21,11 +21,16 @@ define( function( require ) {
   var Segment = require( 'SCENERY/shapes/segments/Segment' );
   var Piece = require( 'SCENERY/shapes/pieces/Piece' );
 
-  Segment.Cubic = function( start, control1, control2, end ) {
+  Segment.Cubic = function( start, control1, control2, end, skipComputations ) {
     this.start = start;
     this.control1 = control1;
     this.control2 = control2;
     this.end = end;
+    
+    // allows us to skip unnecessary computation in the subdivision steps
+    if ( skipComputations ) {
+      return;
+    }
     
     this.startTangent = this.tangentAt( 0 ).normalized();
     this.endTangent = this.tangentAt( 1 ).normalized();
@@ -77,7 +82,22 @@ define( function( require ) {
     toRS: function( point ) {
       var firstVector = point.minus( this.start );
       return new Vector2( firstVector.dot( this.r ), firstVector.dot( this.s ) );
-    }
+    },
+    
+    subdivided: function( skipComputations ) {
+      // de Casteljau method
+      // TODO: add a 'bisect' or 'between' method for vectors?
+      var left = this.start.plus( this.control1 ).times( 0.5 );
+      var right = this.control2.plus( this.end ).times( 0.5 );
+      var middle = this.control1.plus( this.control2 ).times( 0.5 );
+      var leftMid = left.plus( middle ).times( 0.5 );
+      var rightMid = middle.plus( right ).times( 0.5 );
+      var mid = leftMid.plus( rightMid ).times( 0.5 );
+      return [
+        new Segment.Cubic( this.start, left, leftMid, mid, skipComputations ),
+        new Segment.Cubic( mid, rightMid, right, this.end, skipComputations )
+      ];
+    },
   };
   
   return Segment.Cubic;
