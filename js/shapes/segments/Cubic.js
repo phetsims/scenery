@@ -67,6 +67,11 @@ define( function( require ) {
     
   };
   Segment.Cubic.prototype = {
+    hasCusp: function() {
+      var epsilon = 0.000001; // TODO: make this available to change?
+      return this.tangentAt( this.tCusp ).magnitude() < epsilon;
+    },
+    
     // position: (1 - t)^3*start + 3*(1 - t)^2*t*control1 + 3*(1 - t) t^2*control2 + t^3*end
     positionAt: function( t ) {
       var mt = 1 - t;
