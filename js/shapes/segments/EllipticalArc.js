@@ -22,7 +22,7 @@ define( function( require ) {
 
   var Segment = require( 'SCENERY/shapes/segments/Segment' );
   var Piece = require( 'SCENERY/shapes/pieces/Piece' );
-  var Subpath = require( 'SCENERY/shapes/util/Subpath' );
+  require( 'SCENERY/shapes/util/Subpath' );
 
   // TODO: notes at http://www.w3.org/TR/SVG/implnote.html#PathElementImplementationNotes
   // Canvas notes at http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-ellipse
@@ -260,7 +260,7 @@ define( function( require ) {
       }
       
       if ( !shape.hasSubpaths() ) {
-        shape.addSubpath( new Subpath() );
+        shape.addSubpath( new scenery.Subpath() );
       }
       
       shape.getLastSubpath().addSegment( ellipticalArc );

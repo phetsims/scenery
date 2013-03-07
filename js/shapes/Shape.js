@@ -37,8 +37,8 @@ define( function( require ) {
   var lineLineIntersection = require( 'DOT/Util' ).lineLineIntersection;
   
   var Subpath = require( 'SCENERY/shapes/util/Subpath' );
-  var LineStyles = require( 'SCENERY/shapes/util/LineStyles' );
   var Piece = require( 'SCENERY/shapes/pieces/Piece' );
+  require( 'SCENERY/shapes/util/LineStyles' );
   require( 'SCENERY/shapes/pieces/Arc' );
   require( 'SCENERY/shapes/pieces/Close' );
   require( 'SCENERY/shapes/pieces/EllipticalArc' );
@@ -46,7 +46,6 @@ define( function( require ) {
   require( 'SCENERY/shapes/pieces/MoveTo' );
   require( 'SCENERY/shapes/pieces/QuadraticCurveTo' );
   require( 'SCENERY/shapes/pieces/Rect' );
-  var Segment = require( 'SCENERY/shapes/segments/Segment' );
   require( 'SCENERY/shapes/segments/Line' );
   
   // for brevity
@@ -336,7 +335,7 @@ define( function( require ) {
     getStrokedShape: function( lineStyles ) {
       
       if ( lineStyles === undefined ) {
-        lineStyles = new LineStyles();
+        lineStyles = new scenery.LineStyles();
       }
       
       // return a cached version if possible
@@ -421,7 +420,7 @@ define( function( require ) {
         // we don't need to insert an implicit closing segment if the start and end points are the same
         var alreadyClosed = _.last( segments ).end.equals( _.first( segments ).start );
         // if there is an implicit closing segment
-        var closingSegment = alreadyClosed ? null : new Segment.Line( segments[segments.length-1].end, segments[0].start );
+        var closingSegment = alreadyClosed ? null : new scenery.Segment.Line( segments[segments.length-1].end, segments[0].start );
         
         // move to the first point in our stroked path
         shape.addPiece( new Piece.MoveTo( segmentStartLeft( _.first( segments ), lineWidth ) ) );
@@ -488,7 +487,7 @@ define( function( require ) {
       
       this._strokedShape = shape;
       this._strokedShapeComputed = true;
-      this._strokedShapeStyles = new LineStyles( lineStyles ); // shallow copy, since we consider linestyles to be mutable
+      this._strokedShapeStyles = new scenery.LineStyles( lineStyles ); // shallow copy, since we consider linestyles to be mutable
       
       return shape;
     },

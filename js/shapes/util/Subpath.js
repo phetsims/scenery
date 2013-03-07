@@ -13,11 +13,10 @@ define( function( require ) {
   "use strict";
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
-  var assertExtra = require( 'ASSERT/assert' )( 'scenery.extra', true );
   
   var scenery = require( 'SCENERY/scenery' );
   
-  var Segment = require( 'SCENERY/shapes/segments/Segment' );
+  require( 'SCENERY/shapes/segments/Line' );
   
   scenery.Subpath = function() {
     this.points = [];
@@ -74,7 +73,7 @@ define( function( require ) {
     
     getClosingSegment: function() {
       assert && assert( this.hasClosingSegment(), 'Implicit closing segment unnecessary on a fully closed path' );
-      return new Segment.Line( this.getLastPoint(), this.getFirstPoint() );
+      return new scenery.Segment.Line( this.getLastPoint(), this.getFirstPoint() );
     }
   };
   
