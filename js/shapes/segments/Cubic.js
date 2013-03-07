@@ -140,8 +140,7 @@ define( function( require ) {
     },
     
     toPieces: function() {
-      //return [ new Piece.CubicCurveTo( this.control, this.end ) ];
-      throw new Error( 'Segment.Cubic.toPieces unimplemented' ); // TODO: implement
+      return [ new Piece.CubicCurveTo( this.control1, this.control2, this.end ) ];
     },
     
     getSVGPathFragment: function() {
