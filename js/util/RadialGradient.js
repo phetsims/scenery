@@ -63,25 +63,58 @@ define( function( require ) {
     },
     
     getSVGDefinition: function( id ) {
+      var startIsLarger = this.startRadius > this.endRadius;
+      var largePoint = startIsLarger ? this.start : this.end;
+      var smallPoint = startIsLarger ? this.end : this.start;
+      var maxRadius = Math.max( this.startRadius, this.endRadius );
+      var minRadius = Math.min( this.startRadius, this.endRadius );
+      
       var svgns = 'http://www.w3.org/2000/svg'; // TODO: store this in a common place!
       var definition = document.createElementNS( svgns, 'radialGradient' );
       
       // TODO:
-      // definition.setAttribute( 'id', id );
-      // definition.setAttribute( 'gradientUnits', 'userSpaceOnUse' ); // so we don't depend on the bounds of the object being drawn with the gradient
-      // definition.setAttribute( 'x1', this.start.x );
-      // definition.setAttribute( 'y1', this.start.y );
-      // definition.setAttribute( 'x2', this.end.x );
-      // definition.setAttribute( 'y2', this.end.y );
+      definition.setAttribute( 'id', id );
+      definition.setAttribute( 'gradientUnits', 'userSpaceOnUse' ); // so we don't depend on the bounds of the object being drawn with the gradient
+      definition.setAttribute( 'cx', largePoint.x );
+      definition.setAttribute( 'cy', largePoint.y );
+      definition.setAttribute( 'r', maxRadius );
+      definition.setAttribute( 'fx', this.focalPoint.x );
+      definition.setAttribute( 'fy', this.focalPoint.y );
       
-      // _.each( this.stops, function( stop ) {
-      //   // TODO: store color in our stops array, so we don't have to create additional objects every time?
-      //   var color = new scenery.Color( stop.color );
-      //   var stopElement = document.createElementNS( svgns, 'stop' );
-      //   stopElement.setAttribute( 'offset', stop.ratio );
-      //   stopElement.setAttribute( 'style', 'stop-color: ' + color.withAlpha( 1 ).getCSS() + '; stop-opacity: ' + color.a.toFixed( 20 ) + ';' );
-      //   definition.appendChild( stopElement );
-      // } );
+      // maps x linearly from [a0,b0] => [a1,b1]
+      function linearMap( a0, b0, a1, b1, x ) {
+        return a1 + ( x - a0 ) * ( b1 - a1 ) / ( b0 - a0 );
+      }
+      
+      function applyStop( stop ) {
+        // flip the stops if the start has a larger radius
+        var ratio = startIsLarger ? 1 - stop.ratio : stop.ratio;
+        
+        // scale the stops properly if the smaller radius isn't 0
+        if ( minRadius > 0 ) {
+          // scales our ratio from [0,1] => [minRadius/maxRadius,0]
+          ratio = linearMap( 0, 1, minRadius / maxRadius, 1, ratio );
+        }
+        
+        // TODO: store color in our stops array, so we don't have to create additional objects every time?
+        var color = new scenery.Color( stop.color );
+        var stopElement = document.createElementNS( svgns, 'stop' );
+        stopElement.setAttribute( 'offset', ratio );
+        stopElement.setAttribute( 'style', 'stop-color: ' + color.withAlpha( 1 ).getCSS() + '; stop-opacity: ' + color.a.toFixed( 20 ) + ';' );
+        definition.appendChild( stopElement );
+      }
+      
+      var i;
+      // switch the direction we apply stops in, so that the ratios always are increasing.
+      if ( startIsLarger ) {
+        for ( i = this.stops.length - 1; i >= 0; i-- ) {
+          applyStop( this.stops[i] );
+        }
+      } else {
+        for ( var i = 0; i < this.stops.length; i++ ) {
+          applyStop( this.stops[i] );
+        }
+      }
       
       return definition;
     }
