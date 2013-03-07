@@ -26,8 +26,8 @@ define( function( require ) {
     this.control2 = control2;
     this.end = end;
     
-    this.startTangent = this.gradientAt( 0 ).normalized();
-    this.endTangent = this.gradientAt( 1 ).normalized();
+    this.startTangent = this.tangentAt( 0 ).normalized();
+    this.endTangent = this.tangentAt( 1 ).normalized();
     
     if ( start.equals( end, 0 ) && start.equals( control1, 0 ) && start.equals( control2, 0 ) ) {
       this.invalid = true;
@@ -47,7 +47,7 @@ define( function( require ) {
     },
     
     // derivative: -3 p0 (1 - t)^2 + 3 p1 (1 - t)^2 - 6 p1 (1 - t) t + 6 p2 (1 - t) t - 3 p2 t^2 + 3 p3 t^2
-    gradientAt: function( t ) {
+    tangentAt: function( t ) {
       var mt = 1 - t;
       return this.start.times( -3 * mt * mt ).plus( this.control1.times( 3 * mt * mt - 6 * mt * t ) ).plus( this.control2.times( 6 * mt * t - 3 * t * t ) ).plus( this.end.times( t * t ) );
     }

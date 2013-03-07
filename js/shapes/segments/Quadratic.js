@@ -77,7 +77,7 @@ define( function( require ) {
     },
     
     // derivative: 2(1-t)( control - start ) + 2t( end - control )
-    gradientAt: function( t ) {
+    tangentAt: function( t ) {
       return this.control.minus( this.start ).times( 2 * ( 1 - t ) ).plus( this.end.minus( this.control ).times( 2 * t ) );
     },
     
@@ -181,11 +181,11 @@ define( function( require ) {
       var result = 0;
       
       if ( aValid ) {
-        result += ray.dir.perpendicular().dot( this.gradientAt( ta ) ) < 0 ? 1 : -1;
+        result += ray.dir.perpendicular().dot( this.tangentAt( ta ) ) < 0 ? 1 : -1;
       }
       
       if ( bValid ) {
-        result += ray.dir.perpendicular().dot( this.gradientAt( tb ) ) < 0 ? 1 : -1;
+        result += ray.dir.perpendicular().dot( this.tangentAt( tb ) ) < 0 ? 1 : -1;
       }
       
       return result;

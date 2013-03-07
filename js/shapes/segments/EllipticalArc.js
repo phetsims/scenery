@@ -38,8 +38,8 @@ define( function( require ) {
     
     this.start = this.pointAtAngle( startAngle );
     this.end = this.pointAtAngle( endAngle );
-    this.startTangent = this.gradientAtAngle( startAngle );
-    this.endTangent = this.gradientAtAngle( endAngle );
+    this.startTangent = this.tangentAtAngle( startAngle );
+    this.endTangent = this.tangentAtAngle( endAngle );
     
     if ( radiusX === 0 || radiusY === 0 || startAngle === endAngle ) {
       this.invalid = true;
@@ -101,7 +101,7 @@ define( function( require ) {
       return this.unitTransform.transformPosition2( Vector2.createPolar( 1, angle ) );
     },
     
-    gradientAtAngle: function( angle ) {
+    tangentAtAngle: function( angle ) {
       return this.unitTransform.transformDelta2( Vector2.createPolar( 1, angle + this.anticlockwise ? Math.PI / 2 : -Math.PI / 2 ) );
     },
     
@@ -138,7 +138,7 @@ define( function( require ) {
         }
         var angle = this.startAngle + ratio * ( this.endAngle - this.startAngle );
         
-        var point = this.pointAtAngle( angle ).plus( this.gradientAtAngle( angle ).perpendicular().normalized().times( r ) );
+        var point = this.pointAtAngle( angle ).plus( this.tangentAtAngle( angle ).perpendicular().normalized().times( r ) );
         result.push( new Piece.LineTo( point ) );
       }
       
