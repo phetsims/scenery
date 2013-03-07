@@ -1437,6 +1437,13 @@ define( function( require ) {
     
     var isFullPerimeter = ( !anticlockwise && endAngle - startAngle >= Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle >= Math.PI * 2 );
     
+    // compute an angle difference that represents how "much" of the circle our arc covers
+    this.angleDifference = this.anticlockwise ? this.startAngle - this.endAngle : this.endAngle - this.startAngle;
+    if ( this.angleDifference < 0 ) {
+      this.angleDifference += Math.PI * 2;
+    }
+    assert && assert( this.angleDifference >= 0 ); // now it should always be zero or positive
+    
     // a unit arg segment that we can map to our ellipse. useful for hit testing and such.
     this.unitArcSegment = new Segment.Arc( center, 1, startAngle, endAngle, anticlockwise );
     
