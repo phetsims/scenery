@@ -13,7 +13,6 @@ Bugs:
     Switching renderers in Devious Drag example on iPad causes other objects being dragged to be "dropped"
         Probably causes some sort of enter/exit event?
     Nexus 7 hidef scaling
-    CSS transform bounds!
     Multi-touch stress test is flickery!
     FAMB IE9 mouse handling - remember to check out Scenery copy
     Check Firefox/Safari on Mac event handling on multiple touch events
