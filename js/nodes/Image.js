@@ -5,6 +5,8 @@
  *
  * TODO: setImage / getImage and the whole toolchain that uses that
  *
+ * TODO: SVG support
+ *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
@@ -21,6 +23,14 @@ define( function( require ) {
   var Renderer = require( 'SCENERY/layers/Renderer' ); // we need to specify the Renderer in the prototype
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
   
+  /*
+   * Canvas renderer supports the following as 'image':
+   *     HTMLImageElement
+   *     HTMLVideoElement
+   *     HTMLCanvasElement
+   *     CanvasRenderingContext2D
+   *     ImageBitmap
+   */
   scenery.Image = function( image, options ) {
     Node.call( this, options );
     
