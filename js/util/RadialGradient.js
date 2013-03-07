@@ -120,7 +120,7 @@ define( function( require ) {
           applyStop( this.stops[i] );
         }
       } else {
-        for ( var i = 0; i < this.stops.length; i++ ) {
+        for ( i = 0; i < this.stops.length; i++ ) {
           applyStop( this.stops[i] );
         }
       }
