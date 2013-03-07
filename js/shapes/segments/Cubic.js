@@ -84,15 +84,15 @@ define( function( require ) {
       return new Vector2( firstVector.dot( this.r ), firstVector.dot( this.s ) );
     },
     
-    subdivided: function( skipComputations ) {
+    subdivided: function( t, skipComputations ) {
       // de Casteljau method
       // TODO: add a 'bisect' or 'between' method for vectors?
-      var left = this.start.plus( this.control1 ).times( 0.5 );
-      var right = this.control2.plus( this.end ).times( 0.5 );
-      var middle = this.control1.plus( this.control2 ).times( 0.5 );
-      var leftMid = left.plus( middle ).times( 0.5 );
-      var rightMid = middle.plus( right ).times( 0.5 );
-      var mid = leftMid.plus( rightMid ).times( 0.5 );
+      var left = this.start.blend( this.control1, t );
+      var right = this.control2.blend( this.end, t );
+      var middle = this.control1.blend( this.control2, t );
+      var leftMid = left.blend( middle, t );
+      var rightMid = middle.blend( right, t );
+      var mid = leftMid.blend( rightMid, t );
       return [
         new Segment.Cubic( this.start, left, leftMid, mid, skipComputations ),
         new Segment.Cubic( mid, rightMid, right, this.end, skipComputations )

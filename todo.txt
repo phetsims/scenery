@@ -23,6 +23,8 @@ Test:
     Text baseline 'middle'
     Canvas/SVG linear/radial gradients with various combinations
     Elliptical arc / arc transforms, including scale and shear. Especially shear! + reflections
+    Shapes:
+        animated test rotation/scaling/shearing/reflection on segments, showing start/end points, tangents, bounds
 
 BAM:
     Support portrait and landscape?

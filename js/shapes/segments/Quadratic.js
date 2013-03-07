@@ -90,7 +90,7 @@ define( function( require ) {
       var depth = 5; // generates 2^depth curves
       for ( var i = 0; i < depth; i++ ) {
         curves = _.flatten( _.map( curves, function( curve ) {
-          return curve.subdivided( true );
+          return curve.subdivided( 0.5, true );
         } ));
       }
       
@@ -108,11 +108,11 @@ define( function( require ) {
       return result;
     },
     
-    subdivided: function( skipComputations ) {
+    subdivided: function( t, skipComputations ) {
       // de Casteljau method
-      var leftMid = this.start.plus( this.control ).times( 0.5 );
-      var rightMid = this.control.plus( this.end ).times( 0.5 );
-      var mid = leftMid.plus( rightMid ).times( 0.5 );
+      var leftMid = this.start.blend( this.control, t );
+      var rightMid = this.control.blend( this.end, t );
+      var mid = leftMid.blend( rightMid, t );
       return [
         new Segment.Quadratic( this.start, leftMid, mid, skipComputations ),
         new Segment.Quadratic( mid, rightMid, this.end, skipComputations )
