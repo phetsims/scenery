@@ -14,6 +14,7 @@ define( function( require ) {
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
   var scenery = require( 'SCENERY/scenery' );
+  var LineStyles = require( 'SCENERY/shapes/util/LineStyles' );
   
   require( 'SCENERY/shapes/Shape' );
   
@@ -23,7 +24,7 @@ define( function( require ) {
     // this should be called in the constructor to initialize
     proto.initializeStrokable = function() {
       this._stroke = null;
-      this._lineDrawingStyles = new scenery.Shape.LineStyles();
+      this._lineDrawingStyles = new LineStyles();
     };
     
     proto.hasStroke = function() {

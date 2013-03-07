@@ -119,17 +119,17 @@ $(document).ready( function() {
         // TODO: a way to pass an array and run commands without explicitly adding pieces?
         // scene.addChild( new scenery.Path( {
         //   shape: new scenery.Shape( [
-        //     new scenery.Shape.Piece.MoveTo( mainCurve.start ),
-        //     new scenery.Shape.Piece.LineTo( mainCurve.control ),
-        //     new scenery.Shape.Piece.LineTo( mainCurve.end )
+        //     new scenery.Piece.MoveTo( mainCurve.start ),
+        //     new scenery.Piece.LineTo( mainCurve.control ),
+        //     new scenery.Piece.LineTo( mainCurve.end )
         //   ] ),
         //   stroke: '#ff0000'
         // } ) );
         
         scene.addChild( new scenery.Path( {
           shape: new scenery.Shape( [
-            new scenery.Shape.Piece.MoveTo( mainCurve.start ),
-            new scenery.Shape.Piece.QuadraticCurveTo( mainCurve.control, mainCurve.end )
+            new scenery.Piece.MoveTo( mainCurve.start ),
+            new scenery.Piece.QuadraticCurveTo( mainCurve.control, mainCurve.end )
           ] ),
           stroke: '#000000'
         } ) );

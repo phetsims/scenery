@@ -35,24 +35,41 @@ define( [
     'SCENERY/nodes/DOM',
     'SCENERY/nodes/Fillable',
     'SCENERY/nodes/Image',
+    'SCENERY/nodes/Node',
     'SCENERY/nodes/Path',
     'SCENERY/nodes/Strokable',
     'SCENERY/nodes/Text',
+    
+    'SCENERY/shapes/Shape',
+    'SCENERY/shapes/pieces/Arc',
+    'SCENERY/shapes/pieces/Close',
+    'SCENERY/shapes/pieces/EllipticalArc',
+    'SCENERY/shapes/pieces/LineTo',
+    'SCENERY/shapes/pieces/MoveTo',
+    'SCENERY/shapes/pieces/Piece',
+    'SCENERY/shapes/pieces/QuadraticCurveTo',
+    'SCENERY/shapes/pieces/Rect',
+    'SCENERY/shapes/segments/Arc',
+    'SCENERY/shapes/segments/Cubic',
+    'SCENERY/shapes/segments/EllipticalArc',
+    'SCENERY/shapes/segments/Line',
+    'SCENERY/shapes/segments/Quadratic',
+    'SCENERY/shapes/segments/Segment',
+    'SCENERY/shapes/util/LineStyles',
+    'SCENERY/shapes/util/Subpath',
     
     'SCENERY/util/Color',
     'SCENERY/util/Font',
     'SCENERY/util/LinearGradient',
     'SCENERY/util/Pattern',
     'SCENERY/util/RadialGradient',
+    'SCENERY/util/RenderState',
     'SCENERY/util/SceneImage',
+    'SCENERY/util/Trail',
+    'SCENERY/util/TrailPointer',
     'SCENERY/util/Util',
     
-    'SCENERY/nodes/Node',
-    'SCENERY/util/RenderState',
-    'SCENERY/Scene',
-    'SCENERY/shapes/Shape',
-    'SCENERY/util/Trail',
-    'SCENERY/util/TrailPointer'
+    'SCENERY/Scene'
   ], function(
     scenery // note: we don't need any of the other parts, we just need to specify them as dependencies so they fill in the scenery namespace
   ) {
