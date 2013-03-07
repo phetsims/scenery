@@ -38,6 +38,7 @@ define( function( require ) {
     
     // TODO: add color support here, instead of string?
     addColorStop: function( ratio, color ) {
+      // TODO: always add color stops IN ORDER, otherwise SVG will error!
       this.stops.push( { ratio: ratio, color: color } );
       this.canvasGradient.addColorStop( ratio, color );
       return this;

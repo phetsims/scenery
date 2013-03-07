@@ -33,20 +33,83 @@
 </head>
 
 <body>
-  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="200" height="100">
+  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="1000" height="100">
     <defs id="defs">
       <linearGradient id="grad2" x1="0" y1="0" x2="100" y2="0" gradientUnits="userSpaceOnUse">
         <stop offset="0" style="stop-color:rgb(255,255,0);stop-opacity:1" />
         <stop offset="0.5" style="stop-color:rgba(255,255,0,0);stop-opacity:0" />
         <stop offset="1" style="stop-color:rgb(255,0,0);stop-opacity:1" />
       </linearGradient>
+      
+      <radialGradient id="grad200" cx="50" cy="50" r="50" fx="50" fy="50" gradientUnits="userSpaceOnUse">
+        <stop offset="0" style="stop-color:rgb(255,255,0);stop-opacity:1" />
+        <stop offset="0.5" style="stop-color:rgba(255,255,0,0);stop-opacity:0" />
+        <stop offset="1" style="stop-color:rgb(255,0,0);stop-opacity:1" />
+      </radialGradient>
+      
+      <radialGradient id="grad300" cx="50" cy="50" r="50" fx="50" fy="50" gradientUnits="userSpaceOnUse">
+        <stop offset="0" style="stop-color:rgb(255,0,0);stop-opacity:1" />
+        <stop offset="0.5" style="stop-color:rgba(255,255,0,0);stop-opacity:0" />
+        <stop offset="1" style="stop-color:rgb(255,255,0);stop-opacity:1" />
+      </radialGradient>
+      
+      <radialGradient id="grad400" cx="50" cy="50" r="50" fx="90" fy="50" gradientUnits="userSpaceOnUse">
+        <stop offset="0" style="stop-color:rgb(255,255,0);stop-opacity:1" />
+        <stop offset="0.5" style="stop-color:rgba(255,255,0,0);stop-opacity:0" />
+        <stop offset="1" style="stop-color:rgb(255,0,0);stop-opacity:1" />
+      </radialGradient>
+      
+      <radialGradient id="grad500" cx="50" cy="50" r="50" fx="100" fy="50" gradientUnits="userSpaceOnUse">
+        <stop offset="0.2" style="stop-color:rgb(255,255,0);stop-opacity:1" />
+        <stop offset="0.6" style="stop-color:rgba(255,255,0,0);stop-opacity:0" />
+        <stop offset="1" style="stop-color:rgb(255,0,0);stop-opacity:1" />
+      </radialGradient>
+      
+      <radialGradient id="grad600" cx="10" cy="50" r="50" fx="143.33333333" fy="50" gradientUnits="userSpaceOnUse">
+        <stop offset="0.4" style="stop-color:rgb(255,255,0);stop-opacity:1" />
+        <stop offset="0.7" style="stop-color:rgba(255,255,0,0);stop-opacity:0" />
+        <stop offset="1" style="stop-color:rgb(255,0,0);stop-opacity:1" />
+      </radialGradient>
+      
+      <radialGradient id="grad700" cx="10" cy="50" r="50" fx="143.33333333" fy="50" gradientUnits="userSpaceOnUse">
+        <stop offset="0.4" style="stop-color:rgb(255,0,0);stop-opacity:1" />
+        <stop offset="0.7" style="stop-color:rgba(255,255,0,0);stop-opacity:0" />
+        <stop offset="1" style="stop-color:rgb(255,255,0);stop-opacity:1" />
+      </radialGradient>
+      
+      <radialGradient id="grad800" cx="10" cy="50" r="50" fx="143.33333333" fy="50" gradientUnits="userSpaceOnUse" spreadMethod="repeat">
+        <stop offset="0.4" style="stop-color:rgb(255,255,0);stop-opacity:1" />
+        <stop offset="0.7" style="stop-color:rgba(255,255,0,0);stop-opacity:0" />
+        <stop offset="1" style="stop-color:rgb(255,0,0);stop-opacity:1" />
+      </radialGradient>
     </defs>
     <path d="M 0 0 L 100 0 L 100 100 L 0 100 Z" fill="url(#grad2)"/>
     <g transform="translate( 200, 0 ) rotate( 90 )">
       <path d="M 0 0 L 100 0 L 100 100 L 0 100 Z" fill="url(#grad2)"/>
     </g>
+    <g transform="translate( 200, 0 )">
+      <path d="M 0 0 L 100 0 L 100 100 L 0 100 Z" fill="url(#grad200)"/>
+    </g>
+    <g transform="translate( 300, 0 )">
+      <path d="M 0 0 L 100 0 L 100 100 L 0 100 Z" fill="url(#grad300)"/>
+    </g>
+    <g transform="translate( 400, 0 )">
+      <path d="M 0 0 L 100 0 L 100 100 L 0 100 Z" fill="url(#grad400)"/>
+    </g>
+    <g transform="translate( 500, 0 )">
+      <path d="M 0 0 L 100 0 L 100 100 L 0 100 Z" fill="url(#grad500)"/>
+    </g>
+    <g transform="translate( 600, 0 )">
+      <path d="M 0 0 L 100 0 L 100 100 L 0 100 Z" fill="url(#grad600)"/>
+    </g>
+    <g transform="translate( 700, 0 )">
+      <path d="M 0 0 L 100 0 L 100 100 L 0 100 Z" fill="url(#grad700)"/>
+    </g>
+    <g transform="translate( 800, 0 )">
+      <path d="M 0 0 L 100 0 L 100 100 L 0 100 Z" fill="url(#grad800)"/>
+    </g>
   </svg>
-  <canvas width="200" height="100"></canvas>
+  <canvas width="1000" height="100"></canvas>
   
   <svg width="64" height="64" stroke-miterlimit="10" style="position: absolute;">
     <defs>
@@ -66,14 +129,39 @@
   
   <script type="text/javascript">
     var context = $( 'canvas' )[0].getContext( '2d' );
-    var gradient = context.createLinearGradient( 0, 0, 100, 0 );
-    gradient.addColorStop( 0, 'rgb(255,255,0)' );
-    gradient.addColorStop( 0.5, 'rgba(255,255,0,0)' );
-    gradient.addColorStop( 1, 'rgb(255,0,0)' );
-    context.fillStyle = gradient;
+    
+    context.save();
+    var linearGradient = context.createLinearGradient( 0, 0, 100, 0 );
+    linearGradient.addColorStop( 0, 'rgb(255,255,0)' );
+    linearGradient.addColorStop( 0.5, 'rgba(255,255,0,0)' );
+    linearGradient.addColorStop( 1, 'rgb(255,0,0)' );
+    context.fillStyle = linearGradient;
     context.fillRect( 0, 0, 100, 100 );
     context.transform( 0, 1, -1, 0, 200, 0 );
     context.fillRect( 0, 0, 100, 100 );
+    context.restore();
+    
+    function drawRadial( xOffset, x0, y0, r0, x1, y1, r1 ) {
+      context.save();
+      var radialGradient = context.createRadialGradient( xOffset + x0, y0, r0, xOffset + x1, y1, r1 );
+      radialGradient.addColorStop( 0, 'rgb(255,255,0)' );
+      radialGradient.addColorStop( 0.5, 'rgba(255,255,0,0)' );
+      radialGradient.addColorStop( 1, 'rgb(255,0,0)' );
+      context.fillStyle = radialGradient;
+      context.fillRect( xOffset, 0, 100, 100 );
+      context.restore();
+    }
+    drawRadial( 200, 50, 50, 0, 50, 50, 50 );
+    drawRadial( 300, 50, 50, 50, 50, 50, 0 );
+    drawRadial( 400, 90, 50, 0, 50, 50, 50 );
+    drawRadial( 500, 90, 50, 10, 50, 50, 50 );
+    
+    // SVG note: If the point defined by ‘fx’ and ‘fy’ lies outside the circle defined by ‘cx’, ‘cy’ and ‘r’, then the user agent shall set the focal point to the intersection of the line from (‘cx’, ‘cy’) to (‘fx’, ‘fy’) with the circle defined by ‘cx’, ‘cy’ and ‘r’.
+    
+    // swaps the start and end
+    drawRadial( 600, 90, 50, 20, 10, 50, 50 );
+    drawRadial( 700, 10, 50, 50, 90, 50, 20 );
+    
   </script>
 </body>
 </html>
