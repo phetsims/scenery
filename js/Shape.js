@@ -33,6 +33,7 @@ define( function( require ) {
   var Ray2 = require( 'DOT/Ray2' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Transform3 = require( 'DOT/Transform3' );
+  var toDegrees = require( 'DOT/Util' ).toDegrees;
   
   // for brevity
   function p( x,y ) { return new Vector2( x, y ); }
@@ -1094,11 +1095,11 @@ define( function( require ) {
     },
     
     // derivative: 2(1-t)( control - start ) + 2t( end - control )
-    derivativeAt: function( t ) {
+    gradientAt: function( t ) {
       return this.control.minus( this.start ).times( 2 * ( 1 - t ) ).plus( this.end.minus( this.control ).times( 2 * t ) );
     },
     
-    offsetTo: function( r, includeMove, reverse ) {
+    offsetTo: function( r, reverse ) {
       // TODO: implement more accurate method at http://www.antigrain.com/research/adaptive_bezier/index.html
       // TODO: or more recently (and relevantly): http://www.cis.usouthal.edu/~hain/general/Publications/Bezier/BezierFlattening.pdf
       var curves = [this];
@@ -1122,7 +1123,7 @@ define( function( require ) {
         return new Piece.QuadraticCurveTo( curve.control, curve.end );
       } );
       
-      return includeMove ? ( [ new Piece.MoveTo( offsetCurves[0].start ) ].concat( result ) ) : result;
+      return result;
     },
     
     subdivided: function( skipComputations ) {
@@ -1157,11 +1158,11 @@ define( function( require ) {
     },
     
     strokeLeft: function( lineWidth ) {
-      return this.offsetTo( -lineWidth / 2, false, false );
+      return this.offsetTo( -lineWidth / 2, false );
     },
     
     strokeRight: function( lineWidth ) {
-      return this.offsetTo( lineWidth / 2, false, true );
+      return this.offsetTo( lineWidth / 2, true );
     },
     
     intersectsBounds: function( bounds ) {
@@ -1198,11 +1199,11 @@ define( function( require ) {
       var result = 0;
       
       if ( aValid ) {
-        result += ray.dir.perpendicular().dot( this.derivativeAt( ta ) ) < 0 ? 1 : -1;
+        result += ray.dir.perpendicular().dot( this.gradientAt( ta ) ) < 0 ? 1 : -1;
       }
       
       if ( bValid ) {
-        result += ray.dir.perpendicular().dot( this.derivativeAt( tb ) ) < 0 ? 1 : -1;
+        result += ray.dir.perpendicular().dot( this.gradientAt( tb ) ) < 0 ? 1 : -1;
       }
       
       return result;
@@ -1227,7 +1228,7 @@ define( function( require ) {
     },
     
     // derivative: -3 p0 (1 - t)^2 + 3 p1 (1 - t)^2 - 6 p1 (1 - t) t + 6 p2 (1 - t) t - 3 p2 t^2 + 3 p3 t^2
-    derivativeAt: function( t ) {
+    gradientAt: function( t ) {
       var mt = 1 - t;
       return this.start.times( -3 * mt * mt ).plus( this.control1.times( 3 * mt * mt - 6 * mt * t ) ).plus( this.control2.times( 6 * mt * t - 3 * t * t ) ).plus( this.end.times( t * t ) );
     },
@@ -1417,8 +1418,8 @@ define( function( require ) {
     
     this.start = this.pointAtAngle( startAngle );
     this.end = this.pointAtAngle( endAngle );
-    this.startTangent = this.unitTransform.transformDelta2( Vector2.createPolar( 1, startAngle + anticlockwise ? Math.PI / 2 : -Math.PI / 2 ) );
-    this.endTangent = this.unitTransform.transformDelta2( Vector2.createPolar( 1, endAngle + anticlockwise ? Math.PI / 2 : -Math.PI / 2 ) );
+    this.startTangent = this.gradientAtAngle( startAngle );
+    this.endTangent = this.gradientAtAngle( endAngle );
     
     if ( radiusX === 0 || radiusY === 0 || startAngle === endAngle ) {
       this.invalid = true;
@@ -1473,6 +1474,10 @@ define( function( require ) {
       return this.unitTransform.transformPosition2( Vector2.createPolar( 1, angle ) );
     },
     
+    gradientAtAngle: function( angle ) {
+      return this.unitTransform.transformDelta2( Vector2.createPolar( 1, angle + this.anticlockwise ? Math.PI / 2 : -Math.PI / 2 ) );
+    },
+    
     // TODO: refactor? exact same as Segment.Arc
     containsAngle: function( angle ) {
       // transform the angle into the appropriate coordinate form
@@ -1493,13 +1498,33 @@ define( function( require ) {
       return [ new Piece.EllipticalArc( this.center, this.radiusX, this.radiusY, this.rotation, this.startAngle, this.endAngle, this.anticlockwise ) ];
     },
     
+    // discretizes the elliptical arc and returns an offset curve as a list of lineTos
+    offsetTo: function( r, reverse ) {
+      // how many segments to create (possibly make this more adaptive?)
+      var quantity = 32;
+      
+      var result = [];
+      for ( var i = 1; i < quantity; i++ ) {
+        var ratio = i - ( quantity - 1 );
+        if ( reverse ) {
+          ratio = 1 - ratio;
+        }
+        var angle = this.startAngle + ratio * ( this.endAngle - this.startAngle );
+        
+        var point = this.pointAtAngle( angle ).plus( this.gradientAtAngle( angle ).perpendicular().normalized().times( r ) );
+        result.push( new Piece.LineTo( point ) );
+      }
+      
+      return result;
+    },
+    
     getSVGPathFragment: function() {
       // see http://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands for more info
       // rx ry x-axis-rotation large-arc-flag sweep-flag x y
       var epsilon = 0.01; // allow some leeway to render things as 'almost circles'
       var sweepFlag = this.anticlockwise ? '0' : '1';
       var largeArcFlag;
-      var degreesRotation = dot.Util.toDegrees( this.rotation ); // bleh, degrees?
+      var degreesRotation = toDegrees( this.rotation ); // bleh, degrees?
       if ( this.angleDifference < Math.PI * 2 - epsilon ) {
         largeArcFlag = this.angleDifference < Math.PI ? '0' : '1';
         return 'A ' + this.radiusX + ' ' + this.radiusY + ' ' + degreesRotation + ' ' + largeArcFlag + ' ' + sweepFlag + ' ' + this.end.x + ' ' + this.end.y;
@@ -1521,11 +1546,11 @@ define( function( require ) {
     },
     
     strokeLeft: function( lineWidth ) {
-      throw new Error( 'Segment.EllipticalArc.strokeLeft unimplemented' );
+      return this.offsetTo( -lineWidth / 2, false );
     },
     
     strokeRight: function( lineWidth ) {
-      throw new Error( 'Segment.EllipticalArc.strokeRight unimplemented' );
+      return this.offsetTo( lineWidth / 2, true );
     },
     
     intersectsBounds: function( bounds ) {
