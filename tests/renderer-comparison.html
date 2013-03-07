@@ -199,7 +199,7 @@
       },{
         name: 'Images',
         width: 220,
-        height: 97,
+        height: 120,
         draw: function( scene ) {
           var thumbnail = document.createElement( 'img' );
           thumbnail.addEventListener( 'load', function() {
@@ -212,7 +212,8 @@
               scene.addChild( new scenery.Image( logo, {
                 scale: 0.5,
                 rotation: Math.PI / 6,
-                x: 130
+                x: 130,
+                y: 20
               } ) );
               scene.updateScene();
             } );
@@ -220,7 +221,7 @@
           } );
           thumbnail.src = 'http://phet.colorado.edu/sims/molecule-polarity/molecule-polarity-thumbnail.png';
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG, scenery.Renderer.DOM ]
       },{
         name: 'Patterns',
         width: 64,

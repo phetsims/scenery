@@ -119,7 +119,16 @@ define( function( require ) {
   Image.prototype.getImageURL = function() {
     return this._image.src;
   };
-
+  
+  // signal that we are actually rendering something
+  Image.prototype.hasSelf = function() {
+    return true;
+  };
+  
+  /*---------------------------------------------------------------------------*
+  * Canvas support
+  *----------------------------------------------------------------------------*/
+  
   // TODO: add SVG / DOM support
   Image.prototype.paintCanvas = function( state ) {
     var layer = state.layer;
@@ -127,9 +136,17 @@ define( function( require ) {
     context.drawImage( this._image, 0, 0 );
   };
   
+  /*---------------------------------------------------------------------------*
+  * WebGL support
+  *----------------------------------------------------------------------------*/
+  
   Image.prototype.paintWebGL = function( state ) {
     throw new Error( 'Image.prototype.paintWebGL unimplemented' );
   };
+  
+  /*---------------------------------------------------------------------------*
+  * SVG support
+  *----------------------------------------------------------------------------*/
   
   Image.prototype.createSVGFragment = function( svg, defs, group ) {
     var element = document.createElementNS( 'http://www.w3.org/2000/svg', 'image' );
@@ -148,13 +165,27 @@ define( function( require ) {
     element.setAttributeNS( xlinkns, 'xlink:href', this.getImageURL() );
   };
   
-  Image.prototype.hasSelf = function() {
-    return true;
+  /*---------------------------------------------------------------------------*
+  * DOM support
+  *----------------------------------------------------------------------------*/
+  
+  Image.prototype.addToDOMLayer = function( domLayer ) {
+    this._image.style.display = 'block';
+    this._image.style.position = 'absolute';
+    domLayer.$div.append( this._image );
+  };
+  
+  Image.prototype.removeFromDOMLayer = function( domLayer ) {
+    domLayer.$div.remove( this._image );
+  };
+  
+  Image.prototype.updateCSSTransform = function( transform ) {
+    $( this._image ).css( transform.getMatrix().cssTransformStyles() );
   };
   
   Image.prototype._mutatorKeys = [ 'image' ].concat( Node.prototype._mutatorKeys );
   
-  Image.prototype._supportedRenderers = [ Renderer.Canvas, Renderer.SVG ];
+  Image.prototype._supportedRenderers = [ Renderer.Canvas, Renderer.SVG, Renderer.DOM ];
   
   Object.defineProperty( Image.prototype, 'image', { set: Image.prototype.setImage, get: Image.prototype.getImage } );
   
