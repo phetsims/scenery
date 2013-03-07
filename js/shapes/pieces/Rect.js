@@ -18,8 +18,8 @@ define( function( require ) {
   var Piece = require( 'SCENERY/shapes/pieces/Piece' );
   require( 'SCENERY/shapes/pieces/MoveTo' );
   require( 'SCENERY/shapes/pieces/Close' );
-  var Subpath = require( 'SCENERY/shapes/util/Subpath' );
-  var Line = require( 'SCENERY/shapes/segments/Line' );
+  require( 'SCENERY/shapes/util/Subpath' );
+  require( 'SCENERY/shapes/segments/Line' );
   
   // for brevity
   function p( x,y ) { return new Vector2( x, y ); }
@@ -48,17 +48,17 @@ define( function( require ) {
     },
     
     applyPiece: function( shape ) {
-      var subpath = new Subpath();
+      var subpath = new scenery.Subpath();
       shape.addSubpath( subpath );
       subpath.addPoint( p( this.x, this.y ) );
       subpath.addPoint( p( this.x + this.width, this.y ) );
       subpath.addPoint( p( this.x + this.width, this.y + this.height ) );
       subpath.addPoint( p( this.x, this.y + this.height ) );
-      subpath.addSegment( new Line( subpath.points[0], subpath.points[1] ) );
-      subpath.addSegment( new Line( subpath.points[1], subpath.points[2] ) );
-      subpath.addSegment( new Line( subpath.points[2], subpath.points[3] ) );
+      subpath.addSegment( new scenery.Segment.Line( subpath.points[0], subpath.points[1] ) );
+      subpath.addSegment( new scenery.Segment.Line( subpath.points[1], subpath.points[2] ) );
+      subpath.addSegment( new scenery.Segment.Line( subpath.points[2], subpath.points[3] ) );
       subpath.close();
-      shape.addSubpath( new Subpath() );
+      shape.addSubpath( new scenery.Subpath() );
       shape.getLastSubpath().addPoint( p( this.x, this.y ) );
       shape.bounds = shape.bounds.withPoint( this.upperLeft ).withPoint( this.lowerRight );
       assert && assert( !isNaN( shape.bounds.x() ) );

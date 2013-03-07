@@ -10,12 +10,11 @@ define( function( require ) {
   "use strict";
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
-  var assertExtra = require( 'ASSERT/assert' )( 'scenery.extra', true );
   
   var scenery = require( 'SCENERY/scenery' );
   
   var Piece = require( 'SCENERY/shapes/pieces/Piece' );
-  var Subpath = require( 'SCENERY/shapes/util/Subpath' );
+  require( 'SCENERY/shapes/util/Subpath' );
   
   Piece.Close = function() {};
   Piece.Close.prototype = {
@@ -32,7 +31,7 @@ define( function( require ) {
     applyPiece: function( shape ) {
       if ( shape.hasSubpaths() ) {
         var previousPath = shape.getLastSubpath();
-        var nextPath = new Subpath();
+        var nextPath = new scenery.Subpath();
         
         previousPath.close();
         shape.addSubpath( nextPath );

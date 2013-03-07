@@ -21,9 +21,9 @@ define( function( require ) {
   var Transform3 = require( 'DOT/Transform3' );
 
   var Piece = require( 'SCENERY/shapes/pieces/Piece' );
-  var EllipticalArc = require( 'SCENERY/shapes/segments/EllipticalArc' );
-  var Line = require( 'SCENERY/shapes/segments/Line' );
-  var Subpath = require( 'SCENERY/shapes/util/Subpath' );
+  require( 'SCENERY/shapes/segments/EllipticalArc' );
+  require( 'SCENERY/shapes/segments/Line' );
+  require( 'SCENERY/shapes/util/Subpath' );
   
   Piece.EllipticalArc = function( center, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise ) {
     this.center = center;
@@ -34,7 +34,7 @@ define( function( require ) {
     this.endAngle = endAngle;
     this.anticlockwise = anticlockwise;
     
-    this.unitTransform = EllipticalArc.computeUnitTransform( center, radiusX, radiusY, rotation );
+    this.unitTransform = scenery.Segment.EllipticalArc.computeUnitTransform( center, radiusX, radiusY, rotation );
   };
   Piece.EllipticalArc.prototype = {
     constructor: Piece.EllipticalArc,
@@ -72,7 +72,7 @@ define( function( require ) {
     applyPiece: function( shape ) {
       // see http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-arc
       
-      var ellipticalArc = new EllipticalArc( this.center, this.radiusX, this.radiusY, this.rotation, this.startAngle, this.endAngle, this.anticlockwise );
+      var ellipticalArc = new scenery.Segment.EllipticalArc( this.center, this.radiusX, this.radiusY, this.rotation, this.startAngle, this.endAngle, this.anticlockwise );
       
       // we are assuming that the normal conditions were already met (or exceptioned out) so that these actually work with canvas
       var startPoint = ellipticalArc.start;
@@ -80,11 +80,11 @@ define( function( require ) {
       
       // if there is already a point on the subpath, and it is different than our starting point, draw a line between them
       if ( shape.hasSubpaths() && shape.getLastSubpath().getLength() > 0 && !startPoint.equals( shape.getLastSubpath().getLastPoint(), 0 ) ) {
-        shape.getLastSubpath().addSegment( new Line( shape.getLastSubpath().getLastPoint(), startPoint ) );
+        shape.getLastSubpath().addSegment( new scenery.Segment.Line( shape.getLastSubpath().getLastPoint(), startPoint ) );
       }
       
       if ( !shape.hasSubpaths() ) {
-        shape.addSubpath( new Subpath() );
+        shape.addSubpath( new scenery.Subpath() );
       }
       
       shape.getLastSubpath().addSegment( ellipticalArc );

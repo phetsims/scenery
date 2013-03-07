@@ -14,7 +14,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   var Piece = require( 'SCENERY/shapes/pieces/Piece' );
-  var Subpath = require( 'SCENERY/shapes/util/Subpath' );
+  require( 'SCENERY/shapes/util/Subpath' );
   
   Piece.MoveTo = function( point ) {
     this.point = point;
@@ -31,7 +31,7 @@ define( function( require ) {
     },
     
     applyPiece: function( shape ) {
-      var subpath = new Subpath();
+      var subpath = new scenery.Subpath();
       subpath.addPoint( this.point );
       shape.addSubpath( subpath );
     }

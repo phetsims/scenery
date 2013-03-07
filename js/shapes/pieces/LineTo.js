@@ -14,7 +14,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   var Piece = require( 'SCENERY/shapes/pieces/Piece' );
-  var Line = require( 'SCENERY/shapes/segments/Line' );
+  require( 'SCENERY/shapes/segments/Line' );
   
   Piece.LineTo = function( point ) {
     this.point = point;
@@ -35,7 +35,7 @@ define( function( require ) {
       if ( shape.hasSubpaths() ) {
         var start = shape.getLastSubpath().getLastPoint();
         var end = this.point;
-        var line = new Line( start, end );
+        var line = new scenery.Segment.Line( start, end );
         shape.getLastSubpath().addSegment( line );
         shape.getLastSubpath().addPoint( end );
         shape.bounds = shape.bounds.withPoint( start ).withPoint( end );

@@ -14,7 +14,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   var Piece = require( 'SCENERY/shapes/pieces/Piece' );
-  var Quadratic = require( 'SCENERY/shapes/segments/Quadratic' );
+  require( 'SCENERY/shapes/segments/Quadratic' );
   
   Piece.QuadraticCurveTo = function( controlPoint, point ) {
     this.controlPoint = controlPoint;
@@ -35,7 +35,7 @@ define( function( require ) {
       // see http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-quadraticcurveto
       shape.ensure( this.controlPoint );
       var start = shape.getLastSubpath().getLastPoint();
-      var quadratic = new Quadratic( start, this.controlPoint, this.point );
+      var quadratic = new scenery.Segment.Quadratic( start, this.controlPoint, this.point );
       shape.getLastSubpath().addSegment( quadratic );
       shape.getLastSubpath().addPoint( this.point );
       if ( !quadratic.invalid ) {
