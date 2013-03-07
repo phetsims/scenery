@@ -1216,10 +1216,19 @@ define( function( require ) {
     this.control1 = control1;
     this.control2 = control2;
     this.end = end;
+    
+    this.startTangent = this.gradientAt( 0 ).normalized();
+    this.endTangent = this.gradientAt( 1 ).normalized();
+    
     if ( start.equals( end, 0 ) && start.equals( control1, 0 ) && start.equals( control2, 0 ) ) {
       this.invalid = true;
       return;
     }
+    
+    this.bounds = Bounds2.NOTHING;
+    this.bounds = this.bounds.withPoint( this.start );
+    this.bounds = this.bounds.withPoint( this.end );
+    
   };
   Segment.Cubic.prototype = {
     // position: (1 - t)^3*start + 3*(1 - t)^2*t*control1 + 3*(1 - t) t^2*control2 + t^3*end
@@ -1232,7 +1241,7 @@ define( function( require ) {
     gradientAt: function( t ) {
       var mt = 1 - t;
       return this.start.times( -3 * mt * mt ).plus( this.control1.times( 3 * mt * mt - 6 * mt * t ) ).plus( this.control2.times( 6 * mt * t - 3 * t * t ) ).plus( this.end.times( t * t ) );
-    },
+    }
   };
   
   Segment.Arc = function( center, radius, startAngle, endAngle, anticlockwise ) {
