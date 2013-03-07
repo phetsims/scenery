@@ -17,6 +17,7 @@ define( function( require ) {
   
   var Bounds2 = require( 'DOT/Bounds2' );
   var Vector2 = require( 'DOT/Vector2' );
+  var Matrix3 = require( 'DOT/Matrix3' );
   
   var Segment = require( 'SCENERY/shapes/segments/Segment' );
   var Piece = require( 'SCENERY/shapes/pieces/Piece' );
@@ -186,6 +187,23 @@ define( function( require ) {
     
     // returns the resultant winding number of this ray intersecting this segment.
     windingIntersection: function( ray ) {
+      // find the rotation that will put our ray in the direction of the x-axis so we can only solve for y=0 for intersections
+      var inverseMatrix = Matrix3.rotation2( -ray.dir.angle() );
+      assert && assert( inverseMatrix.timesVector2( ray.dir ).x > 0.99 ); // verify that we transform the unit vector to the x-unit
+      
+      var y0 = inverseMatrix.timesVector2( this.start ).y;
+      var y1 = inverseMatrix.timesVector2( this.control1 ).y;
+      var y2 = inverseMatrix.timesVector2( this.control2 ).y;
+      var y3 = inverseMatrix.timesVector2( this.end ).y;
+      
+      // polynomial form of cubic: start + (3 control1 - 3 start) t + (-6 control1 + 3 control2 + 3 start) t^2 + (3 control1 - 3 control2 + end - start) t^3
+      var a = -y0 + 3 * y1 - 3 * y2 + y3;
+      var b = 3 * y0 - 6 * y1 + 3 * y2;
+      var c = -3 * y0 + 3 * y1;
+      var d = y0;
+      
+      // solve cubic roots
+      
       throw new Error( 'Segment.Cubic.windingIntersection unimplemented' ); // TODO: implement
     }
   };
