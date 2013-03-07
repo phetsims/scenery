@@ -5,6 +5,8 @@
  *
  * SVG gradients, see http://www.w3.org/TR/SVG/pservers.html
  *
+ * TODO: reduce code sharing between gradients
+ *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
@@ -27,6 +29,7 @@ define( function( require ) {
     this.end = usesVectors ? y0 : new Vector2( x1, y1 );
     
     this.stops = [];
+    this.lastStopRatio = 0;
     
     // TODO: make a global spot that will have a 'useless' context for these purposes?
     this.canvasGradient = document.createElement( 'canvas' ).getContext( '2d' ).createLinearGradient( x0, y0, x1, y1 );
@@ -38,7 +41,13 @@ define( function( require ) {
     
     // TODO: add color support here, instead of string?
     addColorStop: function( ratio, color ) {
-      // TODO: always add color stops IN ORDER, otherwise SVG will error!
+      if ( this.lastStopRatio > ratio ) {
+        // fail out, since browser quirks go crazy for this case
+        throw new Error( 'Color stops not specified in the order of increasing ratios' );
+      } else {
+        this.lastStopRatio = ratio;
+      }
+      
       this.stops.push( { ratio: ratio, color: color } );
       this.canvasGradient.addColorStop( ratio, color );
       return this;

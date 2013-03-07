@@ -2,7 +2,7 @@
 Priorities:
     Performance
     Cubic bezier
-    Gradients
+    Gradient / pattern transforms!
     Dashed lines
     Documentation
 

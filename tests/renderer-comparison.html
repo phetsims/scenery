@@ -126,6 +126,37 @@
           } ) );
         }
       },{
+        name: 'Radial Gradients',
+        width: 128,
+        height: 64,
+        draw: function( scene ) {
+          var fillGradient = new scenery.RadialGradient( 22, 0, 0, 0, 0, 30 );
+          fillGradient.addColorStop( 0.1, '#ff0000' );
+          fillGradient.addColorStop( 0.5, '#00ff00' );
+          fillGradient.addColorStop( 0.6, 'rgba(0,255,0,0.3)' );
+          fillGradient.addColorStop( 0.9, '#000000' );
+          
+          var mainGradient = new scenery.RadialGradient( 32, 20, 10, 32, 32, 32 );
+          mainGradient.addColorStop( 0, '#8ED6FF' );
+          mainGradient.addColorStop( 0.5, '#004CB3' );
+          mainGradient.addColorStop( 0.6, '#bbbbbb' );
+          mainGradient.addColorStop( 1, '#ffffff' );
+          
+          scene.addChild( new scenery.Path( {
+            shape: scenery.Shape.rectangle( 0, 0, 64, 64 ),
+            fill: mainGradient
+          } ) );
+          scene.addChild( new scenery.Path( {
+            shape: scenery.Shape.regularPolygon( 6, 22 ),
+            x: 32 + 64,
+            y: 32,
+            rotation: Math.PI / 4,
+            fill: fillGradient,
+            stroke: '#000000',
+            lineWidth: 3
+          } ) );
+        }
+      },{
         name: 'RGBA',
         width: 64,
         height: 64,
