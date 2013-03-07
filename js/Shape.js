@@ -146,6 +146,29 @@ define( function( require ) {
       return this;
     },
     
+    /*
+     * Draws an elliptical arc using the Canvas 2D semantics, with the following parameters:
+     * ellipticalArc( center, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise )
+     * ellipticalArc( centerX, centerY, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise )
+     */
+    ellipticalArc: function( centerX, centerY, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise ) {
+      if ( typeof centerX === 'object' ) {
+        // ellipticalArc( center, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise )
+        anticlockwise = endAngle;
+        endAngle = startAngle;
+        startAngle = rotation;
+        rotation = radiusY;
+        radiusY = radiusX;
+        radiusX = centerY;
+        var center = centerX;
+        this.addPiece( new Piece.EllipticalArc( center, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise ) );
+      } else {
+        // ellipticalArc( centerX, centerY, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise )
+        this.addPiece( new Piece.EllipticalArc( p( centerX, centerY ), radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise ) );
+      }
+      return this;
+    },
+    
     rect: function( a, b, c, d ) {
       // rect( upperLeft, lowerRight )
       if ( c === undefined && typeof a === 'object' && typeof b === 'object' ) {
@@ -547,7 +570,7 @@ define( function( require ) {
     },
     
     addSegment: function( segment ) {
-      if ( segment !== InvalidZeroLengthSegment ) {
+      if ( !segment.invalid ) {
         this.segments.push( segment );
       }
     },
@@ -739,9 +762,11 @@ define( function( require ) {
     applyPiece: function( shape ) {
       // see http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-arc
       
+      var arc = new Segment.Arc( this.center, this.radius, this.startAngle, this.endAngle, this.anticlockwise );
+      
       // we are assuming that the normal conditions were already met (or exceptioned out) so that these actually work with canvas
-      var startPoint = this.center.plus( p( this.radius * Math.cos( this.startAngle ), this.radius * Math.sin( this.startAngle ) ) );
-      var endPoint =   this.center.plus( p( this.radius * Math.cos( this.endAngle ),   this.radius * Math.sin( this.endAngle ) ) );
+      var startPoint = arc.start;
+      var endPoint = arc.end;
       
       // if there is already a point on the subpath, and it is different than our starting point, draw a line between them
       if ( shape.hasSubpaths() && shape.getLastSubpath().getLength() > 0 && !startPoint.equals( shape.getLastSubpath().getLastPoint(), 0 ) ) {
@@ -752,7 +777,6 @@ define( function( require ) {
         shape.addSubpath( new Subpath() );
       }
       
-      var arc = new Segment.Arc( this.center, this.radius, this.startAngle, this.endAngle, this.anticlockwise );
       shape.getLastSubpath().addSegment( arc );
       
       // technically the Canvas spec says to add the start point, so we do this even though it is probably completely unnecessary (there is no conditional)
@@ -762,6 +786,81 @@ define( function( require ) {
       // and update the bounds
       if ( !arc.invalid ) {
         shape.bounds = shape.bounds.union( arc.bounds );
+      }
+    }
+  };
+  
+  Piece.EllipticalArc = function( center, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise ) {
+    this.center = center;
+    this.radiusX = radiusX;
+    this.radiusY = radiusY;
+    this.rotation = rotation;
+    this.startAngle = startAngle;
+    this.endAngle = endAngle;
+    this.anticlockwise = anticlockwise;
+    
+    this.unitTransform = Segment.EllipticalArc.computeUnitTransform( center, radiusX, radiusY, rotation );
+  };
+  Piece.EllipticalArc.prototype = {
+    constructor: Piece.EllipticalArc,
+    
+    writeToContext: function( context ) {
+      if ( context.ellipse ) {
+        context.ellipse( this.center.x, this.center.y, this.radiusX, this.radiusY, this.rotation, this.startAngle, this.endAngle, this.anticlockwise );
+      } else {
+        // fake the ellipse call by using transforms
+        this.unitTransform.getMatrix().canvasAppendTransform( context );
+        context.arc( 0, 0, 1, this.startAngle, this.endAngle, this.anticlockwise );
+        this.unitTransform.getInverse().canvasAppendTransform( context );
+      }
+    },
+    
+    // TODO: test various transform types, especially rotations, scaling, shears, etc.
+    transformed: function( matrix ) {
+      var transformedSemiMajorAxis = matrix.timesVector2( Vector2.createPolar( this.radiusX, this.rotation ) ).minus( matrix.timesVector2( Vector2.ZERO ) );
+      var transformedSemiMinorAxis = matrix.timesVector2( Vector2.createPolar( this.radiusY, this.rotation + Math.PI / 2 ) ).minus( matrix.timesVector2( Vector2.ZERO ) );
+      var rotation = transformedSemiMajorAxis.angle();
+      var radiusX = transformedSemiMajorAxis.magnitude();
+      var radiusY = transformedSemiMinorAxis.magnitude();
+      
+      var reflected = matrix.determinant() < 0;
+      
+      // reverse the 'clockwiseness' if our transform includes a reflection
+      // TODO: check reflections. swapping angle signs should fix clockwiseness
+      // var anticlockwise = reflected ? !this.anticlockwise : this.anticlockwise;
+      var startAngle = reflected ? -this.startAngle : this.startAngle;
+      var endAngle = reflected ? -this.endAngle : this.endAngle;
+      
+      return [new Piece.EllipticalArc( matrix.timesVector2( this.center ), radiusX, radiusY, rotation, startAngle, endAngle, this.anticlockwise )];
+    },
+    
+    applyPiece: function( shape ) {
+      // see http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-arc
+      
+      var ellipticalArc = new Segment.EllipticalArc( this.center, this.radiusX, this.radiusY, this.rotation, this.startAngle, this.endAngle, this.anticlockwise );
+      
+      // we are assuming that the normal conditions were already met (or exceptioned out) so that these actually work with canvas
+      var startPoint = ellipticalArc.start;
+      var endPoint = ellipticalArc.end;
+      
+      // if there is already a point on the subpath, and it is different than our starting point, draw a line between them
+      if ( shape.hasSubpaths() && shape.getLastSubpath().getLength() > 0 && !startPoint.equals( shape.getLastSubpath().getLastPoint(), 0 ) ) {
+        shape.getLastSubpath().addSegment( new Segment.Line( shape.getLastSubpath().getLastPoint(), startPoint ) );
+      }
+      
+      if ( !shape.hasSubpaths() ) {
+        shape.addSubpath( new Subpath() );
+      }
+      
+      shape.getLastSubpath().addSegment( ellipticalArc );
+      
+      // technically the Canvas spec says to add the start point, so we do this even though it is probably completely unnecessary (there is no conditional)
+      shape.getLastSubpath().addPoint( startPoint );
+      shape.getLastSubpath().addPoint( endPoint );
+      
+      // and update the bounds
+      if ( !ellipticalArc.invalid ) {
+        shape.bounds = shape.bounds.union( ellipticalArc.bounds );
       }
     }
   };
@@ -834,17 +933,15 @@ define( function( require ) {
   var Segment = Shape.Segment;
   // TODO: consider actually using a segment prototype if we need it sometime
   
-  // for now, simple way of handling error cases internally
-  var InvalidZeroLengthSegment = {
-    invalid: true
-  };
-  
   Segment.Line = function( start, end ) {
-    if ( start.equals( end, 0 ) ) {
-      return InvalidZeroLengthSegment;
-    }
     this.start = start;
     this.end = end;
+    
+    if ( start.equals( end, 0 ) ) {
+      this.invalid = true;
+      return;
+    }
+    
     this.startTangent = end.minus( start ).normalized();
     this.endTangent = this.startTangent;
     
@@ -906,12 +1003,14 @@ define( function( require ) {
   };
   
   Segment.Quadratic = function( start, control, end, skipComputations ) {
-    if ( start.equals( end, 0 ) && start.equals( control, 0 ) ) {
-      return InvalidZeroLengthSegment;
-    }
     this.start = start;
     this.control = control;
     this.end = end;
+    
+    if ( start.equals( end, 0 ) && start.equals( control, 0 ) ) {
+      this.invalid = true;
+      return;
+    }
     
     var t;
     
@@ -1077,13 +1176,14 @@ define( function( require ) {
   };
   
   Segment.Cubic = function( start, control1, control2, end ) {
-    if ( start.equals( end, 0 ) && start.equals( control1, 0 ) && start.equals( control2, 0 ) ) {
-      return InvalidZeroLengthSegment;
-    }
     this.start = start;
     this.control1 = control1;
     this.control2 = control2;
     this.end = end;
+    if ( start.equals( end, 0 ) && start.equals( control1, 0 ) && start.equals( control2, 0 ) ) {
+      this.invalid = true;
+      return;
+    }
   };
   Segment.Cubic.prototype = {
     // position: (1 - t)^3*start + 3*(1 - t)^2*t*control1 + 3*(1 - t) t^2*control2 + t^3*end
@@ -1100,15 +1200,6 @@ define( function( require ) {
   };
   
   Segment.Arc = function( center, radius, startAngle, endAngle, anticlockwise ) {
-    if ( radius <= 0 || startAngle === endAngle ) {
-      return InvalidZeroLengthSegment;
-    }
-    // constraints
-    assert && assert( !( ( !anticlockwise && endAngle - startAngle <= -Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle <= -Math.PI * 2 ) ), 'Not handling arcs with start/end angles that show differences in-between browser handling' );
-    assert && assert( !( ( !anticlockwise && endAngle - startAngle > Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle > Math.PI * 2 ) ), 'Not handling arcs with start/end angles that show differences in-between browser handling' );
-    
-    var isFullPerimeter = ( !anticlockwise && endAngle - startAngle >= Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle >= Math.PI * 2 );
-    
     this.center = center;
     this.radius = radius;
     this.startAngle = startAngle;
@@ -1120,6 +1211,16 @@ define( function( require ) {
     // TODO: double-check the clockwiseness, since we have to reverse it from the mathematically-correct version
     this.startTangent = Vector2.createPolar( 1, startAngle + anticlockwise ? Math.PI / 2 : -Math.PI / 2 );
     this.endTangent = Vector2.createPolar( 1, endAngle + anticlockwise ? Math.PI / 2 : -Math.PI / 2 );
+    
+    if ( radius <= 0 || startAngle === endAngle ) {
+      this.invalid = true;
+      return;
+    }
+    // constraints
+    assert && assert( !( ( !anticlockwise && endAngle - startAngle <= -Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle <= -Math.PI * 2 ) ), 'Not handling arcs with start/end angles that show differences in-between browser handling' );
+    assert && assert( !( ( !anticlockwise && endAngle - startAngle > Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle > Math.PI * 2 ) ), 'Not handling arcs with start/end angles that show differences in-between browser handling' );
+    
+    var isFullPerimeter = ( !anticlockwise && endAngle - startAngle >= Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle >= Math.PI * 2 );
     
     // compute an angle difference that represents how "much" of the circle our arc covers
     this.angleDifference = this.anticlockwise ? this.startAngle - this.endAngle : this.endAngle - this.startAngle;
@@ -1270,20 +1371,6 @@ define( function( require ) {
   // TODO: notes at http://www.w3.org/TR/SVG/implnote.html#PathElementImplementationNotes
   // Canvas notes at http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-ellipse
   Segment.EllipticalArc = function( center, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise ) {
-    if ( radiusX === 0 || radiusY === 0 || startAngle === endAngle ) {
-      return InvalidZeroLengthSegment;
-    }
-    
-    if ( radiusX < radiusY ) {
-      throw new Error( 'Not verified to work if radiusX < radiusY' );
-    }
-    
-    // constraints shared with Segment.Arc
-    assert && assert( !( ( !anticlockwise && endAngle - startAngle <= -Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle <= -Math.PI * 2 ) ), 'Not handling elliptical arcs with start/end angles that show differences in-between browser handling' );
-    assert && assert( !( ( !anticlockwise && endAngle - startAngle > Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle > Math.PI * 2 ) ), 'Not handling elliptical arcs with start/end angles that show differences in-between browser handling' );
-    
-    var isFullPerimeter = ( !anticlockwise && endAngle - startAngle >= Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle >= Math.PI * 2 );
-    
     this.center = center;
     this.radiusX = radiusX;
     this.radiusY = radiusY;
@@ -1292,16 +1379,28 @@ define( function( require ) {
     this.endAngle = endAngle;
     this.anticlockwise = anticlockwise;
     
-    // adapted from http://www.w3.org/TR/SVG/implnote.html#PathElementImplementationNotes
-    // transforms the unit circle onto our ellipse
-    this.unitTransform = new Transform3( Matrix3.translation( this.center.x, this.center.y ) // TODO: convert to Matrix3.translation( this.center) when available
-                                                .timesMatrix( Matrix3.rotation2( rotation ) )
-                                                .timesMatrix( Matrix3.scaling( this.radiusX, this.radiusY ) ) );
+    this.unitTransform = Segment.EllipticalArc.computeUnitTransform( center, radiusX, radiusY, rotation );
     
     this.start = this.pointAtAngle( startAngle );
     this.end = this.pointAtAngle( endAngle );
     this.startTangent = this.unitTransform.transformDelta2( Vector2.createPolar( 1, startAngle + anticlockwise ? Math.PI / 2 : -Math.PI / 2 ) );
     this.endTangent = this.unitTransform.transformDelta2( Vector2.createPolar( 1, endAngle + anticlockwise ? Math.PI / 2 : -Math.PI / 2 ) );
+    
+    if ( radiusX === 0 || radiusY === 0 || startAngle === endAngle ) {
+      this.invalid = true;
+      return;
+    }
+    
+    if ( radiusX < radiusY ) {
+      // TODO: check this
+      throw new Error( 'Not verified to work if radiusX < radiusY' );
+    }
+    
+    // constraints shared with Segment.Arc
+    assert && assert( !( ( !anticlockwise && endAngle - startAngle <= -Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle <= -Math.PI * 2 ) ), 'Not handling elliptical arcs with start/end angles that show differences in-between browser handling' );
+    assert && assert( !( ( !anticlockwise && endAngle - startAngle > Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle > Math.PI * 2 ) ), 'Not handling elliptical arcs with start/end angles that show differences in-between browser handling' );
+    
+    var isFullPerimeter = ( !anticlockwise && endAngle - startAngle >= Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle >= Math.PI * 2 );
     
     // a unit arg segment that we can map to our ellipse. useful for hit testing and such.
     this.unitArcSegment = new Segment.Arc( center, 1, startAngle, endAngle, anticlockwise );
@@ -1384,6 +1483,14 @@ define( function( require ) {
       var rayInUnitCircleSpace = this.unitTransform.inverseRay2( ray );
       return this.unitArcSegment.windingIntersection( rayInUnitCircleSpace );
     }
+  };
+  
+  // adapted from http://www.w3.org/TR/SVG/implnote.html#PathElementImplementationNotes
+  // transforms the unit circle onto our ellipse
+  Segment.EllipticalArc.computeUnitTransform = function( center, radiusX, radiusY, rotation ) {
+    return new Transform3( Matrix3.translation( center.x, center.y ) // TODO: convert to Matrix3.translation( this.center) when available
+                                  .timesMatrix( Matrix3.rotation2( rotation ) )
+                                  .timesMatrix( Matrix3.scaling( radiusX, radiusY ) ) );
   };
   
   // TODO: performance / cleanliness to have these as methods instead?

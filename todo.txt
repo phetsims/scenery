@@ -22,6 +22,7 @@ Test:
     SVG invisible nodes?
     Text baseline 'middle'
     Canvas/SVG linear/radial gradients with various combinations
+    Elliptical arc / arc transforms, including scale and shear. Especially shear! + reflections
 
 BAM:
     Support portrait and landscape?
