@@ -112,6 +112,34 @@ define( function( require ) {
         new Segment.Cubic( mid, rightMid, right, this.end, skipComputations )
       ];
     },
+    
+    toPieces: function() {
+      //return [ new Piece.CubicCurveTo( this.control, this.end ) ];
+      throw new Error( 'Segment.Cubic.toPieces unimplemented' ); // TODO: implement
+    },
+    
+    getSVGPathFragment: function() {
+      return 'C ' + this.control1.x + ' ' + this.control1.y + ' ' + this.control2.x + ' ' + this.control2.y + ' ' + this.end.x + ' ' + this.end.y;
+    },
+    
+    strokeLeft: function( lineWidth ) {
+      throw new Error( 'Segment.Cubic.strokeLeft unimplemented' ); // TODO: implement
+      //return this.offsetTo( -lineWidth / 2, false );
+    },
+    
+    strokeRight: function( lineWidth ) {
+      throw new Error( 'Segment.Cubic.strokeRight unimplemented' ); // TODO: implement
+      //return this.offsetTo( lineWidth / 2, true );
+    },
+    
+    intersectsBounds: function( bounds ) {
+      throw new Error( 'Segment.Cubic.intersectsBounds unimplemented' ); // TODO: implement
+    },
+    
+    // returns the resultant winding number of this ray intersecting this segment.
+    windingIntersection: function( ray ) {
+      throw new Error( 'Segment.Cubic.windingIntersection unimplemented' ); // TODO: implement
+    }
   };
   
   return Segment.Cubic;
