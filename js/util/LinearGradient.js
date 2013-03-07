@@ -59,7 +59,6 @@ define( function( require ) {
       this.transformMatrix = transformMatrix;
     },
     
-    // TODO: for performance, we should create a Canvas 'gradient' and keep it persistently
     getCanvasStyle: function() {
       return this.canvasGradient;
     },
@@ -82,6 +81,9 @@ define( function( require ) {
       definition.setAttribute( 'y1', this.start.y );
       definition.setAttribute( 'x2', this.end.x );
       definition.setAttribute( 'y2', this.end.y );
+      if ( this.transformMatrix ) {
+        definition.setAttribute( 'gradientTransform', this.transformMatrix.svgTransform() );
+      }
       
       _.each( this.stops, function( stop ) {
         // TODO: store color in our stops array, so we don't have to create additional objects every time?

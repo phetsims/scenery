@@ -56,7 +56,7 @@
 
 <body>
   
-  <h1>Scenery Rendering Renderer Comparison</h1>
+  <h1>Scenery Renderer Comparison</h1>
   
   <script>
   
@@ -207,6 +207,27 @@
             logo.src = 'http://phet.colorado.edu/images/phet-logo-yellow.png';
           } );
           thumbnail.src = 'http://phet.colorado.edu/sims/molecule-polarity/molecule-polarity-thumbnail.png';
+        }
+      },{
+        name: 'Patterns',
+        width: 64,
+        height: 64,
+        draw: function( scene ) {
+          var img = document.createElement( 'img' );
+          img.addEventListener( 'load', function() {
+            var pattern = new scenery.Pattern( img );
+            scene.addChild( new scenery.Path( {
+              shape: scenery.Shape.regularPolygon( 6, 22 ),
+              x: 32,
+              y: 32,
+              rotation: Math.PI / 4,
+              fill: pattern,
+              stroke: '#000000',
+              lineWidth: 3
+            } ) );
+            scene.updateScene();
+          } );
+          img.src = 'http://phet.colorado.edu/files/archive/images/circleArrow_Icon.gif';
         }
       },{
         name: 'Overlapping and Nested Rotations',

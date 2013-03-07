@@ -42,6 +42,7 @@ define( [
     'SCENERY/util/Color',
     'SCENERY/util/Font',
     'SCENERY/util/LinearGradient',
+    'SCENERY/util/Pattern',
     'SCENERY/util/RadialGradient',
     'SCENERY/util/SceneImage',
     'SCENERY/util/Util',

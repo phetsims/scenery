@@ -158,6 +158,21 @@ define( function( require ) {
   
   Object.defineProperty( Image.prototype, 'image', { set: Image.prototype.setImage, get: Image.prototype.getImage } );
   
+  // utility for others
+  Image.createSVGImage = function( url, width, height ) {
+    var xlinkns = 'http://www.w3.org/1999/xlink';
+    var svgns = 'http://www.w3.org/2000/svg';
+    
+    var element = document.createElementNS( svgns, 'image' );
+    element.setAttribute( 'x', 0 );
+    element.setAttribute( 'y', 0 );
+    element.setAttribute( 'width', width + 'px' );
+    element.setAttribute( 'height', height + 'px' );
+    element.setAttributeNS( xlinkns, 'xlink:href', url );
+    
+    return element;
+  };
+  
   return Image;
 } );
 
