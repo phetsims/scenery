@@ -32,6 +32,7 @@ define( function( require ) {
   var Bounds2 = require( 'DOT/Bounds2' );
   var Ray2 = require( 'DOT/Ray2' );
   var Matrix3 = require( 'DOT/Matrix3' );
+  var Transform3 = require( 'DOT/Transform3' );
   
   // for brevity
   function p( x,y ) { return new Vector2( x, y ); }
@@ -1153,6 +1154,7 @@ define( function( require ) {
   Segment.Arc.prototype = {
     constructor: Segment.Arc,
     
+    // TODO: refactor? shared with Segment.EllipticalArc
     containsAngle: function( angle ) {
       // transform the angle into the appropriate coordinate form
       // TODO: check anticlockwise version!
@@ -1290,16 +1292,40 @@ define( function( require ) {
     this.endAngle = endAngle;
     this.anticlockwise = anticlockwise;
     
-    // TODO: start/end
-    // TODO: tangents
+    // adapted from http://www.w3.org/TR/SVG/implnote.html#PathElementImplementationNotes
+    // transforms the unit circle onto our ellipse
+    this.unitTransform = new Transform3( Matrix3.translation( this.center.x, this.center.y ) // TODO: convert to Matrix3.translation( this.center) when available
+                                                .timesMatrix( Matrix3.rotation2( rotation ) )
+                                                .timesMatrix( Matrix3.scaling( this.radiusX, this.radiusY ) ) );
+    
+    this.start = this.pointAtAngle( startAngle );
+    this.end = this.pointAtAngle( endAngle );
+    this.startTangent = this.unitTransform.transformDelta2( Vector2.createPolar( 1, startAngle + anticlockwise ? Math.PI / 2 : -Math.PI / 2 ) );
+    this.endTangent = this.unitTransform.transformDelta2( Vector2.createPolar( 1, endAngle + anticlockwise ? Math.PI / 2 : -Math.PI / 2 ) );
     // TODO: bounds
     throw new Error( 'Segment.EllipticalArc constructor unimplemented' );
   };
   Segment.EllipticalArc.prototype = {
     constructor: Segment.EllipticalArc,
     
+    pointAtAngle: function( angle ) {
+      return this.unitTransform.transformPosition2( Vector2.createPolar( 1, angle ) );
+    },
+    
+    // TODO: refactor? exact same as Segment.Arc
     containsAngle: function( angle ) {
-      throw new Error( 'Segment.EllipticalArc.containsAngle unimplemented' );
+      // transform the angle into the appropriate coordinate form
+      // TODO: check anticlockwise version!
+      var normalizedAngle = this.anticlockwise ? angle - this.endAngle : angle - this.startAngle;
+      
+      // get the angle between 0 and 2pi
+      var positiveMinAngle = normalizedAngle % ( Math.PI * 2 );
+      // check this because modular arithmetic with negative numbers reveal a negative number
+      if ( positiveMinAngle < 0 ) {
+        positiveMinAngle += Math.PI * 2;
+      }
+      
+      return positiveMinAngle <= this.angleDifference;
     },
     
     toPieces: function() {
