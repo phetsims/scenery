@@ -1302,6 +1302,10 @@ define( function( require ) {
     this.end = this.pointAtAngle( endAngle );
     this.startTangent = this.unitTransform.transformDelta2( Vector2.createPolar( 1, startAngle + anticlockwise ? Math.PI / 2 : -Math.PI / 2 ) );
     this.endTangent = this.unitTransform.transformDelta2( Vector2.createPolar( 1, endAngle + anticlockwise ? Math.PI / 2 : -Math.PI / 2 ) );
+    
+    // a unit arg segment that we can map to our ellipse. useful for hit testing and such.
+    this.unitArcSegment = new Segment.Arc( center, 1, startAngle, endAngle, anticlockwise );
+    
     // TODO: bounds
     throw new Error( 'Segment.EllipticalArc constructor unimplemented' );
   };
@@ -1352,7 +1356,9 @@ define( function( require ) {
     
     // returns the resultant winding number of this ray intersecting this segment.
     windingIntersection: function( ray ) {
-      throw new Error( 'Segment.EllipticalArc.windingIntersection unimplemented' );
+      // be lazy. transform it into the space of a non-elliptical arc.
+      var rayInUnitCircleSpace = this.unitTransform.inverseRay2( ray );
+      return this.unitArcSegment.windingIntersection( rayInUnitCircleSpace );
     }
   };
   
