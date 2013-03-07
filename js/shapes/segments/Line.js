@@ -37,6 +37,15 @@ define( function( require ) {
   Segment.Line.prototype = {
     constructor: Segment.Line,
     
+    positionAt: function( t ) {
+      return this.start.plus( this.end.minus( this.start ).times( t ) );
+    },
+    
+    tangentAt: function( t ) {
+      // tangent always the same, just use the start tanget
+      return this.startTangent;
+    },
+    
     toPieces: function() {
       return [ new Piece.LineTo( this.end ) ];
     },

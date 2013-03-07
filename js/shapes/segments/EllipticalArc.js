@@ -36,8 +36,8 @@ define( function( require ) {
     
     this.unitTransform = Segment.EllipticalArc.computeUnitTransform( center, radiusX, radiusY, rotation );
     
-    this.start = this.pointAtAngle( startAngle );
-    this.end = this.pointAtAngle( endAngle );
+    this.start = this.positionAtAngle( startAngle );
+    this.end = this.positionAtAngle( endAngle );
     this.startTangent = this.tangentAtAngle( startAngle );
     this.endTangent = this.tangentAtAngle( endAngle );
     
@@ -76,7 +76,7 @@ define( function( require ) {
     function boundsAtAngle( angle ) {
       if ( that.containsAngle( angle ) ) {
         // the boundary point is in the arc
-        that.bounds = that.bounds.withPoint( that.pointAtAngle( angle ) );
+        that.bounds = that.bounds.withPoint( that.positionAtAngle( angle ) );
       }
     }
     
@@ -97,7 +97,19 @@ define( function( require ) {
   Segment.EllipticalArc.prototype = {
     constructor: Segment.EllipticalArc,
     
-    pointAtAngle: function( angle ) {
+    angleAt: function( t ) {
+      return this.startAngle + ( this.endAngle - this.startAngle ) * t;
+    },
+    
+    positionAt: function( t ) {
+      return this.positionAtAngle( this.angleAt( t ) );
+    },
+    
+    tangentAt: function( t ) {
+      return this.tangentAtAngle( this.angleAt( t ) );
+    },
+    
+    positionAtAngle: function( angle ) {
       return this.unitTransform.transformPosition2( Vector2.createPolar( 1, angle ) );
     },
     
@@ -138,7 +150,7 @@ define( function( require ) {
         }
         var angle = this.startAngle + ratio * ( this.endAngle - this.startAngle );
         
-        var point = this.pointAtAngle( angle ).plus( this.tangentAtAngle( angle ).perpendicular().normalized().times( r ) );
+        var point = this.positionAtAngle( angle ).plus( this.tangentAtAngle( angle ).perpendicular().normalized().times( r ) );
         result.push( new Piece.LineTo( point ) );
       }
       
@@ -161,7 +173,7 @@ define( function( require ) {
         
         // get the angle that is between and opposite of both of the points
         var splitOppositeAngle = ( this.startAngle + this.endAngle ) / 2; // this _should_ work for the modular case?
-        var splitPoint = this.pointAtAngle( splitOppositeAngle );
+        var splitPoint = this.positionAtAngle( splitOppositeAngle );
         
         largeArcFlag = '0'; // since we split it in 2, it's always the small arc
         

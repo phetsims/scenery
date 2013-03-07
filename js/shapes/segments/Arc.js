@@ -26,11 +26,10 @@ define( function( require ) {
     this.endAngle = endAngle;
     this.anticlockwise = anticlockwise;
     
-    this.start = center.plus( Vector2.createPolar( radius, startAngle ) );
-    this.end = center.plus( Vector2.createPolar( radius, endAngle ) );
-    // TODO: double-check the clockwiseness, since we have to reverse it from the mathematically-correct version
-    this.startTangent = Vector2.createPolar( 1, startAngle + anticlockwise ? Math.PI / 2 : -Math.PI / 2 );
-    this.endTangent = Vector2.createPolar( 1, endAngle + anticlockwise ? Math.PI / 2 : -Math.PI / 2 );
+    this.start = this.positionAtAngle( startAngle );
+    this.end = this.positionAtAngle( endAngle );
+    this.startTangent = this.tangentAtAngle( startAngle );
+    this.endTangent = this.tangentAtAngle( endAngle );
     
     if ( radius <= 0 || startAngle === endAngle ) {
       this.invalid = true;
@@ -74,6 +73,26 @@ define( function( require ) {
   };
   Segment.Arc.prototype = {
     constructor: Segment.Arc,
+    
+    angleAt: function( t ) {
+      return this.startAngle + ( this.endAngle - this.startAngle ) * t;
+    },
+    
+    positionAt: function( t ) {
+      return this.positionAtAngle( this.angleAt( t ) );
+    },
+    
+    tangentAt: function( t ) {
+      return this.tangentAtAngle( this.angleAt( t ) );
+    },
+    
+    positionAtAngle: function( angle ) {
+      return this.center.plus( Vector2.createPolar( this.radius, angle ) );
+    },
+    
+    tangentAtAngle: function( angle ) {
+      return Vector2.createPolar( 1, angle + this.anticlockwise ? Math.PI / 2 : -Math.PI / 2 );
+    },
     
     // TODO: refactor? shared with Segment.EllipticalArc
     containsAngle: function( angle ) {
