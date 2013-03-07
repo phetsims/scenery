@@ -143,6 +143,27 @@ define( function( require ) {
       ];
     },
     
+    offsetTo: function( r, reverse ) {
+      // TODO: implement more accurate method at http://www.antigrain.com/research/adaptive_bezier/index.html
+      // TODO: or more recently (and relevantly): http://www.cis.usouthal.edu/~hain/general/Publications/Bezier/BezierFlattening.pdf
+      
+      // how many segments to create (possibly make this more adaptive?)
+      var quantity = 32;
+      
+      var result = [];
+      for ( var i = 1; i < quantity; i++ ) {
+        var t = i - ( quantity - 1 );
+        if ( reverse ) {
+          t = 1 - t;
+        }
+        
+        var point = this.positionAt( t ).plus( this.tangentAt( t ).perpendicular().normalized().times( r ) );
+        result.push( new Piece.LineTo( point ) );
+      }
+      
+      return result;
+    },
+    
     toPieces: function() {
       return [ new Piece.CubicCurveTo( this.control1, this.control2, this.end ) ];
     },
@@ -152,13 +173,11 @@ define( function( require ) {
     },
     
     strokeLeft: function( lineWidth ) {
-      throw new Error( 'Segment.Cubic.strokeLeft unimplemented' ); // TODO: implement
-      //return this.offsetTo( -lineWidth / 2, false );
+      return this.offsetTo( -lineWidth / 2, false );
     },
     
     strokeRight: function( lineWidth ) {
-      throw new Error( 'Segment.Cubic.strokeRight unimplemented' ); // TODO: implement
-      //return this.offsetTo( lineWidth / 2, true );
+      return this.offsetTo( lineWidth / 2, true );
     },
     
     intersectsBounds: function( bounds ) {
