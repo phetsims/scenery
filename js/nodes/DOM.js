@@ -92,6 +92,10 @@ define( function( require ) {
     this.attachedToDOM = false;
   };
   
+  DOM.prototype.updateCSSTransform = function( transform ) {
+    this._$element.css( transform.getMatrix().cssTransformStyles() );
+  };
+  
   DOM.prototype.wrapInTemporaryContainer = function() {
     // create a temporary container attached to the DOM tree (not a fragment) so that we can properly set initial bounds
     var temporaryContainer = document.createElement( 'div' );
@@ -115,10 +119,6 @@ define( function( require ) {
     if ( this._element.parentNode === temporaryContainer ) {
       temporaryContainer.removeChild( this._element );
     }
-  };
-  
-  DOM.prototype.updateCSSTransform = function( transform ) {
-    this._$element.css( transform.getMatrix().cssTransformStyles() );
   };
   
   DOM.prototype.hasSelf = function() {
