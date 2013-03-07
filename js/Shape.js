@@ -785,13 +785,14 @@ define( function( require ) {
       // reverse the 'clockwiseness' if our transform includes a reflection
       var anticlockwise = matrix.determinant() >= 0 ? this.anticlockwise : !this.anticlockwise;
       
-      var radius;
       if ( matrix.scaling().x !== matrix.scaling().y ) {
-        throw new Error( 'unimplemented asymmetric scaling of an arc - please implement ellipse' );
+        var radiusX = matrix.scaling().x * this.radius;
+        var radiusY = matrix.scaling().y * this.radius;
+        return [new Piece.EllipticalArc( matrix.timesVector2( this.center ), radiusX, radiusY, 0, startAngle, endAngle, anticlockwise )];
       } else {
-        radius = matrix.scaling().x * this.radius;
+        var radius = matrix.scaling().x * this.radius;
+        return [new Piece.Arc( matrix.timesVector2( this.center ), radius, startAngle, endAngle, anticlockwise )];
       }
-      return [new Piece.Arc( matrix.timesVector2( this.center ), radius, startAngle, endAngle, anticlockwise )];
     },
     
     applyPiece: function( shape ) {
