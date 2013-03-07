@@ -53,7 +53,6 @@ Browsers
             Try using a unicode-escaped quote?
         
         [KNOWN] Chrome XMLSerializer.serializeToString dropping namespaces: https://code.google.com/p/chromium/issues/detail?id=88295
-        [KNOWN] overflow: hidden not working for SVG on IE
     For canvas, create a drawing function that exhibits all differences?
         Canvas difference examples. Set up simple node.is server to keep track of snapshots.
     measureText for webkit?

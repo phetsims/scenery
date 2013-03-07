@@ -24,11 +24,15 @@ define( function( require ) {
   scenery.DOMLayer = function( args ) {
     Layer.call( this, args );
     
+    var width = this.$main.width();
+    var height = this.$main.height();
+    
     this.div = document.createElement( 'div' );
     this.$div = $( this.div );
-    this.$div.width( this.$main.width() );
-    this.$div.height( this.$main.height() );
+    this.$div.width( width );
+    this.$div.height( height );
     this.$div.css( 'position', 'absolute' );
+    this.div.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
     this.$main.append( this.div );
     
     this.scene = args.scene;

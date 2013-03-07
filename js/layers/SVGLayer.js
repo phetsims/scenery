@@ -41,13 +41,17 @@ define( function( require ) {
     // the <defs> block that we will be stuffing gradients and patterns into
     this.defs = document.createElementNS( svgns, 'defs' );
     
+    var width = $main.width();
+    var height = $main.height();
+    
     this.svg.appendChild( this.defs );
     this.svg.appendChild( this.g );
     this.$svg = $( this.svg );
-    this.svg.setAttribute( 'width', $main.width() );
-    this.svg.setAttribute( 'height', $main.height() );
+    this.svg.setAttribute( 'width', width );
+    this.svg.setAttribute( 'height', height );
     this.svg.setAttribute( 'stroke-miterlimit', 10 ); // to match our Canvas brethren so we have the same default behavior
     this.$svg.css( 'position', 'absolute' );
+    this.svg.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
     $main.append( this.svg );
     
     this.scene = args.scene;
