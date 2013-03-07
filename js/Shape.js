@@ -34,6 +34,7 @@ define( function( require ) {
   var Matrix3 = require( 'DOT/Matrix3' );
   var Transform3 = require( 'DOT/Transform3' );
   var toDegrees = require( 'DOT/Util' ).toDegrees;
+  var lineLineIntersection = require( 'DOT/Util' ).lineLineIntersection;
   
   // for brevity
   function p( x,y ) { return new Vector2( x, y ); }
@@ -1609,14 +1610,6 @@ define( function( require ) {
   function segmentEndRight( segment, lineWidth ) {
     assert && assert( lineWidth !== undefined );
     return segment.end.plus( segment.endTangent.perpendicular().times( lineWidth / 2 ) );
-  }
-  
-  // intersection between the line from p1-p2 and the line from p3-p4
-  function lineLineIntersection( p1, p2, p3, p4 ) {
-    return p(
-      ( ( p1.x * p2.y - p1.y * p2.x ) * ( p3.x - p4.x ) - ( p1.x - p2.x ) * ( p3.x * p4.y - p3.y * p4.x ) ) / ( ( p1.x - p2.x ) * ( p3.y - p4.y ) - ( p1.y - p2.y ) * ( p3.x - p4.x ) ),
-      ( ( p1.x * p2.y - p1.y * p2.x ) * ( p3.y - p4.y ) - ( p1.y - p2.y ) * ( p3.x * p4.y - p3.y * p4.x ) ) / ( ( p1.x - p2.x ) * ( p3.y - p4.y ) - ( p1.y - p2.y ) * ( p3.x - p4.x ) )
-    );
   }
   
   return Shape;
