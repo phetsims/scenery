@@ -50,7 +50,14 @@
       left: 2px;
       opacity: 0.3;
     }
-
+    
+    .scene.dom:after {
+      content: "DOM";
+      position: absolute;
+      bottom: 0;
+      left: 2px;
+      opacity: 0.3;
+    }
   </style>
 </head>
 
@@ -75,7 +82,8 @@
             stroke: '#000000',
             lineWidth: 3
           } ) );
-        }
+        },
+        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
       },{
         name: 'Hexagon',
         width: 64,
@@ -89,7 +97,8 @@
             stroke: '#000000',
             lineWidth: 3
           } ) );
-        }
+        },
+        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
       },{
         name: 'Linear Gradients',
         width: 128,
@@ -124,7 +133,8 @@
             stroke: strokeGradient,
             lineWidth: 3
           } ) );
-        }
+        },
+        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
       },{
         name: 'Radial Gradients',
         width: 128+64,
@@ -165,7 +175,8 @@
             x: 128,
             fill: transformedGradient
           } ) );
-        }
+        },
+        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
       },{
         name: 'RGBA',
         width: 64,
@@ -183,7 +194,8 @@
             stroke: '#000000',
             lineWidth: 3
           } ) );
-        }
+        },
+        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
       },{
         name: 'Images',
         width: 220,
@@ -207,7 +219,8 @@
             logo.src = 'http://phet.colorado.edu/images/phet-logo-yellow.png';
           } );
           thumbnail.src = 'http://phet.colorado.edu/sims/molecule-polarity/molecule-polarity-thumbnail.png';
-        }
+        },
+        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
       },{
         name: 'Patterns',
         width: 64,
@@ -228,7 +241,8 @@
             scene.updateScene();
           } );
           img.src = 'http://phet.colorado.edu/files/archive/images/circleArrow_Icon.gif';
-        }
+        },
+        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
       },{
         name: 'Overlapping and Nested Rotations',
         width: 128,
@@ -259,7 +273,8 @@
             // lineJoin: 'round',
             lineWidth: 10
           } ) );
-        }
+        },
+        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
       },{
         name: 'DAG support',
         width: 256,
@@ -298,7 +313,8 @@
           scene.addChild( a );
           scene.addChild( b );
           scene.addChild( c );
-        }
+        },
+        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
       },{
         name: 'Text',
         width: 256,
@@ -309,7 +325,8 @@
             top: 1.5,
             left: 1.5
           } ) );
-        }
+        },
+        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
       },{
         name: 'Circles and Arcs',
         width: 200,
@@ -351,13 +368,37 @@
             stroke: '#000000',
             lineWidth: 3
           } ) );
-        }
+        },
+        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+      },{
+        name: 'DOM Elements',
+        width: 200,
+        height: 200,
+        draw: function( scene ) {
+          var textDiv = document.createElement( 'div' );
+          textDiv.innerHTML = 'See our <a href="http://phet.colorado.edu">website</a>!';
+          scene.addChild( new scenery.DOM( textDiv, {
+            x: 20,
+            y: 20
+          } ) );
+          
+          var form = document.createElement( 'form' );
+          form.innerHTML = '<label>Type in me:</label><input type="text">';
+          
+          scene.addChild( new scenery.DOM( form, {
+            x: 50,
+            y: 50,
+            rotation: Math.PI / 4
+          } ) );
+        },
+        renderers: [ scenery.Renderer.DOM ]
       }
     ];
     
     var renderers = [
       scenery.Renderer.Canvas,
-      scenery.Renderer.SVG
+      scenery.Renderer.SVG,
+      scenery.Renderer.DOM
       // TODO: add WebGL, and possibly DOM for things like text?
     ];
     
@@ -368,6 +409,11 @@
       $( document.body ).append( $testTitle );
       
       _.each( renderers, function( renderer ) {
+        // don't render unsupported renderers for specific test cases
+        if ( !_.contains( testCase.renderers, renderer ) ) {
+          return;
+        }
+        
         var layerType = renderer.defaultLayerType;
         var $container = $( document.createElement( 'div' ) );
         $container.addClass( 'scene' );
