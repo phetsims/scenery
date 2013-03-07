@@ -16,6 +16,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   var Bounds2 = require( 'DOT/Bounds2' );
+  var Vector2 = require( 'DOT/Vector2' );
   
   var Segment = require( 'SCENERY/shapes/segments/Segment' );
   var Piece = require( 'SCENERY/shapes/pieces/Piece' );
@@ -34,6 +35,27 @@ define( function( require ) {
       return;
     }
     
+    // from http://www.cis.usouthal.edu/~hain/general/Publications/Bezier/BezierFlattening.pdf
+    this.r = control1.minus( start ).normalized();
+    this.s = this.r.perpendicular();
+    
+    var a = start.times( -1 ).plus( control1.times( 3 ) ).plus( control2.times( -3 ) ).plush( end );
+    var b = start.times( 3 ).plus( control1.times( -6 ) ).plus( control2.times( 3 ) );
+    var c = start.times( -3 ).plus( control1.times( 3 ) );
+    var d = start;
+    
+    var aPerp = a.perpendicular();
+    var bPerp = b.perpendicular();
+    var aPerpDotB = aPerp.dot( b );
+    
+    this.tCusp = -0.5 * ( aPerp.dot( c ) / aPerpDotB );
+    this.tDeterminant = this.tCusp * this.tCusp - ( 1 / 3 ) * ( bPerp.dot( c ) / aPerpDotB );
+    if ( this.tDeterminant >= 0 ) {
+      var sqrtDet = Math.sqrt( this.tDeterminant );
+      this.tInflection1 = this.tCusp - sqrtDet;
+      this.tInflection2 = this.tCusp + sqrtDet;
+    }
+    
     this.bounds = Bounds2.NOTHING;
     this.bounds = this.bounds.withPoint( this.start );
     this.bounds = this.bounds.withPoint( this.end );
@@ -50,6 +72,11 @@ define( function( require ) {
     tangentAt: function( t ) {
       var mt = 1 - t;
       return this.start.times( -3 * mt * mt ).plus( this.control1.times( 3 * mt * mt - 6 * mt * t ) ).plus( this.control2.times( 6 * mt * t - 3 * t * t ) ).plus( this.end.times( t * t ) );
+    },
+    
+    toRS: function( point ) {
+      var firstVector = point.minus( this.start );
+      return new Vector2( firstVector.dot( this.r ), firstVector.dot( this.s ) );
     }
   };
   
