@@ -7,6 +7,8 @@
  *
  * See http://www.w3.org/TR/css3-color/
  *
+ * TODO: consider using https://github.com/One-com/one-color internally
+ *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
