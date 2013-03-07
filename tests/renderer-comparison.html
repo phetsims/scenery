@@ -193,19 +193,20 @@
           thumbnail.addEventListener( 'load', function() {
             scene.addChild( new scenery.Image( thumbnail ) );
             scene.updateScene();
+            
+            // ugly hack placement for correct z-index
+            var logo = document.createElement( 'img' );
+            logo.addEventListener( 'load', function() {
+              scene.addChild( new scenery.Image( logo, {
+                scale: 0.5,
+                rotation: Math.PI / 6,
+                x: 130
+              } ) );
+              scene.updateScene();
+            } );
+            logo.src = 'http://phet.colorado.edu/images/phet-logo-yellow.png';
           } );
           thumbnail.src = 'http://phet.colorado.edu/sims/molecule-polarity/molecule-polarity-thumbnail.png';
-          
-          var logo = document.createElement( 'img' );
-          logo.addEventListener( 'load', function() {
-            scene.addChild( new scenery.Image( logo, {
-              scale: 0.5,
-              rotation: Math.PI / 6,
-              x: 130
-            } ) );
-            scene.updateScene();
-          } );
-          logo.src = 'http://phet.colorado.edu/images/phet-logo-yellow.png';
         }
       },{
         name: 'Overlapping and Nested Rotations',
