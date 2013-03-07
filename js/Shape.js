@@ -1490,13 +1490,34 @@ define( function( require ) {
     },
     
     toPieces: function() {
-      throw new Error( 'Segment.EllipticalArc.toPieces unimplemented' );
+      return [ new Piece.EllipticalArc( this.center, this.radiusX, this.radiusY, this.rotation, this.startAngle, this.endAngle, this.anticlockwise ) ];
     },
     
     getSVGPathFragment: function() {
       // see http://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands for more info
       // rx ry x-axis-rotation large-arc-flag sweep-flag x y
-      throw new Error( 'Segment.EllipticalArc.getSVGPathFragment unimplemented' );
+      var epsilon = 0.01; // allow some leeway to render things as 'almost circles'
+      var sweepFlag = this.anticlockwise ? '0' : '1';
+      var largeArcFlag;
+      var degreesRotation = dot.Util.toDegrees( this.rotation ); // bleh, degrees?
+      if ( this.angleDifference < Math.PI * 2 - epsilon ) {
+        largeArcFlag = this.angleDifference < Math.PI ? '0' : '1';
+        return 'A ' + this.radiusX + ' ' + this.radiusY + ' ' + degreesRotation + ' ' + largeArcFlag + ' ' + sweepFlag + ' ' + this.end.x + ' ' + this.end.y;
+      } else {
+        // ellipse (or almost-ellipse) case needs to be handled differently
+        // since SVG will not be able to draw (or know how to draw) the correct circle if we just have a start and end, we need to split it into two circular arcs
+        
+        // get the angle that is between and opposite of both of the points
+        var splitOppositeAngle = ( this.startAngle + this.endAngle ) / 2; // this _should_ work for the modular case?
+        var splitPoint = this.pointAtAngle( splitOppositeAngle );
+        
+        largeArcFlag = '0'; // since we split it in 2, it's always the small arc
+        
+        var firstArc = 'A ' + this.radiusX + ' ' + this.radiusY + ' ' + degreesRotation + ' ' + largeArcFlag + ' ' + sweepFlag + ' ' + splitPoint.x + ' ' + splitPoint.y;
+        var secondArc = 'A ' + this.radiusX + ' ' + this.radiusY + ' ' + degreesRotation + ' ' + largeArcFlag + ' ' + sweepFlag + ' ' + this.end.x + ' ' + this.end.y;
+        
+        return firstArc + ' ' + secondArc;
+      }
     },
     
     strokeLeft: function( lineWidth ) {
