@@ -44,7 +44,7 @@ define( function( require ) {
     this.r = control1.minus( start ).normalized();
     this.s = this.r.perpendicular();
     
-    var a = start.times( -1 ).plus( control1.times( 3 ) ).plus( control2.times( -3 ) ).plush( end );
+    var a = start.times( -1 ).plus( control1.times( 3 ) ).plus( control2.times( -3 ) ).plus( end );
     var b = start.times( 3 ).plus( control1.times( -6 ) ).plus( control2.times( 3 ) );
     var c = start.times( -3 ).plus( control1.times( 3 ) );
     var d = start;
