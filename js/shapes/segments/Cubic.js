@@ -1,7 +1,9 @@
 // Copyright 2002-2012, University of Colorado
 
 /**
- * Cubic Bezier segment
+ * Cubic Bezier segment.
+ *
+ * See http://www.cis.usouthal.edu/~hain/general/Publications/Bezier/BezierFlattening.pdf for info
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
