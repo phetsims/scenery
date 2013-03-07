@@ -164,13 +164,13 @@ define( function( require ) {
       var centerToRay = ray.pos.minus( this.center );
       var tmp = ray.dir.dot( centerToRay );
       var centerToRayDistSq = centerToRay.magnitudeSquared();
-      var det = 4 * tmp * tmp - 4 * ( centerToRayDistSq - this.radius * this.radius );
-      if ( det < epsilon ) {
+      var discriminant = 4 * tmp * tmp - 4 * ( centerToRayDistSq - this.radius * this.radius );
+      if ( discriminant < epsilon ) {
         // ray misses circle entirely
         return 0;
       }
       var base = ray.dir.dot( this.center ) - ray.dir.dot( ray.pos );
-      var sqt = Math.sqrt( det ) / 2;
+      var sqt = Math.sqrt( discriminant ) / 2;
       var ta = base - sqt;
       var tb = base + sqt;
       
