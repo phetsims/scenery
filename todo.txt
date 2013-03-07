@@ -2,7 +2,6 @@
 Priorities:
     Performance
     Cubic bezier
-    Ellipse
     Dashed lines
     Documentation
 
