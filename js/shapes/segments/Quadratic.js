@@ -15,7 +15,6 @@ define( function( require ) {
   
   var Bounds2 = require( 'DOT/Bounds2' );
   var Matrix3 = require( 'DOT/Matrix3' );
-  var Transform3 = require( 'DOT/Transform3' );
 
   var Segment = require( 'SCENERY/shapes/segments/Segment' );
   var Piece = require( 'SCENERY/shapes/pieces/Piece' );
