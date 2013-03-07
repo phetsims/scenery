@@ -37,7 +37,14 @@ define( function( require ) {
       shape.ensure( this.controlPoint );
       var start = shape.getLastSubpath().getLastPoint();
       var cubic = new scenery.Segment.Cubic( start, this.control1, this.control2, this.point );
-      shape.getLastSubpath().addSegment( cubic );
+      
+      // if there is a cusp, we add the two (split) quadratic segments instead so that stroking treats the 'join' between them with the proper lineJoin
+      if ( cubic.hasCusp() ) {
+        shape.getLastSubpath().addSegment( cubic.startQuadratic );
+        shape.getLastSubpath().addSegment( cubic.endQuadratic );
+      } else {
+        shape.getLastSubpath().addSegment( cubic );
+      }
       shape.getLastSubpath().addPoint( this.point );
       if ( !cubic.invalid ) {
         shape.bounds = shape.bounds.union( cubic.bounds );

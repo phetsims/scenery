@@ -100,11 +100,15 @@ define( function( require ) {
     _.each( extremaT( this.start.y, this.control1.y, this.control2.y, this.end.y ), function( t ) {
       cubic.bounds = cubic.bounds.withPoint( cubic.positionAt( t ) );
     } );
+    
+    if ( this.hasCusp() ) {
+      this.bounds = this.bounds.withPoint( this.positionAt( this.tCusp ) );
+    }
   };
   Segment.Cubic.prototype = {
     hasCusp: function() {
       var epsilon = 0.000001; // TODO: make this available to change?
-      return this.tangentAt( this.tCusp ).magnitude() < epsilon;
+      return this.tangentAt( this.tCusp ).magnitude() < epsilon && this.tCusp >= 0 && this.tCusp <= 1;
     },
     
     // position: (1 - t)^3*start + 3*(1 - t)^2*t*control1 + 3*(1 - t) t^2*control2 + t^3*end

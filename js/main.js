@@ -43,6 +43,7 @@ define( [
     'SCENERY/shapes/Shape',
     'SCENERY/shapes/pieces/Arc',
     'SCENERY/shapes/pieces/Close',
+    'SCENERY/shapes/pieces/CubicCurveTo',
     'SCENERY/shapes/pieces/EllipticalArc',
     'SCENERY/shapes/pieces/LineTo',
     'SCENERY/shapes/pieces/MoveTo',
