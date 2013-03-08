@@ -41,6 +41,7 @@ define( function( require ) {
   require( 'SCENERY/shapes/util/LineStyles' );
   require( 'SCENERY/shapes/pieces/Arc' );
   require( 'SCENERY/shapes/pieces/Close' );
+  require( 'SCENERY/shapes/pieces/CubicCurveTo' );
   require( 'SCENERY/shapes/pieces/EllipticalArc' );
   require( 'SCENERY/shapes/pieces/LineTo' );
   require( 'SCENERY/shapes/pieces/MoveTo' );
@@ -118,6 +119,20 @@ define( function( require ) {
         this.addPiece( new Piece.QuadraticCurveTo( controlPoint, point ) );
       } else { // quadraticCurveTo( cpx, cpy, x, y )
         this.addPiece( new Piece.QuadraticCurveTo( p( cpx, cpy ), p( x, y ) ) );
+      }
+      return this;
+    },
+    
+    cubicCurveTo: function( cp1x, cp1y, cp2x, cp2y, x, y ) {
+      // cubicCurveTo( cp1, cp2, end )
+      if ( cp2y === undefined && typeof cp1x === 'object' ) {
+        // wrap it in a Vector2 if the class doesn't match
+        var control1 = cp1x instanceof Vector2 ? cp1x : new Vector2( cp1x.x, cp1x.y );
+        var control2 = cp1y instanceof Vector2 ? cp1y : new Vector2( cp1y.x, cp1y.y );
+        var end = cp2x instanceof Vector2 ? cp2x : new Vector2( cp2x.x, cp2x.y );
+        this.addPiece( new Piece.CubicCurveTo( control1, control2, end ) );
+      } else { // cubicCurveTo( cp1x, cp1y, cp2x, cp2y, x, y )
+        this.addPiece( new Piece.CubicCurveTo( p( cp1x, cp1y ), p( cp2x, cp2y ), p( x, y ) ) );
       }
       return this;
     },
