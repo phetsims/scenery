@@ -27,6 +27,7 @@ Test:
     Shapes:
         animated test rotation/scaling/shearing/reflection on segments, showing start/end points, tangents, bounds
         Consider moving spline knowledge, circle intersection, etc. into dot.
+        Test cubic beziers like crazy!
 
 BAM:
     Support portrait and landscape?
