@@ -2,6 +2,8 @@
 Priorities:
     Extract Shape into its own library
     Performance
+        Same-arity methods?
+        Less temporary objects?
     Dashed lines
     Documentation
 
