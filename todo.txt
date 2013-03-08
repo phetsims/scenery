@@ -2,7 +2,6 @@
 Priorities:
     Extract Shape into its own library
     Performance
-    Cubic bezier
     Dashed lines
     Documentation
 
