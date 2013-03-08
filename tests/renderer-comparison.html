@@ -100,6 +100,36 @@
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
       },{
+        name: 'Quadratic B\u00E9zier',
+        width: 64,
+        height: 64,
+        draw: function( scene ) {
+          scene.addChild( new scenery.Path( {
+            shape: new scenery.Shape().moveTo( -20, -20 ).quadraticCurveTo( 20, -20, 20, 20 ).close(),
+            x: 32,
+            y: 32,
+            fill: '#ff0000',
+            stroke: '#000000',
+            lineWidth: 3
+          } ) );
+        },
+        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+      },{
+        name: 'Cubic B\u00E9zier',
+        width: 64,
+        height: 64,
+        draw: function( scene ) {
+          scene.addChild( new scenery.Path( {
+            shape: new scenery.Shape().moveTo( -20, -20 ).cubicCurveTo( -20, 0, 0, 0, 20, 20 ).lineTo( 20, -20 ).close(),
+            x: 32,
+            y: 32,
+            fill: '#ff0000',
+            stroke: '#000000',
+            lineWidth: 3
+          } ) );
+        },
+        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+      },{
         name: 'Linear Gradients',
         width: 128,
         height: 64,
