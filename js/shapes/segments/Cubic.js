@@ -18,6 +18,7 @@ define( function( require ) {
   var Bounds2 = require( 'DOT/Bounds2' );
   var Vector2 = require( 'DOT/Vector2' );
   var Matrix3 = require( 'DOT/Matrix3' );
+  var solveCubicRootsReal = require( 'DOT/Util' ).solveCubicRootsReal;
   
   var Segment = require( 'SCENERY/shapes/segments/Segment' );
   var Piece = require( 'SCENERY/shapes/pieces/Piece' );
@@ -203,8 +204,18 @@ define( function( require ) {
       var d = y0;
       
       // solve cubic roots
+      var ts = solveCubicRootsReal( a, b, c, d );
       
-      throw new Error( 'Segment.Cubic.windingIntersection unimplemented' ); // TODO: implement
+      var result = 0;
+      
+      // for each hit
+      _.each( ts, function( t ) {
+        if ( t >= 0 && t <= 1 ) {
+          result += ray.dir.perpendicular().dot( this.tangentAt( t ) ) < 0 ? 1 : -1;
+        }
+      } );
+      
+      return result;
     }
   };
   

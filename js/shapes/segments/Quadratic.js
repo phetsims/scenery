@@ -163,14 +163,15 @@ define( function( require ) {
       var p1 = inverseMatrix.timesVector2( this.control );
       var p2 = inverseMatrix.timesVector2( this.end );
       
-      var det = p1.y * p1.y - p0.y * p2.y;
-      if ( det < 0.00000001 ) {
+      // TODO: use Dot's quadratic solver!
+      var discriminant = p1.y * p1.y - p0.y * p2.y;
+      if ( discriminant < 0.00000001 ) {
         return 0; // no intersection with the mathematical (extended) curve
       }
       
       // the two t values, which should be valid in our regular coordinate system
-      var ta = ( p0.y - p1.y + Math.sqrt( det ) ) / ( p0.y - 2 * p1.y + p2.y );
-      var tb = ( p0.y - p1.y - Math.sqrt( det ) ) / ( p0.y - 2 * p1.y + p2.y );
+      var ta = ( p0.y - p1.y + Math.sqrt( discriminant ) ) / ( p0.y - 2 * p1.y + p2.y );
+      var tb = ( p0.y - p1.y - Math.sqrt( discriminant ) ) / ( p0.y - 2 * p1.y + p2.y );
       
       var da = this.positionAt( ta ).minus( ray.pos );
       var db = this.positionAt( tb ).minus( ray.pos );
