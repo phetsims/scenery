@@ -8,41 +8,40 @@ module.exports = function( grunt ) {
   grunt.initConfig( {
     pkg: '<json:package.json>',
     
-    lint: {
-      files: [
-       // 'grunt.js',
-       // 'app-easel/*.js'
-      ]
-    },
-    
-    concat: {
-      standalone: {
-        src: [ "contrib/almond.js", "contrib/has.js", "dist/standalone/scenery.js" ],
-        dest: "dist/standalone/scenery.js"
-      }
-    },
-    
-    uglify: {
-      standalone: {
-        src: [ 'dist/standalone/scenery.js' ],
-        dest: 'dist/standalone/scenery.min.js'
-      }
-    },
-    
     requirejs: {
-      standalone: {
+      // unminified, with has.js
+      development: {
         options: {
-          mainConfigFile: "js/production-config.js",
-          out: "dist/standalone/scenery.js",
-          name: "production-config",
-          // optimize: 'uglify2',
+          almond: true,
+          mainConfigFile: "js/config.js",
+          out: "dist/development/scenery.js",
+          name: "config",
           optimize: 'none',
           wrap: {
-            start: "(function() {",
-            end: " window.scenery = require( 'main' ); window.dot = require( 'DOT/main' ); scenery.Util.polyfillRequestAnimationFrame(); }());"
+            startFile: [ "js/wrap-start.frag", "contrib/has.js" ],
+            endFile: [ "js/wrap-end.frag" ]
           }
         }
       },
+      
+      // without has.js
+      standalone: {
+        options: {
+          almond: true,
+          mainConfigFile: "js/production-config.js",
+          out: "dist/standalone/scenery.min.js",
+          name: "production-config",
+          optimize: 'uglify2',
+          generateSourceMaps: true,
+          preserveLicenseComments: false,
+          wrap: {
+            startFile: [ "js/wrap-start.frag", "contrib/has.js" ],
+            endFile: [ "js/wrap-end.frag" ]
+          }
+        }
+      },
+      
+      // with has.js
       production: {
         options: {
           almond: true,
@@ -53,7 +52,7 @@ module.exports = function( grunt ) {
           generateSourceMaps: true,
           preserveLicenseComments: false,
           wrap: {
-            startFile: [ "js/wrap-start.frag", "contrib/has.js" ],
+            startFile: [ "js/wrap-start.frag" ],
             endFile: [ "js/wrap-end.frag" ]
           }
         }
@@ -62,7 +61,7 @@ module.exports = function( grunt ) {
     
     jshint: {
       all: [
-        'Gruntfile.js', 'js/**/*.js'
+        'Gruntfile.js', 'js/**/*.js', 'common/dot/js/**/*.js', 'common/assert/js/**/*.js'
       ],
       // adjust with options from http://www.jshint.com/docs/
       options: {
@@ -114,9 +113,10 @@ module.exports = function( grunt ) {
   } );
   
   // Default task.
-  grunt.registerTask( 'default', [ 'jshint', 'production' ] );
+  grunt.registerTask( 'default', [ 'jshint', 'development', 'standalone', 'production' ] );
   grunt.registerTask( 'production', [ 'requirejs:production' ] );
-  grunt.registerTask( 'standalone', [ 'requirejs:standalone', 'concat:standalone', 'uglify:standalone' ] );
+  grunt.registerTask( 'standalone', [ 'requirejs:standalone' ] );
+  grunt.registerTask( 'development', [ 'requirejs:development' ] );
   grunt.loadNpmTasks( 'grunt-requirejs' );
   grunt.loadNpmTasks( 'grunt-contrib-concat' );
   grunt.loadNpmTasks( 'grunt-contrib-uglify' );
