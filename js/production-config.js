@@ -8,6 +8,9 @@
 
 // if has.js is included, set assertion flags to false, for running speed.
 if ( window.has ) {
+  window.has.add( 'assert.dot', function( global, document, anElement ) {
+    return false;
+  } );
   window.has.add( 'assert.scenery', function( global, document, anElement ) {
     return false;
   } );
