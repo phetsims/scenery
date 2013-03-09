@@ -50,7 +50,7 @@
           runSceneryTests( '.' );
           runDotTests( '../../common/dot/tests/qunit' );
           
-          if ( console.log ) {
+          if ( window.console && console.log ) {
             console.log( scenery.Util.testAssert() );
             console.log( scenery.Util.testAssertExtra() );
           }

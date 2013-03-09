@@ -18,11 +18,11 @@
     equal( ob._key, 6, 'incremented object value' );
   } );
   
-  test( 'Canvas WebGL Context and Features', function() {
-    var canvas = document.createElement( 'canvas' );
-    var context = canvas.getContext( "webgl" ) || canvas.getContext( "experimental-webgl" );
-    ok( context, 'context' );
-  } );   
+  // test( 'Canvas WebGL Context and Features', function() {
+  //   var canvas = document.createElement( 'canvas' );
+  //   var context = canvas.getContext( "webgl" ) || canvas.getContext( "experimental-webgl" );
+  //   ok( context, 'context' );
+  // } );   
   
   if ( includeBleedingEdgeCanvasTests ) {
     // v5 canvas additions
