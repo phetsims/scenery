@@ -31,6 +31,11 @@ define( function( require ) {
     
     addSegment: function( segment ) {
       if ( !segment.invalid ) {
+        assert && assert( segment.start.isFinite(), 'Segment start is infinite' );
+        assert && assert( segment.end.isFinite(), 'Segment end is infinite' );
+        assert && assert( segment.startTangent.isFinite(), 'Segment startTangent is infinite' );
+        assert && assert( segment.endTangent.isFinite(), 'Segment endTangent is infinite' );
+        assert && assert( segment.bounds.isEmpty() || segment.bounds.isFinite(), 'Segment bounds is infinite and non-empty' );
         this.segments.push( segment );
       }
     },

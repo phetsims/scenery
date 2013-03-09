@@ -53,7 +53,7 @@ define( function( require ) {
       definition.setAttribute( 'width', this.image.width );
       definition.setAttribute( 'height', this.image.height );
       if ( this.transformMatrix ) {
-        definition.setAttribute( 'patternTransform', this.transformMatrix.svgTransform() );
+        definition.setAttribute( 'patternTransform', this.transformMatrix.getSVGTransform() );
       }
       
       definition.appendChild( scenery.Image.createSVGImage( this.image.src, this.image.width, this.image.height ) );

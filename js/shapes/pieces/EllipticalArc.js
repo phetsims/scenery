@@ -58,7 +58,7 @@ define( function( require ) {
       var radiusX = transformedSemiMajorAxis.magnitude();
       var radiusY = transformedSemiMinorAxis.magnitude();
       
-      var reflected = matrix.determinant() < 0;
+      var reflected = matrix.getDeterminant() < 0;
       
       // reverse the 'clockwiseness' if our transform includes a reflection
       // TODO: check reflections. swapping angle signs should fix clockwiseness

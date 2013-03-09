@@ -88,7 +88,7 @@ define( function( require ) {
         // move by the delta between the previous point, using the precomputed transform
         // prepend the translation on the node, so we can ignore whatever other transform state the node has
         if ( handler.options.translate ) {
-          var translation = handler.node.transform.getMatrix().translation();
+          var translation = handler.node.transform.getMatrix().getTranslation();
           handler.options.translate( {
             delta: delta,
             oldPosition: translation,

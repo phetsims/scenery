@@ -42,14 +42,15 @@ define( function( require ) {
       var endAngle = matrix.timesVector2( Vector2.createPolar( 1, this.endAngle ) ).minus( matrix.timesVector2( Vector2.ZERO ) ).angle();
       
       // reverse the 'clockwiseness' if our transform includes a reflection
-      var anticlockwise = matrix.determinant() >= 0 ? this.anticlockwise : !this.anticlockwise;
-      
-      if ( matrix.scaling().x !== matrix.scaling().y ) {
-        var radiusX = matrix.scaling().x * this.radius;
-        var radiusY = matrix.scaling().y * this.radius;
+      var anticlockwise = matrix.getDeterminant() >= 0 ? this.anticlockwise : !this.anticlockwise;
+
+      var scaleVector = matrix.getScaleVector();
+      if ( scaleVector.x !== scaleVector.y ) {
+        var radiusX = scaleVector.x * this.radius;
+        var radiusY = scaleVector.y * this.radius;
         return [new Piece.EllipticalArc( matrix.timesVector2( this.center ), radiusX, radiusY, 0, startAngle, endAngle, anticlockwise )];
       } else {
-        var radius = matrix.scaling().x * this.radius;
+        var radius = scaleVector.x * this.radius;
         return [new Piece.Arc( matrix.timesVector2( this.center ), radius, startAngle, endAngle, anticlockwise )];
       }
     },

@@ -326,6 +326,7 @@ define( function( require ) {
     },
     
     markDirtyRegion: function( args ) {
+      assert && assert( args.bounds.isEmpty() || args.bounds.isFinite(), 'Infinite (non-empty) dirty bounds passed to CanvasLayer' );
       var bounds = args.transform.transformBounds2( args.bounds );
       
       // TODO: for performance, consider more than just a single dirty bounding box

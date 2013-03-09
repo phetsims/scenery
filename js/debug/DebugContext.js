@@ -53,6 +53,11 @@ define( function( require ) {
   
   scenery.DebugContext = function( context ) {
     this._context = context;
+    
+    // allow checking of context.ellipse for existence
+    if ( context && !context.ellipse ) {
+      this.ellipse = context.ellipse;
+    }
   };
   var DebugContext = scenery.DebugContext;
   

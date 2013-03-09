@@ -180,7 +180,7 @@ define( function( require ) {
   };
   
   Image.prototype.updateCSSTransform = function( transform ) {
-    $( this._image ).css( transform.getMatrix().cssTransformStyles() );
+    $( this._image ).css( transform.getMatrix().getCSSTransformStyles() );
   };
   
   Image.prototype._mutatorKeys = [ 'image' ].concat( Node.prototype._mutatorKeys );

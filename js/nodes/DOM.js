@@ -93,7 +93,7 @@ define( function( require ) {
   };
   
   DOM.prototype.updateCSSTransform = function( transform ) {
-    this._$element.css( transform.getMatrix().cssTransformStyles() );
+    this._$element.css( transform.getMatrix().getCSSTransformStyles() );
   };
   
   DOM.prototype.wrapInTemporaryContainer = function() {

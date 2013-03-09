@@ -82,7 +82,7 @@ define( function( require ) {
       definition.setAttribute( 'x2', this.end.x );
       definition.setAttribute( 'y2', this.end.y );
       if ( this.transformMatrix ) {
-        definition.setAttribute( 'gradientTransform', this.transformMatrix.svgTransform() );
+        definition.setAttribute( 'gradientTransform', this.transformMatrix.getSVGTransform() );
       }
       
       _.each( this.stops, function( stop ) {

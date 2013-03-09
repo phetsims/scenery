@@ -78,7 +78,7 @@ define( function( require ) {
     this._selfBounds = Bounds2.NOTHING; // just for this node, in "local" coordinates
     this._childBounds = Bounds2.NOTHING; // just for children, in "local" coordinates
     this._boundsDirty = true;
-    this._selfBoundsDirty = true;
+    this._selfBoundsDirty = this.hasSelf();
     this._childBoundsDirty = true;
     
     // dirty region handling
@@ -313,7 +313,8 @@ define( function( require ) {
     
     // called to notify that self rendering will display different paint, with possibly different bounds
     invalidateSelf: function( newBounds ) {
-      assert && assert( !isNaN( newBounds.getX() ) );
+      assert && assert( !isNaN( newBounds.getX() ), 'NaN bounds given to invalidateSelf' );
+      assert && assert( newBounds.isFinite(), 'Infinite bounds given to invalidateSelf' );
       
       // mark the old region to be repainted, regardless of whether the actual bounds change
       this.markOldSelfPaint();
@@ -660,8 +661,9 @@ define( function( require ) {
     },
     
     // returns a vector with an entry for each axis, e.g. (5,2) for an Affine-style matrix with rows ((5,0,0),(0,2,0),(0,0,1))
+    // TODO: rename getScaleVector()
     getScale: function() {
-      return this.transform.getMatrix().scaling();
+      return this.transform.getMatrix().getScaleVector();
     },
     
     // supports setScale( 5 ) for both dimensions, setScale( 5, 3 ) for each dimension separately, or setScale( new Vector2( x, y ) )
@@ -683,7 +685,7 @@ define( function( require ) {
     },
     
     getRotation: function() {
-      return this.transform.getMatrix().rotation();
+      return this.transform.getMatrix().getRotation();
     },
     
     setRotation: function( rotation ) {
@@ -704,7 +706,7 @@ define( function( require ) {
     },
     
     getTranslation: function() {
-      return this.transform.getMatrix().translation();
+      return this.transform.getMatrix().getTranslation();
     },
     
     notifyTransformChange: function( matrix, type ) {

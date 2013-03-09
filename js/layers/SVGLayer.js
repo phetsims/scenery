@@ -84,7 +84,7 @@ define( function( require ) {
           group.removeAttribute( 'transform' );
         }
       } else {
-        group.setAttribute( 'transform', transform.getMatrix().svgTransform() );
+        group.setAttribute( 'transform', transform.getMatrix().getSVGTransform() );
       }
     },
     
@@ -230,7 +230,7 @@ define( function( require ) {
       
       if ( this.cssTransform ) {
         // set the full transform!
-        this.$svg.css( transform.getMatrix().timesMatrix( this.baseNodeTransform.getInverse() ).cssTransformStyles() );
+        this.$svg.css( transform.getMatrix().timesMatrix( this.baseNodeTransform.getInverse() ).getCSSTransformStyles() );
         
         if ( includesBaseTransformChange ) {
           this.applyTransform( this.baseNodeTransform, this.g );
@@ -243,11 +243,11 @@ define( function( require ) {
           cssTransform.append( Matrix3.translation( matrix.m02(), matrix.m12() ) );
         }
         if ( this.cssRotation ) {
-          cssTransform.append( Matrix3.rotation2( matrix.rotation() ) );
+          cssTransform.append( Matrix3.rotation2( matrix.getRotation() ) );
         }
         if ( this.cssScale ) {
-          var scaling = matrix.scaling();
-          cssTransform.append( Matrix3.scaling( scaling.x, scaling.y ) );
+          var scaleVector = matrix.getScaleVector();
+          cssTransform.append( Matrix3.scaling( scaleVector.x, scaleVector.y ) );
         }
         
         // take the CSS transform out of what we will apply to the group
@@ -269,7 +269,7 @@ define( function( require ) {
         
         // apply the transforms
         // TODO: checks to make sure we don't apply them in a row if one didn't change!
-        this.$svg.css( cssTransform.getMatrix().cssTransformStyles() );
+        this.$svg.css( cssTransform.getMatrix().getCSSTransformStyles() );
         this.applyTransform( transform, this.g );
       } else {
         this.applyTransform( transform, this.g );

@@ -87,7 +87,7 @@ define( function( require ) {
       definition.setAttribute( 'fx', this.focalPoint.x );
       definition.setAttribute( 'fy', this.focalPoint.y );
       if ( this.transformMatrix ) {
-        definition.setAttribute( 'gradientTransform', this.transformMatrix.svgTransform() );
+        definition.setAttribute( 'gradientTransform', this.transformMatrix.getSVGTransform() );
       }
       
       // maps x linearly from [a0,b0] => [a1,b1]

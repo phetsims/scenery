@@ -32,7 +32,7 @@ define( function( require ) {
     this.endTangent = this.startTangent;
     
     // acceleration for intersection
-    this.bounds = new Bounds2().withPoint( start ).withPoint( end );
+    this.bounds = Bounds2.NOTHING.withPoint( start ).withPoint( end );
   };
   Segment.Line.prototype = {
     constructor: Segment.Line,

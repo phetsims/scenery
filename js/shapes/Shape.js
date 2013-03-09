@@ -258,6 +258,7 @@ define( function( require ) {
       this.pieces.push( piece );
       piece.applyPiece( this );
       this.invalidate();
+      assert && assert( this.bounds.isEmpty() || this.bounds.isFinite(), 'shape bounds infinite after adding piece: ' + piece );
     },
     
     // write out this shape's path to a canvas 2d context. does NOT include the beginPath()!
@@ -382,7 +383,8 @@ define( function( require ) {
               break;
             case 'miter':
               var theta = fromTangent.angleBetween( toTangent.negated() );
-              if ( 1 / Math.sin( theta / 2 ) <= lineStyles.miterLimit ) {
+              var notStraight = theta < Math.PI - 0.00001; // if fromTangent is approximately equal to toTangent, just bevel. it will be indistinguishable
+              if ( 1 / Math.sin( theta / 2 ) <= lineStyles.miterLimit && theta < Math.PI - 0.00001 ) {
                 // draw the miter
                 var miterPoint = lineLineIntersection( fromPoint, fromPoint.plus( fromTangent ), toPoint, toPoint.plus( toTangent ) );
                 shape.addPiece( new Piece.LineTo( miterPoint ) );
