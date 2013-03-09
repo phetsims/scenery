@@ -245,10 +245,10 @@ define( function( require ) {
       if ( !bounds.isEmpty() ) {
         this.context.save();
         this.context.setTransform( this.backingScale, 0, 0, this.backingScale, 0, 0 );
-        this.context.clearRect( bounds.x(), bounds.y(), bounds.width(), bounds.height() );
+        this.context.clearRect( bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight() );
         // use this for debugging cleared (dirty) regions for now
         // this.context.fillStyle = '#' + Math.floor( Math.random() * 0xffffff ).toString( 16 );
-        // this.context.fillRect( bounds.x(), bounds.y(), bounds.width(), bounds.height() );
+        // this.context.fillRect( bounds.x, bounds.y, bounds.width, bounds.height );
         this.context.restore();
       }
     },

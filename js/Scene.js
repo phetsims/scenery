@@ -344,8 +344,8 @@ define( function( require ) {
   // renders what it can into a Canvas (so far, Canvas and SVG layers work fine)
   Scene.prototype.canvasSnapshot = function( callback ) {
     var canvas = document.createElement( 'canvas' );
-    canvas.width = this.sceneBounds.width();
-    canvas.height = this.sceneBounds.height();
+    canvas.width = this.sceneBounds.getWidth();
+    canvas.height = this.sceneBounds.getHeight();
     
     var context = canvas.getContext( '2d' );
     this.renderToCanvas( canvas, context, function() {
@@ -361,11 +361,11 @@ define( function( require ) {
   };
   
   Scene.prototype.getSceneWidth = function() {
-    return this.sceneBounds.width();
+    return this.sceneBounds.getWidth();
   };
   
   Scene.prototype.getSceneHeight = function() {
-    return this.sceneBounds.height();
+    return this.sceneBounds.getHeight();
   };
   
   Scene.prototype.updateCursor = function() {

@@ -313,7 +313,7 @@ define( function( require ) {
     
     // called to notify that self rendering will display different paint, with possibly different bounds
     invalidateSelf: function( newBounds ) {
-      assert && assert( !isNaN( newBounds.x() ) );
+      assert && assert( !isNaN( newBounds.getX() ) );
       
       // mark the old region to be repainted, regardless of whether the actual bounds change
       this.markOldSelfPaint();
@@ -776,7 +776,7 @@ define( function( require ) {
     },
     
     getCenterX: function() {
-      return this.getBounds().centerX();
+      return this.getBounds().getCenterX();
     },
     
     setCenterX: function( x ) {
@@ -785,7 +785,7 @@ define( function( require ) {
     },
     
     getCenterY: function() {
-      return this.getBounds().centerY();
+      return this.getBounds().getCenterY();
     },
     
     setCenterY: function( y ) {
@@ -816,11 +816,11 @@ define( function( require ) {
     },
     
     getWidth: function() {
-      return this.getBounds().width();
+      return this.getBounds().getWidth();
     },
     
     getHeight: function() {
-      return this.getBounds().height();
+      return this.getBounds().getHeight();
     },
     
     getId: function() {

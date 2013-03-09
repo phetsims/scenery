@@ -70,8 +70,8 @@
   
   // add a centered container with a rotation and scale, to attempt to mess up the dragging ;)
   var rotatingContainer = new scenery.Node( {
-    x: scene.sceneBounds.width() * 2 / 3,
-    y: scene.sceneBounds.centerY(),
+    x: scene.sceneBounds.width * 2 / 3,
+    y: scene.sceneBounds.centerY,
     scale: 0.8 / 0.707,
     rotation: Math.PI / 4,
     layerSplit: true
@@ -79,8 +79,8 @@
   scene.addChild( rotatingContainer );
   
   var miniContainer = new scenery.Node( {
-    x: scene.sceneBounds.width() / 3,
-    y: scene.sceneBounds.centerY(),
+    x: scene.sceneBounds.width / 3,
+    y: scene.sceneBounds.centerY,
     scale: 0.4 / 0.707,
     layerSplit: true
   } );
@@ -92,11 +92,11 @@
   
   // keep the container centered
   function layout() {
-    rotatingContainer.x = scene.sceneBounds.width() * 2 / 3;
-    rotatingContainer.y = scene.sceneBounds.centerY();
+    rotatingContainer.x = scene.sceneBounds.width * 2 / 3;
+    rotatingContainer.y = scene.sceneBounds.centerY;
     
-    miniContainer.x = scene.sceneBounds.width() / 3;
-    miniContainer.y = scene.sceneBounds.centerY();
+    miniContainer.x = scene.sceneBounds.width / 3;
+    miniContainer.y = scene.sceneBounds.centerY;
   }
   $( window ).resize( layout );
   

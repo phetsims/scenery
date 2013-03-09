@@ -39,7 +39,7 @@ define( function( require ) {
         shape.getLastSubpath().addSegment( line );
         shape.getLastSubpath().addPoint( end );
         shape.bounds = shape.bounds.withPoint( start ).withPoint( end );
-        assert && assert( !isNaN( shape.bounds.x() ) );
+        assert && assert( !isNaN( shape.bounds.getX() ) );
       } else {
         shape.ensure( this.point );
       }

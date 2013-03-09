@@ -92,11 +92,11 @@
   var svgText = document.getElementById( 'gA' );
   var svgBox = svgText.getBBox();
   var svgBoundsA = new dot.Bounds2( svgBox.x, svgBox.y, svgBox.x + svgBox.width, svgBox.y + svgBox.height );
-  console.log( 'svg A: ' + svgBoundsA.toString() + ' (' + svgBoundsA.width() + ',' + svgBoundsA.height() + ')' );
+  console.log( 'svg A: ' + svgBoundsA.toString() + ' (' + svgBoundsA.width + ',' + svgBoundsA.height + ')' );
   svgText = document.getElementById( 'gB' );
   svgBox = svgText.getBBox();
   var svgBoundsB = new dot.Bounds2( svgBox.x / 5, svgBox.y / 5, ( svgBox.x + svgBox.width) / 5, ( svgBox.y + svgBox.height ) / 5 );
-  console.log( 'svg B: ' + svgBoundsB.toString() + ' (' + svgBoundsB.width() + ',' + svgBoundsB.height() + ')' );
+  console.log( 'svg B: ' + svgBoundsB.toString() + ' (' + svgBoundsB.width + ',' + svgBoundsB.height + ')' );
   
   var main = $( '#main' );
   
@@ -118,7 +118,7 @@
   scene.addChild( textA );
   
   var boundsA = textA.getBounds();
-  console.log( 'canvas accurate A: ' + boundsA.toString() + ' (' + boundsA.width() + ',' + boundsA.height() + ')' );
+  console.log( 'canvas accurate A: ' + boundsA.toString() + ' (' + boundsA.width + ',' + boundsA.height + ')' );
   scene.updateScene();
   
   /*---------------------------------------------------------------------------*
@@ -144,7 +144,7 @@
   var span = document.getElementById( 'textSpan' );
   var spanRect = span.getBoundingClientRect();
   var spanBounds = new dot.Bounds2( spanRect.left, spanRect.top, spanRect.right, spanRect.bottom );
-  console.log( 'DOM span A: ' + spanBounds.toString() + ' (' + spanBounds.width() + ',' + spanBounds.height() + ')' );
+  console.log( 'DOM span A: ' + spanBounds.toString() + ' (' + spanBounds.width + ',' + spanBounds.height + ')' );
   console.log( 'span.clientWidth: ' + span.clientWidth );
   console.log( 'span.clientHeight: ' + span.clientHeight );
   console.log( 'span.offsetWidth: ' + span.offsetWidth );
@@ -153,7 +153,7 @@
   var baselineSpan = document.getElementById( 'baselineSpan' );
   var baselineSpanRect = baselineSpan.getBoundingClientRect();
   var baselineSpanBounds = new dot.Bounds2( baselineSpanRect.left, baselineSpanRect.top, baselineSpanRect.right, baselineSpanRect.bottom );
-  console.log( 'DOM baseline A: ' + baselineSpanBounds.toString() + ' (' + baselineSpanBounds.width() + ',' + baselineSpanBounds.height() + ')' );
+  console.log( 'DOM baseline A: ' + baselineSpanBounds.toString() + ' (' + baselineSpanBounds.width + ',' + baselineSpanBounds.height + ')' );
   console.log( 'baselineSpan.clientWidth: ' + baselineSpan.clientWidth );
   console.log( 'baselineSpan.clientHeight: ' + baselineSpan.clientHeight );
   console.log( 'baselineSpan.offsetWidth: ' + baselineSpan.offsetWidth );

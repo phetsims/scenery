@@ -61,7 +61,7 @@ define( function( require ) {
       shape.addSubpath( new scenery.Subpath() );
       shape.getLastSubpath().addPoint( p( this.x, this.y ) );
       shape.bounds = shape.bounds.withPoint( this.upperLeft ).withPoint( this.lowerRight );
-      assert && assert( !isNaN( shape.bounds.x() ) );
+      assert && assert( !isNaN( shape.bounds.getX() ) );
     }
   };
   

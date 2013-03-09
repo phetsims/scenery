@@ -195,31 +195,31 @@ function testTextBounds( getBoundsOfText, fontDrawingStyles, message ) {
     var testBounds = getBoundsOfText( testString, fontDrawingStyles );
     var bestBounds = scenery.canvasTextBoundsAccurate( testString, fontDrawingStyles );
     
-    var widthOk = Math.abs( testBounds.width() - bestBounds.width() ) < precision;
-    var heightOk = Math.abs( testBounds.height() - bestBounds.height() ) < precision;
-    var xOk = Math.abs( testBounds.x() - bestBounds.x() ) < precision;
-    var yOk = Math.abs( testBounds.y() - bestBounds.y() ) < precision;
+    var widthOk = Math.abs( testBounds.getWidth() - bestBounds.getWidth() ) < precision;
+    var heightOk = Math.abs( testBounds.getHeight() - bestBounds.getHeight() ) < precision;
+    var xOk = Math.abs( testBounds.getX() - bestBounds.getX() ) < precision;
+    var yOk = Math.abs( testBounds.getY() - bestBounds.getY() ) < precision;
     
     var allOk = widthOk && heightOk && xOk && yOk;
     
-    ok( widthOk, testString + ' width error: ' + Math.abs( testBounds.width() - bestBounds.width() ) );
-    ok( heightOk, testString + ' height error: ' + Math.abs( testBounds.height() - bestBounds.height() ) );
-    ok( xOk, testString + ' x error: ' + Math.abs( testBounds.x() - bestBounds.x() ) );
-    ok( yOk, testString + ' y error: ' + Math.abs( testBounds.y() - bestBounds.y() ) );
+    ok( widthOk, testString + ' width error: ' + Math.abs( testBounds.getWidth() - bestBounds.getWidth() ) );
+    ok( heightOk, testString + ' height error: ' + Math.abs( testBounds.getHeight() - bestBounds.getHeight() ) );
+    ok( xOk, testString + ' x error: ' + Math.abs( testBounds.getX() - bestBounds.getX() ) );
+    ok( yOk, testString + ' y error: ' + Math.abs( testBounds.getY() - bestBounds.getY() ) );
     
     // show any failures
     var pad = 5;
     var scaling = 4; // scale it for display accuracy
     var canvas = document.createElement( 'canvas' );
-    canvas.width = Math.ceil( bestBounds.width() + pad * 2 ) * scaling;
-    canvas.height = Math.ceil( bestBounds.height() + pad * 2 ) * scaling;
+    canvas.width = Math.ceil( bestBounds.getWidth() + pad * 2 ) * scaling;
+    canvas.height = Math.ceil( bestBounds.getHeight() + pad * 2 ) * scaling;
     var context = canvas.getContext( '2d' );
     context.scale( scaling, scaling );
-    context.translate( pad - bestBounds.x(), pad - bestBounds.y() ); // center the text in our bounds
+    context.translate( pad - bestBounds.getX(), pad - bestBounds.getY() ); // center the text in our bounds
     
     // background bounds
     context.fillStyle = allOk ? '#ccffcc' : '#ffcccc'; // red/green depending on whether it passed
-    context.fillRect( testBounds.x(), testBounds.y(), testBounds.width(), testBounds.height() );
+    context.fillRect( testBounds.getX(), testBounds.getY(), testBounds.getWidth(), testBounds.getHeight() );
     
     // text on top
     context.fillStyle = 'rgba(0,0,0,0.7)';

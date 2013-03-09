@@ -282,7 +282,7 @@ $(document).ready( function() {
         var imageSource = document.createElement( 'img' );
         imageSource.onload = function( e ) {
           image = new scenery.Image( imageSource );
-          image.translate( -image.getSelfBounds().width() / 2, -image.getSelfBounds().height() / 2 );
+          image.translate( -image.getSelfBounds().getWidth() / 2, -image.getSelfBounds().getHeight() / 2 );
           scene.addChild( image );
         };
         imageSource.src = 'http://phet.colorado.edu/images/phet-logo.gif';

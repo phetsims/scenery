@@ -260,8 +260,8 @@ define( function( require ) {
         var mappedBounds = transform.transformBounds2( internalBounds );
         var translation = Matrix3.translation( Math.ceil( -mappedBounds.minX + padding ), Math.ceil( -mappedBounds.minY + padding ) );
         var inverseTranslation = translation.inverted();
-        this.updateContainerDimensions( Math.ceil( mappedBounds.width()  + 2 * padding ),
-                                        Math.ceil( mappedBounds.height() + 2 * padding ) );
+        this.updateContainerDimensions( Math.ceil( mappedBounds.getWidth()  + 2 * padding ),
+                                        Math.ceil( mappedBounds.getHeight() + 2 * padding ) );
         
         // put the translation adjustment and its inverse in-between the two transforms
         cssTransform.append( inverseTranslation );
