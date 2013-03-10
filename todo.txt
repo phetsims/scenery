@@ -21,6 +21,8 @@ Bugs:
     Text direction 'rtl' bounds and display difference between canvas / SVG
 
 Test:
+    Test bounds from canvas accurate method vs computed bounds for Shapes and strokes∏
+    Layering tests
     SVG invisible nodes?
     Text baseline 'middle'
     Canvas/SVG linear/radial gradients with various combinations
