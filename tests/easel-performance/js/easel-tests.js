@@ -110,7 +110,7 @@ $(document).ready( function() {
         // TODO: cusps at (100, 100), (300, 200), (200, 200), (200, 100) for cubic
         var scene = new scenery.Scene( main );
         
-        var mainCurve = new scenery.Shape.Segment.Quadratic(
+        var mainCurve = new kite.Shape.Segment.Quadratic(
           new dot.Vector2( 100, 100 ),
           new dot.Vector2( 230, 100 ),
           new dot.Vector2( 150, 350 )
@@ -118,18 +118,19 @@ $(document).ready( function() {
         
         // TODO: a way to pass an array and run commands without explicitly adding pieces?
         // scene.addChild( new scenery.Path( {
-        //   shape: new scenery.Shape( [
-        //     new scenery.Piece.MoveTo( mainCurve.start ),
-        //     new scenery.Piece.LineTo( mainCurve.control ),
-        //     new scenery.Piece.LineTo( mainCurve.end )
+        //   shape: new kite.Shape( [
+        //     new kite.Piece.MoveTo( mainCurve.start ),
+        //     new kite.Piece.LineTo( mainCurve.control ),
+        //     new kite.Piece.LineTo( mainCurve.end )
         //   ] ),
         //   stroke: '#ff0000'
         // } ) );
         
         scene.addChild( new scenery.Path( {
-          shape: new scenery.Shape( [
-            new scenery.Piece.MoveTo( mainCurve.start ),
-            new scenery.Piece.QuadraticCurveTo( mainCurve.control, mainCurve.end )
+          shape: new kite.Shape( [
+            // TODO: convert to methods
+            new kite.Piece.MoveTo( mainCurve.start ),
+            new kite.Piece.QuadraticCurveTo( mainCurve.control, mainCurve.end )
           ] ),
           stroke: '#000000'
         } ) );
@@ -138,7 +139,7 @@ $(document).ready( function() {
           var offsetPieces = mainCurve.offsetTo( offset, true );
           
           scene.addChild( new scenery.Path( {
-            shape: new scenery.Shape( offsetPieces ),
+            shape: new kite.Shape( offsetPieces ),
             stroke: '#0000ff'
           } ) );
         } );
@@ -341,7 +342,7 @@ $(document).ready( function() {
         scene.addChild( container );
         
         // var background = new scenery.Path();
-        // background.setShape( scenery.Shape.rectangle( -400, -400, 800, 800 ) );
+        // background.setShape( kite.Shape.rectangle( -400, -400, 800, 800 ) );
         // background.setFill( 'rgba(230,255,230,0.5)' );
         // scene.addChild( background );
         

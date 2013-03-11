@@ -7,7 +7,7 @@
   asyncTest( 'Rectangle with stroke', function() {
     function setup( scene ) {
       scene.addChild( new scenery.Path( {
-        shape: scenery.Shape.rectangle( 8, 8, 48, 48 ),
+        shape: kite.Shape.rectangle( 8, 8, 48, 48 ),
         fill: '#000000',
         stroke: '#ff0000',
         lineWidth: 2

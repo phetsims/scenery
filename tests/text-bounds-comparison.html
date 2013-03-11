@@ -61,19 +61,19 @@
     } );
     
     container.addChild( new scenery.Path( {
-      shape: scenery.Shape.bounds( canvasBounds ),
+      shape: kite.Shape.bounds( canvasBounds ),
       fill: '#aaaaaa'
     } ) );
     container.addChild( new scenery.Path( {
-      shape: scenery.Shape.bounds( svgBounds ),
+      shape: kite.Shape.bounds( svgBounds ),
       fill: 'rgba(255,0,0,0.4)'
     } ) );
     container.addChild( new scenery.Path( {
-      shape: scenery.Shape.bounds( domBounds ),
+      shape: kite.Shape.bounds( domBounds ),
       fill: 'rgba(0,0,255,0.4)'
     } ) );
     container.addChild( new scenery.Path( {
-      shape: scenery.Shape.lineSegment( new dot.Vector2( domBounds.minX + width, domBounds.minY ), new dot.Vector2( domBounds.minX + width, domBounds.maxY ) ),
+      shape: kite.Shape.lineSegment( new dot.Vector2( domBounds.minX + width, domBounds.minY ), new dot.Vector2( domBounds.minX + width, domBounds.maxY ) ),
       stroke: '#00ff00'
     } ) );
     
@@ -88,11 +88,11 @@
     textNode.fill = 'rgba(255,255,255,0.6)';
     
     container.addChild( new scenery.Path( {
-      shape: scenery.Shape.lineSegment( new dot.Vector2( 5, 0.5 ), new dot.Vector2( -5, 0.5 ) ),
+      shape: kite.Shape.lineSegment( new dot.Vector2( 5, 0.5 ), new dot.Vector2( -5, 0.5 ) ),
       stroke: 'rgba(0,0,0,0.5)'
     } ) );
     container.addChild( new scenery.Path( {
-      shape: scenery.Shape.lineSegment( new dot.Vector2( 0.5, 5 ), new dot.Vector2( 0.5, -5 ) ),
+      shape: kite.Shape.lineSegment( new dot.Vector2( 0.5, 5 ), new dot.Vector2( 0.5, -5 ) ),
       stroke: 'rgba(0,0,0,0.5)'
     } ) );
     

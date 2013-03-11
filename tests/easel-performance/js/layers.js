@@ -22,7 +22,7 @@ phet.tests = phet.tests || {};
       }
       
       var radius = 10;
-      var shape = scenery.Shape.regularPolygon( 6, radius );
+      var shape = kite.Shape.regularPolygon( 6, radius );
       
       for ( var i = 0; i < count; i++ ) {
         var node = new scenery.Path( {

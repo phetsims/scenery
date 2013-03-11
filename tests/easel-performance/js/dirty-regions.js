@@ -16,7 +16,7 @@ phet.tests = phet.tests || {};
     var scene = new scenery.Scene( main );
     
     var background = new scenery.Path();
-    background.setShape( scenery.Shape.rectangle( -sceneWidth / 2 * borderFactor, -sceneHeight / 2 * borderFactor, sceneWidth * borderFactor, sceneHeight * borderFactor ) );
+    background.setShape( kite.Shape.rectangle( -sceneWidth / 2 * borderFactor, -sceneHeight / 2 * borderFactor, sceneWidth * borderFactor, sceneHeight * borderFactor ) );
     background.setFill( '#333333' );
     background.setStroke( '#000000' );
     scene.addChild( background );
@@ -28,7 +28,7 @@ phet.tests = phet.tests || {};
       var node = new scenery.Path();
       
       // regular polygon
-      node.setShape( scenery.Shape.regularPolygon( 6, radius ) );
+      node.setShape( kite.Shape.regularPolygon( 6, radius ) );
       
       var xFactor = Math.random();
       node.setTranslation( ( xFactor - 0.5 ) * sceneWidth, ( Math.random() - 0.5 ) * sceneHeight );

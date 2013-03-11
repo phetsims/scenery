@@ -330,8 +330,8 @@
     var b = new scenery.Path();
     var c = new scenery.Path();
     
-    a.setShape( scenery.Shape.rectangle( 0, 0, 20, 20 ) );
-    c.setShape( scenery.Shape.rectangle( 10, 10, 30, 30 ) );
+    a.setShape( kite.Shape.rectangle( 0, 0, 20, 20 ) );
+    c.setShape( kite.Shape.rectangle( 10, 10, 30, 30 ) );
     
     a.addChild( b );
     b.addChild( c );
@@ -352,12 +352,12 @@
     var scene = new scenery.Scene( $( '#main' ) );
     
     scene.addChild( new scenery.Path( {
-      shape: scenery.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
+      shape: kite.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
       fill: '#ff0000'
     } ) );
     
     var middleRect = new scenery.Path( {
-      shape: scenery.Shape.rectangle( canvasWidth / 4, canvasHeight / 4, canvasWidth / 2, canvasHeight / 2 ),
+      shape: kite.Shape.rectangle( canvasWidth / 4, canvasHeight / 4, canvasWidth / 2, canvasHeight / 2 ),
       fill: '#00ff00'
     } );
     middleRect.layerSplit = true;
@@ -365,7 +365,7 @@
     scene.addChild( middleRect );
     
     scene.addChild( new scenery.Path( {
-      shape: scenery.Shape.rectangle( canvasWidth / 2, canvasHeight / 2, canvasWidth / 2, canvasHeight / 2 ),
+      shape: kite.Shape.rectangle( canvasWidth / 2, canvasHeight / 2, canvasWidth / 2, canvasHeight / 2 ),
       fill: '#0000ff'
     } ) );
     
@@ -378,7 +378,7 @@
     updateVsFullRender( [
       function( scene ) {
         scene.addChild( new scenery.Path( {
-          shape: scenery.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
+          shape: kite.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
           fill: '#000000'
         } ) );
       }, function( scene ) {
@@ -391,12 +391,12 @@
     updateVsFullRender( [
       function( scene ) {
         var node = new scenery.Path();
-        node.setShape( scenery.Shape.rectangle( 0, 0, canvasWidth / 3, canvasHeight / 3 ) );
+        node.setShape( kite.Shape.rectangle( 0, 0, canvasWidth / 3, canvasHeight / 3 ) );
         node.setFill( '#ff0000' );
         node.setStroke( '#000000' );
         scene.addChild( node );
       }, function( scene ) {
-        scene.children[0].setShape( scenery.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ) );
+        scene.children[0].setShape( kite.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ) );
       }
     ] );
   } );
@@ -406,7 +406,7 @@
       function( scene ) {
         // TODO: clearer way of specifying parameters
         var node = new scenery.Path();
-        node.setShape( scenery.Shape.rectangle( 15, 15, canvasWidth / 2, canvasHeight / 2 ) );
+        node.setShape( kite.Shape.rectangle( 15, 15, canvasWidth / 2, canvasHeight / 2 ) );
         node.setFill( '#ff0000' );
         node.setStroke( '#000000' );
         node.setLineWidth( 10 );
@@ -449,7 +449,7 @@
     equal( node.fill, fill );
     equal( node.getFill(), fill );
     
-    var otherNode = new scenery.Path( { fill: fill, shape: scenery.Shape.rectangle( 0, 0, 10, 10 ) } );
+    var otherNode = new scenery.Path( { fill: fill, shape: kite.Shape.rectangle( 0, 0, 10, 10 ) } );
     
     equal( otherNode.fill, fill );
   } );
@@ -459,12 +459,12 @@
     var root = scene;
     
     root.addChild( new scenery.Path( {
-      shape: scenery.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
+      shape: kite.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
       fill: '#ff0000'
     } ) );
     
     var middleRect = new scenery.Path( {
-      shape: scenery.Shape.rectangle( canvasWidth / 4, canvasHeight / 4, canvasWidth / 2, canvasHeight / 2 ),
+      shape: kite.Shape.rectangle( canvasWidth / 4, canvasHeight / 4, canvasWidth / 2, canvasHeight / 2 ),
       fill: '#00ff00'
     } );
     
@@ -472,7 +472,7 @@
     root.addChild( middleRect );
     
     root.addChild( new scenery.Path( {
-      shape: scenery.Shape.rectangle( canvasWidth / 2, canvasHeight / 2, canvasWidth / 2, canvasHeight / 2 ),
+      shape: kite.Shape.rectangle( canvasWidth / 2, canvasHeight / 2, canvasWidth / 2, canvasHeight / 2 ),
       fill: '#0000ff'
     } ) );
     
@@ -525,7 +525,7 @@
   
   test( 'Setting left/right of node', function() {
     var node = new scenery.Path( {
-      shape: scenery.Shape.rectangle( -20, -20, 50, 50 ),
+      shape: kite.Shape.rectangle( -20, -20, 50, 50 ),
       scale: 2
     } );
     

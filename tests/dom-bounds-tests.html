@@ -27,7 +27,7 @@
   
   <script>
   
-  require( [ 'main', '../common/dot/js/main' ], function( scenery, dot ) {
+  requirejs( [ 'main', '../common/kite/js/main', '../common/dot/js/main' ], function( scenery, kite, dot ) {
     var scene = new scenery.Scene( $( '#main' ) );
     
     var $labelElement = $( '<div>' );

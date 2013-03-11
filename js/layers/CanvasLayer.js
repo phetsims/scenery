@@ -21,9 +21,10 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
+  var Shape = require( 'KITE/Shape' );
+  
   var Layer = require( 'SCENERY/layers/Layer' ); // uses Layer's prototype for inheritance
   require( 'SCENERY/util/RenderState' );
-  require( 'SCENERY/shapes/Shape' );
   require( 'SCENERY/util/Trail' );
   require( 'SCENERY/util/TrailPointer' );
   require( 'SCENERY/util/Util' );
@@ -103,7 +104,7 @@ define( function( require ) {
         this.clearGlobalBounds( visibleDirtyBounds );
         
         if ( !args.fullRender ) {
-          state.pushClipShape( scenery.Shape.bounds( visibleDirtyBounds ) );
+          state.pushClipShape( Shape.bounds( visibleDirtyBounds ) );
         }
         
         // dirty bounds (clear, possibly set restricted bounds and handling for that)

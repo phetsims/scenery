@@ -31,7 +31,7 @@
   <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
   
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
-  <script src="../dist/standalone/scenery.js"></script>
+  <script src="../dist/development/scenery.js"></script>
   <!-- <script src="../dist/standalone/scenery.min.js"></script> -->
   
   <style type="text/css">
@@ -128,13 +128,13 @@ scene.updateScene();
           
           // A rectangle at (10,10) with a width of 50 and height of 80
           scene.addChild( new scenery.Path( {
-            shape: scenery.Shape.rectangle( 10, 10, 50, 80 ),
+            shape: kite.Shape.rectangle( 10, 10, 50, 80 ),
             fill: '#ff0000'
           } ) );
           
           // An octogon, with a radius of 30
           scene.addChild( new scenery.Path( {
-            shape: scenery.Shape.regularPolygon( 8, 30 ),
+            shape: kite.Shape.regularPolygon( 8, 30 ),
             fill: '#00ff00',
             stroke: '#000000',
             x: 100, // the shape is centered at the origin, so offset it by this x and y
@@ -142,7 +142,7 @@ scene.updateScene();
           } ) );
           
           // Custom shapes can also be created
-          var customShape = new scenery.Shape();
+          var customShape = new kite.Shape();
           customShape.moveTo( 0, 0 );
           customShape.lineTo( 40, 40 );
           customShape.quadraticCurveTo( 80, 0, 40, -40 );
@@ -166,13 +166,13 @@ scene.updateScene();
       <pre class="brush: js">
 // A rectangle at (10,10) with a width of 50 and height of 80
 scene.addChild( new scenery.Path( {
-  shape: scenery.Shape.rectangle( 10, 10, 50, 80 ),
+  shape: kite.Shape.rectangle( 10, 10, 50, 80 ),
   fill: '#ff0000'
 } ) );
 
 // An octogon, with a radius of 30
 scene.addChild( new scenery.Path( {
-  shape: scenery.Shape.regularPolygon( 8, 30 ),
+  shape: kite.Shape.regularPolygon( 8, 30 ),
   fill: '#00ff00',
   stroke: '#000000',
   x: 100, // the shape is centered at the origin, so offset it by this x and y
@@ -180,7 +180,7 @@ scene.addChild( new scenery.Path( {
 } ) );
 
 // Custom shapes can also be created
-var customShape = new scenery.Shape();
+var customShape = new kite.Shape();
 customShape.moveTo( 0, 0 );
 customShape.lineTo( 40, 40 );
 customShape.quadraticCurveTo( 80, 0, 40, -40 );
@@ -261,7 +261,7 @@ node2.rotation === node3.getRotation();
           // create a node that will have child nodes.
           var container = new scenery.Path( {
             // we'll add a background shape (300x100 rectangle) that will render on this node (it will be rendered below any child nodes)
-            shape: scenery.Shape.rectangle( 0, 0, 300, 100 ),
+            shape: kite.Shape.rectangle( 0, 0, 300, 100 ),
             fill: '#888888',
             x: 20, // this node and all of its children will be offset by (20,20)
             y: 20
@@ -277,7 +277,7 @@ node2.rotation === node3.getRotation();
           
           // add a green rectangle to the container, which will be above the gray background
           var child1 = new scenery.Path( {
-            shape: scenery.Shape.rectangle( 0, 0, 25, 25 ), // a 25x25 rectangle
+            shape: kite.Shape.rectangle( 0, 0, 25, 25 ), // a 25x25 rectangle
             fill: '#00ff00',
             scale: 2, // but scaled so it is effectively a 50x50 rectangle to its parents
             left: 10, // 10px to the right of our parent's left bound
@@ -310,7 +310,7 @@ node2.rotation === node3.getRotation();
 // create a node that will have child nodes.
 var container = new scenery.Path( {
   // we'll add a background shape (300x100 rectangle) that will render on this node (it will be rendered below any child nodes)
-  shape: scenery.Shape.rectangle( 0, 0, 300, 100 ),
+  shape: kite.Shape.rectangle( 0, 0, 300, 100 ),
   fill: '#888888',
   x: 20, // this node and all of its children will be offset by (20,20)
   y: 20
@@ -326,7 +326,7 @@ container.getSelfBounds(); // x between [0, 300], y between [0, 100]
 
 // add a green rectangle to the container, which will be above the gray background
 var child1 = new scenery.Path( {
-  shape: scenery.Shape.rectangle( 0, 0, 25, 25 ), // a 25x25 rectangle
+  shape: kite.Shape.rectangle( 0, 0, 25, 25 ), // a 25x25 rectangle
   fill: '#00ff00',
   scale: 2, // but scaled so it is effectively a 50x50 rectangle to its parents
   left: 10, // 10px to the right of our parent's left bound
@@ -453,14 +453,14 @@ scene.addChild( new scenery.DOM( element, {
           
           // a hexagon to rotate
           var node = new scenery.Path( {
-            shape: scenery.Shape.regularPolygon( 6, 90 ),
+            shape: kite.Shape.regularPolygon( 6, 90 ),
             fill: '#000000',
             centerX: 100,
             centerY: 100
           } );
           // a marker so pauses on the iPad animation (since requestAnimationFrame doesn't trigger while scrolling) are visible
           node.addChild( new scenery.Path( {
-            shape: scenery.Shape.rectangle( 0, -3, 60, 6 ),
+            shape: kite.Shape.rectangle( 0, -3, 60, 6 ),
             fill: '#ff0000'
           } ) );
           scene.addChild( node );
@@ -493,14 +493,14 @@ var scene = new scenery.Scene( div );
 
 // a hexagon to rotate
 var node = new scenery.Path( {
-  shape: scenery.Shape.regularPolygon( 6, 90 ),
+  shape: kite.Shape.regularPolygon( 6, 90 ),
   fill: '#000000',
   centerX: 100,
   centerY: 100
 } );
 // a marker so pauses on the iPad animation (since requestAnimationFrame doesn't trigger while scrolling) are visible
 node.addChild( new scenery.Path( {
-  shape: scenery.Shape.rectangle( 0, -3, 60, 6 ),
+  shape: kite.Shape.rectangle( 0, -3, 60, 6 ),
   fill: '#ff0000'
 } ) );
 scene.addChild( node );
@@ -600,7 +600,7 @@ window.requestAnimationFrame( tick, div[0] );
           
           // a big hexagon in the center. stroke not included in the hit region by default
           var node = new scenery.Path( {
-            shape: scenery.Shape.regularPolygon( 6, 150 ),
+            shape: kite.Shape.regularPolygon( 6, 150 ),
             fill: colors[count],
             stroke: '#000000',
             centerX: 200,
@@ -691,7 +691,7 @@ $( window ).ready( function() {
   
   // a big hexagon in the center. stroke not included in the hit region by default
   var node = new scenery.Path( {
-    shape: scenery.Shape.regularPolygon( 6, 150 ),
+    shape: kite.Shape.regularPolygon( 6, 150 ),
     fill: colors[count],
     stroke: '#000000',
     centerX: 200,

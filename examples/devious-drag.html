@@ -103,13 +103,13 @@
   
   // our paths node for the shape
   var hexagon = new scenery.Path( {
-    shape: scenery.Shape.regularPolygon( 6, 18 ),
+    shape: kite.Shape.regularPolygon( 6, 18 ),
     fill: '#ddeeee',
     stroke: '#000000',
     cursor: 'pointer'
   } );
   var circle = new scenery.Path( {
-    shape: scenery.Shape.circle( 0, 0, 18 ),
+    shape: kite.Shape.circle( 0, 0, 18 ),
     fill: '#ddddee',
     stroke: '#000000',
     cursor: 'pointer'
@@ -212,7 +212,7 @@
         fontSize: 15
       } );
       var button = new scenery.Path( {
-        shape: scenery.Shape.bounds( buttonLabel.getBounds().roundedOut().dilated( 10.5 ) ),
+        shape: kite.Shape.bounds( buttonLabel.getBounds().roundedOut().dilated( 10.5 ) ),
         fill: '#dddddd',
         stroke: '#000000',
         cursor: 'pointer'

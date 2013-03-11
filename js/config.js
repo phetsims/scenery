@@ -11,6 +11,12 @@ if ( window.has ) {
   window.has.add( 'assert.dot', function( global, document, anElement ) {
     return true;
   } );
+  window.has.add( 'assert.kite', function( global, document, anElement ) {
+    return true;
+  } );
+  window.has.add( 'assert.kite.extra', function( global, document, anElement ) {
+    return true;
+  } );
   window.has.add( 'assert.scenery', function( global, document, anElement ) {
     return true;
   } );
@@ -23,13 +29,14 @@ if ( window.has ) {
 window.loadedSceneryConfig = true;
 
 require.config( {
-  // depends on all of Scenery and Dot
-  deps: [ 'main', 'DOT/main' ],
+  // depends on all of Scenery, Kite, and Dot
+  deps: [ 'main', 'KITE/main', 'DOT/main' ],
   
   paths: {
     underscore: '../contrib/lodash.min-1.0.0-rc.3',
     jquery: '../contrib/jquery-1.8.3.min',
     SCENERY: '.',
+    KITE: '../common/kite/js',
     DOT: '../common/dot/js',
     ASSERT: '../common/assert/js'
   },

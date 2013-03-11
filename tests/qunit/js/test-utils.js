@@ -176,7 +176,7 @@ function strokeEqualsFill( shapeToStroke, shapeToFill, strokeNodeSetup, message 
     scene.addChild( node );
     // node.validateBounds();
     // scene.addChild( new scenery.Path( {
-    //   shape: scenery.Shape.bounds( node.getSelfBounds() ),
+    //   shape: kite.Shape.bounds( node.getSelfBounds() ),
     //   fill: 'rgba(0,0,255,0.5)'
     // } ) );
   }, message, 128 ); // threshold of 128 due to antialiasing differences between fill and stroke... :(

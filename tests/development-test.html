@@ -14,7 +14,7 @@
   <script data-main="../js/config.js" src="../contrib/require-2.1.4.js"></script>
   
   <script>
-  requirejs( [ 'main', '../common/dot/js/main' ], function( scenery, dot ) {
+  requirejs( [ 'main', '../common/kite/js/main', '../common/dot/js/main' ], function( scenery, kite, dot ) {
     var scene = new scenery.Scene( $( '#main' ) );
     scene.addChild( new scenery.Text( 'Dynamic loading test for Require.js', {
       left: 10,

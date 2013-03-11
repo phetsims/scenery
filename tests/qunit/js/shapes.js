@@ -4,7 +4,7 @@
   
   module( 'Scenery: Shapes' );
   
-  var Shape = scenery.Shape;
+  var Shape = kite.Shape;
   
   function p( x, y ) { return new dot.Vector2( x, y ); }
 
@@ -18,7 +18,7 @@
   } );
   
   test( 'Line Segment - butt', function() {
-    var styles = new scenery.LineStyles();
+    var styles = new kite.LineStyles();
     styles.lineWidth = 50;
     
     var strokeShape = Shape.lineSegment( p( 100, 100 ), p( 300, 100 ) );
@@ -28,7 +28,7 @@
   } );
   
   test( 'Line Segment - square', function() {
-    var styles = new scenery.LineStyles();
+    var styles = new kite.LineStyles();
     styles.lineWidth = 50;
     styles.lineCap = 'square';
     
@@ -39,7 +39,7 @@
   } );
   
   test( 'Line Segment - round', function() {
-    var styles = new scenery.LineStyles();
+    var styles = new kite.LineStyles();
     styles.lineWidth = 50;
     styles.lineCap = 'round';
     
@@ -50,7 +50,7 @@
   } );
   
   test( 'Line Join - Miter', function() {
-    var styles = new scenery.LineStyles();
+    var styles = new kite.LineStyles();
     styles.lineWidth = 30;
     styles.lineJoin = 'miter';
     
@@ -64,7 +64,7 @@
   } );
   
   test( 'Line Join - Miter - Closed', function() {
-    var styles = new scenery.LineStyles();
+    var styles = new kite.LineStyles();
     styles.lineWidth = 30;
     styles.lineJoin = 'miter';
     
@@ -79,7 +79,7 @@
   } );
   
   test( 'Line Join - Round', function() {
-    var styles = new scenery.LineStyles();
+    var styles = new kite.LineStyles();
     styles.lineWidth = 30;
     styles.lineJoin = 'round';
     
@@ -93,7 +93,7 @@
   } );
   
   test( 'Line Join - Round - Closed', function() {
-    var styles = new scenery.LineStyles();
+    var styles = new kite.LineStyles();
     styles.lineWidth = 30;
     styles.lineJoin = 'round';
     
@@ -108,7 +108,7 @@
   } );
   
   test( 'Line Join - Bevel - Closed', function() {
-    var styles = new scenery.LineStyles();
+    var styles = new kite.LineStyles();
     styles.lineWidth = 30;
     styles.lineJoin = 'bevel';
     
@@ -123,7 +123,7 @@
   } );
   
   test( 'Rect', function() {
-    var styles = new scenery.LineStyles();
+    var styles = new kite.LineStyles();
     styles.lineWidth = 30;
     
     var strokeShape = Shape.rectangle( 40, 40, 150, 150 );
@@ -133,7 +133,7 @@
   } );
   
   test( 'Manual Rect', function() {
-    var styles = new scenery.LineStyles();
+    var styles = new kite.LineStyles();
     styles.lineWidth = 30;
     
     var strokeShape = new Shape();
@@ -149,7 +149,7 @@
   } );
   
   test( 'Hex', function() {
-    var styles = new scenery.LineStyles();
+    var styles = new kite.LineStyles();
     styles.lineWidth = 30;
     
     var strokeShape = Shape.regularPolygon( 6, 100 ).transformed( dot.Matrix3.translation( 130, 130 ) );
@@ -159,7 +159,7 @@
   } );
   
   test( 'Overlap', function() {
-    var styles = new scenery.LineStyles();
+    var styles = new kite.LineStyles();
     styles.lineWidth = 30;
     
     var strokeShape = new Shape();
@@ -180,7 +180,7 @@
   _.each( miterAnglesInDegrees, function( miterAngle ) {
     var miterAngleRadians = miterAngle * Math.PI / 180;
     test( 'Miter limit angle (degrees): ' + miterAngle + ' would change at ' + 1 / Math.sin( miterAngleRadians / 2 ), function() {
-      var styles = new scenery.LineStyles();
+      var styles = new kite.LineStyles();
       styles.lineWidth = 30;
       
       var strokeShape = new Shape();
@@ -197,7 +197,7 @@
   } );
   
   test( 'Overlapping rectangles', function() {
-    var styles = new scenery.LineStyles();
+    var styles = new kite.LineStyles();
     styles.lineWidth = 30;
     
     var strokeShape = new Shape();
@@ -209,34 +209,8 @@
     strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
   } );
   
-  test( 'Line segment winding', function() {
-    var line = new scenery.Segment.Line( p( 0, 0 ), p( 2, 2 ) );
-    
-    equal( line.windingIntersection( new dot.Ray2( p( 0, 1 ), p( 1, 0 ) ) ), 1 );
-    equal( line.windingIntersection( new dot.Ray2( p( 0, 5 ), p( 1, 0 ) ) ), 0 );
-    equal( line.windingIntersection( new dot.Ray2( p( 1, 0 ), p( 0, 1 ) ) ), -1 );
-    equal( line.windingIntersection( new dot.Ray2( p( 0, 0 ), p( 1, 1 ).normalized() ) ), 0 );
-    equal( line.windingIntersection( new dot.Ray2( p( 0, 1 ), p( 1, 1 ).normalized() ) ), 0 );
-  } );
-  
-  test( 'Rectangle hit testing', function() {
-    var shape = Shape.rectangle( 0, 0, 1, 1 );
-    
-    equal( shape.containsPoint( p( 0.2, 0.3 ) ), true, '0.2, 0.3' );
-    equal( shape.containsPoint( p( 0.5, 0.5 ) ), true, '0.5, 0.5' );
-    equal( shape.containsPoint( p( 1.5, 0.5 ) ), false, '1.5, 0.5' );
-    equal( shape.containsPoint( p( -0.5, 0.5 ) ), false, '-0.5, 0.5' );
-  } );
-  
-  test( 'Un-closed shape hit testing', function() {
-    var shape = new Shape().moveTo( 0, 0 ).lineTo( 10, 10 ).lineTo( 0, 10 );
-    
-    equal( shape.containsPoint( p( 1, 2 ) ), true, '1, 2' );
-    equal( shape.containsPoint( p( 10, 2 ) ), false, '10, 2' );
-  } );
-  
   test( 'Bezier Offset', function() {
-    var styles = new scenery.LineStyles();
+    var styles = new kite.LineStyles();
     styles.lineWidth = 30;
     
     var strokeShape = new Shape();

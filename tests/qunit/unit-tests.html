@@ -19,6 +19,7 @@
   <!-- <script src="../../dist/development/scenery.js"></script> -->
   
   <script src="unit-tests.js"></script>
+  <script src="../../common/kite/tests/qunit/unit-tests.js"></script>
   <script src="../../common/dot/tests/qunit/unit-tests.js"></script>
   
 </head>
@@ -43,8 +44,9 @@
     // we need to wait until our config file is loaded before our require statement. apparently this was not guaranteed
     function check() {
       if ( window.loadedSceneryConfig ) {
-        require( [ 'main', 'DOT/main' ], function( scenery, dot ) {
+        require( [ 'main', 'KITE/main', 'DOT/main' ], function( scenery, kite, dot ) {
           window.scenery = scenery;
+          window.kite = kite;
           window.dot = dot;
           
           runSceneryTests( '.' );

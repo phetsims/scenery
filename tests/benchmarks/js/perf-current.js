@@ -15,7 +15,7 @@
         var scene = new scenery.Scene( main );
         for( var i = 0; i < 4000; i++ ) {
           scene.addChild( new scenery.Path( {
-            shape: scenery.Shape.rectangle( ( Math.PI * i ) % this.width, ( 27 * i ) % this.height, 20, 20 ),
+            shape: kite.Shape.rectangle( ( Math.PI * i ) % this.width, ( 27 * i ) % this.height, 20, 20 ),
             fill: 'rgba(255,0,0,0.3)',
             stroke: '#000000'
           } ) );
@@ -45,7 +45,7 @@
         var scene = new scenery.Scene( main );
         for( var i = 0; i < 4000; i++ ) {
           scene.addChild( new scenery.Path( {
-            shape: scenery.Shape.rectangle( 0, 0, 20, 20 ),
+            shape: kite.Shape.rectangle( 0, 0, 20, 20 ),
             fill: 'rgba(0,0,255,0.3)',
             stroke: '#000000',
             x: ( Math.PI * i ) % this.width,
@@ -77,7 +77,7 @@
         var scene = new scenery.Scene( main );
         for( var i = 0; i < 4000; i++ ) {
           scene.addChild( new scenery.Path( {
-            shape: scenery.Shape.rectangle( 0, 0, 20, 20 ),
+            shape: kite.Shape.rectangle( 0, 0, 20, 20 ),
             fill: 'rgba(0,255,0,0.3)',
             stroke: '#000000',
             x: ( Math.PI * i ) % this.width,
@@ -119,7 +119,7 @@
       step: function() {
         for ( var i = 0; i < 200; i++ ) {
           this.scene.addChild( new scenery.Path( {
-            shape: scenery.Shape.regularPolygon( 6, 22 ),
+            shape: kite.Shape.regularPolygon( 6, 22 ),
             fill: 'rgba(255,0,255,0.3)',
             stroke: '#000000',
             x: this.x,

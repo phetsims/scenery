@@ -18,7 +18,7 @@ phet.benchmark = phet.benchmark || {};
   var scene = phet.benchmark.createDetachedScene( 256, 256 );
   for( var i = 0; i < 200; i++ ) {
     scene.addChild( new scenery.Path( {
-      shape: scenery.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ),
+      shape: kite.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ),
       fill: 'rgba(255,0,0,1)',
       stroke: '#000000'
     } ) );
@@ -40,7 +40,7 @@ phet.benchmark = phet.benchmark || {};
     setup: function() {
       var scene = phet.benchmark.createDetachedScene( 256, 256 );
       scene.addChild( new scenery.Path( {
-        shape: scenery.Shape.rectangle( 0, 0, 20, 20 ),
+        shape: kite.Shape.rectangle( 0, 0, 20, 20 ),
         centerX: 128,
         centerY: 128,
         fill: 'rgba(255,0,0,1)'
@@ -58,7 +58,7 @@ phet.benchmark = phet.benchmark || {};
       var scene = phet.benchmark.createDetachedScene( 256, 256 );
       for( var i = 0; i < 200; i++ ) {
         scene.addChild( new scenery.Path( {
-          shape: scenery.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ),
+          shape: kite.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ),
           fill: 'rgba(255,0,0,1)',
           stroke: '#000000'
         } ) );
@@ -76,13 +76,13 @@ phet.benchmark = phet.benchmark || {};
       var scene = phet.benchmark.createDetachedScene( 256, 256 );
       for( var i = 0; i < 200; i++ ) {
         scene.addChild( new scenery.Path( {
-          shape: scenery.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ),
+          shape: kite.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ),
           fill: 'rgba(255,0,0,1)',
           stroke: '#000000'
         } ) );
       }
       var node = new scenery.Path( {
-        shape: scenery.Shape.rectangle( 0, 0, 20, 20 ),
+        shape: kite.Shape.rectangle( 0, 0, 20, 20 ),
         centerX: 128,
         centerY: 128,
         fill: 'rgba(255,0,0,1)',
@@ -101,13 +101,13 @@ phet.benchmark = phet.benchmark || {};
       var scene = phet.benchmark.createDetachedScene( 256, 256 );
       for( var i = 0; i < 200; i++ ) {
         scene.addChild( new scenery.Path( {
-          shape: scenery.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ),
+          shape: kite.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ),
           fill: 'rgba(255,0,0,1)',
           stroke: '#000000'
         } ) );
       }
       var node = new scenery.Path( {
-        shape: scenery.Shape.rectangle( 0, 0, 20, 20 ),
+        shape: kite.Shape.rectangle( 0, 0, 20, 20 ),
         centerX: 128,
         centerY: 128,
         fill: 'rgba(255,0,0,1)',

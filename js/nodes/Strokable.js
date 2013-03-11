@@ -14,9 +14,7 @@ define( function( require ) {
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
   var scenery = require( 'SCENERY/scenery' );
-  var LineStyles = require( 'SCENERY/shapes/util/LineStyles' );
-  
-  require( 'SCENERY/shapes/Shape' );
+  var LineStyles = require( 'KITE/util/LineStyles' );
   
   scenery.Strokable = function( type ) {
     var proto = type.prototype;

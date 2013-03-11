@@ -133,7 +133,7 @@ phet.tests = phet.tests || {};
     for ( var row = 0; row < resolution; row++ ) {
       for ( var col = 0; col < resolution; col++ ) {
         var rect = new scenery.Path( {
-          shape: scenery.Shape.rectangle(
+          shape: kite.Shape.rectangle(
             ( col - ( resolution - 1 ) / 2 ) * size / resolution - boxRadius,
             ( row - ( resolution - 1 ) / 2 ) * size / resolution - boxRadius,
             boxRadius * 2,

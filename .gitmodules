@@ -4,3 +4,6 @@
 [submodule "common/assert"]
 	path = common/assert
 	url = https://github.com/phetsims/assert.git
+[submodule "common/kite"]
+	path = common/kite
+	url = https://github.com/phetsims/kite.git
