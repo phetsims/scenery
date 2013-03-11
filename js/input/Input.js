@@ -6,6 +6,12 @@
  * A 'finger' is an abstract way of describing either the mouse, a single touch point, or a key being pressed.
  * touch points and key presses go away after being released, whereas the mouse 'finger' is persistent.
  *
+ * Events will be called on listeners with a single event object. Supported event types are:
+ * 'up', 'down', 'out', 'over', 'enter', 'exit', 'move', and 'cancel'. Scenery also supports more specific event
+ * types that constrain the type of finger, so 'mouse' + type, 'touch' + type and 'pen' + type will fire
+ * on each listener before the generic event would be fined. E.g. for mouse movement, listener.mousemove will be
+ * fired before listener.move.
+ *
  * DOM Level 3 events spec: http://www.w3.org/TR/DOM-Level-3-Events/
  * Touch events spec: http://www.w3.org/TR/touch-events/
  * Pointer events spec draft: https://dvcs.w3.org/hg/pointerevents/raw-file/tip/pointerEvents.html
