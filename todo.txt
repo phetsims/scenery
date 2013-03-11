@@ -1,6 +1,5 @@
 
 Priorities:
-    Document addInputListener contract
     Extract Shape into its own library
     Performance
         Same-arity methods?
