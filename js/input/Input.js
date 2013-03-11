@@ -305,11 +305,11 @@ define( function( require ) {
         // if a listener returns true, don't handle any more
         var aborted = false;
         
-        if ( !aborted && listener[type] ) {
-          aborted = !!( listener[type]( inputEvent ) ) || inputEvent.aborted;
-        }
         if ( !aborted && listener[specificType] ) {
           aborted = !!( listener[specificType]( inputEvent ) ) || inputEvent.aborted;
+        }
+        if ( !aborted && listener[type] ) {
+          aborted = !!( listener[type]( inputEvent ) ) || inputEvent.aborted;
         }
         
         // bail out if the event is aborted, so no other listeners are triggered
@@ -338,11 +338,11 @@ define( function( require ) {
           // if a listener returns true, don't handle any more
           var aborted = false;
           
-          if ( !aborted && listener[type] ) {
-            aborted = !!( listener[type]( inputEvent ) ) || inputEvent.aborted;
-          }
           if ( !aborted && listener[specificType] ) {
             aborted = !!( listener[specificType]( inputEvent ) ) || inputEvent.aborted;
+          }
+          if ( !aborted && listener[type] ) {
+            aborted = !!( listener[type]( inputEvent ) ) || inputEvent.aborted;
           }
           
           // bail out if the event is aborted, so no other listeners are triggered
