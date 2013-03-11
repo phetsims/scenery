@@ -24,7 +24,7 @@ module.exports = function( grunt ) {
         }
       },
       
-      // without has.js
+      // with has.js
       standalone: {
         options: {
           almond: true,
@@ -41,7 +41,7 @@ module.exports = function( grunt ) {
         }
       },
       
-      // with has.js
+      // without has.js
       production: {
         options: {
           almond: true,
