@@ -1,6 +1,5 @@
 
 Priorities:
-    Extract Shape into its own library
     Performance
         Same-arity methods?
         Less temporary objects?
@@ -294,25 +293,6 @@ Node:
     For bounds checking during rendering, isInGlobalBounds( globalBounds, currentTransform ) would help, and shapes could be more specific
     Canvas: masking with sub-canvas rendering using globalCompositeOperation. CSG should be possible, and hit tests should be better. Bounds might be harder
 
-Shapes:
-    Add support Shape.ellipse
-    * Shape should support just ignoring segments of certain types, or reducing them. e.g.:
-        line with same start/end
-        Add isValid() and don't add segments who are invalid? Test and make sure that lines of 0 length, arcs of 0 radius, etc. don't stroke? If they stroke, keep them somehow
-    * convenience functions on scenery namespace for common shapes
-    ** consider new scenery.Path( shape, args )
-        Maybe even new scenery.Rectangle( width, height, { ... } )? Ability to set width / height, and similar other attributes for RegularPolygon, etc?
-    Finiteness checks
-    Investigate shear / scale effects on stroking -- important for bounds
-    Quadratic curve offsets need implementation improvement (32 sub-quadratics is too costly)
-    Not implemented: arc, arcTo, ellipse, cubic bezier
-    Features not implemented: precise intersection with bounding box (not just intersection of bounds)
-    Nonzero/evenodd support (not yet implemented in browsers)
-    Self-intersection in 'stroked' path
-    WebGL
-    Function for higher-performance possibly-expanded bounds for redraw?
-    Consider bounding box handling for an arbitrary transform, for use with Node's isInGlobalBounds( globalBounds, currentTransform ).
-
 Text:
     Unit tests
     *** Performance of text bounds!
@@ -340,6 +320,11 @@ Trail:
 
 Build:
     Add JSHint into Sublime Text with plugin?
+
+Path:
+    * convenience functions on scenery namespace for common shapes
+    ** consider new scenery.Path( shape, args )
+        Maybe even new scenery.Rectangle( width, height, { ... } )? Ability to set width / height, and similar other attributes for RegularPolygon, etc?
 
 Performance:
     *** Garbage collection jitters!
