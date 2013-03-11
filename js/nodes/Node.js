@@ -754,6 +754,10 @@ define( function( require ) {
       return this.transform.getMatrix();
     },
     
+    resetTransform: function() {
+      this.setMatrix( Matrix3.IDENTITY );
+    },
+    
     // the left bound of this node, in the parent coordinate frame
     getLeft: function() {
       return this.getBounds().minX;
