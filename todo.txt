@@ -93,6 +93,7 @@ General:
     Take extension mechanism from Backbone.js: https://github.com/documentcloud/backbone/blob/master/backbone.js#L1471-L1502
 
 Code:
+    Require.js style handling for underscore/lodash
     Documentation:
         For each 'class'
         * Hit every 'mutator'
