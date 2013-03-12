@@ -128,7 +128,7 @@ define( function( require ) {
       }
     },
     
-    insertChild: function( node, index ) {
+    insertChild: function( index, node ) {
       assert && assert( node !== null && node !== undefined && !_.contains( this.children, node ) );
       
       node.parents.push( this );
@@ -145,7 +145,7 @@ define( function( require ) {
     },
     
     addChild: function( node ) {
-      this.insertChild( node, this.children.length );
+      this.insertChild( this.children.length, node );
     },
     
     removeChild: function ( node ) {
@@ -178,6 +178,42 @@ define( function( require ) {
         _.each( children, function( child ) {
           node.addChild( node );
         } );
+      }
+    },
+    
+    indexOfParent: function( parent ) {
+      return _.indexOf( this.parents, parent );
+    },
+    
+    indexOfChild: function( child ) {
+      return _.indexOf( this.children, child );
+    },
+    
+    moveToFront: function() {
+      var self = this;
+      _.each( this.parents.slice( 0 ), function( parent ) {
+        parent.moveChildToFront( self );
+      } );
+    },
+    
+    moveChildToFront: function( child ) {
+      if ( this.indexOfChild( child ) !== this.children.length - 1 ) {
+        this.removeChild( child );
+        this.addChild( child );
+      }
+    },
+    
+    moveToBack: function() {
+      var self = this;
+      _.each( this.parents.slice( 0 ), function( parent ) {
+        parent.moveChildToBack( self );
+      } );
+    },
+    
+    moveChildToBack: function( child ) {
+      if ( this.indexOfChild( child ) !== 0 ) {
+        this.removeChild( child );
+        this.insertChild( 0, child );
       }
     },
     
