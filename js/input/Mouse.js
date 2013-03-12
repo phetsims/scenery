@@ -10,10 +10,10 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  var Finger = require( 'SCENERY/input/Finger' ); // inherits from Finger
+  var Pointer = require( 'SCENERY/input/Pointer' ); // inherits from Pointer
   
   scenery.Mouse = function() {
-    Finger.call( this );
+    Pointer.call( this );
     
     this.point = null;
     
@@ -29,7 +29,7 @@ define( function( require ) {
   };
   var Mouse = scenery.Mouse;
   
-  Mouse.prototype = _.extend( {}, Finger.prototype, {
+  Mouse.prototype = _.extend( {}, Pointer.prototype, {
     constructor: Mouse,
     
     down: function( point, event ) {

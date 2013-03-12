@@ -1,9 +1,9 @@
 // Copyright 2002-2012, University of Colorado
 
 /*
- * A finger is an abstraction that includes a mouse and touch points (and possibly keys).
+ * A pointer is an abstraction that includes a mouse and touch points (and possibly keys).
  *
- * TODO: add state tracking (dragging/panning/etc.) to finger for convenience
+ * TODO: add state tracking (dragging/panning/etc.) to pointer for convenience
  * TODO: consider an 'active' flag?
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
@@ -15,13 +15,13 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  scenery.Finger = function() {
+  scenery.Pointer = function() {
     this.listeners = [];
   };
-  var Finger = scenery.Finger;
+  var Pointer = scenery.Pointer;
   
-  Finger.prototype = {
-    constructor: Finger,
+  Pointer.prototype = {
+    constructor: Pointer,
     
     addInputListener: function( listener ) {
       assert && assert( !_.contains( this.listeners, listener ) );
@@ -37,5 +37,5 @@ define( function( require ) {
     }
   };
   
-  return Finger;
+  return Pointer;
 } );

@@ -19,7 +19,7 @@ define( function( require ) {
     // ensure that all of the required arguments are supplied
     assert && assert( arguments.trail &&
                       arguments.type &&
-                      arguments.finger &&
+                      arguments.pointer &&
                       arguments.domEvent &&
                       arguments.target, 'Missing required scenery.Event argument' );
     
@@ -32,13 +32,13 @@ define( function( require ) {
     // {String} what event was triggered on the listener
     this.type = arguments.type;
     
-    // {Finger}
-    this.finger = arguments.finger;
+    // {Pointer}
+    this.pointer = arguments.pointer;
     
     // raw DOM InputEvent (TouchEvent, PointerEvent, MouseEvent,...)
     this.domEvent = arguments.domEvent;
     
-    // {Node} whatever node you attached the listener to, null when passed to a Finger,
+    // {Node} whatever node you attached the listener to, or null when firing events on a Pointer
     this.currentTarget = arguments.currentTarget;
     
     // {Node} leaf-most node in trail

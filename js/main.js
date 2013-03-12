@@ -15,10 +15,10 @@ define( [
     'SCENERY/debug/DebugContext',
     
     'SCENERY/input/Event',
-    'SCENERY/input/Finger',
     'SCENERY/input/Input',
     'SCENERY/input/Key',
     'SCENERY/input/Mouse',
+    'SCENERY/input/Pointer',
     'SCENERY/input/SimpleDragHandler',
     'SCENERY/input/Touch',
     

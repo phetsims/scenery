@@ -33,14 +33,14 @@ define( function( require ) {
     }, options );
     
     this.dragging              = false;     // whether a node is being dragged with this handler
-    this.finger                = null;      // the finger doing the current dragging
+    this.pointer                = null;      // the pointer doing the current dragging
     this.trail                 = null;      // stores the path to the node that is being dragged
     this.transform             = null;      // transform of the trail to our node (but not including our node, so we can prepend the deltas)
     this.node                  = null;      // the node that we are handling the drag for
     this.lastDragPoint         = null;      // the location of the drag at the previous event (so we can calculate a delta)
     this.startTransformMatrix  = null;      // the node's transform at the start of the drag, so we can reset on a touch cancel
     this.mouseButton           = undefined; // tracks which mouse button was pressed, so we can handle that specifically
-    // TODO: consider mouse buttons as separate fingers?
+    // TODO: consider mouse buttons as separate pointers?
     
     // if an ancestor is transformed, pin our node
     this.transformListener = {
@@ -60,19 +60,19 @@ define( function( require ) {
       }
     };
     
-    // this listener gets added to the finger when it starts dragging our node
+    // this listener gets added to the pointer when it starts dragging our node
     this.dragListener = {
       // mouse/touch up
       up: function( event ) {
-        assert && assert( event.finger === handler.finger );
-        if ( !event.finger.isMouse || event.domEvent.button === handler.mouseButton ) {
+        assert && assert( event.pointer === handler.pointer );
+        if ( !event.pointer.isMouse || event.domEvent.button === handler.mouseButton ) {
           handler.endDrag( event );
         }
       },
       
       // touch cancel
       cancel: function( event ) {
-        assert && assert( event.finger === handler.finger );
+        assert && assert( event.pointer === handler.pointer );
         handler.endDrag( event );
         
         // since it's a cancel event, go back!
@@ -81,9 +81,9 @@ define( function( require ) {
       
       // mouse/touch move
       move: function( event ) {
-        assert && assert( event.finger === handler.finger );
+        assert && assert( event.pointer === handler.pointer );
         
-        var delta = handler.transform.inverseDelta2( handler.finger.point.minus( handler.lastDragPoint ) );
+        var delta = handler.transform.inverseDelta2( handler.pointer.point.minus( handler.lastDragPoint ) );
         
         // move by the delta between the previous point, using the precomputed transform
         // prepend the translation on the node, so we can ignore whatever other transform state the node has
@@ -97,7 +97,7 @@ define( function( require ) {
         } else {
           handler.node.translate( delta, true );
         }
-        handler.lastDragPoint = handler.finger.point;
+        handler.lastDragPoint = handler.pointer.point;
         
         if ( handler.options.drag ) {
           // TODO: consider adding in a delta to the listener
@@ -113,18 +113,18 @@ define( function( require ) {
     constructor: SimpleDragHandler,
     
     startDrag: function( event ) {
-      // set a flag on the finger so it won't pick up other nodes
-      event.finger.dragging = true;
-      event.finger.addInputListener( this.dragListener );
+      // set a flag on the pointer so it won't pick up other nodes
+      event.pointer.dragging = true;
+      event.pointer.addInputListener( this.dragListener );
       event.trail.rootNode().addEventListener( this.transformListener );
       
       // set all of our persistent information
       this.dragging = true;
-      this.finger = event.finger;
+      this.pointer = event.pointer;
       this.trail = event.trail.subtrailTo( event.currentTarget, true );
       this.transform = this.trail.getTransform();
       this.node = event.currentTarget;
-      this.lastDragPoint = event.finger.point;
+      this.lastDragPoint = event.pointer.point;
       this.startTransformMatrix = event.currentTarget.getMatrix();
       this.mouseButton = event.domEvent.button; // should be undefined for touch events
       
@@ -134,8 +134,8 @@ define( function( require ) {
     },
     
     endDrag: function( event ) {
-      this.finger.dragging = false;
-      this.finger.removeInputListener( this.dragListener );
+      this.pointer.dragging = false;
+      this.pointer.removeInputListener( this.dragListener );
       this.trail.rootNode().removeEventListener( this.transformListener );
       this.dragging = false;
       
@@ -145,8 +145,8 @@ define( function( require ) {
     },
     
     tryToSnag: function( event ) {
-      // only start dragging if the finger isn't dragging anything, we aren't being dragged, and if it's a mouse it's button is down
-      if ( !this.dragging && !event.finger.dragging ) {
+      // only start dragging if the pointer isn't dragging anything, we aren't being dragged, and if it's a mouse it's button is down
+      if ( !this.dragging && !event.pointer.dragging ) {
         this.startDrag( event );
       }
     },

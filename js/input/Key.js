@@ -13,10 +13,10 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  var Finger = require( 'SCENERY/input/Finger' ); // Inherits from Finger
+  var Pointer = require( 'SCENERY/input/Pointer' ); // Inherits from Pointer
   
   scenery.Key = function( key, event ) {
-    Finger.call( this );
+    Pointer.call( this );
     
     this.key = key;
     this.isKey = true;
@@ -25,7 +25,7 @@ define( function( require ) {
   };
   var Key = scenery.Key;
   
-  Key.prototype = _.extend( {}, Finger.prototype, {
+  Key.prototype = _.extend( {}, Pointer.prototype, {
     constructor: Key
   } );
   

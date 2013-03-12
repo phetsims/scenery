@@ -70,7 +70,7 @@ define( function( require ) {
     this._inputListeners = []; // for user input handling (mouse/touch)
     this._eventListeners = []; // for internal events like paint invalidation, layer invalidation, etc.
     
-    // TODO: add getter/setters that will be able to invalidate whether this node is under any fingers, etc.
+    // TODO: add getter/setters that will be able to invalidate whether this node is under any pointers, etc.
     this._includeStrokeInHitRegion = false;
     
     // bounds handling

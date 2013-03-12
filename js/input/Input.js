@@ -3,12 +3,12 @@
 /**
  * API for handling mouse / touch / keyboard events.
  *
- * A 'finger' is an abstract way of describing either the mouse, a single touch point, or a key being pressed.
- * touch points and key presses go away after being released, whereas the mouse 'finger' is persistent.
+ * A 'pointer' is an abstract way of describing either the mouse, a single touch point, or a key being pressed.
+ * touch points and key presses go away after being released, whereas the mouse 'pointer' is persistent.
  *
  * Events will be called on listeners with a single event object. Supported event types are:
  * 'up', 'down', 'out', 'over', 'enter', 'exit', 'move', and 'cancel'. Scenery also supports more specific event
- * types that constrain the type of finger, so 'mouse' + type, 'touch' + type and 'pen' + type will fire
+ * types that constrain the type of pointer, so 'mouse' + type, 'touch' + type and 'pen' + type will fire
  * on each listener before the generic event would be fined. E.g. for mouse movement, listener.mousemove will be
  * fired before listener.move.
  *
@@ -37,7 +37,7 @@ define( function( require ) {
     
     this.mouse = new scenery.Mouse();
     
-    this.fingers = [ this.mouse ];
+    this.pointers = [ this.mouse ];
     
     this.listenerReferences = [];
   };
@@ -46,21 +46,21 @@ define( function( require ) {
   Input.prototype = {
     constructor: Input,
     
-    addFinger: function( finger ) {
-      this.fingers.push( finger );
+    addPointer: function( pointer ) {
+      this.pointers.push( pointer );
     },
     
-    removeFinger: function( finger ) {
+    removePointer: function( pointer ) {
       // sanity check version, will remove all instances
-      for ( var i = this.fingers.length - 1; i >= 0; i-- ) {
-        if ( this.fingers[i] === finger ) {
-          this.fingers.splice( i, 1 );
+      for ( var i = this.pointers.length - 1; i >= 0; i-- ) {
+        if ( this.pointers[i] === pointer ) {
+          this.pointers.splice( i, 1 );
         }
       }
     },
     
     findTouchById: function( id ) {
-      return _.find( this.fingers, function( finger ) { return finger.id === id; } );
+      return _.find( this.pointers, function( pointer ) { return pointer.id === id; } );
     },
     
     mouseDown: function( point, event ) {
@@ -91,14 +91,14 @@ define( function( require ) {
     // called for each touch point
     touchStart: function( id, point, event ) {
       var touch = new scenery.Touch( id, point, event );
-      this.addFinger( touch );
+      this.addPointer( touch );
       this.downEvent( touch, event );
     },
     
     touchEnd: function( id, point, event ) {
       var touch = this.findTouchById( id );
       touch.end( point, event );
-      this.removeFinger( touch );
+      this.removePointer( touch );
       this.upEvent( touch, event );
     },
     
@@ -111,7 +111,7 @@ define( function( require ) {
     touchCancel: function( id, point, event ) {
       var touch = this.findTouchById( id );
       touch.cancel( point, event );
-      this.removeFinger( touch );
+      this.removePointer( touch );
       this.cancelEvent( touch, event );
     },
     
@@ -203,25 +203,25 @@ define( function( require ) {
       
     },
     
-    upEvent: function( finger, event ) {
-      var trail = this.scene.trailUnderPoint( finger.point ) || new scenery.Trail( this.scene );
+    upEvent: function( pointer, event ) {
+      var trail = this.scene.trailUnderPoint( pointer.point ) || new scenery.Trail( this.scene );
       
-      this.dispatchEvent( trail, 'up', finger, event, true );
+      this.dispatchEvent( trail, 'up', pointer, event, true );
       
-      finger.trail = trail;
+      pointer.trail = trail;
     },
     
-    downEvent: function( finger, event ) {
-      var trail = this.scene.trailUnderPoint( finger.point ) || new scenery.Trail( this.scene );
+    downEvent: function( pointer, event ) {
+      var trail = this.scene.trailUnderPoint( pointer.point ) || new scenery.Trail( this.scene );
       
-      this.dispatchEvent( trail, 'down', finger, event, true );
+      this.dispatchEvent( trail, 'down', pointer, event, true );
       
-      finger.trail = trail;
+      pointer.trail = trail;
     },
     
-    moveEvent: function( finger, event ) {
-      var trail = this.scene.trailUnderPoint( finger.point ) || new scenery.Trail( this.scene );
-      var oldTrail = finger.trail || new scenery.Trail( this.scene );
+    moveEvent: function( pointer, event ) {
+      var trail = this.scene.trailUnderPoint( pointer.point ) || new scenery.Trail( this.scene );
+      var oldTrail = pointer.trail || new scenery.Trail( this.scene );
       
       var lastNodeChanged = oldTrail.lastNode() !== trail.lastNode();
       
@@ -234,41 +234,41 @@ define( function( require ) {
       }
       
       if ( lastNodeChanged ) {
-        this.dispatchEvent( oldTrail, 'out', finger, event, true );
+        this.dispatchEvent( oldTrail, 'out', pointer, event, true );
       }
       
       // we want to approximately mimic http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
       // TODO: if a node gets moved down 1 depth, it may see both an exit and enter?
       if ( oldTrail.length > branchIndex ) {
         for ( var oldIndex = branchIndex; oldIndex < oldTrail.length; oldIndex++ ) {
-          this.dispatchEvent( oldTrail.slice( 0, oldIndex + 1 ), 'exit', finger, event, false );
+          this.dispatchEvent( oldTrail.slice( 0, oldIndex + 1 ), 'exit', pointer, event, false );
         }
       }
       if ( trail.length > branchIndex ) {
         for ( var newIndex = branchIndex; newIndex < trail.length; newIndex++ ) {
-          this.dispatchEvent( trail.slice( 0, newIndex + 1 ), 'enter', finger, event, false );
+          this.dispatchEvent( trail.slice( 0, newIndex + 1 ), 'enter', pointer, event, false );
         }
       }
       
       if ( lastNodeChanged ) {
-        this.dispatchEvent( trail, 'over', finger, event, true );
+        this.dispatchEvent( trail, 'over', pointer, event, true );
       }
       
       // TODO: move the 'move' event to before the others, matching http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order ?
-      this.dispatchEvent( trail, 'move', finger, event, true );
+      this.dispatchEvent( trail, 'move', pointer, event, true );
       
-      finger.trail = trail;
+      pointer.trail = trail;
     },
     
-    cancelEvent: function( finger, event ) {
-      var trail = this.scene.trailUnderPoint( finger.point );
+    cancelEvent: function( pointer, event ) {
+      var trail = this.scene.trailUnderPoint( pointer.point );
       
-      this.dispatchEvent( trail, 'cancel', finger, event, true );
+      this.dispatchEvent( trail, 'cancel', pointer, event, true );
       
-      finger.trail = trail;
+      pointer.trail = trail;
     },
     
-    dispatchEvent: function( trail, type, finger, event, bubbles ) {
+    dispatchEvent: function( trail, type, pointer, event, bubbles ) {
       if ( !trail ) {
         try {
           throw new Error( 'falsy trail for dispatchEvent' );
@@ -282,31 +282,31 @@ define( function( require ) {
       var inputEvent = new scenery.Event( {
         trail: trail, // {Trail} path to the leaf-most node, ordered list, from root to leaf
         type: type, // {String} what event was triggered on the listener
-        finger: finger, // {Finger}
+        pointer: pointer, // {Pointer}
         domEvent: event, // raw DOM InputEvent (TouchEvent, PointerEvent, MouseEvent,...)
-        currentTarget: null, // {Node} whatever node you attached the listener to, null when passed to a Finger,
+        currentTarget: null, // {Node} whatever node you attached the listener to, null when passed to a Pointer,
         target: trail.lastNode() // {Node} leaf-most node in trail
       } );
       
-      // first run through the finger's listeners to see if one of them will handle the event
-      this.dispatchToFinger( type, finger, inputEvent );
+      // first run through the pointer's listeners to see if one of them will handle the event
+      this.dispatchToPointer( type, pointer, inputEvent );
       
       // if not yet handled, run through the trail in order to see if one of them will handle the event
       // at the base of the trail should be the scene node, so the scene will be notified last
-      this.dispatchToTargets( trail, finger, type, inputEvent, bubbles );
+      this.dispatchToTargets( trail, pointer, type, inputEvent, bubbles );
     },
     
     // TODO: reduce code sharing between here and dispatchToTargets!
-    dispatchToFinger: function( type, finger, inputEvent ) {
+    dispatchToPointer: function( type, pointer, inputEvent ) {
       if ( inputEvent.aborted || inputEvent.handled ) {
         return;
       }
       
-      var specificType = finger.type + type; // e.g. mouseup, touchup, keyup
+      var specificType = pointer.type + type; // e.g. mouseup, touchup, keyup
       
-      var fingerListeners = finger.listeners.slice( 0 ); // defensive copy
-      for ( var i = 0; i < fingerListeners.length; i++ ) {
-        var listener = fingerListeners[i];
+      var pointerListeners = pointer.listeners.slice( 0 ); // defensive copy
+      for ( var i = 0; i < pointerListeners.length; i++ ) {
+        var listener = pointerListeners[i];
         
         // if a listener returns true, don't handle any more
         var aborted = false;
@@ -327,12 +327,12 @@ define( function( require ) {
       }
     },
     
-    dispatchToTargets: function( trail, finger, type, inputEvent, bubbles ) {
+    dispatchToTargets: function( trail, pointer, type, inputEvent, bubbles ) {
       if ( inputEvent.aborted || inputEvent.handled ) {
         return;
       }
       
-      var specificType = finger.type + type; // e.g. mouseup, touchup, keyup
+      var specificType = pointer.type + type; // e.g. mouseup, touchup, keyup
       
       for ( var i = trail.length - 1; i >= 0; bubbles ? i-- : i = -1 ) {
         var target = trail.nodes[i];

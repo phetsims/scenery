@@ -12,10 +12,10 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  var Finger = require( 'SCENERY/input/Finger' ); // extends Finger
+  var Pointer = require( 'SCENERY/input/Pointer' ); // extends Pointer
   
   scenery.Touch = function( id, point, event ) {
-    Finger.call( this );
+    Pointer.call( this );
     
     this.id = id;
     this.point = point;
@@ -26,7 +26,7 @@ define( function( require ) {
   };
   var Touch = scenery.Touch;
   
-  Touch.prototype = _.extend( {}, Finger.prototype, {
+  Touch.prototype = _.extend( {}, Pointer.prototype, {
     constructor: Touch,
     
     move: function( point, event ) {
