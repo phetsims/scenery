@@ -11,14 +11,38 @@
  
 define( function( require ) {
   
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
   var scenery = require( 'SCENERY/scenery' );
   
-  scenery.Event = function( options ) {
+  scenery.Event = function( arguments ) {
+    // ensure that all of the required arguments are supplied
+    assert && assert( arguments.trail &&
+                      arguments.type &&
+                      arguments.finger &&
+                      arguments.domEvent &&
+                      arguments.target, 'Missing required scenery.Event argument' );
+    
     this.handled = false;
     this.aborted = false;
     
-    // put all properties in the options object into this event
-    _.extend( this, options );
+    // {Trail} path to the leaf-most node, ordered list, from root to leaf
+    this.trail = arguments.trail;
+    
+    // {String} what event was triggered on the listener
+    this.type = arguments.type;
+    
+    // {Finger}
+    this.finger = arguments.finger;
+    
+    // raw DOM InputEvent (TouchEvent, PointerEvent, MouseEvent,...)
+    this.domEvent = arguments.domEvent;
+    
+    // {Node} whatever node you attached the listener to, null when passed to a Finger,
+    this.currentTarget = arguments.currentTarget;
+    
+    // {Node} leaf-most node in trail
+    this.target = arguments.trail;
     
     // TODO: add extended information based on an event here?
   };

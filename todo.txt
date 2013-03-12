@@ -3,8 +3,6 @@ Priorities:
     Finger => Pointer
     Hanging commas on SimpleDragHandler?
     evt => domEvent in Scene
-    this.trail = options.trail
-    Event options => arguments + assertions
     
     Mix-ins for drag handler?
     Performance
