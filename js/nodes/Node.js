@@ -128,7 +128,7 @@ define( function( require ) {
       }
     },
     
-    insertChild: function( node, index ) {
+    insertChild: function( index, node ) {
       assert && assert( node !== null && node !== undefined && !_.contains( this.children, node ) );
       
       node.parents.push( this );
@@ -145,7 +145,7 @@ define( function( require ) {
     },
     
     addChild: function( node ) {
-      this.insertChild( node, this.children.length );
+      this.insertChild( this.children.length, node );
     },
     
     removeChild: function ( node ) {
@@ -178,6 +178,42 @@ define( function( require ) {
         _.each( children, function( child ) {
           node.addChild( node );
         } );
+      }
+    },
+    
+    indexOfParent: function( parent ) {
+      return _.indexOf( this.parents, parent );
+    },
+    
+    indexOfChild: function( child ) {
+      return _.indexOf( this.children, child );
+    },
+    
+    moveToFront: function() {
+      var self = this;
+      _.each( this.parents.slice( 0 ), function( parent ) {
+        parent.moveChildToFront( self );
+      } );
+    },
+    
+    moveChildToFront: function( child ) {
+      if ( this.indexOfChild( child ) !== this.children.length - 1 ) {
+        this.removeChild( child );
+        this.addChild( child );
+      }
+    },
+    
+    moveToBack: function() {
+      var self = this;
+      _.each( this.parents.slice( 0 ), function( parent ) {
+        parent.moveChildToBack( self );
+      } );
+    },
+    
+    moveChildToBack: function( child ) {
+      if ( this.indexOfChild( child ) !== 0 ) {
+        this.removeChild( child );
+        this.insertChild( 0, child );
       }
     },
     
@@ -999,6 +1035,63 @@ define( function( require ) {
     
     parentToLocalBounds: function( bounds ) {
       return this.transform.inverseBounds2( bounds );
+    },
+    
+    // apply this node's transform (and then all of its parents' transforms) to the point
+    localToGlobalPoint: function( point ) {
+      var node = this;
+      while ( node !== null ) {
+        point = node.transform.transformPosition2( point );
+        assert && assert( node.parents[1] === undefined, 'localToGlobalPoint unable to work for DAG' );
+        node = node.parents[0];
+      }
+      return point;
+    },
+    
+    localToGlobalBounds: function( bounds ) {
+      var node = this;
+      while ( node !== null ) {
+        bounds = node.transform.transformBounds2( bounds );
+        assert && assert( node.parents[1] === undefined, 'localToGlobalBounds unable to work for DAG' );
+        node = node.parents[0];
+      }
+      return bounds;
+    },
+    
+    globalToLocalPoint: function( point ) {
+      var node = this;
+      
+      // we need to apply the transformations in the reverse order, so we temporarily store them
+      var transforms = [];
+      while ( node !== null ) {
+        transforms.push( node.transform );
+        assert && assert( node.parents[1] === undefined, 'globalToLocalPoint unable to work for DAG' );
+        node = node.parents[0];
+      }
+      
+      // iterate from the back forwards (from the root node to here)
+      for ( var i = transforms.length - 1; i >=0; i-- ) {
+        point = transforms[i].inversePosition2( point );
+      }
+      return point;
+    },
+    
+    globalToLocalBounds: function( bounds ) {
+      var node = this;
+      
+      // we need to apply the transformations in the reverse order, so we temporarily store them
+      var transforms = [];
+      while ( node !== null ) {
+        transforms.push( node.transform );
+        assert && assert( node.parents[1] === undefined, 'globalToLocalBounds unable to work for DAG' );
+        node = node.parents[0];
+      }
+      
+      // iterate from the back forwards (from the root node to here)
+      for ( var i = transforms.length - 1; i >=0; i-- ) {
+        bounds = transforms[i].inverseBounds2( bounds );
+      }
+      return bounds;
     },
     
     /*---------------------------------------------------------------------------*
