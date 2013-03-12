@@ -1,9 +1,7 @@
 // Copyright 2002-2012, University of Colorado
 
 /**
- * Text
- *
- * TODO: newlines
+ * A Path draws a Shape with a specific type of fill and stroke.
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
