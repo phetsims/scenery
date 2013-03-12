@@ -29,7 +29,7 @@ define( function( require ) {
     var handler = this;
     
     this.options = _.extend( {
-      allowTouchSnag: false,
+      allowTouchSnag: false
     }, options );
     
     this.dragging              = false;     // whether a node is being dragged with this handler
