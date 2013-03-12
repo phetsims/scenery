@@ -2,7 +2,6 @@
 Priorities:
     Finger => Pointer
     Hanging commas on SimpleDragHandler?
-    evt => domEvent in Scene
     
     Mix-ins for drag handler?
     Performance
