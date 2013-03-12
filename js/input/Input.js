@@ -280,12 +280,12 @@ define( function( require ) {
       
       // TODO: is there a way to make this event immutable?
       var inputEvent = new scenery.Event( {
-        trail: trail,
-        type: type,
-        finger: finger,
-        domEvent: event,
-        currentTarget: null,
-        target: trail.lastNode()
+        trail: trail, // {Trail} path to the leaf-most node, ordered list, from root to leaf
+        type: type, // {String} what event was triggered on the listener
+        finger: finger, // {Finger}
+        domEvent: event, // raw DOM InputEvent (TouchEvent, PointerEvent, MouseEvent,...)
+        currentTarget: null, // {Node} whatever node you attached the listener to, null when passed to a Finger,
+        target: trail.lastNode() // {Node} leaf-most node in trail
       } );
       
       // first run through the finger's listeners to see if one of them will handle the event
