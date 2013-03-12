@@ -1,6 +1,5 @@
 
 Priorities:
-    Finger => Pointer
     Hanging commas on SimpleDragHandler?
     
     Mix-ins for drag handler?
