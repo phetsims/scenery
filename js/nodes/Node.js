@@ -62,7 +62,7 @@ define( function( require ) {
     this._cursor = null;
     
     // TODO: consider defensive copy getters?
-    this.children = []; // ordered
+    this._children = []; // ordered
     this.parents = []; // unordered
     
     this.transform = new Transform3();
@@ -129,10 +129,10 @@ define( function( require ) {
     },
     
     insertChild: function( index, node ) {
-      assert && assert( node !== null && node !== undefined && !_.contains( this.children, node ) );
+      assert && assert( node !== null && node !== undefined && !_.contains( this._children, node ) );
       
       node.parents.push( this );
-      this.children.splice( index, 0, node );
+      this._children.splice( index, 0, node );
       
       node.invalidateBounds();
       node.invalidatePaint();
@@ -145,7 +145,7 @@ define( function( require ) {
     },
     
     addChild: function( node ) {
-      this.insertChild( this.children.length, node );
+      this.insertChild( this._children.length, node );
     },
     
     removeChild: function ( node ) {
@@ -154,10 +154,10 @@ define( function( require ) {
       node.markOldPaint();
       
       var indexOfParent = _.indexOf( node.parents, this );
-      var indexOfChild = _.indexOf( this.children, node );
+      var indexOfChild = _.indexOf( this._children, node );
       
       node.parents.splice( indexOfParent, 1 );
-      this.children.splice( indexOfChild, 1 );
+      this._children.splice( indexOfChild, 1 );
       
       this.invalidateBounds();
       
@@ -171,8 +171,8 @@ define( function( require ) {
     // TODO: efficiency by batching calls?
     setChildren: function( children ) {
       var node = this;
-      if ( this.children !== children ) {
-        _.each( this.children.slice( 0 ), function( child ) {
+      if ( this._children !== children ) {
+        _.each( this._children.slice( 0 ), function( child ) {
           node.removeChild( node );
         } );
         _.each( children, function( child ) {
@@ -186,7 +186,7 @@ define( function( require ) {
     },
     
     indexOfChild: function( child ) {
-      return _.indexOf( this.children, child );
+      return _.indexOf( this._children, child );
     },
     
     moveToFront: function() {
@@ -197,7 +197,7 @@ define( function( require ) {
     },
     
     moveChildToFront: function( child ) {
-      if ( this.indexOfChild( child ) !== this.children.length - 1 ) {
+      if ( this.indexOfChild( child ) !== this._children.length - 1 ) {
         this.removeChild( child );
         this.addChild( child );
       }
@@ -243,7 +243,7 @@ define( function( require ) {
       // validate bounds of children if necessary
       if ( this._childBoundsDirty ) {
         // have each child validate their own bounds
-        _.each( this.children, function( child ) {
+        _.each( this._children, function( child ) {
           child.validateBounds();
         } );
         
@@ -252,7 +252,7 @@ define( function( require ) {
         // and recompute our _childBounds
         this._childBounds = Bounds2.NOTHING;
         
-        _.each( this.children, function( child ) {
+        _.each( this._children, function( child ) {
           that._childBounds = that._childBounds.union( child._bounds );
         } );
         
@@ -299,7 +299,7 @@ define( function( require ) {
         this._childPaintDirty = false;
         this._oldPaintMarked = false;
         
-        _.each( this.children, function( child ) {
+        _.each( this._children, function( child ) {
           child.validatePaint();
         } );
       }
@@ -411,7 +411,7 @@ define( function( require ) {
     },
     
     isChild: function ( potentialChild ) {
-      var ourChild = _.contains( this.children, potentialChild );
+      var ourChild = _.contains( this._children, potentialChild );
       var itsParent = _.contains( potentialChild.parents, this );
       assert && assert( ourChild === itsParent );
       return ourChild;
@@ -441,11 +441,11 @@ define( function( require ) {
       var localPoint = this.transform.inversePosition2( point );
       
       // check children first, since they are rendered later
-      if ( this.children.length > 0 && this._childBounds.containsPoint( localPoint ) ) {
+      if ( this._children.length > 0 && this._childBounds.containsPoint( localPoint ) ) {
         
         // manual iteration here so we can return directly, and so we can iterate backwards (last node is in front)
-        for ( var i = this.children.length - 1; i >= 0; i-- ) {
-          var child = this.children[i];
+        for ( var i = this._children.length - 1; i >= 0; i-- ) {
+          var child = this._children[i];
           
           var childHit = child.trailUnderPoint( localPoint );
           
@@ -493,22 +493,22 @@ define( function( require ) {
     },
     
     hasChildren: function() {
-      return this.children.length > 0;
+      return this._children.length > 0;
     },
     
     walkDepthFirst: function( callback ) {
       callback( this );
-      _.each( this.children, function( child ) {
+      _.each( this._children, function( child ) {
         child.walkDepthFirst( callback );
       } );
     },
     
     getChildrenWithinBounds: function( bounds ) {
-      return _.filter( this.children, function( child ) { return !child._bounds.intersection( bounds ).isEmpty(); } );
+      return _.filter( this._children, function( child ) { return !child._bounds.intersection( bounds ).isEmpty(); } );
     },
     
     getChildren: function() {
-      return this.children.slice( 0 ); // create a defensive copy
+      return this._children.slice( 0 ); // create a defensive copy
     },
     
     // TODO: set this up with a mix-in for a generic notifier?
@@ -1155,6 +1155,9 @@ define( function( require ) {
     set centerY( value ) { this.setCenterY( value ); },
     get centerY() { return this.getCenterY(); },
     
+    set children( value ) { this.setChildren( value ); },
+    get children() { return this.getChildren(); },
+    
     get width() { return this.getWidth(); },
     get height() { return this.getHeight(); },
     get id() { return this.getId(); },
@@ -1182,7 +1185,7 @@ define( function( require ) {
    * TODO: using more than one of {translation,x,left,right,centerX} or {translation,y,top,bottom,centerY} should be considered an error
    * TODO: move fill / stroke setting to mixins
    */
-  Node.prototype._mutatorKeys = [ 'cursor', 'visible', 'translation', 'x', 'y', 'rotation', 'scale',
+  Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'translation', 'x', 'y', 'rotation', 'scale',
                                   'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
                                   'layerSplit', 'layerSplitBefore', 'layerSplitAfter' ];
   

@@ -102,7 +102,7 @@ define( function( require ) {
       
       this.nodes.unshift( node );
       if ( oldRoot ) {
-        this.indices.unshift( index === undefined ? _.indexOf( node.children, oldRoot ) : index );
+        this.indices.unshift( index === undefined ? _.indexOf( node._children, oldRoot ) : index );
       }
       
       // mimic an Array
@@ -131,7 +131,7 @@ define( function( require ) {
       
       this.nodes.push( node );
       if ( parent ) {
-        this.indices.push( index === undefined ? _.indexOf( parent.children, node ) : index );
+        this.indices.push( index === undefined ? _.indexOf( parent._children, node ) : index );
       }
       
       // mimic an Array
@@ -155,8 +155,8 @@ define( function( require ) {
       for ( var i = 1; i < this.length; i++ ) {
         // only replace indices where they have changed (this was a performance hotspot)
         var currentIndex = this.indices[i-1];
-        if ( this.nodes[i-1].children[currentIndex] !== this.nodes[i] ) {
-          this.indices[i-1] = _.indexOf( this.nodes[i-1].children, this.nodes[i] );
+        if ( this.nodes[i-1]._children[currentIndex] !== this.nodes[i] ) {
+          this.indices[i-1] = _.indexOf( this.nodes[i-1]._children, this.nodes[i] );
         }
       }
     },
@@ -164,7 +164,7 @@ define( function( require ) {
     areIndicesValid: function() {
       for ( var i = 1; i < this.length; i++ ) {
         var currentIndex = this.indices[i-1];
-        if ( this.nodes[i-1].children[currentIndex] !== this.nodes[i] ) {
+        if ( this.nodes[i-1]._children[currentIndex] !== this.nodes[i] ) {
           return false;
         }
       }
@@ -225,19 +225,19 @@ define( function( require ) {
       var top = this.nodeFromTop( 0 );
       var parent = this.nodeFromTop( 1 );
       
-      var parentIndex = _.indexOf( parent.children, top );
+      var parentIndex = _.indexOf( parent._children, top );
       var arr = this.nodes.slice( 0, this.nodes.length - 1 );
       if ( parentIndex === 0 ) {
         // we were the first child, so give it the trail to the parent
         return new Trail( arr );
       } else {
         // previous child
-        arr.push( parent.children[parentIndex-1] );
+        arr.push( parent._children[parentIndex-1] );
         
         // and find its last terminal
-        while( arr[arr.length-1].children.length !== 0 ) {
+        while( arr[arr.length-1]._children.length !== 0 ) {
           var last = arr[arr.length-1];
-          arr.push( last.children[last.children.length-1] );
+          arr.push( last._children[last._children.length-1] );
         }
         
         return new Trail( arr );
@@ -249,9 +249,9 @@ define( function( require ) {
       var arr = this.nodes.slice( 0 );
       
       var top = this.nodeFromTop( 0 );
-      if ( top.children.length > 0 ) {
+      if ( top._children.length > 0 ) {
         // if we have children, return the first child
-        arr.push( top.children[0] );
+        arr.push( top._children[0] );
         return new Trail( arr );
       } else {
         // walk down and attempt to find the next parent
@@ -263,10 +263,10 @@ define( function( require ) {
           
           arr.pop(); // take off the node so we can add the next sibling if it exists
           
-          var index = _.indexOf( parent.children, node );
-          if ( index !== parent.children.length - 1 ) {
+          var index = _.indexOf( parent._children, node );
+          if ( index !== parent._children.length - 1 ) {
             // there is another (later) sibling. use that!
-            arr.push( parent.children[index+1] );
+            arr.push( parent._children[index+1] );
             return new Trail( arr );
           } else {
             depth--;

@@ -156,7 +156,7 @@ define( function( require ) {
             }
             
             // TODO: restricted bounds rendering, and possibly generalize depthFirstUntil
-            // var children = node.children;
+            // var children = node._children;
             
             // check if we need to filter the children we render, and ignore nodes with few children (but allow 2, since that may prevent branches)
             // if ( state.childRestrictedBounds && children.length > 1 ) {
