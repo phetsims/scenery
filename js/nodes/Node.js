@@ -1037,6 +1037,63 @@ define( function( require ) {
       return this.transform.inverseBounds2( bounds );
     },
     
+    // apply this node's transform (and then all of its parents' transforms) to the point
+    localToGlobalPoint: function( point ) {
+      var node = this;
+      while ( node !== null ) {
+        point = node.transform.transformPosition2( point );
+        assert && assert( node.parents[1] === undefined, 'localToGlobalPoint unable to work for DAG' );
+        node = node.parents[0];
+      }
+      return point;
+    },
+    
+    localToGlobalBounds: function( bounds ) {
+      var node = this;
+      while ( node !== null ) {
+        bounds = node.transform.transformBounds2( bounds );
+        assert && assert( node.parents[1] === undefined, 'localToGlobalBounds unable to work for DAG' );
+        node = node.parents[0];
+      }
+      return bounds;
+    },
+    
+    globalToLocalPoint: function( point ) {
+      var node = this;
+      
+      // we need to apply the transformations in the reverse order, so we temporarily store them
+      var transforms = [];
+      while ( node !== null ) {
+        transforms.push( node.transform );
+        assert && assert( node.parents[1] === undefined, 'globalToLocalPoint unable to work for DAG' );
+        node = node.parents[0];
+      }
+      
+      // iterate from the back forwards (from the root node to here)
+      for ( var i = transforms.length - 1; i >=0; i-- ) {
+        point = transforms[i].inversePosition2( point );
+      }
+      return point;
+    },
+    
+    globalToLocalBounds: function( bounds ) {
+      var node = this;
+      
+      // we need to apply the transformations in the reverse order, so we temporarily store them
+      var transforms = [];
+      while ( node !== null ) {
+        transforms.push( node.transform );
+        assert && assert( node.parents[1] === undefined, 'globalToLocalBounds unable to work for DAG' );
+        node = node.parents[0];
+      }
+      
+      // iterate from the back forwards (from the root node to here)
+      for ( var i = transforms.length - 1; i >=0; i-- ) {
+        bounds = transforms[i].inverseBounds2( bounds );
+      }
+      return bounds;
+    },
+    
     /*---------------------------------------------------------------------------*
     * ES5 get/set
     *----------------------------------------------------------------------------*/
