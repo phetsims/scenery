@@ -554,9 +554,19 @@
     } );
     
     scene.addChild( node );
-    
     scene.updateScene();
+    expect( 0 );
+  } );
+  
+  test( 'Path with null shape', function() {
+    var scene = new scenery.Scene( $( '#main' ) );
     
+    var node = new scenery.Path( {
+      shape: null
+    } );
+    
+    scene.addChild( node );
+    scene.updateScene();
     expect( 0 );
   } );
 })();
