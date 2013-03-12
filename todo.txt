@@ -21,6 +21,7 @@ Bugs:
     Text direction 'rtl' bounds and display difference between canvas / SVG
 
 Test:
+    Unit tests for common node operations
     Test bounds from canvas accurate method vs computed bounds for Shapes and strokes∏
     Layering tests
     SVG invisible nodes?
