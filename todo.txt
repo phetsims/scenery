@@ -1,8 +1,7 @@
 
 Priorities:
     Finger => Pointer
-    listener return true shouldn't abort
-    Hanging commas on SimpleDragHandler and in gruntfile
+    Hanging commas on SimpleDragHandler?
     evt => domEvent in Scene
     this.trail = options.trail
     Event options => arguments + assertions

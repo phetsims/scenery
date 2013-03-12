@@ -108,7 +108,7 @@ module.exports = function( grunt ) {
           
           canvg: false
         }
-      },
+      }
     }
   } );
   
