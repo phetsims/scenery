@@ -129,7 +129,9 @@ define( function( require ) {
     },
     
     insertChild: function( index, node ) {
-      assert && assert( node !== null && node !== undefined && !_.contains( this._children, node ) );
+      assert && assert( node !== null && node !== undefined, 'insertChild cannot insert a null/undefined child' );
+      assert && assert( !_.contains( this._children, node ), 'Parent already contains child' );
+      assert && assert( node !== this, 'Cannot add self as a child' );
       
       node.parents.push( this );
       this._children.splice( index, 0, node );
@@ -173,10 +175,10 @@ define( function( require ) {
       var node = this;
       if ( this._children !== children ) {
         _.each( this._children.slice( 0 ), function( child ) {
-          node.removeChild( node );
+          node.removeChild( child );
         } );
         _.each( children, function( child ) {
-          node.addChild( node );
+          node.addChild( child );
         } );
       }
     },
