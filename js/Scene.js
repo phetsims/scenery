@@ -458,8 +458,10 @@ define( function( require ) {
     }
     
     // TODO: massive boilerplate reduction! closures should help tons!
-    
-    if ( this.enablePointerEvents && window.navigator && window.navigator.pointerEnabled ) {
+
+    var implementsPointerEvents = window.navigator && window.navigator.pointerEnabled; // W3C spec for pointer events
+    var implementsMSPointerEvents = window.navigator && window.navigator.msPointerEnabled; // MS spec for pointer event
+    if ( this.enablePointerEvents && implementsPointerEvents ) {
       // accepts pointer events corresponding to the spec at http://www.w3.org/TR/pointerevents/
       input.addListener( 'pointerdown', function( evt ) {
         input.pointerDown( evt.pointerId, evt.pointerType, pointFromEvent( evt ), evt );
@@ -485,7 +487,7 @@ define( function( require ) {
         input.pointerCancel( evt.pointerId, evt.pointerType, pointFromEvent( evt ), evt );
         if ( preventDefault ) { evt.preventDefault(); }
       } );
-    } else if ( this.enablePointerEvents && window.navigator && window.navigator.msPointerEnabled ) {
+    } else if ( this.enablePointerEvents && implementsMSPointerEvents ) {
       input.addListener( 'MSPointerDown', function( evt ) {
         input.pointerDown( evt.pointerId, msPointerType( evt ), pointFromEvent( evt ), evt );
         if ( preventDefault ) { evt.preventDefault(); }
