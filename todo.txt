@@ -1,5 +1,9 @@
 
 Priorities:
+    Finger => Pointer
+    listener return true shouldn't abort
+    Hanging commas on SimpleDragHandler and in gruntfile
+    
     Mix-ins for drag handler?
     Performance
         Same-arity methods?
