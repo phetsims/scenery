@@ -545,4 +545,18 @@
     equalsApprox( node.left, -45 );
     equalsApprox( node.right, 55 );
   } );
+  
+  test( 'Path with empty shape', function() {
+    var scene = new scenery.Scene( $( '#main' ) );
+    
+    var node = new scenery.Path( {
+      shape: new kite.Shape()
+    } );
+    
+    scene.addChild( node );
+    
+    scene.updateScene();
+    
+    expect( 0 );
+  } );
 })();
