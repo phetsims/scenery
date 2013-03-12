@@ -1,7 +1,5 @@
 
 Priorities:
-    Hanging commas on SimpleDragHandler?
-    
     Mix-ins for drag handler?
     Performance
         Same-arity methods?
