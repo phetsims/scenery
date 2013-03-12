@@ -31,10 +31,6 @@ Test:
         Consider moving spline knowledge, circle intersection, etc. into dot.
         Test cubic beziers like crazy!
 
-BAM:
-    Support portrait and landscape?
-    Backbone / model investigation
-
 Browsers
     Browser bugs? (get Canary / Aurora / IE10):
         [PATCH CREATED] miterLimit off in Chrome 24.0.1312.52 m
