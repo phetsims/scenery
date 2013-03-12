@@ -312,10 +312,12 @@ define( function( require ) {
         var aborted = false;
         
         if ( !aborted && listener[specificType] ) {
-          aborted = !!( listener[specificType]( inputEvent ) ) || inputEvent.aborted;
+          listener[specificType]( inputEvent );
+          aborted = inputEvent.aborted;
         }
         if ( !aborted && listener[type] ) {
-          aborted = !!( listener[type]( inputEvent ) ) || inputEvent.aborted;
+          listener[type]( inputEvent );
+          aborted = inputEvent.aborted;
         }
         
         // bail out if the event is aborted, so no other listeners are triggered
@@ -345,10 +347,12 @@ define( function( require ) {
           var aborted = false;
           
           if ( !aborted && listener[specificType] ) {
-            aborted = !!( listener[specificType]( inputEvent ) ) || inputEvent.aborted;
+            listener[specificType]( inputEvent );
+            aborted = inputEvent.aborted;
           }
           if ( !aborted && listener[type] ) {
-            aborted = !!( listener[type]( inputEvent ) ) || inputEvent.aborted;
+            listener[type]( inputEvent );
+            aborted = inputEvent.aborted;
           }
           
           // bail out if the event is aborted, so no other listeners are triggered
