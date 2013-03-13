@@ -28,6 +28,18 @@ define( function( require ) {
   var debugChromeBoundsScanning = false;
   
   scenery.Util = {
+    // like _.extend, but with hardcoded support for https://github.com/documentcloud/underscore/pull/986
+    extend: function( obj ) {
+      _.each( Array.prototype.slice.call( arguments, 1 ), function( source ) {
+        if ( source ) {
+          for ( var prop in source ) {
+            Object.defineProperty( obj, prop, Object.getOwnPropertyDescriptor( source, prop ) );
+          }
+        }
+      });
+      return obj;
+    },
+    
     // Object.create polyfill
     objectCreate: Object.create || function ( o ) {
       if ( arguments.length > 1 ) {
