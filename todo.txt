@@ -1,5 +1,6 @@
 
 Priorities:
+    Add 'core' library with 'extend', property, etc.?
     Mix-ins for drag handler?
     Performance
         Same-arity methods?
