@@ -1,5 +1,6 @@
 
 Priorities:
+    Beers law lab performance on shaker + bugs
     Add 'core' library with 'extend', property, etc.?
     Mix-ins for drag handler?
     Performance
