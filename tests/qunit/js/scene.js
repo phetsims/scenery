@@ -519,7 +519,10 @@
     node.rotation = -0.7;
     
     equalsApprox( node.getMatrix().m10(), -1.288435374475382 );
-    
+
+    //Test the node scaling with a negative value, see #8
+    node.setScale(-1,1);
+    equalsApprox( node.scale.x, -1 );
     // console.log( node.getMatrix().toString() );
   } );
   
