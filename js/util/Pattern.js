@@ -1,11 +1,9 @@
 // Copyright 2002-2012, University of Colorado
 
 /**
- * A linear gradient that can be passed into the 'fill' or 'stroke' parameters.
+ * A pattern that will deliver a fill or stroke that will repeat an image in both directions (x and y).
  *
- * SVG gradients, see http://www.w3.org/TR/SVG/pservers.html
- *
- * TODO: reduce code sharing between gradients
+ * TODO: future support for repeat-x, repeat-y or no-repeat (needs SVG support)
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
