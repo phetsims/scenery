@@ -1176,6 +1176,8 @@ define( function( require ) {
           }
         }
       } );
+      
+      return this; // allow chaining
     }
   };
   
