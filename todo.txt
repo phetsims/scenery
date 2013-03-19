@@ -12,7 +12,6 @@ Priorities:
 Bugs:
     ConcentrationMeterNode - renderer: svg is causing issues
     
-    Cubic/Quadratic transform in windingIntersection looks buggy - triple-check
     SVG currently doesn't support changing the SVG element? updateSVGFragment unused
         - add test case (comparison vs canvas with add then change style)
         - failing for patterns / images / anything set layer than before it is added to a scene
