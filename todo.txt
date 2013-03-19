@@ -1,6 +1,6 @@
 
 Priorities:
-    Scale issues, consider { x: 1, y: 2, rotate: Math.PI, scale: 5 }
+    Flag for skipping dirty region handling and other overhead?
     Beers law lab performance on shaker + bugs
     Add 'core' library with 'extend', property, etc.?
     Mix-ins for drag handler?

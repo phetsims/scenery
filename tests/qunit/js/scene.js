@@ -491,7 +491,7 @@
   test( 'Piccolo-like behavior', function() {
     var node = new scenery.Node();
     
-    node.scaleBy( 2 );
+    node.scale( 2 );
     node.translate( 1, 3 );
     node.rotate( Math.PI / 2 );
     node.translate( -31, 21 );
@@ -519,11 +519,6 @@
     node.rotation = -0.7;
     
     equalsApprox( node.getMatrix().m10(), -1.288435374475382 );
-
-    //Test the node scaling with a negative value, see #8
-    node.setScale(-1,1);
-    equalsApprox( node.scale.x, -1 );
-    // console.log( node.getMatrix().toString() );
   } );
   
   test( 'Setting left/right of node', function() {

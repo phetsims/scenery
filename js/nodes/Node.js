@@ -640,14 +640,14 @@ define( function( require ) {
       }
     },
     
-    // scaleBy( s ) is also supported, which will scale both dimensions by the same amount. renamed from 'scale' to satisfy the setter/getter
-    scaleBy: function( x, y, prependInstead ) {
+    // scale( s ) is also supported, which will scale both dimensions by the same amount. renamed from 'scale' to satisfy the setter/getter
+    scale: function( x, y, prependInstead ) {
       if ( typeof x === 'number' ) {
         if ( y === undefined ) {
-          // scaleBy( scale )
+          // scale( scale )
           this.appendMatrix( Matrix3.scaling( x, x ) );
         } else {
-          // scaleBy( x, y, prependInstead )
+          // scale( x, y, prependInstead )
           if ( prependInstead ) {
             this.prependMatrix( Matrix3.scaling( x, y ) );
           } else {
@@ -655,9 +655,9 @@ define( function( require ) {
           }
         }
       } else {
-        // scaleBy( vector, prependInstead )
+        // scale( vector, prependInstead )
         var vector = x;
-        this.scaleBy( vector.x, vector.y, y ); // forward to full version
+        this.scale( vector.x, vector.y, y ); // forward to full version
       }
     },
     
@@ -699,23 +699,23 @@ define( function( require ) {
     
     // returns a vector with an entry for each axis, e.g. (5,2) for an Affine-style matrix with rows ((5,0,0),(0,2,0),(0,0,1))
     // TODO: rename getScaleVector()
-    getScale: function() {
+    getScaleVector: function() {
       return this.transform.getMatrix().getScaleVector();
     },
     
-    // supports setScale( 5 ) for both dimensions, setScale( 5, 3 ) for each dimension separately, or setScale( new Vector2( x, y ) )
-    setScale: function( a, b ) {
+    // supports setScaleMagnitude( 5 ) for both dimensions, setScaleMagnitude( 5, 3 ) for each dimension separately, or setScaleMagnitude( new Vector2( x, y ) )
+    setScaleMagnitude: function( a, b ) {
       var currentScale = this.getScale();
       
       if ( typeof a === 'number' ) {
         if ( b === undefined ) {
-          // to map setScale( scale ) => setScale( scale, scale )
+          // to map setScaleMagnitude( scale ) => setScaleMagnitude( scale, scale )
           b = a;
         }
-        // setScale( x, y )
+        // setScaleMagnitude( x, y )
         this.appendMatrix( Matrix3.scaling( a / currentScale.x, b / currentScale.y ) );
       } else {
-        // setScale( vector ), where we set the x-scale to vector.x and y-scale to vector.y
+        // setScaleMagnitude( vector ), where we set the x-scale to vector.x and y-scale to vector.y
         this.appendMatrix( Matrix3.scaling( a.x / currentScale.x, a.y / currentScale.y ) );
       }
       return this;
@@ -1130,9 +1130,6 @@ define( function( require ) {
     set rotation( value ) { this.setRotation( value ); },
     get rotation() { return this.getRotation(); },
     
-    set scale( value ) { this.setScale( value ); },
-    get scale() { return this.getScale(); },
-    
     set x( value ) { this.setX( value ); },
     get x() { return this.getX(); },
     
@@ -1170,7 +1167,12 @@ define( function( require ) {
       
       _.each( this._mutatorKeys, function( key ) {
         if ( options[key] !== undefined ) {
-          node[key] = options[key];
+          var descriptor = Object.getOwnPropertyDescriptor( Node.prototype, key );
+          if ( descriptor && typeof descriptor.value === 'function' ) {
+            node[key]( options[key] );
+          } else {
+            node[key] = options[key];
+          }
         }
       } );
     }
