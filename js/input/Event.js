@@ -15,34 +15,34 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  scenery.Event = function( arguments ) {
-    // ensure that all of the required arguments are supplied
-    assert && assert( arguments.trail &&
-                      arguments.type &&
-                      arguments.pointer &&
-                      arguments.domEvent &&
-                      arguments.target, 'Missing required scenery.Event argument' );
+  scenery.Event = function( args ) {
+    // ensure that all of the required args are supplied
+    assert && assert( args.trail &&
+                      args.type &&
+                      args.pointer &&
+                      args.domEvent &&
+                      args.target, 'Missing required scenery.Event argument' );
     
     this.handled = false;
     this.aborted = false;
     
     // {Trail} path to the leaf-most node, ordered list, from root to leaf
-    this.trail = arguments.trail;
+    this.trail = args.trail;
     
     // {String} what event was triggered on the listener
-    this.type = arguments.type;
+    this.type = args.type;
     
     // {Pointer}
-    this.pointer = arguments.pointer;
+    this.pointer = args.pointer;
     
     // raw DOM InputEvent (TouchEvent, PointerEvent, MouseEvent,...)
-    this.domEvent = arguments.domEvent;
+    this.domEvent = args.domEvent;
     
     // {Node} whatever node you attached the listener to, or null when firing events on a Pointer
-    this.currentTarget = arguments.currentTarget;
+    this.currentTarget = args.currentTarget;
     
     // {Node} leaf-most node in trail
-    this.target = arguments.trail;
+    this.target = args.trail;
     
     // TODO: add extended information based on an event here?
   };
