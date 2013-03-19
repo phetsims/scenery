@@ -51,7 +51,6 @@ define( function( require ) {
     // assign a unique ID to this node (allows trails to )
     this._id = globalIdCounter++;
     
-    // TODO: hide as _visible, add setter/getter
     this._visible = true;
     
     // This node and all children will be clipped by this shape (in addition to any other clipping shapes).
