@@ -40,10 +40,10 @@ define( function( require ) {
     
     // create a temporary container attached to the DOM tree (not a fragment) so that we can properly set initial bounds
     var temporaryContainer = this.wrapInTemporaryContainer();
-    
+
     // will set the element after initializing
     Node.call( this, options );
-    
+
     // now don't memory-leak our container
     this.destroyTemporaryContainer( temporaryContainer );
   };
@@ -58,13 +58,14 @@ define( function( require ) {
   
   // needs to be attached to the DOM tree for this to work
   DOM.prototype.calculateDOMBounds = function() {
-    return new Bounds2( 0, 0, this._$element.width(), this._$element.height() );
+    var boundingRect = this._element.getBoundingClientRect();
+    return new Bounds2( 0, 0, boundingRect.width, boundingRect.height );
   };
   
   DOM.prototype.invalidateDOM = function() {
     // TODO: do we need to reset the CSS transform to get the proper bounds?
     
-    if ( !this.attachedToDOM ) {
+    if ( !this.attachedToDOM && !this.attachedToTemporaryContainer ) {
       // create a temporary container attached to the DOM tree (not a fragment) so that we can properly get the bounds
       var temporaryContainer = this.wrapInTemporaryContainer();
       
@@ -111,6 +112,7 @@ define( function( require ) {
     } );
     temporaryContainer.appendChild( this._element );
     document.body.appendChild( temporaryContainer );
+    this.attachedToTemporaryContainer = true;
     return temporaryContainer;
   };
   
@@ -119,6 +121,7 @@ define( function( require ) {
     if ( this._element.parentNode === temporaryContainer ) {
       temporaryContainer.removeChild( this._element );
     }
+    this.attachedToTemporaryContainer = false;
   };
   
   DOM.prototype.hasSelf = function() {
@@ -130,7 +133,7 @@ define( function( require ) {
     
     // TODO: bounds issue, since this will probably set to empty bounds and thus a repaint may not draw over it
     this.invalidateDOM();
-    
+
     return this; // allow chaining
   };
   
