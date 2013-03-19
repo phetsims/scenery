@@ -1168,6 +1168,8 @@ define( function( require ) {
       _.each( this._mutatorKeys, function( key ) {
         if ( options[key] !== undefined ) {
           var descriptor = Object.getOwnPropertyDescriptor( Node.prototype, key );
+          
+          // if the key refers to a function that is not ES5 writable, it will execute that function with the single argument
           if ( descriptor && typeof descriptor.value === 'function' ) {
             node[key]( options[key] );
           } else {
