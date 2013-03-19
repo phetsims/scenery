@@ -78,7 +78,6 @@ module.exports = function( grunt ) {
         undef: true,
         // unused: true, // certain layer APIs not used in cases
         // strict: true,
-        trailing: true,
         
         // relaxing options
         es5: true, // we use ES5 getters and setters for now
@@ -118,7 +117,5 @@ module.exports = function( grunt ) {
   grunt.registerTask( 'standalone', [ 'requirejs:standalone' ] );
   grunt.registerTask( 'development', [ 'requirejs:development' ] );
   grunt.loadNpmTasks( 'grunt-requirejs' );
-  grunt.loadNpmTasks( 'grunt-contrib-concat' );
-  grunt.loadNpmTasks( 'grunt-contrib-uglify' );
   grunt.loadNpmTasks( 'grunt-contrib-jshint' );
 };
