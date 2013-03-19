@@ -8,6 +8,7 @@ Priorities:
         Same-arity methods?
         Less temporary objects?
     Dashed lines
+        setLineDash( dash ) / mozDash = dash. need to figure out SVG
     Documentation
 
 Bugs:
