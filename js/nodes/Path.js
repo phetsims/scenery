@@ -126,6 +126,9 @@ define( function( require ) {
       style += 'stroke-width: ' + this.getLineWidth() + ';';
       style += 'stroke-linecap: ' + this.getLineCap() + ';';
       style += 'stroke-linejoin: ' + this.getLineJoin() + ';';
+      if ( this.getLineDash() ) {
+        style += 'stroke-dasharray: ' + this.getLineDash().join( ',' ) + ';';
+      }
     }
     path.setAttribute( 'style', style );
   };

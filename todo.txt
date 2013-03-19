@@ -8,8 +8,6 @@ Priorities:
     Performance
         Same-arity methods?
         Less temporary objects?
-    Dashed lines
-        Need SVG support
     Documentation
 
 Bugs:
