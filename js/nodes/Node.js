@@ -704,7 +704,7 @@ define( function( require ) {
     
     // supports setScaleMagnitude( 5 ) for both dimensions, setScaleMagnitude( 5, 3 ) for each dimension separately, or setScaleMagnitude( new Vector2( x, y ) )
     setScaleMagnitude: function( a, b ) {
-      var currentScale = this.getScaleMagnitude();
+      var currentScale = this.getScaleVector();
       
       if ( typeof a === 'number' ) {
         if ( b === undefined ) {
