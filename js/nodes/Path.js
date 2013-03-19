@@ -91,6 +91,7 @@ define( function( require ) {
         layer.setLineWidth( this.getLineWidth() );
         layer.setLineCap( this.getLineCap() );
         layer.setLineJoin( this.getLineJoin() );
+        layer.setLineDash( this.getLineDash() );
         context.stroke();
       }
     }

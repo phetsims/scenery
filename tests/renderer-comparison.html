@@ -227,6 +227,27 @@
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
       },{
+        name: 'Dashes',
+        width: 64,
+        height: 64,
+        draw: function( scene ) {
+          scene.addChild( new scenery.Path( {
+            shape: kite.Shape.rectangle( 10, 10, 44, 44 ),
+            stroke: '#000',
+            lineDash: [7,2,3,2],
+            x: 0.5,
+            y: 0.5
+          } ) );
+          scene.addChild( new scenery.Path( {
+            shape: kite.Shape.regularPolygon( 6, 15 ),
+            stroke: '#000',
+            lineDash: [5,5],
+            x: 32.5,
+            y: 32.5
+          } ) );
+        },
+        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+      },{
         name: 'Images',
         width: 220,
         height: 120,

@@ -1,5 +1,6 @@
 
 Priorities:
+    'this' highlighting
     Flag for skipping dirty region handling and other overhead?
     Beers law lab performance on shaker + bugs
     Add 'core' library with 'extend', property, etc.?
@@ -8,7 +9,7 @@ Priorities:
         Same-arity methods?
         Less temporary objects?
     Dashed lines
-        setLineDash( dash ) / mozDash = dash. need to figure out SVG
+        Need SVG support
     Documentation
 
 Bugs:

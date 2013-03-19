@@ -74,6 +74,21 @@ define( function( require ) {
       return this;
     };
     
+    proto.getLineDash = function() {
+      return this._lineDrawingStyles.lineDash;
+    };
+    
+    proto.setLineDash = function( lineDash ) {
+      if ( this._lineDrawingStyles.lineDash !== lineDash ) {
+        this.markOldSelfPaint();
+        
+        this._lineDrawingStyles.lineDash = lineDash;
+        
+        this.invalidateStroke();
+      }
+      return this;
+    };
+    
     proto.setLineStyles = function( lineStyles ) {
       // TODO: since we have been using lineStyles as mutable for now, lack of change check is good here?
       this.markOldSelfPaint();
@@ -103,12 +118,13 @@ define( function( require ) {
     };
     
     // on mutation, set the stroke parameters first since they may affect the bounds (and thus later operations)
-    proto._mutatorKeys = [ 'stroke', 'lineWidth', 'lineCap', 'lineJoin' ].concat( proto._mutatorKeys );
+    proto._mutatorKeys = [ 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'lineDash' ].concat( proto._mutatorKeys );
     
     Object.defineProperty( proto, 'stroke', { set: proto.setStroke, get: proto.getStroke } );
     Object.defineProperty( proto, 'lineWidth', { set: proto.setLineWidth, get: proto.getLineWidth } );
     Object.defineProperty( proto, 'lineCap', { set: proto.setLineCap, get: proto.getLineCap } );
     Object.defineProperty( proto, 'lineJoin', { set: proto.setLineJoin, get: proto.getLineJoin } );
+    Object.defineProperty( proto, 'lineDash', { set: proto.setLineDash, get: proto.getLineDash } );
     
     if ( !proto.invalidateStroke ) {
       proto.invalidateStroke = function() {
