@@ -49,6 +49,8 @@ define( function( require ) {
    * layerSplitAfter:  Forces a split between layers after this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.
    */
   scenery.Node = function( options ) {
+    var self = this;
+    
     // assign a unique ID to this node (allows trails to )
     this._id = globalIdCounter++;
     
@@ -64,7 +66,17 @@ define( function( require ) {
     this._children = []; // ordered
     this._parents = []; // unordered
     
+    /*
+     * Set up the transform reference. we add a listener so that the transform itself can be modified directly
+     * by reference, or node.transform = <transform> / node.setTransform() can be used to change the transform reference.
+     * Both should trigger the necessary event notifications for Scenery to keep track internally.
+     */
     this._transform = new Transform3();
+    this._transformListener = {
+      before: function() { self.beforeTransformChange(); },
+      after: function() { self.afterTransformChange(); }
+    };
+    this._transform.addTransformListener( this._transformListener );
     
     this._inputListeners = []; // for user input handling (mouse/touch)
     this._eventListeners = []; // for internal events like paint invalidation, layer invalidation, etc.
@@ -750,62 +762,36 @@ define( function( require ) {
       return this._transform.getMatrix().getTranslation();
     },
     
-    notifyTransformChange: function( matrix, type ) {
-      this.dispatchEventWithTransform( 'transform', {
-        node: this,
-        type: type,
-        matrix: matrix
-      } );
-    },
-    
     // append a transformation matrix to our local transform
     appendMatrix: function( matrix ) {
-      // invalidate paint TODO improve methods for this
-      this.markOldPaint();
-      
       this._transform.append( matrix );
-      
-      this.notifyTransformChange( matrix, 'append' );
-      this.invalidateBounds();
-      this.invalidatePaint();
     },
     
     // prepend a transformation matrix to our local transform
     prependMatrix: function( matrix ) {
-      // invalidate paint TODO improve methods for this
-      this.markOldPaint();
-      
       this._transform.prepend( matrix );
-      
-      this.notifyTransformChange( matrix, 'prepend' );
-      this.invalidateBounds();
-      this.invalidatePaint();
     },
     
     setMatrix: function( matrix ) {
-      this.markOldPaint();
-      
       this._transform.set( matrix );
-      
-      this.notifyTransformChange( matrix, 'set' );
-      this.invalidateBounds();
-      this.invalidatePaint();
     },
     
     getMatrix: function() {
       return this._transform.getMatrix();
     },
     
+    // change the actual transform reference (not just the actual transform)
     setTransform: function( transform ) {
       if ( this._transform !== transform ) {
-        this.markOldPaint();
+        // since our referenced transform doesn't change, we need to trigger the before/after ourselves
+        this.beforeTransformChange();
         
-        // TODO: add listeners to the transform?
+        // swap the transform and move the listener to the new one
+        this._transform.removeTransformListener( this._transformListener ); // don't leak memory!
         this._transform = transform;
+        this._transform.addTransformListener( this._transformListener );
         
-        this.notifyTransformChange( transform.getMatrix(), 'set' );
-        this.invalidateBounds();
-        this.invalidatePaint();
+        this.afterTransformChange();
       }
     },
     
@@ -816,6 +802,23 @@ define( function( require ) {
     
     resetTransform: function() {
       this.setMatrix( Matrix3.IDENTITY );
+    },
+    
+    // called before our transform is changed
+    beforeTransformChange: function() {
+      // mark our old bounds as dirty, so that any dirty region repainting will include not just our new position, but also our old position
+      this.markOldPaint();
+    },
+    
+    // called after our transform is changed
+    afterTransformChange: function() {
+      this.dispatchEventWithTransform( 'transform', {
+        node: this,
+        type: 'transform',
+        matrix: this._transform.getMatrix()
+      } );
+      this.invalidateBounds();
+      this.invalidatePaint();
     },
     
     // the left bound of this node, in the parent coordinate frame
@@ -1218,6 +1221,9 @@ define( function( require ) {
     
     set visible( value ) { this.setVisible( value ); },
     get visible() { return this.isVisible(); },
+    
+    set transform( value ) { this.setTransform( value ); },
+    get transform() { return this.getTransform(); },
     
     set matrix( value ) { this.setMatrix( value ); },
     get matrix() { return this.getMatrix(); },
