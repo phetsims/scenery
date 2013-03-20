@@ -43,4 +43,59 @@
     0
   );
   
+  pixelTest( 'Invisible node with rectangles above and below',
+    function( scene ) {
+      var shape = kite.Shape.rectangle( 0, 0, 30, 30 );
+      scene.addChild( new scenery.Path( {
+        shape: shape,
+        fill: '#000',
+        stroke: '#f00',
+        lineWidth: 2,
+        x: -10, y: -10
+      } ) );
+      scene.addChild( new scenery.Path( {
+        shape: shape,
+        fill: '#000',
+        stroke: '#f00',
+        lineWidth: 2,
+        x: 10, y: 10,
+        visible: false
+      } ) );
+      scene.addChild( new scenery.Path( {
+        shape: shape,
+        fill: '#000',
+        stroke: '#f00',
+        lineWidth: 2,
+        x: 20, y: 20
+      } ) );
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAWklEQVRYR+3WsQoAIAhF0ef/f3TZ0NAQWQgR3ajN5HkmTVLxl3J6I5P8xk4rJAACCCCAAAIIIPC5gI+fJhBbwsYqux7gJPXsTx8mvJF6o53aZVYCIIAAAk8KVE6CQBKyrnp4AAAAAElFTkSuQmCC',
+    0
+  );
+  
+  pixelTest( 'Invisible node with rectangles above and below - visible children test + children parameter object',
+    function( scene ) {
+      var shape = kite.Shape.rectangle( 0, 0, 30, 30 );
+      var rect = new scenery.Path( {
+        shape: shape,
+        fill: '#000',
+        stroke: '#f00',
+        lineWidth: 2
+      } );
+      scene.addChild( new scenery.Node( {
+        children: [ rect ],
+        x: -10, y: -10
+      } ) );
+      scene.addChild( new scenery.Node( {
+        children: [ rect ],
+        x: 10, y: 10,
+        visible: false
+      } ) );
+      scene.addChild( new scenery.Node( {
+        children: [ rect ],
+        x: 20, y: 20
+      } ) );
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAWklEQVRYR+3WsQoAIAhF0ef/f3TZ0NAQWQgR3ajN5HkmTVLxl3J6I5P8xk4rJAACCCCAAAIIIPC5gI+fJhBbwsYqux7gJPXsTx8mvJF6o53aZVYCIIAAAk8KVE6CQBKyrnp4AAAAAElFTkSuQmCC',
+    0
+  );
+  
 })();

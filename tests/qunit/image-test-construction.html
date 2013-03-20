@@ -34,11 +34,25 @@
     
     var scene = new scenery.Scene( $div );
     
-    scene.addChild( new scenery.Path( {
-      shape: kite.Shape.rectangle( 8, 8, 48, 48 ),
-      fill: '#000000',
-      stroke: '#ff0000',
+    var shape = kite.Shape.rectangle( 0, 0, 30, 30 );
+    var rect = new scenery.Path( {
+      shape: shape,
+      fill: '#000',
+      stroke: '#f00',
       lineWidth: 2
+    } );
+    scene.addChild( new scenery.Node( {
+      children: [ rect ],
+      x: -10, y: -10
+    } ) );
+    scene.addChild( new scenery.Node( {
+      children: [ rect ],
+      x: 10, y: 10,
+      visible: false
+    } ) );
+    scene.addChild( new scenery.Node( {
+      children: [ rect ],
+      x: 20, y: 20
     } ) );
     
     scene.updateScene();
