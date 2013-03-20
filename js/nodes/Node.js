@@ -61,9 +61,8 @@ define( function( require ) {
     // the CSS cursor to be displayed over this node. null should be the default (inherit) value
     this._cursor = null;
     
-    // TODO: consider defensive copy getters?
     this._children = []; // ordered
-    this.parents = []; // unordered
+    this._parents = []; // unordered
     
     this.transform = new Transform3();
     
@@ -135,7 +134,7 @@ define( function( require ) {
       assert && assert( !_.contains( this._children, node ), 'Parent already contains child' );
       assert && assert( node !== this, 'Cannot add self as a child' );
       
-      node.parents.push( this );
+      node._parents.push( this );
       this._children.splice( index, 0, node );
       
       node.invalidateBounds();
@@ -157,10 +156,10 @@ define( function( require ) {
       
       node.markOldPaint();
       
-      var indexOfParent = _.indexOf( node.parents, this );
+      var indexOfParent = _.indexOf( node._parents, this );
       var indexOfChild = _.indexOf( this._children, node );
       
-      node.parents.splice( indexOfParent, 1 );
+      node._parents.splice( indexOfParent, 1 );
       this._children.splice( indexOfChild, 1 );
       
       this.invalidateBounds();
@@ -185,8 +184,16 @@ define( function( require ) {
       }
     },
     
+    getChildren: function() {
+      return this._children.slice( 0 ); // create a defensive copy
+    },
+    
+    getParents: function() {
+      return this._parents.slice( 0 ); // create a defensive copy
+    },
+    
     indexOfParent: function( parent ) {
-      return _.indexOf( this.parents, parent );
+      return _.indexOf( this._parents, parent );
     },
     
     indexOfChild: function( child ) {
@@ -195,7 +202,7 @@ define( function( require ) {
     
     moveToFront: function() {
       var self = this;
-      _.each( this.parents.slice( 0 ), function( parent ) {
+      _.each( this._parents.slice( 0 ), function( parent ) {
         parent.moveChildToFront( self );
       } );
     },
@@ -209,7 +216,7 @@ define( function( require ) {
     
     moveToBack: function() {
       var self = this;
-      _.each( this.parents.slice( 0 ), function( parent ) {
+      _.each( this._parents.slice( 0 ), function( parent ) {
         parent.moveChildToBack( self );
       } );
     },
@@ -224,7 +231,7 @@ define( function( require ) {
     // remove this node from its parents
     detach: function () {
       var that = this;
-      _.each( this.parents.slice( 0 ), function( parent ) {
+      _.each( this._parents.slice( 0 ), function( parent ) {
         parent.removeChild( that );
       } );
     },
@@ -279,7 +286,7 @@ define( function( require ) {
         if ( changed ) {
           this._bounds = newBounds;
           
-          _.each( this.parents, function( parent ) {
+          _.each( this._parents, function( parent ) {
             parent.invalidateBounds();
           } );
           
@@ -314,7 +321,7 @@ define( function( require ) {
       this._boundsDirty = true;
       
       // and set flags for all ancestors
-      _.each( this.parents, function( parent ) {
+      _.each( this._parents, function( parent ) {
         parent.invalidateChildBounds();
       } );
     },
@@ -324,7 +331,7 @@ define( function( require ) {
       // don't bother updating if we've already been tagged
       if ( !this._childBoundsDirty ) {
         this._childBoundsDirty = true;
-        _.each( this.parents, function( parent ) {
+        _.each( this._parents, function( parent ) {
           parent.invalidateChildBounds();
         } );
       }
@@ -335,7 +342,7 @@ define( function( require ) {
       this._paintDirty = true;
       
       // and set flags for all ancestors
-      _.each( this.parents, function( parent ) {
+      _.each( this._parents, function( parent ) {
         parent.invalidateChildPaint();
       } );
     },
@@ -345,7 +352,7 @@ define( function( require ) {
       // don't bother updating if we've already been tagged
       if ( !this._childPaintDirty ) {
         this._childPaintDirty = true;
-        _.each( this.parents, function( parent ) {
+        _.each( this._parents, function( parent ) {
           parent.invalidateChildPaint();
         } );
       }
@@ -396,7 +403,7 @@ define( function( require ) {
         if( node._oldPaintMarked ) {
           return true;
         }
-        return _.some( node.parents, function( parent ) {
+        return _.some( node._parents, function( parent ) {
           return ancestorHasOldPaint( parent );
         } );
       }
@@ -416,7 +423,7 @@ define( function( require ) {
     
     isChild: function ( potentialChild ) {
       var ourChild = _.contains( this._children, potentialChild );
-      var itsParent = _.contains( potentialChild.parents, this );
+      var itsParent = _.contains( potentialChild._parents, this );
       assert && assert( ourChild === itsParent );
       return ourChild;
     },
@@ -493,7 +500,7 @@ define( function( require ) {
     },
     
     hasParent: function() {
-      return this.parents.length !== 0;
+      return this._parents.length !== 0;
     },
     
     hasChildren: function() {
@@ -509,10 +516,6 @@ define( function( require ) {
     
     getChildrenWithinBounds: function( bounds ) {
       return _.filter( this._children, function( child ) { return !child._bounds.intersection( bounds ).isEmpty(); } );
-    },
-    
-    getChildren: function() {
-      return this._children.slice( 0 ); // create a defensive copy
     },
     
     // TODO: set this up with a mix-in for a generic notifier?
@@ -590,7 +593,7 @@ define( function( require ) {
         
         node.fireEvent( type, args );
         
-        _.each( node.parents, function( parent ) {
+        _.each( node._parents, function( parent ) {
           recursiveEventDispatch( parent );
         } );
         
@@ -614,7 +617,7 @@ define( function( require ) {
         
         node.fireEvent( type, args );
         
-        _.each( node.parents, function( parent ) {
+        _.each( node._parents, function( parent ) {
           recursiveEventDispatch( parent );
         } );
         
@@ -1012,8 +1015,8 @@ define( function( require ) {
       
       while ( node ) {
         trail.addAncestor( node );
-        assert && assert( node.parents.length <= 1 );
-        node = node.parents[0]; // should be undefined if there aren't any parents
+        assert && assert( node._parents.length <= 1 );
+        node = node._parents[0]; // should be undefined if there aren't any parents
       }
       
       return trail;
@@ -1122,8 +1125,8 @@ define( function( require ) {
       var node = this;
       while ( node !== null ) {
         point = node.transform.transformPosition2( point );
-        assert && assert( node.parents[1] === undefined, 'localToGlobalPoint unable to work for DAG' );
-        node = node.parents[0];
+        assert && assert( node._parents[1] === undefined, 'localToGlobalPoint unable to work for DAG' );
+        node = node._parents[0];
       }
       return point;
     },
@@ -1132,8 +1135,8 @@ define( function( require ) {
       var node = this;
       while ( node !== null ) {
         bounds = node.transform.transformBounds2( bounds );
-        assert && assert( node.parents[1] === undefined, 'localToGlobalBounds unable to work for DAG' );
-        node = node.parents[0];
+        assert && assert( node._parents[1] === undefined, 'localToGlobalBounds unable to work for DAG' );
+        node = node._parents[0];
       }
       return bounds;
     },
@@ -1145,8 +1148,8 @@ define( function( require ) {
       var transforms = [];
       while ( node !== null ) {
         transforms.push( node.transform );
-        assert && assert( node.parents[1] === undefined, 'globalToLocalPoint unable to work for DAG' );
-        node = node.parents[0];
+        assert && assert( node._parents[1] === undefined, 'globalToLocalPoint unable to work for DAG' );
+        node = node._parents[0];
       }
       
       // iterate from the back forwards (from the root node to here)
@@ -1163,8 +1166,8 @@ define( function( require ) {
       var transforms = [];
       while ( node !== null ) {
         transforms.push( node.transform );
-        assert && assert( node.parents[1] === undefined, 'globalToLocalBounds unable to work for DAG' );
-        node = node.parents[0];
+        assert && assert( node._parents[1] === undefined, 'globalToLocalBounds unable to work for DAG' );
+        node = node._parents[0];
       }
       
       // iterate from the back forwards (from the root node to here)
@@ -1234,6 +1237,8 @@ define( function( require ) {
     
     set children( value ) { this.setChildren( value ); },
     get children() { return this.getChildren(); },
+    
+    get parents() { return this.getParents(); },
     
     get width() { return this.getWidth(); },
     get height() { return this.getHeight(); },
