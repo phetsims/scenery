@@ -1035,6 +1035,66 @@ define( function( require ) {
       }, false );
     },
     
+    /*
+     * Renders this node to a canvas. If toCanvas( callback ) is used, the canvas will contain the node's
+     * entire bounds.
+     *
+     * callback( canvas, x, y ) is called, where x and y offsets are computed if not specified.
+     */
+    toCanvas: function( callback, x, y, width, height ) {
+      var self = this;
+      
+      var padding = 2; // padding used if x and y are not set
+      
+      var bounds = this.getBounds();
+      x = x !== undefined ? x : Math.ceil( padding - bounds.minX );
+      y = y !== undefined ? y : Math.ceil( padding - bounds.minY );
+      width = width !== undefined ? width : Math.ceil( x + bounds.getWidth() + padding );
+      height = height !== undefined ? height : Math.ceil( y + bounds.getHeight() + padding );
+      
+      var canvas = document.createElement( 'canvas' );
+      canvas.width = width;
+      canvas.height = height;
+      var context = canvas.getContext( '2d' );
+      
+      var $div = $( document.createElement( 'div' ) );
+      $div.width( width ).height( height );
+      var scene = new scenery.Scene( $div );
+      
+      scene.addChild( self );
+      scene.x = x;
+      scene.y = y;
+      scene.updateScene();
+      
+      scene.renderToCanvas( canvas, context, function() {
+        callback( canvas, x, y );
+        
+        // let us be garbage collected
+        scene.removeChild( self );
+      } );
+    },
+    
+    // gives a data URI, with the same parameter handling as Node.toCanvas()
+    toDataURL: function( callback, x, y, width, height ) {
+      this.toCanvas( function( canvas, x, y ) {
+        // this x and y shadow the outside parameters, and will be different if the outside parameters are undefined
+        callback( canvas.toDataURL(), x, y );
+      }, x, y, width, height );
+    },
+    
+    // gives an HTMLImageElement with the same parameter handling as Node.toCanvas()
+    toImage: function( callback, x, y, width, height ) {
+      this.toDataURL( function( url, x, y ) {
+        // this x and y shadow the outside parameters, and will be different if the outside parameters are undefined
+        var img = document.createElement( 'img' );
+        img.onload = function() {
+          callback( img, x, y );
+          delete img.onload;
+        };
+        img.src = url;
+      }, x, y, width, height );
+    },
+    
     /*---------------------------------------------------------------------------*
     * Coordinate transform methods
     *----------------------------------------------------------------------------*/
