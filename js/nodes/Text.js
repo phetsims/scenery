@@ -91,9 +91,7 @@ define( function( require ) {
   };
   
   Text.prototype.createSVGFragment = function( svg, defs, group ) {
-    var element = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
-    this.updateSVGFragment( element );
-    return element;
+    return document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
   };
   
   Text.prototype.updateSVGFragment = function( element ) {

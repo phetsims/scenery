@@ -152,7 +152,6 @@ define( function( require ) {
     var element = document.createElementNS( 'http://www.w3.org/2000/svg', 'image' );
     element.setAttribute( 'x', 0 );
     element.setAttribute( 'y', 0 );
-    this.updateSVGFragment( element );
     return element;
   };
   

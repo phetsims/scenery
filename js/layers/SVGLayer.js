@@ -79,6 +79,15 @@ define( function( require ) {
   SVGLayer.prototype = _.extend( {}, Layer.prototype, {
     constructor: SVGLayer,
     
+    updateNode: function( node, fragment ) {
+      if ( node.updateSVGFragment ) {
+        node.updateSVGFragment( fragment );
+      }
+      if ( node.updateSVGDefs ) {
+        node.updateSVGDefs( this.svg, this.defs );
+      }
+    },
+    
     applyTransform: function( transform, group ) {
       if ( transform.isIdentity() ) {
         if ( group.hasAttribute( 'transform' ) ) {
@@ -143,6 +152,7 @@ define( function( require ) {
         if ( node.hasSelf() ) {
           var group = layer.idGroupMap[trailId];
           var svgFragment = node.createSVGFragment( layer.svg, layer.defs, group );
+          layer.updateNode( node, svgFragment );
           layer.idFragmentMap[trailId] = svgFragment;
           group.appendChild( svgFragment );
         }
@@ -169,8 +179,13 @@ define( function( require ) {
       this.$svg.detach();
     },
     
-    markDirtyRegion: function( node, localBounds, transform, trail ) {
-      // not necessary, SVG takes care of handling this (or would just redraw everything anyways)
+    markDirtyRegion: function( args ) {
+      var node = args.node;
+      var fragment = this.idFragmentMap[args.trail.getUniqueId()];
+      
+      if ( fragment ) {
+        this.updateNode( node, fragment );
+      }
     },
     
     markBaseTransformDirty: function( changed ) {

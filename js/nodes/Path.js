@@ -103,10 +103,7 @@ define( function( require ) {
   
   // svg element, the <defs> block, and the associated group for this node's transform
   Path.prototype.createSVGFragment = function( svg, defs, group ) {
-    var path = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
-    this.updateSVGFragment( path );
-    this.updateSVGDefs( svg, defs );
-    return path;
+    return document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
   };
   
   // TODO: this should be used!
