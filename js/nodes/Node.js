@@ -29,6 +29,7 @@ define( function( require ) {
   /*
    * Available keys for use in the options parameter object for a vanilla Node (not inherited), in the order they are executed in:
    *
+   * children:         A list of children to add (in order)
    * cursor:           Will display the specified CSS cursor when the mouse is over this Node or one of its descendents. The Scene needs to have input listeners attached with an initialize method first.
    * visible:          If false, this node (and its children) will not be displayed (or get input events)
    * pickable:         If false, this node (and its children) will not get input events
