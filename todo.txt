@@ -11,6 +11,7 @@ Priorities:
     Documentation
 
 Bugs:
+    DOM visible
     Switching renderers in Devious Drag example on iPad causes other objects being dragged to be "dropped"
         Probably causes some sort of enter/exit event?
     Nexus 7 hidef scaling
