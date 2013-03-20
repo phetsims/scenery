@@ -97,6 +97,9 @@ module.exports = function( grunt ) {
           console: false,
           Float32Array: true, // we actually polyfill this, so allow it to be set
           
+          HTMLImageElement: false,
+          HTMLCanvasElement: false,
+          
           $: false,
           _: false,
           clearTimeout: false,

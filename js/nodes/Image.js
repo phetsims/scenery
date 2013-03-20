@@ -84,10 +84,23 @@ define( function( require ) {
         image = document.createElement( 'img' );
         image.addEventListener( this.loadListener );
         image.src = src;
-      } else {
+      } else if ( image instanceof HTMLImageElement ) {
         // only add a listener if we probably haven't loaded yet
         if ( !image.width || !image.height ) {
           image.addEventListener( this.loadListener );
+        }
+      }
+      
+      // swap supported renderers if necessary
+      if ( image instanceof HTMLCanvasElement ) {
+        if ( !this.hasOwnProperty( '_supportedRenderers' ) ) {
+          this._supportedRenderers = [ Renderer.Canvas ];
+          this.markLayerRefreshNeeded();
+        }
+      } else {
+        if ( this.hasOwnProperty( '_supportedRenderers' ) ) {
+          delete this._supportedRenderers; // will leave prototype intact
+          this.markLayerRefreshNeeded();
         }
       }
       
