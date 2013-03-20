@@ -91,7 +91,7 @@ define( function( require ) {
       
       // from the root up
       _.each( this.nodes, function( node ) {
-        transform.appendTransform( node.transform );
+        transform.appendTransform( node._transform );
       } );
       
       return transform;

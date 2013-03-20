@@ -64,7 +64,7 @@ define( function( require ) {
     this._children = []; // ordered
     this._parents = []; // unordered
     
-    this.transform = new Transform3();
+    this._transform = new Transform3();
     
     this._inputListeners = []; // for user input handling (mouse/touch)
     this._eventListeners = []; // for internal events like paint invalidation, layer invalidation, etc.
@@ -106,9 +106,9 @@ define( function( require ) {
     // TODO: deprecated. have each layer handle this separately
     enterState: function( state, trail ) {
       // apply this node's transform
-      if ( !this.transform.isIdentity() ) {
+      if ( !this._transform.isIdentity() ) {
         // TODO: consider a stack-based model for transforms?
-        state.applyTransformationMatrix( this.transform.getMatrix() );
+        state.applyTransformationMatrix( this._transform.getMatrix() );
       }
       
       if ( this._clipShape ) {
@@ -124,8 +124,8 @@ define( function( require ) {
       }
       
       // apply the inverse of this node's transform
-      if ( !this.transform.isIdentity() ) {
-        state.applyTransformationMatrix( this.transform.getInverse() );
+      if ( !this._transform.isIdentity() ) {
+        state.applyTransformationMatrix( this._transform.getInverse() );
       }
     },
     
@@ -449,7 +449,7 @@ define( function( require ) {
       if ( !this._bounds.containsPoint( point ) ) { return null; }
       
       // point in the local coordinate frame. computed after the main bounds check, so we can bail out there efficiently
-      var localPoint = this.transform.inversePosition2( point );
+      var localPoint = this._transform.inversePosition2( point );
       
       // check children first, since they are rendered later
       if ( this._children.length > 0 && this._childBounds.containsPoint( localPoint ) ) {
@@ -703,9 +703,8 @@ define( function( require ) {
     },
     
     // returns a vector with an entry for each axis, e.g. (5,2) for an Affine-style matrix with rows ((5,0,0),(0,2,0),(0,0,1))
-    // TODO: rename getScaleVector()
     getScaleVector: function() {
-      return this.transform.getMatrix().getScaleVector();
+      return this._transform.getMatrix().getScaleVector();
     },
     
     // supports setScaleMagnitude( 5 ) for both dimensions, setScaleMagnitude( 5, 3 ) for each dimension separately, or setScaleMagnitude( new Vector2( x, y ) )
@@ -727,7 +726,7 @@ define( function( require ) {
     },
     
     getRotation: function() {
-      return this.transform.getMatrix().getRotation();
+      return this._transform.getMatrix().getRotation();
     },
     
     setRotation: function( rotation ) {
@@ -748,7 +747,7 @@ define( function( require ) {
     },
     
     getTranslation: function() {
-      return this.transform.getMatrix().getTranslation();
+      return this._transform.getMatrix().getTranslation();
     },
     
     notifyTransformChange: function( matrix, type ) {
@@ -764,7 +763,7 @@ define( function( require ) {
       // invalidate paint TODO improve methods for this
       this.markOldPaint();
       
-      this.transform.append( matrix );
+      this._transform.append( matrix );
       
       this.notifyTransformChange( matrix, 'append' );
       this.invalidateBounds();
@@ -776,7 +775,7 @@ define( function( require ) {
       // invalidate paint TODO improve methods for this
       this.markOldPaint();
       
-      this.transform.prepend( matrix );
+      this._transform.prepend( matrix );
       
       this.notifyTransformChange( matrix, 'prepend' );
       this.invalidateBounds();
@@ -786,7 +785,7 @@ define( function( require ) {
     setMatrix: function( matrix ) {
       this.markOldPaint();
       
-      this.transform.set( matrix );
+      this._transform.set( matrix );
       
       this.notifyTransformChange( matrix, 'set' );
       this.invalidateBounds();
@@ -794,7 +793,25 @@ define( function( require ) {
     },
     
     getMatrix: function() {
-      return this.transform.getMatrix();
+      return this._transform.getMatrix();
+    },
+    
+    setTransform: function( transform ) {
+      if ( this._transform !== transform ) {
+        this.markOldPaint();
+        
+        // TODO: add listeners to the transform?
+        this._transform = transform;
+        
+        this.notifyTransformChange( transform.getMatrix(), 'set' );
+        this.invalidateBounds();
+        this.invalidatePaint();
+      }
+    },
+    
+    getTransform: function() {
+      // for now, return an actual copy. we can consider listening to changes in the future
+      return this._transform;
     },
     
     resetTransform: function() {
@@ -1104,27 +1121,27 @@ define( function( require ) {
     
     // apply this node's transform to the point
     localToParentPoint: function( point ) {
-      return this.transform.transformPosition2( point );
+      return this._transform.transformPosition2( point );
     },
     
     localToParentBounds: function( bounds ) {
-      return this.transform.transformBounds2( bounds );
+      return this._transform.transformBounds2( bounds );
     },
     
     // apply the inverse of this node's transform to the point
     parentToLocalPoint: function( point ) {
-      return this.transform.inversePosition2( point );
+      return this._transform.inversePosition2( point );
     },
     
     parentToLocalBounds: function( bounds ) {
-      return this.transform.inverseBounds2( bounds );
+      return this._transform.inverseBounds2( bounds );
     },
     
     // apply this node's transform (and then all of its parents' transforms) to the point
     localToGlobalPoint: function( point ) {
       var node = this;
       while ( node !== null ) {
-        point = node.transform.transformPosition2( point );
+        point = node._transform.transformPosition2( point );
         assert && assert( node._parents[1] === undefined, 'localToGlobalPoint unable to work for DAG' );
         node = node._parents[0];
       }
@@ -1134,7 +1151,7 @@ define( function( require ) {
     localToGlobalBounds: function( bounds ) {
       var node = this;
       while ( node !== null ) {
-        bounds = node.transform.transformBounds2( bounds );
+        bounds = node._transform.transformBounds2( bounds );
         assert && assert( node._parents[1] === undefined, 'localToGlobalBounds unable to work for DAG' );
         node = node._parents[0];
       }
@@ -1147,7 +1164,7 @@ define( function( require ) {
       // we need to apply the transformations in the reverse order, so we temporarily store them
       var transforms = [];
       while ( node !== null ) {
-        transforms.push( node.transform );
+        transforms.push( node._transform );
         assert && assert( node._parents[1] === undefined, 'globalToLocalPoint unable to work for DAG' );
         node = node._parents[0];
       }
@@ -1165,7 +1182,7 @@ define( function( require ) {
       // we need to apply the transformations in the reverse order, so we temporarily store them
       var transforms = [];
       while ( node !== null ) {
-        transforms.push( node.transform );
+        transforms.push( node._transform );
         assert && assert( node._parents[1] === undefined, 'globalToLocalBounds unable to work for DAG' );
         node = node._parents[0];
       }

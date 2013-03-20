@@ -121,7 +121,7 @@ define( function( require ) {
             if ( lastId ) {
               // we have a parent group to which we need to be added
               var group = lastId ? document.createElementNS( svgns, 'g' ) : this.g;
-              this.applyTransform( subtrail.lastNode().transform, group );
+              this.applyTransform( subtrail.lastNode().getTransform(), group );
               this.idGroupMap[id] = group;
               
               // TODO: handle the ordering here if we ensure group trees!
@@ -322,7 +322,7 @@ define( function( require ) {
         
         // apply the transform to the group
         this.domChange( function() {
-          layer.applyTransform( node.transform, group );
+          layer.applyTransform( node.getTransform(), group );
         } );
       } else {
         // ancestor node changed a transform. rebuild the base transform
