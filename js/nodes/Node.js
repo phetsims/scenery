@@ -103,6 +103,7 @@ define( function( require ) {
   Node.prototype = {
     constructor: Node,
     
+    // TODO: deprecated. have each layer handle this separately
     enterState: function( state, trail ) {
       // apply this node's transform
       if ( !this.transform.isIdentity() ) {
@@ -116,6 +117,7 @@ define( function( require ) {
       }
     },
     
+    // TODO: deprecated. have each layer handle this separately
     exitState: function( state, trail ) {
       if ( this._clipShape ) {
         state.popClipShape();

@@ -126,6 +126,8 @@ define( function( require ) {
       var startPointer = new scenery.TrailPointer( this.startSelfTrail, true );
       var endPointer = new scenery.TrailPointer( this.endSelfTrail, true );
       
+      var invisibleCount = 0; // we count how many invisible nodes are in our trail, so we can properly iterate without inspecting everything.
+      
       var boundaryTrail;
       
       // sanity check, and allows us to get faster speed
@@ -138,8 +140,10 @@ define( function( require ) {
       var startWalkLength = startPointer.trail.length - ( startPointer.isBefore ? 1 : 0 );
       boundaryTrail = new scenery.Trail();
       for ( i = 0; i < startWalkLength; i++ ) {
-        boundaryTrail.addDescendant( startPointer.trail.nodes[i] );
-        startPointer.trail.nodes[i].enterState( state, boundaryTrail );
+        var startNode = startPointer.trail.nodes[i];
+        boundaryTrail.addDescendant( startNode );
+        startNode.enterState( state, boundaryTrail );
+        invisibleCount += startNode.isVisible() ? 0 : 1;
       }
       
       startPointer.depthFirstUntil( endPointer, function( pointer ) {
@@ -148,9 +152,11 @@ define( function( require ) {
         var node = pointer.trail.lastNode();
         
         if ( pointer.isBefore ) {
-          node.enterState( state, pointer.trail );
+          invisibleCount += node.isVisible() ? 0 : 1;
           
-          if ( node._visible ) {
+          if ( invisibleCount === 0 ) {
+            node.enterState( state, pointer.trail );
+            
             if ( node.hasSelf() ) {
               node.paintCanvas( state );
             }
@@ -176,7 +182,11 @@ define( function( require ) {
             return true;
           }
         } else {
-          node.exitState( state, pointer.trail );
+          if ( invisibleCount === 0 ) {
+            node.exitState( state, pointer.trail );
+          }
+          
+          invisibleCount -= node.isVisible() ? 0 : 1;
         }
         
       }, false ); // include endpoints (for now)
@@ -189,6 +199,7 @@ define( function( require ) {
       for ( i = endWalkLength - 1; i >= 0; i-- ) {
         endPointer.trail.nodes[i].exitState( state, boundaryTrail );
         boundaryTrail.removeDescendant();
+        // no invisibleCount change needed, since that is only used to decide whether things are visible or not
       }
     },
     
