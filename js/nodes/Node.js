@@ -694,7 +694,7 @@ define( function( require ) {
           }
         }
       } else {
-        // scale( vector, prependInstead )
+        // scale( vector, prependInstead ) or scale( { x: x, y: y }, prependInstead )
         var vector = x;
         this.scale( vector.x, vector.y, y ); // forward to full version
       }
