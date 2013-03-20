@@ -193,7 +193,6 @@ Layers / caching:
     Proof-of-concept for performance and DOM integration
 
 * Event dispatch:
-    * Add Pen support
     * Hook into browser 'zoom' support? - pinch-to-zoom is different? Maybe we can detect?
     Investigate Event.preventManipulation
     ** MSPointerMove filter since location may not have changed while touch is down!!!

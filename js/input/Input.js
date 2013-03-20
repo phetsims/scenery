@@ -29,6 +29,7 @@ define( function( require ) {
   require( 'SCENERY/util/Trail' );
   require( 'SCENERY/input/Mouse' );
   require( 'SCENERY/input/Touch' );
+  require( 'SCENERY/input/Pen' );
   require( 'SCENERY/input/Event' );
   
   scenery.Input = function( scene, listenerTarget ) {
@@ -115,6 +116,33 @@ define( function( require ) {
       this.cancelEvent( touch, event );
     },
     
+    // called for each touch point
+    penStart: function( id, point, event ) {
+      var pen = new scenery.Pen( id, point, event );
+      this.addPointer( pen );
+      this.downEvent( pen, event );
+    },
+    
+    penEnd: function( id, point, event ) {
+      var pen = this.findTouchById( id );
+      pen.end( point, event );
+      this.removePointer( pen );
+      this.upEvent( pen, event );
+    },
+    
+    penMove: function( id, point, event ) {
+      var pen = this.findTouchById( id );
+      pen.move( point, event );
+      this.moveEvent( pen, event );
+    },
+    
+    penCancel: function( id, point, event ) {
+      var pen = this.findTouchById( id );
+      pen.cancel( point, event );
+      this.removePointer( pen );
+      this.cancelEvent( pen, event );
+    },
+    
     pointerDown: function( id, type, point, event ) {
       switch ( type ) {
         case 'mouse':
@@ -124,7 +152,7 @@ define( function( require ) {
           this.touchStart( id, point, event );
           break;
         case 'pen':
-          // TODO: pen input
+          this.penStart( id, point, event );
           break;
         default:
           if ( console.log ) {
@@ -142,7 +170,7 @@ define( function( require ) {
           this.touchEnd( id, point, event );
           break;
         case 'pen':
-          // TODO: pen input
+          this.penEnd( id, point, event );
           break;
         default:
           if ( console.log ) {
@@ -154,13 +182,15 @@ define( function( require ) {
     pointerCancel: function( id, type, point, event ) {
       switch ( type ) {
         case 'mouse':
-          // TODO: a mouse can cancel? no mapping yet for that
+          if ( console && console.log ) {
+            console.log( 'WARNING: Pointer mouse cancel was received' );
+          }
           break;
         case 'touch':
           this.touchCancel( id, point, event );
           break;
         case 'pen':
-          // TODO: pen input
+          this.penCancel( id, point, event );
           break;
         default:
           if ( console.log ) {
@@ -178,7 +208,7 @@ define( function( require ) {
           this.touchMove( id, point, event );
           break;
         case 'pen':
-          // TODO!
+          this.penMove( id, point, event );
           break;
         default:
           if ( console.log ) {

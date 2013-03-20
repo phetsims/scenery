@@ -18,6 +18,7 @@ define( [
     'SCENERY/input/Input',
     'SCENERY/input/Key',
     'SCENERY/input/Mouse',
+    'SCENERY/input/Pen',
     'SCENERY/input/Pointer',
     'SCENERY/input/SimpleDragHandler',
     'SCENERY/input/Touch',
