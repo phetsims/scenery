@@ -15,6 +15,10 @@
 
   <script src="../contrib/jquery-1.8.3.min.js"></script>
   <script src="../contrib/bootstrap-2.2.2.js"></script>
+  <script src="../contrib/lodash.min-1.0.0-rc.3.js"></script>
+  <script src="../contrib/has.js"></script>
+  
+  <script data-main="../js/config.js" src="../contrib/require-2.1.4.js"></script>
 
   <style type="text/css">
 
@@ -34,6 +38,15 @@
     left: 0;
     width: 640px;
     height: 480px;
+    background-color: #fff;
+  }
+  
+  #scene {
+    position: absolute;
+    top: 481px;
+    left: 0;
+    width: 640px;
+    height: 100px;
     background-color: #fff;
   }
   
@@ -92,6 +105,8 @@
     </div>
   </div>
   
+  <div id="scene"></div>
+  
   <script type="text/javascript">
     
     $( document ).on( 'click', function( evt ) {
@@ -104,6 +119,29 @@
       if ( console && console.log ) {
         console.log( 'Wow I was actually clicked!' );
       }
+    } );
+    
+    requirejs( [ 'main', '../common/kite/js/main', '../common/dot/js/main' ], function( scenery, kite, dot ) {
+      var underButton = $( '<button class="btn" type="button">scenery under</button>' );
+      var aboveButton = $( '<button class="btn" type="button">scenery above</button>' );
+      
+      var scene = new scenery.Scene( $( '#scene' ) );
+      
+      scene.addChild( new scenery.DOM( underButton[0], {
+        centerX: 160, centerY: 50
+      } ) );
+      
+      scene.addChild( new scenery.Path( {
+        shape: kite.Shape.rectangle( 0, 0, 640, 100 ),
+        fill: 'rgba(127,127,127,0.5)',
+        renderer: 'svg'
+      } ) );
+      
+      scene.addChild( new scenery.DOM( aboveButton[0], {
+        centerX: 480, centerY: 50
+      } ) );
+      
+      scene.updateScene();
     } );
     
   </script>

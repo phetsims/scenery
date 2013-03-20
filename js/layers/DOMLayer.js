@@ -29,8 +29,8 @@ define( function( require ) {
     
     this.div = document.createElement( 'div' );
     this.$div = $( this.div );
-    this.$div.width( width );
-    this.$div.height( height );
+    this.$div.width( 0 );
+    this.$div.height( 0 );
     this.$div.css( 'position', 'absolute' );
     this.div.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
     this.$main.append( this.div );

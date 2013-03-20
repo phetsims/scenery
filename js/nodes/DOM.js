@@ -29,23 +29,23 @@ define( function( require ) {
     
     this._element = element;
     this._$element = $( element );
-    this._$element.css( 'position', 'absolute' );
-    this._$element.css( 'left', 0 );
-    this._$element.css( 'top', 0 );
+    
+    this._container = document.createElement( 'div' );
+    this._$container = $( this._container );
+    this._$container.css( 'position', 'absolute' );
+    this._$container.css( 'left', 0 );
+    this._$container.css( 'top', 0 );
+    
+    this._container.appendChild( this._element );
     
     this.attachedToDOM = false;
+    this.invalidateDOMLock = false;
     
     // so that the mutator will call setElement()
     options.element = element;
     
-    // create a temporary container attached to the DOM tree (not a fragment) so that we can properly set initial bounds
-    var temporaryContainer = this.wrapInTemporaryContainer();
-
     // will set the element after initializing
     Node.call( this, options );
-
-    // now don't memory-leak our container
-    this.destroyTemporaryContainer( temporaryContainer );
   };
   var DOM = scenery.DOM;
   
@@ -62,43 +62,7 @@ define( function( require ) {
     return new Bounds2( 0, 0, boundingRect.width, boundingRect.height );
   };
   
-  DOM.prototype.invalidateDOM = function() {
-    // TODO: do we need to reset the CSS transform to get the proper bounds?
-    
-    if ( !this.attachedToDOM && !this.attachedToTemporaryContainer ) {
-      // create a temporary container attached to the DOM tree (not a fragment) so that we can properly get the bounds
-      var temporaryContainer = this.wrapInTemporaryContainer();
-      
-      this.invalidateSelf( this.calculateDOMBounds() );
-      
-      // now don't memory-leak our container
-      this.destroyTemporaryContainer( temporaryContainer );
-    } else {
-      this.invalidateSelf( this.calculateDOMBounds() );
-    }
-  };
-  
-  DOM.prototype.addToDOMLayer = function( domLayer ) {
-    this.attachedToDOM = true;
-    
-    // TODO: find better way to handle non-jquery and jquery-wrapped getters for the container. direct access for now ()
-    domLayer.$div.append( this._element );
-    
-    // recompute the bounds
-    this.invalidateDOM();
-  };
-  
-  DOM.prototype.removeFromDOMLayer = function( domLayer ) {
-    domLayer.$div.remove( this._element );
-    this.attachedToDOM = false;
-  };
-  
-  DOM.prototype.updateCSSTransform = function( transform ) {
-    this._$element.css( transform.getMatrix().getCSSTransformStyles() );
-  };
-  
-  DOM.prototype.wrapInTemporaryContainer = function() {
-    // create a temporary container attached to the DOM tree (not a fragment) so that we can properly set initial bounds
+  DOM.prototype.createTemporaryContainer = function() {
     var temporaryContainer = document.createElement( 'div' );
     $( temporaryContainer ).css( {
       display: 'hidden',
@@ -110,18 +74,55 @@ define( function( require ) {
       width: 65535,
       height: 65535
     } );
-    temporaryContainer.appendChild( this._element );
-    document.body.appendChild( temporaryContainer );
-    this.attachedToTemporaryContainer = true;
     return temporaryContainer;
   };
   
-  DOM.prototype.destroyTemporaryContainer = function( temporaryContainer ) {
-    document.body.removeChild( temporaryContainer );
-    if ( this._element.parentNode === temporaryContainer ) {
-      temporaryContainer.removeChild( this._element );
+  DOM.prototype.invalidateDOM = function() {
+    // prevent this from being executed as a side-effect from inside one of its own calls
+    if ( this.invalidateDOMLock ) {
+      return;
     }
-    this.attachedToTemporaryContainer = false;
+    this.invalidateDOMLock = true;
+    
+    // we will place ourselves in a temporary container to get our real desired bounds
+    var temporaryContainer = this.createTemporaryContainer();
+    
+    // move to the temporary container
+    this._container.removeChild( this._element );
+    temporaryContainer.appendChild( this._element );
+    document.body.appendChild( temporaryContainer );
+    
+    // bounds computation and resize our container to fit precisely
+    var selfBounds = this.calculateDOMBounds();
+    this.invalidateSelf( selfBounds );
+    this._$container.width( selfBounds.getWidth() );
+    this._$container.height( selfBounds.getHeight() );
+    
+    // move back to the main container
+    document.body.removeChild( temporaryContainer );
+    temporaryContainer.removeChild( this._element );
+    this._container.appendChild( this._element );
+    
+    this.invalidateDOMLock = false;
+  };
+  
+  DOM.prototype.addToDOMLayer = function( domLayer ) {
+    this.attachedToDOM = true;
+    
+    // TODO: find better way to handle non-jquery and jquery-wrapped getters for the container. direct access for now ()
+    domLayer.$div.append( this._container );
+    
+    // recompute the bounds
+    this.invalidateDOM();
+  };
+  
+  DOM.prototype.removeFromDOMLayer = function( domLayer ) {
+    domLayer.$div.remove( this._container );
+    this.attachedToDOM = false;
+  };
+  
+  DOM.prototype.updateCSSTransform = function( transform ) {
+    this._$container.css( transform.getMatrix().getCSSTransformStyles() );
   };
   
   DOM.prototype.hasSelf = function() {
@@ -129,10 +130,17 @@ define( function( require ) {
   };
   
   DOM.prototype.setElement = function( element ) {
-    this._element = element;
-    
-    // TODO: bounds issue, since this will probably set to empty bounds and thus a repaint may not draw over it
-    this.invalidateDOM();
+    if ( this._element !== element ) {
+      this._container.removeChild( this._element );
+      
+      this._element = element;
+      this._$element = $( element );
+      
+      this._container.addChild( this._element );
+      
+      // TODO: bounds issue, since this will probably set to empty bounds and thus a repaint may not draw over it
+      this.invalidateDOM();  
+    }
 
     return this; // allow chaining
   };
