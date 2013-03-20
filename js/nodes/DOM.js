@@ -27,16 +27,11 @@ define( function( require ) {
       element = element[0];
     }
     
-    this._element = element;
-    this._$element = $( element );
-    
     this._container = document.createElement( 'div' );
     this._$container = $( this._container );
     this._$container.css( 'position', 'absolute' );
     this._$container.css( 'left', 0 );
     this._$container.css( 'top', 0 );
-    
-    this._container.appendChild( this._element );
     
     this.attachedToDOM = false;
     this.invalidateDOMLock = false;
@@ -131,12 +126,14 @@ define( function( require ) {
   
   DOM.prototype.setElement = function( element ) {
     if ( this._element !== element ) {
-      this._container.removeChild( this._element );
+      if ( this._element ) {
+        this._container.removeChild( this._element );
+      }
       
       this._element = element;
       this._$element = $( element );
       
-      this._container.addChild( this._element );
+      this._container.appendChild( this._element );
       
       // TODO: bounds issue, since this will probably set to empty bounds and thus a repaint may not draw over it
       this.invalidateDOM();  
