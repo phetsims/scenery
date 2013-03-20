@@ -29,7 +29,7 @@ define( function( require ) {
    *                              // also necessary to force updateScene() after it has loaded
    *     HTMLImageElement         // works
    *     HTMLVideoElement         // not tested
-   *     HTMLCanvasElement        // works for the canvas renderer
+   *     HTMLCanvasElement        // works, and forces the canvas renderer
    *     CanvasRenderingContext2D // not tested, but bad luck in past
    *     ImageBitmap              // good luck creating this. currently API for window.createImageBitmap not implemented
    * SVG renderer supports the following as 'image':
