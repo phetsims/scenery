@@ -51,10 +51,14 @@ define( function( require ) {
   scenery.Node = function( options ) {
     var self = this;
     
-    // assign a unique ID to this node (allows trails to )
+    // assign a unique ID to this node (allows trails to get a unique list of IDs)
     this._id = globalIdCounter++;
     
+    // Whether this node (and its children) will be visible when the scene is updated. Visible nodes by default will not be pickable either
     this._visible = true;
+    
+    // Whether hit testing will check for this node (and its children).
+    this._pickable = true;
     
     // This node and all children will be clipped by this shape (in addition to any other clipping shapes).
     // The shape should be in the local coordinate frame
@@ -914,6 +918,19 @@ define( function( require ) {
       return this;
     },
     
+    isPickable: function() {
+      return this._pickable;
+    },
+    
+    setPickable: function( pickable ) {
+      if ( this._pickable !== pickable ) {
+        // no paint or invalidation changes for now, since this is only handled for the mouse
+        this._pickable = pickable;
+        
+        // TODO: invalidate the cursor somehow?
+      }
+    },
+    
     setCursor: function( cursor ) {
       // TODO: consider a mapping of types to set reasonable defaults
       /*
@@ -1221,6 +1238,9 @@ define( function( require ) {
     
     set visible( value ) { this.setVisible( value ); },
     get visible() { return this.isVisible(); },
+    
+    set pickable( value ) { this.setPickable( value ); },
+    get pickable() { return this.isPickable(); },
     
     set transform( value ) { this.setTransform( value ); },
     get transform() { return this.getTransform(); },
