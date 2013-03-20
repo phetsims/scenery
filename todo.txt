@@ -12,9 +12,6 @@ Priorities:
 Bugs:
     ConcentrationMeterNode - renderer: svg is causing issues
     
-    SVG currently doesn't support changing the SVG element? updateSVGFragment unused
-        - add test case (comparison vs canvas with add then change style)
-        - failing for patterns / images / anything set layer than before it is added to a scene
     Switching renderers in Devious Drag example on iPad causes other objects being dragged to be "dropped"
         Probably causes some sort of enter/exit event?
     Nexus 7 hidef scaling

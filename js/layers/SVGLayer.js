@@ -79,12 +79,22 @@ define( function( require ) {
   SVGLayer.prototype = _.extend( {}, Layer.prototype, {
     constructor: SVGLayer,
     
+    // updates visual styles on an existing SVG fragment
     updateNode: function( node, fragment ) {
       if ( node.updateSVGFragment ) {
         node.updateSVGFragment( fragment );
       }
       if ( node.updateSVGDefs ) {
         node.updateSVGDefs( this.svg, this.defs );
+      }
+    },
+    
+    // updates necessary paint attributes on a group (not including transform)
+    updateNodeGroup: function( node, group ) {
+      if ( node.isVisible() ) {
+        group.style.display = 'inherit';
+      } else {
+        group.style.display = 'none';
       }
     },
     
@@ -153,6 +163,7 @@ define( function( require ) {
           var group = layer.idGroupMap[trailId];
           var svgFragment = node.createSVGFragment( layer.svg, layer.defs, group );
           layer.updateNode( node, svgFragment );
+          layer.updateNodeGroup( node, group );
           layer.idFragmentMap[trailId] = svgFragment;
           group.appendChild( svgFragment );
         }
@@ -181,10 +192,16 @@ define( function( require ) {
     
     markDirtyRegion: function( args ) {
       var node = args.node;
-      var fragment = this.idFragmentMap[args.trail.getUniqueId()];
+      var trailId = args.trail.getUniqueId();
       
+      var fragment = this.idFragmentMap[trailId];
       if ( fragment ) {
         this.updateNode( node, fragment );
+      }
+      
+      var group = this.idGroupMap[trailId];
+      if ( group ) {
+        this.updateNodeGroup( node, group );
       }
     },
     
