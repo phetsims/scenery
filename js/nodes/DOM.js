@@ -39,18 +39,13 @@ define( function( require ) {
     this._container.appendChild( this._element );
     
     this.attachedToDOM = false;
+    this.invalidateDOMLock = false;
     
     // so that the mutator will call setElement()
     options.element = element;
     
-    // create a temporary container attached to the DOM tree (not a fragment) so that we can properly set initial bounds
-    var temporaryContainer = this.wrapInTemporaryContainer();
-
     // will set the element after initializing
     Node.call( this, options );
-
-    // now don't memory-leak our container
-    this.destroyTemporaryContainer( temporaryContainer );
   };
   var DOM = scenery.DOM;
   
@@ -67,20 +62,48 @@ define( function( require ) {
     return new Bounds2( 0, 0, boundingRect.width, boundingRect.height );
   };
   
+  DOM.prototype.createTemporaryContainer = function() {
+    var temporaryContainer = document.createElement( 'div' );
+    $( temporaryContainer ).css( {
+      display: 'hidden',
+      padding: '0 !important',
+      margin: '0 !important',
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      width: 65535,
+      height: 65535
+    } );
+    return temporaryContainer;
+  };
+  
   DOM.prototype.invalidateDOM = function() {
-    // TODO: do we need to reset the CSS transform to get the proper bounds?
-    
-    if ( !this.attachedToDOM && !this.attachedToTemporaryContainer ) {
-      // create a temporary container attached to the DOM tree (not a fragment) so that we can properly get the bounds
-      var temporaryContainer = this.wrapInTemporaryContainer();
-      
-      this.invalidateSelf( this.calculateDOMBounds() );
-      
-      // now don't memory-leak our container
-      this.destroyTemporaryContainer( temporaryContainer );
-    } else {
-      this.invalidateSelf( this.calculateDOMBounds() );
+    // prevent this from being executed as a side-effect from inside one of its own calls
+    if ( this.invalidateDOMLock ) {
+      return;
     }
+    this.invalidateDOMLock = true;
+    
+    // we will place ourselves in a temporary container to get our real desired bounds
+    var temporaryContainer = this.createTemporaryContainer();
+    
+    // move to the temporary container
+    this._container.removeChild( this._element );
+    temporaryContainer.appendChild( this._element );
+    document.body.appendChild( temporaryContainer );
+    
+    // bounds computation and resize our container to fit precisely
+    var selfBounds = this.calculateDOMBounds();
+    this.invalidateSelf( selfBounds );
+    this._$container.width( selfBounds.getWidth() );
+    this._$container.height( selfBounds.getHeight() );
+    
+    // move back to the main container
+    document.body.removeChild( temporaryContainer );
+    temporaryContainer.removeChild( this._element );
+    this._container.appendChild( this._element );
+    
+    this.invalidateDOMLock = false;
   };
   
   DOM.prototype.addToDOMLayer = function( domLayer ) {
@@ -100,35 +123,6 @@ define( function( require ) {
   
   DOM.prototype.updateCSSTransform = function( transform ) {
     this._$container.css( transform.getMatrix().getCSSTransformStyles() );
-  };
-  
-  DOM.prototype.wrapInTemporaryContainer = function() {
-    // create a temporary container attached to the DOM tree (not a fragment) so that we can properly set initial bounds
-    var temporaryContainer = document.createElement( 'div' );
-    $( temporaryContainer ).css( {
-      display: 'hidden',
-      padding: '0 !important',
-      margin: '0 !important',
-      position: 'absolute',
-      left: 0,
-      top: 0,
-      width: 65535,
-      height: 65535
-    } );
-    this._container.removeChild( this._element );
-    temporaryContainer.appendChild( this._element );
-    document.body.appendChild( temporaryContainer );
-    this.attachedToTemporaryContainer = true;
-    return temporaryContainer;
-  };
-  
-  DOM.prototype.destroyTemporaryContainer = function( temporaryContainer ) {
-    document.body.removeChild( temporaryContainer );
-    if ( this._element.parentNode === temporaryContainer ) {
-      temporaryContainer.removeChild( this._element );
-      this._container.appendChild( this._element );
-    }
-    this.attachedToTemporaryContainer = false;
   };
   
   DOM.prototype.hasSelf = function() {
