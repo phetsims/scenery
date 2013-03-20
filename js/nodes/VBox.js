@@ -2,6 +2,7 @@
 
 /**
  * VBox arranges the child nodes vertically, and they can be centered, left or right justified.
+ * Vertical spacing can be set as a constant or a function which depends on the adjacent nodes.
  * TODO: add an option (not enabled by default) to update layout when children or children bounds change
  *
  * @author Sam Reid
