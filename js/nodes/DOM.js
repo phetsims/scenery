@@ -29,9 +29,14 @@ define( function( require ) {
     
     this._element = element;
     this._$element = $( element );
-    this._$element.css( 'position', 'absolute' );
-    this._$element.css( 'left', 0 );
-    this._$element.css( 'top', 0 );
+    
+    this._container = document.createElement( 'div' );
+    this._$container = $( this._container );
+    this._$container.css( 'position', 'absolute' );
+    this._$container.css( 'left', 0 );
+    this._$container.css( 'top', 0 );
+    
+    this._container.appendChild( this._element );
     
     this.attachedToDOM = false;
     
@@ -82,19 +87,19 @@ define( function( require ) {
     this.attachedToDOM = true;
     
     // TODO: find better way to handle non-jquery and jquery-wrapped getters for the container. direct access for now ()
-    domLayer.$div.append( this._element );
+    domLayer.$div.append( this._container );
     
     // recompute the bounds
     this.invalidateDOM();
   };
   
   DOM.prototype.removeFromDOMLayer = function( domLayer ) {
-    domLayer.$div.remove( this._element );
+    domLayer.$div.remove( this._container );
     this.attachedToDOM = false;
   };
   
   DOM.prototype.updateCSSTransform = function( transform ) {
-    this._$element.css( transform.getMatrix().getCSSTransformStyles() );
+    this._$container.css( transform.getMatrix().getCSSTransformStyles() );
   };
   
   DOM.prototype.wrapInTemporaryContainer = function() {
@@ -110,6 +115,7 @@ define( function( require ) {
       width: 65535,
       height: 65535
     } );
+    this._container.removeChild( this._element );
     temporaryContainer.appendChild( this._element );
     document.body.appendChild( temporaryContainer );
     this.attachedToTemporaryContainer = true;
@@ -120,6 +126,7 @@ define( function( require ) {
     document.body.removeChild( temporaryContainer );
     if ( this._element.parentNode === temporaryContainer ) {
       temporaryContainer.removeChild( this._element );
+      this._container.appendChild( this._element );
     }
     this.attachedToTemporaryContainer = false;
   };
@@ -129,10 +136,17 @@ define( function( require ) {
   };
   
   DOM.prototype.setElement = function( element ) {
-    this._element = element;
-    
-    // TODO: bounds issue, since this will probably set to empty bounds and thus a repaint may not draw over it
-    this.invalidateDOM();
+    if ( this._element !== element ) {
+      this._container.removeChild( this._element );
+      
+      this._element = element;
+      this._$element = $( element );
+      
+      this._container.addChild( this._element );
+      
+      // TODO: bounds issue, since this will probably set to empty bounds and thus a repaint may not draw over it
+      this.invalidateDOM();  
+    }
 
     return this; // allow chaining
   };
