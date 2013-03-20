@@ -146,7 +146,7 @@ define( function( require ) {
         invisibleCount += startNode.isVisible() ? 0 : 1;
       }
       
-      startPointer.depthFirstUntil( endPointer, function( pointer ) {
+      startPointer.depthFirstUntil( endPointer, function renderPointer( pointer ) {
         // handle render here
         
         var node = pointer.trail.lastNode();
