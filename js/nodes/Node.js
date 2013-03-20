@@ -455,9 +455,26 @@ define( function( require ) {
       return this._bounds;
     },
     
-    // return the top node (if any, otherwise null) whose self-rendered area contains the point (in parent coordinates).
-    trailUnderPoint: function( point ) {
+    /*
+     * Return a trail to the top node (if any, otherwise null) whose self-rendered area contains the
+     * point (in parent coordinates).
+     *
+     * If options.pruneInvisible is false, invisible nodes will be allowed in the trail.
+     * If options.pruneUnpickable is false, unpickable nodes will be allowed in the trail.
+     */
+    trailUnderPoint: function( point, options ) {
       assert && assert( point, 'trailUnderPointer requires a point' );
+      
+      var pruneInvisible = ( options && options.pruneInvisible === undefined ) ? true : options.pruneInvisible;
+      var pruneUnpickable = ( options && options.pruneUnpickable === undefined ) ? true : options.pruneUnpickable;
+      
+      if ( pruneInvisible && !this.isVisible() ) {
+        return null;
+      }
+      if ( pruneUnpickable && !this.isPickable() ) {
+        return null;
+      }
+      
       // update bounds for pruning
       this.validateBounds();
       
@@ -474,7 +491,7 @@ define( function( require ) {
         for ( var i = this._children.length - 1; i >= 0; i-- ) {
           var child = this._children[i];
           
-          var childHit = child.trailUnderPoint( localPoint );
+          var childHit = child.trailUnderPoint( localPoint, options );
           
           // the child will have the point in its parent's coordinate frame (i.e. this node's frame)
           if ( childHit ) {
