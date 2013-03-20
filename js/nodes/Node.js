@@ -30,7 +30,8 @@ define( function( require ) {
    * Available keys for use in the options parameter object for a vanilla Node (not inherited), in the order they are executed in:
    *
    * cursor:           Will display the specified CSS cursor when the mouse is over this Node or one of its descendents. The Scene needs to have input listeners attached with an initialize method first.
-   * visible:          If false, this node will not be displayed
+   * visible:          If false, this node (and its children) will not be displayed (or get input events)
+   * pickable:         If false, this node (and its children) will not get input events
    * translation:      Sets the translation of the node to either the specified dot.Vector2 value, or the x,y values from an object (e.g. translation: { x: 1, y: 2 } )
    * x:                Sets the x-translation of the node
    * y:                Sets the y-translation of the node
@@ -1336,7 +1337,7 @@ define( function( require ) {
    * TODO: using more than one of {translation,x,left,right,centerX} or {translation,y,top,bottom,centerY} should be considered an error
    * TODO: move fill / stroke setting to mixins
    */
-  Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'translation', 'x', 'y', 'rotation', 'scale',
+  Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'pickable', 'translation', 'x', 'y', 'rotation', 'scale',
                                   'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
                                   'layerSplit', 'layerSplitBefore', 'layerSplitAfter' ];
   
