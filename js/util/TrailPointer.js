@@ -242,11 +242,9 @@ define( function( require ) {
           skipSubtree = callback( pointer );
         }
         
-        if ( skipSubtree ) {
-          if ( pointer.isBefore ) {
-            // to skip the subtree, we just change to isAfter
-            pointer.setBefore( false );
-          }
+        if ( skipSubtree && pointer.isBefore ) {
+          // to skip the subtree, we just change to isAfter
+          pointer.setBefore( false );
           
           // if we skip a subtree, make sure we don't run past the ending pointer
           if ( pointer.compareNested( other ) === 1 ) {
