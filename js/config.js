@@ -30,7 +30,7 @@ window.loadedSceneryConfig = true;
 
 require.config( {
   // depends on all of Scenery, Kite, and Dot
-  deps: [ 'main', 'KITE/main', 'DOT/main', 'CORE/main' ],
+  deps: [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main' ],
   
   paths: {
     underscore: '../contrib/lodash.min-1.0.0-rc.3',
@@ -38,7 +38,7 @@ require.config( {
     SCENERY: '.',
     KITE: '../common/kite/js',
     DOT: '../common/dot/js',
-    CORE: '../common/phet-core/js',
+    PHET_CORE: '../common/phet-core/js',
     ASSERT: '../common/assert/js'
   },
   

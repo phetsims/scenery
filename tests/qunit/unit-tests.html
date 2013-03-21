@@ -45,7 +45,7 @@
     // we need to wait until our config file is loaded before our require statement. apparently this was not guaranteed
     function check() {
       if ( window.loadedSceneryConfig ) {
-        require( [ 'main', 'KITE/main', 'DOT/main', 'CORE/main' ], function( scenery, kite, dot, core ) {
+        require( [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main' ], function( scenery, kite, dot, core ) {
           window.scenery = scenery;
           window.kite = kite;
           window.dot = dot;
