@@ -94,7 +94,7 @@ define( function( require ) {
       this.div.removeChild( element );
       
       var removalIndex = this.getIndexOfTrail( trail );
-      trails.splice( removalIndex, 1 );
+      this.trails.splice( removalIndex, 1 );
     },
     
     initializeBoundaries: function() {
