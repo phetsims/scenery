@@ -107,6 +107,9 @@
       <a class="sublink" href="#node-insertChild">insertChild</a><br>
       <a class="sublink" href="#node-removeChild">removeChild</a><br>
       <a class="sublink" href="#node-detach">detach</a><br>
+      <a class="sublink" href="#node-cursor">cursor</a><br>
+      <a class="sublink" href="#node-visible">visible</a><br>
+      <a class="sublink" href="#node-pickable">pickable</a><br>
       
       <a class="navlink" href="#scene">Scene</a><br>
       <a class="navlink" href="#path">Path</a><br>
@@ -157,7 +160,8 @@
       
       <h4 id="node-children">node.children</h4>
       <p>
-        ES5 getter/setter to node.getChildren() and node.setChildren( children ). This will return a copy of node's array of children, in rendering
+        ES5 getter/setter to <strong>node.getChildren()</strong> and <strong>node.setChildren( children )</strong>.
+        This will return a copy of node's array of children, in rendering
         order (later children render above previous children). Making changes to the returned array will not change node's children.
       </p>
       <p>
@@ -197,6 +201,32 @@ var container = new scenery.Node( {
       <h4 id="node-detach">node.detach()</h4>
       <p>
         Removes this node from all of its parents.
+      </p>
+      
+      <h4 id="node-cursor">node.cursor</h4>
+      <p>
+        ES5 getter/setter to <strong>node.getCursor()</strong> and <strong>node.setCursor( cursor )</strong>. By default it is null
+        (default cursor), but this can be set to
+        the string for any <a href="https://developer.mozilla.org/en-US/docs/CSS/cursor">CSS cursor value</a>. There is
+        <a href="/scenery/examples/cursors.html">a cursor example page</a> that demos a number of available cursors.
+      </p>
+      
+      <h4 id="node-visible">node.visible</h4>
+      <p>
+        ES5 getter/setter to <strong>node.isVisible()</strong> and <strong>node.setVisible( boolean )</strong>.
+        Nodes are by default visible, but when invisible they will not
+        be displayed and will not be pickable (no input events will be targeted to them).
+      </p>
+      
+      <h4 id="node-pickable">node.pickable</h4>
+      <p>
+        ES5 getter/setter to <strong>node.isPickable()</strong> and <strong>node.setPickable( boolean )</strong>.
+        Nodes that are not pickable will no longer have input events targeted to them, and <a href="#node-trailUnderPoint">node.trailUnderPoint</a>
+        will not include them.
+      </p>
+      <p>
+        This is useful for semi-transparent overlays or other visual elements that should be displayed but should not prevent objects below from being
+        manipulated by user input.
       </p>
       
     </div>
