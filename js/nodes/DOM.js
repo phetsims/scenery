@@ -156,7 +156,7 @@ define( function( require ) {
     }
   };
   
-  DOM.prototype.getInteractive = function() {
+  DOM.prototype.isInteractive = function() {
     return this._interactive;
   };
   
@@ -165,7 +165,7 @@ define( function( require ) {
   DOM.prototype._supportedRenderers = [ Renderer.DOM ];
   
   Object.defineProperty( DOM.prototype, 'element', { set: DOM.prototype.setElement, get: DOM.prototype.getElement } );
-  Object.defineProperty( DOM.prototype, 'interactive', { set: DOM.prototype.setInteractive, get: DOM.prototype.getInteractive } );
+  Object.defineProperty( DOM.prototype, 'interactive', { set: DOM.prototype.setInteractive, get: DOM.prototype.isInteractive } );
   
   return DOM;
 } );
