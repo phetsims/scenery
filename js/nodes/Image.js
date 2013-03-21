@@ -181,14 +181,10 @@ define( function( require ) {
   * DOM support
   *----------------------------------------------------------------------------*/
   
-  Image.prototype.addToDOMLayer = function( domLayer ) {
+  Image.prototype.getDOMElement = function() {
     this._image.style.display = 'block';
     this._image.style.position = 'absolute';
-    domLayer.$div.append( this._image );
-  };
-  
-  Image.prototype.removeFromDOMLayer = function( domLayer ) {
-    domLayer.$div.remove( this._image );
+    return this._image;
   };
   
   Image.prototype.updateCSSTransform = function( transform ) {

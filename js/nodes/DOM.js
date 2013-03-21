@@ -35,7 +35,6 @@ define( function( require ) {
     this._$container.css( 'left', 0 );
     this._$container.css( 'top', 0 );
     
-    this.attachedToDOM = false;
     this.invalidateDOMLock = false;
     
     // so that the mutator will call setElement()
@@ -103,19 +102,8 @@ define( function( require ) {
     this.invalidateDOMLock = false;
   };
   
-  DOM.prototype.addToDOMLayer = function( domLayer ) {
-    this.attachedToDOM = true;
-    
-    // TODO: find better way to handle non-jquery and jquery-wrapped getters for the container. direct access for now ()
-    domLayer.$div.append( this._container );
-    
-    // recompute the bounds
-    this.invalidateDOM();
-  };
-  
-  DOM.prototype.removeFromDOMLayer = function( domLayer ) {
-    domLayer.$div.remove( this._container );
-    this.attachedToDOM = false;
+  DOM.prototype.getDOMElement = function() {
+    return this._container;
   };
   
   DOM.prototype.updateCSSTransform = function( transform ) {

@@ -39,6 +39,9 @@ define( function( require ) {
     
     this.isDOMLayer = true;
     
+    // maps trail ID => DOM element fragment
+    this.idElementMap = {};
+    
     this.initializeBoundaries();
   };
   var DOMLayer = scenery.DOMLayer;
@@ -55,7 +58,9 @@ define( function( require ) {
         
         // all nodes should have DOM support if node.hasSelf()
         if ( node.hasSelf() ) {
-          node.addToDOMLayer( layer );
+          var element = node.getDOMElement();
+          layer.idElementMap[trail.getUniqueId()] = element;
+          layer.div.appendChild( element );
           node.updateCSSTransform( trail.getTransform() );
         }
       } );
@@ -71,7 +76,19 @@ define( function( require ) {
     },
     
     markDirtyRegion: function( args ) {
-      // no-op for now, since it is not scenery's job to change DOM elements. transforms are handled with transformChange.
+      var node = args.node;
+      var trail = args.trail;
+      
+      var element = this.idElementMap[trail.getUniqueId()];
+      if ( element ) {
+        var visible = _.every( trail.nodes, function( node ) { return node.isVisible(); } );
+        
+        if ( visible ) {
+          element.style.display = 'block';
+        } else {
+          element.style.display = 'hidden';
+        }
+      }
     },
     
     transformChange: function( args ) {
