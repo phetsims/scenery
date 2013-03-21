@@ -32,18 +32,24 @@
     // we need to wait until our config file is loaded before our require statement. apparently this was not guaranteed
     function check() {
       if ( window.loadedSceneryConfig ) {
-        requirejs( [ 'main', 'KITE/main', 'DOT/main' ], function( scenery, kite, dot ) {
+        requirejs( [ 'main', 'KITE/main', 'DOT/main', 'CORE/main' ], function( scenery, kite, dot, core ) {
           window.scenery = scenery;
           window.kite = kite;
           window.dot = dot;
+          window.core = core;
           
           console.log( 'loaded' );
           
           window.scene = new scenery.Scene( $( '#scene' ) );
-          
           console.log( 'window.scene created' );
           
-          // TODO: load test-utils from unit tests, so we can create test trees easily
+          core.loadScript( {
+            src: 'qunit/js/test-utils.js',
+            callback: function() {
+              console.log( 'loaded test-utils.js' );
+            }
+          } );
+          
         } );
       } else {
         setTimeout( check, 4 );
