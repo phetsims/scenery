@@ -108,6 +108,7 @@ define( function( require ) {
     },
     
     addAncestor: function( node, index ) {
+      assert && assert ( node instanceof scenery.Node );
       this.clearCache();
       
       var oldRoot = this.nodes[0];
@@ -141,6 +142,7 @@ define( function( require ) {
     },
     
     addDescendant: function( node, index ) {
+      assert && assert ( node instanceof scenery.Node );
       this.clearCache();
       
       var parent = this.lastNode();
