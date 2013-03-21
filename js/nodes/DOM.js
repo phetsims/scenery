@@ -22,6 +22,8 @@ define( function( require ) {
   scenery.DOM = function( element, options ) {
     options = options || {};
     
+    this._interactive = false;
+    
     // unwrap from jQuery if that is passed in, for consistency
     if ( element && element.jquery ) {
       element = element[0];
@@ -146,11 +148,24 @@ define( function( require ) {
     return this._element;
   };
   
-  DOM.prototype._mutatorKeys = [ 'element' ].concat( Node.prototype._mutatorKeys );
+  DOM.prototype.setInteractive = function( interactive ) {
+    if ( this._interactive !== interactive ) {
+      this._interactive = interactive;
+      
+      // TODO: anything needed here?
+    }
+  };
+  
+  DOM.prototype.getInteractive = function() {
+    return this._interactive;
+  };
+  
+  DOM.prototype._mutatorKeys = [ 'element', 'interactive' ].concat( Node.prototype._mutatorKeys );
   
   DOM.prototype._supportedRenderers = [ Renderer.DOM ];
   
   Object.defineProperty( DOM.prototype, 'element', { set: DOM.prototype.setElement, get: DOM.prototype.getElement } );
+  Object.defineProperty( DOM.prototype, 'interactive', { set: DOM.prototype.setInteractive, get: DOM.prototype.getInteractive } );
   
   return DOM;
 } );
