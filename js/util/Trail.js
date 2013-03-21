@@ -333,6 +333,22 @@ define( function( require ) {
       }
     },
     
+    localToGlobalPoint: function( point ) {
+      return this.getTransform().transformPosition2( point );
+    },
+    
+    localToGlobalBounds: function( bounds ) {
+      return this.getTransform().transformBounds2( bounds );
+    },
+    
+    globalToLocalPoint: function( point ) {
+      return this.getTransform().inversePosition2( point );
+    },
+    
+    globalToLocalBounds: function( bounds ) {
+      return this.getTransform().inverseBounds2( bounds );
+    },
+    
     // concatenates the unique IDs of nodes in the trail, so that we can do id-based lookups
     getUniqueId: function() {
       return _.map( this.nodes, function( node ) { return node.getId(); } ).join( '-' );
