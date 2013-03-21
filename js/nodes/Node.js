@@ -169,7 +169,7 @@ define( function( require ) {
       this.insertChild( this._children.length, node );
     },
     
-    removeChild: function ( node ) {
+    removeChild: function( node ) {
       assert && assert( this.isChild( node ) );
       
       node.markOldPaint();
@@ -247,7 +247,7 @@ define( function( require ) {
     },
     
     // remove this node from its parents
-    detach: function () {
+    detach: function() {
       var that = this;
       _.each( this._parents.slice( 0 ), function( parent ) {
         parent.removeChild( that );
@@ -439,7 +439,7 @@ define( function( require ) {
       }
     },
     
-    isChild: function ( potentialChild ) {
+    isChild: function( potentialChild ) {
       var ourChild = _.contains( this._children, potentialChild );
       var itsParent = _.contains( potentialChild._parents, this );
       assert && assert( ourChild === itsParent );

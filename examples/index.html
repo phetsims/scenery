@@ -7,16 +7,16 @@
   <!-- runs in full-screen mode on iOS devices -->
   <meta name="apple-mobile-web-app-capable" content="yes">
 
-  <title>Scenery</title>
+  <title>Examples - Scenery</title>
   
-  <link rel="stylesheet" href="contrib/bootstrap-2.2.2.css">
+  <link rel="stylesheet" href="../contrib/bootstrap-2.2.2.css">
   
   <!-- jQuery and LoDash are dependencies -->
-  <script src="contrib/jquery-1.8.3.min.js"></script>
+  <script src="../contrib/jquery-1.8.3.min.js"></script>
   <!-- <script src="contrib/lodash.min-1.0.0-rc.3.js"></script> -->
   
   <!-- For the styling -->
-  <script src="contrib/bootstrap-2.2.2.js"></script>
+  <script src="../contrib/bootstrap-2.2.2.js"></script>
   
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <!-- <script src="dist/development/scenery.js"></script> -->
@@ -37,9 +37,9 @@
     <div class="navbar-inner">
       <a class="brand" href="/scenery">Scenery</a>
       <ul class="nav">
-        <li class="active"><a href="/scenery">Home</a></li>
+        <li><a href="/scenery/">Home</a></li>
         <li><a href="/scenery/doc">Documentation</a></li>
-        <li><a href="/scenery/examples">Examples</a></li>
+        <li class="active"><a href="/scenery/examples">Examples</a></li>
       </ul>
     </div>
   </div>
@@ -48,22 +48,27 @@
     <div class="span3"></div>
     <div class="span6">
       <div class="page-header" style="text-align: center;">
-        <h1>Scenery</h1>
+        <h1>Scenery Examples</h1>
       </div>
       
-      <p class="lead">
-        A prototype 2D HTML5 scene graph that can display quickly display interactive graphics using
-        Canvas, SVG, and WebGL (soon) under the hood.
-      </p>
-      
-      <div style="text-align: center;">
-        <button class="btn btn-primary" type="button" onclick="window.location='dist/standalone/scenery.min.js';">Download latest (alpha) version</button>
+      <div class="example">
+        <a href="hello-world.html">Hello World!</a>
+      </div>
+      <div class="example">
+        <a href="shapes.html">Shapes</a>
+      </div>
+      <div class="example">
+        <a href="cursors.html">Cursors</a>
+      </div>
+      <div class="example">
+        <a href="multi-touch.html">Simple Multi-Touch Dragging</a>
+      </div>
+      <div class="example">
+        <a href="devious-drag.html">Dragging Corner Cases</a>
       </div>
       
     </div>
     <div class="span3"></div>
   </div>
-  
-  <a href="https://github.com/phetsims/scenery"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
 </body>
 </html>
