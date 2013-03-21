@@ -99,6 +99,12 @@
       <div class="ph2"><a href="#api">Scenery API</a></div>
       <a class="navlink" href="#node">Node</a><br>
       <a class="sublink" href="#node-options">(options)</a><br>
+      <a class="sublink" href="#node-children">children</a><br>
+      <a class="sublink" href="#node-parents">parents</a><br>
+      <a class="sublink" href="#node-addChild">addChild</a><br>
+      <a class="sublink" href="#node-insertChild">insertChild</a><br>
+      <a class="sublink" href="#node-removeChild">removeChild</a><br>
+      <a class="sublink" href="#node-detach">detach</a><br>
     </div>
     <div class="span6">
       <h2 id="tutorials">Tutorials</h2>
@@ -134,6 +140,50 @@
         <li><a href="#node-layerSplitBefore">layerSplitBefore</a>: Forces a split between layers before this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.</li>
         <li><a href="#node-layerSplitAfter">layerSplitAfter</a>: Forces a split between layers after this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.</li>
       </ul>
+      
+      <h4 id="node-children">node.children</h4>
+      <p>
+        ES5 getter/setter to node.getChildren() and node.setChildren( children ). This will return a copy of node's array of children, in rendering
+        order (later children render above previous children). Making changes to the returned array will not change node's children.
+      </p>
+      <p>
+        This can also be used when creating a Node:
+      </p>
+      <pre class="brush: js">
+var container = new scenery.Node( {
+  children: [
+    // arbitrary array of children that will be added to the node
+    new scenery.Node(),
+    new scenery.Node()
+  ]
+} );
+      </pre>
+      
+      <h4 id="node-parents">node.parents</h4>
+      <p>
+        ES5 getter to node.getParents(). Will return an array of parent nodes, but <strong>order is not significant</strong>.
+      </p>
+      
+      <h4 id="node-addChild">node.addChild( childNode )</h4>
+      <p>
+        Appends childNode to node's list of children. childNode will be displayed above node and node's other children.
+      </p>
+      
+      <h4 id="node-insertChild">node.insertChild( index, childNode )</h4>
+      <p>
+        Inserts childNode into node's children at the specified index. insertChild( 0, childNode ) will make childNode the first child, and
+        insertChild( node.children.length, childNode ) is the same ass addChild( childNode ).
+      </p>
+      
+      <h4 id="node-removeChild">node.removeChild( childNode )</h4>
+      <p>
+        Removes childNode from node's children.
+      </p>
+      
+      <h4 id="node-detach">node.detach()</h4>
+      <p>
+        Removes this node from all of its parents.
+      </p>
       
     </div>
     <div class="span3"></div>
