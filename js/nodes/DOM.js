@@ -11,6 +11,8 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
+  var extend = require( 'PHET_CORE/extend' );
+  
   var Bounds2 = require( 'DOT/Bounds2' );
   
   var scenery = require( 'SCENERY/scenery' );
@@ -45,115 +47,115 @@ define( function( require ) {
   };
   var DOM = scenery.DOM;
   
-  DOM.prototype = objectCreate( Node.prototype );
-  DOM.prototype.constructor = DOM;
-  
-  DOM.prototype.invalidatePaint = function( bounds ) {
-    Node.prototype.invalidatePaint.call( this, bounds );
-  };
-  
-  // needs to be attached to the DOM tree for this to work
-  DOM.prototype.calculateDOMBounds = function() {
-    var boundingRect = this._element.getBoundingClientRect();
-    return new Bounds2( 0, 0, boundingRect.width, boundingRect.height );
-  };
-  
-  DOM.prototype.createTemporaryContainer = function() {
-    var temporaryContainer = document.createElement( 'div' );
-    $( temporaryContainer ).css( {
-      display: 'hidden',
-      padding: '0 !important',
-      margin: '0 !important',
-      position: 'absolute',
-      left: 0,
-      top: 0,
-      width: 65535,
-      height: 65535
-    } );
-    return temporaryContainer;
-  };
-  
-  DOM.prototype.invalidateDOM = function() {
-    // prevent this from being executed as a side-effect from inside one of its own calls
-    if ( this.invalidateDOMLock ) {
-      return;
-    }
-    this.invalidateDOMLock = true;
+  DOM.prototype = extend( {}, Node.prototype, {
+    constructor: DOM,
     
-    // we will place ourselves in a temporary container to get our real desired bounds
-    var temporaryContainer = this.createTemporaryContainer();
+    // needs to be attached to the DOM tree for this to work
+    calculateDOMBounds: function() {
+      var boundingRect = this._element.getBoundingClientRect();
+      return new Bounds2( 0, 0, boundingRect.width, boundingRect.height );
+    },
     
-    // move to the temporary container
-    this._container.removeChild( this._element );
-    temporaryContainer.appendChild( this._element );
-    document.body.appendChild( temporaryContainer );
+    createTemporaryContainer: function() {
+      var temporaryContainer = document.createElement( 'div' );
+      $( temporaryContainer ).css( {
+        display: 'hidden',
+        padding: '0 !important',
+        margin: '0 !important',
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        width: 65535,
+        height: 65535
+      } );
+      return temporaryContainer;
+    },
     
-    // bounds computation and resize our container to fit precisely
-    var selfBounds = this.calculateDOMBounds();
-    this.invalidateSelf( selfBounds );
-    this._$container.width( selfBounds.getWidth() );
-    this._$container.height( selfBounds.getHeight() );
-    
-    // move back to the main container
-    document.body.removeChild( temporaryContainer );
-    temporaryContainer.removeChild( this._element );
-    this._container.appendChild( this._element );
-    
-    this.invalidateDOMLock = false;
-  };
-  
-  DOM.prototype.getDOMElement = function() {
-    return this._container;
-  };
-  
-  DOM.prototype.updateCSSTransform = function( transform ) {
-    this._$container.css( transform.getMatrix().getCSSTransformStyles() );
-  };
-  
-  DOM.prototype.hasSelf = function() {
-    return true;
-  };
-  
-  DOM.prototype.setElement = function( element ) {
-    if ( this._element !== element ) {
-      if ( this._element ) {
-        this._container.removeChild( this._element );
+    invalidateDOM: function() {
+      // prevent this from being executed as a side-effect from inside one of its own calls
+      if ( this.invalidateDOMLock ) {
+        return;
       }
+      this.invalidateDOMLock = true;
       
-      this._element = element;
-      this._$element = $( element );
+      // we will place ourselves in a temporary container to get our real desired bounds
+      var temporaryContainer = this.createTemporaryContainer();
       
+      // move to the temporary container
+      this._container.removeChild( this._element );
+      temporaryContainer.appendChild( this._element );
+      document.body.appendChild( temporaryContainer );
+      
+      // bounds computation and resize our container to fit precisely
+      var selfBounds = this.calculateDOMBounds();
+      this.invalidateSelf( selfBounds );
+      this._$container.width( selfBounds.getWidth() );
+      this._$container.height( selfBounds.getHeight() );
+      
+      // move back to the main container
+      document.body.removeChild( temporaryContainer );
+      temporaryContainer.removeChild( this._element );
       this._container.appendChild( this._element );
       
-      // TODO: bounds issue, since this will probably set to empty bounds and thus a repaint may not draw over it
-      this.invalidateDOM();  
-    }
+      this.invalidateDOMLock = false;
+    },
+    
+    getDOMElement: function() {
+      return this._container;
+    },
+    
+    updateCSSTransform: function( transform ) {
+      this._$container.css( transform.getMatrix().getCSSTransformStyles() );
+    },
+    
+    hasSelf: function() {
+      return true;
+    },
+    
+    setElement: function( element ) {
+      if ( this._element !== element ) {
+        if ( this._element ) {
+          this._container.removeChild( this._element );
+        }
+        
+        this._element = element;
+        this._$element = $( element );
+        
+        this._container.appendChild( this._element );
+        
+        // TODO: bounds issue, since this will probably set to empty bounds and thus a repaint may not draw over it
+        this.invalidateDOM();  
+      }
 
-    return this; // allow chaining
-  };
-  
-  DOM.prototype.getElement = function() {
-    return this._element;
-  };
-  
-  DOM.prototype.setInteractive = function( interactive ) {
-    if ( this._interactive !== interactive ) {
-      this._interactive = interactive;
-      
-      // TODO: anything needed here?
-    }
-  };
-  
-  DOM.prototype.isInteractive = function() {
-    return this._interactive;
-  };
+      return this; // allow chaining
+    },
+    
+    getElement: function() {
+      return this._element;
+    },
+    
+    setInteractive: function( interactive ) {
+      if ( this._interactive !== interactive ) {
+        this._interactive = interactive;
+        
+        // TODO: anything needed here?
+      }
+    },
+    
+    isInteractive: function() {
+      return this._interactive;
+    },
+    
+    set element( value ) { this.setElement( value ); },
+    get element() { return this.getElement(); },
+    
+    set interactive( value ) { this.setInteractive( value ); },
+    get interactive() { return this.isInteractive(); }
+  } );
   
   DOM.prototype._mutatorKeys = [ 'element', 'interactive' ].concat( Node.prototype._mutatorKeys );
   
   DOM.prototype._supportedRenderers = [ Renderer.DOM ];
-  
-  Object.defineProperty( DOM.prototype, 'element', { set: DOM.prototype.setElement, get: DOM.prototype.getElement } );
-  Object.defineProperty( DOM.prototype, 'interactive', { set: DOM.prototype.setInteractive, get: DOM.prototype.isInteractive } );
   
   return DOM;
 } );
