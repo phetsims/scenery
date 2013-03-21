@@ -54,6 +54,9 @@ define( function( require ) {
         } );
       }
     }
+    
+    // we'll store a copy of a transform
+    this._transformCache = null;
   };
   var Trail = scenery.Trail;
   
@@ -86,18 +89,27 @@ define( function( require ) {
     },
     
     getTransform: function() {
-      // always return a defensive copy of a transform
-      var transform = new Transform3();
+      if ( !this._transformCache ) {
+        // always return a defensive copy of a transform
+        var transform = new Transform3();
+        
+        // from the root up
+        _.each( this.nodes, function( node ) {
+          transform.appendTransform( node._transform );
+        } );
+        this._transformCache = transform;
+      }
       
-      // from the root up
-      _.each( this.nodes, function( node ) {
-        transform.appendTransform( node._transform );
-      } );
-      
-      return transform;
+      return this._transformCache;
+    },
+    
+    clearCache: function() {
+      this._transformCache = null;
     },
     
     addAncestor: function( node, index ) {
+      this.clearCache();
+      
       var oldRoot = this.nodes[0];
       
       this.nodes.unshift( node );
@@ -113,6 +125,8 @@ define( function( require ) {
     },
     
     removeAncestor: function() {
+      this.clearCache();
+      
       this.nodes.shift();
       if ( this.indices.length ) {
         this.indices.shift();
@@ -127,6 +141,8 @@ define( function( require ) {
     },
     
     addDescendant: function( node, index ) {
+      this.clearCache();
+      
       var parent = this.lastNode();
       
       this.nodes.push( node );
@@ -140,6 +156,8 @@ define( function( require ) {
     },
     
     removeDescendant: function() {
+      this.clearCache();
+      
       this.nodes.pop();
       if ( this.indices.length ) {
         this.indices.pop();
