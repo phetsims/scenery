@@ -10,29 +10,12 @@
   <title>Scenery</title>
   
   <link rel="stylesheet" href="contrib/bootstrap-2.2.2.css">
-  <link rel="stylesheet" href="contrib/syntaxhighlighter-3.0.83/shCore.css">
-  <link rel="stylesheet" href="contrib/syntaxhighlighter-3.0.83/shThemeDefault.css">
-  
-  <!-- jQuery and LoDash are dependencies -->
-  <script src="contrib/jquery-1.8.3.min.js"></script>
-  <script src="contrib/lodash.min-1.0.0-rc.3.js"></script>
   
   <!-- For the styling -->
   <script src="contrib/bootstrap-2.2.2.js"></script>
   
-  <script src="contrib/syntaxhighlighter-3.0.83/shCore.js"></script>
-  <script src="contrib/syntaxhighlighter-3.0.83/shBrushJScript.js"></script>
-  <script src="contrib/syntaxhighlighter-3.0.83/shBrushXml.js"></script>
-  
-  <!-- MathJax config -->
-  <script type="text/x-mathjax-config">
-  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
-  </script>
-  <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-  
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script src="dist/development/scenery.js"></script>
-  <!-- <script src="dist/standalone/scenery.min.js"></script> -->
   
   <style type="text/css">
     
@@ -46,17 +29,37 @@
 </head>
 
 <body>
-  <div class="row-fluid">
-    <div class="span2"></div>
-    <div class="span8">
-      <h1>Scenery</h1>
-      
+  <div class="navbar navbar-inverse navbar-static-top">
+    <div class="navbar-inner">
+      <a class="brand" href="/">Scenery</a>
+      <ul class="nav">
+        <li class="active"><a href="/">Home</a></li>
+        <li><a href="doc">Documentation</a></li>
+        <li><a href="examples">Examples</a></li>
+      </ul>
     </div>
-    <div class="span2"></div>
   </div>
   
-  <script type="text/javascript">
-    SyntaxHighlighter.all();
-  </script>
+  <div class="row-fluid">
+    <div class="span3"></div>
+    <div class="span6">
+      <div class="page-header" style="text-align: center;">
+        <h1>Scenery</h1>
+      </div>
+      
+      <p class="lead">
+        A prototype 2D HTML5 scene graph that can display quickly display interactive graphics using
+        Canvas, SVG, and WebGL (soon) under the hood.
+      </p>
+      
+      <div style="text-align: center;">
+        <button class="btn btn-primary" type="button" onclick="window.location='dist/standalone/scenery.min.js';">Download latest (alpha) version</button>
+      </div>
+      
+    </div>
+    <div class="span3"></div>
+  </div>
+  
+  <a href="https://github.com/phetsims/scenery"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
 </body>
 </html>
