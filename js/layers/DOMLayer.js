@@ -41,6 +41,7 @@ define( function( require ) {
     
     // maps trail ID => DOM element fragment
     this.idElementMap = {};
+    this.idTrailMap = {};
     
     this.initializeBoundaries();
   };
@@ -59,7 +60,9 @@ define( function( require ) {
         // all nodes should have DOM support if node.hasSelf()
         if ( node.hasSelf() ) {
           var element = node.getDOMElement();
+          // TODO: support removal of nodes!
           layer.idElementMap[trail.getUniqueId()] = element;
+          layer.idTrailMap[trail.getUniqueId()] = trail.copy();
           layer.div.appendChild( element );
           node.updateCSSTransform( trail.getTransform() );
         }
@@ -78,15 +81,18 @@ define( function( require ) {
     markDirtyRegion: function( args ) {
       var node = args.node;
       var trail = args.trail;
-      
-      var element = this.idElementMap[trail.getUniqueId()];
-      if ( element ) {
-        var visible = _.every( trail.nodes, function( node ) { return node.isVisible(); } );
-        
-        if ( visible ) {
-          element.style.display = 'block';
-        } else {
-          element.style.display = 'hidden';
+      for ( var trailId in this.idTrailMap ) {
+        var subtrail = this.idTrailMap[trailId];
+        if ( subtrail.isExtensionOf( trail, true ) ) {
+          var element = this.idElementMap[trailId];
+          
+          var visible = _.every( subtrail.nodes, function( node ) { return node.isVisible(); } );
+          
+          if ( visible ) {
+            element.style.visibility = 'visible';
+          } else {
+            element.style.visibility = 'hidden';
+          }
         }
       }
     },
