@@ -324,6 +324,11 @@ define( function( require ) {
       // if not yet handled, run through the trail in order to see if one of them will handle the event
       // at the base of the trail should be the scene node, so the scene will be notified last
       this.dispatchToTargets( trail, pointer, type, inputEvent, bubbles );
+      
+      // TODO: better interactivity handling?
+      if ( !trail.lastNode().interactive ) {
+        event.preventDefault();
+      }
     },
     
     // TODO: reduce code sharing between here and dispatchToTargets!

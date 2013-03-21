@@ -399,7 +399,7 @@ define( function( require ) {
     // TODO extract similarity between standalone and fullscreen!
     var element = this.$main[0];
     this.initializeEvents( _.extend( {}, {
-      preventDefault: true,
+      preventDefault: false,
       listenerTarget: element,
       pointFromEvent: function( evt ) {
         var mainBounds = element.getBoundingClientRect();
@@ -411,7 +411,7 @@ define( function( require ) {
   Scene.prototype.initializeFullscreenEvents = function( parameters ) {
     var element = this.$main[0];
     this.initializeEvents( _.extend( {}, {
-      preventDefault: true,
+      preventDefault: false,
       listenerTarget: document,
       pointFromEvent: function( evt ) {
         var mainBounds = element.getBoundingClientRect();
