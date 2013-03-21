@@ -399,7 +399,6 @@ define( function( require ) {
     // TODO extract similarity between standalone and fullscreen!
     var element = this.$main[0];
     this.initializeEvents( _.extend( {}, {
-      preventDefault: false,
       listenerTarget: element,
       pointFromEvent: function( evt ) {
         var mainBounds = element.getBoundingClientRect();
@@ -411,7 +410,6 @@ define( function( require ) {
   Scene.prototype.initializeFullscreenEvents = function( parameters ) {
     var element = this.$main[0];
     this.initializeEvents( _.extend( {}, {
-      preventDefault: false,
       listenerTarget: document,
       pointFromEvent: function( evt ) {
         var mainBounds = element.getBoundingClientRect();
@@ -430,7 +428,6 @@ define( function( require ) {
     // TODO: come up with more parameter names that have the same string length, so it looks creepier
     var pointFromEvent = parameters.pointFromEvent;
     var listenerTarget = parameters.listenerTarget;
-    var preventDefault = parameters.preventDefault;
     
     var input = new scenery.Input( scene, listenerTarget );
     scene.input = input;
@@ -465,98 +462,77 @@ define( function( require ) {
       // accepts pointer events corresponding to the spec at http://www.w3.org/TR/pointerevents/
       input.addListener( 'pointerdown', function( domEvent ) {
         input.pointerDown( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
-        if ( preventDefault ) { domEvent.preventDefault(); }
       } );
       input.addListener( 'pointerup', function( domEvent ) {
         input.pointerUp( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
-        if ( preventDefault ) { domEvent.preventDefault(); }
       } );
       input.addListener( 'pointermove', function( domEvent ) {
         input.pointerMove( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
-        if ( preventDefault ) { domEvent.preventDefault(); }
       } );
       input.addListener( 'pointerover', function( domEvent ) {
         input.pointerOver( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
-        if ( preventDefault ) { domEvent.preventDefault(); }
       } );
       input.addListener( 'pointerout', function( domEvent ) {
         input.pointerOut( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
-        if ( preventDefault ) { domEvent.preventDefault(); }
       } );
       input.addListener( 'pointercancel', function( domEvent ) {
         input.pointerCancel( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
-        if ( preventDefault ) { domEvent.preventDefault(); }
       } );
     } else if ( this.enablePointerEvents && implementsMSPointerEvents ) {
       input.addListener( 'MSPointerDown', function( domEvent ) {
         input.pointerDown( domEvent.pointerId, msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
-        if ( preventDefault ) { domEvent.preventDefault(); }
       } );
       input.addListener( 'MSPointerUp', function( domEvent ) {
         input.pointerUp( domEvent.pointerId, msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
-        if ( preventDefault ) { domEvent.preventDefault(); }
       } );
       input.addListener( 'MSPointerMove', function( domEvent ) {
         input.pointerMove( domEvent.pointerId, msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
-        if ( preventDefault ) { domEvent.preventDefault(); }
       } );
       input.addListener( 'MSPointerOver', function( domEvent ) {
         input.pointerOver( domEvent.pointerId, msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
-        if ( preventDefault ) { domEvent.preventDefault(); }
       } );
       input.addListener( 'MSPointerOut', function( domEvent ) {
         input.pointerOut( domEvent.pointerId, msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
-        if ( preventDefault ) { domEvent.preventDefault(); }
       } );
       input.addListener( 'MSPointerCancel', function( domEvent ) {
         input.pointerCancel( domEvent.pointerId, msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
-        if ( preventDefault ) { domEvent.preventDefault(); }
       } );
     } else {
       input.addListener( 'mousedown', function( domEvent ) {
         input.mouseDown( pointFromEvent( domEvent ), domEvent );
-        if ( preventDefault ) { domEvent.preventDefault(); }
       } );
       input.addListener( 'mouseup', function( domEvent ) {
         input.mouseUp( pointFromEvent( domEvent ), domEvent );
-        if ( preventDefault ) { domEvent.preventDefault(); }
       } );
       input.addListener( 'mousemove', function( domEvent ) {
         input.mouseMove( pointFromEvent( domEvent ), domEvent );
-        if ( preventDefault ) { domEvent.preventDefault(); }
       } );
       input.addListener( 'mouseover', function( domEvent ) {
         input.mouseOver( pointFromEvent( domEvent ), domEvent );
-        if ( preventDefault ) { domEvent.preventDefault(); }
       } );
       input.addListener( 'mouseout', function( domEvent ) {
         input.mouseOut( pointFromEvent( domEvent ), domEvent );
-        if ( preventDefault ) { domEvent.preventDefault(); }
       } );
       
       input.addListener( 'touchstart', function( domEvent ) {
         forEachChangedTouch( domEvent, function( id, point ) {
           input.touchStart( id, point, domEvent );
         } );
-        if ( preventDefault ) { domEvent.preventDefault(); }
       } );
       input.addListener( 'touchend', function( domEvent ) {
         forEachChangedTouch( domEvent, function( id, point ) {
           input.touchEnd( id, point, domEvent );
         } );
-        if ( preventDefault ) { domEvent.preventDefault(); }
       } );
       input.addListener( 'touchmove', function( domEvent ) {
         forEachChangedTouch( domEvent, function( id, point ) {
           input.touchMove( id, point, domEvent );
         } );
-        if ( preventDefault ) { domEvent.preventDefault(); }
       } );
       input.addListener( 'touchcancel', function( domEvent ) {
         forEachChangedTouch( domEvent, function( id, point ) {
           input.touchCancel( id, point, domEvent );
         } );
-        if ( preventDefault ) { domEvent.preventDefault(); }
       } );
     }
   };
