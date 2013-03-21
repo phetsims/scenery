@@ -229,6 +229,7 @@ define( function( require ) {
       var first = true;
       
       while ( !pointer.equalsNested( other ) ) {
+        assert && assert( pointer.compareNested( other ) !== 1, 'skipped in depthFirstUntil' );
         var skipSubtree = false;
         
         if ( first ) {
