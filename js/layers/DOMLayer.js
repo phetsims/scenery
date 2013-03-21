@@ -43,12 +43,59 @@ define( function( require ) {
     this.idElementMap = {};
     this.idTrailMap = {};
     
+    this.trails = [];
+    
     this.initializeBoundaries();
   };
   var DOMLayer = scenery.DOMLayer;
   
   DOMLayer.prototype = _.extend( {}, Layer.prototype, {
     constructor: DOMLayer,
+    
+    addNodeFromTrail: function( trail ) {
+      this.reindexTrails();
+      
+      var node = trail.lastNode();
+      
+      var element = node.getDOMElement();
+      
+      this.idElementMap[trail.getUniqueId()] = element;
+      this.idTrailMap[trail.getUniqueId()] = trail;
+      
+      // walk the insertion index up the array. TODO: performance: binary search version?
+      var insertionIndex;
+      for ( insertionIndex = 0; insertionIndex < this.trails.length; insertionIndex++ ) {
+        var comparison = this.trails[insertionIndex].compare( trail );
+        assert && assert( comparison !== 0, 'Trail has already been inserted into the DOMLayer' );
+        if ( comparison === 1 ) { // TODO: enum values!
+          break;
+        }
+      }
+      
+      if ( insertionIndex === this.div.childNodes.length ) {
+        this.div.appendChild( element );
+        this.trails.push( trail );
+      } else {
+        this.div.insertBefore( this.getElementFromTrail( this.trails[insertionIndex] ) );
+        this.trails.splice( insertionIndex, 0, trail );
+      }
+      node.updateCSSTransform( trail.getTransform() );
+    },
+    
+    removeNodeFromTrail: function( trail ) {
+      this.reindexTrails();
+      
+      var element = this.getElementFromTrail( trail );
+      assert && assert( element, 'Trail does not exist in the DOMLayer' );
+      
+      delete this.idElementMap[trail.getUniqueId];
+      delete this.idTrailMap[trail.getUniqueId];
+      
+      this.div.removeChild( element );
+      
+      var removalIndex = this.getIndexOfTrail( trail );
+      trails.splice( removalIndex, 1 );
+    },
     
     initializeBoundaries: function() {
       var layer = this;
@@ -59,14 +106,30 @@ define( function( require ) {
         
         // all nodes should have DOM support if node.hasSelf()
         if ( node.hasSelf() ) {
-          var element = node.getDOMElement();
-          // TODO: support removal of nodes!
-          layer.idElementMap[trail.getUniqueId()] = element;
-          layer.idTrailMap[trail.getUniqueId()] = trail.copy();
-          layer.div.appendChild( element );
-          node.updateCSSTransform( trail.getTransform() );
+          layer.addNodeFromTrail( trail.copy() );
         }
       } );
+    },
+    
+    getElementFromTrail: function( trail ) {
+      return this.idElementMap[trail.getUniqueId()];
+    },
+    
+    reindexTrails: function() {
+      _.each( this.trails, function( trail ) {
+        trail.reindex();
+      } );
+    },
+    
+    getIndexOfTrail: function( trail ) {
+      // find the index where our trail is at. strict equality won't work, we want to compare differently
+      var i;
+      for ( i = 0; i < this.trails.length; i++ ) {
+        if ( this.trails[i].compare( trail ) === 0 ) {
+          return i;
+        }
+      }
+      throw new Error( 'DOMLayer.getIndexOfTrail unable to find trail: ' + trail.toString() );
     },
     
     render: function( scene, args ) {
