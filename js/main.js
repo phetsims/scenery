@@ -40,6 +40,7 @@ define( [
     'SCENERY/nodes/Path',
     'SCENERY/nodes/Strokable',
     'SCENERY/nodes/Text',
+    'SCENERY/nodes/VBox',
     
     'SCENERY/util/Color',
     'SCENERY/util/Font',

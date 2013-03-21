@@ -26,19 +26,17 @@ define( function( require ) {
    */
   scenery.VBox = function( options ) {
     // ensure we have a parameter object
-    this.options = options || {};
-
-    // default to black filled text
-    if ( typeof options.spacing === 'undefined' ) {
-      options.spacing = function() {return 0;};
-    }
-    if ( typeof options.align === 'undefined' ) {
-      options.align = "center";
-    }
-    else if ( typeof options.spacing === 'number' ) {
+    this.options = options = _.extend( {
+      // defaults
+      spacing: function() { return 0; },
+      align: 'center'
+    }, options );
+    
+    if ( typeof options.spacing === 'number' ) {
       var spacingConstant = options.spacing;
-      options.spacing = function() {return spacingConstant;};
+      options.spacing = function() { return spacingConstant; };
     }
+
     Node.call( this, options );
     this.updateLayout();
   };
