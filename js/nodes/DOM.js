@@ -47,7 +47,7 @@ define( function( require ) {
   };
   var DOM = scenery.DOM;
   
-  DOM.prototype = extend( {}, Node.prototype, {
+  DOM.prototype = extend( objectCreate( Node.prototype ), {
     constructor: DOM,
     
     // needs to be attached to the DOM tree for this to work
