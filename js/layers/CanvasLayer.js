@@ -126,7 +126,12 @@ define( function( require ) {
       var startPointer = new scenery.TrailPointer( this.startSelfTrail, true );
       var endPointer = new scenery.TrailPointer( this.endSelfTrail, true );
       
-      var invisibleCount = 0; // we count how many invisible nodes are in our trail, so we can properly iterate without inspecting everything.
+      /*
+       * We count how many invisible nodes are in our trail, so we can properly iterate without inspecting everything.
+       * Additionally, state changes (enter/exit) are only done when nodes are visible, so we skip overhead. If
+       * invisibleCount > 0, then the current node is invisible.
+       */
+      var invisibleCount = 0;
       
       var boundaryTrail;
       
@@ -142,8 +147,11 @@ define( function( require ) {
       for ( i = 0; i < startWalkLength; i++ ) {
         var startNode = startPointer.trail.nodes[i];
         boundaryTrail.addDescendant( startNode );
-        startNode.enterState( state, boundaryTrail );
         invisibleCount += startNode.isVisible() ? 0 : 1;
+        
+        if ( invisibleCount === 0 ) {
+          startNode.enterState( state, boundaryTrail ); // walk up initial state
+        }
       }
       
       startPointer.depthFirstUntil( endPointer, function renderPointer( pointer ) {
@@ -197,9 +205,13 @@ define( function( require ) {
       boundaryTrail = endPointer.trail.copy();
       var endWalkLength = endPointer.trail.length - ( endPointer.isAfter ? 1 : 0 );
       for ( i = endWalkLength - 1; i >= 0; i-- ) {
-        endPointer.trail.nodes[i].exitState( state, boundaryTrail );
+        var endNode = endPointer.trail.nodes[i];
         boundaryTrail.removeDescendant();
-        // no invisibleCount change needed, since that is only used to decide whether things are visible or not
+        invisibleCount -= endNode.isVisible() ? 0 : 1;
+        
+        if ( invisibleCount === 0 ) {
+          endNode.exitState( state, boundaryTrail ); // walk back the state
+        }
       }
     },
     
