@@ -930,9 +930,7 @@ define( function( require ) {
         
         this._visible = visible;
         
-        if ( visible ) {
-          this.invalidatePaint();
-        }
+        this.invalidatePaint();
       }
       return this;
     },
