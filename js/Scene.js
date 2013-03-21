@@ -72,8 +72,7 @@ define( function( require ) {
     
     this.$main = $main;
     // resize the main container as a sanity check
-    this.$main.width( options.width );
-    this.$main.height( options.height );
+    this.setSize( options.width, options.height );
     
     this.sceneBounds = new Bounds2( 0, 0, $main.width(), $main.height() );
     
@@ -353,10 +352,20 @@ define( function( require ) {
     } );
   };
   
-  Scene.prototype.resize = function( width, height ) {
+  Scene.prototype.setSize = function( width, height ) {
+    // resize our main container
     this.$main.width( width );
     this.$main.height( height );
+    
+    // set the container's clipping so anything outside won't show up
+    // TODO: verify this clipping doesn't reduce performance!
+    this.$main.css( 'clip', 'rect(0px,' + width + 'px,' + height + 'px,0px)' );
+    
     this.sceneBounds = new Bounds2( 0, 0, width, height );
+  };
+  
+  Scene.prototype.resize = function( width, height ) {
+    this.setSize( width, height );
     this.rebuildLayers(); // TODO: why?
   };
   
@@ -549,7 +558,7 @@ define( function( require ) {
     
   function applyCSSHacks( $main, options ) {
     // to use CSS3 transforms for performance, hide anything outside our bounds by default
-    if ( options.allowSceneOverflow ) {
+    if ( !options.allowSceneOverflow ) {
       $main.css( 'overflow', 'hidden' );
     }
     
