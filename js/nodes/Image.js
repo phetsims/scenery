@@ -15,6 +15,7 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
+  var extend = require( 'PHET_CORE/extend' );
   var Bounds2 = require( 'DOT/Bounds2' );
   
   var scenery = require( 'SCENERY/scenery' );
@@ -58,144 +59,146 @@ define( function( require ) {
   };
   var Image = scenery.Image;
   
-  Image.prototype = objectCreate( Node.prototype );
-  Image.prototype.constructor = Image;
-  
-  Image.prototype.invalidateImage = function() {
-    this.invalidateSelf( new Bounds2( 0, 0, this.getImageWidth(), this.getImageHeight() ) );
-  };
-  
-  Image.prototype.getImage = function() {
-    return this._image;
-  };
-  
-  Image.prototype.setImage = function( image ) {
-    var self = this;
+  Image.prototype = extend( objectCreate( Node.prototype ), {
+    constructor: Image,
     
-    if ( this._image !== image && ( typeof image !== 'string' || !this._image || image !== this._image.src ) ) {
-      // don't leak memory by referencing old images
-      if ( this._image ) {
-        this._image.removeEventListener( this.loadListener );
-      }
+    invalidateImage: function() {
+      this.invalidateSelf( new Bounds2( 0, 0, this.getImageWidth(), this.getImageHeight() ) );
+    },
+    
+    getImage: function() {
+      return this._image;
+    },
+    
+    setImage: function( image ) {
+      var self = this;
       
-      if ( typeof image === 'string' ) {
-        // create an image with the assumed URL
-        var src = image;
-        image = document.createElement( 'img' );
-        image.addEventListener( this.loadListener );
-        image.src = src;
-      } else if ( image instanceof HTMLImageElement ) {
-        // only add a listener if we probably haven't loaded yet
-        if ( !image.width || !image.height ) {
+      if ( this._image !== image && ( typeof image !== 'string' || !this._image || image !== this._image.src ) ) {
+        // don't leak memory by referencing old images
+        if ( this._image ) {
+          this._image.removeEventListener( this.loadListener );
+        }
+        
+        if ( typeof image === 'string' ) {
+          // create an image with the assumed URL
+          var src = image;
+          image = document.createElement( 'img' );
           image.addEventListener( this.loadListener );
+          image.src = src;
+        } else if ( image instanceof HTMLImageElement ) {
+          // only add a listener if we probably haven't loaded yet
+          if ( !image.width || !image.height ) {
+            image.addEventListener( this.loadListener );
+          }
         }
+        
+        // swap supported renderers if necessary
+        if ( image instanceof HTMLCanvasElement ) {
+          if ( !this.hasOwnProperty( '_supportedRenderers' ) ) {
+            this._supportedRenderers = [ Renderer.Canvas ];
+            this.markLayerRefreshNeeded();
+          }
+        } else {
+          if ( this.hasOwnProperty( '_supportedRenderers' ) ) {
+            delete this._supportedRenderers; // will leave prototype intact
+            this.markLayerRefreshNeeded();
+          }
+        }
+        
+        this._image = image;
+        this.invalidateImage(); // yes, if we aren't loaded yet this will give us 0x0 bounds
       }
-      
-      // swap supported renderers if necessary
-      if ( image instanceof HTMLCanvasElement ) {
-        if ( !this.hasOwnProperty( '_supportedRenderers' ) ) {
-          this._supportedRenderers = [ Renderer.Canvas ];
-          this.markLayerRefreshNeeded();
-        }
-      } else {
-        if ( this.hasOwnProperty( '_supportedRenderers' ) ) {
-          delete this._supportedRenderers; // will leave prototype intact
-          this.markLayerRefreshNeeded();
-        }
-      }
-      
-      this._image = image;
-      this.invalidateImage(); // yes, if we aren't loaded yet this will give us 0x0 bounds
-    }
-    return this;
-  };
-  
-  Image.prototype.invalidateOnImageLoad = function( image ) {
-    var self = this;
-    var listener = function( event ) {
-      self.invalidateImage();
-      
-      // don't leak memory!
-      image.removeEventListener( listener );
-    };
-    image.addEventListener( listener );
-  };
-  
-  Image.prototype.getImageWidth = function() {
-    return this._image.width;
-  };
-  
-  Image.prototype.getImageHeight = function() {
-    return this._image.height;
-  };
-  
-  Image.prototype.getImageURL = function() {
-    return this._image.src;
-  };
-  
-  // signal that we are actually rendering something
-  Image.prototype.hasSelf = function() {
-    return true;
-  };
-  
-  /*---------------------------------------------------------------------------*
-  * Canvas support
-  *----------------------------------------------------------------------------*/
-  
-  // TODO: add SVG / DOM support
-  Image.prototype.paintCanvas = function( state ) {
-    var layer = state.layer;
-    var context = layer.context;
-    context.drawImage( this._image, 0, 0 );
-  };
-  
-  /*---------------------------------------------------------------------------*
-  * WebGL support
-  *----------------------------------------------------------------------------*/
-  
-  Image.prototype.paintWebGL = function( state ) {
-    throw new Error( 'Image.prototype.paintWebGL unimplemented' );
-  };
-  
-  /*---------------------------------------------------------------------------*
-  * SVG support
-  *----------------------------------------------------------------------------*/
-  
-  Image.prototype.createSVGFragment = function( svg, defs, group ) {
-    var element = document.createElementNS( 'http://www.w3.org/2000/svg', 'image' );
-    element.setAttribute( 'x', 0 );
-    element.setAttribute( 'y', 0 );
-    return element;
-  };
-  
-  Image.prototype.updateSVGFragment = function( element ) {
-    // like <image xlink:href='http://phet.colorado.edu/images/phet-logo-yellow.png' x='0' y='0' height='127px' width='242px'/>
-    var xlinkns = 'http://www.w3.org/1999/xlink';
+      return this;
+    },
     
-    element.setAttribute( 'width', this.getImageWidth() + 'px' );
-    element.setAttribute( 'height', this.getImageHeight() + 'px' );
-    element.setAttributeNS( xlinkns, 'xlink:href', this.getImageURL() );
-  };
-  
-  /*---------------------------------------------------------------------------*
-  * DOM support
-  *----------------------------------------------------------------------------*/
-  
-  Image.prototype.getDOMElement = function() {
-    this._image.style.display = 'block';
-    this._image.style.position = 'absolute';
-    return this._image;
-  };
-  
-  Image.prototype.updateCSSTransform = function( transform ) {
-    $( this._image ).css( transform.getMatrix().getCSSTransformStyles() );
-  };
+    invalidateOnImageLoad: function( image ) {
+      var self = this;
+      var listener = function( event ) {
+        self.invalidateImage();
+        
+        // don't leak memory!
+        image.removeEventListener( listener );
+      };
+      image.addEventListener( listener );
+    },
+    
+    getImageWidth: function() {
+      return this._image.width;
+    },
+    
+    getImageHeight: function() {
+      return this._image.height;
+    },
+    
+    getImageURL: function() {
+      return this._image.src;
+    },
+    
+    // signal that we are actually rendering something
+    hasSelf: function() {
+      return true;
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * Canvas support
+    *----------------------------------------------------------------------------*/
+    
+    // TODO: add SVG / DOM support
+    paintCanvas: function( state ) {
+      var layer = state.layer;
+      var context = layer.context;
+      context.drawImage( this._image, 0, 0 );
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * WebGL support
+    *----------------------------------------------------------------------------*/
+    
+    paintWebGL: function( state ) {
+      throw new Error( 'paintWebGL:nimplemented' );
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * SVG support
+    *----------------------------------------------------------------------------*/
+    
+    createSVGFragment: function( svg, defs, group ) {
+      var element = document.createElementNS( 'http://www.w3.org/2000/svg', 'image' );
+      element.setAttribute( 'x', 0 );
+      element.setAttribute( 'y', 0 );
+      return element;
+    },
+    
+    updateSVGFragment: function( element ) {
+      // like <image xlink:href='http://phet.colorado.edu/images/phet-logo-yellow.png' x='0' y='0' height='127px' width='242px'/>
+      var xlinkns = 'http://www.w3.org/1999/xlink';
+      
+      element.setAttribute( 'width', this.getImageWidth() + 'px' );
+      element.setAttribute( 'height', this.getImageHeight() + 'px' );
+      element.setAttributeNS( xlinkns, 'xlink:href', this.getImageURL() );
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * DOM support
+    *----------------------------------------------------------------------------*/
+    
+    getDOMElement: function() {
+      this._image.style.display = 'block';
+      this._image.style.position = 'absolute';
+      return this._image;
+    },
+    
+    updateCSSTransform: function( transform ) {
+      $( this._image ).css( transform.getMatrix().getCSSTransformStyles() );
+    },
+    
+    set image( value ) { this.setImage( value ); },
+    get image() { return this.getImage(); }
+  } );
   
   Image.prototype._mutatorKeys = [ 'image' ].concat( Node.prototype._mutatorKeys );
   
   Image.prototype._supportedRenderers = [ Renderer.Canvas, Renderer.SVG, Renderer.DOM ];
-  
-  Object.defineProperty( Image.prototype, 'image', { set: Image.prototype.setImage, get: Image.prototype.getImage } );
   
   // utility for others
   Image.createSVGImage = function( url, width, height ) {

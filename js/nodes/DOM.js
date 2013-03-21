@@ -12,7 +12,6 @@ define( function( require ) {
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
   var extend = require( 'PHET_CORE/extend' );
-  
   var Bounds2 = require( 'DOT/Bounds2' );
   
   var scenery = require( 'SCENERY/scenery' );
