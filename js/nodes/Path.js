@@ -138,6 +138,23 @@ define( function( require ) {
       var strokeId = 'stroke' + this.getId();
       var fillId = 'fill' + this.getId();
       
+      // remove old definitions if they exist
+      this.removeSVGDefs( svg, defs );
+      
+      // add new definitions if necessary
+      if ( stroke && stroke.getSVGDefinition ) {
+        defs.appendChild( stroke.getSVGDefinition( strokeId ) );
+      }
+      if ( fill && fill.getSVGDefinition ) {
+        defs.appendChild( fill.getSVGDefinition( fillId ) );
+      }
+    },
+    
+    // cleans up references created with udpateSVGDefs()
+    removeSVGDefs: function( svg, defs ) {
+      var strokeId = 'stroke' + this.getId();
+      var fillId = 'fill' + this.getId();
+      
       // wipe away any old fill/stroke definitions
       var oldStrokeDef = svg.getElementById( strokeId );
       var oldFillDef = svg.getElementById( fillId );
@@ -146,14 +163,6 @@ define( function( require ) {
       }
       if ( oldFillDef ) {
         defs.removeChild( oldFillDef );
-      }
-      
-      // add new definitions if necessary
-      if ( stroke && stroke.getSVGDefinition ) {
-        defs.appendChild( stroke.getSVGDefinition( strokeId ) );
-      }
-      if ( fill && fill.getSVGDefinition ) {
-        defs.appendChild( fill.getSVGDefinition( fillId ) );
       }
     },
     
