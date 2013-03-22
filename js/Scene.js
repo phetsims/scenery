@@ -134,7 +134,18 @@ define( function( require ) {
         // var node = args.node;
         // var trail = args.trail;
         
-        scene.rebuildLayers();
+        // find the closest before and after self trails that are not affected
+        var affectedTrail = args.trail;
+        var beforeTrail = affectedTrail.copy().previous();
+        while ( beforeTrail && !beforeTrail.hasSelf() ) {
+          beforeTrail = beforeTrail.previous();
+        }
+        var afterTrail = affectedTrail.copy().next();
+        while ( afterTrail && !afterTrail.hasSelf() ) {
+          afterTrail = afterTrail.next();
+        }
+        
+        scene.refreshLayers( beforeTrail, afterTrail );
       }
     };
     
@@ -167,6 +178,18 @@ define( function( require ) {
   Scene.prototype.renderScene = function() {
     // TODO: for now, go with the same path. possibly add options later
     this.updateScene();
+  };
+  
+  /*
+   * Responsible for handling any layering changes in-between the two trails.
+   *
+   * @param {Trail} beforeTrail The trail to the closest layer-unmodified self node to the
+                    start of the affected area, or null if that doesn't exist.
+   * @param {Trail} afterTrail The trail to the closest layer-unmodified self node to the
+                    end of the affected area, or null if that doesn't exist.
+   */
+  Scene.prototype.refreshLayers = function( beforeTrail, afterTrail ) {
+    this.rebuildLayers(); // TODO: actual implementation that doesn't rebuild all layers
   };
   
   Scene.prototype.rebuildLayers = function() {
