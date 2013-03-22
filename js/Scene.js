@@ -145,7 +145,7 @@ define( function( require ) {
           afterTrail = afterTrail.next();
         }
         
-        scene.rebuildLayers();
+        scene.refreshLayers( beforeTrail, afterTrail );
       },
       
       dirtyBounds: function( args ) {
