@@ -65,8 +65,6 @@ define( function( require ) {
     // maps trail ID => SVG <g> that contains that node's self and everything under it
     this.idGroupMap = {};
     
-    // maps trail ID => Trail. These trails will need to be reindexed
-    this.idTrailMap = {};
     
     Layer.call( this, args );
     
@@ -86,8 +84,7 @@ define( function( require ) {
      */
     addNodeFromTrail: function( trail ) {
       assert && assert( !( trail.getUniqueId() in this.idFragmentMap ), 'Already contained that trail!' );
-      
-      // TODO: reindex!
+      assert && assert( trail.lastNode().hasSelf(), 'Don\'t add nodes without hasSelf() to SVGLayer' );
       
       var subtrail = this.baseTrail.copy(); // grab the trail up to (and including) the base node, so we don't create superfluous groups
       var lastId = null;
@@ -132,18 +129,44 @@ define( function( require ) {
         lastId = id;
       }
       
-      throw new Error( 'haven\'t added the actual fragment yet!' );
+      // actually add the node into its own group
+      var node = trail.lastNode();
+      var trailId = trail.getUniqueId();
+      
+      var nodeGroup = this.idGroupMap[trailId];
+      var svgFragment = node.createSVGFragment( this.svg, this.defs, nodeGroup );
+      this.updateNode( node, svgFragment );
+      this.updateNodeGroup( node, nodeGroup );
+      this.idFragmentMap[trailId] = svgFragment;
+      nodeGroup.appendChild( svgFragment );
     },
     
     removeNodeFromTrail: function( trail ) {
       assert && assert( !( trail.getUniqueId() in this.idFragmentMap ), 'Already contained that trail!' );
       
-      // TODO: reindex!
+      // clean up the fragment and defs directly died to the node
+      var trailId = trail.getUniqueId();
+      var node = trail.lastNode();
+      var fragment = this.idFragmentMap[trailId];
+      this.idGroupMap[trailId].removeChild( fragment );
+      delete this.idFragmentMap[trailId];
+      if ( node.removeSVGDefs ) {
+        node.removeSVGDefs( this.svg, this.defs );
+      }
       
+      // clean up any unneeded groups
       var subtrail = trail.copy();
-      
       while ( subtrail.length > this.baseTrail.length ) {
+        var id = subtrail.getUniqueId();
         
+        var group = this.idGroupMap[id];
+        group.referenceCount--;
+        if ( group.referenceCount === 0 ) {
+          // completely kill the group
+          group.parentNode.removeChild( group );
+          delete group.trail; // just in case someone held a reference
+          delete this.idGroupMap[id];
+        }
         
         subtrail.removeDescendant();
       }
