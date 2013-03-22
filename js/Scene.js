@@ -235,6 +235,15 @@ define( function( require ) {
                     end of the affected area, or null if that doesn't exist.
    */
   Scene.prototype.refreshLayers = function( beforeTrail, afterTrail ) {
+    var beforeLayer = beforeTrail ? this.layerLookup( beforeTrail ) : null;
+    var afterLayer = afterTrail ? this.layerLookup( afterTrail ) : null;
+    
+    throw new Error( 'TODO we need beforeLayer.type to actually be set' );
+    throw new Error( 'TODO ensure builder walks state up with just "preferred" info - see builder' );
+    throw new Error( 'start on pointer just after beforeTrail#before, since this is where that self would have executed' );
+    throw new Error( 'end on pointer afterTrail#before so we can stitch ending layers together correctly (reaches afterLayer)' );
+    var builder = new scenery.LayerBuilder( this, beforeLayer ? beforeLayer.type : null, beforeTrail, afterTrail );
+    
     this.rebuildLayers(); // TODO: actual implementation that doesn't rebuild all layers
   };
   
