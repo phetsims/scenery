@@ -90,7 +90,7 @@ define( function( require ) {
         // var trail = args.trail;
         
         // find the closest before and after self trails that are not affected
-        var affectedTrail = args.trail;
+        var affectedTrail = args.trail.copy().addDescendant( args.child ); // add on the child
         var beforeTrail = affectedTrail.copy().previous();
         while ( beforeTrail && !beforeTrail.lastNode().hasSelf() ) {
           beforeTrail = beforeTrail.previous();
@@ -108,6 +108,42 @@ define( function( require ) {
         // var child = args.child;
         // var index = args.index;
         // var trail = args.trail;
+        
+        var parentTrail = args.trail;
+        var parent = args.parent;
+        var index = args.index;
+        
+        // find adjacent nodes to the removal
+        var beforeTrail;
+        var afterTrail;
+        if ( parent.children.length ) {
+          if ( index === 0 ) {
+            // removed first node, so parent is before
+            beforeTrail = parentTrail.copy();
+          } else {
+            // previous sibling on top of the parent trail
+            beforeTrail = parentTrail.copy().addDescendant( parent.children[index-1] );
+          }
+          if ( index === parent.children.length ) {
+            // removed last node, see what's after previous sibling
+            afterTrail = parentTrail.copy().addDescendant( parent.children[index-1] ).next();
+          } else {
+            // next sibling
+            afterTrail = parentTrail.copy().addDescendant( parent.children[index] );
+          }
+        } else {
+          // no more children, easy to find 'adjacent' nodes!
+          beforeTrail = parentTrail.copy(); // the trail to the parent is before
+          afterTrail = parentTrail.copy().next(); // after the parent is after
+        }
+        
+        // expand until we hit self nodes
+        while ( beforeTrail && !beforeTrail.lastNode().hasSelf() ) {
+          beforeTrail = beforeTrail.previous();
+        }
+        while ( afterTrail && !afterTrail.lastNode().hasSelf() ) {
+          afterTrail = afterTrail.next();
+        }
         
         scene.rebuildLayers();
       },
