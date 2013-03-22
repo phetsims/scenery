@@ -235,59 +235,12 @@ define( function( require ) {
       }
     },
     
-    // FIXME: ordering of group trees is currently not guaranteed (this just appends right now, so they need to be ensured in the proper order)
-    ensureGroupTree: function( trail ) {
-      if ( !( trail.getUniqueId() in this.idGroupMap ) ) {
-        var subtrail = this.baseTrail.copy(); // grab the trail up to (and including) the base node, so we don't create superfluous groups
-        var lastId = null;
-        
-        // walk a subtrail up from the root node all the way to the full trail, creating groups where necessary
-        while ( subtrail.length <= trail.length ) {
-          var id = subtrail.getUniqueId();
-          if ( !( id in this.idGroupMap ) ) {
-            if ( lastId ) {
-              // we have a parent group to which we need to be added
-              var group = lastId ? document.createElementNS( svgns, 'g' ) : this.g;
-              this.applyTransform( subtrail.lastNode().getTransform(), group );
-              this.idGroupMap[id] = group;
-              
-              // TODO: handle the ordering here if we ensure group trees!
-              this.idGroupMap[lastId].appendChild( group );
-            } else {
-              // we are ensuring the base group
-              assert && assert( subtrail.lastNode() === this.baseNode );
-              
-              this.idGroupMap[id] = this.g;
-              
-              // sets up the proper transform for the base
-              this.initializeBase();
-            }
-          }
-          subtrail.addDescendant( trail.nodes[subtrail.length] );
-          lastId = id;
-        }
-      }
-    },
-    
     initializeBoundaries: function() {
       var layer = this;
       
-      // TODO: consider removing SVG fragments from our dictionary? if we burn through a lot of one-time fragments we will memory leak like crazy
-      // TODO: handle updates. insertion is helpful based on the trail, as we can find where to insert nodes
-      
       this.startPointer.eachTrailBetween( this.endPointer, function( trail ) {
-        var node = trail.lastNode();
-        var trailId = trail.getUniqueId();
-        
-        layer.ensureGroupTree( trail );
-        
-        if ( node.hasSelf() ) {
-          var group = layer.idGroupMap[trailId];
-          var svgFragment = node.createSVGFragment( layer.svg, layer.defs, group );
-          layer.updateNode( node, svgFragment );
-          layer.updateNodeGroup( node, group );
-          layer.idFragmentMap[trailId] = svgFragment;
-          group.appendChild( svgFragment );
+        if ( trail.lastNode().hasSelf() ) {
+          layer.addNodeFromTrail( trail );
         }
       } );
     },
