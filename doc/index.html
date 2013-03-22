@@ -230,7 +230,23 @@ var container = new scenery.Node( {
         This is useful for semi-transparent overlays or other visual elements that should be displayed but should not prevent objects below from being
         manipulated by user input.
       </p>
-      
+
+      <h3 id="scene" class="section">Scene</h3>
+      The Scene is the "entry point" of a scene graph.  Scene extends Node, so all of its methods and options are inherited, see <a href="#node">Node</a> above.
+      The Scene must be constructed with a jquery wrapper for a DOM element the Scene will be rendered to, typically a div.
+
+      <h4 id="scene-options">Scene Options</h4>
+      A Scene has the following options:
+
+      <ul>
+        <li><a href="#">allowSceneOverflow</a> (default false): usually anything displayed outside of this $main (DOM/CSS3 transformed SVG) is hidden with CSS overflow</li>
+        <li><a href="#">allowCSSHacks</a> (default true): applies styling that prevents mobile browser graphical issues</li>
+        <li><a href="#">allowDevicePixelRatioScaling</a> (default false): allows underlying canvases (Canvas, WebGL) to increase in size to maintain sharpness on high-density displays</li>
+        <li><a href="#">enablePointerEvents</a> (default true): allows pointer events / MSPointerEvent to be used on supported platforms.</li>
+        <li><a href="#">preferredSceneLayerType</a> (default ???): sets the preferred type of layer to be created if there are multiple options.</li>
+        <li><a href="#">width</a> (default currentWidth): override the main container's width</li>
+        <li><a href="#">height</a> (default currentHeight): override the main container's height</li>
+      </ul>
     </div>
     <div class="span3"></div>
   </div>
