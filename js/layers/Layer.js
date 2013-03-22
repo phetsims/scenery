@@ -143,6 +143,16 @@ define( function( require ) {
       throw new Error( 'Layer.applyTransformationMatrix unimplemented' );
     },
     
+    // adds a trail (with the last node) to the layer
+    addNodeFromTrail: function( trail ) {
+      
+    },
+    
+    // removes a trail (with the last node) to the layer
+    removeNodeFromTrail: function( trail ) {
+      
+    },
+    
     // returns next zIndex in place. allows layers to take up more than one single zIndex
     reindex: function( zIndex ) {
       throw new Error( 'unimplemented layer reindex' );
