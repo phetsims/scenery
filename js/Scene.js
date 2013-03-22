@@ -89,8 +89,18 @@ define( function( require ) {
         // var index = args.index;
         // var trail = args.trail;
         
-        // TODO: improve later
-        scene.rebuildLayers();
+        // find the closest before and after self trails that are not affected
+        var affectedTrail = args.trail;
+        var beforeTrail = affectedTrail.copy().previous();
+        while ( beforeTrail && !beforeTrail.lastNode().hasSelf() ) {
+          beforeTrail = beforeTrail.previous();
+        }
+        var afterTrail = affectedTrail.copy().next();
+        while ( afterTrail && !afterTrail.lastNode().hasSelf() ) {
+          afterTrail = afterTrail.next();
+        }
+        
+        scene.refreshLayers( beforeTrail, afterTrail );
       },
       
       removeChild: function( args ) {
@@ -137,11 +147,11 @@ define( function( require ) {
         // find the closest before and after self trails that are not affected
         var affectedTrail = args.trail;
         var beforeTrail = affectedTrail.copy().previous();
-        while ( beforeTrail && !beforeTrail.hasSelf() ) {
+        while ( beforeTrail && !beforeTrail.lastNode().hasSelf() ) {
           beforeTrail = beforeTrail.previous();
         }
         var afterTrail = affectedTrail.copy().next();
-        while ( afterTrail && !afterTrail.hasSelf() ) {
+        while ( afterTrail && !afterTrail.lastNode().hasSelf() ) {
           afterTrail = afterTrail.next();
         }
         
