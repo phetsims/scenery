@@ -110,6 +110,7 @@ define( function( require ) {
       for ( var i = 0; i < this.length; i++ ) {
         this[i] = this.nodes[i];
       }
+      return this;
     },
     
     removeAncestor: function() {
@@ -124,6 +125,7 @@ define( function( require ) {
       for ( var i = 0; i < this.length; i++ ) {
         this[i] = this.nodes[i];
       }
+      return this;
     },
     
     addDescendant: function( node, index ) {
@@ -137,6 +139,7 @@ define( function( require ) {
       // mimic an Array
       this.length++;
       this[this.length-1] = node;
+      return this;
     },
     
     removeDescendant: function() {
@@ -148,6 +151,7 @@ define( function( require ) {
       // mimic an Array
       this.length--;
       delete this[this.length];
+      return this;
     },
     
     // refreshes the internal index references (important if any children arrays were modified!)
