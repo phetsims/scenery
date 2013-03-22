@@ -206,6 +206,13 @@ define( function( require ) {
         endBoundary: endBoundary
       }, layerArgs ) );
       
+      // add the initial nodes to the layer
+      layer.startPointer.eachTrailBetween( layer.endPointer, function( trail ) {
+        if ( trail.lastNode().hasSelf() ) {
+          layer.addNodeFromTrail( trail );
+        }
+      } );
+      
       this.layers.push( layer );
     }
     

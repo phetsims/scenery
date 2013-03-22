@@ -46,8 +46,6 @@ define( function( require ) {
     this.idTrailMap = {};
     
     this.trails = [];
-    
-    this.initializeBoundaries();
   };
   var DOMLayer = scenery.DOMLayer;
   
@@ -55,6 +53,7 @@ define( function( require ) {
     constructor: DOMLayer,
     
     addNodeFromTrail: function( trail ) {
+      trail = trail.copy();
       this.reindexTrails();
       
       var node = trail.lastNode();
@@ -67,7 +66,9 @@ define( function( require ) {
       // walk the insertion index up the array. TODO: performance: binary search version?
       var insertionIndex;
       for ( insertionIndex = 0; insertionIndex < this.trails.length; insertionIndex++ ) {
-        var comparison = this.trails[insertionIndex].compare( trail );
+        var otherTrail = this.trails[insertionIndex];
+        otherTrail.reindex();
+        var comparison = otherTrail.compare( trail );
         assert && assert( comparison !== 0, 'Trail has already been inserted into the DOMLayer' );
         if ( comparison === 1 ) { // TODO: enum values!
           break;
@@ -97,20 +98,6 @@ define( function( require ) {
       
       var removalIndex = this.getIndexOfTrail( trail );
       this.trails.splice( removalIndex, 1 );
-    },
-    
-    initializeBoundaries: function() {
-      var layer = this;
-      
-      // TODO: assumes that nodes under this are in a tree, not a DAG
-      this.startPointer.eachTrailBetween( this.endPointer, function( trail ) {
-        var node = trail.lastNode();
-        
-        // all nodes should have DOM support if node.hasSelf()
-        if ( node.hasSelf() ) {
-          layer.addNodeFromTrail( trail.copy() );
-        }
-      } );
     },
     
     getElementFromTrail: function( trail ) {

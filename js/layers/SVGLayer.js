@@ -70,8 +70,6 @@ define( function( require ) {
     
     this.baseTransformDirty = true;
     this.baseTransformChange = true;
-    
-    this.initializeBoundaries();
   };
   var SVGLayer = scenery.SVGLayer;
   
@@ -233,16 +231,6 @@ define( function( require ) {
       } else {
         group.setAttribute( 'transform', transform.getMatrix().getSVGTransform() );
       }
-    },
-    
-    initializeBoundaries: function() {
-      var layer = this;
-      
-      this.startPointer.eachTrailBetween( this.endPointer, function( trail ) {
-        if ( trail.lastNode().hasSelf() ) {
-          layer.addNodeFromTrail( trail );
-        }
-      } );
     },
     
     render: function( scene, args ) {
