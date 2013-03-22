@@ -65,7 +65,8 @@ define( function( require ) {
     // maps trail ID => SVG <g> that contains that node's self and everything under it
     this.idGroupMap = {};
     
-    this.temporaryDebugFlagSoWeDontUpdateBoundariesMoreThanOnce = false;
+    // maps trail ID => Trail. These trails will need to be reindexed
+    this.idTrailMap = {};
     
     Layer.call( this, args );
     
@@ -78,6 +79,109 @@ define( function( require ) {
   
   SVGLayer.prototype = _.extend( {}, Layer.prototype, {
     constructor: SVGLayer,
+    
+    /*
+     * Notes about how state is tracked here:
+     * Trails are stored on group.trail so that we can look this up when inserting new groups
+     */
+    addNodeFromTrail: function( trail ) {
+      assert && assert( !( trail.getUniqueId() in this.idFragmentMap ), 'Already contained that trail!' );
+      
+      // TODO: reindex!
+      
+      var subtrail = this.baseTrail.copy(); // grab the trail up to (and including) the base node, so we don't create superfluous groups
+      var lastId = null;
+      
+      // walk a subtrail up from the root node all the way to the full trail, creating groups where necessary
+      while ( subtrail.length <= trail.length ) {
+        var id = subtrail.getUniqueId();
+        if ( !( id in this.idGroupMap ) ) {
+          // we need to create a new group
+          var group;
+          
+          if ( lastId ) {
+            // we have a parent group to which we need to be added
+            group = document.createElementNS( svgns, 'g' );
+            
+            // apply the node's transform to the group
+            this.applyTransform( subtrail.lastNode().getTransform(), group );
+            
+            // add the group to its parent
+            this.insertGroupIntoParent( group, this.idGroupMap[lastId], subtrail );
+          } else {
+            // we are ensuring the base group
+            assert && assert( subtrail.lastNode() === this.baseNode );
+            
+            group = this.g;
+            
+            // sets up the proper transform for the base
+            this.initializeBase();
+          }
+          
+          group.referenceCount = 0; // initialize a reference count, so we can know when to remove unused groups
+          group.trail = subtrail.copy(); // put a reference to the trail on the group, so we can efficiently scan and see where to insert future groups
+          
+          this.idGroupMap[id] = group;
+        }
+        
+        // this trail will depend on this group, so increment the reference counter
+        this.idGroupMap[id].referenceCount++;
+        
+        // step down towards our full trail
+        subtrail.addDescendant( trail.nodes[subtrail.length] );
+        lastId = id;
+      }
+      
+      throw new Error( 'haven\'t added the actual fragment yet!' );
+    },
+    
+    removeNodeFromTrail: function( trail ) {
+      assert && assert( !( trail.getUniqueId() in this.idFragmentMap ), 'Already contained that trail!' );
+      
+      // TODO: reindex!
+      
+      var subtrail = trail.copy();
+      
+      while ( subtrail.length > this.baseTrail.length ) {
+        
+        
+        subtrail.removeDescendant();
+      }
+      this.g.referenceCount--; // since we don't go down to the base group, adjust its reference count
+    },
+    
+    // subtrail is to group, and should include parentGroup below
+    insertGroupIntoParent: function( group, parentGroup, subtrail ) {
+      if ( !parentGroup.childNodes.length ) {
+        parentGroup.appendChild( group );
+      } else {
+        // if there is already a child, we need to do a scan to ensure we place our group as a child in the correct order (above/below)
+        
+        // scan other child groups in the parentGroup to find where we need to be (index i)
+        var afterNode = null;
+        var indexIndex = subtrail.length - 2; // index into the trail's indices
+        var ourIndex = subtrail.indices[indexIndex];
+        var i;
+        for ( i = 0; i < parentGroup.childNodes.length; i++ ) {
+          var child = parentGroup.childNodes[i];
+          if ( child.trail ) {
+            child.trail.reindex();
+            var otherIndex = child.trail.indices[indexIndex];
+            if ( otherIndex > ourIndex ) {
+              // this other group is above us
+              break;
+            }
+          }
+        }
+        
+        // insert our group before parentGroup.childNodes[i] (or append if that doesn't exist)
+        if ( i === parentGroup.childNodes.length ) {
+          parentGroup.appendChild( group );
+        } else {
+          parentGroup.insertBefore( group, parentGroup.childNodes[i] );
+        }
+      }
+    },
     
     // updates visual styles on an existing SVG fragment
     updateNode: function( node, fragment ) {
@@ -143,11 +247,6 @@ define( function( require ) {
     },
     
     initializeBoundaries: function() {
-      if ( this.temporaryDebugFlagSoWeDontUpdateBoundariesMoreThanOnce ) {
-        throw new Error( 'temporaryDebugFlagSoWeDontUpdateBoundariesMoreThanOnce!' );
-      }
-      this.temporaryDebugFlagSoWeDontUpdateBoundariesMoreThanOnce = true;
-      
       var layer = this;
       
       // TODO: consider removing SVG fragments from our dictionary? if we burn through a lot of one-time fragments we will memory leak like crazy

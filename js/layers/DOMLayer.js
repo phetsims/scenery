@@ -41,6 +41,8 @@ define( function( require ) {
     
     // maps trail ID => DOM element fragment
     this.idElementMap = {};
+    
+    // maps trail ID => Trail. trails need to be reindexed
     this.idTrailMap = {};
     
     this.trails = [];
@@ -146,6 +148,7 @@ define( function( require ) {
       var trail = args.trail;
       for ( var trailId in this.idTrailMap ) {
         var subtrail = this.idTrailMap[trailId];
+        subtrail.reindex();
         if ( subtrail.isExtensionOf( trail, true ) ) {
           var element = this.idElementMap[trailId];
           
