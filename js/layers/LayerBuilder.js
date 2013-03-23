@@ -94,7 +94,7 @@ define( function( require ) {
         if ( node.layerStrategy.hasPreferredLayerType( pointer, this ) ) {
           this.pushPreferredLayerType( node.layerStrategy.getPreferredLayerType( pointer, this ) );
         }
-        pointer.addDescendant( this.startPointer.trail.nodes[pointer.trail.length] );
+        pointer.trail.addDescendant( this.startPointer.trail.nodes[pointer.trail.length] );
       }
     },
     
