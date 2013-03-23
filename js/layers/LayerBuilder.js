@@ -32,16 +32,16 @@ define( function( require ) {
     this.layerTypeStack = [];
     this.boundaries = [];
     this.pendingBoundary = new scenery.LayerBoundary();
-    this.pendingBoundary.previousLayerType = null; // will be filled in with prepare()
-    this.pendingBoundary.previousSelfTrail = null; // will be filled in with prepare()
+    this.pendingBoundary.previousLayerType = previousLayerType;
+    this.pendingBoundary.previousSelfTrail = previousSelfTrail;
     
     /*
      * The current layer type active, and whether it has been 'used' yet. A node with hasSelf() will trigger a 'used' action,
      * and if the layer hasn't been used, it will actually trigger a boundary creation. We want to collapse 'unused' layers
      * and boundaries together, so that every created layer has a node that displays something.
      */
-    this.currentLayerType = null; // will be filled in with prepare();
-    this.layerChangePending = true; // will be filled in with prepare()
+    this.currentLayerType = previousLayerType;
+    this.layerChangePending = previousSelfTrail === null;
     
     /*---------------------------------------------------------------------------*
     * Start / End pointers
