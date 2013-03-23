@@ -24,6 +24,10 @@ define( function( require ) {
    * previousLayerType should be null if there is no previous layer.
    */
   scenery.LayerBuilder = function( scene, previousLayerType, previousSelfTrail, nextSelfTrail ) {
+    this.previousLayerType = previousLayerType;
+    this.previousSelfTrail = previousSelfTrail;
+    this.nextSelfTrail = nextSelfTrail;
+    
     /*---------------------------------------------------------------------------*
     * Initial state
     *----------------------------------------------------------------------------*/
@@ -31,16 +35,16 @@ define( function( require ) {
     this.layerTypeStack = [];
     this.boundaries = [];
     this.pendingBoundary = new scenery.LayerBoundary();
-    this.pendingBoundary.previousLayerType = previousLayerType;
-    this.pendingBoundary.previousSelfTrail = previousSelfTrail;
+    this.pendingBoundary.previousLayerType = null; // will be filled in with prepare()
+    this.pendingBoundary.previousSelfTrail = null; // will be filled in with prepare()
     
     /*
      * The current layer type active, and whether it has been 'used' yet. A node with hasSelf() will trigger a 'used' action,
      * and if the layer hasn't been used, it will actually trigger a boundary creation. We want to collapse 'unused' layers
      * and boundaries together, so that every created layer has a node that displays something.
      */
-    this.currentLayerType = previousLayerType;
-    this.layerChangePending = previousSelfTrail === null;
+    this.currentLayerType = null; // will be filled in with prepare();
+    this.layerChangePending = true; // will be filled in with prepare()
     
     /*---------------------------------------------------------------------------*
     * Start / End pointers
@@ -85,8 +89,23 @@ define( function( require ) {
   LayerBuilder.prototype = {
     constructor: LayerBuilder,
     
+    // walks part of the state up to just before the startPointer. we want the preferred layer stack to be in place, but the rest is not important
+    prepareLayerStack: function() {
+      var pointer = new scenery.TrailPointer( new scenery.Trail( this.startPointer.trail.rootNode() ), true );
+      while ( pointer.trail.length < this.startPointer.trail.length ) {
+        var node = pointer.trail.lastNode();
+        if ( node.layerStrategy.hasPreferredLayerType( pointer, this ) ) {
+          this.pushPreferredLayerType( node.layerStrategy.getPreferredLayerType( pointer, this ) );
+        }
+        pointer.addDescendant( this.startPointer.trail.nodes[pointer.trail.length] );
+      }
+    },
+    
     run: function() {
       var builder = this;
+      
+      // push preferred layers for ancestors of our start pointer
+      this.prepareLayerStack();
       
       builder.startPointer.depthFirstUntil( builder.endPointer, function( pointer ) {
         var node = pointer.trail.lastNode();
@@ -104,6 +123,25 @@ define( function( require ) {
         this.layerChange( null );
       }
     },
+    
+    // allows selfPointer === null at the end if the main iteration's nextSelfTrail === null (i.e. we are at the end of the scene)
+    layerChange: function( selfPointer ) {
+      this.layerChangePending = false;
+      
+      var confirmedBoundary = this.pendingBoundary;
+      
+      confirmedBoundary.nextSelfTrail = selfPointer ? selfPointer.trail.copy() : null;
+      
+      this.boundaries.push( confirmedBoundary );
+      
+      this.pendingBoundary = new scenery.LayerBoundary();
+      this.pendingBoundary.previousLayerType = confirmedBoundary.nextLayerType;
+      this.pendingBoundary.previousSelfTrail = confirmedBoundary.nextSelfTrail;
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * API for layer strategy or other interaction
+    *----------------------------------------------------------------------------*/
     
     switchToType: function( pointer, layerType ) {
       this.currentLayerType = layerType;
@@ -130,21 +168,6 @@ define( function( require ) {
     // can be null to indicate that there is no current layer type
     getCurrentLayerType: function() {
       return this.currentLayerType;
-    },
-    
-    // allows selfPointer === null at the end if the main iteration's nextSelfTrail === null (i.e. we are at the end of the scene)
-    layerChange: function( selfPointer ) {
-      this.layerChangePending = false;
-      
-      var confirmedBoundary = this.pendingBoundary;
-      
-      confirmedBoundary.nextSelfTrail = selfPointer ? selfPointer.trail.copy() : null;
-      
-      this.boundaries.push( confirmedBoundary );
-      
-      this.pendingBoundary = new scenery.LayerBoundary();
-      this.pendingBoundary.previousLayerType = confirmedBoundary.nextLayerType;
-      this.pendingBoundary.previousSelfTrail = confirmedBoundary.nextSelfTrail;
     },
     
     pushPreferredLayerType: function( layerType ) {
