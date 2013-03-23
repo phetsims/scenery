@@ -235,15 +235,33 @@ define( function( require ) {
                     end of the affected area, or null if that doesn't exist.
    */
   Scene.prototype.refreshLayers = function( beforeTrail, afterTrail ) {
+    console.log( 'refreshLayers between ' + ( beforeTrail ? beforeTrail.toString() : beforeTrail ) + ' and ' + ( afterTrail ? afterTrail.toString() : afterTrail ) );
     var beforeLayer = beforeTrail ? this.layerLookup( beforeTrail ) : null;
     var afterLayer = afterTrail ? this.layerLookup( afterTrail ) : null;
     
     var builder = new scenery.LayerBuilder( this, beforeLayer ? beforeLayer.type : null, beforeTrail, afterTrail );
     
+    // push the preferred layer type before we push that for any nodes
+    if ( this.preferredSceneLayerType ) {
+      builder.pushPreferredLayerType( this.preferredSceneLayerType );
+    }
+    
+    builder.run();
+    
+    console.log( '---' );
+    console.log( 'boundaries:' );
+    _.each( this.boundaries, function( boundary ) {
+      console.log( 'boundary:' );
+      console.log( '    types:    ' + ( boundary.hasPrevious() ? boundary.previousLayerType.name : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextLayerType.name : '' ) );
+      console.log( '    trails:   ' + ( boundary.hasPrevious() ? boundary.previousSelfTrail.getUniqueId() : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextSelfTrail.getUniqueId() : '' ) );
+      console.log( '    pointers: ' + ( boundary.hasPrevious() ? boundary.previousEndPointer.toString() : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextStartPointer.toString() : '' ) );
+    } );
+    
     this.rebuildLayers(); // TODO: actual implementation that doesn't rebuild all layers
   };
   
   Scene.prototype.rebuildLayers = function() {
+    console.log( 'rebuildLayers' );
     // remove all of our tracked layers from the container, so we can fill it with fresh layers
     this.disposeLayers();
     
