@@ -45,6 +45,8 @@ define( function( require ) {
           preferredLayerType = node.getRenderer().defaultLayerType;
         }
       }
+      
+      return preferredLayerType;
     },
     
     enter: function( pointer, layerBuilder ) {
