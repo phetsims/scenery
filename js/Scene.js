@@ -284,6 +284,9 @@ define( function( require ) {
         endBoundary: endBoundary
       }, layerArgs ) );
       
+      // record the type on the layer
+      layer.type = layerType;
+      
       // add the initial nodes to the layer
       layer.startPointer.eachTrailBetween( layer.endPointer, function( trail ) {
         if ( trail.lastNode().hasSelf() ) {
