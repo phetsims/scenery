@@ -363,6 +363,10 @@ define( function( require ) {
     for ( var i = 0; i < this.layers.length; i++ ) {
       var layer = this.layers[i];
       
+      // trails may be stale, so we need to update their indices
+      if ( layer.startSelfTrail ) { layer.startSelfTrail.reindex(); }
+      if ( layer.endSelfTrail ) { layer.endSelfTrail.reindex(); }
+      
       if ( trail.compare( layer.endSelfTrail ) <= 0 ) {
         if ( trail.compare( layer.startSelfTrail ) >= 0 ) {
           return layer;
