@@ -248,15 +248,38 @@ define( function( require ) {
     
     builder.run();
     
+    var boundaries = builder.boundaries;
+    
     console.log( '---' );
     console.log( 'boundaries:' );
-    _.each( this.boundaries, function( boundary ) {
+    _.each( boundaries, function( boundary ) {
       console.log( 'boundary:' );
       console.log( '    types:    ' + ( boundary.hasPrevious() ? boundary.previousLayerType.name : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextLayerType.name : '' ) );
       console.log( '    trails:   ' + ( boundary.hasPrevious() ? boundary.previousSelfTrail.getUniqueId() : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextSelfTrail.getUniqueId() : '' ) );
       console.log( '    pointers: ' + ( boundary.hasPrevious() ? boundary.previousEndPointer.toString() : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextStartPointer.toString() : '' ) );
     } );
     
+    if ( boundaries.length === 0 ) {
+      if ( beforeLayer === afterLayer ) {
+        // nothing needs to be done!
+        return;
+      } else {
+        // we need to stitch together the two layers
+        if ( beforeLayer === null ) {
+          // expand afterLayer to cover
+        } else if ( afterLayer === null ) {
+          // expand beforeLayer to cover
+        } else {
+          // choose a layer to swallow the other layer
+          // TODO: this could be better accomplished by checking which layer has more total descendants - add counts for performance?
+        }
+        
+      }
+    } else {
+      // TODO: unhandled!
+    }
+    
+    // unhandled
     this.rebuildLayers(); // TODO: actual implementation that doesn't rebuild all layers
   };
   
