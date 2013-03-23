@@ -24,9 +24,6 @@ define( function( require ) {
    * previousLayerType should be null if there is no previous layer.
    */
   scenery.LayerBuilder = function( scene, previousLayerType, previousSelfTrail, nextSelfTrail ) {
-    this.previousLayerType = previousLayerType;
-    this.previousSelfTrail = previousSelfTrail;
-    this.nextSelfTrail = nextSelfTrail;
     
     /*---------------------------------------------------------------------------*
     * Initial state
