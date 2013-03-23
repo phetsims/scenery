@@ -350,26 +350,29 @@ define( function( require ) {
     } );
   };
   
-  // what layer does this trail's terminal node render in?
+  // what layer does this trail's terminal node render in? returns null if the node is not contained in a layer
   Scene.prototype.layerLookup = function( trail ) {
     // TODO: add tree form for optimization! this is slower than necessary, it shouldn't be O(n)!
     assert && assert( !( trail.isEmpty() || trail.nodes[0] !== this ), 'layerLookup root matches' );
     assert && assert( trail.lastNode().hasSelf(), 'layerLookup only supports nodes with hasSelf(), as this guarantees an unambiguous answer' );
     
     if ( this.layers.length === 0 ) {
-      throw new Error( 'no layers in the scene' );
+      return null; // node not contained in a layer
     }
     
     for ( var i = 0; i < this.layers.length; i++ ) {
       var layer = this.layers[i];
       
       if ( trail.compare( layer.endSelfTrail ) <= 0 ) {
-        assert && assert( trail.compare( layer.startSelfTrail ) >= 0 );
-        return layer;
+        if ( trail.compare( layer.startSelfTrail ) >= 0 ) {
+          return layer;
+        } else {
+          return null; // node is not contained in a layer (it is before any existing layer)
+        }
       }
     }
     
-    throw new Error( 'node not contained in a layer' );
+    return null; // node not contained in a layer (it is after any existing layer)
   };
   
   // all layers whose start or end points lie inclusively in the range from the trail's before and after
