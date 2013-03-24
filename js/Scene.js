@@ -57,6 +57,7 @@ define( function( require ) {
       height: $main.height()
     }, options || {} );
     
+    // TODO: consider using a pushed preferred layer to indicate this information, instead of as a specific option
     this.backingScale = options.allowDevicePixelRatioScaling ? Util.backingScale( document.createElement( 'canvas' ).getContext( '2d' ) ) : 1;
     this.enablePointerEvents = options.enablePointerEvents;
     
@@ -66,6 +67,8 @@ define( function( require ) {
     
     // main layers in a scene
     this.layers = [];
+    
+    this.layerChangeIntervals = []; // array of {TrailInterval}s indicating what parts need to be stitched together
     
     this.lastCursor = null;
     this.defaultCursor = $main.css( 'cursor' );
@@ -83,12 +86,7 @@ define( function( require ) {
     
     // note, arguments to the functions are mutable. don't destroy them
     this.sceneEventListener = {
-      insertChild: function( args ) {
-        // var parent = args.parent;
-        // var child = args.child;
-        // var index = args.index;
-        // var trail = args.trail;
-        
+      insertChild: function( args ) { // contains parent, child, index, trail
         // find the closest before and after self trails that are not affected
         var affectedTrail = args.trail.copy().addDescendant( args.child ); // add on the child
         var beforeTrail = affectedTrail.copy().previous();
@@ -103,12 +101,7 @@ define( function( require ) {
         scene.refreshLayers( beforeTrail, afterTrail );
       },
       
-      removeChild: function( args ) {
-        // var parent = args.parent;
-        // var child = args.child;
-        // var index = args.index;
-        // var trail = args.trail;
-        
+      removeChild: function( args ) { // contains parent, child, index, trail
         var parentTrail = args.trail;
         var parent = args.parent;
         var index = args.index;
@@ -148,10 +141,7 @@ define( function( require ) {
         scene.refreshLayers( beforeTrail, afterTrail );
       },
       
-      dirtyBounds: function( args ) {
-        // var node = args.node;
-        // var localBounds = args.bounds;
-        // var transform = args.transform;
+      dirtyBounds: function( args ) { // contains node, bounds, transform, trail
         var trail = args.trail;
         
         // if there are no layers, no nodes would actually render, so don't do the lookup
@@ -162,11 +152,7 @@ define( function( require ) {
         }
       },
       
-      transform: function( args ) {
-        // var node = args.node;
-        // var type = args.type;
-        // var matrix = args.matrix;
-        // var transform = args.transform;
+      transform: function( args ) { // conatins node, type, matrix, transform, trail
         var trail = args.trail;
         
         if ( scene.layers.length ) {
@@ -176,10 +162,7 @@ define( function( require ) {
         }
       },
       
-      layerRefresh: function( args ) {
-        // var node = args.node;
-        // var trail = args.trail;
-        
+      layerRefresh: function( args ) { // contains node, trail
         // find the closest before and after self trails that are not affected
         var affectedTrail = args.trail;
         var beforeTrail = affectedTrail.copy().previous();
