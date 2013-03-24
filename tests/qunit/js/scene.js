@@ -325,19 +325,33 @@
     // a subset of trails to test on
     var trails = [
       null,
-      node.getUniqueTrail(),
-      // node.children[0].children[1].getUniqueTrail(), // commented out since it quickly creates many tests to include
+      node.children[0].getUniqueTrail(),
+      node.children[0].children[1].getUniqueTrail(), // commented out since it quickly creates many tests to include
       node.children[0].children[3].children[0].getUniqueTrail(),
       node.children[1].getUniqueTrail(),
       null
     ];
     
+    // get a list of all trails
+    var allTrails = [];
+    var t = node.getUniqueTrail();
+    while ( t ) {
+      allTrails.push( t );
+      t = t.next();
+    }
+    
+    // get a list of all intervals using our 'trails' array
     var intervals = [];
     
     for ( i = 0; i < trails.length; i++ ) {
       // only create proper intervals where i < j, since we specified them in order
       for ( j = i + 1; j < trails.length; j++ ) {
-        intervals.push( new scenery.TrailInterval( trails[i], trails[j] ) );
+        var interval = new scenery.TrailInterval( trails[i], trails[j] );
+        intervals.push( interval );
+        
+        // tag the interval, so we can do additional verification later
+        interval.i = i;
+        interval.j = j;
       }
     }
     
@@ -347,14 +361,28 @@
       for ( j = 0; j < intervals.length; j++ ) {
         var b = intervals[j];
         
+        var union = a.union( b );
         if ( a.exclusiveUnionable( b ) ) {
-          var union = a.union( b );
-          _.each( trails, function( trail ) {
+          _.each( allTrails, function( trail ) {
             if ( trail ) {
               var msg = 'union check of trail ' + trail.toString() + ' with ' + a.toString() + ' and ' + b.toString() + ' with union ' + union.toString();
               equal( a.exclusiveContains( trail ) || b.exclusiveContains( trail ), union.exclusiveContains( trail ), msg );
             }
           } );
+        } else {
+          var wouldBeBadUnion = false;
+          var containsAnything = false;
+          _.each( allTrails, function( trail ) {
+            if ( trail ) {
+              if ( union.exclusiveContains( trail ) ) {
+                containsAnything = true;
+                if ( !a.exclusiveContains( trail ) && !b.exclusiveContains( trail ) ) {
+                  wouldBeBadUnion = true;
+                }
+              }
+            }
+          } );
+          ok( containsAnything && wouldBeBadUnion, 'Not a bad union?: ' + a.toString() + ' and ' + b.toString() + ' with union ' + union.toString() );
         }
       }
     }
