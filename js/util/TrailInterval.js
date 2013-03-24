@@ -11,10 +11,7 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
-  var Transform3 = require( 'DOT/Transform3' );
-  
   var scenery = require( 'SCENERY/scenery' );
-  
   require( 'SCENERY/util/Trail' );
   
   scenery.TrailInterval = function( a, b ) {
