@@ -42,6 +42,11 @@ define( function( require ) {
              ( !this.b || !interval.a || this.b.compare( interval.a ) === 1 );
     },
     
+    exclusiveContains: function( trail ) {
+      assert && assert( trail );
+      return ( !this.a || this.a.compare( trail ) < 0 ) && ( !this.b || this.b.compare( trail ) > 0 );
+    },
+    
     union: function( interval ) {
       return new TrailInterval(
         // falsy checks since if a or b is null, we want that bound to be null
