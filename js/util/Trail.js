@@ -248,6 +248,15 @@ define( function( require ) {
       }
     },
     
+    // like previous(), but keeps moving back until the trail goes to a node with hasSelf() === true
+    previousSelf: function() {
+      var result = this.previous();
+      while ( result && !result.hasSelf() ) {
+        result = result.previous();
+      }
+      return result;
+    },
+    
     // in the order of self-rendering
     next: function() {
       var arr = this.nodes.slice( 0 );
@@ -281,6 +290,16 @@ define( function( require ) {
         return null;
       }
     },
+    
+    // like next(), but keeps moving back until the trail goes to a node with hasSelf() === true
+    nextSelf: function() {
+      var result = this.next();
+      while ( result && !result.hasSelf() ) {
+        result = result.next();
+      }
+      return result;
+    },
+    
     
     /*
      * Standard Java-style compare. -1 means this trail is before (under) the other trail, 0 means equal, and 1 means this trail is
