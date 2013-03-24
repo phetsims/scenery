@@ -33,16 +33,14 @@ define( function( require ) {
       this.b && this.b.reindex();
     },
     
-    disjointFrom: function( interval, excludeEndTrails ) {
-      // TODO: handle null (like infinity!)
-      var c = this.a.compare( interval.b );
-      var d = this.b.compare( interval.a );
-      
-      throw new Error( 'needs to handle null case' );
-      
-      if ( c === d && c !== 0 ) {
-        return true;
-      }
+    /*
+     * Whether the union of this and the specified interval doesn't include any additional trails, when
+     * both are treated as exclusive endpoints (exclusive between a and b). We also make the assumption
+     * that a !== b || a === null for either interval, since otherwise it is not well defined.
+     */
+    exclusiveUnionable: function( interval ) {
+      return ( !this.a || !interval.b || this.a.compare( interval.b ) === -1 ) &&
+             ( !this.b || !interval.a || this.b.compare( interval.a ) === 1 );
     },
     
     union: function( interval ) {
