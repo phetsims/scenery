@@ -44,8 +44,9 @@ define( function( require ) {
     
     union: function( interval ) {
       return new TrailInterval(
-        this.a.compare( interval.a ) === -1 ? this.a : interval.a,
-        this.b.compare( interval.b ) ===  1 ? this.b : interval.b
+        // falsy checks since if a or b is null, we want that bound to be null
+        ( !this.a || ( interval.a && this.a.compare( interval.a ) === -1 ) ) ? this.a : interval.a,
+        ( !this.b || ( interval.b && this.b.compare( interval.b ) === 1 ) ) ? this.b : interval.b
       );
     }
   };
