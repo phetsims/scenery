@@ -114,7 +114,23 @@ define( function( require ) {
       },
       
       addLayerChangeInterval: function( interval ) {
-        throw new Error( 'TODO' );
+        // TODO: replace with a binary-search-like version that may be faster. this includes a full scan
+        var merged = false;
+        
+        // attempt to merge this interval with another if possible.
+        for ( var i = 0; i < this.layerChangeIntervals.length; i++ ) {
+          var other = this.layerChangeIntervals[i];
+          other.reindex(); // sanity check, although for most use-cases this should be unnecessary
+          if ( interval.exclusiveUnionable( other ) ) {
+            this.layerChangeIntervals.splice( i, 1, interval.union( other ) );
+            merged = true;
+            break;
+          }
+        }
+        
+        if ( !merged ) {
+          this.layerChangeIntervals.push( interval );
+        }
       },
       
       insertChild: function( args ) { // contains parent, child, index, trail
