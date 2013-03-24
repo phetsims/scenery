@@ -1,7 +1,7 @@
 // Copyright 2002-2012, University of Colorado
 
 /**
- * An interval between two Trails.
+ * An interval between two Trails
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
@@ -36,6 +36,8 @@ define( function( require ) {
      * that a !== b || a === null for either interval, since otherwise it is not well defined.
      */
     exclusiveUnionable: function( interval ) {
+      assert && assert ( this.a.compare( this.b ) < 0, 'exclusiveUnionable requires exclusive intervals' );
+      assert && assert ( interval.a.compare( interval.b ) < 0, 'exclusiveUnionable requires exclusive intervals' );
       return ( !this.a || !interval.b || this.a.compare( interval.b ) === -1 ) &&
              ( !this.b || !interval.a || this.b.compare( interval.a ) === 1 );
     },
