@@ -15,7 +15,7 @@ define( function( require ) {
   require( 'SCENERY/util/Trail' );
   
   scenery.TrailInterval = function( a, b ) {
-    assert && assert( a.compare( b ) <= 0, 'TrailInterval parameters must not be out of order' );
+    assert && assert( !a || !b || a.compare( b ) <= 0, 'TrailInterval parameters must not be out of order' );
     
     this.a = a;
     this.b = b;
