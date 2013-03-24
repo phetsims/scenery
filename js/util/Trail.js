@@ -251,7 +251,7 @@ define( function( require ) {
     // like previous(), but keeps moving back until the trail goes to a node with hasSelf() === true
     previousSelf: function() {
       var result = this.previous();
-      while ( result && !result.hasSelf() ) {
+      while ( result && !result.lastNode().hasSelf() ) {
         result = result.previous();
       }
       return result;
@@ -294,7 +294,7 @@ define( function( require ) {
     // like next(), but keeps moving back until the trail goes to a node with hasSelf() === true
     nextSelf: function() {
       var result = this.next();
-      while ( result && !result.hasSelf() ) {
+      while ( result && !result.lastNode().hasSelf() ) {
         result = result.next();
       }
       return result;
