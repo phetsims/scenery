@@ -1,7 +1,8 @@
 // Copyright 2002-2012, University of Colorado
 
 /**
- * An interval between two Trails
+ * An interval between two Trails. A trail being null means either 'from the start' or 'to the end', depending
+ * on whether it is the first or second parameter to the constructor.
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
