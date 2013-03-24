@@ -318,6 +318,48 @@
     }
   } );
   
+  test( 'TrailInterval', function() {
+    var node = createTestNodeTree();
+    var i, j;
+    
+    // a subset of trails to test on
+    var trails = [
+      null,
+      node.getUniqueTrail(),
+      // node.children[0].children[1].getUniqueTrail(), // commented out since it quickly creates many tests to include
+      node.children[0].children[3].children[0].getUniqueTrail(),
+      node.children[1].getUniqueTrail(),
+      null
+    ];
+    
+    var intervals = [];
+    
+    for ( i = 0; i < trails.length; i++ ) {
+      // only create proper intervals where i < j, since we specified them in order
+      for ( j = i + 1; j < trails.length; j++ ) {
+        intervals.push( new scenery.TrailInterval( trails[i], trails[j] ) );
+      }
+    }
+    
+    // check every combination of intervals
+    for ( i = 0; i < intervals.length; i++ ) {
+      var a = intervals[i];
+      for ( j = 0; j < intervals.length; j++ ) {
+        var b = intervals[j];
+        
+        if ( a.exclusiveUnionable( b ) ) {
+          var union = a.union( b );
+          _.each( trails, function( trail ) {
+            if ( trail ) {
+              var msg = 'union check of trail ' + trail.toString() + ' with ' + a.toString() + ' and ' + b.toString() + ' with union ' + union.toString();
+              equal( a.exclusiveContains( trail ) || b.exclusiveContains( trail ), union.exclusiveContains( trail ), msg );
+            }
+          } );
+        }
+      }
+    }
+  } );
+  
   test( 'Text width measurement in canvas', function() {
     var canvas = document.createElement( 'canvas' );
     var context = canvas.getContext( '2d' );

@@ -31,14 +31,19 @@ define( function( require ) {
       this.b && this.b.reindex();
     },
     
+    isValidExclusive: function() {
+      // like construction, but with strict inequality
+      return !this.a || !this.b || this.a.compare( this.b ) < 0;
+    },
+    
     /*
      * Whether the union of this and the specified interval doesn't include any additional trails, when
      * both are treated as exclusive endpoints (exclusive between a and b). We also make the assumption
      * that a !== b || a === null for either interval, since otherwise it is not well defined.
      */
     exclusiveUnionable: function( interval ) {
-      assert && assert ( this.a.compare( this.b ) < 0, 'exclusiveUnionable requires exclusive intervals' );
-      assert && assert ( interval.a.compare( interval.b ) < 0, 'exclusiveUnionable requires exclusive intervals' );
+      assert && assert ( this.isValidExclusive(), 'exclusiveUnionable requires exclusive intervals' );
+      assert && assert ( interval.isValidExclusive(), 'exclusiveUnionable requires exclusive intervals' );
       return ( !this.a || !interval.b || this.a.compare( interval.b ) === -1 ) &&
              ( !this.b || !interval.a || this.b.compare( interval.a ) === 1 );
     },
@@ -54,6 +59,10 @@ define( function( require ) {
         ( !this.a || ( interval.a && this.a.compare( interval.a ) === -1 ) ) ? this.a : interval.a,
         ( !this.b || ( interval.b && this.b.compare( interval.b ) === 1 ) ) ? this.b : interval.b
       );
+    },
+    
+    toString: function() {
+      return '[' + ( this.a ? this.a.toString() : this.a ) + ',' + ( this.b ? this.b.toString() : this.b ) + ']';
     }
   };
   
