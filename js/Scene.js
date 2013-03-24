@@ -20,6 +20,7 @@ define( function( require ) {
   
   var Node = require( 'SCENERY/nodes/Node' ); // inherits from Node
   require( 'SCENERY/util/Trail' );
+  require( 'SCENERY/util/TrailInterval' );
   require( 'SCENERY/util/TrailPointer' );
   require( 'SCENERY/input/Input' );
   require( 'SCENERY/layers/LayerBuilder' );
@@ -87,24 +88,40 @@ define( function( require ) {
     // note, arguments to the functions are mutable. don't destroy them
     this.sceneEventListener = {
       markForInsertion: function( args ) { // contains parent, child, index, trail
+        // find the closest before and after self trails that are not affected
+        var affectedTrail = args.trail.copy().addDescendant( args.child ); // add on the child
+        var beforeTrail = affectedTrail.copy().previousSelf();
+        var afterTrail = affectedTrail.copy().nextSelf();
         
+        this.addLayerChangeInterval( new scenery.TrailInterval( beforeTrail, afterTrail ) );
       },
       
       markForRemoval: function( args ) { // contains parent, child, index, trail
+        var scene = this;
         
+        // since this is marked while the child is still connected, we can use our normal trail handling.
+        var affectedTrail = args.trail.copy().addDescendant( args.child );
+        var beforeTrail = affectedTrail.copy().previousSelf();
+        var afterTrail = affectedTrail.copy().nextSelf();
+        
+        this.addLayerChangeInterval( new scenery.TrailInterval( beforeTrail, afterTrail ) );
+        
+        // signal to the relevant layers to remove the specified trail while the trail is still valid.
+        // waiting until after the removal takes place would require more complicated code to properly handle the trails
+        affectedTrail.eachTrailUnder( affectedTrail, function( trail ) {
+          scene.layerLookup( trail ).removeNodeFromTrail( trail );
+        } );
+      },
+      
+      addLayerChangeInterval: function( interval ) {
+        throw new Error( 'TODO' );
       },
       
       insertChild: function( args ) { // contains parent, child, index, trail
         // find the closest before and after self trails that are not affected
         var affectedTrail = args.trail.copy().addDescendant( args.child ); // add on the child
-        var beforeTrail = affectedTrail.copy().previous();
-        while ( beforeTrail && !beforeTrail.lastNode().hasSelf() ) {
-          beforeTrail = beforeTrail.previous();
-        }
-        var afterTrail = affectedTrail.copy().next();
-        while ( afterTrail && !afterTrail.lastNode().hasSelf() ) {
-          afterTrail = afterTrail.next();
-        }
+        var beforeTrail = affectedTrail.copy().previousSelf();
+        var afterTrail = affectedTrail.copy().nextSelf();
         
         scene.refreshLayers( beforeTrail, afterTrail );
       },

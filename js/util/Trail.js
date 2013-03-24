@@ -22,6 +22,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   require( 'SCENERY/nodes/Node' );
+  // require( 'SCENERY/util/TrailPointer' );
   
   scenery.Trail = function( nodes ) {
     if ( nodes instanceof Trail ) {
@@ -300,6 +301,10 @@ define( function( require ) {
       return result;
     },
     
+    // calls callback( trail ) for this trail, and each descendant trail
+    eachTrailUnder: function( callback ) {
+      new scenery.TrailPointer( this, true ).eachTrailBetween( new scenery.TrailPointer( this, false ), callback );
+    },
     
     /*
      * Standard Java-style compare. -1 means this trail is before (under) the other trail, 0 means equal, and 1 means this trail is
