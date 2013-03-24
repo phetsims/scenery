@@ -86,6 +86,14 @@ define( function( require ) {
     
     // note, arguments to the functions are mutable. don't destroy them
     this.sceneEventListener = {
+      markForInsertion: function( args ) { // contains parent, child, index, trail
+        
+      },
+      
+      markForRemoval: function( args ) { // contains parent, child, index, trail
+        
+      },
+      
       insertChild: function( args ) { // contains parent, child, index, trail
         // find the closest before and after self trails that are not affected
         var affectedTrail = args.trail.copy().addDescendant( args.child ); // add on the child
