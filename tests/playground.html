@@ -15,11 +15,23 @@
   <script data-main="../js/config.js" src="../contrib/require-2.1.4.js"></script>
   
   <style>
+    html, body {
+      background-color: #eee;
+      border: 0;
+      padding: 0;
+    }
+    
     #scene {
       position: absolute;
       width: 512px;
-      height: 512px;
-      border: 1px solid black;
+      height: 256px;
+      background-color: #fff;
+    }
+    
+    #debug {
+      position: relative;
+      top: 256px;
+      
     }
   </style>
   
@@ -27,6 +39,8 @@
 <body>
   
   <div id="scene"></div>
+  
+  <div id="debug"></div>
   
   <script>
     // we need to wait until our config file is loaded before our require statement. apparently this was not guaranteed
@@ -50,6 +64,13 @@
             }
           } );
           
+          scenery.Util.polyfillRequestAnimationFrame();
+          
+          (function step(){
+            window.requestAnimationFrame( step, document.getElementById( 'scene' ) );
+            
+            $( '#debug' ).html( scene.getDebugHTML() );
+          })();
         } );
       } else {
         setTimeout( check, 4 );
