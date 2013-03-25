@@ -1,5 +1,6 @@
 
 Layer refresh:
+    Create a way to inclusively iterate between two trails
     Add a validateLayers() call that will throw errors on any noticed discrepancies
     Bug on removal
     Handle matching
