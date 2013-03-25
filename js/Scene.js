@@ -108,7 +108,9 @@ define( function( require ) {
         // signal to the relevant layers to remove the specified trail while the trail is still valid.
         // waiting until after the removal takes place would require more complicated code to properly handle the trails
         affectedTrail.eachTrailUnder( function( trail ) {
-          scene.layerLookup( trail ).removeNodeFromTrail( trail );
+          if ( trail.lastNode().hasSelf() ) {
+            scene.layerLookup( trail ).removeNodeFromTrail( trail );
+          }
         } );
       },
       
@@ -433,6 +435,11 @@ define( function( require ) {
           afterLayer.removeNodeFromTrail( trail );
           currentLayer.addNodeFromTrail( trail );
         }, false, scene );
+      } else if ( !beforeLayer && !afterLayer && boundaries.length === 1 && !boundaries[0].hasNext() && !boundaries[0].hasPrevious() ) {
+        // TODO: why are we generating a boundary here?!?
+        
+        // removing all of our nodes
+        layersToRemove = scene.layers.slice( 0 );
       } else {
         currentLayer = afterLayer;
         // TODO: check concepts on this guard, since it seems sketchy
