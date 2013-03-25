@@ -667,6 +667,8 @@ define( function( require ) {
     
     var layerEntries = [];
     _.each( this.layers, function( layer ) {
+      layer.startPointer.trail.reindex();
+      layer.endPointer.trail.reindex();
       var startIdx = layer.startPointer.toString();
       var endIndex = layer.endPointer.toString();
       if ( !layerEntries[startIdx] ) {
@@ -675,7 +677,9 @@ define( function( require ) {
       if ( !layerEntries[endIndex] ) {
         layerEntries[endIndex] = '';
       }
-      var layerInfo = layer.type.name +
+      layer.startSelfTrail.reindex();
+      layer.endSelfTrail.reindex();
+      var layerInfo = '<strong>' + layer.type.name + '</strong>' +
                       ' trails: ' + ( layer.startSelfTrail ? layer.startSelfTrail.toString() : layer.startSelfTrail ) +
                       ',' + ( layer.endSelfTrail ? layer.endSelfTrail.toString() : layer.endSelfTrail ) +
                       ' pointers: ' + layer.startPointer.toString() +
