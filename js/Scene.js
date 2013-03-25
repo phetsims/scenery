@@ -339,10 +339,11 @@ define( function( require ) {
         assert && assert( ( nextBoundary.nextSelfTrail && trail )
                           ? nextBoundary.nextSelfTrail.equals( trail )
                           : nextBoundary.nextSelfTrail === trail );
-        // console.log( 'step boundary:' );
-        // console.log( '    types:    ' + ( nextBoundary.hasPrevious() ? nextBoundary.previousLayerType.name : '' ) + ' => ' + ( nextBoundary.hasNext() ? nextBoundary.nextLayerType.name : '' ) );
-        // console.log( '    trails:   ' + ( nextBoundary.hasPrevious() ? nextBoundary.previousSelfTrail.getUniqueId() : '' ) + ' => ' + ( nextBoundary.hasNext() ? nextBoundary.nextSelfTrail.getUniqueId() : '' ) );
-        // console.log( '    pointers: ' + ( nextBoundary.hasPrevious() ? nextBoundary.previousEndPointer.toString() : '' ) + ' => ' + ( nextBoundary.hasNext() ? nextBoundary.nextStartPointer.toString() : '' ) );
+        
+        console.log( 'step boundary:' );
+        console.log( '    types:    ' + ( nextBoundary.hasPrevious() ? nextBoundary.previousLayerType.name : '' ) + ' => ' + ( nextBoundary.hasNext() ? nextBoundary.nextLayerType.name : '' ) );
+        console.log( '    trails:   ' + ( nextBoundary.hasPrevious() ? nextBoundary.previousSelfTrail.getUniqueId() : '' ) + ' => ' + ( nextBoundary.hasNext() ? nextBoundary.nextSelfTrail.getUniqueId() : '' ) );
+        console.log( '    pointers: ' + ( nextBoundary.hasPrevious() ? nextBoundary.previousEndPointer.toString() : '' ) + ' => ' + ( nextBoundary.hasNext() ? nextBoundary.nextStartPointer.toString() : '' ) );
         
         // we are at a boundary change. verify that we are at the end of a layer
         if ( currentLayer || currentStartBoundary ) {
