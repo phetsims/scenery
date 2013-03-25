@@ -231,6 +231,7 @@ define( function( require ) {
       var parent = this.nodeFromTop( 1 );
       
       var parentIndex = _.indexOf( parent._children, top );
+      assert && assert( parentIndex !== -1 );
       var arr = this.nodes.slice( 0, this.nodes.length - 1 );
       if ( parentIndex === 0 ) {
         // we were the first child, so give it the trail to the parent

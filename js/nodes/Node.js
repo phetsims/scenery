@@ -174,6 +174,12 @@ define( function( require ) {
     removeChild: function( node ) {
       assert && assert( this.isChild( node ) );
       
+      this.dispatchEvent( 'markForRemoval', {
+        parent: this,
+        child: node,
+        index: indexOfChild
+      } );
+      
       node.markOldPaint();
       
       var indexOfParent = _.indexOf( node._parents, this );
@@ -183,12 +189,6 @@ define( function( require ) {
       this._children.splice( indexOfChild, 1 );
       
       this.invalidateBounds();
-      
-      this.dispatchEvent( 'markForRemoval', {
-        parent: this,
-        child: node,
-        index: indexOfChild
-      } );
       
       this.dispatchEvent( 'stitch', { match: false } );
     },

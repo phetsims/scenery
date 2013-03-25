@@ -134,7 +134,7 @@ define( function( require ) {
         
         // signal to the relevant layers to remove the specified trail while the trail is still valid.
         // waiting until after the removal takes place would require more complicated code to properly handle the trails
-        affectedTrail.eachTrailUnder( affectedTrail, function( trail ) {
+        affectedTrail.eachTrailUnder( function( trail ) {
           scene.layerLookup( trail ).removeNodeFromTrail( trail );
         } );
       },
