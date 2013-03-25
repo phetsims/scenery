@@ -55,14 +55,8 @@ define( function( require ) {
     // bounds in global coordinate frame
     this.dirtyBounds = Bounds2.EVERYTHING;
     
-    this.startBoundary = args.startBoundary;
-    this.endBoundary = args.endBoundary;
-    
-    // TODO: deprecate these, use boundary references instead? or boundary convenience functions
-    this.startPointer = this.startBoundary.nextStartPointer;
-    this.endPointer = this.endBoundary.previousEndPointer;
-    this.startSelfTrail = this.startBoundary.nextSelfTrail;
-    this.endSelfTrail = this.endBoundary.previousSelfTrail;
+    this.setStartBoundary( args.startBoundary );
+    this.setEndBoundary( args.endBoundary );
     
     // set baseTrail from the scene to our baseNode
     if ( this.baseNode === this.scene ) {
@@ -101,6 +95,24 @@ define( function( require ) {
   
   Layer.prototype = {
     constructor: Layer,
+    
+    setStartBoundary: function( boundary ) {
+      console.log( 'setting start boundary on layer ' + this.getId() + ': ' + boundary.toString() );
+      this.startBoundary = boundary;
+      
+      // TODO: deprecate these, use boundary references instead? or boundary convenience functions
+      this.startPointer = this.startBoundary.nextStartPointer;
+      this.startSelfTrail = this.startBoundary.nextSelfTrail;
+    },
+    
+    setEndBoundary: function( boundary ) {
+      console.log( 'setting end boundary on layer ' + this.getId() + ': ' + boundary.toString() );
+      this.endBoundary = boundary;
+      
+      // TODO: deprecate these, use boundary references instead? or boundary convenience functions
+      this.endPointer = this.endBoundary.previousEndPointer;
+      this.endSelfTrail = this.endBoundary.previousSelfTrail;
+    },
     
     getStartPointer: function() {
       return this.startPointer;

@@ -314,6 +314,8 @@ define( function( require ) {
     var currentLayerType = beforeLayer ? beforeLayer.type : null;
     var currentStartBoundary = null;
     
+    console.log( 'currentLayer: ' + ( currentLayer ? currentLayer.id : currentLayer ) );
+    
     // a list of layers that are most likely removed, not including the afterLayer for gluing
     var layersToRemove = [];
     for ( var i = beforeLayerIndex + 1; i < afterLayerIndex; i++ ) {
@@ -347,10 +349,7 @@ define( function( require ) {
           if ( currentLayer ) {
             console.log( 'has currentLayer: ' + currentLayer.getId() );
             // existing layer, reposition its endpoint
-            currentLayer.endBoundary = nextBoundary;
-            // TODO: fix up layer so these extra sets are not necessary?
-            currentLayer.endPointer = nextBoundary.previousEndPointer;
-            currentLayer.endSelfTrail = nextBoundary.previousSelfTrail;
+            currentLayer.setEndBoundary( nextBoundary );
           } else {
             console.log( 'creating layer' );
             assert && assert( currentStartBoundary );
@@ -360,6 +359,7 @@ define( function( require ) {
             }, layerArgs ) );
             currentLayer.type = currentLayerType;
             console.log( 'created layer: ' + currentLayer.getId() + ' of type ' + currentLayer.type.name );
+            console.log( 'currentLayer: ' + ( currentLayer ? currentLayer.id : currentLayer ) );
             scene.insertLayer( currentLayer );
           }
           // sanity checks
@@ -373,6 +373,7 @@ define( function( require ) {
           assert && assert( trailsToAddToLayer.length === 0 );
         }
         currentLayer = null;
+        console.log( 'currentLayer: ' + ( currentLayer ? currentLayer.id : currentLayer ) );
         currentLayerType = nextBoundary.nextLayerType;
         currentStartBoundary = nextBoundary;
         nextBoundaryIndex++;
@@ -403,6 +404,7 @@ define( function( require ) {
         beforeLayer.endBoundary = afterLayer.endBoundary;
         layersToRemove.push( afterLayer );
         currentLayer = beforeLayer;
+        console.log( 'currentLayer: ' + ( currentLayer ? currentLayer.id : currentLayer ) );
         addPendingTrailsToLayer();
         
         // move over all of afterLayer's trails to beforeLayer
@@ -418,12 +420,10 @@ define( function( require ) {
         scene.disposeLayer( afterLayer );
       } else {
         currentLayer = afterLayer;
+        console.log( 'currentLayer: ' + ( currentLayer ? currentLayer.id : currentLayer ) );
         // TODO: check concepts on this guard, since it seems sketchy
         if ( currentLayer && currentStartBoundary ) {
-          currentLayer.startBoundary = currentStartBoundary;
-          // TODO: fix up layer so these extra sets are not necessary?
-          currentLayer.startPointer = currentStartBoundary.nextEndPointer;
-          currentLayer.startSelfTrail = currentStartBoundary.nextSelfTrail;
+          currentLayer.setStartBoundary( currentStartBoundary );
         }
         
         addPendingTrailsToLayer();
