@@ -217,6 +217,13 @@ define( function( require ) {
     // intervals can be mapped to current layers
     var layerMap = {};
     
+    // default arguments for constructing layers
+    var layerArgs = {
+      $main: this.$main,
+      scene: this,
+      baseNode: this
+    };
+    
     console.log( 'stitching on intervals: \n' + this.layerChangeIntervals.join( '\n' ) );
     
     _.each( this.layerChangeIntervals, function( interval ) {
