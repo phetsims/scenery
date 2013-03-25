@@ -57,6 +57,8 @@
           window.scene = new scenery.Scene( $( '#scene' ) );
           console.log( 'window.scene created' );
           
+          window.shape = kite.Shape.rectangle( 0, 0, 50, 40 );
+          
           core.loadScript( {
             src: 'qunit/js/test-utils.js',
             callback: function() {

@@ -210,6 +210,21 @@ define( function( require ) {
     this.layerChangeIntervals.push( interval );
   };
   
+  // insert a layer into the proper place (from its starting boundary)
+  Scene.prototype.insertLayer = function( layer ) {
+    for ( var i = 0; i < this.layers.length; i++ ) {
+      // compare end and start boundaries, as they should match
+      if ( this.layers[i].endBoundary.nextSelfTrail.equals( layer.startBoundary.nextSelfTrail ) ) {
+        break;
+      }
+    }
+    if ( i < this.layers.length ) {
+      this.layers.splice( i + 1, 0, layer );
+    } else {
+      this.layers.push( layer );
+    }
+  };
+  
   Scene.prototype.stitch = function( match ) {
     var scene = this;
     
@@ -346,6 +361,7 @@ define( function( require ) {
               endBoundary: nextBoundary
             }, layerArgs ) );
             currentLayer.type = currentLayerType;
+            scene.insertLayer( currentLayer );
           }
           // sanity checks
           assert && assert( currentLayer.startSelfTrail );
