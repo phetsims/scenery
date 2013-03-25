@@ -274,6 +274,8 @@ define( function( require ) {
       // } );
     } );
     this.layerChangeIntervals = [];
+    
+    this.reindexLayers();
   }
   
   Scene.prototype.stitchInterval = function( layerMap, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match ) {
@@ -506,7 +508,7 @@ define( function( require ) {
   
   Scene.prototype.disposeLayer = function( layer ) {
     layer.dispose();
-    scene.layers.splice( _.indexOf( scene.layers, layer ), 1 ); // TODO: better removal code!
+    this.layers.splice( _.indexOf( this.layers, layer ), 1 ); // TODO: better removal code!
   };
   
   Scene.prototype.disposeLayers = function() {
