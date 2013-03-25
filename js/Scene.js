@@ -228,7 +228,7 @@ define( function( require ) {
   Scene.prototype.insertLayer = function( layer ) {
     for ( var i = 0; i < this.layers.length; i++ ) {
       // compare end and start boundaries, as they should match
-      if ( this.layers[i].endBoundary.nextSelfTrail.equals( layer.startBoundary.nextSelfTrail ) ) {
+      if ( this.layers[i].endBoundary.equivalentNextTrail( layer.startBoundary.nextSelfTrail ) ) {
         break;
       }
     }
@@ -284,6 +284,7 @@ define( function( require ) {
         afterLayer = layerMap[afterLayer.getId()];
       }
       
+      console.log( 'build between ' + ( beforeTrail ? beforeTrail.toString() : beforeTrail ) + ',' + ( afterTrail ? afterTrail.toString() : afterTrail ) + ' with beforeType: ' + ( beforeLayer ? beforeLayer.type.name : null ) );
       var builder = new scenery.LayerBuilder( scene, beforeLayer ? beforeLayer.type : null, beforeTrail, afterTrail );
       
       // push the preferred layer type before we push that for any nodes
@@ -320,6 +321,8 @@ define( function( require ) {
     var beforePointer = beforeTrail ? new scenery.TrailPointer( beforeTrail, true ) : new scenery.TrailPointer( new scenery.Trail( this ), true );
     var afterPointer = afterTrail ? new scenery.TrailPointer( afterTrail, true ) : new scenery.TrailPointer( new scenery.Trail( this ), false );
     
+    console.log( 'stitching with boundaries:\n' + _.map( boundaries, function( boundary ) { return boundary.toString(); } ).join( '\n' ) );
+    
     /*---------------------------------------------------------------------------*
     * State
     *----------------------------------------------------------------------------*/
@@ -344,6 +347,12 @@ define( function( require ) {
         currentLayer.addNodeFromTrail( trail );
       } );
       trailsToAddToLayer = [];
+    }
+    
+    function addLayerForRemoval( layer ) {
+      if ( !_.contains( layersToRemove, layer ) ) {
+        layersToRemove.push( afterLayer );
+      }
     }
     
     function step( trail, isEnd ) {
@@ -406,8 +415,9 @@ define( function( require ) {
       if ( beforeLayer !== afterLayer && boundaries.length === 0 ) {
         // glue the layers together
         console.log( 'gluing layer' );
-        beforeLayer.endBoundary = afterLayer.endBoundary;
-        layersToRemove.push( afterLayer );
+        console.log( 'endBoundary: ' + afterLayer.endBoundary.toString() );
+        beforeLayer.setEndBoundary( afterLayer.endBoundary );
+        addLayerForRemoval( afterLayer );
         currentLayer = beforeLayer;
         addPendingTrailsToLayer();
         
@@ -420,8 +430,6 @@ define( function( require ) {
         } );
         
         layerMap[afterLayer.getId()] = beforeLayer;
-        
-        scene.disposeLayer( afterLayer );
       } else if ( beforeLayer && beforeLayer === afterLayer && boundaries.length > 0 ) {
         // need to 'unglue' and split the layer
         console.log( 'ungluing layer' );
@@ -437,9 +445,6 @@ define( function( require ) {
         }, false, scene );
       } else if ( !beforeLayer && !afterLayer && boundaries.length === 1 && !boundaries[0].hasNext() && !boundaries[0].hasPrevious() ) {
         // TODO: why are we generating a boundary here?!?
-        
-        // removing all of our nodes
-        // layersToRemove = scene.layers.slice( 0 );
       } else {
         currentLayer = afterLayer;
         // TODO: check concepts on this guard, since it seems sketchy

@@ -108,14 +108,18 @@ define( function( require ) {
         var node = pointer.trail.lastNode();
         
         if ( pointer.isBefore ) {
+          console.log( 'builder: enter ' + pointer.toString() );
           node.layerStrategy.enter( pointer, builder );
         } else {
+          console.log( 'builder: exit ' + pointer.toString() );
           node.layerStrategy.exit( pointer, builder );
         }
+        console.log( '         stack: ' + _.map( builder.layerTypeStack, function( type ) { return type.name; } ).join( ', ' ) );
       }, false ); // include the endpoints
       
       // special case handling if we are at the 'end' of the scene, so that we create another 'wrapping' boundary
       if ( !this.includesEndTrail ) {
+        console.log( 'builder: not including end trail' );
         this.pendingBoundary.previousEndPointer = builder.endPointer; // TODO: consider implications if we leave this null, to indicate that it is not ended?
         this.layerChange( null );
       }
@@ -134,6 +138,7 @@ define( function( require ) {
       this.pendingBoundary = new scenery.LayerBoundary();
       this.pendingBoundary.previousLayerType = confirmedBoundary.nextLayerType;
       this.pendingBoundary.previousSelfTrail = confirmedBoundary.nextSelfTrail;
+      console.log( 'builder:   added boundary' );
     },
     
     /*---------------------------------------------------------------------------*
