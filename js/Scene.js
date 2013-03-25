@@ -210,6 +210,18 @@ define( function( require ) {
     this.layerChangeIntervals.push( interval );
   };
   
+  Scene.prototype.createAndAddLayer = function( layerType, layerArgs, startBoundary, endBoundary ) {
+    var layer = layerType.createLayer( _.extend( {
+      startBoundary: startBoundary,
+      endBoundary: endBoundary
+    }, layerArgs ) );
+    layer.type = layerType;
+    console.log( 'created layer: ' + layer.getId() + ' of type ' + layer.type.name );
+    this.insertLayer( layer );
+    
+    return layer;
+  };
+  
   // insert a layer into the proper place (from its starting boundary)
   Scene.prototype.insertLayer = function( layer ) {
     for ( var i = 0; i < this.layers.length; i++ ) {
@@ -308,8 +320,6 @@ define( function( require ) {
     var currentLayerType = beforeLayer ? beforeLayer.type : null;
     var currentStartBoundary = null;
     
-    console.log( 'currentLayer: ' + ( currentLayer ? currentLayer.id : currentLayer ) );
-    
     // a list of layers that are most likely removed, not including the afterLayer for gluing
     var layersToRemove = [];
     for ( var i = beforeLayerIndex + 1; i < afterLayerIndex; i++ ) {
@@ -343,14 +353,7 @@ define( function( require ) {
           } else {
             console.log( 'creating layer' );
             assert && assert( currentStartBoundary );
-            currentLayer = currentLayerType.createLayer( _.extend( {
-              startBoundary: currentStartBoundary,
-              endBoundary: nextBoundary
-            }, layerArgs ) );
-            currentLayer.type = currentLayerType;
-            console.log( 'created layer: ' + currentLayer.getId() + ' of type ' + currentLayer.type.name );
-            console.log( 'currentLayer: ' + ( currentLayer ? currentLayer.id : currentLayer ) );
-            scene.insertLayer( currentLayer );
+            currentLayer = scene.createAndAddLayer( currentLayerType, layerArgs, currentStartBoundary, nextBoundary );
           }
           // sanity checks
           assert && assert( currentLayer.startSelfTrail );
@@ -363,7 +366,6 @@ define( function( require ) {
           assert && assert( trailsToAddToLayer.length === 0 );
         }
         currentLayer = null;
-        console.log( 'currentLayer: ' + ( currentLayer ? currentLayer.id : currentLayer ) );
         currentLayerType = nextBoundary.nextLayerType;
         currentStartBoundary = nextBoundary;
         nextBoundaryIndex++;
@@ -412,21 +414,13 @@ define( function( require ) {
         // need to 'unglue' and split the layer
         console.log( 'ungluing layer' );
         assert && assert( currentStartBoundary );
-        currentLayer = currentLayerType.createLayer( _.extend( {
-          startBoundary: currentStartBoundary,
-          endBoundary: afterLayerEndBoundary
-        }, layerArgs ) );
-        currentLayer.type = currentLayerType;
-        console.log( 'created layer: ' + currentLayer.getId() + ' of type ' + currentLayer.type.name );
-        console.log( 'currentLayer: ' + ( currentLayer ? currentLayer.id : currentLayer ) );
-        scene.insertLayer( currentLayer );
+        currentLayer = scene.createAndAddLayer( currentLayerType, layerArgs, currentStartBoundary, afterLayerEndBoundary );
         
         addPendingTrailsToLayer();
         
         throw new Error( 'need to handle updating of layerMap partially, and move over only a subset of the trails in the split' );
       } else {
         currentLayer = afterLayer;
-        console.log( 'currentLayer: ' + ( currentLayer ? currentLayer.id : currentLayer ) );
         // TODO: check concepts on this guard, since it seems sketchy
         if ( currentLayer && currentStartBoundary ) {
           currentLayer.setStartBoundary( currentStartBoundary );
