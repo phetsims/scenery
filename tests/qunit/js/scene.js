@@ -637,4 +637,14 @@
     scene.updateScene();
     expect( 0 );
   } );
+  
+  test( 'Adding and removing child layer count', function() {
+    var scene = new scenery.Scene( $( '#main' ) );
+    var path = new scenery.Path();
+    equal( scene.layers.length, 0, 'no layers before adding' );
+    scene.addChild( path );
+    equal( scene.layers.length, 1, 'one layer after adding' );
+    scene.removeChild( path );
+    equal( scene.layers.length, 0, 'no layers after removing' );
+  } );
 })();
