@@ -1,4 +1,10 @@
 
+Layer refresh:
+    Conceptually verify edge cases
+    Leaving superfluous layers with add 1 remove 1 from scene
+    Layer startPointer/endPointer after adds and removals has null trail - is this what we want?
+    Concentration shows attempt to create TrailPointer with null trail
+
 Priorities:
     Layer Refresh
     phet-core: LESS_THAN/EQUAL/GREATER_THAN enum, inheritance code, etc.
