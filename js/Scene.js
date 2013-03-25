@@ -418,11 +418,12 @@ define( function( require ) {
         scene.disposeLayer( afterLayer );
       } else {
         currentLayer = afterLayer;
-        if ( currentLayer ) {
+        // TODO: check concepts on this guard, since it seems sketchy
+        if ( currentLayer && currentStartBoundary ) {
           currentLayer.startBoundary = currentStartBoundary;
           // TODO: fix up layer so these extra sets are not necessary?
-          currentLayer.startPointer = currentStartBoundary ? currentStartBoundary.nextEndPointer : null;
-          currentLayer.startSelfTrail = currentStartBoundary ? currentStartBoundary.nextSelfTrail : null;
+          currentLayer.startPointer = currentStartBoundary.nextEndPointer;
+          currentLayer.startSelfTrail = currentStartBoundary.nextSelfTrail;
         }
         
         addPendingTrailsToLayer();
