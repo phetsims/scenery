@@ -214,7 +214,7 @@ define( function( require ) {
     var scene = this;
     
     // we need to map old layer IDs to new layers if we 'glue' two layers into one, so that the layer references we put on the
-    // intervals can be mapped to current layers
+    // intervals can be mapped to current layers.
     var layerMap = {};
     
     // default arguments for constructing layers
@@ -256,20 +256,163 @@ define( function( require ) {
       
       var boundaries = builder.boundaries;
       
-      console.log( '---' );
-      console.log( 'boundaries:' );
-      _.each( boundaries, function( boundary ) {
-        console.log( 'boundary:' );
-        console.log( '    types:    ' + ( boundary.hasPrevious() ? boundary.previousLayerType.name : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextLayerType.name : '' ) );
-        console.log( '    trails:   ' + ( boundary.hasPrevious() ? boundary.previousSelfTrail.getUniqueId() : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextSelfTrail.getUniqueId() : '' ) );
-        console.log( '    pointers: ' + ( boundary.hasPrevious() ? boundary.previousEndPointer.toString() : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextStartPointer.toString() : '' ) );
-      } );
+      if ( match ) {
+        // TODO: patch in the matching version!
+        // scene.stitchInterval( layerMap, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries );
+        this.rebuildLayers(); // bleh
+      } else {
+        scene.stitchInterval( layerMap, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match );
+      }
+      
+      // console.log( '---' );
+      // console.log( 'boundaries:' );
+      // _.each( boundaries, function( boundary ) {
+      //   console.log( 'boundary:' );
+      //   console.log( '    types:    ' + ( boundary.hasPrevious() ? boundary.previousLayerType.name : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextLayerType.name : '' ) );
+      //   console.log( '    trails:   ' + ( boundary.hasPrevious() ? boundary.previousSelfTrail.getUniqueId() : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextSelfTrail.getUniqueId() : '' ) );
+      //   console.log( '    pointers: ' + ( boundary.hasPrevious() ? boundary.previousEndPointer.toString() : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextStartPointer.toString() : '' ) );
+      // } );
     } );
     this.layerChangeIntervals = [];
-    
-    // TODO: remove this
-    this.rebuildLayers();
   }
+  
+  Scene.prototype.stitchInterval = function( layerMap, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match ) {
+    var scene = this;
+    
+    var beforeLayerIndex = _.indexOf( this.layers, beforeLayer );
+    var afterLayerIndex = _.indexOf( this.layers, afterLayer );
+    
+    var beforePointer = beforeTrail ? new scenery.TrailPointer( beforeTrail, true ) : new scenery.TrailPointer( new scenery.Trail( this ), true );
+    var afterPointer = afterTrail ? new scenery.TrailPointer( afterTrail, true ) : new scenery.TrailPointer( new scenery.Trail( this ), false );
+    
+    /*---------------------------------------------------------------------------*
+    * State
+    *----------------------------------------------------------------------------*/
+    
+    var nextBoundaryIndex = 0;
+    var nextBoundary = boundaries[nextBoundaryIndex];
+    var trailsToAddToLayer = [];
+    var currentTrail = beforeTrail;
+    var currentLayer = beforeLayer;
+    var currentLayerType = beforeLayer ? beforeLayer.type : null;
+    var currentStartBoundary = null;
+    
+    // a list of layers that are most likely removed, not including the afterLayer for gluing
+    var layersToRemove = [];
+    for ( var i = beforeLayerIndex + 1; i < afterLayerIndex; i++ ) {
+      layersToRemove.push( this.layers[i] );
+    }
+    
+    function addPendingTrailsToLayer() {
+      // add the necessary nodes to the layer
+      _.each( trailsToAddToLayer, function( trail ) {
+        currentLayer.addNodeFromTrail( trail );
+      } );
+      trailsToAddToLayer = [];
+    }
+    
+    function step( trail ) {
+      // check for a boundary at this step between currentTrail and trail
+      
+      if ( ( nextBoundary.previousSelfTrail && currentTrail )
+           ? nextBoundary.previousSelfTrail.equals( currentTrail ) // non-null style check
+           : nextBoundary.previousSelfTrail === currentTrail ) { // at least one null check
+        assert && assert( ( nextBoundary.nextSelfTrail && trail )
+                          ? nextBoundary.nextSelfTrail.equals( trail )
+                          : nextBoundary.nextSelfTrail === trail );
+        // we are at a boundary change. verify that we are at the end of a layer
+        if ( currentTrail && ( currentLayer || currentStartBoundary ) ) {
+          if ( currentLayer ) {
+            // existing layer, reposition its endpoint
+            currentLayer.endBoundary = nextBoundary;
+            // TODO: fix up layer so these extra sets are not necessary?
+            currentLayer.endPointer = nextBoundary.previousEndPointer;
+            currentLayer.endSelfTrail = nextBoundary.previousSelfTrail;
+          } else {
+            assert && assert( currentStartBoundary );
+            currentLayer = currentLayerType.createLayer( _.extend( {
+              startBoundary: currentStartBoundary,
+              endBoundary: nextBoundary
+            }, layerArgs ) );
+            currentLayer.type = currentLayerType;
+          }
+          
+          addPendingTrailsToLayer();
+          currentLayer = null;
+          currentLayerType = nextBoundary.nextLayerType;
+          currentStartBoundary = nextBoundary;
+          nextBoundaryIndex++;
+          nextBoundary = boundaries[nextBoundaryIndex];
+        } else {
+          // if not at the end of a layer, sanity check that we should have no accumulated pending trails
+          assert && assert( trailsToAddToLayer.length === 0 );
+        }
+      }
+      if ( trail ) {
+        trailsToAddToLayer.push( trail );
+      }
+      currentTrail = trail;
+    }
+    
+    function startStep( trail ) {
+      console.log( 'startStep: ' + ( trail ? trail.toString() : trail ) );
+    }
+    
+    function middleStep( trail ) {
+      console.log( 'middleStep: ' + trail.toString() );
+      step( trail );
+    }
+    
+    function endStep( trail ) {
+      console.log( 'endStep: ' + ( trail ? trail.toString() : trail ) );
+      step( trail );
+      
+      if ( beforeLayer !== afterLayer && boundaries.length === 0 ) {
+        // glue the layers together
+        beforeLayer.endBoundary = afterLayer.endBoundary;
+        layersToRemove.push( afterLayer );
+        currentLayer = beforeLayer;
+        addPendingTrailsToLayer();
+        
+        // move over all of afterLayer's trails to beforeLayer
+        // defensive copy needed, since this will be modified at the same time
+        _.each( afterLayer._layerTrails.slice( 0 ), function( trail ) {
+          afterLayer.removeNodeFromTrail( trail );
+          beforeLayer.addNodeFromTrail( trail );
+        } );
+        
+        layerMap[afterLayer.getId()] = beforeLayer;
+        
+        scene.disposeLayer( afterLayer );
+      } else {
+        currentLayer = afterLayer;
+        if ( currentLayer ) {
+          currentLayer.startBoundary = currentStartBoundary;
+          // TODO: fix up layer so these extra sets are not necessary?
+          currentLayer.startPointer = currentStartBoundary.nextEndPointer;
+          currentLayer.startSelfTrail = currentStartBoundary.nextSelfTrail;
+        }
+        
+        addPendingTrailsToLayer();
+      }
+      
+      _.each( layersToRemove, function( layer ) {
+        scene.disposeLayer( layer );
+      } );
+    }
+    
+    // iterate from beforeTrail up to BEFORE the afterTrail. does not include afterTrail
+    startStep( beforeTrail );
+    beforePointer.eachTrailBetween( afterPointer, function( trail ) {
+      // ignore non-self trails
+      if ( !trail.lastNode().hasSelf() || ( beforeTrail && trail.equals( beforeTrail ) ) ) {
+        return;
+      }
+      
+      middleStep( trail.copy() );
+    } );
+    endStep( afterTrail );
+  };
   
   Scene.prototype.rebuildLayers = function() {
     console.log( 'rebuildLayers' );
@@ -352,12 +495,16 @@ define( function( require ) {
     //throw new Error( 'unimplemented dispose: clear event handlers if added' );
   };
   
+  Scene.prototype.disposeLayer = function( layer ) {
+    layer.dispose();
+    scene.layers.splice( _.indexOf( scene.layers, layer ), 1 ); // TODO: better removal code!
+  };
+  
   Scene.prototype.disposeLayers = function() {
     var scene = this;
     
     _.each( this.layers.slice( 0 ), function( layer ) {
-      layer.dispose();
-      scene.layers.splice( _.indexOf( scene.layers, layer ), 1 ); // TODO: better removal code!
+      scene.disposeLayer( layer );
     } );
   };
   

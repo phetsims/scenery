@@ -72,6 +72,9 @@ define( function( require ) {
       assert && assert( this.baseTrail.lastNode() === this.baseNode );
     }
     
+    // we reference all trails in an unordered way
+    this._layerTrails = [];
+    
     var layer = this;
     
     // whenever the base node's children or self change bounds, signal this. we want to explicitly ignore the base node's main bounds for
@@ -155,12 +158,21 @@ define( function( require ) {
     
     // adds a trail (with the last node) to the layer
     addNodeFromTrail: function( trail ) {
-      
+      // TODO: sync this with DOMLayer's implementation
+      this._layerTrails.push( trail );
     },
     
     // removes a trail (with the last node) to the layer
     removeNodeFromTrail: function( trail ) {
-      
+      // TODO: sync this with DOMLayer's implementation
+      var i;
+      for ( i = 0; i < this._layerTrails.length; i++ ) {
+        if ( this._layerTrails[i].compare( trail ) === 0 ) {
+          break;
+        }
+      }
+      assert && assert( i < this._layerTrails.length );
+      this._layerTrails.splice( i, 1 );
     },
     
     // returns next zIndex in place. allows layers to take up more than one single zIndex
