@@ -398,6 +398,7 @@ define( function( require ) {
       console.log( 'endStep: ' + ( trail ? trail.toString() : trail ) );
       step( trail );
       
+      // TODO: better handling and concepts of beforeLayer / afterLayer when endtrails are null. leaving superfluous layer after removing everything
       if ( beforeLayer !== afterLayer && boundaries.length === 0 ) {
         // glue the layers together
         beforeLayer.endBoundary = afterLayer.endBoundary;
