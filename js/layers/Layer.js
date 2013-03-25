@@ -158,12 +158,14 @@ define( function( require ) {
     
     // adds a trail (with the last node) to the layer
     addNodeFromTrail: function( trail ) {
+      console.log( 'addNodeFromTrail layer: ' + this.getId() + ', trail: ' + trail.toString() );
       // TODO: sync this with DOMLayer's implementation
       this._layerTrails.push( trail );
     },
     
     // removes a trail (with the last node) to the layer
     removeNodeFromTrail: function( trail ) {
+      console.log( 'removeNodeFromTrail layer: ' + this.getId() + ', trail: ' + trail.toString() );
       // TODO: sync this with DOMLayer's implementation
       var i;
       for ( i = 0; i < this._layerTrails.length; i++ ) {

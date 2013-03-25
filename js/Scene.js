@@ -328,7 +328,7 @@ define( function( require ) {
       trailsToAddToLayer = [];
     }
     
-    function step( trail ) {
+    function step( trail, isEnd ) {
       console.log( 'step: ' + ( trail ? trail.toString() : trail ) );
       // check for a boundary at this step between currentTrail and trail
       
@@ -379,7 +379,7 @@ define( function( require ) {
         nextBoundaryIndex++;
         nextBoundary = boundaries[nextBoundaryIndex];
       }
-      if ( trail ) {
+      if ( trail && !isEnd ) {
         trailsToAddToLayer.push( trail );
       }
       currentTrail = trail;
@@ -391,12 +391,12 @@ define( function( require ) {
     
     function middleStep( trail ) {
       console.log( 'middleStep: ' + trail.toString() );
-      step( trail );
+      step( trail, false );
     }
     
     function endStep( trail ) {
       console.log( 'endStep: ' + ( trail ? trail.toString() : trail ) );
-      step( trail );
+      step( trail, true );
       
       // TODO: better handling and concepts of beforeLayer / afterLayer when endtrails are null. leaving superfluous layer after removing everything
       if ( beforeLayer !== afterLayer && boundaries.length === 0 ) {
