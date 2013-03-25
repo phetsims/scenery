@@ -374,6 +374,38 @@ define( function( require ) {
     }
   };
   
+  // like eachTrailBetween, but only fires for self trails
+  Trail.eachSelfTrailbetween = function( a, b, callback, excludeEndTrails, scene ) {
+    Trail.eachTrailBetween( a, b, function( trail ) {
+      if ( trail && trail.lastNode().hasSelf() ) {
+        callback( trail );
+      }
+    }, excludeEndTrails, scene );
+  };
+  
+  // global way of iterating across trails
+  Trail.eachTrailBetween = function( a, b, callback, excludeEndTrails, scene ) {
+    var aPointer = a ? new scenery.TrailPointer( a.copy(), true ) : new scenery.TrailPointer( new scenery.Trail( scene ), true );
+    var bPointer = b ? new scenery.TrailPointer( b.copy(), true ) : new scenery.TrailPointer( new scenery.Trail( scene ), false );
+    
+    // if we are excluding endpoints, just bump the pointers towards each other by one step
+    if ( excludeEndTrails ) {
+      aPointer.nestedForwards();
+      bPointer.nestedBackwards();
+      
+      // they were adjacent, so no callbacks will be executed
+      if ( aPointer.compareNested( bPointer ) === 1 ) {
+        return;
+      }
+    }
+    
+    aPointer.depthFirstUntil( bPointer, function( pointer ) {
+      if ( pointer.isBefore ) {
+        callback( pointer.trail );
+      }
+    }, false );
+  };
+  
   return Trail;
 } );
 

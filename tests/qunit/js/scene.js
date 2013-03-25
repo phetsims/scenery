@@ -164,6 +164,42 @@
     }
   } );
   
+  test( 'Trail eachTrailBetween', function() {
+    var node = createTestNodeTree();
+    
+    // get a list of all trails in render order
+    var trails = [];
+    var currentTrail = new scenery.Trail( node ); // start at the first node
+    
+    while ( currentTrail ) {
+      trails.push( currentTrail );
+      currentTrail = currentTrail.next();
+    }
+    
+    equal( 13, trails.length, 'Trails: ' + _.map( trails, function( trail ) { return trail.toString() ; } ).join( '\n' ) );
+    
+    for ( var i = 0; i < trails.length; i++ ) {
+      for ( var j = i; j < trails.length; j++ ) {
+        var inclusiveList = [];
+        scenery.Trail.eachTrailBetween( trails[i], trails[j], function( trail ) {
+          inclusiveList.push( trail.copy() );
+        }, false, node );
+        var trailString = i + ',' + j + ' ' + trails[i].toString() + ' to ' + trails[j].toString()
+        ok( inclusiveList[0].equals( trails[i] ), 'inclusive start on ' + trailString + ' is ' + inclusiveList[0].toString() );
+        ok( inclusiveList[inclusiveList.length-1].equals( trails[j] ), 'inclusive end on ' + trailString + 'is ' + inclusiveList[inclusiveList.length-1].toString() );
+        equal( inclusiveList.length, j - i + 1, 'inclusive length on ' + trailString + ' is ' + inclusiveList.length + ', ' + _.map( inclusiveList, function( trail ) { return trail.toString(); } ).join( '\n' ) );
+        
+        if ( i < j ) {
+          var exclusiveList = [];
+          scenery.Trail.eachTrailBetween( trails[i], trails[j], function( trail ) {
+            exclusiveList.push( trail.copy() );
+          }, true, node );
+          equal( exclusiveList.length, j - i - 1, 'exclusive length on ' + i + ',' + j );
+        }
+      }
+    }
+  } );
+  
   test( 'TrailPointer render comparison', function() {
     var node = createTestNodeTree();
     
