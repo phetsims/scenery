@@ -317,9 +317,10 @@ define( function( require ) {
       console.log( 'step: ' + ( trail ? trail.toString() : trail ) );
       // check for a boundary at this step between currentTrail and trail
       
-      if ( ( nextBoundary.previousSelfTrail && currentTrail )
-           ? nextBoundary.previousSelfTrail.equals( currentTrail ) // non-null style check
-           : nextBoundary.previousSelfTrail === currentTrail ) { // at least one null check
+      // if there is no next boundary, don't bother checking anyways
+      if ( nextBoundary && ( ( nextBoundary.previousSelfTrail && currentTrail )
+                             ? nextBoundary.previousSelfTrail.equals( currentTrail ) // non-null style check
+                             : nextBoundary.previousSelfTrail === currentTrail ) ) { // at least one null check
         assert && assert( ( nextBoundary.nextSelfTrail && trail )
                           ? nextBoundary.nextSelfTrail.equals( trail )
                           : nextBoundary.nextSelfTrail === trail );
@@ -400,8 +401,8 @@ define( function( require ) {
         if ( currentLayer ) {
           currentLayer.startBoundary = currentStartBoundary;
           // TODO: fix up layer so these extra sets are not necessary?
-          currentLayer.startPointer = currentStartBoundary.nextEndPointer;
-          currentLayer.startSelfTrail = currentStartBoundary.nextSelfTrail;
+          currentLayer.startPointer = currentStartBoundary ? currentStartBoundary.nextEndPointer : null;
+          currentLayer.startSelfTrail = currentStartBoundary ? currentStartBoundary.nextSelfTrail : null;
         }
         
         addPendingTrailsToLayer();
