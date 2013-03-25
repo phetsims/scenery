@@ -403,10 +403,10 @@ define( function( require ) {
       // TODO: better handling and concepts of beforeLayer / afterLayer when endtrails are null. leaving superfluous layer after removing everything
       if ( beforeLayer !== afterLayer && boundaries.length === 0 ) {
         // glue the layers together
+        console.log( 'gluing layer' );
         beforeLayer.endBoundary = afterLayer.endBoundary;
         layersToRemove.push( afterLayer );
         currentLayer = beforeLayer;
-        console.log( 'currentLayer: ' + ( currentLayer ? currentLayer.id : currentLayer ) );
         addPendingTrailsToLayer();
         
         // move over all of afterLayer's trails to beforeLayer
@@ -428,7 +428,7 @@ define( function( require ) {
         layerMap[afterLayer.getId()] = currentLayer;
         addPendingTrailsToLayer();
         
-        throw new Error( 'nmove over only a subset of the trails in the split' );
+        throw new Error( 'move over only a subset of the trails in the split' );
       } else {
         currentLayer = afterLayer;
         // TODO: check concepts on this guard, since it seems sketchy
