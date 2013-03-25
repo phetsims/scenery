@@ -503,19 +503,6 @@ define( function( require ) {
       
       this.layers.push( layer );
     }
-    
-    // console.log( '---' );
-    // console.log( 'boundaries:' );
-    // _.each( this.boundaries, function( boundary ) {
-    //   console.log( 'boundary:' );
-    //   console.log( '    types:    ' + ( boundary.hasPrevious() ? boundary.previousLayerType.name : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextLayerType.name : '' ) );
-    //   console.log( '    trails:   ' + ( boundary.hasPrevious() ? boundary.previousSelfTrail.getUniqueId() : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextSelfTrail.getUniqueId() : '' ) );
-    //   console.log( '    pointers: ' + ( boundary.hasPrevious() ? boundary.previousEndPointer.toString() : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextStartPointer.toString() : '' ) );
-    // } );
-    // console.log( 'layers:' );
-    // _.each( this.layers, function( layer ) {
-    //   console.log( layer.toString() );
-    // } );
   };
   
   // after layer changes, the layers should have their zIndex updated
