@@ -174,16 +174,16 @@ define( function( require ) {
     removeChild: function( node ) {
       assert && assert( this.isChild( node ) );
       
+      node.markOldPaint();
+      
+      var indexOfParent = _.indexOf( node._parents, this );
+      var indexOfChild = _.indexOf( this._children, node );
+      
       this.dispatchEvent( 'markForRemoval', {
         parent: this,
         child: node,
         index: indexOfChild
       } );
-      
-      node.markOldPaint();
-      
-      var indexOfParent = _.indexOf( node._parents, this );
-      var indexOfChild = _.indexOf( this._children, node );
       
       node._parents.splice( indexOfParent, 1 );
       this._children.splice( indexOfChild, 1 );
