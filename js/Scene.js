@@ -291,7 +291,7 @@ define( function( require ) {
     this.layerChangeIntervals = [];
     
     this.reindexLayers();
-  }
+  };
   
   Scene.prototype.stitchInterval = function( layerMap, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match ) {
     var scene = this;
@@ -418,6 +418,22 @@ define( function( require ) {
         layerMap[afterLayer.getId()] = beforeLayer;
         
         scene.disposeLayer( afterLayer );
+      } else if ( beforeLayer === afterLayer && boundaries.length > 0 ) {
+        // need to 'unglue' and split the layer
+        console.log( 'ungluing layer' );
+        assert && assert( currentStartBoundary );
+        currentLayer = currentLayerType.createLayer( _.extend( {
+          startBoundary: currentStartBoundary,
+          endBoundary: afterLayer.endBoundary
+        }, layerArgs ) );
+        currentLayer.type = currentLayerType;
+        console.log( 'created layer: ' + currentLayer.getId() + ' of type ' + currentLayer.type.name );
+        console.log( 'currentLayer: ' + ( currentLayer ? currentLayer.id : currentLayer ) );
+        scene.insertLayer( currentLayer );
+        
+        addPendingTrailsToLayer();
+        
+        throw new Error( 'need to handle updating of layerMap partially, and move over only a subset of the trails in the split' );
       } else {
         currentLayer = afterLayer;
         console.log( 'currentLayer: ' + ( currentLayer ? currentLayer.id : currentLayer ) );
