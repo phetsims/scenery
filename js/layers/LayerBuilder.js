@@ -89,7 +89,11 @@ define( function( require ) {
     // walks part of the state up to just before the startPointer. we want the preferred layer stack to be in place, but the rest is not important
     prepareLayerStack: function() {
       var pointer = new scenery.TrailPointer( new scenery.Trail( this.startPointer.trail.rootNode() ), true );
-      while ( pointer.trail.length < this.startPointer.trail.length ) {
+      
+      // if the start pointer is going to execute an exit() instead of an enter() on its trail node, we need to bump up the layer stack an additional step
+      var targetLength = this.startPointer.trail.length - ( this.startPointer.isBefore ? 1 : 0 );
+      
+      while ( pointer.trail.length <= targetLength ) {
         var node = pointer.trail.lastNode();
         if ( node.layerStrategy.hasPreferredLayerType( pointer, this ) ) {
           this.pushPreferredLayerType( node.layerStrategy.getPreferredLayerType( pointer, this ) );
