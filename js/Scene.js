@@ -314,8 +314,8 @@ define( function( require ) {
     // need a reference to this, since it may changes
     var afterLayerEndBoundary = afterLayer ? afterLayer.endBoundary : null;
     
-    var beforeLayerIndex = _.indexOf( this.layers, beforeLayer );
-    var afterLayerIndex = _.indexOf( this.layers, afterLayer );
+    var beforeLayerIndex = beforeLayer ? _.indexOf( this.layers, beforeLayer ) : -1;
+    var afterLayerIndex = afterLayer ? _.indexOf( this.layers, afterLayer ) : this.layers.length;
     
     var beforePointer = beforeTrail ? new scenery.TrailPointer( beforeTrail, true ) : new scenery.TrailPointer( new scenery.Trail( this ), true );
     var afterPointer = afterTrail ? new scenery.TrailPointer( afterTrail, true ) : new scenery.TrailPointer( new scenery.Trail( this ), false );
@@ -439,7 +439,7 @@ define( function( require ) {
         // TODO: why are we generating a boundary here?!?
         
         // removing all of our nodes
-        layersToRemove = scene.layers.slice( 0 );
+        // layersToRemove = scene.layers.slice( 0 );
       } else {
         currentLayer = afterLayer;
         // TODO: check concepts on this guard, since it seems sketchy
