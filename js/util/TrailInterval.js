@@ -15,11 +15,16 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
   
-  scenery.TrailInterval = function( a, b ) {
+  // dataA and dataB are arbitrary types of data that can be attached, and are preserved on combination operations
+  scenery.TrailInterval = function( a, b, dataA, dataB ) {
     assert && assert( !a || !b || a.compare( b ) <= 0, 'TrailInterval parameters must not be out of order' );
     
     this.a = a;
     this.b = b;
+    
+    // data associated to each endpoint of the interval
+    this.dataA = dataA;
+    this.dataB = dataB;
   };
   var TrailInterval = scenery.TrailInterval;
   
@@ -54,10 +59,15 @@ define( function( require ) {
     },
     
     union: function( interval ) {
+      // falsy checks since if a or b is null, we want that bound to be null
+      var thisA = ( !this.a || ( interval.a && this.a.compare( interval.a ) === -1 ) );
+      var thisB = ( !this.b || ( interval.b && this.b.compare( interval.b ) === 1 ) );
+      
       return new TrailInterval(
-        // falsy checks since if a or b is null, we want that bound to be null
-        ( !this.a || ( interval.a && this.a.compare( interval.a ) === -1 ) ) ? this.a : interval.a,
-        ( !this.b || ( interval.b && this.b.compare( interval.b ) === 1 ) ) ? this.b : interval.b
+        thisA ? this.a : interval.a,
+        thisB ? this.b : interval.b,
+        thisA ? this.dataA : interval.dataA,
+        thisB ? this.dataB : interval.dataB
       );
     },
     

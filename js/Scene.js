@@ -88,16 +88,20 @@ define( function( require ) {
     // note, arguments to the functions are mutable. don't destroy them
     this.sceneEventListener = {
       markForLayerRefresh: function( args ) { // contains trail
+        console.log( 'marking layer refresh: ' + args.trail.toString() );
         scene.markInterval( args.trail );
       },
       
       markForInsertion: function( args ) { // contains parent, child, index, trail
-        scene.markInterval( args.trail.copy().addDescendant( args.child ) );
+        var affectedTrail = args.trail.copy().addDescendant( args.child );
+        console.log( 'marking insertion: ' + affectedTrail.toString() );
+        scene.markInterval( affectedTrail );
       },
       
       markForRemoval: function( args ) { // contains parent, child, index, trail
         // mark the interval
         var affectedTrail = args.trail.copy().addDescendant( args.child );
+        console.log( 'marking removal: ' + affectedTrail.toString() );
         scene.markInterval( affectedTrail );
         
         // signal to the relevant layers to remove the specified trail while the trail is still valid.
@@ -168,14 +172,26 @@ define( function( require ) {
     // since this is marked while the child is still connected, we can use our normal trail handling.
     
     // find the closest before and after self trails that are not affected
-    var beforeTrail = affectedTrail.copy().previousSelf();
-    var afterTrail = affectedTrail.copy().nextSelf();
+    var beforeTrail = affectedTrail.previousSelf(); // easy for the before trail
     
-    this.addLayerChangeInterval( new scenery.TrailInterval( beforeTrail, afterTrail ) );
+    var afterTrailPointer = new scenery.TrailPointer( affectedTrail.copy(), false );
+    while ( afterTrailPointer.hasTrail() && ( !afterTrailPointer.isBefore || !afterTrailPointer.trail.lastNode().hasSelf() ) ) {
+      afterTrailPointer.nestedForwards();
+    }
+    var afterTrail = afterTrailPointer.trail;
+    
+    // store the layer of the before/after trails so that it is easy to access later
+    this.addLayerChangeInterval( new scenery.TrailInterval(
+      beforeTrail,
+      afterTrail,
+      beforeTrail ? this.layerLookup( beforeTrail ) : null,
+      afterTrail ? this.layerLookup( afterTrail ) : null
+    ) );
   };
   
   // convenience function for layer change intervals
   Scene.prototype.addLayerChangeInterval = function( interval ) {
+    console.log( 'adding interval: ' + interval.toString() );
     // TODO: replace with a binary-search-like version that may be faster. this includes a full scan
     
     // attempt to merge this interval with another if possible.
@@ -199,16 +215,15 @@ define( function( require ) {
     console.log( 'stitching on intervals: \n' + this.layerChangeIntervals.join( '\n' ) );
     
     _.each( this.layerChangeIntervals, function( interval ) {
+      console.log( 'before reindex: ' + interval.toString() );
+      interval.reindex();
       console.log( 'stitch on interval ' + interval.toString() );
       var beforeTrail = interval.a;
       var afterTrail = interval.b;
       
-      // before/after may have changed, if we are removing nodes
-      beforeTrail && beforeTrail.reindex();
-      afterTrail && afterTrail.reindex();
-      
-      var beforeLayer = beforeTrail ? scene.layerLookup( beforeTrail ) : null;
-      var afterLayer = afterTrail ? scene.layerLookup( afterTrail ) : null;
+      // stored here, from in markInterval
+      var beforeLayer = interval.dataA;
+      var afterLayer = interval.dataB;
       
       var builder = new scenery.LayerBuilder( scene, beforeLayer ? beforeLayer.type : null, beforeTrail, afterTrail );
       

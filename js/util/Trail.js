@@ -370,7 +370,7 @@ define( function( require ) {
       if ( !this.length ) {
         return 'Empty Trail';
       }
-      return '[Trail ' + this.indices.join( '.' ) + ']';
+      return '[Trail ' + this.indices.join( '.' ) + ' ' + this.getUniqueId() + ']';
     }
   };
   
