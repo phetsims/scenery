@@ -44,7 +44,7 @@ define( function( require ) {
    *   height: <current main height>,       // override the main container's height
    * }
    */
-  scenery.Scene = function( $main, options ) {
+  scenery.Scene = function Scene( $main, options ) {
     assert && assert( $main[0], 'A main container is required for a scene' );
     
     // defaults
@@ -675,25 +675,55 @@ define( function( require ) {
       if ( !layerEntries[endIndex] ) {
         layerEntries[endIndex] = '';
       }
-      var layerInfo = layer.type.name;
+      var layerInfo = layer.type.name +
+                      ' trails: ' + ( layer.startSelfTrail ? layer.startSelfTrail.toString() : layer.startSelfTrail ) +
+                      ',' + ( layer.endSelfTrail ? layer.endSelfTrail.toString() : layer.endSelfTrail ) +
+                      ' pointers: ' + layer.startPointer.toString() +
+                      ',' + layer.endPointer.toString();
       layerEntries[startIdx] += '<div style="color: #080">+Layer ' + layerInfo + '</div>';
       layerEntries[endIndex] += '<div style="color: #800">-Layer ' + layerInfo + '</div>';
     } );
     
     startPointer.depthFirstUntil( endPointer, function( pointer ) {
+      var div;
       var ptr = pointer.toString();
       var node = pointer.trail.lastNode();
+      
+      function addQualifier( text ) {
+          div += ' <span style="color: #008">' + text + '</span>';
+        }
       
       if ( layerEntries[ptr] ) {
         result += layerEntries[ptr];
       }
       if ( pointer.isBefore ) {
-        var div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
+        div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
         if ( node.constructor.name ) {
           div += ' ' + node.constructor.name;
         }
         div += ' <span style="font-weight: ' + ( node.hasSelf() ? 'bold' : 'normal' ) + '">' + pointer.trail.lastNode().getId() + '</span>';
         div += ' ' + pointer.trail.toString();
+        if ( !node._visible ) {
+          addQualifier( 'invisible' );
+        }
+        if ( !node._pickable ) {
+          addQualifier( 'unpickable' );
+        }
+        if ( node._clipShape ) {
+          addQualifier( 'clipShape' );
+        }
+        if ( node._renderer ) {
+          addQualifier( 'renderer:' + node._renderer.toString() );
+        }
+        if ( node._rendererOptions ) {
+          addQualifier( 'rendererOptions:' + _.each( node._rendererOptions, function( option, key ) { return key + ':' + option ? option.toString() : option; } ).join( ',' ) );
+        }
+        if ( node._layerSplitBefore ) {
+          addQualifier( 'layerSplitBefore' );
+        }
+        if ( node._layerSplitAfter ) {
+          addQualifier( 'layerSplitAfter' );
+        }
         div += '</div>';
         result += div;
       }
