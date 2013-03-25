@@ -213,6 +213,10 @@ define( function( require ) {
   Scene.prototype.stitch = function( match ) {
     var scene = this;
     
+    // we need to map old layer IDs to new layers if we 'glue' two layers into one, so that the layer references we put on the
+    // intervals can be mapped to current layers
+    var layerMap = {};
+    
     console.log( 'stitching on intervals: \n' + this.layerChangeIntervals.join( '\n' ) );
     
     _.each( this.layerChangeIntervals, function( interval ) {
@@ -225,6 +229,14 @@ define( function( require ) {
       // stored here, from in markInterval
       var beforeLayer = interval.dataA;
       var afterLayer = interval.dataB;
+      
+      // if these layers are out of date, update them. 'while' will handle chained updates. circular references should be impossible
+      while ( beforeLayer && layerMap[beforeLayer.getId()] ) {
+        beforeLayer = layerMap[beforeLayer.getId()];
+      }
+      while ( afterLayer && layerMap[afterLayer.getId()] ) {
+        afterLayer = layerMap[afterLayer.getId()];
+      }
       
       var builder = new scenery.LayerBuilder( scene, beforeLayer ? beforeLayer.type : null, beforeTrail, afterTrail );
       
