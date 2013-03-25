@@ -428,7 +428,11 @@ define( function( require ) {
         layerMap[afterLayer.getId()] = currentLayer;
         addPendingTrailsToLayer();
         
-        throw new Error( 'move over only a subset of the trails in the split' );
+        scenery.Trail.eachSelfTrailbetween( afterTrail, currentLayer.endSelfTrail, function( trail ) {
+          trail.reindex();
+          afterLayer.removeNodeFromTrail( trail );
+          currentLayer.addNodeFromTrail( trail );
+        }, false, scene );
       } else {
         currentLayer = afterLayer;
         // TODO: check concepts on this guard, since it seems sketchy
