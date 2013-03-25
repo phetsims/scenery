@@ -50,7 +50,7 @@ define( function( require ) {
    * layerSplitBefore: Forces a split between layers before this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.
    * layerSplitAfter:  Forces a split between layers after this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.
    */
-  scenery.Node = function( options ) {
+  scenery.Node = function Node( options ) {
     var self = this;
     
     // assign a unique ID to this node (allows trails to get a unique list of IDs)

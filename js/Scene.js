@@ -65,6 +65,7 @@ define( function( require ) {
     Node.call( this, options );
     
     var scene = this;
+    window.debugScene = scene;
     
     // main layers in a scene
     this.layers = [];
@@ -655,7 +656,62 @@ define( function( require ) {
     $( window ).resize( resizer );
     resizer();
   };
+  
+  Scene.prototype.getDebugHTML = function() {
+    var startPointer = new scenery.TrailPointer( new scenery.Trail( this ), true );
+    var endPointer = new scenery.TrailPointer( new scenery.Trail( this ), false );
     
+    var depth = 0;
+    
+    var result = '';
+    
+    var layerEntries = [];
+    _.each( this.layers, function( layer ) {
+      var startIdx = layer.startPointer.toString();
+      var endIndex = layer.endPointer.toString();
+      if ( !layerEntries[startIdx] ) {
+        layerEntries[startIdx] = '';
+      }
+      if ( !layerEntries[endIndex] ) {
+        layerEntries[endIndex] = '';
+      }
+      var layerInfo = layer.type.name;
+      layerEntries[startIdx] += '<div style="color: #080">+Layer ' + layerInfo + '</div>';
+      layerEntries[endIndex] += '<div style="color: #800">-Layer ' + layerInfo + '</div>';
+    } );
+    
+    startPointer.depthFirstUntil( endPointer, function( pointer ) {
+      var ptr = pointer.toString();
+      var node = pointer.trail.lastNode();
+      
+      if ( layerEntries[ptr] ) {
+        result += layerEntries[ptr];
+      }
+      if ( pointer.isBefore ) {
+        var div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
+        if ( node.constructor.name ) {
+          div += ' ' + node.constructor.name;
+        }
+        div += ' <span style="font-weight: ' + ( node.hasSelf() ? 'bold' : 'normal' ) + '">' + pointer.trail.lastNode().getId() + '</span>';
+        div += ' ' + pointer.trail.toString();
+        div += '</div>';
+        result += div;
+      }
+      depth += pointer.isBefore ? 1 : -1;
+    }, false );
+    
+    return result;
+  };
+  
+  Scene.prototype.popupDebug = function() {
+    var htmlContent = '<!DOCTYPE html>'+
+                      '<html lang="en">'+
+                      '<head><title>Scenery Debug Snapshot</title></head>'+
+                      '<body>' + this.getDebugHTML() + '</body>'+
+                      '</html>';
+    window.open( 'data:text/html;charset=utf-8,' + encodeURIComponent( htmlContent ) );
+  };
+  
   function applyCSSHacks( $main, options ) {
     // to use CSS3 transforms for performance, hide anything outside our bounds by default
     if ( !options.allowSceneOverflow ) {

@@ -20,7 +20,7 @@ define( function( require ) {
   var strokable = require( 'SCENERY/nodes/Strokable' );
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
   
-  scenery.Path = function( options ) {
+  scenery.Path = function Path( options ) {
     // TODO: consider directly passing in a shape object (or at least handling that case)
     this._shape = null;
     

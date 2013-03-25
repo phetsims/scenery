@@ -37,7 +37,7 @@ define( function( require ) {
    *     URL (string)
    *     HTMLImageElement
    */
-  scenery.Image = function( image, options ) {
+  scenery.Image = function Image( image, options ) {
     // allow not passing an options object
     options = options || {};
     

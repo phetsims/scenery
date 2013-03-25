@@ -24,7 +24,7 @@ define( function( require ) {
    *
    * @constructor
    */
-  scenery.VBox = function( options ) {
+  scenery.VBox = function VBox( options ) {
     // ensure we have a parameter object
     this.options = options = _.extend( {
       // defaults
