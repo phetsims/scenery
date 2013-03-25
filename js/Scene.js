@@ -196,71 +196,45 @@ define( function( require ) {
   };
   
   Scene.prototype.stitch = function( match ) {
+    var scene = this;
+    
     _.each( this.layerChangeIntervals, function( interval ) {
-      // TODO
+      console.log( 'stitch on interval ' + interval.toString() );
+      var beforeTrail = interval.a;
+      var afterTrail = interval.b;
+      
+      // before/after may have changed, if we are removing nodes
+      beforeTrail && beforeTrail.reindex();
+      afterTrail && afterTrail.reindex();
+      
+      var beforeLayer = beforeTrail ? scene.layerLookup( beforeTrail ) : null;
+      var afterLayer = afterTrail ? scene.layerLookup( afterTrail ) : null;
+      
+      var builder = new scenery.LayerBuilder( scene, beforeLayer ? beforeLayer.type : null, beforeTrail, afterTrail );
+      
+      // push the preferred layer type before we push that for any nodes
+      if ( scene.preferredSceneLayerType ) {
+        builder.pushPreferredLayerType( scene.preferredSceneLayerType );
+      }
+      
+      builder.run();
+      
+      var boundaries = builder.boundaries;
+      
+      console.log( '---' );
+      console.log( 'boundaries:' );
+      _.each( boundaries, function( boundary ) {
+        console.log( 'boundary:' );
+        console.log( '    types:    ' + ( boundary.hasPrevious() ? boundary.previousLayerType.name : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextLayerType.name : '' ) );
+        console.log( '    trails:   ' + ( boundary.hasPrevious() ? boundary.previousSelfTrail.getUniqueId() : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextSelfTrail.getUniqueId() : '' ) );
+        console.log( '    pointers: ' + ( boundary.hasPrevious() ? boundary.previousEndPointer.toString() : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextStartPointer.toString() : '' ) );
+      } );
     } );
     this.layerChangeIntervals = [];
     
     // TODO: remove this
     this.rebuildLayers();
   }
-  
-  /*
-   * Responsible for handling any layering changes in-between the two trails.
-   *
-   * @param {Trail} beforeTrail The trail to the closest layer-unmodified self node to the
-                    start of the affected area, or null if that doesn't exist.
-   * @param {Trail} afterTrail The trail to the closest layer-unmodified self node to the
-                    end of the affected area, or null if that doesn't exist.
-   */
-  Scene.prototype.refreshLayers = function( beforeTrail, afterTrail ) {
-    console.log( 'refreshLayers between ' + ( beforeTrail ? beforeTrail.toString() : beforeTrail ) + ' and ' + ( afterTrail ? afterTrail.toString() : afterTrail ) );
-    var beforeLayer = beforeTrail ? this.layerLookup( beforeTrail ) : null;
-    var afterLayer = afterTrail ? this.layerLookup( afterTrail ) : null;
-    
-    var builder = new scenery.LayerBuilder( this, beforeLayer ? beforeLayer.type : null, beforeTrail, afterTrail );
-    
-    // push the preferred layer type before we push that for any nodes
-    if ( this.preferredSceneLayerType ) {
-      builder.pushPreferredLayerType( this.preferredSceneLayerType );
-    }
-    
-    builder.run();
-    
-    var boundaries = builder.boundaries;
-    
-    console.log( '---' );
-    console.log( 'boundaries:' );
-    _.each( boundaries, function( boundary ) {
-      console.log( 'boundary:' );
-      console.log( '    types:    ' + ( boundary.hasPrevious() ? boundary.previousLayerType.name : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextLayerType.name : '' ) );
-      console.log( '    trails:   ' + ( boundary.hasPrevious() ? boundary.previousSelfTrail.getUniqueId() : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextSelfTrail.getUniqueId() : '' ) );
-      console.log( '    pointers: ' + ( boundary.hasPrevious() ? boundary.previousEndPointer.toString() : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextStartPointer.toString() : '' ) );
-    } );
-    
-    if ( boundaries.length === 0 ) {
-      if ( beforeLayer === afterLayer ) {
-        // nothing needs to be done!
-        return;
-      } else {
-        // we need to stitch together the two layers
-        if ( beforeLayer === null ) {
-          // expand afterLayer to cover
-        } else if ( afterLayer === null ) {
-          // expand beforeLayer to cover
-        } else {
-          // choose a layer to swallow the other layer
-          // TODO: this could be better accomplished by checking which layer has more total descendants - add counts for performance?
-        }
-        
-      }
-    } else {
-      // TODO: unhandled!
-    }
-    
-    // unhandled
-    this.rebuildLayers(); // TODO: actual implementation that doesn't rebuild all layers
-  };
   
   Scene.prototype.rebuildLayers = function() {
     console.log( 'rebuildLayers' );
@@ -369,8 +343,8 @@ define( function( require ) {
       if ( layer.startSelfTrail ) { layer.startSelfTrail.reindex(); }
       if ( layer.endSelfTrail ) { layer.endSelfTrail.reindex(); }
       
-      if ( trail.compare( layer.endSelfTrail ) <= 0 ) {
-        if ( trail.compare( layer.startSelfTrail ) >= 0 ) {
+      if ( !layer.endSelfTrail || trail.compare( layer.endSelfTrail ) <= 0 ) {
+        if ( !layer.startSelfTrail || trail.compare( layer.startSelfTrail ) >= 0 ) {
           return layer;
         } else {
           return null; // node is not contained in a layer (it is before any existing layer)
