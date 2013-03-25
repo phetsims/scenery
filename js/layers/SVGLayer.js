@@ -84,7 +84,7 @@ define( function( require ) {
       assert && assert( !( trail.getUniqueId() in this.idFragmentMap ), 'Already contained that trail!' );
       assert && assert( trail.lastNode().hasSelf(), 'Don\'t add nodes without hasSelf() to SVGLayer' );
       
-      Layer.addNodeFromTrail.call( this, trail );
+      Layer.prototype.addNodeFromTrail.call( this, trail );
       
       var subtrail = this.baseTrail.copy(); // grab the trail up to (and including) the base node, so we don't create superfluous groups
       var lastId = null;
@@ -144,7 +144,7 @@ define( function( require ) {
     removeNodeFromTrail: function( trail ) {
       assert && assert( !( trail.getUniqueId() in this.idFragmentMap ), 'Already contained that trail!' );
       
-      Layer.removeNodeFromTrail.call( this, trail );
+      Layer.prototype.removeNodeFromTrail.call( this, trail );
       
       // clean up the fragment and defs directly died to the node
       var trailId = trail.getUniqueId();

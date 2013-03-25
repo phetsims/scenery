@@ -312,6 +312,7 @@ define( function( require ) {
     }
     
     function step( trail ) {
+      console.log( 'step: ' + ( trail ? trail.toString() : trail ) );
       // check for a boundary at this step between currentTrail and trail
       
       if ( ( nextBoundary.previousSelfTrail && currentTrail )
@@ -320,15 +321,22 @@ define( function( require ) {
         assert && assert( ( nextBoundary.nextSelfTrail && trail )
                           ? nextBoundary.nextSelfTrail.equals( trail )
                           : nextBoundary.nextSelfTrail === trail );
+        // console.log( 'step boundary:' );
+        // console.log( '    types:    ' + ( nextBoundary.hasPrevious() ? nextBoundary.previousLayerType.name : '' ) + ' => ' + ( nextBoundary.hasNext() ? nextBoundary.nextLayerType.name : '' ) );
+        // console.log( '    trails:   ' + ( nextBoundary.hasPrevious() ? nextBoundary.previousSelfTrail.getUniqueId() : '' ) + ' => ' + ( nextBoundary.hasNext() ? nextBoundary.nextSelfTrail.getUniqueId() : '' ) );
+        // console.log( '    pointers: ' + ( nextBoundary.hasPrevious() ? nextBoundary.previousEndPointer.toString() : '' ) + ' => ' + ( nextBoundary.hasNext() ? nextBoundary.nextStartPointer.toString() : '' ) );
+        
         // we are at a boundary change. verify that we are at the end of a layer
-        if ( currentTrail && ( currentLayer || currentStartBoundary ) ) {
+        if ( currentLayer || currentStartBoundary ) {
           if ( currentLayer ) {
+            console.log( 'has currentLayer' );
             // existing layer, reposition its endpoint
             currentLayer.endBoundary = nextBoundary;
             // TODO: fix up layer so these extra sets are not necessary?
             currentLayer.endPointer = nextBoundary.previousEndPointer;
             currentLayer.endSelfTrail = nextBoundary.previousSelfTrail;
           } else {
+            console.log( 'creating layer' );
             assert && assert( currentStartBoundary );
             currentLayer = currentLayerType.createLayer( _.extend( {
               startBoundary: currentStartBoundary,
@@ -338,15 +346,16 @@ define( function( require ) {
           }
           
           addPendingTrailsToLayer();
-          currentLayer = null;
-          currentLayerType = nextBoundary.nextLayerType;
-          currentStartBoundary = nextBoundary;
-          nextBoundaryIndex++;
-          nextBoundary = boundaries[nextBoundaryIndex];
         } else {
           // if not at the end of a layer, sanity check that we should have no accumulated pending trails
+          console.log( 'was first layer' );
           assert && assert( trailsToAddToLayer.length === 0 );
         }
+        currentLayer = null;
+        currentLayerType = nextBoundary.nextLayerType;
+        currentStartBoundary = nextBoundary;
+        nextBoundaryIndex++;
+        nextBoundary = boundaries[nextBoundaryIndex];
       }
       if ( trail ) {
         trailsToAddToLayer.push( trail );

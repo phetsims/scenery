@@ -53,7 +53,7 @@ define( function( require ) {
     constructor: DOMLayer,
     
     addNodeFromTrail: function( trail ) {
-      Layer.addNodeFromTrail.call( this, trail );
+      Layer.prototype.addNodeFromTrail.call( this, trail );
       trail = trail.copy();
       this.reindexTrails();
       
@@ -87,7 +87,7 @@ define( function( require ) {
     },
     
     removeNodeFromTrail: function( trail ) {
-      Layer.removeNodeFromTrail.call( this, trail );
+      Layer.prototype.removeNodeFromTrail.call( this, trail );
       this.reindexTrails();
       
       var element = this.getElementFromTrail( trail );
