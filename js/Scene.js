@@ -278,15 +278,6 @@ define( function( require ) {
       } else {
         scene.stitchInterval( layerMap, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match );
       }
-      
-      // console.log( '---' );
-      // console.log( 'boundaries:' );
-      // _.each( boundaries, function( boundary ) {
-      //   console.log( 'boundary:' );
-      //   console.log( '    types:    ' + ( boundary.hasPrevious() ? boundary.previousLayerType.name : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextLayerType.name : '' ) );
-      //   console.log( '    trails:   ' + ( boundary.hasPrevious() ? boundary.previousSelfTrail.getUniqueId() : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextSelfTrail.getUniqueId() : '' ) );
-      //   console.log( '    pointers: ' + ( boundary.hasPrevious() ? boundary.previousEndPointer.toString() : '' ) + ' => ' + ( boundary.hasNext() ? boundary.nextStartPointer.toString() : '' ) );
-      // } );
     } );
     this.layerChangeIntervals = [];
     
@@ -295,6 +286,9 @@ define( function( require ) {
   
   Scene.prototype.stitchInterval = function( layerMap, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match ) {
     var scene = this;
+    
+    // need a reference to this, since it may changes
+    var afterLayerEndBoundary = afterLayer ? afterLayer.endBoundary : null;
     
     var beforeLayerIndex = _.indexOf( this.layers, beforeLayer );
     var afterLayerIndex = _.indexOf( this.layers, afterLayer );
@@ -335,12 +329,8 @@ define( function( require ) {
       // check for a boundary at this step between currentTrail and trail
       
       // if there is no next boundary, don't bother checking anyways
-      if ( nextBoundary && ( ( nextBoundary.previousSelfTrail && currentTrail )
-                             ? nextBoundary.previousSelfTrail.equals( currentTrail ) // non-null style check
-                             : nextBoundary.previousSelfTrail === currentTrail ) ) { // at least one null check
-        assert && assert( ( nextBoundary.nextSelfTrail && trail )
-                          ? nextBoundary.nextSelfTrail.equals( trail )
-                          : nextBoundary.nextSelfTrail === trail );
+      if ( nextBoundary && nextBoundary.equivalentPreviousTrail( currentTrail ) ) { // at least one null check
+        assert && assert( nextBoundary.equivalentNextTrail( trail ) );
         
         console.log( nextBoundary.toString() );
         
@@ -418,13 +408,13 @@ define( function( require ) {
         layerMap[afterLayer.getId()] = beforeLayer;
         
         scene.disposeLayer( afterLayer );
-      } else if ( beforeLayer === afterLayer && boundaries.length > 0 ) {
+      } else if ( beforeLayer && beforeLayer === afterLayer && boundaries.length > 0 ) {
         // need to 'unglue' and split the layer
         console.log( 'ungluing layer' );
         assert && assert( currentStartBoundary );
         currentLayer = currentLayerType.createLayer( _.extend( {
           startBoundary: currentStartBoundary,
-          endBoundary: afterLayer.endBoundary
+          endBoundary: afterLayerEndBoundary
         }, layerArgs ) );
         currentLayer.type = currentLayerType;
         console.log( 'created layer: ' + currentLayer.getId() + ' of type ' + currentLayer.type.name );

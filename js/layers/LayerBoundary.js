@@ -39,6 +39,24 @@ define( function( require ) {
       return !!this.nextSelfTrail;
     },
     
+    equivalentPreviousTrail: function( trail ) {
+      if ( this.previousSelfTrail && trail ) {
+        return this.previousSelfTrail.equals( trail );
+      } else {
+        // check that handles null versions properly
+        return this.previousSelfTrail === trail;
+      }
+    },
+    
+    equivalentNextTrail: function( trail ) {
+      if ( this.nextSelfTrail && trail ) {
+        return this.nextSelfTrail.equals( trail );
+      } else {
+        // check that handles null versions properly
+        return this.nextSelfTrail === trail;
+      }
+    },
+    
     toString: function() {
       return 'boundary:' +
              '\n    types:    ' +
