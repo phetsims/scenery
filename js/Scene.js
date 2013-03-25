@@ -340,15 +340,12 @@ define( function( require ) {
                           ? nextBoundary.nextSelfTrail.equals( trail )
                           : nextBoundary.nextSelfTrail === trail );
         
-        console.log( 'step boundary:' );
-        console.log( '    types:    ' + ( nextBoundary.hasPrevious() ? nextBoundary.previousLayerType.name : '' ) + ' => ' + ( nextBoundary.hasNext() ? nextBoundary.nextLayerType.name : '' ) );
-        console.log( '    trails:   ' + ( nextBoundary.hasPrevious() ? nextBoundary.previousSelfTrail.getUniqueId() : '' ) + ' => ' + ( nextBoundary.hasNext() ? nextBoundary.nextSelfTrail.getUniqueId() : '' ) );
-        console.log( '    pointers: ' + ( nextBoundary.hasPrevious() ? nextBoundary.previousEndPointer.toString() : '' ) + ' => ' + ( nextBoundary.hasNext() ? nextBoundary.nextStartPointer.toString() : '' ) );
+        console.log( nextBoundary.toString() );
         
         // we are at a boundary change. verify that we are at the end of a layer
         if ( currentLayer || currentStartBoundary ) {
           if ( currentLayer ) {
-            console.log( 'has currentLayer' );
+            console.log( 'has currentLayer: ' + currentLayer.getId() );
             // existing layer, reposition its endpoint
             currentLayer.endBoundary = nextBoundary;
             // TODO: fix up layer so these extra sets are not necessary?
@@ -362,6 +359,7 @@ define( function( require ) {
               endBoundary: nextBoundary
             }, layerArgs ) );
             currentLayer.type = currentLayerType;
+            console.log( 'created layer: ' + currentLayer.getId() + ' of type ' + currentLayer.type.name );
             scene.insertLayer( currentLayer );
           }
           // sanity checks

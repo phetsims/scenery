@@ -37,6 +37,22 @@ define( function( require ) {
     
     hasNext: function() {
       return !!this.nextSelfTrail;
+    },
+    
+    toString: function() {
+      return 'boundary:' +
+             '\n    types:    ' +
+                  ( this.previousLayerType ? this.previousLayerType.name : '' ) +
+                  ' => ' +
+                  ( this.nextLayerType ? this.nextLayerType.name : '' ) +
+             '\n    trails:   ' +
+                  ( this.previousSelfTrail ? this.previousSelfTrail.getUniqueId() : '' ) +
+                  ' => ' +
+                  ( this.nextSelfTrail ? this.nextSelfTrail.getUniqueId() : '' ) +
+             '\n    pointers: ' +
+                  ( this.previousEndPointer ? this.previousEndPointer.toString() : '' ) +
+                  ' => ' +
+                  ( this.nextStartPointer ? this.nextStartPointer.toString() : '' );
     }
   };
   
