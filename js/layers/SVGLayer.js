@@ -142,7 +142,7 @@ define( function( require ) {
     },
     
     removeNodeFromTrail: function( trail ) {
-      assert && assert( !( trail.getUniqueId() in this.idFragmentMap ), 'Already contained that trail!' );
+      assert && assert( trail.getUniqueId() in this.idFragmentMap, 'Did not contain that trail!' );
       
       Layer.prototype.removeNodeFromTrail.call( this, trail );
       
