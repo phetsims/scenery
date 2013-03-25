@@ -152,6 +152,7 @@ define( function( require ) {
           }
         }
       }
+      return this;
     },
     
     // moves this pointer backwards one step in the nested order
@@ -182,6 +183,7 @@ define( function( require ) {
           this.setBefore( true );
         }
       }
+      return this;
     },
     
     // treats the pointer as render-ordered (includes the start pointer 'before' if applicable, excludes the end pointer 'before' if applicable
