@@ -679,7 +679,7 @@ define( function( require ) {
       }
       layer.startSelfTrail.reindex();
       layer.endSelfTrail.reindex();
-      var layerInfo = '<strong>' + layer.type.name + '</strong>' +
+      var layerInfo = layer.getId() + ' <strong>' + layer.type.name + '</strong>' +
                       ' trails: ' + ( layer.startSelfTrail ? layer.startSelfTrail.toString() : layer.startSelfTrail ) +
                       ',' + ( layer.endSelfTrail ? layer.endSelfTrail.toString() : layer.endSelfTrail ) +
                       ' pointers: ' + layer.startPointer.toString() +
@@ -717,7 +717,7 @@ define( function( require ) {
           addQualifier( 'clipShape' );
         }
         if ( node._renderer ) {
-          addQualifier( 'renderer:' + node._renderer.toString() );
+          addQualifier( 'renderer:' + node._renderer.name );
         }
         if ( node._rendererOptions ) {
           addQualifier( 'rendererOptions:' + _.each( node._rendererOptions, function( option, key ) { return key + ':' + option ? option.toString() : option; } ).join( ',' ) );

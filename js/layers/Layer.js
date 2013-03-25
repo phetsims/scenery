@@ -18,6 +18,8 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
   
+  var globalIdCounter = 1;
+  
   /*
    * Required arguments:
    * $main     - the jQuery-wrapped container for the scene
@@ -28,6 +30,10 @@ define( function( require ) {
    * batchDOMChanges: false - Only run DOM manipulation from within requestAnimationFrame calls
    */
   scenery.Layer = function( args ) {
+    
+    // assign a unique ID to this layer
+    this._id = globalIdCounter++;
+    
     this.$main = args.$main;
     this.scene = args.scene;
     this.baseNode = args.baseNode;
@@ -127,6 +133,10 @@ define( function( require ) {
     
     toString: function() {
       return this.getName() + ' ' + ( this.startPointer ? this.startPointer.toString() : '!' ) + ' (' + ( this.startSelfTrail ? this.startSelfTrail.toString() : '!' ) + ') => ' + ( this.endPointer ? this.endPointer.toString() : '!' ) + ' (' + ( this.endSelfTrail ? this.endSelfTrail.toString() : '!' ) + ')';
+    },
+    
+    getId: function() {
+      return this._id;
     },
     
     /*---------------------------------------------------------------------------*
