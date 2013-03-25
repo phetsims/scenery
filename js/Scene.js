@@ -347,6 +347,9 @@ define( function( require ) {
             }, layerArgs ) );
             currentLayer.type = currentLayerType;
           }
+          // sanity checks
+          assert && assert( currentLayer.startSelfTrail );
+          assert && assert( currentLayer.endSelfTrail );
           
           addPendingTrailsToLayer();
         } else {
