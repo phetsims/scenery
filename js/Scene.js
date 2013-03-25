@@ -702,7 +702,7 @@ define( function( require ) {
           div += ' ' + node.constructor.name;
         }
         div += ' <span style="font-weight: ' + ( node.hasSelf() ? 'bold' : 'normal' ) + '">' + pointer.trail.lastNode().getId() + '</span>';
-        div += ' ' + pointer.trail.toString();
+        div += ' <span style="color: #888">' + pointer.trail.toString() + '</span>';
         if ( !node._visible ) {
           addQualifier( 'invisible' );
         }
