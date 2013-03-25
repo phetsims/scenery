@@ -177,26 +177,26 @@ define( function( require ) {
   // convenience function for layer change intervals
   Scene.prototype.addLayerChangeInterval = function( interval ) {
     // TODO: replace with a binary-search-like version that may be faster. this includes a full scan
-    var merged = false;
     
     // attempt to merge this interval with another if possible.
     for ( var i = 0; i < this.layerChangeIntervals.length; i++ ) {
       var other = this.layerChangeIntervals[i];
       other.reindex(); // sanity check, although for most use-cases this should be unnecessary
+      
       if ( interval.exclusiveUnionable( other ) ) {
-        this.layerChangeIntervals.splice( i, 1, interval.union( other ) );
-        merged = true;
-        break;
+        // the interval can be unioned without including other nodes. do this, and remove the other interval from consideration
+        interval = interval.union( other );
+        this.layerChangeIntervals.splice( i, 1 );
       }
     }
     
-    if ( !merged ) {
-      this.layerChangeIntervals.push( interval );
-    }
+    this.layerChangeIntervals.push( interval );
   };
   
   Scene.prototype.stitch = function( match ) {
     var scene = this;
+    
+    console.log( 'stitching on intervals: \n' + this.layerChangeIntervals.join( '\n' ) );
     
     _.each( this.layerChangeIntervals, function( interval ) {
       console.log( 'stitch on interval ' + interval.toString() );
