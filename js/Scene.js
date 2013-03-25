@@ -861,16 +861,20 @@ define( function( require ) {
     var startPointer = new scenery.TrailPointer( new scenery.Trail( this ), true );
     var endPointer = new scenery.TrailPointer( new scenery.Trail( this ), false );
     
+    function str( ob ) {
+      return ob ? ob.toString : ob;
+    }
+    
     var depth = 0;
     
     var result = '';
     
     var layerEntries = [];
     _.each( this.layers, function( layer ) {
-      layer.startPointer.trail.reindex();
-      layer.endPointer.trail.reindex();
-      var startIdx = layer.startPointer.toString();
-      var endIndex = layer.endPointer.toString();
+      layer.startPointer && layer.startPointer.trail && layer.startPointer.trail.reindex();
+      layer.endPointer && layer.endPointer.trail && layer.endPointer.trail.reindex();
+      var startIdx = str( layer.startPointer );
+      var endIndex = str( layer.endPointer );
       if ( !layerEntries[startIdx] ) {
         layerEntries[startIdx] = '';
       }
@@ -880,17 +884,17 @@ define( function( require ) {
       layer.startSelfTrail.reindex();
       layer.endSelfTrail.reindex();
       var layerInfo = layer.getId() + ' <strong>' + layer.type.name + '</strong>' +
-                      ' trails: ' + ( layer.startSelfTrail ? layer.startSelfTrail.toString() : layer.startSelfTrail ) +
-                      ',' + ( layer.endSelfTrail ? layer.endSelfTrail.toString() : layer.endSelfTrail ) +
-                      ' pointers: ' + layer.startPointer.toString() +
-                      ',' + layer.endPointer.toString();
+                      ' trails: ' + ( layer.startSelfTrail ? str( layer.startSelfTrail ) : layer.startSelfTrail ) +
+                      ',' + ( layer.endSelfTrail ? str( layer.endSelfTrail ) : layer.endSelfTrail ) +
+                      ' pointers: ' + str( layer.startPointer ) +
+                      ',' + str( layer.endPointer );
       layerEntries[startIdx] += '<div style="color: #080">+Layer ' + layerInfo + '</div>';
       layerEntries[endIndex] += '<div style="color: #800">-Layer ' + layerInfo + '</div>';
     } );
     
     startPointer.depthFirstUntil( endPointer, function( pointer ) {
       var div;
-      var ptr = pointer.toString();
+      var ptr = str( pointer );
       var node = pointer.trail.lastNode();
       
       function addQualifier( text ) {
@@ -906,7 +910,7 @@ define( function( require ) {
           div += ' ' + node.constructor.name;
         }
         div += ' <span style="font-weight: ' + ( node.hasSelf() ? 'bold' : 'normal' ) + '">' + pointer.trail.lastNode().getId() + '</span>';
-        div += ' <span style="color: #888">' + pointer.trail.toString() + '</span>';
+        div += ' <span style="color: #888">' + str( pointer.trail ) + '</span>';
         if ( !node._visible ) {
           addQualifier( 'invisible' );
         }
@@ -920,7 +924,7 @@ define( function( require ) {
           addQualifier( 'renderer:' + node._renderer.name );
         }
         if ( node._rendererOptions ) {
-          addQualifier( 'rendererOptions:' + _.each( node._rendererOptions, function( option, key ) { return key + ':' + option ? option.toString() : option; } ).join( ',' ) );
+          addQualifier( 'rendererOptions:' + _.each( node._rendererOptions, function( option, key ) { return key + ':' + str( option ); } ).join( ',' ) );
         }
         if ( node._layerSplitBefore ) {
           addQualifier( 'layerSplitBefore' );
