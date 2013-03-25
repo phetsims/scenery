@@ -409,6 +409,7 @@ define( function( require ) {
         // move over all of afterLayer's trails to beforeLayer
         // defensive copy needed, since this will be modified at the same time
         _.each( afterLayer._layerTrails.slice( 0 ), function( trail ) {
+          trail.reindex();
           afterLayer.removeNodeFromTrail( trail );
           beforeLayer.addNodeFromTrail( trail );
         } );

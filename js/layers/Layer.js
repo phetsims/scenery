@@ -167,6 +167,7 @@ define( function( require ) {
       // TODO: sync this with DOMLayer's implementation
       var i;
       for ( i = 0; i < this._layerTrails.length; i++ ) {
+        this._layerTrails[i].reindex();
         if ( this._layerTrails[i].compare( trail ) === 0 ) {
           break;
         }
