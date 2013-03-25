@@ -251,6 +251,16 @@ define( function( require ) {
       baseNode: this
     };
     
+    /*
+     * Sort our intervals, so that when we need to 'unglue' a layer into two separate layers, we will have passed
+     * all of the parts where we would need to use the 'before' layer, so we can update our layer map with the 'after'
+     * layer.
+     */
+    this.layerChangeIntervals.sort( function( a, b ) {
+      // TODO: consider TrailInterval parameter renaming
+      return a.a.compare( b.a );
+    } );
+    
     console.log( 'stitching on intervals: \n' + this.layerChangeIntervals.join( '\n' ) );
     
     _.each( this.layerChangeIntervals, function( interval ) {
@@ -415,10 +425,10 @@ define( function( require ) {
         console.log( 'ungluing layer' );
         assert && assert( currentStartBoundary );
         currentLayer = scene.createAndAddLayer( currentLayerType, layerArgs, currentStartBoundary, afterLayerEndBoundary );
-        
+        layerMap[afterLayer.getId()] = currentLayer;
         addPendingTrailsToLayer();
         
-        throw new Error( 'need to handle updating of layerMap partially, and move over only a subset of the trails in the split' );
+        throw new Error( 'nmove over only a subset of the trails in the split' );
       } else {
         currentLayer = afterLayer;
         // TODO: check concepts on this guard, since it seems sketchy
