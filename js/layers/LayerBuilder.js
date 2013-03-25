@@ -104,6 +104,8 @@ define( function( require ) {
       // push preferred layers for ancestors of our start pointer
       this.prepareLayerStack();
       
+      console.log( '         stack: ' + _.map( builder.layerTypeStack, function( type ) { return type.name; } ).join( ', ' ) );
+      
       builder.startPointer.depthFirstUntil( builder.endPointer, function( pointer ) {
         var node = pointer.trail.lastNode();
         
