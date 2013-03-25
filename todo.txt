@@ -1,5 +1,6 @@
 
 Layer refresh:
+    Bug on removal
     Handle matching
         * if a layer is changed, remove and add nodes - for pending trails, note layerLookup!
         * won't delete all 'between old' layers
