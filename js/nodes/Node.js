@@ -158,11 +158,13 @@ define( function( require ) {
       node.invalidateBounds();
       node.invalidatePaint();
       
-      this.dispatchEvent( 'insertChild', {
+      this.dispatchEvent( 'markForInsertion', {
         parent: this,
         child: node,
         index: index
       } );
+      
+      this.dispatchEvent( 'stitch', { match: false } );
     },
     
     addChild: function( node ) {
@@ -182,11 +184,13 @@ define( function( require ) {
       
       this.invalidateBounds();
       
-      this.dispatchEvent( 'removeChild', {
+      this.dispatchEvent( 'markForRemoval', {
         parent: this,
         child: node,
         index: indexOfChild
       } );
+      
+      this.dispatchEvent( 'stitch', { match: false } );
     },
     
     // TODO: efficiency by batching calls?
@@ -410,9 +414,9 @@ define( function( require ) {
     
     // should be called whenever something triggers changes for how this node is layered
     markLayerRefreshNeeded: function() {
-      this.dispatchEvent( 'layerRefresh', {
-        node: this
-      } );
+      this.dispatchEvent( 'layerRefresh', {} );
+      
+      this.dispatchEvent( 'stitch', { match: true } );
     },
     
     // marks the last-rendered bounds of this node and optionally all of its descendants as needing a repaint

@@ -87,24 +87,50 @@ define( function( require ) {
     
     // note, arguments to the functions are mutable. don't destroy them
     this.sceneEventListener = {
-      markForInsertion: function( args ) { // contains parent, child, index, trail
+      // not a typical listener, just a convenience function here
+      markInterval: function( affectedTrail ) {
+        // since this is marked while the child is still connected, we can use our normal trail handling.
+        
         // find the closest before and after self trails that are not affected
-        var affectedTrail = args.trail.copy().addDescendant( args.child ); // add on the child
         var beforeTrail = affectedTrail.copy().previousSelf();
         var afterTrail = affectedTrail.copy().nextSelf();
         
         this.addLayerChangeInterval( new scenery.TrailInterval( beforeTrail, afterTrail ) );
       },
       
+      // convenience function for layer change intervals
+      addLayerChangeInterval: function( interval ) {
+        // TODO: replace with a binary-search-like version that may be faster. this includes a full scan
+        var merged = false;
+        
+        // attempt to merge this interval with another if possible.
+        for ( var i = 0; i < scene.layerChangeIntervals.length; i++ ) {
+          var other = scene.layerChangeIntervals[i];
+          other.reindex(); // sanity check, although for most use-cases this should be unnecessary
+          if ( interval.exclusiveUnionable( other ) ) {
+            scene.layerChangeIntervals.splice( i, 1, interval.union( other ) );
+            merged = true;
+            break;
+          }
+        }
+        
+        if ( !merged ) {
+          scene.layerChangeIntervals.push( interval );
+        }
+      },
+      
+      markForLayerRefresh: function( args ) { // contains trail
+        this.markInterval( args.trail );
+      },
+      
+      markForInsertion: function( args ) { // contains parent, child, index, trail
+        this.markInterval( args.trail.copy().addDescendant( args.child ) );
+      },
+      
       markForRemoval: function( args ) { // contains parent, child, index, trail
-        var scene = this;
-        
-        // since this is marked while the child is still connected, we can use our normal trail handling.
+        // mark the interval
         var affectedTrail = args.trail.copy().addDescendant( args.child );
-        var beforeTrail = affectedTrail.copy().previousSelf();
-        var afterTrail = affectedTrail.copy().nextSelf();
-        
-        this.addLayerChangeInterval( new scenery.TrailInterval( beforeTrail, afterTrail ) );
+        this.markInterval( affectedTrail );
         
         // signal to the relevant layers to remove the specified trail while the trail is still valid.
         // waiting until after the removal takes place would require more complicated code to properly handle the trails
@@ -113,73 +139,14 @@ define( function( require ) {
         } );
       },
       
-      addLayerChangeInterval: function( interval ) {
-        // TODO: replace with a binary-search-like version that may be faster. this includes a full scan
-        var merged = false;
+      stitch: function( args ) { // contains match {Boolean}
+        _.each( scene.layerChangeIntervals, function( interval ) {
+          // TODO
+        } );
+        scene.layerChangeIntervals = [];
         
-        // attempt to merge this interval with another if possible.
-        for ( var i = 0; i < this.layerChangeIntervals.length; i++ ) {
-          var other = this.layerChangeIntervals[i];
-          other.reindex(); // sanity check, although for most use-cases this should be unnecessary
-          if ( interval.exclusiveUnionable( other ) ) {
-            this.layerChangeIntervals.splice( i, 1, interval.union( other ) );
-            merged = true;
-            break;
-          }
-        }
-        
-        if ( !merged ) {
-          this.layerChangeIntervals.push( interval );
-        }
-      },
-      
-      insertChild: function( args ) { // contains parent, child, index, trail
-        // find the closest before and after self trails that are not affected
-        var affectedTrail = args.trail.copy().addDescendant( args.child ); // add on the child
-        var beforeTrail = affectedTrail.copy().previousSelf();
-        var afterTrail = affectedTrail.copy().nextSelf();
-        
-        scene.refreshLayers( beforeTrail, afterTrail );
-      },
-      
-      removeChild: function( args ) { // contains parent, child, index, trail
-        var parentTrail = args.trail;
-        var parent = args.parent;
-        var index = args.index;
-        
-        // find adjacent nodes to the removal
-        var beforeTrail;
-        var afterTrail;
-        if ( parent.children.length ) {
-          if ( index === 0 ) {
-            // removed first node, so parent is before
-            beforeTrail = parentTrail.copy();
-          } else {
-            // previous sibling on top of the parent trail
-            beforeTrail = parentTrail.copy().addDescendant( parent.children[index-1] );
-          }
-          if ( index === parent.children.length ) {
-            // removed last node, see what's after previous sibling
-            afterTrail = parentTrail.copy().addDescendant( parent.children[index-1] ).next();
-          } else {
-            // next sibling
-            afterTrail = parentTrail.copy().addDescendant( parent.children[index] );
-          }
-        } else {
-          // no more children, easy to find 'adjacent' nodes!
-          beforeTrail = parentTrail.copy(); // the trail to the parent is before
-          afterTrail = parentTrail.copy().next(); // after the parent is after
-        }
-        
-        // expand until we hit self nodes
-        while ( beforeTrail && !beforeTrail.lastNode().hasSelf() ) {
-          beforeTrail = beforeTrail.previous();
-        }
-        while ( afterTrail && !afterTrail.lastNode().hasSelf() ) {
-          afterTrail = afterTrail.next();
-        }
-        
-        scene.refreshLayers( beforeTrail, afterTrail );
+        // TODO: remove this
+        scene.rebuildLayers();
       },
       
       dirtyBounds: function( args ) { // contains node, bounds, transform, trail
