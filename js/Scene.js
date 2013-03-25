@@ -862,7 +862,7 @@ define( function( require ) {
     var endPointer = new scenery.TrailPointer( new scenery.Trail( this ), false );
     
     function str( ob ) {
-      return ob ? ob.toString : ob;
+      return ob ? ob.toString() : ob;
     }
     
     var depth = 0;
