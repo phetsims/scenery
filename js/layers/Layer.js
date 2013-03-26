@@ -154,6 +154,11 @@ define( function( require ) {
       return this._id;
     },
     
+    // trails associated with the layer, NOT necessarily in order
+    getLayerTrails: function() {
+      return this._layerTrails.slice( 0 );
+    },
+    
     /*---------------------------------------------------------------------------*
     * Abstract
     *----------------------------------------------------------------------------*/

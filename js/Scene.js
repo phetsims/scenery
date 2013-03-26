@@ -239,6 +239,20 @@ define( function( require ) {
     }
   };
   
+  Scene.prototype.calculateBoundaries = function( beforeLayerType, beforeTrail, afterTrail ) {
+    console.log( 'build between ' + ( beforeTrail ? beforeTrail.toString() : beforeTrail ) + ',' + ( afterTrail ? afterTrail.toString() : afterTrail ) + ' with beforeType: ' + ( beforeLayerType ? beforeLayerType.name : null ) );
+    var builder = new scenery.LayerBuilder( this, beforeLayerType, beforeTrail, afterTrail );
+    
+    // push the preferred layer type before we push that for any nodes
+    if ( this.preferredSceneLayerType ) {
+      builder.pushPreferredLayerType( this.preferredSceneLayerType );
+    }
+    
+    builder.run();
+    
+    return builder.boundaries;
+  };
+  
   Scene.prototype.stitch = function( match ) {
     var scene = this;
     
@@ -284,17 +298,7 @@ define( function( require ) {
         afterLayer = layerMap[afterLayer.getId()];
       }
       
-      console.log( 'build between ' + ( beforeTrail ? beforeTrail.toString() : beforeTrail ) + ',' + ( afterTrail ? afterTrail.toString() : afterTrail ) + ' with beforeType: ' + ( beforeLayer ? beforeLayer.type.name : null ) );
-      var builder = new scenery.LayerBuilder( scene, beforeLayer ? beforeLayer.type : null, beforeTrail, afterTrail );
-      
-      // push the preferred layer type before we push that for any nodes
-      if ( scene.preferredSceneLayerType ) {
-        builder.pushPreferredLayerType( scene.preferredSceneLayerType );
-      }
-      
-      builder.run();
-      
-      var boundaries = builder.boundaries;
+      var boundaries = scene.calculateBoundaries( beforeLayer ? beforeLayer.type : null, beforeTrail, afterTrail );
       
       if ( match ) {
         // TODO: patch in the matching version!
@@ -307,6 +311,8 @@ define( function( require ) {
     this.layerChangeIntervals = [];
     
     this.reindexLayers();
+    
+    assert && assert( this.layerAudit() );
   };
   
   Scene.prototype.stitchInterval = function( layerMap, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match ) {
@@ -478,15 +484,7 @@ define( function( require ) {
     // remove all of our tracked layers from the container, so we can fill it with fresh layers
     this.disposeLayers();
     
-    var builder = new scenery.LayerBuilder( this, null, null, null );
-    
-    if ( this.preferredSceneLayerType ) {
-      builder.pushPreferredLayerType( this.preferredSceneLayerType );
-    }
-    
-    builder.run();
-    
-    this.boundaries = builder.boundaries;
+    this.boundaries = this.calculateBoundaries( null, null, null );
     
     var layerArgs = {
       $main: this.$main,
@@ -867,6 +865,49 @@ define( function( require ) {
     };
     $( window ).resize( resizer );
     resizer();
+  };
+  
+  // in-depth check to make sure everything is layered properly
+  Scene.prototype.layerAudit = function() {
+    var scene = this;
+    
+    var boundaries = this.calculateBoundaries( null, null, null );
+    assert && assert( boundaries.length === this.layers.length + 1 );
+    
+    // count how many 'self' trails there are
+    var eachTrailUnderSelfCount = 0;
+    new scenery.Trail( this ).eachTrailUnder( function( trail ) {
+      if ( trail.lastNode().hasSelf() ) {
+        eachTrailUnderSelfCount++;
+      }
+    } );
+    
+    var layerSelfCount = 0;
+    _.each( this.layers, function( layer ) {
+      layerSelfCount += layer.getLayerTrails().length;
+    } );
+    
+    var layerIterationSelfCount = 0;
+    _.each( this.layers, function( layer ) {
+      var selfCount = 0;
+      scenery.Trail.eachSelfTrailbetween( layer.startSelfTrail, layer.endSelfTrail, function( trail ) {
+        selfCount++;
+      }, false, scene );
+      assert && assert( selfCount > 0, 'every layer must have at least one self trail' );
+      layerIterationSelfCount += selfCount;
+    } );
+    
+    assert && assert( eachTrailUnderSelfCount === layerSelfCount, 'cross-referencing self trail counts: layerSelfCount, ' + eachTrailUnderSelfCount + ' vs ' + layerSelfCount );
+    assert && assert( eachTrailUnderSelfCount === layerIterationSelfCount, 'cross-referencing self trail counts: layerIterationSelfCount, ' + eachTrailUnderSelfCount + ' vs ' + layerIterationSelfCount );
+    
+    _.each( this.layers, function( layer ) {
+      var startTrail = layer.startSelfTrail;
+      var endTrail = layer.endSelfTrail;
+      
+      assert && assert( startTrail.compare( endTrail ) <= 0, 'proper ordering on layer trails' );
+    } );
+    
+    return true; // so we can assert( layerAudit() )
   };
   
   Scene.prototype.getDebugHTML = function() {
