@@ -18,7 +18,7 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
-  var extend = require( 'PHET_CORE/extend' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var Bounds2 = require( 'DOT/Bounds2' );
   
   var scenery = require( 'SCENERY/scenery' );
@@ -53,9 +53,7 @@ define( function( require ) {
   };
   var Text = scenery.Text;
   
-  Text.prototype = extend( objectCreate( Node.prototype ), {
-    constructor: Text,
-    
+  inherit( Text, Node, {
     setText: function( text ) {
       if ( text !== this._text ) {
         this._text = text;

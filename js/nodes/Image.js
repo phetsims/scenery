@@ -15,7 +15,7 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
-  var extend = require( 'PHET_CORE/extend' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var Bounds2 = require( 'DOT/Bounds2' );
   
   var scenery = require( 'SCENERY/scenery' );
@@ -59,9 +59,7 @@ define( function( require ) {
   };
   var Image = scenery.Image;
   
-  Image.prototype = extend( objectCreate( Node.prototype ), {
-    constructor: Image,
-    
+  inherit( Image, Node, {
     invalidateImage: function() {
       this.invalidateSelf( new Bounds2( 0, 0, this.getImageWidth(), this.getImageHeight() ) );
     },
