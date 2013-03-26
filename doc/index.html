@@ -100,6 +100,8 @@
       
       <p class="lead" style="color: #a00;">Currently incomplete!</p>
       
+      TODO: coordinate frame notes
+      
     </div>
     <div class="span3"></div>
   </div>
@@ -351,15 +353,41 @@ var container = new scenery.Node( {
       
       <h4 id="node-left">node.left</h4>
       <p>
+        <code>node.left</code> gets or sets the left bound (minimum x value) of this node's <a href="#node-bounds">bounds</a> in the parent coordinate frame, with
+        <code>node.getLeft()</code> and <code>node.setLeft( x )</code>. Setting this left bound effectively translates the node horizontally.
+      </p>
+      
+      <h4 id="node-right">node.right</h4>
+      <p>
+        <code>node.right</code> gets or sets the right bound (maximum x value) of this node's <a href="#node-bounds">bounds</a> in the parent coordinate frame, with
+        <code>node.getRight()</code> and <code>node.setRight( x )</code>. Setting this right bound effectively translates the node horizontally.
+      </p>
+      
+      <h4 id="node-top">node.top</h4>
+      <p>
+        <code>node.top</code> gets or sets the top bound (minimum y value) of this node's <a href="#node-bounds">bounds</a> in the parent coordinate frame, with
+        <code>node.getTop()</code> and <code>node.setTop( y )</code>. Setting this top bound effectively translates the node vertically.
+      </p>
+      
+      <h4 id="node-bottom">node.bottom</h4>
+      <p>
+        <code>node.bottom</code> gets or sets the bottom bound (maximum y value) of this node's <a href="#node-bounds">bounds</a> in the parent coordinate frame, with
+        <code>node.getBottom()</code> and <code>node.setBottom( y )</code>. Setting this bottom bound effectively translates the node vertically.
+      </p>
+      
+      <h4 id="node-centerX">node.centerX</h4>
+      <p>
+        <code>node.centerX</code> gets or sets the horizontal center of this node's <a href="#node-bounds">bounds</a> in the parent coordinate frame, with
+        <code>node.getCenterX()</code> and <code>node.setCenterX( x )</code>. Setting centerX effectively translates the node horizontally.
+      </p>
+      
+      <h4 id="node-centerY">node.centerY</h4>
+      <p>
+        <code>node.centerY</code> gets or sets the vertical center of this node's <a href="#node-bounds">bounds</a> in the parent coordinate frame, with
+        <code>node.getCenterY()</code> and <code>node.setCenterY( y )</code>. Setting centerY effectively translates the node vertically.
       </p>
       
       <!-- 
-      <a class="sublink" href="#node-left">left</a><br>
-      <a class="sublink" href="#node-right">right</a><br>
-      <a class="sublink" href="#node-top">top</a><br>
-      <a class="sublink" href="#node-bottom">bottom</a><br>
-      <a class="sublink" href="#node-centerX">centerX</a><br>
-      <a class="sublink" href="#node-centerY">centerY</a><br>
       <a class="sublink" href="#node-renderer">renderer</a><br>
       <a class="sublink" href="#node-rendererOptions">rendererOptions</a><br>
       <a class="sublink" href="#node-layerSplit">layerSplit</a><br>
