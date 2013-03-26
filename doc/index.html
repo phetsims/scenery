@@ -93,6 +93,9 @@
       
       <p class="lead" style="color: #a00;">Currently incomplete!</p>
       
+      TODO: Link to dot / kite docs<br>
+      TODO: How to handle ES5 getters and setters
+      
     </div>
     <div class="span3"></div>
   </div>
@@ -112,6 +115,22 @@
       <a class="sublink" href="#node-cursor">cursor</a><br>
       <a class="sublink" href="#node-visible">visible</a><br>
       <a class="sublink" href="#node-pickable">pickable</a><br>
+      <a class="sublink" href="#node-translation">translation</a><br>
+      <a class="sublink" href="#node-x">x</a><br>
+      <a class="sublink" href="#node-y">y</a><br>
+      <a class="sublink" href="#node-rotation">rotation</a><br>
+      <a class="sublink" href="#node-scale">scale</a><br>
+      <a class="sublink" href="#node-left">left</a><br>
+      <a class="sublink" href="#node-right">right</a><br>
+      <a class="sublink" href="#node-top">top</a><br>
+      <a class="sublink" href="#node-bottom">bottom</a><br>
+      <a class="sublink" href="#node-centerX">centerX</a><br>
+      <a class="sublink" href="#node-centerY">centerY</a><br>
+      <a class="sublink" href="#node-renderer">renderer</a><br>
+      <a class="sublink" href="#node-rendererOptions">rendererOptions</a><br>
+      <a class="sublink" href="#node-layerSplit">layerSplit</a><br>
+      <a class="sublink" href="#node-layerSplitBefore">layerSplitBefore</a><br>
+      <a class="sublink" href="#node-layerSplitAfter">layerSplitAfter</a><br>
       
       <a class="navlink" href="#scene">Scene</a><br>
       <a class="navlink" href="#path">Path</a><br>
@@ -181,7 +200,7 @@ var container = new scenery.Node( {
       
       <h4 id="node-parents">node.parents</h4>
       <p>
-        ES5 getter to node.getParents(). Will return an array of parent nodes, but <strong>order is not significant</strong>.
+        <code>node.parents</code> or <code>node.getParents()</code> will return an array of parent nodes, but <strong>order is not significant</strong>.
       </p>
       
       <h4 id="node-addChild">node.addChild( childNode )</h4>
@@ -191,8 +210,8 @@ var container = new scenery.Node( {
       
       <h4 id="node-insertChild">node.insertChild( index, childNode )</h4>
       <p>
-        Inserts childNode into node's children at the specified index. insertChild( 0, childNode ) will make childNode the first child, and
-        insertChild( node.children.length, childNode ) is the same ass addChild( childNode ).
+        Inserts childNode into node's children at the specified index. <code>node.insertChild( 0, childNode )</code> will make childNode the first child, and
+        <code>node.insertChild( node.children.length, childNode )</code> is the same as <code>node.addChild( childNode )</code>.
       </p>
       
       <h4 id="node-removeChild">node.removeChild( childNode )</h4>
@@ -207,22 +226,22 @@ var container = new scenery.Node( {
       
       <h4 id="node-cursor">node.cursor</h4>
       <p>
-        ES5 getter/setter to <strong>node.getCursor()</strong> and <strong>node.setCursor( cursor )</strong>. By default it is null
-        (default cursor), but this can be set to
+        <code>node.cursor</code> is a getter/setter linked to <code>node.getCursor()</code> and <code>node.setCursor( cursor )</code>.
+        By default it is null (default cursor), but this can be set to
         the string for any <a href="https://developer.mozilla.org/en-US/docs/CSS/cursor">CSS cursor value</a>. There is
         <a href="/scenery/examples/cursors.html">a cursor example page</a> that demos a number of available cursors.
       </p>
       
       <h4 id="node-visible">node.visible</h4>
       <p>
-        ES5 getter/setter to <strong>node.isVisible()</strong> and <strong>node.setVisible( boolean )</strong>.
+        <code>node.visible</code> is a getter/setter linked to <code>node.isVisible()</code> and <code>node.setVisible( boolean )</code>.
         Nodes are by default visible, but when invisible they will not
         be displayed and will not be pickable (no input events will be targeted to them).
       </p>
       
       <h4 id="node-pickable">node.pickable</h4>
       <p>
-        ES5 getter/setter to <strong>node.isPickable()</strong> and <strong>node.setPickable( boolean )</strong>.
+        <code>node.pickable</code> is a getter/setter linked to <code>node.isPickable()</code> and <code>node.setPickable( boolean )</code>.
         Nodes that are not pickable will no longer have input events targeted to them, and <a href="#node-trailUnderPoint">node.trailUnderPoint</a>
         will not include them.
       </p>
@@ -230,6 +249,35 @@ var container = new scenery.Node( {
         This is useful for semi-transparent overlays or other visual elements that should be displayed but should not prevent objects below from being
         manipulated by user input.
       </p>
+      
+      <h4 id="node-translation">node.translation</h4>
+      <p>
+        Getting the translation: <code>node.translation</code> or <code>node.getTranslation()</code>. It always returns a dot.Vector2 instance representing
+        the translation part of the node's transform. See dot.Matrix3.getTranslation() for more information.
+      </p>
+      <p>
+        Setting the translation: <code>node.translation = translation</code>, <code>node.setTranslation( translation )</code> or <code>node.setTranslation( x, y )</code>.
+        In both instances, <code>translation</code> can be either a dot.Vector2 or an object literal like <code>{ x: 5, y: 10 }</code>.
+      </p>
+      
+      <!-- 
+      <a class="sublink" href="#node-translation">translation</a><br>
+      <a class="sublink" href="#node-x">x</a><br>
+      <a class="sublink" href="#node-y">y</a><br>
+      <a class="sublink" href="#node-rotation">rotation</a><br>
+      <a class="sublink" href="#node-scale">scale</a><br>
+      <a class="sublink" href="#node-left">left</a><br>
+      <a class="sublink" href="#node-right">right</a><br>
+      <a class="sublink" href="#node-top">top</a><br>
+      <a class="sublink" href="#node-bottom">bottom</a><br>
+      <a class="sublink" href="#node-centerX">centerX</a><br>
+      <a class="sublink" href="#node-centerY">centerY</a><br>
+      <a class="sublink" href="#node-renderer">renderer</a><br>
+      <a class="sublink" href="#node-rendererOptions">rendererOptions</a><br>
+      <a class="sublink" href="#node-layerSplit">layerSplit</a><br>
+      <a class="sublink" href="#node-layerSplitBefore">layerSplitBefore</a><br>
+      <a class="sublink" href="#node-layerSplitAfter">layerSplitAfter</a><br>
+       -->
 
       <h3 id="scene" class="section">Scene</h3>
       The Scene is the "entry point" of a scene graph.  Scene extends Node, so all of its methods and options are inherited, see <a href="#node">Node</a> above.
