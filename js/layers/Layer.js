@@ -97,7 +97,7 @@ define( function( require ) {
     constructor: Layer,
     
     setStartBoundary: function( boundary ) {
-      console.log( 'setting start boundary on layer ' + this.getId() + ': ' + boundary.toString() );
+      // console.log( 'setting start boundary on layer ' + this.getId() + ': ' + boundary.toString() );
       this.startBoundary = boundary;
       
       // TODO: deprecate these, use boundary references instead? or boundary convenience functions
@@ -106,7 +106,7 @@ define( function( require ) {
     },
     
     setEndBoundary: function( boundary ) {
-      console.log( 'setting end boundary on layer ' + this.getId() + ': ' + boundary.toString() );
+      // console.log( 'setting end boundary on layer ' + this.getId() + ': ' + boundary.toString() );
       this.endBoundary = boundary;
       
       // TODO: deprecate these, use boundary references instead? or boundary convenience functions
@@ -175,14 +175,14 @@ define( function( require ) {
     
     // adds a trail (with the last node) to the layer
     addNodeFromTrail: function( trail ) {
-      console.log( 'addNodeFromTrail layer: ' + this.getId() + ', trail: ' + trail.toString() );
+      // console.log( 'addNodeFromTrail layer: ' + this.getId() + ', trail: ' + trail.toString() );
       // TODO: sync this with DOMLayer's implementation
       this._layerTrails.push( trail );
     },
     
     // removes a trail (with the last node) to the layer
     removeNodeFromTrail: function( trail ) {
-      console.log( 'removeNodeFromTrail layer: ' + this.getId() + ', trail: ' + trail.toString() );
+      // console.log( 'removeNodeFromTrail layer: ' + this.getId() + ', trail: ' + trail.toString() );
       // TODO: sync this with DOMLayer's implementation
       var i;
       for ( i = 0; i < this._layerTrails.length; i++ ) {

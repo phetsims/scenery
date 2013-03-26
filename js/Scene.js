@@ -89,20 +89,20 @@ define( function( require ) {
     // note, arguments to the functions are mutable. don't destroy them
     this.sceneEventListener = {
       markForLayerRefresh: function( args ) { // contains trail
-        console.log( 'marking layer refresh: ' + args.trail.toString() );
+        // console.log( 'marking layer refresh: ' + args.trail.toString() );
         scene.markInterval( args.trail );
       },
       
       markForInsertion: function( args ) { // contains parent, child, index, trail
         var affectedTrail = args.trail.copy().addDescendant( args.child );
-        console.log( 'marking insertion: ' + affectedTrail.toString() );
+        // console.log( 'marking insertion: ' + affectedTrail.toString() );
         scene.markInterval( affectedTrail );
       },
       
       markForRemoval: function( args ) { // contains parent, child, index, trail
         // mark the interval
         var affectedTrail = args.trail.copy().addDescendant( args.child );
-        console.log( 'marking removal: ' + affectedTrail.toString() );
+        // console.log( 'marking removal: ' + affectedTrail.toString() );
         scene.markInterval( affectedTrail );
         
         // signal to the relevant layers to remove the specified trail while the trail is still valid.
@@ -194,7 +194,7 @@ define( function( require ) {
   
   // convenience function for layer change intervals
   Scene.prototype.addLayerChangeInterval = function( interval ) {
-    console.log( 'adding interval: ' + interval.toString() );
+    // console.log( 'adding interval: ' + interval.toString() );
     // TODO: replace with a binary-search-like version that may be faster. this includes a full scan
     
     // attempt to merge this interval with another if possible.
@@ -218,7 +218,7 @@ define( function( require ) {
       endBoundary: endBoundary
     }, layerArgs ) );
     layer.type = layerType;
-    console.log( 'created layer: ' + layer.getId() + ' of type ' + layer.type.name );
+    // console.log( 'created layer: ' + layer.getId() + ' of type ' + layer.type.name );
     this.insertLayer( layer );
     
     return layer;
@@ -240,7 +240,7 @@ define( function( require ) {
   };
   
   Scene.prototype.calculateBoundaries = function( beforeLayerType, beforeTrail, afterTrail ) {
-    console.log( 'build between ' + ( beforeTrail ? beforeTrail.toString() : beforeTrail ) + ',' + ( afterTrail ? afterTrail.toString() : afterTrail ) + ' with beforeType: ' + ( beforeLayerType ? beforeLayerType.name : null ) );
+    // console.log( 'build between ' + ( beforeTrail ? beforeTrail.toString() : beforeTrail ) + ',' + ( afterTrail ? afterTrail.toString() : afterTrail ) + ' with beforeType: ' + ( beforeLayerType ? beforeLayerType.name : null ) );
     var builder = new scenery.LayerBuilder( this, beforeLayerType, beforeTrail, afterTrail );
     
     // push the preferred layer type before we push that for any nodes
@@ -277,12 +277,12 @@ define( function( require ) {
       return a.a.compare( b.a );
     } );
     
-    console.log( 'stitching on intervals: \n' + this.layerChangeIntervals.join( '\n' ) );
+    // console.log( 'stitching on intervals: \n' + this.layerChangeIntervals.join( '\n' ) );
     
     _.each( this.layerChangeIntervals, function( interval ) {
-      console.log( 'before reindex: ' + interval.toString() );
+      // console.log( 'before reindex: ' + interval.toString() );
       interval.reindex();
-      console.log( 'stitch on interval ' + interval.toString() );
+      // console.log( 'stitch on interval ' + interval.toString() );
       var beforeTrail = interval.a;
       var afterTrail = interval.b;
       
@@ -312,7 +312,8 @@ define( function( require ) {
     
     this.reindexLayers();
     
-    assert && assert( this.layerAudit() );
+    // TODO: add this back in, but with an appropriate assertion level
+    // assert && assert( this.layerAudit() );
   };
   
   Scene.prototype.stitchInterval = function( layerMap, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match ) {
@@ -327,7 +328,7 @@ define( function( require ) {
     var beforePointer = beforeTrail ? new scenery.TrailPointer( beforeTrail, true ) : new scenery.TrailPointer( new scenery.Trail( this ), true );
     var afterPointer = afterTrail ? new scenery.TrailPointer( afterTrail, true ) : new scenery.TrailPointer( new scenery.Trail( this ), false );
     
-    console.log( 'stitching with boundaries:\n' + _.map( boundaries, function( boundary ) { return boundary.toString(); } ).join( '\n' ) );
+    // console.log( 'stitching with boundaries:\n' + _.map( boundaries, function( boundary ) { return boundary.toString(); } ).join( '\n' ) );
     
     /*---------------------------------------------------------------------------*
     * State
@@ -362,23 +363,23 @@ define( function( require ) {
     }
     
     function step( trail, isEnd ) {
-      console.log( 'step: ' + ( trail ? trail.toString() : trail ) );
+      // console.log( 'step: ' + ( trail ? trail.toString() : trail ) );
       // check for a boundary at this step between currentTrail and trail
       
       // if there is no next boundary, don't bother checking anyways
       if ( nextBoundary && nextBoundary.equivalentPreviousTrail( currentTrail ) ) { // at least one null check
         assert && assert( nextBoundary.equivalentNextTrail( trail ) );
         
-        console.log( nextBoundary.toString() );
+        // console.log( nextBoundary.toString() );
         
         // we are at a boundary change. verify that we are at the end of a layer
         if ( currentLayer || currentStartBoundary ) {
           if ( currentLayer ) {
-            console.log( 'has currentLayer: ' + currentLayer.getId() );
+            // console.log( 'has currentLayer: ' + currentLayer.getId() );
             // existing layer, reposition its endpoint
             currentLayer.setEndBoundary( nextBoundary );
           } else {
-            console.log( 'creating layer' );
+            // console.log( 'creating layer' );
             assert && assert( currentStartBoundary );
             currentLayer = scene.createAndAddLayer( currentLayerType, layerArgs, currentStartBoundary, nextBoundary );
           }
@@ -389,7 +390,7 @@ define( function( require ) {
           addPendingTrailsToLayer();
         } else {
           // if not at the end of a layer, sanity check that we should have no accumulated pending trails
-          console.log( 'was first layer' );
+          // console.log( 'was first layer' );
           assert && assert( trailsToAddToLayer.length === 0 );
         }
         currentLayer = null;
@@ -405,23 +406,23 @@ define( function( require ) {
     }
     
     function startStep( trail ) {
-      console.log( 'startStep: ' + ( trail ? trail.toString() : trail ) );
+      // console.log( 'startStep: ' + ( trail ? trail.toString() : trail ) );
     }
     
     function middleStep( trail ) {
-      console.log( 'middleStep: ' + trail.toString() );
+      // console.log( 'middleStep: ' + trail.toString() );
       step( trail, false );
     }
     
     function endStep( trail ) {
-      console.log( 'endStep: ' + ( trail ? trail.toString() : trail ) );
+      // console.log( 'endStep: ' + ( trail ? trail.toString() : trail ) );
       step( trail, true );
       
       // TODO: better handling and concepts of beforeLayer / afterLayer when endtrails are null. leaving superfluous layer after removing everything
       if ( beforeLayer !== afterLayer && boundaries.length === 0 ) {
         // glue the layers together
-        console.log( 'gluing layer' );
-        console.log( 'endBoundary: ' + afterLayer.endBoundary.toString() );
+        // console.log( 'gluing layer' );
+        // console.log( 'endBoundary: ' + afterLayer.endBoundary.toString() );
         beforeLayer.setEndBoundary( afterLayer.endBoundary );
         addLayerForRemoval( afterLayer );
         currentLayer = beforeLayer;
@@ -438,7 +439,7 @@ define( function( require ) {
         layerMap[afterLayer.getId()] = beforeLayer;
       } else if ( beforeLayer && beforeLayer === afterLayer && boundaries.length > 0 ) {
         // need to 'unglue' and split the layer
-        console.log( 'ungluing layer' );
+        // console.log( 'ungluing layer' );
         assert && assert( currentStartBoundary );
         currentLayer = scene.createAndAddLayer( currentLayerType, layerArgs, currentStartBoundary, afterLayerEndBoundary );
         layerMap[afterLayer.getId()] = currentLayer;
@@ -480,7 +481,7 @@ define( function( require ) {
   };
   
   Scene.prototype.rebuildLayers = function() {
-    console.log( 'rebuildLayers' );
+    // console.log( 'rebuildLayers' );
     // remove all of our tracked layers from the container, so we can fill it with fresh layers
     this.disposeLayers();
     
