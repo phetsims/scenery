@@ -414,7 +414,7 @@ define( function( require ) {
     
     // should be called whenever something triggers changes for how this node is layered
     markLayerRefreshNeeded: function() {
-      this.dispatchEvent( 'layerRefresh', {} );
+      this.dispatchEvent( 'markForLayerRefresh', {} );
       
       this.dispatchEvent( 'stitch', { match: true } );
     },
