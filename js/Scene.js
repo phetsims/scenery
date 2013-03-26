@@ -961,7 +961,7 @@ define( function( require ) {
       if ( pointer.isBefore ) {
         div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
         if ( node.constructor.name ) {
-          div += ' ' + node.constructor.name;
+          div += ' ' + node.constructor.name; // see http://stackoverflow.com/questions/332422/how-do-i-get-the-name-of-an-objects-type-in-javascript
         }
         div += ' <span style="font-weight: ' + ( node.hasSelf() ? 'bold' : 'normal' ) + '">' + pointer.trail.lastNode().getId() + '</span>';
         div += ' <span style="color: #888">' + str( pointer.trail ) + '</span>';
