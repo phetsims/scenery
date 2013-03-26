@@ -100,9 +100,6 @@
       
       <p class="lead" style="color: #a00;">Currently incomplete!</p>
       
-      TODO: Link to dot / kite docs<br>
-      TODO: How to handle ES5 getters and setters
-      
     </div>
     <div class="span3"></div>
   </div>
@@ -187,11 +184,11 @@
         <li><a href="#node-cursor">cursor</a>: Will display the specified CSS cursor when the mouse is over this Node or one of its descendents. The Scene needs to have input listeners attached with an initialize method first.</li>
         <li><a href="#node-visible">visible</a>: If false, this node (and its children) will not be displayed (or get input events)</li>
         <li><a href="#node-pickable">pickable</a>: If false, this node (and its children) will not get input events</li>
-        <li><a href="#node-translation">translation</a>: Sets the translation of the node to either the specified dot.Vector2 value, or the x,y values from an object (e.g. translation: { x: 1, y: 2 } )</li>
+        <li><a href="#node-translation">translation</a>: Sets the translation of the node to either the specified <a href="../../dot/doc#vector2">dot.Vector2</a> value, or the x,y values from an object (e.g. translation: { x: 1, y: 2 } )</li>
         <li><a href="#node-x">x</a>: Sets the x-translation of the node</li>
         <li><a href="#node-y">y</a>: Sets the y-translation of the node</li>
         <li><a href="#node-rotation">rotation</a>: Sets the rotation of the node in radians</li>
-        <li><a href="#node-scale">scale</a>: Sets the scale of the node. Supports either a number (same x-y scale), or a dot.Vector2 / object with ob.x and ob.y to set the scale for each axis independently</li>
+        <li><a href="#node-scale">scale</a>: Sets the scale of the node. Supports either a number (same x-y scale), or a <a href="../../dot/doc#vector2">dot.Vector2</a> / object with ob.x and ob.y to set the scale for each axis independently</li>
         <li><a href="#node-left">left</a>: Sets the x-translation so that the left (min X) of the bounding box (in the parent coordinate frame) is at the specified value</li>
         <li><a href="#node-right">right</a>: Sets the x-translation so that the right (max X) of the bounding box (in the parent coordinate frame) is at the specified value</li>
         <li><a href="#node-top">top</a>: Sets the y-translation so that the top (min Y) of the bounding box (in the parent coordinate frame) is at the specified value</li>
@@ -278,18 +275,18 @@ var container = new scenery.Node( {
       
       <h4 id="node-translation">node.translation</h4>
       <p>
-        Getting the translation: <code>node.translation</code> or <code>node.getTranslation()</code>. It always returns a dot.Vector2 instance representing
-        the translation part of the node's transform. See dot.Matrix3.getTranslation() for more information.
+        Getting the translation: <code>node.translation</code> or <code>node.getTranslation()</code>. It always returns a <a href="../../dot/doc#vector2">dot.Vector2</a> instance representing
+        the translation part of the node's transform. See <a href="../../dot/doc#matrix3-getTranslation">dot.Matrix3.getTranslation</a> for more information.
       </p>
       <p>
         Setting the translation: <code>node.translation = translation</code>, <code>node.setTranslation( translation )</code> or <code>node.setTranslation( x, y )</code>.
-        In both instances, <code>translation</code> can be either a dot.Vector2 or an object literal like <code>{ x: 5, y: 10 }</code>.
+        In both instances, <code>translation</code> can be either a <a href="../../dot/doc#vector2">dot.Vector2</a> or an object literal like <code>{ x: 5, y: 10 }</code>.
       </p>
       
       <h4 id="node-translate">node.translate( x, y )</h4>
       <p>
         Translates the node relatively by <code>x</code> and <code>y</code>. In addition to <code>node.translate( x, y )</code>, <code>node.translate( translation )</code>
-        can be used, where <code>transform</code> is either a dot.Vector2 or an object like <code>{ x: 5, y: 10 }</code>
+        can be used, where <code>transform</code> is either a <a href="../../dot/doc#vector2">dot.Vector2</a> or an object like <code>{ x: 5, y: 10 }</code>
       </p>
       
       <h4 id="node-x">node.x</h4>
@@ -319,7 +316,7 @@ var container = new scenery.Node( {
       
       <h4 id="node-rotateAround">node.rotateAround( point, angle )</h4>
       <p>
-        Rotates the node by <code>angle</code> in radians around the dot.Vector2 <code>point</code>. <code>point</code> should be in the node's parent coordinate frame.
+        Rotates the node by <code>angle</code> in radians around the <a href="../../dot/doc#vector2">dot.Vector2</a> <code>point</code>. <code>point</code> should be in the node's parent coordinate frame.
       </p>
       
       <h4 id="node-scale">node.scale( x, y, [prepend] )</h4>
