@@ -24,6 +24,12 @@
   <script src="../contrib/syntaxhighlighter-3.0.83/shBrushJScript.js"></script>
   <script src="../contrib/syntaxhighlighter-3.0.83/shBrushXml.js"></script>
   
+  <!-- MathJax config -->
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+  </script>
+  <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script src="../dist/development/scenery.js"></script>
   
@@ -116,9 +122,12 @@
       <a class="sublink" href="#node-visible">visible</a><br>
       <a class="sublink" href="#node-pickable">pickable</a><br>
       <a class="sublink" href="#node-translation">translation</a><br>
+      <a class="sublink" href="#node-translate">translate</a><br>
       <a class="sublink" href="#node-x">x</a><br>
       <a class="sublink" href="#node-y">y</a><br>
       <a class="sublink" href="#node-rotation">rotation</a><br>
+      <a class="sublink" href="#node-rotate">rotate</a><br>
+      <a class="sublink" href="#node-rotateAround">rotateAround</a><br>
       <a class="sublink" href="#node-scale">scale</a><br>
       <a class="sublink" href="#node-left">left</a><br>
       <a class="sublink" href="#node-right">right</a><br>
@@ -260,12 +269,52 @@ var container = new scenery.Node( {
         In both instances, <code>translation</code> can be either a dot.Vector2 or an object literal like <code>{ x: 5, y: 10 }</code>.
       </p>
       
+      <h4 id="node-translate">node.translate( x, y )</h4>
+      <p>
+        Translates the node relatively by <code>x</code> and <code>y</code>. In addition to <code>node.translate( x, y )</code>, <code>node.translate( translation )</code>
+        can be used, where <code>transform</code> is either a dot.Vector2 or an object like <code>{ x: 5, y: 10 }</code>
+      </p>
+      
+      <h4 id="node-x">node.x</h4>
+      <p>
+        <code>node.x</code> gets or sets the node's x-translation with <code>node.getX()</code> and <code>node.setX( x )</code>. Accessing <code>node.x</code> is equivalent
+        to <code>node.translation.x</code>, and setting <code>node.x</code> is equivalent to <code>node.setTranslation( x, node.y )</code>.
+      </p>
+      
+      <h4 id="node-y">node.y</h4>
+      <p>
+        <code>node.y</code> gets or sets the node's y-translation with <code>node.getY()</code> and <code>node.setY( y )</code>. Accessing <code>node.y</code> is equivalent
+        to <code>node.translation.y</code>, and setting <code>node.y</code> is equivalent to <code>node.setTranslation( node.x, y )</code>.
+      </p>
+      
+      <h4 id="node-rotation">node.rotation</h4>
+      <p>
+        <code>node.rotation</code> gets or sets the node's rotation with <code>node.getRotation()</code> and <code>node.setRotation( radians )</code>. All rotations are
+        handled in radians ($\pi$ is a 180-degree rotation). If you wish to rotate a node by a specific rotation
+        (instead of setting its rotation), use <a href="#node-rotate">node.rotate</a>
+      </p>
+      
+      <h4 id="node-rotate">node.rotate( radians, [prepend] )</h4>
+      <p>
+        Rotates the node's transform. By default the rotation is appended to the node's transform, but the optional <code>prepend</code> boolean flag can be added for the rotation
+        to be prepended to the node's transform.
+      </p>
+      
+      <h4 id="node-rotateAround">node.rotateAround( point, angle )</h4>
+      <p>
+        Rotates the node by <code>angle</code> in radians around the dot.Vector2 <code>point</code>. <code>point</code> should be in the node's parent coordinate frame.
+      </p>
+      
+      <h4 id="node-scale">node.scale( x, y, [prepend] )</h4>
+      <p>
+        Scales the node in each axis. By default the scale is appended to the node's transform, but the optional <code>prepend</code> boolean flag can be added for the
+        scale to be prepended to the node's transform.
+      </p>
+      <p>
+        <code>node.scale( s )</code> will scale by <code>s</code> in both dimensions, and is equivalent to <code>node.scale( s, s )</code>
+      </p>
+      
       <!-- 
-      <a class="sublink" href="#node-translation">translation</a><br>
-      <a class="sublink" href="#node-x">x</a><br>
-      <a class="sublink" href="#node-y">y</a><br>
-      <a class="sublink" href="#node-rotation">rotation</a><br>
-      <a class="sublink" href="#node-scale">scale</a><br>
       <a class="sublink" href="#node-left">left</a><br>
       <a class="sublink" href="#node-right">right</a><br>
       <a class="sublink" href="#node-top">top</a><br>
