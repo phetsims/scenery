@@ -455,6 +455,11 @@ define( function( require ) {
       return this._selfBounds;
     },
     
+    getChildBounds: function() {
+      this.validateBounds();
+      return this._childBounds;
+    },
+    
     // the bounds for content in render(), in "parent" coordinates
     getBounds: function() {
       this.validateBounds();
@@ -1306,6 +1311,9 @@ define( function( require ) {
     
     get width() { return this.getWidth(); },
     get height() { return this.getHeight(); },
+    get bounds() { return this.getBounds(); },
+    get selfBounds() { return this.getSelfBounds(); },
+    get childBounds() { return this.getChildBounds(); },
     get id() { return this.getId(); },
     
     mutate: function( options ) {
