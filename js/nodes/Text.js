@@ -30,7 +30,7 @@ define( function( require ) {
   require( 'SCENERY/util/Font' );
   require( 'SCENERY/util/Util' ); // for canvasAccurateBounds
   
-  scenery.Text = function( text, options ) {
+  scenery.Text = function Text( text, options ) {
     this._text         = '';                 // filled in with mutator
     this._font         = new scenery.Font(); // default font, usually 10px sans-serif
     this._textAlign    = 'start';            // start, end, left, right, center

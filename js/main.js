@@ -50,6 +50,7 @@ define( [
     'SCENERY/util/RenderState',
     'SCENERY/util/SceneImage',
     'SCENERY/util/Trail',
+    'SCENERY/util/TrailInterval',
     'SCENERY/util/TrailPointer',
     'SCENERY/util/Util',
     

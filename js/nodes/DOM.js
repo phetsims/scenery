@@ -20,7 +20,7 @@ define( function( require ) {
   var Renderer = require( 'SCENERY/layers/Renderer' );
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
   
-  scenery.DOM = function( element, options ) {
+  scenery.DOM = function DOM( element, options ) {
     options = options || {};
     
     this._interactive = false;

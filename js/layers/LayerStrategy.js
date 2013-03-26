@@ -25,6 +25,30 @@ define( function( require ) {
    * Specified as such, since there is no needed shared state (we can have node.layerStrategy = scenery.LayerStrategy for many nodes)
    */
   scenery.LayerStrategy = {
+    // true iff enter/exit will push/pop a layer type to the preferred stack. currently limited to only one layer type per level.
+    hasPreferredLayerType: function( pointer, layerBuilder ) {
+      return pointer.trail.lastNode().hasRenderer();
+    },
+    
+    getPreferredLayerType: function( pointer, layerBuilder ) {
+      assert && assert( this.hasPreferredLayerType( pointer, layerBuilder ) ); // sanity check
+      
+      var node = pointer.trail.lastNode();
+      var preferredLayerType;
+      
+      if ( node.hasRendererLayerType() ) {
+        preferredLayerType = node.getRendererLayerType();
+      } else {
+        preferredLayerType = layerBuilder.bestPreferredLayerTypeFor( [ node.getRenderer() ] );
+        if ( !preferredLayerType ) {
+          // there was no preferred layer type matching, just use the default
+          preferredLayerType = node.getRenderer().defaultLayerType;
+        }
+      }
+      
+      return preferredLayerType;
+    },
+    
     enter: function( pointer, layerBuilder ) {
       var trail = pointer.trail;
       var node = trail.lastNode();
@@ -32,15 +56,7 @@ define( function( require ) {
       
       // if the node has a renderer, always push a layer type, so that we can pop on the exit() and ensure consistent behavior
       if ( node.hasRenderer() ) {
-        if ( node.hasRendererLayerType() ) {
-          preferredLayerType = node.getRendererLayerType();
-        } else {
-          preferredLayerType = layerBuilder.bestPreferredLayerTypeFor( [ node.getRenderer() ] );
-          if ( !preferredLayerType ) {
-            // there was no preferred layer type matching, just use the default
-            preferredLayerType = node.getRenderer().defaultLayerType;
-          }
-        }
+        preferredLayerType = this.getPreferredLayerType( pointer, layerBuilder );
         
         // push the preferred layer type
         layerBuilder.pushPreferredLayerType( preferredLayerType );

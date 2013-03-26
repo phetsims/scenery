@@ -50,7 +50,7 @@ define( function( require ) {
    * layerSplitBefore: Forces a split between layers before this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.
    * layerSplitAfter:  Forces a split between layers after this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.
    */
-  scenery.Node = function( options ) {
+  scenery.Node = function Node( options ) {
     var self = this;
     
     // assign a unique ID to this node (allows trails to get a unique list of IDs)
@@ -158,11 +158,13 @@ define( function( require ) {
       node.invalidateBounds();
       node.invalidatePaint();
       
-      this.dispatchEvent( 'insertChild', {
+      this.dispatchEvent( 'markForInsertion', {
         parent: this,
         child: node,
         index: index
       } );
+      
+      this.dispatchEvent( 'stitch', { match: false } );
     },
     
     addChild: function( node ) {
@@ -177,16 +179,18 @@ define( function( require ) {
       var indexOfParent = _.indexOf( node._parents, this );
       var indexOfChild = _.indexOf( this._children, node );
       
+      this.dispatchEvent( 'markForRemoval', {
+        parent: this,
+        child: node,
+        index: indexOfChild
+      } );
+      
       node._parents.splice( indexOfParent, 1 );
       this._children.splice( indexOfChild, 1 );
       
       this.invalidateBounds();
       
-      this.dispatchEvent( 'removeChild', {
-        parent: this,
-        child: node,
-        index: indexOfChild
-      } );
+      this.dispatchEvent( 'stitch', { match: false } );
     },
     
     // TODO: efficiency by batching calls?
@@ -410,9 +414,9 @@ define( function( require ) {
     
     // should be called whenever something triggers changes for how this node is layered
     markLayerRefreshNeeded: function() {
-      this.dispatchEvent( 'layerRefresh', {
-        node: this
-      } );
+      this.dispatchEvent( 'markForLayerRefresh', {} );
+      
+      this.dispatchEvent( 'stitch', { match: true } );
     },
     
     // marks the last-rendered bounds of this node and optionally all of its descendants as needing a repaint

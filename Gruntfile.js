@@ -63,6 +63,9 @@ module.exports = function( grunt ) {
       all: [
         'Gruntfile.js', 'js/**/*.js', 'common/kite/js/**/*.js', 'common/dot/js/**/*.js', 'common/phet-core/js/**/*.js', 'common/assert/js/**/*.js'
       ],
+      scenery: [
+        'js/**/*.js'
+      ],
       // adjust with options from http://www.jshint.com/docs/
       options: {
         // enforcing options
@@ -114,11 +117,18 @@ module.exports = function( grunt ) {
     }
   } );
   
-  // Default task.
-  grunt.registerTask( 'default', [ 'jshint', 'development', 'standalone', 'production' ] );
+  // default task ('grunt')
+  grunt.registerTask( 'default', [ 'jshint:all', 'development', 'standalone', 'production' ] );
+  
+  // linter on scenery subset only ('grunt lint')
+  grunt.registerTask( 'lint', [ 'jshint:scenery' ] );
+  
+  // compilation targets. invoke only one like ('grunt development')
   grunt.registerTask( 'production', [ 'requirejs:production' ] );
   grunt.registerTask( 'standalone', [ 'requirejs:standalone' ] );
   grunt.registerTask( 'development', [ 'requirejs:development' ] );
+  
+  // dependencies
   grunt.loadNpmTasks( 'grunt-requirejs' );
   grunt.loadNpmTasks( 'grunt-contrib-jshint' );
 };

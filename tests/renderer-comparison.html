@@ -551,14 +551,14 @@
           renderer: renderer
         } );
         
-        try {
-          testCase.draw( scene );
-        } catch( e ) {
-          if ( console.log ) {
-            console.log( 'error encountered in test ' + testCase.name + ' with ' + layerType.name );
-          }
-          throw e;
-        }
+        // try {
+        testCase.draw( scene );
+        // } catch( e ) {
+        //   if ( console.log ) {
+        //     console.log( 'error encountered in test ' + testCase.name + ' with ' + layerType.name );
+        //   }
+        //   throw e;
+        // }
         scene.updateScene();
       } );
     } );
