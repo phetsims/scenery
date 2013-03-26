@@ -4,7 +4,8 @@
   <meta charset="utf-8"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   
-  <title>Unit tests (compiled) for Scenery</title>
+  <title>Unit tests for Scenery</title>
+  
   <link rel="stylesheet" href="../../contrib/qunit-1.10.0.css">
   
   <script src="../../contrib/jquery-1.8.3.min.js"></script>
@@ -14,10 +15,13 @@
   <script src="../../contrib/qunit-1.10.0.js"></script>
   <script src="../../contrib/qhint.js"></script>
   
-  <script src="../../dist/development/scenery.js"></script>
+  <!-- <script data-main="../../js/config.js" src="../../contrib/require-2.1.4.js"></script> -->
+  <script src="../../dist/production/scenery.min.js"></script>
   
   <script src="unit-tests.js"></script>
+  <script src="../../common/kite/tests/qunit/unit-tests.js"></script>
   <script src="../../common/dot/tests/qunit/unit-tests.js"></script>
+  <script src="../../common/phet-core/tests/qunit/unit-tests.js"></script>
   
 </head>
 <body>
@@ -39,9 +43,11 @@
     } );
     
     runSceneryTests( '.' );
+    runKiteTests( '../../common/kite/tests/qunit' );
     runDotTests( '../../common/dot/tests/qunit' );
+    runPhetCoreTests( '../../common/phet-core/tests/qunit' );
     
-    if ( console.log ) {
+    if ( window.console && console.log ) {
       console.log( scenery.Util.testAssert() );
       console.log( scenery.Util.testAssertExtra() );
     }
