@@ -57,8 +57,10 @@ define( function( require ) {
     constructor: Text,
     
     setText: function( text ) {
-      this._text = text;
-      this.invalidateText();
+      if ( text !== this._text ) {
+        this._text = text;
+        this.invalidateText();
+      }
       return this;
     },
     
