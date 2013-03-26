@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+
+  <!-- runs in full-screen mode on iOS devices -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <title>Tests - Scenery</title>
+  
+  <link rel="stylesheet" href="../contrib/bootstrap-2.2.2.css">
+  
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../contrib/jquery-1.8.3.min.js"></script>
+  <!-- <script src="contrib/lodash.min-1.0.0-rc.3.js"></script> -->
+  
+  <!-- For the styling -->
+  <script src="../contrib/bootstrap-2.2.2.js"></script>
+  
+  <style type="text/css">
+    
+
+  </style>
+  
+</head>
+
+<body>
+  <div class="navbar navbar-inverse navbar-static-top">
+    <div class="navbar-inner">
+      <a class="brand" href="../">Scenery</a>
+      <ul class="nav">
+        <li><a href="../">Home</a></li>
+        <li><a href="../doc">Documentation</a></li>
+        <li><a href="../examples">Examples</a></li>
+        <li class="active"><a href="../tests">Tests</a></li>
+      </ul>
+    </div>
+  </div>
+  
+  <div class="row-fluid">
+    <div class="span3"></div>
+    <div class="span6">
+      <div class="page-header" style="text-align: center;">
+        <h1>Scenery Tests</h1>
+      </div>
+      
+      <div class="test">
+        Unit tests for <a href="qunit/unit-tests.html">dynamic development</a> or <a href="qunit/compiled-unit-tests.html">production</a>.
+      </div>
+      
+      <div class="test">
+        <a href="playground.html">Playground</a>, with everything set up in global namespaces for the developer console and a
+        Scene setup with node debugging information below.
+      </div>
+      
+      <div class="test">
+        <a href="renderer-comparison.html">Renderer comparison</a>, for inspecting rendering differences between Canvas/SVG/DOM/WebGL.
+        Sometimes requires a reload to work properly, due to some Require.js issues.
+      </div>
+      
+      <div class="test">
+        <a href="diagnostics.html">Diagnostics</a>, shows browser-specific information as a debugging aid.
+      </div>
+      
+      <div class="test">
+        <a href="svg-stacking-test.html">SVG stacking test</a>, verifying that SVG with <code>pointer-events: none</code> will let
+        mouse events pass through to buttons.
+      </div>
+      
+      <div class="test">
+        <a href="multi-touch-stress-test.html">Multi-touch stress test</a>, as a proof of concept for dynamic layer handling for dragging.
+      </div>
+      
+      <div class="test">
+        <a href="text-bounds-comparison.html">Text bounds comparison</a>, for evaluating different methods of computing text bounds.
+      </div>
+      
+      <div class="test">
+        <a href="easel-performance/easel-tests.html">Comparison with Easel</a>, for prototype performance testing.
+      </div>
+      
+      <div class="test">
+        <a href="benchmarks/performance-tests.html">Performance regression suite</a>, for testing Scenery performance between HEAD and snapshot versions.
+      </div>
+      
+      <div class="test">
+        <a href="benchmarks/benchmarks.html">Micro-benchmarks</a>, (somewhat unreliable) way of checking for performance gains.
+      </div>
+      
+      <div class="test">
+        <a href="http://jonathan-olson.com/canvas-diff/canvas-diff.html">Canvas browser differences</a>, for working around differences (bugs?)
+        in browser Canvas 2D implementations.
+      </div>
+      
+    </div>
+    <div class="span3"></div>
+  </div>
+</body>
+</html>
