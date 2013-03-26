@@ -299,7 +299,7 @@ define( function( require ) {
       if ( match ) {
         // TODO: patch in the matching version!
         // scene.stitchInterval( layerMap, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries );
-        this.rebuildLayers(); // bleh
+        scene.rebuildLayers(); // bleh
       } else {
         scene.stitchInterval( layerMap, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match );
       }
