@@ -18,7 +18,7 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
-  var extend = require( 'PHET_CORE/extend' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var Bounds2 = require( 'DOT/Bounds2' );
   
   var scenery = require( 'SCENERY/scenery' );
@@ -30,7 +30,7 @@ define( function( require ) {
   require( 'SCENERY/util/Font' );
   require( 'SCENERY/util/Util' ); // for canvasAccurateBounds
   
-  scenery.Text = function( text, options ) {
+  scenery.Text = function Text( text, options ) {
     this._text         = '';                 // filled in with mutator
     this._font         = new scenery.Font(); // default font, usually 10px sans-serif
     this._textAlign    = 'start';            // start, end, left, right, center
@@ -53,12 +53,12 @@ define( function( require ) {
   };
   var Text = scenery.Text;
   
-  Text.prototype = extend( objectCreate( Node.prototype ), {
-    constructor: Text,
-    
+  inherit( Text, Node, {
     setText: function( text ) {
-      this._text = text;
-      this.invalidateText();
+      if ( text !== this._text ) {
+        this._text = text;
+        this.invalidateText();
+      }
       return this;
     },
     

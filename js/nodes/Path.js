@@ -11,7 +11,7 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
-  var extend = require( 'PHET_CORE/extend' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   
   var Node = require( 'SCENERY/nodes/Node' );
@@ -20,7 +20,7 @@ define( function( require ) {
   var strokable = require( 'SCENERY/nodes/Strokable' );
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
   
-  scenery.Path = function( options ) {
+  scenery.Path = function Path( options ) {
     // TODO: consider directly passing in a shape object (or at least handling that case)
     this._shape = null;
     
@@ -33,9 +33,7 @@ define( function( require ) {
   };
   var Path = scenery.Path;
   
-  Path.prototype = extend( objectCreate( Node.prototype ), {
-    constructor: Path,
-    
+  inherit( Path, Node, {
     // sets the shape drawn, or null to remove the shape
     setShape: function( shape ) {
       if ( this._shape !== shape ) {
@@ -138,6 +136,23 @@ define( function( require ) {
       var strokeId = 'stroke' + this.getId();
       var fillId = 'fill' + this.getId();
       
+      // remove old definitions if they exist
+      this.removeSVGDefs( svg, defs );
+      
+      // add new definitions if necessary
+      if ( stroke && stroke.getSVGDefinition ) {
+        defs.appendChild( stroke.getSVGDefinition( strokeId ) );
+      }
+      if ( fill && fill.getSVGDefinition ) {
+        defs.appendChild( fill.getSVGDefinition( fillId ) );
+      }
+    },
+    
+    // cleans up references created with udpateSVGDefs()
+    removeSVGDefs: function( svg, defs ) {
+      var strokeId = 'stroke' + this.getId();
+      var fillId = 'fill' + this.getId();
+      
       // wipe away any old fill/stroke definitions
       var oldStrokeDef = svg.getElementById( strokeId );
       var oldFillDef = svg.getElementById( fillId );
@@ -146,14 +161,6 @@ define( function( require ) {
       }
       if ( oldFillDef ) {
         defs.removeChild( oldFillDef );
-      }
-      
-      // add new definitions if necessary
-      if ( stroke && stroke.getSVGDefinition ) {
-        defs.appendChild( stroke.getSVGDefinition( strokeId ) );
-      }
-      if ( fill && fill.getSVGDefinition ) {
-        defs.appendChild( fill.getSVGDefinition( fillId ) );
       }
     },
     

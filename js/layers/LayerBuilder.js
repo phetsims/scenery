@@ -24,6 +24,7 @@ define( function( require ) {
    * previousLayerType should be null if there is no previous layer.
    */
   scenery.LayerBuilder = function( scene, previousLayerType, previousSelfTrail, nextSelfTrail ) {
+    
     /*---------------------------------------------------------------------------*
     * Initial state
     *----------------------------------------------------------------------------*/
@@ -85,25 +86,70 @@ define( function( require ) {
   LayerBuilder.prototype = {
     constructor: LayerBuilder,
     
+    // walks part of the state up to just before the startPointer. we want the preferred layer stack to be in place, but the rest is not important
+    prepareLayerStack: function() {
+      var pointer = new scenery.TrailPointer( new scenery.Trail( this.startPointer.trail.rootNode() ), true );
+      
+      // if the start pointer is going to execute an exit() instead of an enter() on its trail node, we need to bump up the layer stack an additional step
+      var targetLength = this.startPointer.trail.length - ( this.startPointer.isBefore ? 1 : 0 );
+      
+      while ( pointer.trail.length <= targetLength ) {
+        var node = pointer.trail.lastNode();
+        if ( node.layerStrategy.hasPreferredLayerType( pointer, this ) ) {
+          this.pushPreferredLayerType( node.layerStrategy.getPreferredLayerType( pointer, this ) );
+        }
+        pointer.trail.addDescendant( this.startPointer.trail.nodes[pointer.trail.length] );
+      }
+    },
+    
     run: function() {
       var builder = this;
+      
+      // push preferred layers for ancestors of our start pointer
+      this.prepareLayerStack();
+      
+      // console.log( '         stack: ' + _.map( builder.layerTypeStack, function( type ) { return type.name; } ).join( ', ' ) );
       
       builder.startPointer.depthFirstUntil( builder.endPointer, function( pointer ) {
         var node = pointer.trail.lastNode();
         
         if ( pointer.isBefore ) {
+          // console.log( 'builder: enter ' + pointer.toString() );
           node.layerStrategy.enter( pointer, builder );
         } else {
+          // console.log( 'builder: exit ' + pointer.toString() );
           node.layerStrategy.exit( pointer, builder );
         }
+        // console.log( '         stack: ' + _.map( builder.layerTypeStack, function( type ) { return type.name; } ).join( ', ' ) );
       }, false ); // include the endpoints
       
       // special case handling if we are at the 'end' of the scene, so that we create another 'wrapping' boundary
       if ( !this.includesEndTrail ) {
+        // console.log( 'builder: not including end trail' );
         this.pendingBoundary.previousEndPointer = builder.endPointer; // TODO: consider implications if we leave this null, to indicate that it is not ended?
         this.layerChange( null );
       }
     },
+    
+    // allows selfPointer === null at the end if the main iteration's nextSelfTrail === null (i.e. we are at the end of the scene)
+    layerChange: function( selfPointer ) {
+      this.layerChangePending = false;
+      
+      var confirmedBoundary = this.pendingBoundary;
+      
+      confirmedBoundary.nextSelfTrail = selfPointer ? selfPointer.trail.copy() : null;
+      
+      this.boundaries.push( confirmedBoundary );
+      
+      this.pendingBoundary = new scenery.LayerBoundary();
+      this.pendingBoundary.previousLayerType = confirmedBoundary.nextLayerType;
+      this.pendingBoundary.previousSelfTrail = confirmedBoundary.nextSelfTrail;
+      // console.log( 'builder:   added boundary' );
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * API for layer strategy or other interaction
+    *----------------------------------------------------------------------------*/
     
     switchToType: function( pointer, layerType ) {
       this.currentLayerType = layerType;
@@ -130,21 +176,6 @@ define( function( require ) {
     // can be null to indicate that there is no current layer type
     getCurrentLayerType: function() {
       return this.currentLayerType;
-    },
-    
-    // allows selfPointer === null at the end if the main iteration's nextSelfTrail === null (i.e. we are at the end of the scene)
-    layerChange: function( selfPointer ) {
-      this.layerChangePending = false;
-      
-      var confirmedBoundary = this.pendingBoundary;
-      
-      confirmedBoundary.nextSelfTrail = selfPointer ? selfPointer.trail.copy() : null;
-      
-      this.boundaries.push( confirmedBoundary );
-      
-      this.pendingBoundary = new scenery.LayerBoundary();
-      this.pendingBoundary.previousLayerType = confirmedBoundary.nextLayerType;
-      this.pendingBoundary.previousSelfTrail = confirmedBoundary.nextSelfTrail;
     },
     
     pushPreferredLayerType: function( layerType ) {

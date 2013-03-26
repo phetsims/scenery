@@ -15,7 +15,7 @@
   
   <!-- jQuery and LoDash are dependencies -->
   <script src="../contrib/jquery-1.8.3.min.js"></script>
-  <script src="contrib/lodash.min-1.0.0-rc.3.js"></script>
+  <script src="../contrib/lodash.min-1.0.0-rc.3.js"></script>
   
   <!-- For the styling -->
   <script src="../contrib/bootstrap-2.2.2.js"></script>
@@ -24,8 +24,14 @@
   <script src="../contrib/syntaxhighlighter-3.0.83/shBrushJScript.js"></script>
   <script src="../contrib/syntaxhighlighter-3.0.83/shBrushXml.js"></script>
   
+  <!-- MathJax config -->
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+  </script>
+  <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
-  <script src="dist/development/scenery.js"></script>
+  <script src="../dist/development/scenery.js"></script>
   
   <style type="text/css">
     
@@ -75,11 +81,12 @@
 <body>
   <div class="navbar navbar-inverse navbar-static-top">
     <div class="navbar-inner">
-      <a class="brand" href="/scenery">Scenery</a>
+      <a class="brand" href="../">Scenery</a>
       <ul class="nav">
-        <li><a href="/scenery/">Home</a></li>
-        <li class="active"><a href="/scenery/doc">Documentation</a></li>
-        <li><a href="/scenery/examples">Examples</a></li>
+        <li><a href="../">Home</a></li>
+        <li class="active"><a href="../doc">Documentation</a></li>
+        <li><a href="../examples">Examples</a></li>
+        <li><a href="../tests">Tests</a></li>
       </ul>
     </div>
   </div>
@@ -90,6 +97,11 @@
       <div class="page-header" style="text-align: center;">
         <h1>Scenery Documentation</h1>
       </div>
+      
+      <p class="lead" style="color: #a00;">Currently incomplete!</p>
+      
+      TODO: Link to dot / kite docs<br>
+      TODO: How to handle ES5 getters and setters
       
     </div>
     <div class="span3"></div>
@@ -107,6 +119,28 @@
       <a class="sublink" href="#node-insertChild">insertChild</a><br>
       <a class="sublink" href="#node-removeChild">removeChild</a><br>
       <a class="sublink" href="#node-detach">detach</a><br>
+      <a class="sublink" href="#node-cursor">cursor</a><br>
+      <a class="sublink" href="#node-visible">visible</a><br>
+      <a class="sublink" href="#node-pickable">pickable</a><br>
+      <a class="sublink" href="#node-translation">translation</a><br>
+      <a class="sublink" href="#node-translate">translate</a><br>
+      <a class="sublink" href="#node-x">x</a><br>
+      <a class="sublink" href="#node-y">y</a><br>
+      <a class="sublink" href="#node-rotation">rotation</a><br>
+      <a class="sublink" href="#node-rotate">rotate</a><br>
+      <a class="sublink" href="#node-rotateAround">rotateAround</a><br>
+      <a class="sublink" href="#node-scale">scale</a><br>
+      <a class="sublink" href="#node-left">left</a><br>
+      <a class="sublink" href="#node-right">right</a><br>
+      <a class="sublink" href="#node-top">top</a><br>
+      <a class="sublink" href="#node-bottom">bottom</a><br>
+      <a class="sublink" href="#node-centerX">centerX</a><br>
+      <a class="sublink" href="#node-centerY">centerY</a><br>
+      <a class="sublink" href="#node-renderer">renderer</a><br>
+      <a class="sublink" href="#node-rendererOptions">rendererOptions</a><br>
+      <a class="sublink" href="#node-layerSplit">layerSplit</a><br>
+      <a class="sublink" href="#node-layerSplitBefore">layerSplitBefore</a><br>
+      <a class="sublink" href="#node-layerSplitAfter">layerSplitAfter</a><br>
       
       <a class="navlink" href="#scene">Scene</a><br>
       <a class="navlink" href="#path">Path</a><br>
@@ -130,7 +164,7 @@
       <h3 id="node" class="section">Node</h3>
       
       <h4 id="node-options">Node Options</h4>
-      A Node (or subtypes of a Node) have the following parameter object options available, executed in in the order listed.
+      A Node (and Node subtypes) have the following parameter object options available, executed in in the order listed.
       
       <ul>
         <li><a href="#node-children">children</a>: A list of children to add (in order)</li>
@@ -157,7 +191,8 @@
       
       <h4 id="node-children">node.children</h4>
       <p>
-        ES5 getter/setter to node.getChildren() and node.setChildren( children ). This will return a copy of node's array of children, in rendering
+        <code>node.children</code> is a getter/setter linked to <code>node.getChildren()</code> and <code>node.setChildren( children )</code>.
+        This will return a copy of node's array of children, in rendering
         order (later children render above previous children). Making changes to the returned array will not change node's children.
       </p>
       <p>
@@ -175,7 +210,7 @@ var container = new scenery.Node( {
       
       <h4 id="node-parents">node.parents</h4>
       <p>
-        ES5 getter to node.getParents(). Will return an array of parent nodes, but <strong>order is not significant</strong>.
+        <code>node.parents</code> or <code>node.getParents()</code> will return an array of parent nodes, but <strong>order is not significant</strong>.
       </p>
       
       <h4 id="node-addChild">node.addChild( childNode )</h4>
@@ -185,8 +220,8 @@ var container = new scenery.Node( {
       
       <h4 id="node-insertChild">node.insertChild( index, childNode )</h4>
       <p>
-        Inserts childNode into node's children at the specified index. insertChild( 0, childNode ) will make childNode the first child, and
-        insertChild( node.children.length, childNode ) is the same ass addChild( childNode ).
+        Inserts childNode into node's children at the specified index. <code>node.insertChild( 0, childNode )</code> will make childNode the first child, and
+        <code>node.insertChild( node.children.length, childNode )</code> is the same as <code>node.addChild( childNode )</code>.
       </p>
       
       <h4 id="node-removeChild">node.removeChild( childNode )</h4>
@@ -199,6 +234,117 @@ var container = new scenery.Node( {
         Removes this node from all of its parents.
       </p>
       
+      <h4 id="node-cursor">node.cursor</h4>
+      <p>
+        <code>node.cursor</code> is a getter/setter linked to <code>node.getCursor()</code> and <code>node.setCursor( cursor )</code>.
+        By default it is null (default cursor), but this can be set to
+        the string for any <a href="https://developer.mozilla.org/en-US/docs/CSS/cursor">CSS cursor value</a>. There is
+        <a href="/scenery/examples/cursors.html">a cursor example page</a> that demos a number of available cursors.
+      </p>
+      
+      <h4 id="node-visible">node.visible</h4>
+      <p>
+        <code>node.visible</code> is a getter/setter linked to <code>node.isVisible()</code> and <code>node.setVisible( boolean )</code>.
+        Nodes are by default visible, but when invisible they will not
+        be displayed and will not be pickable (no input events will be targeted to them).
+      </p>
+      
+      <h4 id="node-pickable">node.pickable</h4>
+      <p>
+        <code>node.pickable</code> is a getter/setter linked to <code>node.isPickable()</code> and <code>node.setPickable( boolean )</code>.
+        Nodes that are not pickable will no longer have input events targeted to them, and <a href="#node-trailUnderPoint">node.trailUnderPoint</a>
+        will not include them.
+      </p>
+      <p>
+        This is useful for semi-transparent overlays or other visual elements that should be displayed but should not prevent objects below from being
+        manipulated by user input.
+      </p>
+      
+      <h4 id="node-translation">node.translation</h4>
+      <p>
+        Getting the translation: <code>node.translation</code> or <code>node.getTranslation()</code>. It always returns a dot.Vector2 instance representing
+        the translation part of the node's transform. See dot.Matrix3.getTranslation() for more information.
+      </p>
+      <p>
+        Setting the translation: <code>node.translation = translation</code>, <code>node.setTranslation( translation )</code> or <code>node.setTranslation( x, y )</code>.
+        In both instances, <code>translation</code> can be either a dot.Vector2 or an object literal like <code>{ x: 5, y: 10 }</code>.
+      </p>
+      
+      <h4 id="node-translate">node.translate( x, y )</h4>
+      <p>
+        Translates the node relatively by <code>x</code> and <code>y</code>. In addition to <code>node.translate( x, y )</code>, <code>node.translate( translation )</code>
+        can be used, where <code>transform</code> is either a dot.Vector2 or an object like <code>{ x: 5, y: 10 }</code>
+      </p>
+      
+      <h4 id="node-x">node.x</h4>
+      <p>
+        <code>node.x</code> gets or sets the node's x-translation with <code>node.getX()</code> and <code>node.setX( x )</code>. Accessing <code>node.x</code> is equivalent
+        to <code>node.translation.x</code>, and setting <code>node.x</code> is equivalent to <code>node.setTranslation( x, node.y )</code>.
+      </p>
+      
+      <h4 id="node-y">node.y</h4>
+      <p>
+        <code>node.y</code> gets or sets the node's y-translation with <code>node.getY()</code> and <code>node.setY( y )</code>. Accessing <code>node.y</code> is equivalent
+        to <code>node.translation.y</code>, and setting <code>node.y</code> is equivalent to <code>node.setTranslation( node.x, y )</code>.
+      </p>
+      
+      <h4 id="node-rotation">node.rotation</h4>
+      <p>
+        <code>node.rotation</code> gets or sets the node's rotation with <code>node.getRotation()</code> and <code>node.setRotation( radians )</code>. All rotations are
+        handled in radians ($\pi$ is a 180-degree rotation). If you wish to rotate a node by a specific rotation
+        (instead of setting its rotation), use <a href="#node-rotate">node.rotate</a>
+      </p>
+      
+      <h4 id="node-rotate">node.rotate( radians, [prepend] )</h4>
+      <p>
+        Rotates the node's transform. By default the rotation is appended to the node's transform, but the optional <code>prepend</code> boolean flag can be added for the rotation
+        to be prepended to the node's transform.
+      </p>
+      
+      <h4 id="node-rotateAround">node.rotateAround( point, angle )</h4>
+      <p>
+        Rotates the node by <code>angle</code> in radians around the dot.Vector2 <code>point</code>. <code>point</code> should be in the node's parent coordinate frame.
+      </p>
+      
+      <h4 id="node-scale">node.scale( x, y, [prepend] )</h4>
+      <p>
+        Scales the node in each axis. By default the scale is appended to the node's transform, but the optional <code>prepend</code> boolean flag can be added for the
+        scale to be prepended to the node's transform.
+      </p>
+      <p>
+        <code>node.scale( s )</code> will scale by <code>s</code> in both dimensions, and is equivalent to <code>node.scale( s, s )</code>
+      </p>
+      
+      <!-- 
+      <a class="sublink" href="#node-left">left</a><br>
+      <a class="sublink" href="#node-right">right</a><br>
+      <a class="sublink" href="#node-top">top</a><br>
+      <a class="sublink" href="#node-bottom">bottom</a><br>
+      <a class="sublink" href="#node-centerX">centerX</a><br>
+      <a class="sublink" href="#node-centerY">centerY</a><br>
+      <a class="sublink" href="#node-renderer">renderer</a><br>
+      <a class="sublink" href="#node-rendererOptions">rendererOptions</a><br>
+      <a class="sublink" href="#node-layerSplit">layerSplit</a><br>
+      <a class="sublink" href="#node-layerSplitBefore">layerSplitBefore</a><br>
+      <a class="sublink" href="#node-layerSplitAfter">layerSplitAfter</a><br>
+       -->
+
+      <h3 id="scene" class="section">Scene</h3>
+      The Scene is the "entry point" of a scene graph.  Scene extends Node, so all of its methods and options are inherited, see <a href="#node">Node</a> above.
+      The Scene must be constructed with a jquery wrapper for a DOM element the Scene will be rendered to, typically a div.
+
+      <h4 id="scene-options">Scene Options</h4>
+      A Scene has the following options:
+
+      <ul>
+        <li><a href="#scene-allowSceneOverflow">allowSceneOverflow</a> (default false): usually anything displayed outside of this $main (DOM/CSS3 transformed SVG) is hidden with CSS overflow</li>
+        <li><a href="#scene-allowCSSHacks">allowCSSHacks</a> (default true): applies styling that prevents mobile browser graphical issues</li>
+        <li><a href="#scene-allowDevicePixelRatioScaling">allowDevicePixelRatioScaling</a> (default false): allows underlying canvases (Canvas, WebGL) to increase in size to maintain sharpness on high-density displays</li>
+        <li><a href="#scene-enablePointerEvents">enablePointerEvents</a> (default true): allows pointer events / MSPointerEvent to be used on supported platforms.</li>
+        <li><a href="#scene-preferredSceneLayerType">preferredSceneLayerType</a> (default ???): sets the preferred type of layer to be created if there are multiple options.</li>
+        <li><a href="#scene-width">width</a> (default currentWidth): override the main container's width</li>
+        <li><a href="#scene-height">height</a> (default currentHeight): override the main container's height</li>
+      </ul>
     </div>
     <div class="span3"></div>
   </div>

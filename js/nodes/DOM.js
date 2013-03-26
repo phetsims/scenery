@@ -11,7 +11,7 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
-  var extend = require( 'PHET_CORE/extend' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var Bounds2 = require( 'DOT/Bounds2' );
   
   var scenery = require( 'SCENERY/scenery' );
@@ -20,7 +20,7 @@ define( function( require ) {
   var Renderer = require( 'SCENERY/layers/Renderer' );
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
   
-  scenery.DOM = function( element, options ) {
+  scenery.DOM = function DOM( element, options ) {
     options = options || {};
     
     this._interactive = false;
@@ -46,9 +46,7 @@ define( function( require ) {
   };
   var DOM = scenery.DOM;
   
-  DOM.prototype = extend( objectCreate( Node.prototype ), {
-    constructor: DOM,
-    
+  inherit( DOM, Node, {
     // needs to be attached to the DOM tree for this to work
     calculateDOMBounds: function() {
       var boundingRect = this._element.getBoundingClientRect();

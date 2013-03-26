@@ -124,6 +124,11 @@ define( function( require ) {
       return this.compareNested( other ) === 0;
     },
     
+    // will return false if this pointer has gone off of the beginning or end of the tree (will be marked with isAfter or isBefore though)
+    hasTrail: function() {
+      return !!this.trail;
+    },
+    
     // TODO: refactor with "Side"-like handling
     // moves this pointer forwards one step in the nested order
     nestedForwards: function() {
@@ -138,6 +143,8 @@ define( function( require ) {
       } else {
         if ( this.trail.indices.length === 0 ) {
           // nothing else to jump to below, so indicate the lack of existence
+          this.trail = null;
+          // stays isAfter
           return null;
         } else {
           var index = this.trail.indices[this.trail.indices.length - 1];
@@ -152,6 +159,7 @@ define( function( require ) {
           }
         }
       }
+      return this;
     },
     
     // moves this pointer backwards one step in the nested order
@@ -159,6 +167,8 @@ define( function( require ) {
       if ( this.isBefore ) {
         if ( this.trail.indices.length === 0 ) {
           // jumping off the front
+          this.trail = null;
+          // stays isBefore
           return null;
         } else {
           var index = this.trail.indices[this.trail.indices.length - 1];
@@ -182,6 +192,7 @@ define( function( require ) {
           this.setBefore( true );
         }
       }
+      return this;
     },
     
     // treats the pointer as render-ordered (includes the start pointer 'before' if applicable, excludes the end pointer 'before' if applicable
