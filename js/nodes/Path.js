@@ -11,7 +11,7 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
-  var extend = require( 'PHET_CORE/extend' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   
   var Node = require( 'SCENERY/nodes/Node' );
@@ -33,9 +33,7 @@ define( function( require ) {
   };
   var Path = scenery.Path;
   
-  Path.prototype = extend( objectCreate( Node.prototype ), {
-    constructor: Path,
-    
+  inherit( Path, Node, {
     // sets the shape drawn, or null to remove the shape
     setShape: function( shape ) {
       if ( this._shape !== shape ) {
