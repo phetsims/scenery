@@ -34,6 +34,8 @@
   <script src="../dist/development/scenery.js"></script>
   
   <script type="text/javascript">
+    scenery.Util.polyfillRequestAnimationFrame();
+    
     function docExample( id, draw ) {
       var $container = $( '#' + id );
       var scene = new scenery.Scene( $container );
@@ -163,6 +165,7 @@
       <a class="sublink" href="#scene-renderToCanvas">renderToCanvas</a><br>
       <a class="sublink" href="#scene-canvasSnapshot">canvasSnapshot</a><br>
       <a class="sublink" href="#scene-canvasDataURL">canvasDataURL</a><br>
+      <a class="sublink" href="#scene-updateOnRequestAnimationFrame">updateOnRequestAnimationFrame</a><br>
       <a class="sublink" href="#scene-initializeStandaloneEvents">initializeStandaloneEvents</a><br>
       <a class="sublink" href="#scene-initializeFullscreenEvents">initializeFullscreenEvents</a><br>
       <a class="sublink" href="#scene-getDebugHTML">getDebugHTML</a><br>
@@ -303,8 +306,29 @@ scene.addChild( new scenery.Node( {
         <code>node.cursor</code> is a getter/setter linked to <code>node.getCursor()</code> and <code>node.setCursor( cursor )</code>.
         By default it is null (default cursor), but this can be set to
         the string for any <a href="https://developer.mozilla.org/en-US/docs/CSS/cursor">CSS cursor value</a>. There is
-        <a href="/scenery/examples/cursors.html">a cursor example page</a> that demos a number of available cursors.
+        <a href="../examples/cursors.html">a cursor example page</a> that demos a number of available cursors.
       </p>
+      <p>
+        The cursor is updated whenever <a href="#scene-updateCursor">scene.updateCursor</a> or <a href="#scene-updateScene">scene.updateScene</a> is called.
+      </p>
+      <div id="example-cursor" class="exampleScene" style="width: 128px; height: 64px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-cursor', function( scene ) {
+/*START*/
+// a simple rectangle which will show the classic 'pointer'
+scene.addChild( new scenery.Path( {
+  shape: kite.Shape.rectangle( 32, 5, 64, 54 ),
+  fill: '#faa',
+  cursor: 'pointer'
+} ) );
+
+// event initialization needed for cursor to work
+scene.initializeStandaloneEvents();
+
+// and update on every frame
+scene.updateOnRequestAnimationFrame();
+/*END*/ } );
+      </script>
       
       <h4 id="node-visible">node.visible</h4>
       <p>
@@ -554,6 +578,12 @@ scene.addChild( new scenery.Node( {
         <a href="https://developer.mozilla.org/en-US/docs/data_URIs">data URI</a> for the image. Generally
         this is a PNG. Does not support origin-dirty content (see <a href="#scene-canvasSnapshot">canvasSnapshot</a>)
         inside the scene.
+      </p>
+      
+      <h4 id="scene-updateOnRequestAnimationFrame">scene.updateOnRequestAnimationFrame( [element] )</h4>
+      <p>
+        A simple way of setting up <a href="#scene-updateScene">scene.updateScene</a> to be called using
+        requestAnimationFrame. More advanced applications will want to handle this themselves.
       </p>
       
       <h4 id="scene-initializeStandaloneEvents">scene.initializeStandaloneEvents()</h4>
