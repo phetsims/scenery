@@ -13,6 +13,7 @@ Layer refresh:
     Concentration shows attempt to create TrailPointer with null trail
 
 Priorities:
+    Fix the Chrome "scrollbar" issue with DOM nodes + CSS transforms? Showing up in main doc page
     Layer Refresh
     Force non-canvas above 'interactive' DOM node
     phet-core: LESS_THAN/EQUAL/GREATER_THAN enum, inheritance code, etc.
