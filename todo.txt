@@ -23,6 +23,7 @@ Priorities:
         Same-arity methods?
         Less temporary objects?
     Line-dash offsets? check SVG support
+    Text stroke handling
     Documentation
 
 Bugs:
