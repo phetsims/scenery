@@ -441,6 +441,8 @@ var container = new scenery.Node( {
       <h3 id="scene" class="section">Scene</h3>
       The Scene is the "entry point" of a scene graph.  Scene extends Node, so all of its methods and options are inherited, see <a href="#node">Node</a> above.
       The Scene must be constructed with a jquery wrapper for a DOM element the Scene will be rendered to, typically a div.
+      This element must be a positioned element (non-'static' CSS position, see
+      the <a href="https://developer.mozilla.org/en-US/docs/CSS/position">MDN docs), and should have a set width and height.
 
       <h4 id="scene-options">Scene Options</h4>
       A Scene has the following options:
