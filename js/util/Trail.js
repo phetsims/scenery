@@ -22,6 +22,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   require( 'SCENERY/nodes/Node' );
+  // require( 'SCENERY/util/TrailPointer' );
   
   scenery.Trail = function( nodes ) {
     if ( nodes instanceof Trail ) {
@@ -110,6 +111,7 @@ define( function( require ) {
       for ( var i = 0; i < this.length; i++ ) {
         this[i] = this.nodes[i];
       }
+      return this;
     },
     
     removeAncestor: function() {
@@ -124,6 +126,7 @@ define( function( require ) {
       for ( var i = 0; i < this.length; i++ ) {
         this[i] = this.nodes[i];
       }
+      return this;
     },
     
     addDescendant: function( node, index ) {
@@ -137,6 +140,7 @@ define( function( require ) {
       // mimic an Array
       this.length++;
       this[this.length-1] = node;
+      return this;
     },
     
     removeDescendant: function() {
@@ -148,6 +152,7 @@ define( function( require ) {
       // mimic an Array
       this.length--;
       delete this[this.length];
+      return this;
     },
     
     // refreshes the internal index references (important if any children arrays were modified!)
@@ -226,6 +231,7 @@ define( function( require ) {
       var parent = this.nodeFromTop( 1 );
       
       var parentIndex = _.indexOf( parent._children, top );
+      assert && assert( parentIndex !== -1 );
       var arr = this.nodes.slice( 0, this.nodes.length - 1 );
       if ( parentIndex === 0 ) {
         // we were the first child, so give it the trail to the parent
@@ -242,6 +248,15 @@ define( function( require ) {
         
         return new Trail( arr );
       }
+    },
+    
+    // like previous(), but keeps moving back until the trail goes to a node with hasSelf() === true
+    previousSelf: function() {
+      var result = this.previous();
+      while ( result && !result.lastNode().hasSelf() ) {
+        result = result.previous();
+      }
+      return result;
     },
     
     // in the order of self-rendering
@@ -276,6 +291,20 @@ define( function( require ) {
         // if we didn't reach a later sibling by now, it doesn't exist
         return null;
       }
+    },
+    
+    // like next(), but keeps moving back until the trail goes to a node with hasSelf() === true
+    nextSelf: function() {
+      var result = this.next();
+      while ( result && !result.lastNode().hasSelf() ) {
+        result = result.next();
+      }
+      return result;
+    },
+    
+    // calls callback( trail ) for this trail, and each descendant trail
+    eachTrailUnder: function( callback ) {
+      new scenery.TrailPointer( this, true ).eachTrailBetween( new scenery.TrailPointer( this, false ), callback );
     },
     
     /*
@@ -341,8 +370,40 @@ define( function( require ) {
       if ( !this.length ) {
         return 'Empty Trail';
       }
-      return '[Trail ' + this.indices.join( '.' ) + ']';
+      return '[Trail ' + this.indices.join( '.' ) + ' ' + this.getUniqueId() + ']';
     }
+  };
+  
+  // like eachTrailBetween, but only fires for self trails
+  Trail.eachSelfTrailbetween = function( a, b, callback, excludeEndTrails, scene ) {
+    Trail.eachTrailBetween( a, b, function( trail ) {
+      if ( trail && trail.lastNode().hasSelf() ) {
+        callback( trail );
+      }
+    }, excludeEndTrails, scene );
+  };
+  
+  // global way of iterating across trails
+  Trail.eachTrailBetween = function( a, b, callback, excludeEndTrails, scene ) {
+    var aPointer = a ? new scenery.TrailPointer( a.copy(), true ) : new scenery.TrailPointer( new scenery.Trail( scene ), true );
+    var bPointer = b ? new scenery.TrailPointer( b.copy(), true ) : new scenery.TrailPointer( new scenery.Trail( scene ), false );
+    
+    // if we are excluding endpoints, just bump the pointers towards each other by one step
+    if ( excludeEndTrails ) {
+      aPointer.nestedForwards();
+      bPointer.nestedBackwards();
+      
+      // they were adjacent, so no callbacks will be executed
+      if ( aPointer.compareNested( bPointer ) === 1 ) {
+        return;
+      }
+    }
+    
+    aPointer.depthFirstUntil( bPointer, function( pointer ) {
+      if ( pointer.isBefore ) {
+        callback( pointer.trail );
+      }
+    }, false );
   };
   
   return Trail;

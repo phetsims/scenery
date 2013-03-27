@@ -1,6 +1,20 @@
 
+Layer refresh:
+    Create a way to inclusively iterate between two trails
+    Add a validateLayers() call that will throw errors on any noticed discrepancies
+    Bug on removal
+    Handle matching
+        * if a layer is changed, remove and add nodes - for pending trails, note layerLookup!
+        * won't delete all 'between old' layers
+            if ( !currentLayer && currentType === node.oldLayer.type && oldLayer not used ) { currentLayer = oldLayer, oldLayer.used = true }
+    Conceptually verify edge cases
+    Leaving superfluous layers with add 1 remove 1 from scene
+    Layer startPointer/endPointer after adds and removals has null trail - is this what we want?
+    Concentration shows attempt to create TrailPointer with null trail
+
 Priorities:
     Layer Refresh
+    Force non-canvas above 'interactive' DOM node
     phet-core: LESS_THAN/EQUAL/GREATER_THAN enum, inheritance code, etc.
     Flag for skipping dirty region handling and other overhead?
     Beers law lab performance on shaker

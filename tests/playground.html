@@ -15,11 +15,23 @@
   <script data-main="../js/config.js" src="../contrib/require-2.1.4.js"></script>
   
   <style>
+    html, body {
+      background-color: #eee;
+      border: 0;
+      padding: 0;
+    }
+    
     #scene {
       position: absolute;
       width: 512px;
-      height: 512px;
-      border: 1px solid black;
+      height: 256px;
+      background-color: #fff;
+    }
+    
+    #debug {
+      position: relative;
+      top: 256px;
+      
     }
   </style>
   
@@ -27,6 +39,8 @@
 <body>
   
   <div id="scene"></div>
+  
+  <div id="debug"></div>
   
   <script>
     // we need to wait until our config file is loaded before our require statement. apparently this was not guaranteed
@@ -43,6 +57,8 @@
           window.scene = new scenery.Scene( $( '#scene' ) );
           console.log( 'window.scene created' );
           
+          window.shape = kite.Shape.rectangle( 0, 0, 50, 40 );
+          
           core.loadScript( {
             src: 'qunit/js/test-utils.js',
             callback: function() {
@@ -50,6 +66,42 @@
             }
           } );
           
+          scenery.Util.polyfillRequestAnimationFrame();
+          
+          (function step(){
+            window.requestAnimationFrame( step, document.getElementById( 'scene' ) );
+            
+            $( '#debug' ).html( scene.getDebugHTML() );
+          })();
+          
+          window.twrap = function( f ) {
+            try {
+              f();
+            } catch( e ) {
+              console.log( e.stack );
+            }
+          };
+          
+          window.runError = function() {
+            window.path1 = new scenery.Path( { shape: shape, fill: '#f00', y: 0 } );
+            window.path2 = new scenery.Path( { shape: shape, fill: '#0f0', y: 70, renderer: 'svg' } );
+            window.path3 = new scenery.Path( { shape: shape, fill: '#00f', y: 140 } );
+            
+            window.node = new scenery.Node();
+            
+            // scene.addChild( path1 );
+            // scene.addChild( path2 );
+            // scene.addChild( path3 );
+            
+            // scene.addChild( node );
+            // scene.updateScene();
+            // scene.removeChild( node );
+            // scene.addChild( path1 );
+            // scene.addChild( path2 );
+            // scene.addChild( path3 ); // should be canvas, but right now is SVG!
+            
+            // scene.updateScene();
+          };
         } );
       } else {
         setTimeout( check, 4 );

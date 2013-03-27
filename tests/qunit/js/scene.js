@@ -164,6 +164,42 @@
     }
   } );
   
+  test( 'Trail eachTrailBetween', function() {
+    var node = createTestNodeTree();
+    
+    // get a list of all trails in render order
+    var trails = [];
+    var currentTrail = new scenery.Trail( node ); // start at the first node
+    
+    while ( currentTrail ) {
+      trails.push( currentTrail );
+      currentTrail = currentTrail.next();
+    }
+    
+    equal( 13, trails.length, 'Trails: ' + _.map( trails, function( trail ) { return trail.toString() ; } ).join( '\n' ) );
+    
+    for ( var i = 0; i < trails.length; i++ ) {
+      for ( var j = i; j < trails.length; j++ ) {
+        var inclusiveList = [];
+        scenery.Trail.eachTrailBetween( trails[i], trails[j], function( trail ) {
+          inclusiveList.push( trail.copy() );
+        }, false, node );
+        var trailString = i + ',' + j + ' ' + trails[i].toString() + ' to ' + trails[j].toString()
+        ok( inclusiveList[0].equals( trails[i] ), 'inclusive start on ' + trailString + ' is ' + inclusiveList[0].toString() );
+        ok( inclusiveList[inclusiveList.length-1].equals( trails[j] ), 'inclusive end on ' + trailString + 'is ' + inclusiveList[inclusiveList.length-1].toString() );
+        equal( inclusiveList.length, j - i + 1, 'inclusive length on ' + trailString + ' is ' + inclusiveList.length + ', ' + _.map( inclusiveList, function( trail ) { return trail.toString(); } ).join( '\n' ) );
+        
+        if ( i < j ) {
+          var exclusiveList = [];
+          scenery.Trail.eachTrailBetween( trails[i], trails[j], function( trail ) {
+            exclusiveList.push( trail.copy() );
+          }, true, node );
+          equal( exclusiveList.length, j - i - 1, 'exclusive length on ' + i + ',' + j );
+        }
+      }
+    }
+  } );
+  
   test( 'TrailPointer render comparison', function() {
     var node = createTestNodeTree();
     
@@ -314,6 +350,76 @@
           }
         }
         ok( isOk, 'depthFirstUntil exclusive ' + i + ',' + j + ' comparison check' );
+      }
+    }
+  } );
+  
+  test( 'TrailInterval', function() {
+    var node = createTestNodeTree();
+    var i, j;
+    
+    // a subset of trails to test on
+    var trails = [
+      null,
+      node.children[0].getUniqueTrail(),
+      node.children[0].children[1].getUniqueTrail(), // commented out since it quickly creates many tests to include
+      node.children[0].children[3].children[0].getUniqueTrail(),
+      node.children[1].getUniqueTrail(),
+      null
+    ];
+    
+    // get a list of all trails
+    var allTrails = [];
+    var t = node.getUniqueTrail();
+    while ( t ) {
+      allTrails.push( t );
+      t = t.next();
+    }
+    
+    // get a list of all intervals using our 'trails' array
+    var intervals = [];
+    
+    for ( i = 0; i < trails.length; i++ ) {
+      // only create proper intervals where i < j, since we specified them in order
+      for ( j = i + 1; j < trails.length; j++ ) {
+        var interval = new scenery.TrailInterval( trails[i], trails[j] );
+        intervals.push( interval );
+        
+        // tag the interval, so we can do additional verification later
+        interval.i = i;
+        interval.j = j;
+      }
+    }
+    
+    // check every combination of intervals
+    for ( i = 0; i < intervals.length; i++ ) {
+      var a = intervals[i];
+      for ( j = 0; j < intervals.length; j++ ) {
+        var b = intervals[j];
+        
+        var union = a.union( b );
+        if ( a.exclusiveUnionable( b ) ) {
+          _.each( allTrails, function( trail ) {
+            if ( trail ) {
+              var msg = 'union check of trail ' + trail.toString() + ' with ' + a.toString() + ' and ' + b.toString() + ' with union ' + union.toString();
+              equal( a.exclusiveContains( trail ) || b.exclusiveContains( trail ), union.exclusiveContains( trail ), msg );
+            }
+          } );
+        } else {
+          var wouldBeBadUnion = false;
+          var containsAnything = false;
+          _.each( allTrails, function( trail ) {
+            if ( trail ) {
+              if ( union.exclusiveContains( trail ) ) {
+                containsAnything = true;
+                if ( !a.exclusiveContains( trail ) && !b.exclusiveContains( trail ) ) {
+                  wouldBeBadUnion = true;
+                }
+              }
+            }
+          } );
+          ok( containsAnything && wouldBeBadUnion, 'Not a bad union?: ' + a.toString() + ' and ' + b.toString() + ' with union ' + union.toString() );
+        }
       }
     }
   } );
@@ -566,5 +672,15 @@
     scene.addChild( node );
     scene.updateScene();
     expect( 0 );
+  } );
+  
+  test( 'Adding and removing child layer count', function() {
+    var scene = new scenery.Scene( $( '#main' ) );
+    var path = new scenery.Path();
+    equal( scene.layers.length, 0, 'no layers before adding' );
+    scene.addChild( path );
+    equal( scene.layers.length, 1, 'one layer after adding' );
+    scene.removeChild( path );
+    equal( scene.layers.length, 0, 'no layers after removing' );
   } );
 })();

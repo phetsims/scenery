@@ -24,8 +24,28 @@
   <script src="../contrib/syntaxhighlighter-3.0.83/shBrushJScript.js"></script>
   <script src="../contrib/syntaxhighlighter-3.0.83/shBrushXml.js"></script>
   
+  <!-- MathJax config -->
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+  </script>
+  <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script src="../dist/development/scenery.js"></script>
+  
+  <script type="text/javascript">
+    scenery.Util.polyfillRequestAnimationFrame();
+    
+    function docExample( id, draw ) {
+      var $container = $( '#' + id );
+      var scene = new scenery.Scene( $container );
+      draw( scene );
+      scene.updateScene();
+      var $code = $( '<pre class="brush: js"></pre>' );
+      $code.text( draw.toString().match( /\/\*START\*\/((.|\n)*)\/\*END\*\// )[1] );
+      $container.after( $code );
+    }
+  </script>
   
   <style type="text/css">
     
@@ -80,6 +100,7 @@
         <li><a href="../">Home</a></li>
         <li class="active"><a href="../doc">Documentation</a></li>
         <li><a href="../examples">Examples</a></li>
+        <li><a href="../tests">Tests</a></li>
       </ul>
     </div>
   </div>
@@ -92,6 +113,8 @@
       </div>
       
       <p class="lead" style="color: #a00;">Currently incomplete!</p>
+      
+      TODO: coordinate frame notes
       
     </div>
     <div class="span3"></div>
@@ -112,8 +135,42 @@
       <a class="sublink" href="#node-cursor">cursor</a><br>
       <a class="sublink" href="#node-visible">visible</a><br>
       <a class="sublink" href="#node-pickable">pickable</a><br>
+      <a class="sublink" href="#node-translation">translation</a><br>
+      <a class="sublink" href="#node-translate">translate</a><br>
+      <a class="sublink" href="#node-x">x</a><br>
+      <a class="sublink" href="#node-y">y</a><br>
+      <a class="sublink" href="#node-rotation">rotation</a><br>
+      <a class="sublink" href="#node-rotate">rotate</a><br>
+      <a class="sublink" href="#node-rotateAround">rotateAround</a><br>
+      <a class="sublink" href="#node-scale">scale</a><br>
+      <a class="sublink" href="#node-bounds">bounds</a><br>
+      <a class="sublink" href="#node-selfBounds">selfBounds</a><br>
+      <a class="sublink" href="#node-childBounds">childBounds</a><br>
+      <a class="sublink" href="#node-left">left</a><br>
+      <a class="sublink" href="#node-right">right</a><br>
+      <a class="sublink" href="#node-top">top</a><br>
+      <a class="sublink" href="#node-bottom">bottom</a><br>
+      <a class="sublink" href="#node-centerX">centerX</a><br>
+      <a class="sublink" href="#node-centerY">centerY</a><br>
+      <a class="sublink" href="#node-renderer">renderer</a><br>
+      <a class="sublink" href="#node-rendererOptions">rendererOptions</a><br>
+      <a class="sublink" href="#node-layerSplit">layerSplit</a><br>
+      <a class="sublink" href="#node-layerSplitBefore">layerSplitBefore</a><br>
+      <a class="sublink" href="#node-layerSplitAfter">layerSplitAfter</a><br>
       
       <a class="navlink" href="#scene">Scene</a><br>
+      <a class="sublink" href="#scene-options">(options)</a><br>
+      <a class="sublink" href="#scene-updateScene">updateScene</a><br>
+      <a class="sublink" href="#scene-dispose">dispose</a><br>
+      <a class="sublink" href="#scene-renderToCanvas">renderToCanvas</a><br>
+      <a class="sublink" href="#scene-canvasSnapshot">canvasSnapshot</a><br>
+      <a class="sublink" href="#scene-canvasDataURL">canvasDataURL</a><br>
+      <a class="sublink" href="#scene-updateOnRequestAnimationFrame">updateOnRequestAnimationFrame</a><br>
+      <a class="sublink" href="#scene-initializeStandaloneEvents">initializeStandaloneEvents</a><br>
+      <a class="sublink" href="#scene-initializeFullscreenEvents">initializeFullscreenEvents</a><br>
+      <a class="sublink" href="#scene-getDebugHTML">getDebugHTML</a><br>
+      <a class="sublink" href="#scene-popupDebug">popupDebug</a><br>
+      
       <a class="navlink" href="#path">Path</a><br>
       <a class="navlink" href="#image">Image</a><br>
       <a class="navlink" href="#text">Text</a><br>
@@ -130,9 +187,32 @@
       
       <p>If you are just starting out, see the <a href="a-tour-of-scenery.html">Tour of Scenery</a></p>
       
+      <h2 id="dependencies">Dependencies</h2>
+      
+      <strong>External</strong> dependencies (please provide these in your page before loading Scenery):
+      <ul>
+        <li><a href="http://jquery.com/">jQuery</a> for parts of DOM manipulation.</li>
+        <li><a href="http://lodash.com/">Lo-Dash</a> for utility functions, as a replacement for <a href="http://underscorejs.org/">Underscore.js</a>.</li>
+        <li>[optional] <a href="https://code.google.com/p/canvg/">Canvg</a>, for supporting SVG &#8594; Canvas operations, like <a href="#scene-renderToCanvas">scene.renderToCanvas</a></li>
+      </ul>
+      
+      <strong>Internal</strong> dependencies:
+      <ul>
+        <li><a href="https://github.com/phetsims/assert">assert</a> for assertion handling. If you want assertions different from the defaults, include <a href="https://github.com/phiggins42/has.js/">has.js</a>.</li>
+        <li><a href="https://github.com/phetsims/phet-core">phet-core</a> for other utility functions.</li>
+        <li><a href="../../dot">Dot</a> for math.</li>
+        <li><a href="../../kite">Kite</a> for shapes.</li>
+      </ul>
+      
       <h2 id="api">Scenery API</h2>
       
       <h3 id="node" class="section">Node</h3>
+      
+      <p>
+        A default node can be created with <code>new scenery.Node()</code>, but usually a parameter object is
+        given, for example <code>new scenery.Node( { x: 20, y: 100 } )</code>. Below are all of the available
+        parameter object options:
+      </p>
       
       <h4 id="node-options">Node Options</h4>
       A Node (and Node subtypes) have the following parameter object options available, executed in in the order listed.
@@ -142,11 +222,11 @@
         <li><a href="#node-cursor">cursor</a>: Will display the specified CSS cursor when the mouse is over this Node or one of its descendents. The Scene needs to have input listeners attached with an initialize method first.</li>
         <li><a href="#node-visible">visible</a>: If false, this node (and its children) will not be displayed (or get input events)</li>
         <li><a href="#node-pickable">pickable</a>: If false, this node (and its children) will not get input events</li>
-        <li><a href="#node-translation">translation</a>: Sets the translation of the node to either the specified dot.Vector2 value, or the x,y values from an object (e.g. translation: { x: 1, y: 2 } )</li>
+        <li><a href="#node-translation">translation</a>: Sets the translation of the node to either the specified <a href="../../dot/doc#vector2">dot.Vector2</a> value, or the x,y values from an object (e.g. translation: { x: 1, y: 2 } )</li>
         <li><a href="#node-x">x</a>: Sets the x-translation of the node</li>
         <li><a href="#node-y">y</a>: Sets the y-translation of the node</li>
         <li><a href="#node-rotation">rotation</a>: Sets the rotation of the node in radians</li>
-        <li><a href="#node-scale">scale</a>: Sets the scale of the node. Supports either a number (same x-y scale), or a dot.Vector2 / object with ob.x and ob.y to set the scale for each axis independently</li>
+        <li><a href="#node-scale">scale</a>: Sets the scale of the node. Supports either a number (same x-y scale), or a <a href="../../dot/doc#vector2">dot.Vector2</a> / object with ob.x and ob.y to set the scale for each axis independently</li>
         <li><a href="#node-left">left</a>: Sets the x-translation so that the left (min X) of the bounding box (in the parent coordinate frame) is at the specified value</li>
         <li><a href="#node-right">right</a>: Sets the x-translation so that the right (max X) of the bounding box (in the parent coordinate frame) is at the specified value</li>
         <li><a href="#node-top">top</a>: Sets the y-translation so that the top (min Y) of the bounding box (in the parent coordinate frame) is at the specified value</li>
@@ -162,26 +242,42 @@
       
       <h4 id="node-children">node.children</h4>
       <p>
-        ES5 getter/setter to <strong>node.getChildren()</strong> and <strong>node.setChildren( children )</strong>.
+        <code>node.children</code> is a getter/setter linked to <code>node.getChildren()</code> and <code>node.setChildren( children )</code>.
         This will return a copy of node's array of children, in rendering
         order (later children render above previous children). Making changes to the returned array will not change node's children.
       </p>
       <p>
         This can also be used when creating a Node:
       </p>
-      <pre class="brush: js">
-var container = new scenery.Node( {
+      <div id="example-children" class="exampleScene" style="width: 128px; height: 64px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-children', function( scene ) {
+/*START*/
+scene.addChild( new scenery.Node( {
+  // an array of children can be specified, so no
+  // reference to the container node is needed
   children: [
-    // arbitrary array of children that will be added to the node
-    new scenery.Node(),
-    new scenery.Node()
+    // gray rectangle on the left
+    new scenery.Path( {
+      shape: kite.Shape.rectangle( 0, 0, 64, 64 ),
+      fill: '#aaa'
+    } ),
+    
+    // later nodes in the array will show up on top
+    // of previous nodes
+    new scenery.Text( 'Children', {
+      font: '20px sans-serif',
+      centerX: 64,
+      centerY: 32
+    } )
   ]
-} );
-      </pre>
+} ) );
+/*END*/ } );
+      </script>
       
       <h4 id="node-parents">node.parents</h4>
       <p>
-        ES5 getter to node.getParents(). Will return an array of parent nodes, but <strong>order is not significant</strong>.
+        <code>node.parents</code> or <code>node.getParents()</code> will return an array of parent nodes, but <strong>order is not significant</strong>.
       </p>
       
       <h4 id="node-addChild">node.addChild( childNode )</h4>
@@ -191,8 +287,8 @@ var container = new scenery.Node( {
       
       <h4 id="node-insertChild">node.insertChild( index, childNode )</h4>
       <p>
-        Inserts childNode into node's children at the specified index. insertChild( 0, childNode ) will make childNode the first child, and
-        insertChild( node.children.length, childNode ) is the same ass addChild( childNode ).
+        Inserts childNode into node's children at the specified index. <code>node.insertChild( 0, childNode )</code> will make childNode the first child, and
+        <code>node.insertChild( node.children.length, childNode )</code> is the same as <code>node.addChild( childNode )</code>.
       </p>
       
       <h4 id="node-removeChild">node.removeChild( childNode )</h4>
@@ -207,22 +303,43 @@ var container = new scenery.Node( {
       
       <h4 id="node-cursor">node.cursor</h4>
       <p>
-        ES5 getter/setter to <strong>node.getCursor()</strong> and <strong>node.setCursor( cursor )</strong>. By default it is null
-        (default cursor), but this can be set to
+        <code>node.cursor</code> is a getter/setter linked to <code>node.getCursor()</code> and <code>node.setCursor( cursor )</code>.
+        By default it is null (default cursor), but this can be set to
         the string for any <a href="https://developer.mozilla.org/en-US/docs/CSS/cursor">CSS cursor value</a>. There is
-        <a href="/scenery/examples/cursors.html">a cursor example page</a> that demos a number of available cursors.
+        <a href="../examples/cursors.html">a cursor example page</a> that demos a number of available cursors.
       </p>
+      <p>
+        The cursor is updated whenever <a href="#scene-updateCursor">scene.updateCursor</a> or <a href="#scene-updateScene">scene.updateScene</a> is called, and event initialization like <a href="#scene-initializeStandaloneEvents">scene.initializeStandaloneEvents</a> should be added so Scenery can track the mouse input.
+      </p>
+      <div id="example-cursor" class="exampleScene" style="width: 128px; height: 64px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-cursor', function( scene ) {
+/*START*/
+scene.addChild( new scenery.Path( {
+  shape: kite.Shape.regularPolygon( 6, 25 ),
+  x: 64, y: 32,
+  fill: '#88f',
+  cursor: 'pointer' // classic hand
+} ) );
+/*END*/
+// event initialization needed for cursor to work
+scene.initializeStandaloneEvents();
+
+// and update on every frame
+scene.updateOnRequestAnimationFrame();
+} );
+      </script>
       
       <h4 id="node-visible">node.visible</h4>
       <p>
-        ES5 getter/setter to <strong>node.isVisible()</strong> and <strong>node.setVisible( boolean )</strong>.
+        <code>node.visible</code> is a getter/setter linked to <code>node.isVisible()</code> and <code>node.setVisible( boolean )</code>.
         Nodes are by default visible, but when invisible they will not
         be displayed and will not be pickable (no input events will be targeted to them).
       </p>
       
       <h4 id="node-pickable">node.pickable</h4>
       <p>
-        ES5 getter/setter to <strong>node.isPickable()</strong> and <strong>node.setPickable( boolean )</strong>.
+        <code>node.pickable</code> is a getter/setter linked to <code>node.isPickable()</code> and <code>node.setPickable( boolean )</code>.
         Nodes that are not pickable will no longer have input events targeted to them, and <a href="#node-trailUnderPoint">node.trailUnderPoint</a>
         will not include them.
       </p>
@@ -230,13 +347,180 @@ var container = new scenery.Node( {
         This is useful for semi-transparent overlays or other visual elements that should be displayed but should not prevent objects below from being
         manipulated by user input.
       </p>
+      
+      <h4 id="node-translation">node.translation</h4>
+      <p>
+        Getting the translation: <code>node.translation</code> or <code>node.getTranslation()</code>. It always returns a <a href="../../dot/doc#vector2">dot.Vector2</a> instance representing
+        the translation part of the node's transform. See <a href="../../dot/doc#matrix3-getTranslation">dot.Matrix3.getTranslation</a> for more information.
+      </p>
+      <p>
+        Setting the translation: <code>node.translation = translation</code>, <code>node.setTranslation( translation )</code> or <code>node.setTranslation( x, y )</code>.
+        In both instances, <code>translation</code> can be either a <a href="../../dot/doc#vector2">dot.Vector2</a> or an object literal like <code>{ x: 5, y: 10 }</code>.
+      </p>
+      
+      <h4 id="node-translate">node.translate( x, y )</h4>
+      <p>
+        Translates the node relatively by <code>x</code> and <code>y</code>. In addition to <code>node.translate( x, y )</code>, <code>node.translate( translation )</code>
+        can be used, where <code>transform</code> is either a <a href="../../dot/doc#vector2">dot.Vector2</a> or an object like <code>{ x: 5, y: 10 }</code>
+      </p>
+      
+      <h4 id="node-x">node.x</h4>
+      <p>
+        <code>node.x</code> gets or sets the node's x-translation with <code>node.getX()</code> and <code>node.setX( x )</code>. Accessing <code>node.x</code> is equivalent
+        to <code>node.translation.x</code>, and setting <code>node.x</code> is equivalent to <code>node.setTranslation( x, node.y )</code>.
+      </p>
+      
+      <h4 id="node-y">node.y</h4>
+      <p>
+        <code>node.y</code> gets or sets the node's y-translation with <code>node.getY()</code> and <code>node.setY( y )</code>. Accessing <code>node.y</code> is equivalent
+        to <code>node.translation.y</code>, and setting <code>node.y</code> is equivalent to <code>node.setTranslation( node.x, y )</code>.
+      </p>
+      
+      <h4 id="node-rotation">node.rotation</h4>
+      <p>
+        <code>node.rotation</code> gets or sets the node's rotation with <code>node.getRotation()</code> and <code>node.setRotation( radians )</code>. All rotations are
+        handled in radians ($\pi$ is a 180-degree rotation). If you wish to rotate a node by a specific rotation
+        (instead of setting its rotation), use <a href="#node-rotate">node.rotate</a>
+      </p>
+      
+      <h4 id="node-rotate">node.rotate( radians, [prepend] )</h4>
+      <p>
+        Rotates the node's transform. By default the rotation is appended to the node's transform, but the optional <code>prepend</code> boolean flag can be added for the rotation
+        to be prepended to the node's transform.
+      </p>
+      
+      <h4 id="node-rotateAround">node.rotateAround( point, angle )</h4>
+      <p>
+        Rotates the node by <code>angle</code> in radians around the <a href="../../dot/doc#vector2">dot.Vector2</a> <code>point</code>. <code>point</code> should be in the node's parent coordinate frame.
+      </p>
+      
+      <h4 id="node-scale">node.scale( x, y, [prepend] )</h4>
+      <p>
+        Scales the node in each axis. By default the scale is appended to the node's transform, but the optional <code>prepend</code> boolean flag can be added for the
+        scale to be prepended to the node's transform.
+      </p>
+      <p>
+        <code>node.scale( s )</code> will scale by <code>s</code> in both dimensions, and is equivalent to <code>node.scale( s, s )</code>
+      </p>
+      
+      <h4 id="node-bounds">node.bounds</h4>
+      <p>
+        Returns the bounding box of this node (and its children) in the parent coordinate frame. Also available with <code>node.getBounds()</code>.
+        <!-- TODO: add an example -->
+      </p>
+      
+      <h4 id="node-selfBounds">node.selfBounds</h4>
+      <p>
+        Returns the bounding box of this node (without its children) in the local coordinate frame. Also available with <code>node.getSelfBounds()</code>.
+        <!-- TODO: add an example -->
+      </p>
+      
+      <h4 id="node-childBounds">node.childBounds</h4>
+      <p>
+        Returns the bounding box of this node's children (without include the node's selfBounds) in the local coordinate frame. Also available with <code>node.getChildBounds()</code>.
+        <!-- TODO: add an example -->
+      </p>
+      
+      <h4 id="node-left">node.left</h4>
+      <p>
+        <code>node.left</code> gets or sets the left bound (minimum x value) of this node's <a href="#node-bounds">bounds</a> in the parent coordinate frame, with
+        <code>node.getLeft()</code> and <code>node.setLeft( x )</code>. Setting this left bound effectively translates the node horizontally.
+      </p>
+      
+      <h4 id="node-right">node.right</h4>
+      <p>
+        <code>node.right</code> gets or sets the right bound (maximum x value) of this node's <a href="#node-bounds">bounds</a> in the parent coordinate frame, with
+        <code>node.getRight()</code> and <code>node.setRight( x )</code>. Setting this right bound effectively translates the node horizontally.
+      </p>
+      
+      <h4 id="node-top">node.top</h4>
+      <p>
+        <code>node.top</code> gets or sets the top bound (minimum y value) of this node's <a href="#node-bounds">bounds</a> in the parent coordinate frame, with
+        <code>node.getTop()</code> and <code>node.setTop( y )</code>. Setting this top bound effectively translates the node vertically.
+      </p>
+      
+      <h4 id="node-bottom">node.bottom</h4>
+      <p>
+        <code>node.bottom</code> gets or sets the bottom bound (maximum y value) of this node's <a href="#node-bounds">bounds</a> in the parent coordinate frame, with
+        <code>node.getBottom()</code> and <code>node.setBottom( y )</code>. Setting this bottom bound effectively translates the node vertically.
+      </p>
+      
+      <h4 id="node-centerX">node.centerX</h4>
+      <p>
+        <code>node.centerX</code> gets or sets the horizontal center of this node's <a href="#node-bounds">bounds</a> in the parent coordinate frame, with
+        <code>node.getCenterX()</code> and <code>node.setCenterX( x )</code>. Setting centerX effectively translates the node horizontally.
+      </p>
+      
+      <h4 id="node-centerY">node.centerY</h4>
+      <p>
+        <code>node.centerY</code> gets or sets the vertical center of this node's <a href="#node-bounds">bounds</a> in the parent coordinate frame, with
+        <code>node.getCenterY()</code> and <code>node.setCenterY( y )</code>. Setting centerY effectively translates the node vertically.
+      </p>
+      
+      <h4 id="node-renderer">node.renderer</h4>
+      <p>
+        <code>node.renderer</code> gets or sets the preferred rendering backend for the node (and children) using <code>node.getRenderer()</code> or <code>node.setRenderer( renderer )</code>.
+      </p>
+      <p>
+        It will always return a <a href="#renderer">Renderer</a> object back, but setting the renderer can be done either with an <a href="#renderer">Renderer</a> reference or
+        a string (either <code>'canvas'</code>, <code>'svg'</code>, <code>'dom'</code> or <code>'webgl'</code>). Manually specifying a renderer may preclude future
+        performance/quality tradeoffs from being automatically made.
+      </p>
+      <p>
+        Setting a renderer will have this node and its children use that renderer if they support it. This may be impossible (for instance, <a href="#path">Paths</a> do not support the <code>'dom'</code> renderer, and <a href="#dom">DOM nodes</a> do not support the <code>'canvas'</code> renderer).
+      </p>
+      <p>
+        This renderer (if non-null) will override any renderers set on ancestor nodes. Effectively, a node's renderer will be decided by whatever the closest ancestor
+        renderer that is compatible, or the scene default.
+      </p>
+      <p>
+        <code>node.hasRenderer()</code> is a convenience function to determine if this is set on the node.
+      </p>
+      
+      <h4 id="node-rendererOptions">node.rendererOptions</h4>
+      <p>
+        <code>node.rendererOptions</code> gets or sets options for the specified <a href="#node-renderer">renderer</a> using
+        <code>node.getRendererOptions()</code> or <code>node.setRendererOptions( renderer )</code>.
+        Setting <a href="#node-rendererOptions">rendererOptions</a> without setting <a href="#node-renderer">renderer</a> will have no effect, and may in future
+        versions throw an error. If this option and the <a href="#node-renderer">renderer</a> is set, this node will have layer boundaries inserted before and after.
+        <!-- TODO: docs of rendererOptions for different layers -->
+      </p>
+      
+      <h4 id="node-layerSplit">node.layerSplit</h4>
+      <p>
+        Setter backed by <code>node.setLayerSplit( boolean )</code> that will set both <a href="#node-layerSplitBefore">layerSplitBefore</a> and
+        <a href="#node-layerSplitAfter">layerSplitAfter</a> at the same time.
+      </p>
+      <p>
+        Setting to true will cause anything rendered before or after to be in a separate layer from this node and its children.
+      </p>
+      
+      <h4 id="node-layerSplitBefore">node.layerSplitBefore</h4>
+      <p>
+        Setter backed by <code>node.setLayerSplitBefore( boolean )</code> that, when set to true, will cause anything rendered before this node to
+        be in a separate layer from this node and its children.
+      </p>
+      
+      <h4 id="node-layerSplitAfter">node.layerSplitAfter</h4>
+      <p>
+        Setter backed by <code>node.setLayerSplitAfter( boolean )</code> that, when set to true, will cause anything rendered after this node to
+        be in a separate layer from this node and its children.
+      </p>
+      
 
       <h3 id="scene" class="section">Scene</h3>
-      The Scene is the "entry point" of a scene graph.  Scene extends Node, so all of its methods and options are inherited, see <a href="#node">Node</a> above.
-      The Scene must be constructed with a jquery wrapper for a DOM element the Scene will be rendered to, typically a div.
+      <p>
+        The Scene is the "entry point" of a scene graph. Scene extends Node, so all of its methods and options
+        are inherited, see <a href="#node">Node</a> above.
+        A scene is created with <code>new scenery.Scene( $container, [options] )</code>, where <code>$container</code>
+        is a block-level DOM element (typically a div) wrapped with jQuery that all scene graphics
+        (Canvas, SVG, etc.) are placed within.
+        This element must be a positioned element (non-'static' CSS position, see
+        the <a href="https://developer.mozilla.org/en-US/docs/CSS/position">MDN docs</a>), and should have a set width and height.
+      </p>
 
       <h4 id="scene-options">Scene Options</h4>
-      A Scene has the following options:
+      A Scene has the following options for the parameter object, in addition to all of <a href="#node-options">Node's options</a>:
 
       <ul>
         <li><a href="#scene-allowSceneOverflow">allowSceneOverflow</a> (default false): usually anything displayed outside of this $main (DOM/CSS3 transformed SVG) is hidden with CSS overflow</li>
@@ -247,6 +531,88 @@ var container = new scenery.Node( {
         <li><a href="#scene-width">width</a> (default currentWidth): override the main container's width</li>
         <li><a href="#scene-height">height</a> (default currentHeight): override the main container's height</li>
       </ul>
+      
+      <h4 id="scene-updateScene">scene.updateScene()</h4>
+      <p>
+        This redraws and/or repositions whatever rendering backends are being used to display the scene.
+        It should be called whenever the scene's display should reflect new changes, generally on each
+        <a href="https://developer.mozilla.org/en-US/docs/DOM/window.requestAnimationFrame">requestAnimationFrame</a>.
+      </p>
+      
+      <h4 id="scene-dispose">scene.dispose()</h4>
+      <p>
+        Disposes of all of the scene's necessary resources and listeners, so that it should be able to be
+        garbage collected if no more references are to the Scene. Call this once you no longer need a scene.
+      </p>
+      
+      <h4 id="scene-renderToCanvas">scene.renderToCanvas( canvas, context, callback )</h4>
+      <p>
+        Renders all applicable layers that support Canvas output to the specified <code>canvas</code> (with
+        the specified <code>context</code>). The <code>context</code> is specified in addition to the canvas
+        to support any custom parameters that were given in context creation.
+      </p>
+      <p>
+        <code>callback()</code> is called once the Scene is fully rendered to the canvas. Generally this is
+        immediate (if the layers are canvas/webgl), or delayed (if a layer contains SVG content). Including
+        the <a href="https://code.google.com/p/canvg/">Canvg</a> library is necessary for rendering SVG
+        content to Canvas.
+      </p>
+      <p>
+        DOM content is currently not supported for renderToCanvas.
+      </p>
+      
+      <h4 id="scene-canvasSnapshot">scene.canvasSnapshot( callback )</h4>
+      <p>
+        Asynchronously draws the scene to a canvas with the same size as the scene
+        (using <a href="#scene-renderToCanvas">renderToCanvas</a>, and calls <code>callback( canvas, imageData )</code>
+        once it is fully written. <code>imageData</code> is of type <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#imagedata">ImageData</a>, from the Canvas specification.
+      </p>
+      <p>
+        If any origin-dirty content (like cross-domain images without <a href="http://en.wikipedia.org/wiki/Cross-origin_resource_sharing">CORS</a>) are included in the Scene, this operation will throw a security error.
+      </p>
+      
+      <h4 id="scene-canvasDataURL">scene.canvasDataURL( callback )</h4>
+      <p>
+        Asynchronously draws the scene to an image (using <a href="#scene-canvasSnapshot">scene.canvasSnapshot</a>),
+        and calls <code>callback( dataURL )</code> with the
+        <a href="https://developer.mozilla.org/en-US/docs/data_URIs">data URI</a> for the image. Generally
+        this is a PNG. Does not support origin-dirty content (see <a href="#scene-canvasSnapshot">canvasSnapshot</a>)
+        inside the scene.
+      </p>
+      
+      <h4 id="scene-updateOnRequestAnimationFrame">scene.updateOnRequestAnimationFrame( [element] )</h4>
+      <p>
+        A simple way of setting up <a href="#scene-updateScene">scene.updateScene</a> to be called using
+        requestAnimationFrame. More advanced applications will want to handle this themselves.
+      </p>
+      
+      <h4 id="scene-initializeStandaloneEvents">scene.initializeStandaloneEvents()</h4>
+      <p>
+        Attaches event listeners onto the scene's containing block-level element, and forwards them to
+        the scene's input event handling system. This or <a href="scene-initializeFullscreenEvents">initializeFullscreenEvents</a> is necessary for cursor handling and input/pointer events.
+      </p>
+      
+      <h4 id="scene-initializeFullscreenEvents">scene.initializeFullscreenEvents()</h4>
+      <p>
+        Attaches event listeners onto the containing document, and forwards them to
+        the scene's input event handling system. This or <a href="scene-initializeStandaloneEvents">initializeStandaloneEvents</a> is necessary for cursor handling and input/pointer events.
+      </p>
+      <p>
+        This may call <a href="https://developer.mozilla.org/en-US/docs/DOM/event.preventDefault">preventDefault</a>
+        on events unrelated to the scene, so <a href="scene-initializeFullscreenEvents">initializeFullscreenEvents</a>
+        should only be used when the scene takes up the entire screen.
+      </p>
+      
+      <h4 id="scene-getDebugHTML">scene.getDebugHTML()</h4>
+      <p>
+        Returns an HTML string of debugging information that shows all of the nodes (their constructor type
+        names), and all layering information.
+      </p>
+      
+      <h4 id="scene-popupDebug">scene.popupDebug()</h4>
+      <p>
+        Pops the information from <a href="#scene-getDebugHTML">getDebugHTML</a> into a new window.
+      </p>
     </div>
     <div class="span3"></div>
   </div>

@@ -18,6 +18,8 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
   
+  var globalIdCounter = 1;
+  
   /*
    * Required arguments:
    * $main     - the jQuery-wrapped container for the scene
@@ -28,6 +30,10 @@ define( function( require ) {
    * batchDOMChanges: false - Only run DOM manipulation from within requestAnimationFrame calls
    */
   scenery.Layer = function( args ) {
+    
+    // assign a unique ID to this layer
+    this._id = globalIdCounter++;
+    
     this.$main = args.$main;
     this.scene = args.scene;
     this.baseNode = args.baseNode;
@@ -49,14 +55,8 @@ define( function( require ) {
     // bounds in global coordinate frame
     this.dirtyBounds = Bounds2.EVERYTHING;
     
-    this.startBoundary = args.startBoundary;
-    this.endBoundary = args.endBoundary;
-    
-    // TODO: deprecate these, use boundary references instead? or boundary convenience functions
-    this.startPointer = this.startBoundary.nextStartPointer;
-    this.endPointer = this.endBoundary.previousEndPointer;
-    this.startSelfTrail = this.startBoundary.nextSelfTrail;
-    this.endSelfTrail = this.endBoundary.previousSelfTrail;
+    this.setStartBoundary( args.startBoundary );
+    this.setEndBoundary( args.endBoundary );
     
     // set baseTrail from the scene to our baseNode
     if ( this.baseNode === this.scene ) {
@@ -65,6 +65,9 @@ define( function( require ) {
       this.baseTrail = this.startPointer.trail.copy();
       assert && assert( this.baseTrail.lastNode() === this.baseNode );
     }
+    
+    // we reference all trails in an unordered way
+    this._layerTrails = [];
     
     var layer = this;
     
@@ -92,6 +95,24 @@ define( function( require ) {
   
   Layer.prototype = {
     constructor: Layer,
+    
+    setStartBoundary: function( boundary ) {
+      // console.log( 'setting start boundary on layer ' + this.getId() + ': ' + boundary.toString() );
+      this.startBoundary = boundary;
+      
+      // TODO: deprecate these, use boundary references instead? or boundary convenience functions
+      this.startPointer = this.startBoundary.nextStartPointer;
+      this.startSelfTrail = this.startBoundary.nextSelfTrail;
+    },
+    
+    setEndBoundary: function( boundary ) {
+      // console.log( 'setting end boundary on layer ' + this.getId() + ': ' + boundary.toString() );
+      this.endBoundary = boundary;
+      
+      // TODO: deprecate these, use boundary references instead? or boundary convenience functions
+      this.endPointer = this.endBoundary.previousEndPointer;
+      this.endSelfTrail = this.endBoundary.previousSelfTrail;
+    },
     
     getStartPointer: function() {
       return this.startPointer;
@@ -129,6 +150,15 @@ define( function( require ) {
       return this.getName() + ' ' + ( this.startPointer ? this.startPointer.toString() : '!' ) + ' (' + ( this.startSelfTrail ? this.startSelfTrail.toString() : '!' ) + ') => ' + ( this.endPointer ? this.endPointer.toString() : '!' ) + ' (' + ( this.endSelfTrail ? this.endSelfTrail.toString() : '!' ) + ')';
     },
     
+    getId: function() {
+      return this._id;
+    },
+    
+    // trails associated with the layer, NOT necessarily in order
+    getLayerTrails: function() {
+      return this._layerTrails.slice( 0 );
+    },
+    
     /*---------------------------------------------------------------------------*
     * Abstract
     *----------------------------------------------------------------------------*/
@@ -141,6 +171,28 @@ define( function( require ) {
     // TODO: is this necessary? verify with the render state
     applyTransformationMatrix: function( matrix ) {
       throw new Error( 'Layer.applyTransformationMatrix unimplemented' );
+    },
+    
+    // adds a trail (with the last node) to the layer
+    addNodeFromTrail: function( trail ) {
+      // console.log( 'addNodeFromTrail layer: ' + this.getId() + ', trail: ' + trail.toString() );
+      // TODO: sync this with DOMLayer's implementation
+      this._layerTrails.push( trail );
+    },
+    
+    // removes a trail (with the last node) to the layer
+    removeNodeFromTrail: function( trail ) {
+      // console.log( 'removeNodeFromTrail layer: ' + this.getId() + ', trail: ' + trail.toString() );
+      // TODO: sync this with DOMLayer's implementation
+      var i;
+      for ( i = 0; i < this._layerTrails.length; i++ ) {
+        this._layerTrails[i].reindex();
+        if ( this._layerTrails[i].compare( trail ) === 0 ) {
+          break;
+        }
+      }
+      assert && assert( i < this._layerTrails.length );
+      this._layerTrails.splice( i, 1 );
     },
     
     // returns next zIndex in place. allows layers to take up more than one single zIndex
