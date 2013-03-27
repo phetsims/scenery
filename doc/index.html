@@ -171,7 +171,19 @@
       <a class="sublink" href="#scene-getDebugHTML">getDebugHTML</a><br>
       <a class="sublink" href="#scene-popupDebug">popupDebug</a><br>
       
+      <a class="navlink" href="#fillable">Fillable</a><br>
+      <a class="sublink" href="#fillable-fill">fill</a><br>
+      
+      <a class="navlink" href="#strokable">Strokable</a><br>
+      <a class="sublink" href="#strokable-stroke">stroke</a><br>
+      <a class="sublink" href="#strokable-lineWidth">lineWidth</a><br>
+      <a class="sublink" href="#strokable-lineCap">lineCap</a><br>
+      <a class="sublink" href="#strokable-lineJoin">lineJoin</a><br>
+      <a class="sublink" href="#strokable-lineDash">lineDash</a><br>
+      
       <a class="navlink" href="#path">Path</a><br>
+      <a class="sublink" href="#path-shape">shape</a><br>
+      
       <a class="navlink" href="#image">Image</a><br>
       <a class="navlink" href="#text">Text</a><br>
       <a class="navlink" href="#dom">DOM</a><br>
@@ -405,19 +417,19 @@ scene.updateOnRequestAnimationFrame();
       
       <h4 id="node-bounds">node.bounds</h4>
       <p>
-        Returns the bounding box of this node (and its children) in the parent coordinate frame. Also available with <code>node.getBounds()</code>.
+        Returns the <a href="../../dot/doc#bounds2">bounding box</a> of this node (and its children) in the parent coordinate frame. Also available with <code>node.getBounds()</code>.
         <!-- TODO: add an example -->
       </p>
       
       <h4 id="node-selfBounds">node.selfBounds</h4>
       <p>
-        Returns the bounding box of this node (without its children) in the local coordinate frame. Also available with <code>node.getSelfBounds()</code>.
+        Returns the <a href="../../dot/doc#bounds2">bounding box</a> of this node (without its children) in the local coordinate frame. Also available with <code>node.getSelfBounds()</code>.
         <!-- TODO: add an example -->
       </p>
       
       <h4 id="node-childBounds">node.childBounds</h4>
       <p>
-        Returns the bounding box of this node's children (without include the node's selfBounds) in the local coordinate frame. Also available with <code>node.getChildBounds()</code>.
+        Returns the <a href="../../dot/doc#bounds2">bounding box</a> of this node's children (without include the node's selfBounds) in the local coordinate frame. Also available with <code>node.getChildBounds()</code>.
         <!-- TODO: add an example -->
       </p>
       
@@ -613,6 +625,227 @@ scene.updateOnRequestAnimationFrame();
       <p>
         Pops the information from <a href="#scene-getDebugHTML">getDebugHTML</a> into a new window.
       </p>
+      
+      <h3 id="fillable" class="section">Fillable</h3>
+      <p>
+        A mix-in for <a href="#node">Node</a> subtypes that can be filled with a color/gradient/pattern.
+      </p>
+      
+      <h4 id="fillable-fill">fill</h4>
+      <p>
+        <a href="#fillable">Fillable</a> nodes provide a single <code>node.fill</code> getter and setter
+        that uses <code>node.getFill()</code> and <code>node.setFill( fill )</code>. <code>node.hasFill()</code>
+        is also available as a quick check, and a null fill is interpreted as not having a fill.
+      </p>
+      <p>
+        <code>fill</code> can currently be either a string (interpreted as a <a href="http://www.w3.org/TR/css3-color/">CSS color</a>), or an instance of a
+        <a href="#linearGradient">LinearGradient</a>, <a href="#radialGradient">RadialGradient</a> or
+        <a href="#pattern">Pattern</a>.
+      </p>
+      
+      <h3 id="strokable" class="section">Strokable</h3>
+      <p>
+        A mix-in for <a href="#node">Node</a> subtypes that can be stroked (outlined) along a border with a color/gradient/pattern.
+      </p>
+      
+      <h4 id="strokable-stroke">stroke</h4>
+      <p>
+        <code>node.stroke</code> is a getter and setter
+        that uses <code>node.getStroke()</code> and <code>node.setStroke( stroke )</code>. <code>node.hasStroke()</code>
+        is also available as a quick check, and a null stroke is interpreted as not having a stroke.
+      </p>
+      <p>
+        <code>stroke</code> can currently be either a string (interpreted as a <a href="http://www.w3.org/TR/css3-color/">CSS color</a>), or an instance of a
+        <a href="#linearGradient">LinearGradient</a>, <a href="#radialGradient">RadialGradient</a> or
+        <a href="#pattern">Pattern</a>.
+      </p>
+      
+      <h4 id="strokable-lineWidth">lineWidth</h4>
+      <p>
+        <code>node.lineWidth</code> (<code>node.getLineWidth()</code>, <code>node.setLineWidth( lineWidth )</code>)
+        controls the thickness of the stroke.
+      </p>
+      
+      <h4 id="strokable-lineCap">lineCap</h4>
+      <p>
+        <code>node.lineCap</code> (<code>node.getLineCap()</code>, <code>node.setLineCap( lineCap )</code>)
+        controls the shape of end-caps, and uses the <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-linecap">Canvas lineCap definitions</a> of <code>'butt'</code> (default),
+        <code>'round'</code> and <code>'square'</code>.
+      </p>
+      <div id="example-lineCap" class="exampleScene" style="width: 256px; height: 64px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-lineCap', function( scene ) {
+scene.addChild( new scenery.Text( 'butt', {
+  fontSize: 14,
+  centerX: 256/6,
+  y: 20
+} ) );
+scene.addChild( new scenery.Text( 'square', {
+  fontSize: 14,
+  centerX: 256*3/6,
+  y: 20
+} ) );
+scene.addChild( new scenery.Text( 'round', {
+  fontSize: 14,
+  centerX: 256*5/6,
+  y: 20
+} ) );
+/*START*/
+var shape = kite.Shape.lineSegment( 0, 50, 0, 70 );
+scene.addChild( new scenery.Path( {
+  shape: shape,
+  x: 256/6,
+  stroke: '#000',
+  lineWidth: 30,
+  lineCap: 'butt'
+} ) );
+scene.addChild( new scenery.Path( {
+  shape: shape,
+  x: 256*3/6,
+  stroke: '#000',
+  lineWidth: 30,
+  lineCap: 'square'
+} ) );
+scene.addChild( new scenery.Path( {
+  shape: shape,
+  x: 256*5/6,
+  stroke: '#000',
+  lineWidth: 30,
+  lineCap: 'round'
+} ) );
+/*END*/
+// add a red highlight
+scene.addChild( new scenery.Path( {
+  shape: shape,
+  x: 256/6,
+  stroke: '#f00'
+} ) );
+scene.addChild( new scenery.Path( {
+  shape: shape,
+  x: 256*3/6,
+  stroke: '#f00'
+} ) );
+scene.addChild( new scenery.Path( {
+  shape: shape,
+  x: 256*5/6,
+  stroke: '#f00'
+} ) );
+} );
+      </script>
+      
+      <h4 id="strokable-lineJoin">lineJoin</h4>
+      <p>
+        <code>node.lineJoin</code> (<code>node.getLineJoin()</code>, <code>node.setLineJoin( lineJoin )</code>)
+        controls the shape of segment joins, and uses the <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-linejoin">Canvas lineJoin definitions</a> of <code>'miter'</code> (default),
+        <code>'round'</code> and <code>'bevel'</code>.
+      </p>
+      <div id="example-lineJoin" class="exampleScene" style="width: 256px; height: 64px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-lineJoin', function( scene ) {
+scene.addChild( new scenery.Text( 'miter', {
+  fontSize: 14,
+  centerX: 256/6,
+  y: 20
+} ) );
+scene.addChild( new scenery.Text( 'bevel', {
+  fontSize: 14,
+  centerX: 256*3/6,
+  y: 20
+} ) );
+scene.addChild( new scenery.Text( 'round', {
+  fontSize: 14,
+  centerX: 256*5/6,
+  y: 20
+} ) );
+/*START*/
+var shape = new kite.Shape().moveTo( -30, 80 ).lineTo( 0, 50 ).lineTo( 30, 80 );
+scene.addChild( new scenery.Path( {
+  shape: shape,
+  x: 256/6,
+  stroke: '#000',
+  lineWidth: 25,
+  lineJoin: 'miter'
+} ) );
+scene.addChild( new scenery.Path( {
+  shape: shape,
+  x: 256*3/6,
+  stroke: '#000',
+  lineWidth: 25,
+  lineJoin: 'bevel'
+} ) );
+scene.addChild( new scenery.Path( {
+  shape: shape,
+  x: 256*5/6,
+  stroke: '#000',
+  lineWidth: 25,
+  lineJoin: 'round'
+} ) );
+/*END*/
+// add a red highlight
+scene.addChild( new scenery.Path( {
+  shape: shape,
+  x: 256/6,
+  stroke: '#f00'
+} ) );
+scene.addChild( new scenery.Path( {
+  shape: shape,
+  x: 256*3/6,
+  stroke: '#f00'
+} ) );
+scene.addChild( new scenery.Path( {
+  shape: shape,
+  x: 256*5/6,
+  stroke: '#f00'
+} ) );
+} );
+      </script>
+      
+      <h4 id="strokable-lineDash">lineDash</h4>
+      <p>
+        <code>node.lineDash</code> (<code>node.getLineDash()</code>, <code>node.setLineDash( lineDash )</code>)
+        controls any dashing of the stroke (or null for no dashing), and uses the <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-setlinedash">Canvas setLineDash</a> handling
+        as an even-length array of dash lengths.
+      </p>
+      
+      <div id="example-lineDash" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-lineDash', function( scene ) {
+/*START*/
+scene.addChild( new scenery.Path( {
+  shape: kite.Shape.regularPolygon( 6, 25 ),
+  x: 32, y: 32,
+  stroke: '#000',
+  lineWidth: 3,
+  lineDash: [ 10, 5 ]
+} ) );
+/*END*/
+} );
+      </script>
+      
+      <h3 id="path" class="section">Path</h3>
+      <p>
+        Path is a <a href="#node">Node</a> subtype that includes the <a href="#fillable">Fillable</a> and
+        <a href="#strokable">Strokable</a> mixins. The main displayed behavior is controlled by its single
+        additional option <a href="#path-shape">shape</a> along with the <a href="#fillable-fill">fill</a>
+        and <a href="#strokable-stroke">stroke</a> options.
+      </p>
+      
+      <h4 id="path-shape">shape</h4>
+      <p>
+        <code>node.shape</code> (<code>node.getShape()</code>, <code>node.setShape( shape )</code>)
+        controls the shape of this path, and is an instance of <a href="../../kite">Kite</a>'s
+        <a href="../../kite/doc#shape">Shape</a>.
+      </p>
+      
+      <h3 id="image" class="section">Image</h3>
+      <h3 id="text" class="section">Text</h3>
+      <h3 id="dom" class="section">DOM</h3>
+      <h3 id="pointer" class="section">Pointer</h3>
+      <h3 id="font" class="section">Font</h3>
+      <h3 id="linearGradient" class="section">LinearGradient</h3>
+      <h3 id="radialGradient" class="section">RadialGradient</h3>
+      <h3 id="pattern" class="section">Pattern</h3>
+      <h3 id="vbox" class="section">VBox</h3>
     </div>
     <div class="span3"></div>
   </div>
