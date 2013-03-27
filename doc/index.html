@@ -1025,6 +1025,37 @@ scene.addChild( new scenery.Text( 'Some text', {
       </p>
       
       <h3 id="dom" class="section">DOM</h3>
+      <p>
+        DOM is a subtype of <a href="#node">Node</a> that positions a DOM element inside the scene using
+        <a href="http://www.w3.org/TR/css3-transforms/">CSS transforms</a>. If the element is attached somewhere
+        else, it will be removed and added into the DOM within the <a href="#scene">scene</a>'s container
+        block-level element.
+      </p>
+      <div id="example-dom" class="exampleScene" style="width: 256px; height: 128px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-dom', function( scene ) {
+/*START*/
+var element = document.createElement( 'form' );
+element.innerHTML = '<label>Type in me:</label><input type="text">';
+scene.addChild( new scenery.DOM( element, { x: 30, rotation: Math.PI / 6 } ) );
+/*END*/
+} );
+      </script>
+      
+      <h4 id="dom-element">element</h4>
+      <p>
+        <code>node.element</code> (<code>node.getElement()</code>, <code>node.setElement( domElement )</code>)
+        controls the displayed DOM element. If the element is a block-level element, it should have a specified
+        width and height.
+      </p>
+      
+      <h4 id="dom-interactive">interactive</h4>
+      <p>
+        <code>node.interactive</code> (<code>node.getInteractive()</code>, <code>node.setInteractive( boolean )</code>),
+        when set to true, will signal to Scenery's event system that preventDefault() should not be called
+        on DOM events when the DOM node is the event target.
+      </p>
+      
       <h3 id="pointer" class="section">Pointer</h3>
       <h3 id="font" class="section">Font</h3>
       <h3 id="linearGradient" class="section">LinearGradient</h3>
