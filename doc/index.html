@@ -171,6 +171,10 @@
       <a class="sublink" href="#scene-getDebugHTML">getDebugHTML</a><br>
       <a class="sublink" href="#scene-popupDebug">popupDebug</a><br>
       
+      <a class="navlink" href="#fillable">Fillable</a><br>
+      <a class="sublink" href="#fillable-fill">fill</a><br>
+      
+      <a class="navlink" href="#strokable">Strokable</a><br>
       <a class="navlink" href="#path">Path</a><br>
       <a class="navlink" href="#image">Image</a><br>
       <a class="navlink" href="#text">Text</a><br>
@@ -613,6 +617,35 @@ scene.updateOnRequestAnimationFrame();
       <p>
         Pops the information from <a href="#scene-getDebugHTML">getDebugHTML</a> into a new window.
       </p>
+      
+      <h3 id="fillable" class="section">Fillable</h3>
+      <p>
+        A mix-in for <a href="#node">Node</a> subtypes that can be filled with a color/gradient/pattern.
+      </p>
+      
+      <h4 id="fillable-fill">fill</h4>
+      <p>
+        <a href="#fillable">Fillable</a> nodes provide a single <code>node.fill</code> getter and setter
+        that uses <code>node.getFill()</code> and <code>node.setFill( fill )</code>. <code>node.hasFill()</code>
+        is also available as a quick check, and a null fill is interpreted as not having a fill.
+      </p>
+      <p>
+        <code>fill</code> can currently be either a string (interpreted as a <a href="http://www.w3.org/TR/css3-color/">CSS color</a>), or an instance of a
+        <a href="#linearGradient">LinearGradient</a>, <a href="#radialGradient">RadialGradient</a> or
+        <a href="#pattern">Pattern</a>.
+      </p>
+      
+      <h3 id="strokable" class="section">Strokable</h3>
+      <h3 id="path" class="section">Path</h3>
+      <h3 id="image" class="section">Image</h3>
+      <h3 id="text" class="section">Text</h3>
+      <h3 id="dom" class="section">DOM</h3>
+      <h3 id="pointer" class="section">Pointer</h3>
+      <h3 id="font" class="section">Font</h3>
+      <h3 id="linearGradient" class="section">LinearGradient</h3>
+      <h3 id="radialGradient" class="section">RadialGradient</h3>
+      <h3 id="pattern" class="section">Pattern</h3>
+      <h3 id="vbox" class="section">VBox</h3>
     </div>
     <div class="span3"></div>
   </div>
