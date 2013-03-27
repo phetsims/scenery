@@ -670,6 +670,66 @@ scene.updateOnRequestAnimationFrame();
         controls the shape of end-caps, and uses the <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-linecap">Canvas lineCap definitions</a> of <code>'butt'</code> (default),
         <code>'round'</code> and <code>'square'</code>.
       </p>
+      <div id="example-lineCap" class="exampleScene" style="width: 256px; height: 64px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-lineCap', function( scene ) {
+scene.addChild( new scenery.Text( 'butt', {
+  fontSize: 14,
+  centerX: 256/6,
+  y: 20
+} ) );
+scene.addChild( new scenery.Text( 'square', {
+  fontSize: 14,
+  centerX: 256*3/6,
+  y: 20
+} ) );
+scene.addChild( new scenery.Text( 'round', {
+  fontSize: 14,
+  centerX: 256*5/6,
+  y: 20
+} ) );
+/*START*/
+var shape = kite.Shape.lineSegment( 0, 50, 0, 70 );
+scene.addChild( new scenery.Path( {
+  shape: shape,
+  x: 256/6,
+  stroke: '#000',
+  lineWidth: 30,
+  lineCap: 'butt'
+} ) );
+scene.addChild( new scenery.Path( {
+  shape: shape,
+  x: 256*3/6,
+  stroke: '#000',
+  lineWidth: 30,
+  lineCap: 'square'
+} ) );
+scene.addChild( new scenery.Path( {
+  shape: shape,
+  x: 256*5/6,
+  stroke: '#000',
+  lineWidth: 30,
+  lineCap: 'round'
+} ) );
+/*END*/
+// add a red highlight
+scene.addChild( new scenery.Path( {
+  shape: shape,
+  x: 256/6,
+  stroke: '#f00'
+} ) );
+scene.addChild( new scenery.Path( {
+  shape: shape,
+  x: 256*3/6,
+  stroke: '#f00'
+} ) );
+scene.addChild( new scenery.Path( {
+  shape: shape,
+  x: 256*5/6,
+  stroke: '#f00'
+} ) );
+} );
+      </script>
       
       <h4 id="strokable-lineJoin">lineJoin</h4>
       <p>
@@ -677,6 +737,66 @@ scene.updateOnRequestAnimationFrame();
         controls the shape of segment joins, and uses the <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-linejoin">Canvas lineJoin definitions</a> of <code>'miter'</code> (default),
         <code>'round'</code> and <code>'bevel'</code>.
       </p>
+      <div id="example-lineJoin" class="exampleScene" style="width: 256px; height: 64px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-lineJoin', function( scene ) {
+scene.addChild( new scenery.Text( 'miter', {
+  fontSize: 14,
+  centerX: 256/6,
+  y: 20
+} ) );
+scene.addChild( new scenery.Text( 'bevel', {
+  fontSize: 14,
+  centerX: 256*3/6,
+  y: 20
+} ) );
+scene.addChild( new scenery.Text( 'round', {
+  fontSize: 14,
+  centerX: 256*5/6,
+  y: 20
+} ) );
+/*START*/
+var shape = new kite.Shape().moveTo( -30, 80 ).lineTo( 0, 50 ).lineTo( 30, 80 );
+scene.addChild( new scenery.Path( {
+  shape: shape,
+  x: 256/6,
+  stroke: '#000',
+  lineWidth: 25,
+  lineJoin: 'miter'
+} ) );
+scene.addChild( new scenery.Path( {
+  shape: shape,
+  x: 256*3/6,
+  stroke: '#000',
+  lineWidth: 25,
+  lineJoin: 'bevel'
+} ) );
+scene.addChild( new scenery.Path( {
+  shape: shape,
+  x: 256*5/6,
+  stroke: '#000',
+  lineWidth: 25,
+  lineJoin: 'round'
+} ) );
+/*END*/
+// add a red highlight
+scene.addChild( new scenery.Path( {
+  shape: shape,
+  x: 256/6,
+  stroke: '#f00'
+} ) );
+scene.addChild( new scenery.Path( {
+  shape: shape,
+  x: 256*3/6,
+  stroke: '#f00'
+} ) );
+scene.addChild( new scenery.Path( {
+  shape: shape,
+  x: 256*5/6,
+  stroke: '#f00'
+} ) );
+} );
+      </script>
       
       <h4 id="strokable-lineDash">lineDash</h4>
       <p>
