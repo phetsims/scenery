@@ -52,7 +52,7 @@ define( function( require ) {
       self.invalidateImage();
       
       // don't leak memory!
-      image.removeEventListener( 'load', self.loadListener );
+      self._image.removeEventListener( 'load', self.loadListener );
     };
     
     Node.call( this, options );
