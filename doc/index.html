@@ -33,6 +33,15 @@
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script src="../dist/development/scenery.js"></script>
   
+  <script type="text/javascript">
+    function docExample( id, draw ) {
+      var scene = new scenery.Scene( $( '#example-' + id ) );
+      draw( scene );
+      scene.updateScene();
+      $( '#example-' + id + '-code' ).text( draw.toString().match( /\/\*START\*\/((.|\n)*)\/\*END\*\// )[1] );
+    }
+  </script>
+  
   <style type="text/css">
     
     .exampleScene {
@@ -238,7 +247,8 @@
       <pre id="example-children-code" class="brush: js"></pre>
       <div style="clear: left;"></div>
       <script type="text/javascript">
-function draw( scene ) { /*START*/
+docExample( 'children', function( scene ) {
+/*START*/
 scene.addChild( new scenery.Node( {
   // an array of children can be specified, so no
   // reference to the container node is needed
@@ -258,13 +268,7 @@ scene.addChild( new scenery.Node( {
     } )
   ]
 } ) );
-/*END*/ }
-(function(){
-  var scene = new scenery.Scene( $( '#example-children' ) );
-  draw( scene );
-  scene.updateScene();
-})();
-$( '#example-children-code' ).text( draw.toString().match( /\/\*START\*\/((.|\n)*)\/\*END\*\// )[1] );
+/*END*/ } );
       </script>
       
       <h4 id="node-parents">node.parents</h4>
