@@ -145,6 +145,13 @@
       <a class="sublink" href="#node-layerSplitAfter">layerSplitAfter</a><br>
       
       <a class="navlink" href="#scene">Scene</a><br>
+      <a class="sublink" href="#scene-options">(options)</a><br>
+      <a class="sublink" href="#scene-updateScene">updateScene</a><br>
+      <a class="sublink" href="#scene-dispose">dispose</a><br>
+      <a class="sublink" href="#scene-renderToCanvas">renderToCanvas</a><br>
+      <a class="sublink" href="#scene-canvasSnapshot">canvasSnapshot</a><br>
+      <a class="sublink" href="#scene-canvasDataURL">canvasDataURL</a><br>
+      
       <a class="navlink" href="#path">Path</a><br>
       <a class="navlink" href="#image">Image</a><br>
       <a class="navlink" href="#text">Text</a><br>
@@ -167,6 +174,7 @@
       <ul>
         <li><a href="http://jquery.com/">jQuery</a> for parts of DOM manipulation.</li>
         <li><a href="http://lodash.com/">Lo-Dash</a> for utility functions, as a replacement for <a href="http://underscorejs.org/">Underscore.js</a>.</li>
+        <li>[optional] <a href="https://code.google.com/p/canvg/">Canvg</a>, for supporting SVG &#8594; Canvas operations, like <a href="#scene-renderToCanvas">scene.renderToCanvas</a></li>
       </ul>
       
       <strong>Internal</strong> dependencies:
@@ -442,7 +450,7 @@ var container = new scenery.Node( {
       The Scene is the "entry point" of a scene graph.  Scene extends Node, so all of its methods and options are inherited, see <a href="#node">Node</a> above.
       The Scene must be constructed with a jquery wrapper for a DOM element the Scene will be rendered to, typically a div.
       This element must be a positioned element (non-'static' CSS position, see
-      the <a href="https://developer.mozilla.org/en-US/docs/CSS/position">MDN docs), and should have a set width and height.
+      the <a href="https://developer.mozilla.org/en-US/docs/CSS/position">MDN docs</a>), and should have a set width and height.
 
       <h4 id="scene-options">Scene Options</h4>
       A Scene has the following options:
@@ -456,6 +464,54 @@ var container = new scenery.Node( {
         <li><a href="#scene-width">width</a> (default currentWidth): override the main container's width</li>
         <li><a href="#scene-height">height</a> (default currentHeight): override the main container's height</li>
       </ul>
+      
+      <h4 id="scene-updateScene">scene.updateScene()</h4>
+      <p>
+        This redraws and/or repositions whatever rendering backends are being used to display the scene.
+        It should be called whenever the scene's display should reflect new changes, generally on each
+        <a href="https://developer.mozilla.org/en-US/docs/DOM/window.requestAnimationFrame">requestAnimationFrame</a>.
+      </p>
+      
+      <h4 id="scene-dispose">scene.dispose()</h4>
+      <p>
+        Disposes of all of the scene's necessary resources and listeners, so that it should be able to be
+        garbage collected if no more references are to the Scene. Call this once you no longer need a scene.
+      </p>
+      
+      <h4 id="scene-renderToCanvas">scene.renderToCanvas( canvas, context, callback )</h4>
+      <p>
+        Renders all applicable layers that support Canvas output to the specified <code>canvas</code> (with
+        the specified <code>context</code>). The <code>context</code> is specified in addition to the canvas
+        to support any custom parameters that were given in context creation.
+      </p>
+      <p>
+        <code>callback()</code> is called once the Scene is fully rendered to the canvas. Generally this is
+        immediate (if the layers are canvas/webgl), or delayed (if a layer contains SVG content). Including
+        the <a href="https://code.google.com/p/canvg/">Canvg</a> library is necessary for rendering SVG
+        content to Canvas.
+      </p>
+      <p>
+        DOM content is currently not supported for renderToCanvas.
+      </p>
+      
+      <h4 id="scene-canvasSnapshot">scene.canvasSnapshot( callback )</h4>
+      <p>
+        Asynchronously draws the scene to a canvas with the same size as the scene
+        (using <a href="#scene-renderToCanvas">renderToCanvas</a>, and calls <code>callback( canvas, imageData )</code>
+        once it is fully written. <code>imageData</code> is of type <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#imagedata">ImageData</a>, from the Canvas specification.
+      </p>
+      <p>
+        If any origin-dirty content (like cross-domain images without <a href="http://en.wikipedia.org/wiki/Cross-origin_resource_sharing">CORS</a>) are included in the Scene, this operation will throw a security error.
+      </p>
+      
+      <h4 id="scene-canvasDataURL">scene.canvasDataURL( callback )</h4>
+      <p>
+        Asynchronously draws the scene to an image (using <a href="#scene-canvasSnapshot">scene.canvasSnapshot</a>),
+        and calls <code>callback( dataURL )</code> with the
+        <a href="https://developer.mozilla.org/en-US/docs/data_URIs">data URI</a> for the image. Generally
+        this is a PNG. Does not support origin-dirty content (see <a href="#scene-canvasSnapshot">canvasSnapshot</a>)
+        inside the scene.
+      </p>
     </div>
     <div class="span3"></div>
   </div>
