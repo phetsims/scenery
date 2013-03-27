@@ -182,6 +182,8 @@
       <a class="sublink" href="#strokable-lineDash">lineDash</a><br>
       
       <a class="navlink" href="#path">Path</a><br>
+      <a class="sublink" href="#path-shape">shape</a><br>
+      
       <a class="navlink" href="#image">Image</a><br>
       <a class="navlink" href="#text">Text</a><br>
       <a class="navlink" href="#dom">DOM</a><br>
@@ -821,6 +823,20 @@ scene.addChild( new scenery.Path( {
       </script>
       
       <h3 id="path" class="section">Path</h3>
+      <p>
+        Path is a <a href="#node">Node</a> subtype that includes the <a href="#fillable">Fillable</a> and
+        <a href="#strokable">Strokable</a> mixins. The main displayed behavior is controlled by its single
+        additional option <a href="#path-shape">shape</a> along with the <a href="#fillable-fill">fill</a>
+        and <a href="#strokable-stroke">stroke</a> options.
+      </p>
+      
+      <h4 id="path-shape">shape</h4>
+      <p>
+        <code>node.shape</code> (<code>node.getShape()</code>, <code>node.setShape( shape )</code>)
+        controls the shape of this path, and is an instance of <a href="../../kite">Kite</a>'s
+        <a href="../../kite/doc#shape">Shape</a>.
+      </p>
+      
       <h3 id="image" class="section">Image</h3>
       <h3 id="text" class="section">Text</h3>
       <h3 id="dom" class="section">DOM</h3>
