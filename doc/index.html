@@ -413,13 +413,30 @@ var container = new scenery.Node( {
         <code>node.getRendererOptions()</code> or <code>node.setRendererOptions( renderer )</code>.
         Setting <a href="#node-rendererOptions">rendererOptions</a> without setting <a href="#node-renderer">renderer</a> will have no effect, and may in future
         versions throw an error. If this option and the <a href="#node-renderer">renderer</a> is set, this node will have layer boundaries inserted before and after.
+        <!-- TODO: docs of rendererOptions for different layers -->
       </p>
       
-      <!-- 
-      <a class="sublink" href="#node-layerSplit">layerSplit</a><br>
-      <a class="sublink" href="#node-layerSplitBefore">layerSplitBefore</a><br>
-      <a class="sublink" href="#node-layerSplitAfter">layerSplitAfter</a><br>
-       -->
+      <h4 id="node-layerSplit">node.layerSplit</h4>
+      <p>
+        Setter backed by <code>node.setLayerSplit( boolean )</code> that will set both <a href="#node-layerSplitBefore">layerSplitBefore</a> and
+        <a href="#node-layerSplitAfter">layerSplitAfter</a> at the same time.
+      </p>
+      <p>
+        Setting to true will cause anything rendered before or after to be in a separate layer from this node and its children.
+      </p>
+      
+      <h4 id="node-layerSplitBefore">node.layerSplitBefore</h4>
+      <p>
+        Setter backed by <code>node.setLayerSplitBefore( boolean )</code> that, when set to true, will cause anything rendered before this node to
+        be in a separate layer from this node and its children.
+      </p>
+      
+      <h4 id="node-layerSplitAfter">node.layerSplitAfter</h4>
+      <p>
+        Setter backed by <code>node.setLayerSplitAfter( boolean )</code> that, when set to true, will cause anything rendered after this node to
+        be in a separate layer from this node and its children.
+      </p>
+      
 
       <h3 id="scene" class="section">Scene</h3>
       The Scene is the "entry point" of a scene graph.  Scene extends Node, so all of its methods and options are inherited, see <a href="#node">Node</a> above.
