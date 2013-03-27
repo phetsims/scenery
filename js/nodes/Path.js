@@ -65,6 +65,7 @@ define( function( require ) {
       return this._shape !== null;
     },
     
+    // TODO: change from state to layer?
     paintCanvas: function( state ) {
       if ( this.hasShape() ) {
         var layer = state.layer;
