@@ -206,11 +206,19 @@
       <a class="sublink" href="#dom-interactive">interactive</a><br>
       
       <a class="navlink" href="#pointer">Pointer</a><br>
+      
       <a class="navlink" href="#font">Font</a><br>
+      
       <a class="navlink" href="#linearGradient">LinearGradient</a><br>
+      <a class="sublink" href="#linearGradient-addColorStop">addColorStop</a><br>
+      <a class="sublink" href="#linearGradient-setTransformMatrix">setTransformMatrix</a><br>
+      
       <a class="navlink" href="#radialGradient">RadialGradient</a><br>
+      
       <a class="navlink" href="#pattern">Pattern</a><br>
+      
       <a class="navlink" href="#vbox">VBox</a><br>
+      
     </div>
     <div class="span6">
       <h2 id="tutorials">Tutorials</h2>
@@ -1061,11 +1069,70 @@ scene.addChild( new scenery.DOM( element, { x: 30, rotation: Math.PI / 6 } ) );
       </p>
       
       <h3 id="pointer" class="section">Pointer</h3>
+      
+      
       <h3 id="font" class="section">Font</h3>
+      
+      
       <h3 id="linearGradient" class="section">LinearGradient</h3>
+      <p>
+        A LinearGradient can be used in place of a color for any <a href="#fillable-fill">fill</a> or
+        <a href="#strokable-stroke">stroke</a>, but is usually done for <a href="#path">Paths</a>.
+      </p>
+      <p>
+        LinearGradient is constructed and used very similarly to Canvas's
+        <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-createlineargradient">context.createLinearGradient</a>, with
+        <code>new scenery.LinearGradient( x0, y0, x1, y1 )</code> where the gradient goes from (x0,y0) to
+        (x1,y1), and then <a href="#linearGradient-addColorStop">color stops</a> can be added.
+      </p>
+      <div id="example-linearGradient" class="exampleScene" style="width: 128px; height: 128px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-linearGradient', function( scene ) {
+/*START*/
+scene.addChild( new scenery.Path( {
+  shape: kite.Shape.rectangle( 0, 0, 128, 128 ),
+  
+  // upper-left to lower-right
+  fill: new scenery.LinearGradient( 0, 0, 128, 128 )
+                   .addColorStop( 0, '#888' )
+                   .addColorStop( 0.4, '#000' )
+                   .addColorStop( 1, '#555' )
+} ) );
+scene.addChild( new scenery.Text( 'A', {
+  fontSize: 80,
+  centerX: 64, centerY: 64,
+  
+  // left to right
+  fill: new scenery.LinearGradient( 0, 0, 55, 0 )
+                   .addColorStop( 0, '#f00' )
+                   .addColorStop( 1, '#ff0' )
+} ) );
+/*END*/
+} );
+      </script>
+      
+      <h4 id="linearGradient-addColorStop">addColorStop( ratio, color )</h4>
+      <p>
+        Adds a point of color along the gradient, where a ratio of 0 is a color point at (x0,y0) and
+        a ratio of 1 is a color point at (x1,y1).
+      </p>
+      
+      <h4 id="linearGradient-setTransformMatrix">setTransformMatrix( matrix )</h4>
+      <p>
+        Given a <a href="../../dot/doc#matrix3">Matrix3</a> for <code>matrix</code>, it will transform
+        the gradient as it is applied. This should only be done before adding it as a fill/stroke to
+        any nodes.
+      </p>
+      
       <h3 id="radialGradient" class="section">RadialGradient</h3>
+      
+      
       <h3 id="pattern" class="section">Pattern</h3>
+      
+      
       <h3 id="vbox" class="section">VBox</h3>
+      
+      
     </div>
     <div class="span3"></div>
   </div>
