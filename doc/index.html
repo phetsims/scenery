@@ -151,6 +151,10 @@
       <a class="sublink" href="#scene-renderToCanvas">renderToCanvas</a><br>
       <a class="sublink" href="#scene-canvasSnapshot">canvasSnapshot</a><br>
       <a class="sublink" href="#scene-canvasDataURL">canvasDataURL</a><br>
+      <a class="sublink" href="#scene-initializeStandaloneEvents">initializeStandaloneEvents</a><br>
+      <a class="sublink" href="#scene-initializeFullscreenEvents">initializeFullscreenEvents</a><br>
+      <a class="sublink" href="#scene-getDebugHTML">getDebugHTML</a><br>
+      <a class="sublink" href="#scene-popupDebug">popupDebug</a><br>
       
       <a class="navlink" href="#path">Path</a><br>
       <a class="navlink" href="#image">Image</a><br>
@@ -511,6 +515,34 @@ var container = new scenery.Node( {
         <a href="https://developer.mozilla.org/en-US/docs/data_URIs">data URI</a> for the image. Generally
         this is a PNG. Does not support origin-dirty content (see <a href="#scene-canvasSnapshot">canvasSnapshot</a>)
         inside the scene.
+      </p>
+      
+      <h4 id="scene-initializeStandaloneEvents">scene.initializeStandaloneEvents()</h4>
+      <p>
+        Attaches event listeners onto the scene's containing block-level element, and forwards them to
+        the scene's input event handling system. This or <a href="scene-initializeFullscreenEvents">initializeFullscreenEvents</a> is necessary for cursor handling and input/pointer events.
+      </p>
+      
+      <h4 id="scene-initializeFullscreenEvents">scene.initializeFullscreenEvents()</h4>
+      <p>
+        Attaches event listeners onto the containing document, and forwards them to
+        the scene's input event handling system. This or <a href="scene-initializeStandaloneEvents">initializeStandaloneEvents</a> is necessary for cursor handling and input/pointer events.
+      </p>
+      <p>
+        This may call <a href="https://developer.mozilla.org/en-US/docs/DOM/event.preventDefault">preventDefault</a>
+        on events unrelated to the scene, so <a href="scene-initializeFullscreenEvents">initializeFullscreenEvents</a>
+        should only be used when the scene takes up the entire screen.
+      </p>
+      
+      <h4 id="scene-getDebugHTML">scene.getDebugHTML()</h4>
+      <p>
+        Returns an HTML string of debugging information that shows all of the nodes (their constructor type
+        names), and all layering information.
+      </p>
+      
+      <h4 id="scene-popupDebug">scene.popupDebug()</h4>
+      <p>
+        Pops the information from <a href="#scene-getDebugHTML">getDebugHTML</a> into a new window.
       </p>
     </div>
     <div class="span3"></div>
