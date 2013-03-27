@@ -6695,7 +6695,7 @@ define('KITE/segments/Segment',['require','ASSERT/assert','KITE/kite'], function
 // Copyright 2002-2012, University of Colorado
 
 /**
- * Represents a higher-level command for Shape, and generally mimics the Canvas drawing api.
+ * Represents an immutable higher-level command for Shape, and generally mimics the Canvas drawing api.
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
@@ -8659,10 +8659,10 @@ define('KITE/Shape',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT/
   // var weirdDir = p( Math.PI, 22 / 7 );
   
   kite.Shape = function( pieces, optionalClose ) {
-    // higher-level Canvas-esque drawing commands
+    // higher-level Canvas-esque drawing commands, individually considered to be immutable
     this.pieces = [];
     
-    // lower-level piecewise mathematical description using segments
+    // lower-level piecewise mathematical description using segments, also individually immutable
     this.subpaths = [];
     
     // computed bounds for all pieces added so far
@@ -8846,6 +8846,10 @@ define('KITE/Shape',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT/
     close: function() {
       this.addPiece( new Piece.Close() );
       return this;
+    },
+    
+    copy: function() {
+      return new Shape( this.pieces );
     },
     
     addPiece: function( piece ) {
@@ -12016,6 +12020,82 @@ define('SCENERY/nodes/Fillable',['require','ASSERT/assert','SCENERY/scenery'], f
 // Copyright 2002-2012, University of Colorado
 
 /**
+ * VBox arranges the child nodes vertically, and they can be centered, left or right justified.
+ * Vertical spacing can be set as a constant or a function which depends on the adjacent nodes.
+ * TODO: add an option (not enabled by default) to update layout when children or children bounds change
+ *
+ * @author Sam Reid
+ */
+
+define('SCENERY/nodes/HBox',['require','SCENERY/scenery','SCENERY/nodes/Node','SCENERY/util/Util'], function( require ) {
+  
+  var scenery = require( 'SCENERY/scenery' );
+  var Node = require( 'SCENERY/nodes/Node' );
+  var objectCreate = require( 'SCENERY/util/Util' ).objectCreate; // i.e. Object.create
+
+  /**
+   *
+   * @param options Same as Node.constructor.options with the following additions:
+   *
+   * spacing: can be a number or a function.  If a number, then it will be the vertical spacing between each object.
+   *              If a function, then the function will have the signature function(top,bottom){} which returns the spacing between adjacent pairs of items.
+   * align:   How to line up the items horizontally.  One of 'center', 'left' or 'right'.  Defaults to 'center'.
+   *
+   * @constructor
+   */
+  scenery.HBox = function HBox( options ) {
+    // ensure we have a parameter object
+    this.options = options = _.extend( {
+                                         // defaults
+                                         spacing: function() { return 0; },
+                                         align: 'center'
+                                       }, options );
+
+    if ( typeof options.spacing === 'number' ) {
+      var spacingConstant = options.spacing;
+      options.spacing = function() { return spacingConstant; };
+    }
+
+    Node.call( this, options );
+    this.updateLayout();
+  };
+  var HBox = scenery.HBox;
+
+  HBox.prototype = objectCreate( Node.prototype );
+
+  HBox.prototype.updateLayout = function() {
+    var minY = _.min( _.map( this.children, function( child ) {return child.y;} ) );
+    var maxY = _.max( _.map( this.children, function( child ) {return child.y + child.height;} ) );
+    var centerY = (maxY + minY) / 2;
+
+    //Start at x=0 in the coordinate frame of this node.  Not possible to set this through the spacing option, instead just set it with the {y:number} option.
+    var x = 0;
+    for ( var i = 0; i < this.children.length; i++ ) {
+      var child = this.children[i];
+      child.x = x;
+
+      //Set the position horizontally
+      if ( this.options.align === 'top' ) {
+        child.top = minY;
+      }
+      else if ( this.options.align === 'bottom' ) {
+        child.bottom = maxY;
+      }
+      else {//default to center
+        child.centerY = centerY;
+      }
+
+      //Move to the next vertical position.
+      x += child.width + this.options.spacing( child, this.children[i + 1] );
+    }
+  };
+  HBox.prototype.constructor = HBox;
+
+  return HBox;
+} );
+// Copyright 2002-2012, University of Colorado
+
+/**
  * Images
  *
  * TODO: setImage / getImage and the whole toolchain that uses that
@@ -12355,6 +12435,7 @@ define('SCENERY/nodes/Strokable',['require','ASSERT/assert','SCENERY/scenery','K
     // on mutation, set the stroke parameters first since they may affect the bounds (and thus later operations)
     proto._mutatorKeys = [ 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'lineDash' ].concat( proto._mutatorKeys );
     
+    // TODO: miterLimit support?
     Object.defineProperty( proto, 'stroke', { set: proto.setStroke, get: proto.getStroke } );
     Object.defineProperty( proto, 'lineWidth', { set: proto.setLineWidth, get: proto.getLineWidth } );
     Object.defineProperty( proto, 'lineCap', { set: proto.setLineCap, get: proto.getLineCap } );
@@ -12441,6 +12522,7 @@ define('SCENERY/nodes/Path',['require','ASSERT/assert','PHET_CORE/inherit','SCEN
       return this._shape !== null;
     },
     
+    // TODO: change from state to layer?
     paintCanvas: function( state ) {
       if ( this.hasShape() ) {
         var layer = state.layer;
@@ -13052,11 +13134,11 @@ define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/
     Object.defineProperty( Text.prototype, propertyName, { set: Text.prototype[setterName], get: Text.prototype[getterName] } );
   }
   
-  addFontForwarding( 'fontWeight', 'fontWeight', 'weight' );
-  addFontForwarding( 'fontFamily', 'fontFamily', 'family' );
-  addFontForwarding( 'fontStretch', 'fontStretch', 'stretch' );
-  addFontForwarding( 'fontStyle', 'fontStyle', 'style' );
-  addFontForwarding( 'fontSize', 'fontSize', 'size' );
+  addFontForwarding( 'fontWeight', 'FontWeight', 'weight' );
+  addFontForwarding( 'fontFamily', 'FontFamily', 'family' );
+  addFontForwarding( 'fontStretch', 'FontStretch', 'stretch' );
+  addFontForwarding( 'fontStyle', 'FontStyle', 'style' );
+  addFontForwarding( 'fontSize', 'FontSize', 'size' );
   addFontForwarding( 'lineHeight', 'LineHeight', 'lineHeight' );
   
   Text.prototype._mutatorKeys = [ 'text', 'font', 'fontWeight', 'fontFamily', 'fontStretch', 'fontStyle', 'fontSize', 'lineHeight',
@@ -15107,6 +15189,7 @@ define('main', [
     
     'SCENERY/nodes/DOM',
     'SCENERY/nodes/Fillable',
+    'SCENERY/nodes/HBox',
     'SCENERY/nodes/Image',
     'SCENERY/nodes/Node',
     'SCENERY/nodes/Path',
