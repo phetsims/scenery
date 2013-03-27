@@ -894,6 +894,7 @@ scene.addChild( new scenery.Path( {
         Text is a <a href="#node">Node</a> subtype that (currently) displays a single line of text
         in Canvas or SVG. DOM and multiline support is planned. It also mixes in
         <a href="#fillable">Fillable</a>, so it should support fill colors, gradients and patterns.
+        The default fill is <code>'#000'</code>, so text is black by default.
         Stroking support is planned.
       </p>
       <p>
@@ -901,6 +902,18 @@ scene.addChild( new scenery.Path( {
         <code>text</code> is described by <a href="#text-text">text</a>, and <code>options</code>
         is the standard <a href="#node">Node</a> parameter object.
       </p>
+      
+      <div id="example-text" class="exampleScene" style="width: 256px; height: 64px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-text', function( scene ) {
+/*START*/
+scene.addChild( new scenery.Text( 'Some text', {
+  font: '20px sans-serif',
+  centerX: 128, centerY: 32
+} ) );
+/*END*/
+} );
+      </script>
       
       <h4 id="text-options">Text Options</h4>
       <p>
