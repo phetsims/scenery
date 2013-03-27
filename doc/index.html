@@ -867,6 +867,16 @@ scene.addChild( new scenery.Path( {
         where <code>image</code> is as described in <a href="#image-image">image</a>, and
         <code>options</code> is the normal <a href="#node-options">options parameter object</a>.
       </p>
+      <div id="example-image" class="exampleScene" style="width: 130px; height: 85px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-image', function( scene ) {
+var url = 'http://phet.colorado.edu/sims/my-solar-system/my-solar-system-thumbnail.png';
+/*START*/
+scene.addChild( new scenery.Image( url ) );
+/*END*/
+scene.updateOnRequestAnimationFrame();
+} );
+      </script>
       
       <h4 id="image-image">image</h4>
       <p>
@@ -875,8 +885,8 @@ scene.addChild( new scenery.Path( {
       </p>
       <ul>
         <li>
-          A <strong>String</strong>, treated as a URL and loads the image. Bounds-based mutators
-          like <a href="#node-left">left</a> and <a href="#node-centerY">centerY</a> will not work,
+          A <strong>String</strong>, treated as a URL and loads the image. <strong>Bounds-based mutators
+          like <a href="#node-left">left</a> and <a href="#node-centerY">centerY</a> will not work</strong>,
           since the image will not have the correct dimensions on node construction.
         </li>
         <li>
@@ -902,7 +912,6 @@ scene.addChild( new scenery.Path( {
         <code>text</code> is described by <a href="#text-text">text</a>, and <code>options</code>
         is the standard <a href="#node">Node</a> parameter object.
       </p>
-      
       <div id="example-text" class="exampleScene" style="width: 256px; height: 64px; margin: 0 auto;"></div>
       <script type="text/javascript">
 docExample( 'example-text', function( scene ) {
