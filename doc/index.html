@@ -175,6 +175,12 @@
       <a class="sublink" href="#fillable-fill">fill</a><br>
       
       <a class="navlink" href="#strokable">Strokable</a><br>
+      <a class="sublink" href="#strokable-stroke">stroke</a><br>
+      <a class="sublink" href="#strokable-lineWidth">lineWidth</a><br>
+      <a class="sublink" href="#strokable-lineCap">lineCap</a><br>
+      <a class="sublink" href="#strokable-lineJoin">lineJoin</a><br>
+      <a class="sublink" href="#strokable-lineDash">lineDash</a><br>
+      
       <a class="navlink" href="#path">Path</a><br>
       <a class="navlink" href="#image">Image</a><br>
       <a class="navlink" href="#text">Text</a><br>
@@ -636,6 +642,49 @@ scene.updateOnRequestAnimationFrame();
       </p>
       
       <h3 id="strokable" class="section">Strokable</h3>
+      <p>
+        A mix-in for <a href="#node">Node</a> subtypes that can be stroked (outlined) along a border with a color/gradient/pattern.
+      </p>
+      
+      <h4 id="strokable-stroke">stroke</h4>
+      <p>
+        <code>node.stroke</code> is a getter and setter
+        that uses <code>node.getStroke()</code> and <code>node.setStroke( stroke )</code>. <code>node.hasStroke()</code>
+        is also available as a quick check, and a null stroke is interpreted as not having a stroke.
+      </p>
+      <p>
+        <code>stroke</code> can currently be either a string (interpreted as a <a href="http://www.w3.org/TR/css3-color/">CSS color</a>), or an instance of a
+        <a href="#linearGradient">LinearGradient</a>, <a href="#radialGradient">RadialGradient</a> or
+        <a href="#pattern">Pattern</a>.
+      </p>
+      
+      <h4 id="strokable-lineWidth">lineWidth</h4>
+      <p>
+        <code>node.lineWidth</code> (<code>node.getLineWidth()</code>, <code>node.setLineWidth( lineWidth )</code>)
+        controls the thickness of the stroke.
+      </p>
+      
+      <h4 id="strokable-lineCap">lineCap</h4>
+      <p>
+        <code>node.lineCap</code> (<code>node.getLineCap()</code>, <code>node.setLineCap( lineCap )</code>)
+        controls the shape of end-caps, and uses the <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-linecap">Canvas lineCap definitions</a> of <code>'butt'</code> (default),
+        <code>'round'</code> and <code>'square'</code>.
+      </p>
+      
+      <h4 id="strokable-lineJoin">lineJoin</h4>
+      <p>
+        <code>node.lineJoin</code> (<code>node.getLineJoin()</code>, <code>node.setLineJoin( lineJoin )</code>)
+        controls the shape of segment joins, and uses the <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-linejoin">Canvas lineJoin definitions</a> of <code>'miter'</code> (default),
+        <code>'round'</code> and <code>'bevel'</code>.
+      </p>
+      
+      <h4 id="strokable-lineDash">lineDash</h4>
+      <p>
+        <code>node.lineDash</code> (<code>node.getLineDash()</code>, <code>node.setLineDash( lineDash )</code>)
+        controls any dashing of the stroke (or null for no dashing), and uses the <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-setlinedash">Canvas setLineDash</a> handling
+        as an even-length array of dash lengths.
+      </p>
+      
       <h3 id="path" class="section">Path</h3>
       <h3 id="image" class="section">Image</h3>
       <h3 id="text" class="section">Text</h3>
