@@ -35,6 +35,7 @@ define( [
     
     'SCENERY/nodes/DOM',
     'SCENERY/nodes/Fillable',
+    'SCENERY/nodes/HBox',
     'SCENERY/nodes/Image',
     'SCENERY/nodes/Node',
     'SCENERY/nodes/Path',

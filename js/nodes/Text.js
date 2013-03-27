@@ -326,11 +326,11 @@ define( function( require ) {
     Object.defineProperty( Text.prototype, propertyName, { set: Text.prototype[setterName], get: Text.prototype[getterName] } );
   }
   
-  addFontForwarding( 'fontWeight', 'fontWeight', 'weight' );
-  addFontForwarding( 'fontFamily', 'fontFamily', 'family' );
-  addFontForwarding( 'fontStretch', 'fontStretch', 'stretch' );
-  addFontForwarding( 'fontStyle', 'fontStyle', 'style' );
-  addFontForwarding( 'fontSize', 'fontSize', 'size' );
+  addFontForwarding( 'fontWeight', 'FontWeight', 'weight' );
+  addFontForwarding( 'fontFamily', 'FontFamily', 'family' );
+  addFontForwarding( 'fontStretch', 'FontStretch', 'stretch' );
+  addFontForwarding( 'fontStyle', 'FontStyle', 'style' );
+  addFontForwarding( 'fontSize', 'FontSize', 'size' );
   addFontForwarding( 'lineHeight', 'LineHeight', 'lineHeight' );
   
   Text.prototype._mutatorKeys = [ 'text', 'font', 'fontWeight', 'fontFamily', 'fontStretch', 'fontStyle', 'fontSize', 'lineHeight',

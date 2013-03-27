@@ -25,6 +25,7 @@ Priorities:
     Line-dash offsets? check SVG support
     Text stroke handling
     Documentation
+    Font consider defensive copy in Text nodes?
 
 Bugs:
     DOM visible
