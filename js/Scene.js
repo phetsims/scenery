@@ -716,6 +716,14 @@ define( function( require ) {
     }
   };
   
+  Scene.prototype.updateOnRequestAnimationFrame = function( element ) {
+    var scene = this;
+    (function step() {
+      window.requestAnimationFrame( step, element );
+      scene.updateScene();
+    })();
+  };
+  
   Scene.prototype.initializeStandaloneEvents = function( parameters ) {
     // TODO extract similarity between standalone and fullscreen!
     var element = this.$main[0];
