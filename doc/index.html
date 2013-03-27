@@ -316,8 +316,9 @@ scene.addChild( new scenery.Node( {
 docExample( 'example-cursor', function( scene ) {
 /*START*/
 scene.addChild( new scenery.Path( {
-  shape: kite.Shape.rectangle( 32, 5, 64, 54 ),
-  fill: '#faa',
+  shape: kite.Shape.regularPolygon( 6, 25 ),
+  x: 64, y: 32,
+  fill: '#88f',
   cursor: 'pointer' // classic hand
 } ) );
 /*END*/
