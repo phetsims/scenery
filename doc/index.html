@@ -35,10 +35,13 @@
   
   <script type="text/javascript">
     function docExample( id, draw ) {
-      var scene = new scenery.Scene( $( '#example-' + id ) );
+      var $container = $( '#' + id );
+      var scene = new scenery.Scene( $container );
       draw( scene );
       scene.updateScene();
-      $( '#example-' + id + '-code' ).text( draw.toString().match( /\/\*START\*\/((.|\n)*)\/\*END\*\// )[1] );
+      var $code = $( '<pre class="brush: js"></pre>' );
+      $code.text( draw.toString().match( /\/\*START\*\/((.|\n)*)\/\*END\*\// )[1] );
+      $container.after( $code );
     }
   </script>
   
@@ -244,10 +247,8 @@
         This can also be used when creating a Node:
       </p>
       <div id="example-children" class="exampleScene" style="width: 128px; height: 64px; margin: 0 auto;"></div>
-      <pre id="example-children-code" class="brush: js"></pre>
-      <div style="clear: left;"></div>
       <script type="text/javascript">
-docExample( 'children', function( scene ) {
+docExample( 'example-children', function( scene ) {
 /*START*/
 scene.addChild( new scenery.Node( {
   // an array of children can be specified, so no
