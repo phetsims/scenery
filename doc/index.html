@@ -805,6 +805,21 @@ scene.addChild( new scenery.Path( {
         as an even-length array of dash lengths.
       </p>
       
+      <div id="example-lineDash" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-lineDash', function( scene ) {
+/*START*/
+scene.addChild( new scenery.Path( {
+  shape: kite.Shape.regularPolygon( 6, 25 ),
+  x: 32, y: 32,
+  stroke: '#000',
+  lineWidth: 3,
+  lineDash: [ 10, 5 ]
+} ) );
+/*END*/
+} );
+      </script>
+      
       <h3 id="path" class="section">Path</h3>
       <h3 id="image" class="section">Image</h3>
       <h3 id="text" class="section">Text</h3>
