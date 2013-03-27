@@ -202,12 +202,23 @@
       <a class="sublink" href="#text-direction">direction</a><br>
       
       <a class="navlink" href="#dom">DOM</a><br>
+      <a class="sublink" href="#dom-element">element</a><br>
+      <a class="sublink" href="#dom-interactive">interactive</a><br>
+      
       <a class="navlink" href="#pointer">Pointer</a><br>
+      
       <a class="navlink" href="#font">Font</a><br>
+      
       <a class="navlink" href="#linearGradient">LinearGradient</a><br>
+      <a class="sublink" href="#linearGradient-addColorStop">addColorStop</a><br>
+      <a class="sublink" href="#linearGradient-setTransformMatrix">setTransformMatrix</a><br>
+      
       <a class="navlink" href="#radialGradient">RadialGradient</a><br>
+      
       <a class="navlink" href="#pattern">Pattern</a><br>
+      
       <a class="navlink" href="#vbox">VBox</a><br>
+      
     </div>
     <div class="span6">
       <h2 id="tutorials">Tutorials</h2>
@@ -844,6 +855,11 @@ scene.addChild( new scenery.Path( {
         additional option <a href="#path-shape">shape</a> along with the <a href="#fillable-fill">fill</a>
         and <a href="#strokable-stroke">stroke</a> options.
       </p>
+      <p>
+        A path is constructed with <code>new scenery.Path( options )</code>, where <code>options</code>
+        is the standard <a href="#node">Node</a> parameter object, where the <a href="#path-shape">shape</a>
+        should be specified.
+      </p>
       
       <h4 id="path-shape">shape</h4>
       <p>
@@ -855,8 +871,20 @@ scene.addChild( new scenery.Path( {
       <h3 id="image" class="section">Image</h3>
       <p>
         Image is a <a href="#node">Node</a> subtype that displays a single image in either Canvas,
-        SVG or DOM.
+        SVG or DOM. An image node is constructed with <code>new scenery.Image( image, [options] )</code>,
+        where <code>image</code> is as described in <a href="#image-image">image</a>, and
+        <code>options</code> is the normal <a href="#node-options">options parameter object</a>.
       </p>
+      <div id="example-image" class="exampleScene" style="width: 130px; height: 85px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-image', function( scene ) {
+var url = 'http://phet.colorado.edu/sims/my-solar-system/my-solar-system-thumbnail.png';
+/*START*/
+scene.addChild( new scenery.Image( url ) );
+/*END*/
+scene.updateOnRequestAnimationFrame();
+} );
+      </script>
       
       <h4 id="image-image">image</h4>
       <p>
@@ -865,8 +893,8 @@ scene.addChild( new scenery.Path( {
       </p>
       <ul>
         <li>
-          A <strong>String</strong>, treated as a URL and loads the image. Bounds-based mutators
-          like <a href="#node-left">left</a> and <a href="#node-centerY">centerY</a> will not work,
+          A <strong>String</strong>, treated as a URL and loads the image. <strong>Bounds-based mutators
+          like <a href="#node-left">left</a> and <a href="#node-centerY">centerY</a> will not work</strong>,
           since the image will not have the correct dimensions on node construction.
         </li>
         <li>
@@ -884,8 +912,25 @@ scene.addChild( new scenery.Path( {
         Text is a <a href="#node">Node</a> subtype that (currently) displays a single line of text
         in Canvas or SVG. DOM and multiline support is planned. It also mixes in
         <a href="#fillable">Fillable</a>, so it should support fill colors, gradients and patterns.
+        The default fill is <code>'#000'</code>, so text is black by default.
         Stroking support is planned.
       </p>
+      <p>
+        Text nodes are constructed with <code>new scenery.Text( text, [options] )</code>, where
+        <code>text</code> is described by <a href="#text-text">text</a>, and <code>options</code>
+        is the standard <a href="#node">Node</a> parameter object.
+      </p>
+      <div id="example-text" class="exampleScene" style="width: 256px; height: 64px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-text', function( scene ) {
+/*START*/
+scene.addChild( new scenery.Text( 'Some text', {
+  font: '20px sans-serif',
+  centerX: 128, centerY: 32
+} ) );
+/*END*/
+} );
+      </script>
       
       <h4 id="text-options">Text Options</h4>
       <p>
@@ -988,12 +1033,106 @@ scene.addChild( new scenery.Path( {
       </p>
       
       <h3 id="dom" class="section">DOM</h3>
+      <p>
+        DOM is a subtype of <a href="#node">Node</a> that positions a DOM element inside the scene using
+        <a href="http://www.w3.org/TR/css3-transforms/">CSS transforms</a>. If the element is attached somewhere
+        else, it will be removed and added into the DOM within the <a href="#scene">scene</a>'s container
+        block-level element.
+      </p>
+      <p>
+        DOM nodes should be constructed by passing in the DOM element, along with a parameter object if desired:
+        <code>new scenery.DOM( element, [options] )</code>
+      </p>
+      <div id="example-dom" class="exampleScene" style="width: 256px; height: 128px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-dom', function( scene ) {
+/*START*/
+var element = document.createElement( 'form' );
+element.innerHTML = '<label>Type in me:</label><input type="text">';
+scene.addChild( new scenery.DOM( element, { x: 30, rotation: Math.PI / 6 } ) );
+/*END*/
+} );
+      </script>
+      
+      <h4 id="dom-element">element</h4>
+      <p>
+        <code>node.element</code> (<code>node.getElement()</code>, <code>node.setElement( domElement )</code>)
+        controls the displayed DOM element. If the element is a block-level element, it should have a specified
+        width and height.
+      </p>
+      
+      <h4 id="dom-interactive">interactive</h4>
+      <p>
+        <code>node.interactive</code> (<code>node.getInteractive()</code>, <code>node.setInteractive( boolean )</code>),
+        when set to true, will signal to Scenery's event system that preventDefault() should not be called
+        on DOM events when the DOM node is the event target.
+      </p>
+      
       <h3 id="pointer" class="section">Pointer</h3>
+      
+      
       <h3 id="font" class="section">Font</h3>
+      
+      
       <h3 id="linearGradient" class="section">LinearGradient</h3>
+      <p>
+        A LinearGradient can be used in place of a color for any <a href="#fillable-fill">fill</a> or
+        <a href="#strokable-stroke">stroke</a>, but is usually done for <a href="#path">Paths</a>.
+      </p>
+      <p>
+        LinearGradient is constructed and used very similarly to Canvas's
+        <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-createlineargradient">context.createLinearGradient</a>, with
+        <code>new scenery.LinearGradient( x0, y0, x1, y1 )</code> where the gradient goes from (x0,y0) to
+        (x1,y1), and then <a href="#linearGradient-addColorStop">color stops</a> can be added.
+      </p>
+      <div id="example-linearGradient" class="exampleScene" style="width: 128px; height: 128px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-linearGradient', function( scene ) {
+/*START*/
+scene.addChild( new scenery.Path( {
+  shape: kite.Shape.rectangle( 0, 0, 128, 128 ),
+  
+  // upper-left to lower-right
+  fill: new scenery.LinearGradient( 0, 0, 128, 128 )
+                   .addColorStop( 0, '#888' )
+                   .addColorStop( 0.4, '#000' )
+                   .addColorStop( 1, '#555' )
+} ) );
+scene.addChild( new scenery.Text( 'A', {
+  fontSize: 80,
+  centerX: 64, centerY: 64,
+  
+  // left to right
+  fill: new scenery.LinearGradient( 0, 0, 55, 0 )
+                   .addColorStop( 0, '#f00' )
+                   .addColorStop( 1, '#ff0' )
+} ) );
+/*END*/
+} );
+      </script>
+      
+      <h4 id="linearGradient-addColorStop">addColorStop( ratio, color )</h4>
+      <p>
+        Adds a point of color along the gradient, where a ratio of 0 is a color point at (x0,y0) and
+        a ratio of 1 is a color point at (x1,y1).
+      </p>
+      
+      <h4 id="linearGradient-setTransformMatrix">setTransformMatrix( matrix )</h4>
+      <p>
+        Given a <a href="../../dot/doc#matrix3">Matrix3</a> for <code>matrix</code>, it will transform
+        the gradient as it is applied. This should only be done before adding it as a fill/stroke to
+        any nodes.
+      </p>
+      
       <h3 id="radialGradient" class="section">RadialGradient</h3>
+      
+      
       <h3 id="pattern" class="section">Pattern</h3>
+      
+      
       <h3 id="vbox" class="section">VBox</h3>
+      
+      
     </div>
     <div class="span3"></div>
   </div>
