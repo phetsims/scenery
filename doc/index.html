@@ -234,15 +234,38 @@
       <p>
         This can also be used when creating a Node:
       </p>
-      <pre class="brush: js">
-var container = new scenery.Node( {
+      <div id="example-children" class="exampleScene" style="width: 128px; height: 64px; margin: 0 auto;"></div>
+      <pre id="example-children-code" class="brush: js"></pre>
+      <div style="clear: left;"></div>
+      <script type="text/javascript">
+function draw( scene ) { /*START*/
+scene.addChild( new scenery.Node( {
+  // an array of children can be specified, so no
+  // reference to the container node is needed
   children: [
-    // arbitrary array of children that will be added to the node
-    new scenery.Node(),
-    new scenery.Node()
+    // gray rectangle on the left
+    new scenery.Path( {
+      shape: kite.Shape.rectangle( 0, 0, 64, 64 ),
+      fill: '#aaa'
+    } ),
+    
+    // later nodes in the array will show up on top
+    // of previous nodes
+    new scenery.Text( 'Children', {
+      font: '20px sans-serif',
+      centerX: 64,
+      centerY: 32
+    } )
   ]
-} );
-      </pre>
+} ) );
+/*END*/ }
+(function(){
+  var scene = new scenery.Scene( $( '#example-children' ) );
+  draw( scene );
+  scene.updateScene();
+})();
+$( '#example-children-code' ).text( draw.toString().match( /\/\*START\*\/((.|\n)*)\/\*END\*\// )[1] );
+      </script>
       
       <h4 id="node-parents">node.parents</h4>
       <p>
