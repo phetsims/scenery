@@ -387,9 +387,35 @@ var container = new scenery.Node( {
         <code>node.getCenterY()</code> and <code>node.setCenterY( y )</code>. Setting centerY effectively translates the node vertically.
       </p>
       
+      <h4 id="node-renderer">node.renderer</h4>
+      <p>
+        <code>node.renderer</code> gets or sets the preferred rendering backend for the node (and children) using <code>node.getRenderer()</code> or <code>node.setRenderer( renderer )</code>.
+      </p>
+      <p>
+        It will always return a <a href="#renderer">Renderer</a> object back, but setting the renderer can be done either with an <a href="#renderer">Renderer</a> reference or
+        a string (either <code>'canvas'</code>, <code>'svg'</code>, <code>'dom'</code> or <code>'webgl'</code>). Manually specifying a renderer may preclude future
+        performance/quality tradeoffs from being automatically made.
+      </p>
+      <p>
+        Setting a renderer will have this node and its children use that renderer if they support it. This may be impossible (for instance, <a href="#path">Paths</a> do not support the <code>'dom'</code> renderer, and <a href="#dom">DOM nodes</a> do not support the <code>'canvas'</code> renderer).
+      </p>
+      <p>
+        This renderer (if non-null) will override any renderers set on ancestor nodes. Effectively, a node's renderer will be decided by whatever the closest ancestor
+        renderer that is compatible, or the scene default.
+      </p>
+      <p>
+        <code>node.hasRenderer()</code> is a convenience function to determine if this is set on the node.
+      </p>
+      
+      <h4 id="node-rendererOptions">node.rendererOptions</h4>
+      <p>
+        <code>node.rendererOptions</code> gets or sets options for the specified <a href="#node-renderer">renderer</a> using
+        <code>node.getRendererOptions()</code> or <code>node.setRendererOptions( renderer )</code>.
+        Setting <a href="#node-rendererOptions">rendererOptions</a> without setting <a href="#node-renderer">renderer</a> will have no effect, and may in future
+        versions throw an error. If this option and the <a href="#node-renderer">renderer</a> is set, this node will have layer boundaries inserted before and after.
+      </p>
+      
       <!-- 
-      <a class="sublink" href="#node-renderer">renderer</a><br>
-      <a class="sublink" href="#node-rendererOptions">rendererOptions</a><br>
       <a class="sublink" href="#node-layerSplit">layerSplit</a><br>
       <a class="sublink" href="#node-layerSplitBefore">layerSplitBefore</a><br>
       <a class="sublink" href="#node-layerSplitAfter">layerSplitAfter</a><br>
