@@ -309,25 +309,24 @@ scene.addChild( new scenery.Node( {
         <a href="../examples/cursors.html">a cursor example page</a> that demos a number of available cursors.
       </p>
       <p>
-        The cursor is updated whenever <a href="#scene-updateCursor">scene.updateCursor</a> or <a href="#scene-updateScene">scene.updateScene</a> is called.
+        The cursor is updated whenever <a href="#scene-updateCursor">scene.updateCursor</a> or <a href="#scene-updateScene">scene.updateScene</a> is called, and event initialization like <a href="#scene-initializeStandaloneEvents">scene.initializeStandaloneEvents</a> should be added so Scenery can track the mouse input.
       </p>
       <div id="example-cursor" class="exampleScene" style="width: 128px; height: 64px; margin: 0 auto;"></div>
       <script type="text/javascript">
 docExample( 'example-cursor', function( scene ) {
 /*START*/
-// a simple rectangle which will show the classic 'pointer'
 scene.addChild( new scenery.Path( {
   shape: kite.Shape.rectangle( 32, 5, 64, 54 ),
   fill: '#faa',
-  cursor: 'pointer'
+  cursor: 'pointer' // classic hand
 } ) );
-
+/*END*/
 // event initialization needed for cursor to work
 scene.initializeStandaloneEvents();
 
 // and update on every frame
 scene.updateOnRequestAnimationFrame();
-/*END*/ } );
+} );
       </script>
       
       <h4 id="node-visible">node.visible</h4>
