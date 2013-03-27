@@ -52,7 +52,7 @@ define( function( require ) {
       self.invalidateImage();
       
       // don't leak memory!
-      image.removeEventListener( self.loadListener );
+      image.removeEventListener( 'load', self.loadListener );
     };
     
     Node.call( this, options );
@@ -74,19 +74,19 @@ define( function( require ) {
       if ( this._image !== image && ( typeof image !== 'string' || !this._image || image !== this._image.src ) ) {
         // don't leak memory by referencing old images
         if ( this._image ) {
-          this._image.removeEventListener( this.loadListener );
+          this._image.removeEventListener( 'load', this.loadListener );
         }
         
         if ( typeof image === 'string' ) {
           // create an image with the assumed URL
           var src = image;
           image = document.createElement( 'img' );
-          image.addEventListener( this.loadListener );
+          image.addEventListener( 'load', this.loadListener );
           image.src = src;
         } else if ( image instanceof HTMLImageElement ) {
           // only add a listener if we probably haven't loaded yet
           if ( !image.width || !image.height ) {
-            image.addEventListener( this.loadListener );
+            image.addEventListener( 'load', this.loadListener );
           }
         }
         
