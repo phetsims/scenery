@@ -116,6 +116,7 @@ define( function( require ) {
       
       var style = '';
       // if the fill / style has an SVG definition, use that with a URL reference to it
+      // TODO: share these in fillable / strokable, due to the duplication with Text
       style += 'fill: ' + ( this._fill ? ( this._fill.getSVGDefinition ? 'url(#fill' + this.getId() + ')' : this._fill ) : 'none' ) + ';';
       style += 'stroke: ' + ( this._stroke ? ( this._stroke.getSVGDefinition ? 'url(#stroke' + this.getId() + ')' : this._stroke ) : 'none' ) + ';';
       if ( this._stroke ) {

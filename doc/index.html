@@ -914,9 +914,10 @@ scene.updateOnRequestAnimationFrame();
       <p>
         Text is a <a href="#node">Node</a> subtype that (currently) displays a single line of text
         in Canvas or SVG. DOM and multiline support is planned. It also mixes in
-        <a href="#fillable">Fillable</a>, so it should support fill colors, gradients and patterns.
-        The default fill is <code>'#000'</code>, so text is black by default.
-        Stroking support is planned.
+        <a href="#fillable">Fillable</a>, and <a href="#strokable">Strokable</a>,
+        so it should support fills and strokes with colors, gradients and patterns.
+        The default fill is <code>'#000'</code>, so text is black by default, with no stroke, so
+        to JUST stroke text, set fill to null.
       </p>
       <p>
         Text nodes are constructed with <code>new scenery.Text( text, [options] )</code>, where
@@ -938,7 +939,7 @@ scene.addChild( new scenery.Text( 'Some text', {
       <h4 id="text-options">Text Options</h4>
       <p>
         A <a href="#text">Text</a> node has the following parameter object options, in addition to
-        the ones from <a href="#fillable">Fillable</a>
+        the ones from <a href="#fillable">Fillable</a> and <a href="#strokable">Strokable</a>.
       </p>
       <ul>
         <li><a href="#text-text">text</a></li>
