@@ -6967,6 +6967,7 @@ define('KITE/util/LineStyles',['require','ASSERT/assert','KITE/kite'], function(
     this.lineCap = args.lineCap !== undefined ? args.lineCap : 'butt'; // butt, round, square
     this.lineJoin = args.lineJoin !== undefined ? args.lineJoin : 'miter'; // miter, round, bevel
     this.lineDash = args.lineDash !== undefined ? args.lineDash : null; // null is default, otherwise an array of numbers
+    this.lineDashOffset = args.lineDashOffset !== undefined ? args.lineDashOffset : 0; // 0 default, any number
     this.miterLimit = args.miterLimit !== undefined ? args.miterLimit : 10; // see https://svgwg.org/svg2-draft/painting.html for miterLimit computations
   };
   var LineStyles = kite.LineStyles;
@@ -6974,7 +6975,11 @@ define('KITE/util/LineStyles',['require','ASSERT/assert','KITE/kite'], function(
     constructor: LineStyles,
     
     equals: function( other ) {
-      var typical = this.lineWidth === other.lineWidth && this.lineCap === other.lineCap && this.lineJoin === other.lineJoin && this.miterLimit === other.miterLimit;
+      var typical = this.lineWidth === other.lineWidth &&
+                    this.lineCap === other.lineCap &&
+                    this.lineJoin === other.lineJoin &&
+                    this.miterLimit === other.miterLimit &&
+                    this.lineDashOffset === other.lineDashOffset;
       if ( !typical ) {
         return false;
       }
@@ -10460,6 +10465,7 @@ define('SCENERY/layers/CanvasLayer',['require','ASSERT/assert','DOT/Bounds2','SC
       this.lineCap = 'butt'; // default 'butt';
       this.lineJoin = 'miter';
       this.lineDash = null;
+      this.lineDashOffset = 0;
       this.miterLimit = 10;
       
       this.font = '10px sans-serif';
@@ -10552,6 +10558,13 @@ define('SCENERY/layers/CanvasLayer',['require','ASSERT/assert','DOT/Bounds2','SC
         } else {
           // unsupported line dash! do... nothing?
         }
+      }
+    },
+    
+    setLineDashOffset: function( lineDashOffset ) {
+      if ( this.lineDashOffset !== lineDashOffset ) {
+        this.lineDashOffset = lineDashOffset;
+        this.context.lineDashOffset = lineDashOffset;
       }
     },
     
@@ -11815,6 +11828,577 @@ define('PHET_CORE/inherit',['require','PHET_CORE/extend'], function( require ) {
 // Copyright 2002-2012, University of Colorado
 
 /**
+ * Mix-in for nodes that support a standard fill.
+ *
+ * TODO: pattern and gradient handling
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define('SCENERY/nodes/Fillable',['require','ASSERT/assert','SCENERY/scenery'], function( require ) {
+  
+  
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
+  var scenery = require( 'SCENERY/scenery' );
+  
+  scenery.Fillable = function( type ) {
+    var proto = type.prototype;
+    
+    // this should be called in the constructor to initialize
+    proto.initializeFillable = function() {
+      this._fill = null;
+    };
+    
+    proto.hasFill = function() {
+      return this._fill !== null;
+    };
+    
+    proto.getFill = function() {
+      return this._fill;
+    };
+    
+    proto.setFill = function( fill ) {
+      if ( this.getFill() !== fill ) {
+        this._fill = fill;
+        this.invalidatePaint();
+        
+        this.invalidateFill();
+      }
+      return this;
+    };
+    
+    proto.beforeCanvasFill = function( layer ) {
+      layer.setFillStyle( this._fill );
+      if ( this._fill.transformMatrix ) {
+        layer.context.save();
+        this._fill.transformMatrix.canvasAppendTransform( layer.context );
+      }
+    };
+    
+    proto.afterCanvasFill = function( layer ) {
+      if ( this._fill.transformMatrix ) {
+        layer.context.restore();
+      }
+    };
+    
+    proto.getSVGFillStyle = function() {
+      // if the fill has an SVG definition, use that with a URL reference to it
+      return 'fill: ' + ( this._fill ? ( this._fill.getSVGDefinition ? 'url(#fill' + this.getId() + ')' : this._fill ) : 'none' ) + ';';
+    };
+    
+    proto.addSVGFillDef = function( svg, defs ) {
+      var fill = this.getFill();
+      var fillId = 'fill' + this.getId();
+      
+      // add new definitions if necessary
+      if ( fill && fill.getSVGDefinition ) {
+        defs.appendChild( fill.getSVGDefinition( fillId ) );
+      }
+    };
+    
+    proto.removeSVGFillDef = function( svg, defs ) {
+      var fillId = 'fill' + this.getId();
+      
+      // wipe away any old definition
+      var oldFillDef = svg.getElementById( fillId );
+      if ( oldFillDef ) {
+        defs.removeChild( oldFillDef );
+      }
+    };
+    
+    // on mutation, set the fill parameter first
+    proto._mutatorKeys = [ 'fill' ].concat( proto._mutatorKeys );
+    
+    Object.defineProperty( proto, 'fill', { set: proto.setFill, get: proto.getFill } );
+    
+    if ( !proto.invalidateFill ) {
+      proto.invalidateFill = function() {
+        // override if fill handling is necessary (TODO: mixins!)
+      };
+    }
+  };
+  var Fillable = scenery.Fillable;
+  
+  return Fillable;
+} );
+
+
+
+// Copyright 2002-2012, University of Colorado
+
+/**
+ * Mix-in for nodes that support a standard stroke.
+ *
+ * TODO: miterLimit handling
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define('SCENERY/nodes/Strokable',['require','ASSERT/assert','SCENERY/scenery','KITE/util/LineStyles'], function( require ) {
+  
+  
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
+  var scenery = require( 'SCENERY/scenery' );
+  var LineStyles = require( 'KITE/util/LineStyles' );
+  
+  scenery.Strokable = function( type ) {
+    var proto = type.prototype;
+    
+    // this should be called in the constructor to initialize
+    proto.initializeStrokable = function() {
+      this._stroke = null;
+      this._lineDrawingStyles = new LineStyles();
+    };
+    
+    proto.hasStroke = function() {
+      return this._stroke !== null;
+    };
+    
+    // TODO: setting these properties looks like a good candidate for refactoring to lessen file size
+    proto.getLineWidth = function() {
+      return this._lineDrawingStyles.lineWidth;
+    };
+    
+    proto.setLineWidth = function( lineWidth ) {
+      if ( this.getLineWidth() !== lineWidth ) {
+        this.markOldSelfPaint(); // since the previous line width may have been wider
+        
+        this._lineDrawingStyles.lineWidth = lineWidth;
+        
+        this.invalidateStroke();
+      }
+      return this;
+    };
+    
+    proto.getLineCap = function() {
+      return this._lineDrawingStyles.lineCap;
+    };
+    
+    proto.setLineCap = function( lineCap ) {
+      if ( this._lineDrawingStyles.lineCap !== lineCap ) {
+        this.markOldSelfPaint();
+        
+        this._lineDrawingStyles.lineCap = lineCap;
+        
+        this.invalidateStroke();
+      }
+      return this;
+    };
+    
+    proto.getLineJoin = function() {
+      return this._lineDrawingStyles.lineJoin;
+    };
+    
+    proto.setLineJoin = function( lineJoin ) {
+      if ( this._lineDrawingStyles.lineJoin !== lineJoin ) {
+        this.markOldSelfPaint();
+        
+        this._lineDrawingStyles.lineJoin = lineJoin;
+        
+        this.invalidateStroke();
+      }
+      return this;
+    };
+    
+    proto.getLineDash = function() {
+      return this._lineDrawingStyles.lineDash;
+    };
+    
+    proto.setLineDash = function( lineDash ) {
+      if ( this._lineDrawingStyles.lineDash !== lineDash ) {
+        this.markOldSelfPaint();
+        
+        this._lineDrawingStyles.lineDash = lineDash;
+        
+        this.invalidateStroke();
+      }
+      return this;
+    };
+    
+    proto.getLineDashOffset = function() {
+      return this._lineDrawingStyles.lineDashOffset;
+    };
+    
+    proto.setLineDashOffset = function( lineDashOffset ) {
+      if ( this._lineDrawingStyles.lineDashOffset !== lineDashOffset ) {
+        this.markOldSelfPaint();
+        
+        this._lineDrawingStyles.lineDashOffset = lineDashOffset;
+        
+        this.invalidateStroke();
+      }
+      return this;
+    };
+    
+    proto.setLineStyles = function( lineStyles ) {
+      // TODO: since we have been using lineStyles as mutable for now, lack of change check is good here?
+      this.markOldSelfPaint();
+      
+      this._lineDrawingStyles = lineStyles;
+      this.invalidateStroke();
+      return this;
+    };
+    
+    proto.getLineStyles = function() {
+      return this._lineDrawingStyles;
+    };
+    
+    proto.getStroke = function() {
+      return this._stroke;
+    };
+    
+    proto.setStroke = function( stroke ) {
+      if ( this.getStroke() !== stroke ) {
+        // since this can actually change the bounds, we need to handle a few things differently than the fill
+        this.markOldSelfPaint();
+        
+        this._stroke = stroke;
+        this.invalidateStroke();
+      }
+      return this;
+    };
+    
+    proto.beforeCanvasStroke = function( layer ) {
+      // TODO: is there a better way of not calling so many things on each stroke?
+      layer.setStrokeStyle( this._stroke );
+      layer.setLineWidth( this.getLineWidth() );
+      layer.setLineCap( this.getLineCap() );
+      layer.setLineJoin( this.getLineJoin() );
+      layer.setLineDash( this.getLineDash() );
+      layer.setLineDashOffset( this.getLineDashOffset() );
+      if ( this._stroke.transformMatrix ) {
+        layer.context.save();
+        this._stroke.transformMatrix.canvasAppendTransform( layer.context );
+      }
+    };
+    
+    proto.afterCanvasStroke = function( layer ) {
+      if ( this._stroke.transformMatrix ) {
+        layer.context.restore();
+      }
+    };
+    
+    proto.getSVGStrokeStyle = function() {
+      // if the style has an SVG definition, use that with a URL reference to it
+      var style = 'stroke: ' + ( this._stroke ? ( this._stroke.getSVGDefinition ? 'url(#stroke' + this.getId() + ')' : this._stroke ) : 'none' ) + ';';
+      if ( this._stroke ) {
+        // TODO: don't include unnecessary directives?
+        style += 'stroke-width: ' + this.getLineWidth() + ';';
+        style += 'stroke-linecap: ' + this.getLineCap() + ';';
+        style += 'stroke-linejoin: ' + this.getLineJoin() + ';';
+        if ( this.getLineDash() ) {
+          style += 'stroke-dasharray: ' + this.getLineDash().join( ',' ) + ';';
+          style += 'stroke-dashoffset: ' + this.getLineDashOffset() + ';';
+        }
+      }
+      return style;
+    };
+    
+    proto.addSVGStrokeDef = function( svg, defs ) {
+      var stroke = this.getStroke();
+      var strokeId = 'stroke' + this.getId();
+      
+      // add new definitions if necessary
+      if ( stroke && stroke.getSVGDefinition ) {
+        defs.appendChild( stroke.getSVGDefinition( strokeId ) );
+      }
+    };
+    
+    proto.removeSVGStrokeDef = function( svg, defs ) {
+      var strokeId = 'stroke' + this.getId();
+      
+      // wipe away any old definition
+      var oldStrokeDef = svg.getElementById( strokeId );
+      if ( oldStrokeDef ) {
+        defs.removeChild( oldStrokeDef );
+      }
+    };
+    
+    // on mutation, set the stroke parameters first since they may affect the bounds (and thus later operations)
+    proto._mutatorKeys = [ 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'lineDash', 'lineDashOffset' ].concat( proto._mutatorKeys );
+    
+    // TODO: miterLimit support?
+    Object.defineProperty( proto, 'stroke', { set: proto.setStroke, get: proto.getStroke } );
+    Object.defineProperty( proto, 'lineWidth', { set: proto.setLineWidth, get: proto.getLineWidth } );
+    Object.defineProperty( proto, 'lineCap', { set: proto.setLineCap, get: proto.getLineCap } );
+    Object.defineProperty( proto, 'lineJoin', { set: proto.setLineJoin, get: proto.getLineJoin } );
+    Object.defineProperty( proto, 'lineDash', { set: proto.setLineDash, get: proto.getLineDash } );
+    Object.defineProperty( proto, 'lineDashOffset', { set: proto.setLineDashOffset, get: proto.getLineDashOffset } );
+    
+    if ( !proto.invalidateStroke ) {
+      proto.invalidateStroke = function() {
+        // override if stroke handling is necessary (TODO: mixins!)
+      };
+    }
+  };
+  var Strokable = scenery.Strokable;
+  
+  return Strokable;
+} );
+
+
+
+// Copyright 2002-2012, University of Colorado
+
+/**
+ * A Path draws a Shape with a specific type of fill and stroke.
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define('SCENERY/nodes/Path',['require','ASSERT/assert','PHET_CORE/inherit','SCENERY/scenery','SCENERY/nodes/Node','SCENERY/layers/Renderer','SCENERY/nodes/Fillable','SCENERY/nodes/Strokable','SCENERY/util/Util'], function( require ) {
+  
+  
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
+  var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
+  
+  var Node = require( 'SCENERY/nodes/Node' );
+  var Renderer = require( 'SCENERY/layers/Renderer' );
+  var fillable = require( 'SCENERY/nodes/Fillable' );
+  var strokable = require( 'SCENERY/nodes/Strokable' );
+  var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
+  
+  scenery.Path = function Path( options ) {
+    // TODO: consider directly passing in a shape object (or at least handling that case)
+    this._shape = null;
+    
+    // ensure we have a parameter object
+    options = options || {};
+    
+    this.initializeStrokable();
+    
+    Node.call( this, options );
+  };
+  var Path = scenery.Path;
+  
+  inherit( Path, Node, {
+    // sets the shape drawn, or null to remove the shape
+    setShape: function( shape ) {
+      if ( this._shape !== shape ) {
+        this._shape = shape;
+        this.invalidateShape();
+      }
+      return this;
+    },
+    
+    getShape: function() {
+      return this._shape;
+    },
+    
+    invalidateShape: function() {
+      this.markOldSelfPaint();
+      
+      if ( this.hasShape() ) {
+        this.invalidateSelf( this._shape.computeBounds( this._stroke ? this._lineDrawingStyles : null ) );
+        this.invalidatePaint();
+      }
+    },
+    
+    // hook stroke mixin changes to invalidation
+    invalidateStroke: function() {
+      this.invalidateShape();
+    },
+    
+    hasShape: function() {
+      return this._shape !== null;
+    },
+    
+    paintCanvas: function( state ) {
+      if ( this.hasShape() ) {
+        var layer = state.layer;
+        var context = layer.context;
+
+        // TODO: fill/stroke delay optimizations?
+        context.beginPath();
+        this._shape.writeToContext( context );
+
+        if ( this._fill ) {
+          this.beforeCanvasFill( layer ); // defined in Fillable
+          context.fill();
+          this.afterCanvasFill( layer ); // defined in Fillable
+        }
+        if ( this._stroke ) {
+          this.beforeCanvasStroke( layer ); // defined in Strokable
+          context.stroke();
+          this.afterCanvasStroke( layer ); // defined in Strokable
+        }
+      }
+    },
+    
+    paintWebGL: function( state ) {
+      throw new Error( 'Path.prototype.paintWebGL unimplemented' );
+    },
+    
+    // svg element, the <defs> block, and the associated group for this node's transform
+    createSVGFragment: function( svg, defs, group ) {
+      return document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+    },
+    
+    updateSVGFragment: function( path ) {
+      if ( this.hasShape() ) {
+        path.setAttribute( 'd', this._shape.getSVGPath() );
+      } else if ( path.hasAttribute( 'd' ) ) {
+        path.removeAttribute( 'd' );
+      }
+      
+      path.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
+    },
+    
+    // support patterns, gradients, and anything else we need to put in the <defs> block
+    updateSVGDefs: function( svg, defs ) {
+      // remove old definitions if they exist
+      this.removeSVGDefs( svg, defs );
+      
+      // add new ones if applicable
+      this.addSVGFillDef( svg, defs );
+      this.addSVGStrokeDef( svg, defs );
+    },
+    
+    // cleans up references created with udpateSVGDefs()
+    removeSVGDefs: function( svg, defs ) {
+      this.removeSVGFillDef( svg, defs );
+      this.removeSVGStrokeDef( svg, defs );
+    },
+    
+    hasSelf: function() {
+      return true;
+    },
+    
+    // override for computation of whether a point is inside the self content
+    // point is considered to be in the local coordinate frame
+    containsPointSelf: function( point ) {
+      if ( !this.hasShape() ) {
+        return false;
+      }
+      
+      var result = this._shape.containsPoint( point );
+      
+      // also include the stroked region in the hit area if applicable
+      if ( !result && this._includeStrokeInHitRegion && this.hasStroke() ) {
+        result = this._shape.getStrokedShape( this._lineDrawingStyles ).containsPoint( point );
+      }
+      return result;
+    },
+    
+    // whether this node's self intersects the specified bounds, in the local coordinate frame
+    intersectsBoundsSelf: function( bounds ) {
+      // TODO: should a shape's stroke be included?
+      return this.hasShape() ? this._shape.intersectsBounds( bounds ) : false;
+    },
+    
+    set shape( value ) { this.setShape( value ); },
+    get shape() { return this.getShape(); }
+  } );
+  
+  Path.prototype._mutatorKeys = [ 'shape' ].concat( Node.prototype._mutatorKeys );
+  
+  Path.prototype._supportedRenderers = [ Renderer.Canvas, Renderer.SVG ];
+  
+  // mix in fill/stroke handling code. for now, this is done after 'shape' is added to the mutatorKeys so that stroke parameters
+  // get set first
+  fillable( Path );
+  strokable( Path );
+  
+  return Path;
+} );
+
+
+
+// Copyright 2002-2012, University of Colorado
+
+/**
+ * A circular node that inherits Path, and allows for optimized drawing,
+ * and improved parameter handling.
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define('SCENERY/nodes/Circle',['require','ASSERT/assert','PHET_CORE/inherit','SCENERY/scenery','SCENERY/nodes/Path','KITE/Shape'], function( require ) {
+  
+  
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
+  var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
+  
+  var Path = require( 'SCENERY/nodes/Path' );
+  var Shape = require( 'KITE/Shape' );
+  
+  scenery.Circle = function Circle( x, y, radius, options ) {
+    this._circleX = x;
+    this._circleY = y;
+    this._circleRadius = radius;
+    
+    // ensure we have a parameter object
+    options = options || {};
+    
+    // fallback for non-canvas or non-svg rendering, and for proper bounds computation
+    options.shape = Shape.circle( x, y, radius );
+    
+    Path.call( this, options );
+  };
+  var Circle = scenery.Circle;
+  
+  inherit( Circle, Path, {
+    invalidateCircle: function() {
+      // setShape should invalidate the path and ensure a redraw
+      this.setShape( Shape.circle( this._circleX, this._circleY, this._circleRadius ) );
+    },
+    
+    // create a circle instead of a path, hopefully it is faster in implementations
+    createSVGFragment: function( svg, defs, group ) {
+      return document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
+    },
+    
+    // optimized for the circle element instead of path
+    updateSVGFragment: function( circle ) {
+      circle.setAttribute( 'cx', this._circleX );
+      circle.setAttribute( 'cy', this._circleY );
+      circle.setAttribute( 'r', this._circleRadius );
+      
+      circle.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
+    }
+  } );
+  
+  // TODO: refactor our this common type of code for Path subtypes
+  function addCircleProp( capitalizedShort ) {
+    var getName = 'getCircle' + capitalizedShort;
+    var setName = 'setCircle' + capitalizedShort;
+    var privateName = '_circle' + capitalizedShort;
+    
+    Circle.prototype[getName] = function() {
+      return this[privateName];
+    };
+    
+    Circle.prototype[setName] = function( value ) {
+      this[privateName] = value;
+      this.invalidateCircle();
+      return this;
+    };
+    
+    Object.defineProperty( Circle.prototype, 'circle' + capitalizedShort, {
+      set: Circle.prototype[setName],
+      get: Circle.prototype[getName]
+    } );
+  }
+  
+  addCircleProp( 'X' );
+  addCircleProp( 'Y' );
+  addCircleProp( 'Radius' );
+  
+  // not adding mutators for now
+  // Circle.prototype._mutatorKeys = [  ].concat( Path.prototype._mutatorKeys );
+  
+  return Circle;
+} );
+
+// Copyright 2002-2012, University of Colorado
+
+/**
  * DOM nodes. Currently lightweight handling
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
@@ -11969,67 +12553,6 @@ define('SCENERY/nodes/DOM',['require','ASSERT/assert','PHET_CORE/inherit','DOT/B
   DOM.prototype._supportedRenderers = [ Renderer.DOM ];
   
   return DOM;
-} );
-
-
-
-// Copyright 2002-2012, University of Colorado
-
-/**
- * Mix-in for nodes that support a standard fill.
- *
- * TODO: pattern and gradient handling
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define('SCENERY/nodes/Fillable',['require','ASSERT/assert','SCENERY/scenery'], function( require ) {
-  
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-  
-  var scenery = require( 'SCENERY/scenery' );
-  
-  scenery.Fillable = function( type ) {
-    var proto = type.prototype;
-    
-    // this should be called in the constructor to initialize
-    proto.initializeFillable = function() {
-      this._fill = null;
-    };
-    
-    proto.hasFill = function() {
-      return this._fill !== null;
-    };
-    
-    proto.getFill = function() {
-      return this._fill;
-    };
-    
-    proto.setFill = function( fill ) {
-      if ( this.getFill() !== fill ) {
-        this._fill = fill;
-        this.invalidatePaint();
-        
-        this.invalidateFill();
-      }
-      return this;
-    };
-    
-    // on mutation, set the fill parameter first
-    proto._mutatorKeys = [ 'fill' ].concat( proto._mutatorKeys );
-    
-    Object.defineProperty( proto, 'fill', { set: proto.setFill, get: proto.getFill } );
-    
-    if ( !proto.invalidateFill ) {
-      proto.invalidateFill = function() {
-        // override if fill handling is necessary (TODO: mixins!)
-      };
-    }
-  };
-  var Fillable = scenery.Fillable;
-  
-  return Fillable;
 } );
 
 
@@ -12333,154 +12856,13 @@ define('SCENERY/nodes/Image',['require','ASSERT/assert','PHET_CORE/inherit','DOT
 // Copyright 2002-2012, University of Colorado
 
 /**
- * Mix-in for nodes that support a standard stroke.
- *
- * TODO: miterLimit handling
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define('SCENERY/nodes/Strokable',['require','ASSERT/assert','SCENERY/scenery','KITE/util/LineStyles'], function( require ) {
-  
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-  
-  var scenery = require( 'SCENERY/scenery' );
-  var LineStyles = require( 'KITE/util/LineStyles' );
-  
-  scenery.Strokable = function( type ) {
-    var proto = type.prototype;
-    
-    // this should be called in the constructor to initialize
-    proto.initializeStrokable = function() {
-      this._stroke = null;
-      this._lineDrawingStyles = new LineStyles();
-    };
-    
-    proto.hasStroke = function() {
-      return this._stroke !== null;
-    };
-    
-    proto.getLineWidth = function() {
-      return this._lineDrawingStyles.lineWidth;
-    };
-    
-    proto.setLineWidth = function( lineWidth ) {
-      if ( this.getLineWidth() !== lineWidth ) {
-        this.markOldSelfPaint(); // since the previous line width may have been wider
-        
-        this._lineDrawingStyles.lineWidth = lineWidth;
-        
-        this.invalidateStroke();
-      }
-      return this;
-    };
-    
-    proto.getLineCap = function() {
-      return this._lineDrawingStyles.lineCap;
-    };
-    
-    proto.setLineCap = function( lineCap ) {
-      if ( this._lineDrawingStyles.lineCap !== lineCap ) {
-        this.markOldSelfPaint();
-        
-        this._lineDrawingStyles.lineCap = lineCap;
-        
-        this.invalidateStroke();
-      }
-      return this;
-    };
-    
-    proto.getLineJoin = function() {
-      return this._lineDrawingStyles.lineJoin;
-    };
-    
-    proto.setLineJoin = function( lineJoin ) {
-      if ( this._lineDrawingStyles.lineJoin !== lineJoin ) {
-        this.markOldSelfPaint();
-        
-        this._lineDrawingStyles.lineJoin = lineJoin;
-        
-        this.invalidateStroke();
-      }
-      return this;
-    };
-    
-    proto.getLineDash = function() {
-      return this._lineDrawingStyles.lineDash;
-    };
-    
-    proto.setLineDash = function( lineDash ) {
-      if ( this._lineDrawingStyles.lineDash !== lineDash ) {
-        this.markOldSelfPaint();
-        
-        this._lineDrawingStyles.lineDash = lineDash;
-        
-        this.invalidateStroke();
-      }
-      return this;
-    };
-    
-    proto.setLineStyles = function( lineStyles ) {
-      // TODO: since we have been using lineStyles as mutable for now, lack of change check is good here?
-      this.markOldSelfPaint();
-      
-      this._lineDrawingStyles = lineStyles;
-      this.invalidateStroke();
-      return this;
-    };
-    
-    proto.getLineStyles = function() {
-      return this._lineDrawingStyles;
-    };
-    
-    proto.getStroke = function() {
-      return this._stroke;
-    };
-    
-    proto.setStroke = function( stroke ) {
-      if ( this.getStroke() !== stroke ) {
-        // since this can actually change the bounds, we need to handle a few things differently than the fill
-        this.markOldSelfPaint();
-        
-        this._stroke = stroke;
-        this.invalidateStroke();
-      }
-      return this;
-    };
-    
-    // on mutation, set the stroke parameters first since they may affect the bounds (and thus later operations)
-    proto._mutatorKeys = [ 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'lineDash' ].concat( proto._mutatorKeys );
-    
-    // TODO: miterLimit support?
-    Object.defineProperty( proto, 'stroke', { set: proto.setStroke, get: proto.getStroke } );
-    Object.defineProperty( proto, 'lineWidth', { set: proto.setLineWidth, get: proto.getLineWidth } );
-    Object.defineProperty( proto, 'lineCap', { set: proto.setLineCap, get: proto.getLineCap } );
-    Object.defineProperty( proto, 'lineJoin', { set: proto.setLineJoin, get: proto.getLineJoin } );
-    Object.defineProperty( proto, 'lineDash', { set: proto.setLineDash, get: proto.getLineDash } );
-    
-    if ( !proto.invalidateStroke ) {
-      proto.invalidateStroke = function() {
-        // override if stroke handling is necessary (TODO: mixins!)
-      };
-    }
-  };
-  var Strokable = scenery.Strokable;
-  
-  return Strokable;
-} );
-
-
-
-// Copyright 2002-2012, University of Colorado
-
-/**
- * A Path draws a Shape with a specific type of fill and stroke.
+ * A rectangular node that inherits Path, and allows for optimized drawing,
+ * and improved rectangle handling.
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define('SCENERY/nodes/Path',['require','ASSERT/assert','PHET_CORE/inherit','SCENERY/scenery','SCENERY/nodes/Node','SCENERY/layers/Renderer','SCENERY/nodes/Fillable','SCENERY/nodes/Strokable','SCENERY/util/Util'], function( require ) {
+define('SCENERY/nodes/Rectangle',['require','ASSERT/assert','PHET_CORE/inherit','SCENERY/scenery','SCENERY/nodes/Path','KITE/Shape'], function( require ) {
   
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
@@ -12488,198 +12870,96 @@ define('SCENERY/nodes/Path',['require','ASSERT/assert','PHET_CORE/inherit','SCEN
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   
-  var Node = require( 'SCENERY/nodes/Node' );
-  var Renderer = require( 'SCENERY/layers/Renderer' );
-  var fillable = require( 'SCENERY/nodes/Fillable' );
-  var strokable = require( 'SCENERY/nodes/Strokable' );
-  var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
+  var Path = require( 'SCENERY/nodes/Path' );
+  var Shape = require( 'KITE/Shape' );
   
-  scenery.Path = function Path( options ) {
-    // TODO: consider directly passing in a shape object (or at least handling that case)
-    this._shape = null;
+  scenery.Rectangle = function Rectangle( x, y, width, height, options ) {
+    this._rectX = x;
+    this._rectY = y;
+    this._rectWidth = width;
+    this._rectHeight = height;
     
     // ensure we have a parameter object
     options = options || {};
     
-    this.initializeStrokable();
+    // fallback for non-canvas or non-svg rendering, and for proper bounds computation
+    options.shape = Shape.rectangle( x, y, width, height );
     
-    Node.call( this, options );
+    Path.call( this, options );
   };
-  var Path = scenery.Path;
+  var Rectangle = scenery.Rectangle;
   
-  inherit( Path, Node, {
-    // sets the shape drawn, or null to remove the shape
-    setShape: function( shape ) {
-      if ( this._shape !== shape ) {
-        this._shape = shape;
-        this.invalidateShape();
-      }
-      return this;
+  inherit( Rectangle, Path, {
+    invalidateRectangle: function() {
+      // setShape should invalidate the path and ensure a redraw
+      this.setShape( Shape.rectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight ) );
     },
     
-    getShape: function() {
-      return this._shape;
-    },
-    
-    invalidateShape: function() {
-      this.markOldSelfPaint();
-      
-      if ( this.hasShape() ) {
-        this.invalidateSelf( this._shape.computeBounds( this._stroke ? this._lineDrawingStyles : null ) );
-        this.invalidatePaint();
-      }
-    },
-    
-    // hook stroke mixin changes to invalidation
-    invalidateStroke: function() {
-      this.invalidateShape();
-    },
-    
-    hasShape: function() {
-      return this._shape !== null;
-    },
-    
-    // TODO: change from state to layer?
+    // override paintCanvas with a faster version, since fillRect and drawRect don't affect the current default path
     paintCanvas: function( state ) {
-      if ( this.hasShape() ) {
-        var layer = state.layer;
-        var context = layer.context;
+      var layer = state.layer;
+      var context = layer.context;
 
-        // TODO: fill/stroke delay optimizations?
-        context.beginPath();
-        this._shape.writeToContext( context );
-
-        if ( this._fill ) {
-          layer.setFillStyle( this._fill );
-          if ( this._fill.transformMatrix ) {
-            context.save();
-            this._fill.transformMatrix.canvasAppendTransform( context );
-          }
-          context.fill();
-          if ( this._fill.transformMatrix ) {
-            context.restore();
-          }
-        }
-        if ( this._stroke ) {
-          layer.setStrokeStyle( this._stroke );
-          layer.setLineWidth( this.getLineWidth() );
-          layer.setLineCap( this.getLineCap() );
-          layer.setLineJoin( this.getLineJoin() );
-          layer.setLineDash( this.getLineDash() );
-          context.stroke();
-        }
+      // TODO: how to handle fill/stroke delay optimizations here?
+      if ( this._fill ) {
+        this.beforeCanvasFill( layer ); // defined in Fillable
+        context.fillRect( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
+        this.afterCanvasFill( layer ); // defined in Fillable
       }
-    },
-    
-    paintWebGL: function( state ) {
-      throw new Error( 'Path.prototype.paintWebGL unimplemented' );
-    },
-    
-    // svg element, the <defs> block, and the associated group for this node's transform
-    createSVGFragment: function( svg, defs, group ) {
-      return document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
-    },
-    
-    // TODO: this should be used!
-    updateSVGFragment: function( path ) {
-      if ( this.hasShape() ) {
-        path.setAttribute( 'd', this._shape.getSVGPath() );
-      } else if ( path.hasAttribute( 'd' ) ) {
-        path.removeAttribute( 'd' );
-      }
-      
-      var style = '';
-      // if the fill / style has an SVG definition, use that with a URL reference to it
-      // TODO: share these in fillable / strokable, due to the duplication with Text
-      style += 'fill: ' + ( this._fill ? ( this._fill.getSVGDefinition ? 'url(#fill' + this.getId() + ')' : this._fill ) : 'none' ) + ';';
-      style += 'stroke: ' + ( this._stroke ? ( this._stroke.getSVGDefinition ? 'url(#stroke' + this.getId() + ')' : this._stroke ) : 'none' ) + ';';
       if ( this._stroke ) {
-        // TODO: don't include unnecessary directives?
-        style += 'stroke-width: ' + this.getLineWidth() + ';';
-        style += 'stroke-linecap: ' + this.getLineCap() + ';';
-        style += 'stroke-linejoin: ' + this.getLineJoin() + ';';
-        if ( this.getLineDash() ) {
-          style += 'stroke-dasharray: ' + this.getLineDash().join( ',' ) + ';';
-        }
+        this.beforeCanvasStroke( layer ); // defined in Strokable
+        context.strokeRect( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
+        this.afterCanvasStroke( layer ); // defined in Strokable
       }
-      path.setAttribute( 'style', style );
     },
     
-    // support patterns, gradients, and anything else we need to put in the <defs> block
-    updateSVGDefs: function( svg, defs ) {
-      var stroke = this.getStroke();
-      var fill = this.getFill();
-      var strokeId = 'stroke' + this.getId();
-      var fillId = 'fill' + this.getId();
+    // create a rect instead of a path, hopefully it is faster in implementations
+    createSVGFragment: function( svg, defs, group ) {
+      return document.createElementNS( 'http://www.w3.org/2000/svg', 'rect' );
+    },
+    
+    // optimized for the rect element instead of path
+    updateSVGFragment: function( rect ) {
+      rect.setAttribute( 'x', this._rectX );
+      rect.setAttribute( 'y', this._rectY );
+      rect.setAttribute( 'width', this._rectWidth );
+      rect.setAttribute( 'height', this._rectHeight );
       
-      // remove old definitions if they exist
-      this.removeSVGDefs( svg, defs );
-      
-      // add new definitions if necessary
-      if ( stroke && stroke.getSVGDefinition ) {
-        defs.appendChild( stroke.getSVGDefinition( strokeId ) );
-      }
-      if ( fill && fill.getSVGDefinition ) {
-        defs.appendChild( fill.getSVGDefinition( fillId ) );
-      }
-    },
+      rect.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
+    }
     
-    // cleans up references created with udpateSVGDefs()
-    removeSVGDefs: function( svg, defs ) {
-      var strokeId = 'stroke' + this.getId();
-      var fillId = 'fill' + this.getId();
-      
-      // wipe away any old fill/stroke definitions
-      var oldStrokeDef = svg.getElementById( strokeId );
-      var oldFillDef = svg.getElementById( fillId );
-      if ( oldStrokeDef ) {
-        defs.removeChild( oldStrokeDef );
-      }
-      if ( oldFillDef ) {
-        defs.removeChild( oldFillDef );
-      }
-    },
-    
-    hasSelf: function() {
-      return true;
-    },
-    
-    // override for computation of whether a point is inside the self content
-    // point is considered to be in the local coordinate frame
-    containsPointSelf: function( point ) {
-      if ( !this.hasShape() ) {
-        return false;
-      }
-      
-      var result = this._shape.containsPoint( point );
-      
-      // also include the stroked region in the hit area if applicable
-      if ( !result && this._includeStrokeInHitRegion && this.hasStroke() ) {
-        result = this._shape.getStrokedShape( this._lineDrawingStyles ).containsPoint( point );
-      }
-      return result;
-    },
-    
-    // whether this node's self intersects the specified bounds, in the local coordinate frame
-    intersectsBoundsSelf: function( bounds ) {
-      // TODO: should a shape's stroke be included?
-      return this.hasShape() ? this._shape.intersectsBounds( bounds ) : false;
-    },
-    
-    set shape( value ) { this.setShape( value ); },
-    get shape() { return this.getShape(); }
   } );
   
-  Path.prototype._mutatorKeys = [ 'shape' ].concat( Node.prototype._mutatorKeys );
+  function addRectProp( capitalizedShort ) {
+    var getName = 'getRect' + capitalizedShort;
+    var setName = 'setRect' + capitalizedShort;
+    var privateName = '_rect' + capitalizedShort;
+    
+    Rectangle.prototype[getName] = function() {
+      return this[privateName];
+    };
+    
+    Rectangle.prototype[setName] = function( value ) {
+      this[privateName] = value;
+      this.invalidateRectangle();
+      return this;
+    };
+    
+    Object.defineProperty( Rectangle.prototype, 'rect' + capitalizedShort, {
+      set: Rectangle.prototype[setName],
+      get: Rectangle.prototype[getName]
+    } );
+  }
   
-  Path.prototype._supportedRenderers = [ Renderer.Canvas, Renderer.SVG ];
+  addRectProp( 'X' );
+  addRectProp( 'Y' );
+  addRectProp( 'Width' );
+  addRectProp( 'Height' );
   
-  // mix in fill/stroke handling code. for now, this is done after 'shape' is added to the mutatorKeys so that stroke parameters
-  // get set first
-  fillable( Path );
-  strokable( Path );
+  // not adding mutators for now
+  // Rectangle.prototype._mutatorKeys = [  ].concat( Path.prototype._mutatorKeys );
   
-  return Path;
+  return Rectangle;
 } );
 
 
@@ -12902,11 +13182,11 @@ define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/
       this.invalidateSelf( this.accurateCanvasBounds() );
     },
 
-    // TODO: add SVG / DOM support
     paintCanvas: function( state ) {
       var layer = state.layer;
       var context = layer.context;
       
+      // extra parameters we need to set, but should avoid setting if we aren't drawing anything
       if ( this.hasFill() || this.hasStroke() ) {
         layer.setFont( this._font.getFont() );
         layer.setTextAlign( this._textAlign );
@@ -12915,23 +13195,14 @@ define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/
       }
       
       if ( this.hasFill() ) {
-        layer.setFillStyle( this._fill );
-        if ( this._fill.transformMatrix ) {
-          context.save();
-          this._fill.transformMatrix.canvasAppendTransform( context );
-        }
+        this.beforeCanvasFill( layer ); // defined in Fillable
         context.fillText( this._text, 0, 0 );
-        if ( this._fill.transformMatrix ) {
-          context.restore();
-        }
+        this.afterCanvasFill( layer ); // defined in Fillable
       }
       if ( this.hasStroke() ) {
-        layer.setStrokeStyle( this.getStroke() );
-        layer.setLineWidth( this.getLineWidth() );
-        layer.setLineCap( this.getLineCap() );
-        layer.setLineJoin( this.getLineJoin() );
-        layer.setLineDash( this.getLineDash() );
+        this.beforeCanvasStroke( layer ); // defined in Strokable
         context.strokeText( this._text, 0, 0 );
+        this.afterCanvasStroke( layer ); // defined in Strokable
       }
     },
     
@@ -12952,23 +13223,7 @@ define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/
       }
       element.appendChild( document.createTextNode( this._text ) );
       
-      var style = '';
-      // TODO: share this in fillable? duplication with Path
-      style += 'fill: ' + ( this._fill ? ( this._fill.getSVGDefinition ? 'url(#fill' + this.getId() + ')' : this._fill ) : 'none' ) + ';';
-      style += 'stroke: ' + ( this._stroke ? ( this._stroke.getSVGDefinition ? 'url(#stroke' + this.getId() + ')' : this._stroke ) : 'none' ) + ';';
-      // TODO: share this in strokable? duplication with Path
-      if ( this._stroke ) {
-        // TODO: don't include unnecessary directives?
-        style += 'stroke-width: ' + this.getLineWidth() + ';';
-        style += 'stroke-linecap: ' + this.getLineCap() + ';';
-        style += 'stroke-linejoin: ' + this.getLineJoin() + ';';
-        if ( this.getLineDash() ) {
-          style += 'stroke-dasharray: ' + this.getLineDash().join( ',' ) + ';';
-        }
-      }
-      element.setAttribute( 'style', style );
-      // element.setAttribute( 'fill', this.hasFill() ? this.getFill() : 'none' );
-      // element.setAttribute( 'stroke', this.hasStroke() ? this.getStroke() : 'none' );
+      element.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
       
       switch ( this._textAlign ) {
         case 'start':
@@ -13002,41 +13257,20 @@ define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/
       }
     },
     
-    // TODO: remove duplication with Path! And separate out Stroke from Fill
     // support patterns, gradients, and anything else we need to put in the <defs> block
     updateSVGDefs: function( svg, defs ) {
-      var stroke = this.getStroke();
-      var fill = this.getFill();
-      var strokeId = 'stroke' + this.getId();
-      var fillId = 'fill' + this.getId();
-      
       // remove old definitions if they exist
       this.removeSVGDefs( svg, defs );
       
-      // add new definitions if necessary
-      if ( stroke && stroke.getSVGDefinition ) {
-        defs.appendChild( stroke.getSVGDefinition( strokeId ) );
-      }
-      if ( fill && fill.getSVGDefinition ) {
-        defs.appendChild( fill.getSVGDefinition( fillId ) );
-      }
+      // add new ones if applicable
+      this.addSVGFillDef( svg, defs );
+      this.addSVGStrokeDef( svg, defs );
     },
     
-    // TODO: remove duplication with Path! And separate out Stroke from Fill
     // cleans up references created with udpateSVGDefs()
     removeSVGDefs: function( svg, defs ) {
-      var strokeId = 'stroke' + this.getId();
-      var fillId = 'fill' + this.getId();
-      
-      // wipe away any old fill/stroke definitions
-      var oldStrokeDef = svg.getElementById( strokeId );
-      var oldFillDef = svg.getElementById( fillId );
-      if ( oldStrokeDef ) {
-        defs.removeChild( oldStrokeDef );
-      }
-      if ( oldFillDef ) {
-        defs.removeChild( oldFillDef );
-      }
+      this.removeSVGFillDef( svg, defs );
+      this.removeSVGStrokeDef( svg, defs );
     },
     
     /*---------------------------------------------------------------------------*
@@ -15284,12 +15518,14 @@ define('main', [
     'SCENERY/layers/Renderer',
     'SCENERY/layers/SVGLayer',
     
+    'SCENERY/nodes/Circle',
     'SCENERY/nodes/DOM',
     'SCENERY/nodes/Fillable',
     'SCENERY/nodes/HBox',
     'SCENERY/nodes/Image',
     'SCENERY/nodes/Node',
     'SCENERY/nodes/Path',
+    'SCENERY/nodes/Rectangle',
     'SCENERY/nodes/Strokable',
     'SCENERY/nodes/Text',
     'SCENERY/nodes/VBox',
