@@ -232,6 +232,7 @@ define( function( require ) {
       this.lineCap = 'butt'; // default 'butt';
       this.lineJoin = 'miter';
       this.lineDash = null;
+      this.lineDashOffset = 0;
       this.miterLimit = 10;
       
       this.font = '10px sans-serif';
@@ -324,6 +325,13 @@ define( function( require ) {
         } else {
           // unsupported line dash! do... nothing?
         }
+      }
+    },
+    
+    setLineDashOffset: function( lineDashOffset ) {
+      if ( this.lineDashOffset !== lineDashOffset ) {
+        this.lineDashOffset = lineDashOffset;
+        this.context.lineDashOffset = lineDashOffset;
       }
     },
     

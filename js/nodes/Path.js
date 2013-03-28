@@ -65,7 +65,6 @@ define( function( require ) {
       return this._shape !== null;
     },
     
-    // TODO: change from state to layer?
     paintCanvas: function( state ) {
       if ( this.hasShape() ) {
         var layer = state.layer;
@@ -76,23 +75,14 @@ define( function( require ) {
         this._shape.writeToContext( context );
 
         if ( this._fill ) {
-          layer.setFillStyle( this._fill );
-          if ( this._fill.transformMatrix ) {
-            context.save();
-            this._fill.transformMatrix.canvasAppendTransform( context );
-          }
+          this.beforeCanvasFill( layer ); // defined in Fillable
           context.fill();
-          if ( this._fill.transformMatrix ) {
-            context.restore();
-          }
+          this.afterCanvasFill( layer ); // defined in Fillable
         }
         if ( this._stroke ) {
-          layer.setStrokeStyle( this._stroke );
-          layer.setLineWidth( this.getLineWidth() );
-          layer.setLineCap( this.getLineCap() );
-          layer.setLineJoin( this.getLineJoin() );
-          layer.setLineDash( this.getLineDash() );
+          this.beforeCanvasStroke( layer ); // defined in Strokable
           context.stroke();
+          this.afterCanvasStroke( layer ); // defined in Strokable
         }
       }
     },
@@ -106,7 +96,6 @@ define( function( require ) {
       return document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
     },
     
-    // TODO: this should be used!
     updateSVGFragment: function( path ) {
       if ( this.hasShape() ) {
         path.setAttribute( 'd', this._shape.getSVGPath() );
@@ -114,55 +103,23 @@ define( function( require ) {
         path.removeAttribute( 'd' );
       }
       
-      var style = '';
-      // if the fill / style has an SVG definition, use that with a URL reference to it
-      style += 'fill: ' + ( this._fill ? ( this._fill.getSVGDefinition ? 'url(#fill' + this.getId() + ')' : this._fill ) : 'none' ) + ';';
-      style += 'stroke: ' + ( this._stroke ? ( this._stroke.getSVGDefinition ? 'url(#stroke' + this.getId() + ')' : this._stroke ) : 'none' ) + ';';
-      if ( this._stroke ) {
-        // TODO: don't include unnecessary directives?
-        style += 'stroke-width: ' + this.getLineWidth() + ';';
-        style += 'stroke-linecap: ' + this.getLineCap() + ';';
-        style += 'stroke-linejoin: ' + this.getLineJoin() + ';';
-        if ( this.getLineDash() ) {
-          style += 'stroke-dasharray: ' + this.getLineDash().join( ',' ) + ';';
-        }
-      }
-      path.setAttribute( 'style', style );
+      path.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
     },
     
     // support patterns, gradients, and anything else we need to put in the <defs> block
     updateSVGDefs: function( svg, defs ) {
-      var stroke = this.getStroke();
-      var fill = this.getFill();
-      var strokeId = 'stroke' + this.getId();
-      var fillId = 'fill' + this.getId();
-      
       // remove old definitions if they exist
       this.removeSVGDefs( svg, defs );
       
-      // add new definitions if necessary
-      if ( stroke && stroke.getSVGDefinition ) {
-        defs.appendChild( stroke.getSVGDefinition( strokeId ) );
-      }
-      if ( fill && fill.getSVGDefinition ) {
-        defs.appendChild( fill.getSVGDefinition( fillId ) );
-      }
+      // add new ones if applicable
+      this.addSVGFillDef( svg, defs );
+      this.addSVGStrokeDef( svg, defs );
     },
     
     // cleans up references created with udpateSVGDefs()
     removeSVGDefs: function( svg, defs ) {
-      var strokeId = 'stroke' + this.getId();
-      var fillId = 'fill' + this.getId();
-      
-      // wipe away any old fill/stroke definitions
-      var oldStrokeDef = svg.getElementById( strokeId );
-      var oldFillDef = svg.getElementById( fillId );
-      if ( oldStrokeDef ) {
-        defs.removeChild( oldStrokeDef );
-      }
-      if ( oldFillDef ) {
-        defs.removeChild( oldFillDef );
-      }
+      this.removeSVGFillDef( svg, defs );
+      this.removeSVGStrokeDef( svg, defs );
     },
     
     hasSelf: function() {

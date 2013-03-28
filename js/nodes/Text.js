@@ -26,6 +26,7 @@ define( function( require ) {
   var Node = require( 'SCENERY/nodes/Node' ); // inherits from Node
   var Renderer = require( 'SCENERY/layers/Renderer' );
   var fillable = require( 'SCENERY/nodes/Fillable' );
+  var strokable = require( 'SCENERY/nodes/Strokable' );
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate; // i.e. Object.create
   require( 'SCENERY/util/Font' );
   require( 'SCENERY/util/Util' ); // for canvasAccurateBounds
@@ -49,6 +50,9 @@ define( function( require ) {
       // set the text parameter so that setText( text ) is effectively called in the mutator from the super call
       options.text = text;
     }
+    
+    this.initializeStrokable();
+    
     Node.call( this, options );
   };
   var Text = scenery.Text;
@@ -72,18 +76,27 @@ define( function( require ) {
       this.invalidateSelf( this.accurateCanvasBounds() );
     },
 
-    // TODO: add SVG / DOM support
     paintCanvas: function( state ) {
       var layer = state.layer;
       var context = layer.context;
-      if ( this.hasFill() ) {
-        layer.setFillStyle( this.getFill() );
+      
+      // extra parameters we need to set, but should avoid setting if we aren't drawing anything
+      if ( this.hasFill() || this.hasStroke() ) {
         layer.setFont( this._font.getFont() );
         layer.setTextAlign( this._textAlign );
         layer.setTextBaseline( this._textBaseline );
         layer.setDirection( this._direction );
-
+      }
+      
+      if ( this.hasFill() ) {
+        this.beforeCanvasFill( layer ); // defined in Fillable
         context.fillText( this._text, 0, 0 );
+        this.afterCanvasFill( layer ); // defined in Fillable
+      }
+      if ( this.hasStroke() ) {
+        this.beforeCanvasStroke( layer ); // defined in Strokable
+        context.strokeText( this._text, 0, 0 );
+        this.afterCanvasStroke( layer ); // defined in Strokable
       }
     },
     
@@ -104,7 +117,7 @@ define( function( require ) {
       }
       element.appendChild( document.createTextNode( this._text ) );
       
-      element.setAttribute( 'fill', this._fill );
+      element.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
       
       switch ( this._textAlign ) {
         case 'start':
@@ -136,6 +149,22 @@ define( function( require ) {
       if ( this._font.getStretch() ) {
         element.setAttribute( 'font-stretch', this._font.getStretch() );
       }
+    },
+    
+    // support patterns, gradients, and anything else we need to put in the <defs> block
+    updateSVGDefs: function( svg, defs ) {
+      // remove old definitions if they exist
+      this.removeSVGDefs( svg, defs );
+      
+      // add new ones if applicable
+      this.addSVGFillDef( svg, defs );
+      this.addSVGStrokeDef( svg, defs );
+    },
+    
+    // cleans up references created with udpateSVGDefs()
+    removeSVGDefs: function( svg, defs ) {
+      this.removeSVGFillDef( svg, defs );
+      this.removeSVGStrokeDef( svg, defs );
     },
     
     /*---------------------------------------------------------------------------*
@@ -345,8 +374,9 @@ define( function( require ) {
   Object.defineProperty( Text.prototype, 'textBaseline', { set: Text.prototype.setTextBaseline, get: Text.prototype.getTextBaseline } );
   Object.defineProperty( Text.prototype, 'direction', { set: Text.prototype.setDirection, get: Text.prototype.getDirection } );
   
-  // mix in support for fills
+  // mix in support for fills and strokes
   fillable( Text );
+  strokable( Text );
 
   return Text;
 } );

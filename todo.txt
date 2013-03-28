@@ -1,22 +1,14 @@
 
 Layer refresh:
-    Create a way to inclusively iterate between two trails
-    Add a validateLayers() call that will throw errors on any noticed discrepancies
-    Bug on removal
     Handle matching
         * if a layer is changed, remove and add nodes - for pending trails, note layerLookup!
         * won't delete all 'between old' layers
             if ( !currentLayer && currentType === node.oldLayer.type && oldLayer not used ) { currentLayer = oldLayer, oldLayer.used = true }
     Conceptually verify edge cases
-    Leaving superfluous layers with add 1 remove 1 from scene
-    Layer startPointer/endPointer after adds and removals has null trail - is this what we want?
-    Concentration shows attempt to create TrailPointer with null trail
 
 Priorities:
-    Fix the Chrome "scrollbar" issue with DOM nodes + CSS transforms? Showing up in main doc page
     Layer Refresh
     Force non-canvas above 'interactive' DOM node
-    phet-core: LESS_THAN/EQUAL/GREATER_THAN enum, inheritance code, etc.
     Flag for skipping dirty region handling and other overhead?
     Beers law lab performance on shaker
     Mix-ins for drag handler?
@@ -24,12 +16,11 @@ Priorities:
         Same-arity methods?
         Less temporary objects?
     Line-dash offsets? check SVG support
-    Text stroke handling
+        Yes, see stroke-dashoffset for SVG, lineDashOffset for Canvas
     Add center: { x: 5, y: 10 } ?
     Documentation
     Font consider defensive copy in Text nodes?
     Add gradient/pattern invalidation?
-    Rounded rectangle using arc/ellipticalarc
 
 Bugs:
     DOM visible
@@ -290,7 +281,6 @@ Text:
     Investigate SVG's writing-mode for rtl/ltr handling (also direction and unicode-bidi)
     Handling multi-line strings
     WebGL / DOM options
-    Allow stroking of text.
 
 Scene:
     Acceleration of layer lookup

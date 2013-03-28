@@ -180,6 +180,7 @@
       <a class="sublink" href="#strokable-lineCap">lineCap</a><br>
       <a class="sublink" href="#strokable-lineJoin">lineJoin</a><br>
       <a class="sublink" href="#strokable-lineDash">lineDash</a><br>
+      <a class="sublink" href="#strokable-lineDashOffset">lineDashOffset</a><br>
       
       <a class="navlink" href="#path">Path</a><br>
       <a class="sublink" href="#path-shape">shape</a><br>
@@ -221,6 +222,17 @@
       <a class="sublink" href="#pattern-setTransformMatrix">setTransformMatrix</a><br>
       
       <a class="navlink" href="#vbox">VBox</a><br>
+      
+      <a class="navlink" href="#rectangle">Rectangle</a><br>
+      <a class="sublink" href="#rectangle-rectX">rectX</a><br>
+      <a class="sublink" href="#rectangle-rectY">rectY</a><br>
+      <a class="sublink" href="#rectangle-rectWidth">rectWidth</a><br>
+      <a class="sublink" href="#rectangle-rectHeight">rectHeight</a><br>
+      
+      <a class="navlink" href="#circle">Circle</a><br>
+      <a class="sublink" href="#circle-circleX">circleX</a><br>
+      <a class="sublink" href="#circle-circleY">circleY</a><br>
+      <a class="sublink" href="#circle-circleRadius">circleRadius</a><br>
       
     </div>
     <div class="span6">
@@ -851,6 +863,49 @@ scene.addChild( new scenery.Path( {
 } );
       </script>
       
+      <h4 id="strokable-lineDashOffset">lineDashOffset</h4>
+      <p>
+        <code>node.lineDashOffset</code> (<code>node.getLineDashOffset()</code>, <code>node.setLineDashOffset( lineDashOffset )</code>)
+        controls the how far the dash pattern in <a href="#strokable-lineDash">lineDash</a> is offset from the start,
+        same as the <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-linedashoffset">Canvas lineDashOffset</a>.
+      </p>
+      
+      <div id="example-lineDashOffset" class="exampleScene" style="width: 128px; height: 64px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-lineDashOffset', function( scene ) {
+scene.addChild( new scenery.Path( {
+  shape: new kite.Shape().moveTo( 0, 16.5 )
+                         .lineTo( 128, 16.5 )
+                         .moveTo( 0, 32.5 )
+                         .lineTo( 128, 32.5 )
+                         .moveTo( 0, 48.5 )
+                         .lineTo( 128, 48.5 ),
+  stroke: '#f00'
+} ) );
+/*START*/
+var shape = kite.Shape.lineSegment( 0, 0, 128, 0 );
+var args = {
+  shape: shape,
+  stroke: '#000',
+  lineWidth: 8,
+  lineDash: [ 20, 5 ]
+};
+scene.addChild( new scenery.Path( _.extend( {
+  y: 16.5,
+  lineDashOffset: 0
+}, args ) ) );
+scene.addChild( new scenery.Path( _.extend( {
+  y: 32.5,
+  lineDashOffset: 5
+}, args ) ) );
+scene.addChild( new scenery.Path( _.extend( {
+  y: 48.5,
+  lineDashOffset: 10
+}, args ) ) );
+/*END*/
+} );
+      </script>
+      
       <h3 id="path" class="section">Path</h3>
       <p>
         Path is a <a href="#node">Node</a> subtype that includes the <a href="#fillable">Fillable</a> and
@@ -914,9 +969,10 @@ scene.updateOnRequestAnimationFrame();
       <p>
         Text is a <a href="#node">Node</a> subtype that (currently) displays a single line of text
         in Canvas or SVG. DOM and multiline support is planned. It also mixes in
-        <a href="#fillable">Fillable</a>, so it should support fill colors, gradients and patterns.
-        The default fill is <code>'#000'</code>, so text is black by default.
-        Stroking support is planned.
+        <a href="#fillable">Fillable</a>, and <a href="#strokable">Strokable</a>,
+        so it should support fills and strokes with colors, gradients and patterns.
+        The default fill is <code>'#000'</code>, so text is black by default, with no stroke, so
+        to JUST stroke text, set fill to null.
       </p>
       <p>
         Text nodes are constructed with <code>new scenery.Text( text, [options] )</code>, where
@@ -938,7 +994,7 @@ scene.addChild( new scenery.Text( 'Some text', {
       <h4 id="text-options">Text Options</h4>
       <p>
         A <a href="#text">Text</a> node has the following parameter object options, in addition to
-        the ones from <a href="#fillable">Fillable</a>
+        the ones from <a href="#fillable">Fillable</a> and <a href="#strokable">Strokable</a>.
       </p>
       <ul>
         <li><a href="#text-text">text</a></li>
@@ -1050,8 +1106,8 @@ scene.addChild( new scenery.Text( 'Some text', {
       <script type="text/javascript">
 docExample( 'example-dom', function( scene ) {
 /*START*/
-var element = document.createElement( 'form' );
-element.innerHTML = '<label>Type in me:</label><input type="text">';
+var element = document.createElement( 'span' );
+element.innerHTML = '<label style="display: inline;">Type in me: </label><input type="text">';
 scene.addChild( new scenery.DOM( element, { x: 30, rotation: Math.PI / 6 } ) );
 /*END*/
 } );
@@ -1230,6 +1286,95 @@ loadedImg.src = 'http://phet.colorado.edu/images/phet-logo-yellow.png';
       
       <h3 id="vbox" class="section">VBox</h3>
       
+      <h3 id="rectangle" class="section">Rectangle</h3>
+      <p>
+        Rectangle is a subtype of <a href="#path">Path</a> that is more convenient to construct
+        and modify, and contains more optimized drawing routines for Canvas and SVG.
+      </p>
+      <p>
+        A Rectangle is created with <code>new scenery.Rectangle( x, y, width, height, [options] )</code>
+      </p>
+      <div id="example-rectangle" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-rectangle', function( scene ) {
+/*START*/
+scene.addChild( new scenery.Rectangle( 10, 10, 44, 44, {
+  fill: '#f00',
+} ) );
+var s = 44 / Math.sqrt( 2 );
+scene.addChild( new scenery.Rectangle( -s / 2, -s / 2, s, s, {
+  fill: '#0f0',
+  x: 32, y: 32,
+  rotation: Math.PI / 4
+} ) );
+/*END*/
+} );
+      </script>
+      
+      <h4 id="rectangle-rectX">rectX</h4>
+      <p>
+        <code>node.rectX</code> (<code>node.getRectX()</code>, <code>node.setRectX( x )</code>)
+        retrieves or modifies the 'x' parameter of the <a href="#rectangle">Rectangle</a>.
+      </p>
+      
+      <h4 id="rectangle-rectY">rectY</h4>
+      <p>
+        <code>node.rectY</code> (<code>node.getRectY()</code>, <code>node.setRectY( y )</code>)
+        retrieves or modifies the 'y' parameter of the <a href="#rectangle">Rectangle</a>.
+      </p>
+      
+      <h4 id="rectangle-rectWidth">rectWidth</h4>
+      <p>
+        <code>node.rectWidth</code> (<code>node.getRectWidth()</code>, <code>node.setRectWidth( width )</code>)
+        retrieves or modifies the 'width' parameter of the <a href="#rectangle">Rectangle</a>.
+      </p>
+      
+      <h4 id="rectangle-rectHeight">rectHeight</h4>
+      <p>
+        <code>node.rectHeight</code> (<code>node.getRectHeight()</code>, <code>node.setRectHeight( height )</code>)
+        retrieves or modifies the 'height' parameter of the <a href="#rectangle">Rectangle</a>.
+      </p>
+      
+      <h3 id="circle" class="section">Circle</h3>
+      <p>
+        Circle is a subtype of <a href="#path">Path</a> that is more convenient to construct
+        and modify, and contains more optimized drawing routines for SVG.
+      </p>
+      <p>
+        A Circle is created with <code>new scenery.Circle( x, y, radius, [options] )</code>, with a circle
+        centered at (x,y) with the specified radius.
+      </p>
+      <div id="example-circle" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-circle', function( scene ) {
+/*START*/
+scene.addChild( new scenery.Circle( 32, 32, 22, {
+  fill: '#f00'
+} ) );
+scene.addChild( new scenery.Circle( 43, 32, 11, {
+  fill: '#0f0'
+} ) );
+/*END*/
+} );
+      </script>
+      
+      <h4 id="circle-circleX">circleX</h4>
+      <p>
+        <code>node.circleX</code> (<code>node.getCircleX()</code>, <code>node.setCircleX( x )</code>)
+        retrieves or modifies the 'x' parameter of the <a href="#circle">Circle</a>.
+      </p>
+      
+      <h4 id="circle-circleY">circleY</h4>
+      <p>
+        <code>node.circleY</code> (<code>node.getCircleY()</code>, <code>node.setCircleY( y )</code>)
+        retrieves or modifies the 'y' parameter of the <a href="#circle">Circle</a>.
+      </p>
+      
+      <h4 id="circle-circleRadius">circleRadius</h4>
+      <p>
+        <code>node.circleRadius</code> (<code>node.getCircleRadius()</code>, <code>node.setCircleRadius( radius )</code>)
+        retrieves or modifies the 'radius' parameter of the <a href="#circle">Circle</a>.
+      </p>
       
     </div>
     <div class="span3"></div>

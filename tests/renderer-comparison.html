@@ -74,12 +74,21 @@
         width: 64,
         height: 64,
         draw: function( scene ) {
-          scene.addChild( new scenery.Path( {
-            shape: kite.Shape.rectangle( 0, 0, 44, 44 ),
-            x: 10.5,
-            y: 10.5,
-            fill: '#ff0000',
-            stroke: '#000000',
+          scene.addChild( new scenery.Rectangle( 10.5, 10.5, 44, 44, {
+            fill: '#f00',
+            stroke: '#000',
+            lineWidth: 3
+          } ) );
+        },
+        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+      },{
+        name: 'Circle',
+        width: 64,
+        height: 64,
+        draw: function( scene ) {
+          scene.addChild( new scenery.Circle( 32, 32, 22, {
+            fill: '#f00',
+            stroke: '#000',
             lineWidth: 3
           } ) );
         },
@@ -243,6 +252,7 @@
             shape: kite.Shape.regularPolygon( 6, 15 ),
             stroke: '#000',
             lineDash: [5,5],
+            lineDashOffset: 5,
             x: 32.5,
             y: 32.5
           } ) );
@@ -376,7 +386,26 @@
           scene.addChild( new scenery.Text( 'Is this a test?', {
             fontSize: 60,
             top: 1.5,
-            left: 1.5
+            left: 1.5,
+            fill: '#606'
+          } ) );
+          scene.addChild( new scenery.Text( 'Aa', {
+            fontSize: 100,
+            centerX: 64,
+            centerY: 64,
+            fill: null,
+            stroke: '#000'
+          } ) );
+          scene.addChild( new scenery.Text( 'Bb', {
+            fontSize: 100,
+            centerX: 64+128,
+            centerY: 64,
+            fill: new scenery.LinearGradient( 0, 0, 0, -40 )
+                             .addColorStop( 0, '#f00' )
+                             .addColorStop( 1, '#0f0' ),
+            stroke: '#777',
+            lineWidth: 3,
+            lineJoin: 'round'
           } ) );
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
