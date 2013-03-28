@@ -76,11 +76,11 @@ define( function( require ) {
       this.invalidateSelf( this.accurateCanvasBounds() );
     },
 
-    // TODO: add SVG / DOM support
     paintCanvas: function( state ) {
       var layer = state.layer;
       var context = layer.context;
       
+      // extra parameters we need to set, but should avoid setting if we aren't drawing anything
       if ( this.hasFill() || this.hasStroke() ) {
         layer.setFont( this._font.getFont() );
         layer.setTextAlign( this._textAlign );
@@ -89,23 +89,14 @@ define( function( require ) {
       }
       
       if ( this.hasFill() ) {
-        layer.setFillStyle( this._fill );
-        if ( this._fill.transformMatrix ) {
-          context.save();
-          this._fill.transformMatrix.canvasAppendTransform( context );
-        }
+        this.beforeCanvasFill( layer ); // defined in Fillable
         context.fillText( this._text, 0, 0 );
-        if ( this._fill.transformMatrix ) {
-          context.restore();
-        }
+        this.afterCanvasFill( layer ); // defined in Fillable
       }
       if ( this.hasStroke() ) {
-        layer.setStrokeStyle( this.getStroke() );
-        layer.setLineWidth( this.getLineWidth() );
-        layer.setLineCap( this.getLineCap() );
-        layer.setLineJoin( this.getLineJoin() );
-        layer.setLineDash( this.getLineDash() );
+        this.beforeCanvasStroke( layer ); // defined in Strokable
         context.strokeText( this._text, 0, 0 );
+        this.afterCanvasStroke( layer ); // defined in Strokable
       }
     },
     

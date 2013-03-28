@@ -117,6 +117,25 @@ define( function( require ) {
       return this;
     };
     
+    proto.beforeCanvasStroke = function( layer ) {
+      // TODO: is there a better way of not calling so many things on each stroke?
+      layer.setStrokeStyle( this._stroke );
+      layer.setLineWidth( this.getLineWidth() );
+      layer.setLineCap( this.getLineCap() );
+      layer.setLineJoin( this.getLineJoin() );
+      layer.setLineDash( this.getLineDash() );
+      if ( this._stroke.transformMatrix ) {
+        layer.context.save();
+        this._stroke.transformMatrix.canvasAppendTransform( layer.context );
+      }
+    };
+    
+    proto.afterCanvasStroke = function( layer ) {
+      if ( this._stroke.transformMatrix ) {
+        layer.context.restore();
+      }
+    };
+    
     // on mutation, set the stroke parameters first since they may affect the bounds (and thus later operations)
     proto._mutatorKeys = [ 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'lineDash' ].concat( proto._mutatorKeys );
     

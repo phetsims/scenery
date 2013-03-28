@@ -41,6 +41,20 @@ define( function( require ) {
       return this;
     };
     
+    proto.beforeCanvasFill = function( layer ) {
+      layer.setFillStyle( this._fill );
+      if ( this._fill.transformMatrix ) {
+        layer.context.save();
+        this._fill.transformMatrix.canvasAppendTransform( layer.context );
+      }
+    };
+    
+    proto.afterCanvasFill = function( layer ) {
+      if ( this._fill.transformMatrix ) {
+        layer.context.restore();
+      }
+    };
+    
     // on mutation, set the fill parameter first
     proto._mutatorKeys = [ 'fill' ].concat( proto._mutatorKeys );
     
