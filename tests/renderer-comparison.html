@@ -71,10 +71,16 @@
     var testCases = [
       {
         name: 'Rectangle',
-        width: 64,
+        width: 128,
         height: 64,
         draw: function( scene ) {
           scene.addChild( new scenery.Rectangle( 10.5, 10.5, 44, 44, {
+            fill: '#f00',
+            stroke: '#000',
+            lineWidth: 3
+          } ) );
+          scene.addChild( new scenery.Rectangle( 10.5, 10.5, 44, 44, 15, 15, {
+            x: 64,
             fill: '#f00',
             stroke: '#000',
             lineWidth: 3
@@ -88,6 +94,14 @@
         draw: function( scene ) {
           scene.addChild( new scenery.Circle( 32, 32, 22, {
             fill: '#f00',
+            stroke: '#000',
+            lineWidth: 3
+          } ) );
+          scene.addChild( new scenery.Circle( {
+            circleX: 43,
+            circleY: 32,
+            circleRadius: 11,
+            fill: '#0f0',
             stroke: '#000',
             lineWidth: 3
           } ) );
