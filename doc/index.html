@@ -1292,20 +1292,31 @@ loadedImg.src = 'http://phet.colorado.edu/images/phet-logo-yellow.png';
         and modify, and contains more optimized drawing routines for Canvas and SVG.
       </p>
       <p>
-        A Rectangle is created with <code>new scenery.Rectangle( x, y, width, height, [options] )</code>
+        A Rectangle is normally created with <code>new scenery.Rectangle( x, y, width, height, [options] )</code>,
+        but rounded corners can be specified with <code>new scenery.Rectangle( x, y, width, height, arcWidth, arcHeight, [options] )</code>,
+        or all of the parameters can be specified in the options with
+        <code>new scenery.Rectangle( { rectX: _, rectY: _, rectWidth: _, rectHeight: _, ... } )</code>
       </p>
-      <div id="example-rectangle" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
+      <div id="example-rectangle" class="exampleScene" style="width: 128px; height: 64px; margin: 0 auto;"></div>
       <script type="text/javascript">
 docExample( 'example-rectangle', function( scene ) {
 /*START*/
+// red rectangle
 scene.addChild( new scenery.Rectangle( 10, 10, 44, 44, {
   fill: '#f00',
 } ) );
+
+// green rotated rectangle
 var s = 44 / Math.sqrt( 2 );
 scene.addChild( new scenery.Rectangle( -s / 2, -s / 2, s, s, {
   fill: '#0f0',
   x: 32, y: 32,
   rotation: Math.PI / 4
+} ) );
+
+// blue rectangle with 10px rounded corners
+scene.addChild( new scenery.Rectangle( 74, 10, 44, 44, 10, 10, {
+  fill: '#00f',
 } ) );
 /*END*/
 } );
@@ -1332,6 +1343,18 @@ scene.addChild( new scenery.Rectangle( -s / 2, -s / 2, s, s, {
       <h4 id="rectangle-rectHeight">rectHeight</h4>
       <p>
         <code>node.rectHeight</code> (<code>node.getRectHeight()</code>, <code>node.setRectHeight( height )</code>)
+        retrieves or modifies the 'height' parameter of the <a href="#rectangle">Rectangle</a>.
+      </p>
+      
+      <h4 id="rectangle-rectArcWidth">rectArcWidth</h4>
+      <p>
+        <code>node.rectArcWidth</code> (<code>node.getRectArcWidth()</code>, <code>node.setRectArcWidth( arcWidth )</code>)
+        retrieves or modifies the 'width' parameter of the <a href="#rectangle">Rectangle</a>.
+      </p>
+      
+      <h4 id="rectangle-rectArcHeight">rectArcHeight</h4>
+      <p>
+        <code>node.rectArcHeight</code> (<code>node.getRectArcHeight()</code>, <code>node.setRectArcHeight( arcHeight )</code>)
         retrieves or modifies the 'height' parameter of the <a href="#rectangle">Rectangle</a>.
       </p>
       
