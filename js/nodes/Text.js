@@ -151,7 +151,6 @@ define( function( require ) {
       }
     },
     
-    // TODO: remove duplication with Path! And separate out Stroke from Fill
     // support patterns, gradients, and anything else we need to put in the <defs> block
     updateSVGDefs: function( svg, defs ) {
       // remove old definitions if they exist
@@ -162,7 +161,6 @@ define( function( require ) {
       this.addSVGStrokeDef( svg, defs );
     },
     
-    // TODO: remove duplication with Path! And separate out Stroke from Fill
     // cleans up references created with udpateSVGDefs()
     removeSVGDefs: function( svg, defs ) {
       this.removeSVGFillDef( svg, defs );

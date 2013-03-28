@@ -97,7 +97,6 @@ define( function( require ) {
       return document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
     },
     
-    // TODO: this should be used!
     updateSVGFragment: function( path ) {
       if ( this.hasShape() ) {
         path.setAttribute( 'd', this._shape.getSVGPath() );
