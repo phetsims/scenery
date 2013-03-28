@@ -24,12 +24,11 @@ Priorities:
         Same-arity methods?
         Less temporary objects?
     Line-dash offsets? check SVG support
-    Text stroke handling
+        Yes, see stroke-dashoffset for SVG, lineDashOffset for Canvas
     Add center: { x: 5, y: 10 } ?
     Documentation
     Font consider defensive copy in Text nodes?
     Add gradient/pattern invalidation?
-    Rounded rectangle using arc/ellipticalarc
 
 Bugs:
     DOM visible
@@ -290,7 +289,6 @@ Text:
     Investigate SVG's writing-mode for rtl/ltr handling (also direction and unicode-bidi)
     Handling multi-line strings
     WebGL / DOM options
-    Allow stroking of text.
 
 Scene:
     Acceleration of layer lookup
