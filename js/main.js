@@ -39,6 +39,7 @@ define( [
     'SCENERY/nodes/Image',
     'SCENERY/nodes/Node',
     'SCENERY/nodes/Path',
+    'SCENERY/nodes/Rectangle',
     'SCENERY/nodes/Strokable',
     'SCENERY/nodes/Text',
     'SCENERY/nodes/VBox',
