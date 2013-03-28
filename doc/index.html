@@ -214,8 +214,11 @@
       <a class="sublink" href="#linearGradient-setTransformMatrix">setTransformMatrix</a><br>
       
       <a class="navlink" href="#radialGradient">RadialGradient</a><br>
+      <a class="sublink" href="#radialGradient-addColorStop">addColorStop</a><br>
+      <a class="sublink" href="#radialGradient-setTransformMatrix">setTransformMatrix</a><br>
       
       <a class="navlink" href="#pattern">Pattern</a><br>
+      <a class="sublink" href="#pattern-setTransformMatrix">setTransformMatrix</a><br>
       
       <a class="navlink" href="#vbox">VBox</a><br>
       
@@ -1186,7 +1189,44 @@ scene.addChild( new scenery.Text( 'A', {
       </p>
       
       <h3 id="pattern" class="section">Pattern</h3>
+      <p>
+        A Pattern can be used in place of a color for any <a href="#fillable-fill">fill</a> or
+        <a href="#strokable-stroke">stroke</a>, but is usually done for <a href="#path">Paths</a>.
+      </p>
+      <p>
+        Pattern is constructed and used very similarly to Canvas's
+        <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-createpattern">context.createPattern</a>, with
+        <code>new scenery.Pattern( image )</code> where <code>image</code> is an HTMLImageElement.
+      </p>
+      <div id="example-pattern" class="exampleScene" style="width: 256px; height: 256px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-pattern', function( scene ) {
+var loadedImg = document.createElement( 'img' );
+loadedImg.addEventListener( 'load', function() {
+/*START*/
+scene.addChild( new scenery.Path( {
+  shape: kite.Shape.roundRectangle( 10, 10, 236, 236, 64, 64 ),
+  
+  // tile the image, and rotate it 30 degrees, and scale it down
+  fill: new scenery.Pattern( loadedImg ).setTransformMatrix(
+    dot.Matrix3.rotation2( Math.PI / 6 )
+               .timesMatrix( dot.Matrix3.scale( 0.5 ) ) ),
+  stroke: '#000'
+} ) );
+/*END*/
+scene.updateScene();
+} );
+loadedImg.src = 'http://phet.colorado.edu/images/phet-logo-yellow.png';
+// loadedImg.src = 'http://phet.colorado.edu/sims/plate-tectonics/plate-tectonics-thumbnail.png';
+} );
+      </script>
       
+      <h4 id="pattern-setTransformMatrix">setTransformMatrix( matrix )</h4>
+      <p>
+        Given a <a href="../../dot/doc#matrix3">Matrix3</a> for <code>matrix</code>, it will transform
+        the gradient as it is applied. This should only be done before adding it as a fill/stroke to
+        any nodes.
+      </p>
       
       <h3 id="vbox" class="section">VBox</h3>
       

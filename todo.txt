@@ -28,6 +28,8 @@ Priorities:
     Add center: { x: 5, y: 10 } ?
     Documentation
     Font consider defensive copy in Text nodes?
+    Add gradient/pattern invalidation?
+    Rounded rectangle using arc/ellipticalarc
 
 Bugs:
     DOM visible
