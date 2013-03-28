@@ -1352,6 +1352,12 @@ define('DOT/Util',['require','ASSERT/assert','DOT/dot'], function( require ) {
     
     cubeRoot: function( x ) {
       return x >= 0 ? Math.pow( x, 1/3 ) : -Math.pow( -x, 1/3 );
+    },
+
+    //Linearly interpolate two points and evaluate the line equation for a third point
+    //Arguments are in the form x1=>y1, x2=>y2, x3=> ???
+    linear: function( x1, y1, x2, y2, x3 ) {
+      return (y2 - y1) / (x2 - x1) * (x3 - x1 ) + y1;
     }
   };
   var Util = dot.Util;
@@ -3043,6 +3049,7 @@ define('DOT/Matrix3',['require','DOT/dot','DOT/Vector2','DOT/Vector3','DOT/Matri
       return new dot.Vector2( x, y );
     },
     
+    // TODO: this operation seems to not work for transformDelta2, should be vetted
     timesRelativeVector2: function( v ) {
       var x = this.m00() * v.x + this.m01() * v.y;
       var y = this.m10() * v.y + this.m11() * v.y;
@@ -3488,7 +3495,8 @@ define('DOT/Transform3',['require','ASSERT/assert','DOT/dot','DOT/Matrix3','DOT/
 
     // transform a vector (exclude translation)
     transformDelta2: function( vec2 ) {
-      return this.matrix.timesRelativeVector2( vec2 );
+      // transform actually has the translation rolled into the other coefficients, so we have to make this longer
+      return this.transformPosition2( vec2 ).minus( this.transformPosition2( dot.Vector2.ZERO ) );
     },
 
     // transform a normal vector (different than a normal vector)
@@ -7066,7 +7074,7 @@ define('KITE/segments/EllipticalArc',['require','ASSERT/assert','KITE/kite','DOT
     assert && assert( this.angleDifference >= 0 ); // now it should always be zero or positive
     
     // a unit arg segment that we can map to our ellipse. useful for hit testing and such.
-    this.unitArcSegment = new Segment.Arc( center, 1, startAngle, endAngle, anticlockwise );
+    this.unitArcSegment = new Segment.Arc( Vector2.ZERO, 1, startAngle, endAngle, anticlockwise );
     
     this.bounds = Bounds2.NOTHING;
     this.bounds = this.bounds.withPoint( this.start );
@@ -8828,18 +8836,27 @@ define('KITE/Shape',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT/
     },
 
     //Create a round rectangle. All arguments are number.
-    //Rounding is currently using quadraticCurveTo.  Please note, future versions may use arcTo
-    //TODO: rewrite with arcTo?
     roundRect: function( x, y, width, height, arcw, arch ) {
-      this.moveTo( x + arcw, y ).
-          lineTo( x + width - arcw, y ).
-          quadraticCurveTo( x + width, y, x + width, y + arch ).
-          lineTo( x + width, y + height - arch ).
-          quadraticCurveTo( x + width, y + height, x + width - arcw, y + height ).
-          lineTo( x + arcw, y + height ).
-          quadraticCurveTo( x, y + height, x, y + height - arch ).
-          lineTo( x, y + arch ).
-          quadraticCurveTo( x, y, x + arcw, y );
+      var lowX = x + arcw;
+      var highX = x + width - arcw;
+      var lowY = y + arch;
+      var highY = y + height - arch;
+      // if ( true ) {
+      if ( arcw === arch ) {
+        // we can use circular arcs, which have well defined stroked offsets
+        this.arc( highX, lowY, arcw, -Math.PI / 2, 0, false )
+            .arc( highX, highY, arcw, 0, Math.PI / 2, false )
+            .arc( lowX, highY, arcw, Math.PI / 2, Math.PI, false )
+            .arc( lowX, lowY, arcw, Math.PI, Math.PI * 3 / 2, false )
+            .close();
+      } else {
+        // we have to resort to elliptical arcs
+        this.ellipticalArc( highX, lowY, arcw, arch, 0, -Math.PI / 2, 0, false )
+            .ellipticalArc( highX, highY, arcw, arch, 0, 0, Math.PI / 2, false )
+            .ellipticalArc( lowX, highY, arcw, arch, 0, Math.PI / 2, Math.PI, false )
+            .ellipticalArc( lowX, lowY, arcw, arch, 0, Math.PI, Math.PI * 3 / 2, false )
+            .close();
+      }
       return this;
     },
     
@@ -12573,6 +12590,7 @@ define('SCENERY/nodes/Path',['require','ASSERT/assert','PHET_CORE/inherit','SCEN
       
       var style = '';
       // if the fill / style has an SVG definition, use that with a URL reference to it
+      // TODO: share these in fillable / strokable, due to the duplication with Text
       style += 'fill: ' + ( this._fill ? ( this._fill.getSVGDefinition ? 'url(#fill' + this.getId() + ')' : this._fill ) : 'none' ) + ';';
       style += 'stroke: ' + ( this._stroke ? ( this._stroke.getSVGDefinition ? 'url(#stroke' + this.getId() + ')' : this._stroke ) : 'none' ) + ';';
       if ( this._stroke ) {
@@ -12821,7 +12839,7 @@ define('SCENERY/util/Font',['require','ASSERT/assert','SCENERY/scenery'], functi
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/Bounds2','SCENERY/scenery','SCENERY/nodes/Node','SCENERY/layers/Renderer','SCENERY/nodes/Fillable','SCENERY/util/Util','SCENERY/util/Font','SCENERY/util/Util'], function( require ) {
+define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/Bounds2','SCENERY/scenery','SCENERY/nodes/Node','SCENERY/layers/Renderer','SCENERY/nodes/Fillable','SCENERY/nodes/Strokable','SCENERY/util/Util','SCENERY/util/Font','SCENERY/util/Util'], function( require ) {
   
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
@@ -12834,6 +12852,7 @@ define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/
   var Node = require( 'SCENERY/nodes/Node' ); // inherits from Node
   var Renderer = require( 'SCENERY/layers/Renderer' );
   var fillable = require( 'SCENERY/nodes/Fillable' );
+  var strokable = require( 'SCENERY/nodes/Strokable' );
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate; // i.e. Object.create
   require( 'SCENERY/util/Font' );
   require( 'SCENERY/util/Util' ); // for canvasAccurateBounds
@@ -12857,6 +12876,9 @@ define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/
       // set the text parameter so that setText( text ) is effectively called in the mutator from the super call
       options.text = text;
     }
+    
+    this.initializeStrokable();
+    
     Node.call( this, options );
   };
   var Text = scenery.Text;
@@ -12884,14 +12906,32 @@ define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/
     paintCanvas: function( state ) {
       var layer = state.layer;
       var context = layer.context;
-      if ( this.hasFill() ) {
-        layer.setFillStyle( this.getFill() );
+      
+      if ( this.hasFill() || this.hasStroke() ) {
         layer.setFont( this._font.getFont() );
         layer.setTextAlign( this._textAlign );
         layer.setTextBaseline( this._textBaseline );
         layer.setDirection( this._direction );
-
+      }
+      
+      if ( this.hasFill() ) {
+        layer.setFillStyle( this._fill );
+        if ( this._fill.transformMatrix ) {
+          context.save();
+          this._fill.transformMatrix.canvasAppendTransform( context );
+        }
         context.fillText( this._text, 0, 0 );
+        if ( this._fill.transformMatrix ) {
+          context.restore();
+        }
+      }
+      if ( this.hasStroke() ) {
+        layer.setStrokeStyle( this.getStroke() );
+        layer.setLineWidth( this.getLineWidth() );
+        layer.setLineCap( this.getLineCap() );
+        layer.setLineJoin( this.getLineJoin() );
+        layer.setLineDash( this.getLineDash() );
+        context.strokeText( this._text, 0, 0 );
       }
     },
     
@@ -12912,7 +12952,23 @@ define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/
       }
       element.appendChild( document.createTextNode( this._text ) );
       
-      element.setAttribute( 'fill', this._fill );
+      var style = '';
+      // TODO: share this in fillable? duplication with Path
+      style += 'fill: ' + ( this._fill ? ( this._fill.getSVGDefinition ? 'url(#fill' + this.getId() + ')' : this._fill ) : 'none' ) + ';';
+      style += 'stroke: ' + ( this._stroke ? ( this._stroke.getSVGDefinition ? 'url(#stroke' + this.getId() + ')' : this._stroke ) : 'none' ) + ';';
+      // TODO: share this in strokable? duplication with Path
+      if ( this._stroke ) {
+        // TODO: don't include unnecessary directives?
+        style += 'stroke-width: ' + this.getLineWidth() + ';';
+        style += 'stroke-linecap: ' + this.getLineCap() + ';';
+        style += 'stroke-linejoin: ' + this.getLineJoin() + ';';
+        if ( this.getLineDash() ) {
+          style += 'stroke-dasharray: ' + this.getLineDash().join( ',' ) + ';';
+        }
+      }
+      element.setAttribute( 'style', style );
+      // element.setAttribute( 'fill', this.hasFill() ? this.getFill() : 'none' );
+      // element.setAttribute( 'stroke', this.hasStroke() ? this.getStroke() : 'none' );
       
       switch ( this._textAlign ) {
         case 'start':
@@ -12943,6 +12999,43 @@ define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/
       element.setAttribute( 'font-weight', this._font.getWeight() );
       if ( this._font.getStretch() ) {
         element.setAttribute( 'font-stretch', this._font.getStretch() );
+      }
+    },
+    
+    // TODO: remove duplication with Path! And separate out Stroke from Fill
+    // support patterns, gradients, and anything else we need to put in the <defs> block
+    updateSVGDefs: function( svg, defs ) {
+      var stroke = this.getStroke();
+      var fill = this.getFill();
+      var strokeId = 'stroke' + this.getId();
+      var fillId = 'fill' + this.getId();
+      
+      // remove old definitions if they exist
+      this.removeSVGDefs( svg, defs );
+      
+      // add new definitions if necessary
+      if ( stroke && stroke.getSVGDefinition ) {
+        defs.appendChild( stroke.getSVGDefinition( strokeId ) );
+      }
+      if ( fill && fill.getSVGDefinition ) {
+        defs.appendChild( fill.getSVGDefinition( fillId ) );
+      }
+    },
+    
+    // TODO: remove duplication with Path! And separate out Stroke from Fill
+    // cleans up references created with udpateSVGDefs()
+    removeSVGDefs: function( svg, defs ) {
+      var strokeId = 'stroke' + this.getId();
+      var fillId = 'fill' + this.getId();
+      
+      // wipe away any old fill/stroke definitions
+      var oldStrokeDef = svg.getElementById( strokeId );
+      var oldFillDef = svg.getElementById( fillId );
+      if ( oldStrokeDef ) {
+        defs.removeChild( oldStrokeDef );
+      }
+      if ( oldFillDef ) {
+        defs.removeChild( oldFillDef );
       }
     },
     
@@ -13153,8 +13246,9 @@ define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/
   Object.defineProperty( Text.prototype, 'textBaseline', { set: Text.prototype.setTextBaseline, get: Text.prototype.getTextBaseline } );
   Object.defineProperty( Text.prototype, 'direction', { set: Text.prototype.setDirection, get: Text.prototype.getDirection } );
   
-  // mix in support for fills
+  // mix in support for fills and strokes
   fillable( Text );
+  strokable( Text );
 
   return Text;
 } );
