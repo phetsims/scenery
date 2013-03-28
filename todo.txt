@@ -29,7 +29,6 @@ Priorities:
     Documentation
     Font consider defensive copy in Text nodes?
     Add gradient/pattern invalidation?
-    Rounded rectangle using arc/ellipticalarc
 
 Bugs:
     DOM visible
