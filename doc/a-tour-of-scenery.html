@@ -420,8 +420,8 @@ thumbnailImage.src = 'http://phet.colorado.edu/sims/energy-skate-park/energy-ska
         $( window ).ready( function() {
           var scene = new scenery.Scene( $( '#dom-simple' ) );
           
-          var element = document.createElement( 'form' );
-          element.innerHTML = '<label>Type in me:</label><input type="text">';
+          var element = document.createElement( 'span' );
+          element.innerHTML = '<label style="display: inline;">Type in me:</label><input type="text">';
           
           scene.addChild( new scenery.DOM( element, {
             x: 50,
