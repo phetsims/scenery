@@ -26,6 +26,7 @@ define( function( require ) {
   var Node = require( 'SCENERY/nodes/Node' ); // inherits from Node
   var Renderer = require( 'SCENERY/layers/Renderer' );
   var fillable = require( 'SCENERY/nodes/Fillable' );
+  var strokable = require( 'SCENERY/nodes/Strokable' );
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate; // i.e. Object.create
   require( 'SCENERY/util/Font' );
   require( 'SCENERY/util/Util' ); // for canvasAccurateBounds
@@ -49,6 +50,9 @@ define( function( require ) {
       // set the text parameter so that setText( text ) is effectively called in the mutator from the super call
       options.text = text;
     }
+    
+    this.initializeStrokable();
+    
     Node.call( this, options );
   };
   var Text = scenery.Text;
@@ -76,14 +80,32 @@ define( function( require ) {
     paintCanvas: function( state ) {
       var layer = state.layer;
       var context = layer.context;
-      if ( this.hasFill() ) {
-        layer.setFillStyle( this.getFill() );
+      
+      if ( this.hasFill() || this.hasStroke() ) {
         layer.setFont( this._font.getFont() );
         layer.setTextAlign( this._textAlign );
         layer.setTextBaseline( this._textBaseline );
         layer.setDirection( this._direction );
-
+      }
+      
+      if ( this.hasFill() ) {
+        layer.setFillStyle( this._fill );
+        if ( this._fill.transformMatrix ) {
+          context.save();
+          this._fill.transformMatrix.canvasAppendTransform( context );
+        }
         context.fillText( this._text, 0, 0 );
+        if ( this._fill.transformMatrix ) {
+          context.restore();
+        }
+      }
+      if ( this.hasStroke() ) {
+        layer.setStrokeStyle( this.getStroke() );
+        layer.setLineWidth( this.getLineWidth() );
+        layer.setLineCap( this.getLineCap() );
+        layer.setLineJoin( this.getLineJoin() );
+        layer.setLineDash( this.getLineDash() );
+        context.strokeText( this._text, 0, 0 );
       }
     },
     
@@ -104,7 +126,23 @@ define( function( require ) {
       }
       element.appendChild( document.createTextNode( this._text ) );
       
-      element.setAttribute( 'fill', this._fill );
+      var style = '';
+      // TODO: share this in fillable? duplication with Path
+      style += 'fill: ' + ( this._fill ? ( this._fill.getSVGDefinition ? 'url(#fill' + this.getId() + ')' : this._fill ) : 'none' ) + ';';
+      style += 'stroke: ' + ( this._stroke ? ( this._stroke.getSVGDefinition ? 'url(#stroke' + this.getId() + ')' : this._stroke ) : 'none' ) + ';';
+      // TODO: share this in strokable? duplication with Path
+      if ( this._stroke ) {
+        // TODO: don't include unnecessary directives?
+        style += 'stroke-width: ' + this.getLineWidth() + ';';
+        style += 'stroke-linecap: ' + this.getLineCap() + ';';
+        style += 'stroke-linejoin: ' + this.getLineJoin() + ';';
+        if ( this.getLineDash() ) {
+          style += 'stroke-dasharray: ' + this.getLineDash().join( ',' ) + ';';
+        }
+      }
+      element.setAttribute( 'style', style );
+      // element.setAttribute( 'fill', this.hasFill() ? this.getFill() : 'none' );
+      // element.setAttribute( 'stroke', this.hasStroke() ? this.getStroke() : 'none' );
       
       switch ( this._textAlign ) {
         case 'start':
@@ -135,6 +173,43 @@ define( function( require ) {
       element.setAttribute( 'font-weight', this._font.getWeight() );
       if ( this._font.getStretch() ) {
         element.setAttribute( 'font-stretch', this._font.getStretch() );
+      }
+    },
+    
+    // TODO: remove duplication with Path! And separate out Stroke from Fill
+    // support patterns, gradients, and anything else we need to put in the <defs> block
+    updateSVGDefs: function( svg, defs ) {
+      var stroke = this.getStroke();
+      var fill = this.getFill();
+      var strokeId = 'stroke' + this.getId();
+      var fillId = 'fill' + this.getId();
+      
+      // remove old definitions if they exist
+      this.removeSVGDefs( svg, defs );
+      
+      // add new definitions if necessary
+      if ( stroke && stroke.getSVGDefinition ) {
+        defs.appendChild( stroke.getSVGDefinition( strokeId ) );
+      }
+      if ( fill && fill.getSVGDefinition ) {
+        defs.appendChild( fill.getSVGDefinition( fillId ) );
+      }
+    },
+    
+    // TODO: remove duplication with Path! And separate out Stroke from Fill
+    // cleans up references created with udpateSVGDefs()
+    removeSVGDefs: function( svg, defs ) {
+      var strokeId = 'stroke' + this.getId();
+      var fillId = 'fill' + this.getId();
+      
+      // wipe away any old fill/stroke definitions
+      var oldStrokeDef = svg.getElementById( strokeId );
+      var oldFillDef = svg.getElementById( fillId );
+      if ( oldStrokeDef ) {
+        defs.removeChild( oldStrokeDef );
+      }
+      if ( oldFillDef ) {
+        defs.removeChild( oldFillDef );
       }
     },
     
@@ -345,8 +420,9 @@ define( function( require ) {
   Object.defineProperty( Text.prototype, 'textBaseline', { set: Text.prototype.setTextBaseline, get: Text.prototype.getTextBaseline } );
   Object.defineProperty( Text.prototype, 'direction', { set: Text.prototype.setDirection, get: Text.prototype.getDirection } );
   
-  // mix in support for fills
+  // mix in support for fills and strokes
   fillable( Text );
+  strokable( Text );
 
   return Text;
 } );

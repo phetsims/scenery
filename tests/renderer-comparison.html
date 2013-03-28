@@ -376,7 +376,26 @@
           scene.addChild( new scenery.Text( 'Is this a test?', {
             fontSize: 60,
             top: 1.5,
-            left: 1.5
+            left: 1.5,
+            fill: '#606'
+          } ) );
+          scene.addChild( new scenery.Text( 'Aa', {
+            fontSize: 100,
+            centerX: 64,
+            centerY: 64,
+            fill: null,
+            stroke: '#000'
+          } ) );
+          scene.addChild( new scenery.Text( 'Bb', {
+            fontSize: 100,
+            centerX: 64+128,
+            centerY: 64,
+            fill: new scenery.LinearGradient( 0, 0, 0, -40 )
+                             .addColorStop( 0, '#f00' )
+                             .addColorStop( 1, '#0f0' ),
+            stroke: '#777',
+            lineWidth: 3,
+            lineJoin: 'round'
           } ) );
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
