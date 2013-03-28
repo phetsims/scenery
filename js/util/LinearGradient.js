@@ -58,6 +58,7 @@ define( function( require ) {
     
     setTransformMatrix: function( transformMatrix ) {
       this.transformMatrix = transformMatrix;
+      return this;
     },
     
     getCanvasStyle: function() {
