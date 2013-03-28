@@ -1051,8 +1051,8 @@ scene.addChild( new scenery.Text( 'Some text', {
       <script type="text/javascript">
 docExample( 'example-dom', function( scene ) {
 /*START*/
-var element = document.createElement( 'form' );
-element.innerHTML = '<label>Type in me:</label><input type="text">';
+var element = document.createElement( 'span' );
+element.innerHTML = '<label style="display: inline;">Type in me: </label><input type="text">';
 scene.addChild( new scenery.DOM( element, { x: 30, rotation: Math.PI / 6 } ) );
 /*END*/
 } );
