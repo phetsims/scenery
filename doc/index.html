@@ -1125,7 +1125,65 @@ scene.addChild( new scenery.Text( 'A', {
       </p>
       
       <h3 id="radialGradient" class="section">RadialGradient</h3>
+      <p>
+        A RadialGradient can be used in place of a color for any <a href="#fillable-fill">fill</a> or
+        <a href="#strokable-stroke">stroke</a>, but is usually done for <a href="#path">Paths</a>.
+      </p>
+      <p>
+        RadialGradient is constructed and used very similarly to Canvas's
+        <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-createradialgradient">context.createRadialGradient</a>, with
+        <code>new scenery.RadialGradient( x0, y0, r0, x1, y1, r1 )</code> where the gradient handled between
+        two circles, one centered at (x0,y0) with a radius r0, and the other at (x1,y1) with a radius r1.
+        Due to SVG compatibility, this is slightly constricted, as the smaller circle needs to be completely
+        within the larger circle. Then <a href="#radialGradient-addColorStop">color stops</a> can be added.
+      </p>
+      <div id="example-radialGradient" class="exampleScene" style="width: 128px; height: 128px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-radialGradient', function( scene ) {
+/*START*/
+scene.addChild( new scenery.Path( {
+  shape: kite.Shape.rectangle( 0, 0, 128, 128 ),
+  
+  // starts at a 10-px radius circle and expands out nonuniformly
+  fill: new scenery.RadialGradient( 32, 32, 10, 64, 64, 90 )
+                   .addColorStop( 0, '#05f' )
+                   .addColorStop( 0.5, '#306' )
+                   .addColorStop( 1, '#000' )
+} ) );
+
+var transparent = 'rgba(255,255,255,0)';
+var letter = '#fff';
+scene.addChild( new scenery.Text( 'A', {
+  fontSize: 80,
+  centerX: 64, centerY: 64,
+  
+  // concentric circles
+  fill: new scenery.RadialGradient( 25, -30, 0, 25, -30, 50 )
+                   .addColorStop( 0, transparent )
+                   .addColorStop( 0.1, letter )
+                   .addColorStop( 0.2, transparent )
+                   .addColorStop( 0.3, letter )
+                   .addColorStop( 0.4, transparent )
+                   .addColorStop( 0.5, letter )
+                   .addColorStop( 0.6, transparent )
+                   .addColorStop( 1, letter )
+} ) );
+/*END*/
+} );
+      </script>
       
+      <h4 id="radialGradient-addColorStop">addColorStop( ratio, color )</h4>
+      <p>
+        Adds a point of color along the gradient, where a ratio of 0 is a color point at (x0,y0) and
+        a ratio of 1 is a color point at (x1,y1).
+      </p>
+      
+      <h4 id="radialGradient-setTransformMatrix">setTransformMatrix( matrix )</h4>
+      <p>
+        Given a <a href="../../dot/doc#matrix3">Matrix3</a> for <code>matrix</code>, it will transform
+        the gradient as it is applied. This should only be done before adding it as a fill/stroke to
+        any nodes.
+      </p>
       
       <h3 id="pattern" class="section">Pattern</h3>
       
