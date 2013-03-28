@@ -117,23 +117,7 @@ define( function( require ) {
       }
       element.appendChild( document.createTextNode( this._text ) );
       
-      var style = '';
-      // TODO: share this in fillable? duplication with Path
-      style += 'fill: ' + ( this._fill ? ( this._fill.getSVGDefinition ? 'url(#fill' + this.getId() + ')' : this._fill ) : 'none' ) + ';';
-      style += 'stroke: ' + ( this._stroke ? ( this._stroke.getSVGDefinition ? 'url(#stroke' + this.getId() + ')' : this._stroke ) : 'none' ) + ';';
-      // TODO: share this in strokable? duplication with Path
-      if ( this._stroke ) {
-        // TODO: don't include unnecessary directives?
-        style += 'stroke-width: ' + this.getLineWidth() + ';';
-        style += 'stroke-linecap: ' + this.getLineCap() + ';';
-        style += 'stroke-linejoin: ' + this.getLineJoin() + ';';
-        if ( this.getLineDash() ) {
-          style += 'stroke-dasharray: ' + this.getLineDash().join( ',' ) + ';';
-        }
-      }
-      element.setAttribute( 'style', style );
-      // element.setAttribute( 'fill', this.hasFill() ? this.getFill() : 'none' );
-      // element.setAttribute( 'stroke', this.hasStroke() ? this.getStroke() : 'none' );
+      element.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
       
       switch ( this._textAlign ) {
         case 'start':
@@ -170,38 +154,19 @@ define( function( require ) {
     // TODO: remove duplication with Path! And separate out Stroke from Fill
     // support patterns, gradients, and anything else we need to put in the <defs> block
     updateSVGDefs: function( svg, defs ) {
-      var stroke = this.getStroke();
-      var fill = this.getFill();
-      var strokeId = 'stroke' + this.getId();
-      var fillId = 'fill' + this.getId();
-      
       // remove old definitions if they exist
       this.removeSVGDefs( svg, defs );
       
-      // add new definitions if necessary
-      if ( stroke && stroke.getSVGDefinition ) {
-        defs.appendChild( stroke.getSVGDefinition( strokeId ) );
-      }
-      if ( fill && fill.getSVGDefinition ) {
-        defs.appendChild( fill.getSVGDefinition( fillId ) );
-      }
+      // add new ones if applicable
+      this.addSVGFillDef( svg, defs );
+      this.addSVGStrokeDef( svg, defs );
     },
     
     // TODO: remove duplication with Path! And separate out Stroke from Fill
     // cleans up references created with udpateSVGDefs()
     removeSVGDefs: function( svg, defs ) {
-      var strokeId = 'stroke' + this.getId();
-      var fillId = 'fill' + this.getId();
-      
-      // wipe away any old fill/stroke definitions
-      var oldStrokeDef = svg.getElementById( strokeId );
-      var oldFillDef = svg.getElementById( fillId );
-      if ( oldStrokeDef ) {
-        defs.removeChild( oldStrokeDef );
-      }
-      if ( oldFillDef ) {
-        defs.removeChild( oldFillDef );
-      }
+      this.removeSVGFillDef( svg, defs );
+      this.removeSVGStrokeDef( svg, defs );
     },
     
     /*---------------------------------------------------------------------------*
