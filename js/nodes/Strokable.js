@@ -136,6 +136,41 @@ define( function( require ) {
       }
     };
     
+    proto.getSVGStrokeStyle = function() {
+      // if the style has an SVG definition, use that with a URL reference to it
+      var style = 'stroke: ' + ( this._stroke ? ( this._stroke.getSVGDefinition ? 'url(#stroke' + this.getId() + ')' : this._stroke ) : 'none' ) + ';';
+      if ( this._stroke ) {
+        // TODO: don't include unnecessary directives?
+        style += 'stroke-width: ' + this.getLineWidth() + ';';
+        style += 'stroke-linecap: ' + this.getLineCap() + ';';
+        style += 'stroke-linejoin: ' + this.getLineJoin() + ';';
+        if ( this.getLineDash() ) {
+          style += 'stroke-dasharray: ' + this.getLineDash().join( ',' ) + ';';
+        }
+      }
+      return style;
+    };
+    
+    proto.addSVGStrokeDef = function( svg, defs ) {
+      var stroke = this.getStroke();
+      var strokeId = 'stroke' + this.getId();
+      
+      // add new definitions if necessary
+      if ( stroke && stroke.getSVGDefinition ) {
+        defs.appendChild( stroke.getSVGDefinition( strokeId ) );
+      }
+    };
+    
+    proto.removeSVGStrokeDef = function( svg, defs ) {
+      var strokeId = 'stroke' + this.getId();
+      
+      // wipe away any old definition
+      var oldStrokeDef = svg.getElementById( strokeId );
+      if ( oldStrokeDef ) {
+        defs.removeChild( oldStrokeDef );
+      }
+    };
+    
     // on mutation, set the stroke parameters first since they may affect the bounds (and thus later operations)
     proto._mutatorKeys = [ 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'lineDash' ].concat( proto._mutatorKeys );
     

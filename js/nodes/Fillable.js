@@ -55,6 +55,31 @@ define( function( require ) {
       }
     };
     
+    proto.getSVGFillStyle = function() {
+      // if the fill has an SVG definition, use that with a URL reference to it
+      return 'fill: ' + ( this._fill ? ( this._fill.getSVGDefinition ? 'url(#fill' + this.getId() + ')' : this._fill ) : 'none' ) + ';';
+    };
+    
+    proto.addSVGFillDef = function( svg, defs ) {
+      var fill = this.getFill();
+      var fillId = 'fill' + this.getId();
+      
+      // add new definitions if necessary
+      if ( fill && fill.getSVGDefinition ) {
+        defs.appendChild( fill.getSVGDefinition( fillId ) );
+      }
+    };
+    
+    proto.removeSVGFillDef = function( svg, defs ) {
+      var fillId = 'fill' + this.getId();
+      
+      // wipe away any old definition
+      var oldFillDef = svg.getElementById( fillId );
+      if ( oldFillDef ) {
+        defs.removeChild( oldFillDef );
+      }
+    };
+    
     // on mutation, set the fill parameter first
     proto._mutatorKeys = [ 'fill' ].concat( proto._mutatorKeys );
     
