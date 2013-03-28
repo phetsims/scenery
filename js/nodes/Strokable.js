@@ -29,6 +29,7 @@ define( function( require ) {
       return this._stroke !== null;
     };
     
+    // TODO: setting these properties looks like a good candidate for refactoring to lessen file size
     proto.getLineWidth = function() {
       return this._lineDrawingStyles.lineWidth;
     };
@@ -89,6 +90,21 @@ define( function( require ) {
       return this;
     };
     
+    proto.getLineDashOffset = function() {
+      return this._lineDrawingStyles.lineDashOffset;
+    };
+    
+    proto.setLineDashOffset = function( lineDashOffset ) {
+      if ( this._lineDrawingStyles.lineDashOffset !== lineDashOffset ) {
+        this.markOldSelfPaint();
+        
+        this._lineDrawingStyles.lineDashOffset = lineDashOffset;
+        
+        this.invalidateStroke();
+      }
+      return this;
+    };
+    
     proto.setLineStyles = function( lineStyles ) {
       // TODO: since we have been using lineStyles as mutable for now, lack of change check is good here?
       this.markOldSelfPaint();
@@ -124,6 +140,7 @@ define( function( require ) {
       layer.setLineCap( this.getLineCap() );
       layer.setLineJoin( this.getLineJoin() );
       layer.setLineDash( this.getLineDash() );
+      layer.setLineDashOffset( this.getLineDashOffset() );
       if ( this._stroke.transformMatrix ) {
         layer.context.save();
         this._stroke.transformMatrix.canvasAppendTransform( layer.context );
@@ -146,6 +163,7 @@ define( function( require ) {
         style += 'stroke-linejoin: ' + this.getLineJoin() + ';';
         if ( this.getLineDash() ) {
           style += 'stroke-dasharray: ' + this.getLineDash().join( ',' ) + ';';
+          style += 'stroke-dashoffset: ' + this.getLineDashOffset() + ';';
         }
       }
       return style;
@@ -172,7 +190,7 @@ define( function( require ) {
     };
     
     // on mutation, set the stroke parameters first since they may affect the bounds (and thus later operations)
-    proto._mutatorKeys = [ 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'lineDash' ].concat( proto._mutatorKeys );
+    proto._mutatorKeys = [ 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'lineDash', 'lineDashOffset' ].concat( proto._mutatorKeys );
     
     // TODO: miterLimit support?
     Object.defineProperty( proto, 'stroke', { set: proto.setStroke, get: proto.getStroke } );
@@ -180,6 +198,7 @@ define( function( require ) {
     Object.defineProperty( proto, 'lineCap', { set: proto.setLineCap, get: proto.getLineCap } );
     Object.defineProperty( proto, 'lineJoin', { set: proto.setLineJoin, get: proto.getLineJoin } );
     Object.defineProperty( proto, 'lineDash', { set: proto.setLineDash, get: proto.getLineDash } );
+    Object.defineProperty( proto, 'lineDashOffset', { set: proto.setLineDashOffset, get: proto.getLineDashOffset } );
     
     if ( !proto.invalidateStroke ) {
       proto.invalidateStroke = function() {
