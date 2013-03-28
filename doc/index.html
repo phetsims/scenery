@@ -180,6 +180,7 @@
       <a class="sublink" href="#strokable-lineCap">lineCap</a><br>
       <a class="sublink" href="#strokable-lineJoin">lineJoin</a><br>
       <a class="sublink" href="#strokable-lineDash">lineDash</a><br>
+      <a class="sublink" href="#strokable-lineDashOffset">lineDashOffset</a><br>
       
       <a class="navlink" href="#path">Path</a><br>
       <a class="sublink" href="#path-shape">shape</a><br>
@@ -847,6 +848,49 @@ scene.addChild( new scenery.Path( {
   lineWidth: 3,
   lineDash: [ 10, 5 ]
 } ) );
+/*END*/
+} );
+      </script>
+      
+      <h4 id="strokable-lineDashOffset">lineDashOffset</h4>
+      <p>
+        <code>node.lineDashOffset</code> (<code>node.getLineDashOffset()</code>, <code>node.setLineDashOffset( lineDashOffset )</code>)
+        controls the how far the dash pattern in <a href="#strokable-lineDash">lineDash</a> is offset from the start,
+        same as the <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-linedashoffset">Canvas lineDashOffset</a>.
+      </p>
+      
+      <div id="example-lineDashOffset" class="exampleScene" style="width: 128px; height: 64px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-lineDashOffset', function( scene ) {
+scene.addChild( new scenery.Path( {
+  shape: new kite.Shape().moveTo( 0, 16.5 )
+                         .lineTo( 128, 16.5 )
+                         .moveTo( 0, 32.5 )
+                         .lineTo( 128, 32.5 )
+                         .moveTo( 0, 48.5 )
+                         .lineTo( 128, 48.5 ),
+  stroke: '#f00'
+} ) );
+/*START*/
+var shape = kite.Shape.lineSegment( 0, 0, 128, 0 );
+var args = {
+  shape: shape,
+  stroke: '#000',
+  lineWidth: 8,
+  lineDash: [ 20, 5 ]
+};
+scene.addChild( new scenery.Path( _.extend( {
+  y: 16.5,
+  lineDashOffset: 0
+}, args ) ) );
+scene.addChild( new scenery.Path( _.extend( {
+  y: 32.5,
+  lineDashOffset: 5
+}, args ) ) );
+scene.addChild( new scenery.Path( _.extend( {
+  y: 48.5,
+  lineDashOffset: 10
+}, args ) ) );
 /*END*/
 } );
       </script>

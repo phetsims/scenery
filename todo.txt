@@ -9,7 +9,6 @@ Layer refresh:
 Priorities:
     Layer Refresh
     Force non-canvas above 'interactive' DOM node
-    phet-core: LESS_THAN/EQUAL/GREATER_THAN enum, inheritance code, etc.
     Flag for skipping dirty region handling and other overhead?
     Beers law lab performance on shaker
     Mix-ins for drag handler?
