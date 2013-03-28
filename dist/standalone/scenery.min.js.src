@@ -13724,6 +13724,7 @@ define('SCENERY/util/LinearGradient',['require','ASSERT/assert','SCENERY/scenery
     
     setTransformMatrix: function( transformMatrix ) {
       this.transformMatrix = transformMatrix;
+      return this;
     },
     
     getCanvasStyle: function() {
@@ -13804,6 +13805,7 @@ define('SCENERY/util/Pattern',['require','ASSERT/assert','SCENERY/scenery','DOT/
     
     setTransformMatrix: function( transformMatrix ) {
       this.transformMatrix = transformMatrix;
+      return this;
     },
     
     getCanvasStyle: function() {
@@ -13897,6 +13899,7 @@ define('SCENERY/util/RadialGradient',['require','ASSERT/assert','SCENERY/scenery
     
     setTransformMatrix: function( transformMatrix ) {
       this.transformMatrix = transformMatrix;
+      return this;
     },
     
     getCanvasStyle: function() {
