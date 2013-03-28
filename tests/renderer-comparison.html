@@ -74,14 +74,19 @@
         width: 64,
         height: 64,
         draw: function( scene ) {
-          scene.addChild( new scenery.Path( {
-            shape: kite.Shape.rectangle( 0, 0, 44, 44 ),
-            x: 10.5,
-            y: 10.5,
-            fill: '#ff0000',
-            stroke: '#000000',
+          scene.addChild( new scenery.Rectangle( 10.5, 10.5, 44, 44, {
+            fill: '#f00',
+            stroke: '#000',
             lineWidth: 3
           } ) );
+          // scene.addChild( new scenery.Path( {
+          //   shape: kite.Shape.rectangle( 0, 0, 44, 44 ),
+          //   x: 10.5,
+          //   y: 10.5,
+          //   fill: '#ff0000',
+          //   stroke: '#000000',
+          //   lineWidth: 3
+          // } ) );
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
       },{
