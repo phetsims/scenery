@@ -76,23 +76,14 @@ define( function( require ) {
         this._shape.writeToContext( context );
 
         if ( this._fill ) {
-          layer.setFillStyle( this._fill );
-          if ( this._fill.transformMatrix ) {
-            context.save();
-            this._fill.transformMatrix.canvasAppendTransform( context );
-          }
+          this.beforeCanvasFill( layer ); // defined in Fillable
           context.fill();
-          if ( this._fill.transformMatrix ) {
-            context.restore();
-          }
+          this.afterCanvasFill( layer ); // defined in Fillable
         }
         if ( this._stroke ) {
-          layer.setStrokeStyle( this._stroke );
-          layer.setLineWidth( this.getLineWidth() );
-          layer.setLineCap( this.getLineCap() );
-          layer.setLineJoin( this.getLineJoin() );
-          layer.setLineDash( this.getLineDash() );
+          this.beforeCanvasStroke( layer ); // defined in Strokable
           context.stroke();
+          this.afterCanvasStroke( layer ); // defined in Strokable
         }
       }
     },
