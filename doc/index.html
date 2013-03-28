@@ -223,6 +223,17 @@
       
       <a class="navlink" href="#vbox">VBox</a><br>
       
+      <a class="navlink" href="#rectangle">Rectangle</a><br>
+      <a class="sublink" href="#rectangle-rectX">rectX</a><br>
+      <a class="sublink" href="#rectangle-rectY">rectY</a><br>
+      <a class="sublink" href="#rectangle-rectWidth">rectWidth</a><br>
+      <a class="sublink" href="#rectangle-rectHeight">rectHeight</a><br>
+      
+      <a class="navlink" href="#circle">Circle</a><br>
+      <a class="sublink" href="#circle-circleX">circleX</a><br>
+      <a class="sublink" href="#circle-circleY">circleY</a><br>
+      <a class="sublink" href="#circle-circleRadius">circleRadius</a><br>
+      
     </div>
     <div class="span6">
       <h2 id="tutorials">Tutorials</h2>
@@ -1275,6 +1286,95 @@ loadedImg.src = 'http://phet.colorado.edu/images/phet-logo-yellow.png';
       
       <h3 id="vbox" class="section">VBox</h3>
       
+      <h3 id="rectangle" class="section">Rectangle</h3>
+      <p>
+        Rectangle is a subtype of <a href="#path">Path</a> that is more convenient to construct
+        and modify, and contains more optimized drawing routines for Canvas and SVG.
+      </p>
+      <p>
+        A Rectangle is created with <code>new scenery.Rectangle( x, y, width, height, [options] )</code>
+      </p>
+      <div id="example-rectangle" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-rectangle', function( scene ) {
+/*START*/
+scene.addChild( new scenery.Rectangle( 10, 10, 44, 44, {
+  fill: '#f00',
+} ) );
+var s = 44 / Math.sqrt( 2 );
+scene.addChild( new scenery.Rectangle( -s / 2, -s / 2, s, s, {
+  fill: '#0f0',
+  x: 32, y: 32,
+  rotation: Math.PI / 4
+} ) );
+/*END*/
+} );
+      </script>
+      
+      <h4 id="rectangle-rectX">rectX</h4>
+      <p>
+        <code>node.rectX</code> (<code>node.getRectX()</code>, <code>node.setRectX( x )</code>)
+        retrieves or modifies the 'x' parameter of the <a href="#rectangle">Rectangle</a>.
+      </p>
+      
+      <h4 id="rectangle-rectY">rectY</h4>
+      <p>
+        <code>node.rectY</code> (<code>node.getRectY()</code>, <code>node.setRectY( y )</code>)
+        retrieves or modifies the 'y' parameter of the <a href="#rectangle">Rectangle</a>.
+      </p>
+      
+      <h4 id="rectangle-rectWidth">rectWidth</h4>
+      <p>
+        <code>node.rectWidth</code> (<code>node.getRectWidth()</code>, <code>node.setRectWidth( width )</code>)
+        retrieves or modifies the 'width' parameter of the <a href="#rectangle">Rectangle</a>.
+      </p>
+      
+      <h4 id="rectangle-rectHeight">rectHeight</h4>
+      <p>
+        <code>node.rectHeight</code> (<code>node.getRectHeight()</code>, <code>node.setRectHeight( height )</code>)
+        retrieves or modifies the 'height' parameter of the <a href="#rectangle">Rectangle</a>.
+      </p>
+      
+      <h3 id="circle" class="section">Circle</h3>
+      <p>
+        Circle is a subtype of <a href="#path">Path</a> that is more convenient to construct
+        and modify, and contains more optimized drawing routines for SVG.
+      </p>
+      <p>
+        A Circle is created with <code>new scenery.Circle( x, y, radius, [options] )</code>, with a circle
+        centered at (x,y) with the specified radius.
+      </p>
+      <div id="example-circle" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-circle', function( scene ) {
+/*START*/
+scene.addChild( new scenery.Circle( 32, 32, 22, {
+  fill: '#f00'
+} ) );
+scene.addChild( new scenery.Circle( 43, 32, 11, {
+  fill: '#0f0'
+} ) );
+/*END*/
+} );
+      </script>
+      
+      <h4 id="circle-circleX">circleX</h4>
+      <p>
+        <code>node.circleX</code> (<code>node.getCircleX()</code>, <code>node.setCircleX( x )</code>)
+        retrieves or modifies the 'x' parameter of the <a href="#circle">Circle</a>.
+      </p>
+      
+      <h4 id="circle-circleY">circleY</h4>
+      <p>
+        <code>node.circleY</code> (<code>node.getCircleY()</code>, <code>node.setCircleY( y )</code>)
+        retrieves or modifies the 'y' parameter of the <a href="#circle">Circle</a>.
+      </p>
+      
+      <h4 id="circle-circleRadius">circleRadius</h4>
+      <p>
+        <code>node.circleRadius</code> (<code>node.getCircleRadius()</code>, <code>node.setCircleRadius( radius )</code>)
+        retrieves or modifies the 'radius' parameter of the <a href="#circle">Circle</a>.
+      </p>
       
     </div>
     <div class="span3"></div>
