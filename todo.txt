@@ -122,6 +122,7 @@ Canvas:
     * Clip shapes that are nested are probably broken
     * CanvasLayer styles are probably broken - resetStyles seems fishy if not in sync (i.e. lineCap)
     * Handle masking similar to SVG masking? see http://www.w3.org/TR/SVG/masking.html
+        Use source-in. Probably a better option than the clipShape, so use clipping for pixel-aligned rectangles, masking for everything else?
 
 DOM:
     [IMPLEMENTATION REMOVED] Hoisting of interactive DOM nodes
