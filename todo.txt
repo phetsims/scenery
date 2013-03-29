@@ -16,7 +16,6 @@ Priorities:
     Performance
         Same-arity methods?
         Less temporary objects?
-    Add center: { x: 5, y: 10 } ?
     Font consider defensive copy in Text nodes?
     Add gradient/pattern invalidation?
 
@@ -82,9 +81,7 @@ Questions for team:
     https://travis-ci.org/ for continuous integration?
     Should enter / exit events be fired before / after touch up/down events?
         Note: check DOM convention?
-    API for:
-        Shape shortcuts, and possible shape "classes"
-        Layering
+    Should we allow Node( { center: { x: 3, y: 10 } } ), or is there a better way of handling that? Or is Node( { centerX: 3, centerY: 10 } ) better?
 
 General:
     contrib/canvg => contrib/canvg-1.2
