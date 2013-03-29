@@ -80,21 +80,13 @@ Questions for team:
 
 General:
     Review IE10 developers guide: http://msdn.microsoft.com/en-us/library/ie/hh673549(v=vs.85).aspx
-    Molecule Shapes Canvas with CSS3 perspective transforms?
-        See http://www.paulrhayes.com/experiments/sphere/ for an example
     * Email OIT about phet.colorado.edu/scenery
         Investigate GitHub pages instead? See http://forrst.com/posts/GitHub_Pages_gh_pages_branch_as_a_subfolder_wi-4ZT
     Test zooming on browsers
     RenderState - consider stack-based transforms
     Documentation and Examples (always an item)
-    Take extension mechanism from Backbone.js: https://github.com/documentcloud/backbone/blob/master/backbone.js#L1471-L1502
 
 Code:
-    Require.js style handling for underscore/lodash
-    Documentation:
-        For each 'class'
-        * Hit every 'mutator'
-        See http://jashkenas.github.com/docco/ for inspiration
     Fast text bounds
     Logging:
         Desired remote logging!
