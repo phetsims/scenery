@@ -1204,6 +1204,10 @@ scene.addChild( new scenery.Text( 'A', {
         Due to SVG compatibility, this is slightly constricted, as the smaller circle needs to be completely
         within the larger circle. Then <a href="#radialGradient-addColorStop">color stops</a> can be added.
       </p>
+      <p>
+        <strong>NOTE: Firefox 19 (Win 7) does not currently render "conic" radial gradients correctly (where x0 != x1 or y0 != y1).</strong>
+        This does not appear to be the case with Firefox 19 on Mac, but please refrain from those edge-case gradients.
+      </p>
       <div id="example-radialGradient" class="exampleScene" style="width: 128px; height: 128px; margin: 0 auto;"></div>
       <script type="text/javascript">
 docExample( 'example-radialGradient', function( scene ) {
