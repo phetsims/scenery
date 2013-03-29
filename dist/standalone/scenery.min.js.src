@@ -12329,15 +12329,21 @@ define('SCENERY/nodes/Circle',['require','ASSERT/assert','PHET_CORE/inherit','SC
   var Shape = require( 'KITE/Shape' );
   
   scenery.Circle = function Circle( x, y, radius, options ) {
-    this._circleX = x;
-    this._circleY = y;
-    this._circleRadius = radius;
-    
-    // ensure we have a parameter object
-    options = options || {};
-    
-    // fallback for non-canvas or non-svg rendering, and for proper bounds computation
-    options.shape = Shape.circle( x, y, radius );
+    if ( typeof x === 'object' ) {
+      // allow new Circle( { circleX: ..., circleY: ..., circleRadius: ... } )
+      // the mutators will call invalidateCircle() and properly set the shape
+      options = x;
+    } else {
+      this._circleX = x;
+      this._circleY = y;
+      this._circleRadius = radius;
+      
+      // ensure we have a parameter object
+      options = options || {};
+      
+      // fallback for non-canvas or non-svg rendering, and for proper bounds computation
+      options.shape = Shape.circle( x, y, radius );
+    }
     
     Path.call( this, options );
   };
@@ -12391,7 +12397,7 @@ define('SCENERY/nodes/Circle',['require','ASSERT/assert','PHET_CORE/inherit','SC
   addCircleProp( 'Radius' );
   
   // not adding mutators for now
-  // Circle.prototype._mutatorKeys = [  ].concat( Path.prototype._mutatorKeys );
+  Circle.prototype._mutatorKeys = [ 'circleX', 'circleY', 'circleRadius' ].concat( Path.prototype._mutatorKeys );
   
   return Circle;
 } );
@@ -12873,30 +12879,70 @@ define('SCENERY/nodes/Rectangle',['require','ASSERT/assert','PHET_CORE/inherit',
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
   
-  scenery.Rectangle = function Rectangle( x, y, width, height, options ) {
-    this._rectX = x;
-    this._rectY = y;
-    this._rectWidth = width;
-    this._rectHeight = height;
-    
-    // ensure we have a parameter object
-    options = options || {};
-    
-    // fallback for non-canvas or non-svg rendering, and for proper bounds computation
-    options.shape = Shape.rectangle( x, y, width, height );
+  scenery.Rectangle = function Rectangle( x, y, width, height, arcWidth, arcHeight, options ) {
+    if ( typeof x === 'object' ) {
+      // allow new Rectangle( { rectX: x, rectY: y, rectWidth: width, rectHeight: height, ... } )
+      // the mutators will call invalidateRectangle() and properly set the shape
+      options = x;
+    } else if ( arguments.length < 6 ) {
+      // new Rectangle( x, y, width, height, [options] )
+      this._rectX = x;
+      this._rectY = y;
+      this._rectWidth = width;
+      this._rectHeight = height;
+      this._rectArcWidth = 0;
+      this._rectArcHeight = 0;
+      
+      // ensure we have a parameter object
+      options = arcWidth || {};
+      
+      // fallback for non-canvas or non-svg rendering, and for proper bounds computation
+      options.shape = this.createRectangleShape();
+    } else {
+      // normal case with args (including arcWidth / arcHeight)
+      this._rectX = x;
+      this._rectY = y;
+      this._rectWidth = width;
+      this._rectHeight = height;
+      this._rectArcWidth = arcWidth;
+      this._rectArcHeight = arcHeight;
+      
+      // ensure we have a parameter object
+      options = options || {};
+      
+      // fallback for non-canvas or non-svg rendering, and for proper bounds computation
+      options.shape = this.createRectangleShape();
+    }
     
     Path.call( this, options );
   };
   var Rectangle = scenery.Rectangle;
   
   inherit( Rectangle, Path, {
+    isRounded: function() {
+      return this._rectArcWidth !== 0 && this._rectArcHeight !== 0;
+    },
+    
+    createRectangleShape: function() {
+      if ( this.isRounded() ) {
+        return Shape.roundRectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight, this._rectArcWidth, this._rectArcHeight );
+      } else {
+        return Shape.rectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
+      }
+    },
+    
     invalidateRectangle: function() {
       // setShape should invalidate the path and ensure a redraw
-      this.setShape( Shape.rectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight ) );
+      this.setShape( this.createRectangleShape() );
     },
     
     // override paintCanvas with a faster version, since fillRect and drawRect don't affect the current default path
     paintCanvas: function( state ) {
+      // use the standard version if it's a rounded rectangle, since there is no Canvas-optimized version for that
+      if ( this.isRounded() ) {
+        return Path.prototype.paintCanvas.call( this, state );
+      }
+      
       var layer = state.layer;
       var context = layer.context;
 
@@ -12920,10 +12966,13 @@ define('SCENERY/nodes/Rectangle',['require','ASSERT/assert','PHET_CORE/inherit',
     
     // optimized for the rect element instead of path
     updateSVGFragment: function( rect ) {
+      // see http://www.w3.org/TR/SVG/shapes.html#RectElement
       rect.setAttribute( 'x', this._rectX );
       rect.setAttribute( 'y', this._rectY );
       rect.setAttribute( 'width', this._rectWidth );
       rect.setAttribute( 'height', this._rectHeight );
+      rect.setAttribute( 'rx', this._rectArcWidth );
+      rect.setAttribute( 'ry', this._rectArcHeight );
       
       rect.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
     }
@@ -12955,9 +13004,11 @@ define('SCENERY/nodes/Rectangle',['require','ASSERT/assert','PHET_CORE/inherit',
   addRectProp( 'Y' );
   addRectProp( 'Width' );
   addRectProp( 'Height' );
+  addRectProp( 'ArcWidth' );
+  addRectProp( 'ArcHeight' );
   
   // not adding mutators for now
-  // Rectangle.prototype._mutatorKeys = [  ].concat( Path.prototype._mutatorKeys );
+  Rectangle.prototype._mutatorKeys = [ 'rectX', 'rectY', 'rectWidth', 'rectHeight', 'rectArcWidth', 'rectArcHeight' ].concat( Path.prototype._mutatorKeys );
   
   return Rectangle;
 } );
