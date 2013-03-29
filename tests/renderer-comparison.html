@@ -560,6 +560,23 @@
           third.visible = false; // delayed, should cause issues with old SVG handling
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+      },{
+        name: 'Clipping',
+        width: 64,
+        height: 64,
+        draw: function( scene ) {
+          var clipShape = kite.Shape.rectangle( 10, 10, 44, 44 );
+          var shape = kite.Shape.circle( 32, 32, 25 );
+          var circle = new scenery.Path( {
+            shape: shape,
+            fill: '#000',
+            stroke: '#f00',
+            lineWidth: 1
+          } );
+          circle._clipShape = clipShape;
+          scene.addChild( circle );
+        },
+        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
       }
     ];
     

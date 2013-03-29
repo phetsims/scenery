@@ -121,6 +121,7 @@ Canvas:
         For canvas rendering, how to handle restricted bounds in depthFirstUntil? Generalize, and allow a return flag to indicate not hitting children?
     * Clip shapes that are nested are probably broken
     * CanvasLayer styles are probably broken - resetStyles seems fishy if not in sync (i.e. lineCap)
+    * Handle masking similar to SVG masking? see http://www.w3.org/TR/SVG/masking.html
 
 DOM:
     [IMPLEMENTATION REMOVED] Hoisting of interactive DOM nodes
