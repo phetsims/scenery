@@ -16,7 +16,6 @@ Priorities:
     Performance
         Same-arity methods?
         Less temporary objects?
-    Add gradient/pattern invalidation?
 
 Bugs:
     DOM visible
@@ -28,17 +27,14 @@ Bugs:
     Check Firefox/Safari on Mac event handling on multiple touch events
     Text direction 'rtl' bounds and display difference between canvas / SVG
 
+Tricky areas:
+    Gradients / Patterns should not be changed after being passed to a node's fill/stroke, since the SVG def won't change, and we don't set up listeners
+
 Test:
     Unit tests for common node operations
     Test bounds from canvas accurate method vs computed bounds for Shapes and strokes
     Layering tests
     Text baseline 'middle'
-    Canvas/SVG linear/radial gradients with various combinations
-    Elliptical arc / arc transforms, including scale and shear. Especially shear! + reflections
-    Shapes:
-        animated test rotation/scaling/shearing/reflection on segments, showing start/end points, tangents, bounds
-        Consider moving spline knowledge, circle intersection, etc. into dot.
-        Test cubic beziers like crazy!
 
 Browsers
     Browser bugs? (get Canary / Aurora / IE10):
