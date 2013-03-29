@@ -108,6 +108,7 @@ Code:
     Logging:
         Desired remote logging!
     Debugging:
+        See https://developers.google.com/chrome-developer-tools/docs/remote-debugging for Android
         Add option to have a 'debugger' statement execute on a failed assertion?
         http://people.apache.org/~pmuellr/weinre-docs/latest/Home.html
         Add wrapper check in requestAnimationFrame loops with a try{} and print e.stack if it is defined?
