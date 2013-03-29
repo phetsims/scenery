@@ -79,7 +79,6 @@ Questions for team:
     Should we allow Node( { center: { x: 3, y: 10 } } ), or is there a better way of handling that? Or is Node( { centerX: 3, centerY: 10 } ) better?
 
 General:
-    contrib/canvg => contrib/canvg-1.2
     Review IE10 developers guide: http://msdn.microsoft.com/en-us/library/ie/hh673549(v=vs.85).aspx
     Molecule Shapes Canvas with CSS3 perspective transforms?
         See http://www.paulrhayes.com/experiments/sphere/ for an example
