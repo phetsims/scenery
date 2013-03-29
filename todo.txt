@@ -10,6 +10,10 @@ Priorities:
     Accessibility
     Layer Refresh
     Force non-canvas above 'interactive' DOM node
+        Need to track lowest DOM-interactive Trail for each Scene.
+            null indicates none exists, and represents the far 'after'
+            If it moves, we invalidate layering between the old and new points?
+            Pass in into the layer strategy, etc. (check for canvas there)
     Flag for skipping dirty region handling and other overhead?
     Beers law lab performance on shaker
     Mix-ins for drag handler?
