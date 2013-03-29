@@ -287,7 +287,9 @@ define( function( require ) {
     *----------------------------------------------------------------------------*/
     
     setFont: function( font ) {
-      this._font = font instanceof scenery.Font ? font : new scenery.Font( font );
+      // if font is a Font instance, we actually create another copy so that modification on the original will not change this font.
+      // in the future we can consider adding listeners to the font to get font change notifications.
+      this._font = font instanceof scenery.Font ? new scenery.Font( font.getFont() ) : new scenery.Font( font );
       this.invalidateText();
       return this;
     },
