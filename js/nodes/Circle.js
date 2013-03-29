@@ -19,15 +19,21 @@ define( function( require ) {
   var Shape = require( 'KITE/Shape' );
   
   scenery.Circle = function Circle( x, y, radius, options ) {
-    this._circleX = x;
-    this._circleY = y;
-    this._circleRadius = radius;
-    
-    // ensure we have a parameter object
-    options = options || {};
-    
-    // fallback for non-canvas or non-svg rendering, and for proper bounds computation
-    options.shape = Shape.circle( x, y, radius );
+    if ( typeof x === 'object' ) {
+      // allow new Circle( { circleX: ..., circleY: ..., circleRadius: ... } )
+      // the mutators will call invalidateCircle() and properly set the shape
+      options = x;
+    } else {
+      this._circleX = x;
+      this._circleY = y;
+      this._circleRadius = radius;
+      
+      // ensure we have a parameter object
+      options = options || {};
+      
+      // fallback for non-canvas or non-svg rendering, and for proper bounds computation
+      options.shape = Shape.circle( x, y, radius );
+    }
     
     Path.call( this, options );
   };
@@ -81,7 +87,7 @@ define( function( require ) {
   addCircleProp( 'Radius' );
   
   // not adding mutators for now
-  // Circle.prototype._mutatorKeys = [  ].concat( Path.prototype._mutatorKeys );
+  Circle.prototype._mutatorKeys = [ 'circleX', 'circleY', 'circleRadius' ].concat( Path.prototype._mutatorKeys );
   
   return Circle;
 } );
