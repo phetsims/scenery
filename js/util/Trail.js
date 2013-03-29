@@ -108,9 +108,6 @@ define( function( require ) {
       
       // mimic an Array
       this.length++;
-      for ( var i = 0; i < this.length; i++ ) {
-        this[i] = this.nodes[i];
-      }
       return this;
     },
     
@@ -122,10 +119,6 @@ define( function( require ) {
       
       // mimic an Array
       this.length--;
-      delete this[this.length];
-      for ( var i = 0; i < this.length; i++ ) {
-        this[i] = this.nodes[i];
-      }
       return this;
     },
     
@@ -139,7 +132,6 @@ define( function( require ) {
       
       // mimic an Array
       this.length++;
-      this[this.length-1] = node;
       return this;
     },
     
@@ -151,7 +143,6 @@ define( function( require ) {
       
       // mimic an Array
       this.length--;
-      delete this[this.length];
       return this;
     },
     
