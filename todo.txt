@@ -7,6 +7,7 @@ Layer refresh:
     Conceptually verify edge cases
 
 Priorities:
+    Accessibility
     Layer Refresh
     Force non-canvas above 'interactive' DOM node
     Flag for skipping dirty region handling and other overhead?
@@ -15,10 +16,7 @@ Priorities:
     Performance
         Same-arity methods?
         Less temporary objects?
-    Line-dash offsets? check SVG support
-        Yes, see stroke-dashoffset for SVG, lineDashOffset for Canvas
     Add center: { x: 5, y: 10 } ?
-    Documentation
     Font consider defensive copy in Text nodes?
     Add gradient/pattern invalidation?
 
@@ -205,6 +203,7 @@ Layers / caching:
     Proof-of-concept for performance and DOM integration
 
 * Event dispatch:
+    ** See inert subtrees at http://www.whatwg.org/specs/web-apps/current-work/multipage/editing.html#inert-subtrees
     * Hook into browser 'zoom' support? - pinch-to-zoom is different? Maybe we can detect?
     Investigate Event.preventManipulation
     ** MSPointerMove filter since location may not have changed while touch is down!!!
@@ -237,6 +236,7 @@ Layers / caching:
         Showing where the fingers are with a display (for projectors)
 
 Accessibility / shadow DOM:
+    see http://www.whatwg.org/specs/web-apps/current-work/multipage/editing.html
     ARIA in general?
     see http://www.paciellogroup.com/blog/2011/12/html5-canvas-accessibility-discussions-2009-2011/
         and http://www.paciellogroup.com/blog/2012/09/html5-accessibility-september-2012/
