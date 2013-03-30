@@ -41,17 +41,17 @@ define( function( require ) {
       return this;
     };
     
-    proto.beforeCanvasFill = function( layer ) {
-      layer.setFillStyle( this._fill );
+    proto.beforeCanvasFill = function( wrapper ) {
+      wrapper.setFillStyle( this._fill );
       if ( this._fill.transformMatrix ) {
-        layer.context.save();
-        this._fill.transformMatrix.canvasAppendTransform( layer.context );
+        wrapper.context.save();
+        this._fill.transformMatrix.canvasAppendTransform( wrapper.context );
       }
     };
     
-    proto.afterCanvasFill = function( layer ) {
+    proto.afterCanvasFill = function( wrapper ) {
       if ( this._fill.transformMatrix ) {
-        layer.context.restore();
+        wrapper.context.restore();
       }
     };
     

@@ -65,21 +65,21 @@ define( function( require ) {
       return this._shape !== null;
     },
     
-    paintCanvas: function( state, layer, context ) {
+    paintCanvas: function( state, wrapper, context ) {
       if ( this.hasShape() ) {
         // TODO: fill/stroke delay optimizations?
         context.beginPath();
         this._shape.writeToContext( context );
 
         if ( this._fill ) {
-          this.beforeCanvasFill( layer ); // defined in Fillable
+          this.beforeCanvasFill( wrapper ); // defined in Fillable
           context.fill();
-          this.afterCanvasFill( layer ); // defined in Fillable
+          this.afterCanvasFill( wrapper ); // defined in Fillable
         }
         if ( this._stroke ) {
-          this.beforeCanvasStroke( layer ); // defined in Strokable
+          this.beforeCanvasStroke( wrapper ); // defined in Strokable
           context.stroke();
-          this.afterCanvasStroke( layer ); // defined in Strokable
+          this.afterCanvasStroke( wrapper ); // defined in Strokable
         }
       }
     },

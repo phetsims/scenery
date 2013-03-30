@@ -133,23 +133,23 @@ define( function( require ) {
       return this;
     };
     
-    proto.beforeCanvasStroke = function( layer ) {
+    proto.beforeCanvasStroke = function( wrapper ) {
       // TODO: is there a better way of not calling so many things on each stroke?
-      layer.setStrokeStyle( this._stroke );
-      layer.setLineWidth( this.getLineWidth() );
-      layer.setLineCap( this.getLineCap() );
-      layer.setLineJoin( this.getLineJoin() );
-      layer.setLineDash( this.getLineDash() );
-      layer.setLineDashOffset( this.getLineDashOffset() );
+      wrapper.setStrokeStyle( this._stroke );
+      wrapper.setLineWidth( this.getLineWidth() );
+      wrapper.setLineCap( this.getLineCap() );
+      wrapper.setLineJoin( this.getLineJoin() );
+      wrapper.setLineDash( this.getLineDash() );
+      wrapper.setLineDashOffset( this.getLineDashOffset() );
       if ( this._stroke.transformMatrix ) {
-        layer.context.save();
-        this._stroke.transformMatrix.canvasAppendTransform( layer.context );
+        wrapper.context.save();
+        this._stroke.transformMatrix.canvasAppendTransform( wrapper.context );
       }
     };
     
-    proto.afterCanvasStroke = function( layer ) {
+    proto.afterCanvasStroke = function( wrapper ) {
       if ( this._stroke.transformMatrix ) {
-        layer.context.restore();
+        wrapper.context.restore();
       }
     };
     

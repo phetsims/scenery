@@ -24,6 +24,7 @@ define( function( require ) {
   var Shape = require( 'KITE/Shape' );
   
   var Layer = require( 'SCENERY/layers/Layer' ); // uses Layer's prototype for inheritance
+  require( 'SCENERY/util/CanvasContextWrapper' );
   require( 'SCENERY/util/RenderState' );
   require( 'SCENERY/util/Trail' );
   require( 'SCENERY/util/TrailPointer' );
@@ -66,7 +67,7 @@ define( function( require ) {
     
     this.isCanvasLayer = true;
     
-    this.resetStyles();
+    this.wrapper = new scenery.CanvasContextWrapper( this.canvas, this.context );
   };
   var CanvasLayer = scenery.CanvasLayer;
   
@@ -94,9 +95,6 @@ define( function( require ) {
       
       // switch to an identity transform
       this.context.setTransform( this.backingScale, 0, 0, this.backingScale, 0, 0 );
-      
-      // reset the internal styles so they match the defaults that should be present
-      this.resetStyles();
       
       var visibleDirtyBounds = args.fullRender ? scene.sceneBounds : this.dirtyBounds.intersection( scene.sceneBounds );
       
@@ -128,14 +126,14 @@ define( function( require ) {
       var endPointer = new scenery.TrailPointer( this.endPaintedTrail, true );
       
       // stack for canvases that need to be painted, since some effects require scratch canvases
-      var canvasStack = [ this.canvas ];
-      var contextStack = [ this.context ];
+      var wrapperStack = [ this.wrapper ]; // type {CanvasContextWrapper}
+      this.wrapper.resetStyles(); // let's be defensive, save() and restore() may have been called previously
       
       function requiresScratchCanvas( trail ) {
         return trail.lastNode().getOpacity() < 1;
       }
       
-      function pushCanvas() {
+      function getCanvasWrapper() {
         // TODO: verify that this works with hi-def canvases
         // TODO: use a cache of scratch canvases/contexts on the scene for this purpose, instead of creation
         var canvas = document.createElement( 'canvas' );
@@ -143,21 +141,17 @@ define( function( require ) {
         canvas.height = layer.logicalHeight * layer.backingScale;
         var context = canvas.getContext( '2d' );
         
-        canvasStack.push( canvas );
-        contextStack.push( context );
-      }
-      
-      function popCanvas() {
-        canvasStack.pop();
-        contextStack.pop();
+        return new scenery.CanvasContextWrapper( canvas, context );
       }
       
       function enter( state, trail ) {
         trail.lastNode().enterState( state, trail );
         if ( requiresScratchCanvas( trail ) ) {
-          pushCanvas();
+          var wrapper = getCanvasWrapper();
+          wrapperStack.push( wrapper );
           
-          var newContext = contextStack[contextStack.length-1];
+          var newContext = wrapper.context;
+          
           // switch to an identity transform
           newContext.setTransform( layer.backingScale, 0, 0, layer.backingScale, 0, 0 );
           
@@ -165,17 +159,14 @@ define( function( require ) {
           _.each( trail.nodes, function( node ) {
             node.transform.getMatrix().canvasAppendTransform( newContext );
           } );
-          
-          // reset the internal styles so they match the defaults that should be present
-          layer.resetStyles();
         }
       }
       
       function exit( state, trail ) {
         trail.lastNode().exitState( state, trail );
         if ( requiresScratchCanvas( trail ) ) {
-          var baseContext = contextStack[contextStack.length-2];
-          var topCanvas = canvasStack[canvasStack.length-1];
+          var baseContext = wrapperStack[wrapperStack.length-2].context;
+          var topCanvas = wrapperStack[wrapperStack.length-1].canvas;
           
           // apply necessary style transforms before painting our popped canvas onto the next canvas
           var opacityChange = trail.lastNode().getOpacity() < 1;
@@ -191,11 +182,7 @@ define( function( require ) {
             baseContext.globalAlpha = 1;
           }
           
-          popCanvas();
-          
-          // no transform sync required on the old context here, but styles have changed
-          // TODO: consider a styles stack also, where we track what styles were applied properly for each context.
-          layer.resetStyles();
+          wrapperStack.pop();
         }
       }
       
@@ -240,7 +227,10 @@ define( function( require ) {
             enter( state, pointer.trail );
             
             if ( node.isPainted() ) {
-              node.paintCanvas( state, layer, contextStack[contextStack.length-1] );
+              var wrapper = wrapperStack[wrapperStack.length-1];
+              
+              // TODO: consider just passing the wrapper. state not needed (for now), context easily accessible
+              node.paintCanvas( state, wrapper, wrapper.context );
             }
             
             // TODO: restricted bounds rendering, and possibly generalize depthFirstUntil
@@ -301,22 +291,6 @@ define( function( require ) {
       matrix.canvasAppendTransform( this.context );
     },
     
-    resetStyles: function() {
-      this.fillStyle = null;
-      this.strokeStyle = null;
-      this.lineWidth = 1;
-      this.lineCap = 'butt'; // default 'butt';
-      this.lineJoin = 'miter';
-      this.lineDash = null;
-      this.lineDashOffset = 0;
-      this.miterLimit = 10;
-      
-      this.font = '10px sans-serif';
-      this.textAlign = 'start';
-      this.textBaseline = 'alphabetic';
-      this.direction = 'inherit';
-    },
-    
     // returns next zIndex in place. allows layers to take up more than one single zIndex
     reindex: function( zIndex ) {
       $( this.canvas ).css( 'z-index', zIndex );
@@ -352,90 +326,6 @@ define( function( require ) {
         // this.context.fillStyle = '#' + Math.floor( Math.random() * 0xffffff ).toString( 16 );
         // this.context.fillRect( bounds.x, bounds.y, bounds.width, bounds.height );
         this.context.restore();
-      }
-    },
-    
-    setFillStyle: function( style ) {
-      if ( this.fillStyle !== style ) {
-        this.fillStyle = style;
-        this.context.fillStyle = style.getCanvasStyle ? style.getCanvasStyle() : style; // allow gradients / patterns
-      }
-    },
-    
-    setStrokeStyle: function( style ) {
-      if ( this.strokeStyle !== style ) {
-        this.strokeStyle = style;
-        this.context.strokeStyle = style.getCanvasStyle ? style.getCanvasStyle() : style; // allow gradients / patterns
-      }
-    },
-    
-    setLineWidth: function( width ) {
-      if ( this.lineWidth !== width ) {
-        this.lineWidth = width;
-        this.context.lineWidth = width;
-      }
-    },
-    
-    setLineCap: function( cap ) {
-      if ( this.lineCap !== cap ) {
-        this.lineCap = cap;
-        this.context.lineCap = cap;
-      }
-    },
-    
-    setLineJoin: function( join ) {
-      if ( this.lineJoin !== join ) {
-        this.lineJoin = join;
-        this.context.lineJoin = join;
-      }
-    },
-    
-    setLineDash: function( dash ) {
-      assert && assert( dash !== undefined, 'undefined line dash would cause hard-to-trace errors' );
-      if ( this.lineDash !== dash ) {
-        this.lineDash = dash;
-        if ( this.context.setLineDash ) {
-          this.context.setLineDash( dash );
-        } else if ( this.context.mozDash !== undefined ) {
-          this.context.mozDash = dash;
-        } else {
-          // unsupported line dash! do... nothing?
-        }
-      }
-    },
-    
-    setLineDashOffset: function( lineDashOffset ) {
-      if ( this.lineDashOffset !== lineDashOffset ) {
-        this.lineDashOffset = lineDashOffset;
-        this.context.lineDashOffset = lineDashOffset;
-      }
-    },
-    
-    setFont: function( font ) {
-      if ( this.font !== font ) {
-        this.font = font;
-        this.context.font = font;
-      }
-    },
-    
-    setTextAlign: function( textAlign ) {
-      if ( this.textAlign !== textAlign ) {
-        this.textAlign = textAlign;
-        this.context.textAlign = textAlign;
-      }
-    },
-    
-    setTextBaseline: function( textBaseline ) {
-      if ( this.textBaseline !== textBaseline ) {
-        this.textBaseline = textBaseline;
-        this.context.textBaseline = textBaseline;
-      }
-    },
-    
-    setDirection: function( direction ) {
-      if ( this.direction !== direction ) {
-        this.direction = direction;
-        this.context.direction = direction;
       }
     },
     

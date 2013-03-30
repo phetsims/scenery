@@ -76,22 +76,22 @@ define( function( require ) {
     },
     
     // override paintCanvas with a faster version, since fillRect and drawRect don't affect the current default path
-    paintCanvas: function( state, layer, context ) {
+    paintCanvas: function( state, wrapper, context ) {
       // use the standard version if it's a rounded rectangle, since there is no Canvas-optimized version for that
       if ( this.isRounded() ) {
-        return Path.prototype.paintCanvas.call( this, state, layer, context );
+        return Path.prototype.paintCanvas.call( this, state, wrapper, context );
       }
       
       // TODO: how to handle fill/stroke delay optimizations here?
       if ( this._fill ) {
-        this.beforeCanvasFill( layer ); // defined in Fillable
+        this.beforeCanvasFill( wrapper ); // defined in Fillable
         context.fillRect( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
-        this.afterCanvasFill( layer ); // defined in Fillable
+        this.afterCanvasFill( wrapper ); // defined in Fillable
       }
       if ( this._stroke ) {
-        this.beforeCanvasStroke( layer ); // defined in Strokable
+        this.beforeCanvasStroke( wrapper ); // defined in Strokable
         context.strokeRect( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
-        this.afterCanvasStroke( layer ); // defined in Strokable
+        this.afterCanvasStroke( wrapper ); // defined in Strokable
       }
     },
     

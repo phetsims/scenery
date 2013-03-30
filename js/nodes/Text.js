@@ -76,24 +76,24 @@ define( function( require ) {
       this.invalidateSelf( this.accurateCanvasBounds() );
     },
 
-    paintCanvas: function( state, layer, context ) {
+    paintCanvas: function( state, wrapper, context ) {
       // extra parameters we need to set, but should avoid setting if we aren't drawing anything
       if ( this.hasFill() || this.hasStroke() ) {
-        layer.setFont( this._font.getFont() );
-        layer.setTextAlign( this._textAlign );
-        layer.setTextBaseline( this._textBaseline );
-        layer.setDirection( this._direction );
+        wrapper.setFont( this._font.getFont() );
+        wrapper.setTextAlign( this._textAlign );
+        wrapper.setTextBaseline( this._textBaseline );
+        wrapper.setDirection( this._direction );
       }
       
       if ( this.hasFill() ) {
-        this.beforeCanvasFill( layer ); // defined in Fillable
+        this.beforeCanvasFill( wrapper ); // defined in Fillable
         context.fillText( this._text, 0, 0 );
-        this.afterCanvasFill( layer ); // defined in Fillable
+        this.afterCanvasFill( wrapper ); // defined in Fillable
       }
       if ( this.hasStroke() ) {
-        this.beforeCanvasStroke( layer ); // defined in Strokable
+        this.beforeCanvasStroke( wrapper ); // defined in Strokable
         context.strokeText( this._text, 0, 0 );
-        this.afterCanvasStroke( layer ); // defined in Strokable
+        this.afterCanvasStroke( wrapper ); // defined in Strokable
       }
     },
     
