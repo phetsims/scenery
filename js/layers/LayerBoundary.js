@@ -39,8 +39,10 @@ define( function( require ) {
       return !!this.nextSelfTrail;
     },
     
+    // assumes that trail is reindexed
     equivalentPreviousTrail: function( trail ) {
       if ( this.previousSelfTrail && trail ) {
+        this.previousSelfTrail.reindex();
         return this.previousSelfTrail.equals( trail );
       } else {
         // check that handles null versions properly
@@ -50,6 +52,7 @@ define( function( require ) {
     
     equivalentNextTrail: function( trail ) {
       if ( this.nextSelfTrail && trail ) {
+        this.nextSelfTrail.reindex();
         return this.nextSelfTrail.equals( trail );
       } else {
         // check that handles null versions properly
