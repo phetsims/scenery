@@ -29,6 +29,9 @@ define( function( require ) {
   var Util = require( 'SCENERY/util/Util' );
   var objectCreate = Util.objectCreate;
   
+  // if assertions are enabled, log out layer information
+  var layerLogger = assert ? function( ob ) { console.log( ob ); } : null;
+  
   /*
    * $main should be a block-level element with a defined width and height. scene.resize() should be called whenever
    * it is resized.
@@ -316,6 +319,11 @@ define( function( require ) {
     // assert && assert( this.layerAudit() );
   };
   
+  /*
+   * Stitching intervals has essentially two specific modes:
+   * non-matching: handles added or removed nodes (and this can span multiple, even adjacent trails)
+   * matching: handles in-place layer refreshes (no nodes removed or added, but something like a renderer was changed)
+   */
   Scene.prototype.stitchInterval = function( layerMap, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match ) {
     var scene = this;
     
