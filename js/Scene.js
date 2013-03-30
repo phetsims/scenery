@@ -323,6 +323,9 @@ define( function( require ) {
    * Stitching intervals has essentially two specific modes:
    * non-matching: handles added or removed nodes (and this can span multiple, even adjacent trails)
    * matching: handles in-place layer refreshes (no nodes removed or added, but something like a renderer was changed)
+   *
+   * This separation occurs since for matching, we want to match old layers with possible new layers, so we can keep trails in their
+   * current layer instead of creating an identical layer and moving the trails to that layer.
    */
   Scene.prototype.stitchInterval = function( layerMap, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match ) {
     var scene = this;
