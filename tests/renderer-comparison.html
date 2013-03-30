@@ -579,6 +579,22 @@
           scene._clipShape = clipShape2;
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+      },{
+        name: 'Opacity',
+        width: 64,
+        height: 64,
+        draw: function( scene ) {
+          scene.addChild( new scenery.Rectangle( 0, 12, 64, 20, { fill: '#000' } ) );
+          var circle = kite.Shape.circle( 0, 0, 30 );
+          scene.addChild( new scenery.Node( {
+            opacity: 0.5,
+            children: [
+              new scenery.Path( { shape: circle, x: 12, y: 22, fill: '#f00' } ),
+              new scenery.Path( { shape: circle, x: 52, y: 22, fill: '#00f' } )
+            ]
+          } ) );
+        },
+        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
       }
     ];
     
