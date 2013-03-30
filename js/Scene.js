@@ -108,7 +108,7 @@ define( function( require ) {
         // signal to the relevant layers to remove the specified trail while the trail is still valid.
         // waiting until after the removal takes place would require more complicated code to properly handle the trails
         affectedTrail.eachTrailUnder( function( trail ) {
-          if ( trail.lastNode().hasSelf() ) {
+          if ( trail.hasSelf() ) {
             scene.layerLookup( trail ).removeNodeFromTrail( trail );
           }
         } );
@@ -178,7 +178,7 @@ define( function( require ) {
     var beforeTrail = affectedTrail.previousSelf(); // easy for the before trail
     
     var afterTrailPointer = new scenery.TrailPointer( affectedTrail.copy(), false );
-    while ( afterTrailPointer.hasTrail() && ( !afterTrailPointer.isBefore || !afterTrailPointer.trail.lastNode().hasSelf() ) ) {
+    while ( afterTrailPointer.hasTrail() && ( !afterTrailPointer.isBefore || !afterTrailPointer.trail.hasSelf() ) ) {
       afterTrailPointer.nestedForwards();
     }
     var afterTrail = afterTrailPointer.trail;
@@ -471,7 +471,7 @@ define( function( require ) {
     startStep( beforeTrail );
     beforePointer.eachTrailBetween( afterPointer, function( trail ) {
       // ignore non-self trails
-      if ( !trail.lastNode().hasSelf() || ( beforeTrail && trail.equals( beforeTrail ) ) ) {
+      if ( !trail.hasSelf() || ( beforeTrail && trail.equals( beforeTrail ) ) ) {
         return;
       }
       
@@ -515,7 +515,7 @@ define( function( require ) {
       
       // add the initial nodes to the layer
       layer.startPointer.eachTrailBetween( layer.endPointer, function( trail ) {
-        if ( trail.lastNode().hasSelf() ) {
+        if ( trail.hasSelf() ) {
           layer.addNodeFromTrail( trail );
         }
       } );
@@ -557,7 +557,7 @@ define( function( require ) {
   Scene.prototype.layerLookup = function( trail ) {
     // TODO: add tree form for optimization! this is slower than necessary, it shouldn't be O(n)!
     assert && assert( !( trail.isEmpty() || trail.nodes[0] !== this ), 'layerLookup root matches' );
-    assert && assert( trail.lastNode().hasSelf(), 'layerLookup only supports nodes with hasSelf(), as this guarantees an unambiguous answer' );
+    assert && assert( trail.hasSelf(), 'layerLookup only supports nodes with hasSelf(), as this guarantees an unambiguous answer' );
     
     if ( this.layers.length === 0 ) {
       return null; // node not contained in a layer
@@ -886,7 +886,7 @@ define( function( require ) {
     // count how many 'self' trails there are
     var eachTrailUnderSelfCount = 0;
     new scenery.Trail( this ).eachTrailUnder( function( trail ) {
-      if ( trail.lastNode().hasSelf() ) {
+      if ( trail.hasSelf() ) {
         eachTrailUnderSelfCount++;
       }
     } );
