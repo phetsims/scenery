@@ -135,7 +135,7 @@ define( function( require ) {
       
       var nodeGroup = this.idGroupMap[trailId];
       var svgFragment = node.createSVGFragment( this.svg, this.defs, nodeGroup );
-      this.updateNode( node, svgFragment, nodeGroup );
+      this.updateNode( node, svgFragment );
       this.updateNodeGroup( node, nodeGroup );
       this.idFragmentMap[trailId] = svgFragment;
       nodeGroup.appendChild( svgFragment );
@@ -209,14 +209,13 @@ define( function( require ) {
     },
     
     // updates visual styles on an existing SVG fragment
-    updateNode: function( node, fragment, group ) {
+    updateNode: function( node, fragment ) {
       if ( node.updateSVGFragment ) {
         node.updateSVGFragment( fragment );
       }
       if ( node.updateSVGDefs ) {
         node.updateSVGDefs( this.svg, this.defs );
       }
-      group.setAttribute( 'opacity', node.getOpacity() );
     },
     
     // updates necessary paint attributes on a group (not including transform)
@@ -226,6 +225,7 @@ define( function( require ) {
       } else {
         group.style.display = 'none';
       }
+      group.setAttribute( 'opacity', node.getOpacity() );
     },
     
     applyTransform: function( transform, group ) {
@@ -267,7 +267,7 @@ define( function( require ) {
       
       if ( fragment ) {
         assert && assert( group );
-        this.updateNode( node, fragment, group );
+        this.updateNode( node, fragment );
       }
       if ( group ) {
         this.updateNodeGroup( node, group );
