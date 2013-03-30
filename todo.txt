@@ -1,4 +1,6 @@
 
+Global rename of 'self' nodes to 'painted', with node.isPainted(), etc.
+
 Layer refresh:
     Handle matching
         * if a layer is changed, remove and add nodes - for pending trails, note layerLookup!
