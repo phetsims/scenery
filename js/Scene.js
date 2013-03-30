@@ -223,7 +223,7 @@ define( function( require ) {
     layer.type = layerType;
     layerLogger && layerLogger( 'created layer: ' + layer.getId() + ' of type ' + layer.type.name );
     return layer;
-  }
+  };
   
   // insert a layer into the proper place (from its starting boundary)
   Scene.prototype.insertLayer = function( layer ) {
