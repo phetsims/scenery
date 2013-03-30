@@ -142,8 +142,8 @@ define( function( require ) {
     *----------------------------------------------------------------------------*/
     
     // TODO: add SVG / DOM support
-    paintCanvas: function( state, wrapper, context ) {
-      context.drawImage( this._image, 0, 0 );
+    paintCanvas: function( wrapper ) {
+      wrapper.context.drawImage( this._image, 0, 0 );
     },
     
     /*---------------------------------------------------------------------------*

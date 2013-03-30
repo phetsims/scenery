@@ -65,7 +65,9 @@ define( function( require ) {
       return this._shape !== null;
     },
     
-    paintCanvas: function( state, wrapper, context ) {
+    paintCanvas: function( wrapper ) {
+      var context = wrapper.context;
+      
       if ( this.hasShape() ) {
         // TODO: fill/stroke delay optimizations?
         context.beginPath();

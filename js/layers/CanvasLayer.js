@@ -250,7 +250,7 @@ define( function( require ) {
               var wrapper = wrapperStack[wrapperStack.length-1];
               
               // TODO: consider just passing the wrapper. state not needed (for now), context easily accessible
-              node.paintCanvas( state, wrapper, wrapper.context );
+              node.paintCanvas( wrapper );
             }
             
             // TODO: restricted bounds rendering, and possibly generalize depthFirstUntil
