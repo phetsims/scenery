@@ -565,16 +565,18 @@
         width: 64,
         height: 64,
         draw: function( scene ) {
-          var clipShape = kite.Shape.rectangle( 10, 10, 44, 44 );
+          var clipShape1 = kite.Shape.regularPolygon( 6, 27 ).transformed( dot.Matrix3.translation( 32, 32 ) );
+          var clipShape2 = kite.Shape.regularPolygon( 9, 32 ).transformed( dot.Matrix3.translation( 32, 0 ) );
           var shape = kite.Shape.circle( 32, 32, 25 );
           var circle = new scenery.Path( {
             shape: shape,
             fill: '#000',
             stroke: '#f00',
-            lineWidth: 1
+            lineWidth: 3
           } );
-          circle._clipShape = clipShape;
+          circle._clipShape = clipShape1;
           scene.addChild( circle );
+          scene._clipShape = clipShape2;
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
       }
