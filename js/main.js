@@ -51,7 +51,6 @@ define( [
     'SCENERY/util/LinearGradient',
     'SCENERY/util/Pattern',
     'SCENERY/util/RadialGradient',
-    'SCENERY/util/RenderState',
     'SCENERY/util/SceneImage',
     'SCENERY/util/Trail',
     'SCENERY/util/TrailInterval',

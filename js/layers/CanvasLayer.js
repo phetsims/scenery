@@ -9,6 +9,8 @@
  *
  * Backing store pixel ratio info: http://www.html5rocks.com/en/tutorials/canvas/hidpi/
  *
+ * TODO: update internal documentation
+ *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
@@ -25,7 +27,6 @@ define( function( require ) {
   
   var Layer = require( 'SCENERY/layers/Layer' ); // uses Layer's prototype for inheritance
   require( 'SCENERY/util/CanvasContextWrapper' );
-  require( 'SCENERY/util/RenderState' );
   require( 'SCENERY/util/Trail' );
   require( 'SCENERY/util/TrailPointer' );
   require( 'SCENERY/util/Util' );
@@ -90,9 +91,6 @@ define( function( require ) {
         return;
       }
       
-      var state = new scenery.RenderState( scene );
-      state.layer = this;
-      
       // switch to an identity transform
       this.context.setTransform( this.backingScale, 0, 0, this.backingScale, 0, 0 );
       
@@ -102,16 +100,16 @@ define( function( require ) {
         this.clearGlobalBounds( visibleDirtyBounds );
         
         if ( !args.fullRender ) {
-          state.pushClipShape( Shape.bounds( visibleDirtyBounds ) );
+          this.pushClipShape( Shape.bounds( visibleDirtyBounds ) );
         }
         
         // dirty bounds (clear, possibly set restricted bounds and handling for that)
         // visibility checks
-        this.recursiveRender( scene, state, args );
+        this.recursiveRender( scene, args );
         
         // exists for now so that we pop the necessary context state
         if ( !args.fullRender ) {
-          state.popClipShape();
+          this.popClipShape();
         }
       }
       
@@ -119,7 +117,7 @@ define( function( require ) {
       this.dirtyBounds = Bounds2.NOTHING;
     },
     
-    recursiveRender: function( scene, state, args ) {
+    recursiveRender: function( scene, args ) {
       var layer = this;
       var i;
       var startPointer = new scenery.TrailPointer( this.startPaintedTrail, true );
@@ -148,7 +146,7 @@ define( function( require ) {
         return wrapperStack[wrapperStack.length-1];
       }
       
-      function enter( state, trail ) {
+      function enter( trail ) {
         var node = trail.lastNode();
         
         if ( requiresScratchCanvas( trail ) ) {
@@ -174,7 +172,7 @@ define( function( require ) {
         }
       }
       
-      function exit( state, trail ) {
+      function exit( trail ) {
         var node = trail.lastNode();
         
         if ( node._clipShape ) {
@@ -231,7 +229,7 @@ define( function( require ) {
         
         if ( invisibleCount === 0 ) {
           // walk up initial state
-          enter( state, boundaryTrail );
+          enter( boundaryTrail );
         }
       }
       
@@ -244,7 +242,7 @@ define( function( require ) {
           invisibleCount += node.isVisible() ? 0 : 1;
           
           if ( invisibleCount === 0 ) {
-            enter( state, pointer.trail );
+            enter( pointer.trail );
             
             if ( node.isPainted() ) {
               var wrapper = wrapperStack[wrapperStack.length-1];
@@ -275,7 +273,7 @@ define( function( require ) {
           }
         } else {
           if ( invisibleCount === 0 ) {
-            exit( state, pointer.trail );
+            exit( pointer.trail );
           }
           
           invisibleCount -= node.isVisible() ? 0 : 1;
@@ -294,7 +292,7 @@ define( function( require ) {
         
         if ( invisibleCount === 0 ) {
           // walk back the state
-          exit( state, boundaryTrail );
+          exit( boundaryTrail );
         }
         
         boundaryTrail.removeDescendant();
