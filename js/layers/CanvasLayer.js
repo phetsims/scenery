@@ -144,8 +144,13 @@ define( function( require ) {
         return new scenery.CanvasContextWrapper( canvas, context );
       }
       
+      function topWrapper() {
+        return wrapperStack[wrapperStack.length-1];
+      }
+      
       function enter( state, trail ) {
-        trail.lastNode().enterState( state, trail );
+        var node = trail.lastNode();
+        
         if ( requiresScratchCanvas( trail ) ) {
           var wrapper = getCanvasWrapper();
           wrapperStack.push( wrapper );
@@ -159,11 +164,24 @@ define( function( require ) {
           _.each( trail.nodes, function( node ) {
             node.transform.getMatrix().canvasAppendTransform( newContext );
           } );
+        } else {
+          node.transform.getMatrix().canvasAppendTransform( topWrapper().context );
+        }
+        
+        if ( node._clipShape ) {
+          // TODO: move to wrapper-specific part
+          layer.pushClipShape( node._clipShape );
         }
       }
       
       function exit( state, trail ) {
-        trail.lastNode().exitState( state, trail );
+        var node = trail.lastNode();
+        
+        if ( node._clipShape ) {
+          // TODO: move to wrapper-specific part
+          layer.popClipShape();
+        }
+        
         if ( requiresScratchCanvas( trail ) ) {
           var baseContext = wrapperStack[wrapperStack.length-2].context;
           var topCanvas = wrapperStack[wrapperStack.length-1].canvas;
@@ -183,6 +201,8 @@ define( function( require ) {
           }
           
           wrapperStack.pop();
+        } else {
+          node.transform.getInverse().canvasAppendTransform( topWrapper().context );
         }
       }
       

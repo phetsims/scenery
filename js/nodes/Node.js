@@ -125,32 +125,6 @@ define( function( require ) {
   Node.prototype = {
     constructor: Node,
     
-    // TODO: deprecated. have each layer handle this separately
-    enterState: function( state, trail ) {
-      // apply this node's transform
-      if ( !this._transform.isIdentity() ) {
-        // TODO: consider a stack-based model for transforms?
-        state.applyTransformationMatrix( this._transform.getMatrix() );
-      }
-      
-      if ( this._clipShape ) {
-        // push the clipping shape in the global coordinate frame (relative to the trail)
-        state.pushClipShape( trail.getTransform().transformShape( this._clipShape ) );
-      }
-    },
-    
-    // TODO: deprecated. have each layer handle this separately
-    exitState: function( state, trail ) {
-      if ( this._clipShape ) {
-        state.popClipShape();
-      }
-      
-      // apply the inverse of this node's transform
-      if ( !this._transform.isIdentity() ) {
-        state.applyTransformationMatrix( this._transform.getInverse() );
-      }
-    },
-    
     insertChild: function( index, node ) {
       assert && assert( node !== null && node !== undefined, 'insertChild cannot insert a null/undefined child' );
       assert && assert( !_.contains( this._children, node ), 'Parent already contains child' );
