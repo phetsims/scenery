@@ -349,6 +349,9 @@ define( function( require ) {
     
     layerLogger && layerLogger( 'stitching with boundaries:\n' + _.map( boundaries, function( boundary ) { return boundary.toString(); } ).join( '\n' ) );
     
+    // maps trail unique ID => layer, only necessary when matching since we need to remove trails from their old layers
+    var oldLayerMap = match ? this.mapTrailLayersBetween( beforeTrail, afterTrail ) : null;
+    
     /*---------------------------------------------------------------------------*
     * State
     *----------------------------------------------------------------------------*/
@@ -370,7 +373,16 @@ define( function( require ) {
     function addPendingTrailsToLayer() {
       // add the necessary nodes to the layer
       _.each( trailsToAddToLayer, function( trail ) {
-        currentLayer.addNodeFromTrail( trail );
+        if ( match ) {
+          // only remove/add if the layer has actually changed. if we are preserving the layer, don't do anything
+          var oldLayer = oldLayerMap[trail.getUniqueId()];
+          if ( oldLayer !== currentLayer ) {
+            oldLayer.removeNodeFromTrail( trail );
+            currentLayer.addNodeFromTrail( trail );
+          }
+        } else {
+          currentLayer.addNodeFromTrail( trail );
+        }
       } );
       trailsToAddToLayer = [];
     }
@@ -496,6 +508,19 @@ define( function( require ) {
       middleStep( trail.copy() );
     } );
     endStep( afterTrail );
+  };
+  
+  // returns a map from trail.getUniqueId() to the current layer in which that trail resides
+  Scene.prototype.mapTrailLayersBetween = function( beforeTrail, afterTrail ) {
+    var scene = this;
+    
+    var result = {};
+    Trail.eachSelfTrailbetween( beforeTrail, afterTrail, function( trail ) {
+      // TODO: optimize this! currently both the layer lookup and this inefficient method of using layer lookup is slow
+      result[trail.getUniqueId()] = scene.layerLookup( trail );
+    }, false, this );
+    
+    return result;
   };
   
   Scene.prototype.rebuildLayers = function() {
