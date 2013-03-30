@@ -63,8 +63,8 @@ define( function( require ) {
         if ( layerBuilder.getCurrentLayerType() !== preferredLayerType ) {
           layerBuilder.switchToType( pointer, preferredLayerType );
         }
-      } else if ( node.hasSelf() ) {
-        // node doesn't specify a renderer, but hasSelf.
+      } else if ( node.isPainted() ) {
+        // node doesn't specify a renderer, but isPainted.
         
         var supportedRenderers = node._supportedRenderers;
         var currentType = layerBuilder.getCurrentLayerType();
@@ -87,9 +87,9 @@ define( function( require ) {
         layerBuilder.switchToType( pointer, layerBuilder.getCurrentLayerType() );
       }
       
-      if ( node.hasSelf() ) {
+      if ( node.isPainted() ) {
         // trigger actual layer creation if necessary (allow collapsing of layers otherwise)
-        layerBuilder.markSelf( pointer );
+        layerBuilder.markPainted( pointer );
       }
     },
     

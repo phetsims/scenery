@@ -1,6 +1,4 @@
 
-Global rename of 'self' nodes to 'painted', with node.isPainted(), etc.
-
 Priorities:
     Accessibility
     Force non-canvas above 'interactive' DOM node

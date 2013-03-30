@@ -133,7 +133,7 @@ define( function( require ) {
     },
     
     // signal that we are actually rendering something
-    hasSelf: function() {
+    isPainted: function() {
       return true;
     },
     

@@ -163,7 +163,7 @@ define( function( require ) {
         }
         
         var node = trail.lastNode();
-        if ( node.hasSelf() ) {
+        if ( node.isPainted() ) {
           node.updateCSSTransform( trail.getTransform() );
         }
       } );

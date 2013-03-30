@@ -95,7 +95,7 @@ define( function( require ) {
     this._selfBounds = Bounds2.NOTHING; // just for this node, in "local" coordinates
     this._childBounds = Bounds2.NOTHING; // just for children, in "local" coordinates
     this._boundsDirty = true;
-    this._selfBoundsDirty = this.hasSelf();
+    this._selfBoundsDirty = this.isPainted();
     this._childBoundsDirty = true;
     
     // dirty region handling
@@ -539,7 +539,7 @@ define( function( require ) {
       return this._selfBounds.intersectsBounds( bounds );
     },
     
-    hasSelf: function() {
+    isPainted: function() {
       return false;
     },
     
@@ -1011,7 +1011,7 @@ define( function( require ) {
         throw new Error( 'unrecognized type of renderer: ' + renderer );
       }
       if ( newRenderer !== this._renderer ) {
-        assert && assert( !this.hasSelf() || !newRenderer || _.contains( this._supportedRenderers, newRenderer ), 'renderer ' + newRenderer + ' not supported by ' + this );
+        assert && assert( !this.isPainted() || !newRenderer || _.contains( this._supportedRenderers, newRenderer ), 'renderer ' + newRenderer + ' not supported by ' + this );
         this._renderer = newRenderer;
         
         this.updateLayerType();

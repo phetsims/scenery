@@ -111,7 +111,7 @@ define( function( require ) {
         // signal to the relevant layers to remove the specified trail while the trail is still valid.
         // waiting until after the removal takes place would require more complicated code to properly handle the trails
         affectedTrail.eachTrailUnder( function( trail ) {
-          if ( trail.hasSelf() ) {
+          if ( trail.isPainted() ) {
             scene.layerLookup( trail ).removeNodeFromTrail( trail );
           }
         } );
@@ -178,10 +178,10 @@ define( function( require ) {
     // since this is marked while the child is still connected, we can use our normal trail handling.
     
     // find the closest before and after self trails that are not affected
-    var beforeTrail = affectedTrail.previousSelf(); // easy for the before trail
+    var beforeTrail = affectedTrail.previousPainted(); // easy for the before trail
     
     var afterTrailPointer = new scenery.TrailPointer( affectedTrail.copy(), false );
-    while ( afterTrailPointer.hasTrail() && ( !afterTrailPointer.isBefore || !afterTrailPointer.trail.hasSelf() ) ) {
+    while ( afterTrailPointer.hasTrail() && ( !afterTrailPointer.isBefore || !afterTrailPointer.trail.isPainted() ) ) {
       afterTrailPointer.nestedForwards();
     }
     var afterTrail = afterTrailPointer.trail;
@@ -227,13 +227,13 @@ define( function( require ) {
   
   // insert a layer into the proper place (from its starting boundary)
   Scene.prototype.insertLayer = function( layer ) {
-    if ( this.layers.length > 0 && this.layers[0].startBoundary.equivalentPreviousTrail( layer.endBoundary.previousSelfTrail ) ) {
+    if ( this.layers.length > 0 && this.layers[0].startBoundary.equivalentPreviousTrail( layer.endBoundary.previousPaintedTrail ) ) {
       // layer needs to be inserted at the very beginning
       this.layers.unshift( layer );
     } else {
       for ( var i = 0; i < this.layers.length; i++ ) {
         // compare end and start boundaries, as they should match
-        if ( this.layers[i].endBoundary.equivalentNextTrail( layer.startBoundary.nextSelfTrail ) ) {
+        if ( this.layers[i].endBoundary.equivalentNextTrail( layer.startBoundary.nextPaintedTrail ) ) {
           break;
         }
       }
@@ -435,8 +435,8 @@ define( function( require ) {
             }
           }
           // sanity checks
-          assert && assert( currentLayer.startSelfTrail );
-          assert && assert( currentLayer.endSelfTrail );
+          assert && assert( currentLayer.startPaintedTrail );
+          assert && assert( currentLayer.endPaintedTrail );
           
           addPendingTrailsToLayer();
         } else {
@@ -503,7 +503,7 @@ define( function( require ) {
         layerMap[afterLayer.getId()] = currentLayer;
         addPendingTrailsToLayer();
         
-        scenery.Trail.eachSelfTrailbetween( afterTrail, currentLayer.endSelfTrail, function( trail ) {
+        scenery.Trail.eachPaintedTrailbetween( afterTrail, currentLayer.endPaintedTrail, function( trail ) {
           trail.reindex();
           afterLayer.removeNodeFromTrail( trail );
           currentLayer.addNodeFromTrail( trail );
@@ -534,7 +534,7 @@ define( function( require ) {
     startStep( beforeTrail );
     beforePointer.eachTrailBetween( afterPointer, function( trail ) {
       // ignore non-self trails
-      if ( !trail.hasSelf() || ( beforeTrail && trail.equals( beforeTrail ) ) ) {
+      if ( !trail.isPainted() || ( beforeTrail && trail.equals( beforeTrail ) ) ) {
         return;
       }
       
@@ -548,7 +548,7 @@ define( function( require ) {
     var scene = this;
     
     var result = {};
-    scenery.Trail.eachSelfTrailbetween( beforeTrail, afterTrail, function( trail ) {
+    scenery.Trail.eachPaintedTrailbetween( beforeTrail, afterTrail, function( trail ) {
       // TODO: optimize this! currently both the layer lookup and this inefficient method of using layer lookup is slow
       result[trail.getUniqueId()] = scene.layerLookup( trail );
     }, false, this );
@@ -591,7 +591,7 @@ define( function( require ) {
       
       // add the initial nodes to the layer
       layer.startPointer.eachTrailBetween( layer.endPointer, function( trail ) {
-        if ( trail.hasSelf() ) {
+        if ( trail.isPainted() ) {
           layer.addNodeFromTrail( trail );
         }
       } );
@@ -633,7 +633,7 @@ define( function( require ) {
   Scene.prototype.layerLookup = function( trail ) {
     // TODO: add tree form for optimization! this is slower than necessary, it shouldn't be O(n)!
     assert && assert( !( trail.isEmpty() || trail.nodes[0] !== this ), 'layerLookup root matches' );
-    assert && assert( trail.hasSelf(), 'layerLookup only supports nodes with hasSelf(), as this guarantees an unambiguous answer' );
+    assert && assert( trail.isPainted(), 'layerLookup only supports nodes with isPainted(), as this guarantees an unambiguous answer' );
     
     if ( this.layers.length === 0 ) {
       return null; // node not contained in a layer
@@ -643,11 +643,11 @@ define( function( require ) {
       var layer = this.layers[i];
       
       // trails may be stale, so we need to update their indices
-      if ( layer.startSelfTrail ) { layer.startSelfTrail.reindex(); }
-      if ( layer.endSelfTrail ) { layer.endSelfTrail.reindex(); }
+      if ( layer.startPaintedTrail ) { layer.startPaintedTrail.reindex(); }
+      if ( layer.endPaintedTrail ) { layer.endPaintedTrail.reindex(); }
       
-      if ( !layer.endSelfTrail || trail.compare( layer.endSelfTrail ) <= 0 ) {
-        if ( !layer.startSelfTrail || trail.compare( layer.startSelfTrail ) >= 0 ) {
+      if ( !layer.endPaintedTrail || trail.compare( layer.endPaintedTrail ) <= 0 ) {
+        if ( !layer.startPaintedTrail || trail.compare( layer.startPaintedTrail ) >= 0 ) {
           return layer;
         } else {
           return null; // node is not contained in a layer (it is before any existing layer)
@@ -677,8 +677,8 @@ define( function( require ) {
     for ( var i = 0; i < this.layers.length; i++ ) {
       var layer = this.layers[i];
       
-      var notBefore = endPointer.compareNested( new scenery.TrailPointer( layer.startSelfTrail, true ) ) !== -1;
-      var notAfter = startPointer.compareNested( new scenery.TrailPointer( layer.endSelfTrail, true ) ) !== 1;
+      var notBefore = endPointer.compareNested( new scenery.TrailPointer( layer.startPaintedTrail, true ) ) !== -1;
+      var notAfter = startPointer.compareNested( new scenery.TrailPointer( layer.endPaintedTrail, true ) ) !== 1;
       
       if ( notBefore && notAfter ) {
         result.push( layer );
@@ -960,40 +960,40 @@ define( function( require ) {
     assert && assert( boundaries.length === this.layers.length + 1, 'boundary count (' + boundaries.length + ') does not match layer count (' + this.layers.length + ') + 1' );
     
     // count how many 'self' trails there are
-    var eachTrailUnderSelfCount = 0;
+    var eachTrailUnderPaintedCount = 0;
     new scenery.Trail( this ).eachTrailUnder( function( trail ) {
-      if ( trail.hasSelf() ) {
-        eachTrailUnderSelfCount++;
+      if ( trail.isPainted() ) {
+        eachTrailUnderPaintedCount++;
       }
     } );
     
-    var layerSelfCount = 0;
+    var layerPaintedCount = 0;
     _.each( this.layers, function( layer ) {
-      layerSelfCount += layer.getLayerTrails().length;
+      layerPaintedCount += layer.getLayerTrails().length;
     } );
     
-    var layerIterationSelfCount = 0;
+    var layerIterationPaintedCount = 0;
     _.each( this.layers, function( layer ) {
       var selfCount = 0;
-      scenery.Trail.eachSelfTrailbetween( layer.startSelfTrail, layer.endSelfTrail, function( trail ) {
+      scenery.Trail.eachPaintedTrailbetween( layer.startPaintedTrail, layer.endPaintedTrail, function( trail ) {
         selfCount++;
       }, false, scene );
       assert && assert( selfCount > 0, 'every layer must have at least one self trail' );
-      layerIterationSelfCount += selfCount;
+      layerIterationPaintedCount += selfCount;
     } );
     
-    assert && assert( eachTrailUnderSelfCount === layerSelfCount, 'cross-referencing self trail counts: layerSelfCount, ' + eachTrailUnderSelfCount + ' vs ' + layerSelfCount );
-    assert && assert( eachTrailUnderSelfCount === layerIterationSelfCount, 'cross-referencing self trail counts: layerIterationSelfCount, ' + eachTrailUnderSelfCount + ' vs ' + layerIterationSelfCount );
+    assert && assert( eachTrailUnderPaintedCount === layerPaintedCount, 'cross-referencing self trail counts: layerPaintedCount, ' + eachTrailUnderPaintedCount + ' vs ' + layerPaintedCount );
+    assert && assert( eachTrailUnderPaintedCount === layerIterationPaintedCount, 'cross-referencing self trail counts: layerIterationPaintedCount, ' + eachTrailUnderPaintedCount + ' vs ' + layerIterationPaintedCount );
     
     _.each( this.layers, function( layer ) {
-      var startTrail = layer.startSelfTrail;
-      var endTrail = layer.endSelfTrail;
+      var startTrail = layer.startPaintedTrail;
+      var endTrail = layer.endPaintedTrail;
       
       assert && assert( startTrail.compare( endTrail ) <= 0, 'proper ordering on layer trails' );
     } );
     
     for ( var i = 1; i < this.layers.length; i++ ) {
-      assert && assert( this.layers[0].startSelfTrail.compare( this.layers[1].startSelfTrail ) === -1, 'proper ordering of layers in scene.layers array' );
+      assert && assert( this.layers[0].startPaintedTrail.compare( this.layers[1].startPaintedTrail ) === -1, 'proper ordering of layers in scene.layers array' );
     }
     
     return true; // so we can assert( layerAudit() )
@@ -1023,11 +1023,11 @@ define( function( require ) {
       if ( !layerEntries[endIndex] ) {
         layerEntries[endIndex] = '';
       }
-      layer.startSelfTrail.reindex();
-      layer.endSelfTrail.reindex();
+      layer.startPaintedTrail.reindex();
+      layer.endPaintedTrail.reindex();
       var layerInfo = layer.getId() + ' <strong>' + layer.type.name + '</strong>' +
-                      ' trails: ' + ( layer.startSelfTrail ? str( layer.startSelfTrail ) : layer.startSelfTrail ) +
-                      ',' + ( layer.endSelfTrail ? str( layer.endSelfTrail ) : layer.endSelfTrail ) +
+                      ' trails: ' + ( layer.startPaintedTrail ? str( layer.startPaintedTrail ) : layer.startPaintedTrail ) +
+                      ',' + ( layer.endPaintedTrail ? str( layer.endPaintedTrail ) : layer.endPaintedTrail ) +
                       ' pointers: ' + str( layer.startPointer ) +
                       ',' + str( layer.endPointer );
       layerEntries[startIdx] += '<div style="color: #080">+Layer ' + layerInfo + '</div>';
@@ -1051,7 +1051,7 @@ define( function( require ) {
         if ( node.constructor.name ) {
           div += ' ' + node.constructor.name; // see http://stackoverflow.com/questions/332422/how-do-i-get-the-name-of-an-objects-type-in-javascript
         }
-        div += ' <span style="font-weight: ' + ( node.hasSelf() ? 'bold' : 'normal' ) + '">' + pointer.trail.lastNode().getId() + '</span>';
+        div += ' <span style="font-weight: ' + ( node.isPainted() ? 'bold' : 'normal' ) + '">' + pointer.trail.lastNode().getId() + '</span>';
         div += ' <span style="color: #888">' + str( pointer.trail ) + '</span>';
         if ( !node._visible ) {
           addQualifier( 'invisible' );

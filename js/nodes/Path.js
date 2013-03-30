@@ -122,7 +122,7 @@ define( function( require ) {
       this.removeSVGStrokeDef( svg, defs );
     },
     
-    hasSelf: function() {
+    isPainted: function() {
       return true;
     },
     

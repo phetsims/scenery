@@ -329,7 +329,7 @@ define( function( require ) {
       return this._direction;
     },
     
-    hasSelf: function() {
+    isPainted: function() {
       return true;
     }
   } );

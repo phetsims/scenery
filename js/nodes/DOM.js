@@ -105,7 +105,7 @@ define( function( require ) {
       this._$container.css( transform.getMatrix().getCSSTransformStyles() );
     },
     
-    hasSelf: function() {
+    isPainted: function() {
       return true;
     },
     

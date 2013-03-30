@@ -123,8 +123,8 @@ define( function( require ) {
     
     recursiveRender: function( state, args ) {
       var i;
-      var startPointer = new scenery.TrailPointer( this.startSelfTrail, true );
-      var endPointer = new scenery.TrailPointer( this.endSelfTrail, true );
+      var startPointer = new scenery.TrailPointer( this.startPaintedTrail, true );
+      var endPointer = new scenery.TrailPointer( this.endPaintedTrail, true );
       
       /*
        * We count how many invisible nodes are in our trail, so we can properly iterate without inspecting everything.
@@ -165,7 +165,7 @@ define( function( require ) {
           if ( invisibleCount === 0 ) {
             node.enterState( state, pointer.trail );
             
-            if ( node.hasSelf() ) {
+            if ( node.isPainted() ) {
               node.paintCanvas( state );
             }
             
