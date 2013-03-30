@@ -358,6 +358,7 @@ define( function( require ) {
     
     // concatenates the unique IDs of nodes in the trail, so that we can do id-based lookups
     getUniqueId: function() {
+      // TODO: consider caching this if it is ever a bottleneck. it seems like it might be called in layer-refresh inner loops
       return _.map( this.nodes, function( node ) { return node.getId(); } ).join( '-' );
     },
     
