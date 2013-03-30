@@ -334,6 +334,8 @@ define( function( require ) {
    *
    * The beforeTrail and afterTrail should be outside the modifications, and if the modifications are to the start/end of the graph,
    * they should be passed as null to indicate 'before everything' and 'after everything' respectively.
+   *
+   * Here be dragons!
    */
   Scene.prototype.stitchInterval = function( layerMap, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match ) {
     var scene = this;
@@ -363,6 +365,7 @@ define( function( require ) {
     var currentLayer = beforeLayer;
     var currentLayerType = beforeLayer ? beforeLayer.type : null;
     var currentStartBoundary = null;
+    var matchingLayer = null; // set whenever a trail has a matching layer, cleared after boundary
     
     // a list of layers that are most likely removed, not including the afterLayer for gluing
     var layersToRemove = [];
@@ -410,9 +413,17 @@ define( function( require ) {
             // existing layer, reposition its endpoint
             currentLayer.setEndBoundary( nextBoundary );
           } else {
-            layerLogger && layerLogger( 'creating layer' );
             assert && assert( currentStartBoundary );
-            currentLayer = scene.createAndAddLayer( currentLayerType, layerArgs, currentStartBoundary, nextBoundary );
+            
+            if ( matchingLayer ) {
+              layerLogger && layerLogger( 'matching layer used: ' + matchingLayer.getId() );
+              matchingLayer.setStartBoundary( currentStartBoundary );
+              matchingLayer.setEndBoundary( nextBoundary );
+              currentLayer = matchingLayer;
+            } else {
+              layerLogger && layerLogger( 'creating layer' );
+              currentLayer = scene.createAndAddLayer( currentLayerType, layerArgs, currentStartBoundary, nextBoundary );
+            }
           }
           // sanity checks
           assert && assert( currentLayer.startSelfTrail );
@@ -427,11 +438,19 @@ define( function( require ) {
         currentLayer = null;
         currentLayerType = nextBoundary.nextLayerType;
         currentStartBoundary = nextBoundary;
+        matchingLayer = null;
         nextBoundaryIndex++;
         nextBoundary = boundaries[nextBoundaryIndex];
       }
       if ( trail && !isEnd ) {
         trailsToAddToLayer.push( trail );
+      }
+      if ( match && !isEnd ) { // TODO: verify this condition with test cases
+        // if the node's old layer is compatible
+        var layer = oldLayerMap[trail.getUniqueId()];
+        if ( layer.type === currentLayerType ) {
+          matchingLayer = layer;
+        }
       }
       currentTrail = trail;
     }
