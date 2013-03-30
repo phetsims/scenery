@@ -373,11 +373,31 @@ define( function( require ) {
     },
     
     markDirtyRegion: function( args ) {
-      assert && assert( args.bounds.isEmpty() || args.bounds.isFinite(), 'Infinite (non-empty) dirty bounds passed to CanvasLayer' );
-      var bounds = args.transform.transformBounds2( args.bounds );
+      this.internalMarkDirtyBounds( args.bounds, args.transform );
+    },
+    
+    addNodeFromTrail: function( trail ) {
+      Layer.prototype.addNodeFromTrail.call( this, trail );
+      
+      // since the node's getBounds() are in the parent coordinate frame, we peel off the last node to get the correct (relevant) transform
+      // TODO: more efficient way of getting this transform?
+      this.internalMarkDirtyBounds( trail.lastNode().getBounds(), trail.slice( 0, trail.length - 1 ).getTransform() );
+    },
+    
+    removeNodeFromTrail: function( trail ) {
+      Layer.prototype.removeNodeFromTrail.call( this, trail );
+      
+      // since the node's getBounds() are in the parent coordinate frame, we peel off the last node to get the correct (relevant) transform
+      // TODO: more efficient way of getting this transform?
+      this.internalMarkDirtyBounds( trail.lastNode().getBounds(), trail.slice( 0, trail.length - 1 ).getTransform() );
+    },
+    
+    internalMarkDirtyBounds: function( localBounds, transform ) {
+      assert && assert( localBounds.isEmpty() || localBounds.isFinite(), 'Infinite (non-empty) dirty bounds passed to internalMarkDirtyBounds' );
+      var globalBounds = transform.transformBounds2( localBounds );
       
       // TODO: for performance, consider more than just a single dirty bounding box
-      this.dirtyBounds = this.dirtyBounds.union( bounds.dilated( 1 ).roundedOut() );
+      this.dirtyBounds = this.dirtyBounds.union( globalBounds.dilated( 1 ).roundedOut() );
     },
     
     transformChange: function( args ) {
