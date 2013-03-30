@@ -215,17 +215,15 @@ define( function( require ) {
     this.layerChangeIntervals.push( interval );
   };
   
-  Scene.prototype.createAndAddLayer = function( layerType, layerArgs, startBoundary, endBoundary ) {
+  Scene.prototype.createLayer = function( layerType, layerArgs, startBoundary, endBoundary ) {
     var layer = layerType.createLayer( _.extend( {
       startBoundary: startBoundary,
       endBoundary: endBoundary
     }, layerArgs ) );
     layer.type = layerType;
     layerLogger && layerLogger( 'created layer: ' + layer.getId() + ' of type ' + layer.type.name );
-    this.insertLayer( layer );
-    
     return layer;
-  };
+  }
   
   // insert a layer into the proper place (from its starting boundary)
   Scene.prototype.insertLayer = function( layer ) {
@@ -366,6 +364,8 @@ define( function( require ) {
     var currentStartBoundary = null;
     var matchingLayer = null; // set whenever a trail has a matching layer, cleared after boundary
     
+    var layersToAdd = [];
+    
     // a list of layers that are most likely removed, not including the afterLayer for gluing
     var layersToRemove = [];
     for ( var i = beforeLayerIndex + 1; i < afterLayerIndex; i++ ) {
@@ -395,6 +395,11 @@ define( function( require ) {
       }
     }
     
+    function addAndCreateLayer( startBoundary, endBoundary ) {
+      currentLayer = scene.createLayer( currentLayerType, layerArgs, startBoundary, endBoundary );
+      layersToAdd.push( currentLayer );
+    }
+    
     function step( trail, isEnd ) {
       layerLogger && layerLogger( 'step: ' + ( trail ? trail.toString() : trail ) );
       // check for a boundary at this step between currentTrail and trail
@@ -421,7 +426,7 @@ define( function( require ) {
               currentLayer = matchingLayer;
             } else {
               layerLogger && layerLogger( 'creating layer' );
-              currentLayer = scene.createAndAddLayer( currentLayerType, layerArgs, currentStartBoundary, nextBoundary );
+              addAndCreateLayer( currentStartBoundary, nextBoundary ); // sets currentLayer
             }
           }
           // sanity checks
@@ -489,7 +494,7 @@ define( function( require ) {
         // need to 'unglue' and split the layer
         layerLogger && layerLogger( 'ungluing layer' );
         assert && assert( currentStartBoundary );
-        currentLayer = scene.createAndAddLayer( currentLayerType, layerArgs, currentStartBoundary, afterLayerEndBoundary );
+        addAndCreateLayer( currentStartBoundary, afterLayerEndBoundary ); // sets currentLayer
         layerMap[afterLayer.getId()] = currentLayer;
         addPendingTrailsToLayer();
         
@@ -512,6 +517,9 @@ define( function( require ) {
       
       _.each( layersToRemove, function( layer ) {
         scene.disposeLayer( layer );
+      } );
+      _.each( layersToAdd, function( layer ) {
+        scene.insertLayer( layer );
       } );
     }
     
