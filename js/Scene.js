@@ -303,13 +303,12 @@ define( function( require ) {
       
       var boundaries = scene.calculateBoundaries( beforeLayer ? beforeLayer.type : null, beforeTrail, afterTrail );
       
-      if ( match ) {
+      // if ( match ) {
         // TODO: patch in the matching version!
-        // scene.stitchInterval( layerMap, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries );
-        scene.rebuildLayers(); // bleh
-      } else {
-        scene.stitchInterval( layerMap, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match );
-      }
+        // scene.rebuildLayers(); // bleh
+      // } else {
+      scene.stitchInterval( layerMap, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match );
+      // }
     } );
     this.layerChangeIntervals = [];
     
@@ -534,7 +533,7 @@ define( function( require ) {
     var scene = this;
     
     var result = {};
-    Trail.eachSelfTrailbetween( beforeTrail, afterTrail, function( trail ) {
+    scenery.Trail.eachSelfTrailbetween( beforeTrail, afterTrail, function( trail ) {
       // TODO: optimize this! currently both the layer lookup and this inefficient method of using layer lookup is slow
       result[trail.getUniqueId()] = scene.layerLookup( trail );
     }, false, this );
