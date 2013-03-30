@@ -1,16 +1,8 @@
 
 Global rename of 'self' nodes to 'painted', with node.isPainted(), etc.
 
-Layer refresh:
-    Handle matching
-        * if a layer is changed, remove and add nodes - for pending trails, note layerLookup!
-        * won't delete all 'between old' layers
-            if ( !currentLayer && currentType === node.oldLayer.type && oldLayer not used ) { currentLayer = oldLayer, oldLayer.used = true }
-    Conceptually verify edge cases
-
 Priorities:
     Accessibility
-    Layer Refresh
     Force non-canvas above 'interactive' DOM node
         Need to track lowest DOM-interactive Trail for each Scene.
             null indicates none exists, and represents the far 'after'
