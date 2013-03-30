@@ -142,9 +142,7 @@ define( function( require ) {
     *----------------------------------------------------------------------------*/
     
     // TODO: add SVG / DOM support
-    paintCanvas: function( state ) {
-      var layer = state.layer;
-      var context = layer.context;
+    paintCanvas: function( state, layer, context ) {
       context.drawImage( this._image, 0, 0 );
     },
     

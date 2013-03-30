@@ -122,6 +122,7 @@ define( function( require ) {
     },
     
     recursiveRender: function( state, args ) {
+      var thisLayer = this;
       var i;
       var startPointer = new scenery.TrailPointer( this.startPaintedTrail, true );
       var endPointer = new scenery.TrailPointer( this.endPaintedTrail, true );
@@ -166,7 +167,7 @@ define( function( require ) {
             node.enterState( state, pointer.trail );
             
             if ( node.isPainted() ) {
-              node.paintCanvas( state );
+              node.paintCanvas( state, thisLayer, thisLayer.context );
             }
             
             // TODO: restricted bounds rendering, and possibly generalize depthFirstUntil

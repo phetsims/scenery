@@ -76,10 +76,7 @@ define( function( require ) {
       this.invalidateSelf( this.accurateCanvasBounds() );
     },
 
-    paintCanvas: function( state ) {
-      var layer = state.layer;
-      var context = layer.context;
-      
+    paintCanvas: function( state, layer, context ) {
       // extra parameters we need to set, but should avoid setting if we aren't drawing anything
       if ( this.hasFill() || this.hasStroke() ) {
         layer.setFont( this._font.getFont() );
