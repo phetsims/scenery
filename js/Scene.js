@@ -516,9 +516,11 @@ define( function( require ) {
       }
       
       _.each( layersToRemove, function( layer ) {
+        layerLogger && layerLogger( 'disposing layer: ' + layer.getId() );
         scene.disposeLayer( layer );
       } );
       _.each( layersToAdd, function( layer ) {
+        layerLogger && layerLogger( 'inserting layer: ' + layer.getId() );
         scene.insertLayer( layer );
       } );
     }
