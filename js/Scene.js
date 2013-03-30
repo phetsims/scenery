@@ -942,7 +942,7 @@ define( function( require ) {
     var scene = this;
     
     var boundaries = this.calculateBoundaries( null, null, null );
-    assert && assert( boundaries.length === this.layers.length + 1 );
+    assert && assert( boundaries.length === this.layers.length + 1, 'boundary count (' + boundaries.length + ') does not match layer count (' + this.layers.length + ') + 1' );
     
     // count how many 'self' trails there are
     var eachTrailUnderSelfCount = 0;
