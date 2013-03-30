@@ -132,6 +132,9 @@ DOM:
         - Either delegate (just set transform) or have inline with just SVG over (with pointer-events)
 
 ** SVG: -- important because we can layer DOM nodes properly under SVG
+    * SVG clip support (use default clip-rule?) see http://www.w3.org/TR/SVG/masking.html#ClipPathElement
+        <clipPath id="clipId"><path d="..."/></clipPath><whatever clip-path="url(#clipId)"/>
+        * does it need to be in defs?
     * Domparser and xmlserializer are ie9 for avg fragment support
     *** Highly recommend <image xlink:href="...">, since we can include URL / data URL, nesting works, and we don't pollute the id namespace
         Direct nesting fails in IE9
