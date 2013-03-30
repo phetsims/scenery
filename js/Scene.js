@@ -326,6 +326,14 @@ define( function( require ) {
    *
    * This separation occurs since for matching, we want to match old layers with possible new layers, so we can keep trails in their
    * current layer instead of creating an identical layer and moving the trails to that layer.
+   *
+   * The stitching basically re-does the layering between a start and end trail, attempting to minimize the amount of changes made.
+   * It can include 'gluing' layers together (a node that caused layer splits was removed, and before/after layers are joined),
+   * 'ungluing' layers (an inserted node causes a layer split in an existing layer, and it is separated into a before/after),
+   * or normal updating of the interior.
+   *
+   * The beforeTrail and afterTrail should be outside the modifications, and if the modifications are to the start/end of the graph,
+   * they should be passed as null to indicate 'before everything' and 'after everything' respectively.
    */
   Scene.prototype.stitchInterval = function( layerMap, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match ) {
     var scene = this;
@@ -429,7 +437,6 @@ define( function( require ) {
       layerLogger && layerLogger( 'endStep: ' + ( trail ? trail.toString() : trail ) );
       step( trail, true );
       
-      // TODO: better handling and concepts of beforeLayer / afterLayer when endtrails are null. leaving superfluous layer after removing everything
       if ( beforeLayer !== afterLayer && boundaries.length === 0 ) {
         // glue the layers together
         layerLogger && layerLogger( 'gluing layer' );
