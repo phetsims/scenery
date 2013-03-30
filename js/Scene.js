@@ -227,16 +227,21 @@ define( function( require ) {
   
   // insert a layer into the proper place (from its starting boundary)
   Scene.prototype.insertLayer = function( layer ) {
-    for ( var i = 0; i < this.layers.length; i++ ) {
-      // compare end and start boundaries, as they should match
-      if ( this.layers[i].endBoundary.equivalentNextTrail( layer.startBoundary.nextSelfTrail ) ) {
-        break;
-      }
-    }
-    if ( i < this.layers.length ) {
-      this.layers.splice( i + 1, 0, layer );
+    if ( this.layers.length > 0 && this.layers[0].startBoundary.equivalentPreviousTrail( layer.endBoundary.previousSelfTrail ) ) {
+      // layer needs to be inserted at the very beginning
+      this.layers.unshift( layer );
     } else {
-      this.layers.push( layer );
+      for ( var i = 0; i < this.layers.length; i++ ) {
+        // compare end and start boundaries, as they should match
+        if ( this.layers[i].endBoundary.equivalentNextTrail( layer.startBoundary.nextSelfTrail ) ) {
+          break;
+        }
+      }
+      if ( i < this.layers.length ) {
+        this.layers.splice( i + 1, 0, layer );
+      } else {
+        this.layers.push( layer );
+      }
     }
   };
   
