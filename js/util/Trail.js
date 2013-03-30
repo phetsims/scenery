@@ -65,6 +65,11 @@ define( function( require ) {
       return new Trail( this );
     },
     
+    // convenience function to determine whether this trail will render something
+    hasSelf: function() {
+      return this.lastNode().hasSelf();
+    },
+    
     get: function( index ) {
       if ( index >= 0 ) {
         return this.nodes[index];
@@ -244,7 +249,7 @@ define( function( require ) {
     // like previous(), but keeps moving back until the trail goes to a node with hasSelf() === true
     previousSelf: function() {
       var result = this.previous();
-      while ( result && !result.lastNode().hasSelf() ) {
+      while ( result && !result.hasSelf() ) {
         result = result.previous();
       }
       return result;
@@ -287,7 +292,7 @@ define( function( require ) {
     // like next(), but keeps moving back until the trail goes to a node with hasSelf() === true
     nextSelf: function() {
       var result = this.next();
-      while ( result && !result.lastNode().hasSelf() ) {
+      while ( result && !result.hasSelf() ) {
         result = result.next();
       }
       return result;
@@ -368,7 +373,7 @@ define( function( require ) {
   // like eachTrailBetween, but only fires for self trails
   Trail.eachSelfTrailbetween = function( a, b, callback, excludeEndTrails, scene ) {
     Trail.eachTrailBetween( a, b, function( trail ) {
-      if ( trail && trail.lastNode().hasSelf() ) {
+      if ( trail && trail.hasSelf() ) {
         callback( trail );
       }
     }, excludeEndTrails, scene );

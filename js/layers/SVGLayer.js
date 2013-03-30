@@ -82,7 +82,7 @@ define( function( require ) {
      */
     addNodeFromTrail: function( trail ) {
       assert && assert( !( trail.getUniqueId() in this.idFragmentMap ), 'Already contained that trail!' );
-      assert && assert( trail.lastNode().hasSelf(), 'Don\'t add nodes without hasSelf() to SVGLayer' );
+      assert && assert( trail.hasSelf(), 'Don\'t add nodes without hasSelf() to SVGLayer' );
       
       Layer.prototype.addNodeFromTrail.call( this, trail );
       
