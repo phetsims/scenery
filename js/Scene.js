@@ -30,7 +30,7 @@ define( function( require ) {
   var objectCreate = Util.objectCreate;
   
   // if assertions are enabled, log out layer information
-  var layerLogger = assert ? function( ob ) { console.log( ob ); } : null;
+  var layerLogger = null; //assert ? function( ob ) { console.log( ob ); } : null;
   
   /*
    * $main should be a block-level element with a defined width and height. scene.resize() should be called whenever
