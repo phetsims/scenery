@@ -977,6 +977,10 @@ define( function( require ) {
       assert && assert( startTrail.compare( endTrail ) <= 0, 'proper ordering on layer trails' );
     } );
     
+    for ( var i = 1; i < this.layers.length; i++ ) {
+      assert && assert( this.layers[0].startSelfTrail.compare( this.layers[1].startSelfTrail ) === -1, 'proper ordering of layers in scene.layers array' );
+    }
+    
     return true; // so we can assert( layerAudit() )
   };
   
