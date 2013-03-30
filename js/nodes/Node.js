@@ -1005,11 +1005,13 @@ define( function( require ) {
         newRenderer = scenery.Renderer[renderer];
       } else if ( renderer instanceof scenery.Renderer ) {
         newRenderer = renderer;
+      } else if ( !renderer ) {
+        newRenderer = null;
       } else {
         throw new Error( 'unrecognized type of renderer: ' + renderer );
       }
       if ( newRenderer !== this._renderer ) {
-        assert && assert( !this.hasSelf() || _.contains( this._supportedRenderers, newRenderer ), 'renderer ' + newRenderer + ' not supported by ' + this );
+        assert && assert( !this.hasSelf() || !newRenderer || _.contains( this._supportedRenderers, newRenderer ), 'renderer ' + newRenderer + ' not supported by ' + this );
         this._renderer = newRenderer;
         
         this.updateLayerType();

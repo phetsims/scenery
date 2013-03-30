@@ -71,6 +71,23 @@
     ok( scene.layerLookup( c.getUniqueTrail() ) === scene.layers[2] );
   } );
   
+  test( 'Two-node inversion', function() {
+    var scene = new scenery.Scene( $( '#main' ) );
+    scene.layerAudit();
+    
+    var path1 = new scenery.Path();
+    var path2 = new scenery.Path();
+    
+    scene.addChild( path1 );
+    scene.layerAudit();
+    scene.addChild( path2 );
+    scene.layerAudit();
+    path1.renderer = 'svg';
+    scene.layerAudit();
+    
+    expect( 0 );
+  } );
+  
   test( 'Three-node renderer toggles', function() {
     var scene = new scenery.Scene( $( '#main' ) );
     scene.layerAudit();
