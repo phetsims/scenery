@@ -12,6 +12,9 @@ Priorities:
     Performance
         Same-arity methods?
         Less temporary objects?
+    Testing with hidef canvases
+    Opacity / scratch canvas handling:
+        Test with various transforms, since we do more complicated handling on context switching
 
 Bugs:
     DOM visible

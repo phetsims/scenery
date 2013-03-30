@@ -42,14 +42,14 @@ define( function( require ) {
       this.backingScale = args.fullResolution ? scenery.Util.backingScale( document.createElement( 'canvas' ).getContext( '2d' ) ) : 1;
     }
     
-    var logicalWidth = this.$main.width();
-    var logicalHeight = this.$main.height();
+    this.logicalWidth = this.$main.width();
+    this.logicalHeight = this.$main.height();
     
     var canvas = document.createElement( 'canvas' );
-    canvas.width = logicalWidth * this.backingScale;
-    canvas.height = logicalHeight * this.backingScale;
-    $( canvas ).css( 'width', logicalWidth );
-    $( canvas ).css( 'height', logicalHeight );
+    canvas.width = this.logicalWidth * this.backingScale;
+    canvas.height = this.logicalHeight * this.backingScale;
+    $( canvas ).css( 'width', this.logicalWidth );
+    $( canvas ).css( 'height', this.logicalHeight );
     $( canvas ).css( 'position', 'absolute' );
     
     // add this layer on top (importantly, the constructors of the layers are called in order)
@@ -109,7 +109,7 @@ define( function( require ) {
         
         // dirty bounds (clear, possibly set restricted bounds and handling for that)
         // visibility checks
-        this.recursiveRender( state, args );
+        this.recursiveRender( scene, state, args );
         
         // exists for now so that we pop the necessary context state
         if ( !args.fullRender ) {
@@ -121,11 +121,83 @@ define( function( require ) {
       this.dirtyBounds = Bounds2.NOTHING;
     },
     
-    recursiveRender: function( state, args ) {
-      var thisLayer = this;
+    recursiveRender: function( scene, state, args ) {
+      var layer = this;
       var i;
       var startPointer = new scenery.TrailPointer( this.startPaintedTrail, true );
       var endPointer = new scenery.TrailPointer( this.endPaintedTrail, true );
+      
+      // stack for canvases that need to be painted, since some effects require scratch canvases
+      var canvasStack = [ this.canvas ];
+      var contextStack = [ this.context ];
+      
+      function requiresScratchCanvas( trail ) {
+        return trail.lastNode().getOpacity() < 1;
+      }
+      
+      function pushCanvas() {
+        // TODO: verify that this works with hi-def canvases
+        // TODO: use a cache of scratch canvases/contexts on the scene for this purpose, instead of creation
+        var canvas = document.createElement( 'canvas' );
+        canvas.width = layer.logicalWidth * layer.backingScale;
+        canvas.height = layer.logicalHeight * layer.backingScale;
+        var context = canvas.getContext( '2d' );
+        
+        canvasStack.push( canvas );
+        contextStack.push( context );
+      }
+      
+      function popCanvas() {
+        canvasStack.pop();
+        contextStack.pop();
+      }
+      
+      function enter( state, trail ) {
+        trail.lastNode().enterState( state, trail );
+        if ( requiresScratchCanvas( trail ) ) {
+          pushCanvas();
+          
+          var newContext = contextStack[contextStack.length-1];
+          // switch to an identity transform
+          newContext.setTransform( layer.backingScale, 0, 0, layer.backingScale, 0, 0 );
+          
+          // properly set the necessary transform on the context
+          _.each( trail.nodes, function( node ) {
+            node.transform.getMatrix().canvasAppendTransform( newContext );
+          } );
+          
+          // reset the internal styles so they match the defaults that should be present
+          layer.resetStyles();
+        }
+      }
+      
+      function exit( state, trail ) {
+        trail.lastNode().exitState( state, trail );
+        if ( requiresScratchCanvas( trail ) ) {
+          var baseContext = contextStack[contextStack.length-2];
+          var topCanvas = canvasStack[canvasStack.length-1];
+          
+          // apply necessary style transforms before painting our popped canvas onto the next canvas
+          var opacityChange = trail.lastNode().getOpacity() < 1;
+          if ( opacityChange ) {
+            baseContext.globalAlpha = trail.lastNode().getOpacity();
+          }
+          
+          // paint our canvas onto the level below
+          baseContext.drawImage( topCanvas, 0, 0 );
+          
+          // reset styles
+          if ( opacityChange ) {
+            baseContext.globalAlpha = 1;
+          }
+          
+          popCanvas();
+          
+          // no transform sync required on the old context here, but styles have changed
+          // TODO: consider a styles stack also, where we track what styles were applied properly for each context.
+          layer.resetStyles();
+        }
+      }
       
       /*
        * We count how many invisible nodes are in our trail, so we can properly iterate without inspecting everything.
@@ -151,7 +223,8 @@ define( function( require ) {
         invisibleCount += startNode.isVisible() ? 0 : 1;
         
         if ( invisibleCount === 0 ) {
-          startNode.enterState( state, boundaryTrail ); // walk up initial state
+          // walk up initial state
+          enter( state, boundaryTrail );
         }
       }
       
@@ -164,10 +237,10 @@ define( function( require ) {
           invisibleCount += node.isVisible() ? 0 : 1;
           
           if ( invisibleCount === 0 ) {
-            node.enterState( state, pointer.trail );
+            enter( state, pointer.trail );
             
             if ( node.isPainted() ) {
-              node.paintCanvas( state, thisLayer, thisLayer.context );
+              node.paintCanvas( state, layer, contextStack[contextStack.length-1] );
             }
             
             // TODO: restricted bounds rendering, and possibly generalize depthFirstUntil
@@ -192,7 +265,7 @@ define( function( require ) {
           }
         } else {
           if ( invisibleCount === 0 ) {
-            node.exitState( state, pointer.trail );
+            exit( state, pointer.trail );
           }
           
           invisibleCount -= node.isVisible() ? 0 : 1;
@@ -207,12 +280,14 @@ define( function( require ) {
       var endWalkLength = endPointer.trail.length - ( endPointer.isAfter ? 1 : 0 );
       for ( i = endWalkLength - 1; i >= 0; i-- ) {
         var endNode = endPointer.trail.nodes[i];
-        boundaryTrail.removeDescendant();
         invisibleCount -= endNode.isVisible() ? 0 : 1;
         
         if ( invisibleCount === 0 ) {
-          endNode.exitState( state, boundaryTrail ); // walk back the state
+          // walk back the state
+          exit( state, boundaryTrail );
         }
+        
+        boundaryTrail.removeDescendant();
       }
     },
     
