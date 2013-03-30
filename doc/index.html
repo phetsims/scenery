@@ -143,6 +143,7 @@
       <a class="sublink" href="#node-cursor">cursor</a><br>
       <a class="sublink" href="#node-visible">visible</a><br>
       <a class="sublink" href="#node-pickable">pickable</a><br>
+      <a class="sublink" href="#node-opacity">opacity</a><br>
       <a class="sublink" href="#node-translation">translation</a><br>
       <a class="sublink" href="#node-translate">translate</a><br>
       <a class="sublink" href="#node-x">x</a><br>
@@ -283,6 +284,7 @@
         <li><a href="#node-cursor">cursor</a>: Will display the specified CSS cursor when the mouse is over this Node or one of its descendents. The Scene needs to have input listeners attached with an initialize method first.</li>
         <li><a href="#node-visible">visible</a>: If false, this node (and its children) will not be displayed (or get input events)</li>
         <li><a href="#node-pickable">pickable</a>: If false, this node (and its children) will not get input events</li>
+        <li><a href="#node-opacity">opacity</a>: From 0 (transparent) to 1 (opaque)</li>
         <li><a href="#node-translation">translation</a>: Sets the translation of the node to either the specified <a href="../../dot/doc#vector2">dot.Vector2</a> value, or the x,y values from an object (e.g. translation: { x: 1, y: 2 } )</li>
         <li><a href="#node-x">x</a>: Sets the x-translation of the node</li>
         <li><a href="#node-y">y</a>: Sets the y-translation of the node</li>
@@ -407,6 +409,13 @@ scene.updateOnRequestAnimationFrame();
       <p>
         This is useful for semi-transparent overlays or other visual elements that should be displayed but should not prevent objects below from being
         manipulated by user input.
+      </p>
+      
+      <h4 id="node-opacity">node.opacity</h4>
+      <p>
+        <code>node.opacity</code> is a getter/setter linked to <code>node.getOpacity()</code> and <code>node.setOpacity( opacity )</code>.
+        Opacity should be in the inclusive range of 0 to 1, where 0 is fully transparent, and 1 is fully opaque. <code>opacity</code> controls not only
+        the opacity (alpha) of the node itself, but also all of its children.
       </p>
       
       <h4 id="node-translation">node.translation</h4>

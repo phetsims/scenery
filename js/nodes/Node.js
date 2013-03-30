@@ -15,6 +15,7 @@ define( function( require ) {
   var Bounds2 = require( 'DOT/Bounds2' );
   var Transform3 = require( 'DOT/Transform3' );
   var Matrix3 = require( 'DOT/Matrix3' );
+  var clamp = require( 'DOT/Util' ).clamp;
   
   var scenery = require( 'SCENERY/scenery' );
   var LayerStrategy = require( 'SCENERY/layers/LayerStrategy' ); // used to set the default layer strategy on the prototype
@@ -58,6 +59,9 @@ define( function( require ) {
     
     // Whether this node (and its children) will be visible when the scene is updated. Visible nodes by default will not be pickable either
     this._visible = true;
+    
+    // Opacity from 0 to 1
+    this._opacity = 1;
     
     // Whether hit testing will check for this node (and its children).
     this._pickable = true;
@@ -944,6 +948,21 @@ define( function( require ) {
       return this;
     },
     
+    getOpacity: function() {
+      return this._opacity;
+    },
+    
+    setOpacity: function( opacity ) {
+      var clampedOpacity = clamp( opacity, 0, 1 );
+      if ( clampedOpacity !== this._opacity ) {
+        this.markOldPaint();
+        
+        this._opacity = clampedOpacity;
+        
+        this.invalidatePaint();
+      }
+    },
+    
     isPickable: function() {
       return this._pickable;
     },
@@ -1267,6 +1286,9 @@ define( function( require ) {
     set visible( value ) { this.setVisible( value ); },
     get visible() { return this.isVisible(); },
     
+    set opacity( value ) { this.setOpacity( value ); },
+    get opacity() { return this.getOpacity(); },
+    
     set pickable( value ) { this.setPickable( value ); },
     get pickable() { return this.isPickable(); },
     
@@ -1350,7 +1372,7 @@ define( function( require ) {
    * TODO: using more than one of {translation,x,left,right,centerX} or {translation,y,top,bottom,centerY} should be considered an error
    * TODO: move fill / stroke setting to mixins
    */
-  Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'pickable', 'translation', 'x', 'y', 'rotation', 'scale',
+  Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'pickable', 'opacity', 'translation', 'x', 'y', 'rotation', 'scale',
                                   'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
                                   'layerSplit', 'layerSplitBefore', 'layerSplitAfter' ];
   
