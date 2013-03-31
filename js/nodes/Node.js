@@ -1334,9 +1334,8 @@ define( function( require ) {
     },
     
     toString: function( spaces ) {
-      spaces = spaces || 0;
-      var spacer = new Array( spaces + 1 ).join( ' ' );
-      return spacer + this.getBasicConstructor( '\n' + this.getPropString( spaces + 2 ) + '\n' + spacer );
+      spaces = spaces || '';
+      return spaces + this.getBasicConstructor( '\n' + this.getPropString( spaces + '  ' ) + '\n' + spaces );
     },
     
     getBasicConstructor: function( propLines ) {
@@ -1345,7 +1344,6 @@ define( function( require ) {
     
     getPropString: function( spaces ) {
       var self = this;
-      var spacer = new Array( spaces + 1 ).join( ' ' );
       var referenceNode = new Node();
       
       var result = '';
@@ -1354,9 +1352,9 @@ define( function( require ) {
           result += ',\n';
         }
         if ( !nowrap && typeof value === 'string' ) {
-          result += spacer + key + ': \'' + value + '\'';
+          result += spaces + key + ': \'' + value + '\'';
         } else {
-          result += spacer + key + ': ' + value;
+          result += spaces + key + ': ' + value;
         }
       }
       
@@ -1366,9 +1364,9 @@ define( function( require ) {
           if ( childString ) {
             childString += ',\n';
           }
-          childString += child.toString( spaces + 2 );
+          childString += child.toString( spaces + '  ' );
         } );
-        addProp( 'children', '[\n' + childString + '\n' + spacer + ']' );
+        addProp( 'children', '[\n' + childString + '\n' + spaces + ']' );
       }
       
       // direct copy props
