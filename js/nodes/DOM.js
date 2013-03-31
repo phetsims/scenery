@@ -151,6 +151,17 @@ define( function( require ) {
     
     getBasicConstructor: function( propLines ) {
       return 'new scenery.DOM( $( \'' + this._container.innerHTML.replace( /'/g, '\\\'' ) + '\' ), {' + propLines + '} )';
+    },
+    
+    getPropString: function( spaces ) {
+      var result = Node.prototype.getPropString.call( this, spaces );
+      if ( this.interactive ) {
+        if ( result ) {
+          result += ',\n';
+        }
+        result += spaces + 'interactive: true';
+      }
+      return result;
     }
   } );
   

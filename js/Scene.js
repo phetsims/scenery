@@ -1119,7 +1119,7 @@ define( function( require ) {
       if ( result ) {
         result += '\n';
       }
-      result += 'scene.addChild( ' + child.toString() + ' );'
+      result += 'scene.addChild( ' + child.toString() + ' );';
     } );
     
     return result;

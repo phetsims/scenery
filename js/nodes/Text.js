@@ -334,6 +334,40 @@ define( function( require ) {
     
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Text( \'' + this._text.replace( /'/g, '\\\'' ) + '\', {' + propLines + '} )';
+    },
+    
+    getPropString: function( spaces ) {
+      var result = Node.prototype.getPropString.call( this, spaces );
+      
+      // TODO: if created again, deduplicate with Node's getPropString
+      function addProp( key, value, nowrap ) {
+        if ( result ) {
+          result += ',\n';
+        }
+        if ( !nowrap && typeof value === 'string' ) {
+          result += spaces + key + ': \'' + value + '\'';
+        } else {
+          result += spaces + key + ': ' + value;
+        }
+      }
+      
+      if ( this.font !== new scenery.Font().getFont() ) {
+        addProp( 'font', this.font );
+      }
+      
+      if ( this._textAlign !== 'start' ) {
+        addProp( 'textAlign', this._textAlign );
+      }
+      
+      if ( this._textBaseline !== 'alphabetic' ) {
+        addProp( 'textBaseline', this._textBaseline );
+      }
+      
+      if ( this._direction !== 'ltr' ) {
+        addProp( 'direction', this._direction );
+      }
+      
+      return result;
     }
   } );
   
