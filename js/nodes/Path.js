@@ -151,8 +151,18 @@ define( function( require ) {
     get shape() { return this.getShape(); },
     
     getBasicConstructor: function( propLines ) {
-      // TODO: add shape!
       return 'new scenery.Path( {' + propLines + '} )';
+    },
+    
+    getPropString: function( spaces ) {
+      var result = Node.prototype.getPropString.call( this, spaces );
+      if ( this._shape ) {
+        if ( result ) {
+          result += ',\n';
+        }
+        result += spaces + 'shape: ' + this._shape.toString();
+      }
+      return result;
     }
   } );
   
