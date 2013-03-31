@@ -15,6 +15,7 @@ define( function( require ) {
   
   var Bounds2 = require( 'DOT/Bounds2' );
   var Vector2 = require( 'DOT/Vector2' );
+  var Matrix3 = require( 'DOT/Matrix3' );
   
   var scenery = require( 'SCENERY/scenery' );
   
@@ -1076,6 +1077,18 @@ define( function( require ) {
         }
         if ( node._opacity < 1 ) {
           addQualifier( 'opacity:' + node._opacity );
+        }
+        
+        var transformType = '';
+        switch ( node.transform.getMatrix().type ) {
+          case Matrix3.Types.IDENTITY: transformType = ''; break;
+          case Matrix3.Types.TRANSLATION_2D: transformType = 'translated'; break;
+          case Matrix3.Types.SCALING: transformType = 'scale'; break;
+          case Matrix3.Types.AFFINE: transformType = 'affine'; break;
+          case Matrix3.Types.OTHER: transformType = 'other'; break;
+        }
+        if ( transformType ) {
+          div += ' <span style="color: #88f" title="' + node.transform.getMatrix().toString().replace( '\n', '&#10;' ) + '">' + transformType + '</span>';
         }
         div += '</div>';
         result += div;
