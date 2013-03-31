@@ -1345,7 +1345,6 @@ define( function( require ) {
     
     getPropString: function( spaces ) {
       var self = this;
-      var referenceNode = new Node();
       
       var result = '';
       function addProp( key, value, nowrap ) {
@@ -1367,15 +1366,14 @@ define( function( require ) {
           }
           childString += child.toString( spaces + '  ' );
         } );
-        addProp( 'children', '[\n' + childString + '\n' + spaces + ']' );
+        addProp( 'children', '[\n' + childString + '\n' + spaces + ']', true );
       }
       
       // direct copy props
-      _.each( [ 'cursor', 'visible', 'pickable', 'opacity' ], function( prop ) {
-        if ( self[prop] !== referenceNode[prop] ) {
-          addProp( prop, self[prop] );
-        }
-      } );
+      if ( this.cursor ) { addProp( 'cursor', this.cursor ); }
+      if ( !this.visible ) { addProp( 'visible', this.visible ); }
+      if ( !this.pickable ) { addProp( 'pickable', this.pickable ); }
+      if ( this.opacity !== 1 ) { addProp( 'opacity', this.opacity ); }
       
       if ( !this.transform.isIdentity() ) {
         var m = this.transform.getMatrix();

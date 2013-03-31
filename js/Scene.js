@@ -1108,6 +1108,23 @@ define( function( require ) {
     window.open( 'data:text/html;charset=utf-8,' + encodeURIComponent( htmlContent ) );
   };
   
+  Scene.prototype.getBasicConstructor = function( propLines ) {
+    return 'new scenery.Scene( $( \'#main\' ), {' + propLines + '} )';
+  };
+  
+  Scene.prototype.toStringWithChildren = function() {
+    var result = '';
+    
+    _.each( this._children, function( child ) {
+      if ( result ) {
+        result += '\n';
+      }
+      result += 'scene.addChild( ' + child.toString() + ' );'
+    } );
+    
+    return result;
+  };
+  
   function applyCSSHacks( $main, options ) {
     // to use CSS3 transforms for performance, hide anything outside our bounds by default
     if ( !options.allowSceneOverflow ) {

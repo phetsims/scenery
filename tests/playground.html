@@ -30,7 +30,13 @@
     #debug {
       position: relative;
       top: 256px;
-      
+    }
+    
+    #serialized {
+      position: relative;
+      top: 256px;
+      padding: 15px;
+      border: 1px solid gray;
     }
   </style>
   
@@ -40,6 +46,8 @@
   <div id="scene"></div>
   
   <div id="debug"></div>
+  
+  <pre id="serialized"></pre>
   
   <script>
     // we need to wait until our config file is loaded before our require statement. apparently this was not guaranteed
@@ -71,6 +79,8 @@
             window.requestAnimationFrame( step, document.getElementById( 'scene' ) );
             
             $( '#debug' ).html( scene.getDebugHTML() );
+            
+            $( '#serialized' ).html( scene.toStringWithChildren() );
           })();
           
           window.twrap = function( f ) {
