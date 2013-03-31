@@ -417,6 +417,27 @@ scene.updateOnRequestAnimationFrame();
         Opacity should be in the inclusive range of 0 to 1, where 0 is fully transparent, and 1 is fully opaque. <code>opacity</code> controls not only
         the opacity (alpha) of the node itself, but also all of its children.
       </p>
+      <div id="example-opacity" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-opacity', function( scene ) {
+/*START*/
+scene.addChild( new scenery.Rectangle( 0, 12, 64, 20, { fill: '#000' } ) );
+var circle = kite.Shape.circle( 0, 0, 30 );
+scene.addChild( new scenery.Node( {
+  opacity: 0.5,
+  children: [
+    new scenery.Path( { shape: circle, x: 12, y: 22, fill: '#f00' } ),
+    new scenery.Path( { shape: circle, x: 52, y: 22, fill: '#00f' } )
+  ]
+} ) );
+/*END*/
+// event initialization needed for cursor to work
+scene.initializeStandaloneEvents();
+
+// and update on every frame
+scene.updateOnRequestAnimationFrame();
+} );
+      </script>
       
       <h4 id="node-translation">node.translation</h4>
       <p>
