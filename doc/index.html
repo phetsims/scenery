@@ -87,6 +87,11 @@
     .sublink {
       padding-left: 1em;
     }
+    
+    .args {
+      font-weight: normal;
+      font-size: 80%;
+    }
   </style>
   
 </head>
@@ -346,18 +351,18 @@ scene.addChild( new scenery.Node( {
         <code>node.parents</code> or <code>node.getParents()</code> will return an array of parent nodes, but <strong>order is not significant</strong>.
       </p>
       
-      <h4 id="node-addChild">node.addChild( childNode )</h4>
+      <h4 id="node-addChild">node.addChild( <span class="args">childNode</span> )</h4>
       <p>
         Appends childNode to node's list of children. childNode will be displayed above node and node's other children.
       </p>
       
-      <h4 id="node-insertChild">node.insertChild( index, childNode )</h4>
+      <h4 id="node-insertChild">node.insertChild( <span class="args">index, childNode</span> )</h4>
       <p>
         Inserts childNode into node's children at the specified index. <code>node.insertChild( 0, childNode )</code> will make childNode the first child, and
         <code>node.insertChild( node.children.length, childNode )</code> is the same as <code>node.addChild( childNode )</code>.
       </p>
       
-      <h4 id="node-removeChild">node.removeChild( childNode )</h4>
+      <h4 id="node-removeChild">node.removeChild( <span class="args">childNode</span> )</h4>
       <p>
         Removes childNode from node's children.
       </p>
@@ -458,7 +463,7 @@ scene.updateOnRequestAnimationFrame();
         In both instances, <code>translation</code> can be either a <a href="../../dot/doc#vector2">dot.Vector2</a> or an object literal like <code>{ x: 5, y: 10 }</code>.
       </p>
       
-      <h4 id="node-translate">node.translate( x, y )</h4>
+      <h4 id="node-translate">node.translate( <span class="args">x, y</span> )</h4>
       <p>
         Translates the node relatively by <code>x</code> and <code>y</code>. In addition to <code>node.translate( x, y )</code>, <code>node.translate( translation )</code>
         can be used, where <code>transform</code> is either a <a href="../../dot/doc#vector2">dot.Vector2</a> or an object like <code>{ x: 5, y: 10 }</code>
@@ -483,18 +488,18 @@ scene.updateOnRequestAnimationFrame();
         (instead of setting its rotation), use <a href="#node-rotate">node.rotate</a>
       </p>
       
-      <h4 id="node-rotate">node.rotate( radians, [prepend] )</h4>
+      <h4 id="node-rotate">node.rotate( <span class="args">radians, [prepend]</span> )</h4>
       <p>
         Rotates the node's transform. By default the rotation is appended to the node's transform, but the optional <code>prepend</code> boolean flag can be added for the rotation
         to be prepended to the node's transform.
       </p>
       
-      <h4 id="node-rotateAround">node.rotateAround( point, angle )</h4>
+      <h4 id="node-rotateAround">node.rotateAround( <span class="args">point, angle</span> )</h4>
       <p>
         Rotates the node by <code>angle</code> in radians around the <a href="../../dot/doc#vector2">dot.Vector2</a> <code>point</code>. <code>point</code> should be in the node's parent coordinate frame.
       </p>
       
-      <h4 id="node-scale">node.scale( x, y, [prepend] )</h4>
+      <h4 id="node-scale">node.scale( <span class="args">x, y, [prepend]</span> )</h4>
       <p>
         Scales the node in each axis. By default the scale is appended to the node's transform, but the optional <code>prepend</code> boolean flag can be added for the
         scale to be prepended to the node's transform.
@@ -645,7 +650,7 @@ scene.updateOnRequestAnimationFrame();
         garbage collected if no more references are to the Scene. Call this once you no longer need a scene.
       </p>
       
-      <h4 id="scene-renderToCanvas">scene.renderToCanvas( canvas, context, callback )</h4>
+      <h4 id="scene-renderToCanvas">scene.renderToCanvas( <span class="args">canvas, context, callback</span> )</h4>
       <p>
         Renders all applicable layers that support Canvas output to the specified <code>canvas</code> (with
         the specified <code>context</code>). The <code>context</code> is specified in addition to the canvas
@@ -661,7 +666,7 @@ scene.updateOnRequestAnimationFrame();
         DOM content is currently not supported for renderToCanvas.
       </p>
       
-      <h4 id="scene-canvasSnapshot">scene.canvasSnapshot( callback )</h4>
+      <h4 id="scene-canvasSnapshot">scene.canvasSnapshot( <span class="args">callback</span> )</h4>
       <p>
         Asynchronously draws the scene to a canvas with the same size as the scene
         (using <a href="#scene-renderToCanvas">renderToCanvas</a>, and calls <code>callback( canvas, imageData )</code>
@@ -671,7 +676,7 @@ scene.updateOnRequestAnimationFrame();
         If any origin-dirty content (like cross-domain images without <a href="http://en.wikipedia.org/wiki/Cross-origin_resource_sharing">CORS</a>) are included in the Scene, this operation will throw a security error.
       </p>
       
-      <h4 id="scene-canvasDataURL">scene.canvasDataURL( callback )</h4>
+      <h4 id="scene-canvasDataURL">scene.canvasDataURL( <span class="args">callback</span> )</h4>
       <p>
         Asynchronously draws the scene to an image (using <a href="#scene-canvasSnapshot">scene.canvasSnapshot</a>),
         and calls <code>callback( dataURL )</code> with the
@@ -680,7 +685,7 @@ scene.updateOnRequestAnimationFrame();
         inside the scene.
       </p>
       
-      <h4 id="scene-updateOnRequestAnimationFrame">scene.updateOnRequestAnimationFrame( [element] )</h4>
+      <h4 id="scene-updateOnRequestAnimationFrame">scene.updateOnRequestAnimationFrame( <span class="args">[element]</span> )</h4>
       <p>
         A simple way of setting up <a href="#scene-updateScene">scene.updateScene</a> to be called using
         requestAnimationFrame. More advanced applications will want to handle this themselves.
@@ -1217,13 +1222,13 @@ scene.addChild( new scenery.Text( 'A', {
 } );
       </script>
       
-      <h4 id="linearGradient-addColorStop">addColorStop( ratio, color )</h4>
+      <h4 id="linearGradient-addColorStop">addColorStop( <span class="args">ratio, color</span> )</h4>
       <p>
         Adds a point of color along the gradient, where a ratio of 0 is a color point at (x0,y0) and
         a ratio of 1 is a color point at (x1,y1).
       </p>
       
-      <h4 id="linearGradient-setTransformMatrix">setTransformMatrix( matrix )</h4>
+      <h4 id="linearGradient-setTransformMatrix">setTransformMatrix( <span class="args">matrix</span> )</h4>
       <p>
         Given a <a href="../../dot/doc#matrix3">Matrix3</a> for <code>matrix</code>, it will transform
         the gradient as it is applied. This should only be done before adding it as a fill/stroke to
@@ -1282,13 +1287,13 @@ scene.addChild( new scenery.Text( 'A', {
 } );
       </script>
       
-      <h4 id="radialGradient-addColorStop">addColorStop( ratio, color )</h4>
+      <h4 id="radialGradient-addColorStop">addColorStop( <span class="args">ratio, color</span> )</h4>
       <p>
         Adds a point of color along the gradient, where a ratio of 0 is a color point at (x0,y0) and
         a ratio of 1 is a color point at (x1,y1).
       </p>
       
-      <h4 id="radialGradient-setTransformMatrix">setTransformMatrix( matrix )</h4>
+      <h4 id="radialGradient-setTransformMatrix">setTransformMatrix( <span class="args">matrix</span> )</h4>
       <p>
         Given a <a href="../../dot/doc#matrix3">Matrix3</a> for <code>matrix</code>, it will transform
         the gradient as it is applied. This should only be done before adding it as a fill/stroke to
@@ -1328,7 +1333,7 @@ loadedImg.src = 'http://phet.colorado.edu/images/phet-logo-yellow.png';
 } );
       </script>
       
-      <h4 id="pattern-setTransformMatrix">setTransformMatrix( matrix )</h4>
+      <h4 id="pattern-setTransformMatrix">setTransformMatrix( <span class="args">matrix</span> )</h4>
       <p>
         Given a <a href="../../dot/doc#matrix3">Matrix3</a> for <code>matrix</code>, it will transform
         the gradient as it is applied. This should only be done before adding it as a fill/stroke to
