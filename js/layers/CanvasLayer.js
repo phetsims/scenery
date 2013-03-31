@@ -137,6 +137,8 @@ define( function( require ) {
         var canvas = document.createElement( 'canvas' );
         canvas.width = layer.logicalWidth * layer.backingScale;
         canvas.height = layer.logicalHeight * layer.backingScale;
+        // $( canvas ).css( 'width', layer.logicalWidth );
+        // $( canvas ).css( 'height', layer.logicalHeight );
         var context = canvas.getContext( '2d' );
         
         return new scenery.CanvasContextWrapper( canvas, context );
@@ -192,7 +194,7 @@ define( function( require ) {
           
           // paint our canvas onto the level below with a straight transform
           baseContext.save();
-          baseContext.setTransform( layer.backingScale, 0, 0, layer.backingScale, 0, 0 );
+          baseContext.setTransform( 1, 0, 0, 1, 0, 0 );
           baseContext.drawImage( topCanvas, 0, 0 );
           baseContext.restore();
           
