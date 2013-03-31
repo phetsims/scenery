@@ -189,6 +189,42 @@ define( function( require ) {
       }
     };
     
+    proto.appendStrokablePropString = function( spaces, result ) {
+      var self = this;
+      
+      function addProp( key, value, nowrap ) {
+        if ( result ) {
+          result += ',\n';
+        }
+        if ( !nowrap && typeof value === 'string' ) {
+          result += spaces + key + ': \'' + value + '\'';
+        } else {
+          result += spaces + key + ': ' + value;
+        }
+      }
+      
+      if ( this._stroke ) {
+        var defaultStyles = new LineStyles();
+        if ( typeof this._stroke === 'string' ) {
+          addProp( 'stroke', this._stroke );
+        } else {
+          addProp( 'stroke', this._stroke.toString(), true );
+        }
+        
+        _.each( [ 'lineWidth', 'lineCap', 'lineJoin', 'lineDashOffset' ], function( prop ) {
+          if ( self[prop] !== defaultStyles[prop] ) {
+            addProp( prop, self[prop] );
+          }
+        } );
+        
+        if ( this.lineDash ) {
+          addProp( 'lineDash', JSON.stringify( this.lineDash ), true );
+        }
+      }
+      
+      return result;
+    };
+    
     // on mutation, set the stroke parameters first since they may affect the bounds (and thus later operations)
     proto._mutatorKeys = [ 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'lineDash', 'lineDashOffset' ].concat( proto._mutatorKeys );
     

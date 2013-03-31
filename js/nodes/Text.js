@@ -338,6 +338,8 @@ define( function( require ) {
     
     getPropString: function( spaces ) {
       var result = Node.prototype.getPropString.call( this, spaces );
+      result = this.appendFillablePropString( spaces, result );
+      result = this.appendStrokablePropString( spaces, result );
       
       // TODO: if created again, deduplicate with Node's getPropString
       function addProp( key, value, nowrap ) {

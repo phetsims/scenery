@@ -156,6 +156,8 @@ define( function( require ) {
     
     getPropString: function( spaces ) {
       var result = Node.prototype.getPropString.call( this, spaces );
+      result = this.appendFillablePropString( spaces, result );
+      result = this.appendStrokablePropString( spaces, result );
       if ( this._shape ) {
         if ( result ) {
           result += ',\n';

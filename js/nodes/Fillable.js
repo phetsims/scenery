@@ -80,6 +80,21 @@ define( function( require ) {
       }
     };
     
+    proto.appendFillablePropString = function( spaces, result ) {
+      if ( this._fill ) {
+        if ( result ) {
+          result += ',\n';
+        }
+        if ( typeof this._fill === 'string' ) {
+          result += spaces + 'fill: \'' + this._fill + '\'';
+        } else {
+          result += spaces + 'fill: ' + this._fill.toString();
+        }
+      }
+      
+      return result;
+    };
+    
     // on mutation, set the fill parameter first
     proto._mutatorKeys = [ 'fill' ].concat( proto._mutatorKeys );
     
