@@ -219,6 +219,8 @@ Accessibility / shadow DOM:
         spec: http://www.w3.org/TR/shadow-dom/
 
 Node:
+    * Arbitrary ImageData filters, or filters that match SVG
+        Like the colorTransform matrix, applied to node.filters?
     Support for setting listeners in the mutator?
         { inputListeners: [ new SimpleDragHandler() ] }
     Since cursor might support data URLs, we can have custom cursors?
