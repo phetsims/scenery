@@ -330,6 +330,10 @@ define( function( require ) {
     
     isPainted: function() {
       return true;
+    },
+    
+    getBasicConstructor: function( propLines ) {
+      return 'new scenery.Text( \'' + this._text.replace( /'/g, '\\\'' ) + '\', {' + propLines + '} )';
     }
   } );
   

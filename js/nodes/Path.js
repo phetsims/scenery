@@ -148,7 +148,12 @@ define( function( require ) {
     },
     
     set shape( value ) { this.setShape( value ); },
-    get shape() { return this.getShape(); }
+    get shape() { return this.getShape(); },
+    
+    getBasicConstructor: function( propLines ) {
+      // TODO: add shape!
+      return 'new scenery.Path( {' + propLines + '} )';
+    }
   } );
   
   Path.prototype._mutatorKeys = [ 'shape' ].concat( Node.prototype._mutatorKeys );

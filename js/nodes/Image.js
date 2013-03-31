@@ -189,7 +189,11 @@ define( function( require ) {
     },
     
     set image( value ) { this.setImage( value ); },
-    get image() { return this.getImage(); }
+    get image() { return this.getImage(); },
+    
+    getBasicConstructor: function( propLines ) {
+      return 'new scenery.Image( \'' + this._image.src.replace( /'/g, '\\\'' ) + '\', {' + propLines + '} )';
+    }
   } );
   
   Image.prototype._mutatorKeys = [ 'image' ].concat( Node.prototype._mutatorKeys );

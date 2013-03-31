@@ -144,6 +144,7 @@
       <a class="sublink" href="#node-visible">visible</a><br>
       <a class="sublink" href="#node-pickable">pickable</a><br>
       <a class="sublink" href="#node-opacity">opacity</a><br>
+      <a class="sublink" href="#node-matrix">matrix</a><br>
       <a class="sublink" href="#node-translation">translation</a><br>
       <a class="sublink" href="#node-translate">translate</a><br>
       <a class="sublink" href="#node-x">x</a><br>
@@ -285,6 +286,7 @@
         <li><a href="#node-visible">visible</a>: If false, this node (and its children) will not be displayed (or get input events)</li>
         <li><a href="#node-pickable">pickable</a>: If false, this node (and its children) will not get input events</li>
         <li><a href="#node-opacity">opacity</a>: From 0 (transparent) to 1 (opaque)</li>
+        <li><a href="#node-matrix">matrix</a>: Sets the transform matrix of the node to the specified <a href="../../dot/doc#matrix3">dot.Matrix3</a> value</li>
         <li><a href="#node-translation">translation</a>: Sets the translation of the node to either the specified <a href="../../dot/doc#vector2">dot.Vector2</a> value, or the x,y values from an object (e.g. translation: { x: 1, y: 2 } )</li>
         <li><a href="#node-x">x</a>: Sets the x-translation of the node</li>
         <li><a href="#node-y">y</a>: Sets the y-translation of the node</li>
@@ -438,6 +440,12 @@ scene.initializeStandaloneEvents();
 scene.updateOnRequestAnimationFrame();
 } );
       </script>
+      
+      <h4 id="node-matrix">node.matrix</h4>
+      <p>
+        <code>node.matrix</code> (<code>node.getMatrix()</code>, <code>node.setMatrix( matrix )</code>) gets or sets the transformation matrix associated with the
+        node, of type <a href="../../dot/doc#matrix3">dot.Matrix3</a>.
+      </p>
       
       <h4 id="node-translation">node.translation</h4>
       <p>

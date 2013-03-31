@@ -147,7 +147,11 @@ define( function( require ) {
     get element() { return this.getElement(); },
     
     set interactive( value ) { this.setInteractive( value ); },
-    get interactive() { return this.isInteractive(); }
+    get interactive() { return this.isInteractive(); },
+    
+    getBasicConstructor: function( propLines ) {
+      return 'new scenery.DOM( $( \'' + this._container.innerHTML.replace( /'/g, '\\\'' ) + '\' ), {' + propLines + '} )';
+    }
   } );
   
   DOM.prototype._mutatorKeys = [ 'element', 'interactive' ].concat( Node.prototype._mutatorKeys );

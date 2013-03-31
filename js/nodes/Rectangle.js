@@ -113,6 +113,12 @@ define( function( require ) {
       rect.setAttribute( 'ry', this._rectArcHeight );
       
       rect.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
+    },
+    
+    getBasicConstructor: function( propLines ) {
+      return 'new scenery.Rectangle( ' + this._rectX + ', ' + this._rectY + ', ' + 
+                                         this._rectWidth + ', ' + this._rectHeight + ', ' +
+                                         this._rectArcWidth + ', ' + this._rectArcHeight + ', {' + propLines + '} )';
     }
     
   } );

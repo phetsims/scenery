@@ -1004,7 +1004,7 @@ define( function( require ) {
         throw new Error( 'unrecognized type of renderer: ' + renderer );
       }
       if ( newRenderer !== this._renderer ) {
-        assert && assert( !this.isPainted() || !newRenderer || _.contains( this._supportedRenderers, newRenderer ), 'renderer ' + newRenderer + ' not supported by ' + this );
+        assert && assert( !this.isPainted() || !newRenderer || _.contains( this._supportedRenderers, newRenderer ), 'renderer ' + newRenderer + ' not supported by ' + this.constructor.name );
         this._renderer = newRenderer;
         
         this.updateLayerType();
@@ -1255,7 +1255,7 @@ define( function( require ) {
     get rendererOptions() { return this.getRendererOptions(); },
     
     set cursor( value ) { this.setCursor( value ); },
-    get cursor() { return this.isCursor(); },
+    get cursor() { return this.getCursor(); },
     
     set visible( value ) { this.setVisible( value ); },
     get visible() { return this.isVisible(); },
@@ -1315,7 +1315,6 @@ define( function( require ) {
     get id() { return this.getId(); },
     
     mutate: function( options ) {
-      
       var node = this;
       
       _.each( this._mutatorKeys, function( key ) {
@@ -1332,6 +1331,76 @@ define( function( require ) {
       } );
       
       return this; // allow chaining
+    },
+    
+    toString: function( spaces ) {
+      spaces = spaces || 0;
+      var spacer = new Array( spaces + 1 ).join( ' ' );
+      return spacer + this.getBasicConstructor( '\n' + this.getPropString( spaces + 2 ) + '\n' + spacer );
+    },
+    
+    getBasicConstructor: function( propLines ) {
+      return 'new scenery.Node( {' + propLines + '} )';
+    },
+    
+    getPropString: function( spaces ) {
+      var self = this;
+      var spacer = new Array( spaces + 1 ).join( ' ' );
+      var referenceNode = new Node();
+      
+      var result = '';
+      function addProp( key, value, nowrap ) {
+        if ( result ) {
+          result += ',\n';
+        }
+        if ( !nowrap && typeof value === 'string' ) {
+          result += spacer + key + ': \'' + value + '\'';
+        } else {
+          result += spacer + key + ': ' + value;
+        }
+      }
+      
+      if ( this._children.length ) {
+        var childString = '';
+        _.each( this._children, function( child ) {
+          if ( childString ) {
+            childString += ',\n';
+          }
+          childString += child.toString( spaces + 2 );
+        } );
+        addProp( 'children', '[\n' + childString + '\n' + spacer + ']' );
+      }
+      
+      // direct copy props
+      _.each( [ 'cursor', 'visible', 'pickable', 'opacity' ], function( prop ) {
+        if ( self[prop] !== referenceNode[prop] ) {
+          addProp( prop, self[prop] );
+        }
+      } );
+      
+      if ( !this.transform.isIdentity() ) {
+        var m = this.transform.getMatrix();
+        addProp( 'matrix', 'new dot.Matrix3( ' + m.m00() + ', ' + m.m01() + ', ' + m.m02() + ', ' +
+                                                 m.m10() + ', ' + m.m11() + ', ' + m.m12() + ', ' +
+                                                 m.m20() + ', ' + m.m21() + ', ' + m.m22() + ' )', true );
+      }
+      
+      if ( this.renderer ) {
+        addProp( 'renderer', this.renderer.name );
+        if ( this.rendererOptions ) {
+          addProp( 'rendererOptions', JSON.stringify( this.rendererOptions ), true );
+        }
+      }
+      
+      if ( this._layerSplitBefore ) {
+        addProp( 'layerSplitBefore', true );
+      }
+      
+      if ( this._layerSplitAfter ) {
+        addProp( 'layerSplitAfter', true );
+      }
+      
+      return result;
     }
   };
   
@@ -1346,7 +1415,7 @@ define( function( require ) {
    * TODO: using more than one of {translation,x,left,right,centerX} or {translation,y,top,bottom,centerY} should be considered an error
    * TODO: move fill / stroke setting to mixins
    */
-  Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'pickable', 'opacity', 'translation', 'x', 'y', 'rotation', 'scale',
+  Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
                                   'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
                                   'layerSplit', 'layerSplitBefore', 'layerSplitAfter' ];
   

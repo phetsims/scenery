@@ -57,6 +57,10 @@ define( function( require ) {
       circle.setAttribute( 'r', this._circleRadius );
       
       circle.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
+    },
+    
+    getBasicConstructor: function( propLines ) {
+      return 'new scenery.Circle( ' + this._circleX + ', ' + this._circleY + ', ' + this._circleRadius + ', {' + propLines + '} )';
     }
   } );
   
