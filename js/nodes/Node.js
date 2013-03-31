@@ -1335,7 +1335,8 @@ define( function( require ) {
     
     toString: function( spaces ) {
       spaces = spaces || '';
-      return spaces + this.getBasicConstructor( '\n' + this.getPropString( spaces + '  ' ) + '\n' + spaces );
+      var props = this.getPropString( spaces + '  ' );
+      return spaces + this.getBasicConstructor( props ? ( '\n' + props + '\n' + spaces ) : '' );
     },
     
     getBasicConstructor: function( propLines ) {
