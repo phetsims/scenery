@@ -100,9 +100,12 @@ function snapshotEquals( a, b, threshold, message ) {
       } else {
         colorDiffData.data[i] = diff;
       }
-      if ( a.data[i] != b.data[i] && Math.abs( a.data[i] - b.data[i] ) > threshold ) {
+      var alphaIndex = ( i - ( i % 4 ) + 3 );
+      // grab the associated alpha channel and multiply it times the diff
+      var alphaMultipliedDiff = ( i % 4 === 3 ) ? diff : diff * ( a.data[alphaIndex] / 255 ) * ( b.data[alphaIndex] / 255 );
+      if ( alphaMultipliedDiff > threshold ) {
         // console.log( message + ": " + Math.abs( a.data[i] - b.data[i] ) );
-        largestDifference = Math.max( largestDifference, Math.abs( a.data[i] - b.data[i] ) );
+        largestDifference = Math.max( largestDifference, alphaMultipliedDiff );
         isEqual = false;
         // break;
       }
