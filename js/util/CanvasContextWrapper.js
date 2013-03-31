@@ -131,7 +131,7 @@ define( function( require ) {
         this.context.direction = direction;
       }
     }
-  }
+  };
   
   return CanvasContextWrapper;
 } );
