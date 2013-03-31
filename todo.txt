@@ -1,5 +1,6 @@
 
 Priorities:
+    Transform information in debug dump - CSS transform output? (or SVG, whichever is more verbose)
     Accessibility
     Force non-canvas above 'interactive' DOM node
         Need to track lowest DOM-interactive Trail for each Scene.

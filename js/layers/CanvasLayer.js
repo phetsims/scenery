@@ -190,8 +190,11 @@ define( function( require ) {
             baseContext.globalAlpha = trail.lastNode().getOpacity();
           }
           
-          // paint our canvas onto the level below
+          // paint our canvas onto the level below with a straight transform
+          baseContext.save();
+          baseContext.setTransform( layer.backingScale, 0, 0, layer.backingScale, 0, 0 );
           baseContext.drawImage( topCanvas, 0, 0 );
+          baseContext.restore();
           
           // reset styles
           if ( opacityChange ) {

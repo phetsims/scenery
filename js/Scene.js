@@ -1074,6 +1074,9 @@ define( function( require ) {
         if ( node._layerSplitAfter ) {
           addQualifier( 'layerSplitAfter' );
         }
+        if ( node._opacity < 1 ) {
+          addQualifier( 'opacity:' + node._opacity );
+        }
         div += '</div>';
         result += div;
       }
