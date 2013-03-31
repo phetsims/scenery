@@ -14,8 +14,6 @@ Priorities:
         Same-arity methods?
         Less temporary objects?
     Testing with hidef canvases
-    Opacity / scratch canvas handling:
-        Test with various transforms, since we do more complicated handling on context switching
 
 Bugs:
     DOM visible
@@ -118,8 +116,7 @@ Patterns:
 Canvas:
     Restricted bounds intersection pruning (also see performance)
         For canvas rendering, how to handle restricted bounds in depthFirstUntil? Generalize, and allow a return flag to indicate not hitting children?
-    * Clip shapes that are nested are probably broken
-    * CanvasLayer styles are probably broken - resetStyles seems fishy if not in sync (i.e. lineCap)
+    * Clip shapes that are nested are probably broken - opacity interaction or anything that triggers scratch canvas
     * Handle masking similar to SVG masking? see http://www.w3.org/TR/SVG/masking.html
         Use source-in. Probably a better option than the clipShape, so use clipping for pixel-aligned rectangles, masking for everything else?
 
@@ -170,9 +167,6 @@ Layers / caching:
         Option to disallow subpixel handling?
     Canvas / WebGL:
         drawImage is used instead of CSS transforms, but same general model, and we should take the same flags.
-        Have a scratch canvas stack for things like opacity
-            Function to determine whether a node needs to write to a global scratch canvas or just the top of the stack (i.e. opacity < 1 || flag)
-            Have a pool of canvases around for this specifically?
         "Global":
             Could combine with the Layer's canvas stack?
             A full scratch canvas wouldn't be able to take care of translations, but would be extremely fast for re-rendering things that didn't change at all.
@@ -227,13 +221,6 @@ Accessibility / shadow DOM:
         spec: http://www.w3.org/TR/shadow-dom/
 
 Node:
-    Feature TODO:
-        * Sub-tree opacity (like setTransparency in Piccolo)
-            'transparency', 'opacity', or 'alpha'?
-            Canvas: globalAlpha?
-                * This would require rendering into off-screen canvases in order to composite this as expected
-            SVG: how to handle?
-                group opacity ('opacity' attribute)
     Support for setting listeners in the mutator?
         { inputListeners: [ new SimpleDragHandler() ] }
     Since cursor might support data URLs, we can have custom cursors?
