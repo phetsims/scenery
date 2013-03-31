@@ -127,6 +127,16 @@ define( function( require ) {
       }
       
       return definition;
+    },
+    
+    toString: function() {
+      var result = 'new scenery.RadialGradient( ' + this.start.x + ', ' + this.start.y + ', ' + this.startRadius + ', ' + this.end.x + ', ' + this.end.y + ', ' + this.endRadius + ' )';
+      
+      _.each( this.stops, function( stop ) {
+        result += '.addColorStop( ' + stop.ratio + ', \'' + stop.color + '\' )';
+      } );
+      
+      return result;
     }
   };
   

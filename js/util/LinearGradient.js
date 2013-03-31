@@ -97,6 +97,16 @@ define( function( require ) {
       } );
       
       return definition;
+    },
+    
+    toString: function() {
+      var result = 'new scenery.LinearGradient( ' + this.start.x + ', ' + this.start.y + ', ' + this.end.x + ', ' + this.end.y + ' )';
+      
+      _.each( this.stops, function( stop ) {
+        result += '.addColorStop( ' + stop.ratio + ', \'' + stop.color + '\' )';
+      } );
+      
+      return result;
     }
   };
   

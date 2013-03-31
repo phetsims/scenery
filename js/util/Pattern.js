@@ -58,6 +58,10 @@ define( function( require ) {
       definition.appendChild( scenery.Image.createSVGImage( this.image.src, this.image.width, this.image.height ) );
       
       return definition;
+    },
+    
+    toString: function() {
+      return 'new scenery.Pattern( $( \'<img src="' + this.image.src + '"/>\' )[0] )';
     }
   };
   
