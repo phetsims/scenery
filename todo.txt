@@ -2,6 +2,7 @@
 Priorities:
     Layering bugs
     Accessibility
+        TabOrder object?
     Force non-canvas above 'interactive' DOM node
         Need to track lowest DOM-interactive Trail for each Scene.
             null indicates none exists, and represents the far 'after'
