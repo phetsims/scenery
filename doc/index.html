@@ -166,6 +166,7 @@
       <a class="sublink" href="#node-right">right</a><br>
       <a class="sublink" href="#node-top">top</a><br>
       <a class="sublink" href="#node-bottom">bottom</a><br>
+      <a class="sublink" href="#node-center">center</a><br>
       <a class="sublink" href="#node-centerX">centerX</a><br>
       <a class="sublink" href="#node-centerY">centerY</a><br>
       <a class="sublink" href="#node-renderer">renderer</a><br>
@@ -300,6 +301,7 @@
         <li><a href="#node-right">right</a>: Sets the x-translation so that the right (max X) of the bounding box (in the parent coordinate frame) is at the specified value</li>
         <li><a href="#node-top">top</a>: Sets the y-translation so that the top (min Y) of the bounding box (in the parent coordinate frame) is at the specified value</li>
         <li><a href="#node-bottom">bottom</a>: Sets the y-translation so that the bottom (min Y) of the bounding box (in the parent coordinate frame) is at the specified value</li>
+        <li><a href="#node-center">center</a>: Sets the translation so that the center of the bounding box (in the parent coordinate frame) is at the specified <a href="../../dot/doc#vector2">dot.Vector2</a> value</li>
         <li><a href="#node-centerX">centerX</a>: Sets the x-translation so that the horizontal center of the bounding box (in the parent coordinate frame) is at the specified value</li>
         <li><a href="#node-centerY">centerY</a>: Sets the y-translation so that the vertical center of the bounding box (in the parent coordinate frame) is at the specified value</li>
         <li><a href="#node-renderer">renderer</a>: Forces Scenery to use the specific renderer (canvas/svg) to display this node (and if possible, children). Accepts both strings (e.g. 'canvas', 'svg', etc.) or actual Renderer objects (e.g. Renderer.Canvas, Renderer.SVG, etc.)</li>
@@ -546,6 +548,13 @@ scene.updateOnRequestAnimationFrame();
       <p>
         <code>node.bottom</code> gets or sets the bottom bound (maximum y value) of this node's <a href="#node-bounds">bounds</a> in the parent coordinate frame, with
         <code>node.getBottom()</code> and <code>node.setBottom( y )</code>. Setting this bottom bound effectively translates the node vertically.
+      </p>
+      
+      <h4 id="node-center">node.center</h4>
+      <p>
+        <code>node.center</code> gets or sets the center of this node's <a href="#node-bounds">bounds</a> in the parent coordinate frame, with
+        <code>node.getCenter()</code> and <code>node.setCenter( center )</code>, which both handle the center as a
+        <a href="../../dot/doc#vector2">dot.Vector2</a> instance. Setting center effectively translates the node.
       </p>
       
       <h4 id="node-centerX">node.centerX</h4>

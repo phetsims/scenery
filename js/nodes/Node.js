@@ -853,6 +853,15 @@ define( function( require ) {
       return this; // allow chaining
     },
     
+    getCenter: function() {
+      return this.getBounds().getCenter();
+    },
+    
+    setCenter: function( center ) {
+      this.translate( center.minus( this.getCenter() ) );
+      return this;
+    },
+    
     getCenterX: function() {
       return this.getBounds().getCenterX();
     },
@@ -1296,6 +1305,9 @@ define( function( require ) {
     set bottom( value ) { this.setBottom( value ); },
     get bottom() { return this.getBottom(); },
     
+    set center( value ) { this.setCenter( value ); },
+    get center() { return this.getCenter(); },
+    
     set centerX( value ) { this.setCenterX( value ); },
     get centerX() { return this.getCenterX(); },
     
@@ -1413,7 +1425,7 @@ define( function( require ) {
    * TODO: move fill / stroke setting to mixins
    */
   Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
-                                  'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
+                                  'left', 'right', 'top', 'bottom', 'center', 'centerX', 'centerY', 'renderer', 'rendererOptions',
                                   'layerSplit', 'layerSplitBefore', 'layerSplitAfter' ];
   
   Node.prototype._supportedRenderers = [];
