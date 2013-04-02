@@ -246,8 +246,6 @@
       <a class="sublink" href="#rectangle-rectHeight">rectHeight</a><br>
       
       <a class="navlink" href="#circle">Circle</a><br>
-      <a class="sublink" href="#circle-circleX">circleX</a><br>
-      <a class="sublink" href="#circle-circleY">circleY</a><br>
       <a class="sublink" href="#circle-circleRadius">circleRadius</a><br>
       
     </div>
@@ -1420,34 +1418,21 @@ scene.addChild( new scenery.Rectangle( 74, 10, 44, 44, 10, 10, {
         and modify, and contains more optimized drawing routines for SVG.
       </p>
       <p>
-        A Circle is created with <code>new scenery.Circle( x, y, radius, [options] )</code>, with a circle
-        centered at (x,y) with the specified radius.
+        A Circle is created with <code>new scenery.Circle( radius, [options] )</code> with the specified radius.
       </p>
       <div id="example-circle" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
       <script type="text/javascript">
 docExample( 'example-circle', function( scene ) {
 /*START*/
-scene.addChild( new scenery.Circle( 32, 32, 22, {
-  fill: '#f00'
+scene.addChild( new scenery.Circle( 22, {
+  x: 32, y: 32, fill: '#f00'
 } ) );
-scene.addChild( new scenery.Circle( 43, 32, 11, {
-  fill: '#0f0'
+scene.addChild( new scenery.Circle( 11, {
+  x: 43, y: 32, fill: '#0f0'
 } ) );
 /*END*/
 } );
       </script>
-      
-      <h4 id="circle-circleX">circleX</h4>
-      <p>
-        <code>node.circleX</code> (<code>node.getCircleX()</code>, <code>node.setCircleX( x )</code>)
-        retrieves or modifies the 'x' parameter of the <a href="#circle">Circle</a>.
-      </p>
-      
-      <h4 id="circle-circleY">circleY</h4>
-      <p>
-        <code>node.circleY</code> (<code>node.getCircleY()</code>, <code>node.setCircleY( y )</code>)
-        retrieves or modifies the 'y' parameter of the <a href="#circle">Circle</a>.
-      </p>
       
       <h4 id="circle-circleRadius">circleRadius</h4>
       <p>
