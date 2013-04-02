@@ -1,5 +1,6 @@
 
 Priorities:
+    Layering bugs
     Accessibility
     Force non-canvas above 'interactive' DOM node
         Need to track lowest DOM-interactive Trail for each Scene.
