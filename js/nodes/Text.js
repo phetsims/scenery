@@ -354,7 +354,7 @@ define( function( require ) {
       }
       
       if ( this.font !== new scenery.Font().getFont() ) {
-        addProp( 'font', this.font );
+        addProp( 'font', this.font.replace( /'/g, '\\\'' ) );
       }
       
       if ( this._textAlign !== 'start' ) {
