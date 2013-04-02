@@ -31,7 +31,10 @@ define( function( require ) {
   var objectCreate = Util.objectCreate;
   
   // if assertions are enabled, log out layer information
-  var layerLogger = null; //assert ? function( ob ) { console.log( ob ); } : null;
+  var layerLogger = assert ? function( ob ) { console.log( ob ); } : null;
+  
+  // debug flag to disable matching of layers when in 'match' mode
+  var forceNewLayers = true; // DEBUG
   
   /*
    * $main should be a block-level element with a defined width and height. scene.resize() should be called whenever
@@ -214,6 +217,14 @@ define( function( require ) {
     }
     
     this.layerChangeIntervals.push( interval );
+    
+    if ( layerLogger ) {
+      layerLogger( 'new intervals: ' );
+      _.each( this.layerChangeIntervals, function( interval ) {
+        layerLogger( '  ' + interval.toString() );
+      } );
+      layerLogger( '---' );
+    }
   };
   
   Scene.prototype.createLayer = function( layerType, layerArgs, startBoundary, endBoundary ) {
@@ -274,6 +285,11 @@ define( function( require ) {
       baseNode: this
     };
     
+    // sanity check
+    _.each( this.layerChangeIntervals, function( interval ) {
+      interval.reindex();
+    } );
+    
     /*
      * Sort our intervals, so that when we need to 'unglue' a layer into two separate layers, we will have passed
      * all of the parts where we would need to use the 'before' layer, so we can update our layer map with the 'after'
@@ -319,7 +335,7 @@ define( function( require ) {
     this.reindexLayers();
     
     // TODO: add this back in, but with an appropriate assertion level
-    // assert && assert( this.layerAudit() );
+    assert && assert( this.layerAudit() );
   };
   
   /*
@@ -458,7 +474,8 @@ define( function( require ) {
       if ( match && !isEnd ) { // TODO: verify this condition with test cases
         // if the node's old layer is compatible
         var layer = oldLayerMap[trail.getUniqueId()];
-        if ( layer.type === currentLayerType ) {
+        if ( layer.type === currentLayerType && !forceNewLayers ) {
+          // TODO: we need to handle compatibility with layer splits. using forceNewLayers flag to temporarily disable
           matchingLayer = layer;
         }
       }
@@ -996,6 +1013,16 @@ define( function( require ) {
     for ( var i = 1; i < this.layers.length; i++ ) {
       assert && assert( this.layers[0].startPaintedTrail.compare( this.layers[1].startPaintedTrail ) === -1, 'proper ordering of layers in scene.layers array' );
     }
+    
+    _.each( this.layers, function( layer ) {
+      var layerTrails = layer.getLayerTrails();
+      var computedTrails = [];
+      scenery.Trail.eachPaintedTrailbetween( layer.startPaintedTrail, layer.endPaintedTrail, function( trail ) {
+        computedTrails.push( trail );
+      }, false, scene );
+      
+      assert && assert( layerTrails.length === computedTrails.length );
+    } );
     
     return true; // so we can assert( layerAudit() )
   };
