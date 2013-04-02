@@ -41,17 +41,17 @@ define( function( require ) {
       return this;
     };
     
-    proto.beforeCanvasFill = function( layer ) {
-      layer.setFillStyle( this._fill );
+    proto.beforeCanvasFill = function( wrapper ) {
+      wrapper.setFillStyle( this._fill );
       if ( this._fill.transformMatrix ) {
-        layer.context.save();
-        this._fill.transformMatrix.canvasAppendTransform( layer.context );
+        wrapper.context.save();
+        this._fill.transformMatrix.canvasAppendTransform( wrapper.context );
       }
     };
     
-    proto.afterCanvasFill = function( layer ) {
+    proto.afterCanvasFill = function( wrapper ) {
       if ( this._fill.transformMatrix ) {
-        layer.context.restore();
+        wrapper.context.restore();
       }
     };
     
@@ -78,6 +78,21 @@ define( function( require ) {
       if ( oldFillDef ) {
         defs.removeChild( oldFillDef );
       }
+    };
+    
+    proto.appendFillablePropString = function( spaces, result ) {
+      if ( this._fill ) {
+        if ( result ) {
+          result += ',\n';
+        }
+        if ( typeof this._fill === 'string' ) {
+          result += spaces + 'fill: \'' + this._fill + '\'';
+        } else {
+          result += spaces + 'fill: ' + this._fill.toString();
+        }
+      }
+      
+      return result;
     };
     
     // on mutation, set the fill parameter first

@@ -65,6 +65,11 @@ define( function( require ) {
       return new Trail( this );
     },
     
+    // convenience function to determine whether this trail will render something
+    isPainted: function() {
+      return this.lastNode().isPainted();
+    },
+    
     get: function( index ) {
       if ( index >= 0 ) {
         return this.nodes[index];
@@ -108,9 +113,6 @@ define( function( require ) {
       
       // mimic an Array
       this.length++;
-      for ( var i = 0; i < this.length; i++ ) {
-        this[i] = this.nodes[i];
-      }
       return this;
     },
     
@@ -122,10 +124,6 @@ define( function( require ) {
       
       // mimic an Array
       this.length--;
-      delete this[this.length];
-      for ( var i = 0; i < this.length; i++ ) {
-        this[i] = this.nodes[i];
-      }
       return this;
     },
     
@@ -139,7 +137,6 @@ define( function( require ) {
       
       // mimic an Array
       this.length++;
-      this[this.length-1] = node;
       return this;
     },
     
@@ -151,7 +148,6 @@ define( function( require ) {
       
       // mimic an Array
       this.length--;
-      delete this[this.length];
       return this;
     },
     
@@ -250,10 +246,10 @@ define( function( require ) {
       }
     },
     
-    // like previous(), but keeps moving back until the trail goes to a node with hasSelf() === true
-    previousSelf: function() {
+    // like previous(), but keeps moving back until the trail goes to a node with isPainted() === true
+    previousPainted: function() {
       var result = this.previous();
-      while ( result && !result.lastNode().hasSelf() ) {
+      while ( result && !result.isPainted() ) {
         result = result.previous();
       }
       return result;
@@ -293,10 +289,10 @@ define( function( require ) {
       }
     },
     
-    // like next(), but keeps moving back until the trail goes to a node with hasSelf() === true
-    nextSelf: function() {
+    // like next(), but keeps moving back until the trail goes to a node with isPainted() === true
+    nextPainted: function() {
       var result = this.next();
-      while ( result && !result.lastNode().hasSelf() ) {
+      while ( result && !result.isPainted() ) {
         result = result.next();
       }
       return result;
@@ -362,6 +358,7 @@ define( function( require ) {
     
     // concatenates the unique IDs of nodes in the trail, so that we can do id-based lookups
     getUniqueId: function() {
+      // TODO: consider caching this if it is ever a bottleneck. it seems like it might be called in layer-refresh inner loops
       return _.map( this.nodes, function( node ) { return node.getId(); } ).join( '-' );
     },
     
@@ -374,10 +371,10 @@ define( function( require ) {
     }
   };
   
-  // like eachTrailBetween, but only fires for self trails
-  Trail.eachSelfTrailbetween = function( a, b, callback, excludeEndTrails, scene ) {
+  // like eachTrailBetween, but only fires for painted trails
+  Trail.eachPaintedTrailbetween = function( a, b, callback, excludeEndTrails, scene ) {
     Trail.eachTrailBetween( a, b, function( trail ) {
-      if ( trail && trail.lastNode().hasSelf() ) {
+      if ( trail && trail.isPainted() ) {
         callback( trail );
       }
     }, excludeEndTrails, scene );

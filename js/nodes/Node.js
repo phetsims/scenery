@@ -15,6 +15,7 @@ define( function( require ) {
   var Bounds2 = require( 'DOT/Bounds2' );
   var Transform3 = require( 'DOT/Transform3' );
   var Matrix3 = require( 'DOT/Matrix3' );
+  var clamp = require( 'DOT/Util' ).clamp;
   
   var scenery = require( 'SCENERY/scenery' );
   var LayerStrategy = require( 'SCENERY/layers/LayerStrategy' ); // used to set the default layer strategy on the prototype
@@ -59,6 +60,9 @@ define( function( require ) {
     // Whether this node (and its children) will be visible when the scene is updated. Visible nodes by default will not be pickable either
     this._visible = true;
     
+    // Opacity from 0 to 1
+    this._opacity = 1;
+    
     // Whether hit testing will check for this node (and its children).
     this._pickable = true;
     
@@ -95,7 +99,7 @@ define( function( require ) {
     this._selfBounds = Bounds2.NOTHING; // just for this node, in "local" coordinates
     this._childBounds = Bounds2.NOTHING; // just for children, in "local" coordinates
     this._boundsDirty = true;
-    this._selfBoundsDirty = this.hasSelf();
+    this._selfBoundsDirty = this.isPainted();
     this._childBoundsDirty = true;
     
     // dirty region handling
@@ -120,32 +124,6 @@ define( function( require ) {
   
   Node.prototype = {
     constructor: Node,
-    
-    // TODO: deprecated. have each layer handle this separately
-    enterState: function( state, trail ) {
-      // apply this node's transform
-      if ( !this._transform.isIdentity() ) {
-        // TODO: consider a stack-based model for transforms?
-        state.applyTransformationMatrix( this._transform.getMatrix() );
-      }
-      
-      if ( this._clipShape ) {
-        // push the clipping shape in the global coordinate frame (relative to the trail)
-        state.pushClipShape( trail.getTransform().transformShape( this._clipShape ) );
-      }
-    },
-    
-    // TODO: deprecated. have each layer handle this separately
-    exitState: function( state, trail ) {
-      if ( this._clipShape ) {
-        state.popClipShape();
-      }
-      
-      // apply the inverse of this node's transform
-      if ( !this._transform.isIdentity() ) {
-        state.applyTransformationMatrix( this._transform.getInverse() );
-      }
-    },
     
     insertChild: function( index, node ) {
       assert && assert( node !== null && node !== undefined, 'insertChild cannot insert a null/undefined child' );
@@ -539,7 +517,7 @@ define( function( require ) {
       return this._selfBounds.intersectsBounds( bounds );
     },
     
-    hasSelf: function() {
+    isPainted: function() {
       return false;
     },
     
@@ -944,6 +922,21 @@ define( function( require ) {
       return this;
     },
     
+    getOpacity: function() {
+      return this._opacity;
+    },
+    
+    setOpacity: function( opacity ) {
+      var clampedOpacity = clamp( opacity, 0, 1 );
+      if ( clampedOpacity !== this._opacity ) {
+        this.markOldPaint();
+        
+        this._opacity = clampedOpacity;
+        
+        this.invalidatePaint();
+      }
+    },
+    
     isPickable: function() {
       return this._pickable;
     },
@@ -1005,11 +998,13 @@ define( function( require ) {
         newRenderer = scenery.Renderer[renderer];
       } else if ( renderer instanceof scenery.Renderer ) {
         newRenderer = renderer;
+      } else if ( !renderer ) {
+        newRenderer = null;
       } else {
         throw new Error( 'unrecognized type of renderer: ' + renderer );
       }
       if ( newRenderer !== this._renderer ) {
-        assert && assert( !this.hasSelf() || _.contains( this._supportedRenderers, newRenderer ), 'renderer ' + newRenderer + ' not supported by ' + this );
+        assert && assert( !this.isPainted() || !newRenderer || _.contains( this._supportedRenderers, newRenderer ), 'renderer ' + newRenderer + ' not supported by ' + this.constructor.name );
         this._renderer = newRenderer;
         
         this.updateLayerType();
@@ -1260,10 +1255,13 @@ define( function( require ) {
     get rendererOptions() { return this.getRendererOptions(); },
     
     set cursor( value ) { this.setCursor( value ); },
-    get cursor() { return this.isCursor(); },
+    get cursor() { return this.getCursor(); },
     
     set visible( value ) { this.setVisible( value ); },
     get visible() { return this.isVisible(); },
+    
+    set opacity( value ) { this.setOpacity( value ); },
+    get opacity() { return this.getOpacity(); },
     
     set pickable( value ) { this.setPickable( value ); },
     get pickable() { return this.isPickable(); },
@@ -1317,7 +1315,6 @@ define( function( require ) {
     get id() { return this.getId(); },
     
     mutate: function( options ) {
-      
       var node = this;
       
       _.each( this._mutatorKeys, function( key ) {
@@ -1334,6 +1331,73 @@ define( function( require ) {
       } );
       
       return this; // allow chaining
+    },
+    
+    toString: function( spaces ) {
+      spaces = spaces || '';
+      var props = this.getPropString( spaces + '  ' );
+      return spaces + this.getBasicConstructor( props ? ( '\n' + props + '\n' + spaces ) : '' );
+    },
+    
+    getBasicConstructor: function( propLines ) {
+      return 'new scenery.Node( {' + propLines + '} )';
+    },
+    
+    getPropString: function( spaces ) {
+      var self = this;
+      
+      var result = '';
+      function addProp( key, value, nowrap ) {
+        if ( result ) {
+          result += ',\n';
+        }
+        if ( !nowrap && typeof value === 'string' ) {
+          result += spaces + key + ': \'' + value + '\'';
+        } else {
+          result += spaces + key + ': ' + value;
+        }
+      }
+      
+      if ( this._children.length ) {
+        var childString = '';
+        _.each( this._children, function( child ) {
+          if ( childString ) {
+            childString += ',\n';
+          }
+          childString += child.toString( spaces + '  ' );
+        } );
+        addProp( 'children', '[\n' + childString + '\n' + spaces + ']', true );
+      }
+      
+      // direct copy props
+      if ( this.cursor ) { addProp( 'cursor', this.cursor ); }
+      if ( !this.visible ) { addProp( 'visible', this.visible ); }
+      if ( !this.pickable ) { addProp( 'pickable', this.pickable ); }
+      if ( this.opacity !== 1 ) { addProp( 'opacity', this.opacity ); }
+      
+      if ( !this.transform.isIdentity() ) {
+        var m = this.transform.getMatrix();
+        addProp( 'matrix', 'new dot.Matrix3( ' + m.m00() + ', ' + m.m01() + ', ' + m.m02() + ', ' +
+                                                 m.m10() + ', ' + m.m11() + ', ' + m.m12() + ', ' +
+                                                 m.m20() + ', ' + m.m21() + ', ' + m.m22() + ' )', true );
+      }
+      
+      if ( this.renderer ) {
+        addProp( 'renderer', this.renderer.name );
+        if ( this.rendererOptions ) {
+          addProp( 'rendererOptions', JSON.stringify( this.rendererOptions ), true );
+        }
+      }
+      
+      if ( this._layerSplitBefore ) {
+        addProp( 'layerSplitBefore', true );
+      }
+      
+      if ( this._layerSplitAfter ) {
+        addProp( 'layerSplitAfter', true );
+      }
+      
+      return result;
     }
   };
   
@@ -1348,7 +1412,7 @@ define( function( require ) {
    * TODO: using more than one of {translation,x,left,right,centerX} or {translation,y,top,bottom,centerY} should be considered an error
    * TODO: move fill / stroke setting to mixins
    */
-  Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'pickable', 'translation', 'x', 'y', 'rotation', 'scale',
+  Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
                                   'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
                                   'layerSplit', 'layerSplitBefore', 'layerSplitAfter' ];
   

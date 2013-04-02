@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Documentation - Scenery</title>
@@ -86,6 +87,11 @@
     .sublink {
       padding-left: 1em;
     }
+    
+    .args {
+      font-weight: normal;
+      font-size: 80%;
+    }
   </style>
   
 </head>
@@ -143,6 +149,8 @@
       <a class="sublink" href="#node-cursor">cursor</a><br>
       <a class="sublink" href="#node-visible">visible</a><br>
       <a class="sublink" href="#node-pickable">pickable</a><br>
+      <a class="sublink" href="#node-opacity">opacity</a><br>
+      <a class="sublink" href="#node-matrix">matrix</a><br>
       <a class="sublink" href="#node-translation">translation</a><br>
       <a class="sublink" href="#node-translate">translate</a><br>
       <a class="sublink" href="#node-x">x</a><br>
@@ -238,8 +246,6 @@
       <a class="sublink" href="#rectangle-rectHeight">rectHeight</a><br>
       
       <a class="navlink" href="#circle">Circle</a><br>
-      <a class="sublink" href="#circle-circleX">circleX</a><br>
-      <a class="sublink" href="#circle-circleY">circleY</a><br>
       <a class="sublink" href="#circle-circleRadius">circleRadius</a><br>
       
     </div>
@@ -283,6 +289,8 @@
         <li><a href="#node-cursor">cursor</a>: Will display the specified CSS cursor when the mouse is over this Node or one of its descendents. The Scene needs to have input listeners attached with an initialize method first.</li>
         <li><a href="#node-visible">visible</a>: If false, this node (and its children) will not be displayed (or get input events)</li>
         <li><a href="#node-pickable">pickable</a>: If false, this node (and its children) will not get input events</li>
+        <li><a href="#node-opacity">opacity</a>: From 0 (transparent) to 1 (opaque)</li>
+        <li><a href="#node-matrix">matrix</a>: Sets the transform matrix of the node to the specified <a href="../../dot/doc#matrix3">dot.Matrix3</a> value</li>
         <li><a href="#node-translation">translation</a>: Sets the translation of the node to either the specified <a href="../../dot/doc#vector2">dot.Vector2</a> value, or the x,y values from an object (e.g. translation: { x: 1, y: 2 } )</li>
         <li><a href="#node-x">x</a>: Sets the x-translation of the node</li>
         <li><a href="#node-y">y</a>: Sets the y-translation of the node</li>
@@ -341,18 +349,18 @@ scene.addChild( new scenery.Node( {
         <code>node.parents</code> or <code>node.getParents()</code> will return an array of parent nodes, but <strong>order is not significant</strong>.
       </p>
       
-      <h4 id="node-addChild">node.addChild( childNode )</h4>
+      <h4 id="node-addChild">node.addChild( <span class="args">childNode</span> )</h4>
       <p>
         Appends childNode to node's list of children. childNode will be displayed above node and node's other children.
       </p>
       
-      <h4 id="node-insertChild">node.insertChild( index, childNode )</h4>
+      <h4 id="node-insertChild">node.insertChild( <span class="args">index, childNode</span> )</h4>
       <p>
         Inserts childNode into node's children at the specified index. <code>node.insertChild( 0, childNode )</code> will make childNode the first child, and
         <code>node.insertChild( node.children.length, childNode )</code> is the same as <code>node.addChild( childNode )</code>.
       </p>
       
-      <h4 id="node-removeChild">node.removeChild( childNode )</h4>
+      <h4 id="node-removeChild">node.removeChild( <span class="args">childNode</span> )</h4>
       <p>
         Removes childNode from node's children.
       </p>
@@ -409,6 +417,40 @@ scene.updateOnRequestAnimationFrame();
         manipulated by user input.
       </p>
       
+      <h4 id="node-opacity">node.opacity</h4>
+      <p>
+        <code>node.opacity</code> is a getter/setter linked to <code>node.getOpacity()</code> and <code>node.setOpacity( opacity )</code>.
+        Opacity should be in the inclusive range of 0 to 1, where 0 is fully transparent, and 1 is fully opaque. <code>opacity</code> controls not only
+        the opacity (alpha) of the node itself, but also all of its children.
+      </p>
+      <div id="example-opacity" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-opacity', function( scene ) {
+/*START*/
+scene.addChild( new scenery.Rectangle( 0, 12, 64, 20, { fill: '#000' } ) );
+var circle = kite.Shape.circle( 0, 0, 30 );
+scene.addChild( new scenery.Node( {
+  opacity: 0.5,
+  children: [
+    new scenery.Path( { shape: circle, x: 12, y: 22, fill: '#f00' } ),
+    new scenery.Path( { shape: circle, x: 52, y: 22, fill: '#00f' } )
+  ]
+} ) );
+/*END*/
+// event initialization needed for cursor to work
+scene.initializeStandaloneEvents();
+
+// and update on every frame
+scene.updateOnRequestAnimationFrame();
+} );
+      </script>
+      
+      <h4 id="node-matrix">node.matrix</h4>
+      <p>
+        <code>node.matrix</code> (<code>node.getMatrix()</code>, <code>node.setMatrix( matrix )</code>) gets or sets the transformation matrix associated with the
+        node, of type <a href="../../dot/doc#matrix3">dot.Matrix3</a>.
+      </p>
+      
       <h4 id="node-translation">node.translation</h4>
       <p>
         Getting the translation: <code>node.translation</code> or <code>node.getTranslation()</code>. It always returns a <a href="../../dot/doc#vector2">dot.Vector2</a> instance representing
@@ -419,7 +461,7 @@ scene.updateOnRequestAnimationFrame();
         In both instances, <code>translation</code> can be either a <a href="../../dot/doc#vector2">dot.Vector2</a> or an object literal like <code>{ x: 5, y: 10 }</code>.
       </p>
       
-      <h4 id="node-translate">node.translate( x, y )</h4>
+      <h4 id="node-translate">node.translate( <span class="args">x, y</span> )</h4>
       <p>
         Translates the node relatively by <code>x</code> and <code>y</code>. In addition to <code>node.translate( x, y )</code>, <code>node.translate( translation )</code>
         can be used, where <code>transform</code> is either a <a href="../../dot/doc#vector2">dot.Vector2</a> or an object like <code>{ x: 5, y: 10 }</code>
@@ -444,18 +486,18 @@ scene.updateOnRequestAnimationFrame();
         (instead of setting its rotation), use <a href="#node-rotate">node.rotate</a>
       </p>
       
-      <h4 id="node-rotate">node.rotate( radians, [prepend] )</h4>
+      <h4 id="node-rotate">node.rotate( <span class="args">radians, [prepend]</span> )</h4>
       <p>
         Rotates the node's transform. By default the rotation is appended to the node's transform, but the optional <code>prepend</code> boolean flag can be added for the rotation
         to be prepended to the node's transform.
       </p>
       
-      <h4 id="node-rotateAround">node.rotateAround( point, angle )</h4>
+      <h4 id="node-rotateAround">node.rotateAround( <span class="args">point, angle</span> )</h4>
       <p>
         Rotates the node by <code>angle</code> in radians around the <a href="../../dot/doc#vector2">dot.Vector2</a> <code>point</code>. <code>point</code> should be in the node's parent coordinate frame.
       </p>
       
-      <h4 id="node-scale">node.scale( x, y, [prepend] )</h4>
+      <h4 id="node-scale">node.scale( <span class="args">x, y, [prepend]</span> )</h4>
       <p>
         Scales the node in each axis. By default the scale is appended to the node's transform, but the optional <code>prepend</code> boolean flag can be added for the
         scale to be prepended to the node's transform.
@@ -606,7 +648,7 @@ scene.updateOnRequestAnimationFrame();
         garbage collected if no more references are to the Scene. Call this once you no longer need a scene.
       </p>
       
-      <h4 id="scene-renderToCanvas">scene.renderToCanvas( canvas, context, callback )</h4>
+      <h4 id="scene-renderToCanvas">scene.renderToCanvas( <span class="args">canvas, context, callback</span> )</h4>
       <p>
         Renders all applicable layers that support Canvas output to the specified <code>canvas</code> (with
         the specified <code>context</code>). The <code>context</code> is specified in addition to the canvas
@@ -622,7 +664,7 @@ scene.updateOnRequestAnimationFrame();
         DOM content is currently not supported for renderToCanvas.
       </p>
       
-      <h4 id="scene-canvasSnapshot">scene.canvasSnapshot( callback )</h4>
+      <h4 id="scene-canvasSnapshot">scene.canvasSnapshot( <span class="args">callback</span> )</h4>
       <p>
         Asynchronously draws the scene to a canvas with the same size as the scene
         (using <a href="#scene-renderToCanvas">renderToCanvas</a>, and calls <code>callback( canvas, imageData )</code>
@@ -632,7 +674,7 @@ scene.updateOnRequestAnimationFrame();
         If any origin-dirty content (like cross-domain images without <a href="http://en.wikipedia.org/wiki/Cross-origin_resource_sharing">CORS</a>) are included in the Scene, this operation will throw a security error.
       </p>
       
-      <h4 id="scene-canvasDataURL">scene.canvasDataURL( callback )</h4>
+      <h4 id="scene-canvasDataURL">scene.canvasDataURL( <span class="args">callback</span> )</h4>
       <p>
         Asynchronously draws the scene to an image (using <a href="#scene-canvasSnapshot">scene.canvasSnapshot</a>),
         and calls <code>callback( dataURL )</code> with the
@@ -641,7 +683,7 @@ scene.updateOnRequestAnimationFrame();
         inside the scene.
       </p>
       
-      <h4 id="scene-updateOnRequestAnimationFrame">scene.updateOnRequestAnimationFrame( [element] )</h4>
+      <h4 id="scene-updateOnRequestAnimationFrame">scene.updateOnRequestAnimationFrame( <span class="args">[element]</span> )</h4>
       <p>
         A simple way of setting up <a href="#scene-updateScene">scene.updateScene</a> to be called using
         requestAnimationFrame. More advanced applications will want to handle this themselves.
@@ -1178,13 +1220,13 @@ scene.addChild( new scenery.Text( 'A', {
 } );
       </script>
       
-      <h4 id="linearGradient-addColorStop">addColorStop( ratio, color )</h4>
+      <h4 id="linearGradient-addColorStop">addColorStop( <span class="args">ratio, color</span> )</h4>
       <p>
         Adds a point of color along the gradient, where a ratio of 0 is a color point at (x0,y0) and
         a ratio of 1 is a color point at (x1,y1).
       </p>
       
-      <h4 id="linearGradient-setTransformMatrix">setTransformMatrix( matrix )</h4>
+      <h4 id="linearGradient-setTransformMatrix">setTransformMatrix( <span class="args">matrix</span> )</h4>
       <p>
         Given a <a href="../../dot/doc#matrix3">Matrix3</a> for <code>matrix</code>, it will transform
         the gradient as it is applied. This should only be done before adding it as a fill/stroke to
@@ -1203,6 +1245,10 @@ scene.addChild( new scenery.Text( 'A', {
         two circles, one centered at (x0,y0) with a radius r0, and the other at (x1,y1) with a radius r1.
         Due to SVG compatibility, this is slightly constricted, as the smaller circle needs to be completely
         within the larger circle. Then <a href="#radialGradient-addColorStop">color stops</a> can be added.
+      </p>
+      <p>
+        <strong>NOTE: Firefox 19 (Win 7) does not currently render "conic" radial gradients correctly (where x0 != x1 or y0 != y1).</strong>
+        This does not appear to be the case with Firefox 19 on Mac, but please refrain from those edge-case gradients.
       </p>
       <div id="example-radialGradient" class="exampleScene" style="width: 128px; height: 128px; margin: 0 auto;"></div>
       <script type="text/javascript">
@@ -1239,13 +1285,13 @@ scene.addChild( new scenery.Text( 'A', {
 } );
       </script>
       
-      <h4 id="radialGradient-addColorStop">addColorStop( ratio, color )</h4>
+      <h4 id="radialGradient-addColorStop">addColorStop( <span class="args">ratio, color</span> )</h4>
       <p>
         Adds a point of color along the gradient, where a ratio of 0 is a color point at (x0,y0) and
         a ratio of 1 is a color point at (x1,y1).
       </p>
       
-      <h4 id="radialGradient-setTransformMatrix">setTransformMatrix( matrix )</h4>
+      <h4 id="radialGradient-setTransformMatrix">setTransformMatrix( <span class="args">matrix</span> )</h4>
       <p>
         Given a <a href="../../dot/doc#matrix3">Matrix3</a> for <code>matrix</code>, it will transform
         the gradient as it is applied. This should only be done before adding it as a fill/stroke to
@@ -1285,7 +1331,7 @@ loadedImg.src = 'http://phet.colorado.edu/images/phet-logo-yellow.png';
 } );
       </script>
       
-      <h4 id="pattern-setTransformMatrix">setTransformMatrix( matrix )</h4>
+      <h4 id="pattern-setTransformMatrix">setTransformMatrix( <span class="args">matrix</span> )</h4>
       <p>
         Given a <a href="../../dot/doc#matrix3">Matrix3</a> for <code>matrix</code>, it will transform
         the gradient as it is applied. This should only be done before adding it as a fill/stroke to
@@ -1372,34 +1418,21 @@ scene.addChild( new scenery.Rectangle( 74, 10, 44, 44, 10, 10, {
         and modify, and contains more optimized drawing routines for SVG.
       </p>
       <p>
-        A Circle is created with <code>new scenery.Circle( x, y, radius, [options] )</code>, with a circle
-        centered at (x,y) with the specified radius.
+        A Circle is created with <code>new scenery.Circle( radius, [options] )</code> with the specified radius.
       </p>
       <div id="example-circle" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
       <script type="text/javascript">
 docExample( 'example-circle', function( scene ) {
 /*START*/
-scene.addChild( new scenery.Circle( 32, 32, 22, {
-  fill: '#f00'
+scene.addChild( new scenery.Circle( 22, {
+  x: 32, y: 32, fill: '#f00'
 } ) );
-scene.addChild( new scenery.Circle( 43, 32, 11, {
-  fill: '#0f0'
+scene.addChild( new scenery.Circle( 11, {
+  x: 43, y: 32, fill: '#0f0'
 } ) );
 /*END*/
 } );
       </script>
-      
-      <h4 id="circle-circleX">circleX</h4>
-      <p>
-        <code>node.circleX</code> (<code>node.getCircleX()</code>, <code>node.setCircleX( x )</code>)
-        retrieves or modifies the 'x' parameter of the <a href="#circle">Circle</a>.
-      </p>
-      
-      <h4 id="circle-circleY">circleY</h4>
-      <p>
-        <code>node.circleY</code> (<code>node.getCircleY()</code>, <code>node.setCircleY( y )</code>)
-        retrieves or modifies the 'y' parameter of the <a href="#circle">Circle</a>.
-      </p>
       
       <h4 id="circle-circleRadius">circleRadius</h4>
       <p>

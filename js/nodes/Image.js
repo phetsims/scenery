@@ -133,7 +133,7 @@ define( function( require ) {
     },
     
     // signal that we are actually rendering something
-    hasSelf: function() {
+    isPainted: function() {
       return true;
     },
     
@@ -142,10 +142,8 @@ define( function( require ) {
     *----------------------------------------------------------------------------*/
     
     // TODO: add SVG / DOM support
-    paintCanvas: function( state ) {
-      var layer = state.layer;
-      var context = layer.context;
-      context.drawImage( this._image, 0, 0 );
+    paintCanvas: function( wrapper ) {
+      wrapper.context.drawImage( this._image, 0, 0 );
     },
     
     /*---------------------------------------------------------------------------*
@@ -191,7 +189,11 @@ define( function( require ) {
     },
     
     set image( value ) { this.setImage( value ); },
-    get image() { return this.getImage(); }
+    get image() { return this.getImage(); },
+    
+    getBasicConstructor: function( propLines ) {
+      return 'new scenery.Image( \'' + this._image.src.replace( /'/g, '\\\'' ) + '\', {' + propLines + '} )';
+    }
   } );
   
   Image.prototype._mutatorKeys = [ 'image' ].concat( Node.prototype._mutatorKeys );

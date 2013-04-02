@@ -76,27 +76,26 @@ define( function( require ) {
       this.invalidateSelf( this.accurateCanvasBounds() );
     },
 
-    paintCanvas: function( state ) {
-      var layer = state.layer;
-      var context = layer.context;
+    paintCanvas: function( wrapper ) {
+      var context = wrapper.context;
       
       // extra parameters we need to set, but should avoid setting if we aren't drawing anything
       if ( this.hasFill() || this.hasStroke() ) {
-        layer.setFont( this._font.getFont() );
-        layer.setTextAlign( this._textAlign );
-        layer.setTextBaseline( this._textBaseline );
-        layer.setDirection( this._direction );
+        wrapper.setFont( this._font.getFont() );
+        wrapper.setTextAlign( this._textAlign );
+        wrapper.setTextBaseline( this._textBaseline );
+        wrapper.setDirection( this._direction );
       }
       
       if ( this.hasFill() ) {
-        this.beforeCanvasFill( layer ); // defined in Fillable
+        this.beforeCanvasFill( wrapper ); // defined in Fillable
         context.fillText( this._text, 0, 0 );
-        this.afterCanvasFill( layer ); // defined in Fillable
+        this.afterCanvasFill( wrapper ); // defined in Fillable
       }
       if ( this.hasStroke() ) {
-        this.beforeCanvasStroke( layer ); // defined in Strokable
+        this.beforeCanvasStroke( wrapper ); // defined in Strokable
         context.strokeText( this._text, 0, 0 );
-        this.afterCanvasStroke( layer ); // defined in Strokable
+        this.afterCanvasStroke( wrapper ); // defined in Strokable
       }
     },
     
@@ -287,7 +286,9 @@ define( function( require ) {
     *----------------------------------------------------------------------------*/
     
     setFont: function( font ) {
-      this._font = font instanceof scenery.Font ? font : new scenery.Font( font );
+      // if font is a Font instance, we actually create another copy so that modification on the original will not change this font.
+      // in the future we can consider adding listeners to the font to get font change notifications.
+      this._font = font instanceof scenery.Font ? new scenery.Font( font.getFont() ) : new scenery.Font( font );
       this.invalidateText();
       return this;
     },
@@ -327,8 +328,48 @@ define( function( require ) {
       return this._direction;
     },
     
-    hasSelf: function() {
+    isPainted: function() {
       return true;
+    },
+    
+    getBasicConstructor: function( propLines ) {
+      return 'new scenery.Text( \'' + this._text.replace( /'/g, '\\\'' ) + '\', {' + propLines + '} )';
+    },
+    
+    getPropString: function( spaces ) {
+      var result = Node.prototype.getPropString.call( this, spaces );
+      result = this.appendFillablePropString( spaces, result );
+      result = this.appendStrokablePropString( spaces, result );
+      
+      // TODO: if created again, deduplicate with Node's getPropString
+      function addProp( key, value, nowrap ) {
+        if ( result ) {
+          result += ',\n';
+        }
+        if ( !nowrap && typeof value === 'string' ) {
+          result += spaces + key + ': \'' + value + '\'';
+        } else {
+          result += spaces + key + ': ' + value;
+        }
+      }
+      
+      if ( this.font !== new scenery.Font().getFont() ) {
+        addProp( 'font', this.font );
+      }
+      
+      if ( this._textAlign !== 'start' ) {
+        addProp( 'textAlign', this._textAlign );
+      }
+      
+      if ( this._textBaseline !== 'alphabetic' ) {
+        addProp( 'textBaseline', this._textBaseline );
+      }
+      
+      if ( this._direction !== 'ltr' ) {
+        addProp( 'direction', this._direction );
+      }
+      
+      return result;
     }
   } );
   

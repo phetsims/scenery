@@ -18,9 +18,9 @@ define( function( require ) {
     this.previousLayerType = null;
     this.nextLayerType = null;
     
-    // trails to the closest nodes with hasSelf() === true before and after the boundary
-    this.previousSelfTrail = null;
-    this.nextSelfTrail = null;
+    // trails to the closest nodes with isPainted() === true before and after the boundary
+    this.previousPaintedTrail = null;
+    this.nextPaintedTrail = null;
     
     // the TrailPointers where the previous layer was ended and the next layer begins (the trail, and enter() or exit())
     this.previousEndPointer = null;
@@ -32,28 +32,31 @@ define( function( require ) {
     constructor: LayerBoundary,
     
     hasPrevious: function() {
-      return !!this.previousSelfTrail;
+      return !!this.previousPaintedTrail;
     },
     
     hasNext: function() {
-      return !!this.nextSelfTrail;
+      return !!this.nextPaintedTrail;
     },
     
+    // assumes that trail is reindexed
     equivalentPreviousTrail: function( trail ) {
-      if ( this.previousSelfTrail && trail ) {
-        return this.previousSelfTrail.equals( trail );
+      if ( this.previousPaintedTrail && trail ) {
+        this.previousPaintedTrail.reindex();
+        return this.previousPaintedTrail.equals( trail );
       } else {
         // check that handles null versions properly
-        return this.previousSelfTrail === trail;
+        return this.previousPaintedTrail === trail;
       }
     },
     
     equivalentNextTrail: function( trail ) {
-      if ( this.nextSelfTrail && trail ) {
-        return this.nextSelfTrail.equals( trail );
+      if ( this.nextPaintedTrail && trail ) {
+        this.nextPaintedTrail.reindex();
+        return this.nextPaintedTrail.equals( trail );
       } else {
         // check that handles null versions properly
-        return this.nextSelfTrail === trail;
+        return this.nextPaintedTrail === trail;
       }
     },
     
@@ -64,9 +67,9 @@ define( function( require ) {
                   ' => ' +
                   ( this.nextLayerType ? this.nextLayerType.name : '' ) +
              '\n    trails:   ' +
-                  ( this.previousSelfTrail ? this.previousSelfTrail.getUniqueId() : '' ) +
+                  ( this.previousPaintedTrail ? this.previousPaintedTrail.getUniqueId() : '' ) +
                   ' => ' +
-                  ( this.nextSelfTrail ? this.nextSelfTrail.getUniqueId() : '' ) +
+                  ( this.nextPaintedTrail ? this.nextPaintedTrail.getUniqueId() : '' ) +
              '\n    pointers: ' +
                   ( this.previousEndPointer ? this.previousEndPointer.toString() : '' ) +
                   ' => ' +

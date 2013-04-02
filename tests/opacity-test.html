@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport"
+  content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+
+  <!-- runs in full-screen mode on iOS devices -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <title>Opacity test</title>
+  
+  <script src="../contrib/jquery-1.8.3.min.js"></script>
+
+  <style type="text/css">
+
+  html, body {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #fff;
+    overflow: hidden;
+  }
+  
+  svg {
+    display: block;
+  }
+
+  </style>
+</head>
+
+<body>
+  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="1000" height="100">
+    <rect x="0" y="40" width="500" height="20" style="fill: #000;"></rect>
+    <g opacity="0.5">
+      <circle cx="50" cy="50" r="40" style="fill: #f00;"></circle>
+      <circle cx="90" cy="50" r="40" style="fill: #00f;"></circle>
+    </g>
+    <g style="opacity: 0.5;">
+      <circle cx="250" cy="50" r="40" style="fill: #f00;"></circle>
+      <circle cx="290" cy="50" r="40" style="fill: #00f;"></circle>
+    </g>
+  </svg>
+  <canvas width="1000" height="100"></canvas>
+  
+  <script type="text/javascript">
+    var context = $( 'canvas' )[0].getContext( '2d' );
+    
+    var scratchCanvas = document.createElement( 'canvas' );
+    scratchCanvas.width = 1000;
+    scratchCanvas.height = 100;
+    var scratchContext = scratchCanvas.getContext( '2d' );
+    
+    scratchContext.beginPath();
+    scratchContext.arc( 50, 50, 40, 0, Math.PI * 2, false );
+    scratchContext.fillStyle = '#f00';
+    scratchContext.fill();
+    
+    scratchContext.beginPath();
+    scratchContext.arc( 90, 50, 40, 0, Math.PI * 2, false );
+    scratchContext.fillStyle = '#00f';
+    scratchContext.fill();
+    
+    context.fillStyle = '#000';
+    context.fillRect( 0, 40, 500, 20 );
+    context.globalAlpha = 0.5;
+    context.drawImage( scratchCanvas, 0, 0 );
+    context.drawImage( scratchCanvas, 200, 0 );
+    context.globalAlpha = 1;
+  </script>
+</body>
+</html>

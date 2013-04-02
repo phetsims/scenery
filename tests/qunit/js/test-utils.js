@@ -86,11 +86,26 @@ function snapshotFromDataURL( dataURL, callback ) {
 function snapshotEquals( a, b, threshold, message ) {
   var isEqual = a.width == b.width && a.height == b.height;
   var largestDifference = 0;
+  var colorDiffData = document.createElement( 'canvas' ).getContext( '2d' ).createImageData( a.width, a.height );
+  var alphaDiffData = document.createElement( 'canvas' ).getContext( '2d' ).createImageData( a.width, a.height );
   if ( isEqual ) {
     for ( var i = 0; i < a.data.length; i++ ) {
-      if ( a.data[i] != b.data[i] && Math.abs( a.data[i] - b.data[i] ) > threshold ) {
+      var diff = Math.abs( a.data[i] - b.data[i] );
+      if ( i % 4 === 3 ) {
+        colorDiffData.data[i] = 255;
+        alphaDiffData.data[i] = 255;
+        alphaDiffData.data[i-3] = diff; // red
+        alphaDiffData.data[i-2] = diff; // green
+        alphaDiffData.data[i-1] = diff; // blue
+      } else {
+        colorDiffData.data[i] = diff;
+      }
+      var alphaIndex = ( i - ( i % 4 ) + 3 );
+      // grab the associated alpha channel and multiply it times the diff
+      var alphaMultipliedDiff = ( i % 4 === 3 ) ? diff : diff * ( a.data[alphaIndex] / 255 ) * ( b.data[alphaIndex] / 255 );
+      if ( alphaMultipliedDiff > threshold ) {
         // console.log( message + ": " + Math.abs( a.data[i] - b.data[i] ) );
-        largestDifference = Math.max( largestDifference, Math.abs( a.data[i] - b.data[i] ) );
+        largestDifference = Math.max( largestDifference, alphaMultipliedDiff );
         isEqual = false;
         // break;
       }
@@ -108,6 +123,8 @@ function snapshotEquals( a, b, threshold, message ) {
     
     display.append( snapshotToCanvas( a ) );
     display.append( snapshotToCanvas( b ) );
+    display.append( snapshotToCanvas( colorDiffData ) );
+    display.append( snapshotToCanvas( alphaDiffData ) );
     
     // for a line-break
     display.append( document.createElement( 'div' ) );

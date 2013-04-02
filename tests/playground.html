@@ -3,8 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Scenery Playground</title>
   
@@ -31,7 +30,13 @@
     #debug {
       position: relative;
       top: 256px;
-      
+    }
+    
+    #serialized {
+      position: relative;
+      top: 256px;
+      padding: 15px;
+      border: 1px solid gray;
     }
   </style>
   
@@ -41,6 +46,8 @@
   <div id="scene"></div>
   
   <div id="debug"></div>
+  
+  <pre id="serialized"></pre>
   
   <script>
     // we need to wait until our config file is loaded before our require statement. apparently this was not guaranteed
@@ -72,6 +79,8 @@
             window.requestAnimationFrame( step, document.getElementById( 'scene' ) );
             
             $( '#debug' ).html( scene.getDebugHTML() );
+            
+            $( '#serialized' ).html( scene.toStringWithChildren() );
           })();
           
           window.twrap = function( f ) {
@@ -83,14 +92,16 @@
           };
           
           window.runError = function() {
-            window.path1 = new scenery.Path( { shape: shape, fill: '#f00', y: 0 } );
-            window.path2 = new scenery.Path( { shape: shape, fill: '#0f0', y: 70, renderer: 'svg' } );
-            window.path3 = new scenery.Path( { shape: shape, fill: '#00f', y: 140 } );
+            window.path1 = new scenery.Path( { shape: shape, fill: '#f00' } );
+            window.path2 = new scenery.Path( { shape: shape, fill: '#0f0', y: 70 } );
+            window.path3 = new scenery.Path( { shape: shape, fill: '#00f', x: 70, y: 140 } );
             
             window.node = new scenery.Node();
             
-            // scene.addChild( path1 );
-            // scene.addChild( path2 );
+            scene.addChild( path1 );
+            scene.addChild( path2 );
+            path1.addChild( path3 );
+            
             // scene.addChild( path3 );
             
             // scene.addChild( node );

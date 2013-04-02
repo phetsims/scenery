@@ -23,7 +23,7 @@ define( function( require ) {
    *
    * previousLayerType should be null if there is no previous layer.
    */
-  scenery.LayerBuilder = function( scene, previousLayerType, previousSelfTrail, nextSelfTrail ) {
+  scenery.LayerBuilder = function( scene, previousLayerType, previousPaintedTrail, nextPaintedTrail ) {
     
     /*---------------------------------------------------------------------------*
     * Initial state
@@ -33,37 +33,37 @@ define( function( require ) {
     this.boundaries = [];
     this.pendingBoundary = new scenery.LayerBoundary();
     this.pendingBoundary.previousLayerType = previousLayerType;
-    this.pendingBoundary.previousSelfTrail = previousSelfTrail;
+    this.pendingBoundary.previousPaintedTrail = previousPaintedTrail;
     
     /*
-     * The current layer type active, and whether it has been 'used' yet. A node with hasSelf() will trigger a 'used' action,
+     * The current layer type active, and whether it has been 'used' yet. A node with isPainted() will trigger a 'used' action,
      * and if the layer hasn't been used, it will actually trigger a boundary creation. We want to collapse 'unused' layers
      * and boundaries together, so that every created layer has a node that displays something.
      */
     this.currentLayerType = previousLayerType;
-    this.layerChangePending = previousSelfTrail === null;
+    this.layerChangePending = previousPaintedTrail === null;
     
     /*---------------------------------------------------------------------------*
     * Start / End pointers
     *----------------------------------------------------------------------------*/
     
-    if ( previousSelfTrail ) {
-      // Move our start pointer just past the previousSelfTrail, since our previousLayerType is presumably for that trail's node's self.
+    if ( previousPaintedTrail ) {
+      // Move our start pointer just past the previousPaintedTrail, since our previousLayerType is presumably for that trail's node's self.
       // Anything after that self could have been collapsed, so we need to start there.
-      this.startPointer = new scenery.TrailPointer( previousSelfTrail.copy(), true );
+      this.startPointer = new scenery.TrailPointer( previousPaintedTrail.copy(), true );
       this.startPointer.nestedForwards();
     } else {
       this.startPointer = new scenery.TrailPointer( new scenery.Trail( scene ), true );
     }
     
-    if ( nextSelfTrail ) {
-      // include the nextSelfTrail's 'before' in our iteration, so we can stitch properly with the next layer
-      this.endPointer = new scenery.TrailPointer( nextSelfTrail.copy(), true );
+    if ( nextPaintedTrail ) {
+      // include the nextPaintedTrail's 'before' in our iteration, so we can stitch properly with the next layer
+      this.endPointer = new scenery.TrailPointer( nextPaintedTrail.copy(), true );
     } else {
       this.endPointer = new scenery.TrailPointer( new scenery.Trail( scene ), false );
     }
     
-    this.includesEndTrail = nextSelfTrail !== null;
+    this.includesEndTrail = nextPaintedTrail !== null;
     
     /*
      * LayerBoundary properties and assurances:
@@ -72,12 +72,12 @@ define( function( require ) {
      *                      set in layerChange for "fresh" pending boundary
      * nextLayerType      - set and overwrites in switchToType, for collapsing layers
      *                      not set anywhere else, so we can leave it null
-     * previousSelfTrail  - initialized in constructor
-     *                      updated in markSelf if there is no pending change (don't set if there is a pending change)
-     * nextSelfTrail      - set on layerChange for "stale" boundary
-     *                      stays null if nextSelfTrail === null
+     * previousPaintedTrail  - initialized in constructor
+     *                      updated in markPainted if there is no pending change (don't set if there is a pending change)
+     * nextPaintedTrail      - set on layerChange for "stale" boundary
+     *                      stays null if nextPaintedTrail === null
      * previousEndPointer - (normal boundary) set in switchToType if there is no layer change pending
-     *                      set in finalization if nextSelfTrail === null && !this.layerChangePending (previousEndPointer should be null in that case)
+     *                      set in finalization if nextPaintedTrail === null && !this.layerChangePending (previousEndPointer should be null in that case)
      * nextStartPointer   - set in switchToType (always), overwrites values so we collapse layers nicely
      */
   };
@@ -131,19 +131,19 @@ define( function( require ) {
       }
     },
     
-    // allows selfPointer === null at the end if the main iteration's nextSelfTrail === null (i.e. we are at the end of the scene)
-    layerChange: function( selfPointer ) {
+    // allows paintedPointer === null at the end if the main iteration's nextPaintedTrail === null (i.e. we are at the end of the scene)
+    layerChange: function( paintedPointer ) {
       this.layerChangePending = false;
       
       var confirmedBoundary = this.pendingBoundary;
       
-      confirmedBoundary.nextSelfTrail = selfPointer ? selfPointer.trail.copy() : null;
+      confirmedBoundary.nextPaintedTrail = paintedPointer ? paintedPointer.trail.copy() : null;
       
       this.boundaries.push( confirmedBoundary );
       
       this.pendingBoundary = new scenery.LayerBoundary();
       this.pendingBoundary.previousLayerType = confirmedBoundary.nextLayerType;
-      this.pendingBoundary.previousSelfTrail = confirmedBoundary.nextSelfTrail;
+      this.pendingBoundary.previousPaintedTrail = confirmedBoundary.nextPaintedTrail;
       // console.log( 'builder:   added boundary' );
     },
     
@@ -160,16 +160,16 @@ define( function( require ) {
         this.pendingBoundary.previousEndPointer = pointer.copy();
       }
       
-      this.layerChangePending = true; // we wait until the first markSelf() call to create a boundary
+      this.layerChangePending = true; // we wait until the first markPainted() call to create a boundary
     },
     
     // called so that we can finalize a layer switch (instead of collapsing unneeded layers)
-    markSelf: function( pointer ) {
+    markPainted: function( pointer ) {
       if ( this.layerChangePending ) {
         this.layerChange( pointer );
       } else {
         // TODO: performance-wise, don't lookup indices on this copy? make a way to create a lightweight copy?
-        this.pendingBoundary.previousSelfTrail = pointer.trail.copy();
+        this.pendingBoundary.previousPaintedTrail = pointer.trail.copy();
       }
     },
     

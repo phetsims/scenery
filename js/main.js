@@ -45,12 +45,12 @@ define( [
     'SCENERY/nodes/Text',
     'SCENERY/nodes/VBox',
     
+    'SCENERY/util/CanvasContextWrapper',
     'SCENERY/util/Color',
     'SCENERY/util/Font',
     'SCENERY/util/LinearGradient',
     'SCENERY/util/Pattern',
     'SCENERY/util/RadialGradient',
-    'SCENERY/util/RenderState',
     'SCENERY/util/SceneImage',
     'SCENERY/util/Trail',
     'SCENERY/util/TrailInterval',

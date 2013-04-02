@@ -82,7 +82,7 @@ define( function( require ) {
      */
     addNodeFromTrail: function( trail ) {
       assert && assert( !( trail.getUniqueId() in this.idFragmentMap ), 'Already contained that trail!' );
-      assert && assert( trail.lastNode().hasSelf(), 'Don\'t add nodes without hasSelf() to SVGLayer' );
+      assert && assert( trail.isPainted(), 'Don\'t add nodes without isPainted() to SVGLayer' );
       
       Layer.prototype.addNodeFromTrail.call( this, trail );
       
@@ -225,6 +225,7 @@ define( function( require ) {
       } else {
         group.style.display = 'none';
       }
+      group.setAttribute( 'opacity', node.getOpacity() );
     },
     
     applyTransform: function( transform, group ) {
@@ -262,11 +263,12 @@ define( function( require ) {
       var trailId = args.trail.getUniqueId();
       
       var fragment = this.idFragmentMap[trailId];
+      var group = this.idGroupMap[trailId];
+      
       if ( fragment ) {
+        assert && assert( group );
         this.updateNode( node, fragment );
       }
-      
-      var group = this.idGroupMap[trailId];
       if ( group ) {
         this.updateNodeGroup( node, group );
       }

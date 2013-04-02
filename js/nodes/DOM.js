@@ -105,7 +105,7 @@ define( function( require ) {
       this._$container.css( transform.getMatrix().getCSSTransformStyles() );
     },
     
-    hasSelf: function() {
+    isPainted: function() {
       return true;
     },
     
@@ -147,7 +147,22 @@ define( function( require ) {
     get element() { return this.getElement(); },
     
     set interactive( value ) { this.setInteractive( value ); },
-    get interactive() { return this.isInteractive(); }
+    get interactive() { return this.isInteractive(); },
+    
+    getBasicConstructor: function( propLines ) {
+      return 'new scenery.DOM( $( \'' + this._container.innerHTML.replace( /'/g, '\\\'' ) + '\' ), {' + propLines + '} )';
+    },
+    
+    getPropString: function( spaces ) {
+      var result = Node.prototype.getPropString.call( this, spaces );
+      if ( this.interactive ) {
+        if ( result ) {
+          result += ',\n';
+        }
+        result += spaces + 'interactive: true';
+      }
+      return result;
+    }
   } );
   
   DOM.prototype._mutatorKeys = [ 'element', 'interactive' ].concat( Node.prototype._mutatorKeys );

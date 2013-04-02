@@ -102,7 +102,7 @@ define( function( require ) {
       
       // TODO: deprecate these, use boundary references instead? or boundary convenience functions
       this.startPointer = this.startBoundary.nextStartPointer;
-      this.startSelfTrail = this.startBoundary.nextSelfTrail;
+      this.startPaintedTrail = this.startBoundary.nextPaintedTrail;
     },
     
     setEndBoundary: function( boundary ) {
@@ -111,7 +111,7 @@ define( function( require ) {
       
       // TODO: deprecate these, use boundary references instead? or boundary convenience functions
       this.endPointer = this.endBoundary.previousEndPointer;
-      this.endSelfTrail = this.endBoundary.previousSelfTrail;
+      this.endPaintedTrail = this.endBoundary.previousPaintedTrail;
     },
     
     getStartPointer: function() {
@@ -147,7 +147,7 @@ define( function( require ) {
     },
     
     toString: function() {
-      return this.getName() + ' ' + ( this.startPointer ? this.startPointer.toString() : '!' ) + ' (' + ( this.startSelfTrail ? this.startSelfTrail.toString() : '!' ) + ') => ' + ( this.endPointer ? this.endPointer.toString() : '!' ) + ' (' + ( this.endSelfTrail ? this.endSelfTrail.toString() : '!' ) + ')';
+      return this.getName() + ' ' + ( this.startPointer ? this.startPointer.toString() : '!' ) + ' (' + ( this.startPaintedTrail ? this.startPaintedTrail.toString() : '!' ) + ') => ' + ( this.endPointer ? this.endPointer.toString() : '!' ) + ' (' + ( this.endPaintedTrail ? this.endPaintedTrail.toString() : '!' ) + ')';
     },
     
     getId: function() {

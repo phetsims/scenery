@@ -1,27 +1,25 @@
 
-Layer refresh:
-    Handle matching
-        * if a layer is changed, remove and add nodes - for pending trails, note layerLookup!
-        * won't delete all 'between old' layers
-            if ( !currentLayer && currentType === node.oldLayer.type && oldLayer not used ) { currentLayer = oldLayer, oldLayer.used = true }
-    Conceptually verify edge cases
-
 Priorities:
+    Layering bugs
     Accessibility
-    Layer Refresh
+        TabOrder object?
     Force non-canvas above 'interactive' DOM node
+        Need to track lowest DOM-interactive Trail for each Scene.
+            null indicates none exists, and represents the far 'after'
+            If it moves, we invalidate layering between the old and new points?
+            Pass in into the layer strategy, etc. (check for canvas there)
     Flag for skipping dirty region handling and other overhead?
     Beers law lab performance on shaker
     Mix-ins for drag handler?
     Performance
         Same-arity methods?
         Less temporary objects?
-    Add center: { x: 5, y: 10 } ?
-    Font consider defensive copy in Text nodes?
-    Add gradient/pattern invalidation?
+    Testing with hidef canvases
+    Serialization:
+        DAG handling (maybe just don't include children, have all addChild calls)
+        Consider keeping Node IDs? May make it easier to visually compare the debug HTML in both places
 
 Bugs:
-    DOM visible
     Switching renderers in Devious Drag example on iPad causes other objects being dragged to be "dropped"
         Probably causes some sort of enter/exit event?
     Nexus 7 hidef scaling
@@ -30,17 +28,14 @@ Bugs:
     Check Firefox/Safari on Mac event handling on multiple touch events
     Text direction 'rtl' bounds and display difference between canvas / SVG
 
+Tricky areas:
+    Gradients / Patterns should not be changed after being passed to a node's fill/stroke, since the SVG def won't change, and we don't set up listeners
+
 Test:
     Unit tests for common node operations
     Test bounds from canvas accurate method vs computed bounds for Shapes and strokes
     Layering tests
     Text baseline 'middle'
-    Canvas/SVG linear/radial gradients with various combinations
-    Elliptical arc / arc transforms, including scale and shear. Especially shear! + reflections
-    Shapes:
-        animated test rotation/scaling/shearing/reflection on segments, showing start/end points, tangents, bounds
-        Consider moving spline knowledge, circle intersection, etc. into dot.
-        Test cubic beziers like crazy!
 
 Browsers
     Browser bugs? (get Canary / Aurora / IE10):
@@ -82,28 +77,16 @@ Questions for team:
     https://travis-ci.org/ for continuous integration?
     Should enter / exit events be fired before / after touch up/down events?
         Note: check DOM convention?
-    API for:
-        Shape shortcuts, and possible shape "classes"
-        Layering
+    Should we allow Node( { center: { x: 3, y: 10 } } ), or is there a better way of handling that? Or is Node( { centerX: 3, centerY: 10 } ) better?
 
 General:
-    contrib/canvg => contrib/canvg-1.2
     Review IE10 developers guide: http://msdn.microsoft.com/en-us/library/ie/hh673549(v=vs.85).aspx
-    Molecule Shapes Canvas with CSS3 perspective transforms?
-        See http://www.paulrhayes.com/experiments/sphere/ for an example
     * Email OIT about phet.colorado.edu/scenery
         Investigate GitHub pages instead? See http://forrst.com/posts/GitHub_Pages_gh_pages_branch_as_a_subfolder_wi-4ZT
     Test zooming on browsers
     RenderState - consider stack-based transforms
-    Documentation and Examples (always an item)
-    Take extension mechanism from Backbone.js: https://github.com/documentcloud/backbone/blob/master/backbone.js#L1471-L1502
 
 Code:
-    Require.js style handling for underscore/lodash
-    Documentation:
-        For each 'class'
-        * Hit every 'mutator'
-        See http://jashkenas.github.com/docco/ for inspiration
     Fast text bounds
     Logging:
         Desired remote logging!
@@ -121,7 +104,6 @@ Code:
         require() is failing silently if the dependency is circular. consider throwing an error in that case?
         require() || throw Error( 'bad dependency!' ); -- can't inline, otherwise discovery won't work
             See https://github.com/jrburke/almond/issues/8
-    ** Trail shouldn't create the 'indices' anymore!
     Rename 'main' to something else
         container? domContainer?
     Validation of example HTML, CSS, etc.
@@ -135,11 +117,11 @@ Patterns:
         Canvas supports its union type (CanvasImageSource) which includes <img> or <canvas>
 
 Canvas:
-    Check reindexing, there may be bugs
     Restricted bounds intersection pruning (also see performance)
         For canvas rendering, how to handle restricted bounds in depthFirstUntil? Generalize, and allow a return flag to indicate not hitting children?
-    * Clip shapes that are nested are probably broken
-    * CanvasLayer styles are probably broken - resetStyles seems fishy if not in sync (i.e. lineCap)
+    * Clip shapes that are nested are probably broken - opacity interaction or anything that triggers scratch canvas
+    * Handle masking similar to SVG masking? see http://www.w3.org/TR/SVG/masking.html
+        Use source-in. Probably a better option than the clipShape, so use clipping for pixel-aligned rectangles, masking for everything else?
 
 DOM:
     [IMPLEMENTATION REMOVED] Hoisting of interactive DOM nodes
@@ -154,6 +136,9 @@ DOM:
         - Either delegate (just set transform) or have inline with just SVG over (with pointer-events)
 
 ** SVG: -- important because we can layer DOM nodes properly under SVG
+    * SVG clip support (use default clip-rule?) see http://www.w3.org/TR/SVG/masking.html#ClipPathElement
+        <clipPath id="clipId"><path d="..."/></clipPath><whatever clip-path="url(#clipId)"/>
+        * does it need to be in defs?
     * Domparser and xmlserializer are ie9 for avg fragment support
     *** Highly recommend <image xlink:href="...">, since we can include URL / data URL, nesting works, and we don't pollute the id namespace
         Direct nesting fails in IE9
@@ -168,18 +153,12 @@ DOM:
     Examine test code for considerations for implementing Shape.
 
 Layers / caching:
-    Consider option that would resize / position canvas/svg elements to smaller portions of the screen for lower memory usage (and possibly better performance?)
+    ** Consider option that would resize / position canvas/svg elements to smaller portions of the screen for lower memory usage (and possibly better performance?)
         Tiling, possibly lock to every 16 pixels. Prevent back-and-forth every frame, and consider full size for animation vs changing
         Would be setting position (layout change) and possibly width. If we can keep width the same, it may be faster?
         * Also do this for CSS transforms on SVG. Resizing is causing slowness
     Implications of last boundary's previousEndPointer being null? (vs scene.after)
     * Make RendererOptions its own class with utilities, that can be added?
-    Refreshing / changes:
-        Think conceptually between 'self' nodes. Just refresh between the minimum bounding self nodes that were not affected by the change.
-            1) Walk up to the first unaffected self, copy layer type from active layer
-            2) Walk through to last unaffected self
-            3) Stitch together based on that information
-        SVG: ref-count groups by children, so that we can remove unused groups
     Performance hints
         Dynamic, so we could set node.movement = 'dynamic' while moving, node.movement = 'static' while stationary?
         Generalized performance flags, so that each node can vary is renderer / settings based on desired appearance
@@ -191,9 +170,6 @@ Layers / caching:
         Option to disallow subpixel handling?
     Canvas / WebGL:
         drawImage is used instead of CSS transforms, but same general model, and we should take the same flags.
-        Have a scratch canvas stack for things like opacity
-            Function to determine whether a node needs to write to a global scratch canvas or just the top of the stack (i.e. opacity < 1 || flag)
-            Have a pool of canvases around for this specifically?
         "Global":
             Could combine with the Layer's canvas stack?
             A full scratch canvas wouldn't be able to take care of translations, but would be extremely fast for re-rendering things that didn't change at all.
@@ -248,24 +224,15 @@ Accessibility / shadow DOM:
         spec: http://www.w3.org/TR/shadow-dom/
 
 Node:
-    Feature TODO:
-        * Sub-tree opacity (like setTransparency in Piccolo)
-            'transparency', 'opacity', or 'alpha'?
-            Canvas: globalAlpha?
-                * This would require rendering into off-screen canvases in order to composite this as expected
-            SVG: how to handle?
-                group opacity ('opacity' attribute)
+    * Arbitrary ImageData filters, or filters that match SVG
+        Like the colorTransform matrix, applied to node.filters?
     Support for setting listeners in the mutator?
+        { inputListeners: [ new SimpleDragHandler() ] }
     Since cursor might support data URLs, we can have custom cursors?
-    Batching of insertions / removals, so that we could consider completely changing children, removing all children, etc. at the same time
-        Possibly consider batching these together until updateScene?
-        Then: add children mutator (setChildren, getChildren) so that it is convenient to set up trees of nodes?
-            Would require renaming node.children to node._children, and consider whether getChildren should have the slice precaution
     * A system for cursor handling that also supports dragging or 'persistent' cursor handling
     Bounds after rotation seems to be a bit too wide
     * Fire event on change of layerStrategy, and possibly rethink layerStrategy design
-    Mix-in notifier for listeners
-    For prepend-flags, set in parameter object instead of boolean flag? (somewhat hard-to-read code)
+    Mix-in notifier for listeners. Backbone?
     Visibility interaction with dirty paint / bounds, and events based on that
         Scene.updateLayer shouldn't be called if only invisible nodes were changed?
     Don't send mark updates on invisible layers? Visibility change causes repaint?
@@ -286,20 +253,15 @@ Text:
 Scene:
     Acceleration of layer lookup
     Spread out z-indices and be adaptive so we don't have to change as many indices where possible
-    refreshLayers() implementation (currently rebuilds all layers, but should be optimized so it doesn't need to redraw as much)
+    refreshLayers() implementation (mostly completed, but need to hit the 'matching' cases properly)
 
 Trail:
     ** Fast Trail lookup data structure (used in scenes to find where a trail is in terms of pointers, and also for Node-to-trail handling)
-    ** Verify current indexing handling (is it sufficient to just reindex trails on layer refreshes?)
+    Verify current indexing handling (is it sufficient to just reindex trails on layer refreshes?)
     DO we need indices in Node.dispatchEvent? May be bottleneck
     Cleanup of nestedForwards/nestedBackwards, possibly based on a Side-like implementation. Decent code duplication!
     Better name for copy()? clone()? getCopy()? Possibly use a copy constructor?
     depthFirstUntil should possibly have option for defensive copies of the pointers?
-
-Path:
-    * convenience functions on scenery namespace for common shapes
-    ** consider new scenery.Path( shape, args )
-        Maybe even new scenery.Rectangle( width, height, { ... } )? Ability to set width / height, and similar other attributes for RegularPolygon, etc?
 
 Performance:
     *** Garbage collection jitters!
@@ -336,6 +298,7 @@ Performance:
         Consider a Canvas 2D context delegate to examine drawing calls for Easel / Scene / Custom / etc.
     Checklists:
         http://www.html5rocks.com/en/tutorials/canvas/performance/
+    Consider batching adding/removal of children with layering code
 
 Benchmarks:
     (deprecate?) Benchmark.js-based:

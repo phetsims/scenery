@@ -65,24 +65,23 @@ define( function( require ) {
       return this._shape !== null;
     },
     
-    paintCanvas: function( state ) {
+    paintCanvas: function( wrapper ) {
+      var context = wrapper.context;
+      
       if ( this.hasShape() ) {
-        var layer = state.layer;
-        var context = layer.context;
-
         // TODO: fill/stroke delay optimizations?
         context.beginPath();
         this._shape.writeToContext( context );
 
         if ( this._fill ) {
-          this.beforeCanvasFill( layer ); // defined in Fillable
+          this.beforeCanvasFill( wrapper ); // defined in Fillable
           context.fill();
-          this.afterCanvasFill( layer ); // defined in Fillable
+          this.afterCanvasFill( wrapper ); // defined in Fillable
         }
         if ( this._stroke ) {
-          this.beforeCanvasStroke( layer ); // defined in Strokable
+          this.beforeCanvasStroke( wrapper ); // defined in Strokable
           context.stroke();
-          this.afterCanvasStroke( layer ); // defined in Strokable
+          this.afterCanvasStroke( wrapper ); // defined in Strokable
         }
       }
     },
@@ -122,7 +121,7 @@ define( function( require ) {
       this.removeSVGStrokeDef( svg, defs );
     },
     
-    hasSelf: function() {
+    isPainted: function() {
       return true;
     },
     
@@ -149,7 +148,24 @@ define( function( require ) {
     },
     
     set shape( value ) { this.setShape( value ); },
-    get shape() { return this.getShape(); }
+    get shape() { return this.getShape(); },
+    
+    getBasicConstructor: function( propLines ) {
+      return 'new scenery.Path( {' + propLines + '} )';
+    },
+    
+    getPropString: function( spaces ) {
+      var result = Node.prototype.getPropString.call( this, spaces );
+      result = this.appendFillablePropString( spaces, result );
+      result = this.appendStrokablePropString( spaces, result );
+      if ( this._shape ) {
+        if ( result ) {
+          result += ',\n';
+        }
+        result += spaces + 'shape: ' + this._shape.toString();
+      }
+      return result;
+    }
   } );
   
   Path.prototype._mutatorKeys = [ 'shape' ].concat( Node.prototype._mutatorKeys );

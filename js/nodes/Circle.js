@@ -18,21 +18,19 @@ define( function( require ) {
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
   
-  scenery.Circle = function Circle( x, y, radius, options ) {
+  scenery.Circle = function Circle( radius, options ) {
     if ( typeof x === 'object' ) {
-      // allow new Circle( { circleX: ..., circleY: ..., circleRadius: ... } )
+      // allow new Circle( { circleRadius: ... } )
       // the mutators will call invalidateCircle() and properly set the shape
-      options = x;
+      options = radius;
     } else {
-      this._circleX = x;
-      this._circleY = y;
       this._circleRadius = radius;
       
       // ensure we have a parameter object
       options = options || {};
       
       // fallback for non-canvas or non-svg rendering, and for proper bounds computation
-      options.shape = Shape.circle( x, y, radius );
+      options.shape = Shape.circle( 0, 0, radius );
     }
     
     Path.call( this, options );
@@ -52,11 +50,13 @@ define( function( require ) {
     
     // optimized for the circle element instead of path
     updateSVGFragment: function( circle ) {
-      circle.setAttribute( 'cx', this._circleX );
-      circle.setAttribute( 'cy', this._circleY );
       circle.setAttribute( 'r', this._circleRadius );
       
       circle.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
+    },
+    
+    getBasicConstructor: function( propLines ) {
+      return 'new scenery.Circle( ' + this._circleRadius + ', {' + propLines + '} )';
     }
   } );
   

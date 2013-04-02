@@ -133,23 +133,23 @@ define( function( require ) {
       return this;
     };
     
-    proto.beforeCanvasStroke = function( layer ) {
+    proto.beforeCanvasStroke = function( wrapper ) {
       // TODO: is there a better way of not calling so many things on each stroke?
-      layer.setStrokeStyle( this._stroke );
-      layer.setLineWidth( this.getLineWidth() );
-      layer.setLineCap( this.getLineCap() );
-      layer.setLineJoin( this.getLineJoin() );
-      layer.setLineDash( this.getLineDash() );
-      layer.setLineDashOffset( this.getLineDashOffset() );
+      wrapper.setStrokeStyle( this._stroke );
+      wrapper.setLineWidth( this.getLineWidth() );
+      wrapper.setLineCap( this.getLineCap() );
+      wrapper.setLineJoin( this.getLineJoin() );
+      wrapper.setLineDash( this.getLineDash() );
+      wrapper.setLineDashOffset( this.getLineDashOffset() );
       if ( this._stroke.transformMatrix ) {
-        layer.context.save();
-        this._stroke.transformMatrix.canvasAppendTransform( layer.context );
+        wrapper.context.save();
+        this._stroke.transformMatrix.canvasAppendTransform( wrapper.context );
       }
     };
     
-    proto.afterCanvasStroke = function( layer ) {
+    proto.afterCanvasStroke = function( wrapper ) {
       if ( this._stroke.transformMatrix ) {
-        layer.context.restore();
+        wrapper.context.restore();
       }
     };
     
@@ -187,6 +187,42 @@ define( function( require ) {
       if ( oldStrokeDef ) {
         defs.removeChild( oldStrokeDef );
       }
+    };
+    
+    proto.appendStrokablePropString = function( spaces, result ) {
+      var self = this;
+      
+      function addProp( key, value, nowrap ) {
+        if ( result ) {
+          result += ',\n';
+        }
+        if ( !nowrap && typeof value === 'string' ) {
+          result += spaces + key + ': \'' + value + '\'';
+        } else {
+          result += spaces + key + ': ' + value;
+        }
+      }
+      
+      if ( this._stroke ) {
+        var defaultStyles = new LineStyles();
+        if ( typeof this._stroke === 'string' ) {
+          addProp( 'stroke', this._stroke );
+        } else {
+          addProp( 'stroke', this._stroke.toString(), true );
+        }
+        
+        _.each( [ 'lineWidth', 'lineCap', 'lineJoin', 'lineDashOffset' ], function( prop ) {
+          if ( self[prop] !== defaultStyles[prop] ) {
+            addProp( prop, self[prop] );
+          }
+        } );
+        
+        if ( this.lineDash ) {
+          addProp( 'lineDash', JSON.stringify( this.lineDash ), true );
+        }
+      }
+      
+      return result;
     };
     
     // on mutation, set the stroke parameters first since they may affect the bounds (and thus later operations)

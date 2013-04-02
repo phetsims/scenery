@@ -92,14 +92,14 @@
         width: 64,
         height: 64,
         draw: function( scene ) {
-          scene.addChild( new scenery.Circle( 32, 32, 22, {
+          scene.addChild( new scenery.Circle( 22, {
+            x: 32, y: 32,
             fill: '#f00',
             stroke: '#000',
             lineWidth: 3
           } ) );
           scene.addChild( new scenery.Circle( {
-            circleX: 43,
-            circleY: 32,
+            x: 43, y: 32,
             circleRadius: 11,
             fill: '#0f0',
             stroke: '#000',
@@ -558,6 +558,41 @@
           } );
           scene.addChild( third );
           third.visible = false; // delayed, should cause issues with old SVG handling
+        },
+        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+      },{
+        name: 'Clipping',
+        width: 64,
+        height: 64,
+        draw: function( scene ) {
+          var clipShape1 = kite.Shape.regularPolygon( 6, 27 ).transformed( dot.Matrix3.translation( 32, 32 ) );
+          var clipShape2 = kite.Shape.regularPolygon( 9, 32 ).transformed( dot.Matrix3.translation( 32, 0 ) );
+          var shape = kite.Shape.circle( 32, 32, 25 );
+          var circle = new scenery.Path( {
+            shape: shape,
+            fill: '#000',
+            stroke: '#f00',
+            lineWidth: 3
+          } );
+          circle._clipShape = clipShape1;
+          scene.addChild( circle );
+          scene._clipShape = clipShape2;
+        },
+        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+      },{
+        name: 'Opacity',
+        width: 64,
+        height: 64,
+        draw: function( scene ) {
+          scene.addChild( new scenery.Rectangle( 0, 12, 64, 20, { fill: '#000' } ) );
+          var circle = kite.Shape.circle( 0, 0, 30 );
+          scene.addChild( new scenery.Node( {
+            opacity: 0.5,
+            children: [
+              new scenery.Path( { shape: circle, x: 12, y: 22, fill: '#f00' } ),
+              new scenery.Path( { shape: circle, x: 52, y: 22, fill: '#00f' } )
+            ]
+          } ) );
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
       }

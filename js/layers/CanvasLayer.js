@@ -9,6 +9,8 @@
  *
  * Backing store pixel ratio info: http://www.html5rocks.com/en/tutorials/canvas/hidpi/
  *
+ * TODO: update internal documentation
+ *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
@@ -24,7 +26,7 @@ define( function( require ) {
   var Shape = require( 'KITE/Shape' );
   
   var Layer = require( 'SCENERY/layers/Layer' ); // uses Layer's prototype for inheritance
-  require( 'SCENERY/util/RenderState' );
+  require( 'SCENERY/util/CanvasContextWrapper' );
   require( 'SCENERY/util/Trail' );
   require( 'SCENERY/util/TrailPointer' );
   require( 'SCENERY/util/Util' );
@@ -42,14 +44,14 @@ define( function( require ) {
       this.backingScale = args.fullResolution ? scenery.Util.backingScale( document.createElement( 'canvas' ).getContext( '2d' ) ) : 1;
     }
     
-    var logicalWidth = this.$main.width();
-    var logicalHeight = this.$main.height();
+    this.logicalWidth = this.$main.width();
+    this.logicalHeight = this.$main.height();
     
     var canvas = document.createElement( 'canvas' );
-    canvas.width = logicalWidth * this.backingScale;
-    canvas.height = logicalHeight * this.backingScale;
-    $( canvas ).css( 'width', logicalWidth );
-    $( canvas ).css( 'height', logicalHeight );
+    canvas.width = this.logicalWidth * this.backingScale;
+    canvas.height = this.logicalHeight * this.backingScale;
+    $( canvas ).css( 'width', this.logicalWidth );
+    $( canvas ).css( 'height', this.logicalHeight );
     $( canvas ).css( 'position', 'absolute' );
     
     // add this layer on top (importantly, the constructors of the layers are called in order)
@@ -66,7 +68,7 @@ define( function( require ) {
     
     this.isCanvasLayer = true;
     
-    this.resetStyles();
+    this.wrapper = new scenery.CanvasContextWrapper( this.canvas, this.context );
   };
   var CanvasLayer = scenery.CanvasLayer;
   
@@ -89,14 +91,8 @@ define( function( require ) {
         return;
       }
       
-      var state = new scenery.RenderState( scene );
-      state.layer = this;
-      
       // switch to an identity transform
       this.context.setTransform( this.backingScale, 0, 0, this.backingScale, 0, 0 );
-      
-      // reset the internal styles so they match the defaults that should be present
-      this.resetStyles();
       
       var visibleDirtyBounds = args.fullRender ? scene.sceneBounds : this.dirtyBounds.intersection( scene.sceneBounds );
       
@@ -104,16 +100,16 @@ define( function( require ) {
         this.clearGlobalBounds( visibleDirtyBounds );
         
         if ( !args.fullRender ) {
-          state.pushClipShape( Shape.bounds( visibleDirtyBounds ) );
+          this.pushClipShape( Shape.bounds( visibleDirtyBounds ) );
         }
         
         // dirty bounds (clear, possibly set restricted bounds and handling for that)
         // visibility checks
-        this.recursiveRender( state, args );
+        this.recursiveRender( scene, args );
         
         // exists for now so that we pop the necessary context state
         if ( !args.fullRender ) {
-          state.popClipShape();
+          this.popClipShape();
         }
       }
       
@@ -121,10 +117,97 @@ define( function( require ) {
       this.dirtyBounds = Bounds2.NOTHING;
     },
     
-    recursiveRender: function( state, args ) {
+    recursiveRender: function( scene, args ) {
+      var layer = this;
       var i;
-      var startPointer = new scenery.TrailPointer( this.startSelfTrail, true );
-      var endPointer = new scenery.TrailPointer( this.endSelfTrail, true );
+      var startPointer = new scenery.TrailPointer( this.startPaintedTrail, true );
+      var endPointer = new scenery.TrailPointer( this.endPaintedTrail, true );
+      
+      // stack for canvases that need to be painted, since some effects require scratch canvases
+      var wrapperStack = [ this.wrapper ]; // type {CanvasContextWrapper}
+      this.wrapper.resetStyles(); // let's be defensive, save() and restore() may have been called previously
+      
+      function requiresScratchCanvas( trail ) {
+        return trail.lastNode().getOpacity() < 1;
+      }
+      
+      function getCanvasWrapper() {
+        // TODO: verify that this works with hi-def canvases
+        // TODO: use a cache of scratch canvases/contexts on the scene for this purpose, instead of creation
+        var canvas = document.createElement( 'canvas' );
+        canvas.width = layer.logicalWidth * layer.backingScale;
+        canvas.height = layer.logicalHeight * layer.backingScale;
+        // $( canvas ).css( 'width', layer.logicalWidth );
+        // $( canvas ).css( 'height', layer.logicalHeight );
+        var context = canvas.getContext( '2d' );
+        
+        return new scenery.CanvasContextWrapper( canvas, context );
+      }
+      
+      function topWrapper() {
+        return wrapperStack[wrapperStack.length-1];
+      }
+      
+      function enter( trail ) {
+        var node = trail.lastNode();
+        
+        if ( requiresScratchCanvas( trail ) ) {
+          var wrapper = getCanvasWrapper();
+          wrapperStack.push( wrapper );
+          
+          var newContext = wrapper.context;
+          
+          // switch to an identity transform
+          newContext.setTransform( layer.backingScale, 0, 0, layer.backingScale, 0, 0 );
+          
+          // properly set the necessary transform on the context
+          _.each( trail.nodes, function( node ) {
+            node.transform.getMatrix().canvasAppendTransform( newContext );
+          } );
+        } else {
+          node.transform.getMatrix().canvasAppendTransform( topWrapper().context );
+        }
+        
+        if ( node._clipShape ) {
+          // TODO: move to wrapper-specific part
+          layer.pushClipShape( node._clipShape );
+        }
+      }
+      
+      function exit( trail ) {
+        var node = trail.lastNode();
+        
+        if ( node._clipShape ) {
+          // TODO: move to wrapper-specific part
+          layer.popClipShape();
+        }
+        
+        if ( requiresScratchCanvas( trail ) ) {
+          var baseContext = wrapperStack[wrapperStack.length-2].context;
+          var topCanvas = wrapperStack[wrapperStack.length-1].canvas;
+          
+          // apply necessary style transforms before painting our popped canvas onto the next canvas
+          var opacityChange = trail.lastNode().getOpacity() < 1;
+          if ( opacityChange ) {
+            baseContext.globalAlpha = trail.lastNode().getOpacity();
+          }
+          
+          // paint our canvas onto the level below with a straight transform
+          baseContext.save();
+          baseContext.setTransform( 1, 0, 0, 1, 0, 0 );
+          baseContext.drawImage( topCanvas, 0, 0 );
+          baseContext.restore();
+          
+          // reset styles
+          if ( opacityChange ) {
+            baseContext.globalAlpha = 1;
+          }
+          
+          wrapperStack.pop();
+        } else {
+          node.transform.getInverse().canvasAppendTransform( topWrapper().context );
+        }
+      }
       
       /*
        * We count how many invisible nodes are in our trail, so we can properly iterate without inspecting everything.
@@ -150,7 +233,8 @@ define( function( require ) {
         invisibleCount += startNode.isVisible() ? 0 : 1;
         
         if ( invisibleCount === 0 ) {
-          startNode.enterState( state, boundaryTrail ); // walk up initial state
+          // walk up initial state
+          enter( boundaryTrail );
         }
       }
       
@@ -163,10 +247,13 @@ define( function( require ) {
           invisibleCount += node.isVisible() ? 0 : 1;
           
           if ( invisibleCount === 0 ) {
-            node.enterState( state, pointer.trail );
+            enter( pointer.trail );
             
-            if ( node.hasSelf() ) {
-              node.paintCanvas( state );
+            if ( node.isPainted() ) {
+              var wrapper = wrapperStack[wrapperStack.length-1];
+              
+              // TODO: consider just passing the wrapper. state not needed (for now), context easily accessible
+              node.paintCanvas( wrapper );
             }
             
             // TODO: restricted bounds rendering, and possibly generalize depthFirstUntil
@@ -191,7 +278,7 @@ define( function( require ) {
           }
         } else {
           if ( invisibleCount === 0 ) {
-            node.exitState( state, pointer.trail );
+            exit( pointer.trail );
           }
           
           invisibleCount -= node.isVisible() ? 0 : 1;
@@ -206,12 +293,14 @@ define( function( require ) {
       var endWalkLength = endPointer.trail.length - ( endPointer.isAfter ? 1 : 0 );
       for ( i = endWalkLength - 1; i >= 0; i-- ) {
         var endNode = endPointer.trail.nodes[i];
-        boundaryTrail.removeDescendant();
         invisibleCount -= endNode.isVisible() ? 0 : 1;
         
         if ( invisibleCount === 0 ) {
-          endNode.exitState( state, boundaryTrail ); // walk back the state
+          // walk back the state
+          exit( boundaryTrail );
         }
+        
+        boundaryTrail.removeDescendant();
       }
     },
     
@@ -223,22 +312,6 @@ define( function( require ) {
     // TODO: consider a stack-based model for transforms?
     applyTransformationMatrix: function( matrix ) {
       matrix.canvasAppendTransform( this.context );
-    },
-    
-    resetStyles: function() {
-      this.fillStyle = null;
-      this.strokeStyle = null;
-      this.lineWidth = 1;
-      this.lineCap = 'butt'; // default 'butt';
-      this.lineJoin = 'miter';
-      this.lineDash = null;
-      this.lineDashOffset = 0;
-      this.miterLimit = 10;
-      
-      this.font = '10px sans-serif';
-      this.textAlign = 'start';
-      this.textBaseline = 'alphabetic';
-      this.direction = 'inherit';
     },
     
     // returns next zIndex in place. allows layers to take up more than one single zIndex
@@ -279,90 +352,6 @@ define( function( require ) {
       }
     },
     
-    setFillStyle: function( style ) {
-      if ( this.fillStyle !== style ) {
-        this.fillStyle = style;
-        this.context.fillStyle = style.getCanvasStyle ? style.getCanvasStyle() : style; // allow gradients / patterns
-      }
-    },
-    
-    setStrokeStyle: function( style ) {
-      if ( this.strokeStyle !== style ) {
-        this.strokeStyle = style;
-        this.context.strokeStyle = style.getCanvasStyle ? style.getCanvasStyle() : style; // allow gradients / patterns
-      }
-    },
-    
-    setLineWidth: function( width ) {
-      if ( this.lineWidth !== width ) {
-        this.lineWidth = width;
-        this.context.lineWidth = width;
-      }
-    },
-    
-    setLineCap: function( cap ) {
-      if ( this.lineCap !== cap ) {
-        this.lineCap = cap;
-        this.context.lineCap = cap;
-      }
-    },
-    
-    setLineJoin: function( join ) {
-      if ( this.lineJoin !== join ) {
-        this.lineJoin = join;
-        this.context.lineJoin = join;
-      }
-    },
-    
-    setLineDash: function( dash ) {
-      assert && assert( dash !== undefined, 'undefined line dash would cause hard-to-trace errors' );
-      if ( this.lineDash !== dash ) {
-        this.lineDash = dash;
-        if ( this.context.setLineDash ) {
-          this.context.setLineDash( dash );
-        } else if ( this.context.mozDash !== undefined ) {
-          this.context.mozDash = dash;
-        } else {
-          // unsupported line dash! do... nothing?
-        }
-      }
-    },
-    
-    setLineDashOffset: function( lineDashOffset ) {
-      if ( this.lineDashOffset !== lineDashOffset ) {
-        this.lineDashOffset = lineDashOffset;
-        this.context.lineDashOffset = lineDashOffset;
-      }
-    },
-    
-    setFont: function( font ) {
-      if ( this.font !== font ) {
-        this.font = font;
-        this.context.font = font;
-      }
-    },
-    
-    setTextAlign: function( textAlign ) {
-      if ( this.textAlign !== textAlign ) {
-        this.textAlign = textAlign;
-        this.context.textAlign = textAlign;
-      }
-    },
-    
-    setTextBaseline: function( textBaseline ) {
-      if ( this.textBaseline !== textBaseline ) {
-        this.textBaseline = textBaseline;
-        this.context.textBaseline = textBaseline;
-      }
-    },
-    
-    setDirection: function( direction ) {
-      if ( this.direction !== direction ) {
-        this.direction = direction;
-        this.context.direction = direction;
-      }
-    },
-    
     getSVGString: function() {
       return '<image xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="' + this.canvas.toDataURL() + '" x="0" y="0" height="' + this.canvas.height + 'px" width="' + this.canvas.width + 'px"/>';
     },
@@ -373,11 +362,31 @@ define( function( require ) {
     },
     
     markDirtyRegion: function( args ) {
-      assert && assert( args.bounds.isEmpty() || args.bounds.isFinite(), 'Infinite (non-empty) dirty bounds passed to CanvasLayer' );
-      var bounds = args.transform.transformBounds2( args.bounds );
+      this.internalMarkDirtyBounds( args.bounds, args.transform );
+    },
+    
+    addNodeFromTrail: function( trail ) {
+      Layer.prototype.addNodeFromTrail.call( this, trail );
+      
+      // since the node's getBounds() are in the parent coordinate frame, we peel off the last node to get the correct (relevant) transform
+      // TODO: more efficient way of getting this transform?
+      this.internalMarkDirtyBounds( trail.lastNode().getBounds(), trail.slice( 0, trail.length - 1 ).getTransform() );
+    },
+    
+    removeNodeFromTrail: function( trail ) {
+      Layer.prototype.removeNodeFromTrail.call( this, trail );
+      
+      // since the node's getBounds() are in the parent coordinate frame, we peel off the last node to get the correct (relevant) transform
+      // TODO: more efficient way of getting this transform?
+      this.internalMarkDirtyBounds( trail.lastNode().getBounds(), trail.slice( 0, trail.length - 1 ).getTransform() );
+    },
+    
+    internalMarkDirtyBounds: function( localBounds, transform ) {
+      assert && assert( localBounds.isEmpty() || localBounds.isFinite(), 'Infinite (non-empty) dirty bounds passed to internalMarkDirtyBounds' );
+      var globalBounds = transform.transformBounds2( localBounds );
       
       // TODO: for performance, consider more than just a single dirty bounding box
-      this.dirtyBounds = this.dirtyBounds.union( bounds.dilated( 1 ).roundedOut() );
+      this.dirtyBounds = this.dirtyBounds.union( globalBounds.dilated( 1 ).roundedOut() );
     },
     
     transformChange: function( args ) {
