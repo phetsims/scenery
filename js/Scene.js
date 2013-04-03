@@ -279,10 +279,7 @@ define( function( require ) {
      * all of the parts where we would need to use the 'before' layer, so we can update our layer map with the 'after'
      * layer.
      */
-    this.layerChangeIntervals.sort( function( a, b ) {
-      // TODO: consider TrailInterval parameter renaming
-      return a.a.compare( b.a );
-    } );
+    this.layerChangeIntervals.sort( scenery.TrailInterval.compareDisjoint );
     
     layerLogger && layerLogger( 'stitching on intervals: \n' + this.layerChangeIntervals.join( '\n' ) );
     
