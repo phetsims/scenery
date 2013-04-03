@@ -113,6 +113,47 @@
             
             // scene.updateScene();
           };
+          
+          window.fuzzLayers = function() {
+            var nodes = [];
+            var scene = new scenery.Scene( $( '<div>' ), { width: 640, height: 480 } );
+            nodes.push( scene );
+            
+            _.times( 10, function() { nodes.push( new scenery.Node() ); } );
+            _.times( 15, function() { nodes.push( new scenery.Path() ); } );
+            // _.times( 5, function() { nodes.push( new scenery.DOM( document.createElement( 'div' ) ) ); } );
+            
+            (function fuzz(){
+              _.times( 20, function() {
+                
+                var r = Math.random();
+                
+                // pick two different nodes at random
+                var a = nodes[_.random( 0, nodes.length - 1 )];
+                var b = nodes[_.random( 0, nodes.length - 1 )];
+                
+                if ( r < 0.333 ) {
+                  // attempt to add a node to another one
+                  if ( a.canAddChild( b ) ) {
+                    // insert it into a random place
+                    a.insertChild( _.random( 0, a.children.length ), b );
+                  }
+                } else if( r < 0.666 ) {
+                  if ( a.children.length ) {
+                    a.removeChild( a.children[_.random( 0, a.children.length - 1 )] );
+                  }
+                } else {
+                  // pick a modification
+                  // TODO
+                }
+                
+              } );
+              $( '#debug' ).html( scene.getDebugHTML() );
+              
+              // an error above will prevent this from running
+              window.requestAnimationFrame( fuzz );
+            })();
+          };
         } );
       } else {
         setTimeout( check, 4 );

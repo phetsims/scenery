@@ -234,6 +234,8 @@ Accessibility / shadow DOM:
         spec: http://www.w3.org/TR/shadow-dom/
 
 Node:
+    Circular checking:
+        add Node.getConnectedNodes() - map
     * Arbitrary ImageData filters, or filters that match SVG
         Like the colorTransform matrix, applied to node.filters?
     Support for setting listeners in the mutator?
