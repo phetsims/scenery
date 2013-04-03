@@ -1,6 +1,5 @@
 
 Priorities:
-    Vector2 convenience function - Vector2.p? Vector2( x, y )?
     Layering bugs
         Fuzzer them out with add/remove and modify on various options
     Accessibility 
