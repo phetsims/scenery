@@ -274,6 +274,11 @@ define( function( require ) {
       baseNode: this
     };
     
+    // reindex intervals, since they may have changed
+    _.each( this.layerChangeIntervals, function( interval ) {
+      interval.reindex();
+    } );
+    
     /*
      * Sort our intervals, so that when we need to 'unglue' a layer into two separate layers, we will have passed
      * all of the parts where we would need to use the 'before' layer, so we can update our layer map with the 'after'
@@ -284,8 +289,6 @@ define( function( require ) {
     layerLogger && layerLogger( 'stitching on intervals: \n' + this.layerChangeIntervals.join( '\n' ) );
     
     _.each( this.layerChangeIntervals, function( interval ) {
-      layerLogger && layerLogger( 'before reindex: ' + interval.toString() );
-      interval.reindex();
       layerLogger && layerLogger( 'stitch on interval ' + interval.toString() );
       var beforeTrail = interval.a;
       var afterTrail = interval.b;
