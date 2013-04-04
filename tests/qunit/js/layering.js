@@ -97,6 +97,8 @@
     scene.layerAudit();
     n4.removeChild( p10 );
     scene.layerAudit();
+    
+    expect( 0 );
   } );
   
   test( 'Two-node inversion', function() {
