@@ -50,6 +50,9 @@
   <pre id="serialized"></pre>
   
   <script>
+    var basicSceneStep = true;
+    var fuzzStep = false;
+    
     // we need to wait until our config file is loaded before our require statement. apparently this was not guaranteed
     function check() {
       if ( window.loadedSceneryConfig ) {
@@ -76,7 +79,9 @@
           scenery.Util.polyfillRequestAnimationFrame();
           
           (function step(){
-            window.requestAnimationFrame( step, document.getElementById( 'scene' ) );
+            if ( basicSceneStep ) {
+              window.requestAnimationFrame( step, document.getElementById( 'scene' ) );
+            }
             
             $( '#debug' ).html( scene.getDebugHTML() );
             
@@ -112,6 +117,64 @@
             // scene.addChild( path3 ); // should be canvas, but right now is SVG!
             
             // scene.updateScene();
+          };
+          
+          window.fuzzLayers = function() {
+            // disable the regular step
+            basicSceneStep = false;
+            fuzzStep = true;
+            
+            var nodes = [];
+            var scene = new scenery.Scene( $( '<div>' ), { width: 640, height: 480 } );
+            nodes.push( scene );
+            
+            _.times( 5, function() { nodes.push( new scenery.Node() ); } );
+            _.times( 10, function() { nodes.push( new scenery.Path() ); } );
+            // _.times( 5, function() { nodes.push( new scenery.DOM( document.createElement( 'div' ) ) ); } );
+            
+            (function fuzz(){
+              // abort if desired
+              if ( !fuzzStep ) {
+                return;
+              }
+              
+              _.times( 20, function() {
+                window.beforeFuzzDebug = scene.getDebugHTML();
+                window.beforeFuzzSerialization = scene.toStringWithChildren();
+                
+                var r = Math.random();
+                
+                // pick two different nodes at random
+                var a = nodes[_.random( 0, nodes.length - 1 )];
+                var b = nodes[_.random( 0, nodes.length - 1 )];
+                
+                if ( r < 0.333 ) {
+                  // attempt to add a node to another one
+                  if ( a.canAddChild( b ) ) {
+                    // insert it into a random place
+                    var index = _.random( 0, a.children.length );
+                    window.fuzzMessage = 'inserting child ' + b.id + ' into ' + a.id + ' at index ' + index;
+                    a.insertChild( index, b );
+                  }
+                } else if( r < 0.666 ) {
+                  if ( a.children.length ) {
+                    var child = a.children[_.random( 0, a.children.length - 1 )];
+                    window.fuzzMessage = 'removing child ' + child.id + ' to ' + a.id;
+                    a.removeChild( child );
+                  }
+                } else {
+                  // pick a modification
+                  // TODO
+                }
+                
+                scene.layerAudit();
+                
+              } );
+              $( '#debug' ).html( scene.getDebugHTML() );
+              
+              // an error above will prevent this from running
+              window.requestAnimationFrame( fuzz );
+            })();
           };
         } );
       } else {

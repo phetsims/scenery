@@ -285,7 +285,7 @@ define( function( require ) {
       baseNode: this
     };
     
-    // sanity check
+    // reindex intervals, since they may have changed
     _.each( this.layerChangeIntervals, function( interval ) {
       interval.reindex();
     } );
@@ -295,16 +295,11 @@ define( function( require ) {
      * all of the parts where we would need to use the 'before' layer, so we can update our layer map with the 'after'
      * layer.
      */
-    this.layerChangeIntervals.sort( function( a, b ) {
-      // TODO: consider TrailInterval parameter renaming
-      return a.a.compare( b.a );
-    } );
+    this.layerChangeIntervals.sort( scenery.TrailInterval.compareDisjoint );
     
     layerLogger && layerLogger( 'stitching on intervals: \n' + this.layerChangeIntervals.join( '\n' ) );
     
     _.each( this.layerChangeIntervals, function( interval ) {
-      layerLogger && layerLogger( 'before reindex: ' + interval.toString() );
-      interval.reindex();
       layerLogger && layerLogger( 'stitch on interval ' + interval.toString() );
       var beforeTrail = interval.a;
       var afterTrail = interval.b;
@@ -988,6 +983,10 @@ define( function( require ) {
     var layerPaintedCount = 0;
     _.each( this.layers, function( layer ) {
       layerPaintedCount += layer.getLayerTrails().length;
+      
+      // reindex now so we don't have problems later
+      layer.startPaintedTrail.reindex();
+      layer.endPaintedTrail.reindex();
     } );
     
     var layerIterationPaintedCount = 0;

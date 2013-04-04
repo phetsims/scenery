@@ -166,6 +166,7 @@
       <a class="sublink" href="#node-right">right</a><br>
       <a class="sublink" href="#node-top">top</a><br>
       <a class="sublink" href="#node-bottom">bottom</a><br>
+      <a class="sublink" href="#node-center">center</a><br>
       <a class="sublink" href="#node-centerX">centerX</a><br>
       <a class="sublink" href="#node-centerY">centerY</a><br>
       <a class="sublink" href="#node-renderer">renderer</a><br>
@@ -246,8 +247,6 @@
       <a class="sublink" href="#rectangle-rectHeight">rectHeight</a><br>
       
       <a class="navlink" href="#circle">Circle</a><br>
-      <a class="sublink" href="#circle-circleX">circleX</a><br>
-      <a class="sublink" href="#circle-circleY">circleY</a><br>
       <a class="sublink" href="#circle-circleRadius">circleRadius</a><br>
       
     </div>
@@ -302,6 +301,7 @@
         <li><a href="#node-right">right</a>: Sets the x-translation so that the right (max X) of the bounding box (in the parent coordinate frame) is at the specified value</li>
         <li><a href="#node-top">top</a>: Sets the y-translation so that the top (min Y) of the bounding box (in the parent coordinate frame) is at the specified value</li>
         <li><a href="#node-bottom">bottom</a>: Sets the y-translation so that the bottom (min Y) of the bounding box (in the parent coordinate frame) is at the specified value</li>
+        <li><a href="#node-center">center</a>: Sets the translation so that the center of the bounding box (in the parent coordinate frame) is at the specified <a href="../../dot/doc#vector2">dot.Vector2</a> value</li>
         <li><a href="#node-centerX">centerX</a>: Sets the x-translation so that the horizontal center of the bounding box (in the parent coordinate frame) is at the specified value</li>
         <li><a href="#node-centerY">centerY</a>: Sets the y-translation so that the vertical center of the bounding box (in the parent coordinate frame) is at the specified value</li>
         <li><a href="#node-renderer">renderer</a>: Forces Scenery to use the specific renderer (canvas/svg) to display this node (and if possible, children). Accepts both strings (e.g. 'canvas', 'svg', etc.) or actual Renderer objects (e.g. Renderer.Canvas, Renderer.SVG, etc.)</li>
@@ -548,6 +548,13 @@ scene.updateOnRequestAnimationFrame();
       <p>
         <code>node.bottom</code> gets or sets the bottom bound (maximum y value) of this node's <a href="#node-bounds">bounds</a> in the parent coordinate frame, with
         <code>node.getBottom()</code> and <code>node.setBottom( y )</code>. Setting this bottom bound effectively translates the node vertically.
+      </p>
+      
+      <h4 id="node-center">node.center</h4>
+      <p>
+        <code>node.center</code> gets or sets the center of this node's <a href="#node-bounds">bounds</a> in the parent coordinate frame, with
+        <code>node.getCenter()</code> and <code>node.setCenter( center )</code>, which both handle the center as a
+        <a href="../../dot/doc#vector2">dot.Vector2</a> instance. Setting center effectively translates the node.
       </p>
       
       <h4 id="node-centerX">node.centerX</h4>
@@ -1420,34 +1427,21 @@ scene.addChild( new scenery.Rectangle( 74, 10, 44, 44, 10, 10, {
         and modify, and contains more optimized drawing routines for SVG.
       </p>
       <p>
-        A Circle is created with <code>new scenery.Circle( x, y, radius, [options] )</code>, with a circle
-        centered at (x,y) with the specified radius.
+        A Circle is created with <code>new scenery.Circle( radius, [options] )</code> with the specified radius.
       </p>
       <div id="example-circle" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
       <script type="text/javascript">
 docExample( 'example-circle', function( scene ) {
 /*START*/
-scene.addChild( new scenery.Circle( 32, 32, 22, {
-  fill: '#f00'
+scene.addChild( new scenery.Circle( 22, {
+  x: 32, y: 32, fill: '#f00'
 } ) );
-scene.addChild( new scenery.Circle( 43, 32, 11, {
-  fill: '#0f0'
+scene.addChild( new scenery.Circle( 11, {
+  x: 43, y: 32, fill: '#0f0'
 } ) );
 /*END*/
 } );
       </script>
-      
-      <h4 id="circle-circleX">circleX</h4>
-      <p>
-        <code>node.circleX</code> (<code>node.getCircleX()</code>, <code>node.setCircleX( x )</code>)
-        retrieves or modifies the 'x' parameter of the <a href="#circle">Circle</a>.
-      </p>
-      
-      <h4 id="circle-circleY">circleY</h4>
-      <p>
-        <code>node.circleY</code> (<code>node.getCircleY()</code>, <code>node.setCircleY( y )</code>)
-        retrieves or modifies the 'y' parameter of the <a href="#circle">Circle</a>.
-      </p>
       
       <h4 id="circle-circleRadius">circleRadius</h4>
       <p>

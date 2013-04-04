@@ -1,6 +1,8 @@
 
 Priorities:
-    Accessibility
+    Layering bugs
+        Fuzzer them out with add/remove and modify on various options
+    Accessibility 
     Force non-canvas above 'interactive' DOM node
         Need to track lowest DOM-interactive Trail for each Scene.
             null indicates none exists, and represents the far 'after'
@@ -18,6 +20,7 @@ Priorities:
         Consider keeping Node IDs? May make it easier to visually compare the debug HTML in both places
 
 Bugs:
+    Layering issues in DAG
     Switching renderers in Devious Drag example on iPad causes other objects being dragged to be "dropped"
         Probably causes some sort of enter/exit event?
     Nexus 7 hidef scaling
@@ -211,6 +214,15 @@ Layers / caching:
         Showing where the fingers are with a display (for projectors)
 
 Accessibility / shadow DOM:
+    TabOrder object?
+    Questions:
+        Shape instead of rect to highlight - SVG in front
+        tabbable: true, tabbable: false, + tabindex
+        TabOrder for scene, or more globally (multiple scene support).
+            * Ideally we can have scenes handle it in an isolated way that doesn't affect other scenes
+    For 'accessible' elements, maybe 'interactive' for a tab order? 'tabbable'? 'readable'?
+        * magnifier
+        CSS styles ('hidden') - tab order?
     see http://www.whatwg.org/specs/web-apps/current-work/multipage/editing.html
     ARIA in general?
     see http://www.paciellogroup.com/blog/2011/12/html5-canvas-accessibility-discussions-2009-2011/
@@ -222,6 +234,8 @@ Accessibility / shadow DOM:
         spec: http://www.w3.org/TR/shadow-dom/
 
 Node:
+    Circular checking:
+        add Node.getConnectedNodes() - map
     * Arbitrary ImageData filters, or filters that match SVG
         Like the colorTransform matrix, applied to node.filters?
     Support for setting listeners in the mutator?

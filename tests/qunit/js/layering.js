@@ -71,6 +71,34 @@
     ok( scene.layerLookup( c.getUniqueTrail() ) === scene.layers[2] );
   } );
   
+  test( 'endBoundary failing case', function() {
+    var scene = new scenery.Scene( $( '#main' ) );
+    
+    var n4 = new scenery.Node();
+    var n5 = new scenery.Node();
+    var n7 = new scenery.Node();
+    var p9 = new scenery.Path();
+    var p10 = new scenery.Path();
+    scene.addChild( p9 );
+    scene.layerAudit();
+    scene.addChild( n7 );
+    scene.layerAudit();
+    scene.addChild( n4 );
+    scene.layerAudit();
+    p9.addChild( p10 );
+    scene.layerAudit();
+    p9.addChild( n4 );
+    scene.layerAudit();
+    n7.addChild( n4 );
+    scene.layerAudit();
+    n4.addChild( n5 );
+    scene.layerAudit();
+    n4.addChild( p10 );
+    scene.layerAudit();
+    n4.removeChild( p10 );
+    scene.layerAudit();
+  } );
+  
   test( 'Two-node inversion', function() {
     var scene = new scenery.Scene( $( '#main' ) );
     scene.layerAudit();

@@ -853,6 +853,15 @@ define( function( require ) {
       return this; // allow chaining
     },
     
+    getCenter: function() {
+      return this.getBounds().getCenter();
+    },
+    
+    setCenter: function( center ) {
+      this.translate( center.minus( this.getCenter() ) );
+      return this;
+    },
+    
     getCenterX: function() {
       return this.getBounds().getCenterX();
     },
@@ -1080,6 +1089,67 @@ define( function( require ) {
       return trail;
     },
     
+    // all nodes in the connected component, returned in an arbitrary order
+    getConnectedNodes: function() {
+      var result = [];
+      var fresh = this._children.concat( this._parents ).concat( this );
+      while ( fresh.length ) {
+        var node = fresh.pop();
+        if ( !_.contains( result, node ) ) {
+          result.push( node );
+          fresh = fresh.concat( node._children, node._parents );
+        }
+      }
+      return result;
+    },
+    
+    // verify that this.addChild( child ) it wouldn't cause circular references
+    canAddChild: function( child ) {
+      if ( this === child || _.contains( this.children, child ) ) {
+        return false;
+      }
+      
+      // see http://en.wikipedia.org/wiki/Topological_sorting
+      var edges = {};
+      var s = [];
+      var l = [];
+      var n;
+      _.each( this.getConnectedNodes().concat( child.getConnectedNodes() ), function( node ) {
+        edges[node.id] = {};
+        _.each( node.children, function( m ) {
+          edges[node.id][m.id] = true;
+        } );
+        if ( !node.parents.length && node !== child ) {
+          s.push( node );
+        }
+      } );
+      edges[this.id][child.id] = true; // add in our 'new' edge
+      function handleChild( m ) {
+        delete edges[n.id][m.id];
+        if ( _.every( edges, function( children ) { return !children[m.id]; } ) ) {
+          // there are no more edges to m
+          s.push( m );
+        }
+      }
+      
+      while ( s.length ) {
+        n = s.pop();
+        l.push( n );
+        
+        _.each( n.children, handleChild );
+        
+        // handle our new edge
+        if ( n === this ) {
+          handleChild( child );
+        }
+      }
+      
+      // ensure that there are no edges left, since then it would contain a circular reference
+      return _.every( edges, function( children ) {
+        return _.every( children, function( final ) { return false; } );
+      } );
+    },
+    
     debugText: function() {
       var startPointer = new scenery.TrailPointer( new scenery.Trail( this ), true );
       var endPointer = new scenery.TrailPointer( new scenery.Trail( this ), false );
@@ -1296,6 +1366,9 @@ define( function( require ) {
     set bottom( value ) { this.setBottom( value ); },
     get bottom() { return this.getBottom(); },
     
+    set center( value ) { this.setCenter( value ); },
+    get center() { return this.getCenter(); },
+    
     set centerX( value ) { this.setCenterX( value ); },
     get centerX() { return this.getCenterX(); },
     
@@ -1413,7 +1486,7 @@ define( function( require ) {
    * TODO: move fill / stroke setting to mixins
    */
   Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
-                                  'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
+                                  'left', 'right', 'top', 'bottom', 'center', 'centerX', 'centerY', 'renderer', 'rendererOptions',
                                   'layerSplit', 'layerSplitBefore', 'layerSplitAfter' ];
   
   Node.prototype._supportedRenderers = [];
