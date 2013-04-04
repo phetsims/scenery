@@ -128,8 +128,8 @@
             var scene = new scenery.Scene( $( '<div>' ), { width: 640, height: 480 } );
             nodes.push( scene );
             
-            _.times( 10, function() { nodes.push( new scenery.Node() ); } );
-            _.times( 15, function() { nodes.push( new scenery.Path() ); } );
+            _.times( 5, function() { nodes.push( new scenery.Node() ); } );
+            _.times( 10, function() { nodes.push( new scenery.Path() ); } );
             // _.times( 5, function() { nodes.push( new scenery.DOM( document.createElement( 'div' ) ) ); } );
             
             (function fuzz(){
