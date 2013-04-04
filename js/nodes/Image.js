@@ -38,6 +38,8 @@ define( function( require ) {
    *     HTMLImageElement
    */
   scenery.Image = function Image( image, options ) {
+    assert && assert( image, "image should be available" );
+    
     // allow not passing an options object
     options = options || {};
     
