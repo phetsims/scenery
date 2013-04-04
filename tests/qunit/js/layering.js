@@ -103,19 +103,21 @@
   } );
   
   test( 'unknown break #1', function() {
-      var p1 = new scenery.Path();
-      var p2 = new scenery.Path();
-      var p3 = new scenery.Path();
-      var n1 = new scenery.Node();
-      
-      scene.addChild( p1 );
-      scene.addChild( p2 );
-      p1.addChild( n1 );
-      p1.addChild( p3 );
-      n1.addChild( p3 );
-      p2.renderer = 'svg';
-      
-      expect( 0 );
+    var scene = new scenery.Scene( $( '#main' ) );
+    
+    var p1 = new scenery.Path();
+    var p2 = new scenery.Path();
+    var p3 = new scenery.Path();
+    var n1 = new scenery.Node();
+    
+    scene.addChild( p1 );
+    scene.addChild( p2 );
+    p1.addChild( n1 );
+    p1.addChild( p3 );
+    n1.addChild( p3 );
+    p2.renderer = 'svg';
+    
+    expect( 0 );
   } );
   
   test( 'Single subnode renderer toggle', function() {
