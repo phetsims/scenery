@@ -1,5 +1,6 @@
 
 Priorities:
+    SVGPath takes d="..."
     Layering bugs
         Fuzzer them out with add/remove and modify on various options
     Accessibility 
