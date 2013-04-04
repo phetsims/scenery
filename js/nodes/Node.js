@@ -1103,6 +1103,44 @@ define( function( require ) {
       return result;
     },
     
+    getTopologicallySortedNodes: function() {
+      // see http://en.wikipedia.org/wiki/Topological_sorting
+      var edges = {};
+      var s = [];
+      var l = [];
+      var n;
+      _.each( this.getConnectedNodes(), function( node ) {
+        edges[node.id] = {};
+        _.each( node.children, function( m ) {
+          edges[node.id][m.id] = true;
+        } );
+        if ( !node.parents.length ) {
+          s.push( node );
+        }
+      } );
+      function handleChild( m ) {
+        delete edges[n.id][m.id];
+        if ( _.every( edges, function( children ) { return !children[m.id]; } ) ) {
+          // there are no more edges to m
+          s.push( m );
+        }
+      }
+      
+      while ( s.length ) {
+        n = s.pop();
+        l.push( n );
+        
+        _.each( n.children, handleChild );
+      }
+      
+      // ensure that there are no edges left, since then it would contain a circular reference
+      assert && assert( _.every( edges, function( children ) {
+        return _.every( children, function( final ) { return false; } );
+      } ), 'circular reference check' );
+      
+      return l;
+    },
+    
     // verify that this.addChild( child ) it wouldn't cause circular references
     canAddChild: function( child ) {
       if ( this === child || _.contains( this.children, child ) ) {
@@ -1110,6 +1148,7 @@ define( function( require ) {
       }
       
       // see http://en.wikipedia.org/wiki/Topological_sorting
+      // TODO: remove duplication with above handling?
       var edges = {};
       var s = [];
       var l = [];
@@ -1406,9 +1445,9 @@ define( function( require ) {
       return this; // allow chaining
     },
     
-    toString: function( spaces ) {
+    toString: function( spaces, includeChildren ) {
       spaces = spaces || '';
-      var props = this.getPropString( spaces + '  ' );
+      var props = this.getPropString( spaces + '  ', includeChildren === undefined ? true : includeChildren );
       return spaces + this.getBasicConstructor( props ? ( '\n' + props + '\n' + spaces ) : '' );
     },
     
@@ -1416,7 +1455,7 @@ define( function( require ) {
       return 'new scenery.Node( {' + propLines + '} )';
     },
     
-    getPropString: function( spaces ) {
+    getPropString: function( spaces, includeChildren ) {
       var self = this;
       
       var result = '';
@@ -1431,7 +1470,7 @@ define( function( require ) {
         }
       }
       
-      if ( this._children.length ) {
+      if ( this._children.length && includeChildren ) {
         var childString = '';
         _.each( this._children, function( child ) {
           if ( childString ) {

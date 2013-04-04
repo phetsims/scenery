@@ -87,7 +87,7 @@
             
             $( '#debug' ).html( scene.getDebugHTML() );
             
-            $( '#serialized' ).html( scene.toStringWithChildren() );
+            $( '#serialized' ).html( scene.toStringWithChildren( true ) );
           })();
           
           window.twrap = function( f ) {
@@ -150,7 +150,7 @@
               
               _.times( 20, function() {
                 window.beforeFuzzDebug = scene.getDebugHTML();
-                window.beforeFuzzSerialization = scene.toStringWithChildren();
+                window.beforeFuzzSerialization = scene.toStringWithChildren( true );
                 
                 var r = Math.random();
                 

@@ -1152,14 +1152,31 @@ define( function( require ) {
     return 'new scenery.Scene( $( \'#main\' ), {' + propLines + '} )';
   };
   
-  Scene.prototype.toStringWithChildren = function() {
+  Scene.prototype.toStringWithChildren = function( mutateScene ) {
+    var scene = this;
     var result = '';
     
-    _.each( this._children, function( child ) {
+    var nodes = this.getTopologicallySortedNodes().slice( 0 ).reverse(); // defensive slice, in case we store the order somewhere
+    
+    function name( node ) {
+      return node === scene ? 'scene' : node.constructor.name.toLowerCase() + node.id;
+    }
+    
+    _.each( nodes, function( node ) {
       if ( result ) {
         result += '\n';
       }
-      result += 'scene.addChild( ' + child.toString() + ' );';
+      
+      if ( mutateScene && node === scene ) {
+        var props = scene.getPropString( '  ', false );
+        result += 'scene.mutate( {' + ( props ? ( '\n' + props + '\n' ) : '' ) + '} )';
+      } else {
+        result += 'var ' + name( node ) + ' = ' + node.toString( '', false );
+      }
+      
+      _.each( node.children, function( child ) {
+        result += '\n' + name( node ) + '.addChild( ' + name( child ) + ' );';
+      } );
     } );
     
     return result;
