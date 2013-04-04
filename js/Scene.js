@@ -116,7 +116,9 @@ define( function( require ) {
         // waiting until after the removal takes place would require more complicated code to properly handle the trails
         affectedTrail.eachTrailUnder( function( trail ) {
           if ( trail.isPainted() ) {
-            scene.layerLookup( trail ).removeNodeFromTrail( trail );
+            var layer = scene.layerLookup( trail );
+            layerLogger && layerLogger( '  removal of trail ' + trail.toString() + ' from layer ' + layer.getId() );
+            layer.removeNodeFromTrail( trail );
           }
         } );
       },
@@ -403,6 +405,7 @@ define( function( require ) {
           // only remove/add if the layer has actually changed. if we are preserving the layer, don't do anything
           var oldLayer = oldLayerMap[trail.getUniqueId()];
           if ( oldLayer !== currentLayer ) {
+            layerLogger && layerLogger( '  moving trail ' + trail.toString() + ' from layer ' + oldLayer.getId() + ' to ' + currentLayer.getId() );
             oldLayer.removeNodeFromTrail( trail );
             currentLayer.addNodeFromTrail( trail );
           }
