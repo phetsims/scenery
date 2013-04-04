@@ -38,6 +38,8 @@ define( function( require ) {
    *     HTMLImageElement
    */
   scenery.Image = function Image( image, options ) {
+    assert && assert( image, "image should be available" );
+    
     // allow not passing an options object
     options = options || {};
     
@@ -192,7 +194,8 @@ define( function( require ) {
     get image() { return this.getImage(); },
     
     getBasicConstructor: function( propLines ) {
-      return 'new scenery.Image( \'' + this._image.src.replace( /'/g, '\\\'' ) + '\', {' + propLines + '} )';
+      return "hello";
+//      return 'new scenery.Image( \'' + this._image.src.replace( /'/g, '\\\'' ) + '\', {' + propLines + '} )';
     }
   } );
   
