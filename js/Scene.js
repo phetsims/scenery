@@ -31,7 +31,7 @@ define( function( require ) {
   var objectCreate = Util.objectCreate;
   
   // if assertions are enabled, log out layer information
-  var layerLogger = assert ? function( ob ) { console.log( ob ); } : null;
+  var layerLogger = null; //assert ? function( ob ) { console.log( ob ); } : null;
   
   // debug flag to disable matching of layers when in 'match' mode
   var forceNewLayers = true; // DEBUG
@@ -1159,6 +1159,10 @@ define( function( require ) {
     } );
     
     return result;
+  };
+  
+  Scene.enableLayerLogging = function() {
+    layerLogger = function( ob ) { console.log( ob ); };
   };
   
   function applyCSSHacks( $main, options ) {
