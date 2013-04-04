@@ -159,7 +159,7 @@
                 } else if( r < 0.666 ) {
                   if ( a.children.length ) {
                     var child = a.children[_.random( 0, a.children.length - 1 )];
-                    window.fuzzMessage = 'adding child ' + b.id + ' to ' + a.id;
+                    window.fuzzMessage = 'removing child ' + child.id + ' to ' + a.id;
                     a.removeChild( child );
                   }
                 } else {
