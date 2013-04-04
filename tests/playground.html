@@ -126,6 +126,9 @@
             basicSceneStep = false;
             fuzzStep = true;
             
+            var lines = [];
+            window.lines = lines;
+            
             var nodes = [];
             var scene = new scenery.Scene( $( '<div>' ), { width: 640, height: 480 } );
             nodes.push( scene );
@@ -134,6 +137,16 @@
             _.times( 10, function() { nodes.push( new scenery.Path() ); } );
             // _.times( 5, function() { nodes.push( new scenery.DOM( document.createElement( 'div' ) ) ); } );
             
+            function name( node ) {
+              return node === scene ? 'scene' : node.constructor.name.toLowerCase() + node.id;
+            }
+            
+            _.each( nodes, function( node ) {
+              if ( node !== scene ) {
+                lines.push( 'var ' + name( node ) + ' = ' + node.toString() + ';' );
+              }
+            } );
+            
             (function fuzz(){
               // abort if desired
               if ( !fuzzStep ) {
@@ -141,9 +154,24 @@
               }
               
               var nodeMutators = [
-                { weight: 1.0, f: function( node ) { node.renderer = 'canvas'; }, mess: 'canvas renderer' },
-                { weight: 1.0, f: function( node ) { node.renderer = 'svg'; }, mess: 'svg renderer' },
-                { weight: 2.0, f: function( node ) { node.renderer = null; }, mess: 'null renderer' }
+                {
+                  weight: 1.0,
+                  f: function( node ) { node.renderer = 'canvas'; },
+                  mess: 'canvas renderer',
+                  line: function( node ) { return name( node ) + '.renderer = \'canvas\';' }
+                },
+                {
+                  weight: 1.0,
+                  f: function( node ) { node.renderer = 'svg'; },
+                  mess: 'svg renderer',
+                  line: function( node ) { return name( node ) + '.renderer = \'svg\';' }
+                },
+                {
+                  weight: 2.0,
+                  f: function( node ) { node.renderer = null; },
+                  mess: 'null renderer',
+                  line: function( node ) { return name( node ) + '.renderer = null;' }
+                }
               ];
               
               var totalWeight = _.reduce( _.pluck( nodeMutators, 'weight' ), function( memo, num ) { return memo + num; }, 0 );
@@ -164,12 +192,14 @@
                     // insert it into a random place
                     var index = _.random( 0, a.children.length );
                     window.fuzzMessage = 'inserting child ' + b.id + ' into ' + a.id + ' at index ' + index;
+                    lines.push( name( a ) + '.insertChild( ' + index + ', ' + name( b ) + ' );' );
                     a.insertChild( index, b );
                   }
                 } else if( r < 0.666 ) {
                   if ( a.children.length ) {
                     var child = a.children[_.random( 0, a.children.length - 1 )];
                     window.fuzzMessage = 'removing child ' + child.id + ' to ' + a.id;
+                    lines.push( name( a ) + '.removeChild( ' + name( child ) + ' );' );
                     a.removeChild( child );
                   }
                 } else {
@@ -180,6 +210,7 @@
                     rr -= mutator.weight;
                     if ( rr <= 0 ) {
                       window.fuzzMessage = 'mutating node ' + a.id + ' with ' + mutator.mess;
+                      lines.push( mutator.line( a ) );
                       mutator.f( a );
                       break;
                     }
