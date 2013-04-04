@@ -138,6 +138,14 @@
                 return;
               }
               
+              var nodeMutators = [
+                { weight: 1.0, f: function( node ) { node.renderer = 'canvas'; }, mess: 'canvas renderer' },
+                { weight: 1.0, f: function( node ) { node.renderer = 'svg'; }, mess: 'svg renderer' },
+                { weight: 2.0, f: function( node ) { node.renderer = null; }, mess: 'null renderer' }
+              ];
+              
+              var totalWeight = _.reduce( _.pluck( nodeMutators, 'weight' ), function( memo, num ) { return memo + num; }, 0 );
+              
               _.times( 20, function() {
                 window.beforeFuzzDebug = scene.getDebugHTML();
                 window.beforeFuzzSerialization = scene.toStringWithChildren();
@@ -163,8 +171,17 @@
                     a.removeChild( child );
                   }
                 } else {
-                  // pick a modification
-                  // TODO
+                  // pick a random modification from the weighted list
+                  var rr = Math.random() * totalWeight;
+                  for ( var i = 0; i < nodeMutators.length; i++ ) {
+                    var mutator = nodeMutators[i];
+                    rr -= mutator.weight;
+                    if ( rr <= 0 ) {
+                      window.fuzzMessage = 'mutating node ' + a.id + ' with ' + mutator.mess;
+                      mutator.f( a );
+                      break;
+                    }
+                  }
                 }
                 
                 scene.layerAudit();

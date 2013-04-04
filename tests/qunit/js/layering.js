@@ -97,6 +97,20 @@
     scene.layerAudit();
     n4.removeChild( p10 );
     scene.layerAudit();
+    
+    expect( 0 );
+  } );
+  
+  test( 'Single subnode renderer toggle', function() {
+    var scene = new scenery.Scene( $( '#main' ) );
+    
+    var a = new scenery.Path();
+    scene.addChild( a );
+    scene.layerAudit();
+    a.renderer = 'canvas'; // it was canvas before, and the layer seems to disappear!
+    scene.layerAudit();
+    
+    equal( scene.layers.length, 1, 'should still have a layer' );
   } );
   
   test( 'Two-node inversion', function() {

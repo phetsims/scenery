@@ -201,7 +201,13 @@ define( function( require ) {
   
   // convenience function for layer change intervals
   Scene.prototype.addLayerChangeInterval = function( interval ) {
-    layerLogger && layerLogger( 'adding interval: ' + interval.toString() );
+    if ( layerLogger ) {
+      layerLogger( 'adding interval: ' + interval.toString() + ' to intervals:' );
+      _.each( this.layerChangeIntervals[i], function( interval ) {
+        layerLogger( '  ' + interval.toString() );
+      } );
+    }
+    
     // TODO: replace with a binary-search-like version that may be faster. this includes a full scan
     
     // attempt to merge this interval with another if possible.
@@ -212,7 +218,8 @@ define( function( require ) {
       if ( interval.exclusiveUnionable( other ) ) {
         // the interval can be unioned without including other nodes. do this, and remove the other interval from consideration
         interval = interval.union( other );
-        this.layerChangeIntervals.splice( i, 1 );
+        this.layerChangeIntervals.splice( i--, 1 ); // decrement to stay at the same index
+        layerLogger && layerLogger( 'removing interval: ' + other.toString() );
       }
     }
     
