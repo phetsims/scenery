@@ -971,6 +971,10 @@ define( function( require ) {
     var layerPaintedCount = 0;
     _.each( this.layers, function( layer ) {
       layerPaintedCount += layer.getLayerTrails().length;
+      
+      // reindex now so we don't have problems later
+      layer.startPaintedTrail.reindex();
+      layer.endPaintedTrail.reindex();
     } );
     
     var layerIterationPaintedCount = 0;
