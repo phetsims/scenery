@@ -316,8 +316,8 @@ define( function( require ) {
       assert && assert( !this.isEmpty(), 'cannot compare with an empty trail' );
       assert && assert( !other.isEmpty(), 'cannot compare with an empty trail' );
       assert && assert( this.nodes[0] === other.nodes[0], 'for Trail comparison, trails must have the same root node' );
-      assertExtra && assertExtra( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed' );
-      assertExtra && assertExtra( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed' );
+      assertExtra && assertExtra( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed on ' + this.toString() );
+      assertExtra && assertExtra( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed on ' + other.toString() );
       
       var minNodeIndex = Math.min( this.indices.length, other.indices.length );
       for ( var i = 0; i < minNodeIndex; i++ ) {
