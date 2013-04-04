@@ -1027,10 +1027,14 @@ define( function( require ) {
       var layerTrails = layer.getLayerTrails();
       var computedTrails = [];
       scenery.Trail.eachPaintedTrailbetween( layer.startPaintedTrail, layer.endPaintedTrail, function( trail ) {
-        computedTrails.push( trail );
+        computedTrails.push( trail.copy() );
       }, false, scene );
       
       assert && assert( layerTrails.length === computedTrails.length );
+      
+      _.each( layerTrails, function( trail ) {
+        assert && assert( _.some( computedTrails, function( otherTrail ) { return trail.equals( otherTrail ); } ) );
+      } );
     } );
     
     return true; // so we can assert( layerAudit() )
