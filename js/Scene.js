@@ -203,7 +203,7 @@ define( function( require ) {
   Scene.prototype.addLayerChangeInterval = function( interval ) {
     if ( layerLogger ) {
       layerLogger( 'adding interval: ' + interval.toString() + ' to intervals:' );
-      _.each( this.layerChangeIntervals[i], function( interval ) {
+      _.each( this.layerChangeIntervals, function( interval ) {
         layerLogger( '  ' + interval.toString() );
       } );
     }
