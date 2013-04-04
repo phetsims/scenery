@@ -50,6 +50,9 @@
   <pre id="serialized"></pre>
   
   <script>
+    var basicSceneStep = true;
+    var fuzzStep = false;
+    
     // we need to wait until our config file is loaded before our require statement. apparently this was not guaranteed
     function check() {
       if ( window.loadedSceneryConfig ) {
@@ -76,7 +79,9 @@
           scenery.Util.polyfillRequestAnimationFrame();
           
           (function step(){
-            window.requestAnimationFrame( step, document.getElementById( 'scene' ) );
+            if ( basicSceneStep ) {
+              window.requestAnimationFrame( step, document.getElementById( 'scene' ) );
+            }
             
             $( '#debug' ).html( scene.getDebugHTML() );
             
@@ -115,6 +120,10 @@
           };
           
           window.fuzzLayers = function() {
+            // disable the regular step
+            basicSceneStep = false;
+            fuzzStep = true;
+            
             var nodes = [];
             var scene = new scenery.Scene( $( '<div>' ), { width: 640, height: 480 } );
             nodes.push( scene );
@@ -124,6 +133,11 @@
             // _.times( 5, function() { nodes.push( new scenery.DOM( document.createElement( 'div' ) ) ); } );
             
             (function fuzz(){
+              // abort if desired
+              if ( !fuzzStep ) {
+                return;
+              }
+              
               _.times( 20, function() {
                 window.beforeFuzzDebug = scene.getDebugHTML();
                 window.beforeFuzzSerialization = scene.toStringWithChildren();
