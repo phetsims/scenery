@@ -399,6 +399,7 @@ define( function( require ) {
     // a list of layers that are most likely removed, not including the afterLayer for gluing
     var layersToRemove = [];
     for ( var i = beforeLayerIndex + 1; i < afterLayerIndex; i++ ) {
+      // TODO: this seems like a failure point for multiple stitches
       layersToRemove.push( this.layers[i] );
     }
     
