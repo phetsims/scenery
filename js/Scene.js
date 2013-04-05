@@ -1040,11 +1040,17 @@ define( function( require ) {
         computedTrails.push( trail.copy() );
       }, false, scene );
       
+      // verify that the layer has an identical record of trails compared to the trails inside its boundaries
       assert && assert( layerTrails.length === computedTrails.length );
-      
       _.each( layerTrails, function( trail ) {
         assert && assert( _.some( computedTrails, function( otherTrail ) { return trail.equals( otherTrail ); } ) );
       } );
+      
+      // verify that each trail has the same (or null) renderer as the layer
+      scenery.Trail.eachTrailBetween( layer.startPaintedTrail, layer.endPaintedTrail, function( trail ) {
+        var node = trail.lastNode();
+        assert && assert( !node.renderer || node.renderer.name === layer.type.name );
+      }, false, scene );
     } );
     
     return true; // so we can assert( layerAudit() )
