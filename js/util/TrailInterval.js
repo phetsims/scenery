@@ -19,6 +19,10 @@ define( function( require ) {
   scenery.TrailInterval = function( a, b, dataA, dataB ) {
     assert && assert( !a || !b || a.compare( b ) <= 0, 'TrailInterval parameters must not be out of order' );
     
+    // ensure that these trails will not be modified
+    a && a.setImmutable();
+    b && b.setImmutable();
+    
     this.a = a;
     this.b = b;
     

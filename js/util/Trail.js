@@ -181,6 +181,8 @@ define( function( require ) {
       assert && assert( this.immutable !== false, 'A trail cannot be made immutable after being flagged as mutable' );
       
       this.immutable = true;
+      
+      // TODO: consider setting mutators to null here instead of the function call check (for performance, and profile the differences)
     },
     
     setMutable: function() {

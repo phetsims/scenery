@@ -607,6 +607,7 @@ define( function( require ) {
      */
     dispatchEvent: function( type, args ) {
       var trail = new scenery.Trail();
+      trail.setMutable(); // don't allow this trail to be set as immutable for storage
       
       function recursiveEventDispatch( node ) {
         trail.addAncestor( node );
@@ -628,6 +629,8 @@ define( function( require ) {
     // dispatches events with the transform computed from parent of the "root" to the local frame
     dispatchEventWithTransform: function( type, args ) {
       var trail = new scenery.Trail();
+      trail.setMutable(); // don't allow this trail to be set as immutable for storage
+      
       var transformStack = [ new Transform3() ];
       
       function recursiveEventDispatch( node ) {
