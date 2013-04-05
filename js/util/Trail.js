@@ -25,6 +25,13 @@ define( function( require ) {
   // require( 'SCENERY/util/TrailPointer' );
   
   scenery.Trail = function( nodes ) {
+    /*
+     * Controls the immutability of the trail.
+     * If set to true, add/remove descendant/ancestor should fail if assertions are enabled
+     * Use setImmutable() or setMutable() to signal a specific type of protection, so it cannot be changed later
+     */
+    this.immutable = undefined;
+    
     if ( nodes instanceof Trail ) {
       // copy constructor (takes advantage of already built index information)
       var otherTrail = nodes;
@@ -104,6 +111,8 @@ define( function( require ) {
     },
     
     addAncestor: function( node, index ) {
+      assert && assert( !this.immutable, 'cannot modify an immutable Trail with addAncestor' );
+      
       var oldRoot = this.nodes[0];
       
       this.nodes.unshift( node );
@@ -117,6 +126,8 @@ define( function( require ) {
     },
     
     removeAncestor: function() {
+      assert && assert( !this.immutable, 'cannot modify an immutable Trail with removeAncestor' );
+      
       this.nodes.shift();
       if ( this.indices.length ) {
         this.indices.shift();
@@ -128,6 +139,8 @@ define( function( require ) {
     },
     
     addDescendant: function( node, index ) {
+      assert && assert( !this.immutable, 'cannot modify an immutable Trail with addDescendant' );
+      
       var parent = this.lastNode();
       
       this.nodes.push( node );
@@ -141,6 +154,8 @@ define( function( require ) {
     },
     
     removeDescendant: function() {
+      assert && assert( !this.immutable, 'cannot modify an immutable Trail with removeDescendant' );
+      
       this.nodes.pop();
       if ( this.indices.length ) {
         this.indices.pop();
@@ -160,6 +175,18 @@ define( function( require ) {
           this.indices[i-1] = _.indexOf( this.nodes[i-1]._children, this.nodes[i] );
         }
       }
+    },
+    
+    setImmutable: function() {
+      assert && assert( this.immutable !== false, 'A trail cannot be made immutable after being flagged as mutable' );
+      
+      this.immutable = true;
+    },
+    
+    setMutable: function() {
+      assert && assert( this.immutable !== true, 'A trail cannot be made mutable after being flagged as immutable' );
+      
+      this.immutable = false;
     },
     
     areIndicesValid: function() {

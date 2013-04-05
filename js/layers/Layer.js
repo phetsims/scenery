@@ -103,6 +103,10 @@ define( function( require ) {
       // TODO: deprecate these, use boundary references instead? or boundary convenience functions
       this.startPointer = this.startBoundary.nextStartPointer;
       this.startPaintedTrail = this.startBoundary.nextPaintedTrail;
+      
+      // set immutability guarantees
+      this.startPointer.trail && this.startPointer.trail.setImmutable();
+      this.startPaintedTrail.setImmutable();
     },
     
     setEndBoundary: function( boundary ) {
@@ -112,6 +116,10 @@ define( function( require ) {
       // TODO: deprecate these, use boundary references instead? or boundary convenience functions
       this.endPointer = this.endBoundary.previousEndPointer;
       this.endPaintedTrail = this.endBoundary.previousPaintedTrail;
+      
+      // set immutability guarantees
+      this.endPointer.trail && this.endPointer.trail.setImmutable();
+      this.endPaintedTrail.setImmutable();
     },
     
     getStartPointer: function() {

@@ -363,6 +363,10 @@ define( function( require ) {
   Scene.prototype.stitchInterval = function( layerMap, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match ) {
     var scene = this;
     
+    // make sure our beforeTrail and afterTrail are immutable
+    beforeTrail && beforeTrail.setImmutable();
+    afterTrail && afterTrail.setImmutable();
+    
     // need a reference to this, since it may changes
     var afterLayerEndBoundary = afterLayer ? afterLayer.endBoundary : null;
     
@@ -429,6 +433,7 @@ define( function( require ) {
     
     function step( trail, isEnd ) {
       layerLogger && layerLogger( 'step: ' + ( trail ? trail.toString() : trail ) );
+      trail && trail.setImmutable(); // we don't want our trail to be modified, so we can store direct references to it
       // check for a boundary at this step between currentTrail and trail
       
       // if there is no next boundary, don't bother checking anyways
@@ -526,10 +531,11 @@ define( function( require ) {
         layerMap[afterLayer.getId()] = currentLayer;
         addPendingTrailsToLayer();
         
-        scenery.Trail.eachPaintedTrailbetween( afterTrail, currentLayer.endPaintedTrail, function( trail ) {
-          trail.reindex();
-          afterLayer.removeNodeFromTrail( trail );
-          currentLayer.addNodeFromTrail( trail );
+        scenery.Trail.eachPaintedTrailbetween( afterTrail, currentLayer.endPaintedTrail, function( subtrail ) {
+          subtrail = subtrail.copy();
+          subtrail.setImmutable(); // we are storing references to this trail
+          afterLayer.removeNodeFromTrail( subtrail );
+          currentLayer.addNodeFromTrail( subtrail );
         }, false, scene );
       } else if ( !beforeLayer && !afterLayer && boundaries.length === 1 && !boundaries[0].hasNext() && !boundaries[0].hasPrevious() ) {
         // TODO: why are we generating a boundary here?!?
