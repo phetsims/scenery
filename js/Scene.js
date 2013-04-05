@@ -13,6 +13,8 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
+  var collect = require( 'PHET_CORE/collect' );
+  
   var Bounds2 = require( 'DOT/Bounds2' );
   var Vector2 = require( 'DOT/Vector2' );
   var Matrix3 = require( 'DOT/Matrix3' );
@@ -1034,22 +1036,32 @@ define( function( require ) {
     }
     
     _.each( this.layers, function( layer ) {
+      // a list of trails that the layer tracks
       var layerTrails = layer.getLayerTrails();
+      
+      // a list of trails that the layer should be tracking (between painted trails)
       var computedTrails = [];
       scenery.Trail.eachPaintedTrailBetween( layer.startPaintedTrail, layer.endPaintedTrail, function( trail ) {
         computedTrails.push( trail.copy() );
       }, false, scene );
       
       // verify that the layer has an identical record of trails compared to the trails inside its boundaries
-      assert && assert( layerTrails.length === computedTrails.length );
+      assert && assert( layerTrails.length === computedTrails.length, 'layer has incorrect number of tracked trails' );
       _.each( layerTrails, function( trail ) {
-        assert && assert( _.some( computedTrails, function( otherTrail ) { return trail.equals( otherTrail ); } ) );
+        assert && assert( _.some( computedTrails, function( otherTrail ) { return trail.equals( otherTrail ); } ), 'layer has a tracked trail discrepancy' );
       } );
       
       // verify that each trail has the same (or null) renderer as the layer
       scenery.Trail.eachTrailBetween( layer.startPaintedTrail, layer.endPaintedTrail, function( trail ) {
         var node = trail.lastNode();
-        assert && assert( !node.renderer || node.renderer.name === layer.type.name );
+        assert && assert( !node.renderer || node.renderer.name === layer.type.name, 'specified renderers should match the layer renderer' );
+      }, false, scene );
+      
+      // verify layer splits
+      scenery.Trail.eachTrailBetween( layer.startPaintedTrail, layer.endPaintedTrail, function( trail ) {
+        var node = trail.lastNode();
+        assert && assert( !node.layerSplitBefore || trail.equals( layerTrails[0] ), 'layerSplitBefore between painted trails can only be on the first trail' );
+        assert && assert( !node.layerSplitAfter || trail.equals( layerTrails[layerTrails.length-1] ), 'layerSplitAfter between painted trails can only be on the last trail' );
       }, false, scene );
     } );
     
