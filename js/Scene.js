@@ -531,7 +531,7 @@ define( function( require ) {
         layerMap[afterLayer.getId()] = currentLayer;
         addPendingTrailsToLayer();
         
-        scenery.Trail.eachPaintedTrailbetween( afterTrail, currentLayer.endPaintedTrail, function( subtrail ) {
+        scenery.Trail.eachPaintedTrailBetween( afterTrail, currentLayer.endPaintedTrail, function( subtrail ) {
           subtrail = subtrail.copy();
           subtrail.setImmutable(); // we are storing references to this trail
           afterLayer.removeNodeFromTrail( subtrail );
@@ -579,7 +579,7 @@ define( function( require ) {
     // allow providing a result to copy into, so we can chain these
     var result = result || {};
     
-    scenery.Trail.eachPaintedTrailbetween( beforeTrail, afterTrail, function( trail ) {
+    scenery.Trail.eachPaintedTrailBetween( beforeTrail, afterTrail, function( trail ) {
       // TODO: optimize this! currently both the layer lookup and this inefficient method of using layer lookup is slow
       var layer = scene.layerLookup( trail );
       assert && assert( layer, 'each trail during a proper match should always have a layer' );
@@ -1012,7 +1012,7 @@ define( function( require ) {
     var layerIterationPaintedCount = 0;
     _.each( this.layers, function( layer ) {
       var selfCount = 0;
-      scenery.Trail.eachPaintedTrailbetween( layer.startPaintedTrail, layer.endPaintedTrail, function( trail ) {
+      scenery.Trail.eachPaintedTrailBetween( layer.startPaintedTrail, layer.endPaintedTrail, function( trail ) {
         selfCount++;
       }, false, scene );
       assert && assert( selfCount > 0, 'every layer must have at least one self trail' );
@@ -1036,7 +1036,7 @@ define( function( require ) {
     _.each( this.layers, function( layer ) {
       var layerTrails = layer.getLayerTrails();
       var computedTrails = [];
-      scenery.Trail.eachPaintedTrailbetween( layer.startPaintedTrail, layer.endPaintedTrail, function( trail ) {
+      scenery.Trail.eachPaintedTrailBetween( layer.startPaintedTrail, layer.endPaintedTrail, function( trail ) {
         computedTrails.push( trail.copy() );
       }, false, scene );
       

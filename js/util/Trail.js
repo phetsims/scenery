@@ -401,7 +401,7 @@ define( function( require ) {
   };
   
   // like eachTrailBetween, but only fires for painted trails
-  Trail.eachPaintedTrailbetween = function( a, b, callback, excludeEndTrails, scene ) {
+  Trail.eachPaintedTrailBetween = function( a, b, callback, excludeEndTrails, scene ) {
     Trail.eachTrailBetween( a, b, function( trail ) {
       if ( trail && trail.isPainted() ) {
         callback( trail );
