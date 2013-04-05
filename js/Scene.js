@@ -573,13 +573,17 @@ define( function( require ) {
   };
   
   // returns a map from trail.getUniqueId() to the current layer in which that trail resides
-  Scene.prototype.mapTrailLayersBetween = function( beforeTrail, afterTrail ) {
+  Scene.prototype.mapTrailLayersBetween = function( beforeTrail, afterTrail, result ) {
     var scene = this;
     
-    var result = {};
+    // allow providing a result to copy into, so we can chain these
+    var result = result || {};
+    
     scenery.Trail.eachPaintedTrailbetween( beforeTrail, afterTrail, function( trail ) {
       // TODO: optimize this! currently both the layer lookup and this inefficient method of using layer lookup is slow
-      result[trail.getUniqueId()] = scene.layerLookup( trail );
+      var layer = scene.layerLookup( trail );
+      assert && assert( layer, 'each trail during a proper match should always have a layer' );
+      result[trail.getUniqueId()] = layer;
     }, false, this );
     
     return result;

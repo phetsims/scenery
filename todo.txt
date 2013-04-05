@@ -1,6 +1,7 @@
 
 Priorities:
     Layer Refresh handling should batch add/remove trail layer calls until end of stitch, so we avoid side effects
+        Record 'old' layers for each trail, so we can avoid the 'null layerLookup' issue in mapTrailLayersBetween.
     SVGPath takes d="..."
     Layering bugs
         Fuzzer them out with add/remove and modify on various options
