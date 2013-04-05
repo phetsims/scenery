@@ -577,7 +577,7 @@ define( function( require ) {
     var scene = this;
     
     // allow providing a result to copy into, so we can chain these
-    var result = result || {};
+    result = result || {};
     
     scenery.Trail.eachPaintedTrailBetween( beforeTrail, afterTrail, function( trail ) {
       // TODO: optimize this! currently both the layer lookup and this inefficient method of using layer lookup is slow
