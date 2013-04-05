@@ -367,7 +367,7 @@ define( function( require ) {
     beforeTrail && beforeTrail.setImmutable();
     afterTrail && afterTrail.setImmutable();
     
-    // need a reference to this, since it may changes
+    // need a reference to this, since it may change
     var afterLayerEndBoundary = afterLayer ? afterLayer.endBoundary : null;
     
     var beforeLayerIndex = beforeLayer ? _.indexOf( this.layers, beforeLayer ) : -1;
