@@ -186,6 +186,7 @@ define( function( require ) {
       // console.log( 'addNodeFromTrail layer: ' + this.getId() + ', trail: ' + trail.toString() );
       // TODO: sync this with DOMLayer's implementation
       this._layerTrails.push( trail );
+      trail.setImmutable(); // don't allow this Trail to be changed
     },
     
     // removes a trail (with the last node) to the layer

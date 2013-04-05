@@ -621,7 +621,7 @@ define( function( require ) {
       // add the initial nodes to the layer
       layer.startPointer.eachTrailBetween( layer.endPointer, function( trail ) {
         if ( trail.isPainted() ) {
-          layer.addNodeFromTrail( trail );
+          layer.addNodeFromTrail( trail.copy() );
         }
       } );
       
