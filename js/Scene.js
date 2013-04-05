@@ -285,9 +285,12 @@ define( function( require ) {
   Scene.prototype.stitch = function( match ) {
     var scene = this;
     
-    // we need to map old layer IDs to new layers if we 'glue' two layers into one, so that the layer references we put on the
-    // intervals can be mapped to current layers.
-    var layerMap = {};
+    // data to be shared across all of the individually stitched intervals
+    var stitchData = {
+      // We need to map old layer IDs to new layers if we 'glue' two layers into one,
+      // so that the layer references we put on the intervals can be mapped to current layers.
+      layerMap: {}
+    };
     
     // default arguments for constructing layers
     var layerArgs = {
@@ -320,21 +323,16 @@ define( function( require ) {
       var afterLayer = interval.dataB;
       
       // if these layers are out of date, update them. 'while' will handle chained updates. circular references should be impossible
-      while ( beforeLayer && layerMap[beforeLayer.getId()] ) {
-        beforeLayer = layerMap[beforeLayer.getId()];
+      while ( beforeLayer && stitchData.layerMap[beforeLayer.getId()] ) {
+        beforeLayer = stitchData.layerMap[beforeLayer.getId()];
       }
-      while ( afterLayer && layerMap[afterLayer.getId()] ) {
-        afterLayer = layerMap[afterLayer.getId()];
+      while ( afterLayer && stitchData.layerMap[afterLayer.getId()] ) {
+        afterLayer = stitchData.layerMap[afterLayer.getId()];
       }
       
       var boundaries = scene.calculateBoundaries( beforeLayer ? beforeLayer.type : null, beforeTrail, afterTrail );
       
-      // if ( match ) {
-        // TODO: patch in the matching version!
-        // scene.rebuildLayers(); // bleh
-      // } else {
-      scene.stitchInterval( layerMap, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match );
-      // }
+      scene.stitchInterval( stitchData, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match );
     } );
     this.layerChangeIntervals = [];
     
@@ -362,7 +360,7 @@ define( function( require ) {
    *
    * Here be dragons!
    */
-  Scene.prototype.stitchInterval = function( layerMap, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match ) {
+  Scene.prototype.stitchInterval = function( stitchData, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match ) {
     var scene = this;
     
     // make sure our beforeTrail and afterTrail are immutable
@@ -524,13 +522,13 @@ define( function( require ) {
           beforeLayer.addNodeFromTrail( trail );
         } );
         
-        layerMap[afterLayer.getId()] = beforeLayer;
+        stitchData.layerMap[afterLayer.getId()] = beforeLayer;
       } else if ( beforeLayer && beforeLayer === afterLayer && boundaries.length > 0 ) {
         // need to 'unglue' and split the layer
         layerLogger && layerLogger( 'ungluing layer' );
         assert && assert( currentStartBoundary );
         addAndCreateLayer( currentStartBoundary, afterLayerEndBoundary ); // sets currentLayer
-        layerMap[afterLayer.getId()] = currentLayer;
+        stitchData.layerMap[afterLayer.getId()] = currentLayer;
         addPendingTrailsToLayer();
         
         scenery.Trail.eachPaintedTrailBetween( afterTrail, currentLayer.endPaintedTrail, function( subtrail ) {
