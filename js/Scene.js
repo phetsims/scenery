@@ -613,9 +613,7 @@ define( function( require ) {
         addPendingTrailsToLayer();
         
         scenery.Trail.eachPaintedTrailBetween( afterTrail, currentLayer.endPaintedTrail, function( subtrail ) {
-          subtrail = subtrail.copy();
-          subtrail.setImmutable(); // we are storing references to this trail
-          changeTrailLayer( subtrail, currentLayer );
+          changeTrailLayer( subtrail.copy().setImmutable(), currentLayer );
         }, false, scene );
       } else if ( !beforeLayer && !afterLayer && boundaries.length === 1 && !boundaries[0].hasNext() && !boundaries[0].hasPrevious() ) {
         // TODO: why are we generating a boundary here?!?

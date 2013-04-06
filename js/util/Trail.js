@@ -183,12 +183,16 @@ define( function( require ) {
       this.immutable = true;
       
       // TODO: consider setting mutators to null here instead of the function call check (for performance, and profile the differences)
+      
+      return this; // allow chaining
     },
     
     setMutable: function() {
       assert && assert( this.immutable !== true, 'A trail cannot be made mutable after being flagged as immutable' );
       
       this.immutable = false;
+      
+      return this; // allow chaining
     },
     
     areIndicesValid: function() {
