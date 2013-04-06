@@ -428,6 +428,8 @@ define( function( require ) {
     
     // TODO: add this back in, but with an appropriate assertion level
     assert && assert( this.layerAudit() );
+    
+    layerLogger && layerLogger( 'finished stitch\n-----------------------------------' );
   };
   
   /*
