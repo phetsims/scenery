@@ -1110,13 +1110,15 @@ define( function( require ) {
         var node = trail.lastNode();
         assert && assert( !node.renderer || node.renderer.name === layer.type.name, 'specified renderers should match the layer renderer' );
       }, false, scene );
-      
-      // verify layer splits
-      scenery.Trail.eachTrailBetween( layer.startPaintedTrail, layer.endPaintedTrail, function( trail ) {
-        var node = trail.lastNode();
-        assert && assert( !node.layerSplitBefore || trail.equals( layerTrails[0] ), 'layerSplitBefore between painted trails can only be on the first trail' );
-        assert && assert( !node.layerSplitAfter || trail.equals( layerTrails[layerTrails.length-1] ), 'layerSplitAfter between painted trails can only be on the last trail' );
-      }, false, scene );
+    } );
+    
+    // verify layer splits
+    new scenery.Trail( this ).eachTrailUnder( function( trail ) {
+      if ( trail.layerSplitBefore ) {
+        var beforeSplitTrail = trail.previousPainted();
+        var afterSplitTrail = trail.lastNode().isPainted() ? trail : trail.nextPainted();
+        assert && assert( !beforeSplitTrail || !afterSplitTrail || scene.layerLookup( beforeSplitTrail ) !== scene.layerLookup( afterSplitTrail ), 'layerSplitBefore layers need to be different' );
+      }
     } );
     
     return true; // so we can assert( layerAudit() )
