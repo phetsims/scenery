@@ -91,6 +91,7 @@ General:
     RenderState - consider stack-based transforms
 
 Code:
+    Refactor Trail .compare usage to isBefore / isAfter
     Fast text bounds
     Logging:
         Desired remote logging!

@@ -373,6 +373,14 @@ define( function( require ) {
       }
     },
     
+    isBefore: function( other ) {
+      return this.compare( other ) === -1;
+    },
+    
+    isAfter: function( other ) {
+      return this.compare( other ) === 1;
+    },
+    
     localToGlobalPoint: function( point ) {
       return this.getTransform().transformPosition2( point );
     },

@@ -277,22 +277,15 @@ define( function( require ) {
   
   // insert a layer into the proper place (from its starting boundary)
   Scene.prototype.insertLayer = function( layer ) {
-    if ( this.layers.length > 0 && this.layers[0].startBoundary.equivalentPreviousTrail( layer.endBoundary.previousPaintedTrail ) ) {
-      // layer needs to be inserted at the very beginning
-      this.layers.unshift( layer );
-    } else {
-      for ( var i = 0; i < this.layers.length; i++ ) {
-        // compare end and start boundaries, as they should match
-        if ( this.layers[i].endBoundary.equivalentNextTrail( layer.startBoundary.nextPaintedTrail ) ) {
-          break;
-        }
-      }
-      if ( i < this.layers.length ) {
-        this.layers.splice( i + 1, 0, layer );
-      } else {
-        this.layers.push( layer );
+    for ( var i = 0; i < this.layers.length; i++ ) {
+      if ( layer.endPaintedTrail.isBefore( this.layers[i].startPaintedTrail ) ) {
+        this.layers.splice( i, 0, layer ); // insert the layer here
+        return;
       }
     }
+    
+    // it is after all other layers
+    this.layers.push( layer );
   };
   
   Scene.prototype.getBoundaries = function() {
@@ -1092,8 +1085,8 @@ define( function( require ) {
     } );
     
     for ( var i = 1; i < this.layers.length; i++ ) {
-      assert && assert( this.layers[i-1].endBoundary === this.layers[i].startBoundary, 'proper sharing of boundaries' );
       assert && assert( this.layers[i-1].endPaintedTrail.compare( this.layers[i].startPaintedTrail ) === -1, 'proper ordering of layer trail boundaries in scene.layers array' );
+      assert && assert( this.layers[i-1].endBoundary === this.layers[i].startBoundary, 'proper sharing of boundaries' );
     }
     
     _.each( this.layers, function( layer ) {
