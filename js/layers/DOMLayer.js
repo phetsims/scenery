@@ -106,7 +106,7 @@ define( function( require ) {
       return this.idElementMap[trail.getUniqueId()];
     },
     
-    reindexTrails: function() {
+    reindexTrails: function( zIndex ) {
       Layer.prototype.reindex.call( this, zIndex );
       
       _.each( this.trails, function( trail ) {
