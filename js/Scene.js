@@ -299,7 +299,7 @@ define( function( require ) {
       originalLayerMap: {},
       
       // trail ID => layer at the end of stitching (needed to batch the layer notifications)
-      newLayerMap: {}
+      newLayerMap: {} // will be set in stitching operations
     };
     
     // default arguments for constructing layers
@@ -317,12 +317,14 @@ define( function( require ) {
         var trailId = trail.getUniqueId();
         stitchData.affectedTrails.push( trail.copy() );
         
-        // TODO: this is inefficient. we only need to lookup the first one.
-        // TODO: for the consecutive ones, check layer boundaries and increment when necessary!
-        var layer = scene.layerLookup( trail );
-        
-        stitchData.originalLayerMap[trailId] = layer;
-        stitchData.newLayerMap[trailId] = layer; // default is for the layer to not change
+        // if matching, we should determine the original layers, so we can remove trails from those if necessary
+        if ( match ) {
+          // TODO: this is inefficient. we only need to lookup the first one.
+          // TODO: for the consecutive ones, check layer boundaries and increment when necessary!
+          var layer = scene.layerLookup( trail );
+          
+          stitchData.originalLayerMap[trailId] = layer;
+        }
       }, false, scene );
     } );
     
