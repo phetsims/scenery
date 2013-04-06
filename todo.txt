@@ -1,8 +1,9 @@
 
 Priorities:
-    Layering bugs
-    Accessibility
-        TabOrder object?
+    Note about has.js and assertion controls for use with Scenery.
+    Re-enable layer refresh handling for matching (and the optimizations therein)
+    SVGPath takes d="..."
+    Accessibility 
     Force non-canvas above 'interactive' DOM node
         Need to track lowest DOM-interactive Trail for each Scene.
             null indicates none exists, and represents the far 'after'
@@ -87,6 +88,7 @@ General:
     RenderState - consider stack-based transforms
 
 Code:
+    Refactor Trail .compare usage to isBefore / isAfter
     Fast text bounds
     Logging:
         Desired remote logging!
@@ -213,6 +215,15 @@ Layers / caching:
         Showing where the fingers are with a display (for projectors)
 
 Accessibility / shadow DOM:
+    TabOrder object?
+    Questions:
+        Shape instead of rect to highlight - SVG in front
+        tabbable: true, tabbable: false, + tabindex
+        TabOrder for scene, or more globally (multiple scene support).
+            * Ideally we can have scenes handle it in an isolated way that doesn't affect other scenes
+    For 'accessible' elements, maybe 'interactive' for a tab order? 'tabbable'? 'readable'?
+        * magnifier
+        CSS styles ('hidden') - tab order?
     see http://www.whatwg.org/specs/web-apps/current-work/multipage/editing.html
     ARIA in general?
     see http://www.paciellogroup.com/blog/2011/12/html5-canvas-accessibility-discussions-2009-2011/
@@ -224,6 +235,8 @@ Accessibility / shadow DOM:
         spec: http://www.w3.org/TR/shadow-dom/
 
 Node:
+    Circular checking:
+        add Node.getConnectedNodes() - map
     * Arbitrary ImageData filters, or filters that match SVG
         Like the colorTransform matrix, applied to node.filters?
     Support for setting listeners in the mutator?

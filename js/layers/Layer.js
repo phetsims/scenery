@@ -103,6 +103,10 @@ define( function( require ) {
       // TODO: deprecate these, use boundary references instead? or boundary convenience functions
       this.startPointer = this.startBoundary.nextStartPointer;
       this.startPaintedTrail = this.startBoundary.nextPaintedTrail;
+      
+      // set immutability guarantees
+      this.startPointer.trail && this.startPointer.trail.setImmutable();
+      this.startPaintedTrail.setImmutable();
     },
     
     setEndBoundary: function( boundary ) {
@@ -112,6 +116,10 @@ define( function( require ) {
       // TODO: deprecate these, use boundary references instead? or boundary convenience functions
       this.endPointer = this.endBoundary.previousEndPointer;
       this.endPaintedTrail = this.endBoundary.previousPaintedTrail;
+      
+      // set immutability guarantees
+      this.endPointer.trail && this.endPointer.trail.setImmutable();
+      this.endPaintedTrail.setImmutable();
     },
     
     getStartPointer: function() {
@@ -175,9 +183,16 @@ define( function( require ) {
     
     // adds a trail (with the last node) to the layer
     addNodeFromTrail: function( trail ) {
+      if ( assert ) {
+        _.each( this._layerTrails, function( otherTrail ) {
+          assert( !trail.equals( otherTrail ), 'trail in addNodeFromTrail should not already exist in a layer' );
+        } );
+      }
+      
       // console.log( 'addNodeFromTrail layer: ' + this.getId() + ', trail: ' + trail.toString() );
       // TODO: sync this with DOMLayer's implementation
       this._layerTrails.push( trail );
+      trail.setImmutable(); // don't allow this Trail to be changed
     },
     
     // removes a trail (with the last node) to the layer
@@ -197,7 +212,8 @@ define( function( require ) {
     
     // returns next zIndex in place. allows layers to take up more than one single zIndex
     reindex: function( zIndex ) {
-      throw new Error( 'unimplemented layer reindex' );
+      this.startBoundary.reindex();
+      this.endBoundary.reindex();
     },
     
     pushClipShape: function( shape ) {

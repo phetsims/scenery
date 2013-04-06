@@ -19,6 +19,10 @@ define( function( require ) {
   scenery.TrailInterval = function( a, b, dataA, dataB ) {
     assert && assert( !a || !b || a.compare( b ) <= 0, 'TrailInterval parameters must not be out of order' );
     
+    // ensure that these trails will not be modified
+    a && a.setImmutable();
+    b && b.setImmutable();
+    
     this.a = a;
     this.b = b;
     
@@ -27,6 +31,18 @@ define( function( require ) {
     this.dataB = dataB;
   };
   var TrailInterval = scenery.TrailInterval;
+  
+  // assumes the intervals are disjoint, so we can just compare the starting (a) node
+  TrailInterval.compareDisjoint = function( x, y ) {
+    // if they are both falsy, they should be the same
+    if ( !x.a && !y.a ) { return 0; }
+    
+    // otherwise, since we are comparing the starts, null would signify 'before anything'
+    if ( !x.a || !y.a ) { return x.a ? 1 : -1; }
+    
+    // otherwise our standard comparison
+    return x.a.compare( y.a );
+  };
   
   TrailInterval.prototype = {
     constructor: TrailInterval,

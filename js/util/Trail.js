@@ -25,6 +25,13 @@ define( function( require ) {
   // require( 'SCENERY/util/TrailPointer' );
   
   scenery.Trail = function( nodes ) {
+    /*
+     * Controls the immutability of the trail.
+     * If set to true, add/remove descendant/ancestor should fail if assertions are enabled
+     * Use setImmutable() or setMutable() to signal a specific type of protection, so it cannot be changed later
+     */
+    this.immutable = undefined;
+    
     if ( nodes instanceof Trail ) {
       // copy constructor (takes advantage of already built index information)
       var otherTrail = nodes;
@@ -104,6 +111,8 @@ define( function( require ) {
     },
     
     addAncestor: function( node, index ) {
+      assert && assert( !this.immutable, 'cannot modify an immutable Trail with addAncestor' );
+      
       var oldRoot = this.nodes[0];
       
       this.nodes.unshift( node );
@@ -117,6 +126,8 @@ define( function( require ) {
     },
     
     removeAncestor: function() {
+      assert && assert( !this.immutable, 'cannot modify an immutable Trail with removeAncestor' );
+      
       this.nodes.shift();
       if ( this.indices.length ) {
         this.indices.shift();
@@ -128,6 +139,8 @@ define( function( require ) {
     },
     
     addDescendant: function( node, index ) {
+      assert && assert( !this.immutable, 'cannot modify an immutable Trail with addDescendant' );
+      
       var parent = this.lastNode();
       
       this.nodes.push( node );
@@ -141,6 +154,8 @@ define( function( require ) {
     },
     
     removeDescendant: function() {
+      assert && assert( !this.immutable, 'cannot modify an immutable Trail with removeDescendant' );
+      
       this.nodes.pop();
       if ( this.indices.length ) {
         this.indices.pop();
@@ -160,6 +175,24 @@ define( function( require ) {
           this.indices[i-1] = _.indexOf( this.nodes[i-1]._children, this.nodes[i] );
         }
       }
+    },
+    
+    setImmutable: function() {
+      assert && assert( this.immutable !== false, 'A trail cannot be made immutable after being flagged as mutable' );
+      
+      this.immutable = true;
+      
+      // TODO: consider setting mutators to null here instead of the function call check (for performance, and profile the differences)
+      
+      return this; // allow chaining
+    },
+    
+    setMutable: function() {
+      assert && assert( this.immutable !== true, 'A trail cannot be made mutable after being flagged as immutable' );
+      
+      this.immutable = false;
+      
+      return this; // allow chaining
     },
     
     areIndicesValid: function() {
@@ -316,8 +349,8 @@ define( function( require ) {
       assert && assert( !this.isEmpty(), 'cannot compare with an empty trail' );
       assert && assert( !other.isEmpty(), 'cannot compare with an empty trail' );
       assert && assert( this.nodes[0] === other.nodes[0], 'for Trail comparison, trails must have the same root node' );
-      assertExtra && assertExtra( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed' );
-      assertExtra && assertExtra( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed' );
+      assertExtra && assertExtra( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed on ' + this.toString() );
+      assertExtra && assertExtra( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed on ' + other.toString() );
       
       var minNodeIndex = Math.min( this.indices.length, other.indices.length );
       for ( var i = 0; i < minNodeIndex; i++ ) {
@@ -338,6 +371,14 @@ define( function( require ) {
       } else {
         return 0;
       }
+    },
+    
+    isBefore: function( other ) {
+      return this.compare( other ) === -1;
+    },
+    
+    isAfter: function( other ) {
+      return this.compare( other ) === 1;
     },
     
     localToGlobalPoint: function( point ) {
@@ -372,7 +413,7 @@ define( function( require ) {
   };
   
   // like eachTrailBetween, but only fires for painted trails
-  Trail.eachPaintedTrailbetween = function( a, b, callback, excludeEndTrails, scene ) {
+  Trail.eachPaintedTrailBetween = function( a, b, callback, excludeEndTrails, scene ) {
     Trail.eachTrailBetween( a, b, function( trail ) {
       if ( trail && trail.isPainted() ) {
         callback( trail );

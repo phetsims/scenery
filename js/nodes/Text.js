@@ -336,8 +336,8 @@ define( function( require ) {
       return 'new scenery.Text( \'' + this._text.replace( /'/g, '\\\'' ) + '\', {' + propLines + '} )';
     },
     
-    getPropString: function( spaces ) {
-      var result = Node.prototype.getPropString.call( this, spaces );
+    getPropString: function( spaces, includeChildren ) {
+      var result = Node.prototype.getPropString.call( this, spaces, includeChildren );
       result = this.appendFillablePropString( spaces, result );
       result = this.appendStrokablePropString( spaces, result );
       
@@ -354,7 +354,7 @@ define( function( require ) {
       }
       
       if ( this.font !== new scenery.Font().getFont() ) {
-        addProp( 'font', this.font );
+        addProp( 'font', this.font.replace( /'/g, '\\\'' ) );
       }
       
       if ( this._textAlign !== 'start' ) {
