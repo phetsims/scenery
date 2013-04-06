@@ -183,6 +183,12 @@ define( function( require ) {
     
     // adds a trail (with the last node) to the layer
     addNodeFromTrail: function( trail ) {
+      if ( assert ) {
+        _.each( this._layerTrails, function( otherTrail ) {
+          assert( !trail.equals( otherTrail ), 'trail in addNodeFromTrail should not already exist in a layer' );
+        } );
+      }
+      
       // console.log( 'addNodeFromTrail layer: ' + this.getId() + ', trail: ' + trail.toString() );
       // TODO: sync this with DOMLayer's implementation
       this._layerTrails.push( trail );
