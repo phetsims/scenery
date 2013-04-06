@@ -1114,7 +1114,7 @@ define( function( require ) {
     
     // verify layer splits
     new scenery.Trail( this ).eachTrailUnder( function( trail ) {
-      if ( trail.layerSplitBefore ) {
+      if ( trail.lastNode().layerSplitBefore ) {
         var beforeSplitTrail = trail.previousPainted();
         var afterSplitTrail = trail.lastNode().isPainted() ? trail : trail.nextPainted();
         assert && assert( !beforeSplitTrail || !afterSplitTrail || scene.layerLookup( beforeSplitTrail ) !== scene.layerLookup( afterSplitTrail ), 'layerSplitBefore layers need to be different' );
