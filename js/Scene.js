@@ -289,7 +289,17 @@ define( function( require ) {
     var stitchData = {
       // We need to map old layer IDs to new layers if we 'glue' two layers into one,
       // so that the layer references we put on the intervals can be mapped to current layers.
-      layerMap: {}
+      // layer ID => layer
+      layerMap: {},
+      
+      // all trails that are affected, in no particular order
+      affectedTrails: [],
+      
+      // trail ID => layer at the start of the stitching
+      oldLayerMap: {},
+      
+      // trail ID => layer at the end of stitching (needed to batch the layer notifications)
+      newLayerMap: {}
     };
     
     // default arguments for constructing layers
