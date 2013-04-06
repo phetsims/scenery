@@ -21,7 +21,6 @@ Priorities:
         Consider keeping Node IDs? May make it easier to visually compare the debug HTML in both places
 
 Bugs:
-    Layering issues in DAG
     Switching renderers in Devious Drag example on iPad causes other objects being dragged to be "dropped"
         Probably causes some sort of enter/exit event?
     Nexus 7 hidef scaling
