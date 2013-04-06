@@ -325,7 +325,7 @@ define( function( require ) {
       // trail ID => layer at the end of stitching (needed to batch the layer notifications)
       newLayerMap: {}, // will be set in stitching operations
       
-      layersToAdd: [],
+      newLayers: [],
       
       layersToRemove: []
     };
@@ -374,28 +374,50 @@ define( function( require ) {
     } );
     layerLogger && layerLogger( 'finished intervals in stitching' );
     
-    // cleanup after layers all of the intervals have been stitched
-    _.each( stitchData.layersToRemove, function( layer ) {
-      layerLogger && layerLogger( 'disposing layer: ' + layer.getId() );
-      scene.disposeLayer( layer );
+    // store a count to how many trails are currently in each layer. we'll increment/decrement these later, and every layer with a count of 0 (no trails) will be removed
+    var layerTrailCounts = {}; // layer ID => count
+    _.each( this.layers.concat( stitchData.newLayers ), function( layer ) {
+      layerTrailCounts[layer.getId()] = layer._layerTrails.length;
     } );
-    _.each( stitchData.layersToAdd, function( layer ) {
-      layerLogger && layerLogger( 'inserting layer: ' + layer.getId() );
-      scene.insertLayer( layer );
-    } );
-    this.reindexLayers();
     
     // before notifying layers of added/removed trails, make our internal state consistent, since the add/remove may trigger side effects
     var beforeTrailLayerMap = {}; // we dump any previous trail-layer mappings here, so we can get the correct removal down below when we do the add/remove
     _.each( stitchData.affectedTrails, function( trail ) {
       var trailId = trail.getUniqueId();
       
+      var originalLayer = scene.trailLayerMap[trailId];
+      var newLayer = stitchData.newLayerMap[trailId];
+      
       // store the old layer (if any)
-      beforeTrailLayerMap[trailId] = scene.trailLayerMap[trailId];
+      beforeTrailLayerMap[trailId] = originalLayer;
       
       // store our new layer so layerLookup will return the new consistent state
-      scene.trailLayerMap[trailId] = stitchData.newLayerMap[trailId];
+      scene.trailLayerMap[trailId] = newLayer;
+      
+      // increment/decrement counts
+      originalLayer && layerTrailCounts[originalLayer.getId()]--;
+      newLayer && layerTrailCounts[newLayer.getId()]++;
     } );
+    
+    // remove necessary layers. do this before adding layers, since insertLayer currently does not gracefully handle weird overlapping cases
+    _.each( this.layers.slice( 0 ), function( layer ) {
+      // layers with zero trails should be removed
+      if ( layerTrailCounts[layer.getId()] === 0 ) {
+        layerLogger && layerLogger( 'disposing layer: ' + layer.getId() );
+        scene.disposeLayer( layer );
+      }
+    } );
+    
+    // add new layers. we do this before the add/remove trails, since those can trigger layer side effects
+    _.each( stitchData.newLayers, function( layer ) {
+      assert && assert( layerTrailCounts[layer.getId()], 'ensure we are not adding empty layers' );
+      
+      layerLogger && layerLogger( 'inserting layer: ' + layer.getId() );
+      scene.insertLayer( layer );
+    } );
+    
+    // set the layers' elements' z-indices, and reindex their trails so they are in a consistent state
+    this.reindexLayers();
     
     // add/remove trails from their necessary layers
     var processedTrails = {}; // store references to trail IDs that were processed, since trails could be added to our affectedTrails multiple times
@@ -512,7 +534,7 @@ define( function( require ) {
     
     function addAndCreateLayer( startBoundary, endBoundary ) {
       currentLayer = scene.createLayer( currentLayerType, layerArgs, startBoundary, endBoundary );
-      stitchData.layersToAdd.push( currentLayer );
+      stitchData.newLayers.push( currentLayer );
     }
     
     function changeTrailLayer( trail, layer ) {
