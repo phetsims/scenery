@@ -406,6 +406,12 @@ define( function( require ) {
       newLayer && layerTrailCounts[newLayer.getId()]++;
     } );
     
+    // reindex all of the relevant layer trails
+    _.each( this.layers.concat( stitchData.newLayers ), function( layer ) {
+      layer.startBoundary.reindex();
+      layer.endBoundary.reindex(); // TODO: this repeats some work, verify in layer audit that we are sharing boundaries properly, then only reindex end boundary on last layer
+    } );
+    
     // remove necessary layers. do this before adding layers, since insertLayer currently does not gracefully handle weird overlapping cases
     _.each( this.layers.slice( 0 ), function( layer ) {
       // layers with zero trails should be removed
