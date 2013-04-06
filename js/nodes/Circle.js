@@ -19,7 +19,7 @@ define( function( require ) {
   var Shape = require( 'KITE/Shape' );
   
   scenery.Circle = function Circle( radius, options ) {
-    if ( typeof x === 'object' ) {
+    if ( typeof radius === 'object' ) {
       // allow new Circle( { circleRadius: ... } )
       // the mutators will call invalidateCircle() and properly set the shape
       options = radius;
