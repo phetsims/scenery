@@ -1267,6 +1267,10 @@ define( function( require ) {
     layerLogger = function( ob ) { console.log( ob ); };
   };
   
+  Scene.disableLayerLogging = function() {
+    layerLogger = null;
+  };
+  
   function applyCSSHacks( $main, options ) {
     // to use CSS3 transforms for performance, hide anything outside our bounds by default
     if ( !options.allowSceneOverflow ) {
