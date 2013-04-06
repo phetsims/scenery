@@ -467,6 +467,9 @@ define( function( require ) {
     var afterPointer = afterTrail ? new scenery.TrailPointer( afterTrail, true ) : new scenery.TrailPointer( new scenery.Trail( this ), false );
     
     layerLogger && layerLogger( 'stitching with boundaries:\n' + _.map( boundaries, function( boundary ) { return boundary.toString(); } ).join( '\n' ) );
+    layerLogger && layerLogger( '               layers: ' + ( beforeLayer ? beforeLayer.getId() : '-' ) + ' to ' + ( afterLayer ? afterLayer.getId() : '-' ) );
+    layerLogger && layerLogger( '               trails: ' + ( beforeTrail ? beforeTrail.toString() : '-' ) + ' to ' + ( afterTrail ? afterTrail.toString() : '-' ) );
+    layerLogger && layerLogger( '               match: ' + match );
     
     // maps trail unique ID => layer, only necessary when matching since we need to remove trails from their old layers
     var oldLayerMap = match ? this.mapTrailLayersBetween( beforeTrail, afterTrail ) : null;
@@ -487,7 +490,9 @@ define( function( require ) {
     // a list of layers that are most likely removed, not including the afterLayer for gluing
     for ( var i = beforeLayerIndex + 1; i < afterLayerIndex; i++ ) {
       // TODO: this seems like a failure point for multiple stitches
-      stitchData.layersToRemove.push( this.layers[i] );
+      var layer = this.layers[i];
+      layerLogger && layerLogger( '  preparing to remove layer ' + layer.getId() + ' since its index is exclusively between ' + beforeLayerIndex + ' and ' + afterLayerIndex );
+      addLayerForRemoval( layer );
     }
     
     function addPendingTrailsToLayer() {
@@ -500,7 +505,8 @@ define( function( require ) {
     
     function addLayerForRemoval( layer ) {
       if ( !_.contains( stitchData.layersToRemove, layer ) ) {
-        stitchData.layersToRemove.push( afterLayer );
+        layerLogger && layerLogger( '  marking layer ' + layer.getId() + ' for removal' );
+        stitchData.layersToRemove.push( layer );
       }
     }
     
