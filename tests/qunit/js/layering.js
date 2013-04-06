@@ -572,183 +572,59 @@
   test( 'unknown break #4', function() {
     var scene = new scenery.Scene( $( '#main' ) );
     
-    var node3 = new scenery.Node( {} );
-    var node4 = new scenery.Node( {} );
-    var node5 = new scenery.Node( {} );
-    var node6 = new scenery.Node( {} );
-    var node7 = new scenery.Node( {} );
-    var path8 = new scenery.Path( {} );
-    var path9 = new scenery.Path( {} );
-    var path10 = new scenery.Path( {} );
-    var path11 = new scenery.Path( {} );
-    var path12 = new scenery.Path( {} );
-    var path13 = new scenery.Path( {} );
-    var path14 = new scenery.Path( {} );
-    var path15 = new scenery.Path( {} );
-    var path16 = new scenery.Path( {} );
-    var path17 = new scenery.Path( {} );
-    node5.insertChild( 0, path17 );
-    path12.insertChild( 0, path9 );
-    path14.insertChild( 0, scene );
-    path8.insertChild( 0, path14 );
-    scene.insertChild( 0, node6 );
-    path8.renderer = null;
-    path14.renderer = null;
-    node7.renderer = null;
-    node5.removeChild( path17 );
-    path9.renderer = null;
-    path15.insertChild( 0, path11 );
-    path13.renderer = null;
-    node6.renderer = 'canvas';
-    path16.insertChild( 0, path10 );
-    path9.renderer = 'canvas';
-    path14.renderer = null;
-    node7.renderer = null;
-    path17.insertChild( 0, path10 );
-    path9.renderer = null;
-    path8.renderer = null;
-    path10.renderer = 'svg';
-    node6.renderer = 'canvas';
-    scene.removeChild( node6 );
-    path14.removeChild( scene );
-    node4.insertChild( 0, path9 );
-    path13.renderer = null;
-    path8.removeChild( path14 );
-    path15.removeChild( path11 );
-    path16.removeChild( path10 );
-    path13.renderer = null;
-    path15.insertChild( 0, path12 );
-    path10.renderer = null;
-    path14.insertChild( 0, path10 );
-    path10.renderer = null;
-    path13.insertChild( 0, node5 );
-    path17.renderer = 'svg';
-    path13.renderer = 'canvas';
-    path12.insertChild( 1, path14 );
-    path8.renderer = null;
-    path16.insertChild( 0, node3 );
-    path14.removeChild( path10 );
-    path9.renderer = null;
-    path17.removeChild( path10 );
-    path14.insertChild( 0, node6 );
-    node4.removeChild( path9 );
-    path9.renderer = null;
-    path12.insertChild( 1, path11 );
-    path10.insertChild( 0, path17 );
-    node4.renderer = 'canvas';
-    path8.insertChild( 0, path14 );
-    path10.insertChild( 0, path13 );
-    path8.renderer = 'canvas';
-    path8.renderer = null;
-    node5.insertChild( 0, path8 );
-    path9.insertChild( 0, node5 );
-    path17.insertChild( 0, path13 );
-    path16.removeChild( node3 );
-    path11.renderer = null;
-    node6.renderer = null;
-    path11.insertChild( 0, path16 );
-    path10.insertChild( 0, path9 );
-    path9.renderer = null;
-    path11.removeChild( path16 );
-    path8.renderer = null;
-    scene.insertChild( 0, path14 );
-    path8.removeChild( path14 );
-    path15.insertChild( 0, path10 );
-    node5.renderer = null;
-    scene.insertChild( 1, path13 );
-    path10.renderer = 'svg';
-    path10.removeChild( path13 );
-    path16.renderer = 'svg';
-    node7.renderer = 'canvas';
-    path10.removeChild( path9 );
-    path14.removeChild( node6 );
-    path9.renderer = 'canvas';
-    path14.insertChild( 0, path10 );
-    path14.renderer = null;
-    path16.renderer = 'svg';
-    node3.insertChild( 0, node6 );
-    path15.renderer = 'canvas';
-    node3.renderer = 'canvas';
-    path14.removeChild( path10 );
-    path13.renderer = 'canvas';
-    path15.removeChild( path10 );
-    path12.removeChild( path14 );
-    path13.renderer = null;
-    node3.removeChild( node6 );
-    node6.renderer = 'svg';
-    path17.renderer = 'svg';
-    path17.insertChild( 0, path14 );
-    scene.insertChild( 2, path11 );
-    node6.renderer = 'svg';
-    path10.renderer = 'svg';
-    path15.renderer = null;
-    path15.insertChild( 1, node7 );
-    path9.removeChild( node5 );
-    node3.insertChild( 0, scene );
-    node6.insertChild( 0, node4 );
-    path13.removeChild( node5 );
-    path15.renderer = 'svg';
-    path10.removeChild( path17 );
-    path9.insertChild( 0, node4 );
-    node6.removeChild( node4 );
-    path17.removeChild( path13 );
-    scene.renderer = null;
-    path12.renderer = 'canvas';
-    node7.renderer = null;
-    path12.insertChild( 1, path10 );
-    node3.removeChild( scene );
-    path17.removeChild( path14 );
-    path16.renderer = null;
-    node4.renderer = null;
-    node4.insertChild( 0, node5 );
-    scene.removeChild( path14 );
-    node3.renderer = 'canvas';
-    path9.insertChild( 1, path14 );
-    scene.insertChild( 1, path8 );
-    path15.removeChild( path12 );
-    node6.insertChild( 0, path8 );
-    path12.renderer = 'canvas';
-    path8.renderer = 'canvas';
-    scene.insertChild( 0, node6 );
-    path16.renderer = null;
-    node4.renderer = 'canvas';
-    node7.insertChild( 0, path10 );
-    path16.insertChild( 0, node5 );
-    path9.renderer = null;
-    scene.removeChild( path11 );
-    node3.renderer = 'svg';
-    path12.removeChild( path10 );
-    node4.removeChild( node5 );
-    node6.insertChild( 0, node7 );
-    node4.insertChild( 0, node3 );
-    node7.renderer = 'svg';
-    node7.renderer = null;
-    node5.insertChild( 0, path14 );
-    path12.insertChild( 2, node4 );
-    node4.removeChild( node3 );
-    path12.renderer = 'svg';
-    path9.insertChild( 1, node7 );
-    path15.renderer = null;
-    node5.removeChild( path8 );
-    node3.insertChild( 0, path15 );
-    node7.removeChild( path10 );
-    path14.insertChild( 0, path8 );
-    path16.insertChild( 1, path12 );
-    path11.insertChild( 0, node7 );
-    scene.removeChild( path13 );
-    node5.removeChild( path14 );
-    scene.renderer = 'svg';
-    path11.renderer = null;
-    path8.renderer = null;
-    node4.insertChild( 0, path17 );
-    path12.removeChild( path11 );
-    node5.insertChild( 0, path10 );
-    node3.renderer = null;
-    node7.insertChild( 0, path17 );
-    path8.insertChild( 0, node3 );
-    path10.insertChild( 0, path14 );
-    path10.insertChild( 0, path17 );
-    path15.renderer = 'canvas';
+    var path2 = new scenery.Path( {
+      renderer: 'svg'
+    } )
+    var node3 = new scenery.Node( {} )
+    node3.addChild( path2 );
+    var path4 = new scenery.Path( {} )
+    path4.addChild( node3 );
+    var node5 = new scenery.Node( {} )
+    node5.addChild( path4 );
+    var path6 = new scenery.Path( {} )
+    path6.addChild( node5 );
+    var node7 = new scenery.Node( {
+      renderer: 'svg'
+    } )
+    node7.addChild( node3 );
+    node7.addChild( path6 );
+    scene.mutate( {
+      renderer: 'svg'
+    } )
+    scene.addChild( node7 );
+    scene.addChild( path6 );
+    var path8 = new scenery.Path( {} )
+    path8.addChild( path6 );
+    var path9 = new scenery.Path( {
+      renderer: 'svg'
+    } )
+    path9.addChild( path2 );
+    path9.addChild( path8 );
+    var node10 = new scenery.Node( {} )
+    node10.addChild( path9 );
+    var node11 = new scenery.Node( {
+      renderer: 'canvas'
+    } )
+    node11.addChild( path2 );
+    var path12 = new scenery.Path( {} )
+    path12.addChild( node11 );
+    path12.addChild( node3 );
+    path12.addChild( path8 );
+    var path13 = new scenery.Path( {
+      renderer: 'svg'
+    } )
+    path13.addChild( path12 );
+    path13.addChild( node11 );
+    var path14 = new scenery.Path( {
+      renderer: 'canvas'
+    } )
+    path14.addChild( node10 );
+    path14.addChild( path13 );
+    var path15 = new scenery.Path( {} )
+    path15.addChild( node3 );
+    
+    // causes the break
+    path4.renderer = 'canvas';
     
     expect( 0 );
   } );
