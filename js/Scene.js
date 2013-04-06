@@ -1088,6 +1088,7 @@ define( function( require ) {
     } );
     
     for ( var i = 1; i < this.layers.length; i++ ) {
+      assert && assert( this.layers[i-1].endBoundary === this.layers[i].startBoundary, 'proper sharing of boundaries' );
       assert && assert( this.layers[i-1].endPaintedTrail.compare( this.layers[i].startPaintedTrail ) === -1, 'proper ordering of layer trail boundaries in scene.layers array' );
     }
     
