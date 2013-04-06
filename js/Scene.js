@@ -1078,14 +1078,11 @@ define( function( require ) {
     assert && assert( eachTrailUnderPaintedCount === trailLayerCount, 'cross-referencing self trail counts: trailLayerCount, ' + eachTrailUnderPaintedCount + ' vs ' + trailLayerCount );
     
     _.each( this.layers, function( layer ) {
-      var startTrail = layer.startPaintedTrail;
-      var endTrail = layer.endPaintedTrail;
-      
-      assert && assert( startTrail.compare( endTrail ) <= 0, 'proper ordering on layer trails' );
+      assert && assert( layer.startPaintedTrail.compare( layer.endPaintedTrail ) <= 0, 'proper ordering on layer trails' );
     } );
     
     for ( var i = 1; i < this.layers.length; i++ ) {
-      assert && assert( this.layers[0].startPaintedTrail.compare( this.layers[1].startPaintedTrail ) === -1, 'proper ordering of layers in scene.layers array' );
+      assert && assert( this.layers[i-1].endPaintedTrail.compare( this.layers[i].startPaintedTrail ) === -1, 'proper ordering of layer trail boundaries in scene.layers array' );
     }
     
     _.each( this.layers, function( layer ) {
