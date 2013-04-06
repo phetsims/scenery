@@ -295,6 +295,10 @@ define( function( require ) {
     }
   };
   
+  Scene.prototype.getBoundaries = function() {
+    return [ this.layers[0].startBoundary ].concat( _.pluck( this.layers, 'endBoundary' ) );
+  };
+  
   Scene.prototype.calculateBoundaries = function( beforeLayerType, beforeTrail, afterTrail ) {
     layerLogger && layerLogger( 'build between ' + ( beforeTrail ? beforeTrail.toString() : beforeTrail ) + ',' + ( afterTrail ? afterTrail.toString() : afterTrail ) + ' with beforeType: ' + ( beforeLayerType ? beforeLayerType.name : null ) );
     var builder = new scenery.LayerBuilder( this, beforeLayerType, beforeTrail, afterTrail );
