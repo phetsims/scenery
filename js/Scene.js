@@ -325,9 +325,8 @@ define( function( require ) {
       // trail ID => layer at the end of stitching (needed to batch the layer notifications)
       newLayerMap: {}, // will be set in stitching operations
       
-      newLayers: [],
-      
-      layersToRemove: []
+      // fresh layers that should be added into the scene
+      newLayers: []
     };
     
     // default arguments for constructing layers
@@ -509,27 +508,12 @@ define( function( require ) {
     var currentStartBoundary = null;
     var matchingLayer = null; // set whenever a trail has a matching layer, cleared after boundary
     
-    // a list of layers that are most likely removed, not including the afterLayer for gluing
-    for ( var i = beforeLayerIndex + 1; i < afterLayerIndex; i++ ) {
-      // TODO: this seems like a failure point for multiple stitches
-      var layer = this.layers[i];
-      layerLogger && layerLogger( '  preparing to remove layer ' + layer.getId() + ' since its index is exclusively between ' + beforeLayerIndex + ' and ' + afterLayerIndex );
-      addLayerForRemoval( layer );
-    }
-    
     function addPendingTrailsToLayer() {
       // add the necessary nodes to the layer
       _.each( trailsToAddToLayer, function( trail ) {
         changeTrailLayer( trail, currentLayer );
       } );
       trailsToAddToLayer = [];
-    }
-    
-    function addLayerForRemoval( layer ) {
-      if ( !_.contains( stitchData.layersToRemove, layer ) ) {
-        layerLogger && layerLogger( '  marking layer ' + layer.getId() + ' for removal' );
-        stitchData.layersToRemove.push( layer );
-      }
     }
     
     function addAndCreateLayer( startBoundary, endBoundary ) {
@@ -622,7 +606,6 @@ define( function( require ) {
         layerLogger && layerLogger( 'gluing layer' );
         layerLogger && layerLogger( 'endBoundary: ' + afterLayer.endBoundary.toString() );
         beforeLayer.setEndBoundary( afterLayer.endBoundary );
-        addLayerForRemoval( afterLayer );
         currentLayer = beforeLayer;
         addPendingTrailsToLayer();
         
