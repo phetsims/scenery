@@ -299,7 +299,11 @@ define( function( require ) {
       originalLayerMap: {},
       
       // trail ID => layer at the end of stitching (needed to batch the layer notifications)
-      newLayerMap: {} // will be set in stitching operations
+      newLayerMap: {}, // will be set in stitching operations
+      
+      layersToAdd: [],
+      
+      layersToRemove: []
     };
     
     // default arguments for constructing layers
@@ -360,6 +364,16 @@ define( function( require ) {
     } );
     this.layerChangeIntervals = [];
     
+    // cleanup after all of the intervals have been stitched
+    _.each( stitchData.layersToRemove, function( layer ) {
+      layerLogger && layerLogger( 'disposing layer: ' + layer.getId() );
+      scene.disposeLayer( layer );
+    } );
+    _.each( stitchData.layersToAdd, function( layer ) {
+      layerLogger && layerLogger( 'inserting layer: ' + layer.getId() );
+      scene.insertLayer( layer );
+    } );
+    
     this.reindexLayers();
     
     // TODO: add this back in, but with an appropriate assertion level
@@ -418,13 +432,10 @@ define( function( require ) {
     var currentStartBoundary = null;
     var matchingLayer = null; // set whenever a trail has a matching layer, cleared after boundary
     
-    var layersToAdd = [];
-    
     // a list of layers that are most likely removed, not including the afterLayer for gluing
-    var layersToRemove = [];
     for ( var i = beforeLayerIndex + 1; i < afterLayerIndex; i++ ) {
       // TODO: this seems like a failure point for multiple stitches
-      layersToRemove.push( this.layers[i] );
+      stitchData.layersToRemove.push( this.layers[i] );
     }
     
     function addPendingTrailsToLayer() {
@@ -446,14 +457,14 @@ define( function( require ) {
     }
     
     function addLayerForRemoval( layer ) {
-      if ( !_.contains( layersToRemove, layer ) ) {
-        layersToRemove.push( afterLayer );
+      if ( !_.contains( stitchData.layersToRemove, layer ) ) {
+        stitchData.layersToRemove.push( afterLayer );
       }
     }
     
     function addAndCreateLayer( startBoundary, endBoundary ) {
       currentLayer = scene.createLayer( currentLayerType, layerArgs, startBoundary, endBoundary );
-      layersToAdd.push( currentLayer );
+      stitchData.layersToAdd.push( currentLayer );
     }
     
     function step( trail, isEnd ) {
@@ -573,15 +584,6 @@ define( function( require ) {
         
         addPendingTrailsToLayer();
       }
-      
-      _.each( layersToRemove, function( layer ) {
-        layerLogger && layerLogger( 'disposing layer: ' + layer.getId() );
-        scene.disposeLayer( layer );
-      } );
-      _.each( layersToAdd, function( layer ) {
-        layerLogger && layerLogger( 'inserting layer: ' + layer.getId() );
-        scene.insertLayer( layer );
-      } );
     }
     
     // iterate from beforeTrail up to BEFORE the afterTrail. does not include afterTrail
