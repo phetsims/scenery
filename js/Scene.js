@@ -76,10 +76,11 @@ define( function( require ) {
     var scene = this;
     window.debugScene = scene;
     
-    // main layers in a scene
-    this.layers = [];
-    
-    this.layerChangeIntervals = []; // array of {TrailInterval}s indicating what parts need to be stitched together
+    // layering data
+    this.layers = [];               // main layers in a scene
+    this.trailLayerMap = {};        // maps every single painted trail to its current layer. helpful for fast lookup, and crucial during layer stitching operations
+    this.oldTrailLayerMap = {};     // stores references to old layers for removed trails which may be needed for stitching. cleared after each stitching
+    this.layerChangeIntervals = []; // array of {TrailInterval}s indicating what parts need to be stitched together. cleared after each stitching
     
     this.lastCursor = null;
     this.defaultCursor = $main.css( 'cursor' );
@@ -118,9 +119,14 @@ define( function( require ) {
         // waiting until after the removal takes place would require more complicated code to properly handle the trails
         affectedTrail.eachTrailUnder( function( trail ) {
           if ( trail.isPainted() ) {
+            var trailId = trail.getUniqueId();
             var layer = scene.layerLookup( trail );
-            layerLogger && layerLogger( '  removal of trail ' + trail.toString() + ' from layer ' + layer.getId() );
-            layer.removeNodeFromTrail( trail );
+            
+            // store the trail's layer reference in the old map that will be cleared after stitching. we need a reference to properly handle situations
+            scene.oldTrailLayerMap[trailId] = layer;
+            
+            // and remove the trail now. TODO: can we do this removal later, since all oldTrailLayerMap nodes should essentially be removed?
+            scene.removeTrailFromLayer( trail, layer );
           }
         } );
       },
@@ -180,6 +186,20 @@ define( function( require ) {
   Scene.prototype.renderScene = function() {
     // TODO: for now, go with the same path. possibly add options later
     this.updateScene();
+  };
+  
+  Scene.prototype.addTrailToLayer = function( trail, layer ) {
+    layerLogger && layerLogger( '  addition of trail ' + trail.toString() + ' from layer ' + layer.getId() );
+    this.trailLayerMap[trail.getUniqueId()] = layer;
+    layer.addNodeFromTrail( trail );
+  };
+  
+  Scene.prototype.removeTrailFromLayer = function( trail, layer ) {
+    layerLogger && layerLogger( '  removal of trail ' + trail.toString() + ' from layer ' + layer.getId() );
+    
+    // we don't want to leak memory, so since we don't know if this trail will continue to exist, ditch the reference
+    delete this.trailLayerMap[trail.getUniqueId()];
+    layer.removeNodeFromTrail( trail );
   };
   
   Scene.prototype.markInterval = function( affectedTrail ) {
@@ -295,9 +315,6 @@ define( function( require ) {
       // all trails that are affected, in no particular order
       affectedTrails: [],
       
-      // trail ID => layer at the start of the stitching
-      originalLayerMap: {},
-      
       // trail ID => layer at the end of stitching (needed to batch the layer notifications)
       newLayerMap: {}, // will be set in stitching operations
       
@@ -316,20 +333,6 @@ define( function( require ) {
     _.each( this.layerChangeIntervals, function( interval ) {
       // reindex intervals, since their endpoints indices may need to be updated
       interval.reindex();
-      
-      scenery.Trail.eachPaintedTrailBetween( interval.a, interval.b, function( trail ) {
-        var trailId = trail.getUniqueId();
-        stitchData.affectedTrails.push( trail.copy() );
-        
-        // if matching, we should determine the original layers, so we can remove trails from those if necessary
-        if ( match ) {
-          // TODO: this is inefficient. we only need to lookup the first one.
-          // TODO: for the consecutive ones, check layer boundaries and increment when necessary!
-          var layer = scene.layerLookup( trail );
-          
-          stitchData.originalLayerMap[trailId] = layer;
-        }
-      }, false, scene );
     } );
     
     /*
@@ -362,9 +365,9 @@ define( function( require ) {
       
       scene.stitchInterval( stitchData, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match );
     } );
-    this.layerChangeIntervals = [];
+    layerLogger && layerLogger( 'finished intervals in stitching' );
     
-    // cleanup after all of the intervals have been stitched
+    // cleanup after layers all of the intervals have been stitched
     _.each( stitchData.layersToRemove, function( layer ) {
       layerLogger && layerLogger( 'disposing layer: ' + layer.getId() );
       scene.disposeLayer( layer );
@@ -373,8 +376,36 @@ define( function( require ) {
       layerLogger && layerLogger( 'inserting layer: ' + layer.getId() );
       scene.insertLayer( layer );
     } );
-    
     this.reindexLayers();
+    
+    // add/remove trails from their necessary layers
+    var processedTrails = {}; // store references to trail IDs that were processed, since trails could be added to our affectedTrails multiple times
+    _.each( stitchData.affectedTrails, function( trail ) {
+      var trailId = trail.getUniqueId();
+      
+      if ( !processedTrails[trailId] ) {
+        processedTrails[trailId] = true; // mark as processed, so we don't process another equivalent trail that was added later
+        
+        // sanity check, since these will be stored by the layers
+        trail.setImmutable();
+        
+        var currentLayer = scene.trailLayerMap[trailId];
+        var newLayer = stitchData.newLayerMap[trailId];
+        
+        if ( currentLayer !== newLayer ) {
+          if ( currentLayer ) {
+            scene.removeTrailFromLayer( trail, currentLayer );
+          }
+          
+          // unless we change markForRemoval's listener, we should always have a newLayer specified
+          scene.addTrailToLayer( trail, newLayer );
+        }
+      }
+    } );
+    
+    // clean up state that was set leading up to the stitching
+    this.oldTrailLayerMap = {};
+    this.layerChangeIntervals = [];
     
     // TODO: add this back in, but with an appropriate assertion level
     assert && assert( this.layerAudit() );
@@ -441,17 +472,7 @@ define( function( require ) {
     function addPendingTrailsToLayer() {
       // add the necessary nodes to the layer
       _.each( trailsToAddToLayer, function( trail ) {
-        if ( match ) {
-          // only remove/add if the layer has actually changed. if we are preserving the layer, don't do anything
-          var oldLayer = oldLayerMap[trail.getUniqueId()];
-          if ( oldLayer !== currentLayer ) {
-            layerLogger && layerLogger( '  moving trail ' + trail.toString() + ' from layer ' + oldLayer.getId() + ' to ' + currentLayer.getId() );
-            oldLayer.removeNodeFromTrail( trail );
-            currentLayer.addNodeFromTrail( trail );
-          }
-        } else {
-          currentLayer.addNodeFromTrail( trail );
-        }
+        changeTrailLayer( trail, currentLayer );
       } );
       trailsToAddToLayer = [];
     }
@@ -465,6 +486,12 @@ define( function( require ) {
     function addAndCreateLayer( startBoundary, endBoundary ) {
       currentLayer = scene.createLayer( currentLayerType, layerArgs, startBoundary, endBoundary );
       stitchData.layersToAdd.push( currentLayer );
+    }
+    
+    function changeTrailLayer( trail, layer ) {
+      layerLogger && layerLogger( '  moving trail ' + trail.toString() + ' to layer ' + layer.getId() );
+      stitchData.affectedTrails.push( trail ); // don't check for duplicates now, we get better performance by performing uniqueness tests afterwards
+      stitchData.newLayerMap[trail.getUniqueId()] = layer;
     }
     
     function step( trail, isEnd ) {
@@ -519,7 +546,7 @@ define( function( require ) {
       }
       if ( match && !isEnd ) { // TODO: verify this condition with test cases
         // if the node's old layer is compatible
-        var layer = oldLayerMap[trail.getUniqueId()];
+        var layer = scene.layerLookup( trail ); // lookup should return the old layer from the system
         if ( layer.type === currentLayerType && !forceNewLayers ) {
           // TODO: we need to handle compatibility with layer splits. using forceNewLayers flag to temporarily disable
           matchingLayer = layer;
@@ -554,8 +581,7 @@ define( function( require ) {
         // defensive copy needed, since this will be modified at the same time
         _.each( afterLayer._layerTrails.slice( 0 ), function( trail ) {
           trail.reindex();
-          afterLayer.removeNodeFromTrail( trail );
-          beforeLayer.addNodeFromTrail( trail );
+          changeTrailLayer( trail, beforeLayer );
         } );
         
         stitchData.layerMap[afterLayer.getId()] = beforeLayer;
@@ -570,8 +596,7 @@ define( function( require ) {
         scenery.Trail.eachPaintedTrailBetween( afterTrail, currentLayer.endPaintedTrail, function( subtrail ) {
           subtrail = subtrail.copy();
           subtrail.setImmutable(); // we are storing references to this trail
-          afterLayer.removeNodeFromTrail( subtrail );
-          currentLayer.addNodeFromTrail( subtrail );
+          changeTrailLayer( subtrail, currentLayer );
         }, false, scene );
       } else if ( !beforeLayer && !afterLayer && boundaries.length === 1 && !boundaries[0].hasNext() && !boundaries[0].hasPrevious() ) {
         // TODO: why are we generating a boundary here?!?
@@ -618,46 +643,12 @@ define( function( require ) {
   
   Scene.prototype.rebuildLayers = function() {
     layerLogger && layerLogger( 'rebuildLayers' );
-    // remove all of our tracked layers from the container, so we can fill it with fresh layers
-    this.disposeLayers();
     
-    this.boundaries = this.calculateBoundaries( null, null, null );
+    // mark the entire scene 
+    this.markInterval( new scenery.Trail( this ) );
     
-    var layerArgs = {
-      $main: this.$main,
-      scene: this,
-      baseNode: this
-    };
-    
-    this.layers = [];
-    
-    layerLogger && layerLogger( this.boundaries );
-    
-    for ( var i = 1; i < this.boundaries.length; i++ ) {
-      var startBoundary = this.boundaries[i-1];
-      var endBoundary = this.boundaries[i];
-      
-      assert && assert( startBoundary.nextLayerType === endBoundary.previousLayerType );
-      var layerType = startBoundary.nextLayerType;
-      
-      // LayerType is responsible for applying its own arguments in createLayer()
-      var layer = layerType.createLayer( _.extend( {
-        startBoundary: startBoundary,
-        endBoundary: endBoundary
-      }, layerArgs ) );
-      
-      // record the type on the layer
-      layer.type = layerType;
-      
-      // add the initial nodes to the layer
-      layer.startPointer.eachTrailBetween( layer.endPointer, function( trail ) {
-        if ( trail.isPainted() ) {
-          layer.addNodeFromTrail( trail.copy() );
-        }
-      } );
-      
-      this.layers.push( layer );
-    }
+    // then stitch with match=true
+    this.stitch( true );
   };
   
   // after layer changes, the layers should have their zIndex updated
@@ -691,7 +682,6 @@ define( function( require ) {
   
   // what layer does this trail's terminal node render in? returns null if the node is not contained in a layer
   Scene.prototype.layerLookup = function( trail ) {
-    // TODO: add tree form for optimization! this is slower than necessary, it shouldn't be O(n)!
     assert && assert( !( trail.isEmpty() || trail.nodes[0] !== this ), 'layerLookup root matches' );
     assert && assert( trail.isPainted(), 'layerLookup only supports nodes with isPainted(), as this guarantees an unambiguous answer' );
     
@@ -699,23 +689,20 @@ define( function( require ) {
       return null; // node not contained in a layer
     }
     
-    for ( var i = 0; i < this.layers.length; i++ ) {
-      var layer = this.layers[i];
+    var trailId = trail.getUniqueId();
+    var layer = this.trailLayerMap[trailId];
+    
+    // if the trail isn't in the main map, it was probably removed (we're in the stitching process, it's in the temporary map), or it's added and we have no reference
+    if ( !layer ) {
+      layer = this.oldTrailLayerMap[trailId];
       
-      // trails may be stale, so we need to update their indices
-      if ( layer.startPaintedTrail ) { layer.startPaintedTrail.reindex(); }
-      if ( layer.endPaintedTrail ) { layer.endPaintedTrail.reindex(); }
-      
-      if ( !layer.endPaintedTrail || trail.compare( layer.endPaintedTrail ) <= 0 ) {
-        if ( !layer.startPaintedTrail || trail.compare( layer.startPaintedTrail ) >= 0 ) {
-          return layer;
-        } else {
-          return null; // node is not contained in a layer (it is before any existing layer)
-        }
+      // it's not referenced, so return null
+      if ( !layer ) {
+        layer = null;
       }
     }
     
-    return null; // node not contained in a layer (it is after any existing layer)
+    return layer;
   };
   
   // all layers whose start or end points lie inclusively in the range from the trail's before and after
@@ -1024,6 +1011,8 @@ define( function( require ) {
     new scenery.Trail( this ).eachTrailUnder( function( trail ) {
       if ( trail.isPainted() ) {
         eachTrailUnderPaintedCount++;
+        
+        assert && assert( scene.trailLayerMap[trail.getUniqueId()], 'scene must map every painted trail to a layer' );
       }
     } );
     
@@ -1046,8 +1035,13 @@ define( function( require ) {
       layerIterationPaintedCount += selfCount;
     } );
     
+    // we have a map that tracks every painted trail, so this count should match the above totals
+    var trailLayerCount = 0;
+    _.each( this.trailLayerMap, function() { trailLayerCount++; } );
+    
     assert && assert( eachTrailUnderPaintedCount === layerPaintedCount, 'cross-referencing self trail counts: layerPaintedCount, ' + eachTrailUnderPaintedCount + ' vs ' + layerPaintedCount );
     assert && assert( eachTrailUnderPaintedCount === layerIterationPaintedCount, 'cross-referencing self trail counts: layerIterationPaintedCount, ' + eachTrailUnderPaintedCount + ' vs ' + layerIterationPaintedCount );
+    assert && assert( eachTrailUnderPaintedCount === trailLayerCount, 'cross-referencing self trail counts: trailLayerCount, ' + eachTrailUnderPaintedCount + ' vs ' + trailLayerCount );
     
     _.each( this.layers, function( layer ) {
       var startTrail = layer.startPaintedTrail;
