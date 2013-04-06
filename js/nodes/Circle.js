@@ -40,7 +40,7 @@ define( function( require ) {
   inherit( Circle, Path, {
     invalidateCircle: function() {
       // setShape should invalidate the path and ensure a redraw
-      this.setShape( Shape.circle( this._circleX, this._circleY, this._circleRadius ) );
+      this.setShape( Shape.circle( 0, 0, this._circleRadius ) );
     },
     
     // create a circle instead of a path, hopefully it is faster in implementations
@@ -82,12 +82,10 @@ define( function( require ) {
     } );
   }
   
-  addCircleProp( 'X' );
-  addCircleProp( 'Y' );
   addCircleProp( 'Radius' );
   
   // not adding mutators for now
-  Circle.prototype._mutatorKeys = [ 'circleX', 'circleY', 'circleRadius' ].concat( Path.prototype._mutatorKeys );
+  Circle.prototype._mutatorKeys = [ 'circleRadius' ].concat( Path.prototype._mutatorKeys );
   
   return Circle;
 } );
