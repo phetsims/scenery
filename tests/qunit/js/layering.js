@@ -628,4 +628,63 @@
     
     expect( 0 );
   } );
+  
+  test( 'unknown break #5', function() {
+    var scene = new scenery.Scene( $( '#main' ) );
+    
+    var path10 = new scenery.Path( {
+      renderer: 'svg'
+    } )
+    var path14 = new scenery.Path( {} )
+    var path12 = new scenery.Path( {} )
+    path12.addChild( path10 );
+    path12.addChild( path14 );
+    var node4 = new scenery.Node( {
+      renderer: 'canvas'
+    } )
+    node4.addChild( path12 );
+    var path11 = new scenery.Path( {
+      renderer: 'svg'
+    } )
+    path11.addChild( path10 );
+    var path16 = new scenery.Path( {} )
+    path16.addChild( path11 );
+    var node5 = new scenery.Node( {} )
+    var node7 = new scenery.Node( {
+      renderer: 'svg'
+    } )
+    node7.addChild( node4 );
+    node7.addChild( path16 );
+    node7.addChild( path10 );
+    node7.addChild( node5 );
+    var path15 = new scenery.Path( {} )
+    scene.mutate( {} )
+    scene.addChild( node7 );
+    scene.addChild( path15 );
+    scene.addChild( node5 );
+    var node6 = new scenery.Node( {} )
+    node6.addChild( path15 );
+    node6.addChild( node7 );
+    var path17 = new scenery.Path( {} )
+    path17.addChild( node6 );
+    var path13 = new scenery.Path( {} )
+    path13.addChild( path10 );
+    path13.addChild( path11 );
+    path13.addChild( path17 );
+    var path8 = new scenery.Path( {} )
+    path8.addChild( path12 );
+    path8.addChild( path11 );
+    var node3 = new scenery.Node( {
+      renderer: 'canvas'
+    } )
+    node3.addChild( node4 );
+    var path9 = new scenery.Path( {} )
+    path9.addChild( path11 );
+    path9.addChild( path10 );
+    
+    // breaks
+    node7.renderer = null;
+    
+    expect( 0 );
+  } );
 })();
