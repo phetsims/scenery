@@ -194,6 +194,13 @@ define( function( require ) {
     layer.addNodeFromTrail( trail );
   };
   
+  Scene.prototype.moveTrailFromLayerToLayer = function( trail, oldLayer, newLayer ) {
+    layerLogger && layerLogger( '  moving trail ' + trail.toString() + ' from layer ' + oldLayer.getId() + ' to layer ' + newLayer.getId() );
+    this.trailLayerMap[trail.getUniqueId()] = newLayer;
+    oldLayer.removeNodeFromTrail( trail );
+    newLayer.addNodeFromTrail( trail );
+  };
+  
   Scene.prototype.removeTrailFromLayer = function( trail, layer ) {
     layerLogger && layerLogger( '  removal of trail ' + trail.toString() + ' from layer ' + layer.getId() );
     
@@ -378,6 +385,18 @@ define( function( require ) {
     } );
     this.reindexLayers();
     
+    // before notifying layers of added/removed trails, make our internal state consistent, since the add/remove may trigger side effects
+    var beforeTrailLayerMap = {}; // we dump any previous trail-layer mappings here, so we can get the correct removal down below when we do the add/remove
+    _.each( stitchData.affectedTrails, function( trail ) {
+      var trailId = trail.getUniqueId();
+      
+      // store the old layer (if any)
+      beforeTrailLayerMap[trailId] = scene.trailLayerMap[trailId];
+      
+      // store our new layer so layerLookup will return the new consistent state
+      scene.trailLayerMap[trailId] = stitchData.newLayerMap[trailId];
+    } );
+    
     // add/remove trails from their necessary layers
     var processedTrails = {}; // store references to trail IDs that were processed, since trails could be added to our affectedTrails multiple times
     _.each( stitchData.affectedTrails, function( trail ) {
@@ -389,16 +408,16 @@ define( function( require ) {
         // sanity check, since these will be stored by the layers
         trail.setImmutable();
         
-        var currentLayer = scene.trailLayerMap[trailId];
+        // don't do a layer lookup to determine the current layer (we already modified that state to be consistent).
+        var currentLayer = beforeTrailLayerMap[trailId];
         var newLayer = stitchData.newLayerMap[trailId];
         
         if ( currentLayer !== newLayer ) {
           if ( currentLayer ) {
-            scene.removeTrailFromLayer( trail, currentLayer );
+            scene.moveTrailFromLayerToLayer( trail, currentLayer, newLayer );
+          } else {
+            scene.addTrailToLayer( trail, newLayer );
           }
-          
-          // unless we change markForRemoval's listener, we should always have a newLayer specified
-          scene.addTrailToLayer( trail, newLayer );
         }
       }
     } );
