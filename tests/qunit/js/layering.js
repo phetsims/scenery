@@ -102,7 +102,7 @@
     expect( 0 );
   } );
   
-  test( 'unknown break #1', function() {
+  test( 'unnamed break #1', function() {
     var scene = new scenery.Scene( $( '#main' ) );
     
     var p1 = new scenery.Path();
@@ -199,7 +199,7 @@
     equal( scene.layers.length, 1, 'canvas (again)' );
   } );
   
-  test( 'unknown break #2', function() {
+  test( 'unnamed break #2', function() {
     var scene = new scenery.Scene( $( '#main' ) );
     
     var node3 = new scenery.Node( {} );
@@ -328,7 +328,7 @@
     expect( 0 );
   } );
   
-  test( 'unknown break #3', function() {
+  test( 'unnamed break #3', function() {
     var scene = new scenery.Scene( $( '#main' ) );
     
     var node3 = new scenery.Node( {} );
@@ -569,7 +569,7 @@
     expect( 0 );
   } );
   
-  test( 'unknown break #4', function() {
+  test( 'unnamed break #4', function() {
     var scene = new scenery.Scene( $( '#main' ) );
     
     var path2 = new scenery.Path( {
@@ -629,7 +629,7 @@
     expect( 0 );
   } );
   
-  test( 'unknown break #5', function() {
+  test( 'unnamed break #5 (layer ordering)', function() {
     var scene = new scenery.Scene( $( '#main' ) );
     
     var path10 = new scenery.Path( {
@@ -684,6 +684,93 @@
     
     // breaks
     node7.renderer = null;
+    
+    expect( 0 );
+  } );
+  
+  test( 'unnamed break #6 (layer split)', function() {
+    var scene = new scenery.Scene( $( '#main' ) );
+    
+    var node6 = new scenery.Node( {} )
+    var path16 = new scenery.Path( {
+      renderer: 'canvas'
+    } )
+    var node7 = new scenery.Node( {
+      layerSplitBefore: true,
+      layerSplitAfter: true
+    } )
+    var node5 = new scenery.Node( {
+      renderer: 'svg'
+    } )
+    node5.addChild( node6 );
+    node5.addChild( path16 );
+    node5.addChild( node7 );
+    var node4 = new scenery.Node( {
+      renderer: 'svg'
+    } )
+    node4.addChild( node5 );
+    var path12 = new scenery.Path( {} )
+    var path14 = new scenery.Path( {
+      layerSplitBefore: true
+    } )
+    var path9 = new scenery.Path( {
+      renderer: 'svg',
+      layerSplitAfter: true
+    } )
+    path9.addChild( path12 );
+    path9.addChild( path14 );
+    scene.mutate( {} )
+    var path13 = new scenery.Path( {
+      renderer: 'canvas'
+    } )
+    path13.addChild( node7 );
+    var path10 = new scenery.Path( {
+      renderer: 'canvas',
+      layerSplitBefore: true
+    } )
+    path10.addChild( scene );
+    path10.addChild( path12 );
+    path10.addChild( path13 );
+    var path8 = new scenery.Path( {
+      renderer: 'canvas'
+    } )
+    path8.addChild( node4 );
+    path8.addChild( path9 );
+    path8.addChild( node6 );
+    path8.addChild( path10 );
+    var node3 = new scenery.Node( {
+      renderer: 'canvas'
+    } )
+    node3.addChild( path8 );
+    node3.addChild( path13 );
+    node3.addChild( path9 );
+    node3.addChild( node4 );
+    node3.addChild( path10 );
+    node3.addChild( path12 );
+    var path17 = new scenery.Path( {
+      renderer: 'svg'
+    } )
+    path17.addChild( path16 );
+    path17.addChild( node6 );
+    path17.addChild( node3 );
+    path17.addChild( path13 );
+    path17.addChild( scene );
+    var path15 = new scenery.Path( {} )
+    path15.addChild( path14 );
+    var path11 = new scenery.Path( {
+      renderer: 'canvas',
+      layerSplitAfter: true
+    } )
+    path11.addChild( path13 );
+    path11.addChild( path9 );
+    path11.addChild( node6 );
+    path11.addChild( scene );
+    path11.addChild( path15 );
+    path11.addChild( path12 );
+    path11.addChild( node5 );
+    
+    // breaks
+    scene.insertChild( 0, path9 );
     
     expect( 0 );
   } );

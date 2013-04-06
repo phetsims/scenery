@@ -155,6 +155,30 @@
                   f: function( node ) { node.renderer = null; },
                   mess: 'null renderer',
                   line: function( node ) { return name( node ) + '.renderer = null;' }
+                },
+                {
+                  weight: 0.4,
+                  f: function( node ) { node.layerSplitBefore = true; },
+                  mess: 'layerSplitBefore true',
+                  line: function( node ) { return name( node ) + '.layerSplitBefore = true;' }
+                },
+                {
+                  weight: 0.4,
+                  f: function( node ) { node.layerSplitBefore = false; },
+                  mess: 'layerSplitBefore false',
+                  line: function( node ) { return name( node ) + '.layerSplitBefore = false;' }
+                },
+                {
+                  weight: 0.4,
+                  f: function( node ) { node.layerSplitAfter = true; },
+                  mess: 'layerSplitAfter true',
+                  line: function( node ) { return name( node ) + '.layerSplitAfter = true;' }
+                },
+                {
+                  weight: 0.4,
+                  f: function( node ) { node.layerSplitAfter = false; },
+                  mess: 'layerSplitAfter false',
+                  line: function( node ) { return name( node ) + '.layerSplitAfter = false;' }
                 }
               ];
               
