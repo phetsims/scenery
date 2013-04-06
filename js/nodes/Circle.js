@@ -20,11 +20,11 @@ define( function( require ) {
   
   scenery.Circle = function Circle( radius, options ) {
     if ( typeof radius === 'object' ) {
-      // allow new Circle( { circleRadius: ... } )
+      // allow new Circle( { radius: ... } )
       // the mutators will call invalidateCircle() and properly set the shape
       options = radius;
     } else {
-      this._circleRadius = radius;
+      this._radius = radius;
       
       // ensure we have a parameter object
       options = options || {};
@@ -40,7 +40,7 @@ define( function( require ) {
   inherit( Circle, Path, {
     invalidateCircle: function() {
       // setShape should invalidate the path and ensure a redraw
-      this.setShape( Shape.circle( 0, 0, this._circleRadius ) );
+      this.setShape( Shape.circle( 0, 0, this._radius ) );
     },
     
     // create a circle instead of a path, hopefully it is faster in implementations
@@ -50,42 +50,33 @@ define( function( require ) {
     
     // optimized for the circle element instead of path
     updateSVGFragment: function( circle ) {
-      circle.setAttribute( 'r', this._circleRadius );
+      circle.setAttribute( 'r', this._radius );
       
       circle.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
     },
     
     getBasicConstructor: function( propLines ) {
-      return 'new scenery.Circle( ' + this._circleRadius + ', {' + propLines + '} )';
-    }
+      return 'new scenery.Circle( ' + this._radius + ', {' + propLines + '} )';
+    },
+    
+    getRadius: function() {
+      return this._radius;
+    },
+    
+    setRadius: function( radius ) {
+      if ( this._radius !== radius ) {
+        this._radius = radius;
+        this.invalidateCircle();
+      }
+      return this;
+    },
+    
+    get radius() { return this.getRadius(); },
+    set radius( value ) { return this.setRadius( value ); }
   } );
   
-  // TODO: refactor our this common type of code for Path subtypes
-  function addCircleProp( capitalizedShort ) {
-    var getName = 'getCircle' + capitalizedShort;
-    var setName = 'setCircle' + capitalizedShort;
-    var privateName = '_circle' + capitalizedShort;
-    
-    Circle.prototype[getName] = function() {
-      return this[privateName];
-    };
-    
-    Circle.prototype[setName] = function( value ) {
-      this[privateName] = value;
-      this.invalidateCircle();
-      return this;
-    };
-    
-    Object.defineProperty( Circle.prototype, 'circle' + capitalizedShort, {
-      set: Circle.prototype[setName],
-      get: Circle.prototype[getName]
-    } );
-  }
-  
-  addCircleProp( 'Radius' );
-  
   // not adding mutators for now
-  Circle.prototype._mutatorKeys = [ 'circleRadius' ].concat( Path.prototype._mutatorKeys );
+  Circle.prototype._mutatorKeys = [ 'radius' ].concat( Path.prototype._mutatorKeys );
   
   return Circle;
 } );
