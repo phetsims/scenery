@@ -1114,10 +1114,26 @@ define( function( require ) {
     
     // verify layer splits
     new scenery.Trail( this ).eachTrailUnder( function( trail ) {
+      var beforeSplitTrail;
+      var afterSplitTrail;
       if ( trail.lastNode().layerSplitBefore ) {
-        var beforeSplitTrail = trail.previousPainted();
-        var afterSplitTrail = trail.lastNode().isPainted() ? trail : trail.nextPainted();
+        beforeSplitTrail = trail.previousPainted();
+        afterSplitTrail = trail.lastNode().isPainted() ? trail : trail.nextPainted();
         assert && assert( !beforeSplitTrail || !afterSplitTrail || scene.layerLookup( beforeSplitTrail ) !== scene.layerLookup( afterSplitTrail ), 'layerSplitBefore layers need to be different' );
+      }
+      if ( trail.lastNode().layerSplitAfter ) {
+        // shift a pointer from the (nested) end of the trail to the next isBefore (if available)
+        var ptr = new scenery.TrailPointer( trail.copy(), false );
+        while ( ptr && ptr.isAfter ) {
+          ptr = ptr.nestedForwards();
+        }
+        
+        // if !ptr, we walked off the end of the graph (nothing after layer split, automatically ok)
+        if ( ptr ) {
+          beforeSplitTrail = ptr.trail.previousPainted();
+          afterSplitTrail = ptr.trail.lastNode().isPainted() ? ptr.trail : ptr.trail.nextPainted();
+          assert && assert( !beforeSplitTrail || !afterSplitTrail || scene.layerLookup( beforeSplitTrail ) !== scene.layerLookup( afterSplitTrail ), 'layerSplitAfter layers need to be different' );
+        }
       }
     } );
     
