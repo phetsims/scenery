@@ -206,7 +206,8 @@ define( function( require ) {
     
     // returns next zIndex in place. allows layers to take up more than one single zIndex
     reindex: function( zIndex ) {
-      throw new Error( 'unimplemented layer reindex' );
+      this.startBoundary.reindex();
+      this.endBoundary.reindex();
     },
     
     pushClipShape: function( shape ) {

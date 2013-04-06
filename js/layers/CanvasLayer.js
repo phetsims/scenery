@@ -316,6 +316,8 @@ define( function( require ) {
     
     // returns next zIndex in place. allows layers to take up more than one single zIndex
     reindex: function( zIndex ) {
+      Layer.prototype.reindex.call( this, zIndex );
+      
       $( this.canvas ).css( 'z-index', zIndex );
       this.zIndex = zIndex;
       return zIndex + 1;

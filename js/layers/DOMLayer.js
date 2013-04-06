@@ -107,6 +107,8 @@ define( function( require ) {
     },
     
     reindexTrails: function() {
+      Layer.prototype.reindex.call( this, zIndex );
+      
       _.each( this.trails, function( trail ) {
         trail.reindex();
       } );

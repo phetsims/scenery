@@ -671,7 +671,7 @@ define( function( require ) {
     this.stitch( true );
   };
   
-  // after layer changes, the layers should have their zIndex updated
+  // after layer changes, the layers should have their zIndex updated, and updates their trails
   Scene.prototype.reindexLayers = function() {
     var index = 1;
     _.each( this.layers, function( layer ) {

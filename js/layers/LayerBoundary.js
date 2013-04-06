@@ -39,6 +39,15 @@ define( function( require ) {
       return !!this.nextPaintedTrail;
     },
     
+    // reindexes the trails
+    reindex: function() {
+      this.previousPaintedTrail && this.previousPaintedTrail.reindex();
+      this.nextPaintedTrail && this.nextPaintedTrail.reindex();
+      
+      this.previousEndPointer && this.previousEndPointer.trail && this.previousEndPointer.trail.reindex();
+      this.nextStartPointer && this.nextStartPointer.trail && this.nextStartPointer.trail.reindex();
+    },
+    
     // assumes that trail is reindexed
     equivalentPreviousTrail: function( trail ) {
       if ( this.previousPaintedTrail && trail ) {
