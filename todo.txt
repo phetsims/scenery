@@ -1,8 +1,6 @@
 
 Priorities:
     Note about has.js and assertion controls for use with Scenery.
-    Layer Refresh handling should batch add/remove trail layer calls until end of stitch, so we avoid side effects
-        Record 'old' layers for each trail, so we can avoid the 'null layerLookup' issue in mapTrailLayersBetween.
     Re-enable layer refresh handling for matching (and the optimizations therein)
     SVGPath takes d="..."
     Accessibility 
