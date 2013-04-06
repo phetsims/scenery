@@ -107,6 +107,9 @@
             basicSceneStep = false;
             fuzzStep = true;
             
+            // disable the layer logging, or we'll spam ourselves to death
+            scenery.Scene.disableLayerLogging();
+            
             var lines = [];
             window.lines = lines;
             
