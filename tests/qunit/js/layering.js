@@ -324,6 +324,8 @@
     node7.renderer = 'canvas';
     scene.insertChild( 2, node3 );
     scene.insertChild( 1, path16 );
+    
+    expect( 0 );
   } );
   
   test( 'unknown break #3', function() {
@@ -563,6 +565,8 @@
     path17.removeChild( node4 );
     path17.insertChild( 0, path11 );
     scene.insertChild( 0, path14 );
+    
+    expect( 0 );
   } );
   
   test( 'unknown break #4', function() {
@@ -745,5 +749,7 @@
     path10.insertChild( 0, path14 );
     path10.insertChild( 0, path17 );
     path15.renderer = 'canvas';
+    
+    expect( 0 );
   } );
 })();

@@ -614,6 +614,7 @@ define( function( require ) {
         stitchData.layerMap[afterLayer.getId()] = currentLayer;
         addPendingTrailsToLayer();
         
+        currentLayer.endPaintedTrail.reindex(); // currentLayer's trails may be stale at this point
         scenery.Trail.eachPaintedTrailBetween( afterTrail, currentLayer.endPaintedTrail, function( subtrail ) {
           changeTrailLayer( subtrail.copy().setImmutable(), currentLayer );
         }, false, scene );
