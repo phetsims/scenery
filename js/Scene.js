@@ -296,7 +296,7 @@ define( function( require ) {
       affectedTrails: [],
       
       // trail ID => layer at the start of the stitching
-      oldLayerMap: {},
+      originalLayerMap: {},
       
       // trail ID => layer at the end of stitching (needed to batch the layer notifications)
       newLayerMap: {}
@@ -309,9 +309,21 @@ define( function( require ) {
       baseNode: this
     };
     
-    // reindex intervals, since they may have changed
     _.each( this.layerChangeIntervals, function( interval ) {
+      // reindex intervals, since their endpoints indices may need to be updated
       interval.reindex();
+      
+      scenery.Trail.eachPaintedTrailBetween( interval.a, interval.b, function( trail ) {
+        var trailId = trail.getUniqueId();
+        stitchData.affectedTrails.push( trail.copy() );
+        
+        // TODO: this is inefficient. we only need to lookup the first one.
+        // TODO: for the consecutive ones, check layer boundaries and increment when necessary!
+        var layer = scene.layerLookup( trail );
+        
+        stitchData.originalLayerMap[trailId] = layer;
+        stitchData.newLayerMap[trailId] = layer; // default is for the layer to not change
+      }, false, scene );
     } );
     
     /*
