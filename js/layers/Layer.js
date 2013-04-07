@@ -66,7 +66,7 @@ define( function( require ) {
       assert && assert( this.baseTrail.lastNode() === this.baseNode );
     }
     
-    // we reference all trails in an unordered way
+    // we reference all painted trails in an unordered way
     this._layerTrails = [];
     
     var layer = this;
@@ -162,9 +162,13 @@ define( function( require ) {
       return this._id;
     },
     
-    // trails associated with the layer, NOT necessarily in order
+    // painted trails associated with the layer, NOT necessarily in order
     getLayerTrails: function() {
       return this._layerTrails.slice( 0 );
+    },
+    
+    getPaintedTrailCount: function() {
+      return this._layerTrails.length;
     },
     
     /*---------------------------------------------------------------------------*
