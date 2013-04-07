@@ -2,6 +2,7 @@
 Priorities:
     Note about has.js and assertion controls for use with Scenery.
     Re-enable layer refresh handling for matching (and the optimizations therein)
+        With the delayed layer handling, we could conceivably remove the distinction between 'matching' and 'non-matching'
     SVGPath takes d="..."
     Accessibility 
     Force non-canvas above 'interactive' DOM node
