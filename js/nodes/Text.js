@@ -172,7 +172,7 @@ define( function( require ) {
     
     accurateCanvasBounds: function() {
       var node = this;
-      var svgBounds = this.approximateSVGBounds();
+      var svgBounds = this.approximateSVGBounds(); // this seems to be slower than expected, mostly due to Font getters
       return scenery.Util.canvasAccurateBounds( function( context ) {
         context.font = node.font;
         context.textAlign = node.textAlign;
