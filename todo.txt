@@ -4,6 +4,7 @@ Priorities:
     Re-enable layer refresh handling for matching (and the optimizations therein)
         With the delayed layer handling, we could conceivably remove the distinction between 'matching' and 'non-matching'
     SVGPath takes d="..."
+        Add relative and smooth curve methods and mapping of elliptical flags to complete SVG path parsing
     Accessibility 
     Force non-canvas above 'interactive' DOM node
         Need to track lowest DOM-interactive Trail for each Scene.
