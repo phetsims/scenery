@@ -4,6 +4,7 @@ Priorities:
     Re-enable layer refresh handling for matching (and the optimizations therein)
         With the delayed layer handling, we could conceivably remove the distinction between 'matching' and 'non-matching'
     SVGPath takes d="..."
+        Add relative and smooth curve methods and mapping of elliptical flags to complete SVG path parsing
     Accessibility 
     Force non-canvas above 'interactive' DOM node
         Need to track lowest DOM-interactive Trail for each Scene.
@@ -222,6 +223,7 @@ Accessibility / shadow DOM:
         tabbable: true, tabbable: false, + tabindex
         TabOrder for scene, or more globally (multiple scene support).
             * Ideally we can have scenes handle it in an isolated way that doesn't affect other scenes
+        Delegates could be positioned with latency - every 1-2 seconds.
     For 'accessible' elements, maybe 'interactive' for a tab order? 'tabbable'? 'readable'?
         * magnifier
         CSS styles ('hidden') - tab order?
