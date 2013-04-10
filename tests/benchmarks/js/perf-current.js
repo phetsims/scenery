@@ -3,6 +3,76 @@
   
   marks.currentMarks = [
     {
+      name: 'Text node instances',
+      count: 20,
+      before: function() {
+        this.width = 1024;
+        this.height = 768;
+        
+        this.i = 0;
+        
+        var main = $( '#main' );
+        main.width( this.width );
+        main.height( this.height );
+        var scene = new scenery.Scene( main );
+        var text = new scenery.Text( 'A', { font: '16px sans-serif' } );
+        for ( var i = 0; i < 10000; i++ ) {
+          scene.addChild( new scenery.Node( {
+            children: [text],
+            x: i % 759,
+            y: ( i * 172 ) % 973
+          } ) );
+        }
+        
+        this.main = main;
+        this.scene = scene;
+      },
+      step: function() {
+        this.scene.rotate( 0.01 );
+        this.scene.updateScene();
+      },
+      after: function() {
+        this.main.empty();
+      }
+    },
+    {
+      name: 'Text path instances',
+      count: 20,
+      before: function() {
+        this.width = 1024;
+        this.height = 768;
+        
+        this.i = 0;
+        
+        var main = $( '#main' );
+        main.width( this.width );
+        main.height( this.height );
+        var scene = new scenery.Scene( main );
+        var text = new scenery.Path( {
+          shape: new kite.Shape( 'M108 385.875 L82.6875 385.875 L82.6875 224.5781 Q63.7031 242.5781 31.9219 255.0938 L31.9219 230.625 Q75.6562 209.6719 91.5469 178.7344 L108 178.7344 L108 385.875 Z' ),
+          fill: '#000',
+          scale: 0.1
+        } );
+        for ( var i = 0; i < 10000; i++ ) {
+          scene.addChild( new scenery.Node( {
+            children: [text],
+            x: i % 759,
+            y: ( i * 172 ) % 973
+          } ) );
+        }
+        
+        this.main = main;
+        this.scene = scene;
+      },
+      step: function() {
+        this.scene.rotate( 0.01 );
+        this.scene.updateScene();
+      },
+      after: function() {
+        this.main.empty();
+      }
+    },
+    {
       name: 'Text bounds changes',
       count: 20,
       before: function() {
