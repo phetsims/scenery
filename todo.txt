@@ -1,5 +1,6 @@
 
 Priorities:
+    Text bounds handling is unacceptably slow - note on Issue about SVG font parsing + handling
     Note about has.js and assertion controls for use with Scenery.
     Re-enable layer refresh handling for matching (and the optimizations therein)
         With the delayed layer handling, we could conceivably remove the distinction between 'matching' and 'non-matching'
@@ -153,6 +154,16 @@ DOM:
     Investigate SVG crispEdges to see whether it would be valuable for other renderers
 
 ** WebGL:
+    Stroke will just be a kite-stroked shape.
+        Bring back persistent stroked references, since sharing them is ideal? And mark them as immutable
+    Consider storing buffers (or display list references) in Shape instances so we can quickly render things
+    Fragment shader for:
+        Plain color
+        Linear Gradient
+        Radial Gradient
+        Image
+        Pattern
+    Investigate FrameBuffer for opacity handling (and caching?)
     Use display lists?
     Examine test code for considerations for implementing Shape.
 
