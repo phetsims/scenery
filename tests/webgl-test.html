@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport"
+  content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+
+  <!-- runs in full-screen mode on iOS devices -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <title>WebGL Test</title>
+  
+  <script src="../contrib/jquery-1.8.3.min.js"></script>
+
+  <script id="shader-fs" type="x-shader/x-fragment">
+    precision mediump float;
+    
+    uniform vec4 color;
+    varying vec2 vPosition; // not used yet
+
+    void main( void ) {
+      gl_FragColor = color;
+    }
+  </script>
+
+  <script id="shader-vs" type="x-shader/x-vertex">
+    precision mediump float;
+    
+    attribute vec2 aVertexPosition;
+    varying vec2 vPosition;
+    uniform mat3 uMatrix;
+
+    void main( void ) {
+      gl_Position = vec4( uMatrix * vec3( aVertexPosition, 1.0 ), 1.0 );
+
+      vPosition = aVertexPosition;
+    }
+  </script>
+  <style type="text/css">
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+      overflow: hidden;
+    }
+
+    canvas {
+      position: absolute;
+    }
+  </style>
+</head>
+
+<body id="home">
+
+<canvas id="main" width="1024" height="768" style="z-index:0;">
+  Your browser appears to not support the HTML5 <code>&lt;canvas&gt;</code> element!
+</canvas>
+
+<script type="text/javascript">
+  var canvas = document.getElementById( 'main' );
+
+  var shaderProgram;
+  var gl, context;
+  
+  // TODO: basically change this into just a shader compilation step
+  var getShaderFromDOM = function( gl, id ) {
+    var shaderScript = document.getElementById( id );
+    if ( !shaderScript ) {
+      throw new Error( 'shader DOM not found: for id=' + id );
+    }
+
+    var str = '';
+    var k = shaderScript.firstChild;
+    while ( k ) {
+      if ( k.nodeType === 3 ) {
+        str += k.textContent;
+      }
+      k = k.nextSibling;
+    }
+
+    var shader;
+    if ( shaderScript.type === 'x-shader/x-fragment' ) {
+      shader = gl.createShader( gl.FRAGMENT_SHADER );
+    }
+    else if ( shaderScript.type === 'x-shader/x-vertex' ) {
+      shader = gl.createShader( gl.VERTEX_SHADER );
+    }
+    else {
+      throw new Error( 'shader DOM type not recognized: ' + shaderScript.type );
+    }
+
+    gl.shaderSource( shader, str );
+    gl.compileShader( shader );
+
+    if ( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
+      throw new Error( gl.getShaderInfoLog( shader ) );
+    }
+
+    return shader;
+  };
+
+  var initWebGL = function( canvas ) {
+    // Initialize the global variable gl to null.
+    var gl = null;
+
+    try {
+      // Try to grab the standard context. If it fails, fallback to experimental.
+      gl = canvas.getContext( 'webgl' ) || canvas.getContext( 'experimental-webgl' );
+    }
+    catch( e ) {}
+
+    // If we don't have a GL context, give up now
+    if ( !gl ) {
+      // TODO: show a visual display
+      throw new Error( 'Unable to initialize WebGL. Your browser may not support it.' );
+    }
+
+    return gl;
+  };
+  
+  // TODO: allow custom shaders
+  function initShaders() {
+    var fragmentShader = getShaderFromDOM( gl, 'shader-fs' );
+    var vertexShader = getShaderFromDOM( gl, 'shader-vs' );
+
+    shaderProgram = gl.createProgram();
+    gl.attachShader( shaderProgram, vertexShader );
+    gl.attachShader( shaderProgram, fragmentShader );
+    gl.linkProgram( shaderProgram );
+
+    if ( !gl.getProgramParameter( shaderProgram, gl.LINK_STATUS ) ) {
+      alert( 'Could not initialise shaders' );
+    }
+
+    gl.useProgram( shaderProgram );
+
+    shaderProgram.vertexPositionAttribute = gl.getAttribLocation( shaderProgram, 'aVertexPosition' );
+    gl.enableVertexAttribArray( shaderProgram.vertexPositionAttribute );
+
+    shaderProgram.uMatrix = gl.getUniformLocation( shaderProgram, 'uMatrix' );
+    shaderProgram.color = gl.getUniformLocation( shaderProgram, 'color' );
+  }
+  
+  gl = initWebGL( canvas );
+
+  initShaders();
+
+  gl.clearColor( 0.0, 0.0, 0.0, 1.0 );
+
+  gl.disable( gl.DEPTH_TEST );
+  gl.enable( gl.BLEND );
+  gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );
+
+  function drawCanvas() {
+    gl.viewportWidth = canvas.width;
+    gl.viewportHeight = canvas.height;
+
+    gl.viewport( 0, 0, gl.viewportWidth, gl.viewportHeight );
+    gl.clear( gl.COLOR_BUFFER_BIT );
+    
+    // TODO: maybe double arrays would have better performance in JS-land?
+    // var projectionMatrix = getSceneProjectionMatrix();
+    // gl.uniformMatrix4fv( shaderProgram.pMatrixUniform, false, projectionMatrix.entries );
+
+    // var args = new GLNode.RenderState();
+    // args.transformAttribute = shaderProgram.mvMatrixUniform;
+    // args.inverseTransposeAttribute = shaderProgram.inverseTransposeMatrixUniform;
+    // args.positionAttribute = shaderProgram.vertexPositionAttribute;
+    // args.normalAttribute = shaderProgram.normalAttribute;
+    // args.gl = gl;
+    // args.useGL = useGL;
+    // args.shaderProgram = shaderProgram;
+
+    // scene.render( args );
+  }
+  
+  drawCanvas();
+</script>
+
+</body>
+</html>
