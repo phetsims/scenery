@@ -74,34 +74,39 @@ var marks = marks || {};
       
       var mark = this.findMark( this.markNames[this.markNameIndex] );
       
-      mark.before && mark.before();
-      
-      var count = 0;
-      
-      if( !mark.count ) {
-        mark.count = 50;
-      }
-      
-      function tick() {
-        if( count++ === mark.count ) {
-          var time = new Date - startTime;
-          if( that.options.onMark ) {
-            that.options.onMark( that.currentSnapshot, mark, time / mark.count, that );
-          }
-          mark.after && mark.after();
-          
-          setTimeout( function() {
-            that.runSnapshots();
-          }, 500 );
-        } else {
-          window.requestAnimationFrame( tick, main[0] );
-          
-          mark.step && mark.step();
+      if ( mark ) {
+        mark.before && mark.before();
+        
+        var count = 0;
+        
+        if( !mark.count ) {
+          mark.count = 50;
         }
+        
+        function tick() {
+          if( count++ === mark.count ) {
+            var time = new Date - startTime;
+            if( that.options.onMark ) {
+              that.options.onMark( that.currentSnapshot, mark, time / mark.count, that );
+            }
+            mark.after && mark.after();
+            
+            setTimeout( function() {
+              that.runSnapshots();
+            }, 500 );
+          } else {
+            window.requestAnimationFrame( tick, main[0] );
+            
+            mark.step && mark.step();
+          }
+        }
+        window.requestAnimationFrame( tick, main[0] );
+        
+        var startTime = new Date;
+      } else {
+        // skip this one
+        that.runSnapshots();
       }
-      window.requestAnimationFrame( tick, main[0] );
-      
-      var startTime = new Date;
     }
   };
   

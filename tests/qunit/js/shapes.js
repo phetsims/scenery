@@ -185,11 +185,11 @@
       
       var strokeShape = new Shape();
       var point = new dot.Vector2( 40, 100 );
-      strokeShape.moveTo( point );
+      strokeShape.moveToPoint( point );
       point = point.plus( dot.Vector2.X_UNIT.times( miterMagnitude ) );
-      strokeShape.lineTo( point );
+      strokeShape.lineToPoint( point );
       point = point.plus( dot.Vector2.createPolar( miterMagnitude, miterAngleRadians ).negated() );
-      strokeShape.lineTo( point );
+      strokeShape.lineToPoint( point );
       var fillShape = strokeShape.getStrokedShape( styles );
       
       strokeEqualsFill( strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );

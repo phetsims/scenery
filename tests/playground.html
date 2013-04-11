@@ -50,6 +50,9 @@
   <pre id="serialized"></pre>
   
   <script>
+    var basicSceneStep = true;
+    var fuzzStep = false;
+    
     // we need to wait until our config file is loaded before our require statement. apparently this was not guaranteed
     function check() {
       if ( window.loadedSceneryConfig ) {
@@ -60,6 +63,8 @@
           window.core = core;
           
           console.log( 'loaded' );
+          
+          scenery.Scene.enableLayerLogging();
           
           window.scene = new scenery.Scene( $( '#scene' ) );
           console.log( 'window.scene created' );
@@ -76,11 +81,13 @@
           scenery.Util.polyfillRequestAnimationFrame();
           
           (function step(){
-            window.requestAnimationFrame( step, document.getElementById( 'scene' ) );
+            if ( basicSceneStep ) {
+              window.requestAnimationFrame( step, document.getElementById( 'scene' ) );
+            }
             
             $( '#debug' ).html( scene.getDebugHTML() );
             
-            $( '#serialized' ).html( scene.toStringWithChildren() );
+            $( '#serialized' ).html( scene.toStringWithChildren( true ) );
           })();
           
           window.twrap = function( f ) {
@@ -92,26 +99,140 @@
           };
           
           window.runError = function() {
-            window.path1 = new scenery.Path( { shape: shape, fill: '#f00' } );
-            window.path2 = new scenery.Path( { shape: shape, fill: '#0f0', y: 70 } );
-            window.path3 = new scenery.Path( { shape: shape, fill: '#00f', x: 70, y: 140 } );
             
-            window.node = new scenery.Node();
+          };
+          
+          window.fuzzLayers = function() {
+            // disable the regular step
+            basicSceneStep = false;
+            fuzzStep = true;
             
-            scene.addChild( path1 );
-            scene.addChild( path2 );
-            path1.addChild( path3 );
+            // disable the layer logging, or we'll spam ourselves to death
+            scenery.Scene.disableLayerLogging();
             
-            // scene.addChild( path3 );
+            var lines = [];
+            window.lines = lines;
             
-            // scene.addChild( node );
-            // scene.updateScene();
-            // scene.removeChild( node );
-            // scene.addChild( path1 );
-            // scene.addChild( path2 );
-            // scene.addChild( path3 ); // should be canvas, but right now is SVG!
+            var nodes = [];
+            var scene = new scenery.Scene( $( '<div>' ), { width: 640, height: 480 } );
+            nodes.push( scene );
             
-            // scene.updateScene();
+            _.times( 5, function() { nodes.push( new scenery.Node() ); } );
+            _.times( 10, function() { nodes.push( new scenery.Path() ); } );
+            // _.times( 5, function() { nodes.push( new scenery.DOM( document.createElement( 'div' ) ) ); } );
+            
+            function name( node ) {
+              return node === scene ? 'scene' : node.constructor.name.toLowerCase() + node.id;
+            }
+            
+            _.each( nodes, function( node ) {
+              if ( node !== scene ) {
+                lines.push( 'var ' + name( node ) + ' = ' + node.toString() + ';' );
+              }
+            } );
+            
+            (function fuzz(){
+              // abort if desired
+              if ( !fuzzStep ) {
+                return;
+              }
+              
+              var nodeMutators = [
+                {
+                  weight: 1.0,
+                  f: function( node ) { node.renderer = 'canvas'; },
+                  mess: 'canvas renderer',
+                  line: function( node ) { return name( node ) + '.renderer = \'canvas\';' }
+                },
+                {
+                  weight: 1.0,
+                  f: function( node ) { node.renderer = 'svg'; },
+                  mess: 'svg renderer',
+                  line: function( node ) { return name( node ) + '.renderer = \'svg\';' }
+                },
+                {
+                  weight: 2.0,
+                  f: function( node ) { node.renderer = null; },
+                  mess: 'null renderer',
+                  line: function( node ) { return name( node ) + '.renderer = null;' }
+                },
+                {
+                  weight: 0.2,
+                  f: function( node ) { node.layerSplitBefore = true; },
+                  mess: 'layerSplitBefore true',
+                  line: function( node ) { return name( node ) + '.layerSplitBefore = true;' }
+                },
+                {
+                  weight: 0.8,
+                  f: function( node ) { node.layerSplitBefore = false; },
+                  mess: 'layerSplitBefore false',
+                  line: function( node ) { return name( node ) + '.layerSplitBefore = false;' }
+                },
+                {
+                  weight: 0.2,
+                  f: function( node ) { node.layerSplitAfter = true; },
+                  mess: 'layerSplitAfter true',
+                  line: function( node ) { return name( node ) + '.layerSplitAfter = true;' }
+                },
+                {
+                  weight: 0.8,
+                  f: function( node ) { node.layerSplitAfter = false; },
+                  mess: 'layerSplitAfter false',
+                  line: function( node ) { return name( node ) + '.layerSplitAfter = false;' }
+                }
+              ];
+              
+              var totalWeight = _.reduce( _.pluck( nodeMutators, 'weight' ), function( memo, num ) { return memo + num; }, 0 );
+              
+              _.times( 20, function() {
+                window.beforeFuzzDebug = scene.getDebugHTML();
+                window.beforeFuzzSerialization = scene.toStringWithChildren( true );
+                
+                var r = Math.random();
+                
+                // pick two different nodes at random
+                var a = nodes[_.random( 0, nodes.length - 1 )];
+                var b = nodes[_.random( 0, nodes.length - 1 )];
+                
+                if ( r < 0.333 ) {
+                  // attempt to add a node to another one
+                  if ( a.canAddChild( b ) ) {
+                    // insert it into a random place
+                    var index = _.random( 0, a.children.length );
+                    window.fuzzMessage = 'inserting child ' + b.id + ' into ' + a.id + ' at index ' + index;
+                    lines.push( name( a ) + '.insertChild( ' + index + ', ' + name( b ) + ' );' );
+                    a.insertChild( index, b );
+                  }
+                } else if( r < 0.666 ) {
+                  if ( a.children.length ) {
+                    var child = a.children[_.random( 0, a.children.length - 1 )];
+                    window.fuzzMessage = 'removing child ' + child.id + ' to ' + a.id;
+                    lines.push( name( a ) + '.removeChild( ' + name( child ) + ' );' );
+                    a.removeChild( child );
+                  }
+                } else {
+                  // pick a random modification from the weighted list
+                  var rr = Math.random() * totalWeight;
+                  for ( var i = 0; i < nodeMutators.length; i++ ) {
+                    var mutator = nodeMutators[i];
+                    rr -= mutator.weight;
+                    if ( rr <= 0 ) {
+                      window.fuzzMessage = 'mutating node ' + a.id + ' with ' + mutator.mess;
+                      lines.push( mutator.line( a ) );
+                      mutator.f( a );
+                      break;
+                    }
+                  }
+                }
+                
+                scene.layerAudit();
+                
+              } );
+              $( '#debug' ).html( scene.getDebugHTML() );
+              
+              // an error above will prevent this from running
+              window.requestAnimationFrame( fuzz );
+            })();
           };
         } );
       } else {

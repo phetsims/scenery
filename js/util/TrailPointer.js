@@ -236,6 +236,7 @@ define( function( require ) {
       other.trail.reindex();
       
       var pointer = this.copy();
+      pointer.trail.setMutable(); // this trail will be modified in the iteration, so references to it may be modified
       
       var first = true;
       

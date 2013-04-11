@@ -153,8 +153,8 @@ define( function( require ) {
       return 'new scenery.DOM( $( \'' + this._container.innerHTML.replace( /'/g, '\\\'' ) + '\' ), {' + propLines + '} )';
     },
     
-    getPropString: function( spaces ) {
-      var result = Node.prototype.getPropString.call( this, spaces );
+    getPropString: function( spaces, includeChildren ) {
+      var result = Node.prototype.getPropString.call( this, spaces, includeChildren );
       if ( this.interactive ) {
         if ( result ) {
           result += ',\n';
