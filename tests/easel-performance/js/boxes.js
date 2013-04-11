@@ -132,13 +132,12 @@ phet.tests = phet.tests || {};
     
     for ( var row = 0; row < resolution; row++ ) {
       for ( var col = 0; col < resolution; col++ ) {
-        var rect = new scenery.Path( {
-          shape: kite.Shape.rectangle(
-            ( col - ( resolution - 1 ) / 2 ) * size / resolution - boxRadius,
-            ( row - ( resolution - 1 ) / 2 ) * size / resolution - boxRadius,
+        var rect = new scenery.Rectangle(
+          ( col - ( resolution - 1 ) / 2 ) * size / resolution - boxRadius,
+          ( row - ( resolution - 1 ) / 2 ) * size / resolution - boxRadius,
             boxRadius * 2,
-            boxRadius * 2
-          ),
+            boxRadius * 2,
+         {
           fill: 'rgba(255,0,0,1)'
         } );
         grid.addChild( rect );
