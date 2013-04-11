@@ -1221,7 +1221,91 @@ define('SCENERY/input/Event',['require','ASSERT/assert','SCENERY/scenery'], func
 
 define('DOT/dot',['require'], function( require ) {
   // will be filled in by other modules
-  return {};
+  return function dot() {
+    switch ( arguments.length ) {
+      case 2:
+        return new dot.Vector2( arguments[0], arguments[1] );
+      case 3:
+        return new dot.Vector3( arguments[0], arguments[1], arguments[2] );
+      case 4:
+        return new dot.Vector4( arguments[0], arguments[1], arguments[2], arguments[3] );
+      default:
+        throw new Error( 'dot takes 2-4 arguments' );
+    }
+  };
+} );
+
+// Copyright 2002-2012, University of Colorado
+
+/**
+ * Like Underscore's _.extend, but with hardcoded support for ES5 getters/setters.
+ *
+ * See https://github.com/documentcloud/underscore/pull/986.
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define('PHET_CORE/extend',['require'], function( require ) {
+  
+  
+  return function extend( obj ) {
+    _.each( Array.prototype.slice.call( arguments, 1 ), function( source ) {
+      if ( source ) {
+        for ( var prop in source ) {
+          Object.defineProperty( obj, prop, Object.getOwnPropertyDescriptor( source, prop ) );
+        }
+      }
+    });
+    return obj;
+  };
+} );
+
+// Copyright 2013, University of Colorado
+
+/**
+ * Experimental prototype inheritance
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+define('PHET_CORE/inherit',['require','PHET_CORE/extend'], function( require ) {
+  
+  
+  var extend = require( 'PHET_CORE/extend' );
+  
+  /**
+   * Experimental inheritance prototype, similar to Inheritance.inheritPrototype, but maintains
+   * supertype.prototype.constructor while properly copying ES5 getters and setters.
+   *
+   * TODO: find problems with this! It's effectively what is being used by Scenery
+   * TODO: consider inspecting arguments to see whether they are functions or just objects, to support
+   *       something like inherit( subtype, supertypeA, supertypeB, properties )
+   *
+   * Usage:
+   * function A() { scenery.Node.call( this ); };
+   * inherit( A, scenery.Node, {
+   *   customBehavior: function() { ... },
+   *   isAnA: true
+   * } );
+   * new A().isAnA // true
+   * new scenery.Node().isAnA // undefined
+   * new A().constructor.name // 'A'
+   *
+   * @param subtype             Constructor for the subtype. Generally should contain supertype.call( this, ... )
+   * @param supertype           Constructor for the supertype.
+   * @param prototypeProperties [optional] object containing properties that will be set on the prototype.
+   */
+  function inherit( subtype, supertype, prototypeProperties ) {
+    function F() {}
+    F.prototype = supertype.prototype; // so new F().__proto__ === supertype.prototype
+    
+    subtype.prototype = extend( // extend will combine the properties and constructor into the new F copy
+      new F(),                  // so new F().__proto__ === supertype.prototype, and the prototype chain is set up nicely
+      { constructor: subtype }, // overrides the constructor properly
+      prototypeProperties       // [optional] additional properties for the prototype, as an object.
+    );
+  }
+
+  return inherit;
 } );
 
 // Copyright 2002-2012, University of Colorado
@@ -1381,25 +1465,29 @@ define('DOT/Util',['require','ASSERT/assert','DOT/dot'], function( require ) {
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define('DOT/Vector2',['require','ASSERT/assert','DOT/dot','DOT/Util'], function( require ) {
+define('DOT/Vector2',['require','ASSERT/assert','DOT/dot','PHET_CORE/inherit','DOT/Util'], function( require ) {
   
   
   var assert = require( 'ASSERT/assert' )( 'dot' );
   
   var dot = require( 'DOT/dot' );
   
+  var inherit = require( 'PHET_CORE/inherit' );
   require( 'DOT/Util' );
   // require( 'DOT/Vector3' ); // commented out since Require.js complains about the circular dependency
   
-  dot.Vector2 = function( x, y ) {
+  dot.Vector2 = function Vector2( x, y ) {
     // allow optional parameters
     this.x = x || 0;
     this.y = y || 0;
+    
+    assert && assert( typeof this.x === 'number', 'x needs to be a number' );
+    assert && assert( typeof this.y === 'number', 'y needs to be a number' );
   };
   var Vector2 = dot.Vector2;
   
   Vector2.createPolar = function( magnitude, angle ) {
-    return new Vector2( Math.cos( angle ), Math.sin( angle ) ).timesScalar( magnitude );
+    return new Vector2( magnitude * Math.cos( angle ), magnitude * Math.sin( angle ) );
   };
   
   Vector2.prototype = {
@@ -1439,7 +1527,7 @@ define('DOT/Vector2',['require','ASSERT/assert','DOT/dot','DOT/Util'], function(
       if ( !epsilon ) {
         epsilon = 0;
       }
-      return Math.abs( this.x - other.x ) + Math.abs( this.y - other.y ) <= epsilon;
+      return Math.max( Math.abs( this.x - other.x ), Math.abs( this.y - other.y ) ) <= epsilon;
     },
     
     isFinite: function() {
@@ -1451,7 +1539,7 @@ define('DOT/Vector2',['require','ASSERT/assert','DOT/dot','DOT/Util'], function(
      *----------------------------------------------------------------------------*/
     
     copy: function() {
-      return new Vector2( this.x, this.y );
+      return new this.constructor( this.x, this.y );
     },
     
     // z component of the equivalent 3-dimensional cross product (this.x, this.y,0) x (v.x, v.y, 0)
@@ -1465,12 +1553,12 @@ define('DOT/Vector2',['require','ASSERT/assert','DOT/dot','DOT/Util'], function(
         throw new Error( "Cannot normalize a zero-magnitude vector" );
       }
       else {
-        return new Vector2( this.x / mag, this.y / mag );
+        return new this.constructor( this.x / mag, this.y / mag );
       }
     },
     
     timesScalar: function( scalar ) {
-      return new Vector2( this.x * scalar, this.y * scalar );
+      return new this.constructor( this.x * scalar, this.y * scalar );
     },
     
     times: function( scalar ) {
@@ -1480,31 +1568,31 @@ define('DOT/Vector2',['require','ASSERT/assert','DOT/dot','DOT/Util'], function(
     },
     
     componentTimes: function( v ) {
-      return new Vector2( this.x * v.x, this.y * v.y );
+      return new this.constructor( this.x * v.x, this.y * v.y );
     },
     
     plus: function( v ) {
-      return new Vector2( this.x + v.x, this.y + v.y );
+      return new this.constructor( this.x + v.x, this.y + v.y );
     },
     
     plusScalar: function( scalar ) {
-      return new Vector2( this.x + scalar, this.y + scalar );
+      return new this.constructor( this.x + scalar, this.y + scalar );
     },
     
     minus: function( v ) {
-      return new Vector2( this.x - v.x, this.y - v.y );
+      return new this.constructor( this.x - v.x, this.y - v.y );
     },
     
     minusScalar: function( scalar ) {
-      return new Vector2( this.x - scalar, this.y - scalar );
+      return new this.constructor( this.x - scalar, this.y - scalar );
     },
     
     dividedScalar: function( scalar ) {
-      return new Vector2( this.x / scalar, this.y / scalar );
+      return new this.constructor( this.x / scalar, this.y / scalar );
     },
     
     negated: function() {
-      return new Vector2( -this.x, -this.y );
+      return new this.constructor( -this.x, -this.y );
     },
     
     angle: function() {
@@ -1513,7 +1601,7 @@ define('DOT/Vector2',['require','ASSERT/assert','DOT/dot','DOT/Util'], function(
     
     // equivalent to a -PI/2 rotation (right hand rotation)
     perpendicular: function() {
-      return new Vector2( this.y, -this.x );
+      return new this.constructor( this.y, -this.x );
     },
     
     angleBetween: function( v ) {
@@ -1521,7 +1609,8 @@ define('DOT/Vector2',['require','ASSERT/assert','DOT/dot','DOT/Util'], function(
     },
     
     rotated: function( angle ) {
-      return Vector2.createPolar( this.magnitude(), this.angle() + angle );
+      var newAngle = this.angle() + angle;
+      return new this.constructor( Math.cos( newAngle ), Math.sin( newAngle ) ).timesScalar( this.getMagnitude() );
     },
       
     // linear interpolation from this (ratio=0) to vector (ratio=1)
@@ -1604,14 +1693,12 @@ define('DOT/Vector2',['require','ASSERT/assert','DOT/dot','DOT/Util'], function(
   /*---------------------------------------------------------------------------*
    * Immutable Vector form
    *----------------------------------------------------------------------------*/
-  Vector2.Immutable = function( x, y ) {
-    this.x = x || 0;
-    this.y = y || 0;
+  Vector2.Immutable = function ImmutableVector2( x, y ) {
+    Vector2.call( this, x, y );
   };
   var Immutable = Vector2.Immutable;
   
-  Immutable.prototype = new Vector2();
-  Immutable.prototype.constructor = Immutable;
+  inherit( Immutable, Vector2 );
   
   // throw errors whenever a mutable method is called on our immutable vector
   Immutable.mutableOverrideHelper = function( mutableFunctionName ) {
@@ -1646,6 +1733,9 @@ define('DOT/Vector2',['require','ASSERT/assert','DOT/dot','DOT/Util'], function(
 /**
  * Basic 4-dimensional vector
  *
+ * TODO: sync with Vector2 changes
+ * TODO: add quaternion extension
+ *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
@@ -1659,7 +1749,7 @@ define('DOT/Vector4',['require','ASSERT/assert','DOT/dot','DOT/Util'], function(
   require( 'DOT/Util' );
   // require( 'DOT/Vector3' ); // commented out so Require.js doesn't complain about the circular dependency
   
-  dot.Vector4 = function( x, y, z, w ) {
+  dot.Vector4 = function Vector4( x, y, z, w ) {
     // allow optional parameters
     this.x = x || 0;
     this.y = y || 0;
@@ -1917,6 +2007,8 @@ define('DOT/Vector4',['require','ASSERT/assert','DOT/dot','DOT/Util'], function(
 /**
  * Basic 3-dimensional vector
  *
+ * TODO: sync with Vector2 changes
+ *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
@@ -1931,7 +2023,7 @@ define('DOT/Vector3',['require','ASSERT/assert','DOT/dot','DOT/Util','DOT/Vector
   require( 'DOT/Vector2' );
   require( 'DOT/Vector4' );
 
-  dot.Vector3 = function( x, y, z ) {
+  dot.Vector3 = function Vector3( x, y, z ) {
     // allow optional parameters
     this.x = x || 0;
     this.y = y || 0;
@@ -2199,7 +2291,7 @@ define('DOT/Matrix4',['require','DOT/dot','DOT/Vector3','DOT/Vector4'], function
   
   var Float32Array = window.Float32Array || Array;
   
-  dot.Matrix4 = function( v00, v01, v02, v03, v10, v11, v12, v13, v20, v21, v22, v23, v30, v31, v32, v33, type ) {
+  dot.Matrix4 = function Matrix4( v00, v01, v02, v03, v10, v11, v12, v13, v20, v21, v22, v23, v30, v31, v32, v33, type ) {
 
     // entries stored in column-major format
     this.entries = new Float32Array( 16 );
@@ -2550,10 +2642,10 @@ define('DOT/Matrix3',['require','DOT/dot','DOT/Vector2','DOT/Vector3','DOT/Matri
   require( 'DOT/Vector3' );
   require( 'DOT/Matrix4' );
   
-  dot.Matrix3 = function( v00, v01, v02, v10, v11, v12, v20, v21, v22, type ) {
+  dot.Matrix3 = function Matrix3( v00, v01, v02, v10, v11, v12, v20, v21, v22, type ) {
 
     // entries stored in column-major format
-    this.entries = new Array( 9 );
+    this.entries = new Array( 9 ); // TODO: consider a typed array if possible (double even?) for performance and compatibility with WebGL
 
     this.rowMajor( v00 === undefined ? 1 : v00, v01 || 0, v02 || 0,
                    v10 || 0, v11 === undefined ? 1 : v11, v12 || 0,
@@ -2603,6 +2695,10 @@ define('DOT/Matrix3',['require','DOT/dot','DOT/Vector2','DOT/Vector3','DOT/Matri
                         Types.SCALING );
   };
   Matrix3.scale = Matrix3.scaling;
+  
+  Matrix3.affine = function( m00, m10, m01, m11, m02, m12 ) {
+    return new Matrix3( m00, m01, m02, m10, m11, m12, 0, 0, 1, Types.AFFINE );
+  };
 
   // axis is a normalized Vector3, angle in radians.
   Matrix3.rotationAxisAngle = function( axis, angle ) {
@@ -3330,7 +3426,7 @@ define('DOT/Ray2',['require','ASSERT/assert','DOT/dot'], function( require ) {
   
   var dot = require( 'DOT/dot' );
 
-  dot.Ray2 = function( pos, dir ) {
+  dot.Ray2 = function Ray2( pos, dir ) {
     this.pos = pos;
     this.dir = dir;
     
@@ -3377,7 +3473,7 @@ define('DOT/Transform3',['require','ASSERT/assert','DOT/dot','DOT/Matrix3','DOT/
   require( 'DOT/Ray2' );
 
   // takes a 4x4 matrix
-  dot.Transform3 = function( matrix ) {
+  dot.Transform3 = function Transform3( matrix ) {
     this.listeners = [];
     
     // using immutable version for now. change it to the mutable identity copy if we need mutable operations on the matrices
@@ -3600,7 +3696,7 @@ define('DOT/Bounds2',['require','ASSERT/assert','DOT/dot','DOT/Vector2'], functi
   require( 'DOT/Vector2' );
   
   // not using x,y,width,height so that it can handle infinity-based cases in a better way
-  dot.Bounds2 = function( minX, minY, maxX, maxY ) {
+  dot.Bounds2 = function Bounds2( minX, minY, maxX, maxY ) {
     assert && assert( maxY !== undefined, 'Bounds2 requires 4 parameters' );
     this.minX = minX;
     this.minY = minY;
@@ -3627,6 +3723,9 @@ define('DOT/Bounds2',['require','ASSERT/assert','DOT/dot','DOT/Vector2'], functi
     
     getY: function() { return this.minY; },
     get y() { return this.getY(); },
+    
+    getCenter: function() { return new dot.Vector2( this.getCenterX(), this.getCenterY() ); },
+    get center() { return this.getCenter(); },
     
     getCenterX: function() { return ( this.maxX + this.minX ) / 2; },
     get centerX() { return this.getCenterX(); },
@@ -4643,6 +4742,7 @@ define('SCENERY/nodes/Node',['require','ASSERT/assert','DOT/Bounds2','DOT/Transf
      */
     dispatchEvent: function( type, args ) {
       var trail = new scenery.Trail();
+      trail.setMutable(); // don't allow this trail to be set as immutable for storage
       
       function recursiveEventDispatch( node ) {
         trail.addAncestor( node );
@@ -4664,6 +4764,8 @@ define('SCENERY/nodes/Node',['require','ASSERT/assert','DOT/Bounds2','DOT/Transf
     // dispatches events with the transform computed from parent of the "root" to the local frame
     dispatchEventWithTransform: function( type, args ) {
       var trail = new scenery.Trail();
+      trail.setMutable(); // don't allow this trail to be set as immutable for storage
+      
       var transformStack = [ new Transform3() ];
       
       function recursiveEventDispatch( node ) {
@@ -4887,6 +4989,15 @@ define('SCENERY/nodes/Node',['require','ASSERT/assert','DOT/Bounds2','DOT/Transf
     setRight: function( right ) {
       this.translate( right - this.getRight(), 0, true );
       return this; // allow chaining
+    },
+    
+    getCenter: function() {
+      return this.getBounds().getCenter();
+    },
+    
+    setCenter: function( center ) {
+      this.translate( center.minus( this.getCenter() ) );
+      return this;
     },
     
     getCenterX: function() {
@@ -5116,6 +5227,106 @@ define('SCENERY/nodes/Node',['require','ASSERT/assert','DOT/Bounds2','DOT/Transf
       return trail;
     },
     
+    // all nodes in the connected component, returned in an arbitrary order
+    getConnectedNodes: function() {
+      var result = [];
+      var fresh = this._children.concat( this._parents ).concat( this );
+      while ( fresh.length ) {
+        var node = fresh.pop();
+        if ( !_.contains( result, node ) ) {
+          result.push( node );
+          fresh = fresh.concat( node._children, node._parents );
+        }
+      }
+      return result;
+    },
+    
+    getTopologicallySortedNodes: function() {
+      // see http://en.wikipedia.org/wiki/Topological_sorting
+      var edges = {};
+      var s = [];
+      var l = [];
+      var n;
+      _.each( this.getConnectedNodes(), function( node ) {
+        edges[node.id] = {};
+        _.each( node.children, function( m ) {
+          edges[node.id][m.id] = true;
+        } );
+        if ( !node.parents.length ) {
+          s.push( node );
+        }
+      } );
+      function handleChild( m ) {
+        delete edges[n.id][m.id];
+        if ( _.every( edges, function( children ) { return !children[m.id]; } ) ) {
+          // there are no more edges to m
+          s.push( m );
+        }
+      }
+      
+      while ( s.length ) {
+        n = s.pop();
+        l.push( n );
+        
+        _.each( n.children, handleChild );
+      }
+      
+      // ensure that there are no edges left, since then it would contain a circular reference
+      assert && assert( _.every( edges, function( children ) {
+        return _.every( children, function( final ) { return false; } );
+      } ), 'circular reference check' );
+      
+      return l;
+    },
+    
+    // verify that this.addChild( child ) it wouldn't cause circular references
+    canAddChild: function( child ) {
+      if ( this === child || _.contains( this.children, child ) ) {
+        return false;
+      }
+      
+      // see http://en.wikipedia.org/wiki/Topological_sorting
+      // TODO: remove duplication with above handling?
+      var edges = {};
+      var s = [];
+      var l = [];
+      var n;
+      _.each( this.getConnectedNodes().concat( child.getConnectedNodes() ), function( node ) {
+        edges[node.id] = {};
+        _.each( node.children, function( m ) {
+          edges[node.id][m.id] = true;
+        } );
+        if ( !node.parents.length && node !== child ) {
+          s.push( node );
+        }
+      } );
+      edges[this.id][child.id] = true; // add in our 'new' edge
+      function handleChild( m ) {
+        delete edges[n.id][m.id];
+        if ( _.every( edges, function( children ) { return !children[m.id]; } ) ) {
+          // there are no more edges to m
+          s.push( m );
+        }
+      }
+      
+      while ( s.length ) {
+        n = s.pop();
+        l.push( n );
+        
+        _.each( n.children, handleChild );
+        
+        // handle our new edge
+        if ( n === this ) {
+          handleChild( child );
+        }
+      }
+      
+      // ensure that there are no edges left, since then it would contain a circular reference
+      return _.every( edges, function( children ) {
+        return _.every( children, function( final ) { return false; } );
+      } );
+    },
+    
     debugText: function() {
       var startPointer = new scenery.TrailPointer( new scenery.Trail( this ), true );
       var endPointer = new scenery.TrailPointer( new scenery.Trail( this ), false );
@@ -5332,6 +5543,9 @@ define('SCENERY/nodes/Node',['require','ASSERT/assert','DOT/Bounds2','DOT/Transf
     set bottom( value ) { this.setBottom( value ); },
     get bottom() { return this.getBottom(); },
     
+    set center( value ) { this.setCenter( value ); },
+    get center() { return this.getCenter(); },
+    
     set centerX( value ) { this.setCenterX( value ); },
     get centerX() { return this.getCenterX(); },
     
@@ -5369,9 +5583,9 @@ define('SCENERY/nodes/Node',['require','ASSERT/assert','DOT/Bounds2','DOT/Transf
       return this; // allow chaining
     },
     
-    toString: function( spaces ) {
+    toString: function( spaces, includeChildren ) {
       spaces = spaces || '';
-      var props = this.getPropString( spaces + '  ' );
+      var props = this.getPropString( spaces + '  ', includeChildren === undefined ? true : includeChildren );
       return spaces + this.getBasicConstructor( props ? ( '\n' + props + '\n' + spaces ) : '' );
     },
     
@@ -5379,7 +5593,7 @@ define('SCENERY/nodes/Node',['require','ASSERT/assert','DOT/Bounds2','DOT/Transf
       return 'new scenery.Node( {' + propLines + '} )';
     },
     
-    getPropString: function( spaces ) {
+    getPropString: function( spaces, includeChildren ) {
       var self = this;
       
       var result = '';
@@ -5394,7 +5608,7 @@ define('SCENERY/nodes/Node',['require','ASSERT/assert','DOT/Bounds2','DOT/Transf
         }
       }
       
-      if ( this._children.length ) {
+      if ( this._children.length && includeChildren ) {
         var childString = '';
         _.each( this._children, function( child ) {
           if ( childString ) {
@@ -5449,7 +5663,7 @@ define('SCENERY/nodes/Node',['require','ASSERT/assert','DOT/Bounds2','DOT/Transf
    * TODO: move fill / stroke setting to mixins
    */
   Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
-                                  'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
+                                  'left', 'right', 'top', 'bottom', 'center', 'centerX', 'centerY', 'renderer', 'rendererOptions',
                                   'layerSplit', 'layerSplitBefore', 'layerSplitAfter' ];
   
   Node.prototype._supportedRenderers = [];
@@ -5486,6 +5700,13 @@ define('SCENERY/util/Trail',['require','ASSERT/assert','ASSERT/assert','DOT/Tran
   // require( 'SCENERY/util/TrailPointer' );
   
   scenery.Trail = function( nodes ) {
+    /*
+     * Controls the immutability of the trail.
+     * If set to true, add/remove descendant/ancestor should fail if assertions are enabled
+     * Use setImmutable() or setMutable() to signal a specific type of protection, so it cannot be changed later
+     */
+    this.immutable = undefined;
+    
     if ( nodes instanceof Trail ) {
       // copy constructor (takes advantage of already built index information)
       var otherTrail = nodes;
@@ -5565,6 +5786,8 @@ define('SCENERY/util/Trail',['require','ASSERT/assert','ASSERT/assert','DOT/Tran
     },
     
     addAncestor: function( node, index ) {
+      assert && assert( !this.immutable, 'cannot modify an immutable Trail with addAncestor' );
+      
       var oldRoot = this.nodes[0];
       
       this.nodes.unshift( node );
@@ -5578,6 +5801,8 @@ define('SCENERY/util/Trail',['require','ASSERT/assert','ASSERT/assert','DOT/Tran
     },
     
     removeAncestor: function() {
+      assert && assert( !this.immutable, 'cannot modify an immutable Trail with removeAncestor' );
+      
       this.nodes.shift();
       if ( this.indices.length ) {
         this.indices.shift();
@@ -5589,6 +5814,8 @@ define('SCENERY/util/Trail',['require','ASSERT/assert','ASSERT/assert','DOT/Tran
     },
     
     addDescendant: function( node, index ) {
+      assert && assert( !this.immutable, 'cannot modify an immutable Trail with addDescendant' );
+      
       var parent = this.lastNode();
       
       this.nodes.push( node );
@@ -5602,6 +5829,8 @@ define('SCENERY/util/Trail',['require','ASSERT/assert','ASSERT/assert','DOT/Tran
     },
     
     removeDescendant: function() {
+      assert && assert( !this.immutable, 'cannot modify an immutable Trail with removeDescendant' );
+      
       this.nodes.pop();
       if ( this.indices.length ) {
         this.indices.pop();
@@ -5621,6 +5850,24 @@ define('SCENERY/util/Trail',['require','ASSERT/assert','ASSERT/assert','DOT/Tran
           this.indices[i-1] = _.indexOf( this.nodes[i-1]._children, this.nodes[i] );
         }
       }
+    },
+    
+    setImmutable: function() {
+      assert && assert( this.immutable !== false, 'A trail cannot be made immutable after being flagged as mutable' );
+      
+      this.immutable = true;
+      
+      // TODO: consider setting mutators to null here instead of the function call check (for performance, and profile the differences)
+      
+      return this; // allow chaining
+    },
+    
+    setMutable: function() {
+      assert && assert( this.immutable !== true, 'A trail cannot be made mutable after being flagged as immutable' );
+      
+      this.immutable = false;
+      
+      return this; // allow chaining
     },
     
     areIndicesValid: function() {
@@ -5777,8 +6024,8 @@ define('SCENERY/util/Trail',['require','ASSERT/assert','ASSERT/assert','DOT/Tran
       assert && assert( !this.isEmpty(), 'cannot compare with an empty trail' );
       assert && assert( !other.isEmpty(), 'cannot compare with an empty trail' );
       assert && assert( this.nodes[0] === other.nodes[0], 'for Trail comparison, trails must have the same root node' );
-      assertExtra && assertExtra( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed' );
-      assertExtra && assertExtra( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed' );
+      assertExtra && assertExtra( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed on ' + this.toString() );
+      assertExtra && assertExtra( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed on ' + other.toString() );
       
       var minNodeIndex = Math.min( this.indices.length, other.indices.length );
       for ( var i = 0; i < minNodeIndex; i++ ) {
@@ -5799,6 +6046,14 @@ define('SCENERY/util/Trail',['require','ASSERT/assert','ASSERT/assert','DOT/Tran
       } else {
         return 0;
       }
+    },
+    
+    isBefore: function( other ) {
+      return this.compare( other ) === -1;
+    },
+    
+    isAfter: function( other ) {
+      return this.compare( other ) === 1;
     },
     
     localToGlobalPoint: function( point ) {
@@ -5833,7 +6088,7 @@ define('SCENERY/util/Trail',['require','ASSERT/assert','ASSERT/assert','DOT/Tran
   };
   
   // like eachTrailBetween, but only fires for painted trails
-  Trail.eachPaintedTrailbetween = function( a, b, callback, excludeEndTrails, scene ) {
+  Trail.eachPaintedTrailBetween = function( a, b, callback, excludeEndTrails, scene ) {
     Trail.eachTrailBetween( a, b, function( trail ) {
       if ( trail && trail.isPainted() ) {
         callback( trail );
@@ -6749,13 +7004,14 @@ define('KITE/segments/Segment',['require','ASSERT/assert','KITE/kite'], function
      * positionAt( t )          - returns the position parametrically, with 0 <= t <= 1. this does NOT guarantee a constant magnitude tangent... don't feel like adding elliptical functions yet!
      * tangentAt( t )           - returns the non-normalized tangent (dx/dt, dy/dt) parametrically, with 0 <= t <= 1.
      * curvatureAt( t )         - returns the signed curvature (positive for visual clockwise - mathematical counterclockwise)
-     * toPieces                 - returns an array of pieces that are equivalent to this segment, assuming start points are preserved
-     *                              TODO: is toPieces that valuable? it doesn't seem to have a strict guarantee on checking what the last segment did right now
-     * getSVGPathFragment       - returns a string containing the SVG path. assumes that the start point is already provided, so anything that calls this needs to put the M calls first
-     * strokeLeft( lineWidth )  - returns an array of pieces that will draw an offset curve on the logical left side
-     * strokeRight( lineWidth ) - returns an array of pieces that will draw an offset curve on the logical right side
+     * getSVGPathFragment()     - returns a string containing the SVG path. assumes that the start point is already provided, so anything that calls this needs to put the M calls first
+     * strokeLeft( lineWidth )  - returns an array of segments that will draw an offset curve on the logical left side
+     * strokeRight( lineWidth ) - returns an array of segments that will draw an offset curve on the logical right side
      * intersectsBounds         - whether this segment intersects the specified bounding box (not just the segment's bounding box, but the actual segment)
      * windingIntersection      - returns the winding number for intersection with a ray
+     *
+     * writeToContext( context ) - draws the segment to the 2D Canvas context, assuming the context's current location is already at the start point
+     * transformed( matrix )     - returns a new segment that represents this segment after transformation by the matrix
      */
   };
   var Segment = kite.Segment;
@@ -6766,43 +7022,12 @@ define('KITE/segments/Segment',['require','ASSERT/assert','KITE/kite'], function
 // Copyright 2002-2012, University of Colorado
 
 /**
- * Represents an immutable higher-level command for Shape, and generally mimics the Canvas drawing api.
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define('KITE/pieces/Piece',['require','ASSERT/assert','KITE/kite'], function( require ) {
-  
-  
-  var assert = require( 'ASSERT/assert' )( 'kite' );
-  
-  var kite = require( 'KITE/kite' );
-  
-  kite.Piece = {
-    /*
-     * Will contain (for pieces):
-     * methods:
-     * writeToContext( context ) - Executes this drawing command directly on a Canvas context
-     * transformed( matrix )     - Returns a transformed copy of this piece
-     * applyPiece( shape )       - Applies this piece to a shape, essentially internally executing the Canvas api and creating subpaths and segments.
-     *                             This is necessary, since pieces like Rect can actually contain many more than one segment, and drawing pieces depends
-     *                             on context / subpath state.
-     */
-  };
-  var Piece = kite.Piece;
-  
-  return Piece;
-} );
-
-// Copyright 2002-2012, University of Colorado
-
-/**
  * Linear segment
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define('KITE/segments/Line',['require','ASSERT/assert','KITE/kite','DOT/Bounds2','DOT/Util','KITE/segments/Segment','KITE/pieces/Piece'], function( require ) {
+define('KITE/segments/Line',['require','ASSERT/assert','KITE/kite','DOT/Bounds2','DOT/Util','KITE/segments/Segment'], function( require ) {
   
   
   var assert = require( 'ASSERT/assert' )( 'kite' );
@@ -6813,9 +7038,8 @@ define('KITE/segments/Line',['require','ASSERT/assert','KITE/kite','DOT/Bounds2'
   var lineLineIntersection = require( 'DOT/Util' ).lineLineIntersection;
   
   var Segment = require( 'KITE/segments/Segment' );
-  var Piece = require( 'KITE/pieces/Piece' );
 
-  Segment.Line = function( start, end ) {
+  Segment.Line = function Line( start, end ) {
     this.start = start;
     this.end = end;
     
@@ -6846,20 +7070,18 @@ define('KITE/segments/Line',['require','ASSERT/assert','KITE/kite','DOT/Bounds2'
       return 0; // no curvature on a straight line segment
     },
     
-    toPieces: function() {
-      return [ new Piece.LineTo( this.end ) ];
-    },
-    
     getSVGPathFragment: function() {
       return 'L ' + this.end.x + ' ' + this.end.y;
     },
     
     strokeLeft: function( lineWidth ) {
-      return [ new Piece.LineTo( this.end.plus( this.endTangent.perpendicular().negated().times( lineWidth / 2 ) ) ) ];
+      var offset = this.endTangent.perpendicular().negated().times( lineWidth / 2 );
+      return [new Segment.Line( this.start.plus( offset ), this.end.plus( offset ) )];
     },
     
     strokeRight: function( lineWidth ) {
-      return [ new Piece.LineTo( this.start.plus( this.startTangent.perpendicular().times( lineWidth / 2 ) ) ) ];
+      var offset = this.startTangent.perpendicular().times( lineWidth / 2 );
+      return [new Segment.Line( this.end.plus( offset ), this.start.plus( offset ) )];
     },
     
     intersectsBounds: function( bounds ) {
@@ -6913,567 +7135,19 @@ define('KITE/segments/Line',['require','ASSERT/assert','KITE/kite','DOT/Bounds2'
       } else {
         return 0;
       }
+    },
+    
+    // assumes the current position is at start
+    writeToContext: function( context ) {
+      context.lineTo( this.end.x, this.end.y );
+    },
+    
+    transformed: function( matrix ) {
+      return new Segment.Line( matrix.timesVector2( this.start ), matrix.timesVector2( this.end ) );
     }
   };
   
   return Segment.Line;
-} );
-
-// Copyright 2002-2012, University of Colorado
-
-/**
- * A Canvas-style stateful (mutable) subpath, which tracks segments in addition to the points.
- *
- * See http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#concept-path
- * for the path / subpath Canvas concept.
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define('KITE/util/Subpath',['require','ASSERT/assert','KITE/kite','KITE/segments/Line'], function( require ) {
-  
-  
-  var assert = require( 'ASSERT/assert' )( 'kite' );
-  
-  var kite = require( 'KITE/kite' );
-  
-  require( 'KITE/segments/Line' );
-  
-  kite.Subpath = function() {
-    this.points = [];
-    this.segments = [];
-    this.closed = false;
-  };
-  var Subpath = kite.Subpath;
-  Subpath.prototype = {
-    addPoint: function( point ) {
-      this.points.push( point );
-    },
-    
-    addSegment: function( segment ) {
-      if ( !segment.invalid ) {
-        assert && assert( segment.start.isFinite(), 'Segment start is infinite' );
-        assert && assert( segment.end.isFinite(), 'Segment end is infinite' );
-        assert && assert( segment.startTangent.isFinite(), 'Segment startTangent is infinite' );
-        assert && assert( segment.endTangent.isFinite(), 'Segment endTangent is infinite' );
-        assert && assert( segment.bounds.isEmpty() || segment.bounds.isFinite(), 'Segment bounds is infinite and non-empty' );
-        this.segments.push( segment );
-      }
-    },
-    
-    close: function() {
-      this.closed = true;
-    },
-    
-    getLength: function() {
-      return this.points.length;
-    },
-    
-    getFirstPoint: function() {
-      return _.first( this.points );
-    },
-    
-    getLastPoint: function() {
-      return _.last( this.points );
-    },
-    
-    getFirstSegment: function() {
-      return _.first( this.segments );
-    },
-    
-    getLastSegment: function() {
-      return _.last( this.segments );
-    },
-    
-    isDrawable: function() {
-      return this.segments.length > 0;
-    },
-    
-    isClosed: function() {
-      return this.closed;
-    },
-    
-    hasClosingSegment: function() {
-      return !this.getFirstPoint().equalsEpsilon( this.getLastPoint(), 0.000000001 );
-    },
-    
-    getClosingSegment: function() {
-      assert && assert( this.hasClosingSegment(), 'Implicit closing segment unnecessary on a fully closed path' );
-      return new kite.Segment.Line( this.getLastPoint(), this.getFirstPoint() );
-    }
-  };
-  
-  return kite.Subpath;
-} );
-
-//jshint -W018
-// Copyright 2002-2012, University of Colorado
-
-/**
- * Styles needed to determine a stroked line shape.
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define('KITE/util/LineStyles',['require','ASSERT/assert','KITE/kite'], function( require ) {
-  
-  
-  var assert = require( 'ASSERT/assert' )( 'kite' );
-  
-  var kite = require( 'KITE/kite' );
-  
-  kite.LineStyles = function( args ) {
-    if ( args === undefined ) {
-      args = {};
-    }
-    this.lineWidth = args.lineWidth !== undefined ? args.lineWidth : 1;
-    this.lineCap = args.lineCap !== undefined ? args.lineCap : 'butt'; // butt, round, square
-    this.lineJoin = args.lineJoin !== undefined ? args.lineJoin : 'miter'; // miter, round, bevel
-    this.lineDash = args.lineDash !== undefined ? args.lineDash : null; // null is default, otherwise an array of numbers
-    this.lineDashOffset = args.lineDashOffset !== undefined ? args.lineDashOffset : 0; // 0 default, any number
-    this.miterLimit = args.miterLimit !== undefined ? args.miterLimit : 10; // see https://svgwg.org/svg2-draft/painting.html for miterLimit computations
-  };
-  var LineStyles = kite.LineStyles;
-  LineStyles.prototype = {
-    constructor: LineStyles,
-    
-    equals: function( other ) {
-      var typical = this.lineWidth === other.lineWidth &&
-                    this.lineCap === other.lineCap &&
-                    this.lineJoin === other.lineJoin &&
-                    this.miterLimit === other.miterLimit &&
-                    this.lineDashOffset === other.lineDashOffset;
-      if ( !typical ) {
-        return false;
-      }
-      
-      // now we need to compare the line dashes
-      /* jshint -W018 */
-      //jshint -W018
-      if ( !this.lineDash !== !other.lineDash ) {
-        // one is defined, the other is not
-        return false;
-      }
-      
-      if ( this.lineDash ) {
-        if ( this.lineDash.length !== other.lineDash.length ) {
-          return false;
-        }
-        for ( var i = 0; i < this.lineDash.length; i++ ) {
-          if ( this.lineDash[i] !== other.lineDash[i] ) {
-            return false;
-          }
-        }
-        return true;
-      } else {
-        // both have no line dash, so they are equal
-        return true;
-      }
-    }
-  };
-  
-  return kite.LineStyles;
-} );
-
-// Copyright 2002-2012, University of Colorado
-
-/**
- * Elliptical arc segment
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define('KITE/segments/EllipticalArc',['require','ASSERT/assert','KITE/kite','DOT/Vector2','DOT/Bounds2','DOT/Matrix3','DOT/Transform3','DOT/Util','KITE/segments/Segment','KITE/pieces/Piece','KITE/util/Subpath'], function( require ) {
-  
-  
-  var assert = require( 'ASSERT/assert' )( 'kite' );
-
-  var kite = require( 'KITE/kite' );
-  
-  var Vector2 = require( 'DOT/Vector2' );
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var Matrix3 = require( 'DOT/Matrix3' );
-  var Transform3 = require( 'DOT/Transform3' );
-  var toDegrees = require( 'DOT/Util' ).toDegrees;
-
-  var Segment = require( 'KITE/segments/Segment' );
-  var Piece = require( 'KITE/pieces/Piece' );
-  require( 'KITE/util/Subpath' );
-
-  // TODO: notes at http://www.w3.org/TR/SVG/implnote.html#PathElementImplementationNotes
-  // Canvas notes at http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-ellipse
-  Segment.EllipticalArc = function( center, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise ) {
-    this.center = center;
-    this.radiusX = radiusX;
-    this.radiusY = radiusY;
-    this.rotation = rotation;
-    this.startAngle = startAngle;
-    this.endAngle = endAngle;
-    this.anticlockwise = anticlockwise;
-    
-    this.unitTransform = Segment.EllipticalArc.computeUnitTransform( center, radiusX, radiusY, rotation );
-    
-    this.start = this.positionAtAngle( startAngle );
-    this.end = this.positionAtAngle( endAngle );
-    this.startTangent = this.tangentAtAngle( startAngle ).normalized();
-    this.endTangent = this.tangentAtAngle( endAngle ).normalized();
-    
-    if ( radiusX === 0 || radiusY === 0 || startAngle === endAngle ) {
-      this.invalid = true;
-      return;
-    }
-    
-    if ( radiusX < radiusY ) {
-      // TODO: check this
-      throw new Error( 'Not verified to work if radiusX < radiusY' );
-    }
-    
-    // constraints shared with Segment.Arc
-    assert && assert( !( ( !anticlockwise && endAngle - startAngle <= -Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle <= -Math.PI * 2 ) ), 'Not handling elliptical arcs with start/end angles that show differences in-between browser handling' );
-    assert && assert( !( ( !anticlockwise && endAngle - startAngle > Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle > Math.PI * 2 ) ), 'Not handling elliptical arcs with start/end angles that show differences in-between browser handling' );
-    
-    var isFullPerimeter = ( !anticlockwise && endAngle - startAngle >= Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle >= Math.PI * 2 );
-    
-    // compute an angle difference that represents how "much" of the circle our arc covers
-    this.angleDifference = this.anticlockwise ? this.startAngle - this.endAngle : this.endAngle - this.startAngle;
-    if ( this.angleDifference < 0 ) {
-      this.angleDifference += Math.PI * 2;
-    }
-    assert && assert( this.angleDifference >= 0 ); // now it should always be zero or positive
-    
-    // a unit arg segment that we can map to our ellipse. useful for hit testing and such.
-    this.unitArcSegment = new Segment.Arc( Vector2.ZERO, 1, startAngle, endAngle, anticlockwise );
-    
-    this.bounds = Bounds2.NOTHING;
-    this.bounds = this.bounds.withPoint( this.start );
-    this.bounds = this.bounds.withPoint( this.end );
-    
-    // for bounds computations
-    var that = this;
-    function boundsAtAngle( angle ) {
-      if ( that.containsAngle( angle ) ) {
-        // the boundary point is in the arc
-        that.bounds = that.bounds.withPoint( that.positionAtAngle( angle ) );
-      }
-    }
-    
-    // if the angles are different, check extrema points
-    if ( startAngle !== endAngle ) {
-      // solve the mapping from the unit circle, find locations where a coordinate of the gradient is zero.
-      // we find one extrema point for both x and y, since the other two are just rotated by pi from them.
-      var xAngle = Math.atan( -( radiusY / radiusX ) * Math.tan( rotation ) );
-      var yAngle = Math.atan( ( radiusY / radiusX ) / Math.tan( rotation ) );
-      
-      // check all of the extrema points
-      boundsAtAngle( xAngle );
-      boundsAtAngle( xAngle + Math.PI );
-      boundsAtAngle( yAngle );
-      boundsAtAngle( yAngle + Math.PI );
-    }
-  };
-  Segment.EllipticalArc.prototype = {
-    constructor: Segment.EllipticalArc,
-    
-    angleAt: function( t ) {
-      if ( this.anticlockwise ) {
-        // angle is 'decreasing'
-        // -2pi <= end - start < 2pi
-        if ( this.startAngle > this.endAngle ) {
-          return this.startAngle + ( this.endAngle - this.startAngle ) * t;
-        } else if ( this.startAngle < this.endAngle ) {
-          return this.startAngle + ( -Math.PI * 2 + this.endAngle - this.startAngle ) * t;
-        } else {
-          // equal
-          return this.startAngle;
-        }
-      } else {
-        // angle is 'increasing'
-        // -2pi < end - start <= 2pi
-        if ( this.startAngle < this.endAngle ) {
-          return this.startAngle + ( this.endAngle - this.startAngle ) * t;
-        } else if ( this.startAngle > this.endAngle ) {
-          return this.startAngle + ( Math.PI * 2 + this.endAngle - this.startAngle ) * t;
-        } else {
-          // equal
-          return this.startAngle;
-        }
-      }
-    },
-    
-    positionAt: function( t ) {
-      return this.positionAtAngle( this.angleAt( t ) );
-    },
-    
-    tangentAt: function( t ) {
-      return this.tangentAtAngle( this.angleAt( t ) );
-    },
-    
-    curvatureAt: function( t ) {
-      // see http://mathworld.wolfram.com/Ellipse.html (59)
-      var angle = this.angleAt( t );
-      var aq = this.radiusX * Math.sin( angle );
-      var bq = this.radiusY * Math.cos( angle );
-      var denominator = Math.pow( bq * bq + aq * aq, 3/2 );
-      return ( this.anticlockwise ? -1 : 1 ) * this.radiusX * this.radiusY / denominator;
-    },
-    
-    positionAtAngle: function( angle ) {
-      return this.unitTransform.transformPosition2( Vector2.createPolar( 1, angle ) );
-    },
-    
-    tangentAtAngle: function( angle ) {
-      var normal = this.unitTransform.transformNormal2( Vector2.createPolar( 1, angle ) );
-      
-      return this.anticlockwise ? normal.perpendicular() : normal.perpendicular().negated();
-    },
-    
-    // TODO: refactor? exact same as Segment.Arc
-    containsAngle: function( angle ) {
-      // transform the angle into the appropriate coordinate form
-      // TODO: check anticlockwise version!
-      var normalizedAngle = this.anticlockwise ? angle - this.endAngle : angle - this.startAngle;
-      
-      // get the angle between 0 and 2pi
-      var positiveMinAngle = normalizedAngle % ( Math.PI * 2 );
-      // check this because modular arithmetic with negative numbers reveal a negative number
-      if ( positiveMinAngle < 0 ) {
-        positiveMinAngle += Math.PI * 2;
-      }
-      
-      return positiveMinAngle <= this.angleDifference;
-    },
-    
-    toPieces: function() {
-      return [ new Piece.EllipticalArc( this.center, this.radiusX, this.radiusY, this.rotation, this.startAngle, this.endAngle, this.anticlockwise ) ];
-    },
-    
-    // discretizes the elliptical arc and returns an offset curve as a list of lineTos
-    offsetTo: function( r, reverse ) {
-      // how many segments to create (possibly make this more adaptive?)
-      var quantity = 32;
-      
-      var result = [];
-      for ( var i = 1; i < quantity; i++ ) {
-        var ratio = i / ( quantity - 1 );
-        if ( reverse ) {
-          ratio = 1 - ratio;
-        }
-        var angle = this.angleAt( ratio );
-        
-        var point = this.positionAtAngle( angle ).plus( this.tangentAtAngle( angle ).perpendicular().normalized().times( r ) );
-        result.push( new Piece.LineTo( point ) );
-      }
-      
-      return result;
-    },
-    
-    getSVGPathFragment: function() {
-      // see http://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands for more info
-      // rx ry x-axis-rotation large-arc-flag sweep-flag x y
-      var epsilon = 0.01; // allow some leeway to render things as 'almost circles'
-      var sweepFlag = this.anticlockwise ? '0' : '1';
-      var largeArcFlag;
-      var degreesRotation = toDegrees( this.rotation ); // bleh, degrees?
-      if ( this.angleDifference < Math.PI * 2 - epsilon ) {
-        largeArcFlag = this.angleDifference < Math.PI ? '0' : '1';
-        return 'A ' + this.radiusX + ' ' + this.radiusY + ' ' + degreesRotation + ' ' + largeArcFlag + ' ' + sweepFlag + ' ' + this.end.x + ' ' + this.end.y;
-      } else {
-        // ellipse (or almost-ellipse) case needs to be handled differently
-        // since SVG will not be able to draw (or know how to draw) the correct circle if we just have a start and end, we need to split it into two circular arcs
-        
-        // get the angle that is between and opposite of both of the points
-        var splitOppositeAngle = ( this.startAngle + this.endAngle ) / 2; // this _should_ work for the modular case?
-        var splitPoint = this.positionAtAngle( splitOppositeAngle );
-        
-        largeArcFlag = '0'; // since we split it in 2, it's always the small arc
-        
-        var firstArc = 'A ' + this.radiusX + ' ' + this.radiusY + ' ' + degreesRotation + ' ' + largeArcFlag + ' ' + sweepFlag + ' ' + splitPoint.x + ' ' + splitPoint.y;
-        var secondArc = 'A ' + this.radiusX + ' ' + this.radiusY + ' ' + degreesRotation + ' ' + largeArcFlag + ' ' + sweepFlag + ' ' + this.end.x + ' ' + this.end.y;
-        
-        return firstArc + ' ' + secondArc;
-      }
-    },
-    
-    strokeLeft: function( lineWidth ) {
-      return this.offsetTo( -lineWidth / 2, false );
-    },
-    
-    strokeRight: function( lineWidth ) {
-      return this.offsetTo( lineWidth / 2, true );
-    },
-    
-    intersectsBounds: function( bounds ) {
-      throw new Error( 'Segment.EllipticalArc.intersectsBounds unimplemented' );
-    },
-    
-    intersection: function( ray ) {
-      // be lazy. transform it into the space of a non-elliptical arc.
-      var unitTransform = this.unitTransform;
-      var rayInUnitCircleSpace = unitTransform.inverseRay2( ray );
-      var hits = this.unitArcSegment.intersection( rayInUnitCircleSpace );
-      
-      return _.map( hits, function( hit ) {
-        var transformedPoint = unitTransform.transformPosition2( hit.point );
-        return {
-          distance: ray.pos.distance( transformedPoint ),
-          point: transformedPoint,
-          normal: unitTransform.inverseNormal2( hit.normal ),
-          wind: hit.wind
-        };
-      } );
-    },
-    
-    // returns the resultant winding number of this ray intersecting this segment.
-    windingIntersection: function( ray ) {
-      // be lazy. transform it into the space of a non-elliptical arc.
-      var rayInUnitCircleSpace = this.unitTransform.inverseRay2( ray );
-      return this.unitArcSegment.windingIntersection( rayInUnitCircleSpace );
-    }
-  };
-  
-  // adapted from http://www.w3.org/TR/SVG/implnote.html#PathElementImplementationNotes
-  // transforms the unit circle onto our ellipse
-  Segment.EllipticalArc.computeUnitTransform = function( center, radiusX, radiusY, rotation ) {
-    return new Transform3( Matrix3.translation( center.x, center.y ) // TODO: convert to Matrix3.translation( this.center) when available
-                                  .timesMatrix( Matrix3.rotation2( rotation ) )
-                                  .timesMatrix( Matrix3.scaling( radiusX, radiusY ) ) );
-  };
-  
-  return Segment.EllipticalArc;
-} );
-
-// Copyright 2002-2012, University of Colorado
-
-/**
- * Elliptical arc piece
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define('KITE/pieces/EllipticalArc',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT/Vector2','DOT/Bounds2','DOT/Ray2','DOT/Matrix3','DOT/Transform3','KITE/pieces/Piece','KITE/segments/EllipticalArc','KITE/segments/Line','KITE/util/Subpath'], function( require ) {
-  
-  
-  var assert = require( 'ASSERT/assert' )( 'kite' );
-  var assertExtra = require( 'ASSERT/assert' )( 'kite.extra', true );
-  
-  var kite = require( 'KITE/kite' );
-  
-  var Vector2 = require( 'DOT/Vector2' );
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var Ray2 = require( 'DOT/Ray2' );
-  var Matrix3 = require( 'DOT/Matrix3' );
-  var Transform3 = require( 'DOT/Transform3' );
-
-  var Piece = require( 'KITE/pieces/Piece' );
-  require( 'KITE/segments/EllipticalArc' );
-  require( 'KITE/segments/Line' );
-  require( 'KITE/util/Subpath' );
-  
-  Piece.EllipticalArc = function( center, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise ) {
-    if ( radiusX < 0 ) {
-      // support this case since we might actually need to handle it inside of strokes?
-      radiusX = -radiusX;
-      startAngle = Math.PI - startAngle;
-      endAngle = Math.PI - endAngle;
-      anticlockwise = !anticlockwise;
-    }
-    if ( radiusY < 0 ) {
-      // support this case since we might actually need to handle it inside of strokes?
-      radiusY = -radiusY;
-      startAngle = -startAngle;
-      endAngle = -endAngle;
-      anticlockwise = !anticlockwise;
-    }
-    if ( radiusX < radiusY ) {
-      // swap radiusX and radiusY internally for consistent Canvas / SVG output
-      rotation += Math.PI / 2;
-      startAngle -= Math.PI / 2;
-      endAngle -= Math.PI / 2;
-      
-      // swap radiusX and radiusY
-      var tmpR = radiusX;
-      radiusX = radiusY;
-      radiusY = tmpR;
-    }
-    this.center = center;
-    this.radiusX = radiusX;
-    this.radiusY = radiusY;
-    this.rotation = rotation;
-    this.startAngle = startAngle;
-    this.endAngle = endAngle;
-    this.anticlockwise = anticlockwise;
-    
-    this.unitTransform = kite.Segment.EllipticalArc.computeUnitTransform( center, radiusX, radiusY, rotation );
-  };
-  Piece.EllipticalArc.prototype = {
-    constructor: Piece.EllipticalArc,
-    
-    writeToContext: function( context ) {
-      if ( context.ellipse ) {
-        context.ellipse( this.center.x, this.center.y, this.radiusX, this.radiusY, this.rotation, this.startAngle, this.endAngle, this.anticlockwise );
-      } else {
-        // fake the ellipse call by using transforms
-        this.unitTransform.getMatrix().canvasAppendTransform( context );
-        context.arc( 0, 0, 1, this.startAngle, this.endAngle, this.anticlockwise );
-        this.unitTransform.getInverse().canvasAppendTransform( context );
-      }
-    },
-    
-    // TODO: test various transform types, especially rotations, scaling, shears, etc.
-    transformed: function( matrix ) {
-      var transformedSemiMajorAxis = matrix.timesVector2( Vector2.createPolar( this.radiusX, this.rotation ) ).minus( matrix.timesVector2( Vector2.ZERO ) );
-      var transformedSemiMinorAxis = matrix.timesVector2( Vector2.createPolar( this.radiusY, this.rotation + Math.PI / 2 ) ).minus( matrix.timesVector2( Vector2.ZERO ) );
-      var rotation = transformedSemiMajorAxis.angle();
-      var radiusX = transformedSemiMajorAxis.magnitude();
-      var radiusY = transformedSemiMinorAxis.magnitude();
-      
-      var reflected = matrix.getDeterminant() < 0;
-      
-      // reverse the 'clockwiseness' if our transform includes a reflection
-      // TODO: check reflections. swapping angle signs should fix clockwiseness
-      var anticlockwise = reflected ? !this.anticlockwise : this.anticlockwise;
-      var startAngle = reflected ? -this.startAngle : this.startAngle;
-      var endAngle = reflected ? -this.endAngle : this.endAngle;
-      
-      return [new Piece.EllipticalArc( matrix.timesVector2( this.center ), radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise )];
-    },
-    
-    applyPiece: function( shape ) {
-      // see http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-arc
-      
-      var ellipticalArc = new kite.Segment.EllipticalArc( this.center, this.radiusX, this.radiusY, this.rotation, this.startAngle, this.endAngle, this.anticlockwise );
-      
-      // we are assuming that the normal conditions were already met (or exceptioned out) so that these actually work with canvas
-      var startPoint = ellipticalArc.start;
-      var endPoint = ellipticalArc.end;
-      
-      // if there is already a point on the subpath, and it is different than our starting point, draw a line between them
-      if ( shape.hasSubpaths() && shape.getLastSubpath().getLength() > 0 && !startPoint.equals( shape.getLastSubpath().getLastPoint(), 0 ) ) {
-        shape.getLastSubpath().addSegment( new kite.Segment.Line( shape.getLastSubpath().getLastPoint(), startPoint ) );
-      }
-      
-      if ( !shape.hasSubpaths() ) {
-        shape.addSubpath( new kite.Subpath() );
-      }
-      
-      shape.getLastSubpath().addSegment( ellipticalArc );
-      
-      // technically the Canvas spec says to add the start point, so we do this even though it is probably completely unnecessary (there is no conditional)
-      shape.getLastSubpath().addPoint( startPoint );
-      shape.getLastSubpath().addPoint( endPoint );
-      
-      // and update the bounds
-      if ( !ellipticalArc.invalid ) {
-        shape.bounds = shape.bounds.union( ellipticalArc.bounds );
-      }
-    },
-    
-    toString: function() {
-      return 'ellipticalArc( ' + this.center.x + ', ' + this.center.y + ', ' + this.radiusX + ', ' + this.radiusY + ', ' + this.rotation + ', ' + this.startAngle + ', ' + this.endAngle + ', ' + this.anticlockwise + ' )';
-    }
-  };
-  
-  return Piece.EllipticalArc;
 } );
 
 // Copyright 2002-2012, University of Colorado
@@ -7484,7 +7158,7 @@ define('KITE/pieces/EllipticalArc',['require','ASSERT/assert','ASSERT/assert','K
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define('KITE/segments/Arc',['require','ASSERT/assert','KITE/kite','DOT/Vector2','DOT/Bounds2','KITE/segments/Segment','KITE/pieces/Piece'], function( require ) {
+define('KITE/segments/Arc',['require','ASSERT/assert','KITE/kite','DOT/Vector2','DOT/Bounds2','KITE/segments/Segment'], function( require ) {
   
   
   var assert = require( 'ASSERT/assert' )( 'kite' );
@@ -7495,9 +7169,15 @@ define('KITE/segments/Arc',['require','ASSERT/assert','KITE/kite','DOT/Vector2',
   var Bounds2 = require( 'DOT/Bounds2' );
 
   var Segment = require( 'KITE/segments/Segment' );
-  var Piece = require( 'KITE/pieces/Piece' );
 
-  Segment.Arc = function( center, radius, startAngle, endAngle, anticlockwise ) {
+  Segment.Arc = function Arc( center, radius, startAngle, endAngle, anticlockwise ) {
+    if ( radius < 0 ) {
+      // support this case since we might actually need to handle it inside of strokes?
+      radius = -radius;
+      startAngle += Math.PI;
+      endAngle += Math.PI;
+    }
+    
     this.center = center;
     this.radius = radius;
     this.startAngle = startAngle;
@@ -7616,10 +7296,6 @@ define('KITE/segments/Arc',['require','ASSERT/assert','KITE/kite','DOT/Vector2',
       return positiveMinAngle <= this.angleDifference;
     },
     
-    toPieces: function() {
-      return [ new Piece.Arc( this.center, this.radius, this.startAngle, this.endAngle, this.anticlockwise ) ];
-    },
-    
     getSVGPathFragment: function() {
       // see http://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands for more info
       // rx ry x-axis-rotation large-arc-flag sweep-flag x y
@@ -7648,11 +7324,11 @@ define('KITE/segments/Arc',['require','ASSERT/assert','KITE/kite','DOT/Vector2',
     },
     
     strokeLeft: function( lineWidth ) {
-      return [ new Piece.Arc( this.center, this.radius + ( this.anticlockwise ? 1 : -1 ) * lineWidth / 2, this.startAngle, this.endAngle, this.anticlockwise ) ];
+      return [new Segment.Arc( this.center, this.radius + ( this.anticlockwise ? 1 : -1 ) * lineWidth / 2, this.startAngle, this.endAngle, this.anticlockwise )];
     },
     
     strokeRight: function( lineWidth ) {
-      return [ new Piece.Arc( this.center, this.radius + ( this.anticlockwise ? -1 : 1 ) * lineWidth / 2, this.endAngle, this.startAngle, !this.anticlockwise ) ];
+      return [new Segment.Arc( this.center, this.radius + ( this.anticlockwise ? -1 : 1 ) * lineWidth / 2, this.endAngle, this.startAngle, !this.anticlockwise )];
     },
     
     intersectsBounds: function( bounds ) {
@@ -7734,50 +7410,7 @@ define('KITE/segments/Arc',['require','ASSERT/assert','KITE/kite','DOT/Vector2',
         wind += hit.wind;
       } );
       return wind;
-    }
-  };
-  
-  return Segment.Arc;
-} );
-
-// Copyright 2002-2012, University of Colorado
-
-/**
- * Draws an arc.
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define('KITE/pieces/Arc',['require','ASSERT/assert','KITE/kite','DOT/Vector2','KITE/pieces/Piece','KITE/pieces/EllipticalArc','KITE/segments/Line','KITE/segments/Arc','KITE/util/Subpath'], function( require ) {
-  
-  
-  var assert = require( 'ASSERT/assert' )( 'kite' );
-  
-  var kite = require( 'KITE/kite' );
-  
-  var Vector2 = require( 'DOT/Vector2' );
-  
-  var Piece = require( 'KITE/pieces/Piece' );
-  require( 'KITE/pieces/EllipticalArc' );
-  require( 'KITE/segments/Line' );
-  require( 'KITE/segments/Arc' );
-  require( 'KITE/util/Subpath' );
-  
-  Piece.Arc = function( center, radius, startAngle, endAngle, anticlockwise ) {
-    if ( radius < 0 ) {
-      // support this case since we might actually need to handle it inside of strokes?
-      radius = -radius;
-      startAngle += Math.PI;
-      endAngle += Math.PI;
-    }
-    this.center = center;
-    this.radius = radius;
-    this.startAngle = startAngle;
-    this.endAngle = endAngle;
-    this.anticlockwise = anticlockwise;
-  };
-  Piece.Arc.prototype = {
-    constructor: Piece.Arc,
+    },
     
     writeToContext: function( context ) {
       context.arc( this.center.x, this.center.y, this.radius, this.startAngle, this.endAngle, this.anticlockwise );
@@ -7796,98 +7429,2886 @@ define('KITE/pieces/Arc',['require','ASSERT/assert','KITE/kite','DOT/Vector2','K
       if ( scaleVector.x !== scaleVector.y ) {
         var radiusX = scaleVector.x * this.radius;
         var radiusY = scaleVector.y * this.radius;
-        return [new Piece.EllipticalArc( matrix.timesVector2( this.center ), radiusX, radiusY, 0, startAngle, endAngle, anticlockwise )];
+        return new Segment.EllipticalArc( matrix.timesVector2( this.center ), radiusX, radiusY, 0, startAngle, endAngle, anticlockwise );
       } else {
         var radius = scaleVector.x * this.radius;
-        return [new Piece.Arc( matrix.timesVector2( this.center ), radius, startAngle, endAngle, anticlockwise )];
+        return new Segment.Arc( matrix.timesVector2( this.center ), radius, startAngle, endAngle, anticlockwise );
       }
-    },
-    
-    applyPiece: function( shape ) {
-      // see http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-arc
-      
-      var arc = new kite.Segment.Arc( this.center, this.radius, this.startAngle, this.endAngle, this.anticlockwise );
-      
-      // we are assuming that the normal conditions were already met (or exceptioned out) so that these actually work with canvas
-      var startPoint = arc.start;
-      var endPoint = arc.end;
-      
-      // if there is already a point on the subpath, and it is different than our starting point, draw a line between them
-      if ( shape.hasSubpaths() && shape.getLastSubpath().getLength() > 0 && !startPoint.equals( shape.getLastSubpath().getLastPoint(), 0 ) ) {
-        shape.getLastSubpath().addSegment( new kite.Segment.Line( shape.getLastSubpath().getLastPoint(), startPoint ) );
-      }
-      
-      if ( !shape.hasSubpaths() ) {
-        shape.addSubpath( new kite.Subpath() );
-      }
-      
-      shape.getLastSubpath().addSegment( arc );
-      
-      // technically the Canvas spec says to add the start point, so we do this even though it is probably completely unnecessary (there is no conditional)
-      shape.getLastSubpath().addPoint( startPoint );
-      shape.getLastSubpath().addPoint( endPoint );
-      
-      // and update the bounds
-      if ( !arc.invalid ) {
-        shape.bounds = shape.bounds.union( arc.bounds );
-      }
-    },
-    
-    toString: function() {
-      return 'arc( ' + this.center.x + ', ' + this.center.y + ', ' + this.radius + ', ' + this.startAngle + ', ' + this.endAngle + ', ' + this.anticlockwise + ' )';
     }
   };
   
-  return Piece.Arc;
+  return Segment.Arc;
 } );
 
 // Copyright 2002-2012, University of Colorado
 
 /**
- * Closes a subpath
+ * A Canvas-style stateful (mutable) subpath, which tracks segments in addition to the points.
+ *
+ * See http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#concept-path
+ * for the path / subpath Canvas concept.
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define('KITE/pieces/Close',['require','ASSERT/assert','KITE/kite','KITE/pieces/Piece','KITE/util/Subpath'], function( require ) {
+define('KITE/util/Subpath',['require','ASSERT/assert','DOT/Vector2','DOT/Bounds2','DOT/Util','KITE/kite','KITE/segments/Line','KITE/segments/Arc'], function( require ) {
+  
+  
+  var assert = require( 'ASSERT/assert' )( 'kite' );
+  
+  var Vector2 = require( 'DOT/Vector2' );
+  var Bounds2 = require( 'DOT/Bounds2' );
+  var lineLineIntersection = require( 'DOT/Util' ).lineLineIntersection;
+  
+  var kite = require( 'KITE/kite' );
+  
+  require( 'KITE/segments/Line' );
+  require( 'KITE/segments/Arc' );
+  
+  // all arguments optional (they are for the copy() method)
+  kite.Subpath = function Subpath( segments, points, closed ) {
+    this.segments = segments || [];
+    
+    // recombine points if necessary, based off of start points of segments + the end point of the last segment
+    this.points = points || ( ( segments && segments.length ) ? _.map( segments, function( segment ) { return segment.start; } ).concat( segments[segments.length-1].end ) : [] );
+    this.closed = !!closed;
+    
+    // cached stroked shape (so hit testing can be done quickly on stroked shapes)
+    this._strokedSubpaths = null;
+    this._strokedSubpathsComputed = false;
+    this._strokedStyles = null;
+  };
+  var Subpath = kite.Subpath;
+  Subpath.prototype = {
+    copy: function() {
+      return new Subpath( this.segments.slice( 0 ), this.points.slice( 0 ), this.closed );
+    },
+    
+    invalidate: function() {
+      this._strokedSubpathsComputed = false;
+    },
+    
+    addPoint: function( point ) {
+      this.points.push( point );
+      
+      return this; // allow chaining
+    },
+    
+    addSegment: function( segment ) {
+      if ( !segment.invalid ) {
+        assert && assert( segment.start.isFinite(), 'Segment start is infinite' );
+        assert && assert( segment.end.isFinite(), 'Segment end is infinite' );
+        assert && assert( segment.startTangent.isFinite(), 'Segment startTangent is infinite' );
+        assert && assert( segment.endTangent.isFinite(), 'Segment endTangent is infinite' );
+        assert && assert( segment.bounds.isEmpty() || segment.bounds.isFinite(), 'Segment bounds is infinite and non-empty' );
+        this.segments.push( segment );
+        this.invalidate();
+      }
+      
+      return this; // allow chaining
+    },
+    
+    close: function() {
+      this.closed = true;
+    },
+    
+    getLength: function() {
+      return this.points.length;
+    },
+    
+    getFirstPoint: function() {
+      return _.first( this.points );
+    },
+    
+    getLastPoint: function() {
+      return _.last( this.points );
+    },
+    
+    getFirstSegment: function() {
+      return _.first( this.segments );
+    },
+    
+    getLastSegment: function() {
+      return _.last( this.segments );
+    },
+    
+    isDrawable: function() {
+      return this.segments.length > 0;
+    },
+    
+    isClosed: function() {
+      return this.closed;
+    },
+    
+    hasClosingSegment: function() {
+      return !this.getFirstPoint().equalsEpsilon( this.getLastPoint(), 0.000000001 );
+    },
+    
+    getClosingSegment: function() {
+      assert && assert( this.hasClosingSegment(), 'Implicit closing segment unnecessary on a fully closed path' );
+      return new kite.Segment.Line( this.getLastPoint(), this.getFirstPoint() );
+    },
+    
+    writeToContext: function( context ) {
+      if ( this.isDrawable() ) {
+        var startPoint = this.getFirstSegment().start;
+        context.moveTo( startPoint.x, startPoint.y ); // the segments assume the current context position is at their start
+        
+        _.each( this.segments, function( segment ) {
+          segment.writeToContext( context );
+        } );
+        
+        if ( this.closed ) {
+          context.closePath();
+        }
+      }
+    },
+    
+    transformed: function( matrix ) {
+      return new Subpath(
+        _.map( this.segments, function( segment ) { return segment.transformed( matrix ); } ),
+        _.map( this.points, function( point ) { return matrix.timesVector2( point ); } ),
+        this.closed
+      );
+    },
+    
+    computeBounds: function() {
+      return _.reduce( this.segments, function( bounds, segment ) {
+        return bounds.union( segment.bounds );
+      }, Bounds2.NOTHING );
+    },
+    
+    // returns an array of subpaths (one if open, two if closed) that represent a stroked copy of this subpath.
+    stroked: function( lineStyles ) {
+      // non-drawable subpaths convert to empty subpaths
+      if ( !this.isDrawable() ) {
+        return new Subpath();
+      }
+      
+      if ( lineStyles === undefined ) {
+        lineStyles = new kite.LineStyles();
+      }
+      
+      // return a cached version if possible
+      if ( this._strokedSubpathsComputed && this._strokedStyles.equals( lineStyles ) ) {
+        return this._strokedSubpaths;
+      }
+      
+      var lineWidth = lineStyles.lineWidth;
+      
+      // joins two segments together on the logical "left" side, at 'center' (where they meet), and normalized tangent vectors in the direction of the stroking
+      // to join on the "right" side, switch the tangent order and negate them
+      function join( center, fromTangent, toTangent ) {
+        // where our join path starts and ends
+        var fromPoint = center.plus( fromTangent.perpendicular().negated().times( lineWidth / 2 ) );
+        var toPoint = center.plus( toTangent.perpendicular().negated().times( lineWidth / 2 ) );
+        
+        var bevel = ( fromPoint.equals( toPoint ) ? [] : [new kite.Segment.Line( fromPoint, toPoint )] );
+        
+        // only insert a join on the non-acute-angle side
+        if ( fromTangent.perpendicular().dot( toTangent ) > 0 ) {
+          switch( lineStyles.lineJoin ) {
+            case 'round':
+              var fromAngle = fromTangent.angle() + Math.PI / 2;
+              var toAngle = toTangent.angle() + Math.PI / 2;
+              return [new kite.Segment.Arc( center, lineWidth / 2, fromAngle, toAngle, true )];
+            case 'miter':
+              var theta = fromTangent.angleBetween( toTangent.negated() );
+              var notStraight = theta < Math.PI - 0.00001; // if fromTangent is approximately equal to toTangent, just bevel. it will be indistinguishable
+              if ( 1 / Math.sin( theta / 2 ) <= lineStyles.miterLimit && theta < Math.PI - 0.00001 ) {
+                // draw the miter
+                var miterPoint = lineLineIntersection( fromPoint, fromPoint.plus( fromTangent ), toPoint, toPoint.plus( toTangent ) );
+                return [
+                  new kite.Segment.Line( fromPoint, miterPoint ),
+                  new kite.Segment.Line( miterPoint, toPoint )
+                ];
+              } else {
+                // angle too steep, use bevel instead. same as below, but copied for linter
+                return bevel;
+              }
+              break;
+            case 'bevel':
+              return bevel;
+          }
+        } else {
+          // no join necessary here since we have the acute angle. just simple lineTo for now so that the next segment starts from the right place
+          // TODO: can we prevent self-intersection here?
+          return bevel;
+        }
+      }
+      
+      // draws the necessary line cap from the endpoint 'center' in the direction of the tangent
+      function cap( center, tangent ) {
+        var fromPoint = center.plus( tangent.perpendicular().times( -lineWidth / 2 ) );
+        var toPoint = center.plus( tangent.perpendicular().times( lineWidth / 2 ) );
+        
+        switch( lineStyles.lineCap ) {
+          case 'butt':
+            return [new kite.Segment.Line( fromPoint, toPoint )];
+          case 'round':
+            var tangentAngle = tangent.angle();
+            return [new kite.Segment.Arc( center, lineWidth / 2, tangentAngle + Math.PI / 2, tangentAngle - Math.PI / 2, true )];
+          case 'square':
+            var toLeft = tangent.perpendicular().negated().times( lineWidth / 2 );
+            var toRight = tangent.perpendicular().times( lineWidth / 2 );
+            var toFront = tangent.times( lineWidth / 2 );
+            
+            var left = center.plus( toLeft ).plus( toFront );
+            var right = center.plus( toRight ).plus( toFront );
+            return [
+              new kite.Segment.Line( fromPoint, left ),
+              new kite.Segment.Line( left, right ),
+              new kite.Segment.Line( right, toPoint )
+            ];
+        }
+      }
+      
+      var i;
+      var leftSegments = [];
+      var rightSegments = [];
+      var firstSegment = this.getFirstSegment();
+      var lastSegment = this.getLastSegment();
+      
+      function addLeftSegments( segments ) {
+        _.each( segments, function( segment ) { leftSegments.push( segment ); } );
+      }
+      function addRightSegments( segments ) {
+        _.each( segments, function( segment ) { rightSegments.push( segment ); } );
+      }
+      
+      // we don't need to insert an implicit closing segment if the start and end points are the same
+      var alreadyClosed = lastSegment.end.equals( firstSegment.start );
+      // if there is an implicit closing segment
+      var closingSegment = alreadyClosed ? null : new kite.Segment.Line( this.segments[this.segments.length-1].end, this.segments[0].start );
+      
+      // stroke the logical "left" side of our path
+      for ( i = 0; i < this.segments.length; i++ ) {
+        if ( i > 0 ) {
+          addLeftSegments( join( this.segments[i].start, this.segments[i-1].endTangent, this.segments[i].startTangent, true ) );
+        }
+        addLeftSegments( this.segments[i].strokeLeft( lineWidth ) );
+      }
+      
+      // stroke the logical "right" side of our path
+      for ( i = this.segments.length - 1; i >= 0; i-- ) {
+        if ( i < this.segments.length - 1 ) {
+          addRightSegments( join( this.segments[i].end, this.segments[i+1].startTangent.negated(), this.segments[i].endTangent.negated(), false ) );
+        }
+        addRightSegments( this.segments[i].strokeRight( lineWidth ) );
+      }
+      
+      var subpaths;
+      if ( this.closed ) {
+        if ( alreadyClosed ) {
+          // add the joins between the start and end
+          addLeftSegments( join( lastSegment.end, lastSegment.endTangent, firstSegment.startTangent ) );
+          addRightSegments( join( lastSegment.end, firstSegment.startTangent.negated(), lastSegment.endTangent.negated() ) );
+        } else {
+          // logical "left" stroke on the implicit closing segment
+          addLeftSegments( join( closingSegment.start, lastSegment.endTangent, closingSegment.startTangent ) );
+          addLeftSegments( closingSegment.strokeLeft( lineWidth ) );
+          addLeftSegments( join( closingSegment.end, closingSegment.endTangent, firstSegment.startTangent ) );
+          
+          // logical "right" stroke on the implicit closing segment
+          addRightSegments( join( closingSegment.end, firstSegment.startTangent.negated(), closingSegment.endTangent.negated() ) );
+          addRightSegments( closingSegment.strokeRight( lineWidth ) );
+          addRightSegments( join( closingSegment.start, closingSegment.startTangent.negated(), lastSegment.endTangent.negated() ) );
+        }
+        subpaths = [
+          new Subpath( leftSegments, null, true ),
+          new Subpath( rightSegments, null, true )
+        ];
+      } else {
+        subpaths = [
+          new Subpath( leftSegments
+                         .concat( cap( lastSegment.end, lastSegment.endTangent ) )
+                         .concat( rightSegments )
+                         .concat( cap( firstSegment.start, firstSegment.startTangent.negated() ) ),
+                       null, true )
+        ];
+      }
+      
+      this._strokedSubpaths = subpaths;
+      this._strokedSubpathsComputed = true;
+      this._strokedStyles = new kite.LineStyles( lineStyles ); // shallow copy, since we consider linestyles to be mutable
+      
+      return subpaths;
+    }
+  };
+  
+  // TODO: performance / cleanliness to have these as methods instead?
+  function segmentStartLeft( segment, lineWidth ) {
+    assert && assert( lineWidth !== undefined );
+    return segment.start.plus( segment.startTangent.perpendicular().negated().times( lineWidth / 2 ) );
+  }
+  
+  function segmentEndLeft( segment, lineWidth ) {
+    assert && assert( lineWidth !== undefined );
+    return segment.end.plus( segment.endTangent.perpendicular().negated().times( lineWidth / 2 ) );
+  }
+  
+  function segmentStartRight( segment, lineWidth ) {
+    assert && assert( lineWidth !== undefined );
+    return segment.start.plus( segment.startTangent.perpendicular().times( lineWidth / 2 ) );
+  }
+  
+  function segmentEndRight( segment, lineWidth ) {
+    assert && assert( lineWidth !== undefined );
+    return segment.end.plus( segment.endTangent.perpendicular().times( lineWidth / 2 ) );
+  }
+  
+  return kite.Subpath;
+} );
+
+// generated from svgPath.pegjs, with added kite namespace and require.js compatibility
+
+define('KITE/../parser/svgPath',['require','KITE/kite'], function( require ) {
+  
+  var kite = require( 'KITE/kite' );
+  
+  /*
+   * Generated by PEG.js 0.7.0.
+   *
+   * http://pegjs.majda.cz/
+   */
+  
+  function quote(s) {
+    /*
+     * ECMA-262, 5th ed., 7.8.4: All characters may appear literally in a
+     * string literal except for the closing quote character, backslash,
+     * carriage return, line separator, paragraph separator, and line feed.
+     * Any character may appear in the form of an escape sequence.
+     *
+     * For portability, we also escape escape all control and non-ASCII
+     * characters. Note that "\0" and "\v" escape sequences are not used
+     * because JSHint does not like the first and IE the second.
+     */
+     return '"' + s
+      .replace(/\\/g, '\\\\')  // backslash
+      .replace(/"/g, '\\"')    // closing quote character
+      .replace(/\x08/g, '\\b') // backspace
+      .replace(/\t/g, '\\t')   // horizontal tab
+      .replace(/\n/g, '\\n')   // line feed
+      .replace(/\f/g, '\\f')   // form feed
+      .replace(/\r/g, '\\r')   // carriage return
+      .replace(/[\x00-\x07\x0B\x0E-\x1F\x80-\uFFFF]/g, escape)
+      + '"';
+  }
+  
+  kite.svgPath = {
+    /*
+     * Parses the input with a generated parser. If the parsing is successfull,
+     * returns a value explicitly or implicitly specified by the grammar from
+     * which the parser was generated (see |PEG.buildParser|). If the parsing is
+     * unsuccessful, throws |PEG.parser.SyntaxError| describing the error.
+     */
+    parse: function(input, startRule) {
+      var parseFunctions = {
+        "svgPath": parse_svgPath,
+        "movetoDrawtoCommandGroups": parse_movetoDrawtoCommandGroups,
+        "movetoDrawtoCommandGroup": parse_movetoDrawtoCommandGroup,
+        "drawtoCommands": parse_drawtoCommands,
+        "drawtoCommand": parse_drawtoCommand,
+        "moveto": parse_moveto,
+        "movetoArgumentSequence": parse_movetoArgumentSequence,
+        "closepath": parse_closepath,
+        "lineto": parse_lineto,
+        "linetoArgumentSequence": parse_linetoArgumentSequence,
+        "horizontalLineto": parse_horizontalLineto,
+        "horizontalLinetoArgumentSequence": parse_horizontalLinetoArgumentSequence,
+        "verticalLineto": parse_verticalLineto,
+        "verticalLinetoArgumentSequence": parse_verticalLinetoArgumentSequence,
+        "curveto": parse_curveto,
+        "curvetoArgumentSequence": parse_curvetoArgumentSequence,
+        "curvetoArgument": parse_curvetoArgument,
+        "smoothCurveto": parse_smoothCurveto,
+        "smoothCurvetoArgumentSequence": parse_smoothCurvetoArgumentSequence,
+        "smoothCurvetoArgument": parse_smoothCurvetoArgument,
+        "quadraticBezierCurveto": parse_quadraticBezierCurveto,
+        "quadraticBezierCurvetoArgumentSequence": parse_quadraticBezierCurvetoArgumentSequence,
+        "quadraticBezierCurvetoArgument": parse_quadraticBezierCurvetoArgument,
+        "smoothQuadraticBezierCurveto": parse_smoothQuadraticBezierCurveto,
+        "smoothQuadraticBezierCurvetoArgumentSequence": parse_smoothQuadraticBezierCurvetoArgumentSequence,
+        "ellipticalArc": parse_ellipticalArc,
+        "ellipticalArcArgumentSequence": parse_ellipticalArcArgumentSequence,
+        "ellipticalArcArgument": parse_ellipticalArcArgument,
+        "coordinatePair": parse_coordinatePair,
+        "nonnegativeNumber": parse_nonnegativeNumber,
+        "number": parse_number,
+        "flag": parse_flag,
+        "commaWsp": parse_commaWsp,
+        "comma": parse_comma,
+        "floatingPointConstant": parse_floatingPointConstant,
+        "fractionalConstant": parse_fractionalConstant,
+        "exponent": parse_exponent,
+        "sign": parse_sign,
+        "digitSequence": parse_digitSequence,
+        "digit": parse_digit,
+        "wsp": parse_wsp
+      };
+      
+      if (startRule !== undefined) {
+        if (parseFunctions[startRule] === undefined) {
+          throw new Error("Invalid rule name: " + quote(startRule) + ".");
+        }
+      } else {
+        startRule = "svgPath";
+      }
+      
+      var pos = 0;
+      var reportFailures = 0;
+      var rightmostFailuresPos = 0;
+      var rightmostFailuresExpected = [];
+      
+      function padLeft(input, padding, length) {
+        var result = input;
+        
+        var padLength = length - input.length;
+        for (var i = 0; i < padLength; i++) {
+          result = padding + result;
+        }
+        
+        return result;
+      }
+      
+      function escape(ch) {
+        var charCode = ch.charCodeAt(0);
+        var escapeChar;
+        var length;
+        
+        if (charCode <= 0xFF) {
+          escapeChar = 'x';
+          length = 2;
+        } else {
+          escapeChar = 'u';
+          length = 4;
+        }
+        
+        return '\\' + escapeChar + padLeft(charCode.toString(16).toUpperCase(), '0', length);
+      }
+      
+      function matchFailed(failure) {
+        if (pos < rightmostFailuresPos) {
+          return;
+        }
+        
+        if (pos > rightmostFailuresPos) {
+          rightmostFailuresPos = pos;
+          rightmostFailuresExpected = [];
+        }
+        
+        rightmostFailuresExpected.push(failure);
+      }
+      
+      function parse_svgPath() {
+        var result0, result1, result2, result3;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        result0 = [];
+        result1 = parse_wsp();
+        while (result1 !== null) {
+          result0.push(result1);
+          result1 = parse_wsp();
+        }
+        if (result0 !== null) {
+          result1 = parse_movetoDrawtoCommandGroups();
+          result1 = result1 !== null ? result1 : "";
+          if (result1 !== null) {
+            result2 = [];
+            result3 = parse_wsp();
+            while (result3 !== null) {
+              result2.push(result3);
+              result3 = parse_wsp();
+            }
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, path) { return path ? path : []; })(pos0, result0[1]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        return result0;
+      }
+      
+      function parse_movetoDrawtoCommandGroups() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        result0 = parse_movetoDrawtoCommandGroup();
+        if (result0 !== null) {
+          result1 = [];
+          result2 = parse_wsp();
+          while (result2 !== null) {
+            result1.push(result2);
+            result2 = parse_wsp();
+          }
+          if (result1 !== null) {
+            result2 = parse_movetoDrawtoCommandGroups();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, a, b) { return a.concat( b ); })(pos0, result0[0], result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          result0 = parse_movetoDrawtoCommandGroup();
+          if (result0 !== null) {
+            result0 = (function(offset, a) { return a; })(pos0, result0);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_movetoDrawtoCommandGroup() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        result0 = parse_moveto();
+        if (result0 !== null) {
+          result1 = [];
+          result2 = parse_wsp();
+          while (result2 !== null) {
+            result1.push(result2);
+            result2 = parse_wsp();
+          }
+          if (result1 !== null) {
+            result2 = parse_drawtoCommands();
+            result2 = result2 !== null ? result2 : "";
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, m, c) { return c.length ? m.concat( c ) : m; })(pos0, result0[0], result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        return result0;
+      }
+      
+      function parse_drawtoCommands() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        result0 = parse_drawtoCommand();
+        if (result0 !== null) {
+          result1 = [];
+          result2 = parse_wsp();
+          while (result2 !== null) {
+            result1.push(result2);
+            result2 = parse_wsp();
+          }
+          if (result1 !== null) {
+            result2 = parse_drawtoCommands();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, cmd, cmds) { return cmd.concat( cmds ); })(pos0, result0[0], result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          result0 = parse_drawtoCommand();
+          if (result0 !== null) {
+            result0 = (function(offset, cmd) { return cmd; })(pos0, result0);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_drawtoCommand() {
+        var result0;
+        
+        result0 = parse_closepath();
+        if (result0 === null) {
+          result0 = parse_lineto();
+          if (result0 === null) {
+            result0 = parse_horizontalLineto();
+            if (result0 === null) {
+              result0 = parse_verticalLineto();
+              if (result0 === null) {
+                result0 = parse_curveto();
+                if (result0 === null) {
+                  result0 = parse_smoothCurveto();
+                  if (result0 === null) {
+                    result0 = parse_quadraticBezierCurveto();
+                    if (result0 === null) {
+                      result0 = parse_smoothQuadraticBezierCurveto();
+                      if (result0 === null) {
+                        result0 = parse_ellipticalArc();
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        return result0;
+      }
+      
+      function parse_moveto() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        if (input.charCodeAt(pos) === 77) {
+          result0 = "M";
+          pos++;
+        } else {
+          result0 = null;
+          if (reportFailures === 0) {
+            matchFailed("\"M\"");
+          }
+        }
+        if (result0 !== null) {
+          result1 = [];
+          result2 = parse_wsp();
+          while (result2 !== null) {
+            result1.push(result2);
+            result2 = parse_wsp();
+          }
+          if (result1 !== null) {
+            result2 = parse_movetoArgumentSequence();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, args) { return createMoveTo( args, false ); })(pos0, result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          pos1 = pos;
+          if (input.charCodeAt(pos) === 109) {
+            result0 = "m";
+            pos++;
+          } else {
+            result0 = null;
+            if (reportFailures === 0) {
+              matchFailed("\"m\"");
+            }
+          }
+          if (result0 !== null) {
+            result1 = [];
+            result2 = parse_wsp();
+            while (result2 !== null) {
+              result1.push(result2);
+              result2 = parse_wsp();
+            }
+            if (result1 !== null) {
+              result2 = parse_movetoArgumentSequence();
+              if (result2 !== null) {
+                result0 = [result0, result1, result2];
+              } else {
+                result0 = null;
+                pos = pos1;
+              }
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+          if (result0 !== null) {
+            result0 = (function(offset, args) { return createMoveTo( args, true ); })(pos0, result0[2]);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_movetoArgumentSequence() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        result0 = parse_coordinatePair();
+        if (result0 !== null) {
+          result1 = parse_commaWsp();
+          result1 = result1 !== null ? result1 : "";
+          if (result1 !== null) {
+            result2 = parse_linetoArgumentSequence();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, pair, list) { return [pair].concat( list ); })(pos0, result0[0], result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          result0 = parse_coordinatePair();
+          if (result0 !== null) {
+            result0 = (function(offset, pair) { return [pair]; })(pos0, result0);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_closepath() {
+        var result0;
+        var pos0;
+        
+        pos0 = pos;
+        if (input.charCodeAt(pos) === 90) {
+          result0 = "Z";
+          pos++;
+        } else {
+          result0 = null;
+          if (reportFailures === 0) {
+            matchFailed("\"Z\"");
+          }
+        }
+        if (result0 === null) {
+          if (input.charCodeAt(pos) === 122) {
+            result0 = "z";
+            pos++;
+          } else {
+            result0 = null;
+            if (reportFailures === 0) {
+              matchFailed("\"z\"");
+            }
+          }
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, command) { return { cmd: 'close' }; })(pos0, result0);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        return result0;
+      }
+      
+      function parse_lineto() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        if (input.charCodeAt(pos) === 76) {
+          result0 = "L";
+          pos++;
+        } else {
+          result0 = null;
+          if (reportFailures === 0) {
+            matchFailed("\"L\"");
+          }
+        }
+        if (result0 !== null) {
+          result1 = [];
+          result2 = parse_wsp();
+          while (result2 !== null) {
+            result1.push(result2);
+            result2 = parse_wsp();
+          }
+          if (result1 !== null) {
+            result2 = parse_linetoArgumentSequence();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, args) { return args.map( function( arg ) { return { cmd: 'lineTo', args: [ arg.x, arg.y ] }; } ); })(pos0, result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          pos1 = pos;
+          if (input.charCodeAt(pos) === 108) {
+            result0 = "l";
+            pos++;
+          } else {
+            result0 = null;
+            if (reportFailures === 0) {
+              matchFailed("\"l\"");
+            }
+          }
+          if (result0 !== null) {
+            result1 = [];
+            result2 = parse_wsp();
+            while (result2 !== null) {
+              result1.push(result2);
+              result2 = parse_wsp();
+            }
+            if (result1 !== null) {
+              result2 = parse_linetoArgumentSequence();
+              if (result2 !== null) {
+                result0 = [result0, result1, result2];
+              } else {
+                result0 = null;
+                pos = pos1;
+              }
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+          if (result0 !== null) {
+            result0 = (function(offset, args) { return args.map( function( arg ) { return { cmd: 'lineToRelative', args: [ arg.x, arg.y ] }; } ); })(pos0, result0[2]);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_linetoArgumentSequence() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        result0 = parse_coordinatePair();
+        if (result0 !== null) {
+          result1 = parse_commaWsp();
+          result1 = result1 !== null ? result1 : "";
+          if (result1 !== null) {
+            result2 = parse_linetoArgumentSequence();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, a, b) { return [a].concat( b ); })(pos0, result0[0], result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          result0 = parse_coordinatePair();
+          if (result0 !== null) {
+            result0 = (function(offset, a) { return [a]; })(pos0, result0);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_horizontalLineto() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        if (input.charCodeAt(pos) === 72) {
+          result0 = "H";
+          pos++;
+        } else {
+          result0 = null;
+          if (reportFailures === 0) {
+            matchFailed("\"H\"");
+          }
+        }
+        if (result0 !== null) {
+          result1 = [];
+          result2 = parse_wsp();
+          while (result2 !== null) {
+            result1.push(result2);
+            result2 = parse_wsp();
+          }
+          if (result1 !== null) {
+            result2 = parse_horizontalLinetoArgumentSequence();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, args) { return args.map( function( arg ) { return { cmd: 'horizontalLineTo', args: [ arg ] } } ); })(pos0, result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          pos1 = pos;
+          if (input.charCodeAt(pos) === 104) {
+            result0 = "h";
+            pos++;
+          } else {
+            result0 = null;
+            if (reportFailures === 0) {
+              matchFailed("\"h\"");
+            }
+          }
+          if (result0 !== null) {
+            result1 = [];
+            result2 = parse_wsp();
+            while (result2 !== null) {
+              result1.push(result2);
+              result2 = parse_wsp();
+            }
+            if (result1 !== null) {
+              result2 = parse_horizontalLinetoArgumentSequence();
+              if (result2 !== null) {
+                result0 = [result0, result1, result2];
+              } else {
+                result0 = null;
+                pos = pos1;
+              }
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+          if (result0 !== null) {
+            result0 = (function(offset, args) { return args.map( function( arg ) { return { cmd: 'horizontalLineToRelative', args: [ arg ] } } ); })(pos0, result0[2]);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_horizontalLinetoArgumentSequence() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        result0 = parse_number();
+        if (result0 !== null) {
+          result1 = parse_commaWsp();
+          result1 = result1 !== null ? result1 : "";
+          if (result1 !== null) {
+            result2 = parse_horizontalLinetoArgumentSequence();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, a, b) { return [a].concat( b ); })(pos0, result0[0], result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          result0 = parse_number();
+          if (result0 !== null) {
+            result0 = (function(offset, a) { return [a]; })(pos0, result0);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_verticalLineto() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        if (input.charCodeAt(pos) === 86) {
+          result0 = "V";
+          pos++;
+        } else {
+          result0 = null;
+          if (reportFailures === 0) {
+            matchFailed("\"V\"");
+          }
+        }
+        if (result0 !== null) {
+          result1 = [];
+          result2 = parse_wsp();
+          while (result2 !== null) {
+            result1.push(result2);
+            result2 = parse_wsp();
+          }
+          if (result1 !== null) {
+            result2 = parse_verticalLinetoArgumentSequence();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, args) { return args.map( function( arg ) { return { cmd: 'verticalLineTo', args: [ arg ] } } ); })(pos0, result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          pos1 = pos;
+          if (input.charCodeAt(pos) === 118) {
+            result0 = "v";
+            pos++;
+          } else {
+            result0 = null;
+            if (reportFailures === 0) {
+              matchFailed("\"v\"");
+            }
+          }
+          if (result0 !== null) {
+            result1 = [];
+            result2 = parse_wsp();
+            while (result2 !== null) {
+              result1.push(result2);
+              result2 = parse_wsp();
+            }
+            if (result1 !== null) {
+              result2 = parse_verticalLinetoArgumentSequence();
+              if (result2 !== null) {
+                result0 = [result0, result1, result2];
+              } else {
+                result0 = null;
+                pos = pos1;
+              }
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+          if (result0 !== null) {
+            result0 = (function(offset, args) { return args.map( function( arg ) { return { cmd: 'verticalLineToRelative', args: [ arg ] } } ); })(pos0, result0[2]);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_verticalLinetoArgumentSequence() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        result0 = parse_number();
+        if (result0 !== null) {
+          result1 = parse_commaWsp();
+          result1 = result1 !== null ? result1 : "";
+          if (result1 !== null) {
+            result2 = parse_verticalLinetoArgumentSequence();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, a, b) { return [a].concat( b ); })(pos0, result0[0], result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          result0 = parse_number();
+          if (result0 !== null) {
+            result0 = (function(offset, a) { return [a]; })(pos0, result0);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_curveto() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        if (input.charCodeAt(pos) === 67) {
+          result0 = "C";
+          pos++;
+        } else {
+          result0 = null;
+          if (reportFailures === 0) {
+            matchFailed("\"C\"");
+          }
+        }
+        if (result0 !== null) {
+          result1 = [];
+          result2 = parse_wsp();
+          while (result2 !== null) {
+            result1.push(result2);
+            result2 = parse_wsp();
+          }
+          if (result1 !== null) {
+            result2 = parse_curvetoArgumentSequence();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, args) { return args.map( function( arg ) { return { cmd: 'cubicCurveTo', args: arg } } ); })(pos0, result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          pos1 = pos;
+          if (input.charCodeAt(pos) === 99) {
+            result0 = "c";
+            pos++;
+          } else {
+            result0 = null;
+            if (reportFailures === 0) {
+              matchFailed("\"c\"");
+            }
+          }
+          if (result0 !== null) {
+            result1 = [];
+            result2 = parse_wsp();
+            while (result2 !== null) {
+              result1.push(result2);
+              result2 = parse_wsp();
+            }
+            if (result1 !== null) {
+              result2 = parse_curvetoArgumentSequence();
+              if (result2 !== null) {
+                result0 = [result0, result1, result2];
+              } else {
+                result0 = null;
+                pos = pos1;
+              }
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+          if (result0 !== null) {
+            result0 = (function(offset, args) { return args.map( function( arg ) { return { cmd: 'cubicCurveToRelative', args: arg } } ); })(pos0, result0[2]);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_curvetoArgumentSequence() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        result0 = parse_curvetoArgument();
+        if (result0 !== null) {
+          result1 = parse_commaWsp();
+          result1 = result1 !== null ? result1 : "";
+          if (result1 !== null) {
+            result2 = parse_curvetoArgumentSequence();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, a, list) { return [a].concat( list ); })(pos0, result0[0], result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          result0 = parse_curvetoArgument();
+          if (result0 !== null) {
+            result0 = (function(offset, a) { return [a]; })(pos0, result0);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_curvetoArgument() {
+        var result0, result1, result2, result3, result4;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        result0 = parse_coordinatePair();
+        if (result0 !== null) {
+          result1 = parse_commaWsp();
+          result1 = result1 !== null ? result1 : "";
+          if (result1 !== null) {
+            result2 = parse_coordinatePair();
+            if (result2 !== null) {
+              result3 = parse_commaWsp();
+              result3 = result3 !== null ? result3 : "";
+              if (result3 !== null) {
+                result4 = parse_coordinatePair();
+                if (result4 !== null) {
+                  result0 = [result0, result1, result2, result3, result4];
+                } else {
+                  result0 = null;
+                  pos = pos1;
+                }
+              } else {
+                result0 = null;
+                pos = pos1;
+              }
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, a, b, c) { return [ a.x, a.y, b.x, b.y, c.x, c.y ]; })(pos0, result0[0], result0[2], result0[4]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        return result0;
+      }
+      
+      function parse_smoothCurveto() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        if (input.charCodeAt(pos) === 83) {
+          result0 = "S";
+          pos++;
+        } else {
+          result0 = null;
+          if (reportFailures === 0) {
+            matchFailed("\"S\"");
+          }
+        }
+        if (result0 !== null) {
+          result1 = [];
+          result2 = parse_wsp();
+          while (result2 !== null) {
+            result1.push(result2);
+            result2 = parse_wsp();
+          }
+          if (result1 !== null) {
+            result2 = parse_smoothCurvetoArgumentSequence();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, args) { return args.map( function( arg ) { return { cmd: 'smoothCubicCurveTo', args: arg } } ); })(pos0, result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          pos1 = pos;
+          if (input.charCodeAt(pos) === 115) {
+            result0 = "s";
+            pos++;
+          } else {
+            result0 = null;
+            if (reportFailures === 0) {
+              matchFailed("\"s\"");
+            }
+          }
+          if (result0 !== null) {
+            result1 = [];
+            result2 = parse_wsp();
+            while (result2 !== null) {
+              result1.push(result2);
+              result2 = parse_wsp();
+            }
+            if (result1 !== null) {
+              result2 = parse_smoothCurvetoArgumentSequence();
+              if (result2 !== null) {
+                result0 = [result0, result1, result2];
+              } else {
+                result0 = null;
+                pos = pos1;
+              }
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+          if (result0 !== null) {
+            result0 = (function(offset, args) { return args.map( function( arg ) { return { cmd: 'smoothCubicCurveToRelative', args: arg } } ); })(pos0, result0[2]);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_smoothCurvetoArgumentSequence() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        result0 = parse_smoothCurvetoArgument();
+        if (result0 !== null) {
+          result1 = parse_commaWsp();
+          result1 = result1 !== null ? result1 : "";
+          if (result1 !== null) {
+            result2 = parse_smoothCurvetoArgumentSequence();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, a, list) { return [a].concat( list ); })(pos0, result0[0], result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          result0 = parse_smoothCurvetoArgument();
+          if (result0 !== null) {
+            result0 = (function(offset, a) { return [a]; })(pos0, result0);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_smoothCurvetoArgument() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        result0 = parse_coordinatePair();
+        if (result0 !== null) {
+          result1 = parse_commaWsp();
+          result1 = result1 !== null ? result1 : "";
+          if (result1 !== null) {
+            result2 = parse_coordinatePair();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, a, b) { return [ a.x, a.y, b.x, b.y ]; })(pos0, result0[0], result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        return result0;
+      }
+      
+      function parse_quadraticBezierCurveto() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        if (input.charCodeAt(pos) === 81) {
+          result0 = "Q";
+          pos++;
+        } else {
+          result0 = null;
+          if (reportFailures === 0) {
+            matchFailed("\"Q\"");
+          }
+        }
+        if (result0 !== null) {
+          result1 = [];
+          result2 = parse_wsp();
+          while (result2 !== null) {
+            result1.push(result2);
+            result2 = parse_wsp();
+          }
+          if (result1 !== null) {
+            result2 = parse_quadraticBezierCurvetoArgumentSequence();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, args) { return args.map( function( arg ) { return { cmd: 'quadraticCurveTo', args: arg } } ); })(pos0, result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          pos1 = pos;
+          if (input.charCodeAt(pos) === 113) {
+            result0 = "q";
+            pos++;
+          } else {
+            result0 = null;
+            if (reportFailures === 0) {
+              matchFailed("\"q\"");
+            }
+          }
+          if (result0 !== null) {
+            result1 = [];
+            result2 = parse_wsp();
+            while (result2 !== null) {
+              result1.push(result2);
+              result2 = parse_wsp();
+            }
+            if (result1 !== null) {
+              result2 = parse_quadraticBezierCurvetoArgumentSequence();
+              if (result2 !== null) {
+                result0 = [result0, result1, result2];
+              } else {
+                result0 = null;
+                pos = pos1;
+              }
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+          if (result0 !== null) {
+            result0 = (function(offset, args) { return args.map( function( arg ) { return { cmd: 'quadraticCurveToRelative', args: arg } } ); })(pos0, result0[2]);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_quadraticBezierCurvetoArgumentSequence() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        result0 = parse_quadraticBezierCurvetoArgument();
+        if (result0 !== null) {
+          result1 = parse_commaWsp();
+          result1 = result1 !== null ? result1 : "";
+          if (result1 !== null) {
+            result2 = parse_quadraticBezierCurvetoArgumentSequence();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, a, list) { return [a].concat( list ); })(pos0, result0[0], result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          result0 = parse_quadraticBezierCurvetoArgument();
+          if (result0 !== null) {
+            result0 = (function(offset, a) { return [a]; })(pos0, result0);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_quadraticBezierCurvetoArgument() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        result0 = parse_coordinatePair();
+        if (result0 !== null) {
+          result1 = parse_commaWsp();
+          result1 = result1 !== null ? result1 : "";
+          if (result1 !== null) {
+            result2 = parse_coordinatePair();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, a, b) { return [ a.x, a.y, b.x, b.y ]; })(pos0, result0[0], result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        return result0;
+      }
+      
+      function parse_smoothQuadraticBezierCurveto() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        if (input.charCodeAt(pos) === 84) {
+          result0 = "T";
+          pos++;
+        } else {
+          result0 = null;
+          if (reportFailures === 0) {
+            matchFailed("\"T\"");
+          }
+        }
+        if (result0 !== null) {
+          result1 = [];
+          result2 = parse_wsp();
+          while (result2 !== null) {
+            result1.push(result2);
+            result2 = parse_wsp();
+          }
+          if (result1 !== null) {
+            result2 = parse_smoothQuadraticBezierCurvetoArgumentSequence();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, args) { return args.map( function( arg ) { return { cmd: 'smoothQuadraticCurveTo', args: [ arg.x, arg.y ] } } ); })(pos0, result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          pos1 = pos;
+          if (input.charCodeAt(pos) === 116) {
+            result0 = "t";
+            pos++;
+          } else {
+            result0 = null;
+            if (reportFailures === 0) {
+              matchFailed("\"t\"");
+            }
+          }
+          if (result0 !== null) {
+            result1 = [];
+            result2 = parse_wsp();
+            while (result2 !== null) {
+              result1.push(result2);
+              result2 = parse_wsp();
+            }
+            if (result1 !== null) {
+              result2 = parse_smoothQuadraticBezierCurvetoArgumentSequence();
+              if (result2 !== null) {
+                result0 = [result0, result1, result2];
+              } else {
+                result0 = null;
+                pos = pos1;
+              }
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+          if (result0 !== null) {
+            result0 = (function(offset, args) { return args.map( function( arg ) { return { cmd: 'smoothQuadraticCurveToRelative', args: [ arg.x, arg.y ] } } ); })(pos0, result0[2]);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_smoothQuadraticBezierCurvetoArgumentSequence() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        result0 = parse_coordinatePair();
+        if (result0 !== null) {
+          result1 = parse_commaWsp();
+          result1 = result1 !== null ? result1 : "";
+          if (result1 !== null) {
+            result2 = parse_smoothQuadraticBezierCurvetoArgumentSequence();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, a, list) { return [a].concat( list ); })(pos0, result0[0], result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          result0 = parse_coordinatePair();
+          if (result0 !== null) {
+            result0 = (function(offset, a) { return [a]; })(pos0, result0);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_ellipticalArc() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        if (input.charCodeAt(pos) === 65) {
+          result0 = "A";
+          pos++;
+        } else {
+          result0 = null;
+          if (reportFailures === 0) {
+            matchFailed("\"A\"");
+          }
+        }
+        if (result0 !== null) {
+          result1 = [];
+          result2 = parse_wsp();
+          while (result2 !== null) {
+            result1.push(result2);
+            result2 = parse_wsp();
+          }
+          if (result1 !== null) {
+            result2 = parse_ellipticalArcArgumentSequence();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, args) { return args.map( function( arg ) { return { cmd: 'ellipticalArcTo', args: arg } } ); })(pos0, result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          pos1 = pos;
+          if (input.charCodeAt(pos) === 97) {
+            result0 = "a";
+            pos++;
+          } else {
+            result0 = null;
+            if (reportFailures === 0) {
+              matchFailed("\"a\"");
+            }
+          }
+          if (result0 !== null) {
+            result1 = [];
+            result2 = parse_wsp();
+            while (result2 !== null) {
+              result1.push(result2);
+              result2 = parse_wsp();
+            }
+            if (result1 !== null) {
+              result2 = parse_ellipticalArcArgumentSequence();
+              if (result2 !== null) {
+                result0 = [result0, result1, result2];
+              } else {
+                result0 = null;
+                pos = pos1;
+              }
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+          if (result0 !== null) {
+            result0 = (function(offset, args) { return args.map( function( arg ) { return { cmd: 'ellipticalArcToRelative', args: arg } } ); })(pos0, result0[2]);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_ellipticalArcArgumentSequence() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        result0 = parse_ellipticalArcArgument();
+        if (result0 !== null) {
+          result1 = parse_commaWsp();
+          result1 = result1 !== null ? result1 : "";
+          if (result1 !== null) {
+            result2 = parse_ellipticalArcArgumentSequence();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, a, list) { return [a].concat( list ); })(pos0, result0[0], result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          result0 = parse_ellipticalArcArgument();
+          if (result0 !== null) {
+            result0 = (function(offset, a) { return [a]; })(pos0, result0);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_ellipticalArcArgument() {
+        var result0, result1, result2, result3, result4, result5, result6, result7, result8, result9, result10;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        result0 = parse_nonnegativeNumber();
+        if (result0 !== null) {
+          result1 = parse_commaWsp();
+          result1 = result1 !== null ? result1 : "";
+          if (result1 !== null) {
+            result2 = parse_nonnegativeNumber();
+            if (result2 !== null) {
+              result3 = parse_commaWsp();
+              result3 = result3 !== null ? result3 : "";
+              if (result3 !== null) {
+                result4 = parse_number();
+                if (result4 !== null) {
+                  result5 = parse_commaWsp();
+                  if (result5 !== null) {
+                    result6 = parse_flag();
+                    if (result6 !== null) {
+                      result7 = parse_commaWsp();
+                      result7 = result7 !== null ? result7 : "";
+                      if (result7 !== null) {
+                        result8 = parse_flag();
+                        if (result8 !== null) {
+                          result9 = parse_commaWsp();
+                          result9 = result9 !== null ? result9 : "";
+                          if (result9 !== null) {
+                            result10 = parse_coordinatePair();
+                            if (result10 !== null) {
+                              result0 = [result0, result1, result2, result3, result4, result5, result6, result7, result8, result9, result10];
+                            } else {
+                              result0 = null;
+                              pos = pos1;
+                            }
+                          } else {
+                            result0 = null;
+                            pos = pos1;
+                          }
+                        } else {
+                          result0 = null;
+                          pos = pos1;
+                        }
+                      } else {
+                        result0 = null;
+                        pos = pos1;
+                      }
+                    } else {
+                      result0 = null;
+                      pos = pos1;
+                    }
+                  } else {
+                    result0 = null;
+                    pos = pos1;
+                  }
+                } else {
+                  result0 = null;
+                  pos = pos1;
+                }
+              } else {
+                result0 = null;
+                pos = pos1;
+              }
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, rx, ry, rot, largeArc, sweep, to) { return [ rx, ry, rot, largeArc, sweep, to.x, to.y ] })(pos0, result0[0], result0[2], result0[4], result0[6], result0[8], result0[10]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        return result0;
+      }
+      
+      function parse_coordinatePair() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        result0 = parse_number();
+        if (result0 !== null) {
+          result1 = parse_commaWsp();
+          result1 = result1 !== null ? result1 : "";
+          if (result1 !== null) {
+            result2 = parse_number();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, a, b) { return { x: a, y: b }; })(pos0, result0[0], result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        return result0;
+      }
+      
+      function parse_nonnegativeNumber() {
+        var result0;
+        var pos0;
+        
+        pos0 = pos;
+        result0 = parse_floatingPointConstant();
+        if (result0 !== null) {
+          result0 = (function(offset, number) { return parseFloat( number, 10 ); })(pos0, result0);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          result0 = parse_digitSequence();
+          if (result0 !== null) {
+            result0 = (function(offset, number) { return parseInt( number, 10 ); })(pos0, result0);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_number() {
+        var result0, result1;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        result0 = parse_sign();
+        result0 = result0 !== null ? result0 : "";
+        if (result0 !== null) {
+          result1 = parse_floatingPointConstant();
+          if (result1 !== null) {
+            result0 = [result0, result1];
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, sign, number) { return parseFloat( sign + number, 10 ); })(pos0, result0[0], result0[1]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          pos1 = pos;
+          result0 = parse_sign();
+          result0 = result0 !== null ? result0 : "";
+          if (result0 !== null) {
+            result1 = parse_digitSequence();
+            if (result1 !== null) {
+              result0 = [result0, result1];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+          if (result0 !== null) {
+            result0 = (function(offset, sign, number) { return parseInt( sign + number, 10 ); })(pos0, result0[0], result0[1]);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_flag() {
+        var result0;
+        var pos0;
+        
+        pos0 = pos;
+        if (input.charCodeAt(pos) === 48) {
+          result0 = "0";
+          pos++;
+        } else {
+          result0 = null;
+          if (reportFailures === 0) {
+            matchFailed("\"0\"");
+          }
+        }
+        if (result0 !== null) {
+          result0 = (function(offset) { return false; })(pos0);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          if (input.charCodeAt(pos) === 49) {
+            result0 = "1";
+            pos++;
+          } else {
+            result0 = null;
+            if (reportFailures === 0) {
+              matchFailed("\"1\"");
+            }
+          }
+          if (result0 !== null) {
+            result0 = (function(offset) { return true; })(pos0);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_commaWsp() {
+        var result0, result1, result2, result3;
+        var pos0;
+        
+        pos0 = pos;
+        result1 = parse_wsp();
+        if (result1 !== null) {
+          result0 = [];
+          while (result1 !== null) {
+            result0.push(result1);
+            result1 = parse_wsp();
+          }
+        } else {
+          result0 = null;
+        }
+        if (result0 !== null) {
+          result1 = parse_comma();
+          result1 = result1 !== null ? result1 : "";
+          if (result1 !== null) {
+            result2 = [];
+            result3 = parse_wsp();
+            while (result3 !== null) {
+              result2.push(result3);
+              result3 = parse_wsp();
+            }
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos0;
+            }
+          } else {
+            result0 = null;
+            pos = pos0;
+          }
+        } else {
+          result0 = null;
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          result0 = parse_comma();
+          if (result0 !== null) {
+            result1 = [];
+            result2 = parse_wsp();
+            while (result2 !== null) {
+              result1.push(result2);
+              result2 = parse_wsp();
+            }
+            if (result1 !== null) {
+              result0 = [result0, result1];
+            } else {
+              result0 = null;
+              pos = pos0;
+            }
+          } else {
+            result0 = null;
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_comma() {
+        var result0;
+        
+        if (input.charCodeAt(pos) === 44) {
+          result0 = ",";
+          pos++;
+        } else {
+          result0 = null;
+          if (reportFailures === 0) {
+            matchFailed("\",\"");
+          }
+        }
+        return result0;
+      }
+      
+      function parse_floatingPointConstant() {
+        var result0, result1;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        result0 = parse_fractionalConstant();
+        if (result0 !== null) {
+          result1 = parse_exponent();
+          result1 = result1 !== null ? result1 : "";
+          if (result1 !== null) {
+            result0 = [result0, result1];
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, a, b) { return a + b; })(pos0, result0[0], result0[1]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          pos1 = pos;
+          result0 = parse_digitSequence();
+          if (result0 !== null) {
+            result1 = parse_exponent();
+            if (result1 !== null) {
+              result0 = [result0, result1];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+          if (result0 !== null) {
+            result0 = (function(offset, a, b) { return a + b; })(pos0, result0[0], result0[1]);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_fractionalConstant() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        result0 = parse_digitSequence();
+        result0 = result0 !== null ? result0 : "";
+        if (result0 !== null) {
+          if (input.charCodeAt(pos) === 46) {
+            result1 = ".";
+            pos++;
+          } else {
+            result1 = null;
+            if (reportFailures === 0) {
+              matchFailed("\".\"");
+            }
+          }
+          if (result1 !== null) {
+            result2 = parse_digitSequence();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, a, b) { return a + '.' + b; })(pos0, result0[0], result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          pos1 = pos;
+          result0 = parse_digitSequence();
+          if (result0 !== null) {
+            if (input.charCodeAt(pos) === 46) {
+              result1 = ".";
+              pos++;
+            } else {
+              result1 = null;
+              if (reportFailures === 0) {
+                matchFailed("\".\"");
+              }
+            }
+            if (result1 !== null) {
+              result0 = [result0, result1];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+          if (result0 !== null) {
+            result0 = (function(offset, a) { return a })(pos0, result0[0]);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_exponent() {
+        var result0, result1, result2;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        if (input.charCodeAt(pos) === 101) {
+          result0 = "e";
+          pos++;
+        } else {
+          result0 = null;
+          if (reportFailures === 0) {
+            matchFailed("\"e\"");
+          }
+        }
+        if (result0 === null) {
+          if (input.charCodeAt(pos) === 69) {
+            result0 = "E";
+            pos++;
+          } else {
+            result0 = null;
+            if (reportFailures === 0) {
+              matchFailed("\"E\"");
+            }
+          }
+        }
+        if (result0 !== null) {
+          result1 = parse_sign();
+          result1 = result1 !== null ? result1 : "";
+          if (result1 !== null) {
+            result2 = parse_digitSequence();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, a, b, c) { return a + b + c; })(pos0, result0[0], result0[1], result0[2]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        return result0;
+      }
+      
+      function parse_sign() {
+        var result0;
+        
+        if (input.charCodeAt(pos) === 43) {
+          result0 = "+";
+          pos++;
+        } else {
+          result0 = null;
+          if (reportFailures === 0) {
+            matchFailed("\"+\"");
+          }
+        }
+        if (result0 === null) {
+          if (input.charCodeAt(pos) === 45) {
+            result0 = "-";
+            pos++;
+          } else {
+            result0 = null;
+            if (reportFailures === 0) {
+              matchFailed("\"-\"");
+            }
+          }
+        }
+        return result0;
+      }
+      
+      function parse_digitSequence() {
+        var result0, result1;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        result0 = parse_digit();
+        if (result0 !== null) {
+          result1 = parse_digitSequence();
+          if (result1 !== null) {
+            result0 = [result0, result1];
+          } else {
+            result0 = null;
+            pos = pos1;
+          }
+        } else {
+          result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, a, b) { return a + b; })(pos0, result0[0], result0[1]);
+        }
+        if (result0 === null) {
+          pos = pos0;
+        }
+        if (result0 === null) {
+          result0 = parse_digit();
+        }
+        return result0;
+      }
+      
+      function parse_digit() {
+        var result0;
+        
+        if (/^[0-9]/.test(input.charAt(pos))) {
+          result0 = input.charAt(pos);
+          pos++;
+        } else {
+          result0 = null;
+          if (reportFailures === 0) {
+            matchFailed("[0-9]");
+          }
+        }
+        return result0;
+      }
+      
+      function parse_wsp() {
+        var result0;
+        
+        if (input.charCodeAt(pos) === 32) {
+          result0 = " ";
+          pos++;
+        } else {
+          result0 = null;
+          if (reportFailures === 0) {
+            matchFailed("\" \"");
+          }
+        }
+        if (result0 === null) {
+          if (input.charCodeAt(pos) === 9) {
+            result0 = "\t";
+            pos++;
+          } else {
+            result0 = null;
+            if (reportFailures === 0) {
+              matchFailed("\"\\t\"");
+            }
+          }
+          if (result0 === null) {
+            if (input.charCodeAt(pos) === 13) {
+              result0 = "\r";
+              pos++;
+            } else {
+              result0 = null;
+              if (reportFailures === 0) {
+                matchFailed("\"\\r\"");
+              }
+            }
+            if (result0 === null) {
+              if (input.charCodeAt(pos) === 10) {
+                result0 = "\n";
+                pos++;
+              } else {
+                result0 = null;
+                if (reportFailures === 0) {
+                  matchFailed("\"\\n\"");
+                }
+              }
+            }
+          }
+        }
+        return result0;
+      }
+      
+      
+      function cleanupExpected(expected) {
+        expected.sort();
+        
+        var lastExpected = null;
+        var cleanExpected = [];
+        for (var i = 0; i < expected.length; i++) {
+          if (expected[i] !== lastExpected) {
+            cleanExpected.push(expected[i]);
+            lastExpected = expected[i];
+          }
+        }
+        return cleanExpected;
+      }
+      
+      function computeErrorPosition() {
+        /*
+         * The first idea was to use |String.split| to break the input up to the
+         * error position along newlines and derive the line and column from
+         * there. However IE's |split| implementation is so broken that it was
+         * enough to prevent it.
+         */
+        
+        var line = 1;
+        var column = 1;
+        var seenCR = false;
+        
+        for (var i = 0; i < Math.max(pos, rightmostFailuresPos); i++) {
+          var ch = input.charAt(i);
+          if (ch === "\n") {
+            if (!seenCR) { line++; }
+            column = 1;
+            seenCR = false;
+          } else if (ch === "\r" || ch === "\u2028" || ch === "\u2029") {
+            line++;
+            column = 1;
+            seenCR = true;
+          } else {
+            column++;
+            seenCR = false;
+          }
+        }
+        
+        return { line: line, column: column };
+      }
+      
+      
+        function createMoveTo( args, isRelative ) {
+          var result = [ {
+            cmd: isRelative ? 'moveToRelative' : 'moveTo',
+            args: [ args[0].x, args[0].y ]
+          } ];
+          
+          // any other coordinate pairs are implicit lineTos
+          if ( args.length > 1 ) {
+            for ( var i = 1; i < args.length; i++ ) {
+              result.push( {
+                cmd: isRelative ? 'lineToRelative' : 'lineTo',
+                args: [ args[i].x, args[i].y ]
+              } );
+            }
+          }
+          return result;
+        }
+      
+      
+      var result = parseFunctions[startRule]();
+      
+      /*
+       * The parser is now in one of the following three states:
+       *
+       * 1. The parser successfully parsed the whole input.
+       *
+       *    - |result !== null|
+       *    - |pos === input.length|
+       *    - |rightmostFailuresExpected| may or may not contain something
+       *
+       * 2. The parser successfully parsed only a part of the input.
+       *
+       *    - |result !== null|
+       *    - |pos < input.length|
+       *    - |rightmostFailuresExpected| may or may not contain something
+       *
+       * 3. The parser did not successfully parse any part of the input.
+       *
+       *   - |result === null|
+       *   - |pos === 0|
+       *   - |rightmostFailuresExpected| contains at least one failure
+       *
+       * All code following this comment (including called functions) must
+       * handle these states.
+       */
+      if (result === null || pos !== input.length) {
+        var offset = Math.max(pos, rightmostFailuresPos);
+        var found = offset < input.length ? input.charAt(offset) : null;
+        var errorPosition = computeErrorPosition();
+        
+        throw new this.SyntaxError(
+          cleanupExpected(rightmostFailuresExpected),
+          found,
+          offset,
+          errorPosition.line,
+          errorPosition.column
+        );
+      }
+      
+      return result;
+    },
+    
+    /* Returns the parser source code. */
+    toSource: function() { return this._source; }
+  };
+  var result = kite.svgPath;
+  
+  /* Thrown when a parser encounters a syntax error. */
+  
+  result.SyntaxError = function(expected, found, offset, line, column) {
+    function buildMessage(expected, found) {
+      var expectedHumanized, foundHumanized;
+      
+      switch (expected.length) {
+        case 0:
+          expectedHumanized = "end of input";
+          break;
+        case 1:
+          expectedHumanized = expected[0];
+          break;
+        default:
+          expectedHumanized = expected.slice(0, expected.length - 1).join(", ")
+            + " or "
+            + expected[expected.length - 1];
+      }
+      
+      foundHumanized = found ? quote(found) : "end of input";
+      
+      return "Expected " + expectedHumanized + " but " + foundHumanized + " found.";
+    }
+    
+    this.name = "SyntaxError";
+    this.expected = expected;
+    this.found = found;
+    this.message = buildMessage(expected, found);
+    this.offset = offset;
+    this.line = line;
+    this.column = column;
+  };
+  
+  result.SyntaxError.prototype = Error.prototype;
+  
+  return result;
+});
+
+//jshint -W018
+// Copyright 2002-2012, University of Colorado
+
+/**
+ * Styles needed to determine a stroked line shape.
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define('KITE/util/LineStyles',['require','ASSERT/assert','KITE/kite'], function( require ) {
   
   
   var assert = require( 'ASSERT/assert' )( 'kite' );
   
   var kite = require( 'KITE/kite' );
   
-  var Piece = require( 'KITE/pieces/Piece' );
-  require( 'KITE/util/Subpath' );
-  
-  Piece.Close = function() {};
-  Piece.Close.prototype = {
-    constructor: Piece.Close,
+  kite.LineStyles = function( args ) {
+    if ( args === undefined ) {
+      args = {};
+    }
+    this.lineWidth = args.lineWidth !== undefined ? args.lineWidth : 1;
+    this.lineCap = args.lineCap !== undefined ? args.lineCap : 'butt'; // butt, round, square
+    this.lineJoin = args.lineJoin !== undefined ? args.lineJoin : 'miter'; // miter, round, bevel
+    this.lineDash = args.lineDash !== undefined ? args.lineDash : null; // null is default, otherwise an array of numbers
+    this.lineDashOffset = args.lineDashOffset !== undefined ? args.lineDashOffset : 0; // 0 default, any number
+    this.miterLimit = args.miterLimit !== undefined ? args.miterLimit : 10; // see https://svgwg.org/svg2-draft/painting.html for miterLimit computations
+  };
+  var LineStyles = kite.LineStyles;
+  LineStyles.prototype = {
+    constructor: LineStyles,
     
-    writeToContext: function( context ) {
-      context.closePath();
-    },
-    
-    transformed: function( matrix ) {
-      return [this];
-    },
-    
-    applyPiece: function( shape ) {
-      if ( shape.hasSubpaths() ) {
-        var previousPath = shape.getLastSubpath();
-        var nextPath = new kite.Subpath();
-        
-        previousPath.close();
-        shape.addSubpath( nextPath );
-        nextPath.addPoint( previousPath.getFirstPoint() );
+    equals: function( other ) {
+      var typical = this.lineWidth === other.lineWidth &&
+                    this.lineCap === other.lineCap &&
+                    this.lineJoin === other.lineJoin &&
+                    this.miterLimit === other.miterLimit &&
+                    this.lineDashOffset === other.lineDashOffset;
+      if ( !typical ) {
+        return false;
       }
-    },
-    
-    toString: function() {
-      return 'close()';
+      
+      // now we need to compare the line dashes
+      /* jshint -W018 */
+      //jshint -W018
+      if ( !this.lineDash !== !other.lineDash ) {
+        // one is defined, the other is not
+        return false;
+      }
+      
+      if ( this.lineDash ) {
+        if ( this.lineDash.length !== other.lineDash.length ) {
+          return false;
+        }
+        for ( var i = 0; i < this.lineDash.length; i++ ) {
+          if ( this.lineDash[i] !== other.lineDash[i] ) {
+            return false;
+          }
+        }
+        return true;
+      } else {
+        // both have no line dash, so they are equal
+        return true;
+      }
     }
   };
   
-  return Piece.Close;
+  return kite.LineStyles;
 } );
 
 // Copyright 2002-2012, University of Colorado
@@ -7900,7 +10321,7 @@ define('KITE/pieces/Close',['require','ASSERT/assert','KITE/kite','KITE/pieces/P
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define('KITE/segments/Quadratic',['require','ASSERT/assert','KITE/kite','DOT/Bounds2','DOT/Matrix3','DOT/Util','KITE/segments/Segment','KITE/pieces/Piece'], function( require ) {
+define('KITE/segments/Quadratic',['require','ASSERT/assert','KITE/kite','DOT/Bounds2','DOT/Matrix3','DOT/Util','KITE/segments/Segment'], function( require ) {
   
   
   var assert = require( 'ASSERT/assert' )( 'kite' );
@@ -7912,14 +10333,13 @@ define('KITE/segments/Quadratic',['require','ASSERT/assert','KITE/kite','DOT/Bou
   var solveQuadraticRootsReal = require( 'DOT/Util' ).solveQuadraticRootsReal;
 
   var Segment = require( 'KITE/segments/Segment' );
-  var Piece = require( 'KITE/pieces/Piece' );
 
-  Segment.Quadratic = function( start, control, end, skipComputations ) {
+  Segment.Quadratic = function Quadratic( start, control, end, skipComputations ) {
     this.start = start;
     this.control = control;
     this.end = end;
     
-    if ( start.equals( end, 0 ) && start.equals( control, 0 ) ) {
+    if ( start.equals( end ) && start.equals( control ) ) {
       this.invalid = true;
       return;
     }
@@ -8019,11 +10439,7 @@ define('KITE/segments/Quadratic',['require','ASSERT/assert','KITE/kite','DOT/Bou
         offsetCurves = _.map( offsetCurves, function( curve ) { return curve.reversed( true ); } );
       }
       
-      var result = _.map( offsetCurves, function( curve ) {
-        return new Piece.QuadraticCurveTo( curve.control, curve.end );
-      } );
-      
-      return result;
+      return offsetCurves;
     },
     
     subdivided: function( t, skipComputations ) {
@@ -8047,10 +10463,6 @@ define('KITE/segments/Quadratic',['require','ASSERT/assert','KITE/kite','DOT/Bou
         this.control.plus( this.end.minus( this.start ).perpendicular().normalized().times( r ) ),
         this.end.plus( ( this.end.equals( this.control ) ? this.end.minus( this.start ) : this.end.minus( this.control ) ).perpendicular().normalized().times( r ) )
       );
-    },
-    
-    toPieces: function() {
-      return [ new Piece.QuadraticCurveTo( this.control, this.end ) ];
     },
     
     getSVGPathFragment: function() {
@@ -8116,6 +10528,15 @@ define('KITE/segments/Quadratic',['require','ASSERT/assert','KITE/kite','DOT/Bou
         wind += hit.wind;
       } );
       return wind;
+    },
+    
+    // assumes the current position is at start
+    writeToContext: function( context ) {
+      context.quadraticCurveTo( this.control.x, this.control.y, this.end.x, this.end.y );
+    },
+    
+    transformed: function( matrix ) {
+      return new Segment.Quadratic( matrix.timesVector2( this.start ), matrix.timesVector2( this.control ), matrix.timesVector2( this.end ) );
     }
   };
   
@@ -8134,7 +10555,7 @@ define('KITE/segments/Quadratic',['require','ASSERT/assert','KITE/kite','DOT/Bou
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define('KITE/segments/Cubic',['require','ASSERT/assert','KITE/kite','DOT/Bounds2','DOT/Vector2','DOT/Matrix3','DOT/Util','DOT/Util','KITE/segments/Segment','KITE/pieces/Piece','KITE/segments/Quadratic'], function( require ) {
+define('KITE/segments/Cubic',['require','ASSERT/assert','KITE/kite','DOT/Bounds2','DOT/Vector2','DOT/Matrix3','DOT/Util','DOT/Util','KITE/segments/Segment','KITE/segments/Quadratic'], function( require ) {
   
   
   var assert = require( 'ASSERT/assert' )( 'kite' );
@@ -8148,10 +10569,9 @@ define('KITE/segments/Cubic',['require','ASSERT/assert','KITE/kite','DOT/Bounds2
   var solveCubicRootsReal = require( 'DOT/Util' ).solveCubicRootsReal;
   
   var Segment = require( 'KITE/segments/Segment' );
-  var Piece = require( 'KITE/pieces/Piece' );
   require( 'KITE/segments/Quadratic' );
 
-  Segment.Cubic = function( start, control1, control2, end, skipComputations ) {
+  Segment.Cubic = function Cubic( start, control1, control2, end, skipComputations ) {
     this.start = start;
     this.control1 = control1;
     this.control2 = control2;
@@ -8300,22 +10720,21 @@ define('KITE/segments/Cubic',['require','ASSERT/assert','KITE/kite','DOT/Bounds2
       // how many segments to create (possibly make this more adaptive?)
       var quantity = 32;
       
+      var points = [];
       var result = [];
-      for ( var i = 1; i < quantity; i++ ) {
+      for ( var i = 0; i < quantity; i++ ) {
         var t = i / ( quantity - 1 );
         if ( reverse ) {
           t = 1 - t;
         }
         
-        var point = this.positionAt( t ).plus( this.tangentAt( t ).perpendicular().normalized().times( r ) );
-        result.push( new Piece.LineTo( point ) );
+        points.push( this.positionAt( t ).plus( this.tangentAt( t ).perpendicular().normalized().times( r ) ) );
+        if ( i > 0 ) {
+          result.push( new Segment.Line( points[i-1], points[i] ) );
+        }
       }
       
       return result;
-    },
-    
-    toPieces: function() {
-      return [ new Piece.CubicCurveTo( this.control1, this.control2, this.end ) ];
     },
     
     getSVGPathFragment: function() {
@@ -8383,6 +10802,15 @@ define('KITE/segments/Cubic',['require','ASSERT/assert','KITE/kite','DOT/Bounds2
         wind += hit.wind;
       } );
       return wind;
+    },
+    
+    // assumes the current position is at start
+    writeToContext: function( context ) {
+      context.bezierCurveTo( this.control1.x, this.control1.y, this.control2.x, this.control2.y, this.end.x, this.end.y );
+    },
+    
+    transformed: function( matrix ) {
+      return new Segment.Cubic( matrix.timesVector2( this.start ), matrix.timesVector2( this.control1 ), matrix.timesVector2( this.control2 ), matrix.timesVector2( this.end ) );
     }
     
     // returns the resultant winding number of this ray intersecting this segment.
@@ -8424,289 +10852,322 @@ define('KITE/segments/Cubic',['require','ASSERT/assert','KITE/kite','DOT/Bounds2
 // Copyright 2002-2012, University of Colorado
 
 /**
- * Draws a cubic bezier curve
+ * Elliptical arc segment
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define('KITE/pieces/CubicCurveTo',['require','ASSERT/assert','KITE/kite','KITE/pieces/Piece','KITE/segments/Cubic'], function( require ) {
+define('KITE/segments/EllipticalArc',['require','ASSERT/assert','KITE/kite','DOT/Vector2','DOT/Bounds2','DOT/Matrix3','DOT/Transform3','DOT/Util','KITE/segments/Segment','KITE/util/Subpath'], function( require ) {
   
   
   var assert = require( 'ASSERT/assert' )( 'kite' );
-  
-  var kite = require( 'KITE/kite' );
-  
-  var Piece = require( 'KITE/pieces/Piece' );
-  require( 'KITE/segments/Cubic' );
-  
-  Piece.CubicCurveTo = function( control1, control2, point ) {
-    this.control1 = control1;
-    this.control2 = control2;
-    this.point = point;
-  };
-  Piece.CubicCurveTo.prototype = {
-    constructor: Piece.CubicCurveTo,
-    
-    writeToContext: function( context ) {
-      context.bezierCurveTo( this.control1.x, this.control1.y, this.control2.x, this.control2.y, this.point.x, this.point.y );
-    },
-    
-    transformed: function( matrix ) {
-      return [new Piece.CubicCurveTo( matrix.timesVector2( this.control1 ), matrix.timesVector2( this.control2 ), matrix.timesVector2( this.point ) )];
-    },
-    
-    applyPiece: function( shape ) {
-      // see http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-quadraticcurveto
-      shape.ensure( this.controlPoint );
-      var start = shape.getLastSubpath().getLastPoint();
-      var cubic = new kite.Segment.Cubic( start, this.control1, this.control2, this.point );
-      
-      // if there is a cusp, we add the two (split) quadratic segments instead so that stroking treats the 'join' between them with the proper lineJoin
-      if ( cubic.hasCusp() ) {
-        shape.getLastSubpath().addSegment( cubic.startQuadratic );
-        shape.getLastSubpath().addSegment( cubic.endQuadratic );
-      } else {
-        shape.getLastSubpath().addSegment( cubic );
-      }
-      shape.getLastSubpath().addPoint( this.point );
-      if ( !cubic.invalid ) {
-        shape.bounds = shape.bounds.union( cubic.bounds );
-      }
-    },
-    
-    toString: function() {
-      return 'cubicCurveTo( ' + this.control1.x + ', ' + this.control1.y + ', ' + this.control2.x + ', ' + this.control2.y + ', ' + this.point.x + ', ' + this.point.y + ' )';
-    }
-  };
-  
-  return Piece.CubicCurveTo;
-} );
 
-// Copyright 2002-2012, University of Colorado
-
-/**
- * Creates a line from the previous point
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define('KITE/pieces/LineTo',['require','ASSERT/assert','KITE/kite','KITE/pieces/Piece','KITE/segments/Line'], function( require ) {
-  
-  
-  var assert = require( 'ASSERT/assert' )( 'kite' );
-  
-  var kite = require( 'KITE/kite' );
-  
-  var Piece = require( 'KITE/pieces/Piece' );
-  require( 'KITE/segments/Line' );
-  
-  Piece.LineTo = function( point ) {
-    this.point = point;
-  };
-  Piece.LineTo.prototype = {
-    constructor: Piece.LineTo,
-    
-    writeToContext: function( context ) {
-      context.lineTo( this.point.x, this.point.y );
-    },
-    
-    transformed: function( matrix ) {
-      return [new Piece.LineTo( matrix.timesVector2( this.point ) )];
-    },
-    
-    applyPiece: function( shape ) {
-      // see http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-lineto
-      if ( shape.hasSubpaths() ) {
-        var start = shape.getLastSubpath().getLastPoint();
-        var end = this.point;
-        var line = new kite.Segment.Line( start, end );
-        shape.getLastSubpath().addSegment( line );
-        shape.getLastSubpath().addPoint( end );
-        shape.bounds = shape.bounds.withPoint( start ).withPoint( end );
-        assert && assert( !isNaN( shape.bounds.getX() ) );
-      } else {
-        shape.ensure( this.point );
-      }
-    },
-    
-    toString: function() {
-      return 'lineTo( ' + this.point.x + ', ' + this.point.y + ' )';
-    }
-  };
-  
-  return Piece.LineTo;
-} );
-
-// Copyright 2002-2012, University of Colorado
-
-/**
- * Creates a new subpath starting at the specified point
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define('KITE/pieces/MoveTo',['require','ASSERT/assert','KITE/kite','KITE/pieces/Piece','KITE/util/Subpath'], function( require ) {
-  
-  
-  var assert = require( 'ASSERT/assert' )( 'kite' );
-  
-  var kite = require( 'KITE/kite' );
-  
-  var Piece = require( 'KITE/pieces/Piece' );
-  require( 'KITE/util/Subpath' );
-  
-  Piece.MoveTo = function( point ) {
-    this.point = point;
-  };
-  Piece.MoveTo.prototype = {
-    constructor: Piece.MoveTo,
-    
-    writeToContext: function( context ) {
-      context.moveTo( this.point.x, this.point.y );
-    },
-    
-    transformed: function( matrix ) {
-      return [new Piece.MoveTo( matrix.timesVector2( this.point ) )];
-    },
-    
-    applyPiece: function( shape ) {
-      var subpath = new kite.Subpath();
-      subpath.addPoint( this.point );
-      shape.addSubpath( subpath );
-    },
-    
-    toString: function() {
-      return 'moveTo( ' + this.point.x + ', ' + this.point.y + ' )';
-    }
-  };
-  
-  return Piece.MoveTo;
-} );
-
-// Copyright 2002-2012, University of Colorado
-
-/**
- * Draws a quadratic bezier curve
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define('KITE/pieces/QuadraticCurveTo',['require','ASSERT/assert','KITE/kite','KITE/pieces/Piece','KITE/segments/Quadratic'], function( require ) {
-  
-  
-  var assert = require( 'ASSERT/assert' )( 'kite' );
-  
-  var kite = require( 'KITE/kite' );
-  
-  var Piece = require( 'KITE/pieces/Piece' );
-  require( 'KITE/segments/Quadratic' );
-  
-  Piece.QuadraticCurveTo = function( controlPoint, point ) {
-    this.controlPoint = controlPoint;
-    this.point = point;
-  };
-  Piece.QuadraticCurveTo.prototype = {
-    constructor: Piece.QuadraticCurveTo,
-    
-    writeToContext: function( context ) {
-      context.quadraticCurveTo( this.controlPoint.x, this.controlPoint.y, this.point.x, this.point.y );
-    },
-    
-    transformed: function( matrix ) {
-      return [new Piece.QuadraticCurveTo( matrix.timesVector2( this.controlPoint ), matrix.timesVector2( this.point ) )];
-    },
-    
-    applyPiece: function( shape ) {
-      // see http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-quadraticcurveto
-      shape.ensure( this.controlPoint );
-      var start = shape.getLastSubpath().getLastPoint();
-      var quadratic = new kite.Segment.Quadratic( start, this.controlPoint, this.point );
-      shape.getLastSubpath().addSegment( quadratic );
-      shape.getLastSubpath().addPoint( this.point );
-      if ( !quadratic.invalid ) {
-        shape.bounds = shape.bounds.union( quadratic.bounds );
-      }
-    },
-    
-    toString: function() {
-      return 'quadraticCurveTo( ' + this.controlPoint.x + ', ' + this.controlPoint.y + ', ' + this.point.x + ', ' + this.point.y + ' )';
-    }
-  };
-  
-  return Piece.QuadraticCurveTo;
-} );
-
-// Copyright 2002-2012, University of Colorado
-
-/**
- * Draws a rectangle.
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define('KITE/pieces/Rect',['require','ASSERT/assert','KITE/kite','DOT/Vector2','KITE/pieces/Piece','KITE/pieces/MoveTo','KITE/pieces/Close','KITE/util/Subpath','KITE/segments/Line'], function( require ) {
-  
-  
-  var assert = require( 'ASSERT/assert' )( 'kite' );
-  
   var kite = require( 'KITE/kite' );
   
   var Vector2 = require( 'DOT/Vector2' );
-  
-  var Piece = require( 'KITE/pieces/Piece' );
-  require( 'KITE/pieces/MoveTo' );
-  require( 'KITE/pieces/Close' );
+  var Bounds2 = require( 'DOT/Bounds2' );
+  var Matrix3 = require( 'DOT/Matrix3' );
+  var Transform3 = require( 'DOT/Transform3' );
+  var toDegrees = require( 'DOT/Util' ).toDegrees;
+
+  var Segment = require( 'KITE/segments/Segment' );
   require( 'KITE/util/Subpath' );
-  require( 'KITE/segments/Line' );
-  
-  // for brevity
-  function p( x,y ) { return new Vector2( x, y ); }
-  
-  Piece.Rect = function( x, y, width, height ) {
-    assert && assert( x !== undefined && y !== undefined && width !== undefined && height !== undefined, 'Undefined argument for Piece.Rect' );
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
-  };
-  Piece.Rect.prototype = {
-    constructor: Piece.Rect,
+
+  // TODO: notes at http://www.w3.org/TR/SVG/implnote.html#PathElementImplementationNotes
+  // Canvas notes at http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-ellipse
+  Segment.EllipticalArc = function EllipticalArc( center, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise ) {
+    if ( radiusX < 0 ) {
+      // support this case since we might actually need to handle it inside of strokes?
+      radiusX = -radiusX;
+      startAngle = Math.PI - startAngle;
+      endAngle = Math.PI - endAngle;
+      anticlockwise = !anticlockwise;
+    }
+    if ( radiusY < 0 ) {
+      // support this case since we might actually need to handle it inside of strokes?
+      radiusY = -radiusY;
+      startAngle = -startAngle;
+      endAngle = -endAngle;
+      anticlockwise = !anticlockwise;
+    }
+    if ( radiusX < radiusY ) {
+      // swap radiusX and radiusY internally for consistent Canvas / SVG output
+      rotation += Math.PI / 2;
+      startAngle -= Math.PI / 2;
+      endAngle -= Math.PI / 2;
+      
+      // swap radiusX and radiusY
+      var tmpR = radiusX;
+      radiusX = radiusY;
+      radiusY = tmpR;
+    }
     
+    this.center = center;
+    this.radiusX = radiusX;
+    this.radiusY = radiusY;
+    this.rotation = rotation;
+    this.startAngle = startAngle;
+    this.endAngle = endAngle;
+    this.anticlockwise = anticlockwise;
+    
+    this.unitTransform = Segment.EllipticalArc.computeUnitTransform( center, radiusX, radiusY, rotation );
+    
+    this.start = this.positionAtAngle( startAngle );
+    this.end = this.positionAtAngle( endAngle );
+    this.startTangent = this.tangentAtAngle( startAngle ).normalized();
+    this.endTangent = this.tangentAtAngle( endAngle ).normalized();
+    
+    if ( radiusX === 0 || radiusY === 0 || startAngle === endAngle ) {
+      this.invalid = true;
+      return;
+    }
+    
+    if ( radiusX < radiusY ) {
+      // TODO: check this
+      throw new Error( 'Not verified to work if radiusX < radiusY' );
+    }
+    
+    // constraints shared with Segment.Arc
+    assert && assert( !( ( !anticlockwise && endAngle - startAngle <= -Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle <= -Math.PI * 2 ) ), 'Not handling elliptical arcs with start/end angles that show differences in-between browser handling' );
+    assert && assert( !( ( !anticlockwise && endAngle - startAngle > Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle > Math.PI * 2 ) ), 'Not handling elliptical arcs with start/end angles that show differences in-between browser handling' );
+    
+    var isFullPerimeter = ( !anticlockwise && endAngle - startAngle >= Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle >= Math.PI * 2 );
+    
+    // compute an angle difference that represents how "much" of the circle our arc covers
+    this.angleDifference = this.anticlockwise ? this.startAngle - this.endAngle : this.endAngle - this.startAngle;
+    if ( this.angleDifference < 0 ) {
+      this.angleDifference += Math.PI * 2;
+    }
+    assert && assert( this.angleDifference >= 0 ); // now it should always be zero or positive
+    
+    // a unit arg segment that we can map to our ellipse. useful for hit testing and such.
+    this.unitArcSegment = new Segment.Arc( Vector2.ZERO, 1, startAngle, endAngle, anticlockwise );
+    
+    this.bounds = Bounds2.NOTHING;
+    this.bounds = this.bounds.withPoint( this.start );
+    this.bounds = this.bounds.withPoint( this.end );
+    
+    // for bounds computations
+    var that = this;
+    function boundsAtAngle( angle ) {
+      if ( that.containsAngle( angle ) ) {
+        // the boundary point is in the arc
+        that.bounds = that.bounds.withPoint( that.positionAtAngle( angle ) );
+      }
+    }
+    
+    // if the angles are different, check extrema points
+    if ( startAngle !== endAngle ) {
+      // solve the mapping from the unit circle, find locations where a coordinate of the gradient is zero.
+      // we find one extrema point for both x and y, since the other two are just rotated by pi from them.
+      var xAngle = Math.atan( -( radiusY / radiusX ) * Math.tan( rotation ) );
+      var yAngle = Math.atan( ( radiusY / radiusX ) / Math.tan( rotation ) );
+      
+      // check all of the extrema points
+      boundsAtAngle( xAngle );
+      boundsAtAngle( xAngle + Math.PI );
+      boundsAtAngle( yAngle );
+      boundsAtAngle( yAngle + Math.PI );
+    }
+  };
+  Segment.EllipticalArc.prototype = {
+    constructor: Segment.EllipticalArc,
+    
+    angleAt: function( t ) {
+      if ( this.anticlockwise ) {
+        // angle is 'decreasing'
+        // -2pi <= end - start < 2pi
+        if ( this.startAngle > this.endAngle ) {
+          return this.startAngle + ( this.endAngle - this.startAngle ) * t;
+        } else if ( this.startAngle < this.endAngle ) {
+          return this.startAngle + ( -Math.PI * 2 + this.endAngle - this.startAngle ) * t;
+        } else {
+          // equal
+          return this.startAngle;
+        }
+      } else {
+        // angle is 'increasing'
+        // -2pi < end - start <= 2pi
+        if ( this.startAngle < this.endAngle ) {
+          return this.startAngle + ( this.endAngle - this.startAngle ) * t;
+        } else if ( this.startAngle > this.endAngle ) {
+          return this.startAngle + ( Math.PI * 2 + this.endAngle - this.startAngle ) * t;
+        } else {
+          // equal
+          return this.startAngle;
+        }
+      }
+    },
+    
+    positionAt: function( t ) {
+      return this.positionAtAngle( this.angleAt( t ) );
+    },
+    
+    tangentAt: function( t ) {
+      return this.tangentAtAngle( this.angleAt( t ) );
+    },
+    
+    curvatureAt: function( t ) {
+      // see http://mathworld.wolfram.com/Ellipse.html (59)
+      var angle = this.angleAt( t );
+      var aq = this.radiusX * Math.sin( angle );
+      var bq = this.radiusY * Math.cos( angle );
+      var denominator = Math.pow( bq * bq + aq * aq, 3/2 );
+      return ( this.anticlockwise ? -1 : 1 ) * this.radiusX * this.radiusY / denominator;
+    },
+    
+    positionAtAngle: function( angle ) {
+      return this.unitTransform.transformPosition2( Vector2.createPolar( 1, angle ) );
+    },
+    
+    tangentAtAngle: function( angle ) {
+      var normal = this.unitTransform.transformNormal2( Vector2.createPolar( 1, angle ) );
+      
+      return this.anticlockwise ? normal.perpendicular() : normal.perpendicular().negated();
+    },
+    
+    // TODO: refactor? exact same as Segment.Arc
+    containsAngle: function( angle ) {
+      // transform the angle into the appropriate coordinate form
+      // TODO: check anticlockwise version!
+      var normalizedAngle = this.anticlockwise ? angle - this.endAngle : angle - this.startAngle;
+      
+      // get the angle between 0 and 2pi
+      var positiveMinAngle = normalizedAngle % ( Math.PI * 2 );
+      // check this because modular arithmetic with negative numbers reveal a negative number
+      if ( positiveMinAngle < 0 ) {
+        positiveMinAngle += Math.PI * 2;
+      }
+      
+      return positiveMinAngle <= this.angleDifference;
+    },
+    
+    // discretizes the elliptical arc and returns an offset curve as a list of lineTos
+    offsetTo: function( r, reverse ) {
+      // how many segments to create (possibly make this more adaptive?)
+      var quantity = 32;
+      
+      var points = [];
+      var result = [];
+      for ( var i = 0; i < quantity; i++ ) {
+        var ratio = i / ( quantity - 1 );
+        if ( reverse ) {
+          ratio = 1 - ratio;
+        }
+        var angle = this.angleAt( ratio );
+        
+        points.push( this.positionAtAngle( angle ).plus( this.tangentAtAngle( angle ).perpendicular().normalized().times( r ) ) );
+        if ( i > 0 ) {
+          result.push( new Segment.Line( points[i-1], points[i] ) );
+        }
+      }
+      
+      return result;
+    },
+    
+    getSVGPathFragment: function() {
+      // see http://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands for more info
+      // rx ry x-axis-rotation large-arc-flag sweep-flag x y
+      var epsilon = 0.01; // allow some leeway to render things as 'almost circles'
+      var sweepFlag = this.anticlockwise ? '0' : '1';
+      var largeArcFlag;
+      var degreesRotation = toDegrees( this.rotation ); // bleh, degrees?
+      if ( this.angleDifference < Math.PI * 2 - epsilon ) {
+        largeArcFlag = this.angleDifference < Math.PI ? '0' : '1';
+        return 'A ' + this.radiusX + ' ' + this.radiusY + ' ' + degreesRotation + ' ' + largeArcFlag + ' ' + sweepFlag + ' ' + this.end.x + ' ' + this.end.y;
+      } else {
+        // ellipse (or almost-ellipse) case needs to be handled differently
+        // since SVG will not be able to draw (or know how to draw) the correct circle if we just have a start and end, we need to split it into two circular arcs
+        
+        // get the angle that is between and opposite of both of the points
+        var splitOppositeAngle = ( this.startAngle + this.endAngle ) / 2; // this _should_ work for the modular case?
+        var splitPoint = this.positionAtAngle( splitOppositeAngle );
+        
+        largeArcFlag = '0'; // since we split it in 2, it's always the small arc
+        
+        var firstArc = 'A ' + this.radiusX + ' ' + this.radiusY + ' ' + degreesRotation + ' ' + largeArcFlag + ' ' + sweepFlag + ' ' + splitPoint.x + ' ' + splitPoint.y;
+        var secondArc = 'A ' + this.radiusX + ' ' + this.radiusY + ' ' + degreesRotation + ' ' + largeArcFlag + ' ' + sweepFlag + ' ' + this.end.x + ' ' + this.end.y;
+        
+        return firstArc + ' ' + secondArc;
+      }
+    },
+    
+    strokeLeft: function( lineWidth ) {
+      return this.offsetTo( -lineWidth / 2, false );
+    },
+    
+    strokeRight: function( lineWidth ) {
+      return this.offsetTo( lineWidth / 2, true );
+    },
+    
+    intersectsBounds: function( bounds ) {
+      throw new Error( 'Segment.EllipticalArc.intersectsBounds unimplemented' );
+    },
+    
+    intersection: function( ray ) {
+      // be lazy. transform it into the space of a non-elliptical arc.
+      var unitTransform = this.unitTransform;
+      var rayInUnitCircleSpace = unitTransform.inverseRay2( ray );
+      var hits = this.unitArcSegment.intersection( rayInUnitCircleSpace );
+      
+      return _.map( hits, function( hit ) {
+        var transformedPoint = unitTransform.transformPosition2( hit.point );
+        return {
+          distance: ray.pos.distance( transformedPoint ),
+          point: transformedPoint,
+          normal: unitTransform.inverseNormal2( hit.normal ),
+          wind: hit.wind
+        };
+      } );
+    },
+    
+    // returns the resultant winding number of this ray intersecting this segment.
+    windingIntersection: function( ray ) {
+      // be lazy. transform it into the space of a non-elliptical arc.
+      var rayInUnitCircleSpace = this.unitTransform.inverseRay2( ray );
+      return this.unitArcSegment.windingIntersection( rayInUnitCircleSpace );
+    },
+    
+    // assumes the current position is at start
     writeToContext: function( context ) {
-      context.rect( this.x, this.y, this.width, this.height );
+      if ( context.ellipse ) {
+        context.ellipse( this.center.x, this.center.y, this.radiusX, this.radiusY, this.rotation, this.startAngle, this.endAngle, this.anticlockwise );
+      } else {
+        // fake the ellipse call by using transforms
+        this.unitTransform.getMatrix().canvasAppendTransform( context );
+        context.arc( 0, 0, 1, this.startAngle, this.endAngle, this.anticlockwise );
+        this.unitTransform.getInverse().canvasAppendTransform( context );
+      }
     },
     
     transformed: function( matrix ) {
-      var a = matrix.timesVector2( p( this.x, this.y ) );
-      var b = matrix.timesVector2( p( this.x + this.width, this.y ) );
-      var c = matrix.timesVector2( p( this.x + this.width, this.y + this.height ) );
-      var d = matrix.timesVector2( p( this.x, this.y + this.height ) );
-      return [new Piece.MoveTo( a ), new Piece.LineTo( b ), new Piece.LineTo( c ), new Piece.LineTo( d ), new Piece.Close(), new Piece.MoveTo( a )];
-    },
-    
-    applyPiece: function( shape ) {
-      var subpath = new kite.Subpath();
-      shape.addSubpath( subpath );
-      subpath.addPoint( p( this.x, this.y ) );
-      subpath.addPoint( p( this.x + this.width, this.y ) );
-      subpath.addPoint( p( this.x + this.width, this.y + this.height ) );
-      subpath.addPoint( p( this.x, this.y + this.height ) );
-      subpath.addSegment( new kite.Segment.Line( subpath.points[0], subpath.points[1] ) );
-      subpath.addSegment( new kite.Segment.Line( subpath.points[1], subpath.points[2] ) );
-      subpath.addSegment( new kite.Segment.Line( subpath.points[2], subpath.points[3] ) );
-      subpath.close();
-      shape.addSubpath( new kite.Subpath() );
-      shape.getLastSubpath().addPoint( p( this.x, this.y ) );
-      shape.bounds = shape.bounds.withCoordinates( this.x, this.y ).withCoordinates( this.x + this.width, this.y + this.height );
-      assert && assert( !isNaN( shape.bounds.getX() ) );
-    },
-    
-    toString: function() {
-      return 'rect( ' + this.x + ', ' + this.y + ', ' + this.width + ', ' + this.height + ' )';
+      var transformedSemiMajorAxis = matrix.timesVector2( Vector2.createPolar( this.radiusX, this.rotation ) ).minus( matrix.timesVector2( Vector2.ZERO ) );
+      var transformedSemiMinorAxis = matrix.timesVector2( Vector2.createPolar( this.radiusY, this.rotation + Math.PI / 2 ) ).minus( matrix.timesVector2( Vector2.ZERO ) );
+      var rotation = transformedSemiMajorAxis.angle();
+      var radiusX = transformedSemiMajorAxis.magnitude();
+      var radiusY = transformedSemiMinorAxis.magnitude();
+      
+      var reflected = matrix.getDeterminant() < 0;
+      
+      // reverse the 'clockwiseness' if our transform includes a reflection
+      // TODO: check reflections. swapping angle signs should fix clockwiseness
+      var anticlockwise = reflected ? !this.anticlockwise : this.anticlockwise;
+      var startAngle = reflected ? -this.startAngle : this.startAngle;
+      var endAngle = reflected ? -this.endAngle : this.endAngle;
+      
+      return new Segment.EllipticalArc( matrix.timesVector2( this.center ), radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise );
     }
   };
   
-  return Piece.Rect;
+  // adapted from http://www.w3.org/TR/SVG/implnote.html#PathElementImplementationNotes
+  // transforms the unit circle onto our ellipse
+  Segment.EllipticalArc.computeUnitTransform = function( center, radiusX, radiusY, rotation ) {
+    return new Transform3( Matrix3.translation( center.x, center.y ) // TODO: convert to Matrix3.translation( this.center) when available
+                                  .timesMatrix( Matrix3.rotation2( rotation ) )
+                                  .timesMatrix( Matrix3.scaling( radiusX, radiusY ) ) );
+  };
+  
+  return Segment.EllipticalArc;
 } );
 
 // Copyright 2002-2012, University of Colorado
@@ -8714,10 +11175,8 @@ define('KITE/pieces/Rect',['require','ASSERT/assert','KITE/kite','DOT/Vector2','
 /**
  * Shape handling
  *
- * Shapes are internally made up of pieces (generally individual Canvas calls),
- * which for simplicity of stroking and hit testing are then broken up into
- * individual segments stored in subpaths. Familiarity with how Canvas handles
- * subpaths is helpful for understanding this code.
+ * Shapes are internally made up of Subpaths, which contain a series of segments, and are optionally closed.
+ * Familiarity with how Canvas handles subpaths is helpful for understanding this code.
  *
  * Canvas spec: http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html
  * SVG spec: http://www.w3.org/TR/SVG/expanded-toc.html
@@ -8731,7 +11190,7 @@ define('KITE/pieces/Rect',['require','ASSERT/assert','KITE/kite','DOT/Vector2','
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define('KITE/Shape',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT/Vector2','DOT/Bounds2','DOT/Ray2','DOT/Matrix3','DOT/Transform3','DOT/Util','DOT/Util','KITE/util/Subpath','KITE/pieces/Piece','KITE/util/LineStyles','KITE/pieces/Arc','KITE/pieces/Close','KITE/pieces/CubicCurveTo','KITE/pieces/EllipticalArc','KITE/pieces/LineTo','KITE/pieces/MoveTo','KITE/pieces/QuadraticCurveTo','KITE/pieces/Rect','KITE/segments/Line'], function( require ) {
+define('KITE/Shape',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT/Vector2','DOT/Bounds2','DOT/Ray2','DOT/Matrix3','DOT/Transform3','DOT/Util','DOT/Util','KITE/util/Subpath','KITE/../parser/svgPath','KITE/util/LineStyles','KITE/segments/Arc','KITE/segments/Cubic','KITE/segments/EllipticalArc','KITE/segments/Line','KITE/segments/Quadratic'], function( require ) {
   
   
   var assert = require( 'ASSERT/assert' )( 'kite' );
@@ -8739,6 +11198,7 @@ define('KITE/Shape',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT/
   
   var kite = require( 'KITE/kite' );
   
+  // TODO: clean up imports
   var Vector2 = require( 'DOT/Vector2' );
   var Bounds2 = require( 'DOT/Bounds2' );
   var Ray2 = require( 'DOT/Ray2' );
@@ -8748,48 +11208,40 @@ define('KITE/Shape',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT/
   var lineLineIntersection = require( 'DOT/Util' ).lineLineIntersection;
   
   var Subpath = require( 'KITE/util/Subpath' );
-  var Piece = require( 'KITE/pieces/Piece' );
+  
+  var svgPath = require( 'KITE/../parser/svgPath' );
   require( 'KITE/util/LineStyles' );
-  require( 'KITE/pieces/Arc' );
-  require( 'KITE/pieces/Close' );
-  require( 'KITE/pieces/CubicCurveTo' );
-  require( 'KITE/pieces/EllipticalArc' );
-  require( 'KITE/pieces/LineTo' );
-  require( 'KITE/pieces/MoveTo' );
-  require( 'KITE/pieces/QuadraticCurveTo' );
-  require( 'KITE/pieces/Rect' );
+  require( 'KITE/segments/Arc' );
+  require( 'KITE/segments/Cubic' );
+  require( 'KITE/segments/EllipticalArc' );
   require( 'KITE/segments/Line' );
+  require( 'KITE/segments/Quadratic' );
   
   // for brevity
   function p( x,y ) { return new Vector2( x, y ); }
+  function v( x,y ) { return new Vector2( x, y ); } // TODO: use this version in general, it makes more sense and is easier to type
   
   // a normalized vector for non-zero winding checks
   // var weirdDir = p( Math.PI, 22 / 7 );
   
-  kite.Shape = function( pieces, optionalClose ) {
-    // higher-level Canvas-esque drawing commands, individually considered to be immutable
-    this.pieces = [];
-    
+  // all arguments optional, they are for the copy() method. if used, ensure that 'bounds' is consistent with 'subpaths'
+  kite.Shape = function Shape( subpaths, bounds ) {
     // lower-level piecewise mathematical description using segments, also individually immutable
-    this.subpaths = [];
+    this.subpaths = ( typeof subpaths === 'object' ) ? subpaths : [];
+    assert && assert( this.subpaths.length === 0 || this.subpaths[0].constructor.name !== 'Array' );
     
     // computed bounds for all pieces added so far
-    this.bounds = Bounds2.NOTHING;
-    
-    // cached stroked shape (so hit testing can be done quickly on stroked shapes)
-    this._strokedShape = null;
-    this._strokedShapeComputed = false;
-    this._strokedShapeStyles = null;
+    this.bounds = bounds || Bounds2.NOTHING;
     
     var that = this;
-    // initialize with pieces passed in
-    if ( pieces !== undefined ) {
-      _.each( pieces, function( piece ) {
-        that.addPiece( piece );
+    if ( subpaths && typeof subpaths !== 'object' ) {
+      assert && assert( typeof subpaths === 'string', 'if subpaths is not an object, it must be a string' )
+      ;
+      // parse the SVG path
+      _.each( svgPath.parse( subpaths ), function( item ) {
+        assert && assert( Shape.prototype[item.cmd] !== undefined, 'method ' + item.cmd + ' from parsed SVG does not exist' );
+        that[item.cmd].apply( that, item.args );
       } );
-    }
-    if ( optionalClose ) {
-      this.addPiece( new Piece.Close() );
     }
   };
   var Shape = kite.Shape;
@@ -8797,55 +11249,179 @@ define('KITE/Shape',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT/
   Shape.prototype = {
     constructor: Shape,
     
-    moveTo: function( x, y ) {
-      // moveTo( point )
-      if ( y === undefined && typeof x === 'object' ) {
-        // wrap it in a Vector2 if the class doesn't match
-        var point = x instanceof Vector2 ? x : new Vector2( x.x, x.y );
-        this.addPiece( new Piece.MoveTo( point ) );
-      } else { // moveTo( x, y )
-        this.addPiece( new Piece.MoveTo( p( x, y ) ) );
+    moveTo: function( x, y ) { return this.moveToPoint( v( x, y ) ); },
+    moveToRelative: function( x, y ) { return this.moveToPointRelative( v( x, y ) ); },
+    moveToPointRelative: function( point ) { return this.moveToPoint( this.getRelativePoint().plus( point ) ); },
+    moveToPoint: function( point ) {
+      return this.addSubpath( new kite.Subpath().addPoint( point ) );
+    },
+    
+    lineTo: function( x, y ) { return this.lineToPoint( v( x, y ) ); },
+    lineToRelative: function( x, y ) { return this.lineToPointRelative( v( x, y ) ); },
+    lineToPointRelative: function( point ) { return this.lineToPoint( this.getRelativePoint().plus( point ) ); },
+    lineToPoint: function( point ) {
+      // see http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-lineto
+      if ( this.hasSubpaths() ) {
+        var start = this.getLastSubpath().getLastPoint();
+        var end = point;
+      var line = new kite.Segment.Line( start, end );
+        this.getLastSubpath().addPoint( end );
+        if ( !line.invalid ) {
+          this.getLastSubpath().addSegment( line );
+          this.bounds = this.bounds.withPoint( start ).withPoint( end );
+          assert && assert( !isNaN( this.bounds.getX() ) );
+        }
+      } else {
+        this.ensure( point );
+      }
+      
+      return this;
+    },
+    
+    horizontalLineTo: function( x ) { return this.lineTo( x, this.getRelativePoint().y ); },
+    horizontalLineToRelative: function( x ) { return this.lineToRelative( x, 0 ); },
+    
+    verticalLineTo: function( y ) { return this.lineTo( this.getRelativePoint().x, y ); },
+    verticalLineToRelative: function( y ) { return this.lineToRelative( 0, y ); },
+    
+    quadraticCurveTo: function( cpx, cpy, x, y ) { return this.quadraticCurveToPoint( v( cpx, cpy ), v( x, y ) ); },
+    quadraticCurveToRelative: function( cpx, cpy, x, y ) { return this.quadraticCurveToPointRelative( v( cpx, cpy ), v( x, y ) ); },
+    quadraticCurveToPointRelative: function( controlPoint, point ) {
+      var relativePoint = this.getRelativePoint();
+      return this.quadraticCurveToPoint( relativePoint.plus( controlPoint ), relativePoint.plus( point ) );
+    },
+    // TODO: consider a rename to put 'smooth' farther back?
+    smoothQuadraticCurveTo: function( x, y ) { return this.quadraticCurveToPoint( this.getSmoothQuadraticControlPoint(), v( x, y ) ); },
+    smoothQuadraticCurveToRelative: function( x, y ) { return this.quadraticCurveToPoint( this.getSmoothQuadraticControlPoint(), v( x, y ).plus( this.getRelativePoint() ) ); },
+    quadraticCurveToPoint: function( controlPoint, point ) {
+      // see http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-quadraticcurveto
+      this.ensure( controlPoint );
+      var start = this.getLastSubpath().getLastPoint();
+      var quadratic = new kite.Segment.Quadratic( start, controlPoint, point );
+      this.getLastSubpath().addPoint( point );
+      if ( !quadratic.invalid ) {
+        this.getLastSubpath().addSegment( quadratic );
+        this.bounds = this.bounds.union( quadratic.bounds );
+      }
+      
+      return this;
+    },
+    
+    cubicCurveTo: function( cp1x, cp1y, cp2x, cp2y, x, y ) { return this.cubicCurveToPoint( v( cp1x, cp1y ), v( cp2x, cp2y ), v( x, y ) ); },
+    cubicCurveToRelative: function( cp1x, cp1y, cp2x, cp2y, x, y ) { return this.cubicCurveToPointRelative( v( cp1x, cp1y ), v( cp2x, cp2y ), v( x, y ) ); },
+    cubicCurveToPointRelative: function( control1, control2, point ) {
+      var relativePoint = this.getRelativePoint();
+      return this.cubicCurveToPoint( relativePoint.plus( control1 ), relativePoint.plus( control2 ), relativePoint.plus( point ) );
+    },
+    smoothCubicCurveTo: function( cp2x, cp2y, x, y ) { return this.cubicCurveToPoint( this.getSmoothCubicControlPoint(), v( cp2x, cp2y ), v( x, y ) ); },
+    smoothCubicCurveToRelative: function( cp2x, cp2y, x, y ) { return this.cubicCurveToPoint( this.getSmoothCubicControlPoint(), v( cp2x, cp2y ).plus( this.getRelativePoint() ), v( x, y ).plus( this.getRelativePoint() ) ); },
+    cubicCurveToPoint: function( control1, control2, point ) {
+      // see http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-quadraticcurveto
+      this.ensure( control1 );
+      var start = this.getLastSubpath().getLastPoint();
+      var cubic = new kite.Segment.Cubic( start, control1, control2, point );
+      
+      if ( !cubic.invalid ) {
+        // if there is a cusp, we add the two (split) quadratic segments instead so that stroking treats the 'join' between them with the proper lineJoin
+        if ( cubic.hasCusp() ) {
+          this.getLastSubpath().addSegment( cubic.startQuadratic );
+          this.getLastSubpath().addSegment( cubic.endQuadratic );
+        } else {
+          this.getLastSubpath().addSegment( cubic );
+        }
+        
+        this.bounds = this.bounds.union( cubic.bounds );
+      }
+      this.getLastSubpath().addPoint( point );
+      
+      return this;
+    },
+    
+    arc: function( centerX, centerY, radius, startAngle, endAngle, anticlockwise ) { return this.arcPoint( v( centerX, centerY ), radius, startAngle, endAngle, anticlockwise ); },
+    arcPoint: function( center, radius, startAngle, endAngle, anticlockwise ) {
+      // see http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-arc
+      
+      var arc = new kite.Segment.Arc( center, radius, startAngle, endAngle, anticlockwise );
+      
+      // we are assuming that the normal conditions were already met (or exceptioned out) so that these actually work with canvas
+      var startPoint = arc.start;
+      var endPoint = arc.end;
+      
+      // if there is already a point on the subpath, and it is different than our starting point, draw a line between them
+      if ( this.hasSubpaths() && this.getLastSubpath().getLength() > 0 && !startPoint.equals( this.getLastSubpath().getLastPoint(), 0 ) ) {
+        this.getLastSubpath().addSegment( new kite.Segment.Line( this.getLastSubpath().getLastPoint(), startPoint ) );
+      }
+      
+      if ( !this.hasSubpaths() ) {
+        this.addSubpath( new kite.Subpath() );
+      }
+      
+      // technically the Canvas spec says to add the start point, so we do this even though it is probably completely unnecessary (there is no conditional)
+      this.getLastSubpath().addPoint( startPoint );
+      this.getLastSubpath().addPoint( endPoint );
+      
+      if ( !arc.invalid ) {
+        this.getLastSubpath().addSegment( arc );
+        
+        // and update the bounds
+        this.bounds = this.bounds.union( arc.bounds );
+      }
+      
+      return this;
+    },
+    
+    ellipticalArc: function( centerX, centerY, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise ) { return this.ellipticalArcPoint( v( centerX, centerY ), radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise ); },
+    ellipticalArcPoint: function( center, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise ) {
+      // see http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-arc
+      
+      var ellipticalArc = new kite.Segment.EllipticalArc( center, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise );
+      
+      // we are assuming that the normal conditions were already met (or exceptioned out) so that these actually work with canvas
+      var startPoint = ellipticalArc.start;
+      var endPoint = ellipticalArc.end;
+      
+      // if there is already a point on the subpath, and it is different than our starting point, draw a line between them
+      if ( this.hasSubpaths() && this.getLastSubpath().getLength() > 0 && !startPoint.equals( this.getLastSubpath().getLastPoint(), 0 ) ) {
+        this.getLastSubpath().addSegment( new kite.Segment.Line( this.getLastSubpath().getLastPoint(), startPoint ) );
+      }
+      
+      if ( !this.hasSubpaths() ) {
+        this.addSubpath( new kite.Subpath() );
+      }
+      
+      // technically the Canvas spec says to add the start point, so we do this even though it is probably completely unnecessary (there is no conditional)
+      this.getLastSubpath().addPoint( startPoint );
+      this.getLastSubpath().addPoint( endPoint );
+      
+      if ( !ellipticalArc.invalid ) {
+        this.getLastSubpath().addSegment( ellipticalArc );
+        
+        // and update the bounds
+        this.bounds = this.bounds.union( ellipticalArc.bounds );
+      }
+      
+      return this;
+    },
+    
+    close: function() {
+      if ( this.hasSubpaths() ) {
+        var previousPath = this.getLastSubpath();
+        var nextPath = new kite.Subpath();
+        
+        previousPath.close();
+        this.addSubpath( nextPath );
+        nextPath.addPoint( previousPath.getFirstPoint() );
       }
       return this;
     },
     
-    lineTo: function( x, y ) {
-      // lineTo( point )
-      if ( y === undefined && typeof x === 'object' ) {
-        // wrap it in a Vector2 if the class doesn't match
-        var point = x instanceof Vector2 ? x : new Vector2( x.x, x.y );
-        this.addPiece( new Piece.LineTo( point ) );
-      } else { // lineTo( x, y )
-        this.addPiece( new Piece.LineTo( p( x, y ) ) );
-      }
-      return this;
+    // matches SVG's elliptical arc from http://www.w3.org/TR/SVG/paths.html
+    ellipticalArcToRelative: function( radiusX, radiusY, rotation, largeArc, sweep, x, y ) {
+      var relativePoint = this.getRelativePoint();
+      return this.ellipticalArcTo( radiusX, radiusY, rotation, largeArc, sweep, x + relativePoint.x, y + relativePoint.y );
     },
-    
-    quadraticCurveTo: function( cpx, cpy, x, y ) {
-      // quadraticCurveTo( control, point )
-      if ( x === undefined && typeof cpx === 'object' ) {
-        // wrap it in a Vector2 if the class doesn't match
-        var controlPoint = cpx instanceof Vector2 ? cpx : new Vector2( cpx.x, cpx.y );
-        var point = cpy instanceof Vector2 ? cpy : new Vector2( cpy.x, cpy.y );
-        this.addPiece( new Piece.QuadraticCurveTo( controlPoint, point ) );
-      } else { // quadraticCurveTo( cpx, cpy, x, y )
-        this.addPiece( new Piece.QuadraticCurveTo( p( cpx, cpy ), p( x, y ) ) );
-      }
-      return this;
-    },
-    
-    cubicCurveTo: function( cp1x, cp1y, cp2x, cp2y, x, y ) {
-      // cubicCurveTo( cp1, cp2, end )
-      if ( cp2y === undefined && typeof cp1x === 'object' ) {
-        // wrap it in a Vector2 if the class doesn't match
-        var control1 = cp1x instanceof Vector2 ? cp1x : new Vector2( cp1x.x, cp1x.y );
-        var control2 = cp1y instanceof Vector2 ? cp1y : new Vector2( cp1y.x, cp1y.y );
-        var end = cp2x instanceof Vector2 ? cp2x : new Vector2( cp2x.x, cp2x.y );
-        this.addPiece( new Piece.CubicCurveTo( control1, control2, end ) );
-      } else { // cubicCurveTo( cp1x, cp1y, cp2x, cp2y, x, y )
-        this.addPiece( new Piece.CubicCurveTo( p( cp1x, cp1y ), p( cp2x, cp2y ), p( x, y ) ) );
-      }
-      return this;
+    ellipticalArcTo: function( radiusX, radiusY, rotation, largeArc, sweep, x, y ) {
+      throw new Error( 'ellipticalArcTo unimplemented' );
     },
     
     /*
@@ -8858,10 +11434,10 @@ define('KITE/Shape',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT/
         // circle( center, radius )
         var center = centerX;
         radius = centerY;
-        return this.arc( center, radius, 0, Math.PI * 2, false );
+        return this.arcPoint( center, radius, 0, Math.PI * 2, false );
       } else {
         // circle( centerX, centerY, radius )
-        return this.arc( p( centerX, centerY ), radius, 0, Math.PI * 2, false );
+        return this.arcPoint( p( centerX, centerY ), radius, 0, Math.PI * 2, false );
       }
     },
     
@@ -8871,6 +11447,7 @@ define('KITE/Shape',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT/
      * ellipse( centerX, centerY, radiusX, radiusY, rotation )
      */
     ellipse: function( centerX, centerY, radiusX, radiusY, rotation ) {
+      // TODO: separate into ellipse() and ellipsePoint()?
       // TODO: Ellipse/EllipticalArc has a mess of parameters. Consider parameter object, or double-check parameter handling
       if ( typeof centerX === 'object' ) {
         // ellipse( center, radiusX, radiusY, rotation )
@@ -8878,60 +11455,29 @@ define('KITE/Shape',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT/
         rotation = radiusY;
         radiusY = radiusX;
         radiusX = centerY;
-        return this.ellipticalArc( center, radiusX, radiusY, rotation || 0, 0, Math.PI * 2, false );
+        return this.ellipticalArcPoint( center, radiusX, radiusY, rotation || 0, 0, Math.PI * 2, false );
       } else {
         // ellipse( centerX, centerY, radiusX, radiusY, rotation )
-        return this.ellipticalArc( p( centerX, centerY ), radiusX, radiusY, rotation || 0, 0, Math.PI * 2, false );
+        return this.ellipticalArcPoint( v( centerX, centerY ), radiusX, radiusY, rotation || 0, 0, Math.PI * 2, false );
       }
-    },
-    
-    /*
-     * Draws an arc using the Canvas 2D semantics, with the following parameters:
-     * arc( center, radius, startAngle, endAngle, anticlockwise )
-     * arc( centerX, centerY, radius, startAngle, endAngle, anticlockwise )
-     */
-    arc: function( centerX, centerY, radius, startAngle, endAngle, anticlockwise ) {
-      if ( typeof centerX === 'object' ) {
-        // arc( center, radius, startAngle, endAngle, anticlockwise )
-        anticlockwise = endAngle;
-        endAngle = startAngle;
-        startAngle = radius;
-        radius = centerY;
-        var center = centerX;
-        this.addPiece( new Piece.Arc( center, radius, startAngle, endAngle, anticlockwise ) );
-      } else {
-        // arc( centerX, centerY, radius, startAngle, endAngle, anticlockwise )
-        this.addPiece( new Piece.Arc( p( centerX, centerY ), radius, startAngle, endAngle, anticlockwise ) );
-      }
-      return this;
-    },
-    
-    /*
-     * Draws an elliptical arc using the Canvas 2D semantics, with the following parameters:
-     * ellipticalArc( center, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise )
-     * ellipticalArc( centerX, centerY, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise )
-     */
-    ellipticalArc: function( centerX, centerY, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise ) {
-      // TODO: Ellipse/EllipticalArc has a mess of parameters. Consider parameter object, or double-check parameter handling
-      if ( typeof centerX === 'object' ) {
-        // ellipticalArc( center, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise )
-        anticlockwise = endAngle;
-        endAngle = startAngle;
-        startAngle = rotation;
-        rotation = radiusY;
-        radiusY = radiusX;
-        radiusX = centerY;
-        var center = centerX;
-        this.addPiece( new Piece.EllipticalArc( center, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise ) );
-      } else {
-        // ellipticalArc( centerX, centerY, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise )
-        this.addPiece( new Piece.EllipticalArc( p( centerX, centerY ), radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise ) );
-      }
-      return this;
     },
     
     rect: function( x, y, width, height ) {
-      this.addPiece( new Piece.Rect( x, y, width, height ) );
+      var subpath = new kite.Subpath();
+      this.addSubpath( subpath );
+      subpath.addPoint( v( x, y ) );
+      subpath.addPoint( v( x + width, y ) );
+      subpath.addPoint( v( x + width, y + height ) );
+      subpath.addPoint( v( x, y + height ) );
+      subpath.addSegment( new kite.Segment.Line( subpath.points[0], subpath.points[1] ) );
+      subpath.addSegment( new kite.Segment.Line( subpath.points[1], subpath.points[2] ) );
+      subpath.addSegment( new kite.Segment.Line( subpath.points[2], subpath.points[3] ) );
+      subpath.close();
+      this.addSubpath( new kite.Subpath() );
+      this.getLastSubpath().addPoint( v( x, y ) );
+      this.bounds = this.bounds.withCoordinates( x, y ).withCoordinates( x + width, y + height );
+      assert && assert( !isNaN( this.bounds.getX() ) );
+      
       return this;
     },
 
@@ -8960,27 +11506,15 @@ define('KITE/Shape',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT/
       return this;
     },
     
-    close: function() {
-      this.addPiece( new Piece.Close() );
-      return this;
-    },
-    
     copy: function() {
-      return new Shape( this.pieces );
-    },
-    
-    addPiece: function( piece ) {
-      this.pieces.push( piece );
-      piece.applyPiece( this );
-      this.invalidate();
-      assert && assert( this.bounds.isEmpty() || this.bounds.isFinite(), 'shape bounds infinite after adding piece: ' + piece );
-      return this; // allow for chaining
+      // copy each individual subpath, so future modifications to either Shape doesn't affect the other one
+      return new Shape( _.map( this.subpaths, function( subpath ) { return subpath.copy(); } ), this.bounds );
     },
     
     // write out this shape's path to a canvas 2d context. does NOT include the beginPath()!
     writeToContext: function( context ) {
-      _.each( this.pieces, function( piece ) {
-        piece.writeToContext( context );
+      _.each( this.subpaths, function( subpath ) {
+        subpath.writeToContext( context );
       } );
     },
     
@@ -9007,7 +11541,9 @@ define('KITE/Shape',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT/
     
     // return a new Shape that is transformed by the associated matrix
     transformed: function( matrix ) {
-      return new Shape( _.flatten( _.map( this.pieces, function( piece ) { return piece.transformed( matrix ); } ), true ) );
+      var subpaths = _.map( this.subpaths, function( subpath ) { return subpath.transformed( matrix ); } );
+      var bounds = _.reduce( subpaths, function( bounds, subpath ) { return bounds.union( subpath.computeBounds() ); }, Bounds2.NOTHING );
+      return new Shape( subpaths, bounds );
     },
     
     // returns the bounds. if lineStyles exists, include the stroke in the bounds
@@ -9084,178 +11620,17 @@ define('KITE/Shape',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT/
       return intersects;
     },
     
-    invalidate: function() {
-      this._strokedShapeComputed = false;
-    },
-    
     // returns a new Shape that is an outline of the stroked path of this current Shape. currently not intended to be nested (doesn't do intersection computations yet)
+    // TODO: rename stroked( lineStyles )
     getStrokedShape: function( lineStyles ) {
-      
-      if ( lineStyles === undefined ) {
-        lineStyles = new kite.LineStyles();
-      }
-      
-      // return a cached version if possible
-      if ( this._strokedShapeComputed && this._strokedShapeStyles.equals( lineStyles ) ) {
-        return this._strokedShape;
-      }
-      
-      // filter out subpaths where nothing would be drawn
-      var subpaths = _.filter( this.subpaths, function( subpath ) { return subpath.isDrawable(); } );
-      
-      var shape = new Shape();
-      
-      var lineWidth = lineStyles.lineWidth;
-      
-      // joins two segments together on the logical "left" side, at 'center' (where they meet), and normalized tangent vectors in the direction of the stroking
-      // to join on the "right" side, switch the tangent order and negate them
-      function join( center, fromTangent, toTangent ) {
-        // where our join path starts and ends
-        var fromPoint = center.plus( fromTangent.perpendicular().negated().times( lineWidth / 2 ) );
-        var toPoint = center.plus( toTangent.perpendicular().negated().times( lineWidth / 2 ) );
-        
-        // only insert a join on the non-acute-angle side
-        if ( fromTangent.perpendicular().dot( toTangent ) > 0 ) {
-          switch( lineStyles.lineJoin ) {
-            case 'round':
-              var fromAngle = fromTangent.angle() + Math.PI / 2;
-              var toAngle = toTangent.angle() + Math.PI / 2;
-              shape.addPiece( new Piece.Arc( center, lineWidth / 2, fromAngle, toAngle, true ) );
-              break;
-            case 'miter':
-              var theta = fromTangent.angleBetween( toTangent.negated() );
-              var notStraight = theta < Math.PI - 0.00001; // if fromTangent is approximately equal to toTangent, just bevel. it will be indistinguishable
-              if ( 1 / Math.sin( theta / 2 ) <= lineStyles.miterLimit && theta < Math.PI - 0.00001 ) {
-                // draw the miter
-                var miterPoint = lineLineIntersection( fromPoint, fromPoint.plus( fromTangent ), toPoint, toPoint.plus( toTangent ) );
-                shape.addPiece( new Piece.LineTo( miterPoint ) );
-                shape.addPiece( new Piece.LineTo( toPoint ) );
-              } else {
-                // angle too steep, use bevel instead. same as below, but copied for linter
-                shape.addPiece( new Piece.LineTo( toPoint ) );
-              }
-              break;
-            case 'bevel':
-              shape.addPiece( new Piece.LineTo( toPoint ) );
-              break;
-          }
-        } else {
-          // no join necessary here since we have the acute angle. just simple lineTo for now so that the next segment starts from the right place
-          // TODO: can we prevent self-intersection here?
-          if ( !fromPoint.equals( toPoint ) ) {
-            shape.addPiece( new Piece.LineTo( toPoint ) );
-          }
-        }
-      }
-      
-      // draws the necessary line cap from the endpoint 'center' in the direction of the tangent
-      function cap( center, tangent ) {
-        switch( lineStyles.lineCap ) {
-          case 'butt':
-            shape.addPiece( new Piece.LineTo( center.plus( tangent.perpendicular().times( lineWidth / 2 ) ) ) );
-            break;
-          case 'round':
-            var tangentAngle = tangent.angle();
-            shape.addPiece( new Piece.Arc( center, lineWidth / 2, tangentAngle + Math.PI / 2, tangentAngle - Math.PI / 2, true ) );
-            break;
-          case 'square':
-            var toLeft = tangent.perpendicular().negated().times( lineWidth / 2 );
-            var toRight = tangent.perpendicular().times( lineWidth / 2 );
-            var toFront = tangent.times( lineWidth / 2 );
-            shape.addPiece( new Piece.LineTo( center.plus( toLeft ).plus( toFront ) ) );
-            shape.addPiece( new Piece.LineTo( center.plus( toRight ).plus( toFront ) ) );
-            shape.addPiece( new Piece.LineTo( center.plus( toRight ) ) );
-            break;
-        }
-      }
-      
-      _.each( subpaths, function( subpath ) {
-        var i;
-        var segments = subpath.segments;
-        
-        // TODO: shortcuts for _.first( segments ) and _.last( segments ),
-        
-        // we don't need to insert an implicit closing segment if the start and end points are the same
-        var alreadyClosed = _.last( segments ).end.equals( _.first( segments ).start );
-        // if there is an implicit closing segment
-        var closingSegment = alreadyClosed ? null : new kite.Segment.Line( segments[segments.length-1].end, segments[0].start );
-        
-        // move to the first point in our stroked path
-        shape.addPiece( new Piece.MoveTo( segmentStartLeft( _.first( segments ), lineWidth ) ) );
-        
-        // stroke the logical "left" side of our path
-        for ( i = 0; i < segments.length; i++ ) {
-          if ( i > 0 ) {
-            join( segments[i].start, segments[i-1].endTangent, segments[i].startTangent, true );
-          }
-          _.each( segments[i].strokeLeft( lineWidth ), function( piece ) {
-            shape.addPiece( piece );
-          } );
-        }
-        
-        // handle the "endpoint"
-        if ( subpath.closed ) {
-          if ( alreadyClosed ) {
-            join( _.last( segments ).end, _.last( segments ).endTangent, _.first( segments ).startTangent );
-            shape.addPiece( new Piece.Close() );
-            shape.addPiece( new Piece.MoveTo( segmentStartRight( _.first( segments ), lineWidth ) ) );
-            join( _.last( segments ).end, _.first( segments ).startTangent.negated(), _.last( segments ).endTangent.negated() );
-          } else {
-            // logical "left" stroke on the implicit closing segment
-            join( closingSegment.start, _.last( segments ).endTangent, closingSegment.startTangent );
-            _.each( closingSegment.strokeLeft( lineWidth ), function( piece ) {
-              shape.addPiece( piece );
-            } );
-            
-            // TODO: similar here to other block of if.
-            join( closingSegment.end, closingSegment.endTangent, _.first( segments ).startTangent );
-            shape.addPiece( new Piece.Close() );
-            shape.addPiece( new Piece.MoveTo( segmentStartRight( _.first( segments ), lineWidth ) ) );
-            join( closingSegment.end, _.first( segments ).startTangent.negated(), closingSegment.endTangent.negated() );
-            
-            // logical "right" stroke on the implicit closing segment
-            _.each( closingSegment.strokeRight( lineWidth ), function( piece ) {
-              shape.addPiece( piece );
-            } );
-            join( closingSegment.start, closingSegment.startTangent.negated(), _.last( segments ).endTangent.negated() );
-          }
-        } else {
-          cap( _.last( segments ).end, _.last( segments ).endTangent );
-        }
-        
-        // stroke the logical "right" side of our path
-        for ( i = segments.length - 1; i >= 0; i-- ) {
-          if ( i < segments.length - 1 ) {
-            join( segments[i].end, segments[i+1].startTangent.negated(), segments[i].endTangent.negated(), false );
-          }
-          _.each( segments[i].strokeRight( lineWidth ), function( piece ) {
-            shape.addPiece( piece );
-          } );
-        }
-        
-        // handle the start point
-        if ( subpath.closed ) {
-          // we already did the joins, just close the 'right' side
-          shape.addPiece( new Piece.Close() );
-        } else {
-          cap( _.first( segments ).start, _.first( segments ).startTangent.negated() );
-          shape.addPiece( new Piece.Close() );
-        }
-      } );
-      
-      this._strokedShape = shape;
-      this._strokedShapeComputed = true;
-      this._strokedShapeStyles = new kite.LineStyles( lineStyles ); // shallow copy, since we consider linestyles to be mutable
-      
-      return shape;
+      var subpaths = _.flatten( _.map( this.subpaths, function( subpath ) { return subpath.stroked( lineStyles ); } ) );
+      var bounds = _.reduce( subpaths, function( bounds, subpath ) { return bounds.union( subpath.computeBounds() ); }, Bounds2.NOTHING );
+      return new Shape( subpaths, bounds );
     },
     
     toString: function() {
-      var result = 'new kite.Shape()';
-      _.each( this.pieces, function( piece ) {
-        result += '.' + piece.toString();
-      } );
-      return result;
+      // TODO: consider a more verbose but safer way?
+      return 'new kite.Shape( \'' + this.getSVGPath() + '\' )';
     },
     
     /*---------------------------------------------------------------------------*
@@ -9271,6 +11646,8 @@ define('KITE/Shape',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT/
     
     addSubpath: function( subpath ) {
       this.subpaths.push( subpath );
+      
+      return this; // allow chaining
     },
     
     hasSubpaths: function() {
@@ -9279,6 +11656,45 @@ define('KITE/Shape',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT/
     
     getLastSubpath: function() {
       return _.last( this.subpaths );
+    },
+    
+    // gets the last point in the last subpath, or null if it doesn't exist
+    getLastPoint: function() {
+      return this.hasSubpaths() ? this.getLastSubpath().getLastPoint() : null;
+    },
+    
+    getLastSegment: function() {
+      if ( !this.hasSubpaths() ) { return null; }
+      
+      var subpath = this.getLastSubpath();
+      if ( !subpath.isDrawable() ) { return null; }
+      
+      return subpath.getLastSegment();
+    },
+    
+    // returns the point to be used for smooth quadratic segments
+    getSmoothQuadraticControlPoint: function() {
+      var lastPoint = this.getLastPoint();
+      
+      var segment = this.getLastSegment();
+      if ( !segment || !( segment instanceof kite.Segment.Quadratic ) ) { return lastPoint; }
+      
+      return lastPoint.plus( lastPoint.minus( segment.control ) );
+    },
+    
+    // returns the point to be used for smooth cubic segments
+    getSmoothCubicControlPoint: function() {
+      var lastPoint = this.getLastPoint();
+      
+      var segment = this.getLastSegment();
+      if ( !segment || !( segment instanceof kite.Segment.Cubic ) ) { return lastPoint; }
+      
+      return lastPoint.plus( lastPoint.minus( segment.control2 ) );
+    },
+    
+    getRelativePoint: function() {
+      var lastPoint = this.getLastPoint();
+      return lastPoint ? lastPoint : Vector2.ZERO;
     }
   };
   
@@ -9310,22 +11726,17 @@ define('KITE/Shape',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT/
       return new Shape().moveTo( a, b ).lineTo( c, d );
     }
     else {
-      return new Shape().moveTo( a ).lineTo( b );
+      return new Shape().moveToPoint( a ).lineToPoint( b );
     }
   };
   
   Shape.regularPolygon = function( sides, radius ) {
-    var first = true;
-    return new Shape( _.map( _.range( sides ), function( k ) {
-      var theta = 2 * Math.PI * k / sides;
-      if ( first ) {
-        first = false;
-        // first segment should be a moveTo
-        return new Piece.MoveTo( p( radius * Math.cos( theta ), radius * Math.sin( theta ) ) );
-      } else {
-        return new Piece.LineTo( p( radius * Math.cos( theta ), radius * Math.sin( theta ) ) );
-      }
-    } ), true );
+    var shape = new Shape();
+    _.each( _.range( sides ), function( k ) {
+      var point = Vector2.createPolar( radius, 2 * Math.PI * k / sides );
+      ( k === 0 ) ? shape.moveToPoint( point ) : shape.lineToPoint( point );
+    } );
+    return shape.close();
   };
   
   // supports both circle( centerX, centerY, radius ), circle( center, radius ), and circle( radius ) with the center default to 0,0
@@ -9354,28 +11765,6 @@ define('KITE/Shape',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT/
   Shape.arc = function( centerX, centerY, radius, startAngle, endAngle, anticlockwise ) {
     return new Shape().arc( centerX, centerY, radius, startAngle, endAngle, anticlockwise );
   };
-  
-  
-  // TODO: performance / cleanliness to have these as methods instead?
-  function segmentStartLeft( segment, lineWidth ) {
-    assert && assert( lineWidth !== undefined );
-    return segment.start.plus( segment.startTangent.perpendicular().negated().times( lineWidth / 2 ) );
-  }
-  
-  function segmentEndLeft( segment, lineWidth ) {
-    assert && assert( lineWidth !== undefined );
-    return segment.end.plus( segment.endTangent.perpendicular().negated().times( lineWidth / 2 ) );
-  }
-  
-  function segmentStartRight( segment, lineWidth ) {
-    assert && assert( lineWidth !== undefined );
-    return segment.start.plus( segment.startTangent.perpendicular().times( lineWidth / 2 ) );
-  }
-  
-  function segmentEndRight( segment, lineWidth ) {
-    assert && assert( lineWidth !== undefined );
-    return segment.end.plus( segment.endTangent.perpendicular().times( lineWidth / 2 ) );
-  }
   
   return Shape;
 } );
@@ -9448,7 +11837,7 @@ define('SCENERY/layers/Layer',['require','ASSERT/assert','ASSERT/assert','DOT/Bo
       assert && assert( this.baseTrail.lastNode() === this.baseNode );
     }
     
-    // we reference all trails in an unordered way
+    // we reference all painted trails in an unordered way
     this._layerTrails = [];
     
     var layer = this;
@@ -9485,6 +11874,10 @@ define('SCENERY/layers/Layer',['require','ASSERT/assert','ASSERT/assert','DOT/Bo
       // TODO: deprecate these, use boundary references instead? or boundary convenience functions
       this.startPointer = this.startBoundary.nextStartPointer;
       this.startPaintedTrail = this.startBoundary.nextPaintedTrail;
+      
+      // set immutability guarantees
+      this.startPointer.trail && this.startPointer.trail.setImmutable();
+      this.startPaintedTrail.setImmutable();
     },
     
     setEndBoundary: function( boundary ) {
@@ -9494,6 +11887,10 @@ define('SCENERY/layers/Layer',['require','ASSERT/assert','ASSERT/assert','DOT/Bo
       // TODO: deprecate these, use boundary references instead? or boundary convenience functions
       this.endPointer = this.endBoundary.previousEndPointer;
       this.endPaintedTrail = this.endBoundary.previousPaintedTrail;
+      
+      // set immutability guarantees
+      this.endPointer.trail && this.endPointer.trail.setImmutable();
+      this.endPaintedTrail.setImmutable();
     },
     
     getStartPointer: function() {
@@ -9536,9 +11933,13 @@ define('SCENERY/layers/Layer',['require','ASSERT/assert','ASSERT/assert','DOT/Bo
       return this._id;
     },
     
-    // trails associated with the layer, NOT necessarily in order
+    // painted trails associated with the layer, NOT necessarily in order
     getLayerTrails: function() {
       return this._layerTrails.slice( 0 );
+    },
+    
+    getPaintedTrailCount: function() {
+      return this._layerTrails.length;
     },
     
     /*---------------------------------------------------------------------------*
@@ -9557,9 +11958,16 @@ define('SCENERY/layers/Layer',['require','ASSERT/assert','ASSERT/assert','DOT/Bo
     
     // adds a trail (with the last node) to the layer
     addNodeFromTrail: function( trail ) {
+      if ( assert ) {
+        _.each( this._layerTrails, function( otherTrail ) {
+          assert( !trail.equals( otherTrail ), 'trail in addNodeFromTrail should not already exist in a layer' );
+        } );
+      }
+      
       // console.log( 'addNodeFromTrail layer: ' + this.getId() + ', trail: ' + trail.toString() );
       // TODO: sync this with DOMLayer's implementation
       this._layerTrails.push( trail );
+      trail.setImmutable(); // don't allow this Trail to be changed
     },
     
     // removes a trail (with the last node) to the layer
@@ -9579,7 +11987,8 @@ define('SCENERY/layers/Layer',['require','ASSERT/assert','ASSERT/assert','DOT/Bo
     
     // returns next zIndex in place. allows layers to take up more than one single zIndex
     reindex: function( zIndex ) {
-      throw new Error( 'unimplemented layer reindex' );
+      this.startBoundary.reindex();
+      this.endBoundary.reindex();
     },
     
     pushClipShape: function( shape ) {
@@ -10001,6 +12410,7 @@ define('SCENERY/util/TrailPointer',['require','ASSERT/assert','SCENERY/scenery',
       other.trail.reindex();
       
       var pointer = this.copy();
+      pointer.trail.setMutable(); // this trail will be modified in the iteration, so references to it may be modified
       
       var first = true;
       
@@ -10721,6 +13131,8 @@ define('SCENERY/layers/CanvasLayer',['require','ASSERT/assert','DOT/Bounds2','SC
     
     // returns next zIndex in place. allows layers to take up more than one single zIndex
     reindex: function( zIndex ) {
+      Layer.prototype.reindex.call( this, zIndex );
+      
       $( this.canvas ).css( 'z-index', zIndex );
       this.zIndex = zIndex;
       return zIndex + 1;
@@ -10916,7 +13328,9 @@ define('SCENERY/layers/DOMLayer',['require','ASSERT/assert','DOT/Bounds2','SCENE
       return this.idElementMap[trail.getUniqueId()];
     },
     
-    reindexTrails: function() {
+    reindexTrails: function( zIndex ) {
+      Layer.prototype.reindex.call( this, zIndex );
+      
       _.each( this.trails, function( trail ) {
         trail.reindex();
       } );
@@ -11082,6 +13496,15 @@ define('SCENERY/layers/LayerBoundary',['require','ASSERT/assert','SCENERY/scener
     
     hasNext: function() {
       return !!this.nextPaintedTrail;
+    },
+    
+    // reindexes the trails
+    reindex: function() {
+      this.previousPaintedTrail && this.previousPaintedTrail.reindex();
+      this.nextPaintedTrail && this.nextPaintedTrail.reindex();
+      
+      this.previousEndPointer && this.previousEndPointer.trail && this.previousEndPointer.trail.reindex();
+      this.nextStartPointer && this.nextStartPointer.trail && this.nextStartPointer.trail.reindex();
     },
     
     // assumes that trail is reindexed
@@ -11798,6 +14221,8 @@ define('SCENERY/layers/SVGLayer',['require','ASSERT/assert','DOT/Bounds2','DOT/T
     
     // returns next zIndex in place. allows layers to take up more than one single zIndex
     reindex: function( zIndex ) {
+      Layer.prototype.reindex.call( this, zIndex );
+      
       this.$svg.css( 'z-index', zIndex );
       this.zIndex = zIndex;
       return zIndex + 1;
@@ -11938,77 +14363,6 @@ define('SCENERY/layers/Renderer',['require','ASSERT/assert','SCENERY/scenery','S
   Renderer.webgl = Renderer.WebGL;
   
   return Renderer;
-} );
-
-// Copyright 2002-2012, University of Colorado
-
-/**
- * Like Underscore's _.extend, but with hardcoded support for ES5 getters/setters.
- *
- * See https://github.com/documentcloud/underscore/pull/986.
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define('PHET_CORE/extend',['require'], function( require ) {
-  
-  
-  return function extend( obj ) {
-    _.each( Array.prototype.slice.call( arguments, 1 ), function( source ) {
-      if ( source ) {
-        for ( var prop in source ) {
-          Object.defineProperty( obj, prop, Object.getOwnPropertyDescriptor( source, prop ) );
-        }
-      }
-    });
-    return obj;
-  };
-} );
-
-// Copyright 2013, University of Colorado
-
-/**
- * Experimental prototype inheritance
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-define('PHET_CORE/inherit',['require','PHET_CORE/extend'], function( require ) {
-  
-  
-  var extend = require( 'PHET_CORE/extend' );
-  
-  /**
-   * Experimental inheritance prototype, similar to Inheritance.inheritPrototype, but maintains
-   * supertype.prototype.constructor while properly copying ES5 getters and setters.
-   *
-   * TODO: find problems with this! It's effectively what is being used by Scenery
-   *
-   * Usage:
-   * function A() { scenery.Node.call( this ); };
-   * inherit( A, scenery.Node, {
-   *   customBehavior: function() { ... },
-   *   isAnA: true
-   * } );
-   * new A().isAnA // true
-   * new scenery.Node().isAnA // undefined
-   * new A().constructor.name // 'A'
-   *
-   * @param subtype             Constructor for the subtype. Generally should contain supertype.call( this, ... )
-   * @param supertype           Constructor for the supertype.
-   * @param prototypeProperties [optional] object containing properties that will be set on the prototype.
-   */
-  function inherit( subtype, supertype, prototypeProperties ) {
-    function F() {}
-    F.prototype = supertype.prototype; // so new F().__proto__ === supertype.prototype
-    
-    subtype.prototype = extend( // extend will combine the properties and constructor into the new F copy
-      new F(),                  // so new F().__proto__ === supertype.prototype, and the prototype chain is set up nicely
-      { constructor: subtype }, // overrides the constructor properly
-      prototypeProperties       // [optional] additional properties for the prototype, as an object.
-    );
-  }
-
-  return inherit;
 } );
 
 // Copyright 2002-2012, University of Colorado
@@ -12533,8 +14887,8 @@ define('SCENERY/nodes/Path',['require','ASSERT/assert','PHET_CORE/inherit','SCEN
       return 'new scenery.Path( {' + propLines + '} )';
     },
     
-    getPropString: function( spaces ) {
-      var result = Node.prototype.getPropString.call( this, spaces );
+    getPropString: function( spaces, includeChildren ) {
+      var result = Node.prototype.getPropString.call( this, spaces, includeChildren );
       result = this.appendFillablePropString( spaces, result );
       result = this.appendStrokablePropString( spaces, result );
       if ( this._shape ) {
@@ -12582,12 +14936,12 @@ define('SCENERY/nodes/Circle',['require','ASSERT/assert','PHET_CORE/inherit','SC
   var Shape = require( 'KITE/Shape' );
   
   scenery.Circle = function Circle( radius, options ) {
-    if ( typeof x === 'object' ) {
-      // allow new Circle( { circleRadius: ... } )
+    if ( typeof radius === 'object' ) {
+      // allow new Circle( { radius: ... } )
       // the mutators will call invalidateCircle() and properly set the shape
       options = radius;
     } else {
-      this._circleRadius = radius;
+      this._radius = radius;
       
       // ensure we have a parameter object
       options = options || {};
@@ -12603,7 +14957,7 @@ define('SCENERY/nodes/Circle',['require','ASSERT/assert','PHET_CORE/inherit','SC
   inherit( Circle, Path, {
     invalidateCircle: function() {
       // setShape should invalidate the path and ensure a redraw
-      this.setShape( Shape.circle( this._circleX, this._circleY, this._circleRadius ) );
+      this.setShape( Shape.circle( 0, 0, this._radius ) );
     },
     
     // create a circle instead of a path, hopefully it is faster in implementations
@@ -12613,44 +14967,33 @@ define('SCENERY/nodes/Circle',['require','ASSERT/assert','PHET_CORE/inherit','SC
     
     // optimized for the circle element instead of path
     updateSVGFragment: function( circle ) {
-      circle.setAttribute( 'r', this._circleRadius );
+      circle.setAttribute( 'r', this._radius );
       
       circle.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
     },
     
     getBasicConstructor: function( propLines ) {
-      return 'new scenery.Circle( ' + this._circleRadius + ', {' + propLines + '} )';
-    }
+      return 'new scenery.Circle( ' + this._radius + ', {' + propLines + '} )';
+    },
+    
+    getRadius: function() {
+      return this._radius;
+    },
+    
+    setRadius: function( radius ) {
+      if ( this._radius !== radius ) {
+        this._radius = radius;
+        this.invalidateCircle();
+      }
+      return this;
+    },
+    
+    get radius() { return this.getRadius(); },
+    set radius( value ) { return this.setRadius( value ); }
   } );
   
-  // TODO: refactor our this common type of code for Path subtypes
-  function addCircleProp( capitalizedShort ) {
-    var getName = 'getCircle' + capitalizedShort;
-    var setName = 'setCircle' + capitalizedShort;
-    var privateName = '_circle' + capitalizedShort;
-    
-    Circle.prototype[getName] = function() {
-      return this[privateName];
-    };
-    
-    Circle.prototype[setName] = function( value ) {
-      this[privateName] = value;
-      this.invalidateCircle();
-      return this;
-    };
-    
-    Object.defineProperty( Circle.prototype, 'circle' + capitalizedShort, {
-      set: Circle.prototype[setName],
-      get: Circle.prototype[getName]
-    } );
-  }
-  
-  addCircleProp( 'X' );
-  addCircleProp( 'Y' );
-  addCircleProp( 'Radius' );
-  
   // not adding mutators for now
-  Circle.prototype._mutatorKeys = [ 'circleX', 'circleY', 'circleRadius' ].concat( Path.prototype._mutatorKeys );
+  Circle.prototype._mutatorKeys = [ 'radius' ].concat( Path.prototype._mutatorKeys );
   
   return Circle;
 } );
@@ -12810,8 +15153,8 @@ define('SCENERY/nodes/DOM',['require','ASSERT/assert','PHET_CORE/inherit','DOT/B
       return 'new scenery.DOM( $( \'' + this._container.innerHTML.replace( /'/g, '\\\'' ) + '\' ), {' + propLines + '} )';
     },
     
-    getPropString: function( spaces ) {
-      var result = Node.prototype.getPropString.call( this, spaces );
+    getPropString: function( spaces, includeChildren ) {
+      var result = Node.prototype.getPropString.call( this, spaces, includeChildren );
       if ( this.interactive ) {
         if ( result ) {
           result += ',\n';
@@ -12947,6 +15290,8 @@ define('SCENERY/nodes/Image',['require','ASSERT/assert','PHET_CORE/inherit','DOT
    *     HTMLImageElement
    */
   scenery.Image = function Image( image, options ) {
+    assert && assert( image, "image should be available" );
+    
     // allow not passing an options object
     options = options || {};
     
@@ -13353,9 +15698,6 @@ define('SCENERY/util/Font',['require','ASSERT/assert','SCENERY/scenery'], functi
     constructor: Font,
     
     getProperty: function( property ) {
-      // sanity check, in case some CSS changed somewhere
-      this.$span.css( 'font', this._font );
-      
       return this.$span.css( property );
     },
     setProperty: function( property, value ) {
@@ -13604,7 +15946,7 @@ define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/
     
     accurateCanvasBounds: function() {
       var node = this;
-      var svgBounds = this.approximateSVGBounds();
+      var svgBounds = this.approximateSVGBounds(); // this seems to be slower than expected, mostly due to Font getters
       return scenery.Util.canvasAccurateBounds( function( context ) {
         context.font = node.font;
         context.textAlign = node.textAlign;
@@ -13768,8 +16110,8 @@ define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/
       return 'new scenery.Text( \'' + this._text.replace( /'/g, '\\\'' ) + '\', {' + propLines + '} )';
     },
     
-    getPropString: function( spaces ) {
-      var result = Node.prototype.getPropString.call( this, spaces );
+    getPropString: function( spaces, includeChildren ) {
+      var result = Node.prototype.getPropString.call( this, spaces, includeChildren );
       result = this.appendFillablePropString( spaces, result );
       result = this.appendStrokablePropString( spaces, result );
       
@@ -13786,7 +16128,7 @@ define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/
       }
       
       if ( this.font !== new scenery.Font().getFont() ) {
-        addProp( 'font', this.font );
+        addProp( 'font', this.font.replace( /'/g, '\\\'' ) );
       }
       
       if ( this._textAlign !== 'start' ) {
@@ -14765,6 +17107,10 @@ define('SCENERY/util/TrailInterval',['require','ASSERT/assert','SCENERY/scenery'
   scenery.TrailInterval = function( a, b, dataA, dataB ) {
     assert && assert( !a || !b || a.compare( b ) <= 0, 'TrailInterval parameters must not be out of order' );
     
+    // ensure that these trails will not be modified
+    a && a.setImmutable();
+    b && b.setImmutable();
+    
     this.a = a;
     this.b = b;
     
@@ -14773,6 +17119,18 @@ define('SCENERY/util/TrailInterval',['require','ASSERT/assert','SCENERY/scenery'
     this.dataB = dataB;
   };
   var TrailInterval = scenery.TrailInterval;
+  
+  // assumes the intervals are disjoint, so we can just compare the starting (a) node
+  TrailInterval.compareDisjoint = function( x, y ) {
+    // if they are both falsy, they should be the same
+    if ( !x.a && !y.a ) { return 0; }
+    
+    // otherwise, since we are comparing the starts, null would signify 'before anything'
+    if ( !x.a || !y.a ) { return x.a ? 1 : -1; }
+    
+    // otherwise our standard comparison
+    return x.a.compare( y.a );
+  };
   
   TrailInterval.prototype = {
     constructor: TrailInterval,
@@ -14830,6 +17188,30 @@ define('SCENERY/util/TrailInterval',['require','ASSERT/assert','SCENERY/scenery'
 // Copyright 2002-2012, University of Colorado
 
 /**
+ * Creates an array of results from an iterator that takes a callback.
+ *
+ * For instance, if calling a function f( g ) will call g( 1 ), g( 2 ), and g( 3 ),
+ * collect( function( callback ) { f( callback ); } );
+ * will return [1,2,3].
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define('PHET_CORE/collect',['require'], function( require ) {
+  
+  
+  return function collect( iterate ) {
+    var result = [];
+    iterate( function( ob ) {
+      result.push( ob );
+    } );
+    return result;
+  };
+} );
+
+// Copyright 2002-2012, University of Colorado
+
+/**
  * Main scene, that is also a Node.
  *
  * TODO: documentation!
@@ -14837,10 +17219,12 @@ define('SCENERY/util/TrailInterval',['require','ASSERT/assert','SCENERY/scenery'
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define('SCENERY/Scene',['require','ASSERT/assert','DOT/Bounds2','DOT/Vector2','DOT/Matrix3','SCENERY/scenery','SCENERY/nodes/Node','SCENERY/util/Trail','SCENERY/util/TrailInterval','SCENERY/util/TrailPointer','SCENERY/input/Input','SCENERY/layers/LayerBuilder','SCENERY/layers/Renderer','SCENERY/util/Util'], function( require ) {
+define('SCENERY/Scene',['require','ASSERT/assert','PHET_CORE/collect','DOT/Bounds2','DOT/Vector2','DOT/Matrix3','SCENERY/scenery','SCENERY/nodes/Node','SCENERY/util/Trail','SCENERY/util/TrailInterval','SCENERY/util/TrailPointer','SCENERY/input/Input','SCENERY/layers/LayerBuilder','SCENERY/layers/Renderer','SCENERY/util/Util'], function( require ) {
   
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
+  var collect = require( 'PHET_CORE/collect' );
   
   var Bounds2 = require( 'DOT/Bounds2' );
   var Vector2 = require( 'DOT/Vector2' );
@@ -14861,6 +17245,9 @@ define('SCENERY/Scene',['require','ASSERT/assert','DOT/Bounds2','DOT/Vector2','D
   
   // if assertions are enabled, log out layer information
   var layerLogger = null; //assert ? function( ob ) { console.log( ob ); } : null;
+  
+  // debug flag to disable matching of layers when in 'match' mode
+  var forceNewLayers = true; // DEBUG
   
   /*
    * $main should be a block-level element with a defined width and height. scene.resize() should be called whenever
@@ -14900,10 +17287,11 @@ define('SCENERY/Scene',['require','ASSERT/assert','DOT/Bounds2','DOT/Vector2','D
     var scene = this;
     window.debugScene = scene;
     
-    // main layers in a scene
-    this.layers = [];
-    
-    this.layerChangeIntervals = []; // array of {TrailInterval}s indicating what parts need to be stitched together
+    // layering data
+    this.layers = [];               // main layers in a scene
+    this.trailLayerMap = {};        // maps every single painted trail to its current layer. helpful for fast lookup, and crucial during layer stitching operations
+    this.oldTrailLayerMap = {};     // stores references to old layers for removed trails which may be needed for stitching. cleared after each stitching
+    this.layerChangeIntervals = []; // array of {TrailInterval}s indicating what parts need to be stitched together. cleared after each stitching
     
     this.lastCursor = null;
     this.defaultCursor = $main.css( 'cursor' );
@@ -14942,7 +17330,14 @@ define('SCENERY/Scene',['require','ASSERT/assert','DOT/Bounds2','DOT/Vector2','D
         // waiting until after the removal takes place would require more complicated code to properly handle the trails
         affectedTrail.eachTrailUnder( function( trail ) {
           if ( trail.isPainted() ) {
-            scene.layerLookup( trail ).removeNodeFromTrail( trail );
+            var trailId = trail.getUniqueId();
+            var layer = scene.layerLookup( trail );
+            
+            // store the trail's layer reference in the old map that will be cleared after stitching. we need a reference to properly handle situations
+            scene.oldTrailLayerMap[trailId] = layer;
+            
+            // and remove the trail now. TODO: can we do this removal later, since all oldTrailLayerMap nodes should essentially be removed?
+            scene.removeTrailFromLayer( trail, layer );
           }
         } );
       },
@@ -15004,6 +17399,27 @@ define('SCENERY/Scene',['require','ASSERT/assert','DOT/Bounds2','DOT/Vector2','D
     this.updateScene();
   };
   
+  Scene.prototype.addTrailToLayer = function( trail, layer ) {
+    layerLogger && layerLogger( '  addition of trail ' + trail.toString() + ' from layer ' + layer.getId() );
+    this.trailLayerMap[trail.getUniqueId()] = layer;
+    layer.addNodeFromTrail( trail );
+  };
+  
+  Scene.prototype.moveTrailFromLayerToLayer = function( trail, oldLayer, newLayer ) {
+    layerLogger && layerLogger( '  moving trail ' + trail.toString() + ' from layer ' + oldLayer.getId() + ' to layer ' + newLayer.getId() );
+    this.trailLayerMap[trail.getUniqueId()] = newLayer;
+    oldLayer.removeNodeFromTrail( trail );
+    newLayer.addNodeFromTrail( trail );
+  };
+  
+  Scene.prototype.removeTrailFromLayer = function( trail, layer ) {
+    layerLogger && layerLogger( '  removal of trail ' + trail.toString() + ' from layer ' + layer.getId() );
+    
+    // we don't want to leak memory, so since we don't know if this trail will continue to exist, ditch the reference
+    delete this.trailLayerMap[trail.getUniqueId()];
+    layer.removeNodeFromTrail( trail );
+  };
+  
   Scene.prototype.markInterval = function( affectedTrail ) {
     // since this is marked while the child is still connected, we can use our normal trail handling.
     
@@ -15027,7 +17443,13 @@ define('SCENERY/Scene',['require','ASSERT/assert','DOT/Bounds2','DOT/Vector2','D
   
   // convenience function for layer change intervals
   Scene.prototype.addLayerChangeInterval = function( interval ) {
-    layerLogger && layerLogger( 'adding interval: ' + interval.toString() );
+    if ( layerLogger ) {
+      layerLogger( 'adding interval: ' + interval.toString() + ' to intervals:' );
+      _.each( this.layerChangeIntervals, function( interval ) {
+        layerLogger( '  ' + interval.toString() );
+      } );
+    }
+    
     // TODO: replace with a binary-search-like version that may be faster. this includes a full scan
     
     // attempt to merge this interval with another if possible.
@@ -15038,11 +17460,20 @@ define('SCENERY/Scene',['require','ASSERT/assert','DOT/Bounds2','DOT/Vector2','D
       if ( interval.exclusiveUnionable( other ) ) {
         // the interval can be unioned without including other nodes. do this, and remove the other interval from consideration
         interval = interval.union( other );
-        this.layerChangeIntervals.splice( i, 1 );
+        this.layerChangeIntervals.splice( i--, 1 ); // decrement to stay at the same index
+        layerLogger && layerLogger( 'removing interval: ' + other.toString() );
       }
     }
     
     this.layerChangeIntervals.push( interval );
+    
+    if ( layerLogger ) {
+      layerLogger( 'new intervals: ' );
+      _.each( this.layerChangeIntervals, function( interval ) {
+        layerLogger( '  ' + interval.toString() );
+      } );
+      layerLogger( '---' );
+    }
   };
   
   Scene.prototype.createLayer = function( layerType, layerArgs, startBoundary, endBoundary ) {
@@ -15057,22 +17488,19 @@ define('SCENERY/Scene',['require','ASSERT/assert','DOT/Bounds2','DOT/Vector2','D
   
   // insert a layer into the proper place (from its starting boundary)
   Scene.prototype.insertLayer = function( layer ) {
-    if ( this.layers.length > 0 && this.layers[0].startBoundary.equivalentPreviousTrail( layer.endBoundary.previousPaintedTrail ) ) {
-      // layer needs to be inserted at the very beginning
-      this.layers.unshift( layer );
-    } else {
-      for ( var i = 0; i < this.layers.length; i++ ) {
-        // compare end and start boundaries, as they should match
-        if ( this.layers[i].endBoundary.equivalentNextTrail( layer.startBoundary.nextPaintedTrail ) ) {
-          break;
-        }
-      }
-      if ( i < this.layers.length ) {
-        this.layers.splice( i + 1, 0, layer );
-      } else {
-        this.layers.push( layer );
+    for ( var i = 0; i < this.layers.length; i++ ) {
+      if ( layer.endPaintedTrail.isBefore( this.layers[i].startPaintedTrail ) ) {
+        this.layers.splice( i, 0, layer ); // insert the layer here
+        return;
       }
     }
+    
+    // it is after all other layers
+    this.layers.push( layer );
+  };
+  
+  Scene.prototype.getBoundaries = function() {
+    return [ this.layers[0].startBoundary ].concat( _.pluck( this.layers, 'endBoundary' ) );
   };
   
   Scene.prototype.calculateBoundaries = function( beforeLayerType, beforeTrail, afterTrail ) {
@@ -15092,9 +17520,22 @@ define('SCENERY/Scene',['require','ASSERT/assert','DOT/Bounds2','DOT/Vector2','D
   Scene.prototype.stitch = function( match ) {
     var scene = this;
     
-    // we need to map old layer IDs to new layers if we 'glue' two layers into one, so that the layer references we put on the
-    // intervals can be mapped to current layers.
-    var layerMap = {};
+    // data to be shared across all of the individually stitched intervals
+    var stitchData = {
+      // We need to map old layer IDs to new layers if we 'glue' two layers into one,
+      // so that the layer references we put on the intervals can be mapped to current layers.
+      // layer ID => layer
+      layerMap: {},
+      
+      // all trails that are affected, in no particular order
+      affectedTrails: [],
+      
+      // trail ID => layer at the end of stitching (needed to batch the layer notifications)
+      newLayerMap: {}, // will be set in stitching operations
+      
+      // fresh layers that should be added into the scene
+      newLayers: []
+    };
     
     // default arguments for constructing layers
     var layerArgs = {
@@ -15103,21 +17544,21 @@ define('SCENERY/Scene',['require','ASSERT/assert','DOT/Bounds2','DOT/Vector2','D
       baseNode: this
     };
     
+    _.each( this.layerChangeIntervals, function( interval ) {
+      // reindex intervals, since their endpoints indices may need to be updated
+      interval.reindex();
+    } );
+    
     /*
      * Sort our intervals, so that when we need to 'unglue' a layer into two separate layers, we will have passed
      * all of the parts where we would need to use the 'before' layer, so we can update our layer map with the 'after'
      * layer.
      */
-    this.layerChangeIntervals.sort( function( a, b ) {
-      // TODO: consider TrailInterval parameter renaming
-      return a.a.compare( b.a );
-    } );
+    this.layerChangeIntervals.sort( scenery.TrailInterval.compareDisjoint );
     
     layerLogger && layerLogger( 'stitching on intervals: \n' + this.layerChangeIntervals.join( '\n' ) );
     
     _.each( this.layerChangeIntervals, function( interval ) {
-      layerLogger && layerLogger( 'before reindex: ' + interval.toString() );
-      interval.reindex();
       layerLogger && layerLogger( 'stitch on interval ' + interval.toString() );
       var beforeTrail = interval.a;
       var afterTrail = interval.b;
@@ -15127,28 +17568,106 @@ define('SCENERY/Scene',['require','ASSERT/assert','DOT/Bounds2','DOT/Vector2','D
       var afterLayer = interval.dataB;
       
       // if these layers are out of date, update them. 'while' will handle chained updates. circular references should be impossible
-      while ( beforeLayer && layerMap[beforeLayer.getId()] ) {
-        beforeLayer = layerMap[beforeLayer.getId()];
+      while ( beforeLayer && stitchData.layerMap[beforeLayer.getId()] ) {
+        beforeLayer = stitchData.layerMap[beforeLayer.getId()];
       }
-      while ( afterLayer && layerMap[afterLayer.getId()] ) {
-        afterLayer = layerMap[afterLayer.getId()];
+      while ( afterLayer && stitchData.layerMap[afterLayer.getId()] ) {
+        afterLayer = stitchData.layerMap[afterLayer.getId()];
       }
       
       var boundaries = scene.calculateBoundaries( beforeLayer ? beforeLayer.type : null, beforeTrail, afterTrail );
       
-      // if ( match ) {
-        // TODO: patch in the matching version!
-        // scene.rebuildLayers(); // bleh
-      // } else {
-      scene.stitchInterval( layerMap, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match );
-      // }
+      scene.stitchInterval( stitchData, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match );
     } );
-    this.layerChangeIntervals = [];
+    layerLogger && layerLogger( 'finished intervals in stitching' );
     
+    // store a count to how many trails are currently in each layer. we'll increment/decrement these later, and every layer with a count of 0 (no trails) will be removed
+    var layerTrailCounts = {}; // layer ID => count
+    _.each( this.layers.concat( stitchData.newLayers ), function( layer ) {
+      layerTrailCounts[layer.getId()] = layer._layerTrails.length;
+    } );
+    
+    // before notifying layers of added/removed trails, make our internal state consistent, since the add/remove may trigger side effects
+    var beforeTrailLayerMap = {}; // we dump any previous trail-layer mappings here, so we can get the correct removal down below when we do the add/remove
+    var affectedTrails = []; // get a list of unique affected trails
+    var processedTrails = {}; // store references to trail IDs that were processed, since trails could be added to our affectedTrails multiple times
+    _.each( stitchData.affectedTrails, function( trail ) {
+      var trailId = trail.getUniqueId();
+      
+      if ( processedTrails[trailId] ) {
+        return;
+      }
+      processedTrails[trailId] = true; // mark as processed, so we don't process another equivalent trail that was added later
+      affectedTrails.push( trail ); // store the unique trails for later
+      
+      var originalLayer = scene.trailLayerMap[trailId];
+      var newLayer = stitchData.newLayerMap[trailId];
+      
+      // store the old layer (if any)
+      beforeTrailLayerMap[trailId] = originalLayer;
+      
+      // store our new layer so layerLookup will return the new consistent state
+      scene.trailLayerMap[trailId] = newLayer;
+      
+      // increment/decrement counts
+      originalLayer && layerTrailCounts[originalLayer.getId()]--;
+      newLayer && layerTrailCounts[newLayer.getId()]++;
+    } );
+    
+    // reindex all of the relevant layer trails
+    _.each( this.layers.concat( stitchData.newLayers ), function( layer ) {
+      layer.startBoundary.reindex();
+      layer.endBoundary.reindex(); // TODO: this repeats some work, verify in layer audit that we are sharing boundaries properly, then only reindex end boundary on last layer
+    } );
+    
+    // remove necessary layers. do this before adding layers, since insertLayer currently does not gracefully handle weird overlapping cases
+    _.each( this.layers.slice( 0 ), function( layer ) {
+      // layers with zero trails should be removed
+      if ( layerTrailCounts[layer.getId()] === 0 ) {
+        layerLogger && layerLogger( 'disposing layer: ' + layer.getId() );
+        scene.disposeLayer( layer );
+      }
+    } );
+    
+    // add new layers. we do this before the add/remove trails, since those can trigger layer side effects
+    _.each( stitchData.newLayers, function( layer ) {
+      assert && assert( layerTrailCounts[layer.getId()], 'ensure we are not adding empty layers' );
+      
+      layerLogger && layerLogger( 'inserting layer: ' + layer.getId() );
+      scene.insertLayer( layer );
+    } );
+    
+    // set the layers' elements' z-indices, and reindex their trails so they are in a consistent state
     this.reindexLayers();
     
+    // add/remove trails from their necessary layers
+    _.each( affectedTrails, function( trail ) {
+      var trailId = trail.getUniqueId();
+      
+      // sanity check, since these will be stored by the layers
+      trail.setImmutable();
+      
+      // don't do a layer lookup to determine the current layer (we already modified that state to be consistent).
+      var currentLayer = beforeTrailLayerMap[trailId];
+      var newLayer = stitchData.newLayerMap[trailId];
+      
+      if ( currentLayer !== newLayer ) {
+        if ( currentLayer ) {
+          scene.moveTrailFromLayerToLayer( trail, currentLayer, newLayer );
+        } else {
+          scene.addTrailToLayer( trail, newLayer );
+        }
+      }
+    } );
+    
+    // clean up state that was set leading up to the stitching
+    this.oldTrailLayerMap = {};
+    this.layerChangeIntervals = [];
+    
     // TODO: add this back in, but with an appropriate assertion level
-    // assert && assert( this.layerAudit() );
+    assert && assert( this.layerAudit() );
+    
+    layerLogger && layerLogger( 'finished stitch\n-----------------------------------' );
   };
   
   /*
@@ -15169,10 +17688,14 @@ define('SCENERY/Scene',['require','ASSERT/assert','DOT/Bounds2','DOT/Vector2','D
    *
    * Here be dragons!
    */
-  Scene.prototype.stitchInterval = function( layerMap, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match ) {
+  Scene.prototype.stitchInterval = function( stitchData, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match ) {
     var scene = this;
     
-    // need a reference to this, since it may changes
+    // make sure our beforeTrail and afterTrail are immutable
+    beforeTrail && beforeTrail.setImmutable();
+    afterTrail && afterTrail.setImmutable();
+    
+    // need a reference to this, since it may change
     var afterLayerEndBoundary = afterLayer ? afterLayer.endBoundary : null;
     
     var beforeLayerIndex = beforeLayer ? _.indexOf( this.layers, beforeLayer ) : -1;
@@ -15182,6 +17705,9 @@ define('SCENERY/Scene',['require','ASSERT/assert','DOT/Bounds2','DOT/Vector2','D
     var afterPointer = afterTrail ? new scenery.TrailPointer( afterTrail, true ) : new scenery.TrailPointer( new scenery.Trail( this ), false );
     
     layerLogger && layerLogger( 'stitching with boundaries:\n' + _.map( boundaries, function( boundary ) { return boundary.toString(); } ).join( '\n' ) );
+    layerLogger && layerLogger( '               layers: ' + ( beforeLayer ? beforeLayer.getId() : '-' ) + ' to ' + ( afterLayer ? afterLayer.getId() : '-' ) );
+    layerLogger && layerLogger( '               trails: ' + ( beforeTrail ? beforeTrail.toString() : '-' ) + ' to ' + ( afterTrail ? afterTrail.toString() : '-' ) );
+    layerLogger && layerLogger( '               match: ' + match );
     
     // maps trail unique ID => layer, only necessary when matching since we need to remove trails from their old layers
     var oldLayerMap = match ? this.mapTrailLayersBetween( beforeTrail, afterTrail ) : null;
@@ -15199,44 +17725,28 @@ define('SCENERY/Scene',['require','ASSERT/assert','DOT/Bounds2','DOT/Vector2','D
     var currentStartBoundary = null;
     var matchingLayer = null; // set whenever a trail has a matching layer, cleared after boundary
     
-    var layersToAdd = [];
-    
-    // a list of layers that are most likely removed, not including the afterLayer for gluing
-    var layersToRemove = [];
-    for ( var i = beforeLayerIndex + 1; i < afterLayerIndex; i++ ) {
-      layersToRemove.push( this.layers[i] );
-    }
-    
     function addPendingTrailsToLayer() {
       // add the necessary nodes to the layer
       _.each( trailsToAddToLayer, function( trail ) {
-        if ( match ) {
-          // only remove/add if the layer has actually changed. if we are preserving the layer, don't do anything
-          var oldLayer = oldLayerMap[trail.getUniqueId()];
-          if ( oldLayer !== currentLayer ) {
-            oldLayer.removeNodeFromTrail( trail );
-            currentLayer.addNodeFromTrail( trail );
-          }
-        } else {
-          currentLayer.addNodeFromTrail( trail );
-        }
+        changeTrailLayer( trail, currentLayer );
       } );
       trailsToAddToLayer = [];
     }
     
-    function addLayerForRemoval( layer ) {
-      if ( !_.contains( layersToRemove, layer ) ) {
-        layersToRemove.push( afterLayer );
-      }
-    }
-    
     function addAndCreateLayer( startBoundary, endBoundary ) {
       currentLayer = scene.createLayer( currentLayerType, layerArgs, startBoundary, endBoundary );
-      layersToAdd.push( currentLayer );
+      stitchData.newLayers.push( currentLayer );
+    }
+    
+    function changeTrailLayer( trail, layer ) {
+      layerLogger && layerLogger( '  moving trail ' + trail.toString() + ' to layer ' + layer.getId() );
+      stitchData.affectedTrails.push( trail ); // don't check for duplicates now, we get better performance by performing uniqueness tests afterwards
+      stitchData.newLayerMap[trail.getUniqueId()] = layer;
     }
     
     function step( trail, isEnd ) {
       layerLogger && layerLogger( 'step: ' + ( trail ? trail.toString() : trail ) );
+      trail && trail.setImmutable(); // we don't want our trail to be modified, so we can store direct references to it
       // check for a boundary at this step between currentTrail and trail
       
       // if there is no next boundary, don't bother checking anyways
@@ -15286,8 +17796,9 @@ define('SCENERY/Scene',['require','ASSERT/assert','DOT/Bounds2','DOT/Vector2','D
       }
       if ( match && !isEnd ) { // TODO: verify this condition with test cases
         // if the node's old layer is compatible
-        var layer = oldLayerMap[trail.getUniqueId()];
-        if ( layer.type === currentLayerType ) {
+        var layer = scene.layerLookup( trail ); // lookup should return the old layer from the system
+        if ( layer.type === currentLayerType && !forceNewLayers ) {
+          // TODO: we need to handle compatibility with layer splits. using forceNewLayers flag to temporarily disable
           matchingLayer = layer;
         }
       }
@@ -15312,7 +17823,6 @@ define('SCENERY/Scene',['require','ASSERT/assert','DOT/Bounds2','DOT/Vector2','D
         layerLogger && layerLogger( 'gluing layer' );
         layerLogger && layerLogger( 'endBoundary: ' + afterLayer.endBoundary.toString() );
         beforeLayer.setEndBoundary( afterLayer.endBoundary );
-        addLayerForRemoval( afterLayer );
         currentLayer = beforeLayer;
         addPendingTrailsToLayer();
         
@@ -15320,23 +17830,21 @@ define('SCENERY/Scene',['require','ASSERT/assert','DOT/Bounds2','DOT/Vector2','D
         // defensive copy needed, since this will be modified at the same time
         _.each( afterLayer._layerTrails.slice( 0 ), function( trail ) {
           trail.reindex();
-          afterLayer.removeNodeFromTrail( trail );
-          beforeLayer.addNodeFromTrail( trail );
+          changeTrailLayer( trail, beforeLayer );
         } );
         
-        layerMap[afterLayer.getId()] = beforeLayer;
+        stitchData.layerMap[afterLayer.getId()] = beforeLayer;
       } else if ( beforeLayer && beforeLayer === afterLayer && boundaries.length > 0 ) {
         // need to 'unglue' and split the layer
         layerLogger && layerLogger( 'ungluing layer' );
         assert && assert( currentStartBoundary );
         addAndCreateLayer( currentStartBoundary, afterLayerEndBoundary ); // sets currentLayer
-        layerMap[afterLayer.getId()] = currentLayer;
+        stitchData.layerMap[afterLayer.getId()] = currentLayer;
         addPendingTrailsToLayer();
         
-        scenery.Trail.eachPaintedTrailbetween( afterTrail, currentLayer.endPaintedTrail, function( trail ) {
-          trail.reindex();
-          afterLayer.removeNodeFromTrail( trail );
-          currentLayer.addNodeFromTrail( trail );
+        currentLayer.endPaintedTrail.reindex(); // currentLayer's trails may be stale at this point
+        scenery.Trail.eachPaintedTrailBetween( afterTrail, currentLayer.endPaintedTrail, function( subtrail ) {
+          changeTrailLayer( subtrail.copy().setImmutable(), currentLayer );
         }, false, scene );
       } else if ( !beforeLayer && !afterLayer && boundaries.length === 1 && !boundaries[0].hasNext() && !boundaries[0].hasPrevious() ) {
         // TODO: why are we generating a boundary here?!?
@@ -15349,15 +17857,6 @@ define('SCENERY/Scene',['require','ASSERT/assert','DOT/Bounds2','DOT/Vector2','D
         
         addPendingTrailsToLayer();
       }
-      
-      _.each( layersToRemove, function( layer ) {
-        layerLogger && layerLogger( 'disposing layer: ' + layer.getId() );
-        scene.disposeLayer( layer );
-      } );
-      _.each( layersToAdd, function( layer ) {
-        layerLogger && layerLogger( 'inserting layer: ' + layer.getId() );
-        scene.insertLayer( layer );
-      } );
     }
     
     // iterate from beforeTrail up to BEFORE the afterTrail. does not include afterTrail
@@ -15374,13 +17873,17 @@ define('SCENERY/Scene',['require','ASSERT/assert','DOT/Bounds2','DOT/Vector2','D
   };
   
   // returns a map from trail.getUniqueId() to the current layer in which that trail resides
-  Scene.prototype.mapTrailLayersBetween = function( beforeTrail, afterTrail ) {
+  Scene.prototype.mapTrailLayersBetween = function( beforeTrail, afterTrail, result ) {
     var scene = this;
     
-    var result = {};
-    scenery.Trail.eachPaintedTrailbetween( beforeTrail, afterTrail, function( trail ) {
+    // allow providing a result to copy into, so we can chain these
+    result = result || {};
+    
+    scenery.Trail.eachPaintedTrailBetween( beforeTrail, afterTrail, function( trail ) {
       // TODO: optimize this! currently both the layer lookup and this inefficient method of using layer lookup is slow
-      result[trail.getUniqueId()] = scene.layerLookup( trail );
+      var layer = scene.layerLookup( trail );
+      assert && assert( layer, 'each trail during a proper match should always have a layer' );
+      result[trail.getUniqueId()] = layer;
     }, false, this );
     
     return result;
@@ -15388,49 +17891,15 @@ define('SCENERY/Scene',['require','ASSERT/assert','DOT/Bounds2','DOT/Vector2','D
   
   Scene.prototype.rebuildLayers = function() {
     layerLogger && layerLogger( 'rebuildLayers' );
-    // remove all of our tracked layers from the container, so we can fill it with fresh layers
-    this.disposeLayers();
     
-    this.boundaries = this.calculateBoundaries( null, null, null );
+    // mark the entire scene 
+    this.markInterval( new scenery.Trail( this ) );
     
-    var layerArgs = {
-      $main: this.$main,
-      scene: this,
-      baseNode: this
-    };
-    
-    this.layers = [];
-    
-    layerLogger && layerLogger( this.boundaries );
-    
-    for ( var i = 1; i < this.boundaries.length; i++ ) {
-      var startBoundary = this.boundaries[i-1];
-      var endBoundary = this.boundaries[i];
-      
-      assert && assert( startBoundary.nextLayerType === endBoundary.previousLayerType );
-      var layerType = startBoundary.nextLayerType;
-      
-      // LayerType is responsible for applying its own arguments in createLayer()
-      var layer = layerType.createLayer( _.extend( {
-        startBoundary: startBoundary,
-        endBoundary: endBoundary
-      }, layerArgs ) );
-      
-      // record the type on the layer
-      layer.type = layerType;
-      
-      // add the initial nodes to the layer
-      layer.startPointer.eachTrailBetween( layer.endPointer, function( trail ) {
-        if ( trail.isPainted() ) {
-          layer.addNodeFromTrail( trail );
-        }
-      } );
-      
-      this.layers.push( layer );
-    }
+    // then stitch with match=true
+    this.stitch( true );
   };
   
-  // after layer changes, the layers should have their zIndex updated
+  // after layer changes, the layers should have their zIndex updated, and updates their trails
   Scene.prototype.reindexLayers = function() {
     var index = 1;
     _.each( this.layers, function( layer ) {
@@ -15461,7 +17930,6 @@ define('SCENERY/Scene',['require','ASSERT/assert','DOT/Bounds2','DOT/Vector2','D
   
   // what layer does this trail's terminal node render in? returns null if the node is not contained in a layer
   Scene.prototype.layerLookup = function( trail ) {
-    // TODO: add tree form for optimization! this is slower than necessary, it shouldn't be O(n)!
     assert && assert( !( trail.isEmpty() || trail.nodes[0] !== this ), 'layerLookup root matches' );
     assert && assert( trail.isPainted(), 'layerLookup only supports nodes with isPainted(), as this guarantees an unambiguous answer' );
     
@@ -15469,23 +17937,20 @@ define('SCENERY/Scene',['require','ASSERT/assert','DOT/Bounds2','DOT/Vector2','D
       return null; // node not contained in a layer
     }
     
-    for ( var i = 0; i < this.layers.length; i++ ) {
-      var layer = this.layers[i];
+    var trailId = trail.getUniqueId();
+    var layer = this.trailLayerMap[trailId];
+    
+    // if the trail isn't in the main map, it was probably removed (we're in the stitching process, it's in the temporary map), or it's added and we have no reference
+    if ( !layer ) {
+      layer = this.oldTrailLayerMap[trailId];
       
-      // trails may be stale, so we need to update their indices
-      if ( layer.startPaintedTrail ) { layer.startPaintedTrail.reindex(); }
-      if ( layer.endPaintedTrail ) { layer.endPaintedTrail.reindex(); }
-      
-      if ( !layer.endPaintedTrail || trail.compare( layer.endPaintedTrail ) <= 0 ) {
-        if ( !layer.startPaintedTrail || trail.compare( layer.startPaintedTrail ) >= 0 ) {
-          return layer;
-        } else {
-          return null; // node is not contained in a layer (it is before any existing layer)
-        }
+      // it's not referenced, so return null
+      if ( !layer ) {
+        layer = null;
       }
     }
     
-    return null; // node not contained in a layer (it is after any existing layer)
+    return layer;
   };
   
   // all layers whose start or end points lie inclusively in the range from the trail's before and after
@@ -15794,37 +18259,94 @@ define('SCENERY/Scene',['require','ASSERT/assert','DOT/Bounds2','DOT/Vector2','D
     new scenery.Trail( this ).eachTrailUnder( function( trail ) {
       if ( trail.isPainted() ) {
         eachTrailUnderPaintedCount++;
+        
+        assert && assert( scene.trailLayerMap[trail.getUniqueId()], 'scene must map every painted trail to a layer' );
       }
     } );
     
     var layerPaintedCount = 0;
     _.each( this.layers, function( layer ) {
       layerPaintedCount += layer.getLayerTrails().length;
+      
+      // reindex now so we don't have problems later
+      layer.startPaintedTrail.reindex();
+      layer.endPaintedTrail.reindex();
     } );
     
     var layerIterationPaintedCount = 0;
     _.each( this.layers, function( layer ) {
       var selfCount = 0;
-      scenery.Trail.eachPaintedTrailbetween( layer.startPaintedTrail, layer.endPaintedTrail, function( trail ) {
+      scenery.Trail.eachPaintedTrailBetween( layer.startPaintedTrail, layer.endPaintedTrail, function( trail ) {
         selfCount++;
       }, false, scene );
       assert && assert( selfCount > 0, 'every layer must have at least one self trail' );
       layerIterationPaintedCount += selfCount;
     } );
     
+    // we have a map that tracks every painted trail, so this count should match the above totals
+    var trailLayerCount = 0;
+    _.each( this.trailLayerMap, function() { trailLayerCount++; } );
+    
     assert && assert( eachTrailUnderPaintedCount === layerPaintedCount, 'cross-referencing self trail counts: layerPaintedCount, ' + eachTrailUnderPaintedCount + ' vs ' + layerPaintedCount );
     assert && assert( eachTrailUnderPaintedCount === layerIterationPaintedCount, 'cross-referencing self trail counts: layerIterationPaintedCount, ' + eachTrailUnderPaintedCount + ' vs ' + layerIterationPaintedCount );
+    assert && assert( eachTrailUnderPaintedCount === trailLayerCount, 'cross-referencing self trail counts: trailLayerCount, ' + eachTrailUnderPaintedCount + ' vs ' + trailLayerCount );
     
     _.each( this.layers, function( layer ) {
-      var startTrail = layer.startPaintedTrail;
-      var endTrail = layer.endPaintedTrail;
-      
-      assert && assert( startTrail.compare( endTrail ) <= 0, 'proper ordering on layer trails' );
+      assert && assert( layer.startPaintedTrail.compare( layer.endPaintedTrail ) <= 0, 'proper ordering on layer trails' );
     } );
     
     for ( var i = 1; i < this.layers.length; i++ ) {
-      assert && assert( this.layers[0].startPaintedTrail.compare( this.layers[1].startPaintedTrail ) === -1, 'proper ordering of layers in scene.layers array' );
+      assert && assert( this.layers[i-1].endPaintedTrail.compare( this.layers[i].startPaintedTrail ) === -1, 'proper ordering of layer trail boundaries in scene.layers array' );
+      assert && assert( this.layers[i-1].endBoundary === this.layers[i].startBoundary, 'proper sharing of boundaries' );
     }
+    
+    _.each( this.layers, function( layer ) {
+      // a list of trails that the layer tracks
+      var layerTrails = layer.getLayerTrails();
+      
+      // a list of trails that the layer should be tracking (between painted trails)
+      var computedTrails = [];
+      scenery.Trail.eachPaintedTrailBetween( layer.startPaintedTrail, layer.endPaintedTrail, function( trail ) {
+        computedTrails.push( trail.copy() );
+      }, false, scene );
+      
+      // verify that the layer has an identical record of trails compared to the trails inside its boundaries
+      assert && assert( layerTrails.length === computedTrails.length, 'layer has incorrect number of tracked trails' );
+      _.each( layerTrails, function( trail ) {
+        assert && assert( _.some( computedTrails, function( otherTrail ) { return trail.equals( otherTrail ); } ), 'layer has a tracked trail discrepancy' );
+      } );
+      
+      // verify that each trail has the same (or null) renderer as the layer
+      scenery.Trail.eachTrailBetween( layer.startPaintedTrail, layer.endPaintedTrail, function( trail ) {
+        var node = trail.lastNode();
+        assert && assert( !node.renderer || node.renderer.name === layer.type.name, 'specified renderers should match the layer renderer' );
+      }, false, scene );
+    } );
+    
+    // verify layer splits
+    new scenery.Trail( this ).eachTrailUnder( function( trail ) {
+      var beforeSplitTrail;
+      var afterSplitTrail;
+      if ( trail.lastNode().layerSplitBefore ) {
+        beforeSplitTrail = trail.previousPainted();
+        afterSplitTrail = trail.lastNode().isPainted() ? trail : trail.nextPainted();
+        assert && assert( !beforeSplitTrail || !afterSplitTrail || scene.layerLookup( beforeSplitTrail ) !== scene.layerLookup( afterSplitTrail ), 'layerSplitBefore layers need to be different' );
+      }
+      if ( trail.lastNode().layerSplitAfter ) {
+        // shift a pointer from the (nested) end of the trail to the next isBefore (if available)
+        var ptr = new scenery.TrailPointer( trail.copy(), false );
+        while ( ptr && ptr.isAfter ) {
+          ptr = ptr.nestedForwards();
+        }
+        
+        // if !ptr, we walked off the end of the graph (nothing after layer split, automatically ok)
+        if ( ptr ) {
+          beforeSplitTrail = ptr.trail.previousPainted();
+          afterSplitTrail = ptr.trail.lastNode().isPainted() ? ptr.trail : ptr.trail.nextPainted();
+          assert && assert( !beforeSplitTrail || !afterSplitTrail || scene.layerLookup( beforeSplitTrail ) !== scene.layerLookup( afterSplitTrail ), 'layerSplitAfter layers need to be different' );
+        }
+      }
+    } );
     
     return true; // so we can assert( layerAudit() )
   };
@@ -15941,17 +18463,42 @@ define('SCENERY/Scene',['require','ASSERT/assert','DOT/Bounds2','DOT/Vector2','D
     return 'new scenery.Scene( $( \'#main\' ), {' + propLines + '} )';
   };
   
-  Scene.prototype.toStringWithChildren = function() {
+  Scene.prototype.toStringWithChildren = function( mutateScene ) {
+    var scene = this;
     var result = '';
     
-    _.each( this._children, function( child ) {
+    var nodes = this.getTopologicallySortedNodes().slice( 0 ).reverse(); // defensive slice, in case we store the order somewhere
+    
+    function name( node ) {
+      return node === scene ? 'scene' : node.constructor.name.toLowerCase() + node.id;
+    }
+    
+    _.each( nodes, function( node ) {
       if ( result ) {
         result += '\n';
       }
-      result += 'scene.addChild( ' + child.toString() + ' );';
+      
+      if ( mutateScene && node === scene ) {
+        var props = scene.getPropString( '  ', false );
+        result += 'scene.mutate( {' + ( props ? ( '\n' + props + '\n' ) : '' ) + '} )';
+      } else {
+        result += 'var ' + name( node ) + ' = ' + node.toString( '', false );
+      }
+      
+      _.each( node.children, function( child ) {
+        result += '\n' + name( node ) + '.addChild( ' + name( child ) + ' );';
+      } );
     } );
     
     return result;
+  };
+  
+  Scene.enableLayerLogging = function() {
+    layerLogger = function( ob ) { console.log( ob ); };
+  };
+  
+  Scene.disableLayerLogging = function() {
+    layerLogger = null;
   };
   
   function applyCSSHacks( $main, options ) {
@@ -16070,15 +18617,6 @@ define('KITE/main', [
     'KITE/kite',
     
     'KITE/Shape',
-    'KITE/pieces/Arc',
-    'KITE/pieces/Close',
-    'KITE/pieces/CubicCurveTo',
-    'KITE/pieces/EllipticalArc',
-    'KITE/pieces/LineTo',
-    'KITE/pieces/MoveTo',
-    'KITE/pieces/Piece',
-    'KITE/pieces/QuadraticCurveTo',
-    'KITE/pieces/Rect',
     'KITE/segments/Arc',
     'KITE/segments/Cubic',
     'KITE/segments/EllipticalArc',
@@ -16086,12 +18624,103 @@ define('KITE/main', [
     'KITE/segments/Quadratic',
     'KITE/segments/Segment',
     'KITE/util/LineStyles',
-    'KITE/util/Subpath'
+    'KITE/util/Subpath',
+    
+    'KITE/../parser/svgPath'
   ], function(
     kite // note: we don't need any of the other parts, we just need to specify them as dependencies so they fill in the kite namespace
   ) {
   
   return kite;
+} );
+
+// Copyright 2002-2012, University of Colorado
+
+/**
+ * Immutable complex number handling
+ *
+ * TODO: handle quaternions in a Quaternion.js!
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Chris Malley
+ */
+
+define('DOT/Complex',['require','ASSERT/assert','DOT/dot','PHET_CORE/inherit','DOT/Vector2'], function( require ) {
+  
+  
+  var assert = require( 'ASSERT/assert' )( 'dot' );
+  
+  var dot = require( 'DOT/dot' );
+  
+  var inherit = require( 'PHET_CORE/inherit' );
+  var Vector2 = require( 'DOT/Vector2' );
+  
+  // not using x,y,width,height so that it can handle infinity-based cases in a better way
+  dot.Complex = function Complex( real, imaginary ) {
+    Vector2.call( this, real, imaginary );
+    this.real = real;
+    this.imaginary = imaginary;
+  };
+  var Complex = dot.Complex;
+  
+  Complex.real = function( real ) {
+    return new Complex( real, 0 );
+  };
+  
+  Complex.imaginary = function( imaginary ) {
+    return new Complex( 0, imaginary );
+  };
+  
+  Complex.createPolar = function( magnitude, phase ) {
+    return new Complex( magnitude * Math.cos( phase ), magnitude * Math.sin( phase ) );
+  };
+  
+  // inheriting Vector2 for now since many times we may want to treat the complex number as a vector
+  // ideally, we should have Vector2-likeness be a mixin?
+  // we also inherit the immutable form since we add 'real' and 'imaginary' properties,
+  // without adding extra logic to mutators in Vector2
+  inherit( Complex, Vector2.Immutable, {
+    phase: Vector2.prototype.angle,
+    
+    // TODO: remove times() from Vector2? or have it do this for vectors
+    times: function( c ) {
+      return new Complex( this.real * c.real - this.imaginary * c.imaginary, this.real * c.imaginary + this.imaginary * c.real );
+    },
+    
+    dividedBy: function( c ) {
+      var cMag = c.magnitudeSquared();
+      return new Complex(
+        ( this.real * c.real + this.imaginary * c.imaginary ) / cMag,
+        ( this.imaginary * c.real - this.real * c.imaginary ) / cMag
+      );
+    },
+    
+    // TODO: pow()
+    sqrt: function() {
+      var mag = this.magnitude();
+      return new Complex( Math.sqrt( ( mag + this.real ) / 2 ),
+                          ( this.imaginary >= 0 ? 1 : -1 ) * Math.sqrt( ( mag - this.real ) / 2 ) );
+    },
+    
+    conjugate: function() {
+      return new Complex( this.real, -this.imaginary );
+    },
+    
+    // e^(a+bi) = ( e^a ) * ( cos(b) + i * sin(b) )
+    exponentiated: function() {
+      return Complex.createPolar( Math.exp( this.real ), this.imaginary );
+    },
+    
+    toString: function() {
+      return "Complex(" + this.x + ", " + this.y + ")";
+    }
+  } );
+  
+  Complex.ZERO = new Complex( 0, 0 );
+  Complex.ONE = new Complex( 1, 0 );
+  Complex.I = new Complex( 0, 1 );
+  
+  return Complex;
 } );
 
 // Copyright 2002-2012, University of Colorado
@@ -16189,7 +18818,7 @@ define('DOT/Dimension2',['require','DOT/dot'], function( require ) {
   
   var dot = require( 'DOT/dot' );
   
-  dot.Dimension2 = function( width, height ) {
+  dot.Dimension2 = function Dimension2( width, height ) {
     this.width = width;
     this.height = height;
   };
@@ -16227,7 +18856,7 @@ define('DOT/LUDecomposition',['require','DOT/dot'], function( require ) {
   
   // require( 'DOT/Matrix' ); // commented out so Require.js doesn't complain about the circular dependency
 
-  dot.LUDecomposition = function( matrix ) {
+  dot.LUDecomposition = function LUDecomposition( matrix ) {
     var i, j, k;
 
     this.matrix = matrix;
@@ -16450,7 +19079,7 @@ define('DOT/SingularValueDecomposition',['require','DOT/dot'], function( require
   
   // require( 'DOT/Matrix' ); // commented out so Require.js doesn't complain about the circular dependency
 
-  dot.SingularValueDecomposition = function( matrix ) {
+  dot.SingularValueDecomposition = function SingularValueDecomposition( matrix ) {
     this.matrix = matrix;
 
     var Arg = matrix;
@@ -16969,7 +19598,7 @@ define('DOT/QRDecomposition',['require','DOT/dot'], function( require ) {
   
   // require( 'DOT/Matrix' ); // commented out so Require.js doesn't complain about the circular dependency
 
-  dot.QRDecomposition = function( matrix ) {
+  dot.QRDecomposition = function QRDecomposition( matrix ) {
     this.matrix = matrix;
 
     // TODO: size!
@@ -17160,7 +19789,7 @@ define('DOT/Matrix',['require','ASSERT/assert','DOT/dot','PHET_CORE/isArray','DO
   require( 'DOT/Vector3' );
   require( 'DOT/Vector4' );
   
-  dot.Matrix = function( m, n, filler, fast ) {
+  dot.Matrix = function Matrix( m, n, filler, fast ) {
     this.m = m;
     this.n = n;
 
@@ -17701,7 +20330,7 @@ define('DOT/Permutation',['require','ASSERT/assert','DOT/dot','PHET_CORE/isArray
   require( 'DOT/Util' ); // for rangeInclusive
   
   // Creates a permutation that will rearrange a list so that newList[i] = oldList[permutation[i]]
-  var Permutation = function( indices ) {
+  var Permutation = function Permutation( indices ) {
     this.indices = indices;
   };
 
@@ -17839,7 +20468,7 @@ define('DOT/Ray3',['require','DOT/dot'], function( require ) {
   
   var dot = require( 'DOT/dot' );
   
-  dot.Ray3 = function( pos, dir ) {
+  dot.Ray3 = function Ray3( pos, dir ) {
     this.pos = pos;
     this.dir = dir;
   };
@@ -17882,7 +20511,7 @@ define('DOT/Transform4',['require','DOT/dot','DOT/Matrix4','DOT/Vector3','DOT/Ra
   require( 'DOT/Ray3' );
   
   // takes a 4x4 matrix
-  dot.Transform4 = function( matrix ) {
+  dot.Transform4 = function Transform4( matrix ) {
     // using immutable version for now. change it to the mutable identity copy if we need mutable operations on the matrices
     this.set( matrix === undefined ? dot.Matrix4.IDENTITY : matrix );
   };
@@ -18031,6 +20660,7 @@ define('DOT/Transform4',['require','DOT/dot','DOT/Matrix4','DOT/Vector3','DOT/Ra
 define('DOT/main', [
   'DOT/dot',
   'DOT/Bounds2',
+  'DOT/Complex',
   'DOT/ConvexHull2',
   'DOT/Dimension2',
   'DOT/LUDecomposition',
@@ -18199,9 +20829,10 @@ define('PHET_CORE/loadScript',['require'], function( require ) {
 } );
 
 
-define('PHET_CORE/main',['require','PHET_CORE/callSuper','PHET_CORE/inherit','PHET_CORE/inheritPrototype','PHET_CORE/isArray','PHET_CORE/extend','PHET_CORE/loadScript'], function( require ) {
+define('PHET_CORE/main',['require','PHET_CORE/callSuper','PHET_CORE/collect','PHET_CORE/inherit','PHET_CORE/inheritPrototype','PHET_CORE/isArray','PHET_CORE/extend','PHET_CORE/loadScript'], function( require ) {
   return {
     callSuper: require( 'PHET_CORE/callSuper' ),
+    collect: require( 'PHET_CORE/collect' ),
     inherit: require( 'PHET_CORE/inherit' ),
     inheritPrototype: require( 'PHET_CORE/inheritPrototype' ),
     isArray: require( 'PHET_CORE/isArray' ),
