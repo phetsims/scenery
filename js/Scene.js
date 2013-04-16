@@ -1207,7 +1207,7 @@ define( function( require ) {
           addQualifier( 'renderer:' + node._renderer.name );
         }
         if ( node._rendererOptions ) {
-          addQualifier( 'rendererOptions:' + _.each( node._rendererOptions, function( option, key ) { return key + ':' + str( option ); } ).join( ',' ) );
+          // addQualifier( 'rendererOptions:' + _.each( node._rendererOptions, function( option, key ) { return key + ':' + str( option ); } ).join( ',' ) );
         }
         if ( node._layerSplitBefore ) {
           addQualifier( 'layerSplitBefore' );

@@ -1,8 +1,11 @@
 
 Priorities:
+    Text bounds handling is unacceptably slow - note on Issue about SVG font parsing + handling
     Note about has.js and assertion controls for use with Scenery.
     Re-enable layer refresh handling for matching (and the optimizations therein)
+        With the delayed layer handling, we could conceivably remove the distinction between 'matching' and 'non-matching'
     SVGPath takes d="..."
+        Add relative and smooth curve methods and mapping of elliptical flags to complete SVG path parsing
     Accessibility 
     Force non-canvas above 'interactive' DOM node
         Need to track lowest DOM-interactive Trail for each Scene.
@@ -151,6 +154,16 @@ DOM:
     Investigate SVG crispEdges to see whether it would be valuable for other renderers
 
 ** WebGL:
+    Stroke will just be a kite-stroked shape.
+        Bring back persistent stroked references, since sharing them is ideal? And mark them as immutable
+    Consider storing buffers (or display list references) in Shape instances so we can quickly render things
+    Fragment shader for:
+        Plain color
+        Linear Gradient
+        Radial Gradient
+        Image
+        Pattern
+    Investigate FrameBuffer for opacity handling (and caching?)
     Use display lists?
     Examine test code for considerations for implementing Shape.
 
@@ -221,6 +234,7 @@ Accessibility / shadow DOM:
         tabbable: true, tabbable: false, + tabindex
         TabOrder for scene, or more globally (multiple scene support).
             * Ideally we can have scenes handle it in an isolated way that doesn't affect other scenes
+        Delegates could be positioned with latency - every 1-2 seconds.
     For 'accessible' elements, maybe 'interactive' for a tab order? 'tabbable'? 'readable'?
         * magnifier
         CSS styles ('hidden') - tab order?
@@ -277,6 +291,7 @@ Trail:
     depthFirstUntil should possibly have option for defensive copies of the pointers?
 
 Performance:
+    *** paintCanvas bottleneck?
     *** Garbage collection jitters!
     *** Performance regressions with layering
     * Prune node rendering based on visible dirty bounds

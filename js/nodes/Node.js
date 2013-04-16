@@ -1500,7 +1500,7 @@ define( function( require ) {
       if ( this.renderer ) {
         addProp( 'renderer', this.renderer.name );
         if ( this.rendererOptions ) {
-          addProp( 'rendererOptions', JSON.stringify( this.rendererOptions ), true );
+          // addProp( 'rendererOptions', JSON.stringify( this.rendererOptions ), true );
         }
       }
       

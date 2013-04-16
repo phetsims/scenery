@@ -981,8 +981,9 @@ scene.addChild( new scenery.Path( _.extend( {
       <h4 id="path-shape">shape</h4>
       <p>
         <code>node.shape</code> (<code>node.getShape()</code>, <code>node.setShape( shape )</code>)
-        controls the shape of this path, and is an instance of <a href="../../kite">Kite</a>'s
-        <a href="../../kite/doc#shape">Shape</a>.
+        controls the shape of this path, and is either an instance of <a href="../../kite">Kite</a>'s
+        <a href="../../kite/doc#shape">Shape</a>, or it is a string representing an <a href="http://www.w3.org/TR/SVG/paths.html#DAttribute">SVG path</a>,
+        and will be converted into a <a href="../../kite/doc#shape">Shape</a>.
       </p>
       
       <h3 id="image" class="section">Image</h3>

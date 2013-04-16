@@ -19,6 +19,7 @@ define( function( require ) {
   var fillable = require( 'SCENERY/nodes/Fillable' );
   var strokable = require( 'SCENERY/nodes/Strokable' );
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
+  require( 'KITE/Shape' );
   
   scenery.Path = function Path( options ) {
     // TODO: consider directly passing in a shape object (or at least handling that case)
@@ -37,6 +38,10 @@ define( function( require ) {
     // sets the shape drawn, or null to remove the shape
     setShape: function( shape ) {
       if ( this._shape !== shape ) {
+        if ( typeof shape === 'string' ) {
+          // be content with setShape always invalidating the shape?
+          shape = new kite.Shape( shape );
+        }
         this._shape = shape;
         this.invalidateShape();
       }

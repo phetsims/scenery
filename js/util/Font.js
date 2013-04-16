@@ -61,9 +61,6 @@ define( function( require ) {
     constructor: Font,
     
     getProperty: function( property ) {
-      // sanity check, in case some CSS changed somewhere
-      this.$span.css( 'font', this._font );
-      
       return this.$span.css( property );
     },
     setProperty: function( property, value ) {
