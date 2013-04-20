@@ -1293,7 +1293,7 @@ define( function( require ) {
     // apply this node's transform (and then all of its parents' transforms) to the point
     localToGlobalPoint: function( point ) {
       var node = this;
-      while ( node !== null ) {
+      while ( node ) {
         point = node._transform.transformPosition2( point );
         assert && assert( node._parents[1] === undefined, 'localToGlobalPoint unable to work for DAG' );
         node = node._parents[0];
@@ -1303,7 +1303,7 @@ define( function( require ) {
     
     localToGlobalBounds: function( bounds ) {
       var node = this;
-      while ( node !== null ) {
+      while ( node ) {
         bounds = node._transform.transformBounds2( bounds );
         assert && assert( node._parents[1] === undefined, 'localToGlobalBounds unable to work for DAG' );
         node = node._parents[0];
@@ -1316,7 +1316,7 @@ define( function( require ) {
       
       // we need to apply the transformations in the reverse order, so we temporarily store them
       var transforms = [];
-      while ( node !== null ) {
+      while ( node ) {
         transforms.push( node._transform );
         assert && assert( node._parents[1] === undefined, 'globalToLocalPoint unable to work for DAG' );
         node = node._parents[0];
@@ -1334,7 +1334,7 @@ define( function( require ) {
       
       // we need to apply the transformations in the reverse order, so we temporarily store them
       var transforms = [];
-      while ( node !== null ) {
+      while ( node ) {
         transforms.push( node._transform );
         assert && assert( node._parents[1] === undefined, 'globalToLocalBounds unable to work for DAG' );
         node = node._parents[0];
