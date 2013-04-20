@@ -1326,6 +1326,16 @@ define( function( require ) {
       return this.parents.length ? this.parents[0].localToGlobalBounds( bounds ) : bounds;
     },
     
+    globalToParentPoint: function( point ) {
+      assert && assert( this.parents.length <= 1, 'globalToParentPoint unable to work for DAG' );
+      return this.parents.length ? this.parents[0].globalToLocalPoint( point ) : point;
+    },
+    
+    globalToParentBounds: function( bounds ) {
+      assert && assert( this.parents.length <= 1, 'globalToParentBounds unable to work for DAG' );
+      return this.parents.length ? this.parents[0].globalToLocalBounds( bounds ) : bounds;
+    },
+    
     // get the Bounds2 of this node in the global coordinate frame.  Does not work for DAG.
     getGlobalBounds: function() {
       assert && assert( this.parents.length <= 1, 'globalBounds unable to work for DAG' );

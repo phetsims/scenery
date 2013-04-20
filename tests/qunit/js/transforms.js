@@ -27,6 +27,10 @@
     
     ok( dot( 15, 5 ).equalsEpsilon( b.parentToGlobalPoint( dot( 5, 5 ) ), epsilon ), 'parentToGlobalPoint on child' );
     ok( dot( 5, 5 ).equalsEpsilon( a.parentToGlobalPoint( dot( 5, 5 ) ), epsilon ), 'parentToGlobalPoint on root' );
+    
+    ok( dot( -5, 5 ).equalsEpsilon( b.globalToParentPoint( dot( 5, 5 ) ), epsilon ), 'globalToParentPoint on child' );
+    ok( dot( 5, 5 ).equalsEpsilon( a.globalToParentPoint( dot( 5, 5 ) ), epsilon ), 'globalToParentPoint on root' );
+    
   } );
   
 })();
