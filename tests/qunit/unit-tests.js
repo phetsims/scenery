@@ -18,5 +18,6 @@ function runSceneryTests( pathToTestBase ) {
   loadTestFile( 'js/color.js' );
   loadTestFile( 'js/layering.js' );
   loadTestFile( 'js/pixel-perfect.js' );
+  loadTestFile( 'js/transforms.js' );
   loadTestFile( 'js/miscellaneous.js' );
 };

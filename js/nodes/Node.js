@@ -1277,6 +1277,7 @@ define( function( require ) {
       return this._transform.transformPosition2( point );
     },
     
+    // apply this node's transform to the bounds
     localToParentBounds: function( bounds ) {
       return this._transform.transformBounds2( bounds );
     },
@@ -1286,6 +1287,7 @@ define( function( require ) {
       return this._transform.inversePosition2( point );
     },
     
+    // apply the inverse of this node's transform to the bounds
     parentToLocalBounds: function( bounds ) {
       return this._transform.inverseBounds2( bounds );
     },
@@ -1301,6 +1303,7 @@ define( function( require ) {
       return point;
     },
     
+    // apply this node's transform (and then all of its parents' transforms) to the bounds
     localToGlobalBounds: function( bounds ) {
       var node = this;
       while ( node ) {
@@ -1311,15 +1314,27 @@ define( function( require ) {
       return bounds;
     },
     
-    //Get the Bounds2 of this node in the global coordinate frame.  Does not work for DAG.
-    get globalBounds(){
-      assert && assert(this.parents.length===1,'globalBounds unable to work for DAG');
-      return this.parents[0].localToGlobalBounds(this.bounds);
+    // like localToGlobalPoint, but without applying this node's transform
+    parentToGlobalPoint: function( point ) {
+      assert && assert( this.parents.length <= 1, 'parentToGlobalPoint unable to work for DAG' );
+      return this.parents.length ? this.parents[0].localToGlobalPoint( point ) : point;
     },
     
-    //Get the Bounds2 of any other node by converting to the global coordinate frame.  Does not work for DAG.
-    boundsOf: function(node){
-      return this.globalToLocalBounds(node.globalBounds);
+    // like localToGlobalBounds, but without applying this node's transform
+    parentToGlobalBounds: function( bounds ) {
+      assert && assert( this.parents.length <= 1, 'parentToGlobalBounds unable to work for DAG' );
+      return this.parents.length ? this.parents[0].localToGlobalBounds( bounds ) : bounds;
+    },
+    
+    // get the Bounds2 of this node in the global coordinate frame.  Does not work for DAG.
+    getGlobalBounds: function() {
+      assert && assert( this.parents.length <= 1, 'globalBounds unable to work for DAG' );
+      return this.parentToGlobalBounds( this.getBounds() );
+    },
+    
+    // get the Bounds2 of any other node by converting to the global coordinate frame.  Does not work for DAG.
+    boundsOf: function( node ) {
+      return this.globalToLocalBounds( node.getGlobalBounds() );
     },
     
     globalToLocalPoint: function( point ) {
@@ -1438,6 +1453,7 @@ define( function( require ) {
     get bounds() { return this.getBounds(); },
     get selfBounds() { return this.getSelfBounds(); },
     get childBounds() { return this.getChildBounds(); },
+    get globalBounds() { return this.getGlobalBounds(); },
     get id() { return this.getId(); },
     
     mutate: function( options ) {
