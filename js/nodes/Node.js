@@ -1311,6 +1311,17 @@ define( function( require ) {
       return bounds;
     },
     
+    //Get the Bounds2 of this node in the global coordinate frame.  Does not work for DAG.
+    get globalBounds(){
+      assert && assert(this.parents.length===1,'globalBounds unable to work for DAG');
+      return this.parents[0].localToGlobalBounds(this.bounds);
+    },
+    
+    //Get the Bounds2 of any other node by converting to the global coordinate frame.  Does not work for DAG.
+    boundsOf: function(node){
+      return this.globalToLocalBounds(node.globalBounds);
+    },
+    
     globalToLocalPoint: function( point ) {
       var node = this;
       
