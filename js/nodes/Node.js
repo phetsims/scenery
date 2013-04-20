@@ -1347,6 +1347,11 @@ define( function( require ) {
       return this.globalToLocalBounds( node.getGlobalBounds() );
     },
     
+    // get the Bounds2 of this node in the coordinate frame of the parameter node. Does not work for DAG cases.
+    boundsTo: function( node ) {
+      return node.globalToLocalBounds( this.getGlobalBounds() );
+    },
+    
     globalToLocalPoint: function( point ) {
       var node = this;
       
