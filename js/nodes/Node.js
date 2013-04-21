@@ -546,6 +546,7 @@ define( function( require ) {
       if ( _.indexOf( this._inputListeners, listener ) === -1 ) {
         this._inputListeners.push( listener );
       }
+      return this;
     },
     
     removeInputListener: function( listener ) {
@@ -553,6 +554,7 @@ define( function( require ) {
       assert && assert( _.indexOf( this._inputListeners, listener ) !== -1 );
       
       this._inputListeners.splice( _.indexOf( this._inputListeners, listener ), 1 );
+      return this;
     },
     
     getInputListeners: function() {
@@ -565,6 +567,7 @@ define( function( require ) {
       if ( _.indexOf( this._eventListeners, listener ) === -1 ) {
         this._eventListeners.push( listener );
       }
+      return this;
     },
     
     removeEventListener: function( listener ) {
@@ -572,6 +575,7 @@ define( function( require ) {
       assert && assert( _.indexOf( this._eventListeners, listener ) !== -1 );
       
       this._eventListeners.splice( _.indexOf( this._eventListeners, listener ), 1 );
+      return this;
     },
     
     getEventListeners: function() {
