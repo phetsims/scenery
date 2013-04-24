@@ -1,6 +1,7 @@
 
 Priorities:
     Switch to jQuery 2
+    lib/phet/ instead of common/, lib/ instead of contrib/
     Performance: Batch DOM (or at least CSS) changes to animation frames?
     Text bounds handling is unacceptably slow - note on Issue about SVG font parsing + handling
     Note about has.js and assertion controls for use with Scenery.
