@@ -3,7 +3,9 @@
 /**
  * Text
  *
- * TODO: newlines
+ * TODO: newlines (multiline)
+ * TODO: htmlText support (and DOM renderer)
+ * TODO: don't get bounds until the Text node is fully mutated?
  *
  * Useful specs:
  * http://www.w3.org/TR/css3-text/
@@ -37,6 +39,7 @@ define( function( require ) {
     this._textAlign    = 'start';            // start, end, left, right, center
     this._textBaseline = 'alphabetic';       // top, hanging, middle, alphabetic, ideographic, bottom
     this._direction    = 'ltr';              // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
+    this._boundsMethod = 'fast';             // fast (SVG/DOM), or slow (Canvas accurate recursive)
     
     // ensure we have a parameter object
     options = options || {};
@@ -70,10 +73,36 @@ define( function( require ) {
       return this._text;
     },
     
+    setBoundsMethod: function( method ) {
+      assert && assert( method === 'fast' || method === 'accurate', '"fast" and "accurate" are the only allowed boundsMethod values for Text' );
+      if ( method !== this._boundsMethod ) {
+        this._boundsMethod = method;
+        this.invalidateText();
+      }
+      return this;
+    },
+    
+    getBoundsMethod: function() {
+      return this._boundsMethod;
+    },
+    
     invalidateText: function() {
-      // TODO: faster bounds determination? getBBox()?
+      // swap supported renderers if necessary TODO: share this code dealing with compatible renderer changes
+      if ( this._boundsMethod === 'fast' && !this.hasOwnProperty( '_supportedRenderers' ) ) {
+        // TODO: support disabling Canvas dirty regions?
+        this._supportedRenderers = this._supportedFastRenderers;
+        this.markLayerRefreshNeeded();
+      } else if ( this._boundsMethod === 'accurate' && this.hasOwnProperty( '_supportedRenderers' ) ) {
+        delete this._supportedRenderers; // will leave prototype intact
+        this.markLayerRefreshNeeded();
+      }
+      
       // investigate http://mudcu.be/journal/2011/01/html5-typographic-metrics/
-      this.invalidateSelf( this.accurateCanvasBounds() );
+      if ( this._boundsMethod === 'fast' ) {
+        this.invalidateSelf( this.approximateSVGBounds() );
+      } else {
+        this.invalidateSelf( this.accurateCanvasBounds() );
+      }
     },
 
     paintCanvas: function( wrapper ) {
@@ -403,10 +432,11 @@ define( function( require ) {
   addFontForwarding( 'fontSize', 'FontSize', 'size' );
   addFontForwarding( 'lineHeight', 'LineHeight', 'lineHeight' );
   
-  Text.prototype._mutatorKeys = [ 'text', 'font', 'fontWeight', 'fontFamily', 'fontStretch', 'fontStyle', 'fontSize', 'lineHeight',
+  Text.prototype._mutatorKeys = [ 'boundsMethod', 'text', 'font', 'fontWeight', 'fontFamily', 'fontStretch', 'fontStyle', 'fontSize', 'lineHeight',
                                   'textAlign', 'textBaseline', 'direction' ].concat( Node.prototype._mutatorKeys );
   
   Text.prototype._supportedRenderers = [ Renderer.Canvas, Renderer.SVG ];
+  Text.prototype._supportedFastRenderers = [ Renderer.SVG ]; // renderers for fast (SVG/DOM) bounds, since canvas dirty regions would present issues
   
   // font-specific ES5 setters and getters are defined using addFontForwarding above
   Object.defineProperty( Text.prototype, 'font', { set: Text.prototype.setFont, get: Text.prototype.getFont } );
@@ -414,6 +444,7 @@ define( function( require ) {
   Object.defineProperty( Text.prototype, 'textAlign', { set: Text.prototype.setTextAlign, get: Text.prototype.getTextAlign } );
   Object.defineProperty( Text.prototype, 'textBaseline', { set: Text.prototype.setTextBaseline, get: Text.prototype.getTextBaseline } );
   Object.defineProperty( Text.prototype, 'direction', { set: Text.prototype.setDirection, get: Text.prototype.getDirection } );
+  Object.defineProperty( Text.prototype, 'boundsMethod', { set: Text.prototype.setBoundsMethod, get: Text.prototype.getBoundsMethod } );
   
   // mix in support for fills and strokes
   fillable( Text );

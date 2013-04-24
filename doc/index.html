@@ -218,6 +218,7 @@
       <a class="sublink" href="#text-textAlign">textAlign</a><br>
       <a class="sublink" href="#text-textBaseline">textBaseline</a><br>
       <a class="sublink" href="#text-direction">direction</a><br>
+      <a class="sublink" href="#text-boundsMethod">boundsMethod</a><br>
       
       <a class="navlink" href="#dom">DOM</a><br>
       <a class="sublink" href="#dom-element">element</a><br>
@@ -1169,6 +1170,14 @@ scene.addChild( new scenery.Text( 'Some text', {
         <code>node.direction</code> (<code>node.getDirection()</code>, <code>node.setDirection( direction )</code>)
         sets the LTR or RTL direction of the text. It should take on values from
         Canvas's <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-direction">context.direction</a>, but <strong>proper bounds and renderer compatibility is not ensured yet</strong>
+      </p>
+      
+      <h4 id="text-boundsMethod">boundsMethod</h4>
+      <p>
+        <code>node.boundsMethod</code> (<code>node.getBoundsMethod()</code>, <code>node.setBoundsMethod( method )</code>)
+        sets what type of method is used for determining Text bounds. Currently, there are two options: <code>"fast"</code> (default),
+        which may be somewhat inaccurate, but is much faster, and disables Canvas dirty region redrawing (or canvas entirely) depending
+        on the implementation, or <code>"accurate"></code> which is accurate and supports dirty regions, but is much slower.
       </p>
       
       <h3 id="dom" class="section">DOM</h3>
