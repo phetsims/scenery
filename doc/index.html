@@ -272,6 +272,26 @@
         <li><a href="../../kite">Kite</a> for shapes.</li>
       </ul>
       
+      <h2 id="debugging">Debugging</h2>
+      
+      <p>
+        If has.js is included, Scenery assertions can be enabled or disabled. Performance can be significantly decreased if all assertions are enabled.
+      </p>
+      <p>
+        To enable all assertions for debugging, run the following (assuming has.js has been loaded):
+      </p>
+      <pre class="brush: js">
+has.add( 'assert.scenery', function() { return true; } );
+has.add( 'assert.scenery.extra', function() { return true; } );
+      </pre>
+      <p>
+        or to disable assertions:
+      </p>
+      <pre class="brush: js">
+has.add( 'assert.scenery', function() { return false; } );
+has.add( 'assert.scenery.extra', function() { return false; } );
+      </pre>
+      
       <h2 id="api">Scenery API</h2>
       
       <h3 id="node" class="section">Node</h3>

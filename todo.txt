@@ -1,9 +1,7 @@
 
 Priorities:
-    lib/phet/ instead of common/, lib/ instead of contrib/
     Performance: Batch DOM (or at least CSS) changes to animation frames?
     Text bounds handling is unacceptably slow - note on Issue about SVG font parsing + handling
-    Note about has.js and assertion controls for use with Scenery.
     Re-enable layer refresh handling for matching (and the optimizations therein)
         With the delayed layer handling, we could conceivably remove the distinction between 'matching' and 'non-matching'
     SVGPath takes d="..."
@@ -24,7 +22,6 @@ Priorities:
     Serialization:
         DAG handling (maybe just don't include children, have all addChild calls)
         Consider keeping Node IDs? May make it easier to visually compare the debug HTML in both places
-    Remove Easel references in comparison
 
 Bugs:
     Switching renderers in Devious Drag example on iPad causes other objects being dragged to be "dropped"
@@ -94,6 +91,8 @@ General:
     RenderState - consider stack-based transforms
 
 Code:
+    lib/phet/ instead of common/, lib/ instead of contrib/
+    Remove Easel references in comparison
     Refactor Trail .compare usage to isBefore / isAfter
     Fast text bounds
     Logging:
