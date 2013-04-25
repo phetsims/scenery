@@ -92,7 +92,7 @@ define( function( require ) {
         } else if ( this.context.mozDash !== undefined ) {
           this.context.mozDash = dash;
         } else if ( this.context.webkitLineDash !== undefined ) {
-          this.context.webkitLineDash = dash;
+          this.context.webkitLineDash = dash ? dash : [];
         } else {
           // unsupported line dash! do... nothing?
         }
