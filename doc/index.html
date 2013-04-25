@@ -128,7 +128,8 @@
       
       <p class="lead" style="color: #a00;">Currently incomplete!</p>
       
-      TODO: coordinate frame notes
+      TODO: coordinate frame notes<br>
+      TODO: event handling API documentation
       
     </div>
     <div class="span3"></div>
@@ -224,10 +225,6 @@
       <a class="sublink" href="#dom-element">element</a><br>
       <a class="sublink" href="#dom-interactive">interactive</a><br>
       
-      <a class="navlink" href="#pointer">Pointer</a><br>
-      
-      <a class="navlink" href="#font">Font</a><br>
-      
       <a class="navlink" href="#linearGradient">LinearGradient</a><br>
       <a class="sublink" href="#linearGradient-addColorStop">addColorStop</a><br>
       <a class="sublink" href="#linearGradient-setTransformMatrix">setTransformMatrix</a><br>
@@ -250,11 +247,26 @@
       <a class="navlink" href="#circle">Circle</a><br>
       <a class="sublink" href="#circle-radius">radius</a><br>
       
+      <a class="navlink" href="#font">Font</a><br>
+      
+      <a class="navlink" href="#event">Event</a><br>
+      
+      <a class="navlink" href="#pointer">Pointer</a><br>
+      
+      <a class="navlink" href="#mouse">Mouse</a><br>
+      
+      <a class="navlink" href="#touch">Touch</a><br>
+      
+      <a class="navlink" href="#pen">Pen</a><br>
+      
+      <a class="navlink" href="#trail">Trail</a><br>
+      
     </div>
     <div class="span6">
       <h2 id="tutorials">Tutorials</h2>
       
       <p>If you are just starting out, see the <a href="a-tour-of-scenery.html">Tour of Scenery</a></p>
+      <p>See the <a href="user-input.html">user input documentation</a> for handling user-generated events.</p>
       
       <h2 id="dependencies">Dependencies</h2>
       
@@ -1217,11 +1229,6 @@ scene.addChild( new scenery.DOM( element, { x: 30, rotation: Math.PI / 6 } ) );
         on DOM events when the DOM node is the event target.
       </p>
       
-      <h3 id="pointer" class="section">Pointer</h3>
-      
-      
-      <h3 id="font" class="section">Font</h3>
-      
       
       <h3 id="linearGradient" class="section">LinearGradient</h3>
       <p>
@@ -1479,6 +1486,14 @@ scene.addChild( new scenery.Circle( 11, {
         <code>node.radius</code> (<code>node.getRadius()</code>, <code>node.setRadius( radius )</code>)
         retrieves or modifies the 'radius' parameter of the <a href="#circle">Circle</a>.
       </p>
+      
+      <h3 id="font" class="section">Font</h3>
+      <h3 id="event" class="section">Event</h3>
+      <h3 id="pointer" class="section">Pointer</h3>
+      <h3 id="mouse" class="section">Mouse</h3>
+      <h3 id="touch" class="section">Touch</h3>
+      <h3 id="pen" class="section">Pen</h3>
+      <h3 id="trail" class="section">Trail</h3>
       
     </div>
     <div class="span3"></div>
