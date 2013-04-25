@@ -278,7 +278,7 @@ define( function( require ) {
         }
       }
       if ( trail.length > branchIndex ) {
-        for ( var newIndex = branchIndex; newIndex < trail.length; newIndex++ ) {
+        for ( var newIndex = trail.length - 1; newIndex >= branchIndex; newIndex-- ) {
           this.dispatchEvent( trail.slice( 0, newIndex + 1 ), 'enter', pointer, event, false );
         }
       }
