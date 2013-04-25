@@ -76,8 +76,6 @@ Questions for SB (or others):
 
 Questions for team:
     https://travis-ci.org/ for continuous integration?
-    Should enter / exit events be fired before / after touch up/down events?
-        Note: check DOM convention?
     Should we allow Node( { center: { x: 3, y: 10 } } ), or is there a better way of handling that? Or is Node( { centerX: 3, centerY: 10 } ) better?
 
 General:
