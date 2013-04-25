@@ -1175,9 +1175,10 @@ scene.addChild( new scenery.Text( 'Some text', {
       <h4 id="text-boundsMethod">boundsMethod</h4>
       <p>
         <code>node.boundsMethod</code> (<code>node.getBoundsMethod()</code>, <code>node.setBoundsMethod( method )</code>)
-        sets what type of method is used for determining Text bounds. Currently, there are two options: <code>"fast"</code> (default),
-        which may be somewhat inaccurate, but is much faster, and disables Canvas dirty region redrawing (or canvas entirely) depending
-        on the implementation, or <code>"accurate"></code> which is accurate and supports dirty regions, but is much slower.
+        sets what type of method is used for determining Text bounds. Currently, there are three options: <code>"fast"</code> (default)
+        which may be somewhat inaccurate, is much faster, and disables Canvas rendering entirely, <code>"fastCanvas"</code>
+        which is similar but allows Canvas rendering but with dirty region redrawing disabled, or <code>"accurate"</code>
+        which is accurate and supports dirty regions, but is much slower.
       </p>
       
       <h3 id="dom" class="section">DOM</h3>

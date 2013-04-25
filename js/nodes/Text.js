@@ -39,7 +39,9 @@ define( function( require ) {
     this._textAlign    = 'start';            // start, end, left, right, center
     this._textBaseline = 'alphabetic';       // top, hanging, middle, alphabetic, ideographic, bottom
     this._direction    = 'ltr';              // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
-    this._boundsMethod = 'fast';             // fast (SVG/DOM), or slow (Canvas accurate recursive)
+    this._boundsMethod = 'fast';             // fast (SVG/DOM, no canvas rendering allowed), fastCanvas (SVG/DOM, canvas rendering allowed without dirty regions),
+                                             //   or slow (Canvas accurate recursive)
+    this.updateTextFlags();
     
     // ensure we have a parameter object
     options = options || {};
@@ -74,9 +76,11 @@ define( function( require ) {
     },
     
     setBoundsMethod: function( method ) {
-      assert && assert( method === 'fast' || method === 'accurate', '"fast" and "accurate" are the only allowed boundsMethod values for Text' );
+      assert && assert( method === 'fast' || method === 'fastCanvas' || method === 'accurate', '"fast" and "accurate" are the only allowed boundsMethod values for Text' );
       if ( method !== this._boundsMethod ) {
         this._boundsMethod = method;
+        this.updateTextFlags();
+        this.dispatchEvent( 'boundsAccuracy', { node: this } ); // TODO: consider standardizing this, or attaching listeners in a different manner?
         this.invalidateText();
       }
       return this;
@@ -86,19 +90,23 @@ define( function( require ) {
       return this._boundsMethod;
     },
     
+    updateTextFlags: function() {
+      this.boundsInaccurate = this._boundsMethod !== 'accurate';
+    },
+    
     invalidateText: function() {
       // swap supported renderers if necessary TODO: share this code dealing with compatible renderer changes
       if ( this._boundsMethod === 'fast' && !this.hasOwnProperty( '_supportedRenderers' ) ) {
-        // TODO: support disabling Canvas dirty regions?
-        this._supportedRenderers = this._supportedFastRenderers;
+        this._supportedRenderers = this._supportedRenderersWithFastBounds;
         this.markLayerRefreshNeeded();
-      } else if ( this._boundsMethod === 'accurate' && this.hasOwnProperty( '_supportedRenderers' ) ) {
+      } else if ( this.hasOwnProperty( '_supportedRenderers' ) ) {
+        // for 'fastCanvas' and 'accurate', we will leave Canvas as a renderer
         delete this._supportedRenderers; // will leave prototype intact
         this.markLayerRefreshNeeded();
       }
       
       // investigate http://mudcu.be/journal/2011/01/html5-typographic-metrics/
-      if ( this._boundsMethod === 'fast' ) {
+      if ( this._boundsMethod === 'fast' || this._boundsMethod === 'fastCanvas' ) {
         this.invalidateSelf( this.approximateSVGBounds() );
       } else {
         this.invalidateSelf( this.accurateCanvasBounds() );
@@ -436,7 +444,7 @@ define( function( require ) {
                                   'textAlign', 'textBaseline', 'direction' ].concat( Node.prototype._mutatorKeys );
   
   Text.prototype._supportedRenderers = [ Renderer.Canvas, Renderer.SVG ];
-  Text.prototype._supportedFastRenderers = [ Renderer.SVG ]; // renderers for fast (SVG/DOM) bounds, since canvas dirty regions would present issues
+  Text.prototype._supportedRenderersWithFastBounds = [ Renderer.SVG ]; // renderers for fast (SVG/DOM) bounds, since canvas dirty regions would present issues
   
   // font-specific ES5 setters and getters are defined using addFontForwarding above
   Object.defineProperty( Text.prototype, 'font', { set: Text.prototype.setFont, get: Text.prototype.getFont } );

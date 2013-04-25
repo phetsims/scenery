@@ -1,5 +1,7 @@
 
 Priorities:
+    Performance: Better event system handling (notification of common changes?)
+        Layers could conceivably add a listener to a node with a specific trail reference, instead of doing a dispatch up the tree.
     Performance: Batch DOM (or at least CSS) changes to animation frames?
     Text bounds handling is unacceptably slow - note on Issue about SVG font parsing + handling
     Re-enable layer refresh handling for matching (and the optimizations therein)
