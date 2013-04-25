@@ -47,6 +47,7 @@ define( function( require ) {
     
     // span for using the browser to compute font styles
     this.$span = $( document.createElement( 'span' ) );
+    this.$span.css( 'font', this._font ); // set up the initial CSS, since it isn't called in getProperty anymore
     
     var type = typeof options;
     if ( type === 'string' ) {
