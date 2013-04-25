@@ -6,7 +6,7 @@ Priorities:
     Canvas-accurate bounds:
         Speed / performance (#16)
         Handle empty strings / nothing (currently getting NaNs) (#21)
-        Find bug that causes the Arial sized string on Mac to return an infinite bound on the right side.
+        Find bug that causes the Arial sized string on Mac to return an infinite bound on the right side. (#22)
     Re-enable layer refresh handling for matching (and the optimizations therein)
         With the delayed layer handling, we could conceivably remove the distinction between 'matching' and 'non-matching'
     Accessibility
