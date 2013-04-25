@@ -71,6 +71,7 @@ Browsers
             Not present in Ubuntu 12.04 v18 or nightly
         [UNKNOWN] IE9 will take click events on an SVG element with "pointer-events: none", but only if there is nothing "clickable" behind that point
             What is considered "clickable", and will it affect us?
+        [UNKNOWN] Firefox (20, Aurora 22) on Mac is not applying mozDash to strokeRect()
         [SUBMITTED] Chrome/Safari seems to cache the charset of loaded JS (unable to override)
             Firefox OK
             Chromium bug: https://code.google.com/p/chromium/issues/detail?id=176694
