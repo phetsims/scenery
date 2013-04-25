@@ -1,7 +1,8 @@
 
 Priorities:
-    Performance: Better event system handling (notification of common changes?)
+    * Performance: Better event system handling (notification of common changes?)
         Layers could conceivably add a listener to a node with a specific trail reference, instead of doing a dispatch up the tree.
+        Looks important for transform changes, since they are firing off 2 dispatchEventWithTransform calls, and it should be much better to notify the layers directly
     Performance: Batch DOM (or at least CSS) changes to animation frames?
     Canvas-accurate bounds:
         Speed / performance (#16)
