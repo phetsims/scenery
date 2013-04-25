@@ -13,7 +13,6 @@ Priorities:
             If it moves, we invalidate layering between the old and new points?
             Pass in into the layer strategy, etc. (check for canvas there)
     Flag for skipping dirty region handling and other overhead?
-        And for preventing it with Text?
     Beers law lab performance on shaker
     Mix-ins for drag handler?
     Performance
