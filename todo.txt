@@ -20,9 +20,6 @@ Priorities:
         Same-arity methods?
         Less temporary objects?
     Testing with hidef canvases
-    Serialization:
-        DAG handling (maybe just don't include children, have all addChild calls)
-        Consider keeping Node IDs? May make it easier to visually compare the debug HTML in both places
 
 Bugs:
     Switching renderers in Devious Drag example on iPad causes other objects being dragged to be "dropped"
