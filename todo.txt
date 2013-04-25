@@ -3,10 +3,13 @@ Priorities:
     Performance: Better event system handling (notification of common changes?)
         Layers could conceivably add a listener to a node with a specific trail reference, instead of doing a dispatch up the tree.
     Performance: Batch DOM (or at least CSS) changes to animation frames?
-    Text bounds handling is unacceptably slow - note on Issue about SVG font parsing + handling
+    Canvas-accurate bounds:
+        Speed / performance (#16)
+        Handle empty strings / nothing (currently getting NaNs) (#21)
+        Find bug that causes the Arial sized string on Mac to return an infinite bound on the right side.
     Re-enable layer refresh handling for matching (and the optimizations therein)
         With the delayed layer handling, we could conceivably remove the distinction between 'matching' and 'non-matching'
-    Accessibility 
+    Accessibility
     Force non-canvas above 'interactive' DOM node
         Need to track lowest DOM-interactive Trail for each Scene.
             null indicates none exists, and represents the far 'after'
