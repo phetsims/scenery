@@ -91,6 +91,8 @@ define( function( require ) {
           this.context.setLineDash( dash );
         } else if ( this.context.mozDash !== undefined ) {
           this.context.mozDash = dash;
+        } else if ( this.context.webkitLineDash !== undefined ) {
+          this.context.webkitLineDash = dash;
         } else {
           // unsupported line dash! do... nothing?
         }
@@ -100,7 +102,13 @@ define( function( require ) {
     setLineDashOffset: function( lineDashOffset ) {
       if ( this.lineDashOffset !== lineDashOffset ) {
         this.lineDashOffset = lineDashOffset;
-        this.context.lineDashOffset = lineDashOffset;
+        if ( this.context.lineDashOffset !== undefined ) {
+          this.context.lineDashOffset = lineDashOffset;
+        } else if ( this.context.webkitLineDashOffset !== undefined ) {
+          this.context.webkitLineDashOffset = lineDashOffset;
+        } else {
+          // unsupported line dash! do... nothing?
+        }
       }
     },
     
