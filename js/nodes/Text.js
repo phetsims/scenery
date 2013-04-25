@@ -6,6 +6,7 @@
  * TODO: newlines (multiline)
  * TODO: htmlText support (and DOM renderer)
  * TODO: don't get bounds until the Text node is fully mutated?
+ * TODO: remove some support for centering, since Scenery's Node already handles that better?
  *
  * Useful specs:
  * http://www.w3.org/TR/css3-text/
@@ -112,7 +113,11 @@ define( function( require ) {
         this.invalidateSelf( this.accurateCanvasBounds() );
       }
     },
-
+    
+    /*---------------------------------------------------------------------------*
+    * Canvas support
+    *----------------------------------------------------------------------------*/
+    
     paintCanvas: function( wrapper ) {
       var context = wrapper.context;
       
@@ -136,9 +141,17 @@ define( function( require ) {
       }
     },
     
+    /*---------------------------------------------------------------------------*
+    * WebGL support
+    *----------------------------------------------------------------------------*/
+    
     paintWebGL: function( state ) {
       throw new Error( 'Text.prototype.paintWebGL unimplemented' );
     },
+    
+    /*---------------------------------------------------------------------------*
+    * SVG support
+    *----------------------------------------------------------------------------*/
     
     createSVGFragment: function( svg, defs, group ) {
       return document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
@@ -201,6 +214,27 @@ define( function( require ) {
     removeSVGDefs: function( svg, defs ) {
       this.removeSVGFillDef( svg, defs );
       this.removeSVGStrokeDef( svg, defs );
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * DOM support
+    *----------------------------------------------------------------------------*/
+    
+    allowsMultipleDOMInstances: true,
+    
+    getDOMElement: function() {
+      var div = document.createElement( 'div' );
+      var $div = $( div );
+      $div.css( 'font', this.getFont() );
+      $div.width( this.getSelfBounds().width ); // TODO: how to update these? Don't enable DOM yet
+      $div.height( this.getSelfBounds().height );
+      div.appendChild( document.createTextNode( this.text ) );
+      div.setAttribute( 'direction', this._direction );
+    },
+    
+    updateCSSTransform: function( transform, element ) {
+      // TODO: extract this out, it's completely shared!
+      $( element ).css( transform.getMatrix().getCSSTransformStyles() );
     },
     
     /*---------------------------------------------------------------------------*

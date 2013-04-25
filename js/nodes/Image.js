@@ -62,6 +62,8 @@ define( function( require ) {
   var Image = scenery.Image;
   
   inherit( Image, Node, {
+    allowsMultipleDOMInstances: false, // TODO: support multiple instances
+    
     invalidateImage: function() {
       this.invalidateSelf( new Bounds2( 0, 0, this.getImageWidth(), this.getImageHeight() ) );
     },
@@ -186,8 +188,9 @@ define( function( require ) {
       return this._image;
     },
     
-    updateCSSTransform: function( transform ) {
-      $( this._image ).css( transform.getMatrix().getCSSTransformStyles() );
+    updateCSSTransform: function( transform, element ) {
+      // TODO: extract this out, it's completely shared!
+      $( element ).css( transform.getMatrix().getCSSTransformStyles() );
     },
     
     set image( value ) { this.setImage( value ); },

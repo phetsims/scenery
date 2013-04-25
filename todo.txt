@@ -1,5 +1,14 @@
 
 Priorities:
+    OnOfDragHandler
+    Remove 'dirtyBounds' part from debugScene if it's infinite?
+    Consider having children that don't get stitched, but just added (for speed, imagine particules)
+    DOM text:
+        getDOMElement() and updateCSSTransform() should support DAGable nodes, with a flag that will cause it to fail?
+        Should we add in a DOM-support mixin?
+        allowsMultipleDOMInstances
+            For image, would require not using the initial image copy (but creating images with the same src)
+        TODO: how to document the interfaces for NODE rendering support?
     * Performance: Better event system handling (notification of common changes?)
         Layers could conceivably add a listener to a node with a specific trail reference, instead of doing a dispatch up the tree.
         Looks important for transform changes, since they are firing off 2 dispatchEventWithTransform calls, and it should be much better to notify the layers directly
@@ -25,6 +34,7 @@ Priorities:
     Testing with hidef canvases
 
 Bugs:
+    Default text with text string changed visual size switching between boundsMethods in playground
     Switching renderers in Devious Drag example on iPad causes other objects being dragged to be "dropped"
         Probably causes some sort of enter/exit event?
     Nexus 7 hidef scaling

@@ -83,7 +83,7 @@ define( function( require ) {
         this.div.insertBefore( this.getElementFromTrail( this.trails[insertionIndex] ) );
         this.trails.splice( insertionIndex, 0, trail );
       }
-      node.updateCSSTransform( trail.getTransform() );
+      node.updateCSSTransform( trail.getTransform(), element );
     },
     
     removeNodeFromTrail: function( trail ) {
@@ -166,7 +166,8 @@ define( function( require ) {
         
         var node = trail.lastNode();
         if ( node.isPainted() ) {
-          node.updateCSSTransform( trail.getTransform() );
+          var element = this.idElementMap[trail.getUniqueId()];
+          node.updateCSSTransform( trail.getTransform(), element );
         }
       } );
     },
