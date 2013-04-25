@@ -155,6 +155,8 @@ define( function( require ) {
     },
     
     transformChange: function( args ) {
+      var layer = this;
+      
       var baseTrail = args.trail;
       
       // TODO: efficiency! this computes way more matrix transforms than needed
@@ -166,7 +168,7 @@ define( function( require ) {
         
         var node = trail.lastNode();
         if ( node.isPainted() ) {
-          var element = this.idElementMap[trail.getUniqueId()];
+          var element = layer.idElementMap[trail.getUniqueId()];
           node.updateCSSTransform( trail.getTransform(), element );
         }
       } );
