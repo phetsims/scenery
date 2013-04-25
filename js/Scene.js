@@ -135,6 +135,7 @@ define( function( require ) {
         scene.stitch( args.match );
       },
       
+      // TODO: consider adding direct node listeners for this instead from layers?
       dirtyBounds: function( args ) { // contains node, bounds, transform, trail
         var trail = args.trail;
         
@@ -146,12 +147,25 @@ define( function( require ) {
         }
       },
       
+      // TODO: consider adding direct node listeners for this instead from layers?
       transform: function( args ) { // conatins node, type, matrix, transform, trail
         var trail = args.trail;
         
         if ( scene.layers.length ) {
           _.each( scene.affectedLayers( trail ), function( layer ) {
             layer.transformChange( args );
+          } );
+        }
+      },
+      
+      // TODO: consider adding direct node listeners for this instead from layers?
+      // called when a node's accuracy of bounds changes (is either accurate now, or not)
+      boundsAccuracy: function( args ) {
+        var trail = args.trail;
+        
+        if ( scene.layers.length ) {
+          _.each( scene.affectedLayers( trail ), function( layer ) {
+            layer.boundsAccuracy( args );
           } );
         }
       }
@@ -1171,6 +1185,14 @@ define( function( require ) {
                       ',' + ( layer.endPaintedTrail ? str( layer.endPaintedTrail ) : layer.endPaintedTrail ) +
                       ' pointers: ' + str( layer.startPointer ) +
                       ',' + str( layer.endPointer );
+      layerInfo += '<span style="color: #008">';
+      if ( layer.canUseDirtyRegions && !layer.canUseDirtyRegions() ) { layerInfo += ' dirtyRegionsDisabled'; }
+      if ( layer.cssTranslation ) { layerInfo += ' cssTranslation'; }
+      if ( layer.cssRotation ) { layerInfo += ' cssTranslation'; }
+      if ( layer.cssScale ) { layerInfo += ' cssTranslation'; }
+      if ( layer.cssTransform ) { layerInfo += ' cssTranslation'; }
+      if ( layer.dirtyBounds ) { layerInfo += ' dirtyBounds:' + layer.dirtyBounds.toString(); }
+      layerInfo += '</span>';
       layerEntries[startIdx] += '<div style="color: #080">+Layer ' + layerInfo + '</div>';
       layerEntries[endIndex] += '<div style="color: #800">-Layer ' + layerInfo + '</div>';
     } );
@@ -1207,7 +1229,7 @@ define( function( require ) {
           addQualifier( 'renderer:' + node._renderer.name );
         }
         if ( node._rendererOptions ) {
-          addQualifier( 'rendererOptions:' + _.each( node._rendererOptions, function( option, key ) { return key + ':' + str( option ); } ).join( ',' ) );
+          // addQualifier( 'rendererOptions:' + _.each( node._rendererOptions, function( option, key ) { return key + ':' + str( option ); } ).join( ',' ) );
         }
         if ( node._layerSplitBefore ) {
           addQualifier( 'layerSplitBefore' );

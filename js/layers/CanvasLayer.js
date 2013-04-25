@@ -69,6 +69,8 @@ define( function( require ) {
     this.isCanvasLayer = true;
     
     this.wrapper = new scenery.CanvasContextWrapper( this.canvas, this.context );
+    
+    this.boundlessCount = 0; // count of how many trails do not support bounds. we only will use dirty region repainting if this number is 0.
   };
   var CanvasLayer = scenery.CanvasLayer;
   
@@ -86,20 +88,22 @@ define( function( require ) {
     render: function( scene, args ) {
       args = args || {};
       
+      var dirtyBoundsEnabled = this.canUseDirtyRegions() && !args.fullRender;
+      
       // bail out quickly if possible
-      if ( !args.fullRender && this.dirtyBounds.isEmpty() ) {
+      if ( dirtyBoundsEnabled && this.dirtyBounds.isEmpty() ) {
         return;
       }
       
       // switch to an identity transform
       this.context.setTransform( this.backingScale, 0, 0, this.backingScale, 0, 0 );
       
-      var visibleDirtyBounds = args.fullRender ? scene.sceneBounds : this.dirtyBounds.intersection( scene.sceneBounds );
+      var visibleDirtyBounds = dirtyBoundsEnabled ? this.dirtyBounds.intersection( scene.sceneBounds ) : scene.sceneBounds;
       
       if ( !visibleDirtyBounds.isEmpty() ) {
         this.clearGlobalBounds( visibleDirtyBounds );
         
-        if ( !args.fullRender ) {
+        if ( dirtyBoundsEnabled ) {
           this.pushClipShape( Shape.bounds( visibleDirtyBounds ) );
         }
         
@@ -108,7 +112,7 @@ define( function( require ) {
         this.recursiveRender( scene, args );
         
         // exists for now so that we pop the necessary context state
-        if ( !args.fullRender ) {
+        if ( dirtyBoundsEnabled ) {
           this.popClipShape();
         }
       }
@@ -373,6 +377,10 @@ define( function( require ) {
       // since the node's getBounds() are in the parent coordinate frame, we peel off the last node to get the correct (relevant) transform
       // TODO: more efficient way of getting this transform?
       this.internalMarkDirtyBounds( trail.lastNode().getBounds(), trail.slice( 0, trail.length - 1 ).getTransform() );
+      
+      if ( trail.lastNode().boundsInaccurate ) {
+        this.boundlessCount++;
+      }
     },
     
     removeNodeFromTrail: function( trail ) {
@@ -381,6 +389,27 @@ define( function( require ) {
       // since the node's getBounds() are in the parent coordinate frame, we peel off the last node to get the correct (relevant) transform
       // TODO: more efficient way of getting this transform?
       this.internalMarkDirtyBounds( trail.lastNode().getBounds(), trail.slice( 0, trail.length - 1 ).getTransform() );
+      
+      if ( trail.lastNode().boundsInaccurate ) {
+        this.boundlessCount--;
+      }
+    },
+    
+    // TODO: direct listeners, instead of this being forwarded through the Scene?
+    boundsAccuracy: function( args ) {
+      Layer.prototype.boundsAccuracy.call( this, args );
+      
+      // TODO: if this node isn't a self node, how should it be handled? what does this flag exactly mean?
+      if ( args.node.boundsInaccurate ) {
+        this.boundlessCount++;
+      } else {
+        this.boundlessCount--;
+      }
+    },
+    
+    canUseDirtyRegions: function() {
+      assert && assert( this.boundlessCount >= 0 );
+      return this.boundlessCount === 0;
     },
     
     internalMarkDirtyBounds: function( localBounds, transform ) {

@@ -220,6 +220,10 @@ define( function( require ) {
       this.endBoundary.reindex();
     },
     
+    boundsAccuracy: function( args ) {
+      // nothing needed in the default case, only Canvas-based layers should care
+    },
+    
     pushClipShape: function( shape ) {
       throw new Error( 'Layer.pushClipShape unimplemented' );
     },

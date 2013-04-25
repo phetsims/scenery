@@ -92,7 +92,7 @@ define( function( require ) {
           }
         }
         
-        // swap supported renderers if necessary
+        // swap supported renderers if necessary TODO: share this code dealing with compatible renderer changes
         if ( image instanceof HTMLCanvasElement ) {
           if ( !this.hasOwnProperty( '_supportedRenderers' ) ) {
             this._supportedRenderers = [ Renderer.Canvas ];

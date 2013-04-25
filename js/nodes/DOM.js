@@ -49,8 +49,10 @@ define( function( require ) {
   inherit( DOM, Node, {
     // needs to be attached to the DOM tree for this to work
     calculateDOMBounds: function() {
-      var boundingRect = this._element.getBoundingClientRect();
-      return new Bounds2( 0, 0, boundingRect.width, boundingRect.height );
+      // var boundingRect = this._element.getBoundingClientRect();
+      // return new Bounds2( 0, 0, boundingRect.width, boundingRect.height );
+      var $element = $( this._element );
+      return new Bounds2( 0, 0, $element.width(), $element.height() );
     },
     
     createTemporaryContainer: function() {

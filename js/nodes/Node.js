@@ -546,6 +546,7 @@ define( function( require ) {
       if ( _.indexOf( this._inputListeners, listener ) === -1 ) {
         this._inputListeners.push( listener );
       }
+      return this;
     },
     
     removeInputListener: function( listener ) {
@@ -553,6 +554,7 @@ define( function( require ) {
       assert && assert( _.indexOf( this._inputListeners, listener ) !== -1 );
       
       this._inputListeners.splice( _.indexOf( this._inputListeners, listener ), 1 );
+      return this;
     },
     
     getInputListeners: function() {
@@ -565,6 +567,7 @@ define( function( require ) {
       if ( _.indexOf( this._eventListeners, listener ) === -1 ) {
         this._eventListeners.push( listener );
       }
+      return this;
     },
     
     removeEventListener: function( listener ) {
@@ -572,6 +575,7 @@ define( function( require ) {
       assert && assert( _.indexOf( this._eventListeners, listener ) !== -1 );
       
       this._eventListeners.splice( _.indexOf( this._eventListeners, listener ), 1 );
+      return this;
     },
     
     getEventListeners: function() {
@@ -1277,6 +1281,7 @@ define( function( require ) {
       return this._transform.transformPosition2( point );
     },
     
+    // apply this node's transform to the bounds
     localToParentBounds: function( bounds ) {
       return this._transform.transformBounds2( bounds );
     },
@@ -1286,6 +1291,7 @@ define( function( require ) {
       return this._transform.inversePosition2( point );
     },
     
+    // apply the inverse of this node's transform to the bounds
     parentToLocalBounds: function( bounds ) {
       return this._transform.inverseBounds2( bounds );
     },
@@ -1293,7 +1299,7 @@ define( function( require ) {
     // apply this node's transform (and then all of its parents' transforms) to the point
     localToGlobalPoint: function( point ) {
       var node = this;
-      while ( node !== null ) {
+      while ( node ) {
         point = node._transform.transformPosition2( point );
         assert && assert( node._parents[1] === undefined, 'localToGlobalPoint unable to work for DAG' );
         node = node._parents[0];
@@ -1301,9 +1307,10 @@ define( function( require ) {
       return point;
     },
     
+    // apply this node's transform (and then all of its parents' transforms) to the bounds
     localToGlobalBounds: function( bounds ) {
       var node = this;
-      while ( node !== null ) {
+      while ( node ) {
         bounds = node._transform.transformBounds2( bounds );
         assert && assert( node._parents[1] === undefined, 'localToGlobalBounds unable to work for DAG' );
         node = node._parents[0];
@@ -1311,12 +1318,50 @@ define( function( require ) {
       return bounds;
     },
     
+    // like localToGlobalPoint, but without applying this node's transform
+    parentToGlobalPoint: function( point ) {
+      assert && assert( this.parents.length <= 1, 'parentToGlobalPoint unable to work for DAG' );
+      return this.parents.length ? this.parents[0].localToGlobalPoint( point ) : point;
+    },
+    
+    // like localToGlobalBounds, but without applying this node's transform
+    parentToGlobalBounds: function( bounds ) {
+      assert && assert( this.parents.length <= 1, 'parentToGlobalBounds unable to work for DAG' );
+      return this.parents.length ? this.parents[0].localToGlobalBounds( bounds ) : bounds;
+    },
+    
+    globalToParentPoint: function( point ) {
+      assert && assert( this.parents.length <= 1, 'globalToParentPoint unable to work for DAG' );
+      return this.parents.length ? this.parents[0].globalToLocalPoint( point ) : point;
+    },
+    
+    globalToParentBounds: function( bounds ) {
+      assert && assert( this.parents.length <= 1, 'globalToParentBounds unable to work for DAG' );
+      return this.parents.length ? this.parents[0].globalToLocalBounds( bounds ) : bounds;
+    },
+    
+    // get the Bounds2 of this node in the global coordinate frame.  Does not work for DAG.
+    getGlobalBounds: function() {
+      assert && assert( this.parents.length <= 1, 'globalBounds unable to work for DAG' );
+      return this.parentToGlobalBounds( this.getBounds() );
+    },
+    
+    // get the Bounds2 of any other node by converting to the global coordinate frame.  Does not work for DAG.
+    boundsOf: function( node ) {
+      return this.globalToLocalBounds( node.getGlobalBounds() );
+    },
+    
+    // get the Bounds2 of this node in the coordinate frame of the parameter node. Does not work for DAG cases.
+    boundsTo: function( node ) {
+      return node.globalToLocalBounds( this.getGlobalBounds() );
+    },
+    
     globalToLocalPoint: function( point ) {
       var node = this;
       
       // we need to apply the transformations in the reverse order, so we temporarily store them
       var transforms = [];
-      while ( node !== null ) {
+      while ( node ) {
         transforms.push( node._transform );
         assert && assert( node._parents[1] === undefined, 'globalToLocalPoint unable to work for DAG' );
         node = node._parents[0];
@@ -1334,7 +1379,7 @@ define( function( require ) {
       
       // we need to apply the transformations in the reverse order, so we temporarily store them
       var transforms = [];
-      while ( node !== null ) {
+      while ( node ) {
         transforms.push( node._transform );
         assert && assert( node._parents[1] === undefined, 'globalToLocalBounds unable to work for DAG' );
         node = node._parents[0];
@@ -1427,6 +1472,7 @@ define( function( require ) {
     get bounds() { return this.getBounds(); },
     get selfBounds() { return this.getSelfBounds(); },
     get childBounds() { return this.getChildBounds(); },
+    get globalBounds() { return this.getGlobalBounds(); },
     get id() { return this.getId(); },
     
     mutate: function( options ) {
@@ -1500,7 +1546,7 @@ define( function( require ) {
       if ( this.renderer ) {
         addProp( 'renderer', this.renderer.name );
         if ( this.rendererOptions ) {
-          addProp( 'rendererOptions', JSON.stringify( this.rendererOptions ), true );
+          // addProp( 'rendererOptions', JSON.stringify( this.rendererOptions ), true );
         }
       }
       
