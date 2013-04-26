@@ -176,6 +176,10 @@ define( function( require ) {
     if ( options.accessibleScene ) {
       this.accessibleScene = new Scene( options.accessibleScene );
     }
+    if ( options.focusScene ) {
+      this.focusScene = new Scene( options.focusScene );
+      this.focusScene.addChild( new scenery.Rectangle( 0, 0, 0, 0, {stroke: 'blue', lineWidth: 2, renderer: 'svg'} ) );
+    }
   };
   var Scene = scenery.Scene;
 
@@ -218,6 +222,30 @@ define( function( require ) {
         }
       }
       this.accessibleScene.updateScene();
+
+      var accessibleNodes = this.accessibleScene.children;
+      var activeElement = document.activeElement;
+      var found = false;
+      for ( var i = 0; i < accessibleNodes.length; i++ ) {
+        if ( accessibleNodes[i]._element === activeElement ) {
+          if ( accessibleNodes[i].origin ) {
+            var b = accessibleNodes[i].origin.globalBounds;
+            this.focusScene.children[0].rectX = b.minX;
+            this.focusScene.children[0].rectY = b.minY;
+            this.focusScene.children[0].rectWidth = b.width;
+            this.focusScene.children[0].rectHeight = b.height;
+            found = true;
+          }
+        }
+        if ( !found ) {
+          this.focusScene.children[0].rectX = -10;
+          this.focusScene.children[0].rectY = -10;
+          this.focusScene.children[0].rectWidth = 0;
+          this.focusScene.children[0].rectHeight = 0;
+        }
+
+      }
+      this.focusScene.updateScene();
     }
   };
   
@@ -877,6 +905,12 @@ define( function( require ) {
   Scene.prototype.resize = function( width, height ) {
     this.setSize( width, height );
     this.rebuildLayers(); // TODO: why?
+
+    if ( this.focusScene ) {
+      console.log( "set focusscene size ", width, height );
+      this.focusScene.resize( width, height );
+      this.accessibleScene.resize( width, height ); //TODO: this may actually be unnecessary if this node is hidden
+    }
   };
   
   Scene.prototype.getSceneWidth = function() {
