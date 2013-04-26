@@ -172,6 +172,10 @@ define( function( require ) {
     };
     
     this.addEventListener( this.sceneEventListener );
+
+    if ( options.accessibleScene ) {
+      this.accessibleScene = new Scene( options.accessibleScene );
+    }
   };
   var Scene = scenery.Scene;
 
@@ -179,6 +183,15 @@ define( function( require ) {
   Scene.prototype.constructor = Scene;
   
   Scene.prototype.updateScene = function( args ) {
+    if ( this.accessibleScene ) {
+      var accessChildren = this.accessibleScene.getChildren();
+      for ( var i = 0; i < accessChildren.length; i++ ) {
+        accessChildren[i].markForDeletion=true;
+      }
+      //temp global
+      window.accessibleScene = this.accessibleScene;
+//      console.log(window.accessibleScene);
+    }
     // validating bounds, similar to Piccolo2d
     this.validateBounds();
     this.validatePaint();
@@ -195,6 +208,17 @@ define( function( require ) {
     } );
     
     this.updateCursor();
+
+    if ( this.accessibleScene ) {
+      for ( var i = 0; i < accessChildren.length; i++ ) {
+        var obj = accessChildren[i];
+        if ( obj.markForDeletion && this.accessibleScene.indexOfChild( obj ) >= 0 ) {
+          obj.markForDeletion = false;
+          this.accessibleScene.removeChild( obj );
+        }
+      }
+      this.accessibleScene.updateScene();
+    }
   };
   
   Scene.prototype.renderScene = function() {

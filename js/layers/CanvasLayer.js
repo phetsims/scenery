@@ -259,7 +259,24 @@ define( function( require ) {
               // TODO: consider just passing the wrapper. state not needed (for now), context easily accessible
               node.paintCanvas( wrapper );
             }
-            
+
+            //Add or update accessibility peers
+            if ( window.accessibleScene && node.peer ) {
+              var globalBounds = node.globalBounds;
+              node.peer.x = globalBounds.x;
+              node.peer.y = globalBounds.y;
+              if ( node.peer._$element.width() !== globalBounds.width ) {
+                node.peer._$element.width( globalBounds.width );
+              }
+              if ( node.peer._$element.height() !== globalBounds.height ) {
+                node.peer._$element.height( globalBounds.height );
+              }
+              node.peer.markForDeletion = false;
+              if ( window.accessibleScene.indexOfChild( node.peer ) < 0 ) {
+                window.accessibleScene.addChild( node.peer );
+              }
+            }
+
             // TODO: restricted bounds rendering, and possibly generalize depthFirstUntil
             // var children = node._children;
             
