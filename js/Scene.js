@@ -177,8 +177,6 @@ define( function( require ) {
 
     if ( options.accessibleScene ) {
       this.accessibleScene = new Scene( options.accessibleScene );
-    }
-    if ( options.focusScene ) {
       this.focusRingSVGContainer = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
       this.$focusRingSVGContainer = $( this.focusRingSVGContainer );
       this.$focusRingSVGContainer.css( 'position', 'absolute' );
@@ -912,7 +910,6 @@ define( function( require ) {
     this.rebuildLayers(); // TODO: why?
 
     if ( this.accessibleScene ) {
-      console.log( "set focusscene size ", width, height );
       this.accessibleScene.resize( width, height ); //TODO: this may actually be unnecessary if this node is hidden
     }
     this.resizeFocusRingSVGContainer( width, height );
