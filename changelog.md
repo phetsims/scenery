@@ -2,6 +2,9 @@
 Scenery Changelog
 =================
 
+2013-4-24 Changed input event order for moves: move happens before other associated enter/exit/over/out events, and the 'enter' event order is reversed to match DOM events.
+2013-4-24 Added Text.boundsMethod to switch between text-bounds detection methods
+2013-4-24 Upgraded documentation and other HTML files to jQuery 2.0.0
 2013-4-11 Added new scenery.Path( svgPathString )
 2013-4-5  Changed Circle.circleRadius => Circle.radius
 2013-4-2  Added Node.center (ES5)

@@ -263,6 +263,9 @@ define( function( require ) {
         }
       }
       
+      // event order matches http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
+      this.dispatchEvent( trail, 'move', pointer, event, true );
+      
       if ( lastNodeChanged ) {
         this.dispatchEvent( oldTrail, 'out', pointer, event, true );
       }
@@ -275,7 +278,7 @@ define( function( require ) {
         }
       }
       if ( trail.length > branchIndex ) {
-        for ( var newIndex = branchIndex; newIndex < trail.length; newIndex++ ) {
+        for ( var newIndex = trail.length - 1; newIndex >= branchIndex; newIndex-- ) {
           this.dispatchEvent( trail.slice( 0, newIndex + 1 ), 'enter', pointer, event, false );
         }
       }
@@ -283,9 +286,6 @@ define( function( require ) {
       if ( lastNodeChanged ) {
         this.dispatchEvent( trail, 'over', pointer, event, true );
       }
-      
-      // TODO: move the 'move' event to before the others, matching http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order ?
-      this.dispatchEvent( trail, 'move', pointer, event, true );
       
       pointer.trail = trail;
     },

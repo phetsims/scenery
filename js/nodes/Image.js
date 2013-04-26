@@ -62,6 +62,8 @@ define( function( require ) {
   var Image = scenery.Image;
   
   inherit( Image, Node, {
+    allowsMultipleDOMInstances: false, // TODO: support multiple instances
+    
     invalidateImage: function() {
       this.invalidateSelf( new Bounds2( 0, 0, this.getImageWidth(), this.getImageHeight() ) );
     },
@@ -92,7 +94,7 @@ define( function( require ) {
           }
         }
         
-        // swap supported renderers if necessary
+        // swap supported renderers if necessary TODO: share this code dealing with compatible renderer changes
         if ( image instanceof HTMLCanvasElement ) {
           if ( !this.hasOwnProperty( '_supportedRenderers' ) ) {
             this._supportedRenderers = [ Renderer.Canvas ];
@@ -186,8 +188,9 @@ define( function( require ) {
       return this._image;
     },
     
-    updateCSSTransform: function( transform ) {
-      $( this._image ).css( transform.getMatrix().getCSSTransformStyles() );
+    updateCSSTransform: function( transform, element ) {
+      // TODO: extract this out, it's completely shared!
+      $( element ).css( transform.getMatrix().getCSSTransformStyles() );
     },
     
     set image( value ) { this.setImage( value ); },

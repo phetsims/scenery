@@ -34,7 +34,7 @@ require.config( {
   
   paths: {
     underscore: '../contrib/lodash.min-1.0.0-rc.3',
-    jquery: '../contrib/jquery-1.8.3.min',
+    jquery: '../contrib/jquery-2.0.0.min',
     SCENERY: '.',
     KITE: '../common/kite/js',
     DOT: '../common/dot/js',

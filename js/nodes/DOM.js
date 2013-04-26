@@ -47,6 +47,9 @@ define( function( require ) {
   var DOM = scenery.DOM;
   
   inherit( DOM, Node, {
+    // we use a single DOM instance, so this flag should indicate that we don't support duplicating it
+    allowsMultipleDOMInstances: false,
+    
     // needs to be attached to the DOM tree for this to work
     calculateDOMBounds: function() {
       // var boundingRect = this._element.getBoundingClientRect();
@@ -103,7 +106,8 @@ define( function( require ) {
       return this._container;
     },
     
-    updateCSSTransform: function( transform ) {
+    updateCSSTransform: function( transform, element ) {
+      // faster to use our jQuery reference instead of wrapping element
       this._$container.css( transform.getMatrix().getCSSTransformStyles() );
     },
     
