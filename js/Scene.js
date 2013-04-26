@@ -19,6 +19,8 @@ define( function( require ) {
   var Vector2 = require( 'DOT/Vector2' );
   var Matrix3 = require( 'DOT/Matrix3' );
   
+  var Shape = require( 'KITE/Shape' );
+
   var scenery = require( 'SCENERY/scenery' );
   
   var Node = require( 'SCENERY/nodes/Node' ); // inherits from Node
@@ -177,8 +179,15 @@ define( function( require ) {
       this.accessibleScene = new Scene( options.accessibleScene );
     }
     if ( options.focusScene ) {
-      this.focusScene = new Scene( options.focusScene );
-      this.focusScene.addChild( new scenery.Rectangle( 0, 0, 0, 0, {stroke: 'blue', lineWidth: 2, renderer: 'svg'} ) );
+      this.focusRingSVGContainer = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+      this.$focusRingSVGContainer = $( this.focusRingSVGContainer );
+      this.$focusRingSVGContainer.css( 'position', 'absolute' );
+      this.focusRingSVGContainer.style['pointer-events'] = 'none';
+      this.resizeFocusRingSVGContainer( options.width, options.height );
+      this.focusRingPath = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+      this.focusRingPath.setAttribute('style',"fill:none;stroke:blue;stroke-width:5");
+      this.focusRingSVGContainer.appendChild( this.focusRingPath );
+      $main[0].appendChild( this.focusRingSVGContainer );
     }
   };
   var Scene = scenery.Scene;
@@ -230,22 +239,15 @@ define( function( require ) {
         if ( accessibleNodes[i]._element === activeElement ) {
           if ( accessibleNodes[i].origin ) {
             var b = accessibleNodes[i].origin.globalBounds;
-            this.focusScene.children[0].rectX = b.minX;
-            this.focusScene.children[0].rectY = b.minY;
-            this.focusScene.children[0].rectWidth = b.width;
-            this.focusScene.children[0].rectHeight = b.height;
+            var rect = Shape.bounds( b );
+            this.focusRingPath.setAttribute( 'd', rect.getSVGPath() );
             found = true;
           }
         }
         if ( !found ) {
-          this.focusScene.children[0].rectX = -10;
-          this.focusScene.children[0].rectY = -10;
-          this.focusScene.children[0].rectWidth = 0;
-          this.focusScene.children[0].rectHeight = 0;
+          this.focusRingPath.removeAttribute( 'd' );
         }
-
       }
-      this.focusScene.updateScene();
     }
   };
   
@@ -761,6 +763,9 @@ define( function( require ) {
       // layers increment indices as needed
       index = layer.reindex( index );
     } );
+    if ( this.focusRingSVGContainer ) {
+      this.focusRingSVGContainer.style.zIndex = index;
+    }
   };
   
   Scene.prototype.dispose = function() {
@@ -906,13 +911,21 @@ define( function( require ) {
     this.setSize( width, height );
     this.rebuildLayers(); // TODO: why?
 
-    if ( this.focusScene ) {
+    if ( this.accessibleScene ) {
       console.log( "set focusscene size ", width, height );
-      this.focusScene.resize( width, height );
       this.accessibleScene.resize( width, height ); //TODO: this may actually be unnecessary if this node is hidden
     }
+    this.resizeFocusRingSVGContainer( width, height );
   };
   
+  Scene.prototype.resizeFocusRingSVGContainer = function( width, height ) {
+    if ( this.focusRingSVGContainer ) {
+      this.focusRingSVGContainer.setAttribute( 'width', width );
+      this.focusRingSVGContainer.setAttribute( 'height', height );
+      this.focusRingSVGContainer.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
+    }
+  };
+
   Scene.prototype.getSceneWidth = function() {
     return this.sceneBounds.getWidth();
   };
