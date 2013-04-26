@@ -21,6 +21,7 @@ define( function( require ) {
   scenery.AccessibilityPeer = function AccessibilityPeer( origin, domText, options ) {
     options = options || {};
 
+//    options.interactive = true;
     this.origin = origin;
     // will set the element after initializing
     scenery.DOM.call( this, $( domText ), options );
