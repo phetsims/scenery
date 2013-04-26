@@ -130,11 +130,6 @@ define( function( require ) {
       assert && assert( !_.contains( this._children, node ), 'Parent already contains child' );
       assert && assert( node !== this, 'Cannot add self as a child' );
 
-      //Add peer for accessibility to the other scene
-      if (window.accessibilityScene && node.peer){
-        window.accessibilityScene.addChild(node.peer);
-      }
-      
       node._parents.push( this );
       this._children.splice( index, 0, node );
       
@@ -174,11 +169,6 @@ define( function( require ) {
       this.invalidateBounds();
       
       this.dispatchEvent( 'stitch', { match: false } );
-
-      //Remove peer for accessibility to the other scene
-      if (window.accessibilityScene && node.peer){
-        window.accessibilityScene.removeChild(node.peer);
-      }
     },
     
     // TODO: efficiency by batching calls?
