@@ -175,8 +175,14 @@ define( function( require ) {
     
     this.addEventListener( this.sceneEventListener );
 
-    if ( options.accessibleScene ) {
-      this.accessibleScene = new Scene( options.accessibleScene );
+    if ( options.accessible ) {
+      this.accessibilityLayer = document.createElement( 'div' );
+      this.accessibilityLayer.className = "accessibility-layer";
+      this.accessibilityLayer.style.zIndex = 9999;
+      this.$accessibilityLayer = $( this.accessibilityLayer );
+      this.$accessibilityLayer.css( 'position', 'absolute' );
+      $main[0].appendChild( this.accessibilityLayer );
+
       this.focusRingSVGContainer = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
       this.$focusRingSVGContainer = $( this.focusRingSVGContainer );
       this.$focusRingSVGContainer.css( 'position', 'absolute' );
@@ -195,14 +201,29 @@ define( function( require ) {
   Scene.prototype.constructor = Scene;
   
   Scene.prototype.updateScene = function( args ) {
-    if ( this.accessibleScene ) {
-      var accessChildren = this.accessibleScene.getChildren();
-      for ( var i = 0; i < accessChildren.length; i++ ) {
-        accessChildren[i].markForDeletion=true;
-      }
+
+    var scene = this;
+    //TODO: For handling as a DAG, use a createAccessiblePeer method so that pairs can be based on Trail
+    var elms = [];
+    if ( this.accessibilityLayer ) {
+      this.$accessibilityLayer.children().each( function( i, elm ) {
+        elm.accessiblePeer.markForDeletion = true;
+        elms.push( elm.accessiblePeer );
+      } );
       //temp global
-      window.accessibleScene = this.accessibleScene;
-//      console.log(window.accessibleScene);
+      window.accessibilityAPI = {
+        addAccessiblePeer: function( accessiblePeer ) {
+          accessiblePeer.syncBounds();
+          accessiblePeer.markForDeletion = false;
+
+          //Prevent from adding same one multiple times
+          if ( !scene.$accessibilityLayer.has( accessiblePeer.$element ).length ) {
+            scene.$accessibilityLayer.append( accessiblePeer.$element );
+            var elm = accessiblePeer.$element[0];
+            elm.accessiblePeer = accessiblePeer;
+          }
+        }
+      };
     }
     // validating bounds, similar to Piccolo2d
     this.validateBounds();
@@ -221,58 +242,87 @@ define( function( require ) {
     
     this.updateCursor();
 
-    if ( this.accessibleScene ) {
-      for ( var i = 0; i < accessChildren.length; i++ ) {
-        var obj = accessChildren[i];
-        if ( obj.markForDeletion && this.accessibleScene.indexOfChild( obj ) >= 0 ) {
-          obj.markForDeletion = false;
-          this.accessibleScene.removeChild( obj );
+    if ( this.accessibilityLayer ) {
+
+      var copy = elms.slice(0);
+      _.each( copy, function( accessiblePeer ) {
+        if ( accessiblePeer.markForDeletion ) {
+          accessiblePeer.markForDeletion = false;
+          accessiblePeer.$element.detach();
+          console.log("removing one marked for deletion")
         }
+      } );
+//      for ( var i = 0; i < elms.length; i++ ) {
+//        var elm = elms[i];
+//
+//      }
+      //Remove unused accessibilty peers
+//      for ( var i = 0; i < accessChildren.length; i++ ) {
+//        var obj = accessChildren[i];
+//        if ( obj.markForDeletion && this.$accessibilityLayer.has( obj ) ) {
+//          obj.markForDeletion = false;
+//          console.log( "trying to remove ", obj );
+//          this.$accessibilityLayer.remove( $( obj ) );
+//        }
+//      }
+
+      //Show the focus.
+
+      var $focused = this.$accessibilityLayer.find( $( "*:focus" ) );
+//      console.log(focused.length, focused);
+
+      if ( $focused.length === 1 ) {
+        var focusedElement = $focused[0];
+        var b = focusedElement.accessiblePeer.origin.globalBounds;
+        var rect = Shape.bounds( b );
+        this.focusRingPath.setAttribute( 'd', rect.getSVGPath() );
       }
-      this.accessibleScene.updateScene();
-
-      var accessibleNodes = this.accessibleScene.children;
-      var activeElement = document.activeElement;
-      var found = false;
-      for ( var i = 0; i < accessibleNodes.length; i++ ) {
-        if ( accessibleNodes[i]._element === activeElement ) {
-          if ( accessibleNodes[i].origin ) {
-            var b = accessibleNodes[i].origin.globalBounds;
-            var rect = Shape.bounds( b );
-
-            //Animation is a bit buggy, but I left this code in in case we want to pick it up later.
-            var animateTheRect = false;
-            if ( animateTheRect ) {
-              if ( !this.focusRingPath.lastSVGPath ) {
-            this.focusRingPath.setAttribute( 'd', rect.getSVGPath() );
-                this.focusRingPath.lastSVGPath = rect.getSVGPath();
-              }
-              else {
-                var animate = document.createElementNS( 'http://www.w3.org/2000/svg', 'animate' );
-                animate.setAttribute( 'attributeType', 'XML' );
-                animate.setAttribute( 'xlink:href', '#p1' );
-                animate.setAttribute( 'attributeName', 'd' );
-                animate.setAttribute( 'from', this.focusRingPath.lastSVGPath );
-                animate.setAttribute( 'to', rect.getSVGPath() );
-                animate.setAttribute( 'dur', '4s' );
-
-                $( this.focusRingPath ).empty();
-                this.focusRingPath.appendChild( animate );
-                this.focusRingPath.lastSVGPath = rect.getSVGPath();
-              }
-            }
-            else{
-              this.focusRingPath.setAttribute( 'd', rect.getSVGPath() );
-            }
-
-            found = true;
-          }
-        }
-        if ( !found ) {
-          this.focusRingPath.removeAttribute( 'd' );
-        }
+      else {
+        this.focusRingPath.setAttribute( 'd', "M 0 0" );
       }
+
+//      for ( var i = 0; i < accessibleNodes.length; i++ ) {
+//        if ( accessibleNodes[i]._element === activeElement ) {
+//          if ( accessibleNodes[i].origin ) {
+//            var b = accessibleNodes[i].origin.globalBounds;
+//            var rect = Shape.bounds( b );
+//
+//            //Animation is a bit buggy, but I left this code in in case we want to pick it up later.
+//            var animateTheRect = false;
+//            if ( animateTheRect ) {
+//              if ( !this.focusRingPath.lastSVGPath ) {
+//                this.focusRingPath.setAttribute( 'd', rect.getSVGPath() );
+//                this.focusRingPath.lastSVGPath = rect.getSVGPath();
+//              }
+//              else {
+//                var animate = document.createElementNS( 'http://www.w3.org/2000/svg', 'animate' );
+//                animate.setAttribute( 'attributeType', 'XML' );
+//                animate.setAttribute( 'xlink:href', '#p1' );
+//                animate.setAttribute( 'attributeName', 'd' );
+//                animate.setAttribute( 'from', this.focusRingPath.lastSVGPath );
+//                animate.setAttribute( 'to', rect.getSVGPath() );
+//                animate.setAttribute( 'dur', '4s' );
+//
+//                $( this.focusRingPath ).empty();
+//                this.focusRingPath.appendChild( animate );
+//                this.focusRingPath.lastSVGPath = rect.getSVGPath();
+//              }
+//            }
+//            else{
+//              this.focusRingPath.setAttribute( 'd', rect.getSVGPath() );
+//            }
+//
+//            found = true;
+//          }
+//        }
+//        if ( !found ) {
+//          this.focusRingPath.removeAttribute( 'd' );
+//        }
+//      }
     }
+
+    //Cleanup and prevent unwanted usage
+    window.accessibilityAPI = null;
   };
   
   Scene.prototype.renderScene = function() {
@@ -783,6 +833,10 @@ define( function( require ) {
   // after layer changes, the layers should have their zIndex updated, and updates their trails
   Scene.prototype.reindexLayers = function() {
     var index = 1;
+    if ( this.accessibiltyLayer ) {
+      this.accessibilityLayer.style.zIndex = 9999;
+      index++;
+    }
     _.each( this.layers, function( layer ) {
       // layers increment indices as needed
       index = layer.reindex( index );
@@ -935,10 +989,16 @@ define( function( require ) {
     this.setSize( width, height );
     this.rebuildLayers(); // TODO: why?
 
-    if ( this.accessibleScene ) {
-      this.accessibleScene.resize( width, height ); //TODO: this may actually be unnecessary if this node is hidden
-    }
+    this.resizeAccessibilityLayer( width, height );
     this.resizeFocusRingSVGContainer( width, height );
+  };
+
+  Scene.prototype.resizeAccessibilityLayer = function( width, height ) {
+    if ( this.accessibilityLayer ) {
+      this.accessibilityLayer.setAttribute( 'width', width );
+      this.accessibilityLayer.setAttribute( 'height', height );
+      this.accessibilityLayer.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
+    }
   };
   
   Scene.prototype.resizeFocusRingSVGContainer = function( width, height ) {

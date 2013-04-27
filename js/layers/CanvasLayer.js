@@ -261,20 +261,8 @@ define( function( require ) {
             }
 
             //Add or update accessibility peers
-            if ( window.accessibleScene && node.peer ) {
-              var globalBounds = node.globalBounds;
-              node.peer.x = globalBounds.x;
-              node.peer.y = globalBounds.y;
-              if ( node.peer._$element.width() !== globalBounds.width ) {
-                node.peer._$element.width( globalBounds.width );
-              }
-              if ( node.peer._$element.height() !== globalBounds.height ) {
-                node.peer._$element.height( globalBounds.height );
-              }
-              node.peer.markForDeletion = false;
-              if ( window.accessibleScene.indexOfChild( node.peer ) < 0 ) {
-                window.accessibleScene.addChild( node.peer );
-              }
+            if ( window.accessibilityAPI && node.accessibilityPeer ) {
+              window.accessibilityAPI.addAccessiblePeer(node.accessibilityPeer);
             }
 
             // TODO: restricted bounds rendering, and possibly generalize depthFirstUntil
