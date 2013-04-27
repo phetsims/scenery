@@ -1,5 +1,6 @@
 
 Priorities:
+    Investigate double typed arrays for speed (comared to float typed arrays, less casting?)
     OnOfDragHandler
     Remove 'dirtyBounds' part from debugScene if it's infinite?
     Consider having children that don't get stitched, but just added (for speed, imagine particules)
