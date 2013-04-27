@@ -184,6 +184,7 @@ define( function( require ) {
       this.resizeFocusRingSVGContainer( options.width, options.height );
       this.focusRingPath = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
       this.focusRingPath.setAttribute('style',"fill:none;stroke:blue;stroke-width:5");
+      this.focusRingPath.setAttribute( 'id', "p1" );
       this.focusRingSVGContainer.appendChild( this.focusRingPath );
       $main[0].appendChild( this.focusRingSVGContainer );
     }
@@ -238,7 +239,32 @@ define( function( require ) {
           if ( accessibleNodes[i].origin ) {
             var b = accessibleNodes[i].origin.globalBounds;
             var rect = Shape.bounds( b );
+
+            //Animation is a bit buggy, but I left this code in in case we want to pick it up later.
+            var animateTheRect = false;
+            if ( animateTheRect ) {
+              if ( !this.focusRingPath.lastSVGPath ) {
             this.focusRingPath.setAttribute( 'd', rect.getSVGPath() );
+                this.focusRingPath.lastSVGPath = rect.getSVGPath();
+              }
+              else {
+                var animate = document.createElementNS( 'http://www.w3.org/2000/svg', 'animate' );
+                animate.setAttribute( 'attributeType', 'XML' );
+                animate.setAttribute( 'xlink:href', '#p1' );
+                animate.setAttribute( 'attributeName', 'd' );
+                animate.setAttribute( 'from', this.focusRingPath.lastSVGPath );
+                animate.setAttribute( 'to', rect.getSVGPath() );
+                animate.setAttribute( 'dur', '4s' );
+
+                $( this.focusRingPath ).empty();
+                this.focusRingPath.appendChild( animate );
+                this.focusRingPath.lastSVGPath = rect.getSVGPath();
+              }
+            }
+            else{
+              this.focusRingPath.setAttribute( 'd', rect.getSVGPath() );
+            }
+
             found = true;
           }
         }
