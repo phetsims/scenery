@@ -12293,6 +12293,8 @@ define('SCENERY/util/CanvasContextWrapper',['require','ASSERT/assert','SCENERY/s
           this.context.setLineDash( dash );
         } else if ( this.context.mozDash !== undefined ) {
           this.context.mozDash = dash;
+        } else if ( this.context.webkitLineDash !== undefined ) {
+          this.context.webkitLineDash = dash ? dash : [];
         } else {
           // unsupported line dash! do... nothing?
         }
@@ -12302,7 +12304,13 @@ define('SCENERY/util/CanvasContextWrapper',['require','ASSERT/assert','SCENERY/s
     setLineDashOffset: function( lineDashOffset ) {
       if ( this.lineDashOffset !== lineDashOffset ) {
         this.lineDashOffset = lineDashOffset;
-        this.context.lineDashOffset = lineDashOffset;
+        if ( this.context.lineDashOffset !== undefined ) {
+          this.context.lineDashOffset = lineDashOffset;
+        } else if ( this.context.webkitLineDashOffset !== undefined ) {
+          this.context.webkitLineDashOffset = lineDashOffset;
+        } else {
+          // unsupported line dash! do... nothing?
+        }
       }
     },
     
@@ -13424,6 +13432,12 @@ define('SCENERY/layers/CanvasLayer',['require','ASSERT/assert','DOT/Bounds2','SC
  * scene graph. It only will render a contiguous block of nodes visited in a depth-first
  * manner.
  *
+ * Nodes supporting the DOM renderer should have the following functions:
+ *   allowsMultipleDOMInstances:               {Boolean} whether getDOMElement will return the same element every time, or new elements.
+ *   getDOMElement():                          Returns a DOM element that represents this node.
+ *   updateDOMElement( element ):              Updates the DOM element with any changes that were made.
+ *   updateCSSTransform( transform, element ): Updates the CSS transform of the element
+ *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
@@ -13477,6 +13491,7 @@ define('SCENERY/layers/DOMLayer',['require','ASSERT/assert','DOT/Bounds2','SCENE
       var node = trail.lastNode();
       
       var element = node.getDOMElement();
+      node.updateDOMElement( element );
       
       this.idElementMap[trail.getUniqueId()] = element;
       this.idTrailMap[trail.getUniqueId()] = trail;
@@ -13500,7 +13515,7 @@ define('SCENERY/layers/DOMLayer',['require','ASSERT/assert','DOT/Bounds2','SCENE
         this.div.insertBefore( this.getElementFromTrail( this.trails[insertionIndex] ) );
         this.trails.splice( insertionIndex, 0, trail );
       }
-      node.updateCSSTransform( trail.getTransform() );
+      node.updateCSSTransform( trail.getTransform(), element );
     },
     
     removeNodeFromTrail: function( trail ) {
@@ -13554,6 +13569,13 @@ define('SCENERY/layers/DOMLayer',['require','ASSERT/assert','DOT/Bounds2','SCENE
     markDirtyRegion: function( args ) {
       var node = args.node;
       var trail = args.trail;
+      
+      // if we have the trail that is marked as dirty, update it's DOM element
+      var dirtyElement = this.idElementMap[trail.getUniqueId()];
+      if ( dirtyElement ) {
+        node.updateDOMElement( dirtyElement );
+      }
+      
       for ( var trailId in this.idTrailMap ) {
         var subtrail = this.idTrailMap[trailId];
         subtrail.reindex();
@@ -13572,6 +13594,8 @@ define('SCENERY/layers/DOMLayer',['require','ASSERT/assert','DOT/Bounds2','SCENE
     },
     
     transformChange: function( args ) {
+      var layer = this;
+      
       var baseTrail = args.trail;
       
       // TODO: efficiency! this computes way more matrix transforms than needed
@@ -13583,7 +13607,8 @@ define('SCENERY/layers/DOMLayer',['require','ASSERT/assert','DOT/Bounds2','SCENE
         
         var node = trail.lastNode();
         if ( node.isPainted() ) {
-          node.updateCSSTransform( trail.getTransform() );
+          var element = layer.idElementMap[trail.getUniqueId()];
+          node.updateCSSTransform( trail.getTransform(), element );
         }
       } );
     },
@@ -14622,6 +14647,11 @@ define('SCENERY/nodes/Fillable',['require','ASSERT/assert','SCENERY/scenery'], f
       return 'fill: ' + ( this._fill ? ( this._fill.getSVGDefinition ? 'url(#fill' + this.getId() + ')' : this._fill ) : 'none' ) + ';';
     };
     
+    proto.isFillDOMCompatible = function() {
+      // make sure we're not a pattern or gradient
+      return !this._fill || !this._fill.getSVGDefinition;
+    };
+    
     proto.addSVGFillDef = function( svg, defs ) {
       var fill = this.getFill();
       var fillId = 'fill' + this.getId();
@@ -15247,6 +15277,9 @@ define('SCENERY/nodes/DOM',['require','ASSERT/assert','PHET_CORE/inherit','DOT/B
   var DOM = scenery.DOM;
   
   inherit( DOM, Node, {
+    // we use a single DOM instance, so this flag should indicate that we don't support duplicating it
+    allowsMultipleDOMInstances: false,
+    
     // needs to be attached to the DOM tree for this to work
     calculateDOMBounds: function() {
       // var boundingRect = this._element.getBoundingClientRect();
@@ -15303,7 +15336,12 @@ define('SCENERY/nodes/DOM',['require','ASSERT/assert','PHET_CORE/inherit','DOT/B
       return this._container;
     },
     
-    updateCSSTransform: function( transform ) {
+    updateDOMElement: function( container ) {
+      // nothing needed, since we are just displaying a single DOM element
+    },
+    
+    updateCSSTransform: function( transform, element ) {
+      // faster to use our jQuery reference instead of wrapping element
       this._$container.css( transform.getMatrix().getCSSTransformStyles() );
     },
     
@@ -15516,6 +15554,8 @@ define('SCENERY/nodes/Image',['require','ASSERT/assert','PHET_CORE/inherit','DOT
   var Image = scenery.Image;
   
   inherit( Image, Node, {
+    allowsMultipleDOMInstances: false, // TODO: support multiple instances
+    
     invalidateImage: function() {
       this.invalidateSelf( new Bounds2( 0, 0, this.getImageWidth(), this.getImageHeight() ) );
     },
@@ -15640,8 +15680,15 @@ define('SCENERY/nodes/Image',['require','ASSERT/assert','PHET_CORE/inherit','DOT
       return this._image;
     },
     
-    updateCSSTransform: function( transform ) {
-      $( this._image ).css( transform.getMatrix().getCSSTransformStyles() );
+    updateDOMElement: function( image ) {
+      if ( image.src !== this._image.src ) {
+        image.src = this._image.src;
+      }
+    },
+    
+    updateCSSTransform: function( transform, element ) {
+      // TODO: extract this out, it's completely shared!
+      $( element ).css( transform.getMatrix().getCSSTransformStyles() );
     },
     
     set image( value ) { this.setImage( value ); },
@@ -15890,8 +15937,12 @@ define('SCENERY/util/Font',['require','ASSERT/assert','SCENERY/scenery'], functi
     var type = typeof options;
     if ( type === 'string' ) {
       this._font = options;
+      this.$span.css( 'font', this._font ); // properly initialize the font instance
     } else if ( type === 'object' ) {
+      this.$span.css( 'font', this._font ); // properly initialize the font instance
       this.mutate( options );
+    } else {
+      this.$span.css( 'font', this._font ); // properly initialize the font instance
     }
   };
   var Font = scenery.Font;
@@ -15982,6 +16033,7 @@ define('SCENERY/util/Font',['require','ASSERT/assert','SCENERY/scenery'], functi
  * TODO: newlines (multiline)
  * TODO: htmlText support (and DOM renderer)
  * TODO: don't get bounds until the Text node is fully mutated?
+ * TODO: remove some support for centering, since Scenery's Node already handles that better?
  *
  * Useful specs:
  * http://www.w3.org/TR/css3-text/
@@ -16017,7 +16069,11 @@ define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/
     this._direction    = 'ltr';              // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
     this._boundsMethod = 'fast';             // fast (SVG/DOM, no canvas rendering allowed), fastCanvas (SVG/DOM, canvas rendering allowed without dirty regions),
                                              //   or slow (Canvas accurate recursive)
-    this.updateTextFlags();
+    this._isHtml       = false;              // whether the text is rendered as HTML or not
+    
+    // we will dynamically change renderers, so they are initialized per-instance instead of per-type
+    this._supportedRenderers = [ Renderer.Canvas, Renderer.SVG, Renderer.DOM ];
+    
     
     // ensure we have a parameter object
     options = options || {};
@@ -16035,6 +16091,8 @@ define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/
     this.initializeStrokable();
     
     Node.call( this, options );
+    
+    this.updateTextFlags();
   };
   var Text = scenery.Text;
   
@@ -16049,6 +16107,18 @@ define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/
     
     getText: function() {
       return this._text;
+    },
+    
+    setIsHtml: function( isHtml ) {
+      if ( isHtml !== this._isHtml ) {
+        this._isHtml = isHtml;
+        this.invalidateText();
+      }
+      return this;
+    },
+    
+    getIsHtml: function() {
+      return this._isHtml;
     },
     
     setBoundsMethod: function( method ) {
@@ -16067,28 +16137,73 @@ define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/
     },
     
     updateTextFlags: function() {
+      var thisText = this;
       this.boundsInaccurate = this._boundsMethod !== 'accurate';
+      
+      var renderersChanged = false;
+      function check( predicateValue, renderer ) {
+        var inSupportedRenderers = _.contains( thisText._supportedRenderers, renderer );
+        if ( predicateValue !== inSupportedRenderers ) {
+          renderersChanged = true;
+          if ( predicateValue ) {
+            // add the renderer
+            thisText._supportedRenderers.push( renderer );
+          } else {
+            // remove the renderer
+            thisText._supportedRenderers.splice( _.indexOf( thisText._supportedRenderers, renderer ), 1 );
+            if ( thisText.renderer === renderer ) {
+              // our set renderer is incompatible. set to null to disable this. TODO: investigate rendering system to prevent overrides like this?
+              thisText.renderer = null;
+              
+              // for now, error out
+              throw new Error( 'The explicitly specified Text renderer: ' + renderer.name + ' is not supported by this operation (probably invalid stroke, fill, or boundsMethod)' );
+            }
+          }
+        }
+      }
+      
+      check( !this.boundsInaccurate && !this._isHtml, Renderer.Canvas );
+      check( !this._isHtml, Renderer.SVG );
+      check( !this.hasStroke() && this.isFillDOMCompatible(), Renderer.DOM );
+      
+      if ( this._supportedRenderers.length === 0 ) {
+        throw new Error( 'No renderers are able to support this Text node (probably HTML text with a stroke or incompatible fill)' );
+      }
+      
+      if ( renderersChanged ) {
+        this.markLayerRefreshNeeded();
+      }
     },
     
     invalidateText: function() {
-      // swap supported renderers if necessary TODO: share this code dealing with compatible renderer changes
-      if ( this._boundsMethod === 'fast' && !this.hasOwnProperty( '_supportedRenderers' ) ) {
-        this._supportedRenderers = this._supportedRenderersWithFastBounds;
-        this.markLayerRefreshNeeded();
-      } else if ( this.hasOwnProperty( '_supportedRenderers' ) ) {
-        // for 'fastCanvas' and 'accurate', we will leave Canvas as a renderer
-        delete this._supportedRenderers; // will leave prototype intact
-        this.markLayerRefreshNeeded();
-      }
-      
       // investigate http://mudcu.be/journal/2011/01/html5-typographic-metrics/
       if ( this._boundsMethod === 'fast' || this._boundsMethod === 'fastCanvas' ) {
-        this.invalidateSelf( this.approximateSVGBounds() );
+        this.invalidateSelf( this._isHtml ? this.approximateDOMBounds() : this.approximateSVGBounds() );
       } else {
+        assert && assert( !this._isHtml, 'HTML text is not allowed with the accurate bounds method' );
         this.invalidateSelf( this.accurateCanvasBounds() );
       }
+      
+      // we may have changed renderers if parameters were changed!
+      this.updateTextFlags();
     },
-
+    
+    // overrides from Strokable
+    invalidateStroke: function() {
+      // stroke can change both the bounds and renderer
+      this.invalidateText();
+    },
+    
+    // overrides from Fillable
+    invalidateFill: function() {
+      // fill type can change the renderer (gradient/fill not supported by DOM)
+      this.invalidateText();
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * Canvas support
+    *----------------------------------------------------------------------------*/
+    
     paintCanvas: function( wrapper ) {
       var context = wrapper.context;
       
@@ -16112,9 +16227,17 @@ define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/
       }
     },
     
+    /*---------------------------------------------------------------------------*
+    * WebGL support
+    *----------------------------------------------------------------------------*/
+    
     paintWebGL: function( state ) {
       throw new Error( 'Text.prototype.paintWebGL unimplemented' );
     },
+    
+    /*---------------------------------------------------------------------------*
+    * SVG support
+    *----------------------------------------------------------------------------*/
     
     createSVGFragment: function( svg, defs, group ) {
       return document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
@@ -16177,6 +16300,44 @@ define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/
     removeSVGDefs: function( svg, defs ) {
       this.removeSVGFillDef( svg, defs );
       this.removeSVGStrokeDef( svg, defs );
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * DOM support
+    *----------------------------------------------------------------------------*/
+    
+    allowsMultipleDOMInstances: true,
+    
+    getDOMElement: function() {
+      return document.createElement( 'div' );
+    },
+    
+    updateDOMElement: function( div ) {
+      var $div = $( div );
+      $div.css( 'font', this.getFont() );
+      $div.css( 'margin-top', this.getSelfBounds().minY + 'px' ); // put our baseline at the correct position
+      $div.css( 'color', this.getFill() ? this.getFill() : 'transparent' ); // transparent will make us invisible if the fill is null
+      $div.width( this.getSelfBounds().width );
+      $div.height( this.getSelfBounds().height );
+      $div.empty(); // remove all children, including previously-created text nodes
+      div.appendChild( this.getDOMTextNode() );
+      div.setAttribute( 'direction', this._direction );
+    },
+    
+    updateCSSTransform: function( transform, element ) {
+      // TODO: extract this out, it's completely shared!
+      $( element ).css( transform.getMatrix().getCSSTransformStyles() );
+    },
+    
+    // a DOM node (not a Scenery DOM node, but an actual DOM node) with the text
+    getDOMTextNode: function() {
+      if ( this._isHtml ) {
+        var span = document.createElement( 'span' );
+        span.innerHTML = this.text;
+        return span;
+      } else {
+        return document.createTextNode( this.text );
+      }
     },
     
     /*---------------------------------------------------------------------------*
@@ -16251,7 +16412,7 @@ define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/
       
       var span = document.createElement( 'span' );
       $( span ).css( 'font', this.getFont() );
-      span.appendChild( document.createTextNode( this.text ) );
+      span.appendChild( this.getDOMTextNode() );
       span.setAttribute( 'direction', this._direction );
       
       var fakeImage = document.createElement( 'div' );
@@ -16270,7 +16431,11 @@ define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/
       document.body.appendChild( div );
       var rect = span.getBoundingClientRect();
       var divRect = div.getBoundingClientRect();
+      // console.log( 'rect: ' + rect.toString() );
+      // console.log( 'divRect: ' + divRect.toString() );
+      // console.log( 'span width from jQuery: ' + $( span ).width() );
       var result = new Bounds2( rect.left, rect.top - maxHeight, rect.right, rect.bottom - maxHeight ).shifted( -divRect.left, -divRect.top );
+      // console.log( 'result: ' + result );
       document.body.removeChild( div );
       
       var width = rect.right - rect.left;
@@ -16346,7 +16511,7 @@ define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/
     },
     
     getBasicConstructor: function( propLines ) {
-      return 'new scenery.Text( \'' + this._text.replace( /'/g, '\\\'' ) + '\', {' + propLines + '} )';
+      return 'new scenery.Text( \'' + window.escape( this._text.replace( /'/g, '\\\'' ) ) + '\', {' + propLines + '} )';
     },
     
     getPropString: function( spaces, includeChildren ) {
@@ -16416,11 +16581,11 @@ define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/
   addFontForwarding( 'fontSize', 'FontSize', 'size' );
   addFontForwarding( 'lineHeight', 'LineHeight', 'lineHeight' );
   
-  Text.prototype._mutatorKeys = [ 'boundsMethod', 'text', 'font', 'fontWeight', 'fontFamily', 'fontStretch', 'fontStyle', 'fontSize', 'lineHeight',
+  Text.prototype._mutatorKeys = [ 'isHtml', 'boundsMethod', 'text', 'font', 'fontWeight', 'fontFamily', 'fontStretch', 'fontStyle', 'fontSize', 'lineHeight',
                                   'textAlign', 'textBaseline', 'direction' ].concat( Node.prototype._mutatorKeys );
   
-  Text.prototype._supportedRenderers = [ Renderer.Canvas, Renderer.SVG ];
-  Text.prototype._supportedRenderersWithFastBounds = [ Renderer.SVG ]; // renderers for fast (SVG/DOM) bounds, since canvas dirty regions would present issues
+  Text.prototype._supportedRenderers = [ Renderer.Canvas, Renderer.SVG, Renderer.DOM ];
+  Text.prototype._supportedRenderersWithFastBounds = [ Renderer.SVG, Renderer.DOM ]; // renderers for fast (SVG/DOM) bounds, since canvas dirty regions would present issues
   
   // font-specific ES5 setters and getters are defined using addFontForwarding above
   Object.defineProperty( Text.prototype, 'font', { set: Text.prototype.setFont, get: Text.prototype.getFont } );
@@ -16429,6 +16594,7 @@ define('SCENERY/nodes/Text',['require','ASSERT/assert','PHET_CORE/inherit','DOT/
   Object.defineProperty( Text.prototype, 'textBaseline', { set: Text.prototype.setTextBaseline, get: Text.prototype.getTextBaseline } );
   Object.defineProperty( Text.prototype, 'direction', { set: Text.prototype.setDirection, get: Text.prototype.getDirection } );
   Object.defineProperty( Text.prototype, 'boundsMethod', { set: Text.prototype.setBoundsMethod, get: Text.prototype.getBoundsMethod } );
+  Object.defineProperty( Text.prototype, 'isHtml', { set: Text.prototype.setIsHtml, get: Text.prototype.getIsHtml } );
   
   // mix in support for fills and strokes
   fillable( Text );
