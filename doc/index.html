@@ -220,6 +220,7 @@
       <a class="sublink" href="#text-textBaseline">textBaseline</a><br>
       <a class="sublink" href="#text-direction">direction</a><br>
       <a class="sublink" href="#text-boundsMethod">boundsMethod</a><br>
+      <a class="sublink" href="#text-isHtml">isHtml</a><br>
       
       <a class="navlink" href="#dom">DOM</a><br>
       <a class="sublink" href="#dom-element">element</a><br>
@@ -1203,6 +1204,18 @@ scene.addChild( new scenery.Text( 'Some text', {
         The <code>"accurate"</code> <a href="#text-boundsMethod">boundsMethod</a> is also disallowed, since using
         Canvas for HTML bounds would be extremely inaccurate.
       </p>
+      <div id="example-htmlText" class="exampleScene" style="width: 256px; height: 64px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-htmlText', function( scene ) {
+/*START*/
+scene.addChild( new scenery.Text( '<strong>bold</strong>, <em>italic</em>', {
+  font: '20px sans-serif',
+  centerX: 128, centerY: 32,
+  isHtml: true
+} ) );
+/*END*/
+} );
+      </script>
       
       <h3 id="dom" class="section">DOM</h3>
       <p>
