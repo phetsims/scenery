@@ -106,6 +106,10 @@ define( function( require ) {
       return this._container;
     },
     
+    updateDOMElement: function( container ) {
+      // nothing needed, since we are just displaying a single DOM element
+    },
+    
     updateCSSTransform: function( transform, element ) {
       // faster to use our jQuery reference instead of wrapping element
       this._$container.css( transform.getMatrix().getCSSTransformStyles() );

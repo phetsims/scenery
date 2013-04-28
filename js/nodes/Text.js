@@ -42,7 +42,10 @@ define( function( require ) {
     this._direction    = 'ltr';              // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
     this._boundsMethod = 'fast';             // fast (SVG/DOM, no canvas rendering allowed), fastCanvas (SVG/DOM, canvas rendering allowed without dirty regions),
                                              //   or slow (Canvas accurate recursive)
-    this.updateTextFlags();
+    
+    // we will dynamically change renderers, so they are initialized per-instance instead of per-type
+    this._supportedRenderers = [ Renderer.Canvas, Renderer.SVG, Renderer.DOM ];
+    
     
     // ensure we have a parameter object
     options = options || {};
@@ -60,6 +63,8 @@ define( function( require ) {
     this.initializeStrokable();
     
     Node.call( this, options );
+    
+    this.updateTextFlags();
   };
   var Text = scenery.Text;
   
@@ -92,26 +97,59 @@ define( function( require ) {
     },
     
     updateTextFlags: function() {
+      var thisText = this;
       this.boundsInaccurate = this._boundsMethod !== 'accurate';
+      
+      var renderersChanged = false;
+      function check( predicateValue, renderer ) {
+        var inSupportedRenderers = _.contains( thisText._supportedRenderers, renderer );
+        if ( predicateValue !== inSupportedRenderers ) {
+          renderersChanged = true;
+          if ( predicateValue ) {
+            // add the renderer
+            thisText._supportedRenderers.push( renderer );
+          } else {
+            // remove the renderer
+            thisText._supportedRenderers.splice( _.indexOf( thisText._supportedRenderers, renderer ), 1 );
+            if ( thisText.renderer === renderer ) {
+              // our set renderer is incompatible. set to null to disable this. TODO: investigate rendering system to prevent overrides like this?
+              thisText.renderer = null;
+            }
+          }
+        }
+      }
+      
+      check( !this.boundsInaccurate, Renderer.Canvas );
+      check( true, Renderer.SVG ); // SVG always supported currently, but that will change with htmlText
+      check( !this.hasStroke() && this.isFillDOMCompatible(), Renderer.DOM );
+      
+      if ( renderersChanged ) {
+        this.markLayerRefreshNeeded();
+      }
     },
     
     invalidateText: function() {
-      // swap supported renderers if necessary TODO: share this code dealing with compatible renderer changes
-      if ( this._boundsMethod === 'fast' && !this.hasOwnProperty( '_supportedRenderers' ) ) {
-        this._supportedRenderers = this._supportedRenderersWithFastBounds;
-        this.markLayerRefreshNeeded();
-      } else if ( this.hasOwnProperty( '_supportedRenderers' ) ) {
-        // for 'fastCanvas' and 'accurate', we will leave Canvas as a renderer
-        delete this._supportedRenderers; // will leave prototype intact
-        this.markLayerRefreshNeeded();
-      }
-      
       // investigate http://mudcu.be/journal/2011/01/html5-typographic-metrics/
       if ( this._boundsMethod === 'fast' || this._boundsMethod === 'fastCanvas' ) {
         this.invalidateSelf( this.approximateSVGBounds() );
       } else {
         this.invalidateSelf( this.accurateCanvasBounds() );
       }
+      
+      // we may have changed renderers if parameters were changed!
+      this.updateTextFlags();
+    },
+    
+    // overrides from Strokable
+    invalidateStroke: function() {
+      // stroke can change both the bounds and renderer
+      this.invalidateText();
+    },
+    
+    // overrides from Fillable
+    invalidateFill: function() {
+      // fill type can change the renderer (gradient/fill not supported by DOM)
+      this.invalidateText();
     },
     
     /*---------------------------------------------------------------------------*
@@ -223,11 +261,17 @@ define( function( require ) {
     allowsMultipleDOMInstances: true,
     
     getDOMElement: function() {
-      var div = document.createElement( 'div' );
+      return document.createElement( 'div' );
+    },
+    
+    updateDOMElement: function( div ) {
       var $div = $( div );
       $div.css( 'font', this.getFont() );
+      $div.css( 'margin-top', this.getSelfBounds().minY + 'px' ); // put our baseline at the correct position
+      $div.css( 'color', this.getFill() ? this.getFill() : 'transparent' ); // transparent will make us invisible if the fill is null
       $div.width( this.getSelfBounds().width ); // TODO: how to update these? Don't enable DOM yet
       $div.height( this.getSelfBounds().height );
+      $div.empty(); // remove all children, including previously-created text nodes
       div.appendChild( document.createTextNode( this.text ) );
       div.setAttribute( 'direction', this._direction );
     },
@@ -477,8 +521,8 @@ define( function( require ) {
   Text.prototype._mutatorKeys = [ 'boundsMethod', 'text', 'font', 'fontWeight', 'fontFamily', 'fontStretch', 'fontStyle', 'fontSize', 'lineHeight',
                                   'textAlign', 'textBaseline', 'direction' ].concat( Node.prototype._mutatorKeys );
   
-  Text.prototype._supportedRenderers = [ Renderer.Canvas, Renderer.SVG ];
-  Text.prototype._supportedRenderersWithFastBounds = [ Renderer.SVG ]; // renderers for fast (SVG/DOM) bounds, since canvas dirty regions would present issues
+  Text.prototype._supportedRenderers = [ Renderer.Canvas, Renderer.SVG, Renderer.DOM ];
+  Text.prototype._supportedRenderersWithFastBounds = [ Renderer.SVG, Renderer.DOM ]; // renderers for fast (SVG/DOM) bounds, since canvas dirty regions would present issues
   
   // font-specific ES5 setters and getters are defined using addFontForwarding above
   Object.defineProperty( Text.prototype, 'font', { set: Text.prototype.setFont, get: Text.prototype.getFont } );

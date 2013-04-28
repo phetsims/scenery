@@ -38,10 +38,22 @@
       padding: 15px;
       border: 1px solid gray;
     }
+    
+    #controls {
+      position: absolute;
+      width: 150px;
+      top: 0;
+      right: 0;
+    }
   </style>
   
 </head>
 <body>
+  
+  <div id="controls">
+    <button onclick="scene.updateOnRequestAnimationFrame();">Continuous Update</button>
+    <button onclick="scene.popupDebug();">Popup Debug</button>
+  </div>
   
   <div id="scene"></div>
   

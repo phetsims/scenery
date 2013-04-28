@@ -188,6 +188,12 @@ define( function( require ) {
       return this._image;
     },
     
+    updateDOMElement: function( image ) {
+      if ( image.src !== this._image.src ) {
+        image.src = this._image.src;
+      }
+    },
+    
     updateCSSTransform: function( transform, element ) {
       // TODO: extract this out, it's completely shared!
       $( element ).css( transform.getMatrix().getCSSTransformStyles() );

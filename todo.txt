@@ -102,6 +102,8 @@ General:
     RenderState - consider stack-based transforms
 
 Code:
+    ** _supportedRenderers => supportedRenderers? (pushes on this array if shared in the prototype could be bad!)
+        getSupportedRenderers()? - fixes much of what we're doing
     lib/phet/ instead of common/, lib/ instead of contrib/
     Remove Easel references in comparison
     Refactor Trail .compare usage to isBefore / isAfter
