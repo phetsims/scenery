@@ -114,6 +114,9 @@ define( function( require ) {
             if ( thisText.renderer === renderer ) {
               // our set renderer is incompatible. set to null to disable this. TODO: investigate rendering system to prevent overrides like this?
               thisText.renderer = null;
+              
+              // for now, error out
+              throw new Error( 'The explicitly specified Text renderer: ' + renderer.name + ' is not supported by this operation (probably invalid stroke, fill, or boundsMethod)' );
             }
           }
         }
