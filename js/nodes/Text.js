@@ -6,6 +6,7 @@
  * TODO: newlines (multiline)
  * TODO: htmlText support (and DOM renderer)
  * TODO: don't get bounds until the Text node is fully mutated?
+ * TODO: remove some support for centering, since Scenery's Node already handles that better?
  *
  * Useful specs:
  * http://www.w3.org/TR/css3-text/
@@ -41,7 +42,11 @@ define( function( require ) {
     this._direction    = 'ltr';              // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
     this._boundsMethod = 'fast';             // fast (SVG/DOM, no canvas rendering allowed), fastCanvas (SVG/DOM, canvas rendering allowed without dirty regions),
                                              //   or slow (Canvas accurate recursive)
-    this.updateTextFlags();
+    this._isHtml       = false;              // whether the text is rendered as HTML or not
+    
+    // we will dynamically change renderers, so they are initialized per-instance instead of per-type
+    this._supportedRenderers = [ Renderer.Canvas, Renderer.SVG, Renderer.DOM ];
+    
     
     // ensure we have a parameter object
     options = options || {};
@@ -59,6 +64,8 @@ define( function( require ) {
     this.initializeStrokable();
     
     Node.call( this, options );
+    
+    this.updateTextFlags();
   };
   var Text = scenery.Text;
   
@@ -73,6 +80,18 @@ define( function( require ) {
     
     getText: function() {
       return this._text;
+    },
+    
+    setIsHtml: function( isHtml ) {
+      if ( isHtml !== this._isHtml ) {
+        this._isHtml = isHtml;
+        this.invalidateText();
+      }
+      return this;
+    },
+    
+    getIsHtml: function() {
+      return this._isHtml;
     },
     
     setBoundsMethod: function( method ) {
@@ -91,28 +110,73 @@ define( function( require ) {
     },
     
     updateTextFlags: function() {
+      var thisText = this;
       this.boundsInaccurate = this._boundsMethod !== 'accurate';
+      
+      var renderersChanged = false;
+      function check( predicateValue, renderer ) {
+        var inSupportedRenderers = _.contains( thisText._supportedRenderers, renderer );
+        if ( predicateValue !== inSupportedRenderers ) {
+          renderersChanged = true;
+          if ( predicateValue ) {
+            // add the renderer
+            thisText._supportedRenderers.push( renderer );
+          } else {
+            // remove the renderer
+            thisText._supportedRenderers.splice( _.indexOf( thisText._supportedRenderers, renderer ), 1 );
+            if ( thisText.renderer === renderer ) {
+              // our set renderer is incompatible. set to null to disable this. TODO: investigate rendering system to prevent overrides like this?
+              thisText.renderer = null;
+              
+              // for now, error out
+              throw new Error( 'The explicitly specified Text renderer: ' + renderer.name + ' is not supported by this operation (probably invalid stroke, fill, or boundsMethod)' );
+            }
+          }
+        }
+      }
+      
+      check( !this.boundsInaccurate && !this._isHtml, Renderer.Canvas );
+      check( !this._isHtml, Renderer.SVG );
+      check( !this.hasStroke() && this.isFillDOMCompatible(), Renderer.DOM );
+      
+      if ( this._supportedRenderers.length === 0 ) {
+        throw new Error( 'No renderers are able to support this Text node (probably HTML text with a stroke or incompatible fill)' );
+      }
+      
+      if ( renderersChanged ) {
+        this.markLayerRefreshNeeded();
+      }
     },
     
     invalidateText: function() {
-      // swap supported renderers if necessary TODO: share this code dealing with compatible renderer changes
-      if ( this._boundsMethod === 'fast' && !this.hasOwnProperty( '_supportedRenderers' ) ) {
-        this._supportedRenderers = this._supportedRenderersWithFastBounds;
-        this.markLayerRefreshNeeded();
-      } else if ( this.hasOwnProperty( '_supportedRenderers' ) ) {
-        // for 'fastCanvas' and 'accurate', we will leave Canvas as a renderer
-        delete this._supportedRenderers; // will leave prototype intact
-        this.markLayerRefreshNeeded();
-      }
-      
       // investigate http://mudcu.be/journal/2011/01/html5-typographic-metrics/
       if ( this._boundsMethod === 'fast' || this._boundsMethod === 'fastCanvas' ) {
-        this.invalidateSelf( this.approximateSVGBounds() );
+        this.invalidateSelf( this._isHtml ? this.approximateDOMBounds() : this.approximateSVGBounds() );
       } else {
+        assert && assert( !this._isHtml, 'HTML text is not allowed with the accurate bounds method' );
         this.invalidateSelf( this.accurateCanvasBounds() );
       }
+      
+      // we may have changed renderers if parameters were changed!
+      this.updateTextFlags();
     },
-
+    
+    // overrides from Strokable
+    invalidateStroke: function() {
+      // stroke can change both the bounds and renderer
+      this.invalidateText();
+    },
+    
+    // overrides from Fillable
+    invalidateFill: function() {
+      // fill type can change the renderer (gradient/fill not supported by DOM)
+      this.invalidateText();
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * Canvas support
+    *----------------------------------------------------------------------------*/
+    
     paintCanvas: function( wrapper ) {
       var context = wrapper.context;
       
@@ -136,9 +200,17 @@ define( function( require ) {
       }
     },
     
+    /*---------------------------------------------------------------------------*
+    * WebGL support
+    *----------------------------------------------------------------------------*/
+    
     paintWebGL: function( state ) {
       throw new Error( 'Text.prototype.paintWebGL unimplemented' );
     },
+    
+    /*---------------------------------------------------------------------------*
+    * SVG support
+    *----------------------------------------------------------------------------*/
     
     createSVGFragment: function( svg, defs, group ) {
       return document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
@@ -201,6 +273,44 @@ define( function( require ) {
     removeSVGDefs: function( svg, defs ) {
       this.removeSVGFillDef( svg, defs );
       this.removeSVGStrokeDef( svg, defs );
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * DOM support
+    *----------------------------------------------------------------------------*/
+    
+    allowsMultipleDOMInstances: true,
+    
+    getDOMElement: function() {
+      return document.createElement( 'div' );
+    },
+    
+    updateDOMElement: function( div ) {
+      var $div = $( div );
+      $div.css( 'font', this.getFont() );
+      $div.css( 'margin-top', this.getSelfBounds().minY + 'px' ); // put our baseline at the correct position
+      $div.css( 'color', this.getFill() ? this.getFill() : 'transparent' ); // transparent will make us invisible if the fill is null
+      $div.width( this.getSelfBounds().width );
+      $div.height( this.getSelfBounds().height );
+      $div.empty(); // remove all children, including previously-created text nodes
+      div.appendChild( this.getDOMTextNode() );
+      div.setAttribute( 'direction', this._direction );
+    },
+    
+    updateCSSTransform: function( transform, element ) {
+      // TODO: extract this out, it's completely shared!
+      $( element ).css( transform.getMatrix().getCSSTransformStyles() );
+    },
+    
+    // a DOM node (not a Scenery DOM node, but an actual DOM node) with the text
+    getDOMTextNode: function() {
+      if ( this._isHtml ) {
+        var span = document.createElement( 'span' );
+        span.innerHTML = this.text;
+        return span;
+      } else {
+        return document.createTextNode( this.text );
+      }
     },
     
     /*---------------------------------------------------------------------------*
@@ -275,7 +385,7 @@ define( function( require ) {
       
       var span = document.createElement( 'span' );
       $( span ).css( 'font', this.getFont() );
-      span.appendChild( document.createTextNode( this.text ) );
+      span.appendChild( this.getDOMTextNode() );
       span.setAttribute( 'direction', this._direction );
       
       var fakeImage = document.createElement( 'div' );
@@ -294,7 +404,11 @@ define( function( require ) {
       document.body.appendChild( div );
       var rect = span.getBoundingClientRect();
       var divRect = div.getBoundingClientRect();
+      // console.log( 'rect: ' + rect.toString() );
+      // console.log( 'divRect: ' + divRect.toString() );
+      // console.log( 'span width from jQuery: ' + $( span ).width() );
       var result = new Bounds2( rect.left, rect.top - maxHeight, rect.right, rect.bottom - maxHeight ).shifted( -divRect.left, -divRect.top );
+      // console.log( 'result: ' + result );
       document.body.removeChild( div );
       
       var width = rect.right - rect.left;
@@ -370,7 +484,7 @@ define( function( require ) {
     },
     
     getBasicConstructor: function( propLines ) {
-      return 'new scenery.Text( \'' + this._text.replace( /'/g, '\\\'' ) + '\', {' + propLines + '} )';
+      return 'new scenery.Text( \'' + window.escape( this._text.replace( /'/g, '\\\'' ) ) + '\', {' + propLines + '} )';
     },
     
     getPropString: function( spaces, includeChildren ) {
@@ -440,11 +554,11 @@ define( function( require ) {
   addFontForwarding( 'fontSize', 'FontSize', 'size' );
   addFontForwarding( 'lineHeight', 'LineHeight', 'lineHeight' );
   
-  Text.prototype._mutatorKeys = [ 'boundsMethod', 'text', 'font', 'fontWeight', 'fontFamily', 'fontStretch', 'fontStyle', 'fontSize', 'lineHeight',
+  Text.prototype._mutatorKeys = [ 'isHtml', 'boundsMethod', 'text', 'font', 'fontWeight', 'fontFamily', 'fontStretch', 'fontStyle', 'fontSize', 'lineHeight',
                                   'textAlign', 'textBaseline', 'direction' ].concat( Node.prototype._mutatorKeys );
   
-  Text.prototype._supportedRenderers = [ Renderer.Canvas, Renderer.SVG ];
-  Text.prototype._supportedRenderersWithFastBounds = [ Renderer.SVG ]; // renderers for fast (SVG/DOM) bounds, since canvas dirty regions would present issues
+  Text.prototype._supportedRenderers = [ Renderer.Canvas, Renderer.SVG, Renderer.DOM ];
+  Text.prototype._supportedRenderersWithFastBounds = [ Renderer.SVG, Renderer.DOM ]; // renderers for fast (SVG/DOM) bounds, since canvas dirty regions would present issues
   
   // font-specific ES5 setters and getters are defined using addFontForwarding above
   Object.defineProperty( Text.prototype, 'font', { set: Text.prototype.setFont, get: Text.prototype.getFont } );
@@ -453,6 +567,7 @@ define( function( require ) {
   Object.defineProperty( Text.prototype, 'textBaseline', { set: Text.prototype.setTextBaseline, get: Text.prototype.getTextBaseline } );
   Object.defineProperty( Text.prototype, 'direction', { set: Text.prototype.setDirection, get: Text.prototype.getDirection } );
   Object.defineProperty( Text.prototype, 'boundsMethod', { set: Text.prototype.setBoundsMethod, get: Text.prototype.getBoundsMethod } );
+  Object.defineProperty( Text.prototype, 'isHtml', { set: Text.prototype.setIsHtml, get: Text.prototype.getIsHtml } );
   
   // mix in support for fills and strokes
   fillable( Text );

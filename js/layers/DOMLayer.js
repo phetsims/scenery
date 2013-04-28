@@ -7,6 +7,12 @@
  * scene graph. It only will render a contiguous block of nodes visited in a depth-first
  * manner.
  *
+ * Nodes supporting the DOM renderer should have the following functions:
+ *   allowsMultipleDOMInstances:               {Boolean} whether getDOMElement will return the same element every time, or new elements.
+ *   getDOMElement():                          Returns a DOM element that represents this node.
+ *   updateDOMElement( element ):              Updates the DOM element with any changes that were made.
+ *   updateCSSTransform( transform, element ): Updates the CSS transform of the element
+ *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
@@ -60,6 +66,7 @@ define( function( require ) {
       var node = trail.lastNode();
       
       var element = node.getDOMElement();
+      node.updateDOMElement( element );
       
       this.idElementMap[trail.getUniqueId()] = element;
       this.idTrailMap[trail.getUniqueId()] = trail;
@@ -83,7 +90,7 @@ define( function( require ) {
         this.div.insertBefore( this.getElementFromTrail( this.trails[insertionIndex] ) );
         this.trails.splice( insertionIndex, 0, trail );
       }
-      node.updateCSSTransform( trail.getTransform() );
+      node.updateCSSTransform( trail.getTransform(), element );
     },
     
     removeNodeFromTrail: function( trail ) {
@@ -137,6 +144,13 @@ define( function( require ) {
     markDirtyRegion: function( args ) {
       var node = args.node;
       var trail = args.trail;
+      
+      // if we have the trail that is marked as dirty, update it's DOM element
+      var dirtyElement = this.idElementMap[trail.getUniqueId()];
+      if ( dirtyElement ) {
+        node.updateDOMElement( dirtyElement );
+      }
+      
       for ( var trailId in this.idTrailMap ) {
         var subtrail = this.idTrailMap[trailId];
         subtrail.reindex();
@@ -155,6 +169,8 @@ define( function( require ) {
     },
     
     transformChange: function( args ) {
+      var layer = this;
+      
       var baseTrail = args.trail;
       
       // TODO: efficiency! this computes way more matrix transforms than needed
@@ -166,7 +182,8 @@ define( function( require ) {
         
         var node = trail.lastNode();
         if ( node.isPainted() ) {
-          node.updateCSSTransform( trail.getTransform() );
+          var element = layer.idElementMap[trail.getUniqueId()];
+          node.updateCSSTransform( trail.getTransform(), element );
         }
       } );
     },

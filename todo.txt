@@ -1,12 +1,28 @@
 
 Priorities:
-    Performance: Better event system handling (notification of common changes?)
+    Consider an HTML node instead of overloading Text with it
+    Investigate double typed arrays for speed (comared to float typed arrays, less casting?)
+    OnOfDragHandler
+    Remove 'dirtyBounds' part from debugScene if it's infinite?
+    Consider having children that don't get stitched, but just added (for speed, imagine particules)
+    DOM text:
+        --- Update docs with isHtml flag
+        getDOMElement() and updateCSSTransform() should support DAGable nodes, with a flag that will cause it to fail?
+        Should we add in a DOM-support mixin?
+        allowsMultipleDOMInstances
+            For image, would require not using the initial image copy (but creating images with the same src)
+        TODO: how to document the interfaces for NODE rendering support?
+    * Performance: Better event system handling (notification of common changes?)
         Layers could conceivably add a listener to a node with a specific trail reference, instead of doing a dispatch up the tree.
+        Looks important for transform changes, since they are firing off 2 dispatchEventWithTransform calls, and it should be much better to notify the layers directly
     Performance: Batch DOM (or at least CSS) changes to animation frames?
-    Text bounds handling is unacceptably slow - note on Issue about SVG font parsing + handling
+    Canvas-accurate bounds:
+        Speed / performance (#16)
+        Handle empty strings / nothing (currently getting NaNs) (#21)
+        Find bug that causes the Arial sized string on Mac to return an infinite bound on the right side. (#22)
     Re-enable layer refresh handling for matching (and the optimizations therein)
         With the delayed layer handling, we could conceivably remove the distinction between 'matching' and 'non-matching'
-    Accessibility 
+    Accessibility
     Force non-canvas above 'interactive' DOM node
         Need to track lowest DOM-interactive Trail for each Scene.
             null indicates none exists, and represents the far 'after'
@@ -21,6 +37,8 @@ Priorities:
     Testing with hidef canvases
 
 Bugs:
+    Text width detected improperly, or wrapping in DOM renderer
+    Default text with text string changed visual size switching between boundsMethods in playground
     Switching renderers in Devious Drag example on iPad causes other objects being dragged to be "dropped"
         Probably causes some sort of enter/exit event?
     Nexus 7 hidef scaling
@@ -57,6 +75,7 @@ Browsers
             Not present in Ubuntu 12.04 v18 or nightly
         [UNKNOWN] IE9 will take click events on an SVG element with "pointer-events: none", but only if there is nothing "clickable" behind that point
             What is considered "clickable", and will it affect us?
+        [UNKNOWN] Firefox (20, Aurora 22) on Mac is not applying mozDash to strokeRect()
         [SUBMITTED] Chrome/Safari seems to cache the charset of loaded JS (unable to override)
             Firefox OK
             Chromium bug: https://code.google.com/p/chromium/issues/detail?id=176694
@@ -86,6 +105,8 @@ General:
     RenderState - consider stack-based transforms
 
 Code:
+    ** _supportedRenderers => supportedRenderers? (pushes on this array if shared in the prototype could be bad!)
+        getSupportedRenderers()? - fixes much of what we're doing
     lib/phet/ instead of common/, lib/ instead of contrib/
     Remove Easel references in comparison
     Refactor Trail .compare usage to isBefore / isAfter

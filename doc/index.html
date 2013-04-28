@@ -1193,6 +1193,17 @@ scene.addChild( new scenery.Text( 'Some text', {
         which is accurate and supports dirty regions, but is much slower.
       </p>
       
+      <h4 id="text-isHtml">isHtml</h4>
+      <p>
+        <code>node.isHtml</code> (<code>node.getIsHtml()</code>, <code>node.setIsHtml( isHtml )</code>)
+        sets whether or not the Text node's text should be treated as HTML text. Defaults to false.
+      </p>
+      <p>
+        If true, it will force the DOM renderer (possibly this could be done with SVG's foreignObject in the future).
+        The <code>"accurate"</code> <a href="#text-boundsMethod">boundsMethod</a> is also disallowed, since using
+        Canvas for HTML bounds would be extremely inaccurate.
+      </p>
+      
       <h3 id="dom" class="section">DOM</h3>
       <p>
         DOM is a subtype of <a href="#node">Node</a> that positions a DOM element inside the scene using

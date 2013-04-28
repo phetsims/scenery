@@ -262,6 +262,13 @@
             x: 0.5,
             y: 0.5
           } ) );
+          scene.addChild( new scenery.Rectangle( 5, 5, 54, 54, {
+            stroke: '#000',
+            lineWidth: 3,
+            lineDash: [7,2,3,2],
+            x: 0.5,
+            y: 0.5
+          } ) );
           scene.addChild( new scenery.Path( {
             shape: kite.Shape.regularPolygon( 6, 15 ),
             stroke: '#000',
@@ -423,6 +430,20 @@
           } ) );
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+      },{
+        name: 'HTML Text',
+        width: 512,
+        height: 128,
+        draw: function( scene ) {
+          scene.addChild( new scenery.Text( '<strong>H<sub>2</sub>O</strong> <em>might</em> contain water, also<br>known as <u>dihydrogen monoxide</u>!', {
+            fontSize: 35,
+            top: 2,
+            left: 2,
+            fill: '#606',
+            isHtml: true
+          } ) );
+        },
+        renderers: [ scenery.Renderer.DOM ]
       },{
         name: 'Circles and Arcs',
         width: 200,
