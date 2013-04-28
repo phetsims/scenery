@@ -290,7 +290,7 @@ define( function( require ) {
       $div.css( 'font', this.getFont() );
       $div.css( 'margin-top', this.getSelfBounds().minY + 'px' ); // put our baseline at the correct position
       $div.css( 'color', this.getFill() ? this.getFill() : 'transparent' ); // transparent will make us invisible if the fill is null
-      $div.width( this.getSelfBounds().width ); // TODO: how to update these? Don't enable DOM yet
+      $div.width( this.getSelfBounds().width );
       $div.height( this.getSelfBounds().height );
       $div.empty(); // remove all children, including previously-created text nodes
       div.appendChild( this.getDOMTextNode() );
