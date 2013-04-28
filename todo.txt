@@ -1,10 +1,12 @@
 
 Priorities:
+    Consider an HTML node instead of overloading Text with it
     Investigate double typed arrays for speed (comared to float typed arrays, less casting?)
     OnOfDragHandler
     Remove 'dirtyBounds' part from debugScene if it's infinite?
     Consider having children that don't get stitched, but just added (for speed, imagine particules)
     DOM text:
+        --- Update docs with isHtml flag
         getDOMElement() and updateCSSTransform() should support DAGable nodes, with a flag that will cause it to fail?
         Should we add in a DOM-support mixin?
         allowsMultipleDOMInstances
