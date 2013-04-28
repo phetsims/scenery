@@ -404,7 +404,11 @@ define( function( require ) {
       document.body.appendChild( div );
       var rect = span.getBoundingClientRect();
       var divRect = div.getBoundingClientRect();
+      // console.log( 'rect: ' + rect.toString() );
+      // console.log( 'divRect: ' + divRect.toString() );
+      // console.log( 'span width from jQuery: ' + $( span ).width() );
       var result = new Bounds2( rect.left, rect.top - maxHeight, rect.right, rect.bottom - maxHeight ).shifted( -divRect.left, -divRect.top );
+      // console.log( 'result: ' + result );
       document.body.removeChild( div );
       
       var width = rect.right - rect.left;
