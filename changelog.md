@@ -2,6 +2,7 @@
 Scenery Changelog
 =================
 
+2013-4-27 Added DOM renderer support for Text (disallows strokes, only allows normal color fill)
 2013-4-24 Changed input event order for moves: move happens before other associated enter/exit/over/out events, and the 'enter' event order is reversed to match DOM events.
 2013-4-24 Added Text.boundsMethod to switch between text-bounds detection methods
 2013-4-24 Upgraded documentation and other HTML files to jQuery 2.0.0
