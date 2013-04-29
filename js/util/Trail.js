@@ -38,12 +38,14 @@ define( function( require ) {
       
       this.nodes = otherTrail.nodes.slice( 0 );
       this.length = otherTrail.length;
+      this.uniqueId = otherTrail.uniqueId;
       this.indices = otherTrail.indices.slice( 0 );
       return;
     }
     
     this.nodes = [];
     this.length = 0;
+    this.uniqueId = '';
     
     // indices[x] stores the index of nodes[x] in nodes[x-1]'s children
     this.indices = [];
@@ -112,6 +114,7 @@ define( function( require ) {
     
     addAncestor: function( node, index ) {
       assert && assert( !this.immutable, 'cannot modify an immutable Trail with addAncestor' );
+      assert && assert( node, 'cannot add falsy value to a Trail' );
       
       var oldRoot = this.nodes[0];
       
@@ -120,26 +123,28 @@ define( function( require ) {
         this.indices.unshift( index === undefined ? _.indexOf( node._children, oldRoot ) : index );
       }
       
-      // mimic an Array
       this.length++;
+      this.updateUniqueId();
       return this;
     },
     
     removeAncestor: function() {
       assert && assert( !this.immutable, 'cannot modify an immutable Trail with removeAncestor' );
+      assert && assert( this.length > 0, 'cannot remove a Node from an empty trail' );
       
       this.nodes.shift();
       if ( this.indices.length ) {
         this.indices.shift();
       }
       
-      // mimic an Array
       this.length--;
+      this.updateUniqueId();
       return this;
     },
     
     addDescendant: function( node, index ) {
       assert && assert( !this.immutable, 'cannot modify an immutable Trail with addDescendant' );
+      assert && assert( node, 'cannot add falsy value to a Trail' );
       
       var parent = this.lastNode();
       
@@ -148,21 +153,22 @@ define( function( require ) {
         this.indices.push( index === undefined ? _.indexOf( parent._children, node ) : index );
       }
       
-      // mimic an Array
       this.length++;
+      this.updateUniqueId();
       return this;
     },
     
     removeDescendant: function() {
       assert && assert( !this.immutable, 'cannot modify an immutable Trail with removeDescendant' );
+      assert && assert( this.length > 0, 'cannot remove a Node from an empty trail' );
       
       this.nodes.pop();
       if ( this.indices.length ) {
         this.indices.pop();
       }
       
-      // mimic an Array
       this.length--;
+      this.updateUniqueId();
       return this;
     },
     
@@ -397,10 +403,16 @@ define( function( require ) {
       return this.getTransform().inverseBounds2( bounds );
     },
     
+    updateUniqueId: function() {
+      this.uniqueId = _.map( this.nodes, function( node ) { return node.getId(); } ).join( '-' );
+    },
+    
     // concatenates the unique IDs of nodes in the trail, so that we can do id-based lookups
     getUniqueId: function() {
-      // TODO: consider caching this if it is ever a bottleneck. it seems like it might be called in layer-refresh inner loops
-      return _.map( this.nodes, function( node ) { return node.getId(); } ).join( '-' );
+      var previousId = this.uniqueId;
+      this.updateUniqueId();
+      assert && assert( previousId === this.uniqueId, 'bad id(ea)' );
+      return this.uniqueId;
     },
     
     toString: function() {
