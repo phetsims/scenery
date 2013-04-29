@@ -1191,7 +1191,7 @@ define( function( require ) {
       if ( layer.cssRotation ) { layerInfo += ' cssTranslation'; }
       if ( layer.cssScale ) { layerInfo += ' cssTranslation'; }
       if ( layer.cssTransform ) { layerInfo += ' cssTranslation'; }
-      if ( layer.dirtyBounds ) { layerInfo += ' dirtyBounds:' + layer.dirtyBounds.toString(); }
+      if ( layer.dirtyBounds && layer.dirtyBounds.isFinite() ) { layerInfo += ' dirtyBounds:' + layer.dirtyBounds.toString(); }
       layerInfo += '</span>';
       layerEntries[startIdx] += '<div style="color: #080">+Layer ' + layerInfo + '</div>';
       layerEntries[endIndex] += '<div style="color: #800">-Layer ' + layerInfo + '</div>';

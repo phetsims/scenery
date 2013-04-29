@@ -3,7 +3,6 @@ Priorities:
     Consider an HTML node instead of overloading Text with it
     Investigate double typed arrays for speed (comared to float typed arrays, less casting?)
     OnOffDragHandler
-    Remove 'dirtyBounds' part from debugScene if it's infinite?
     Consider having children that don't get stitched, but just added (for speed, imagine particules)
     * Performance: Better event system handling (notification of common changes?)
         Layers could conceivably add a listener to a node with a specific trail reference, instead of doing a dispatch up the tree.
