@@ -42,7 +42,9 @@ define( function( require ) {
     this._direction    = 'ltr';              // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
     this._boundsMethod = 'fast';             // fast (SVG/DOM, no canvas rendering allowed), fastCanvas (SVG/DOM, canvas rendering allowed without dirty regions),
                                              //   or accurate (Canvas accurate recursive)
-    this._isHtml       = false;              // whether the text is rendered as HTML or not
+    
+    // whether the text is rendered as HTML or not. if defined (in a subtype constructor), use that value instead
+    this._isHTML = this._isHTML === undefined ? false : this._isHTML;
     
     // we will dynamically change renderers, so they are initialized per-instance instead of per-type
     this._supportedRenderers = [ Renderer.Canvas, Renderer.SVG, Renderer.DOM ];
@@ -80,18 +82,6 @@ define( function( require ) {
     
     getText: function() {
       return this._text;
-    },
-    
-    setIsHtml: function( isHtml ) {
-      if ( isHtml !== this._isHtml ) {
-        this._isHtml = isHtml;
-        this.invalidateText();
-      }
-      return this;
-    },
-    
-    getIsHtml: function() {
-      return this._isHtml;
     },
     
     setBoundsMethod: function( method ) {
@@ -135,8 +125,8 @@ define( function( require ) {
         }
       }
       
-      check( !this.boundsInaccurate && !this._isHtml, Renderer.Canvas );
-      check( !this._isHtml, Renderer.SVG );
+      check( !this.boundsInaccurate && !this._isHTML, Renderer.Canvas );
+      check( !this._isHTML, Renderer.SVG );
       check( !this.hasStroke() && this.isFillDOMCompatible(), Renderer.DOM );
       
       if ( this._supportedRenderers.length === 0 ) {
@@ -151,9 +141,9 @@ define( function( require ) {
     invalidateText: function() {
       // investigate http://mudcu.be/journal/2011/01/html5-typographic-metrics/
       if ( this._boundsMethod === 'fast' || this._boundsMethod === 'fastCanvas' ) {
-        this.invalidateSelf( this._isHtml ? this.approximateDOMBounds() : this.approximateSVGBounds() );
+        this.invalidateSelf( this._isHTML ? this.approximateDOMBounds() : this.approximateSVGBounds() );
       } else {
-        assert && assert( !this._isHtml, 'HTML text is not allowed with the accurate bounds method' );
+        assert && assert( !this._isHTML, 'HTML text is not allowed with the accurate bounds method' );
         this.invalidateSelf( this.accurateCanvasBounds() );
       }
       
@@ -304,7 +294,7 @@ define( function( require ) {
     
     // a DOM node (not a Scenery DOM node, but an actual DOM node) with the text
     getDOMTextNode: function() {
-      if ( this._isHtml ) {
+      if ( this._isHTML ) {
         var span = document.createElement( 'span' );
         span.innerHTML = this.text;
         return span;
@@ -554,7 +544,7 @@ define( function( require ) {
   addFontForwarding( 'fontSize', 'FontSize', 'size' );
   addFontForwarding( 'lineHeight', 'LineHeight', 'lineHeight' );
   
-  Text.prototype._mutatorKeys = [ 'isHtml', 'boundsMethod', 'text', 'font', 'fontWeight', 'fontFamily', 'fontStretch', 'fontStyle', 'fontSize', 'lineHeight',
+  Text.prototype._mutatorKeys = [ 'boundsMethod', 'text', 'font', 'fontWeight', 'fontFamily', 'fontStretch', 'fontStyle', 'fontSize', 'lineHeight',
                                   'textAlign', 'textBaseline', 'direction' ].concat( Node.prototype._mutatorKeys );
   
   Text.prototype._supportedRenderers = [ Renderer.Canvas, Renderer.SVG, Renderer.DOM ];
@@ -567,7 +557,6 @@ define( function( require ) {
   Object.defineProperty( Text.prototype, 'textBaseline', { set: Text.prototype.setTextBaseline, get: Text.prototype.getTextBaseline } );
   Object.defineProperty( Text.prototype, 'direction', { set: Text.prototype.setDirection, get: Text.prototype.getDirection } );
   Object.defineProperty( Text.prototype, 'boundsMethod', { set: Text.prototype.setBoundsMethod, get: Text.prototype.getBoundsMethod } );
-  Object.defineProperty( Text.prototype, 'isHtml', { set: Text.prototype.setIsHtml, get: Text.prototype.getIsHtml } );
   
   // mix in support for fills and strokes
   fillable( Text );
