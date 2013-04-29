@@ -124,6 +124,11 @@ define( function( require ) {
         // this trail will depend on this group, so increment the reference counter
         this.idGroupMap[id].referenceCount++;
         
+        if ( subtrail.length === trail.length ) {
+          // TODO: cleaner control structures
+          break;
+        }
+        
         // step down towards our full trail
         subtrail.addDescendant( trail.nodes[subtrail.length] );
         lastId = id;
