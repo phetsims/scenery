@@ -2,16 +2,9 @@
 Priorities:
     Consider an HTML node instead of overloading Text with it
     Investigate double typed arrays for speed (comared to float typed arrays, less casting?)
-    OnOfDragHandler
+    OnOffDragHandler
     Remove 'dirtyBounds' part from debugScene if it's infinite?
     Consider having children that don't get stitched, but just added (for speed, imagine particules)
-    DOM text:
-        --- Update docs with isHtml flag
-        getDOMElement() and updateCSSTransform() should support DAGable nodes, with a flag that will cause it to fail?
-        Should we add in a DOM-support mixin?
-        allowsMultipleDOMInstances
-            For image, would require not using the initial image copy (but creating images with the same src)
-        TODO: how to document the interfaces for NODE rendering support?
     * Performance: Better event system handling (notification of common changes?)
         Layers could conceivably add a listener to a node with a specific trail reference, instead of doing a dispatch up the tree.
         Looks important for transform changes, since they are firing off 2 dispatchEventWithTransform calls, and it should be much better to notify the layers directly
