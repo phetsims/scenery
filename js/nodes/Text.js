@@ -41,7 +41,7 @@ define( function( require ) {
     this._textBaseline = 'alphabetic';       // top, hanging, middle, alphabetic, ideographic, bottom
     this._direction    = 'ltr';              // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
     this._boundsMethod = 'fast';             // fast (SVG/DOM, no canvas rendering allowed), fastCanvas (SVG/DOM, canvas rendering allowed without dirty regions),
-                                             //   or slow (Canvas accurate recursive)
+                                             //   or accurate (Canvas accurate recursive)
     this._isHtml       = false;              // whether the text is rendered as HTML or not
     
     // we will dynamically change renderers, so they are initialized per-instance instead of per-type
