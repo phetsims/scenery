@@ -44,8 +44,8 @@ define( function( require ) {
       this.backingScale = args.fullResolution ? scenery.Util.backingScale( document.createElement( 'canvas' ).getContext( '2d' ) ) : 1;
     }
     
-    this.logicalWidth = this.$main.width();
-    this.logicalHeight = this.$main.height();
+    this.logicalWidth = this.scene.sceneBounds.width;
+    this.logicalHeight = this.scene.sceneBounds.height;
     
     var canvas = document.createElement( 'canvas' );
     canvas.width = this.logicalWidth * this.backingScale;

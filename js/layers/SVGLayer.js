@@ -31,6 +31,8 @@ define( function( require ) {
   scenery.SVGLayer = function( args ) {
     var $main = args.$main;
     
+    this.scene = args.scene;
+    
     // main SVG element
     this.svg = document.createElementNS( svgns, 'svg' );
     
@@ -41,8 +43,8 @@ define( function( require ) {
     // the <defs> block that we will be stuffing gradients and patterns into
     this.defs = document.createElementNS( svgns, 'defs' );
     
-    var width = $main.width();
-    var height = $main.height();
+    var width = args.scene.sceneBounds.width;
+    var height = args.scene.sceneBounds.height;
     
     this.svg.appendChild( this.defs );
     this.svg.appendChild( this.g );
@@ -54,8 +56,6 @@ define( function( require ) {
     this.svg.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
     this.svg.style['pointer-events'] = 'none';
     $main.append( this.svg );
-    
-    this.scene = args.scene;
     
     this.isSVGLayer = true;
     
