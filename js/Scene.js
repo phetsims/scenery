@@ -89,7 +89,7 @@ define( function( require ) {
     // resize the main container as a sanity check
     this.setSize( options.width, options.height );
     
-    this.sceneBounds = new Bounds2( 0, 0, $main.width(), $main.height() );
+    this.sceneBounds = new Bounds2( 0, 0, options.width, options.height );
     
     // default to a canvas layer type, but this can be changed
     this.preferredSceneLayerType = options.preferredSceneLayerType;
