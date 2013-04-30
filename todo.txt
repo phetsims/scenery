@@ -303,14 +303,17 @@ Trail:
 
 Performance:
     Stitching:
-        ** Layer creation is about 50% of the cost
+        * Layer reation
             - match in stitch, cache canvases, minimize jquery parts
-        Main stitchInterval
         * addTrailToLayer (various)
+            ** SVG addNodeFromTrail and updateNode
+        * Main stitchInterval
+        * Layer builder
         TrailPointer:
             equalsNested
             compareNested
             nestedForwards
+        Better reindexing of layers (don't affect so many)
     Events:
         Layer refresh: up tree to all scenes?
             Same with marking and stitch? Better way?
