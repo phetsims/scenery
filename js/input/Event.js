@@ -42,7 +42,7 @@ define( function( require ) {
     this.currentTarget = args.currentTarget;
     
     // {Node} leaf-most node in trail
-    this.target = args.trail;
+    this.target = args.target;
     
     // TODO: add extended information based on an event here?
   };
