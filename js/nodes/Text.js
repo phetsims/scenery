@@ -279,13 +279,13 @@ define( function( require ) {
     
     updateDOMElement: function( div ) {
       var $div = $( div );
-      $div.css( 'font', this.getFont() );
-      $div.css( 'color', this.getFill() ? this.getFill() : 'transparent' ); // transparent will make us invisible if the fill is null
+      div.style.font = this.getFont();
+      div.style.color = this.getFill() ? this.getFill() : 'transparent'; // transparent will make us invisible if the fill is null
       $div.width( this.getSelfBounds().width );
       $div.height( this.getSelfBounds().height );
       $div.empty(); // remove all children, including previously-created text nodes
       div.appendChild( this.getDOMTextNode() );
-      div.setAttribute( 'direction', this._direction );
+      div.setAttribute( 'dir', this._direction );
     },
     
     updateCSSTransform: function( transform, element ) {

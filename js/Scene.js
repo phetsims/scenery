@@ -452,6 +452,7 @@ define( function( require ) {
       trail.setImmutable();
       
       // don't do a layer lookup to determine the current layer (we already modified that state to be consistent).
+      // TODO: possible somewhat-bottleneck location
       var currentLayer = beforeTrailLayerMap[trailId];
       var newLayer = stitchData.newLayerMap[trailId];
       
