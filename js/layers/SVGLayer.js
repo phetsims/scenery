@@ -50,7 +50,7 @@ define( function( require ) {
     this.svg.setAttribute( 'width', width );
     this.svg.setAttribute( 'height', height );
     this.svg.setAttribute( 'stroke-miterlimit', 10 ); // to match our Canvas brethren so we have the same default behavior
-    this.$svg.css( 'position', 'absolute' );
+    this.svg.style.position = 'absolute';
     this.svg.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
     this.svg.style['pointer-events'] = 'none';
     $main.append( this.svg );
