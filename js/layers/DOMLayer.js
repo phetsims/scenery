@@ -67,6 +67,7 @@ define( function( require ) {
       
       var element = node.getDOMElement();
       node.updateDOMElement( element );
+      this.updateVisibility( trail, element );
       
       this.idElementMap[trail.getUniqueId()] = element;
       this.idTrailMap[trail.getUniqueId()] = trail;
@@ -151,20 +152,21 @@ define( function( require ) {
         node.updateDOMElement( dirtyElement );
       }
       
+      // TODO: faster way to iterate through
       for ( var trailId in this.idTrailMap ) {
         var subtrail = this.idTrailMap[trailId];
         subtrail.reindex();
         if ( subtrail.isExtensionOf( trail, true ) ) {
-          var element = this.idElementMap[trailId];
-          
-          var visible = _.every( subtrail.nodes, function( node ) { return node.isVisible(); } );
-          
-          if ( visible ) {
-            element.style.visibility = 'visible';
-          } else {
-            element.style.visibility = 'hidden';
-          }
+          this.updateVisibility( subtrail, this.idElementMap[trailId] );
         }
+      }
+    },
+    
+    updateVisibility: function( trail, element ) {
+      if ( trail.isVisible() ) {
+        element.style.visibility = 'visible';
+      } else {
+        element.style.visibility = 'hidden';
       }
     },
     

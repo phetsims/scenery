@@ -79,6 +79,11 @@ define( function( require ) {
       return this.lastNode().isPainted();
     },
     
+    // this trail is visible only if all nodes on it are marked as visible
+    isVisible: function() {
+      return _.every( this.nodes, function( node ) { return node.isVisible(); } );
+    },
+    
     get: function( index ) {
       if ( index >= 0 ) {
         return this.nodes[index];
