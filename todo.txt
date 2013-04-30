@@ -29,6 +29,7 @@ Priorities:
     Testing with hidef canvases
 
 Bugs:
+    What happens with a computer with multiple mice? is that handled in the pointer spec?
     Text width detected improperly, or wrapping in DOM renderer
     Default text with text string changed visual size switching between boundsMethods in playground
     Switching renderers in Devious Drag example on iPad causes other objects being dragged to be "dropped"
@@ -309,6 +310,11 @@ Performance:
             equalsNested
             compareNested
             nestedForwards
+    Events:
+        Layer refresh: up tree to all scenes?
+            Same with marking and stitch? Better way?
+        Dirty bounds:
+        ...
     *** paintCanvas bottleneck?
     *** Garbage collection jitters!
     *** Performance regressions with layering

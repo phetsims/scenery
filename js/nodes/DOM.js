@@ -160,7 +160,8 @@ define( function( require ) {
     get interactive() { return this.isInteractive(); },
     
     getBasicConstructor: function( propLines ) {
-      return 'new scenery.DOM( $( \'' + this._container.innerHTML.replace( /'/g, '\\\'' ) + '\' ), {' + propLines + '} )';
+      // TODO: actual way of escaping things
+      return 'new scenery.DOM( $( \'' + window.escape( this._container.innerHTML.replace( /'/g, '\\\'' ) ) + '\' ), {' + propLines + '} )';
     },
     
     getPropString: function( spaces, includeChildren ) {
