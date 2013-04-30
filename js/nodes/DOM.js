@@ -161,7 +161,6 @@ define( function( require ) {
     get interactive() { return this.isInteractive(); },
     
     getBasicConstructor: function( propLines ) {
-      // TODO: actual way of escaping things
       return 'new scenery.DOM( $( \'' + escapeHTML( this._container.innerHTML.replace( /'/g, '\\\'' ) ) + '\' ), {' + propLines + '} )';
     },
     
