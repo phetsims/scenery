@@ -304,8 +304,9 @@ Trail:
 Performance:
     Stitching:
         ** Layer creation is about 50% of the cost
+            - match in stitch, cache canvases, minimize jquery parts
         Main stitchInterval
-        addTrailToLayer (various)
+        * addTrailToLayer (various)
         TrailPointer:
             equalsNested
             compareNested
