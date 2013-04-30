@@ -55,6 +55,8 @@ define( function( require ) {
    */
   scenery.Scene = function Scene( $main, options ) {
     assert && assert( $main[0], 'A main container is required for a scene' );
+    this.$main = $main;
+    this.main = $main[0];
     
     // defaults
     options = _.extend( {
@@ -85,7 +87,6 @@ define( function( require ) {
     this.lastCursor = null;
     this.defaultCursor = $main.css( 'cursor' );
     
-    this.$main = $main;
     // resize the main container as a sanity check
     this.setSize( options.width, options.height );
     
