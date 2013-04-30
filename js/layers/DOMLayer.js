@@ -150,6 +150,7 @@ define( function( require ) {
       var dirtyElement = this.idElementMap[trail.getUniqueId()];
       if ( dirtyElement ) {
         node.updateDOMElement( dirtyElement );
+        node.updateCSSTransform( trail.getTransform(), dirtyElement );
       }
       
       // TODO: faster way to iterate through
