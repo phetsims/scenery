@@ -24,6 +24,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var escapeHTML = require( 'PHET_CORE/escapeHTML' );
   var Bounds2 = require( 'DOT/Bounds2' );
+  var Matrix3 = require( 'DOT/Matrix3' );
   
   var scenery = require( 'SCENERY/scenery' );
   
@@ -279,7 +280,6 @@ define( function( require ) {
     updateDOMElement: function( div ) {
       var $div = $( div );
       $div.css( 'font', this.getFont() );
-      $div.css( 'margin-top', this.getSelfBounds().minY + 'px' ); // put our baseline at the correct position
       $div.css( 'color', this.getFill() ? this.getFill() : 'transparent' ); // transparent will make us invisible if the fill is null
       $div.width( this.getSelfBounds().width );
       $div.height( this.getSelfBounds().height );
@@ -289,8 +289,10 @@ define( function( require ) {
     },
     
     updateCSSTransform: function( transform, element ) {
-      // TODO: extract this out, it's completely shared!
-      $( element ).css( transform.getMatrix().getCSSTransformStyles() );
+      // since the DOM origin of the text is at the upper-left, and our Scenery origin is at the lower-left, we need to
+      // shift the text vertically, postmultiplied with the entire transform.
+      var yOffset = this.getSelfBounds().minY;
+      $( element ).css( transform.getMatrix().timesMatrix( Matrix3.translation( 0, yOffset ) ).getCSSTransformStyles() );
     },
     
     // a DOM node (not a Scenery DOM node, but an actual DOM node) with the text
