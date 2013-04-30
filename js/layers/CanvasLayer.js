@@ -50,9 +50,9 @@ define( function( require ) {
     var canvas = document.createElement( 'canvas' );
     canvas.width = this.logicalWidth * this.backingScale;
     canvas.height = this.logicalHeight * this.backingScale;
-    $( canvas ).css( 'width', this.logicalWidth );
-    $( canvas ).css( 'height', this.logicalHeight );
-    $( canvas ).css( 'position', 'absolute' );
+    canvas.style.width = this.logicalWidth + 'px';
+    canvas.style.height = this.logicalHeight + 'px';
+    canvas.style.position = 'absolute';
     
     // add this layer on top (importantly, the constructors of the layers are called in order)
     this.$main.append( canvas );
