@@ -303,12 +303,14 @@ Trail:
 
 Performance:
     Stitching:
-        * Layer reation
+        *** Layer creation
             - match in stitch, cache canvases, minimize jquery parts
         * addTrailToLayer (various)
             ** SVG addNodeFromTrail and updateNode
-        * Main stitchInterval
-        * Layer builder
+        * removeTrailFromLayer (various)
+            
+        * Main stitchInterval (see layer creation)
+        ** Layer builder
         TrailPointer:
             equalsNested
             compareNested

@@ -588,11 +588,14 @@ define( function( require ) {
      * that is relevant for a specific node, and ancestors don't need to be notified.
      */
     fireEvent: function( type, args ) {
-      _.each( this.getEventListeners(), function( eventListener ) {
-        if ( eventListener[type] ) {
-          eventListener[type]( args );
+      var eventListenersCopy = this._eventListeners.slice( 0 );
+      var len = eventListenersCopy.length;
+      for ( var i = 0; i < len; i++ ) {
+        var callback = eventListenersCopy[i][type];
+        if ( callback ) {
+          callback( args );
         }
-      } );
+      }
     },
     
     /*
