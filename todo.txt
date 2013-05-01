@@ -302,6 +302,8 @@ Trail:
     depthFirstUntil should possibly have option for defensive copies of the pointers?
 
 Performance:
+    Transform duplication and handling? markOldPaint?
+    paint and validation not needed for many types of nodes
     ** affectedLayers
     * Bounds2 handling changes for garbage collection
     ** dispatch with transform, 2x since we have the listener to the transform? can we remove that?
