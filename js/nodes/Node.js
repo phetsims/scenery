@@ -644,7 +644,7 @@ define( function( require ) {
       
       var transformStack = [ new Transform3() ];
       
-      function recursiveEventDispatch( node ) {
+      function recursiveEventDispatchWithTransform( node ) {
         trail.addAncestor( node );
         
         transformStack.push( new Transform3( node.getMatrix().timesMatrix( transformStack[transformStack.length-1].getMatrix() ) ) );
@@ -654,7 +654,7 @@ define( function( require ) {
         node.fireEvent( type, args );
         
         _.each( node._parents, function( parent ) {
-          recursiveEventDispatch( parent );
+          recursiveEventDispatchWithTransform( parent );
         } );
         
         transformStack.pop();
@@ -662,7 +662,7 @@ define( function( require ) {
         trail.removeAncestor();
       }
       
-      recursiveEventDispatch( this );
+      recursiveEventDispatchWithTransform( this );
     },
     
     // TODO: consider renaming to translateBy to match scaleBy
