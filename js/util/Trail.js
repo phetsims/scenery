@@ -129,7 +129,8 @@ define( function( require ) {
       }
       
       this.length++;
-      this.updateUniqueId();
+      // accelerated version of this.updateUniqueId()
+      this.uniqueId = ( this.uniqueId ? node._id + '-' + this.uniqueId : node._id + '' );
       return this;
     },
     
@@ -159,7 +160,8 @@ define( function( require ) {
       }
       
       this.length++;
-      this.updateUniqueId();
+      // accelerated version of this.updateUniqueId()
+      this.uniqueId = ( this.uniqueId ? this.uniqueId + '-' + node._id : node._id + '' );
       return this;
     },
     
@@ -409,7 +411,17 @@ define( function( require ) {
     },
     
     updateUniqueId: function() {
-      this.uniqueId = _.map( this.nodes, function( node ) { return node.getId(); } ).join( '-' );
+      // string concatenation is faster, see http://jsperf.com/string-concat-vs-joins
+      var result = '';
+      var len = this.nodes.length;
+      if ( len > 0 ) {
+        result += this.nodes[0]._id;
+      }
+      for ( var i = 1; i < len; i++ ) {
+        result += '-' + this.nodes[i]._id;
+      }
+      this.uniqueId = result;
+      // this.uniqueId = _.map( this.nodes, function( node ) { return node.getId(); } ).join( '-' );
     },
     
     // concatenates the unique IDs of nodes in the trail, so that we can do id-based lookups
