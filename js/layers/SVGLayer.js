@@ -420,8 +420,10 @@ define( function( require ) {
     reindex: function( zIndex ) {
       Layer.prototype.reindex.call( this, zIndex );
       
-      this.$svg.css( 'z-index', zIndex );
-      this.zIndex = zIndex;
+      if ( this.zIndex !== zIndex ) {
+        this.svg.style.zIndex = zIndex;
+        this.zIndex = zIndex;
+      }
       return zIndex + 1;
     },
     

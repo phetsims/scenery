@@ -442,6 +442,7 @@ define( function( require ) {
     } );
     
     // set the layers' elements' z-indices, and reindex their trails so they are in a consistent state
+    // TODO: performance: don't reindex layers if no layers were added or removed?
     this.reindexLayers();
     
     // add/remove trails from their necessary layers
@@ -706,7 +707,7 @@ define( function( require ) {
   
   // after layer changes, the layers should have their zIndex updated, and updates their trails
   Scene.prototype.reindexLayers = function() {
-    var index = 1;
+    var index = 1; // don't start below 1
     _.each( this.layers, function( layer ) {
       // layers increment indices as needed
       index = layer.reindex( index );

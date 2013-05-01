@@ -318,7 +318,7 @@ Performance:
             equalsNested
             compareNested
             nestedForwards
-        Better reindexing of layers (don't affect so many)
+        * Better reindexing of layers (don't affect so many, possibly cache and don't change?)
     Events:
         Layer refresh: up tree to all scenes?
             Same with marking and stitch? Better way?
