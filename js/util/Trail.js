@@ -414,6 +414,12 @@ define( function( require ) {
     
     // concatenates the unique IDs of nodes in the trail, so that we can do id-based lookups
     getUniqueId: function() {
+      // sanity checks
+      if ( assert ) {
+        var oldUniqueId = this.uniqueId;
+        this.updateUniqueId();
+        assert( oldUniqueId === this.uniqueId );
+      }
       return this.uniqueId;
     },
     
