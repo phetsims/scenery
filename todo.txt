@@ -304,6 +304,7 @@ Trail:
 Performance:
     ** affectedLayers
     * Bounds2 handling changes for garbage collection
+    ** dispatch with transform, 2x since we have the listener to the transform? can we remove that?
     Stitching:
         *** Layer creation
             - match in stitch, cache canvases, minimize jquery parts

@@ -83,6 +83,7 @@ define( function( require ) {
      */
     this._transform = new Transform3();
     this._transformListener = {
+      // TODO: performance handling so we don't need to do two recursions!
       before: function() { self.beforeTransformChange(); },
       after: function() { self.afterTransformChange(); }
     };
@@ -635,6 +636,7 @@ define( function( require ) {
     
     // dispatches events with the transform computed from parent of the "root" to the local frame
     dispatchEventWithTransform: function( type, args ) {
+      // TODO: this in general is a MAJOR performance bottleneck when there are many moving nodes
       var trail = new scenery.Trail();
       trail.setMutable(); // don't allow this trail to be set as immutable for storage
       
