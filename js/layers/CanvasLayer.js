@@ -413,6 +413,7 @@ define( function( require ) {
     },
     
     internalMarkDirtyBounds: function( localBounds, transform ) {
+      // TODO: performance minor hotspot, use mutable forms?
       assert && assert( localBounds.isEmpty() || localBounds.isFinite(), 'Infinite (non-empty) dirty bounds passed to internalMarkDirtyBounds' );
       var globalBounds = transform.transformBounds2( localBounds );
       

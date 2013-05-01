@@ -302,6 +302,8 @@ Trail:
     depthFirstUntil should possibly have option for defensive copies of the pointers?
 
 Performance:
+    ** affectedLayers
+    * Bounds2 handling changes for garbage collection
     Stitching:
         *** Layer creation
             - match in stitch, cache canvases, minimize jquery parts
