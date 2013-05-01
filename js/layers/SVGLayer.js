@@ -103,6 +103,9 @@ define( function( require ) {
             // apply the node's transform to the group
             this.applyTransform( subtrail.lastNode().getTransform(), group );
             
+            // apply any stylings to the group (opacity, visibility)
+            this.updateNodeGroup( subtrail.lastNode(), group );
+            
             // add the group to its parent
             this.insertGroupIntoParent( group, this.idGroupMap[lastId], subtrail );
           } else {
