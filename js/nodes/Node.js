@@ -813,7 +813,7 @@ define( function( require ) {
         // swap the transform and move the listener to the new one
         this._transform.removeTransformListener( this._transformListener ); // don't leak memory!
         this._transform = transform;
-        this._transform.addTransformListener( this._transformListener );
+        this._transform.prependTransformListener( this._transformListener );
         
         this.afterTransformChange();
       }
