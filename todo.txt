@@ -3,7 +3,6 @@ Priorities:
     For transform listeners and changes:
         Notes about marking dirty regions should NEVER change a transform?
         Things may go a bit screwy if event listeners for transforms change the transform?
-    Consider an HTML node instead of overloading Text with it
     Investigate double typed arrays for speed (comared to float typed arrays, less casting?)
     OnOffDragHandler
     Consider having children that don't get stitched, but just added (for speed, imagine particules)
