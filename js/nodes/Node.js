@@ -652,35 +652,6 @@ define( function( require ) {
       recursiveEventDispatch( this );
     },
     
-    // dispatches events with the transform computed from parent of the "root" to the local frame
-    dispatchEventWithTransform: function( type, args ) {
-      // TODO: this in general is a MAJOR performance bottleneck when there are many moving nodes
-      var trail = new scenery.Trail();
-      trail.setMutable(); // don't allow this trail to be set as immutable for storage
-      
-      var transformStack = [ new Transform3() ];
-      
-      function recursiveEventDispatchWithTransform( node ) {
-        trail.addAncestor( node );
-        
-        transformStack.push( new Transform3( node.getMatrix().timesMatrix( transformStack[transformStack.length-1].getMatrix() ) ) );
-        args.transform = transformStack[transformStack.length-1];
-        args.trail = trail;
-        
-        node.fireEvent( type, args );
-        
-        _.each( node._parents, function( parent ) {
-          recursiveEventDispatchWithTransform( parent );
-        } );
-        
-        transformStack.pop();
-        
-        trail.removeAncestor();
-      }
-      
-      recursiveEventDispatchWithTransform( this );
-    },
-    
     // TODO: consider renaming to translateBy to match scaleBy
     translate: function( x, y, prependInstead ) {
       if ( typeof x === 'number' ) {
@@ -852,7 +823,7 @@ define( function( require ) {
     
     // called after our transform is changed
     afterTransformChange: function() {
-      this.dispatchEventWithTransform( 'transform', {
+      this.dispatchEvent( 'transform', {
         node: this,
         type: 'transform',
         matrix: this._transform.getMatrix()
