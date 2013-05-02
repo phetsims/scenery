@@ -46,6 +46,7 @@ define( [
     'SCENERY/nodes/Text',
     'SCENERY/nodes/VBox',
     
+    'SCENERY/util/BasicNodeEvents',
     'SCENERY/util/CanvasContextWrapper',
     'SCENERY/util/Color',
     'SCENERY/util/Font',

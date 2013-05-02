@@ -18,6 +18,7 @@ define( function( require ) {
   var clamp = require( 'DOT/Util' ).clamp;
   
   var scenery = require( 'SCENERY/scenery' );
+  var NodeEvents = require( 'SCENERY/util/BasicNodeEvents' );
   var LayerStrategy = require( 'SCENERY/layers/LayerStrategy' ); // used to set the default layer strategy on the prototype
   // require( 'SCENERY/layers/Renderer' ); // commented out so Require.js doesn't balk at the circular dependency
   
@@ -90,7 +91,7 @@ define( function( require ) {
     this._transform.addTransformListener( this._transformListener );
     
     this._inputListeners = []; // for user input handling (mouse/touch)
-    this._eventListeners = []; // for internal events like paint invalidation, layer invalidation, etc.
+    this.initializeNodeEvents(); // for internal events like paint invalidation, layer invalidation, etc.
     
     // TODO: add getter/setters that will be able to invalidate whether this node is under any pointers, etc.
     this._includeStrokeInHitRegion = false;
@@ -567,46 +568,6 @@ define( function( require ) {
     
     getInputListeners: function() {
       return this._inputListeners.slice( 0 ); // defensive copy
-    },
-    
-    // TODO: set this up with a mix-in for a generic notifier?
-    addEventListener: function( listener ) {
-      // don't allow listeners to be added multiple times
-      if ( _.indexOf( this._eventListeners, listener ) === -1 ) {
-        this._eventListeners.push( listener );
-      }
-      return this;
-    },
-    
-    removeEventListener: function( listener ) {
-      // ensure the listener is in our list
-      assert && assert( _.indexOf( this._eventListeners, listener ) !== -1 );
-      
-      this._eventListeners.splice( _.indexOf( this._eventListeners, listener ), 1 );
-      return this;
-    },
-    
-    getEventListeners: function() {
-      return this._eventListeners.slice( 0 ); // defensive copy
-    },
-    
-    /*
-     * Fires an event to all event listeners attached to this node. It does not bubble down to
-     * all ancestors with trails, like dispatchEvent does. Use fireEvent when you only want an event
-     * that is relevant for a specific node, and ancestors don't need to be notified.
-     */
-    fireEvent: function( type, args ) {
-      // TODO: performance: 8% bottleneck - consider storing separate locations for each event type
-      var len = this._eventListeners.length;
-      if ( len ) {
-        var eventListenersCopy = this._eventListeners.slice( 0 );
-        for ( var i = 0; i < len; i++ ) {
-          var callback = eventListenersCopy[i][type];
-          if ( callback ) {
-            callback( args );
-          }
-        }
-      }
     },
     
     /*
@@ -1577,6 +1538,8 @@ define( function( require ) {
   Node.prototype._supportedRenderers = [];
   
   Node.prototype.layerStrategy = LayerStrategy;
+  
+  NodeEvents( Node );
   
   return Node;
 } );
