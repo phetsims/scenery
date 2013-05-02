@@ -24,7 +24,7 @@
     
     var size = width * height * 4;
     
-    setInterval( function() {
+    function addACanvas() {
       totalSize += size;
       var canvas = document.createElement( 'canvas' );
       canvas.width = width;
@@ -40,6 +40,16 @@
       document.body.appendChild( canvas );
       
       document.getElementById( 'usage' ).innerHTML = totalSize / 1024 / 1024;
+    }
+    
+    setInterval( function() {
+      addACanvas();
+      // addACanvas();
+      // addACanvas();
+      // addACanvas();
+      // addACanvas();
+      // addACanvas();
+      // addACanvas();
     }, 500 );
   };
   
