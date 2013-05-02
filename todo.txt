@@ -32,6 +32,7 @@ Priorities:
     Testing with hidef canvases
 
 Bugs:
+    DOM opacity
     What happens with a computer with multiple mice? is that handled in the pointer spec?
     Text width detected improperly, or wrapping in DOM renderer
     Default text with text string changed visual size switching between boundsMethods in playground
@@ -327,7 +328,27 @@ Performance:
     Events:
         Layer refresh: up tree to all scenes?
             Same with marking and stitch? Better way?
-        Dirty bounds:
+        Mark Dirty bounds:
+            TODO: add a mark flag that it either affects only self, or a subtree?
+            TODO: DOM opacity is not there!
+            * we're currently firing to any affected layers
+                DOM:
+                    self: update DOM, update transform (because Text transform relies on text height etc.)
+                    subtrail: visibility
+                SVG:
+                    self: update SVG, visibility/opacity on group (recursion not needed)
+                        * external, for affected group
+                Canvas:
+                    self: transforms bounds with trail transform, unions
+                        * external, for affected bounds
+        Transform:
+            * we're currently firing to any affected layers
+                DOM:
+                    subtrail: update CSS *** currently slow
+                SVG:
+                    self/var: under base/base/above base
+                Canvas:
+                    no-op
         ...
     *** paintCanvas bottleneck?
     *** Garbage collection jitters!
