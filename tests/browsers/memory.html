@@ -12,20 +12,23 @@
 <body>
   
   <p>Current usage: <span id="usage"></span> MB</p>
+  <p>Canvas count: <span id="count"></span></p>
   
   <script type="text/javascript">
   
   window.onload = function() {
     var canvases = [];
     var totalSize = 0;
+    var count = 0;
     
-    var width = 1024;
-    var height = 769;
+    var width = document.documentElement.clientWidth;
+    var height = document.documentElement.clientHeight;
     
     var size = width * height * 4;
     
     function addACanvas() {
       totalSize += size;
+      count++;
       var canvas = document.createElement( 'canvas' );
       canvas.width = width;
       canvas.height = height;
@@ -40,6 +43,7 @@
       document.body.appendChild( canvas );
       
       document.getElementById( 'usage' ).innerHTML = totalSize / 1024 / 1024;
+      document.getElementById( 'count' ).innerHTML = count;
     }
     
     setInterval( function() {
