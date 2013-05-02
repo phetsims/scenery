@@ -172,10 +172,15 @@ define( function( require ) {
       this.dispatchEvent( 'stitch', { match: false } );
     },
     
+    removeAllChildren: function() {
+      this.setChildren( [] );
+    },
+    
     // TODO: efficiency by batching calls?
     setChildren: function( children ) {
       var node = this;
       if ( this._children !== children ) {
+        // TODO: maybe iterating in reverse is more efficient?
         _.each( this._children.slice( 0 ), function( child ) {
           node.removeChild( child );
         } );

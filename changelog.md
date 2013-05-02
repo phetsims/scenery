@@ -2,6 +2,7 @@
 Scenery Changelog
 =================
 
+2013-5-1  Added Node.removeAllChildren()
 2013-4-29 Removed Text.isHtml flag, added HTMLText instead for HTML-styled text
 2013-4-27 Added isHtml flag to Text that will treat text as HTML and force the DOM renderer.
 2013-4-27 Added DOM renderer support for Text (disallows strokes, only allows normal color fill)
