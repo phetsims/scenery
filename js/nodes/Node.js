@@ -594,6 +594,7 @@ define( function( require ) {
      * that is relevant for a specific node, and ancestors don't need to be notified.
      */
     fireEvent: function( type, args ) {
+      // TODO: performance: 8% bottleneck - consider storing separate locations for each event type
       var len = this._eventListeners.length;
       if ( len ) {
         var eventListenersCopy = this._eventListeners.slice( 0 );
