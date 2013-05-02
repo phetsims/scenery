@@ -1,9 +1,16 @@
 // Copyright 2002-2012, University of Colorado
 
 /**
- * Represents a trail (path in the graph) from a "root" node down to a descendant node.
+ * Represents a trail (path in the graph) from a 'root' node down to a descendant node.
  * In a DAG, or with different views, there can be more than one trail up from a node,
  * even to the same root node!
+ *
+ * It has an array of nodes, in order from the 'root' down to the last node,
+ * a length, and an array of indices such that node_i.children[index_i] === node_{i+1}.
+ *
+ * The indices can sometimes become stale when nodes are added and removed, so Trails
+ * can have their indices updated with reindex(). It's designed to be as fast as possible
+ * on Trails that are already indexed accurately.
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
