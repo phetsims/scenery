@@ -496,8 +496,11 @@
       var children = this.scene.getChildren();
       for ( var i = 0; i < children.length; i++ ) {
         var child = children[i];
-        child.rotate( 0.1 );
-        child.fill = ( this.iterationCount + i ) % 2 === 0 ? 'rgba(0,255,0,0.3)' : 'rgba(0,0,255,0.3)';
+        if ( i % 3 ) {
+          child.rotate( 0.1 );
+        } else {
+          child.fill = ( this.iterationCount + i ) % 2 === 0 ? 'rgba(0,255,0,0.3)' : 'rgba(0,0,255,0.3)';
+        }
       }
       this.scene.updateScene();
     },
@@ -536,8 +539,11 @@
       var children = this.scene.getChildren();
       for ( var i = 0; i < children.length; i++ ) {
         var child = children[i];
-        child.rotate( 0.1 );
-        child.fill = ( this.iterationCount + i ) % 2 === 0 ? 'rgba(0,255,0,0.3)' : 'rgba(0,0,255,0.3)';
+        if ( i % 3 ) {
+          child.rotate( 0.1 );
+        } else {
+          child.fill = ( this.iterationCount + i ) % 2 === 0 ? 'rgba(0,255,0,0.3)' : 'rgba(0,0,255,0.3)';
+        }
       }
       this.scene.updateScene();
     },
