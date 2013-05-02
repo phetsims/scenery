@@ -488,11 +488,17 @@
       
       this.main = main;
       this.scene = scene;
+      
+      this.iterationCount = 0;
     },
     step: function() {
-      _.each( this.scene.getChildren(), function( child ) {
+      this.iterationCount++;
+      var children = this.scene.getChildren();
+      for ( var i = 0; i < children.length; i++ ) {
+        var child = children[i];
         child.rotate( 0.1 );
-      } );
+        child.fill = ( this.iterationCount + i ) % 2 === 0 ? 'rgba(0,255,0,0.3)' : 'rgba(0,0,255,0.3)';
+      }
       this.scene.updateScene();
     },
     after: function() {
@@ -522,11 +528,17 @@
       
       this.main = main;
       this.scene = scene;
+      
+      this.iterationCount = 0;
     },
     step: function() {
-      _.each( this.scene.getChildren(), function( child ) {
+      this.iterationCount++;
+      var children = this.scene.getChildren();
+      for ( var i = 0; i < children.length; i++ ) {
+        var child = children[i];
         child.rotate( 0.1 );
-      } );
+        child.fill = ( this.iterationCount + i ) % 2 === 0 ? 'rgba(0,255,0,0.3)' : 'rgba(0,0,255,0.3)';
+      }
       this.scene.updateScene();
     },
     after: function() {
