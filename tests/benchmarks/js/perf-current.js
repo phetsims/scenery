@@ -466,6 +466,74 @@
     }
   };
   
+  var fastSquaresCanvas = {
+    name: 'Fast Squares Canvas',
+    count: 20,
+    before: function() {
+      this.width = 1024;
+      this.height = 768;
+      
+      var main = $( '#main' );
+      main.width( this.width );
+      main.height( this.height );
+      var scene = new scenery.Scene( main );
+      for( var i = 0; i < 1000; i++ ) {
+        scene.addChild( new scenery.Rectangle( 0, 0, 20, 20, {
+          fill: 'rgba(0,255,0,0.3)',
+          stroke: '#000000',
+          x: ( Math.PI * i ) % this.width,
+          y: ( 27 * i ) % this.height
+        } ) );
+      }
+      
+      this.main = main;
+      this.scene = scene;
+    },
+    step: function() {
+      _.each( this.scene.getChildren(), function( child ) {
+        child.rotate( 0.1 );
+      } );
+      this.scene.updateScene();
+    },
+    after: function() {
+      this.main.empty();
+    }
+  };
+  
+  var fastSquaresSVG = {
+    name: 'Fast Squares SVG',
+    count: 20,
+    before: function() {
+      this.width = 1024;
+      this.height = 768;
+      
+      var main = $( '#main' );
+      main.width( this.width );
+      main.height( this.height );
+      var scene = new scenery.Scene( main, { renderer: 'svg' } );
+      for( var i = 0; i < 500; i++ ) {
+        scene.addChild( new scenery.Rectangle( 0, 0, 20, 20, {
+          fill: 'rgba(0,255,0,0.3)',
+          stroke: '#000000',
+          x: ( Math.PI * i ) % this.width,
+          y: ( 27 * i ) % this.height
+        } ) );
+      }
+      
+      this.main = main;
+      this.scene = scene;
+    },
+    step: function() {
+      _.each( this.scene.getChildren(), function( child ) {
+        child.rotate( 0.1 );
+      } );
+      this.scene.updateScene();
+    },
+    after: function() {
+      this.main.empty();
+    }
+  };
+  
   var addingHexagons = {
     name: 'Adding Hexagons',
     count: 20,
@@ -506,12 +574,14 @@
   marks.currentMarks = [
     // textNodeInstances,
     // textPathInstances,
-    textBoundsChanges,
-    fuzzRecordAddRemoveRender,
-    rotatedSquaresHardcodedXY,
-    rotatedSquaresTransformXY,
-    rotatedSquaresIndividual,
-    addingHexagons,
+    // textBoundsChanges,
+    // fuzzRecordAddRemoveRender,
+    // rotatedSquaresHardcodedXY,
+    // rotatedSquaresTransformXY,
+    // rotatedSquaresIndividual,
+    // addingHexagons,
+    fastSquaresCanvas,
+    fastSquaresSVG,
     {
       name: 'Empty Loop'
     }
