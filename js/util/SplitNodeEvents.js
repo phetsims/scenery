@@ -34,7 +34,7 @@ define( function( require ) {
       this._events = {};
       
       var node = this;
-      // TODO: consider delaying this?
+      // TODO: performance: consider delaying this? Could affect memory usage?
       _.each( eventNames, function( name ) {
         node._events[name] = [];
       } );
