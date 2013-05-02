@@ -779,7 +779,7 @@ define( function( require ) {
       var layer = this.layers[i];
       
       var notBefore = endPointer.compareNested( new scenery.TrailPointer( layer.startPaintedTrail, true ) ) !== -1;
-      var notAfter = startPointer.compareNested( new scenery.TrailPointer( layer.endPaintedTrail, true ) ) !== 1;
+      var notAfter = startPointer.compareNested( new scenery.TrailPointer( layer.endPaintedTrail, false ) ) !== 1;
       
       if ( notBefore && notAfter ) {
         result.push( layer );
