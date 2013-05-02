@@ -5,9 +5,6 @@
  * In a DAG, or with different views, there can be more than one trail up from a node,
  * even to the same root node!
  *
- * This trail also mimics an Array, so trail[0] will be the root, and trail[trail.length-1]
- * will be the end node of the trail.
- *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
