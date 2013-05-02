@@ -54,6 +54,7 @@ define( [
     'SCENERY/util/Pattern',
     'SCENERY/util/RadialGradient',
     'SCENERY/util/SceneImage',
+    'SCENERY/util/SplitNodeEvents',
     'SCENERY/util/Trail',
     'SCENERY/util/TrailInterval',
     'SCENERY/util/TrailPointer',

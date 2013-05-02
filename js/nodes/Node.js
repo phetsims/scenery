@@ -18,7 +18,8 @@ define( function( require ) {
   var clamp = require( 'DOT/Util' ).clamp;
   
   var scenery = require( 'SCENERY/scenery' );
-  var nodeEvents = require( 'SCENERY/util/BasicNodeEvents' ); // uncapitalized, because of JSHint (TODO: find the flag)
+  // var nodeEvents = require( 'SCENERY/util/BasicNodeEvents' ); // uncapitalized, because of JSHint (TODO: find the flag)
+  var nodeEvents = require( 'SCENERY/util/SplitNodeEvents' ); // uncapitalized, because of JSHint (TODO: find the flag)
   var LayerStrategy = require( 'SCENERY/layers/LayerStrategy' ); // used to set the default layer strategy on the prototype
   // require( 'SCENERY/layers/Renderer' ); // commented out so Require.js doesn't balk at the circular dependency
   
@@ -1539,6 +1540,7 @@ define( function( require ) {
   
   Node.prototype.layerStrategy = LayerStrategy;
   
+  // mix-in the events for Node
   nodeEvents( Node );
   
   return Node;
