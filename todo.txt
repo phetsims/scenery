@@ -306,25 +306,21 @@ Trail:
     depthFirstUntil should possibly have option for defensive copies of the pointers?
 
 Performance:
-    Transform duplication and handling? markOldPaint?
-    paint and validation not needed for many types of nodes
-    ** affectedLayers
-    * Bounds2 handling changes for garbage collection
-    ** dispatch with transform, 2x since we have the listener to the transform? can we remove that?
-    Stitching:
-        *** Layer creation
-            - match in stitch, cache canvases, minimize jquery parts
-        * addTrailToLayer (various)
-            ** SVG addNodeFromTrail and updateNode
-        * removeTrailFromLayer (various)
-            
-        * Main stitchInterval (see layer creation)
-        ** Layer builder
-        TrailPointer:
-            equalsNested
-            compareNested
-            nestedForwards
-        * Better reindexing of layers (don't affect so many, possibly cache and don't change?)
+    Priorities:
+        Scene.affectedLayers O(N) => O(log N)
+        Node.fireEvent (and event listeners) should be split based on event type, so it's faster to fire?
+        Try Scene/Layer adding listeners to nodes based on their Trail, so we don't have to do the dispatching.
+            ** how to handle removal of the specific listener? Node COULD track (Scenes / Layers,Trail)?
+                Otherwise we get hash lookups, which won't scale well.
+        Bounds validation and immutable => mutable for lessening GC
+        Layer creation costs
+            * match in stitching
+            * cache canvases
+            * minimize jquery
+        addTrailToLayer / removeTrailFromLayer
+        LayerBuilder and LayerStrategy
+        TrailPointer's equalsNested, compareNested, nestedForwards
+        Better reindexing of layers (don't affect so many, spread the indices out more and do intelligently)
     Events:
         Layer refresh: up tree to all scenes?
             Same with marking and stitch? Better way?
