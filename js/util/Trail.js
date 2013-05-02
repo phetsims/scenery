@@ -399,6 +399,7 @@ define( function( require ) {
     },
     
     localToGlobalBounds: function( bounds ) {
+      // TODO: performance: if only called once, is it faster to run through each transform rather than combining?
       return this.getTransform().transformBounds2( bounds );
     },
     

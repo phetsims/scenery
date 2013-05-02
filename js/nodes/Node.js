@@ -386,7 +386,7 @@ define( function( require ) {
     
     // bounds assumed to be in the local coordinate frame, below this node's transform
     markDirtyRegion: function( bounds ) {
-      this.dispatchEventWithTransform( 'dirtyBounds', {
+      this.dispatchEvent( 'dirtyBounds', {
         node: this,
         bounds: bounds
       } );

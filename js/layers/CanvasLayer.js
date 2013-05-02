@@ -370,7 +370,7 @@ define( function( require ) {
     },
     
     markDirtyRegion: function( args ) {
-      this.internalMarkDirtyBounds( args.bounds, args.transform );
+      this.internalMarkDirtyBounds( args.bounds, args.trail );
     },
     
     addNodeFromTrail: function( trail ) {
@@ -378,7 +378,7 @@ define( function( require ) {
       
       // since the node's getBounds() are in the parent coordinate frame, we peel off the last node to get the correct (relevant) transform
       // TODO: more efficient way of getting this transform?
-      this.internalMarkDirtyBounds( trail.lastNode().getBounds(), trail.slice( 0, trail.length - 1 ).getTransform() );
+      this.internalMarkDirtyBounds( trail.lastNode().getBounds(), trail.slice( 0, trail.length - 1 ) );
       
       if ( trail.lastNode().boundsInaccurate ) {
         this.boundlessCount++;
@@ -390,7 +390,7 @@ define( function( require ) {
       
       // since the node's getBounds() are in the parent coordinate frame, we peel off the last node to get the correct (relevant) transform
       // TODO: more efficient way of getting this transform?
-      this.internalMarkDirtyBounds( trail.lastNode().getBounds(), trail.slice( 0, trail.length - 1 ).getTransform() );
+      this.internalMarkDirtyBounds( trail.lastNode().getBounds(), trail.slice( 0, trail.length - 1 ) );
       
       if ( trail.lastNode().boundsInaccurate ) {
         this.boundlessCount--;
@@ -414,10 +414,10 @@ define( function( require ) {
       return this.boundlessCount === 0;
     },
     
-    internalMarkDirtyBounds: function( localBounds, transform ) {
+    internalMarkDirtyBounds: function( localBounds, trail ) {
       // TODO: performance minor hotspot, use mutable forms?
       assert && assert( localBounds.isEmpty() || localBounds.isFinite(), 'Infinite (non-empty) dirty bounds passed to internalMarkDirtyBounds' );
-      var globalBounds = transform.transformBounds2( localBounds );
+      var globalBounds = trail.localToGlobalBounds( localBounds );
       
       // TODO: for performance, consider more than just a single dirty bounding box
       this.dirtyBounds = this.dirtyBounds.union( globalBounds.dilated( 1 ).roundedOut() );
