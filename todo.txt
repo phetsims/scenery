@@ -309,6 +309,8 @@ Trail:
 
 Performance:
     Priorities:
+        Disabling bounds / paint tracking where not needed?
+        Memory taken up, causing iOS crashes!
         Scene.affectedLayers O(N) => O(log N)
         Node.fireEvent (and event listeners) should be split based on event type, so it's faster to fire?
         Try Scene/Layer adding listeners to nodes based on their Trail, so we don't have to do the dispatching.
