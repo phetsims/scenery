@@ -316,9 +316,11 @@ define( function( require ) {
         this._childPaintDirty = false;
         this._oldPaintMarked = false;
         
-        _.each( this._children, function( child ) {
-          child.validatePaint();
-        } );
+        var children = this._children;
+        var length = children.length;
+        for ( var i = 0; i < length; i++ ) {
+          children[i].validatePaint();
+        }
       }
     },
     
