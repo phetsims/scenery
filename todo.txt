@@ -33,6 +33,8 @@ Priorities:
 
 Bugs:
     DOM opacity
+    **** General opacity: multiple layers combined!
+        **** Should we consider supporting a nested structure of layers based on opacity?
     What happens with a computer with multiple mice? is that handled in the pointer spec?
     Text width detected improperly, or wrapping in DOM renderer
     Default text with text string changed visual size switching between boundsMethods in playground
