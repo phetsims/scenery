@@ -287,12 +287,10 @@ Node:
     Canvas: masking with sub-canvas rendering using globalCompositeOperation. CSG should be possible, and hit tests should be better. Bounds might be harder
 
 Text:
+    *** Strip out textBaseline and textAlign, they are not needed
     Unit tests
-    *** Performance of text bounds!
-        Comparison vs accurate bounds for all of the various text bounds methods
-    Investigate SVG's writing-mode for rtl/ltr handling (also direction and unicode-bidi)
     Handling multi-line strings
-    WebGL / DOM options
+    WebGL options
 
 Scene:
     Acceleration of layer lookup
