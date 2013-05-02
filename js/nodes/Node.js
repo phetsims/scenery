@@ -623,19 +623,30 @@ define( function( require ) {
     dispatchEvent: function( type, args ) {
       var trail = new scenery.Trail();
       trail.setMutable(); // don't allow this trail to be set as immutable for storage
+      args.trail = trail; // this reference shouldn't be changed be listeners (or errors will occur)
+      
+      // store a branching flag, since if we don't branch at all, we don't have to walk our trail back down.
+      var branches = false;
       
       function recursiveEventDispatch( node ) {
         trail.addAncestor( node );
         
-        args.trail = trail;
-        
         node.fireEvent( type, args );
         
-        _.each( node._parents, function( parent ) {
-          recursiveEventDispatch( parent );
-        } );
+        var parents = node._parents;
+        var length = parents.length;
         
-        trail.removeAncestor();
+        // make sure to set the branch flag here before iterating (don't move it)
+        branches = branches || length > 1;
+        
+        for ( var i = 0; i < length; i++ ) {
+          recursiveEventDispatch( parents[i] );
+        }
+        
+        // if there were no branches, we will not fire another listener once we have reached here
+        if ( branches ) {
+          trail.removeAncestor();
+        }
       }
       
       recursiveEventDispatch( this );
