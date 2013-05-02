@@ -247,6 +247,7 @@ define( function( require ) {
       element.setAttribute( 'font-style', this._font.getStyle() );
       element.setAttribute( 'font-weight', this._font.getWeight() );
       if ( this._font.getStretch() ) {
+        // TODO: would setting and unsetting the font stretch leave the attribute? probable bug
         element.setAttribute( 'font-stretch', this._font.getStretch() );
       }
     },
