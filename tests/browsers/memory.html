@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  
+  <title>Memory Testing</title>
+  
+  <style>
+  </style>
+</head>
+<body>
+  
+  <p>Current usage: <span id="usage"></span> MB</p>
+  
+  <script type="text/javascript">
+  
+  window.onload = function() {
+    var canvases = [];
+    var totalSize = 0;
+    
+    var width = 1024;
+    var height = 769;
+    
+    var size = width * height * 4;
+    
+    setInterval( function() {
+      totalSize += size;
+      var canvas = document.createElement( 'canvas' );
+      canvas.width = width;
+      canvas.height = height;
+      canvas.style.width = width + 'px';
+      canvas.style.height = height + 'px';
+      var context = canvas.getContext( '2d' );
+      context.fillStyle = '#f00';
+      context.fillRect( 0, 0, width, height );
+      
+      canvases.push( canvas );
+      
+      document.body.appendChild( canvas );
+      
+      document.getElementById( 'usage' ).innerHTML = totalSize / 1024 / 1024;
+    }, 500 );
+  };
+  
+  </script>
+
+</body>
+</html>
