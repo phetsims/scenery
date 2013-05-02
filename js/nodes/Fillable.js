@@ -60,6 +60,11 @@ define( function( require ) {
       return 'fill: ' + ( this._fill ? ( this._fill.getSVGDefinition ? 'url(#fill' + this.getId() + ')' : this._fill ) : 'none' ) + ';';
     };
     
+    proto.isFillDOMCompatible = function() {
+      // make sure we're not a pattern or gradient
+      return !this._fill || !this._fill.getSVGDefinition;
+    };
+    
     proto.addSVGFillDef = function( svg, defs ) {
       var fill = this.getFill();
       var fillId = 'fill' + this.getId();

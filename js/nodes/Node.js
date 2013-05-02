@@ -18,6 +18,8 @@ define( function( require ) {
   var clamp = require( 'DOT/Util' ).clamp;
   
   var scenery = require( 'SCENERY/scenery' );
+  // var nodeEvents = require( 'SCENERY/util/BasicNodeEvents' ); // uncapitalized, because of JSHint (TODO: find the flag)
+  var nodeEvents = require( 'SCENERY/util/SplitNodeEvents' ); // uncapitalized, because of JSHint (TODO: find the flag)
   var LayerStrategy = require( 'SCENERY/layers/LayerStrategy' ); // used to set the default layer strategy on the prototype
   // require( 'SCENERY/layers/Renderer' ); // commented out so Require.js doesn't balk at the circular dependency
   
@@ -83,13 +85,14 @@ define( function( require ) {
      */
     this._transform = new Transform3();
     this._transformListener = {
+      // TODO: performance handling so we don't need to do two recursions!
       before: function() { self.beforeTransformChange(); },
       after: function() { self.afterTransformChange(); }
     };
     this._transform.addTransformListener( this._transformListener );
     
     this._inputListeners = []; // for user input handling (mouse/touch)
-    this._eventListeners = []; // for internal events like paint invalidation, layer invalidation, etc.
+    this.initializeNodeEvents(); // for internal events like paint invalidation, layer invalidation, etc.
     
     // TODO: add getter/setters that will be able to invalidate whether this node is under any pointers, etc.
     this._includeStrokeInHitRegion = false;
@@ -171,10 +174,15 @@ define( function( require ) {
       this.dispatchEvent( 'stitch', { match: false } );
     },
     
+    removeAllChildren: function() {
+      this.setChildren( [] );
+    },
+    
     // TODO: efficiency by batching calls?
     setChildren: function( children ) {
       var node = this;
       if ( this._children !== children ) {
+        // TODO: maybe iterating in reverse is more efficient?
         _.each( this._children.slice( 0 ), function( child ) {
           node.removeChild( child );
         } );
@@ -310,9 +318,11 @@ define( function( require ) {
         this._childPaintDirty = false;
         this._oldPaintMarked = false;
         
-        _.each( this._children, function( child ) {
-          child.validatePaint();
-        } );
+        var children = this._children;
+        var length = children.length;
+        for ( var i = 0; i < length; i++ ) {
+          children[i].validatePaint();
+        }
       }
     },
     
@@ -380,7 +390,7 @@ define( function( require ) {
     
     // bounds assumed to be in the local coordinate frame, below this node's transform
     markDirtyRegion: function( bounds ) {
-      this.dispatchEventWithTransform( 'dirtyBounds', {
+      this.dispatchEvent( 'dirtyBounds', {
         node: this,
         bounds: bounds
       } );
@@ -546,6 +556,7 @@ define( function( require ) {
       if ( _.indexOf( this._inputListeners, listener ) === -1 ) {
         this._inputListeners.push( listener );
       }
+      return this;
     },
     
     removeInputListener: function( listener ) {
@@ -553,42 +564,11 @@ define( function( require ) {
       assert && assert( _.indexOf( this._inputListeners, listener ) !== -1 );
       
       this._inputListeners.splice( _.indexOf( this._inputListeners, listener ), 1 );
+      return this;
     },
     
     getInputListeners: function() {
       return this._inputListeners.slice( 0 ); // defensive copy
-    },
-    
-    // TODO: set this up with a mix-in for a generic notifier?
-    addEventListener: function( listener ) {
-      // don't allow listeners to be added multiple times
-      if ( _.indexOf( this._eventListeners, listener ) === -1 ) {
-        this._eventListeners.push( listener );
-      }
-    },
-    
-    removeEventListener: function( listener ) {
-      // ensure the listener is in our list
-      assert && assert( _.indexOf( this._eventListeners, listener ) !== -1 );
-      
-      this._eventListeners.splice( _.indexOf( this._eventListeners, listener ), 1 );
-    },
-    
-    getEventListeners: function() {
-      return this._eventListeners.slice( 0 ); // defensive copy
-    },
-    
-    /*
-     * Fires an event to all event listeners attached to this node. It does not bubble down to
-     * all ancestors with trails, like dispatchEvent does. Use fireEvent when you only want an event
-     * that is relevant for a specific node, and ancestors don't need to be notified.
-     */
-    fireEvent: function( type, args ) {
-      _.each( this.getEventListeners(), function( eventListener ) {
-        if ( eventListener[type] ) {
-          eventListener[type]( args );
-        }
-      } );
     },
     
     /*
@@ -608,47 +588,30 @@ define( function( require ) {
     dispatchEvent: function( type, args ) {
       var trail = new scenery.Trail();
       trail.setMutable(); // don't allow this trail to be set as immutable for storage
+      args.trail = trail; // this reference shouldn't be changed be listeners (or errors will occur)
+      
+      // store a branching flag, since if we don't branch at all, we don't have to walk our trail back down.
+      var branches = false;
       
       function recursiveEventDispatch( node ) {
         trail.addAncestor( node );
         
-        args.trail = trail;
-        
         node.fireEvent( type, args );
         
-        _.each( node._parents, function( parent ) {
-          recursiveEventDispatch( parent );
-        } );
+        var parents = node._parents;
+        var length = parents.length;
         
-        trail.removeAncestor();
-      }
-      
-      recursiveEventDispatch( this );
-    },
-    
-    // dispatches events with the transform computed from parent of the "root" to the local frame
-    dispatchEventWithTransform: function( type, args ) {
-      var trail = new scenery.Trail();
-      trail.setMutable(); // don't allow this trail to be set as immutable for storage
-      
-      var transformStack = [ new Transform3() ];
-      
-      function recursiveEventDispatch( node ) {
-        trail.addAncestor( node );
+        // make sure to set the branch flag here before iterating (don't move it)
+        branches = branches || length > 1;
         
-        transformStack.push( new Transform3( node.getMatrix().timesMatrix( transformStack[transformStack.length-1].getMatrix() ) ) );
-        args.transform = transformStack[transformStack.length-1];
-        args.trail = trail;
+        for ( var i = 0; i < length; i++ ) {
+          recursiveEventDispatch( parents[i] );
+        }
         
-        node.fireEvent( type, args );
-        
-        _.each( node._parents, function( parent ) {
-          recursiveEventDispatch( parent );
-        } );
-        
-        transformStack.pop();
-        
-        trail.removeAncestor();
+        // if there were no branches, we will not fire another listener once we have reached here
+        if ( branches ) {
+          trail.removeAncestor();
+        }
       }
       
       recursiveEventDispatch( this );
@@ -802,7 +765,7 @@ define( function( require ) {
         // swap the transform and move the listener to the new one
         this._transform.removeTransformListener( this._transformListener ); // don't leak memory!
         this._transform = transform;
-        this._transform.addTransformListener( this._transformListener );
+        this._transform.prependTransformListener( this._transformListener );
         
         this.afterTransformChange();
       }
@@ -825,7 +788,7 @@ define( function( require ) {
     
     // called after our transform is changed
     afterTransformChange: function() {
-      this.dispatchEventWithTransform( 'transform', {
+      this.dispatchEvent( 'transform', {
         node: this,
         type: 'transform',
         matrix: this._transform.getMatrix()
@@ -1277,6 +1240,7 @@ define( function( require ) {
       return this._transform.transformPosition2( point );
     },
     
+    // apply this node's transform to the bounds
     localToParentBounds: function( bounds ) {
       return this._transform.transformBounds2( bounds );
     },
@@ -1286,6 +1250,7 @@ define( function( require ) {
       return this._transform.inversePosition2( point );
     },
     
+    // apply the inverse of this node's transform to the bounds
     parentToLocalBounds: function( bounds ) {
       return this._transform.inverseBounds2( bounds );
     },
@@ -1293,7 +1258,7 @@ define( function( require ) {
     // apply this node's transform (and then all of its parents' transforms) to the point
     localToGlobalPoint: function( point ) {
       var node = this;
-      while ( node !== null ) {
+      while ( node ) {
         point = node._transform.transformPosition2( point );
         assert && assert( node._parents[1] === undefined, 'localToGlobalPoint unable to work for DAG' );
         node = node._parents[0];
@@ -1301,9 +1266,10 @@ define( function( require ) {
       return point;
     },
     
+    // apply this node's transform (and then all of its parents' transforms) to the bounds
     localToGlobalBounds: function( bounds ) {
       var node = this;
-      while ( node !== null ) {
+      while ( node ) {
         bounds = node._transform.transformBounds2( bounds );
         assert && assert( node._parents[1] === undefined, 'localToGlobalBounds unable to work for DAG' );
         node = node._parents[0];
@@ -1311,12 +1277,50 @@ define( function( require ) {
       return bounds;
     },
     
+    // like localToGlobalPoint, but without applying this node's transform
+    parentToGlobalPoint: function( point ) {
+      assert && assert( this.parents.length <= 1, 'parentToGlobalPoint unable to work for DAG' );
+      return this.parents.length ? this.parents[0].localToGlobalPoint( point ) : point;
+    },
+    
+    // like localToGlobalBounds, but without applying this node's transform
+    parentToGlobalBounds: function( bounds ) {
+      assert && assert( this.parents.length <= 1, 'parentToGlobalBounds unable to work for DAG' );
+      return this.parents.length ? this.parents[0].localToGlobalBounds( bounds ) : bounds;
+    },
+    
+    globalToParentPoint: function( point ) {
+      assert && assert( this.parents.length <= 1, 'globalToParentPoint unable to work for DAG' );
+      return this.parents.length ? this.parents[0].globalToLocalPoint( point ) : point;
+    },
+    
+    globalToParentBounds: function( bounds ) {
+      assert && assert( this.parents.length <= 1, 'globalToParentBounds unable to work for DAG' );
+      return this.parents.length ? this.parents[0].globalToLocalBounds( bounds ) : bounds;
+    },
+    
+    // get the Bounds2 of this node in the global coordinate frame.  Does not work for DAG.
+    getGlobalBounds: function() {
+      assert && assert( this.parents.length <= 1, 'globalBounds unable to work for DAG' );
+      return this.parentToGlobalBounds( this.getBounds() );
+    },
+    
+    // get the Bounds2 of any other node by converting to the global coordinate frame.  Does not work for DAG.
+    boundsOf: function( node ) {
+      return this.globalToLocalBounds( node.getGlobalBounds() );
+    },
+    
+    // get the Bounds2 of this node in the coordinate frame of the parameter node. Does not work for DAG cases.
+    boundsTo: function( node ) {
+      return node.globalToLocalBounds( this.getGlobalBounds() );
+    },
+    
     globalToLocalPoint: function( point ) {
       var node = this;
       
       // we need to apply the transformations in the reverse order, so we temporarily store them
       var transforms = [];
-      while ( node !== null ) {
+      while ( node ) {
         transforms.push( node._transform );
         assert && assert( node._parents[1] === undefined, 'globalToLocalPoint unable to work for DAG' );
         node = node._parents[0];
@@ -1334,7 +1338,7 @@ define( function( require ) {
       
       // we need to apply the transformations in the reverse order, so we temporarily store them
       var transforms = [];
-      while ( node !== null ) {
+      while ( node ) {
         transforms.push( node._transform );
         assert && assert( node._parents[1] === undefined, 'globalToLocalBounds unable to work for DAG' );
         node = node._parents[0];
@@ -1427,6 +1431,7 @@ define( function( require ) {
     get bounds() { return this.getBounds(); },
     get selfBounds() { return this.getSelfBounds(); },
     get childBounds() { return this.getChildBounds(); },
+    get globalBounds() { return this.getGlobalBounds(); },
     get id() { return this.getId(); },
     
     mutate: function( options ) {
@@ -1534,6 +1539,9 @@ define( function( require ) {
   Node.prototype._supportedRenderers = [];
   
   Node.prototype.layerStrategy = LayerStrategy;
+  
+  // mix-in the events for Node
+  nodeEvents( Node );
   
   return Node;
 } );

@@ -55,6 +55,8 @@ define( function( require ) {
    */
   scenery.Scene = function Scene( $main, options ) {
     assert && assert( $main[0], 'A main container is required for a scene' );
+    this.$main = $main;
+    this.main = $main[0];
     
     // defaults
     options = _.extend( {
@@ -85,11 +87,10 @@ define( function( require ) {
     this.lastCursor = null;
     this.defaultCursor = $main.css( 'cursor' );
     
-    this.$main = $main;
     // resize the main container as a sanity check
     this.setSize( options.width, options.height );
     
-    this.sceneBounds = new Bounds2( 0, 0, $main.width(), $main.height() );
+    this.sceneBounds = new Bounds2( 0, 0, options.width, options.height );
     
     // default to a canvas layer type, but this can be changed
     this.preferredSceneLayerType = options.preferredSceneLayerType;
@@ -135,6 +136,7 @@ define( function( require ) {
         scene.stitch( args.match );
       },
       
+      // TODO: consider adding direct node listeners for this instead from layers?
       dirtyBounds: function( args ) { // contains node, bounds, transform, trail
         var trail = args.trail;
         
@@ -146,12 +148,25 @@ define( function( require ) {
         }
       },
       
+      // TODO: consider adding direct node listeners for this instead from layers?
       transform: function( args ) { // conatins node, type, matrix, transform, trail
         var trail = args.trail;
         
         if ( scene.layers.length ) {
           _.each( scene.affectedLayers( trail ), function( layer ) {
             layer.transformChange( args );
+          } );
+        }
+      },
+      
+      // TODO: consider adding direct node listeners for this instead from layers?
+      // called when a node's accuracy of bounds changes (is either accurate now, or not)
+      boundsAccuracy: function( args ) {
+        var trail = args.trail;
+        
+        if ( scene.layers.length ) {
+          _.each( scene.affectedLayers( trail ), function( layer ) {
+            layer.boundsAccuracy( args );
           } );
         }
       }
@@ -427,6 +442,7 @@ define( function( require ) {
     } );
     
     // set the layers' elements' z-indices, and reindex their trails so they are in a consistent state
+    // TODO: performance: don't reindex layers if no layers were added or removed?
     this.reindexLayers();
     
     // add/remove trails from their necessary layers
@@ -437,6 +453,7 @@ define( function( require ) {
       trail.setImmutable();
       
       // don't do a layer lookup to determine the current layer (we already modified that state to be consistent).
+      // TODO: possible somewhat-bottleneck location
       var currentLayer = beforeTrailLayerMap[trailId];
       var newLayer = stitchData.newLayerMap[trailId];
       
@@ -690,7 +707,7 @@ define( function( require ) {
   
   // after layer changes, the layers should have their zIndex updated, and updates their trails
   Scene.prototype.reindexLayers = function() {
-    var index = 1;
+    var index = 1; // don't start below 1
     _.each( this.layers, function( layer ) {
       // layers increment indices as needed
       index = layer.reindex( index );
@@ -1171,6 +1188,14 @@ define( function( require ) {
                       ',' + ( layer.endPaintedTrail ? str( layer.endPaintedTrail ) : layer.endPaintedTrail ) +
                       ' pointers: ' + str( layer.startPointer ) +
                       ',' + str( layer.endPointer );
+      layerInfo += '<span style="color: #008">';
+      if ( layer.canUseDirtyRegions && !layer.canUseDirtyRegions() ) { layerInfo += ' dirtyRegionsDisabled'; }
+      if ( layer.cssTranslation ) { layerInfo += ' cssTranslation'; }
+      if ( layer.cssRotation ) { layerInfo += ' cssTranslation'; }
+      if ( layer.cssScale ) { layerInfo += ' cssTranslation'; }
+      if ( layer.cssTransform ) { layerInfo += ' cssTranslation'; }
+      if ( layer.dirtyBounds && layer.dirtyBounds.isFinite() ) { layerInfo += ' dirtyBounds:' + layer.dirtyBounds.toString(); }
+      layerInfo += '</span>';
       layerEntries[startIdx] += '<div style="color: #080">+Layer ' + layerInfo + '</div>';
       layerEntries[endIndex] += '<div style="color: #800">-Layer ' + layerInfo + '</div>';
     } );

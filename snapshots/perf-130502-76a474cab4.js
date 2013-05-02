@@ -592,17 +592,17 @@
   marks.currentMarks = [
     // textNodeInstances,
     // textPathInstances,
-    // textBoundsChanges,
-    // fuzzRecordAddRemoveRender,
-    // rotatedSquaresHardcodedXY,
-    // rotatedSquaresTransformXY,
-    // rotatedSquaresIndividual,
-    // addingHexagons,
+    textBoundsChanges,
+    fuzzRecordAddRemoveRender,
+    rotatedSquaresHardcodedXY,
+    rotatedSquaresTransformXY,
+    rotatedSquaresIndividual,
+    addingHexagons,
     fastSquaresCanvas,
-    fastSquaresSVG
-    // {
-    //   name: 'Empty Loop'
-    // }
+    fastSquaresSVG,
+    {
+      name: 'Empty Loop'
+    }
   ];
   
 })();

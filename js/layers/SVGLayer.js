@@ -31,6 +31,8 @@ define( function( require ) {
   scenery.SVGLayer = function( args ) {
     var $main = args.$main;
     
+    this.scene = args.scene;
+    
     // main SVG element
     this.svg = document.createElementNS( svgns, 'svg' );
     
@@ -41,8 +43,8 @@ define( function( require ) {
     // the <defs> block that we will be stuffing gradients and patterns into
     this.defs = document.createElementNS( svgns, 'defs' );
     
-    var width = $main.width();
-    var height = $main.height();
+    var width = args.scene.sceneBounds.width;
+    var height = args.scene.sceneBounds.height;
     
     this.svg.appendChild( this.defs );
     this.svg.appendChild( this.g );
@@ -50,12 +52,10 @@ define( function( require ) {
     this.svg.setAttribute( 'width', width );
     this.svg.setAttribute( 'height', height );
     this.svg.setAttribute( 'stroke-miterlimit', 10 ); // to match our Canvas brethren so we have the same default behavior
-    this.$svg.css( 'position', 'absolute' );
+    this.svg.style.position = 'absolute';
     this.svg.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
     this.svg.style['pointer-events'] = 'none';
     $main.append( this.svg );
-    
-    this.scene = args.scene;
     
     this.isSVGLayer = true;
     
@@ -103,6 +103,9 @@ define( function( require ) {
             // apply the node's transform to the group
             this.applyTransform( subtrail.lastNode().getTransform(), group );
             
+            // apply any stylings to the group (opacity, visibility)
+            this.updateNodeGroup( subtrail.lastNode(), group );
+            
             // add the group to its parent
             this.insertGroupIntoParent( group, this.idGroupMap[lastId], subtrail );
           } else {
@@ -123,6 +126,11 @@ define( function( require ) {
         
         // this trail will depend on this group, so increment the reference counter
         this.idGroupMap[id].referenceCount++;
+        
+        if ( subtrail.length === trail.length ) {
+          // TODO: cleaner control structures
+          break;
+        }
         
         // step down towards our full trail
         subtrail.addDescendant( trail.nodes[subtrail.length] );
@@ -412,8 +420,10 @@ define( function( require ) {
     reindex: function( zIndex ) {
       Layer.prototype.reindex.call( this, zIndex );
       
-      this.$svg.css( 'z-index', zIndex );
-      this.zIndex = zIndex;
+      if ( this.zIndex !== zIndex ) {
+        this.svg.style.zIndex = zIndex;
+        this.zIndex = zIndex;
+      }
       return zIndex + 1;
     },
     

@@ -98,7 +98,12 @@ define( function( require ) {
         if ( node.layerStrategy.hasPreferredLayerType( pointer, this ) ) {
           this.pushPreferredLayerType( node.layerStrategy.getPreferredLayerType( pointer, this ) );
         }
-        pointer.trail.addDescendant( this.startPointer.trail.nodes[pointer.trail.length] );
+        if ( pointer.trail.length < this.startPointer.trail.nodes.length ) {
+          pointer.trail.addDescendant( this.startPointer.trail.nodes[pointer.trail.length] );
+        } else {
+          // TODO: a cleaner way of doing this, since we were adding undefined into a trail to cause the loop to exit
+          break;
+        }
       }
     },
     

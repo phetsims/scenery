@@ -12,6 +12,7 @@ define( function( require ) {
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
   var inherit = require( 'PHET_CORE/inherit' );
+  var escapeHTML = require( 'PHET_CORE/escapeHTML' );
   var Bounds2 = require( 'DOT/Bounds2' );
   
   var scenery = require( 'SCENERY/scenery' );
@@ -47,10 +48,15 @@ define( function( require ) {
   var DOM = scenery.DOM;
   
   inherit( DOM, Node, {
+    // we use a single DOM instance, so this flag should indicate that we don't support duplicating it
+    allowsMultipleDOMInstances: false,
+    
     // needs to be attached to the DOM tree for this to work
     calculateDOMBounds: function() {
-      var boundingRect = this._element.getBoundingClientRect();
-      return new Bounds2( 0, 0, boundingRect.width, boundingRect.height );
+      // var boundingRect = this._element.getBoundingClientRect();
+      // return new Bounds2( 0, 0, boundingRect.width, boundingRect.height );
+      var $element = $( this._element );
+      return new Bounds2( 0, 0, $element.width(), $element.height() );
     },
     
     createTemporaryContainer: function() {
@@ -101,7 +107,12 @@ define( function( require ) {
       return this._container;
     },
     
-    updateCSSTransform: function( transform ) {
+    updateDOMElement: function( container ) {
+      // nothing needed, since we are just displaying a single DOM element
+    },
+    
+    updateCSSTransform: function( transform, element ) {
+      // faster to use our jQuery reference instead of wrapping element
       this._$container.css( transform.getMatrix().getCSSTransformStyles() );
     },
     
@@ -150,7 +161,7 @@ define( function( require ) {
     get interactive() { return this.isInteractive(); },
     
     getBasicConstructor: function( propLines ) {
-      return 'new scenery.DOM( $( \'' + this._container.innerHTML.replace( /'/g, '\\\'' ) + '\' ), {' + propLines + '} )';
+      return 'new scenery.DOM( $( \'' + escapeHTML( this._container.innerHTML.replace( /'/g, '\\\'' ) ) + '\' ), {' + propLines + '} )';
     },
     
     getPropString: function( spaces, includeChildren ) {

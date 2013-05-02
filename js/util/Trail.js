@@ -38,12 +38,14 @@ define( function( require ) {
       
       this.nodes = otherTrail.nodes.slice( 0 );
       this.length = otherTrail.length;
+      this.uniqueId = otherTrail.uniqueId;
       this.indices = otherTrail.indices.slice( 0 );
       return;
     }
     
     this.nodes = [];
     this.length = 0;
+    this.uniqueId = '';
     
     // indices[x] stores the index of nodes[x] in nodes[x-1]'s children
     this.indices = [];
@@ -75,6 +77,11 @@ define( function( require ) {
     // convenience function to determine whether this trail will render something
     isPainted: function() {
       return this.lastNode().isPainted();
+    },
+    
+    // this trail is visible only if all nodes on it are marked as visible
+    isVisible: function() {
+      return _.every( this.nodes, function( node ) { return node.isVisible(); } );
     },
     
     get: function( index ) {
@@ -112,6 +119,7 @@ define( function( require ) {
     
     addAncestor: function( node, index ) {
       assert && assert( !this.immutable, 'cannot modify an immutable Trail with addAncestor' );
+      assert && assert( node, 'cannot add falsy value to a Trail' );
       
       var oldRoot = this.nodes[0];
       
@@ -120,26 +128,29 @@ define( function( require ) {
         this.indices.unshift( index === undefined ? _.indexOf( node._children, oldRoot ) : index );
       }
       
-      // mimic an Array
       this.length++;
+      // accelerated version of this.updateUniqueId()
+      this.uniqueId = ( this.uniqueId ? node._id + '-' + this.uniqueId : node._id + '' );
       return this;
     },
     
     removeAncestor: function() {
       assert && assert( !this.immutable, 'cannot modify an immutable Trail with removeAncestor' );
+      assert && assert( this.length > 0, 'cannot remove a Node from an empty trail' );
       
       this.nodes.shift();
       if ( this.indices.length ) {
         this.indices.shift();
       }
       
-      // mimic an Array
       this.length--;
+      this.updateUniqueId();
       return this;
     },
     
     addDescendant: function( node, index ) {
       assert && assert( !this.immutable, 'cannot modify an immutable Trail with addDescendant' );
+      assert && assert( node, 'cannot add falsy value to a Trail' );
       
       var parent = this.lastNode();
       
@@ -148,21 +159,23 @@ define( function( require ) {
         this.indices.push( index === undefined ? _.indexOf( parent._children, node ) : index );
       }
       
-      // mimic an Array
       this.length++;
+      // accelerated version of this.updateUniqueId()
+      this.uniqueId = ( this.uniqueId ? this.uniqueId + '-' + node._id : node._id + '' );
       return this;
     },
     
     removeDescendant: function() {
       assert && assert( !this.immutable, 'cannot modify an immutable Trail with removeDescendant' );
+      assert && assert( this.length > 0, 'cannot remove a Node from an empty trail' );
       
       this.nodes.pop();
       if ( this.indices.length ) {
         this.indices.pop();
       }
       
-      // mimic an Array
       this.length--;
+      this.updateUniqueId();
       return this;
     },
     
@@ -386,6 +399,7 @@ define( function( require ) {
     },
     
     localToGlobalBounds: function( bounds ) {
+      // TODO: performance: if only called once, is it faster to run through each transform rather than combining?
       return this.getTransform().transformBounds2( bounds );
     },
     
@@ -397,10 +411,29 @@ define( function( require ) {
       return this.getTransform().inverseBounds2( bounds );
     },
     
+    updateUniqueId: function() {
+      // string concatenation is faster, see http://jsperf.com/string-concat-vs-joins
+      var result = '';
+      var len = this.nodes.length;
+      if ( len > 0 ) {
+        result += this.nodes[0]._id;
+      }
+      for ( var i = 1; i < len; i++ ) {
+        result += '-' + this.nodes[i]._id;
+      }
+      this.uniqueId = result;
+      // this.uniqueId = _.map( this.nodes, function( node ) { return node.getId(); } ).join( '-' );
+    },
+    
     // concatenates the unique IDs of nodes in the trail, so that we can do id-based lookups
     getUniqueId: function() {
-      // TODO: consider caching this if it is ever a bottleneck. it seems like it might be called in layer-refresh inner loops
-      return _.map( this.nodes, function( node ) { return node.getId(); } ).join( '-' );
+      // sanity checks
+      if ( assert ) {
+        var oldUniqueId = this.uniqueId;
+        this.updateUniqueId();
+        assert( oldUniqueId === this.uniqueId );
+      }
+      return this.uniqueId;
     },
     
     toString: function() {

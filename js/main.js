@@ -37,6 +37,7 @@ define( [
     'SCENERY/nodes/DOM',
     'SCENERY/nodes/Fillable',
     'SCENERY/nodes/HBox',
+    'SCENERY/nodes/HTMLText',
     'SCENERY/nodes/Image',
     'SCENERY/nodes/Node',
     'SCENERY/nodes/Path',
@@ -45,6 +46,7 @@ define( [
     'SCENERY/nodes/Text',
     'SCENERY/nodes/VBox',
     
+    'SCENERY/util/BasicNodeEvents',
     'SCENERY/util/CanvasContextWrapper',
     'SCENERY/util/Color',
     'SCENERY/util/Font',
@@ -52,6 +54,7 @@ define( [
     'SCENERY/util/Pattern',
     'SCENERY/util/RadialGradient',
     'SCENERY/util/SceneImage',
+    'SCENERY/util/SplitNodeEvents',
     'SCENERY/util/Trail',
     'SCENERY/util/TrailInterval',
     'SCENERY/util/TrailPointer',
