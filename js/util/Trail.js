@@ -34,7 +34,10 @@ define( function( require ) {
      * If set to true, add/remove descendant/ancestor should fail if assertions are enabled
      * Use setImmutable() or setMutable() to signal a specific type of protection, so it cannot be changed later
      */
-    this.immutable = undefined;
+    if ( assert ) {
+      // only do this if assertions are enabled, otherwise we won't access it at all
+      this.immutable = undefined;
+    }
     
     if ( nodes instanceof Trail ) {
       // copy constructor (takes advantage of already built index information)
@@ -207,9 +210,11 @@ define( function( require ) {
     },
     
     setMutable: function() {
-      assert && assert( this.immutable !== true, 'A trail cannot be made mutable after being flagged as immutable' );
-      
-      this.immutable = false;
+      // if assertions are disabled, we hope this is inlined as a no-op
+      if ( assert ) {
+        assert( this.immutable !== true, 'A trail cannot be made mutable after being flagged as immutable' );
+        this.immutable = false;
+      }
       
       return this; // allow chaining
     },
