@@ -30,15 +30,16 @@ define( function( require ) {
   scenery.DOMLayer = function( args ) {
     Layer.call( this, args );
     
-    var width = this.$main.width();
-    var height = this.$main.height();
+    var width = args.scene.sceneBounds.width;
+    var height = args.scene.sceneBounds.height;
     
     this.div = document.createElement( 'div' );
+    var div = this.div;
+    div.style.width = '0';
+    div.style.height = '0';
+    div.style.position = 'absolute';
+    div.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
     this.$div = $( this.div );
-    this.$div.width( 0 );
-    this.$div.height( 0 );
-    this.$div.css( 'position', 'absolute' );
-    this.div.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
     this.$main.append( this.div );
     
     this.scene = args.scene;
