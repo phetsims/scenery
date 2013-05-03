@@ -934,8 +934,9 @@ define( function( require ) {
     // TODO: come up with more parameter names that have the same string length, so it looks creepier
     var pointFromEvent = parameters.pointFromEvent;
     var listenerTarget = parameters.listenerTarget;
+    var batchDOMEvents = parameters.batchDOMEvents;
     
-    var input = new scenery.Input( scene, listenerTarget );
+    var input = new scenery.Input( scene, listenerTarget, !!batchDOMEvents );
     scene.input = input;
     
     // maps the current MS pointer types onto the pointer spec
@@ -1041,6 +1042,10 @@ define( function( require ) {
         } );
       } );
     }
+  };
+  
+  Scene.prototype.fireBatchedEvents = function() {
+    this.input.fireBatchedEvents();
   };
   
   Scene.prototype.resizeOnWindowResize = function() {

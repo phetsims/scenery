@@ -43,7 +43,6 @@ define( function( require ) {
   svgTextSizeContainer.setAttribute( 'style', 'display: hidden; pointer-events: none; position: absolute; left: -65535; right: -65535;' ); // so we don't flash it in a visible way to the user
   var svgTextSizeElement = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
   svgTextSizeContainer.appendChild( svgTextSizeElement );
-  document.body.appendChild( svgTextSizeContainer );
   
   scenery.Text = function Text( text, options ) {
     this._text         = '';                 // filled in with mutator
@@ -326,6 +325,9 @@ define( function( require ) {
     },
     
     approximateSVGBounds: function() {
+      if ( !svgTextSizeContainer.parentNode ) {
+        document.body.appendChild( svgTextSizeContainer );
+      }
       this.updateSVGFragment( svgTextSizeElement );
       var rect = svgTextSizeElement.getBBox();
       return new Bounds2( rect.x, rect.y, rect.x + rect.width, rect.y + rect.height );
