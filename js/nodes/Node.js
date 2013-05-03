@@ -155,7 +155,7 @@ define( function( require ) {
     removeChild: function( node ) {
       assert && assert( this.isChild( node ) );
       
-      node.markOldPaint();
+      node.markOldPaint( false );
       
       var indexOfParent = _.indexOf( node._parents, this );
       var indexOfChild = _.indexOf( this._children, node );
@@ -783,7 +783,7 @@ define( function( require ) {
     // called before our transform is changed
     beforeTransformChange: function() {
       // mark our old bounds as dirty, so that any dirty region repainting will include not just our new position, but also our old position
-      this.markOldPaint();
+      this.markOldPaint( false );
     },
     
     // called after our transform is changed
@@ -904,7 +904,7 @@ define( function( require ) {
     setOpacity: function( opacity ) {
       var clampedOpacity = clamp( opacity, 0, 1 );
       if ( clampedOpacity !== this._opacity ) {
-        this.markOldPaint();
+        this.markOldPaint( false );
         
         this._opacity = clampedOpacity;
         

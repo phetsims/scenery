@@ -307,6 +307,24 @@ Trail:
     depthFirstUntil should possibly have option for defensive copies of the pointers?
 
 Performance:
+[disabled optimization for Node.validateBounds, reason: optimized too many times]
+[disabled optimization for Trail.reindex, reason: optimized too many times]
+[disabled optimization for Trail.addDescendant, reason: optimized too many times]
+[disabled optimization for Matrix3.inverted, reason: SwitchStatement: non-literal switch label]
+[disabled optimization for Node.invalidateChildBounds, reason: optimized too many times]
+[disabled optimization for _.extend.internalMarkDirtyBounds, reason: optimized too many times]
+[disabled optimization for Node.invalidateChildPaint, reason: optimized too many times]
+[disabled optimization for Bounds2.roundedOut, reason: optimized too many times]
+[disabled optimization for jQuery.extend.access, reason: ForInStatement is not fast case]
+[disabled optimization for Matrix3.getSVGTransform, reason: SwitchStatement: non-literal switch label]
+[disabled optimization for jQuery.fn.extend.append, reason: bad value context for arguments value]
+[disabled optimization for proto.afterCanvasFill, reason: optimized too many times]
+[disabled optimization for reduce, reason: assignment to parameter in arguments object]
+[disabled optimization for proto.beforeCanvasFill, reason: optimized too many times]
+[disabled optimization for enter, reason: optimized too many times]
+[disabled optimization for exit, reason: optimized too many times]
+[disabled optimization for Node.markOldPaint, reason: optimized too many times]
+[disabled optimization for Node.trailUnderPoint, reason: optimized too many times]
     Thoughts:
         Node can know about all of its Trails, and what the corresponding Scene/Layer is?
         Nodes could track what layer types they are rendering under, and thus what optimizations they could make?

@@ -128,10 +128,10 @@ define( function( require ) {
       assert && assert( !this.immutable, 'cannot modify an immutable Trail with addAncestor' );
       assert && assert( node, 'cannot add falsy value to a Trail' );
       
-      var oldRoot = this.nodes[0];
       
       this.nodes.unshift( node );
-      if ( oldRoot ) {
+      if ( this.nodes.length > 1 ) {
+        var oldRoot = this.nodes[1];
         this.indices.unshift( index === undefined ? _.indexOf( node._children, oldRoot ) : index );
       }
       
@@ -188,11 +188,14 @@ define( function( require ) {
     
     // refreshes the internal index references (important if any children arrays were modified!)
     reindex: function() {
-      for ( var i = 1; i < this.length; i++ ) {
+      var length = this.length;
+      for ( var i = 1; i < length; i++ ) {
         // only replace indices where they have changed (this was a performance hotspot)
         var currentIndex = this.indices[i-1];
-        if ( this.nodes[i-1]._children[currentIndex] !== this.nodes[i] ) {
-          this.indices[i-1] = _.indexOf( this.nodes[i-1]._children, this.nodes[i] );
+        var baseNode = this.nodes[i-1];
+        
+        if ( baseNode._children[currentIndex] !== this.nodes[i] ) {
+          this.indices[i-1] = _.indexOf( baseNode._children, this.nodes[i] );
         }
       }
     },
