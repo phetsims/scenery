@@ -129,11 +129,11 @@ define( function( require ) {
       assert && assert( node, 'cannot add falsy value to a Trail' );
       
       
-      this.nodes.unshift( node );
-      if ( this.nodes.length > 1 ) {
-        var oldRoot = this.nodes[1];
+      if ( this.nodes.length ) {
+        var oldRoot = this.nodes[0];
         this.indices.unshift( index === undefined ? _.indexOf( node._children, oldRoot ) : index );
       }
+      this.nodes.unshift( node );
       
       this.length++;
       // accelerated version of this.updateUniqueId()
@@ -159,12 +159,12 @@ define( function( require ) {
       assert && assert( !this.immutable, 'cannot modify an immutable Trail with addDescendant' );
       assert && assert( node, 'cannot add falsy value to a Trail' );
       
-      var parent = this.lastNode();
       
-      this.nodes.push( node );
-      if ( parent ) {
+      if ( this.nodes.length ) {
+        var parent = this.lastNode();
         this.indices.push( index === undefined ? _.indexOf( parent._children, node ) : index );
       }
+      this.nodes.push( node );
       
       this.length++;
       // accelerated version of this.updateUniqueId()
