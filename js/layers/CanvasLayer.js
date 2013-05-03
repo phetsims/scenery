@@ -310,7 +310,8 @@ define( function( require ) {
     
     dispose: function() {
       Layer.prototype.dispose.call( this );
-      $( this.canvas ).detach();
+      
+      this.canvas.parentNode.removeChild( this.canvas );
     },
     
     // TODO: consider a stack-based model for transforms?

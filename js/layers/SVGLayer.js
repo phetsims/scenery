@@ -263,7 +263,8 @@ define( function( require ) {
     
     dispose: function() {
       Layer.prototype.dispose.call( this );
-      this.$svg.detach();
+      
+      this.svg.parentNode.removeChild( this.svg );
     },
     
     markDirtyRegion: function( args ) {

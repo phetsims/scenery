@@ -139,7 +139,8 @@ define( function( require ) {
     
     dispose: function() {
       Layer.prototype.dispose.call( this );
-      this.$div.detach();
+      
+      this.div.parentNode.removeChild( this.div );
     },
     
     markDirtyRegion: function( args ) {
