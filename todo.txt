@@ -1,5 +1,7 @@
 
 Priorities:
+    Beware of closures! (test speeds, see https://developers.google.com/speed/articles/optimizing-javascript)
+    For DOM / jQuery manipulation: https://developers.google.com/speed/articles/javascript-dom
     For transform listeners and changes:
         Notes about marking dirty regions should NEVER change a transform?
         Things may go a bit screwy if event listeners for transforms change the transform?
