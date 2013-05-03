@@ -38,8 +38,8 @@ define( function( require ) {
   
   // set up the container and text for testing text bounds quickly (using approximateSVGBounds)
   var svgTextSizeContainer = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
-  svgTextSizeContainer.setAttribute( 'width', '1024' );
-  svgTextSizeContainer.setAttribute( 'height', '1024' );
+  svgTextSizeContainer.setAttribute( 'width', '2' );
+  svgTextSizeContainer.setAttribute( 'height', '2' );
   svgTextSizeContainer.setAttribute( 'style', 'display: hidden; pointer-events: none; position: absolute; left: -65535; right: -65535;' ); // so we don't flash it in a visible way to the user
   var svgTextSizeElement = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
   svgTextSizeContainer.appendChild( svgTextSizeElement );
