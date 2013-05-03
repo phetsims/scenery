@@ -92,9 +92,10 @@ define( function( require ) {
       // walk a subtrail up from the root node all the way to the full trail, creating groups where necessary
       while ( subtrail.length <= trail.length ) {
         var id = subtrail.getUniqueId();
-        if ( !( id in this.idGroupMap ) ) {
+        var group = this.idGroupMap[id];
+        
+        if ( !group ) {
           // we need to create a new group
-          var group;
           
           if ( lastId ) {
             // we have a parent group to which we need to be added
@@ -125,7 +126,7 @@ define( function( require ) {
         }
         
         // this trail will depend on this group, so increment the reference counter
-        this.idGroupMap[id].referenceCount++;
+        group.referenceCount++;
         
         if ( subtrail.length === trail.length ) {
           // TODO: cleaner control structures
