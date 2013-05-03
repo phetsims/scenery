@@ -590,8 +590,8 @@
   };
   
   marks.currentMarks = [
-    // textNodeInstances,
-    // textPathInstances,
+    textNodeInstances,
+    textPathInstances,
     textBoundsChanges,
     fuzzRecordAddRemoveRender,
     rotatedSquaresHardcodedXY,

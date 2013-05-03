@@ -325,6 +325,8 @@ Performance:
 [disabled optimization for exit, reason: optimized too many times]
 [disabled optimization for Node.markOldPaint, reason: optimized too many times]
 [disabled optimization for Node.trailUnderPoint, reason: optimized too many times]
+    Issues:
+        FAMB tab 2 slider
     Thoughts:
         Node can know about all of its Trails, and what the corresponding Scene/Layer is?
         Nodes could track what layer types they are rendering under, and thus what optimizations they could make?

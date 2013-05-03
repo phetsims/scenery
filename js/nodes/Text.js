@@ -36,6 +36,15 @@ define( function( require ) {
   require( 'SCENERY/util/Font' );
   require( 'SCENERY/util/Util' ); // for canvasAccurateBounds
   
+  // set up the container and text for testing text bounds quickly (using approximateSVGBounds)
+  var svgTextSizeContainer = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+  svgTextSizeContainer.setAttribute( 'width', '1024' );
+  svgTextSizeContainer.setAttribute( 'height', '1024' );
+  svgTextSizeContainer.setAttribute( 'style', 'display: hidden; pointer-events: none; position: absolute; left: -65535; right: -65535;' ); // so we don't flash it in a visible way to the user
+  var svgTextSizeElement = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
+  svgTextSizeContainer.appendChild( svgTextSizeElement );
+  document.body.appendChild( svgTextSizeContainer );
+  
   scenery.Text = function Text( text, options ) {
     this._text         = '';                 // filled in with mutator
     this._font         = new scenery.Font(); // default font, usually 10px sans-serif
@@ -343,24 +352,9 @@ define( function( require ) {
     },
     
     approximateSVGBounds: function() {
-      var isRTL = this._direction === 'rtl';
-      
-      var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
-      svg.setAttribute( 'width', '1024' );
-      svg.setAttribute( 'height', '1024' );
-      svg.setAttribute( 'style', 'display: hidden;' ); // so we don't flash it in a visible way to the user
-      
-      var textElement = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
-      this.updateSVGFragment( textElement );
-      
-      svg.appendChild( textElement );
-      
-      document.body.appendChild( svg );
-      var rect = textElement.getBBox();
-      var result = new Bounds2( rect.x, rect.y, rect.x + rect.width, rect.y + rect.height );
-      document.body.removeChild( svg );
-      
-      return result;
+      this.updateSVGFragment( svgTextSizeElement );
+      var rect = svgTextSizeElement.getBBox();
+      return new Bounds2( rect.x, rect.y, rect.x + rect.width, rect.y + rect.height );
     },
     
     approximateDOMBounds: function() {

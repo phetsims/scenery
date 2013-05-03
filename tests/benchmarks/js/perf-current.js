@@ -592,7 +592,7 @@
   marks.currentMarks = [
     // textNodeInstances,
     // textPathInstances,
-    // textBoundsChanges,
+    textBoundsChanges,
     // fuzzRecordAddRemoveRender,
     // rotatedSquaresHardcodedXY,
     // rotatedSquaresTransformXY,
