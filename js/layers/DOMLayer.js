@@ -35,9 +35,11 @@ define( function( require ) {
     
     this.div = document.createElement( 'div' );
     var div = this.div;
+    div.style.position = 'absolute';
+    div.style.left = '0';
+    div.style.top = '0';
     div.style.width = '0';
     div.style.height = '0';
-    div.style.position = 'absolute';
     div.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
     this.$div = $( this.div );
     this.$main.append( this.div );
