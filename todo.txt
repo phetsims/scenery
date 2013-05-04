@@ -338,6 +338,7 @@ Performance:
         Better way of applying CSS transform than jQuery + Matrix3's current way
         Consider a CanvasAccelerationNode - batches events and should be treated like an opaque rectangle that is dirty or not
         Disabling bounds / paint tracking where not needed?
+            Or just don't ever compute bounds until they are needed? (call validateBounds more often as a result)
         Memory taken up, causing iOS crashes!
         Scene.affectedLayers O(N) => O(log N)
             FAMB animation loop:
