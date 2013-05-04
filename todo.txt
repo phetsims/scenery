@@ -383,6 +383,10 @@ Performance:
         ...
     *** paintCanvas bottleneck?
     *** Garbage collection jitters!
+        see https://www.scirra.com/blog/76/how-to-write-low-garbage-real-time-javascript
+        arr.length = 0 instead of arr = []
+        Avoid creating new functions implicitly (function(){})
+        Recommends not using explicit vector objects due to GCs
     *** Performance regressions with layering
     * Prune node rendering based on visible dirty bounds
     Consider checking for hotspots and layer changes based on that
