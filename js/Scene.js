@@ -779,14 +779,82 @@ define( function( require ) {
       var layer = this.layers[i];
       
       var notBefore = endPointer.compareNested( new scenery.TrailPointer( layer.startPaintedTrail, true ) ) !== -1;
-      var notAfter = startPointer.compareNested( new scenery.TrailPointer( layer.endPaintedTrail, false ) ) !== 1;
+      var notAfter = startPointer.compareNested( new scenery.TrailPointer( layer.endPaintedTrail, true ) ) !== 1;
       
       if ( notBefore && notAfter ) {
         result.push( layer );
       }
     }
     
+    if ( assert ) {
+      var other = this.fastAffectedLayers( trail );
+      assert( other.length === result.length );
+      for ( var k = 0; k < result.length; k++ ) {
+        assert( other[k] === result[k] );
+      }
+    }
+    
     return result;
+  };
+  
+  Scene.prototype.fastAffectedLayers = function( trail ) {
+    // midpoint search and result depends on the order of layers being in render order (bottom to top)
+    
+    assert && assert( !( trail.isEmpty() || trail.nodes[0] !== this ), 'layerLookup root matches' );
+    
+    var n = this.layers.length;
+    if ( n === 0 ) {
+      throw new Error( 'no layers in the scene' );
+    }
+    
+    trail.reindex();
+    
+    // point to the beginning of the node, right before it would be rendered
+    var startPointer = new scenery.TrailPointer( trail, true );
+    var endPointer = new scenery.TrailPointer( trail, false );
+    
+    var layers = this.layers;
+    
+    // from layers 0 to n-1, notAfter goes from false to true, notBefore goes from true to false
+    var low = -1;
+    var high = n;
+    var mid;
+    
+    // midpoint search to see where our trail's start isn't after a layer's end
+    while ( high - 1 > low ) {
+      mid = ( high + low ) >> 1;
+      var endTrail = layers[mid].endPaintedTrail;
+      endTrail.reindex();
+      // NOTE TO SELF: don't change this flag to true again. think it through
+      var notAfter = startPointer.compareNested( new scenery.TrailPointer( endTrail, true ) ) !== 1;
+      if ( notAfter ) {
+        high = mid;
+      } else {
+        low = mid;
+      }
+    }
+    
+    // store result and reset bound
+    var firstIndex = high;
+    low = -1;
+    high = n;
+    
+    // midpoint search to see where our trail's end isn't before a layer's start
+    while ( high - 1 > low ) {
+      mid = ( high + low ) >> 1;
+      var startTrail = layers[mid].startPaintedTrail;
+      startTrail.reindex();
+      var notBefore = endPointer.compareNested( new scenery.TrailPointer( startTrail, true ) ) !== -1;
+      if ( notBefore ) {
+        low = mid;
+      } else {
+        high = mid;
+      }
+    }
+    
+    var lastIndex = low;
+    
+    return layers.slice( firstIndex, lastIndex + 1 );
   };
   
   // attempt to render everything currently visible in the scene to an external canvas. allows copying from canvas layers straight to the other canvas
