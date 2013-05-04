@@ -761,43 +761,6 @@ define( function( require ) {
   
   // all layers whose start or end points lie inclusively in the range from the trail's before and after
   Scene.prototype.affectedLayers = function( trail ) {
-    // TODO: add tree form for optimization! this is slower than necessary, it shouldn't be O(n)!
-    
-    var result = [];
-    
-    assert && assert( !( trail.isEmpty() || trail.nodes[0] !== this ), 'layerLookup root matches' );
-    
-    if ( this.layers.length === 0 ) {
-      throw new Error( 'no layers in the scene' );
-    }
-    
-    // point to the beginning of the node, right before it would be rendered
-    var startPointer = new scenery.TrailPointer( trail, true );
-    var endPointer = new scenery.TrailPointer( trail, false );
-    
-    for ( var i = 0; i < this.layers.length; i++ ) {
-      var layer = this.layers[i];
-      
-      var notBefore = endPointer.compareNested( new scenery.TrailPointer( layer.startPaintedTrail, true ) ) !== -1;
-      var notAfter = startPointer.compareNested( new scenery.TrailPointer( layer.endPaintedTrail, true ) ) !== 1;
-      
-      if ( notBefore && notAfter ) {
-        result.push( layer );
-      }
-    }
-    
-    if ( assert ) {
-      var other = this.fastAffectedLayers( trail );
-      assert( other.length === result.length );
-      for ( var k = 0; k < result.length; k++ ) {
-        assert( other[k] === result[k] );
-      }
-    }
-    
-    return result;
-  };
-  
-  Scene.prototype.fastAffectedLayers = function( trail ) {
     // midpoint search and result depends on the order of layers being in render order (bottom to top)
     
     assert && assert( !( trail.isEmpty() || trail.nodes[0] !== this ), 'layerLookup root matches' );
@@ -807,7 +770,7 @@ define( function( require ) {
       throw new Error( 'no layers in the scene' );
     }
     
-    trail.reindex();
+    assert && assert( trail.areIndicesValid() );
     
     // point to the beginning of the node, right before it would be rendered
     var startPointer = new scenery.TrailPointer( trail, true );
@@ -824,7 +787,7 @@ define( function( require ) {
     while ( high - 1 > low ) {
       mid = ( high + low ) >> 1;
       var endTrail = layers[mid].endPaintedTrail;
-      endTrail.reindex();
+      assert && assert( endTrail.areIndicesValid() );
       // NOTE TO SELF: don't change this flag to true again. think it through
       var notAfter = startPointer.compareNested( new scenery.TrailPointer( endTrail, true ) ) !== 1;
       if ( notAfter ) {
@@ -844,6 +807,7 @@ define( function( require ) {
       mid = ( high + low ) >> 1;
       var startTrail = layers[mid].startPaintedTrail;
       startTrail.reindex();
+      assert && assert( startTrail.areIndicesValid() );
       var notBefore = endPointer.compareNested( new scenery.TrailPointer( startTrail, true ) ) !== -1;
       if ( notBefore ) {
         low = mid;
