@@ -51,6 +51,9 @@
     .exampleScene {
       margin: 15px auto;
       border: 1px solid black;
+      position: relative;
+      left: 0;
+      top: 0;
     }
     
     #sidebar {
@@ -216,8 +219,6 @@
       <a class="sublink" href="#text-fontStyle">fontStyle</a><br>
       <a class="sublink" href="#text-fontSize">fontSize</a><br>
       <a class="sublink" href="#text-lineHeight">lineHeight</a><br>
-      <a class="sublink" href="#text-textAlign">textAlign</a><br>
-      <a class="sublink" href="#text-textBaseline">textBaseline</a><br>
       <a class="sublink" href="#text-direction">direction</a><br>
       <a class="sublink" href="#text-boundsMethod">boundsMethod</a><br>
       
@@ -1116,7 +1117,14 @@ scene.addChild( new scenery.Text( 'Some text', {
         <code>node.font</code> (<code>node.getFont()</code>, <code>node.setFont( font )</code>)
         gets or sets the entire font. This can be a <a href="#font">Font</a> object, or a String
         that is interpreted as a <a href="http://www.w3.org/TR/css3-fonts/">CSS font</a>.
-        Node that Canvas places <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-font">restrictions</a> on the possible interpreted values, so
+      </p>
+      <p>
+        If text.font is set to a <a href="#font">Font</a> instance, this instance will be stored,
+        and any later changes to the <a href="#font">Font</a> instance will affect this <a href="#text">Text</a>
+        node.
+      </p>
+      <p>
+        Note that Canvas places <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-font">restrictions</a> on the possible interpreted values, so
         only those should be set on a <a href="#text">Text</a> node.
       </p>
       
@@ -1126,12 +1134,18 @@ scene.addChild( new scenery.Text( 'Some text', {
         gets or sets the <a href="#font-weight">font weight</a> by internally forwarding to the <a href="#text">Text</a> node's
         internal <a href="#font">Font</a> reference.
       </p>
+      <p>
+        Setting the fontWeight will create a new internal Font object, so future changes to the original Font will not apply to this node.
+      </p>
       
       <h4 id="text-fontFamily">fontFamily</h4>
       <p>
         <code>node.fontFamily</code> (<code>node.getFontFamily()</code>, <code>node.setFontFamily( family )</code>)
         gets or sets the <a href="#font-family">font family</a> by internally forwarding to the <a href="#text">Text</a> node's
         internal <a href="#font">Font</a> reference.
+      </p>
+      <p>
+        Setting the fontWeight will create a new internal Font object, so future changes to the original Font will not apply to this node.
       </p>
       
       <h4 id="text-fontStretch">fontStretch</h4>
@@ -1140,12 +1154,18 @@ scene.addChild( new scenery.Text( 'Some text', {
         gets or sets the <a href="#font-stretch">font stretch</a> by internally forwarding to the <a href="#text">Text</a> node's
         internal <a href="#font">Font</a> reference.
       </p>
+      <p>
+        Setting the fontWeight will create a new internal Font object, so future changes to the original Font will not apply to this node.
+      </p>
       
       <h4 id="text-fontStyle">fontStyle</h4>
       <p>
         <code>node.fontStyle</code> (<code>node.getFontStyle()</code>, <code>node.setFontStyle( style )</code>)
         gets or sets the <a href="#font-style">font style</a> by internally forwarding to the <a href="#text">Text</a> node's
         internal <a href="#font">Font</a> reference.
+      </p>
+      <p>
+        Setting the fontWeight will create a new internal Font object, so future changes to the original Font will not apply to this node.
       </p>
       
       <h4 id="text-fontSize">fontSize</h4>
@@ -1154,6 +1174,9 @@ scene.addChild( new scenery.Text( 'Some text', {
         gets or sets the <a href="#font-size">font size</a> by internally forwarding to the <a href="#text">Text</a> node's
         internal <a href="#font">Font</a> reference.
       </p>
+      <p>
+        Setting the fontWeight will create a new internal Font object, so future changes to the original Font will not apply to this node.
+      </p>
       
       <h4 id="text-lineHeight">lineHeight</h4>
       <p>
@@ -1161,22 +1184,8 @@ scene.addChild( new scenery.Text( 'Some text', {
         gets or sets the <a href="#font-lineHeight">line height</a> by internally forwarding to the <a href="#text">Text</a> node's
         internal <a href="#font">Font</a> reference.
       </p>
-      
-      <h4 id="text-textAlign">textAlign</h4>
       <p>
-        <code>node.textAlign</code> (<code>node.getTextAlign()</code>, <code>node.setTextAlign( align )</code>)
-        sets the text horizontal alignment compared to the origin point. It should take on values from
-        Canvas's <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-textalign">context.textAlign</a>, although in practice the default <code>'start'</code> is best to use.
-        Other values may not behave as expected yet across rendering backends.
-      </p>
-      
-      <h4 id="text-textBaseline">textBaseline</h4>
-      <p>
-        <code>node.textBaseline</code> (<code>node.getTextBaseline()</code>, <code>node.setTextBaseline( baseline )</code>)
-        sets the text baseline position compared to the origin point. It should take on values from
-        Canvas's <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-textbaseline">context.textBaseline</a>, although in practice it should be constrained to
-        <code>'alphabetic'</code>, <code>'ideographic'</code>, <code>'hanging'</code> or <code>'middle'</code>,
-        as those are supported in the SVG renderer.
+        Setting the fontWeight will create a new internal Font object, so future changes to the original Font will not apply to this node.
       </p>
       
       <h4 id="text-direction">direction</h4>

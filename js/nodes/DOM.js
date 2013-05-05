@@ -20,6 +20,7 @@ define( function( require ) {
   var Node = require( 'SCENERY/nodes/Node' ); // DOM inherits from Node
   var Renderer = require( 'SCENERY/layers/Renderer' );
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
+  require( 'SCENERY/util/Util' );
   
   scenery.DOM = function DOM( element, options ) {
     options = options || {};
@@ -113,7 +114,7 @@ define( function( require ) {
     
     updateCSSTransform: function( transform, element ) {
       // faster to use our jQuery reference instead of wrapping element
-      this._$container.css( transform.getMatrix().getCSSTransformStyles() );
+      scenery.Util.applyCSSTransform( transform.getMatrix(), this._container );
     },
     
     isPainted: function() {

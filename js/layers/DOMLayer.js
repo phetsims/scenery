@@ -30,15 +30,18 @@ define( function( require ) {
   scenery.DOMLayer = function( args ) {
     Layer.call( this, args );
     
-    var width = this.$main.width();
-    var height = this.$main.height();
+    var width = args.scene.sceneBounds.width;
+    var height = args.scene.sceneBounds.height;
     
     this.div = document.createElement( 'div' );
+    var div = this.div;
+    div.style.position = 'absolute';
+    div.style.left = '0';
+    div.style.top = '0';
+    div.style.width = '0';
+    div.style.height = '0';
+    div.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
     this.$div = $( this.div );
-    this.$div.width( 0 );
-    this.$div.height( 0 );
-    this.$div.css( 'position', 'absolute' );
-    this.div.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
     this.$main.append( this.div );
     
     this.scene = args.scene;
@@ -139,7 +142,8 @@ define( function( require ) {
     
     dispose: function() {
       Layer.prototype.dispose.call( this );
-      this.$div.detach();
+      
+      this.div.parentNode.removeChild( this.div );
     },
     
     markDirtyRegion: function( args ) {

@@ -58,6 +58,9 @@ define( function( require ) {
     this.$main = $main;
     this.main = $main[0];
     
+    // add a self reference to aid in debugging. this generally shouldn't lead to a memory leak
+    this.main.scene = this;
+    
     // defaults
     options = _.extend( {
       allowSceneOverflow: false,
@@ -717,6 +720,9 @@ define( function( require ) {
   Scene.prototype.dispose = function() {
     this.disposeLayers();
     
+    // remove self reference from the container
+    delete this.main.scene;
+    
     // TODO: clear event handlers if added
     //throw new Error( 'unimplemented dispose: clear event handlers if added' );
   };
@@ -761,32 +767,64 @@ define( function( require ) {
   
   // all layers whose start or end points lie inclusively in the range from the trail's before and after
   Scene.prototype.affectedLayers = function( trail ) {
-    // TODO: add tree form for optimization! this is slower than necessary, it shouldn't be O(n)!
-    
-    var result = [];
+    // midpoint search and result depends on the order of layers being in render order (bottom to top)
     
     assert && assert( !( trail.isEmpty() || trail.nodes[0] !== this ), 'layerLookup root matches' );
     
-    if ( this.layers.length === 0 ) {
+    var n = this.layers.length;
+    if ( n === 0 ) {
       throw new Error( 'no layers in the scene' );
     }
+    
+    assert && assert( trail.areIndicesValid() );
     
     // point to the beginning of the node, right before it would be rendered
     var startPointer = new scenery.TrailPointer( trail, true );
     var endPointer = new scenery.TrailPointer( trail, false );
     
-    for ( var i = 0; i < this.layers.length; i++ ) {
-      var layer = this.layers[i];
-      
-      var notBefore = endPointer.compareNested( new scenery.TrailPointer( layer.startPaintedTrail, true ) ) !== -1;
-      var notAfter = startPointer.compareNested( new scenery.TrailPointer( layer.endPaintedTrail, true ) ) !== 1;
-      
-      if ( notBefore && notAfter ) {
-        result.push( layer );
+    var layers = this.layers;
+    
+    // from layers 0 to n-1, notAfter goes from false to true, notBefore goes from true to false
+    var low = -1;
+    var high = n;
+    var mid;
+    
+    // midpoint search to see where our trail's start isn't after a layer's end
+    while ( high - 1 > low ) {
+      mid = ( high + low ) >> 1;
+      var endTrail = layers[mid].endPaintedTrail;
+      assert && assert( endTrail.areIndicesValid() );
+      // NOTE TO SELF: don't change this flag to true again. think it through
+      var notAfter = startPointer.compareNested( new scenery.TrailPointer( endTrail, true ) ) !== 1;
+      if ( notAfter ) {
+        high = mid;
+      } else {
+        low = mid;
       }
     }
     
-    return result;
+    // store result and reset bound
+    var firstIndex = high;
+    low = -1;
+    high = n;
+    
+    // midpoint search to see where our trail's end isn't before a layer's start
+    while ( high - 1 > low ) {
+      mid = ( high + low ) >> 1;
+      var startTrail = layers[mid].startPaintedTrail;
+      startTrail.reindex();
+      assert && assert( startTrail.areIndicesValid() );
+      var notBefore = endPointer.compareNested( new scenery.TrailPointer( startTrail, true ) ) !== -1;
+      if ( notBefore ) {
+        low = mid;
+      } else {
+        high = mid;
+      }
+    }
+    
+    var lastIndex = low;
+    
+    return layers.slice( firstIndex, lastIndex + 1 );
   };
   
   // attempt to render everything currently visible in the scene to an external canvas. allows copying from canvas layers straight to the other canvas
@@ -934,8 +972,9 @@ define( function( require ) {
     // TODO: come up with more parameter names that have the same string length, so it looks creepier
     var pointFromEvent = parameters.pointFromEvent;
     var listenerTarget = parameters.listenerTarget;
+    var batchDOMEvents = parameters.batchDOMEvents;
     
-    var input = new scenery.Input( scene, listenerTarget );
+    var input = new scenery.Input( scene, listenerTarget, !!batchDOMEvents );
     scene.input = input;
     
     // maps the current MS pointer types onto the pointer spec
@@ -1041,6 +1080,10 @@ define( function( require ) {
         } );
       } );
     }
+  };
+  
+  Scene.prototype.fireBatchedEvents = function() {
+    this.input.fireBatchedEvents();
   };
   
   Scene.prototype.resizeOnWindowResize = function() {

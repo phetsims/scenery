@@ -22,7 +22,8 @@ define( function( require ) {
     'transform',
     'selfBounds',
     'childBounds',
-    'bounds'
+    'bounds',
+    'boundsAccuracy'
   ];
   
   scenery.SplitNodeEvents = function( type ) {

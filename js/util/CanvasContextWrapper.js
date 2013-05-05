@@ -39,8 +39,6 @@ define( function( require ) {
       this.miterLimit = undefined; // 10
       
       this.font = undefined; // '10px sans-serif'
-      this.textAlign = undefined; // 'start'
-      this.textBaseline = undefined; // 'alphabetic'
       this.direction = undefined; // 'inherit'
     },
     
@@ -116,20 +114,6 @@ define( function( require ) {
       if ( this.font !== font ) {
         this.font = font;
         this.context.font = font;
-      }
-    },
-    
-    setTextAlign: function( textAlign ) {
-      if ( this.textAlign !== textAlign ) {
-        this.textAlign = textAlign;
-        this.context.textAlign = textAlign;
-      }
-    },
-    
-    setTextBaseline: function( textBaseline ) {
-      if ( this.textBaseline !== textBaseline ) {
-        this.textBaseline = textBaseline;
-        this.context.textBaseline = textBaseline;
       }
     },
     

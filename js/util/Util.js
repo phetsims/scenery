@@ -27,6 +27,54 @@ define( function( require ) {
   // TODO: remove flag and tests after we're done
   var debugChromeBoundsScanning = false;
   
+  // detect properly prefixed transform and transformOrigin properties
+  var transformProperty = '';
+  var transformOriginProperty = '';
+  var webkitHardwareAcceleration = false;
+  var mozillaHardwareAcceleration = false;
+  if ( document && document.createElement ) {
+    var style = document.createElement( 'div' ).style;
+    
+    var transformNames = [
+      'transform',
+      'webkitTransform',
+      'oTransform',
+      'mozTransform',
+      'msTransform'
+    ];
+    var transformOriginNames = [
+      'transformOrigin',
+      'webkitTransformOrigin',
+      'oTransformOrigin',
+      'mozTransformOrigin',
+      'msTransformOrigin'
+    ];
+    
+    var i;
+    
+    for ( i = 0; i < transformNames.length; i++ ) {
+      if ( transformNames[i] in style ) {
+        transformProperty = transformNames[i];
+        break;
+      }
+    }
+    for ( i = 0; i < transformOriginNames.length; i++ ) {
+      if ( transformOriginNames[i] in style ) {
+        transformOriginProperty = transformOriginNames[i];
+        break;
+      }
+    }
+    if ( !transformOriginProperty ) {
+      transformOriginProperty = 'transformOrigin'; // fallback, so we don't try to set an empty string property later
+    }
+    if ( ( 'webkitBackfaceVisibility' in style ) || ( 'webkitTransform' in style ) ) {
+      webkitHardwareAcceleration = true;
+    }
+    if ( 'mozTransform' in style ) {
+      mozillaHardwareAcceleration = true;
+    }
+  }
+  
   scenery.Util = {
     // like _.extend, but with hardcoded support for https://github.com/documentcloud/underscore/pull/986
     extend: function( obj ) {
@@ -49,6 +97,25 @@ define( function( require ) {
 
       F.prototype = o;
       return new F();
+    },
+    
+    applyCSSTransform: function( matrix, element ) {
+      var transformCSS = matrix.getCSSTransform();
+      // notes on triggering hardware acceleration: http://creativejs.com/2011/12/day-2-gpu-accelerate-your-dom-elements/
+      // TODO: consider leaving out on iOS if possible, since we might be overflowing the GPU memory
+      
+      // TODO: we may want control over this flag
+      if ( webkitHardwareAcceleration || mozillaHardwareAcceleration ) {
+        transformCSS += ' translateZ(0)';
+      }
+      
+      if ( webkitHardwareAcceleration ) {
+        // TODO: find out bug that causes BLL text to disappear unless this acceleration is present
+        element.style.webkitBackfaceVisibility = 'hidden';
+      }
+      
+      element.style[transformProperty] = transformCSS;
+      element.style[transformOriginProperty] = 'top left'; // TODO: performance: this only needs to be set once!
     },
     
     testAssert: function() {

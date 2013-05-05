@@ -23,6 +23,7 @@ define( function( require ) {
   
   var Layer = require( 'SCENERY/layers/Layer' ); // extends Layer
   require( 'SCENERY/util/Trail' );
+  require( 'SCENERY/util/Util' );
   
   // used namespaces
   var svgns = 'http://www.w3.org/2000/svg';
@@ -53,6 +54,8 @@ define( function( require ) {
     this.svg.setAttribute( 'height', height );
     this.svg.setAttribute( 'stroke-miterlimit', 10 ); // to match our Canvas brethren so we have the same default behavior
     this.svg.style.position = 'absolute';
+    this.svg.style.left = '0';
+    this.svg.style.top = '0';
     this.svg.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
     this.svg.style['pointer-events'] = 'none';
     $main.append( this.svg );
@@ -92,9 +95,10 @@ define( function( require ) {
       // walk a subtrail up from the root node all the way to the full trail, creating groups where necessary
       while ( subtrail.length <= trail.length ) {
         var id = subtrail.getUniqueId();
-        if ( !( id in this.idGroupMap ) ) {
+        var group = this.idGroupMap[id];
+        
+        if ( !group ) {
           // we need to create a new group
-          var group;
           
           if ( lastId ) {
             // we have a parent group to which we need to be added
@@ -125,7 +129,7 @@ define( function( require ) {
         }
         
         // this trail will depend on this group, so increment the reference counter
-        this.idGroupMap[id].referenceCount++;
+        group.referenceCount++;
         
         if ( subtrail.length === trail.length ) {
           // TODO: cleaner control structures
@@ -263,7 +267,8 @@ define( function( require ) {
     
     dispose: function() {
       Layer.prototype.dispose.call( this );
-      this.$svg.detach();
+      
+      this.svg.parentNode.removeChild( this.svg );
     },
     
     markDirtyRegion: function( args ) {
@@ -340,7 +345,7 @@ define( function( require ) {
       
       if ( this.cssTransform ) {
         // set the full transform!
-        this.$svg.css( transform.getMatrix().timesMatrix( this.baseNodeTransform.getInverse() ).getCSSTransformStyles() );
+        scenery.Util.applyCSSTransform( transform.getMatrix().timesMatrix( this.baseNodeTransform.getInverse() ), this.svg );
         
         if ( includesBaseTransformChange ) {
           this.applyTransform( this.baseNodeTransform, this.g );
@@ -379,7 +384,7 @@ define( function( require ) {
         
         // apply the transforms
         // TODO: checks to make sure we don't apply them in a row if one didn't change!
-        this.$svg.css( cssTransform.getMatrix().getCSSTransformStyles() );
+        scenery.Util.applyCSSTransform( cssTransform.getMatrix(), this.svg );
         this.applyTransform( transform, this.g );
       } else {
         this.applyTransform( transform, this.g );

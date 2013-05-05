@@ -53,6 +53,8 @@ define( function( require ) {
     canvas.style.width = this.logicalWidth + 'px';
     canvas.style.height = this.logicalHeight + 'px';
     canvas.style.position = 'absolute';
+    canvas.style.left = '0';
+    canvas.style.top = '0';
     
     // add this layer on top (importantly, the constructors of the layers are called in order)
     this.$main.append( canvas );
@@ -310,7 +312,8 @@ define( function( require ) {
     
     dispose: function() {
       Layer.prototype.dispose.call( this );
-      $( this.canvas ).detach();
+      
+      this.canvas.parentNode.removeChild( this.canvas );
     },
     
     // TODO: consider a stack-based model for transforms?
