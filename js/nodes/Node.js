@@ -1267,6 +1267,41 @@ define( function( require ) {
       return this._transform.inverseBounds2( bounds );
     },
     
+    // returns the matrix (fresh copy) that transforms points from the local coordinate frame into the global coordinate frame
+    getLocalToGlobalMatrix: function() {
+      var node = this;
+      
+      // we need to apply the transformations in the reverse order, so we temporarily store them
+      var matrices = [];
+      
+      // concatenation like this has been faster than getting a unique trail, getting its transform, and applying it
+      while ( node ) {
+        matrices.push( node._transform.getMatrix() );
+        assert && assert( node._parents[1] === undefined, 'getLocalToGlobalMatrix unable to work for DAG' );
+        node = node._parents[0];
+      }
+      
+      var matrix = new Matrix3(); // will be modified in place
+      
+      // iterate from the back forwards (from the root node to here)
+      for ( var i = matrices.length - 1; i >=0; i-- ) {
+        matrix.multiplyMatrix( matrices[i] );
+      }
+      
+      // NOTE: always return a fresh copy, getGlobalToLocalMatrix depends on it to minimize instance usage!
+      return matrix;
+    },
+    
+    // equivalent to getUniqueTrail().getTransform(), but faster.
+    getUniqueTransform: function() {
+      return new Transform3( this.getLocalToGlobalMatrix() );
+    },
+    
+    // returns the matrix (fresh copy) that transforms points in the global coordinate frame into the local coordinate frame
+    getGlobalToLocalMatrix: function() {
+      return this.getLocalToGlobalMatrix().invert();
+    },
+    
     // apply this node's transform (and then all of its parents' transforms) to the point
     localToGlobalPoint: function( point ) {
       var node = this;
@@ -1278,30 +1313,34 @@ define( function( require ) {
       return point;
     },
     
-    // apply this node's transform (and then all of its parents' transforms) to the bounds
-    localToGlobalBounds: function( bounds ) {
+    globalToLocalPoint: function( point ) {
       var node = this;
       
       // we need to apply the transformations in the reverse order, so we temporarily store them
-      var matrices = [];
-      
-      // concatenation like this has been faster than getting a unique trail, getting its transform, and applying it
+      var transforms = [];
       while ( node ) {
-        matrices.push( node._transform.getMatrix() );
-        assert && assert( node._parents[1] === undefined, 'localToGlobalBounds unable to work for DAG' );
+        transforms.push( node._transform );
+        assert && assert( node._parents[1] === undefined, 'globalToLocalPoint unable to work for DAG' );
         node = node._parents[0];
       }
       
-      var matrix = new Matrix3(); // will be modified in place
-      
       // iterate from the back forwards (from the root node to here)
-      for ( var i = matrices.length - 1; i >=0; i-- ) {
-        matrix.multiplyMatrix( matrices[i] );
+      for ( var i = transforms.length - 1; i >=0; i-- ) {
+        point = transforms[i].inversePosition2( point );
       }
-      
+      return point;
+    },
+    
+    // apply this node's transform (and then all of its parents' transforms) to the bounds
+    localToGlobalBounds: function( bounds ) {
       // apply the bounds transform only once, so we can minimize the expansion encountered from multiple rotations
       // it also seems to be a bit faster this way
-      return bounds.transformed( matrix );
+      return bounds.transformed( this.getLocalToGlobalMatrix() );
+    },
+    
+    globalToLocalBounds: function( bounds ) {
+      // apply the bounds transform only once, so we can minimize the expansion encountered from multiple rotations
+      return bounds.transformed( this.getGlobalToLocalMatrix() );
     },
     
     // like localToGlobalPoint, but without applying this node's transform
@@ -1340,42 +1379,6 @@ define( function( require ) {
     // get the Bounds2 of this node in the coordinate frame of the parameter node. Does not work for DAG cases.
     boundsTo: function( node ) {
       return node.globalToLocalBounds( this.getGlobalBounds() );
-    },
-    
-    globalToLocalPoint: function( point ) {
-      var node = this;
-      
-      // we need to apply the transformations in the reverse order, so we temporarily store them
-      var transforms = [];
-      while ( node ) {
-        transforms.push( node._transform );
-        assert && assert( node._parents[1] === undefined, 'globalToLocalPoint unable to work for DAG' );
-        node = node._parents[0];
-      }
-      
-      // iterate from the back forwards (from the root node to here)
-      for ( var i = transforms.length - 1; i >=0; i-- ) {
-        point = transforms[i].inversePosition2( point );
-      }
-      return point;
-    },
-    
-    globalToLocalBounds: function( bounds ) {
-      var node = this;
-      
-      // we need to apply the transformations in the reverse order, so we temporarily store them
-      var transforms = [];
-      while ( node ) {
-        transforms.push( node._transform );
-        assert && assert( node._parents[1] === undefined, 'globalToLocalBounds unable to work for DAG' );
-        node = node._parents[0];
-      }
-      
-      // iterate from the back forwards (from the root node to here)
-      for ( var i = transforms.length - 1; i >=0; i-- ) {
-        bounds = transforms[i].inverseBounds2( bounds );
-      }
-      return bounds;
     },
     
     /*---------------------------------------------------------------------------*
