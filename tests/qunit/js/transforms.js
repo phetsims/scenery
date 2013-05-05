@@ -63,4 +63,40 @@
     ok( new Bounds2( 4, 4, 20, 30 ).equalsEpsilon( a.globalToParentBounds( bounds ), epsilon ), 'globalToParentBounds on root' );
   } );
   
+  test( 'Points (order of transforms)', function() {
+    var a = new scenery.Node();
+    var b = new scenery.Node();
+    var c = new scenery.Node();
+    a.addChild( b );
+    b.addChild( c );
+    a.x = 10;
+    b.scale( 2 );
+    c.y = 10;
+    
+    ok( dot( 20, 30 ).equalsEpsilon( c.localToGlobalPoint( dot( 5, 5 ) ), epsilon ), 'localToGlobalPoint' );
+    ok( dot( -2.5, -7.5 ).equalsEpsilon( c.globalToLocalPoint( dot( 5, 5 ) ), epsilon ), 'globalToLocalPoint' );
+    ok( dot( 20, 10 ).equalsEpsilon( c.parentToGlobalPoint( dot( 5, 5 ) ), epsilon ), 'parentToGlobalPoint' );
+    ok( dot( -2.5, 2.5 ).equalsEpsilon( c.globalToParentPoint( dot( 5, 5 ) ), epsilon ), 'globalToParentPoint' );
+  } );
+  
+  test( 'Bounds (order of transforms)', function() {
+    var a = new scenery.Node();
+    var b = new scenery.Node();
+    var c = new scenery.Node();
+    a.addChild( b );
+    b.addChild( c );
+    a.x = 10;
+    b.scale( 2 );
+    c.y = 10;
+    
+    var Bounds2 = dot.Bounds2;
+    
+    var bounds = new Bounds2( 4, 4, 20, 30 );
+    
+    ok( new Bounds2( 18, 28, 50, 80 ).equalsEpsilon( c.localToGlobalBounds( bounds ), epsilon ), 'localToGlobalBounds' );
+    ok( new Bounds2( -3, -8, 5, 5 ).equalsEpsilon( c.globalToLocalBounds( bounds ), epsilon ), 'globalToLocalBounds' );
+    ok( new Bounds2( 18, 8, 50, 60 ).equalsEpsilon( c.parentToGlobalBounds( bounds ), epsilon ), 'parentToGlobalBounds' );
+    ok( new Bounds2( -3, 2, 5, 15 ).equalsEpsilon( c.globalToParentBounds( bounds ), epsilon ), 'globalToParentBounds' );
+  } );
+  
 })();
