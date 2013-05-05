@@ -58,6 +58,9 @@ define( function( require ) {
     this.$main = $main;
     this.main = $main[0];
     
+    // add a self reference to aid in debugging. this generally shouldn't lead to a memory leak
+    this.main.scene = this;
+    
     // defaults
     options = _.extend( {
       allowSceneOverflow: false,
@@ -716,6 +719,9 @@ define( function( require ) {
   
   Scene.prototype.dispose = function() {
     this.disposeLayers();
+    
+    // remove self reference from the container
+    delete this.main.scene;
     
     // TODO: clear event handlers if added
     //throw new Error( 'unimplemented dispose: clear event handlers if added' );
