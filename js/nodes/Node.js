@@ -621,6 +621,7 @@ define( function( require ) {
     translate: function( x, y, prependInstead ) {
       if ( typeof x === 'number' ) {
         // translate( x, y, prependInstead )
+        if ( !x && !y ) { return; } // bail out if both are zero
         if ( prependInstead ) {
           this.prependMatrix( Matrix3.translation( x, y ) );
         } else {
@@ -629,6 +630,7 @@ define( function( require ) {
       } else {
         // translate( vector, prependInstead )
         var vector = x;
+        if ( !vector.x && !vector.y ) { return; } // bail out if both are zero
         this.translate( vector.x, vector.y, y ); // forward to full version
       }
     },
@@ -638,9 +640,11 @@ define( function( require ) {
       if ( typeof x === 'number' ) {
         if ( y === undefined ) {
           // scale( scale )
+          if ( x === 1 ) { return; } // bail out if we are scaling by 1 (identity)
           this.appendMatrix( Matrix3.scaling( x, x ) );
         } else {
           // scale( x, y, prependInstead )
+          if ( x === 1 && y === 1 ) { return; } // bail out if we are scaling by 1 (identity)
           if ( prependInstead ) {
             this.prependMatrix( Matrix3.scaling( x, y ) );
           } else {
@@ -656,6 +660,7 @@ define( function( require ) {
     
     // TODO: consider naming to rotateBy to match scaleBy (due to scale property / method name conflict)
     rotate: function( angle, prependInstead ) {
+      if ( angle % ( 2 * Math.PI ) === 0 ) { return; } // bail out if our angle is effectively 0
       if ( prependInstead ) {
         this.prependMatrix( Matrix3.rotation2( angle ) );
       } else {
@@ -726,11 +731,18 @@ define( function( require ) {
     setTranslation: function( a, b ) {
       var translation = this.getTranslation();
       
+      var dx, dy;
+      
       if ( typeof a === 'number' ) {
-        this.translate( a - translation.x, b - translation.y, true );
+        dx = a - translation.x;
+        dy = b - translation.y;
       } else {
-        this.translate( a.x - translation.x, a.y - translation.y, true );
+        dx = a.x - translation.x;
+        dy = a.y - translation.y;
       }
+      
+      this.translate( dx, dy, true );
+      
       return this;
     },
     
