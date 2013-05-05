@@ -48,6 +48,9 @@ define( function( require ) {
     // span for using the browser to compute font styles
     this.$span = $( document.createElement( 'span' ) );
     
+    // cache values for all of the span's properties
+    this.cachedValues = null;
+    
     var type = typeof options;
     if ( type === 'string' ) {
       this._font = options;
@@ -65,9 +68,23 @@ define( function( require ) {
     constructor: Font,
     
     getProperty: function( property ) {
-      return this.$span.css( property );
+      if ( !this.cachedValues ) {
+        this.cachedValues = this.$span.css( [
+          'font',
+          'font-family',
+          'font-weight',
+          'font-stretch',
+          'font-style',
+          'font-size',
+          'lineHeight'
+        ] );
+      }
+      assert && assert( property in this.cachedValues );
+      return this.cachedValues[property];
     },
     setProperty: function( property, value ) {
+      this.cachedValues = null;
+      
       // sanity check, in case some CSS changed somewhere
       this.$span.css( 'font', this._font );
       
@@ -78,8 +95,16 @@ define( function( require ) {
     },
     
     // direct access to the font string
-    getFont: function() { return this._font; },
-    setFont: function( value ) { this._font = value; return this; },
+    getFont: function() {
+      return this._font;
+    },
+    setFont: function( value ) {
+      if ( this._font !== value ) {
+        this.cachedValues = null;
+        this._font = value;
+      }
+      return this;
+    },
     
     // using the property mechanism
     getFamily: function() { return this.getProperty( 'font-family' ); },
@@ -131,6 +156,10 @@ define( function( require ) {
           font[key] = options[key];
         }
       } );
+    },
+    
+    toString: function() {
+      return this.getFont();
     }
   };
   
