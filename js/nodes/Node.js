@@ -1305,12 +1305,14 @@ define( function( require ) {
     // apply this node's transform (and then all of its parents' transforms) to the point
     localToGlobalPoint: function( point ) {
       var node = this;
+      var resultPoint = point.copy();
       while ( node ) {
-        point = node._transform.transformPosition2( point );
+        // in-place multiplication
+        node._transform.getMatrix().multiplyVector2( resultPoint );
         assert && assert( node._parents[1] === undefined, 'localToGlobalPoint unable to work for DAG' );
         node = node._parents[0];
       }
-      return point;
+      return resultPoint;
     },
     
     globalToLocalPoint: function( point ) {
@@ -1326,10 +1328,12 @@ define( function( require ) {
       }
       
       // iterate from the back forwards (from the root node to here)
+      var resultPoint = point.copy();
       for ( var i = transforms.length - 1; i >=0; i-- ) {
-        point = transforms[i].inversePosition2( point );
+        // in-place multiplication
+        transforms[i].getInverse().multiplyVector2( resultPoint );
       }
-      return point;
+      return resultPoint;
     },
     
     // apply this node's transform (and then all of its parents' transforms) to the bounds
