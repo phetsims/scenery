@@ -110,8 +110,39 @@
             }
           };
           
-          window.runError = function() {
-            
+          window.setupTest = function() {
+            var n1 = new scenery.Node();
+            var n2 = new scenery.Node();
+            var n3 = new scenery.Node();
+            var n4 = new scenery.Node();
+            var n5 = new scenery.Node();
+            var n6 = new scenery.Node();
+            var n7 = new scenery.Node();
+            var n8 = new scenery.Node();
+            var n9 = new scenery.Node();
+            n1.addChild( n2 );
+            n2.addChild( n3 );
+            n3.addChild( n4 );
+            n4.addChild( n5 );
+            n5.addChild( n6 );
+            n6.addChild( n7 );
+            n7.addChild( n8 );
+            n8.addChild( n9 );
+            scene.addChild( n1 );
+            window.trail = n9.getUniqueTrail();
+            window.bounds = new dot.Bounds2( 1, 2, 5, 6 );
+          };
+          
+          window.testNodeBounds = function( trail ) {
+            var a = performance.now();
+            for ( var i = 0; i < 100000; i++ ) { trail.lastNode().localToGlobalBounds( bounds ); };
+            console.log( performance.now() - a );
+          };
+          
+          window.testTrailBounds = function( trail ) {
+            var a = performance.now();
+            for ( var i = 0; i < 100000; i++ ) { trail.localToGlobalBounds( bounds ); };
+            console.log( performance.now() - a );
           };
           
           window.fuzzLayers = function() {
