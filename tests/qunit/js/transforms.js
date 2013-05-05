@@ -99,4 +99,19 @@
     ok( new Bounds2( -3, 2, 5, 15 ).equalsEpsilon( c.globalToParentBounds( bounds ), epsilon ), 'globalToParentBounds' );
   } );
   
+  test( 'Trail and Node transform equivalence', function() {
+    var a = new scenery.Node();
+    var b = new scenery.Node();
+    var c = new scenery.Node();
+    a.addChild( b );
+    b.addChild( c );
+    a.x = 10;
+    b.scale( 2 );
+    c.y = 10;
+    
+    var trailMatrix = c.getUniqueTrail().getTransform().getMatrix();
+    var nodeMatrix = c.getUniqueTransform().getMatrix();
+    ok( trailMatrix.equalsEpsilon( nodeMatrix, epsilon ), 'Trail and Node transform equivalence' );
+  } );
+  
 })();
