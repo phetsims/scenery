@@ -336,7 +336,7 @@ Performance:
     Priorities:
         ** Faster dirty marking for changes that don't modify children
         ** Don't double-mark the 'old' and 'new' spots for DOM / SVG
-        Only set CSS3 transform-origin once, on construction?
+        Only set CSS3 transform-origin once, on construction? -- create a SceneryStyle for it
         Better way of applying CSS transform than jQuery + Matrix3's current way
         Consider a CanvasAccelerationNode - batches events and should be treated like an opaque rectangle that is dirty or not
         Disabling bounds / paint tracking where not needed?
