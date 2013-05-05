@@ -1281,12 +1281,27 @@ define( function( require ) {
     // apply this node's transform (and then all of its parents' transforms) to the bounds
     localToGlobalBounds: function( bounds ) {
       var node = this;
+      
+      // we need to apply the transformations in the reverse order, so we temporarily store them
+      var matrices = [];
+      
+      // concatenation like this has been faster than getting a unique trail, getting its transform, and applying it
       while ( node ) {
-        bounds = node._transform.transformBounds2( bounds );
+        matrices.push( node._transform.getMatrix() );
         assert && assert( node._parents[1] === undefined, 'localToGlobalBounds unable to work for DAG' );
         node = node._parents[0];
       }
-      return bounds;
+      
+      var matrix = new Matrix3(); // will be modified in place
+      
+      // iterate from the back forwards (from the root node to here)
+      for ( var i = matrices.length - 1; i >=0; i-- ) {
+        matrix.multiplyMatrix( matrices[i] );
+      }
+      
+      // apply the bounds transform only once, so we can minimize the expansion encountered from multiple rotations
+      // it also seems to be a bit faster this way
+      return bounds.transformed( matrix );
     },
     
     // like localToGlobalPoint, but without applying this node's transform
