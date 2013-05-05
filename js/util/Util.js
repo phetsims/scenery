@@ -30,7 +30,8 @@ define( function( require ) {
   // detect properly prefixed transform and transformOrigin properties
   var transformProperty = '';
   var transformOriginProperty = '';
-  var triggerHardwareAcceleration = false;
+  var webkitHardwareAcceleration = false;
+  var mozillaHardwareAcceleration = false;
   if ( document && document.createElement ) {
     var style = document.createElement( 'div' ).style;
     
@@ -66,6 +67,12 @@ define( function( require ) {
     if ( !transformOriginProperty ) {
       transformOriginProperty = 'transformOrigin'; // fallback, so we don't try to set an empty string property later
     }
+    if ( ( 'webkitBackfaceVisibility' in style ) || ( 'webkitTransform' in style ) ) {
+      webkitHardwareAcceleration = true;
+    }
+    if ( 'mozTransform' in style ) {
+      mozillaHardwareAcceleration = true;
+    }
   }
   
   scenery.Util = {
@@ -94,19 +101,21 @@ define( function( require ) {
     
     applyCSSTransform: function( matrix, element ) {
       var transformCSS = matrix.getCSSTransform();
+      // notes on triggering hardware acceleration: http://creativejs.com/2011/12/day-2-gpu-accelerate-your-dom-elements/
+      // TODO: consider leaving out on iOS if possible, since we might be overflowing the GPU memory
       
       // TODO: we may want control over this flag
-      if ( triggerHardwareAcceleration ) {
+      if ( webkitHardwareAcceleration || mozillaHardwareAcceleration ) {
         transformCSS += ' translateZ(0)';
+      }
+      
+      if ( webkitHardwareAcceleration ) {
+        // TODO: find out bug that causes BLL text to disappear unless this acceleration is present
+        element.style.webkitBackfaceVisibility = 'hidden';
       }
       
       element.style[transformProperty] = transformCSS;
       element.style[transformOriginProperty] = 'top left'; // TODO: performance: this only needs to be set once!
-      
-      // notes on triggering hardware acceleration: http://creativejs.com/2011/12/day-2-gpu-accelerate-your-dom-elements/
-      // TODO: consider below for iOS hardware acceleration (maybe that causes more crashes due to a constrained GPU?)
-      // TODO: consider -webkit-perspective: 1000
-      // TODO: consider -webkit-backface-visibility: 'hidden'
     },
     
     testAssert: function() {
