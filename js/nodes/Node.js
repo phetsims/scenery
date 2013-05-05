@@ -1315,6 +1315,7 @@ define( function( require ) {
     
     globalToLocalPoint: function( point ) {
       var node = this;
+      // TODO: performance: test whether it is faster to get a total transform and then invert (won't compute individual inverses)
       
       // we need to apply the transformations in the reverse order, so we temporarily store them
       var transforms = [];
