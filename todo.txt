@@ -337,14 +337,10 @@ Performance:
         ** Faster dirty marking for changes that don't modify children
         ** Don't double-mark the 'old' and 'new' spots for DOM / SVG
         Only set CSS3 transform-origin once, on construction? -- create a SceneryStyle for it
-        Better way of applying CSS transform than jQuery + Matrix3's current way
         Consider a CanvasAccelerationNode - batches events and should be treated like an opaque rectangle that is dirty or not
         Disabling bounds / paint tracking where not needed?
             Or just don't ever compute bounds until they are needed? (call validateBounds more often as a result)
         Memory taken up, causing iOS crashes!
-        Scene.affectedLayers O(N) => O(log N)
-            FAMB animation loop:
-                11.77 + 11.86 + 4.38 + 3.52 + 14.35 = 45.88% !!!
         Path boundsMethod - either bounds not needed, or a more inaccurate form (particularly for stroked bounds!)
         Node.fireEvent (and event listeners) should be split based on event type, so it's faster to fire?
         Try Scene/Layer adding listeners to nodes based on their Trail, so we don't have to do the dispatching.
@@ -354,7 +350,6 @@ Performance:
         Layer creation costs
             * match in stitching
             * cache canvases
-            * minimize jquery
         addTrailToLayer / removeTrailFromLayer
         LayerBuilder and LayerStrategy
         TrailPointer's equalsNested, compareNested, nestedForwards
@@ -386,10 +381,6 @@ Performance:
         ...
     *** paintCanvas bottleneck?
     *** Garbage collection jitters!
-        see https://www.scirra.com/blog/76/how-to-write-low-garbage-real-time-javascript
-        arr.length = 0 instead of arr = []
-        Avoid creating new functions implicitly (function(){})
-        Recommends not using explicit vector objects due to GCs
     *** Performance regressions with layering
     * Prune node rendering based on visible dirty bounds
     Consider checking for hotspots and layer changes based on that
