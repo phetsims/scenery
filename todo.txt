@@ -336,8 +336,6 @@ Performance:
     Priorities:
         ** Faster dirty marking for changes that don't modify children
         ** Don't double-mark the 'old' and 'new' spots for DOM / SVG
-        Float64Array when possible? Also check Firefox performance
-        SVG text bounds - for other, and faster Font setting
         Better way of applying CSS transform than jQuery + Matrix3's current way
         Consider a CanvasAccelerationNode - batches events and should be treated like an opaque rectangle that is dirty or not
         Disabling bounds / paint tracking where not needed?
