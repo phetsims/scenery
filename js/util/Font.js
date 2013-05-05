@@ -54,6 +54,11 @@ define( function( require ) {
     // allow listeners to be notified on any changes
     this.listeners = [];
     
+    if ( assert ) {
+      // only do this if assertions are enabled, otherwise we won't access it at all
+      this.immutable = false;
+    }
+    
     var type = typeof options;
     if ( type === 'string' ) {
       this._font = options;
@@ -72,6 +77,8 @@ define( function( require ) {
     
     // invalidate cached data and notify listeners of the change
     invalidateFont: function() {
+      assert && assert( !this.immutable, 'cannot change immutable font instance' );
+      
       this.cachedValues = null;
       
       var listeners = this.listeners.slice( 0 );
@@ -80,6 +87,11 @@ define( function( require ) {
       for ( var i = 0; i < length; i++ ) {
         listeners[i]();
       }
+    },
+    
+    // marks this Font instance as immutable. any further change will trigger an error (if assertions are enabled)
+    setImmutable: function() {
+      this.immutable = true;
     },
     
     getProperty: function( property ) {
@@ -180,6 +192,7 @@ define( function( require ) {
     * listeners
     *----------------------------------------------------------------------------*/
     
+    // listener should be a callback expecting no arguments, listener() will be called when the font changes
     addFontListener: function( listener ) {
       assert && assert( !_.contains( this.listeners, listener ) );
       this.listeners.push( listener );
@@ -192,6 +205,8 @@ define( function( require ) {
   };
   
   Font.prototype._mutatorKeys = [ 'font', 'weight', 'family', 'stretch', 'style', 'size', 'lineHeight' ];
+  
+  Font.DEFAULT_FONT = new Font();
   
   return Font;
 } );
