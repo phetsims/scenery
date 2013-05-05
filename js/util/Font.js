@@ -206,7 +206,8 @@ define( function( require ) {
   
   Font.prototype._mutatorKeys = [ 'font', 'weight', 'family', 'stretch', 'style', 'size', 'lineHeight' ];
   
-  Font.DEFAULT_FONT = new Font();
+  Font.DEFAULT = new Font();
+  Font.DEFAULT.setImmutable();
   
   return Font;
 } );

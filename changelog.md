@@ -2,6 +2,9 @@
 Scenery Changelog
 =================
 
+2013-5-4  Text nodes can now share Font instances for performance reasons. This means a change to a Font will update
+          any Text nodes referring to it. Calling a mutator (like text.fontWeight = 'bold') will internally create a
+          copy of the Font instance, and the Text node will not be affected by changes to the previous Font object.
 2013-5-3  Removed Text.textAlign and Text.textBaseline, due to complexity, speed and duplication (with bounds methods)
 2013-4-29 Removed Text.isHtml flag, added HTMLText instead for HTML-styled text
 2013-4-27 Added isHtml flag to Text that will treat text as HTML and force the DOM renderer.

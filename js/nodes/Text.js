@@ -45,11 +45,11 @@ define( function( require ) {
   svgTextSizeContainer.appendChild( svgTextSizeElement );
   
   scenery.Text = function Text( text, options ) {
-    this._text         = '';                 // filled in with mutator
-    this._font         = new scenery.Font(); // default font, usually 10px sans-serif
-    this._direction    = 'ltr';              // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
-    this._boundsMethod = 'fast';             // fast (SVG/DOM, no canvas rendering allowed), fastCanvas (SVG/DOM, canvas rendering allowed without dirty regions),
-                                             //   or accurate (Canvas accurate recursive)
+    this._text         = '';                   // filled in with mutator
+    this._font         = scenery.Font.DEFAULT; // default font, usually 10px sans-serif
+    this._direction    = 'ltr';                // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
+    this._boundsMethod = 'fast';               // fast (SVG/DOM, no canvas rendering allowed), fastCanvas (SVG/DOM, canvas rendering allowed without dirty regions),
+                                               //   or accurate (Canvas accurate recursive)
     
     // whether the text is rendered as HTML or not. if defined (in a subtype constructor), use that value instead
     this._isHTML = this._isHTML === undefined ? false : this._isHTML;
@@ -57,6 +57,11 @@ define( function( require ) {
     // we will dynamically change renderers, so they are initialized per-instance instead of per-type
     this._supportedRenderers = [ Renderer.Canvas, Renderer.SVG, Renderer.DOM ];
     
+    var thisFont = this;
+    this.fontListener = function() {
+      thisFont.invalidateText();
+    };
+    this._font.addFontListener( this.fontListener );
     
     // ensure we have a parameter object
     options = options || {};
@@ -383,10 +388,12 @@ define( function( require ) {
     *----------------------------------------------------------------------------*/
     
     setFont: function( font ) {
-      // if font is a Font instance, we actually create another copy so that modification on the original will not change this font.
-      // in the future we can consider adding listeners to the font to get font change notifications.
-      this._font = font instanceof scenery.Font ? new scenery.Font( font.getFont() ) : new scenery.Font( font );
-      this.invalidateText();
+      if ( this.font !== font ) {
+        this._font.removeFontListener( this.fontListener );
+        this._font = font instanceof scenery.Font ? font : new scenery.Font( font );
+        this._font.addFontListener( this.fontListener );
+        this.invalidateText();
+      }
       return this;
     },
     
@@ -456,9 +463,14 @@ define( function( require ) {
     };
     
     Text.prototype[setterName] = function( value ) {
+      // create a full copy of our font instance
+      var newFont = new scenery.Font( this._font.getFont() );
+      
       // use the ES5 setter. probably somewhat slow.
-      this._font[ shortUncapitalized ] = value;
-      this.invalidateText();
+      newFont[ shortUncapitalized ] = value;
+      
+      // apply the new Font. this should call invalidateText() as normal
+      this.setFont( newFont );
       return this;
     };
     
