@@ -23,6 +23,7 @@ define( function( require ) {
   var Node = require( 'SCENERY/nodes/Node' ); // Image inherits from Node
   var Renderer = require( 'SCENERY/layers/Renderer' ); // we need to specify the Renderer in the prototype
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
+  require( 'SCENERY/util/Util' );
   
   /*
    * Canvas renderer supports the following as 'image':
@@ -196,7 +197,7 @@ define( function( require ) {
     
     updateCSSTransform: function( transform, element ) {
       // TODO: extract this out, it's completely shared!
-      $( element ).css( transform.getMatrix().getCSSTransformStyles() );
+      scenery.Util.applyCSSTransform( transform.getMatrix(), element );
     },
     
     set image( value ) { this.setImage( value ); },

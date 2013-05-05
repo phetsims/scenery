@@ -34,7 +34,7 @@ define( function( require ) {
   var strokable = require( 'SCENERY/nodes/Strokable' );
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate; // i.e. Object.create
   require( 'SCENERY/util/Font' );
-  require( 'SCENERY/util/Util' ); // for canvasAccurateBounds
+  require( 'SCENERY/util/Util' ); // for canvasAccurateBounds and CSS transforms
   
   // set up the container and text for testing text bounds quickly (using approximateSVGBounds)
   var svgTextSizeContainer = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
@@ -281,7 +281,8 @@ define( function( require ) {
       // since the DOM origin of the text is at the upper-left, and our Scenery origin is at the lower-left, we need to
       // shift the text vertically, postmultiplied with the entire transform.
       var yOffset = this.getSelfBounds().minY;
-      $( element ).css( transform.getMatrix().timesMatrix( Matrix3.translation( 0, yOffset ) ).getCSSTransformStyles() );
+      var matrix = transform.getMatrix().timesMatrix( Matrix3.translation( 0, yOffset ) );
+      scenery.Util.applyCSSTransform( matrix, element );
     },
     
     // a DOM node (not a Scenery DOM node, but an actual DOM node) with the text

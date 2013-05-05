@@ -23,6 +23,7 @@ define( function( require ) {
   
   var Layer = require( 'SCENERY/layers/Layer' ); // extends Layer
   require( 'SCENERY/util/Trail' );
+  require( 'SCENERY/util/Util' );
   
   // used namespaces
   var svgns = 'http://www.w3.org/2000/svg';
@@ -344,7 +345,7 @@ define( function( require ) {
       
       if ( this.cssTransform ) {
         // set the full transform!
-        this.$svg.css( transform.getMatrix().timesMatrix( this.baseNodeTransform.getInverse() ).getCSSTransformStyles() );
+        scenery.Util.applyCSSTransform( transform.getMatrix().timesMatrix( this.baseNodeTransform.getInverse() ), this.svg );
         
         if ( includesBaseTransformChange ) {
           this.applyTransform( this.baseNodeTransform, this.g );
@@ -383,7 +384,7 @@ define( function( require ) {
         
         // apply the transforms
         // TODO: checks to make sure we don't apply them in a row if one didn't change!
-        this.$svg.css( cssTransform.getMatrix().getCSSTransformStyles() );
+        scenery.Util.applyCSSTransform( cssTransform.getMatrix(), this.svg );
         this.applyTransform( transform, this.g );
       } else {
         this.applyTransform( transform, this.g );
