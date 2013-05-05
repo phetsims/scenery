@@ -21,6 +21,7 @@ define( function( require ) {
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   var assertExtra = require( 'ASSERT/assert' )( 'scenery.extra', false );
   
+  var Matrix3 = require( 'DOT/Matrix3' );
   var Transform3 = require( 'DOT/Transform3' );
   
   var scenery = require( 'SCENERY/scenery' );
@@ -113,15 +114,16 @@ define( function( require ) {
     },
     
     getTransform: function() {
-      // always return a defensive copy of a transform
-      var transform = new Transform3();
+      // this matrix will be modified in place, so always start fresh
+      var matrix = new Matrix3();
       
       // from the root up
-      _.each( this.nodes, function( node ) {
-        transform.appendTransform( node._transform );
-      } );
-      
-      return transform;
+      var nodes = this.nodes;
+      var length = nodes.length;
+      for ( var i = 0; i < length; i++ ) {
+        matrix.multiplyMatrix( nodes[i]._transform.getMatrix() );
+      }
+      return new Transform3( matrix );
     },
     
     addAncestor: function( node, index ) {
