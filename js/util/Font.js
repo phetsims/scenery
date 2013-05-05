@@ -51,6 +51,9 @@ define( function( require ) {
     // cache values for all of the span's properties
     this.cachedValues = null;
     
+    // allow listeners to be notified on any changes
+    this.listeners = [];
+    
     var type = typeof options;
     if ( type === 'string' ) {
       this._font = options;
@@ -66,6 +69,18 @@ define( function( require ) {
   
   Font.prototype = {
     constructor: Font,
+    
+    // invalidate cached data and notify listeners of the change
+    invalidateFont: function() {
+      this.cachedValues = null;
+      
+      var listeners = this.listeners.slice( 0 );
+      var length = listeners.length;
+      
+      for ( var i = 0; i < length; i++ ) {
+        listeners[i]();
+      }
+    },
     
     getProperty: function( property ) {
       if ( !this.cachedValues ) {
@@ -83,14 +98,13 @@ define( function( require ) {
       return this.cachedValues[property];
     },
     setProperty: function( property, value ) {
-      this.cachedValues = null;
-      
       // sanity check, in case some CSS changed somewhere
       this.$span.css( 'font', this._font );
       
       this.$span.css( property, value );
       this._font = this.$span.css( 'font' );
       
+      this.invalidateFont();
       return this;
     },
     
@@ -100,8 +114,8 @@ define( function( require ) {
     },
     setFont: function( value ) {
       if ( this._font !== value ) {
-        this.cachedValues = null;
         this._font = value;
+        this.invalidateFont();
       }
       return this;
     },
@@ -160,6 +174,20 @@ define( function( require ) {
     
     toString: function() {
       return this.getFont();
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * listeners
+    *----------------------------------------------------------------------------*/
+    
+    addFontListener: function( listener ) {
+      assert && assert( !_.contains( this.listeners, listener ) );
+      this.listeners.push( listener );
+    },
+    
+    removeFontListener: function( listener ) {
+      assert && assert( _.contains( this.listeners, listener ) );
+      this.listeners.splice( _.indexOf( this.listeners, listener ), 1 );
     }
   };
   
