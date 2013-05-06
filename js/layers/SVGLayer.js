@@ -15,6 +15,7 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
+  var inherit = require( 'PHET_CORE/inherit' );
   var Bounds2 = require( 'DOT/Bounds2' );
   var Transform3 = require( 'DOT/Transform3' );
   var Matrix3 = require( 'DOT/Matrix3' );
@@ -77,8 +78,7 @@ define( function( require ) {
   };
   var SVGLayer = scenery.SVGLayer;
   
-  SVGLayer.prototype = _.extend( {}, Layer.prototype, {
-    constructor: SVGLayer,
+  inherit( SVGLayer, Layer, {
     
     /*
      * Notes about how state is tracked here:

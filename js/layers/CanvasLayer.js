@@ -19,6 +19,7 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
+  var inherit = require( 'PHET_CORE/inherit' );
   var Bounds2 = require( 'DOT/Bounds2' );
   
   var scenery = require( 'SCENERY/scenery' );
@@ -77,8 +78,7 @@ define( function( require ) {
   };
   var CanvasLayer = scenery.CanvasLayer;
   
-  CanvasLayer.prototype = _.extend( {}, Layer.prototype, {
-    constructor: CanvasLayer,
+  inherit( CanvasLayer, Layer, {
     
     /*
      * Renders the canvas layer from the scene

@@ -21,6 +21,7 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
+  var inherit = require( 'PHET_CORE/inherit' );
   var Bounds2 = require( 'DOT/Bounds2' );
   
   var scenery = require( 'SCENERY/scenery' );
@@ -60,8 +61,7 @@ define( function( require ) {
   };
   var DOMLayer = scenery.DOMLayer;
   
-  DOMLayer.prototype = _.extend( {}, Layer.prototype, {
-    constructor: DOMLayer,
+  inherit( DOMLayer, Layer, {
     
     addNodeFromTrail: function( trail ) {
       Layer.prototype.addNodeFromTrail.call( this, trail );
