@@ -1347,14 +1347,6 @@ define( function( require ) {
     return result;
   };
   
-  Scene.enableLayerLogging = function() {
-    sceneryLayerLog = function( ob ) { console.log( ob ); };
-  };
-  
-  Scene.disableLayerLogging = function() {
-    sceneryLayerLog = null;
-  };
-  
   function applyCSSHacks( $main, options ) {
     // to use CSS3 transforms for performance, hide anything outside our bounds by default
     if ( !options.allowSceneOverflow ) {

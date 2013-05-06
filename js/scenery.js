@@ -17,5 +17,13 @@ define( function( require ) {
   window.sceneryLayerLog = null; //function( ob ) { console.log( ob ); };
   
   // will be filled in by other modules
-  return {};
+  return {
+    enableLayerLogging: function() {
+      window.sceneryLayerLog = function( ob ) { console.log( ob ); };
+    },
+  
+    disableLayerLogging: function() {
+      window.sceneryLayerLog = null;
+    }
+  };
 } );

@@ -76,7 +76,7 @@
           
           console.log( 'loaded' );
           
-          scenery.Scene.enableLayerLogging();
+          scenery.enableLayerLogging();
           
           window.scene = new scenery.Scene( $( '#scene' ) );
           console.log( 'window.scene created' );
@@ -169,7 +169,7 @@
             fuzzStep = true;
             
             // disable the layer logging, or we'll spam ourselves to death
-            scenery.Scene.disableLayerLogging();
+            scenery.disableLayerLogging();
             
             var lines = [];
             window.lines = lines;
