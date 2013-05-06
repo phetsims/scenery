@@ -32,9 +32,6 @@ define( function( require ) {
   var Util = require( 'SCENERY/util/Util' );
   var objectCreate = Util.objectCreate;
   
-  // if assertions are enabled, log out layer information
-  var layerLogger = null; //assert ? function( ob ) { console.log( ob ); } : null;
-  
   // debug flag to disable matching of layers when in 'match' mode
   var forceNewLayers = true; // DEBUG
   
@@ -103,20 +100,20 @@ define( function( require ) {
     // note, arguments to the functions are mutable. don't destroy them
     this.sceneEventListener = {
       markForLayerRefresh: function( args ) { // contains trail
-        layerLogger && layerLogger( 'marking layer refresh: ' + args.trail.toString() );
+        sceneryLayerLog && sceneryLayerLog( 'marking layer refresh: ' + args.trail.toString() );
         scene.markInterval( args.trail );
       },
       
       markForInsertion: function( args ) { // contains parent, child, index, trail
         var affectedTrail = args.trail.copy().addDescendant( args.child );
-        layerLogger && layerLogger( 'marking insertion: ' + affectedTrail.toString() );
+        sceneryLayerLog && sceneryLayerLog( 'marking insertion: ' + affectedTrail.toString() );
         scene.markInterval( affectedTrail );
       },
       
       markForRemoval: function( args ) { // contains parent, child, index, trail
         // mark the interval
         var affectedTrail = args.trail.copy().addDescendant( args.child );
-        layerLogger && layerLogger( 'marking removal: ' + affectedTrail.toString() );
+        sceneryLayerLog && sceneryLayerLog( 'marking removal: ' + affectedTrail.toString() );
         scene.markInterval( affectedTrail );
         
         // signal to the relevant layers to remove the specified trail while the trail is still valid.
@@ -207,20 +204,20 @@ define( function( require ) {
   };
   
   Scene.prototype.addTrailToLayer = function( trail, layer ) {
-    layerLogger && layerLogger( '  addition of trail ' + trail.toString() + ' from layer ' + layer.getId() );
+    sceneryLayerLog && sceneryLayerLog( '  addition of trail ' + trail.toString() + ' from layer ' + layer.getId() );
     this.trailLayerMap[trail.getUniqueId()] = layer;
     layer.addNodeFromTrail( trail );
   };
   
   Scene.prototype.moveTrailFromLayerToLayer = function( trail, oldLayer, newLayer ) {
-    layerLogger && layerLogger( '  moving trail ' + trail.toString() + ' from layer ' + oldLayer.getId() + ' to layer ' + newLayer.getId() );
+    sceneryLayerLog && sceneryLayerLog( '  moving trail ' + trail.toString() + ' from layer ' + oldLayer.getId() + ' to layer ' + newLayer.getId() );
     this.trailLayerMap[trail.getUniqueId()] = newLayer;
     oldLayer.removeNodeFromTrail( trail );
     newLayer.addNodeFromTrail( trail );
   };
   
   Scene.prototype.removeTrailFromLayer = function( trail, layer ) {
-    layerLogger && layerLogger( '  removal of trail ' + trail.toString() + ' from layer ' + layer.getId() );
+    sceneryLayerLog && sceneryLayerLog( '  removal of trail ' + trail.toString() + ' from layer ' + layer.getId() );
     
     // we don't want to leak memory, so since we don't know if this trail will continue to exist, ditch the reference
     delete this.trailLayerMap[trail.getUniqueId()];
@@ -250,10 +247,10 @@ define( function( require ) {
   
   // convenience function for layer change intervals
   Scene.prototype.addLayerChangeInterval = function( interval ) {
-    if ( layerLogger ) {
-      layerLogger( 'adding interval: ' + interval.toString() + ' to intervals:' );
+    if ( sceneryLayerLog ) {
+      sceneryLayerLog( 'adding interval: ' + interval.toString() + ' to intervals:' );
       _.each( this.layerChangeIntervals, function( interval ) {
-        layerLogger( '  ' + interval.toString() );
+        sceneryLayerLog( '  ' + interval.toString() );
       } );
     }
     
@@ -268,18 +265,18 @@ define( function( require ) {
         // the interval can be unioned without including other nodes. do this, and remove the other interval from consideration
         interval = interval.union( other );
         this.layerChangeIntervals.splice( i--, 1 ); // decrement to stay at the same index
-        layerLogger && layerLogger( 'removing interval: ' + other.toString() );
+        sceneryLayerLog && sceneryLayerLog( 'removing interval: ' + other.toString() );
       }
     }
     
     this.layerChangeIntervals.push( interval );
     
-    if ( layerLogger ) {
-      layerLogger( 'new intervals: ' );
+    if ( sceneryLayerLog ) {
+      sceneryLayerLog( 'new intervals: ' );
       _.each( this.layerChangeIntervals, function( interval ) {
-        layerLogger( '  ' + interval.toString() );
+        sceneryLayerLog( '  ' + interval.toString() );
       } );
-      layerLogger( '---' );
+      sceneryLayerLog( '---' );
     }
   };
   
@@ -289,7 +286,7 @@ define( function( require ) {
       endBoundary: endBoundary
     }, layerArgs ) );
     layer.type = layerType;
-    layerLogger && layerLogger( 'created layer: ' + layer.getId() + ' of type ' + layer.type.name );
+    sceneryLayerLog && sceneryLayerLog( 'created layer: ' + layer.getId() + ' of type ' + layer.type.name );
     return layer;
   };
   
@@ -311,7 +308,7 @@ define( function( require ) {
   };
   
   Scene.prototype.calculateBoundaries = function( beforeLayerType, beforeTrail, afterTrail ) {
-    layerLogger && layerLogger( 'build between ' + ( beforeTrail ? beforeTrail.toString() : beforeTrail ) + ',' + ( afterTrail ? afterTrail.toString() : afterTrail ) + ' with beforeType: ' + ( beforeLayerType ? beforeLayerType.name : null ) );
+    sceneryLayerLog && sceneryLayerLog( 'build between ' + ( beforeTrail ? beforeTrail.toString() : beforeTrail ) + ',' + ( afterTrail ? afterTrail.toString() : afterTrail ) + ' with beforeType: ' + ( beforeLayerType ? beforeLayerType.name : null ) );
     var builder = new scenery.LayerBuilder( this, beforeLayerType, beforeTrail, afterTrail );
     
     // push the preferred layer type before we push that for any nodes
@@ -363,10 +360,10 @@ define( function( require ) {
      */
     this.layerChangeIntervals.sort( scenery.TrailInterval.compareDisjoint );
     
-    layerLogger && layerLogger( 'stitching on intervals: \n' + this.layerChangeIntervals.join( '\n' ) );
+    sceneryLayerLog && sceneryLayerLog( 'stitching on intervals: \n' + this.layerChangeIntervals.join( '\n' ) );
     
     _.each( this.layerChangeIntervals, function( interval ) {
-      layerLogger && layerLogger( 'stitch on interval ' + interval.toString() );
+      sceneryLayerLog && sceneryLayerLog( 'stitch on interval ' + interval.toString() );
       var beforeTrail = interval.a;
       var afterTrail = interval.b;
       
@@ -386,7 +383,7 @@ define( function( require ) {
       
       scene.stitchInterval( stitchData, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match );
     } );
-    layerLogger && layerLogger( 'finished intervals in stitching' );
+    sceneryLayerLog && sceneryLayerLog( 'finished intervals in stitching' );
     
     // store a count to how many trails are currently in each layer. we'll increment/decrement these later, and every layer with a count of 0 (no trails) will be removed
     var layerTrailCounts = {}; // layer ID => count
@@ -431,7 +428,7 @@ define( function( require ) {
     _.each( this.layers.slice( 0 ), function( layer ) {
       // layers with zero trails should be removed
       if ( layerTrailCounts[layer.getId()] === 0 ) {
-        layerLogger && layerLogger( 'disposing layer: ' + layer.getId() );
+        sceneryLayerLog && sceneryLayerLog( 'disposing layer: ' + layer.getId() );
         scene.disposeLayer( layer );
       }
     } );
@@ -440,7 +437,7 @@ define( function( require ) {
     _.each( stitchData.newLayers, function( layer ) {
       assert && assert( layerTrailCounts[layer.getId()], 'ensure we are not adding empty layers' );
       
-      layerLogger && layerLogger( 'inserting layer: ' + layer.getId() );
+      sceneryLayerLog && sceneryLayerLog( 'inserting layer: ' + layer.getId() );
       scene.insertLayer( layer );
     } );
     
@@ -476,7 +473,7 @@ define( function( require ) {
     // TODO: add this back in, but with an appropriate assertion level
     assert && assert( this.layerAudit() );
     
-    layerLogger && layerLogger( 'finished stitch\n-----------------------------------' );
+    sceneryLayerLog && sceneryLayerLog( 'finished stitch\n-----------------------------------' );
   };
   
   /*
@@ -513,10 +510,10 @@ define( function( require ) {
     var beforePointer = beforeTrail ? new scenery.TrailPointer( beforeTrail, true ) : new scenery.TrailPointer( new scenery.Trail( this ), true );
     var afterPointer = afterTrail ? new scenery.TrailPointer( afterTrail, true ) : new scenery.TrailPointer( new scenery.Trail( this ), false );
     
-    layerLogger && layerLogger( 'stitching with boundaries:\n' + _.map( boundaries, function( boundary ) { return boundary.toString(); } ).join( '\n' ) );
-    layerLogger && layerLogger( '               layers: ' + ( beforeLayer ? beforeLayer.getId() : '-' ) + ' to ' + ( afterLayer ? afterLayer.getId() : '-' ) );
-    layerLogger && layerLogger( '               trails: ' + ( beforeTrail ? beforeTrail.toString() : '-' ) + ' to ' + ( afterTrail ? afterTrail.toString() : '-' ) );
-    layerLogger && layerLogger( '               match: ' + match );
+    sceneryLayerLog && sceneryLayerLog( 'stitching with boundaries:\n' + _.map( boundaries, function( boundary ) { return boundary.toString(); } ).join( '\n' ) );
+    sceneryLayerLog && sceneryLayerLog( '               layers: ' + ( beforeLayer ? beforeLayer.getId() : '-' ) + ' to ' + ( afterLayer ? afterLayer.getId() : '-' ) );
+    sceneryLayerLog && sceneryLayerLog( '               trails: ' + ( beforeTrail ? beforeTrail.toString() : '-' ) + ' to ' + ( afterTrail ? afterTrail.toString() : '-' ) );
+    sceneryLayerLog && sceneryLayerLog( '               match: ' + match );
     
     // maps trail unique ID => layer, only necessary when matching since we need to remove trails from their old layers
     var oldLayerMap = match ? this.mapTrailLayersBetween( beforeTrail, afterTrail ) : null;
@@ -548,13 +545,13 @@ define( function( require ) {
     }
     
     function changeTrailLayer( trail, layer ) {
-      layerLogger && layerLogger( '  moving trail ' + trail.toString() + ' to layer ' + layer.getId() );
+      sceneryLayerLog && sceneryLayerLog( '  moving trail ' + trail.toString() + ' to layer ' + layer.getId() );
       stitchData.affectedTrails.push( trail ); // don't check for duplicates now, we get better performance by performing uniqueness tests afterwards
       stitchData.newLayerMap[trail.getUniqueId()] = layer;
     }
     
     function step( trail, isEnd ) {
-      layerLogger && layerLogger( 'step: ' + ( trail ? trail.toString() : trail ) );
+      sceneryLayerLog && sceneryLayerLog( 'step: ' + ( trail ? trail.toString() : trail ) );
       trail && trail.setImmutable(); // we don't want our trail to be modified, so we can store direct references to it
       // check for a boundary at this step between currentTrail and trail
       
@@ -562,24 +559,24 @@ define( function( require ) {
       if ( nextBoundary && nextBoundary.equivalentPreviousTrail( currentTrail ) ) { // at least one null check
         assert && assert( nextBoundary.equivalentNextTrail( trail ) );
         
-        layerLogger && layerLogger( nextBoundary.toString() );
+        sceneryLayerLog && sceneryLayerLog( nextBoundary.toString() );
         
         // we are at a boundary change. verify that we are at the end of a layer
         if ( currentLayer || currentStartBoundary ) {
           if ( currentLayer ) {
-            layerLogger && layerLogger( 'has currentLayer: ' + currentLayer.getId() );
+            sceneryLayerLog && sceneryLayerLog( 'has currentLayer: ' + currentLayer.getId() );
             // existing layer, reposition its endpoint
             currentLayer.setEndBoundary( nextBoundary );
           } else {
             assert && assert( currentStartBoundary );
             
             if ( matchingLayer ) {
-              layerLogger && layerLogger( 'matching layer used: ' + matchingLayer.getId() );
+              sceneryLayerLog && sceneryLayerLog( 'matching layer used: ' + matchingLayer.getId() );
               matchingLayer.setStartBoundary( currentStartBoundary );
               matchingLayer.setEndBoundary( nextBoundary );
               currentLayer = matchingLayer;
             } else {
-              layerLogger && layerLogger( 'creating layer' );
+              sceneryLayerLog && sceneryLayerLog( 'creating layer' );
               addAndCreateLayer( currentStartBoundary, nextBoundary ); // sets currentLayer
             }
           }
@@ -590,7 +587,7 @@ define( function( require ) {
           addPendingTrailsToLayer();
         } else {
           // if not at the end of a layer, sanity check that we should have no accumulated pending trails
-          layerLogger && layerLogger( 'was first layer' );
+          sceneryLayerLog && sceneryLayerLog( 'was first layer' );
           assert && assert( trailsToAddToLayer.length === 0 );
         }
         currentLayer = null;
@@ -615,22 +612,22 @@ define( function( require ) {
     }
     
     function startStep( trail ) {
-      layerLogger && layerLogger( 'startStep: ' + ( trail ? trail.toString() : trail ) );
+      sceneryLayerLog && sceneryLayerLog( 'startStep: ' + ( trail ? trail.toString() : trail ) );
     }
     
     function middleStep( trail ) {
-      layerLogger && layerLogger( 'middleStep: ' + trail.toString() );
+      sceneryLayerLog && sceneryLayerLog( 'middleStep: ' + trail.toString() );
       step( trail, false );
     }
     
     function endStep( trail ) {
-      layerLogger && layerLogger( 'endStep: ' + ( trail ? trail.toString() : trail ) );
+      sceneryLayerLog && sceneryLayerLog( 'endStep: ' + ( trail ? trail.toString() : trail ) );
       step( trail, true );
       
       if ( beforeLayer !== afterLayer && boundaries.length === 0 ) {
         // glue the layers together
-        layerLogger && layerLogger( 'gluing layer' );
-        layerLogger && layerLogger( 'endBoundary: ' + afterLayer.endBoundary.toString() );
+        sceneryLayerLog && sceneryLayerLog( 'gluing layer' );
+        sceneryLayerLog && sceneryLayerLog( 'endBoundary: ' + afterLayer.endBoundary.toString() );
         beforeLayer.setEndBoundary( afterLayer.endBoundary );
         currentLayer = beforeLayer;
         addPendingTrailsToLayer();
@@ -645,7 +642,7 @@ define( function( require ) {
         stitchData.layerMap[afterLayer.getId()] = beforeLayer;
       } else if ( beforeLayer && beforeLayer === afterLayer && boundaries.length > 0 ) {
         // need to 'unglue' and split the layer
-        layerLogger && layerLogger( 'ungluing layer' );
+        sceneryLayerLog && sceneryLayerLog( 'ungluing layer' );
         assert && assert( currentStartBoundary );
         addAndCreateLayer( currentStartBoundary, afterLayerEndBoundary ); // sets currentLayer
         stitchData.layerMap[afterLayer.getId()] = currentLayer;
@@ -699,7 +696,7 @@ define( function( require ) {
   };
   
   Scene.prototype.rebuildLayers = function() {
-    layerLogger && layerLogger( 'rebuildLayers' );
+    sceneryLayerLog && sceneryLayerLog( 'rebuildLayers' );
     
     // mark the entire scene 
     this.markInterval( new scenery.Trail( this ) );
@@ -1351,11 +1348,11 @@ define( function( require ) {
   };
   
   Scene.enableLayerLogging = function() {
-    layerLogger = function( ob ) { console.log( ob ); };
+    sceneryLayerLog = function( ob ) { console.log( ob ); };
   };
   
   Scene.disableLayerLogging = function() {
-    layerLogger = null;
+    sceneryLayerLog = null;
   };
   
   function applyCSSHacks( $main, options ) {

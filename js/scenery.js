@@ -14,7 +14,7 @@ define( function( require ) {
   window.sceneryAssert = require( 'ASSERT/assert' )( 'scenery' );
   window.sceneryAssertExtra = require( 'ASSERT/assert' )( 'scenery.extra' );
   
-  window.sceneryLayerLog = null;
+  window.sceneryLayerLog = null; //function( ob ) { console.log( ob ); };
   
   // will be filled in by other modules
   return {};
