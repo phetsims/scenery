@@ -33,6 +33,7 @@ Priorities:
     Testing with hidef canvases
 
 Bugs:
+    Chrome canvas lineWidth with pattern bug (looks like half size?)
     DOM opacity
     **** General opacity: multiple layers combined!
         **** Should we consider supporting a nested structure of layers based on opacity?
@@ -83,6 +84,7 @@ Browsers
             WebKit bug: https://bugs.webkit.org/show_bug.cgi?id=110031
             Try using a unicode-escaped quote?
         [REGRESSION] Chrome 27 context.arc( 0, 0, 100, Math.PI / 4, -Math.PI / 2, true );
+        [UNKNOWN] Chrome canvas lineWidth with pattern bug (looks like half size?)
         
         [KNOWN] Chrome XMLSerializer.serializeToString dropping namespaces: https://code.google.com/p/chromium/issues/detail?id=88295
     For canvas, create a drawing function that exhibits all differences?
