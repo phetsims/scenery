@@ -37,6 +37,15 @@ module.exports = function( grunt ) {
           wrap: {
             startFile: [ "js/wrap-start.frag", "contrib/has.js" ],
             endFile: [ "js/wrap-end.frag" ]
+          },
+          uglify2: {
+            compress: {
+              global_defs: {
+                sceneryAssert: false,
+                sceneryExtraAssert: false,
+              },
+              dead_code: true
+            }
           }
         }
       },
@@ -54,6 +63,15 @@ module.exports = function( grunt ) {
           wrap: {
             startFile: [ "js/wrap-start.frag" ],
             endFile: [ "js/wrap-end.frag" ]
+          },
+          uglify2: {
+            compress: {
+              global_defs: {
+                sceneryAssert: false,
+                sceneryExtraAssert: false,
+              },
+              dead_code: true
+            }
           }
         }
       }
@@ -89,6 +107,13 @@ module.exports = function( grunt ) {
         expr: true, // so we can use assert && assert( ... )
         
         globals: {
+          // for removal of assertions
+          sceneryAssert: true,
+          sceneryExtraAssert: true,
+          
+          // for logging levels
+          sceneryLayerLog: true,
+          
           // for require.js
           define: true,
           require: true,
