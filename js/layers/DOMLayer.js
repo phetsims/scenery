@@ -28,6 +28,8 @@ define( function( require ) {
   var Layer = require( 'SCENERY/layers/Layer' ); // DOMLayer inherits from Layer
   
   scenery.DOMLayer = function( args ) {
+    sceneryLayerLog && sceneryLayerLog( 'DOMLayer constructor' );
+    
     Layer.call( this, args );
     
     var width = args.scene.sceneBounds.width;

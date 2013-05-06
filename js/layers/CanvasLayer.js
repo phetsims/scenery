@@ -36,6 +36,7 @@ define( function( require ) {
    *
    */
   scenery.CanvasLayer = function( args ) {
+    sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' constructor' );
     Layer.call( this, args );
     
     // TODO: deprecate Scene's backing scale, and handle this on a layer-by-layer option?
@@ -373,10 +374,12 @@ define( function( require ) {
     },
     
     markDirtyRegion: function( args ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' markDirtyRegion' );
       this.internalMarkDirtyBounds( args.bounds, args.trail );
     },
     
     addNodeFromTrail: function( trail ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' addNodeFromTrail: ' + trail.toString() );
       Layer.prototype.addNodeFromTrail.call( this, trail );
       
       // since the node's getBounds() are in the parent coordinate frame, we peel off the last node to get the correct (relevant) transform
@@ -389,6 +392,7 @@ define( function( require ) {
     },
     
     removeNodeFromTrail: function( trail ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' removeNodeFromTrail: ' + trail.toString() );
       Layer.prototype.removeNodeFromTrail.call( this, trail );
       
       // since the node's getBounds() are in the parent coordinate frame, we peel off the last node to get the correct (relevant) transform
@@ -402,6 +406,7 @@ define( function( require ) {
     
     // TODO: direct listeners, instead of this being forwarded through the Scene?
     boundsAccuracy: function( args ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' boundsAccuracy' );
       Layer.prototype.boundsAccuracy.call( this, args );
       
       // TODO: if this node isn't a self node, how should it be handled? what does this flag exactly mean?
@@ -418,6 +423,8 @@ define( function( require ) {
     },
     
     internalMarkDirtyBounds: function( localBounds, trail ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' internalMarkDirtyBounds: ' + trail.toString() + ' with localBounds: ' + localBounds.toString() );
+      
       // TODO: performance minor hotspot, use mutable forms?
       assert && assert( localBounds.isEmpty() || localBounds.isFinite(), 'Infinite (non-empty) dirty bounds passed to internalMarkDirtyBounds' );
       var globalBounds = trail.localToGlobalBounds( localBounds );
@@ -427,6 +434,7 @@ define( function( require ) {
     },
     
     transformChange: function( args ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' transformChange: no-op' );
       // currently no-op, since this is taken care of by markDirtyRegion
     },
     

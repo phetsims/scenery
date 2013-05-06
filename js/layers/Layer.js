@@ -161,6 +161,7 @@ define( function( require ) {
     getId: function() {
       return this._id;
     },
+    get id() { return this._id; }, // ES5 version
     
     // painted trails associated with the layer, NOT necessarily in order
     getLayerTrails: function() {

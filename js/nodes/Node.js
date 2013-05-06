@@ -803,7 +803,6 @@ define( function( require ) {
     afterTransformChange: function() {
       this.dispatchEvent( 'transform', {
         node: this,
-        type: 'transform',
         matrix: this._transform.getMatrix()
       } );
       this.invalidateBounds();

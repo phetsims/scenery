@@ -100,20 +100,20 @@ define( function( require ) {
     // note, arguments to the functions are mutable. don't destroy them
     this.sceneEventListener = {
       markForLayerRefresh: function( args ) { // contains trail
-        sceneryLayerLog && sceneryLayerLog( 'marking layer refresh: ' + args.trail.toString() );
+        sceneryLayerLog && sceneryLayerLog( 'Scene: marking layer refresh: ' + args.trail.toString() );
         scene.markInterval( args.trail );
       },
       
       markForInsertion: function( args ) { // contains parent, child, index, trail
         var affectedTrail = args.trail.copy().addDescendant( args.child );
-        sceneryLayerLog && sceneryLayerLog( 'marking insertion: ' + affectedTrail.toString() );
+        sceneryLayerLog && sceneryLayerLog( 'Scene: marking insertion: ' + affectedTrail.toString() );
         scene.markInterval( affectedTrail );
       },
       
       markForRemoval: function( args ) { // contains parent, child, index, trail
         // mark the interval
         var affectedTrail = args.trail.copy().addDescendant( args.child );
-        sceneryLayerLog && sceneryLayerLog( 'marking removal: ' + affectedTrail.toString() );
+        sceneryLayerLog && sceneryLayerLog( 'Scene: marking removal: ' + affectedTrail.toString() );
         scene.markInterval( affectedTrail );
         
         // signal to the relevant layers to remove the specified trail while the trail is still valid.
@@ -133,11 +133,17 @@ define( function( require ) {
       },
       
       stitch: function( args ) { // contains match {Boolean}
+        sceneryLayerLog && sceneryLayerLog( 'Scene: stitch event, match:' + args.match );
         scene.stitch( args.match );
       },
       
       // TODO: consider adding direct node listeners for this instead from layers?
-      dirtyBounds: function( args ) { // contains node, bounds, transform, trail
+      dirtyBounds: function( args ) { // contains node, bounds, trail
+        sceneryLayerLog && sceneryLayerLog( 'Scene: dirtyBounds ' +
+                                            'node:' + args.node.constructor.name +
+                                            ', trail:' + args.trail.toString() +
+                                            ', bounds:' + args.bounds.toString() );
+        
         var trail = args.trail;
         
         // if there are no layers, no nodes would actually render, so don't do the lookup
@@ -149,11 +155,16 @@ define( function( require ) {
       },
       
       // TODO: consider adding direct node listeners for this instead from layers?
-      transform: function( args ) { // conatins node, type, matrix, transform, trail
+      transform: function( args ) { // conatins node, type, matrix, trail
+        sceneryLayerLog && sceneryLayerLog( 'Scene: transform ' +
+                                            'node:' + args.node.constructor.name +
+                                            ', trail:' + args.trail.toString() );
+        
         var trail = args.trail;
         
         if ( scene.layers.length ) {
           _.each( scene.affectedLayers( trail ), function( layer ) {
+            sceneryLayerLog && sceneryLayerLog( 'transformChange on ' + layer.toString() );
             layer.transformChange( args );
           } );
         }
@@ -162,10 +173,15 @@ define( function( require ) {
       // TODO: consider adding direct node listeners for this instead from layers?
       // called when a node's accuracy of bounds changes (is either accurate now, or not)
       boundsAccuracy: function( args ) {
+        sceneryLayerLog && sceneryLayerLog( 'Scene: boundsAccuracy ' +
+                                            'node:' + args.node.constructor.name +
+                                            ', trail:' + args.trail.toString() );
+        
         var trail = args.trail;
         
         if ( scene.layers.length ) {
           _.each( scene.affectedLayers( trail ), function( layer ) {
+            sceneryLayerLog && sceneryLayerLog( 'boundsAccuracy on ' + layer.toString() );
             layer.boundsAccuracy( args );
           } );
         }
@@ -180,6 +196,8 @@ define( function( require ) {
   Scene.prototype.constructor = Scene;
   
   Scene.prototype.updateScene = function( args ) {
+    sceneryLayerLog && sceneryLayerLog( 'Scene: updateScene' );
+    
     // validating bounds, similar to Piccolo2d
     this.validateBounds();
     this.validatePaint();
@@ -696,7 +714,7 @@ define( function( require ) {
   };
   
   Scene.prototype.rebuildLayers = function() {
-    sceneryLayerLog && sceneryLayerLog( 'rebuildLayers' );
+    sceneryLayerLog && sceneryLayerLog( 'Scene: rebuildLayers' );
     
     // mark the entire scene 
     this.markInterval( new scenery.Trail( this ) );
@@ -707,6 +725,8 @@ define( function( require ) {
   
   // after layer changes, the layers should have their zIndex updated, and updates their trails
   Scene.prototype.reindexLayers = function() {
+    sceneryLayerLog && sceneryLayerLog( 'Scene: reindexLayers' );
+    
     var index = 1; // don't start below 1
     _.each( this.layers, function( layer ) {
       // layers increment indices as needed

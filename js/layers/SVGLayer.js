@@ -30,6 +30,7 @@ define( function( require ) {
   var xlinkns = 'http://www.w3.org/1999/xlink';
   
   scenery.SVGLayer = function( args ) {
+    sceneryLayerLog && sceneryLayerLog( 'SVGLayer constructor' );
     var $main = args.$main;
     
     this.scene = args.scene;
@@ -84,6 +85,8 @@ define( function( require ) {
      * Trails are stored on group.trail so that we can look this up when inserting new groups
      */
     addNodeFromTrail: function( trail ) {
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' addNodeFromTrail: ' + trail.toString() );
+      
       assert && assert( !( trail.getUniqueId() in this.idFragmentMap ), 'Already contained that trail!' );
       assert && assert( trail.isPainted(), 'Don\'t add nodes without isPainted() to SVGLayer' );
       
@@ -154,6 +157,7 @@ define( function( require ) {
     },
     
     removeNodeFromTrail: function( trail ) {
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' removeNodeFromTrail: ' + trail.toString() );
       assert && assert( trail.getUniqueId() in this.idFragmentMap, 'Did not contain that trail!' );
       
       Layer.prototype.removeNodeFromTrail.call( this, trail );
@@ -189,6 +193,7 @@ define( function( require ) {
     
     // subtrail is to group, and should include parentGroup below
     insertGroupIntoParent: function( group, parentGroup, subtrail ) {
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' insertGroupIntoParent subtrail:' + subtrail.toString() );
       if ( !parentGroup.childNodes.length ) {
         parentGroup.appendChild( group );
       } else {
@@ -222,6 +227,7 @@ define( function( require ) {
     
     // updates visual styles on an existing SVG fragment
     updateNode: function( node, fragment ) {
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' updateNode: ' + node.constructor.name + ' #' + node.id );
       if ( node.updateSVGFragment ) {
         node.updateSVGFragment( fragment );
       }
@@ -232,6 +238,7 @@ define( function( require ) {
     
     // updates necessary paint attributes on a group (not including transform)
     updateNodeGroup: function( node, group ) {
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' updateNodeGroup: ' + node.constructor.name + ' #' + node.id );
       if ( node.isVisible() ) {
         group.style.display = 'inherit';
       } else {
@@ -272,6 +279,7 @@ define( function( require ) {
     },
     
     markDirtyRegion: function( args ) {
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' markDirtyRegion: ' + args.trail.toString() );
       var node = args.node;
       var trailId = args.trail.getUniqueId();
       
@@ -288,6 +296,7 @@ define( function( require ) {
     },
     
     markBaseTransformDirty: function( changed ) {
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' markBaseTransformDirty' );
       var baseTransformChange = this.baseTransformChange || !!changed;
       if ( this.batchDOMChanges ) {
         this.baseTransformDirty = true;
@@ -308,6 +317,7 @@ define( function( require ) {
     
     // called when the base node's "internal" (self or child) bounds change, but not when it is just from the base node's own transform changing
     baseNodeInternalBoundsChange: function() {
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' baseNodeInternalBoundsChange' );
       if ( this.cssTransform ) {
         // we want to set the baseNodeTransform to a translation so that it maps the baseNode's self/children in the baseNode's local bounds to (0,0,w,h)
         var internalBounds = this.baseNode.parentToLocalBounds( this.baseNode.getBounds() );
@@ -341,6 +351,7 @@ define( function( require ) {
     },
     
     updateBaseTransform: function( includesBaseTransformChange ) {
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' updateBaseTransform' );
       var transform = this.baseTrail.getTransform();
       
       if ( this.cssTransform ) {
@@ -392,6 +403,7 @@ define( function( require ) {
     },
     
     transformChange: function( args ) {
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' transformChange: ' + args.trail.toString() );
       var layer = this;
       var node = args.node;
       var trail = args.trail;
