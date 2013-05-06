@@ -43,7 +43,8 @@ module.exports = function( grunt ) {
               global_defs: {
                 sceneryAssert: false,
                 sceneryExtraAssert: false,
-                sceneryLayerLog: false
+                sceneryLayerLog: false,
+                sceneryEventLog: false
               },
               dead_code: true
             }
@@ -70,7 +71,8 @@ module.exports = function( grunt ) {
               global_defs: {
                 sceneryAssert: false,
                 sceneryExtraAssert: false,
-                sceneryLayerLog: false
+                sceneryLayerLog: false,
+                sceneryEventLog: false
               },
               dead_code: true
             }
@@ -115,6 +117,7 @@ module.exports = function( grunt ) {
           
           // for logging levels
           sceneryLayerLog: true,
+          sceneryEventLog: true,
           
           // for require.js
           define: true,

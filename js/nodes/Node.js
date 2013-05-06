@@ -586,6 +586,7 @@ define( function( require ) {
      * event is relevant for (e.g. marks dirty paint region for both places X was on the scene).
      */
     dispatchEvent: function( type, args ) {
+      sceneryEventLog && sceneryEventLog( this.constructor.name + '.dispatchEvent ' + type );
       var trail = new scenery.Trail();
       trail.setMutable(); // don't allow this trail to be set as immutable for storage
       args.trail = trail; // this reference shouldn't be changed be listeners (or errors will occur)

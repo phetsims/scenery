@@ -61,6 +61,10 @@ define( function( require ) {
     out: function( point, event ) {
       // TODO: how to handle the mouse out-of-bounds
       this.point = null;
+    },
+    
+    toString: function() {
+      return 'Mouse';
     }
   } );
   

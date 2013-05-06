@@ -302,6 +302,7 @@ define( function( require ) {
     },
     
     dispatchEvent: function( trail, type, pointer, event, bubbles ) {
+      sceneryEventLog && sceneryEventLog( 'Input: ' + type + ' on ' + trail.toString() + ' for pointer ' + pointer.toString() );
       if ( !trail ) {
         try {
           throw new Error( 'falsy trail for dispatchEvent' );
@@ -411,6 +412,8 @@ define( function( require ) {
       
       if ( this.batchDOMEvents ) {
         var batchedCallback = function batchedEvent( domEvent ) {
+          sceneryEventLog && sceneryEventLog( 'Batching event for ' + type );
+          
           domEvent.preventDefault(); // TODO: should we batch the events in a different place so we don't preventDefault on something bad?
           input.batchedCallbacks.push( function() {
             callback( domEvent );
@@ -433,6 +436,7 @@ define( function( require ) {
     
     fireBatchedEvents: function() {
       if ( this.batchedCallbacks.length ) {
+        sceneryEventLog && sceneryEventLog( 'Input.fireBatchedEvents length:' + this.batchedCallbacks.length );
         _.each( this.batchedCallbacks, function( callback ) { callback(); } );
         this.batchedCallbacks = [];
       }

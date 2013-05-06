@@ -39,6 +39,10 @@ define( function( require ) {
     
     cancel: function( point, event ) {
       this.point = point;
+    },
+    
+    toString: function() {
+      return 'Touch#' + this.id;
     }
   } );
   
