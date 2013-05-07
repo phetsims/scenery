@@ -344,6 +344,8 @@ Performance:
         Instance Events API:
             mark for: insertion (to parent), removal (from parent), refresh, then stitch
             dirtyPaint( boundsChanged, affectsChildren )
+                self old paint dirty
+                subtree old dirty
                 self dirty                   (fill change)
                 self dirty, bounds change    (changed line width, shape, text, image)
                 subtree dirty                (visibility, opacity)
@@ -351,6 +353,16 @@ Performance:
             transform
                 before/after?
             boundsAccuracy
+        Current notifications:
+            marking and stitching (direct)
+            markOldPaint:
+                self (from invalidateSelf)
+                subtree (from removeNode)
+                subtree (before transform)
+                subtree (visibility)
+                subtree (opacity)
+            validateBounds - if self bounds changed, mark that
+            validatePaint - if dirty paint, mark total bounds
     Thoughts:
         Nodes could track what layer types they are rendering under, and thus what optimizations they could make?
         Also track affected layers this way?

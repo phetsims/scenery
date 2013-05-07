@@ -24,6 +24,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   var Node = require( 'SCENERY/nodes/Node' ); // inherits from Node
+  require( 'SCENERY/util/Instance' );
   require( 'SCENERY/util/Trail' );
   require( 'SCENERY/util/TrailInterval' );
   require( 'SCENERY/util/TrailPointer' );
@@ -93,6 +94,11 @@ define( function( require ) {
     this.setSize( options.width, options.height );
     
     this.sceneBounds = new Bounds2( 0, 0, options.width, options.height );
+    
+    // set up the root instance for this scene
+    // only do this after Node.call has been invoked, since Trail.addDescendant uses a few things
+    this.rootInstance = new scenery.Instance( new scenery.Trail( this ), null );
+    this.addInstance( this.rootInstance );
     
     // default to a canvas layer type, but this can be changed
     this.preferredSceneLayerType = options.preferredSceneLayerType;
@@ -350,7 +356,12 @@ define( function( require ) {
   };
   
   Scene.prototype.addTrailToLayer = function( trail, layer ) {
+    assert && assert( trail.rootNode() === this, 'Trail does not start with the Scene' );
     sceneryLayerLog && sceneryLayerLog( '  addition of trail ' + trail.toString() + ' from layer ' + layer.getId() );
+    
+    // TODO: flesh out, add parent
+    trail.lastNode().addInstance( new scenery.Instance( trail, layer ) );
+    
     this.trailLayerMap[trail.getUniqueId()] = layer;
     layer.addNodeFromTrail( trail );
   };
@@ -358,12 +369,19 @@ define( function( require ) {
   Scene.prototype.moveTrailFromLayerToLayer = function( trail, oldLayer, newLayer ) {
     sceneryLayerLog && sceneryLayerLog( '  moving trail ' + trail.toString() + ' from layer ' + oldLayer.getId() + ' to layer ' + newLayer.getId() );
     this.trailLayerMap[trail.getUniqueId()] = newLayer;
+    
+    // TODO: flesh out (and DO NOT RELY on getInstance(), it's slow)
+    trail.getInstance().changeLayer( newLayer );
+    
     oldLayer.removeNodeFromTrail( trail );
     newLayer.addNodeFromTrail( trail );
   };
   
   Scene.prototype.removeTrailFromLayer = function( trail, layer ) {
     sceneryLayerLog && sceneryLayerLog( '  removal of trail ' + trail.toString() + ' from layer ' + layer.getId() );
+    
+    // TODO: flesh out (and DO NOT RELY on getInstance(), it's slow)
+    trail.lastNode().removeInstance( trail.getInstance() );
     
     // we don't want to leak memory, so since we don't know if this trail will continue to exist, ditch the reference
     delete this.trailLayerMap[trail.getUniqueId()];
