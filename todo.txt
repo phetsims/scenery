@@ -328,14 +328,14 @@ Performance:
 [disabled optimization for exit, reason: optimized too many times]
 [disabled optimization for Node.markOldPaint, reason: optimized too many times]
 [disabled optimization for Node.trailUnderPoint, reason: optimized too many times]
-    Issues:
-        FAMB tab 2 slider
     Thoughts:
         Node can know about all of its Trails, and what the corresponding Scene/Layer is?
         Nodes could track what layer types they are rendering under, and thus what optimizations they could make?
         Also track affected layers this way?
         Seems like stitch speed would be affected? Fast way of determining affected layers?
     Priorities:
+        Remove startPointer / endPointer from Layer boundaries?
+            Wait and verify later?
         SVG could potentially mark certain nodes as 'dirty' and only update on the scene render
             Faster?
         ** Faster dirty marking for changes that don't modify children
