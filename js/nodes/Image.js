@@ -204,7 +204,7 @@ define( function( require ) {
     get image() { return this.getImage(); },
     
     getBasicConstructor: function( propLines ) {
-      return 'new scenery.Image( \'' + this._image.src.replace( /'/g, '\\\'' ) + '\', {' + propLines + '} )';
+      return 'new scenery.Image( \'' + ( this._image.src ? this._image.src.replace( /'/g, '\\\'' ) : 'other' ) + '\', {' + propLines + '} )';
     }
   } );
   
