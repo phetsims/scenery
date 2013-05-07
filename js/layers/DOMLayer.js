@@ -198,6 +198,7 @@ define( function( require ) {
     },
     
     // TODO: consider a stack-based model for transforms?
+    // TODO: deprecated? remove this?
     applyTransformationMatrix: function( matrix ) {
       // nothing at all needed here
     },

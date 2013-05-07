@@ -1,3 +1,6 @@
+Examine:
+    http://jonobr1.github.io/two.js/
+    https://github.com/GoodBoyDigital/pixi.js
 
 Priorities:
     Beware of closures! (test speeds, see https://developers.google.com/speed/articles/optimizing-javascript)
@@ -351,6 +354,16 @@ Performance:
             transform
                 before/after?
             boundsAccuracy
+        * Layer needs:
+            Canvas
+                Global changed bounds (if bounds change, both old place and the newest)
+                Bounds accuracy count
+            SVG
+            DOM
+                (self) Update DOM element on that type of change
+                    (self) transform on Text, since it relies on any text/font changes
+                (subtrail) Transform (CSS)
+                (subtrail) Visibility / Opacity
         Current notifications:
             marking and stitching (direct)
             markOldPaint:
