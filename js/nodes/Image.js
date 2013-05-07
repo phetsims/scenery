@@ -6,6 +6,7 @@
  * TODO: setImage / getImage and the whole toolchain that uses that
  * TODO: allow multiple DOM instances (create new HTMLImageElement elements)
  * TODO: SVG support
+ * TODO: support rendering a Canvas to DOM (single instance)
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
