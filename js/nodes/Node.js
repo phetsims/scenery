@@ -291,6 +291,7 @@ define( function( require ) {
       if ( this._boundsDirty ) {
         var oldBounds = this._bounds;
         
+        // TODO: we can possibly make this not needed?
         var newBounds = this.localToParentBounds( this._selfBounds ).union( that.localToParentBounds( this._childBounds ) );
         var changed = !newBounds.equals( oldBounds );
         
@@ -902,7 +903,7 @@ define( function( require ) {
     setVisible: function( visible ) {
       if ( visible !== this._visible ) {
         if ( this._visible ) {
-          this.markOldSelfPaint();
+          this.markOldPaint( false );
         }
         
         this._visible = visible;
@@ -1058,31 +1059,6 @@ define( function( require ) {
     
     getInstances: function() {
       return this._instances;
-    },
-    
-    addInstance: function( instance ) {
-      assert && assert( !_.find( this._instances, function( other ) { return instance.equals( other ); } ), 'Cannot add duplicates of an instance to a Node' );
-      this._instances.push( instance );
-    },
-    
-    // returns undefined if there is no instance.
-    getInstanceFromTrail: function( trail ) {
-      var result;
-      if ( this._instances.length === 1 ) {
-        // don't bother with checking the trail, but assertion should assure that it's what we're looking for
-        result = this._instances[0];
-      } else {
-        result = _.find( this._instances, function( instance ) { return trail.equals( instance.trail ); } );
-      }
-      assert && assert( result, 'Could not find an instance for the trail ' + trail.toString() );
-      assert && assert( result.trail.equals( trail ), 'Instance has an incorrect Trail' );
-      return result;
-    },
-    
-    removeInstance: function( instance ) {
-      var index = _.indexOf( this._instances, instance ); // actual instance equality (NOT capitalized, normal meaning)
-      assert && assert( index !== -1, 'Cannot remove an Instance from a Node if it was not there' );
-      this._instances.splice( index, 1 );
     },
     
     // returns a unique trail (if it exists) where each node in the ancestor chain has 0 or 1 parents
@@ -1273,6 +1249,63 @@ define( function( require ) {
         };
         img.src = url;
       }, x, y, width, height );
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * Instance handling
+    *----------------------------------------------------------------------------*/
+    
+    addInstance: function( instance ) {
+      assert && assert( !_.find( this._instances, function( other ) { return instance.equals( other ); } ), 'Cannot add duplicates of an instance to a Node' );
+      this._instances.push( instance );
+    },
+    
+    // returns undefined if there is no instance.
+    getInstanceFromTrail: function( trail ) {
+      var result;
+      if ( this._instances.length === 1 ) {
+        // don't bother with checking the trail, but assertion should assure that it's what we're looking for
+        result = this._instances[0];
+      } else {
+        result = _.find( this._instances, function( instance ) { return trail.equals( instance.trail ); } );
+      }
+      assert && assert( result, 'Could not find an instance for the trail ' + trail.toString() );
+      assert && assert( result.trail.equals( trail ), 'Instance has an incorrect Trail' );
+      return result;
+    },
+    
+    removeInstance: function( instance ) {
+      var index = _.indexOf( this._instances, instance ); // actual instance equality (NOT capitalized, normal meaning)
+      assert && assert( index !== -1, 'Cannot remove an Instance from a Node if it was not there' );
+      this._instances.splice( index, 1 );
+    },
+    
+    notifyDirtyPaint: function( justSelf, boundsChange, isOld ) {
+      _.each( this._instances, function( instance ) { instance.layer.notifyDirtyPaint( instance, justSelf, boundsChange, isOld ); } );
+    },
+    
+    notifyTransform: function() {
+      _.each( this._instances, function( instance ) { instance.layer.notifyTransform( instance ); } );
+    },
+    
+    notifyBoundsAccuracy: function() {
+      _.each( this._instances, function( instance ) { instance.layer.notifyBoundsAccuracy( instance ); } );
+    },
+    
+    notifyStitch: function() {
+      _.each( this._instances, function( instance ) { instance.layer.notifyStitch( instance ); } );
+    },
+    
+    markForLayerRefresh: function() {
+      _.each( this._instances, function( instance ) { instance.layer.markForLayerRefresh( instance ); } );
+    },
+    
+    markForInsertion: function( child, index ) {
+      _.each( this._instances, function( instance ) { instance.layer.markForInsertion( instance, child, index ); } );
+    },
+    
+    markForRemoval: function( child, index ) {
+      _.each( this._instances, function( instance ) { instance.layer.markForRemoval( instance, child, index ); } );
     },
     
     /*---------------------------------------------------------------------------*
