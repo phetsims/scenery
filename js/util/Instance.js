@@ -13,9 +13,10 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  scenery.Instance = function( trail, scene, layer ) {
+  // layer should be null if the trail isn't to a painted node
+  scenery.Instance = function( trail, layer ) {
     this.trail = trail;
-    this.scene = scene;
+    this.scene = trail.rootNode();
     this.layer = layer;
     
     // TODO: ensure that we can track this? otherwise remove it for memory and speed
@@ -25,11 +26,17 @@ define( function( require ) {
     // TODO: track these? should significantly accelerate subtree-changing operations
     this.startAffectedLayer = null;
     this.endAffectedLayer = null;
+    
+    trail.setImmutable(); // make sure our Trail doesn't change from under us
   };
   var Instance = scenery.Instance;
   
   Instance.prototype = {
     constructor: Instance,
+    
+    changeLayer: function( newLayer ) {
+      this.layer = newLayer;
+    },
     
     reindex: function() {
       this.trail.reindex();

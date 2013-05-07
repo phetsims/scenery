@@ -1061,7 +1061,7 @@ define( function( require ) {
     },
     
     addInstance: function( instance ) {
-      assert && assert( _.find( this._instances, function( other ) { return instance.equals( other ); } ), 'Cannot add duplicates of an instance to a Node' );
+      assert && assert( !_.find( this._instances, function( other ) { return instance.equals( other ); } ), 'Cannot add duplicates of an instance to a Node' );
       this._instances.push( instance );
     },
     
@@ -1493,6 +1493,7 @@ define( function( require ) {
     get childBounds() { return this.getChildBounds(); },
     get globalBounds() { return this.getGlobalBounds(); },
     get id() { return this.getId(); },
+    get instances() { return this.getInstances(); },
     
     mutate: function( options ) {
       var node = this;

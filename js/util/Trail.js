@@ -113,6 +113,10 @@ define( function( require ) {
       return this.nodes.length === 0;
     },
     
+    getInstance: function() {
+      return this.lastNode().getInstanceFromTrail( this );
+    },
+    
     getTransform: function() {
       // this matrix will be modified in place, so always start fresh
       var matrix = new Matrix3();
