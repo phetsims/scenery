@@ -59,6 +59,9 @@ define( function( require ) {
     // assign a unique ID to this node (allows trails to get a unique list of IDs)
     this._id = globalIdCounter++;
     
+    // all of the Instances tracking this Node (across multiple layers and scenes)
+    this._instances = [];
+    
     // Whether this node (and its children) will be visible when the scene is updated. Visible nodes by default will not be pickable either
     this._visible = true;
     
@@ -1051,6 +1054,28 @@ define( function( require ) {
         this._layerSplitAfter = split;
         this.markLayerRefreshNeeded();
       }
+    },
+    
+    getInstances: function() {
+      return this._instances;
+    },
+    
+    addInstance: function( instance ) {
+      assert && assert( _.find( this._instances, function( other ) { return instance.equals( other ); } ), 'Cannot add duplicates of an instance to a Node' );
+      this._instances.push( instance );
+    },
+    
+    // returns undefined if there is no instance.
+    getInstanceFromTrail: function( trail ) {
+      var result = _.find( this._instances, function( instance ) { return trail.equals( instance.trail ); } );
+      assert && assert( result, 'Could not find an instance for the trail ' + trail.toString() );
+      return result;
+    },
+    
+    removeInstance: function( instance ) {
+      var index = _.indexOf( this._instances, instance ); // actual instance equality (NOT capitalized, normal meaning)
+      assert && assert( index !== -1, 'Cannot remove an Instance from a Node if it was not there' );
+      this._instances.splice( index, 1 );
     },
     
     // returns a unique trail (if it exists) where each node in the ancestor chain has 0 or 1 parents

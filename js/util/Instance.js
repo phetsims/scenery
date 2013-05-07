@@ -33,6 +33,11 @@ define( function( require ) {
     
     reindex: function() {
       this.trail.reindex();
+    },
+    
+    equals: function( other ) {
+      assert && assert( ( this === other ) === this.trail.equals( other.trail ), 'We assume a 1-1 mapping from trails to instances' );
+      return this === other;
     }
   };
   
