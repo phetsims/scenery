@@ -1057,10 +1057,6 @@ define( function( require ) {
       }
     },
     
-    getInstances: function() {
-      return this._instances;
-    },
-    
     // returns a unique trail (if it exists) where each node in the ancestor chain has 0 or 1 parents
     getUniqueTrail: function() {
       var trail = new scenery.Trail();
@@ -1254,6 +1250,10 @@ define( function( require ) {
     /*---------------------------------------------------------------------------*
     * Instance handling
     *----------------------------------------------------------------------------*/
+    
+    getInstances: function() {
+      return this._instances;
+    },
     
     addInstance: function( instance ) {
       assert && assert( !_.find( this._instances, function( other ) { return instance.equals( other ); } ), 'Cannot add duplicates of an instance to a Node' );
