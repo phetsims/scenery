@@ -259,8 +259,6 @@ define( function( require ) {
       return;
     }
     
-    var scene = this;
-    
     _.each( this.layers, function( layer ) {
       layer.render( scene, args );
     } );
