@@ -12,7 +12,8 @@ define( function( require ) {
   "use strict";
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
-  
+
+  require( 'SCENERY/util/Color' );
   var scenery = require( 'SCENERY/scenery' );
   
   var Vector2 = require( 'DOT/Vector2' );

@@ -33,7 +33,7 @@ define( function( require ) {
     }, options );
     
     this.dragging              = false;     // whether a node is being dragged with this handler
-    this.pointer                = null;      // the pointer doing the current dragging
+    this.pointer               = null;      // the pointer doing the current dragging
     this.trail                 = null;      // stores the path to the node that is being dragged
     this.transform             = null;      // transform of the trail to our node (but not including our node, so we can prepend the deltas)
     this.node                  = null;      // the node that we are handling the drag for

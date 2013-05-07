@@ -12,6 +12,7 @@ define( function( require ) {
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
   var inherit = require( 'PHET_CORE/inherit' );
+  var escapeHTML = require( 'PHET_CORE/escapeHTML' );
   var Bounds2 = require( 'DOT/Bounds2' );
   
   var scenery = require( 'SCENERY/scenery' );
@@ -19,6 +20,7 @@ define( function( require ) {
   var Node = require( 'SCENERY/nodes/Node' ); // DOM inherits from Node
   var Renderer = require( 'SCENERY/layers/Renderer' );
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
+  require( 'SCENERY/util/Util' );
   
   scenery.DOM = function DOM( element, options ) {
     options = options || {};
@@ -106,9 +108,13 @@ define( function( require ) {
       return this._container;
     },
     
+    updateDOMElement: function( container ) {
+      // nothing needed, since we are just displaying a single DOM element
+    },
+    
     updateCSSTransform: function( transform, element ) {
       // faster to use our jQuery reference instead of wrapping element
-      this._$container.css( transform.getMatrix().getCSSTransformStyles() );
+      scenery.Util.applyCSSTransform( transform.getMatrix(), this._container );
     },
     
     isPainted: function() {
@@ -156,7 +162,7 @@ define( function( require ) {
     get interactive() { return this.isInteractive(); },
     
     getBasicConstructor: function( propLines ) {
-      return 'new scenery.DOM( $( \'' + this._container.innerHTML.replace( /'/g, '\\\'' ) + '\' ), {' + propLines + '} )';
+      return 'new scenery.DOM( $( \'' + escapeHTML( this._container.innerHTML.replace( /'/g, '\\\'' ) ) + '\' ), {' + propLines + '} )';
     },
     
     getPropString: function( spaces, includeChildren ) {

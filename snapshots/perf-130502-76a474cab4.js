@@ -590,19 +590,19 @@
   };
   
   marks.currentMarks = [
-    // textNodeInstances,
-    // textPathInstances,
+    textNodeInstances,
+    textPathInstances,
     textBoundsChanges,
-    // fuzzRecordAddRemoveRender,
-    // rotatedSquaresHardcodedXY,
-    // rotatedSquaresTransformXY,
-    // rotatedSquaresIndividual,
-    // addingHexagons,
+    fuzzRecordAddRemoveRender,
+    rotatedSquaresHardcodedXY,
+    rotatedSquaresTransformXY,
+    rotatedSquaresIndividual,
+    addingHexagons,
     fastSquaresCanvas,
-    fastSquaresSVG
-    // {
-    //   name: 'Empty Loop'
-    // }
+    fastSquaresSVG,
+    {
+      name: 'Empty Loop'
+    }
   ];
   
 })();

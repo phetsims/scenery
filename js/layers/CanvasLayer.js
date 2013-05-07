@@ -19,6 +19,7 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
+  var inherit = require( 'PHET_CORE/inherit' );
   var Bounds2 = require( 'DOT/Bounds2' );
   
   var scenery = require( 'SCENERY/scenery' );
@@ -36,6 +37,7 @@ define( function( require ) {
    *
    */
   scenery.CanvasLayer = function( args ) {
+    sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' constructor' );
     Layer.call( this, args );
     
     // TODO: deprecate Scene's backing scale, and handle this on a layer-by-layer option?
@@ -44,15 +46,17 @@ define( function( require ) {
       this.backingScale = args.fullResolution ? scenery.Util.backingScale( document.createElement( 'canvas' ).getContext( '2d' ) ) : 1;
     }
     
-    this.logicalWidth = this.$main.width();
-    this.logicalHeight = this.$main.height();
+    this.logicalWidth = this.scene.sceneBounds.width;
+    this.logicalHeight = this.scene.sceneBounds.height;
     
     var canvas = document.createElement( 'canvas' );
     canvas.width = this.logicalWidth * this.backingScale;
     canvas.height = this.logicalHeight * this.backingScale;
-    $( canvas ).css( 'width', this.logicalWidth );
-    $( canvas ).css( 'height', this.logicalHeight );
-    $( canvas ).css( 'position', 'absolute' );
+    canvas.style.width = this.logicalWidth + 'px';
+    canvas.style.height = this.logicalHeight + 'px';
+    canvas.style.position = 'absolute';
+    canvas.style.left = '0';
+    canvas.style.top = '0';
     
     // add this layer on top (importantly, the constructors of the layers are called in order)
     this.$main.append( canvas );
@@ -74,8 +78,7 @@ define( function( require ) {
   };
   var CanvasLayer = scenery.CanvasLayer;
   
-  CanvasLayer.prototype = _.extend( {}, Layer.prototype, {
-    constructor: CanvasLayer,
+  inherit( CanvasLayer, Layer, {
     
     /*
      * Renders the canvas layer from the scene
@@ -315,7 +318,8 @@ define( function( require ) {
     
     dispose: function() {
       Layer.prototype.dispose.call( this );
-      $( this.canvas ).detach();
+      
+      this.canvas.parentNode.removeChild( this.canvas );
     },
     
     // TODO: consider a stack-based model for transforms?
@@ -327,8 +331,10 @@ define( function( require ) {
     reindex: function( zIndex ) {
       Layer.prototype.reindex.call( this, zIndex );
       
-      $( this.canvas ).css( 'z-index', zIndex );
-      this.zIndex = zIndex;
+      if ( this.zIndex !== zIndex ) {
+        this.canvas.style.zIndex = zIndex;
+        this.zIndex = zIndex;
+      }
       return zIndex + 1;
     },
     
@@ -373,15 +379,17 @@ define( function( require ) {
     },
     
     markDirtyRegion: function( args ) {
-      this.internalMarkDirtyBounds( args.bounds, args.transform );
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' markDirtyRegion' );
+      this.internalMarkDirtyBounds( args.bounds, args.trail );
     },
     
     addNodeFromTrail: function( trail ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' addNodeFromTrail: ' + trail.toString() );
       Layer.prototype.addNodeFromTrail.call( this, trail );
       
       // since the node's getBounds() are in the parent coordinate frame, we peel off the last node to get the correct (relevant) transform
       // TODO: more efficient way of getting this transform?
-      this.internalMarkDirtyBounds( trail.lastNode().getBounds(), trail.slice( 0, trail.length - 1 ).getTransform() );
+      this.internalMarkDirtyBounds( trail.lastNode().getBounds(), trail.slice( 0, trail.length - 1 ) );
       
       if ( trail.lastNode().boundsInaccurate ) {
         this.boundlessCount++;
@@ -389,11 +397,12 @@ define( function( require ) {
     },
     
     removeNodeFromTrail: function( trail ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' removeNodeFromTrail: ' + trail.toString() );
       Layer.prototype.removeNodeFromTrail.call( this, trail );
       
       // since the node's getBounds() are in the parent coordinate frame, we peel off the last node to get the correct (relevant) transform
       // TODO: more efficient way of getting this transform?
-      this.internalMarkDirtyBounds( trail.lastNode().getBounds(), trail.slice( 0, trail.length - 1 ).getTransform() );
+      this.internalMarkDirtyBounds( trail.lastNode().getBounds(), trail.slice( 0, trail.length - 1 ) );
       
       if ( trail.lastNode().boundsInaccurate ) {
         this.boundlessCount--;
@@ -402,6 +411,7 @@ define( function( require ) {
     
     // TODO: direct listeners, instead of this being forwarded through the Scene?
     boundsAccuracy: function( args ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' boundsAccuracy' );
       Layer.prototype.boundsAccuracy.call( this, args );
       
       // TODO: if this node isn't a self node, how should it be handled? what does this flag exactly mean?
@@ -417,15 +427,19 @@ define( function( require ) {
       return this.boundlessCount === 0;
     },
     
-    internalMarkDirtyBounds: function( localBounds, transform ) {
+    internalMarkDirtyBounds: function( localBounds, trail ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' internalMarkDirtyBounds: ' + trail.toString() + ' with localBounds: ' + localBounds.toString() );
+      
+      // TODO: performance minor hotspot, use mutable forms?
       assert && assert( localBounds.isEmpty() || localBounds.isFinite(), 'Infinite (non-empty) dirty bounds passed to internalMarkDirtyBounds' );
-      var globalBounds = transform.transformBounds2( localBounds );
+      var globalBounds = trail.localToGlobalBounds( localBounds );
       
       // TODO: for performance, consider more than just a single dirty bounding box
       this.dirtyBounds = this.dirtyBounds.union( globalBounds.dilated( 1 ).roundedOut() );
     },
     
     transformChange: function( args ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' transformChange: no-op' );
       // currently no-op, since this is taken care of by markDirtyRegion
     },
     

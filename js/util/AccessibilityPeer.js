@@ -9,7 +9,14 @@
 define( function( require ) {
   "use strict";
 
+  var inherit = require( 'PHET_CORE/inherit' );
+
   var scenery = require( 'SCENERY/scenery' );
+
+  var Node = require( 'SCENERY/nodes/Node' ); // DOM inherits from Node
+
+  //I cannot figure out why this import is required, but without it the sim crashes on startup.
+  var Renderer = require( 'SCENERY/layers/Renderer' );
 
   scenery.AccessibilityPeer = function AccessibilityPeer( origin, domText, options ) {
     options = options || {};
@@ -31,8 +38,7 @@ define( function( require ) {
   scenery.AccessibilityPeer.prototype = {
     syncBounds: function() {
       var globalBounds = this.origin.globalBounds;
-      //TODO: add checks in here that will only set the values if changed.
-      //TODO: or if bounds of peers not important, just skip the whole thing
+      //TODO: add checks in here that will only set the values if changed
       this.$element.css( 'left', globalBounds.x );
       this.$element.css( 'top', globalBounds.y );
       this.$element.width( globalBounds.width );

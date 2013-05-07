@@ -18,6 +18,8 @@ define( function( require ) {
   var clamp = require( 'DOT/Util' ).clamp;
   
   var scenery = require( 'SCENERY/scenery' );
+  // var nodeEvents = require( 'SCENERY/util/BasicNodeEvents' ); // uncapitalized, because of JSHint (TODO: find the flag)
+  var nodeEvents = require( 'SCENERY/util/SplitNodeEvents' ); // uncapitalized, because of JSHint (TODO: find the flag)
   var LayerStrategy = require( 'SCENERY/layers/LayerStrategy' ); // used to set the default layer strategy on the prototype
   // require( 'SCENERY/layers/Renderer' ); // commented out so Require.js doesn't balk at the circular dependency
   
@@ -83,13 +85,14 @@ define( function( require ) {
      */
     this._transform = new Transform3();
     this._transformListener = {
+      // TODO: performance handling so we don't need to do two recursions!
       before: function() { self.beforeTransformChange(); },
       after: function() { self.afterTransformChange(); }
     };
     this._transform.addTransformListener( this._transformListener );
     
     this._inputListeners = []; // for user input handling (mouse/touch)
-    this._eventListeners = []; // for internal events like paint invalidation, layer invalidation, etc.
+    this.initializeNodeEvents(); // for internal events like paint invalidation, layer invalidation, etc.
     
     // TODO: add getter/setters that will be able to invalidate whether this node is under any pointers, etc.
     this._includeStrokeInHitRegion = false;
@@ -152,7 +155,7 @@ define( function( require ) {
     removeChild: function( node ) {
       assert && assert( this.isChild( node ) );
       
-      node.markOldPaint();
+      node.markOldPaint( false );
       
       var indexOfParent = _.indexOf( node._parents, this );
       var indexOfChild = _.indexOf( this._children, node );
@@ -171,10 +174,15 @@ define( function( require ) {
       this.dispatchEvent( 'stitch', { match: false } );
     },
     
+    removeAllChildren: function() {
+      this.setChildren( [] );
+    },
+    
     // TODO: efficiency by batching calls?
     setChildren: function( children ) {
       var node = this;
       if ( this._children !== children ) {
+        // TODO: maybe iterating in reverse is more efficient?
         _.each( this._children.slice( 0 ), function( child ) {
           node.removeChild( child );
         } );
@@ -310,9 +318,11 @@ define( function( require ) {
         this._childPaintDirty = false;
         this._oldPaintMarked = false;
         
-        _.each( this._children, function( child ) {
-          child.validatePaint();
-        } );
+        var children = this._children;
+        var length = children.length;
+        for ( var i = 0; i < length; i++ ) {
+          children[i].validatePaint();
+        }
       }
     },
     
@@ -380,7 +390,7 @@ define( function( require ) {
     
     // bounds assumed to be in the local coordinate frame, below this node's transform
     markDirtyRegion: function( bounds ) {
-      this.dispatchEventWithTransform( 'dirtyBounds', {
+      this.dispatchEvent( 'dirtyBounds', {
         node: this,
         bounds: bounds
       } );
@@ -561,40 +571,6 @@ define( function( require ) {
       return this._inputListeners.slice( 0 ); // defensive copy
     },
     
-    // TODO: set this up with a mix-in for a generic notifier?
-    addEventListener: function( listener ) {
-      // don't allow listeners to be added multiple times
-      if ( _.indexOf( this._eventListeners, listener ) === -1 ) {
-        this._eventListeners.push( listener );
-      }
-      return this;
-    },
-    
-    removeEventListener: function( listener ) {
-      // ensure the listener is in our list
-      assert && assert( _.indexOf( this._eventListeners, listener ) !== -1 );
-      
-      this._eventListeners.splice( _.indexOf( this._eventListeners, listener ), 1 );
-      return this;
-    },
-    
-    getEventListeners: function() {
-      return this._eventListeners.slice( 0 ); // defensive copy
-    },
-    
-    /*
-     * Fires an event to all event listeners attached to this node. It does not bubble down to
-     * all ancestors with trails, like dispatchEvent does. Use fireEvent when you only want an event
-     * that is relevant for a specific node, and ancestors don't need to be notified.
-     */
-    fireEvent: function( type, args ) {
-      _.each( this.getEventListeners(), function( eventListener ) {
-        if ( eventListener[type] ) {
-          eventListener[type]( args );
-        }
-      } );
-    },
-    
     /*
      * Dispatches an event across all possible Trails ending in this node.
      *
@@ -610,49 +586,33 @@ define( function( require ) {
      * event is relevant for (e.g. marks dirty paint region for both places X was on the scene).
      */
     dispatchEvent: function( type, args ) {
+      sceneryEventLog && sceneryEventLog( this.constructor.name + '.dispatchEvent ' + type );
       var trail = new scenery.Trail();
       trail.setMutable(); // don't allow this trail to be set as immutable for storage
+      args.trail = trail; // this reference shouldn't be changed be listeners (or errors will occur)
+      
+      // store a branching flag, since if we don't branch at all, we don't have to walk our trail back down.
+      var branches = false;
       
       function recursiveEventDispatch( node ) {
         trail.addAncestor( node );
         
-        args.trail = trail;
-        
         node.fireEvent( type, args );
         
-        _.each( node._parents, function( parent ) {
-          recursiveEventDispatch( parent );
-        } );
+        var parents = node._parents;
+        var length = parents.length;
         
-        trail.removeAncestor();
-      }
-      
-      recursiveEventDispatch( this );
-    },
-    
-    // dispatches events with the transform computed from parent of the "root" to the local frame
-    dispatchEventWithTransform: function( type, args ) {
-      var trail = new scenery.Trail();
-      trail.setMutable(); // don't allow this trail to be set as immutable for storage
-      
-      var transformStack = [ new Transform3() ];
-      
-      function recursiveEventDispatch( node ) {
-        trail.addAncestor( node );
+        // make sure to set the branch flag here before iterating (don't move it)
+        branches = branches || length > 1;
         
-        transformStack.push( new Transform3( node.getMatrix().timesMatrix( transformStack[transformStack.length-1].getMatrix() ) ) );
-        args.transform = transformStack[transformStack.length-1];
-        args.trail = trail;
+        for ( var i = 0; i < length; i++ ) {
+          recursiveEventDispatch( parents[i] );
+        }
         
-        node.fireEvent( type, args );
-        
-        _.each( node._parents, function( parent ) {
-          recursiveEventDispatch( parent );
-        } );
-        
-        transformStack.pop();
-        
-        trail.removeAncestor();
+        // if there were no branches, we will not fire another listener once we have reached here
+        if ( branches ) {
+          trail.removeAncestor();
+        }
       }
       
       recursiveEventDispatch( this );
@@ -662,6 +622,7 @@ define( function( require ) {
     translate: function( x, y, prependInstead ) {
       if ( typeof x === 'number' ) {
         // translate( x, y, prependInstead )
+        if ( !x && !y ) { return; } // bail out if both are zero
         if ( prependInstead ) {
           this.prependMatrix( Matrix3.translation( x, y ) );
         } else {
@@ -670,6 +631,7 @@ define( function( require ) {
       } else {
         // translate( vector, prependInstead )
         var vector = x;
+        if ( !vector.x && !vector.y ) { return; } // bail out if both are zero
         this.translate( vector.x, vector.y, y ); // forward to full version
       }
     },
@@ -679,9 +641,11 @@ define( function( require ) {
       if ( typeof x === 'number' ) {
         if ( y === undefined ) {
           // scale( scale )
+          if ( x === 1 ) { return; } // bail out if we are scaling by 1 (identity)
           this.appendMatrix( Matrix3.scaling( x, x ) );
         } else {
           // scale( x, y, prependInstead )
+          if ( x === 1 && y === 1 ) { return; } // bail out if we are scaling by 1 (identity)
           if ( prependInstead ) {
             this.prependMatrix( Matrix3.scaling( x, y ) );
           } else {
@@ -697,6 +661,7 @@ define( function( require ) {
     
     // TODO: consider naming to rotateBy to match scaleBy (due to scale property / method name conflict)
     rotate: function( angle, prependInstead ) {
+      if ( angle % ( 2 * Math.PI ) === 0 ) { return; } // bail out if our angle is effectively 0
       if ( prependInstead ) {
         this.prependMatrix( Matrix3.rotation2( angle ) );
       } else {
@@ -767,11 +732,18 @@ define( function( require ) {
     setTranslation: function( a, b ) {
       var translation = this.getTranslation();
       
+      var dx, dy;
+      
       if ( typeof a === 'number' ) {
-        this.translate( a - translation.x, b - translation.y, true );
+        dx = a - translation.x;
+        dy = b - translation.y;
       } else {
-        this.translate( a.x - translation.x, a.y - translation.y, true );
+        dx = a.x - translation.x;
+        dy = a.y - translation.y;
       }
+      
+      this.translate( dx, dy, true );
+      
       return this;
     },
     
@@ -806,7 +778,7 @@ define( function( require ) {
         // swap the transform and move the listener to the new one
         this._transform.removeTransformListener( this._transformListener ); // don't leak memory!
         this._transform = transform;
-        this._transform.addTransformListener( this._transformListener );
+        this._transform.prependTransformListener( this._transformListener );
         
         this.afterTransformChange();
       }
@@ -824,14 +796,13 @@ define( function( require ) {
     // called before our transform is changed
     beforeTransformChange: function() {
       // mark our old bounds as dirty, so that any dirty region repainting will include not just our new position, but also our old position
-      this.markOldPaint();
+      this.markOldPaint( false );
     },
     
     // called after our transform is changed
     afterTransformChange: function() {
-      this.dispatchEventWithTransform( 'transform', {
+      this.dispatchEvent( 'transform', {
         node: this,
-        type: 'transform',
         matrix: this._transform.getMatrix()
       } );
       this.invalidateBounds();
@@ -945,7 +916,7 @@ define( function( require ) {
     setOpacity: function( opacity ) {
       var clampedOpacity = clamp( opacity, 0, 1 );
       if ( clampedOpacity !== this._opacity ) {
-        this.markOldPaint();
+        this.markOldPaint( false );
         
         this._opacity = clampedOpacity;
         
@@ -1296,26 +1267,85 @@ define( function( require ) {
       return this._transform.inverseBounds2( bounds );
     },
     
+    // returns the matrix (fresh copy) that transforms points from the local coordinate frame into the global coordinate frame
+    getLocalToGlobalMatrix: function() {
+      var node = this;
+      
+      // we need to apply the transformations in the reverse order, so we temporarily store them
+      var matrices = [];
+      
+      // concatenation like this has been faster than getting a unique trail, getting its transform, and applying it
+      while ( node ) {
+        matrices.push( node._transform.getMatrix() );
+        assert && assert( node._parents[1] === undefined, 'getLocalToGlobalMatrix unable to work for DAG' );
+        node = node._parents[0];
+      }
+      
+      var matrix = new Matrix3(); // will be modified in place
+      
+      // iterate from the back forwards (from the root node to here)
+      for ( var i = matrices.length - 1; i >=0; i-- ) {
+        matrix.multiplyMatrix( matrices[i] );
+      }
+      
+      // NOTE: always return a fresh copy, getGlobalToLocalMatrix depends on it to minimize instance usage!
+      return matrix;
+    },
+    
+    // equivalent to getUniqueTrail().getTransform(), but faster.
+    getUniqueTransform: function() {
+      return new Transform3( this.getLocalToGlobalMatrix() );
+    },
+    
+    // returns the matrix (fresh copy) that transforms points in the global coordinate frame into the local coordinate frame
+    getGlobalToLocalMatrix: function() {
+      return this.getLocalToGlobalMatrix().invert();
+    },
+    
     // apply this node's transform (and then all of its parents' transforms) to the point
     localToGlobalPoint: function( point ) {
       var node = this;
+      var resultPoint = point.copy();
       while ( node ) {
-        point = node._transform.transformPosition2( point );
+        // in-place multiplication
+        node._transform.getMatrix().multiplyVector2( resultPoint );
         assert && assert( node._parents[1] === undefined, 'localToGlobalPoint unable to work for DAG' );
         node = node._parents[0];
       }
-      return point;
+      return resultPoint;
+    },
+    
+    globalToLocalPoint: function( point ) {
+      var node = this;
+      // TODO: performance: test whether it is faster to get a total transform and then invert (won't compute individual inverses)
+      
+      // we need to apply the transformations in the reverse order, so we temporarily store them
+      var transforms = [];
+      while ( node ) {
+        transforms.push( node._transform );
+        assert && assert( node._parents[1] === undefined, 'globalToLocalPoint unable to work for DAG' );
+        node = node._parents[0];
+      }
+      
+      // iterate from the back forwards (from the root node to here)
+      var resultPoint = point.copy();
+      for ( var i = transforms.length - 1; i >=0; i-- ) {
+        // in-place multiplication
+        transforms[i].getInverse().multiplyVector2( resultPoint );
+      }
+      return resultPoint;
     },
     
     // apply this node's transform (and then all of its parents' transforms) to the bounds
     localToGlobalBounds: function( bounds ) {
-      var node = this;
-      while ( node ) {
-        bounds = node._transform.transformBounds2( bounds );
-        assert && assert( node._parents[1] === undefined, 'localToGlobalBounds unable to work for DAG' );
-        node = node._parents[0];
-      }
-      return bounds;
+      // apply the bounds transform only once, so we can minimize the expansion encountered from multiple rotations
+      // it also seems to be a bit faster this way
+      return bounds.transformed( this.getLocalToGlobalMatrix() );
+    },
+    
+    globalToLocalBounds: function( bounds ) {
+      // apply the bounds transform only once, so we can minimize the expansion encountered from multiple rotations
+      return bounds.transformed( this.getGlobalToLocalMatrix() );
     },
     
     // like localToGlobalPoint, but without applying this node's transform
@@ -1354,42 +1384,6 @@ define( function( require ) {
     // get the Bounds2 of this node in the coordinate frame of the parameter node. Does not work for DAG cases.
     boundsTo: function( node ) {
       return node.globalToLocalBounds( this.getGlobalBounds() );
-    },
-    
-    globalToLocalPoint: function( point ) {
-      var node = this;
-      
-      // we need to apply the transformations in the reverse order, so we temporarily store them
-      var transforms = [];
-      while ( node ) {
-        transforms.push( node._transform );
-        assert && assert( node._parents[1] === undefined, 'globalToLocalPoint unable to work for DAG' );
-        node = node._parents[0];
-      }
-      
-      // iterate from the back forwards (from the root node to here)
-      for ( var i = transforms.length - 1; i >=0; i-- ) {
-        point = transforms[i].inversePosition2( point );
-      }
-      return point;
-    },
-    
-    globalToLocalBounds: function( bounds ) {
-      var node = this;
-      
-      // we need to apply the transformations in the reverse order, so we temporarily store them
-      var transforms = [];
-      while ( node ) {
-        transforms.push( node._transform );
-        assert && assert( node._parents[1] === undefined, 'globalToLocalBounds unable to work for DAG' );
-        node = node._parents[0];
-      }
-      
-      // iterate from the back forwards (from the root node to here)
-      for ( var i = transforms.length - 1; i >=0; i-- ) {
-        bounds = transforms[i].inverseBounds2( bounds );
-      }
-      return bounds;
     },
     
     /*---------------------------------------------------------------------------*
@@ -1580,6 +1574,9 @@ define( function( require ) {
   Node.prototype._supportedRenderers = [];
   
   Node.prototype.layerStrategy = LayerStrategy;
+  
+  // mix-in the events for Node
+  nodeEvents( Node );
   
   return Node;
 } );

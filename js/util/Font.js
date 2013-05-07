@@ -48,6 +48,17 @@ define( function( require ) {
     // span for using the browser to compute font styles
     this.$span = $( document.createElement( 'span' ) );
     
+    // cache values for all of the span's properties
+    this.cachedValues = null;
+    
+    // allow listeners to be notified on any changes
+    this.listeners = [];
+    
+    if ( assert ) {
+      // only do this if assertions are enabled, otherwise we won't access it at all
+      this.immutable = false;
+    }
+    
     var type = typeof options;
     if ( type === 'string' ) {
       this._font = options;
@@ -64,8 +75,39 @@ define( function( require ) {
   Font.prototype = {
     constructor: Font,
     
+    // invalidate cached data and notify listeners of the change
+    invalidateFont: function() {
+      assert && assert( !this.immutable, 'cannot change immutable font instance' );
+      
+      this.cachedValues = null;
+      
+      var listeners = this.listeners.slice( 0 );
+      var length = listeners.length;
+      
+      for ( var i = 0; i < length; i++ ) {
+        listeners[i]();
+      }
+    },
+    
+    // marks this Font instance as immutable. any further change will trigger an error (if assertions are enabled)
+    setImmutable: function() {
+      this.immutable = true;
+    },
+    
     getProperty: function( property ) {
-      return this.$span.css( property );
+      if ( !this.cachedValues ) {
+        this.cachedValues = this.$span.css( [
+          'font',
+          'font-family',
+          'font-weight',
+          'font-stretch',
+          'font-style',
+          'font-size',
+          'lineHeight'
+        ] );
+      }
+      assert && assert( property in this.cachedValues );
+      return this.cachedValues[property];
     },
     setProperty: function( property, value ) {
       // sanity check, in case some CSS changed somewhere
@@ -74,12 +116,21 @@ define( function( require ) {
       this.$span.css( property, value );
       this._font = this.$span.css( 'font' );
       
+      this.invalidateFont();
       return this;
     },
     
     // direct access to the font string
-    getFont: function() { return this._font; },
-    setFont: function( value ) { this._font = value; return this; },
+    getFont: function() {
+      return this._font;
+    },
+    setFont: function( value ) {
+      if ( this._font !== value ) {
+        this._font = value;
+        this.invalidateFont();
+      }
+      return this;
+    },
     
     // using the property mechanism
     getFamily: function() { return this.getProperty( 'font-family' ); },
@@ -131,10 +182,32 @@ define( function( require ) {
           font[key] = options[key];
         }
       } );
+    },
+    
+    toString: function() {
+      return this.getFont();
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * listeners
+    *----------------------------------------------------------------------------*/
+    
+    // listener should be a callback expecting no arguments, listener() will be called when the font changes
+    addFontListener: function( listener ) {
+      assert && assert( !_.contains( this.listeners, listener ) );
+      this.listeners.push( listener );
+    },
+    
+    removeFontListener: function( listener ) {
+      assert && assert( _.contains( this.listeners, listener ) );
+      this.listeners.splice( _.indexOf( this.listeners, listener ), 1 );
     }
   };
   
   Font.prototype._mutatorKeys = [ 'font', 'weight', 'family', 'stretch', 'style', 'size', 'lineHeight' ];
+  
+  Font.DEFAULT = new Font();
+  Font.DEFAULT.setImmutable();
   
   return Font;
 } );

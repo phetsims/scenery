@@ -1,14 +1,13 @@
 
 Priorities:
-    OnOfDragHandler
-    Remove 'dirtyBounds' part from debugScene if it's infinite?
+    Beware of closures! (test speeds, see https://developers.google.com/speed/articles/optimizing-javascript)
+    For DOM / jQuery manipulation: https://developers.google.com/speed/articles/javascript-dom
+    For transform listeners and changes:
+        Notes about marking dirty regions should NEVER change a transform?
+        Things may go a bit screwy if event listeners for transforms change the transform?
+    Investigate double typed arrays for speed (comared to float typed arrays, less casting?)
+    OnOffDragHandler
     Consider having children that don't get stitched, but just added (for speed, imagine particules)
-    DOM text:
-        getDOMElement() and updateCSSTransform() should support DAGable nodes, with a flag that will cause it to fail?
-        Should we add in a DOM-support mixin?
-        allowsMultipleDOMInstances
-            For image, would require not using the initial image copy (but creating images with the same src)
-        TODO: how to document the interfaces for NODE rendering support?
     * Performance: Better event system handling (notification of common changes?)
         Layers could conceivably add a listener to a node with a specific trail reference, instead of doing a dispatch up the tree.
         Looks important for transform changes, since they are firing off 2 dispatchEventWithTransform calls, and it should be much better to notify the layers directly
@@ -34,6 +33,12 @@ Priorities:
     Testing with hidef canvases
 
 Bugs:
+    Chrome canvas lineWidth with pattern bug (looks like half size?)
+    DOM opacity
+    **** General opacity: multiple layers combined!
+        **** Should we consider supporting a nested structure of layers based on opacity?
+    What happens with a computer with multiple mice? is that handled in the pointer spec?
+    Text width detected improperly, or wrapping in DOM renderer
     Default text with text string changed visual size switching between boundsMethods in playground
     Switching renderers in Devious Drag example on iPad causes other objects being dragged to be "dropped"
         Probably causes some sort of enter/exit event?
@@ -47,6 +52,7 @@ Tricky areas:
     Gradients / Patterns should not be changed after being passed to a node's fill/stroke, since the SVG def won't change, and we don't set up listeners
 
 Test:
+    Test issues (zero-bounds text, etc.)
     Unit tests for common node operations
     Test bounds from canvas accurate method vs computed bounds for Shapes and strokes
     Layering tests
@@ -78,6 +84,7 @@ Browsers
             WebKit bug: https://bugs.webkit.org/show_bug.cgi?id=110031
             Try using a unicode-escaped quote?
         [REGRESSION] Chrome 27 context.arc( 0, 0, 100, Math.PI / 4, -Math.PI / 2, true );
+        [UNKNOWN] Chrome canvas lineWidth with pattern bug (looks like half size?)
         
         [KNOWN] Chrome XMLSerializer.serializeToString dropping namespaces: https://code.google.com/p/chromium/issues/detail?id=88295
     For canvas, create a drawing function that exhibits all differences?
@@ -101,6 +108,8 @@ General:
     RenderState - consider stack-based transforms
 
 Code:
+    ** _supportedRenderers => supportedRenderers? (pushes on this array if shared in the prototype could be bad!)
+        getSupportedRenderers()? - fixes much of what we're doing
     lib/phet/ instead of common/, lib/ instead of contrib/
     Remove Easel references in comparison
     Refactor Trail .compare usage to isBefore / isAfter
@@ -282,12 +291,10 @@ Node:
     Canvas: masking with sub-canvas rendering using globalCompositeOperation. CSG should be possible, and hit tests should be better. Bounds might be harder
 
 Text:
+    *** Strip out textBaseline and textAlign, they are not needed
     Unit tests
-    *** Performance of text bounds!
-        Comparison vs accurate bounds for all of the various text bounds methods
-    Investigate SVG's writing-mode for rtl/ltr handling (also direction and unicode-bidi)
     Handling multi-line strings
-    WebGL / DOM options
+    WebGL options
 
 Scene:
     Acceleration of layer lookup
@@ -303,6 +310,118 @@ Trail:
     depthFirstUntil should possibly have option for defensive copies of the pointers?
 
 Performance:
+    V8:
+        Optimized too many times:
+            Trail: reindex, addDescendant
+            Node: validateBounds, invalidateChildBounds, invalidateChildPaint, markOldPaint, trailUnderPoint
+            CanvasLayer: internalMarkDirtyBounds
+            Bounds2: roundedOut
+            Fillable: beforeCanvasFill, afterCanvasFill
+            enter / exit (probably Canvas rendering?)
+        Non-literal switch label:
+            Matrix3.inverted
+            Matrix3.getSVGTransform
+    Event Abstraction:
+        NOTE: quick check to see if changes that 'affect rest of tree' affect other layers, look at isAfter node vs end?
+        NOTE: Node wouldn't store all affected layers (for each trail reference), only first and last
+        NOTE: scene/layer dispose has to be accurate and enforced if we store info on nodes. check in layer audit?
+        Instance
+            Trail
+            Layer (if painted) (on matching layer refresh stitches, just switch the layer reference)
+            Scene
+            (probably) children / parent
+            (possibly) bottom/top affected layers (and implicitly all between)
+        Layer
+            Add instance count, so in the stitching we can verify that if X instances are removed the layer should disappear
+            Ability to list instances or trails (or check stitching to see how we move trails from one layer to another)
+                Also for layerAudit
+        Check:
+            _layerTrails
+            getLayerTrails
+            getPaintedTrailCount
+        Instance Events API:
+            mark for: insertion (to parent), removal (from parent), refresh, then stitch
+            dirtyPaint( boundsChanged, affectsChildren )
+                self dirty                   (fill change)
+                self dirty, bounds change    (changed line width, shape, text, image)
+                subtree dirty                (visibility, opacity)
+                subtree dirty, bounds change (add/remove from graph)
+            transform
+                before/after?
+            boundsAccuracy
+    Thoughts:
+        Nodes could track what layer types they are rendering under, and thus what optimizations they could make?
+        Also track affected layers this way?
+    Priorities:
+        Gruntfile - duplicated defines moved to single variable + references
+        ** removing recursiveEventDispatch may help?
+            Implement using mix-ins for various strategies? Current is 'dispatch', then 'trail reference', or 'event'
+        Instead of a full scan of all trails in a Node (under a Trail), do a recursive bounds-based approach!
+        SLOW to create Canvas layer on iPad? ALL SELF TIME
+        CanvasLayer in render: enter,setTransform slow !!!
+        markDirtyRegion speedup
+            layerLookup on 'self-only' instead of affectedLayers?
+        Faster way to do Trail.addDescendant - PASS indices in if we know what they are?
+        LayerStrategy enter
+        TrailPointer nestedForwards (minor?)
+        add/remove trail from layer - SVG/Canvas
+            Canvas add
+                mostly getBounds, internalMarkDirtyBounds
+            SVG add
+                initialize base
+                update node
+        Remove startPointer / endPointer from Layer boundaries?
+            Wait and verify later?
+        SVG could potentially mark certain nodes as 'dirty' and only update on the scene render
+            Faster?
+        ** Faster dirty marking for changes that don't modify children
+        ** Don't double-mark the 'old' and 'new' spots for DOM / SVG
+        Only set CSS3 transform-origin once, on construction? -- create a SceneryStyle for it
+        Consider a CanvasAccelerationNode - batches events and should be treated like an opaque rectangle that is dirty or not
+        Consider a CanvasCustomNode
+            Could it be duplicated? Probably not worth handling for performance? Might not just use this for performance.
+            High-performance version (direct canvas access), or low-performance version (blitted on?)
+        Disabling bounds / paint tracking where not needed?
+            Or just don't ever compute bounds until they are needed? (call validateBounds more often as a result)
+        Memory taken up, causing iOS crashes!
+        Path boundsMethod - either bounds not needed, or a more inaccurate form (particularly for stroked bounds!)
+        Node.fireEvent (and event listeners) should be split based on event type, so it's faster to fire?
+        Try Scene/Layer adding listeners to nodes based on their Trail, so we don't have to do the dispatching.
+            ** how to handle removal of the specific listener? Node COULD track (Scenes / Layers,Trail)?
+                Otherwise we get hash lookups, which won't scale well.
+        Bounds validation and immutable => mutable for lessening GC
+        Layer creation costs
+            * match in stitching
+            * cache canvases
+        addTrailToLayer / removeTrailFromLayer
+        LayerBuilder and LayerStrategy
+        TrailPointer's equalsNested, compareNested, nestedForwards
+        Better reindexing of layers (don't affect so many, spread the indices out more and do intelligently)
+    Events:
+        Layer refresh: up tree to all scenes?
+            Same with marking and stitch? Better way?
+        Mark Dirty bounds:
+            TODO: add a mark flag that it either affects only self, or a subtree?
+            TODO: DOM opacity is not there!
+            * we're currently firing to any affected layers
+                DOM:
+                    self: update DOM, update transform (because Text transform relies on text height etc.)
+                    subtrail: visibility
+                SVG:
+                    self: update SVG, visibility/opacity on group (recursion not needed)
+                        * external, for affected group
+                Canvas:
+                    self: transforms bounds with trail transform, unions
+                        * external, for affected bounds
+        Transform:
+            * we're currently firing to any affected layers
+                DOM:
+                    subtrail: update CSS *** currently slow
+                SVG:
+                    self/var: under base/base/above base
+                Canvas:
+                    no-op
+        ...
     *** paintCanvas bottleneck?
     *** Garbage collection jitters!
     *** Performance regressions with layering

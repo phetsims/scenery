@@ -11,6 +11,28 @@
  */
 
 define( function( require ) {
+  window.sceneryAssert = require( 'ASSERT/assert' )( 'scenery' );
+  window.sceneryAssertExtra = require( 'ASSERT/assert' )( 'scenery.extra' );
+  
+  window.sceneryLayerLog = null;
+  window.sceneryEventLog = null;
+  
   // will be filled in by other modules
-  return {};
+  return {
+    enableLayerLogging: function() {
+      window.sceneryLayerLog = function( ob ) { console.log( ob ); };
+    },
+  
+    disableLayerLogging: function() {
+      window.sceneryLayerLog = null;
+    },
+    
+    enableEventLogging: function() {
+      window.sceneryEventLog = function( ob ) { console.log( ob ); };
+    },
+  
+    disableEventLogging: function() {
+      window.sceneryEventLog = null;
+    }
+  };
 } );

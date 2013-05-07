@@ -7,6 +7,12 @@
  * scene graph. It only will render a contiguous block of nodes visited in a depth-first
  * manner.
  *
+ * Nodes supporting the DOM renderer should have the following functions:
+ *   allowsMultipleDOMInstances:               {Boolean} whether getDOMElement will return the same element every time, or new elements.
+ *   getDOMElement():                          Returns a DOM element that represents this node.
+ *   updateDOMElement( element ):              Updates the DOM element with any changes that were made.
+ *   updateCSSTransform( transform, element ): Updates the CSS transform of the element
+ *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
@@ -15,6 +21,7 @@ define( function( require ) {
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
+  var inherit = require( 'PHET_CORE/inherit' );
   var Bounds2 = require( 'DOT/Bounds2' );
   
   var scenery = require( 'SCENERY/scenery' );
@@ -22,17 +29,22 @@ define( function( require ) {
   var Layer = require( 'SCENERY/layers/Layer' ); // DOMLayer inherits from Layer
   
   scenery.DOMLayer = function( args ) {
+    sceneryLayerLog && sceneryLayerLog( 'DOMLayer constructor' );
+    
     Layer.call( this, args );
     
-    var width = this.$main.width();
-    var height = this.$main.height();
+    var width = args.scene.sceneBounds.width;
+    var height = args.scene.sceneBounds.height;
     
     this.div = document.createElement( 'div' );
+    var div = this.div;
+    div.style.position = 'absolute';
+    div.style.left = '0';
+    div.style.top = '0';
+    div.style.width = '0';
+    div.style.height = '0';
+    div.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
     this.$div = $( this.div );
-    this.$div.width( 0 );
-    this.$div.height( 0 );
-    this.$div.css( 'position', 'absolute' );
-    this.div.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
     this.$main.append( this.div );
     
     this.scene = args.scene;
@@ -49,8 +61,7 @@ define( function( require ) {
   };
   var DOMLayer = scenery.DOMLayer;
   
-  DOMLayer.prototype = _.extend( {}, Layer.prototype, {
-    constructor: DOMLayer,
+  inherit( DOMLayer, Layer, {
     
     addNodeFromTrail: function( trail ) {
       Layer.prototype.addNodeFromTrail.call( this, trail );
@@ -60,6 +71,8 @@ define( function( require ) {
       var node = trail.lastNode();
       
       var element = node.getDOMElement();
+      node.updateDOMElement( element );
+      this.updateVisibility( trail, element );
       
       this.idElementMap[trail.getUniqueId()] = element;
       this.idTrailMap[trail.getUniqueId()] = trail;
@@ -131,26 +144,36 @@ define( function( require ) {
     
     dispose: function() {
       Layer.prototype.dispose.call( this );
-      this.$div.detach();
+      
+      this.div.parentNode.removeChild( this.div );
     },
     
     markDirtyRegion: function( args ) {
       var node = args.node;
       var trail = args.trail;
+      
+      // if we have the trail that is marked as dirty, update it's DOM element
+      var dirtyElement = this.idElementMap[trail.getUniqueId()];
+      if ( dirtyElement ) {
+        node.updateDOMElement( dirtyElement );
+        node.updateCSSTransform( trail.getTransform(), dirtyElement );
+      }
+      
+      // TODO: faster way to iterate through
       for ( var trailId in this.idTrailMap ) {
         var subtrail = this.idTrailMap[trailId];
         subtrail.reindex();
         if ( subtrail.isExtensionOf( trail, true ) ) {
-          var element = this.idElementMap[trailId];
-          
-          var visible = _.every( subtrail.nodes, function( node ) { return node.isVisible(); } );
-          
-          if ( visible ) {
-            element.style.visibility = 'visible';
-          } else {
-            element.style.visibility = 'hidden';
-          }
+          this.updateVisibility( subtrail, this.idElementMap[trailId] );
         }
+      }
+    },
+    
+    updateVisibility: function( trail, element ) {
+      if ( trail.isVisible() ) {
+        element.style.visibility = 'visible';
+      } else {
+        element.style.visibility = 'hidden';
       }
     },
     
@@ -185,8 +208,12 @@ define( function( require ) {
     
     // returns next zIndex in place. allows layers to take up more than one single zIndex
     reindex: function( zIndex ) {
-      this.$div.css( 'z-index', zIndex );
-      this.zIndex = zIndex;
+      Layer.prototype.reindex.call( this, zIndex );
+      
+      if ( this.zIndex !== zIndex ) {
+        this.div.style.zIndex = zIndex;
+        this.zIndex = zIndex;
+      }
       return zIndex + 1;
     },
     

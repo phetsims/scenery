@@ -1,12 +1,16 @@
 // Copyright 2002-2012, University of Colorado
 
 /**
- * Represents a trail (path in the graph) from a "root" node down to a descendant node.
+ * Represents a trail (path in the graph) from a 'root' node down to a descendant node.
  * In a DAG, or with different views, there can be more than one trail up from a node,
  * even to the same root node!
  *
- * This trail also mimics an Array, so trail[0] will be the root, and trail[trail.length-1]
- * will be the end node of the trail.
+ * It has an array of nodes, in order from the 'root' down to the last node,
+ * a length, and an array of indices such that node_i.children[index_i] === node_{i+1}.
+ *
+ * The indices can sometimes become stale when nodes are added and removed, so Trails
+ * can have their indices updated with reindex(). It's designed to be as fast as possible
+ * on Trails that are already indexed accurately.
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
@@ -17,6 +21,7 @@ define( function( require ) {
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   var assertExtra = require( 'ASSERT/assert' )( 'scenery.extra', false );
   
+  var Matrix3 = require( 'DOT/Matrix3' );
   var Transform3 = require( 'DOT/Transform3' );
   
   var scenery = require( 'SCENERY/scenery' );
@@ -30,7 +35,10 @@ define( function( require ) {
      * If set to true, add/remove descendant/ancestor should fail if assertions are enabled
      * Use setImmutable() or setMutable() to signal a specific type of protection, so it cannot be changed later
      */
-    this.immutable = undefined;
+    if ( assert ) {
+      // only do this if assertions are enabled, otherwise we won't access it at all
+      this.immutable = undefined;
+    }
     
     if ( nodes instanceof Trail ) {
       // copy constructor (takes advantage of already built index information)
@@ -38,12 +46,14 @@ define( function( require ) {
       
       this.nodes = otherTrail.nodes.slice( 0 );
       this.length = otherTrail.length;
+      this.uniqueId = otherTrail.uniqueId;
       this.indices = otherTrail.indices.slice( 0 );
       return;
     }
     
     this.nodes = [];
     this.length = 0;
+    this.uniqueId = '';
     
     // indices[x] stores the index of nodes[x] in nodes[x-1]'s children
     this.indices = [];
@@ -77,6 +87,11 @@ define( function( require ) {
       return this.lastNode().isPainted();
     },
     
+    // this trail is visible only if all nodes on it are marked as visible
+    isVisible: function() {
+      return _.every( this.nodes, function( node ) { return node.isVisible(); } );
+    },
+    
     get: function( index ) {
       if ( index >= 0 ) {
         return this.nodes[index];
@@ -99,88 +114,100 @@ define( function( require ) {
     },
     
     getTransform: function() {
-      // always return a defensive copy of a transform
-      var transform = new Transform3();
+      // this matrix will be modified in place, so always start fresh
+      var matrix = new Matrix3();
       
       // from the root up
-      _.each( this.nodes, function( node ) {
-        transform.appendTransform( node._transform );
-      } );
-      
-      return transform;
+      var nodes = this.nodes;
+      var length = nodes.length;
+      for ( var i = 0; i < length; i++ ) {
+        matrix.multiplyMatrix( nodes[i]._transform.getMatrix() );
+      }
+      return new Transform3( matrix );
     },
     
     addAncestor: function( node, index ) {
       assert && assert( !this.immutable, 'cannot modify an immutable Trail with addAncestor' );
+      assert && assert( node, 'cannot add falsy value to a Trail' );
       
-      var oldRoot = this.nodes[0];
       
-      this.nodes.unshift( node );
-      if ( oldRoot ) {
+      if ( this.nodes.length ) {
+        var oldRoot = this.nodes[0];
         this.indices.unshift( index === undefined ? _.indexOf( node._children, oldRoot ) : index );
       }
+      this.nodes.unshift( node );
       
-      // mimic an Array
       this.length++;
+      // accelerated version of this.updateUniqueId()
+      this.uniqueId = ( this.uniqueId ? node._id + '-' + this.uniqueId : node._id + '' );
       return this;
     },
     
     removeAncestor: function() {
       assert && assert( !this.immutable, 'cannot modify an immutable Trail with removeAncestor' );
+      assert && assert( this.length > 0, 'cannot remove a Node from an empty trail' );
       
       this.nodes.shift();
       if ( this.indices.length ) {
         this.indices.shift();
       }
       
-      // mimic an Array
       this.length--;
+      this.updateUniqueId();
       return this;
     },
     
     addDescendant: function( node, index ) {
       assert && assert( !this.immutable, 'cannot modify an immutable Trail with addDescendant' );
+      assert && assert( node, 'cannot add falsy value to a Trail' );
       
-      var parent = this.lastNode();
       
-      this.nodes.push( node );
-      if ( parent ) {
+      if ( this.nodes.length ) {
+        var parent = this.lastNode();
         this.indices.push( index === undefined ? _.indexOf( parent._children, node ) : index );
       }
+      this.nodes.push( node );
       
-      // mimic an Array
       this.length++;
+      // accelerated version of this.updateUniqueId()
+      this.uniqueId = ( this.uniqueId ? this.uniqueId + '-' + node._id : node._id + '' );
       return this;
     },
     
     removeDescendant: function() {
       assert && assert( !this.immutable, 'cannot modify an immutable Trail with removeDescendant' );
+      assert && assert( this.length > 0, 'cannot remove a Node from an empty trail' );
       
       this.nodes.pop();
       if ( this.indices.length ) {
         this.indices.pop();
       }
       
-      // mimic an Array
       this.length--;
+      this.updateUniqueId();
       return this;
     },
     
     // refreshes the internal index references (important if any children arrays were modified!)
     reindex: function() {
-      for ( var i = 1; i < this.length; i++ ) {
+      var length = this.length;
+      for ( var i = 1; i < length; i++ ) {
         // only replace indices where they have changed (this was a performance hotspot)
         var currentIndex = this.indices[i-1];
-        if ( this.nodes[i-1]._children[currentIndex] !== this.nodes[i] ) {
-          this.indices[i-1] = _.indexOf( this.nodes[i-1]._children, this.nodes[i] );
+        var baseNode = this.nodes[i-1];
+        
+        if ( baseNode._children[currentIndex] !== this.nodes[i] ) {
+          this.indices[i-1] = _.indexOf( baseNode._children, this.nodes[i] );
         }
       }
     },
     
     setImmutable: function() {
-      assert && assert( this.immutable !== false, 'A trail cannot be made immutable after being flagged as mutable' );
-      
-      this.immutable = true;
+      // if assertions are disabled, we hope this is inlined as a no-op
+      if ( assert ) {
+        assert( this.immutable !== false, 'A trail cannot be made immutable after being flagged as mutable' );
+        this.immutable = true;
+      }
       
       // TODO: consider setting mutators to null here instead of the function call check (for performance, and profile the differences)
       
@@ -188,9 +215,11 @@ define( function( require ) {
     },
     
     setMutable: function() {
-      assert && assert( this.immutable !== true, 'A trail cannot be made mutable after being flagged as immutable' );
-      
-      this.immutable = false;
+      // if assertions are disabled, we hope this is inlined as a no-op
+      if ( assert ) {
+        assert( this.immutable !== true, 'A trail cannot be made mutable after being flagged as immutable' );
+        this.immutable = false;
+      }
       
       return this; // allow chaining
     },
@@ -386,6 +415,7 @@ define( function( require ) {
     },
     
     localToGlobalBounds: function( bounds ) {
+      // TODO: performance: if only called once, is it faster to run through each transform rather than combining?
       return this.getTransform().transformBounds2( bounds );
     },
     
@@ -397,10 +427,29 @@ define( function( require ) {
       return this.getTransform().inverseBounds2( bounds );
     },
     
+    updateUniqueId: function() {
+      // string concatenation is faster, see http://jsperf.com/string-concat-vs-joins
+      var result = '';
+      var len = this.nodes.length;
+      if ( len > 0 ) {
+        result += this.nodes[0]._id;
+      }
+      for ( var i = 1; i < len; i++ ) {
+        result += '-' + this.nodes[i]._id;
+      }
+      this.uniqueId = result;
+      // this.uniqueId = _.map( this.nodes, function( node ) { return node.getId(); } ).join( '-' );
+    },
+    
     // concatenates the unique IDs of nodes in the trail, so that we can do id-based lookups
     getUniqueId: function() {
-      // TODO: consider caching this if it is ever a bottleneck. it seems like it might be called in layer-refresh inner loops
-      return _.map( this.nodes, function( node ) { return node.getId(); } ).join( '-' );
+      // sanity checks
+      if ( assert ) {
+        var oldUniqueId = this.uniqueId;
+        this.updateUniqueId();
+        assert( oldUniqueId === this.uniqueId );
+      }
+      return this.uniqueId;
     },
     
     toString: function() {

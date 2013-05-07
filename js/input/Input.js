@@ -32,9 +32,12 @@ define( function( require ) {
   require( 'SCENERY/input/Pen' );
   require( 'SCENERY/input/Event' );
   
-  scenery.Input = function( scene, listenerTarget ) {
+  scenery.Input = function( scene, listenerTarget, batchDOMEvents ) {
     this.scene = scene;
     this.listenerTarget = listenerTarget;
+    this.batchDOMEvents = batchDOMEvents;
+    
+    this.batchedCallbacks = [];
     
     this.mouse = new scenery.Mouse();
     
@@ -299,6 +302,7 @@ define( function( require ) {
     },
     
     dispatchEvent: function( trail, type, pointer, event, bubbles ) {
+      sceneryEventLog && sceneryEventLog( 'Input: ' + type + ' on ' + trail.toString() + ' for pointer ' + pointer.toString() );
       if ( !trail ) {
         try {
           throw new Error( 'falsy trail for dispatchEvent' );
@@ -404,8 +408,23 @@ define( function( require ) {
     },
     
     addListener: function( type, callback, useCapture ) {
-      this.listenerTarget.addEventListener( type, callback, useCapture );
-      this.listenerReferences.push( { type: type, callback: callback, useCapture: useCapture } );
+      var input = this;
+      
+      if ( this.batchDOMEvents ) {
+        var batchedCallback = function batchedEvent( domEvent ) {
+          sceneryEventLog && sceneryEventLog( 'Batching event for ' + type );
+          
+          domEvent.preventDefault(); // TODO: should we batch the events in a different place so we don't preventDefault on something bad?
+          input.batchedCallbacks.push( function() {
+            callback( domEvent );
+          } );
+        };
+        this.listenerTarget.addEventListener( type, batchedCallback, useCapture );
+        this.listenerReferences.push( { type: type, callback: batchedCallback, useCapture: useCapture } );
+      } else {
+        this.listenerTarget.addEventListener( type, callback, useCapture );
+        this.listenerReferences.push( { type: type, callback: callback, useCapture: useCapture } );
+      }
     },
     
     diposeListeners: function() {
@@ -413,6 +432,14 @@ define( function( require ) {
       _.each( this.listenerReferences, function( ref ) {
         input.listenerTarget.removeEventListener( ref.type, ref.callback, ref.useCapture );
       } );
+    },
+    
+    fireBatchedEvents: function() {
+      if ( this.batchedCallbacks.length ) {
+        sceneryEventLog && sceneryEventLog( 'Input.fireBatchedEvents length:' + this.batchedCallbacks.length );
+        _.each( this.batchedCallbacks, function( callback ) { callback(); } );
+        this.batchedCallbacks = [];
+      }
     }
   };
   

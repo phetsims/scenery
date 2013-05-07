@@ -7,7 +7,7 @@
   
   <title>Scenery Playground</title>
   
-  <script src="../contrib/jquery-2.0.0.min.js"></script>
+  <script src="../contrib/jquery-2.0.0.js"></script>
   <script src="../contrib/lodash.min-1.0.0-rc.3.js"></script>
   <script src="../contrib/has.js"></script>
   
@@ -38,10 +38,22 @@
       padding: 15px;
       border: 1px solid gray;
     }
+    
+    #controls {
+      position: absolute;
+      width: 150px;
+      top: 0;
+      right: 0;
+    }
   </style>
   
 </head>
 <body>
+  
+  <div id="controls">
+    <button onclick="scene.updateOnRequestAnimationFrame();">Continuous Update</button>
+    <button onclick="scene.popupDebug();">Popup Debug</button>
+  </div>
   
   <div id="scene"></div>
   
@@ -64,7 +76,8 @@
           
           console.log( 'loaded' );
           
-          scenery.Scene.enableLayerLogging();
+          scenery.enableLayerLogging();
+          scenery.enableEventLogging();
           
           window.scene = new scenery.Scene( $( '#scene' ) );
           console.log( 'window.scene created' );
@@ -98,8 +111,57 @@
             }
           };
           
-          window.runError = function() {
-            
+          window.setupTest = function() {
+            var n1 = new scenery.Node();
+            var n2 = new scenery.Node();
+            var n3 = new scenery.Node();
+            var n4 = new scenery.Node();
+            var n5 = new scenery.Node();
+            var n6 = new scenery.Node();
+            var n7 = new scenery.Node();
+            var n8 = new scenery.Node();
+            var n9 = new scenery.Node();
+            n1.addChild( n2 );
+            n2.addChild( n3 );
+            n3.addChild( n4 );
+            n4.addChild( n5 );
+            n5.addChild( n6 );
+            n6.addChild( n7 );
+            n7.addChild( n8 );
+            n8.addChild( n9 );
+            scene.addChild( n1 );
+            window.trail = n9.getUniqueTrail();
+            window.bounds = new dot.Bounds2( 1, 2, 5, 6 );
+          };
+          
+          window.setupTranslation = function() {
+            var n = scene;
+            while ( n ) {
+              n.translate( 5, 0 );
+              n = n.children[0];
+            }
+          };
+          
+          window.setupRotation = function() {
+            var n = scene;
+            while ( n ) {
+              n.rotate( 0.2 );
+              n = n.children[0];
+            }
+          };
+          
+          window.testNodeBounds = function( trail ) {
+            var a = performance.now();
+            for ( var i = 0; i < 100000; i++ ) { trail.lastNode().localToGlobalBounds( bounds ); };
+            console.log( performance.now() - a );
+            console.log( trail.lastNode().localToGlobalBounds( bounds ) );
+          };
+          
+          window.testTrailBounds = function( trail ) {
+            var a = performance.now();
+            for ( var i = 0; i < 100000; i++ ) { trail.localToGlobalBounds( bounds ); };
+            console.log( performance.now() - a );
+          console.log( trail.localToGlobalBounds( bounds ) );
           };
           
           window.fuzzLayers = function() {
@@ -108,7 +170,8 @@
             fuzzStep = true;
             
             // disable the layer logging, or we'll spam ourselves to death
-            scenery.Scene.disableLayerLogging();
+            scenery.disableLayerLogging();
+            scenery.disableEventLogging();
             
             var lines = [];
             window.lines = lines;

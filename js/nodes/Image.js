@@ -4,7 +4,7 @@
  * Images
  *
  * TODO: setImage / getImage and the whole toolchain that uses that
- *
+ * TODO: allow multiple DOM instances (create new HTMLImageElement elements)
  * TODO: SVG support
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
@@ -23,6 +23,7 @@ define( function( require ) {
   var Node = require( 'SCENERY/nodes/Node' ); // Image inherits from Node
   var Renderer = require( 'SCENERY/layers/Renderer' ); // we need to specify the Renderer in the prototype
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
+  require( 'SCENERY/util/Util' );
   
   /*
    * Canvas renderer supports the following as 'image':
@@ -188,9 +189,15 @@ define( function( require ) {
       return this._image;
     },
     
+    updateDOMElement: function( image ) {
+      if ( image.src !== this._image.src ) {
+        image.src = this._image.src;
+      }
+    },
+    
     updateCSSTransform: function( transform, element ) {
       // TODO: extract this out, it's completely shared!
-      $( element ).css( transform.getMatrix().getCSSTransformStyles() );
+      scenery.Util.applyCSSTransform( transform.getMatrix(), element );
     },
     
     set image( value ) { this.setImage( value ); },
