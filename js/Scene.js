@@ -218,7 +218,7 @@ define( function( require ) {
   Scene.prototype.constructor = Scene;
   
   Scene.prototype.updateScene = function( args ) {
-    sceneryLayerLog && sceneryLayerLog( 'Scene: updateScene' );
+    // sceneryLayerLog && sceneryLayerLog( 'Scene: updateScene' );
 
     var scene = this;
     //TODO: For handling as a DAG, use a createAccessiblePeer method so that pairs can be based on Trail
