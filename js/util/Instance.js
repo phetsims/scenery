@@ -16,7 +16,6 @@ define( function( require ) {
   // layer should be null if the trail isn't to a painted node
   scenery.Instance = function( trail, layer ) {
     this.trail = trail;
-    this.scene = trail.rootNode();
     this.layer = layer;
     
     // TODO: ensure that we can track this? otherwise remove it for memory and speed
@@ -33,6 +32,16 @@ define( function( require ) {
   
   Instance.prototype = {
     constructor: Instance,
+    
+    getScene: function() {
+      return this.trail.rootNode();
+    },
+    get scene() { return this.getScene(); },
+    
+    getNode: function() {
+      return this.trail.lastNode();
+    },
+    get node() { return this.getNode(); },
     
     changeLayer: function( newLayer ) {
       this.layer = newLayer;
