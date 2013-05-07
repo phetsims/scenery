@@ -310,30 +310,66 @@ Trail:
     depthFirstUntil should possibly have option for defensive copies of the pointers?
 
 Performance:
-[disabled optimization for Node.validateBounds, reason: optimized too many times]
-[disabled optimization for Trail.reindex, reason: optimized too many times]
-[disabled optimization for Trail.addDescendant, reason: optimized too many times]
-[disabled optimization for Matrix3.inverted, reason: SwitchStatement: non-literal switch label]
-[disabled optimization for Node.invalidateChildBounds, reason: optimized too many times]
-[disabled optimization for _.extend.internalMarkDirtyBounds, reason: optimized too many times]
-[disabled optimization for Node.invalidateChildPaint, reason: optimized too many times]
-[disabled optimization for Bounds2.roundedOut, reason: optimized too many times]
-[disabled optimization for jQuery.extend.access, reason: ForInStatement is not fast case]
-[disabled optimization for Matrix3.getSVGTransform, reason: SwitchStatement: non-literal switch label]
-[disabled optimization for jQuery.fn.extend.append, reason: bad value context for arguments value]
-[disabled optimization for proto.afterCanvasFill, reason: optimized too many times]
-[disabled optimization for reduce, reason: assignment to parameter in arguments object]
-[disabled optimization for proto.beforeCanvasFill, reason: optimized too many times]
-[disabled optimization for enter, reason: optimized too many times]
-[disabled optimization for exit, reason: optimized too many times]
-[disabled optimization for Node.markOldPaint, reason: optimized too many times]
-[disabled optimization for Node.trailUnderPoint, reason: optimized too many times]
+    V8:
+        Optimized too many times:
+            Trail: reindex, addDescendant
+            Node: validateBounds, invalidateChildBounds, invalidateChildPaint, markOldPaint, trailUnderPoint
+            CanvasLayer: internalMarkDirtyBounds
+            Bounds2: roundedOut
+            Fillable: beforeCanvasFill, afterCanvasFill
+            enter / exit (probably Canvas rendering?)
+        Non-literal switch label:
+            Matrix3.inverted
+            Matrix3.getSVGTransform
+    Event Abstraction:
+        NOTE: quick check to see if changes that 'affect rest of tree' affect other layers, look at isAfter node vs end?
+        NOTE: Node wouldn't store all affected layers (for each trail reference), only first and last
+        NOTE: scene/layer dispose has to be accurate and enforced if we store info on nodes. check in layer audit?
+        Instance
+            Trail
+            Layer (if painted) (on matching layer refresh stitches, just switch the layer reference)
+            Scene
+            (probably) children / parent
+            (possibly) bottom/top affected layers (and implicitly all between)
+        Layer
+            Add instance count, so in the stitching we can verify that if X instances are removed the layer should disappear
+            Ability to list instances or trails (or check stitching to see how we move trails from one layer to another)
+                Also for layerAudit
+        Check:
+            _layerTrails
+            getLayerTrails
+            getPaintedTrailCount
+        Instance Events API:
+            mark for: insertion (to parent), removal (from parent), refresh, then stitch
+            dirtyPaint( boundsChanged, affectsChildren )
+                self dirty                   (fill change)
+                self dirty, bounds change    (changed line width, shape, text, image)
+                subtree dirty                (visibility, opacity)
+                subtree dirty, bounds change (add/remove from graph)
+            transform
+                before/after?
+            boundsAccuracy
     Thoughts:
-        Node can know about all of its Trails, and what the corresponding Scene/Layer is?
         Nodes could track what layer types they are rendering under, and thus what optimizations they could make?
         Also track affected layers this way?
-        Seems like stitch speed would be affected? Fast way of determining affected layers?
     Priorities:
+        Gruntfile - duplicated defines moved to single variable + references
+        ** removing recursiveEventDispatch may help?
+            Implement using mix-ins for various strategies? Current is 'dispatch', then 'trail reference', or 'event'
+        Instead of a full scan of all trails in a Node (under a Trail), do a recursive bounds-based approach!
+        SLOW to create Canvas layer on iPad? ALL SELF TIME
+        CanvasLayer in render: enter,setTransform slow !!!
+        markDirtyRegion speedup
+            layerLookup on 'self-only' instead of affectedLayers?
+        Faster way to do Trail.addDescendant - PASS indices in if we know what they are?
+        LayerStrategy enter
+        TrailPointer nestedForwards (minor?)
+        add/remove trail from layer - SVG/Canvas
+            Canvas add
+                mostly getBounds, internalMarkDirtyBounds
+            SVG add
+                initialize base
+                update node
         Remove startPointer / endPointer from Layer boundaries?
             Wait and verify later?
         SVG could potentially mark certain nodes as 'dirty' and only update on the scene render
@@ -342,6 +378,9 @@ Performance:
         ** Don't double-mark the 'old' and 'new' spots for DOM / SVG
         Only set CSS3 transform-origin once, on construction? -- create a SceneryStyle for it
         Consider a CanvasAccelerationNode - batches events and should be treated like an opaque rectangle that is dirty or not
+        Consider a CanvasCustomNode
+            Could it be duplicated? Probably not worth handling for performance? Might not just use this for performance.
+            High-performance version (direct canvas access), or low-performance version (blitted on?)
         Disabling bounds / paint tracking where not needed?
             Or just don't ever compute bounds until they are needed? (call validateBounds more often as a result)
         Memory taken up, causing iOS crashes!
