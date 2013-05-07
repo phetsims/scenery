@@ -1234,7 +1234,7 @@ define( function( require ) {
       }, x, y, width, height );
     },
     
-    // gives an HTMLImageElement with the same parameter handling as Node.toCanvas()
+    // gives an HTMLImageElement with the same parameter handling as Node.toCanvas(). guaranteed to be asynchronous
     toImage: function( callback, x, y, width, height ) {
       this.toDataURL( function( url, x, y ) {
         // this x and y shadow the outside parameters, and will be different if the outside parameters are undefined
@@ -1245,6 +1245,39 @@ define( function( require ) {
         };
         img.src = url;
       }, x, y, width, height );
+    },
+    
+    // will call callback( node )
+    toImageNodeAsynchronous: function( callback, x, y, width, height ) {
+      this.toImage( function( image, x, y ) {
+        callback( new scenery.Node( { children: [
+          new scenery.Image( image, { x: -x, y: -y } )
+        ] } ) );
+      }, x, y, width, height );
+    },
+    
+    // fully synchronous, but returns a node that can only be rendered in Canvas
+    toCanvasNodeSynchronous: function( x, y, width, height ) {
+      var result;
+      this.toCanvas( function( canvas, x, y ) {
+        result = new scenery.Node( { children: [
+          new scenery.Image( canvas, { x: -x, y: -y } )
+        ] } );
+      }, x, y, width, height );
+      assert && assert( result, 'toCanvasNodeSynchronous requires that the node can be rendered only using Canvas' );
+      return result;
+    },
+    
+    // synchronous, but Image will not have the correct bounds immediately (that will be asynchronous)
+    toDataURLNodeSynchronous: function( x, y, width, height ) {
+      var result;
+      this.toDataURL( function( dataURL, x, y ) {
+        result = new scenery.Node( { children: [
+          new scenery.Image( dataURL, { x: -x, y: -y } )
+        ] } );
+      }, x, y, width, height );
+      assert && assert( result, 'toDataURLNodeSynchronous requires that the node can be rendered only using Canvas' );
+      return result;
     },
     
     /*---------------------------------------------------------------------------*
