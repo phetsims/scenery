@@ -336,7 +336,6 @@ Performance:
         Also track affected layers this way?
         Seems like stitch speed would be affected? Fast way of determining affected layers?
     Priorities:
-        Remove SVG-side batching
         SVG could potentially mark certain nodes as 'dirty' and only update on the scene render
             Faster?
         ** Faster dirty marking for changes that don't modify children
