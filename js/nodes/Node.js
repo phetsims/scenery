@@ -1243,15 +1243,36 @@ define( function( require ) {
       }, x, y, width, height );
     },
     
-    // TODO: synchronous is failing
-    toImageNodeSynchronous: function( x, y, width, height ) {
-      var result;
+    // will call callback( node )
+    toImageNodeAsynchronous: function( callback, x, y, width, height ) {
       this.toImage( function( image, x, y ) {
-        result = new scenery.Node( { children: [
+        callback( new scenery.Node( { children: [
           new scenery.Image( image, { x: -x, y: -y } )
+        ] } ) );
+      }, x, y, width, height );
+    },
+    
+    // fully synchronous, but returns a node that can only be rendered in Canvas
+    toCanvasNodeSynchronous: function( x, y, width, height ) {
+      var result;
+      this.toCanvas( function( canvas, x, y ) {
+        result = new scenery.Node( { children: [
+          new scenery.Image( canvas, { x: -x, y: -y } )
         ] } );
       }, x, y, width, height );
-      assert && assert( result, 'toImageNodeSynchronous can only handle Canvas renderers that are synchronous' );
+      assert && assert( result, 'toCanvasNodeSynchronous requires that the node can be rendered only using Canvas' );
+      return result;
+    },
+    
+    // synchronous, but Image will not have the correct bounds immediately (that will be asynchronous)
+    toDataURLNodeSynchronous: function( x, y, width, height ) {
+      var result;
+      this.toDataURL( function( dataURL, x, y ) {
+        result = new scenery.Node( { children: [
+          new scenery.Image( dataURL, { x: -x, y: -y } )
+        ] } );
+      }, x, y, width, height );
+      assert && assert( result, 'toDataURLNodeSynchronous requires that the node can be rendered only using Canvas' );
       return result;
     },
     
