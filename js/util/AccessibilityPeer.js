@@ -13,8 +13,6 @@ define( function( require ) {
 
   var scenery = require( 'SCENERY/scenery' );
 
-  var Node = require( 'SCENERY/nodes/Node' ); // DOM inherits from Node
-
   //I cannot figure out why this import is required, but without it the sim crashes on startup.
   var Renderer = require( 'SCENERY/layers/Renderer' );
 

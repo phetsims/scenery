@@ -33,7 +33,6 @@ define( [
     'SCENERY/layers/Renderer',
     'SCENERY/layers/SVGLayer',
     
-    'SCENERY/nodes/AccessibilityPeer',
     'SCENERY/nodes/Circle',
     'SCENERY/nodes/DOM',
     'SCENERY/nodes/Fillable',
@@ -47,6 +46,7 @@ define( [
     'SCENERY/nodes/Text',
     'SCENERY/nodes/VBox',
     
+    'SCENERY/util/AccessibilityPeer',
     'SCENERY/util/BasicNodeEvents',
     'SCENERY/util/CanvasContextWrapper',
     'SCENERY/util/Color',
