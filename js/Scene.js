@@ -196,7 +196,7 @@ define( function( require ) {
   Scene.prototype.constructor = Scene;
   
   Scene.prototype.updateScene = function( args ) {
-    sceneryLayerLog && sceneryLayerLog( 'Scene: updateScene' );
+    // sceneryLayerLog && sceneryLayerLog( 'Scene: updateScene' );
     
     // validating bounds, similar to Piccolo2d
     this.validateBounds();

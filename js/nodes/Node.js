@@ -1243,6 +1243,18 @@ define( function( require ) {
       }, x, y, width, height );
     },
     
+    // TODO: synchronous is failing
+    toImageNodeSynchronous: function( x, y, width, height ) {
+      var result;
+      this.toImage( function( image, x, y ) {
+        result = new scenery.Node( { children: [
+          new scenery.Image( image, { x: -x, y: -y } )
+        ] } );
+      }, x, y, width, height );
+      assert && assert( result, 'toImageNodeSynchronous can only handle Canvas renderers that are synchronous' );
+      return result;
+    },
+    
     /*---------------------------------------------------------------------------*
     * Coordinate transform methods
     *----------------------------------------------------------------------------*/
