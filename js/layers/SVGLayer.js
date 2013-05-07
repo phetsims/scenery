@@ -258,18 +258,14 @@ define( function( require ) {
     },
     
     render: function( scene, args ) {
-      var layer = this;
       if ( this.baseTransformDirty ) {
         // this will be run either now or at the end of flushing changes
         var includesBaseTransformChange = this.baseTransformChange;
-        this.domChange( function() {
-          layer.updateBaseTransform( includesBaseTransformChange );
-        } );
+        this.updateBaseTransform( includesBaseTransformChange );
         
         this.baseTransformDirty = false;
         this.baseTransformChange = false;
       }
-      this.flushDOMChanges();
     },
     
     dispose: function() {
@@ -298,12 +294,8 @@ define( function( require ) {
     markBaseTransformDirty: function( changed ) {
       sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' markBaseTransformDirty' );
       var baseTransformChange = this.baseTransformChange || !!changed;
-      if ( this.batchDOMChanges ) {
-        this.baseTransformDirty = true;
-        this.baseTransformChange = baseTransformChange;
-      } else {
-        this.updateBaseTransform( baseTransformChange );
-      }
+      this.baseTransformDirty = true;
+      this.baseTransformChange = baseTransformChange;
     },
     
     initializeBase: function() {
@@ -343,11 +335,8 @@ define( function( require ) {
     },
     
     updateContainerDimensions: function( width, height ) {
-      var layer = this;
-      this.domChange( function() {
-        layer.svg.setAttribute( 'width', width );
-        layer.svg.setAttribute( 'height', height );
-      } );
+      this.svg.setAttribute( 'width', width );
+      this.svg.setAttribute( 'height', height );
     },
     
     updateBaseTransform: function( includesBaseTransformChange ) {
@@ -404,7 +393,6 @@ define( function( require ) {
     
     transformChange: function( args ) {
       sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' transformChange: ' + args.trail.toString() );
-      var layer = this;
       var node = args.node;
       var trail = args.trail;
       
@@ -415,9 +403,7 @@ define( function( require ) {
         var group = this.idGroupMap[trail.getUniqueId()];
         
         // apply the transform to the group
-        this.domChange( function() {
-          layer.applyTransform( node.getTransform(), group );
-        } );
+        this.applyTransform( node.getTransform(), group );
       } else {
         // ancestor node changed a transform. rebuild the base transform
         this.markBaseTransformDirty();
