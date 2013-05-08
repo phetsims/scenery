@@ -117,7 +117,9 @@ define( function( require ) {
       return this.lastNode().getInstanceFromTrail( this );
     },
     
-    getTransform: function() {
+    // from local to global
+    getMatrix: function() {
+      // TODO: performance: can we cache this ever? would need the scene to not really change in between
       // this matrix will be modified in place, so always start fresh
       var matrix = new Matrix3();
       
@@ -127,7 +129,31 @@ define( function( require ) {
       for ( var i = 0; i < length; i++ ) {
         matrix.multiplyMatrix( nodes[i]._transform.getMatrix() );
       }
-      return new Transform3( matrix );
+      return matrix;
+    },
+    
+    // from parent to global
+    getParentMatrix: function() {
+      // this matrix will be modified in place, so always start fresh
+      var matrix = new Matrix3();
+      
+      // from the root up
+      var nodes = this.nodes;
+      var length = nodes.length;
+      for ( var i = 0; i < length - 1; i++ ) {
+        matrix.multiplyMatrix( nodes[i]._transform.getMatrix() );
+      }
+      return matrix;
+    },
+    
+    // from local to global
+    getTransform: function() {
+      return new Transform3( this.getMatrix() );
+    },
+    
+    // from parent to global
+    getParentTransform: function() {
+      return new Transform3( this.getParentMatrix() );
     },
     
     addAncestor: function( node, index ) {
@@ -415,12 +441,12 @@ define( function( require ) {
     },
     
     localToGlobalPoint: function( point ) {
-      return this.getTransform().transformPosition2( point );
+      // TODO: performance: multiple timesVector2 calls up the chain is probably faster
+      return this.getMatrix().timesVector2( point );
     },
     
     localToGlobalBounds: function( bounds ) {
-      // TODO: performance: if only called once, is it faster to run through each transform rather than combining?
-      return this.getTransform().transformBounds2( bounds );
+      return bounds.transformed( this.getMatrix() );
     },
     
     globalToLocalPoint: function( point ) {
@@ -429,6 +455,23 @@ define( function( require ) {
     
     globalToLocalBounds: function( bounds ) {
       return this.getTransform().inverseBounds2( bounds );
+    },
+    
+    parentToGlobalPoint: function( point ) {
+      // TODO: performance: multiple timesVector2 calls up the chain is probably faster
+      return this.getParentMatrix().timesVector2( point );
+    },
+    
+    parentToGlobalBounds: function( bounds ) {
+      return bounds.transformed( this.getParentMatrix() );
+    },
+    
+    globalToParentPoint: function( point ) {
+      return this.getParentTransform().inversePosition2( point );
+    },
+    
+    globalToParentBounds: function( bounds ) {
+      return this.getParentTransform().inverseBounds2( bounds );
     },
     
     updateUniqueId: function() {

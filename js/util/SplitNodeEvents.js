@@ -14,16 +14,9 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   var eventNames = [
-    'markForInsertion',
-    'markForRemoval',
-    'stitch',
-    'dirtyBounds',
-    'markForLayerRefresh',
-    'transform',
     'selfBounds',
     'childBounds',
-    'bounds',
-    'boundsAccuracy'
+    'bounds'
   ];
   
   scenery.SplitNodeEvents = function( type ) {

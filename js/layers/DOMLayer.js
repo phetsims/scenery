@@ -148,53 +148,12 @@ define( function( require ) {
       this.div.parentNode.removeChild( this.div );
     },
     
-    markDirtyRegion: function( args ) {
-      var node = args.node;
-      var trail = args.trail;
-      
-      // if we have the trail that is marked as dirty, update it's DOM element
-      var dirtyElement = this.idElementMap[trail.getUniqueId()];
-      if ( dirtyElement ) {
-        node.updateDOMElement( dirtyElement );
-        node.updateCSSTransform( trail.getTransform(), dirtyElement );
-      }
-      
-      // TODO: faster way to iterate through
-      for ( var trailId in this.idTrailMap ) {
-        var subtrail = this.idTrailMap[trailId];
-        subtrail.reindex();
-        if ( subtrail.isExtensionOf( trail, true ) ) {
-          this.updateVisibility( subtrail, this.idElementMap[trailId] );
-        }
-      }
-    },
-    
     updateVisibility: function( trail, element ) {
       if ( trail.isVisible() ) {
         element.style.visibility = 'visible';
       } else {
         element.style.visibility = 'hidden';
       }
-    },
-    
-    transformChange: function( args ) {
-      var layer = this;
-      
-      var baseTrail = args.trail;
-      
-      // TODO: efficiency! this computes way more matrix transforms than needed
-      this.startPointer.eachTrailBetween( this.endPointer, function( trail ) {
-        // bail out quickly if the trails don't match
-        if ( !trail.isExtensionOf( baseTrail, true ) ) {
-          return;
-        }
-        
-        var node = trail.lastNode();
-        if ( node.isPainted() ) {
-          var element = layer.idElementMap[trail.getUniqueId()];
-          node.updateCSSTransform( trail.getTransform(), element );
-        }
-      } );
     },
     
     // TODO: consider a stack-based model for transforms?
@@ -258,7 +217,79 @@ define( function( require ) {
     
     getName: function() {
       return 'dom';
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * Events from Instances
+    *----------------------------------------------------------------------------*/
+    
+    notifyVisibilityChange: function( instance ) {
+      var trail = instance.trail;
+      
+      // TODO: performance: faster way to iterate through!
+      for ( var trailId in this.idTrailMap ) {
+        var subtrail = this.idTrailMap[trailId];
+        subtrail.reindex();
+        if ( subtrail.isExtensionOf( trail, true ) ) {
+          this.updateVisibility( subtrail, this.idElementMap[trailId] );
+        }
+      }
+    },
+    
+    notifyOpacityChange: function( instance ) {
+      // TODO: BROKEN: FIXME: DOM opacity is not handled yet, see issue #31: https://github.com/phetsims/scenery/issues/31
+    },
+    
+    // only a painted trail under this layer
+    notifyBeforeSelfChange: function( instance ) {
+      // no-op, we don't need paint changes
+    },
+    
+    notifyBeforeSubtreeChange: function( instance ) {
+      // no-op, we don't need paint changes
+    },
+    
+    // only a painted trail under this layer
+    notifyDirtySelfPaint: function( instance ) {
+      var node = instance.getNode();
+      var trail = instance.trail;
+      
+      // TODO: performance: store this in the Instance itself?
+      var dirtyElement = this.idElementMap[trail.getUniqueId()];
+      if ( dirtyElement ) {
+        node.updateDOMElement( dirtyElement );
+        
+        if ( node.domUpdateTransformOnRepaint ) {
+          node.updateCSSTransform( trail.getTransform(), dirtyElement );
+        }
+      }
+    },
+    
+    notifyTransformChange: function( instance ) {
+      var layer = this;
+      
+      var baseTrail = instance.trail;
+      
+      // TODO: performance: efficiency! this computes way more matrix transforms than needed
+      this.startPointer.eachTrailBetween( this.endPointer, function( trail ) {
+        // bail out quickly if the trails don't match
+        if ( !trail.isExtensionOf( baseTrail, true ) ) {
+          return;
+        }
+        
+        var node = trail.lastNode();
+        if ( node.isPainted() ) {
+          var element = layer.idElementMap[trail.getUniqueId()];
+          node.updateCSSTransform( trail.getTransform(), element );
+        }
+      } );
+    },
+    
+    // only a painted trail under this layer (for now)
+    notifyBoundsAccuracyChange: function( instance ) {
+      // no-op, we don't care about bounds
     }
+    
   } );
   
   return DOMLayer;

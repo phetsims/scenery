@@ -55,6 +55,7 @@ Tricky areas:
     Gradients / Patterns should not be changed after being passed to a node's fill/stroke, since the SVG def won't change, and we don't set up listeners
 
 Test:
+    Trail transforms
     Test issues (zero-bounds text, etc.)
     Unit tests for common node operations
     Test bounds from canvas accurate method vs computed bounds for Shapes and strokes
@@ -359,11 +360,20 @@ Performance:
                 Global changed bounds (if bounds change, both old place and the newest)
                 Bounds accuracy count
             SVG
+                (subtrail-self) update fragment, defs, group
             DOM
                 (self) Update DOM element on that type of change
                     (self) transform on Text, since it relies on any text/font changes
                 (subtrail) Transform (CSS)
                 (subtrail) Visibility / Opacity
+            Overall:
+                visibilityChanged
+                opacityChanged
+                beforeSelfChange (old self paint?)
+                beforeSubtreeChange (old paint)
+                transformChanged
+                paintChange (e.g. from validatePaint/validateBounds?)
+                boundsChange?
         Current notifications:
             marking and stitching (direct)
             markOldPaint:

@@ -109,9 +109,8 @@ define( function( require ) {
     this._childBoundsDirty = true;
     
     // dirty region handling
-    this._paintDirty = false;
-    this._childPaintDirty = false;
-    this._oldPaintMarked = false; // flag indicates the last rendered bounds of this node and all descendants are marked for a repaint already
+    this._paintDirty = false;      // whether the self paint is dirty
+    this._childPaintDirty = false; // whether the child paint is dirty (excluding self paint, just used for finding _paintDirty)
     
     // what type of renderer should be forced for this node.
     this._renderer = null;
@@ -142,13 +141,8 @@ define( function( require ) {
       node.invalidateBounds();
       node.invalidatePaint();
       
-      this.dispatchEvent( 'markForInsertion', {
-        parent: this,
-        child: node,
-        index: index
-      } );
-      
-      this.dispatchEvent( 'stitch', { match: false } );
+      this.markForInsertion( node, index );
+      this.notifyStitch( false );
     },
     
     addChild: function( node ) {
@@ -163,18 +157,14 @@ define( function( require ) {
       var indexOfParent = _.indexOf( node._parents, this );
       var indexOfChild = _.indexOf( this._children, node );
       
-      this.dispatchEvent( 'markForRemoval', {
-        parent: this,
-        child: node,
-        index: indexOfChild
-      } );
+      this.markForRemoval( node, indexOfChild );
       
       node._parents.splice( indexOfParent, 1 );
       this._children.splice( indexOfChild, 1 );
       
       this.invalidateBounds();
       
-      this.dispatchEvent( 'stitch', { match: false } );
+      this.notifyStitch( false );
     },
     
     removeAllChildren: function() {
@@ -255,9 +245,6 @@ define( function( require ) {
         // note: this should only be triggered if the bounds were actually changed, since we have a guard in place at invalidateSelf()
         this._selfBoundsDirty = false;
         
-        // if our self bounds changed, make sure to paint the area where our new bounds are
-        this.markDirtyRegion( this._selfBounds );
-        
         // TODO: consider changing to parameter object (that may be a problem for the GC overhead)
         this.fireEvent( 'selfBounds', this._selfBounds );
       }
@@ -313,14 +300,13 @@ define( function( require ) {
     validatePaint: function() {
       // if dirty, mark the region
       if ( this._paintDirty ) {
-        this.markDirtyRegion( this.parentToLocalBounds( this._bounds ) );
+        this.notifyDirtySelfPaint();
         this._paintDirty = false;
       }
       
       // clear flags and recurse
-      if ( this._childPaintDirty || this._oldPaintMarked ) {
+      if ( this._childPaintDirty ) {
         this._childPaintDirty = false;
-        this._oldPaintMarked = false;
         
         var children = this._children;
         var length = children.length;
@@ -377,7 +363,7 @@ define( function( require ) {
       assert && assert( newBounds.isEmpty() || newBounds.isFinite() , "Bounds must be empty or finite in invalidateSelf");
       
       // mark the old region to be repainted, regardless of whether the actual bounds change
-      this.markOldSelfPaint();
+      this.notifyBeforeSelfChange();
       
       // if these bounds are different than current self bounds
       if ( !this._selfBounds.equals( newBounds ) ) {
@@ -392,46 +378,23 @@ define( function( require ) {
       this.invalidatePaint();
     },
     
-    // bounds assumed to be in the local coordinate frame, below this node's transform
-    markDirtyRegion: function( bounds ) {
-      this.dispatchEvent( 'dirtyBounds', {
-        node: this,
-        bounds: bounds
-      } );
-    },
-    
     markOldSelfPaint: function() {
-      this.markOldPaint( true );
+      this.notifyBeforeSelfChange();
     },
     
     // should be called whenever something triggers changes for how this node is layered
     markLayerRefreshNeeded: function() {
-      this.dispatchEvent( 'markForLayerRefresh', {} );
-      
-      this.dispatchEvent( 'stitch', { match: true } );
+      this.markForLayerRefresh();
+      this.notifyStitch( true );
     },
     
     // marks the last-rendered bounds of this node and optionally all of its descendants as needing a repaint
     markOldPaint: function( justSelf ) {
-      function ancestorHasOldPaint( node ) {
-        if( node._oldPaintMarked ) {
-          return true;
-        }
-        return _.some( node._parents, function( parent ) {
-          return ancestorHasOldPaint( parent );
-        } );
-      }
-      
-      var alreadyMarked = ancestorHasOldPaint( this );
-      
-      // we want to not do this marking if possible multiple times for the same sub-tree, so we check flags first
-      if ( !alreadyMarked ) {
-        if ( justSelf ) {
-          this.markDirtyRegion( this._selfBounds );
-        } else {
-          this.markDirtyRegion( this.parentToLocalBounds( this._bounds ) );
-          this._oldPaintMarked = true; // don't mark this in self calls, because we don't use the full bounds
-        }
+      // TODO: rearchitecture
+      if ( justSelf ) {
+        this.notifyBeforeSelfChange();
+      } else {
+        this.notifyBeforeSubtreeChange();
       }
     },
     
@@ -800,15 +763,14 @@ define( function( require ) {
     // called before our transform is changed
     beforeTransformChange: function() {
       // mark our old bounds as dirty, so that any dirty region repainting will include not just our new position, but also our old position
-      this.markOldPaint( false );
+      this.notifyBeforeSubtreeChange();
     },
     
     // called after our transform is changed
     afterTransformChange: function() {
-      this.dispatchEvent( 'transform', {
-        node: this,
-        matrix: this._transform.getMatrix()
-      } );
+      this.notifyTransformChange();
+      
+      // TODO verify these are needed
       this.invalidateBounds();
       this.invalidatePaint();
     },
@@ -903,12 +865,12 @@ define( function( require ) {
     setVisible: function( visible ) {
       if ( visible !== this._visible ) {
         if ( this._visible ) {
-          this.markOldPaint( false );
+          this.notifyBeforeSubtreeChange();
         }
         
         this._visible = visible;
         
-        this.invalidatePaint();
+        this.notifyVisibilityChange();
       }
       return this;
     },
@@ -920,11 +882,11 @@ define( function( require ) {
     setOpacity: function( opacity ) {
       var clampedOpacity = clamp( opacity, 0, 1 );
       if ( clampedOpacity !== this._opacity ) {
-        this.markOldPaint( false );
+        this.notifyBeforeSubtreeChange();
         
         this._opacity = clampedOpacity;
         
-        this.invalidatePaint();
+        this.notifyOpacityChange();
       }
     },
     
@@ -1313,32 +1275,54 @@ define( function( require ) {
       this._instances.splice( index, 1 );
     },
     
-    notifyDirtyPaint: function( justSelf, boundsChange, isOld ) {
-      _.each( this._instances, function( instance ) { instance.layer.notifyDirtyPaint( instance, justSelf, boundsChange, isOld ); } );
+    notifyVisibilityChange: function() {
+      _.each( this._instances, function( instance ) { instance.notifyVisibilityChange(); } );
     },
     
-    notifyTransform: function() {
-      _.each( this._instances, function( instance ) { instance.layer.notifyTransform( instance ); } );
+    notifyOpacityChange: function() {
+      _.each( this._instances, function( instance ) { instance.notifyOpacityChange(); } );
     },
     
-    notifyBoundsAccuracy: function() {
-      _.each( this._instances, function( instance ) { instance.layer.notifyBoundsAccuracy( instance ); } );
+    notifyBeforeSelfChange: function() {
+      _.each( this._instances, function( instance ) { instance.notifyBeforeSelfChange(); } );
     },
     
-    notifyStitch: function() {
-      _.each( this._instances, function( instance ) { instance.layer.notifyStitch( instance ); } );
+    notifyBeforeSubtreeChange: function() {
+      _.each( this._instances, function( instance ) { instance.notifyBeforeSubtreeChange(); } );
+    },
+    
+    // called when the way just this node is painted is changed, generally from validatePaint
+    notifyDirtySelfPaint: function() {
+      _.each( this._instances, function( instance ) { instance.notifyDirtySelfPaint(); } );
+    },
+    
+    notifyDirtySubtreeBounds: function() {
+      _.each( this._instances, function( instance ) { instance.notifyDirtySubtreeBounds(); } );
+      throw new Error( 'unimplemented? remove! or keep, since it is a more general form of the visibility/opacity changes' );
+    },
+    
+    notifyTransformChange: function() {
+      _.each( this._instances, function( instance ) { instance.notifyTransformChange(); } );
+    },
+    
+    notifyBoundsAccuracyChange: function() {
+      _.each( this._instances, function( instance ) { instance.notifyBoundsAccuracyChange(); } );
+    },
+    
+    notifyStitch: function( match ) {
+      _.each( this._instances, function( instance ) { instance.notifyStitch( match ); } );
     },
     
     markForLayerRefresh: function() {
-      _.each( this._instances, function( instance ) { instance.layer.markForLayerRefresh( instance ); } );
+      _.each( this._instances, function( instance ) { instance.markForLayerRefresh(); } );
     },
     
     markForInsertion: function( child, index ) {
-      _.each( this._instances, function( instance ) { instance.layer.markForInsertion( instance, child, index ); } );
+      _.each( this._instances, function( instance ) { instance.markForInsertion( child, index ); } );
     },
     
     markForRemoval: function( child, index ) {
-      _.each( this._instances, function( instance ) { instance.layer.markForRemoval( instance, child, index ); } );
+      _.each( this._instances, function( instance ) { instance.markForRemoval( child, index ); } );
     },
     
     /*---------------------------------------------------------------------------*
