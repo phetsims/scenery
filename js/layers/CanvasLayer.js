@@ -437,6 +437,7 @@ define( function( require ) {
     *----------------------------------------------------------------------------*/
     
     notifyVisibilityChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyVisibilityChange: ' + instance.trail.toString() );
       // old paint taken care of in notifyBeforeSubtreeChange()
       
       if ( instance.isVisible() ) {
@@ -445,6 +446,7 @@ define( function( require ) {
     },
     
     notifyOpacityChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyOpacityChange: ' + instance.trail.toString() );
       // old paint taken care of in notifyBeforeSubtreeChange()
       
       this.canvasMarkSubtree( instance );
@@ -452,25 +454,29 @@ define( function( require ) {
     
     // only a painted trail under this layer
     notifyBeforeSelfChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyBeforeSelfChange: ' + instance.trail.toString() );
       this.canvasMarkSelf( instance );
     },
     
     notifyBeforeSubtreeChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyBeforeSubtreeChange: ' + instance.trail.toString() );
       this.canvasMarkSubtree( instance );
     },
     
     // only a painted trail under this layer
     notifyDirtySelfPaint: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyDirtySelfPaint: ' + instance.trail.toString() );
       this.canvasMarkSelf( instance );
     },
     
     notifyTransformChange: function( instance ) {
+      // sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyTransformChange: ' + instance.trail.toString() );
       // no-op, taken care of by old paint
     },
     
     // only a painted trail under this layer (for now)
     notifyBoundsAccuracyChange: function( instance ) {
-      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyBoundsAccuracyChange' );
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyBoundsAccuracyChange: ' + instance.trail.toString() );
       
       if ( instance.node.boundsInaccurate ) {
         this.boundlessCount++;

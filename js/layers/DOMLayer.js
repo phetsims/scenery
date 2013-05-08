@@ -224,6 +224,7 @@ define( function( require ) {
     *----------------------------------------------------------------------------*/
     
     notifyVisibilityChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'DOMLayer #' + this.id + ' notifyVisibilityChange: ' + instance.trail.toString() );
       var trail = instance.trail;
       
       // TODO: performance: faster way to iterate through!
@@ -237,20 +238,24 @@ define( function( require ) {
     },
     
     notifyOpacityChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'DOMLayer #' + this.id + ' notifyOpacityChange: ' + instance.trail.toString() );
       // TODO: BROKEN: FIXME: DOM opacity is not handled yet, see issue #31: https://github.com/phetsims/scenery/issues/31
     },
     
     // only a painted trail under this layer
     notifyBeforeSelfChange: function( instance ) {
+      // sceneryLayerLog && sceneryLayerLog( 'DOMLayer #' + this.id + ' notifyBeforeSelfChange: ' + instance.trail.toString() );
       // no-op, we don't need paint changes
     },
     
     notifyBeforeSubtreeChange: function( instance ) {
+      // sceneryLayerLog && sceneryLayerLog( 'DOMLayer #' + this.id + ' notifyBeforeSubtreeChange: ' + instance.trail.toString() );
       // no-op, we don't need paint changes
     },
     
     // only a painted trail under this layer
     notifyDirtySelfPaint: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'DOMLayer #' + this.id + ' notifyDirtySelfPaint: ' + instance.trail.toString() );
       var node = instance.getNode();
       var trail = instance.trail;
       
@@ -266,6 +271,7 @@ define( function( require ) {
     },
     
     notifyTransformChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'DOMLayer #' + this.id + ' notifyTransformChange: ' + instance.trail.toString() );
       var layer = this;
       
       var baseTrail = instance.trail;
@@ -287,6 +293,7 @@ define( function( require ) {
     
     // only a painted trail under this layer (for now)
     notifyBoundsAccuracyChange: function( instance ) {
+      // sceneryLayerLog && sceneryLayerLog( 'DOMLayer #' + this.id + ' notifyBoundsAccuracyChange: ' + instance.trail.toString() );
       // no-op, we don't care about bounds
     }
     

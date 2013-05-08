@@ -489,6 +489,7 @@ define( function( require ) {
     *----------------------------------------------------------------------------*/
     
     notifyVisibilityChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' notifyVisibilityChange: ' + instance.trail.toString() );
       var group = this.getGroupFromInstance( instance );
       if ( group ) {
         this.updateGroupVisibility( instance.getNode(), group );
@@ -496,6 +497,7 @@ define( function( require ) {
     },
     
     notifyOpacityChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' notifyOpacityChange: ' + instance.trail.toString() );
       var group = this.getGroupFromInstance( instance );
       if ( group ) {
         this.updateGroupOpacity( instance.getNode(), group );
@@ -504,15 +506,18 @@ define( function( require ) {
     
     // only a painted trail under this layer
     notifyBeforeSelfChange: function( instance ) {
+      // sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' notifyBeforeSelfChange: ' + instance.trail.toString() );
       // no-op, we don't need paint changes
     },
     
     notifyBeforeSubtreeChange: function( instance ) {
+      // sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' notifyBeforeSubtreeChange: ' + instance.trail.toString() );
       // no-op, we don't need paint changes
     },
     
     // only a painted trail under this layer
     notifyDirtySelfPaint: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' notifyDirtySelfPaint: ' + instance.trail.toString() );
       var fragment = this.getFragmentFromInstance( instance );
       
       if ( fragment ) {
@@ -550,6 +555,7 @@ define( function( require ) {
     
     // only a painted trail under this layer (for now)
     notifyBoundsAccuracyChange: function( instance ) {
+      // sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' notifyBoundsAccuracyChange: ' + instance.trail.toString() );
       // no-op, we don't care about bounds
     }
     
