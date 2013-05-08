@@ -139,7 +139,6 @@ define( function( require ) {
       this._children.splice( index, 0, node );
       
       node.invalidateBounds();
-      node.invalidatePaint();
       
       this.markForInsertion( node, index );
       this.notifyStitch( false );
@@ -300,6 +299,7 @@ define( function( require ) {
     validatePaint: function() {
       // if dirty, mark the region
       if ( this._paintDirty ) {
+        assert && assert( this.isPainted(), 'Only painted nodes can have dirty paint' );
         this.notifyDirtySelfPaint();
         this._paintDirty = false;
       }
@@ -773,7 +773,6 @@ define( function( require ) {
       
       // TODO verify these are needed
       this.invalidateBounds();
-      this.invalidatePaint();
     },
     
     // the left bound of this node, in the parent coordinate frame
@@ -1252,6 +1251,7 @@ define( function( require ) {
     },
     
     addInstance: function( instance ) {
+      assert && assert( instance.getNode() === this, 'Must be an instance of this Node' );
       assert && assert( !_.find( this._instances, function( other ) { return instance.equals( other ); } ), 'Cannot add duplicates of an instance to a Node' );
       this._instances.push( instance );
     },
@@ -1295,11 +1295,6 @@ define( function( require ) {
     // called when the way just this node is painted is changed, generally from validatePaint
     notifyDirtySelfPaint: function() {
       _.each( this._instances, function( instance ) { instance.notifyDirtySelfPaint(); } );
-    },
-    
-    notifyDirtySubtreeBounds: function() {
-      _.each( this._instances, function( instance ) { instance.notifyDirtySubtreeBounds(); } );
-      throw new Error( 'unimplemented? remove! or keep, since it is a more general form of the visibility/opacity changes' );
     },
     
     notifyTransformChange: function() {

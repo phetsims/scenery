@@ -18,6 +18,8 @@ define( function( require ) {
     this.trail = trail; // trail may be assumed to be stale, for performance reasons
     this.layer = layer;
     
+    assert && assert( trail.lastNode().isPainted() === ( layer !== null ), 'Has a layer iff is painted' );
+    
     // TODO: SVG layer might want to put data (group/fragment) references here (indexed by layer ID)
     this.data = {};
     

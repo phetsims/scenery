@@ -440,7 +440,7 @@ define( function( require ) {
       sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyVisibilityChange: ' + instance.trail.toString() );
       // old paint taken care of in notifyBeforeSubtreeChange()
       
-      if ( instance.isVisible() ) {
+      if ( instance.trail.isVisible() ) {
         this.canvasMarkSubtree( instance );
       }
     },
