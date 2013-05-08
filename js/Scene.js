@@ -85,6 +85,11 @@ define( function( require ) {
     this.oldTrailLayerMap = {};     // stores references to old layers for removed trails which may be needed for stitching. cleared after each stitching
     this.layerChangeIntervals = []; // array of {TrailInterval}s indicating what parts need to be stitched together. cleared after each stitching
     
+    // for tracking inserted nodes so we can build up the instances properly
+    this.insertionInstances = [];
+    this.insertionIndex = -1;
+    this.insertionChild = null;
+    
     this.lastCursor = null;
     this.defaultCursor = $main.css( 'cursor' );
     
@@ -138,9 +143,6 @@ define( function( require ) {
     assert && assert( trail.rootNode() === this, 'Trail does not start with the Scene' );
     sceneryLayerLog && sceneryLayerLog( '  addition of trail ' + trail.toString() + ' from layer ' + layer.getId() );
     
-    // TODO: flesh out, add parent
-    trail.lastNode().addInstance( new scenery.Instance( trail, layer ) );
-    
     this.trailLayerMap[trail.getUniqueId()] = layer;
     layer.addNodeFromTrail( trail );
   };
@@ -158,9 +160,6 @@ define( function( require ) {
   
   Scene.prototype.removeTrailFromLayer = function( trail, layer ) {
     sceneryLayerLog && sceneryLayerLog( '  removal of trail ' + trail.toString() + ' from layer ' + layer.getId() );
-    
-    // TODO: flesh out (and DO NOT RELY on getInstance(), it's slow)
-    trail.lastNode().removeInstance( trail.getInstance() );
     
     // we don't want to leak memory, so since we don't know if this trail will continue to exist, ditch the reference
     delete this.trailLayerMap[trail.getUniqueId()];
@@ -392,6 +391,37 @@ define( function( require ) {
     // set the layers' elements' z-indices, and reindex their trails so they are in a consistent state
     // TODO: performance: don't reindex layers if no layers were added or removed?
     this.reindexLayers();
+    
+    sceneryLayerLog && sceneryLayerLog( 'total insertion instance points: ' + this.insertionInstances.length );
+    _.each( this.insertionInstances, function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'inserting instances onto ' + instance.toString() );
+      var freshTrail = instance.trail.copy().addDescendant( scene.insertionChild );
+      var freshLayer = stitchData.newLayerMap[freshTrail.getUniqueId()];
+      var freshInstance = new scenery.Instance( freshTrail, freshLayer ? freshLayer : null );
+      freshInstance.parent = instance;
+      instance.insertInstance( scene.insertionIndex, freshInstance );
+      freshInstance.getNode().addInstance( freshInstance );
+      sceneryLayerLog && sceneryLayerLog( 'inserting base ' + freshInstance.toString() );
+      
+      // constructs all sub-trees for the specified instance
+      function buildInstances( instance ) {
+        _.each( instance.getNode().children, function( child, index ) {
+          // TODO: performance: track instances instead of trails for all of stitching?
+          var trail = instance.trail.copy().addDescendant( child );
+          var layer = stitchData.newLayerMap[trail.getUniqueId()];
+          var nextInstance = new scenery.Instance( trail, layer ? layer : null );
+          nextInstance.parent = instance;
+          instance.addInstance( nextInstance );
+          nextInstance.getNode().addInstance( nextInstance );
+          sceneryLayerLog && sceneryLayerLog( 'appending ' + nextInstance.toString() + ' to ' + instance.toString() );
+          buildInstances( nextInstance );
+        } );
+      }
+      buildInstances( freshInstance );
+    } );
+    this.insertionInstances.length = 0;
+    this.insertionIndex = -1;
+    this.insertionChild = null;
     
     // add/remove trails from their necessary layers
     _.each( affectedTrails, function( trail ) {
@@ -860,6 +890,12 @@ define( function( require ) {
     var affectedTrail = instance.trail.copy().addDescendant( child );
     sceneryLayerLog && sceneryLayerLog( 'Scene: marking insertion: ' + affectedTrail.toString() );
     this.markInterval( affectedTrail );
+    
+    assert && assert( this.insertionIndex === index || !this.insertionInstances.length, 'Insertion indices must match' );
+    assert && assert( this.insertionChild === child || !this.insertionInstances.length, 'Insertion children must match' );
+    this.insertionInstances.push( instance );
+    this.insertionChild = child;
+    this.insertionIndex = index;  
   };
   
   Scene.prototype.markSceneForRemoval = function( instance, child, index ) {
@@ -868,10 +904,24 @@ define( function( require ) {
     sceneryLayerLog && sceneryLayerLog( 'Scene: marking removal: ' + affectedTrail.toString() );
     this.markInterval( affectedTrail );
     
+    // remove the necessary instances
+    var toRemove = [ instance.children[index] ];
+    instance.removeInstance( index );
+    while ( toRemove.length ) {
+      var item = toRemove.pop();
+      assert && assert( item, 'item instance should always exist' );
+      
+      // add its children
+      Array.prototype.push.apply( toRemove, item.children );
+      
+      item.dispose(); // removes it from the node and sets it up for easy GC
+    }
+    
     var scene = this;
     // signal to the relevant layers to remove the specified trail while the trail is still valid.
     // waiting until after the removal takes place would require more complicated code to properly handle the trails
     affectedTrail.eachTrailUnder( function( trail ) {
+      // TODO: performance: we can put this in the above simple loop for instances
       if ( trail.isPainted() ) {
         var trailId = trail.getUniqueId();
         var layer = scene.layerLookup( trail );

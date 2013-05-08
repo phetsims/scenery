@@ -339,6 +339,7 @@ define( function( require ) {
     
     // mark the paint of this node as invalid, so its new region will be painted
     invalidatePaint: function() {
+      assert && assert( this.isPainted(), 'Can only call invalidatePaint on a painted node' );
       this._paintDirty = true;
       
       // and set flags for all ancestors

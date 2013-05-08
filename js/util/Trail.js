@@ -392,6 +392,7 @@ define( function( require ) {
     
     // calls callback( trail ) for this trail, and each descendant trail
     eachTrailUnder: function( callback ) {
+      // TODO: performance: should be optimized to be much faster, since we don't have to deal with the before/after
       new scenery.TrailPointer( this, true ).eachTrailBetween( new scenery.TrailPointer( this, false ), callback );
     },
     

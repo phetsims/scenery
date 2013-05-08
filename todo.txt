@@ -326,6 +326,7 @@ Performance:
             Matrix3.inverted
             Matrix3.getSVGTransform
     Event Abstraction:
+        *** markSceneForRemoval speedups significant?
         NOTE: quick check to see if changes that 'affect rest of tree' affect other layers, look at isAfter node vs end?
         NOTE: Node wouldn't store all affected layers (for each trail reference), only first and last
         NOTE: scene/layer dispose has to be accurate and enforced if we store info on nodes. check in layer audit?

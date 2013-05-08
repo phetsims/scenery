@@ -50,8 +50,30 @@ define( function( require ) {
       this.layer = newLayer;
     },
     
+    addInstance: function( instance ) {
+      assert && assert( instance, 'Instance.addInstance cannot have falsy parameter' );
+      this.children.push( instance );
+    },
+    
+    insertInstance: function( index, instance ) {
+      assert && assert( instance, 'Instance.insert cannot have falsy instance parameter' );
+      assert && assert( index >= 0 && index <= this.children.length, 'Instance.insert has bad index ' + index + ' for length ' + this.children.length );
+      this.children.splice( index, 0, instance );
+    },
+    
+    removeInstance: function( index ) {
+      assert && assert( typeof index === 'number' );
+      this.children.splice( index, 1 );
+    },
+    
     reindex: function() {
       this.trail.reindex();
+    },
+    
+    dispose: function() {
+      this.parent = null;
+      this.children.length = 0;
+      this.getNode().removeInstance( this );
     },
     
     equals: function( other ) {
@@ -61,6 +83,14 @@ define( function( require ) {
     
     getLayerString: function() {
       return this.layer ? ( this.layer.getName() + '#' + this.layer.getId() ) : '-';
+    },
+    
+    getTrailString: function() {
+      return this.trail.toString();
+    },
+    
+    toString: function() {
+      return '{' + this.getTrailString() + ', ' + this.getLayerString() + '}';
     },
     
     getAffectedLayers: function() {
