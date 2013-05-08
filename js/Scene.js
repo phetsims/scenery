@@ -750,7 +750,8 @@ define( function( require ) {
     
     var n = this.layers.length;
     if ( n === 0 ) {
-      throw new Error( 'no layers in the scene' );
+      assert && assert( !trail.lastNode().isPainted(), 'There should be at least one layer for a painted trail' );
+      return [];
     }
     
     assert && assert( trail.areIndicesValid() );
