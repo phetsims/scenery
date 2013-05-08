@@ -179,11 +179,15 @@ define( function( require ) {
     
     markForInsertion: function( child, index ) {
       sceneryEventLog && sceneryEventLog( 'markForInsertion: ' + this.trail.toString() + ' child:' + child.id + ', index: ' + index + ', ' + this.getLayerString() );
+      
+      this.reindex();
       this.getScene().markSceneForInsertion( this, child, index );
     },
     
     markForRemoval: function( child, index ) {
       sceneryEventLog && sceneryEventLog( 'markForRemoval: ' + this.trail.toString() + ' child:' + child.id + ', index: ' + index + ', ' + this.getLayerString() );
+      
+      this.reindex();
       this.getScene().markSceneForRemoval( this, child, index );
     }
   };
