@@ -1268,6 +1268,22 @@ define( function( require ) {
         } );
       } );
     }
+    
+    input.addListener( 'keyup', function( domEvent ) {
+      input.keyUp( domEvent );
+    } );
+    input.addListener( 'keydown', function( domEvent ) {
+      input.keyDown( domEvent );
+    } );
+    input.addListener( 'keypress', function( domEvent ) {
+      input.keyPress( domEvent );
+    } );
+  };
+  
+  Scene.prototype.getTrailFromKeyboardFocus = function() {
+    // return the root (scene) trail by default
+    // TODO: fill in with actual keyboard focus
+    return new scenery.Trail( this );
   };
   
   Scene.prototype.fireBatchedEvents = function() {

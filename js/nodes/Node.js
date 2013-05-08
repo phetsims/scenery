@@ -237,6 +237,10 @@ define( function( require ) {
       } );
     },
     
+    addPeer: function( stringOrElement, options ) {
+      throw new Error( 'addPeer unimplemented' );
+    },
+    
     // ensure that cached bounds stored on this node (and all children) are accurate
     validateBounds: function() {
       var that = this;

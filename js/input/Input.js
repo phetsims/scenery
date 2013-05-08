@@ -67,6 +67,15 @@ define( function( require ) {
       return _.find( this.pointers, function( pointer ) { return pointer.id === id; } );
     },
     
+    findKeyByEvent: function( event ) {
+      assert && assert( event.key, 'Assumes the KeyboardEvent has a key property' );
+      var result = _.find( this.pointers, function( pointer ) {
+        return pointer.key === event.key && pointer.event.location === event.location;
+      } );
+      // assert && assert( result, 'No key found for the combination of key:' + event.key + ' and location:' + event.location );
+      return result;
+    },
+    
     mouseDown: function( point, event ) {
       this.mouse.down( point, event );
       this.downEvent( this.mouse, event );
@@ -90,6 +99,28 @@ define( function( require ) {
     mouseOut: function( point, event ) {
       this.mouse.out( point, event );
       // TODO: how to handle mouse-out
+    },
+    
+    keyDown: function( event ) {
+      var key = new scenery.Key( event );
+      this.addPointer( key );
+      
+      var trail = this.scene.getTrailFromKeyboardFocus();
+      this.dispatchEvent( trail, 'keyDown', key, event, true );
+    },
+    
+    keyUp: function( event ) {
+      var key = this.findKeyByEvent( event );
+      if ( key ) {
+        this.removePointer( key );
+        
+        var trail = this.scene.getTrailFromKeyboardFocus();
+        this.dispatchEvent( trail, 'keyUp', key, event, true );
+      }
+    },
+    
+    keyPress: function( event ) {
+      // NOTE: do we even need keyPress?
     },
     
     // called for each touch point

@@ -8,6 +8,7 @@
 
 define( function( require ) {
   
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   
   var Pointer = require( 'SCENERY/input/Pointer' ); // extends Pointer
@@ -24,8 +25,7 @@ define( function( require ) {
   };
   var Pen = scenery.Pen;
   
-  Pen.prototype = _.extend( {}, Pointer.prototype, {
-    constructor: Pen,
+  inherit( Pen, Pointer, {
     
     move: function( point, event ) {
       this.point = point;
