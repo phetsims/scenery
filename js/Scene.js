@@ -1092,6 +1092,8 @@ define( function( require ) {
         
         assert && assert( scene.trailLayerMap[trail.getUniqueId()], 'scene must map every painted trail to a layer' );
       }
+      
+      assert && assert( trail.getInstance() && trail.getInstance().trail.equals( trail ), 'every trail must have a single corresponding instance' );
     } );
     
     var layerPaintedCount = 0;
