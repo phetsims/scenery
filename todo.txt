@@ -112,6 +112,7 @@ General:
     RenderState - consider stack-based transforms
 
 Code:
+    var Path = scenery.Path = ....
     ** _supportedRenderers => supportedRenderers? (pushes on this array if shared in the prototype could be bad!)
         getSupportedRenderers()? - fixes much of what we're doing
     lib/phet/ instead of common/, lib/ instead of contrib/
@@ -295,7 +296,7 @@ Node:
     Canvas: masking with sub-canvas rendering using globalCompositeOperation. CSG should be possible, and hit tests should be better. Bounds might be harder
 
 Text:
-    *** Strip out textBaseline and textAlign, they are not needed
+    Text bounds option to store height per font and update width with measureText
     Unit tests
     Handling multi-line strings
     WebGL options
