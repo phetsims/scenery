@@ -97,6 +97,7 @@ define( function( require ) {
     
     getAffectedLayers: function() {
       // TODO: optimize this using pre-recorded versions?
+      this.reindex();
       return this.getScene().affectedLayers( this.trail );
     },
     
@@ -105,13 +106,17 @@ define( function( require ) {
     *----------------------------------------------------------------------------*/
     
     notifyVisibilityChange: function() {
+      var thisInstance = this;
       sceneryEventLog && sceneryEventLog( 'notifyVisibilityChange: ' + this.trail.toString() + ', ' + this.getLayerString() );
-      this.layer.notifyVisibilityChange( this );
+      
+      _.each( this.getAffectedLayers(), function( layer ) { layer.notifyVisibilityChange( thisInstance ); } );
     },
     
     notifyOpacityChange: function() {
+      var thisInstance = this;
       sceneryEventLog && sceneryEventLog( 'notifyOpacityChange: ' + this.trail.toString() + ', ' + this.getLayerString() );
-      this.layer.notifyOpacityChange( this );
+      
+      _.each( this.getAffectedLayers(), function( layer ) { layer.notifyOpacityChange( thisInstance ); } );
     },
     
     notifyBeforeSelfChange: function() {
