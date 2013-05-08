@@ -406,6 +406,7 @@ define( function( require ) {
     
     // NOTE: for performance, we will mutate the bounds passed in (they are almost assuredly from the local or parent bounds functions)
     canvasMarkGlobalBounds: function( globalBounds ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' canvasMarkGlobalBounds: ' + globalBounds.toString() );
       assert && assert( globalBounds.isEmpty() || globalBounds.isFinite(), 'Infinite (non-empty) dirty bounds passed to canvasMarkGlobalBounds' );
       
       // TODO: for performance, consider more than just a single dirty bounding box
@@ -413,10 +414,12 @@ define( function( require ) {
     },
     
     canvasMarkLocalBounds: function( localBounds, trail ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' canvasMarkLocalBounds: ' + localBounds.toString() + ' on ' + trail.toString() );
       this.canvasMarkGlobalBounds( trail.localToGlobalBounds( localBounds ) );
     },
     
     canvasMarkParentBounds: function( parentBounds, trail ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' canvasMarkParentBounds: ' + parentBounds.toString() + ' on ' + trail.toString() );
       this.canvasMarkGlobalBounds( trail.parentToGlobalBounds( parentBounds ) );
     },
     
@@ -469,9 +472,15 @@ define( function( require ) {
       this.canvasMarkSelf( instance );
     },
     
+    notifyDirtySubtreePaint: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyDirtySubtreePaint: ' + instance.trail.toString() );
+      this.canvasMarkSubtree( instance );
+    },
+    
     notifyTransformChange: function( instance ) {
       // sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyTransformChange: ' + instance.trail.toString() );
-      // no-op, taken care of by old paint
+      // TODO: how best to mark this so if there are multiple 'movements' we don't get called more than needed?
+      // this.canvasMarkSubtree( instance );
     },
     
     // only a painted trail under this layer (for now)

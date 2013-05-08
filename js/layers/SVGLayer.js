@@ -534,6 +534,10 @@ define( function( require ) {
       }
     },
     
+    notifyDirtySubtreePaint: function( instance ) {
+      // no-op, post-transform isn't needed by SVG
+    },
+    
     notifyTransformChange: function( instance ) {
       sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' notifyTransformChange: ' + instance.trail.toString() );
       var node = instance.node;

@@ -270,6 +270,10 @@ define( function( require ) {
       }
     },
     
+    notifyDirtySubtreePaint: function( instance ) {
+      // no-op, post-transform isn't needed by DOM
+    },
+    
     notifyTransformChange: function( instance ) {
       sceneryLayerLog && sceneryLayerLog( 'DOMLayer #' + this.id + ' notifyTransformChange: ' + instance.trail.toString() );
       var layer = this;

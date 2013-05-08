@@ -140,6 +140,14 @@ define( function( require ) {
       this.layer.notifyDirtySelfPaint( this );
     },
     
+    // TODO: consider special post-transform type?
+    notifyDirtySubtreePaint: function() {
+      var thisInstance = this;
+      sceneryEventLog && sceneryEventLog( 'notifyDirtySubtreePaint: ' + this.trail.toString() + ', ' + this.getLayerString() );
+      
+      _.each( this.getAffectedLayers(), function( layer ) { layer.notifyDirtySubtreePaint( thisInstance ); } );
+    },
+    
     notifyDirtySubtreeBounds: function() {
       var thisInstance = this;
       sceneryEventLog && sceneryEventLog( 'notifyDirtySubtreeBounds: ' + this.trail.toString() + ', ' + this.getLayerString() );

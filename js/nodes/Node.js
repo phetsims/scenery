@@ -109,8 +109,9 @@ define( function( require ) {
     this._childBoundsDirty = true;
     
     // dirty region handling
-    this._paintDirty = false;      // whether the self paint is dirty
-    this._childPaintDirty = false; // whether the child paint is dirty (excluding self paint, just used for finding _paintDirty)
+    this._paintDirty = false;        // whether the self paint is dirty (just this node, none of its children)
+    this._subtreePaintDirty = false; // whether the subtree paint is dirty (this node and its children, usually after a transform)
+    this._childPaintDirty = false;   // whether the child paint is dirty (excluding self paint, just used for finding _paintDirty, _selfPaintDirty)
     
     // what type of renderer should be forced for this node.
     this._renderer = null;
@@ -297,11 +298,18 @@ define( function( require ) {
     },
     
     validatePaint: function() {
-      // if dirty, mark the region
       if ( this._paintDirty ) {
-        assert && assert( this.isPainted(), 'Only painted nodes can have dirty paint' );
-        this.notifyDirtySelfPaint();
+        assert && assert( this.isPainted(), 'Only painted nodes can have self dirty paint' );
+        if ( !this._subtreePaintDirty ) {
+          // if the subtree is clean, just notify the self (only will hit one layer, instead of possibly multiple ones)
+          this.notifyDirtySelfPaint();
+        }
         this._paintDirty = false;
+      }
+      
+      if ( this._subtreePaintDirty ) {
+        this.notifyDirtySubtreePaint();
+        this._subtreePaintDirty = false;
       }
       
       // clear flags and recurse
@@ -341,6 +349,15 @@ define( function( require ) {
     invalidatePaint: function() {
       assert && assert( this.isPainted(), 'Can only call invalidatePaint on a painted node' );
       this._paintDirty = true;
+      
+      // and set flags for all ancestors
+      _.each( this._parents, function( parent ) {
+        parent.invalidateChildPaint();
+      } );
+    },
+    
+    invalidateSubtreePaint: function() {
+      this._subtreePaintDirty = true;
       
       // and set flags for all ancestors
       _.each( this._parents, function( parent ) {
@@ -771,8 +788,8 @@ define( function( require ) {
     afterTransformChange: function() {
       this.notifyTransformChange();
       
-      // TODO verify these are needed
       this.invalidateBounds();
+      this.invalidateSubtreePaint();
     },
     
     // the left bound of this node, in the parent coordinate frame
@@ -1292,9 +1309,12 @@ define( function( require ) {
       _.each( this._instances, function( instance ) { instance.notifyBeforeSubtreeChange(); } );
     },
     
-    // called when the way just this node is painted is changed, generally from validatePaint
     notifyDirtySelfPaint: function() {
       _.each( this._instances, function( instance ) { instance.notifyDirtySelfPaint(); } );
+    },
+    
+    notifyDirtySubtreePaint: function() {
+      _.each( this._instances, function( instance ) { instance.notifyDirtySubtreePaint(); } );
     },
     
     notifyTransformChange: function() {
