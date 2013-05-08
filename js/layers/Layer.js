@@ -189,10 +189,6 @@ define( function( require ) {
       this.endBoundary.reindex();
     },
     
-    boundsAccuracy: function( args ) {
-      // nothing needed in the default case, only Canvas-based layers should care
-    },
-    
     pushClipShape: function( shape ) {
       throw new Error( 'Layer.pushClipShape unimplemented' );
     },
@@ -209,16 +205,6 @@ define( function( require ) {
       this.baseNode.removeEventListener( this.baseNodeListener );
     },
     
-    // args should contain node, bounds (local bounds), transform, trail
-    markDirtyRegion: function( args ) {
-      throw new Error( 'Layer.markDirtyRegion unimplemented' );
-    },
-    
-    // args should contain node, type (append, prepend, set), matrix, transform, trail
-    transformChange: function( args ) {
-      throw new Error( 'Layer.transformChange unimplemented' );
-    },
-    
     getName: function() {
       throw new Error( 'Layer.getName unimplemented' );
     },
@@ -226,7 +212,38 @@ define( function( require ) {
     // called when the base node's "internal" (self or child) bounds change, but not when it is just from the base node's own transform changing
     baseNodeInternalBoundsChange: function() {
       // no error, many times this doesn't need to be handled
-    }
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * Events from Instances
+    *----------------------------------------------------------------------------*/
+    
+    // notifyVisibilityChange: function( instance ) {
+    // },
+    
+    // notifyOpacityChange: function( instance ) {
+    // },
+    
+    // // only a painted trail under this layer
+    // notifyBeforeSelfChange: function( instance ) {
+    // },
+    
+    // notifyBeforeSubtreeChange: function( instance ) {
+    // },
+    
+    // // only a painted trail under this layer
+    // notifyDirtySelfPaint: function( instance ) {
+    // },
+    
+    // notifyDirtySubtreeBounds: function( instance ) {
+    // },
+    
+    // notifyTransformChange: function( instance ) {
+    // },
+    
+    // // only a painted trail under this layer (for now)
+    // notifyBoundsAccuracyChange: function( instance ) {
+    // }
   };
   
   Layer.cssTransformPadding = 3;

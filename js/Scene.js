@@ -61,6 +61,9 @@ define( function( require ) {
     // add a self reference to aid in debugging. this generally shouldn't lead to a memory leak
     this.main.scene = this;
     
+    // add a reference to the API for debugging
+    this.scenery = scenery;
+    
     // defaults
     options = _.extend( {
       allowSceneOverflow: false,
@@ -87,6 +90,11 @@ define( function( require ) {
     this.oldTrailLayerMap = {};     // stores references to old layers for removed trails which may be needed for stitching. cleared after each stitching
     this.layerChangeIntervals = []; // array of {TrailInterval}s indicating what parts need to be stitched together. cleared after each stitching
     
+    // for tracking inserted nodes so we can build up the instances properly
+    this.insertionInstances = [];
+    this.insertionIndex = -1;
+    this.insertionChild = null;
+    
     this.lastCursor = null;
     this.defaultCursor = $main.css( 'cursor' );
     
@@ -104,99 +112,6 @@ define( function( require ) {
     this.preferredSceneLayerType = options.preferredSceneLayerType;
     
     applyCSSHacks( $main, options );
-    
-    // note, arguments to the functions are mutable. don't destroy them
-    this.sceneEventListener = {
-      markForLayerRefresh: function( args ) { // contains trail
-        sceneryLayerLog && sceneryLayerLog( 'Scene: marking layer refresh: ' + args.trail.toString() );
-        scene.markInterval( args.trail );
-      },
-      
-      markForInsertion: function( args ) { // contains parent, child, index, trail
-        var affectedTrail = args.trail.copy().addDescendant( args.child );
-        sceneryLayerLog && sceneryLayerLog( 'Scene: marking insertion: ' + affectedTrail.toString() );
-        scene.markInterval( affectedTrail );
-      },
-      
-      markForRemoval: function( args ) { // contains parent, child, index, trail
-        // mark the interval
-        var affectedTrail = args.trail.copy().addDescendant( args.child );
-        sceneryLayerLog && sceneryLayerLog( 'Scene: marking removal: ' + affectedTrail.toString() );
-        scene.markInterval( affectedTrail );
-        
-        // signal to the relevant layers to remove the specified trail while the trail is still valid.
-        // waiting until after the removal takes place would require more complicated code to properly handle the trails
-        affectedTrail.eachTrailUnder( function( trail ) {
-          if ( trail.isPainted() ) {
-            var trailId = trail.getUniqueId();
-            var layer = scene.layerLookup( trail );
-            
-            // store the trail's layer reference in the old map that will be cleared after stitching. we need a reference to properly handle situations
-            scene.oldTrailLayerMap[trailId] = layer;
-            
-            // and remove the trail now. TODO: can we do this removal later, since all oldTrailLayerMap nodes should essentially be removed?
-            scene.removeTrailFromLayer( trail, layer );
-          }
-        } );
-      },
-      
-      stitch: function( args ) { // contains match {Boolean}
-        sceneryLayerLog && sceneryLayerLog( 'Scene: stitch event, match:' + args.match );
-        scene.stitch( args.match );
-      },
-      
-      // TODO: consider adding direct node listeners for this instead from layers?
-      dirtyBounds: function( args ) { // contains node, bounds, trail
-        sceneryLayerLog && sceneryLayerLog( 'Scene: dirtyBounds ' +
-                                            'node:' + args.node.constructor.name +
-                                            ', trail:' + args.trail.toString() +
-                                            ', bounds:' + args.bounds.toString() );
-        
-        var trail = args.trail;
-        
-        // if there are no layers, no nodes would actually render, so don't do the lookup
-        if ( scene.layers.length ) {
-          _.each( scene.affectedLayers( trail ), function( layer ) {
-            layer.markDirtyRegion( args );
-          } );
-        }
-      },
-      
-      // TODO: consider adding direct node listeners for this instead from layers?
-      transform: function( args ) { // conatins node, type, matrix, trail
-        sceneryLayerLog && sceneryLayerLog( 'Scene: transform ' +
-                                            'node:' + args.node.constructor.name +
-                                            ', trail:' + args.trail.toString() );
-        
-        var trail = args.trail;
-        
-        if ( scene.layers.length ) {
-          _.each( scene.affectedLayers( trail ), function( layer ) {
-            sceneryLayerLog && sceneryLayerLog( 'transformChange on ' + layer.toString() );
-            layer.transformChange( args );
-          } );
-        }
-      },
-      
-      // TODO: consider adding direct node listeners for this instead from layers?
-      // called when a node's accuracy of bounds changes (is either accurate now, or not)
-      boundsAccuracy: function( args ) {
-        sceneryLayerLog && sceneryLayerLog( 'Scene: boundsAccuracy ' +
-                                            'node:' + args.node.constructor.name +
-                                            ', trail:' + args.trail.toString() );
-        
-        var trail = args.trail;
-        
-        if ( scene.layers.length ) {
-          _.each( scene.affectedLayers( trail ), function( layer ) {
-            sceneryLayerLog && sceneryLayerLog( 'boundsAccuracy on ' + layer.toString() );
-            layer.boundsAccuracy( args );
-          } );
-        }
-      }
-    };
-    
-    this.addEventListener( this.sceneEventListener );
 
     if ( options.accessible ) {
       this.accessibilityLayer = document.createElement( 'div' );
@@ -357,9 +272,6 @@ define( function( require ) {
     assert && assert( trail.rootNode() === this, 'Trail does not start with the Scene' );
     sceneryLayerLog && sceneryLayerLog( '  addition of trail ' + trail.toString() + ' from layer ' + layer.getId() );
     
-    // TODO: flesh out, add parent
-    trail.lastNode().addInstance( new scenery.Instance( trail, layer ) );
-    
     this.trailLayerMap[trail.getUniqueId()] = layer;
     layer.addNodeFromTrail( trail );
   };
@@ -377,9 +289,6 @@ define( function( require ) {
   
   Scene.prototype.removeTrailFromLayer = function( trail, layer ) {
     sceneryLayerLog && sceneryLayerLog( '  removal of trail ' + trail.toString() + ' from layer ' + layer.getId() );
-    
-    // TODO: flesh out (and DO NOT RELY on getInstance(), it's slow)
-    trail.lastNode().removeInstance( trail.getInstance() );
     
     // we don't want to leak memory, so since we don't know if this trail will continue to exist, ditch the reference
     delete this.trailLayerMap[trail.getUniqueId()];
@@ -485,6 +394,11 @@ define( function( require ) {
   
   Scene.prototype.stitch = function( match ) {
     var scene = this;
+    
+    // bail out if there are no changes to stitch (stitch is called multiple times)
+    if ( !this.layerChangeIntervals.length ) {
+      return;
+    }
     
     // data to be shared across all of the individually stitched intervals
     var stitchData = {
@@ -606,6 +520,37 @@ define( function( require ) {
     // set the layers' elements' z-indices, and reindex their trails so they are in a consistent state
     // TODO: performance: don't reindex layers if no layers were added or removed?
     this.reindexLayers();
+    
+    sceneryLayerLog && sceneryLayerLog( 'total insertion instance points: ' + this.insertionInstances.length );
+    _.each( this.insertionInstances, function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'inserting instances onto ' + instance.toString() );
+      var freshTrail = instance.trail.copy().addDescendant( scene.insertionChild );
+      var freshLayer = stitchData.newLayerMap[freshTrail.getUniqueId()];
+      var freshInstance = new scenery.Instance( freshTrail, freshLayer ? freshLayer : null );
+      freshInstance.parent = instance;
+      instance.insertInstance( scene.insertionIndex, freshInstance );
+      freshInstance.getNode().addInstance( freshInstance );
+      sceneryLayerLog && sceneryLayerLog( 'inserting base ' + freshInstance.toString() );
+      
+      // constructs all sub-trees for the specified instance
+      function buildInstances( instance ) {
+        _.each( instance.getNode().children, function( child, index ) {
+          // TODO: performance: track instances instead of trails for all of stitching?
+          var trail = instance.trail.copy().addDescendant( child );
+          var layer = stitchData.newLayerMap[trail.getUniqueId()];
+          var nextInstance = new scenery.Instance( trail, layer ? layer : null );
+          nextInstance.parent = instance;
+          instance.addInstance( nextInstance );
+          nextInstance.getNode().addInstance( nextInstance );
+          sceneryLayerLog && sceneryLayerLog( 'appending ' + nextInstance.toString() + ' to ' + instance.toString() );
+          buildInstances( nextInstance );
+        } );
+      }
+      buildInstances( freshInstance );
+    } );
+    this.insertionInstances.length = 0;
+    this.insertionIndex = -1;
+    this.insertionChild = null;
     
     // add/remove trails from their necessary layers
     _.each( affectedTrails, function( trail ) {
@@ -942,7 +887,8 @@ define( function( require ) {
     
     var n = this.layers.length;
     if ( n === 0 ) {
-      throw new Error( 'no layers in the scene' );
+      assert && assert( !trail.lastNode().isPainted(), 'There should be at least one layer for a painted trail' );
+      return [];
     }
     
     assert && assert( trail.areIndicesValid() );
@@ -1090,6 +1036,60 @@ define( function( require ) {
   
   Scene.prototype.getSceneHeight = function() {
     return this.sceneBounds.getHeight();
+  };
+  
+  Scene.prototype.markSceneForLayerRefresh = function( instance ) {
+    sceneryLayerLog && sceneryLayerLog( 'Scene: marking layer refresh: ' + instance.trail.toString() );
+    this.markInterval( instance.trail );
+  };
+  
+  Scene.prototype.markSceneForInsertion = function( instance, child, index ) {
+    var affectedTrail = instance.trail.copy().addDescendant( child );
+    sceneryLayerLog && sceneryLayerLog( 'Scene: marking insertion: ' + affectedTrail.toString() );
+    this.markInterval( affectedTrail );
+    
+    assert && assert( this.insertionIndex === index || !this.insertionInstances.length, 'Insertion indices must match' );
+    assert && assert( this.insertionChild === child || !this.insertionInstances.length, 'Insertion children must match' );
+    this.insertionInstances.push( instance );
+    this.insertionChild = child;
+    this.insertionIndex = index;  
+  };
+  
+  Scene.prototype.markSceneForRemoval = function( instance, child, index ) {
+    // mark the interval
+    var affectedTrail = instance.trail.copy().addDescendant( child );
+    sceneryLayerLog && sceneryLayerLog( 'Scene: marking removal: ' + affectedTrail.toString() );
+    this.markInterval( affectedTrail );
+    
+    // remove the necessary instances
+    var toRemove = [ instance.children[index] ];
+    instance.removeInstance( index );
+    while ( toRemove.length ) {
+      var item = toRemove.pop();
+      assert && assert( item, 'item instance should always exist' );
+      
+      // add its children
+      Array.prototype.push.apply( toRemove, item.children );
+      
+      item.dispose(); // removes it from the node and sets it up for easy GC
+    }
+    
+    var scene = this;
+    // signal to the relevant layers to remove the specified trail while the trail is still valid.
+    // waiting until after the removal takes place would require more complicated code to properly handle the trails
+    affectedTrail.eachTrailUnder( function( trail ) {
+      // TODO: performance: we can put this in the above simple loop for instances
+      if ( trail.isPainted() ) {
+        var trailId = trail.getUniqueId();
+        var layer = scene.layerLookup( trail );
+        
+        // store the trail's layer reference in the old map that will be cleared after stitching. we need a reference to properly handle situations
+        scene.oldTrailLayerMap[trailId] = layer;
+        
+        // and remove the trail now. TODO: can we do this removal later, since all oldTrailLayerMap nodes should essentially be removed?
+        scene.removeTrailFromLayer( trail, layer );
+      }
+    } );
   };
   
   Scene.prototype.updateCursor = function() {
@@ -1299,6 +1299,8 @@ define( function( require ) {
         
         assert && assert( scene.trailLayerMap[trail.getUniqueId()], 'scene must map every painted trail to a layer' );
       }
+      
+      assert && assert( trail.getInstance() && trail.getInstance().trail.equals( trail ), 'every trail must have a single corresponding instance' );
     } );
     
     var layerPaintedCount = 0;

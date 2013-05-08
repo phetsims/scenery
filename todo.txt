@@ -1,3 +1,6 @@
+Examine:
+    http://jonobr1.github.io/two.js/
+    https://github.com/GoodBoyDigital/pixi.js
 
 Priorities:
     Beware of closures! (test speeds, see https://developers.google.com/speed/articles/optimizing-javascript)
@@ -52,6 +55,7 @@ Tricky areas:
     Gradients / Patterns should not be changed after being passed to a node's fill/stroke, since the SVG def won't change, and we don't set up listeners
 
 Test:
+    Trail transforms
     Test issues (zero-bounds text, etc.)
     Unit tests for common node operations
     Test bounds from canvas accurate method vs computed bounds for Shapes and strokes
@@ -324,6 +328,7 @@ Performance:
             Matrix3.inverted
             Matrix3.getSVGTransform
     Event Abstraction:
+        *** markSceneForRemoval speedups significant?
         NOTE: quick check to see if changes that 'affect rest of tree' affect other layers, look at isAfter node vs end?
         NOTE: Node wouldn't store all affected layers (for each trail reference), only first and last
         NOTE: scene/layer dispose has to be accurate and enforced if we store info on nodes. check in layer audit?
@@ -353,6 +358,25 @@ Performance:
             transform
                 before/after?
             boundsAccuracy
+        * Layer needs:
+            Canvas
+                Global changed bounds (if bounds change, both old place and the newest)
+                Bounds accuracy count
+            SVG
+                (subtrail-self) update fragment, defs, group
+            DOM
+                (self) Update DOM element on that type of change
+                    (self) transform on Text, since it relies on any text/font changes
+                (subtrail) Transform (CSS)
+                (subtrail) Visibility / Opacity
+            Overall:
+                visibilityChanged
+                opacityChanged
+                beforeSelfChange (old self paint?)
+                beforeSubtreeChange (old paint)
+                transformChanged
+                paintChange (e.g. from validatePaint/validateBounds?)
+                boundsChange?
         Current notifications:
             marking and stitching (direct)
             markOldPaint:
