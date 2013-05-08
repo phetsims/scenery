@@ -59,6 +59,9 @@ define( function( require ) {
     // add a self reference to aid in debugging. this generally shouldn't lead to a memory leak
     this.main.scene = this;
     
+    // add a reference to the API for debugging
+    this.scenery = scenery;
+    
     // defaults
     options = _.extend( {
       allowSceneOverflow: false,
