@@ -54,6 +54,7 @@ define( [
     'SCENERY/util/Instance',
     'SCENERY/util/Pattern',
     'SCENERY/util/RadialGradient',
+    'SCENERY/util/RenderInterval',
     'SCENERY/util/SceneImage',
     'SCENERY/util/SceneryStyle',
     'SCENERY/util/SplitNodeEvents',

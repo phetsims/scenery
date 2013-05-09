@@ -72,6 +72,7 @@ define( function( require ) {
       this.trail.reindex();
     },
     
+    // TODO: rename, so that it indicates that it removes the instance from the node
     dispose: function() {
       this.parent = null;
       this.children.length = 0;
@@ -81,6 +82,11 @@ define( function( require ) {
     equals: function( other ) {
       assert && assert( ( this === other ) === this.trail.equals( other.trail ), 'We assume a 1-1 mapping from trails to instances' );
       return this === other;
+    },
+    
+    // standard -1,0,1 comparison with another instance, as a total ordering from the render order
+    compare: function( other ) {
+      return this.trail.compare( other.trail );
     },
     
     getLayerString: function() {
