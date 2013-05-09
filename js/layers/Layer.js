@@ -54,7 +54,7 @@ define( function( require ) {
     if ( this.baseNode === this.scene ) {
       this.baseTrail = new scenery.Trail( this.scene );
     } else {
-      this.baseTrail = this.startPointer.trail.copy();
+      this.baseTrail = this.startPaintedTrail.upToNode( this.baseNode );
       assert && assert( this.baseTrail.lastNode() === this.baseNode );
     }
     
@@ -93,11 +93,9 @@ define( function( require ) {
       this.startBoundary = boundary;
       
       // TODO: deprecate these, use boundary references instead? or boundary convenience functions
-      this.startPointer = this.startBoundary.nextStartPointer;
       this.startPaintedTrail = this.startBoundary.nextPaintedTrail;
       
       // set immutability guarantees
-      this.startPointer.trail && this.startPointer.trail.setImmutable();
       this.startPaintedTrail.setImmutable();
     },
     
@@ -106,24 +104,14 @@ define( function( require ) {
       this.endBoundary = boundary;
       
       // TODO: deprecate these, use boundary references instead? or boundary convenience functions
-      this.endPointer = this.endBoundary.previousEndPointer;
       this.endPaintedTrail = this.endBoundary.previousPaintedTrail;
       
       // set immutability guarantees
-      this.endPointer.trail && this.endPointer.trail.setImmutable();
       this.endPaintedTrail.setImmutable();
     },
     
-    getStartPointer: function() {
-      return this.startPointer;
-    },
-    
-    getEndPointer: function() {
-      return this.endPointer;
-    },
-    
     toString: function() {
-      return this.getName() + ' ' + ( this.startPointer ? this.startPointer.toString() : '!' ) + ' (' + ( this.startPaintedTrail ? this.startPaintedTrail.toString() : '!' ) + ') => ' + ( this.endPointer ? this.endPointer.toString() : '!' ) + ' (' + ( this.endPaintedTrail ? this.endPaintedTrail.toString() : '!' ) + ')';
+      return this.getName() + ' ' + ( this.startPaintedTrail ? this.startPaintedTrail.toString() : '!' ) + ' => ' + ( this.endPaintedTrail ? this.endPaintedTrail.toString() : '!' );
     },
     
     getId: function() {
@@ -212,38 +200,8 @@ define( function( require ) {
     // called when the base node's "internal" (self or child) bounds change, but not when it is just from the base node's own transform changing
     baseNodeInternalBoundsChange: function() {
       // no error, many times this doesn't need to be handled
-    },
+    }
     
-    /*---------------------------------------------------------------------------*
-    * Events from Instances
-    *----------------------------------------------------------------------------*/
-    
-    // notifyVisibilityChange: function( instance ) {
-    // },
-    
-    // notifyOpacityChange: function( instance ) {
-    // },
-    
-    // // only a painted trail under this layer
-    // notifyBeforeSelfChange: function( instance ) {
-    // },
-    
-    // notifyBeforeSubtreeChange: function( instance ) {
-    // },
-    
-    // // only a painted trail under this layer
-    // notifyDirtySelfPaint: function( instance ) {
-    // },
-    
-    // notifyDirtySubtreeBounds: function( instance ) {
-    // },
-    
-    // notifyTransformChange: function( instance ) {
-    // },
-    
-    // // only a painted trail under this layer (for now)
-    // notifyBoundsAccuracyChange: function( instance ) {
-    // }
   };
   
   Layer.cssTransformPadding = 3;

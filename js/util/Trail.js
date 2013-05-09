@@ -278,6 +278,13 @@ define( function( require ) {
       return true;
     },
     
+    // returns a new Trail from the root up to the parameter node.
+    upToNode: function( node ) {
+      var nodeIndex = _.indexOf( this.nodes, node );
+      assert && assert( nodeIndex >= 0, 'Trail does not contain the node' );
+      return this.slice( 0, _.indexOf( this.nodes, node ) + 1 );
+    },
+    
     // whether this trail contains the complete 'other' trail, but with added descendants afterwards
     isExtensionOf: function( other, allowSameTrail ) {
       assertExtra && assertExtra( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed' );

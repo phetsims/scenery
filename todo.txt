@@ -3,6 +3,7 @@ Examine:
     https://github.com/GoodBoyDigital/pixi.js
 
 Priorities:
+    *** Travis for tests
     *** Unicode font tests - grab strings from every language for testing
     Set default boundsMethod to 'fastCanvas'
     Mouse buttons - are they pointers, like Key?
@@ -116,6 +117,7 @@ General:
 
 Code:
     var Path = scenery.Path = ....
+    scenery.TrailPointer.before( trail )  ?
     ** _supportedRenderers => supportedRenderers? (pushes on this array if shared in the prototype could be bad!)
         getSupportedRenderers()? - fixes much of what we're doing
     lib/phet/ instead of common/, lib/ instead of contrib/

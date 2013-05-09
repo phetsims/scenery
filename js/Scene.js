@@ -1249,25 +1249,18 @@ define( function( require ) {
     
     var result = '';
     
-    var layerEntries = [];
+    var layerStartEntries = {};
+    var layerEndEntries = {};
     _.each( this.layers, function( layer ) {
-      layer.startPointer && layer.startPointer.trail && layer.startPointer.trail.reindex();
-      layer.endPointer && layer.endPointer.trail && layer.endPointer.trail.reindex();
-      var startIdx = str( layer.startPointer );
-      var endIndex = str( layer.endPointer );
-      if ( !layerEntries[startIdx] ) {
-        layerEntries[startIdx] = '';
-      }
-      if ( !layerEntries[endIndex] ) {
-        layerEntries[endIndex] = '';
-      }
+      var startIdx = layer.startPaintedTrail.getUniqueId();
+      var endIndex = layer.endPaintedTrail.getUniqueId();
+      layerStartEntries[startIdx] = '';
+      layerEndEntries[endIndex] = '';
       layer.startPaintedTrail.reindex();
       layer.endPaintedTrail.reindex();
       var layerInfo = layer.getId() + ' <strong>' + layer.type.name + '</strong>' +
                       ' trails: ' + ( layer.startPaintedTrail ? str( layer.startPaintedTrail ) : layer.startPaintedTrail ) +
-                      ',' + ( layer.endPaintedTrail ? str( layer.endPaintedTrail ) : layer.endPaintedTrail ) +
-                      ' pointers: ' + str( layer.startPointer ) +
-                      ',' + str( layer.endPointer );
+                      ',' + ( layer.endPaintedTrail ? str( layer.endPaintedTrail ) : layer.endPaintedTrail );
       layerInfo += '<span style="color: #008">';
       if ( layer.canUseDirtyRegions && !layer.canUseDirtyRegions() ) { layerInfo += ' dirtyRegionsDisabled'; }
       if ( layer.cssTranslation ) { layerInfo += ' cssTranslation'; }
@@ -1276,8 +1269,8 @@ define( function( require ) {
       if ( layer.cssTransform ) { layerInfo += ' cssTranslation'; }
       if ( layer.dirtyBounds && layer.dirtyBounds.isFinite() ) { layerInfo += ' dirtyBounds:' + layer.dirtyBounds.toString(); }
       layerInfo += '</span>';
-      layerEntries[startIdx] += '<div style="color: #080">+Layer ' + layerInfo + '</div>';
-      layerEntries[endIndex] += '<div style="color: #800">-Layer ' + layerInfo + '</div>';
+      layerStartEntries[startIdx] += '<div style="color: #080">+Layer ' + layerInfo + '</div>';
+      layerEndEntries[endIndex] += '<div style="color: #800">-Layer ' + layerInfo + '</div>';
     } );
     
     startPointer.depthFirstUntil( endPointer, function( pointer ) {
@@ -1289,8 +1282,8 @@ define( function( require ) {
           div += ' <span style="color: #008">' + text + '</span>';
         }
       
-      if ( layerEntries[ptr] ) {
-        result += layerEntries[ptr];
+      if ( layerStartEntries[ptr] ) {
+        result += layerStartEntries[ptr];
       }
       if ( pointer.isBefore ) {
         div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
@@ -1337,6 +1330,9 @@ define( function( require ) {
         }
         div += '</div>';
         result += div;
+      }
+      if ( layerEndEntries[ptr] ) {
+        result += layerEndEntries[ptr];
       }
       depth += pointer.isBefore ? 1 : -1;
     }, false );
