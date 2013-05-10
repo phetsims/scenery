@@ -263,11 +263,6 @@ define( function( require ) {
               node.paintCanvas( wrapper );
             }
 
-            //Add or update accessibility peers
-            if ( window.accessibilityAPI && node.accessibilityPeer ) {
-              window.accessibilityAPI.addAccessiblePeer(node.accessibilityPeer);
-            }
-
             // TODO: restricted bounds rendering, and possibly generalize depthFirstUntil
             // var children = node._children;
             

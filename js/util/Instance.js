@@ -12,6 +12,7 @@ define( function( require ) {
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   
   var scenery = require( 'SCENERY/scenery' );
+  require( 'SCENERY/util/AccessibilityPeer' );
   
   // layer should be null if the trail isn't to a painted node
   scenery.Instance = function( trail, layer ) {
@@ -27,11 +28,15 @@ define( function( require ) {
     this.parent = null;
     this.children = [];
     
+    this.peers = []; // list of AccessibilityPeer instances attached to this trail
+    
     // TODO: track these? should significantly accelerate subtree-changing operations
     this.startAffectedLayer = null;
     this.endAffectedLayer = null;
     
     trail.setImmutable(); // make sure our Trail doesn't change from under us
+    
+    this.addPeers();
   };
   var Instance = scenery.Instance;
   
@@ -76,6 +81,8 @@ define( function( require ) {
       this.parent = null;
       this.children.length = 0;
       this.getNode().removeInstance( this );
+      
+      this.removePeers();
     },
     
     equals: function( other ) {
@@ -99,6 +106,30 @@ define( function( require ) {
       // TODO: optimize this using pre-recorded versions?
       this.reindex();
       return this.getScene().affectedLayers( this.trail );
+    },
+    
+    addPeers: function() {
+      var thisInstance = this;
+      var node = this.getNode();
+      var scene = this.getScene();
+      
+      if ( node._peers.length ) {
+        _.each( node._peers, function( desc ) {
+          var peer = new scenery.AccessibilityPeer( thisInstance, desc.element, desc.options );
+          scene.addPeer( peer );
+          thisInstance.peers.push( peer );
+        } );
+      }
+    },
+    
+    removePeers: function() {
+      var scene = this.getScene();
+      
+      _.each( this.peers, function( peer ) {
+        scene.removePeer( peer );
+      } );
+      
+      this.peers.length = 0; // clear this.peers
     },
     
     /*---------------------------------------------------------------------------*

@@ -112,26 +112,25 @@ define( function( require ) {
     this.preferredSceneLayerType = options.preferredSceneLayerType;
     
     applyCSSHacks( $main, options );
+    
+    this.activePeer = null;
+    
+    this.accessibilityLayer = document.createElement( 'div' );
+    this.accessibilityLayer.className = "accessibility-layer";
+    this.accessibilityLayer.style.zIndex = 9999;
+    this.accessibilityLayer.style.position = 'absolute';
+    this.$accessibilityLayer = $( this.accessibilityLayer );
+    $main[0].appendChild( this.accessibilityLayer );
 
-    if ( options.accessible ) {
-      this.accessibilityLayer = document.createElement( 'div' );
-      this.accessibilityLayer.className = "accessibility-layer";
-      this.accessibilityLayer.style.zIndex = 9999;
-      this.$accessibilityLayer = $( this.accessibilityLayer );
-      this.$accessibilityLayer.css( 'position', 'absolute' );
-      $main[0].appendChild( this.accessibilityLayer );
-
-      this.focusRingSVGContainer = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
-      this.$focusRingSVGContainer = $( this.focusRingSVGContainer );
-      this.$focusRingSVGContainer.css( 'position', 'absolute' );
-      this.focusRingSVGContainer.style['pointer-events'] = 'none';
-      this.resizeFocusRingSVGContainer( options.width, options.height );
-      this.focusRingPath = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
-      this.focusRingPath.setAttribute('style',"fill:none;stroke:blue;stroke-width:5");
-      this.focusRingPath.setAttribute( 'id', "p1" );
-      this.focusRingSVGContainer.appendChild( this.focusRingPath );
-      $main[0].appendChild( this.focusRingSVGContainer );
-    }
+    this.focusRingSVGContainer = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+    this.focusRingSVGContainer.style.position = 'absolute';
+    this.focusRingSVGContainer.style['pointer-events'] = 'none';
+    this.resizeFocusRingSVGContainer( options.width, options.height );
+    this.focusRingPath = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+    this.focusRingPath.setAttribute( 'style', 'fill: none; stroke: blue; stroke-width: 5;' );
+    this.focusRingPath.setAttribute( 'id', 'p1' );
+    this.focusRingSVGContainer.appendChild( this.focusRingPath );
+    $main[0].appendChild( this.focusRingSVGContainer );
   };
   var Scene = scenery.Scene;
 
@@ -142,28 +141,6 @@ define( function( require ) {
     // sceneryLayerLog && sceneryLayerLog( 'Scene: updateScene' );
 
     var scene = this;
-    //TODO: For handling as a DAG, use a createAccessiblePeer method so that pairs can be based on Trail
-    var elms = [];
-    if ( this.accessibilityLayer ) {
-      this.$accessibilityLayer.children().each( function( i, elm ) {
-        elm.accessiblePeer.markForDeletion = true;
-        elms.push( elm.accessiblePeer );
-      } );
-      //temp global
-      window.accessibilityAPI = {
-        addAccessiblePeer: function( accessiblePeer ) {
-          accessiblePeer.syncBounds();
-          accessiblePeer.markForDeletion = false;
-
-          //Prevent from adding same one multiple times
-          if ( !scene.$accessibilityLayer.has( accessiblePeer.$element ).length ) {
-            scene.$accessibilityLayer.append( accessiblePeer.$element );
-            var elm = accessiblePeer.$element[0];
-            elm.accessiblePeer = accessiblePeer;
-          }
-        }
-      };
-    }
     
     // validating bounds, similar to Piccolo2d
     this.validateBounds();
@@ -180,45 +157,7 @@ define( function( require ) {
     
     this.updateCursor();
 
-    if ( this.accessibilityLayer ) {
-
-      var copy = elms.slice(0);
-      _.each( copy, function( accessiblePeer ) {
-        if ( accessiblePeer.markForDeletion ) {
-          // accessiblePeer.markForDeletion = false;
-          // accessiblePeer.$element.detach();
-          // console.log("removing one marked for deletion")
-        }
-      } );
-//      for ( var i = 0; i < elms.length; i++ ) {
-//        var elm = elms[i];
-//
-//      }
-      //Remove unused accessibilty peers
-//      for ( var i = 0; i < accessChildren.length; i++ ) {
-//        var obj = accessChildren[i];
-//        if ( obj.markForDeletion && this.$accessibilityLayer.has( obj ) ) {
-//          obj.markForDeletion = false;
-//          console.log( "trying to remove ", obj );
-//          this.$accessibilityLayer.remove( $( obj ) );
-//        }
-//      }
-
-      //Show the focus.
-
-      var $focused = this.$accessibilityLayer.find( $( "*:focus" ) );
-//      console.log(focused.length, focused);
-
-      if ( $focused.length === 1 ) {
-        var focusedElement = $focused[0];
-        var b = focusedElement.accessiblePeer.origin.globalBounds;
-        var rect = Shape.bounds( b );
-        this.focusRingPath.setAttribute( 'd', rect.getSVGPath() );
-      }
-      else {
-        this.focusRingPath.setAttribute( 'd', "M 0 0" );
-      }
-
+    // if ( this.accessibilityLayer ) {
 //      for ( var i = 0; i < accessibleNodes.length; i++ ) {
 //        if ( accessibleNodes[i]._element === activeElement ) {
 //          if ( accessibleNodes[i].origin ) {
@@ -257,15 +196,47 @@ define( function( require ) {
 //          this.focusRingPath.removeAttribute( 'd' );
 //        }
 //      }
-    }
-
-    //Cleanup and prevent unwanted usage
-    window.accessibilityAPI = null;
+    // }
   };
   
   Scene.prototype.renderScene = function() {
     // TODO: for now, go with the same path. possibly add options later
     this.updateScene();
+  };
+  
+  Scene.prototype.addPeer = function( peer ) {
+    this.accessibilityLayer.appendChild( peer.element );
+  };
+  
+  Scene.prototype.removePeer = function( peer ) {
+    this.accessibilityLayer.removeChild( peer.element );
+  };
+  
+  Scene.prototype.setActivePeer = function( peer ) {
+    if ( this.activePeer !== peer ) {
+      this.activePeer = peer;
+      
+      if ( peer ) {
+        var rect = Shape.bounds( peer.getGlobalBounds() );
+        this.focusRingPath.setAttribute( 'd', rect.getSVGPath() );
+      }
+      else {
+        this.focusRingPath.setAttribute( 'd', "M 0 0" );
+      }
+    }
+  };
+  
+  Scene.prototype.getActivePeer = function( peer ) {
+    return this.activePeer;
+  };
+  
+  Scene.prototype.focusPeer = function( peer ) {
+    this.setActivePeer( peer );
+  };
+  
+  Scene.prototype.blurPeer = function( peer ) {
+    assert && assert( this.getActivePeer() === peer, 'Can only blur an active peer' );
+    this.setActivePeer( null );
   };
   
   Scene.prototype.addTrailToLayer = function( trail, layer ) {
