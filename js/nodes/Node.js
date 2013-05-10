@@ -244,6 +244,10 @@ define( function( require ) {
       } );
     },
     
+    addPeer: function() {
+      // stub for accessibility (will be replaced with a merge)
+    },
+    
     // ensure that cached bounds stored on this node (and all children) are accurate
     validateBounds: function() {
       var that = this;
