@@ -30,6 +30,7 @@ define( function( require ) {
   require( 'SCENERY/input/Mouse' );
   require( 'SCENERY/input/Touch' );
   require( 'SCENERY/input/Pen' );
+  require( 'SCENERY/input/Key' );
   require( 'SCENERY/input/Event' );
   
   scenery.Input = function( scene, listenerTarget, batchDOMEvents ) {
@@ -68,9 +69,10 @@ define( function( require ) {
     },
     
     findKeyByEvent: function( event ) {
-      assert && assert( event.key, 'Assumes the KeyboardEvent has a key property' );
+      assert && assert( event.keyCode && event.charCode, 'Assumes the KeyboardEvent has keyCode and charCode properties' );
       var result = _.find( this.pointers, function( pointer ) {
-        return pointer.key === event.key && pointer.event.location === event.location;
+        // TODO: also check location (if that exists), so we don't mix up left and right shift, etc.
+        return pointer.keyCode === event.keyCode && pointer.charCode === event.charCode;
       } );
       // assert && assert( result, 'No key found for the combination of key:' + event.key + ' and location:' + event.location );
       return result;
@@ -361,7 +363,7 @@ define( function( require ) {
       this.dispatchToTargets( trail, pointer, type, inputEvent, bubbles );
       
       // TODO: better interactivity handling?
-      if ( !trail.lastNode().interactive ) {
+      if ( !trail.lastNode().interactive && !pointer.isKey ) {
         event.preventDefault();
       }
     },

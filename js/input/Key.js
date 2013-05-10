@@ -19,8 +19,7 @@ define( function( require ) {
   scenery.Key = function( event ) {
     Pointer.call( this );
     
-    this.event = event;
-    this.key = event.key;
+    this.event = event; // event.keyCode event.charCode
     this.isKey = true; // compared to isMouse/isPen/isTouch
     this.trail = null;
     this.type = 'key';

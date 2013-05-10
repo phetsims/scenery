@@ -44,7 +44,8 @@ module.exports = function( grunt ) {
                 sceneryAssert: false,
                 sceneryExtraAssert: false,
                 sceneryLayerLog: false,
-                sceneryEventLog: false
+                sceneryEventLog: false,
+                sceneryAccessibilityLog: false
               },
               dead_code: true
             }
@@ -72,7 +73,8 @@ module.exports = function( grunt ) {
                 sceneryAssert: false,
                 sceneryExtraAssert: false,
                 sceneryLayerLog: false,
-                sceneryEventLog: false
+                sceneryEventLog: false,
+                sceneryAccessibilityLog: false
               },
               dead_code: true
             }
@@ -118,6 +120,7 @@ module.exports = function( grunt ) {
           // for logging levels
           sceneryLayerLog: true,
           sceneryEventLog: true,
+          sceneryAccessibilityLog: true,
           
           // for require.js
           define: true,

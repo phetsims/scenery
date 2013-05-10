@@ -127,6 +127,7 @@ define( function( require ) {
       
       _.each( this.peers, function( peer ) {
         scene.removePeer( peer );
+        peer.dispose();
       } );
       
       this.peers.length = 0; // clear this.peers

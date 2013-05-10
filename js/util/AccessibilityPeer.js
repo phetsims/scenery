@@ -29,14 +29,18 @@ define( function( require ) {
     this.element.setAttribute( 'tabindex', 0 );
     this.element.style.position = 'absolute';
     
+    // TODO: batch these also if the Scene is batching events
     var scene = instance.getScene();
     this.clickListener = function PeerClickListener( event ) {
+      sceneryAccessibilityLog && sceneryAccessibilityLog( 'peer click on ' + instance.toString() + ': ' + instance.getNode().constructor.name );
       if ( options.click ) { options.click( event ); }
     };
     this.focusListener = function PeerFocusListener( event ) {
+      sceneryAccessibilityLog && sceneryAccessibilityLog( 'peer focused: ' + instance.toString() + ': ' + instance.getNode().constructor.name );
       scene.focusPeer( peer );
     };
     this.blurListener = function PeerBlurListener( event ) {
+      sceneryAccessibilityLog && sceneryAccessibilityLog( 'peer blurred: ' + instance.toString() + ': ' + instance.getNode().constructor.name );
       scene.blurPeer( peer );
     };
     this.element.addEventListener( 'click', this.clickListener );
