@@ -593,11 +593,11 @@
     // textNodeInstances,
     // textPathInstances,
     textBoundsChanges,
-    // fuzzRecordAddRemoveRender,
-    // rotatedSquaresHardcodedXY,
-    // rotatedSquaresTransformXY,
-    // rotatedSquaresIndividual,
-    // addingHexagons,
+    fuzzRecordAddRemoveRender,
+    rotatedSquaresHardcodedXY,
+    rotatedSquaresTransformXY,
+    rotatedSquaresIndividual,
+    addingHexagons,
     fastSquaresCanvas,
     fastSquaresSVG
     // {
