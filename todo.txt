@@ -1,5 +1,6 @@
 
 Priorities:
+    *** FIX devious drag! Canvas renderer + console not being open
     Beware of closures! (test speeds, see https://developers.google.com/speed/articles/optimizing-javascript)
     For DOM / jQuery manipulation: https://developers.google.com/speed/articles/javascript-dom
     For transform listeners and changes:
