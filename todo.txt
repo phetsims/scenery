@@ -320,6 +320,7 @@ Trail:
     depthFirstUntil should possibly have option for defensive copies of the pointers?
 
 Performance:
+    affectedLayers: compare performance with tree inspection (iterate in nested order from each side until we find painted nodes)
     V8:
         Optimized too many times:
             Trail: reindex, addDescendant
