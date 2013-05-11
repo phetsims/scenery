@@ -321,6 +321,8 @@ Trail:
 
 Performance:
     affectedLayers: compare performance with tree inspection (iterate in nested order from each side until we find painted nodes)
+    Instances as a linked list in render order could speed up many operations (iterate through instances/trails! between two points!)
+    Node option (or standard override) that skips validate bounds and paint, and provides a specific bounds and hit region (and flag for repaint) may speed things up
     V8:
         Optimized too many times:
             Trail: reindex, addDescendant
