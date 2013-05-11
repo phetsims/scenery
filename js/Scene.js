@@ -496,9 +496,6 @@ define( function( require ) {
     sceneryLayerLog && sceneryLayerLog( '               trails: ' + ( beforeTrail ? beforeTrail.toString() : '-' ) + ' to ' + ( afterTrail ? afterTrail.toString() : '-' ) );
     sceneryLayerLog && sceneryLayerLog( '               match: ' + match );
     
-    // maps trail unique ID => layer, only necessary when matching since we need to remove trails from their old layers
-    var oldLayerMap = match ? this.mapTrailLayersBetween( beforeTrail, afterTrail ) : null;
-    
     /*---------------------------------------------------------------------------*
     * State
     *----------------------------------------------------------------------------*/
@@ -657,23 +654,6 @@ define( function( require ) {
       middleStep( trail.copy() );
     } );
     endStep( afterTrail );
-  };
-  
-  // returns a map from trail.getUniqueId() to the current layer in which that trail resides
-  Scene.prototype.mapTrailLayersBetween = function( beforeTrail, afterTrail, result ) {
-    var scene = this;
-    
-    // allow providing a result to copy into, so we can chain these
-    result = result || {};
-    
-    scenery.Trail.eachPaintedTrailBetween( beforeTrail, afterTrail, function( trail ) {
-      // TODO: optimize this! currently both the layer lookup and this inefficient method of using layer lookup is slow
-      var layer = scene.layerLookup( trail );
-      assert && assert( layer, 'each trail during a proper match should always have a layer' );
-      result[trail.getUniqueId()] = layer;
-    }, false, this );
-    
-    return result;
   };
   
   Scene.prototype.rebuildLayers = function() {
