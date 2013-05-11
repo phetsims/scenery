@@ -1006,6 +1006,11 @@ define( function( require ) {
 
     this.resizeAccessibilityLayer( width, height );
     this.resizeFocusRingSVGContainer( width, height );
+
+    //Update the focus ring when the scene resizes.  Note: as of 5/10/2013 this only works properly when scaling up, and is buggy (off by a translation) when scaling down
+    if ( this.updateFocusRing && this.activePeer) {
+      this.updateFocusRing.bounds.call();
+    }
   };
 
   Scene.prototype.resizeAccessibilityLayer = function( width, height ) {
