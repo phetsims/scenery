@@ -20,13 +20,17 @@ define( function( require ) {
     var peer = this;
     
     options = options || {};
+
+    //Defaulting to 0 would mean using the document order, which can easily be incorrect for a PhET simulation.
+    //For any of the nodes to use a nonzero tabindex, they must all use a nonzero tabindex, see #40
+    options.tabIndex = options.tabIndex || 1;
     
     // TODO: if element is a DOM element, verify that no other accessibility peer is using it! (add a flag, and remove on disposal)
     this.element = ( typeof element === 'string' ) ? $( element )[0] : element;
     this.instance = instance;
     this.trail = instance.trail;
     
-    this.element.setAttribute( 'tabindex', 0 );
+    this.element.setAttribute( 'tabindex', options.tabIndex );
     this.element.style.position = 'absolute';
     
     // TODO: batch these also if the Scene is batching events
