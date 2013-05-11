@@ -1282,8 +1282,8 @@ define( function( require ) {
           div += ' <span style="color: #008">' + text + '</span>';
         }
       
-      if ( layerStartEntries[ptr] ) {
-        result += layerStartEntries[ptr];
+      if ( pointer.isBefore && layerStartEntries[pointer.trail.getUniqueId()] ) {
+        result += layerStartEntries[pointer.trail.getUniqueId()];
       }
       if ( pointer.isBefore ) {
         div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
@@ -1331,8 +1331,8 @@ define( function( require ) {
         div += '</div>';
         result += div;
       }
-      if ( layerEndEntries[ptr] ) {
-        result += layerEndEntries[ptr];
+      if ( pointer.isAfter && layerEndEntries[pointer.trail.getUniqueId()] ) {
+        result += layerEndEntries[pointer.trail.getUniqueId()];
       }
       depth += pointer.isBefore ? 1 : -1;
     }, false );
