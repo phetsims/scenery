@@ -76,6 +76,7 @@ define( function( require ) {
         if ( this.layer ) {
           this.layer.addNodeFromTrail( this.trail );
         }
+        this.oldLayer = this.layer;
       }
     },
     
