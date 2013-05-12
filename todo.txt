@@ -507,6 +507,7 @@ Performance:
     Checklists:
         http://www.html5rocks.com/en/tutorials/canvas/performance/
     Consider batching adding/removal of children with layering code
+    Consider flag to say "order of children" doesn't matter, so Scenery could minimize number of layers implicitly
 
 Benchmarks:
     (deprecate?) Benchmark.js-based:
