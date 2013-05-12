@@ -15,7 +15,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
   
-  // start and end are of type {Instance} or null (indicates all the way to the start / end)
+  // start and end are of type {Trail} or null (indicates all the way to the start / end)
   scenery.RenderInterval = function( start, end ) {
     assert && assert( !start || !end || start.compare( end ) <= 0, 'RenderInterval parameters must not be out of order' );
     
@@ -73,9 +73,7 @@ define( function( require ) {
       
       return new RenderInterval(
         thisA ? this.start : interval.start,
-        thisB ? this.end : interval.end,
-        thisA ? this.dataA : interval.dataA,
-        thisB ? this.dataB : interval.dataB
+        thisB ? this.end : interval.end
       );
     },
     

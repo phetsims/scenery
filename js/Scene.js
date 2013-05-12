@@ -148,10 +148,7 @@ define( function( require ) {
     var afterTrail = afterTrailPointer.trail;
     
     // store the layer of the before/after trails so that it is easy to access later
-    this.addLayerChangeInterval( new scenery.RenderInterval(
-      beforeTrail ? beforeTrail.getInstance() : null,
-      afterTrail ? afterTrail.getInstance() : null
-    ) );
+    this.addLayerChangeInterval( new scenery.RenderInterval( beforeTrail, afterTrail ) );
   };
   
   // convenience function for layer change intervals
@@ -273,14 +270,14 @@ define( function( require ) {
     
     _.each( this.layerChangeIntervals, function( interval ) {
       sceneryLayerLog && sceneryLayerLog( 'stitch on interval ' + interval.toString() );
-      var beforeInstance = interval.start;
-      var afterInstance = interval.end;
+      var beforeTrail = interval.start;
+      var afterTrail = interval.end;
+      
+      var beforeInstance = beforeTrail ? beforeTrail.getInstance() : null;
+      var afterInstance = afterTrail ? afterTrail.getInstance() : null;
       
       var beforeLayer = beforeInstance ? beforeInstance.layer : null;
       var afterLayer = afterInstance ? afterInstance.layer : null;
-      
-      var beforeTrail = beforeInstance ? beforeInstance.trail : null;
-      var afterTrail = afterInstance ? afterInstance.trail : null;
       
       // TODO: calculate boundaries based on the instances?
       var boundaries = scene.calculateBoundaries( beforeLayer ? beforeLayer.type : null, beforeTrail, afterTrail );
