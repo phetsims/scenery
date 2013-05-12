@@ -40,6 +40,7 @@ Priorities:
     Testing with hidef canvases
 
 Bugs:
+    *** SimpleDragHandler's parent transform tracking is broken
     Chrome canvas lineWidth with pattern bug (looks like half size?)
     DOM opacity
     **** General opacity: multiple layers combined!
@@ -321,6 +322,7 @@ Trail:
 
 Performance:
     affectedLayers: compare performance with tree inspection (iterate in nested order from each side until we find painted nodes)
+        Also even faster to keep this updated in the instances?
     Instances as a linked list in render order could speed up many operations (iterate through instances/trails! between two points!)
     Node option (or standard override) that skips validate bounds and paint, and provides a specific bounds and hit region (and flag for repaint) may speed things up
     V8:

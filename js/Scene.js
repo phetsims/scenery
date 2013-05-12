@@ -85,7 +85,6 @@ define( function( require ) {
     // layering data
     this.layers = [];               // main layers in a scene
     this.trailLayerMap = {};        // maps every single painted trail to its current layer. helpful for fast lookup, and crucial during layer stitching operations
-    this.oldTrailLayerMap = {};     // stores references to old layers for removed trails which may be needed for stitching. cleared after each stitching
     this.layerChangeIntervals = []; // array of {TrailInterval}s indicating what parts need to be stitched together. cleared after each stitching
     
     // for tracking inserted nodes so we can build up the instances properly
@@ -448,7 +447,6 @@ define( function( require ) {
     } );
     
     // clean up state that was set leading up to the stitching
-    this.oldTrailLayerMap = {};
     this.layerChangeIntervals = [];
     
     // TODO: add this back in, but with an appropriate assertion level
@@ -714,12 +712,7 @@ define( function( require ) {
     
     // if the trail isn't in the main map, it was probably removed (we're in the stitching process, it's in the temporary map), or it's added and we have no reference
     if ( !layer ) {
-      layer = this.oldTrailLayerMap[trailId];
-      
-      // it's not referenced, so return null
-      if ( !layer ) {
-        layer = null;
-      }
+      layer = null;
     }
     
     return layer;
@@ -909,9 +902,6 @@ define( function( require ) {
       if ( trail.isPainted() ) {
         var trailId = trail.getUniqueId();
         var layer = scene.layerLookup( trail );
-        
-        // store the trail's layer reference in the old map that will be cleared after stitching. we need a reference to properly handle situations
-        scene.oldTrailLayerMap[trailId] = layer;
         
         // and remove the trail now. TODO: can we do this removal later, since all oldTrailLayerMap nodes should essentially be removed?
         scene.removeTrailFromLayer( trail, layer );
