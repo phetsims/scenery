@@ -234,6 +234,8 @@ define( function( require ) {
   Scene.prototype.stitch = function( match ) {
     var scene = this;
     
+    sceneryLayerLog && sceneryLayerLog( '-----------------------------------\nbeginning stitch' );
+    
     // bail out if there are no changes to stitch (stitch is called multiple times)
     if ( !this.layerChangeIntervals.length ) {
       return;
@@ -285,7 +287,7 @@ define( function( require ) {
       
       scene.stitchInterval( stitchData, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match );
     } );
-    sceneryLayerLog && sceneryLayerLog( 'finished intervals in stitching' );
+    sceneryLayerLog && sceneryLayerLog( '------ finished intervals in stitching' );
     
     // reindex all of the relevant layer trails
     _.each( this.layers.concat( stitchData.newLayers ), function( layer ) {
@@ -304,7 +306,7 @@ define( function( require ) {
     
     // add new layers. we do this before the add/remove trails, since those can trigger layer side effects
     _.each( stitchData.newLayers, function( layer ) {
-      assert && assert( layerTrailCounts[layer.getId()], 'ensure we are not adding empty layers' );
+      assert && assert( layer._instanceCount, 'ensure we are not adding empty layers' );
       
       sceneryLayerLog && sceneryLayerLog( 'inserting layer: ' + layer.getId() );
       scene.insertLayer( layer );
@@ -314,8 +316,10 @@ define( function( require ) {
     // TODO: performance: don't reindex layers if no layers were added or removed?
     this.reindexLayers();
     
+    sceneryLayerLog && sceneryLayerLog( '------ updating layer references' );
+    
     // add/remove trails from their necessary layers
-    _.each( affectedInstances, function( instance ) {
+    _.each( stitchData.affectedInstances, function( instance ) {
       instance.updateLayer();
     } );
     
@@ -362,7 +366,7 @@ define( function( require ) {
     var beforePointer = beforeTrail ? new scenery.TrailPointer( beforeTrail, true ) : new scenery.TrailPointer( new scenery.Trail( this ), true );
     var afterPointer = afterTrail ? new scenery.TrailPointer( afterTrail, true ) : new scenery.TrailPointer( new scenery.Trail( this ), false );
     
-    sceneryLayerLog && sceneryLayerLog( 'stitching with boundaries:\n' + _.map( boundaries, function( boundary ) { return boundary.toString(); } ).join( '\n' ) );
+    sceneryLayerLog && sceneryLayerLog( '\nstitching with boundaries:\n' + _.map( boundaries, function( boundary ) { return boundary.toString(); } ).join( '\n' ) );
     sceneryLayerLog && sceneryLayerLog( '               layers: ' + ( beforeLayer ? beforeLayer.getId() : '-' ) + ' to ' + ( afterLayer ? afterLayer.getId() : '-' ) );
     sceneryLayerLog && sceneryLayerLog( '               trails: ' + ( beforeTrail ? beforeTrail.toString() : '-' ) + ' to ' + ( afterTrail ? afterTrail.toString() : '-' ) );
     sceneryLayerLog && sceneryLayerLog( '               match: ' + match );
@@ -373,7 +377,7 @@ define( function( require ) {
     
     var nextBoundaryIndex = 0;
     var nextBoundary = boundaries[nextBoundaryIndex];
-    var trailsToAddToLayer = [];
+    var instancesToAddToLayer = [];
     var currentTrail = beforeTrail;
     var currentLayer = beforeLayer;
     var currentLayerType = beforeLayer ? beforeLayer.type : null;
@@ -382,22 +386,16 @@ define( function( require ) {
     
     function addPendingTrailsToLayer() {
       // add the necessary nodes to the layer
-      _.each( trailsToAddToLayer, function( trail ) {
-        changeTrailLayer( trail, currentLayer );
+      _.each( instancesToAddToLayer, function( instance ) {
+        instance.changeLayer( currentLayer );
+        stitchData.affectedInstances.push( instance );
       } );
-      trailsToAddToLayer = [];
+      instancesToAddToLayer.length = 0;
     }
     
     function addAndCreateLayer( startBoundary, endBoundary ) {
       currentLayer = scene.createLayer( currentLayerType, layerArgs, startBoundary, endBoundary );
       stitchData.newLayers.push( currentLayer );
-    }
-    
-    // TODO: use an instance instead?
-    function changeTrailLayer( trail, layer ) {
-      sceneryLayerLog && sceneryLayerLog( '  moving trail ' + trail.toString() + ' to layer ' + layer.getId() );
-      stitchData.affectedTrails.push( trail ); // don't check for duplicates now, we get better performance by performing uniqueness tests afterwards
-      stitchData.newLayerMap[trail.getUniqueId()] = layer;
     }
     
     function step( trail, isEnd ) {
@@ -438,7 +436,7 @@ define( function( require ) {
         } else {
           // if not at the end of a layer, sanity check that we should have no accumulated pending trails
           sceneryLayerLog && sceneryLayerLog( 'was first layer' );
-          assert && assert( trailsToAddToLayer.length === 0 );
+          assert && assert( instancesToAddToLayer.length === 0 );
         }
         currentLayer = null;
         currentLayerType = nextBoundary.nextLayerType;
@@ -448,11 +446,13 @@ define( function( require ) {
         nextBoundary = boundaries[nextBoundaryIndex];
       }
       if ( trail && !isEnd ) {
-        trailsToAddToLayer.push( trail );
+        // TODO: performance: handle instances natively, don't just convert here
+        instancesToAddToLayer.push( trail.getInstance() );
       }
       if ( match && !isEnd ) { // TODO: verify this condition with test cases
         // if the node's old layer is compatible
-        var layer = scene.layerLookup( trail ); // lookup should return the old layer from the system
+        // TODO: performance: don't use getInstance() here, use instances natively
+        var layer = trail.getInstance().layer; // lookup should return the old layer from the system
         if ( layer.type === currentLayerType && !forceNewLayers ) {
           // TODO: we need to handle compatibility with layer splits. using forceNewLayers flag to temporarily disable
           matchingLayer = layer;
@@ -486,21 +486,23 @@ define( function( require ) {
         // defensive copy needed, since this will be modified at the same time
         _.each( afterLayer._layerTrails.slice( 0 ), function( trail ) {
           trail.reindex();
-          changeTrailLayer( trail, beforeLayer );
+          var instance = trail.getInstance();
+          instance.changeLayer( beforeLayer ); // TODO: performance: handle instances natively
+          stitchData.affectedInstances.push( instance );
         } );
         
-        stitchData.layerMap[afterLayer.getId()] = beforeLayer;
       } else if ( beforeLayer && beforeLayer === afterLayer && boundaries.length > 0 ) {
         // need to 'unglue' and split the layer
         sceneryLayerLog && sceneryLayerLog( 'ungluing layer' );
         assert && assert( currentStartBoundary );
         addAndCreateLayer( currentStartBoundary, afterLayerEndBoundary ); // sets currentLayer
-        stitchData.layerMap[afterLayer.getId()] = currentLayer;
         addPendingTrailsToLayer();
         
         currentLayer.endPaintedTrail.reindex(); // currentLayer's trails may be stale at this point
         scenery.Trail.eachPaintedTrailBetween( afterTrail, currentLayer.endPaintedTrail, function( subtrail ) {
-          changeTrailLayer( subtrail.copy().setImmutable(), currentLayer );
+          var instance = subtrail.getInstance();
+          instance.changeLayer( currentLayer );
+          stitchData.affectedInstances.push( instance );
         }, false, scene );
       } else if ( !beforeLayer && !afterLayer && boundaries.length === 1 && !boundaries[0].hasNext() && !boundaries[0].hasPrevious() ) {
         // TODO: why are we generating a boundary here?!?
@@ -754,20 +756,6 @@ define( function( require ) {
       
       item.dispose(); // removes it from the node and sets it up for easy GC
     }
-    
-    var scene = this;
-    // signal to the relevant layers to remove the specified trail while the trail is still valid.
-    // waiting until after the removal takes place would require more complicated code to properly handle the trails
-    affectedTrail.eachTrailUnder( function( trail ) {
-      // TODO: performance: we can put this in the above simple loop for instances
-      if ( trail.isPainted() ) {
-        var trailId = trail.getUniqueId();
-        var layer = scene.layerLookup( trail );
-        
-        // and remove the trail now. TODO: can we do this removal later, since all oldTrailLayerMap nodes should essentially be removed?
-        scene.removeTrailFromLayer( trail, layer );
-      }
-    } );
   };
   
   Scene.prototype.updateCursor = function() {
@@ -1042,7 +1030,7 @@ define( function( require ) {
       if ( trail.lastNode().layerSplitBefore ) {
         beforeSplitTrail = trail.previousPainted();
         afterSplitTrail = trail.lastNode().isPainted() ? trail : trail.nextPainted();
-        assert && assert( !beforeSplitTrail || !afterSplitTrail || scene.layerLookup( beforeSplitTrail ) !== scene.layerLookup( afterSplitTrail ), 'layerSplitBefore layers need to be different' );
+        assert && assert( !beforeSplitTrail || !afterSplitTrail || beforeSplitTrail.getInstance().layer !== afterSplitTrail.getInstance().layer, 'layerSplitBefore layers need to be different' );
       }
       if ( trail.lastNode().layerSplitAfter ) {
         // shift a pointer from the (nested) end of the trail to the next isBefore (if available)
@@ -1055,7 +1043,7 @@ define( function( require ) {
         if ( ptr ) {
           beforeSplitTrail = ptr.trail.previousPainted();
           afterSplitTrail = ptr.trail.lastNode().isPainted() ? ptr.trail : ptr.trail.nextPainted();
-          assert && assert( !beforeSplitTrail || !afterSplitTrail || scene.layerLookup( beforeSplitTrail ) !== scene.layerLookup( afterSplitTrail ), 'layerSplitAfter layers need to be different' );
+          assert && assert( !beforeSplitTrail || !afterSplitTrail || beforeSplitTrail.getInstance().layer !== afterSplitTrail.getInstance().layer, 'layerSplitAfter layers need to be different' );
         }
       }
     } );

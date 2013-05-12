@@ -60,6 +60,7 @@ Tricky areas:
     Gradients / Patterns should not be changed after being passed to a node's fill/stroke, since the SVG def won't change, and we don't set up listeners
 
 Test:
+    RenderInterval
     Trail transforms
     Test issues (zero-bounds text, etc.)
     Unit tests for common node operations
