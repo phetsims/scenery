@@ -143,6 +143,8 @@ define( function( require ) {
       
       this.markForInsertion( node, index );
       this.notifyStitch( false );
+      
+      node.invalidateSubtreePaint();
     },
     
     addChild: function( node ) {
