@@ -52,7 +52,7 @@ define( function( require ) {
     
     changeLayer: function( newLayer ) {
       if ( newLayer !== this.layer ) {
-        sceneryLayerLog && sceneryLayerLog( 'changing instance ' + this.trail.toString() + ' to layer #' + newLayer.id );
+        sceneryLayerLog && sceneryLayerLog( 'changing instance ' + this.trail.toString() + ' to layer ' + ( newLayer ? '#' + newLayer.id : 'null' ) );
         this.layer && ( this.layer._instanceCount -= 1 );
         this.layer = newLayer;
         this.layer && ( this.layer._instanceCount += 1 );
@@ -113,8 +113,8 @@ define( function( require ) {
     // TODO: rename, so that it indicates that it removes the instance from the node
     dispose: function() {
       if ( this.layer ) {
-        this.layer.removeNodeFromTrail( this.trail );
-        this.layer = null;
+        this.changeLayer( null );
+        this.updateLayer();
       }
       this.parent = null;
       this.children.length = 0;
