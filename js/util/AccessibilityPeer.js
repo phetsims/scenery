@@ -50,7 +50,19 @@ define( function( require ) {
     this.element.addEventListener( 'click', this.clickListener );
     this.element.addEventListener( 'focus', this.focusListener );
     this.element.addEventListener( 'blur', this.blurListener );
-  };
+
+    var keepPeerBoundsInSync = true;
+    if ( keepPeerBoundsInSync ) {
+      instance.node.addEventListener( {bounds: this.syncBounds.bind( this )} );
+      this.syncBounds();
+
+      //When the scene resizes, update the peer bounds
+      instance.trail.nodes[0].resizeListeners.push( this.syncBounds.bind( this ) );
+
+      //Initial layout
+      window.setTimeout( this.syncBounds.bind( this ), 30 );
+    }
+  }; 
   
   AccessibilityPeer.prototype = {
     constructor: AccessibilityPeer,
@@ -67,15 +79,10 @@ define( function( require ) {
     
     syncBounds: function() {
       var globalBounds = this.getGlobalBounds();
-      //TODO: add checks in here that will only set the values if changed
       this.element.style.left = globalBounds.x + 'px';
       this.element.style.top = globalBounds.y + 'px';
       this.element.style.width = globalBounds.width + 'px';
       this.element.style.height = globalBounds.height + 'px';
-      // this.$element.css( 'left', globalBounds.x );
-      // this.$element.css( 'top', globalBounds.y );
-      // this.$element.width( globalBounds.width );
-      // this.$element.height( globalBounds.height );
     }
   };
   
