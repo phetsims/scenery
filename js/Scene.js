@@ -136,6 +136,9 @@ define( function( require ) {
   };
   
   Scene.prototype.markInterval = function( affectedTrail ) {
+    // TODO: maybe reindexing sooner is better? are we covering up a bug here?
+    affectedTrail.reindex();
+    
     // since this is marked while the child is still connected, we can use our normal trail handling.
     
     // find the closest before and after self trails that are not affected
@@ -146,6 +149,11 @@ define( function( require ) {
       afterTrailPointer.nestedForwards();
     }
     var afterTrail = afterTrailPointer.trail;
+    
+    // sanity checks
+    assert && assert( !beforeTrail || beforeTrail.areIndicesValid(), 'beforeTrail needs to be valid' );
+    assert && assert( !afterTrail || afterTrail.areIndicesValid(), 'afterTrail needs to be valid' );
+    assert && assert( !beforeTrail || !afterTrail || beforeTrail.compare( afterTrail ) !== 0, 'Marked interval needs to be exclusive' );
     
     // store the layer of the before/after trails so that it is easy to access later
     this.addLayerChangeInterval( new scenery.RenderInterval( beforeTrail, afterTrail ) );

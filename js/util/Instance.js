@@ -61,6 +61,9 @@ define( function( require ) {
     
     updateLayer: function() {
       if ( this.layer !== this.oldLayer ) {
+        // we may have stale indices
+        this.reindex();
+        
         if ( sceneryLayerLog ) {
           if ( this.oldLayer && this.layer ) {
             sceneryLayerLog( 'moving instance ' + this.trail.toString() + ' from layer #' + this.oldLayer.id + ' to layer #' + this.layer.id );
