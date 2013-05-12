@@ -59,7 +59,6 @@ define( [
     'SCENERY/util/SceneryStyle',
     'SCENERY/util/SplitNodeEvents',
     'SCENERY/util/Trail',
-    'SCENERY/util/TrailInterval',
     'SCENERY/util/TrailPointer',
     'SCENERY/util/Util',
     

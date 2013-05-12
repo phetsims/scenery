@@ -14,17 +14,19 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   // layer should be null if the trail isn't to a painted node
-  scenery.Instance = function( trail, layer ) {
+  scenery.Instance = function( trail, layer, parent ) {
     this.trail = trail; // trail may be assumed to be stale, for performance reasons
     this.layer = layer;
+    this.oldLayer = layer; // used during stitching
     
-    assert && assert( trail.lastNode().isPainted() === ( layer !== null ), 'Has a layer iff is painted' );
+    // assertion not enabled, since at the start we don't specify a layer (it will be constructed later)
+    // assert && assert( trail.lastNode().isPainted() === ( layer !== null ), 'Has a layer iff is painted' );
     
     // TODO: SVG layer might want to put data (group/fragment) references here (indexed by layer ID)
     this.data = {};
     
     // TODO: ensure that we can track this? otherwise remove it for memory and speed
-    this.parent = null;
+    this.parent = parent;
     this.children = [];
     
     // TODO: track these? should significantly accelerate subtree-changing operations
@@ -49,7 +51,42 @@ define( function( require ) {
     get node() { return this.getNode(); },
     
     changeLayer: function( newLayer ) {
-      this.layer = newLayer;
+      if ( newLayer !== this.layer ) {
+        sceneryLayerLog && sceneryLayerLog( 'changing instance ' + this.trail.toString() + ' to layer #' + newLayer.id );
+        this.layer._instanceCount -= 1;
+        this.layer = newLayer;
+        this.layer._instanceCount += 1;
+      }
+    },
+    
+    updateLayer: function() {
+      if ( this.layer !== this.oldLayer ) {
+        if ( sceneryLayerLog ) {
+          if ( this.oldLayer && this.layer ) {
+            sceneryLayerLog( 'moving instance ' + this.trail.toString() + ' from layer #' + this.oldLayer.id + ' to layer #' + this.layer.id );
+          } else if ( this.layer ) {
+            sceneryLayerLog( 'adding instance ' + this.trail.toString() + ' to layer #' + this.layer.id );
+          } else {
+            sceneryLayerLog( 'remove instance ' + this.trail.toString() + ' from layer #' + this.oldLayer.id );
+          }
+        }
+        if ( this.oldLayer ) {
+          this.oldLayer.removeNodeFromTrail( this.trail );
+        }
+        if ( this.layer ) {
+          this.layer.addNodeFromTrail( this.trail );
+        }
+      }
+    },
+    
+    createChild: function( childNode, index ) {
+      var childTrail = this.trail.copy().addDescendant( childNode );
+      var childInstance = new scenery.Instance( childTrail, null, this );
+      sceneryLayerLog && sceneryLayerLog( 'Instance.createChild: ' + childInstance.toString() );
+      this.insertInstance( index, childInstance );
+      childInstance.getNode().addInstance( childInstance );
+      
+      return childInstance;
     },
     
     addInstance: function( instance ) {

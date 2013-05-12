@@ -59,7 +59,8 @@ define( function( require ) {
     }
     
     // we reference all painted trails in an unordered way
-    this._layerTrails = [];
+    this._layerTrails = []; // TODO: performance: remove layerTrails if possible!
+    this._instanceCount = 0; // track how many instances we are tracking (updated in stitching by instances)
     
     var layer = this;
     
@@ -168,6 +169,7 @@ define( function( require ) {
         }
       }
       assert && assert( i < this._layerTrails.length );
+      
       this._layerTrails.splice( i, 1 );
     },
     
