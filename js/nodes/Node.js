@@ -556,6 +556,10 @@ define( function( require ) {
       return this._inputListeners.slice( 0 ); // defensive copy
     },
     
+    addPeer: function() {
+      // stub for accessibility3 compatibility. will be merged in later. REMOVE THIS PART IN THE MERGE
+    },
+    
     /*
      * Dispatches an event across all possible Trails ending in this node.
      *
