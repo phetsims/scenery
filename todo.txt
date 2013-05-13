@@ -95,6 +95,7 @@ Browsers
             Try using a unicode-escaped quote?
         [REGRESSION] Chrome 27 context.arc( 0, 0, 100, Math.PI / 4, -Math.PI / 2, true );
         [UNKNOWN] Chrome canvas lineWidth with pattern bug (looks like half size?)
+        [UNKNOWN] Chrome and Firefox treat painting with 'transparent' differently. see dynamic layering slide
         
         [KNOWN] Chrome XMLSerializer.serializeToString dropping namespaces: https://code.google.com/p/chromium/issues/detail?id=88295
     For canvas, create a drawing function that exhibits all differences?
