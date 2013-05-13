@@ -1,5 +1,6 @@
 /*global module:false*/
 module.exports = function( grunt ) {
+  'use strict';
   
   // print this immediately, so it is clear what project grunt is building
   grunt.log.writeln( 'Scenery' );
@@ -102,7 +103,7 @@ module.exports = function( grunt ) {
         // quotmark: 'single',
         undef: true,
         // unused: true, // certain layer APIs not used in cases
-        // strict: true,
+        strict: true,
         
         // relaxing options
         es5: true, // we use ES5 getters and setters for now

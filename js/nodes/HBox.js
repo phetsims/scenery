@@ -9,7 +9,7 @@
  */
 
 define( function( require ) {
-  "use strict";
+  'use strict';
   var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate; // i.e. Object.create

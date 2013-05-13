@@ -13,7 +13,7 @@
  */
 
 define( function( require ) {
-  "use strict";
+  'use strict';
   
   var assert = require( 'ASSERT/assert' )( 'scenery' );
   

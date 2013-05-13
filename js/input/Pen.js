@@ -7,6 +7,7 @@
  */
 
 define( function( require ) {
+  'use strict';
   
   var scenery = require( 'SCENERY/scenery' );
   
