@@ -187,6 +187,8 @@ define( function( require ) {
     getDOMElement: function() {
       this._image.style.display = 'block';
       this._image.style.position = 'absolute';
+      this._image.style.left = '0';
+      this._image.style.top = '0';
       return this._image;
     },
     
