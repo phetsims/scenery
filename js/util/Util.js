@@ -9,9 +9,6 @@
 define( function( require ) {
   'use strict';
   
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-  var assertExtra = require( 'ASSERT/assert' )( 'scenery.extra', true );
-  
   var scenery = require( 'SCENERY/scenery' );
   
   var Matrix3 = require( 'DOT/Matrix3' );
@@ -119,11 +116,11 @@ define( function( require ) {
     },
     
     testAssert: function() {
-      return 'assert.scenery: ' + ( assert ? 'true' : 'false' );
+      return 'assert.scenery: ' + ( sceneryAssert ? 'true' : 'false' );
     },
     
     testAssertExtra: function() {
-      return 'assert.scenery.extra: ' + ( assertExtra ? 'true' : 'false' );
+      return 'assert.scenery.extra: ' + ( sceneryAssertExtra ? 'true' : 'false' );
     },
     
     /*---------------------------------------------------------------------------*

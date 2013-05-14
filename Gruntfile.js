@@ -43,7 +43,7 @@ module.exports = function( grunt ) {
             compress: {
               global_defs: {
                 sceneryAssert: false,
-                sceneryExtraAssert: false,
+                sceneryAssertExtra: false,
                 sceneryLayerLog: false,
                 sceneryEventLog: false
               },
@@ -71,7 +71,7 @@ module.exports = function( grunt ) {
             compress: {
               global_defs: {
                 sceneryAssert: false,
-                sceneryExtraAssert: false,
+                sceneryAssertExtra: false,
                 sceneryLayerLog: false,
                 sceneryEventLog: false
               },
@@ -114,7 +114,7 @@ module.exports = function( grunt ) {
         globals: {
           // for removal of assertions
           sceneryAssert: true,
-          sceneryExtraAssert: true,
+          sceneryAssertExtra: true,
           
           // for logging levels
           sceneryLayerLog: true,

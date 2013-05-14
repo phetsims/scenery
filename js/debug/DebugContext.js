@@ -16,8 +16,6 @@
 define( function( require ) {
   'use strict';
   
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-  
   var scenery = require( 'SCENERY/scenery' );
   
   // used to serialize arguments so that it displays exactly like the call would be executed

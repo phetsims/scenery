@@ -9,8 +9,6 @@
 define( function( require ) {
   'use strict';
   
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-  
   var Matrix3 = require( 'DOT/Matrix3' );
   
   var scenery = require( 'SCENERY/scenery' );
@@ -64,7 +62,7 @@ define( function( require ) {
     this.dragListener = {
       // mouse/touch up
       up: function( event ) {
-        assert && assert( event.pointer === handler.pointer );
+        sceneryAssert && sceneryAssert( event.pointer === handler.pointer );
         if ( !event.pointer.isMouse || event.domEvent.button === handler.mouseButton ) {
           handler.endDrag( event );
         }
@@ -72,7 +70,7 @@ define( function( require ) {
       
       // touch cancel
       cancel: function( event ) {
-        assert && assert( event.pointer === handler.pointer );
+        sceneryAssert && sceneryAssert( event.pointer === handler.pointer );
         handler.endDrag( event );
         
         // since it's a cancel event, go back!
@@ -81,7 +79,7 @@ define( function( require ) {
       
       // mouse/touch move
       move: function( event ) {
-        assert && assert( event.pointer === handler.pointer );
+        sceneryAssert && sceneryAssert( event.pointer === handler.pointer );
         
         var delta = handler.transform.inverseDelta2( handler.pointer.point.minus( handler.lastDragPoint ) );
         

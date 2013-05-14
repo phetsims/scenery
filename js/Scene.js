@@ -11,8 +11,6 @@
 define( function( require ) {
   'use strict';
   
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-  
   var collect = require( 'PHET_CORE/collect' );
   
   var Bounds2 = require( 'DOT/Bounds2' );
@@ -52,7 +50,7 @@ define( function( require ) {
    * }
    */
   scenery.Scene = function Scene( $main, options ) {
-    assert && assert( $main[0], 'A main container is required for a scene' );
+    sceneryAssert && sceneryAssert( $main[0], 'A main container is required for a scene' );
     this.$main = $main;
     this.main = $main[0];
     
@@ -151,9 +149,9 @@ define( function( require ) {
     var afterTrail = afterTrailPointer.trail;
     
     // sanity checks
-    assert && assert( !beforeTrail || beforeTrail.areIndicesValid(), 'beforeTrail needs to be valid' );
-    assert && assert( !afterTrail || afterTrail.areIndicesValid(), 'afterTrail needs to be valid' );
-    assert && assert( !beforeTrail || !afterTrail || beforeTrail.compare( afterTrail ) !== 0, 'Marked interval needs to be exclusive' );
+    sceneryAssert && sceneryAssert( !beforeTrail || beforeTrail.areIndicesValid(), 'beforeTrail needs to be valid' );
+    sceneryAssert && sceneryAssert( !afterTrail || afterTrail.areIndicesValid(), 'afterTrail needs to be valid' );
+    sceneryAssert && sceneryAssert( !beforeTrail || !afterTrail || beforeTrail.compare( afterTrail ) !== 0, 'Marked interval needs to be exclusive' );
     
     // store the layer of the before/after trails so that it is easy to access later
     this.addLayerChangeInterval( new scenery.RenderInterval( beforeTrail, afterTrail ) );
@@ -311,7 +309,7 @@ define( function( require ) {
     
     // add new layers. we do this before the add/remove trails, since those can trigger layer side effects
     _.each( stitchData.newLayers, function( layer ) {
-      assert && assert( layer._instanceCount, 'ensure we are not adding empty layers' );
+      sceneryAssert && sceneryAssert( layer._instanceCount, 'ensure we are not adding empty layers' );
       
       sceneryLayerLog && sceneryLayerLog( 'inserting layer: ' + layer.getId() );
       scene.insertLayer( layer );
@@ -332,7 +330,7 @@ define( function( require ) {
     this.layerChangeIntervals.length = 0;
     
     // TODO: add this back in, but with an appropriate assertion level
-    assert && assert( this.layerAudit() );
+    sceneryAssert && sceneryAssert( this.layerAudit() );
     
     sceneryLayerLog && sceneryLayerLog( 'finished stitch\n-----------------------------------' );
   };
@@ -410,7 +408,7 @@ define( function( require ) {
       
       // if there is no next boundary, don't bother checking anyways
       if ( nextBoundary && nextBoundary.equivalentPreviousTrail( currentTrail ) ) { // at least one null check
-        assert && assert( nextBoundary.equivalentNextTrail( trail ) );
+        sceneryAssert && sceneryAssert( nextBoundary.equivalentNextTrail( trail ) );
         
         sceneryLayerLog && sceneryLayerLog( nextBoundary.toString() );
         
@@ -421,7 +419,7 @@ define( function( require ) {
             // existing layer, reposition its endpoint
             currentLayer.setEndBoundary( nextBoundary );
           } else {
-            assert && assert( currentStartBoundary );
+            sceneryAssert && sceneryAssert( currentStartBoundary );
             
             if ( matchingLayer ) {
               sceneryLayerLog && sceneryLayerLog( 'matching layer used: ' + matchingLayer.getId() );
@@ -434,14 +432,14 @@ define( function( require ) {
             }
           }
           // sanity checks
-          assert && assert( currentLayer.startPaintedTrail );
-          assert && assert( currentLayer.endPaintedTrail );
+          sceneryAssert && sceneryAssert( currentLayer.startPaintedTrail );
+          sceneryAssert && sceneryAssert( currentLayer.endPaintedTrail );
           
           addPendingTrailsToLayer();
         } else {
           // if not at the end of a layer, sanity check that we should have no accumulated pending trails
           sceneryLayerLog && sceneryLayerLog( 'was first layer' );
-          assert && assert( instancesToAddToLayer.length === 0 );
+          sceneryAssert && sceneryAssert( instancesToAddToLayer.length === 0 );
         }
         currentLayer = null;
         currentLayerType = nextBoundary.nextLayerType;
@@ -499,7 +497,7 @@ define( function( require ) {
       } else if ( beforeLayer && beforeLayer === afterLayer && boundaries.length > 0 ) {
         // need to 'unglue' and split the layer
         sceneryLayerLog && sceneryLayerLog( 'ungluing layer' );
-        assert && assert( currentStartBoundary );
+        sceneryAssert && sceneryAssert( currentStartBoundary );
         addAndCreateLayer( currentStartBoundary, afterLayerEndBoundary ); // sets currentLayer
         addPendingTrailsToLayer();
         
@@ -583,15 +581,15 @@ define( function( require ) {
   Scene.prototype.affectedLayers = function( trail ) {
     // midpoint search and result depends on the order of layers being in render order (bottom to top)
     
-    assert && assert( !( trail.isEmpty() || trail.nodes[0] !== this ), 'layerLookup root matches' );
+    sceneryAssert && sceneryAssert( !( trail.isEmpty() || trail.nodes[0] !== this ), 'layerLookup root matches' );
     
     var n = this.layers.length;
     if ( n === 0 ) {
-      assert && assert( !trail.lastNode().isPainted(), 'There should be at least one layer for a painted trail' );
+      sceneryAssert && sceneryAssert( !trail.lastNode().isPainted(), 'There should be at least one layer for a painted trail' );
       return [];
     }
     
-    assert && assert( trail.areIndicesValid() );
+    sceneryAssert && sceneryAssert( trail.areIndicesValid() );
     
     // point to the beginning of the node, right before it would be rendered
     var startPointer = new scenery.TrailPointer( trail, true );
@@ -608,7 +606,7 @@ define( function( require ) {
     while ( high - 1 > low ) {
       mid = ( high + low ) >> 1;
       var endTrail = layers[mid].endPaintedTrail;
-      assert && assert( endTrail.areIndicesValid() );
+      sceneryAssert && sceneryAssert( endTrail.areIndicesValid() );
       // NOTE TO SELF: don't change this flag to true again. think it through
       var notAfter = startPointer.compareNested( new scenery.TrailPointer( endTrail, true ) ) !== 1;
       if ( notAfter ) {
@@ -628,7 +626,7 @@ define( function( require ) {
       mid = ( high + low ) >> 1;
       var startTrail = layers[mid].startPaintedTrail;
       startTrail.reindex();
-      assert && assert( startTrail.areIndicesValid() );
+      sceneryAssert && sceneryAssert( startTrail.areIndicesValid() );
       var notBefore = endPointer.compareNested( new scenery.TrailPointer( startTrail, true ) ) !== -1;
       if ( notBefore ) {
         low = mid;
@@ -754,7 +752,7 @@ define( function( require ) {
     instance.removeInstance( index );
     while ( toRemove.length ) {
       var item = toRemove.pop();
-      assert && assert( item, 'item instance should always exist' );
+      sceneryAssert && sceneryAssert( item, 'item instance should always exist' );
       
       // add its children
       Array.prototype.push.apply( toRemove, item.children );
@@ -960,7 +958,7 @@ define( function( require ) {
     var scene = this;
     
     var boundaries = this.calculateBoundaries( null, null, null );
-    assert && assert( boundaries.length === this.layers.length + 1, 'boundary count (' + boundaries.length + ') does not match layer count (' + this.layers.length + ') + 1' );
+    sceneryAssert && sceneryAssert( boundaries.length === this.layers.length + 1, 'boundary count (' + boundaries.length + ') does not match layer count (' + this.layers.length + ') + 1' );
     
     // count how many 'self' trails there are
     var eachTrailUnderPaintedCount = 0;
@@ -968,10 +966,10 @@ define( function( require ) {
       if ( trail.isPainted() ) {
         eachTrailUnderPaintedCount++;
         
-        assert && assert( trail.getInstance(), 'every painted trail must have an instance' );
+        sceneryAssert && sceneryAssert( trail.getInstance(), 'every painted trail must have an instance' );
       }
       
-      assert && assert( trail.getInstance() && trail.getInstance().trail.equals( trail ), 'every trail must have a single corresponding instance' );
+      sceneryAssert && sceneryAssert( trail.getInstance() && trail.getInstance().trail.equals( trail ), 'every trail must have a single corresponding instance' );
     } );
     
     var layerPaintedCount = 0;
@@ -989,20 +987,20 @@ define( function( require ) {
       scenery.Trail.eachPaintedTrailBetween( layer.startPaintedTrail, layer.endPaintedTrail, function( trail ) {
         selfCount++;
       }, false, scene );
-      assert && assert( selfCount > 0, 'every layer must have at least one self trail' );
+      sceneryAssert && sceneryAssert( selfCount > 0, 'every layer must have at least one self trail' );
       layerIterationPaintedCount += selfCount;
     } );
     
-    assert && assert( eachTrailUnderPaintedCount === layerPaintedCount, 'cross-referencing self trail counts: layerPaintedCount, ' + eachTrailUnderPaintedCount + ' vs ' + layerPaintedCount );
-    assert && assert( eachTrailUnderPaintedCount === layerIterationPaintedCount, 'cross-referencing self trail counts: layerIterationPaintedCount, ' + eachTrailUnderPaintedCount + ' vs ' + layerIterationPaintedCount );
+    sceneryAssert && sceneryAssert( eachTrailUnderPaintedCount === layerPaintedCount, 'cross-referencing self trail counts: layerPaintedCount, ' + eachTrailUnderPaintedCount + ' vs ' + layerPaintedCount );
+    sceneryAssert && sceneryAssert( eachTrailUnderPaintedCount === layerIterationPaintedCount, 'cross-referencing self trail counts: layerIterationPaintedCount, ' + eachTrailUnderPaintedCount + ' vs ' + layerIterationPaintedCount );
     
     _.each( this.layers, function( layer ) {
-      assert && assert( layer.startPaintedTrail.compare( layer.endPaintedTrail ) <= 0, 'proper ordering on layer trails' );
+      sceneryAssert && sceneryAssert( layer.startPaintedTrail.compare( layer.endPaintedTrail ) <= 0, 'proper ordering on layer trails' );
     } );
     
     for ( var i = 1; i < this.layers.length; i++ ) {
-      assert && assert( this.layers[i-1].endPaintedTrail.compare( this.layers[i].startPaintedTrail ) === -1, 'proper ordering of layer trail boundaries in scene.layers array' );
-      assert && assert( this.layers[i-1].endBoundary === this.layers[i].startBoundary, 'proper sharing of boundaries' );
+      sceneryAssert && sceneryAssert( this.layers[i-1].endPaintedTrail.compare( this.layers[i].startPaintedTrail ) === -1, 'proper ordering of layer trail boundaries in scene.layers array' );
+      sceneryAssert && sceneryAssert( this.layers[i-1].endBoundary === this.layers[i].startBoundary, 'proper sharing of boundaries' );
     }
     
     _.each( this.layers, function( layer ) {
@@ -1016,15 +1014,15 @@ define( function( require ) {
       }, false, scene );
       
       // verify that the layer has an identical record of trails compared to the trails inside its boundaries
-      assert && assert( layerTrails.length === computedTrails.length, 'layer has incorrect number of tracked trails' );
+      sceneryAssert && sceneryAssert( layerTrails.length === computedTrails.length, 'layer has incorrect number of tracked trails' );
       _.each( layerTrails, function( trail ) {
-        assert && assert( _.some( computedTrails, function( otherTrail ) { return trail.equals( otherTrail ); } ), 'layer has a tracked trail discrepancy' );
+        sceneryAssert && sceneryAssert( _.some( computedTrails, function( otherTrail ) { return trail.equals( otherTrail ); } ), 'layer has a tracked trail discrepancy' );
       } );
       
       // verify that each trail has the same (or null) renderer as the layer
       scenery.Trail.eachTrailBetween( layer.startPaintedTrail, layer.endPaintedTrail, function( trail ) {
         var node = trail.lastNode();
-        assert && assert( !node.renderer || node.renderer.name === layer.type.name, 'specified renderers should match the layer renderer' );
+        sceneryAssert && sceneryAssert( !node.renderer || node.renderer.name === layer.type.name, 'specified renderers should match the layer renderer' );
       }, false, scene );
     } );
     
@@ -1035,7 +1033,7 @@ define( function( require ) {
       if ( trail.lastNode().layerSplitBefore ) {
         beforeSplitTrail = trail.previousPainted();
         afterSplitTrail = trail.lastNode().isPainted() ? trail : trail.nextPainted();
-        assert && assert( !beforeSplitTrail || !afterSplitTrail || beforeSplitTrail.getInstance().layer !== afterSplitTrail.getInstance().layer, 'layerSplitBefore layers need to be different' );
+        sceneryAssert && sceneryAssert( !beforeSplitTrail || !afterSplitTrail || beforeSplitTrail.getInstance().layer !== afterSplitTrail.getInstance().layer, 'layerSplitBefore layers need to be different' );
       }
       if ( trail.lastNode().layerSplitAfter ) {
         // shift a pointer from the (nested) end of the trail to the next isBefore (if available)
@@ -1048,7 +1046,7 @@ define( function( require ) {
         if ( ptr ) {
           beforeSplitTrail = ptr.trail.previousPainted();
           afterSplitTrail = ptr.trail.lastNode().isPainted() ? ptr.trail : ptr.trail.nextPainted();
-          assert && assert( !beforeSplitTrail || !afterSplitTrail || beforeSplitTrail.getInstance().layer !== afterSplitTrail.getInstance().layer, 'layerSplitAfter layers need to be different' );
+          sceneryAssert && sceneryAssert( !beforeSplitTrail || !afterSplitTrail || beforeSplitTrail.getInstance().layer !== afterSplitTrail.getInstance().layer, 'layerSplitAfter layers need to be different' );
         }
       }
     } );

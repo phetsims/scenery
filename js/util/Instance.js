@@ -9,8 +9,6 @@
 define( function( require ) {
   "use strict";
   
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-  
   var scenery = require( 'SCENERY/scenery' );
   
   // layer should be null if the trail isn't to a painted node
@@ -20,7 +18,7 @@ define( function( require ) {
     this.oldLayer = layer; // used during stitching
     
     // assertion not enabled, since at the start we don't specify a layer (it will be constructed later)
-    // assert && assert( trail.lastNode().isPainted() === ( layer !== null ), 'Has a layer iff is painted' );
+    // sceneryAssert && sceneryAssert( trail.lastNode().isPainted() === ( layer !== null ), 'Has a layer iff is painted' );
     
     // TODO: SVG layer might want to put data (group/fragment) references here (indexed by layer ID)
     this.data = {};
@@ -94,18 +92,18 @@ define( function( require ) {
     },
     
     addInstance: function( instance ) {
-      assert && assert( instance, 'Instance.addInstance cannot have falsy parameter' );
+      sceneryAssert && sceneryAssert( instance, 'Instance.addInstance cannot have falsy parameter' );
       this.children.push( instance );
     },
     
     insertInstance: function( index, instance ) {
-      assert && assert( instance, 'Instance.insert cannot have falsy instance parameter' );
-      assert && assert( index >= 0 && index <= this.children.length, 'Instance.insert has bad index ' + index + ' for length ' + this.children.length );
+      sceneryAssert && sceneryAssert( instance, 'Instance.insert cannot have falsy instance parameter' );
+      sceneryAssert && sceneryAssert( index >= 0 && index <= this.children.length, 'Instance.insert has bad index ' + index + ' for length ' + this.children.length );
       this.children.splice( index, 0, instance );
     },
     
     removeInstance: function( index ) {
-      assert && assert( typeof index === 'number' );
+      sceneryAssert && sceneryAssert( typeof index === 'number' );
       this.children.splice( index, 1 );
     },
     
@@ -125,7 +123,7 @@ define( function( require ) {
     },
     
     equals: function( other ) {
-      assert && assert( ( this === other ) === this.trail.equals( other.trail ), 'We assume a 1-1 mapping from trails to instances' );
+      sceneryAssert && sceneryAssert( ( this === other ) === this.trail.equals( other.trail ), 'We assume a 1-1 mapping from trails to instances' );
       return this === other;
     },
     
@@ -187,7 +185,7 @@ define( function( require ) {
     
     notifyDirtySelfPaint: function() {
       sceneryEventLog && sceneryEventLog( 'notifyDirtySelfPaint: ' + this.trail.toString() + ', ' + this.getLayerString() );
-      assert && assert( this.getNode().isPainted(), 'Instance needs to be painted for notifyDirtySelfPaint' );
+      sceneryAssert && sceneryAssert( this.getNode().isPainted(), 'Instance needs to be painted for notifyDirtySelfPaint' );
       this.layer.notifyDirtySelfPaint( this );
     },
     

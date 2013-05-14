@@ -14,8 +14,6 @@
 define( function( require ) {
   'use strict';
   
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-  
   var inherit = require( 'PHET_CORE/inherit' );
   var Bounds2 = require( 'DOT/Bounds2' );
   
@@ -40,7 +38,7 @@ define( function( require ) {
    *     HTMLImageElement
    */
   scenery.Image = function Image( image, options ) {
-    assert && assert( image, "image should be available" );
+    sceneryAssert && sceneryAssert( image, "image should be available" );
     
     // allow not passing an options object
     options = options || {};

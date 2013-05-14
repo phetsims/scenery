@@ -9,9 +9,6 @@
 define( function( require ) {
   'use strict';
   
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-  var assertExtra = require( 'ASSERT/assert' )( 'scenery.extra', true );
-  
   var Bounds2 = require( 'DOT/Bounds2' );
   var Transform3 = require( 'DOT/Transform3' );
   
@@ -41,7 +38,7 @@ define( function( require ) {
     this.cssRotation = args.cssRotation;       // CSS for the rotation
     this.cssScale = args.cssScale;             // CSS for the scaling
     this.cssTransform = args.cssTransform;     // CSS for the entire base node (will ignore other partial transforms)
-    assert && assert( !( this.usesPartialCSSTransforms && this.cssTransform ), 'Do not specify both partial and complete CSS transform arguments.' );
+    sceneryAssert && sceneryAssert( !( this.usesPartialCSSTransforms && this.cssTransform ), 'Do not specify both partial and complete CSS transform arguments.' );
     
     // initialize to fully dirty so we draw everything the first time
     // bounds in global coordinate frame
@@ -55,7 +52,7 @@ define( function( require ) {
       this.baseTrail = new scenery.Trail( this.scene );
     } else {
       this.baseTrail = this.startPaintedTrail.upToNode( this.baseNode );
-      assert && assert( this.baseTrail.lastNode() === this.baseNode );
+      sceneryAssert && sceneryAssert( this.baseTrail.lastNode() === this.baseNode );
     }
     
     // we reference all painted trails in an unordered way
@@ -78,7 +75,7 @@ define( function( require ) {
     this.baseNode.addEventListener( this.baseNodeListener );
     
     this.fitToBounds = this.usesPartialCSSTransforms || this.cssTransform;
-    assert && assert( this.fitToBounds || this.baseNode === this.scene, 'If the baseNode is not the scene, we need to fit the bounds' );
+    sceneryAssert && sceneryAssert( this.fitToBounds || this.baseNode === this.scene, 'If the baseNode is not the scene, we need to fit the bounds' );
     
     // used for CSS transforms where we need to transform our base node's bounds into the (0,0,w,h) bounds range
     this.baseNodeTransform = new Transform3();
@@ -145,9 +142,9 @@ define( function( require ) {
     
     // adds a trail (with the last node) to the layer
     addNodeFromTrail: function( trail ) {
-      if ( assert ) {
+      if ( sceneryAssert ) {
         _.each( this._layerTrails, function( otherTrail ) {
-          assert( !trail.equals( otherTrail ), 'trail in addNodeFromTrail should not already exist in a layer' );
+          sceneryAssert( !trail.equals( otherTrail ), 'trail in addNodeFromTrail should not already exist in a layer' );
         } );
       }
       
@@ -168,7 +165,7 @@ define( function( require ) {
           break;
         }
       }
-      assert && assert( i < this._layerTrails.length );
+      sceneryAssert && sceneryAssert( i < this._layerTrails.length );
       
       this._layerTrails.splice( i, 1 );
     },

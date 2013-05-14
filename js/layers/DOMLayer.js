@@ -19,8 +19,6 @@
 define( function( require ) {
   'use strict';
   
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-  
   var inherit = require( 'PHET_CORE/inherit' );
   var Bounds2 = require( 'DOT/Bounds2' );
   
@@ -84,7 +82,7 @@ define( function( require ) {
         var otherTrail = this.trails[insertionIndex];
         otherTrail.reindex();
         var comparison = otherTrail.compare( trail );
-        assert && assert( comparison !== 0, 'Trail has already been inserted into the DOMLayer' );
+        sceneryAssert && sceneryAssert( comparison !== 0, 'Trail has already been inserted into the DOMLayer' );
         if ( comparison === 1 ) { // TODO: enum values!
           break;
         }
@@ -105,7 +103,7 @@ define( function( require ) {
       this.reindexTrails();
       
       var element = this.getElementFromTrail( trail );
-      assert && assert( element, 'Trail does not exist in the DOMLayer' );
+      sceneryAssert && sceneryAssert( element, 'Trail does not exist in the DOMLayer' );
       
       delete this.idElementMap[trail.getUniqueId];
       delete this.idTrailMap[trail.getUniqueId];

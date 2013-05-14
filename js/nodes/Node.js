@@ -10,8 +10,6 @@
 define( function( require ) {
   'use strict';
   
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-  
   var Bounds2 = require( 'DOT/Bounds2' );
   var Transform3 = require( 'DOT/Transform3' );
   var Matrix3 = require( 'DOT/Matrix3' );
@@ -132,9 +130,9 @@ define( function( require ) {
     constructor: Node,
     
     insertChild: function( index, node ) {
-      assert && assert( node !== null && node !== undefined, 'insertChild cannot insert a null/undefined child' );
-      assert && assert( !_.contains( this._children, node ), 'Parent already contains child' );
-      assert && assert( node !== this, 'Cannot add self as a child' );
+      sceneryAssert && sceneryAssert( node !== null && node !== undefined, 'insertChild cannot insert a null/undefined child' );
+      sceneryAssert && sceneryAssert( !_.contains( this._children, node ), 'Parent already contains child' );
+      sceneryAssert && sceneryAssert( node !== this, 'Cannot add self as a child' );
       
       node._parents.push( this );
       this._children.splice( index, 0, node );
@@ -152,7 +150,7 @@ define( function( require ) {
     },
     
     removeChild: function( node ) {
-      assert && assert( this.isChild( node ) );
+      sceneryAssert && sceneryAssert( this.isChild( node ) );
       
       node.markOldPaint( false );
       
@@ -301,7 +299,7 @@ define( function( require ) {
     
     validatePaint: function() {
       if ( this._paintDirty ) {
-        assert && assert( this.isPainted(), 'Only painted nodes can have self dirty paint' );
+        sceneryAssert && sceneryAssert( this.isPainted(), 'Only painted nodes can have self dirty paint' );
         if ( !this._subtreePaintDirty ) {
           // if the subtree is clean, just notify the self (only will hit one layer, instead of possibly multiple ones)
           this.notifyDirtySelfPaint();
@@ -349,7 +347,7 @@ define( function( require ) {
     
     // mark the paint of this node as invalid, so its new region will be painted
     invalidatePaint: function() {
-      assert && assert( this.isPainted(), 'Can only call invalidatePaint on a painted node' );
+      sceneryAssert && sceneryAssert( this.isPainted(), 'Can only call invalidatePaint on a painted node' );
       this._paintDirty = true;
       
       // and set flags for all ancestors
@@ -380,7 +378,7 @@ define( function( require ) {
     
     // called to notify that self rendering will display different paint, with possibly different bounds
     invalidateSelf: function( newBounds ) {
-      assert && assert( newBounds.isEmpty() || newBounds.isFinite() , "Bounds must be empty or finite in invalidateSelf");
+      sceneryAssert && sceneryAssert( newBounds.isEmpty() || newBounds.isFinite() , "Bounds must be empty or finite in invalidateSelf");
       
       // mark the old region to be repainted, regardless of whether the actual bounds change
       this.notifyBeforeSelfChange();
@@ -421,7 +419,7 @@ define( function( require ) {
     isChild: function( potentialChild ) {
       var ourChild = _.contains( this._children, potentialChild );
       var itsParent = _.contains( potentialChild._parents, this );
-      assert && assert( ourChild === itsParent );
+      sceneryAssert && sceneryAssert( ourChild === itsParent );
       return ourChild;
     },
     
@@ -449,7 +447,7 @@ define( function( require ) {
      * If options.pruneUnpickable is false, unpickable nodes will be allowed in the trail.
      */
     trailUnderPoint: function( point, options ) {
-      assert && assert( point, 'trailUnderPointer requires a point' );
+      sceneryAssert && sceneryAssert( point, 'trailUnderPointer requires a point' );
       
       var pruneInvisible = ( !options || options.pruneInvisible === undefined ) ? true : options.pruneInvisible;
       var pruneUnpickable = ( !options || options.pruneUnpickable === undefined ) ? true : options.pruneUnpickable;
@@ -548,7 +546,7 @@ define( function( require ) {
     
     removeInputListener: function( listener ) {
       // ensure the listener is in our list
-      assert && assert( _.indexOf( this._inputListeners, listener ) !== -1 );
+      sceneryAssert && sceneryAssert( _.indexOf( this._inputListeners, listener ) !== -1 );
       
       this._inputListeners.splice( _.indexOf( this._inputListeners, listener ), 1 );
       return this;
@@ -970,7 +968,7 @@ define( function( require ) {
     setRenderer: function( renderer ) {
       var newRenderer;
       if ( typeof renderer === 'string' ) {
-        assert && assert( scenery.Renderer[renderer], 'unknown renderer in setRenderer: ' + renderer );
+        sceneryAssert && sceneryAssert( scenery.Renderer[renderer], 'unknown renderer in setRenderer: ' + renderer );
         newRenderer = scenery.Renderer[renderer];
       } else if ( renderer instanceof scenery.Renderer ) {
         newRenderer = renderer;
@@ -980,7 +978,7 @@ define( function( require ) {
         throw new Error( 'unrecognized type of renderer: ' + renderer );
       }
       if ( newRenderer !== this._renderer ) {
-        assert && assert( !this.isPainted() || !newRenderer || _.contains( this._supportedRenderers, newRenderer ), 'renderer ' + newRenderer + ' not supported by ' + this.constructor.name );
+        sceneryAssert && sceneryAssert( !this.isPainted() || !newRenderer || _.contains( this._supportedRenderers, newRenderer ), 'renderer ' + newRenderer + ' not supported by ' + this.constructor.name );
         this._renderer = newRenderer;
         
         this.updateLayerType();
@@ -1049,7 +1047,7 @@ define( function( require ) {
       
       while ( node ) {
         trail.addAncestor( node );
-        assert && assert( node._parents.length <= 1 );
+        sceneryAssert && sceneryAssert( node._parents.length <= 1 );
         node = node._parents[0]; // should be undefined if there aren't any parents
       }
       
@@ -1101,7 +1099,7 @@ define( function( require ) {
       }
       
       // ensure that there are no edges left, since then it would contain a circular reference
-      assert && assert( _.every( edges, function( children ) {
+      sceneryAssert && sceneryAssert( _.every( edges, function( children ) {
         return _.every( children, function( final ) { return false; } );
       } ), 'circular reference check' );
       
@@ -1249,7 +1247,7 @@ define( function( require ) {
           new scenery.Image( canvas, { x: -x, y: -y } )
         ] } );
       }, x, y, width, height );
-      assert && assert( result, 'toCanvasNodeSynchronous requires that the node can be rendered only using Canvas' );
+      sceneryAssert && sceneryAssert( result, 'toCanvasNodeSynchronous requires that the node can be rendered only using Canvas' );
       return result;
     },
     
@@ -1261,7 +1259,7 @@ define( function( require ) {
           new scenery.Image( dataURL, { x: -x, y: -y } )
         ] } );
       }, x, y, width, height );
-      assert && assert( result, 'toDataURLNodeSynchronous requires that the node can be rendered only using Canvas' );
+      sceneryAssert && sceneryAssert( result, 'toDataURLNodeSynchronous requires that the node can be rendered only using Canvas' );
       return result;
     },
     
@@ -1274,8 +1272,8 @@ define( function( require ) {
     },
     
     addInstance: function( instance ) {
-      assert && assert( instance.getNode() === this, 'Must be an instance of this Node' );
-      assert && assert( !_.find( this._instances, function( other ) { return instance.equals( other ); } ), 'Cannot add duplicates of an instance to a Node' );
+      sceneryAssert && sceneryAssert( instance.getNode() === this, 'Must be an instance of this Node' );
+      sceneryAssert && sceneryAssert( !_.find( this._instances, function( other ) { return instance.equals( other ); } ), 'Cannot add duplicates of an instance to a Node' );
       this._instances.push( instance );
     },
     
@@ -1288,14 +1286,14 @@ define( function( require ) {
       } else {
         result = _.find( this._instances, function( instance ) { return trail.equals( instance.trail ); } );
       }
-      assert && assert( result, 'Could not find an instance for the trail ' + trail.toString() );
-      assert && assert( result.trail.equals( trail ), 'Instance has an incorrect Trail' );
+      sceneryAssert && sceneryAssert( result, 'Could not find an instance for the trail ' + trail.toString() );
+      sceneryAssert && sceneryAssert( result.trail.equals( trail ), 'Instance has an incorrect Trail' );
       return result;
     },
     
     removeInstance: function( instance ) {
       var index = _.indexOf( this._instances, instance ); // actual instance equality (NOT capitalized, normal meaning)
-      assert && assert( index !== -1, 'Cannot remove an Instance from a Node if it was not there' );
+      sceneryAssert && sceneryAssert( index !== -1, 'Cannot remove an Instance from a Node if it was not there' );
       this._instances.splice( index, 1 );
     },
     
@@ -1381,7 +1379,7 @@ define( function( require ) {
       // concatenation like this has been faster than getting a unique trail, getting its transform, and applying it
       while ( node ) {
         matrices.push( node._transform.getMatrix() );
-        assert && assert( node._parents[1] === undefined, 'getLocalToGlobalMatrix unable to work for DAG' );
+        sceneryAssert && sceneryAssert( node._parents[1] === undefined, 'getLocalToGlobalMatrix unable to work for DAG' );
         node = node._parents[0];
       }
       
@@ -1413,7 +1411,7 @@ define( function( require ) {
       while ( node ) {
         // in-place multiplication
         node._transform.getMatrix().multiplyVector2( resultPoint );
-        assert && assert( node._parents[1] === undefined, 'localToGlobalPoint unable to work for DAG' );
+        sceneryAssert && sceneryAssert( node._parents[1] === undefined, 'localToGlobalPoint unable to work for DAG' );
         node = node._parents[0];
       }
       return resultPoint;
@@ -1427,7 +1425,7 @@ define( function( require ) {
       var transforms = [];
       while ( node ) {
         transforms.push( node._transform );
-        assert && assert( node._parents[1] === undefined, 'globalToLocalPoint unable to work for DAG' );
+        sceneryAssert && sceneryAssert( node._parents[1] === undefined, 'globalToLocalPoint unable to work for DAG' );
         node = node._parents[0];
       }
       
@@ -1454,29 +1452,29 @@ define( function( require ) {
     
     // like localToGlobalPoint, but without applying this node's transform
     parentToGlobalPoint: function( point ) {
-      assert && assert( this.parents.length <= 1, 'parentToGlobalPoint unable to work for DAG' );
+      sceneryAssert && sceneryAssert( this.parents.length <= 1, 'parentToGlobalPoint unable to work for DAG' );
       return this.parents.length ? this.parents[0].localToGlobalPoint( point ) : point;
     },
     
     // like localToGlobalBounds, but without applying this node's transform
     parentToGlobalBounds: function( bounds ) {
-      assert && assert( this.parents.length <= 1, 'parentToGlobalBounds unable to work for DAG' );
+      sceneryAssert && sceneryAssert( this.parents.length <= 1, 'parentToGlobalBounds unable to work for DAG' );
       return this.parents.length ? this.parents[0].localToGlobalBounds( bounds ) : bounds;
     },
     
     globalToParentPoint: function( point ) {
-      assert && assert( this.parents.length <= 1, 'globalToParentPoint unable to work for DAG' );
+      sceneryAssert && sceneryAssert( this.parents.length <= 1, 'globalToParentPoint unable to work for DAG' );
       return this.parents.length ? this.parents[0].globalToLocalPoint( point ) : point;
     },
     
     globalToParentBounds: function( bounds ) {
-      assert && assert( this.parents.length <= 1, 'globalToParentBounds unable to work for DAG' );
+      sceneryAssert && sceneryAssert( this.parents.length <= 1, 'globalToParentBounds unable to work for DAG' );
       return this.parents.length ? this.parents[0].globalToLocalBounds( bounds ) : bounds;
     },
     
     // get the Bounds2 of this node in the global coordinate frame.  Does not work for DAG.
     getGlobalBounds: function() {
-      assert && assert( this.parents.length <= 1, 'globalBounds unable to work for DAG' );
+      sceneryAssert && sceneryAssert( this.parents.length <= 1, 'globalBounds unable to work for DAG' );
       return this.parentToGlobalBounds( this.getBounds() );
     },
     

@@ -26,8 +26,6 @@
 define( function( require ) {
   'use strict';
   
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-  
   var scenery = require( 'SCENERY/scenery' );
   
   // options from http://www.w3.org/TR/css3-fonts/
@@ -54,7 +52,7 @@ define( function( require ) {
     // allow listeners to be notified on any changes
     this.listeners = [];
     
-    if ( assert ) {
+    if ( sceneryAssert ) {
       // only do this if assertions are enabled, otherwise we won't access it at all
       this.immutable = false;
     }
@@ -77,7 +75,7 @@ define( function( require ) {
     
     // invalidate cached data and notify listeners of the change
     invalidateFont: function() {
-      assert && assert( !this.immutable, 'cannot change immutable font instance' );
+      sceneryAssert && sceneryAssert( !this.immutable, 'cannot change immutable font instance' );
       
       this.cachedValues = null;
       
@@ -106,7 +104,7 @@ define( function( require ) {
           'lineHeight'
         ] );
       }
-      assert && assert( property in this.cachedValues );
+      sceneryAssert && sceneryAssert( property in this.cachedValues );
       return this.cachedValues[property];
     },
     setProperty: function( property, value ) {
@@ -194,12 +192,12 @@ define( function( require ) {
     
     // listener should be a callback expecting no arguments, listener() will be called when the font changes
     addFontListener: function( listener ) {
-      assert && assert( !_.contains( this.listeners, listener ) );
+      sceneryAssert && sceneryAssert( !_.contains( this.listeners, listener ) );
       this.listeners.push( listener );
     },
     
     removeFontListener: function( listener ) {
-      assert && assert( _.contains( this.listeners, listener ) );
+      sceneryAssert && sceneryAssert( _.contains( this.listeners, listener ) );
       this.listeners.splice( _.indexOf( this.listeners, listener ), 1 );
     }
   };

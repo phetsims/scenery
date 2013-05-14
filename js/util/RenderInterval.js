@@ -10,14 +10,12 @@
 define( function( require ) {
   'use strict';
   
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-  
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
   
   // start and end are of type {Trail} or null (indicates all the way to the start / end)
   scenery.RenderInterval = function( start, end ) {
-    assert && assert( !start || !end || start.compare( end ) <= 0, 'RenderInterval parameters must not be out of order' );
+    sceneryAssert && sceneryAssert( !start || !end || start.compare( end ) <= 0, 'RenderInterval parameters must not be out of order' );
     
     this.start = start;
     this.end = end;
@@ -55,14 +53,14 @@ define( function( require ) {
      * that a !== b || a === null for either interval, since otherwise it is not well defined.
      */
     exclusiveUnionable: function( interval ) {
-      assert && assert ( this.isValidExclusive(), 'exclusiveUnionable requires exclusive intervals' );
-      assert && assert ( interval.isValidExclusive(), 'exclusiveUnionable requires exclusive intervals' );
+      sceneryAssert && sceneryAssert ( this.isValidExclusive(), 'exclusiveUnionable requires exclusive intervals' );
+      sceneryAssert && sceneryAssert ( interval.isValidExclusive(), 'exclusiveUnionable requires exclusive intervals' );
       return ( !this.start || !interval.end || this.start.compare( interval.end ) === -1 ) &&
              ( !this.end || !interval.start || this.end.compare( interval.start ) === 1 );
     },
     
     exclusiveContains: function( trail ) {
-      assert && assert( trail );
+      sceneryAssert && sceneryAssert( trail );
       return ( !this.start || this.start.compare( trail ) < 0 ) && ( !this.end || this.end.compare( trail ) > 0 );
     },
     

@@ -12,13 +12,11 @@
 define( function( require ) {
   'use strict';
   
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-  
   var scenery = require( 'SCENERY/scenery' );
   
   scenery.Event = function( args ) {
     // ensure that all of the required args are supplied
-    assert && assert( args.trail &&
+    sceneryAssert && sceneryAssert( args.trail &&
                       args.type &&
                       args.pointer &&
                       args.domEvent &&

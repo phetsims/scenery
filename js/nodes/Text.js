@@ -19,8 +19,6 @@
 define( function( require ) {
   'use strict';
   
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-  
   var inherit = require( 'PHET_CORE/inherit' );
   var escapeHTML = require( 'PHET_CORE/escapeHTML' );
   var Bounds2 = require( 'DOT/Bounds2' );
@@ -100,7 +98,7 @@ define( function( require ) {
     },
     
     setBoundsMethod: function( method ) {
-      assert && assert( method === 'fast' || method === 'fastCanvas' || method === 'accurate', '"fast" and "accurate" are the only allowed boundsMethod values for Text' );
+      sceneryAssert && sceneryAssert( method === 'fast' || method === 'fastCanvas' || method === 'accurate', '"fast" and "accurate" are the only allowed boundsMethod values for Text' );
       if ( method !== this._boundsMethod ) {
         this._boundsMethod = method;
         this.updateTextFlags();
@@ -158,7 +156,7 @@ define( function( require ) {
       if ( this._boundsMethod === 'fast' || this._boundsMethod === 'fastCanvas' ) {
         this.invalidateSelf( this._isHTML ? this.approximateDOMBounds() : this.approximateSVGBounds() );
       } else {
-        assert && assert( !this._isHTML, 'HTML text is not allowed with the accurate bounds method' );
+        sceneryAssert && sceneryAssert( !this._isHTML, 'HTML text is not allowed with the accurate bounds method' );
         this.invalidateSelf( this.accurateCanvasBounds() );
       }
       

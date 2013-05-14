@@ -9,8 +9,6 @@
 define( function( require ) {
   'use strict';
   
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-  
   var scenery = require( 'SCENERY/scenery' );
   
   var styleElement = document.createElement( 'style' );
@@ -18,8 +16,8 @@ define( function( require ) {
   document.head.appendChild( styleElement );
   
   var stylesheet = document.styleSheets[document.styleSheets.length-1];
-  assert && assert( stylesheet.disabled === false );
-  assert && assert( stylesheet.cssRules.length === 0 );
+  sceneryAssert && sceneryAssert( stylesheet.disabled === false );
+  sceneryAssert && sceneryAssert( stylesheet.cssRules.length === 0 );
   
   return {
     stylesheet: stylesheet,
