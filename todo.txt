@@ -4,10 +4,10 @@ Examine:
     Others from html5 game engines (particularly webgl)
 
 Priorities:
-    *** FIX devious drag! Canvas renderer + console not being open
-    *** Travis for tests
-    *** Unicode font tests - grab strings from every language for testing
-    Set default boundsMethod to 'fastCanvas'
+    * FIX devious drag! Canvas renderer + console not being open
+    * Travis for tests
+    ** Unicode font tests - grab strings from every language for testing
+    ** Set default boundsMethod to 'fastCanvas'
     Mouse buttons - are they pointers, like Key?
     Beware of closures! (test speeds, see https://developers.google.com/speed/articles/optimizing-javascript)
     For DOM / jQuery manipulation: https://developers.google.com/speed/articles/javascript-dom
@@ -20,7 +20,6 @@ Priorities:
     * Performance: Better event system handling (notification of common changes?)
         Layers could conceivably add a listener to a node with a specific trail reference, instead of doing a dispatch up the tree.
         Looks important for transform changes, since they are firing off 2 dispatchEventWithTransform calls, and it should be much better to notify the layers directly
-    Performance: Batch DOM (or at least CSS) changes to animation frames?
     Canvas-accurate bounds:
         Speed / performance (#16)
         Handle empty strings / nothing (currently getting NaNs) (#21)
@@ -34,7 +33,6 @@ Priorities:
             If it moves, we invalidate layering between the old and new points?
             Pass in into the layer strategy, etc. (check for canvas there)
     Flag for skipping dirty region handling and other overhead?
-    Beers law lab performance on shaker
     Mix-ins for drag handler?
     Performance
         Same-arity methods?
@@ -62,6 +60,7 @@ Tricky areas:
     Gradients / Patterns should not be changed after being passed to a node's fill/stroke, since the SVG def won't change, and we don't set up listeners
 
 Test:
+    More pixel tests
     RenderInterval
     Trail transforms
     Test issues (zero-bounds text, etc.)
@@ -121,6 +120,7 @@ General:
     RenderState - consider stack-based transforms
 
 Code:
+    Gruntfile - duplicated defines moved to single variable + references
     var Path = scenery.Path = ....
     scenery.TrailPointer.before( trail )  ?
     ** _supportedRenderers => supportedRenderers? (pushes on this array if shared in the prototype could be bad!)
@@ -203,33 +203,6 @@ DOM:
     Use display lists?
     Examine test code for considerations for implementing Shape.
 
-Layers / caching:
-    ** Consider option that would resize / position canvas/svg elements to smaller portions of the screen for lower memory usage (and possibly better performance?)
-        Tiling, possibly lock to every 16 pixels. Prevent back-and-forth every frame, and consider full size for animation vs changing
-        Would be setting position (layout change) and possibly width. If we can keep width the same, it may be faster?
-        * Also do this for CSS transforms on SVG. Resizing is causing slowness
-    Implications of last boundary's previousEndPointer being null? (vs scene.after)
-    * Make RendererOptions its own class with utilities, that can be added?
-    Performance hints
-        Dynamic, so we could set node.movement = 'dynamic' while moving, node.movement = 'static' while stationary?
-        Generalized performance flags, so that each node can vary is renderer / settings based on desired appearance
-            quality: 'low' / 'medium' / 'high' ?
-            flags like 'moving' or 'stationary' could help for dynamic objects. Scenery would then decide whether to optimize the layers or not
-    Transform "caching" should be shared between the CSS / Canvas(local)-based methods
-        Deal with making sure we don't have "clipping" of the bounds
-    ** Slight bit of rounding if necessary to pixel-aligned integral numbers may get performance benefits
-        Option to disallow subpixel handling?
-    Canvas / WebGL:
-        drawImage is used instead of CSS transforms, but same general model, and we should take the same flags.
-        "Global":
-            Could combine with the Layer's canvas stack?
-            A full scratch canvas wouldn't be able to take care of translations, but would be extremely fast for re-rendering things that didn't change at all.
-        "Local":
-            Possible to have a single scratch canvas for a Node, even in DAG situations, since RenderState only tracks clipping / opacity (handled already)
-    ** WebGL: Caching SVG / Canvas as a texture would allow extremely fast dragging?
-        How to allow children to render as a different renderer (canvas?) to then transfer into a texture?
-    Proof-of-concept for performance and DOM integration
-
 * Event dispatch:
     ** See inert subtrees at http://www.whatwg.org/specs/web-apps/current-work/multipage/editing.html#inert-subtrees
     * Hook into browser 'zoom' support? - pinch-to-zoom is different? Maybe we can detect?
@@ -285,21 +258,18 @@ Accessibility / shadow DOM:
         spec: http://www.w3.org/TR/shadow-dom/
 
 Node:
-    Circular checking:
-        add Node.getConnectedNodes() - map
     * Arbitrary ImageData filters, or filters that match SVG
         Like the colorTransform matrix, applied to node.filters?
     Support for setting listeners in the mutator?
         { inputListeners: [ new SimpleDragHandler() ] }
     Since cursor might support data URLs, we can have custom cursors?
     * A system for cursor handling that also supports dragging or 'persistent' cursor handling
-    Bounds after rotation seems to be a bit too wide
+    ** Bounds after rotation seems to be a bit too wide
     * Fire event on change of layerStrategy, and possibly rethink layerStrategy design
     Mix-in notifier for listeners. Backbone?
     Visibility interaction with dirty paint / bounds, and events based on that
         Scene.updateLayer shouldn't be called if only invisible nodes were changed?
     Don't send mark updates on invisible layers? Visibility change causes repaint?
-    General optimization and organization so we can extract "self" from child rendering bounds, what is repainted, etc. better.
     Function for higher-performance possibly-expanded bounds for redraw?
         Should we have an option so that selfBounds uses this?
     For bounds checking during rendering, isInGlobalBounds( globalBounds, currentTransform ) would help, and shapes could be more specific
@@ -312,20 +282,41 @@ Text:
     WebGL options
 
 Scene:
-    Acceleration of layer lookup
     Spread out z-indices and be adaptive so we don't have to change as many indices where possible
-    refreshLayers() implementation (mostly completed, but need to hit the 'matching' cases properly)
 
 Trail:
-    ** Fast Trail lookup data structure (used in scenes to find where a trail is in terms of pointers, and also for Node-to-trail handling)
     Verify current indexing handling (is it sufficient to just reindex trails on layer refreshes?)
-    DO we need indices in Node.dispatchEvent? May be bottleneck
     Cleanup of nestedForwards/nestedBackwards, possibly based on a Side-like implementation. Decent code duplication!
     Better name for copy()? clone()? getCopy()? Possibly use a copy constructor?
     depthFirstUntil should possibly have option for defensive copies of the pointers?
 
 Performance:
-    Strip out assertions?
+    Layers / caching:
+        **** Consider option that would resize / position canvas/svg elements to smaller portions of the screen for lower memory usage (and possibly better performance?)
+            Tiling, possibly lock to every 16 pixels. Prevent back-and-forth every frame, and consider full size for animation vs changing
+            Would be setting position (layout change) and possibly width. If we can keep width the same, it may be faster?
+            * Also do this for CSS transforms on SVG. Resizing is causing slowness
+        * Make RendererOptions its own class with utilities, that can be added?
+        Performance hints
+            Dynamic, so we could set node.movement = 'dynamic' while moving, node.movement = 'static' while stationary?
+            Generalized performance flags, so that each node can vary is renderer / settings based on desired appearance
+                quality: 'low' / 'medium' / 'high' ?
+                flags like 'moving' or 'stationary' could help for dynamic objects. Scenery would then decide whether to optimize the layers or not
+        Transform "caching" should be shared between the CSS / Canvas(local)-based methods
+            Deal with making sure we don't have "clipping" of the bounds
+        ** Slight bit of rounding if necessary to pixel-aligned integral numbers may get performance benefits
+            Option to disallow subpixel handling?
+        Canvas / WebGL:
+            drawImage is used instead of CSS transforms, but same general model, and we should take the same flags.
+            "Global":
+                Could combine with the Layer's canvas stack?
+                A full scratch canvas wouldn't be able to take care of translations, but would be extremely fast for re-rendering things that didn't change at all.
+            "Local":
+                Possible to have a single scratch canvas for a Node, even in DAG situations, since RenderState only tracks clipping / opacity (handled already)
+        ** WebGL: Caching SVG / Canvas as a texture would allow extremely fast dragging?
+            How to allow children to render as a different renderer (canvas?) to then transfer into a texture?
+        Proof-of-concept for performance and DOM integration
+    * Matching in layering code
     * Consider linked-trails on instances, to take up less memory
     affectedLayers: compare performance with tree inspection (iterate in nested order from each side until we find painted nodes)
         Also even faster to keep this updated in the instances?
@@ -342,93 +333,19 @@ Performance:
         Non-literal switch label:
             Matrix3.inverted
             Matrix3.getSVGTransform
-    Event Abstraction:
-        *** markSceneForRemoval speedups significant?
-        NOTE: quick check to see if changes that 'affect rest of tree' affect other layers, look at isAfter node vs end?
-        NOTE: Node wouldn't store all affected layers (for each trail reference), only first and last
-        NOTE: scene/layer dispose has to be accurate and enforced if we store info on nodes. check in layer audit?
-        Instance
-            Trail
-            Layer (if painted) (on matching layer refresh stitches, just switch the layer reference)
-            Scene
-            (probably) children / parent
-            (possibly) bottom/top affected layers (and implicitly all between)
-        Layer
-            Add instance count, so in the stitching we can verify that if X instances are removed the layer should disappear
-            Ability to list instances or trails (or check stitching to see how we move trails from one layer to another)
-                Also for layerAudit
-        Check:
-            _layerTrails
-            getLayerTrails
-            getPaintedTrailCount
-        Instance Events API:
-            mark for: insertion (to parent), removal (from parent), refresh, then stitch
-            dirtyPaint( boundsChanged, affectsChildren )
-                self old paint dirty
-                subtree old dirty
-                self dirty                   (fill change)
-                self dirty, bounds change    (changed line width, shape, text, image)
-                subtree dirty                (visibility, opacity)
-                subtree dirty, bounds change (add/remove from graph)
-            transform
-                before/after?
-            boundsAccuracy
-        * Layer needs:
-            Canvas
-                Global changed bounds (if bounds change, both old place and the newest)
-                Bounds accuracy count
-            SVG
-                (subtrail-self) update fragment, defs, group
-            DOM
-                (self) Update DOM element on that type of change
-                    (self) transform on Text, since it relies on any text/font changes
-                (subtrail) Transform (CSS)
-                (subtrail) Visibility / Opacity
-            Overall:
-                visibilityChanged
-                opacityChanged
-                beforeSelfChange (old self paint?)
-                beforeSubtreeChange (old paint)
-                transformChanged
-                paintChange (e.g. from validatePaint/validateBounds?)
-                boundsChange?
-        Current notifications:
-            marking and stitching (direct)
-            markOldPaint:
-                self (from invalidateSelf)
-                subtree (from removeNode)
-                subtree (before transform)
-                subtree (visibility)
-                subtree (opacity)
-            validateBounds - if self bounds changed, mark that
-            validatePaint - if dirty paint, mark total bounds
-    Thoughts:
-        Nodes could track what layer types they are rendering under, and thus what optimizations they could make?
-        Also track affected layers this way?
+    Instances:
+        *** bottom/top affected layers (store, or do fast traversal)
+        Can we make any optimizations based on what renderers a node has?
+        Consider descendant count?
     Priorities:
-        Gruntfile - duplicated defines moved to single variable + references
-        ** removing recursiveEventDispatch may help?
-            Implement using mix-ins for various strategies? Current is 'dispatch', then 'trail reference', or 'event'
-        Instead of a full scan of all trails in a Node (under a Trail), do a recursive bounds-based approach!
-        SLOW to create Canvas layer on iPad? ALL SELF TIME
+        Layer creation
+            SLOW to create Canvas layer on iPad? ALL SELF TIME
+            Cache canvases?
         CanvasLayer in render: enter,setTransform slow !!!
-        markDirtyRegion speedup
-            layerLookup on 'self-only' instead of affectedLayers?
         Faster way to do Trail.addDescendant - PASS indices in if we know what they are?
         LayerStrategy enter
         TrailPointer nestedForwards (minor?)
-        add/remove trail from layer - SVG/Canvas
-            Canvas add
-                mostly getBounds, internalMarkDirtyBounds
-            SVG add
-                initialize base
-                update node
-        Remove startPointer / endPointer from Layer boundaries?
-            Wait and verify later?
         SVG could potentially mark certain nodes as 'dirty' and only update on the scene render
-            Faster?
-        ** Faster dirty marking for changes that don't modify children
-        ** Don't double-mark the 'old' and 'new' spots for DOM / SVG
         Only set CSS3 transform-origin once, on construction? -- create a SceneryStyle for it
         Consider a CanvasAccelerationNode - batches events and should be treated like an opaque rectangle that is dirty or not
         Consider a CanvasCustomNode
@@ -438,43 +355,10 @@ Performance:
             Or just don't ever compute bounds until they are needed? (call validateBounds more often as a result)
         Memory taken up, causing iOS crashes!
         Path boundsMethod - either bounds not needed, or a more inaccurate form (particularly for stroked bounds!)
-        Node.fireEvent (and event listeners) should be split based on event type, so it's faster to fire?
-        Try Scene/Layer adding listeners to nodes based on their Trail, so we don't have to do the dispatching.
-            ** how to handle removal of the specific listener? Node COULD track (Scenes / Layers,Trail)?
-                Otherwise we get hash lookups, which won't scale well.
         Bounds validation and immutable => mutable for lessening GC
-        Layer creation costs
-            * match in stitching
-            * cache canvases
-        addTrailToLayer / removeTrailFromLayer
         LayerBuilder and LayerStrategy
         TrailPointer's equalsNested, compareNested, nestedForwards
         Better reindexing of layers (don't affect so many, spread the indices out more and do intelligently)
-    Events:
-        Layer refresh: up tree to all scenes?
-            Same with marking and stitch? Better way?
-        Mark Dirty bounds:
-            TODO: add a mark flag that it either affects only self, or a subtree?
-            TODO: DOM opacity is not there!
-            * we're currently firing to any affected layers
-                DOM:
-                    self: update DOM, update transform (because Text transform relies on text height etc.)
-                    subtrail: visibility
-                SVG:
-                    self: update SVG, visibility/opacity on group (recursion not needed)
-                        * external, for affected group
-                Canvas:
-                    self: transforms bounds with trail transform, unions
-                        * external, for affected bounds
-        Transform:
-            * we're currently firing to any affected layers
-                DOM:
-                    subtrail: update CSS *** currently slow
-                SVG:
-                    self/var: under base/base/above base
-                Canvas:
-                    no-op
-        ...
     *** paintCanvas bottleneck?
     *** Garbage collection jitters!
     *** Performance regressions with layering
@@ -512,36 +396,20 @@ Performance:
         http://www.html5rocks.com/en/tutorials/canvas/performance/
     Consider batching adding/removal of children with layering code
     Consider flag to say "order of children" doesn't matter, so Scenery could minimize number of layers implicitly
+    Kite:
+        precompile shape render code using 'eval'?
 
 Benchmarks:
-    (deprecate?) Benchmark.js-based:
-        async vs defer vs queued
-        Ability to re-run tests to add precision? Or just a control for precision?
-            Add a flag for the tests being run (or null for all tests)
-            Store results[][] instead of benchmarks[][], and add benchmarks to the result (combining statistics, etc).
-            Add ability to scrap statistics
-            Have an updateResult function that will handle the updating
-            Benchmark cycling feedback?
-        If we can, handle both synchronous and asynchronous tests. Maybe this is possible to wrap with a deferred so that we can handle both without specifying a flag?
-            Consider forking Benchmark.js and submitting a pull request if this is easy
-            Reason for this is the issue where in asynchronous tests, immediate calls to deferred.resolve() do not allow us to measure performance if it is slow
-                See http://jsperf.com/asynchronous-limit
-            Ask John David Dalton maybe?
-            Synchronous: for checking Scenery overhead
-            Asynchronous - requestAnimationFrame loops
-                We need to verify that these tests are fully taxing the system (maybe 20% less FPS than an empty loop in requestAnimationFrame?)
     Performance based:
-        * submodules of self?
         Add exception handling
         Consider using Local Storage to show previous results?
-        Examine subclass penalty for Shape in Path instead of Node
     Using xStats (https://github.com/bestiejs/xstats.js), also add memory output for verifying lack of memory leaks?
 
 Property / Notifiers:
-    SR's WatchJS or Backbone
+    Consider Fort
 
 Color:
-    *** Switch to straight one-color!
+    *** Switch to straight one-color?
 
 Features:
     AnimateTo-style animation
@@ -550,7 +418,7 @@ Features:
     Include MathJax text?
     Property change events for nodes?
 
-Cleanliness / Debugging:
+Debugging:
     *** Debug layer
         Or just debug out a tree view (using scenery of course).
             Previews inside nodes if hasSelf()
@@ -562,10 +430,3 @@ Cleanliness / Debugging:
 Other:
     Pull requests to underscore.js / LoDash? for FunctionalUtils wishlist ... or fork
     Highlighting and indexing of TODO items
-
-API Usage:
-
-var node = scenery.SVG( '<svg>....</svg>' | $( SVGEelement ) );
-node.x = (etc.)
-
-scene resize listeners?

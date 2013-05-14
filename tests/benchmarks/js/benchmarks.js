@@ -1,3 +1,21 @@
+/*
+ * TODO notes:
+ *       async vs defer vs queued
+ *       Ability to re-run tests to add precision? Or just a control for precision?
+ *           Add a flag for the tests being run (or null for all tests)
+ *           Store results[][] instead of benchmarks[][], and add benchmarks to the result (combining statistics, etc).
+ *           Add ability to scrap statistics
+ *           Have an updateResult function that will handle the updating
+ *           Benchmark cycling feedback?
+ *       If we can, handle both synchronous and asynchronous tests. Maybe this is possible to wrap with a deferred so that we can handle both without specifying a flag?
+ *           Consider forking Benchmark.js and submitting a pull request if this is easy
+ *           Reason for this is the issue where in asynchronous tests, immediate calls to deferred.resolve() do not allow us to measure performance if it is slow
+ *               See http://jsperf.com/asynchronous-limit
+ *           Ask John David Dalton maybe?
+ *           Synchronous: for checking Scenery overhead
+ *           Asynchronous - requestAnimationFrame loops
+ *               We need to verify that these tests are fully taxing the system (maybe 20% less FPS than an empty loop in requestAnimationFrame?)
+ */
 
 (function(){
   
