@@ -108,8 +108,10 @@ define( function( require ) {
 
     this.accessibilityLayer = document.createElement( 'div' );
     this.accessibilityLayer.className = "accessibility-layer";
-    this.accessibilityLayer.style.zIndex = 9999;
-    this.accessibilityLayer.style.position = 'absolute';
+    
+    //Put the accessibility layer behind the background so it cannot be seen.  Change this to some high number like 9999 to show it for debugging purposes.
+    this.accessibilityLayer.style.zIndex = -1;
+    this.accessibilityLayer.style.position = 'relative';
     this.$accessibilityLayer = $( this.accessibilityLayer );
     $main[0].appendChild( this.accessibilityLayer );
 
@@ -127,6 +129,8 @@ define( function( require ) {
       sceneryAssert && sceneryAssert( scene.activePeer, 'scene should have an active peer when changing the focus ring bounds' );
       scene.focusRingPath.setAttribute( 'd', Shape.bounds( scene.activePeer.getGlobalBounds() ).getSVGPath() );
     }};
+    
+    this.resizeListeners = [];
   };
   var Scene = scenery.Scene;
 
@@ -864,8 +868,13 @@ define( function( require ) {
 
     //Update the focus ring when the scene resizes.  Note: as of 5/10/2013 this only works properly when scaling up, and is buggy (off by a translation) when scaling down
     if ( this.updateFocusRing && this.activePeer) {
+//      this.updateScene();
       this.updateFocusRing.bounds.call();
     }
+
+    _.each( this.resizeListeners, function( resizeListener ) {
+      resizeListener();
+    } );
   };
 
   Scene.prototype.resizeAccessibilityLayer = function( width, height ) {
