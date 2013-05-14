@@ -268,9 +268,11 @@ define( function( require ) {
         }
       }
     },
-    
+
     notifyDirtySubtreePaint: function( instance ) {
-      // no-op, post-transform isn't needed by DOM
+      if ( instance.layer === this ) {
+        this.notifyDirtySelfPaint( instance );
+      }
     },
     
     notifyTransformChange: function( instance ) {
