@@ -9,9 +9,7 @@
  */
 
 define( function( require ) {
-  "use strict";
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  'use strict';
   
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/layers/LayerBoundary' );
@@ -76,9 +74,6 @@ define( function( require ) {
      *                      updated in markPainted if there is no pending change (don't set if there is a pending change)
      * nextPaintedTrail      - set on layerChange for "stale" boundary
      *                      stays null if nextPaintedTrail === null
-     * previousEndPointer - (normal boundary) set in switchToType if there is no layer change pending
-     *                      set in finalization if nextPaintedTrail === null && !this.layerChangePending (previousEndPointer should be null in that case)
-     * nextStartPointer   - set in switchToType (always), overwrites values so we collapse layers nicely
      */
   };
   var LayerBuilder = scenery.LayerBuilder;
@@ -131,7 +126,6 @@ define( function( require ) {
       // special case handling if we are at the 'end' of the scene, so that we create another 'wrapping' boundary
       if ( !this.includesEndTrail ) {
         // console.log( 'builder: not including end trail' );
-        this.pendingBoundary.previousEndPointer = builder.endPointer; // TODO: consider implications if we leave this null, to indicate that it is not ended?
         this.layerChange( null );
       }
     },
@@ -160,10 +154,6 @@ define( function( require ) {
       this.currentLayerType = layerType;
       
       this.pendingBoundary.nextLayerType = layerType;
-      this.pendingBoundary.nextStartPointer = pointer.copy();
-      if ( !this.layerChangePending ) {
-        this.pendingBoundary.previousEndPointer = pointer.copy();
-      }
       
       this.layerChangePending = true; // we wait until the first markPainted() call to create a boundary
     },

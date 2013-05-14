@@ -12,9 +12,7 @@
  */
 
 define( function( require ) {
-  "use strict";
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  'use strict';
   
   var scenery = require( 'SCENERY/scenery' );
   
@@ -31,7 +29,7 @@ define( function( require ) {
     },
     
     getPreferredLayerType: function( pointer, layerBuilder ) {
-      assert && assert( this.hasPreferredLayerType( pointer, layerBuilder ) ); // sanity check
+      sceneryAssert && sceneryAssert( this.hasPreferredLayerType( pointer, layerBuilder ) ); // sanity check
       
       var node = pointer.trail.lastNode();
       var preferredLayerType;

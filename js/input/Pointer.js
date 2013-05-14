@@ -10,8 +10,7 @@
  */
 
 define( function( require ) {
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  'use strict';
   
   var scenery = require( 'SCENERY/scenery' );
   
@@ -24,14 +23,14 @@ define( function( require ) {
     constructor: Pointer,
     
     addInputListener: function( listener ) {
-      assert && assert( !_.contains( this.listeners, listener ) );
+      sceneryAssert && sceneryAssert( !_.contains( this.listeners, listener ) );
       
       this.listeners.push( listener );
     },
     
     removeInputListener: function( listener ) {
       var index = _.indexOf( this.listeners, listener );
-      assert && assert( index !== -1 );
+      sceneryAssert && sceneryAssert( index !== -1 );
       
       this.listeners.splice( index, 1 );
     }

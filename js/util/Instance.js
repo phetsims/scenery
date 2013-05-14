@@ -9,23 +9,23 @@
 define( function( require ) {
   "use strict";
   
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-  
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/AccessibilityPeer' );
   
   // layer should be null if the trail isn't to a painted node
-  scenery.Instance = function( trail, layer ) {
+  scenery.Instance = function( trail, layer, parent ) {
     this.trail = trail; // trail may be assumed to be stale, for performance reasons
     this.layer = layer;
+    this.oldLayer = layer; // used during stitching
     
-    assert && assert( trail.lastNode().isPainted() === ( layer !== null ), 'Has a layer iff is painted' );
+    // assertion not enabled, since at the start we don't specify a layer (it will be constructed later)
+    // sceneryAssert && sceneryAssert( trail.lastNode().isPainted() === ( layer !== null ), 'Has a layer iff is painted' );
     
     // TODO: SVG layer might want to put data (group/fragment) references here (indexed by layer ID)
     this.data = {};
     
     // TODO: ensure that we can track this? otherwise remove it for memory and speed
-    this.parent = null;
+    this.parent = parent;
     this.children = [];
     
     this.peers = []; // list of AccessibilityPeer instances attached to this trail
@@ -54,22 +54,61 @@ define( function( require ) {
     get node() { return this.getNode(); },
     
     changeLayer: function( newLayer ) {
-      this.layer = newLayer;
+      if ( newLayer !== this.layer ) {
+        sceneryLayerLog && sceneryLayerLog( 'changing instance ' + this.trail.toString() + ' to layer ' + ( newLayer ? '#' + newLayer.id : 'null' ) );
+        this.layer && ( this.layer._instanceCount -= 1 );
+        this.layer = newLayer;
+        this.layer && ( this.layer._instanceCount += 1 );
+      }
+    },
+    
+    updateLayer: function() {
+      if ( this.layer !== this.oldLayer ) {
+        // we may have stale indices
+        this.reindex();
+        
+        if ( sceneryLayerLog ) {
+          if ( this.oldLayer && this.layer ) {
+            sceneryLayerLog( 'moving instance ' + this.trail.toString() + ' from layer #' + this.oldLayer.id + ' to layer #' + this.layer.id );
+          } else if ( this.layer ) {
+            sceneryLayerLog( 'adding instance ' + this.trail.toString() + ' to layer #' + this.layer.id );
+          } else {
+            sceneryLayerLog( 'remove instance ' + this.trail.toString() + ' from layer #' + this.oldLayer.id );
+          }
+        }
+        if ( this.oldLayer ) {
+          this.oldLayer.removeNodeFromTrail( this.trail );
+        }
+        if ( this.layer ) {
+          this.layer.addNodeFromTrail( this.trail );
+        }
+        this.oldLayer = this.layer;
+      }
+    },
+    
+    createChild: function( childNode, index ) {
+      var childTrail = this.trail.copy().addDescendant( childNode );
+      var childInstance = new scenery.Instance( childTrail, null, this );
+      sceneryLayerLog && sceneryLayerLog( 'Instance.createChild: ' + childInstance.toString() );
+      this.insertInstance( index, childInstance );
+      childInstance.getNode().addInstance( childInstance );
+      
+      return childInstance;
     },
     
     addInstance: function( instance ) {
-      assert && assert( instance, 'Instance.addInstance cannot have falsy parameter' );
+      sceneryAssert && sceneryAssert( instance, 'Instance.addInstance cannot have falsy parameter' );
       this.children.push( instance );
     },
     
     insertInstance: function( index, instance ) {
-      assert && assert( instance, 'Instance.insert cannot have falsy instance parameter' );
-      assert && assert( index >= 0 && index <= this.children.length, 'Instance.insert has bad index ' + index + ' for length ' + this.children.length );
+      sceneryAssert && sceneryAssert( instance, 'Instance.insert cannot have falsy instance parameter' );
+      sceneryAssert && sceneryAssert( index >= 0 && index <= this.children.length, 'Instance.insert has bad index ' + index + ' for length ' + this.children.length );
       this.children.splice( index, 0, instance );
     },
     
     removeInstance: function( index ) {
-      assert && assert( typeof index === 'number' );
+      sceneryAssert && sceneryAssert( typeof index === 'number' );
       this.children.splice( index, 1 );
     },
     
@@ -77,7 +116,12 @@ define( function( require ) {
       this.trail.reindex();
     },
     
+    // TODO: rename, so that it indicates that it removes the instance from the node
     dispose: function() {
+      if ( this.layer ) {
+        this.changeLayer( null );
+        this.updateLayer();
+      }
       this.parent = null;
       this.children.length = 0;
       this.getNode().removeInstance( this );
@@ -86,8 +130,13 @@ define( function( require ) {
     },
     
     equals: function( other ) {
-      assert && assert( ( this === other ) === this.trail.equals( other.trail ), 'We assume a 1-1 mapping from trails to instances' );
+      sceneryAssert && sceneryAssert( ( this === other ) === this.trail.equals( other.trail ), 'We assume a 1-1 mapping from trails to instances' );
       return this === other;
+    },
+    
+    // standard -1,0,1 comparison with another instance, as a total ordering from the render order
+    compare: function( other ) {
+      return this.trail.compare( other.trail );
     },
     
     getLayerString: function() {
@@ -168,7 +217,7 @@ define( function( require ) {
     
     notifyDirtySelfPaint: function() {
       sceneryEventLog && sceneryEventLog( 'notifyDirtySelfPaint: ' + this.trail.toString() + ', ' + this.getLayerString() );
-      assert && assert( this.getNode().isPainted(), 'Instance needs to be painted for notifyDirtySelfPaint' );
+      sceneryAssert && sceneryAssert( this.getNode().isPainted(), 'Instance needs to be painted for notifyDirtySelfPaint' );
       this.layer.notifyDirtySelfPaint( this );
     },
     

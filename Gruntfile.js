@@ -1,5 +1,6 @@
 /*global module:false*/
 module.exports = function( grunt ) {
+  'use strict';
   
   // print this immediately, so it is clear what project grunt is building
   grunt.log.writeln( 'Scenery' );
@@ -42,7 +43,7 @@ module.exports = function( grunt ) {
             compress: {
               global_defs: {
                 sceneryAssert: false,
-                sceneryExtraAssert: false,
+                sceneryAssertExtra: false,
                 sceneryLayerLog: false,
                 sceneryEventLog: false,
                 sceneryAccessibilityLog: false
@@ -71,7 +72,7 @@ module.exports = function( grunt ) {
             compress: {
               global_defs: {
                 sceneryAssert: false,
-                sceneryExtraAssert: false,
+                sceneryAssertExtra: false,
                 sceneryLayerLog: false,
                 sceneryEventLog: false,
                 sceneryAccessibilityLog: false
@@ -104,7 +105,7 @@ module.exports = function( grunt ) {
         // quotmark: 'single',
         undef: true,
         // unused: true, // certain layer APIs not used in cases
-        // strict: true,
+        strict: true,
         
         // relaxing options
         es5: true, // we use ES5 getters and setters for now
@@ -115,7 +116,7 @@ module.exports = function( grunt ) {
         globals: {
           // for removal of assertions
           sceneryAssert: true,
-          sceneryExtraAssert: true,
+          sceneryAssertExtra: true,
           
           // for logging levels
           sceneryLayerLog: true,

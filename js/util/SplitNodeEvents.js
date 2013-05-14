@@ -7,9 +7,7 @@
  */
 
 define( function( require ) {
-  "use strict";
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  'use strict';
   
   var scenery = require( 'SCENERY/scenery' );
   
@@ -52,14 +50,14 @@ define( function( require ) {
     proto.removeEventListener = function( listener ) {
       var node = this;
       // ensure the listener is in our list
-      assert && assert( _.indexOf( this._eventListeners, listener ) !== -1 );
+      sceneryAssert && sceneryAssert( _.indexOf( this._eventListeners, listener ) !== -1 );
       
       this._eventListeners.splice( _.indexOf( this._eventListeners, listener ), 1 );
       
       _.each( eventNames, function( name ) {
         if ( listener[name] ) {
           var arr = node._events[name];
-          assert && assert( _.indexOf( arr, listener[name] ) !== -1 );
+          sceneryAssert && sceneryAssert( _.indexOf( arr, listener[name] ) !== -1 );
           arr.splice( _.indexOf( arr, listener[name] ), 1 );
         }
       } );
@@ -76,7 +74,7 @@ define( function( require ) {
      * that is relevant for a specific node, and ancestors don't need to be notified.
      */
     proto.fireEvent = function( type, args ) {
-      assert && assert( _.contains( eventNames, type ), 'unknown event type: ' + type );
+      sceneryAssert && sceneryAssert( _.contains( eventNames, type ), 'unknown event type: ' + type );
       
       var array = this._events[type];
       var len = array.length;

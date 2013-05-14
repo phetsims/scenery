@@ -14,9 +14,7 @@
  */
 
 define( function( require ) {
-  "use strict";
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  'use strict';
   
   var scenery = require( 'SCENERY/scenery' );
   

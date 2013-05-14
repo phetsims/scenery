@@ -7,6 +7,7 @@
  */
 
 define( function( require ) {
+  'use strict';
   
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );

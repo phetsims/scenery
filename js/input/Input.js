@@ -20,9 +20,7 @@
  */
 
 define( function( require ) {
-  "use strict";
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  'use strict';
   
   var scenery = require( 'SCENERY/scenery' );
   
@@ -69,12 +67,12 @@ define( function( require ) {
     },
     
     findKeyByEvent: function( event ) {
-      assert && assert( event.keyCode && event.charCode, 'Assumes the KeyboardEvent has keyCode and charCode properties' );
+      sceneryAssert && sceneryAssert( event.keyCode && event.charCode, 'Assumes the KeyboardEvent has keyCode and charCode properties' );
       var result = _.find( this.pointers, function( pointer ) {
         // TODO: also check location (if that exists), so we don't mix up left and right shift, etc.
         return pointer.keyCode === event.keyCode && pointer.charCode === event.charCode;
       } );
-      // assert && assert( result, 'No key found for the combination of key:' + event.key + ' and location:' + event.location );
+      // sceneryAssert && sceneryAssert( result, 'No key found for the combination of key:' + event.key + ' and location:' + event.location );
       return result;
     },
     

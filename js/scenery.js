@@ -11,6 +11,8 @@
  */
 
 define( function( require ) {
+  'use strict';
+  
   window.sceneryAssert = require( 'ASSERT/assert' )( 'scenery' );
   window.sceneryAssertExtra = require( 'ASSERT/assert' )( 'scenery.extra' );
   

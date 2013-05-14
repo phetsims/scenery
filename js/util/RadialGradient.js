@@ -9,10 +9,8 @@
  */
 
 define( function( require ) {
-  "use strict";
+  'use strict';
   
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-
   require( 'SCENERY/util/Color' );
   var scenery = require( 'SCENERY/scenery' );
   
@@ -30,9 +28,9 @@ define( function( require ) {
     
     // make sure that the focal point is in both circles. SVG doesn't support rendering outside of them
     if ( this.startRadius >= this.endRadius ) {
-      assert && assert( this.focalPoint.minus( this.start ).magnitude() <= this.startRadius );
+      sceneryAssert && sceneryAssert( this.focalPoint.minus( this.start ).magnitude() <= this.startRadius );
     } else {
-      assert && assert( this.focalPoint.minus( this.end ).magnitude() <= this.endRadius );
+      sceneryAssert && sceneryAssert( this.focalPoint.minus( this.end ).magnitude() <= this.endRadius );
     }
     
     this.stops = [];

@@ -17,9 +17,7 @@
  */
 
 define( function( require ) {
-  "use strict";
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  'use strict';
   
   var inherit = require( 'PHET_CORE/inherit' );
   var Bounds2 = require( 'DOT/Bounds2' );
@@ -27,6 +25,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   var Layer = require( 'SCENERY/layers/Layer' ); // DOMLayer inherits from Layer
+  require( 'SCENERY/util/Trail' );
   
   scenery.DOMLayer = function( args ) {
     sceneryLayerLog && sceneryLayerLog( 'DOMLayer constructor' );
@@ -47,7 +46,7 @@ define( function( require ) {
     this.$div = $( this.div );
     this.$main.append( this.div );
     
-    this.scene = args.scene;
+    this.scene = args.scene; // TODO: should already be set in the supertype Layer
     
     this.isDOMLayer = true;
     
@@ -83,7 +82,7 @@ define( function( require ) {
         var otherTrail = this.trails[insertionIndex];
         otherTrail.reindex();
         var comparison = otherTrail.compare( trail );
-        assert && assert( comparison !== 0, 'Trail has already been inserted into the DOMLayer' );
+        sceneryAssert && sceneryAssert( comparison !== 0, 'Trail has already been inserted into the DOMLayer' );
         if ( comparison === 1 ) { // TODO: enum values!
           break;
         }
@@ -104,7 +103,7 @@ define( function( require ) {
       this.reindexTrails();
       
       var element = this.getElementFromTrail( trail );
-      assert && assert( element, 'Trail does not exist in the DOMLayer' );
+      sceneryAssert && sceneryAssert( element, 'Trail does not exist in the DOMLayer' );
       
       delete this.idElementMap[trail.getUniqueId];
       delete this.idTrailMap[trail.getUniqueId];
@@ -281,18 +280,14 @@ define( function( require ) {
       var baseTrail = instance.trail;
       
       // TODO: performance: efficiency! this computes way more matrix transforms than needed
-      this.startPointer.eachTrailBetween( this.endPointer, function( trail ) {
-        // bail out quickly if the trails don't match
-        if ( !trail.isExtensionOf( baseTrail, true ) ) {
-          return;
-        }
-        
-        var node = trail.lastNode();
-        if ( node.isPainted() ) {
+      scenery.Trail.eachPaintedTrailBetween( this.startPaintedTrail, this.endPaintedTrail, function( trail ) {
+        if ( trail.isExtensionOf( baseTrail, true ) ) {
+          // TODO: put the element on the instance?
           var element = layer.idElementMap[trail.getUniqueId()];
+          var node = trail.lastNode();
           node.updateCSSTransform( trail.getTransform(), element );
         }
-      } );
+      }, false, this.scene );
     },
     
     // only a painted trail under this layer (for now)

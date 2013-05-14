@@ -15,9 +15,7 @@
  */
 
 define( function( require ) {
-  "use strict";
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  'use strict';
   
   var inherit = require( 'PHET_CORE/inherit' );
   var Bounds2 = require( 'DOT/Bounds2' );
@@ -400,14 +398,14 @@ define( function( require ) {
     },
     
     canUseDirtyRegions: function() {
-      assert && assert( this.boundlessCount >= 0 );
+      sceneryAssert && sceneryAssert( this.boundlessCount >= 0 );
       return this.boundlessCount === 0;
     },
     
     // NOTE: for performance, we will mutate the bounds passed in (they are almost assuredly from the local or parent bounds functions)
     canvasMarkGlobalBounds: function( globalBounds ) {
       sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' canvasMarkGlobalBounds: ' + globalBounds.toString() );
-      assert && assert( globalBounds.isEmpty() || globalBounds.isFinite(), 'Infinite (non-empty) dirty bounds passed to canvasMarkGlobalBounds' );
+      sceneryAssert && sceneryAssert( globalBounds.isEmpty() || globalBounds.isFinite(), 'Infinite (non-empty) dirty bounds passed to canvasMarkGlobalBounds' );
       
       // TODO: for performance, consider more than just a single dirty bounding box
       this.dirtyBounds = this.dirtyBounds.union( globalBounds.dilate( 1 ).roundOut() );

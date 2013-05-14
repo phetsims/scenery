@@ -7,10 +7,7 @@
  */
 
 define( function( require ) {
-  "use strict";
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-  var assertExtra = require( 'ASSERT/assert' )( 'scenery.extra', true );
+  'use strict';
   
   var Bounds2 = require( 'DOT/Bounds2' );
   var Transform3 = require( 'DOT/Transform3' );
@@ -41,7 +38,7 @@ define( function( require ) {
     this.cssRotation = args.cssRotation;       // CSS for the rotation
     this.cssScale = args.cssScale;             // CSS for the scaling
     this.cssTransform = args.cssTransform;     // CSS for the entire base node (will ignore other partial transforms)
-    assert && assert( !( this.usesPartialCSSTransforms && this.cssTransform ), 'Do not specify both partial and complete CSS transform arguments.' );
+    sceneryAssert && sceneryAssert( !( this.usesPartialCSSTransforms && this.cssTransform ), 'Do not specify both partial and complete CSS transform arguments.' );
     
     // initialize to fully dirty so we draw everything the first time
     // bounds in global coordinate frame
@@ -54,12 +51,13 @@ define( function( require ) {
     if ( this.baseNode === this.scene ) {
       this.baseTrail = new scenery.Trail( this.scene );
     } else {
-      this.baseTrail = this.startPointer.trail.copy();
-      assert && assert( this.baseTrail.lastNode() === this.baseNode );
+      this.baseTrail = this.startPaintedTrail.upToNode( this.baseNode );
+      sceneryAssert && sceneryAssert( this.baseTrail.lastNode() === this.baseNode );
     }
     
     // we reference all painted trails in an unordered way
-    this._layerTrails = [];
+    this._layerTrails = []; // TODO: performance: remove layerTrails if possible!
+    this._instanceCount = 0; // track how many instances we are tracking (updated in stitching by instances)
     
     var layer = this;
     
@@ -77,7 +75,7 @@ define( function( require ) {
     this.baseNode.addEventListener( this.baseNodeListener );
     
     this.fitToBounds = this.usesPartialCSSTransforms || this.cssTransform;
-    assert && assert( this.fitToBounds || this.baseNode === this.scene, 'If the baseNode is not the scene, we need to fit the bounds' );
+    sceneryAssert && sceneryAssert( this.fitToBounds || this.baseNode === this.scene, 'If the baseNode is not the scene, we need to fit the bounds' );
     
     // used for CSS transforms where we need to transform our base node's bounds into the (0,0,w,h) bounds range
     this.baseNodeTransform = new Transform3();
@@ -93,11 +91,9 @@ define( function( require ) {
       this.startBoundary = boundary;
       
       // TODO: deprecate these, use boundary references instead? or boundary convenience functions
-      this.startPointer = this.startBoundary.nextStartPointer;
       this.startPaintedTrail = this.startBoundary.nextPaintedTrail;
       
       // set immutability guarantees
-      this.startPointer.trail && this.startPointer.trail.setImmutable();
       this.startPaintedTrail.setImmutable();
     },
     
@@ -106,24 +102,14 @@ define( function( require ) {
       this.endBoundary = boundary;
       
       // TODO: deprecate these, use boundary references instead? or boundary convenience functions
-      this.endPointer = this.endBoundary.previousEndPointer;
       this.endPaintedTrail = this.endBoundary.previousPaintedTrail;
       
       // set immutability guarantees
-      this.endPointer.trail && this.endPointer.trail.setImmutable();
       this.endPaintedTrail.setImmutable();
     },
     
-    getStartPointer: function() {
-      return this.startPointer;
-    },
-    
-    getEndPointer: function() {
-      return this.endPointer;
-    },
-    
     toString: function() {
-      return this.getName() + ' ' + ( this.startPointer ? this.startPointer.toString() : '!' ) + ' (' + ( this.startPaintedTrail ? this.startPaintedTrail.toString() : '!' ) + ') => ' + ( this.endPointer ? this.endPointer.toString() : '!' ) + ' (' + ( this.endPaintedTrail ? this.endPaintedTrail.toString() : '!' ) + ')';
+      return this.getName() + ' ' + ( this.startPaintedTrail ? this.startPaintedTrail.toString() : '!' ) + ' => ' + ( this.endPaintedTrail ? this.endPaintedTrail.toString() : '!' );
     },
     
     getId: function() {
@@ -156,9 +142,9 @@ define( function( require ) {
     
     // adds a trail (with the last node) to the layer
     addNodeFromTrail: function( trail ) {
-      if ( assert ) {
+      if ( sceneryAssert ) {
         _.each( this._layerTrails, function( otherTrail ) {
-          assert( !trail.equals( otherTrail ), 'trail in addNodeFromTrail should not already exist in a layer' );
+          sceneryAssert( !trail.equals( otherTrail ), 'trail in addNodeFromTrail should not already exist in a layer' );
         } );
       }
       
@@ -179,7 +165,8 @@ define( function( require ) {
           break;
         }
       }
-      assert && assert( i < this._layerTrails.length );
+      sceneryAssert && sceneryAssert( i < this._layerTrails.length );
+      
       this._layerTrails.splice( i, 1 );
     },
     
@@ -212,38 +199,8 @@ define( function( require ) {
     // called when the base node's "internal" (self or child) bounds change, but not when it is just from the base node's own transform changing
     baseNodeInternalBoundsChange: function() {
       // no error, many times this doesn't need to be handled
-    },
+    }
     
-    /*---------------------------------------------------------------------------*
-    * Events from Instances
-    *----------------------------------------------------------------------------*/
-    
-    // notifyVisibilityChange: function( instance ) {
-    // },
-    
-    // notifyOpacityChange: function( instance ) {
-    // },
-    
-    // // only a painted trail under this layer
-    // notifyBeforeSelfChange: function( instance ) {
-    // },
-    
-    // notifyBeforeSubtreeChange: function( instance ) {
-    // },
-    
-    // // only a painted trail under this layer
-    // notifyDirtySelfPaint: function( instance ) {
-    // },
-    
-    // notifyDirtySubtreeBounds: function( instance ) {
-    // },
-    
-    // notifyTransformChange: function( instance ) {
-    // },
-    
-    // // only a painted trail under this layer (for now)
-    // notifyBoundsAccuracyChange: function( instance ) {
-    // }
   };
   
   Layer.cssTransformPadding = 3;

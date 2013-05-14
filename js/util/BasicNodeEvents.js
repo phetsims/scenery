@@ -7,9 +7,7 @@
  */
 
 define( function( require ) {
-  "use strict";
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  'use strict';
   
   var scenery = require( 'SCENERY/scenery' );
   
@@ -31,7 +29,7 @@ define( function( require ) {
     
     proto.removeEventListener = function( listener ) {
       // ensure the listener is in our list
-      assert && assert( _.indexOf( this._eventListeners, listener ) !== -1 );
+      sceneryAssert && sceneryAssert( _.indexOf( this._eventListeners, listener ) !== -1 );
       
       this._eventListeners.splice( _.indexOf( this._eventListeners, listener ), 1 );
       return this;

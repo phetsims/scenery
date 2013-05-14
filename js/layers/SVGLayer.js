@@ -11,9 +11,7 @@
  */
 
 define( function( require ) {
-  "use strict";
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  'use strict';
   
   var inherit = require( 'PHET_CORE/inherit' );
   var Bounds2 = require( 'DOT/Bounds2' );
@@ -87,8 +85,8 @@ define( function( require ) {
     addNodeFromTrail: function( trail ) {
       sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' addNodeFromTrail: ' + trail.toString() );
       
-      assert && assert( !( trail.getUniqueId() in this.idFragmentMap ), 'Already contained that trail!' );
-      assert && assert( trail.isPainted(), 'Don\'t add nodes without isPainted() to SVGLayer' );
+      sceneryAssert && sceneryAssert( !( trail.getUniqueId() in this.idFragmentMap ), 'Already contained that trail!' );
+      sceneryAssert && sceneryAssert( trail.isPainted(), 'Don\'t add nodes without isPainted() to SVGLayer' );
       
       Layer.prototype.addNodeFromTrail.call( this, trail );
       
@@ -117,7 +115,7 @@ define( function( require ) {
             this.insertGroupIntoParent( group, this.idGroupMap[lastId], subtrail );
           } else {
             // we are ensuring the base group
-            assert && assert( subtrail.lastNode() === this.baseNode );
+            sceneryAssert && sceneryAssert( subtrail.lastNode() === this.baseNode );
             
             group = this.g;
             
@@ -158,7 +156,7 @@ define( function( require ) {
     
     removeNodeFromTrail: function( trail ) {
       sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' removeNodeFromTrail: ' + trail.toString() );
-      assert && assert( trail.getUniqueId() in this.idFragmentMap, 'Did not contain that trail!' );
+      sceneryAssert && sceneryAssert( trail.getUniqueId() in this.idFragmentMap, 'Did not contain that trail!' );
       
       Layer.prototype.removeNodeFromTrail.call( this, trail );
       
@@ -322,7 +320,7 @@ define( function( require ) {
           var baseNodeInteralBounds = this.baseNodeTransform.transformBounds2( internalBounds );
           
           // sanity check to ensure we are within that range
-          assert && assert( baseNodeInteralBounds.minX >= 0 && baseNodeInteralBounds.minY >= 0 );
+          sceneryAssert && sceneryAssert( baseNodeInteralBounds.minX >= 0 && baseNodeInteralBounds.minY >= 0 );
           
           this.updateContainerDimensions( Math.ceil( baseNodeInteralBounds.maxX + padding ),
                                           Math.ceil( baseNodeInteralBounds.maxY + padding ) );
@@ -535,7 +533,9 @@ define( function( require ) {
     },
     
     notifyDirtySubtreePaint: function( instance ) {
-      // no-op, post-transform isn't needed by SVG
+      if ( instance.layer === this ) {
+        this.notifyDirtySelfPaint( instance );
+      }
     },
     
     notifyTransformChange: function( instance ) {
