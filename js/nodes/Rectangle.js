@@ -4,6 +4,8 @@
  * A rectangular node that inherits Path, and allows for optimized drawing,
  * and improved rectangle handling.
  *
+ * TODO: add DOM support
+ *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 

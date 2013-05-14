@@ -1,6 +1,14 @@
+Examine:
+    http://jonobr1.github.io/two.js/
+    https://github.com/GoodBoyDigital/pixi.js
+    Others from html5 game engines (particularly webgl)
 
 Priorities:
     *** FIX devious drag! Canvas renderer + console not being open
+    *** Travis for tests
+    *** Unicode font tests - grab strings from every language for testing
+    Set default boundsMethod to 'fastCanvas'
+    Mouse buttons - are they pointers, like Key?
     Beware of closures! (test speeds, see https://developers.google.com/speed/articles/optimizing-javascript)
     For DOM / jQuery manipulation: https://developers.google.com/speed/articles/javascript-dom
     For transform listeners and changes:
@@ -34,6 +42,7 @@ Priorities:
     Testing with hidef canvases
 
 Bugs:
+    *** SimpleDragHandler's parent transform tracking is broken
     Chrome canvas lineWidth with pattern bug (looks like half size?)
     DOM opacity
     **** General opacity: multiple layers combined!
@@ -53,6 +62,8 @@ Tricky areas:
     Gradients / Patterns should not be changed after being passed to a node's fill/stroke, since the SVG def won't change, and we don't set up listeners
 
 Test:
+    RenderInterval
+    Trail transforms
     Test issues (zero-bounds text, etc.)
     Unit tests for common node operations
     Test bounds from canvas accurate method vs computed bounds for Shapes and strokes
@@ -86,6 +97,7 @@ Browsers
             Try using a unicode-escaped quote?
         [REGRESSION] Chrome 27 context.arc( 0, 0, 100, Math.PI / 4, -Math.PI / 2, true );
         [UNKNOWN] Chrome canvas lineWidth with pattern bug (looks like half size?)
+        [UNKNOWN] Chrome and Firefox treat painting with 'transparent' differently. see dynamic layering slide
         
         [KNOWN] Chrome XMLSerializer.serializeToString dropping namespaces: https://code.google.com/p/chromium/issues/detail?id=88295
     For canvas, create a drawing function that exhibits all differences?
@@ -109,6 +121,8 @@ General:
     RenderState - consider stack-based transforms
 
 Code:
+    var Path = scenery.Path = ....
+    scenery.TrailPointer.before( trail )  ?
     ** _supportedRenderers => supportedRenderers? (pushes on this array if shared in the prototype could be bad!)
         getSupportedRenderers()? - fixes much of what we're doing
     lib/phet/ instead of common/, lib/ instead of contrib/
@@ -292,7 +306,7 @@ Node:
     Canvas: masking with sub-canvas rendering using globalCompositeOperation. CSG should be possible, and hit tests should be better. Bounds might be harder
 
 Text:
-    *** Strip out textBaseline and textAlign, they are not needed
+    Text bounds option to store height per font and update width with measureText
     Unit tests
     Handling multi-line strings
     WebGL options
@@ -312,6 +326,11 @@ Trail:
 
 Performance:
     Strip out assertions?
+    * Consider linked-trails on instances, to take up less memory
+    affectedLayers: compare performance with tree inspection (iterate in nested order from each side until we find painted nodes)
+        Also even faster to keep this updated in the instances?
+    Instances as a linked list in render order could speed up many operations (iterate through instances/trails! between two points!)
+    Node option (or standard override) that skips validate bounds and paint, and provides a specific bounds and hit region (and flag for repaint) may speed things up
     V8:
         Optimized too many times:
             Trail: reindex, addDescendant
@@ -324,6 +343,7 @@ Performance:
             Matrix3.inverted
             Matrix3.getSVGTransform
     Event Abstraction:
+        *** markSceneForRemoval speedups significant?
         NOTE: quick check to see if changes that 'affect rest of tree' affect other layers, look at isAfter node vs end?
         NOTE: Node wouldn't store all affected layers (for each trail reference), only first and last
         NOTE: scene/layer dispose has to be accurate and enforced if we store info on nodes. check in layer audit?
@@ -344,6 +364,8 @@ Performance:
         Instance Events API:
             mark for: insertion (to parent), removal (from parent), refresh, then stitch
             dirtyPaint( boundsChanged, affectsChildren )
+                self old paint dirty
+                subtree old dirty
                 self dirty                   (fill change)
                 self dirty, bounds change    (changed line width, shape, text, image)
                 subtree dirty                (visibility, opacity)
@@ -351,6 +373,35 @@ Performance:
             transform
                 before/after?
             boundsAccuracy
+        * Layer needs:
+            Canvas
+                Global changed bounds (if bounds change, both old place and the newest)
+                Bounds accuracy count
+            SVG
+                (subtrail-self) update fragment, defs, group
+            DOM
+                (self) Update DOM element on that type of change
+                    (self) transform on Text, since it relies on any text/font changes
+                (subtrail) Transform (CSS)
+                (subtrail) Visibility / Opacity
+            Overall:
+                visibilityChanged
+                opacityChanged
+                beforeSelfChange (old self paint?)
+                beforeSubtreeChange (old paint)
+                transformChanged
+                paintChange (e.g. from validatePaint/validateBounds?)
+                boundsChange?
+        Current notifications:
+            marking and stitching (direct)
+            markOldPaint:
+                self (from invalidateSelf)
+                subtree (from removeNode)
+                subtree (before transform)
+                subtree (visibility)
+                subtree (opacity)
+            validateBounds - if self bounds changed, mark that
+            validatePaint - if dirty paint, mark total bounds
     Thoughts:
         Nodes could track what layer types they are rendering under, and thus what optimizations they could make?
         Also track affected layers this way?
@@ -460,6 +511,7 @@ Performance:
     Checklists:
         http://www.html5rocks.com/en/tutorials/canvas/performance/
     Consider batching adding/removal of children with layering code
+    Consider flag to say "order of children" doesn't matter, so Scenery could minimize number of layers implicitly
 
 Benchmarks:
     (deprecate?) Benchmark.js-based:

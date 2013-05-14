@@ -373,18 +373,13 @@ define( function( require ) {
       context.drawImage( this.canvas, 0, 0 );
     },
     
-    markDirtyRegion: function( args ) {
-      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' markDirtyRegion' );
-      this.internalMarkDirtyBounds( args.bounds, args.trail );
-    },
-    
     addNodeFromTrail: function( trail ) {
       sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' addNodeFromTrail: ' + trail.toString() );
       Layer.prototype.addNodeFromTrail.call( this, trail );
       
       // since the node's getBounds() are in the parent coordinate frame, we peel off the last node to get the correct (relevant) transform
       // TODO: more efficient way of getting this transform?
-      this.internalMarkDirtyBounds( trail.lastNode().getBounds(), trail.slice( 0, trail.length - 1 ) );
+      this.canvasMarkLocalBounds( trail.lastNode().getBounds(), trail.slice( 0, trail.length - 1 ) );
       
       if ( trail.lastNode().boundsInaccurate ) {
         this.boundlessCount++;
@@ -397,22 +392,9 @@ define( function( require ) {
       
       // since the node's getBounds() are in the parent coordinate frame, we peel off the last node to get the correct (relevant) transform
       // TODO: more efficient way of getting this transform?
-      this.internalMarkDirtyBounds( trail.lastNode().getBounds(), trail.slice( 0, trail.length - 1 ) );
+      this.canvasMarkLocalBounds( trail.lastNode().getBounds(), trail.slice( 0, trail.length - 1 ) );
       
       if ( trail.lastNode().boundsInaccurate ) {
-        this.boundlessCount--;
-      }
-    },
-    
-    // TODO: direct listeners, instead of this being forwarded through the Scene?
-    boundsAccuracy: function( args ) {
-      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' boundsAccuracy' );
-      Layer.prototype.boundsAccuracy.call( this, args );
-      
-      // TODO: if this node isn't a self node, how should it be handled? what does this flag exactly mean?
-      if ( args.node.boundsInaccurate ) {
-        this.boundlessCount++;
-      } else {
         this.boundlessCount--;
       }
     },
@@ -422,24 +404,94 @@ define( function( require ) {
       return this.boundlessCount === 0;
     },
     
-    internalMarkDirtyBounds: function( localBounds, trail ) {
-      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' internalMarkDirtyBounds: ' + trail.toString() + ' with localBounds: ' + localBounds.toString() );
-      
-      // TODO: performance minor hotspot, use mutable forms?
-      assert && assert( localBounds.isEmpty() || localBounds.isFinite(), 'Infinite (non-empty) dirty bounds passed to internalMarkDirtyBounds' );
-      var globalBounds = trail.localToGlobalBounds( localBounds );
+    // NOTE: for performance, we will mutate the bounds passed in (they are almost assuredly from the local or parent bounds functions)
+    canvasMarkGlobalBounds: function( globalBounds ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' canvasMarkGlobalBounds: ' + globalBounds.toString() );
+      assert && assert( globalBounds.isEmpty() || globalBounds.isFinite(), 'Infinite (non-empty) dirty bounds passed to canvasMarkGlobalBounds' );
       
       // TODO: for performance, consider more than just a single dirty bounding box
-      this.dirtyBounds = this.dirtyBounds.union( globalBounds.dilated( 1 ).roundedOut() );
+      this.dirtyBounds = this.dirtyBounds.union( globalBounds.dilate( 1 ).roundOut() );
     },
     
-    transformChange: function( args ) {
-      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' transformChange: no-op' );
-      // currently no-op, since this is taken care of by markDirtyRegion
+    canvasMarkLocalBounds: function( localBounds, trail ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' canvasMarkLocalBounds: ' + localBounds.toString() + ' on ' + trail.toString() );
+      this.canvasMarkGlobalBounds( trail.localToGlobalBounds( localBounds ) );
+    },
+    
+    canvasMarkParentBounds: function( parentBounds, trail ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' canvasMarkParentBounds: ' + parentBounds.toString() + ' on ' + trail.toString() );
+      this.canvasMarkGlobalBounds( trail.parentToGlobalBounds( parentBounds ) );
+    },
+    
+    canvasMarkSelf: function( instance ) {
+      this.canvasMarkLocalBounds( instance.getNode().getSelfBounds(), instance.trail );
+    },
+    
+    canvasMarkSubtree: function( instance ) {
+      this.canvasMarkParentBounds( instance.getNode().getBounds(), instance.trail );
     },
     
     getName: function() {
       return 'canvas';
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * Events from Instances
+    *----------------------------------------------------------------------------*/
+    
+    notifyVisibilityChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyVisibilityChange: ' + instance.trail.toString() );
+      // old paint taken care of in notifyBeforeSubtreeChange()
+      
+      if ( instance.trail.isVisible() ) {
+        this.canvasMarkSubtree( instance );
+      }
+    },
+    
+    notifyOpacityChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyOpacityChange: ' + instance.trail.toString() );
+      // old paint taken care of in notifyBeforeSubtreeChange()
+      
+      this.canvasMarkSubtree( instance );
+    },
+    
+    // only a painted trail under this layer
+    notifyBeforeSelfChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyBeforeSelfChange: ' + instance.trail.toString() );
+      this.canvasMarkSelf( instance );
+    },
+    
+    notifyBeforeSubtreeChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyBeforeSubtreeChange: ' + instance.trail.toString() );
+      this.canvasMarkSubtree( instance );
+    },
+    
+    // only a painted trail under this layer
+    notifyDirtySelfPaint: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyDirtySelfPaint: ' + instance.trail.toString() );
+      this.canvasMarkSelf( instance );
+    },
+    
+    notifyDirtySubtreePaint: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyDirtySubtreePaint: ' + instance.trail.toString() );
+      this.canvasMarkSubtree( instance );
+    },
+    
+    notifyTransformChange: function( instance ) {
+      // sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyTransformChange: ' + instance.trail.toString() );
+      // TODO: how best to mark this so if there are multiple 'movements' we don't get called more than needed?
+      // this.canvasMarkSubtree( instance );
+    },
+    
+    // only a painted trail under this layer (for now)
+    notifyBoundsAccuracyChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyBoundsAccuracyChange: ' + instance.trail.toString() );
+      
+      if ( instance.node.boundsInaccurate ) {
+        this.boundlessCount++;
+      } else {
+        this.boundlessCount--;
+      }
     }
   } );
   

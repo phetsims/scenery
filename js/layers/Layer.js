@@ -54,12 +54,13 @@ define( function( require ) {
     if ( this.baseNode === this.scene ) {
       this.baseTrail = new scenery.Trail( this.scene );
     } else {
-      this.baseTrail = this.startPointer.trail.copy();
+      this.baseTrail = this.startPaintedTrail.upToNode( this.baseNode );
       assert && assert( this.baseTrail.lastNode() === this.baseNode );
     }
     
     // we reference all painted trails in an unordered way
-    this._layerTrails = [];
+    this._layerTrails = []; // TODO: performance: remove layerTrails if possible!
+    this._instanceCount = 0; // track how many instances we are tracking (updated in stitching by instances)
     
     var layer = this;
     
@@ -93,11 +94,9 @@ define( function( require ) {
       this.startBoundary = boundary;
       
       // TODO: deprecate these, use boundary references instead? or boundary convenience functions
-      this.startPointer = this.startBoundary.nextStartPointer;
       this.startPaintedTrail = this.startBoundary.nextPaintedTrail;
       
       // set immutability guarantees
-      this.startPointer.trail && this.startPointer.trail.setImmutable();
       this.startPaintedTrail.setImmutable();
     },
     
@@ -106,24 +105,14 @@ define( function( require ) {
       this.endBoundary = boundary;
       
       // TODO: deprecate these, use boundary references instead? or boundary convenience functions
-      this.endPointer = this.endBoundary.previousEndPointer;
       this.endPaintedTrail = this.endBoundary.previousPaintedTrail;
       
       // set immutability guarantees
-      this.endPointer.trail && this.endPointer.trail.setImmutable();
       this.endPaintedTrail.setImmutable();
     },
     
-    getStartPointer: function() {
-      return this.startPointer;
-    },
-    
-    getEndPointer: function() {
-      return this.endPointer;
-    },
-    
     toString: function() {
-      return this.getName() + ' ' + ( this.startPointer ? this.startPointer.toString() : '!' ) + ' (' + ( this.startPaintedTrail ? this.startPaintedTrail.toString() : '!' ) + ') => ' + ( this.endPointer ? this.endPointer.toString() : '!' ) + ' (' + ( this.endPaintedTrail ? this.endPaintedTrail.toString() : '!' ) + ')';
+      return this.getName() + ' ' + ( this.startPaintedTrail ? this.startPaintedTrail.toString() : '!' ) + ' => ' + ( this.endPaintedTrail ? this.endPaintedTrail.toString() : '!' );
     },
     
     getId: function() {
@@ -180,6 +169,7 @@ define( function( require ) {
         }
       }
       assert && assert( i < this._layerTrails.length );
+      
       this._layerTrails.splice( i, 1 );
     },
     
@@ -187,10 +177,6 @@ define( function( require ) {
     reindex: function( zIndex ) {
       this.startBoundary.reindex();
       this.endBoundary.reindex();
-    },
-    
-    boundsAccuracy: function( args ) {
-      // nothing needed in the default case, only Canvas-based layers should care
     },
     
     pushClipShape: function( shape ) {
@@ -209,16 +195,6 @@ define( function( require ) {
       this.baseNode.removeEventListener( this.baseNodeListener );
     },
     
-    // args should contain node, bounds (local bounds), transform, trail
-    markDirtyRegion: function( args ) {
-      throw new Error( 'Layer.markDirtyRegion unimplemented' );
-    },
-    
-    // args should contain node, type (append, prepend, set), matrix, transform, trail
-    transformChange: function( args ) {
-      throw new Error( 'Layer.transformChange unimplemented' );
-    },
-    
     getName: function() {
       throw new Error( 'Layer.getName unimplemented' );
     },
@@ -227,6 +203,7 @@ define( function( require ) {
     baseNodeInternalBoundsChange: function() {
       // no error, many times this doesn't need to be handled
     }
+    
   };
   
   Layer.cssTransformPadding = 3;
