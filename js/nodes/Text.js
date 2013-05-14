@@ -46,7 +46,7 @@ define( function( require ) {
     this._text         = '';                   // filled in with mutator
     this._font         = scenery.Font.DEFAULT; // default font, usually 10px sans-serif
     this._direction    = 'ltr';                // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
-    this._boundsMethod = 'fast';               // fast (SVG/DOM, no canvas rendering allowed), fastCanvas (SVG/DOM, canvas rendering allowed without dirty regions),
+    this._boundsMethod = 'fastCanvas';               // fast (SVG/DOM, no canvas rendering allowed), fastCanvas (SVG/DOM, canvas rendering allowed without dirty regions),
                                                //   or accurate (Canvas accurate recursive)
     
     // whether the text is rendered as HTML or not. if defined (in a subtype constructor), use that value instead
