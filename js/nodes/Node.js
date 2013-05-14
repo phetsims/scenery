@@ -439,6 +439,21 @@ define( function( require ) {
       return this._bounds;
     },
     
+    // like getBounds() in the "parent" coordinate frame, but only includes visible children
+    getVisibleBounds: function() {
+      // defensive copy, since we use mutable modifications below
+      var bounds = this._selfBounds.copy();
+      
+      _.each( this.children, function( child ) {
+        if ( child.isVisible() ) {
+          bounds.includeBounds( child.getVisibleBounds() );
+        }
+      } );
+      
+      sceneryAssert && sceneryAssert( bounds.isFinite() || bounds.isEmpty(), 'Visible bounds should not be infinite' );
+      return this.localToParentBounds( bounds );
+    },
+    
     /*
      * Return a trail to the top node (if any, otherwise null) whose self-rendered area contains the
      * point (in parent coordinates).
@@ -1569,6 +1584,7 @@ define( function( require ) {
     get selfBounds() { return this.getSelfBounds(); },
     get childBounds() { return this.getChildBounds(); },
     get globalBounds() { return this.getGlobalBounds(); },
+    get visibleBounds() { return this.getVisibleBounds(); },
     get id() { return this.getId(); },
     get instances() { return this.getInstances(); },
     

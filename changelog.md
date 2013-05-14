@@ -2,6 +2,7 @@
 Scenery Changelog
 =================
 
+* 2013-5-14 Adding Node.getVisibleBounds / node.visibleBounds
 * 2013-5-4  Text nodes can now share Font instances for performance reasons. This means a change to a Font will update
             any Text nodes referring to it. Calling a mutator (like text.fontWeight = 'bold') will internally create a
             copy of the Font instance, and the Text node will not be affected by changes to the previous Font object.
