@@ -535,7 +535,9 @@ define( function( require ) {
     },
     
     notifyDirtySubtreePaint: function( instance ) {
-      // no-op, post-transform isn't needed by SVG
+      if ( instance.layer === this ) {
+        this.notifyDirtySelfPaint( instance );
+      }
     },
     
     notifyTransformChange: function( instance ) {
