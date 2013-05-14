@@ -7,7 +7,6 @@ Priorities:
     * FIX devious drag! Canvas renderer + console not being open
     * Travis for tests
     ** Unicode font tests - grab strings from every language for testing
-    ** Set default boundsMethod to 'fastCanvas'
     Mouse buttons - are they pointers, like Key?
     Beware of closures! (test speeds, see https://developers.google.com/speed/articles/optimizing-javascript)
     For DOM / jQuery manipulation: https://developers.google.com/speed/articles/javascript-dom
