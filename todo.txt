@@ -39,6 +39,7 @@ Priorities:
     Testing with hidef canvases
 
 Bugs:
+    ** Nexus 7 play area cropped
     ***** Things disappear sometimes when the window is large
     *** SimpleDragHandler's parent transform tracking is broken
     Chrome canvas lineWidth with pattern bug (looks like half size?)
