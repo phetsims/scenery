@@ -1,7 +1,7 @@
 // Copyright 2002-2012, University of Colorado
 
 /**
- * A DOM-based layer in the scene graph. Each layer handles dirty-region handling separately,
+ * An SVG-based layer in the scene graph. Each layer handles dirty-region handling separately,
  * and corresponds to a single canvas / svg element / DOM element in the main container.
  * Importantly, it does not contain rendered content from a subtree of the main
  * scene graph. It only will render a contiguous block of nodes visited in a depth-first
