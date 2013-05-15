@@ -49,7 +49,7 @@ define( function( require ) {
       }
     } else {
       // alpha
-      this.a = a === undefined ? 255 : a;
+      this.a = a === undefined ? 1 : a;
 
       // bitwise handling if 3 elements aren't defined
       if ( g === undefined || b === undefined ) {
