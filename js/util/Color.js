@@ -222,6 +222,7 @@ define( function( require ) {
       if ( factor < 0 || factor > 1 ) {
         throw new Error( "factor must be between 0 and 1: " + factor );
       }
+      factor = ( factor === undefined ) ? 0.7 : factor;
       var red = Math.min( 255, this.r + Math.floor( factor * ( 255 - this.r ) ) );
       var green = Math.min( 255, this.g + Math.floor( factor * ( 255 - this.g ) ) );
       var blue = Math.min( 255, this.b + Math.floor( factor * ( 255 - this.b ) ) );
@@ -232,6 +233,7 @@ define( function( require ) {
       if ( factor < 0 || factor > 1 ) {
         throw new Error( "factor must be between 0 and 1: " + factor );
       }
+      factor = ( factor === undefined ) ? 0.7 : factor;
       var red = Math.max( 0, this.r - Math.floor( factor * this.r ) );
       var green = Math.max( 0, this.g - Math.floor( factor * this.g ) );
       var blue = Math.max( 0, this.b - Math.floor( factor * this.b ) );
