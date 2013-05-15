@@ -181,7 +181,7 @@ define( function( require ) {
     },
     
     // TODO: on modification, cache this.
-    getCSS: function() {
+    toCSS: function() {
       if ( this.a === 1 ) {
         return 'rgb(' + this.r + ',' + this.g + ',' + this.b + ')';
       } else {

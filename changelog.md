@@ -2,6 +2,7 @@
 Scenery Changelog
 =================
 
+* 2013-5-15 Rename Color.getCSS to Color.toCSS
 * 2013-5-14 Changing default Text boundsMethod to fastCanvas
 * 2013-5-14 Adding Node.getVisibleBounds / node.visibleBounds
 * 2013-5-4  Text nodes can now share Font instances for performance reasons. This means a change to a Font will update

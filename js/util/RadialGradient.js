@@ -109,7 +109,7 @@ define( function( require ) {
         var color = new scenery.Color( stop.color );
         var stopElement = document.createElementNS( svgns, 'stop' );
         stopElement.setAttribute( 'offset', ratio );
-        stopElement.setAttribute( 'style', 'stop-color: ' + color.withAlpha( 1 ).getCSS() + '; stop-opacity: ' + color.a.toFixed( 20 ) + ';' );
+        stopElement.setAttribute( 'style', 'stop-color: ' + color.withAlpha( 1 ).toCSS() + '; stop-opacity: ' + color.a.toFixed( 20 ) + ';' );
         definition.appendChild( stopElement );
       }
       

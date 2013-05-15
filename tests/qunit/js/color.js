@@ -12,14 +12,14 @@
     equal( ff00cc.g, 0, 'ff00cc green' );
     equal( ff00cc.b, 0xcc, 'ff00cc blue' );
     equal( ff00cc.a, 1, 'ff00cc alpha' );
-    equal( ff00cc.getCSS(), 'rgb(255,0,204)', 'ff00cc css' );
+    equal( ff00cc.toCSS(), 'rgb(255,0,204)', 'ff00cc css' );
     
     var f0c = new Color( '#f0c' );
     equal( f0c.r, 0xff, 'f0c red' );
     equal( f0c.g, 0, 'f0c green' );
     equal( f0c.b, 0xcc, 'f0c blue' );
     equal( f0c.a, 1, 'f0c alpha' );
-    equal( f0c.getCSS(), 'rgb(255,0,204)', 'f0c css' );
+    equal( f0c.toCSS(), 'rgb(255,0,204)', 'f0c css' );
   } );
   
   test( 'Keywords', function() {
@@ -39,7 +39,7 @@
     equal( rgb.g, 250, 'rgb green' );
     equal( rgb.b, 10, 'rgb blue' );
     equal( rgb.a, 1, 'rgb alpha' );
-    equal( rgb.getCSS(), 'rgb(100,250,10)', 'rgb css' );
+    equal( rgb.toCSS(), 'rgb(100,250,10)', 'rgb css' );
     
     var clamped = new Color( 'rgb(-50,120%,999)' );
     equal( clamped.r, 0, 'clamped rgb red' );
@@ -53,7 +53,7 @@
     equal( rgba.g, 255, 'rgba green' );
     equal( rgba.b, 0, 'rgba blue' );
     equal( rgba.a, 0, 'rgba alpha' );
-    equal( rgba.getCSS(), 'rgba(100,255,0,0)', 'rgba css' );
+    equal( rgba.toCSS(), 'rgba(100,255,0,0)', 'rgba css' );
     
     var clamped = new Color( 'rgba(-50,120%,999,255)' );
     equal( clamped.r, 0, 'clamped rgba red' );
