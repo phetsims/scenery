@@ -182,7 +182,7 @@ define( function( require ) {
       } );
     },
     
-    toString: function() {
+    toCSS: function() {
       return this.getFont();
     },
     
