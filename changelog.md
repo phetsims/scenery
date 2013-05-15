@@ -2,6 +2,7 @@
 Scenery Changelog
 =================
 
+* 2013-5-15 Changed implementation of Color.brighterColor and darkerColor to match Java
 * 2013-5-15 Rename Font.toString to Font.toCSS
 * 2013-5-15 Rename Color.getCSS to Color.toCSS
 * 2013-5-14 Changing default Text boundsMethod to fastCanvas
