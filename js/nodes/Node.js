@@ -138,6 +138,7 @@ define( function( require ) {
       this._children.splice( index, 0, node );
       
       node.invalidateBounds();
+      this._boundsDirty = true; // like calling this.invalidateBounds(), but we already marked all ancestors with dirty child bounds
       
       this.markForInsertion( node, index );
       this.notifyStitch( false );
@@ -259,10 +260,10 @@ define( function( require ) {
         var oldChildBounds = this._childBounds;
         
         // and recompute our _childBounds
-        this._childBounds = Bounds2.NOTHING;
+        this._childBounds = Bounds2.NOTHING.copy();
         
         _.each( this._children, function( child ) {
-          that._childBounds = that._childBounds.union( child._bounds );
+          that._childBounds.includeBounds( child._bounds );
         } );
         
         this._childBoundsDirty = false;
@@ -481,7 +482,7 @@ define( function( require ) {
       if ( !this._bounds.containsPoint( point ) ) { return null; }
       
       // point in the local coordinate frame. computed after the main bounds check, so we can bail out there efficiently
-      var localPoint = this._transform.inversePosition2( point );
+      var localPoint = this.parentToLocalPoint( point );
       
       // check children first, since they are rendered later
       if ( this._children.length > 0 && this._childBounds.containsPoint( localPoint ) ) {
