@@ -313,7 +313,7 @@ define( function( require ) {
           var epsilon = 0.000001;
           
           var childBounds = Bounds2.NOTHING.copy();
-          _.each( that.children, function( child ) { childBounds.includeBounds( child._bounds ) } );
+          _.each( that.children, function( child ) { childBounds.includeBounds( child._bounds ); } );
           
           var fullBounds = that.localToParentBounds( that._selfBounds ).union( that.localToParentBounds( childBounds ) );
           
