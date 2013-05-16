@@ -14,6 +14,7 @@ define( [
     'SCENERY/scenery',
     'SCENERY/debug/DebugContext',
     
+    'SCENERY/input/ButtonListener',
     'SCENERY/input/Event',
     'SCENERY/input/Input',
     'SCENERY/input/Key',
