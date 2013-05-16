@@ -159,7 +159,7 @@
             node.addChild( rect );
             scene.updateOnRequestAnimationFrame();
             scene.initializeStandaloneEvents();
-            node.addInputListener( new scenery.ButtonListener( {
+            node.addInputListener( new scenery.DownUpListener( {
               down: function() { rect.fill = '#00f'; },
               up: function() { rect.fill = '#f00'; },
               upInside: function() { rect.stroke = '#000'; },

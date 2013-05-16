@@ -16,7 +16,7 @@ define( function( require ) {
   require( 'SCENERY/util/Trail' );
   
   /*
-   * The 'trail' parameter passed to down/upInside/upOutside will end with the node to which this ButtonListener has been added.
+   * The 'trail' parameter passed to down/upInside/upOutside will end with the node to which this DownUpListener has been added.
    *
    * Allowed options: {
    *    down: null      // down( event, trail ) is called when the pointer is pressed down on this node
@@ -30,7 +30,7 @@ define( function( require ) {
                         // same instance is still directly under the pointer)
    * }
    */
-  scenery.ButtonListener = function( options ) {
+  scenery.DownUpListener = function( options ) {
     var handler = this;
     
     this.options = _.extend( {
@@ -57,10 +57,10 @@ define( function( require ) {
       }
     };
   };
-  var ButtonListener = scenery.ButtonListener;
+  var DownUpListener = scenery.DownUpListener;
   
-  ButtonListener.prototype = {
-    constructor: ButtonListener,
+  DownUpListener.prototype = {
+    constructor: DownUpListener,
     
     buttonDown: function( event ) {
       // already down from another pointer, don't do anything
@@ -113,7 +113,7 @@ define( function( require ) {
     }
   };
   
-  return ButtonListener;
+  return DownUpListener;
 } );
 
 
