@@ -267,6 +267,7 @@ define( function( require ) {
           that._childBounds.includeBounds( child._bounds );
         } );
         
+        // run this before firing the event
         this._childBoundsDirty = false;
         
         if ( !this._childBounds.equals( oldChildBounds ) ) {
@@ -278,6 +279,9 @@ define( function( require ) {
       // TODO: layout here?
       
       if ( this._boundsDirty ) {
+        // run this before firing the event
+        this._boundsDirty = false;
+        
         var oldBounds = this._bounds;
         
         // TODO: we can possibly make this not needed?
@@ -294,8 +298,12 @@ define( function( require ) {
           // TODO: consider changing to parameter object (that may be a problem for the GC overhead)
           this.fireEvent( 'bounds', this._bounds );
         }
-        
-        this._boundsDirty = false;
+      }
+      
+      // if there were side-effects, run the validation again until we are clean
+      if ( this._selfBoundsDirty || this._childBoundsDirty || this._boundsDirty ) {
+        // TODO: if there are side-effects in listeners, this could overflow the stack. we should report an error instead of locking up
+        this.validateBounds();
       }
       
       // double-check that all of our bounds handling has been accurate
