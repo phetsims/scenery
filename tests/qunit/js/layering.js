@@ -774,4 +774,47 @@
     
     expect( 0 );
   } );
+  
+  test( 'Stitch re-entrance immediate', function() {
+    var scene = new scenery.Scene( $( '#main' ) );
+    
+    var p1 = new scenery.Rectangle( 0, 0, 100, 50 );
+    p1.addEventListener( {
+      bounds: function() {
+        scene.removeChild( p1 );
+      }
+    } );
+    scene.addChild( p1 );
+    
+    scene.layerAudit();
+    
+    p1.rectWidth = 150;
+    
+    scene.layerAudit();
+    
+    equal( scene.children.length, 0, 'Should have no children left after listener' );
+    
+    scene.updateScene();
+  } );
+  
+  test( 'Stitch re-entrance degenerate scene', function() {
+    var scene = new scenery.Scene( $( '#main' ) );
+    
+    scene.addEventListener( {
+      bounds: function() {
+        if ( scene.children.length ) {
+          console.log( 'boo: ' + scene.children.length );
+          scene.removeChild( scene.children[0] );
+        }
+      }
+    } );
+    var p1 = new scenery.Rectangle( 0, 0, 100, 50 );
+    scene.addChild( p1 );
+    scene.layerAudit();
+    
+    scene.updateScene();
+    scene.layerAudit();
+    
+    equal( scene.children.length, 0, 'Should have no children left after listener' );
+  } );
 })();
