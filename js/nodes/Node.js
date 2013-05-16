@@ -158,7 +158,7 @@ define( function( require ) {
       var indexOfParent = _.indexOf( node._parents, this );
       var indexOfChild = _.indexOf( this._children, node );
       
-      this.markForRemoval( ndoe, indexOfChild );
+      this.markForRemoval( node, indexOfChild );
       
       node._parents.splice( indexOfParent, 1 );
       this._children.splice( indexOfChild, 1 );
