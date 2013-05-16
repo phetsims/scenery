@@ -329,8 +329,7 @@ define( function( require ) {
     // clean up state that was set leading up to the stitching
     this.layerChangeIntervals.length = 0;
     
-    // TODO: add this back in, but with an appropriate assertion level
-    sceneryAssert && sceneryAssert( this.layerAudit() );
+    sceneryAssertExtra && sceneryAssertExtra( this.layerAudit() );
     
     sceneryLayerLog && sceneryLayerLog( 'finished stitch\n-----------------------------------' );
   };

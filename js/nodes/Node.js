@@ -158,12 +158,13 @@ define( function( require ) {
       var indexOfParent = _.indexOf( node._parents, this );
       var indexOfChild = _.indexOf( this._children, node );
       
-      this.markForRemoval( node, indexOfChild );
+      this.markForRemoval( ndoe, indexOfChild );
       
       node._parents.splice( indexOfParent, 1 );
       this._children.splice( indexOfChild, 1 );
       
       this.invalidateBounds();
+      this._childBoundsDirty = true; // force recomputation of child bounds after removing a child
       
       this.notifyStitch( false );
     },
@@ -295,6 +296,24 @@ define( function( require ) {
         }
         
         this._boundsDirty = false;
+      }
+      
+      // double-check that all of our bounds handling has been accurate
+      if ( sceneryAssertExtra ) {
+        // new scope for safety
+        (function(){
+          var epsilon = 0.000001;
+          
+          var childBounds = Bounds2.NOTHING.copy();
+          _.each( that.children, function( child ) { childBounds.includeBounds( child._bounds ) } );
+          
+          var fullBounds = that.localToParentBounds( that._selfBounds ).union( that.localToParentBounds( childBounds ) );
+          
+          sceneryAssertExtra && sceneryAssertExtra( that._childBounds.equalsEpsilon( childBounds, epsilon ), 'Child bounds mismatch after validateBounds: ' +
+                                                                                                    that._childBounds.toString() + ', expected: ' + childBounds.toString() );
+          sceneryAssertExtra && sceneryAssertExtra( that._bounds.equalsEpsilon( fullBounds, epsilon ), 'Bounds mismatch after validateBounds: ' +
+                                                                                              that._bounds.toString() + ', expected: ' + fullBounds.toString() );
+        })();
       }
     },
     
