@@ -14,7 +14,7 @@ define( function( require ) {
   scenery.BasicNodeEvents = function( type ) {
     var proto = type.prototype;
     
-    // this should be called in the constructor to initialize
+    // this should be only called in Node's constructor to initialize
     proto.initializeNodeEvents = function() {
       this._eventListeners = [];
     };
