@@ -290,6 +290,11 @@ define( function( require ) {
       
       scene.stitchInterval( stitchData, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match );
     } );
+    
+    // clean up state that was set leading up to the stitching, and do it early so
+    // if we do things later that cause side-effects we won't clear intervals that haven't been stitched
+    this.layerChangeIntervals.length = 0;
+    
     sceneryLayerLog && sceneryLayerLog( '------ finished intervals in stitching' );
     
     // reindex all of the relevant layer trails
@@ -325,9 +330,6 @@ define( function( require ) {
     _.each( stitchData.affectedInstances, function( instance ) {
       instance.updateLayer();
     } );
-    
-    // clean up state that was set leading up to the stitching
-    this.layerChangeIntervals.length = 0;
     
     sceneryAssertExtra && sceneryAssertExtra( this.layerAudit() );
     
