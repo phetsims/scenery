@@ -441,12 +441,14 @@ define( function( require ) {
     addListener: function( type, callback, useCapture ) {
       var input = this;
       
+      //Cancel propagation of mouse events but not key events.  Key Events need to propagate for tab navigability
+      var usePreventDefault = type !== 'keydown' && type !== 'keyup' && type !== 'keypress';
+      
       if ( this.batchDOMEvents ) {
         var batchedCallback = function batchedEvent( domEvent ) {
           sceneryEventLog && sceneryEventLog( 'Batching event for ' + type );
           
-          //Cancel propagation of mouse events but not key events.  Key Events need to propagate for tab navigability
-          if ( domEvent.type !== 'keydown' && domEvent.type !== 'keyup' && domEvent.type !== 'keypress' ) {
+          if ( usePreventDefault ) {
             domEvent.preventDefault(); // TODO: should we batch the events in a different place so we don't preventDefault on something bad?
           }
           input.batchedCallbacks.push( function() {
