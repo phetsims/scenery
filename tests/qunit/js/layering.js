@@ -779,10 +779,8 @@
     var scene = new scenery.Scene( $( '#main' ) );
     
     var p1 = new scenery.Rectangle( 0, 0, 100, 50 );
-    p1.addEventListener( {
-      bounds: function() {
-        scene.removeChild( p1 );
-      }
+    p1.addEventListener( 'bounds', function() {
+      scene.removeChild( p1 );
     } );
     scene.addChild( p1 );
     
@@ -800,12 +798,9 @@
   test( 'Stitch re-entrance degenerate scene', function() {
     var scene = new scenery.Scene( $( '#main' ) );
     
-    scene.addEventListener( {
-      bounds: function() {
-        if ( scene.children.length ) {
-          console.log( 'boo: ' + scene.children.length );
-          scene.removeChild( scene.children[0] );
-        }
+    scene.addEventListener( 'bounds', function() {
+      if ( scene.children.length ) {
+        scene.removeChild( scene.children[0] );
       }
     } );
     var p1 = new scenery.Rectangle( 0, 0, 100, 50 );

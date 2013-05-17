@@ -114,7 +114,7 @@ define( function( require ) {
       // set a flag on the pointer so it won't pick up other nodes
       event.pointer.dragging = true;
       event.pointer.addInputListener( this.dragListener );
-      event.trail.rootNode().addEventListener( this.transformListener );
+      // event.trail.rootNode().addEventListener( this.transformListener ); // TODO: replace with new parent transform listening solution
       
       // set all of our persistent information
       this.dragging = true;
@@ -134,7 +134,7 @@ define( function( require ) {
     endDrag: function( event ) {
       this.pointer.dragging = false;
       this.pointer.removeInputListener( this.dragListener );
-      this.trail.rootNode().removeEventListener( this.transformListener );
+      // this.trail.rootNode().removeEventListener( this.transformListener ); // TODO: replace with new parent transform listening solution
       this.dragging = false;
       
       if ( this.options.end ) {

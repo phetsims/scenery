@@ -4,6 +4,7 @@ Examine:
     Others from html5 game engines (particularly webgl)
 
 Priorities:
+    * Performance-test arbitrary events
     * FIX devious drag! Canvas renderer + console not being open
     * Travis for tests
     ** Unicode font tests - grab strings from every language for testing
@@ -62,6 +63,7 @@ Tricky areas:
     Gradients / Patterns should not be changed after being passed to a node's fill/stroke, since the SVG def won't change, and we don't set up listeners
 
 Test:
+    Event handling tests (and generalize the event handler)
     DownUpListener
     More pixel tests
     RenderInterval

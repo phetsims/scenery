@@ -31,6 +31,7 @@ define( function( require ) {
   require( 'SCENERY/input/Key' );
   require( 'SCENERY/input/Event' );
   
+  // listenerTarget is the DOM node (window/document/element) to which DOM event listeners will be attached
   scenery.Input = function Input( scene, listenerTarget, batchDOMEvents ) {
     this.scene = scene;
     this.listenerTarget = listenerTarget;
@@ -463,7 +464,7 @@ define( function( require ) {
       }
     },
     
-    diposeListeners: function() {
+    disposeListeners: function() {
       var input = this;
       _.each( this.listenerReferences, function( ref ) {
         input.listenerTarget.removeEventListener( ref.type, ref.callback, ref.useCapture );

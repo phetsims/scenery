@@ -63,16 +63,11 @@ define( function( require ) {
     
     // whenever the base node's children or self change bounds, signal this. we want to explicitly ignore the base node's main bounds for
     // CSS transforms, since the self / children bounds may not have changed
-    this.baseNodeListener = {
-      selfBounds: function( bounds ) {
-        layer.baseNodeInternalBoundsChange();
-      },
-      
-      childBounds: function( bounds ) {
-        layer.baseNodeInternalBoundsChange();
-      }
+    this.baseNodeBoundsListener = function( bounds ) {
+      layer.baseNodeInternalBoundsChange(); // TODO: verify that this is working as expected
     };
-    this.baseNode.addEventListener( this.baseNodeListener );
+    this.baseNode.addEventListener( 'selfBounds', this.baseNodeBoundsListener );
+    this.baseNode.addEventListener( 'childBounds', this.baseNodeBoundsListener );
     
     this.fitToBounds = this.usesPartialCSSTransforms || this.cssTransform;
     sceneryAssert && sceneryAssert( this.fitToBounds || this.baseNode === this.scene, 'If the baseNode is not the scene, we need to fit the bounds' );
@@ -80,6 +75,8 @@ define( function( require ) {
     // used for CSS transforms where we need to transform our base node's bounds into the (0,0,w,h) bounds range
     this.baseNodeTransform = new Transform3();
     //this.baseNodeInteralBounds = Bounds2.NOTHING; // stores the bounds transformed into (0,0,w,h)
+    
+    this.disposed = false; // track whether we have been disposed or not
   };
   var Layer = scenery.Layer;
   
@@ -189,7 +186,13 @@ define( function( require ) {
     },
     
     dispose: function() {
-      this.baseNode.removeEventListener( this.baseNodeListener );
+      sceneryAssert && sceneryAssert( !this.disposed, 'Layer has already been disposed!' );
+      
+      this.disposed = true;
+      
+      // clean up listeners
+      this.baseNode.removeEventListener( 'selfBounds', this.baseNodeBoundsListener );
+      this.baseNode.removeEventListener( 'childBounds', this.baseNodeBoundsListener );
     },
     
     getName: function() {

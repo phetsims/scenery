@@ -51,13 +51,15 @@ define( function( require ) {
     this.element.addEventListener( 'focus', this.focusListener );
     this.element.addEventListener( 'blur', this.blurListener );
 
-    var keepPeerBoundsInSync = true;
-    if ( keepPeerBoundsInSync ) {
-      instance.node.addEventListener( {bounds: this.syncBounds.bind( this )} );
+    this.keepPeerBoundsInSync = true;
+    if ( this.keepPeerBoundsInSync ) {
+      this.boundsSyncListener = this.syncBounds.bind( this );
+
+      instance.getNode().addEventListener( 'bounds', this.boundsSyncListener );
       this.syncBounds();
 
       //When the scene resizes, update the peer bounds
-      instance.trail.nodes[0].resizeListeners.push( this.syncBounds.bind( this ) );
+      instance.getScene().addEventListener( 'resize', this.boundsSyncListener );
 
       //Initial layout
       window.setTimeout( this.syncBounds.bind( this ), 30 );
@@ -71,6 +73,12 @@ define( function( require ) {
       this.element.removeEventListener( 'click', this.clickListener );
       this.element.removeEventListener( 'focus', this.focusListener );
       this.element.removeEventListener( 'blur', this.blurListener );
+      
+      // don't leak memory
+      if ( this.keepPeerBoundsInSync ) {
+        this.instance.getNode().removeEventListener( 'bounds', this.boundsSyncListener );
+        this.instance.getScene().removeEventListener( 'resize', this.boundsSyncListener );
+      }
     },
     
     getGlobalBounds: function() {

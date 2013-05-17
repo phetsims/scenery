@@ -113,17 +113,6 @@ define( function( require ) {
       return this;
     },
     
-    invalidateOnImageLoad: function( image ) {
-      var self = this;
-      var listener = function( event ) {
-        self.invalidateImage();
-        
-        // don't leak memory!
-        image.removeEventListener( listener );
-      };
-      image.addEventListener( listener );
-    },
-    
     getImageWidth: function() {
       return this._image.width;
     },

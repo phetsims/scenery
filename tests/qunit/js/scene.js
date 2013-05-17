@@ -683,4 +683,65 @@
     scene.removeChild( path );
     equal( scene.layers.length, 0, 'no layers after removing' );
   } );
+  
+  test( 'Scene resize event', function() {
+    var scene = new scenery.Scene( $( '#main' ) );
+    
+    var width, height, count = 0;
+    
+    scene.addEventListener( 'resize', function( event ) {
+      width = event.width;
+      height = event.height;
+      count++;
+    } );
+    
+    scene.resize( 712, 217 );
+    
+    equal( width, 712, 'Scene resize width' );
+    equal( height, 217, 'Scene resize height' );
+    equal( count, 1, 'Scene resize count' );
+  } );
+  
+  test( 'Bounds events', function() {
+    var node = new scenery.Node();
+    node.y = 10;
+    
+    var rect = new scenery.Rectangle( 0, 0, 100, 50, { fill: '#f00' } );
+    rect.x = 10; // a transform, so we can verify everything is handled correctly
+    node.addChild( rect );
+    
+    node.validateBounds();
+    
+    var epsilon = 0.0000001;
+    
+    node.addEventListener( 'childBounds', function( bounds ) {
+      ok( bounds.equalsEpsilon( new dot.Bounds2( 10, 0, 110, 30 ), epsilon ), 'Parent child bounds check: ' + bounds.toString() );
+    } );
+    
+    node.addEventListener( 'bounds', function( bounds ) {
+      ok( bounds.equalsEpsilon( new dot.Bounds2( 10, 10, 110, 40 ), epsilon ), 'Parent bounds check: ' + bounds.toString() );
+    } );
+    
+    node.addEventListener( 'selfBounds', function( bounds ) {
+      ok( false, 'Self bounds should not change for parent node' );
+    } );
+    
+    rect.addEventListener( 'selfBounds', function( bounds ) {
+      ok( bounds.equalsEpsilon( new dot.Bounds2( 0, 0, 100, 30 ), epsilon ), 'Self bounds check: ' + bounds.toString() );
+    } );
+    
+    rect.addEventListener( 'bounds', function( bounds ) {
+      ok( bounds.equalsEpsilon( new dot.Bounds2( 10, 0, 110, 30 ), epsilon ), 'Bounds check: ' + bounds.toString() );
+    } );
+    
+    rect.addEventListener( 'childBounds', function( bounds ) {
+      ok( false, 'Child bounds should not change for leaf node' );
+    } );
+    
+    rect.rectHeight = 30;
+    node.validateBounds();
+    
+    // this may change if for some reason we end up calling more events in the future
+    expect( 4 );
+  } );
 })();

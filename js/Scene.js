@@ -128,13 +128,11 @@ define( function( require ) {
       this.focusRingSVGContainer.appendChild( this.focusRingPath );
       $main[0].appendChild( this.focusRingSVGContainer );
       
-      this.updateFocusRing = {bounds: function() {
+      this.updateFocusRing = function() {
+        // TODO: move into prototype definitions, this doesn't need to be private, and isn't a closure over anything in the constructor
         sceneryAssert && sceneryAssert( scene.activePeer, 'scene should have an active peer when changing the focus ring bounds' );
         scene.focusRingPath.setAttribute( 'd', Shape.bounds( scene.activePeer.getGlobalBounds() ).getSVGPath() );
-      }};
-      
-      // only for accessibility for now
-      this.resizeListeners = [];
+      };
     }
   };
   var Scene = scenery.Scene;
@@ -221,14 +219,14 @@ define( function( require ) {
       
       //Remove bounds listener from old active peer
       if ( this.activePeer ) {
-        this.activePeer.instance.node.removeEventListener( this.updateFocusRing );
+        this.activePeer.instance.node.removeEventListener( 'bounds', this.updateFocusRing );
       }
       
       this.activePeer = peer;
       
       if ( peer ) {
-        this.activePeer.instance.node.addEventListener( this.updateFocusRing );
-        this.updateFocusRing.bounds.call( this );
+        this.activePeer.instance.node.addEventListener( 'bounds', this.updateFocusRing );
+        this.updateFocusRing();
       } else {
         this.focusRingPath.setAttribute( 'd', "M 0 0" );
       }
@@ -710,6 +708,9 @@ define( function( require ) {
   
   Scene.prototype.dispose = function() {
     this.disposeLayers();
+    if ( this.input ) {
+      this.input.disposeListeners();
+    }
     
     // remove self reference from the container
     delete this.main.scene;
@@ -846,6 +847,7 @@ define( function( require ) {
     } );
   };
   
+  // TODO: Note that this is private, better name?
   Scene.prototype.setSize = function( width, height ) {
     // resize our main container
     this.$main.width( width );
@@ -869,13 +871,11 @@ define( function( require ) {
       //Update the focus ring when the scene resizes.  Note: as of 5/10/2013 this only works properly when scaling up, and is buggy (off by a translation) when scaling down
       if ( this.updateFocusRing && this.activePeer) {
         // this.updateScene();
-        this.updateFocusRing.bounds.call();
+        this.updateFocusRing();
       }
-      
-      _.each( this.resizeListeners, function( resizeListener ) {
-        resizeListener();
-      } );
     }
+    
+    this.fireEvent( 'resize', { width: width, height: height } );
   };
   
   Scene.prototype.resizeAccessibilityLayer = function( width, height ) {
