@@ -1556,8 +1556,22 @@ scene.addChild( new scenery.Circle( 11, {
       </p>
       <p>
         For example, <code>new scenery.Font( { size: 16, style: 'italic' } )</code> and <code>new scenery.Font( 'italic 16px sans-serif' )</code>
-        are equivalent ways of creating that specific Font instance.
+        are equivalent ways of creating that specific Font instance. In addition:
       </p>
+      <pre class="brush: js">
+new scenery.Font().font                      // "10px sans-serif" (the default)
+new scenery.Font( { family: 'serif' } ).font // "10px serif"
+new scenery.Font( { weight: 'bold' } ).font  // "bold 10px sans-serif"
+new scenery.Font( { size: 16 } ).font        // "16px sans-serif"
+var font = new scenery.Font( {
+  family: '"Times New Roman", serif'
+} );
+font.style = 'italic';
+font.lineHeight = 10;
+font.font;                                   // "italic 10px/10 'Times New Roman', serif"
+font.family;                                 // "'Times New Roman', serif"
+font.weight;                                 // 400 (the default)
+      </pre>
       
       <h4 id="font-font">font</h4>
       <p>
