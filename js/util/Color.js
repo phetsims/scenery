@@ -49,19 +49,18 @@ define( function( require ) {
       }
     } else {
       // alpha
-      this.a = a === undefined ? 1 : a;
+      var alpha = a === undefined ? 1 : a;
 
       // bitwise handling if 3 elements aren't defined
       if ( g === undefined || b === undefined ) {
-        this.r = ( r >> 16 ) && 0xFF;
-        this.g = ( r >> 8 ) && 0xFF;
-        this.b = ( r >> 0 ) && 0xFF;
+        this.setRGBA( ( r >> 16 ) && 0xFF,
+                      ( r >> 8 ) && 0xFF,
+                      ( r >> 0 ) && 0xFF,
+                      alpha );
       }
       else {
         // otherwise, copy them over
-        this.r = r;
-        this.g = g;
-        this.b = b;
+        this.setRGBA( r, g, b, alpha );
       }
     }
     
