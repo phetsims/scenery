@@ -445,7 +445,10 @@ define( function( require ) {
         var batchedCallback = function batchedEvent( domEvent ) {
           sceneryEventLog && sceneryEventLog( 'Batching event for ' + type );
           
-          domEvent.preventDefault(); // TODO: should we batch the events in a different place so we don't preventDefault on something bad?
+          //Cancel propagation of mouse events but not key events.  Key Events need to propagate for tab navigability
+          if ( domEvent.type !== 'keydown' && domEvent.type !== 'keyup' && domEvent.type !== 'keypress' ) {
+            domEvent.preventDefault(); // TODO: should we batch the events in a different place so we don't preventDefault on something bad?
+          }
           input.batchedCallbacks.push( function() {
             callback( domEvent );
           } );
