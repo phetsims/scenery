@@ -744,4 +744,15 @@
     // this may change if for some reason we end up calling more events in the future
     expect( 4 );
   } );
+  
+  test( 'Using a color instance', function() {
+    var scene = new scenery.Scene( $( '#main' ) );
+    
+    var rect = new scenery.Rectangle( 0, 0, 100, 50 );
+    ok( rect.fill === null, 'Always starts with a null fill' );
+    scene.addChild( rect );
+    var color = new scenery.Color( 255, 0, 0 );
+    rect.fill = color;
+    color.setRGBA( 0, 255, 0, 1 );
+  } );
 })();

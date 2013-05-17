@@ -269,7 +269,7 @@ define( function( require ) {
     updateDOMElement: function( div ) {
       var $div = $( div );
       div.style.font = this.getFont();
-      div.style.color = this.getFill() ? this.getFill() : 'transparent'; // transparent will make us invisible if the fill is null
+      div.style.color = this.getCSSFill();
       $div.width( this.getSelfBounds().width );
       $div.height( this.getSelfBounds().height );
       $div.empty(); // remove all children, including previously-created text nodes

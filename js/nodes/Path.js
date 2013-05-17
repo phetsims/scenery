@@ -26,6 +26,7 @@ define( function( require ) {
     // ensure we have a parameter object
     options = options || {};
     
+    this.initializeFillable();
     this.initializeStrokable();
     
     Node.call( this, options );

@@ -7,7 +7,7 @@
  *
  * See http://www.w3.org/TR/css3-color/
  *
- * TODO: consider using https://github.com/One-com/one-color internally
+ * TODO: getters for color components, including ES5 red/green/blue/alpha?
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
@@ -21,6 +21,9 @@ define( function( require ) {
   
   // r,g,b integers 0-255, 'a' float 0-1
   scenery.Color = function Color( r, g, b, a ) {
+    
+    // allow listeners to be notified on any changes. called with listener()
+    this.listeners = [];
     
     if ( typeof r === 'string' ) {
       var str = r.replace( / /g, '' ).toLowerCase();
@@ -63,8 +66,6 @@ define( function( require ) {
         this.setRGBA( r, g, b, alpha );
       }
     }
-    
-    this.updateColor();
   };
   var Color = scenery.Color;
   
@@ -201,7 +202,29 @@ define( function( require ) {
     
     // called to update the interally cached CSS value
     updateColor: function() {
+      sceneryAssert && sceneryAssert( !this.immutable, 'Cannot modify an immutable color' );
+      
+      var oldCSS = this._css;
       this._css = this.computeCSS();
+      
+      // notify listeners if it changed
+      if ( oldCSS !== this._css && this.listeners.length ) {
+        var listeners = this.listeners.slice( 0 ); // defensive copy. consider removing if it's a performance bottleneck?
+        var length = listeners.length;
+        
+        for ( var i = 0; i < length; i++ ) {
+          listeners[i]();
+        }
+      }
+    },
+    
+    // allow setting this Color to be immutable when assertions are disabled. any change will throw an error
+    setImmutable: function() {
+      if ( sceneryAssert ) {
+        this.immutable = true;
+      }
+      
+      return this; // allow chaining
     },
     
     // to what value a Canvas's context.fillStyle should be set
@@ -259,6 +282,22 @@ define( function( require ) {
       var green = Math.max( 0, Math.floor( factor * this.g ) );
       var blue  = Math.max( 0, Math.floor( factor * this.b ) );
       return new Color( red, green, blue, this.a );
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * listeners TODO: consider mixing in this behavior, it's common
+    *----------------------------------------------------------------------------*/
+    
+    // listener should be a callback expecting no arguments, listener() will be called when the font changes
+    addChangeListener: function( listener ) {
+      sceneryAssert && sceneryAssert( listener !== undefined && listener !== null, 'Verify that the listener exists' );
+      sceneryAssert && sceneryAssert( !_.contains( this.listeners, listener ) );
+      this.listeners.push( listener );
+    },
+    
+    removeChangeListener: function( listener ) {
+      sceneryAssert && sceneryAssert( _.contains( this.listeners, listener ) );
+      this.listeners.splice( _.indexOf( this.listeners, listener ), 1 );
     }
   };
   
@@ -428,19 +467,19 @@ define( function( require ) {
   };
   
   // JAVA compatibility TODO: remove after porting MS
-  Color.BLACK      = new Color( 0,   0,   0 );
-  Color.BLUE       = new Color( 0,   0,   255 );
-  Color.CYAN       = new Color( 0,   255, 255 );
-  Color.DARK_GRAY  = new Color( 64,  64,  64 );
-  Color.GRAY       = new Color( 128, 128, 128 );
-  Color.GREEN      = new Color( 0,   255, 0 );
-  Color.LIGHT_GRAY = new Color( 192, 192, 192 );
-  Color.MAGENTA    = new Color( 255, 0,   255 );
-  Color.ORANGE     = new Color( 255, 200, 0 );
-  Color.PINK       = new Color( 255, 175, 175 );
-  Color.RED        = new Color( 255, 0,   0 );
-  Color.WHITE      = new Color( 255, 255, 255 );
-  Color.YELLOW     = new Color( 255, 255, 0 );
+  Color.BLACK      = new Color( 0,   0,   0   ).setImmutable();
+  Color.BLUE       = new Color( 0,   0,   255 ).setImmutable();
+  Color.CYAN       = new Color( 0,   255, 255 ).setImmutable();
+  Color.DARK_GRAY  = new Color( 64,  64,  64  ).setImmutable();
+  Color.GRAY       = new Color( 128, 128, 128 ).setImmutable();
+  Color.GREEN      = new Color( 0,   255, 0   ).setImmutable();
+  Color.LIGHT_GRAY = new Color( 192, 192, 192 ).setImmutable();
+  Color.MAGENTA    = new Color( 255, 0,   255 ).setImmutable();
+  Color.ORANGE     = new Color( 255, 200, 0   ).setImmutable();
+  Color.PINK       = new Color( 255, 175, 175 ).setImmutable();
+  Color.RED        = new Color( 255, 0,   0   ).setImmutable();
+  Color.WHITE      = new Color( 255, 255, 255 ).setImmutable();
+  Color.YELLOW     = new Color( 255, 255, 0   ).setImmutable();
   
   return Color;
 } );

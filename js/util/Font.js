@@ -190,6 +190,7 @@ define( function( require ) {
     * listeners
     *----------------------------------------------------------------------------*/
     
+    // TODO: change to addChangeListener?
     // listener should be a callback expecting no arguments, listener() will be called when the font changes
     addFontListener: function( listener ) {
       sceneryAssert && sceneryAssert( !_.contains( this.listeners, listener ) );
