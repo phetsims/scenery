@@ -295,6 +295,7 @@ Trail:
     depthFirstUntil should possibly have option for defensive copies of the pointers?
 
 Performance:
+    **** FAMB tab 2 slower after instances-stitch (SVG+CSS)
     Layers / caching:
         **** Consider option that would resize / position canvas/svg elements to smaller portions of the screen for lower memory usage (and possibly better performance?)
             Tiling, possibly lock to every 16 pixels. Prevent back-and-forth every frame, and consider full size for animation vs changing
