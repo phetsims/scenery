@@ -34,7 +34,7 @@ define( function( require ) {
   /*
    *
    */
-  scenery.CanvasLayer = function( args ) {
+  scenery.CanvasLayer = function CanvasLayer( args ) {
     sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' constructor' );
     Layer.call( this, args );
     

@@ -14,7 +14,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  scenery.Pointer = function() {
+  scenery.Pointer = function Pointer() {
     this.listeners = [];
   };
   var Pointer = scenery.Pointer;

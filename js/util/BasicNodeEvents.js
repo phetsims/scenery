@@ -11,7 +11,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  scenery.BasicNodeEvents = function( type ) {
+  scenery.BasicNodeEvents = function BasicNodeEvents( type ) {
     var proto = type.prototype;
     
     // this should be only called in Node's constructor to initialize

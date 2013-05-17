@@ -26,7 +26,7 @@ define( function( require ) {
   require( 'SCENERY/nodes/Node' );
   // require( 'SCENERY/util/TrailPointer' );
   
-  scenery.Trail = function( nodes ) {
+  scenery.Trail = function Trail( nodes ) {
     /*
      * Controls the immutability of the trail.
      * If set to true, add/remove descendant/ancestor should fail if assertions are enabled

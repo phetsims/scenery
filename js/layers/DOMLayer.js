@@ -27,7 +27,7 @@ define( function( require ) {
   var Layer = require( 'SCENERY/layers/Layer' ); // DOMLayer inherits from Layer
   require( 'SCENERY/util/Trail' );
   
-  scenery.DOMLayer = function( args ) {
+  scenery.DOMLayer = function DOMLayer( args ) {
     sceneryLayerLog && sceneryLayerLog( 'DOMLayer constructor' );
     
     Layer.call( this, args );

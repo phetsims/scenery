@@ -15,7 +15,7 @@ define( function( require ) {
   
   var Pointer = require( 'SCENERY/input/Pointer' ); // extends Pointer
   
-  scenery.Touch = function( id, point, event ) {
+  scenery.Touch = function Touch( id, point, event ) {
     Pointer.call( this );
     
     this.id = id;

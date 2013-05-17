@@ -12,7 +12,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  scenery.LayerType = function( Constructor, name, renderer, args ) {
+  scenery.LayerType = function LayerType( Constructor, name, renderer, args ) {
     this.Constructor = Constructor;
     this.name = name;
     this.renderer = renderer;

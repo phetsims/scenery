@@ -14,7 +14,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var LineStyles = require( 'KITE/util/LineStyles' );
   
-  scenery.Strokable = function( type ) {
+  scenery.Strokable = function Strokable( type ) {
     var proto = type.prototype;
     
     // this should be called in the constructor to initialize

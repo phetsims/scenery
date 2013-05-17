@@ -20,7 +20,7 @@ define( function( require ) {
   var clamp = require( 'DOT/Util' ).clamp;
   
   // r,g,b integers 0-255, 'a' float 0-1
-  scenery.Color = function( r, g, b, a ) {
+  scenery.Color = function Color( r, g, b, a ) {
     
     if ( typeof r === 'string' ) {
       var str = r.replace( / /g, '' ).toLowerCase();

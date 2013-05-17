@@ -21,7 +21,7 @@ define( function( require ) {
    *
    * previousLayerType should be null if there is no previous layer.
    */
-  scenery.LayerBuilder = function( scene, previousLayerType, previousPaintedTrail, nextPaintedTrail ) {
+  scenery.LayerBuilder = function LayerBuilder( scene, previousLayerType, previousPaintedTrail, nextPaintedTrail ) {
     
     /*---------------------------------------------------------------------------*
     * Initial state

@@ -49,7 +49,7 @@ define( function( require ) {
     }
   }
   
-  scenery.DebugContext = function( context ) {
+  scenery.DebugContext = function DebugContext( context ) {
     this._context = context;
     
     // allow checking of context.ellipse for existence

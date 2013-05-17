@@ -14,7 +14,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  scenery.CanvasContextWrapper = function( canvas, context ) {
+  scenery.CanvasContextWrapper = function CanvasContextWrapper( canvas, context ) {
     this.canvas = canvas;
     this.context = context;
     

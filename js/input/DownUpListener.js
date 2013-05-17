@@ -30,7 +30,7 @@ define( function( require ) {
                         // same instance is still directly under the pointer)
    * }
    */
-  scenery.DownUpListener = function( options ) {
+  scenery.DownUpListener = function DownUpListener( options ) {
     var handler = this;
     
     this.options = _.extend( {

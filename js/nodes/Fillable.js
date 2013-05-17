@@ -13,7 +13,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  scenery.Fillable = function( type ) {
+  scenery.Fillable = function Fillable( type ) {
     var proto = type.prototype;
     
     // this should be called in the constructor to initialize

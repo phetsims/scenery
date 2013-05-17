@@ -17,7 +17,7 @@ define( function( require ) {
   
   // TODO: support scene or other various content (SVG is flexible, can backport to canvas)
   // TODO: investigate options to support repeat-x, repeat-y or no-repeat in SVG (available repeat options from Canvas)
-  scenery.Pattern = function( image ) {
+  scenery.Pattern = function Pattern( image ) {
     this.image = image;
     
     // TODO: make a global spot that will have a 'useless' context for these purposes?

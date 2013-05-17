@@ -17,7 +17,7 @@ define( function( require ) {
   var Vector2 = require( 'DOT/Vector2' );
   
   // TODO: support Vector2s for p0 and p1
-  scenery.RadialGradient = function( x0, y0, r0, x1, y1, r1 ) {
+  scenery.RadialGradient = function RadialGradient( x0, y0, r0, x1, y1, r1 ) {
     this.start = new Vector2( x0, y0 );
     this.end = new Vector2( x1, y1 );
     this.startRadius = r0;

@@ -14,7 +14,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  scenery.Event = function( args ) {
+  scenery.Event = function Event( args ) {
     // ensure that all of the required args are supplied
     sceneryAssert && sceneryAssert( args.trail &&
                       args.type &&

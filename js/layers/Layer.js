@@ -23,7 +23,7 @@ define( function( require ) {
    * scene     - the scene itself
    * baseNode  - the base node for this layer
    */
-  scenery.Layer = function( args ) {
+  scenery.Layer = function Layer( args ) {
     
     // assign a unique ID to this layer
     this._id = globalIdCounter++;

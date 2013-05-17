@@ -13,7 +13,7 @@ define( function( require ) {
   
   var Pointer = require( 'SCENERY/input/Pointer' ); // inherits from Pointer
   
-  scenery.Mouse = function() {
+  scenery.Mouse = function Mouse() {
     Pointer.call( this );
     
     this.point = null;

@@ -16,7 +16,7 @@ define( function( require ) {
   
   var Pointer = require( 'SCENERY/input/Pointer' ); // Inherits from Pointer
   
-  scenery.Key = function( key, event ) {
+  scenery.Key = function Key( key, event ) {
     Pointer.call( this );
     
     this.key = key;

@@ -17,7 +17,7 @@ define( function( require ) {
     'bounds'
   ];
   
-  scenery.SplitNodeEvents = function( type ) {
+  scenery.SplitNodeEvents = function SplitNodeEvents( type ) {
     var proto = type.prototype;
     
     // this should be called in the constructor to initialize

@@ -12,7 +12,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   // layer should be null if the trail isn't to a painted node
-  scenery.Instance = function( trail, layer, parent ) {
+  scenery.Instance = function Instance( trail, layer, parent ) {
     this.trail = trail; // trail may be assumed to be stale, for performance reasons
     this.layer = layer;
     this.oldLayer = layer; // used during stitching

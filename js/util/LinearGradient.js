@@ -19,7 +19,7 @@ define( function( require ) {
   var Vector2 = require( 'DOT/Vector2' );
 
   // TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ]
-  scenery.LinearGradient = function( x0, y0, x1, y1 ) {
+  scenery.LinearGradient = function LinearGradient( x0, y0, x1, y1 ) {
     sceneryAssert && sceneryAssert( isFinite( x0 ) && isFinite( y0 ) && isFinite( x1 ) && isFinite( y1 ) );
     var usesVectors = y1 === undefined;
     if ( usesVectors ) {

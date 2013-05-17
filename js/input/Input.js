@@ -30,7 +30,7 @@ define( function( require ) {
   require( 'SCENERY/input/Pen' );
   require( 'SCENERY/input/Event' );
   
-  scenery.Input = function( scene, listenerTarget, batchDOMEvents ) {
+  scenery.Input = function Input( scene, listenerTarget, batchDOMEvents ) {
     this.scene = scene;
     this.listenerTarget = listenerTarget;
     this.batchDOMEvents = batchDOMEvents;

@@ -23,7 +23,7 @@ define( function( require ) {
    *    translate:            // if this exists, translate( { delta: _, oldPosition: _, position: _ } ) will be called instead of directly translating the node
    * }
    */
-  scenery.SimpleDragHandler = function( options ) {
+  scenery.SimpleDragHandler = function SimpleDragHandler( options ) {
     var handler = this;
     
     this.options = _.extend( {

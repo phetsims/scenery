@@ -11,7 +11,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  scenery.LayerBoundary = function() {
+  scenery.LayerBoundary = function LayerBoundary() {
     // layer types before and after the boundary. null indicates the lack of information (first or last layer)
     this.previousLayerType = null;
     this.nextLayerType = null;

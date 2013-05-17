@@ -39,7 +39,7 @@ define( function( require ) {
   //                    <font-variant-css21> = [normal | small-caps]
   // font-synthesis   v none | [ weight || style ]
   
-  scenery.Font = function( options ) {
+  scenery.Font = function Font( options ) {
     // internal string representation
     this._font = '10px sans-serif';
     

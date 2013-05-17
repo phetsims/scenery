@@ -13,7 +13,7 @@ define( function( require ) {
   
   var Pointer = require( 'SCENERY/input/Pointer' ); // extends Pointer
   
-  scenery.Pen = function( id, point, event ) {
+  scenery.Pen = function Pen( id, point, event ) {
     Pointer.call( this );
     
     this.id = id;
