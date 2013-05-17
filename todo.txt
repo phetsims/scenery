@@ -241,6 +241,8 @@ DOM:
         Showing where the fingers are with a display (for projectors)
 
 Accessibility / shadow DOM:
+    Peers:
+        Only in tab order if visible
     TabOrder object?
     Questions:
         Shape instead of rect to highlight - SVG in front

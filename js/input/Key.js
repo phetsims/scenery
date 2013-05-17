@@ -12,22 +12,23 @@
 define( function( require ) {
   'use strict';
   
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   
   var Pointer = require( 'SCENERY/input/Pointer' ); // Inherits from Pointer
   
-  scenery.Key = function Key( key, event ) {
+  scenery.Key = function Key( event ) {
     Pointer.call( this );
     
-    this.key = key;
-    this.isKey = true;
+    this.event = event; // event.keyCode event.charCode
+    this.isKey = true; // compared to isMouse/isPen/isTouch
     this.trail = null;
     this.type = 'key';
   };
   var Key = scenery.Key;
   
-  Key.prototype = _.extend( {}, Pointer.prototype, {
-    constructor: Key
+  inherit( Key, Pointer, {
+    
   } );
   
   return Key;

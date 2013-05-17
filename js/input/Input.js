@@ -28,6 +28,7 @@ define( function( require ) {
   require( 'SCENERY/input/Mouse' );
   require( 'SCENERY/input/Touch' );
   require( 'SCENERY/input/Pen' );
+  require( 'SCENERY/input/Key' );
   require( 'SCENERY/input/Event' );
   
   scenery.Input = function Input( scene, listenerTarget, batchDOMEvents ) {
@@ -65,6 +66,16 @@ define( function( require ) {
       return _.find( this.pointers, function( pointer ) { return pointer.id === id; } );
     },
     
+    findKeyByEvent: function( event ) {
+      sceneryAssert && sceneryAssert( event.keyCode && event.charCode, 'Assumes the KeyboardEvent has keyCode and charCode properties' );
+      var result = _.find( this.pointers, function( pointer ) {
+        // TODO: also check location (if that exists), so we don't mix up left and right shift, etc.
+        return pointer.keyCode === event.keyCode && pointer.charCode === event.charCode;
+      } );
+      // sceneryAssert && sceneryAssert( result, 'No key found for the combination of key:' + event.key + ' and location:' + event.location );
+      return result;
+    },
+    
     mouseDown: function( point, event ) {
       this.mouse.down( point, event );
       this.downEvent( this.mouse, event );
@@ -88,6 +99,28 @@ define( function( require ) {
     mouseOut: function( point, event ) {
       this.mouse.out( point, event );
       // TODO: how to handle mouse-out
+    },
+    
+    keyDown: function( event ) {
+      var key = new scenery.Key( event );
+      this.addPointer( key );
+      
+      var trail = this.scene.getTrailFromKeyboardFocus();
+      this.dispatchEvent( trail, 'keyDown', key, event, true );
+    },
+    
+    keyUp: function( event ) {
+      var key = this.findKeyByEvent( event );
+      if ( key ) {
+        this.removePointer( key );
+        
+        var trail = this.scene.getTrailFromKeyboardFocus();
+        this.dispatchEvent( trail, 'keyUp', key, event, true );
+      }
+    },
+    
+    keyPress: function( event ) {
+      // NOTE: do we even need keyPress?
     },
     
     // called for each touch point
@@ -328,7 +361,7 @@ define( function( require ) {
       this.dispatchToTargets( trail, pointer, type, inputEvent, bubbles );
       
       // TODO: better interactivity handling?
-      if ( !trail.lastNode().interactive ) {
+      if ( !trail.lastNode().interactive && !pointer.isKey ) {
         event.preventDefault();
       }
     },

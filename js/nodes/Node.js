@@ -79,6 +79,8 @@ define( function( require ) {
     this._children = []; // ordered
     this._parents = []; // unordered
     
+    this._peers = []; // array of peer factories: { element: ..., options: ... }, where element can be an element or a string
+    
     /*
      * Set up the transform reference. we add a listener so that the transform itself can be modified directly
      * by reference, or node.transform = <transform> / node.setTransform() can be used to change the transform reference.
@@ -237,6 +239,12 @@ define( function( require ) {
       _.each( this._parents.slice( 0 ), function( parent ) {
         parent.removeChild( that );
       } );
+    },
+    
+    // currently, there is no way to remove peers. if a string is passed as the element pattern, it will be turned into an element
+    addPeer: function( element, options ) {
+      sceneryAssert && sceneryAssert( !this.instances.length, 'Cannot call addPeer after a node has instances (yet)' );
+      this._peers.push( { element: element, options: options } );
     },
     
     // ensure that cached bounds stored on this node (and all children) are accurate
@@ -597,10 +605,6 @@ define( function( require ) {
     
     getInputListeners: function() {
       return this._inputListeners.slice( 0 ); // defensive copy
-    },
-    
-    addPeer: function() {
-      // stub for accessibility3 compatibility. will be merged in later. REMOVE THIS PART IN THE MERGE
     },
     
     /*

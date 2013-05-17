@@ -17,6 +17,8 @@ define( function( require ) {
   var Vector2 = require( 'DOT/Vector2' );
   var Matrix3 = require( 'DOT/Matrix3' );
   
+  var Shape = require( 'KITE/Shape' );
+  
   var scenery = require( 'SCENERY/scenery' );
   
   var Node = require( 'SCENERY/nodes/Node' ); // inherits from Node
@@ -30,6 +32,8 @@ define( function( require ) {
   
   var Util = require( 'SCENERY/util/Util' );
   var objectCreate = Util.objectCreate;
+  
+  var accessibility = window.has && window.has( 'scenery.accessibility' );
   
   // debug flag to disable matching of layers when in 'match' mode
   var forceNewLayers = true; // DEBUG
@@ -101,14 +105,47 @@ define( function( require ) {
     this.preferredSceneLayerType = options.preferredSceneLayerType;
     
     applyCSSHacks( $main, options );
+    
+    if ( accessibility ) {
+      this.activePeer = null;
+      
+      this.accessibilityLayer = document.createElement( 'div' );
+      this.accessibilityLayer.className = "accessibility-layer";
+      
+      //Put the accessibility layer behind the background so it cannot be seen.  Change this to some high number like 9999 to show it for debugging purposes.
+      this.accessibilityLayer.style.zIndex = -1;
+      this.accessibilityLayer.style.position = 'relative';
+      this.$accessibilityLayer = $( this.accessibilityLayer );
+      $main[0].appendChild( this.accessibilityLayer );
+      
+      this.focusRingSVGContainer = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+      this.focusRingSVGContainer.style.position = 'absolute';
+      this.focusRingSVGContainer.style['pointer-events'] = 'none';
+      this.resizeFocusRingSVGContainer( options.width, options.height );
+      this.focusRingPath = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+      this.focusRingPath.setAttribute( 'style', 'fill: none; stroke: blue; stroke-width: 5;' );
+      this.focusRingPath.setAttribute( 'id', 'p1' );
+      this.focusRingSVGContainer.appendChild( this.focusRingPath );
+      $main[0].appendChild( this.focusRingSVGContainer );
+      
+      this.updateFocusRing = {bounds: function() {
+        sceneryAssert && sceneryAssert( scene.activePeer, 'scene should have an active peer when changing the focus ring bounds' );
+        scene.focusRingPath.setAttribute( 'd', Shape.bounds( scene.activePeer.getGlobalBounds() ).getSVGPath() );
+      }};
+      
+      // only for accessibility for now
+      this.resizeListeners = [];
+    }
   };
   var Scene = scenery.Scene;
-
+  
   Scene.prototype = objectCreate( Node.prototype );
   Scene.prototype.constructor = Scene;
   
   Scene.prototype.updateScene = function( args ) {
     // sceneryLayerLog && sceneryLayerLog( 'Scene: updateScene' );
+    
+    var scene = this;
     
     // validating bounds, similar to Piccolo2d
     this.validateBounds();
@@ -119,18 +156,123 @@ define( function( require ) {
       return;
     }
     
-    var scene = this;
-    
     _.each( this.layers, function( layer ) {
       layer.render( scene, args );
     } );
     
     this.updateCursor();
+    
+    // if ( this.accessibilityLayer ) {
+//      for ( var i = 0; i < accessibleNodes.length; i++ ) {
+//        if ( accessibleNodes[i]._element === activeElement ) {
+//          if ( accessibleNodes[i].origin ) {
+//            var b = accessibleNodes[i].origin.globalBounds;
+//            var rect = Shape.bounds( b );
+//
+//            //Animation is a bit buggy, but I left this code in in case we want to pick it up later.
+//            var animateTheRect = false;
+//            if ( animateTheRect ) {
+//              if ( !this.focusRingPath.lastSVGPath ) {
+//                this.focusRingPath.setAttribute( 'd', rect.getSVGPath() );
+//                this.focusRingPath.lastSVGPath = rect.getSVGPath();
+//              } else {
+//                var animate = document.createElementNS( 'http://www.w3.org/2000/svg', 'animate' );
+//                animate.setAttribute( 'attributeType', 'XML' );
+//                animate.setAttribute( 'xlink:href', '#p1' );
+//                animate.setAttribute( 'attributeName', 'd' );
+//                animate.setAttribute( 'from', this.focusRingPath.lastSVGPath );
+//                animate.setAttribute( 'to', rect.getSVGPath() );
+//                animate.setAttribute( 'dur', '4s' );
+//
+//                $( this.focusRingPath ).empty();
+//                this.focusRingPath.appendChild( animate );
+//                this.focusRingPath.lastSVGPath = rect.getSVGPath();
+//              }
+//            } else {
+//              this.focusRingPath.setAttribute( 'd', rect.getSVGPath() );
+//            }
+//
+//            found = true;
+//          }
+//        }
+//        if ( !found ) {
+//          this.focusRingPath.removeAttribute( 'd' );
+//        }
+//      }
+    // }
   };
   
   Scene.prototype.renderScene = function() {
     // TODO: for now, go with the same path. possibly add options later
     this.updateScene();
+  };
+  
+  Scene.prototype.addPeer = function( peer ) {
+    this.accessibilityLayer.appendChild( peer.element );
+  };
+  
+  Scene.prototype.removePeer = function( peer ) {
+    this.accessibilityLayer.removeChild( peer.element );
+  };
+  
+  Scene.prototype.setActivePeer = function( peer ) {
+    if ( this.activePeer !== peer ) {
+      var scene = this;
+      
+      //Remove bounds listener from old active peer
+      if ( this.activePeer ) {
+        this.activePeer.instance.node.removeEventListener( this.updateFocusRing );
+      }
+      
+      this.activePeer = peer;
+      
+      if ( peer ) {
+        this.activePeer.instance.node.addEventListener( this.updateFocusRing );
+        this.updateFocusRing.bounds.call( this );
+      } else {
+        this.focusRingPath.setAttribute( 'd', "M 0 0" );
+      }
+    }
+  };
+  
+  Scene.prototype.getActivePeer = function( peer ) {
+    return this.activePeer;
+  };
+  
+  Scene.prototype.focusPeer = function( peer ) {
+    this.setActivePeer( peer );
+  };
+  
+  Scene.prototype.blurPeer = function( peer ) {
+    sceneryAssert && sceneryAssert( this.getActivePeer() === peer, 'Can only blur an active peer' );
+    this.setActivePeer( null );
+  };
+  
+  Scene.prototype.addTrailToLayer = function( trail, layer ) {
+    sceneryAssert && sceneryAssert( trail.rootNode() === this, 'Trail does not start with the Scene' );
+    sceneryLayerLog && sceneryLayerLog( '  addition of trail ' + trail.toString() + ' from layer ' + layer.getId() );
+    
+    this.trailLayerMap[trail.getUniqueId()] = layer;
+    layer.addNodeFromTrail( trail );
+  };
+  
+  Scene.prototype.moveTrailFromLayerToLayer = function( trail, oldLayer, newLayer ) {
+    sceneryLayerLog && sceneryLayerLog( '  moving trail ' + trail.toString() + ' from layer ' + oldLayer.getId() + ' to layer ' + newLayer.getId() );
+    this.trailLayerMap[trail.getUniqueId()] = newLayer;
+    
+    // TODO: flesh out (and DO NOT RELY on getInstance(), it's slow)
+    trail.getInstance().changeLayer( newLayer );
+    
+    oldLayer.removeNodeFromTrail( trail );
+    newLayer.addNodeFromTrail( trail );
+  };
+  
+  Scene.prototype.removeTrailFromLayer = function( trail, layer ) {
+    sceneryLayerLog && sceneryLayerLog( '  removal of trail ' + trail.toString() + ' from layer ' + layer.getId() );
+    
+    // we don't want to leak memory, so since we don't know if this trail will continue to exist, ditch the reference
+    delete this.trailLayerMap[trail.getUniqueId()];
+    layer.removeNodeFromTrail( trail );
   };
   
   Scene.prototype.markInterval = function( affectedTrail ) {
@@ -549,10 +691,21 @@ define( function( require ) {
     sceneryLayerLog && sceneryLayerLog( 'Scene: reindexLayers' );
     
     var index = 1; // don't start below 1
+    if ( accessibility && this.accessibiltyLayer ) {
+      this.accessibilityLayer.style.zIndex = 9999; // TODO: a better way than 9999, SR says probably unnecessary
+      index++;
+    }
+    
     _.each( this.layers, function( layer ) {
       // layers increment indices as needed
       index = layer.reindex( index );
     } );
+    
+    if ( accessibility ) {
+      if ( this.focusRingSVGContainer ) {
+        this.focusRingSVGContainer.style.zIndex = index;
+      }
+    }
   };
   
   Scene.prototype.dispose = function() {
@@ -707,7 +860,38 @@ define( function( require ) {
   
   Scene.prototype.resize = function( width, height ) {
     this.setSize( width, height );
-    this.rebuildLayers(); // TODO: why?
+    this.rebuildLayers(); // TODO: why? - change this to resize individual layers
+    
+    if ( accessibility ) {
+      this.resizeAccessibilityLayer( width, height );
+      this.resizeFocusRingSVGContainer( width, height );
+      
+      //Update the focus ring when the scene resizes.  Note: as of 5/10/2013 this only works properly when scaling up, and is buggy (off by a translation) when scaling down
+      if ( this.updateFocusRing && this.activePeer) {
+        // this.updateScene();
+        this.updateFocusRing.bounds.call();
+      }
+      
+      _.each( this.resizeListeners, function( resizeListener ) {
+        resizeListener();
+      } );
+    }
+  };
+  
+  Scene.prototype.resizeAccessibilityLayer = function( width, height ) {
+    if ( this.accessibilityLayer ) {
+      this.accessibilityLayer.setAttribute( 'width', width );
+      this.accessibilityLayer.setAttribute( 'height', height );
+      this.accessibilityLayer.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
+    }
+  };
+  
+  Scene.prototype.resizeFocusRingSVGContainer = function( width, height ) {
+    if ( this.focusRingSVGContainer ) {
+      this.focusRingSVGContainer.setAttribute( 'width', width );
+      this.focusRingSVGContainer.setAttribute( 'height', height );
+      this.focusRingSVGContainer.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
+    }
   };
   
   Scene.prototype.getSceneWidth = function() {
@@ -858,7 +1042,7 @@ define( function( require ) {
     }
     
     // TODO: massive boilerplate reduction! closures should help tons!
-
+    
     var implementsPointerEvents = window.navigator && window.navigator.pointerEnabled; // W3C spec for pointer events
     var implementsMSPointerEvents = window.navigator && window.navigator.msPointerEnabled; // MS spec for pointer event
     if ( this.enablePointerEvents && implementsPointerEvents ) {
@@ -938,6 +1122,22 @@ define( function( require ) {
         } );
       } );
     }
+    
+    input.addListener( 'keyup', function( domEvent ) {
+      input.keyUp( domEvent );
+    } );
+    input.addListener( 'keydown', function( domEvent ) {
+      input.keyDown( domEvent );
+    } );
+    input.addListener( 'keypress', function( domEvent ) {
+      input.keyPress( domEvent );
+    } );
+  };
+  
+  Scene.prototype.getTrailFromKeyboardFocus = function() {
+    // return the root (scene) trail by default
+    // TODO: fill in with actual keyboard focus
+    return new scenery.Trail( this );
   };
   
   Scene.prototype.fireBatchedEvents = function() {
@@ -947,7 +1147,7 @@ define( function( require ) {
   Scene.prototype.resizeOnWindowResize = function() {
     var scene = this;
     
-    var resizer = function () {
+    var resizer = function() {
       scene.resize( window.innerWidth, window.innerHeight );
     };
     $( window ).resize( resizer );
@@ -1137,11 +1337,11 @@ define( function( require ) {
         
         var transformType = '';
         switch ( node.transform.getMatrix().type ) {
-          case Matrix3.Types.IDENTITY: transformType = ''; break;
+          case Matrix3.Types.IDENTITY:       transformType = '';           break;
           case Matrix3.Types.TRANSLATION_2D: transformType = 'translated'; break;
-          case Matrix3.Types.SCALING: transformType = 'scale'; break;
-          case Matrix3.Types.AFFINE: transformType = 'affine'; break;
-          case Matrix3.Types.OTHER: transformType = 'other'; break;
+          case Matrix3.Types.SCALING:        transformType = 'scale';      break;
+          case Matrix3.Types.AFFINE:         transformType = 'affine';     break;
+          case Matrix3.Types.OTHER:          transformType = 'other';      break;
         }
         if ( transformType ) {
           div += ' <span style="color: #88f" title="' + node.transform.getMatrix().toString().replace( '\n', '&#10;' ) + '">' + transformType + '</span>';
@@ -1159,10 +1359,10 @@ define( function( require ) {
   };
   
   Scene.prototype.popupDebug = function() {
-    var htmlContent = '<!DOCTYPE html>'+
-                      '<html lang="en">'+
-                      '<head><title>Scenery Debug Snapshot</title></head>'+
-                      '<body>' + this.getDebugHTML() + '</body>'+
+    var htmlContent = '<!DOCTYPE html>' +
+                      '<html lang="en">' +
+                      '<head><title>Scenery Debug Snapshot</title></head>' +
+                      '<body>' + this.getDebugHTML() + '</body>' +
                       '</html>';
     window.open( 'data:text/html;charset=utf-8,' + encodeURIComponent( htmlContent ) );
   };

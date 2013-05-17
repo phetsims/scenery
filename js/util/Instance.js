@@ -10,6 +10,9 @@ define( function( require ) {
   "use strict";
   
   var scenery = require( 'SCENERY/scenery' );
+  require( 'SCENERY/util/AccessibilityPeer' );
+  
+  var accessibility = window.has && window.has( 'scenery.accessibility' );
   
   // layer should be null if the trail isn't to a painted node
   scenery.Instance = function Instance( trail, layer, parent ) {
@@ -27,11 +30,17 @@ define( function( require ) {
     this.parent = parent;
     this.children = [];
     
+    this.peers = []; // list of AccessibilityPeer instances attached to this trail
+    
     // TODO: track these? should significantly accelerate subtree-changing operations
     this.startAffectedLayer = null;
     this.endAffectedLayer = null;
     
     trail.setImmutable(); // make sure our Trail doesn't change from under us
+    
+    if ( accessibility ) {
+      this.addPeers();
+    }
   };
   var Instance = scenery.Instance;
   
@@ -120,6 +129,10 @@ define( function( require ) {
       this.parent = null;
       this.children.length = 0;
       this.getNode().removeInstance( this );
+      
+      if ( accessibility ) {
+        this.removePeers();
+      }
     },
     
     equals: function( other ) {
@@ -148,6 +161,31 @@ define( function( require ) {
       // TODO: optimize this using pre-recorded versions?
       this.reindex();
       return this.getScene().affectedLayers( this.trail );
+    },
+    
+    addPeers: function() {
+      var thisInstance = this;
+      var node = this.getNode();
+      var scene = this.getScene();
+      
+      if ( node._peers.length ) {
+        _.each( node._peers, function( desc ) {
+          var peer = new scenery.AccessibilityPeer( thisInstance, desc.element, desc.options );
+          scene.addPeer( peer );
+          thisInstance.peers.push( peer );
+        } );
+      }
+    },
+    
+    removePeers: function() {
+      var scene = this.getScene();
+      
+      _.each( this.peers, function( peer ) {
+        scene.removePeer( peer );
+        peer.dispose();
+      } );
+      
+      this.peers.length = 0; // clear this.peers
     },
     
     /*---------------------------------------------------------------------------*

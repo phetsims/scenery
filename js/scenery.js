@@ -18,6 +18,7 @@ define( function( require ) {
   
   window.sceneryLayerLog = null;
   window.sceneryEventLog = null;
+  window.sceneryAccessibilityLog = null;
   
   // will be filled in by other modules
   return {
@@ -35,6 +36,14 @@ define( function( require ) {
   
     disableEventLogging: function() {
       window.sceneryEventLog = null;
+    },
+    
+    enableAccessibilityLogging: function() {
+      window.sceneryAccessibilityLog = function( ob ) { console.log( ob ); };
+    },
+  
+    disableAccessibilityLogging: function() {
+      window.sceneryAccessibilityLog = null;
     }
   };
 } );
