@@ -32,6 +32,8 @@ define( function( require ) {
 
   var Util = require( 'SCENERY/util/Util' );
   var objectCreate = Util.objectCreate;
+  
+  var accessibility = window.has && window.has( 'scenery.accessibility' );
 
   // debug flag to disable matching of layers when in 'match' mode
   var forceNewLayers = true; // DEBUG
@@ -103,34 +105,37 @@ define( function( require ) {
     this.preferredSceneLayerType = options.preferredSceneLayerType;
 
     applyCSSHacks( $main, options );
-
-    this.activePeer = null;
-
-    this.accessibilityLayer = document.createElement( 'div' );
-    this.accessibilityLayer.className = "accessibility-layer";
     
-    //Put the accessibility layer behind the background so it cannot be seen.  Change this to some high number like 9999 to show it for debugging purposes.
-    this.accessibilityLayer.style.zIndex = -1;
-    this.accessibilityLayer.style.position = 'relative';
-    this.$accessibilityLayer = $( this.accessibilityLayer );
-    $main[0].appendChild( this.accessibilityLayer );
-
-    this.focusRingSVGContainer = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
-    this.focusRingSVGContainer.style.position = 'absolute';
-    this.focusRingSVGContainer.style['pointer-events'] = 'none';
-    this.resizeFocusRingSVGContainer( options.width, options.height );
-    this.focusRingPath = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
-    this.focusRingPath.setAttribute( 'style', 'fill: none; stroke: blue; stroke-width: 5;' );
-    this.focusRingPath.setAttribute( 'id', 'p1' );
-    this.focusRingSVGContainer.appendChild( this.focusRingPath );
-    $main[0].appendChild( this.focusRingSVGContainer );
-
-    this.updateFocusRing = {bounds: function() {
-      sceneryAssert && sceneryAssert( scene.activePeer, 'scene should have an active peer when changing the focus ring bounds' );
-      scene.focusRingPath.setAttribute( 'd', Shape.bounds( scene.activePeer.getGlobalBounds() ).getSVGPath() );
-    }};
-    
-    this.resizeListeners = [];
+    if ( accessibility ) {
+      this.activePeer = null;
+      
+      this.accessibilityLayer = document.createElement( 'div' );
+      this.accessibilityLayer.className = "accessibility-layer";
+      
+      //Put the accessibility layer behind the background so it cannot be seen.  Change this to some high number like 9999 to show it for debugging purposes.
+      this.accessibilityLayer.style.zIndex = -1;
+      this.accessibilityLayer.style.position = 'relative';
+      this.$accessibilityLayer = $( this.accessibilityLayer );
+      $main[0].appendChild( this.accessibilityLayer );
+      
+      this.focusRingSVGContainer = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+      this.focusRingSVGContainer.style.position = 'absolute';
+      this.focusRingSVGContainer.style['pointer-events'] = 'none';
+      this.resizeFocusRingSVGContainer( options.width, options.height );
+      this.focusRingPath = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+      this.focusRingPath.setAttribute( 'style', 'fill: none; stroke: blue; stroke-width: 5;' );
+      this.focusRingPath.setAttribute( 'id', 'p1' );
+      this.focusRingSVGContainer.appendChild( this.focusRingPath );
+      $main[0].appendChild( this.focusRingSVGContainer );
+      
+      this.updateFocusRing = {bounds: function() {
+        sceneryAssert && sceneryAssert( scene.activePeer, 'scene should have an active peer when changing the focus ring bounds' );
+        scene.focusRingPath.setAttribute( 'd', Shape.bounds( scene.activePeer.getGlobalBounds() ).getSVGPath() );
+      }};
+      
+      // only for accessibility for now
+      this.resizeListeners = [];
+    }
   };
   var Scene = scenery.Scene;
 
@@ -692,8 +697,8 @@ define( function( require ) {
     sceneryLayerLog && sceneryLayerLog( 'Scene: reindexLayers' );
 
     var index = 1; // don't start below 1
-    if ( this.accessibiltyLayer ) {
-      this.accessibilityLayer.style.zIndex = 9999;
+    if ( accessibility && this.accessibiltyLayer ) {
+      this.accessibilityLayer.style.zIndex = 9999; // TODO: a better way than 9999, SR says probably unnecessary
       index++;
     }
 
@@ -701,8 +706,11 @@ define( function( require ) {
       // layers increment indices as needed
       index = layer.reindex( index );
     } );
-    if ( this.focusRingSVGContainer ) {
-      this.focusRingSVGContainer.style.zIndex = index;
+    
+    if ( accessibility ) {
+      if ( this.focusRingSVGContainer ) {
+        this.focusRingSVGContainer.style.zIndex = index;
+      }
     }
   };
 
@@ -861,20 +869,22 @@ define( function( require ) {
 
   Scene.prototype.resize = function( width, height ) {
     this.setSize( width, height );
-    this.rebuildLayers(); // TODO: why?
-
-    this.resizeAccessibilityLayer( width, height );
-    this.resizeFocusRingSVGContainer( width, height );
-
-    //Update the focus ring when the scene resizes.  Note: as of 5/10/2013 this only works properly when scaling up, and is buggy (off by a translation) when scaling down
-    if ( this.updateFocusRing && this.activePeer) {
-//      this.updateScene();
-      this.updateFocusRing.bounds.call();
+    this.rebuildLayers(); // TODO: why? - change this to resize individual layers
+    
+    if ( accessibility ) {
+      this.resizeAccessibilityLayer( width, height );
+      this.resizeFocusRingSVGContainer( width, height );
+      
+      //Update the focus ring when the scene resizes.  Note: as of 5/10/2013 this only works properly when scaling up, and is buggy (off by a translation) when scaling down
+      if ( this.updateFocusRing && this.activePeer) {
+  //      this.updateScene();
+        this.updateFocusRing.bounds.call();
+      }
+      
+      _.each( this.resizeListeners, function( resizeListener ) {
+        resizeListener();
+      } );
     }
-
-    _.each( this.resizeListeners, function( resizeListener ) {
-      resizeListener();
-    } );
   };
 
   Scene.prototype.resizeAccessibilityLayer = function( width, height ) {

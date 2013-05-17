@@ -12,6 +12,8 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/AccessibilityPeer' );
   
+  var accessibility = window.has && window.has( 'scenery.accessibility' );
+  
   // layer should be null if the trail isn't to a painted node
   scenery.Instance = function( trail, layer, parent ) {
     this.trail = trail; // trail may be assumed to be stale, for performance reasons
@@ -36,7 +38,9 @@ define( function( require ) {
     
     trail.setImmutable(); // make sure our Trail doesn't change from under us
     
-    this.addPeers();
+    if ( accessibility ) {
+      this.addPeers();
+    }
   };
   var Instance = scenery.Instance;
   
@@ -126,7 +130,9 @@ define( function( require ) {
       this.children.length = 0;
       this.getNode().removeInstance( this );
       
-      this.removePeers();
+      if ( accessibility ) {
+        this.removePeers();
+      }
     },
     
     equals: function( other ) {
