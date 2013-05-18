@@ -1616,7 +1616,44 @@ font.weight;                                 // 400 (the default)
         retrieves or modifies the <a href="http://www.w3.org/TR/CSS21/visudet.html#propdef-line-height">CSS 'line-height' property</a> of the Font object.
       </p>
       
+      
       <h3 id="color" class="section">Color</h3>
+      <p>
+        A Color can be constructed either with any valid CSS color (<code>new scenery.Color( cssColorString )</code>), or with components directly
+        (<code>new scenery.Color( red, green blue [, alpha] )</code>) where red/green/blue are 0-255, and alpha is 0-1.
+      </p>
+      <p>Color operations will assume that the color is not pre-multiplied.</p>
+      
+      <h4 id="color-red">red</h4>
+      <p>
+        <code>color.red</code> (<code>color.getRed()</code>, <code>color.setRed( redInt )</code>)
+        retrieves or modifies the red component of the color. It will be returned or converted to an integral value between 0-255 (inclusive).
+      </p>
+      
+      <h4 id="color-green">green</h4>
+      <p>
+        <code>color.green</code> (<code>color.getGreen()</code>, <code>color.setGreen( greenInt )</code>)
+        retrieves or modifies the green component of the color. It will be returned or converted to an integral value between 0-255 (inclusive).
+      </p>
+      
+      <h4 id="color-blue">blue</h4>
+      <p>
+        <code>color.blue</code> (<code>color.getBlue()</code>, <code>color.setBlue( blueInt )</code>)
+        retrieves or modifies the blue component of the color. It will be returned or converted to an integral value between 0-255 (inclusive).
+      </p>
+      
+      <h4 id="color-alpha">alpha</h4>
+      <p>
+        <code>color.alpha</code> (<code>color.getAlpha()</code>, <code>color.setAlpha( alphaFloat )</code>)
+        retrieves or modifies the alpha component of the color. It will be returned or converted to an integral value between 0-1 (inclusive).
+      </p>
+      
+      <h4 id="color-toCSS">toCSS()</h4>
+      <p>
+        Returns a CSS value for the color, currently using 'rgb' or 'rgba'.
+      </p>
+      
+      
       <h3 id="event" class="section">Event</h3>
       <h3 id="pointer" class="section">Pointer</h3>
       <h3 id="mouse" class="section">Mouse</h3>

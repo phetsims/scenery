@@ -73,6 +73,10 @@ define( function( require ) {
   Font.prototype = {
     constructor: Font,
     
+    copy: function() {
+      return new Font( this._font );
+    },
+    
     // invalidate cached data and notify listeners of the change
     invalidateFont: function() {
       sceneryAssert && sceneryAssert( !this.immutable, 'cannot change immutable font instance' );

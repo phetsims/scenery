@@ -7,7 +7,7 @@
  *
  * See http://www.w3.org/TR/css3-color/
  *
- * TODO: getters for color components, including ES5 red/green/blue/alpha?
+ * TODO: make a getHue, getSaturation, getLightness. we can then expose them via ES5!
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
@@ -174,6 +174,34 @@ define( function( require ) {
   Color.prototype = {
     constructor: Color,
     
+    copy: function() {
+      return new Color( this.r, this.g, this.b, this.a );
+    },
+    
+    // red, integral 0-255
+    getRed: function() { return this.r; },
+    setRed: function( value ) { return this.setRGBA( value, this.g, this.b, this.a ); },
+    get red() { return this.getRed(); },
+    set red( value ) { return this.setRed( value ); },
+    
+    // green, integral 0-255
+    getGreen: function() { return this.g; },
+    setGreen: function( value ) { return this.setRGBA( this.r, value, this.b, this.a ); },
+    get green() { return this.getGreen(); },
+    set green( value ) { return this.setGreen( value ); },
+    
+    // blue, integral 0-255
+    getBlue: function() { return this.b; },
+    setBlue: function( value ) { return this.setRGBA( this.r, this.g, value, this.a ); },
+    get blue() { return this.getBlue(); },
+    set blue( value ) { return this.setBlue( value ); },
+    
+    // alpha, floating 0-1
+    getAlpha: function() { return this.a; },
+    setAlpha: function( value ) { return this.setRGBA( this.r, this.g, this.b, value ); },
+    get alpha() { return this.getAlpha(); },
+    set alpha( value ) { return this.setAlpha( value ); },
+    
     // RGB integral between 0-255, alpha (float) between 0-1
     setRGBA: function( red, green, blue, alpha ) {
       this.r = Math.round( clamp( red, 0, 255 ) );
@@ -182,6 +210,8 @@ define( function( require ) {
       this.a = clamp( alpha, 0, 1 );
       
       this.updateColor(); // update the cached value
+      
+      return this; // allow chaining
     },
     
     computeCSS: function() {
@@ -232,6 +262,7 @@ define( function( require ) {
       return this.toCSS(); // should be inlined, leave like this for future maintainability
     },
     
+    // TODO: make a getHue, getSaturation, getLightness. we can then expose them via ES5!
     setHSLA: function( hue, saturation, lightness, alpha ) {
       hue = ( hue % 360 ) / 360;                    // integer modulo 360
       saturation = clamp( saturation / 100, 0, 1 ); // percentage
@@ -252,6 +283,8 @@ define( function( require ) {
       this.a = clamp( alpha, 0, 1 );
       
       this.updateColor(); // update the cached value
+      
+      return this; // allow chaining
     },
     
     equals: function( color ) {
