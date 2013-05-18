@@ -76,7 +76,8 @@
           
           console.log( 'loaded' );
           
-          scenery.Scene.enableLayerLogging();
+          scenery.enableLayerLogging();
+          scenery.enableEventLogging();
           
           window.scene = new scenery.Scene( $( '#scene' ) );
           console.log( 'window.scene created' );
@@ -149,6 +150,23 @@
             }
           };
           
+          window.setupDownUp = function() {
+            var node = new scenery.Node();
+            node.x = 50;
+            var rect = new scenery.Rectangle( 0, 0, 100, 50, { fill: '#f00' } );
+            rect.y = 50;
+            scene.addChild( node );
+            node.addChild( rect );
+            scene.updateOnRequestAnimationFrame();
+            scene.initializeStandaloneEvents();
+            node.addInputListener( new scenery.DownUpListener( {
+              down: function() { rect.fill = '#00f'; },
+              up: function() { rect.fill = '#f00'; },
+              upInside: function() { rect.stroke = '#000'; },
+              upOutside: function() { rect.stroke = null; }
+            } ) );
+          };
+          
           window.testNodeBounds = function( trail ) {
             var a = performance.now();
             for ( var i = 0; i < 100000; i++ ) { trail.lastNode().localToGlobalBounds( bounds ); };
@@ -169,7 +187,8 @@
             fuzzStep = true;
             
             // disable the layer logging, or we'll spam ourselves to death
-            scenery.Scene.disableLayerLogging();
+            scenery.disableLayerLogging();
+            scenery.disableEventLogging();
             
             var lines = [];
             window.lines = lines;

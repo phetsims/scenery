@@ -2,6 +2,13 @@
 Scenery Changelog
 =================
 
+* 2013-5-17 Node.addEventListener / removeEventListener changed to the DOM-like format
+* 2013-5-17 Merged accessibility support (see Node.addPeer)
+* 2013-5-15 Changed implementation of Color.brighterColor and darkerColor to match Java
+* 2013-5-15 Rename Font.toString to Font.toCSS
+* 2013-5-15 Rename Color.getCSS to Color.toCSS
+* 2013-5-14 Changing default Text boundsMethod to fastCanvas
+* 2013-5-14 Adding Node.getVisibleBounds / node.visibleBounds
 * 2013-5-4  Text nodes can now share Font instances for performance reasons. This means a change to a Font will update
             any Text nodes referring to it. Calling a mutator (like text.fontWeight = 'bold') will internally create a
             copy of the Font instance, and the Text node will not be affected by changes to the previous Font object.

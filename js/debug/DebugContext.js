@@ -14,9 +14,7 @@
  */
 
 define( function( require ) {
-  "use strict";
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  'use strict';
   
   var scenery = require( 'SCENERY/scenery' );
   
@@ -51,7 +49,7 @@ define( function( require ) {
     }
   }
   
-  scenery.DebugContext = function( context ) {
+  scenery.DebugContext = function DebugContext( context ) {
     this._context = context;
     
     // allow checking of context.ellipse for existence

@@ -8,9 +8,7 @@
  */
 
 define( function( require ) {
-  "use strict";
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  'use strict';
   
   var Bounds2 = require( 'DOT/Bounds2' );
   var Transform3 = require( 'DOT/Transform3' );
@@ -18,8 +16,7 @@ define( function( require ) {
   var clamp = require( 'DOT/Util' ).clamp;
   
   var scenery = require( 'SCENERY/scenery' );
-  // var nodeEvents = require( 'SCENERY/util/BasicNodeEvents' ); // uncapitalized, because of JSHint (TODO: find the flag)
-  var nodeEvents = require( 'SCENERY/util/SplitNodeEvents' ); // uncapitalized, because of JSHint (TODO: find the flag)
+  var nodeEvents = require( 'SCENERY/util/FixedNodeEvents' ); // uncapitalized, because of JSHint (TODO: find the flag)
   var LayerStrategy = require( 'SCENERY/layers/LayerStrategy' ); // used to set the default layer strategy on the prototype
   // require( 'SCENERY/layers/Renderer' ); // commented out so Require.js doesn't balk at the circular dependency
   
@@ -59,6 +56,9 @@ define( function( require ) {
     // assign a unique ID to this node (allows trails to get a unique list of IDs)
     this._id = globalIdCounter++;
     
+    // all of the Instances tracking this Node (across multiple layers and scenes)
+    this._instances = [];
+    
     // Whether this node (and its children) will be visible when the scene is updated. Visible nodes by default will not be pickable either
     this._visible = true;
     
@@ -77,6 +77,8 @@ define( function( require ) {
     
     this._children = []; // ordered
     this._parents = []; // unordered
+    
+    this._peers = []; // array of peer factories: { element: ..., options: ... }, where element can be an element or a string
     
     /*
      * Set up the transform reference. we add a listener so that the transform itself can be modified directly
@@ -106,9 +108,9 @@ define( function( require ) {
     this._childBoundsDirty = true;
     
     // dirty region handling
-    this._paintDirty = false;
-    this._childPaintDirty = false;
-    this._oldPaintMarked = false; // flag indicates the last rendered bounds of this node and all descendants are marked for a repaint already
+    this._paintDirty = false;        // whether the self paint is dirty (just this node, none of its children)
+    this._subtreePaintDirty = false; // whether the subtree paint is dirty (this node and its children, usually after a transform)
+    this._childPaintDirty = false;   // whether the child paint is dirty (excluding self paint, just used for finding _paintDirty, _selfPaintDirty)
     
     // what type of renderer should be forced for this node.
     this._renderer = null;
@@ -129,23 +131,20 @@ define( function( require ) {
     constructor: Node,
     
     insertChild: function( index, node ) {
-      assert && assert( node !== null && node !== undefined, 'insertChild cannot insert a null/undefined child' );
-      assert && assert( !_.contains( this._children, node ), 'Parent already contains child' );
-      assert && assert( node !== this, 'Cannot add self as a child' );
+      sceneryAssert && sceneryAssert( node !== null && node !== undefined, 'insertChild cannot insert a null/undefined child' );
+      sceneryAssert && sceneryAssert( !_.contains( this._children, node ), 'Parent already contains child' );
+      sceneryAssert && sceneryAssert( node !== this, 'Cannot add self as a child' );
       
       node._parents.push( this );
       this._children.splice( index, 0, node );
       
       node.invalidateBounds();
-      node.invalidatePaint();
+      this._boundsDirty = true; // like calling this.invalidateBounds(), but we already marked all ancestors with dirty child bounds
       
-      this.dispatchEvent( 'markForInsertion', {
-        parent: this,
-        child: node,
-        index: index
-      } );
+      this.markForInsertion( node, index );
+      this.notifyStitch( false );
       
-      this.dispatchEvent( 'stitch', { match: false } );
+      node.invalidateSubtreePaint();
     },
     
     addChild: function( node ) {
@@ -153,25 +152,22 @@ define( function( require ) {
     },
     
     removeChild: function( node ) {
-      assert && assert( this.isChild( node ) );
+      sceneryAssert && sceneryAssert( this.isChild( node ) );
       
       node.markOldPaint( false );
       
       var indexOfParent = _.indexOf( node._parents, this );
       var indexOfChild = _.indexOf( this._children, node );
       
-      this.dispatchEvent( 'markForRemoval', {
-        parent: this,
-        child: node,
-        index: indexOfChild
-      } );
+      this.markForRemoval( node, indexOfChild );
       
       node._parents.splice( indexOfParent, 1 );
       this._children.splice( indexOfChild, 1 );
       
       this.invalidateBounds();
+      this._childBoundsDirty = true; // force recomputation of child bounds after removing a child
       
-      this.dispatchEvent( 'stitch', { match: false } );
+      this.notifyStitch( false );
     },
     
     removeAllChildren: function() {
@@ -244,6 +240,12 @@ define( function( require ) {
       } );
     },
     
+    // currently, there is no way to remove peers. if a string is passed as the element pattern, it will be turned into an element
+    addPeer: function( element, options ) {
+      sceneryAssert && sceneryAssert( !this.instances.length, 'Cannot call addPeer after a node has instances (yet)' );
+      this._peers.push( { element: element, options: options } );
+    },
+    
     // ensure that cached bounds stored on this node (and all children) are accurate
     validateBounds: function() {
       var that = this;
@@ -251,9 +253,6 @@ define( function( require ) {
       if ( this._selfBoundsDirty ) {
         // note: this should only be triggered if the bounds were actually changed, since we have a guard in place at invalidateSelf()
         this._selfBoundsDirty = false;
-        
-        // if our self bounds changed, make sure to paint the area where our new bounds are
-        this.markDirtyRegion( this._selfBounds );
         
         // TODO: consider changing to parameter object (that may be a problem for the GC overhead)
         this.fireEvent( 'selfBounds', this._selfBounds );
@@ -269,12 +268,13 @@ define( function( require ) {
         var oldChildBounds = this._childBounds;
         
         // and recompute our _childBounds
-        this._childBounds = Bounds2.NOTHING;
+        this._childBounds = Bounds2.NOTHING.copy();
         
         _.each( this._children, function( child ) {
-          that._childBounds = that._childBounds.union( child._bounds );
+          that._childBounds.includeBounds( child._bounds );
         } );
         
+        // run this before firing the event
         this._childBoundsDirty = false;
         
         if ( !this._childBounds.equals( oldChildBounds ) ) {
@@ -286,8 +286,12 @@ define( function( require ) {
       // TODO: layout here?
       
       if ( this._boundsDirty ) {
+        // run this before firing the event
+        this._boundsDirty = false;
+        
         var oldBounds = this._bounds;
         
+        // TODO: we can possibly make this not needed?
         var newBounds = this.localToParentBounds( this._selfBounds ).union( that.localToParentBounds( this._childBounds ) );
         var changed = !newBounds.equals( oldBounds );
         
@@ -301,22 +305,51 @@ define( function( require ) {
           // TODO: consider changing to parameter object (that may be a problem for the GC overhead)
           this.fireEvent( 'bounds', this._bounds );
         }
-        
-        this._boundsDirty = false;
+      }
+      
+      // if there were side-effects, run the validation again until we are clean
+      if ( this._selfBoundsDirty || this._childBoundsDirty || this._boundsDirty ) {
+        // TODO: if there are side-effects in listeners, this could overflow the stack. we should report an error instead of locking up
+        this.validateBounds();
+      }
+      
+      // double-check that all of our bounds handling has been accurate
+      if ( sceneryAssertExtra ) {
+        // new scope for safety
+        (function(){
+          var epsilon = 0.000001;
+          
+          var childBounds = Bounds2.NOTHING.copy();
+          _.each( that.children, function( child ) { childBounds.includeBounds( child._bounds ); } );
+          
+          var fullBounds = that.localToParentBounds( that._selfBounds ).union( that.localToParentBounds( childBounds ) );
+          
+          sceneryAssertExtra && sceneryAssertExtra( that._childBounds.equalsEpsilon( childBounds, epsilon ), 'Child bounds mismatch after validateBounds: ' +
+                                                                                                    that._childBounds.toString() + ', expected: ' + childBounds.toString() );
+          sceneryAssertExtra && sceneryAssertExtra( that._bounds.equalsEpsilon( fullBounds, epsilon ), 'Bounds mismatch after validateBounds: ' +
+                                                                                              that._bounds.toString() + ', expected: ' + fullBounds.toString() );
+        })();
       }
     },
     
     validatePaint: function() {
-      // if dirty, mark the region
       if ( this._paintDirty ) {
-        this.markDirtyRegion( this.parentToLocalBounds( this._bounds ) );
+        sceneryAssert && sceneryAssert( this.isPainted(), 'Only painted nodes can have self dirty paint' );
+        if ( !this._subtreePaintDirty ) {
+          // if the subtree is clean, just notify the self (only will hit one layer, instead of possibly multiple ones)
+          this.notifyDirtySelfPaint();
+        }
         this._paintDirty = false;
       }
       
+      if ( this._subtreePaintDirty ) {
+        this.notifyDirtySubtreePaint();
+        this._subtreePaintDirty = false;
+      }
+      
       // clear flags and recurse
-      if ( this._childPaintDirty || this._oldPaintMarked ) {
+      if ( this._childPaintDirty ) {
         this._childPaintDirty = false;
-        this._oldPaintMarked = false;
         
         var children = this._children;
         var length = children.length;
@@ -349,7 +382,17 @@ define( function( require ) {
     
     // mark the paint of this node as invalid, so its new region will be painted
     invalidatePaint: function() {
+      sceneryAssert && sceneryAssert( this.isPainted(), 'Can only call invalidatePaint on a painted node' );
       this._paintDirty = true;
+      
+      // and set flags for all ancestors
+      _.each( this._parents, function( parent ) {
+        parent.invalidateChildPaint();
+      } );
+    },
+    
+    invalidateSubtreePaint: function() {
+      this._subtreePaintDirty = true;
       
       // and set flags for all ancestors
       _.each( this._parents, function( parent ) {
@@ -370,10 +413,10 @@ define( function( require ) {
     
     // called to notify that self rendering will display different paint, with possibly different bounds
     invalidateSelf: function( newBounds ) {
-      assert && assert( newBounds.isEmpty() || newBounds.isFinite() , "Bounds must be empty or finite in invalidateSelf");
+      sceneryAssert && sceneryAssert( newBounds.isEmpty() || newBounds.isFinite() , "Bounds must be empty or finite in invalidateSelf");
       
       // mark the old region to be repainted, regardless of whether the actual bounds change
-      this.markOldSelfPaint();
+      this.notifyBeforeSelfChange();
       
       // if these bounds are different than current self bounds
       if ( !this._selfBounds.equals( newBounds ) ) {
@@ -388,53 +431,30 @@ define( function( require ) {
       this.invalidatePaint();
     },
     
-    // bounds assumed to be in the local coordinate frame, below this node's transform
-    markDirtyRegion: function( bounds ) {
-      this.dispatchEvent( 'dirtyBounds', {
-        node: this,
-        bounds: bounds
-      } );
-    },
-    
     markOldSelfPaint: function() {
-      this.markOldPaint( true );
+      this.notifyBeforeSelfChange();
     },
     
     // should be called whenever something triggers changes for how this node is layered
     markLayerRefreshNeeded: function() {
-      this.dispatchEvent( 'markForLayerRefresh', {} );
-      
-      this.dispatchEvent( 'stitch', { match: true } );
+      this.markForLayerRefresh();
+      this.notifyStitch( true );
     },
     
     // marks the last-rendered bounds of this node and optionally all of its descendants as needing a repaint
     markOldPaint: function( justSelf ) {
-      function ancestorHasOldPaint( node ) {
-        if( node._oldPaintMarked ) {
-          return true;
-        }
-        return _.some( node._parents, function( parent ) {
-          return ancestorHasOldPaint( parent );
-        } );
-      }
-      
-      var alreadyMarked = ancestorHasOldPaint( this );
-      
-      // we want to not do this marking if possible multiple times for the same sub-tree, so we check flags first
-      if ( !alreadyMarked ) {
-        if ( justSelf ) {
-          this.markDirtyRegion( this._selfBounds );
-        } else {
-          this.markDirtyRegion( this.parentToLocalBounds( this._bounds ) );
-          this._oldPaintMarked = true; // don't mark this in self calls, because we don't use the full bounds
-        }
+      // TODO: rearchitecture
+      if ( justSelf ) {
+        this.notifyBeforeSelfChange();
+      } else {
+        this.notifyBeforeSubtreeChange();
       }
     },
     
     isChild: function( potentialChild ) {
       var ourChild = _.contains( this._children, potentialChild );
       var itsParent = _.contains( potentialChild._parents, this );
-      assert && assert( ourChild === itsParent );
+      sceneryAssert && sceneryAssert( ourChild === itsParent );
       return ourChild;
     },
     
@@ -454,6 +474,21 @@ define( function( require ) {
       return this._bounds;
     },
     
+    // like getBounds() in the "parent" coordinate frame, but only includes visible children
+    getVisibleBounds: function() {
+      // defensive copy, since we use mutable modifications below
+      var bounds = this._selfBounds.copy();
+      
+      _.each( this.children, function( child ) {
+        if ( child.isVisible() ) {
+          bounds.includeBounds( child.getVisibleBounds() );
+        }
+      } );
+      
+      sceneryAssert && sceneryAssert( bounds.isFinite() || bounds.isEmpty(), 'Visible bounds should not be infinite' );
+      return this.localToParentBounds( bounds );
+    },
+    
     /*
      * Return a trail to the top node (if any, otherwise null) whose self-rendered area contains the
      * point (in parent coordinates).
@@ -462,7 +497,7 @@ define( function( require ) {
      * If options.pruneUnpickable is false, unpickable nodes will be allowed in the trail.
      */
     trailUnderPoint: function( point, options ) {
-      assert && assert( point, 'trailUnderPointer requires a point' );
+      sceneryAssert && sceneryAssert( point, 'trailUnderPointer requires a point' );
       
       var pruneInvisible = ( !options || options.pruneInvisible === undefined ) ? true : options.pruneInvisible;
       var pruneUnpickable = ( !options || options.pruneUnpickable === undefined ) ? true : options.pruneUnpickable;
@@ -481,7 +516,7 @@ define( function( require ) {
       if ( !this._bounds.containsPoint( point ) ) { return null; }
       
       // point in the local coordinate frame. computed after the main bounds check, so we can bail out there efficiently
-      var localPoint = this._transform.inversePosition2( point );
+      var localPoint = this.parentToLocalPoint( point );
       
       // check children first, since they are rendered later
       if ( this._children.length > 0 && this._childBounds.containsPoint( localPoint ) ) {
@@ -561,7 +596,7 @@ define( function( require ) {
     
     removeInputListener: function( listener ) {
       // ensure the listener is in our list
-      assert && assert( _.indexOf( this._inputListeners, listener ) !== -1 );
+      sceneryAssert && sceneryAssert( _.indexOf( this._inputListeners, listener ) !== -1 );
       
       this._inputListeners.splice( _.indexOf( this._inputListeners, listener ), 1 );
       return this;
@@ -586,6 +621,7 @@ define( function( require ) {
      * event is relevant for (e.g. marks dirty paint region for both places X was on the scene).
      */
     dispatchEvent: function( type, args ) {
+      sceneryEventLog && sceneryEventLog( this.constructor.name + '.dispatchEvent ' + type );
       var trail = new scenery.Trail();
       trail.setMutable(); // don't allow this trail to be set as immutable for storage
       args.trail = trail; // this reference shouldn't be changed be listeners (or errors will occur)
@@ -795,18 +831,15 @@ define( function( require ) {
     // called before our transform is changed
     beforeTransformChange: function() {
       // mark our old bounds as dirty, so that any dirty region repainting will include not just our new position, but also our old position
-      this.markOldPaint( false );
+      this.notifyBeforeSubtreeChange();
     },
     
     // called after our transform is changed
     afterTransformChange: function() {
-      this.dispatchEvent( 'transform', {
-        node: this,
-        type: 'transform',
-        matrix: this._transform.getMatrix()
-      } );
+      this.notifyTransformChange();
+      
       this.invalidateBounds();
-      this.invalidatePaint();
+      this.invalidateSubtreePaint();
     },
     
     // the left bound of this node, in the parent coordinate frame
@@ -899,12 +932,12 @@ define( function( require ) {
     setVisible: function( visible ) {
       if ( visible !== this._visible ) {
         if ( this._visible ) {
-          this.markOldSelfPaint();
+          this.notifyBeforeSubtreeChange();
         }
         
         this._visible = visible;
         
-        this.invalidatePaint();
+        this.notifyVisibilityChange();
       }
       return this;
     },
@@ -916,11 +949,11 @@ define( function( require ) {
     setOpacity: function( opacity ) {
       var clampedOpacity = clamp( opacity, 0, 1 );
       if ( clampedOpacity !== this._opacity ) {
-        this.markOldPaint( false );
+        this.notifyBeforeSubtreeChange();
         
         this._opacity = clampedOpacity;
         
-        this.invalidatePaint();
+        this.notifyOpacityChange();
       }
     },
     
@@ -981,7 +1014,7 @@ define( function( require ) {
     setRenderer: function( renderer ) {
       var newRenderer;
       if ( typeof renderer === 'string' ) {
-        assert && assert( scenery.Renderer[renderer], 'unknown renderer in setRenderer: ' + renderer );
+        sceneryAssert && sceneryAssert( scenery.Renderer[renderer], 'unknown renderer in setRenderer: ' + renderer );
         newRenderer = scenery.Renderer[renderer];
       } else if ( renderer instanceof scenery.Renderer ) {
         newRenderer = renderer;
@@ -991,7 +1024,7 @@ define( function( require ) {
         throw new Error( 'unrecognized type of renderer: ' + renderer );
       }
       if ( newRenderer !== this._renderer ) {
-        assert && assert( !this.isPainted() || !newRenderer || _.contains( this._supportedRenderers, newRenderer ), 'renderer ' + newRenderer + ' not supported by ' + this.constructor.name );
+        sceneryAssert && sceneryAssert( !this.isPainted() || !newRenderer || _.contains( this._supportedRenderers, newRenderer ), 'renderer ' + newRenderer + ' not supported by ' + this.constructor.name );
         this._renderer = newRenderer;
         
         this.updateLayerType();
@@ -1060,7 +1093,7 @@ define( function( require ) {
       
       while ( node ) {
         trail.addAncestor( node );
-        assert && assert( node._parents.length <= 1 );
+        sceneryAssert && sceneryAssert( node._parents.length <= 1 );
         node = node._parents[0]; // should be undefined if there aren't any parents
       }
       
@@ -1112,7 +1145,7 @@ define( function( require ) {
       }
       
       // ensure that there are no edges left, since then it would contain a circular reference
-      assert && assert( _.every( edges, function( children ) {
+      sceneryAssert && sceneryAssert( _.every( edges, function( children ) {
         return _.every( children, function( final ) { return false; } );
       } ), 'circular reference check' );
       
@@ -1230,7 +1263,7 @@ define( function( require ) {
       }, x, y, width, height );
     },
     
-    // gives an HTMLImageElement with the same parameter handling as Node.toCanvas()
+    // gives an HTMLImageElement with the same parameter handling as Node.toCanvas(). guaranteed to be asynchronous
     toImage: function( callback, x, y, width, height ) {
       this.toDataURL( function( url, x, y ) {
         // this x and y shadow the outside parameters, and will be different if the outside parameters are undefined
@@ -1241,6 +1274,121 @@ define( function( require ) {
         };
         img.src = url;
       }, x, y, width, height );
+    },
+    
+    // will call callback( node )
+    toImageNodeAsynchronous: function( callback, x, y, width, height ) {
+      this.toImage( function( image, x, y ) {
+        callback( new scenery.Node( { children: [
+          new scenery.Image( image, { x: -x, y: -y } )
+        ] } ) );
+      }, x, y, width, height );
+    },
+    
+    // fully synchronous, but returns a node that can only be rendered in Canvas
+    toCanvasNodeSynchronous: function( x, y, width, height ) {
+      var result;
+      this.toCanvas( function( canvas, x, y ) {
+        result = new scenery.Node( { children: [
+          new scenery.Image( canvas, { x: -x, y: -y } )
+        ] } );
+      }, x, y, width, height );
+      sceneryAssert && sceneryAssert( result, 'toCanvasNodeSynchronous requires that the node can be rendered only using Canvas' );
+      return result;
+    },
+    
+    // synchronous, but Image will not have the correct bounds immediately (that will be asynchronous)
+    toDataURLNodeSynchronous: function( x, y, width, height ) {
+      var result;
+      this.toDataURL( function( dataURL, x, y ) {
+        result = new scenery.Node( { children: [
+          new scenery.Image( dataURL, { x: -x, y: -y } )
+        ] } );
+      }, x, y, width, height );
+      sceneryAssert && sceneryAssert( result, 'toDataURLNodeSynchronous requires that the node can be rendered only using Canvas' );
+      return result;
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * Instance handling
+    *----------------------------------------------------------------------------*/
+    
+    getInstances: function() {
+      return this._instances;
+    },
+    
+    addInstance: function( instance ) {
+      sceneryAssert && sceneryAssert( instance.getNode() === this, 'Must be an instance of this Node' );
+      sceneryAssert && sceneryAssert( !_.find( this._instances, function( other ) { return instance.equals( other ); } ), 'Cannot add duplicates of an instance to a Node' );
+      this._instances.push( instance );
+    },
+    
+    // returns undefined if there is no instance.
+    getInstanceFromTrail: function( trail ) {
+      var result;
+      if ( this._instances.length === 1 ) {
+        // don't bother with checking the trail, but assertion should assure that it's what we're looking for
+        result = this._instances[0];
+      } else {
+        result = _.find( this._instances, function( instance ) { return trail.equals( instance.trail ); } );
+      }
+      sceneryAssert && sceneryAssert( result, 'Could not find an instance for the trail ' + trail.toString() );
+      sceneryAssert && sceneryAssert( result.trail.equals( trail ), 'Instance has an incorrect Trail' );
+      return result;
+    },
+    
+    removeInstance: function( instance ) {
+      var index = _.indexOf( this._instances, instance ); // actual instance equality (NOT capitalized, normal meaning)
+      sceneryAssert && sceneryAssert( index !== -1, 'Cannot remove an Instance from a Node if it was not there' );
+      this._instances.splice( index, 1 );
+    },
+    
+    notifyVisibilityChange: function() {
+      _.each( this._instances, function( instance ) { instance.notifyVisibilityChange(); } );
+    },
+    
+    notifyOpacityChange: function() {
+      _.each( this._instances, function( instance ) { instance.notifyOpacityChange(); } );
+    },
+    
+    notifyBeforeSelfChange: function() {
+      _.each( this._instances, function( instance ) { instance.notifyBeforeSelfChange(); } );
+    },
+    
+    notifyBeforeSubtreeChange: function() {
+      _.each( this._instances, function( instance ) { instance.notifyBeforeSubtreeChange(); } );
+    },
+    
+    notifyDirtySelfPaint: function() {
+      _.each( this._instances, function( instance ) { instance.notifyDirtySelfPaint(); } );
+    },
+    
+    notifyDirtySubtreePaint: function() {
+      _.each( this._instances, function( instance ) { instance.notifyDirtySubtreePaint(); } );
+    },
+    
+    notifyTransformChange: function() {
+      _.each( this._instances, function( instance ) { instance.notifyTransformChange(); } );
+    },
+    
+    notifyBoundsAccuracyChange: function() {
+      _.each( this._instances, function( instance ) { instance.notifyBoundsAccuracyChange(); } );
+    },
+    
+    notifyStitch: function( match ) {
+      _.each( this._instances, function( instance ) { instance.notifyStitch( match ); } );
+    },
+    
+    markForLayerRefresh: function() {
+      _.each( this._instances, function( instance ) { instance.markForLayerRefresh(); } );
+    },
+    
+    markForInsertion: function( child, index ) {
+      _.each( this._instances, function( instance ) { instance.markForInsertion( child, index ); } );
+    },
+    
+    markForRemoval: function( child, index ) {
+      _.each( this._instances, function( instance ) { instance.markForRemoval( child, index ); } );
     },
     
     /*---------------------------------------------------------------------------*
@@ -1277,7 +1425,7 @@ define( function( require ) {
       // concatenation like this has been faster than getting a unique trail, getting its transform, and applying it
       while ( node ) {
         matrices.push( node._transform.getMatrix() );
-        assert && assert( node._parents[1] === undefined, 'getLocalToGlobalMatrix unable to work for DAG' );
+        sceneryAssert && sceneryAssert( node._parents[1] === undefined, 'getLocalToGlobalMatrix unable to work for DAG' );
         node = node._parents[0];
       }
       
@@ -1309,7 +1457,7 @@ define( function( require ) {
       while ( node ) {
         // in-place multiplication
         node._transform.getMatrix().multiplyVector2( resultPoint );
-        assert && assert( node._parents[1] === undefined, 'localToGlobalPoint unable to work for DAG' );
+        sceneryAssert && sceneryAssert( node._parents[1] === undefined, 'localToGlobalPoint unable to work for DAG' );
         node = node._parents[0];
       }
       return resultPoint;
@@ -1323,7 +1471,7 @@ define( function( require ) {
       var transforms = [];
       while ( node ) {
         transforms.push( node._transform );
-        assert && assert( node._parents[1] === undefined, 'globalToLocalPoint unable to work for DAG' );
+        sceneryAssert && sceneryAssert( node._parents[1] === undefined, 'globalToLocalPoint unable to work for DAG' );
         node = node._parents[0];
       }
       
@@ -1350,29 +1498,29 @@ define( function( require ) {
     
     // like localToGlobalPoint, but without applying this node's transform
     parentToGlobalPoint: function( point ) {
-      assert && assert( this.parents.length <= 1, 'parentToGlobalPoint unable to work for DAG' );
+      sceneryAssert && sceneryAssert( this.parents.length <= 1, 'parentToGlobalPoint unable to work for DAG' );
       return this.parents.length ? this.parents[0].localToGlobalPoint( point ) : point;
     },
     
     // like localToGlobalBounds, but without applying this node's transform
     parentToGlobalBounds: function( bounds ) {
-      assert && assert( this.parents.length <= 1, 'parentToGlobalBounds unable to work for DAG' );
+      sceneryAssert && sceneryAssert( this.parents.length <= 1, 'parentToGlobalBounds unable to work for DAG' );
       return this.parents.length ? this.parents[0].localToGlobalBounds( bounds ) : bounds;
     },
     
     globalToParentPoint: function( point ) {
-      assert && assert( this.parents.length <= 1, 'globalToParentPoint unable to work for DAG' );
+      sceneryAssert && sceneryAssert( this.parents.length <= 1, 'globalToParentPoint unable to work for DAG' );
       return this.parents.length ? this.parents[0].globalToLocalPoint( point ) : point;
     },
     
     globalToParentBounds: function( bounds ) {
-      assert && assert( this.parents.length <= 1, 'globalToParentBounds unable to work for DAG' );
+      sceneryAssert && sceneryAssert( this.parents.length <= 1, 'globalToParentBounds unable to work for DAG' );
       return this.parents.length ? this.parents[0].globalToLocalBounds( bounds ) : bounds;
     },
     
     // get the Bounds2 of this node in the global coordinate frame.  Does not work for DAG.
     getGlobalBounds: function() {
-      assert && assert( this.parents.length <= 1, 'globalBounds unable to work for DAG' );
+      sceneryAssert && sceneryAssert( this.parents.length <= 1, 'globalBounds unable to work for DAG' );
       return this.parentToGlobalBounds( this.getBounds() );
     },
     
@@ -1467,7 +1615,9 @@ define( function( require ) {
     get selfBounds() { return this.getSelfBounds(); },
     get childBounds() { return this.getChildBounds(); },
     get globalBounds() { return this.getGlobalBounds(); },
+    get visibleBounds() { return this.getVisibleBounds(); },
     get id() { return this.getId(); },
+    get instances() { return this.getInstances(); },
     
     mutate: function( options ) {
       var node = this;

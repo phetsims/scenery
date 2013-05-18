@@ -1,7 +1,7 @@
 // Copyright 2002-2012, University of Colorado
 
 /**
- * A DOM-based layer in the scene graph. Each layer handles dirty-region handling separately,
+ * An SVG-based layer in the scene graph. Each layer handles dirty-region handling separately,
  * and corresponds to a single canvas / svg element / DOM element in the main container.
  * Importantly, it does not contain rendered content from a subtree of the main
  * scene graph. It only will render a contiguous block of nodes visited in a depth-first
@@ -11,10 +11,9 @@
  */
 
 define( function( require ) {
-  "use strict";
+  'use strict';
   
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-  
+  var inherit = require( 'PHET_CORE/inherit' );
   var Bounds2 = require( 'DOT/Bounds2' );
   var Transform3 = require( 'DOT/Transform3' );
   var Matrix3 = require( 'DOT/Matrix3' );
@@ -29,7 +28,8 @@ define( function( require ) {
   var svgns = 'http://www.w3.org/2000/svg';
   var xlinkns = 'http://www.w3.org/1999/xlink';
   
-  scenery.SVGLayer = function( args ) {
+  scenery.SVGLayer = function SVGLayer( args ) {
+    sceneryLayerLog && sceneryLayerLog( 'SVGLayer constructor' );
     var $main = args.$main;
     
     this.scene = args.scene;
@@ -76,16 +76,17 @@ define( function( require ) {
   };
   var SVGLayer = scenery.SVGLayer;
   
-  SVGLayer.prototype = _.extend( {}, Layer.prototype, {
-    constructor: SVGLayer,
+  inherit( SVGLayer, Layer, {
     
     /*
      * Notes about how state is tracked here:
      * Trails are stored on group.trail so that we can look this up when inserting new groups
      */
     addNodeFromTrail: function( trail ) {
-      assert && assert( !( trail.getUniqueId() in this.idFragmentMap ), 'Already contained that trail!' );
-      assert && assert( trail.isPainted(), 'Don\'t add nodes without isPainted() to SVGLayer' );
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' addNodeFromTrail: ' + trail.toString() );
+      
+      sceneryAssert && sceneryAssert( !( trail.getUniqueId() in this.idFragmentMap ), 'Already contained that trail!' );
+      sceneryAssert && sceneryAssert( trail.isPainted(), 'Don\'t add nodes without isPainted() to SVGLayer' );
       
       Layer.prototype.addNodeFromTrail.call( this, trail );
       
@@ -114,7 +115,7 @@ define( function( require ) {
             this.insertGroupIntoParent( group, this.idGroupMap[lastId], subtrail );
           } else {
             // we are ensuring the base group
-            assert && assert( subtrail.lastNode() === this.baseNode );
+            sceneryAssert && sceneryAssert( subtrail.lastNode() === this.baseNode );
             
             group = this.g;
             
@@ -154,7 +155,8 @@ define( function( require ) {
     },
     
     removeNodeFromTrail: function( trail ) {
-      assert && assert( trail.getUniqueId() in this.idFragmentMap, 'Did not contain that trail!' );
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' removeNodeFromTrail: ' + trail.toString() );
+      sceneryAssert && sceneryAssert( trail.getUniqueId() in this.idFragmentMap, 'Did not contain that trail!' );
       
       Layer.prototype.removeNodeFromTrail.call( this, trail );
       
@@ -189,6 +191,7 @@ define( function( require ) {
     
     // subtrail is to group, and should include parentGroup below
     insertGroupIntoParent: function( group, parentGroup, subtrail ) {
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' insertGroupIntoParent subtrail:' + subtrail.toString() );
       if ( !parentGroup.childNodes.length ) {
         parentGroup.appendChild( group );
       } else {
@@ -222,6 +225,7 @@ define( function( require ) {
     
     // updates visual styles on an existing SVG fragment
     updateNode: function( node, fragment ) {
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' updateNode: ' + node.constructor.name + ' #' + node.id );
       if ( node.updateSVGFragment ) {
         node.updateSVGFragment( fragment );
       }
@@ -232,12 +236,31 @@ define( function( require ) {
     
     // updates necessary paint attributes on a group (not including transform)
     updateNodeGroup: function( node, group ) {
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' updateNodeGroup: ' + node.constructor.name + ' #' + node.id );
+      this.updateGroupVisibility( node, group );
+      this.updateGroupOpacity( node, group );
+    },
+    
+    updateGroupVisibility: function( node, group ) {
       if ( node.isVisible() ) {
         group.style.display = 'inherit';
       } else {
         group.style.display = 'none';
       }
+    },
+    
+    updateGroupOpacity: function( node, group ) {
       group.setAttribute( 'opacity', node.getOpacity() );
+    },
+    
+    getFragmentFromInstance: function( instance ) {
+      // TODO: performance: key optimization point for SVG layers
+      return this.idFragmentMap[instance.trail.getUniqueId()];
+    },
+    
+    getGroupFromInstance: function( instance ) {
+      // TODO: performance: key optimization point for SVG layers
+      return this.idGroupMap[instance.trail.getUniqueId()];
     },
     
     applyTransform: function( transform, group ) {
@@ -251,18 +274,14 @@ define( function( require ) {
     },
     
     render: function( scene, args ) {
-      var layer = this;
       if ( this.baseTransformDirty ) {
         // this will be run either now or at the end of flushing changes
         var includesBaseTransformChange = this.baseTransformChange;
-        this.domChange( function() {
-          layer.updateBaseTransform( includesBaseTransformChange );
-        } );
+        this.updateBaseTransform( includesBaseTransformChange );
         
         this.baseTransformDirty = false;
         this.baseTransformChange = false;
       }
-      this.flushDOMChanges();
     },
     
     dispose: function() {
@@ -271,30 +290,11 @@ define( function( require ) {
       this.svg.parentNode.removeChild( this.svg );
     },
     
-    markDirtyRegion: function( args ) {
-      var node = args.node;
-      var trailId = args.trail.getUniqueId();
-      
-      var fragment = this.idFragmentMap[trailId];
-      var group = this.idGroupMap[trailId];
-      
-      if ( fragment ) {
-        assert && assert( group );
-        this.updateNode( node, fragment );
-      }
-      if ( group ) {
-        this.updateNodeGroup( node, group );
-      }
-    },
-    
     markBaseTransformDirty: function( changed ) {
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' markBaseTransformDirty' );
       var baseTransformChange = this.baseTransformChange || !!changed;
-      if ( this.batchDOMChanges ) {
-        this.baseTransformDirty = true;
-        this.baseTransformChange = baseTransformChange;
-      } else {
-        this.updateBaseTransform( baseTransformChange );
-      }
+      this.baseTransformDirty = true;
+      this.baseTransformChange = baseTransformChange;
     },
     
     initializeBase: function() {
@@ -308,6 +308,7 @@ define( function( require ) {
     
     // called when the base node's "internal" (self or child) bounds change, but not when it is just from the base node's own transform changing
     baseNodeInternalBoundsChange: function() {
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' baseNodeInternalBoundsChange' );
       if ( this.cssTransform ) {
         // we want to set the baseNodeTransform to a translation so that it maps the baseNode's self/children in the baseNode's local bounds to (0,0,w,h)
         var internalBounds = this.baseNode.parentToLocalBounds( this.baseNode.getBounds() );
@@ -319,7 +320,7 @@ define( function( require ) {
           var baseNodeInteralBounds = this.baseNodeTransform.transformBounds2( internalBounds );
           
           // sanity check to ensure we are within that range
-          assert && assert( baseNodeInteralBounds.minX >= 0 && baseNodeInteralBounds.minY >= 0 );
+          sceneryAssert && sceneryAssert( baseNodeInteralBounds.minX >= 0 && baseNodeInteralBounds.minY >= 0 );
           
           this.updateContainerDimensions( Math.ceil( baseNodeInteralBounds.maxX + padding ),
                                           Math.ceil( baseNodeInteralBounds.maxY + padding ) );
@@ -333,14 +334,12 @@ define( function( require ) {
     },
     
     updateContainerDimensions: function( width, height ) {
-      var layer = this;
-      this.domChange( function() {
-        layer.svg.setAttribute( 'width', width );
-        layer.svg.setAttribute( 'height', height );
-      } );
+      this.svg.setAttribute( 'width', width );
+      this.svg.setAttribute( 'height', height );
     },
     
     updateBaseTransform: function( includesBaseTransformChange ) {
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' updateBaseTransform' );
       var transform = this.baseTrail.getTransform();
       
       if ( this.cssTransform ) {
@@ -388,27 +387,6 @@ define( function( require ) {
         this.applyTransform( transform, this.g );
       } else {
         this.applyTransform( transform, this.g );
-      }
-    },
-    
-    transformChange: function( args ) {
-      var layer = this;
-      var node = args.node;
-      var trail = args.trail;
-      
-      if ( trail.lastNode() === this.baseNode ) {
-        // our trail points to the base node. handle this case as special
-        this.markBaseTransformDirty();
-      } else if ( _.contains( trail.nodes, this.baseNode ) ) {
-        var group = this.idGroupMap[trail.getUniqueId()];
-        
-        // apply the transform to the group
-        this.domChange( function() {
-          layer.applyTransform( node.getTransform(), group );
-        } );
-      } else {
-        // ancestor node changed a transform. rebuild the base transform
-        this.markBaseTransformDirty();
       }
     },
     
@@ -502,7 +480,89 @@ define( function( require ) {
     
     getName: function() {
       return 'svg';
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * Events from Instances
+    *----------------------------------------------------------------------------*/
+    
+    notifyVisibilityChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' notifyVisibilityChange: ' + instance.trail.toString() );
+      var group = this.getGroupFromInstance( instance );
+      if ( group ) {
+        this.updateGroupVisibility( instance.getNode(), group );
+      }
+    },
+    
+    notifyOpacityChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' notifyOpacityChange: ' + instance.trail.toString() );
+      var group = this.getGroupFromInstance( instance );
+      if ( group ) {
+        this.updateGroupOpacity( instance.getNode(), group );
+      }
+    },
+    
+    // only a painted trail under this layer
+    notifyBeforeSelfChange: function( instance ) {
+      // sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' notifyBeforeSelfChange: ' + instance.trail.toString() );
+      // no-op, we don't need paint changes
+    },
+    
+    notifyBeforeSubtreeChange: function( instance ) {
+      // sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' notifyBeforeSubtreeChange: ' + instance.trail.toString() );
+      // no-op, we don't need paint changes
+    },
+    
+    // only a painted trail under this layer
+    notifyDirtySelfPaint: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' notifyDirtySelfPaint: ' + instance.trail.toString() );
+      var fragment = this.getFragmentFromInstance( instance );
+      
+      if ( fragment ) {
+        var node = instance.getNode();
+        
+        if ( node.updateSVGFragment ) {
+          // TODO: performance: don't re-do all of the fragment here! intelligent updating?
+          node.updateSVGFragment( fragment );
+        }
+        if ( node.updateSVGDefs ) {
+          // TODO: performance: don't re-do all of the defs here! intelligent updating?
+          node.updateSVGDefs( this.svg, this.defs );
+        }
+      }
+    },
+    
+    notifyDirtySubtreePaint: function( instance ) {
+      if ( instance.layer === this ) {
+        this.notifyDirtySelfPaint( instance );
+      }
+    },
+    
+    notifyTransformChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' notifyTransformChange: ' + instance.trail.toString() );
+      var node = instance.node;
+      var trail = instance.trail;
+      
+      if ( trail.lastNode() === this.baseNode ) {
+        // our trail points to the base node. handle this case as special
+        this.markBaseTransformDirty();
+      } else if ( _.contains( trail.nodes, this.baseNode ) ) { // TODO: performance: this linear scan looks slower than needed
+        var group = this.idGroupMap[trail.getUniqueId()];
+        
+        // apply the transform to the group
+        this.applyTransform( node.getTransform(), group );
+      } else {
+        // ancestor node changed a transform. rebuild the base transform
+        this.markBaseTransformDirty();
+      }
+    },
+    
+    // only a painted trail under this layer (for now)
+    notifyBoundsAccuracyChange: function( instance ) {
+      // sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' notifyBoundsAccuracyChange: ' + instance.trail.toString() );
+      // no-op, we don't care about bounds
     }
+    
   } );
   
   return SVGLayer;

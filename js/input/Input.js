@@ -20,9 +20,7 @@
  */
 
 define( function( require ) {
-  "use strict";
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  'use strict';
   
   var scenery = require( 'SCENERY/scenery' );
   
@@ -30,9 +28,11 @@ define( function( require ) {
   require( 'SCENERY/input/Mouse' );
   require( 'SCENERY/input/Touch' );
   require( 'SCENERY/input/Pen' );
+  require( 'SCENERY/input/Key' );
   require( 'SCENERY/input/Event' );
   
-  scenery.Input = function( scene, listenerTarget, batchDOMEvents ) {
+  // listenerTarget is the DOM node (window/document/element) to which DOM event listeners will be attached
+  scenery.Input = function Input( scene, listenerTarget, batchDOMEvents ) {
     this.scene = scene;
     this.listenerTarget = listenerTarget;
     this.batchDOMEvents = batchDOMEvents;
@@ -67,6 +67,16 @@ define( function( require ) {
       return _.find( this.pointers, function( pointer ) { return pointer.id === id; } );
     },
     
+    findKeyByEvent: function( event ) {
+      sceneryAssert && sceneryAssert( event.keyCode && event.charCode, 'Assumes the KeyboardEvent has keyCode and charCode properties' );
+      var result = _.find( this.pointers, function( pointer ) {
+        // TODO: also check location (if that exists), so we don't mix up left and right shift, etc.
+        return pointer.keyCode === event.keyCode && pointer.charCode === event.charCode;
+      } );
+      // sceneryAssert && sceneryAssert( result, 'No key found for the combination of key:' + event.key + ' and location:' + event.location );
+      return result;
+    },
+    
     mouseDown: function( point, event ) {
       this.mouse.down( point, event );
       this.downEvent( this.mouse, event );
@@ -90,6 +100,28 @@ define( function( require ) {
     mouseOut: function( point, event ) {
       this.mouse.out( point, event );
       // TODO: how to handle mouse-out
+    },
+    
+    keyDown: function( event ) {
+      var key = new scenery.Key( event );
+      this.addPointer( key );
+      
+      var trail = this.scene.getTrailFromKeyboardFocus();
+      this.dispatchEvent( trail, 'keyDown', key, event, true );
+    },
+    
+    keyUp: function( event ) {
+      var key = this.findKeyByEvent( event );
+      if ( key ) {
+        this.removePointer( key );
+        
+        var trail = this.scene.getTrailFromKeyboardFocus();
+        this.dispatchEvent( trail, 'keyUp', key, event, true );
+      }
+    },
+    
+    keyPress: function( event ) {
+      // NOTE: do we even need keyPress?
     },
     
     // called for each touch point
@@ -302,6 +334,7 @@ define( function( require ) {
     },
     
     dispatchEvent: function( trail, type, pointer, event, bubbles ) {
+      sceneryEventLog && sceneryEventLog( 'Input: ' + type + ' on ' + trail.toString() + ' for pointer ' + pointer.toString() );
       if ( !trail ) {
         try {
           throw new Error( 'falsy trail for dispatchEvent' );
@@ -329,7 +362,7 @@ define( function( require ) {
       this.dispatchToTargets( trail, pointer, type, inputEvent, bubbles );
       
       // TODO: better interactivity handling?
-      if ( !trail.lastNode().interactive ) {
+      if ( !trail.lastNode().interactive && !pointer.isKey ) {
         event.preventDefault();
       }
     },
@@ -409,9 +442,16 @@ define( function( require ) {
     addListener: function( type, callback, useCapture ) {
       var input = this;
       
+      //Cancel propagation of mouse events but not key events.  Key Events need to propagate for tab navigability
+      var usePreventDefault = type !== 'keydown' && type !== 'keyup' && type !== 'keypress';
+      
       if ( this.batchDOMEvents ) {
         var batchedCallback = function batchedEvent( domEvent ) {
-          domEvent.preventDefault(); // TODO: should we batch the events in a different place so we don't preventDefault on something bad?
+          sceneryEventLog && sceneryEventLog( 'Batching event for ' + type );
+          
+          if ( usePreventDefault ) {
+            domEvent.preventDefault(); // TODO: should we batch the events in a different place so we don't preventDefault on something bad?
+          }
           input.batchedCallbacks.push( function() {
             callback( domEvent );
           } );
@@ -424,7 +464,7 @@ define( function( require ) {
       }
     },
     
-    diposeListeners: function() {
+    disposeListeners: function() {
       var input = this;
       _.each( this.listenerReferences, function( ref ) {
         input.listenerTarget.removeEventListener( ref.type, ref.callback, ref.useCapture );
@@ -433,6 +473,7 @@ define( function( require ) {
     
     fireBatchedEvents: function() {
       if ( this.batchedCallbacks.length ) {
+        sceneryEventLog && sceneryEventLog( 'Input.fireBatchedEvents length:' + this.batchedCallbacks.length );
         _.each( this.batchedCallbacks, function( callback ) { callback(); } );
         this.batchedCallbacks = [];
       }

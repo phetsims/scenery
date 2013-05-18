@@ -7,10 +7,7 @@
  */
 
 define( function( require ) {
-  "use strict";
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-  var assertExtra = require( 'ASSERT/assert' )( 'scenery.extra', true );
+  'use strict';
   
   var Bounds2 = require( 'DOT/Bounds2' );
   var Transform3 = require( 'DOT/Transform3' );
@@ -25,11 +22,8 @@ define( function( require ) {
    * $main     - the jQuery-wrapped container for the scene
    * scene     - the scene itself
    * baseNode  - the base node for this layer
-   *
-   * Optional arguments:
-   * batchDOMChanges: false - Only run DOM manipulation from within requestAnimationFrame calls
    */
-  scenery.Layer = function( args ) {
+  scenery.Layer = function Layer( args ) {
     
     // assign a unique ID to this layer
     this._id = globalIdCounter++;
@@ -38,18 +32,13 @@ define( function( require ) {
     this.scene = args.scene;
     this.baseNode = args.baseNode;
     
-    // DOM batching
-    this.batchDOMChanges = args.batchDOMChanges || false;
-    this.pendingDOMChanges = [];
-    this.applyingDOMChanges = false;
-    
     // TODO: cleanup of flags!
     this.usesPartialCSSTransforms = args.cssTranslation || args.cssRotation || args.cssScale;
     this.cssTranslation = args.cssTranslation; // CSS for the translation
     this.cssRotation = args.cssRotation;       // CSS for the rotation
     this.cssScale = args.cssScale;             // CSS for the scaling
     this.cssTransform = args.cssTransform;     // CSS for the entire base node (will ignore other partial transforms)
-    assert && assert( !( this.usesPartialCSSTransforms && this.cssTransform ), 'Do not specify both partial and complete CSS transform arguments.' );
+    sceneryAssert && sceneryAssert( !( this.usesPartialCSSTransforms && this.cssTransform ), 'Do not specify both partial and complete CSS transform arguments.' );
     
     // initialize to fully dirty so we draw everything the first time
     // bounds in global coordinate frame
@@ -62,34 +51,32 @@ define( function( require ) {
     if ( this.baseNode === this.scene ) {
       this.baseTrail = new scenery.Trail( this.scene );
     } else {
-      this.baseTrail = this.startPointer.trail.copy();
-      assert && assert( this.baseTrail.lastNode() === this.baseNode );
+      this.baseTrail = this.startPaintedTrail.upToNode( this.baseNode );
+      sceneryAssert && sceneryAssert( this.baseTrail.lastNode() === this.baseNode );
     }
     
     // we reference all painted trails in an unordered way
-    this._layerTrails = [];
+    this._layerTrails = []; // TODO: performance: remove layerTrails if possible!
+    this._instanceCount = 0; // track how many instances we are tracking (updated in stitching by instances)
     
     var layer = this;
     
     // whenever the base node's children or self change bounds, signal this. we want to explicitly ignore the base node's main bounds for
     // CSS transforms, since the self / children bounds may not have changed
-    this.baseNodeListener = {
-      selfBounds: function( bounds ) {
-        layer.baseNodeInternalBoundsChange();
-      },
-      
-      childBounds: function( bounds ) {
-        layer.baseNodeInternalBoundsChange();
-      }
+    this.baseNodeBoundsListener = function( bounds ) {
+      layer.baseNodeInternalBoundsChange(); // TODO: verify that this is working as expected
     };
-    this.baseNode.addEventListener( this.baseNodeListener );
+    this.baseNode.addEventListener( 'selfBounds', this.baseNodeBoundsListener );
+    this.baseNode.addEventListener( 'childBounds', this.baseNodeBoundsListener );
     
     this.fitToBounds = this.usesPartialCSSTransforms || this.cssTransform;
-    assert && assert( this.fitToBounds || this.baseNode === this.scene, 'If the baseNode is not the scene, we need to fit the bounds' );
+    sceneryAssert && sceneryAssert( this.fitToBounds || this.baseNode === this.scene, 'If the baseNode is not the scene, we need to fit the bounds' );
     
     // used for CSS transforms where we need to transform our base node's bounds into the (0,0,w,h) bounds range
     this.baseNodeTransform = new Transform3();
     //this.baseNodeInteralBounds = Bounds2.NOTHING; // stores the bounds transformed into (0,0,w,h)
+    
+    this.disposed = false; // track whether we have been disposed or not
   };
   var Layer = scenery.Layer;
   
@@ -101,11 +88,9 @@ define( function( require ) {
       this.startBoundary = boundary;
       
       // TODO: deprecate these, use boundary references instead? or boundary convenience functions
-      this.startPointer = this.startBoundary.nextStartPointer;
       this.startPaintedTrail = this.startBoundary.nextPaintedTrail;
       
       // set immutability guarantees
-      this.startPointer.trail && this.startPointer.trail.setImmutable();
       this.startPaintedTrail.setImmutable();
     },
     
@@ -114,53 +99,20 @@ define( function( require ) {
       this.endBoundary = boundary;
       
       // TODO: deprecate these, use boundary references instead? or boundary convenience functions
-      this.endPointer = this.endBoundary.previousEndPointer;
       this.endPaintedTrail = this.endBoundary.previousPaintedTrail;
       
       // set immutability guarantees
-      this.endPointer.trail && this.endPointer.trail.setImmutable();
       this.endPaintedTrail.setImmutable();
     },
     
-    getStartPointer: function() {
-      return this.startPointer;
-    },
-    
-    getEndPointer: function() {
-      return this.endPointer;
-    },
-    
-    flushDOMChanges: function() {
-      // signal that we are now applying the changes, so calling domChange will trigger instant evaluation
-      this.applyingDOMChanges = true;
-      
-      // TODO: consider a 'try' block, as things may now not exist? ideally we should only batch things that will always work
-      _.each( this.pendingDOMChanges, function( change ) {
-        change();
-      } );
-      
-      // removes all entries
-      this.pendingDOMChanges.splice( 0, this.pendingDOMChanges.length );
-      
-      // start batching again
-      this.applyingDOMChanges = false;
-    },
-    
-    domChange: function( callback ) {
-      if ( this.batchDOMChanges && !this.applyingDOMChanges ) {
-        this.pendingDOMChanges.push( callback );
-      } else {
-        callback();
-      }
-    },
-    
     toString: function() {
-      return this.getName() + ' ' + ( this.startPointer ? this.startPointer.toString() : '!' ) + ' (' + ( this.startPaintedTrail ? this.startPaintedTrail.toString() : '!' ) + ') => ' + ( this.endPointer ? this.endPointer.toString() : '!' ) + ' (' + ( this.endPaintedTrail ? this.endPaintedTrail.toString() : '!' ) + ')';
+      return this.getName() + ' ' + ( this.startPaintedTrail ? this.startPaintedTrail.toString() : '!' ) + ' => ' + ( this.endPaintedTrail ? this.endPaintedTrail.toString() : '!' );
     },
     
     getId: function() {
       return this._id;
     },
+    get id() { return this._id; }, // ES5 version
     
     // painted trails associated with the layer, NOT necessarily in order
     getLayerTrails: function() {
@@ -187,9 +139,9 @@ define( function( require ) {
     
     // adds a trail (with the last node) to the layer
     addNodeFromTrail: function( trail ) {
-      if ( assert ) {
+      if ( sceneryAssert ) {
         _.each( this._layerTrails, function( otherTrail ) {
-          assert( !trail.equals( otherTrail ), 'trail in addNodeFromTrail should not already exist in a layer' );
+          sceneryAssert( !trail.equals( otherTrail ), 'trail in addNodeFromTrail should not already exist in a layer' );
         } );
       }
       
@@ -210,7 +162,8 @@ define( function( require ) {
           break;
         }
       }
-      assert && assert( i < this._layerTrails.length );
+      sceneryAssert && sceneryAssert( i < this._layerTrails.length );
+      
       this._layerTrails.splice( i, 1 );
     },
     
@@ -218,10 +171,6 @@ define( function( require ) {
     reindex: function( zIndex ) {
       this.startBoundary.reindex();
       this.endBoundary.reindex();
-    },
-    
-    boundsAccuracy: function( args ) {
-      // nothing needed in the default case, only Canvas-based layers should care
     },
     
     pushClipShape: function( shape ) {
@@ -237,17 +186,13 @@ define( function( require ) {
     },
     
     dispose: function() {
-      this.baseNode.removeEventListener( this.baseNodeListener );
-    },
-    
-    // args should contain node, bounds (local bounds), transform, trail
-    markDirtyRegion: function( args ) {
-      throw new Error( 'Layer.markDirtyRegion unimplemented' );
-    },
-    
-    // args should contain node, type (append, prepend, set), matrix, transform, trail
-    transformChange: function( args ) {
-      throw new Error( 'Layer.transformChange unimplemented' );
+      sceneryAssert && sceneryAssert( !this.disposed, 'Layer has already been disposed!' );
+      
+      this.disposed = true;
+      
+      // clean up listeners
+      this.baseNode.removeEventListener( 'selfBounds', this.baseNodeBoundsListener );
+      this.baseNode.removeEventListener( 'childBounds', this.baseNodeBoundsListener );
     },
     
     getName: function() {
@@ -258,6 +203,7 @@ define( function( require ) {
     baseNodeInternalBoundsChange: function() {
       // no error, many times this doesn't need to be handled
     }
+    
   };
   
   Layer.cssTransformPadding = 3;

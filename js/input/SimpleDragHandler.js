@@ -7,9 +7,7 @@
  */
 
 define( function( require ) {
-  "use strict";
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  'use strict';
   
   var Matrix3 = require( 'DOT/Matrix3' );
   
@@ -25,7 +23,7 @@ define( function( require ) {
    *    translate:            // if this exists, translate( { delta: _, oldPosition: _, position: _ } ) will be called instead of directly translating the node
    * }
    */
-  scenery.SimpleDragHandler = function( options ) {
+  scenery.SimpleDragHandler = function SimpleDragHandler( options ) {
     var handler = this;
     
     this.options = _.extend( {
@@ -33,7 +31,7 @@ define( function( require ) {
     }, options );
     
     this.dragging              = false;     // whether a node is being dragged with this handler
-    this.pointer                = null;      // the pointer doing the current dragging
+    this.pointer               = null;      // the pointer doing the current dragging
     this.trail                 = null;      // stores the path to the node that is being dragged
     this.transform             = null;      // transform of the trail to our node (but not including our node, so we can prepend the deltas)
     this.node                  = null;      // the node that we are handling the drag for
@@ -64,7 +62,7 @@ define( function( require ) {
     this.dragListener = {
       // mouse/touch up
       up: function( event ) {
-        assert && assert( event.pointer === handler.pointer );
+        sceneryAssert && sceneryAssert( event.pointer === handler.pointer );
         if ( !event.pointer.isMouse || event.domEvent.button === handler.mouseButton ) {
           handler.endDrag( event );
         }
@@ -72,7 +70,7 @@ define( function( require ) {
       
       // touch cancel
       cancel: function( event ) {
-        assert && assert( event.pointer === handler.pointer );
+        sceneryAssert && sceneryAssert( event.pointer === handler.pointer );
         handler.endDrag( event );
         
         // since it's a cancel event, go back!
@@ -81,7 +79,7 @@ define( function( require ) {
       
       // mouse/touch move
       move: function( event ) {
-        assert && assert( event.pointer === handler.pointer );
+        sceneryAssert && sceneryAssert( event.pointer === handler.pointer );
         
         var delta = handler.transform.inverseDelta2( handler.pointer.point.minus( handler.lastDragPoint ) );
         
@@ -116,7 +114,7 @@ define( function( require ) {
       // set a flag on the pointer so it won't pick up other nodes
       event.pointer.dragging = true;
       event.pointer.addInputListener( this.dragListener );
-      event.trail.rootNode().addEventListener( this.transformListener );
+      // event.trail.rootNode().addEventListener( this.transformListener ); // TODO: replace with new parent transform listening solution
       
       // set all of our persistent information
       this.dragging = true;
@@ -136,7 +134,7 @@ define( function( require ) {
     endDrag: function( event ) {
       this.pointer.dragging = false;
       this.pointer.removeInputListener( this.dragListener );
-      this.trail.rootNode().removeEventListener( this.transformListener );
+      // this.trail.rootNode().removeEventListener( this.transformListener ); // TODO: replace with new parent transform listening solution
       this.dragging = false;
       
       if ( this.options.end ) {

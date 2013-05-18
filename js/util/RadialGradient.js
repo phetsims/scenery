@@ -9,17 +9,15 @@
  */
 
 define( function( require ) {
-  "use strict";
+  'use strict';
   
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-
   require( 'SCENERY/util/Color' );
   var scenery = require( 'SCENERY/scenery' );
   
   var Vector2 = require( 'DOT/Vector2' );
   
   // TODO: support Vector2s for p0 and p1
-  scenery.RadialGradient = function( x0, y0, r0, x1, y1, r1 ) {
+  scenery.RadialGradient = function RadialGradient( x0, y0, r0, x1, y1, r1 ) {
     this.start = new Vector2( x0, y0 );
     this.end = new Vector2( x1, y1 );
     this.startRadius = r0;
@@ -30,9 +28,9 @@ define( function( require ) {
     
     // make sure that the focal point is in both circles. SVG doesn't support rendering outside of them
     if ( this.startRadius >= this.endRadius ) {
-      assert && assert( this.focalPoint.minus( this.start ).magnitude() <= this.startRadius );
+      sceneryAssert && sceneryAssert( this.focalPoint.minus( this.start ).magnitude() <= this.startRadius );
     } else {
-      assert && assert( this.focalPoint.minus( this.end ).magnitude() <= this.endRadius );
+      sceneryAssert && sceneryAssert( this.focalPoint.minus( this.end ).magnitude() <= this.endRadius );
     }
     
     this.stops = [];
@@ -111,7 +109,7 @@ define( function( require ) {
         var color = new scenery.Color( stop.color );
         var stopElement = document.createElementNS( svgns, 'stop' );
         stopElement.setAttribute( 'offset', ratio );
-        stopElement.setAttribute( 'style', 'stop-color: ' + color.withAlpha( 1 ).getCSS() + '; stop-opacity: ' + color.a.toFixed( 20 ) + ';' );
+        stopElement.setAttribute( 'style', 'stop-color: ' + color.withAlpha( 1 ).toCSS() + '; stop-opacity: ' + color.a.toFixed( 20 ) + ';' );
         definition.appendChild( stopElement );
       }
       

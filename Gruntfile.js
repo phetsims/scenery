@@ -1,5 +1,6 @@
 /*global module:false*/
 module.exports = function( grunt ) {
+  'use strict';
   
   // print this immediately, so it is clear what project grunt is building
   grunt.log.writeln( 'Scenery' );
@@ -37,6 +38,18 @@ module.exports = function( grunt ) {
           wrap: {
             startFile: [ "js/wrap-start.frag", "contrib/has.js" ],
             endFile: [ "js/wrap-end.frag" ]
+          },
+          uglify2: {
+            compress: {
+              global_defs: {
+                sceneryAssert: false,
+                sceneryAssertExtra: false,
+                sceneryLayerLog: false,
+                sceneryEventLog: false,
+                sceneryAccessibilityLog: false
+              },
+              dead_code: true
+            }
           }
         }
       },
@@ -54,6 +67,18 @@ module.exports = function( grunt ) {
           wrap: {
             startFile: [ "js/wrap-start.frag" ],
             endFile: [ "js/wrap-end.frag" ]
+          },
+          uglify2: {
+            compress: {
+              global_defs: {
+                sceneryAssert: false,
+                sceneryAssertExtra: false,
+                sceneryLayerLog: false,
+                sceneryEventLog: false,
+                sceneryAccessibilityLog: false
+              },
+              dead_code: true
+            }
           }
         }
       }
@@ -80,7 +105,7 @@ module.exports = function( grunt ) {
         // quotmark: 'single',
         undef: true,
         // unused: true, // certain layer APIs not used in cases
-        // strict: true,
+        strict: true,
         
         // relaxing options
         es5: true, // we use ES5 getters and setters for now
@@ -89,6 +114,15 @@ module.exports = function( grunt ) {
         expr: true, // so we can use assert && assert( ... )
         
         globals: {
+          // for removal of assertions
+          sceneryAssert: true,
+          sceneryAssertExtra: true,
+          
+          // for logging levels
+          sceneryLayerLog: true,
+          sceneryEventLog: true,
+          sceneryAccessibilityLog: true,
+          
           // for require.js
           define: true,
           require: true,

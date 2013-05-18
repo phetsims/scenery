@@ -16,10 +16,7 @@
  */
 
 define( function( require ) {
-  "use strict";
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-  var assertExtra = require( 'ASSERT/assert' )( 'scenery.extra', false );
+  'use strict';
   
   var Matrix3 = require( 'DOT/Matrix3' );
   var Transform3 = require( 'DOT/Transform3' );
@@ -29,13 +26,13 @@ define( function( require ) {
   require( 'SCENERY/nodes/Node' );
   // require( 'SCENERY/util/TrailPointer' );
   
-  scenery.Trail = function( nodes ) {
+  scenery.Trail = function Trail( nodes ) {
     /*
      * Controls the immutability of the trail.
      * If set to true, add/remove descendant/ancestor should fail if assertions are enabled
      * Use setImmutable() or setMutable() to signal a specific type of protection, so it cannot be changed later
      */
-    if ( assert ) {
+    if ( sceneryAssert ) {
       // only do this if assertions are enabled, otherwise we won't access it at all
       this.immutable = undefined;
     }
@@ -113,7 +110,13 @@ define( function( require ) {
       return this.nodes.length === 0;
     },
     
-    getTransform: function() {
+    getInstance: function() {
+      return this.lastNode().getInstanceFromTrail( this );
+    },
+    
+    // from local to global
+    getMatrix: function() {
+      // TODO: performance: can we cache this ever? would need the scene to not really change in between
       // this matrix will be modified in place, so always start fresh
       var matrix = new Matrix3();
       
@@ -123,12 +126,36 @@ define( function( require ) {
       for ( var i = 0; i < length; i++ ) {
         matrix.multiplyMatrix( nodes[i]._transform.getMatrix() );
       }
-      return new Transform3( matrix );
+      return matrix;
+    },
+    
+    // from parent to global
+    getParentMatrix: function() {
+      // this matrix will be modified in place, so always start fresh
+      var matrix = new Matrix3();
+      
+      // from the root up
+      var nodes = this.nodes;
+      var length = nodes.length;
+      for ( var i = 0; i < length - 1; i++ ) {
+        matrix.multiplyMatrix( nodes[i]._transform.getMatrix() );
+      }
+      return matrix;
+    },
+    
+    // from local to global
+    getTransform: function() {
+      return new Transform3( this.getMatrix() );
+    },
+    
+    // from parent to global
+    getParentTransform: function() {
+      return new Transform3( this.getParentMatrix() );
     },
     
     addAncestor: function( node, index ) {
-      assert && assert( !this.immutable, 'cannot modify an immutable Trail with addAncestor' );
-      assert && assert( node, 'cannot add falsy value to a Trail' );
+      sceneryAssert && sceneryAssert( !this.immutable, 'cannot modify an immutable Trail with addAncestor' );
+      sceneryAssert && sceneryAssert( node, 'cannot add falsy value to a Trail' );
       
       
       if ( this.nodes.length ) {
@@ -144,8 +171,8 @@ define( function( require ) {
     },
     
     removeAncestor: function() {
-      assert && assert( !this.immutable, 'cannot modify an immutable Trail with removeAncestor' );
-      assert && assert( this.length > 0, 'cannot remove a Node from an empty trail' );
+      sceneryAssert && sceneryAssert( !this.immutable, 'cannot modify an immutable Trail with removeAncestor' );
+      sceneryAssert && sceneryAssert( this.length > 0, 'cannot remove a Node from an empty trail' );
       
       this.nodes.shift();
       if ( this.indices.length ) {
@@ -158,8 +185,8 @@ define( function( require ) {
     },
     
     addDescendant: function( node, index ) {
-      assert && assert( !this.immutable, 'cannot modify an immutable Trail with addDescendant' );
-      assert && assert( node, 'cannot add falsy value to a Trail' );
+      sceneryAssert && sceneryAssert( !this.immutable, 'cannot modify an immutable Trail with addDescendant' );
+      sceneryAssert && sceneryAssert( node, 'cannot add falsy value to a Trail' );
       
       
       if ( this.nodes.length ) {
@@ -175,8 +202,8 @@ define( function( require ) {
     },
     
     removeDescendant: function() {
-      assert && assert( !this.immutable, 'cannot modify an immutable Trail with removeDescendant' );
-      assert && assert( this.length > 0, 'cannot remove a Node from an empty trail' );
+      sceneryAssert && sceneryAssert( !this.immutable, 'cannot modify an immutable Trail with removeDescendant' );
+      sceneryAssert && sceneryAssert( this.length > 0, 'cannot remove a Node from an empty trail' );
       
       this.nodes.pop();
       if ( this.indices.length ) {
@@ -204,8 +231,8 @@ define( function( require ) {
     
     setImmutable: function() {
       // if assertions are disabled, we hope this is inlined as a no-op
-      if ( assert ) {
-        assert( this.immutable !== false, 'A trail cannot be made immutable after being flagged as mutable' );
+      if ( sceneryAssert ) {
+        sceneryAssert( this.immutable !== false, 'A trail cannot be made immutable after being flagged as mutable' );
         this.immutable = true;
       }
       
@@ -216,8 +243,8 @@ define( function( require ) {
     
     setMutable: function() {
       // if assertions are disabled, we hope this is inlined as a no-op
-      if ( assert ) {
-        assert( this.immutable !== true, 'A trail cannot be made mutable after being flagged as immutable' );
+      if ( sceneryAssert ) {
+        sceneryAssert( this.immutable !== true, 'A trail cannot be made mutable after being flagged as immutable' );
         this.immutable = false;
       }
       
@@ -248,10 +275,17 @@ define( function( require ) {
       return true;
     },
     
+    // returns a new Trail from the root up to the parameter node.
+    upToNode: function( node ) {
+      var nodeIndex = _.indexOf( this.nodes, node );
+      sceneryAssert && sceneryAssert( nodeIndex >= 0, 'Trail does not contain the node' );
+      return this.slice( 0, _.indexOf( this.nodes, node ) + 1 );
+    },
+    
     // whether this trail contains the complete 'other' trail, but with added descendants afterwards
     isExtensionOf: function( other, allowSameTrail ) {
-      assertExtra && assertExtra( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed' );
-      assertExtra && assertExtra( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed' );
+      sceneryAssertExtra && sceneryAssertExtra( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed' );
+      sceneryAssertExtra && sceneryAssertExtra( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed' );
       
       if ( this.length <= other.length - ( allowSameTrail ? 1 : 0 ) ) {
         return false;
@@ -289,7 +323,7 @@ define( function( require ) {
       var parent = this.nodeFromTop( 1 );
       
       var parentIndex = _.indexOf( parent._children, top );
-      assert && assert( parentIndex !== -1 );
+      sceneryAssert && sceneryAssert( parentIndex !== -1 );
       var arr = this.nodes.slice( 0, this.nodes.length - 1 );
       if ( parentIndex === 0 ) {
         // we were the first child, so give it the trail to the parent
@@ -362,6 +396,7 @@ define( function( require ) {
     
     // calls callback( trail ) for this trail, and each descendant trail
     eachTrailUnder: function( callback ) {
+      // TODO: performance: should be optimized to be much faster, since we don't have to deal with the before/after
       new scenery.TrailPointer( this, true ).eachTrailBetween( new scenery.TrailPointer( this, false ), callback );
     },
     
@@ -375,11 +410,11 @@ define( function( require ) {
      * Comparison is for the rendering order, so an ancestor is 'before' a descendant
      */
     compare: function( other ) {
-      assert && assert( !this.isEmpty(), 'cannot compare with an empty trail' );
-      assert && assert( !other.isEmpty(), 'cannot compare with an empty trail' );
-      assert && assert( this.nodes[0] === other.nodes[0], 'for Trail comparison, trails must have the same root node' );
-      assertExtra && assertExtra( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed on ' + this.toString() );
-      assertExtra && assertExtra( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed on ' + other.toString() );
+      sceneryAssert && sceneryAssert( !this.isEmpty(), 'cannot compare with an empty trail' );
+      sceneryAssert && sceneryAssert( !other.isEmpty(), 'cannot compare with an empty trail' );
+      sceneryAssert && sceneryAssert( this.nodes[0] === other.nodes[0], 'for Trail comparison, trails must have the same root node' );
+      sceneryAssertExtra && sceneryAssertExtra( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed on ' + this.toString() );
+      sceneryAssertExtra && sceneryAssertExtra( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed on ' + other.toString() );
       
       var minNodeIndex = Math.min( this.indices.length, other.indices.length );
       for ( var i = 0; i < minNodeIndex; i++ ) {
@@ -411,12 +446,12 @@ define( function( require ) {
     },
     
     localToGlobalPoint: function( point ) {
-      return this.getTransform().transformPosition2( point );
+      // TODO: performance: multiple timesVector2 calls up the chain is probably faster
+      return this.getMatrix().timesVector2( point );
     },
     
     localToGlobalBounds: function( bounds ) {
-      // TODO: performance: if only called once, is it faster to run through each transform rather than combining?
-      return this.getTransform().transformBounds2( bounds );
+      return bounds.transformed( this.getMatrix() );
     },
     
     globalToLocalPoint: function( point ) {
@@ -425,6 +460,23 @@ define( function( require ) {
     
     globalToLocalBounds: function( bounds ) {
       return this.getTransform().inverseBounds2( bounds );
+    },
+    
+    parentToGlobalPoint: function( point ) {
+      // TODO: performance: multiple timesVector2 calls up the chain is probably faster
+      return this.getParentMatrix().timesVector2( point );
+    },
+    
+    parentToGlobalBounds: function( bounds ) {
+      return bounds.transformed( this.getParentMatrix() );
+    },
+    
+    globalToParentPoint: function( point ) {
+      return this.getParentTransform().inversePosition2( point );
+    },
+    
+    globalToParentBounds: function( bounds ) {
+      return this.getParentTransform().inverseBounds2( bounds );
     },
     
     updateUniqueId: function() {
@@ -444,10 +496,10 @@ define( function( require ) {
     // concatenates the unique IDs of nodes in the trail, so that we can do id-based lookups
     getUniqueId: function() {
       // sanity checks
-      if ( assert ) {
+      if ( sceneryAssert ) {
         var oldUniqueId = this.uniqueId;
         this.updateUniqueId();
-        assert( oldUniqueId === this.uniqueId );
+        sceneryAssert( oldUniqueId === this.uniqueId );
       }
       return this.uniqueId;
     },

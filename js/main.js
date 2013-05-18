@@ -14,6 +14,7 @@ define( [
     'SCENERY/scenery',
     'SCENERY/debug/DebugContext',
     
+    'SCENERY/input/DownUpListener',
     'SCENERY/input/Event',
     'SCENERY/input/Input',
     'SCENERY/input/Key',
@@ -46,18 +47,19 @@ define( [
     'SCENERY/nodes/Text',
     'SCENERY/nodes/VBox',
     
-    'SCENERY/util/BasicNodeEvents',
+    'SCENERY/util/AccessibilityPeer',
     'SCENERY/util/CanvasContextWrapper',
     'SCENERY/util/Color',
+    'SCENERY/util/FixedNodeEvents',
     'SCENERY/util/Font',
     'SCENERY/util/LinearGradient',
+    'SCENERY/util/Instance',
     'SCENERY/util/Pattern',
     'SCENERY/util/RadialGradient',
+    'SCENERY/util/RenderInterval',
     'SCENERY/util/SceneImage',
     'SCENERY/util/SceneryStyle',
-    'SCENERY/util/SplitNodeEvents',
     'SCENERY/util/Trail',
-    'SCENERY/util/TrailInterval',
     'SCENERY/util/TrailPointer',
     'SCENERY/util/Util',
     
@@ -65,6 +67,7 @@ define( [
   ], function(
     scenery // note: we don't need any of the other parts, we just need to specify them as dependencies so they fill in the scenery namespace
   ) {
-  
-  return scenery;
+    'use strict';
+    
+    return scenery;
 } );

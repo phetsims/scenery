@@ -8,9 +8,7 @@
  */
 
 define( function( require ) {
-  "use strict";
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  'use strict';
   
   var scenery = require( 'SCENERY/scenery' );
   
@@ -22,7 +20,7 @@ define( function( require ) {
   // cached defaults
   var defaults = {};
   
-  scenery.Renderer = function( layerConstructor, name, defaultOptions ) {
+  scenery.Renderer = function Renderer( layerConstructor, name, defaultOptions ) {
     this.layerConstructor = layerConstructor;
     this.name = name;
     this.defaultOptions = defaultOptions;

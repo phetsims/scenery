@@ -9,20 +9,24 @@
  */
 
 define( function( require ) {
-  "use strict";
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  'use strict';
   
   var scenery = require( 'SCENERY/scenery' );
   var LineStyles = require( 'KITE/util/LineStyles' );
   
-  scenery.Strokable = function( type ) {
+  scenery.Strokable = function Strokable( type ) {
     var proto = type.prototype;
     
     // this should be called in the constructor to initialize
     proto.initializeStrokable = function() {
       this._stroke = null;
       this._lineDrawingStyles = new LineStyles();
+      
+      var that = this;
+      this._strokeListener = function() {
+        that.invalidatePaint(); // TODO: move this to invalidateStroke?
+        that.invalidateStroke();
+      };
     };
     
     proto.hasStroke = function() {
@@ -127,7 +131,16 @@ define( function( require ) {
         // since this can actually change the bounds, we need to handle a few things differently than the fill
         this.markOldSelfPaint();
         
+        if ( this._stroke && this._stroke.removeChangeListener ) {
+          this._stroke.removeChangeListener( this._strokeListener );
+        }
+        
         this._stroke = stroke;
+        
+        if ( this._stroke && this._stroke.addChangeListener ) {
+          this._stroke.addChangeListener( this._strokeListener );
+        }
+        
         this.invalidateStroke();
       }
       return this;
@@ -154,18 +167,32 @@ define( function( require ) {
     };
     
     proto.getSVGStrokeStyle = function() {
-      // if the style has an SVG definition, use that with a URL reference to it
-      var style = 'stroke: ' + ( this._stroke ? ( this._stroke.getSVGDefinition ? 'url(#stroke' + this.getId() + ')' : this._stroke ) : 'none' ) + ';';
-      if ( this._stroke ) {
-        // TODO: don't include unnecessary directives?
-        style += 'stroke-width: ' + this.getLineWidth() + ';';
-        style += 'stroke-linecap: ' + this.getLineCap() + ';';
-        style += 'stroke-linejoin: ' + this.getLineJoin() + ';';
-        if ( this.getLineDash() ) {
-          style += 'stroke-dasharray: ' + this.getLineDash().join( ',' ) + ';';
-          style += 'stroke-dashoffset: ' + this.getLineDashOffset() + ';';
-        }
+      if ( !this._stroke ) {
+        // no stroke
+        return 'stroke: none;';
       }
+      
+      var style = 'stroke: ';
+      if ( this._stroke.toCSS ) {
+        // Color object stroke
+        style += this._stroke.toCSS() + ';';
+      } else if ( this._stroke.getSVGDefinition ) {
+        // reference the SVG definition with a URL
+        style += 'url(#stroke' + this.getId() + ');';
+      } else {
+        // plain CSS color
+        style += this._stroke + ';';
+      }
+      
+      // TODO: don't include unnecessary directives? - is it worth any branching cost?
+      style += 'stroke-width: ' + this.getLineWidth() + ';';
+      style += 'stroke-linecap: ' + this.getLineCap() + ';';
+      style += 'stroke-linejoin: ' + this.getLineJoin() + ';';
+      if ( this.getLineDash() ) {
+        style += 'stroke-dasharray: ' + this.getLineDash().join( ',' ) + ';';
+        style += 'stroke-dashoffset: ' + this.getLineDashOffset() + ';';
+      }
+      
       return style;
     };
     

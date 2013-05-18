@@ -354,75 +354,75 @@
     }
   } );
   
-  test( 'TrailInterval', function() {
-    var node = createTestNodeTree();
-    var i, j;
+  // test( 'TrailInterval', function() {
+  //   var node = createTestNodeTree();
+  //   var i, j;
     
-    // a subset of trails to test on
-    var trails = [
-      null,
-      node.children[0].getUniqueTrail(),
-      node.children[0].children[1].getUniqueTrail(), // commented out since it quickly creates many tests to include
-      node.children[0].children[3].children[0].getUniqueTrail(),
-      node.children[1].getUniqueTrail(),
-      null
-    ];
+  //   // a subset of trails to test on
+  //   var trails = [
+  //     null,
+  //     node.children[0].getUniqueTrail(),
+  //     node.children[0].children[1].getUniqueTrail(), // commented out since it quickly creates many tests to include
+  //     node.children[0].children[3].children[0].getUniqueTrail(),
+  //     node.children[1].getUniqueTrail(),
+  //     null
+  //   ];
     
-    // get a list of all trails
-    var allTrails = [];
-    var t = node.getUniqueTrail();
-    while ( t ) {
-      allTrails.push( t );
-      t = t.next();
-    }
+  //   // get a list of all trails
+  //   var allTrails = [];
+  //   var t = node.getUniqueTrail();
+  //   while ( t ) {
+  //     allTrails.push( t );
+  //     t = t.next();
+  //   }
     
-    // get a list of all intervals using our 'trails' array
-    var intervals = [];
+  //   // get a list of all intervals using our 'trails' array
+  //   var intervals = [];
     
-    for ( i = 0; i < trails.length; i++ ) {
-      // only create proper intervals where i < j, since we specified them in order
-      for ( j = i + 1; j < trails.length; j++ ) {
-        var interval = new scenery.TrailInterval( trails[i], trails[j] );
-        intervals.push( interval );
+  //   for ( i = 0; i < trails.length; i++ ) {
+  //     // only create proper intervals where i < j, since we specified them in order
+  //     for ( j = i + 1; j < trails.length; j++ ) {
+  //       var interval = new scenery.TrailInterval( trails[i], trails[j] );
+  //       intervals.push( interval );
         
-        // tag the interval, so we can do additional verification later
-        interval.i = i;
-        interval.j = j;
-      }
-    }
+  //       // tag the interval, so we can do additional verification later
+  //       interval.i = i;
+  //       interval.j = j;
+  //     }
+  //   }
     
-    // check every combination of intervals
-    for ( i = 0; i < intervals.length; i++ ) {
-      var a = intervals[i];
-      for ( j = 0; j < intervals.length; j++ ) {
-        var b = intervals[j];
+  //   // check every combination of intervals
+  //   for ( i = 0; i < intervals.length; i++ ) {
+  //     var a = intervals[i];
+  //     for ( j = 0; j < intervals.length; j++ ) {
+  //       var b = intervals[j];
         
-        var union = a.union( b );
-        if ( a.exclusiveUnionable( b ) ) {
-          _.each( allTrails, function( trail ) {
-            if ( trail ) {
-              var msg = 'union check of trail ' + trail.toString() + ' with ' + a.toString() + ' and ' + b.toString() + ' with union ' + union.toString();
-              equal( a.exclusiveContains( trail ) || b.exclusiveContains( trail ), union.exclusiveContains( trail ), msg );
-            }
-          } );
-        } else {
-          var wouldBeBadUnion = false;
-          var containsAnything = false;
-          _.each( allTrails, function( trail ) {
-            if ( trail ) {
-              if ( union.exclusiveContains( trail ) ) {
-                containsAnything = true;
-                if ( !a.exclusiveContains( trail ) && !b.exclusiveContains( trail ) ) {
-                  wouldBeBadUnion = true;
-                }
-              }
-            }
-          } );
-          ok( containsAnything && wouldBeBadUnion, 'Not a bad union?: ' + a.toString() + ' and ' + b.toString() + ' with union ' + union.toString() );
-        }
-      }
-    }
-  } );
+  //       var union = a.union( b );
+  //       if ( a.exclusiveUnionable( b ) ) {
+  //         _.each( allTrails, function( trail ) {
+  //           if ( trail ) {
+  //             var msg = 'union check of trail ' + trail.toString() + ' with ' + a.toString() + ' and ' + b.toString() + ' with union ' + union.toString();
+  //             equal( a.exclusiveContains( trail ) || b.exclusiveContains( trail ), union.exclusiveContains( trail ), msg );
+  //           }
+  //         } );
+  //       } else {
+  //         var wouldBeBadUnion = false;
+  //         var containsAnything = false;
+  //         _.each( allTrails, function( trail ) {
+  //           if ( trail ) {
+  //             if ( union.exclusiveContains( trail ) ) {
+  //               containsAnything = true;
+  //               if ( !a.exclusiveContains( trail ) && !b.exclusiveContains( trail ) ) {
+  //                 wouldBeBadUnion = true;
+  //               }
+  //             }
+  //           }
+  //         } );
+  //         ok( containsAnything && wouldBeBadUnion, 'Not a bad union?: ' + a.toString() + ' and ' + b.toString() + ' with union ' + union.toString() );
+  //       }
+  //     }
+  //   }
+  // } );
   
   test( 'Text width measurement in canvas', function() {
     var canvas = document.createElement( 'canvas' );
@@ -682,5 +682,77 @@
     equal( scene.layers.length, 1, 'one layer after adding' );
     scene.removeChild( path );
     equal( scene.layers.length, 0, 'no layers after removing' );
+  } );
+  
+  test( 'Scene resize event', function() {
+    var scene = new scenery.Scene( $( '#main' ) );
+    
+    var width, height, count = 0;
+    
+    scene.addEventListener( 'resize', function( event ) {
+      width = event.width;
+      height = event.height;
+      count++;
+    } );
+    
+    scene.resize( 712, 217 );
+    
+    equal( width, 712, 'Scene resize width' );
+    equal( height, 217, 'Scene resize height' );
+    equal( count, 1, 'Scene resize count' );
+  } );
+  
+  test( 'Bounds events', function() {
+    var node = new scenery.Node();
+    node.y = 10;
+    
+    var rect = new scenery.Rectangle( 0, 0, 100, 50, { fill: '#f00' } );
+    rect.x = 10; // a transform, so we can verify everything is handled correctly
+    node.addChild( rect );
+    
+    node.validateBounds();
+    
+    var epsilon = 0.0000001;
+    
+    node.addEventListener( 'childBounds', function( bounds ) {
+      ok( bounds.equalsEpsilon( new dot.Bounds2( 10, 0, 110, 30 ), epsilon ), 'Parent child bounds check: ' + bounds.toString() );
+    } );
+    
+    node.addEventListener( 'bounds', function( bounds ) {
+      ok( bounds.equalsEpsilon( new dot.Bounds2( 10, 10, 110, 40 ), epsilon ), 'Parent bounds check: ' + bounds.toString() );
+    } );
+    
+    node.addEventListener( 'selfBounds', function( bounds ) {
+      ok( false, 'Self bounds should not change for parent node' );
+    } );
+    
+    rect.addEventListener( 'selfBounds', function( bounds ) {
+      ok( bounds.equalsEpsilon( new dot.Bounds2( 0, 0, 100, 30 ), epsilon ), 'Self bounds check: ' + bounds.toString() );
+    } );
+    
+    rect.addEventListener( 'bounds', function( bounds ) {
+      ok( bounds.equalsEpsilon( new dot.Bounds2( 10, 0, 110, 30 ), epsilon ), 'Bounds check: ' + bounds.toString() );
+    } );
+    
+    rect.addEventListener( 'childBounds', function( bounds ) {
+      ok( false, 'Child bounds should not change for leaf node' );
+    } );
+    
+    rect.rectHeight = 30;
+    node.validateBounds();
+    
+    // this may change if for some reason we end up calling more events in the future
+    expect( 4 );
+  } );
+  
+  test( 'Using a color instance', function() {
+    var scene = new scenery.Scene( $( '#main' ) );
+    
+    var rect = new scenery.Rectangle( 0, 0, 100, 50 );
+    ok( rect.fill === null, 'Always starts with a null fill' );
+    scene.addChild( rect );
+    var color = new scenery.Color( 255, 0, 0 );
+    rect.fill = color;
+    color.setRGBA( 0, 255, 0, 1 );
   } );
 })();

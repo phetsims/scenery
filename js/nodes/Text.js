@@ -17,9 +17,7 @@
  */
 
 define( function( require ) {
-  "use strict";
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  'use strict';
   
   var inherit = require( 'PHET_CORE/inherit' );
   var escapeHTML = require( 'PHET_CORE/escapeHTML' );
@@ -48,7 +46,7 @@ define( function( require ) {
     this._text         = '';                   // filled in with mutator
     this._font         = scenery.Font.DEFAULT; // default font, usually 10px sans-serif
     this._direction    = 'ltr';                // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
-    this._boundsMethod = 'fast';               // fast (SVG/DOM, no canvas rendering allowed), fastCanvas (SVG/DOM, canvas rendering allowed without dirty regions),
+    this._boundsMethod = 'fastCanvas';         // fast (SVG/DOM, no canvas rendering allowed), fastCanvas (SVG/DOM, canvas rendering allowed without dirty regions),
                                                //   or accurate (Canvas accurate recursive)
     
     // whether the text is rendered as HTML or not. if defined (in a subtype constructor), use that value instead
@@ -85,6 +83,8 @@ define( function( require ) {
   var Text = scenery.Text;
   
   inherit( Text, Node, {
+    domUpdateTransformOnRepaint: true, // since we have to integrate the baseline offset into the CSS transform, signal to DOMLayer
+    
     setText: function( text ) {
       if ( text !== this._text ) {
         this._text = text;
@@ -98,7 +98,7 @@ define( function( require ) {
     },
     
     setBoundsMethod: function( method ) {
-      assert && assert( method === 'fast' || method === 'fastCanvas' || method === 'accurate', '"fast" and "accurate" are the only allowed boundsMethod values for Text' );
+      sceneryAssert && sceneryAssert( method === 'fast' || method === 'fastCanvas' || method === 'accurate', '"fast" and "accurate" are the only allowed boundsMethod values for Text' );
       if ( method !== this._boundsMethod ) {
         this._boundsMethod = method;
         this.updateTextFlags();
@@ -138,7 +138,7 @@ define( function( require ) {
         }
       }
       
-      check( !this.boundsInaccurate && !this._isHTML, Renderer.Canvas );
+      check( this._boundsMethod !== 'fast' && !this._isHTML, Renderer.Canvas );
       check( !this._isHTML, Renderer.SVG );
       check( !this.hasStroke() && this.isFillDOMCompatible(), Renderer.DOM );
       
@@ -156,7 +156,7 @@ define( function( require ) {
       if ( this._boundsMethod === 'fast' || this._boundsMethod === 'fastCanvas' ) {
         this.invalidateSelf( this._isHTML ? this.approximateDOMBounds() : this.approximateSVGBounds() );
       } else {
-        assert && assert( !this._isHTML, 'HTML text is not allowed with the accurate bounds method' );
+        sceneryAssert && sceneryAssert( !this._isHTML, 'HTML text is not allowed with the accurate bounds method' );
         this.invalidateSelf( this.accurateCanvasBounds() );
       }
       
@@ -269,7 +269,7 @@ define( function( require ) {
     updateDOMElement: function( div ) {
       var $div = $( div );
       div.style.font = this.getFont();
-      div.style.color = this.getFill() ? this.getFill() : 'transparent'; // transparent will make us invisible if the fill is null
+      div.style.color = this.getCSSFill();
       $div.width( this.getSelfBounds().width );
       $div.height( this.getSelfBounds().height );
       $div.empty(); // remove all children, including previously-created text nodes
@@ -373,10 +373,8 @@ define( function( require ) {
       document.body.appendChild( div );
       var rect = span.getBoundingClientRect();
       var divRect = div.getBoundingClientRect();
-      // console.log( 'rect: ' + rect.toString() );
-      // console.log( 'divRect: ' + divRect.toString() );
-      // console.log( 'span width from jQuery: ' + $( span ).width() );
-      var result = new Bounds2( rect.left, rect.top - maxHeight, rect.right, rect.bottom - maxHeight ).shifted( -divRect.left, -divRect.top );
+      // add 1 pixel to rect.right to prevent HTML text wrapping
+      var result = new Bounds2( rect.left, rect.top - maxHeight, rect.right + 1, rect.bottom - maxHeight ).shifted( -divRect.left, -divRect.top );
       // console.log( 'result: ' + result );
       document.body.removeChild( div );
       

@@ -10,13 +10,11 @@
  */
 
 define( function( require ) {
-  "use strict";
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  'use strict';
   
   var scenery = require( 'SCENERY/scenery' );
   
-  scenery.CanvasContextWrapper = function( canvas, context ) {
+  scenery.CanvasContextWrapper = function CanvasContextWrapper( canvas, context ) {
     this.canvas = canvas;
     this.context = context;
     
@@ -82,7 +80,7 @@ define( function( require ) {
     },
     
     setLineDash: function( dash ) {
-      assert && assert( dash !== undefined, 'undefined line dash would cause hard-to-trace errors' );
+      sceneryAssert && sceneryAssert( dash !== undefined, 'undefined line dash would cause hard-to-trace errors' );
       if ( this.lineDash !== dash ) {
         this.lineDash = dash;
         if ( this.context.setLineDash ) {

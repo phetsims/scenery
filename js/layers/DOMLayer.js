@@ -17,17 +17,19 @@
  */
 
 define( function( require ) {
-  "use strict";
+  'use strict';
   
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-  
+  var inherit = require( 'PHET_CORE/inherit' );
   var Bounds2 = require( 'DOT/Bounds2' );
   
   var scenery = require( 'SCENERY/scenery' );
   
   var Layer = require( 'SCENERY/layers/Layer' ); // DOMLayer inherits from Layer
+  require( 'SCENERY/util/Trail' );
   
-  scenery.DOMLayer = function( args ) {
+  scenery.DOMLayer = function DOMLayer( args ) {
+    sceneryLayerLog && sceneryLayerLog( 'DOMLayer constructor' );
+    
     Layer.call( this, args );
     
     var width = args.scene.sceneBounds.width;
@@ -44,7 +46,7 @@ define( function( require ) {
     this.$div = $( this.div );
     this.$main.append( this.div );
     
-    this.scene = args.scene;
+    this.scene = args.scene; // TODO: should already be set in the supertype Layer
     
     this.isDOMLayer = true;
     
@@ -58,8 +60,7 @@ define( function( require ) {
   };
   var DOMLayer = scenery.DOMLayer;
   
-  DOMLayer.prototype = _.extend( {}, Layer.prototype, {
-    constructor: DOMLayer,
+  inherit( DOMLayer, Layer, {
     
     addNodeFromTrail: function( trail ) {
       Layer.prototype.addNodeFromTrail.call( this, trail );
@@ -81,7 +82,7 @@ define( function( require ) {
         var otherTrail = this.trails[insertionIndex];
         otherTrail.reindex();
         var comparison = otherTrail.compare( trail );
-        assert && assert( comparison !== 0, 'Trail has already been inserted into the DOMLayer' );
+        sceneryAssert && sceneryAssert( comparison !== 0, 'Trail has already been inserted into the DOMLayer' );
         if ( comparison === 1 ) { // TODO: enum values!
           break;
         }
@@ -102,7 +103,7 @@ define( function( require ) {
       this.reindexTrails();
       
       var element = this.getElementFromTrail( trail );
-      assert && assert( element, 'Trail does not exist in the DOMLayer' );
+      sceneryAssert && sceneryAssert( element, 'Trail does not exist in the DOMLayer' );
       
       delete this.idElementMap[trail.getUniqueId];
       delete this.idTrailMap[trail.getUniqueId];
@@ -146,27 +147,6 @@ define( function( require ) {
       this.div.parentNode.removeChild( this.div );
     },
     
-    markDirtyRegion: function( args ) {
-      var node = args.node;
-      var trail = args.trail;
-      
-      // if we have the trail that is marked as dirty, update it's DOM element
-      var dirtyElement = this.idElementMap[trail.getUniqueId()];
-      if ( dirtyElement ) {
-        node.updateDOMElement( dirtyElement );
-        node.updateCSSTransform( trail.getTransform(), dirtyElement );
-      }
-      
-      // TODO: faster way to iterate through
-      for ( var trailId in this.idTrailMap ) {
-        var subtrail = this.idTrailMap[trailId];
-        subtrail.reindex();
-        if ( subtrail.isExtensionOf( trail, true ) ) {
-          this.updateVisibility( subtrail, this.idElementMap[trailId] );
-        }
-      }
-    },
-    
     updateVisibility: function( trail, element ) {
       if ( trail.isVisible() ) {
         element.style.visibility = 'visible';
@@ -175,27 +155,8 @@ define( function( require ) {
       }
     },
     
-    transformChange: function( args ) {
-      var layer = this;
-      
-      var baseTrail = args.trail;
-      
-      // TODO: efficiency! this computes way more matrix transforms than needed
-      this.startPointer.eachTrailBetween( this.endPointer, function( trail ) {
-        // bail out quickly if the trails don't match
-        if ( !trail.isExtensionOf( baseTrail, true ) ) {
-          return;
-        }
-        
-        var node = trail.lastNode();
-        if ( node.isPainted() ) {
-          var element = layer.idElementMap[trail.getUniqueId()];
-          node.updateCSSTransform( trail.getTransform(), element );
-        }
-      } );
-    },
-    
     // TODO: consider a stack-based model for transforms?
+    // TODO: deprecated? remove this?
     applyTransformationMatrix: function( matrix ) {
       // nothing at all needed here
     },
@@ -255,7 +216,88 @@ define( function( require ) {
     
     getName: function() {
       return 'dom';
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * Events from Instances
+    *----------------------------------------------------------------------------*/
+    
+    notifyVisibilityChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'DOMLayer #' + this.id + ' notifyVisibilityChange: ' + instance.trail.toString() );
+      var trail = instance.trail;
+      
+      // TODO: performance: faster way to iterate through!
+      for ( var trailId in this.idTrailMap ) {
+        var subtrail = this.idTrailMap[trailId];
+        subtrail.reindex();
+        if ( subtrail.isExtensionOf( trail, true ) ) {
+          this.updateVisibility( subtrail, this.idElementMap[trailId] );
+        }
+      }
+    },
+    
+    notifyOpacityChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'DOMLayer #' + this.id + ' notifyOpacityChange: ' + instance.trail.toString() );
+      // TODO: BROKEN: FIXME: DOM opacity is not handled yet, see issue #31: https://github.com/phetsims/scenery/issues/31
+    },
+    
+    // only a painted trail under this layer
+    notifyBeforeSelfChange: function( instance ) {
+      // sceneryLayerLog && sceneryLayerLog( 'DOMLayer #' + this.id + ' notifyBeforeSelfChange: ' + instance.trail.toString() );
+      // no-op, we don't need paint changes
+    },
+    
+    notifyBeforeSubtreeChange: function( instance ) {
+      // sceneryLayerLog && sceneryLayerLog( 'DOMLayer #' + this.id + ' notifyBeforeSubtreeChange: ' + instance.trail.toString() );
+      // no-op, we don't need paint changes
+    },
+    
+    // only a painted trail under this layer
+    notifyDirtySelfPaint: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'DOMLayer #' + this.id + ' notifyDirtySelfPaint: ' + instance.trail.toString() );
+      var node = instance.getNode();
+      var trail = instance.trail;
+      
+      // TODO: performance: store this in the Instance itself?
+      var dirtyElement = this.idElementMap[trail.getUniqueId()];
+      if ( dirtyElement ) {
+        node.updateDOMElement( dirtyElement );
+        
+        if ( node.domUpdateTransformOnRepaint ) {
+          node.updateCSSTransform( trail.getTransform(), dirtyElement );
+        }
+      }
+    },
+
+    notifyDirtySubtreePaint: function( instance ) {
+      if ( instance.layer === this ) {
+        this.notifyDirtySelfPaint( instance );
+      }
+    },
+    
+    notifyTransformChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'DOMLayer #' + this.id + ' notifyTransformChange: ' + instance.trail.toString() );
+      var layer = this;
+      
+      var baseTrail = instance.trail;
+      
+      // TODO: performance: efficiency! this computes way more matrix transforms than needed
+      scenery.Trail.eachPaintedTrailBetween( this.startPaintedTrail, this.endPaintedTrail, function( trail ) {
+        if ( trail.isExtensionOf( baseTrail, true ) ) {
+          // TODO: put the element on the instance?
+          var element = layer.idElementMap[trail.getUniqueId()];
+          var node = trail.lastNode();
+          node.updateCSSTransform( trail.getTransform(), element );
+        }
+      }, false, this.scene );
+    },
+    
+    // only a painted trail under this layer (for now)
+    notifyBoundsAccuracyChange: function( instance ) {
+      // sceneryLayerLog && sceneryLayerLog( 'DOMLayer #' + this.id + ' notifyBoundsAccuracyChange: ' + instance.trail.toString() );
+      // no-op, we don't care about bounds
     }
+    
   } );
   
   return DOMLayer;

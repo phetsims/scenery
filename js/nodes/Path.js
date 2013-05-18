@@ -7,9 +7,7 @@
  */
 
 define( function( require ) {
-  "use strict";
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  'use strict';
   
   var inherit = require( 'PHET_CORE/inherit' );
   var Shape = require( 'KITE/Shape' );
@@ -28,6 +26,7 @@ define( function( require ) {
     // ensure we have a parameter object
     options = options || {};
     
+    this.initializeFillable();
     this.initializeStrokable();
     
     Node.call( this, options );

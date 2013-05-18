@@ -7,14 +7,12 @@
  */
 
 define( function( require ) {
-  "use strict";
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  'use strict';
   
   var scenery = require( 'SCENERY/scenery' );
   
   // NOTE: ideally the scene shouldn't use SVG, since rendering that to a canvas takes a callback (and usually requires canvg)
-  scenery.SceneImage = function( scene ) {
+  scenery.SceneImage = function SceneImage( scene ) {
     this.scene = scene;
     
     // we write the scene to a canvas, get its data URL, and pass that to the image.

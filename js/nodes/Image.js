@@ -6,14 +6,13 @@
  * TODO: setImage / getImage and the whole toolchain that uses that
  * TODO: allow multiple DOM instances (create new HTMLImageElement elements)
  * TODO: SVG support
+ * TODO: support rendering a Canvas to DOM (single instance)
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
 define( function( require ) {
-  "use strict";
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  'use strict';
   
   var inherit = require( 'PHET_CORE/inherit' );
   var Bounds2 = require( 'DOT/Bounds2' );
@@ -39,7 +38,7 @@ define( function( require ) {
    *     HTMLImageElement
    */
   scenery.Image = function Image( image, options ) {
-    assert && assert( image, "image should be available" );
+    sceneryAssert && sceneryAssert( image, "image should be available" );
     
     // allow not passing an options object
     options = options || {};
@@ -114,17 +113,6 @@ define( function( require ) {
       return this;
     },
     
-    invalidateOnImageLoad: function( image ) {
-      var self = this;
-      var listener = function( event ) {
-        self.invalidateImage();
-        
-        // don't leak memory!
-        image.removeEventListener( listener );
-      };
-      image.addEventListener( listener );
-    },
-    
     getImageWidth: function() {
       return this._image.width;
     },
@@ -186,6 +174,8 @@ define( function( require ) {
     getDOMElement: function() {
       this._image.style.display = 'block';
       this._image.style.position = 'absolute';
+      this._image.style.left = '0';
+      this._image.style.top = '0';
       return this._image;
     },
     
@@ -204,7 +194,7 @@ define( function( require ) {
     get image() { return this.getImage(); },
     
     getBasicConstructor: function( propLines ) {
-      return 'new scenery.Image( \'' + this._image.src.replace( /'/g, '\\\'' ) + '\', {' + propLines + '} )';
+      return 'new scenery.Image( \'' + ( this._image.src ? this._image.src.replace( /'/g, '\\\'' ) : 'other' ) + '\', {' + propLines + '} )';
     }
   } );
   

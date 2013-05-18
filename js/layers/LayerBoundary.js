@@ -7,13 +7,11 @@
  */
 
 define( function( require ) {
-  "use strict";
-  
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  'use strict';
   
   var scenery = require( 'SCENERY/scenery' );
   
-  scenery.LayerBoundary = function() {
+  scenery.LayerBoundary = function LayerBoundary() {
     // layer types before and after the boundary. null indicates the lack of information (first or last layer)
     this.previousLayerType = null;
     this.nextLayerType = null;
@@ -21,10 +19,6 @@ define( function( require ) {
     // trails to the closest nodes with isPainted() === true before and after the boundary
     this.previousPaintedTrail = null;
     this.nextPaintedTrail = null;
-    
-    // the TrailPointers where the previous layer was ended and the next layer begins (the trail, and enter() or exit())
-    this.previousEndPointer = null;
-    this.nextStartPointer = null;
   };
   var LayerBoundary = scenery.LayerBoundary;
   
@@ -43,9 +37,6 @@ define( function( require ) {
     reindex: function() {
       this.previousPaintedTrail && this.previousPaintedTrail.reindex();
       this.nextPaintedTrail && this.nextPaintedTrail.reindex();
-      
-      this.previousEndPointer && this.previousEndPointer.trail && this.previousEndPointer.trail.reindex();
-      this.nextStartPointer && this.nextStartPointer.trail && this.nextStartPointer.trail.reindex();
     },
     
     // assumes that trail is reindexed
@@ -78,11 +69,7 @@ define( function( require ) {
              '\n    trails:   ' +
                   ( this.previousPaintedTrail ? this.previousPaintedTrail.getUniqueId() : '' ) +
                   ' => ' +
-                  ( this.nextPaintedTrail ? this.nextPaintedTrail.getUniqueId() : '' ) +
-             '\n    pointers: ' +
-                  ( this.previousEndPointer ? this.previousEndPointer.toString() : '' ) +
-                  ' => ' +
-                  ( this.nextStartPointer ? this.nextStartPointer.toString() : '' );
+                  ( this.nextPaintedTrail ? this.nextPaintedTrail.getUniqueId() : '' );
     }
   };
   
