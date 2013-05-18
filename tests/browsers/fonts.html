@@ -128,7 +128,7 @@
     }
     
     var textField = $( '<input type="text">' )[0];
-    textField.value = currentFontFamily;
+    textField.value = currentFontFamily + ', monospace';
     
     var canvasButton = new scenery.Text( 'Canvas', { fontSize: 20, top: 0, left: 200, cursor: 'pointer' } );
     canvasButton.addInputListener( {
@@ -161,7 +161,7 @@
     scene.updateOnRequestAnimationFrame();
     
     textField.addEventListener( 'change', function() {
-      font.family = textField.value;
+      font.family = textField.value + ', monospace';
     } );
   };
   
