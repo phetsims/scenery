@@ -116,7 +116,7 @@
     
     var currentFontFamily = ( location.search && location.search.length ) ? decodeURIComponent( location.search.slice( 1 ) ) : 'sans-serif';
     
-    var font = new scenery.Font( { size: 20, family: currentFontFamily } );
+    var font = new scenery.Font( { size: 20, family: currentFontFamily + ', monospace' } );
     
     var offset = 30;
     
@@ -128,7 +128,7 @@
     }
     
     var textField = $( '<input type="text">' )[0];
-    textField.value = currentFontFamily + ', monospace';
+    textField.value = currentFontFamily;
     
     var canvasButton = new scenery.Text( 'Canvas', { fontSize: 20, top: 0, left: 200, cursor: 'pointer' } );
     canvasButton.addInputListener( {
