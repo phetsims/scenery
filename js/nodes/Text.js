@@ -28,8 +28,8 @@ define( function( require ) {
   
   var Node = require( 'SCENERY/nodes/Node' ); // inherits from Node
   var Renderer = require( 'SCENERY/layers/Renderer' );
-  var fillable = require( 'SCENERY/nodes/Fillable' );
-  var strokable = require( 'SCENERY/nodes/Strokable' );
+  var Fillable = require( 'SCENERY/nodes/Fillable' );
+  var Strokable = require( 'SCENERY/nodes/Strokable' );
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate; // i.e. Object.create
   require( 'SCENERY/util/Font' );
   require( 'SCENERY/util/Util' ); // for canvasAccurateBounds and CSS transforms
@@ -496,8 +496,9 @@ define( function( require ) {
   Object.defineProperty( Text.prototype, 'boundsMethod', { set: Text.prototype.setBoundsMethod, get: Text.prototype.getBoundsMethod } );
   
   // mix in support for fills and strokes
-  fillable( Text );
-  strokable( Text );
+  /* jshint -W064 */
+  Fillable( Text );
+  Strokable( Text );
 
   return Text;
 } );
