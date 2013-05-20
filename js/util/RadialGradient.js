@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * A radial gradient that can be passed into the 'fill' or 'stroke' parameters.

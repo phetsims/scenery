@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /*
  * A pointer is an abstraction that includes a mouse and touch points (and possibly keys).
