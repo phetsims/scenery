@@ -41,8 +41,12 @@ define( function( require ) {
   LinearGradient.prototype = {
     constructor: LinearGradient,
     
-    // TODO: add color support here, instead of string?
+    /**
+     * @param {Number} ratio        Monotonically increasing value in the range of 0 to 1
+     * @param {Color|String} color  Color for the stop, either a scenery.Color or CSS color string
+     */
     addColorStop: function( ratio, color ) {
+      // TODO: invalidate the gradient?
       if ( this.lastStopRatio > ratio ) {
         // fail out, since browser quirks go crazy for this case
         throw new Error( 'Color stops not specified in the order of increasing ratios' );
@@ -50,13 +54,26 @@ define( function( require ) {
         this.lastStopRatio = ratio;
       }
       
-      this.stops.push( { ratio: ratio, color: color } );
-      this.canvasGradient.addColorStop( ratio, color );
+      // make sure we have a scenery.Color now
+      if ( typeof color === 'string' ) {
+        color = new scenery.Color( color );
+      }
+      
+      this.stops.push( {
+        ratio: ratio,
+        color: color
+      } );
+      
+      // construct the Canvas gradient as we go
+      this.canvasGradient.addColorStop( ratio, color.toCSS() );
       return this;
     },
     
     setTransformMatrix: function( transformMatrix ) {
-      this.transformMatrix = transformMatrix;
+      // TODO: invalidate the gradient?
+      if ( this.transformMatrix !== transformMatrix ) {
+        this.transformMatrix = transformMatrix;
+      }
       return this;
     },
     
@@ -87,11 +104,9 @@ define( function( require ) {
       }
       
       _.each( this.stops, function( stop ) {
-        // TODO: store color in our stops array, so we don't have to create additional objects every time?
-        var color = new scenery.Color( stop.color );
         var stopElement = document.createElementNS( svgns, 'stop' );
         stopElement.setAttribute( 'offset', stop.ratio );
-        stopElement.setAttribute( 'style', 'stop-color: ' + color.withAlpha( 1 ).toCSS() + '; stop-opacity: ' + color.a.toFixed( 20 ) + ';' );
+        stopElement.setAttribute( 'style', 'stop-color: ' + stop.color.withAlpha( 1 ).toCSS() + '; stop-opacity: ' + stop.color.a.toFixed( 20 ) + ';' );
         definition.appendChild( stopElement );
       } );
       
@@ -102,7 +117,7 @@ define( function( require ) {
       var result = 'new scenery.LinearGradient( ' + this.start.x + ', ' + this.start.y + ', ' + this.end.x + ', ' + this.end.y + ' )';
       
       _.each( this.stops, function( stop ) {
-        result += '.addColorStop( ' + stop.ratio + ', \'' + stop.color + '\' )';
+        result += '.addColorStop( ' + stop.ratio + ', \'' + stop.color.toString() + '\' )';
       } );
       
       return result;
