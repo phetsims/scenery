@@ -11,10 +11,11 @@
 define( function( require ) {
   'use strict';
   
-  require( 'SCENERY/util/Color' );
   var scenery = require( 'SCENERY/scenery' );
   
+  var inherit = require( 'PHET_CORE/inherit' );
   var Vector2 = require( 'DOT/Vector2' );
+  var Gradient = require( 'SCENERY/util/Gradient' );
   
   // TODO: support Vector2s for p0 and p1
   scenery.RadialGradient = function RadialGradient( x0, y0, r0, x1, y1, r1 ) {
@@ -33,57 +34,12 @@ define( function( require ) {
       sceneryAssert && sceneryAssert( this.focalPoint.minus( this.end ).magnitude() <= this.endRadius );
     }
     
-    this.stops = [];
-    this.lastStopRatio = 0;
-    
     // use the global scratch canvas instead of creating a new Canvas
-    this.canvasGradient = scenery.scratchContext.createRadialGradient( x0, y0, r0, x1, y1, r1 );
-    
-    this.transformMatrix = null;
+    Gradient.call( this, scenery.scratchContext.createRadialGradient( x0, y0, r0, x1, y1, r1 ) );
   };
   var RadialGradient = scenery.RadialGradient;
   
-  RadialGradient.prototype = {
-    constructor: RadialGradient,
-    
-    /**
-     * @param {Number} ratio        Monotonically increasing value in the range of 0 to 1
-     * @param {Color|String} color  Color for the stop, either a scenery.Color or CSS color string
-     */
-    addColorStop: function( ratio, color ) {
-      if ( this.lastStopRatio > ratio ) {
-        // fail out, since browser quirks go crazy for this case
-        throw new Error( 'Color stops not specified in the order of increasing ratios' );
-      } else {
-        this.lastStopRatio = ratio;
-      }
-      
-      // make sure we have a scenery.Color now
-      if ( typeof color === 'string' ) {
-        color = new scenery.Color( color );
-      }
-      
-      this.stops.push( {
-        ratio: ratio,
-        color: color
-      } );
-      
-      // construct the Canvas gradient as we go
-      this.canvasGradient.addColorStop( ratio, color.toCSS() );
-      return this;
-    },
-    
-    setTransformMatrix: function( transformMatrix ) {
-      // TODO: invalidate the gradient?
-      if ( this.transformMatrix !== transformMatrix ) {
-        this.transformMatrix = transformMatrix;
-      }
-      return this;
-    },
-    
-    getCanvasStyle: function() {
-      return this.canvasGradient;
-    },
+  inherit( RadialGradient, Gradient, {
     
     getSVGDefinition: function( id ) {
       var startIsLarger = this.startRadius > this.endRadius;
@@ -153,7 +109,7 @@ define( function( require ) {
       
       return result;
     }
-  };
+  } );
   
   return RadialGradient;
 } );

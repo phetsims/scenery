@@ -52,6 +52,7 @@ define( [
     'SCENERY/util/Color',
     'SCENERY/util/FixedNodeEvents',
     'SCENERY/util/Font',
+    'SCENERY/util/Gradient',
     'SCENERY/util/LinearGradient',
     'SCENERY/util/Instance',
     'SCENERY/util/Pattern',
