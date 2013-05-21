@@ -16,6 +16,12 @@
   <script data-main="../../js/config.js" src="../../contrib/require-2.1.4.js"></script>
   <!-- <script src="../dist/development/scenery.js"></script> -->
   <!-- <script src="../dist/standalone/scenery.min.js"></script> -->
+  
+  <style type="text/css">
+    html, body {
+      margin: 0; padding: 0; border: none;
+    }
+  </style>
 </head>
 
 <body>
@@ -34,27 +40,8 @@
     
     var scene = new scenery.Scene( $div );
     
-    var shape = kite.Shape.rectangle( 0, 0, 30, 30 );
-    var rect = new scenery.Path( {
-      shape: shape,
-      fill: '#000',
-      stroke: '#f00',
-      lineWidth: 2
-    } );
-    scene.addChild( new scenery.Node( {
-      children: [ rect ],
-      x: -10, y: -10
-    } ) );
-    scene.addChild( new scenery.Node( {
-      children: [ rect ],
-      x: 10, y: 10,
-      visible: false
-    } ) );
-    scene.addChild( new scenery.Node( {
-      children: [ rect ],
-      x: 20, y: 20
-    } ) );
-    
+    // var rect = new scenery.Rectangle( 0, 0, 16, 16, { fill: '#f00', renderer: 'svg' } );
+    // scene.addChild( rect );
     scene.updateScene();
     
     (function(){
