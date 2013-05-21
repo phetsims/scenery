@@ -230,12 +230,14 @@ DOM:
     Consider finger.isDown for checking general (but possibly mouse related) events
     Indie UI events should be tracked: https://dvcs.w3.org/hg/IndieUI/raw-file/default/src/indie-ui-events.html
     Enter/Exit events on up/down? - see question above
+        Yes, enter before down?
     Freeze event handlers, a la the DOM 3 Events spec? Or copy Piccolo?
     Best pattern for handling drags / more persistence? Add listeners directly to finger?
         Standard flags on fingers for whether they are performing an operation? dragging, etc.
         A way to 'cancel' the operation a finger is currently doing, so it can switch to a different one?
     Mouse enter/exit needs to trigger for node add/remove
         Does it make sense to hit-test every frame for this?
+        Yes?
     How to hit test against DOM nodes?
     Use cases:
         Zoom / Pinch / Drag with interrupts
