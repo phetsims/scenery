@@ -63,6 +63,7 @@ Tricky areas:
     Gradients / Patterns should not be changed after being passed to a node's fill/stroke, since the SVG def won't change, and we don't set up listeners
 
 Test:
+    Color updates (pixel tests)
     Event handling tests (and generalize the event handler)
     DownUpListener
     More pixel tests

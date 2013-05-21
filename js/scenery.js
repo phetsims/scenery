@@ -20,8 +20,14 @@ define( function( require ) {
   window.sceneryEventLog = null;
   window.sceneryAccessibilityLog = null;
   
+  var scratchCanvas = document.createElement( 'canvas' );
+  var scratchContext = scratchCanvas.getContext( '2d' );
+  
   // will be filled in by other modules
   return {
+    scratchCanvas: scratchCanvas,   // a canvas used for convenience functions (think of it as having arbitrary state)
+    scratchContext: scratchContext, // a context used for convenience functions (think of it as having arbitrary state)
+    
     enableLayerLogging: function() {
       window.sceneryLayerLog = function( ob ) { console.log( ob ); };
     },

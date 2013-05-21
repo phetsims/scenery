@@ -31,8 +31,8 @@ define( function( require ) {
     this.stops = [];
     this.lastStopRatio = 0;
     
-    // TODO: make a global spot that will have a 'useless' context for these purposes?
-    this.canvasGradient = document.createElement( 'canvas' ).getContext( '2d' ).createLinearGradient( x0, y0, x1, y1 );
+    // use the global scratch canvas instead of creating a new Canvas
+    this.canvasGradient = scenery.scratchContext.createLinearGradient( x0, y0, x1, y1 );
     
     this.transformMatrix = null;
   };

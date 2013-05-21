@@ -20,8 +20,8 @@ define( function( require ) {
   scenery.Pattern = function Pattern( image ) {
     this.image = image;
     
-    // TODO: make a global spot that will have a 'useless' context for these purposes?
-    this.canvasPattern = document.createElement( 'canvas' ).getContext( '2d' ).createPattern( image, 'repeat' );
+    // use the global scratch canvas instead of creating a new Canvas
+    this.canvasPattern = scenery.scratchContext.createPattern( image, 'repeat' );
     
     this.transformMatrix = null;
   };
