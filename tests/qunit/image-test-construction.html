@@ -10,6 +10,12 @@
   <script src="../../contrib/jquery-2.0.0.min.js"></script>
   <script src="../../contrib/lodash.min-1.0.0-rc.3.js"></script>
   <script src="../../contrib/has.js"></script>
+  
+  <!-- Canvg and dependencies -->
+  <script src="../../contrib/canvg-1.2/rgbcolor.js"></script>
+  <script src="../../contrib/canvg-1.2/canvg.js"></script>
+  
+  <!-- Testing utilities -->
   <script src="js/test-utils.js"></script>
   
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
@@ -40,8 +46,8 @@
     
     var scene = new scenery.Scene( $div );
     
-    // var rect = new scenery.Rectangle( 0, 0, 16, 16, { fill: '#f00', renderer: 'svg' } );
-    // scene.addChild( rect );
+    var rect = new scenery.Rectangle( 0, 0, 16, 16, { fill: '#f00', renderer: 'svg', visible: false } );
+    scene.addChild( rect );
     scene.updateScene();
     
     (function(){

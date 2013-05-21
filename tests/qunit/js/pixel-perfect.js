@@ -161,4 +161,22 @@
     }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAQUlEQVRYR+3WMQoAMAgDQP3/o9tCf2AGlxPXQLhFu8I5VW/n0/PoTypAgAABAgQIrAuk5zz+BxQgQIAAAQIEUoELbg4gAWKut4YAAAAASUVORK5CYII=',
     0
   );
+  
+  pixelTest( 'SVG: Rectangle',
+    function( scene ) {
+      var rect = new scenery.Rectangle( 0, 0, 16, 16, { fill: '#f00', renderer: 'svg' } );
+      scene.addChild( rect );
+      scene.updateScene();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAQUlEQVRYR+3WMQoAMAgDwPj/R7e+wQpdTrIK4Ratk3TmU0lnPqUAAQIECBAg8F1gfsl3Np+eiY0KChAgQIAAAQIX6VUgIfXDabwAAAAASUVORK5CYII=',
+    0
+  );
+  
+  pixelTest( 'SVG: Invisible Rectangle',
+    function( scene ) {
+      var rect = new scenery.Rectangle( 0, 0, 16, 16, { fill: '#f00', renderer: 'svg', visible: false } );
+      scene.addChild( rect );
+      scene.updateScene();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAALUlEQVRYR+3QQREAAAABQfqXFsNnFTizzXk99+MAAQIECBAgQIAAAQIECBAgMBo/ACHo7lH9AAAAAElFTkSuQmCC',
+    0
+  );
 })();
