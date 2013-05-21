@@ -58,6 +58,18 @@ define( function( require ) {
   var Rectangle = scenery.Rectangle;
   
   inherit( Rectangle, Path, {
+    setRect: function( x, y, width, height, arcWidth, arcHeight ) {
+      sceneryAssert && sceneryAssert( x !== undefined && y !== undefined && width !== undefined && height !== undefined, 'x/y/width/height need to be defined' );
+      
+      this._rectX = x;
+      this._rectY = y;
+      this._rectWidth = width;
+      this._rectHeight = height;
+      this._rectArcWidth = arcWidth || 0;
+      this._rectArcHeight = arcHeight || 0;
+      this.invalidateRectangle();
+    },
+    
     isRounded: function() {
       return this._rectArcWidth !== 0 && this._rectArcHeight !== 0;
     },
