@@ -2,6 +2,8 @@
 Scenery Changelog
 =================
 
+* 2013-5-21 Touches now trigger the enter/over and out/exit before/after the 'down' and 'up'/'cancel' events, respectively
+* 2013-5-21 Added ButtonListener
 * 2013-5-21 Node.bounds changed to behavior of Node.visibleBounds, Node.completeBounds now handles the old Node.bounds behavior
 * 2013-5-17 Node.addEventListener / removeEventListener changed to the DOM-like format
 * 2013-5-17 Merged accessibility support (see Node.addPeer)

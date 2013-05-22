@@ -324,6 +324,11 @@ define( function( require ) {
       
       this.dispatchEvent( trail, 'cancel', pointer, event, true );
       
+      // touch pointers are transient, so fire exit/out to the trail afterwards
+      if ( pointer.isTouch ) {
+        this.exitEvents( pointer, event, trail, 0, true );
+      }
+      
       pointer.trail = trail;
     },
     
