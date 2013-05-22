@@ -273,11 +273,21 @@ define( function( require ) {
       
       this.dispatchEvent( trail, 'up', pointer, event, true );
       
+      // touch pointers are transient, so fire exit/out to the trail afterwards
+      if ( pointer.isTouch ) {
+        this.exitEvents( pointer, event, trail, 0, true );
+      }
+      
       pointer.trail = trail;
     },
     
     downEvent: function( pointer, event ) {
       var trail = this.scene.trailUnderPoint( pointer.point ) || new scenery.Trail( this.scene );
+      
+      // touch pointers are transient, so fire enter/over to the trail first
+      if ( pointer.isTouch ) {
+        this.enterEvents( pointer, event, trail, 0, true );
+      }
       
       this.dispatchEvent( trail, 'down', pointer, event, true );
       
@@ -301,26 +311,10 @@ define( function( require ) {
       // event order matches http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
       this.dispatchEvent( trail, 'move', pointer, event, true );
       
-      if ( lastNodeChanged ) {
-        this.dispatchEvent( oldTrail, 'out', pointer, event, true );
-      }
-      
       // we want to approximately mimic http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
       // TODO: if a node gets moved down 1 depth, it may see both an exit and enter?
-      if ( oldTrail.length > branchIndex ) {
-        for ( var oldIndex = branchIndex; oldIndex < oldTrail.length; oldIndex++ ) {
-          this.dispatchEvent( oldTrail.slice( 0, oldIndex + 1 ), 'exit', pointer, event, false );
-        }
-      }
-      if ( trail.length > branchIndex ) {
-        for ( var newIndex = trail.length - 1; newIndex >= branchIndex; newIndex-- ) {
-          this.dispatchEvent( trail.slice( 0, newIndex + 1 ), 'enter', pointer, event, false );
-        }
-      }
-      
-      if ( lastNodeChanged ) {
-        this.dispatchEvent( trail, 'over', pointer, event, true );
-      }
+      this.exitEvents( pointer, event, oldTrail, branchIndex, lastNodeChanged );
+      this.enterEvents( pointer, event, trail, branchIndex, lastNodeChanged );
       
       pointer.trail = trail;
     },
@@ -331,6 +325,30 @@ define( function( require ) {
       this.dispatchEvent( trail, 'cancel', pointer, event, true );
       
       pointer.trail = trail;
+    },
+    
+    enterEvents: function( pointer, event, trail, branchIndex, lastNodeChanged ) {
+      if ( trail.length > branchIndex ) {
+        for ( var newIndex = trail.length - 1; newIndex >= branchIndex; newIndex-- ) {
+          this.dispatchEvent( trail.slice( 0, newIndex + 1 ), 'enter', pointer, event, false );
+        }
+      }
+      
+      if ( lastNodeChanged ) {
+        this.dispatchEvent( trail, 'over', pointer, event, true );
+      }
+    },
+    
+    exitEvents: function( pointer, event, trail, branchIndex, lastNodeChanged ) {
+      if ( lastNodeChanged ) {
+        this.dispatchEvent( trail, 'out', pointer, event, true );
+      }
+      
+      if ( trail.length > branchIndex ) {
+        for ( var oldIndex = branchIndex; oldIndex < trail.length; oldIndex++ ) {
+          this.dispatchEvent( trail.slice( 0, oldIndex + 1 ), 'exit', pointer, event, false );
+        }
+      }
     },
     
     dispatchEvent: function( trail, type, pointer, event, bubbles ) {
