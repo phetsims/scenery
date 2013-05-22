@@ -291,8 +291,7 @@ define( function( require ) {
         
         var oldBounds = this._bounds;
         
-        // TODO: we can possibly make this not needed?
-        var newBounds = this.localToParentBounds( this._selfBounds ).union( that.localToParentBounds( this._childBounds ) );
+        var newBounds = this.isVisible() ? this.localToParentBounds( this._selfBounds ).union( that.localToParentBounds( this._childBounds ) ) : Bounds2.NOTHING;
         var changed = !newBounds.equals( oldBounds );
         
         if ( changed ) {
@@ -322,7 +321,7 @@ define( function( require ) {
           var childBounds = Bounds2.NOTHING.copy();
           _.each( that.children, function( child ) { childBounds.includeBounds( child._bounds ); } );
           
-          var fullBounds = that.localToParentBounds( that._selfBounds ).union( that.localToParentBounds( childBounds ) );
+          var fullBounds = that.isVisible() ? that.localToParentBounds( that._selfBounds ).union( that.localToParentBounds( childBounds ) ) : Bounds2.NOTHING;
           
           sceneryAssertExtra && sceneryAssertExtra( that._childBounds.equalsEpsilon( childBounds, epsilon ), 'Child bounds mismatch after validateBounds: ' +
                                                                                                     that._childBounds.toString() + ', expected: ' + childBounds.toString() );
@@ -458,7 +457,7 @@ define( function( require ) {
       return ourChild;
     },
     
-    // the bounds for self content in "local" coordinates
+    // the bounds for self content in "local" coordinates.
     getSelfBounds: function() {
       return this._selfBounds;
     },
@@ -474,18 +473,16 @@ define( function( require ) {
       return this._bounds;
     },
     
-    // like getBounds() in the "parent" coordinate frame, but only includes visible children
-    getVisibleBounds: function() {
+    // like getBounds() in the "parent" coordinate frame, but also includes invisible descendants
+    getCompleteBounds: function() {
       // defensive copy, since we use mutable modifications below
       var bounds = this._selfBounds.copy();
       
       _.each( this.children, function( child ) {
-        if ( child.isVisible() ) {
-          bounds.includeBounds( child.getVisibleBounds() );
-        }
+        bounds.includeBounds( child.getCompleteBounds() );
       } );
       
-      sceneryAssert && sceneryAssert( bounds.isFinite() || bounds.isEmpty(), 'Visible bounds should not be infinite' );
+      sceneryAssert && sceneryAssert( bounds.isFinite() || bounds.isEmpty(), 'Complete bounds should not be infinite' );
       return this.localToParentBounds( bounds );
     },
     
@@ -937,6 +934,7 @@ define( function( require ) {
         
         this._visible = visible;
         
+        this.invalidateBounds(); // since visibility can affect bounds
         this.notifyVisibilityChange();
       }
       return this;
@@ -1615,7 +1613,7 @@ define( function( require ) {
     get selfBounds() { return this.getSelfBounds(); },
     get childBounds() { return this.getChildBounds(); },
     get globalBounds() { return this.getGlobalBounds(); },
-    get visibleBounds() { return this.getVisibleBounds(); },
+    get completeBounds() { return this.getCompleteBounds(); },
     get id() { return this.getId(); },
     get instances() { return this.getInstances(); },
     
