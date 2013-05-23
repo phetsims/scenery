@@ -5,7 +5,6 @@ Examine:
 
 Priorities:
     * Performance-test arbitrary events
-    * FIX devious drag! Canvas renderer + console not being open
     * Travis for tests
     ** Unicode font tests - grab strings from every language for testing
     Mouse buttons - are they pointers, like Key?
@@ -45,12 +44,10 @@ Bugs:
     ***** Things disappear sometimes when the window is large
     *** SimpleDragHandler's parent transform tracking is broken
     Chrome canvas lineWidth with pattern bug (looks like half size?)
-    DOM opacity
-    **** General opacity: multiple layers combined!
-        **** Should we consider supporting a nested structure of layers based on opacity?
+    Opacity:
+        Cross-layer
+        DOM
     What happens with a computer with multiple mice? is that handled in the pointer spec?
-    Text width detected improperly, or wrapping in DOM renderer
-    Default text with text string changed visual size switching between boundsMethods in playground
     Switching renderers in Devious Drag example on iPad causes other objects being dragged to be "dropped"
         Probably causes some sort of enter/exit event?
     Nexus 7 hidef scaling
