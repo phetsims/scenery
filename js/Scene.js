@@ -120,6 +120,8 @@ define( function( require ) {
       
       this.focusRingSVGContainer = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
       this.focusRingSVGContainer.style.position = 'absolute';
+      this.focusRingSVGContainer.style.top = 0;
+      this.focusRingSVGContainer.style.left = 0;
       this.focusRingSVGContainer.style['pointer-events'] = 'none';
       this.resizeFocusRingSVGContainer( options.width, options.height );
       this.focusRingPath = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
@@ -206,11 +208,11 @@ define( function( require ) {
   };
   
   Scene.prototype.addPeer = function( peer ) {
-    this.accessibilityLayer.appendChild( peer.element );
+    this.accessibilityLayer.appendChild( peer.peerElement );
   };
   
   Scene.prototype.removePeer = function( peer ) {
-    this.accessibilityLayer.removeChild( peer.element );
+    this.accessibilityLayer.removeChild( peer.peerElement );
   };
   
   Scene.prototype.setActivePeer = function( peer ) {
