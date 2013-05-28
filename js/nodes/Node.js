@@ -151,12 +151,32 @@ define( function( require ) {
     },
     
     removeChild: function( node ) {
+      sceneryAssert && sceneryAssert( node );
       sceneryAssert && sceneryAssert( this.isChild( node ) );
+      
+      var indexOfChild = _.indexOf( this._children, node );
+      
+      this.removeChildWithIndex( node, indexOfChild );
+    },
+    
+    removeChildAt: function( index ) {
+      sceneryAssert && sceneryAssert( index >= 0 );
+      sceneryAssert && sceneryAssert( index < this._children.length );
+      
+      var node = this._children[index];
+      
+      this.removeChildWithIndex( node, index );
+    },
+    
+    // meant for internal use
+    removeChildWithIndex: function( node, indexOfChild ) {
+      sceneryAssert && sceneryAssert( node );
+      sceneryAssert && sceneryAssert( this.isChild( node ) );
+      sceneryAssert && sceneryAssert( this._children[indexOfChild] === node );
       
       node.markOldPaint( false );
       
       var indexOfParent = _.indexOf( node._parents, this );
-      var indexOfChild = _.indexOf( this._children, node );
       
       this.markForRemoval( node, indexOfChild );
       
@@ -191,8 +211,16 @@ define( function( require ) {
       return this._children.slice( 0 ); // create a defensive copy
     },
     
+    getChildrenCount: function() {
+      return this._children.length;
+    },
+    
     getParents: function() {
       return this._parents.slice( 0 ); // create a defensive copy
+    },
+    
+    getChildAt: function( index ) {
+      return this._children[index];
     },
     
     indexOfParent: function( parent ) {
