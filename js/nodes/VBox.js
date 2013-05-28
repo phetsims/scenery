@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * VBox arranges the child nodes vertically, and they can be centered, left or right justified.

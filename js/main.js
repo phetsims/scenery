@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * Module that includes all Scenery dependencies, so that requiring this module will return an object
@@ -14,6 +14,7 @@ define( [
     'SCENERY/scenery',
     'SCENERY/debug/DebugContext',
     
+    'SCENERY/input/ButtonListener',
     'SCENERY/input/DownUpListener',
     'SCENERY/input/Event',
     'SCENERY/input/Input',
@@ -47,10 +48,12 @@ define( [
     'SCENERY/nodes/Text',
     'SCENERY/nodes/VBox',
     
-    'SCENERY/util/BasicNodeEvents',
+    'SCENERY/util/AccessibilityPeer',
     'SCENERY/util/CanvasContextWrapper',
     'SCENERY/util/Color',
+    'SCENERY/util/FixedNodeEvents',
     'SCENERY/util/Font',
+    'SCENERY/util/Gradient',
     'SCENERY/util/LinearGradient',
     'SCENERY/util/Instance',
     'SCENERY/util/Pattern',
@@ -58,7 +61,6 @@ define( [
     'SCENERY/util/RenderInterval',
     'SCENERY/util/SceneImage',
     'SCENERY/util/SceneryStyle',
-    'SCENERY/util/SplitNodeEvents',
     'SCENERY/util/Trail',
     'SCENERY/util/TrailPointer',
     'SCENERY/util/Util',

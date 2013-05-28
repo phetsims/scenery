@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * A debugging version of the CanvasRenderingContext2D that will output all commands issued,
@@ -49,7 +49,7 @@ define( function( require ) {
     }
   }
   
-  scenery.DebugContext = function( context ) {
+  scenery.DebugContext = function DebugContext( context ) {
     this._context = context;
     
     // allow checking of context.ellipse for existence

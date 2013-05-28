@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * A layer state is used to construct layer information (and later, layers), and is a state machine
@@ -21,7 +21,7 @@ define( function( require ) {
    *
    * previousLayerType should be null if there is no previous layer.
    */
-  scenery.LayerBuilder = function( scene, previousLayerType, previousPaintedTrail, nextPaintedTrail ) {
+  scenery.LayerBuilder = function LayerBuilder( scene, previousLayerType, previousPaintedTrail, nextPaintedTrail ) {
     
     /*---------------------------------------------------------------------------*
     * Initial state

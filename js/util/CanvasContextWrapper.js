@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * Wraps the context and contains a reference to the canvas, so that we can absorb unnecessary state changes,
@@ -14,7 +14,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  scenery.CanvasContextWrapper = function( canvas, context ) {
+  scenery.CanvasContextWrapper = function CanvasContextWrapper( canvas, context ) {
     this.canvas = canvas;
     this.context = context;
     

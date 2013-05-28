@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * Basic dragging for a node.
@@ -23,7 +23,7 @@ define( function( require ) {
    *    translate:            // if this exists, translate( { delta: _, oldPosition: _, position: _ } ) will be called instead of directly translating the node
    * }
    */
-  scenery.SimpleDragHandler = function( options ) {
+  scenery.SimpleDragHandler = function SimpleDragHandler( options ) {
     var handler = this;
     
     this.options = _.extend( {
@@ -114,7 +114,7 @@ define( function( require ) {
       // set a flag on the pointer so it won't pick up other nodes
       event.pointer.dragging = true;
       event.pointer.addInputListener( this.dragListener );
-      event.trail.rootNode().addEventListener( this.transformListener );
+      // event.trail.rootNode().addEventListener( this.transformListener ); // TODO: replace with new parent transform listening solution
       
       // set all of our persistent information
       this.dragging = true;
@@ -134,7 +134,7 @@ define( function( require ) {
     endDrag: function( event ) {
       this.pointer.dragging = false;
       this.pointer.removeInputListener( this.dragListener );
-      this.trail.rootNode().removeEventListener( this.transformListener );
+      // this.trail.rootNode().removeEventListener( this.transformListener ); // TODO: replace with new parent transform listening solution
       this.dragging = false;
       
       if ( this.options.end ) {

@@ -1,8 +1,8 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
- * VBox arranges the child nodes vertically, and they can be centered, left or right justified.
- * Vertical spacing can be set as a constant or a function which depends on the adjacent nodes.
+ * HBox arranges the child nodes horizontally, and they can be centered, left or right justified.
+ * Horizontal spacing can be set as a constant or a function which depends on the adjacent nodes.
  * TODO: add an option (not enabled by default) to update layout when children or children bounds change
  *
  * @author Sam Reid

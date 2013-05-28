@@ -132,7 +132,8 @@
       <p class="lead" style="color: #a00;">Currently incomplete!</p>
       
       TODO: coordinate frame notes<br>
-      TODO: event handling API documentation
+      TODO: event handling API documentation<br>
+      TODO: use <a href="http://softwaremaniacs.org/soft/highlight/en/">highlight.js</a> for highlighting
       
     </div>
     <div class="span3"></div>
@@ -149,6 +150,7 @@
       <a class="sublink" href="#node-addChild">addChild</a><br>
       <a class="sublink" href="#node-insertChild">insertChild</a><br>
       <a class="sublink" href="#node-removeChild">removeChild</a><br>
+      <a class="sublink" href="#node-addPeer">addPeer</a><br>
       <a class="sublink" href="#node-detach">detach</a><br>
       <a class="sublink" href="#node-cursor">cursor</a><br>
       <a class="sublink" href="#node-visible">visible</a><br>
@@ -166,6 +168,7 @@
       <a class="sublink" href="#node-bounds">bounds</a><br>
       <a class="sublink" href="#node-selfBounds">selfBounds</a><br>
       <a class="sublink" href="#node-childBounds">childBounds</a><br>
+      <a class="sublink" href="#node-completeBounds">completeBounds</a><br>
       <a class="sublink" href="#node-left">left</a><br>
       <a class="sublink" href="#node-right">right</a><br>
       <a class="sublink" href="#node-top">top</a><br>
@@ -251,6 +254,20 @@
       <a class="sublink" href="#circle-radius">radius</a><br>
       
       <a class="navlink" href="#font">Font</a><br>
+      <a class="sublink" href="#font-font">font</a><br>
+      <a class="sublink" href="#font-family">family</a><br>
+      <a class="sublink" href="#font-weight">weight</a><br>
+      <a class="sublink" href="#font-stretch">stretch</a><br>
+      <a class="sublink" href="#font-style">style</a><br>
+      <a class="sublink" href="#font-size">size</a><br>
+      <a class="sublink" href="#font-lineHeight">lineHeight</a><br>
+      
+      <a class="navlink" href="#color">Color</a><br>
+      <a class="sublink" href="#color-red">red</a><br>
+      <a class="sublink" href="#color-green">green</a><br>
+      <a class="sublink" href="#color-blue">blue</a><br>
+      <a class="sublink" href="#color-alpha">alpha</a><br>
+      <a class="sublink" href="#color-toCSS">toCSS</a><br>
       
       <a class="navlink" href="#event">Event</a><br>
       
@@ -403,6 +420,19 @@ scene.addChild( new scenery.Node( {
         Removes childNode from node's children.
       </p>
       
+      <h4 id="node-addPeer">node.addPeer( <span class="args">element, options</span> )</h4>
+      <p>
+        Adds an accessibility peer described by the element and options to the tab order (handled for each instance). <code>element</code> can be either
+        a DOM element (it is used directly, and tabindex is set on it), or an HTML string (which will be duplicated for each instance). The peer can be focused,
+        and peers can be modified to reflect the current state of the node.
+      </p>
+      <p>
+        Currently if it exists, options.click is called when the peer is activated by the keyboard while focused.
+      </p>
+      <p>
+        For instance, a toggle button or checkbox should generally use <code>'&lt;input type="checkbox"&gt;'</code> for its element.
+      </p>
+      
       <h4 id="node-detach">node.detach()</h4>
       <p>
         Removes this node from all of its parents.
@@ -546,7 +576,7 @@ scene.updateOnRequestAnimationFrame();
       
       <h4 id="node-bounds">node.bounds</h4>
       <p>
-        Returns the <a href="../../dot/doc#bounds2">bounding box</a> of this node (and its children) in the parent coordinate frame. Also available with <code>node.getBounds()</code>.
+        Returns the <a href="../../dot/doc#bounds2">bounding box</a> of this node (and its children) in the parent coordinate frame. Also available with <code>node.getBounds()</code>. This does not include invisible descendants, and will return empty bounds when called on an invisible node.
         <!-- TODO: add an example -->
       </p>
       
@@ -559,6 +589,13 @@ scene.updateOnRequestAnimationFrame();
       <h4 id="node-childBounds">node.childBounds</h4>
       <p>
         Returns the <a href="../../dot/doc#bounds2">bounding box</a> of this node's children (without include the node's selfBounds) in the local coordinate frame. Also available with <code>node.getChildBounds()</code>.
+        <!-- TODO: add an example -->
+      </p>
+      
+      <h4 id="node-completeBounds">node.completeBounds</h4>
+      <p>
+        Returns the <a href="../../dot/doc#bounds2">bounding box</a> of this node (and its children) in the parent coordinate frame.. Also available with <code>node.getCompleteBounds()</code>. Unlike <a href="#node-bounds">bounds</a>, this includes all descendants (even if invisible). It is not tracked, so each call will
+        need to traverse the subtree to get the bounds.
         <!-- TODO: add an example -->
       </p>
       
@@ -774,9 +811,13 @@ scene.updateOnRequestAnimationFrame();
         is also available as a quick check, and a null fill is interpreted as not having a fill.
       </p>
       <p>
-        <code>fill</code> can currently be either a string (interpreted as a <a href="http://www.w3.org/TR/css3-color/">CSS color</a>), or an instance of a
+        <code>fill</code> can currently be either a string (interpreted as a <a href="http://www.w3.org/TR/css3-color/">CSS color</a>), a
+        <a href="#color">Color</a> object, or an instance of a
         <a href="#linearGradient">LinearGradient</a>, <a href="#radialGradient">RadialGradient</a> or
         <a href="#pattern">Pattern</a>.
+      </p>
+      <p>
+        If a <a href="#color">Color</a> object is used for a fill, any changes to the Color object will update this node.
       </p>
       
       <h3 id="strokable" class="section">Strokable</h3>
@@ -791,9 +832,13 @@ scene.updateOnRequestAnimationFrame();
         is also available as a quick check, and a null stroke is interpreted as not having a stroke.
       </p>
       <p>
-        <code>stroke</code> can currently be either a string (interpreted as a <a href="http://www.w3.org/TR/css3-color/">CSS color</a>), or an instance of a
+        <code>stroke</code> can currently be either a string (interpreted as a <a href="http://www.w3.org/TR/css3-color/">CSS color</a>),
+        a <a href="#color">Color</a> object, or an instance of a
         <a href="#linearGradient">LinearGradient</a>, <a href="#radialGradient">RadialGradient</a> or
         <a href="#pattern">Pattern</a>.
+      </p>
+      <p>
+        If a <a href="#color">Color</a> object is used for a stroke, any changes to the Color object will update this node.
       </p>
       
       <h4 id="strokable-lineWidth">lineWidth</h4>
@@ -1519,6 +1564,116 @@ scene.addChild( new scenery.Circle( 11, {
       </p>
       
       <h3 id="font" class="section">Font</h3>
+      <p>
+        Font represents a single font, which can be queried for various parameters, and can be changed.
+      </p>
+      <p>
+        It can be constructed with <code>new scenery.Font()</code> initialized with the default font '10px sans-serif',
+        <code>new scenery.Font( cssFontString )</code> initialized with the specified <a href="http://www.w3.org/TR/css3-fonts/">CSS Font</a>,
+        or with a property object <code>new scenery.Font( { ... } )</code>, where any of the Font's properties
+        (<a href="#font-font">font</a>, <a href="#font-family">family</a>, <a href="#font-weight">weight</a>, <a href="#font-stretch">stretch</a>, <a href="#font-style">style</a>, <a href="#font-size">size</a>, and <a href="#font-lineHeight">lineHeight</a>)
+        can be present.
+      </p>
+      <p>
+        For example, <code>new scenery.Font( { size: 16, style: 'italic' } )</code> and <code>new scenery.Font( 'italic 16px sans-serif' )</code>
+        are equivalent ways of creating that specific Font instance. In addition:
+      </p>
+      <pre class="brush: js">
+new scenery.Font().font                      // "10px sans-serif" (the default)
+new scenery.Font( { family: 'serif' } ).font // "10px serif"
+new scenery.Font( { weight: 'bold' } ).font  // "bold 10px sans-serif"
+new scenery.Font( { size: 16 } ).font        // "16px sans-serif"
+var font = new scenery.Font( {
+  family: '"Times New Roman", serif'
+} );
+font.style = 'italic';
+font.lineHeight = 10;
+font.font;                                   // "italic 10px/10 'Times New Roman', serif"
+font.family;                                 // "'Times New Roman', serif"
+font.weight;                                 // 400 (the default)
+      </pre>
+      
+      <h4 id="font-font">font</h4>
+      <p>
+        <code>font.font</code> (<code>font.getFont()</code>, <code>font.setFont( fontString )</code>)
+        retrieves or modifies the <a href="http://www.w3.org/TR/css3-fonts/#propdef-font">shorthand CSS 'font' property</a> of the Font object.
+        This property completely specifies all font settings.
+      </p>
+      
+      <h4 id="font-family">family</h4>
+      <p>
+        <code>font.family</code> (<code>font.getFamily()</code>, <code>font.setFamily( family )</code>)
+        retrieves or modifies the <a href="http://www.w3.org/TR/css3-fonts/#propdef-font-family">CSS 'font-family' property</a> of the Font object.
+      </p>
+      
+      <h4 id="font-weight">weight</h4>
+      <p>
+        <code>font.weight</code> (<code>font.getWeight()</code>, <code>font.setWeight( weight )</code>)
+        retrieves or modifies the <a href="http://www.w3.org/TR/css3-fonts/#propdef-font-weight">CSS 'font-weight' property</a> of the Font object.
+      </p>
+      
+      <h4 id="font-stretch">stretch</h4>
+      <p>
+        <code>font.stretch</code> (<code>font.getStretch()</code>, <code>font.setStretch( stretch )</code>)
+        retrieves or modifies the <a href="http://www.w3.org/TR/css3-fonts/#propdef-font-stretch">CSS 'font-stretch' property</a> of the Font object.
+      </p>
+      
+      <h4 id="font-style">style</h4>
+      <p>
+        <code>font.style</code> (<code>font.getStyle()</code>, <code>font.setStyle( style )</code>)
+        retrieves or modifies the <a href="http://www.w3.org/TR/css3-fonts/#propdef-font-style">CSS 'font-style' property</a> of the Font object.
+      </p>
+      
+      <h4 id="font-size">size</h4>
+      <p>
+        <code>font.size</code> (<code>font.getSize()</code>, <code>font.setSize( size )</code>)
+        retrieves or modifies the <a href="http://www.w3.org/TR/css3-fonts/#propdef-font-size">CSS 'font-size' property</a> of the Font object.
+      </p>
+      
+      <h4 id="font-lineHeight">lineHeight</h4>
+      <p>
+        <strong>Deprecated</strong>: <code>font.lineHeight</code> (<code>font.getLineHeight()</code>, <code>font.setLineHeight( lineHeight )</code>)
+        retrieves or modifies the <a href="http://www.w3.org/TR/CSS21/visudet.html#propdef-line-height">CSS 'line-height' property</a> of the Font object.
+      </p>
+      
+      
+      <h3 id="color" class="section">Color</h3>
+      <p>
+        A Color can be constructed either with any valid CSS color (<code>new scenery.Color( cssColorString )</code>), or with components directly
+        (<code>new scenery.Color( red, green blue [, alpha] )</code>) where red/green/blue are 0-255, and alpha is 0-1.
+      </p>
+      <p>Color operations will assume that the color is not pre-multiplied.</p>
+      
+      <h4 id="color-red">red</h4>
+      <p>
+        <code>color.red</code> (<code>color.getRed()</code>, <code>color.setRed( redInt )</code>)
+        retrieves or modifies the red component of the color. It will be returned or converted to an integral value between 0-255 (inclusive).
+      </p>
+      
+      <h4 id="color-green">green</h4>
+      <p>
+        <code>color.green</code> (<code>color.getGreen()</code>, <code>color.setGreen( greenInt )</code>)
+        retrieves or modifies the green component of the color. It will be returned or converted to an integral value between 0-255 (inclusive).
+      </p>
+      
+      <h4 id="color-blue">blue</h4>
+      <p>
+        <code>color.blue</code> (<code>color.getBlue()</code>, <code>color.setBlue( blueInt )</code>)
+        retrieves or modifies the blue component of the color. It will be returned or converted to an integral value between 0-255 (inclusive).
+      </p>
+      
+      <h4 id="color-alpha">alpha</h4>
+      <p>
+        <code>color.alpha</code> (<code>color.getAlpha()</code>, <code>color.setAlpha( alphaFloat )</code>)
+        retrieves or modifies the alpha component of the color. It will be returned or converted to an integral value between 0-1 (inclusive).
+      </p>
+      
+      <h4 id="color-toCSS">toCSS()</h4>
+      <p>
+        Returns a CSS value for the color, currently using 'rgb' or 'rgba'.
+      </p>
+      
+      
       <h3 id="event" class="section">Event</h3>
       <h3 id="pointer" class="section">Pointer</h3>
       <h3 id="mouse" class="section">Mouse</h3>

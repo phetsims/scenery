@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * A node for the Scenery scene graph. Supports general directed acyclic graphics (DAGs).
@@ -16,8 +16,7 @@ define( function( require ) {
   var clamp = require( 'DOT/Util' ).clamp;
   
   var scenery = require( 'SCENERY/scenery' );
-  // var nodeEvents = require( 'SCENERY/util/BasicNodeEvents' ); // uncapitalized, because of JSHint (TODO: find the flag)
-  var nodeEvents = require( 'SCENERY/util/SplitNodeEvents' ); // uncapitalized, because of JSHint (TODO: find the flag)
+  var NodeEvents = require( 'SCENERY/util/FixedNodeEvents' ); // uncapitalized, because of JSHint (TODO: find the flag)
   var LayerStrategy = require( 'SCENERY/layers/LayerStrategy' ); // used to set the default layer strategy on the prototype
   // require( 'SCENERY/layers/Renderer' ); // commented out so Require.js doesn't balk at the circular dependency
   
@@ -78,6 +77,8 @@ define( function( require ) {
     
     this._children = []; // ordered
     this._parents = []; // unordered
+    
+    this._peers = []; // array of peer factories: { element: ..., options: ... }, where element can be an element or a string
     
     /*
      * Set up the transform reference. we add a listener so that the transform itself can be modified directly
@@ -267,6 +268,12 @@ define( function( require ) {
       } );
     },
     
+    // currently, there is no way to remove peers. if a string is passed as the element pattern, it will be turned into an element
+    addPeer: function( element, options ) {
+      sceneryAssert && sceneryAssert( !this.instances.length, 'Cannot call addPeer after a node has instances (yet)' );
+      this._peers.push( { element: element, options: options } );
+    },
+    
     // ensure that cached bounds stored on this node (and all children) are accurate
     validateBounds: function() {
       var that = this;
@@ -312,8 +319,7 @@ define( function( require ) {
         
         var oldBounds = this._bounds;
         
-        // TODO: we can possibly make this not needed?
-        var newBounds = this.localToParentBounds( this._selfBounds ).union( that.localToParentBounds( this._childBounds ) );
+        var newBounds = this.isVisible() ? this.localToParentBounds( this._selfBounds ).union( that.localToParentBounds( this._childBounds ) ) : Bounds2.NOTHING;
         var changed = !newBounds.equals( oldBounds );
         
         if ( changed ) {
@@ -343,7 +349,7 @@ define( function( require ) {
           var childBounds = Bounds2.NOTHING.copy();
           _.each( that.children, function( child ) { childBounds.includeBounds( child._bounds ); } );
           
-          var fullBounds = that.localToParentBounds( that._selfBounds ).union( that.localToParentBounds( childBounds ) );
+          var fullBounds = that.isVisible() ? that.localToParentBounds( that._selfBounds ).union( that.localToParentBounds( childBounds ) ) : Bounds2.NOTHING;
           
           sceneryAssertExtra && sceneryAssertExtra( that._childBounds.equalsEpsilon( childBounds, epsilon ), 'Child bounds mismatch after validateBounds: ' +
                                                                                                     that._childBounds.toString() + ', expected: ' + childBounds.toString() );
@@ -479,7 +485,7 @@ define( function( require ) {
       return ourChild;
     },
     
-    // the bounds for self content in "local" coordinates
+    // the bounds for self content in "local" coordinates.
     getSelfBounds: function() {
       return this._selfBounds;
     },
@@ -495,18 +501,16 @@ define( function( require ) {
       return this._bounds;
     },
     
-    // like getBounds() in the "parent" coordinate frame, but only includes visible children
-    getVisibleBounds: function() {
+    // like getBounds() in the "parent" coordinate frame, but also includes invisible descendants
+    getCompleteBounds: function() {
       // defensive copy, since we use mutable modifications below
       var bounds = this._selfBounds.copy();
       
       _.each( this.children, function( child ) {
-        if ( child.isVisible() ) {
-          bounds.includeBounds( child.getVisibleBounds() );
-        }
+        bounds.includeBounds( child.getCompleteBounds() );
       } );
       
-      sceneryAssert && sceneryAssert( bounds.isFinite() || bounds.isEmpty(), 'Visible bounds should not be infinite' );
+      sceneryAssert && sceneryAssert( bounds.isFinite() || bounds.isEmpty(), 'Complete bounds should not be infinite' );
       return this.localToParentBounds( bounds );
     },
     
@@ -625,10 +629,6 @@ define( function( require ) {
     
     getInputListeners: function() {
       return this._inputListeners.slice( 0 ); // defensive copy
-    },
-    
-    addPeer: function() {
-      // stub for accessibility3 compatibility. will be merged in later. REMOVE THIS PART IN THE MERGE
     },
     
     /*
@@ -962,6 +962,7 @@ define( function( require ) {
         
         this._visible = visible;
         
+        this.invalidateBounds(); // since visibility can affect bounds
         this.notifyVisibilityChange();
       }
       return this;
@@ -1640,7 +1641,7 @@ define( function( require ) {
     get selfBounds() { return this.getSelfBounds(); },
     get childBounds() { return this.getChildBounds(); },
     get globalBounds() { return this.getGlobalBounds(); },
-    get visibleBounds() { return this.getVisibleBounds(); },
+    get completeBounds() { return this.getCompleteBounds(); },
     get id() { return this.getId(); },
     get instances() { return this.getInstances(); },
     
@@ -1751,7 +1752,8 @@ define( function( require ) {
   Node.prototype.layerStrategy = LayerStrategy;
   
   // mix-in the events for Node
-  nodeEvents( Node );
+  /* jshint -W064 */
+  NodeEvents( Node );
   
   return Node;
 } );

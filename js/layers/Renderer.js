@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * An enumeration of different back-end technologies used for rendering. It also essentially
@@ -20,7 +20,7 @@ define( function( require ) {
   // cached defaults
   var defaults = {};
   
-  scenery.Renderer = function( layerConstructor, name, defaultOptions ) {
+  scenery.Renderer = function Renderer( layerConstructor, name, defaultOptions ) {
     this.layerConstructor = layerConstructor;
     this.name = name;
     this.defaultOptions = defaultOptions;

@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * An SVG-based layer in the scene graph. Each layer handles dirty-region handling separately,
@@ -28,7 +28,7 @@ define( function( require ) {
   var svgns = 'http://www.w3.org/2000/svg';
   var xlinkns = 'http://www.w3.org/1999/xlink';
   
-  scenery.SVGLayer = function( args ) {
+  scenery.SVGLayer = function SVGLayer( args ) {
     sceneryLayerLog && sceneryLayerLog( 'SVGLayer constructor' );
     var $main = args.$main;
     

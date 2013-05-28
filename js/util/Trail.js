@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * Represents a trail (path in the graph) from a 'root' node down to a descendant node.
@@ -26,7 +26,7 @@ define( function( require ) {
   require( 'SCENERY/nodes/Node' );
   // require( 'SCENERY/util/TrailPointer' );
   
-  scenery.Trail = function( nodes ) {
+  scenery.Trail = function Trail( nodes ) {
     /*
      * Controls the immutability of the trail.
      * If set to true, add/remove descendant/ancestor should fail if assertions are enabled

@@ -683,4 +683,90 @@
     scene.removeChild( path );
     equal( scene.layers.length, 0, 'no layers after removing' );
   } );
+  
+  test( 'Scene resize event', function() {
+    var scene = new scenery.Scene( $( '#main' ) );
+    
+    var width, height, count = 0;
+    
+    scene.addEventListener( 'resize', function( event ) {
+      width = event.width;
+      height = event.height;
+      count++;
+    } );
+    
+    scene.resize( 712, 217 );
+    
+    equal( width, 712, 'Scene resize width' );
+    equal( height, 217, 'Scene resize height' );
+    equal( count, 1, 'Scene resize count' );
+  } );
+  
+  test( 'Bounds events', function() {
+    var node = new scenery.Node();
+    node.y = 10;
+    
+    var rect = new scenery.Rectangle( 0, 0, 100, 50, { fill: '#f00' } );
+    rect.x = 10; // a transform, so we can verify everything is handled correctly
+    node.addChild( rect );
+    
+    node.validateBounds();
+    
+    var epsilon = 0.0000001;
+    
+    node.addEventListener( 'childBounds', function( bounds ) {
+      ok( bounds.equalsEpsilon( new dot.Bounds2( 10, 0, 110, 30 ), epsilon ), 'Parent child bounds check: ' + bounds.toString() );
+    } );
+    
+    node.addEventListener( 'bounds', function( bounds ) {
+      ok( bounds.equalsEpsilon( new dot.Bounds2( 10, 10, 110, 40 ), epsilon ), 'Parent bounds check: ' + bounds.toString() );
+    } );
+    
+    node.addEventListener( 'selfBounds', function( bounds ) {
+      ok( false, 'Self bounds should not change for parent node' );
+    } );
+    
+    rect.addEventListener( 'selfBounds', function( bounds ) {
+      ok( bounds.equalsEpsilon( new dot.Bounds2( 0, 0, 100, 30 ), epsilon ), 'Self bounds check: ' + bounds.toString() );
+    } );
+    
+    rect.addEventListener( 'bounds', function( bounds ) {
+      ok( bounds.equalsEpsilon( new dot.Bounds2( 10, 0, 110, 30 ), epsilon ), 'Bounds check: ' + bounds.toString() );
+    } );
+    
+    rect.addEventListener( 'childBounds', function( bounds ) {
+      ok( false, 'Child bounds should not change for leaf node' );
+    } );
+    
+    rect.rectHeight = 30;
+    node.validateBounds();
+    
+    // this may change if for some reason we end up calling more events in the future
+    expect( 4 );
+  } );
+  
+  test( 'Using a color instance', function() {
+    var scene = new scenery.Scene( $( '#main' ) );
+    
+    var rect = new scenery.Rectangle( 0, 0, 100, 50 );
+    ok( rect.fill === null, 'Always starts with a null fill' );
+    scene.addChild( rect );
+    var color = new scenery.Color( 255, 0, 0 );
+    rect.fill = color;
+    color.setRGBA( 0, 255, 0, 1 );
+  } );
+  
+  test( 'Bounds and Complete Bounds', function() {
+    var node = new scenery.Node();
+    var rect = new scenery.Rectangle( 0, 0, 100, 50 );
+    node.addChild( rect );
+    
+    ok( node.bounds.equals( new dot.Bounds2( 0, 0, 100, 50 ) ), 'Bounds Visible' );
+    ok( node.completeBounds.equals( new dot.Bounds2( 0, 0, 100, 50 ) ), 'Complete Bounds Visible' );
+    
+    rect.visible = false;
+    
+    ok( node.bounds.equals( dot.Bounds2.NOTHING ), 'Bounds Invisible' );
+    ok( node.completeBounds.equals( new dot.Bounds2( 0, 0, 100, 50 ) ), 'Complete Bounds Invisible' );
+  } );
 })();

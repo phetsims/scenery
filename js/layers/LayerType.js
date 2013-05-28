@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * A description of layer settings and the ability to create a layer with those settings.
@@ -12,7 +12,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  scenery.LayerType = function( Constructor, name, renderer, args ) {
+  scenery.LayerType = function LayerType( Constructor, name, renderer, args ) {
     this.Constructor = Constructor;
     this.name = name;
     this.renderer = renderer;

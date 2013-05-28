@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /*
  * An HTMLImageElement that is backed by a scene. Call update() on this SceneImage to update the image from the scene.
@@ -12,7 +12,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   // NOTE: ideally the scene shouldn't use SVG, since rendering that to a canvas takes a callback (and usually requires canvg)
-  scenery.SceneImage = function( scene ) {
+  scenery.SceneImage = function SceneImage( scene ) {
     this.scene = scene;
     
     // we write the scene to a canvas, get its data URL, and pass that to the image.

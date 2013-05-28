@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * Mix-in for nodes that support a standard fill.
@@ -13,12 +13,18 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  scenery.Fillable = function( type ) {
+  scenery.Fillable = function Fillable( type ) {
     var proto = type.prototype;
     
     // this should be called in the constructor to initialize
     proto.initializeFillable = function() {
       this._fill = null;
+      
+      var that = this;
+      this._fillListener = function() {
+        that.invalidatePaint(); // TODO: move this to invalidateFill?
+        that.invalidateFill();
+      };
     };
     
     proto.hasFill = function() {
@@ -31,7 +37,16 @@ define( function( require ) {
     
     proto.setFill = function( fill ) {
       if ( this.getFill() !== fill ) {
+        if ( this._fill && this._fill.removeChangeListener ) {
+          this._fill.removeChangeListener( this._fillListener );
+        }
+        
         this._fill = fill;
+        
+        if ( this._fill && this._fill.addChangeListener ) {
+          this._fill.addChangeListener( this._fillListener );
+        }
+        
         this.invalidatePaint();
         
         this.invalidateFill();
@@ -54,13 +69,34 @@ define( function( require ) {
     };
     
     proto.getSVGFillStyle = function() {
-      // if the fill has an SVG definition, use that with a URL reference to it
-      return 'fill: ' + ( this._fill ? ( this._fill.getSVGDefinition ? 'url(#fill' + this.getId() + ')' : this._fill ) : 'none' ) + ';';
+      var style = 'fill: ';
+      if ( !this._fill ) {
+        // no fill
+        style += 'none;';
+      } else if ( this._fill.toCSS ) {
+        // Color object fill
+        style += this._fill.toCSS() + ';';
+      } else if ( this._fill.getSVGDefinition ) {
+        // reference the SVG definition with a URL
+        style += 'url(#fill' + this.getId() + ');';
+      } else {
+        // plain CSS color
+        style += this._fill + ';';
+      }
+      return style;
     };
     
     proto.isFillDOMCompatible = function() {
       // make sure we're not a pattern or gradient
       return !this._fill || !this._fill.getSVGDefinition;
+    };
+    
+    proto.getCSSFill = function() {
+      sceneryAssert && sceneryAssert( this.isFillDOMCompatible() );
+      
+      // if it's a Color object, get the corresponding CSS
+      // 'transparent' will make us invisible if the fill is null
+      return this._fill ? ( this._fill.toCSS ? this._fill.toCSS() : this._fill ) : 'transparent';
     };
     
     proto.addSVGFillDef = function( svg, defs ) {

@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * Images
@@ -111,17 +111,6 @@ define( function( require ) {
         this.invalidateImage(); // yes, if we aren't loaded yet this will give us 0x0 bounds
       }
       return this;
-    },
-    
-    invalidateOnImageLoad: function( image ) {
-      var self = this;
-      var listener = function( event ) {
-        self.invalidateImage();
-        
-        // don't leak memory!
-        image.removeEventListener( listener );
-      };
-      image.addEventListener( listener );
     },
     
     getImageWidth: function() {

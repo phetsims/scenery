@@ -167,6 +167,21 @@
             } ) );
           };
           
+          window.setupButton = function() {
+            var rect = new scenery.Rectangle( 50, 50, 100, 50, { fill: '#f00' } );
+            scene.addChild( rect );
+            scene.initializeStandaloneEvents();
+            scenery.disableLayerLogging();
+            scenery.disableEventLogging();
+            rect.cursor = 'pointer';
+            rect.addInputListener( new scenery.ButtonListener( {
+              up: function( event, old ) { console.log( 'up from ' + old ); rect.fill = '#f00'; },
+              over: function( event, old ) { console.log( 'over from ' + old ); rect.fill = '#00f'; },
+              down: function( event, old ) { console.log( 'down from ' + old ); rect.fill = '#0f0'; },
+              fire: function( event ) { console.log( 'fire' ); }
+            } ) );
+          };
+          
           window.testNodeBounds = function( trail ) {
             var a = performance.now();
             for ( var i = 0; i < 100000; i++ ) { trail.lastNode().localToGlobalBounds( bounds ); };

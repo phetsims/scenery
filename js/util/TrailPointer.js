@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * Points to a specific node (with a trail), and whether it is conceptually before or after the node.
@@ -22,7 +22,7 @@ define( function( require ) {
   /*
    * isBefore: whether this points to before the node (and its children) have been rendered, or after
    */
-  scenery.TrailPointer = function( trail, isBefore ) {
+  scenery.TrailPointer = function TrailPointer( trail, isBefore ) {
     sceneryAssert && sceneryAssert( trail instanceof scenery.Trail, 'trail is not a trail' );
     this.trail = trail;
     

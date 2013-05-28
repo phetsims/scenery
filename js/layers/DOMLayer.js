@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * A DOM-based layer in the scene graph. Each layer handles dirty-region handling separately,
@@ -27,7 +27,7 @@ define( function( require ) {
   var Layer = require( 'SCENERY/layers/Layer' ); // DOMLayer inherits from Layer
   require( 'SCENERY/util/Trail' );
   
-  scenery.DOMLayer = function( args ) {
+  scenery.DOMLayer = function DOMLayer( args ) {
     sceneryLayerLog && sceneryLayerLog( 'DOMLayer constructor' );
     
     Layer.call( this, args );

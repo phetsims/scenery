@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * A radial gradient that can be passed into the 'fill' or 'stroke' parameters.
@@ -11,13 +11,14 @@
 define( function( require ) {
   'use strict';
   
-  require( 'SCENERY/util/Color' );
   var scenery = require( 'SCENERY/scenery' );
   
+  var inherit = require( 'PHET_CORE/inherit' );
   var Vector2 = require( 'DOT/Vector2' );
+  var Gradient = require( 'SCENERY/util/Gradient' );
   
   // TODO: support Vector2s for p0 and p1
-  scenery.RadialGradient = function( x0, y0, r0, x1, y1, r1 ) {
+  scenery.RadialGradient = function RadialGradient( x0, y0, r0, x1, y1, r1 ) {
     this.start = new Vector2( x0, y0 );
     this.end = new Vector2( x1, y1 );
     this.startRadius = r0;
@@ -33,40 +34,12 @@ define( function( require ) {
       sceneryAssert && sceneryAssert( this.focalPoint.minus( this.end ).magnitude() <= this.endRadius );
     }
     
-    this.stops = [];
-    this.lastStopRatio = 0;
-    
-    // TODO: make a global spot that will have a 'useless' context for these purposes?
-    this.canvasGradient = document.createElement( 'canvas' ).getContext( '2d' ).createRadialGradient( x0, y0, r0, x1, y1, r1 );
-    
-    this.transformMatrix = null;
+    // use the global scratch canvas instead of creating a new Canvas
+    Gradient.call( this, scenery.scratchContext.createRadialGradient( x0, y0, r0, x1, y1, r1 ) );
   };
   var RadialGradient = scenery.RadialGradient;
   
-  RadialGradient.prototype = {
-    constructor: RadialGradient,
-    
-    addColorStop: function( ratio, color ) {
-      if ( this.lastStopRatio > ratio ) {
-        // fail out, since browser quirks go crazy for this case
-        throw new Error( 'Color stops not specified in the order of increasing ratios' );
-      } else {
-        this.lastStopRatio = ratio;
-      }
-      
-      this.stops.push( { ratio: ratio, color: color } );
-      this.canvasGradient.addColorStop( ratio, color );
-      return this;
-    },
-    
-    setTransformMatrix: function( transformMatrix ) {
-      this.transformMatrix = transformMatrix;
-      return this;
-    },
-    
-    getCanvasStyle: function() {
-      return this.canvasGradient;
-    },
+  inherit( RadialGradient, Gradient, {
     
     getSVGDefinition: function( id ) {
       var startIsLarger = this.startRadius > this.endRadius;
@@ -106,10 +79,9 @@ define( function( require ) {
         }
         
         // TODO: store color in our stops array, so we don't have to create additional objects every time?
-        var color = new scenery.Color( stop.color );
         var stopElement = document.createElementNS( svgns, 'stop' );
         stopElement.setAttribute( 'offset', ratio );
-        stopElement.setAttribute( 'style', 'stop-color: ' + color.withAlpha( 1 ).toCSS() + '; stop-opacity: ' + color.a.toFixed( 20 ) + ';' );
+        stopElement.setAttribute( 'style', 'stop-color: ' + stop.color.withAlpha( 1 ).toCSS() + '; stop-opacity: ' + stop.color.a.toFixed( 20 ) + ';' );
         definition.appendChild( stopElement );
       }
       
@@ -132,12 +104,12 @@ define( function( require ) {
       var result = 'new scenery.RadialGradient( ' + this.start.x + ', ' + this.start.y + ', ' + this.startRadius + ', ' + this.end.x + ', ' + this.end.y + ', ' + this.endRadius + ' )';
       
       _.each( this.stops, function( stop ) {
-        result += '.addColorStop( ' + stop.ratio + ', \'' + stop.color + '\' )';
+        result += '.addColorStop( ' + stop.ratio + ', \'' + stop.color.toString() + '\' )';
       } );
       
       return result;
     }
-  };
+  } );
   
   return RadialGradient;
 } );

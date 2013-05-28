@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * An interval between two Trails. A trail being null means either 'from the start' or 'to the end', depending
@@ -14,7 +14,7 @@ define( function( require ) {
   require( 'SCENERY/util/Trail' );
   
   // start and end are of type {Trail} or null (indicates all the way to the start / end)
-  scenery.RenderInterval = function( start, end ) {
+  scenery.RenderInterval = function RenderInterval( start, end ) {
     sceneryAssert && sceneryAssert( !start || !end || start.compare( end ) <= 0, 'RenderInterval parameters must not be out of order' );
     
     this.start = start;

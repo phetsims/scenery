@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * A pattern that will deliver a fill or stroke that will repeat an image in both directions (x and y).
@@ -17,11 +17,11 @@ define( function( require ) {
   
   // TODO: support scene or other various content (SVG is flexible, can backport to canvas)
   // TODO: investigate options to support repeat-x, repeat-y or no-repeat in SVG (available repeat options from Canvas)
-  scenery.Pattern = function( image ) {
+  scenery.Pattern = function Pattern( image ) {
     this.image = image;
     
-    // TODO: make a global spot that will have a 'useless' context for these purposes?
-    this.canvasPattern = document.createElement( 'canvas' ).getContext( '2d' ).createPattern( image, 'repeat' );
+    // use the global scratch canvas instead of creating a new Canvas
+    this.canvasPattern = scenery.scratchContext.createPattern( image, 'repeat' );
     
     this.transformMatrix = null;
   };

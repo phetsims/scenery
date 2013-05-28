@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * Tracks a stylus ('pen') or something with tilt and pressure information
@@ -9,11 +9,12 @@
 define( function( require ) {
   'use strict';
   
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   
   var Pointer = require( 'SCENERY/input/Pointer' ); // extends Pointer
   
-  scenery.Pen = function( id, point, event ) {
+  scenery.Pen = function Pen( id, point, event ) {
     Pointer.call( this );
     
     this.id = id;
@@ -25,9 +26,7 @@ define( function( require ) {
   };
   var Pen = scenery.Pen;
   
-  Pen.prototype = _.extend( {}, Pointer.prototype, {
-    constructor: Pen,
-    
+  inherit( Pen, Pointer, {
     move: function( point, event ) {
       this.point = point;
     },

@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * API for handling mouse / touch / keyboard events.
@@ -28,9 +28,11 @@ define( function( require ) {
   require( 'SCENERY/input/Mouse' );
   require( 'SCENERY/input/Touch' );
   require( 'SCENERY/input/Pen' );
+  require( 'SCENERY/input/Key' );
   require( 'SCENERY/input/Event' );
   
-  scenery.Input = function( scene, listenerTarget, batchDOMEvents ) {
+  // listenerTarget is the DOM node (window/document/element) to which DOM event listeners will be attached
+  scenery.Input = function Input( scene, listenerTarget, batchDOMEvents ) {
     this.scene = scene;
     this.listenerTarget = listenerTarget;
     this.batchDOMEvents = batchDOMEvents;
@@ -65,6 +67,16 @@ define( function( require ) {
       return _.find( this.pointers, function( pointer ) { return pointer.id === id; } );
     },
     
+    findKeyByEvent: function( event ) {
+      sceneryAssert && sceneryAssert( event.keyCode && event.charCode, 'Assumes the KeyboardEvent has keyCode and charCode properties' );
+      var result = _.find( this.pointers, function( pointer ) {
+        // TODO: also check location (if that exists), so we don't mix up left and right shift, etc.
+        return pointer.keyCode === event.keyCode && pointer.charCode === event.charCode;
+      } );
+      // sceneryAssert && sceneryAssert( result, 'No key found for the combination of key:' + event.key + ' and location:' + event.location );
+      return result;
+    },
+    
     mouseDown: function( point, event ) {
       this.mouse.down( point, event );
       this.downEvent( this.mouse, event );
@@ -88,6 +100,28 @@ define( function( require ) {
     mouseOut: function( point, event ) {
       this.mouse.out( point, event );
       // TODO: how to handle mouse-out
+    },
+    
+    keyDown: function( event ) {
+      var key = new scenery.Key( event );
+      this.addPointer( key );
+      
+      var trail = this.scene.getTrailFromKeyboardFocus();
+      this.dispatchEvent( trail, 'keyDown', key, event, true );
+    },
+    
+    keyUp: function( event ) {
+      var key = this.findKeyByEvent( event );
+      if ( key ) {
+        this.removePointer( key );
+        
+        var trail = this.scene.getTrailFromKeyboardFocus();
+        this.dispatchEvent( trail, 'keyUp', key, event, true );
+      }
+    },
+    
+    keyPress: function( event ) {
+      // NOTE: do we even need keyPress?
     },
     
     // called for each touch point
@@ -239,11 +273,21 @@ define( function( require ) {
       
       this.dispatchEvent( trail, 'up', pointer, event, true );
       
+      // touch pointers are transient, so fire exit/out to the trail afterwards
+      if ( pointer.isTouch ) {
+        this.exitEvents( pointer, event, trail, 0, true );
+      }
+      
       pointer.trail = trail;
     },
     
     downEvent: function( pointer, event ) {
       var trail = this.scene.trailUnderPoint( pointer.point ) || new scenery.Trail( this.scene );
+      
+      // touch pointers are transient, so fire enter/over to the trail first
+      if ( pointer.isTouch ) {
+        this.enterEvents( pointer, event, trail, 0, true );
+      }
       
       this.dispatchEvent( trail, 'down', pointer, event, true );
       
@@ -267,26 +311,10 @@ define( function( require ) {
       // event order matches http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
       this.dispatchEvent( trail, 'move', pointer, event, true );
       
-      if ( lastNodeChanged ) {
-        this.dispatchEvent( oldTrail, 'out', pointer, event, true );
-      }
-      
       // we want to approximately mimic http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
       // TODO: if a node gets moved down 1 depth, it may see both an exit and enter?
-      if ( oldTrail.length > branchIndex ) {
-        for ( var oldIndex = branchIndex; oldIndex < oldTrail.length; oldIndex++ ) {
-          this.dispatchEvent( oldTrail.slice( 0, oldIndex + 1 ), 'exit', pointer, event, false );
-        }
-      }
-      if ( trail.length > branchIndex ) {
-        for ( var newIndex = trail.length - 1; newIndex >= branchIndex; newIndex-- ) {
-          this.dispatchEvent( trail.slice( 0, newIndex + 1 ), 'enter', pointer, event, false );
-        }
-      }
-      
-      if ( lastNodeChanged ) {
-        this.dispatchEvent( trail, 'over', pointer, event, true );
-      }
+      this.exitEvents( pointer, event, oldTrail, branchIndex, lastNodeChanged );
+      this.enterEvents( pointer, event, trail, branchIndex, lastNodeChanged );
       
       pointer.trail = trail;
     },
@@ -296,7 +324,36 @@ define( function( require ) {
       
       this.dispatchEvent( trail, 'cancel', pointer, event, true );
       
+      // touch pointers are transient, so fire exit/out to the trail afterwards
+      if ( pointer.isTouch ) {
+        this.exitEvents( pointer, event, trail, 0, true );
+      }
+      
       pointer.trail = trail;
+    },
+    
+    enterEvents: function( pointer, event, trail, branchIndex, lastNodeChanged ) {
+      if ( trail.length > branchIndex ) {
+        for ( var newIndex = trail.length - 1; newIndex >= branchIndex; newIndex-- ) {
+          this.dispatchEvent( trail.slice( 0, newIndex + 1 ), 'enter', pointer, event, false );
+        }
+      }
+      
+      if ( lastNodeChanged ) {
+        this.dispatchEvent( trail, 'over', pointer, event, true );
+      }
+    },
+    
+    exitEvents: function( pointer, event, trail, branchIndex, lastNodeChanged ) {
+      if ( lastNodeChanged ) {
+        this.dispatchEvent( trail, 'out', pointer, event, true );
+      }
+      
+      if ( trail.length > branchIndex ) {
+        for ( var oldIndex = branchIndex; oldIndex < trail.length; oldIndex++ ) {
+          this.dispatchEvent( trail.slice( 0, oldIndex + 1 ), 'exit', pointer, event, false );
+        }
+      }
     },
     
     dispatchEvent: function( trail, type, pointer, event, bubbles ) {
@@ -328,7 +385,7 @@ define( function( require ) {
       this.dispatchToTargets( trail, pointer, type, inputEvent, bubbles );
       
       // TODO: better interactivity handling?
-      if ( !trail.lastNode().interactive ) {
+      if ( !trail.lastNode().interactive && !pointer.isKey ) {
         event.preventDefault();
       }
     },
@@ -408,11 +465,16 @@ define( function( require ) {
     addListener: function( type, callback, useCapture ) {
       var input = this;
       
+      //Cancel propagation of mouse events but not key events.  Key Events need to propagate for tab navigability
+      var usePreventDefault = type !== 'keydown' && type !== 'keyup' && type !== 'keypress';
+      
       if ( this.batchDOMEvents ) {
         var batchedCallback = function batchedEvent( domEvent ) {
           sceneryEventLog && sceneryEventLog( 'Batching event for ' + type );
           
-          domEvent.preventDefault(); // TODO: should we batch the events in a different place so we don't preventDefault on something bad?
+          if ( usePreventDefault ) {
+            domEvent.preventDefault(); // TODO: should we batch the events in a different place so we don't preventDefault on something bad?
+          }
           input.batchedCallbacks.push( function() {
             callback( domEvent );
           } );
@@ -425,7 +487,7 @@ define( function( require ) {
       }
     },
     
-    diposeListeners: function() {
+    disposeListeners: function() {
       var input = this;
       _.each( this.listenerReferences, function( ref ) {
         input.listenerTarget.removeEventListener( ref.type, ref.callback, ref.useCapture );

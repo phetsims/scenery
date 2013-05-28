@@ -4,7 +4,7 @@ Examine:
     Others from html5 game engines (particularly webgl)
 
 Priorities:
-    * FIX devious drag! Canvas renderer + console not being open
+    * Performance-test arbitrary events
     * Travis for tests
     ** Unicode font tests - grab strings from every language for testing
     Mouse buttons - are they pointers, like Key?
@@ -44,12 +44,10 @@ Bugs:
     ***** Things disappear sometimes when the window is large
     *** SimpleDragHandler's parent transform tracking is broken
     Chrome canvas lineWidth with pattern bug (looks like half size?)
-    DOM opacity
-    **** General opacity: multiple layers combined!
-        **** Should we consider supporting a nested structure of layers based on opacity?
+    Opacity:
+        Cross-layer
+        DOM
     What happens with a computer with multiple mice? is that handled in the pointer spec?
-    Text width detected improperly, or wrapping in DOM renderer
-    Default text with text string changed visual size switching between boundsMethods in playground
     Switching renderers in Devious Drag example on iPad causes other objects being dragged to be "dropped"
         Probably causes some sort of enter/exit event?
     Nexus 7 hidef scaling
@@ -62,6 +60,8 @@ Tricky areas:
     Gradients / Patterns should not be changed after being passed to a node's fill/stroke, since the SVG def won't change, and we don't set up listeners
 
 Test:
+    Color updates (pixel tests)
+    Event handling tests (and generalize the event handler)
     DownUpListener
     More pixel tests
     RenderInterval
@@ -225,15 +225,14 @@ DOM:
         How to deal with mouse-wheel events? Scroll if zoomed in?
     Consider all elements under point: http://msdn.microsoft.com/en-us/library/hh673523.aspx
     * SimpleDragHandler needs an option for increased hit areas for touch
-    Consider finger.isDown for checking general (but possibly mouse related) events
     Indie UI events should be tracked: https://dvcs.w3.org/hg/IndieUI/raw-file/default/src/indie-ui-events.html
-    Enter/Exit events on up/down? - see question above
     Freeze event handlers, a la the DOM 3 Events spec? Or copy Piccolo?
     Best pattern for handling drags / more persistence? Add listeners directly to finger?
         Standard flags on fingers for whether they are performing an operation? dragging, etc.
         A way to 'cancel' the operation a finger is currently doing, so it can switch to a different one?
     Mouse enter/exit needs to trigger for node add/remove
         Does it make sense to hit-test every frame for this?
+        Yes?
     How to hit test against DOM nodes?
     Use cases:
         Zoom / Pinch / Drag with interrupts
@@ -241,6 +240,8 @@ DOM:
         Showing where the fingers are with a display (for projectors)
 
 Accessibility / shadow DOM:
+    Peers:
+        Only in tab order if visible
     TabOrder object?
     Questions:
         Shape instead of rect to highlight - SVG in front
@@ -295,6 +296,8 @@ Trail:
     depthFirstUntil should possibly have option for defensive copies of the pointers?
 
 Performance:
+    Consider removing switch statements from inner loops? test!
+    **** FAMB tab 2 slower after instances-stitch (SVG+CSS)
     Layers / caching:
         **** Consider option that would resize / position canvas/svg elements to smaller portions of the screen for lower memory usage (and possibly better performance?)
             Tiling, possibly lock to every 16 pixels. Prevent back-and-forth every frame, and consider full size for animation vs changing

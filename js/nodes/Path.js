@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * A Path draws a Shape with a specific type of fill and stroke.
@@ -15,8 +15,8 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
   var Renderer = require( 'SCENERY/layers/Renderer' );
-  var fillable = require( 'SCENERY/nodes/Fillable' );
-  var strokable = require( 'SCENERY/nodes/Strokable' );
+  var Fillable = require( 'SCENERY/nodes/Fillable' );
+  var Strokable = require( 'SCENERY/nodes/Strokable' );
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
   
   scenery.Path = function Path( options ) {
@@ -26,6 +26,7 @@ define( function( require ) {
     // ensure we have a parameter object
     options = options || {};
     
+    this.initializeFillable();
     this.initializeStrokable();
     
     Node.call( this, options );
@@ -177,8 +178,9 @@ define( function( require ) {
   
   // mix in fill/stroke handling code. for now, this is done after 'shape' is added to the mutatorKeys so that stroke parameters
   // get set first
-  fillable( Path );
-  strokable( Path );
+  /* jshint -W064 */
+  Fillable( Path );
+  Strokable( Path );
   
   return Path;
 } );

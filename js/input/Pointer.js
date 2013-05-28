@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /*
  * A pointer is an abstraction that includes a mouse and touch points (and possibly keys).
@@ -14,7 +14,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  scenery.Pointer = function() {
+  scenery.Pointer = function Pointer() {
     this.listeners = [];
   };
   var Pointer = scenery.Pointer;

@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /*
  * An event in Scenery that has similar event-handling characteristics to DOM events.
@@ -14,7 +14,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  scenery.Event = function( args ) {
+  scenery.Event = function Event( args ) {
     // ensure that all of the required args are supplied
     sceneryAssert && sceneryAssert( args.trail &&
                       args.type &&

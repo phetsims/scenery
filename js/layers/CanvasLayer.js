@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * A Canvas-backed layer in the scene graph. Each layer handles dirty-region handling separately,
@@ -34,7 +34,7 @@ define( function( require ) {
   /*
    *
    */
-  scenery.CanvasLayer = function( args ) {
+  scenery.CanvasLayer = function CanvasLayer( args ) {
     sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' constructor' );
     Layer.call( this, args );
     

@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * Tracks the mouse state
@@ -9,11 +9,12 @@
 define( function( require ) {
   'use strict';
   
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   
   var Pointer = require( 'SCENERY/input/Pointer' ); // inherits from Pointer
   
-  scenery.Mouse = function() {
+  scenery.Mouse = function Mouse() {
     Pointer.call( this );
     
     this.point = null;
@@ -30,9 +31,7 @@ define( function( require ) {
   };
   var Mouse = scenery.Mouse;
   
-  Mouse.prototype = _.extend( {}, Pointer.prototype, {
-    constructor: Mouse,
-    
+  inherit( Mouse, Pointer, {
     down: function( point, event ) {
       this.point = point;
       switch( event.button ) {

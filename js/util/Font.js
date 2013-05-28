@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * Font handling for text drawing
@@ -39,7 +39,7 @@ define( function( require ) {
   //                    <font-variant-css21> = [normal | small-caps]
   // font-synthesis   v none | [ weight || style ]
   
-  scenery.Font = function( options ) {
+  scenery.Font = function Font( options ) {
     // internal string representation
     this._font = '10px sans-serif';
     
@@ -72,6 +72,10 @@ define( function( require ) {
   
   Font.prototype = {
     constructor: Font,
+    
+    copy: function() {
+      return new Font( this._font );
+    },
     
     // invalidate cached data and notify listeners of the change
     invalidateFont: function() {
@@ -190,6 +194,7 @@ define( function( require ) {
     * listeners
     *----------------------------------------------------------------------------*/
     
+    // TODO: change to addChangeListener?
     // listener should be a callback expecting no arguments, listener() will be called when the font changes
     addFontListener: function( listener ) {
       sceneryAssert && sceneryAssert( !_.contains( this.listeners, listener ) );
