@@ -115,7 +115,6 @@ define( function( require ) {
       //Put the accessibility layer behind the background so it cannot be seen.  Change this to some high number like 9999 to show it for debugging purposes.
       this.accessibilityLayer.style.zIndex = -1;
       this.accessibilityLayer.style.position = 'relative';
-      this.$accessibilityLayer = $( this.accessibilityLayer );
       $main[0].appendChild( this.accessibilityLayer );
       
       this.focusRingSVGContainer = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
@@ -135,6 +134,13 @@ define( function( require ) {
         sceneryAssert && sceneryAssert( scene.activePeer, 'scene should have an active peer when changing the focus ring bounds' );
         scene.focusRingPath.setAttribute( 'd', Shape.bounds( scene.activePeer.getGlobalBounds() ).getSVGPath() );
       };
+
+      //Put the live region layer behind the accessibility peer layer to make debugging easier (if we need to see the accessibility layer)
+      this.liveRegionLayer = document.createElement( 'div' );
+      this.liveRegionLayer.className = 'live-region-layer';
+      this.liveRegionLayer.style.zIndex = -2;
+      this.liveRegionLayer.style.position = 'relative';
+      $main[0].appendChild( this.liveRegionLayer );
     }
   };
   var Scene = scenery.Scene;
@@ -213,6 +219,14 @@ define( function( require ) {
   
   Scene.prototype.removePeer = function( peer ) {
     this.accessibilityLayer.removeChild( peer.peerElement );
+  };
+
+  Scene.prototype.addLiveRegion = function( liveRegion ) {
+    this.liveRegionLayer.appendChild( liveRegion.element );
+  };
+
+  Scene.prototype.removeLiveRegion = function( liveRegion ) {
+    this.liveRegionLayer.removeChild( liveRegion.element );
   };
   
   Scene.prototype.setActivePeer = function( peer ) {

@@ -79,6 +79,7 @@ define( function( require ) {
     this._parents = []; // unordered
     
     this._peers = []; // array of peer factories: { element: ..., options: ... }, where element can be an element or a string
+    this._liveRegions = []; // array of live region instances
     
     /*
      * Set up the transform reference. we add a listener so that the transform itself can be modified directly
@@ -272,6 +273,13 @@ define( function( require ) {
     addPeer: function( element, options ) {
       sceneryAssert && sceneryAssert( !this.instances.length, 'Cannot call addPeer after a node has instances (yet)' );
       this._peers.push( { element: element, options: options } );
+    },
+
+    /**               
+     * @param property any object that has es5 getter for 'value' es5 setter for value, and 
+     */
+    addLiveRegion: function( property, options ) {
+      this._liveRegions.push( {property: property, options: options} );
     },
     
     // ensure that cached bounds stored on this node (and all children) are accurate

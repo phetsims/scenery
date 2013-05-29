@@ -13,9 +13,6 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  //I cannot figure out why this import is required, but without it the sim crashes on startup.
-  var Renderer = require( 'SCENERY/layers/Renderer' );
-  
   var AccessibilityPeer = scenery.AccessibilityPeer = function AccessibilityPeer( instance, element, options ) {
     var peer = this;
     

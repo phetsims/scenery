@@ -55,6 +55,7 @@ define( [
     'SCENERY/util/Font',
     'SCENERY/util/Gradient',
     'SCENERY/util/LinearGradient',
+    'SCENERY/util/LiveRegion',
     'SCENERY/util/Instance',
     'SCENERY/util/Pattern',
     'SCENERY/util/RadialGradient',
