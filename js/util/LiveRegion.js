@@ -11,6 +11,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var escapeHTML = require( 'PHET_CORE/escapeHTML' );
 
   var scenery = require( 'SCENERY/scenery' );
 
@@ -28,9 +29,15 @@ define( function( require ) {
     this.element = document.createElement( 'div' );
     this.element.setAttribute( 'aria-live', 'polite' );
     this.element.setAttribute( 'role', 'region' );
-    this.textNode = document.createTextNode( 'hello there' );
+    this.textNode = document.createTextNode( '' );
     this.element.appendChild( this.textNode );
-    this.listener = function( newText ) { liveRegion.textNode.nodeValue = newText;};
+
+    //Just setting the text causes NVDA to read deltas
+    this.listener = function( newText ) {
+      liveRegion.element.removeChild( liveRegion.textNode );
+      liveRegion.textNode = document.createTextNode( newText );
+      liveRegion.element.appendChild( liveRegion.textNode );
+    };
     property.link( this.listener );
   };
 
