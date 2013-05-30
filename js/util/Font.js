@@ -9,10 +9,10 @@
  * new scenery.Font( { weight: 'bold' } ).font  // "bold 10px sans-serif"
  * new scenery.Font( { size: 16 } ).font        // "16px sans-serif"
  * var font = new scenery.Font( {
- *   family: '"Times New Roman", serif'
+ *   family: '"Times New Roman", serif',
+ *   style: 'italic',
+ *   lineHeight: 10
  * } );
- * font.style = 'italic';
- * font.lineHeight = 10;
  * font.font;                                   // "italic 10px/10 'Times New Roman', serif"
  * font.family;                                 // "'Times New Roman', serif"
  * font.weight;                                 // 400 (the default)
@@ -27,6 +27,18 @@ define( function( require ) {
   'use strict';
   
   var scenery = require( 'SCENERY/scenery' );
+  
+  var fontAttributeMap = {
+    weight: 'font-weight',
+    family: 'font-family',
+    stretch: 'font-stretch',
+    style: 'font-style',
+    size: 'font-size',
+    lineHeight: 'line-height' // NOTE: Canvas spec forces line-height to normal
+  };
+  
+  // span for using the browser to compute font styles
+  var $span = $( document.createElement( 'span' ) );
   
   // options from http://www.w3.org/TR/css3-fonts/
   // font-family      v ---
@@ -43,174 +55,71 @@ define( function( require ) {
     // internal string representation
     this._font = '10px sans-serif';
     
-    // span for using the browser to compute font styles
-    this.$span = $( document.createElement( 'span' ) );
-    
-    // cache values for all of the span's properties
-    this.cachedValues = null;
-    
-    // allow listeners to be notified on any changes
-    this.listeners = [];
-    
-    if ( sceneryAssert ) {
-      // only do this if assertions are enabled, otherwise we won't access it at all
-      this.immutable = false;
-    }
-    
     var type = typeof options;
     if ( type === 'string' ) {
       this._font = options;
-      this.$span.css( 'font', this._font ); // properly initialize the font instance
+      $span.css( 'font', this._font ); // properly initialize the font instance
     } else if ( type === 'object' ) {
-      this.$span.css( 'font', this._font ); // properly initialize the font instance
-      this.mutate( options );
+      // initialize if a 'font' is provided, otherwise use the default
+      $span.css( 'font', options.font ? options.font : this._font );
+      
+      // set any font attributes on our span
+      _.each( fontAttributeMap, function( cssAttribute, property ) {
+        if ( options[property] ) {
+          $span.css( cssAttribute, options[property] );
+        }
+      } );
+      this._font = $span.css( 'font' );
     } else {
-      this.$span.css( 'font', this._font ); // properly initialize the font instance
+      $span.css( 'font', this._font ); // properly initialize the font instance
     }
+    
+    // cache values for all of the span's properties
+    this.cache = $span.css( [
+      'font',
+      'font-family',
+      'font-weight',
+      'font-stretch',
+      'font-style',
+      'font-size',
+      'lineHeight'
+    ] );
   };
   var Font = scenery.Font;
   
   Font.prototype = {
     constructor: Font,
     
-    copy: function() {
-      return new Font( this._font );
-    },
-    
-    // invalidate cached data and notify listeners of the change
-    invalidateFont: function() {
-      sceneryAssert && sceneryAssert( !this.immutable, 'cannot change immutable font instance' );
-      
-      this.cachedValues = null;
-      
-      var listeners = this.listeners.slice( 0 );
-      var length = listeners.length;
-      
-      for ( var i = 0; i < length; i++ ) {
-        listeners[i]();
-      }
-    },
-    
-    // marks this Font instance as immutable. any further change will trigger an error (if assertions are enabled)
-    setImmutable: function() {
-      this.immutable = true;
-    },
-    
-    getProperty: function( property ) {
-      if ( !this.cachedValues ) {
-        this.cachedValues = this.$span.css( [
-          'font',
-          'font-family',
-          'font-weight',
-          'font-stretch',
-          'font-style',
-          'font-size',
-          'lineHeight'
-        ] );
-      }
-      sceneryAssert && sceneryAssert( property in this.cachedValues );
-      return this.cachedValues[property];
-    },
-    setProperty: function( property, value ) {
-      // sanity check, in case some CSS changed somewhere
-      this.$span.css( 'font', this._font );
-      
-      this.$span.css( property, value );
-      this._font = this.$span.css( 'font' );
-      
-      this.invalidateFont();
-      return this;
-    },
-    
     // direct access to the font string
     getFont: function() {
       return this._font;
     },
-    setFont: function( value ) {
-      if ( this._font !== value ) {
-        this._font = value;
-        this.invalidateFont();
-      }
-      return this;
-    },
     
-    // using the property mechanism
-    getFamily: function() { return this.getProperty( 'font-family' ); },
-    setFamily: function( value ) { return this.setProperty( 'font-family', value ); },
+    getFamily:     function() { return this.cache['font-family']; },
+    getWeight:     function() { return this.cache['font-weight']; },
+    getStretch:    function() { return this.cache['font-stretch']; },
+    getStyle:      function() { return this.cache['font-style']; },
+    getSize:       function() { return this.cache['font-size']; },
+    getLineHeight: function() { return this.cache['line-height']; },
     
-    getWeight: function() { return this.getProperty( 'font-weight' ); },
-    setWeight: function( value ) { return this.setProperty( 'font-weight', value ); },
-    
-    getStretch: function() { return this.getProperty( 'font-stretch' ); },
-    setStretch: function( value ) { return this.setProperty( 'font-stretch', value ); },
-    
-    getStyle: function() { return this.getProperty( 'font-style' ); },
-    setStyle: function( value ) { return this.setProperty( 'font-style', value ); },
-    
-    getSize: function() { return this.getProperty( 'font-size' ); },
-    setSize: function( value ) { return this.setProperty( 'font-size', value ); },
-    
-    // NOTE: Canvas spec forces line-height to normal
-    getLineHeight: function() { return this.getProperty( 'line-height' ); },
-    setLineHeight: function( value ) { return this.setProperty( 'line-height', value ); },
-    
-    set font( value ) { this.setFont( value ); },
-    get font() { return this.getFont(); },
-    
-    set weight( value ) { this.setWeight( value ); },
-    get weight() { return this.getWeight(); },
-    
-    set family( value ) { this.setFamily( value ); },
-    get family() { return this.getFamily(); },
-    
-    set stretch( value ) { this.setStretch( value ); },
-    get stretch() { return this.getStretch(); },
-    
-    set style( value ) { this.setStyle( value ); },
-    get style() { return this.getStyle(); },
-    
-    set size( value ) { this.setSize( value ); },
-    get size() { return this.getSize(); },
-    
-    set lineHeight( value ) { this.setLineHeight( value ); },
+    get font()       { return this.getFont(); },
+    get weight()     { return this.getWeight(); },
+    get family()     { return this.getFamily(); },
+    get stretch()    { return this.getStretch(); },
+    get style()      { return this.getStyle(); },
+    get size()       { return this.getSize(); },
     get lineHeight() { return this.getLineHeight(); },
     
-    // TODO: move this style of mutation out into more common code, if we use it again
-    mutate: function( options ) {
-      var font = this;
-      
-      _.each( this._mutatorKeys, function( key ) {
-        if ( options[key] !== undefined ) {
-          font[key] = options[key];
-        }
-      } );
+    with: function( options ) {
+      return new Font( _.extend( { font: this._font }, options ) );
     },
     
     toCSS: function() {
       return this.getFont();
-    },
-    
-    /*---------------------------------------------------------------------------*
-    * listeners
-    *----------------------------------------------------------------------------*/
-    
-    // TODO: change to addChangeListener?
-    // listener should be a callback expecting no arguments, listener() will be called when the font changes
-    addFontListener: function( listener ) {
-      sceneryAssert && sceneryAssert( !_.contains( this.listeners, listener ) );
-      this.listeners.push( listener );
-    },
-    
-    removeFontListener: function( listener ) {
-      sceneryAssert && sceneryAssert( _.contains( this.listeners, listener ) );
-      this.listeners.splice( _.indexOf( this.listeners, listener ), 1 );
     }
   };
   
-  Font.prototype._mutatorKeys = [ 'font', 'weight', 'family', 'stretch', 'style', 'size', 'lineHeight' ];
-  
   Font.DEFAULT = new Font();
-  Font.DEFAULT.setImmutable();
   
   return Font;
 } );

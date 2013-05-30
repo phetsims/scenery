@@ -56,10 +56,6 @@ define( function( require ) {
     this._supportedRenderers = [ Renderer.Canvas, Renderer.SVG, Renderer.DOM ];
     
     var thisFont = this;
-    this.fontListener = function() {
-      thisFont.invalidateText();
-    };
-    this._font.addFontListener( this.fontListener );
     
     // ensure we have a parameter object
     options = options || {};
@@ -388,9 +384,7 @@ define( function( require ) {
     
     setFont: function( font ) {
       if ( this.font !== font ) {
-        this._font.removeFontListener( this.fontListener );
         this._font = font instanceof scenery.Font ? font : new scenery.Font( font );
-        this._font.addFontListener( this.fontListener );
         this.invalidateText();
       }
       return this;
@@ -463,10 +457,9 @@ define( function( require ) {
     
     Text.prototype[setterName] = function( value ) {
       // create a full copy of our font instance
-      var newFont = new scenery.Font( this._font.getFont() );
-      
-      // use the ES5 setter. probably somewhat slow.
-      newFont[ shortUncapitalized ] = value;
+      var ob = {};
+      ob[shortUncapitalized] = value;
+      var newFont = this._font.with( ob );
       
       // apply the new Font. this should call invalidateText() as normal
       this.setFont( newFont );
