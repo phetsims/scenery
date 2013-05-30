@@ -3,8 +3,6 @@
 /**
  * Encapsulates common color information and transformations.
  *
- * Consider it immutable!
- *
  * See http://www.w3.org/TR/css3-color/
  *
  * TODO: make a getHue, getSaturation, getLightness. we can then expose them via ES5!
@@ -321,7 +319,7 @@ define( function( require ) {
     * listeners TODO: consider mixing in this behavior, it's common
     *----------------------------------------------------------------------------*/
     
-    // listener should be a callback expecting no arguments, listener() will be called when the font changes
+    // listener should be a callback expecting no arguments, listener() will be called when the color changes
     addChangeListener: function( listener ) {
       sceneryAssert && sceneryAssert( listener !== undefined && listener !== null, 'Verify that the listener exists' );
       sceneryAssert && sceneryAssert( !_.contains( this.listeners, listener ) );
@@ -499,7 +497,7 @@ define( function( require ) {
     yellowgreen:          '9acd32'
   };
   
-  // JAVA compatibility TODO: remove after porting MS
+  // Java compatibility
   Color.BLACK      = new Color( 0,   0,   0   ).setImmutable();
   Color.BLUE       = new Color( 0,   0,   255 ).setImmutable();
   Color.CYAN       = new Color( 0,   255, 255 ).setImmutable();
