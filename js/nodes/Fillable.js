@@ -37,13 +37,15 @@ define( function( require ) {
     
     proto.setFill = function( fill ) {
       if ( this.getFill() !== fill ) {
-        if ( this._fill && this._fill.removeChangeListener ) {
+        var hasInstances = this._instances.length > 0;
+        
+        if ( hasInstances && this._fill && this._fill.removeChangeListener ) {
           this._fill.removeChangeListener( this._fillListener );
         }
         
         this._fill = fill;
         
-        if ( this._fill && this._fill.addChangeListener ) {
+        if ( hasInstances && this._fill && this._fill.addChangeListener ) {
           this._fill.addChangeListener( this._fillListener );
         }
         
@@ -52,6 +54,28 @@ define( function( require ) {
         this.invalidateFill();
       }
       return this;
+    };
+    
+    var superFirstInstanceAdded = proto.firstInstanceAdded;
+    proto.firstInstanceAdded = function() {
+      if ( this._fill && this._fill.addChangeListener ) {
+        this._fill.addChangeListener( this._fillListener );
+      }
+      
+      if ( superFirstInstanceAdded ) {
+        superFirstInstanceAdded.call( this );
+      }
+    };
+    
+    var superLastInstanceRemoved = proto.lastInstanceRemoved;
+    proto.lastInstanceRemoved = function() {
+      if ( this._fill && this._fill.removeChangeListener ) {
+        this._fill.removeChangeListener( this._fillListener );
+      }
+      
+      if ( superLastInstanceRemoved ) {
+        superLastInstanceRemoved.call( this );
+      }
     };
     
     proto.beforeCanvasFill = function( wrapper ) {

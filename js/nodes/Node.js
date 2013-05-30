@@ -1355,6 +1355,13 @@ define( function( require ) {
       sceneryAssert && sceneryAssert( instance.getNode() === this, 'Must be an instance of this Node' );
       sceneryAssert && sceneryAssert( !_.find( this._instances, function( other ) { return instance.equals( other ); } ), 'Cannot add duplicates of an instance to a Node' );
       this._instances.push( instance );
+      if ( this._instances.length === 1 ) {
+        this.firstInstanceAdded();
+      }
+    },
+    
+    firstInstanceAdded: function() {
+      // no-op, meant to be overridden in the prototype chain
     },
     
     // returns undefined if there is no instance.
@@ -1375,6 +1382,13 @@ define( function( require ) {
       var index = _.indexOf( this._instances, instance ); // actual instance equality (NOT capitalized, normal meaning)
       sceneryAssert && sceneryAssert( index !== -1, 'Cannot remove an Instance from a Node if it was not there' );
       this._instances.splice( index, 1 );
+      if ( this._instances.length === 0 ) {
+        this.lastInstanceRemoved();
+      }
+    },
+    
+    lastInstanceRemoved: function() {
+      // no-op, meant to be overridden in the prototype chain
     },
     
     notifyVisibilityChange: function() {
