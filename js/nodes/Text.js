@@ -459,7 +459,7 @@ define( function( require ) {
       // create a full copy of our font instance
       var ob = {};
       ob[shortUncapitalized] = value;
-      var newFont = this._font.with( ob );
+      var newFont = this._font.copy( ob );
       
       // apply the new Font. this should call invalidateText() as normal
       this.setFont( newFont );
