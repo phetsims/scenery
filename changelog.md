@@ -2,6 +2,7 @@
 Scenery Changelog
 =================
 
+* 2013-5-30 Node.bounds changed to include invisible bounds, getCompleteBounds() removed, getVisibleBounds() added back in
 * 2013-5-30 Font is now immutable, use font.with( { ... } ) to create a modified copy
 * 2013-5-21 Touches now trigger the enter/over and out/exit before/after the 'down' and 'up'/'cancel' events, respectively
 * 2013-5-21 Added ButtonListener

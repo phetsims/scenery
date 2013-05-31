@@ -168,7 +168,7 @@
       <a class="sublink" href="#node-bounds">bounds</a><br>
       <a class="sublink" href="#node-selfBounds">selfBounds</a><br>
       <a class="sublink" href="#node-childBounds">childBounds</a><br>
-      <a class="sublink" href="#node-completeBounds">completeBounds</a><br>
+      <a class="sublink" href="#node-visibleBounds">visibleBounds</a><br>
       <a class="sublink" href="#node-left">left</a><br>
       <a class="sublink" href="#node-right">right</a><br>
       <a class="sublink" href="#node-top">top</a><br>
@@ -576,7 +576,8 @@ scene.updateOnRequestAnimationFrame();
       
       <h4 id="node-bounds">node.bounds</h4>
       <p>
-        Returns the <a href="../../dot/doc#bounds2">bounding box</a> of this node (and its children) in the parent coordinate frame. Also available with <code>node.getBounds()</code>. This does not include invisible descendants, and will return empty bounds when called on an invisible node.
+        Returns the <a href="../../dot/doc#bounds2">bounding box</a> of this node (and its children) in the parent coordinate frame. Also available with <code>node.getBounds()</code>. It includes all children, regardless
+        of whether they are visible or not.
         <!-- TODO: add an example -->
       </p>
       
@@ -592,9 +593,9 @@ scene.updateOnRequestAnimationFrame();
         <!-- TODO: add an example -->
       </p>
       
-      <h4 id="node-completeBounds">node.completeBounds</h4>
+      <h4 id="node-visibleBounds">node.visibleBounds</h4>
       <p>
-        Returns the <a href="../../dot/doc#bounds2">bounding box</a> of this node (and its children) in the parent coordinate frame.. Also available with <code>node.getCompleteBounds()</code>. Unlike <a href="#node-bounds">bounds</a>, this includes all descendants (even if invisible). It is not tracked, so each call will
+        Returns the <a href="../../dot/doc#bounds2">bounding box</a> of this node (and its children) in the parent coordinate frame. Also available with <code>node.getVisibleBounds()</code>. Unlike <a href="#node-bounds">bounds</a>, this includes only descendants which are visible. It is not tracked, so each call will
         need to traverse the subtree to get the bounds.
         <!-- TODO: add an example -->
       </p>
