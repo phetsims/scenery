@@ -91,63 +91,8 @@ module.exports = function( grunt ) {
       scenery: [
         'js/**/*.js'
       ],
-      // adjust with options from http://www.jshint.com/docs/
-      options: {
-        // enforcing options
-        curly: true, // brackets for conditionals
-        eqeqeq: true,
-        immed: true,
-        latedef: true,
-        newcap: true,
-        noarg: true,
-        // noempty: true,
-        nonew: true,
-        // quotmark: 'single',
-        undef: true,
-        // unused: true, // certain layer APIs not used in cases
-        strict: true,
-        
-        // relaxing options
-        es5: true, // we use ES5 getters and setters for now
-        loopfunc: true, // we know how not to shoot ourselves in the foot, and this is useful for _.each
-        
-        expr: true, // so we can use assert && assert( ... )
-        
-        globals: {
-          // for removal of assertions
-          sceneryAssert: true,
-          sceneryAssertExtra: true,
-          
-          // for logging levels
-          sceneryLayerLog: true,
-          sceneryEventLog: true,
-          sceneryAccessibilityLog: true,
-          
-          // for require.js
-          define: true,
-          require: true,
-          
-          Uint16Array: false,
-          Uint32Array: false,
-          document: false,
-          window: false,
-          console: false,
-          Float32Array: true, // we actually polyfill this, so allow it to be set
-          
-          HTMLImageElement: false,
-          HTMLCanvasElement: false,
-          
-          $: false,
-          _: false,
-          clearTimeout: false,
-          
-          // for DOM.js
-          Image: false,
-          Blob: false,
-          
-          canvg: false
-        }
-      }
+      // reference external JSHint options in jshint-options.js
+      options: require( '../chipper/grunt/jshint-options' )
     }
   } );
   
