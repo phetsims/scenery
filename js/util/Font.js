@@ -110,7 +110,7 @@ define( function( require ) {
     get size()       { return this.getSize(); },
     get lineHeight() { return this.getLineHeight(); },
     
-    with: function( options ) {
+    copy: function( options ) {
       return new Font( _.extend( { font: this._font }, options ) );
     },
     
