@@ -32,7 +32,7 @@ define( function( require ) {
     this.textNode = document.createTextNode( '' );
     this.element.appendChild( this.textNode );
 
-    //Just setting the text causes NVDA to read deltas
+    //Just setting the text causes NVDA to read deltas, you have to replace the node to have it read the text
     this.listener = function( newText ) {
       liveRegion.element.removeChild( liveRegion.textNode );
       liveRegion.textNode = document.createTextNode( newText );
