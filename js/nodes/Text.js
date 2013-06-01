@@ -42,6 +42,12 @@ define( function( require ) {
   var svgTextSizeElement = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
   svgTextSizeContainer.appendChild( svgTextSizeElement );
   
+  // SVG bounds seems to be malfunctioning for Safari 5. Since we don't have a reproducible test machine for
+  // fast iteration, we'll guess the user agent and use DOM bounds instead of SVG.
+  // Hopefully the two contraints rule out any future Safari versions (fairly safe, but not impossible!)
+  var useDOMAsFastBounds = window.navigator.userAgent.indexOf( 'like Gecko) Version/5' ) !== -1 &&
+                           window.navigator.userAgent.indexOf( 'Safari/' ) !== -1;
+  
   scenery.Text = function Text( text, options ) {
     this._text         = '';                   // filled in with mutator
     this._font         = scenery.Font.DEFAULT; // default font, usually 10px sans-serif
@@ -150,7 +156,9 @@ define( function( require ) {
     invalidateText: function() {
       // investigate http://mudcu.be/journal/2011/01/html5-typographic-metrics/
       if ( this._boundsMethod === 'fast' || this._boundsMethod === 'fastCanvas' ) {
-        this.invalidateSelf( this._isHTML ? this.approximateDOMBounds() : this.approximateSVGBounds() );
+        this.invalidateSelf( ( this._isHTML || useDOMAsFastBounds ) ?
+                             this.approximateDOMBounds() :
+                             this.approximateSVGBounds() );
       } else {
         sceneryAssert && sceneryAssert( !this._isHTML, 'HTML text is not allowed with the accurate bounds method' );
         this.invalidateSelf( this.accurateCanvasBounds() );
