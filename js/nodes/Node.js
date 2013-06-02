@@ -13,6 +13,7 @@ define( function( require ) {
   var Bounds2 = require( 'DOT/Bounds2' );
   var Transform3 = require( 'DOT/Transform3' );
   var Matrix3 = require( 'DOT/Matrix3' );
+  var Vector2 = require( 'DOT/Vector2' );
   var clamp = require( 'DOT/Util' ).clamp;
   
   var scenery = require( 'SCENERY/scenery' );
@@ -272,6 +273,7 @@ define( function( require ) {
     // currently, there is no way to remove peers. if a string is passed as the element pattern, it will be turned into an element
     addPeer: function( element, options ) {
       sceneryAssert && sceneryAssert( !this.instances.length, 'Cannot call addPeer after a node has instances (yet)' );
+      
       this._peers.push( { element: element, options: options } );
     },
 
@@ -753,6 +755,8 @@ define( function( require ) {
     },
     
     setX: function( x ) {
+      sceneryAssert && sceneryAssert( typeof x === 'number' );
+      
       this.setTranslation( x, this.getY() );
       return this;
     },
@@ -762,6 +766,8 @@ define( function( require ) {
     },
     
     setY: function( y ) {
+      sceneryAssert && sceneryAssert( typeof y === 'number' );
+      
       this.setTranslation( this.getX(), y );
       return this;
     },
@@ -794,6 +800,8 @@ define( function( require ) {
     },
     
     setRotation: function( rotation ) {
+      sceneryAssert && sceneryAssert( typeof rotation === 'number' );
+      
       this.appendMatrix( Matrix3.rotation2( rotation - this.getRotation() ) );
       return this;
     },
@@ -841,6 +849,8 @@ define( function( require ) {
     
     // change the actual transform reference (not just the actual transform)
     setTransform: function( transform ) {
+      sceneryAssert && sceneryAssert( transform.isFinite(), 'Transform should not have infinite/NaN values' );
+      
       if ( this._transform !== transform ) {
         // since our referenced transform doesn't change, we need to trigger the before/after ourselves
         this.beforeTransformChange();
@@ -884,6 +894,8 @@ define( function( require ) {
     
     // shifts this node horizontally so that its left bound (in the parent coordinate frame) is 'left'
     setLeft: function( left ) {
+      sceneryAssert && sceneryAssert( typeof left === 'number' );
+      
       this.translate( left - this.getLeft(), 0, true );
       return this; // allow chaining
     },
@@ -895,6 +907,8 @@ define( function( require ) {
     
     // shifts this node horizontally so that its right bound (in the parent coordinate frame) is 'right'
     setRight: function( right ) {
+      sceneryAssert && sceneryAssert( typeof right === 'number' );
+      
       this.translate( right - this.getRight(), 0, true );
       return this; // allow chaining
     },
@@ -904,6 +918,8 @@ define( function( require ) {
     },
     
     setCenter: function( center ) {
+      sceneryAssert && sceneryAssert( center instanceof Vector2 );
+      
       this.translate( center.minus( this.getCenter() ) );
       return this;
     },
@@ -913,6 +929,8 @@ define( function( require ) {
     },
     
     setCenterX: function( x ) {
+      sceneryAssert && sceneryAssert( typeof x === 'number' );
+      
       this.translate( x - this.getCenterX(), 0, true );
       return this; // allow chaining
     },
@@ -922,6 +940,8 @@ define( function( require ) {
     },
     
     setCenterY: function( y ) {
+      sceneryAssert && sceneryAssert( typeof y === 'number' );
+      
       this.translate( 0, y - this.getCenterY(), true );
       return this; // allow chaining
     },
@@ -933,6 +953,8 @@ define( function( require ) {
     
     // shifts this node vertically so that its top bound (in the parent coordinate frame) is 'top'
     setTop: function( top ) {
+      sceneryAssert && sceneryAssert( typeof top === 'number' );
+      
       this.translate( 0, top - this.getTop(), true );
       return this; // allow chaining
     },
@@ -944,6 +966,8 @@ define( function( require ) {
     
     // shifts this node vertically so that its bottom bound (in the parent coordinate frame) is 'bottom'
     setBottom: function( bottom ) {
+      sceneryAssert && sceneryAssert( typeof bottom === 'number' );
+      
       this.translate( 0, bottom - this.getBottom(), true );
       return this; // allow chaining
     },
@@ -965,6 +989,8 @@ define( function( require ) {
     },
     
     setVisible: function( visible ) {
+      sceneryAssert && sceneryAssert( typeof visible === 'boolean' );
+      
       if ( visible !== this._visible ) {
         if ( this._visible ) {
           this.notifyBeforeSubtreeChange();
@@ -982,6 +1008,8 @@ define( function( require ) {
     },
     
     setOpacity: function( opacity ) {
+      sceneryAssert && sceneryAssert( typeof opacity === 'number' );
+      
       var clampedOpacity = clamp( opacity, 0, 1 );
       if ( clampedOpacity !== this._opacity ) {
         this.notifyBeforeSubtreeChange();
@@ -997,6 +1025,8 @@ define( function( require ) {
     },
     
     setPickable: function( pickable ) {
+      sceneryAssert && sceneryAssert( typeof pickable === 'boolean' );
+      
       if ( this._pickable !== pickable ) {
         // no paint or invalidation changes for now, since this is only handled for the mouse
         this._pickable = pickable;
@@ -1006,6 +1036,8 @@ define( function( require ) {
     },
     
     setCursor: function( cursor ) {
+      sceneryAssert && sceneryAssert( typeof cursor === 'string' || cursor === null );
+      
       // TODO: consider a mapping of types to set reasonable defaults
       /*
       auto default none inherit help pointer progress wait crosshair text vertical-text alias copy move no-drop not-allowed
@@ -1092,6 +1124,8 @@ define( function( require ) {
     },
     
     setLayerSplitBefore: function( split ) {
+      sceneryAssert && sceneryAssert( typeof split === 'boolean' );
+      
       if ( this._layerSplitBefore !== split ) {
         this._layerSplitBefore = split;
         this.markLayerRefreshNeeded();
@@ -1103,6 +1137,8 @@ define( function( require ) {
     },
     
     setLayerSplitAfter: function( split ) {
+      sceneryAssert && sceneryAssert( typeof split === 'boolean' );
+      
       if ( this._layerSplitAfter !== split ) {
         this._layerSplitAfter = split;
         this.markLayerRefreshNeeded();
@@ -1114,6 +1150,8 @@ define( function( require ) {
     },
     
     setLayerSplit: function( split ) {
+      sceneryAssert && sceneryAssert( typeof split === 'boolean' );
+      
       if ( split !== this._layerSplitBefore || split !== this._layerSplitAfter ) {
         this._layerSplitBefore = split;
         this._layerSplitAfter = split;
