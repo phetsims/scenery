@@ -3,7 +3,10 @@
 /**
  * Basic button handling.
  *
- * Uses three states: up, over, and down.
+ * Uses three states:
+ * up: mouse not over, not pressed
+ * over: mouse over, not pressed
+ * down: pressed (anywhere)
  *
  * TODO: offscreen handling
  * TODO: fix enter/exit edge cases for moving nodes or add/remove child, and when touches are created
@@ -24,7 +27,7 @@ define( function( require ) {
    * Options for the ButtonListener:
    *
    * mouseButton: 0
-   * fireOnDown: false // default is to fire on after 'down', but passing fireOnDown: true will fire on 'down' instead
+   * fireOnDown: false // default is to fire on 'up' after 'down', but passing fireOnDown: true will fire on 'down' instead
    * up: null          // Called on an 'up' state change, as up( event, oldState )
    * over: null        // Called on an 'over' state change, as over( event, oldState )
    * down: null        // Called on an 'down' state change, as down( event, oldState )
