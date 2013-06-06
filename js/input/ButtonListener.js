@@ -55,7 +55,7 @@ define( function( require ) {
   };
   var ButtonListener = scenery.ButtonListener;
   
-  inherit( ButtonListener, DownUpListener, {
+  inherit( DownUpListener, ButtonListener, {
     setButtonState: function( event, state ) {
       if ( state !== this.buttonState ) {
         var oldState = this.buttonState;

@@ -35,7 +35,7 @@ define( function( require ) {
   };
   var Circle = scenery.Circle;
   
-  inherit( Circle, Path, {
+  inherit( Path, Circle, {
     invalidateCircle: function() {
       // setShape should invalidate the path and ensure a redraw
       this.setShape( Shape.circle( 0, 0, this._radius ) );

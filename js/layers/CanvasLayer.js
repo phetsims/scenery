@@ -76,7 +76,7 @@ define( function( require ) {
   };
   var CanvasLayer = scenery.CanvasLayer;
   
-  inherit( CanvasLayer, Layer, {
+  inherit( Layer, CanvasLayer, {
     
     /*
      * Renders the canvas layer from the scene

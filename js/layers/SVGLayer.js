@@ -76,7 +76,7 @@ define( function( require ) {
   };
   var SVGLayer = scenery.SVGLayer;
   
-  inherit( SVGLayer, Layer, {
+  inherit( Layer, SVGLayer, {
     
     /*
      * Notes about how state is tracked here:

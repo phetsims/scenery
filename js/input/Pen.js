@@ -26,7 +26,7 @@ define( function( require ) {
   };
   var Pen = scenery.Pen;
   
-  inherit( Pen, Pointer, {
+  inherit( Pointer, Pen, {
     move: function( point, event ) {
       this.point = point;
     },

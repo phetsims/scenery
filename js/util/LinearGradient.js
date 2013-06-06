@@ -32,7 +32,7 @@ define( function( require ) {
   };
   var LinearGradient = scenery.LinearGradient;
   
-  inherit( LinearGradient, Gradient, {
+  inherit( Gradient, LinearGradient, {
     
     // seems we need the defs: http://stackoverflow.com/questions/7614209/linear-gradients-in-svg-without-defs
     // SVG: spreadMethod 'pad' 'reflect' 'repeat' - find Canvas usage

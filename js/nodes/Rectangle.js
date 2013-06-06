@@ -57,7 +57,7 @@ define( function( require ) {
   };
   var Rectangle = scenery.Rectangle;
   
-  inherit( Rectangle, Path, {
+  inherit( Path, Rectangle, {
     setRect: function( x, y, width, height, arcWidth, arcHeight ) {
       sceneryAssert && sceneryAssert( x !== undefined && y !== undefined && width !== undefined && height !== undefined, 'x/y/width/height need to be defined' );
       

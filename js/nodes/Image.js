@@ -61,7 +61,7 @@ define( function( require ) {
   };
   var Image = scenery.Image;
   
-  inherit( Image, Node, {
+  inherit( Node, Image, {
     allowsMultipleDOMInstances: false, // TODO: support multiple instances
     
     invalidateImage: function() {

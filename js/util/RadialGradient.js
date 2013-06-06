@@ -39,7 +39,7 @@ define( function( require ) {
   };
   var RadialGradient = scenery.RadialGradient;
   
-  inherit( RadialGradient, Gradient, {
+  inherit( Gradient, RadialGradient, {
     
     getSVGDefinition: function( id ) {
       var startIsLarger = this.startRadius > this.endRadius;

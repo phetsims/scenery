@@ -84,7 +84,7 @@ define( function( require ) {
   };
   var Text = scenery.Text;
   
-  inherit( Text, Node, {
+  inherit( Node, Text, {
     domUpdateTransformOnRepaint: true, // since we have to integrate the baseline offset into the CSS transform, signal to DOMLayer
     
     setText: function( text ) {

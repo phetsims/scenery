@@ -60,7 +60,7 @@ define( function( require ) {
   };
   var DOMLayer = scenery.DOMLayer;
   
-  inherit( DOMLayer, Layer, {
+  inherit( Layer, DOMLayer, {
     
     addNodeFromTrail: function( trail ) {
       Layer.prototype.addNodeFromTrail.call( this, trail );

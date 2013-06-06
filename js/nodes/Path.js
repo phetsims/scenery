@@ -33,7 +33,7 @@ define( function( require ) {
   };
   var Path = scenery.Path;
   
-  inherit( Path, Node, {
+  inherit( Node, Path, {
     // sets the shape drawn, or null to remove the shape
     setShape: function( shape ) {
       if ( this._shape !== shape ) {

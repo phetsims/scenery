@@ -28,7 +28,7 @@ define( function( require ) {
   };
   var Touch = scenery.Touch;
   
-  inherit( Touch, Pointer, {
+  inherit( Pointer, Touch, {
     move: function( point, event ) {
       this.point = point;
     },

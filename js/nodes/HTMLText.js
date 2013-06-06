@@ -21,7 +21,7 @@ define( function( require ) {
   };
   var HTMLText = scenery.HTMLText;
   
-  inherit( HTMLText, Text, {} );
+  inherit( Text, HTMLText, {} );
   
   return HTMLText;
 } );
