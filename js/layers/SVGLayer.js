@@ -82,13 +82,15 @@ define( function( require ) {
      * Notes about how state is tracked here:
      * Trails are stored on group.trail so that we can look this up when inserting new groups
      */
-    addNodeFromTrail: function( trail ) {
-      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' addNodeFromTrail: ' + trail.toString() );
+    addInstance: function( instance ) {
+      var trail = instance.trail;
+      
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' addInstance: ' + trail.toString() );
       
       sceneryAssert && sceneryAssert( !( trail.getUniqueId() in this.idFragmentMap ), 'Already contained that trail!' );
       sceneryAssert && sceneryAssert( trail.isPainted(), 'Don\'t add nodes without isPainted() to SVGLayer' );
       
-      Layer.prototype.addNodeFromTrail.call( this, trail );
+      Layer.prototype.addInstance.call( this, instance );
       
       var subtrail = this.baseTrail.copy(); // grab the trail up to (and including) the base node, so we don't create superfluous groups
       var lastId = null;
@@ -154,11 +156,13 @@ define( function( require ) {
       nodeGroup.appendChild( svgFragment );
     },
     
-    removeNodeFromTrail: function( trail ) {
-      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' removeNodeFromTrail: ' + trail.toString() );
+    removeInstance: function( instance ) {
+      var trail = instance.trail;
+      
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' removeInstance: ' + trail.toString() );
       sceneryAssert && sceneryAssert( trail.getUniqueId() in this.idFragmentMap, 'Did not contain that trail!' );
       
-      Layer.prototype.removeNodeFromTrail.call( this, trail );
+      Layer.prototype.removeInstance.call( this, instance );
       
       // clean up the fragment and defs directly died to the node
       var trailId = trail.getUniqueId();

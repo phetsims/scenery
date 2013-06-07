@@ -84,10 +84,10 @@ define( function( require ) {
           }
         }
         if ( this.oldLayer ) {
-          this.oldLayer.removeNodeFromTrail( this.trail );
+          this.oldLayer.removeInstance( this );
         }
         if ( this.layer ) {
-          this.layer.addNodeFromTrail( this.trail );
+          this.layer.addInstance( this );
         }
         this.oldLayer = this.layer;
       }

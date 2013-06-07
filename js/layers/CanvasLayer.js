@@ -371,9 +371,11 @@ define( function( require ) {
       context.drawImage( this.canvas, 0, 0 );
     },
     
-    addNodeFromTrail: function( trail ) {
-      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' addNodeFromTrail: ' + trail.toString() );
-      Layer.prototype.addNodeFromTrail.call( this, trail );
+    addInstance: function( instance ) {
+      var trail = instance.trail;
+      
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' addInstance: ' + trail.toString() );
+      Layer.prototype.addInstance.call( this, instance );
       
       // since the node's getBounds() are in the parent coordinate frame, we peel off the last node to get the correct (relevant) transform
       // TODO: more efficient way of getting this transform?
@@ -384,9 +386,11 @@ define( function( require ) {
       }
     },
     
-    removeNodeFromTrail: function( trail ) {
-      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' removeNodeFromTrail: ' + trail.toString() );
-      Layer.prototype.removeNodeFromTrail.call( this, trail );
+    removeInstance: function( instance ) {
+      var trail = instance.trail;
+      
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' removeInstance: ' + trail.toString() );
+      Layer.prototype.removeInstance.call( this, instance );
       
       // since the node's getBounds() are in the parent coordinate frame, we peel off the last node to get the correct (relevant) transform
       // TODO: more efficient way of getting this transform?
