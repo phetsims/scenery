@@ -537,6 +537,7 @@ define( function( require ) {
     },
     
     notifyDirtySubtreePaint: function( instance ) {
+      // TODO: performance: this caused a 50% increase for the fast-svg transform steps, what were we missing?
       if ( instance.layer === this ) {
         this.notifyDirtySelfPaint( instance );
       }
