@@ -1,3 +1,7 @@
+
+var sys = require( 'sys' );
+var exec = require( 'child_process' ).exec;
+
 /*global module:false*/
 module.exports = function( grunt ) {
   'use strict';
@@ -106,6 +110,35 @@ module.exports = function( grunt ) {
   grunt.registerTask( 'production', [ 'requirejs:production' ] );
   grunt.registerTask( 'standalone', [ 'requirejs:standalone' ] );
   grunt.registerTask( 'development', [ 'requirejs:development' ] );
+  
+  grunt.registerTask( 'snapshot', [ 'standalone', '_createSnapshot' ] );
+  
+  // creates a performance snapshot for profiling changes
+  grunt.registerTask( '_createSnapshot', 'Description', function( arg ) {
+    var done = this.async();
+    
+    exec( 'git log -1 --date=short', function( error, stdout, stderr ) {
+      if ( error ) { throw error; }
+      
+      var sha = /commit (.*)$/m.exec( stdout )[1];
+      var date = /Date: *(\d+)-(\d+)-(\d+)$/m.exec( stdout );
+      var year = date[1].slice( 2, 4 );
+      var month = date[2];
+      var day = date[3];
+      
+      var suffix = '-' + year + month + day + '-' + sha.slice( 0, 10 ) + '.js';
+      
+      var sceneryFilename = 
+      
+      grunt.file.copy( 'dist/standalone/scenery.min.js', 'snapshots/scenery-min' + suffix );
+      grunt.file.copy( 'tests/benchmarks/js/perf-current.js', 'snapshots/perf' + suffix );
+      
+      grunt.log.writeln( 'Copied standalone js to snapshots/scenery-min' + suffix );
+      grunt.log.writeln( 'Copied perf js to       snapshots/perf' + suffix );
+      
+      done();
+    } );
+  } );
   
   // dependencies
   grunt.loadNpmTasks( 'grunt-requirejs' );
