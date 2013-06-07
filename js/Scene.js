@@ -262,33 +262,6 @@ define( function( require ) {
     this.setActivePeer( null );
   };
   
-  Scene.prototype.addTrailToLayer = function( trail, layer ) {
-    sceneryAssert && sceneryAssert( trail.rootNode() === this, 'Trail does not start with the Scene' );
-    sceneryLayerLog && sceneryLayerLog( '  addition of trail ' + trail.toString() + ' from layer ' + layer.getId() );
-    
-    this.trailLayerMap[trail.getUniqueId()] = layer;
-    layer.addNodeFromTrail( trail );
-  };
-  
-  Scene.prototype.moveTrailFromLayerToLayer = function( trail, oldLayer, newLayer ) {
-    sceneryLayerLog && sceneryLayerLog( '  moving trail ' + trail.toString() + ' from layer ' + oldLayer.getId() + ' to layer ' + newLayer.getId() );
-    this.trailLayerMap[trail.getUniqueId()] = newLayer;
-    
-    // TODO: flesh out (and DO NOT RELY on getInstance(), it's slow)
-    trail.getInstance().changeLayer( newLayer );
-    
-    oldLayer.removeNodeFromTrail( trail );
-    newLayer.addNodeFromTrail( trail );
-  };
-  
-  Scene.prototype.removeTrailFromLayer = function( trail, layer ) {
-    sceneryLayerLog && sceneryLayerLog( '  removal of trail ' + trail.toString() + ' from layer ' + layer.getId() );
-    
-    // we don't want to leak memory, so since we don't know if this trail will continue to exist, ditch the reference
-    delete this.trailLayerMap[trail.getUniqueId()];
-    layer.removeNodeFromTrail( trail );
-  };
-  
   Scene.prototype.markInterval = function( affectedTrail ) {
     // TODO: maybe reindexing sooner is better? are we covering up a bug here?
     affectedTrail.reindex();
