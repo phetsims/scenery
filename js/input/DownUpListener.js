@@ -38,6 +38,7 @@ define( function( require ) {
       mouseButton: 0 // allow a different mouse button 
     }, options );
     this.isDown = false;   // public, whether this listener is down
+    this.downCurrentTarget = null; // 'up' is handled via a pointer lister, which will have null currentTarget, so save the 'down' currentTarget
     this.downTrail = null;
     this.pointer = null;
     
@@ -74,6 +75,7 @@ define( function( require ) {
       event.pointer.addInputListener( this.downListener );
       
       this.isDown = true;
+      this.downCurrentTarget = event.currentTarget;
       this.downTrail = event.trail.subtrailTo( event.currentTarget, false );
       this.pointer = event.pointer;
       
@@ -85,7 +87,9 @@ define( function( require ) {
     buttonUp: function( event ) {
       this.isDown = false;
       this.pointer.removeInputListener( this.downListener );
-      
+
+      var currentTargetSave = event.currentTarget;
+      event.currentTarget = this.downCurrentTarget; // up is handled by a pointer listener, so currentTarget would be null.
       if ( this.options.upInside || this.options.upOutside ) {
         var scene = this.downTrail.rootNode();
         var trailUnderPointer = event.trail;
@@ -102,6 +106,7 @@ define( function( require ) {
       if ( this.options.up ) {
         this.options.up( event, this.downTrail );
       }
+      event.currentTarget = currentTargetSave; // be polite to other listeners, restore currentTarget
     },
     
     /*---------------------------------------------------------------------------*
