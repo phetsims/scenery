@@ -38,7 +38,6 @@ define( function( require ) {
     this.lastDragPoint         = null;      // the location of the drag at the previous event (so we can calculate a delta)
     this.startTransformMatrix  = null;      // the node's transform at the start of the drag, so we can reset on a touch cancel
     this.mouseButton           = undefined; // tracks which mouse button was pressed, so we can handle that specifically
-    this.downCurrentTarget     = null;      // internal pointer listeners have a null currentTarget, so store the currentTarget when on node 'down'
     // TODO: consider mouse buttons as separate pointers?
     
     // if an ancestor is transformed, pin our node
@@ -156,7 +155,6 @@ define( function( require ) {
     
     // mouse/touch down on this node
     down: function( event ) {
-      this.currentTarget = event.currentTarget;
       this.tryToSnag( event );
     },
     
