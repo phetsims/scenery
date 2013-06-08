@@ -528,10 +528,10 @@ define( function( require ) {
     if ( distance < 0 || distance > 1 ) {
       throw new Error( "distance must be between 0 and 1: " + distance );
     }
-    var r = Math.floor( linear( 0, color1.r, 1, color2.r, distance ) );
-    var g = Math.floor( linear( 0, color1.g, 1, color2.g, distance ) );
-    var b = Math.floor( linear( 0, color1.b, 1, color2.b, distance ) );
-    var a = linear( 0, color1.a, 1, color2.a, distance );
+    var r = Math.floor( linear( 0, 1, color1.r, color2.r, distance ) );
+    var g = Math.floor( linear( 0, 1, color1.g, color2.g, distance ) );
+    var b = Math.floor( linear( 0, 1, color1.b, color2.b, distance ) );
+    var a = linear( 0, 1, color1.a, color2.a, distance );
     return new Color( r, g, b, a );
   };
 
