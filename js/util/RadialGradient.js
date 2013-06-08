@@ -62,7 +62,8 @@ define( function( require ) {
       if ( this.transformMatrix ) {
         definition.setAttribute( 'gradientTransform', this.transformMatrix.getSVGTransform() );
       }
-      
+
+      //TODO: replace with dot.Util.linear
       // maps x linearly from [a0,b0] => [a1,b1]
       function linearMap( a0, b0, a1, b1, x ) {
         return a1 + ( x - a0 ) * ( b1 - a1 ) / ( b0 - a0 );
