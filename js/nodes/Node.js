@@ -920,7 +920,7 @@ define( function( require ) {
     setCenter: function( center ) {
       sceneryAssert && sceneryAssert( center instanceof Vector2 );
       
-      this.translate( center.minus( this.getCenter() ) );
+      this.translate( center.minus( this.getCenter() ), true );
       return this;
     },
     
