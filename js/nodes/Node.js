@@ -16,6 +16,8 @@ define( function( require ) {
   var Vector2 = require( 'DOT/Vector2' );
   var clamp = require( 'DOT/Util' ).clamp;
   
+  var Shape = require( 'KITE/Shape' );
+  
   var scenery = require( 'SCENERY/scenery' );
   var NodeEvents = require( 'SCENERY/util/FixedNodeEvents' ); // uncapitalized, because of JSHint (TODO: find the flag)
   var LayerStrategy = require( 'SCENERY/layers/LayerStrategy' ); // used to set the default layer strategy on the prototype
@@ -72,6 +74,10 @@ define( function( require ) {
     // This node and all children will be clipped by this shape (in addition to any other clipping shapes).
     // The shape should be in the local coordinate frame
     this._clipShape = null;
+    
+    // areas for hit intersection. if set on a Node, no descendants can handle events
+    this._mouseArea = null; // {Shape} for mouse position          in the local coordinate frame
+    this._touchArea = null; // {Shape} for touch and pen position  in the local coordinate frame
     
     // the CSS cursor to be displayed over this node. null should be the default (inherit) value
     this._cursor = null;
@@ -526,6 +532,15 @@ define( function( require ) {
       return this.localToParentBounds( bounds );
     },
     
+    trailUnderPointer: function( pointer ) {
+      var options = {};
+      if ( pointer.isMouse ) { options.isMouse = true; }
+      if ( pointer.isTouch ) { options.isTouch = true; }
+      if ( pointer.isPen ) { options.isPen = true; }
+      
+      return this.trailUnderPoint( pointer.point, options );
+    },
+    
     /*
      * Return a trail to the top node (if any, otherwise null) whose self-rendered area contains the
      * point (in parent coordinates).
@@ -538,6 +553,7 @@ define( function( require ) {
       
       var pruneInvisible = ( !options || options.pruneInvisible === undefined ) ? true : options.pruneInvisible;
       var pruneUnpickable = ( !options || options.pruneUnpickable === undefined ) ? true : options.pruneUnpickable;
+      var useHitAreas = options && ( options.isMouse || options.isTouch || options.isPen );
       
       if ( pruneInvisible && !this.isVisible() ) {
         return null;
@@ -550,13 +566,22 @@ define( function( require ) {
       this.validateBounds();
       
       // bail quickly if this doesn't hit our computed bounds
-      if ( !this._bounds.containsPoint( point ) ) { return null; }
+      if ( !useHitAreas && !this._bounds.containsPoint( point ) ) { return null; }
       
       // point in the local coordinate frame. computed after the main bounds check, so we can bail out there efficiently
       var localPoint = this.parentToLocalPoint( point );
       
+      if ( useHitAreas ) {
+        if ( options.isMouse && this._mouseArea ) {
+          return this._mouseArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
+        }
+        if ( ( options.isTouch || options.isPen ) && this._touchArea ) {
+          return this._touchArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
+        }
+      }
+      
       // check children first, since they are rendered later
-      if ( this._children.length > 0 && this._childBounds.containsPoint( localPoint ) ) {
+      if ( this._children.length > 0 && ( useHitAreas || this._childBounds.containsPoint( localPoint ) ) ) {
         
         // manual iteration here so we can return directly, and so we can iterate backwards (last node is in front)
         for ( var i = this._children.length - 1; i >= 0; i-- ) {
@@ -573,8 +598,10 @@ define( function( require ) {
       }
       
       // didn't hit our children, so check ourself as a last resort
-      if ( this._selfBounds.containsPoint( localPoint ) && this.containsPointSelf( localPoint ) ) {
-        return new scenery.Trail( this );
+      if ( useHitAreas || this._selfBounds.containsPoint( localPoint ) ) {
+        if ( this.containsPointSelf( localPoint ) ) {
+          return new scenery.Trail( this );
+        }
       }
       
       // signal no hit
@@ -1051,6 +1078,30 @@ define( function( require ) {
     
     getCursor: function() {
       return this._cursor;
+    },
+    
+    setMouseArea: function( shape ) {
+      sceneryAssert && sceneryAssert( shape === null || shape instanceof Shape );
+      
+      if ( this._mouseArea !== shape ) {
+        this._mouseArea = shape; // TODO: could change what is under the mouse, invalidate!
+      }
+    },
+    
+    getMouseArea: function() {
+      return this._mouseArea;
+    },
+    
+    setTouchArea: function( shape ) {
+      sceneryAssert && sceneryAssert( shape === null || shape instanceof Shape );
+      
+      if ( this._touchArea !== shape ) {
+        this._touchArea = shape; // TODO: could change what is under the touch, invalidate!
+      }
+    },
+    
+    getTouchArea: function() {
+      return this._touchArea;
     },
     
     updateLayerType: function() {
@@ -1642,6 +1693,12 @@ define( function( require ) {
     
     set cursor( value ) { this.setCursor( value ); },
     get cursor() { return this.getCursor(); },
+    
+    set mouseArea( value ) { this.setMouseArea( value ); },
+    get mouseArea() { return this.getMouseArea(); },
+    
+    set touchArea( value ) { this.setTouchArea( value ); },
+    get touchArea() { return this.getTouchArea(); },
     
     set visible( value ) { this.setVisible( value ); },
     get visible() { return this.isVisible(); },

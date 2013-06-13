@@ -269,7 +269,7 @@ define( function( require ) {
     },
     
     upEvent: function( pointer, event ) {
-      var trail = this.scene.trailUnderPoint( pointer.point ) || new scenery.Trail( this.scene );
+      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
       
       this.dispatchEvent( trail, 'up', pointer, event, true );
       
@@ -282,7 +282,7 @@ define( function( require ) {
     },
     
     downEvent: function( pointer, event ) {
-      var trail = this.scene.trailUnderPoint( pointer.point ) || new scenery.Trail( this.scene );
+      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
       
       // touch pointers are transient, so fire enter/over to the trail first
       if ( pointer.isTouch ) {
@@ -295,7 +295,7 @@ define( function( require ) {
     },
     
     moveEvent: function( pointer, event ) {
-      var trail = this.scene.trailUnderPoint( pointer.point ) || new scenery.Trail( this.scene );
+      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
       var oldTrail = pointer.trail || new scenery.Trail( this.scene );
       
       var lastNodeChanged = oldTrail.lastNode() !== trail.lastNode();
@@ -320,7 +320,7 @@ define( function( require ) {
     },
     
     cancelEvent: function( pointer, event ) {
-      var trail = this.scene.trailUnderPoint( pointer.point );
+      var trail = this.scene.trailUnderPointer( pointer );
       
       this.dispatchEvent( trail, 'cancel', pointer, event, true );
       

@@ -153,6 +153,8 @@
       <a class="sublink" href="#node-addPeer">addPeer</a><br>
       <a class="sublink" href="#node-detach">detach</a><br>
       <a class="sublink" href="#node-cursor">cursor</a><br>
+      <a class="sublink" href="#node-mouseArea">mouseArea</a><br>
+      <a class="sublink" href="#node-touchArea">touchArea</a><br>
       <a class="sublink" href="#node-visible">visible</a><br>
       <a class="sublink" href="#node-pickable">pickable</a><br>
       <a class="sublink" href="#node-opacity">opacity</a><br>
@@ -466,6 +468,26 @@ scene.initializeStandaloneEvents();
 scene.updateOnRequestAnimationFrame();
 } );
       </script>
+      
+      <h4 id="node-mouseArea">node.mouseArea</h4>
+      <p>
+        Sets an alternative hit region when receiving mouse events. Useful for when there
+        are gaps between children which should still respond to the event.
+      </p>
+      <p>
+        The mouse area supersedes the hit regions for mouse events of the node itself and its descendants.
+        Setting mouseArea on a Node will cause it to either return no hit (for it or its children when outside of the mouseArea) or this Node as an event target.
+      </p>
+      
+      <h4 id="node-touchArea">node.touchArea</h4>
+      <p>
+        Sets an alternative hit region when receiving touch events. Useful for expanding
+        where the user can touch controls.
+      </p>
+      <p>
+        The touch area supersedes the hit regions for touch events of the node itself and its descendants.
+        Setting touchArea on a Node will cause it to either return no hit (for it or its children when outside of the touchArea) or this Node as an event target.
+      </p>
       
       <h4 id="node-visible">node.visible</h4>
       <p>
