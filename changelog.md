@@ -2,6 +2,8 @@
 Scenery Changelog
 =================
 
+* 2013-6-13 Adding mouseArea and touchArea to Node, for expanding mouse and touch/pen interaction areas
+            manually (with Shapes).
 * 2013-5-30 Node.bounds changed to include invisible bounds, getCompleteBounds() removed, getVisibleBounds() added back in
 * 2013-5-30 Font is now immutable, use font.with( { ... } ) to create a modified copy
 * 2013-5-21 Touches now trigger the enter/over and out/exit before/after the 'down' and 'up'/'cancel' events, respectively
