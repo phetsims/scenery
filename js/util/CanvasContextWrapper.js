@@ -41,7 +41,7 @@ define( function( require ) {
     },
     
     setDimensions: function( width, height ) {
-      if ( width !== canvas.width || height !== canvas.height ) {
+      if ( width !== this.canvas.width || height !== this.canvas.height ) {
         canvas.width = width;
         canvas.height = height;
         
