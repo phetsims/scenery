@@ -39,15 +39,21 @@ define( function( require ) {
       this.font = undefined; // '10px sans-serif'
       this.direction = undefined; // 'inherit'
     },
-    
+
+    /**
+     * Sets a (possibly) new width and height, and clears the canvas.
+     * @param width
+     * @param height
+     */
     setDimensions: function( width, height ) {
-      if ( width !== this.canvas.width || height !== this.canvas.height ) {
-        this.canvas.width = width;
-        this.canvas.height = height;
-        
-        // assume all persistent data could have changed
-        this.resetStyles();
-      }
+
+      //Don't guard against width and height, because we need to clear the canvas.
+      //TODO: Is it expensive to clear by setting both the width and the height?  Maybe we just need to set the width to clear it.
+      this.canvas.width = width;
+      this.canvas.height = height;
+
+      // assume all persistent data could have changed
+      this.resetStyles();
     },
     
     setFillStyle: function( style ) {
