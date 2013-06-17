@@ -40,6 +40,16 @@ define( function( require ) {
       this.direction = undefined; // 'inherit'
     },
     
+    setDimensions: function( width, height ) {
+      if ( width !== canvas.width || height !== canvas.height ) {
+        canvas.width = width;
+        canvas.height = height;
+        
+        // assume all persistent data could have changed
+        this.resetStyles();
+      }
+    },
+    
     setFillStyle: function( style ) {
       if ( this.fillStyle !== style ) {
         this.fillStyle = style;

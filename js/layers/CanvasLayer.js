@@ -30,6 +30,9 @@ define( function( require ) {
   require( 'SCENERY/util/TrailPointer' );
   require( 'SCENERY/util/Util' );
   
+  // stores CanvasContextWrappers to be re-used
+  var canvasContextPool = [];
+  
   // assumes main is wrapped with JQuery
   /*
    *
@@ -137,16 +140,23 @@ define( function( require ) {
       }
       
       function getCanvasWrapper() {
-        // TODO: verify that this works with hi-def canvases
-        // TODO: use a cache of scratch canvases/contexts on the scene for this purpose, instead of creation
-        var canvas = document.createElement( 'canvas' );
-        canvas.width = layer.logicalWidth * layer.backingScale;
-        canvas.height = layer.logicalHeight * layer.backingScale;
-        // $( canvas ).css( 'width', layer.logicalWidth );
-        // $( canvas ).css( 'height', layer.logicalHeight );
-        var context = canvas.getContext( '2d' );
+        var width = layer.logicalWidth * layer.backingScale;
+        var height = layer.logicalHeight * layer.backingScale;
         
-        return new scenery.CanvasContextWrapper( canvas, context );
+        if ( canvasContextPool.length ) {
+          // use a pooled wrapper
+          var wrapper = canvasContextPool.pop();
+          wrapper.setDimensions( width, height );
+          return wrapper;
+        } else {
+          // create a new wrapper
+          var canvas = document.createElement( 'canvas' );
+          canvas.width = layer.logicalWidth * layer.backingScale;
+          canvas.height = layer.logicalHeight * layer.backingScale;
+          var context = canvas.getContext( '2d' );
+          
+          return new scenery.CanvasContextWrapper( canvas, context );
+        }
       }
       
       function topWrapper() {
@@ -208,7 +218,11 @@ define( function( require ) {
             baseContext.globalAlpha = 1;
           }
           
-          wrapperStack.pop();
+          var wrapper = wrapperStack.pop();
+          if ( wrapper !== layer.wrapper ) {
+            // store the CanvasContextWrapper for recycling if it isn't our core wrapper
+            canvasContextPool.push( wrapper );
+          }
         } else {
           node.transform.getInverse().canvasAppendTransform( topWrapper().context );
         }
