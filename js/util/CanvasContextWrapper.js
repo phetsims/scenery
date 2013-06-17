@@ -42,8 +42,8 @@ define( function( require ) {
     
     setDimensions: function( width, height ) {
       if ( width !== this.canvas.width || height !== this.canvas.height ) {
-        canvas.width = width;
-        canvas.height = height;
+        this.canvas.width = width;
+        this.canvas.height = height;
         
         // assume all persistent data could have changed
         this.resetStyles();
