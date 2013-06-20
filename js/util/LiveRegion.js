@@ -2,7 +2,7 @@
 
 /**
  * Live region is used with accessibility to read out changes in model state.
- * Should conform to the Fort.Model.property interface to make it easy to interchange.
+ * Should conform to the Axon property interface to make it easy to interchange.
  *
  * @author Sam Reid
  */
