@@ -10,7 +10,7 @@
 
 define( function( require ) {
   'use strict';
-  
+
   var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate; // i.e. Object.create
@@ -32,7 +32,7 @@ define( function( require ) {
       spacing: function() { return 0; },
       align: 'center'
     }, options );
-    
+
     if ( typeof options.spacing === 'number' ) {
       var spacingConstant = options.spacing;
       options.spacing = function() { return spacingConstant; };
@@ -46,15 +46,15 @@ define( function( require ) {
   VBox.prototype = objectCreate( Node.prototype );
 
   VBox.prototype.updateLayout = function() {
-    var minX = _.min( _.map( this.children, function( child ) {return child.x;} ) );
-    var maxX = _.max( _.map( this.children, function( child ) {return child.x + child.width;} ) );
+    var minX = _.min( _.map( this.children, function( child ) {return child.left;} ) );
+    var maxX = _.max( _.map( this.children, function( child ) {return child.left + child.width;} ) );
     var centerX = (maxX + minX) / 2;
 
     //Start at y=0 in the coordinate frame of this node.  Not possible to set this through the spacing option, instead just set it with the {y:number} option.
     var y = 0;
     for ( var i = 0; i < this.children.length; i++ ) {
       var child = this.children[i];
-      child.y = y;
+      child.top = y;
 
       //Set the position horizontally
       if ( this.options.align === 'left' ) {

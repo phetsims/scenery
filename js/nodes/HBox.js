@@ -10,7 +10,7 @@
 
 define( function( require ) {
   'use strict';
-  
+
   var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate; // i.e. Object.create
@@ -28,10 +28,10 @@ define( function( require ) {
   scenery.HBox = function HBox( options ) {
     // ensure we have a parameter object
     this.options = options = _.extend( {
-                                         // defaults
-                                         spacing: function() { return 0; },
-                                         align: 'center'
-                                       }, options );
+      // defaults
+      spacing: function() { return 0; },
+      align: 'center'
+    }, options );
 
     if ( typeof options.spacing === 'number' ) {
       var spacingConstant = options.spacing;
@@ -46,15 +46,15 @@ define( function( require ) {
   HBox.prototype = objectCreate( Node.prototype );
 
   HBox.prototype.updateLayout = function() {
-    var minY = _.min( _.map( this.children, function( child ) {return child.y;} ) );
-    var maxY = _.max( _.map( this.children, function( child ) {return child.y + child.height;} ) );
+    var minY = _.min( _.map( this.children, function( child ) {return child.top;} ) );
+    var maxY = _.max( _.map( this.children, function( child ) {return child.top + child.height;} ) );
     var centerY = (maxY + minY) / 2;
 
     //Start at x=0 in the coordinate frame of this node.  Not possible to set this through the spacing option, instead just set it with the {y:number} option.
     var x = 0;
     for ( var i = 0; i < this.children.length; i++ ) {
       var child = this.children[i];
-      child.x = x;
+      child.left = x;
 
       //Set the position horizontally
       if ( this.options.align === 'top' ) {
