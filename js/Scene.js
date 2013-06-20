@@ -936,7 +936,7 @@ define( function( require ) {
     
     updateCursor: function() {
       if ( this.input && this.input.mouse.point ) {
-        var mouseTrail = this.trailUnderPoint( this.input.mouse.point );
+        var mouseTrail = this.trailUnderPoint( this.input.mouse.point, { isMouse: true } );
         
         if ( mouseTrail ) {
           for ( var i = mouseTrail.length - 1; i >= 0; i-- ) {
