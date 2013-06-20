@@ -21,7 +21,7 @@
     ok( !node.trailUnderPoint( dot( -10, 10 ) ), 'Node no intersection' );
     
     ok( node.trailUnderPoint( dot( 10, 10 ), { isTouch: true } ), 'Node intersection (isTouch)' );
-    ok( !node.trailUnderPoint( dot( 90, 10 ), { isTouch: true } ), 'Node intersection (isTouch)' );
+    ok( node.trailUnderPoint( dot( 90, 10 ), { isTouch: true } ), 'Node intersection (isTouch)' );
     ok( node.trailUnderPoint( dot( -10, 10 ), { isTouch: true } ), 'Node no intersection (isTouch)' );
   } );
 })();

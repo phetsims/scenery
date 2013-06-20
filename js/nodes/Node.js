@@ -571,15 +571,6 @@ define( function( require ) {
       // point in the local coordinate frame. computed after the main bounds check, so we can bail out there efficiently
       var localPoint = this.parentToLocalPoint( point );
       
-      if ( useHitAreas ) {
-        if ( options.isMouse && this._mouseArea ) {
-          return this._mouseArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
-        }
-        if ( ( options.isTouch || options.isPen ) && this._touchArea ) {
-          return this._touchArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
-        }
-      }
-      
       // check children first, since they are rendered later
       if ( this._children.length > 0 && ( useHitAreas || this._childBounds.containsPoint( localPoint ) ) ) {
         
@@ -594,6 +585,16 @@ define( function( require ) {
             childHit.addAncestor( this, i );
             return childHit;
           }
+        }
+      }
+
+      // tests for mouse and touch hit areas before testing containsPointSelf
+      if ( useHitAreas ) {
+        if ( options.isMouse && this._mouseArea ) {
+          return this._mouseArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
+        }
+        if ( ( options.isTouch || options.isPen ) && this._touchArea ) {
+          return this._touchArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
         }
       }
       
