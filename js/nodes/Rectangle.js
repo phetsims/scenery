@@ -18,6 +18,15 @@ define( function( require ) {
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
   
+  /**
+   * Currently, all numerical parameters should be finite.
+   * x:         x-position of the upper-left corner (left bound)
+   * y:         y-position of the upper-left corner (top bound)
+   * width:     width of the rectangle to the right of the upper-left corner, required to be >= 0
+   * height:    height of the rectangle below the upper-left corner, required to be >= 0
+   * arcWidth:  positive width of the rounded corner, or 0 to indicate the corner should be sharp
+   * arcHeight: positive height of the rounded corner, or 0 to indicate the corner should be sharp
+   */
   scenery.Rectangle = function Rectangle( x, y, width, height, arcWidth, arcHeight, options ) {
     if ( typeof x === 'object' ) {
       // allow new Rectangle( { rectX: x, rectY: y, rectWidth: width, rectHeight: height, ... } )
@@ -75,6 +84,13 @@ define( function( require ) {
     },
     
     createRectangleShape: function() {
+      sceneryAssert && sceneryAssert( isFinite( this._rectX ), 'A rectangle needs to have a finite x (' + this._rectX + ')' );
+      sceneryAssert && sceneryAssert( isFinite( this._rectY ), 'A rectangle needs to have a finite x (' + this._rectY + ')' );
+      sceneryAssert && sceneryAssert( this._rectWidth >= 0 && isFinite( this._rectWidth ), 'A rectangle needs to have a non-negative finite width (' + this._rectWidth + ')' );
+      sceneryAssert && sceneryAssert( this._rectHeight >= 0 && isFinite( this._rectHeight ), 'A rectangle needs to have a non-negative finite height (' + this._rectHeight + ')' );
+      sceneryAssert && sceneryAssert( this._rectArcWidth >= 0 && isFinite( this._rectArcWidth ), 'A rectangle needs to have a non-negative finite arcWidth (' + this._rectArcWidth + ')' );
+      sceneryAssert && sceneryAssert( this._rectArcHeight >= 0 && isFinite( this._rectArcHeight ), 'A rectangle needs to have a non-negative finite arcHeight (' + this._rectArcHeight + ')' );
+      
       if ( this.isRounded() ) {
         return Shape.roundRectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight, this._rectArcWidth, this._rectArcHeight );
       } else {
