@@ -36,7 +36,8 @@ define( function( require ) {
    * fire: null        // Called on a state change to/from 'down' (depending on fireOnDown), as fire( event ). Called after the triggering up/over/down event.
    */
   scenery.ButtonListener = function ButtonListener( options ) {
-    this.buttonState = 'up'; // public, 'up', 'over', or 'down'
+
+    this.buttonState = 'up'; // public: 'up', 'over', 'down' or 'out'
     
     this._overCount = 0; // how many pointers are over us (track a count, so we can handle multiple pointers gracefully)
     
@@ -78,28 +79,16 @@ define( function( require ) {
     
     enter: function( event ) {
       this._overCount++;
-
       if ( this._overCount === 1 ) {
-        if ( this.isDown ) {
-          this.setButtonState( event, 'down' );
-        }
-        else {
-          this.setButtonState( event, 'over' );
-        }
+        this.setButtonState( event, this.isDown ? 'down' : 'over' );
       }
     },
-    
+
     exit: function( event ) {
       sceneryAssert && sceneryAssert( this._overCount > 0, 'Exit events not matched by an enter' );
       this._overCount--;
-
       if ( this._overCount === 0 ) {
-        if ( this.isDown ) {
-          this.setButtonState( event, 'out' );
-        }
-        else {
-          this.setButtonState( event, 'up' );
-        }
+        this.setButtonState( event, this.isDown ? 'out' : 'up' );
       }
     }
   } );
