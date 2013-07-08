@@ -45,6 +45,7 @@ define( function( require ) {
     
     var buttonListener = this;
     DownUpListener.call( this, {
+
       mouseButton: options.mouseButton || 0, // forward the mouse button, default to 0 (LMB)
       
       down: function( event, trail ) {
@@ -56,9 +57,11 @@ define( function( require ) {
       }
     } );
   };
+
   var ButtonListener = scenery.ButtonListener;
   
   inherit( DownUpListener, ButtonListener, {
+
     setButtonState: function( event, state ) {
       if ( state !== this.buttonState ) {
         var oldState = this.buttonState;
