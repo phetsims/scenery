@@ -3,10 +3,11 @@
 /**
  * Basic button handling.
  *
- * Uses three states:
+ * Uses 4 states:
  * up: mouse not over, not pressed
  * over: mouse over, not pressed
- * down: pressed (anywhere)
+ * down: mouse over, pressed
+ * out: mouse not over, pressed
  *
  * TODO: offscreen handling
  * TODO: fix enter/exit edge cases for moving nodes or add/remove child, and when touches are created
@@ -31,6 +32,7 @@ define( function( require ) {
    * up: null          // Called on an 'up' state change, as up( event, oldState )
    * over: null        // Called on an 'over' state change, as over( event, oldState )
    * down: null        // Called on an 'down' state change, as down( event, oldState )
+   * out: null         // Called on an 'out' state change, as out( event, oldState )
    * fire: null        // Called on a state change to/from 'down' (depending on fireOnDown), as fire( event ). Called after the triggering up/over/down event.
    */
   scenery.ButtonListener = function ButtonListener( options ) {
@@ -76,18 +78,28 @@ define( function( require ) {
     
     enter: function( event ) {
       this._overCount++;
-      
-      if ( this._overCount === 1 && !this.isDown ) {
-        this.setButtonState( event, 'over' );
+
+      if ( this._overCount === 1 ) {
+        if ( this.isDown ) {
+          this.setButtonState( event, 'down' );
+        }
+        else {
+          this.setButtonState( event, 'over' );
+        }
       }
     },
     
     exit: function( event ) {
       sceneryAssert && sceneryAssert( this._overCount > 0, 'Exit events not matched by an enter' );
       this._overCount--;
-      
-      if ( this._overCount === 0 && !this.isDown ) {
-        this.setButtonState( event, 'up' );
+
+      if ( this._overCount === 0 ) {
+        if ( this.isDown ) {
+          this.setButtonState( event, 'out' );
+        }
+        else {
+          this.setButtonState( event, 'up' );
+        }
       }
     }
   } );
