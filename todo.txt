@@ -39,6 +39,7 @@ Priorities:
     Testing with hidef canvases
 
 Bugs:
+    Dragging and releasing outside of the window
     Gradients don't listen to Colors for changes
     ** Nexus 7 play area cropped
     ***** Things disappear sometimes when the window is large
