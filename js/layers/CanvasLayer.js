@@ -426,7 +426,7 @@ define( function( require ) {
       sceneryAssert && sceneryAssert( globalBounds.isEmpty() || globalBounds.isFinite(), 'Infinite (non-empty) dirty bounds passed to canvasMarkGlobalBounds' );
       
       // TODO: for performance, consider more than just a single dirty bounding box
-      this.dirtyBounds = this.dirtyBounds.union( globalBounds.dilate( 1 ).roundOut() );
+      this.dirtyBounds = this.dirtyBounds.union( globalBounds.dilate( 2 ).roundOut() );
     },
     
     canvasMarkLocalBounds: function( localBounds, trail ) {
