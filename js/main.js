@@ -43,6 +43,7 @@ define( [
     'SCENERY/nodes/Image',
     'SCENERY/nodes/Node',
     'SCENERY/nodes/Path',
+    'SCENERY/nodes/Plane',
     'SCENERY/nodes/Rectangle',
     'SCENERY/nodes/Strokable',
     'SCENERY/nodes/Text',
