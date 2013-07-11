@@ -1397,7 +1397,7 @@ define( function( require ) {
           callback( img, x, y );
           try {
             delete img.onload;
-          } catch ( e ) {}; // fails on Safari 5.1
+          } catch ( e ) {} // fails on Safari 5.1
         };
         img.src = url;
       }, x, y, width, height );
