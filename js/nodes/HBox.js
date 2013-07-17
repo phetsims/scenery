@@ -1,4 +1,4 @@
-// Copyright 2002-2013, University of Colorado
+// Copyright 2002-2013, University of Colorado Boulder
 
 /**
  * HBox arranges the child nodes horizontally, and they can be centered, left or right justified.
@@ -40,6 +40,11 @@ define( function( require ) {
 
     Node.call( this, options );
     this.updateLayout();
+
+    //TODO: perhaps not all options must be passed to Node.call AND this.mutate.  On 7/17/2013, layout problems occurred when using only mutate() or only Node.call(this,options)
+    if ( options ) {
+      this.mutate( options );
+    }
   };
   var HBox = scenery.HBox;
 
