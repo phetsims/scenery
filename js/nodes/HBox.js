@@ -42,6 +42,7 @@ define( function( require ) {
     this.updateLayout();
 
     //TODO: perhaps not all options must be passed to Node.call AND this.mutate.  On 7/17/2013, layout problems occurred when using only mutate() or only Node.call(this,options)
+    //See VBox.js
     if ( options ) {
       this.mutate( options );
     }
