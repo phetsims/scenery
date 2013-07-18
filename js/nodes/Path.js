@@ -100,7 +100,9 @@ define( function( require ) {
     },
     
     updateSVGFragment: function( path ) {
-      if ( this.hasShape() ) {
+      var svgPath = this.hasShape() ? this._shape.getSVGPath() : "";
+      if ( svgPath ) {
+        // only set the SVG path if it's not the empty string
         path.setAttribute( 'd', this._shape.getSVGPath() );
       } else if ( path.hasAttribute( 'd' ) ) {
         path.removeAttribute( 'd' );
