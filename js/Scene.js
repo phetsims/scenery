@@ -153,6 +153,9 @@ define( function( require ) {
       
       var scene = this;
       
+      // check to see whether contents under pointers changed (and if so, send the enter/exit events) to maintain consistent state
+      this.input.validatePointers();
+      
       // validating bounds, similar to Piccolo2d
       this.validateBounds();
       this.validatePaint();

@@ -295,28 +295,7 @@ define( function( require ) {
     },
     
     moveEvent: function( pointer, event ) {
-      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
-      var oldTrail = pointer.trail || new scenery.Trail( this.scene );
-      
-      var lastNodeChanged = oldTrail.lastNode() !== trail.lastNode();
-      
-      var branchIndex;
-      
-      for ( branchIndex = 0; branchIndex < Math.min( trail.length, oldTrail.length ); branchIndex++ ) {
-        if ( trail.nodes[branchIndex] !== oldTrail.nodes[branchIndex] ) {
-          break;
-        }
-      }
-      
-      // event order matches http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
-      this.dispatchEvent( trail, 'move', pointer, event, true );
-      
-      // we want to approximately mimic http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
-      // TODO: if a node gets moved down 1 depth, it may see both an exit and enter?
-      this.exitEvents( pointer, event, oldTrail, branchIndex, lastNodeChanged );
-      this.enterEvents( pointer, event, trail, branchIndex, lastNodeChanged );
-      
-      pointer.trail = trail;
+      this.branchChangeEvents( pointer, event, true );
     },
     
     cancelEvent: function( pointer, event ) {
@@ -328,6 +307,37 @@ define( function( require ) {
       if ( pointer.isTouch ) {
         this.exitEvents( pointer, event, trail, 0, true );
       }
+      
+      pointer.trail = trail;
+    },
+    
+    branchChangeEvents: function( pointer, event, isMove ) {
+      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
+      var oldTrail = pointer.trail || new scenery.Trail( this.scene ); // TODO: consider a static trail reference
+      
+      var lastNodeChanged = oldTrail.lastNode() !== trail.lastNode();
+      if ( !lastNodeChanged && !isMove ) {
+        // bail out if nothing needs to be done
+        return;
+      }
+      
+      var branchIndex;
+      
+      for ( branchIndex = 0; branchIndex < Math.min( trail.length, oldTrail.length ); branchIndex++ ) {
+        if ( trail.nodes[branchIndex] !== oldTrail.nodes[branchIndex] ) {
+          break;
+        }
+      }
+      
+      // event order matches http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
+      if ( isMove ) {
+        this.dispatchEvent( trail, 'move', pointer, event, true );
+      }
+      
+      // we want to approximately mimic http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
+      // TODO: if a node gets moved down 1 depth, it may see both an exit and enter?
+      this.exitEvents( pointer, event, oldTrail, branchIndex, lastNodeChanged );
+      this.enterEvents( pointer, event, trail, branchIndex, lastNodeChanged );
       
       pointer.trail = trail;
     },
@@ -354,6 +364,15 @@ define( function( require ) {
           this.dispatchEvent( trail.slice( 0, oldIndex + 1 ), 'exit', pointer, event, false );
         }
       }
+    },
+    
+    validatePointers: function() {
+      var that = this;
+      _.each( this.pointers, function( pointer ) {
+        if ( pointer.point !== null ) {
+          that.branchChangeEvents( pointer, null, false );
+        }
+      } );
     },
     
     dispatchEvent: function( trail, type, pointer, event, bubbles ) {
@@ -385,7 +404,7 @@ define( function( require ) {
       this.dispatchToTargets( trail, pointer, type, inputEvent, bubbles );
       
       // TODO: better interactivity handling?
-      if ( !trail.lastNode().interactive && !pointer.isKey ) {
+      if ( !trail.lastNode().interactive && !pointer.isKey && event ) {
         event.preventDefault();
       }
     },
@@ -476,6 +495,9 @@ define( function( require ) {
             domEvent.preventDefault(); // TODO: should we batch the events in a different place so we don't preventDefault on something bad?
           }
           input.batchedCallbacks.push( function() {
+            // process whether anything under the pointers changed before running additional input events
+            input.validatePointers();
+            
             callback( domEvent );
           } );
         };
@@ -483,7 +505,14 @@ define( function( require ) {
         this.listenerReferences.push( { type: type, callback: batchedCallback, useCapture: useCapture } );
       } else {
         this.listenerTarget.addEventListener( type, callback, useCapture );
-        this.listenerReferences.push( { type: type, callback: callback, useCapture: useCapture } );
+        this.listenerReferences.push( { type: type, callback: function synchronousEvent( domEvent ) {
+          sceneryEventLog && sceneryEventLog( 'Running event for ' + type );
+          
+          // process whether anything under the pointers changed before running additional input events
+          input.validatePointers();
+          
+          callback( domEvent );
+        }, useCapture: useCapture } );
       }
     },
     
