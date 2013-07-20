@@ -101,9 +101,15 @@ define( function( require ) {
     
     updateSVGFragment: function( path ) {
       var svgPath = this.hasShape() ? this._shape.getSVGPath() : "";
+      
+      // temporary workaround for https://bugs.webkit.org/show_bug.cgi?id=78980
+      // and http://code.google.com/p/chromium/issues/detail?id=231626 where even removing
+      // the attribute can cause this bug
+      if ( !svgPath ) { svgPath = 'M0 0'; }
+      
       if ( svgPath ) {
         // only set the SVG path if it's not the empty string
-        path.setAttribute( 'd', this._shape.getSVGPath() );
+        path.setAttribute( 'd', svgPath );
       } else if ( path.hasAttribute( 'd' ) ) {
         path.removeAttribute( 'd' );
       }
