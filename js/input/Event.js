@@ -19,7 +19,6 @@ define( function( require ) {
     sceneryAssert && sceneryAssert( args.trail &&
                       args.type &&
                       args.pointer &&
-                      args.domEvent &&
                       args.target, 'Missing required scenery.Event argument' );
     
     this.handled = false;
