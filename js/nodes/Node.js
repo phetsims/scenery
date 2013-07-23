@@ -114,9 +114,14 @@ define( function( require ) {
     this._boundsDirty = true;
     this._selfBoundsDirty = this.isPainted();
     this._childBoundsDirty = true;
-    this._mouseBounds = Bounds2.NOTHING; // same as bounds, but includes any mouse areas. only validated after regular bounds are validated!
+    
+    // Similar to bounds, but includes any mouse/touch areas respectively. They are validated separately (immediately after normal bounds validation),
+    // and are only non-null if there are mouseAreas/touchAreas in this node or any descendants. null indicates that the normal bounds can be treated
+    // as the mouse/touch bounds, and hit pruning can use those instead. These are needed because mouse/touch areas (and thus pruning bounds) can be
+    // larger than the actual bounds (display bounds, _bounds above)
+    this._mouseBounds = null;
     this._mouseBoundsDirty = true;
-    this._touchBounds = Bounds2.NOTHING; // same as bounds, but includes any touch areas. only validated after regular bounds are validated!
+    this._touchBounds = null;
     this._touchBoundsDirty = true;
     
     // dirty region handling
@@ -382,20 +387,37 @@ define( function( require ) {
     validateMouseBounds: function() {
       var that = this;
       
+      sceneryAssert && sceneryAssert( !this._selfBoundsDirty && !this._childBoundsDirty && !this._boundsDirty, 'Bounds must be validated before calling validateMouseBounds' );
+      
       if ( this._mouseBoundsDirty ) {
+        var hasMouseAreas = false;
+        
         this._mouseBounds = this._selfBounds.copy(); // start with the self bounds, then add from there
         
+        // union of all children's mouse bounds (if they exist)
         _.each( this._children, function( child ) {
           child.validateMouseBounds();
-          that._mouseBounds.includeBounds( child._mouseBounds );
+          if ( child._mouseBounds ) {
+            hasMouseAreas = true;
+            that._mouseBounds.includeBounds( child._mouseBounds );
+          }
         } );
         
         // do this before the transformation to the parent coordinate frame
         if ( this._mouseArea ) {
+          hasMouseAreas = true;
           this._mouseBounds.includeBounds( this._mouseArea.bounds );
         }
         
-        this._mouseBounds = that.localToParentBounds( this._mouseBounds );
+        if ( hasMouseAreas ) {
+          // transform it to the parent coordinate frame
+          this._mouseBounds = that.localToParentBounds( this._mouseBounds );
+          
+          // and include the normal bounds, so that we don't have to 
+          this._mouseBounds.includeBounds( this._bounds );
+        } else {
+          this._mouseBounds = null; // no mouse areas under this node
+        }
         
         this._mouseBoundsDirty = false;
       }
@@ -404,20 +426,37 @@ define( function( require ) {
     validateTouchBounds: function() {
       var that = this;
       
+      sceneryAssert && sceneryAssert( !this._selfBoundsDirty && !this._childBoundsDirty && !this._boundsDirty, 'Bounds must be validated before calling validateTouchBounds' );
+      
       if ( this._touchBoundsDirty ) {
+        var hasTouchAreas = false;
+        
         this._touchBounds = this._selfBounds.copy(); // start with the self bounds, then add from there
         
+        // union of all children's touch bounds (if they exist)
         _.each( this._children, function( child ) {
           child.validateTouchBounds();
-          that._touchBounds.includeBounds( child._touchBounds );
+          if ( child._touchBounds ) {
+            hasTouchAreas = true;
+            that._touchBounds.includeBounds( child._touchBounds );
+          }
         } );
         
         // do this before the transformation to the parent coordinate frame
         if ( this._touchArea ) {
+          hasTouchAreas = true;
           this._touchBounds.includeBounds( this._touchArea.bounds );
         }
         
-        this._touchBounds = that.localToParentBounds( this._touchBounds );
+        if ( hasTouchAreas ) {
+          // transform it to the parent coordinate frame
+          this._touchBounds = that.localToParentBounds( this._touchBounds );
+          
+          // and include the normal bounds, so that we don't have to 
+          this._touchBounds.includeBounds( this._bounds );
+        } else {
+          this._touchBounds = null; // no touch areas under this node
+        }
         
         this._touchBoundsDirty = false;
       }
@@ -607,7 +646,6 @@ define( function( require ) {
       
       var pruneInvisible = ( !options || options.pruneInvisible === undefined ) ? true : options.pruneInvisible;
       var pruneUnpickable = ( !options || options.pruneUnpickable === undefined ) ? true : options.pruneUnpickable;
-      var useHitAreas = options && ( options.isMouse || options.isTouch || options.isPen );
       
       if ( pruneInvisible && !this.isVisible() ) {
         return null;
@@ -621,18 +659,23 @@ define( function( require ) {
       if ( options.isMouse ) { this.validateMouseBounds(); }
       if ( options.isTouch ) { this.validateTouchBounds(); }
       
+      var hasHitAreas = options && ( ( options.isMouse && this._mouseBounds ) || ( options.isTouch && this._touchBounds ) || options.isPen );
+      
       // bail quickly if this doesn't hit our computed bounds
-      if ( ( !useHitAreas    && !this._bounds.containsPoint( point ) ) ||
-           ( options.isMouse && !this._mouseBounds.containsPoint( point ) ) ||
-           ( options.isTouch && !this._touchBounds.containsPoint( point ) ) ) {
-        return null;
+      if ( hasHitAreas ? (
+            // if we have hit areas, prune based on the respective hit bounds (mouseBounds/touchBounds)
+            ( options.isMouse && !this._mouseBounds.containsPoint( point ) ) ||
+            ( options.isTouch && !this._touchBounds.containsPoint( point ) )
+            // otherwise, prune based on the normal bounds
+          ) : !this._bounds.containsPoint( point ) ) {
+        return null; // not in our bounds, so this point can't possibly be contained
       }
       
       // point in the local coordinate frame. computed after the main bounds check, so we can bail out there efficiently
       var localPoint = this.parentToLocalPoint( point );
       
       // check children first, since they are rendered later
-      if ( this._children.length > 0 && ( useHitAreas || this._childBounds.containsPoint( localPoint ) ) ) {
+      if ( this._children.length > 0 && ( hasHitAreas || this._childBounds.containsPoint( localPoint ) ) ) {
         
         // manual iteration here so we can return directly, and so we can iterate backwards (last node is in front)
         for ( var i = this._children.length - 1; i >= 0; i-- ) {
@@ -649,7 +692,7 @@ define( function( require ) {
       }
 
       // tests for mouse and touch hit areas before testing containsPointSelf
-      if ( useHitAreas ) {
+      if ( hasHitAreas ) {
         if ( options.isMouse && this._mouseArea ) {
           return this._mouseArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
         }
@@ -659,7 +702,7 @@ define( function( require ) {
       }
       
       // didn't hit our children, so check ourself as a last resort
-      if ( useHitAreas || this._selfBounds.containsPoint( localPoint ) ) {
+      if ( hasHitAreas || this._selfBounds.containsPoint( localPoint ) ) {
         if ( this.containsPointSelf( localPoint ) ) {
           return new scenery.Trail( this );
         }
