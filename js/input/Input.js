@@ -44,6 +44,9 @@ define( function( require ) {
     this.pointers = [ this.mouse ];
     
     this.listenerReferences = [];
+    
+    this.eventLog = [];     // written when recording event input. can be overwritten to the empty array to reset. Strings relative to this class (prefix "scene.input.")
+    this.logEvents = false; // can be set to true to cause Scenery to record all input calls to eventLog
   };
   var Input = scenery.Input;
   
@@ -78,31 +81,37 @@ define( function( require ) {
     },
     
     mouseDown: function( point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'mouseDown(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       this.mouse.down( point, event );
       this.downEvent( this.mouse, event );
     },
     
     mouseUp: function( point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'mouseUp(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       this.mouse.up( point, event );
       this.upEvent( this.mouse, event );
     },
     
     mouseMove: function( point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'mouseMove(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       this.mouse.move( point, event );
       this.moveEvent( this.mouse, event );
     },
     
     mouseOver: function( point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'mouseOver(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       this.mouse.over( point, event );
-      // TODO: how to handle mouse-over
+      // TODO: how to handle mouse-over (and log it)
     },
     
     mouseOut: function( point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'mouseOut(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       this.mouse.out( point, event );
-      // TODO: how to handle mouse-out
+      // TODO: how to handle mouse-out (and log it)
     },
     
     keyDown: function( event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'keyDown(' + Input.serializeDomEvent( event ) + ');' ); }
       var key = new scenery.Key( event );
       this.addPointer( key );
       
@@ -111,6 +120,7 @@ define( function( require ) {
     },
     
     keyUp: function( event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'keyUp(' + Input.serializeDomEvent( event ) + ');' ); }
       var key = this.findKeyByEvent( event );
       if ( key ) {
         this.removePointer( key );
@@ -121,17 +131,20 @@ define( function( require ) {
     },
     
     keyPress: function( event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'keyPress(' + Input.serializeDomEvent( event ) + ');' ); }
       // NOTE: do we even need keyPress?
     },
     
     // called for each touch point
     touchStart: function( id, point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'touchStart(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var touch = new scenery.Touch( id, point, event );
       this.addPointer( touch );
       this.downEvent( touch, event );
     },
     
     touchEnd: function( id, point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'touchEnd(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var touch = this.findTouchById( id );
       touch.end( point, event );
       this.removePointer( touch );
@@ -139,12 +152,14 @@ define( function( require ) {
     },
     
     touchMove: function( id, point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'touchMove(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var touch = this.findTouchById( id );
       touch.move( point, event );
       this.moveEvent( touch, event );
     },
     
     touchCancel: function( id, point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'touchCancel(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var touch = this.findTouchById( id );
       touch.cancel( point, event );
       this.removePointer( touch );
@@ -153,12 +168,14 @@ define( function( require ) {
     
     // called for each touch point
     penStart: function( id, point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'penStart(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var pen = new scenery.Pen( id, point, event );
       this.addPointer( pen );
       this.downEvent( pen, event );
     },
     
     penEnd: function( id, point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'penEnd(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var pen = this.findTouchById( id );
       pen.end( point, event );
       this.removePointer( pen );
@@ -166,12 +183,14 @@ define( function( require ) {
     },
     
     penMove: function( id, point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'penMove(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var pen = this.findTouchById( id );
       pen.move( point, event );
       this.moveEvent( pen, event );
     },
     
     penCancel: function( id, point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'penCancel(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var pen = this.findTouchById( id );
       pen.cancel( point, event );
       this.removePointer( pen );
@@ -404,7 +423,7 @@ define( function( require ) {
       this.dispatchToTargets( trail, pointer, type, inputEvent, bubbles );
       
       // TODO: better interactivity handling?
-      if ( !trail.lastNode().interactive && !pointer.isKey && event ) {
+      if ( !trail.lastNode().interactive && !pointer.isKey && event && event.preventDefault ) {
         event.preventDefault();
       }
     },
@@ -497,6 +516,7 @@ define( function( require ) {
           input.batchedCallbacks.push( function() {
             // process whether anything under the pointers changed before running additional input events
             input.validatePointers();
+            if ( input.logEvents ) { input.eventLog.push( 'validatePointers();' ); }
             
             callback( domEvent );
           } );
@@ -510,6 +530,7 @@ define( function( require ) {
           
           // process whether anything under the pointers changed before running additional input events
           input.validatePointers();
+          if ( input.logEvents ) { input.eventLog.push( 'validatePointers();' ); }
           
           callback( domEvent );
         }, useCapture: useCapture } );
@@ -530,6 +551,21 @@ define( function( require ) {
         this.batchedCallbacks = [];
       }
     }
+  };
+  
+  Input.serializeDomEvent = function( domEvent ) {
+    var lines = [];
+    for ( var prop in domEvent ) {
+      if ( domEvent.hasOwnProperty( prop ) ) {
+        // stringifying dom event object properties can cause circular references, so we avoid that completely
+        lines.push( prop + ':' + ( ( typeof domEvent[prop] === 'object' ) && ( domEvent[prop] !== null ) ? '{}' : JSON.stringify( domEvent[prop] ) ) );
+      }
+    }
+    return '{' + lines.join( ',' ) + '}';
+  };
+  
+  Input.serializeVector2 = function( vector ) {
+    return 'dot(' + vector.x + ',' + vector.y + ')';
   };
   
   return Input;
