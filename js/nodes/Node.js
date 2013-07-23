@@ -108,12 +108,16 @@ define( function( require ) {
     this._includeStrokeInHitRegion = false;
     
     // bounds handling
-    this._bounds = Bounds2.NOTHING; // for this node and its children, in "parent" coordinates
-    this._selfBounds = Bounds2.NOTHING; // just for this node, in "local" coordinates
+    this._bounds = Bounds2.NOTHING;      // for this node and its children, in "parent" coordinates
+    this._selfBounds = Bounds2.NOTHING;  // just for this node, in "local" coordinates
     this._childBounds = Bounds2.NOTHING; // just for children, in "local" coordinates
     this._boundsDirty = true;
     this._selfBoundsDirty = this.isPainted();
     this._childBoundsDirty = true;
+    this._mouseBounds = Bounds2.NOTHING; // same as bounds, but includes any mouse areas. only validated after regular bounds are validated!
+    this._mouseBoundsDirty = true;
+    this._touchBounds = Bounds2.NOTHING; // same as bounds, but includes any touch areas. only validated after regular bounds are validated!
+    this._touchBoundsDirty = true;
     
     // dirty region handling
     this._paintDirty = false;        // whether the self paint is dirty (just this node, none of its children)
@@ -375,6 +379,50 @@ define( function( require ) {
       }
     },
     
+    validateMouseBounds: function() {
+      var that = this;
+      
+      if ( this._mouseBoundsDirty ) {
+        this._mouseBounds = this._selfBounds.copy(); // start with the self bounds, then add from there
+        
+        _.each( this._children, function( child ) {
+          child.validateMouseBounds();
+          that._mouseBounds.includeBounds( child._mouseBounds );
+        } );
+        
+        // do this before the transformation to the parent coordinate frame
+        if ( this._mouseArea ) {
+          this._mouseBounds.includeBounds( this._mouseArea.bounds );
+        }
+        
+        this._mouseBounds = that.localToParentBounds( this._mouseBounds );
+        
+        this._mouseBoundsDirty = false;
+      }
+    },
+    
+    validateTouchBounds: function() {
+      var that = this;
+      
+      if ( this._touchBoundsDirty ) {
+        this._touchBounds = this._selfBounds.copy(); // start with the self bounds, then add from there
+        
+        _.each( this._children, function( child ) {
+          child.validateTouchBounds();
+          that._touchBounds.includeBounds( child._touchBounds );
+        } );
+        
+        // do this before the transformation to the parent coordinate frame
+        if ( this._touchArea ) {
+          this._touchBounds.includeBounds( this._touchArea.bounds );
+        }
+        
+        this._touchBounds = that.localToParentBounds( this._touchBounds );
+        
+        this._touchBoundsDirty = false;
+      }
+    },
+    
     validatePaint: function() {
       if ( this._paintDirty ) {
         sceneryAssert && sceneryAssert( this.isPainted(), 'Only painted nodes can have self dirty paint' );
@@ -405,6 +453,8 @@ define( function( require ) {
     // mark the bounds of this node as invalid, so it is recomputed before it is accessed again
     invalidateBounds: function() {
       this._boundsDirty = true;
+      this._mouseBoundsDirty = true;
+      this._touchBoundsDirty = true;
       
       // and set flags for all ancestors
       _.each( this._parents, function( parent ) {
@@ -417,6 +467,8 @@ define( function( require ) {
       // don't bother updating if we've already been tagged
       if ( !this._childBoundsDirty ) {
         this._childBoundsDirty = true;
+        this._mouseBoundsDirty = true;
+        this._touchBoundsDirty = true;
         _.each( this._parents, function( parent ) {
           parent.invalidateChildBounds();
         } );
@@ -551,6 +603,8 @@ define( function( require ) {
     trailUnderPoint: function( point, options ) {
       sceneryAssert && sceneryAssert( point, 'trailUnderPointer requires a point' );
       
+      if ( options === undefined ) { options = {}; }
+      
       var pruneInvisible = ( !options || options.pruneInvisible === undefined ) ? true : options.pruneInvisible;
       var pruneUnpickable = ( !options || options.pruneUnpickable === undefined ) ? true : options.pruneUnpickable;
       var useHitAreas = options && ( options.isMouse || options.isTouch || options.isPen );
@@ -564,9 +618,15 @@ define( function( require ) {
       
       // update bounds for pruning
       this.validateBounds();
+      if ( options.isMouse ) { this.validateMouseBounds(); }
+      if ( options.isTouch ) { this.validateTouchBounds(); }
       
       // bail quickly if this doesn't hit our computed bounds
-      if ( !useHitAreas && !this._bounds.containsPoint( point ) ) { return null; }
+      if ( ( !useHitAreas    && !this._bounds.containsPoint( point ) ) ||
+           ( options.isMouse && !this._mouseBounds.containsPoint( point ) ) ||
+           ( options.isTouch && !this._touchBounds.containsPoint( point ) ) ) {
+        return null;
+      }
       
       // point in the local coordinate frame. computed after the main bounds check, so we can bail out there efficiently
       var localPoint = this.parentToLocalPoint( point );
@@ -1086,6 +1146,8 @@ define( function( require ) {
       
       if ( this._mouseArea !== shape ) {
         this._mouseArea = shape; // TODO: could change what is under the mouse, invalidate!
+        
+        this.invalidateBounds();
       }
     },
     
@@ -1098,6 +1160,8 @@ define( function( require ) {
       
       if ( this._touchArea !== shape ) {
         this._touchArea = shape; // TODO: could change what is under the touch, invalidate!
+        
+        this.invalidateBounds();
       }
     },
     
