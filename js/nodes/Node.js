@@ -1185,7 +1185,7 @@ define( function( require ) {
     },
     
     setMouseArea: function( shape ) {
-      sceneryAssert && sceneryAssert( shape === null || shape instanceof Shape );
+      sceneryAssert && sceneryAssert( shape === null || shape instanceof Shape, 'mouseArea needs to be a kite.Shape, or null' );
       
       if ( this._mouseArea !== shape ) {
         this._mouseArea = shape; // TODO: could change what is under the mouse, invalidate!
@@ -1199,7 +1199,7 @@ define( function( require ) {
     },
     
     setTouchArea: function( shape ) {
-      sceneryAssert && sceneryAssert( shape === null || shape instanceof Shape );
+      sceneryAssert && sceneryAssert( shape === null || shape instanceof Shape, 'touchArea needs to be a kite.Shape, or null' );
       
       if ( this._touchArea !== shape ) {
         this._touchArea = shape; // TODO: could change what is under the touch, invalidate!
