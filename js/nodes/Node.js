@@ -644,8 +644,8 @@ define( function( require ) {
       
       if ( options === undefined ) { options = {}; }
       
-      var pruneInvisible = ( !options || options.pruneInvisible === undefined ) ? true : options.pruneInvisible;
-      var pruneUnpickable = ( !options || options.pruneUnpickable === undefined ) ? true : options.pruneUnpickable;
+      var pruneInvisible = ( options.pruneInvisible === undefined ) ? true : options.pruneInvisible;
+      var pruneUnpickable = ( options.pruneUnpickable === undefined ) ? true : options.pruneUnpickable;
       
       if ( pruneInvisible && !this.isVisible() ) {
         return null;
