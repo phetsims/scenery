@@ -979,7 +979,7 @@ define( function( require ) {
       var element = this.$main[0];
       this.initializeEvents( _.extend( {}, {
         listenerTarget: element,
-        pointFromEvent: function( evt ) {
+        pointFromEvent: function pointFromEvent( evt ) {
           var mainBounds = element.getBoundingClientRect();
           return new Vector2( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
         }
@@ -990,7 +990,7 @@ define( function( require ) {
       var element = this.$main[0];
       this.initializeEvents( _.extend( {}, {
         listenerTarget: document,
-        pointFromEvent: function( evt ) {
+        pointFromEvent: function pointFromEvent( evt ) {
           var mainBounds = element.getBoundingClientRect();
           return new Vector2( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
         }

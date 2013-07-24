@@ -513,7 +513,7 @@ define( function( require ) {
           if ( usePreventDefault ) {
             domEvent.preventDefault(); // TODO: should we batch the events in a different place so we don't preventDefault on something bad?
           }
-          input.batchedCallbacks.push( function() {
+          input.batchedCallbacks.push( function batchedEventCallback() {
             // process whether anything under the pointers changed before running additional input events
             input.validatePointers();
             if ( input.logEvents ) { input.eventLog.push( 'validatePointers();' ); }
@@ -547,7 +547,7 @@ define( function( require ) {
     fireBatchedEvents: function() {
       if ( this.batchedCallbacks.length ) {
         sceneryEventLog && sceneryEventLog( 'Input.fireBatchedEvents length:' + this.batchedCallbacks.length );
-        _.each( this.batchedCallbacks, function( callback ) { callback(); } );
+        _.each( this.batchedCallbacks, function callbackLoop( callback ) { callback(); } );
         this.batchedCallbacks = [];
       }
     }
