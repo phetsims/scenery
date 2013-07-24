@@ -1040,89 +1040,89 @@ define( function( require ) {
       var implementsMSPointerEvents = window.navigator && window.navigator.msPointerEnabled; // MS spec for pointer event
       if ( this.enablePointerEvents && implementsPointerEvents ) {
         // accepts pointer events corresponding to the spec at http://www.w3.org/TR/pointerevents/
-        input.addListener( 'pointerdown', function( domEvent ) {
+        input.addListener( 'pointerdown', function pointerDownCallback( domEvent ) {
           input.pointerDown( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
         } );
-        input.addListener( 'pointerup', function( domEvent ) {
+        input.addListener( 'pointerup', function pointerUpCallback( domEvent ) {
           input.pointerUp( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
         } );
-        input.addListener( 'pointermove', function( domEvent ) {
+        input.addListener( 'pointermove', function pointerMoveCallback( domEvent ) {
           input.pointerMove( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
         } );
-        input.addListener( 'pointerover', function( domEvent ) {
+        input.addListener( 'pointerover', function pointerOverCallback( domEvent ) {
           input.pointerOver( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
         } );
-        input.addListener( 'pointerout', function( domEvent ) {
+        input.addListener( 'pointerout', function pointerOutCallback( domEvent ) {
           input.pointerOut( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
         } );
-        input.addListener( 'pointercancel', function( domEvent ) {
+        input.addListener( 'pointercancel', function pointerCancelCallback( domEvent ) {
           input.pointerCancel( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
         } );
       } else if ( this.enablePointerEvents && implementsMSPointerEvents ) {
-        input.addListener( 'MSPointerDown', function( domEvent ) {
+        input.addListener( 'MSPointerDown', function msPointerDownCallback( domEvent ) {
           input.pointerDown( domEvent.pointerId, msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
         } );
-        input.addListener( 'MSPointerUp', function( domEvent ) {
+        input.addListener( 'MSPointerUp', function msPointerUpCallback( domEvent ) {
           input.pointerUp( domEvent.pointerId, msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
         } );
-        input.addListener( 'MSPointerMove', function( domEvent ) {
+        input.addListener( 'MSPointerMove', function msPointerMoveCallback( domEvent ) {
           input.pointerMove( domEvent.pointerId, msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
         } );
-        input.addListener( 'MSPointerOver', function( domEvent ) {
+        input.addListener( 'MSPointerOver', function msPointerOverCallback( domEvent ) {
           input.pointerOver( domEvent.pointerId, msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
         } );
-        input.addListener( 'MSPointerOut', function( domEvent ) {
+        input.addListener( 'MSPointerOut', function msPointerOutCallback( domEvent ) {
           input.pointerOut( domEvent.pointerId, msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
         } );
-        input.addListener( 'MSPointerCancel', function( domEvent ) {
+        input.addListener( 'MSPointerCancel', function msPointerCancelCallback( domEvent ) {
           input.pointerCancel( domEvent.pointerId, msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
         } );
       } else {
-        input.addListener( 'mousedown', function( domEvent ) {
+        input.addListener( 'mousedown', function mouseDownCallback( domEvent ) {
           input.mouseDown( pointFromEvent( domEvent ), domEvent );
         } );
-        input.addListener( 'mouseup', function( domEvent ) {
+        input.addListener( 'mouseup', function mouseUpCallback( domEvent ) {
           input.mouseUp( pointFromEvent( domEvent ), domEvent );
         } );
-        input.addListener( 'mousemove', function( domEvent ) {
+        input.addListener( 'mousemove', function mouseMoveCallback( domEvent ) {
           input.mouseMove( pointFromEvent( domEvent ), domEvent );
         } );
-        input.addListener( 'mouseover', function( domEvent ) {
+        input.addListener( 'mouseover', function mouseOverCallback( domEvent ) {
           input.mouseOver( pointFromEvent( domEvent ), domEvent );
         } );
-        input.addListener( 'mouseout', function( domEvent ) {
+        input.addListener( 'mouseout', function mouseOutCallback( domEvent ) {
           input.mouseOut( pointFromEvent( domEvent ), domEvent );
         } );
         
-        input.addListener( 'touchstart', function( domEvent ) {
-          forEachChangedTouch( domEvent, function( id, point ) {
+        input.addListener( 'touchstart', function touchStartCallback( domEvent ) {
+          forEachChangedTouch( domEvent, function touchStartTouch( id, point ) {
             input.touchStart( id, point, domEvent );
           } );
         } );
-        input.addListener( 'touchend', function( domEvent ) {
-          forEachChangedTouch( domEvent, function( id, point ) {
+        input.addListener( 'touchend', function touchEndCallback( domEvent ) {
+          forEachChangedTouch( domEvent, function touchEndTouch( id, point ) {
             input.touchEnd( id, point, domEvent );
           } );
         } );
-        input.addListener( 'touchmove', function( domEvent ) {
-          forEachChangedTouch( domEvent, function( id, point ) {
+        input.addListener( 'touchmove', function touchMoveCallback( domEvent ) {
+          forEachChangedTouch( domEvent, function touchMoveTouch( id, point ) {
             input.touchMove( id, point, domEvent );
           } );
         } );
-        input.addListener( 'touchcancel', function( domEvent ) {
-          forEachChangedTouch( domEvent, function( id, point ) {
+        input.addListener( 'touchcancel', function touchCancelCallback( domEvent ) {
+          forEachChangedTouch( domEvent, function touchCancelTouch( id, point ) {
             input.touchCancel( id, point, domEvent );
           } );
         } );
       }
       
-      input.addListener( 'keyup', function( domEvent ) {
+      input.addListener( 'keyup', function keyUpCallback( domEvent ) {
         input.keyUp( domEvent );
       } );
-      input.addListener( 'keydown', function( domEvent ) {
+      input.addListener( 'keydown', function keyDownCallback( domEvent ) {
         input.keyDown( domEvent );
       } );
-      input.addListener( 'keypress', function( domEvent ) {
+      input.addListener( 'keypress', function keyPressCallback( domEvent ) {
         input.keyPress( domEvent );
       } );
     },
