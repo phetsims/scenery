@@ -103,6 +103,11 @@ define( function( require ) {
       this.setShape( this.createRectangleShape() );
     },
     
+    computeShapeBounds: function() {
+      // optimization, where we know our computed bounds will be just expanded by half the lineWidth if we are stroked (don't have to compute the stroke shape)
+      return this._stroke ? this._shape.bounds.dilated( this._lineDrawingStyles.lineWidth / 2 ) : this._shape.bounds;
+    },
+    
     // override paintCanvas with a faster version, since fillRect and drawRect don't affect the current default path
     paintCanvas: function( wrapper ) {
       var context = wrapper.context;

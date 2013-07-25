@@ -55,9 +55,14 @@ define( function( require ) {
       this.markOldSelfPaint();
       
       if ( this.hasShape() ) {
-        this.invalidateSelf( this._shape.computeBounds( this._stroke ? this._lineDrawingStyles : null ) );
+        this.invalidateSelf( this.computeShapeBounds() );
         this.invalidatePaint();
       }
+    },
+    
+    // separated out, so that we can override this with a faster version in Rectangle. includes the Stroke, if any
+    computeShapeBounds: function() {
+      return this._stroke ? this._shape.computeBounds( this._lineDrawingStyles ) : this._shape.bounds;
     },
     
     // hook stroke mixin changes to invalidation
