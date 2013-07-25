@@ -35,6 +35,7 @@ define( [
     'SCENERY/layers/Renderer',
     'SCENERY/layers/SVGLayer',
     
+    'SCENERY/nodes/CanvasNode',
     'SCENERY/nodes/Circle',
     'SCENERY/nodes/DOM',
     'SCENERY/nodes/Fillable',
