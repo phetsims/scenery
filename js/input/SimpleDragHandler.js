@@ -126,7 +126,8 @@ define( function( require ) {
       this.node = event.currentTarget;
       this.lastDragPoint = event.pointer.point;
       this.startTransformMatrix = event.currentTarget.getMatrix();
-      this.mouseButton = event.domEvent.button; // should be undefined for touch events
+      // event.domEvent may not exist if this is touch-to-snag
+      this.mouseButton = event.pointer.isMouse ? event.domEvent.button : undefined;
       
       if ( this.options.start ) {
         this.options.start( event, this.trail );
