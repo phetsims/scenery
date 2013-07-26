@@ -110,9 +110,6 @@ define( function( require ) {
             // apply the node's transform to the group
             this.applyTransform( subtrail.lastNode().getTransform(), group );
             
-            // apply any stylings to the group (opacity, visibility)
-            this.updateNodeGroup( subtrail.lastNode(), group );
-            
             // add the group to its parent
             this.insertGroupIntoParent( group, this.idGroupMap[lastId], subtrail );
           } else {
@@ -124,6 +121,9 @@ define( function( require ) {
             // sets up the proper transform for the base
             this.initializeBase();
           }
+          
+          // apply any stylings to the group (opacity, visibility)
+          this.updateNodeGroup( subtrail.lastNode(), group );
           
           group.referenceCount = 0; // initialize a reference count, so we can know when to remove unused groups
           group.trail = subtrail.copy(); // put a reference to the trail on the group, so we can efficiently scan and see where to insert future groups
@@ -246,7 +246,8 @@ define( function( require ) {
     },
     
     updateGroupVisibility: function( node, group ) {
-      if ( node.isVisible() ) {
+      // if we're updating visibility for the base trail, apply its visibility and everything beneath it
+      if ( node === this.baseNode ? this.baseTrail.isVisible() : node.isVisible() ) {
         group.style.display = 'inherit';
       } else {
         group.style.display = 'none';
@@ -254,7 +255,13 @@ define( function( require ) {
     },
     
     updateGroupOpacity: function( node, group ) {
-      group.setAttribute( 'opacity', node.getOpacity() );
+      var opacity;
+      if ( node === this.baseNode ) {
+        opacity = this.baseTrail.getOpacity(); // multiplied by opacities of all ancestors
+      } else {
+        opacity = node.getOpacity();
+      }
+      group.setAttribute( 'opacity', opacity );
     },
     
     getFragmentFromInstance: function( instance ) {
@@ -495,6 +502,9 @@ define( function( require ) {
       var group = this.getGroupFromInstance( instance );
       if ( group ) {
         this.updateGroupVisibility( instance.getNode(), group );
+      } else if ( this.baseNode !== this.scene ) {
+        // if we are using a CSS transform (basically)
+        this.updateGroupVisibility( this.baseNode, this.getGroupFromInstance( this.baseTrail.getInstance() ) );
       }
     },
     
@@ -503,6 +513,9 @@ define( function( require ) {
       var group = this.getGroupFromInstance( instance );
       if ( group ) {
         this.updateGroupOpacity( instance.getNode(), group );
+      } else if ( this.baseNode !== this.scene ) {
+        // if we are using a CSS transform (basically)
+        this.updateGroupOpacity( this.baseNode, this.getGroupFromInstance( this.baseTrail.getInstance() ) );
       }
     },
     

@@ -89,6 +89,10 @@ define( function( require ) {
       return _.every( this.nodes, function( node ) { return node.isVisible(); } );
     },
     
+    getOpacity: function() {
+      return _.reduce( this.nodes, function( opacity, node ) { return opacity * node.getOpacity(); }, 1 );
+    },
+    
     get: function( index ) {
       if ( index >= 0 ) {
         return this.nodes[index];
