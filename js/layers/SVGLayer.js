@@ -120,6 +120,10 @@ define( function( require ) {
             
             // sets up the proper transform for the base
             this.initializeBase();
+            
+            // immediately update the base transform so we don't temporarily display.
+            // fixes https://github.com/phetsims/beers-law-lab/issues/20
+            this.refreshBaseTransform();
           }
           
           // apply any stylings to the group (opacity, visibility)
@@ -285,6 +289,10 @@ define( function( require ) {
     },
     
     render: function( scene, args ) {
+      this.refreshBaseTransform();
+    },
+    
+    refreshBaseTransform: function() {
       if ( this.baseTransformDirty ) {
         // this will be run either now or at the end of flushing changes
         var includesBaseTransformChange = this.baseTransformChange;
