@@ -342,7 +342,7 @@ define( function( require ) {
     },
     
     cancelEvent: function( pointer, event ) {
-      var trail = this.scene.trailUnderPointer( pointer );
+      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
       
       this.dispatchEvent( trail, 'cancel', pointer, event, true );
       
