@@ -553,12 +553,23 @@ define( function( require ) {
     }
   };
   
-  Input.serializeDomEvent = function( domEvent ) {
+  Input.serializeDomEvent = function serializeDomEvent( domEvent ) {
     var lines = [];
     for ( var prop in domEvent ) {
       if ( domEvent.hasOwnProperty( prop ) ) {
         // stringifying dom event object properties can cause circular references, so we avoid that completely
-        lines.push( prop + ':' + ( ( typeof domEvent[prop] === 'object' ) && ( domEvent[prop] !== null ) ? '{}' : JSON.stringify( domEvent[prop] ) ) );
+        if ( prop === 'touches' || prop === 'targetTouches' || prop === 'changedTouches' ) {
+          var arr = [];
+          for ( var i = 0; i < domEvent[prop].length; i++ ) {
+            // according to spec (http://www.w3.org/TR/touch-events/), this is not an Array, but a TouchList
+            var touch = domEvent[prop].item( i );
+            
+            arr.push( serializeDomEvent( touch ) );
+          }
+          lines.push( prop + ':[' + arr.join( ',' ) + ']' );
+        } else {
+          lines.push( prop + ':' + ( ( typeof domEvent[prop] === 'object' ) && ( domEvent[prop] !== null ) ? '{}' : JSON.stringify( domEvent[prop] ) ) );
+        }
       }
     }
     return '{' + lines.join( ',' ) + '}';

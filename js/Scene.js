@@ -1039,6 +1039,7 @@ define( function( require ) {
       var implementsPointerEvents = window.navigator && window.navigator.pointerEnabled; // W3C spec for pointer events
       var implementsMSPointerEvents = window.navigator && window.navigator.msPointerEnabled; // MS spec for pointer event
       if ( this.enablePointerEvents && implementsPointerEvents ) {
+        sceneryEventLog && sceneryEventLog( 'Detected pointer events support, using that instead of mouse/touch events' );
         // accepts pointer events corresponding to the spec at http://www.w3.org/TR/pointerevents/
         input.addListener( 'pointerdown', function pointerDownCallback( domEvent ) {
           input.pointerDown( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
@@ -1059,6 +1060,7 @@ define( function( require ) {
           input.pointerCancel( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
         } );
       } else if ( this.enablePointerEvents && implementsMSPointerEvents ) {
+        sceneryEventLog && sceneryEventLog( 'Detected MS pointer events support, using that instead of mouse/touch events' );
         input.addListener( 'MSPointerDown', function msPointerDownCallback( domEvent ) {
           input.pointerDown( domEvent.pointerId, msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
         } );
@@ -1078,6 +1080,7 @@ define( function( require ) {
           input.pointerCancel( domEvent.pointerId, msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
         } );
       } else {
+        sceneryEventLog && sceneryEventLog( 'No pointer events support detected, using mouse/touch events' );
         input.addListener( 'mousedown', function mouseDownCallback( domEvent ) {
           input.mouseDown( pointFromEvent( domEvent ), domEvent );
         } );
@@ -1095,21 +1098,25 @@ define( function( require ) {
         } );
         
         input.addListener( 'touchstart', function touchStartCallback( domEvent ) {
+          sceneryEventLog && sceneryEventLog( 'touchstart (multiple events)' );
           forEachChangedTouch( domEvent, function touchStartTouch( id, point ) {
             input.touchStart( id, point, domEvent );
           } );
         } );
         input.addListener( 'touchend', function touchEndCallback( domEvent ) {
+          sceneryEventLog && sceneryEventLog( 'touchend (multiple events)' );
           forEachChangedTouch( domEvent, function touchEndTouch( id, point ) {
             input.touchEnd( id, point, domEvent );
           } );
         } );
         input.addListener( 'touchmove', function touchMoveCallback( domEvent ) {
+          sceneryEventLog && sceneryEventLog( 'touchmove (multiple events)' );
           forEachChangedTouch( domEvent, function touchMoveTouch( id, point ) {
             input.touchMove( id, point, domEvent );
           } );
         } );
         input.addListener( 'touchcancel', function touchCancelCallback( domEvent ) {
+          sceneryEventLog && sceneryEventLog( 'touchcancel (multiple events)' );
           forEachChangedTouch( domEvent, function touchCancelTouch( id, point ) {
             input.touchCancel( id, point, domEvent );
           } );
