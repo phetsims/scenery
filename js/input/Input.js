@@ -146,24 +146,36 @@ define( function( require ) {
     touchEnd: function( id, point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'touchEnd(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var touch = this.findTouchById( id );
-      touch.end( point, event );
-      this.removePointer( touch );
-      this.upEvent( touch, event );
+      if ( touch ) {
+        touch.end( point, event );
+        this.removePointer( touch );
+        this.upEvent( touch, event );
+      } else {
+        sceneryAssert && sceneryAssert( false, 'Touch not found for touchEnd: ' + id );
+      }
     },
     
     touchMove: function( id, point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'touchMove(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var touch = this.findTouchById( id );
-      touch.move( point, event );
-      this.moveEvent( touch, event );
+      if ( touch ) {
+        touch.move( point, event );
+        this.moveEvent( touch, event );
+      } else {
+        sceneryAssert && sceneryAssert( false, 'Touch not found for touchMove: ' + id );
+      }
     },
     
     touchCancel: function( id, point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'touchCancel(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var touch = this.findTouchById( id );
-      touch.cancel( point, event );
-      this.removePointer( touch );
-      this.cancelEvent( touch, event );
+      if ( touch ) {
+        touch.cancel( point, event );
+        this.removePointer( touch );
+        this.cancelEvent( touch, event );
+      } else {
+        sceneryAssert && sceneryAssert( false, 'Touch not found for touchCancel: ' + id );
+      }
     },
     
     // called for each touch point
@@ -177,24 +189,36 @@ define( function( require ) {
     penEnd: function( id, point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'penEnd(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var pen = this.findTouchById( id );
-      pen.end( point, event );
-      this.removePointer( pen );
-      this.upEvent( pen, event );
+      if ( pen ) {
+        pen.end( point, event );
+        this.removePointer( pen );
+        this.upEvent( pen, event );
+      } else {
+        sceneryAssert && sceneryAssert( false, 'Pen not found for penEnd: ' + id );
+      }
     },
     
     penMove: function( id, point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'penMove(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var pen = this.findTouchById( id );
-      pen.move( point, event );
-      this.moveEvent( pen, event );
+      if ( pen ) {
+        pen.move( point, event );
+        this.moveEvent( pen, event );
+      } else {
+        sceneryAssert && sceneryAssert( false, 'Pen not found for penMove: ' + id );
+      }
     },
     
     penCancel: function( id, point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'penCancel(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var pen = this.findTouchById( id );
-      pen.cancel( point, event );
-      this.removePointer( pen );
-      this.cancelEvent( pen, event );
+      if ( pen ) {
+        pen.cancel( point, event );
+        this.removePointer( pen );
+        this.cancelEvent( pen, event );
+      } else {
+        sceneryAssert && sceneryAssert( false, 'Pen not found for penCancel: ' + id );
+      }
     },
     
     pointerDown: function( id, type, point, event ) {
