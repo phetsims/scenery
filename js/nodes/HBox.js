@@ -21,7 +21,7 @@ define( function( require ) {
    *
    * spacing: can be a number or a function.  If a number, then it will be the vertical spacing between each object.
    *              If a function, then the function will have the signature function(top,bottom){} which returns the spacing between adjacent pairs of items.
-   * align:   How to line up the items horizontally.  One of 'center', 'left' or 'right'.  Defaults to 'center'.
+   * align:   How to line up the items horizontally.  One of 'center', 'top' or 'bottom'.  Defaults to 'center'.
    *
    * @constructor
    */
