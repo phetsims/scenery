@@ -92,6 +92,11 @@ define( function( require ) {
       this.upEvent( this.mouse, event );
     },
     
+    mouseUpImmediate: function( point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'mouseUpImmediate(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      this.upImmediateEvent( this.mouse, event );
+    },
+    
     mouseMove: function( point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'mouseMove(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       this.mouse.move( point, event );
@@ -155,6 +160,16 @@ define( function( require ) {
       }
     },
     
+    touchEndImmediate: function( id, point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'touchEndImmediate(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      var touch = this.findTouchById( id );
+      if ( touch ) {
+        this.upImmediateEvent( touch, event );
+      } else {
+        sceneryAssert && sceneryAssert( false, 'Touch not found for touchEndImmediate: ' + id );
+      }
+    },
+    
     touchMove: function( id, point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'touchMove(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var touch = this.findTouchById( id );
@@ -195,6 +210,16 @@ define( function( require ) {
         this.upEvent( pen, event );
       } else {
         sceneryAssert && sceneryAssert( false, 'Pen not found for penEnd: ' + id );
+      }
+    },
+    
+    penEndImmediate: function( id, point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'penEndImmediate(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      var pen = this.findTouchById( id );
+      if ( pen ) {
+        this.upImmediateEvent( pen, event );
+      } else {
+        sceneryAssert && sceneryAssert( false, 'Pen not found for penEndImmediate: ' + id );
       }
     },
     
@@ -249,6 +274,24 @@ define( function( require ) {
           break;
         case 'pen':
           this.penEnd( id, point, event );
+          break;
+        default:
+          if ( console.log ) {
+            console.log( 'Unknown pointer type: ' + type );
+          }
+      }
+    },
+    
+    pointerUpImmediate: function( id, type, point, event ) {
+      switch ( type ) {
+        case 'mouse':
+          this.mouseUpImmediate( point, event );
+          break;
+        case 'touch':
+          this.touchEndImmediate( id, point, event );
+          break;
+        case 'pen':
+          this.penEndImmediate( id, point, event );
           break;
         default:
           if ( console.log ) {
@@ -322,6 +365,12 @@ define( function( require ) {
       }
       
       pointer.trail = trail;
+    },
+    
+    upImmediateEvent: function( pointer, event ) {
+      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
+      
+      this.dispatchEvent( trail, 'upImmediate', pointer, event, true );
     },
     
     downEvent: function( pointer, event ) {
@@ -559,6 +608,22 @@ define( function( require ) {
           callback( domEvent );
         }, useCapture: useCapture } );
       }
+    },
+    
+    // temporary, for mouse events
+    addImmediateListener: function( type, callback, useCapture ) {
+      var input = this;
+      
+      this.listenerTarget.addEventListener( type, callback, useCapture );
+      this.listenerReferences.push( { type: type, callback: function immediateEvent( domEvent ) {
+        sceneryEventLog && sceneryEventLog( 'Running immediate event for ' + type );
+        
+        // process whether anything under the pointers changed before running additional input events
+        // input.validatePointers();
+        // if ( input.logEvents ) { input.eventLog.push( 'validatePointers();' ); }
+        
+        callback( domEvent );
+      }, useCapture: useCapture } );
     },
     
     disposeListeners: function() {
