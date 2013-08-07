@@ -854,21 +854,23 @@ define( function( require ) {
     },
     
     resize: function( width, height ) {
-      this.setSize( width, height );
-      this.rebuildLayers(); // TODO: why? - change this to resize individual layers
-      
-      if ( accessibility ) {
-        this.resizeAccessibilityLayer( width, height );
-        this.resizeFocusRingSVGContainer( width, height );
+      if ( this.sceneBounds.width !== width || this.sceneBounds.height !== height ) {
+        this.setSize( width, height );
+        this.rebuildLayers(); // TODO: why? - change this to resize individual layers
         
-        //Update the focus ring when the scene resizes.  Note: as of 5/10/2013 this only works properly when scaling up, and is buggy (off by a translation) when scaling down
-        if ( this.updateFocusRing && this.activePeer) {
-          // this.updateScene();
-          this.updateFocusRing();
+        if ( accessibility ) {
+          this.resizeAccessibilityLayer( width, height );
+          this.resizeFocusRingSVGContainer( width, height );
+          
+          //Update the focus ring when the scene resizes.  Note: as of 5/10/2013 this only works properly when scaling up, and is buggy (off by a translation) when scaling down
+          if ( this.updateFocusRing && this.activePeer) {
+            // this.updateScene();
+            this.updateFocusRing();
+          }
         }
+        
+        this.fireEvent( 'resize', { width: width, height: height } );
       }
-      
-      this.fireEvent( 'resize', { width: width, height: height } );
     },
     
     resizeAccessibilityLayer: function( width, height ) {
