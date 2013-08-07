@@ -40,6 +40,7 @@ define( function( require ) {
   svgTextSizeContainer.setAttribute( 'height', '2' );
   svgTextSizeContainer.setAttribute( 'style', 'display: hidden; pointer-events: none; position: absolute; left: -65535; right: -65535;' ); // so we don't flash it in a visible way to the user
   var svgTextSizeElement = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
+  svgTextSizeElement.appendChild( document.createTextNode( '' ) );
   svgTextSizeContainer.appendChild( svgTextSizeElement );
   
   // SVG bounds seems to be malfunctioning for Safari 5. Since we don't have a reproducible test machine for
@@ -218,17 +219,16 @@ define( function( require ) {
     *----------------------------------------------------------------------------*/
     
     createSVGFragment: function( svg, defs, group ) {
-      return document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
+      var element = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
+      element.appendChild( document.createTextNode( '' ) );
+      return element;
     },
     
     updateSVGFragment: function( element ) {
       var isRTL = this._direction === 'rtl';
       
-      // make the text the only child
-      while ( element.hasChildNodes() ) {
-        element.removeChild( element.lastChild );
-      }
-      element.appendChild( document.createTextNode( this._text ) );
+      // update the text-node's value
+      element.lastChild.nodeValue = this._text;
       
       element.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
       
