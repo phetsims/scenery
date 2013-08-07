@@ -869,6 +869,10 @@ define( function( require ) {
           }
         }
         
+        if ( this.input ) {
+          this.input.validatePointers();
+        }
+        
         this.fireEvent( 'resize', { width: width, height: height } );
       }
     },
