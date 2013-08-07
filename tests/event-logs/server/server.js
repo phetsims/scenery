@@ -71,6 +71,6 @@ http.createServer( function( req, res ) {
     });
     return
   }
-} ).listen( port, ip );
+} ).listen( port );
 console.log( 'ip: ' + ip );
 console.log( 'port: ' + port );
