@@ -324,8 +324,7 @@ define( function( require ) {
     },
     
     approximateCanvasWidth: function() {
-      // TODO: consider caching a scratch 1x1 canvas for this purpose
-      var context = document.createElement( 'canvas' ).getContext( '2d' );
+      var context = scenery.scratchContext;
       context.font = this.font;
       context.direction = this.direction;
       return context.measureText( this.text ).width;
