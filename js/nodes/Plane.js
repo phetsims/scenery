@@ -24,7 +24,7 @@ define( function( require ) {
    * @constructor
    */
   scenery.Plane = function Plane( options ) {
-    Rectangle.call( this, -1000, -1000, 3000, 3000, options );
+    Rectangle.call( this, -2000, -2000, 6000, 6000, options );
   };
   var Plane = scenery.Plane;
 
