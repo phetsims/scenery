@@ -100,7 +100,7 @@ define( function( require ) {
       if ( this.lineDash !== dash ) {
         this.lineDash = dash;
         if ( this.context.setLineDash ) {
-          this.context.setLineDash( dash );
+          this.context.setLineDash( dash === null ? [] : dash ); // see https://github.com/phetsims/scenery/issues/101 for null line-dash workaround
         } else if ( this.context.mozDash !== undefined ) {
           this.context.mozDash = dash;
         } else if ( this.context.webkitLineDash !== undefined ) {
