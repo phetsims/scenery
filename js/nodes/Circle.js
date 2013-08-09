@@ -69,6 +69,11 @@ define( function( require ) {
       return this;
     },
     
+    computeShapeBounds: function() {
+      // optimization, where we know our computed bounds will be just expanded by half the lineWidth if we are stroked (don't have to compute the stroke shape)
+      return this._stroke ? this._shape.bounds.dilated( this._lineDrawingStyles.lineWidth / 2 ) : this._shape.bounds;
+    },
+    
     // accelerated hit detection
     containsPointSelf: function( point ) {
       return point.x * point.x + point.y * point.y < this._radius * this._radius;
