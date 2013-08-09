@@ -1003,6 +1003,17 @@ define( function( require ) {
       }, parameters ) );
     },
     
+    initializeWindowEvents: function( parameters ) {
+      var element = this.$main[0];
+      this.initializeEvents( _.extend( {}, {
+        listenerTarget: window,
+        pointFromEvent: function pointFromEvent( evt ) {
+          var mainBounds = element.getBoundingClientRect();
+          return new Vector2( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
+        }
+      }, parameters ) );
+    },
+    
     initializeEvents: function( parameters ) {
       var scene = this;
       
