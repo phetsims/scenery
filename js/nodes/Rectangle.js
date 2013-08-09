@@ -17,6 +17,7 @@ define( function( require ) {
   
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
+  var Vector2 = require( 'DOT/Vector2' );
   
   /**
    * Currently, all numerical parameters should be finite.
@@ -86,10 +87,16 @@ define( function( require ) {
     createRectangleShape: function() {
       sceneryAssert && sceneryAssert( isFinite( this._rectX ), 'A rectangle needs to have a finite x (' + this._rectX + ')' );
       sceneryAssert && sceneryAssert( isFinite( this._rectY ), 'A rectangle needs to have a finite x (' + this._rectY + ')' );
-      sceneryAssert && sceneryAssert( this._rectWidth >= 0 && isFinite( this._rectWidth ), 'A rectangle needs to have a non-negative finite width (' + this._rectWidth + ')' );
-      sceneryAssert && sceneryAssert( this._rectHeight >= 0 && isFinite( this._rectHeight ), 'A rectangle needs to have a non-negative finite height (' + this._rectHeight + ')' );
-      sceneryAssert && sceneryAssert( this._rectArcWidth >= 0 && isFinite( this._rectArcWidth ), 'A rectangle needs to have a non-negative finite arcWidth (' + this._rectArcWidth + ')' );
-      sceneryAssert && sceneryAssert( this._rectArcHeight >= 0 && isFinite( this._rectArcHeight ), 'A rectangle needs to have a non-negative finite arcHeight (' + this._rectArcHeight + ')' );
+      sceneryAssert && sceneryAssert( this._rectWidth >= 0 && isFinite( this._rectWidth ),
+                                      'A rectangle needs to have a non-negative finite width (' + this._rectWidth + ')' );
+      sceneryAssert && sceneryAssert( this._rectHeight >= 0 && isFinite( this._rectHeight ),
+                                      'A rectangle needs to have a non-negative finite height (' + this._rectHeight + ')' );
+      sceneryAssert && sceneryAssert( this._rectArcWidth >= 0 && isFinite( this._rectArcWidth ),
+                                      'A rectangle needs to have a non-negative finite arcWidth (' + this._rectArcWidth + ')' );
+      sceneryAssert && sceneryAssert( this._rectArcHeight >= 0 && isFinite( this._rectArcHeight ),
+                                      'A rectangle needs to have a non-negative finite arcHeight (' + this._rectArcHeight + ')' );
+      sceneryAssert && sceneryAssert( !this.isRounded() || ( this._rectWidth >= this._rectArcWidth * 2 && this._rectHeight >= this._rectArcHeight * 2 ),
+                                      'The rounded sections of the rectangle should not intersect (the length of the straight sections shouldn\'t be negative' );
       
       if ( this.isRounded() ) {
         return Shape.roundRectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight, this._rectArcWidth, this._rectArcHeight );
@@ -106,6 +113,59 @@ define( function( require ) {
     computeShapeBounds: function() {
       // optimization, where we know our computed bounds will be just expanded by half the lineWidth if we are stroked (don't have to compute the stroke shape)
       return this._stroke ? this._shape.bounds.dilated( this._lineDrawingStyles.lineWidth / 2 ) : this._shape.bounds;
+    },
+    
+    // accelerated hit detection for axis-aligned optionally-rounded rectangle
+    // fast computation if it isn't rounded. if rounded, we check if a corner computation is needed (usually isn't), and only check that one needed corner
+    containsPointSelf: function( point ) {
+      var result = point.x >= this._rectX &&
+                   point.x <= this._rectX + this._rectWidth &&
+                   point.y >= this._rectY &&
+                   point.y <= this._rectY + this._rectHeight;
+      
+      if ( !result || !this.isRounded() ) {
+        return result;
+      }
+      
+      // we are rounded and inside the logical rectangle (if it didn't have rounded corners)
+      
+      // closest corner arc's center (we assume the rounded rectangle's arcs are 90 degrees fully, and don't intersect)
+      var closestCornerX, closestCornerY, guaranteedInside = false;
+      
+      // if we are to the inside of the closest corner arc's center, we are guaranteed to be in the rounded rectangle (guaranteedInside)
+      if ( point.x < this._rectX + this._rectWidth / 2 ) {
+        closestCornerX = this._rectX + this._rectArcWidth;
+        guaranteedInside = guaranteedInside || point.x >= closestCornerX;
+      } else {
+        closestCornerX = this._rectX + this._rectWidth - this._rectArcWidth;
+        guaranteedInside = guaranteedInside || point.x <= closestCornerX;
+      }
+      if ( guaranteedInside ) { return true; }
+      
+      if ( point.y < this._rectY + this._rectHeight / 2 ) {
+        closestCornerY = this._rectY + this._rectArcHeight;
+        guaranteedInside = guaranteedInside || point.y >= closestCornerY;
+      } else {
+        closestCornerY = this._rectY + this._rectHeight - this._rectArcHeight;
+        guaranteedInside = guaranteedInside || point.y <= closestCornerY;
+      }
+      if ( guaranteedInside ) { return true; }
+      
+      // we are now in the rectangular region between the logical corner and the center of the closest corner's arc.
+      
+      // offset from the closest corner's arc center
+      var offsetX = point.x - closestCornerX;
+      var offsetY = point.y - closestCornerY;
+      
+      // normalize the coordinates so now we are dealing with a unit circle
+      // (technically arc, but we are guaranteed to be in the area covered by the arc, so we just consider the circle)
+      // NOTE: we are rounded, so both arcWidth and arcHeight are non-zero (this is well defined)
+      offsetX /= this._rectArcWidth;
+      offsetY /= this._rectArcHeight;
+      
+      offsetX *= offsetX;
+      offsetY *= offsetY;
+      return offsetX + offsetY <= 1; // return whether we are in the rounded corner. see the formula for an ellipse
     },
     
     // override paintCanvas with a faster version, since fillRect and drawRect don't affect the current default path

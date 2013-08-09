@@ -167,6 +167,15 @@
             } ) );
           };
           
+          window.setupRoundRect = function() {
+            var rect = new scenery.Rectangle( 100, 50, 300, 150, 150, 50, { fill: 'red', cursor: 'pointer' } );
+            scene.addChild( rect );
+            scene.updateOnRequestAnimationFrame();
+            scene.initializeStandaloneEvents();
+            
+            rect.containsPointSelf( dot( 111, 118 ) ); // 111,118
+          };
+          
           window.setupButton = function() {
             var rect = new scenery.Rectangle( 50, 50, 100, 50, { fill: '#f00' } );
             scene.addChild( rect );
