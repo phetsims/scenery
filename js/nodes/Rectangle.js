@@ -95,11 +95,14 @@ define( function( require ) {
                                       'A rectangle needs to have a non-negative finite arcWidth (' + this._rectArcWidth + ')' );
       sceneryAssert && sceneryAssert( this._rectArcHeight >= 0 && isFinite( this._rectArcHeight ),
                                       'A rectangle needs to have a non-negative finite arcHeight (' + this._rectArcHeight + ')' );
-      sceneryAssert && sceneryAssert( !this.isRounded() || ( this._rectWidth >= this._rectArcWidth * 2 && this._rectHeight >= this._rectArcHeight * 2 ),
-                                      'The rounded sections of the rectangle should not intersect (the length of the straight sections shouldn\'t be negative' );
+      // sceneryAssert && sceneryAssert( !this.isRounded() || ( this._rectWidth >= this._rectArcWidth * 2 && this._rectHeight >= this._rectArcHeight * 2 ),
+      //                                 'The rounded sections of the rectangle should not intersect (the length of the straight sections shouldn\'t be negative' );
       
       if ( this.isRounded() ) {
-        return Shape.roundRectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight, this._rectArcWidth, this._rectArcHeight );
+        // copy border-radius CSS behavior in Chrome, where the arcs won't intersect, in cases where the arc segments at full size would intersect each other
+        var maximumArcSize = Math.min( this._rectWidth / 2, this._rectHeight / 2 );
+        return Shape.roundRectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight,
+                                     Math.min( maximumArcSize, this._rectArcWidth ), Math.min( maximumArcSize, this._rectArcHeight ) );
       } else {
         return Shape.rectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
       }
