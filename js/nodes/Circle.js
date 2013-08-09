@@ -69,6 +69,11 @@ define( function( require ) {
       return this;
     },
     
+    // accelerated hit detection
+    containsPointSelf: function( point ) {
+      return point.x * point.x + point.y * point.y < this._radius * this._radius;
+    },
+    
     get radius() { return this.getRadius(); },
     set radius( value ) { return this.setRadius( value ); }
   } );
