@@ -49,12 +49,14 @@ define( function( require ) {
   var useDOMAsFastBounds = window.navigator.userAgent.indexOf( 'like Gecko) Version/5' ) !== -1 &&
                            window.navigator.userAgent.indexOf( 'Safari/' ) !== -1;
   
+  var hybridTextNode; // a node that is used to measure SVG text top/height for hybrid caching purposes
+  
   scenery.Text = function Text( text, options ) {
     this._text         = '';                   // filled in with mutator
     this._font         = scenery.Font.DEFAULT; // default font, usually 10px sans-serif
     this._direction    = 'ltr';                // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
-    this._boundsMethod = 'fastCanvas';         // fast (SVG/DOM, no canvas rendering allowed), fastCanvas (SVG/DOM, canvas rendering allowed without dirty regions),
-                                               //   or accurate (Canvas accurate recursive)
+    this._boundsMethod = 'hybrid';             // fast (SVG/DOM, no canvas rendering allowed), fastCanvas (SVG/DOM, canvas rendering allowed without dirty regions),
+                                               // accurate (Canvas accurate recursive), or hybrid (cache SVG height, use canvas measureText for width)
     
     // whether the text is rendered as HTML or not. if defined (in a subtype constructor), use that value instead
     this._isHTML = this._isHTML === undefined ? false : this._isHTML;
@@ -101,7 +103,7 @@ define( function( require ) {
     },
     
     setBoundsMethod: function( method ) {
-      sceneryAssert && sceneryAssert( method === 'fast' || method === 'fastCanvas' || method === 'accurate', '"fast" and "accurate" are the only allowed boundsMethod values for Text' );
+      sceneryAssert && sceneryAssert( method === 'fast' || method === 'fastCanvas' || method === 'accurate' || method === 'hybrid', 'Unknown Text boundsMethod' );
       if ( method !== this._boundsMethod ) {
         this._boundsMethod = method;
         this.updateTextFlags();
@@ -156,12 +158,13 @@ define( function( require ) {
     
     invalidateText: function() {
       // investigate http://mudcu.be/journal/2011/01/html5-typographic-metrics/
-      if ( this._boundsMethod === 'fast' || this._boundsMethod === 'fastCanvas' ) {
-        this.invalidateSelf( ( this._isHTML || useDOMAsFastBounds ) ?
-                             this.approximateDOMBounds() :
-                             this.approximateSVGBounds() );
+      if ( this._isHTML || ( useDOMAsFastBounds && this._boundsMethod !== 'accurate' ) ) {
+        this.invalidateSelf( this.approximateDOMBounds() );
+      } else if ( this._boundsMethod === 'hybrid' ) {
+        this.invalidateSelf( this.approximateHybridBounds() );
+      } else if ( this._boundsMethod === 'fast' || this._boundsMethod === 'fastCanvas' ) {
+        this.invalidateSelf( this.approximateSVGBounds() );
       } else {
-        sceneryAssert && sceneryAssert( !this._isHTML, 'HTML text is not allowed with the accurate bounds method' );
         this.invalidateSelf( this.accurateCanvasBounds() );
       }
       
@@ -339,6 +342,23 @@ define( function( require ) {
       return new Bounds2( rect.x, rect.y, rect.x + rect.width, rect.y + rect.height );
     },
     
+    approximateHybridBounds: function() {
+      if ( !hybridTextNode ) {
+        return Bounds2.NOTHING; // we are the hybridTextNode, ignore us
+      }
+      
+      if ( this._font._cachedSVGBounds === undefined ) {
+        hybridTextNode.setFont( this._font );
+        this._font._cachedSVGBounds = hybridTextNode.getBounds();
+      }
+      
+      var canvasWidth = this.approximateCanvasWidth();
+      var verticalBounds = this._font._cachedSVGBounds;
+      
+      // it seems that SVG bounds generally have x=0, so we hard code that here
+      return new Bounds2( 0, verticalBounds.minY, canvasWidth, verticalBounds.maxY );
+    },
+    
     approximateDOMBounds: function() {
       var maxHeight = 1024; // technically this will fail if the font is taller than this!
       var isRTL = this.direction === 'rtl';
@@ -499,6 +519,8 @@ define( function( require ) {
   /* jshint -W064 */
   Fillable( Text );
   Strokable( Text );
+  
+  hybridTextNode = new Text( 'm', { boundsMethod: 'fast' } );
 
   return Text;
 } );

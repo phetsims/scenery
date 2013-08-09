@@ -15,7 +15,8 @@ define( function( require ) {
     'selfBounds',
     'childBounds',
     'bounds',
-    'resize'
+    'resize',
+    'boundsAccuracy'
   ];
   
   scenery.FixedNodeEvents = function FixedNodeEvents( type ) {
