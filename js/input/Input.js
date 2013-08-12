@@ -461,7 +461,7 @@ define( function( require ) {
     validatePointers: function() {
       var that = this;
       _.each( this.pointers, function( pointer ) {
-        if ( pointer.point !== null ) {
+        if ( pointer.point ) {
           that.branchChangeEvents( pointer, null, false );
         }
       } );
