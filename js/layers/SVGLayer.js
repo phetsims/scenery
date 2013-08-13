@@ -359,7 +359,7 @@ define( function( require ) {
     
     updateBaseTransform: function( includesBaseTransformChange ) {
       sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' updateBaseTransform' );
-      var transform = this.baseTrail.getTransform();
+      var transform = this.baseTrail.getTransform(); // TODO: consider improving this, CSS+SVG bottleneck
       
       if ( this.cssTransform ) {
         // set the full transform!
