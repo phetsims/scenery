@@ -431,12 +431,20 @@ define( function( require ) {
     
     canvasMarkLocalBounds: function( localBounds, trail ) {
       sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' canvasMarkLocalBounds: ' + localBounds.toString() + ' on ' + trail.toString() );
-      this.canvasMarkGlobalBounds( trail.localToGlobalBounds( localBounds ) );
+      if ( !this.canUseDirtyRegions() ) {
+        this.dirtyBounds = Bounds2.EVERYTHING;
+      } else {
+        this.canvasMarkGlobalBounds( trail.localToGlobalBounds( localBounds ) );
+      }
     },
     
     canvasMarkParentBounds: function( parentBounds, trail ) {
       sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' canvasMarkParentBounds: ' + parentBounds.toString() + ' on ' + trail.toString() );
-      this.canvasMarkGlobalBounds( trail.parentToGlobalBounds( parentBounds ) );
+      if ( !this.canUseDirtyRegions() ) {
+        this.dirtyBounds = Bounds2.EVERYTHING;
+      } else {
+        this.canvasMarkGlobalBounds( trail.parentToGlobalBounds( parentBounds ) );
+      }
     },
     
     canvasMarkSelf: function( instance ) {
