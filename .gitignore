@@ -1,5 +1,5 @@
-scenery.iml
+build/
 node_modules/
-dist/
+*.iml
 .DS_Store
 .DS_Store?
