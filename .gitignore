@@ -1,3 +1,5 @@
 scenery.iml
-node_modules
-dist
+node_modules/
+dist/
+.DS_Store
+.DS_Store?
