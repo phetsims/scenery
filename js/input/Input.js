@@ -460,11 +460,14 @@ define( function( require ) {
     
     validatePointers: function() {
       var that = this;
-      _.each( this.pointers, function( pointer ) {
+      
+      var i = this.pointers.length;
+      while ( i-- ) {
+        var pointer = this.pointers[i];
         if ( pointer.point ) {
           that.branchChangeEvents( pointer, null, false );
         }
-      } );
+      }
     },
     
     dispatchEvent: function( trail, type, pointer, event, bubbles ) {
@@ -636,7 +639,10 @@ define( function( require ) {
     fireBatchedEvents: function() {
       if ( this.batchedCallbacks.length ) {
         sceneryEventLog && sceneryEventLog( 'Input.fireBatchedEvents length:' + this.batchedCallbacks.length );
-        _.each( this.batchedCallbacks, function callbackLoop( callback ) { callback(); } );
+        var len = this.batchedCallbacks.length;
+        for ( var i = 0; i < len; i++ ) {
+          this.batchedCallbacks[i]();
+        }
         this.batchedCallbacks = [];
       }
     }

@@ -124,9 +124,10 @@ define( function( require ) {
     reindexTrails: function( zIndex ) {
       Layer.prototype.reindex.call( this, zIndex );
       
-      _.each( this.trails, function( trail ) {
-        trail.reindex();
-      } );
+      var i = this.trails.length;
+      while ( i-- ) {
+        this.trails[i].reindex();
+      }
     },
     
     getIndexOfTrail: function( trail ) {

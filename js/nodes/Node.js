@@ -213,15 +213,15 @@ define( function( require ) {
     
     // TODO: efficiency by batching calls?
     setChildren: function( children ) {
-      var node = this;
       if ( this._children !== children ) {
-        // TODO: maybe iterating in reverse is more efficient?
-        _.each( this._children.slice( 0 ), function( child ) {
-          node.removeChild( child );
-        } );
-        _.each( children, function( child ) {
-          node.addChild( child );
-        } );
+        var i = this._children.length;
+        while ( i-- ) {
+          this.removeChild( this._children[i] );
+        }
+        var len = children.length;
+        for ( i = 0; i < len; i++ ) {
+          this.addChild( children[i] );
+        }
       }
     },
     
