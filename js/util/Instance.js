@@ -61,6 +61,7 @@ define( function( require ) {
     get node() { return this.getNode(); },
     
     changeLayer: function( newLayer ) {
+      // NOTE: DO NOT change _layerTrails somehow in this function. we don't make a defensive copy of that array during stitching!
       if ( newLayer !== this.layer ) {
         sceneryLayerLog && sceneryLayerLog( 'changing instance ' + this.trail.toString() + ' to layer ' + ( newLayer ? '#' + newLayer.id : 'null' ) );
         this.layer && ( this.layer._instanceCount -= 1 );

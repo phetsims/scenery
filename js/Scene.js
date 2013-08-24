@@ -471,9 +471,10 @@ define( function( require ) {
       sceneryLayerLog && sceneryLayerLog( '------ updating layer references' );
       
       // add/remove trails from their necessary layers
-      _.each( stitchData.affectedInstances, function( instance ) {
-        instance.updateLayer();
-      } );
+      i = stitchData.affectedInstances.length;
+      while ( i-- ) {
+        stitchData.affectedInstances[i].updateLayer();
+      }
       
       sceneryAssertExtra && sceneryAssertExtra( this.layerAudit() );
       
@@ -534,10 +535,12 @@ define( function( require ) {
       
       function addPendingTrailsToLayer() {
         // add the necessary nodes to the layer
-        _.each( instancesToAddToLayer, function( instance ) {
+        var len = instancesToAddToLayer.length;
+        for ( var i = 0; i < len; i++ ) {
+          var instance = instancesToAddToLayer[i];
           instance.changeLayer( currentLayer );
           stitchData.affectedInstances.push( instance );
-        } );
+        };
         instancesToAddToLayer.length = 0;
       }
       
@@ -631,13 +634,15 @@ define( function( require ) {
           addPendingTrailsToLayer();
           
           // move over all of afterLayer's trails to beforeLayer
-          // defensive copy needed, since this will be modified at the same time
-          _.each( afterLayer._layerTrails.slice( 0 ), function( trail ) {
+          var len = afterLayer._layerTrails.length;
+          for ( var i = 0; i < len; i++ ) {
+            var trail = afterLayer._layerTrails[i];
+            
             trail.reindex();
             var instance = trail.getInstance();
             instance.changeLayer( beforeLayer ); // TODO: performance: handle instances natively
             stitchData.affectedInstances.push( instance );
-          } );
+          }
           
         } else if ( beforeLayer && beforeLayer === afterLayer && boundaries.length > 0 ) {
           // need to 'unglue' and split the layer
