@@ -437,42 +437,32 @@ define( function( require ) {
       
       sceneryLayerLog && sceneryLayerLog( '------ finished intervals in stitching' );
       
-      // reindex all of the relevant layer trails
+      // reindex all of the relevant layer trails, and dispose/add as necessary
       i = this.layers.length;
       while ( i-- ) {
         var layer = this.layers[i];
         layer.startBoundary.reindex();
         layer.endBoundary.reindex(); // TODO: performance: this repeats some work, verify in layer audit that we are sharing boundaries properly, then only reindex end boundary on last layer
-      }
-      i = stitchData.newLayers.length;
-      while ( i-- ) {
-        var layer = stitchData.newLayers[i];
-        layer.startBoundary.reindex();
-        layer.endBoundary.reindex(); // TODO: performance: this repeats some work, verify in layer audit that we are sharing boundaries properly, then only reindex end boundary on last layer
-      }
-      
-      // remove necessary layers. do this before adding layers, since insertLayer currently does not gracefully handle weird overlapping cases
-      i = this.layers.length;
-      // NOTE: this has to iterate in reverse, since we are removing elements that are indexed
-      while ( i-- ) {
-        var layer = this.layers[i];
         
+        // remove necessary layers. do this before adding layers, since insertLayer currently does not gracefully handle weird overlapping cases
         // layers with zero trails should be removed
         if ( layer._instanceCount === 0 ) {
           sceneryLayerLog && sceneryLayerLog( 'disposing layer: ' + layer.getId() );
           this.disposeLayer( layer );
         }
       }
-      
-      // add new layers. we do this before the add/remove trails, since those can trigger layer side effects
       i = stitchData.newLayers.length;
       while ( i-- ) {
         var layer = stitchData.newLayers[i];
+        layer.startBoundary.reindex();
+        layer.endBoundary.reindex(); // TODO: performance: this repeats some work, verify in layer audit that we are sharing boundaries properly, then only reindex end boundary on last layer
+        
+        // add new layers. we do this before the add/remove trails, since those can trigger layer side effects
         sceneryAssert && sceneryAssert( layer._instanceCount, 'ensure we are not adding empty layers' );
         
         sceneryLayerLog && sceneryLayerLog( 'inserting layer: ' + layer.getId() );
         scene.insertLayer( layer );
-      };
+      }
       
       // set the layers' elements' z-indices, and reindex their trails so they are in a consistent state
       // TODO: performance: don't reindex layers if no layers were added or removed?
