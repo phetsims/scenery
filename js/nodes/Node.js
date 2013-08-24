@@ -507,9 +507,10 @@ define( function( require ) {
       this._touchBoundsDirty = true;
       
       // and set flags for all ancestors
-      _.each( this._parents, function( parent ) {
-        parent.invalidateChildBounds();
-      } );
+      var i = this._parents.length;
+      while ( i-- ) {
+        this._parents[i].invalidateChildBounds();
+      }
     },
     
     // recursively tag all ancestors with _childBoundsDirty
@@ -519,9 +520,10 @@ define( function( require ) {
         this._childBoundsDirty = true;
         this._mouseBoundsDirty = true;
         this._touchBoundsDirty = true;
-        _.each( this._parents, function( parent ) {
-          parent.invalidateChildBounds();
-        } );
+        var i = this._parents.length;
+        while ( i-- ) {
+          this._parents[i].invalidateChildBounds();
+        }
       }
     },
     
@@ -531,18 +533,20 @@ define( function( require ) {
       this._paintDirty = true;
       
       // and set flags for all ancestors
-      _.each( this._parents, function( parent ) {
-        parent.invalidateChildPaint();
-      } );
+      var i = this._parents.length;
+      while ( i-- ) {
+        this._parents[i].invalidateChildPaint();
+      }
     },
     
     invalidateSubtreePaint: function() {
       this._subtreePaintDirty = true;
       
       // and set flags for all ancestors
-      _.each( this._parents, function( parent ) {
-        parent.invalidateChildPaint();
-      } );
+      var i = this._parents.length;
+      while ( i-- ) {
+        this._parents[i].invalidateChildPaint();
+      }
     },
     
     // recursively tag all ancestors with _childPaintDirty
@@ -550,9 +554,10 @@ define( function( require ) {
       // don't bother updating if we've already been tagged
       if ( !this._childPaintDirty ) {
         this._childPaintDirty = true;
-        _.each( this._parents, function( parent ) {
-          parent.invalidateChildPaint();
-        } );
+        var i = this._parents.length;
+        while ( i-- ) {
+          this._parents[i].invalidateChildPaint();
+        }
       }
     },
     
@@ -624,11 +629,13 @@ define( function( require ) {
       // defensive copy, since we use mutable modifications below
       var bounds = this._selfBounds.copy();
       
-      _.each( this.children, function( child ) {
+      var i = this._children.length;
+      while ( i-- ) {
+        var child = this._children[i];
         if ( child.isVisible() ) {
           bounds.includeBounds( child.getVisibleBounds() );
         }
-      } );
+      }
       
       sceneryAssert && sceneryAssert( bounds.isFinite() || bounds.isEmpty(), 'Visible bounds should not be infinite' );
       return this.localToParentBounds( bounds );
@@ -755,9 +762,10 @@ define( function( require ) {
     
     walkDepthFirst: function( callback ) {
       callback( this );
-      _.each( this._children, function( child ) {
-        child.walkDepthFirst( callback );
-      } );
+      var length = this._children.length;
+      for ( var i = 0; i < length; i++ ) {
+        this._children[i].walkDepthFirst( callback );
+      }
     },
     
     getChildrenWithinBounds: function( bounds ) {
