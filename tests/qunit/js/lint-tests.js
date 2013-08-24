@@ -14,15 +14,17 @@
   } );
   
   var options = window.jshintOptions;
-  var globals = options.globals;
-  delete options.globals; // it's technically an invalid option when passed to qHint
-  
-  _.each( filenames, function( filename ) {
-    var name = filename.slice( filename.lastIndexOf( '/' ) + 1, filename.indexOf( '?' ) );
-    var lib = filename.slice( 0, filename.lastIndexOf( '/js/' ) );
-    lib = lib.slice( lib.lastIndexOf( '/' ) + 1 );
-    qHint( lib + ': ' + name, filename, options, globals );
-  } );
+  if ( options ) {
+    var globals = options.globals;
+    delete options.globals; // it's technically an invalid option when passed to qHint
+    
+    _.each( filenames, function( filename ) {
+      var name = filename.slice( filename.lastIndexOf( '/' ) + 1, filename.indexOf( '?' ) );
+      var lib = filename.slice( 0, filename.lastIndexOf( '/js/' ) );
+      lib = lib.slice( lib.lastIndexOf( '/' ) + 1 );
+      qHint( lib + ': ' + name, filename, options, globals );
+    } );
+  }
   
 })();
 

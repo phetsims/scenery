@@ -50,6 +50,7 @@ define( function( require ) {
                            window.navigator.userAgent.indexOf( 'Safari/' ) !== -1;
   
   var hybridTextNode; // a node that is used to measure SVG text top/height for hybrid caching purposes
+  var initializingHybridTextNode = false;
   
   scenery.Text = function Text( text, options ) {
     this._text         = '';                   // filled in with mutator
@@ -335,7 +336,17 @@ define( function( require ) {
     
     approximateSVGBounds: function() {
       if ( !svgTextSizeContainer.parentNode ) {
-        document.body.appendChild( svgTextSizeContainer );
+        if ( document.body ) {
+          document.body.appendChild( svgTextSizeContainer );
+        } else {
+          // TODO: better way to handle the hybridTextNode being added inside the HEAD? Requiring a body for proper operation might be a problem.
+          if ( initializingHybridTextNode ) {
+            // if this is almost assuredly the hybridTextNode, return nothing for now. TODO: better way of handling this! it's a hack!
+            return Bounds2.NOTHING;
+          } else {
+            throw new Error( 'No document.body and trying to get approximate SVG bounds of a Text node' );
+          }
+        }
       }
       this.updateSVGFragment( svgTextSizeElement );
       var rect = svgTextSizeElement.getBBox();
@@ -520,7 +531,9 @@ define( function( require ) {
   Fillable( Text );
   Strokable( Text );
   
+  initializingHybridTextNode = true;
   hybridTextNode = new Text( 'm', { boundsMethod: 'fast' } );
+  initializingHybridTextNode = false;
 
   return Text;
 } );

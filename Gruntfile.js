@@ -19,11 +19,11 @@ module.exports = function( grunt ) {
         options: {
           almond: true,
           mainConfigFile: "js/config.js",
-          out: "dist/development/scenery.js",
+          out: "build/development/scenery.js",
           name: "config",
           optimize: 'none',
           wrap: {
-            startFile: [ "js/wrap-start.frag", "contrib/has.js" ],
+            startFile: [ "js/wrap-start.frag", "lib/has.js" ],
             endFile: [ "js/wrap-end.frag" ]
           }
         }
@@ -34,13 +34,13 @@ module.exports = function( grunt ) {
         options: {
           almond: true,
           mainConfigFile: "js/production-config.js",
-          out: "dist/standalone/scenery.min.js",
+          out: "build/standalone/scenery.min.js",
           name: "production-config",
           optimize: 'uglify2',
           generateSourceMaps: true,
           preserveLicenseComments: false,
           wrap: {
-            startFile: [ "js/wrap-start.frag", "contrib/has.js" ],
+            startFile: [ "js/wrap-start.frag", "lib/has.js" ],
             endFile: [ "js/wrap-end.frag" ]
           },
           uglify2: {
@@ -63,7 +63,7 @@ module.exports = function( grunt ) {
         options: {
           almond: true,
           mainConfigFile: "js/production-config.js",
-          out: "dist/production/scenery.min.js",
+          out: "build/production/scenery.min.js",
           name: "production-config",
           optimize: 'uglify2',
           generateSourceMaps: true,
@@ -130,7 +130,7 @@ module.exports = function( grunt ) {
       
       var sceneryFilename = 
       
-      grunt.file.copy( 'dist/standalone/scenery.min.js', 'snapshots/scenery-min' + suffix );
+      grunt.file.copy( 'build/standalone/scenery.min.js', 'snapshots/scenery-min' + suffix );
       grunt.file.copy( 'tests/benchmarks/js/perf-current.js', 'snapshots/perf' + suffix );
       
       grunt.log.writeln( 'Copied standalone js to snapshots/scenery-min' + suffix );
