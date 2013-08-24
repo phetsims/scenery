@@ -344,7 +344,7 @@ define( function( require ) {
         
         var oldBounds = this._bounds;
         
-        var newBounds = this.localToParentBounds( this._selfBounds ).union( that.localToParentBounds( this._childBounds ) );
+        var newBounds = this.localToParentBounds( this._selfBounds.union( this._childBounds ) );
         var changed = !newBounds.equals( oldBounds );
         
         if ( changed ) {
