@@ -64,9 +64,10 @@ define( function( require ) {
         trail.addDescendant( node );
       } else {
         // process it as an array
-        _.each( nodes, function( node ) {
-          trail.addDescendant( node );
-        } );
+        var len = nodes.length;
+        for ( var i = 0; i < len; i++ ) {
+          trail.addDescendant( nodes[i] );
+        }
       }
     }
   };

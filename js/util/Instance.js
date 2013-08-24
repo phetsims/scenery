@@ -169,26 +169,29 @@ define( function( require ) {
     },
     
     addPeers: function() {
-      var thisInstance = this;
       var node = this.getNode();
       var scene = this.getScene();
       
-      if ( node._peers.length ) {
-        _.each( node._peers, function( desc ) {
-          var peer = new scenery.AccessibilityPeer( thisInstance, desc.element, desc.options );
+      var len = node._peers.length;
+      if ( len ) {
+        for ( var i = 0; i < len; i++ ) {
+          var desc = node._peers[i];
+          var peer = new scenery.AccessibilityPeer( this, desc.element, desc.options );
           scene.addPeer( peer );
-          thisInstance.peers.push( peer );
-        } );
+          this.peers.push( peer );
+        }
       }
     },
     
     removePeers: function() {
       var scene = this.getScene();
       
-      _.each( this.peers, function( peer ) {
+      var i = this.peers.length;
+      while ( i-- ) {
+        var peer = this.peers[i];
         scene.removePeer( peer );
         peer.dispose();
-      } );
+      }
       
       this.peers.length = 0; // clear this.peers
     },
@@ -223,17 +226,23 @@ define( function( require ) {
     *----------------------------------------------------------------------------*/
     
     notifyVisibilityChange: function() {
-      var thisInstance = this;
       sceneryEventLog && sceneryEventLog( 'notifyVisibilityChange: ' + this.trail.toString() + ', ' + this.getLayerString() );
       
-      _.each( this.getAffectedLayers(), function( layer ) { layer.notifyVisibilityChange( thisInstance ); } );
+      var affectedLayers = this.getAffectedLayers();
+      var i = affectedLayers.length;
+      while ( i-- ) {
+        affectedLayers[i].notifyVisibilityChange( this );
+      }
     },
     
     notifyOpacityChange: function() {
-      var thisInstance = this;
       sceneryEventLog && sceneryEventLog( 'notifyOpacityChange: ' + this.trail.toString() + ', ' + this.getLayerString() );
       
-      _.each( this.getAffectedLayers(), function( layer ) { layer.notifyOpacityChange( thisInstance ); } );
+      var affectedLayers = this.getAffectedLayers();
+      var i = affectedLayers.length;
+      while ( i-- ) {
+        affectedLayers[i].notifyOpacityChange( this );
+      }
     },
     
     notifyBeforeSelfChange: function() {
@@ -245,10 +254,13 @@ define( function( require ) {
     },
     
     notifyBeforeSubtreeChange: function() {
-      var thisInstance = this;
       sceneryEventLog && sceneryEventLog( 'notifyBeforeSubtreeChange: ' + this.trail.toString() + ', ' + this.getLayerString() );
       
-      _.each( this.getAffectedLayers(), function( layer ) { layer.notifyBeforeSubtreeChange( thisInstance ); } );
+      var affectedLayers = this.getAffectedLayers();
+      var i = affectedLayers.length;
+      while ( i-- ) {
+        affectedLayers[i].notifyBeforeSubtreeChange( this );
+      }
     },
     
     notifyDirtySelfPaint: function() {
@@ -259,24 +271,33 @@ define( function( require ) {
     
     // TODO: consider special post-transform type?
     notifyDirtySubtreePaint: function() {
-      var thisInstance = this;
       sceneryEventLog && sceneryEventLog( 'notifyDirtySubtreePaint: ' + this.trail.toString() + ', ' + this.getLayerString() );
       
-      _.each( this.getAffectedLayers(), function( layer ) { layer.notifyDirtySubtreePaint( thisInstance ); } );
+      var affectedLayers = this.getAffectedLayers();
+      var i = affectedLayers.length;
+      while ( i-- ) {
+        affectedLayers[i].notifyDirtySubtreePaint( this );
+      }
     },
     
     notifyDirtySubtreeBounds: function() {
-      var thisInstance = this;
       sceneryEventLog && sceneryEventLog( 'notifyDirtySubtreeBounds: ' + this.trail.toString() + ', ' + this.getLayerString() );
       
-      _.each( this.getAffectedLayers(), function( layer ) { layer.notifyDirtySubtreeBounds( thisInstance ); } );
+      var affectedLayers = this.getAffectedLayers();
+      var i = affectedLayers.length;
+      while ( i-- ) {
+        affectedLayers[i].notifyDirtySubtreeBounds( this );
+      }
     },
     
     notifyTransformChange: function() {
-      var thisInstance = this;
       sceneryEventLog && sceneryEventLog( 'notifyTransformChange: ' + this.trail.toString() + ', ' + this.getLayerString() );
       
-      _.each( this.getAffectedLayers(), function( layer ) { layer.notifyTransformChange( thisInstance ); } );
+      var affectedLayers = this.getAffectedLayers();
+      var i = affectedLayers.length;
+      while ( i-- ) {
+        affectedLayers[i].notifyTransformChange( this );
+      }
     },
     
     notifyBoundsAccuracyChange: function() {
