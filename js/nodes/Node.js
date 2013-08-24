@@ -769,7 +769,15 @@ define( function( require ) {
     },
     
     getChildrenWithinBounds: function( bounds ) {
-      return _.filter( this._children, function( child ) { return !child._bounds.intersection( bounds ).isEmpty(); } );
+      var result = [];
+      var length = this._children.length;
+      for ( var i = 0; i < length; i++ ) {
+        var child = this._children[i];
+        if ( !child._bounds.intersection( bounds ).isEmpty() ) {
+          result.push( child );
+        }
+      }
+      return result;
     },
     
     // TODO: set this up with a mix-in for a generic notifier?
@@ -1611,51 +1619,87 @@ define( function( require ) {
     },
     
     notifyVisibilityChange: function() {
-      _.each( this._instances, function( instance ) { instance.notifyVisibilityChange(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyVisibilityChange();
+      }
     },
     
     notifyOpacityChange: function() {
-      _.each( this._instances, function( instance ) { instance.notifyOpacityChange(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyOpacityChange();
+      }
     },
     
     notifyBeforeSelfChange: function() {
-      _.each( this._instances, function( instance ) { instance.notifyBeforeSelfChange(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyBeforeSelfChange();
+      }
     },
     
     notifyBeforeSubtreeChange: function() {
-      _.each( this._instances, function( instance ) { instance.notifyBeforeSubtreeChange(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyBeforeSubtreeChange();
+      }
     },
     
     notifyDirtySelfPaint: function() {
-      _.each( this._instances, function( instance ) { instance.notifyDirtySelfPaint(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyDirtySelfPaint();
+      }
     },
     
     notifyDirtySubtreePaint: function() {
-      _.each( this._instances, function( instance ) { instance.notifyDirtySubtreePaint(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyDirtySubtreePaint();
+      }
     },
     
     notifyTransformChange: function() {
-      _.each( this._instances, function( instance ) { instance.notifyTransformChange(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyTransformChange();
+      }
     },
     
     notifyBoundsAccuracyChange: function() {
-      _.each( this._instances, function( instance ) { instance.notifyBoundsAccuracyChange(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyBoundsAccuracyChange();
+      }
     },
     
     notifyStitch: function( match ) {
-      _.each( this._instances, function( instance ) { instance.notifyStitch( match ); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyStitch( match );
+      }
     },
     
     markForLayerRefresh: function() {
-      _.each( this._instances, function( instance ) { instance.markForLayerRefresh(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].markForLayerRefresh();
+      }
     },
     
     markForInsertion: function( child, index ) {
-      _.each( this._instances, function( instance ) { instance.markForInsertion( child, index ); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].markForInsertion( child, index );
+      }
     },
     
     markForRemoval: function( child, index ) {
-      _.each( this._instances, function( instance ) { instance.markForRemoval( child, index ); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].markForRemoval( child, index );
+      }
     },
     
     /*---------------------------------------------------------------------------*
