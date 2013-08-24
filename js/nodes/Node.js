@@ -344,7 +344,8 @@ define( function( require ) {
         
         var oldBounds = this._bounds;
         
-        var newBounds = this.localToParentBounds( this._selfBounds.union( this._childBounds ) );
+        // converts local to parent bounds. mutable methods used to minimize number of created bounds instances (we create one so we don't change references to the old one)
+        var newBounds = this.transformBoundsFromLocalToParent( this._selfBounds.copy().includeBounds( this._childBounds ) );
         var changed = !newBounds.equals( oldBounds );
         
         if ( changed ) {
@@ -410,8 +411,8 @@ define( function( require ) {
         }
         
         if ( hasMouseAreas ) {
-          // transform it to the parent coordinate frame
-          this._mouseBounds = that.localToParentBounds( this._mouseBounds );
+          // transform it to the parent coordinate frame\
+          this.transformBoundsFromLocalToParent( this._mouseBounds );
           
           // and include the normal bounds, so that we don't have to 
           this._mouseBounds.includeBounds( this._bounds );
@@ -450,7 +451,7 @@ define( function( require ) {
         
         if ( hasTouchAreas ) {
           // transform it to the parent coordinate frame
-          this._touchBounds = that.localToParentBounds( this._touchBounds );
+          this.transformBoundsFromLocalToParent( this._touchBounds );
           
           // and include the normal bounds, so that we don't have to 
           this._touchBounds.includeBounds( this._bounds );
@@ -1661,6 +1662,11 @@ define( function( require ) {
     // apply the inverse of this node's transform to the bounds
     parentToLocalBounds: function( bounds ) {
       return this._transform.inverseBounds2( bounds );
+    },
+    
+    // mutable optimized form of localToParentBounds
+    transformBoundsFromLocalToParent: function( bounds ) {
+      return bounds.transform( this._transform.getMatrix() );
     },
     
     // returns the matrix (fresh copy) that transforms points from the local coordinate frame into the global coordinate frame
