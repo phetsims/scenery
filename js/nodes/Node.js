@@ -1594,11 +1594,19 @@ define( function( require ) {
     // returns undefined if there is no instance.
     getInstanceFromTrail: function( trail ) {
       var result;
-      if ( this._instances.length === 1 ) {
+      var len = this._instances.length;
+      if ( len === 1 ) {
         // don't bother with checking the trail, but assertion should assure that it's what we're looking for
         result = this._instances[0];
       } else {
-        result = _.find( this._instances, function( instance ) { return trail.equals( instance.trail ); } );
+        var i = len;
+        while ( i-- ) {
+          if ( this._instances[i].trail.equals( trail ) ) {
+            result = this._instances[i];
+            break;
+          }
+        }
+        // leave it as undefined if we don't find one
       }
       sceneryAssert && sceneryAssert( result, 'Could not find an instance for the trail ' + trail.toString() );
       sceneryAssert && sceneryAssert( result.trail.equals( trail ), 'Instance has an incorrect Trail' );
