@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * Represents a trail (path in the graph) from a 'root' node down to a descendant node.
@@ -87,6 +87,10 @@ define( function( require ) {
     // this trail is visible only if all nodes on it are marked as visible
     isVisible: function() {
       return _.every( this.nodes, function( node ) { return node.isVisible(); } );
+    },
+    
+    getOpacity: function() {
+      return _.reduce( this.nodes, function( opacity, node ) { return opacity * node.getOpacity(); }, 1 );
     },
     
     get: function( index ) {

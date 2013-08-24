@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * Accessibility peer, which is added to the dom for focus and keyboard navigation.
@@ -13,9 +13,6 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  //I cannot figure out why this import is required, but without it the sim crashes on startup.
-  var Renderer = require( 'SCENERY/layers/Renderer' );
-  
   var AccessibilityPeer = scenery.AccessibilityPeer = function AccessibilityPeer( instance, element, options ) {
     var peer = this;
     
@@ -27,6 +24,19 @@ define( function( require ) {
     
     // TODO: if element is a DOM element, verify that no other accessibility peer is using it! (add a flag, and remove on disposal)
     this.element = ( typeof element === 'string' ) ? $( element )[0] : element;
+
+    if ( options.label ) {
+      this.peerElement = document.createElement( 'div' );
+      this.element.id = 'peer-' + instance.trail.getUniqueId();
+      var label = document.createElement('label');
+      label.appendChild(document.createTextNode(options.label));
+      label.setAttribute('for',this.element.id);
+      this.peerElement.appendChild(label);
+      this.peerElement.appendChild(this.element);
+    } else{
+      this.peerElement = this.element;
+    }
+
     this.instance = instance;
     this.trail = instance.trail;
     
@@ -64,8 +74,8 @@ define( function( require ) {
       //Initial layout
       window.setTimeout( this.syncBounds.bind( this ), 30 );
     }
-  }; 
-  
+  };
+
   AccessibilityPeer.prototype = {
     constructor: AccessibilityPeer,
     

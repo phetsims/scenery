@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * Text
@@ -28,8 +28,8 @@ define( function( require ) {
   
   var Node = require( 'SCENERY/nodes/Node' ); // inherits from Node
   var Renderer = require( 'SCENERY/layers/Renderer' );
-  var fillable = require( 'SCENERY/nodes/Fillable' );
-  var strokable = require( 'SCENERY/nodes/Strokable' );
+  var Fillable = require( 'SCENERY/nodes/Fillable' );
+  var Strokable = require( 'SCENERY/nodes/Strokable' );
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate; // i.e. Object.create
   require( 'SCENERY/util/Font' );
   require( 'SCENERY/util/Util' ); // for canvasAccurateBounds and CSS transforms
@@ -40,14 +40,24 @@ define( function( require ) {
   svgTextSizeContainer.setAttribute( 'height', '2' );
   svgTextSizeContainer.setAttribute( 'style', 'display: hidden; pointer-events: none; position: absolute; left: -65535; right: -65535;' ); // so we don't flash it in a visible way to the user
   var svgTextSizeElement = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
+  svgTextSizeElement.appendChild( document.createTextNode( '' ) );
   svgTextSizeContainer.appendChild( svgTextSizeElement );
+  
+  // SVG bounds seems to be malfunctioning for Safari 5. Since we don't have a reproducible test machine for
+  // fast iteration, we'll guess the user agent and use DOM bounds instead of SVG.
+  // Hopefully the two contraints rule out any future Safari versions (fairly safe, but not impossible!)
+  var useDOMAsFastBounds = window.navigator.userAgent.indexOf( 'like Gecko) Version/5' ) !== -1 &&
+                           window.navigator.userAgent.indexOf( 'Safari/' ) !== -1;
+  
+  var hybridTextNode; // a node that is used to measure SVG text top/height for hybrid caching purposes
+  var initializingHybridTextNode = false;
   
   scenery.Text = function Text( text, options ) {
     this._text         = '';                   // filled in with mutator
     this._font         = scenery.Font.DEFAULT; // default font, usually 10px sans-serif
     this._direction    = 'ltr';                // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
-    this._boundsMethod = 'fastCanvas';         // fast (SVG/DOM, no canvas rendering allowed), fastCanvas (SVG/DOM, canvas rendering allowed without dirty regions),
-                                               //   or accurate (Canvas accurate recursive)
+    this._boundsMethod = 'hybrid';             // fast (SVG/DOM, no canvas rendering allowed), fastCanvas (SVG/DOM, canvas rendering allowed without dirty regions),
+                                               // accurate (Canvas accurate recursive), or hybrid (cache SVG height, use canvas measureText for width)
     
     // whether the text is rendered as HTML or not. if defined (in a subtype constructor), use that value instead
     this._isHTML = this._isHTML === undefined ? false : this._isHTML;
@@ -56,10 +66,6 @@ define( function( require ) {
     this._supportedRenderers = [ Renderer.Canvas, Renderer.SVG, Renderer.DOM ];
     
     var thisFont = this;
-    this.fontListener = function() {
-      thisFont.invalidateText();
-    };
-    this._font.addFontListener( this.fontListener );
     
     // ensure we have a parameter object
     options = options || {};
@@ -82,7 +88,7 @@ define( function( require ) {
   };
   var Text = scenery.Text;
   
-  inherit( Text, Node, {
+  inherit( Node, Text, {
     domUpdateTransformOnRepaint: true, // since we have to integrate the baseline offset into the CSS transform, signal to DOMLayer
     
     setText: function( text ) {
@@ -98,7 +104,7 @@ define( function( require ) {
     },
     
     setBoundsMethod: function( method ) {
-      sceneryAssert && sceneryAssert( method === 'fast' || method === 'fastCanvas' || method === 'accurate', '"fast" and "accurate" are the only allowed boundsMethod values for Text' );
+      sceneryAssert && sceneryAssert( method === 'fast' || method === 'fastCanvas' || method === 'accurate' || method === 'hybrid', 'Unknown Text boundsMethod' );
       if ( method !== this._boundsMethod ) {
         this._boundsMethod = method;
         this.updateTextFlags();
@@ -153,10 +159,13 @@ define( function( require ) {
     
     invalidateText: function() {
       // investigate http://mudcu.be/journal/2011/01/html5-typographic-metrics/
-      if ( this._boundsMethod === 'fast' || this._boundsMethod === 'fastCanvas' ) {
-        this.invalidateSelf( this._isHTML ? this.approximateDOMBounds() : this.approximateSVGBounds() );
+      if ( this._isHTML || ( useDOMAsFastBounds && this._boundsMethod !== 'accurate' ) ) {
+        this.invalidateSelf( this.approximateDOMBounds() );
+      } else if ( this._boundsMethod === 'hybrid' ) {
+        this.invalidateSelf( this.approximateHybridBounds() );
+      } else if ( this._boundsMethod === 'fast' || this._boundsMethod === 'fastCanvas' ) {
+        this.invalidateSelf( this.approximateSVGBounds() );
       } else {
-        sceneryAssert && sceneryAssert( !this._isHTML, 'HTML text is not allowed with the accurate bounds method' );
         this.invalidateSelf( this.accurateCanvasBounds() );
       }
       
@@ -214,17 +223,16 @@ define( function( require ) {
     *----------------------------------------------------------------------------*/
     
     createSVGFragment: function( svg, defs, group ) {
-      return document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
+      var element = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
+      element.appendChild( document.createTextNode( '' ) );
+      return element;
     },
     
     updateSVGFragment: function( element ) {
       var isRTL = this._direction === 'rtl';
       
-      // make the text the only child
-      while ( element.hasChildNodes() ) {
-        element.removeChild( element.lastChild );
-      }
-      element.appendChild( document.createTextNode( this._text ) );
+      // update the text-node's value
+      element.lastChild.nodeValue = this._text;
       
       element.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
       
@@ -320,8 +328,7 @@ define( function( require ) {
     },
     
     approximateCanvasWidth: function() {
-      // TODO: consider caching a scratch 1x1 canvas for this purpose
-      var context = document.createElement( 'canvas' ).getContext( '2d' );
+      var context = scenery.scratchContext;
       context.font = this.font;
       context.direction = this.direction;
       return context.measureText( this.text ).width;
@@ -329,11 +336,38 @@ define( function( require ) {
     
     approximateSVGBounds: function() {
       if ( !svgTextSizeContainer.parentNode ) {
-        document.body.appendChild( svgTextSizeContainer );
+        if ( document.body ) {
+          document.body.appendChild( svgTextSizeContainer );
+        } else {
+          // TODO: better way to handle the hybridTextNode being added inside the HEAD? Requiring a body for proper operation might be a problem.
+          if ( initializingHybridTextNode ) {
+            // if this is almost assuredly the hybridTextNode, return nothing for now. TODO: better way of handling this! it's a hack!
+            return Bounds2.NOTHING;
+          } else {
+            throw new Error( 'No document.body and trying to get approximate SVG bounds of a Text node' );
+          }
+        }
       }
       this.updateSVGFragment( svgTextSizeElement );
       var rect = svgTextSizeElement.getBBox();
       return new Bounds2( rect.x, rect.y, rect.x + rect.width, rect.y + rect.height );
+    },
+    
+    approximateHybridBounds: function() {
+      if ( !hybridTextNode ) {
+        return Bounds2.NOTHING; // we are the hybridTextNode, ignore us
+      }
+      
+      if ( this._font._cachedSVGBounds === undefined ) {
+        hybridTextNode.setFont( this._font );
+        this._font._cachedSVGBounds = hybridTextNode.getBounds();
+      }
+      
+      var canvasWidth = this.approximateCanvasWidth();
+      var verticalBounds = this._font._cachedSVGBounds;
+      
+      // it seems that SVG bounds generally have x=0, so we hard code that here
+      return new Bounds2( 0, verticalBounds.minY, canvasWidth, verticalBounds.maxY );
     },
     
     approximateDOMBounds: function() {
@@ -388,9 +422,7 @@ define( function( require ) {
     
     setFont: function( font ) {
       if ( this.font !== font ) {
-        this._font.removeFontListener( this.fontListener );
         this._font = font instanceof scenery.Font ? font : new scenery.Font( font );
-        this._font.addFontListener( this.fontListener );
         this.invalidateText();
       }
       return this;
@@ -463,10 +495,9 @@ define( function( require ) {
     
     Text.prototype[setterName] = function( value ) {
       // create a full copy of our font instance
-      var newFont = new scenery.Font( this._font.getFont() );
-      
-      // use the ES5 setter. probably somewhat slow.
-      newFont[ shortUncapitalized ] = value;
+      var ob = {};
+      ob[shortUncapitalized] = value;
+      var newFont = this._font.copy( ob );
       
       // apply the new Font. this should call invalidateText() as normal
       this.setFont( newFont );
@@ -496,8 +527,13 @@ define( function( require ) {
   Object.defineProperty( Text.prototype, 'boundsMethod', { set: Text.prototype.setBoundsMethod, get: Text.prototype.getBoundsMethod } );
   
   // mix in support for fills and strokes
-  fillable( Text );
-  strokable( Text );
+  /* jshint -W064 */
+  Fillable( Text );
+  Strokable( Text );
+  
+  initializingHybridTextNode = true;
+  hybridTextNode = new Text( 'm', { boundsMethod: 'fast' } );
+  initializingHybridTextNode = false;
 
   return Text;
 } );

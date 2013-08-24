@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * Tracks a single key-press
@@ -27,7 +27,7 @@ define( function( require ) {
   };
   var Key = scenery.Key;
   
-  inherit( Key, Pointer, {
+  inherit( Pointer, Key, {
     
   } );
   

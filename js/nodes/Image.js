@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * Images
@@ -61,7 +61,7 @@ define( function( require ) {
   };
   var Image = scenery.Image;
   
-  inherit( Image, Node, {
+  inherit( Node, Image, {
     allowsMultipleDOMInstances: false, // TODO: support multiple instances
     
     invalidateImage: function() {

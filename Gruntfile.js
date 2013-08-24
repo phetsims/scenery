@@ -1,3 +1,7 @@
+
+var sys = require( 'sys' );
+var exec = require( 'child_process' ).exec;
+
 /*global module:false*/
 module.exports = function( grunt ) {
   'use strict';
@@ -15,11 +19,11 @@ module.exports = function( grunt ) {
         options: {
           almond: true,
           mainConfigFile: "js/config.js",
-          out: "dist/development/scenery.js",
+          out: "build/development/scenery.js",
           name: "config",
           optimize: 'none',
           wrap: {
-            startFile: [ "js/wrap-start.frag", "contrib/has.js" ],
+            startFile: [ "js/wrap-start.frag", "lib/has.js" ],
             endFile: [ "js/wrap-end.frag" ]
           }
         }
@@ -30,13 +34,13 @@ module.exports = function( grunt ) {
         options: {
           almond: true,
           mainConfigFile: "js/production-config.js",
-          out: "dist/standalone/scenery.min.js",
+          out: "build/standalone/scenery.min.js",
           name: "production-config",
           optimize: 'uglify2',
           generateSourceMaps: true,
           preserveLicenseComments: false,
           wrap: {
-            startFile: [ "js/wrap-start.frag", "contrib/has.js" ],
+            startFile: [ "js/wrap-start.frag", "lib/has.js" ],
             endFile: [ "js/wrap-end.frag" ]
           },
           uglify2: {
@@ -59,7 +63,7 @@ module.exports = function( grunt ) {
         options: {
           almond: true,
           mainConfigFile: "js/production-config.js",
-          out: "dist/production/scenery.min.js",
+          out: "build/production/scenery.min.js",
           name: "production-config",
           optimize: 'uglify2',
           generateSourceMaps: true,
@@ -91,63 +95,8 @@ module.exports = function( grunt ) {
       scenery: [
         'js/**/*.js'
       ],
-      // adjust with options from http://www.jshint.com/docs/
-      options: {
-        // enforcing options
-        curly: true, // brackets for conditionals
-        eqeqeq: true,
-        immed: true,
-        latedef: true,
-        newcap: true,
-        noarg: true,
-        // noempty: true,
-        nonew: true,
-        // quotmark: 'single',
-        undef: true,
-        // unused: true, // certain layer APIs not used in cases
-        strict: true,
-        
-        // relaxing options
-        es5: true, // we use ES5 getters and setters for now
-        loopfunc: true, // we know how not to shoot ourselves in the foot, and this is useful for _.each
-        
-        expr: true, // so we can use assert && assert( ... )
-        
-        globals: {
-          // for removal of assertions
-          sceneryAssert: true,
-          sceneryAssertExtra: true,
-          
-          // for logging levels
-          sceneryLayerLog: true,
-          sceneryEventLog: true,
-          sceneryAccessibilityLog: true,
-          
-          // for require.js
-          define: true,
-          require: true,
-          
-          Uint16Array: false,
-          Uint32Array: false,
-          document: false,
-          window: false,
-          console: false,
-          Float32Array: true, // we actually polyfill this, so allow it to be set
-          
-          HTMLImageElement: false,
-          HTMLCanvasElement: false,
-          
-          $: false,
-          _: false,
-          clearTimeout: false,
-          
-          // for DOM.js
-          Image: false,
-          Blob: false,
-          
-          canvg: false
-        }
-      }
+      // reference external JSHint options in jshint-options.js
+      options: require( '../chipper/grunt/jshint-options' )
     }
   } );
   
@@ -161,6 +110,35 @@ module.exports = function( grunt ) {
   grunt.registerTask( 'production', [ 'requirejs:production' ] );
   grunt.registerTask( 'standalone', [ 'requirejs:standalone' ] );
   grunt.registerTask( 'development', [ 'requirejs:development' ] );
+  
+  grunt.registerTask( 'snapshot', [ 'standalone', '_createSnapshot' ] );
+  
+  // creates a performance snapshot for profiling changes
+  grunt.registerTask( '_createSnapshot', 'Description', function( arg ) {
+    var done = this.async();
+    
+    exec( 'git log -1 --date=short', function( error, stdout, stderr ) {
+      if ( error ) { throw error; }
+      
+      var sha = /commit (.*)$/m.exec( stdout )[1];
+      var date = /Date: *(\d+)-(\d+)-(\d+)$/m.exec( stdout );
+      var year = date[1].slice( 2, 4 );
+      var month = date[2];
+      var day = date[3];
+      
+      var suffix = '-' + year + month + day + '-' + sha.slice( 0, 10 ) + '.js';
+      
+      var sceneryFilename = 
+      
+      grunt.file.copy( 'build/standalone/scenery.min.js', 'snapshots/scenery-min' + suffix );
+      grunt.file.copy( 'tests/benchmarks/js/perf-current.js', 'snapshots/perf' + suffix );
+      
+      grunt.log.writeln( 'Copied standalone js to snapshots/scenery-min' + suffix );
+      grunt.log.writeln( 'Copied perf js to       snapshots/perf' + suffix );
+      
+      done();
+    } );
+  } );
   
   // dependencies
   grunt.loadNpmTasks( 'grunt-requirejs' );

@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * Base code for layers that helps with shared layer functions
@@ -138,27 +138,27 @@ define( function( require ) {
     },
     
     // adds a trail (with the last node) to the layer
-    addNodeFromTrail: function( trail ) {
+    addInstance: function( instance ) {
+      var trail = instance.trail;
+      
       if ( sceneryAssert ) {
         _.each( this._layerTrails, function( otherTrail ) {
-          sceneryAssert( !trail.equals( otherTrail ), 'trail in addNodeFromTrail should not already exist in a layer' );
+          sceneryAssert( !trail.equals( otherTrail ), 'trail in addInstance should not already exist in a layer' );
         } );
       }
       
-      // console.log( 'addNodeFromTrail layer: ' + this.getId() + ', trail: ' + trail.toString() );
       // TODO: sync this with DOMLayer's implementation
       this._layerTrails.push( trail );
       trail.setImmutable(); // don't allow this Trail to be changed
     },
     
     // removes a trail (with the last node) to the layer
-    removeNodeFromTrail: function( trail ) {
-      // console.log( 'removeNodeFromTrail layer: ' + this.getId() + ', trail: ' + trail.toString() );
+    removeInstance: function( instance ) {
       // TODO: sync this with DOMLayer's implementation
       var i;
       for ( i = 0; i < this._layerTrails.length; i++ ) {
         this._layerTrails[i].reindex();
-        if ( this._layerTrails[i].compare( trail ) === 0 ) {
+        if ( this._layerTrails[i].compare( instance.trail ) === 0 ) {
           break;
         }
       }

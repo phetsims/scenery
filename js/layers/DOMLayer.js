@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * A DOM-based layer in the scene graph. Each layer handles dirty-region handling separately,
@@ -60,11 +60,12 @@ define( function( require ) {
   };
   var DOMLayer = scenery.DOMLayer;
   
-  inherit( DOMLayer, Layer, {
+  inherit( Layer, DOMLayer, {
     
-    addNodeFromTrail: function( trail ) {
-      Layer.prototype.addNodeFromTrail.call( this, trail );
-      trail = trail.copy();
+    addInstance: function( instance ) {
+      Layer.prototype.addInstance.call( this, instance );
+      
+      var trail = instance.trail;
       this.reindexTrails();
       
       var node = trail.lastNode();
@@ -98,8 +99,10 @@ define( function( require ) {
       node.updateCSSTransform( trail.getTransform(), element );
     },
     
-    removeNodeFromTrail: function( trail ) {
-      Layer.prototype.removeNodeFromTrail.call( this, trail );
+    removeInstance: function( instance ) {
+      Layer.prototype.removeInstance.call( this, instance );
+      
+      var trail = instance.trail;
       this.reindexTrails();
       
       var element = this.getElementFromTrail( trail );

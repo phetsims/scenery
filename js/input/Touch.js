@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * Tracks a single touch point
@@ -28,7 +28,7 @@ define( function( require ) {
   };
   var Touch = scenery.Touch;
   
-  inherit( Touch, Pointer, {
+  inherit( Pointer, Touch, {
     move: function( point, event ) {
       this.point = point;
     },

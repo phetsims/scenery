@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * A Path draws a Shape with a specific type of fill and stroke.
@@ -15,8 +15,8 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
   var Renderer = require( 'SCENERY/layers/Renderer' );
-  var fillable = require( 'SCENERY/nodes/Fillable' );
-  var strokable = require( 'SCENERY/nodes/Strokable' );
+  var Fillable = require( 'SCENERY/nodes/Fillable' );
+  var Strokable = require( 'SCENERY/nodes/Strokable' );
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
   
   scenery.Path = function Path( options ) {
@@ -33,7 +33,7 @@ define( function( require ) {
   };
   var Path = scenery.Path;
   
-  inherit( Path, Node, {
+  inherit( Node, Path, {
     // sets the shape drawn, or null to remove the shape
     setShape: function( shape ) {
       if ( this._shape !== shape ) {
@@ -55,9 +55,14 @@ define( function( require ) {
       this.markOldSelfPaint();
       
       if ( this.hasShape() ) {
-        this.invalidateSelf( this._shape.computeBounds( this._stroke ? this._lineDrawingStyles : null ) );
+        this.invalidateSelf( this.computeShapeBounds() );
         this.invalidatePaint();
       }
+    },
+    
+    // separated out, so that we can override this with a faster version in Rectangle. includes the Stroke, if any
+    computeShapeBounds: function() {
+      return this._stroke ? this._shape.computeBounds( this._lineDrawingStyles ) : this._shape.bounds;
     },
     
     // hook stroke mixin changes to invalidation
@@ -100,8 +105,16 @@ define( function( require ) {
     },
     
     updateSVGFragment: function( path ) {
-      if ( this.hasShape() ) {
-        path.setAttribute( 'd', this._shape.getSVGPath() );
+      var svgPath = this.hasShape() ? this._shape.getSVGPath() : "";
+      
+      // temporary workaround for https://bugs.webkit.org/show_bug.cgi?id=78980
+      // and http://code.google.com/p/chromium/issues/detail?id=231626 where even removing
+      // the attribute can cause this bug
+      if ( !svgPath ) { svgPath = 'M0 0'; }
+      
+      if ( svgPath ) {
+        // only set the SVG path if it's not the empty string
+        path.setAttribute( 'd', svgPath );
       } else if ( path.hasAttribute( 'd' ) ) {
         path.removeAttribute( 'd' );
       }
@@ -178,8 +191,9 @@ define( function( require ) {
   
   // mix in fill/stroke handling code. for now, this is done after 'shape' is added to the mutatorKeys so that stroke parameters
   // get set first
-  fillable( Path );
-  strokable( Path );
+  /* jshint -W064 */
+  Fillable( Path );
+  Strokable( Path );
   
   return Path;
 } );

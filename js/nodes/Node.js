@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * A node for the Scenery scene graph. Supports general directed acyclic graphics (DAGs).
@@ -13,10 +13,13 @@ define( function( require ) {
   var Bounds2 = require( 'DOT/Bounds2' );
   var Transform3 = require( 'DOT/Transform3' );
   var Matrix3 = require( 'DOT/Matrix3' );
+  var Vector2 = require( 'DOT/Vector2' );
   var clamp = require( 'DOT/Util' ).clamp;
   
+  var Shape = require( 'KITE/Shape' );
+  
   var scenery = require( 'SCENERY/scenery' );
-  var nodeEvents = require( 'SCENERY/util/FixedNodeEvents' ); // uncapitalized, because of JSHint (TODO: find the flag)
+  var NodeEvents = require( 'SCENERY/util/FixedNodeEvents' ); // uncapitalized, because of JSHint (TODO: find the flag)
   var LayerStrategy = require( 'SCENERY/layers/LayerStrategy' ); // used to set the default layer strategy on the prototype
   // require( 'SCENERY/layers/Renderer' ); // commented out so Require.js doesn't balk at the circular dependency
   
@@ -72,6 +75,10 @@ define( function( require ) {
     // The shape should be in the local coordinate frame
     this._clipShape = null;
     
+    // areas for hit intersection. if set on a Node, no descendants can handle events
+    this._mouseArea = null; // {Shape} for mouse position          in the local coordinate frame
+    this._touchArea = null; // {Shape} for touch and pen position  in the local coordinate frame
+    
     // the CSS cursor to be displayed over this node. null should be the default (inherit) value
     this._cursor = null;
     
@@ -79,6 +86,7 @@ define( function( require ) {
     this._parents = []; // unordered
     
     this._peers = []; // array of peer factories: { element: ..., options: ... }, where element can be an element or a string
+    this._liveRegions = []; // array of live region instances
     
     /*
      * Set up the transform reference. we add a listener so that the transform itself can be modified directly
@@ -100,12 +108,21 @@ define( function( require ) {
     this._includeStrokeInHitRegion = false;
     
     // bounds handling
-    this._bounds = Bounds2.NOTHING; // for this node and its children, in "parent" coordinates
-    this._selfBounds = Bounds2.NOTHING; // just for this node, in "local" coordinates
+    this._bounds = Bounds2.NOTHING;      // for this node and its children, in "parent" coordinates
+    this._selfBounds = Bounds2.NOTHING;  // just for this node, in "local" coordinates
     this._childBounds = Bounds2.NOTHING; // just for children, in "local" coordinates
     this._boundsDirty = true;
     this._selfBoundsDirty = this.isPainted();
     this._childBoundsDirty = true;
+    
+    // Similar to bounds, but includes any mouse/touch areas respectively. They are validated separately (immediately after normal bounds validation),
+    // and are only non-null if there are mouseAreas/touchAreas in this node or any descendants. null indicates that the normal bounds can be treated
+    // as the mouse/touch bounds, and hit pruning can use those instead. These are needed because mouse/touch areas (and thus pruning bounds) can be
+    // larger than the actual bounds (display bounds, _bounds above)
+    this._mouseBounds = null;
+    this._mouseBoundsDirty = true;
+    this._touchBounds = null;
+    this._touchBoundsDirty = true;
     
     // dirty region handling
     this._paintDirty = false;        // whether the self paint is dirty (just this node, none of its children)
@@ -152,12 +169,32 @@ define( function( require ) {
     },
     
     removeChild: function( node ) {
+      sceneryAssert && sceneryAssert( node );
       sceneryAssert && sceneryAssert( this.isChild( node ) );
+      
+      var indexOfChild = _.indexOf( this._children, node );
+      
+      this.removeChildWithIndex( node, indexOfChild );
+    },
+    
+    removeChildAt: function( index ) {
+      sceneryAssert && sceneryAssert( index >= 0 );
+      sceneryAssert && sceneryAssert( index < this._children.length );
+      
+      var node = this._children[index];
+      
+      this.removeChildWithIndex( node, index );
+    },
+    
+    // meant for internal use
+    removeChildWithIndex: function( node, indexOfChild ) {
+      sceneryAssert && sceneryAssert( node );
+      sceneryAssert && sceneryAssert( this.isChild( node ) );
+      sceneryAssert && sceneryAssert( this._children[indexOfChild] === node );
       
       node.markOldPaint( false );
       
       var indexOfParent = _.indexOf( node._parents, this );
-      var indexOfChild = _.indexOf( this._children, node );
       
       this.markForRemoval( node, indexOfChild );
       
@@ -192,8 +229,16 @@ define( function( require ) {
       return this._children.slice( 0 ); // create a defensive copy
     },
     
+    getChildrenCount: function() {
+      return this._children.length;
+    },
+    
     getParents: function() {
       return this._parents.slice( 0 ); // create a defensive copy
+    },
+    
+    getChildAt: function( index ) {
+      return this._children[index];
     },
     
     indexOfParent: function( parent ) {
@@ -243,7 +288,15 @@ define( function( require ) {
     // currently, there is no way to remove peers. if a string is passed as the element pattern, it will be turned into an element
     addPeer: function( element, options ) {
       sceneryAssert && sceneryAssert( !this.instances.length, 'Cannot call addPeer after a node has instances (yet)' );
+      
       this._peers.push( { element: element, options: options } );
+    },
+
+    /**               
+     * @param property any object that has es5 getter for 'value' es5 setter for value, and 
+     */
+    addLiveRegion: function( property, options ) {
+      this._liveRegions.push( {property: property, options: options} );
     },
     
     // ensure that cached bounds stored on this node (and all children) are accurate
@@ -291,7 +344,6 @@ define( function( require ) {
         
         var oldBounds = this._bounds;
         
-        // TODO: we can possibly make this not needed?
         var newBounds = this.localToParentBounds( this._selfBounds ).union( that.localToParentBounds( this._childBounds ) );
         var changed = !newBounds.equals( oldBounds );
         
@@ -332,6 +384,84 @@ define( function( require ) {
       }
     },
     
+    validateMouseBounds: function() {
+      var that = this;
+      
+      sceneryAssert && sceneryAssert( !this._selfBoundsDirty && !this._childBoundsDirty && !this._boundsDirty, 'Bounds must be validated before calling validateMouseBounds' );
+      
+      if ( this._mouseBoundsDirty ) {
+        var hasMouseAreas = false;
+        
+        this._mouseBounds = this._selfBounds.copy(); // start with the self bounds, then add from there
+        
+        // union of all children's mouse bounds (if they exist)
+        _.each( this._children, function( child ) {
+          child.validateMouseBounds();
+          if ( child._mouseBounds ) {
+            hasMouseAreas = true;
+            that._mouseBounds.includeBounds( child._mouseBounds );
+          }
+        } );
+        
+        // do this before the transformation to the parent coordinate frame
+        if ( this._mouseArea ) {
+          hasMouseAreas = true;
+          this._mouseBounds.includeBounds( this._mouseArea.bounds );
+        }
+        
+        if ( hasMouseAreas ) {
+          // transform it to the parent coordinate frame
+          this._mouseBounds = that.localToParentBounds( this._mouseBounds );
+          
+          // and include the normal bounds, so that we don't have to 
+          this._mouseBounds.includeBounds( this._bounds );
+        } else {
+          this._mouseBounds = null; // no mouse areas under this node
+        }
+        
+        this._mouseBoundsDirty = false;
+      }
+    },
+    
+    validateTouchBounds: function() {
+      var that = this;
+      
+      sceneryAssert && sceneryAssert( !this._selfBoundsDirty && !this._childBoundsDirty && !this._boundsDirty, 'Bounds must be validated before calling validateTouchBounds' );
+      
+      if ( this._touchBoundsDirty ) {
+        var hasTouchAreas = false;
+        
+        this._touchBounds = this._selfBounds.copy(); // start with the self bounds, then add from there
+        
+        // union of all children's touch bounds (if they exist)
+        _.each( this._children, function( child ) {
+          child.validateTouchBounds();
+          if ( child._touchBounds ) {
+            hasTouchAreas = true;
+            that._touchBounds.includeBounds( child._touchBounds );
+          }
+        } );
+        
+        // do this before the transformation to the parent coordinate frame
+        if ( this._touchArea ) {
+          hasTouchAreas = true;
+          this._touchBounds.includeBounds( this._touchArea.bounds );
+        }
+        
+        if ( hasTouchAreas ) {
+          // transform it to the parent coordinate frame
+          this._touchBounds = that.localToParentBounds( this._touchBounds );
+          
+          // and include the normal bounds, so that we don't have to 
+          this._touchBounds.includeBounds( this._bounds );
+        } else {
+          this._touchBounds = null; // no touch areas under this node
+        }
+        
+        this._touchBoundsDirty = false;
+      }
+    },
+    
     validatePaint: function() {
       if ( this._paintDirty ) {
         sceneryAssert && sceneryAssert( this.isPainted(), 'Only painted nodes can have self dirty paint' );
@@ -362,6 +492,8 @@ define( function( require ) {
     // mark the bounds of this node as invalid, so it is recomputed before it is accessed again
     invalidateBounds: function() {
       this._boundsDirty = true;
+      this._mouseBoundsDirty = true;
+      this._touchBoundsDirty = true;
       
       // and set flags for all ancestors
       _.each( this._parents, function( parent ) {
@@ -374,6 +506,8 @@ define( function( require ) {
       // don't bother updating if we've already been tagged
       if ( !this._childBoundsDirty ) {
         this._childBoundsDirty = true;
+        this._mouseBoundsDirty = true;
+        this._touchBoundsDirty = true;
         _.each( this._parents, function( parent ) {
           parent.invalidateChildBounds();
         } );
@@ -458,7 +592,7 @@ define( function( require ) {
       return ourChild;
     },
     
-    // the bounds for self content in "local" coordinates
+    // the bounds for self content in "local" coordinates.
     getSelfBounds: function() {
       return this._selfBounds;
     },
@@ -474,7 +608,7 @@ define( function( require ) {
       return this._bounds;
     },
     
-    // like getBounds() in the "parent" coordinate frame, but only includes visible children
+    // like getBounds() in the "parent" coordinate frame, but includes only visible nodes
     getVisibleBounds: function() {
       // defensive copy, since we use mutable modifications below
       var bounds = this._selfBounds.copy();
@@ -489,6 +623,15 @@ define( function( require ) {
       return this.localToParentBounds( bounds );
     },
     
+    trailUnderPointer: function( pointer ) {
+      var options = {};
+      if ( pointer.isMouse ) { options.isMouse = true; }
+      if ( pointer.isTouch ) { options.isTouch = true; }
+      if ( pointer.isPen ) { options.isPen = true; }
+      
+      return this.trailUnderPoint( pointer.point, options );
+    },
+    
     /*
      * Return a trail to the top node (if any, otherwise null) whose self-rendered area contains the
      * point (in parent coordinates).
@@ -499,8 +642,10 @@ define( function( require ) {
     trailUnderPoint: function( point, options ) {
       sceneryAssert && sceneryAssert( point, 'trailUnderPointer requires a point' );
       
-      var pruneInvisible = ( !options || options.pruneInvisible === undefined ) ? true : options.pruneInvisible;
-      var pruneUnpickable = ( !options || options.pruneUnpickable === undefined ) ? true : options.pruneUnpickable;
+      if ( options === undefined ) { options = {}; }
+      
+      var pruneInvisible = ( options.pruneInvisible === undefined ) ? true : options.pruneInvisible;
+      var pruneUnpickable = ( options.pruneUnpickable === undefined ) ? true : options.pruneUnpickable;
       
       if ( pruneInvisible && !this.isVisible() ) {
         return null;
@@ -511,15 +656,26 @@ define( function( require ) {
       
       // update bounds for pruning
       this.validateBounds();
+      if ( options.isMouse ) { this.validateMouseBounds(); }
+      if ( options.isTouch ) { this.validateTouchBounds(); }
+      
+      var hasHitAreas = options && ( ( options.isMouse && this._mouseBounds ) || ( options.isTouch && this._touchBounds ) || options.isPen );
       
       // bail quickly if this doesn't hit our computed bounds
-      if ( !this._bounds.containsPoint( point ) ) { return null; }
+      if ( hasHitAreas ? (
+            // if we have hit areas, prune based on the respective hit bounds (mouseBounds/touchBounds)
+            ( options.isMouse && !this._mouseBounds.containsPoint( point ) ) ||
+            ( options.isTouch && !this._touchBounds.containsPoint( point ) )
+            // otherwise, prune based on the normal bounds
+          ) : !this._bounds.containsPoint( point ) ) {
+        return null; // not in our bounds, so this point can't possibly be contained
+      }
       
       // point in the local coordinate frame. computed after the main bounds check, so we can bail out there efficiently
       var localPoint = this.parentToLocalPoint( point );
       
       // check children first, since they are rendered later
-      if ( this._children.length > 0 && this._childBounds.containsPoint( localPoint ) ) {
+      if ( this._children.length > 0 && ( hasHitAreas || this._childBounds.containsPoint( localPoint ) ) ) {
         
         // manual iteration here so we can return directly, and so we can iterate backwards (last node is in front)
         for ( var i = this._children.length - 1; i >= 0; i-- ) {
@@ -534,10 +690,22 @@ define( function( require ) {
           }
         }
       }
+
+      // tests for mouse and touch hit areas before testing containsPointSelf
+      if ( hasHitAreas ) {
+        if ( options.isMouse && this._mouseArea ) {
+          return this._mouseArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
+        }
+        if ( ( options.isTouch || options.isPen ) && this._touchArea ) {
+          return this._touchArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
+        }
+      }
       
       // didn't hit our children, so check ourself as a last resort
-      if ( this._selfBounds.containsPoint( localPoint ) && this.containsPointSelf( localPoint ) ) {
-        return new scenery.Trail( this );
+      if ( hasHitAreas || this._selfBounds.containsPoint( localPoint ) ) {
+        if ( this.containsPointSelf( localPoint ) ) {
+          return new scenery.Trail( this );
+        }
       }
       
       // signal no hit
@@ -718,6 +886,8 @@ define( function( require ) {
     },
     
     setX: function( x ) {
+      sceneryAssert && sceneryAssert( typeof x === 'number' );
+      
       this.setTranslation( x, this.getY() );
       return this;
     },
@@ -727,6 +897,8 @@ define( function( require ) {
     },
     
     setY: function( y ) {
+      sceneryAssert && sceneryAssert( typeof y === 'number' );
+      
       this.setTranslation( this.getX(), y );
       return this;
     },
@@ -759,6 +931,8 @@ define( function( require ) {
     },
     
     setRotation: function( rotation ) {
+      sceneryAssert && sceneryAssert( typeof rotation === 'number' );
+      
       this.appendMatrix( Matrix3.rotation2( rotation - this.getRotation() ) );
       return this;
     },
@@ -806,6 +980,8 @@ define( function( require ) {
     
     // change the actual transform reference (not just the actual transform)
     setTransform: function( transform ) {
+      sceneryAssert && sceneryAssert( transform.isFinite(), 'Transform should not have infinite/NaN values' );
+      
       if ( this._transform !== transform ) {
         // since our referenced transform doesn't change, we need to trigger the before/after ourselves
         this.beforeTransformChange();
@@ -849,6 +1025,8 @@ define( function( require ) {
     
     // shifts this node horizontally so that its left bound (in the parent coordinate frame) is 'left'
     setLeft: function( left ) {
+      sceneryAssert && sceneryAssert( typeof left === 'number' );
+      
       this.translate( left - this.getLeft(), 0, true );
       return this; // allow chaining
     },
@@ -860,6 +1038,8 @@ define( function( require ) {
     
     // shifts this node horizontally so that its right bound (in the parent coordinate frame) is 'right'
     setRight: function( right ) {
+      sceneryAssert && sceneryAssert( typeof right === 'number' );
+      
       this.translate( right - this.getRight(), 0, true );
       return this; // allow chaining
     },
@@ -869,7 +1049,9 @@ define( function( require ) {
     },
     
     setCenter: function( center ) {
-      this.translate( center.minus( this.getCenter() ) );
+      sceneryAssert && sceneryAssert( center instanceof Vector2 );
+      
+      this.translate( center.minus( this.getCenter() ), true );
       return this;
     },
     
@@ -878,6 +1060,8 @@ define( function( require ) {
     },
     
     setCenterX: function( x ) {
+      sceneryAssert && sceneryAssert( typeof x === 'number' );
+      
       this.translate( x - this.getCenterX(), 0, true );
       return this; // allow chaining
     },
@@ -887,6 +1071,8 @@ define( function( require ) {
     },
     
     setCenterY: function( y ) {
+      sceneryAssert && sceneryAssert( typeof y === 'number' );
+      
       this.translate( 0, y - this.getCenterY(), true );
       return this; // allow chaining
     },
@@ -898,6 +1084,8 @@ define( function( require ) {
     
     // shifts this node vertically so that its top bound (in the parent coordinate frame) is 'top'
     setTop: function( top ) {
+      sceneryAssert && sceneryAssert( typeof top === 'number' );
+      
       this.translate( 0, top - this.getTop(), true );
       return this; // allow chaining
     },
@@ -909,6 +1097,8 @@ define( function( require ) {
     
     // shifts this node vertically so that its bottom bound (in the parent coordinate frame) is 'bottom'
     setBottom: function( bottom ) {
+      sceneryAssert && sceneryAssert( typeof bottom === 'number' );
+      
       this.translate( 0, bottom - this.getBottom(), true );
       return this; // allow chaining
     },
@@ -930,6 +1120,8 @@ define( function( require ) {
     },
     
     setVisible: function( visible ) {
+      sceneryAssert && sceneryAssert( typeof visible === 'boolean' );
+      
       if ( visible !== this._visible ) {
         if ( this._visible ) {
           this.notifyBeforeSubtreeChange();
@@ -947,6 +1139,8 @@ define( function( require ) {
     },
     
     setOpacity: function( opacity ) {
+      sceneryAssert && sceneryAssert( typeof opacity === 'number' );
+      
       var clampedOpacity = clamp( opacity, 0, 1 );
       if ( clampedOpacity !== this._opacity ) {
         this.notifyBeforeSubtreeChange();
@@ -962,6 +1156,8 @@ define( function( require ) {
     },
     
     setPickable: function( pickable ) {
+      sceneryAssert && sceneryAssert( typeof pickable === 'boolean' );
+      
       if ( this._pickable !== pickable ) {
         // no paint or invalidation changes for now, since this is only handled for the mouse
         this._pickable = pickable;
@@ -971,6 +1167,8 @@ define( function( require ) {
     },
     
     setCursor: function( cursor ) {
+      sceneryAssert && sceneryAssert( typeof cursor === 'string' || cursor === null );
+      
       // TODO: consider a mapping of types to set reasonable defaults
       /*
       auto default none inherit help pointer progress wait crosshair text vertical-text alias copy move no-drop not-allowed
@@ -984,6 +1182,34 @@ define( function( require ) {
     
     getCursor: function() {
       return this._cursor;
+    },
+    
+    setMouseArea: function( shape ) {
+      sceneryAssert && sceneryAssert( shape === null || shape instanceof Shape, 'mouseArea needs to be a kite.Shape, or null' );
+      
+      if ( this._mouseArea !== shape ) {
+        this._mouseArea = shape; // TODO: could change what is under the mouse, invalidate!
+        
+        this.invalidateBounds();
+      }
+    },
+    
+    getMouseArea: function() {
+      return this._mouseArea;
+    },
+    
+    setTouchArea: function( shape ) {
+      sceneryAssert && sceneryAssert( shape === null || shape instanceof Shape, 'touchArea needs to be a kite.Shape, or null' );
+      
+      if ( this._touchArea !== shape ) {
+        this._touchArea = shape; // TODO: could change what is under the touch, invalidate!
+        
+        this.invalidateBounds();
+      }
+    },
+    
+    getTouchArea: function() {
+      return this._touchArea;
     },
     
     updateLayerType: function() {
@@ -1057,6 +1283,8 @@ define( function( require ) {
     },
     
     setLayerSplitBefore: function( split ) {
+      sceneryAssert && sceneryAssert( typeof split === 'boolean' );
+      
       if ( this._layerSplitBefore !== split ) {
         this._layerSplitBefore = split;
         this.markLayerRefreshNeeded();
@@ -1068,6 +1296,8 @@ define( function( require ) {
     },
     
     setLayerSplitAfter: function( split ) {
+      sceneryAssert && sceneryAssert( typeof split === 'boolean' );
+      
       if ( this._layerSplitAfter !== split ) {
         this._layerSplitAfter = split;
         this.markLayerRefreshNeeded();
@@ -1079,6 +1309,8 @@ define( function( require ) {
     },
     
     setLayerSplit: function( split ) {
+      sceneryAssert && sceneryAssert( typeof split === 'boolean' );
+      
       if ( split !== this._layerSplitBefore || split !== this._layerSplitAfter ) {
         this._layerSplitBefore = split;
         this._layerSplitAfter = split;
@@ -1270,7 +1502,9 @@ define( function( require ) {
         var img = document.createElement( 'img' );
         img.onload = function() {
           callback( img, x, y );
-          delete img.onload;
+          try {
+            delete img.onload;
+          } catch ( e ) {} // fails on Safari 5.1
         };
         img.src = url;
       }, x, y, width, height );
@@ -1321,6 +1555,13 @@ define( function( require ) {
       sceneryAssert && sceneryAssert( instance.getNode() === this, 'Must be an instance of this Node' );
       sceneryAssert && sceneryAssert( !_.find( this._instances, function( other ) { return instance.equals( other ); } ), 'Cannot add duplicates of an instance to a Node' );
       this._instances.push( instance );
+      if ( this._instances.length === 1 ) {
+        this.firstInstanceAdded();
+      }
+    },
+    
+    firstInstanceAdded: function() {
+      // no-op, meant to be overridden in the prototype chain
     },
     
     // returns undefined if there is no instance.
@@ -1341,6 +1582,13 @@ define( function( require ) {
       var index = _.indexOf( this._instances, instance ); // actual instance equality (NOT capitalized, normal meaning)
       sceneryAssert && sceneryAssert( index !== -1, 'Cannot remove an Instance from a Node if it was not there' );
       this._instances.splice( index, 1 );
+      if ( this._instances.length === 0 ) {
+        this.lastInstanceRemoved();
+      }
+    },
+    
+    lastInstanceRemoved: function() {
+      // no-op, meant to be overridden in the prototype chain
     },
     
     notifyVisibilityChange: function() {
@@ -1556,6 +1804,12 @@ define( function( require ) {
     set cursor( value ) { this.setCursor( value ); },
     get cursor() { return this.getCursor(); },
     
+    set mouseArea( value ) { this.setMouseArea( value ); },
+    get mouseArea() { return this.getMouseArea(); },
+    
+    set touchArea( value ) { this.setTouchArea( value ); },
+    get touchArea() { return this.getTouchArea(); },
+    
     set visible( value ) { this.setVisible( value ); },
     get visible() { return this.isVisible(); },
     
@@ -1719,14 +1973,15 @@ define( function( require ) {
    */
   Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
                                   'left', 'right', 'top', 'bottom', 'center', 'centerX', 'centerY', 'renderer', 'rendererOptions',
-                                  'layerSplit', 'layerSplitBefore', 'layerSplitAfter' ];
+                                  'layerSplit', 'layerSplitBefore', 'layerSplitAfter', 'mouseArea', 'touchArea' ];
   
   Node.prototype._supportedRenderers = [];
   
   Node.prototype.layerStrategy = LayerStrategy;
   
   // mix-in the events for Node
-  nodeEvents( Node );
+  /* jshint -W064 */
+  NodeEvents( Node );
   
   return Node;
 } );

@@ -1,9 +1,7 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * Encapsulates common color information and transformations.
- *
- * Consider it immutable!
  *
  * See http://www.w3.org/TR/css3-color/
  *
@@ -18,7 +16,8 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   var clamp = require( 'DOT/Util' ).clamp;
-  
+  var linear = require( 'DOT/Util' ).linear;
+
   // r,g,b integers 0-255, 'a' float 0-1
   scenery.Color = function Color( r, g, b, a ) {
     
@@ -321,7 +320,7 @@ define( function( require ) {
     * listeners TODO: consider mixing in this behavior, it's common
     *----------------------------------------------------------------------------*/
     
-    // listener should be a callback expecting no arguments, listener() will be called when the font changes
+    // listener should be a callback expecting no arguments, listener() will be called when the color changes
     addChangeListener: function( listener ) {
       sceneryAssert && sceneryAssert( listener !== undefined && listener !== null, 'Verify that the listener exists' );
       sceneryAssert && sceneryAssert( !_.contains( this.listeners, listener ) );
@@ -499,7 +498,7 @@ define( function( require ) {
     yellowgreen:          '9acd32'
   };
   
-  // JAVA compatibility TODO: remove after porting MS
+  // Java compatibility
   Color.BLACK      = new Color( 0,   0,   0   ).setImmutable();
   Color.BLUE       = new Color( 0,   0,   255 ).setImmutable();
   Color.CYAN       = new Color( 0,   255, 255 ).setImmutable();
@@ -513,6 +512,28 @@ define( function( require ) {
   Color.RED        = new Color( 255, 0,   0   ).setImmutable();
   Color.WHITE      = new Color( 255, 255, 255 ).setImmutable();
   Color.YELLOW     = new Color( 255, 255, 0   ).setImmutable();
-  
+
+  /**
+   * Interpolates between 2 colors in RGBA space. When distance is 0, color1
+   * is returned. When distance is 1, color2 is returned. Other values of
+   * distance return a color somewhere between color1 and color2. Each color
+   * component is interpolated separately.
+   *
+   * @param {Color} color1
+   * @param {Color} color2
+   * @param {Number} distance distance between color1 and color2, 0 <= distance <= 1
+   * @return {Color}
+   */
+  Color.interpolateRBGA = function( color1, color2, distance ) {
+    if ( distance < 0 || distance > 1 ) {
+      throw new Error( "distance must be between 0 and 1: " + distance );
+    }
+    var r = Math.floor( linear( 0, 1, color1.r, color2.r, distance ) );
+    var g = Math.floor( linear( 0, 1, color1.g, color2.g, distance ) );
+    var b = Math.floor( linear( 0, 1, color1.b, color2.b, distance ) );
+    var a = linear( 0, 1, color1.a, color2.a, distance );
+    return new Color( r, g, b, a );
+  };
+
   return Color;
 } );

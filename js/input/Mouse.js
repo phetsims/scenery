@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * Tracks the mouse state
@@ -31,7 +31,7 @@ define( function( require ) {
   };
   var Mouse = scenery.Mouse;
   
-  inherit( Mouse, Pointer, {
+  inherit( Pointer, Mouse, {
     down: function( point, event ) {
       this.point = point;
       switch( event.button ) {

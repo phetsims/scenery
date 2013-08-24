@@ -1,25 +1,30 @@
 
 
 (function(){
-  "use strict";
+  'use strict';
   
-  // module( 'JSHint' );
+  module( 'Scenery: JSHint' );
   
-  // TODO: Be able to pull variables from Gruntfile, files from something else
+  var filenames = _.filter( $( 'head script' ).map( function( i, script ) { return script.src; } ), function( src ) {
+    return src.indexOf( 'scenery/js' ) !== -1 ||
+           src.indexOf( 'scenery/common/kite/js' ) !== -1 ||
+           src.indexOf( 'scenery/common/dot/js' ) !== -1 ||
+           src.indexOf( 'scenery/common/phet-core/js' ) !== -1 ||
+           src.indexOf( 'scenery/common/assert/js' ) !== -1;
+  } );
   
-  // qHint.sendRequest( '../../build/file-list.txt', function( req ) {
-  //   test( 'File list OK', function() {
-  //     equal( req.status, 200 );
-  //   } );
+  var options = window.jshintOptions;
+  if ( options ) {
+    var globals = options.globals;
+    delete options.globals; // it's technically an invalid option when passed to qHint
     
-  //   var filenames = req.responseText.split( /\r?\n/ );
-    
-  //   _.each( filenames, function( filename ) {
-  //     if ( filename ) {
-  //       qHint( filename, '../../' + filename + '?random=' + Math.random().toFixed( 20 ), options, globals );
-  //     }
-  //   } );
-  // } );
+    _.each( filenames, function( filename ) {
+      var name = filename.slice( filename.lastIndexOf( '/' ) + 1, filename.indexOf( '?' ) );
+      var lib = filename.slice( 0, filename.lastIndexOf( '/js/' ) );
+      lib = lib.slice( lib.lastIndexOf( '/' ) + 1 );
+      qHint( lib + ': ' + name, filename, options, globals );
+    } );
+  }
   
 })();
 

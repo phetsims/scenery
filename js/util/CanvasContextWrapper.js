@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * Wraps the context and contains a reference to the canvas, so that we can absorb unnecessary state changes,
@@ -38,6 +38,22 @@ define( function( require ) {
       
       this.font = undefined; // '10px sans-serif'
       this.direction = undefined; // 'inherit'
+    },
+
+    /**
+     * Sets a (possibly) new width and height, and clears the canvas.
+     * @param width
+     * @param height
+     */
+    setDimensions: function( width, height ) {
+
+      //Don't guard against width and height, because we need to clear the canvas.
+      //TODO: Is it expensive to clear by setting both the width and the height?  Maybe we just need to set the width to clear it.
+      this.canvas.width = width;
+      this.canvas.height = height;
+
+      // assume all persistent data could have changed
+      this.resetStyles();
     },
     
     setFillStyle: function( style ) {
@@ -84,7 +100,7 @@ define( function( require ) {
       if ( this.lineDash !== dash ) {
         this.lineDash = dash;
         if ( this.context.setLineDash ) {
-          this.context.setLineDash( dash );
+          this.context.setLineDash( dash === null ? [] : dash ); // see https://github.com/phetsims/scenery/issues/101 for null line-dash workaround
         } else if ( this.context.mozDash !== undefined ) {
           this.context.mozDash = dash;
         } else if ( this.context.webkitLineDash !== undefined ) {

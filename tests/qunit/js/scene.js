@@ -755,4 +755,18 @@
     rect.fill = color;
     color.setRGBA( 0, 255, 0, 1 );
   } );
+  
+  test( 'Bounds and Visible Bounds', function() {
+    var node = new scenery.Node();
+    var rect = new scenery.Rectangle( 0, 0, 100, 50 );
+    node.addChild( rect );
+    
+    ok( node.visibleBounds.equals( new dot.Bounds2( 0, 0, 100, 50 ) ), 'Visible Bounds Visible' );
+    ok( node.bounds.equals( new dot.Bounds2( 0, 0, 100, 50 ) ), 'Complete Bounds Visible' );
+    
+    rect.visible = false;
+    
+    ok( node.visibleBounds.equals( dot.Bounds2.NOTHING ), 'Visible Bounds Invisible' );
+    ok( node.bounds.equals( new dot.Bounds2( 0, 0, 100, 50 ) ), 'Complete Bounds Invisible' );
+  } );
 })();

@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * Basic dragging for a node.
@@ -16,6 +16,7 @@ define( function( require ) {
   /*
    * Allowed options: {
    *    allowTouchSnag: false // allow touch swipes across an object to pick it up,
+   *    mouseButton: 0        // allow changing the mouse button that activates the drag listener. -1 should activate on any mouse button, 0 on left, 1 for middle, 2 for right, etc.
    *    start: null           // if non-null, called when a drag is started. start( event, trail )
    *    drag: null            // if non-null, called when the user moves something with a drag (not a start or end event).
    *                                                                         drag( event, trail )
@@ -27,7 +28,8 @@ define( function( require ) {
     var handler = this;
     
     this.options = _.extend( {
-      allowTouchSnag: false
+      allowTouchSnag: false,
+      mouseButton: 0
     }, options );
     
     this.dragging              = false;     // whether a node is being dragged with this handler
@@ -124,7 +126,8 @@ define( function( require ) {
       this.node = event.currentTarget;
       this.lastDragPoint = event.pointer.point;
       this.startTransformMatrix = event.currentTarget.getMatrix();
-      this.mouseButton = event.domEvent.button; // should be undefined for touch events
+      // event.domEvent may not exist if this is touch-to-snag
+      this.mouseButton = event.pointer.isMouse ? event.domEvent.button : undefined;
       
       if ( this.options.start ) {
         this.options.start( event, this.trail );
@@ -143,6 +146,11 @@ define( function( require ) {
     },
     
     tryToSnag: function( event ) {
+      // don't allow drag attempts that use the wrong mouse button (-1 indicates any mouse button works)
+      if ( event.pointer.isMouse && event.domEvent && this.options.mouseButton !== event.domEvent.button && this.options.mouseButton !== -1 ) {
+        return;
+      }
+      
       // only start dragging if the pointer isn't dragging anything, we aren't being dragged, and if it's a mouse it's button is down
       if ( !this.dragging && !event.pointer.dragging ) {
         this.startDrag( event );

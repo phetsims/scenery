@@ -7,11 +7,11 @@
   
   <title>Scenery Playground</title>
   
-  <script src="../contrib/jquery-2.0.0.js"></script>
-  <script src="../contrib/lodash.min-1.0.0-rc.3.js"></script>
-  <script src="../contrib/has.js"></script>
+  <script src="../lib/jquery-2.0.0.js"></script>
+  <script src="../lib/lodash.min-1.0.0-rc.3.js"></script>
+  <script src="../lib/has.js"></script>
   
-  <script data-main="../js/config.js" src="../contrib/require-2.1.4.js"></script>
+  <script data-main="../js/config.js" src="../lib/require-2.1.4.js"></script>
   
   <style>
     html, body {
@@ -164,6 +164,30 @@
               up: function() { rect.fill = '#f00'; },
               upInside: function() { rect.stroke = '#000'; },
               upOutside: function() { rect.stroke = null; }
+            } ) );
+          };
+          
+          window.setupRoundRect = function() {
+            var rect = new scenery.Rectangle( 100, 50, 300, 150, 150, 50, { fill: 'red', cursor: 'pointer' } );
+            scene.addChild( rect );
+            scene.updateOnRequestAnimationFrame();
+            scene.initializeStandaloneEvents();
+            
+            rect.containsPointSelf( dot( 111, 118 ) ); // 111,118
+          };
+          
+          window.setupButton = function() {
+            var rect = new scenery.Rectangle( 50, 50, 100, 50, { fill: '#f00' } );
+            scene.addChild( rect );
+            scene.initializeStandaloneEvents();
+            scenery.disableLayerLogging();
+            scenery.disableEventLogging();
+            rect.cursor = 'pointer';
+            rect.addInputListener( new scenery.ButtonListener( {
+              up: function( event, old ) { console.log( 'up from ' + old ); rect.fill = '#f00'; },
+              over: function( event, old ) { console.log( 'over from ' + old ); rect.fill = '#00f'; },
+              down: function( event, old ) { console.log( 'down from ' + old ); rect.fill = '#0f0'; },
+              fire: function( event ) { console.log( 'fire' ); }
             } ) );
           };
           

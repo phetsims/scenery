@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * An SVG-based layer in the scene graph. Each layer handles dirty-region handling separately,
@@ -76,19 +76,21 @@ define( function( require ) {
   };
   var SVGLayer = scenery.SVGLayer;
   
-  inherit( SVGLayer, Layer, {
+  inherit( Layer, SVGLayer, {
     
     /*
      * Notes about how state is tracked here:
      * Trails are stored on group.trail so that we can look this up when inserting new groups
      */
-    addNodeFromTrail: function( trail ) {
-      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' addNodeFromTrail: ' + trail.toString() );
+    addInstance: function( instance ) {
+      var trail = instance.trail;
+      
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' addInstance: ' + trail.toString() );
       
       sceneryAssert && sceneryAssert( !( trail.getUniqueId() in this.idFragmentMap ), 'Already contained that trail!' );
       sceneryAssert && sceneryAssert( trail.isPainted(), 'Don\'t add nodes without isPainted() to SVGLayer' );
       
-      Layer.prototype.addNodeFromTrail.call( this, trail );
+      Layer.prototype.addInstance.call( this, instance );
       
       var subtrail = this.baseTrail.copy(); // grab the trail up to (and including) the base node, so we don't create superfluous groups
       var lastId = null;
@@ -108,9 +110,6 @@ define( function( require ) {
             // apply the node's transform to the group
             this.applyTransform( subtrail.lastNode().getTransform(), group );
             
-            // apply any stylings to the group (opacity, visibility)
-            this.updateNodeGroup( subtrail.lastNode(), group );
-            
             // add the group to its parent
             this.insertGroupIntoParent( group, this.idGroupMap[lastId], subtrail );
           } else {
@@ -121,7 +120,14 @@ define( function( require ) {
             
             // sets up the proper transform for the base
             this.initializeBase();
+            
+            // immediately update the base transform so we don't temporarily display.
+            // fixes https://github.com/phetsims/beers-law-lab/issues/20
+            this.refreshBaseTransform();
           }
+          
+          // apply any stylings to the group (opacity, visibility)
+          this.updateNodeGroup( subtrail.lastNode(), group );
           
           group.referenceCount = 0; // initialize a reference count, so we can know when to remove unused groups
           group.trail = subtrail.copy(); // put a reference to the trail on the group, so we can efficiently scan and see where to insert future groups
@@ -154,11 +160,13 @@ define( function( require ) {
       nodeGroup.appendChild( svgFragment );
     },
     
-    removeNodeFromTrail: function( trail ) {
-      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' removeNodeFromTrail: ' + trail.toString() );
+    removeInstance: function( instance ) {
+      var trail = instance.trail;
+      
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' removeInstance: ' + trail.toString() );
       sceneryAssert && sceneryAssert( trail.getUniqueId() in this.idFragmentMap, 'Did not contain that trail!' );
       
-      Layer.prototype.removeNodeFromTrail.call( this, trail );
+      Layer.prototype.removeInstance.call( this, instance );
       
       // clean up the fragment and defs directly died to the node
       var trailId = trail.getUniqueId();
@@ -242,7 +250,8 @@ define( function( require ) {
     },
     
     updateGroupVisibility: function( node, group ) {
-      if ( node.isVisible() ) {
+      // if we're updating visibility for the base trail, apply its visibility and everything beneath it
+      if ( node === this.baseNode ? this.baseTrail.isVisible() : node.isVisible() ) {
         group.style.display = 'inherit';
       } else {
         group.style.display = 'none';
@@ -250,7 +259,13 @@ define( function( require ) {
     },
     
     updateGroupOpacity: function( node, group ) {
-      group.setAttribute( 'opacity', node.getOpacity() );
+      var opacity;
+      if ( node === this.baseNode ) {
+        opacity = this.baseTrail.getOpacity(); // multiplied by opacities of all ancestors
+      } else {
+        opacity = node.getOpacity();
+      }
+      group.setAttribute( 'opacity', opacity );
     },
     
     getFragmentFromInstance: function( instance ) {
@@ -274,6 +289,10 @@ define( function( require ) {
     },
     
     render: function( scene, args ) {
+      this.refreshBaseTransform();
+    },
+    
+    refreshBaseTransform: function() {
       if ( this.baseTransformDirty ) {
         // this will be run either now or at the end of flushing changes
         var includesBaseTransformChange = this.baseTransformChange;
@@ -340,7 +359,7 @@ define( function( require ) {
     
     updateBaseTransform: function( includesBaseTransformChange ) {
       sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' updateBaseTransform' );
-      var transform = this.baseTrail.getTransform();
+      var transform = this.baseTrail.getTransform(); // TODO: consider improving this, CSS+SVG bottleneck
       
       if ( this.cssTransform ) {
         // set the full transform!
@@ -491,6 +510,9 @@ define( function( require ) {
       var group = this.getGroupFromInstance( instance );
       if ( group ) {
         this.updateGroupVisibility( instance.getNode(), group );
+      } else if ( this.baseNode !== this.scene ) {
+        // if we are using a CSS transform (basically)
+        this.updateGroupVisibility( this.baseNode, this.getGroupFromInstance( this.baseTrail.getInstance() ) );
       }
     },
     
@@ -499,6 +521,9 @@ define( function( require ) {
       var group = this.getGroupFromInstance( instance );
       if ( group ) {
         this.updateGroupOpacity( instance.getNode(), group );
+      } else if ( this.baseNode !== this.scene ) {
+        // if we are using a CSS transform (basically)
+        this.updateGroupOpacity( this.baseNode, this.getGroupFromInstance( this.baseTrail.getInstance() ) );
       }
     },
     
@@ -533,6 +558,7 @@ define( function( require ) {
     },
     
     notifyDirtySubtreePaint: function( instance ) {
+      // TODO: performance: this caused a 50% increase for the fast-svg transform steps, what were we missing?
       if ( instance.layer === this ) {
         this.notifyDirtySelfPaint( instance );
       }

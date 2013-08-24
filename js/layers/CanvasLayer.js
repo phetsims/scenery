@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * A Canvas-backed layer in the scene graph. Each layer handles dirty-region handling separately,
@@ -29,6 +29,9 @@ define( function( require ) {
   require( 'SCENERY/util/Trail' );
   require( 'SCENERY/util/TrailPointer' );
   require( 'SCENERY/util/Util' );
+  
+  // stores CanvasContextWrappers to be re-used
+  var canvasContextPool = [];
   
   // assumes main is wrapped with JQuery
   /*
@@ -76,7 +79,7 @@ define( function( require ) {
   };
   var CanvasLayer = scenery.CanvasLayer;
   
-  inherit( CanvasLayer, Layer, {
+  inherit( Layer, CanvasLayer, {
     
     /*
      * Renders the canvas layer from the scene
@@ -137,16 +140,23 @@ define( function( require ) {
       }
       
       function getCanvasWrapper() {
-        // TODO: verify that this works with hi-def canvases
-        // TODO: use a cache of scratch canvases/contexts on the scene for this purpose, instead of creation
-        var canvas = document.createElement( 'canvas' );
-        canvas.width = layer.logicalWidth * layer.backingScale;
-        canvas.height = layer.logicalHeight * layer.backingScale;
-        // $( canvas ).css( 'width', layer.logicalWidth );
-        // $( canvas ).css( 'height', layer.logicalHeight );
-        var context = canvas.getContext( '2d' );
+        var width = layer.logicalWidth * layer.backingScale;
+        var height = layer.logicalHeight * layer.backingScale;
         
-        return new scenery.CanvasContextWrapper( canvas, context );
+        if ( canvasContextPool.length ) {
+          // use a pooled wrapper
+          var wrapper = canvasContextPool.pop();
+          wrapper.setDimensions( width, height );
+          return wrapper;
+        } else {
+          // create a new wrapper
+          var canvas = document.createElement( 'canvas' );
+          canvas.width = layer.logicalWidth * layer.backingScale;
+          canvas.height = layer.logicalHeight * layer.backingScale;
+          var context = canvas.getContext( '2d' );
+          
+          return new scenery.CanvasContextWrapper( canvas, context );
+        }
       }
       
       function topWrapper() {
@@ -208,7 +218,11 @@ define( function( require ) {
             baseContext.globalAlpha = 1;
           }
           
-          wrapperStack.pop();
+          var wrapper = wrapperStack.pop();
+          if ( wrapper !== layer.wrapper ) {
+            // store the CanvasContextWrapper for recycling if it isn't our core wrapper
+            canvasContextPool.push( wrapper );
+          }
         } else {
           node.transform.getInverse().canvasAppendTransform( topWrapper().context );
         }
@@ -371,9 +385,11 @@ define( function( require ) {
       context.drawImage( this.canvas, 0, 0 );
     },
     
-    addNodeFromTrail: function( trail ) {
-      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' addNodeFromTrail: ' + trail.toString() );
-      Layer.prototype.addNodeFromTrail.call( this, trail );
+    addInstance: function( instance ) {
+      var trail = instance.trail;
+      
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' addInstance: ' + trail.toString() );
+      Layer.prototype.addInstance.call( this, instance );
       
       // since the node's getBounds() are in the parent coordinate frame, we peel off the last node to get the correct (relevant) transform
       // TODO: more efficient way of getting this transform?
@@ -384,9 +400,11 @@ define( function( require ) {
       }
     },
     
-    removeNodeFromTrail: function( trail ) {
-      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' removeNodeFromTrail: ' + trail.toString() );
-      Layer.prototype.removeNodeFromTrail.call( this, trail );
+    removeInstance: function( instance ) {
+      var trail = instance.trail;
+      
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' removeInstance: ' + trail.toString() );
+      Layer.prototype.removeInstance.call( this, instance );
       
       // since the node's getBounds() are in the parent coordinate frame, we peel off the last node to get the correct (relevant) transform
       // TODO: more efficient way of getting this transform?
@@ -408,17 +426,25 @@ define( function( require ) {
       sceneryAssert && sceneryAssert( globalBounds.isEmpty() || globalBounds.isFinite(), 'Infinite (non-empty) dirty bounds passed to canvasMarkGlobalBounds' );
       
       // TODO: for performance, consider more than just a single dirty bounding box
-      this.dirtyBounds = this.dirtyBounds.union( globalBounds.dilate( 1 ).roundOut() );
+      this.dirtyBounds = this.dirtyBounds.union( globalBounds.dilate( 2 ).roundOut() );
     },
     
     canvasMarkLocalBounds: function( localBounds, trail ) {
       sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' canvasMarkLocalBounds: ' + localBounds.toString() + ' on ' + trail.toString() );
-      this.canvasMarkGlobalBounds( trail.localToGlobalBounds( localBounds ) );
+      if ( !this.canUseDirtyRegions() ) {
+        this.dirtyBounds = Bounds2.EVERYTHING;
+      } else {
+        this.canvasMarkGlobalBounds( trail.localToGlobalBounds( localBounds ) );
+      }
     },
     
     canvasMarkParentBounds: function( parentBounds, trail ) {
       sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' canvasMarkParentBounds: ' + parentBounds.toString() + ' on ' + trail.toString() );
-      this.canvasMarkGlobalBounds( trail.parentToGlobalBounds( parentBounds ) );
+      if ( !this.canUseDirtyRegions() ) {
+        this.dirtyBounds = Bounds2.EVERYTHING;
+      } else {
+        this.canvasMarkGlobalBounds( trail.parentToGlobalBounds( parentBounds ) );
+      }
     },
     
     canvasMarkSelf: function( instance ) {

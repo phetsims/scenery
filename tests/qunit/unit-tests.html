@@ -6,17 +6,31 @@
   
   <title>Unit tests for Scenery</title>
   
-  <link rel="stylesheet" href="../../contrib/qunit-1.10.0.css">
+  <link rel="stylesheet" href="../../lib/qunit-1.10.0.css">
   
-  <script src="../../contrib/jquery-2.0.0.js"></script>
-  <script src="../../contrib/lodash.min-1.0.0-rc.3.js"></script>
-  <script src="../../contrib/has.js"></script>
-  <script src="../../contrib/jshint-r12.js"></script>
-  <script src="../../contrib/qunit-1.10.0.js"></script>
-  <script src="../../contrib/qhint.js"></script>
+  <!-- load JSHint options for layer, before anything writes to window.module -->
+  <script type="text/javascript">
+    window.module = {}; // so module.exports can be set while loading our JSHint options
+  </script>
+  <script src="../../../chipper/grunt/jshint-options.js"></script>
+  <script type="text/javascript">
+    window.jshintOptions = window.module.exports; // defined in jshint-options.js
+    delete window.module;
+  </script>
   
-  <script data-main="../../js/config.js" src="../../contrib/require-2.1.4.js"></script>
-  <!-- <script src="../../dist/development/scenery.js"></script> -->
+  <script src="../../lib/jquery-2.0.0.js"></script>
+  <script src="../../lib/lodash.min-1.0.0-rc.3.js"></script>
+  <script src="../../lib/has.js"></script>
+  <script src="../../lib/jshint-2.1.2.js"></script>
+  <script src="../../lib/qunit-1.10.0.js"></script>
+  <script src="../../lib/qhint.js"></script>
+  
+  <!-- Canvg and dependencies -->
+  <script src="../../lib/canvg-1.2/rgbcolor.js"></script>
+  <script src="../../lib/canvg-1.2/canvg.js"></script>
+  
+  <script data-main="../../js/config.js" src="../../lib/require-2.1.4.js"></script>
+  <!-- <script src="../../build/development/scenery.js"></script> -->
   
   <script src="unit-tests.js"></script>
   <script src="../../common/kite/tests/qunit/unit-tests.js"></script>

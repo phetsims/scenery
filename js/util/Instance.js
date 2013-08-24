@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * An Instance of a Node in the expanded tree form.
@@ -11,6 +11,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/AccessibilityPeer' );
+  require( 'SCENERY/util/LiveRegion' );
   
   var accessibility = window.has && window.has( 'scenery.accessibility' );
   
@@ -31,6 +32,7 @@ define( function( require ) {
     this.children = [];
     
     this.peers = []; // list of AccessibilityPeer instances attached to this trail
+    this.liveRegions = []; // list of LiveRegion instances attached to this trail
     
     // TODO: track these? should significantly accelerate subtree-changing operations
     this.startAffectedLayer = null;
@@ -40,6 +42,7 @@ define( function( require ) {
     
     if ( accessibility ) {
       this.addPeers();
+      this.addLiveRegions();
     }
   };
   var Instance = scenery.Instance;
@@ -81,10 +84,10 @@ define( function( require ) {
           }
         }
         if ( this.oldLayer ) {
-          this.oldLayer.removeNodeFromTrail( this.trail );
+          this.oldLayer.removeInstance( this );
         }
         if ( this.layer ) {
-          this.layer.addNodeFromTrail( this.trail );
+          this.layer.addInstance( this );
         }
         this.oldLayer = this.layer;
       }
@@ -132,6 +135,7 @@ define( function( require ) {
       
       if ( accessibility ) {
         this.removePeers();
+        this.removeLiveRegions();
       }
     },
     
@@ -183,6 +187,31 @@ define( function( require ) {
       _.each( this.peers, function( peer ) {
         scene.removePeer( peer );
         peer.dispose();
+      } );
+      
+      this.peers.length = 0; // clear this.peers
+    },
+
+    addLiveRegions: function() {
+      var thisInstance = this;
+      var node = this.getNode();
+      var scene = this.getScene();
+
+      if ( node._liveRegions.length ) {
+        _.each( node._liveRegions, function( item ) {
+          var liveRegion = new scenery.LiveRegion( thisInstance, item.property, item.options );
+          scene.addLiveRegion( liveRegion );
+          thisInstance.liveRegions.push( liveRegion );
+        } );
+      }
+    },
+
+    removeLiveRegions: function() {
+      var scene = this.getScene();
+
+      _.each( this.liveRegions, function( liveRegion ) {
+        scene.removeLiveRegion( liveRegion );
+        liveRegion.dispose();
       } );
       
       this.peers.length = 0; // clear this.peers

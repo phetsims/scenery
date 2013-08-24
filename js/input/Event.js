@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /*
  * An event in Scenery that has similar event-handling characteristics to DOM events.
@@ -19,7 +19,6 @@ define( function( require ) {
     sceneryAssert && sceneryAssert( args.trail &&
                       args.type &&
                       args.pointer &&
-                      args.domEvent &&
                       args.target, 'Missing required scenery.Event argument' );
     
     this.handled = false;

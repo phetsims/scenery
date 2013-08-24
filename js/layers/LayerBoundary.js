@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * A conceptual boundary between layers, where it is optional to have information about a previous or next layer.

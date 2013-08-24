@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * Configuration file for production deployment purposes, NOT for development (it currently excludes most assertions).
@@ -35,8 +35,8 @@ require.config( {
   deps: [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main' ],
   
   paths: {
-    underscore: '../contrib/lodash.min-1.0.0-rc.3',
-    jquery: '../contrib/jquery-2.0.0.min',
+    underscore: '../lib/lodash.min-1.0.0-rc.3',
+    jquery: '../lib/jquery-2.0.0.min',
     SCENERY: '.',
     KITE: '../common/kite/js',
     DOT: '../common/dot/js',

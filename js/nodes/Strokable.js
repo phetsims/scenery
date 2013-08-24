@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * Mix-in for nodes that support a standard stroke.
@@ -131,19 +131,43 @@ define( function( require ) {
         // since this can actually change the bounds, we need to handle a few things differently than the fill
         this.markOldSelfPaint();
         
-        if ( this._stroke && this._stroke.removeChangeListener ) {
+        var hasInstances = this._instances.length > 0;
+        
+        if ( hasInstances && this._stroke && this._stroke.removeChangeListener ) {
           this._stroke.removeChangeListener( this._strokeListener );
         }
         
         this._stroke = stroke;
         
-        if ( this._stroke && this._stroke.addChangeListener ) {
+        if ( hasInstances && this._stroke && this._stroke.addChangeListener ) {
           this._stroke.addChangeListener( this._strokeListener );
         }
         
         this.invalidateStroke();
       }
       return this;
+    };
+    
+    var superFirstInstanceAdded = proto.firstInstanceAdded;
+    proto.firstInstanceAdded = function() {
+      if ( this._stroke && this._stroke.addChangeListener ) {
+        this._stroke.addChangeListener( this._strokeListener );
+      }
+      
+      if ( superFirstInstanceAdded ) {
+        superFirstInstanceAdded.call( this );
+      }
+    };
+    
+    var superLastInstanceRemoved = proto.lastInstanceRemoved;
+    proto.lastInstanceRemoved = function() {
+      if ( this._stroke && this._stroke.removeChangeListener ) {
+        this._stroke.removeChangeListener( this._strokeListener );
+      }
+      
+      if ( superLastInstanceRemoved ) {
+        superLastInstanceRemoved.call( this );
+      }
     };
     
     proto.beforeCanvasStroke = function( wrapper ) {

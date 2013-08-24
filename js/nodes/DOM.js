@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * DOM nodes. Currently lightweight handling
@@ -46,7 +46,7 @@ define( function( require ) {
   };
   var DOM = scenery.DOM;
   
-  inherit( DOM, Node, {
+  inherit( Node, DOM, {
     // we use a single DOM instance, so this flag should indicate that we don't support duplicating it
     allowsMultipleDOMInstances: false,
     

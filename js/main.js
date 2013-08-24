@@ -1,4 +1,4 @@
-// Copyright 2002-2012, University of Colorado
+// Copyright 2002-2013, University of Colorado
 
 /**
  * Module that includes all Scenery dependencies, so that requiring this module will return an object
@@ -14,6 +14,7 @@ define( [
     'SCENERY/scenery',
     'SCENERY/debug/DebugContext',
     
+    'SCENERY/input/ButtonListener',
     'SCENERY/input/DownUpListener',
     'SCENERY/input/Event',
     'SCENERY/input/Input',
@@ -34,6 +35,7 @@ define( [
     'SCENERY/layers/Renderer',
     'SCENERY/layers/SVGLayer',
     
+    'SCENERY/nodes/CanvasNode',
     'SCENERY/nodes/Circle',
     'SCENERY/nodes/DOM',
     'SCENERY/nodes/Fillable',
@@ -42,6 +44,7 @@ define( [
     'SCENERY/nodes/Image',
     'SCENERY/nodes/Node',
     'SCENERY/nodes/Path',
+    'SCENERY/nodes/Plane',
     'SCENERY/nodes/Rectangle',
     'SCENERY/nodes/Strokable',
     'SCENERY/nodes/Text',
@@ -52,7 +55,9 @@ define( [
     'SCENERY/util/Color',
     'SCENERY/util/FixedNodeEvents',
     'SCENERY/util/Font',
+    'SCENERY/util/Gradient',
     'SCENERY/util/LinearGradient',
+    'SCENERY/util/LiveRegion',
     'SCENERY/util/Instance',
     'SCENERY/util/Pattern',
     'SCENERY/util/RadialGradient',
