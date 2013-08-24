@@ -167,9 +167,10 @@ define( function( require ) {
         return;
       }
       
-      _.each( this.layers, function( layer ) {
-        layer.render( scene, args );
-      } );
+      var i = this.layers.length;
+      while ( i-- ) {
+        this.layers[i].render( scene, args );
+      }
       
       this.updateCursor();
       
@@ -371,6 +372,8 @@ define( function( require ) {
     stitch: function( match ) {
       var scene = this;
       
+      var i;
+      
       sceneryLayerLog && sceneryLayerLog( '-----------------------------------\nbeginning stitch' );
       
       // bail out if there are no changes to stitch (stitch is called multiple times)
@@ -394,10 +397,11 @@ define( function( require ) {
         baseNode: this
       };
       
-      _.each( this.layerChangeIntervals, function( interval ) {
-        // reindex intervals, since their endpoints indices may need to be updated
-        interval.reindex();
-      } );
+      // reindex intervals, since their endpoints indices may need to be updated
+      i = this.layerChangeIntervals.length;
+      while ( i-- ) {
+        this.layerChangeIntervals[i].reindex();
+      }
       
       /*
        * Sort our intervals, so that when we need to 'unglue' a layer into two separate layers, we will have passed
@@ -408,7 +412,9 @@ define( function( require ) {
       
       sceneryLayerLog && sceneryLayerLog( 'stitching on intervals: \n' + this.layerChangeIntervals.join( '\n' ) );
       
-      _.each( this.layerChangeIntervals, function( interval ) {
+      for ( i = 0; i < this.layerChangeIntervals.length; i++ ) {
+        var interval = this.layerChangeIntervals[i];
+        
         sceneryLayerLog && sceneryLayerLog( 'stitch on interval ' + interval.toString() );
         var beforeTrail = interval.start;
         var afterTrail = interval.end;
@@ -420,10 +426,10 @@ define( function( require ) {
         var afterLayer = afterInstance ? afterInstance.layer : null;
         
         // TODO: calculate boundaries based on the instances?
-        var boundaries = scene.calculateBoundaries( beforeLayer ? beforeLayer.type : null, beforeTrail, afterTrail );
+        var boundaries = this.calculateBoundaries( beforeLayer ? beforeLayer.type : null, beforeTrail, afterTrail );
         
-        scene.stitchInterval( stitchData, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match );
-      } );
+        this.stitchInterval( stitchData, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match );
+      };
       
       // clean up state that was set leading up to the stitching, and do it early so
       // if we do things later that cause side-effects we won't clear intervals that haven't been stitched
@@ -432,27 +438,41 @@ define( function( require ) {
       sceneryLayerLog && sceneryLayerLog( '------ finished intervals in stitching' );
       
       // reindex all of the relevant layer trails
-      _.each( this.layers.concat( stitchData.newLayers ), function( layer ) {
+      i = this.layers.length;
+      while ( i-- ) {
+        var layer = this.layers[i];
         layer.startBoundary.reindex();
         layer.endBoundary.reindex(); // TODO: performance: this repeats some work, verify in layer audit that we are sharing boundaries properly, then only reindex end boundary on last layer
-      } );
+      }
+      i = stitchData.newLayers.length;
+      while ( i-- ) {
+        var layer = stitchData.newLayers[i];
+        layer.startBoundary.reindex();
+        layer.endBoundary.reindex(); // TODO: performance: this repeats some work, verify in layer audit that we are sharing boundaries properly, then only reindex end boundary on last layer
+      }
       
       // remove necessary layers. do this before adding layers, since insertLayer currently does not gracefully handle weird overlapping cases
-      _.each( this.layers.slice( 0 ), function( layer ) {
+      i = this.layers.length;
+      // NOTE: this has to iterate in reverse, since we are removing elements that are indexed
+      while ( i-- ) {
+        var layer = this.layers[i];
+        
         // layers with zero trails should be removed
         if ( layer._instanceCount === 0 ) {
           sceneryLayerLog && sceneryLayerLog( 'disposing layer: ' + layer.getId() );
-          scene.disposeLayer( layer );
+          this.disposeLayer( layer );
         }
-      } );
+      }
       
       // add new layers. we do this before the add/remove trails, since those can trigger layer side effects
-      _.each( stitchData.newLayers, function( layer ) {
+      i = stitchData.newLayers.length;
+      while ( i-- ) {
+        var layer = stitchData.newLayers[i];
         sceneryAssert && sceneryAssert( layer._instanceCount, 'ensure we are not adding empty layers' );
         
         sceneryLayerLog && sceneryLayerLog( 'inserting layer: ' + layer.getId() );
         scene.insertLayer( layer );
-      } );
+      };
       
       // set the layers' elements' z-indices, and reindex their trails so they are in a consistent state
       // TODO: performance: don't reindex layers if no layers were added or removed?
@@ -714,6 +734,7 @@ define( function( require ) {
     },
     
     disposeLayer: function( layer ) {
+      // NOTE: stitching relies on this not changing this.layers except for removing the specific layer
       layer.dispose();
       this.layers.splice( _.indexOf( this.layers, layer ), 1 ); // TODO: better removal code!
     },
