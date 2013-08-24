@@ -214,12 +214,13 @@ define( function( require ) {
     // TODO: efficiency by batching calls?
     setChildren: function( children ) {
       if ( this._children !== children ) {
-        var i = this._children.length;
-        while ( i-- ) {
-          this.removeChild( this._children[i] );
+        // remove all children in a way where we don't have to copy the child array for safety
+        while ( this._children.length ) {
+          this.removeChild( this._children[this._children.length-1] );
         }
+        
         var len = children.length;
-        for ( i = 0; i < len; i++ ) {
+        for ( var i = 0; i < len; i++ ) {
           this.addChild( children[i] );
         }
       }
@@ -302,6 +303,7 @@ define( function( require ) {
     // ensure that cached bounds stored on this node (and all children) are accurate
     validateBounds: function() {
       var that = this;
+      var i;
       
       if ( this._selfBoundsDirty ) {
         // note: this should only be triggered if the bounds were actually changed, since we have a guard in place at invalidateSelf()
@@ -313,19 +315,22 @@ define( function( require ) {
       
       // validate bounds of children if necessary
       if ( this._childBoundsDirty ) {
+        
         // have each child validate their own bounds
-        _.each( this._children, function( child ) {
-          child.validateBounds();
-        } );
+        i = this._children.length;
+        while ( i-- ) {
+          this._children[i].validateBounds();
+        }
         
         var oldChildBounds = this._childBounds;
         
         // and recompute our _childBounds
         this._childBounds = Bounds2.NOTHING.copy();
         
-        _.each( this._children, function( child ) {
-          that._childBounds.includeBounds( child._bounds );
-        } );
+        i = this._children.length;
+        while ( i-- ) {
+          this._childBounds.includeBounds( this._children[i]._bounds );
+        }
         
         // run this before firing the event
         this._childBoundsDirty = false;
@@ -351,9 +356,10 @@ define( function( require ) {
         if ( changed ) {
           this._bounds = newBounds;
           
-          _.each( this._parents, function( parent ) {
-            parent.invalidateBounds();
-          } );
+          i = this._parents.length;
+          while ( i-- ) {
+            this._parents[i].invalidateBounds();
+          }
           
           // TODO: consider changing to parameter object (that may be a problem for the GC overhead)
           this.fireEvent( 'bounds', this._bounds );
@@ -396,13 +402,15 @@ define( function( require ) {
         this._mouseBounds = this._selfBounds.copy(); // start with the self bounds, then add from there
         
         // union of all children's mouse bounds (if they exist)
-        _.each( this._children, function( child ) {
+        var i = this._children.length;
+        while ( i-- ) {
+          var child = this._children[i];
           child.validateMouseBounds();
           if ( child._mouseBounds ) {
             hasMouseAreas = true;
             that._mouseBounds.includeBounds( child._mouseBounds );
           }
-        } );
+        }
         
         // do this before the transformation to the parent coordinate frame
         if ( this._mouseArea ) {
@@ -435,13 +443,15 @@ define( function( require ) {
         this._touchBounds = this._selfBounds.copy(); // start with the self bounds, then add from there
         
         // union of all children's touch bounds (if they exist)
-        _.each( this._children, function( child ) {
+        var i = this._children.length;
+        while ( i-- ) {
+          var child = this._children[i];
           child.validateTouchBounds();
           if ( child._touchBounds ) {
             hasTouchAreas = true;
             that._touchBounds.includeBounds( child._touchBounds );
           }
-        } );
+        }
         
         // do this before the transformation to the parent coordinate frame
         if ( this._touchArea ) {
