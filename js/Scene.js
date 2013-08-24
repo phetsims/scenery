@@ -429,7 +429,7 @@ define( function( require ) {
         var boundaries = this.calculateBoundaries( beforeLayer ? beforeLayer.type : null, beforeTrail, afterTrail );
         
         this.stitchInterval( stitchData, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match );
-      };
+      }
       
       // clean up state that was set leading up to the stitching, and do it early so
       // if we do things later that cause side-effects we won't clear intervals that haven't been stitched
@@ -453,15 +453,15 @@ define( function( require ) {
       }
       i = stitchData.newLayers.length;
       while ( i-- ) {
-        var layer = stitchData.newLayers[i];
-        layer.startBoundary.reindex();
-        layer.endBoundary.reindex(); // TODO: performance: this repeats some work, verify in layer audit that we are sharing boundaries properly, then only reindex end boundary on last layer
+        var newLayer = stitchData.newLayers[i];
+        newLayer.startBoundary.reindex();
+        newLayer.endBoundary.reindex(); // TODO: performance: this repeats some work, verify in layer audit that we are sharing boundaries properly, then only reindex end boundary on last layer
         
         // add new layers. we do this before the add/remove trails, since those can trigger layer side effects
-        sceneryAssert && sceneryAssert( layer._instanceCount, 'ensure we are not adding empty layers' );
+        sceneryAssert && sceneryAssert( newLayer._instanceCount, 'ensure we are not adding empty layers' );
         
-        sceneryLayerLog && sceneryLayerLog( 'inserting layer: ' + layer.getId() );
-        scene.insertLayer( layer );
+        sceneryLayerLog && sceneryLayerLog( 'inserting layer: ' + newLayer.getId() );
+        scene.insertLayer( newLayer );
       }
       
       // set the layers' elements' z-indices, and reindex their trails so they are in a consistent state
@@ -540,7 +540,7 @@ define( function( require ) {
           var instance = instancesToAddToLayer[i];
           instance.changeLayer( currentLayer );
           stitchData.affectedInstances.push( instance );
-        };
+        }
         instancesToAddToLayer.length = 0;
       }
       
@@ -636,10 +636,10 @@ define( function( require ) {
           // move over all of afterLayer's trails to beforeLayer
           var len = afterLayer._layerTrails.length;
           for ( var i = 0; i < len; i++ ) {
-            var trail = afterLayer._layerTrails[i];
+            var endTrail = afterLayer._layerTrails[i];
             
-            trail.reindex();
-            var instance = trail.getInstance();
+            endTrail.reindex();
+            var instance = endTrail.getInstance();
             instance.changeLayer( beforeLayer ); // TODO: performance: handle instances natively
             stitchData.affectedInstances.push( instance );
           }
@@ -703,10 +703,10 @@ define( function( require ) {
         index++;
       }
       
-      _.each( this.layers, function( layer ) {
-        // layers increment indices as needed
-        index = layer.reindex( index );
-      } );
+      var len = this.layers.length;
+      for ( var i = 0; i < len; i++ ) {
+        index = this.layers[i].reindex( index );
+      }
       
       if ( accessibility ) {
         if ( this.focusRingSVGContainer ) {
@@ -737,9 +737,10 @@ define( function( require ) {
     disposeLayers: function() {
       var scene = this;
       
-      _.each( this.layers.slice( 0 ), function( layer ) {
-        scene.disposeLayer( layer );
-      } );
+      var i = this.layers.length;
+      while ( i-- ) {
+        this.disposeLayer( this.layers[i] );
+      }
     },
     
     // all layers whose start or end points lie inclusively in the range from the trail's before and after
@@ -823,9 +824,10 @@ define( function( require ) {
       };
       
       context.clearRect( 0, 0, canvas.width, canvas.height );
-      _.each( this.layers, function( layer ) {
-        layer.renderToCanvas( canvas, context, delayCounts );
-      } );
+      var len = this.layers.length;
+      for ( var i = 0; i < len; i++ ) {
+        this.layers[i].renderToCanvas( canvas, context, delayCounts );
+      }
       
       if ( count === 0 ) {
         // no asynchronous layers, callback immediately
