@@ -39,6 +39,15 @@ define( function( require ) {
   // debug flag to disable matching of layers when in 'match' mode
   var forceNewLayers = true; // DEBUG
   
+  // constructs all sub-trees for the specified instance. used from markSceneForInsertion
+  function buildInstances( instance ) {
+    var node = instance.getNode();
+    var len = node._children.length;
+    for ( var i = 0; i < len; i++ ) {
+      buildInstances( instance.createChild( node._children[i], i ) );
+    }
+  }
+  
   /*
    * $main should be a block-level element with a defined width and height. scene.resize() should be called whenever
    * it is resized.
@@ -931,13 +940,6 @@ define( function( require ) {
       sceneryLayerLog && sceneryLayerLog( 'inserting instances onto ' + instance.toString() + ' with child ' + child.id + ' and index ' + index );
       var baseInstance = instance.createChild( child, index );
       
-      // constructs all sub-trees for the specified instance
-      function buildInstances( instance ) {
-        _.each( instance.getNode().children, function( child, index ) {
-          var nextInstance = instance.createChild( child, index );
-          buildInstances( nextInstance );
-        } );
-      }
       buildInstances( baseInstance );
       
       this.markInterval( affectedTrail );
