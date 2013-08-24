@@ -28,10 +28,14 @@ define( function( require ) {
     },
     
     supportsNode: function( node ) {
-      var that = this;
-      return _.some( node._supportedRenderers, function( renderer ) {
-        return that.supportsRenderer( renderer );
-      } );
+      var supportedRenderers = node._supportedRenderers;
+      var i = supportedRenderers.length;
+      while ( i-- ) {
+        if ( this.supportsRenderer( supportedRenderers[i] ) ) {
+          return true;
+        }
+      }
+      return false;
     },
     
     createLayer: function( args ) {

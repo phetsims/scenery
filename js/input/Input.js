@@ -67,7 +67,14 @@ define( function( require ) {
     },
     
     findTouchById: function( id ) {
-      return _.find( this.pointers, function( pointer ) { return pointer.id === id; } );
+      var i = this.pointers.length;
+      while ( i-- ) {
+        var pointer = this.pointers[i];
+        if ( pointer.id === id ) {
+          return pointer;
+        }
+      }
+      return undefined;
     },
     
     findKeyByEvent: function( event ) {
