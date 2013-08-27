@@ -172,7 +172,7 @@ define( function( require ) {
   addLineProp( 'Y2' );
   
   // not adding mutators for now
-  Line.prototype._mutatorKeys = [ 'x1', 'y1', 'x2', 'y2' ].concat( Path.prototype._mutatorKeys );
+  Line.prototype._mutatorKeys = [ 'p1', 'p2', 'x1', 'y1', 'x2', 'y2' ].concat( Path.prototype._mutatorKeys );
   
   return Line;
 } );
