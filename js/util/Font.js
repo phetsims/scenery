@@ -171,7 +171,7 @@ define( function( require ) {
         stretch: this._stretch,
         size: this._size,
         lineHeight: this._lineHeight,
-        family: this._family,
+        family: this._family
       }, options ) );
     },
     
