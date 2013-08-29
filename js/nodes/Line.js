@@ -1,0 +1,180 @@
+// Copyright 2002-2013, University of Colorado
+
+/**
+ * A line that inherits Path, and allows for optimized drawing,
+ * and improved line handling.
+ *
+ * TODO: add DOM support
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( function( require ) {
+  'use strict';
+  
+  var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
+  
+  var Path = require( 'SCENERY/nodes/Path' );
+  var Shape = require( 'KITE/Shape' );
+  var Vector2 = require( 'DOT/Vector2' );
+  
+  /**
+   * Currently, all numerical parameters should be finite.
+   * x1:         x-position of the start
+   * y1:         y-position of the start
+   * x2:         x-position of the end
+   * y2:         y-position of the end
+   *
+   * Available constructors:
+   * new Line( x1, y1, x2, y2, { ... } )
+   * new Line( new Vector2( x1, y1 ), new Vector2( x2, y2 ), { ... } )
+   * new Line( { x1: x1, y1: y1, x2: x2, y2: y2,  ... } )
+   */
+  scenery.Line = function Line( x1, y1, x2, y2, options ) {
+    if ( typeof x1 === 'object' ) {
+      if ( x1 instanceof Vector2 ) {
+        // assumes Line( Vector2, Vector2, options );
+        this._x1 = x1.x;
+        this._y1 = x1.y;
+        this._x2 = y1.x;
+        this._y2 = y1.y;
+        options = x2 || {};
+        
+        options.shape = this.createLineShape();
+      } else {
+        // assumes Line( { ... } ), init to zero for now
+        this._x1 = 0;
+        this._y1 = 0;
+        this._x2 = 0;
+        this._y2 = 0;
+        options = x1 || {};
+      }
+    } else {
+      // new Line(  x1, y1, x2, y2, [options] )
+      this._x1 = x1;
+      this._y1 = y1;
+      this._x2 = x2;
+      this._y2 = y2;
+      
+      // ensure we have a parameter object
+      options = options || {};
+      
+      // fallback for non-canvas or non-svg rendering, and for proper bounds computation
+      options.shape = this.createLineShape();
+    }
+    
+    Path.call( this, options );
+  };
+  var Line = scenery.Line;
+  
+  inherit( Path, Line, {
+    setLine: function( x1, y1, x2, y2 ) {
+      sceneryAssert && sceneryAssert( x1 !== undefined && y1 !== undefined && x2 !== undefined && y2 !== undefined, 'parameters need to be defined' );
+      
+      this._x1 = x1;
+      this._y1 = y1;
+      this._x2 = x2;
+      this._y2 = y2;
+      this.invalidateLine();
+    },
+    
+    setPoint1: function( x1, y1 ) {
+      if ( typeof x1 === 'number' ) {
+        // setPoint1( x1, y1 );
+        this.setLine( x1, y1, this._x2, this._y2 );
+      } else {
+        // setPoint1( Vector2 )
+        this.setLine( x1.x, x1.y, this._x2, this._y2 );
+      }
+    },
+    set p1( point ) { this.setPoint1( point ); },
+    get p1() { return new Vector2( this._x1, this._y1 ); },
+    
+    setPoint2: function( x2, y2 ) {
+      if ( typeof x2 === 'number' ) {
+        // setPoint2( x2, y2 );
+        this.setLine( this._x1, this._y1, x2, y2 );
+      } else {
+        // setPoint2( Vector2 )
+        this.setLine( this._x1, this._y1, x2.x, x2.y );
+      }
+    },
+    set p2( point ) { this.setPoint2( point ); },
+    get p2() { return new Vector2( this._x2, this._y2 ); },
+    
+    createLineShape: function() {
+      sceneryAssert && sceneryAssert( isFinite( this._x1 ), 'A rectangle needs to have a finite x1 (' + this._x1 + ')' );
+      sceneryAssert && sceneryAssert( isFinite( this._y1 ), 'A rectangle needs to have a finite y1 (' + this._y1 + ')' );
+      sceneryAssert && sceneryAssert( isFinite( this._x2 ), 'A rectangle needs to have a finite x2 (' + this._x2 + ')' );
+      sceneryAssert && sceneryAssert( isFinite( this._y2 ), 'A rectangle needs to have a finite y2 (' + this._y2 + ')' );
+      
+      return Shape.lineSegment( this._x1, this._y1, this._x2, this._y2 );
+    },
+    
+    invalidateLine: function() {
+      // setShape should invalidate the path and ensure a redraw
+      this.setShape( this.createLineShape() );
+    },
+    
+    containsPointSelf: function( point ) {
+      return false; // nothing is in a line! (although maybe we should handle edge points properly?)
+    },
+    
+    // create a rect instead of a path, hopefully it is faster in implementations
+    createSVGFragment: function( svg, defs, group ) {
+      return document.createElementNS( 'http://www.w3.org/2000/svg', 'line' );
+    },
+    
+    // optimized for the rect element instead of path
+    updateSVGFragment: function( rect ) {
+      // see http://www.w3.org/TR/SVG/shapes.html#LineElement
+      rect.setAttribute( 'x1', this._x1 );
+      rect.setAttribute( 'y1', this._y1 );
+      rect.setAttribute( 'x2', this._x2 );
+      rect.setAttribute( 'y2', this._y2 );
+      
+      rect.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
+    },
+    
+    getBasicConstructor: function( propLines ) {
+      return 'new scenery.Line( ' + this._x1 + ', ' + this._y1 + ', ' + this._x1 + ', ' + this._y1 + ', {' + propLines + '} )';
+    }
+    
+  } );
+  
+  function addLineProp( capitalizedShort ) {
+    var lowerShort = capitalizedShort.toLowerCase();
+    
+    var getName = 'get' + capitalizedShort;
+    var setName = 'set' + capitalizedShort;
+    var privateName = '_' + lowerShort;
+    
+    Line.prototype[getName] = function() {
+      return this[privateName];
+    };
+    
+    Line.prototype[setName] = function( value ) {
+      this[privateName] = value;
+      this.invalidateLine();
+      return this;
+    };
+    
+    Object.defineProperty( Line.prototype, lowerShort, {
+      set: Line.prototype[setName],
+      get: Line.prototype[getName]
+    } );
+  }
+  
+  addLineProp( 'X1' );
+  addLineProp( 'Y1' );
+  addLineProp( 'X2' );
+  addLineProp( 'Y2' );
+  
+  // not adding mutators for now
+  Line.prototype._mutatorKeys = [ 'p1', 'p2', 'x1', 'y1', 'x2', 'y2' ].concat( Path.prototype._mutatorKeys );
+  
+  return Line;
+} );
+
+

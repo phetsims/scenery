@@ -255,6 +255,14 @@
       <a class="navlink" href="#circle">Circle</a><br>
       <a class="sublink" href="#circle-radius">radius</a><br>
       
+      <a class="navlink" href="#line">Line</a><br>
+      <a class="sublink" href="#line-x1">x1</a><br>
+      <a class="sublink" href="#line-y1">x1</a><br>
+      <a class="sublink" href="#line-x2">x2</a><br>
+      <a class="sublink" href="#line-y2">y2</a><br>
+      <a class="sublink" href="#line-p1">p1</a><br>
+      <a class="sublink" href="#line-p2">p2</a><br>
+      
       <a class="navlink" href="#font">Font</a><br>
       <a class="sublink" href="#font-font">font</a><br>
       <a class="sublink" href="#font-family">family</a><br>
@@ -1579,6 +1587,62 @@ scene.addChild( new scenery.Circle( 11, {
       <p>
         <code>node.radius</code> (<code>node.getRadius()</code>, <code>node.setRadius( radius )</code>)
         retrieves or modifies the 'radius' parameter of the <a href="#circle">Circle</a>.
+      </p>
+      
+      <h3 id="line" class="section">Line</h3>
+      <p>
+        Line is a subtype of <a href="#path">Path</a> that is more convenient to construct
+        and modify, and contains more optimized drawing routines for SVG.
+      </p>
+      <p>
+        A Line is created with <code>new scenery.Line( x1, y1, x2, y2, [options] )</code> as a line from (x1,y1) to (x2,y2). Additionally,
+        the constructors <code>new scenery.Line( new Vector2( x1, y1 ), new Vector2( x2, y2 ), [options] )</code> and
+        <code>new scenery.Line( { x1: x1, y1: y1, x2: x2, y2: y2, [other options] } )</code>
+        are supported.
+      </p>
+      <div id="example-line" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-line', function( scene ) {
+/*START*/
+scene.addChild( new scenery.Line( 8, 8, 56, 56, {
+  stroke: 'red', lineWidth: 5, lineCap: 'round'
+} ) );
+scene.addChild( new scenery.Line( 8, 56, 56, 8, {
+  stroke: 'blue', lineWidth: 5, lineCap: 'round'
+} ) );
+/*END*/
+} );
+      </script>
+      
+      <h4 id="line-x1">x1</h4>
+      <p>
+        <code>node.x1</code> (<code>node.getX1()</code>, <code>node.setX1( x1 )</code>)
+        retrieves or modifies the 'x1' parameter of the <a href="#line">Line</a>.
+      </p>
+      <h4 id="line-y1">y1</h4>
+      <p>
+        <code>node.y1</code> (<code>node.getY1()</code>, <code>node.setY1( y1 )</code>)
+        retrieves or modifies the 'y1' parameter of the <a href="#line">Line</a>.
+      </p>
+      <h4 id="line-x2">x2</h4>
+      <p>
+        <code>node.x2</code> (<code>node.getX2()</code>, <code>node.setX2( x2 )</code>)
+        retrieves or modifies the 'x2' parameter of the <a href="#line">Line</a>.
+      </p>
+      <h4 id="line-y2">y2</h4>
+      <p>
+        <code>node.y2</code> (<code>node.getY2()</code>, <code>node.setY2( y2 )</code>)
+        retrieves or modifies the 'y2' parameter of the <a href="#line">Line</a>.
+      </p>
+      <h4 id="line-p1">p1</h4>
+      <p>
+        <code>node.p1</code> (<code>node.getPoint1()</code>, <code>node.setPoint1( p1 )</code>)
+        retrieves or modifies the Vector2 (x1,y1) of the <a href="#line">Line</a>.
+      </p>
+      <h4 id="line-p2">p2</h4>
+      <p>
+        <code>node.p2</code> (<code>node.getPoint2()</code>, <code>node.setPoint2( p2 )</code>)
+        retrieves or modifies the Vector2 (x2,y2) of the <a href="#line">Line</a>.
       </p>
       
       <h3 id="font" class="section">Font</h3>
