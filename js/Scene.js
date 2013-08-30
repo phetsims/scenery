@@ -480,8 +480,8 @@ define( function( require ) {
       sceneryLayerLog && sceneryLayerLog( '------ updating layer references' );
       
       // add/remove trails from their necessary layers
-      i = stitchData.affectedInstances.length;
-      while ( i-- ) {
+      var affectedLen = stitchData.affectedInstances.length;
+      for ( i = 0; i < affectedLen; i++ ) {
         stitchData.affectedInstances[i].updateLayer();
       }
       
