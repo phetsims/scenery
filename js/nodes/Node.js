@@ -909,24 +909,24 @@ define( function( require ) {
     },
     
     getX: function() {
-      return this.getTranslation().x;
+      return this._transform.getMatrix().m02();
     },
     
     setX: function( x ) {
       sceneryAssert && sceneryAssert( typeof x === 'number' );
       
-      this.setTranslation( x, this.getY() );
+      this.translate( x - this.getX(), 0, true );
       return this;
     },
     
     getY: function() {
-      return this.getTranslation().y;
+      return this._transform.getMatrix().m12();
     },
     
     setY: function( y ) {
       sceneryAssert && sceneryAssert( typeof y === 'number' );
       
-      this.setTranslation( this.getX(), y );
+      this.translate( 0, y - this.getY(), true );
       return this;
     },
     
@@ -986,7 +986,8 @@ define( function( require ) {
     },
     
     getTranslation: function() {
-      return this._transform.getMatrix().getTranslation();
+      var matrix = this._transform.getMatrix();
+      return new Vector2( matrix.m02(), matrix.m12() );
     },
     
     // append a transformation matrix to our local transform
