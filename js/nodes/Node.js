@@ -854,7 +854,7 @@ define( function( require ) {
         // translate( x, y, prependInstead )
         if ( !x && !y ) { return; } // bail out if both are zero
         if ( prependInstead ) {
-          this.prependTranslation(x,y);
+          this.prependTranslation( x, y );
         } else {
           this.appendMatrix( Matrix3.translation( x, y ) );
         }
@@ -1001,7 +1001,7 @@ define( function( require ) {
 
     // prepend an x,y translation to our local transform without allocating a matrix for it, see #119
     prependTranslation: function( x,y ) {
-      this._transform.prependTranslation( x,y );
+      this._transform.prependTranslation( x, y );
     },
     
     setMatrix: function( matrix ) {
