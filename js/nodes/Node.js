@@ -966,16 +966,18 @@ define( function( require ) {
     
     // supports setTranslation( x, y ) or setTranslation( new Vector2( x, y ) ) .. or technically setTranslation( { x: x, y: y } )
     setTranslation: function( a, b ) {
-      var translation = this.getTranslation();
-      
+      var m = this._transform.getMatrix();
+      var tx = m.m02();
+      var ty = m.m12();
+
       var dx, dy;
       
       if ( typeof a === 'number' ) {
-        dx = a - translation.x;
-        dy = b - translation.y;
+        dx = a - tx;
+        dy = b - ty;
       } else {
-        dx = a.x - translation.x;
-        dy = a.y - translation.y;
+        dx = a.x - tx;
+        dy = a.y - ty;
       }
       
       this.translate( dx, dy, true );
