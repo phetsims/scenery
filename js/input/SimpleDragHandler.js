@@ -66,15 +66,22 @@ define( function( require ) {
       up: function( event ) {
         sceneryAssert && sceneryAssert( event.pointer === handler.pointer );
         if ( !event.pointer.isMouse || event.domEvent.button === handler.mouseButton ) {
+          var saveCurrentTarget = event.currentTarget;
+          event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
           handler.endDrag( event );
+          event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
       },
       
       // touch cancel
       cancel: function( event ) {
         sceneryAssert && sceneryAssert( event.pointer === handler.pointer );
+
+        var saveCurrentTarget = event.currentTarget;
+        event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
         handler.endDrag( event );
-        
+        event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
+
         // since it's a cancel event, go back!
         if ( !handler.transform ) {
           handler.node.setMatrix( handler.startTransformMatrix );
@@ -104,7 +111,10 @@ define( function( require ) {
         if ( handler.options.drag ) {
           // TODO: consider adding in a delta to the listener
           // TODO: add the position in to the listener
+          var saveCurrentTarget = event.currentTarget;
+          event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
           handler.options.drag( event, handler.trail ); // new position (old position?) delta
+          event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
       }
     };
