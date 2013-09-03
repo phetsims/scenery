@@ -76,7 +76,9 @@ define( function( require ) {
         handler.endDrag( event );
         
         // since it's a cancel event, go back!
-        handler.node.setMatrix( handler.startTransformMatrix );
+        if ( !handler.transform ) {
+          handler.node.setMatrix( handler.startTransformMatrix );
+        }
       },
       
       // mouse/touch move
