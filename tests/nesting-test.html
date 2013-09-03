@@ -40,8 +40,7 @@
   <script>
   
   var mainScene = new scenery.Scene( $( '#main' ) );
-  mainScene.addChild( new scenery.Path( {
-    shape: kite.Shape.rectangle( 0, 0, 512, 512 ),
+  mainScene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 512, 512 ), {
     fill: '#ffffaa'
   } ) );
   
@@ -49,8 +48,7 @@
   $div.width( 256 );
   $div.height( 256 );
   var nestedScene = new scenery.Scene( $div );
-  nestedScene.addChild( new scenery.Path( {
-    shape: kite.Shape.rectangle( 0, 0, 256, 256 ),
+  nestedScene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 256, 256 ), {
     fill: '#aaffff'
   } ) );
   nestedScene.updateScene();

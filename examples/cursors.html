@@ -108,8 +108,7 @@
     } );
     
     // add background and text to our group
-    group.addChild( new scenery.Path( {
-      shape: kite.Shape.rectangle( 0, 0, columnWidth, rowHeight ),
+    group.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, columnWidth, rowHeight ), {
       centerX: x,
       centerY: y,
       stroke: '#000000',

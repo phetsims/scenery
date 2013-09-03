@@ -34,15 +34,13 @@
     *----------------------------------------------------------------------------*/
      
     // circle
-    scene.addChild( new scenery.Path( {
-      shape: kite.Shape.circle( 50, 50, 40 ), // center X, center Y, radius
+    scene.addChild( new scenery.Path( kite.Shape.circle( 50, 50, 40 ), {// center X, center Y, radius
       fill: '#0ff',
       stroke: '#000'
     } ) );
     
     // regular polygon
-    scene.addChild( new scenery.Path( {
-      shape: kite.Shape.regularPolygon( 6, 22 ), // sides, radius
+    scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), { // sides, radius
       fill: '#ff0',
       stroke: '#000',
       

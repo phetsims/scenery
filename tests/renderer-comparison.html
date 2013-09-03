@@ -112,8 +112,7 @@
         width: 64,
         height: 64,
         draw: function( scene ) {
-          scene.addChild( new scenery.Path( {
-            shape: kite.Shape.regularPolygon( 6, 22 ),
+          scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
             x: 32,
             y: 32,
             fill: '#ff0000',
@@ -127,8 +126,7 @@
         width: 64,
         height: 64,
         draw: function( scene ) {
-          scene.addChild( new scenery.Path( {
-            shape: new kite.Shape().moveTo( -20, -20 ).quadraticCurveTo( 20, -20, 20, 20 ).close(),
+          scene.addChild( new scenery.Path( new kite.Shape().moveTo( -20, -20 ).quadraticCurveTo( 20, -20, 20, 20 ).close(), {
             x: 32,
             y: 32,
             fill: '#ff0000',
@@ -142,8 +140,7 @@
         width: 64,
         height: 64,
         draw: function( scene ) {
-          scene.addChild( new scenery.Path( {
-            shape: new kite.Shape().moveTo( -20, -20 ).cubicCurveTo( -20, 0, 0, 0, 20, 20 ).lineTo( 20, -20 ).close(),
+          scene.addChild( new scenery.Path( new kite.Shape().moveTo( -20, -20 ).cubicCurveTo( -20, 0, 0, 0, 20, 20 ).lineTo( 20, -20 ).close(), {
             x: 32,
             y: 32,
             fill: '#ff0000',
@@ -168,8 +165,7 @@
           strokeGradient.addColorStop( 0.5, '#00ff00' );
           strokeGradient.addColorStop( 1, '#0000ff' );
           
-          scene.addChild( new scenery.Path( {
-            shape: kite.Shape.regularPolygon( 6, 22 ),
+          scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
             x: 32,
             y: 32,
             rotation: Math.PI / 4,
@@ -178,8 +174,7 @@
             stroke: '#000000',
             lineWidth: 3
           } ) );
-          scene.addChild( new scenery.Path( {
-            shape: kite.Shape.regularPolygon( 6, 22 ),
+          scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
             x: 32 + 64,
             y: 32,
             fill: fillGradient,
@@ -210,12 +205,10 @@
           transformedGradient.addColorStop( 1, '#004CB3' );
           transformedGradient.setTransformMatrix( dot.Matrix3.translation( 32, 32 ).timesMatrix( dot.Matrix3.rotation2( Math.PI / 4 ).timesMatrix( dot.Matrix3.scaling( 1, 0.25 ) ) ) );
           
-          scene.addChild( new scenery.Path( {
-            shape: kite.Shape.rectangle( 0, 0, 64, 64 ),
+          scene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 64, 64 ), {
             fill: mainGradient
           } ) );
-          scene.addChild( new scenery.Path( {
-            shape: kite.Shape.regularPolygon( 6, 22 ),
+          scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
             x: 32 + 64,
             y: 32,
             rotation: Math.PI / 4,
@@ -223,8 +216,7 @@
             stroke: '#000000',
             lineWidth: 3
           } ) );
-          scene.addChild( new scenery.Path( {
-            shape: kite.Shape.rectangle( 0, 0, 64, 64 ),
+          scene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 64, 64 ), {
             x: 128,
             fill: transformedGradient
           } ) );
@@ -235,12 +227,10 @@
         width: 64,
         height: 64,
         draw: function( scene ) {
-          scene.addChild( new scenery.Path( {
-            shape: kite.Shape.rectangle( 32, 0, 32, 64 ),
+          scene.addChild( new scenery.Path( kite.Shape.rectangle( 32, 0, 32, 64 ), {
             fill: '#000000'
           } ) );
-          scene.addChild( new scenery.Path( {
-            shape: kite.Shape.rectangle( 0, 0, 44, 44 ),
+          scene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 44, 44 ), {
             x: 10.5,
             y: 10.5,
             fill: 'rgba(255,0,0,0.5)',
@@ -254,8 +244,7 @@
         width: 64,
         height: 64,
         draw: function( scene ) {
-          scene.addChild( new scenery.Path( {
-            shape: kite.Shape.rectangle( 10, 10, 44, 44 ),
+          scene.addChild( new scenery.Path( kite.Shape.rectangle( 10, 10, 44, 44 ), {
             stroke: '#000',
             lineWidth: 3,
             lineDash: [7,2,3,2],
@@ -269,8 +258,7 @@
             x: 0.5,
             y: 0.5
           } ) );
-          scene.addChild( new scenery.Path( {
-            shape: kite.Shape.regularPolygon( 6, 15 ),
+          scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 15 ), {
             stroke: '#000',
             lineDash: [5,5],
             lineDashOffset: 5,
@@ -313,8 +301,7 @@
           var img = document.createElement( 'img' );
           img.addEventListener( 'load', function() {
             var pattern = new scenery.Pattern( img );
-            scene.addChild( new scenery.Path( {
-              shape: kite.Shape.regularPolygon( 6, 22 ),
+            scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
               x: 32,
               y: 32,
               rotation: Math.PI / 4,
@@ -338,8 +325,7 @@
           } );
           scene.addChild( container );
           
-          container.addChild( new scenery.Path( {
-            shape: kite.Shape.rectangle( 0, 0, 44, 44 ),
+          container.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 44, 44 ), {
             x: 10.5,
             y: 10.5,
             rotation: Math.PI / 4,
@@ -348,8 +334,7 @@
             lineWidth: 3
           } ) );
           
-          container.addChild( new scenery.Path( {
-            shape: kite.Shape.rectangle( 0, 0, 44, 44 ),
+          container.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 44, 44 ), {
             x: 30.5,
             y: 10.5,
             fill: '#ff0000',
@@ -364,8 +349,7 @@
         width: 256,
         height: 128,
         draw: function( scene ) {
-          var square = new scenery.Path( {
-            shape: kite.Shape.rectangle( 0, 0, 50, 50 ),
+          var square = new scenery.Path( kite.Shape.rectangle( 0, 0, 50, 50 ), {
             x: 0.5,
             y: 0.5,
             fill: 'rgba(0,0,0,0.5)',
@@ -373,8 +357,7 @@
             lineWidth: 3
           } );
           
-          var arrow = new scenery.Path( {
-            shape: kite.Shape.regularPolygon( 3, 10 ),
+          var arrow = new scenery.Path( kite.Shape.regularPolygon( 3, 10 ), {
             fill: 'rgba(0,255,0,1)',
             stroke: '#000000'
           } );
@@ -449,37 +432,32 @@
         height: 64,
         draw: function( scene ) {
           var x = 32;
-          scene.addChild( new scenery.Path( {
-            shape: kite.Shape.circle( x, 25, 20 ),
+          scene.addChild( new scenery.Path( kite.Shape.circle( x, 25, 20 ), {
             fill: '#ff0000',
             stroke: '#000000',
             lineWidth: 3
           } ) );
           
           x += 64;
-          scene.addChild( new scenery.Path( {
-            shape: kite.Shape.arc( x, 25, 20, Math.PI / 4, Math.PI * 3 / 2, false ),
+          scene.addChild( new scenery.Path( kite.Shape.arc( x, 25, 20, Math.PI / 4, Math.PI * 3 / 2, false ), {
             fill: 'rgba(255,0,0,0.5)',
             stroke: '#aa0000',
             lineWidth: 3
           } ) );
           
-          scene.addChild( new scenery.Path( {
-            shape: kite.Shape.arc( x, 25, 20, Math.PI / 4, Math.PI * 3 / 2, true ),
+          scene.addChild( new scenery.Path( kite.Shape.arc( x, 25, 20, Math.PI / 4, Math.PI * 3 / 2, true ), {
             fill: 'rgba(0,0,255,0.5)',
             stroke: '#0000aa',
             lineWidth: 3
           } ) );
           
           x += 64;
-          scene.addChild( new scenery.Path( {
+          scene.addChild( new scenery.Path( new kite.Shape().moveTo( 0, 0 )
+                                                            .arc( 0, 0, 20, 0, Math.PI / 3, false )
+                                                            .arc( 0, 0, 20, Math.PI / 3 + Math.PI, Math.PI, true )
+                                                            .close(),{
             x: x,
             y: 25.5,
-            shape: new kite.Shape()
-              .moveTo( 0, 0 )
-              .arc( 0, 0, 20, 0, Math.PI / 3, false )
-              .arc( 0, 0, 20, Math.PI / 3 + Math.PI, Math.PI, true )
-              .close(),
             fill: '#ff0000',
             stroke: '#000000',
             lineWidth: 3
@@ -492,37 +470,32 @@
         height: 64,
         draw: function( scene ) {
           var x = 32;
-          scene.addChild( new scenery.Path( {
-            shape: kite.Shape.ellipse( x, 25, 20, 10 ),
+          scene.addChild( new scenery.Path( kite.Shape.ellipse( x, 25, 20, 10 ), {
             fill: '#ff0000',
             stroke: '#000000',
             lineWidth: 3
           } ) );
           
           x += 64;
-          scene.addChild( new scenery.Path( {
-            shape: new kite.Shape().ellipticalArc( x, 25, 20, 10, Math.PI / 6, Math.PI / 4, Math.PI * 3 / 2, false ),
+          scene.addChild( new scenery.Path( new kite.Shape().ellipticalArc( x, 25, 20, 10, Math.PI / 6, Math.PI / 4, Math.PI * 3 / 2, false ), {
             fill: 'rgba(255,0,0,0.5)',
             stroke: '#aa0000',
             lineWidth: 3
           } ) );
           
-          scene.addChild( new scenery.Path( {
-            shape: new kite.Shape().ellipticalArc( x, 25, 20, 10, Math.PI / 6, Math.PI / 4, Math.PI * 3 / 2, true ),
+          scene.addChild( new scenery.Path( new kite.Shape().ellipticalArc( x, 25, 20, 10, Math.PI / 6, Math.PI / 4, Math.PI * 3 / 2, true ), {
             fill: 'rgba(0,0,255,0.5)',
             stroke: '#0000aa',
             lineWidth: 3
           } ) );
           
           x += 64;
-          scene.addChild( new scenery.Path( {
+          scene.addChild( new scenery.Path( new kite.Shape().moveTo( 0, 0 )
+                                                            .ellipticalArc( 0, 0, 20, 10, 0, 0, Math.PI / 3, false )
+                                                            .ellipticalArc( 0, 0, 20, 10, 0, Math.PI / 3 + Math.PI, Math.PI, true )
+                                                            .close(), {
             x: x,
             y: 25.5,
-            shape: new kite.Shape()
-              .moveTo( 0, 0 )
-              .ellipticalArc( 0, 0, 20, 10, 0, 0, Math.PI / 3, false )
-              .ellipticalArc( 0, 0, 20, 10, 0, Math.PI / 3 + Math.PI, Math.PI, true )
-              .close(),
             fill: '#ff0000',
             stroke: '#000000',
             lineWidth: 3
@@ -557,8 +530,7 @@
         height: 64,
         draw: function( scene ) {
           var shape = kite.Shape.rectangle( 0, 0, 30, 30 );
-          var rect = new scenery.Path( {
-            shape: shape,
+          var rect = new scenery.Path( shape, {
             fill: '#000',
             stroke: '#f00',
             lineWidth: 4
@@ -588,8 +560,7 @@
           var clipShape1 = kite.Shape.regularPolygon( 6, 27 ).transformed( dot.Matrix3.translation( 32, 32 ) );
           var clipShape2 = kite.Shape.regularPolygon( 9, 32 ).transformed( dot.Matrix3.translation( 32, 0 ) );
           var shape = kite.Shape.circle( 32, 32, 25 );
-          var circle = new scenery.Path( {
-            shape: shape,
+          var circle = new scenery.Path( shape, {
             fill: '#000',
             stroke: '#f00',
             lineWidth: 3
@@ -609,8 +580,8 @@
           scene.addChild( new scenery.Node( {
             opacity: 0.5,
             children: [
-              new scenery.Path( { shape: circle, x: 12, y: 22, fill: '#f00' } ),
-              new scenery.Path( { shape: circle, x: 52, y: 22, fill: '#00f' } )
+              new scenery.Path( circle, { x: 12, y: 22, fill: '#f00' } ),
+              new scenery.Path( circle, { x: 52, y: 22, fill: '#00f' } )
             ]
           } ) );
         },

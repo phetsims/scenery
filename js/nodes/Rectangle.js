@@ -45,8 +45,6 @@ define( function( require ) {
       // ensure we have a parameter object
       options = arcWidth || {};
       
-      // fallback for non-canvas or non-svg rendering, and for proper bounds computation
-      options.shape = this.createRectangleShape();
     } else {
       // normal case with args (including arcWidth / arcHeight)
       this._rectX = x;
@@ -59,11 +57,10 @@ define( function( require ) {
       // ensure we have a parameter object
       options = options || {};
       
-      // fallback for non-canvas or non-svg rendering, and for proper bounds computation
-      options.shape = this.createRectangleShape();
     }
-    
-    Path.call( this, options );
+    // fallback for non-canvas or non-svg rendering, and for proper bounds computation
+
+    Path.call( this, this.createRectangleShape(), options );
   };
   var Rectangle = scenery.Rectangle;
   

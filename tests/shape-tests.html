@@ -19,15 +19,13 @@
     
     function testPath( path ) {
       scene.addChild( path );
-      scene.addChild( new scenery.Path( {
-        shape: kite.Shape.bounds( path.getBounds() ),
+      scene.addChild( new scenery.Path( kite.Shape.bounds( path.getBounds() ), {
         fill: 'rgba(0,255,0,0.3)'
       } ) );
     }
     
     function testShape( shape ) {
-      testPath( new scenery.Path( {
-        shape: shape,
+      testPath( new scenery.Path( shape, {
         fill: '#000000'
       } ) );
     }

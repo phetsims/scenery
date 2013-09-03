@@ -60,11 +60,10 @@ define( function( require ) {
       // ensure we have a parameter object
       options = options || {};
       
-      // fallback for non-canvas or non-svg rendering, and for proper bounds computation
-      options.shape = this.createLineShape();
     }
-    
-    Path.call( this, options );
+    // fallback for non-canvas or non-svg rendering, and for proper bounds computation
+
+    Path.call( this, this.createLineShape(),options );
   };
   var Line = scenery.Line;
   

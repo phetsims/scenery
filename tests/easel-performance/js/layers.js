@@ -25,8 +25,7 @@ phet.tests = phet.tests || {};
       var shape = kite.Shape.regularPolygon( 6, radius );
       
       for ( var i = 0; i < count; i++ ) {
-        var node = new scenery.Path( {
-          shape: shape, // regular polygon
+        var node = new scenery.Path( shape, { // regular polygon
           fill: color,
           stroke: '#000000'
         } );

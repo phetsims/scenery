@@ -6,35 +6,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Documentation - Scenery</title>
-  
+
   <link rel="stylesheet" href="../lib/bootstrap-2.2.2.css">
   <link rel="stylesheet" href="../lib/bootstrap-responsive-2.2.2.css">
   <link rel="stylesheet" href="../lib/syntaxhighlighter-3.0.83/shCore.css">
   <link rel="stylesheet" href="../lib/syntaxhighlighter-3.0.83/shThemeDefault.css">
-  
+
   <!-- jQuery and LoDash are dependencies -->
   <script src="../lib/jquery-2.0.0.min.js"></script>
   <script src="../lib/lodash.min-1.0.0-rc.3.js"></script>
-  
+
   <!-- For the styling -->
   <script src="../lib/bootstrap-2.2.2.js"></script>
-  
+
   <script src="../lib/syntaxhighlighter-3.0.83/shCore.js"></script>
   <script src="../lib/syntaxhighlighter-3.0.83/shBrushJScript.js"></script>
   <script src="../lib/syntaxhighlighter-3.0.83/shBrushXml.js"></script>
-  
+
   <!-- MathJax config -->
   <script type="text/x-mathjax-config">
   MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
   </script>
   <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-  
+
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script src="../build/development/scenery.js"></script>
-  
+
   <script type="text/javascript">
     scenery.Util.polyfillRequestAnimationFrame();
-    
+
     function docExample( id, draw ) {
       var $container = $( '#' + id );
       var scene = new scenery.Scene( $container );
@@ -45,9 +45,9 @@
       $container.after( $code );
     }
   </script>
-  
+
   <style type="text/css">
-    
+
     .exampleScene {
       margin: 15px auto;
       border: 1px solid black;
@@ -55,7 +55,7 @@
       left: 0;
       top: 0;
     }
-    
+
     #sidebar {
       background-color: #eee;
       position: fixed;
@@ -69,7 +69,7 @@
       border-right: 1px solid #bbb;
       box-shadow: 0 0 20px #ccc; -webkit-box-shadow: 0 0 20px #ccc; -moz-box-shadow: 0 0 20px #ccc;
     }
-    
+
     #apiList {
       background-color: #eee;
       position: relative;
@@ -77,26 +77,26 @@
       border-left: none;
       padding: 10px;
     }
-    
+
     .ph2 {
       font-weight: bold;
       font-size: 18px;
     }
-    
+
     .navlink {
       font-weight: bold;
     }
-    
+
     .sublink {
       padding-left: 1em;
     }
-    
+
     .args {
       font-weight: normal;
       font-size: 80%;
     }
   </style>
-  
+
 </head>
 
 <body>
@@ -121,28 +121,28 @@
       </ul>
     </div>
   </div>
-  
+
   <div class="row-fluid">
     <div class="span3"></div>
     <div class="span6">
       <div class="page-header" style="text-align: center;">
         <h1>Scenery Documentation</h1>
       </div>
-      
+
       <p class="lead" style="color: #a00;">Currently incomplete!</p>
-      
+
       TODO: coordinate frame notes<br>
       TODO: event handling API documentation<br>
       TODO: use <a href="http://softwaremaniacs.org/soft/highlight/en/">highlight.js</a> for highlighting
-      
+
     </div>
     <div class="span3"></div>
   </div>
-  
+
   <div class="row-fluid">
     <div class="span3" id="apiList">
       <div class="ph2"><a href="#api">Scenery API</a></div>
-      
+
       <a class="navlink" href="#node">Node</a><br>
       <a class="sublink" href="#node-options">(options)</a><br>
       <a class="sublink" href="#node-children">children</a><br>
@@ -183,7 +183,7 @@
       <a class="sublink" href="#node-layerSplit">layerSplit</a><br>
       <a class="sublink" href="#node-layerSplitBefore">layerSplitBefore</a><br>
       <a class="sublink" href="#node-layerSplitAfter">layerSplitAfter</a><br>
-      
+
       <a class="navlink" href="#scene">Scene</a><br>
       <a class="sublink" href="#scene-options">(options)</a><br>
       <a class="sublink" href="#scene-updateScene">updateScene</a><br>
@@ -196,10 +196,10 @@
       <a class="sublink" href="#scene-initializeFullscreenEvents">initializeFullscreenEvents</a><br>
       <a class="sublink" href="#scene-getDebugHTML">getDebugHTML</a><br>
       <a class="sublink" href="#scene-popupDebug">popupDebug</a><br>
-      
+
       <a class="navlink" href="#fillable">Fillable</a><br>
       <a class="sublink" href="#fillable-fill">fill</a><br>
-      
+
       <a class="navlink" href="#strokable">Strokable</a><br>
       <a class="sublink" href="#strokable-stroke">stroke</a><br>
       <a class="sublink" href="#strokable-lineWidth">lineWidth</a><br>
@@ -207,13 +207,13 @@
       <a class="sublink" href="#strokable-lineJoin">lineJoin</a><br>
       <a class="sublink" href="#strokable-lineDash">lineDash</a><br>
       <a class="sublink" href="#strokable-lineDashOffset">lineDashOffset</a><br>
-      
+
       <a class="navlink" href="#path">Path</a><br>
       <a class="sublink" href="#path-shape">shape</a><br>
-      
+
       <a class="navlink" href="#image">Image</a><br>
       <a class="sublink" href="#image-image">image</a><br>
-      
+
       <a class="navlink" href="#text">Text</a><br>
       <a class="sublink" href="#text-options">(options)</a><br>
       <a class="sublink" href="#text-text">text</a><br>
@@ -226,35 +226,35 @@
       <a class="sublink" href="#text-lineHeight">lineHeight</a><br>
       <a class="sublink" href="#text-direction">direction</a><br>
       <a class="sublink" href="#text-boundsMethod">boundsMethod</a><br>
-      
+
       <a class="navlink" href="#htmlText">HTMLText</a><br>
-      
+
       <a class="navlink" href="#dom">DOM</a><br>
       <a class="sublink" href="#dom-element">element</a><br>
       <a class="sublink" href="#dom-interactive">interactive</a><br>
-      
+
       <a class="navlink" href="#linearGradient">LinearGradient</a><br>
       <a class="sublink" href="#linearGradient-addColorStop">addColorStop</a><br>
       <a class="sublink" href="#linearGradient-setTransformMatrix">setTransformMatrix</a><br>
-      
+
       <a class="navlink" href="#radialGradient">RadialGradient</a><br>
       <a class="sublink" href="#radialGradient-addColorStop">addColorStop</a><br>
       <a class="sublink" href="#radialGradient-setTransformMatrix">setTransformMatrix</a><br>
-      
+
       <a class="navlink" href="#pattern">Pattern</a><br>
       <a class="sublink" href="#pattern-setTransformMatrix">setTransformMatrix</a><br>
-      
+
       <a class="navlink" href="#vbox">VBox</a><br>
-      
+
       <a class="navlink" href="#rectangle">Rectangle</a><br>
       <a class="sublink" href="#rectangle-rectX">rectX</a><br>
       <a class="sublink" href="#rectangle-rectY">rectY</a><br>
       <a class="sublink" href="#rectangle-rectWidth">rectWidth</a><br>
       <a class="sublink" href="#rectangle-rectHeight">rectHeight</a><br>
-      
+
       <a class="navlink" href="#circle">Circle</a><br>
       <a class="sublink" href="#circle-radius">radius</a><br>
-      
+
       <a class="navlink" href="#line">Line</a><br>
       <a class="sublink" href="#line-x1">x1</a><br>
       <a class="sublink" href="#line-y1">x1</a><br>
@@ -262,7 +262,7 @@
       <a class="sublink" href="#line-y2">y2</a><br>
       <a class="sublink" href="#line-p1">p1</a><br>
       <a class="sublink" href="#line-p2">p2</a><br>
-      
+
       <a class="navlink" href="#font">Font</a><br>
       <a class="sublink" href="#font-font">font</a><br>
       <a class="sublink" href="#font-family">family</a><br>
@@ -271,42 +271,42 @@
       <a class="sublink" href="#font-style">style</a><br>
       <a class="sublink" href="#font-size">size</a><br>
       <a class="sublink" href="#font-lineHeight">lineHeight</a><br>
-      
+
       <a class="navlink" href="#color">Color</a><br>
       <a class="sublink" href="#color-red">red</a><br>
       <a class="sublink" href="#color-green">green</a><br>
       <a class="sublink" href="#color-blue">blue</a><br>
       <a class="sublink" href="#color-alpha">alpha</a><br>
       <a class="sublink" href="#color-toCSS">toCSS</a><br>
-      
+
       <a class="navlink" href="#event">Event</a><br>
-      
+
       <a class="navlink" href="#pointer">Pointer</a><br>
-      
+
       <a class="navlink" href="#mouse">Mouse</a><br>
-      
+
       <a class="navlink" href="#touch">Touch</a><br>
-      
+
       <a class="navlink" href="#pen">Pen</a><br>
-      
+
       <a class="navlink" href="#trail">Trail</a><br>
-      
+
     </div>
     <div class="span6">
       <h2 id="tutorials">Tutorials</h2>
-      
+
       <p>If you are just starting out, see the <a href="a-tour-of-scenery.html">Tour of Scenery</a></p>
       <p>See the <a href="user-input.html">user input documentation</a> for handling user-generated events.</p>
-      
+
       <h2 id="dependencies">Dependencies</h2>
-      
+
       <strong>External</strong> dependencies (please provide these in your page before loading Scenery):
       <ul>
         <li><a href="http://jquery.com/">jQuery</a> for parts of DOM manipulation.</li>
         <li><a href="http://lodash.com/">Lo-Dash</a> for utility functions, as a replacement for <a href="http://underscorejs.org/">Underscore.js</a>.</li>
         <li>[optional] <a href="https://code.google.com/p/canvg/">Canvg</a>, for supporting SVG &#8594; Canvas operations, like <a href="#scene-renderToCanvas">scene.renderToCanvas</a></li>
       </ul>
-      
+
       <strong>Internal</strong> dependencies:
       <ul>
         <li><a href="https://github.com/phetsims/assert">assert</a> for assertion handling. If you want assertions different from the defaults, include <a href="https://github.com/phiggins42/has.js/">has.js</a>.</li>
@@ -314,9 +314,9 @@
         <li><a href="../../dot">Dot</a> for math.</li>
         <li><a href="../../kite">Kite</a> for shapes.</li>
       </ul>
-      
+
       <h2 id="debugging">Debugging</h2>
-      
+
       <p>
         If has.js is included, Scenery assertions can be enabled or disabled. Performance can be significantly decreased if all assertions are enabled.
       </p>
@@ -334,20 +334,20 @@ has.add( 'assert.scenery.extra', function() { return true; } );
 has.add( 'assert.scenery', function() { return false; } );
 has.add( 'assert.scenery.extra', function() { return false; } );
       </pre>
-      
+
       <h2 id="api">Scenery API</h2>
-      
+
       <h3 id="node" class="section">Node</h3>
-      
+
       <p>
         A default node can be created with <code>new scenery.Node()</code>, but usually a parameter object is
         given, for example <code>new scenery.Node( { x: 20, y: 100 } )</code>. Below are all of the available
         parameter object options:
       </p>
-      
+
       <h4 id="node-options">Node Options</h4>
       A Node (and Node subtypes) have the following parameter object options available, executed in in the order listed.
-      
+
       <ul>
         <li><a href="#node-children">children</a>: A list of children to add (in order)</li>
         <li><a href="#node-cursor">cursor</a>: Will display the specified CSS cursor when the mouse is over this Node or one of its descendents. The Scene needs to have input listeners attached with an initialize method first.</li>
@@ -373,7 +373,7 @@ has.add( 'assert.scenery.extra', function() { return false; } );
         <li><a href="#node-layerSplitBefore">layerSplitBefore</a>: Forces a split between layers before this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.</li>
         <li><a href="#node-layerSplitAfter">layerSplitAfter</a>: Forces a split between layers after this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.</li>
       </ul>
-      
+
       <h4 id="node-children">node.children</h4>
       <p>
         <code>node.children</code> is a getter/setter linked to <code>node.getChildren()</code> and <code>node.setChildren( children )</code>.
@@ -392,11 +392,10 @@ scene.addChild( new scenery.Node( {
   // reference to the container node is needed
   children: [
     // gray rectangle on the left
-    new scenery.Path( {
-      shape: kite.Shape.rectangle( 0, 0, 64, 64 ),
+    new scenery.Path( kite.Shape.rectangle( 0, 0, 64, 64 ), {
       fill: '#aaa'
     } ),
-    
+
     // later nodes in the array will show up on top
     // of previous nodes
     new scenery.Text( 'Children', {
@@ -408,28 +407,28 @@ scene.addChild( new scenery.Node( {
 } ) );
 /*END*/ } );
       </script>
-      
+
       <h4 id="node-parents">node.parents</h4>
       <p>
         <code>node.parents</code> or <code>node.getParents()</code> will return an array of parent nodes, but <strong>order is not significant</strong>.
       </p>
-      
+
       <h4 id="node-addChild">node.addChild( <span class="args">childNode</span> )</h4>
       <p>
         Appends childNode to node's list of children. childNode will be displayed above node and node's other children.
       </p>
-      
+
       <h4 id="node-insertChild">node.insertChild( <span class="args">index, childNode</span> )</h4>
       <p>
         Inserts childNode into node's children at the specified index. <code>node.insertChild( 0, childNode )</code> will make childNode the first child, and
         <code>node.insertChild( node.children.length, childNode )</code> is the same as <code>node.addChild( childNode )</code>.
       </p>
-      
+
       <h4 id="node-removeChild">node.removeChild( <span class="args">childNode</span> )</h4>
       <p>
         Removes childNode from node's children.
       </p>
-      
+
       <h4 id="node-addPeer">node.addPeer( <span class="args">element, options</span> )</h4>
       <p>
         Adds an accessibility peer described by the element and options to the tab order (handled for each instance). <code>element</code> can be either
@@ -442,12 +441,12 @@ scene.addChild( new scenery.Node( {
       <p>
         For instance, a toggle button or checkbox should generally use <code>'&lt;input type="checkbox"&gt;'</code> for its element.
       </p>
-      
+
       <h4 id="node-detach">node.detach()</h4>
       <p>
         Removes this node from all of its parents.
       </p>
-      
+
       <h4 id="node-cursor">node.cursor</h4>
       <p>
         <code>node.cursor</code> is a getter/setter linked to <code>node.getCursor()</code> and <code>node.setCursor( cursor )</code>.
@@ -462,8 +461,7 @@ scene.addChild( new scenery.Node( {
       <script type="text/javascript">
 docExample( 'example-cursor', function( scene ) {
 /*START*/
-scene.addChild( new scenery.Path( {
-  shape: kite.Shape.regularPolygon( 6, 25 ),
+scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 25 ), {
   x: 64, y: 32,
   fill: '#88f',
   cursor: 'pointer' // classic hand
@@ -476,7 +474,7 @@ scene.initializeStandaloneEvents();
 scene.updateOnRequestAnimationFrame();
 } );
       </script>
-      
+
       <h4 id="node-mouseArea">node.mouseArea</h4>
       <p>
         Sets an alternative hit region when receiving mouse events. Useful for when there
@@ -486,7 +484,7 @@ scene.updateOnRequestAnimationFrame();
         The mouse area supersedes the hit regions for mouse events of the node itself and its descendants.
         Setting mouseArea on a Node will cause it to either return no hit (for it or its children when outside of the mouseArea) or this Node as an event target.
       </p>
-      
+
       <h4 id="node-touchArea">node.touchArea</h4>
       <p>
         Sets an alternative hit region when receiving touch events. Useful for expanding
@@ -496,14 +494,14 @@ scene.updateOnRequestAnimationFrame();
         The touch area supersedes the hit regions for touch events of the node itself and its descendants.
         Setting touchArea on a Node will cause it to either return no hit (for it or its children when outside of the touchArea) or this Node as an event target.
       </p>
-      
+
       <h4 id="node-visible">node.visible</h4>
       <p>
         <code>node.visible</code> is a getter/setter linked to <code>node.isVisible()</code> and <code>node.setVisible( boolean )</code>.
         Nodes are by default visible, but when invisible they will not
         be displayed and will not be pickable (no input events will be targeted to them).
       </p>
-      
+
       <h4 id="node-pickable">node.pickable</h4>
       <p>
         <code>node.pickable</code> is a getter/setter linked to <code>node.isPickable()</code> and <code>node.setPickable( boolean )</code>.
@@ -514,7 +512,7 @@ scene.updateOnRequestAnimationFrame();
         This is useful for semi-transparent overlays or other visual elements that should be displayed but should not prevent objects below from being
         manipulated by user input.
       </p>
-      
+
       <h4 id="node-opacity">node.opacity</h4>
       <p>
         <code>node.opacity</code> is a getter/setter linked to <code>node.getOpacity()</code> and <code>node.setOpacity( opacity )</code>.
@@ -530,8 +528,8 @@ var circle = kite.Shape.circle( 0, 0, 30 );
 scene.addChild( new scenery.Node( {
   opacity: 0.5,
   children: [
-    new scenery.Path( { shape: circle, x: 12, y: 22, fill: '#f00' } ),
-    new scenery.Path( { shape: circle, x: 52, y: 22, fill: '#00f' } )
+    new scenery.Path( circle, { x: 12, y: 22, fill: '#f00' } ),
+    new scenery.Path( circle, { x: 52, y: 22, fill: '#00f' } )
   ]
 } ) );
 /*END*/
@@ -542,13 +540,13 @@ scene.initializeStandaloneEvents();
 scene.updateOnRequestAnimationFrame();
 } );
       </script>
-      
+
       <h4 id="node-matrix">node.matrix</h4>
       <p>
         <code>node.matrix</code> (<code>node.getMatrix()</code>, <code>node.setMatrix( matrix )</code>) gets or sets the transformation matrix associated with the
         node, of type <a href="../../dot/doc#matrix3">dot.Matrix3</a>.
       </p>
-      
+
       <h4 id="node-translation">node.translation</h4>
       <p>
         Getting the translation: <code>node.translation</code> or <code>node.getTranslation()</code>. It always returns a <a href="../../dot/doc#vector2">dot.Vector2</a> instance representing
@@ -558,43 +556,43 @@ scene.updateOnRequestAnimationFrame();
         Setting the translation: <code>node.translation = translation</code>, <code>node.setTranslation( translation )</code> or <code>node.setTranslation( x, y )</code>.
         In both instances, <code>translation</code> can be either a <a href="../../dot/doc#vector2">dot.Vector2</a> or an object literal like <code>{ x: 5, y: 10 }</code>.
       </p>
-      
+
       <h4 id="node-translate">node.translate( <span class="args">x, y</span> )</h4>
       <p>
         Translates the node relatively by <code>x</code> and <code>y</code>. In addition to <code>node.translate( x, y )</code>, <code>node.translate( translation )</code>
         can be used, where <code>transform</code> is either a <a href="../../dot/doc#vector2">dot.Vector2</a> or an object like <code>{ x: 5, y: 10 }</code>
       </p>
-      
+
       <h4 id="node-x">node.x</h4>
       <p>
         <code>node.x</code> gets or sets the node's x-translation with <code>node.getX()</code> and <code>node.setX( x )</code>. Accessing <code>node.x</code> is equivalent
         to <code>node.translation.x</code>, and setting <code>node.x</code> is equivalent to <code>node.setTranslation( x, node.y )</code>.
       </p>
-      
+
       <h4 id="node-y">node.y</h4>
       <p>
         <code>node.y</code> gets or sets the node's y-translation with <code>node.getY()</code> and <code>node.setY( y )</code>. Accessing <code>node.y</code> is equivalent
         to <code>node.translation.y</code>, and setting <code>node.y</code> is equivalent to <code>node.setTranslation( node.x, y )</code>.
       </p>
-      
+
       <h4 id="node-rotation">node.rotation</h4>
       <p>
         <code>node.rotation</code> gets or sets the node's rotation with <code>node.getRotation()</code> and <code>node.setRotation( radians )</code>. All rotations are
         handled in radians ($\pi$ is a 180-degree rotation). If you wish to rotate a node by a specific rotation
         (instead of setting its rotation), use <a href="#node-rotate">node.rotate</a>
       </p>
-      
+
       <h4 id="node-rotate">node.rotate( <span class="args">radians, [prepend]</span> )</h4>
       <p>
         Rotates the node's transform. By default the rotation is appended to the node's transform, but the optional <code>prepend</code> boolean flag can be added for the rotation
         to be prepended to the node's transform.
       </p>
-      
+
       <h4 id="node-rotateAround">node.rotateAround( <span class="args">point, angle</span> )</h4>
       <p>
         Rotates the node by <code>angle</code> in radians around the <a href="../../dot/doc#vector2">dot.Vector2</a> <code>point</code>. <code>point</code> should be in the node's parent coordinate frame.
       </p>
-      
+
       <h4 id="node-scale">node.scale( <span class="args">x, y, [prepend]</span> )</h4>
       <p>
         Scales the node in each axis. By default the scale is appended to the node's transform, but the optional <code>prepend</code> boolean flag can be added for the
@@ -603,76 +601,76 @@ scene.updateOnRequestAnimationFrame();
       <p>
         <code>node.scale( s )</code> will scale by <code>s</code> in both dimensions, and is equivalent to <code>node.scale( s, s )</code>
       </p>
-      
+
       <h4 id="node-bounds">node.bounds</h4>
       <p>
         Returns the <a href="../../dot/doc#bounds2">bounding box</a> of this node (and its children) in the parent coordinate frame. Also available with <code>node.getBounds()</code>. It includes all children, regardless
         of whether they are visible or not.
         <!-- TODO: add an example -->
       </p>
-      
+
       <h4 id="node-selfBounds">node.selfBounds</h4>
       <p>
         Returns the <a href="../../dot/doc#bounds2">bounding box</a> of this node (without its children) in the local coordinate frame. Also available with <code>node.getSelfBounds()</code>.
         <!-- TODO: add an example -->
       </p>
-      
+
       <h4 id="node-childBounds">node.childBounds</h4>
       <p>
         Returns the <a href="../../dot/doc#bounds2">bounding box</a> of this node's children (without include the node's selfBounds) in the local coordinate frame. Also available with <code>node.getChildBounds()</code>.
         <!-- TODO: add an example -->
       </p>
-      
+
       <h4 id="node-visibleBounds">node.visibleBounds</h4>
       <p>
         Returns the <a href="../../dot/doc#bounds2">bounding box</a> of this node (and its children) in the parent coordinate frame. Also available with <code>node.getVisibleBounds()</code>. Unlike <a href="#node-bounds">bounds</a>, this includes only descendants which are visible. It is not tracked, so each call will
         need to traverse the subtree to get the bounds.
         <!-- TODO: add an example -->
       </p>
-      
+
       <h4 id="node-left">node.left</h4>
       <p>
         <code>node.left</code> gets or sets the left bound (minimum x value) of this node's <a href="#node-bounds">bounds</a> in the parent coordinate frame, with
         <code>node.getLeft()</code> and <code>node.setLeft( x )</code>. Setting this left bound effectively translates the node horizontally.
       </p>
-      
+
       <h4 id="node-right">node.right</h4>
       <p>
         <code>node.right</code> gets or sets the right bound (maximum x value) of this node's <a href="#node-bounds">bounds</a> in the parent coordinate frame, with
         <code>node.getRight()</code> and <code>node.setRight( x )</code>. Setting this right bound effectively translates the node horizontally.
       </p>
-      
+
       <h4 id="node-top">node.top</h4>
       <p>
         <code>node.top</code> gets or sets the top bound (minimum y value) of this node's <a href="#node-bounds">bounds</a> in the parent coordinate frame, with
         <code>node.getTop()</code> and <code>node.setTop( y )</code>. Setting this top bound effectively translates the node vertically.
       </p>
-      
+
       <h4 id="node-bottom">node.bottom</h4>
       <p>
         <code>node.bottom</code> gets or sets the bottom bound (maximum y value) of this node's <a href="#node-bounds">bounds</a> in the parent coordinate frame, with
         <code>node.getBottom()</code> and <code>node.setBottom( y )</code>. Setting this bottom bound effectively translates the node vertically.
       </p>
-      
+
       <h4 id="node-center">node.center</h4>
       <p>
         <code>node.center</code> gets or sets the center of this node's <a href="#node-bounds">bounds</a> in the parent coordinate frame, with
         <code>node.getCenter()</code> and <code>node.setCenter( center )</code>, which both handle the center as a
         <a href="../../dot/doc#vector2">dot.Vector2</a> instance. Setting center effectively translates the node.
       </p>
-      
+
       <h4 id="node-centerX">node.centerX</h4>
       <p>
         <code>node.centerX</code> gets or sets the horizontal center of this node's <a href="#node-bounds">bounds</a> in the parent coordinate frame, with
         <code>node.getCenterX()</code> and <code>node.setCenterX( x )</code>. Setting centerX effectively translates the node horizontally.
       </p>
-      
+
       <h4 id="node-centerY">node.centerY</h4>
       <p>
         <code>node.centerY</code> gets or sets the vertical center of this node's <a href="#node-bounds">bounds</a> in the parent coordinate frame, with
         <code>node.getCenterY()</code> and <code>node.setCenterY( y )</code>. Setting centerY effectively translates the node vertically.
       </p>
-      
+
       <h4 id="node-renderer">node.renderer</h4>
       <p>
         <code>node.renderer</code> gets or sets the preferred rendering backend for the node (and children) using <code>node.getRenderer()</code> or <code>node.setRenderer( renderer )</code>.
@@ -692,7 +690,7 @@ scene.updateOnRequestAnimationFrame();
       <p>
         <code>node.hasRenderer()</code> is a convenience function to determine if this is set on the node.
       </p>
-      
+
       <h4 id="node-rendererOptions">node.rendererOptions</h4>
       <p>
         <code>node.rendererOptions</code> gets or sets options for the specified <a href="#node-renderer">renderer</a> using
@@ -701,7 +699,7 @@ scene.updateOnRequestAnimationFrame();
         versions throw an error. If this option and the <a href="#node-renderer">renderer</a> is set, this node will have layer boundaries inserted before and after.
         <!-- TODO: docs of rendererOptions for different layers -->
       </p>
-      
+
       <h4 id="node-layerSplit">node.layerSplit</h4>
       <p>
         Setter backed by <code>node.setLayerSplit( boolean )</code> that will set both <a href="#node-layerSplitBefore">layerSplitBefore</a> and
@@ -710,19 +708,19 @@ scene.updateOnRequestAnimationFrame();
       <p>
         Setting to true will cause anything rendered before or after to be in a separate layer from this node and its children.
       </p>
-      
+
       <h4 id="node-layerSplitBefore">node.layerSplitBefore</h4>
       <p>
         Setter backed by <code>node.setLayerSplitBefore( boolean )</code> that, when set to true, will cause anything rendered before this node to
         be in a separate layer from this node and its children.
       </p>
-      
+
       <h4 id="node-layerSplitAfter">node.layerSplitAfter</h4>
       <p>
         Setter backed by <code>node.setLayerSplitAfter( boolean )</code> that, when set to true, will cause anything rendered after this node to
         be in a separate layer from this node and its children.
       </p>
-      
+
 
       <h3 id="scene" class="section">Scene</h3>
       <p>
@@ -747,20 +745,20 @@ scene.updateOnRequestAnimationFrame();
         <li><a href="#scene-width">width</a> (default currentWidth): override the main container's width</li>
         <li><a href="#scene-height">height</a> (default currentHeight): override the main container's height</li>
       </ul>
-      
+
       <h4 id="scene-updateScene">scene.updateScene()</h4>
       <p>
         This redraws and/or repositions whatever rendering backends are being used to display the scene.
         It should be called whenever the scene's display should reflect new changes, generally on each
         <a href="https://developer.mozilla.org/en-US/docs/DOM/window.requestAnimationFrame">requestAnimationFrame</a>.
       </p>
-      
+
       <h4 id="scene-dispose">scene.dispose()</h4>
       <p>
         Disposes of all of the scene's necessary resources and listeners, so that it should be able to be
         garbage collected if no more references are to the Scene. Call this once you no longer need a scene.
       </p>
-      
+
       <h4 id="scene-renderToCanvas">scene.renderToCanvas( <span class="args">canvas, context, callback</span> )</h4>
       <p>
         Renders all applicable layers that support Canvas output to the specified <code>canvas</code> (with
@@ -776,7 +774,7 @@ scene.updateOnRequestAnimationFrame();
       <p>
         DOM content is currently not supported for renderToCanvas.
       </p>
-      
+
       <h4 id="scene-canvasSnapshot">scene.canvasSnapshot( <span class="args">callback</span> )</h4>
       <p>
         Asynchronously draws the scene to a canvas with the same size as the scene
@@ -786,7 +784,7 @@ scene.updateOnRequestAnimationFrame();
       <p>
         If any origin-dirty content (like cross-domain images without <a href="http://en.wikipedia.org/wiki/Cross-origin_resource_sharing">CORS</a>) are included in the Scene, this operation will throw a security error.
       </p>
-      
+
       <h4 id="scene-canvasDataURL">scene.canvasDataURL( <span class="args">callback</span> )</h4>
       <p>
         Asynchronously draws the scene to an image (using <a href="#scene-canvasSnapshot">scene.canvasSnapshot</a>),
@@ -795,19 +793,19 @@ scene.updateOnRequestAnimationFrame();
         this is a PNG. Does not support origin-dirty content (see <a href="#scene-canvasSnapshot">canvasSnapshot</a>)
         inside the scene.
       </p>
-      
+
       <h4 id="scene-updateOnRequestAnimationFrame">scene.updateOnRequestAnimationFrame( <span class="args">[element]</span> )</h4>
       <p>
         A simple way of setting up <a href="#scene-updateScene">scene.updateScene</a> to be called using
         requestAnimationFrame. More advanced applications will want to handle this themselves.
       </p>
-      
+
       <h4 id="scene-initializeStandaloneEvents">scene.initializeStandaloneEvents()</h4>
       <p>
         Attaches event listeners onto the scene's containing block-level element, and forwards them to
         the scene's input event handling system. This or <a href="scene-initializeFullscreenEvents">initializeFullscreenEvents</a> is necessary for cursor handling and input/pointer events.
       </p>
-      
+
       <h4 id="scene-initializeFullscreenEvents">scene.initializeFullscreenEvents()</h4>
       <p>
         Attaches event listeners onto the containing document, and forwards them to
@@ -818,23 +816,23 @@ scene.updateOnRequestAnimationFrame();
         on events unrelated to the scene, so <a href="scene-initializeFullscreenEvents">initializeFullscreenEvents</a>
         should only be used when the scene takes up the entire screen.
       </p>
-      
+
       <h4 id="scene-getDebugHTML">scene.getDebugHTML()</h4>
       <p>
         Returns an HTML string of debugging information that shows all of the nodes (their constructor type
         names), and all layering information.
       </p>
-      
+
       <h4 id="scene-popupDebug">scene.popupDebug()</h4>
       <p>
         Pops the information from <a href="#scene-getDebugHTML">getDebugHTML</a> into a new window.
       </p>
-      
+
       <h3 id="fillable" class="section">Fillable</h3>
       <p>
         A mix-in for <a href="#node">Node</a> subtypes that can be filled with a color/gradient/pattern.
       </p>
-      
+
       <h4 id="fillable-fill">fill</h4>
       <p>
         <a href="#fillable">Fillable</a> nodes provide a single <code>node.fill</code> getter and setter
@@ -850,12 +848,12 @@ scene.updateOnRequestAnimationFrame();
       <p>
         If a <a href="#color">Color</a> object is used for a fill, any changes to the Color object will update this node.
       </p>
-      
+
       <h3 id="strokable" class="section">Strokable</h3>
       <p>
         A mix-in for <a href="#node">Node</a> subtypes that can be stroked (outlined) along a border with a color/gradient/pattern.
       </p>
-      
+
       <h4 id="strokable-stroke">stroke</h4>
       <p>
         <code>node.stroke</code> is a getter and setter
@@ -871,13 +869,13 @@ scene.updateOnRequestAnimationFrame();
       <p>
         If a <a href="#color">Color</a> object is used for a stroke, any changes to the Color object will update this node.
       </p>
-      
+
       <h4 id="strokable-lineWidth">lineWidth</h4>
       <p>
         <code>node.lineWidth</code> (<code>node.getLineWidth()</code>, <code>node.setLineWidth( lineWidth )</code>)
         controls the thickness of the stroke.
       </p>
-      
+
       <h4 id="strokable-lineCap">lineCap</h4>
       <p>
         <code>node.lineCap</code> (<code>node.getLineCap()</code>, <code>node.setLineCap( lineCap )</code>)
@@ -904,22 +902,19 @@ scene.addChild( new scenery.Text( 'round', {
 } ) );
 /*START*/
 var shape = kite.Shape.lineSegment( 0, 50, 0, 70 );
-scene.addChild( new scenery.Path( {
-  shape: shape,
+scene.addChild( new scenery.Path( shape, {
   x: 256/6,
   stroke: '#000',
   lineWidth: 30,
   lineCap: 'butt'
 } ) );
-scene.addChild( new scenery.Path( {
-  shape: shape,
+scene.addChild( new scenery.Path( shape, {
   x: 256*3/6,
   stroke: '#000',
   lineWidth: 30,
   lineCap: 'square'
 } ) );
-scene.addChild( new scenery.Path( {
-  shape: shape,
+scene.addChild( new scenery.Path( shape, {
   x: 256*5/6,
   stroke: '#000',
   lineWidth: 30,
@@ -927,24 +922,21 @@ scene.addChild( new scenery.Path( {
 } ) );
 /*END*/
 // add a red highlight
-scene.addChild( new scenery.Path( {
-  shape: shape,
+scene.addChild( new scenery.Path( shape, {
   x: 256/6,
   stroke: '#f00'
 } ) );
-scene.addChild( new scenery.Path( {
-  shape: shape,
+scene.addChild( new scenery.Path( shape, {
   x: 256*3/6,
   stroke: '#f00'
 } ) );
-scene.addChild( new scenery.Path( {
-  shape: shape,
+scene.addChild( new scenery.Path( shape, {
   x: 256*5/6,
   stroke: '#f00'
 } ) );
 } );
       </script>
-      
+
       <h4 id="strokable-lineJoin">lineJoin</h4>
       <p>
         <code>node.lineJoin</code> (<code>node.getLineJoin()</code>, <code>node.setLineJoin( lineJoin )</code>)
@@ -971,22 +963,19 @@ scene.addChild( new scenery.Text( 'round', {
 } ) );
 /*START*/
 var shape = new kite.Shape().moveTo( -30, 80 ).lineTo( 0, 50 ).lineTo( 30, 80 );
-scene.addChild( new scenery.Path( {
-  shape: shape,
+scene.addChild( new scenery.Path( shape, {
   x: 256/6,
   stroke: '#000',
   lineWidth: 25,
   lineJoin: 'miter'
 } ) );
-scene.addChild( new scenery.Path( {
-  shape: shape,
+scene.addChild( new scenery.Path( shape, {
   x: 256*3/6,
   stroke: '#000',
   lineWidth: 25,
   lineJoin: 'bevel'
 } ) );
-scene.addChild( new scenery.Path( {
-  shape: shape,
+scene.addChild( new scenery.Path( shape, {
   x: 256*5/6,
   stroke: '#000',
   lineWidth: 25,
@@ -994,37 +983,33 @@ scene.addChild( new scenery.Path( {
 } ) );
 /*END*/
 // add a red highlight
-scene.addChild( new scenery.Path( {
-  shape: shape,
+scene.addChild( new scenery.Path( shape, {
   x: 256/6,
   stroke: '#f00'
 } ) );
-scene.addChild( new scenery.Path( {
-  shape: shape,
+scene.addChild( new scenery.Path( shape, {
   x: 256*3/6,
   stroke: '#f00'
 } ) );
-scene.addChild( new scenery.Path( {
-  shape: shape,
+scene.addChild( new scenery.Path( shape, {
   x: 256*5/6,
   stroke: '#f00'
 } ) );
 } );
       </script>
-      
+
       <h4 id="strokable-lineDash">lineDash</h4>
       <p>
         <code>node.lineDash</code> (<code>node.getLineDash()</code>, <code>node.setLineDash( lineDash )</code>)
         controls any dashing of the stroke (or null for no dashing), and uses the <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-setlinedash">Canvas setLineDash</a> handling
         as an even-length array of dash lengths.
       </p>
-      
+
       <div id="example-lineDash" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
       <script type="text/javascript">
 docExample( 'example-lineDash', function( scene ) {
 /*START*/
-scene.addChild( new scenery.Path( {
-  shape: kite.Shape.regularPolygon( 6, 25 ),
+scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 25 ), {
   x: 32, y: 32,
   stroke: '#000',
   lineWidth: 3,
@@ -1033,50 +1018,48 @@ scene.addChild( new scenery.Path( {
 /*END*/
 } );
       </script>
-      
+
       <h4 id="strokable-lineDashOffset">lineDashOffset</h4>
       <p>
         <code>node.lineDashOffset</code> (<code>node.getLineDashOffset()</code>, <code>node.setLineDashOffset( lineDashOffset )</code>)
         controls the how far the dash pattern in <a href="#strokable-lineDash">lineDash</a> is offset from the start,
         same as the <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-linedashoffset">Canvas lineDashOffset</a>.
       </p>
-      
+
       <div id="example-lineDashOffset" class="exampleScene" style="width: 128px; height: 64px; margin: 0 auto;"></div>
       <script type="text/javascript">
 docExample( 'example-lineDashOffset', function( scene ) {
-scene.addChild( new scenery.Path( {
-  shape: new kite.Shape().moveTo( 0, 16.5 )
-                         .lineTo( 128, 16.5 )
-                         .moveTo( 0, 32.5 )
-                         .lineTo( 128, 32.5 )
-                         .moveTo( 0, 48.5 )
-                         .lineTo( 128, 48.5 ),
+scene.addChild( new scenery.Path( new kite.Shape().moveTo( 0, 16.5 )
+                                                  .lineTo( 128, 16.5 )
+                                                  .moveTo( 0, 32.5 )
+                                                  .lineTo( 128, 32.5 )
+                                                  .moveTo( 0, 48.5 )
+                                                  .lineTo( 128, 48.5 ), {
   stroke: '#f00'
 } ) );
 /*START*/
 var shape = kite.Shape.lineSegment( 0, 0, 128, 0 );
 var args = {
-  shape: shape,
   stroke: '#000',
   lineWidth: 8,
   lineDash: [ 20, 5 ]
 };
-scene.addChild( new scenery.Path( _.extend( {
+scene.addChild( new scenery.Path( shape, _.extend( {
   y: 16.5,
   lineDashOffset: 0
 }, args ) ) );
-scene.addChild( new scenery.Path( _.extend( {
+scene.addChild( new scenery.Path( shape, _.extend( {
   y: 32.5,
   lineDashOffset: 5
 }, args ) ) );
-scene.addChild( new scenery.Path( _.extend( {
+scene.addChild( new scenery.Path( shape, _.extend( {
   y: 48.5,
   lineDashOffset: 10
 }, args ) ) );
 /*END*/
 } );
       </script>
-      
+
       <h3 id="path" class="section">Path</h3>
       <p>
         Path is a <a href="#node">Node</a> subtype that includes the <a href="#fillable">Fillable</a> and
@@ -1089,7 +1072,7 @@ scene.addChild( new scenery.Path( _.extend( {
         is the standard <a href="#node">Node</a> parameter object, where the <a href="#path-shape">shape</a>
         should be specified.
       </p>
-      
+
       <h4 id="path-shape">shape</h4>
       <p>
         <code>node.shape</code> (<code>node.getShape()</code>, <code>node.setShape( shape )</code>)
@@ -1097,7 +1080,7 @@ scene.addChild( new scenery.Path( _.extend( {
         <a href="../../kite/doc#shape">Shape</a>, or it is a string representing an <a href="http://www.w3.org/TR/SVG/paths.html#DAttribute">SVG path</a>,
         and will be converted into a <a href="../../kite/doc#shape">Shape</a>.
       </p>
-      
+
       <h3 id="image" class="section">Image</h3>
       <p>
         Image is a <a href="#node">Node</a> subtype that displays a single image in either Canvas,
@@ -1115,7 +1098,7 @@ scene.addChild( new scenery.Image( url ) );
 scene.updateOnRequestAnimationFrame();
 } );
       </script>
-      
+
       <h4 id="image-image">image</h4>
       <p>
         <code>node.image</code> (<code>node.getImage()</code>, <code>node.setImage( image )</code>)
@@ -1136,7 +1119,7 @@ scene.updateOnRequestAnimationFrame();
           a Canvas renderer.
         </li>
       </ul>
-      
+
       <h3 id="text" class="section">Text</h3>
       <p>
         Text is a <a href="#node">Node</a> subtype that (currently) displays a single line of text
@@ -1162,7 +1145,7 @@ scene.addChild( new scenery.Text( 'Some text', {
 /*END*/
 } );
       </script>
-      
+
       <h4 id="text-options">Text Options</h4>
       <p>
         A <a href="#text">Text</a> node has the following parameter object options, in addition to
@@ -1181,13 +1164,13 @@ scene.addChild( new scenery.Text( 'Some text', {
         <li><a href="#text-textBaseline">textBaseline</a></li>
         <li><a href="#text-direction">direction</a></li>
       </ul>
-      
+
       <h4 id="text-text">text</h4>
       <p>
         <code>node.text</code> (<code>node.getText()</code>, <code>node.setText( string )</code>)
         gets or sets the string text.
       </p>
-      
+
       <h4 id="text-font">font</h4>
       <p>
         <code>node.font</code> (<code>node.getFont()</code>, <code>node.setFont( font )</code>)
@@ -1198,7 +1181,7 @@ scene.addChild( new scenery.Text( 'Some text', {
         Note that Canvas places <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-font">restrictions</a> on the possible interpreted values, so
         only those should be set on a <a href="#text">Text</a> node.
       </p>
-      
+
       <h4 id="text-fontWeight">fontWeight</h4>
       <p>
         <code>node.fontWeight</code> (<code>node.getFontWeight()</code>, <code>node.setFontWeight( weight )</code>)
@@ -1208,7 +1191,7 @@ scene.addChild( new scenery.Text( 'Some text', {
       <p>
         Setting the fontWeight will create a new internal Font object, so future changes to the original Font will not apply to this node.
       </p>
-      
+
       <h4 id="text-fontFamily">fontFamily</h4>
       <p>
         <code>node.fontFamily</code> (<code>node.getFontFamily()</code>, <code>node.setFontFamily( family )</code>)
@@ -1218,7 +1201,7 @@ scene.addChild( new scenery.Text( 'Some text', {
       <p>
         Setting the fontWeight will create a new internal Font object, so future changes to the original Font will not apply to this node.
       </p>
-      
+
       <h4 id="text-fontStretch">fontStretch</h4>
       <p>
         <code>node.fontStretch</code> (<code>node.getFontStretch()</code>, <code>node.setFontStretch( stretch )</code>)
@@ -1228,7 +1211,7 @@ scene.addChild( new scenery.Text( 'Some text', {
       <p>
         Setting the fontWeight will create a new internal Font object, so future changes to the original Font will not apply to this node.
       </p>
-      
+
       <h4 id="text-fontStyle">fontStyle</h4>
       <p>
         <code>node.fontStyle</code> (<code>node.getFontStyle()</code>, <code>node.setFontStyle( style )</code>)
@@ -1238,7 +1221,7 @@ scene.addChild( new scenery.Text( 'Some text', {
       <p>
         Setting the fontWeight will create a new internal Font object, so future changes to the original Font will not apply to this node.
       </p>
-      
+
       <h4 id="text-fontSize">fontSize</h4>
       <p>
         <code>node.fontSize</code> (<code>node.getFontSize()</code>, <code>node.setFontSize( size )</code>)
@@ -1248,7 +1231,7 @@ scene.addChild( new scenery.Text( 'Some text', {
       <p>
         Setting the fontWeight will create a new internal Font object, so future changes to the original Font will not apply to this node.
       </p>
-      
+
       <h4 id="text-lineHeight">lineHeight</h4>
       <p>
         <code>node.lineHeight</code> (<code>node.getLineHeight()</code>, <code>node.setLineHeight( lineHeight )</code>)
@@ -1258,14 +1241,14 @@ scene.addChild( new scenery.Text( 'Some text', {
       <p>
         Setting the fontWeight will create a new internal Font object, so future changes to the original Font will not apply to this node.
       </p>
-      
+
       <h4 id="text-direction">direction</h4>
       <p>
         <code>node.direction</code> (<code>node.getDirection()</code>, <code>node.setDirection( direction )</code>)
         sets the LTR or RTL direction of the text. It should take on values from
         Canvas's <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-direction">context.direction</a>, but <strong>proper bounds and renderer compatibility is not ensured yet</strong>
       </p>
-      
+
       <h4 id="text-boundsMethod">boundsMethod</h4>
       <p>
         <code>node.boundsMethod</code> (<code>node.getBoundsMethod()</code>, <code>node.setBoundsMethod( method )</code>)
@@ -1274,7 +1257,7 @@ scene.addChild( new scenery.Text( 'Some text', {
         which is similar but allows Canvas rendering but with dirty region redrawing disabled, or <code>"accurate"</code>
         which is accurate and supports dirty regions, but is much slower.
       </p>
-      
+
       <h3 id="htmlText" class="section">HTMLText</h3>
       <p>
         HTMLText behaves exactly like <a href="#text">Text</a>, except that it displays the text as unescaped HTML.
@@ -1282,7 +1265,7 @@ scene.addChild( new scenery.Text( 'Some text', {
         The <code>"accurate"</code> <a href="#text-boundsMethod">boundsMethod</a> is also disallowed, since using
         Canvas for HTML bounds would be extremely inaccurate.
       </p>
-      
+
       <div id="example-htmlText" class="exampleScene" style="width: 256px; height: 64px; margin: 0 auto;"></div>
       <script type="text/javascript">
 docExample( 'example-htmlText', function( scene ) {
@@ -1294,7 +1277,7 @@ scene.addChild( new scenery.HTMLText( '<strong>bold</strong>, <em>italic</em>', 
 /*END*/
 } );
       </script>
-      
+
       <h3 id="dom" class="section">DOM</h3>
       <p>
         DOM is a subtype of <a href="#node">Node</a> that positions a DOM element inside the scene using
@@ -1316,22 +1299,22 @@ scene.addChild( new scenery.DOM( element, { x: 30, rotation: Math.PI / 6 } ) );
 /*END*/
 } );
       </script>
-      
+
       <h4 id="dom-element">element</h4>
       <p>
         <code>node.element</code> (<code>node.getElement()</code>, <code>node.setElement( domElement )</code>)
         controls the displayed DOM element. If the element is a block-level element, it should have a specified
         width and height.
       </p>
-      
+
       <h4 id="dom-interactive">interactive</h4>
       <p>
         <code>node.interactive</code> (<code>node.getInteractive()</code>, <code>node.setInteractive( boolean )</code>),
         when set to true, will signal to Scenery's event system that preventDefault() should not be called
         on DOM events when the DOM node is the event target.
       </p>
-      
-      
+
+
       <h3 id="linearGradient" class="section">LinearGradient</h3>
       <p>
         A LinearGradient can be used in place of a color for any <a href="#fillable-fill">fill</a> or
@@ -1347,9 +1330,8 @@ scene.addChild( new scenery.DOM( element, { x: 30, rotation: Math.PI / 6 } ) );
       <script type="text/javascript">
 docExample( 'example-linearGradient', function( scene ) {
 /*START*/
-scene.addChild( new scenery.Path( {
-  shape: kite.Shape.rectangle( 0, 0, 128, 128 ),
-  
+scene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 128, 128 ), {
+
   // upper-left to lower-right
   fill: new scenery.LinearGradient( 0, 0, 128, 128 )
                    .addColorStop( 0, '#888' )
@@ -1359,7 +1341,7 @@ scene.addChild( new scenery.Path( {
 scene.addChild( new scenery.Text( 'A', {
   fontSize: 80,
   centerX: 64, centerY: 64,
-  
+
   // left to right
   fill: new scenery.LinearGradient( 0, 0, 55, 0 )
                    .addColorStop( 0, '#f00' )
@@ -1368,20 +1350,20 @@ scene.addChild( new scenery.Text( 'A', {
 /*END*/
 } );
       </script>
-      
+
       <h4 id="linearGradient-addColorStop">addColorStop( <span class="args">ratio, color</span> )</h4>
       <p>
         Adds a point of color along the gradient, where a ratio of 0 is a color point at (x0,y0) and
         a ratio of 1 is a color point at (x1,y1).
       </p>
-      
+
       <h4 id="linearGradient-setTransformMatrix">setTransformMatrix( <span class="args">matrix</span> )</h4>
       <p>
         Given a <a href="../../dot/doc#matrix3">Matrix3</a> for <code>matrix</code>, it will transform
         the gradient as it is applied. This should only be done before adding it as a fill/stroke to
         any nodes.
       </p>
-      
+
       <h3 id="radialGradient" class="section">RadialGradient</h3>
       <p>
         A RadialGradient can be used in place of a color for any <a href="#fillable-fill">fill</a> or
@@ -1403,9 +1385,8 @@ scene.addChild( new scenery.Text( 'A', {
       <script type="text/javascript">
 docExample( 'example-radialGradient', function( scene ) {
 /*START*/
-scene.addChild( new scenery.Path( {
-  shape: kite.Shape.rectangle( 0, 0, 128, 128 ),
-  
+scene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 128, 128 ), {
+
   // starts at a 10-px radius circle and expands out nonuniformly
   fill: new scenery.RadialGradient( 32, 32, 10, 64, 64, 90 )
                    .addColorStop( 0, '#05f' )
@@ -1418,7 +1399,7 @@ var letter = '#fff';
 scene.addChild( new scenery.Text( 'A', {
   fontSize: 80,
   centerX: 64, centerY: 64,
-  
+
   // concentric circles
   fill: new scenery.RadialGradient( 25, -30, 0, 25, -30, 50 )
                    .addColorStop( 0, transparent )
@@ -1433,20 +1414,20 @@ scene.addChild( new scenery.Text( 'A', {
 /*END*/
 } );
       </script>
-      
+
       <h4 id="radialGradient-addColorStop">addColorStop( <span class="args">ratio, color</span> )</h4>
       <p>
         Adds a point of color along the gradient, where a ratio of 0 is a color point at (x0,y0) and
         a ratio of 1 is a color point at (x1,y1).
       </p>
-      
+
       <h4 id="radialGradient-setTransformMatrix">setTransformMatrix( <span class="args">matrix</span> )</h4>
       <p>
         Given a <a href="../../dot/doc#matrix3">Matrix3</a> for <code>matrix</code>, it will transform
         the gradient as it is applied. This should only be done before adding it as a fill/stroke to
         any nodes.
       </p>
-      
+
       <h3 id="pattern" class="section">Pattern</h3>
       <p>
         A Pattern can be used in place of a color for any <a href="#fillable-fill">fill</a> or
@@ -1463,9 +1444,8 @@ docExample( 'example-pattern', function( scene ) {
 var loadedImg = document.createElement( 'img' );
 loadedImg.addEventListener( 'load', function() {
 /*START*/
-scene.addChild( new scenery.Path( {
-  shape: kite.Shape.roundRectangle( 10, 10, 236, 236, 64, 64 ),
-  
+scene.addChild( new scenery.Path( kite.Shape.roundRectangle( 10, 10, 236, 236, 64, 64 ), {
+
   // tile the image, and rotate it 30 degrees, and scale it down
   fill: new scenery.Pattern( loadedImg ).setTransformMatrix(
     dot.Matrix3.rotation2( Math.PI / 6 )
@@ -1479,16 +1459,16 @@ loadedImg.src = 'http://phet.colorado.edu/images/phet-logo-yellow.png';
 // loadedImg.src = 'http://phet.colorado.edu/sims/plate-tectonics/plate-tectonics-thumbnail.png';
 } );
       </script>
-      
+
       <h4 id="pattern-setTransformMatrix">setTransformMatrix( <span class="args">matrix</span> )</h4>
       <p>
         Given a <a href="../../dot/doc#matrix3">Matrix3</a> for <code>matrix</code>, it will transform
         the gradient as it is applied. This should only be done before adding it as a fill/stroke to
         any nodes.
       </p>
-      
+
       <h3 id="vbox" class="section">VBox</h3>
-      
+
       <h3 id="rectangle" class="section">Rectangle</h3>
       <p>
         Rectangle is a subtype of <a href="#path">Path</a> that is more convenient to construct
@@ -1524,43 +1504,43 @@ scene.addChild( new scenery.Rectangle( 74, 10, 44, 44, 10, 10, {
 /*END*/
 } );
       </script>
-      
+
       <h4 id="rectangle-rectX">rectX</h4>
       <p>
         <code>node.rectX</code> (<code>node.getRectX()</code>, <code>node.setRectX( x )</code>)
         retrieves or modifies the 'x' parameter of the <a href="#rectangle">Rectangle</a>.
       </p>
-      
+
       <h4 id="rectangle-rectY">rectY</h4>
       <p>
         <code>node.rectY</code> (<code>node.getRectY()</code>, <code>node.setRectY( y )</code>)
         retrieves or modifies the 'y' parameter of the <a href="#rectangle">Rectangle</a>.
       </p>
-      
+
       <h4 id="rectangle-rectWidth">rectWidth</h4>
       <p>
         <code>node.rectWidth</code> (<code>node.getRectWidth()</code>, <code>node.setRectWidth( width )</code>)
         retrieves or modifies the 'width' parameter of the <a href="#rectangle">Rectangle</a>.
       </p>
-      
+
       <h4 id="rectangle-rectHeight">rectHeight</h4>
       <p>
         <code>node.rectHeight</code> (<code>node.getRectHeight()</code>, <code>node.setRectHeight( height )</code>)
         retrieves or modifies the 'height' parameter of the <a href="#rectangle">Rectangle</a>.
       </p>
-      
+
       <h4 id="rectangle-rectArcWidth">rectArcWidth</h4>
       <p>
         <code>node.rectArcWidth</code> (<code>node.getRectArcWidth()</code>, <code>node.setRectArcWidth( arcWidth )</code>)
         retrieves or modifies the 'width' parameter of the <a href="#rectangle">Rectangle</a>.
       </p>
-      
+
       <h4 id="rectangle-rectArcHeight">rectArcHeight</h4>
       <p>
         <code>node.rectArcHeight</code> (<code>node.getRectArcHeight()</code>, <code>node.setRectArcHeight( arcHeight )</code>)
         retrieves or modifies the 'height' parameter of the <a href="#rectangle">Rectangle</a>.
       </p>
-      
+
       <h3 id="circle" class="section">Circle</h3>
       <p>
         Circle is a subtype of <a href="#path">Path</a> that is more convenient to construct
@@ -1582,13 +1562,13 @@ scene.addChild( new scenery.Circle( 11, {
 /*END*/
 } );
       </script>
-      
+
       <h4 id="circle-radius">radius</h4>
       <p>
         <code>node.radius</code> (<code>node.getRadius()</code>, <code>node.setRadius( radius )</code>)
         retrieves or modifies the 'radius' parameter of the <a href="#circle">Circle</a>.
       </p>
-      
+
       <h3 id="line" class="section">Line</h3>
       <p>
         Line is a subtype of <a href="#path">Path</a> that is more convenient to construct
@@ -1613,7 +1593,7 @@ scene.addChild( new scenery.Line( 8, 56, 56, 8, {
 /*END*/
 } );
       </script>
-      
+
       <h4 id="line-x1">x1</h4>
       <p>
         <code>node.x1</code> (<code>node.getX1()</code>, <code>node.setX1( x1 )</code>)
@@ -1644,7 +1624,7 @@ scene.addChild( new scenery.Line( 8, 56, 56, 8, {
         <code>node.p2</code> (<code>node.getPoint2()</code>, <code>node.setPoint2( p2 )</code>)
         retrieves or modifies the Vector2 (x2,y2) of the <a href="#line">Line</a>.
       </p>
-      
+
       <h3 id="font" class="section">Font</h3>
       <p>
         Font represents a single <strong>immutable</strong>font, which can be queried for various parameters, and can be changed.
@@ -1674,99 +1654,99 @@ font.font;                                   // "italic 10px/10 'Times New Roman
 font.family;                                 // "'Times New Roman', serif"
 font.weight;                                 // 400 (the default)
       </pre>
-      
+
       <h4 id="font-font">font</h4>
       <p>
         <code>font.font</code> (<code>font.getFont()</code>)
         retrieves the <a href="http://www.w3.org/TR/css3-fonts/#propdef-font">shorthand CSS 'font' property</a> of the Font object.
         This property completely specifies all font settings.
       </p>
-      
+
       <h4 id="font-family">family</h4>
       <p>
         <code>font.family</code> (<code>font.getFamily()</code>)
         retrieves the <a href="http://www.w3.org/TR/css3-fonts/#propdef-font-family">CSS 'font-family' property</a> of the Font object.
       </p>
-      
+
       <h4 id="font-weight">weight</h4>
       <p>
         <code>font.weight</code> (<code>font.getWeight()</code>)
         retrieves the <a href="http://www.w3.org/TR/css3-fonts/#propdef-font-weight">CSS 'font-weight' property</a> of the Font object.
       </p>
-      
+
       <h4 id="font-stretch">stretch</h4>
       <p>
         <code>font.stretch</code> (<code>font.getStretch()</code>)
         retrieves the <a href="http://www.w3.org/TR/css3-fonts/#propdef-font-stretch">CSS 'font-stretch' property</a> of the Font object.
       </p>
-      
+
       <h4 id="font-style">style</h4>
       <p>
         <code>font.style</code> (<code>font.getStyle()</code>)
         retrieves the <a href="http://www.w3.org/TR/css3-fonts/#propdef-font-style">CSS 'font-style' property</a> of the Font object.
       </p>
-      
+
       <h4 id="font-size">size</h4>
       <p>
         <code>font.size</code> (<code>font.getSize()</code>)
         retrieves the <a href="http://www.w3.org/TR/css3-fonts/#propdef-font-size">CSS 'font-size' property</a> of the Font object.
       </p>
-      
+
       <h4 id="font-lineHeight">lineHeight</h4>
       <p>
         <strong>Deprecated</strong>: <code>font.lineHeight</code> (<code>font.getLineHeight()</code>)
         retrieves the <a href="http://www.w3.org/TR/CSS21/visudet.html#propdef-line-height">CSS 'line-height' property</a> of the Font object.
       </p>
-      
-      
+
+
       <h3 id="color" class="section">Color</h3>
       <p>
         A Color can be constructed either with any valid CSS color (<code>new scenery.Color( cssColorString )</code>), or with components directly
         (<code>new scenery.Color( red, green blue [, alpha] )</code>) where red/green/blue are 0-255, and alpha is 0-1.
       </p>
       <p>Color operations will assume that the color is not pre-multiplied.</p>
-      
+
       <h4 id="color-red">red</h4>
       <p>
         <code>color.red</code> (<code>color.getRed()</code>, <code>color.setRed( redInt )</code>)
         retrieves or modifies the red component of the color. It will be returned or converted to an integral value between 0-255 (inclusive).
       </p>
-      
+
       <h4 id="color-green">green</h4>
       <p>
         <code>color.green</code> (<code>color.getGreen()</code>, <code>color.setGreen( greenInt )</code>)
         retrieves or modifies the green component of the color. It will be returned or converted to an integral value between 0-255 (inclusive).
       </p>
-      
+
       <h4 id="color-blue">blue</h4>
       <p>
         <code>color.blue</code> (<code>color.getBlue()</code>, <code>color.setBlue( blueInt )</code>)
         retrieves or modifies the blue component of the color. It will be returned or converted to an integral value between 0-255 (inclusive).
       </p>
-      
+
       <h4 id="color-alpha">alpha</h4>
       <p>
         <code>color.alpha</code> (<code>color.getAlpha()</code>, <code>color.setAlpha( alphaFloat )</code>)
         retrieves or modifies the alpha component of the color. It will be returned or converted to an integral value between 0-1 (inclusive).
       </p>
-      
+
       <h4 id="color-toCSS">toCSS()</h4>
       <p>
         Returns a CSS value for the color, currently using 'rgb' or 'rgba'.
       </p>
-      
-      
+
+
       <h3 id="event" class="section">Event</h3>
       <h3 id="pointer" class="section">Pointer</h3>
       <h3 id="mouse" class="section">Mouse</h3>
       <h3 id="touch" class="section">Touch</h3>
       <h3 id="pen" class="section">Pen</h3>
       <h3 id="trail" class="section">Trail</h3>
-      
+
     </div>
     <div class="span3"></div>
   </div>
-  
+
   <script type="text/javascript">
     SyntaxHighlighter.all();
   </script>

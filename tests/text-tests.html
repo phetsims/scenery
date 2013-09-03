@@ -165,16 +165,13 @@
   *----------------------------------------------------------------------------*/
   
   var boundsScene = new scenery.Scene( $( '#bounds' ) );
-  boundsScene.addChild( new scenery.Path( {
-    shape: kite.Shape.bounds( svgBoundsA ),
+  boundsScene.addChild( new scenery.Path( kite.Shape.bounds( svgBoundsA ), {
     fill: 'rgba(255,0,0,0.1)'
   } ) );
-  boundsScene.addChild( new scenery.Path( {
-    shape: kite.Shape.bounds( baselineSpanBounds ),
+  boundsScene.addChild( new scenery.Path( kite.Shape.bounds( baselineSpanBounds ), {
     fill: 'rgba(0,0,255,0.1)'
   } ) );
-  boundsScene.addChild( new scenery.Path( {
-    shape: kite.Shape.bounds( boundsA ),
+  boundsScene.addChild( new scenery.Path( kite.Shape.bounds( boundsA ), {
     fill: 'rgba(0,255,0,0.1)'
   } ) );
   boundsScene.updateScene();

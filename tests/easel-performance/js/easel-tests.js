@@ -126,20 +126,18 @@ $(document).ready( function() {
         //   stroke: '#ff0000'
         // } ) );
         
-        scene.addChild( new scenery.Path( {
-          shape: new kite.Shape( [
-            // TODO: convert to methods
-            new kite.Piece.MoveTo( mainCurve.start ),
-            new kite.Piece.QuadraticCurveTo( mainCurve.control, mainCurve.end )
-          ] ),
+        scene.addChild( new scenery.Path( new kite.Shape( [
+          // TODO: convert to methods
+          new kite.Piece.MoveTo( mainCurve.start ),
+          new kite.Piece.QuadraticCurveTo( mainCurve.control, mainCurve.end )
+        ] ), {
           stroke: '#000000'
         } ) );
         
         _.each( [ -55, -40, -30, -15, -5, 5, 15, 30, 40, 55 ], function( offset ) {
           var offsetPieces = mainCurve.offsetTo( offset, true );
           
-          scene.addChild( new scenery.Path( {
-            shape: new kite.Shape( offsetPieces ),
+          scene.addChild( new scenery.Path( new kite.Shape( offsetPieces ), {
             stroke: '#0000ff'
           } ) );
         } );

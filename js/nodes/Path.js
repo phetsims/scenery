@@ -19,17 +19,19 @@ define( function( require ) {
   var Strokable = require( 'SCENERY/nodes/Strokable' );
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
   
-  scenery.Path = function Path( options ) {
+  scenery.Path = function Path( shape, options ) {
     // TODO: consider directly passing in a shape object (or at least handling that case)
     this._shape = null;
-    
+
     // ensure we have a parameter object
     options = options || {};
     
     this.initializeFillable();
     this.initializeStrokable();
-    
-    Node.call( this, options );
+
+    Node.call( this );
+    this.setShape( shape );
+    this.mutate( options );
   };
   var Path = scenery.Path;
   
@@ -71,7 +73,7 @@ define( function( require ) {
     },
     
     hasShape: function() {
-      return this._shape !== null;
+      return this._shape;
     },
     
     paintCanvas: function( wrapper ) {

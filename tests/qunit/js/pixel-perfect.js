@@ -33,8 +33,7 @@
   
   pixelTest( 'Rectangle with stroke',
     function( scene ) {
-      scene.addChild( new scenery.Path( {
-        shape: kite.Shape.rectangle( 8, 8, 48, 48 ),
+      scene.addChild( new scenery.Path( kite.Shape.rectangle( 8, 8, 48, 48 ), {
         fill: '#000000',
         stroke: '#ff0000',
         lineWidth: 2
@@ -46,23 +45,20 @@
   pixelTest( 'Invisible node with rectangles above and below',
     function( scene ) {
       var shape = kite.Shape.rectangle( 0, 0, 30, 30 );
-      scene.addChild( new scenery.Path( {
-        shape: shape,
+      scene.addChild( new scenery.Path( shape, {
         fill: '#000',
         stroke: '#f00',
         lineWidth: 2,
         x: -10, y: -10
       } ) );
-      scene.addChild( new scenery.Path( {
-        shape: shape,
+      scene.addChild( new scenery.Path( shape, {
         fill: '#000',
         stroke: '#f00',
         lineWidth: 2,
         x: 10, y: 10,
         visible: false
       } ) );
-      scene.addChild( new scenery.Path( {
-        shape: shape,
+      scene.addChild( new scenery.Path( shape, {
         fill: '#000',
         stroke: '#f00',
         lineWidth: 2,
@@ -75,8 +71,7 @@
   pixelTest( 'Invisible node with rectangles above and below - visible children test + children parameter object',
     function( scene ) {
       var shape = kite.Shape.rectangle( 0, 0, 30, 30 );
-      var rect = new scenery.Path( {
-        shape: shape,
+      var rect = new scenery.Path( shape, {
         fill: '#000',
         stroke: '#f00',
         lineWidth: 2

@@ -48,8 +48,7 @@
       main.width( this.width );
       main.height( this.height );
       var scene = new scenery.Scene( main );
-      var text = new scenery.Path( {
-        shape: new kite.Shape( 'M108 385.875 L82.6875 385.875 L82.6875 224.5781 Q63.7031 242.5781 31.9219 255.0938 L31.9219 230.625 Q75.6562 209.6719 91.5469 178.7344 L108 178.7344 L108 385.875 Z' ),
+      var text = new scenery.Path( new kite.Shape( 'M108 385.875 L82.6875 385.875 L82.6875 224.5781 Q63.7031 242.5781 31.9219 255.0938 L31.9219 230.625 Q75.6562 209.6719 91.5469 178.7344 L108 178.7344 L108 385.875 Z' ),{
         fill: '#000',
         scale: 0.1
       } );
@@ -572,8 +571,7 @@
     },
     step: function() {
       for ( var i = 0; i < 200; i++ ) {
-        this.scene.addChild( new scenery.Path( {
-          shape: kite.Shape.regularPolygon( 6, 22 ),
+        this.scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ),{
           fill: 'rgba(255,0,255,0.3)',
           stroke: '#000000',
           x: this.x,

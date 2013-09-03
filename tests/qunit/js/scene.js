@@ -457,21 +457,18 @@
   test( 'Checking Layers and external canvas', function() {
     var scene = new scenery.Scene( $( '#main' ) );
     
-    scene.addChild( new scenery.Path( {
-      shape: kite.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
+    scene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ), {
       fill: '#ff0000'
     } ) );
     
-    var middleRect = new scenery.Path( {
-      shape: kite.Shape.rectangle( canvasWidth / 4, canvasHeight / 4, canvasWidth / 2, canvasHeight / 2 ),
+    var middleRect = new scenery.Path( kite.Shape.rectangle( canvasWidth / 4, canvasHeight / 4, canvasWidth / 2, canvasHeight / 2 ), {
       fill: '#00ff00'
     } );
     middleRect.layerSplit = true;
     
     scene.addChild( middleRect );
     
-    scene.addChild( new scenery.Path( {
-      shape: kite.Shape.rectangle( canvasWidth / 2, canvasHeight / 2, canvasWidth / 2, canvasHeight / 2 ),
+    scene.addChild( new scenery.Path( kite.Shape.rectangle( canvasWidth / 2, canvasHeight / 2, canvasWidth / 2, canvasHeight / 2 ), {
       fill: '#0000ff'
     } ) );
     
@@ -483,8 +480,7 @@
   test( 'Update vs Full Basic Clearing Check', function() {
     updateVsFullRender( [
       function( scene ) {
-        scene.addChild( new scenery.Path( {
-          shape: kite.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
+        scene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ), {
           fill: '#000000'
         } ) );
       }, function( scene ) {
@@ -555,7 +551,7 @@
     equal( node.fill, fill );
     equal( node.getFill(), fill );
     
-    var otherNode = new scenery.Path( { fill: fill, shape: kite.Shape.rectangle( 0, 0, 10, 10 ) } );
+    var otherNode = new scenery.Path( kite.Shape.rectangle( 0, 0, 10, 10 ), { fill: fill } );
     
     equal( otherNode.fill, fill );
   } );
@@ -564,21 +560,18 @@
     var scene = new scenery.Scene( $( '#main' ) );
     var root = scene;
     
-    root.addChild( new scenery.Path( {
-      shape: kite.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ),
+    root.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ), {
       fill: '#ff0000'
     } ) );
     
-    var middleRect = new scenery.Path( {
-      shape: kite.Shape.rectangle( canvasWidth / 4, canvasHeight / 4, canvasWidth / 2, canvasHeight / 2 ),
+    var middleRect = new scenery.Path( kite.Shape.rectangle( canvasWidth / 4, canvasHeight / 4, canvasWidth / 2, canvasHeight / 2 ), {
       fill: '#00ff00'
     } );
     
     
     root.addChild( middleRect );
     
-    root.addChild( new scenery.Path( {
-      shape: kite.Shape.rectangle( canvasWidth / 2, canvasHeight / 2, canvasWidth / 2, canvasHeight / 2 ),
+    root.addChild( new scenery.Path( kite.Shape.rectangle( canvasWidth / 2, canvasHeight / 2, canvasWidth / 2, canvasHeight / 2 ), {
       fill: '#0000ff'
     } ) );
     
@@ -628,8 +621,7 @@
   } );
   
   test( 'Setting left/right of node', function() {
-    var node = new scenery.Path( {
-      shape: kite.Shape.rectangle( -20, -20, 50, 50 ),
+    var node = new scenery.Path( kite.Shape.rectangle( -20, -20, 50, 50 ), {
       scale: 2
     } );
     
@@ -653,9 +645,7 @@
   test( 'Path with empty shape', function() {
     var scene = new scenery.Scene( $( '#main' ) );
     
-    var node = new scenery.Path( {
-      shape: new kite.Shape()
-    } );
+    var node = new scenery.Path( new kite.Shape() );
     
     scene.addChild( node );
     scene.updateScene();
@@ -664,11 +654,9 @@
   
   test( 'Path with null shape', function() {
     var scene = new scenery.Scene( $( '#main' ) );
-    
-    var node = new scenery.Path( {
-      shape: null
-    } );
-    
+
+    var node = new scenery.Path( null );
+
     scene.addChild( node );
     scene.updateScene();
     expect( 0 );
