@@ -44,6 +44,8 @@ define( function( require ) {
       this.addPeers();
       this.addLiveRegions();
     }
+    
+    phetAllocation && phetAllocation( 'Instance' );
   };
   var Instance = scenery.Instance;
   

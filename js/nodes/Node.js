@@ -141,6 +141,8 @@ define( function( require ) {
     if ( options ) {
       this.mutate( options );
     }
+    
+    phetAllocation && phetAllocation( 'Node' );
   };
   var Node = scenery.Node;
   

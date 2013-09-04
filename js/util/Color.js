@@ -65,6 +65,8 @@ define( function( require ) {
         this.setRGBA( r, g, b, alpha );
       }
     }
+    
+    phetAllocation && phetAllocation( 'Color' );
   };
   var Color = scenery.Color;
   

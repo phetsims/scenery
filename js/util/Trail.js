@@ -70,6 +70,8 @@ define( function( require ) {
         }
       }
     }
+    
+    phetAllocation && phetAllocation( 'Trail' );
   };
   var Trail = scenery.Trail;
   

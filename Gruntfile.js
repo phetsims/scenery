@@ -50,7 +50,8 @@ module.exports = function( grunt ) {
                 sceneryAssertExtra: false,
                 sceneryLayerLog: false,
                 sceneryEventLog: false,
-                sceneryAccessibilityLog: false
+                sceneryAccessibilityLog: false,
+                phetAllocation: false
               },
               dead_code: true
             }
@@ -79,7 +80,8 @@ module.exports = function( grunt ) {
                 sceneryAssertExtra: false,
                 sceneryLayerLog: false,
                 sceneryEventLog: false,
-                sceneryAccessibilityLog: false
+                sceneryAccessibilityLog: false,
+                phetAllocation: false
               },
               dead_code: true
             }

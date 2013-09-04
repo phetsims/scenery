@@ -20,6 +20,9 @@ define( function( require ) {
   window.sceneryEventLog = null;
   window.sceneryAccessibilityLog = null;
   
+  // object allocation tracking
+  window.phetAllocation = require( 'PHET_CORE/phetAllocation' );
+  
   var scratchCanvas = document.createElement( 'canvas' );
   var scratchContext = scratchCanvas.getContext( '2d' );
   

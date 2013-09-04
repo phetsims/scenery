@@ -16,6 +16,8 @@ define( function( require ) {
   
   scenery.Pointer = function Pointer() {
     this.listeners = [];
+    
+    phetAllocation && phetAllocation( 'Pointer' );
   };
   var Pointer = scenery.Pointer;
   

@@ -27,6 +27,8 @@ define( function( require ) {
     this.trail = trail;
     
     this.setBefore( isBefore );
+    
+    phetAllocation && phetAllocation( 'TrailPointer' );
   };
   var TrailPointer = scenery.TrailPointer;
   
