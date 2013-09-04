@@ -1749,6 +1749,11 @@ define( function( require ) {
       return bounds.transform( this._transform.getMatrix() );
     },
     
+    // mutable optimized form of parentToLocalBounds
+    transformBoundsFromParentToLocal: function( bounds ) {
+      return bounds.transform( this._transform.getInverse() );
+    },
+    
     // returns the matrix (fresh copy) that transforms points from the local coordinate frame into the global coordinate frame
     getLocalToGlobalMatrix: function() {
       var node = this;
