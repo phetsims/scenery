@@ -33,7 +33,7 @@ define( function( require ) {
   
   inherit( Pointer, Mouse, {
     down: function( point, event ) {
-      if ( this.point ) { this.point.freeToPool(); }
+      // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
       switch( event.button ) {
         case 0: this.leftDown = true; break;
@@ -43,7 +43,7 @@ define( function( require ) {
     },
     
     up: function( point, event ) {
-      if ( this.point ) { this.point.freeToPool(); }
+      // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
       switch( event.button ) {
         case 0: this.leftDown = false; break;
@@ -53,17 +53,17 @@ define( function( require ) {
     },
     
     move: function( point, event ) {
-      if ( this.point ) { this.point.freeToPool(); }
+      // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
     },
     
     over: function( point, event ) {
-      if ( this.point ) { this.point.freeToPool(); }
+      // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
     },
     
     out: function( point, event ) {
-      if ( this.point ) { this.point.freeToPool(); }
+      // if ( this.point ) { this.point.freeToPool(); }
       // TODO: how to handle the mouse out-of-bounds
       this.point = null;
     },
