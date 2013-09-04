@@ -658,8 +658,10 @@ define( function( require ) {
      *
      * If options.pruneInvisible is false, invisible nodes will be allowed in the trail.
      * If options.pruneUnpickable is false, unpickable nodes will be allowed in the trail.
+     *
+     * When calling, don't pass the recursive flag. It signals that the point passed can be mutated
      */
-    trailUnderPoint: function( point, options ) {
+    trailUnderPoint: function( point, options, recursive ) {
       sceneryAssert && sceneryAssert( point, 'trailUnderPointer requires a point' );
       
       if ( options === undefined ) { options = {}; }
@@ -691,8 +693,12 @@ define( function( require ) {
         return null; // not in our bounds, so this point can't possibly be contained
       }
       
+      // temporary result variable, since it's easier to do this way to free the computed point
+      var result = null;
+      
       // point in the local coordinate frame. computed after the main bounds check, so we can bail out there efficiently
-      var localPoint = this.parentToLocalPoint( point );
+      var localPoint = this._transform.getInverse().multiplyVector2( Vector2.createFromPool( point.x, point.y ) );
+      // var localPoint = this.parentToLocalPoint( point );
       
       // check children first, since they are rendered later
       if ( this._children.length > 0 && ( hasHitAreas || this._childBounds.containsPoint( localPoint ) ) ) {
@@ -706,6 +712,7 @@ define( function( require ) {
           // the child will have the point in its parent's coordinate frame (i.e. this node's frame)
           if ( childHit ) {
             childHit.addAncestor( this, i );
+            localPoint.freeToPool();
             return childHit;
           }
         }
@@ -714,21 +721,27 @@ define( function( require ) {
       // tests for mouse and touch hit areas before testing containsPointSelf
       if ( hasHitAreas ) {
         if ( options.isMouse && this._mouseArea ) {
-          return this._mouseArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
+          result = this._mouseArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
+          localPoint.freeToPool();
+          return result;
         }
         if ( ( options.isTouch || options.isPen ) && this._touchArea ) {
-          return this._touchArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
+          result = this._touchArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
+          localPoint.freeToPool();
+          return result;
         }
       }
       
       // didn't hit our children, so check ourself as a last resort
       if ( hasHitAreas || this._selfBounds.containsPoint( localPoint ) ) {
         if ( this.containsPointSelf( localPoint ) ) {
+          localPoint.freeToPool();
           return new scenery.Trail( this );
         }
       }
       
       // signal no hit
+      localPoint.freeToPool();
       return null;
     },
     

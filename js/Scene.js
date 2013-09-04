@@ -1004,7 +1004,7 @@ define( function( require ) {
         listenerTarget: element,
         pointFromEvent: function pointFromEvent( evt ) {
           var mainBounds = element.getBoundingClientRect();
-          return new Vector2( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
+          return Vector2.createFromPool( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
         }
       }, parameters ) );
     },
@@ -1015,7 +1015,7 @@ define( function( require ) {
         listenerTarget: document,
         pointFromEvent: function pointFromEvent( evt ) {
           var mainBounds = element.getBoundingClientRect();
-          return new Vector2( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
+          return Vector2.createFromPool( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
         }
       }, parameters ) );
     },
@@ -1026,7 +1026,7 @@ define( function( require ) {
         listenerTarget: window,
         pointFromEvent: function pointFromEvent( evt ) {
           var mainBounds = element.getBoundingClientRect();
-          return new Vector2( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
+          return Vector2.createFromPool( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
         }
       }, parameters ) );
     },
