@@ -766,10 +766,6 @@ define( function( require ) {
       
       sceneryAssert && sceneryAssert( trail.areIndicesValid() );
       
-      // point to the beginning of the node, right before it would be rendered
-      var startPointer = new scenery.TrailPointer( trail, true );
-      var endPointer = new scenery.TrailPointer( trail, false );
-      
       var layers = this.layers;
       
       // from layers 0 to n-1, notAfter goes from false to true, notBefore goes from true to false
@@ -783,7 +779,8 @@ define( function( require ) {
         var endTrail = layers[mid].endPaintedTrail;
         sceneryAssert && sceneryAssert( endTrail.areIndicesValid() );
         // NOTE TO SELF: don't change this flag to true again. think it through
-        var notAfter = startPointer.compareNested( new scenery.TrailPointer( endTrail, true ) ) !== 1;
+        // trail,true points to the beginning of the node, right before it would be rendered
+        var notAfter = scenery.TrailPointer.compareNested( trail, true, endTrail, true ) !== 1;
         if ( notAfter ) {
           high = mid;
         } else {
@@ -802,7 +799,7 @@ define( function( require ) {
         var startTrail = layers[mid].startPaintedTrail;
         startTrail.reindex();
         sceneryAssert && sceneryAssert( startTrail.areIndicesValid() );
-        var notBefore = endPointer.compareNested( new scenery.TrailPointer( startTrail, true ) ) !== -1;
+        var notBefore = scenery.TrailPointer.compareNested( trail, false, startTrail, true ) !== -1;
         if ( notBefore ) {
           low = mid;
         } else {
