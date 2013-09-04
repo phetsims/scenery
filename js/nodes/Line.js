@@ -40,8 +40,6 @@ define( function( require ) {
         this._x2 = y1.x;
         this._y2 = y1.y;
         options = x2 || {};
-        
-        options.shape = this.createLineShape();
       } else {
         // assumes Line( { ... } ), init to zero for now
         this._x1 = 0;
@@ -59,11 +57,10 @@ define( function( require ) {
       
       // ensure we have a parameter object
       options = options || {};
-      
     }
     // fallback for non-canvas or non-svg rendering, and for proper bounds computation
-
-    Path.call( this, this.createLineShape(),options );
+    
+    Path.call( this, this.createLineShape(), options );
   };
   var Line = scenery.Line;
   
