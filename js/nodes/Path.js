@@ -170,19 +170,13 @@ define( function( require ) {
     get shape() { return this.getShape(); },
     
     getBasicConstructor: function( propLines ) {
-      return 'new scenery.Path( {' + propLines + '} )';
+      return 'new scenery.Path( ' + this._shape.toString() + ', {' + propLines + '} )';
     },
     
     getPropString: function( spaces, includeChildren ) {
       var result = Node.prototype.getPropString.call( this, spaces, includeChildren );
       result = this.appendFillablePropString( spaces, result );
       result = this.appendStrokablePropString( spaces, result );
-      if ( this._shape ) {
-        if ( result ) {
-          result += ',\n';
-        }
-        result += spaces + 'shape: ' + this._shape.toString();
-      }
       return result;
     }
   } );
