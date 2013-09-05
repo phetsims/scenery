@@ -21,5 +21,5 @@ function runSceneryTests( pathToTestBase ) {
   loadTestFile( 'js/pixel-perfect.js' );
   loadTestFile( 'js/transforms.js' );
   loadTestFile( 'js/miscellaneous.js' );
-  loadTestFile( 'js/lint-tests.js' );
+  loadTestFile( 'js/linting.js' );
 };

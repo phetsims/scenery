@@ -8,12 +8,20 @@
   
   <link rel="stylesheet" href="../../lib/qunit-1.10.0.css">
   
+  <!-- load JSHint settings first, before window.module can't be overwritten -->
+  <script type="text/javascript" src="../../common/phet-core/tests/qunit/beforeJSHintOptions.js"></script>
+  <script type="text/javascript" src="../../../chipper/grunt/jshint-options.js"></script>
+  <script type="text/javascript" src="../../common/phet-core/tests/qunit/afterJSHintOptions.js"></script>
+  
   <script src="../../lib/jquery-2.0.0.min.js"></script>
   <script src="../../lib/lodash.min-1.0.0-rc.3.js"></script>
   <script src="../../lib/has.js"></script>
   <script src="../../lib/jshint-2.1.2.js"></script>
   <script src="../../lib/qunit-1.10.0.js"></script>
   <script src="../../lib/qhint.js"></script>
+  
+  <!-- Dependency for the linting tests -->
+  <script type="text/javascript" src="../../common/phet-core/tests/qunit/unitTestLintFilesMatching.js"></script>
   
   <!-- Canvg and dependencies -->
   <script src="../../lib/canvg-1.2/rgbcolor.js"></script>
