@@ -37,7 +37,7 @@ define( function( require ) {
     this.listenerTarget = listenerTarget;
     this.batchDOMEvents = batchDOMEvents;
     
-    this.batchedCallbacks = [];
+    this.batchedCallbacks = []; // cleared every frame
     
     this.mouse = new scenery.Mouse();
     
@@ -650,7 +650,7 @@ define( function( require ) {
         for ( var i = 0; i < len; i++ ) {
           this.batchedCallbacks[i]();
         }
-        this.batchedCallbacks = [];
+        this.batchedCallbacks.length = 0;
       }
     }
   };
