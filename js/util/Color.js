@@ -296,26 +296,61 @@ define( function( require ) {
       return new Color( this.r, this.g, this.b, alpha );
     },
     
-    brighterColor: function( factor ) {
+    checkFactor: function( factor ) {
       if ( factor < 0 || factor > 1 ) {
-        throw new Error( "factor must be between 0 and 1: " + factor );
+        throw new Error( 'factor must be between 0 and 1: ' + factor );
       }
-      factor = ( factor === undefined ) ? 0.7 : factor;
+      return ( factor === undefined ) ? 0.7 : factor;
+    },
+    
+    // matches Java's Color.brighter()
+    brighterColor: function( factor ) {
+      factor = this.checkFactor( factor );
       var red   = Math.min( 255, Math.floor( this.r / factor ) );
       var green = Math.min( 255, Math.floor( this.g / factor ) );
       var blue  = Math.min( 255, Math.floor( this.b / factor ) );
       return new Color( red, green, blue, this.a );
     },
     
+    /**
+     * Brightens a color in RGB space. Useful when creating gradients from a
+     * single base color.
+     *
+     * @param color
+     * @param factor 0 (no change) to 1 (white)
+     * @return lighter (closer to white) version of the original color.
+     */
+    colorUtilsBrighter: function( factor ) {
+      factor = this.checkFactor( factor );
+      var red = Math.min( 255, this.getRed() + Math.floor( factor * ( 255 - this.getRed() ) ) );
+      var green = Math.min( 255, this.getGreen() + Math.floor( factor * ( 255 - this.getGreen() ) ) );
+      var blue = Math.min( 255, this.getBlue() + Math.floor( factor * ( 255 - this.getBlue() ) ) );
+      return new Color( red, green, blue, this.getAlpha() );
+    },
+    
+    // matches Java's Color.darker()
     darkerColor: function( factor ) {
-      if ( factor < 0 || factor > 1 ) {
-        throw new Error( "factor must be between 0 and 1: " + factor );
-      }
-      factor = ( factor === undefined ) ? 0.7 : factor;
+      factor = this.checkFactor( factor );
       var red   = Math.max( 0, Math.floor( factor * this.r ) );
       var green = Math.max( 0, Math.floor( factor * this.g ) );
       var blue  = Math.max( 0, Math.floor( factor * this.b ) );
       return new Color( red, green, blue, this.a );
+    },
+    
+    /**
+     * Darken a color in RGB space. Useful when creating gradients from a single
+     * base color.
+     *
+     * @param color  the original color
+     * @param factor 0 (no change) to 1 (black)
+     * @return darker (closer to black) version of the original color.
+     */
+    colorUtilsDarker: function( factor ) {
+      factor = this.checkFactor( factor );
+      var red = Math.max( 0, this.getRed() - Math.floor( factor * this.getRed() ) );
+      var green = Math.max( 0, this.getGreen() - Math.floor( factor * this.getGreen() ) );
+      var blue = Math.max( 0, this.getBlue() - Math.floor( factor * this.getBlue() ) );
+      return new Color( red, green, blue, this.getAlpha() );
     },
     
     /*---------------------------------------------------------------------------*
@@ -528,7 +563,7 @@ define( function( require ) {
    */
   Color.interpolateRBGA = function( color1, color2, distance ) {
     if ( distance < 0 || distance > 1 ) {
-      throw new Error( "distance must be between 0 and 1: " + distance );
+      throw new Error( 'distance must be between 0 and 1: ' + distance );
     }
     var r = Math.floor( linear( 0, 1, color1.r, color2.r, distance ) );
     var g = Math.floor( linear( 0, 1, color1.g, color2.g, distance ) );
