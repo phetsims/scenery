@@ -1978,6 +1978,10 @@ define( function( require ) {
     get instances() { return this.getInstances(); },
     
     mutate: function( options ) {
+      if ( !options ) {
+        return this;
+      }
+      
       var node = this;
       
       _.each( this._mutatorKeys, function( key ) {
