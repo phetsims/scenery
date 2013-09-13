@@ -367,6 +367,10 @@ define( function( require ) {
     removeChangeListener: function( listener ) {
       sceneryAssert && sceneryAssert( _.contains( this.listeners, listener ) );
       this.listeners.splice( _.indexOf( this.listeners, listener ), 1 );
+    },
+
+    toString: function() {
+      return this.constructor.name + "[r:" + this.r + " g:" + this.g + " b:" + this.b + " a:" + this.a + "]";
     }
   };
   
