@@ -87,7 +87,7 @@ define( function( require ) {
       if ( this._lineDrawingStyles.lineDash !== lineDash ) {
         this.markOldSelfPaint();
         
-        this._lineDrawingStyles.lineDash = lineDash;
+        this._lineDrawingStyles.lineDash = lineDash || [];
         
         this.invalidateStroke();
       }
