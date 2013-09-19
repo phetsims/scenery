@@ -13,7 +13,9 @@
 define( function( require ) {
   'use strict';
   
-  window.sceneryAssert = require( 'ASSERT/assert' )( 'scenery' );
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
+  window.sceneryAssert = assert;
   window.sceneryAssertExtra = require( 'ASSERT/assert' )( 'scenery.extra' );
   
   window.sceneryLayerLog = null;
@@ -28,6 +30,8 @@ define( function( require ) {
   
   // will be filled in by other modules
   return {
+    assert: assert,
+    
     scratchCanvas: scratchCanvas,   // a canvas used for convenience functions (think of it as having arbitrary state)
     scratchContext: scratchContext, // a context used for convenience functions (think of it as having arbitrary state)
     

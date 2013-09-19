@@ -1,6 +1,10 @@
 
 var sys = require( 'sys' );
 var exec = require( 'child_process' ).exec;
+var escodegen = require( 'escodegen' );
+var esprima = require( 'esprima' );
+
+var chipperRewrite = require( '../chipper/ast/chipperRewrite.js' );
 
 /*global module:false*/
 module.exports = function( grunt ) {
@@ -8,6 +12,10 @@ module.exports = function( grunt ) {
   
   // print this immediately, so it is clear what project grunt is building
   grunt.log.writeln( 'Scenery' );
+  
+  var onBuildWrite = function( name, path, contents ) {
+    return chipperRewrite.chipperRewrite( contents, esprima, escodegen );
+  };
   
   // Project configuration.
   grunt.initConfig( {
@@ -55,7 +63,8 @@ module.exports = function( grunt ) {
               },
               dead_code: true
             }
-          }
+          },
+          onBuildWrite: onBuildWrite
         }
       },
       
@@ -85,7 +94,8 @@ module.exports = function( grunt ) {
               },
               dead_code: true
             }
-          }
+          },
+          onBuildWrite: onBuildWrite
         }
       }
     },
