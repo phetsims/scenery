@@ -1,5 +1,5 @@
 
-// path to test base, without a slash, e.g. '../../common/scenery/tests/qunit'
+// path to test base, without a slash, e.g. '../../../scenery/tests/qunit'
 function runSceneryTests( pathToTestBase ) {
   function loadTestFile( src ) {
     var script = document.createElement( 'script' );

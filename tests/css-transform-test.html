@@ -14,7 +14,7 @@
   <script data-main="../js/config.js" src="../../sherpa/require-2.1.8.js"></script>
   
   <script>
-  requirejs( [ 'main', '../common/kite/js/main', '../common/dot/js/main' ], function( scenery, kite, dot ) {
+  requirejs( [ 'main', '../../kite/js/main', '../../dot/js/main' ], function( scenery, kite, dot ) {
     var scene = new scenery.Scene( $( '#main' ) );
     
     var container = new scenery.Node( {

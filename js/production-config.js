@@ -38,10 +38,10 @@ require.config( {
     underscore: '../../sherpa/lodash-2.0.0',
     jquery: '../../sherpa/jquery-2.0.3',
     SCENERY: '.',
-    KITE: '../common/kite/js',
-    DOT: '../common/dot/js',
-    PHET_CORE: '../common/phet-core/js',
-    ASSERT: '../common/assert/js'
+    KITE: '../../kite/js',
+    DOT: '../../dot/js',
+    PHET_CORE: '../../phet-core/js',
+    ASSERT: '../../assert/js'
   },
   
   shim: {
