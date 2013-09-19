@@ -297,6 +297,35 @@
 
       <p>If you are just starting out, see the <a href="a-tour-of-scenery.html">Tour of Scenery</a></p>
       <p>See the <a href="user-input.html">user input documentation</a> for handling user-generated events.</p>
+      
+      <h2 id="get-the-code">Get the code</h2>
+      
+      <p>
+        Scenery depends on a few other libraries, and needs to have them checked out as siblings. It is recommended to
+        place all of these inside a containing directory. Make sure you have <a href="https://help.github.com/articles/set-up-git">git</a> installed, then run:
+      </p>
+      
+      <pre>
+git clone https://github.com/phetsims/sherpa.git
+git clone https://github.com/phetsims/chipper.git
+git clone https://github.com/phetsims/assert.git
+git clone https://github.com/phetsims/phet-core.git
+git clone https://github.com/phetsims/dot.git
+git clone https://github.com/phetsims/kite.git
+git clone https://github.com/phetsims/scenery.git</pre>
+      
+      <p>
+        For some examples and tests, and to build a custom version, you'll need to install <a href="http://nodejs.org/">node.js</a>, and <a href="https://github.com/gruntjs/grunt-cli">grunt-cli</a>. Then,
+      </p>
+      
+      <pre>
+cd scenery
+npm install
+grunt</pre>
+      
+      <p>
+        You will now have the built files under build/
+      </p>
 
       <h2 id="dependencies">Dependencies</h2>
 
