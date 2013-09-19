@@ -1,0 +1,31 @@
+#   Thu Sep 19 00:29:15 MDT 2013
+{
+  "sherpa": {
+    "sha": "65434405d7439fef68d8273d3f0e538b4295a9aa",
+    "branch": "master"
+  },
+  "chipper": {
+    "sha": "ba6b9f8016fe1d84f112389d63bbbcbb35c16090",
+    "branch": "master"
+  },
+  "assert": {
+    "sha": "243a1befeb048c0a5354812fa0ee24b5a62df742",
+    "branch": "master"
+  },
+  "phet-core": {
+    "sha": "da8852d1e86f3dc857079daec8283769b9ffe678",
+    "branch": "master"
+  },
+  "dot": {
+    "sha": "450bafdc2aa984e5e10aabbcf6c4e6bef6fabfc3",
+    "branch": "master"
+  },
+  "kite": {
+    "sha": "d763b08e288010698f082e7fe5cea4336f745813",
+    "branch": "master"
+  },
+  "scenery": {
+    "sha": "57f09b9ab61930265d5cfc787317038aad7ea866",
+    "branch": "master"
+  },
+}
