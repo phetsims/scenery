@@ -140,8 +140,6 @@ module.exports = function( grunt ) {
       
       var suffix = '-' + year + month + day + '-' + sha.slice( 0, 10 ) + '.js';
       
-      var sceneryFilename = 
-      
       grunt.file.copy( 'build/standalone/scenery.min.js', 'snapshots/scenery-min' + suffix );
       grunt.file.copy( 'tests/benchmarks/js/perf-current.js', 'snapshots/perf' + suffix );
       
