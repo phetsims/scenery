@@ -102,7 +102,7 @@ module.exports = function( grunt ) {
     
     jshint: {
       all: [
-        'Gruntfile.js', 'js/**/*.js', 'common/kite/js/**/*.js', 'common/dot/js/**/*.js', 'common/phet-core/js/**/*.js', 'common/assert/js/**/*.js'
+        'Gruntfile.js', 'js/**/*.js', '../kite/js/**/*.js', '../dot/js/**/*.js', '../phet-core/js/**/*.js', '../assert/js/**/*.js'
       ],
       scenery: [
         'js/**/*.js'

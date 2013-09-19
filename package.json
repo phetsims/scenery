@@ -2,6 +2,7 @@
   "name": "scenery",
   "version": "0.0.0",
   "license": "MIT",
+  "phetLibs": "sherpa chipper assert phet-core dot kite scenery",
   "devDependencies": {
     "grunt": "~0.4.0",
     "grunt-requirejs": "~0.3.2",
