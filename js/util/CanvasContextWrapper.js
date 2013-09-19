@@ -34,7 +34,7 @@ define( function( require ) {
       this.lineWidth = undefined; // 1
       this.lineCap = undefined; // 'butt'
       this.lineJoin = undefined; // 'miter'
-      this.lineDash = undefined; // null
+      this.lineDash = undefined; // []
       this.lineDashOffset = undefined; // 0
       this.miterLimit = undefined; // 10
       

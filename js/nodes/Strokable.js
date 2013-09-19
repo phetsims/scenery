@@ -212,7 +212,7 @@ define( function( require ) {
       style += 'stroke-width: ' + this.getLineWidth() + ';';
       style += 'stroke-linecap: ' + this.getLineCap() + ';';
       style += 'stroke-linejoin: ' + this.getLineJoin() + ';';
-      if ( this.getLineDash() ) {
+      if ( this.getLineDash().length ) {
         style += 'stroke-dasharray: ' + this.getLineDash().join( ',' ) + ';';
         style += 'stroke-dashoffset: ' + this.getLineDashOffset() + ';';
       }
@@ -268,7 +268,7 @@ define( function( require ) {
           }
         } );
         
-        if ( this.lineDash ) {
+        if ( this.lineDash.length ) {
           addProp( 'lineDash', JSON.stringify( this.lineDash ), true );
         }
       }
