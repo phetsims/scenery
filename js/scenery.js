@@ -13,18 +13,25 @@
 define( function( require ) {
   'use strict';
   
-  window.sceneryAssert = require( 'ASSERT/assert' )( 'scenery' );
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
+  window.sceneryAssert = assert;
   window.sceneryAssertExtra = require( 'ASSERT/assert' )( 'scenery.extra' );
   
   window.sceneryLayerLog = null;
   window.sceneryEventLog = null;
   window.sceneryAccessibilityLog = null;
   
+  // object allocation tracking
+  window.phetAllocation = require( 'PHET_CORE/phetAllocation' );
+  
   var scratchCanvas = document.createElement( 'canvas' );
   var scratchContext = scratchCanvas.getContext( '2d' );
   
   // will be filled in by other modules
   return {
+    assert: assert,
+    
     scratchCanvas: scratchCanvas,   // a canvas used for convenience functions (think of it as having arbitrary state)
     scratchContext: scratchContext, // a context used for convenience functions (think of it as having arbitrary state)
     

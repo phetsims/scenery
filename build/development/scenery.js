@@ -2,160 +2,159 @@
 
 ;(function(g){
 
-    // summary: A simple feature detection function/framework.
-    //
-    // name: String
-    //      The name of the feature to detect, as defined by the overall `has` tests.
-    //      Tests can be registered via `has.add(testname, testfunction)`.
-    //
-    // example:
-    //      mylibrary.bind = has("native-bind") ? function(fn, context){
-    //          return fn.bind(context);
-    //      } : function(fn, context){
-    //          return function(){
-    //              fn.apply(context, arguments);
-    //          }
-    //      }
+  // summary: A simple feature detection function/framework.
+  //
+  // name: String
+  //      The name of the feature to detect, as defined by the overall `has` tests.
+  //      Tests can be registered via `has.add(testname, testfunction)`.
+  //
+  // example:
+  //      mylibrary.bind = has("native-bind") ? function(fn, context){
+  //          return fn.bind(context);
+  //      } : function(fn, context){
+  //          return function(){
+  //              fn.apply(context, arguments);
+  //          }
+  //      }
 
-    var NON_HOST_TYPES = { "boolean": 1, "number": 1, "string": 1, "undefined": 1 },
-        VENDOR_PREFIXES = ["Webkit", "Moz", "O", "ms", "Khtml"],
-        d = isHostType(g, "document") && g.document,
-        el = d && isHostType(d, "createElement") && d.createElement("DiV"),
-        freeExports = typeof exports == "object" && exports,
-        freeModule = typeof module == "object" && module,
-        testCache = {}
+  var NON_HOST_TYPES = { "boolean": 1, "number": 1, "string": 1, "undefined": 1 },
+    VENDOR_PREFIXES = ["Webkit", "Moz", "O", "ms", "Khtml"],
+    d = isHostType(g, "document") && g.document,
+    el = d && isHostType(d, "createElement") && d.createElement("DiV"),
+    freeExports = typeof exports == "object" && exports,
+    freeModule = typeof module == "object" && module,
+    testCache = {}
     ;
 
-    function has(/* String */name){
-        if(typeof testCache[name] == "function"){
-            testCache[name] = testCache[name](g, d, el);
+  function has(/* String */name){
+    if(typeof testCache[name] == "function"){
+      testCache[name] = testCache[name](g, d, el);
+    }
+    return testCache[name]; // Boolean
+  }
+
+  function add(/* String */name, /* Function */test, /* Boolean? */now){
+    // summary: Register a new feature detection test for some named feature
+    //
+    // name: String
+    //      The name of the feature to test.
+    //
+    // test: Function
+    //      A test function to register. If a function, queued for testing until actually
+    //      needed. The test function should return a boolean indicating
+    //      the presence of a feature or bug.
+    //
+    // now: Boolean?
+    //      Optional. Omit if `test` is not a function. Provides a way to immediately
+    //      run the test and cache the result.
+    // example:
+    //      A redundant test, testFn with immediate execution:
+    //  |       has.add("javascript", function(){ return true; }, true);
+    //
+    // example:
+    //      Again with the redundantness. You can do this in your tests, but we should
+    //      not be doing this in any internal has.js tests
+    //  |       has.add("javascript", true);
+    //
+    // example:
+    //      Three things are passed to the testFunction. `global`, `document`, and a generic element
+    //      from which to work your test should the need arise.
+    //  |       has.add("bug-byid", function(g, d, el){
+    //  |           // g  == global, typically window, yadda yadda
+    //  |           // d  == document object
+    //  |           // el == the generic element. a `has` element.
+    //  |           return false; // fake test, byid-when-form-has-name-matching-an-id is slightly longer
+    //  |       });
+    testCache[name] = now ? test(g, d, el) : test;
+  }
+
+  // cssprop adapted from http://gist.github.com/598008 (thanks, ^pi)
+  function cssprop(name, el){
+    var supported = false,
+      capitalized = name.charAt(0).toUpperCase() + name.slice(1),
+      length = VENDOR_PREFIXES.length,
+      style = el.style;
+
+    if(typeof style[name] == "string"){
+      supported = true;
+    }else{
+      while(length--){
+        if(typeof style[VENDOR_PREFIXES[length] + capitalized] == "string"){
+          supported = true;
+          break;
         }
-        return testCache[name]; // Boolean
+      }
     }
+    return supported;
+  }
 
-    function add(/* String */name, /* Function */test, /* Boolean? */now){
-        // summary: Register a new feature detection test for some named feature
-        //
-        // name: String
-        //      The name of the feature to test.
-        //
-        // test: Function
-        //      A test function to register. If a function, queued for testing until actually
-        //      needed. The test function should return a boolean indicating
-        //      the presence of a feature or bug.
-        //
-        // now: Boolean?
-        //      Optional. Omit if `test` is not a function. Provides a way to immediately
-        //      run the test and cache the result.
-        // example:
-        //      A redundant test, testFn with immediate execution:
-        //  |       has.add("javascript", function(){ return true; }, true);
-        //
-        // example:
-        //      Again with the redundantness. You can do this in your tests, but we should
-        //      not be doing this in any internal has.js tests
-        //  |       has.add("javascript", true);
-        //
-        // example:
-        //      Three things are passed to the testFunction. `global`, `document`, and a generic element
-        //      from which to work your test should the need arise.
-        //  |       has.add("bug-byid", function(g, d, el){
-        //  |           // g  == global, typically window, yadda yadda
-        //  |           // d  == document object
-        //  |           // el == the generic element. a `has` element.
-        //  |           return false; // fake test, byid-when-form-has-name-matching-an-id is slightly longer
-        //  |       });
-        testCache[name] = now ? test(g, d, el) : test;
+  function clearElement(el){
+    if(el){
+      while(el.lastChild){
+        el.removeChild(el.lastChild);
+      }
     }
+    return el;
+  }
 
-    // cssprop adapted from http://gist.github.com/598008 (thanks, ^pi)
-    function cssprop(name, el){
-        var supported = false,
-            capitalized = name.charAt(0).toUpperCase() + name.slice(1),
-            length = VENDOR_PREFIXES.length,
-            style = el.style;
+  // Host objects can return type values that are different from their actual
+  // data type. The objects we are concerned with usually return non-primitive
+  // types of object, function, or unknown.
+  function isHostType(object, property){
+    var type = typeof object[property];
+    return type == "object" ? !!object[property] : !NON_HOST_TYPES[type];
+  }
 
-        if(typeof style[name] == "string"){
-            supported = true;
-        }else{
-            while(length--){
-                if(typeof style[VENDOR_PREFIXES[length] + capitalized] == "string"){
-                    supported = true;
-                    break;
-                }
-            }
-        }
-        return supported;
-    }
+    has.add = add;
+  has.clearElement = clearElement;
+  has.cssprop = cssprop;
+  has.isHostType = isHostType;
+  has._tests = testCache;
 
-    function clearElement(el){
-        if(el){
-            while(el.lastChild){
-                el.removeChild(el.lastChild);
-            }
-        }
-        return el;
-    }
+  has.add("dom", function(g, d, el){
+    return d && el && isHostType(g, "location") && isHostType(d, "documentElement") &&
+           isHostType(d, "getElementById") && isHostType(d, "getElementsByName") &&
+           isHostType(d, "getElementsByTagName") && isHostType(d, "createComment") &&
+           isHostType(d, "createElement") && isHostType(d, "createTextNode") &&
+           isHostType(el, "appendChild") && isHostType(el, "insertBefore") &&
+           isHostType(el, "removeChild") && isHostType(el, "getAttribute") &&
+           isHostType(el, "setAttribute") && isHostType(el, "removeAttribute") &&
+           isHostType(el, "style") && typeof el.style.cssText == "string";
+  });
 
-    // Host objects can return type values that are different from their actual
-    // data type. The objects we are concerned with usually return non-primitive
-    // types of object, function, or unknown.
-    function isHostType(object, property){
-        var type = typeof object[property];
-        return type == "object" ? !!object[property] : !NON_HOST_TYPES[type];
-    }
+  // Stop repeat background-image requests and reduce memory consumption in IE6 SP1
+  // http://misterpixel.blogspot.com/2006/09/forensic-analysis-of-ie6.html
+  // http://blogs.msdn.com/b/cwilso/archive/2006/11/07/ie-re-downloading-background-images.aspx?PageIndex=1
+  // http://support.microsoft.com/kb/823727
+  try{
+    document.execCommand("BackgroundImageCache", false, true);
+  }catch(e){}
 
-        has.add = add;
-    has.clearElement = clearElement;
-    has.cssprop = cssprop;
-    has.isHostType = isHostType;
-    has._tests = testCache;
-
-    has.add("dom", function(g, d, el){
-        return d && el && isHostType(g, "location") && isHostType(d, "documentElement") &&
-            isHostType(d, "getElementById") && isHostType(d, "getElementsByName") &&
-            isHostType(d, "getElementsByTagName") && isHostType(d, "createComment") &&
-            isHostType(d, "createElement") && isHostType(d, "createTextNode") &&
-            isHostType(el, "appendChild") && isHostType(el, "insertBefore") &&
-            isHostType(el, "removeChild") && isHostType(el, "getAttribute") &&
-            isHostType(el, "setAttribute") && isHostType(el, "removeAttribute") &&
-            isHostType(el, "style") && typeof el.style.cssText == "string";
+  // Expose has()
+  // some AMD build optimizers, like r.js, check for specific condition patterns like the following:
+  if(typeof define == "function" && typeof define.amd == "object" && define.amd){
+    define("has", function(){
+      return has;
     });
-
-    // Stop repeat background-image requests and reduce memory consumption in IE6 SP1
-    // http://misterpixel.blogspot.com/2006/09/forensic-analysis-of-ie6.html
-    // http://blogs.msdn.com/b/cwilso/archive/2006/11/07/ie-re-downloading-background-images.aspx?PageIndex=1
-    // http://support.microsoft.com/kb/823727
-    try{
-        document.execCommand("BackgroundImageCache", false, true);
-    }catch(e){}
-
-    // Expose has()
-    // some AMD build optimizers, like r.js, check for specific condition patterns like the following:
-    if(typeof define == "function" && typeof define.amd == "object" && define.amd){
-        define("has", function(){
-            return has;
-        });
+  }
+  // check for `exports` after `define` in case a build optimizer adds an `exports` object
+  else if(freeExports){
+    // in Node.js or RingoJS v0.8.0+
+    if(freeModule && freeModule.exports == freeExports){
+      (freeModule.exports = has).has = has;
     }
-    // check for `exports` after `define` in case a build optimizer adds an `exports` object
-    else if(freeExports){
-        // in Node.js or RingoJS v0.8.0+
-        if(freeModule && freeModule.exports == freeExports){
-          (freeModule.exports = has).has = has;
-        }
-        // in Narwhal or RingoJS v0.7.0-
-        else{
-          freeExports.has = has;
-        }
-    }
-    // in a browser or Rhino
+    // in Narwhal or RingoJS v0.7.0-
     else{
-        // use square bracket notation so Closure Compiler won't munge `has`
-        // http://code.google.com/closure/compiler/docs/api-tutorial3.html#export
-        g["has"] = has;
+      freeExports.has = has;
     }
+  }
+  // in a browser or Rhino
+  else{
+    // use square bracket notation so Closure Compiler won't munge `has`
+    // http://code.google.com/closure/compiler/docs/api-tutorial3.html#export
+    g["has"] = has;
+  }
 })(this);
-
 /**
  * almond 0.2.6 Copyright (c) 2011-2012, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
@@ -587,7 +586,8 @@ define("almond", function(){});
 define( 'ASSERT/assert',['require'],function( require ) {
   
   
-  var assert = function( name, excludeByDefault ) {
+  // CAUTION: if using the AST modifier for assertions, do not separate this out into its own 'assert' variable
+  return function assert( name, excludeByDefault ) {
     var hasName = 'assert.' + name;
     
     var flagDefined = window.has && window.has( hasName ) !== undefined;
@@ -614,8 +614,44 @@ define( 'ASSERT/assert',['require'],function( require ) {
       };
     }
   };
+} );
+
+// Copyright 2002-2013, University of Colorado Boulder
+
+/**
+ * Object instance allocation tracking, so we can cut down on garbage collection.
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'PHET_CORE/phetAllocation',['require'],function( require ) {
   
-  return assert;
+  
+  return function phetAllocation( name ) {
+    if ( window.alloc ) {
+      var stack;
+      try { throw new Error(); } catch ( e ) { stack = e.stack; }
+      
+      if ( !window.alloc[name] ) {
+        window.alloc[name] = { count: 0, stacks: {} };
+      }
+      var log = window.alloc[name];
+      
+      log.count++;
+      if ( !log.stacks[stack] ) {
+        log.stacks[stack] = 1;
+      } else {
+        log.stacks[stack] += 1;
+      }
+      log.report = function() {
+        var stacks = Object.keys( log.stacks );
+        stacks = _.sortBy( stacks, function( key ) { return log.stacks[key]; } );
+        _.each( stacks, function( stack ) {
+          console.log( log.stacks[stack] + ': ' + stack );
+        } );
+      };
+    }
+  };
 } );
 
 // Copyright 2002-2013, University of Colorado
@@ -630,21 +666,28 @@ define( 'ASSERT/assert',['require'],function( require ) {
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'SCENERY/scenery',['require','ASSERT/assert','ASSERT/assert'],function( require ) {
+define( 'SCENERY/scenery',['require','ASSERT/assert','ASSERT/assert','PHET_CORE/phetAllocation'],function( require ) {
   
   
-  window.sceneryAssert = require( 'ASSERT/assert' )( 'scenery' );
+  var assert = require( 'ASSERT/assert' )( 'scenery' );
+  
+  window.sceneryAssert = assert;
   window.sceneryAssertExtra = require( 'ASSERT/assert' )( 'scenery.extra' );
   
   window.sceneryLayerLog = null;
   window.sceneryEventLog = null;
   window.sceneryAccessibilityLog = null;
   
+  // object allocation tracking
+  window.phetAllocation = require( 'PHET_CORE/phetAllocation' );
+  
   var scratchCanvas = document.createElement( 'canvas' );
   var scratchContext = scratchCanvas.getContext( '2d' );
   
   // will be filled in by other modules
   return {
+    assert: assert,
+    
     scratchCanvas: scratchCanvas,   // a canvas used for convenience functions (think of it as having arbitrary state)
     scratchContext: scratchContext, // a context used for convenience functions (think of it as having arbitrary state)
     
@@ -1205,8 +1248,13 @@ define( 'SCENERY/debug/DebugContext',['require','SCENERY/scenery'],function( req
 
 // Copyright 2002-2013, University of Colorado Boulder
 
-define( 'DOT/dot',['require'],function( require ) {
+define( 'DOT/dot',['require','ASSERT/assert','PHET_CORE/phetAllocation'],function( require ) {
   
+  
+  var assert = require( 'ASSERT/assert' )( 'dot' );
+  
+  // object allocation tracking
+  window.phetAllocation = require( 'PHET_CORE/phetAllocation' );
   
   var dot = function dot() {
     switch ( arguments.length ) {
@@ -1223,6 +1271,8 @@ define( 'DOT/dot',['require'],function( require ) {
   
   // TODO: performance: check browser speed to compare how fast this is. We may need to add a 32 option for GL ES.
   dot.FastArray = window.Float64Array ? window.Float64Array : window.Array;
+  
+  dot.assert = assert;
   
   // will be filled in by other modules
   return dot;
@@ -1305,6 +1355,87 @@ define( 'PHET_CORE/inherit',['require','PHET_CORE/extend'],function( require ) {
   }
 
   return inherit;
+} );
+
+// Copyright 2002-2013, University of Colorado
+
+/**
+ * Experimental object pooling mix-in
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'PHET_CORE/Poolable',['require','PHET_CORE/extend'],function( require ) {
+  
+  
+  var extend = require( 'PHET_CORE/extend' );
+  
+  /*
+   * For option details, please see documentation inside this constructor body for now
+   */
+  return function Poolable( type, options ) {
+    var proto = type.prototype;
+    
+    // defaults
+    options = extend( {
+      maxPoolSize: 50, // since we don't want to blow too much memory
+      initialSize: 0
+    }, options );
+    
+    var pool = type.pool = [];
+    
+    /*
+     * For example: defaultFactory: function() { return new Vector2(); }
+     */
+    if ( options.defaultFactory ) {
+      type.dirtyFromPool = function() {
+        if ( pool.length ) {
+          // return an instance in an arbitrary (dirty) state
+          return pool.pop();
+        } else {
+          // else return a new default instance
+          return options.defaultFactory();
+        }
+      };
+      
+      // fills the object pool up to n instances
+      type.fillPool = function( n ) {
+        // fill up the object pool to the initial size
+        while ( pool.length < n ) {
+          pool.push( options.defaultFactory() );
+        }
+      };
+      
+      // fill the pool initially to the initial size
+      type.fillPool( options.initialSize );
+    }
+    
+    /*
+     * For example: constructorDuplicateFactory:
+     *                function( pool ) {
+     *                  return function( x, y ) {
+     *                    if ( pool.length ) {
+     *                      return pool.pop().set( x, y );
+     *                    } else {
+     *                      return new Vector2( x, y );
+     *                    }
+     *                  }
+     *                }
+     * It allows arbitrary creation (from the constructor / etc) or mutation (from the pooled instance).
+     */
+    if ( options.constructorDuplicateFactory ) {
+      type.createFromPool = options.constructorDuplicateFactory( pool );
+    }
+    
+    /*
+     * Frees the object to the pool (instance.freeToPool())
+     */
+    proto.freeToPool = function() {
+      if ( pool.length < options.maxPoolSize ) {
+        pool.push( this );
+      }
+    };
+  };
 } );
 
 // Copyright 2002-2013, University of Colorado Boulder
@@ -1396,6 +1527,13 @@ define( 'DOT/Util',['require','ASSERT/assert','DOT/dot'],function( require ) {
     
     // return an array of real roots of ax^2 + bx + c = 0
     solveQuadraticRootsReal: function( a, b, c ) {
+      var epsilon = 1E7;
+      
+      //We need to test whether a is several orders of magnitude less than b or c. If so, return the result as a solution to the linear (easy) equation
+      if ( a === 0 || Math.abs( b / a ) > epsilon || Math.abs( c / a ) > epsilon ) {
+        return [ -c / b ];
+      }
+      
       var discriminant = b * b - 4 * a * c;
       if ( discriminant < 0 ) {
         return [];
@@ -1510,7 +1648,7 @@ define( 'DOT/Util',['require','ASSERT/assert','DOT/dot'],function( require ) {
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'DOT/Vector2',['require','ASSERT/assert','DOT/dot','PHET_CORE/inherit','DOT/Util'],function( require ) {
+define( 'DOT/Vector2',['require','ASSERT/assert','DOT/dot','PHET_CORE/inherit','PHET_CORE/Poolable','DOT/Util'],function( require ) {
   
   
   var assert = require( 'ASSERT/assert' )( 'dot' );
@@ -1518,6 +1656,7 @@ define( 'DOT/Vector2',['require','ASSERT/assert','DOT/dot','PHET_CORE/inherit','
   var dot = require( 'DOT/dot' );
   
   var inherit = require( 'PHET_CORE/inherit' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   require( 'DOT/Util' );
   // require( 'DOT/Vector3' ); // commented out since Require.js complains about the circular dependency
   
@@ -1528,6 +1667,8 @@ define( 'DOT/Vector2',['require','ASSERT/assert','DOT/dot','PHET_CORE/inherit','
     
     assert && assert( typeof this.x === 'number', 'x needs to be a number' );
     assert && assert( typeof this.y === 'number', 'y needs to be a number' );
+    
+    phetAllocation && phetAllocation( 'Vector2' );
   };
   var Vector2 = dot.Vector2;
   
@@ -1547,17 +1688,26 @@ define( 'DOT/Vector2',['require','ASSERT/assert','DOT/dot','PHET_CORE/inherit','
     },
     
     magnitudeSquared: function() {
-      return this.dot( this );
+      return this.x * this.x + this.y * this.y;
     },
     
     // the distance between this vector (treated as a point) and another point
     distance: function( point ) {
-      return this.minus( point ).magnitude();
+      return Math.sqrt( this.distanceSquared( point ) );
+    },
+
+    // the distance between this vector (treated as a point) and another point specified as x:Number, y:Number
+    distanceXY: function( x, y ) {
+      var dx = this.x - x;
+      var dy = this.y - y;
+      return Math.sqrt( dx * dx + dy * dy );
     },
     
     // the squared distance between this vector (treated as a point) and another point
     distanceSquared: function( point ) {
-      return this.minus( point ).magnitudeSquared();
+      var dx = this.x - point.x;
+      var dy = this.y - point.y;
+      return dx * dx + dy * dy;
     },
     
     dot: function( v ) {
@@ -1584,7 +1734,7 @@ define( 'DOT/Vector2',['require','ASSERT/assert','DOT/dot','PHET_CORE/inherit','
      *----------------------------------------------------------------------------*/
     
     copy: function() {
-      return new this.constructor( this.x, this.y );
+      return new Vector2( this.x, this.y );
     },
     
     // z component of the equivalent 3-dimensional cross product (this.x, this.y,0) x (v.x, v.y, 0)
@@ -1598,12 +1748,12 @@ define( 'DOT/Vector2',['require','ASSERT/assert','DOT/dot','PHET_CORE/inherit','
         throw new Error( "Cannot normalize a zero-magnitude vector" );
       }
       else {
-        return new this.constructor( this.x / mag, this.y / mag );
+        return new Vector2( this.x / mag, this.y / mag );
       }
     },
     
     timesScalar: function( scalar ) {
-      return new this.constructor( this.x * scalar, this.y * scalar );
+      return new Vector2( this.x * scalar, this.y * scalar );
     },
     
     times: function( scalar ) {
@@ -1613,31 +1763,31 @@ define( 'DOT/Vector2',['require','ASSERT/assert','DOT/dot','PHET_CORE/inherit','
     },
     
     componentTimes: function( v ) {
-      return new this.constructor( this.x * v.x, this.y * v.y );
+      return new Vector2( this.x * v.x, this.y * v.y );
     },
     
     plus: function( v ) {
-      return new this.constructor( this.x + v.x, this.y + v.y );
+      return new Vector2( this.x + v.x, this.y + v.y );
     },
     
     plusScalar: function( scalar ) {
-      return new this.constructor( this.x + scalar, this.y + scalar );
+      return new Vector2( this.x + scalar, this.y + scalar );
     },
     
     minus: function( v ) {
-      return new this.constructor( this.x - v.x, this.y - v.y );
+      return new Vector2( this.x - v.x, this.y - v.y );
     },
     
     minusScalar: function( scalar ) {
-      return new this.constructor( this.x - scalar, this.y - scalar );
+      return new Vector2( this.x - scalar, this.y - scalar );
     },
     
     dividedScalar: function( scalar ) {
-      return new this.constructor( this.x / scalar, this.y / scalar );
+      return new Vector2( this.x / scalar, this.y / scalar );
     },
     
     negated: function() {
-      return new this.constructor( -this.x, -this.y );
+      return new Vector2( -this.x, -this.y );
     },
     
     angle: function() {
@@ -1646,21 +1796,24 @@ define( 'DOT/Vector2',['require','ASSERT/assert','DOT/dot','PHET_CORE/inherit','
     
     // equivalent to a -PI/2 rotation (right hand rotation)
     perpendicular: function() {
-      return new this.constructor( this.y, -this.x );
+      return new Vector2( this.y, -this.x );
     },
     
     angleBetween: function( v ) {
-      return Math.acos( dot.clamp( this.normalized().dot( v.normalized() ), -1, 1 ) );
+      var thisMagnitude = this.magnitude();
+      var vMagnitude = v.magnitude();
+      return Math.acos( dot.clamp( ( this.x * v.x + this.y * v.y ) / ( thisMagnitude * vMagnitude ), -1, 1 ) );
     },
     
     rotated: function( angle ) {
       var newAngle = this.angle() + angle;
-      return new this.constructor( Math.cos( newAngle ), Math.sin( newAngle ) ).timesScalar( this.magnitude() );
+      var mag = this.magnitude();
+      return new Vector2( mag * Math.cos( newAngle ), mag * Math.sin( newAngle ) );
     },
     
     // linear interpolation from this (ratio=0) to vector (ratio=1)
     blend: function( vector, ratio ) {
-      return this.plus( vector.minus( this ).times( ratio ) );
+      return new Vector2( this.x + (vector.x - this.x) * ratio, this.y + (vector.y - this.y) * ratio );
     },
     
     toString: function() {
@@ -1735,6 +1888,21 @@ define( 'DOT/Vector2',['require','ASSERT/assert','DOT/dot','PHET_CORE/inherit','
     
   };
   
+  // experimental object pooling
+  /* jshint -W064 */
+  Poolable( Vector2, {
+    defaultFactory: function() { return new Vector2(); },
+    constructorDuplicateFactory: function( pool ) {
+      return function( x, y ) {
+        if ( pool.length ) {
+          return pool.pop().set( x, y );
+        } else {
+          return new Vector2( x, y );
+        }
+      };
+    }
+  } );
+  
   /*---------------------------------------------------------------------------*
    * Immutable Vector form
    *----------------------------------------------------------------------------*/
@@ -1756,7 +1924,6 @@ define( 'DOT/Vector2',['require','ASSERT/assert','DOT/dot','PHET_CORE/inherit','
   Immutable.mutableOverrideHelper( 'set' );
   Immutable.mutableOverrideHelper( 'setX' );
   Immutable.mutableOverrideHelper( 'setY' );
-  Immutable.mutableOverrideHelper( 'copy' );
   Immutable.mutableOverrideHelper( 'add' );
   Immutable.mutableOverrideHelper( 'addScalar' );
   Immutable.mutableOverrideHelper( 'subtract' );
@@ -2698,6 +2865,8 @@ define( 'DOT/Matrix3',['require','DOT/dot','DOT/Vector2','DOT/Vector3','DOT/Matr
                    v10 || 0, v11 === undefined ? 1 : v11, v12 || 0,
                    v20 || 0, v21 || 0, v22 === undefined ? 1 : v22,
                    type );
+    
+    phetAllocation && phetAllocation( 'Matrix3' );
   };
   var Matrix3 = dot.Matrix3;
 
@@ -3440,7 +3609,7 @@ define( 'DOT/Matrix3',['require','DOT/dot','DOT/Vector2','DOT/Vector3','DOT/Matr
       }
     }
   };
-
+  
   // create an immutable
   Matrix3.IDENTITY = new Matrix3( 1, 0, 0,
                                   0, 1, 0,
@@ -3459,6 +3628,25 @@ define( 'DOT/Matrix3',['require','DOT/dot','DOT/Vector2','DOT/Vector3','DOT/Matr
                                       0,  0, 1,
                                       Types.AFFINE );
   Matrix3.Y_REFLECTION.makeImmutable();
+  
+  //Shortcut for translation times a matrix (without allocating a translation matrix), see scenery#119
+  Matrix3.translationTimesMatrix = function( x, y, m ) {
+    var type;
+    if ( m.type === Types.IDENTITY || m.type === Types.TRANSLATION_2D ) {
+      return new Matrix3( 1, 0, m.m02() + x,
+                          0, 1, m.m12() + y,
+                          0, 0, 1,
+                          Types.TRANSLATION_2D );
+    } else if ( m.type === Types.OTHER ) {
+      type = Types.OTHER;
+    } else {
+      type = Types.AFFINE;
+    }
+    return new Matrix3( m.m00(), m.m01(), m.m02() + x,
+                        m.m10(), m.m11(), m.m12() + y,
+                        m.m20(), m.m21(), m.m22(),
+                        type );
+  };
   
   Matrix3.printer = {
     print: function( matrix ) {
@@ -3489,6 +3677,8 @@ define( 'DOT/Ray2',['require','ASSERT/assert','DOT/dot'],function( require ) {
     this.dir = dir;
     
     assert && assert( Math.abs( dir.magnitude() - 1 ) < 0.01 );
+    
+    phetAllocation && phetAllocation( 'Ray2' );
   };
   var Ray2 = dot.Ray2;
 
@@ -3536,6 +3726,8 @@ define( 'DOT/Transform3',['require','ASSERT/assert','DOT/dot','DOT/Matrix3','DOT
     
     // using immutable version for now. change it to the mutable identity copy if we need mutable operations on the matrices
     this.set( matrix === undefined ? dot.Matrix3.IDENTITY : matrix );
+    
+    phetAllocation && phetAllocation( 'Transform3' );
   };
   var Transform3 = dot.Transform3;
 
@@ -3574,6 +3766,11 @@ define( 'DOT/Transform3',['require','ASSERT/assert','DOT/dot','DOT/Matrix3','DOT
     
     prepend: function( matrix ) {
       this.set( matrix.timesMatrix( this.matrix ) );
+    },
+
+    //Simpler case of prepending a translation without having to allocate a matrix for it, see scenery#119
+    prependTranslation: function( x, y ) {
+      this.set( dot.Matrix3.translationTimesMatrix( x, y, this.matrix ) );
     },
 
     append: function( matrix ) {
@@ -3656,21 +3853,41 @@ define( 'DOT/Transform3',['require','ASSERT/assert','DOT/dot','DOT/Matrix3','DOT
 
     // transform a vector (exclude translation)
     transformDelta2: function( vec2 ) {
-      // transform actually has the translation rolled into the other coefficients, so we have to make this longer
-      return this.transformPosition2( vec2 ).minus( this.transformPosition2( dot.Vector2.ZERO ) );
+      var m = this.getMatrix();
+      // m . vec2 - m . Vector2.ZERO
+      return new dot.Vector2( m.m00() * vec2.x + m.m01() * vec2.y, m.m10() * vec2.x + m.m11() * vec2.y );
     },
 
     // transform a normal vector (different than a normal vector)
     transformNormal2: function( vec2 ) {
       return this.getInverse().timesTransposeVector2( vec2 );
     },
-
-    transformDeltaX: function( x ) {
-      return this.transformDelta2( new dot.Vector2( x, 0 ) ).x;
+    
+    transformX: function( x ) {
+      var m = this.getMatrix();
+      // TODO: ensure assertions are stripped out
+      assert && assert( !m.m01(), 'Transforming an X value with a rotation/shear is ill-defined' );
+      return m.m00() * x + m.m02();
     },
-
+    
+    transformY: function( y ) {
+      var m = this.getMatrix();
+      assert && assert( !m.m10(), 'Transforming a Y value with a rotation/shear is ill-defined' );
+      return m.m11() * y + m.m12();
+    },
+    
+    transformDeltaX: function( x ) {
+      var m = this.getMatrix();
+      assert && assert( !m.m01(), 'Transforming an X value with a rotation/shear is ill-defined' );
+      // same as this.transformDelta2( new dot.Vector2( x, 0 ) ).x;
+      return m.m00() * x;
+    },
+    
     transformDeltaY: function( y ) {
-      return this.transformDelta2( new dot.Vector2( 0, y ) ).y;
+      var m = this.getMatrix();
+      assert && assert( !m.m10(), 'Transforming a Y value with a rotation/shear is ill-defined' );
+      // same as this.transformDelta2( new dot.Vector2( 0, y ) ).y;
+      return m.m11() * y;
     },
     
     transformBounds2: function( bounds2 ) {
@@ -3694,20 +3911,39 @@ define( 'DOT/Transform3',['require','ASSERT/assert','DOT/dot','DOT/Matrix3','DOT
     },
 
     inverseDelta2: function( vec2 ) {
-      // inverse actually has the translation rolled into the other coefficients, so we have to make this longer
-      return this.inversePosition2( vec2 ).minus( this.inversePosition2( dot.Vector2.ZERO ) );
+      var m = this.getInverse();
+      // m . vec2 - m . Vector2.ZERO
+      return new dot.Vector2( m.m00() * vec2.x + m.m01() * vec2.y, m.m10() * vec2.x + m.m11() * vec2.y );
     },
 
     inverseNormal2: function( vec2 ) {
       return this.matrix.timesTransposeVector2( vec2 );
     },
-
+    
+    inverseX: function( x ) {
+      var m = this.getInverse();
+      assert && assert( !m.m01(), 'Inverting an X value with a rotation/shear is ill-defined' );
+      return m.m00() * x + m.m02();
+    },
+    
+    inverseY: function( y ) {
+      var m = this.getInverse();
+      assert && assert( !m.m10(), 'Inverting a Y value with a rotation/shear is ill-defined' );
+      return m.m11() * y + m.m12();
+    },
+    
     inverseDeltaX: function( x ) {
-      return this.inverseDelta2( new dot.Vector2( x, 0 ) ).x;
+      var m = this.getInverse();
+      assert && assert( !m.m01(), 'Inverting an X value with a rotation/shear is ill-defined' );
+      // same as this.inverseDelta2( new dot.Vector2( x, 0 ) ).x;
+      return m.m00() * x;
     },
 
     inverseDeltaY: function( y ) {
-      return this.inverseDelta2( new dot.Vector2( 0, y ) ).y;
+      var m = this.getInverse();
+      assert && assert( !m.m10(), 'Inverting a Y value with a rotation/shear is ill-defined' );
+      // same as this.inverseDelta2( new dot.Vector2( 0, y ) ).y;
+      return m.m11() * y;
     },
     
     inverseBounds2: function( bounds2 ) {
@@ -3771,6 +4007,8 @@ define( 'DOT/Bounds2',['require','ASSERT/assert','DOT/dot','DOT/Vector2'],functi
     this.minY = minY;
     this.maxX = maxX;
     this.maxY = maxY;
+    
+    phetAllocation && phetAllocation( 'Bounds2' );
   };
   var Bounds2 = dot.Bounds2;
 
@@ -4101,11 +4339,20 @@ define( 'DOT/Bounds2',['require','ASSERT/assert','DOT/dot','DOT/Vector2'],functi
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'KITE/kite',['require'],function( require ) {
+define( 'KITE/kite',['require','ASSERT/assert','PHET_CORE/phetAllocation'],function( require ) {
   
+  
+  var assert = require( 'ASSERT/assert' )( 'kite' );
+  
+  // object allocation tracking
+  window.phetAllocation = require( 'PHET_CORE/phetAllocation' );
+  
+  var kite = {};
+  
+  kite.assert = assert;
   
   // will be filled in by other modules
-  return {};
+  return kite;
 } );
 
 // Copyright 2002-2013, University of Colorado Boulder
@@ -4771,9 +5018,10 @@ define( 'KITE/util/Subpath',['require','ASSERT/assert','DOT/Vector2','DOT/Bounds
         var startPoint = this.getFirstSegment().start;
         context.moveTo( startPoint.x, startPoint.y ); // the segments assume the current context position is at their start
         
-        _.each( this.segments, function( segment ) {
-          segment.writeToContext( context );
-        } );
+        var len = this.segments.length;
+        for ( var i = 0; i < len; i++ ) {
+          this.segments[i].writeToContext( context );
+        }
         
         if ( this.closed ) {
           context.closePath();
@@ -4790,16 +5038,19 @@ define( 'KITE/util/Subpath',['require','ASSERT/assert','DOT/Vector2','DOT/Bounds
     },
     
     computeBounds: function() {
-      return _.reduce( this.segments, function( bounds, segment ) {
-        return bounds.union( segment.bounds );
-      }, Bounds2.NOTHING );
+      var bounds = Bounds2.NOTHING.copy();
+      var len = this.segments.length;
+      for ( var i = 0; i < len; i++ ) {
+        bounds.includeBounds( this.segments[i].bounds );
+      }
+      return bounds;
     },
     
     // returns an array of subpaths (one if open, two if closed) that represent a stroked copy of this subpath.
     stroked: function( lineStyles ) {
       // non-drawable subpaths convert to empty subpaths
       if ( !this.isDrawable() ) {
-        return new Subpath();
+        return [];
       }
       
       if ( lineStyles === undefined ) {
@@ -4887,10 +5138,10 @@ define( 'KITE/util/Subpath',['require','ASSERT/assert','DOT/Vector2','DOT/Bounds
       var lastSegment = this.getLastSegment();
       
       function addLeftSegments( segments ) {
-        _.each( segments, function( segment ) { leftSegments.push( segment ); } );
+        leftSegments = leftSegments.concat( segments );
       }
       function addRightSegments( segments ) {
-        _.each( segments, function( segment ) { rightSegments.push( segment ); } );
+        rightSegments = rightSegments.concat( segments );
       }
       
       // we don't need to insert an implicit closing segment if the start and end points are the same
@@ -8527,14 +8778,15 @@ define( 'KITE/Shape',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT
     
     var that = this;
     if ( subpaths && typeof subpaths !== 'object' ) {
-      assert && assert( typeof subpaths === 'string', 'if subpaths is not an object, it must be a string' )
-      ;
+      assert && assert( typeof subpaths === 'string', 'if subpaths is not an object, it must be a string' );
       // parse the SVG path
       _.each( svgPath.parse( subpaths ), function( item ) {
         assert && assert( Shape.prototype[item.cmd] !== undefined, 'method ' + item.cmd + ' from parsed SVG does not exist' );
         that[item.cmd].apply( that, item.args );
       } );
     }
+    
+    phetAllocation && phetAllocation( 'Shape' );
   };
   var Shape = kite.Shape;
   
@@ -8805,15 +9057,18 @@ define( 'KITE/Shape',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT
     
     // write out this shape's path to a canvas 2d context. does NOT include the beginPath()!
     writeToContext: function( context ) {
-      _.each( this.subpaths, function( subpath ) {
-        subpath.writeToContext( context );
-      } );
+      var len = this.subpaths.length;
+      for ( var i = 0; i < len; i++ ) {
+        this.subpaths[i].writeToContext( context );
+      }
     },
     
     // returns something like "M150 0 L75 200 L225 200 Z" for a triangle
     getSVGPath: function() {
       var subpathStrings = [];
-      _.each( this.subpaths, function( subpath ) {
+      var len = this.subpaths.length;
+      for ( var i = 0; i < len; i++ ) {
+        var subpath = this.subpaths[i];
         if( subpath.isDrawable() ) {
           // since the commands after this are relative to the previous 'point', we need to specify a move to the initial point
           var startPoint = subpath.getFirstSegment().start;
@@ -8827,7 +9082,7 @@ define( 'KITE/Shape',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT
           }
           subpathStrings.push( string );
         }
-      } );
+      }
       return subpathStrings.join( ' ' );
     },
     
@@ -8850,73 +9105,94 @@ define( 'KITE/Shape',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT
     
     containsPoint: function( point ) {
       // we pick a ray, and determine the winding number over that ray. if the number of segments crossing it CCW == number of segments crossing it CW, then the point is contained in the shape
-      var ray = new Ray2( point, p( 1, 0 ) );
+      var ray = new Ray2( point, Vector2.X_UNIT );
       
       return this.windingIntersection( ray ) !== 0;
     },
     
     intersection: function( ray ) {
       var hits = [];
-      _.each( this.subpaths, function( subpath ) {
+      var numSubpaths = this.subpaths.length;
+      for ( var i = 0; i < numSubpaths; i++ ) {
+        var subpath = this.subpaths[i];
+        
         if ( subpath.isDrawable() ) {
-          _.each( subpath.segments, function( segment ) {
-            _.each( segment.intersection( ray ), function( hit ) {
-              hits.push( hit );
-            } );
-          } );
+          var numSegments = subpath.segments.length;
+          for ( var k = 0; k < numSegments; k++ ) {
+            var segment = subpath.segments[k];
+            hits = hits.concat( segment.intersection( ray ) );
+          }
           
           if ( subpath.hasClosingSegment() ) {
-            _.each( subpath.getClosingSegment().intersection( ray ), function( hit ) {
-              hits.push( hit );
-            } );
+            hits = hits.concat( subpath.getClosingSegment().intersection( ray ) );
           }
         }
-      } );
+      }
       return _.sortBy( hits, function( hit ) { return hit.distance; } );
     },
     
     windingIntersection: function( ray ) {
       var wind = 0;
       
-      _.each( this.subpaths, function( subpath ) {
+      var numSubpaths = this.subpaths.length;
+      for ( var i = 0; i < numSubpaths; i++ ) {
+        var subpath = this.subpaths[i];
+        
         if ( subpath.isDrawable() ) {
-          _.each( subpath.segments, function( segment ) {
-            wind += segment.windingIntersection( ray );
-          } );
+          var numSegments = subpath.segments.length;
+          for ( var k = 0; k < numSegments; k++ ) {
+            wind += subpath.segments[k].windingIntersection( ray );
+          }
           
           // handle the implicit closing line segment
           if ( subpath.hasClosingSegment() ) {
             wind += subpath.getClosingSegment().windingIntersection( ray );
           }
         }
-      } );
+      }
       
       return wind;
     },
     
     intersectsBounds: function( bounds ) {
-      var intersects = false;
-      // TODO: break-out-early optimizations
-      _.each( this.subpaths, function( subpath ) {
+      var numSubpaths = this.subpaths.length;
+      for ( var i = 0; i < numSubpaths; i++ ) {
+        var subpath = this.subpaths[i];
+        
         if ( subpath.isDrawable() ) {
-          _.each( subpath.segments, function( segment ) {
-            intersects = intersects && segment.intersectsBounds( bounds );
-          } );
+          var numSegments = subpath.segments.length;
+          for ( var k = 0; k < numSegments; k++ ) {
+            if ( subpath.segments[k].intersectsBounds( bounds ) ) {
+              return true;
+            }
+          }
           
           // handle the implicit closing line segment
           if ( subpath.hasClosingSegment() ) {
-            intersects = intersects && subpath.getClosingSegment().intersectsBounds( bounds );
+            if ( subpath.getClosingSegment().intersectsBounds( bounds ) ) {
+              return true;
+            }
           }
         }
-      } );
-      return intersects;
+      }
+      return false;
     },
     
     // returns a new Shape that is an outline of the stroked path of this current Shape. currently not intended to be nested (doesn't do intersection computations yet)
     // TODO: rename stroked( lineStyles )
     getStrokedShape: function( lineStyles ) {
-      var subpaths = _.flatten( _.map( this.subpaths, function( subpath ) { return subpath.stroked( lineStyles ); } ) );
-      var bounds = _.reduce( subpaths, function( bounds, subpath ) { return bounds.union( subpath.computeBounds() ); }, Bounds2.NOTHING );
+      var subpaths = [];
+      var bounds = Bounds2.NOTHING.copy();
+      var subLen = this.subpaths.length;
+      for ( var i = 0; i < subLen; i++ ) {
+        var subpath = this.subpaths[i];
+        var strokedSubpath = subpath.stroked( lineStyles );
+        subpaths = subpaths.concat( strokedSubpath );
+      }
+      subLen = subpaths.length;
+      for ( i = 0; i < subLen; i++ ) {
+        bounds.includeBounds( subpaths[i].computeBounds() );
+      }
       return new Shape( subpaths, bounds );
     },
     
@@ -9092,9 +9368,10 @@ define( 'SCENERY/util/FixedNodeEvents',['require','SCENERY/scenery'],function( r
       var node = this;
       
       // TODO: performance: consider delaying this? Could affect memory usage?
-      _.each( eventNames, function( name ) {
-        node._events[name] = [];
-      } );
+      var len = eventNames.length;
+      for ( var i = 0; i < len; i++ ) {
+        node._events[eventNames[i]] = [];
+      }
     };
     
     /**
@@ -9440,6 +9717,8 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     if ( options ) {
       this.mutate( options );
     }
+    
+    phetAllocation && phetAllocation( 'Node' );
   };
   var Node = scenery.Node;
   
@@ -9512,15 +9791,16 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     
     // TODO: efficiency by batching calls?
     setChildren: function( children ) {
-      var node = this;
       if ( this._children !== children ) {
-        // TODO: maybe iterating in reverse is more efficient?
-        _.each( this._children.slice( 0 ), function( child ) {
-          node.removeChild( child );
-        } );
-        _.each( children, function( child ) {
-          node.addChild( child );
-        } );
+        // remove all children in a way where we don't have to copy the child array for safety
+        while ( this._children.length ) {
+          this.removeChild( this._children[this._children.length-1] );
+        }
+        
+        var len = children.length;
+        for ( var i = 0; i < len; i++ ) {
+          this.addChild( children[i] );
+        }
       }
     },
     
@@ -9601,6 +9881,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     // ensure that cached bounds stored on this node (and all children) are accurate
     validateBounds: function() {
       var that = this;
+      var i;
       
       if ( this._selfBoundsDirty ) {
         // note: this should only be triggered if the bounds were actually changed, since we have a guard in place at invalidateSelf()
@@ -9612,19 +9893,22 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
       
       // validate bounds of children if necessary
       if ( this._childBoundsDirty ) {
+        
         // have each child validate their own bounds
-        _.each( this._children, function( child ) {
-          child.validateBounds();
-        } );
+        i = this._children.length;
+        while ( i-- ) {
+          this._children[i].validateBounds();
+        }
         
         var oldChildBounds = this._childBounds;
         
         // and recompute our _childBounds
         this._childBounds = Bounds2.NOTHING.copy();
         
-        _.each( this._children, function( child ) {
-          that._childBounds.includeBounds( child._bounds );
-        } );
+        i = this._children.length;
+        while ( i-- ) {
+          this._childBounds.includeBounds( this._children[i]._bounds );
+        }
         
         // run this before firing the event
         this._childBoundsDirty = false;
@@ -9643,15 +9927,17 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
         
         var oldBounds = this._bounds;
         
-        var newBounds = this.localToParentBounds( this._selfBounds ).union( that.localToParentBounds( this._childBounds ) );
+        // converts local to parent bounds. mutable methods used to minimize number of created bounds instances (we create one so we don't change references to the old one)
+        var newBounds = this.transformBoundsFromLocalToParent( this._selfBounds.copy().includeBounds( this._childBounds ) );
         var changed = !newBounds.equals( oldBounds );
         
         if ( changed ) {
           this._bounds = newBounds;
           
-          _.each( this._parents, function( parent ) {
-            parent.invalidateBounds();
-          } );
+          i = this._parents.length;
+          while ( i-- ) {
+            this._parents[i].invalidateBounds();
+          }
           
           // TODO: consider changing to parameter object (that may be a problem for the GC overhead)
           this.fireEvent( 'bounds', this._bounds );
@@ -9694,13 +9980,15 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
         this._mouseBounds = this._selfBounds.copy(); // start with the self bounds, then add from there
         
         // union of all children's mouse bounds (if they exist)
-        _.each( this._children, function( child ) {
+        var i = this._children.length;
+        while ( i-- ) {
+          var child = this._children[i];
           child.validateMouseBounds();
           if ( child._mouseBounds ) {
             hasMouseAreas = true;
             that._mouseBounds.includeBounds( child._mouseBounds );
           }
-        } );
+        }
         
         // do this before the transformation to the parent coordinate frame
         if ( this._mouseArea ) {
@@ -9709,8 +9997,8 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
         }
         
         if ( hasMouseAreas ) {
-          // transform it to the parent coordinate frame
-          this._mouseBounds = that.localToParentBounds( this._mouseBounds );
+          // transform it to the parent coordinate frame\
+          this.transformBoundsFromLocalToParent( this._mouseBounds );
           
           // and include the normal bounds, so that we don't have to 
           this._mouseBounds.includeBounds( this._bounds );
@@ -9733,13 +10021,15 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
         this._touchBounds = this._selfBounds.copy(); // start with the self bounds, then add from there
         
         // union of all children's touch bounds (if they exist)
-        _.each( this._children, function( child ) {
+        var i = this._children.length;
+        while ( i-- ) {
+          var child = this._children[i];
           child.validateTouchBounds();
           if ( child._touchBounds ) {
             hasTouchAreas = true;
             that._touchBounds.includeBounds( child._touchBounds );
           }
-        } );
+        }
         
         // do this before the transformation to the parent coordinate frame
         if ( this._touchArea ) {
@@ -9749,7 +10039,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
         
         if ( hasTouchAreas ) {
           // transform it to the parent coordinate frame
-          this._touchBounds = that.localToParentBounds( this._touchBounds );
+          this.transformBoundsFromLocalToParent( this._touchBounds );
           
           // and include the normal bounds, so that we don't have to 
           this._touchBounds.includeBounds( this._bounds );
@@ -9795,9 +10085,10 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
       this._touchBoundsDirty = true;
       
       // and set flags for all ancestors
-      _.each( this._parents, function( parent ) {
-        parent.invalidateChildBounds();
-      } );
+      var i = this._parents.length;
+      while ( i-- ) {
+        this._parents[i].invalidateChildBounds();
+      }
     },
     
     // recursively tag all ancestors with _childBoundsDirty
@@ -9807,9 +10098,10 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
         this._childBoundsDirty = true;
         this._mouseBoundsDirty = true;
         this._touchBoundsDirty = true;
-        _.each( this._parents, function( parent ) {
-          parent.invalidateChildBounds();
-        } );
+        var i = this._parents.length;
+        while ( i-- ) {
+          this._parents[i].invalidateChildBounds();
+        }
       }
     },
     
@@ -9819,18 +10111,20 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
       this._paintDirty = true;
       
       // and set flags for all ancestors
-      _.each( this._parents, function( parent ) {
-        parent.invalidateChildPaint();
-      } );
+      var i = this._parents.length;
+      while ( i-- ) {
+        this._parents[i].invalidateChildPaint();
+      }
     },
     
     invalidateSubtreePaint: function() {
       this._subtreePaintDirty = true;
       
       // and set flags for all ancestors
-      _.each( this._parents, function( parent ) {
-        parent.invalidateChildPaint();
-      } );
+      var i = this._parents.length;
+      while ( i-- ) {
+        this._parents[i].invalidateChildPaint();
+      }
     },
     
     // recursively tag all ancestors with _childPaintDirty
@@ -9838,9 +10132,10 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
       // don't bother updating if we've already been tagged
       if ( !this._childPaintDirty ) {
         this._childPaintDirty = true;
-        _.each( this._parents, function( parent ) {
-          parent.invalidateChildPaint();
-        } );
+        var i = this._parents.length;
+        while ( i-- ) {
+          this._parents[i].invalidateChildPaint();
+        }
       }
     },
     
@@ -9912,11 +10207,13 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
       // defensive copy, since we use mutable modifications below
       var bounds = this._selfBounds.copy();
       
-      _.each( this.children, function( child ) {
+      var i = this._children.length;
+      while ( i-- ) {
+        var child = this._children[i];
         if ( child.isVisible() ) {
           bounds.includeBounds( child.getVisibleBounds() );
         }
-      } );
+      }
       
       sceneryAssert && sceneryAssert( bounds.isFinite() || bounds.isEmpty(), 'Visible bounds should not be infinite' );
       return this.localToParentBounds( bounds );
@@ -9937,8 +10234,10 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
      *
      * If options.pruneInvisible is false, invisible nodes will be allowed in the trail.
      * If options.pruneUnpickable is false, unpickable nodes will be allowed in the trail.
+     *
+     * When calling, don't pass the recursive flag. It signals that the point passed can be mutated
      */
-    trailUnderPoint: function( point, options ) {
+    trailUnderPoint: function( point, options, recursive ) {
       sceneryAssert && sceneryAssert( point, 'trailUnderPointer requires a point' );
       
       if ( options === undefined ) { options = {}; }
@@ -9970,8 +10269,12 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
         return null; // not in our bounds, so this point can't possibly be contained
       }
       
+      // temporary result variable, since it's easier to do this way to free the computed point
+      var result = null;
+      
       // point in the local coordinate frame. computed after the main bounds check, so we can bail out there efficiently
-      var localPoint = this.parentToLocalPoint( point );
+      var localPoint = this._transform.getInverse().multiplyVector2( Vector2.createFromPool( point.x, point.y ) );
+      // var localPoint = this.parentToLocalPoint( point );
       
       // check children first, since they are rendered later
       if ( this._children.length > 0 && ( hasHitAreas || this._childBounds.containsPoint( localPoint ) ) ) {
@@ -9985,6 +10288,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
           // the child will have the point in its parent's coordinate frame (i.e. this node's frame)
           if ( childHit ) {
             childHit.addAncestor( this, i );
+            localPoint.freeToPool();
             return childHit;
           }
         }
@@ -9993,21 +10297,27 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
       // tests for mouse and touch hit areas before testing containsPointSelf
       if ( hasHitAreas ) {
         if ( options.isMouse && this._mouseArea ) {
-          return this._mouseArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
+          result = this._mouseArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
+          localPoint.freeToPool();
+          return result;
         }
         if ( ( options.isTouch || options.isPen ) && this._touchArea ) {
-          return this._touchArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
+          result = this._touchArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
+          localPoint.freeToPool();
+          return result;
         }
       }
       
       // didn't hit our children, so check ourself as a last resort
       if ( hasHitAreas || this._selfBounds.containsPoint( localPoint ) ) {
         if ( this.containsPointSelf( localPoint ) ) {
+          localPoint.freeToPool();
           return new scenery.Trail( this );
         }
       }
       
       // signal no hit
+      localPoint.freeToPool();
       return null;
     },
     
@@ -10043,13 +10353,22 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     
     walkDepthFirst: function( callback ) {
       callback( this );
-      _.each( this._children, function( child ) {
-        child.walkDepthFirst( callback );
-      } );
+      var length = this._children.length;
+      for ( var i = 0; i < length; i++ ) {
+        this._children[i].walkDepthFirst( callback );
+      }
     },
     
     getChildrenWithinBounds: function( bounds ) {
-      return _.filter( this._children, function( child ) { return !child._bounds.intersection( bounds ).isEmpty(); } );
+      var result = [];
+      var length = this._children.length;
+      for ( var i = 0; i < length; i++ ) {
+        var child = this._children[i];
+        if ( !child._bounds.intersection( bounds ).isEmpty() ) {
+          result.push( child );
+        }
+      }
+      return result;
     },
     
     // TODO: set this up with a mix-in for a generic notifier?
@@ -10126,7 +10445,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
         // translate( x, y, prependInstead )
         if ( !x && !y ) { return; } // bail out if both are zero
         if ( prependInstead ) {
-          this.prependMatrix( Matrix3.translation( x, y ) );
+          this.prependTranslation( x, y );
         } else {
           this.appendMatrix( Matrix3.translation( x, y ) );
         }
@@ -10181,24 +10500,24 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     },
     
     getX: function() {
-      return this.getTranslation().x;
+      return this._transform.getMatrix().m02();
     },
     
     setX: function( x ) {
       sceneryAssert && sceneryAssert( typeof x === 'number' );
       
-      this.setTranslation( x, this.getY() );
+      this.translate( x - this.getX(), 0, true );
       return this;
     },
     
     getY: function() {
-      return this.getTranslation().y;
+      return this._transform.getMatrix().m12();
     },
     
     setY: function( y ) {
       sceneryAssert && sceneryAssert( typeof y === 'number' );
       
-      this.setTranslation( this.getX(), y );
+      this.translate( 0, y - this.getY(), true );
       return this;
     },
     
@@ -10238,16 +10557,18 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     
     // supports setTranslation( x, y ) or setTranslation( new Vector2( x, y ) ) .. or technically setTranslation( { x: x, y: y } )
     setTranslation: function( a, b ) {
-      var translation = this.getTranslation();
-      
+      var m = this._transform.getMatrix();
+      var tx = m.m02();
+      var ty = m.m12();
+
       var dx, dy;
       
       if ( typeof a === 'number' ) {
-        dx = a - translation.x;
-        dy = b - translation.y;
+        dx = a - tx;
+        dy = b - ty;
       } else {
-        dx = a.x - translation.x;
-        dy = a.y - translation.y;
+        dx = a.x - tx;
+        dy = a.y - ty;
       }
       
       this.translate( dx, dy, true );
@@ -10256,7 +10577,8 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     },
     
     getTranslation: function() {
-      return this._transform.getMatrix().getTranslation();
+      var matrix = this._transform.getMatrix();
+      return new Vector2( matrix.m02(), matrix.m12() );
     },
     
     // append a transformation matrix to our local transform
@@ -10267,6 +10589,11 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     // prepend a transformation matrix to our local transform
     prependMatrix: function( matrix ) {
       this._transform.prepend( matrix );
+    },
+
+    // prepend an x,y translation to our local transform without allocating a matrix for it, see #119
+    prependTranslation: function( x,y ) {
+      this._transform.prependTranslation( x, y );
     },
     
     setMatrix: function( matrix ) {
@@ -10866,11 +11193,19 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     // returns undefined if there is no instance.
     getInstanceFromTrail: function( trail ) {
       var result;
-      if ( this._instances.length === 1 ) {
+      var len = this._instances.length;
+      if ( len === 1 ) {
         // don't bother with checking the trail, but assertion should assure that it's what we're looking for
         result = this._instances[0];
       } else {
-        result = _.find( this._instances, function( instance ) { return trail.equals( instance.trail ); } );
+        var i = len;
+        while ( i-- ) {
+          if ( this._instances[i].trail.equals( trail ) ) {
+            result = this._instances[i];
+            break;
+          }
+        }
+        // leave it as undefined if we don't find one
       }
       sceneryAssert && sceneryAssert( result, 'Could not find an instance for the trail ' + trail.toString() );
       sceneryAssert && sceneryAssert( result.trail.equals( trail ), 'Instance has an incorrect Trail' );
@@ -10891,51 +11226,87 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     },
     
     notifyVisibilityChange: function() {
-      _.each( this._instances, function( instance ) { instance.notifyVisibilityChange(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyVisibilityChange();
+      }
     },
     
     notifyOpacityChange: function() {
-      _.each( this._instances, function( instance ) { instance.notifyOpacityChange(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyOpacityChange();
+      }
     },
     
     notifyBeforeSelfChange: function() {
-      _.each( this._instances, function( instance ) { instance.notifyBeforeSelfChange(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyBeforeSelfChange();
+      }
     },
     
     notifyBeforeSubtreeChange: function() {
-      _.each( this._instances, function( instance ) { instance.notifyBeforeSubtreeChange(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyBeforeSubtreeChange();
+      }
     },
     
     notifyDirtySelfPaint: function() {
-      _.each( this._instances, function( instance ) { instance.notifyDirtySelfPaint(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyDirtySelfPaint();
+      }
     },
     
     notifyDirtySubtreePaint: function() {
-      _.each( this._instances, function( instance ) { instance.notifyDirtySubtreePaint(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyDirtySubtreePaint();
+      }
     },
     
     notifyTransformChange: function() {
-      _.each( this._instances, function( instance ) { instance.notifyTransformChange(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyTransformChange();
+      }
     },
     
     notifyBoundsAccuracyChange: function() {
-      _.each( this._instances, function( instance ) { instance.notifyBoundsAccuracyChange(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyBoundsAccuracyChange();
+      }
     },
     
     notifyStitch: function( match ) {
-      _.each( this._instances, function( instance ) { instance.notifyStitch( match ); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyStitch( match );
+      }
     },
     
     markForLayerRefresh: function() {
-      _.each( this._instances, function( instance ) { instance.markForLayerRefresh(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].markForLayerRefresh();
+      }
     },
     
     markForInsertion: function( child, index ) {
-      _.each( this._instances, function( instance ) { instance.markForInsertion( child, index ); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].markForInsertion( child, index );
+      }
     },
     
     markForRemoval: function( child, index ) {
-      _.each( this._instances, function( instance ) { instance.markForRemoval( child, index ); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].markForRemoval( child, index );
+      }
     },
     
     /*---------------------------------------------------------------------------*
@@ -10960,6 +11331,16 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     // apply the inverse of this node's transform to the bounds
     parentToLocalBounds: function( bounds ) {
       return this._transform.inverseBounds2( bounds );
+    },
+    
+    // mutable optimized form of localToParentBounds
+    transformBoundsFromLocalToParent: function( bounds ) {
+      return bounds.transform( this._transform.getMatrix() );
+    },
+    
+    // mutable optimized form of parentToLocalBounds
+    transformBoundsFromParentToLocal: function( bounds ) {
+      return bounds.transform( this._transform.getInverse() );
     },
     
     // returns the matrix (fresh copy) that transforms points from the local coordinate frame into the global coordinate frame
@@ -11173,6 +11554,10 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     get instances() { return this.getInstances(); },
     
     mutate: function( options ) {
+      if ( !options ) {
+        return this;
+      }
+      
       var node = this;
       
       _.each( this._mutatorKeys, function( key ) {
@@ -11351,11 +11736,14 @@ define( 'SCENERY/util/Trail',['require','DOT/Matrix3','DOT/Transform3','SCENERY/
         trail.addDescendant( node );
       } else {
         // process it as an array
-        _.each( nodes, function( node ) {
-          trail.addDescendant( node );
-        } );
+        var len = nodes.length;
+        for ( var i = 0; i < len; i++ ) {
+          trail.addDescendant( nodes[i] );
+        }
       }
     }
+    
+    phetAllocation && phetAllocation( 'Trail' );
   };
   var Trail = scenery.Trail;
   
@@ -11373,11 +11761,22 @@ define( 'SCENERY/util/Trail',['require','DOT/Matrix3','DOT/Transform3','SCENERY/
     
     // this trail is visible only if all nodes on it are marked as visible
     isVisible: function() {
-      return _.every( this.nodes, function( node ) { return node.isVisible(); } );
+      var i = this.nodes.length;
+      while ( i-- ) {
+        if ( !this.nodes[i].isVisible() ) {
+          return false;
+        }
+      }
+      return true;
     },
     
     getOpacity: function() {
-      return _.reduce( this.nodes, function( opacity, node ) { return opacity * node.getOpacity(); }, 1 );
+      var opacity = 1;
+      var i = this.nodes.length;
+      while ( i-- ) {
+        opacity *= this.nodes[i].getOpacity();
+      }
+      return opacity;
     },
     
     get: function( index ) {
@@ -12178,6 +12577,8 @@ define( 'SCENERY/input/Pointer',['require','SCENERY/scenery'],function( require 
   
   scenery.Pointer = function Pointer() {
     this.listeners = [];
+    
+    phetAllocation && phetAllocation( 'Pointer' );
   };
   var Pointer = scenery.Pointer;
   
@@ -12236,6 +12637,7 @@ define( 'SCENERY/input/Mouse',['require','PHET_CORE/inherit','SCENERY/scenery','
   
   inherit( Pointer, Mouse, {
     down: function( point, event ) {
+      // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
       switch( event.button ) {
         case 0: this.leftDown = true; break;
@@ -12245,6 +12647,7 @@ define( 'SCENERY/input/Mouse',['require','PHET_CORE/inherit','SCENERY/scenery','
     },
     
     up: function( point, event ) {
+      // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
       switch( event.button ) {
         case 0: this.leftDown = false; break;
@@ -12254,14 +12657,17 @@ define( 'SCENERY/input/Mouse',['require','PHET_CORE/inherit','SCENERY/scenery','
     },
     
     move: function( point, event ) {
+      // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
     },
     
     over: function( point, event ) {
+      // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
     },
     
     out: function( point, event ) {
+      // if ( this.point ) { this.point.freeToPool(); }
       // TODO: how to handle the mouse out-of-bounds
       this.point = null;
     },
@@ -12306,14 +12712,17 @@ define( 'SCENERY/input/Touch',['require','PHET_CORE/inherit','SCENERY/scenery','
   
   inherit( Pointer, Touch, {
     move: function( point, event ) {
+      // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
     },
     
     end: function( point, event ) {
+      // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
     },
     
     cancel: function( point, event ) {
+      // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
     },
     
@@ -12355,14 +12764,17 @@ define( 'SCENERY/input/Pen',['require','PHET_CORE/inherit','SCENERY/scenery','SC
   
   inherit( Pointer, Pen, {
     move: function( point, event ) {
+      // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
     },
     
     end: function( point, event ) {
+      // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
     },
     
     cancel: function( point, event ) {
+      // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
     },
     
@@ -12449,7 +12861,7 @@ define( 'SCENERY/input/Input',['require','SCENERY/scenery','SCENERY/util/Trail',
     this.listenerTarget = listenerTarget;
     this.batchDOMEvents = batchDOMEvents;
     
-    this.batchedCallbacks = [];
+    this.batchedCallbacks = []; // cleared every frame
     
     this.mouse = new scenery.Mouse();
     
@@ -12479,7 +12891,14 @@ define( 'SCENERY/input/Input',['require','SCENERY/scenery','SCENERY/util/Trail',
     },
     
     findTouchById: function( id ) {
-      return _.find( this.pointers, function( pointer ) { return pointer.id === id; } );
+      var i = this.pointers.length;
+      while ( i-- ) {
+        var pointer = this.pointers[i];
+        if ( pointer.id === id ) {
+          return pointer;
+        }
+      }
+      return undefined;
     },
     
     findKeyByEvent: function( event ) {
@@ -12872,11 +13291,14 @@ define( 'SCENERY/input/Input',['require','SCENERY/scenery','SCENERY/util/Trail',
     
     validatePointers: function() {
       var that = this;
-      _.each( this.pointers, function( pointer ) {
+      
+      var i = this.pointers.length;
+      while ( i-- ) {
+        var pointer = this.pointers[i];
         if ( pointer.point ) {
           that.branchChangeEvents( pointer, null, false );
         }
-      } );
+      }
     },
     
     dispatchEvent: function( trail, type, pointer, event, bubbles ) {
@@ -13048,8 +13470,11 @@ define( 'SCENERY/input/Input',['require','SCENERY/scenery','SCENERY/util/Trail',
     fireBatchedEvents: function() {
       if ( this.batchedCallbacks.length ) {
         sceneryEventLog && sceneryEventLog( 'Input.fireBatchedEvents length:' + this.batchedCallbacks.length );
-        _.each( this.batchedCallbacks, function callbackLoop( callback ) { callback(); } );
-        this.batchedCallbacks = [];
+        var len = this.batchedCallbacks.length;
+        for ( var i = 0; i < len; i++ ) {
+          this.batchedCallbacks[i]();
+        }
+        this.batchedCallbacks.length = 0;
       }
     }
   };
@@ -13151,17 +13576,26 @@ define( 'SCENERY/input/SimpleDragHandler',['require','DOT/Matrix3','SCENERY/scen
       up: function( event ) {
         sceneryAssert && sceneryAssert( event.pointer === handler.pointer );
         if ( !event.pointer.isMouse || event.domEvent.button === handler.mouseButton ) {
+          var saveCurrentTarget = event.currentTarget;
+          event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
           handler.endDrag( event );
+          event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
       },
       
       // touch cancel
       cancel: function( event ) {
         sceneryAssert && sceneryAssert( event.pointer === handler.pointer );
+
+        var saveCurrentTarget = event.currentTarget;
+        event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
         handler.endDrag( event );
-        
+        event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
+
         // since it's a cancel event, go back!
-        handler.node.setMatrix( handler.startTransformMatrix );
+        if ( !handler.transform ) {
+          handler.node.setMatrix( handler.startTransformMatrix );
+        }
       },
       
       // mouse/touch move
@@ -13187,7 +13621,10 @@ define( 'SCENERY/input/SimpleDragHandler',['require','DOT/Matrix3','SCENERY/scen
         if ( handler.options.drag ) {
           // TODO: consider adding in a delta to the listener
           // TODO: add the position in to the listener
+          var saveCurrentTarget = event.currentTarget;
+          event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
           handler.options.drag( event, handler.trail ); // new position (old position?) delta
+          event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
       }
     };
@@ -13501,6 +13938,8 @@ define( 'SCENERY/util/CanvasContextWrapper',['require','SCENERY/scenery'],functi
     this.context = context;
     
     this.resetStyles();
+    
+    phetAllocation && phetAllocation( 'CanvasContextWrapper' );
   };
   var CanvasContextWrapper = scenery.CanvasContextWrapper;
   
@@ -13653,6 +14092,8 @@ define( 'SCENERY/util/TrailPointer',['require','SCENERY/scenery','SCENERY/util/T
     this.trail = trail;
     
     this.setBefore( isBefore );
+    
+    phetAllocation && phetAllocation( 'TrailPointer' );
   };
   var TrailPointer = scenery.TrailPointer;
   
@@ -13900,6 +14341,30 @@ define( 'SCENERY/util/TrailPointer',['require','SCENERY/scenery','SCENERY/util/T
     
     toString: function() {
       return '[' + ( this.isBefore ? 'before' : 'after' ) + ' ' + this.trail.toString().slice( 1 );
+    }
+  };
+  
+  // same as new TrailPointer( trailA, isBeforeA ).compareNested( new TrailPointer( trailB, isBeforeB ) )
+  TrailPointer.compareNested = function( trailA, isBeforeA, trailB, isBeforeB ) {
+    var comparison = trailA.compare( trailB );
+    
+    if ( comparison === 0 ) {
+      // if trails are equal, just compare before/after
+      if ( isBeforeA === isBeforeB ) {
+        return 0;
+      } else {
+        return isBeforeA ? -1 : 1;
+      }
+    } else {
+      // if one is an extension of the other, the shorter isBefore flag determines the order completely
+      if ( trailA.isExtensionOf( trailB ) ) {
+        return isBeforeB ? 1 : -1;
+      } else if ( trailB.isExtensionOf( trailA ) ) {
+        return isBeforeA ? -1 : 1;
+      } else {
+        // neither is a subtrail of the other, so a straight trail comparison should give the answer
+        return comparison;
+      }
     }
   };
   
@@ -14505,9 +14970,10 @@ define( 'SCENERY/layers/CanvasLayer',['require','PHET_CORE/inherit','DOT/Bounds2
           newContext.setTransform( layer.backingScale, 0, 0, layer.backingScale, 0, 0 );
           
           // properly set the necessary transform on the context
-          _.each( trail.nodes, function( node ) {
-            node.transform.getMatrix().canvasAppendTransform( newContext );
-          } );
+          var length = trail.nodes.length;
+          for ( var i = 0; i < length; i++ ) {
+            trail.nodes[i].transform.getMatrix().canvasAppendTransform( newContext );
+          }
         } else {
           node.transform.getMatrix().canvasAppendTransform( topWrapper().context );
         }
@@ -14979,9 +15445,10 @@ define( 'SCENERY/layers/DOMLayer',['require','PHET_CORE/inherit','DOT/Bounds2','
     reindexTrails: function( zIndex ) {
       Layer.prototype.reindex.call( this, zIndex );
       
-      _.each( this.trails, function( trail ) {
-        trail.reindex();
-      } );
+      var i = this.trails.length;
+      while ( i-- ) {
+        this.trails[i].reindex();
+      }
     },
     
     getIndexOfTrail: function( trail ) {
@@ -15435,8 +15902,13 @@ define( 'SCENERY/layers/LayerBuilder',['require','SCENERY/scenery','SCENERY/laye
     bestPreferredLayerTypeFor: function( renderers ) {
       for ( var i = this.layerTypeStack.length - 1; i >= 0; i-- ) {
         var preferredType = this.layerTypeStack[i];
-        if ( _.some( renderers, function( renderer ) { return preferredType.supportsRenderer( renderer ); } ) ) {
-          return preferredType;
+        
+        var k = renderers.length;
+        while ( k-- ) {
+          // if any renderer is supported by this type, use this type
+          if ( preferredType.supportsRenderer( renderers[k] ) ) {
+            return preferredType;
+          }
         }
       }
       
@@ -15478,10 +15950,14 @@ define( 'SCENERY/layers/LayerType',['require','SCENERY/scenery'],function( requi
     },
     
     supportsNode: function( node ) {
-      var that = this;
-      return _.some( node._supportedRenderers, function( renderer ) {
-        return that.supportsRenderer( renderer );
-      } );
+      var supportedRenderers = node._supportedRenderers;
+      var i = supportedRenderers.length;
+      while ( i-- ) {
+        if ( this.supportsRenderer( supportedRenderers[i] ) ) {
+          return true;
+        }
+      }
+      return false;
     },
     
     createLayer: function( args ) {
@@ -15572,6 +16048,10 @@ define( 'SCENERY/layers/SVGLayer',['require','PHET_CORE/inherit','DOT/Bounds2','
     this.baseTransformChange = true;
   };
   var SVGLayer = scenery.SVGLayer;
+  
+  // used as an object pool for marking internal base node bounds
+  
+  var scratchBounds1 = Bounds2.NOTHING.copy();
   
   inherit( Layer, SVGLayer, {
     
@@ -15827,13 +16307,17 @@ define( 'SCENERY/layers/SVGLayer',['require','PHET_CORE/inherit','DOT/Bounds2','
       sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' baseNodeInternalBoundsChange' );
       if ( this.cssTransform ) {
         // we want to set the baseNodeTransform to a translation so that it maps the baseNode's self/children in the baseNode's local bounds to (0,0,w,h)
-        var internalBounds = this.baseNode.parentToLocalBounds( this.baseNode.getBounds() );
+        var internalBounds = scratchBounds1; // pooled copy
+        internalBounds.setBounds( this.baseNode.getBounds() );
+        this.baseNode.transformBoundsFromParentToLocal( internalBounds );
         var padding = scenery.Layer.cssTransformPadding;
         
         // if there is nothing, or the bounds are empty for some reason, skip this!
         if ( !internalBounds.isEmpty() ) {
           this.baseNodeTransform.set( Matrix3.translation( Math.ceil( -internalBounds.minX + padding), Math.ceil( -internalBounds.minY + padding ) ) );
-          var baseNodeInteralBounds = this.baseNodeTransform.transformBounds2( internalBounds );
+          
+          // NOTE: this is mutable! don't use internalBounds after this
+          var baseNodeInteralBounds = internalBounds.transform( this.baseNodeTransform.getMatrix() );
           
           // sanity check to ensure we are within that range
           sceneryAssert && sceneryAssert( baseNodeInteralBounds.minX >= 0 && baseNodeInteralBounds.minY >= 0 );
@@ -16719,17 +17203,19 @@ define( 'SCENERY/nodes/Path',['require','PHET_CORE/inherit','KITE/Shape','SCENER
   var Strokable = require( 'SCENERY/nodes/Strokable' );
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
   
-  scenery.Path = function Path( options ) {
+  scenery.Path = function Path( shape, options ) {
     // TODO: consider directly passing in a shape object (or at least handling that case)
     this._shape = null;
-    
+
     // ensure we have a parameter object
     options = options || {};
     
     this.initializeFillable();
     this.initializeStrokable();
-    
-    Node.call( this, options );
+
+    Node.call( this );
+    this.setShape( shape );
+    this.mutate( options );
   };
   var Path = scenery.Path;
   
@@ -16771,7 +17257,7 @@ define( 'SCENERY/nodes/Path',['require','PHET_CORE/inherit','KITE/Shape','SCENER
     },
     
     hasShape: function() {
-      return this._shape !== null;
+      return this._shape;
     },
     
     paintCanvas: function( wrapper ) {
@@ -16868,19 +17354,13 @@ define( 'SCENERY/nodes/Path',['require','PHET_CORE/inherit','KITE/Shape','SCENER
     get shape() { return this.getShape(); },
     
     getBasicConstructor: function( propLines ) {
-      return 'new scenery.Path( {' + propLines + '} )';
+      return 'new scenery.Path( ' + this._shape.toString() + ', {' + propLines + '} )';
     },
     
     getPropString: function( spaces, includeChildren ) {
       var result = Node.prototype.getPropString.call( this, spaces, includeChildren );
       result = this.appendFillablePropString( spaces, result );
       result = this.appendStrokablePropString( spaces, result );
-      if ( this._shape ) {
-        if ( result ) {
-          result += ',\n';
-        }
-        result += spaces + 'shape: ' + this._shape.toString();
-      }
       return result;
     }
   } );
@@ -16911,13 +17391,13 @@ define( 'SCENERY/nodes/Path',['require','PHET_CORE/inherit','KITE/Shape','SCENER
 
 define( 'SCENERY/nodes/Circle',['require','PHET_CORE/inherit','SCENERY/scenery','SCENERY/nodes/Path','KITE/Shape'],function( require ) {
   
-  
+
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  
+
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
-  
+
   scenery.Circle = function Circle( radius, options ) {
     if ( typeof radius === 'object' ) {
       // allow new Circle( { radius: ... } )
@@ -16925,44 +17405,43 @@ define( 'SCENERY/nodes/Circle',['require','PHET_CORE/inherit','SCENERY/scenery',
       options = radius;
     } else {
       this._radius = radius;
-      
+
       // ensure we have a parameter object
       options = options || {};
-      
-      // fallback for non-canvas or non-svg rendering, and for proper bounds computation
-      options.shape = Shape.circle( 0, 0, radius );
+
     }
-    
-    Path.call( this, options );
+    // fallback for non-canvas or non-svg rendering, and for proper bounds computation
+
+    Path.call( this,Shape.circle( 0, 0, radius ), options );
   };
   var Circle = scenery.Circle;
-  
+
   inherit( Path, Circle, {
     invalidateCircle: function() {
       // setShape should invalidate the path and ensure a redraw
       this.setShape( Shape.circle( 0, 0, this._radius ) );
     },
-    
+
     // create a circle instead of a path, hopefully it is faster in implementations
     createSVGFragment: function( svg, defs, group ) {
       return document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
     },
-    
+
     // optimized for the circle element instead of path
     updateSVGFragment: function( circle ) {
       circle.setAttribute( 'r', this._radius );
-      
+
       circle.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
     },
-    
+
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Circle( ' + this._radius + ', {' + propLines + '} )';
     },
-    
+
     getRadius: function() {
       return this._radius;
     },
-    
+
     setRadius: function( radius ) {
       if ( this._radius !== radius ) {
         this._radius = radius;
@@ -16970,24 +17449,24 @@ define( 'SCENERY/nodes/Circle',['require','PHET_CORE/inherit','SCENERY/scenery',
       }
       return this;
     },
-    
+
     computeShapeBounds: function() {
       // optimization, where we know our computed bounds will be just expanded by half the lineWidth if we are stroked (don't have to compute the stroke shape)
       return this._stroke ? this._shape.bounds.dilated( this._lineDrawingStyles.lineWidth / 2 ) : this._shape.bounds;
     },
-    
+
     // accelerated hit detection
     containsPointSelf: function( point ) {
       return point.x * point.x + point.y * point.y < this._radius * this._radius;
     },
-    
+
     get radius() { return this.getRadius(); },
     set radius( value ) { return this.setRadius( value ); }
   } );
-  
+
   // not adding mutators for now
   Circle.prototype._mutatorKeys = [ 'radius' ].concat( Path.prototype._mutatorKeys );
-  
+
   return Circle;
 } );
 
@@ -17426,6 +17905,8 @@ define( 'SCENERY/util/Font',['require','SCENERY/scenery'],function( require ) {
     
     // initialize the shorthand font property (stored as _font)
     this._font = this.computeShorthand();
+    
+    phetAllocation && phetAllocation( 'Font' );
   };
   var Font = scenery.Font;
   
@@ -17458,7 +17939,7 @@ define( 'SCENERY/util/Font',['require','SCENERY/scenery'],function( require ) {
         stretch: this._stretch,
         size: this._size,
         lineHeight: this._lineHeight,
-        family: this._family,
+        family: this._family
       }, options ) );
     },
     
@@ -18283,6 +18764,183 @@ define( 'SCENERY/nodes/Image',['require','PHET_CORE/inherit','DOT/Bounds2','SCEN
 // Copyright 2002-2013, University of Colorado
 
 /**
+ * A line that inherits Path, and allows for optimized drawing,
+ * and improved line handling.
+ *
+ * TODO: add DOM support
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'SCENERY/nodes/Line',['require','PHET_CORE/inherit','SCENERY/scenery','SCENERY/nodes/Path','KITE/Shape','DOT/Vector2'],function( require ) {
+  
+  
+  var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
+  
+  var Path = require( 'SCENERY/nodes/Path' );
+  var Shape = require( 'KITE/Shape' );
+  var Vector2 = require( 'DOT/Vector2' );
+  
+  /**
+   * Currently, all numerical parameters should be finite.
+   * x1:         x-position of the start
+   * y1:         y-position of the start
+   * x2:         x-position of the end
+   * y2:         y-position of the end
+   *
+   * Available constructors:
+   * new Line( x1, y1, x2, y2, { ... } )
+   * new Line( new Vector2( x1, y1 ), new Vector2( x2, y2 ), { ... } )
+   * new Line( { x1: x1, y1: y1, x2: x2, y2: y2,  ... } )
+   */
+  scenery.Line = function Line( x1, y1, x2, y2, options ) {
+    if ( typeof x1 === 'object' ) {
+      if ( x1 instanceof Vector2 ) {
+        // assumes Line( Vector2, Vector2, options );
+        this._x1 = x1.x;
+        this._y1 = x1.y;
+        this._x2 = y1.x;
+        this._y2 = y1.y;
+        options = x2 || {};
+      } else {
+        // assumes Line( { ... } ), init to zero for now
+        this._x1 = 0;
+        this._y1 = 0;
+        this._x2 = 0;
+        this._y2 = 0;
+        options = x1 || {};
+      }
+    } else {
+      // new Line(  x1, y1, x2, y2, [options] )
+      this._x1 = x1;
+      this._y1 = y1;
+      this._x2 = x2;
+      this._y2 = y2;
+      
+      // ensure we have a parameter object
+      options = options || {};
+    }
+    // fallback for non-canvas or non-svg rendering, and for proper bounds computation
+    
+    Path.call( this, this.createLineShape(), options );
+  };
+  var Line = scenery.Line;
+  
+  inherit( Path, Line, {
+    setLine: function( x1, y1, x2, y2 ) {
+      sceneryAssert && sceneryAssert( x1 !== undefined && y1 !== undefined && x2 !== undefined && y2 !== undefined, 'parameters need to be defined' );
+      
+      this._x1 = x1;
+      this._y1 = y1;
+      this._x2 = x2;
+      this._y2 = y2;
+      this.invalidateLine();
+    },
+    
+    setPoint1: function( x1, y1 ) {
+      if ( typeof x1 === 'number' ) {
+        // setPoint1( x1, y1 );
+        this.setLine( x1, y1, this._x2, this._y2 );
+      } else {
+        // setPoint1( Vector2 )
+        this.setLine( x1.x, x1.y, this._x2, this._y2 );
+      }
+    },
+    set p1( point ) { this.setPoint1( point ); },
+    get p1() { return new Vector2( this._x1, this._y1 ); },
+    
+    setPoint2: function( x2, y2 ) {
+      if ( typeof x2 === 'number' ) {
+        // setPoint2( x2, y2 );
+        this.setLine( this._x1, this._y1, x2, y2 );
+      } else {
+        // setPoint2( Vector2 )
+        this.setLine( this._x1, this._y1, x2.x, x2.y );
+      }
+    },
+    set p2( point ) { this.setPoint2( point ); },
+    get p2() { return new Vector2( this._x2, this._y2 ); },
+    
+    createLineShape: function() {
+      sceneryAssert && sceneryAssert( isFinite( this._x1 ), 'A rectangle needs to have a finite x1 (' + this._x1 + ')' );
+      sceneryAssert && sceneryAssert( isFinite( this._y1 ), 'A rectangle needs to have a finite y1 (' + this._y1 + ')' );
+      sceneryAssert && sceneryAssert( isFinite( this._x2 ), 'A rectangle needs to have a finite x2 (' + this._x2 + ')' );
+      sceneryAssert && sceneryAssert( isFinite( this._y2 ), 'A rectangle needs to have a finite y2 (' + this._y2 + ')' );
+      
+      return Shape.lineSegment( this._x1, this._y1, this._x2, this._y2 );
+    },
+    
+    invalidateLine: function() {
+      // setShape should invalidate the path and ensure a redraw
+      this.setShape( this.createLineShape() );
+    },
+    
+    containsPointSelf: function( point ) {
+      return false; // nothing is in a line! (although maybe we should handle edge points properly?)
+    },
+    
+    // create a rect instead of a path, hopefully it is faster in implementations
+    createSVGFragment: function( svg, defs, group ) {
+      return document.createElementNS( 'http://www.w3.org/2000/svg', 'line' );
+    },
+    
+    // optimized for the rect element instead of path
+    updateSVGFragment: function( rect ) {
+      // see http://www.w3.org/TR/SVG/shapes.html#LineElement
+      rect.setAttribute( 'x1', this._x1 );
+      rect.setAttribute( 'y1', this._y1 );
+      rect.setAttribute( 'x2', this._x2 );
+      rect.setAttribute( 'y2', this._y2 );
+      
+      rect.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
+    },
+    
+    getBasicConstructor: function( propLines ) {
+      return 'new scenery.Line( ' + this._x1 + ', ' + this._y1 + ', ' + this._x1 + ', ' + this._y1 + ', {' + propLines + '} )';
+    }
+    
+  } );
+  
+  function addLineProp( capitalizedShort ) {
+    var lowerShort = capitalizedShort.toLowerCase();
+    
+    var getName = 'get' + capitalizedShort;
+    var setName = 'set' + capitalizedShort;
+    var privateName = '_' + lowerShort;
+    
+    Line.prototype[getName] = function() {
+      return this[privateName];
+    };
+    
+    Line.prototype[setName] = function( value ) {
+      this[privateName] = value;
+      this.invalidateLine();
+      return this;
+    };
+    
+    Object.defineProperty( Line.prototype, lowerShort, {
+      set: Line.prototype[setName],
+      get: Line.prototype[getName]
+    } );
+  }
+  
+  addLineProp( 'X1' );
+  addLineProp( 'Y1' );
+  addLineProp( 'X2' );
+  addLineProp( 'Y2' );
+  
+  // not adding mutators for now
+  Line.prototype._mutatorKeys = [ 'p1', 'p2', 'x1', 'y1', 'x2', 'y2' ].concat( Path.prototype._mutatorKeys );
+  
+  return Line;
+} );
+
+
+
+// Copyright 2002-2013, University of Colorado
+
+/**
  * A rectangular node that inherits Path, and allows for optimized drawing,
  * and improved rectangle handling.
  *
@@ -18315,6 +18973,12 @@ define( 'SCENERY/nodes/Rectangle',['require','PHET_CORE/inherit','SCENERY/scener
       // allow new Rectangle( { rectX: x, rectY: y, rectWidth: width, rectHeight: height, ... } )
       // the mutators will call invalidateRectangle() and properly set the shape
       options = x;
+      this._rectX = options.rectX || 0;
+      this._rectY = options.rectY || 0;
+      this._rectWidth = options.rectWidth;
+      this._rectHeight = options.rectHeight;
+      this._rectArcWidth = options.rectArcWidth || 0;
+      this._rectArcHeight = options.rectArcHeight || 0;
     } else if ( arguments.length < 6 ) {
       // new Rectangle( x, y, width, height, [options] )
       this._rectX = x;
@@ -18327,8 +18991,6 @@ define( 'SCENERY/nodes/Rectangle',['require','PHET_CORE/inherit','SCENERY/scener
       // ensure we have a parameter object
       options = arcWidth || {};
       
-      // fallback for non-canvas or non-svg rendering, and for proper bounds computation
-      options.shape = this.createRectangleShape();
     } else {
       // normal case with args (including arcWidth / arcHeight)
       this._rectX = x;
@@ -18341,11 +19003,10 @@ define( 'SCENERY/nodes/Rectangle',['require','PHET_CORE/inherit','SCENERY/scener
       // ensure we have a parameter object
       options = options || {};
       
-      // fallback for non-canvas or non-svg rendering, and for proper bounds computation
-      options.shape = this.createRectangleShape();
     }
-    
-    Path.call( this, options );
+    // fallback for non-canvas or non-svg rendering, and for proper bounds computation
+
+    Path.call( this, this.createRectangleShape(), options );
   };
   var Rectangle = scenery.Rectangle;
   
@@ -18829,6 +19490,8 @@ define( 'SCENERY/util/Color',['require','SCENERY/scenery','DOT/Util','DOT/Util']
         this.setRGBA( r, g, b, alpha );
       }
     }
+    
+    phetAllocation && phetAllocation( 'Color' );
   };
   var Color = scenery.Color;
   
@@ -19058,26 +19721,61 @@ define( 'SCENERY/util/Color',['require','SCENERY/scenery','DOT/Util','DOT/Util']
       return new Color( this.r, this.g, this.b, alpha );
     },
     
-    brighterColor: function( factor ) {
+    checkFactor: function( factor ) {
       if ( factor < 0 || factor > 1 ) {
-        throw new Error( "factor must be between 0 and 1: " + factor );
+        throw new Error( 'factor must be between 0 and 1: ' + factor );
       }
-      factor = ( factor === undefined ) ? 0.7 : factor;
+      return ( factor === undefined ) ? 0.7 : factor;
+    },
+    
+    // matches Java's Color.brighter()
+    brighterColor: function( factor ) {
+      factor = this.checkFactor( factor );
       var red   = Math.min( 255, Math.floor( this.r / factor ) );
       var green = Math.min( 255, Math.floor( this.g / factor ) );
       var blue  = Math.min( 255, Math.floor( this.b / factor ) );
       return new Color( red, green, blue, this.a );
     },
     
+    /**
+     * Brightens a color in RGB space. Useful when creating gradients from a
+     * single base color.
+     *
+     * @param color
+     * @param factor 0 (no change) to 1 (white)
+     * @return lighter (closer to white) version of the original color.
+     */
+    colorUtilsBrighter: function( factor ) {
+      factor = this.checkFactor( factor );
+      var red = Math.min( 255, this.getRed() + Math.floor( factor * ( 255 - this.getRed() ) ) );
+      var green = Math.min( 255, this.getGreen() + Math.floor( factor * ( 255 - this.getGreen() ) ) );
+      var blue = Math.min( 255, this.getBlue() + Math.floor( factor * ( 255 - this.getBlue() ) ) );
+      return new Color( red, green, blue, this.getAlpha() );
+    },
+    
+    // matches Java's Color.darker()
     darkerColor: function( factor ) {
-      if ( factor < 0 || factor > 1 ) {
-        throw new Error( "factor must be between 0 and 1: " + factor );
-      }
-      factor = ( factor === undefined ) ? 0.7 : factor;
+      factor = this.checkFactor( factor );
       var red   = Math.max( 0, Math.floor( factor * this.r ) );
       var green = Math.max( 0, Math.floor( factor * this.g ) );
       var blue  = Math.max( 0, Math.floor( factor * this.b ) );
       return new Color( red, green, blue, this.a );
+    },
+    
+    /**
+     * Darken a color in RGB space. Useful when creating gradients from a single
+     * base color.
+     *
+     * @param color  the original color
+     * @param factor 0 (no change) to 1 (black)
+     * @return darker (closer to black) version of the original color.
+     */
+    colorUtilsDarker: function( factor ) {
+      factor = this.checkFactor( factor );
+      var red = Math.max( 0, this.getRed() - Math.floor( factor * this.getRed() ) );
+      var green = Math.max( 0, this.getGreen() - Math.floor( factor * this.getGreen() ) );
+      var blue = Math.max( 0, this.getBlue() - Math.floor( factor * this.getBlue() ) );
+      return new Color( red, green, blue, this.getAlpha() );
     },
     
     /*---------------------------------------------------------------------------*
@@ -19094,6 +19792,10 @@ define( 'SCENERY/util/Color',['require','SCENERY/scenery','DOT/Util','DOT/Util']
     removeChangeListener: function( listener ) {
       sceneryAssert && sceneryAssert( _.contains( this.listeners, listener ) );
       this.listeners.splice( _.indexOf( this.listeners, listener ), 1 );
+    },
+
+    toString: function() {
+      return this.constructor.name + "[r:" + this.r + " g:" + this.g + " b:" + this.b + " a:" + this.a + "]";
     }
   };
   
@@ -19290,7 +19992,7 @@ define( 'SCENERY/util/Color',['require','SCENERY/scenery','DOT/Util','DOT/Util']
    */
   Color.interpolateRBGA = function( color1, color2, distance ) {
     if ( distance < 0 || distance > 1 ) {
-      throw new Error( "distance must be between 0 and 1: " + distance );
+      throw new Error( 'distance must be between 0 and 1: ' + distance );
     }
     var r = Math.floor( linear( 0, 1, color1.r, color2.r, distance ) );
     var g = Math.floor( linear( 0, 1, color1.g, color2.g, distance ) );
@@ -19556,6 +20258,8 @@ define( 'SCENERY/util/Instance',['require','SCENERY/scenery','SCENERY/util/Acces
       this.addPeers();
       this.addLiveRegions();
     }
+    
+    phetAllocation && phetAllocation( 'Instance' );
   };
   var Instance = scenery.Instance;
   
@@ -19573,6 +20277,7 @@ define( 'SCENERY/util/Instance',['require','SCENERY/scenery','SCENERY/util/Acces
     get node() { return this.getNode(); },
     
     changeLayer: function( newLayer ) {
+      // NOTE: DO NOT change _layerTrails somehow in this function. we don't make a defensive copy of that array during stitching!
       if ( newLayer !== this.layer ) {
         sceneryLayerLog && sceneryLayerLog( 'changing instance ' + this.trail.toString() + ' to layer ' + ( newLayer ? '#' + newLayer.id : 'null' ) );
         this.layer && ( this.layer._instanceCount -= 1 );
@@ -19680,26 +20385,29 @@ define( 'SCENERY/util/Instance',['require','SCENERY/scenery','SCENERY/util/Acces
     },
     
     addPeers: function() {
-      var thisInstance = this;
       var node = this.getNode();
       var scene = this.getScene();
       
-      if ( node._peers.length ) {
-        _.each( node._peers, function( desc ) {
-          var peer = new scenery.AccessibilityPeer( thisInstance, desc.element, desc.options );
+      var len = node._peers.length;
+      if ( len ) {
+        for ( var i = 0; i < len; i++ ) {
+          var desc = node._peers[i];
+          var peer = new scenery.AccessibilityPeer( this, desc.element, desc.options );
           scene.addPeer( peer );
-          thisInstance.peers.push( peer );
-        } );
+          this.peers.push( peer );
+        }
       }
     },
     
     removePeers: function() {
       var scene = this.getScene();
       
-      _.each( this.peers, function( peer ) {
+      var i = this.peers.length;
+      while ( i-- ) {
+        var peer = this.peers[i];
         scene.removePeer( peer );
         peer.dispose();
-      } );
+      }
       
       this.peers.length = 0; // clear this.peers
     },
@@ -19734,17 +20442,23 @@ define( 'SCENERY/util/Instance',['require','SCENERY/scenery','SCENERY/util/Acces
     *----------------------------------------------------------------------------*/
     
     notifyVisibilityChange: function() {
-      var thisInstance = this;
       sceneryEventLog && sceneryEventLog( 'notifyVisibilityChange: ' + this.trail.toString() + ', ' + this.getLayerString() );
       
-      _.each( this.getAffectedLayers(), function( layer ) { layer.notifyVisibilityChange( thisInstance ); } );
+      var affectedLayers = this.getAffectedLayers();
+      var i = affectedLayers.length;
+      while ( i-- ) {
+        affectedLayers[i].notifyVisibilityChange( this );
+      }
     },
     
     notifyOpacityChange: function() {
-      var thisInstance = this;
       sceneryEventLog && sceneryEventLog( 'notifyOpacityChange: ' + this.trail.toString() + ', ' + this.getLayerString() );
       
-      _.each( this.getAffectedLayers(), function( layer ) { layer.notifyOpacityChange( thisInstance ); } );
+      var affectedLayers = this.getAffectedLayers();
+      var i = affectedLayers.length;
+      while ( i-- ) {
+        affectedLayers[i].notifyOpacityChange( this );
+      }
     },
     
     notifyBeforeSelfChange: function() {
@@ -19756,10 +20470,13 @@ define( 'SCENERY/util/Instance',['require','SCENERY/scenery','SCENERY/util/Acces
     },
     
     notifyBeforeSubtreeChange: function() {
-      var thisInstance = this;
       sceneryEventLog && sceneryEventLog( 'notifyBeforeSubtreeChange: ' + this.trail.toString() + ', ' + this.getLayerString() );
       
-      _.each( this.getAffectedLayers(), function( layer ) { layer.notifyBeforeSubtreeChange( thisInstance ); } );
+      var affectedLayers = this.getAffectedLayers();
+      var i = affectedLayers.length;
+      while ( i-- ) {
+        affectedLayers[i].notifyBeforeSubtreeChange( this );
+      }
     },
     
     notifyDirtySelfPaint: function() {
@@ -19770,24 +20487,33 @@ define( 'SCENERY/util/Instance',['require','SCENERY/scenery','SCENERY/util/Acces
     
     // TODO: consider special post-transform type?
     notifyDirtySubtreePaint: function() {
-      var thisInstance = this;
       sceneryEventLog && sceneryEventLog( 'notifyDirtySubtreePaint: ' + this.trail.toString() + ', ' + this.getLayerString() );
       
-      _.each( this.getAffectedLayers(), function( layer ) { layer.notifyDirtySubtreePaint( thisInstance ); } );
+      var affectedLayers = this.getAffectedLayers();
+      var i = affectedLayers.length;
+      while ( i-- ) {
+        affectedLayers[i].notifyDirtySubtreePaint( this );
+      }
     },
     
     notifyDirtySubtreeBounds: function() {
-      var thisInstance = this;
       sceneryEventLog && sceneryEventLog( 'notifyDirtySubtreeBounds: ' + this.trail.toString() + ', ' + this.getLayerString() );
       
-      _.each( this.getAffectedLayers(), function( layer ) { layer.notifyDirtySubtreeBounds( thisInstance ); } );
+      var affectedLayers = this.getAffectedLayers();
+      var i = affectedLayers.length;
+      while ( i-- ) {
+        affectedLayers[i].notifyDirtySubtreeBounds( this );
+      }
     },
     
     notifyTransformChange: function() {
-      var thisInstance = this;
       sceneryEventLog && sceneryEventLog( 'notifyTransformChange: ' + this.trail.toString() + ', ' + this.getLayerString() );
       
-      _.each( this.getAffectedLayers(), function( layer ) { layer.notifyTransformChange( thisInstance ); } );
+      var affectedLayers = this.getAffectedLayers();
+      var i = affectedLayers.length;
+      while ( i-- ) {
+        affectedLayers[i].notifyTransformChange( this );
+      }
     },
     
     notifyBoundsAccuracyChange: function() {
@@ -20247,6 +20973,15 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
   // debug flag to disable matching of layers when in 'match' mode
   var forceNewLayers = true; // DEBUG
   
+  // constructs all sub-trees for the specified instance. used from markSceneForInsertion
+  function buildInstances( instance ) {
+    var node = instance.getNode();
+    var len = node._children.length;
+    for ( var i = 0; i < len; i++ ) {
+      buildInstances( instance.createChild( node._children[i], i ) );
+    }
+  }
+  
   /*
    * $main should be a block-level element with a defined width and height. scene.resize() should be called whenever
    * it is resized.
@@ -20375,9 +21110,10 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
         return;
       }
       
-      _.each( this.layers, function( layer ) {
-        layer.render( scene, args );
-      } );
+      var i = this.layers.length;
+      while ( i-- ) {
+        this.layers[i].render( scene, args );
+      }
       
       this.updateCursor();
       
@@ -20579,6 +21315,8 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
     stitch: function( match ) {
       var scene = this;
       
+      var i;
+      
       sceneryLayerLog && sceneryLayerLog( '-----------------------------------\nbeginning stitch' );
       
       // bail out if there are no changes to stitch (stitch is called multiple times)
@@ -20602,10 +21340,11 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
         baseNode: this
       };
       
-      _.each( this.layerChangeIntervals, function( interval ) {
-        // reindex intervals, since their endpoints indices may need to be updated
-        interval.reindex();
-      } );
+      // reindex intervals, since their endpoints indices may need to be updated
+      i = this.layerChangeIntervals.length;
+      while ( i-- ) {
+        this.layerChangeIntervals[i].reindex();
+      }
       
       /*
        * Sort our intervals, so that when we need to 'unglue' a layer into two separate layers, we will have passed
@@ -20616,7 +21355,9 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
       
       sceneryLayerLog && sceneryLayerLog( 'stitching on intervals: \n' + this.layerChangeIntervals.join( '\n' ) );
       
-      _.each( this.layerChangeIntervals, function( interval ) {
+      for ( i = 0; i < this.layerChangeIntervals.length; i++ ) {
+        var interval = this.layerChangeIntervals[i];
+        
         sceneryLayerLog && sceneryLayerLog( 'stitch on interval ' + interval.toString() );
         var beforeTrail = interval.start;
         var afterTrail = interval.end;
@@ -20628,10 +21369,10 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
         var afterLayer = afterInstance ? afterInstance.layer : null;
         
         // TODO: calculate boundaries based on the instances?
-        var boundaries = scene.calculateBoundaries( beforeLayer ? beforeLayer.type : null, beforeTrail, afterTrail );
+        var boundaries = this.calculateBoundaries( beforeLayer ? beforeLayer.type : null, beforeTrail, afterTrail );
         
-        scene.stitchInterval( stitchData, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match );
-      } );
+        this.stitchInterval( stitchData, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match );
+      }
       
       // clean up state that was set leading up to the stitching, and do it early so
       // if we do things later that cause side-effects we won't clear intervals that haven't been stitched
@@ -20639,28 +21380,32 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
       
       sceneryLayerLog && sceneryLayerLog( '------ finished intervals in stitching' );
       
-      // reindex all of the relevant layer trails
-      _.each( this.layers.concat( stitchData.newLayers ), function( layer ) {
+      // reindex all of the relevant layer trails, and dispose/add as necessary
+      i = this.layers.length;
+      while ( i-- ) {
+        var layer = this.layers[i];
         layer.startBoundary.reindex();
         layer.endBoundary.reindex(); // TODO: performance: this repeats some work, verify in layer audit that we are sharing boundaries properly, then only reindex end boundary on last layer
-      } );
-      
-      // remove necessary layers. do this before adding layers, since insertLayer currently does not gracefully handle weird overlapping cases
-      _.each( this.layers.slice( 0 ), function( layer ) {
+        
+        // remove necessary layers. do this before adding layers, since insertLayer currently does not gracefully handle weird overlapping cases
         // layers with zero trails should be removed
         if ( layer._instanceCount === 0 ) {
           sceneryLayerLog && sceneryLayerLog( 'disposing layer: ' + layer.getId() );
-          scene.disposeLayer( layer );
+          this.disposeLayer( layer );
         }
-      } );
-      
-      // add new layers. we do this before the add/remove trails, since those can trigger layer side effects
-      _.each( stitchData.newLayers, function( layer ) {
-        sceneryAssert && sceneryAssert( layer._instanceCount, 'ensure we are not adding empty layers' );
+      }
+      i = stitchData.newLayers.length;
+      while ( i-- ) {
+        var newLayer = stitchData.newLayers[i];
+        newLayer.startBoundary.reindex();
+        newLayer.endBoundary.reindex(); // TODO: performance: this repeats some work, verify in layer audit that we are sharing boundaries properly, then only reindex end boundary on last layer
         
-        sceneryLayerLog && sceneryLayerLog( 'inserting layer: ' + layer.getId() );
-        scene.insertLayer( layer );
-      } );
+        // add new layers. we do this before the add/remove trails, since those can trigger layer side effects
+        sceneryAssert && sceneryAssert( newLayer._instanceCount, 'ensure we are not adding empty layers' );
+        
+        sceneryLayerLog && sceneryLayerLog( 'inserting layer: ' + newLayer.getId() );
+        scene.insertLayer( newLayer );
+      }
       
       // set the layers' elements' z-indices, and reindex their trails so they are in a consistent state
       // TODO: performance: don't reindex layers if no layers were added or removed?
@@ -20669,9 +21414,10 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
       sceneryLayerLog && sceneryLayerLog( '------ updating layer references' );
       
       // add/remove trails from their necessary layers
-      _.each( stitchData.affectedInstances, function( instance ) {
-        instance.updateLayer();
-      } );
+      var affectedLen = stitchData.affectedInstances.length;
+      for ( i = 0; i < affectedLen; i++ ) {
+        stitchData.affectedInstances[i].updateLayer();
+      }
       
       sceneryAssertExtra && sceneryAssertExtra( this.layerAudit() );
       
@@ -20732,10 +21478,12 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
       
       function addPendingTrailsToLayer() {
         // add the necessary nodes to the layer
-        _.each( instancesToAddToLayer, function( instance ) {
+        var len = instancesToAddToLayer.length;
+        for ( var i = 0; i < len; i++ ) {
+          var instance = instancesToAddToLayer[i];
           instance.changeLayer( currentLayer );
           stitchData.affectedInstances.push( instance );
-        } );
+        }
         instancesToAddToLayer.length = 0;
       }
       
@@ -20829,13 +21577,15 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
           addPendingTrailsToLayer();
           
           // move over all of afterLayer's trails to beforeLayer
-          // defensive copy needed, since this will be modified at the same time
-          _.each( afterLayer._layerTrails.slice( 0 ), function( trail ) {
-            trail.reindex();
-            var instance = trail.getInstance();
+          var len = afterLayer._layerTrails.length;
+          for ( var i = 0; i < len; i++ ) {
+            var endTrail = afterLayer._layerTrails[i];
+            
+            endTrail.reindex();
+            var instance = endTrail.getInstance();
             instance.changeLayer( beforeLayer ); // TODO: performance: handle instances natively
             stitchData.affectedInstances.push( instance );
-          } );
+          }
           
         } else if ( beforeLayer && beforeLayer === afterLayer && boundaries.length > 0 ) {
           // need to 'unglue' and split the layer
@@ -20896,10 +21646,10 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
         index++;
       }
       
-      _.each( this.layers, function( layer ) {
-        // layers increment indices as needed
-        index = layer.reindex( index );
-      } );
+      var len = this.layers.length;
+      for ( var i = 0; i < len; i++ ) {
+        index = this.layers[i].reindex( index );
+      }
       
       if ( accessibility ) {
         if ( this.focusRingSVGContainer ) {
@@ -20922,6 +21672,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
     },
     
     disposeLayer: function( layer ) {
+      // NOTE: stitching relies on this not changing this.layers except for removing the specific layer
       layer.dispose();
       this.layers.splice( _.indexOf( this.layers, layer ), 1 ); // TODO: better removal code!
     },
@@ -20929,9 +21680,10 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
     disposeLayers: function() {
       var scene = this;
       
-      _.each( this.layers.slice( 0 ), function( layer ) {
-        scene.disposeLayer( layer );
-      } );
+      var i = this.layers.length;
+      while ( i-- ) {
+        this.disposeLayer( this.layers[i] );
+      }
     },
     
     // all layers whose start or end points lie inclusively in the range from the trail's before and after
@@ -20948,10 +21700,6 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
       
       sceneryAssert && sceneryAssert( trail.areIndicesValid() );
       
-      // point to the beginning of the node, right before it would be rendered
-      var startPointer = new scenery.TrailPointer( trail, true );
-      var endPointer = new scenery.TrailPointer( trail, false );
-      
       var layers = this.layers;
       
       // from layers 0 to n-1, notAfter goes from false to true, notBefore goes from true to false
@@ -20965,7 +21713,8 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
         var endTrail = layers[mid].endPaintedTrail;
         sceneryAssert && sceneryAssert( endTrail.areIndicesValid() );
         // NOTE TO SELF: don't change this flag to true again. think it through
-        var notAfter = startPointer.compareNested( new scenery.TrailPointer( endTrail, true ) ) !== 1;
+        // trail,true points to the beginning of the node, right before it would be rendered
+        var notAfter = scenery.TrailPointer.compareNested( trail, true, endTrail, true ) !== 1;
         if ( notAfter ) {
           high = mid;
         } else {
@@ -20984,7 +21733,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
         var startTrail = layers[mid].startPaintedTrail;
         startTrail.reindex();
         sceneryAssert && sceneryAssert( startTrail.areIndicesValid() );
-        var notBefore = endPointer.compareNested( new scenery.TrailPointer( startTrail, true ) ) !== -1;
+        var notBefore = scenery.TrailPointer.compareNested( trail, false, startTrail, true ) !== -1;
         if ( notBefore ) {
           low = mid;
         } else {
@@ -21015,9 +21764,10 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
       };
       
       context.clearRect( 0, 0, canvas.width, canvas.height );
-      _.each( this.layers, function( layer ) {
-        layer.renderToCanvas( canvas, context, delayCounts );
-      } );
+      var len = this.layers.length;
+      for ( var i = 0; i < len; i++ ) {
+        this.layers[i].renderToCanvas( canvas, context, delayCounts );
+      }
       
       if ( count === 0 ) {
         // no asynchronous layers, callback immediately
@@ -21121,13 +21871,6 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
       sceneryLayerLog && sceneryLayerLog( 'inserting instances onto ' + instance.toString() + ' with child ' + child.id + ' and index ' + index );
       var baseInstance = instance.createChild( child, index );
       
-      // constructs all sub-trees for the specified instance
-      function buildInstances( instance ) {
-        _.each( instance.getNode().children, function( child, index ) {
-          var nextInstance = instance.createChild( child, index );
-          buildInstances( nextInstance );
-        } );
-      }
       buildInstances( baseInstance );
       
       this.markInterval( affectedTrail );
@@ -21195,7 +21938,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
         listenerTarget: element,
         pointFromEvent: function pointFromEvent( evt ) {
           var mainBounds = element.getBoundingClientRect();
-          return new Vector2( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
+          return Vector2.createFromPool( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
         }
       }, parameters ) );
     },
@@ -21206,7 +21949,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
         listenerTarget: document,
         pointFromEvent: function pointFromEvent( evt ) {
           var mainBounds = element.getBoundingClientRect();
-          return new Vector2( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
+          return Vector2.createFromPool( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
         }
       }, parameters ) );
     },
@@ -21217,7 +21960,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
         listenerTarget: window,
         pointFromEvent: function pointFromEvent( evt ) {
           var mainBounds = element.getBoundingClientRect();
-          return new Vector2( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
+          return Vector2.createFromPool( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
         }
       }, parameters ) );
     },
@@ -21723,6 +22466,7 @@ define( 'main',[
     'SCENERY/nodes/HBox',
     'SCENERY/nodes/HTMLText',
     'SCENERY/nodes/Image',
+    'SCENERY/nodes/Line',
     'SCENERY/nodes/Node',
     'SCENERY/nodes/Path',
     'SCENERY/nodes/Plane',
@@ -24654,6 +25398,34 @@ define( 'DOT/Ray3',['require','DOT/dot'],function( require ) {
 // Copyright 2002-2013, University of Colorado Boulder
 
 /**
+ * A 2D rectangle-shaped bounded area, with a convenience name and constructor. Totally functionally
+ * equivalent to Bounds2, but with a different constructor.
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'DOT/Rectangle',['require','ASSERT/assert','DOT/dot','PHET_CORE/inherit','DOT/Bounds2'],function( require ) {
+  
+  
+  var assert = require( 'ASSERT/assert' )( 'dot' );
+  var dot = require( 'DOT/dot' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var Bounds2 = require( 'DOT/Bounds2' );
+  
+  dot.Rectangle = function Rectangle( x, y, width, height ) {
+    assert && assert( height !== undefined, 'Rectangle requires 4 parameters' );
+    Bounds2.call( this, x, y, x + width, y + height );
+  };
+  var Rectangle = dot.Rectangle;
+  
+  inherit( Bounds2, Rectangle );
+  
+  return Rectangle;
+} );
+
+// Copyright 2002-2013, University of Colorado Boulder
+
+/**
  * Forward and inverse transforms with 4x4 matrices, allowing flexibility including affine and perspective transformations.
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
@@ -24833,6 +25605,7 @@ define( 'DOT/main',[
   'DOT/QRDecomposition',
   'DOT/Ray2',
   'DOT/Ray3',
+  'DOT/Rectangle',
   'DOT/SingularValueDecomposition',
   'DOT/Transform3',
   'DOT/Transform4',
@@ -24872,7 +25645,7 @@ define( 'PHET_CORE/callSuper',['require'],function( require ) {
    * SubType.prototype = new SuperType(); // prototype chaining
    *
    * SubType.prototype.reset = function() {
-   *     Inheritance.callSuper( SuperType, "reset", this ); // call overridden super method
+   *     callSuper( SuperType, "reset", this ); // call overridden super method
    *     // do subtype-specific stuff
    * }
    * </code>
@@ -24993,7 +25766,7 @@ define( 'PHET_CORE/loadScript',['require'],function( require ) {
 
 // Copyright 2002-2013, University of Colorado Boulder
 
-define( 'PHET_CORE/main',['require','PHET_CORE/callSuper','PHET_CORE/collect','PHET_CORE/escapeHTML','PHET_CORE/inherit','PHET_CORE/inheritPrototype','PHET_CORE/isArray','PHET_CORE/extend','PHET_CORE/loadScript'],function( require ) {
+define( 'PHET_CORE/main',['require','PHET_CORE/callSuper','PHET_CORE/collect','PHET_CORE/escapeHTML','PHET_CORE/inherit','PHET_CORE/inheritPrototype','PHET_CORE/isArray','PHET_CORE/extend','PHET_CORE/loadScript','PHET_CORE/phetAllocation','PHET_CORE/Poolable'],function( require ) {
   
   
   return {
@@ -25004,7 +25777,9 @@ define( 'PHET_CORE/main',['require','PHET_CORE/callSuper','PHET_CORE/collect','P
     inheritPrototype: require( 'PHET_CORE/inheritPrototype' ),
     isArray: require( 'PHET_CORE/isArray' ),
     extend: require( 'PHET_CORE/extend' ),
-    loadScript: require( 'PHET_CORE/loadScript' )
+    loadScript: require( 'PHET_CORE/loadScript' ),
+    phetAllocation: require( 'PHET_CORE/phetAllocation' ),
+    Poolable: require( 'PHET_CORE/Poolable' )
   };
 } );
 
@@ -25048,8 +25823,8 @@ require.config( {
   deps: [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main' ],
   
   paths: {
-    underscore: '../lib/lodash.min-1.0.0-rc.3',
-    jquery: '../lib/jquery-2.0.0.min',
+    underscore: '../../sherpa/lodash-2.0.0',
+    jquery: '../../sherpa/jquery-2.0.3',
     SCENERY: '.',
     KITE: '../common/kite/js',
     DOT: '../common/dot/js',

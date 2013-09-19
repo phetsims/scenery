@@ -19,6 +19,8 @@ define( function( require ) {
     this.context = context;
     
     this.resetStyles();
+    
+    phetAllocation && phetAllocation( 'CanvasContextWrapper' );
   };
   var CanvasContextWrapper = scenery.CanvasContextWrapper;
   

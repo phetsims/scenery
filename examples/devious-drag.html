@@ -11,17 +11,17 @@
 
   <title>Devious Dragging - Scenery Example</title>
   
-  <link rel="stylesheet" href="../lib/bootstrap-2.2.2.css">
+  <link rel="stylesheet" href="../../sherpa/bootstrap-2.2.2.css">
   
   <!-- jQuery and LoDash are dependencies -->
-  <script src="../lib/jquery-2.0.0.min.js"></script>
-  <script src="../lib/lodash.min-1.0.0-rc.3.js"></script>
+  <script src="../../sherpa/jquery-2.0.3.min.js"></script>
+  <script src="../../sherpa/lodash-2.0.0.min.js"></script>
   
   <!-- Bootstrap not necessarily needed -->
-  <script src="../lib/bootstrap-2.2.2.js"></script>
+  <script src="../../sherpa/bootstrap-2.2.2.js"></script>
   
   <!-- For the pop-up FPS meter -->
-  <script src="../lib/stats.min.js"></script>
+  <script src="../../sherpa/stats.min.js"></script>
   
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script src="../build/development/scenery.js"></script>
@@ -102,14 +102,12 @@
   $( window ).resize( layout );
   
   // our paths node for the shape
-  var hexagon = new scenery.Path( {
-    shape: kite.Shape.regularPolygon( 6, 18 ),
+  var hexagon = new scenery.Path( kite.Shape.regularPolygon( 6, 18 ), {
     fill: '#ddeeee',
     stroke: '#000000',
     cursor: 'pointer'
   } );
-  var circle = new scenery.Path( {
-    shape: kite.Shape.circle( 0, 0, 18 ),
+  var circle = new scenery.Path( kite.Shape.circle( 0, 0, 18 ), {
     fill: '#ddddee',
     stroke: '#000000',
     cursor: 'pointer'
@@ -211,8 +209,7 @@
         top: y + 10,
         fontSize: 15
       } );
-      var button = new scenery.Path( {
-        shape: kite.Shape.bounds( buttonLabel.getBounds().roundedOut().dilated( 10.5 ) ),
+      var button = new scenery.Path( kite.Shape.bounds( buttonLabel.getBounds().roundedOut().dilated( 10.5 ) ), {
         fill: '#dddddd',
         stroke: '#000000',
         cursor: 'pointer'

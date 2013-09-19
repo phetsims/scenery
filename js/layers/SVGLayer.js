@@ -76,6 +76,10 @@ define( function( require ) {
   };
   var SVGLayer = scenery.SVGLayer;
   
+  // used as an object pool for marking internal base node bounds
+  
+  var scratchBounds1 = Bounds2.NOTHING.copy();
+  
   inherit( Layer, SVGLayer, {
     
     /*
@@ -330,13 +334,17 @@ define( function( require ) {
       sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' baseNodeInternalBoundsChange' );
       if ( this.cssTransform ) {
         // we want to set the baseNodeTransform to a translation so that it maps the baseNode's self/children in the baseNode's local bounds to (0,0,w,h)
-        var internalBounds = this.baseNode.parentToLocalBounds( this.baseNode.getBounds() );
+        var internalBounds = scratchBounds1; // pooled copy
+        internalBounds.setBounds( this.baseNode.getBounds() );
+        this.baseNode.transformBoundsFromParentToLocal( internalBounds );
         var padding = scenery.Layer.cssTransformPadding;
         
         // if there is nothing, or the bounds are empty for some reason, skip this!
         if ( !internalBounds.isEmpty() ) {
           this.baseNodeTransform.set( Matrix3.translation( Math.ceil( -internalBounds.minX + padding), Math.ceil( -internalBounds.minY + padding ) ) );
-          var baseNodeInteralBounds = this.baseNodeTransform.transformBounds2( internalBounds );
+          
+          // NOTE: this is mutable! don't use internalBounds after this
+          var baseNodeInteralBounds = internalBounds.transform( this.baseNodeTransform.getMatrix() );
           
           // sanity check to ensure we are within that range
           sceneryAssert && sceneryAssert( baseNodeInteralBounds.minX >= 0 && baseNodeInteralBounds.minY >= 0 );

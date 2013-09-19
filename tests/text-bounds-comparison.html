@@ -7,12 +7,12 @@
   <title>Text Bounds Comparison - Scenery</title>
   
   <!-- jQuery and LoDash are dependencies -->
-  <script src="../lib/jquery-2.0.0.min.js"></script>
-  <script src="../lib/lodash.min-1.0.0-rc.3.js"></script>
+  <script src="../../sherpa/jquery-2.0.3.min.js"></script>
+  <script src="../../sherpa/lodash-2.0.0.min.js"></script>
   
   <!-- Canvg for SVG to Canvas -->
-  <script src="../lib/canvg-1.2/rgbcolor.js"></script>
-  <script src="../lib/canvg-1.2/canvg.js"></script>
+  <script src="../../sherpa/rgbcolor.js"></script>
+  <script src="../../sherpa/canvg-1.2.js"></script>
   
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script src="../build/development/scenery.js"></script>
@@ -60,20 +60,16 @@
       y: -unionBounds.minY
     } );
     
-    container.addChild( new scenery.Path( {
-      shape: kite.Shape.bounds( canvasBounds ),
+    container.addChild( new scenery.Path( kite.Shape.bounds( canvasBounds ), {
       fill: '#aaaaaa'
     } ) );
-    container.addChild( new scenery.Path( {
-      shape: kite.Shape.bounds( svgBounds ),
+    container.addChild( new scenery.Path( kite.Shape.bounds( svgBounds ), {
       fill: 'rgba(255,0,0,0.4)'
     } ) );
-    container.addChild( new scenery.Path( {
-      shape: kite.Shape.bounds( domBounds ),
+    container.addChild( new scenery.Path( kite.Shape.bounds( domBounds ), {
       fill: 'rgba(0,0,255,0.4)'
     } ) );
-    container.addChild( new scenery.Path( {
-      shape: kite.Shape.lineSegment( new dot.Vector2( domBounds.minX + width, domBounds.minY ), new dot.Vector2( domBounds.minX + width, domBounds.maxY ) ),
+    container.addChild( new scenery.Path( kite.Shape.lineSegment( new dot.Vector2( domBounds.minX + width, domBounds.minY ), new dot.Vector2( domBounds.minX + width, domBounds.maxY ) ), {
       stroke: '#00ff00'
     } ) );
     
@@ -87,12 +83,10 @@
     container.addChild( canvasNode );
     textNode.fill = 'rgba(255,255,255,0.6)';
     
-    container.addChild( new scenery.Path( {
-      shape: kite.Shape.lineSegment( new dot.Vector2( 5, 0.5 ), new dot.Vector2( -5, 0.5 ) ),
+    container.addChild( new scenery.Path( kite.Shape.lineSegment( new dot.Vector2( 5, 0.5 ), new dot.Vector2( -5, 0.5 ) ), {
       stroke: 'rgba(0,0,0,0.5)'
     } ) );
-    container.addChild( new scenery.Path( {
-      shape: kite.Shape.lineSegment( new dot.Vector2( 0.5, 5 ), new dot.Vector2( 0.5, -5 ) ),
+    container.addChild( new scenery.Path( kite.Shape.lineSegment( new dot.Vector2( 0.5, 5 ), new dot.Vector2( 0.5, -5 ) ), {
       stroke: 'rgba(0,0,0,0.5)'
     } ) );
     

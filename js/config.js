@@ -38,8 +38,8 @@ require.config( {
   deps: [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main' ],
   
   paths: {
-    underscore: '../lib/lodash.min-1.0.0-rc.3',
-    jquery: '../lib/jquery-2.0.0.min',
+    underscore: '../../sherpa/lodash-2.0.0',
+    jquery: '../../sherpa/jquery-2.0.3',
     SCENERY: '.',
     KITE: '../common/kite/js',
     DOT: '../common/dot/js',

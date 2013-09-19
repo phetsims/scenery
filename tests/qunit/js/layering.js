@@ -207,16 +207,16 @@
     var node5 = new scenery.Node( {} );
     var node6 = new scenery.Node( {} );
     var node7 = new scenery.Node( {} );
-    var path8 = new scenery.Path( {} );
-    var path9 = new scenery.Path( {} );
-    var path10 = new scenery.Path( {} );
-    var path11 = new scenery.Path( {} );
-    var path12 = new scenery.Path( {} );
-    var path13 = new scenery.Path( {} );
-    var path14 = new scenery.Path( {} );
-    var path15 = new scenery.Path( {} );
-    var path16 = new scenery.Path( {} );
-    var path17 = new scenery.Path( {} );
+    var path8 = new scenery.Path( );
+    var path9 = new scenery.Path( );
+    var path10 = new scenery.Path( );
+    var path11 = new scenery.Path( );
+    var path12 = new scenery.Path( );
+    var path13 = new scenery.Path( );
+    var path14 = new scenery.Path( );
+    var path15 = new scenery.Path( );
+    var path16 = new scenery.Path( );
+    var path17 = new scenery.Path( );
     path15.renderer = 'canvas';
     path8.renderer = 'svg';
     path9.insertChild( 0, path14 );
@@ -336,16 +336,16 @@
     var node5 = new scenery.Node( {} );
     var node6 = new scenery.Node( {} );
     var node7 = new scenery.Node( {} );
-    var path8 = new scenery.Path( {} );
-    var path9 = new scenery.Path( {} );
-    var path10 = new scenery.Path( {} );
-    var path11 = new scenery.Path( {} );
-    var path12 = new scenery.Path( {} );
-    var path13 = new scenery.Path( {} );
-    var path14 = new scenery.Path( {} );
-    var path15 = new scenery.Path( {} );
-    var path16 = new scenery.Path( {} );
-    var path17 = new scenery.Path( {} );
+    var path8 = new scenery.Path( );
+    var path9 = new scenery.Path( );
+    var path10 = new scenery.Path( );
+    var path11 = new scenery.Path( );
+    var path12 = new scenery.Path( );
+    var path13 = new scenery.Path( );
+    var path14 = new scenery.Path( );
+    var path15 = new scenery.Path( );
+    var path16 = new scenery.Path( );
+    var path17 = new scenery.Path( );
     path12.renderer = null;
     path16.insertChild( 0, node5 );
     scene.renderer = 'canvas';
@@ -572,55 +572,55 @@
   test( 'unnamed break #4', function() {
     var scene = new scenery.Scene( $( '#main' ) );
     
-    var path2 = new scenery.Path( {
+    var path2 = new scenery.Path( null, {
       renderer: 'svg'
-    } )
-    var node3 = new scenery.Node( {} )
+    } );
+    var node3 = new scenery.Node( {} );
     node3.addChild( path2 );
-    var path4 = new scenery.Path( {} )
+    var path4 = new scenery.Path( );
     path4.addChild( node3 );
-    var node5 = new scenery.Node( {} )
+    var node5 = new scenery.Node( );
     node5.addChild( path4 );
-    var path6 = new scenery.Path( {} )
+    var path6 = new scenery.Path( );
     path6.addChild( node5 );
     var node7 = new scenery.Node( {
       renderer: 'svg'
-    } )
+    } );
     node7.addChild( node3 );
     node7.addChild( path6 );
     scene.mutate( {
       renderer: 'svg'
-    } )
+    } );
     scene.addChild( node7 );
     scene.addChild( path6 );
-    var path8 = new scenery.Path( {} )
+    var path8 = new scenery.Path( );
     path8.addChild( path6 );
-    var path9 = new scenery.Path( {
+    var path9 = new scenery.Path( null, {
       renderer: 'svg'
-    } )
+    } );
     path9.addChild( path2 );
     path9.addChild( path8 );
-    var node10 = new scenery.Node( {} )
+    var node10 = new scenery.Node( );
     node10.addChild( path9 );
     var node11 = new scenery.Node( {
       renderer: 'canvas'
-    } )
+    } );
     node11.addChild( path2 );
-    var path12 = new scenery.Path( {} )
+    var path12 = new scenery.Path( );
     path12.addChild( node11 );
     path12.addChild( node3 );
     path12.addChild( path8 );
-    var path13 = new scenery.Path( {
+    var path13 = new scenery.Path( null, {
       renderer: 'svg'
-    } )
+    } );
     path13.addChild( path12 );
     path13.addChild( node11 );
-    var path14 = new scenery.Path( {
+    var path14 = new scenery.Path( null, {
       renderer: 'canvas'
-    } )
+    } );
     path14.addChild( node10 );
     path14.addChild( path13 );
-    var path15 = new scenery.Path( {} )
+    var path15 = new scenery.Path(  );
     path15.addChild( node3 );
     
     // causes the break
@@ -632,53 +632,53 @@
   test( 'unnamed break #5 (layer ordering)', function() {
     var scene = new scenery.Scene( $( '#main' ) );
     
-    var path10 = new scenery.Path( {
+    var path10 = new scenery.Path( null, {
       renderer: 'svg'
-    } )
-    var path14 = new scenery.Path( {} )
-    var path12 = new scenery.Path( {} )
+    } );
+    var path14 = new scenery.Path( );
+    var path12 = new scenery.Path( );
     path12.addChild( path10 );
     path12.addChild( path14 );
     var node4 = new scenery.Node( {
       renderer: 'canvas'
-    } )
+    } );
     node4.addChild( path12 );
-    var path11 = new scenery.Path( {
+    var path11 = new scenery.Path( null, {
       renderer: 'svg'
-    } )
+    } );
     path11.addChild( path10 );
-    var path16 = new scenery.Path( {} )
+    var path16 = new scenery.Path( );
     path16.addChild( path11 );
-    var node5 = new scenery.Node( {} )
+    var node5 = new scenery.Node( {} );
     var node7 = new scenery.Node( {
       renderer: 'svg'
-    } )
+    } );
     node7.addChild( node4 );
     node7.addChild( path16 );
     node7.addChild( path10 );
     node7.addChild( node5 );
-    var path15 = new scenery.Path( {} )
-    scene.mutate( {} )
+    var path15 = new scenery.Path( );
+    scene.mutate( {} );
     scene.addChild( node7 );
     scene.addChild( path15 );
     scene.addChild( node5 );
-    var node6 = new scenery.Node( {} )
+    var node6 = new scenery.Node( {} );
     node6.addChild( path15 );
     node6.addChild( node7 );
-    var path17 = new scenery.Path( {} )
+    var path17 = new scenery.Path( );
     path17.addChild( node6 );
-    var path13 = new scenery.Path( {} )
+    var path13 = new scenery.Path( );
     path13.addChild( path10 );
     path13.addChild( path11 );
     path13.addChild( path17 );
-    var path8 = new scenery.Path( {} )
+    var path8 = new scenery.Path( );
     path8.addChild( path12 );
     path8.addChild( path11 );
     var node3 = new scenery.Node( {
       renderer: 'canvas'
-    } )
+    } );
     node3.addChild( node4 );
-    var path9 = new scenery.Path( {} )
+    var path9 = new scenery.Path( );
     path9.addChild( path11 );
     path9.addChild( path10 );
     
@@ -691,49 +691,49 @@
   test( 'unnamed break #6 (layer split)', function() {
     var scene = new scenery.Scene( $( '#main' ) );
     
-    var node6 = new scenery.Node( {} )
-    var path16 = new scenery.Path( {
+    var node6 = new scenery.Node( {} );
+    var path16 = new scenery.Path( null, {
       renderer: 'canvas'
-    } )
+    } );
     var node7 = new scenery.Node( {
       layerSplitBefore: true,
       layerSplitAfter: true
-    } )
+    } );
     var node5 = new scenery.Node( {
       renderer: 'svg'
-    } )
+    } );
     node5.addChild( node6 );
     node5.addChild( path16 );
     node5.addChild( node7 );
     var node4 = new scenery.Node( {
       renderer: 'svg'
-    } )
+    } );
     node4.addChild( node5 );
-    var path12 = new scenery.Path( {} )
-    var path14 = new scenery.Path( {
+    var path12 = new scenery.Path( );
+    var path14 = new scenery.Path( null, {
       layerSplitBefore: true
-    } )
-    var path9 = new scenery.Path( {
+    } );
+    var path9 = new scenery.Path( null, {
       renderer: 'svg',
       layerSplitAfter: true
-    } )
+    } );
     path9.addChild( path12 );
     path9.addChild( path14 );
-    scene.mutate( {} )
-    var path13 = new scenery.Path( {
+    scene.mutate( {} );
+    var path13 = new scenery.Path( null, {
       renderer: 'canvas'
-    } )
+    } );
     path13.addChild( node7 );
-    var path10 = new scenery.Path( {
+    var path10 = new scenery.Path( null, {
       renderer: 'canvas',
       layerSplitBefore: true
-    } )
+    } );
     path10.addChild( scene );
     path10.addChild( path12 );
     path10.addChild( path13 );
-    var path8 = new scenery.Path( {
+    var path8 = new scenery.Path( null, {
       renderer: 'canvas'
-    } )
+    } );
     path8.addChild( node4 );
     path8.addChild( path9 );
     path8.addChild( node6 );
@@ -747,20 +747,20 @@
     node3.addChild( node4 );
     node3.addChild( path10 );
     node3.addChild( path12 );
-    var path17 = new scenery.Path( {
+    var path17 = new scenery.Path( null, {
       renderer: 'svg'
-    } )
+    } );
     path17.addChild( path16 );
     path17.addChild( node6 );
     path17.addChild( node3 );
     path17.addChild( path13 );
     path17.addChild( scene );
-    var path15 = new scenery.Path( {} )
+    var path15 = new scenery.Path( null,{} );
     path15.addChild( path14 );
-    var path11 = new scenery.Path( {
+    var path11 = new scenery.Path( null, {
       renderer: 'canvas',
       layerSplitAfter: true
-    } )
+    } );
     path11.addChild( path13 );
     path11.addChild( path9 );
     path11.addChild( node6 );

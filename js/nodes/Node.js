@@ -141,6 +141,8 @@ define( function( require ) {
     if ( options ) {
       this.mutate( options );
     }
+    
+    phetAllocation && phetAllocation( 'Node' );
   };
   var Node = scenery.Node;
   
@@ -213,15 +215,16 @@ define( function( require ) {
     
     // TODO: efficiency by batching calls?
     setChildren: function( children ) {
-      var node = this;
       if ( this._children !== children ) {
-        // TODO: maybe iterating in reverse is more efficient?
-        _.each( this._children.slice( 0 ), function( child ) {
-          node.removeChild( child );
-        } );
-        _.each( children, function( child ) {
-          node.addChild( child );
-        } );
+        // remove all children in a way where we don't have to copy the child array for safety
+        while ( this._children.length ) {
+          this.removeChild( this._children[this._children.length-1] );
+        }
+        
+        var len = children.length;
+        for ( var i = 0; i < len; i++ ) {
+          this.addChild( children[i] );
+        }
       }
     },
     
@@ -302,6 +305,7 @@ define( function( require ) {
     // ensure that cached bounds stored on this node (and all children) are accurate
     validateBounds: function() {
       var that = this;
+      var i;
       
       if ( this._selfBoundsDirty ) {
         // note: this should only be triggered if the bounds were actually changed, since we have a guard in place at invalidateSelf()
@@ -313,19 +317,22 @@ define( function( require ) {
       
       // validate bounds of children if necessary
       if ( this._childBoundsDirty ) {
+        
         // have each child validate their own bounds
-        _.each( this._children, function( child ) {
-          child.validateBounds();
-        } );
+        i = this._children.length;
+        while ( i-- ) {
+          this._children[i].validateBounds();
+        }
         
         var oldChildBounds = this._childBounds;
         
         // and recompute our _childBounds
         this._childBounds = Bounds2.NOTHING.copy();
         
-        _.each( this._children, function( child ) {
-          that._childBounds.includeBounds( child._bounds );
-        } );
+        i = this._children.length;
+        while ( i-- ) {
+          this._childBounds.includeBounds( this._children[i]._bounds );
+        }
         
         // run this before firing the event
         this._childBoundsDirty = false;
@@ -351,9 +358,10 @@ define( function( require ) {
         if ( changed ) {
           this._bounds = newBounds;
           
-          _.each( this._parents, function( parent ) {
-            parent.invalidateBounds();
-          } );
+          i = this._parents.length;
+          while ( i-- ) {
+            this._parents[i].invalidateBounds();
+          }
           
           // TODO: consider changing to parameter object (that may be a problem for the GC overhead)
           this.fireEvent( 'bounds', this._bounds );
@@ -396,13 +404,15 @@ define( function( require ) {
         this._mouseBounds = this._selfBounds.copy(); // start with the self bounds, then add from there
         
         // union of all children's mouse bounds (if they exist)
-        _.each( this._children, function( child ) {
+        var i = this._children.length;
+        while ( i-- ) {
+          var child = this._children[i];
           child.validateMouseBounds();
           if ( child._mouseBounds ) {
             hasMouseAreas = true;
             that._mouseBounds.includeBounds( child._mouseBounds );
           }
-        } );
+        }
         
         // do this before the transformation to the parent coordinate frame
         if ( this._mouseArea ) {
@@ -435,13 +445,15 @@ define( function( require ) {
         this._touchBounds = this._selfBounds.copy(); // start with the self bounds, then add from there
         
         // union of all children's touch bounds (if they exist)
-        _.each( this._children, function( child ) {
+        var i = this._children.length;
+        while ( i-- ) {
+          var child = this._children[i];
           child.validateTouchBounds();
           if ( child._touchBounds ) {
             hasTouchAreas = true;
             that._touchBounds.includeBounds( child._touchBounds );
           }
-        } );
+        }
         
         // do this before the transformation to the parent coordinate frame
         if ( this._touchArea ) {
@@ -497,9 +509,10 @@ define( function( require ) {
       this._touchBoundsDirty = true;
       
       // and set flags for all ancestors
-      _.each( this._parents, function( parent ) {
-        parent.invalidateChildBounds();
-      } );
+      var i = this._parents.length;
+      while ( i-- ) {
+        this._parents[i].invalidateChildBounds();
+      }
     },
     
     // recursively tag all ancestors with _childBoundsDirty
@@ -509,9 +522,10 @@ define( function( require ) {
         this._childBoundsDirty = true;
         this._mouseBoundsDirty = true;
         this._touchBoundsDirty = true;
-        _.each( this._parents, function( parent ) {
-          parent.invalidateChildBounds();
-        } );
+        var i = this._parents.length;
+        while ( i-- ) {
+          this._parents[i].invalidateChildBounds();
+        }
       }
     },
     
@@ -521,18 +535,20 @@ define( function( require ) {
       this._paintDirty = true;
       
       // and set flags for all ancestors
-      _.each( this._parents, function( parent ) {
-        parent.invalidateChildPaint();
-      } );
+      var i = this._parents.length;
+      while ( i-- ) {
+        this._parents[i].invalidateChildPaint();
+      }
     },
     
     invalidateSubtreePaint: function() {
       this._subtreePaintDirty = true;
       
       // and set flags for all ancestors
-      _.each( this._parents, function( parent ) {
-        parent.invalidateChildPaint();
-      } );
+      var i = this._parents.length;
+      while ( i-- ) {
+        this._parents[i].invalidateChildPaint();
+      }
     },
     
     // recursively tag all ancestors with _childPaintDirty
@@ -540,9 +556,10 @@ define( function( require ) {
       // don't bother updating if we've already been tagged
       if ( !this._childPaintDirty ) {
         this._childPaintDirty = true;
-        _.each( this._parents, function( parent ) {
-          parent.invalidateChildPaint();
-        } );
+        var i = this._parents.length;
+        while ( i-- ) {
+          this._parents[i].invalidateChildPaint();
+        }
       }
     },
     
@@ -614,11 +631,13 @@ define( function( require ) {
       // defensive copy, since we use mutable modifications below
       var bounds = this._selfBounds.copy();
       
-      _.each( this.children, function( child ) {
+      var i = this._children.length;
+      while ( i-- ) {
+        var child = this._children[i];
         if ( child.isVisible() ) {
           bounds.includeBounds( child.getVisibleBounds() );
         }
-      } );
+      }
       
       sceneryAssert && sceneryAssert( bounds.isFinite() || bounds.isEmpty(), 'Visible bounds should not be infinite' );
       return this.localToParentBounds( bounds );
@@ -639,8 +658,10 @@ define( function( require ) {
      *
      * If options.pruneInvisible is false, invisible nodes will be allowed in the trail.
      * If options.pruneUnpickable is false, unpickable nodes will be allowed in the trail.
+     *
+     * When calling, don't pass the recursive flag. It signals that the point passed can be mutated
      */
-    trailUnderPoint: function( point, options ) {
+    trailUnderPoint: function( point, options, recursive ) {
       sceneryAssert && sceneryAssert( point, 'trailUnderPointer requires a point' );
       
       if ( options === undefined ) { options = {}; }
@@ -672,8 +693,12 @@ define( function( require ) {
         return null; // not in our bounds, so this point can't possibly be contained
       }
       
+      // temporary result variable, since it's easier to do this way to free the computed point
+      var result = null;
+      
       // point in the local coordinate frame. computed after the main bounds check, so we can bail out there efficiently
-      var localPoint = this.parentToLocalPoint( point );
+      var localPoint = this._transform.getInverse().multiplyVector2( Vector2.createFromPool( point.x, point.y ) );
+      // var localPoint = this.parentToLocalPoint( point );
       
       // check children first, since they are rendered later
       if ( this._children.length > 0 && ( hasHitAreas || this._childBounds.containsPoint( localPoint ) ) ) {
@@ -687,6 +712,7 @@ define( function( require ) {
           // the child will have the point in its parent's coordinate frame (i.e. this node's frame)
           if ( childHit ) {
             childHit.addAncestor( this, i );
+            localPoint.freeToPool();
             return childHit;
           }
         }
@@ -695,21 +721,27 @@ define( function( require ) {
       // tests for mouse and touch hit areas before testing containsPointSelf
       if ( hasHitAreas ) {
         if ( options.isMouse && this._mouseArea ) {
-          return this._mouseArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
+          result = this._mouseArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
+          localPoint.freeToPool();
+          return result;
         }
         if ( ( options.isTouch || options.isPen ) && this._touchArea ) {
-          return this._touchArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
+          result = this._touchArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
+          localPoint.freeToPool();
+          return result;
         }
       }
       
       // didn't hit our children, so check ourself as a last resort
       if ( hasHitAreas || this._selfBounds.containsPoint( localPoint ) ) {
         if ( this.containsPointSelf( localPoint ) ) {
+          localPoint.freeToPool();
           return new scenery.Trail( this );
         }
       }
       
       // signal no hit
+      localPoint.freeToPool();
       return null;
     },
     
@@ -745,13 +777,22 @@ define( function( require ) {
     
     walkDepthFirst: function( callback ) {
       callback( this );
-      _.each( this._children, function( child ) {
-        child.walkDepthFirst( callback );
-      } );
+      var length = this._children.length;
+      for ( var i = 0; i < length; i++ ) {
+        this._children[i].walkDepthFirst( callback );
+      }
     },
     
     getChildrenWithinBounds: function( bounds ) {
-      return _.filter( this._children, function( child ) { return !child._bounds.intersection( bounds ).isEmpty(); } );
+      var result = [];
+      var length = this._children.length;
+      for ( var i = 0; i < length; i++ ) {
+        var child = this._children[i];
+        if ( !child._bounds.intersection( bounds ).isEmpty() ) {
+          result.push( child );
+        }
+      }
+      return result;
     },
     
     // TODO: set this up with a mix-in for a generic notifier?
@@ -828,7 +869,7 @@ define( function( require ) {
         // translate( x, y, prependInstead )
         if ( !x && !y ) { return; } // bail out if both are zero
         if ( prependInstead ) {
-          this.prependMatrix( Matrix3.translation( x, y ) );
+          this.prependTranslation( x, y );
         } else {
           this.appendMatrix( Matrix3.translation( x, y ) );
         }
@@ -883,24 +924,24 @@ define( function( require ) {
     },
     
     getX: function() {
-      return this.getTranslation().x;
+      return this._transform.getMatrix().m02();
     },
     
     setX: function( x ) {
       sceneryAssert && sceneryAssert( typeof x === 'number' );
       
-      this.setTranslation( x, this.getY() );
+      this.translate( x - this.getX(), 0, true );
       return this;
     },
     
     getY: function() {
-      return this.getTranslation().y;
+      return this._transform.getMatrix().m12();
     },
     
     setY: function( y ) {
       sceneryAssert && sceneryAssert( typeof y === 'number' );
       
-      this.setTranslation( this.getX(), y );
+      this.translate( 0, y - this.getY(), true );
       return this;
     },
     
@@ -940,16 +981,18 @@ define( function( require ) {
     
     // supports setTranslation( x, y ) or setTranslation( new Vector2( x, y ) ) .. or technically setTranslation( { x: x, y: y } )
     setTranslation: function( a, b ) {
-      var translation = this.getTranslation();
-      
+      var m = this._transform.getMatrix();
+      var tx = m.m02();
+      var ty = m.m12();
+
       var dx, dy;
       
       if ( typeof a === 'number' ) {
-        dx = a - translation.x;
-        dy = b - translation.y;
+        dx = a - tx;
+        dy = b - ty;
       } else {
-        dx = a.x - translation.x;
-        dy = a.y - translation.y;
+        dx = a.x - tx;
+        dy = a.y - ty;
       }
       
       this.translate( dx, dy, true );
@@ -958,7 +1001,8 @@ define( function( require ) {
     },
     
     getTranslation: function() {
-      return this._transform.getMatrix().getTranslation();
+      var matrix = this._transform.getMatrix();
+      return new Vector2( matrix.m02(), matrix.m12() );
     },
     
     // append a transformation matrix to our local transform
@@ -969,6 +1013,11 @@ define( function( require ) {
     // prepend a transformation matrix to our local transform
     prependMatrix: function( matrix ) {
       this._transform.prepend( matrix );
+    },
+
+    // prepend an x,y translation to our local transform without allocating a matrix for it, see #119
+    prependTranslation: function( x,y ) {
+      this._transform.prependTranslation( x, y );
     },
     
     setMatrix: function( matrix ) {
@@ -1568,11 +1617,19 @@ define( function( require ) {
     // returns undefined if there is no instance.
     getInstanceFromTrail: function( trail ) {
       var result;
-      if ( this._instances.length === 1 ) {
+      var len = this._instances.length;
+      if ( len === 1 ) {
         // don't bother with checking the trail, but assertion should assure that it's what we're looking for
         result = this._instances[0];
       } else {
-        result = _.find( this._instances, function( instance ) { return trail.equals( instance.trail ); } );
+        var i = len;
+        while ( i-- ) {
+          if ( this._instances[i].trail.equals( trail ) ) {
+            result = this._instances[i];
+            break;
+          }
+        }
+        // leave it as undefined if we don't find one
       }
       sceneryAssert && sceneryAssert( result, 'Could not find an instance for the trail ' + trail.toString() );
       sceneryAssert && sceneryAssert( result.trail.equals( trail ), 'Instance has an incorrect Trail' );
@@ -1593,51 +1650,87 @@ define( function( require ) {
     },
     
     notifyVisibilityChange: function() {
-      _.each( this._instances, function( instance ) { instance.notifyVisibilityChange(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyVisibilityChange();
+      }
     },
     
     notifyOpacityChange: function() {
-      _.each( this._instances, function( instance ) { instance.notifyOpacityChange(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyOpacityChange();
+      }
     },
     
     notifyBeforeSelfChange: function() {
-      _.each( this._instances, function( instance ) { instance.notifyBeforeSelfChange(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyBeforeSelfChange();
+      }
     },
     
     notifyBeforeSubtreeChange: function() {
-      _.each( this._instances, function( instance ) { instance.notifyBeforeSubtreeChange(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyBeforeSubtreeChange();
+      }
     },
     
     notifyDirtySelfPaint: function() {
-      _.each( this._instances, function( instance ) { instance.notifyDirtySelfPaint(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyDirtySelfPaint();
+      }
     },
     
     notifyDirtySubtreePaint: function() {
-      _.each( this._instances, function( instance ) { instance.notifyDirtySubtreePaint(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyDirtySubtreePaint();
+      }
     },
     
     notifyTransformChange: function() {
-      _.each( this._instances, function( instance ) { instance.notifyTransformChange(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyTransformChange();
+      }
     },
     
     notifyBoundsAccuracyChange: function() {
-      _.each( this._instances, function( instance ) { instance.notifyBoundsAccuracyChange(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyBoundsAccuracyChange();
+      }
     },
     
     notifyStitch: function( match ) {
-      _.each( this._instances, function( instance ) { instance.notifyStitch( match ); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyStitch( match );
+      }
     },
     
     markForLayerRefresh: function() {
-      _.each( this._instances, function( instance ) { instance.markForLayerRefresh(); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].markForLayerRefresh();
+      }
     },
     
     markForInsertion: function( child, index ) {
-      _.each( this._instances, function( instance ) { instance.markForInsertion( child, index ); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].markForInsertion( child, index );
+      }
     },
     
     markForRemoval: function( child, index ) {
-      _.each( this._instances, function( instance ) { instance.markForRemoval( child, index ); } );
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].markForRemoval( child, index );
+      }
     },
     
     /*---------------------------------------------------------------------------*
@@ -1667,6 +1760,11 @@ define( function( require ) {
     // mutable optimized form of localToParentBounds
     transformBoundsFromLocalToParent: function( bounds ) {
       return bounds.transform( this._transform.getMatrix() );
+    },
+    
+    // mutable optimized form of parentToLocalBounds
+    transformBoundsFromParentToLocal: function( bounds ) {
+      return bounds.transform( this._transform.getInverse() );
     },
     
     // returns the matrix (fresh copy) that transforms points from the local coordinate frame into the global coordinate frame
@@ -1880,6 +1978,10 @@ define( function( require ) {
     get instances() { return this.getInstances(); },
     
     mutate: function( options ) {
+      if ( !options ) {
+        return this;
+      }
+      
       var node = this;
       
       _.each( this._mutatorKeys, function( key ) {

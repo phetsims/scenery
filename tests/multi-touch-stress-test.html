@@ -11,17 +11,17 @@
 
   <title>Multi-touch Example</title>
   
-  <link rel="stylesheet" href="../lib/bootstrap-2.2.2.css">
+  <link rel="stylesheet" href="../../sherpa/bootstrap-2.2.2.css">
   
   <!-- jQuery and LoDash are dependencies -->
-  <script src="../lib/jquery-2.0.0.min.js"></script>
-  <script src="../lib/lodash.min-1.0.0-rc.3.js"></script>
+  <script src="../../sherpa/jquery-2.0.3.min.js"></script>
+  <script src="../../sherpa/lodash-2.0.0.min.js"></script>
   
   <!-- Bootstrap not necessarily needed -->
-  <script src="../lib/bootstrap-2.2.2.js"></script>
+  <script src="../../sherpa/bootstrap-2.2.2.js"></script>
   
   <!-- For the pop-up FPS meter -->
-  <script src="../lib/stats.min.js"></script>
+  <script src="../../sherpa/stats.min.js"></script>
   
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script src="../build/development/scenery.js"></script>
@@ -85,8 +85,7 @@
   for ( var i = 0; i < count; i++ ) {
     // anonymous function so the closure variables aren't shared between iterations
     (function(){
-      var node = new scenery.Path( {
-        shape: kite.Shape.regularPolygon( 6, 22 ),
+      var node = new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
         fill: normalColor,
         stroke: '#000000',
         x: Math.random() * 500,

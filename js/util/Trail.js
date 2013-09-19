@@ -64,11 +64,14 @@ define( function( require ) {
         trail.addDescendant( node );
       } else {
         // process it as an array
-        _.each( nodes, function( node ) {
-          trail.addDescendant( node );
-        } );
+        var len = nodes.length;
+        for ( var i = 0; i < len; i++ ) {
+          trail.addDescendant( nodes[i] );
+        }
       }
     }
+    
+    phetAllocation && phetAllocation( 'Trail' );
   };
   var Trail = scenery.Trail;
   
@@ -86,11 +89,22 @@ define( function( require ) {
     
     // this trail is visible only if all nodes on it are marked as visible
     isVisible: function() {
-      return _.every( this.nodes, function( node ) { return node.isVisible(); } );
+      var i = this.nodes.length;
+      while ( i-- ) {
+        if ( !this.nodes[i].isVisible() ) {
+          return false;
+        }
+      }
+      return true;
     },
     
     getOpacity: function() {
-      return _.reduce( this.nodes, function( opacity, node ) { return opacity * node.getOpacity(); }, 1 );
+      var opacity = 1;
+      var i = this.nodes.length;
+      while ( i-- ) {
+        opacity *= this.nodes[i].getOpacity();
+      }
+      return opacity;
     },
     
     get: function( index ) {

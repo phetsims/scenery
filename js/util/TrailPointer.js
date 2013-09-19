@@ -27,6 +27,8 @@ define( function( require ) {
     this.trail = trail;
     
     this.setBefore( isBefore );
+    
+    phetAllocation && phetAllocation( 'TrailPointer' );
   };
   var TrailPointer = scenery.TrailPointer;
   
@@ -274,6 +276,30 @@ define( function( require ) {
     
     toString: function() {
       return '[' + ( this.isBefore ? 'before' : 'after' ) + ' ' + this.trail.toString().slice( 1 );
+    }
+  };
+  
+  // same as new TrailPointer( trailA, isBeforeA ).compareNested( new TrailPointer( trailB, isBeforeB ) )
+  TrailPointer.compareNested = function( trailA, isBeforeA, trailB, isBeforeB ) {
+    var comparison = trailA.compare( trailB );
+    
+    if ( comparison === 0 ) {
+      // if trails are equal, just compare before/after
+      if ( isBeforeA === isBeforeB ) {
+        return 0;
+      } else {
+        return isBeforeA ? -1 : 1;
+      }
+    } else {
+      // if one is an extension of the other, the shorter isBefore flag determines the order completely
+      if ( trailA.isExtensionOf( trailB ) ) {
+        return isBeforeB ? 1 : -1;
+      } else if ( trailB.isExtensionOf( trailA ) ) {
+        return isBeforeA ? -1 : 1;
+      } else {
+        // neither is a subtrail of the other, so a straight trail comparison should give the answer
+        return comparison;
+      }
     }
   };
   

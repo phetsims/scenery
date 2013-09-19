@@ -7,12 +7,12 @@
   <title>Text Tests</title>
   
   <!-- jQuery and LoDash are dependencies -->
-  <script src="../lib/jquery-2.0.0.min.js"></script>
-  <script src="../lib/lodash.min-1.0.0-rc.3.js"></script>
+  <script src="../../sherpa/jquery-2.0.3.min.js"></script>
+  <script src="../../sherpa/lodash-2.0.0.min.js"></script>
   
   <!-- Canvg for SVG to Canvas -->
-  <script src="../lib/canvg-1.2/rgbcolor.js"></script>
-  <script src="../lib/canvg-1.2/canvg.js"></script>
+  <script src="../../sherpa/rgbcolor.js"></script>
+  <script src="../../sherpa/canvg-1.2.js"></script>
   
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script src="../build/development/scenery.js"></script>
@@ -40,8 +40,7 @@
   <script>
   
   var mainScene = new scenery.Scene( $( '#main' ) );
-  mainScene.addChild( new scenery.Path( {
-    shape: kite.Shape.rectangle( 0, 0, 512, 512 ),
+  mainScene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 512, 512 ), {
     fill: '#ffffaa'
   } ) );
   
@@ -49,8 +48,7 @@
   $div.width( 256 );
   $div.height( 256 );
   var nestedScene = new scenery.Scene( $div );
-  nestedScene.addChild( new scenery.Path( {
-    shape: kite.Shape.rectangle( 0, 0, 256, 256 ),
+  nestedScene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 256, 256 ), {
     fill: '#aaffff'
   } ) );
   nestedScene.updateScene();

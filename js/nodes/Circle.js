@@ -9,13 +9,13 @@
 
 define( function( require ) {
   'use strict';
-  
+
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  
+
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
-  
+
   scenery.Circle = function Circle( radius, options ) {
     if ( typeof radius === 'object' ) {
       // allow new Circle( { radius: ... } )
@@ -23,44 +23,43 @@ define( function( require ) {
       options = radius;
     } else {
       this._radius = radius;
-      
+
       // ensure we have a parameter object
       options = options || {};
-      
-      // fallback for non-canvas or non-svg rendering, and for proper bounds computation
-      options.shape = Shape.circle( 0, 0, radius );
+
     }
-    
-    Path.call( this, options );
+    // fallback for non-canvas or non-svg rendering, and for proper bounds computation
+
+    Path.call( this,Shape.circle( 0, 0, radius ), options );
   };
   var Circle = scenery.Circle;
-  
+
   inherit( Path, Circle, {
     invalidateCircle: function() {
       // setShape should invalidate the path and ensure a redraw
       this.setShape( Shape.circle( 0, 0, this._radius ) );
     },
-    
+
     // create a circle instead of a path, hopefully it is faster in implementations
     createSVGFragment: function( svg, defs, group ) {
       return document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
     },
-    
+
     // optimized for the circle element instead of path
     updateSVGFragment: function( circle ) {
       circle.setAttribute( 'r', this._radius );
-      
+
       circle.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
     },
-    
+
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Circle( ' + this._radius + ', {' + propLines + '} )';
     },
-    
+
     getRadius: function() {
       return this._radius;
     },
-    
+
     setRadius: function( radius ) {
       if ( this._radius !== radius ) {
         this._radius = radius;
@@ -68,23 +67,23 @@ define( function( require ) {
       }
       return this;
     },
-    
+
     computeShapeBounds: function() {
       // optimization, where we know our computed bounds will be just expanded by half the lineWidth if we are stroked (don't have to compute the stroke shape)
       return this._stroke ? this._shape.bounds.dilated( this._lineDrawingStyles.lineWidth / 2 ) : this._shape.bounds;
     },
-    
+
     // accelerated hit detection
     containsPointSelf: function( point ) {
       return point.x * point.x + point.y * point.y < this._radius * this._radius;
     },
-    
+
     get radius() { return this.getRadius(); },
     set radius( value ) { return this.setRadius( value ); }
   } );
-  
+
   // not adding mutators for now
   Circle.prototype._mutatorKeys = [ 'radius' ].concat( Path.prototype._mutatorKeys );
-  
+
   return Circle;
 } );

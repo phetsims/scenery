@@ -1,6 +1,10 @@
 
 var sys = require( 'sys' );
 var exec = require( 'child_process' ).exec;
+var escodegen = require( 'escodegen' );
+var esprima = require( 'esprima' );
+
+var chipperRewrite = require( '../chipper/ast/chipperRewrite.js' );
 
 /*global module:false*/
 module.exports = function( grunt ) {
@@ -8,6 +12,10 @@ module.exports = function( grunt ) {
   
   // print this immediately, so it is clear what project grunt is building
   grunt.log.writeln( 'Scenery' );
+  
+  var onBuildRead = function( name, path, contents ) {
+    return chipperRewrite.chipperRewrite( contents, esprima, escodegen );
+  };
   
   // Project configuration.
   grunt.initConfig( {
@@ -23,7 +31,7 @@ module.exports = function( grunt ) {
           name: "config",
           optimize: 'none',
           wrap: {
-            startFile: [ "js/wrap-start.frag", "lib/has.js" ],
+            startFile: [ "js/wrap-start.frag", "../sherpa/has.js" ],
             endFile: [ "js/wrap-end.frag" ]
           }
         }
@@ -40,7 +48,7 @@ module.exports = function( grunt ) {
           generateSourceMaps: true,
           preserveLicenseComments: false,
           wrap: {
-            startFile: [ "js/wrap-start.frag", "lib/has.js" ],
+            startFile: [ "js/wrap-start.frag", "../sherpa/has.js" ],
             endFile: [ "js/wrap-end.frag" ]
           },
           uglify2: {
@@ -50,11 +58,13 @@ module.exports = function( grunt ) {
                 sceneryAssertExtra: false,
                 sceneryLayerLog: false,
                 sceneryEventLog: false,
-                sceneryAccessibilityLog: false
+                sceneryAccessibilityLog: false,
+                phetAllocation: false
               },
               dead_code: true
             }
-          }
+          },
+          onBuildRead: onBuildRead
         }
       },
       
@@ -79,11 +89,13 @@ module.exports = function( grunt ) {
                 sceneryAssertExtra: false,
                 sceneryLayerLog: false,
                 sceneryEventLog: false,
-                sceneryAccessibilityLog: false
+                sceneryAccessibilityLog: false,
+                phetAllocation: false
               },
               dead_code: true
             }
-          }
+          },
+          onBuildRead: onBuildRead
         }
       }
     },
@@ -127,8 +139,6 @@ module.exports = function( grunt ) {
       var day = date[3];
       
       var suffix = '-' + year + month + day + '-' + sha.slice( 0, 10 ) + '.js';
-      
-      var sceneryFilename = 
       
       grunt.file.copy( 'build/standalone/scenery.min.js', 'snapshots/scenery-min' + suffix );
       grunt.file.copy( 'tests/benchmarks/js/perf-current.js', 'snapshots/perf' + suffix );

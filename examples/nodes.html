@@ -8,17 +8,17 @@
 
   <title>Nodes - Scenery Example</title>
   
-  <link rel="stylesheet" href="../lib/bootstrap-2.2.2.css">
+  <link rel="stylesheet" href="../../sherpa/bootstrap-2.2.2.css">
   
   <!-- jQuery and LoDash are dependencies -->
-  <script src="../lib/jquery-2.0.0.min.js"></script>
-  <script src="../lib/lodash.min-1.0.0-rc.3.js"></script>
+  <script src="../../sherpa/jquery-2.0.3.min.js"></script>
+  <script src="../../sherpa/lodash-2.0.0.min.js"></script>
   
   <!-- Bootstrap not necessarily needed -->
-  <script src="../lib/bootstrap-2.2.2.js"></script>
+  <script src="../../sherpa/bootstrap-2.2.2.js"></script>
   
   <!-- For the pop-up FPS meter -->
-  <script src="../lib/stats.min.js"></script>
+  <script src="../../sherpa/stats.min.js"></script>
   
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script src="../build/development/scenery.js"></script>
@@ -80,8 +80,7 @@
   * Rectangle
   *----------------------------------------------------------------------------*/    
   
-  container.addChild( new scenery.Path( {
-    shape: kite.Shape.rectangle( 0, 0, 44, 44 ),
+  container.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 44, 44 ), {
     x: 20.5,
     y: 100.5,
     fill: '#ff0000',
@@ -99,8 +98,7 @@
   customShape.lineTo( 0, 25 );
   customShape.close();
   
-  container.addChild( new scenery.Path( {
-    shape: customShape,
+  container.addChild( new scenery.Path( customShape, {
     x: 120.5,
     y: 100.5,
     fill: '#ff0000',

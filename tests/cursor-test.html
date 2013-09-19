@@ -1,0 +1,50 @@
+<!DOCTYPE HTML>
+<!-- //Copyright 2002-2013, University of Colorado Boulder -->
+    <!--Simple test to see if changing the cursor on Firefox causes stutters in the animation, see https://github.com/phetsims/forces-and-motion-basics/issues/40-->
+
+<html>
+<head>
+  <style>
+    body {
+      margin: 0px;
+      padding: 0px;
+    }
+
+    #myCanvas {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+<canvas id="myCanvas" width="578" height="200"></canvas>
+<script>
+  window.requestAnimFrame = (function( callback ) {
+    return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+           function( callback ) {
+             window.setTimeout( callback, 1000 / 60 );
+           };
+  })();
+
+  function animate() {
+    var canvas = document.getElementById( 'myCanvas' );
+    var context = canvas.getContext( '2d' );
+
+    // update
+
+    // clear
+    context.clearRect( 0, 0, canvas.width, canvas.height );
+
+    context.fillStyle = "#FF0000";
+    context.fillRect( 20, 20, 150 + 100 * Math.sin( Date.now() / 1000 ), 100 );
+    // draw stuff
+
+    // request new frame
+    requestAnimFrame( function() {
+      animate();
+    } );
+  }
+  animate();
+
+</script>
+</body>
+</html>

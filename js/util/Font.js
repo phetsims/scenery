@@ -139,6 +139,8 @@ define( function( require ) {
     
     // initialize the shorthand font property (stored as _font)
     this._font = this.computeShorthand();
+    
+    phetAllocation && phetAllocation( 'Font' );
   };
   var Font = scenery.Font;
   
@@ -171,7 +173,7 @@ define( function( require ) {
         stretch: this._stretch,
         size: this._size,
         lineHeight: this._lineHeight,
-        family: this._family,
+        family: this._family
       }, options ) );
     },
     

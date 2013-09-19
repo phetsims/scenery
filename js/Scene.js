@@ -39,6 +39,15 @@ define( function( require ) {
   // debug flag to disable matching of layers when in 'match' mode
   var forceNewLayers = true; // DEBUG
   
+  // constructs all sub-trees for the specified instance. used from markSceneForInsertion
+  function buildInstances( instance ) {
+    var node = instance.getNode();
+    var len = node._children.length;
+    for ( var i = 0; i < len; i++ ) {
+      buildInstances( instance.createChild( node._children[i], i ) );
+    }
+  }
+  
   /*
    * $main should be a block-level element with a defined width and height. scene.resize() should be called whenever
    * it is resized.
@@ -167,9 +176,10 @@ define( function( require ) {
         return;
       }
       
-      _.each( this.layers, function( layer ) {
-        layer.render( scene, args );
-      } );
+      var i = this.layers.length;
+      while ( i-- ) {
+        this.layers[i].render( scene, args );
+      }
       
       this.updateCursor();
       
@@ -371,6 +381,8 @@ define( function( require ) {
     stitch: function( match ) {
       var scene = this;
       
+      var i;
+      
       sceneryLayerLog && sceneryLayerLog( '-----------------------------------\nbeginning stitch' );
       
       // bail out if there are no changes to stitch (stitch is called multiple times)
@@ -394,10 +406,11 @@ define( function( require ) {
         baseNode: this
       };
       
-      _.each( this.layerChangeIntervals, function( interval ) {
-        // reindex intervals, since their endpoints indices may need to be updated
-        interval.reindex();
-      } );
+      // reindex intervals, since their endpoints indices may need to be updated
+      i = this.layerChangeIntervals.length;
+      while ( i-- ) {
+        this.layerChangeIntervals[i].reindex();
+      }
       
       /*
        * Sort our intervals, so that when we need to 'unglue' a layer into two separate layers, we will have passed
@@ -408,7 +421,9 @@ define( function( require ) {
       
       sceneryLayerLog && sceneryLayerLog( 'stitching on intervals: \n' + this.layerChangeIntervals.join( '\n' ) );
       
-      _.each( this.layerChangeIntervals, function( interval ) {
+      for ( i = 0; i < this.layerChangeIntervals.length; i++ ) {
+        var interval = this.layerChangeIntervals[i];
+        
         sceneryLayerLog && sceneryLayerLog( 'stitch on interval ' + interval.toString() );
         var beforeTrail = interval.start;
         var afterTrail = interval.end;
@@ -420,10 +435,10 @@ define( function( require ) {
         var afterLayer = afterInstance ? afterInstance.layer : null;
         
         // TODO: calculate boundaries based on the instances?
-        var boundaries = scene.calculateBoundaries( beforeLayer ? beforeLayer.type : null, beforeTrail, afterTrail );
+        var boundaries = this.calculateBoundaries( beforeLayer ? beforeLayer.type : null, beforeTrail, afterTrail );
         
-        scene.stitchInterval( stitchData, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match );
-      } );
+        this.stitchInterval( stitchData, layerArgs, beforeTrail, afterTrail, beforeLayer, afterLayer, boundaries, match );
+      }
       
       // clean up state that was set leading up to the stitching, and do it early so
       // if we do things later that cause side-effects we won't clear intervals that haven't been stitched
@@ -431,28 +446,32 @@ define( function( require ) {
       
       sceneryLayerLog && sceneryLayerLog( '------ finished intervals in stitching' );
       
-      // reindex all of the relevant layer trails
-      _.each( this.layers.concat( stitchData.newLayers ), function( layer ) {
+      // reindex all of the relevant layer trails, and dispose/add as necessary
+      i = this.layers.length;
+      while ( i-- ) {
+        var layer = this.layers[i];
         layer.startBoundary.reindex();
         layer.endBoundary.reindex(); // TODO: performance: this repeats some work, verify in layer audit that we are sharing boundaries properly, then only reindex end boundary on last layer
-      } );
-      
-      // remove necessary layers. do this before adding layers, since insertLayer currently does not gracefully handle weird overlapping cases
-      _.each( this.layers.slice( 0 ), function( layer ) {
+        
+        // remove necessary layers. do this before adding layers, since insertLayer currently does not gracefully handle weird overlapping cases
         // layers with zero trails should be removed
         if ( layer._instanceCount === 0 ) {
           sceneryLayerLog && sceneryLayerLog( 'disposing layer: ' + layer.getId() );
-          scene.disposeLayer( layer );
+          this.disposeLayer( layer );
         }
-      } );
-      
-      // add new layers. we do this before the add/remove trails, since those can trigger layer side effects
-      _.each( stitchData.newLayers, function( layer ) {
-        sceneryAssert && sceneryAssert( layer._instanceCount, 'ensure we are not adding empty layers' );
+      }
+      i = stitchData.newLayers.length;
+      while ( i-- ) {
+        var newLayer = stitchData.newLayers[i];
+        newLayer.startBoundary.reindex();
+        newLayer.endBoundary.reindex(); // TODO: performance: this repeats some work, verify in layer audit that we are sharing boundaries properly, then only reindex end boundary on last layer
         
-        sceneryLayerLog && sceneryLayerLog( 'inserting layer: ' + layer.getId() );
-        scene.insertLayer( layer );
-      } );
+        // add new layers. we do this before the add/remove trails, since those can trigger layer side effects
+        sceneryAssert && sceneryAssert( newLayer._instanceCount, 'ensure we are not adding empty layers' );
+        
+        sceneryLayerLog && sceneryLayerLog( 'inserting layer: ' + newLayer.getId() );
+        scene.insertLayer( newLayer );
+      }
       
       // set the layers' elements' z-indices, and reindex their trails so they are in a consistent state
       // TODO: performance: don't reindex layers if no layers were added or removed?
@@ -461,9 +480,10 @@ define( function( require ) {
       sceneryLayerLog && sceneryLayerLog( '------ updating layer references' );
       
       // add/remove trails from their necessary layers
-      _.each( stitchData.affectedInstances, function( instance ) {
-        instance.updateLayer();
-      } );
+      var affectedLen = stitchData.affectedInstances.length;
+      for ( i = 0; i < affectedLen; i++ ) {
+        stitchData.affectedInstances[i].updateLayer();
+      }
       
       sceneryAssertExtra && sceneryAssertExtra( this.layerAudit() );
       
@@ -524,10 +544,12 @@ define( function( require ) {
       
       function addPendingTrailsToLayer() {
         // add the necessary nodes to the layer
-        _.each( instancesToAddToLayer, function( instance ) {
+        var len = instancesToAddToLayer.length;
+        for ( var i = 0; i < len; i++ ) {
+          var instance = instancesToAddToLayer[i];
           instance.changeLayer( currentLayer );
           stitchData.affectedInstances.push( instance );
-        } );
+        }
         instancesToAddToLayer.length = 0;
       }
       
@@ -621,13 +643,15 @@ define( function( require ) {
           addPendingTrailsToLayer();
           
           // move over all of afterLayer's trails to beforeLayer
-          // defensive copy needed, since this will be modified at the same time
-          _.each( afterLayer._layerTrails.slice( 0 ), function( trail ) {
-            trail.reindex();
-            var instance = trail.getInstance();
+          var len = afterLayer._layerTrails.length;
+          for ( var i = 0; i < len; i++ ) {
+            var endTrail = afterLayer._layerTrails[i];
+            
+            endTrail.reindex();
+            var instance = endTrail.getInstance();
             instance.changeLayer( beforeLayer ); // TODO: performance: handle instances natively
             stitchData.affectedInstances.push( instance );
-          } );
+          }
           
         } else if ( beforeLayer && beforeLayer === afterLayer && boundaries.length > 0 ) {
           // need to 'unglue' and split the layer
@@ -688,10 +712,10 @@ define( function( require ) {
         index++;
       }
       
-      _.each( this.layers, function( layer ) {
-        // layers increment indices as needed
-        index = layer.reindex( index );
-      } );
+      var len = this.layers.length;
+      for ( var i = 0; i < len; i++ ) {
+        index = this.layers[i].reindex( index );
+      }
       
       if ( accessibility ) {
         if ( this.focusRingSVGContainer ) {
@@ -714,6 +738,7 @@ define( function( require ) {
     },
     
     disposeLayer: function( layer ) {
+      // NOTE: stitching relies on this not changing this.layers except for removing the specific layer
       layer.dispose();
       this.layers.splice( _.indexOf( this.layers, layer ), 1 ); // TODO: better removal code!
     },
@@ -721,9 +746,10 @@ define( function( require ) {
     disposeLayers: function() {
       var scene = this;
       
-      _.each( this.layers.slice( 0 ), function( layer ) {
-        scene.disposeLayer( layer );
-      } );
+      var i = this.layers.length;
+      while ( i-- ) {
+        this.disposeLayer( this.layers[i] );
+      }
     },
     
     // all layers whose start or end points lie inclusively in the range from the trail's before and after
@@ -740,10 +766,6 @@ define( function( require ) {
       
       sceneryAssert && sceneryAssert( trail.areIndicesValid() );
       
-      // point to the beginning of the node, right before it would be rendered
-      var startPointer = new scenery.TrailPointer( trail, true );
-      var endPointer = new scenery.TrailPointer( trail, false );
-      
       var layers = this.layers;
       
       // from layers 0 to n-1, notAfter goes from false to true, notBefore goes from true to false
@@ -757,7 +779,8 @@ define( function( require ) {
         var endTrail = layers[mid].endPaintedTrail;
         sceneryAssert && sceneryAssert( endTrail.areIndicesValid() );
         // NOTE TO SELF: don't change this flag to true again. think it through
-        var notAfter = startPointer.compareNested( new scenery.TrailPointer( endTrail, true ) ) !== 1;
+        // trail,true points to the beginning of the node, right before it would be rendered
+        var notAfter = scenery.TrailPointer.compareNested( trail, true, endTrail, true ) !== 1;
         if ( notAfter ) {
           high = mid;
         } else {
@@ -776,7 +799,7 @@ define( function( require ) {
         var startTrail = layers[mid].startPaintedTrail;
         startTrail.reindex();
         sceneryAssert && sceneryAssert( startTrail.areIndicesValid() );
-        var notBefore = endPointer.compareNested( new scenery.TrailPointer( startTrail, true ) ) !== -1;
+        var notBefore = scenery.TrailPointer.compareNested( trail, false, startTrail, true ) !== -1;
         if ( notBefore ) {
           low = mid;
         } else {
@@ -807,9 +830,10 @@ define( function( require ) {
       };
       
       context.clearRect( 0, 0, canvas.width, canvas.height );
-      _.each( this.layers, function( layer ) {
-        layer.renderToCanvas( canvas, context, delayCounts );
-      } );
+      var len = this.layers.length;
+      for ( var i = 0; i < len; i++ ) {
+        this.layers[i].renderToCanvas( canvas, context, delayCounts );
+      }
       
       if ( count === 0 ) {
         // no asynchronous layers, callback immediately
@@ -913,13 +937,6 @@ define( function( require ) {
       sceneryLayerLog && sceneryLayerLog( 'inserting instances onto ' + instance.toString() + ' with child ' + child.id + ' and index ' + index );
       var baseInstance = instance.createChild( child, index );
       
-      // constructs all sub-trees for the specified instance
-      function buildInstances( instance ) {
-        _.each( instance.getNode().children, function( child, index ) {
-          var nextInstance = instance.createChild( child, index );
-          buildInstances( nextInstance );
-        } );
-      }
       buildInstances( baseInstance );
       
       this.markInterval( affectedTrail );
@@ -987,7 +1004,7 @@ define( function( require ) {
         listenerTarget: element,
         pointFromEvent: function pointFromEvent( evt ) {
           var mainBounds = element.getBoundingClientRect();
-          return new Vector2( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
+          return Vector2.createFromPool( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
         }
       }, parameters ) );
     },
@@ -998,7 +1015,7 @@ define( function( require ) {
         listenerTarget: document,
         pointFromEvent: function pointFromEvent( evt ) {
           var mainBounds = element.getBoundingClientRect();
-          return new Vector2( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
+          return Vector2.createFromPool( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
         }
       }, parameters ) );
     },
@@ -1009,7 +1026,7 @@ define( function( require ) {
         listenerTarget: window,
         pointFromEvent: function pointFromEvent( evt ) {
           var mainBounds = element.getBoundingClientRect();
-          return new Vector2( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
+          return Vector2.createFromPool( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
         }
       }, parameters ) );
     },

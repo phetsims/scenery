@@ -30,14 +30,17 @@ define( function( require ) {
   
   inherit( Pointer, Touch, {
     move: function( point, event ) {
+      // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
     },
     
     end: function( point, event ) {
+      // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
     },
     
     cancel: function( point, event ) {
+      // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
     },
     

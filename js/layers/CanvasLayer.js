@@ -176,9 +176,10 @@ define( function( require ) {
           newContext.setTransform( layer.backingScale, 0, 0, layer.backingScale, 0, 0 );
           
           // properly set the necessary transform on the context
-          _.each( trail.nodes, function( node ) {
-            node.transform.getMatrix().canvasAppendTransform( newContext );
-          } );
+          var length = trail.nodes.length;
+          for ( var i = 0; i < length; i++ ) {
+            trail.nodes[i].transform.getMatrix().canvasAppendTransform( newContext );
+          }
         } else {
           node.transform.getMatrix().canvasAppendTransform( topWrapper().context );
         }
