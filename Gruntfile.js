@@ -13,7 +13,7 @@ module.exports = function( grunt ) {
   // print this immediately, so it is clear what project grunt is building
   grunt.log.writeln( 'Scenery' );
   
-  var onBuildWrite = function( name, path, contents ) {
+  var onBuildRead = function( name, path, contents ) {
     return chipperRewrite.chipperRewrite( contents, esprima, escodegen );
   };
   
@@ -64,7 +64,7 @@ module.exports = function( grunt ) {
               dead_code: true
             }
           },
-          onBuildWrite: onBuildWrite
+          onBuildRead: onBuildRead
         }
       },
       
@@ -95,7 +95,7 @@ module.exports = function( grunt ) {
               dead_code: true
             }
           },
-          onBuildWrite: onBuildWrite
+          onBuildRead: onBuildRead
         }
       }
     },
