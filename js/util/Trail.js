@@ -348,6 +348,8 @@ define( function( require ) {
     
     // the first index that is different between this trail and the other trail
     getBranchIndexTo: function( otherTrail ) {
+      sceneryAssert && sceneryAssert( this.nodes[0] === otherTrail.nodes[0], 'To get a branch index, the trails must have the same root' );
+      
       var branchIndex;
       
       for ( branchIndex = 0; branchIndex < Math.min( this.length, otherTrail.length ); branchIndex++ ) {

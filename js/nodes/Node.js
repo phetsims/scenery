@@ -240,6 +240,12 @@ define( function( require ) {
       return this._parents.slice( 0 ); // create a defensive copy
     },
     
+    // returns a single parent if it exists, otherwise null (no parents), or an assertion failure (multiple parents)
+    getParent: function() {
+      sceneryAssert && sceneryAssert( this._parents.length <= 1, 'Cannot call getParent on a node with multiple parents' );
+      return this._parents.length ? this._parents[0] : null;
+    },
+    
     getChildAt: function( index ) {
       return this._children[index];
     },
