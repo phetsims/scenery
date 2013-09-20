@@ -18,6 +18,7 @@ define( function( require ) {
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
   var Vector2 = require( 'DOT/Vector2' );
+  var Bounds2 = require( 'DOT/Bounds2' );
   
   /**
    * Currently, all numerical parameters should be finite.
@@ -30,15 +31,34 @@ define( function( require ) {
    */
   scenery.Rectangle = function Rectangle( x, y, width, height, arcWidth, arcHeight, options ) {
     if ( typeof x === 'object' ) {
-      // allow new Rectangle( { rectX: x, rectY: y, rectWidth: width, rectHeight: height, ... } )
-      // the mutators will call invalidateRectangle() and properly set the shape
-      options = x;
-      this._rectX = options.rectX || 0;
-      this._rectY = options.rectY || 0;
-      this._rectWidth = options.rectWidth;
-      this._rectHeight = options.rectHeight;
-      this._rectArcWidth = options.rectArcWidth || 0;
-      this._rectArcHeight = options.rectArcHeight || 0;
+      if ( x instanceof Bounds2 ) {
+        // allow new Rectangle( bounds2, { ... } ) or new Rectangle( bounds2, arcWidth, arcHeight, options )
+        this._rectX = x.minX;
+        this._rectY = x.minY;
+        this._rectWidth = x.width;
+        this._rectHeight = x.height;
+        if ( arguments.length < 3 ) {
+          // Rectangle( bounds2, { ... } )
+          options = y;
+          this._rectArcWidth = 0;
+          this._rectArcHeight = 0;
+        } else {
+          // Rectangle( bounds2, arcWidth, arcHeight, { ... } )
+          options = height;
+          this._rectArcWidth = y;
+          this._rectArcHeight = width;
+        }
+      } else {
+        // allow new Rectangle( { rectX: x, rectY: y, rectWidth: width, rectHeight: height, ... } )
+        // the mutators will call invalidateRectangle() and properly set the shape
+        options = x;
+        this._rectX = options.rectX || 0;
+        this._rectY = options.rectY || 0;
+        this._rectWidth = options.rectWidth;
+        this._rectHeight = options.rectHeight;
+        this._rectArcWidth = options.rectArcWidth || 0;
+        this._rectArcHeight = options.rectArcHeight || 0;
+      }
     } else if ( arguments.length < 6 ) {
       // new Rectangle( x, y, width, height, [options] )
       this._rectX = x;
