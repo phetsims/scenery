@@ -318,6 +318,47 @@ define( function( require ) {
       return true;
     },
     
+    // a transform from our local coordinate frame to the other trail's local coordinate frame
+    getTransformTo: function( otherTrail ) {
+      return new Transform3( this.getMatrixTo( otherTrail ) );
+    },
+    
+    // returns a matrix that transforms a point in our last node's local coordinate frame to the other trail's last node's local coordinate frame
+    getMatrixTo: function( otherTrail ) {
+      this.reindex();
+      otherTrail.reindex();
+      
+      var branchIndex = this.getBranchIndexTo( otherTrail );
+      var idx;
+      
+      var matrix = Matrix3.IDENTITY;
+      
+      // walk our transform down, prepending
+      for ( idx = this.length-1; idx >= branchIndex; idx-- ) {
+        matrix = this.nodes[idx].getTransform().getMatrix().timesMatrix( matrix );
+      }
+      
+      // walk our transform up, prepending inverses
+      for ( idx = branchIndex; idx < otherTrail.length; idx++ ) {
+        matrix = otherTrail.nodes[idx].getTransform().getInverse().timesMatrix( matrix );
+      }
+      
+      return matrix;
+    },
+    
+    // the first index that is different between this trail and the other trail
+    getBranchIndexTo: function( otherTrail ) {
+      var branchIndex;
+      
+      for ( branchIndex = 0; branchIndex < Math.min( this.length, otherTrail.length ); branchIndex++ ) {
+        if ( this.nodes[branchIndex] !== otherTrail.nodes[branchIndex] ) {
+          break;
+        }
+      }
+      
+      return branchIndex;
+    },
+    
     // TODO: phase out in favor of get()
     nodeFromTop: function( offset ) {
       return this.nodes[this.length - 1 - offset];
