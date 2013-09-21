@@ -271,7 +271,12 @@ define( function( require ) {
     allowsMultipleDOMInstances: true,
     
     getDOMElement: function() {
-      return document.createElement( 'div' );
+      var div = document.createElement( 'div' );
+      
+      // so they are absolutely positioned compared to the containing DOM layer (that is positioned).
+      // otherwise, two adjacent HTMLText elements will 'flow' and be positioned incorrectly
+      div.style.position = 'absolute';
+      return div;
     },
     
     updateDOMElement: function( div ) {
