@@ -90,7 +90,9 @@ define( function( require ) {
     this.enablePointerEvents = options.enablePointerEvents;
     
     Node.call( this, options );
-    
+
+    this.showPointers = true; // TODO: Hook this up to query param or something.
+
     var scene = this;
     window.debugScene = scene;
     
@@ -116,23 +118,7 @@ define( function( require ) {
     
     applyCSSHacks( $main, options );
 
-    // add element to show the pointers
-    this.showPointers = true; // TODO: Hook this up to query param or something.
-    this.pointerSVGContainer = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
-    this.pointerSVGContainer.style.position = 'absolute';
-    this.pointerSVGContainer.style.top = 0;
-    this.pointerSVGContainer.style.left = 0;
-    this.pointerSVGContainer.style['pointer-events'] = 'none';
-    this.resizePointerSVGContainer( options.width, options.height );
-    this.pointerPath = document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
-    this.pointerPath.setAttribute( 'cx', '100' );
-    this.pointerPath.setAttribute( 'cy', '100' );
-    this.pointerPath.setAttribute( 'r', '30' );
-    this.pointerPath.setAttribute( 'style', 'stroke:cyan; stroke-width:10; fill:none;' );
-    this.pointerPath.setAttribute( 'id', 'pointerSVGContainer' );
-    this.pointerSVGContainer.appendChild( this.pointerPath );
-    $main[0].appendChild( this.pointerSVGContainer );
-
+    // TODO: Does this need to move to where inputEvents are hooked up so that it doesn't get run each time Node.toImage is called?
     if ( accessibility ) {
       this.activePeer = null;
       
@@ -1215,6 +1201,28 @@ define( function( require ) {
       input.addListener( 'keypress', function keyPressCallback( domEvent ) {
         input.keyPress( domEvent );
       } );
+
+      this.setPointerDisplayVisible( this.showPointers );
+    },
+
+    // Used to make the pointer visible.
+    setPointerDisplayVisible : function( isVisible ){
+      if ( isVisible && !this.pointerSVGContainer ){
+        // add element to show the pointers
+        this.pointerSVGContainer = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+        this.pointerSVGContainer.style.position = 'absolute';
+        this.pointerSVGContainer.style.top = 0;
+        this.pointerSVGContainer.style.left = 0;
+        this.pointerSVGContainer.style['pointer-events'] = 'none';
+        this.pointerPath = document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
+        this.pointerPath.setAttribute( 'cx', '100' );
+        this.pointerPath.setAttribute( 'cy', '100' );
+        this.pointerPath.setAttribute( 'r', '30' );
+        this.pointerPath.setAttribute( 'style', 'stroke:cyan; stroke-width:10; fill:none;' );
+        this.pointerPath.setAttribute( 'id', 'pointerSVGContainer' );
+        this.pointerSVGContainer.appendChild( this.pointerPath );
+        this.$main[0].appendChild( this.pointerSVGContainer );
+      }
     },
     
     getTrailFromKeyboardFocus: function() {
