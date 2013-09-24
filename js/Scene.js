@@ -115,7 +115,24 @@ define( function( require ) {
     this.preferredSceneLayerType = options.preferredSceneLayerType;
     
     applyCSSHacks( $main, options );
-    
+
+    // add element to show the pointers
+    this.showPointers = true; // TODO: Hook this up to query param or something.
+    this.pointerSVGContainer = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+    this.pointerSVGContainer.style.position = 'absolute';
+    this.pointerSVGContainer.style.top = 0;
+    this.pointerSVGContainer.style.left = 0;
+    this.pointerSVGContainer.style['pointer-events'] = 'none';
+    this.resizePointerSVGContainer( options.width, options.height );
+    this.pointerPath = document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
+    this.pointerPath.setAttribute( 'cx', '100' );
+    this.pointerPath.setAttribute( 'cy', '100' );
+    this.pointerPath.setAttribute( 'r', '30' );
+    this.pointerPath.setAttribute( 'style', 'stroke:cyan; stroke-width:10; fill:none;' );
+    this.pointerPath.setAttribute( 'id', 'pointerSVGContainer' );
+    this.pointerSVGContainer.appendChild( this.pointerPath );
+    $main[0].appendChild( this.pointerSVGContainer );
+
     if ( accessibility ) {
       this.activePeer = null;
       
@@ -881,6 +898,10 @@ define( function( require ) {
       if ( this.sceneBounds.width !== width || this.sceneBounds.height !== height ) {
         this.setSize( width, height );
         this.rebuildLayers(); // TODO: why? - change this to resize individual layers
+
+        if ( this.showPointers ){
+          this.resizePointerSVGContainer( width, height );
+        }
         
         if ( accessibility ) {
           this.resizeAccessibilityLayer( width, height );
@@ -900,7 +921,8 @@ define( function( require ) {
         this.fireEvent( 'resize', { width: width, height: height } );
       }
     },
-    
+
+    // TODO: Refactor the following methods into one to avoid code duplication.
     resizeAccessibilityLayer: function( width, height ) {
       if ( this.accessibilityLayer ) {
         this.accessibilityLayer.setAttribute( 'width', width );
@@ -916,7 +938,15 @@ define( function( require ) {
         this.focusRingSVGContainer.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
       }
     },
-    
+
+    resizePointerSVGContainer: function( width, height ) {
+      if ( this.pointerSVGContainer ) {
+        this.pointerSVGContainer.setAttribute( 'width', width );
+        this.pointerSVGContainer.setAttribute( 'height', height );
+        this.pointerSVGContainer.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
+      }
+    },
+
     getSceneWidth: function() {
       return this.sceneBounds.getWidth();
     },
