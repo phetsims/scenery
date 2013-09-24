@@ -38,9 +38,12 @@ define( function( require ) {
     this.batchDOMEvents = batchDOMEvents;
     
     this.batchedCallbacks = []; // cleared every frame
-    
+
+    //TODO: is mouse getting created on iPad?
     this.mouse = new scenery.Mouse();
-    
+
+    this.scene.pointerAdded(this.mouse);
+
     this.pointers = [ this.mouse ];
     
     this.listenerReferences = [];
@@ -55,6 +58,7 @@ define( function( require ) {
     
     addPointer: function( pointer ) {
       this.pointers.push( pointer );
+      this.scene.pointerAdded( pointer );
     },
     
     removePointer: function( pointer ) {
@@ -64,6 +68,7 @@ define( function( require ) {
           this.pointers.splice( i, 1 );
         }
       }
+      this.scene.pointerRemoved(pointer);
     },
     
     findTouchById: function( id ) {
@@ -395,6 +400,7 @@ define( function( require ) {
     
     moveEvent: function( pointer, event ) {
       this.branchChangeEvents( pointer, event, true );
+      this.scene.pointerMoved( pointer, event );
     },
     
     cancelEvent: function( pointer, event ) {

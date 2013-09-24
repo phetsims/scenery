@@ -1054,6 +1054,8 @@ define( function( require ) {
         throw new Error( 'Attempt to attach events twice to the scene' );
       }
       
+      this.setPointerDisplayVisible( this.showPointers );
+
       // TODO: come up with more parameter names that have the same string length, so it looks creepier
       var pointFromEvent = parameters.pointFromEvent;
       var listenerTarget = parameters.listenerTarget;
@@ -1201,8 +1203,29 @@ define( function( require ) {
       input.addListener( 'keypress', function keyPressCallback( domEvent ) {
         input.keyPress( domEvent );
       } );
+    },
 
-      this.setPointerDisplayVisible( this.showPointers );
+    //TODO: Make sure the mouse doesn't show a pointer on the ipad
+    pointerAdded:function(pointer){
+      var path = document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
+
+      //TODO: use css transform for performance?
+      path.setAttribute( 'cx', '100' );
+      path.setAttribute( 'cy', '100' );
+      path.setAttribute( 'r', '30' );
+      path.setAttribute( 'style', 'stroke:cyan; stroke-width:10; fill:none;' );
+      pointer.path = path;
+      this.pointerSVGContainer.appendChild( path );
+    },
+
+    pointerMoved:function(pointer,event){
+      pointer.path.setAttribute( 'cx', pointer.point.x );
+      pointer.path.setAttribute( 'cy', pointer.point.y );
+    },
+
+    pointerRemoved:function(pointer){
+      this.pointerSVGContainer.removeChild( pointer.path );
+      delete pointer.path;
     },
 
     // Used to make the pointer visible.
@@ -1214,13 +1237,8 @@ define( function( require ) {
         this.pointerSVGContainer.style.top = 0;
         this.pointerSVGContainer.style.left = 0;
         this.pointerSVGContainer.style['pointer-events'] = 'none';
-        this.pointerPath = document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
-        this.pointerPath.setAttribute( 'cx', '100' );
-        this.pointerPath.setAttribute( 'cy', '100' );
-        this.pointerPath.setAttribute( 'r', '30' );
-        this.pointerPath.setAttribute( 'style', 'stroke:cyan; stroke-width:10; fill:none;' );
-        this.pointerPath.setAttribute( 'id', 'pointerSVGContainer' );
-        this.pointerSVGContainer.appendChild( this.pointerPath );
+        this.pointerSVGContainer.style.zIndex = 99;
+        this.pointerSVGContainer.setAttribute( 'id', 'pointerSVGContainer' );
         this.$main[0].appendChild( this.pointerSVGContainer );
       }
     },
