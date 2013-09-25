@@ -1210,11 +1210,14 @@ define( function( require ) {
       var path = document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
 
       //TODO: use css transform for performance?
-      path.setAttribute( 'cx', '100' );
-      path.setAttribute( 'cy', '100' );
       path.setAttribute( 'r', '30' );
       path.setAttribute( 'style', 'stroke:cyan; stroke-width:10; fill:none;' );
       pointer.path = path;
+      if ( pointer.point === null ){
+        // Set the point to be way off screen so that it isn't visible to the user.
+        pointer.point = { x: -1000, y: -1000 };
+      }
+      this.pointerMoved( pointer );
       this.pointerSVGContainer.appendChild( path );
     },
 
