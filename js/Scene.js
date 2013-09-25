@@ -1205,37 +1205,57 @@ define( function( require ) {
       } );
     },
 
-    //TODO: Make sure the mouse doesn't show a pointer on the ipad
-    pointerAdded:function(pointer){
-      var path = document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
+    //Display a pointer that was added.  Use a separate SVG layer for each pointer so it can be hardware accelerated, otherwise it is too slow just setting svg internal attributes
+    pointerAdded: function( pointer ) {
+
+      var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+      svg.style.position = 'absolute';
+      svg.style.top = 0;
+      svg.style.left = 0;
+      svg.style['pointer-events'] = 'none';
+
+      var innerRadius = 30;
+      var strokeWidth = 10;
+      var diameter = (innerRadius + strokeWidth / 2) * 2;
+      var radius = diameter / 2;
+
+      //TODO: keep the size fitted to the circle
+      svg.setAttribute( 'width', diameter );
+      svg.setAttribute( 'height', diameter );
+      var circle = document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
 
       //TODO: use css transform for performance?
-      path.setAttribute( 'r', '30' );
-      path.setAttribute( 'style', 'stroke:cyan; stroke-width:10; fill:none;' );
-      pointer.path = path;
-      if ( pointer.point === null ){
+
+      circle.setAttribute( 'cx', innerRadius + strokeWidth / 2 );
+      circle.setAttribute( 'cy', innerRadius + strokeWidth / 2 );
+      circle.setAttribute( 'r', innerRadius );
+      circle.setAttribute( 'style', 'stroke:cyan; stroke-width:10; fill:none;' );
+      pointer.svg = svg;
+      pointer.radius = radius;
+      if ( pointer.point === null ) {
         // Set the point to be way off screen so that it isn't visible to the user.
-        pointer.point = { x: -1000, y: -1000 };
+        pointer.point = { x: -10000, y: -1000 };
       }
       this.pointerMoved( pointer );
-      this.pointerSVGContainer.appendChild( path );
+      svg.appendChild( circle );
+      this.pointerSVGContainer.appendChild( svg );
     },
 
-    pointerMoved:function(pointer,event){
-      pointer.path.setAttribute( 'cx', pointer.point.x );
-      pointer.path.setAttribute( 'cy', pointer.point.y );
+    pointerMoved: function( pointer ) {
+      Util.applyCSSTransform( Matrix3.translation( pointer.point.x - pointer.radius, pointer.point.y - pointer.radius ), pointer.svg );
     },
 
-    pointerRemoved:function(pointer){
-      this.pointerSVGContainer.removeChild( pointer.path );
+    pointerRemoved: function( pointer ) {
+      this.pointerSVGContainer.removeChild( pointer.svg );
       delete pointer.path;
+      delete pointer.radius;
     },
 
     // Used to make the pointer visible.
-    setPointerDisplayVisible : function( isVisible ){
-      if ( isVisible && !this.pointerSVGContainer ){
+    setPointerDisplayVisible: function( isVisible ) {
+      if ( isVisible && !this.pointerSVGContainer ) {
         // add element to show the pointers
-        this.pointerSVGContainer = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+        this.pointerSVGContainer = document.createElement( 'div' );
         this.pointerSVGContainer.style.position = 'absolute';
         this.pointerSVGContainer.style.top = 0;
         this.pointerSVGContainer.style.left = 0;
