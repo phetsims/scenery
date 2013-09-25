@@ -308,6 +308,11 @@ define( function( require ) {
       this._liveRegions.push( {property: property, options: options} );
     },
     
+    // should be overridden to modify (increase ONLY if Canvas is involved) the node's bounds. Return the expanded bounds.
+    overrideBounds: function( computedBounds ) {
+      return computedBounds;
+    },
+    
     // ensure that cached bounds stored on this node (and all children) are accurate
     validateBounds: function() {
       var that = this;
@@ -359,6 +364,7 @@ define( function( require ) {
         
         // converts local to parent bounds. mutable methods used to minimize number of created bounds instances (we create one so we don't change references to the old one)
         var newBounds = this.transformBoundsFromLocalToParent( this._selfBounds.copy().includeBounds( this._childBounds ) );
+        newBounds = this.overrideBounds( newBounds ); // allow expansion of the bounds area
         var changed = !newBounds.equals( oldBounds );
         
         if ( changed ) {
@@ -393,8 +399,9 @@ define( function( require ) {
           
           sceneryAssertExtra && sceneryAssertExtra( that._childBounds.equalsEpsilon( childBounds, epsilon ), 'Child bounds mismatch after validateBounds: ' +
                                                                                                     that._childBounds.toString() + ', expected: ' + childBounds.toString() );
-          sceneryAssertExtra && sceneryAssertExtra( that._bounds.equalsEpsilon( fullBounds, epsilon ), 'Bounds mismatch after validateBounds: ' +
-                                                                                              that._bounds.toString() + ', expected: ' + fullBounds.toString() );
+          sceneryAssertExtra && sceneryAssertExtra( that._bounds.equalsEpsilon( fullBounds, epsilon ) ||
+                                                    that._bounds.equalsEpsilon( that.overrideBounds( fullBounds ), epsilon ),
+                                                    'Bounds mismatch after validateBounds: ' + that._bounds.toString() + ', expected: ' + fullBounds.toString() );
         })();
       }
     },
