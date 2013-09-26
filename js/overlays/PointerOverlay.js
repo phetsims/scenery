@@ -89,7 +89,6 @@ define( function( require ) {
       pointerRemoved: function( pointer ) {
         pointerOverlay.pointerSVGContainer.removeChild( pointer.svg );
         delete pointer.path;
-        delete pointer.radius;
       }
     };
 
