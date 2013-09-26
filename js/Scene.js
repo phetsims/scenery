@@ -30,7 +30,8 @@ define( function( require ) {
   require( 'SCENERY/input/Input' );
   require( 'SCENERY/layers/LayerBuilder' );
   require( 'SCENERY/layers/Renderer' );
-  
+  require( 'SCENERY/overlays/PointerOverlay' );
+
   var Util = require( 'SCENERY/util/Util' );
   var objectCreate = Util.objectCreate;
   
@@ -90,7 +91,7 @@ define( function( require ) {
     this.enablePointerEvents = options.enablePointerEvents;
     
     Node.call( this, options );
-    
+
     var scene = this;
     window.debugScene = scene;
     
@@ -115,7 +116,8 @@ define( function( require ) {
     this.preferredSceneLayerType = options.preferredSceneLayerType;
     
     applyCSSHacks( $main, options );
-    
+
+    // TODO: Does this need to move to where inputEvents are hooked up so that it doesn't get run each time Node.toImage is called?
     if ( accessibility ) {
       this.activePeer = null;
       
@@ -719,8 +721,12 @@ define( function( require ) {
       
       if ( accessibility ) {
         if ( this.focusRingSVGContainer ) {
-          this.focusRingSVGContainer.style.zIndex = index;
+          this.focusRingSVGContainer.style.zIndex = index++;
         }
+      }
+
+      if (this.pointerOverlay){
+        this.pointerOverlay.setZIndex( index++ );
       }
     },
     
@@ -881,7 +887,7 @@ define( function( require ) {
       if ( this.sceneBounds.width !== width || this.sceneBounds.height !== height ) {
         this.setSize( width, height );
         this.rebuildLayers(); // TODO: why? - change this to resize individual layers
-        
+
         if ( accessibility ) {
           this.resizeAccessibilityLayer( width, height );
           this.resizeFocusRingSVGContainer( width, height );
@@ -900,7 +906,8 @@ define( function( require ) {
         this.fireEvent( 'resize', { width: width, height: height } );
       }
     },
-    
+
+    // TODO: Refactor the following methods into one to avoid code duplication.
     resizeAccessibilityLayer: function( width, height ) {
       if ( this.accessibilityLayer ) {
         this.accessibilityLayer.setAttribute( 'width', width );
@@ -916,7 +923,7 @@ define( function( require ) {
         this.focusRingSVGContainer.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
       }
     },
-    
+
     getSceneWidth: function() {
       return this.sceneBounds.getWidth();
     },
@@ -963,7 +970,7 @@ define( function( require ) {
     },
     
     updateCursor: function() {
-      if ( this.input && this.input.mouse.point ) {
+      if ( this.input && this.input.mouse && this.input.mouse.point ) {
         var mouseTrail = this.trailUnderPoint( this.input.mouse.point, { isMouse: true } );
         
         if ( mouseTrail ) {
@@ -1186,7 +1193,17 @@ define( function( require ) {
         input.keyPress( domEvent );
       } );
     },
-    
+
+    setPointerDisplayVisible: function( visible ) {
+      if ( visible && !this.pointerOverlay ) {
+        this.pointerOverlay = new scenery.PointerOverlay( this );
+      }
+      else if ( !visible && this.pointerOverlay ) {
+        this.pointerOverlay.dispose();
+        delete this.pointerOverlay;
+      }
+    },
+
     getTrailFromKeyboardFocus: function() {
       // return the root (scene) trail by default
       // TODO: fill in with actual keyboard focus
