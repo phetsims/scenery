@@ -83,13 +83,6 @@ define( function( require ) {
       circle.setAttribute( 'r', innerRadius );
       circle.setAttribute( 'style', 'stroke:cyan; stroke-width:10; fill:none;' );
 
-      // If there is no point, show the pointer way off screen so that it isn't visible to the user.
-      //TODO: remove the need for this workaround
-      if ( pointer.point === null ) {
-
-        pointer.point = { x: -10000, y: -1000 };
-      }
-
       //Add a move listener to the pointer to update position when it has moved
       var pointerRemoved = function() {
 
@@ -102,8 +95,12 @@ define( function( require ) {
       var moveListener = {
         move: function() {
 
-          //TODO: this allocates memory when pointers are dragging, perhaps rewrite to remove allocations
-          Util.applyCSSTransform( Matrix3.translation( pointer.point.x - radius, pointer.point.y - radius ), svg );
+          //TODO: Why is point sometimes null?
+          if ( pointer.point ) {
+
+            //TODO: this allocates memory when pointers are dragging, perhaps rewrite to remove allocations
+            Util.applyCSSTransform( Matrix3.translation( pointer.point.x - radius, pointer.point.y - radius ), svg );
+          }
         },
 
         up: pointerRemoved,
@@ -119,7 +116,8 @@ define( function( require ) {
     };
     scene.input.addPointerAddedListener( pointerAdded );
 
-    //if there is a mouse, add it here
+    //if there is already a mouse, add it here
+    //TODO: if there already other non-mouse touches, could be added here
     if ( scene.input && scene.input.mouse ) {
       pointerAdded( scene.input.mouse );
     }
