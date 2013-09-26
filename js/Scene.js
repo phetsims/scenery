@@ -970,7 +970,7 @@ define( function( require ) {
     },
     
     updateCursor: function() {
-      if ( this.input && this.input.mouse.point ) {
+      if ( this.input && this.input.mouse && this.input.mouse.point ) {
         var mouseTrail = this.trailUnderPoint( this.input.mouse.point, { isMouse: true } );
         
         if ( mouseTrail ) {

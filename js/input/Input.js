@@ -39,10 +39,10 @@ define( function( require ) {
     
     this.batchedCallbacks = []; // cleared every frame
 
-    //TODO: is mouse getting created on iPad?
-    this.mouse = new scenery.Mouse();
+    //Pointer for mouse, only created lazily on first mouse event, so no mouse is allocated on tablets
+    this.mouse = null;
 
-    this.pointers = [ this.mouse ];
+    this.pointers = [];
     
     this.listenerReferences = [];
     
@@ -107,38 +107,50 @@ define( function( require ) {
       // sceneryAssert && sceneryAssert( result, 'No key found for the combination of key:' + event.key + ' and location:' + event.location );
       return result;
     },
+
+    //Init the mouse on the first mouse event (if any!)
+    initMouse: function() {
+      this.mouse = new scenery.Mouse();
+      this.addPointer( this.mouse );
+    },
     
     mouseDown: function( point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'mouseDown(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      if ( !this.mouse ) { this.initMouse(); }
       this.mouse.down( point, event );
       this.downEvent( this.mouse, event );
     },
     
     mouseUp: function( point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'mouseUp(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      if ( !this.mouse ) { this.initMouse(); }
       this.mouse.up( point, event );
       this.upEvent( this.mouse, event );
     },
     
     mouseUpImmediate: function( point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'mouseUpImmediate(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      if ( !this.mouse ) { this.initMouse(); }
       this.upImmediateEvent( this.mouse, event );
     },
     
     mouseMove: function( point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'mouseMove(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      if ( !this.mouse ) { this.initMouse(); }
       this.mouse.move( point, event );
       this.moveEvent( this.mouse, event );
     },
     
     mouseOver: function( point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'mouseOver(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      if ( !this.mouse ) { this.initMouse(); }
       this.mouse.over( point, event );
       // TODO: how to handle mouse-over (and log it)
     },
     
     mouseOut: function( point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'mouseOut(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      if ( !this.mouse ) { this.initMouse(); }
       this.mouse.out( point, event );
       // TODO: how to handle mouse-out (and log it)
     },

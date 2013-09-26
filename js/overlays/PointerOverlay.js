@@ -47,6 +47,8 @@ define( function( require ) {
     //Display a pointer that was added.  Use a separate SVG layer for each pointer so it can be hardware accelerated, otherwise it is too slow just setting svg internal attributes
     var pointerAdded = function( pointer ) {
 
+      if ( pointer.isKey ) { return; }
+
       var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
       svg.style.position = 'absolute';
       svg.style.top = 0;
