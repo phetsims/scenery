@@ -30,7 +30,8 @@ define( function( require ) {
   require( 'SCENERY/input/Input' );
   require( 'SCENERY/layers/LayerBuilder' );
   require( 'SCENERY/layers/Renderer' );
-  
+  require( 'SCENERY/overlays/PointerOverlay' );
+
   var Util = require( 'SCENERY/util/Util' );
   var objectCreate = Util.objectCreate;
   
@@ -90,8 +91,6 @@ define( function( require ) {
     this.enablePointerEvents = options.enablePointerEvents;
     
     Node.call( this, options );
-
-    this.showPointers = true; // TODO: Hook this up to query param or something.
 
     var scene = this;
     window.debugScene = scene;
@@ -885,10 +884,6 @@ define( function( require ) {
         this.setSize( width, height );
         this.rebuildLayers(); // TODO: why? - change this to resize individual layers
 
-        if ( this.showPointers ){
-          this.resizePointerSVGContainer( width, height );
-        }
-        
         if ( accessibility ) {
           this.resizeAccessibilityLayer( width, height );
           this.resizeFocusRingSVGContainer( width, height );
@@ -922,14 +917,6 @@ define( function( require ) {
         this.focusRingSVGContainer.setAttribute( 'width', width );
         this.focusRingSVGContainer.setAttribute( 'height', height );
         this.focusRingSVGContainer.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
-      }
-    },
-
-    resizePointerSVGContainer: function( width, height ) {
-      if ( this.pointerSVGContainer ) {
-        this.pointerSVGContainer.setAttribute( 'width', width );
-        this.pointerSVGContainer.setAttribute( 'height', height );
-        this.pointerSVGContainer.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
       }
     },
 
@@ -1203,85 +1190,16 @@ define( function( require ) {
       } );
     },
 
-    //Display a pointer that was added.  Use a separate SVG layer for each pointer so it can be hardware accelerated, otherwise it is too slow just setting svg internal attributes
-    pointerAdded: function( pointer ) {
-      if (!this.pointerSVGContainer){
-        return;
-      }
-
-      var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
-      svg.style.position = 'absolute';
-      svg.style.top = 0;
-      svg.style.left = 0;
-      svg.style['pointer-events'] = 'none';
-
-      var innerRadius = 30;
-      var strokeWidth = 10;
-      var diameter = (innerRadius + strokeWidth / 2) * 2;
-      var radius = diameter / 2;
-
-      //TODO: keep the size fitted to the circle
-      svg.setAttribute( 'width', diameter );
-      svg.setAttribute( 'height', diameter );
-      var circle = document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
-
-      //TODO: use css transform for performance?
-
-      circle.setAttribute( 'cx', innerRadius + strokeWidth / 2 );
-      circle.setAttribute( 'cy', innerRadius + strokeWidth / 2 );
-      circle.setAttribute( 'r', innerRadius );
-      circle.setAttribute( 'style', 'stroke:cyan; stroke-width:10; fill:none;' );
-      pointer.svg = svg;
-      pointer.radius = radius;
-      if ( pointer.point === null ) {
-        // Set the point to be way off screen so that it isn't visible to the user.
-        pointer.point = { x: -10000, y: -1000 };
-      }
-      this.pointerMoved( pointer );
-      svg.appendChild( circle );
-      this.pointerSVGContainer.appendChild( svg );
-    },
-
-    pointerMoved: function( pointer ) {
-      if ( this.pointerSVGContainer ) {
-
-        //TODO: this allocates memory when pointers are dragging, perhaps rewrite to remove allocations
-        Util.applyCSSTransform( Matrix3.translation( pointer.point.x - pointer.radius, pointer.point.y - pointer.radius ), pointer.svg );
-      }
-    },
-
-    pointerRemoved: function( pointer ) {
-      if ( this.pointerSVGContainer ) {
-        this.pointerSVGContainer.removeChild( pointer.svg );
-        delete pointer.path;
-        delete pointer.radius;
-      }
-    },
-
-    // Set the pointer overlay display to be visible or invisible
     setPointerDisplayVisible: function( visible ) {
-      if ( visible && !this.pointerSVGContainer ) {
-        // add element to show the pointers
-        this.pointerSVGContainer = document.createElement( 'div' );
-        this.pointerSVGContainer.style.position = 'absolute';
-        this.pointerSVGContainer.style.top = 0;
-        this.pointerSVGContainer.style.left = 0;
-        this.pointerSVGContainer.style['pointer-events'] = 'none';
-        this.pointerSVGContainer.style.zIndex = 99;
-        this.pointerSVGContainer.setAttribute( 'id', 'pointerSVGContainer' );
-        this.$main[0].appendChild( this.pointerSVGContainer );
-
-        //if there is a mouse, add it here
-        if ( this.input && this.input.mouse ) {
-          this.pointerAdded( this.input.mouse );
-        }
+      if ( visible && !this.pointerOverlay ) {
+        this.pointerOverlay = new scenery.PointerOverlay( this );
       }
-      else if ( !visible && this.pointerSVGContainer ) {
-        this.$main[0].removeChild(this.pointerSVGContainer);
-        delete this.pointerSVGContainer;
+      else if ( !visible && this.pointerOverlay ) {
+        this.pointerOverlay.dispose();
+        delete this.pointerOverlay;
       }
     },
-    
+
     getTrailFromKeyboardFocus: function() {
       // return the root (scene) trail by default
       // TODO: fill in with actual keyboard focus

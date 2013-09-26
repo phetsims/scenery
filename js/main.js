@@ -50,7 +50,9 @@ define( [
     'SCENERY/nodes/Strokable',
     'SCENERY/nodes/Text',
     'SCENERY/nodes/VBox',
-    
+
+    'SCENERY/overlays/PointerOverlay',
+
     'SCENERY/util/AccessibilityPeer',
     'SCENERY/util/CanvasContextWrapper',
     'SCENERY/util/Color',

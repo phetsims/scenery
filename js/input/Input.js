@@ -42,8 +42,6 @@ define( function( require ) {
     //TODO: is mouse getting created on iPad?
     this.mouse = new scenery.Mouse();
 
-    this.scene.pointerAdded(this.mouse);
-
     this.pointers = [ this.mouse ];
     
     this.listenerReferences = [];
@@ -58,7 +56,11 @@ define( function( require ) {
     
     addPointer: function( pointer ) {
       this.pointers.push( pointer );
-      this.scene.pointerAdded( pointer );
+
+      //Callback for showing pointer events.  Optimized for performance.
+      if ( this.pointerListener ) {
+        this.pointerListener.pointerAdded( pointer );
+      }
     },
     
     removePointer: function( pointer ) {
@@ -68,7 +70,11 @@ define( function( require ) {
           this.pointers.splice( i, 1 );
         }
       }
-      this.scene.pointerRemoved(pointer);
+
+      //Callback for showing pointer events.  Optimized for performance.
+      if (this.pointerListener){
+        this.pointerListener.pointerRemoved(pointer);
+      }
     },
     
     findTouchById: function( id ) {
@@ -400,7 +406,11 @@ define( function( require ) {
     
     moveEvent: function( pointer, event ) {
       this.branchChangeEvents( pointer, event, true );
-      this.scene.pointerMoved( pointer, event );
+
+      //Callback for showing pointer events.  Optimized for performance since this happens during dragging.
+      if ( this.pointerListener ) {
+        this.pointerListener.pointerMoved( pointer );
+      }
     },
     
     cancelEvent: function( pointer, event ) {
