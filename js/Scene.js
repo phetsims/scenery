@@ -1054,8 +1054,6 @@ define( function( require ) {
         throw new Error( 'Attempt to attach events twice to the scene' );
       }
       
-      this.setPointerDisplayVisible( this.showPointers );
-
       // TODO: come up with more parameter names that have the same string length, so it looks creepier
       var pointFromEvent = parameters.pointFromEvent;
       var listenerTarget = parameters.listenerTarget;
@@ -1207,6 +1205,9 @@ define( function( require ) {
 
     //Display a pointer that was added.  Use a separate SVG layer for each pointer so it can be hardware accelerated, otherwise it is too slow just setting svg internal attributes
     pointerAdded: function( pointer ) {
+      if (!this.pointerSVGContainer){
+        return;
+      }
 
       var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
       svg.style.position = 'absolute';
@@ -1242,18 +1243,24 @@ define( function( require ) {
     },
 
     pointerMoved: function( pointer ) {
-      Util.applyCSSTransform( Matrix3.translation( pointer.point.x - pointer.radius, pointer.point.y - pointer.radius ), pointer.svg );
+      if ( this.pointerSVGContainer ) {
+
+        //TODO: this allocates memory when pointers are dragging, perhaps rewrite to remove allocations
+        Util.applyCSSTransform( Matrix3.translation( pointer.point.x - pointer.radius, pointer.point.y - pointer.radius ), pointer.svg );
+      }
     },
 
     pointerRemoved: function( pointer ) {
-      this.pointerSVGContainer.removeChild( pointer.svg );
-      delete pointer.path;
-      delete pointer.radius;
+      if ( this.pointerSVGContainer ) {
+        this.pointerSVGContainer.removeChild( pointer.svg );
+        delete pointer.path;
+        delete pointer.radius;
+      }
     },
 
-    // Used to make the pointer visible.
-    setPointerDisplayVisible: function( isVisible ) {
-      if ( isVisible && !this.pointerSVGContainer ) {
+    // Set the pointer overlay display to be visible or invisible
+    setPointerDisplayVisible: function( visible ) {
+      if ( visible && !this.pointerSVGContainer ) {
         // add element to show the pointers
         this.pointerSVGContainer = document.createElement( 'div' );
         this.pointerSVGContainer.style.position = 'absolute';
@@ -1263,6 +1270,15 @@ define( function( require ) {
         this.pointerSVGContainer.style.zIndex = 99;
         this.pointerSVGContainer.setAttribute( 'id', 'pointerSVGContainer' );
         this.$main[0].appendChild( this.pointerSVGContainer );
+
+        //if there is a mouse, add it here
+        if ( this.input && this.input.mouse ) {
+          this.pointerAdded( this.input.mouse );
+        }
+      }
+      else if ( !visible && this.pointerSVGContainer ) {
+        this.$main[0].removeChild(this.pointerSVGContainer);
+        delete this.pointerSVGContainer;
       }
     },
     
