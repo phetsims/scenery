@@ -721,8 +721,12 @@ define( function( require ) {
       
       if ( accessibility ) {
         if ( this.focusRingSVGContainer ) {
-          this.focusRingSVGContainer.style.zIndex = index;
+          this.focusRingSVGContainer.style.zIndex = index++;
         }
+      }
+
+      if (this.pointerOverlay){
+        this.pointerOverlay.setZIndex( index++ );
       }
     },
     

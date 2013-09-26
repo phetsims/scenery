@@ -31,7 +31,6 @@ define( function( require ) {
     this.pointerSVGContainer.style.top = 0;
     this.pointerSVGContainer.style.left = 0;
     this.pointerSVGContainer.style['pointer-events'] = 'none';
-    this.pointerSVGContainer.style.zIndex = 100;//Make sure it is in front of enough other things!
 
     var innerRadius = 30;
     var strokeWidth = 10;
@@ -123,6 +122,7 @@ define( function( require ) {
       scene.input.pointerListener.pointerAdded( scene.input.mouse );
     }
 
+    scene.reindexLayers();
     scene.$main[0].appendChild( this.pointerSVGContainer );
   };
   var PointerOverlay = scenery.PointerOverlay;
@@ -131,6 +131,10 @@ define( function( require ) {
     dispose: function() {
       this.scene.$main[0].removeChild( this.pointerSVGContainer );
       delete this.scene.input.pointerListener;
+    },
+
+    setZIndex: function( index ) {
+      this.pointerSVGContainer.style.zIndex = index;//Make sure it is in front of enough other things!
     }
   };
 
