@@ -48,6 +48,8 @@ define( function( require ) {
     
     this.eventLog = [];     // written when recording event input. can be overwritten to the empty array to reset. Strings relative to this class (prefix "scene.input.")
     this.logEvents = false; // can be set to true to cause Scenery to record all input calls to eventLog
+
+    this.pointerAddedListeners = [];
   };
   var Input = scenery.Input;
   
@@ -58,8 +60,21 @@ define( function( require ) {
       this.pointers.push( pointer );
 
       //Callback for showing pointer events.  Optimized for performance.
-      if ( this.pointerListener ) {
-        this.pointerListener.pointerAdded( pointer );
+      if ( this.pointerAddedListeners.length ) {
+        for ( var i = 0; i < this.pointerAddedListeners.length; i++ ) {
+          this.pointerAddedListeners[i].pointerAdded( pointer );
+      }
+      }
+    },
+
+    addPointerAddedListener:function(listener){
+      this.pointerAddedListeners.push(listener);
+    },
+
+    removePointerAddedListener:function(listener){
+      var index = this.pointerAddedListeners.indexOf( listener );
+      if ( index !== -1 ) {
+        this.pointerAddedListeners.splice( index, index + 1 );
       }
     },
     
