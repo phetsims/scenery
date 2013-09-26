@@ -33,6 +33,11 @@ define( function( require ) {
     this.pointerSVGContainer.style['pointer-events'] = 'none';
     this.pointerSVGContainer.style.zIndex = 100;//Make sure it is in front of enough other things!
 
+    var innerRadius = 30;
+    var strokeWidth = 10;
+    var diameter = (innerRadius + strokeWidth / 2) * 2;
+    var radius = diameter / 2;
+
     //Resize the parent div when the scene is resized
     scene.addEventListener( 'resize', function( args ) {
       pointerOverlay.pointerSVGContainer.setAttribute( 'width', args.width );
@@ -51,11 +56,6 @@ define( function( require ) {
         svg.style.left = 0;
         svg.style['pointer-events'] = 'none';
 
-        var innerRadius = 30;
-        var strokeWidth = 10;
-        var diameter = (innerRadius + strokeWidth / 2) * 2;
-        var radius = diameter / 2;
-
         //Fit the size to the display
         svg.setAttribute( 'width', diameter );
         svg.setAttribute( 'height', diameter );
@@ -67,7 +67,6 @@ define( function( require ) {
         circle.setAttribute( 'r', innerRadius );
         circle.setAttribute( 'style', 'stroke:cyan; stroke-width:10; fill:none;' );
         pointer.svg = svg;
-        pointer.radius = radius;
 
         // If there is no point, show the pointer way off screen so that it isn't visible to the user.
         //TODO: remove the need for this workaround
@@ -84,7 +83,7 @@ define( function( require ) {
       pointerMoved: function( pointer ) {
 
         //TODO: this allocates memory when pointers are dragging, perhaps rewrite to remove allocations
-        Util.applyCSSTransform( Matrix3.translation( pointer.point.x - pointer.radius, pointer.point.y - pointer.radius ), pointer.svg );
+        Util.applyCSSTransform( Matrix3.translation( pointer.point.x - radius, pointer.point.y - radius ), pointer.svg );
       },
 
       pointerRemoved: function( pointer ) {
