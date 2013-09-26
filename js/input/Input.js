@@ -55,7 +55,7 @@ define( function( require ) {
   
   Input.prototype = {
     constructor: Input,
-    
+
     addPointer: function( pointer ) {
       this.pointers.push( pointer );
 
@@ -63,7 +63,7 @@ define( function( require ) {
       if ( this.pointerAddedListeners.length ) {
         for ( var i = 0; i < this.pointerAddedListeners.length; i++ ) {
           this.pointerAddedListeners[i]( pointer );
-      }
+        }
       }
     },
 
