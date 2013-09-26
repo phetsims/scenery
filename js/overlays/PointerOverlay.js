@@ -82,7 +82,6 @@ define( function( require ) {
         circle.setAttribute( 'cy', innerRadius + strokeWidth / 2 );
         circle.setAttribute( 'r', innerRadius );
         circle.setAttribute( 'style', 'stroke:cyan; stroke-width:10; fill:none;' );
-        pointer.svg = svg;
 
         // If there is no point, show the pointer way off screen so that it isn't visible to the user.
         //TODO: remove the need for this workaround
@@ -92,28 +91,31 @@ define( function( require ) {
         }
 
         //Add a move listener to the pointer to update position when it has moved
+        var pointerRemoved = function() {
+
+          //For touches that get a touch up event, remove them.  But when the mouse button is released, don't stop showing the mouse location
+          if ( pointer.isTouch ) {
+            pointerOverlay.pointerSVGContainer.removeChild( svg );
+            pointer.removeInputListener( moveListener );
+          }
+        };
         var moveListener = {
           move: function() {
 
             //TODO: this allocates memory when pointers are dragging, perhaps rewrite to remove allocations
-            Util.applyCSSTransform( Matrix3.translation( pointer.point.x - radius, pointer.point.y - radius ), pointer.svg );
-          }
+            Util.applyCSSTransform( Matrix3.translation( pointer.point.x - radius, pointer.point.y - radius ), svg );
+          },
+
+          up: pointerRemoved,
+          cancel: pointerRemoved
         };
         pointer.addInputListener( moveListener );
-        pointer.moveListener = moveListener;
 
         moveListener.move();
         svg.appendChild( verticalLine );
         svg.appendChild( horizontalLine );
         svg.appendChild( circle );
         pointerOverlay.pointerSVGContainer.appendChild( svg );
-      },
-
-      pointerRemoved: function( pointer ) {
-        pointerOverlay.pointerSVGContainer.removeChild( pointer.svg );
-        pointer.removeInputListener( pointer.moveListener );
-        delete pointer.moveListener;
-        delete pointer.path;
       }
     };
 

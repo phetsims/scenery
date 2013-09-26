@@ -70,11 +70,6 @@ define( function( require ) {
           this.pointers.splice( i, 1 );
         }
       }
-
-      //Callback for showing pointer events.  Optimized for performance.
-      if (this.pointerListener){
-        this.pointerListener.pointerRemoved(pointer);
-      }
     },
     
     findTouchById: function( id ) {
