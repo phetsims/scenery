@@ -59,6 +59,23 @@ define( function( require ) {
         //Fit the size to the display
         svg.setAttribute( 'width', diameter );
         svg.setAttribute( 'height', diameter );
+
+        var verticalLine = document.createElementNS( 'http://www.w3.org/2000/svg', 'line' );
+        verticalLine.setAttribute( 'x1', radius );
+        verticalLine.setAttribute( 'y1', 0 );
+        verticalLine.setAttribute( 'x2', radius );
+        verticalLine.setAttribute( 'y2', diameter );
+        verticalLine.setAttribute( 'stroke', 'black' );
+        verticalLine.setAttribute( 'stroke-width', 1 );
+
+        var horizontalLine = document.createElementNS( 'http://www.w3.org/2000/svg', 'line' );
+        horizontalLine.setAttribute( 'x1', 0 );
+        horizontalLine.setAttribute( 'y1', radius );
+        horizontalLine.setAttribute( 'x2', diameter );
+        horizontalLine.setAttribute( 'y2', radius );
+        horizontalLine.setAttribute( 'stroke', 'black' );
+        horizontalLine.setAttribute( 'stroke-width', 1 );
+
         var circle = document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
 
         //use css transform for performance?
@@ -87,6 +104,8 @@ define( function( require ) {
         pointer.moveListener = moveListener;
 
         moveListener.move();
+        svg.appendChild( verticalLine );
+        svg.appendChild( horizontalLine );
         svg.appendChild( circle );
         pointerOverlay.pointerSVGContainer.appendChild( svg );
       },
