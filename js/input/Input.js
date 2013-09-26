@@ -406,11 +406,6 @@ define( function( require ) {
     
     moveEvent: function( pointer, event ) {
       this.branchChangeEvents( pointer, event, true );
-
-      //Callback for showing pointer events.  Optimized for performance since this happens during dragging.
-      if ( this.pointerListener ) {
-        this.pointerListener.pointerMoved( pointer );
-      }
     },
     
     cancelEvent: function( pointer, event ) {

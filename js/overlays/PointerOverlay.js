@@ -74,20 +74,27 @@ define( function( require ) {
 
           pointer.point = { x: -10000, y: -1000 };
         }
-        this.pointerMoved( pointer );
+
+        //Add a move listener to the pointer to update position when it has moved
+        var moveListener = {
+          move: function() {
+
+            //TODO: this allocates memory when pointers are dragging, perhaps rewrite to remove allocations
+            Util.applyCSSTransform( Matrix3.translation( pointer.point.x - radius, pointer.point.y - radius ), pointer.svg );
+          }
+        };
+        pointer.addInputListener( moveListener );
+        pointer.moveListener = moveListener;
+
+        moveListener.move();
         svg.appendChild( circle );
         pointerOverlay.pointerSVGContainer.appendChild( svg );
       },
 
-      //Update the location of a pointer
-      pointerMoved: function( pointer ) {
-
-        //TODO: this allocates memory when pointers are dragging, perhaps rewrite to remove allocations
-        Util.applyCSSTransform( Matrix3.translation( pointer.point.x - radius, pointer.point.y - radius ), pointer.svg );
-      },
-
       pointerRemoved: function( pointer ) {
         pointerOverlay.pointerSVGContainer.removeChild( pointer.svg );
+        pointer.removeInputListener( pointer.moveListener );
+        delete pointer.moveListener;
         delete pointer.path;
       }
     };
