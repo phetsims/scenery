@@ -32,8 +32,8 @@ define( function( require ) {
     this.pointerSVGContainer.style.left = 0;
     this.pointerSVGContainer.style['pointer-events'] = 'none';
 
-    var innerRadius = 30;
-    var strokeWidth = 10;
+    var innerRadius = 10;
+    var strokeWidth = 1;
     var diameter = (innerRadius + strokeWidth / 2) * 2;
     var radius = diameter / 2;
 
@@ -59,29 +59,14 @@ define( function( require ) {
       svg.setAttribute( 'width', diameter );
       svg.setAttribute( 'height', diameter );
 
-      var verticalLine = document.createElementNS( 'http://www.w3.org/2000/svg', 'line' );
-      verticalLine.setAttribute( 'x1', radius );
-      verticalLine.setAttribute( 'y1', 0 );
-      verticalLine.setAttribute( 'x2', radius );
-      verticalLine.setAttribute( 'y2', diameter );
-      verticalLine.setAttribute( 'stroke', 'black' );
-      verticalLine.setAttribute( 'stroke-width', 1 );
-
-      var horizontalLine = document.createElementNS( 'http://www.w3.org/2000/svg', 'line' );
-      horizontalLine.setAttribute( 'x1', 0 );
-      horizontalLine.setAttribute( 'y1', radius );
-      horizontalLine.setAttribute( 'x2', diameter );
-      horizontalLine.setAttribute( 'y2', radius );
-      horizontalLine.setAttribute( 'stroke', 'black' );
-      horizontalLine.setAttribute( 'stroke-width', 1 );
-
       var circle = document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
 
       //use css transform for performance?
       circle.setAttribute( 'cx', innerRadius + strokeWidth / 2 );
       circle.setAttribute( 'cy', innerRadius + strokeWidth / 2 );
       circle.setAttribute( 'r', innerRadius );
-      circle.setAttribute( 'style', 'stroke:cyan; stroke-width:10; fill:none;' );
+      circle.setAttribute( 'style', 'fill:black;' );
+      circle.setAttribute( 'opacity', 0.4 );
 
       //Add a move listener to the pointer to update position when it has moved
       var pointerRemoved = function() {
@@ -109,8 +94,6 @@ define( function( require ) {
       pointer.addInputListener( moveListener );
 
       moveListener.move();
-      svg.appendChild( verticalLine );
-      svg.appendChild( horizontalLine );
       svg.appendChild( circle );
       pointerOverlay.pointerSVGContainer.appendChild( svg );
     };
