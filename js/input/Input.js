@@ -62,7 +62,7 @@ define( function( require ) {
       //Callback for showing pointer events.  Optimized for performance.
       if ( this.pointerAddedListeners.length ) {
         for ( var i = 0; i < this.pointerAddedListeners.length; i++ ) {
-          this.pointerAddedListeners[i].pointerAdded( pointer );
+          this.pointerAddedListeners[i]( pointer );
       }
       }
     },
