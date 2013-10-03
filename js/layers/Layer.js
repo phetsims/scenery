@@ -38,7 +38,7 @@ define( function( require ) {
     this.cssRotation = args.cssRotation;       // CSS for the rotation
     this.cssScale = args.cssScale;             // CSS for the scaling
     this.cssTransform = args.cssTransform;     // CSS for the entire base node (will ignore other partial transforms)
-    sceneryAssert && sceneryAssert( !( this.usesPartialCSSTransforms && this.cssTransform ), 'Do not specify both partial and complete CSS transform arguments.' );
+    assert && assert( !( this.usesPartialCSSTransforms && this.cssTransform ), 'Do not specify both partial and complete CSS transform arguments.' );
     
     // initialize to fully dirty so we draw everything the first time
     // bounds in global coordinate frame
@@ -52,7 +52,7 @@ define( function( require ) {
       this.baseTrail = new scenery.Trail( this.scene );
     } else {
       this.baseTrail = this.startPaintedTrail.upToNode( this.baseNode );
-      sceneryAssert && sceneryAssert( this.baseTrail.lastNode() === this.baseNode );
+      assert && assert( this.baseTrail.lastNode() === this.baseNode );
     }
     
     // we reference all painted trails in an unordered way
@@ -70,7 +70,7 @@ define( function( require ) {
     this.baseNode.addEventListener( 'childBounds', this.baseNodeBoundsListener );
     
     this.fitToBounds = this.usesPartialCSSTransforms || this.cssTransform;
-    sceneryAssert && sceneryAssert( this.fitToBounds || this.baseNode === this.scene, 'If the baseNode is not the scene, we need to fit the bounds' );
+    assert && assert( this.fitToBounds || this.baseNode === this.scene, 'If the baseNode is not the scene, we need to fit the bounds' );
     
     // used for CSS transforms where we need to transform our base node's bounds into the (0,0,w,h) bounds range
     this.baseNodeTransform = new Transform3();
@@ -141,9 +141,9 @@ define( function( require ) {
     addInstance: function( instance ) {
       var trail = instance.trail;
       
-      if ( sceneryAssert ) {
+      if ( assert ) {
         _.each( this._layerTrails, function( otherTrail ) {
-          sceneryAssert( !trail.equals( otherTrail ), 'trail in addInstance should not already exist in a layer' );
+          assert( !trail.equals( otherTrail ), 'trail in addInstance should not already exist in a layer' );
         } );
       }
       
@@ -162,7 +162,7 @@ define( function( require ) {
           break;
         }
       }
-      sceneryAssert && sceneryAssert( i < this._layerTrails.length );
+      assert && assert( i < this._layerTrails.length );
       
       this._layerTrails.splice( i, 1 );
     },
@@ -186,7 +186,7 @@ define( function( require ) {
     },
     
     dispose: function() {
-      sceneryAssert && sceneryAssert( !this.disposed, 'Layer has already been disposed!' );
+      assert && assert( !this.disposed, 'Layer has already been disposed!' );
       
       this.disposed = true;
       

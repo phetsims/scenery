@@ -23,7 +23,7 @@ define( function( require ) {
    * isBefore: whether this points to before the node (and its children) have been rendered, or after
    */
   scenery.TrailPointer = function TrailPointer( trail, isBefore ) {
-    sceneryAssert && sceneryAssert( trail instanceof scenery.Trail, 'trail is not a trail' );
+    assert && assert( trail instanceof scenery.Trail, 'trail is not a trail' );
     this.trail = trail;
     
     this.setBefore( isBefore );
@@ -68,7 +68,7 @@ define( function( require ) {
      * other pointer, and 1 if this pointer is after the other pointer.
      */
     compareRender: function( other ) {
-      sceneryAssert && sceneryAssert( other !== null );
+      assert && assert( other !== null );
       
       var a = this.getRenderBeforePointer();
       var b = other.getRenderBeforePointer();
@@ -92,7 +92,7 @@ define( function( require ) {
      * TODO: optimization?
      */
     compareNested: function( other ) {
-      sceneryAssert && sceneryAssert( other );
+      assert && assert( other );
       
       var comparison = this.trail.compare( other.trail );
       
@@ -228,8 +228,8 @@ define( function( require ) {
      */
     depthFirstUntil: function( other, callback, excludeEndpoints ) {
       // make sure this pointer is before the other, but allow start === end if we are not excluding endpoints
-      sceneryAssert && sceneryAssert( this.compareNested( other ) <= ( excludeEndpoints ? -1 : 0 ), 'TrailPointer.depthFirstUntil pointers out of order, possibly in both meanings of the phrase!' );
-      sceneryAssert && sceneryAssert( this.trail.rootNode() === other.trail.rootNode(), 'TrailPointer.depthFirstUntil takes pointers with the same root' );
+      assert && assert( this.compareNested( other ) <= ( excludeEndpoints ? -1 : 0 ), 'TrailPointer.depthFirstUntil pointers out of order, possibly in both meanings of the phrase!' );
+      assert && assert( this.trail.rootNode() === other.trail.rootNode(), 'TrailPointer.depthFirstUntil takes pointers with the same root' );
       
       // sanity check TODO: remove later
       this.trail.reindex();
@@ -241,7 +241,7 @@ define( function( require ) {
       var first = true;
       
       while ( !pointer.equalsNested( other ) ) {
-        sceneryAssert && sceneryAssert( pointer.compareNested( other ) !== 1, 'skipped in depthFirstUntil' );
+        assert && assert( pointer.compareNested( other ) !== 1, 'skipped in depthFirstUntil' );
         var skipSubtree = false;
         
         if ( first ) {

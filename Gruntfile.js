@@ -54,8 +54,8 @@ module.exports = function( grunt ) {
           uglify2: {
             compress: {
               global_defs: {
-                sceneryAssert: false,
-                sceneryAssertExtra: false,
+                assert: false,
+                assertSlow: false,
                 sceneryLayerLog: false,
                 sceneryEventLog: false,
                 sceneryAccessibilityLog: false,
@@ -85,8 +85,8 @@ module.exports = function( grunt ) {
           uglify2: {
             compress: {
               global_defs: {
-                sceneryAssert: false,
-                sceneryAssertExtra: false,
+                assert: false,
+                assertSlow: false,
                 sceneryLayerLog: false,
                 sceneryEventLog: false,
                 sceneryAccessibilityLog: false,

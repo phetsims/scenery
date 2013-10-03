@@ -91,8 +91,8 @@ define( function( require ) {
       
       sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' addInstance: ' + trail.toString() );
       
-      sceneryAssert && sceneryAssert( !( trail.getUniqueId() in this.idFragmentMap ), 'Already contained that trail!' );
-      sceneryAssert && sceneryAssert( trail.isPainted(), 'Don\'t add nodes without isPainted() to SVGLayer' );
+      assert && assert( !( trail.getUniqueId() in this.idFragmentMap ), 'Already contained that trail!' );
+      assert && assert( trail.isPainted(), 'Don\'t add nodes without isPainted() to SVGLayer' );
       
       Layer.prototype.addInstance.call( this, instance );
       
@@ -118,7 +118,7 @@ define( function( require ) {
             this.insertGroupIntoParent( group, this.idGroupMap[lastId], subtrail );
           } else {
             // we are ensuring the base group
-            sceneryAssert && sceneryAssert( subtrail.lastNode() === this.baseNode );
+            assert && assert( subtrail.lastNode() === this.baseNode );
             
             group = this.g;
             
@@ -168,7 +168,7 @@ define( function( require ) {
       var trail = instance.trail;
       
       sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' removeInstance: ' + trail.toString() );
-      sceneryAssert && sceneryAssert( trail.getUniqueId() in this.idFragmentMap, 'Did not contain that trail!' );
+      assert && assert( trail.getUniqueId() in this.idFragmentMap, 'Did not contain that trail!' );
       
       Layer.prototype.removeInstance.call( this, instance );
       
@@ -347,7 +347,7 @@ define( function( require ) {
           var baseNodeInteralBounds = internalBounds.transform( this.baseNodeTransform.getMatrix() );
           
           // sanity check to ensure we are within that range
-          sceneryAssert && sceneryAssert( baseNodeInteralBounds.minX >= 0 && baseNodeInteralBounds.minY >= 0 );
+          assert && assert( baseNodeInteralBounds.minX >= 0 && baseNodeInteralBounds.minY >= 0 );
           
           this.updateContainerDimensions( Math.ceil( baseNodeInteralBounds.maxX + padding ),
                                           Math.ceil( baseNodeInteralBounds.maxY + padding ) );

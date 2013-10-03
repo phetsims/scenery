@@ -8,26 +8,9 @@
 
 // if has.js is included, set assertion flags to false, for running speed.
 if ( window.has ) {
-  window.has.add( 'assert.dot', function( global, document, anElement ) {
-    'use strict';
-    return false;
-  } );
-  window.has.add( 'assert.kite', function( global, document, anElement ) {
-    'use strict';
-    return false;
-  } );
-  window.has.add( 'assert.kite.extra', function( global, document, anElement ) {
-    'use strict';
-    return false;
-  } );
-  window.has.add( 'assert.scenery', function( global, document, anElement ) {
-    'use strict';
-    return false;
-  } );
-  window.has.add( 'assert.scenery.extra', function( global, document, anElement ) {
-    'use strict';
-    return false;
-  } );
+  // default config only enables basic assertions
+  window.has.add( 'assert.basic', function( global, document, anElement ) { 'use strict'; return false; } );
+  // window.has.add( 'assert.slow', function( global, document, anElement ) { 'use strict'; return true; } );
 }
 
 require.config( {

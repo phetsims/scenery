@@ -353,15 +353,15 @@ grunt</pre>
         To enable all assertions for debugging, run the following (assuming has.js has been loaded):
       </p>
       <pre class="brush: js">
-has.add( 'assert.scenery', function() { return true; } );
-has.add( 'assert.scenery.extra', function() { return true; } );
+has.add( 'assert.basic', function() { return true; } );
+has.add( 'assert.slow', function() { return true; } );
       </pre>
       <p>
         or to disable assertions:
       </p>
       <pre class="brush: js">
-has.add( 'assert.scenery', function() { return false; } );
-has.add( 'assert.scenery.extra', function() { return false; } );
+has.add( 'assert.basic', function() { return false; } );
+has.add( 'assert.slow', function() { return false; } );
       </pre>
 
       <h2 id="api">Scenery API</h2>

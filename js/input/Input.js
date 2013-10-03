@@ -99,12 +99,12 @@ define( function( require ) {
     },
     
     findKeyByEvent: function( event ) {
-      sceneryAssert && sceneryAssert( event.keyCode && event.charCode, 'Assumes the KeyboardEvent has keyCode and charCode properties' );
+      assert && assert( event.keyCode && event.charCode, 'Assumes the KeyboardEvent has keyCode and charCode properties' );
       var result = _.find( this.pointers, function( pointer ) {
         // TODO: also check location (if that exists), so we don't mix up left and right shift, etc.
         return pointer.keyCode === event.keyCode && pointer.charCode === event.charCode;
       } );
-      // sceneryAssert && sceneryAssert( result, 'No key found for the combination of key:' + event.key + ' and location:' + event.location );
+      // assert && assert( result, 'No key found for the combination of key:' + event.key + ' and location:' + event.location );
       return result;
     },
 
@@ -196,7 +196,7 @@ define( function( require ) {
         this.removePointer( touch );
         this.upEvent( touch, event );
       } else {
-        sceneryAssert && sceneryAssert( false, 'Touch not found for touchEnd: ' + id );
+        assert && assert( false, 'Touch not found for touchEnd: ' + id );
       }
     },
     
@@ -206,7 +206,7 @@ define( function( require ) {
       if ( touch ) {
         this.upImmediateEvent( touch, event );
       } else {
-        sceneryAssert && sceneryAssert( false, 'Touch not found for touchEndImmediate: ' + id );
+        assert && assert( false, 'Touch not found for touchEndImmediate: ' + id );
       }
     },
     
@@ -217,7 +217,7 @@ define( function( require ) {
         touch.move( point, event );
         this.moveEvent( touch, event );
       } else {
-        sceneryAssert && sceneryAssert( false, 'Touch not found for touchMove: ' + id );
+        assert && assert( false, 'Touch not found for touchMove: ' + id );
       }
     },
     
@@ -229,7 +229,7 @@ define( function( require ) {
         this.removePointer( touch );
         this.cancelEvent( touch, event );
       } else {
-        sceneryAssert && sceneryAssert( false, 'Touch not found for touchCancel: ' + id );
+        assert && assert( false, 'Touch not found for touchCancel: ' + id );
       }
     },
     
@@ -249,7 +249,7 @@ define( function( require ) {
         this.removePointer( pen );
         this.upEvent( pen, event );
       } else {
-        sceneryAssert && sceneryAssert( false, 'Pen not found for penEnd: ' + id );
+        assert && assert( false, 'Pen not found for penEnd: ' + id );
       }
     },
     
@@ -259,7 +259,7 @@ define( function( require ) {
       if ( pen ) {
         this.upImmediateEvent( pen, event );
       } else {
-        sceneryAssert && sceneryAssert( false, 'Pen not found for penEndImmediate: ' + id );
+        assert && assert( false, 'Pen not found for penEndImmediate: ' + id );
       }
     },
     
@@ -270,7 +270,7 @@ define( function( require ) {
         pen.move( point, event );
         this.moveEvent( pen, event );
       } else {
-        sceneryAssert && sceneryAssert( false, 'Pen not found for penMove: ' + id );
+        assert && assert( false, 'Pen not found for penMove: ' + id );
       }
     },
     
@@ -282,7 +282,7 @@ define( function( require ) {
         this.removePointer( pen );
         this.cancelEvent( pen, event );
       } else {
-        sceneryAssert && sceneryAssert( false, 'Pen not found for penCancel: ' + id );
+        assert && assert( false, 'Pen not found for penCancel: ' + id );
       }
     },
     

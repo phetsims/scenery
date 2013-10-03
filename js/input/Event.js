@@ -16,7 +16,7 @@ define( function( require ) {
   
   scenery.Event = function Event( args ) {
     // ensure that all of the required args are supplied
-    sceneryAssert && sceneryAssert( args.trail &&
+    assert && assert( args.trail &&
                       args.type &&
                       args.pointer &&
                       args.target, 'Missing required scenery.Event argument' );

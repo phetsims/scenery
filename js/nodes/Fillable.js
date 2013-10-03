@@ -116,7 +116,7 @@ define( function( require ) {
     };
     
     proto.getCSSFill = function() {
-      sceneryAssert && sceneryAssert( this.isFillDOMCompatible() );
+      assert && assert( this.isFillDOMCompatible() );
       
       // if it's a Color object, get the corresponding CSS
       // 'transparent' will make us invisible if the fill is null

@@ -226,14 +226,14 @@ define( function( require ) {
     
     toCSS: function() {
       // verify that the cached value is correct (in debugging builds only, defeats the point of caching otherwise)
-      sceneryAssert && sceneryAssert( this._css === this.computeCSS(), 'CSS cached value is ' + this._css + ', but the computed value appears to be ' + this.computeCSS() );
+      assert && assert( this._css === this.computeCSS(), 'CSS cached value is ' + this._css + ', but the computed value appears to be ' + this.computeCSS() );
       
       return this._css;
     },
     
     // called to update the interally cached CSS value
     updateColor: function() {
-      sceneryAssert && sceneryAssert( !this.immutable, 'Cannot modify an immutable color' );
+      assert && assert( !this.immutable, 'Cannot modify an immutable color' );
       
       var oldCSS = this._css;
       this._css = this.computeCSS();
@@ -251,7 +251,7 @@ define( function( require ) {
     
     // allow setting this Color to be immutable when assertions are disabled. any change will throw an error
     setImmutable: function() {
-      if ( sceneryAssert ) {
+      if ( assert ) {
         this.immutable = true;
       }
       
@@ -359,13 +359,13 @@ define( function( require ) {
     
     // listener should be a callback expecting no arguments, listener() will be called when the color changes
     addChangeListener: function( listener ) {
-      sceneryAssert && sceneryAssert( listener !== undefined && listener !== null, 'Verify that the listener exists' );
-      sceneryAssert && sceneryAssert( !_.contains( this.listeners, listener ) );
+      assert && assert( listener !== undefined && listener !== null, 'Verify that the listener exists' );
+      assert && assert( !_.contains( this.listeners, listener ) );
       this.listeners.push( listener );
     },
     
     removeChangeListener: function( listener ) {
-      sceneryAssert && sceneryAssert( _.contains( this.listeners, listener ) );
+      assert && assert( _.contains( this.listeners, listener ) );
       this.listeners.splice( _.indexOf( this.listeners, listener ), 1 );
     },
 

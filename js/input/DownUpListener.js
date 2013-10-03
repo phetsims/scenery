@@ -46,7 +46,7 @@ define( function( require ) {
     this.downListener = {
       // mouse/touch up
       up: function( event ) {
-        sceneryAssert && sceneryAssert( event.pointer === handler.pointer );
+        assert && assert( event.pointer === handler.pointer );
         if ( !event.pointer.isMouse || event.domEvent.button === handler.options.mouseButton ) {
           handler.buttonUp( event );
         }
@@ -54,7 +54,7 @@ define( function( require ) {
       
       // touch cancel
       cancel: function( event ) {
-        sceneryAssert && sceneryAssert( event.pointer === handler.pointer );
+        assert && assert( event.pointer === handler.pointer );
         handler.buttonUp( event );
       }
     };

@@ -35,7 +35,7 @@ define( function( require ) {
   scenery.LayoutNode = function LayoutNode( defaultMethod, options ) {
     var layoutNode = this;
     
-    sceneryAssert && sceneryAssert( defaultMethod instanceof LayoutMethod, 'defaultMethod is required' );
+    assert && assert( defaultMethod instanceof LayoutMethod, 'defaultMethod is required' );
     
     options = extend( {
       updateOnBounds: true,

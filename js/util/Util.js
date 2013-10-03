@@ -116,11 +116,11 @@ define( function( require ) {
     },
     
     testAssert: function() {
-      return 'assert.scenery: ' + ( sceneryAssert ? 'true' : 'false' );
+      return 'assert.basic: ' + ( assert ? 'true' : 'false' );
     },
     
     testAssertExtra: function() {
-      return 'assert.scenery.extra: ' + ( sceneryAssertExtra ? 'true' : 'false' );
+      return 'assert.slow: ' + ( assertSlow ? 'true' : 'false' );
     },
     
     /*---------------------------------------------------------------------------*

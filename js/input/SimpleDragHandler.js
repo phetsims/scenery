@@ -64,7 +64,7 @@ define( function( require ) {
     this.dragListener = {
       // mouse/touch up
       up: function( event ) {
-        sceneryAssert && sceneryAssert( event.pointer === handler.pointer );
+        assert && assert( event.pointer === handler.pointer );
         if ( !event.pointer.isMouse || event.domEvent.button === handler.mouseButton ) {
           var saveCurrentTarget = event.currentTarget;
           event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
@@ -75,7 +75,7 @@ define( function( require ) {
       
       // touch cancel
       cancel: function( event ) {
-        sceneryAssert && sceneryAssert( event.pointer === handler.pointer );
+        assert && assert( event.pointer === handler.pointer );
 
         var saveCurrentTarget = event.currentTarget;
         event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
@@ -90,7 +90,7 @@ define( function( require ) {
       
       // mouse/touch move
       move: function( event ) {
-        sceneryAssert && sceneryAssert( event.pointer === handler.pointer );
+        assert && assert( event.pointer === handler.pointer );
         
         var delta = handler.transform.inverseDelta2( handler.pointer.point.minus( handler.lastDragPoint ) );
         

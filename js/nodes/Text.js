@@ -80,6 +80,7 @@ define( function( require ) {
       options.text = text;
     }
     
+    this.initializeFillable();
     this.initializeStrokable();
     
     Node.call( this, options );
@@ -104,7 +105,7 @@ define( function( require ) {
     },
     
     setBoundsMethod: function( method ) {
-      sceneryAssert && sceneryAssert( method === 'fast' || method === 'fastCanvas' || method === 'accurate' || method === 'hybrid', 'Unknown Text boundsMethod' );
+      assert && assert( method === 'fast' || method === 'fastCanvas' || method === 'accurate' || method === 'hybrid', 'Unknown Text boundsMethod' );
       if ( method !== this._boundsMethod ) {
         this._boundsMethod = method;
         this.updateTextFlags();

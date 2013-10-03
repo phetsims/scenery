@@ -83,7 +83,7 @@ define( function( require ) {
         var otherTrail = this.trails[insertionIndex];
         otherTrail.reindex();
         var comparison = otherTrail.compare( trail );
-        sceneryAssert && sceneryAssert( comparison !== 0, 'Trail has already been inserted into the DOMLayer' );
+        assert && assert( comparison !== 0, 'Trail has already been inserted into the DOMLayer' );
         if ( comparison === 1 ) { // TODO: enum values!
           break;
         }
@@ -106,7 +106,7 @@ define( function( require ) {
       this.reindexTrails();
       
       var element = this.getElementFromTrail( trail );
-      sceneryAssert && sceneryAssert( element, 'Trail does not exist in the DOMLayer' );
+      assert && assert( element, 'Trail does not exist in the DOMLayer' );
       
       delete this.idElementMap[trail.getUniqueId];
       delete this.idTrailMap[trail.getUniqueId];

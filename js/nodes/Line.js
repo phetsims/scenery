@@ -66,7 +66,7 @@ define( function( require ) {
   
   inherit( Path, Line, {
     setLine: function( x1, y1, x2, y2 ) {
-      sceneryAssert && sceneryAssert( x1 !== undefined && y1 !== undefined && x2 !== undefined && y2 !== undefined, 'parameters need to be defined' );
+      assert && assert( x1 !== undefined && y1 !== undefined && x2 !== undefined && y2 !== undefined, 'parameters need to be defined' );
       
       this._x1 = x1;
       this._y1 = y1;
@@ -100,10 +100,10 @@ define( function( require ) {
     get p2() { return new Vector2( this._x2, this._y2 ); },
     
     createLineShape: function() {
-      sceneryAssert && sceneryAssert( isFinite( this._x1 ), 'A rectangle needs to have a finite x1 (' + this._x1 + ')' );
-      sceneryAssert && sceneryAssert( isFinite( this._y1 ), 'A rectangle needs to have a finite y1 (' + this._y1 + ')' );
-      sceneryAssert && sceneryAssert( isFinite( this._x2 ), 'A rectangle needs to have a finite x2 (' + this._x2 + ')' );
-      sceneryAssert && sceneryAssert( isFinite( this._y2 ), 'A rectangle needs to have a finite y2 (' + this._y2 + ')' );
+      assert && assert( isFinite( this._x1 ), 'A rectangle needs to have a finite x1 (' + this._x1 + ')' );
+      assert && assert( isFinite( this._y1 ), 'A rectangle needs to have a finite y1 (' + this._y1 + ')' );
+      assert && assert( isFinite( this._x2 ), 'A rectangle needs to have a finite x2 (' + this._x2 + ')' );
+      assert && assert( isFinite( this._y2 ), 'A rectangle needs to have a finite y2 (' + this._y2 + ')' );
       
       return Shape.lineSegment( this._x1, this._y1, this._x2, this._y2 );
     },

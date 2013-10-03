@@ -92,7 +92,7 @@ define( function( require ) {
   
   inherit( Path, Rectangle, {
     setRect: function( x, y, width, height, arcWidth, arcHeight ) {
-      sceneryAssert && sceneryAssert( x !== undefined && y !== undefined && width !== undefined && height !== undefined, 'x/y/width/height need to be defined' );
+      assert && assert( x !== undefined && y !== undefined && width !== undefined && height !== undefined, 'x/y/width/height need to be defined' );
       
       this._rectX = x;
       this._rectY = y;
@@ -108,17 +108,17 @@ define( function( require ) {
     },
     
     createRectangleShape: function() {
-      sceneryAssert && sceneryAssert( isFinite( this._rectX ), 'A rectangle needs to have a finite x (' + this._rectX + ')' );
-      sceneryAssert && sceneryAssert( isFinite( this._rectY ), 'A rectangle needs to have a finite x (' + this._rectY + ')' );
-      sceneryAssert && sceneryAssert( this._rectWidth >= 0 && isFinite( this._rectWidth ),
+      assert && assert( isFinite( this._rectX ), 'A rectangle needs to have a finite x (' + this._rectX + ')' );
+      assert && assert( isFinite( this._rectY ), 'A rectangle needs to have a finite x (' + this._rectY + ')' );
+      assert && assert( this._rectWidth >= 0 && isFinite( this._rectWidth ),
                                       'A rectangle needs to have a non-negative finite width (' + this._rectWidth + ')' );
-      sceneryAssert && sceneryAssert( this._rectHeight >= 0 && isFinite( this._rectHeight ),
+      assert && assert( this._rectHeight >= 0 && isFinite( this._rectHeight ),
                                       'A rectangle needs to have a non-negative finite height (' + this._rectHeight + ')' );
-      sceneryAssert && sceneryAssert( this._rectArcWidth >= 0 && isFinite( this._rectArcWidth ),
+      assert && assert( this._rectArcWidth >= 0 && isFinite( this._rectArcWidth ),
                                       'A rectangle needs to have a non-negative finite arcWidth (' + this._rectArcWidth + ')' );
-      sceneryAssert && sceneryAssert( this._rectArcHeight >= 0 && isFinite( this._rectArcHeight ),
+      assert && assert( this._rectArcHeight >= 0 && isFinite( this._rectArcHeight ),
                                       'A rectangle needs to have a non-negative finite arcHeight (' + this._rectArcHeight + ')' );
-      // sceneryAssert && sceneryAssert( !this.isRounded() || ( this._rectWidth >= this._rectArcWidth * 2 && this._rectHeight >= this._rectArcHeight * 2 ),
+      // assert && assert( !this.isRounded() || ( this._rectWidth >= this._rectArcWidth * 2 && this._rectHeight >= this._rectArcHeight * 2 ),
       //                                 'The rounded sections of the rectangle should not intersect (the length of the straight sections shouldn\'t be negative' );
       
       if ( this.isRounded() ) {
