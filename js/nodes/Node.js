@@ -617,6 +617,7 @@ define( function( require ) {
     },
     
     isChild: function( potentialChild ) {
+      assert && assert( potentialChild && ( potentialChild instanceof Node ), 'isChild needs to be called with a Node' );
       var ourChild = _.contains( this._children, potentialChild );
       var itsParent = _.contains( potentialChild._parents, this );
       assert && assert( ourChild === itsParent );
