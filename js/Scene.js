@@ -30,6 +30,7 @@ define( function( require ) {
   require( 'SCENERY/input/Input' );
   require( 'SCENERY/layers/LayerBuilder' );
   require( 'SCENERY/layers/Renderer' );
+  require( 'SCENERY/overlays/PointerAreaOverlay' );
   require( 'SCENERY/overlays/PointerOverlay' );
 
   var Util = require( 'SCENERY/util/Util' );
@@ -184,6 +185,10 @@ define( function( require ) {
       }
       
       this.updateCursor();
+      
+      if ( this.mouseTouchAreaOverlay ) {
+        this.mouseTouchAreaOverlay.update();
+      }
       
       // if ( this.accessibilityLayer ) {
   //      for ( var i = 0; i < accessibleNodes.length; i++ ) {
@@ -724,9 +729,13 @@ define( function( require ) {
           this.focusRingSVGContainer.style.zIndex = index++;
         }
       }
-
-      if (this.pointerOverlay){
-        this.pointerOverlay.setZIndex( index++ );
+      
+      if ( this.mouseTouchAreaOverlay ){
+        this.mouseTouchAreaOverlay.reindex( index++ );
+      }
+      
+      if ( this.pointerOverlay ){
+        this.pointerOverlay.reindex( index++ );
       }
     },
     
@@ -1193,17 +1202,25 @@ define( function( require ) {
         input.keyPress( domEvent );
       } );
     },
-
+    
     setPointerDisplayVisible: function( visible ) {
       if ( visible && !this.pointerOverlay ) {
         this.pointerOverlay = new scenery.PointerOverlay( this );
-      }
-      else if ( !visible && this.pointerOverlay ) {
+      } else if ( !visible && this.pointerOverlay ) {
         this.pointerOverlay.dispose();
         delete this.pointerOverlay;
       }
     },
-
+    
+    setPointerAreaDisplayVisible: function( visible ) {
+      if ( visible && !this.mouseTouchAreaOverlay ) {
+        this.mouseTouchAreaOverlay = new scenery.PointerAreaOverlay( this );
+      } else if ( !visible && this.mouseTouchAreaOverlay ) {
+        this.mouseTouchAreaOverlay.dispose();
+        delete this.mouseTouchAreaOverlay;
+      }
+    },
+    
     getTrailFromKeyboardFocus: function() {
       // return the root (scene) trail by default
       // TODO: fill in with actual keyboard focus

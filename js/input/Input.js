@@ -67,11 +67,11 @@ define( function( require ) {
       }
     },
 
-    addPointerAddedListener:function(listener){
+    addPointerAddedListener: function( listener ) {
       this.pointerAddedListeners.push(listener);
     },
 
-    removePointerAddedListener:function(listener){
+    removePointerAddedListener: function( listener ) {
       var index = this.pointerAddedListeners.indexOf( listener );
       if ( index !== -1 ) {
         this.pointerAddedListeners.splice( index, index + 1 );

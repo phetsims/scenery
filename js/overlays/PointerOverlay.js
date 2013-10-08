@@ -45,7 +45,7 @@ define( function( require ) {
     }, false );
 
     //Display a pointer that was added.  Use a separate SVG layer for each pointer so it can be hardware accelerated, otherwise it is too slow just setting svg internal attributes
-    var pointerAdded = function( pointer ) {
+    var pointerAdded = this.pointerAdded = function( pointer ) {
 
       if ( pointer.isKey ) { return; }
 
@@ -113,11 +113,11 @@ define( function( require ) {
   PointerOverlay.prototype = {
     dispose: function() {
       this.scene.$main[0].removeChild( this.pointerSVGContainer );
-      delete this.scene.input.pointerListener;
+      this.scene.input.removePointerAddedListener( this.pointerAdded );
     },
 
-    setZIndex: function( index ) {
-      this.pointerSVGContainer.style.zIndex = index;//Make sure it is in front of enough other things!
+    reindex: function( index ) {
+      this.pointerSVGContainer.style.zIndex = index; //Make sure it is in front of enough other things!
     }
   };
 
