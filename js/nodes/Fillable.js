@@ -19,6 +19,7 @@ define( function( require ) {
     // this should be called in the constructor to initialize
     proto.initializeFillable = function() {
       this._fill = null;
+      this._fillPickable = true;
       
       var that = this;
       this._fillListener = function() {
@@ -51,6 +52,21 @@ define( function( require ) {
         
         this.invalidatePaint();
         
+        this.invalidateFill();
+      }
+      return this;
+    };
+    
+    proto.getFillPickable = function() {
+      return this._fillPickable;
+    };
+    
+    proto.setFillPickable = function( pickable ) {
+      assert && assert( typeof pickable === 'boolean' );
+      if ( this._fillPickable !== pickable ) {
+        this._fillPickable = pickable;
+        
+        // TODO: better way of indicating that only the node under pointers could have changed, but no paint change is needed?
         this.invalidateFill();
       }
       return this;
@@ -159,9 +175,10 @@ define( function( require ) {
     };
     
     // on mutation, set the fill parameter first
-    proto._mutatorKeys = [ 'fill' ].concat( proto._mutatorKeys );
+    proto._mutatorKeys = [ 'fill', 'fillPickable' ].concat( proto._mutatorKeys );
     
     Object.defineProperty( proto, 'fill', { set: proto.setFill, get: proto.getFill } );
+    Object.defineProperty( proto, 'fillPickable', { set: proto.setFillPickable, get: proto.getFillPickable } );
     
     if ( !proto.invalidateFill ) {
       proto.invalidateFill = function() {

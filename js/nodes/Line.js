@@ -118,7 +118,11 @@ define( function( require ) {
     },
     
     containsPointSelf: function( point ) {
-      return false; // nothing is in a line! (although maybe we should handle edge points properly?)
+      if ( this._strokePickable ) {
+        return Path.prototype.containsPointSelf.call( this, point );
+      } else {
+        return false; // nothing is in a line! (although maybe we should handle edge points properly?)
+      }
     },
     
     intersectsBoundsSelf: function( bounds ) {
@@ -142,7 +146,6 @@ define( function( require ) {
     },
     
     computeShapeBounds: function() {
-      this.getShape();
       return Path.prototype.computeShapeBounds.call( this );
     },
     

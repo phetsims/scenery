@@ -132,7 +132,29 @@ define( function( require ) {
 
     // accelerated hit detection
     containsPointSelf: function( point ) {
-      return point.x * point.x + point.y * point.y < this._radius * this._radius;
+      var magSq = point.x * point.x + point.y * point.y;
+      var result = true;
+      var iRadius;
+      if ( this._strokePickable ) {
+        iRadius = this.getLineWidth() / 2;
+        var outerRadius = this._radius + iRadius;
+        result = result && magSq <= outerRadius * outerRadius;
+      }
+      
+      if ( this._fillPickable ) {
+        if ( this._strokePickable ) {
+          // we were either within the outer radius, or not
+          return result;
+        } else {
+          // just testing in the fill range
+          return magSq <= this._radius * this._radius;
+        }
+      } else if ( this._strokePickable ) {
+        var innerRadius = this._radius - iRadius;
+        return result && magSq >= innerRadius * innerRadius;
+      } else {
+        return false; // neither stroke nor fill is pickable
+      }
     },
 
     get radius() { return this.getRadius(); },

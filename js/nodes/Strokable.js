@@ -20,6 +20,7 @@ define( function( require ) {
     // this should be called in the constructor to initialize
     proto.initializeStrokable = function() {
       this._stroke = null;
+      this._strokePickable = false;
       this._lineDrawingStyles = new LineStyles();
       
       var that = this;
@@ -104,6 +105,21 @@ define( function( require ) {
         
         this._lineDrawingStyles.lineDashOffset = lineDashOffset;
         
+        this.invalidateStroke();
+      }
+      return this;
+    };
+    
+    proto.getStrokePickable = function() {
+      return this._strokePickable;
+    };
+    
+    proto.setStrokePickable = function( pickable ) {
+      assert && assert( typeof pickable === 'boolean' );
+      if ( this._strokePickable !== pickable ) {
+        this._strokePickable = pickable;
+        
+        // TODO: better way of indicating that only the node under pointers could have changed, but no paint change is needed?
         this.invalidateStroke();
       }
       return this;
@@ -277,7 +293,7 @@ define( function( require ) {
     };
     
     // on mutation, set the stroke parameters first since they may affect the bounds (and thus later operations)
-    proto._mutatorKeys = [ 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'lineDash', 'lineDashOffset' ].concat( proto._mutatorKeys );
+    proto._mutatorKeys = [ 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'lineDash', 'lineDashOffset', 'strokePickable' ].concat( proto._mutatorKeys );
     
     // TODO: miterLimit support?
     Object.defineProperty( proto, 'stroke', { set: proto.setStroke, get: proto.getStroke } );
@@ -286,6 +302,7 @@ define( function( require ) {
     Object.defineProperty( proto, 'lineJoin', { set: proto.setLineJoin, get: proto.getLineJoin } );
     Object.defineProperty( proto, 'lineDash', { set: proto.setLineDash, get: proto.getLineDash } );
     Object.defineProperty( proto, 'lineDashOffset', { set: proto.setLineDashOffset, get: proto.getLineDashOffset } );
+    Object.defineProperty( proto, 'strokePickable', { set: proto.setStrokePickable, get: proto.getStrokePickable } );
     
     if ( !proto.invalidateStroke ) {
       proto.invalidateStroke = function() {
