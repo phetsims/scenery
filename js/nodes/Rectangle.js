@@ -86,7 +86,7 @@ define( function( require ) {
     }
     // fallback for non-canvas or non-svg rendering, and for proper bounds computation
 
-    Path.call( this, this.createRectangleShape(), options );
+    Path.call( this, null, options );
   };
   var Rectangle = scenery.Rectangle;
   
@@ -107,7 +107,27 @@ define( function( require ) {
       return this._rectArcWidth !== 0 && this._rectArcHeight !== 0;
     },
     
+    computeShapeBounds: function() {
+      var bounds = new Bounds2( this._rectX, this._rectY, this._rectX + this._rectWidth, this._rectY + this._rectHeight );
+      if ( this._stroke ) {
+        // since we are axis-aligned, any stroke will expand our bounds by a guaranteed set amount
+        bounds = bounds.dilated( this.getLineWidth() / 2 );
+      }
+      return bounds;
+    },
+    
     createRectangleShape: function() {
+      if ( this.isRounded() ) {
+        // copy border-radius CSS behavior in Chrome, where the arcs won't intersect, in cases where the arc segments at full size would intersect each other
+        var maximumArcSize = Math.min( this._rectWidth / 2, this._rectHeight / 2 );
+        return Shape.roundRectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight,
+                                     Math.min( maximumArcSize, this._rectArcWidth ), Math.min( maximumArcSize, this._rectArcHeight ) );
+      } else {
+        return Shape.rectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
+      }
+    },
+    
+    invalidateRectangle: function() {
       assert && assert( isFinite( this._rectX ), 'A rectangle needs to have a finite x (' + this._rectX + ')' );
       assert && assert( isFinite( this._rectY ), 'A rectangle needs to have a finite x (' + this._rectY + ')' );
       assert && assert( this._rectWidth >= 0 && isFinite( this._rectWidth ),
@@ -121,24 +141,11 @@ define( function( require ) {
       // assert && assert( !this.isRounded() || ( this._rectWidth >= this._rectArcWidth * 2 && this._rectHeight >= this._rectArcHeight * 2 ),
       //                                 'The rounded sections of the rectangle should not intersect (the length of the straight sections shouldn\'t be negative' );
       
-      if ( this.isRounded() ) {
-        // copy border-radius CSS behavior in Chrome, where the arcs won't intersect, in cases where the arc segments at full size would intersect each other
-        var maximumArcSize = Math.min( this._rectWidth / 2, this._rectHeight / 2 );
-        return Shape.roundRectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight,
-                                     Math.min( maximumArcSize, this._rectArcWidth ), Math.min( maximumArcSize, this._rectArcHeight ) );
-      } else {
-        return Shape.rectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
-      }
-    },
-    
-    invalidateRectangle: function() {
-      // setShape should invalidate the path and ensure a redraw
-      this.setShape( this.createRectangleShape() );
-    },
-    
-    computeShapeBounds: function() {
-      // optimization, where we know our computed bounds will be just expanded by half the lineWidth if we are stroked (don't have to compute the stroke shape)
-      return this._stroke ? this._shape.bounds.dilated( this._lineDrawingStyles.lineWidth / 2 ) : this._shape.bounds;
+      // sets our 'cache' to null, so we don't always have to recompute our shape
+      this._shape = null;
+      
+      // should invalidate the path and ensure a redraw
+      this.invalidateShape();
     },
     
     // accelerated hit detection for axis-aligned optionally-rounded rectangle
@@ -194,25 +201,60 @@ define( function( require ) {
       return offsetX + offsetY <= 1; // return whether we are in the rounded corner. see the formula for an ellipse
     },
     
+    intersectsBoundsSelf: function( bounds ) {
+      return !this.computeShapeBounds().intersection( bounds ).isEmpty();
+    },
+    
     // override paintCanvas with a faster version, since fillRect and drawRect don't affect the current default path
     paintCanvas: function( wrapper ) {
       var context = wrapper.context;
       
       // use the standard version if it's a rounded rectangle, since there is no Canvas-optimized version for that
       if ( this.isRounded() ) {
-        return Path.prototype.paintCanvas.call( this, wrapper );
-      }
-      
-      // TODO: how to handle fill/stroke delay optimizations here?
-      if ( this._fill ) {
-        this.beforeCanvasFill( wrapper ); // defined in Fillable
-        context.fillRect( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
-        this.afterCanvasFill( wrapper ); // defined in Fillable
-      }
-      if ( this._stroke ) {
-        this.beforeCanvasStroke( wrapper ); // defined in Strokable
-        context.strokeRect( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
-        this.afterCanvasStroke( wrapper ); // defined in Strokable
+        context.beginPath();
+        var arcw = this._rectArcWidth;
+        var arch = this._rectArcHeight;
+        var lowX = this._rectX + arcw;
+        var highX = this._rectX + this._rectWidth - arcw;
+        var lowY = this._rectY + arch;
+        var highY = this._rectY + this._rectHeight - arch;
+        if ( arcw === arch ) {
+          // we can use circular arcs, which have well defined stroked offsets
+          context.arc( highX, lowY, arcw, -Math.PI / 2, 0, false );
+          context.arc( highX, highY, arcw, 0, Math.PI / 2, false );
+          context.arc( lowX, highY, arcw, Math.PI / 2, Math.PI, false );
+          context.arc( lowX, lowY, arcw, Math.PI, Math.PI * 3 / 2, false );
+        } else {
+          // we have to resort to elliptical arcs
+          context.ellipse( highX, lowY, arcw, arch, 0, -Math.PI / 2, 0, false );
+          context.ellipse( highX, highY, arcw, arch, 0, 0, Math.PI / 2, false );
+          context.ellipse( lowX, highY, arcw, arch, 0, Math.PI / 2, Math.PI, false );
+          context.ellipse( lowX, lowY, arcw, arch, 0, Math.PI, Math.PI * 3 / 2, false );
+        }
+        context.closePath();
+        
+        if ( this._fill ) {
+          this.beforeCanvasFill( wrapper ); // defined in Fillable
+          context.fill();
+          this.afterCanvasFill( wrapper ); // defined in Fillable
+        }
+        if ( this._stroke ) {
+          this.beforeCanvasStroke( wrapper ); // defined in Strokable
+          context.stroke();
+          this.afterCanvasStroke( wrapper ); // defined in Strokable
+        }
+      } else {
+        // TODO: how to handle fill/stroke delay optimizations here?
+        if ( this._fill ) {
+          this.beforeCanvasFill( wrapper ); // defined in Fillable
+          context.fillRect( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
+          this.afterCanvasFill( wrapper ); // defined in Fillable
+        }
+        if ( this._stroke ) {
+          this.beforeCanvasStroke( wrapper ); // defined in Strokable
+          context.strokeRect( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
+          this.afterCanvasStroke( wrapper ); // defined in Strokable
+        }
       }
     },
     
@@ -238,8 +280,27 @@ define( function( require ) {
       return 'new scenery.Rectangle( ' + this._rectX + ', ' + this._rectY + ', ' + 
                                          this._rectWidth + ', ' + this._rectHeight + ', ' +
                                          this._rectArcWidth + ', ' + this._rectArcHeight + ', {' + propLines + '} )';
-    }
+    },
     
+    setShape: function( shape ) {
+      if ( shape !== null ) {
+        throw new Error( 'Cannot set the shape of a scenery.Rectangle to something non-null' );
+      } else {
+        // probably called from the Path constructor
+        this.invalidateShape();
+      }
+    },
+    
+    getShape: function() {
+      if ( !this._shape ) {
+        this._shape = this.createRectangleShape();
+      }
+      return this._shape;
+    },
+    
+    hasShape: function() {
+      return true;
+    }
   } );
   
   function addRectProp( capitalizedShort ) {

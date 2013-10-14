@@ -22,6 +22,7 @@ define( function( require ) {
   
   scenery.Path = function Path( shape, options ) {
     // TODO: consider directly passing in a shape object (or at least handling that case)
+    // NOTE: _shape can be lazily constructed, in the case of types like Rectangle where they have their own drawing code
     this._shape = null;
 
     // ensure we have a parameter object
@@ -55,15 +56,10 @@ define( function( require ) {
     },
     
     invalidateShape: function() {
-      this.invalidateShapeBounds( this.hasShape() ? this.computeShapeBounds() : Bounds2.NOTHING );
-    },
-    
-    // direct hook with supplied bounds, so that subtypes don't have to create Shape instances
-    invalidateShapeBounds: function( bounds ) {
       this.markOldSelfPaint();
       
       if ( this.hasShape() ) {
-        this.invalidateSelf( bounds );
+        this.invalidateSelf( this.computeShapeBounds() );
         this.invalidatePaint();
       }
     },
