@@ -135,6 +135,9 @@ define( function( require ) {
     this._layerSplitBefore = false;
     this._layerSplitAfter = false;
     
+    // the subtree pickable count is #pickable:true + #inputListeners, since we can prune subtrees with a pickable count of 0
+    this._subtreePickableCount = 0;
+    
     if ( options ) {
       this.mutate( options );
     }
@@ -150,6 +153,9 @@ define( function( require ) {
       assert && assert( node !== null && node !== undefined, 'insertChild cannot insert a null/undefined child' );
       assert && assert( !_.contains( this._children, node ), 'Parent already contains child' );
       assert && assert( node !== this, 'Cannot add self as a child' );
+      
+      // needs to be early to prevent re-entrant children modifications
+      this.changePickableCount( node._subtreePickableCount );
       
       node._parents.push( this );
       this._children.splice( index, 0, node );
@@ -190,6 +196,9 @@ define( function( require ) {
       assert && assert( node );
       assert && assert( this.isChild( node ) );
       assert && assert( this._children[indexOfChild] === node );
+      
+      // needs to be early to prevent re-entrant children modifications
+      this.changePickableCount( -node._subtreePickableCount );
       
       node.markOldPaint( false );
       
@@ -289,6 +298,15 @@ define( function( require ) {
       _.each( this._parents.slice( 0 ), function( parent ) {
         parent.removeChild( that );
       } );
+    },
+    
+    // propagate the pickable count change down to our ancestors
+    changePickableCount: function( n ) {
+      this._subtreePickableCount += n;
+      var len = this._parents.length;
+      for ( var i = 0; i < len; i++ ) {
+        this._parents[i].changePickableCount( n );
+      }
     },
     
     // currently, there is no way to remove peers. if a string is passed as the element pattern, it will be turned into an element
@@ -811,6 +829,7 @@ define( function( require ) {
       // don't allow listeners to be added multiple times
       if ( _.indexOf( this._inputListeners, listener ) === -1 ) {
         this._inputListeners.push( listener );
+        this.changePickableCount( 1 );
       }
       return this;
     },
@@ -820,6 +839,7 @@ define( function( require ) {
       assert && assert( _.indexOf( this._inputListeners, listener ) !== -1 );
       
       this._inputListeners.splice( _.indexOf( this._inputListeners, listener ), 1 );
+      this.changePickableCount( -1 );
       return this;
     },
     
