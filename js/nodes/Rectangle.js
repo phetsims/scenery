@@ -252,8 +252,10 @@ define( function( require ) {
     };
     
     Rectangle.prototype[setName] = function( value ) {
-      this[privateName] = value;
-      this.invalidateRectangle();
+      if ( this[privateName] !== value ) {
+        this[privateName] = value;
+        this.invalidateRectangle();
+      }
       return this;
     };
     
