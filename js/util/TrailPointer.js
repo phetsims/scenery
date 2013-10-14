@@ -198,7 +198,7 @@ define( function( require ) {
     // treats the pointer as render-ordered (includes the start pointer 'before' if applicable, excludes the end pointer 'before' if applicable
     eachNodeBetween: function( other, callback ) {
       this.eachTrailBetween( other, function( trail ) {
-        callback( trail.lastNode() );
+        return callback( trail.lastNode() );
       } );
     },
     
@@ -213,7 +213,7 @@ define( function( require ) {
       
       this.depthFirstUntil( other, function( pointer ) {
         if ( pointer.isBefore ) {
-          callback( pointer.trail );
+          return callback( pointer.trail );
         }
       }, true ); // exclude the endpoints so we can ignore the ending 'before' case
     },

@@ -200,6 +200,32 @@
     }
   } );
   
+  test( 'depthFirstUntil depthFirstUntil with subtree skipping', function() {
+    var node = createTestNodeTree();
+    node.children[0].children[2].visible = false;
+    node.children[0].children[3].visible = false;
+    new scenery.TrailPointer( new scenery.Trail( node ), true ).depthFirstUntil( new scenery.TrailPointer( new scenery.Trail( node ), false ), function( pointer ) {
+      if ( !pointer.trail.lastNode().isVisible() ) {
+        // should skip
+        return true;
+      }
+      ok( pointer.trail.isVisible(), 'Trail visibility for ' + pointer.trail.toString() );
+    }, false );
+  } );
+  
+  test( 'Trail eachTrailUnder with subtree skipping', function() {
+    var node = createTestNodeTree();
+    node.children[0].children[2].visible = false;
+    node.children[0].children[3].visible = false;
+    new scenery.Trail( node ).eachTrailUnder( function( trail ) {
+      if ( !trail.lastNode().isVisible() ) {
+        // should skip
+        return true;
+      }
+      ok( trail.isVisible(), 'Trail visibility for ' + trail.toString() );
+    } );
+  } );
+  
   test( 'TrailPointer render comparison', function() {
     var node = createTestNodeTree();
     
