@@ -273,6 +273,22 @@ define( function( require ) {
   // not adding mutators for now
   Rectangle.prototype._mutatorKeys = [ 'rectX', 'rectY', 'rectWidth', 'rectHeight', 'rectArcWidth', 'rectArcHeight' ].concat( Path.prototype._mutatorKeys );
   
+  Rectangle.rect = function( x, y, width, height, options ) {
+    return new Rectangle( x, y, width, height, 0, 0, options );
+  };
+  
+  Rectangle.roundedRect = function( x, y, width, height, arcWidth, arcHeight, options ) {
+    return new Rectangle( x, y, width, height, arcWidth, arcHeight, options );
+  };
+  
+  Rectangle.bounds = function( bounds, options ) {
+    return new Rectangle( bounds.minX, bounds.minY, bounds.width, bounds.height, 0, 0, options );
+  };
+  
+  Rectangle.roundedBounds = function( bounds, arcWidth, arcHeight, options ) {
+    return new Rectangle( bounds.minX, bounds.minY, bounds.width, bounds.height, arcWidth, arcHeight, options );
+  };
+  
   return Rectangle;
 } );
 
