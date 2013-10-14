@@ -11,6 +11,7 @@ define( function( require ) {
   
   var inherit = require( 'PHET_CORE/inherit' );
   var Shape = require( 'KITE/Shape' );
+  var Bounds2 = require( 'DOT/Bounds2' );
   
   var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
@@ -54,10 +55,15 @@ define( function( require ) {
     },
     
     invalidateShape: function() {
+      this.invalidateShapeBounds( this.hasShape() ? this.computeShapeBounds() : Bounds2.NOTHING );
+    },
+    
+    // direct hook with supplied bounds, so that subtypes don't have to create Shape instances
+    invalidateShapeBounds: function( bounds ) {
       this.markOldSelfPaint();
       
       if ( this.hasShape() ) {
-        this.invalidateSelf( this.computeShapeBounds() );
+        this.invalidateSelf( bounds );
         this.invalidatePaint();
       }
     },
