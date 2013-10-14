@@ -535,13 +535,36 @@ scene.updateOnRequestAnimationFrame();
 
       <h4 id="node-pickable">node.pickable</h4>
       <p>
-        <code>node.pickable</code> is a getter/setter linked to <code>node.isPickable()</code> and <code>node.setPickable( boolean )</code>.
-        Nodes that are not pickable will no longer have input events targeted to them, and <a href="#node-trailUnderPoint">node.trailUnderPoint</a>
-        will not include them.
+        <code>node.pickable</code> is a getter/setter linked to <code>node.isPickable()</code> and <code>node.setPickable( boolean | null )</code>.
+        Pickable can take three values:
+      </p>
+      <ul>
+        <li>
+          null: (default) pass-through behavior. Hit-testing will prune this subtree if there are no ancestors/descendants with either pickable: true set
+          or with any input listeners
+        </li>
+        <li>
+          false: Hit-testing is pruned, nothing under a pickable: false will respond to events or be picked
+        </li>
+        <li>
+          true: Hit-testing will not be pruned in this subtree, except for pickable: false cases.
+        </li>
+      </ul>
+      <p>
+        Hit testing is accomplished mainly with <a href="#node-trailUnderPointer">node.trailUnderPointer</a> and <a href="#node-trailUnderPoint">node.trailUnderPoint</a>,
+        following the above rules. Nodes that are not pickable (pruned) will not have input events targeted to them.
       </p>
       <p>
+        Thus in order for a Node (really, a Trail) to be able to receive input events:
+      </p>
+      <ol>
+        <li>If the node or one of its ancestors has pickable: false OR is invisible, the node <strong>will not</strong> receive events or hit testing</li>
+        <li>If the node or one of its ancestors or descendants is pickable: true OR has an input listener attached, it <strong>will</strong> receive events or hit testing</li>
+        <li>Otherwise, it <strong>will not</strong> receive events or hit testing</li>
+      </ol>
+      <p>
         This is useful for semi-transparent overlays or other visual elements that should be displayed but should not prevent objects below from being
-        manipulated by user input.
+        manipulated by user input, and the default 'null' value is used to increase performance by ignoring areas that don't need user input.
       </p>
 
       <h4 id="node-opacity">node.opacity</h4>

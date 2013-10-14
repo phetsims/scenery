@@ -7,6 +7,7 @@
   test( 'Mouse and Touch areas', function() {
     var node = new scenery.Node();
     var rect = new scenery.Rectangle( 0, 0, 100, 50 );
+    rect.pickable = true;
     
     node.addChild( rect );
     

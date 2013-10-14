@@ -1400,11 +1400,26 @@ define( function( require ) {
           if ( !node._visible ) {
             addQualifier( 'invisible' );
           }
-          if ( !node._pickable ) {
+          if ( node._pickable === true ) {
+            addQualifier( 'pickable' );
+          }
+          if ( node._pickable === false ) {
             addQualifier( 'unpickable' );
+          }
+          if ( pointer.trail.isPickable() ) {
+            addQualifier( '<span style="color: #808">hits</span>' );
           }
           if ( node._clipShape ) {
             addQualifier( 'clipShape' );
+          }
+          if ( node._mouseArea ) {
+            addQualifier( 'mouseArea' );
+          }
+          if ( node._touchArea ) {
+            addQualifier( 'touchArea' );
+          }
+          if ( node._inputListeners.length ) {
+            addQualifier( 'inputListeners' );
           }
           if ( node._renderer ) {
             addQualifier( 'renderer:' + node._renderer.name );

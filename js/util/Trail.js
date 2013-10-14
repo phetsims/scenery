@@ -107,6 +107,22 @@ define( function( require ) {
       return opacity;
     },
     
+    // essentially whether this node is visited in the hit-testing operation
+    isPickable: function() {
+      // it won't be if it or any ancestor is pickable: false, or is invisible
+      if ( _.some( this.nodes, function( node ) { return node._pickable === false || node._visible === false; } ) ) { return false; }
+      
+      // if there is any listener or pickable: true, it will be pickable
+      if ( _.some( this.nodes, function( node ) { return node._pickable === true || node._inputListeners.length > 0; } ) ) { return true; }
+      
+      if ( this.lastNode()._subtreePickableCount > 0 ) {
+        return true;
+      }
+      
+      // no listeners or pickable: true, so it will be pruned
+      return false;
+    },
+    
     get: function( index ) {
       if ( index >= 0 ) {
         return this.nodes[index];

@@ -68,8 +68,11 @@ define( function( require ) {
     // Opacity from 0 to 1
     this._opacity = 1;
     
-    // Whether hit testing will check for this node (and its children).
-    this._pickable = true;
+    // Whether this node (and its subtree) will allow hit-testing (and thus user interaction). Notably:
+    // pickable: null  - default. Node is only pickable if it (or an ancestor/descendant) has either an input listener or pickable: true set
+    // pickable: false - Node (and subtree) is pickable, just like if there is an input listener
+    // pickable: true  - Node is unpickable (only has an effect when underneath a node with an input listener / pickable: true set)
+    this._pickable = null;
     
     // This node and all children will be clipped by this shape (in addition to any other clipping shapes).
     // The shape should be in the local coordinate frame
@@ -303,6 +306,7 @@ define( function( require ) {
     // propagate the pickable count change down to our ancestors
     changePickableCount: function( n ) {
       this._subtreePickableCount += n;
+      assert && assert( this._subtreePickableCount >= 0, 'subtree pickable count should be guaranteed to be >= 0' );
       var len = this._parents.length;
       for ( var i = 0; i < len; i++ ) {
         this._parents[i].changePickableCount( n );
@@ -690,7 +694,7 @@ define( function( require ) {
      *
      * When calling, don't pass the recursive flag. It signals that the point passed can be mutated
      */
-    trailUnderPoint: function( point, options, recursive ) {
+    trailUnderPoint: function( point, options, recursive, hasListener ) {
       assert && assert( point, 'trailUnderPointer requires a point' );
       
       if ( options === undefined ) { options = {}; }
@@ -698,10 +702,15 @@ define( function( require ) {
       var pruneInvisible = ( options.pruneInvisible === undefined ) ? true : options.pruneInvisible;
       var pruneUnpickable = ( options.pruneUnpickable === undefined ) ? true : options.pruneUnpickable;
       
+      hasListener = hasListener || this._inputListeners.length > 0 || this._pickable === true;
+      
       if ( pruneInvisible && !this.isVisible() ) {
         return null;
       }
-      if ( pruneUnpickable && !this.isPickable() ) {
+      
+      // if pickable: false, skip it
+      // if pickable: undefined and our pickable count indicates there are no input listeners / pickable: true in our subtree, skip it
+      if ( pruneUnpickable && ( this._pickable === false || ( this._pickable !== true && !hasListener && this._subtreePickableCount === 0 ) ) ) {
         return null;
       }
       
@@ -736,7 +745,7 @@ define( function( require ) {
         for ( var i = this._children.length - 1; i >= 0; i-- ) {
           var child = this._children[i];
           
-          var childHit = child.trailUnderPoint( localPoint, options );
+          var childHit = child.trailUnderPoint( localPoint, options, true, hasListener );
           
           // the child will have the point in its parent's coordinate frame (i.e. this node's frame)
           if ( childHit ) {
@@ -1240,10 +1249,17 @@ define( function( require ) {
       assert && assert( typeof pickable === 'boolean' );
       
       if ( this._pickable !== pickable ) {
+        var n = this._pickable === true ? -1 : 0;
+        
         // no paint or invalidation changes for now, since this is only handled for the mouse
         this._pickable = pickable;
+        n += this._pickable === true ? 1 : 0;
         
-        // TODO: invalidate the cursor somehow?
+        if ( n ) {
+          this.changePickableCount( n );
+        }
+        
+        // TODO: invalidate the cursor somehow? #150
       }
     },
     
