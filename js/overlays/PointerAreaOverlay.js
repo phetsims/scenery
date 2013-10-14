@@ -84,7 +84,11 @@ define( function( require ) {
       
       new scenery.Trail( scene ).eachTrailUnder( function( trail ) {
         var node = trail.lastNode();
-        if ( node._mouseArea || node._touchArea ) {
+        if ( !node.isVisible() ) {
+          // skip this subtree if the node is invisible
+          return true;
+        }
+        if ( ( node._mouseArea || node._touchArea ) && trail.isVisible() ) {
           var transform = trail.getTransform();
           
           if ( node._mouseArea ) {
