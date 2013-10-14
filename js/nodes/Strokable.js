@@ -110,7 +110,7 @@ define( function( require ) {
       return this;
     };
     
-    proto.getStrokePickable = function() {
+    proto.isStrokePickable = function() {
       return this._strokePickable;
     };
     
@@ -302,7 +302,7 @@ define( function( require ) {
     Object.defineProperty( proto, 'lineJoin', { set: proto.setLineJoin, get: proto.getLineJoin } );
     Object.defineProperty( proto, 'lineDash', { set: proto.setLineDash, get: proto.getLineDash } );
     Object.defineProperty( proto, 'lineDashOffset', { set: proto.setLineDashOffset, get: proto.getLineDashOffset } );
-    Object.defineProperty( proto, 'strokePickable', { set: proto.setStrokePickable, get: proto.getStrokePickable } );
+    Object.defineProperty( proto, 'strokePickable', { set: proto.setStrokePickable, get: proto.isStrokePickable } );
     
     if ( !proto.invalidateStroke ) {
       proto.invalidateStroke = function() {

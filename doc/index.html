@@ -199,6 +199,7 @@
 
       <a class="navlink" href="#fillable">Fillable</a><br>
       <a class="sublink" href="#fillable-fill">fill</a><br>
+      <a class="sublink" href="#fillable-fillPickable">fillPickable</a><br>
 
       <a class="navlink" href="#strokable">Strokable</a><br>
       <a class="sublink" href="#strokable-stroke">stroke</a><br>
@@ -207,6 +208,7 @@
       <a class="sublink" href="#strokable-lineJoin">lineJoin</a><br>
       <a class="sublink" href="#strokable-lineDash">lineDash</a><br>
       <a class="sublink" href="#strokable-lineDashOffset">lineDashOffset</a><br>
+      <a class="sublink" href="#strokable-strokePickable">strokePickable</a><br>
 
       <a class="navlink" href="#path">Path</a><br>
       <a class="sublink" href="#path-shape">shape</a><br>
@@ -877,6 +879,17 @@ scene.updateOnRequestAnimationFrame();
       <p>
         If a <a href="#color">Color</a> object is used for a fill, any changes to the Color object will update this node.
       </p>
+      
+      <h4 id="fillable-fillPickable">fillPickable</h4>
+      <p>
+        <code>node.fillPickable</code> is a getter/setter linked to <code>node.isFillPickable()</code> and <code>node.setFillPickable( boolean )</code>.
+        <a href="#path">Paths</a> or other <a href="#fillable">Fillable</a> objects will be considered to be under a <a href="#pointer">Pointer</a> when
+        it is over the region where the fill is painted. This defaults to true.
+      </p>
+      <p>
+        NOTE: <a href="#text">Text</a> nodes currently do not respect this setting, since there is no easy/fast way of determining whether a point is inside
+        or outside of a Text node's painted region.
+      </p>
 
       <h3 id="strokable" class="section">Strokable</h3>
       <p>
@@ -1088,6 +1101,18 @@ scene.addChild( new scenery.Path( shape, _.extend( {
 /*END*/
 } );
       </script>
+
+      <h4 id="strokable-strokePickable">strokePickable</h4>
+      <p>
+        <code>node.strokePickable</code> is a getter/setter linked to <code>node.isStrokePickable()</code> and <code>node.setStrokePickable( boolean )</code>.
+        <a href="#path">Paths</a> or other <a href="#strokable">Strokable</a> objects will be considered to be under a <a href="#pointer">Pointer</a> when
+        it is over the region where the stroke is painted. This defaults to false, as it is generally more computationally expensive, and Scenery did not
+        support this initially.
+      </p>
+      <p>
+        NOTE: <a href="#text">Text</a> nodes currently do not respect this setting, since there is no easy/fast way of determining whether a point is inside
+        or outside of a Text node's painted region.
+      </p>
 
       <h3 id="path" class="section">Path</h3>
       <p>

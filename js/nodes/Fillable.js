@@ -57,7 +57,7 @@ define( function( require ) {
       return this;
     };
     
-    proto.getFillPickable = function() {
+    proto.isFillPickable = function() {
       return this._fillPickable;
     };
     
@@ -178,7 +178,7 @@ define( function( require ) {
     proto._mutatorKeys = [ 'fill', 'fillPickable' ].concat( proto._mutatorKeys );
     
     Object.defineProperty( proto, 'fill', { set: proto.setFill, get: proto.getFill } );
-    Object.defineProperty( proto, 'fillPickable', { set: proto.setFillPickable, get: proto.getFillPickable } );
+    Object.defineProperty( proto, 'fillPickable', { set: proto.setFillPickable, get: proto.isFillPickable } );
     
     if ( !proto.invalidateFill ) {
       proto.invalidateFill = function() {

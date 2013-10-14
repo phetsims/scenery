@@ -164,11 +164,12 @@ define( function( require ) {
         return result;
       }
       
+      // if this node is fillPickable, we will return true if the point is inside our fill area
       if ( this._fillPickable ) {
         result = this.getShape().containsPoint( point );
       }
       
-      // also include the stroked region in the hit area if applicable
+      // also include the stroked region in the hit area if strokePickable
       if ( !result && this._strokePickable ) {
         result = this.getStrokedShape().containsPoint( point );
       }
