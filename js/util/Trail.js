@@ -455,7 +455,7 @@ define( function( require ) {
       return result;
     },
     
-    // calls callback( trail ) for this trail, and each descendant trail
+    // calls callback( trail ) for this trail, and each descendant trail. If callback returns true, subtree will be skipped
     eachTrailUnder: function( callback ) {
       // TODO: performance: should be optimized to be much faster, since we don't have to deal with the before/after
       new scenery.TrailPointer( this, true ).eachTrailBetween( new scenery.TrailPointer( this, false ), callback );
@@ -574,16 +574,16 @@ define( function( require ) {
     }
   };
   
-  // like eachTrailBetween, but only fires for painted trails
+  // like eachTrailBetween, but only fires for painted trails. If callback returns true, subtree will be skipped
   Trail.eachPaintedTrailBetween = function( a, b, callback, excludeEndTrails, scene ) {
     Trail.eachTrailBetween( a, b, function( trail ) {
       if ( trail && trail.isPainted() ) {
-        callback( trail );
+        return callback( trail );
       }
     }, excludeEndTrails, scene );
   };
   
-  // global way of iterating across trails
+  // global way of iterating across trails. when callback returns true, subtree will be skipped
   Trail.eachTrailBetween = function( a, b, callback, excludeEndTrails, scene ) {
     var aPointer = a ? new scenery.TrailPointer( a.copy(), true ) : new scenery.TrailPointer( new scenery.Trail( scene ), true );
     var bPointer = b ? new scenery.TrailPointer( b.copy(), true ) : new scenery.TrailPointer( new scenery.Trail( scene ), false );
@@ -601,7 +601,7 @@ define( function( require ) {
     
     aPointer.depthFirstUntil( bPointer, function( pointer ) {
       if ( pointer.isBefore ) {
-        callback( pointer.trail );
+        return callback( pointer.trail );
       }
     }, false );
   };
