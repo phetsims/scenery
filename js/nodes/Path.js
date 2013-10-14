@@ -64,7 +64,7 @@ define( function( require ) {
       }
     },
     
-    // separated out, so that we can override this with a faster version in Rectangle. includes the Stroke, if any
+    // separated out, so that we can override this with a faster version in subtypes. includes the Stroke, if any
     computeShapeBounds: function() {
       return this._stroke ? this._shape.computeBounds( this._lineDrawingStyles ) : this._shape.bounds;
     },
