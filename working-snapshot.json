@@ -1,10 +1,10 @@
 {
   "sherpa": {
-    "sha": "bb78b8b67b9ddb5033d0e4b6764ecd9eafeae211",
+    "sha": "71d59ca730a951e5faee5d10144b99da954bd8d2",
     "branch": "master"
   },
   "chipper": {
-    "sha": "94a47da45936eb9f4915c21fec4bb198e1e56a40",
+    "sha": "1c842f45873ea07c7809fc18d8abb0eab72fc50a",
     "branch": "master"
   },
   "assert": {
@@ -16,15 +16,15 @@
     "branch": "master"
   },
   "dot": {
-    "sha": "57591de55bf9445ef5dcffeab84b5b0c9ca73658",
+    "sha": "52bb4f051107692c80b8d689a7d339d8dbe99790",
     "branch": "master"
   },
   "kite": {
-    "sha": "c3a5ef17fc3beea037f4939e088ac455461611fa",
+    "sha": "835bd21ac21b58d147736d8a70a36d2736d0b7e3",
     "branch": "master"
   },
   "scenery": {
-    "sha": "83a798ed4c51ee1a1ac4df7d0d2819dccad2b9ad",
+    "sha": "1ebb311eb1a8ab33466774a01d6f0898cfe42d95",
     "branch": "master"
   },
 }
