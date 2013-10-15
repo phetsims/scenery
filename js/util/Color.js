@@ -353,6 +353,24 @@ define( function( require ) {
       return new Color( red, green, blue, this.getAlpha() );
     },
     
+    /*
+     * Like colorUtilsBrighter/Darker, however factor should be in the range -1 to 1, and it will call:
+     *   colorUtilsBrighter( factor )   for factor >  0
+     *   this                           for factor == 0
+     *   colorUtilsDarker( -factor )    for factor <  0
+     * Thus:
+     * @param factor from -1 (black), to 0 (no change), to 1 (white)
+     */
+    colorUtilsBrightness: function( factor ) {
+      if ( factor === 0 ) {
+        return this;
+      } else if ( factor > 0 ) {
+        return this.colorUtilsBrighter( factor );
+      } else {
+        return this.colorUtilsDarker( -factor );
+      }
+    },
+    
     /*---------------------------------------------------------------------------*
     * listeners TODO: consider mixing in this behavior, it's common
     *----------------------------------------------------------------------------*/
