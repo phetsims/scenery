@@ -105,8 +105,6 @@ define( function( require ) {
             oldPosition: translation,
             position: translation.plus( delta )
           } );
-        } else {
-          handler.node.translate( delta, true );
         }
         handler.lastDragPoint = handler.pointer.point;
         
