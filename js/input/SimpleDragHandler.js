@@ -151,7 +151,7 @@ define( function( require ) {
     
     endDrag: function( event ) {
       this.pointer.dragging = false;
-      event.pointer.cursor = null;
+      this.pointer.cursor = null;
       this.pointer.removeInputListener( this.dragListener );
       // this.trail.rootNode().removeEventListener( this.transformListener ); // TODO: replace with new parent transform listening solution
       this.dragging = false;
