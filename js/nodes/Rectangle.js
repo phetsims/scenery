@@ -103,6 +103,10 @@ define( function( require ) {
       this.invalidateRectangle();
     },
     
+    setRectBounds: function( bounds ) {
+      this.setRect( bounds.x, bounds.y, bounds.width, bounds.height );
+    },
+    
     isRounded: function() {
       return this._rectArcWidth !== 0 && this._rectArcHeight !== 0;
     },
