@@ -980,6 +980,10 @@ define( function( require ) {
     
     updateCursor: function() {
       if ( this.input && this.input.mouse && this.input.mouse.point ) {
+        if ( this.input.mouse.cursor ) {
+          return this.setSceneCursor( this.input.mouse.cursor );
+        }
+        
         var mouseTrail = this.trailUnderPoint( this.input.mouse.point, { isMouse: true } );
         
         if ( mouseTrail ) {
@@ -987,8 +991,7 @@ define( function( require ) {
             var cursor = mouseTrail.nodes[i].getCursor();
             
             if ( cursor ) {
-              this.setSceneCursor( cursor );
-              return;
+              return this.setSceneCursor( cursor );
             }
           }
         }
