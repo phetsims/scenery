@@ -653,6 +653,11 @@ define( function( require ) {
       return this._childBounds;
     },
     
+    // local coordinate frame bounds
+    getLocalBounds: function() {
+      return this.getSelfBounds().union( this.getChildBounds() );
+    },
+    
     // the bounds for content in render(), in "parent" coordinates
     getBounds: function() {
       this.validateBounds();
@@ -2019,6 +2024,7 @@ define( function( require ) {
     get bounds() { return this.getBounds(); },
     get selfBounds() { return this.getSelfBounds(); },
     get childBounds() { return this.getChildBounds(); },
+    get localBounds() { return this.getLocalBounds(); },
     get globalBounds() { return this.getGlobalBounds(); },
     get visibleBounds() { return this.getVisibleBounds(); },
     get id() { return this.getId(); },
