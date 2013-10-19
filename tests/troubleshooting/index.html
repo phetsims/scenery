@@ -176,6 +176,45 @@
     // addIfTruthy( 'window.navigator.appCodeName', window.navigator.appCodeName );
     addIfDefined( 'Window', window.innerWidth + 'x' + window.innerHeight );
     addIfDefined( 'Pixel Ratio', ( window.devicePixelRatio || 1 ) + '/' + backingStorePixelRatio );
+    
+    if ( window.WebGLRenderingContext ) {
+      var canvas = document.createElement( 'canvas' );
+      var err = '';
+      var contextNames = ['webgl', 'experimental-webgl', 'webkit-3d', 'moz-webgl'];
+      var gl;
+      canvas.addEventListener( 'webglcontextcreationerror', function( event ) {
+        err += event.statusMessage + ' ';
+      }, false);
+      for ( var i = 0; i < contextNames.length; i++ ) {
+        try {
+          gl = canvas.getContext( contextNames[i] );
+        } catch ( e ) {
+          err += e.toString() + ' ';
+        }
+        if ( gl ) {
+          break;
+        }
+      }
+      if ( !gl ) {
+        addText( 'WebGL', 'disabled' + ( err ? ' (' + err + ')' : '' ) );
+      } else {
+        var indented = { marginLeft: '40px' };
+        addText( 'WebGL', gl.getParameter( gl.VERSION ) );
+        addText( 'GLSL', gl.getParameter( gl.SHADING_LANGUAGE_VERSION ), indented );
+        addText( 'Vendor', gl.getParameter( gl.VENDOR ) + ' (' + gl.getParameter( gl.RENDERER ) + ')', indented );
+        addText( 'Vertex', 'attribs: ' + gl.getParameter( gl.MAX_VERTEX_ATTRIBS ) +
+                           ' varying: ' + gl.getParameter( gl.MAX_VARYING_VECTORS ) +
+                           ' uniform: ' + gl.getParameter( gl.MAX_VERTEX_UNIFORM_VECTORS ), indented );
+        addText( 'Texture', 'size: ' + gl.getParameter( gl.MAX_TEXTURE_SIZE ) +
+                            ' imageUnits: ' + gl.getParameter( gl.MAX_TEXTURE_IMAGE_UNITS ) +
+                            ' (vertex: ' + gl.getParameter( gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS ) + ',' +
+                            ' combined: ' + gl.getParameter( gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS ) + ')', indented );
+        addText( 'Max viewport', gl.getParameter( gl.MAX_VIEWPORT_DIMS )[0] + 'x' + gl.getParameter( gl.MAX_VIEWPORT_DIMS )[1], indented );
+        addText( 'OES_texture_float', gl.getExtension( 'OES_texture_float' ) ? 'true' : 'false', indented );
+      }
+    } else {
+      addText( 'WebGL', 'unsupported' );
+    }
 
   </script>
 

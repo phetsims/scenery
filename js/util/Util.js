@@ -411,6 +411,23 @@ define( function( require ) {
       
       // return the average
       return result;
+    },
+    
+    getWebGLContext: function( canvas ) {
+      var gl = null;
+      var contextNames = ['webgl', 'experimental-webgl', 'webkit-3d', 'moz-webgl'];
+      for ( var i = 0; i < contextNames.length; i++ ) {
+        try {
+          gl = canvas.getContext( contextNames[i] );
+        } catch ( e ) {
+          // consider storing this failure somewhere?
+        }
+        if ( gl ) {
+          break;
+        }
+      }
+      
+      return gl;
     }
   };
   var Util = scenery.Util;
