@@ -71,7 +71,9 @@
     gl.bindTexture( gl.TEXTURE_2D, sampleTexture );
     gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST );
     gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST );
+    //gl.generateMipmap(gl.TEXTURE_2D); // if using any mipmaps
     gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texCanvas );
+    gl.bindTexture( gl.TEXTURE_2D, null ); // cleanup
     
     var vertexShader = scenery.GLShader.vertexShader( gl,
       'precision mediump float;' +
@@ -161,8 +163,22 @@
     gl.uniform1i( textureShaderProgram.uSampler, 0 );
     
     gl.bindBuffer( gl.ARRAY_BUFFER, positionBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [width/2,0,width,height,width,0] ), gl.STATIC_DRAW );
+    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [width/2,0,width,height,width,0,
+                                                       width/2,0,width/2,height,width*3/4,height] ), gl.STATIC_DRAW );
     gl.vertexAttribPointer( textureShaderProgram.aPosition, 2, gl.FLOAT, false, 0, 0 );
+    gl.drawArrays( gl.TRIANGLES, 0, 6 );
+    
+    /*---------------------------------------------------------------------------*
+    * Second flat
+    *----------------------------------------------------------------------------*/
+    
+    flatShaderProgram.use( gl );
+    gl.uniform4f( flatShaderProgram.color, 0, 0, 1, 1 );
+    // gl.uniformMatrix3fv( flatShaderProgram.uMatrix, false, new Float32Array( matrix.entries ) );
+    
+    gl.bindBuffer( gl.ARRAY_BUFFER, positionBuffer );
+    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [0,0,width/4,height,width/4,0] ), gl.STATIC_DRAW );
+    // gl.vertexAttribPointer( flatShaderProgram.aPosition, 2, gl.FLOAT, false, 0, 0 );
     gl.drawArrays( gl.TRIANGLES, 0, 3 );
   } );
 </script>
