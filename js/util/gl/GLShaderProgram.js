@@ -1,0 +1,48 @@
+// Copyright 2002-2013, University of Colorado
+
+/**
+ * Shader program wrapper, so we can seamlessly recreate them on context loss.
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( function( require ) {
+  'use strict';
+  
+  var scenery = require( 'SCENERY/scenery' );
+  
+  var GLShaderProgram = scenery.GLShaderProgram = function GLShaderProgram( gl, shaders, attributes, uniforms ) {
+    var that = this;
+    
+    this._shaders = shaders;
+    this._shaderProgram = GLShaderProgram.createProgram( gl, shaders );
+    
+    gl.useProgram( this._shaderProgram );
+    
+    _.each( this.attributes, function( attribute ) {
+      var location = gl.getAttribLocation( that._shaderProgram, attribute );
+      this[attribute + 'Location'] = location;
+      gl.enableVertexAttribArray( location ); // TODO: what about where we don't always want them defined?
+    } );
+    
+    _.each( this.uniforms, function( uniform ) {
+      this[uniform + 'Location'] = gl.getUniformLocation( that._shaderProgram, uniform );
+    } );
+  };
+  
+  GLShaderProgram.createProgram = function( gl, shaders ) {
+    var shaderProgram = gl.createProgram();
+    _.each( shaders, function( shader ) {
+      gl.attachShader( shaderProgram, shader );
+    } );
+    gl.linkProgram( shaderProgram );
+
+    if ( !gl.getProgramParameter( shaderProgram, gl.LINK_STATUS ) ) {
+      throw new Error( 'Could not initialise shaders' );
+    }
+    
+    return shaderProgram;
+  };
+  
+  return GLShaderProgram;
+} );
