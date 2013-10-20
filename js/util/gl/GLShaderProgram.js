@@ -36,6 +36,14 @@ define( function( require ) {
     } );
   };
   
+  GLShaderProgram.prototype = {
+    constructor: GLShaderProgram,
+    
+    use: function( gl ) {
+      gl.useProgram( this._shaderProgram );
+    }
+  };
+  
   GLShaderProgram.createProgram = function( gl, shaders ) {
     var shaderProgram = gl.createProgram();
     _.each( shaders, function( shader ) {
