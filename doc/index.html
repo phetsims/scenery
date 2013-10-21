@@ -404,6 +404,9 @@ has.add( 'assert.slow', function() { return false; } );
         <li><a href="#node-layerSplit">layerSplit</a>: Forces a split between layers before and after this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.</li>
         <li><a href="#node-layerSplitBefore">layerSplitBefore</a>: Forces a split between layers before this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.</li>
         <li><a href="#node-layerSplitAfter">layerSplitAfter</a>: Forces a split between layers after this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.</li>
+        <li><a href="#node-mouseArea">mouseArea</a>: Shape (in local coordinate frame) that overrides the 'hit area' for mouse input.</li>
+        <li><a href="#node-touchArea">touchArea</a>: Shape (in local coordinate frame) that overrides the 'hit area' for touch input.</li>
+        <li><a href="#node-clipArea">clipArea</a>: Shape (in local coordinate frame) that causes any graphics outside of the shape to be invisible (for the node and any children).</li>
       </ul>
 
       <h4 id="node-children">node.children</h4>
@@ -536,6 +539,9 @@ scene.updateOnRequestAnimationFrame();
       </p>
       <p>
         clipArea currently does not affect DOM layers, and the general case can't be added in (CSS clip only allows rectangles currently).
+      </p>
+      <p>
+        clipArea is not currently compatible with CSS-transformed SVG rendering if the clipArea is on an ancestor of the CSS-transformed Node.
       </p>
       <p>
         clipArea does not affect the bounds of the Node (matching SVG's behavior)
