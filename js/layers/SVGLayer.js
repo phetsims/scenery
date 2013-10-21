@@ -291,7 +291,7 @@ define( function( require ) {
         definition.setAttribute( 'clipPathUnits', 'userSpaceOnUse' );
         console.log( 'adding ' + clipId );
         
-        var path = document.createElementNS( path, 'path' );
+        var path = document.createElementNS( svgns, 'path' );
         path.setAttribute( 'd', node._clipArea.getSVGPath() );
         definition.appendChild( path );
         
