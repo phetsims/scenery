@@ -31,7 +31,7 @@
       position: relative; /* trigger correct positioning inside the scene */
       background-color: #fff;
       z-index: 0;
-      padding: none !important; /* in case we add jQuery Mobile back in */
+      padding: 0 !important; /* in case we add jQuery Mobile back in */
       border: 1px solid black;
     }
     
@@ -553,7 +553,20 @@
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
       },{
-        name: 'Clipping',
+        name: 'Simple Clipping',
+        width: 64,
+        height: 64,
+        draw: function( scene ) {
+          scene.addChild( new scenery.Rectangle( 4, 4, 56, 56, {
+            fill: 'black',
+            clipArea: kite.Shape.circle( 32, 32, 25 ),
+            x: 20,
+            y: -20
+          } ) );
+        },
+        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+      },{
+        name: 'Nested Clipping',
         width: 64,
         height: 64,
         draw: function( scene ) {
@@ -565,9 +578,9 @@
             stroke: '#f00',
             lineWidth: 3
           } );
-          circle._clipShape = clipShape1;
+          circle.clipArea = clipShape1;
           scene.addChild( circle );
-          scene._clipShape = clipShape2;
+          scene.clipArea = clipShape2;
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
       },{

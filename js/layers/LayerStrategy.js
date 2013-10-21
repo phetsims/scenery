@@ -29,7 +29,7 @@ define( function( require ) {
     },
     
     getPreferredLayerType: function( pointer, layerBuilder ) {
-      sceneryAssert && sceneryAssert( this.hasPreferredLayerType( pointer, layerBuilder ) ); // sanity check
+      assert && assert( this.hasPreferredLayerType( pointer, layerBuilder ) ); // sanity check
       
       var node = pointer.trail.lastNode();
       var preferredLayerType;

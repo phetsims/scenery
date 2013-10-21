@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewport="0 0 64 64" width="64" height="64" stroke-miterlimit="10" style="position: absolute; left: 0px; top: 0px; clip: rect(0px 64px 64px 0px);">
+  <defs>
+    <clipPath id="clip131" clipPathUnits="userSpaceOnUse">
+      <path d="M 0 0 L 64 0 L 64 32 L 0 32 Z"></path>
+    </clipPath>
+  </defs>
+  <g transform="matrix(1.00000000000000000000,0.00000000000000000000,0.00000000000000000000,1.00000000000000000000,0.00000000000000000000,0.00000000000000000000)" opacity="1" style="display: inherit;">
+    <g opacity="1" clip-path="url(#clip131)" style="display: inherit;">
+      <rect x="4" y="4" width="56" height="56" rx="0" ry="0" style="fill: black;stroke: none;"></rect>
+    </g>
+  </g>
+</svg>

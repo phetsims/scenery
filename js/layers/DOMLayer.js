@@ -83,7 +83,7 @@ define( function( require ) {
         var otherTrail = this.trails[insertionIndex];
         otherTrail.reindex();
         var comparison = otherTrail.compare( trail );
-        sceneryAssert && sceneryAssert( comparison !== 0, 'Trail has already been inserted into the DOMLayer' );
+        assert && assert( comparison !== 0, 'Trail has already been inserted into the DOMLayer' );
         if ( comparison === 1 ) { // TODO: enum values!
           break;
         }
@@ -106,7 +106,7 @@ define( function( require ) {
       this.reindexTrails();
       
       var element = this.getElementFromTrail( trail );
-      sceneryAssert && sceneryAssert( element, 'Trail does not exist in the DOMLayer' );
+      assert && assert( element, 'Trail does not exist in the DOMLayer' );
       
       delete this.idElementMap[trail.getUniqueId];
       delete this.idTrailMap[trail.getUniqueId];
@@ -243,6 +243,11 @@ define( function( require ) {
     notifyOpacityChange: function( instance ) {
       sceneryLayerLog && sceneryLayerLog( 'DOMLayer #' + this.id + ' notifyOpacityChange: ' + instance.trail.toString() );
       // TODO: BROKEN: FIXME: DOM opacity is not handled yet, see issue #31: https://github.com/phetsims/scenery/issues/31
+    },
+    
+    notifyClipChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'DOMLayer #' + this.id + ' notifyClipChange: ' + instance.trail.toString() );
+      // TODO: BROKEN: FIXME: DOM clipping is not handled, see issue #31: https://github.com/phetsims/scenery/issues/31
     },
     
     // only a painted trail under this layer

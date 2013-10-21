@@ -16,8 +16,8 @@ define( function( require ) {
   document.head.appendChild( styleElement );
   
   var stylesheet = document.styleSheets[document.styleSheets.length-1];
-  sceneryAssert && sceneryAssert( stylesheet.disabled === false );
-  sceneryAssert && sceneryAssert( stylesheet.cssRules.length === 0 );
+  assert && assert( stylesheet.disabled === false );
+  assert && assert( stylesheet.cssRules.length === 0 );
   
   return {
     stylesheet: stylesheet,

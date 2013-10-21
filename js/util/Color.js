@@ -226,14 +226,14 @@ define( function( require ) {
     
     toCSS: function() {
       // verify that the cached value is correct (in debugging builds only, defeats the point of caching otherwise)
-      sceneryAssert && sceneryAssert( this._css === this.computeCSS(), 'CSS cached value is ' + this._css + ', but the computed value appears to be ' + this.computeCSS() );
+      assert && assert( this._css === this.computeCSS(), 'CSS cached value is ' + this._css + ', but the computed value appears to be ' + this.computeCSS() );
       
       return this._css;
     },
     
     // called to update the interally cached CSS value
     updateColor: function() {
-      sceneryAssert && sceneryAssert( !this.immutable, 'Cannot modify an immutable color' );
+      assert && assert( !this.immutable, 'Cannot modify an immutable color' );
       
       var oldCSS = this._css;
       this._css = this.computeCSS();
@@ -251,7 +251,7 @@ define( function( require ) {
     
     // allow setting this Color to be immutable when assertions are disabled. any change will throw an error
     setImmutable: function() {
-      if ( sceneryAssert ) {
+      if ( assert ) {
         this.immutable = true;
       }
       
@@ -353,19 +353,37 @@ define( function( require ) {
       return new Color( red, green, blue, this.getAlpha() );
     },
     
+    /*
+     * Like colorUtilsBrighter/Darker, however factor should be in the range -1 to 1, and it will call:
+     *   colorUtilsBrighter( factor )   for factor >  0
+     *   this                           for factor == 0
+     *   colorUtilsDarker( -factor )    for factor <  0
+     * Thus:
+     * @param factor from -1 (black), to 0 (no change), to 1 (white)
+     */
+    colorUtilsBrightness: function( factor ) {
+      if ( factor === 0 ) {
+        return this;
+      } else if ( factor > 0 ) {
+        return this.colorUtilsBrighter( factor );
+      } else {
+        return this.colorUtilsDarker( -factor );
+      }
+    },
+    
     /*---------------------------------------------------------------------------*
     * listeners TODO: consider mixing in this behavior, it's common
     *----------------------------------------------------------------------------*/
     
     // listener should be a callback expecting no arguments, listener() will be called when the color changes
     addChangeListener: function( listener ) {
-      sceneryAssert && sceneryAssert( listener !== undefined && listener !== null, 'Verify that the listener exists' );
-      sceneryAssert && sceneryAssert( !_.contains( this.listeners, listener ) );
+      assert && assert( listener !== undefined && listener !== null, 'Verify that the listener exists' );
+      assert && assert( !_.contains( this.listeners, listener ) );
       this.listeners.push( listener );
     },
     
     removeChangeListener: function( listener ) {
-      sceneryAssert && sceneryAssert( _.contains( this.listeners, listener ) );
+      assert && assert( _.contains( this.listeners, listener ) );
       this.listeners.splice( _.indexOf( this.listeners, listener ), 1 );
     },
 

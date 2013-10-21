@@ -80,6 +80,7 @@ define( function( require ) {
       options.text = text;
     }
     
+    this.initializeFillable();
     this.initializeStrokable();
     
     Node.call( this, options );
@@ -104,7 +105,7 @@ define( function( require ) {
     },
     
     setBoundsMethod: function( method ) {
-      sceneryAssert && sceneryAssert( method === 'fast' || method === 'fastCanvas' || method === 'accurate' || method === 'hybrid', 'Unknown Text boundsMethod' );
+      assert && assert( method === 'fast' || method === 'fastCanvas' || method === 'accurate' || method === 'hybrid', 'Unknown Text boundsMethod' );
       if ( method !== this._boundsMethod ) {
         this._boundsMethod = method;
         this.updateTextFlags();
@@ -271,7 +272,12 @@ define( function( require ) {
     allowsMultipleDOMInstances: true,
     
     getDOMElement: function() {
-      return document.createElement( 'div' );
+      var div = document.createElement( 'div' );
+      
+      // so they are absolutely positioned compared to the containing DOM layer (that is positioned).
+      // otherwise, two adjacent HTMLText elements will 'flow' and be positioned incorrectly
+      div.style.position = 'absolute';
+      return div;
     },
     
     updateDOMElement: function( div ) {

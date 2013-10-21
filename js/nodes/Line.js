@@ -14,6 +14,7 @@ define( function( require ) {
   
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
+  var KiteLine = require( 'KITE/segments/Line' );
   
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
@@ -60,13 +61,13 @@ define( function( require ) {
     }
     // fallback for non-canvas or non-svg rendering, and for proper bounds computation
     
-    Path.call( this, this.createLineShape(), options );
+    Path.call( this, null, options );
   };
   var Line = scenery.Line;
   
   inherit( Path, Line, {
     setLine: function( x1, y1, x2, y2 ) {
-      sceneryAssert && sceneryAssert( x1 !== undefined && y1 !== undefined && x2 !== undefined && y2 !== undefined, 'parameters need to be defined' );
+      assert && assert( x1 !== undefined && y1 !== undefined && x2 !== undefined && y2 !== undefined, 'parameters need to be defined' );
       
       this._x1 = x1;
       this._y1 = y1;
@@ -100,21 +101,52 @@ define( function( require ) {
     get p2() { return new Vector2( this._x2, this._y2 ); },
     
     createLineShape: function() {
-      sceneryAssert && sceneryAssert( isFinite( this._x1 ), 'A rectangle needs to have a finite x1 (' + this._x1 + ')' );
-      sceneryAssert && sceneryAssert( isFinite( this._y1 ), 'A rectangle needs to have a finite y1 (' + this._y1 + ')' );
-      sceneryAssert && sceneryAssert( isFinite( this._x2 ), 'A rectangle needs to have a finite x2 (' + this._x2 + ')' );
-      sceneryAssert && sceneryAssert( isFinite( this._y2 ), 'A rectangle needs to have a finite y2 (' + this._y2 + ')' );
-      
       return Shape.lineSegment( this._x1, this._y1, this._x2, this._y2 );
     },
     
     invalidateLine: function() {
-      // setShape should invalidate the path and ensure a redraw
-      this.setShape( this.createLineShape() );
+      assert && assert( isFinite( this._x1 ), 'A rectangle needs to have a finite x1 (' + this._x1 + ')' );
+      assert && assert( isFinite( this._y1 ), 'A rectangle needs to have a finite y1 (' + this._y1 + ')' );
+      assert && assert( isFinite( this._x2 ), 'A rectangle needs to have a finite x2 (' + this._x2 + ')' );
+      assert && assert( isFinite( this._y2 ), 'A rectangle needs to have a finite y2 (' + this._y2 + ')' );
+      
+      // sets our 'cache' to null, so we don't always have to recompute our shape
+      this._shape = null;
+      
+      // should invalidate the path and ensure a redraw
+      this.invalidateShape();
     },
     
     containsPointSelf: function( point ) {
-      return false; // nothing is in a line! (although maybe we should handle edge points properly?)
+      if ( this._strokePickable ) {
+        return Path.prototype.containsPointSelf.call( this, point );
+      } else {
+        return false; // nothing is in a line! (although maybe we should handle edge points properly?)
+      }
+    },
+    
+    intersectsBoundsSelf: function( bounds ) {
+      // TODO: optimization
+      return new KiteLine( this.p1, this.p2 ).intersectsBounds( bounds );
+    },
+    
+    paintCanvas: function( wrapper ) {
+      var context = wrapper.context;
+      
+      context.beginPath();
+      context.moveTo( this._x1, this._y1 );
+      context.lineTo( this._x2, this._y2 );
+      context.closePath();
+      
+      if ( this._stroke ) {
+        this.beforeCanvasStroke( wrapper ); // defined in Strokable
+        context.stroke();
+        this.afterCanvasStroke( wrapper ); // defined in Strokable
+      }
+    },
+    
+    computeShapeBounds: function() {
+      return Path.prototype.computeShapeBounds.call( this );
     },
     
     // create a rect instead of a path, hopefully it is faster in implementations
@@ -135,6 +167,26 @@ define( function( require ) {
     
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Line( ' + this._x1 + ', ' + this._y1 + ', ' + this._x1 + ', ' + this._y1 + ', {' + propLines + '} )';
+    },
+    
+    setShape: function( shape ) {
+      if ( shape !== null ) {
+        throw new Error( 'Cannot set the shape of a scenery.Line to something non-null' );
+      } else {
+        // probably called from the Path constructor
+        this.invalidateShape();
+      }
+    },
+    
+    getShape: function() {
+      if ( !this._shape ) {
+        this._shape = this.createLineShape();
+      }
+      return this._shape;
+    },
+    
+    hasShape: function() {
+      return true;
     }
     
   } );
@@ -151,8 +203,10 @@ define( function( require ) {
     };
     
     Line.prototype[setName] = function( value ) {
-      this[privateName] = value;
-      this.invalidateLine();
+      if ( this[privateName] !== value ) {
+        this[privateName] = value;
+        this.invalidateLine();
+      }
       return this;
     };
     

@@ -27,11 +27,26 @@ define( function( require ) {
     
     this.trail = null;
     
+    // overrides the cursor of whatever is under it when set
+    this._cursor = null;
+    
     this.type = 'mouse';
   };
   var Mouse = scenery.Mouse;
   
   inherit( Pointer, Mouse, {
+    set cursor( value ) { return this.setCursor( value ); },
+    get cursor() { return this._cursor; },
+    
+    setCursor: function( value ) {
+      this._cursor = value;
+      return this; // allow chaining
+    },
+    
+    clearCursor: function() {
+      this.setCursor( null );
+    },
+    
     down: function( point, event ) {
       // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;

@@ -184,16 +184,16 @@ define( function( require ) {
           node.transform.getMatrix().canvasAppendTransform( topWrapper().context );
         }
         
-        if ( node._clipShape ) {
+        if ( node._clipArea ) {
           // TODO: move to wrapper-specific part
-          layer.pushClipShape( node._clipShape );
+          layer.pushClipShape( node._clipArea );
         }
       }
       
       function exit( trail ) {
         var node = trail.lastNode();
         
-        if ( node._clipShape ) {
+        if ( node._clipArea ) {
           // TODO: move to wrapper-specific part
           layer.popClipShape();
         }
@@ -417,14 +417,14 @@ define( function( require ) {
     },
     
     canUseDirtyRegions: function() {
-      sceneryAssert && sceneryAssert( this.boundlessCount >= 0 );
+      assert && assert( this.boundlessCount >= 0 );
       return this.boundlessCount === 0;
     },
     
     // NOTE: for performance, we will mutate the bounds passed in (they are almost assuredly from the local or parent bounds functions)
     canvasMarkGlobalBounds: function( globalBounds ) {
       sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' canvasMarkGlobalBounds: ' + globalBounds.toString() );
-      sceneryAssert && sceneryAssert( globalBounds.isEmpty() || globalBounds.isFinite(), 'Infinite (non-empty) dirty bounds passed to canvasMarkGlobalBounds' );
+      assert && assert( globalBounds.isEmpty() || globalBounds.isFinite(), 'Infinite (non-empty) dirty bounds passed to canvasMarkGlobalBounds' );
       
       // TODO: for performance, consider more than just a single dirty bounding box
       this.dirtyBounds = this.dirtyBounds.union( globalBounds.dilate( 2 ).roundOut() );
@@ -475,6 +475,13 @@ define( function( require ) {
     
     notifyOpacityChange: function( instance ) {
       sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyOpacityChange: ' + instance.trail.toString() );
+      // old paint taken care of in notifyBeforeSubtreeChange()
+      
+      this.canvasMarkSubtree( instance );
+    },
+    
+    notifyClipChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyClipChange: ' + instance.trail.toString() );
       // old paint taken care of in notifyBeforeSubtreeChange()
       
       this.canvasMarkSubtree( instance );

@@ -34,7 +34,7 @@ define( function( require ) {
       this.lineWidth = undefined; // 1
       this.lineCap = undefined; // 'butt'
       this.lineJoin = undefined; // 'miter'
-      this.lineDash = undefined; // null
+      this.lineDash = undefined; // []
       this.lineDashOffset = undefined; // 0
       this.miterLimit = undefined; // 10
       
@@ -98,7 +98,7 @@ define( function( require ) {
     },
     
     setLineDash: function( dash ) {
-      sceneryAssert && sceneryAssert( dash !== undefined, 'undefined line dash would cause hard-to-trace errors' );
+      assert && assert( dash !== undefined, 'undefined line dash would cause hard-to-trace errors' );
       if ( this.lineDash !== dash ) {
         this.lineDash = dash;
         if ( this.context.setLineDash ) {

@@ -42,6 +42,7 @@ define( [
     'SCENERY/nodes/HBox',
     'SCENERY/nodes/HTMLText',
     'SCENERY/nodes/Image',
+    'SCENERY/nodes/LayoutNode',
     'SCENERY/nodes/Line',
     'SCENERY/nodes/Node',
     'SCENERY/nodes/Path',
@@ -50,7 +51,9 @@ define( [
     'SCENERY/nodes/Strokable',
     'SCENERY/nodes/Text',
     'SCENERY/nodes/VBox',
-    
+
+    'SCENERY/overlays/PointerOverlay',
+
     'SCENERY/util/AccessibilityPeer',
     'SCENERY/util/CanvasContextWrapper',
     'SCENERY/util/Color',
@@ -68,6 +71,10 @@ define( [
     'SCENERY/util/Trail',
     'SCENERY/util/TrailPointer',
     'SCENERY/util/Util',
+    
+    'SCENERY/util/gl/GLUtil',
+    'SCENERY/util/gl/GLShader',
+    'SCENERY/util/gl/GLShaderProgram',
     
     'SCENERY/Scene'
   ], function(

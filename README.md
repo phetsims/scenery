@@ -33,3 +33,15 @@ For testing purposes, the following are currently being worked on:
 * [Scene Graph Comparisons and Experiments](http://phetsims.github.io/scenery/tests/easel-performance/easel-tests.html)
 * [Performance Improvement/Regression](http://phetsims.github.io/scenery/tests/benchmarks/performance-tests.html)
 * [Canvas Browser Differences](http://jonathan-olson.com/canvas-diff/canvas-diff.html)
+
+By PhET Interactive Simulations
+http://phet.colorado.edu/
+
+NOTE: This repository has dependency on other repositories. Those repositories
+much be checked out as siblings to this repository in your directory structure.
+
+Third Party Dependencies
+=============
+
+This simulation uses a number of third party libraries, which are enumerated in package.json.
+The dependencies and corresponding licenses are available in: https://github.com/phetsims/sherpa

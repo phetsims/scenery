@@ -13,10 +13,8 @@
 define( function( require ) {
   'use strict';
   
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-  
-  window.sceneryAssert = assert;
-  window.sceneryAssertExtra = require( 'ASSERT/assert' )( 'scenery.extra' );
+  window.assert = window.assert || require( 'ASSERT/assert' )( 'basic' );
+  window.assertSlow = window.assertSlow || require( 'ASSERT/assert' )( 'slow', true );
   
   window.sceneryLayerLog = null;
   window.sceneryEventLog = null;

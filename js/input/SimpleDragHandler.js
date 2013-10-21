@@ -16,6 +16,7 @@ define( function( require ) {
   /*
    * Allowed options: {
    *    allowTouchSnag: false // allow touch swipes across an object to pick it up,
+   *    dragCursor: 'pointer' // while dragging with the mouse, sets the cursor to this value (or use null to not override the cursor while dragging)
    *    mouseButton: 0        // allow changing the mouse button that activates the drag listener. -1 should activate on any mouse button, 0 on left, 1 for middle, 2 for right, etc.
    *    start: null           // if non-null, called when a drag is started. start( event, trail )
    *    drag: null            // if non-null, called when the user moves something with a drag (not a start or end event).
@@ -29,7 +30,8 @@ define( function( require ) {
     
     this.options = _.extend( {
       allowTouchSnag: false,
-      mouseButton: 0
+      mouseButton: 0,
+      dragCursor: 'pointer'
     }, options );
     
     this.dragging              = false;     // whether a node is being dragged with this handler
@@ -64,7 +66,7 @@ define( function( require ) {
     this.dragListener = {
       // mouse/touch up
       up: function( event ) {
-        sceneryAssert && sceneryAssert( event.pointer === handler.pointer );
+        assert && assert( event.pointer === handler.pointer );
         if ( !event.pointer.isMouse || event.domEvent.button === handler.mouseButton ) {
           var saveCurrentTarget = event.currentTarget;
           event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
@@ -75,7 +77,7 @@ define( function( require ) {
       
       // touch cancel
       cancel: function( event ) {
-        sceneryAssert && sceneryAssert( event.pointer === handler.pointer );
+        assert && assert( event.pointer === handler.pointer );
 
         var saveCurrentTarget = event.currentTarget;
         event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
@@ -90,7 +92,7 @@ define( function( require ) {
       
       // mouse/touch move
       move: function( event ) {
-        sceneryAssert && sceneryAssert( event.pointer === handler.pointer );
+        assert && assert( event.pointer === handler.pointer );
         
         var delta = handler.transform.inverseDelta2( handler.pointer.point.minus( handler.lastDragPoint ) );
         
@@ -103,8 +105,6 @@ define( function( require ) {
             oldPosition: translation,
             position: translation.plus( delta )
           } );
-        } else {
-          handler.node.translate( delta, true );
         }
         handler.lastDragPoint = handler.pointer.point;
         
@@ -127,6 +127,7 @@ define( function( require ) {
     startDrag: function( event ) {
       // set a flag on the pointer so it won't pick up other nodes
       event.pointer.dragging = true;
+      event.pointer.cursor = this.options.dragCursor;
       event.pointer.addInputListener( this.dragListener );
       // event.trail.rootNode().addEventListener( this.transformListener ); // TODO: replace with new parent transform listening solution
       
@@ -148,6 +149,7 @@ define( function( require ) {
     
     endDrag: function( event ) {
       this.pointer.dragging = false;
+      this.pointer.cursor = null;
       this.pointer.removeInputListener( this.dragListener );
       // this.trail.rootNode().removeEventListener( this.transformListener ); // TODO: replace with new parent transform listening solution
       this.dragging = false;

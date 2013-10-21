@@ -91,8 +91,8 @@ define( function( require ) {
       
       sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' addInstance: ' + trail.toString() );
       
-      sceneryAssert && sceneryAssert( !( trail.getUniqueId() in this.idFragmentMap ), 'Already contained that trail!' );
-      sceneryAssert && sceneryAssert( trail.isPainted(), 'Don\'t add nodes without isPainted() to SVGLayer' );
+      assert && assert( !( trail.getUniqueId() in this.idFragmentMap ), 'Already contained that trail!' );
+      assert && assert( trail.isPainted(), 'Don\'t add nodes without isPainted() to SVGLayer' );
       
       Layer.prototype.addInstance.call( this, instance );
       
@@ -118,7 +118,7 @@ define( function( require ) {
             this.insertGroupIntoParent( group, this.idGroupMap[lastId], subtrail );
           } else {
             // we are ensuring the base group
-            sceneryAssert && sceneryAssert( subtrail.lastNode() === this.baseNode );
+            assert && assert( subtrail.lastNode() === this.baseNode );
             
             group = this.g;
             
@@ -168,7 +168,7 @@ define( function( require ) {
       var trail = instance.trail;
       
       sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' removeInstance: ' + trail.toString() );
-      sceneryAssert && sceneryAssert( trail.getUniqueId() in this.idFragmentMap, 'Did not contain that trail!' );
+      assert && assert( trail.getUniqueId() in this.idFragmentMap, 'Did not contain that trail!' );
       
       Layer.prototype.removeInstance.call( this, instance );
       
@@ -251,6 +251,7 @@ define( function( require ) {
       sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' updateNodeGroup: ' + node.constructor.name + ' #' + node.id );
       this.updateGroupVisibility( node, group );
       this.updateGroupOpacity( node, group );
+      this.updateGroupClip( node, group );
     },
     
     updateGroupVisibility: function( node, group ) {
@@ -270,6 +271,35 @@ define( function( require ) {
         opacity = node.getOpacity();
       }
       group.setAttribute( 'opacity', opacity );
+    },
+    
+    updateGroupClip: function( node, group ) {
+      // TODO: optimization! this is not the fastest way of doing things
+      var clipId = 'clip' + node.getId();
+      
+      assert && assert( !( node === this.baseNode && node !== this.scene && node._clipArea ), 'clipArea not supported on CSS-transformed SVG elements (or the base for now)' );
+      
+      // remove any old defs
+      var oldDef = this.svg.getElementById( clipId );
+      if ( oldDef ) {
+        this.defs.removeChild( oldDef );
+      }
+      
+      if ( node._clipArea ) {
+        var definition = document.createElementNS( svgns, 'clipPath' );
+        definition.setAttribute( 'id', clipId );
+        definition.setAttribute( 'clipPathUnits', 'userSpaceOnUse' );
+        
+        var path = document.createElementNS( svgns, 'path' );
+        path.setAttribute( 'd', node._clipArea.getSVGPath() );
+        definition.appendChild( path );
+        
+        this.defs.appendChild( definition );
+        
+        group.setAttribute( 'clip-path', 'url(#' + clipId + ')' );
+      } else {
+        group.removeAttribute( 'clip-path' );
+      }
     },
     
     getFragmentFromInstance: function( instance ) {
@@ -347,7 +377,7 @@ define( function( require ) {
           var baseNodeInteralBounds = internalBounds.transform( this.baseNodeTransform.getMatrix() );
           
           // sanity check to ensure we are within that range
-          sceneryAssert && sceneryAssert( baseNodeInteralBounds.minX >= 0 && baseNodeInteralBounds.minY >= 0 );
+          assert && assert( baseNodeInteralBounds.minX >= 0 && baseNodeInteralBounds.minY >= 0 );
           
           this.updateContainerDimensions( Math.ceil( baseNodeInteralBounds.maxX + padding ),
                                           Math.ceil( baseNodeInteralBounds.maxY + padding ) );
@@ -532,6 +562,18 @@ define( function( require ) {
       } else if ( this.baseNode !== this.scene ) {
         // if we are using a CSS transform (basically)
         this.updateGroupOpacity( this.baseNode, this.getGroupFromInstance( this.baseTrail.getInstance() ) );
+      }
+    },
+    
+    notifyClipChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' notifyClipChange: ' + instance.trail.toString() );
+      var group = this.getGroupFromInstance( instance );
+      if ( group ) {
+        this.updateGroupClip( instance.getNode(), group );
+      } else if ( this.baseNode !== this.scene ) {
+        // if we are using a CSS transform (basically)
+        // TODO: clip combinations don't work yet, this won't really do anything (probably errors out)
+        this.updateGroupClip( this.baseNode, this.getGroupFromInstance( this.baseTrail.getInstance() ) );
       }
     },
     

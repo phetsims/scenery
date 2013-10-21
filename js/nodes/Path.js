@@ -11,6 +11,7 @@ define( function( require ) {
   
   var inherit = require( 'PHET_CORE/inherit' );
   var Shape = require( 'KITE/Shape' );
+  var Bounds2 = require( 'DOT/Bounds2' );
   
   var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
@@ -21,7 +22,9 @@ define( function( require ) {
   
   scenery.Path = function Path( shape, options ) {
     // TODO: consider directly passing in a shape object (or at least handling that case)
+    // NOTE: _shape can be lazily constructed, in the case of types like Rectangle where they have their own drawing code
     this._shape = null;
+    this._strokedShape = null; // a stroked copy of the shape, lazily computed
 
     // ensure we have a parameter object
     options = options || {};
@@ -53,8 +56,17 @@ define( function( require ) {
       return this._shape;
     },
     
+    getStrokedShape: function() {
+      if ( !this._strokedShape ) {
+        this._strokedShape = this.getShape().getStrokedShape( this._lineDrawingStyles );
+      }
+      return this._strokedShape;
+    },
+    
     invalidateShape: function() {
       this.markOldSelfPaint();
+      
+      this._strokedShape = null;
       
       if ( this.hasShape() ) {
         this.invalidateSelf( this.computeShapeBounds() );
@@ -62,9 +74,9 @@ define( function( require ) {
       }
     },
     
-    // separated out, so that we can override this with a faster version in Rectangle. includes the Stroke, if any
+    // separated out, so that we can override this with a faster version in subtypes. includes the Stroke, if any
     computeShapeBounds: function() {
-      return this._stroke ? this._shape.computeBounds( this._lineDrawingStyles ) : this._shape.bounds;
+      return this._stroke ? this.getStrokedShape().bounds : this.getShape().bounds;
     },
     
     // hook stroke mixin changes to invalidation
@@ -147,15 +159,19 @@ define( function( require ) {
     // override for computation of whether a point is inside the self content
     // point is considered to be in the local coordinate frame
     containsPointSelf: function( point ) {
+      var result = false;
       if ( !this.hasShape() ) {
-        return false;
+        return result;
       }
       
-      var result = this._shape.containsPoint( point );
+      // if this node is fillPickable, we will return true if the point is inside our fill area
+      if ( this._fillPickable ) {
+        result = this.getShape().containsPoint( point );
+      }
       
-      // also include the stroked region in the hit area if applicable
-      if ( !result && this._includeStrokeInHitRegion && this.hasStroke() ) {
-        result = this._shape.getStrokedShape( this._lineDrawingStyles ).containsPoint( point );
+      // also include the stroked region in the hit area if strokePickable
+      if ( !result && this._strokePickable ) {
+        result = this.getStrokedShape().containsPoint( point );
       }
       return result;
     },

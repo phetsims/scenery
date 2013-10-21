@@ -71,16 +71,16 @@ define( function( require ) {
         if ( token === 'normal' ) {
           // nothing has to be done, everything already normal as default
         } else if ( _.contains( styles, token ) ) {
-          sceneryAssert && sceneryAssert( this._style === 'normal', 'Style cannot be applied twice. Already set to "' + this._style + '", attempt to replace with "' + token + '"' );
+          assert && assert( this._style === 'normal', 'Style cannot be applied twice. Already set to "' + this._style + '", attempt to replace with "' + token + '"' );
           this._style = token;
         } else if ( _.contains( variants, token ) ) {
-          sceneryAssert && sceneryAssert( this._variant === 'normal', 'Variant cannot be applied twice. Already set to "' + this._variant + '", attempt to replace with "' + token + '"' );
+          assert && assert( this._variant === 'normal', 'Variant cannot be applied twice. Already set to "' + this._variant + '", attempt to replace with "' + token + '"' );
           this._variant = token;
         } else if ( _.contains( weights, token ) ) {
-          sceneryAssert && sceneryAssert( this._weight === 'normal', 'Weight cannot be applied twice. Already set to "' + this._weight + '", attempt to replace with "' + token + '"' );
+          assert && assert( this._weight === 'normal', 'Weight cannot be applied twice. Already set to "' + this._weight + '", attempt to replace with "' + token + '"' );
           this._weight = token;
         } else if ( _.contains( stretches, token ) ) {
-          sceneryAssert && sceneryAssert( this._stretch === 'normal', 'Stretch cannot be applied twice. Already set to "' + this._stretch + '", attempt to replace with "' + token + '"' );
+          assert && assert( this._stretch === 'normal', 'Stretch cannot be applied twice. Already set to "' + this._stretch + '", attempt to replace with "' + token + '"' );
           this._stretch = token;
         } else {
           // not a style/variant/weight/stretch, must be a font size, possibly with an included line-height
@@ -119,23 +119,23 @@ define( function( require ) {
     }
     
     // sanity checks to prevent errors in interpretation or in the font shorthand usage
-    sceneryAssert && sceneryAssert( typeof this._style === 'string' &&
+    assert && assert( typeof this._style === 'string' &&
                                     _.contains( styles, this._style ),
                                     'Font style must be one of "normal", "italic", or "oblique"' );
-    sceneryAssert && sceneryAssert( typeof this._variant === 'string' &&
+    assert && assert( typeof this._variant === 'string' &&
                                     _.contains( variants, this._variant ),
                                     'Font variant must be "normal" or "small-caps"' );
-    sceneryAssert && sceneryAssert( typeof this._weight === 'string' &&
+    assert && assert( typeof this._weight === 'string' &&
                                     _.contains( weights, this._weight ),
                                     'Font weight must be one of "normal", "bold", "bolder", "lighter", "100", "200", "300", "400", "500", "600", "700", "800", or "900"' );
-    sceneryAssert && sceneryAssert( typeof this._stretch === 'string' &&
+    assert && assert( typeof this._stretch === 'string' &&
                                     _.contains( stretches, this._stretch ),
                                     'Font stretch must be one of "normal", "ultra-condensed", "extra-condensed", "condensed", "semi-condensed", "semi-expanded", "expanded", "extra-expanded", or "ultra-expanded"' );
-    sceneryAssert && sceneryAssert( typeof this._size === 'string' &&
+    assert && assert( typeof this._size === 'string' &&
                                     !_.contains( [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ], this._size[this._size.length - 1] ),
                                     'Font size must be either passed as a number (not a string, interpreted as px), or must contain a suffix for percentage, absolute or relative units, or an explicit size constant' );
-    sceneryAssert && sceneryAssert( typeof this._lineHeight === 'string' );
-    sceneryAssert && sceneryAssert( typeof this._family === 'string' );
+    assert && assert( typeof this._lineHeight === 'string' );
+    assert && assert( typeof this._family === 'string' );
     
     // initialize the shorthand font property (stored as _font)
     this._font = this.computeShorthand();

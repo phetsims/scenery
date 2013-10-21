@@ -88,7 +88,7 @@ define( function( require ) {
     },
 
     exit: function( event ) {
-      sceneryAssert && sceneryAssert( this._overCount > 0, 'Exit events not matched by an enter' );
+      assert && assert( this._overCount > 0, 'Exit events not matched by an enter' );
       this._overCount--;
       if ( this._overCount === 0 ) {
         this.setButtonState( event, this.isDown ? 'out' : 'up' );

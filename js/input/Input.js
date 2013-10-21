@@ -38,23 +38,44 @@ define( function( require ) {
     this.batchDOMEvents = batchDOMEvents;
     
     this.batchedCallbacks = []; // cleared every frame
-    
-    this.mouse = new scenery.Mouse();
-    
-    this.pointers = [ this.mouse ];
+
+    //Pointer for mouse, only created lazily on first mouse event, so no mouse is allocated on tablets
+    this.mouse = null;
+
+    this.pointers = [];
     
     this.listenerReferences = [];
     
     this.eventLog = [];     // written when recording event input. can be overwritten to the empty array to reset. Strings relative to this class (prefix "scene.input.")
     this.logEvents = false; // can be set to true to cause Scenery to record all input calls to eventLog
+
+    this.pointerAddedListeners = [];
   };
   var Input = scenery.Input;
   
   Input.prototype = {
     constructor: Input,
-    
+
     addPointer: function( pointer ) {
       this.pointers.push( pointer );
+
+      //Callback for showing pointer events.  Optimized for performance.
+      if ( this.pointerAddedListeners.length ) {
+        for ( var i = 0; i < this.pointerAddedListeners.length; i++ ) {
+          this.pointerAddedListeners[i]( pointer );
+        }
+      }
+    },
+
+    addPointerAddedListener: function( listener ) {
+      this.pointerAddedListeners.push(listener);
+    },
+
+    removePointerAddedListener: function( listener ) {
+      var index = this.pointerAddedListeners.indexOf( listener );
+      if ( index !== -1 ) {
+        this.pointerAddedListeners.splice( index, index + 1 );
+      }
     },
     
     removePointer: function( pointer ) {
@@ -78,46 +99,58 @@ define( function( require ) {
     },
     
     findKeyByEvent: function( event ) {
-      sceneryAssert && sceneryAssert( event.keyCode && event.charCode, 'Assumes the KeyboardEvent has keyCode and charCode properties' );
+      assert && assert( event.hasOwnProperty( 'keyCode' ) && event.hasOwnProperty('charCode'), 'Assumes the KeyboardEvent has keyCode and charCode properties' );
       var result = _.find( this.pointers, function( pointer ) {
         // TODO: also check location (if that exists), so we don't mix up left and right shift, etc.
         return pointer.keyCode === event.keyCode && pointer.charCode === event.charCode;
       } );
-      // sceneryAssert && sceneryAssert( result, 'No key found for the combination of key:' + event.key + ' and location:' + event.location );
+      // assert && assert( result, 'No key found for the combination of key:' + event.key + ' and location:' + event.location );
       return result;
+    },
+
+    //Init the mouse on the first mouse event (if any!)
+    initMouse: function() {
+      this.mouse = new scenery.Mouse();
+      this.addPointer( this.mouse );
     },
     
     mouseDown: function( point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'mouseDown(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      if ( !this.mouse ) { this.initMouse(); }
       this.mouse.down( point, event );
       this.downEvent( this.mouse, event );
     },
     
     mouseUp: function( point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'mouseUp(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      if ( !this.mouse ) { this.initMouse(); }
       this.mouse.up( point, event );
       this.upEvent( this.mouse, event );
     },
     
     mouseUpImmediate: function( point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'mouseUpImmediate(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      if ( !this.mouse ) { this.initMouse(); }
       this.upImmediateEvent( this.mouse, event );
     },
     
     mouseMove: function( point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'mouseMove(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      if ( !this.mouse ) { this.initMouse(); }
       this.mouse.move( point, event );
       this.moveEvent( this.mouse, event );
     },
     
     mouseOver: function( point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'mouseOver(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      if ( !this.mouse ) { this.initMouse(); }
       this.mouse.over( point, event );
       // TODO: how to handle mouse-over (and log it)
     },
     
     mouseOut: function( point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'mouseOut(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      if ( !this.mouse ) { this.initMouse(); }
       this.mouse.out( point, event );
       // TODO: how to handle mouse-out (and log it)
     },
@@ -163,7 +196,7 @@ define( function( require ) {
         this.removePointer( touch );
         this.upEvent( touch, event );
       } else {
-        sceneryAssert && sceneryAssert( false, 'Touch not found for touchEnd: ' + id );
+        assert && assert( false, 'Touch not found for touchEnd: ' + id );
       }
     },
     
@@ -173,7 +206,7 @@ define( function( require ) {
       if ( touch ) {
         this.upImmediateEvent( touch, event );
       } else {
-        sceneryAssert && sceneryAssert( false, 'Touch not found for touchEndImmediate: ' + id );
+        assert && assert( false, 'Touch not found for touchEndImmediate: ' + id );
       }
     },
     
@@ -184,7 +217,7 @@ define( function( require ) {
         touch.move( point, event );
         this.moveEvent( touch, event );
       } else {
-        sceneryAssert && sceneryAssert( false, 'Touch not found for touchMove: ' + id );
+        assert && assert( false, 'Touch not found for touchMove: ' + id );
       }
     },
     
@@ -196,7 +229,7 @@ define( function( require ) {
         this.removePointer( touch );
         this.cancelEvent( touch, event );
       } else {
-        sceneryAssert && sceneryAssert( false, 'Touch not found for touchCancel: ' + id );
+        assert && assert( false, 'Touch not found for touchCancel: ' + id );
       }
     },
     
@@ -216,7 +249,7 @@ define( function( require ) {
         this.removePointer( pen );
         this.upEvent( pen, event );
       } else {
-        sceneryAssert && sceneryAssert( false, 'Pen not found for penEnd: ' + id );
+        assert && assert( false, 'Pen not found for penEnd: ' + id );
       }
     },
     
@@ -226,7 +259,7 @@ define( function( require ) {
       if ( pen ) {
         this.upImmediateEvent( pen, event );
       } else {
-        sceneryAssert && sceneryAssert( false, 'Pen not found for penEndImmediate: ' + id );
+        assert && assert( false, 'Pen not found for penEndImmediate: ' + id );
       }
     },
     
@@ -237,7 +270,7 @@ define( function( require ) {
         pen.move( point, event );
         this.moveEvent( pen, event );
       } else {
-        sceneryAssert && sceneryAssert( false, 'Pen not found for penMove: ' + id );
+        assert && assert( false, 'Pen not found for penMove: ' + id );
       }
     },
     
@@ -249,7 +282,7 @@ define( function( require ) {
         this.removePointer( pen );
         this.cancelEvent( pen, event );
       } else {
-        sceneryAssert && sceneryAssert( false, 'Pen not found for penCancel: ' + id );
+        assert && assert( false, 'Pen not found for penCancel: ' + id );
       }
     },
     

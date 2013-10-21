@@ -515,6 +515,40 @@ $(document).ready( function() {
       }
     }]
   },{
+    testName: 'SVG Use',
+    testId: 'svg-use',
+    types: [{
+      typeName: 'A None',
+      typeId: 'simpleNone',
+      init: function( main ) {
+        return phet.tests.svgUseSimpleNone( main );
+      }
+    },{
+      typeName: 'A Dup',
+      typeId: 'simpleDup',
+      init: function( main ) {
+        return phet.tests.svgUseSimpleDuplicated( main );
+      }
+    },{
+      typeName: 'A Comp',
+      typeId: 'simpleComp',
+      init: function( main ) {
+        return phet.tests.svgUseSimpleDuplicated( main );
+      }
+    },{
+      typeName: 'B None',
+      typeId: 'bNone',
+      init: function( main ) {
+        return phet.tests.svgUseHeavyNone( main );
+      }
+    },{
+      typeName: 'B Comp',
+      typeId: 'bComp',
+      init: function( main ) {
+        return phet.tests.svgUseHeavyComplete( main );
+      }
+    }]
+  },{
     testName: 'Placebo',
     testId: 'test-placebo',
     types: [{

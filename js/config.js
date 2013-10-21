@@ -8,26 +8,9 @@
 
 // if has.js is included, set assertion flags to true (so we can catch errors during development)
 if ( window.has ) {
-  window.has.add( 'assert.dot', function( global, document, anElement ) {
-    'use strict';
-    return true;
-  } );
-  window.has.add( 'assert.kite', function( global, document, anElement ) {
-    'use strict';
-    return true;
-  } );
-  window.has.add( 'assert.kite.extra', function( global, document, anElement ) {
-    'use strict';
-    return true;
-  } );
-  window.has.add( 'assert.scenery', function( global, document, anElement ) {
-    'use strict';
-    return true;
-  } );
-  window.has.add( 'assert.scenery.extra', function( global, document, anElement ) {
-    'use strict';
-    return true;
-  } );
+  // default config only enables basic assertions
+  window.has.add( 'assert.basic', function( global, document, anElement ) { 'use strict'; return true; } );
+  // window.has.add( 'assert.slow', function( global, document, anElement ) { 'use strict'; return true; } );
 }
 
 // flag is set so we can ensure that the config has executed. This prevents various Require.js dynamic loading timeouts and script errors

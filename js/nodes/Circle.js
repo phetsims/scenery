@@ -12,6 +12,7 @@ define( function( require ) {
 
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
+  var Bounds2 = require( 'DOT/Bounds2' );
 
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
@@ -21,6 +22,7 @@ define( function( require ) {
       // allow new Circle( { radius: ... } )
       // the mutators will call invalidateCircle() and properly set the shape
       options = radius;
+      this._radius = options.radius;
     } else {
       this._radius = radius;
 
@@ -30,16 +32,67 @@ define( function( require ) {
     }
     // fallback for non-canvas or non-svg rendering, and for proper bounds computation
 
-    Path.call( this,Shape.circle( 0, 0, radius ), options );
+    Path.call( this, null, options );
   };
   var Circle = scenery.Circle;
 
   inherit( Path, Circle, {
     invalidateCircle: function() {
-      // setShape should invalidate the path and ensure a redraw
-      this.setShape( Shape.circle( 0, 0, this._radius ) );
+      assert && assert( this._radius >= 0, 'A circle needs a non-negative radius' );
+      
+      // sets our 'cache' to null, so we don't always have to recompute our shape
+      this._shape = null;
+      
+      // should invalidate the path and ensure a redraw
+      this.invalidateShape();
     },
-
+    
+    createCircleShape: function() {
+      return Shape.circle( 0, 0, this._radius );
+    },
+    
+    intersectsBoundsSelf: function( bounds ) {
+      // TODO: handle intersection with somewhat-infinite bounds!
+      var x = Math.abs( bounds.centerX );
+      var y = Math.abs( bounds.centerY );
+      var halfWidth = bounds.maxX - x;
+      var halfHeight = bounds.maxY - y;
+      
+      // too far to have a possible intersection
+      if ( x > halfWidth + this._radius || y > halfHeight + this._radius ) {
+        return false;
+      }
+      
+      // guaranteed intersection
+      if ( x <= halfWidth || y <= halfHeight ) {
+        return true;
+      }
+      
+      // corner case
+      x -= halfWidth;
+      y -= halfHeight;
+      return x * x + y * y <= this._radius * this._radius;
+    },
+    
+    paintCanvas: function( wrapper ) {
+      var context = wrapper.context;
+      
+      context.beginPath();
+      context.arc( 0, 0, this._radius, 0, Math.PI * 2, false );
+      context.closePath();
+      
+      if ( this._fill ) {
+        this.beforeCanvasFill( wrapper ); // defined in Fillable
+        context.fill();
+        this.afterCanvasFill( wrapper ); // defined in Fillable
+      }
+      if ( this._stroke ) {
+        this.beforeCanvasStroke( wrapper ); // defined in Strokable
+        context.stroke();
+        this.afterCanvasStroke( wrapper ); // defined in Strokable
+      }
+    },
+    
     // create a circle instead of a path, hopefully it is faster in implementations
     createSVGFragment: function( svg, defs, group ) {
       return document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
@@ -69,17 +122,63 @@ define( function( require ) {
     },
 
     computeShapeBounds: function() {
-      // optimization, where we know our computed bounds will be just expanded by half the lineWidth if we are stroked (don't have to compute the stroke shape)
-      return this._stroke ? this._shape.bounds.dilated( this._lineDrawingStyles.lineWidth / 2 ) : this._shape.bounds;
+      var bounds = new Bounds2( -this._radius, -this._radius, this._radius, this._radius );
+      if ( this._stroke ) {
+        // since we are axis-aligned, any stroke will expand our bounds by a guaranteed set amount
+        bounds = bounds.dilated( this.getLineWidth() / 2 );
+      }
+      return bounds;
     },
 
     // accelerated hit detection
     containsPointSelf: function( point ) {
-      return point.x * point.x + point.y * point.y < this._radius * this._radius;
+      var magSq = point.x * point.x + point.y * point.y;
+      var result = true;
+      var iRadius;
+      if ( this._strokePickable ) {
+        iRadius = this.getLineWidth() / 2;
+        var outerRadius = this._radius + iRadius;
+        result = result && magSq <= outerRadius * outerRadius;
+      }
+      
+      if ( this._fillPickable ) {
+        if ( this._strokePickable ) {
+          // we were either within the outer radius, or not
+          return result;
+        } else {
+          // just testing in the fill range
+          return magSq <= this._radius * this._radius;
+        }
+      } else if ( this._strokePickable ) {
+        var innerRadius = this._radius - iRadius;
+        return result && magSq >= innerRadius * innerRadius;
+      } else {
+        return false; // neither stroke nor fill is pickable
+      }
     },
 
     get radius() { return this.getRadius(); },
-    set radius( value ) { return this.setRadius( value ); }
+    set radius( value ) { return this.setRadius( value ); },
+    
+    setShape: function( shape ) {
+      if ( shape !== null ) {
+        throw new Error( 'Cannot set the shape of a scenery.Circle to something non-null' );
+      } else {
+        // probably called from the Path constructor
+        this.invalidateShape();
+      }
+    },
+    
+    getShape: function() {
+      if ( !this._shape ) {
+        this._shape = this.createCircleShape();
+      }
+      return this._shape;
+    },
+    
+    hasShape: function() {
+      return true;
+    }
   } );
 
   // not adding mutators for now

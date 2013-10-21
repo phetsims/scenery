@@ -31,6 +31,7 @@ define( function( require ) {
   
   /*
    * Available keys for use in the options parameter object for a vanilla Node (not inherited), in the order they are executed in:
+   * TODO: this list is incomplete!
    *
    * children:         A list of children to add (in order)
    * cursor:           Will display the specified CSS cursor when the mouse is over this Node or one of its descendents. The Scene needs to have input listeners attached with an initialize method first.
@@ -68,12 +69,15 @@ define( function( require ) {
     // Opacity from 0 to 1
     this._opacity = 1;
     
-    // Whether hit testing will check for this node (and its children).
-    this._pickable = true;
+    // Whether this node (and its subtree) will allow hit-testing (and thus user interaction). Notably:
+    // pickable: null  - default. Node is only pickable if it (or an ancestor/descendant) has either an input listener or pickable: true set
+    // pickable: false - Node (and subtree) is pickable, just like if there is an input listener
+    // pickable: true  - Node is unpickable (only has an effect when underneath a node with an input listener / pickable: true set)
+    this._pickable = null;
     
     // This node and all children will be clipped by this shape (in addition to any other clipping shapes).
     // The shape should be in the local coordinate frame
-    this._clipShape = null;
+    this._clipArea = null;
     
     // areas for hit intersection. if set on a Node, no descendants can handle events
     this._mouseArea = null; // {Shape} for mouse position          in the local coordinate frame
@@ -103,9 +107,6 @@ define( function( require ) {
     
     this._inputListeners = []; // for user input handling (mouse/touch)
     this.initializeNodeEvents(); // for internal events like paint invalidation, layer invalidation, etc.
-    
-    // TODO: add getter/setters that will be able to invalidate whether this node is under any pointers, etc.
-    this._includeStrokeInHitRegion = false;
     
     // bounds handling
     this._bounds = Bounds2.NOTHING;      // for this node and its children, in "parent" coordinates
@@ -138,6 +139,9 @@ define( function( require ) {
     this._layerSplitBefore = false;
     this._layerSplitAfter = false;
     
+    // the subtree pickable count is #pickable:true + #inputListeners, since we can prune subtrees with a pickable count of 0
+    this._subtreePickableCount = 0;
+    
     if ( options ) {
       this.mutate( options );
     }
@@ -150,9 +154,12 @@ define( function( require ) {
     constructor: Node,
     
     insertChild: function( index, node ) {
-      sceneryAssert && sceneryAssert( node !== null && node !== undefined, 'insertChild cannot insert a null/undefined child' );
-      sceneryAssert && sceneryAssert( !_.contains( this._children, node ), 'Parent already contains child' );
-      sceneryAssert && sceneryAssert( node !== this, 'Cannot add self as a child' );
+      assert && assert( node !== null && node !== undefined, 'insertChild cannot insert a null/undefined child' );
+      assert && assert( !_.contains( this._children, node ), 'Parent already contains child' );
+      assert && assert( node !== this, 'Cannot add self as a child' );
+      
+      // needs to be early to prevent re-entrant children modifications
+      this.changePickableCount( node._subtreePickableCount );
       
       node._parents.push( this );
       this._children.splice( index, 0, node );
@@ -171,8 +178,8 @@ define( function( require ) {
     },
     
     removeChild: function( node ) {
-      sceneryAssert && sceneryAssert( node );
-      sceneryAssert && sceneryAssert( this.isChild( node ) );
+      assert && assert( node );
+      assert && assert( this.isChild( node ) );
       
       var indexOfChild = _.indexOf( this._children, node );
       
@@ -180,8 +187,8 @@ define( function( require ) {
     },
     
     removeChildAt: function( index ) {
-      sceneryAssert && sceneryAssert( index >= 0 );
-      sceneryAssert && sceneryAssert( index < this._children.length );
+      assert && assert( index >= 0 );
+      assert && assert( index < this._children.length );
       
       var node = this._children[index];
       
@@ -190,9 +197,12 @@ define( function( require ) {
     
     // meant for internal use
     removeChildWithIndex: function( node, indexOfChild ) {
-      sceneryAssert && sceneryAssert( node );
-      sceneryAssert && sceneryAssert( this.isChild( node ) );
-      sceneryAssert && sceneryAssert( this._children[indexOfChild] === node );
+      assert && assert( node );
+      assert && assert( this.isChild( node ) );
+      assert && assert( this._children[indexOfChild] === node );
+      
+      // needs to be early to prevent re-entrant children modifications
+      this.changePickableCount( -node._subtreePickableCount );
       
       node.markOldPaint( false );
       
@@ -238,6 +248,12 @@ define( function( require ) {
     
     getParents: function() {
       return this._parents.slice( 0 ); // create a defensive copy
+    },
+    
+    // returns a single parent if it exists, otherwise null (no parents), or an assertion failure (multiple parents)
+    getParent: function() {
+      assert && assert( this._parents.length <= 1, 'Cannot call getParent on a node with multiple parents' );
+      return this._parents.length ? this._parents[0] : null;
     },
     
     getChildAt: function( index ) {
@@ -288,9 +304,19 @@ define( function( require ) {
       } );
     },
     
+    // propagate the pickable count change down to our ancestors
+    changePickableCount: function( n ) {
+      this._subtreePickableCount += n;
+      assert && assert( this._subtreePickableCount >= 0, 'subtree pickable count should be guaranteed to be >= 0' );
+      var len = this._parents.length;
+      for ( var i = 0; i < len; i++ ) {
+        this._parents[i].changePickableCount( n );
+      }
+    },
+    
     // currently, there is no way to remove peers. if a string is passed as the element pattern, it will be turned into an element
     addPeer: function( element, options ) {
-      sceneryAssert && sceneryAssert( !this.instances.length, 'Cannot call addPeer after a node has instances (yet)' );
+      assert && assert( !this.instances.length, 'Cannot call addPeer after a node has instances (yet)' );
       
       this._peers.push( { element: element, options: options } );
     },
@@ -300,6 +326,11 @@ define( function( require ) {
      */
     addLiveRegion: function( property, options ) {
       this._liveRegions.push( {property: property, options: options} );
+    },
+    
+    // should be overridden to modify (increase ONLY if Canvas is involved) the node's bounds. Return the expanded bounds.
+    overrideBounds: function( computedBounds ) {
+      return computedBounds;
     },
     
     // ensure that cached bounds stored on this node (and all children) are accurate
@@ -353,6 +384,7 @@ define( function( require ) {
         
         // converts local to parent bounds. mutable methods used to minimize number of created bounds instances (we create one so we don't change references to the old one)
         var newBounds = this.transformBoundsFromLocalToParent( this._selfBounds.copy().includeBounds( this._childBounds ) );
+        newBounds = this.overrideBounds( newBounds ); // allow expansion of the bounds area
         var changed = !newBounds.equals( oldBounds );
         
         if ( changed ) {
@@ -375,7 +407,7 @@ define( function( require ) {
       }
       
       // double-check that all of our bounds handling has been accurate
-      if ( sceneryAssertExtra ) {
+      if ( assertSlow ) {
         // new scope for safety
         (function(){
           var epsilon = 0.000001;
@@ -385,10 +417,11 @@ define( function( require ) {
           
           var fullBounds = that.localToParentBounds( that._selfBounds ).union( that.localToParentBounds( childBounds ) );
           
-          sceneryAssertExtra && sceneryAssertExtra( that._childBounds.equalsEpsilon( childBounds, epsilon ), 'Child bounds mismatch after validateBounds: ' +
+          assertSlow && assertSlow( that._childBounds.equalsEpsilon( childBounds, epsilon ), 'Child bounds mismatch after validateBounds: ' +
                                                                                                     that._childBounds.toString() + ', expected: ' + childBounds.toString() );
-          sceneryAssertExtra && sceneryAssertExtra( that._bounds.equalsEpsilon( fullBounds, epsilon ), 'Bounds mismatch after validateBounds: ' +
-                                                                                              that._bounds.toString() + ', expected: ' + fullBounds.toString() );
+          assertSlow && assertSlow( that._bounds.equalsEpsilon( fullBounds, epsilon ) ||
+                                                    that._bounds.equalsEpsilon( that.overrideBounds( fullBounds ), epsilon ),
+                                                    'Bounds mismatch after validateBounds: ' + that._bounds.toString() + ', expected: ' + fullBounds.toString() );
         })();
       }
     },
@@ -396,7 +429,7 @@ define( function( require ) {
     validateMouseBounds: function() {
       var that = this;
       
-      sceneryAssert && sceneryAssert( !this._selfBoundsDirty && !this._childBoundsDirty && !this._boundsDirty, 'Bounds must be validated before calling validateMouseBounds' );
+      assert && assert( !this._selfBoundsDirty && !this._childBoundsDirty && !this._boundsDirty, 'Bounds must be validated before calling validateMouseBounds' );
       
       if ( this._mouseBoundsDirty ) {
         var hasMouseAreas = false;
@@ -437,7 +470,7 @@ define( function( require ) {
     validateTouchBounds: function() {
       var that = this;
       
-      sceneryAssert && sceneryAssert( !this._selfBoundsDirty && !this._childBoundsDirty && !this._boundsDirty, 'Bounds must be validated before calling validateTouchBounds' );
+      assert && assert( !this._selfBoundsDirty && !this._childBoundsDirty && !this._boundsDirty, 'Bounds must be validated before calling validateTouchBounds' );
       
       if ( this._touchBoundsDirty ) {
         var hasTouchAreas = false;
@@ -477,7 +510,7 @@ define( function( require ) {
     
     validatePaint: function() {
       if ( this._paintDirty ) {
-        sceneryAssert && sceneryAssert( this.isPainted(), 'Only painted nodes can have self dirty paint' );
+        assert && assert( this.isPainted(), 'Only painted nodes can have self dirty paint' );
         if ( !this._subtreePaintDirty ) {
           // if the subtree is clean, just notify the self (only will hit one layer, instead of possibly multiple ones)
           this.notifyDirtySelfPaint();
@@ -531,7 +564,7 @@ define( function( require ) {
     
     // mark the paint of this node as invalid, so its new region will be painted
     invalidatePaint: function() {
-      sceneryAssert && sceneryAssert( this.isPainted(), 'Can only call invalidatePaint on a painted node' );
+      assert && assert( this.isPainted(), 'Can only call invalidatePaint on a painted node' );
       this._paintDirty = true;
       
       // and set flags for all ancestors
@@ -565,7 +598,7 @@ define( function( require ) {
     
     // called to notify that self rendering will display different paint, with possibly different bounds
     invalidateSelf: function( newBounds ) {
-      sceneryAssert && sceneryAssert( newBounds.isEmpty() || newBounds.isFinite() , "Bounds must be empty or finite in invalidateSelf");
+      assert && assert( newBounds.isEmpty() || newBounds.isFinite() , "Bounds must be empty or finite in invalidateSelf");
       
       // mark the old region to be repainted, regardless of whether the actual bounds change
       this.notifyBeforeSelfChange();
@@ -604,9 +637,10 @@ define( function( require ) {
     },
     
     isChild: function( potentialChild ) {
+      assert && assert( potentialChild && ( potentialChild instanceof Node ), 'isChild needs to be called with a Node' );
       var ourChild = _.contains( this._children, potentialChild );
       var itsParent = _.contains( potentialChild._parents, this );
-      sceneryAssert && sceneryAssert( ourChild === itsParent );
+      assert && assert( ourChild === itsParent );
       return ourChild;
     },
     
@@ -618,6 +652,11 @@ define( function( require ) {
     getChildBounds: function() {
       this.validateBounds();
       return this._childBounds;
+    },
+    
+    // local coordinate frame bounds
+    getLocalBounds: function() {
+      return this.getSelfBounds().union( this.getChildBounds() );
     },
     
     // the bounds for content in render(), in "parent" coordinates
@@ -639,7 +678,7 @@ define( function( require ) {
         }
       }
       
-      sceneryAssert && sceneryAssert( bounds.isFinite() || bounds.isEmpty(), 'Visible bounds should not be infinite' );
+      assert && assert( bounds.isFinite() || bounds.isEmpty(), 'Visible bounds should not be infinite' );
       return this.localToParentBounds( bounds );
     },
     
@@ -661,18 +700,23 @@ define( function( require ) {
      *
      * When calling, don't pass the recursive flag. It signals that the point passed can be mutated
      */
-    trailUnderPoint: function( point, options, recursive ) {
-      sceneryAssert && sceneryAssert( point, 'trailUnderPointer requires a point' );
+    trailUnderPoint: function( point, options, recursive, hasListener ) {
+      assert && assert( point, 'trailUnderPointer requires a point' );
       
       if ( options === undefined ) { options = {}; }
       
       var pruneInvisible = ( options.pruneInvisible === undefined ) ? true : options.pruneInvisible;
       var pruneUnpickable = ( options.pruneUnpickable === undefined ) ? true : options.pruneUnpickable;
       
+      hasListener = hasListener || this._inputListeners.length > 0 || this._pickable === true;
+      
       if ( pruneInvisible && !this.isVisible() ) {
         return null;
       }
-      if ( pruneUnpickable && !this.isPickable() ) {
+      
+      // if pickable: false, skip it
+      // if pickable: undefined and our pickable count indicates there are no input listeners / pickable: true in our subtree, skip it
+      if ( pruneUnpickable && ( this._pickable === false || ( this._pickable !== true && !hasListener && this._subtreePickableCount === 0 ) ) ) {
         return null;
       }
       
@@ -707,7 +751,7 @@ define( function( require ) {
         for ( var i = this._children.length - 1; i >= 0; i-- ) {
           var child = this._children[i];
           
-          var childHit = child.trailUnderPoint( localPoint, options );
+          var childHit = child.trailUnderPoint( localPoint, options, true, hasListener );
           
           // the child will have the point in its parent's coordinate frame (i.e. this node's frame)
           if ( childHit ) {
@@ -800,15 +844,17 @@ define( function( require ) {
       // don't allow listeners to be added multiple times
       if ( _.indexOf( this._inputListeners, listener ) === -1 ) {
         this._inputListeners.push( listener );
+        this.changePickableCount( 1 );
       }
       return this;
     },
     
     removeInputListener: function( listener ) {
       // ensure the listener is in our list
-      sceneryAssert && sceneryAssert( _.indexOf( this._inputListeners, listener ) !== -1 );
+      assert && assert( _.indexOf( this._inputListeners, listener ) !== -1 );
       
       this._inputListeners.splice( _.indexOf( this._inputListeners, listener ), 1 );
+      this.changePickableCount( -1 );
       return this;
     },
     
@@ -928,7 +974,7 @@ define( function( require ) {
     },
     
     setX: function( x ) {
-      sceneryAssert && sceneryAssert( typeof x === 'number' );
+      assert && assert( typeof x === 'number' );
       
       this.translate( x - this.getX(), 0, true );
       return this;
@@ -939,7 +985,7 @@ define( function( require ) {
     },
     
     setY: function( y ) {
-      sceneryAssert && sceneryAssert( typeof y === 'number' );
+      assert && assert( typeof y === 'number' );
       
       this.translate( 0, y - this.getY(), true );
       return this;
@@ -973,7 +1019,7 @@ define( function( require ) {
     },
     
     setRotation: function( rotation ) {
-      sceneryAssert && sceneryAssert( typeof rotation === 'number' );
+      assert && assert( typeof rotation === 'number' );
       
       this.appendMatrix( Matrix3.rotation2( rotation - this.getRotation() ) );
       return this;
@@ -1030,7 +1076,7 @@ define( function( require ) {
     
     // change the actual transform reference (not just the actual transform)
     setTransform: function( transform ) {
-      sceneryAssert && sceneryAssert( transform.isFinite(), 'Transform should not have infinite/NaN values' );
+      assert && assert( transform.isFinite(), 'Transform should not have infinite/NaN values' );
       
       if ( this._transform !== transform ) {
         // since our referenced transform doesn't change, we need to trigger the before/after ourselves
@@ -1075,7 +1121,7 @@ define( function( require ) {
     
     // shifts this node horizontally so that its left bound (in the parent coordinate frame) is 'left'
     setLeft: function( left ) {
-      sceneryAssert && sceneryAssert( typeof left === 'number' );
+      assert && assert( typeof left === 'number' );
       
       this.translate( left - this.getLeft(), 0, true );
       return this; // allow chaining
@@ -1088,7 +1134,7 @@ define( function( require ) {
     
     // shifts this node horizontally so that its right bound (in the parent coordinate frame) is 'right'
     setRight: function( right ) {
-      sceneryAssert && sceneryAssert( typeof right === 'number' );
+      assert && assert( typeof right === 'number' );
       
       this.translate( right - this.getRight(), 0, true );
       return this; // allow chaining
@@ -1099,7 +1145,7 @@ define( function( require ) {
     },
     
     setCenter: function( center ) {
-      sceneryAssert && sceneryAssert( center instanceof Vector2 );
+      assert && assert( center instanceof Vector2 );
       
       this.translate( center.minus( this.getCenter() ), true );
       return this;
@@ -1110,7 +1156,7 @@ define( function( require ) {
     },
     
     setCenterX: function( x ) {
-      sceneryAssert && sceneryAssert( typeof x === 'number' );
+      assert && assert( typeof x === 'number' );
       
       this.translate( x - this.getCenterX(), 0, true );
       return this; // allow chaining
@@ -1121,7 +1167,7 @@ define( function( require ) {
     },
     
     setCenterY: function( y ) {
-      sceneryAssert && sceneryAssert( typeof y === 'number' );
+      assert && assert( typeof y === 'number' );
       
       this.translate( 0, y - this.getCenterY(), true );
       return this; // allow chaining
@@ -1134,7 +1180,7 @@ define( function( require ) {
     
     // shifts this node vertically so that its top bound (in the parent coordinate frame) is 'top'
     setTop: function( top ) {
-      sceneryAssert && sceneryAssert( typeof top === 'number' );
+      assert && assert( typeof top === 'number' );
       
       this.translate( 0, top - this.getTop(), true );
       return this; // allow chaining
@@ -1147,7 +1193,7 @@ define( function( require ) {
     
     // shifts this node vertically so that its bottom bound (in the parent coordinate frame) is 'bottom'
     setBottom: function( bottom ) {
-      sceneryAssert && sceneryAssert( typeof bottom === 'number' );
+      assert && assert( typeof bottom === 'number' );
       
       this.translate( 0, bottom - this.getBottom(), true );
       return this; // allow chaining
@@ -1170,7 +1216,7 @@ define( function( require ) {
     },
     
     setVisible: function( visible ) {
-      sceneryAssert && sceneryAssert( typeof visible === 'boolean' );
+      assert && assert( typeof visible === 'boolean' );
       
       if ( visible !== this._visible ) {
         if ( this._visible ) {
@@ -1189,7 +1235,7 @@ define( function( require ) {
     },
     
     setOpacity: function( opacity ) {
-      sceneryAssert && sceneryAssert( typeof opacity === 'number' );
+      assert && assert( typeof opacity === 'number' );
       
       var clampedOpacity = clamp( opacity, 0, 1 );
       if ( clampedOpacity !== this._opacity ) {
@@ -1206,18 +1252,25 @@ define( function( require ) {
     },
     
     setPickable: function( pickable ) {
-      sceneryAssert && sceneryAssert( typeof pickable === 'boolean' );
+      assert && assert( typeof pickable === 'boolean' );
       
       if ( this._pickable !== pickable ) {
+        var n = this._pickable === true ? -1 : 0;
+        
         // no paint or invalidation changes for now, since this is only handled for the mouse
         this._pickable = pickable;
+        n += this._pickable === true ? 1 : 0;
         
-        // TODO: invalidate the cursor somehow?
+        if ( n ) {
+          this.changePickableCount( n );
+        }
+        
+        // TODO: invalidate the cursor somehow? #150
       }
     },
     
     setCursor: function( cursor ) {
-      sceneryAssert && sceneryAssert( typeof cursor === 'string' || cursor === null );
+      assert && assert( typeof cursor === 'string' || cursor === null );
       
       // TODO: consider a mapping of types to set reasonable defaults
       /*
@@ -1235,7 +1288,7 @@ define( function( require ) {
     },
     
     setMouseArea: function( shape ) {
-      sceneryAssert && sceneryAssert( shape === null || shape instanceof Shape, 'mouseArea needs to be a kite.Shape, or null' );
+      assert && assert( shape === null || shape instanceof Shape, 'mouseArea needs to be a kite.Shape, or null' );
       
       if ( this._mouseArea !== shape ) {
         this._mouseArea = shape; // TODO: could change what is under the mouse, invalidate!
@@ -1249,7 +1302,7 @@ define( function( require ) {
     },
     
     setTouchArea: function( shape ) {
-      sceneryAssert && sceneryAssert( shape === null || shape instanceof Shape, 'touchArea needs to be a kite.Shape, or null' );
+      assert && assert( shape === null || shape instanceof Shape, 'touchArea needs to be a kite.Shape, or null' );
       
       if ( this._touchArea !== shape ) {
         this._touchArea = shape; // TODO: could change what is under the touch, invalidate!
@@ -1260,6 +1313,22 @@ define( function( require ) {
     
     getTouchArea: function() {
       return this._touchArea;
+    },
+    
+    setClipArea: function( shape ) {
+      assert && assert( shape === null || shape instanceof Shape, 'clipArea needs to be a kite.Shape, or null' );
+      
+      if ( this._clipArea !== shape ) {
+        this.notifyBeforeSubtreeChange();
+        
+        this._clipArea = shape;
+        
+        this.notifyClipChange();
+      }
+    },
+    
+    getClipArea: function() {
+      return this._clipArea;
     },
     
     updateLayerType: function() {
@@ -1290,7 +1359,7 @@ define( function( require ) {
     setRenderer: function( renderer ) {
       var newRenderer;
       if ( typeof renderer === 'string' ) {
-        sceneryAssert && sceneryAssert( scenery.Renderer[renderer], 'unknown renderer in setRenderer: ' + renderer );
+        assert && assert( scenery.Renderer[renderer], 'unknown renderer in setRenderer: ' + renderer );
         newRenderer = scenery.Renderer[renderer];
       } else if ( renderer instanceof scenery.Renderer ) {
         newRenderer = renderer;
@@ -1300,7 +1369,7 @@ define( function( require ) {
         throw new Error( 'unrecognized type of renderer: ' + renderer );
       }
       if ( newRenderer !== this._renderer ) {
-        sceneryAssert && sceneryAssert( !this.isPainted() || !newRenderer || _.contains( this._supportedRenderers, newRenderer ), 'renderer ' + newRenderer + ' not supported by ' + this.constructor.name );
+        assert && assert( !this.isPainted() || !newRenderer || _.contains( this._supportedRenderers, newRenderer ), 'renderer ' + newRenderer + ' not supported by ' + this.constructor.name );
         this._renderer = newRenderer;
         
         this.updateLayerType();
@@ -1333,7 +1402,7 @@ define( function( require ) {
     },
     
     setLayerSplitBefore: function( split ) {
-      sceneryAssert && sceneryAssert( typeof split === 'boolean' );
+      assert && assert( typeof split === 'boolean' );
       
       if ( this._layerSplitBefore !== split ) {
         this._layerSplitBefore = split;
@@ -1346,7 +1415,7 @@ define( function( require ) {
     },
     
     setLayerSplitAfter: function( split ) {
-      sceneryAssert && sceneryAssert( typeof split === 'boolean' );
+      assert && assert( typeof split === 'boolean' );
       
       if ( this._layerSplitAfter !== split ) {
         this._layerSplitAfter = split;
@@ -1359,7 +1428,7 @@ define( function( require ) {
     },
     
     setLayerSplit: function( split ) {
-      sceneryAssert && sceneryAssert( typeof split === 'boolean' );
+      assert && assert( typeof split === 'boolean' );
       
       if ( split !== this._layerSplitBefore || split !== this._layerSplitAfter ) {
         this._layerSplitBefore = split;
@@ -1375,7 +1444,7 @@ define( function( require ) {
       
       while ( node ) {
         trail.addAncestor( node );
-        sceneryAssert && sceneryAssert( node._parents.length <= 1 );
+        assert && assert( node._parents.length <= 1 );
         node = node._parents[0]; // should be undefined if there aren't any parents
       }
       
@@ -1427,7 +1496,7 @@ define( function( require ) {
       }
       
       // ensure that there are no edges left, since then it would contain a circular reference
-      sceneryAssert && sceneryAssert( _.every( edges, function( children ) {
+      assert && assert( _.every( edges, function( children ) {
         return _.every( children, function( final ) { return false; } );
       } ), 'circular reference check' );
       
@@ -1577,7 +1646,7 @@ define( function( require ) {
           new scenery.Image( canvas, { x: -x, y: -y } )
         ] } );
       }, x, y, width, height );
-      sceneryAssert && sceneryAssert( result, 'toCanvasNodeSynchronous requires that the node can be rendered only using Canvas' );
+      assert && assert( result, 'toCanvasNodeSynchronous requires that the node can be rendered only using Canvas' );
       return result;
     },
     
@@ -1589,7 +1658,7 @@ define( function( require ) {
           new scenery.Image( dataURL, { x: -x, y: -y } )
         ] } );
       }, x, y, width, height );
-      sceneryAssert && sceneryAssert( result, 'toDataURLNodeSynchronous requires that the node can be rendered only using Canvas' );
+      assert && assert( result, 'toDataURLNodeSynchronous requires that the node can be rendered only using Canvas' );
       return result;
     },
     
@@ -1602,8 +1671,8 @@ define( function( require ) {
     },
     
     addInstance: function( instance ) {
-      sceneryAssert && sceneryAssert( instance.getNode() === this, 'Must be an instance of this Node' );
-      sceneryAssert && sceneryAssert( !_.find( this._instances, function( other ) { return instance.equals( other ); } ), 'Cannot add duplicates of an instance to a Node' );
+      assert && assert( instance.getNode() === this, 'Must be an instance of this Node' );
+      assert && assert( !_.find( this._instances, function( other ) { return instance.equals( other ); } ), 'Cannot add duplicates of an instance to a Node' );
       this._instances.push( instance );
       if ( this._instances.length === 1 ) {
         this.firstInstanceAdded();
@@ -1631,14 +1700,14 @@ define( function( require ) {
         }
         // leave it as undefined if we don't find one
       }
-      sceneryAssert && sceneryAssert( result, 'Could not find an instance for the trail ' + trail.toString() );
-      sceneryAssert && sceneryAssert( result.trail.equals( trail ), 'Instance has an incorrect Trail' );
+      assert && assert( result, 'Could not find an instance for the trail ' + trail.toString() );
+      assert && assert( result.trail.equals( trail ), 'Instance has an incorrect Trail' );
       return result;
     },
     
     removeInstance: function( instance ) {
       var index = _.indexOf( this._instances, instance ); // actual instance equality (NOT capitalized, normal meaning)
-      sceneryAssert && sceneryAssert( index !== -1, 'Cannot remove an Instance from a Node if it was not there' );
+      assert && assert( index !== -1, 'Cannot remove an Instance from a Node if it was not there' );
       this._instances.splice( index, 1 );
       if ( this._instances.length === 0 ) {
         this.lastInstanceRemoved();
@@ -1660,6 +1729,13 @@ define( function( require ) {
       var i = this._instances.length;
       while ( i-- ) {
         this._instances[i].notifyOpacityChange();
+      }
+    },
+    
+    notifyClipChange: function() {
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyClipChange();
       }
     },
     
@@ -1777,7 +1853,7 @@ define( function( require ) {
       // concatenation like this has been faster than getting a unique trail, getting its transform, and applying it
       while ( node ) {
         matrices.push( node._transform.getMatrix() );
-        sceneryAssert && sceneryAssert( node._parents[1] === undefined, 'getLocalToGlobalMatrix unable to work for DAG' );
+        assert && assert( node._parents[1] === undefined, 'getLocalToGlobalMatrix unable to work for DAG' );
         node = node._parents[0];
       }
       
@@ -1809,7 +1885,7 @@ define( function( require ) {
       while ( node ) {
         // in-place multiplication
         node._transform.getMatrix().multiplyVector2( resultPoint );
-        sceneryAssert && sceneryAssert( node._parents[1] === undefined, 'localToGlobalPoint unable to work for DAG' );
+        assert && assert( node._parents[1] === undefined, 'localToGlobalPoint unable to work for DAG' );
         node = node._parents[0];
       }
       return resultPoint;
@@ -1823,7 +1899,7 @@ define( function( require ) {
       var transforms = [];
       while ( node ) {
         transforms.push( node._transform );
-        sceneryAssert && sceneryAssert( node._parents[1] === undefined, 'globalToLocalPoint unable to work for DAG' );
+        assert && assert( node._parents[1] === undefined, 'globalToLocalPoint unable to work for DAG' );
         node = node._parents[0];
       }
       
@@ -1850,29 +1926,29 @@ define( function( require ) {
     
     // like localToGlobalPoint, but without applying this node's transform
     parentToGlobalPoint: function( point ) {
-      sceneryAssert && sceneryAssert( this.parents.length <= 1, 'parentToGlobalPoint unable to work for DAG' );
+      assert && assert( this.parents.length <= 1, 'parentToGlobalPoint unable to work for DAG' );
       return this.parents.length ? this.parents[0].localToGlobalPoint( point ) : point;
     },
     
     // like localToGlobalBounds, but without applying this node's transform
     parentToGlobalBounds: function( bounds ) {
-      sceneryAssert && sceneryAssert( this.parents.length <= 1, 'parentToGlobalBounds unable to work for DAG' );
+      assert && assert( this.parents.length <= 1, 'parentToGlobalBounds unable to work for DAG' );
       return this.parents.length ? this.parents[0].localToGlobalBounds( bounds ) : bounds;
     },
     
     globalToParentPoint: function( point ) {
-      sceneryAssert && sceneryAssert( this.parents.length <= 1, 'globalToParentPoint unable to work for DAG' );
+      assert && assert( this.parents.length <= 1, 'globalToParentPoint unable to work for DAG' );
       return this.parents.length ? this.parents[0].globalToLocalPoint( point ) : point;
     },
     
     globalToParentBounds: function( bounds ) {
-      sceneryAssert && sceneryAssert( this.parents.length <= 1, 'globalToParentBounds unable to work for DAG' );
+      assert && assert( this.parents.length <= 1, 'globalToParentBounds unable to work for DAG' );
       return this.parents.length ? this.parents[0].globalToLocalBounds( bounds ) : bounds;
     },
     
     // get the Bounds2 of this node in the global coordinate frame.  Does not work for DAG.
     getGlobalBounds: function() {
-      sceneryAssert && sceneryAssert( this.parents.length <= 1, 'globalBounds unable to work for DAG' );
+      assert && assert( this.parents.length <= 1, 'globalBounds unable to work for DAG' );
       return this.parentToGlobalBounds( this.getBounds() );
     },
     
@@ -1913,6 +1989,9 @@ define( function( require ) {
     
     set touchArea( value ) { this.setTouchArea( value ); },
     get touchArea() { return this.getTouchArea(); },
+    
+    set clipArea( value ) { this.setClipArea( value ); },
+    get clipArea() { return this.getClipArea(); },
     
     set visible( value ) { this.setVisible( value ); },
     get visible() { return this.isVisible(); },
@@ -1972,6 +2051,7 @@ define( function( require ) {
     get bounds() { return this.getBounds(); },
     get selfBounds() { return this.getSelfBounds(); },
     get childBounds() { return this.getChildBounds(); },
+    get localBounds() { return this.getLocalBounds(); },
     get globalBounds() { return this.getGlobalBounds(); },
     get visibleBounds() { return this.getVisibleBounds(); },
     get id() { return this.getId(); },
@@ -2081,7 +2161,7 @@ define( function( require ) {
    */
   Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
                                   'left', 'right', 'top', 'bottom', 'center', 'centerX', 'centerY', 'renderer', 'rendererOptions',
-                                  'layerSplit', 'layerSplitBefore', 'layerSplitAfter', 'mouseArea', 'touchArea' ];
+                                  'layerSplit', 'layerSplitBefore', 'layerSplitAfter', 'mouseArea', 'touchArea', 'clipArea' ];
   
   Node.prototype._supportedRenderers = [];
   

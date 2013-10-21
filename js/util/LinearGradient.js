@@ -19,10 +19,10 @@ define( function( require ) {
 
   // TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ]
   scenery.LinearGradient = function LinearGradient( x0, y0, x1, y1 ) {
-    sceneryAssert && sceneryAssert( isFinite( x0 ) && isFinite( y0 ) && isFinite( x1 ) && isFinite( y1 ) );
+    assert && assert( isFinite( x0 ) && isFinite( y0 ) && isFinite( x1 ) && isFinite( y1 ) );
     var usesVectors = y1 === undefined;
     if ( usesVectors ) {
-      sceneryAssert && sceneryAssert( ( x0 instanceof Vector2 ) && ( y0 instanceof Vector2 ), 'If less than 4 parameters are given, the first two parameters must be Vector2' );
+      assert && assert( ( x0 instanceof Vector2 ) && ( y0 instanceof Vector2 ), 'If less than 4 parameters are given, the first two parameters must be Vector2' );
     }
     this.start = usesVectors ? x0 : new Vector2( x0, y0 );
     this.end = usesVectors ? y0 : new Vector2( x1, y1 );
