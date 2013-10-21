@@ -553,7 +553,30 @@
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
       },{
-        name: 'Clipping',
+        name: 'Simple Clipping',
+        width: 64,
+        height: 64,
+        draw: function( scene ) {
+          scene.addChild( new scenery.Rectangle( 4, 4, 56, 56, {
+            fill: 'black',
+            // clipArea: kite.Shape.circle( 32, 32, 25 )
+            clipArea: kite.Shape.rect( 0, 0, 64, 32 )
+          } ) );
+          // var clipShape1 = kite.Shape.regularPolygon( 6, 27 ).transformed( dot.Matrix3.translation( 32, 32 ) );
+          // var clipShape2 = kite.Shape.regularPolygon( 9, 32 ).transformed( dot.Matrix3.translation( 32, 0 ) );
+          // var shape = kite.Shape.circle( 32, 32, 25 );
+          // var circle = new scenery.Path( shape, {
+          //   fill: '#000',
+          //   stroke: '#f00',
+          //   lineWidth: 3
+          // } );
+          // circle.clipArea = clipShape1;
+          // scene.addChild( circle );
+          // scene.clipArea = clipShape2;
+        },
+        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+      },{
+        name: 'Nested Clipping',
         width: 64,
         height: 64,
         draw: function( scene ) {
@@ -565,9 +588,9 @@
             stroke: '#f00',
             lineWidth: 3
           } );
-          circle._clipShape = clipShape1;
+          circle.clipArea = clipShape1;
           scene.addChild( circle );
-          scene._clipShape = clipShape2;
+          scene.clipArea = clipShape2;
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
       },{

@@ -247,6 +247,16 @@ define( function( require ) {
       }
     },
     
+    notifyClipChange: function() {
+      sceneryEventLog && sceneryEventLog( 'notifyClipChange: ' + this.trail.toString() + ', ' + this.getLayerString() );
+      
+      var affectedLayers = this.getAffectedLayers();
+      var i = affectedLayers.length;
+      while ( i-- ) {
+        affectedLayers[i].notifyClipChange( this );
+      }
+    },
+    
     notifyBeforeSelfChange: function() {
       sceneryEventLog && sceneryEventLog( 'notifyBeforeSelfChange: ' + this.trail.toString() + ', ' + this.getLayerString() );
       // TODO: Canvas will only need to be notified of these once in-between scene updates

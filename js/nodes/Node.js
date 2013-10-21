@@ -76,7 +76,7 @@ define( function( require ) {
     
     // This node and all children will be clipped by this shape (in addition to any other clipping shapes).
     // The shape should be in the local coordinate frame
-    this._clipShape = null;
+    this._clipArea = null;
     
     // areas for hit intersection. if set on a Node, no descendants can handle events
     this._mouseArea = null; // {Shape} for mouse position          in the local coordinate frame
@@ -1314,6 +1314,22 @@ define( function( require ) {
       return this._touchArea;
     },
     
+    setClipArea: function( shape ) {
+      assert && assert( shape === null || shape instanceof Shape, 'clipArea needs to be a kite.Shape, or null' );
+      
+      if ( this._clipArea !== shape ) {
+        this.notifyBeforeSubtreeChange();
+        
+        this._clipArea = shape;
+        
+        this.notifyClipChange();
+      }
+    },
+    
+    getClipArea: function() {
+      return this._clipArea;
+    },
+    
     updateLayerType: function() {
       if ( this._renderer && this._rendererOptions ) {
         // TODO: factor this check out! Make RendererOptions its own class?
@@ -1715,6 +1731,13 @@ define( function( require ) {
       }
     },
     
+    notifyClipChange: function() {
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyClipChange();
+      }
+    },
+    
     notifyBeforeSelfChange: function() {
       var i = this._instances.length;
       while ( i-- ) {
@@ -1966,6 +1989,9 @@ define( function( require ) {
     set touchArea( value ) { this.setTouchArea( value ); },
     get touchArea() { return this.getTouchArea(); },
     
+    set clipArea( value ) { this.setClipArea( value ); },
+    get clipArea() { return this.getClipArea(); },
+    
     set visible( value ) { this.setVisible( value ); },
     get visible() { return this.isVisible(); },
     
@@ -2134,7 +2160,7 @@ define( function( require ) {
    */
   Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
                                   'left', 'right', 'top', 'bottom', 'center', 'centerX', 'centerY', 'renderer', 'rendererOptions',
-                                  'layerSplit', 'layerSplitBefore', 'layerSplitAfter', 'mouseArea', 'touchArea' ];
+                                  'layerSplit', 'layerSplitBefore', 'layerSplitAfter', 'mouseArea', 'touchArea', 'clipArea' ];
   
   Node.prototype._supportedRenderers = [];
   

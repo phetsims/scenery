@@ -245,6 +245,11 @@ define( function( require ) {
       // TODO: BROKEN: FIXME: DOM opacity is not handled yet, see issue #31: https://github.com/phetsims/scenery/issues/31
     },
     
+    notifyClipChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'DOMLayer #' + this.id + ' notifyClipChange: ' + instance.trail.toString() );
+      // TODO: BROKEN: FIXME: DOM clipping is not handled, see issue #31: https://github.com/phetsims/scenery/issues/31
+    },
+    
     // only a painted trail under this layer
     notifyBeforeSelfChange: function( instance ) {
       // sceneryLayerLog && sceneryLayerLog( 'DOMLayer #' + this.id + ' notifyBeforeSelfChange: ' + instance.trail.toString() );

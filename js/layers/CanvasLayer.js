@@ -184,16 +184,16 @@ define( function( require ) {
           node.transform.getMatrix().canvasAppendTransform( topWrapper().context );
         }
         
-        if ( node._clipShape ) {
+        if ( node._clipArea ) {
           // TODO: move to wrapper-specific part
-          layer.pushClipShape( node._clipShape );
+          layer.pushClipShape( node._clipArea );
         }
       }
       
       function exit( trail ) {
         var node = trail.lastNode();
         
-        if ( node._clipShape ) {
+        if ( node._clipArea ) {
           // TODO: move to wrapper-specific part
           layer.popClipShape();
         }
@@ -475,6 +475,13 @@ define( function( require ) {
     
     notifyOpacityChange: function( instance ) {
       sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyOpacityChange: ' + instance.trail.toString() );
+      // old paint taken care of in notifyBeforeSubtreeChange()
+      
+      this.canvasMarkSubtree( instance );
+    },
+    
+    notifyClipChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyClipChange: ' + instance.trail.toString() );
       // old paint taken care of in notifyBeforeSubtreeChange()
       
       this.canvasMarkSubtree( instance );

@@ -1412,8 +1412,8 @@ define( function( require ) {
           if ( pointer.trail.isPickable() ) {
             addQualifier( '<span style="color: #808">hits</span>' );
           }
-          if ( node._clipShape ) {
-            addQualifier( 'clipShape' );
+          if ( node._clipArea ) {
+            addQualifier( 'clipArea' );
           }
           if ( node._mouseArea ) {
             addQualifier( 'mouseArea' );
