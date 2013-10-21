@@ -616,6 +616,21 @@ define( 'ASSERT/assert',['require'],function( require ) {
   };
 } );
 
+
+// Copyright 2002-2013, University of Colorado Boulder
+
+define( 'PHET_CORE/core',['require','ASSERT/assert','ASSERT/assert'],function( require ) {
+  
+  
+  window.assert = window.assert || require( 'ASSERT/assert' )( 'basic' );
+  window.assertSlow = window.assertSlow || require( 'ASSERT/assert' )( 'slow', true );
+  
+  // no phetAllocation initialized, since we don't need it with just phet-core, and this file is required before that
+  
+  // will be filled in by other modules
+  return {};
+} );
+
 // Copyright 2002-2013, University of Colorado Boulder
 
 /**
@@ -624,10 +639,12 @@ define( 'ASSERT/assert',['require'],function( require ) {
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'PHET_CORE/phetAllocation',['require'],function( require ) {
+define( 'PHET_CORE/phetAllocation',['require','PHET_CORE/core'],function( require ) {
   
   
-  return function phetAllocation( name ) {
+  var core = require( 'PHET_CORE/core' );
+  
+  var phetAllocation = core.phetAllocation = function phetAllocation( name ) {
     if ( window.alloc ) {
       var stack;
       try { throw new Error(); } catch ( e ) { stack = e.stack; }
@@ -652,6 +669,7 @@ define( 'PHET_CORE/phetAllocation',['require'],function( require ) {
       };
     }
   };
+  return phetAllocation;
 } );
 
 // Copyright 2002-2013, University of Colorado
@@ -669,10 +687,8 @@ define( 'PHET_CORE/phetAllocation',['require'],function( require ) {
 define( 'SCENERY/scenery',['require','ASSERT/assert','ASSERT/assert','PHET_CORE/phetAllocation'],function( require ) {
   
   
-  var assert = require( 'ASSERT/assert' )( 'scenery' );
-  
-  window.sceneryAssert = assert;
-  window.sceneryAssertExtra = require( 'ASSERT/assert' )( 'scenery.extra' );
+  window.assert = window.assert || require( 'ASSERT/assert' )( 'basic' );
+  window.assertSlow = window.assertSlow || require( 'ASSERT/assert' )( 'slow', true );
   
   window.sceneryLayerLog = null;
   window.sceneryEventLog = null;
@@ -1248,10 +1264,11 @@ define( 'SCENERY/debug/DebugContext',['require','SCENERY/scenery'],function( req
 
 // Copyright 2002-2013, University of Colorado Boulder
 
-define( 'DOT/dot',['require','ASSERT/assert','PHET_CORE/phetAllocation'],function( require ) {
+define( 'DOT/dot',['require','ASSERT/assert','ASSERT/assert','PHET_CORE/phetAllocation'],function( require ) {
   
   
-  var assert = require( 'ASSERT/assert' )( 'dot' );
+  window.assert = window.assert || require( 'ASSERT/assert' )( 'basic' );
+  window.assertSlow = window.assertSlow || require( 'ASSERT/assert' )( 'slow', true );
   
   // object allocation tracking
   window.phetAllocation = require( 'PHET_CORE/phetAllocation' );
@@ -1272,8 +1289,6 @@ define( 'DOT/dot',['require','ASSERT/assert','PHET_CORE/phetAllocation'],functio
   // TODO: performance: check browser speed to compare how fast this is. We may need to add a 32 option for GL ES.
   dot.FastArray = window.Float64Array ? window.Float64Array : window.Array;
   
-  dot.assert = assert;
-  
   // will be filled in by other modules
   return dot;
 } );
@@ -1288,10 +1303,12 @@ define( 'DOT/dot',['require','ASSERT/assert','PHET_CORE/phetAllocation'],functio
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'PHET_CORE/extend',['require'],function( require ) {
+define( 'PHET_CORE/extend',['require','PHET_CORE/core'],function( require ) {
   
   
-  return function extend( obj ) {
+  var core = require( 'PHET_CORE/core' );
+  
+  var extend = core.extend = function extend( obj ) {
     _.each( Array.prototype.slice.call( arguments, 1 ), function( source ) {
       if ( source ) {
         for ( var prop in source ) {
@@ -1301,6 +1318,7 @@ define( 'PHET_CORE/extend',['require'],function( require ) {
     });
     return obj;
   };
+  return extend;
 } );
 
 // Copyright 2002-2013, University of Colorado Boulder
@@ -1310,9 +1328,10 @@ define( 'PHET_CORE/extend',['require'],function( require ) {
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
-define( 'PHET_CORE/inherit',['require','PHET_CORE/extend'],function( require ) {
+define( 'PHET_CORE/inherit',['require','PHET_CORE/core','PHET_CORE/extend'],function( require ) {
   
   
+  var core = require( 'PHET_CORE/core' );
   var extend = require( 'PHET_CORE/extend' );
   
   /**
@@ -1338,7 +1357,9 @@ define( 'PHET_CORE/inherit',['require','PHET_CORE/extend'],function( require ) {
    * @param prototypeProperties [optional] object containing properties that will be set on the prototype.
    * @param staticProperties [optional] object containing properties that will be set on the constructor function itself
    */
-  function inherit( supertype, subtype, prototypeProperties, staticProperties ) {
+  var inherit = core.inherit = function inherit( supertype, subtype, prototypeProperties, staticProperties ) {
+    assert && assert( typeof supertype === 'function' );
+    
     function F() {}
     F.prototype = supertype.prototype; // so new F().__proto__ === supertype.prototype
     
@@ -1352,7 +1373,7 @@ define( 'PHET_CORE/inherit',['require','PHET_CORE/extend'],function( require ) {
     extend( subtype, staticProperties );
     
     return subtype; // pass back the subtype so it can be returned immediately as a module export
-  }
+  };
 
   return inherit;
 } );
@@ -1365,15 +1386,16 @@ define( 'PHET_CORE/inherit',['require','PHET_CORE/extend'],function( require ) {
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'PHET_CORE/Poolable',['require','PHET_CORE/extend'],function( require ) {
+define( 'PHET_CORE/Poolable',['require','PHET_CORE/core','PHET_CORE/extend'],function( require ) {
   
   
+  var core = require( 'PHET_CORE/core' );
   var extend = require( 'PHET_CORE/extend' );
   
   /*
    * For option details, please see documentation inside this constructor body for now
    */
-  return function Poolable( type, options ) {
+  var Poolable = core.Poolable = function Poolable( type, options ) {
     var proto = type.prototype;
     
     // defaults
@@ -1436,6 +1458,7 @@ define( 'PHET_CORE/Poolable',['require','PHET_CORE/extend'],function( require ) 
       }
     };
   };
+  return Poolable;
 } );
 
 // Copyright 2002-2013, University of Colorado Boulder
@@ -1446,10 +1469,8 @@ define( 'PHET_CORE/Poolable',['require','PHET_CORE/extend'],function( require ) 
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'DOT/Util',['require','ASSERT/assert','DOT/dot'],function( require ) {
+define( 'DOT/Util',['require','DOT/dot'],function( require ) {
   
-  
-  var assert = require( 'ASSERT/assert' )( 'dot' );
   
   var dot = require( 'DOT/dot' );
   // require( 'DOT/Vector2' ); // Require.js doesn't like the circular reference
@@ -1519,10 +1540,82 @@ define( 'DOT/Util',['require','ASSERT/assert','DOT/dot'],function( require ) {
     
     // intersection between the line from p1-p2 and the line from p3-p4
     lineLineIntersection: function( p1, p2, p3, p4 ) {
+      var x12 = p1.x - p2.x;
+      var x34 = p3.x - p4.x;
+      var y12 = p1.y - p2.y;
+      var y34 = p3.y - p4.y;
+      
+      var denom = x12 * y34 - y12 * x34;
+      
+      var a = p1.x * p2.y - p1.y * p2.x;
+      var b = p3.x * p4.y - p3.y * p4.x;
+      
       return new dot.Vector2(
-        ( ( p1.x * p2.y - p1.y * p2.x ) * ( p3.x - p4.x ) - ( p1.x - p2.x ) * ( p3.x * p4.y - p3.y * p4.x ) ) / ( ( p1.x - p2.x ) * ( p3.y - p4.y ) - ( p1.y - p2.y ) * ( p3.x - p4.x ) ),
-        ( ( p1.x * p2.y - p1.y * p2.x ) * ( p3.y - p4.y ) - ( p1.y - p2.y ) * ( p3.x * p4.y - p3.y * p4.x ) ) / ( ( p1.x - p2.x ) * ( p3.y - p4.y ) - ( p1.y - p2.y ) * ( p3.x - p4.x ) )
+        ( a * x34 - x12 * b ) / denom,
+        ( a * y34 - y12 * b ) / denom
       );
+    },
+    
+    // assumes a sphere with the specified radius, centered at the origin
+    sphereRayIntersection: function( radius, ray, epsilon ) {
+      epsilon = epsilon === undefined ? 1e-5 : epsilon;
+
+      // center is the origin for now, but leaving in computations so that we can change that in the future. optimize away if needed
+      var center = new dot.Vector3();
+
+      var rayDir = ray.dir;
+      var pos = ray.pos;
+      var centerToRay = pos.minus( center );
+
+      // basically, we can use the quadratic equation to solve for both possible hit points (both +- roots are the hit points)
+      var tmp = rayDir.dot( centerToRay );
+      var centerToRayDistSq = centerToRay.magnitudeSquared();
+      var det = 4 * tmp * tmp - 4 * ( centerToRayDistSq - radius * radius );
+      if ( det < epsilon ) {
+        // ray misses sphere entirely
+        return null;
+      }
+
+      var base = rayDir.dot( center ) - rayDir.dot( pos );
+      var sqt = Math.sqrt( det ) / 2;
+
+      // the "first" entry point distance into the sphere. if we are inside the sphere, it is behind us
+      var ta = base - sqt;
+
+      // the "second" entry point distance
+      var tb = base + sqt;
+
+      if ( tb < epsilon ) {
+        // sphere is behind ray, so don't return an intersection
+        return null;
+      }
+
+      var hitPositionB = ray.pointAtDistance( tb );
+      var normalB = hitPositionB.minus( center ).normalized();
+
+      if ( ta < epsilon ) {
+        // we are inside the sphere
+        // in => out
+        return {
+          distance: tb,
+          hitPoint: hitPositionB,
+          normal: normalB.negated(),
+          fromOutside: false
+        };
+      }
+      else {
+        // two possible hits
+        var hitPositionA = ray.pointAtDistance( ta );
+        var normalA = hitPositionA.minus( center ).normalized();
+
+        // close hit, we have out => in
+        return {
+          distance: ta,
+          hitPoint: hitPositionA,
+          normal: normalA,
+          fromOutside: true
+        };
+      }
     },
     
     // return an array of real roots of ax^2 + bx + c = 0
@@ -1618,7 +1711,66 @@ define( 'DOT/Util',['require','ASSERT/assert','DOT/dot'],function( require ) {
 
     isInteger: function( number ) {
       return Math.floor( number ) === number;
-    }
+    },
+
+    /*
+     * Computes the intersection of two line segments. Algorithm taked from Paul Bourke, 1989:
+     * http://astronomy.swin.edu.au/~pbourke/geometry/lineline2d/
+     * Ported from MathUtil.java on 9/20/2013 by @samreid
+     * line a goes from point 1->2 and line b goes from 3->4
+     * @returns a Vector2 of the intersection point, or null if no intersection
+     */
+    lineSegmentIntersection: function( x1, y1, x2, y2, x3, y3, x4, y4 ) {
+      var numA = ( x4 - x3 ) * ( y1 - y3 ) - ( y4 - y3 ) * ( x1 - x3 );
+      var numB = ( x2 - x1 ) * ( y1 - y3 ) - ( y2 - y1 ) * ( x1 - x3 );
+      var denom = ( y4 - y3 ) * ( x2 - x1 ) - ( x4 - x3 ) * ( y2 - y1 );
+
+      // If denominator is 0, the lines are parallel or coincident
+      if ( denom === 0 ) {
+        return null;
+      }
+      else {
+        var ua = numA / denom;
+        var ub = numB / denom;
+
+        // ua and ub must both be in the range 0 to 1 for the segments to have an intersection pt.
+        if ( !( ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1 ) ) {
+          return null;
+        }
+        else {
+          var x = x1 + ua * ( x2 - x1 );
+          var y = y1 + ua * ( y2 - y1 );
+          return new dot.Vector2( x, y );
+        }
+      }
+    },
+
+    /**
+     * Squared distance from a point to a line segment squared.
+     * See http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+     *
+     * @param point the point
+     * @param a start point of a line segment
+     * @param b end point of a line segment
+     * @returns {Number}
+     */
+    distToSegmentSquared: function( point, a, b ) {
+      var segmentLength = a.distanceSquared( b );
+      if ( segmentLength === 0 ) { return point.distanceSquared( a ); }
+      var t = ((point.x - a.x) * (b.x - a.x) + (point.y - a.y) * (b.y - a.y)) / segmentLength;
+      return t < 0 ? point.distanceSquared( a ) :
+             t > 1 ? point.distanceSquared( b ) :
+             point.distanceSquared( new dot.Vector2( a.x + t * (b.x - a.x), a.y + t * (b.y - a.y) ) );
+    },
+
+    /**
+     * Squared distance from a point to a line segment squared.
+     * @param point the point
+     * @param a start point of a line segment
+     * @param b end point of a line segment
+     * @returns {Number}
+     */
+    distToSegment: function( point, a, b ) { return Math.sqrt( this.distToSegmentSquared( point, a, b ) ); }
   };
   var Util = dot.Util;
   
@@ -1632,6 +1784,7 @@ define( 'DOT/Util',['require','ASSERT/assert','DOT/dot'],function( require ) {
   dot.toRadians = Util.toRadians;
   dot.toDegrees = Util.toDegrees;
   dot.lineLineIntersection = Util.lineLineIntersection;
+  dot.sphereRayIntersection = Util.sphereRayIntersection;
   dot.solveQuadraticRootsReal = Util.solveQuadraticRootsReal;
   dot.solveCubicRootsReal = Util.solveCubicRootsReal;
   dot.cubeRoot = Util.cubeRoot;
@@ -1648,10 +1801,8 @@ define( 'DOT/Util',['require','ASSERT/assert','DOT/dot'],function( require ) {
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'DOT/Vector2',['require','ASSERT/assert','DOT/dot','PHET_CORE/inherit','PHET_CORE/Poolable','DOT/Util'],function( require ) {
+define( 'DOT/Vector2',['require','DOT/dot','PHET_CORE/inherit','PHET_CORE/Poolable','DOT/Util'],function( require ) {
   
-  
-  var assert = require( 'ASSERT/assert' )( 'dot' );
   
   var dot = require( 'DOT/dot' );
   
@@ -1746,8 +1897,7 @@ define( 'DOT/Vector2',['require','ASSERT/assert','DOT/dot','PHET_CORE/inherit','
       var mag = this.magnitude();
       if ( mag === 0 ) {
         throw new Error( "Cannot normalize a zero-magnitude vector" );
-      }
-      else {
+      } else {
         return new Vector2( this.x / mag, this.y / mag );
       }
     },
@@ -1769,7 +1919,11 @@ define( 'DOT/Vector2',['require','ASSERT/assert','DOT/dot','PHET_CORE/inherit','
     plus: function( v ) {
       return new Vector2( this.x + v.x, this.y + v.y );
     },
-    
+
+    plusXY: function( x, y ) {
+      return new Vector2( this.x + x, this.y + y );
+    },
+
     plusScalar: function( scalar ) {
       return new Vector2( this.x + scalar, this.y + scalar );
     },
@@ -1834,6 +1988,13 @@ define( 'DOT/Vector2',['require','ASSERT/assert','DOT/dot','PHET_CORE/inherit','
       return this;
     },
     
+    
+    setVector2: function( v ) {
+      this.x = v.x;
+      this.y = v.y;
+      return this;
+    },
+    
     setX: function( x ) {
       this.x = x;
       return this;
@@ -1868,6 +2029,18 @@ define( 'DOT/Vector2',['require','ASSERT/assert','DOT/dot','PHET_CORE/inherit','
       return this;
     },
     
+    multiplyScalar: function( scalar ) {
+      this.x *= scalar;
+      this.y *= scalar;
+      return this;
+    },
+    
+    multiply: function( scalar ) {
+      // make sure it's not a vector!
+      assert && assert( scalar.dimension === undefined );
+      return this.multiplyScalar( scalar );
+    },
+    
     componentMultiply: function( v ) {
       this.x *= v.x;
       this.y *= v.y;
@@ -1883,6 +2056,17 @@ define( 'DOT/Vector2',['require','ASSERT/assert','DOT/dot','PHET_CORE/inherit','
     negate: function() {
       this.x = -this.x;
       this.y = -this.y;
+      return this;
+    },
+    
+    normalize: function() {
+      var mag = this.magnitude();
+      if ( mag === 0 ) {
+        throw new Error( "Cannot normalize a zero-magnitude vector" );
+      } else {
+        this.x /= mag;
+        this.y /= mag;
+      }
       return this;
     }
     
@@ -1951,10 +2135,8 @@ define( 'DOT/Vector2',['require','ASSERT/assert','DOT/dot','PHET_CORE/inherit','
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'DOT/Vector4',['require','ASSERT/assert','DOT/dot','DOT/Util'],function( require ) {
+define( 'DOT/Vector4',['require','DOT/dot','DOT/Util'],function( require ) {
   
-  
-  var assert = require( 'ASSERT/assert' )( 'dot' );
   
   var dot = require( 'DOT/dot' );
   
@@ -2129,6 +2311,20 @@ define( 'DOT/Vector4',['require','ASSERT/assert','DOT/dot','DOT/Util'],function(
       this.z -= scalar;
       this.w -= scalar;
     },
+    
+    multiplyScalar: function( scalar ) {
+      this.x *= scalar;
+      this.y *= scalar;
+      this.z *= scalar;
+      this.w *= scalar;
+      return this;
+    },
+    
+    multiply: function( scalar ) {
+      // make sure it's not a vector!
+      assert && assert( scalar.dimension === undefined );
+      return this.multiplyScalar( scalar );
+    },
 
     componentMultiply: function( v ) {
       this.x *= v.x;
@@ -2149,6 +2345,19 @@ define( 'DOT/Vector4',['require','ASSERT/assert','DOT/dot','DOT/Util'],function(
       this.y = -this.y;
       this.z = -this.z;
       this.w = -this.w;
+    },
+    
+    normalize: function() {
+      var mag = this.magnitude();
+      if ( mag === 0 ) {
+        throw new Error( "Cannot normalize a zero-magnitude vector" );
+      } else {
+        this.x /= mag;
+        this.y /= mag;
+        this.z /= mag;
+        this.w /= mag;
+      }
+      return this;
     },
     
     equals: function( other ) {
@@ -2224,10 +2433,8 @@ define( 'DOT/Vector4',['require','ASSERT/assert','DOT/dot','DOT/Util'],function(
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'DOT/Vector3',['require','ASSERT/assert','DOT/dot','DOT/Util','DOT/Vector2','DOT/Vector4'],function( require ) {
+define( 'DOT/Vector3',['require','DOT/dot','DOT/Util','DOT/Vector2','DOT/Vector4'],function( require ) {
   
-  
-  var assert = require( 'ASSERT/assert' )( 'dot' );
   
   var dot = require( 'DOT/dot' );
   
@@ -2404,6 +2611,19 @@ define( 'DOT/Vector3',['require','ASSERT/assert','DOT/dot','DOT/Util','DOT/Vecto
       this.y -= scalar;
       this.z -= scalar;
     },
+    
+    multiplyScalar: function( scalar ) {
+      this.x *= scalar;
+      this.y *= scalar;
+      this.z *= scalar;
+      return this;
+    },
+    
+    multiply: function( scalar ) {
+      // make sure it's not a vector!
+      assert && assert( scalar.dimension === undefined );
+      return this.multiplyScalar( scalar );
+    },
 
     componentMultiply: function( v ) {
       this.x *= v.x;
@@ -2421,6 +2641,18 @@ define( 'DOT/Vector3',['require','ASSERT/assert','DOT/dot','DOT/Util','DOT/Vecto
       this.x = -this.x;
       this.y = -this.y;
       this.z = -this.z;
+    },
+    
+    normalize: function() {
+      var mag = this.magnitude();
+      if ( mag === 0 ) {
+        throw new Error( "Cannot normalize a zero-magnitude vector" );
+      } else {
+        this.x /= mag;
+        this.y /= mag;
+        this.z /= mag;
+      }
+      return this;
     },
     
     equals: function( other ) {
@@ -2489,6 +2721,7 @@ define( 'DOT/Vector3',['require','ASSERT/assert','DOT/dot','DOT/Util','DOT/Vecto
  * 4-dimensional Matrix
  *
  * TODO: consider adding affine flag if it will help performance (a la Matrix3)
+ * TODO: get rotation angles
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
@@ -2520,7 +2753,8 @@ define( 'DOT/Matrix4',['require','DOT/dot','DOT/Vector3','DOT/Vector4'],function
     OTHER: 0, // default
     IDENTITY: 1,
     TRANSLATION_3D: 2,
-    SCALING: 3
+    SCALING: 3,
+    AFFINE: 4
 
     // TODO: possibly add rotations
   };
@@ -2567,7 +2801,7 @@ define( 'DOT/Matrix4',['require','DOT/dot','DOT/Vector3','DOT/Vector4'],function
               axis.y * axis.x * C + axis.z * s, axis.y * axis.y * C + c, axis.y * axis.z * C - axis.x * s, 0,
               axis.z * axis.x * C - axis.y * s, axis.z * axis.y * C + axis.x * s, axis.z * axis.z * C + c, 0,
               0, 0, 0, 1,
-              Types.OTHER );
+              Types.AFFINE );
   };
 
   // TODO: add in rotation from quaternion, and from quat + translation
@@ -2580,7 +2814,7 @@ define( 'DOT/Matrix4',['require','DOT/dot','DOT/Vector3','DOT/Vector4'],function
               0, c, -s, 0,
               0, s, c, 0,
               0, 0, 0, 1,
-              Types.OTHER );
+              Types.AFFINE );
   };
 
   Matrix4.rotationY = function( angle ) {
@@ -2591,7 +2825,7 @@ define( 'DOT/Matrix4',['require','DOT/dot','DOT/Vector3','DOT/Vector4'],function
               0, 1, 0, 0,
               -s, 0, c, 0,
               0, 0, 0, 1,
-              Types.OTHER );
+              Types.AFFINE );
   };
 
   Matrix4.rotationZ = function( angle ) {
@@ -2602,7 +2836,7 @@ define( 'DOT/Matrix4',['require','DOT/dot','DOT/Vector3','DOT/Vector4'],function
               s, c, 0, 0,
               0, 0, 1, 0,
               0, 0, 0, 1,
-              Types.OTHER );
+              Types.AFFINE );
   };
 
   // aspect === width / height
@@ -2635,11 +2869,14 @@ define( 'DOT/Matrix4',['require','DOT/dot','DOT/Vector3','DOT/Vector4'],function
       this.entries[13] = v13;
       this.entries[14] = v23;
       this.entries[15] = v33;
-      this.type = type === undefined ? Types.OTHER : type;
+      
+      // TODO: consider performance of the affine check here
+      this.type = type === undefined ? ( ( v30 === 0 && v31 === 0 && v32 === 0 && v33 === 1 ) ? Types.AFFINE : Types.OTHER ) : type;
+      return this;
     },
 
     columnMajor: function( v00, v10, v20, v30, v01, v11, v21, v31, v02, v12, v22, v32, v03, v13, v23, v33, type ) {
-      this.rowMajor( v00, v01, v02, v03, v10, v11, v12, v13, v20, v21, v22, v23, v30, v31, v32, v33, type );
+      return this.rowMajor( v00, v01, v02, v03, v10, v11, v12, v13, v20, v21, v22, v23, v30, v31, v32, v33, type );
     },
 
     // convenience getters. inline usages of these when performance is critical? TODO: test performance of inlining these, with / without closure compiler
@@ -2659,7 +2896,122 @@ define( 'DOT/Matrix4',['require','DOT/dot','DOT/Vector3','DOT/Vector4'],function
     m31: function() { return this.entries[7]; },
     m32: function() { return this.entries[11]; },
     m33: function() { return this.entries[15]; },
-
+    
+    isFinite: function() {
+      return isFinite( this.m00() ) &&
+             isFinite( this.m01() ) &&
+             isFinite( this.m02() ) &&
+             isFinite( this.m03() ) &&
+             isFinite( this.m10() ) &&
+             isFinite( this.m11() ) &&
+             isFinite( this.m12() ) &&
+             isFinite( this.m13() ) &&
+             isFinite( this.m20() ) &&
+             isFinite( this.m21() ) &&
+             isFinite( this.m22() ) &&
+             isFinite( this.m23() ) &&
+             isFinite( this.m30() ) &&
+             isFinite( this.m31() ) &&
+             isFinite( this.m32() ) &&
+             isFinite( this.m33() );
+    },
+    
+    // the 3D translation, assuming multiplication with a homogeneous vector
+    getTranslation: function() {
+      return new dot.Vector3( this.m03(), this.m13(), this.m23() );
+    },
+    get translation() { return this.getTranslation(); },
+    
+    // returns a vector that is equivalent to ( T(1,0,0).magnitude(), T(0,1,0).magnitude(), T(0,0,1).magnitude() )
+    // where T is a relative transform
+    getScaleVector: function() {
+      var m0003 = this.m00() + this.m03();
+      var m1013 = this.m10() + this.m13();
+      var m2023 = this.m20() + this.m23();
+      var m3033 = this.m30() + this.m33();
+      var m0103 = this.m01() + this.m03();
+      var m1113 = this.m11() + this.m13();
+      var m2123 = this.m21() + this.m23();
+      var m3133 = this.m31() + this.m33();
+      var m0203 = this.m02() + this.m03();
+      var m1213 = this.m12() + this.m13();
+      var m2223 = this.m22() + this.m23();
+      var m3233 = this.m32() + this.m33();
+      return new dot.Vector3( Math.sqrt( m0003 * m0003 + m1013 * m1013 + m2023 * m2023 + m3033 * m3033 ),
+                              Math.sqrt( m0103 * m0103 + m1113 * m1113 + m2123 * m2123 + m3133 * m3133 ),
+                              Math.sqrt( m0203 * m0203 + m1213 * m1213 + m2223 * m2223 + m3233 * m3233 ) );
+    },
+    get scaleVector() { return this.getScaleVector(); },
+    
+    getCSSTransform: function() {
+      // See http://www.w3.org/TR/css3-transforms/, particularly Section 13 that discusses the SVG compatibility
+      
+      // we need to prevent the numbers from being in an exponential toString form, since the CSS transform does not support that
+      // 20 is the largest guaranteed number of digits according to https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Number/toFixed
+      
+      // the inner part of a CSS3 transform, but remember to add the browser-specific parts!
+      // NOTE: the toFixed calls are inlined for performance reasons
+      return 'matrix3d(' + this.entries[0].toFixed( 20 ) + ',' +
+                           this.entries[1].toFixed( 20 ) + ',' +
+                           this.entries[2].toFixed( 20 ) + ',' +
+                           this.entries[3].toFixed( 20 ) + ',' +
+                           this.entries[4].toFixed( 20 ) + ',' +
+                           this.entries[5].toFixed( 20 ) + ',' +
+                           this.entries[6].toFixed( 20 ) + ',' +
+                           this.entries[7].toFixed( 20 ) + ',' +
+                           this.entries[8].toFixed( 20 ) + ',' +
+                           this.entries[9].toFixed( 20 ) + ',' +
+                           this.entries[10].toFixed( 20 ) + ',' +
+                           this.entries[11].toFixed( 20 ) + ',' +
+                           this.entries[12].toFixed( 20 ) + ',' +
+                           this.entries[13].toFixed( 20 ) + ',' +
+                           this.entries[14].toFixed( 20 ) + ',' +
+                           this.entries[15].toFixed( 20 ) + ')';
+    },
+    get cssTransform() { return this.getCSSTransform(); },
+    
+    // exact equality
+    equals: function( m ) {
+      return this.m00() === m.m00() && this.m01() === m.m01() && this.m02() === m.m02() && this.m03() === m.m03() &&
+             this.m10() === m.m10() && this.m11() === m.m11() && this.m12() === m.m12() && this.m13() === m.m13() &&
+             this.m20() === m.m20() && this.m21() === m.m21() && this.m22() === m.m22() && this.m23() === m.m23() &&
+             this.m30() === m.m30() && this.m31() === m.m31() && this.m32() === m.m32() && this.m33() === m.m33();
+    },
+    
+    // equality within a margin of error
+    equalsEpsilon: function( m, epsilon ) {
+      return Math.abs( this.m00() - m.m00() ) < epsilon &&
+             Math.abs( this.m01() - m.m01() ) < epsilon &&
+             Math.abs( this.m02() - m.m02() ) < epsilon &&
+             Math.abs( this.m03() - m.m03() ) < epsilon &&
+             Math.abs( this.m10() - m.m10() ) < epsilon &&
+             Math.abs( this.m11() - m.m11() ) < epsilon &&
+             Math.abs( this.m12() - m.m12() ) < epsilon &&
+             Math.abs( this.m13() - m.m13() ) < epsilon &&
+             Math.abs( this.m20() - m.m20() ) < epsilon &&
+             Math.abs( this.m21() - m.m21() ) < epsilon &&
+             Math.abs( this.m22() - m.m22() ) < epsilon &&
+             Math.abs( this.m23() - m.m23() ) < epsilon &&
+             Math.abs( this.m30() - m.m30() ) < epsilon &&
+             Math.abs( this.m31() - m.m31() ) < epsilon &&
+             Math.abs( this.m32() - m.m32() ) < epsilon &&
+             Math.abs( this.m33() - m.m33() ) < epsilon;
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * Immutable operations (returning a new matrix)
+    *----------------------------------------------------------------------------*/
+    
+    copy: function() {
+      return new Matrix4(
+        this.m00(), this.m01(), this.m02(), this.m03(),
+        this.m10(), this.m11(), this.m12(), this.m13(),
+        this.m20(), this.m21(), this.m22(), this.m23(),
+        this.m30(), this.m31(), this.m32(), this.m33(),
+        this.type
+      );
+    },
+    
     plus: function( m ) {
       return new Matrix4(
           this.m00() + m.m00(), this.m01() + m.m01(), this.m02() + m.m02(), this.m03() + m.m03(),
@@ -2693,49 +3045,93 @@ define( 'DOT/Matrix4',['require','DOT/dot','DOT/Vector3','DOT/Vector4'],function
     },
 
     inverted: function() {
-      // TODO: optimizations for matrix types (like identity)
-
-      var det = this.determinant();
-
-      if ( det !== 0 ) {
-        return new Matrix4(
-            ( -this.m31() * this.m22() * this.m13() + this.m21() * this.m32() * this.m13() + this.m31() * this.m12() * this.m23() - this.m11() * this.m32() * this.m23() - this.m21() * this.m12() * this.m33() + this.m11() * this.m22() * this.m33() ) / det,
-            ( this.m31() * this.m22() * this.m03() - this.m21() * this.m32() * this.m03() - this.m31() * this.m02() * this.m23() + this.m01() * this.m32() * this.m23() + this.m21() * this.m02() * this.m33() - this.m01() * this.m22() * this.m33() ) / det,
-            ( -this.m31() * this.m12() * this.m03() + this.m11() * this.m32() * this.m03() + this.m31() * this.m02() * this.m13() - this.m01() * this.m32() * this.m13() - this.m11() * this.m02() * this.m33() + this.m01() * this.m12() * this.m33() ) / det,
-            ( this.m21() * this.m12() * this.m03() - this.m11() * this.m22() * this.m03() - this.m21() * this.m02() * this.m13() + this.m01() * this.m22() * this.m13() + this.m11() * this.m02() * this.m23() - this.m01() * this.m12() * this.m23() ) / det,
-            ( this.m30() * this.m22() * this.m13() - this.m20() * this.m32() * this.m13() - this.m30() * this.m12() * this.m23() + this.m10() * this.m32() * this.m23() + this.m20() * this.m12() * this.m33() - this.m10() * this.m22() * this.m33() ) / det,
-            ( -this.m30() * this.m22() * this.m03() + this.m20() * this.m32() * this.m03() + this.m30() * this.m02() * this.m23() - this.m00() * this.m32() * this.m23() - this.m20() * this.m02() * this.m33() + this.m00() * this.m22() * this.m33() ) / det,
-            ( this.m30() * this.m12() * this.m03() - this.m10() * this.m32() * this.m03() - this.m30() * this.m02() * this.m13() + this.m00() * this.m32() * this.m13() + this.m10() * this.m02() * this.m33() - this.m00() * this.m12() * this.m33() ) / det,
-            ( -this.m20() * this.m12() * this.m03() + this.m10() * this.m22() * this.m03() + this.m20() * this.m02() * this.m13() - this.m00() * this.m22() * this.m13() - this.m10() * this.m02() * this.m23() + this.m00() * this.m12() * this.m23() ) / det,
-            ( -this.m30() * this.m21() * this.m13() + this.m20() * this.m31() * this.m13() + this.m30() * this.m11() * this.m23() - this.m10() * this.m31() * this.m23() - this.m20() * this.m11() * this.m33() + this.m10() * this.m21() * this.m33() ) / det,
-            ( this.m30() * this.m21() * this.m03() - this.m20() * this.m31() * this.m03() - this.m30() * this.m01() * this.m23() + this.m00() * this.m31() * this.m23() + this.m20() * this.m01() * this.m33() - this.m00() * this.m21() * this.m33() ) / det,
-            ( -this.m30() * this.m11() * this.m03() + this.m10() * this.m31() * this.m03() + this.m30() * this.m01() * this.m13() - this.m00() * this.m31() * this.m13() - this.m10() * this.m01() * this.m33() + this.m00() * this.m11() * this.m33() ) / det,
-            ( this.m20() * this.m11() * this.m03() - this.m10() * this.m21() * this.m03() - this.m20() * this.m01() * this.m13() + this.m00() * this.m21() * this.m13() + this.m10() * this.m01() * this.m23() - this.m00() * this.m11() * this.m23() ) / det,
-            ( this.m30() * this.m21() * this.m12() - this.m20() * this.m31() * this.m12() - this.m30() * this.m11() * this.m22() + this.m10() * this.m31() * this.m22() + this.m20() * this.m11() * this.m32() - this.m10() * this.m21() * this.m32() ) / det,
-            ( -this.m30() * this.m21() * this.m02() + this.m20() * this.m31() * this.m02() + this.m30() * this.m01() * this.m22() - this.m00() * this.m31() * this.m22() - this.m20() * this.m01() * this.m32() + this.m00() * this.m21() * this.m32() ) / det,
-            ( this.m30() * this.m11() * this.m02() - this.m10() * this.m31() * this.m02() - this.m30() * this.m01() * this.m12() + this.m00() * this.m31() * this.m12() + this.m10() * this.m01() * this.m32() - this.m00() * this.m11() * this.m32() ) / det,
-            ( -this.m20() * this.m11() * this.m02() + this.m10() * this.m21() * this.m02() + this.m20() * this.m01() * this.m12() - this.m00() * this.m21() * this.m12() - this.m10() * this.m01() * this.m22() + this.m00() * this.m11() * this.m22() ) / det
-        );
-      }
-      else {
-        throw new Error( "Matrix could not be inverted, determinant === 0" );
+      switch ( this.type ) {
+        case Types.IDENTITY:
+          return this;
+        case Types.TRANSLATION_3D:
+          return new Matrix4( 1, 0, 0, -this.m03(),
+                              0, 1, 0, -this.m13(),
+                              0, 0, 1, -this.m23(),
+                              0, 0, 0, 1, Types.TRANSLATION_3D );
+        case Types.SCALING:
+          return new Matrix4( 1 / this.m00(), 0, 0, 0,
+                              0, 1 / this.m11(), 0, 0,
+                              0, 0, 1 / this.m22(), 0,
+                              0, 0, 0, 1 / this.m33(), Types.SCALING );
+        case Types.AFFINE:
+        case Types.OTHER:
+          var det = this.getDeterminant();
+          if ( det !== 0 ) {
+            return new Matrix4(
+                ( -this.m31() * this.m22() * this.m13() + this.m21() * this.m32() * this.m13() + this.m31() * this.m12() * this.m23() - this.m11() * this.m32() * this.m23() - this.m21() * this.m12() * this.m33() + this.m11() * this.m22() * this.m33() ) / det,
+                ( this.m31() * this.m22() * this.m03() - this.m21() * this.m32() * this.m03() - this.m31() * this.m02() * this.m23() + this.m01() * this.m32() * this.m23() + this.m21() * this.m02() * this.m33() - this.m01() * this.m22() * this.m33() ) / det,
+                ( -this.m31() * this.m12() * this.m03() + this.m11() * this.m32() * this.m03() + this.m31() * this.m02() * this.m13() - this.m01() * this.m32() * this.m13() - this.m11() * this.m02() * this.m33() + this.m01() * this.m12() * this.m33() ) / det,
+                ( this.m21() * this.m12() * this.m03() - this.m11() * this.m22() * this.m03() - this.m21() * this.m02() * this.m13() + this.m01() * this.m22() * this.m13() + this.m11() * this.m02() * this.m23() - this.m01() * this.m12() * this.m23() ) / det,
+                ( this.m30() * this.m22() * this.m13() - this.m20() * this.m32() * this.m13() - this.m30() * this.m12() * this.m23() + this.m10() * this.m32() * this.m23() + this.m20() * this.m12() * this.m33() - this.m10() * this.m22() * this.m33() ) / det,
+                ( -this.m30() * this.m22() * this.m03() + this.m20() * this.m32() * this.m03() + this.m30() * this.m02() * this.m23() - this.m00() * this.m32() * this.m23() - this.m20() * this.m02() * this.m33() + this.m00() * this.m22() * this.m33() ) / det,
+                ( this.m30() * this.m12() * this.m03() - this.m10() * this.m32() * this.m03() - this.m30() * this.m02() * this.m13() + this.m00() * this.m32() * this.m13() + this.m10() * this.m02() * this.m33() - this.m00() * this.m12() * this.m33() ) / det,
+                ( -this.m20() * this.m12() * this.m03() + this.m10() * this.m22() * this.m03() + this.m20() * this.m02() * this.m13() - this.m00() * this.m22() * this.m13() - this.m10() * this.m02() * this.m23() + this.m00() * this.m12() * this.m23() ) / det,
+                ( -this.m30() * this.m21() * this.m13() + this.m20() * this.m31() * this.m13() + this.m30() * this.m11() * this.m23() - this.m10() * this.m31() * this.m23() - this.m20() * this.m11() * this.m33() + this.m10() * this.m21() * this.m33() ) / det,
+                ( this.m30() * this.m21() * this.m03() - this.m20() * this.m31() * this.m03() - this.m30() * this.m01() * this.m23() + this.m00() * this.m31() * this.m23() + this.m20() * this.m01() * this.m33() - this.m00() * this.m21() * this.m33() ) / det,
+                ( -this.m30() * this.m11() * this.m03() + this.m10() * this.m31() * this.m03() + this.m30() * this.m01() * this.m13() - this.m00() * this.m31() * this.m13() - this.m10() * this.m01() * this.m33() + this.m00() * this.m11() * this.m33() ) / det,
+                ( this.m20() * this.m11() * this.m03() - this.m10() * this.m21() * this.m03() - this.m20() * this.m01() * this.m13() + this.m00() * this.m21() * this.m13() + this.m10() * this.m01() * this.m23() - this.m00() * this.m11() * this.m23() ) / det,
+                ( this.m30() * this.m21() * this.m12() - this.m20() * this.m31() * this.m12() - this.m30() * this.m11() * this.m22() + this.m10() * this.m31() * this.m22() + this.m20() * this.m11() * this.m32() - this.m10() * this.m21() * this.m32() ) / det,
+                ( -this.m30() * this.m21() * this.m02() + this.m20() * this.m31() * this.m02() + this.m30() * this.m01() * this.m22() - this.m00() * this.m31() * this.m22() - this.m20() * this.m01() * this.m32() + this.m00() * this.m21() * this.m32() ) / det,
+                ( this.m30() * this.m11() * this.m02() - this.m10() * this.m31() * this.m02() - this.m30() * this.m01() * this.m12() + this.m00() * this.m31() * this.m12() + this.m10() * this.m01() * this.m32() - this.m00() * this.m11() * this.m32() ) / det,
+                ( -this.m20() * this.m11() * this.m02() + this.m10() * this.m21() * this.m02() + this.m20() * this.m01() * this.m12() - this.m00() * this.m21() * this.m12() - this.m10() * this.m01() * this.m22() + this.m00() * this.m11() * this.m22() ) / det
+            );
+          } else {
+            throw new Error( 'Matrix could not be inverted, determinant === 0' );
+          }
+          break; // because JSHint totally can't tell that this can't be reached
+        default:
+          throw new Error( 'Matrix3.inverted with unknown type: ' + this.type );
       }
     },
 
     timesMatrix: function( m ) {
-      var newType = Types.OTHER;
-      if ( this.type === Types.TRANSLATION_3D && m.type === Types.TRANSLATION_3D ) {
-        newType = Types.TRANSLATION_3D;
+      // I * M === M * I === I (the identity)
+      if( this.type === Types.IDENTITY || m.type === Types.IDENTITY ) {
+        return this.type === Types.IDENTITY ? m : this;
       }
-      if ( this.type === Types.SCALING && m.type === Types.SCALING ) {
-        newType = Types.SCALING;
+      
+      if ( this.type === m.type ) {
+        // currently two matrices of the same type will result in the same result type
+        if ( this.type === Types.TRANSLATION_3D ) {
+          // faster combination of translations
+          return new Matrix4( 1, 0, 0, this.m03() + m.m02(),
+                              0, 1, 0, this.m13() + m.m12(),
+                              0, 0, 1, this.m23() + m.m23(),
+                              0, 0, 0, 1, Types.TRANSLATION_3D );
+        } else if ( this.type === Types.SCALING ) {
+          // faster combination of scaling
+          return new Matrix4( this.m00() * m.m00(), 0, 0, 0,
+                              0, this.m11() * m.m11(), 0, 0,
+                              0, 0, this.m22() * m.m22(), 0,
+                              0, 0, 0, 1, Types.SCALING );
+        }
       }
-      if ( this.type === Types.IDENTITY ) {
-        newType = m.type;
+      
+      if ( this.type !== Types.OTHER && m.type !== Types.OTHER ) {
+        // currently two matrices that are anything but "other" are technically affine, and the result will be affine
+        
+        // affine case
+        return new Matrix4( this.m00() * m.m00() + this.m01() * m.m10() + this.m02() * m.m20(),
+                            this.m00() * m.m01() + this.m01() * m.m11() + this.m02() * m.m21(),
+                            this.m00() * m.m02() + this.m01() * m.m12() + this.m02() * m.m22(),
+                            this.m00() * m.m03() + this.m01() * m.m13() + this.m02() * m.m23() + this.m03(),
+                            this.m10() * m.m00() + this.m11() * m.m10() + this.m12() * m.m20(),
+                            this.m10() * m.m01() + this.m11() * m.m11() + this.m12() * m.m21(),
+                            this.m10() * m.m02() + this.m11() * m.m12() + this.m12() * m.m22(),
+                            this.m10() * m.m03() + this.m11() * m.m13() + this.m12() * m.m23() + this.m13(),
+                            this.m20() * m.m00() + this.m21() * m.m10() + this.m22() * m.m20(),
+                            this.m20() * m.m01() + this.m21() * m.m11() + this.m22() * m.m21(),
+                            this.m20() * m.m02() + this.m21() * m.m12() + this.m22() * m.m22(),
+                            this.m20() * m.m03() + this.m21() * m.m13() + this.m22() * m.m23() + this.m23(),
+                            0, 0, 0, 1, Types.AFFINE );
       }
-      if ( m.type === Types.IDENTITY ) {
-        newType = this.type;
-      }
+      
+      // general case
       return new Matrix4( this.m00() * m.m00() + this.m01() * m.m10() + this.m02() * m.m20() + this.m03() * m.m30(),
                 this.m00() * m.m01() + this.m01() * m.m11() + this.m02() * m.m21() + this.m03() * m.m31(),
                 this.m00() * m.m02() + this.m01() * m.m12() + this.m02() * m.m22() + this.m03() * m.m32(),
@@ -2751,8 +3147,7 @@ define( 'DOT/Matrix4',['require','DOT/dot','DOT/Vector3','DOT/Vector4'],function
                 this.m30() * m.m00() + this.m31() * m.m10() + this.m32() * m.m20() + this.m33() * m.m30(),
                 this.m30() * m.m01() + this.m31() * m.m11() + this.m32() * m.m21() + this.m33() * m.m31(),
                 this.m30() * m.m02() + this.m31() * m.m12() + this.m32() * m.m22() + this.m33() * m.m32(),
-                this.m30() * m.m03() + this.m31() * m.m13() + this.m32() * m.m23() + this.m33() * m.m33(),
-                newType );
+                this.m30() * m.m03() + this.m31() * m.m13() + this.m32() * m.m23() + this.m33() * m.m33() );
     },
 
     timesVector4: function( v ) {
@@ -2786,7 +3181,7 @@ define( 'DOT/Matrix4',['require','DOT/dot','DOT/Vector3','DOT/Vector4'],function
       return new dot.Vector3( x, y, z );
     },
 
-    determinant: function() {
+    getDeterminant: function() {
       return this.m03() * this.m12() * this.m21() * this.m30() -
           this.m02() * this.m13() * this.m21() * this.m30() -
           this.m03() * this.m11() * this.m22() * this.m30() +
@@ -2812,6 +3207,7 @@ define( 'DOT/Matrix4',['require','DOT/dot','DOT/Vector3','DOT/Vector4'],function
           this.m01() * this.m10() * this.m22() * this.m33() +
           this.m00() * this.m11() * this.m22() * this.m33();
     },
+    get determinant() { return this.getDeterminant(); },
 
     toString: function() {
       return this.m00() + " " + this.m01() + " " + this.m02() + " " + this.m03() + "\n" +
@@ -2819,9 +3215,6 @@ define( 'DOT/Matrix4',['require','DOT/dot','DOT/Vector3','DOT/Vector4'],function
            this.m20() + " " + this.m21() + " " + this.m22() + " " + this.m23() + "\n" +
            this.m30() + " " + this.m31() + " " + this.m32() + " " + this.m33();
     },
-
-    translation: function() { return new dot.Vector3( this.m03(), this.m13(), this.m23() ); },
-    scaling: function() { return new dot.Vector3( this.m00(), this.m11(), this.m22() );},
 
     makeImmutable: function() {
       this.rowMajor = function() {
@@ -3068,6 +3461,10 @@ define( 'DOT/Matrix3',['require','DOT/dot','DOT/Vector2','DOT/Vector3','DOT/Matr
     m21: function() { return this.entries[5]; },
     m22: function() { return this.entries[8]; },
     
+    isIdentity: function() {
+      return this.type === Types.IDENTITY || this.equals( Matrix3.IDENTITY );
+    },
+    
     isAffine: function() {
       return this.type === Types.AFFINE || ( this.m20() === 0 && this.m21() === 0 && this.m22() === 1 );
     },
@@ -3089,6 +3486,7 @@ define( 'DOT/Matrix3',['require','DOT/dot','DOT/Vector2','DOT/Vector3','DOT/Matr
     },
     get determinant() { return this.getDeterminant(); },
     
+    // the 2D translation, assuming multiplication with a homogeneous vector
     getTranslation: function() {
       return new dot.Vector2( this.m02(), this.m12() );
     },
@@ -3383,6 +3781,19 @@ define( 'DOT/Matrix3',['require','DOT/dot','DOT/Vector2','DOT/Vector3','DOT/Matr
     * Mutable operations (changes this matrix)
     *----------------------------------------------------------------------------*/
     
+    set: function( matrix ) {
+      this.entries[0] = matrix.entries[0];
+      this.entries[1] = matrix.entries[1];
+      this.entries[2] = matrix.entries[2];
+      this.entries[3] = matrix.entries[3];
+      this.entries[4] = matrix.entries[4];
+      this.entries[5] = matrix.entries[5];
+      this.entries[6] = matrix.entries[6];
+      this.entries[7] = matrix.entries[7];
+      this.entries[8] = matrix.entries[8];
+      this.type = matrix.type;
+    },
+    
     makeImmutable: function() {
       this.rowMajor = function() {
         throw new Error( 'Cannot modify immutable matrix' );
@@ -3665,10 +4076,8 @@ define( 'DOT/Matrix3',['require','DOT/dot','DOT/Vector2','DOT/Vector3','DOT/Matr
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'DOT/Ray2',['require','ASSERT/assert','DOT/dot'],function( require ) {
+define( 'DOT/Ray2',['require','DOT/dot'],function( require ) {
   
-  
-  var assert = require( 'ASSERT/assert' )( 'dot' );
   
   var dot = require( 'DOT/dot' );
 
@@ -3709,11 +4118,9 @@ define( 'DOT/Ray2',['require','ASSERT/assert','DOT/dot'],function( require ) {
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'DOT/Transform3',['require','ASSERT/assert','DOT/dot','DOT/Matrix3','DOT/Vector2','DOT/Ray2'],function( require ) {
+define( 'DOT/Transform3',['require','DOT/dot','DOT/Matrix3','DOT/Vector2','DOT/Ray2'],function( require ) {
   
 
-  var assert = require( 'ASSERT/assert' )( 'dot' );
-  
   var dot = require( 'DOT/dot' );
   
   require( 'DOT/Matrix3' );
@@ -3988,13 +4395,18 @@ define( 'DOT/Transform3',['require','ASSERT/assert','DOT/dot','DOT/Matrix3','DOT
 /**
  * A 2D rectangle-shaped bounded area (bounding box)
  *
+ * There are a number of convenience functions to get locations and points on the Bounds. Currently we do not
+ * store these with the Bounds2 instance, since we want to lower the memory footprint.
+ *
+ * minX, minY, maxX, and maxY are actually stored. We don't do x,y,width,height because this can't properly express
+ * semi-infinite bounds (like a half-plane), or easily handle what Bounds2.NOTHING and Bounds2.EVERYTHING do with
+ * the constructive solid areas.
+ *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'DOT/Bounds2',['require','ASSERT/assert','DOT/dot','DOT/Vector2'],function( require ) {
+define( 'DOT/Bounds2',['require','DOT/dot','DOT/Vector2'],function( require ) {
   
-  
-  var assert = require( 'ASSERT/assert' )( 'dot' );
   
   var dot = require( 'DOT/dot' );
   
@@ -4025,25 +4437,53 @@ define( 'DOT/Bounds2',['require','ASSERT/assert','DOT/dot','DOT/Vector2'],functi
     getHeight: function() { return this.maxY - this.minY; },
     get height() { return this.getHeight(); },
     
+    /* 
+     * Convenience locations
+     * upper is in terms of the visual layout in Scenery and other programs, so the minY is the "upper", and minY is the "lower"
+     *
+     *             minX (x)     centerX        maxX
+     *          ---------------------------------------
+     * minY (y) | upperLeft   upperCenter   upperRight
+     * centerY  | centerLeft    center      centerRight
+     * maxY     | lowerLeft   lowerCenter   lowerRight
+     */
     getX: function() { return this.minX; },
     get x() { return this.getX(); },
-    
     getY: function() { return this.minY; },
     get y() { return this.getY(); },
     
-    getCenter: function() { return new dot.Vector2( this.getCenterX(), this.getCenterY() ); },
-    get center() { return this.getCenter(); },
+    getMinX: function() { return this.minX; },
+    get left() { return this.minX; },
+    getMinY: function() { return this.minY; },
+    get top() { return this.minY; },
+    getMaxX: function() { return this.maxX; },
+    get right() { return this.maxX; },
+    getMaxY: function() { return this.maxY; },
+    get bottom() { return this.maxY; },
     
     getCenterX: function() { return ( this.maxX + this.minX ) / 2; },
     get centerX() { return this.getCenterX(); },
-    
     getCenterY: function() { return ( this.maxY + this.minY ) / 2; },
     get centerY() { return this.getCenterY(); },
     
-    getMinX: function() { return this.minX; },
-    getMinY: function() { return this.minY; },
-    getMaxX: function() { return this.maxX; },
-    getMaxY: function() { return this.maxY; },
+    getUpperLeft: function() { return new dot.Vector2( this.minX, this.minY ); },
+    get upperLeft() { return this.getUpperLeft(); },
+    getUpperCenter: function() { return new dot.Vector2( this.getCenterX(), this.minY ); },
+    get upperCenter() { return this.getUpperCenter(); },
+    getUpperRight: function() { return new dot.Vector2( this.maxX, this.minY ); },
+    get upperRight() { return this.getUpperRight(); },
+    getCenterLeft: function() { return new dot.Vector2( this.minX, this.getCenterY ); },
+    get centerLeft() { return this.getCenterLeft(); },
+    getCenter: function() { return new dot.Vector2( this.getCenterX(), this.getCenterY() ); },
+    get center() { return this.getCenter(); },
+    getCenterRight: function() { return new dot.Vector2( this.maxX, this.getCenterY ); },
+    get centerRight() { return this.getCenterRight(); },
+    getLowerLeft: function() { return new dot.Vector2( this.minX, this.maxY ); },
+    get lowerLeft() { return this.getLowerLeft(); },
+    getLowerCenter: function() { return new dot.Vector2( this.getCenterX(), this.maxY ); },
+    get lowerCenter() { return this.getLowerCenter(); },
+    getLowerRight: function() { return new dot.Vector2( this.maxX, this.maxY ); },
+    get lowerRight() { return this.getLowerRight(); },
     
     isEmpty: function() { return this.getWidth() < 0 || this.getHeight() < 0; },
     
@@ -4184,10 +4624,26 @@ define( 'DOT/Bounds2',['require','ASSERT/assert','DOT/dot','DOT/Vector2'],functi
       return new Bounds2( this.minX - d, this.minY - d, this.maxX + d, this.maxY + d );
     },
     
-    // returns copy contracted on all sides by length d
-    eroded: function( d ) {
-      return this.dilated( -d );
+    // dilates only in the x direction
+    dilatedX: function( x ) {
+      return new Bounds2( this.minX - x, this.minY, this.maxX + x, this.maxY );
     },
+    
+    // dilates only in the y direction
+    dilatedY: function( y ) {
+      return new Bounds2( this.minX, this.minY - y, this.maxX, this.maxY + y );
+    },
+    
+    // dilate with different amounts in the x and y directions
+    dilatedXY: function( x, y ) {
+      return new Bounds2( this.minX - x, this.minY - y, this.maxX + x, this.maxY + y );
+    },
+    
+    // returns copy contracted on all sides by length d, or for x/y independently
+    eroded: function( d ) { return this.dilated( -d ); },
+    erodedX: function( x ) { return this.dilatedX( -x ); },
+    erodedY: function( y ) { return this.dilatedY( -y ); },
+    erodedXY: function( x, y ) { return this.dilatedXY( -x, -y ); },
     
     shiftedX: function( x ) {
       return new Bounds2( this.minX + x, this.minY, this.maxX + x, this.maxY );
@@ -4298,10 +4754,26 @@ define( 'DOT/Bounds2',['require','ASSERT/assert','DOT/dot','DOT/Vector2'],functi
       return this.set( this.minX - d, this.minY - d, this.maxX + d, this.maxY + d );
     },
     
-    // contracts on all sides by length d
-    erode: function( d ) {
-      return this.dilate( -d );
+    // dilates only in the x direction
+    dilateX: function( x ) {
+      return this.set( this.minX - x, this.minY, this.maxX + x, this.maxY );
     },
+    
+    // dilates only in the y direction
+    dilateY: function( y ) {
+      return this.set( this.minX, this.minY - y, this.maxX, this.maxY + y );
+    },
+    
+    // dilate with different amounts in the x and y directions
+    dilateXY: function( x, y ) {
+      return this.set( this.minX - x, this.minY - y, this.maxX + x, this.maxY + y );
+    },
+    
+    // contracts on all sides by length d, or for x/y independently
+    erode: function( d ) { return this.dilate( -d ); },
+    erodeX: function( x ) { return this.dilateX( -x ); },
+    erodeY: function( y ) { return this.dilateY( -y ); },
+    erodeXY: function( x, y ) { return this.dilateXY( -x, -y ); },
     
     shiftX: function( x ) {
       return this.setMinX( this.minX + x ).setMaxX( this.maxX + x );
@@ -4313,6 +4785,27 @@ define( 'DOT/Bounds2',['require','ASSERT/assert','DOT/dot','DOT/Vector2'],functi
     
     shift: function( x, y ) {
       return this.shiftX( x ).shiftY( y );
+    },
+
+    /**
+     * Find a point in the Bounds2 closest to the specified point.  Used for making sure a dragged object doesn't get outside the visible play area.
+     * @param x x point to test
+     * @param y y point to test
+     * @param {Vector2} result optional Vector2 that can store the return value to avoid allocations
+     * @returns {Vector2}
+     */
+    getClosestPoint: function( x, y, result ) {
+      if ( result ) {
+        result.set( x, y );
+      }
+      else {
+        result = new dot.Vector2( x, y );
+      }
+      if ( result.x < this.minX ) { result.x = this.minX; }
+      if ( result.x > this.maxX ) { result.x = this.maxX; }
+      if ( result.y < this.minY ) { result.y = this.minY; }
+      if ( result.y > this.maxY ) { result.y = this.maxY; }
+      return result;
     }
   };
   
@@ -4320,6 +4813,11 @@ define( 'DOT/Bounds2',['require','ASSERT/assert','DOT/dot','DOT/Vector2'],functi
     return new Bounds2( x, y, x + width, y + height );
   };
   
+  // a volume-less point bounds, which can be dilated to form a centered bounds
+  Bounds2.point = function( x, y ) {
+    return new Bounds2( x, y, x, y );
+  };
+
   // specific bounds useful for operations
   Bounds2.EVERYTHING = new Bounds2( Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY );
   Bounds2.NOTHING = new Bounds2( Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY );
@@ -4339,17 +4837,16 @@ define( 'DOT/Bounds2',['require','ASSERT/assert','DOT/dot','DOT/Vector2'],functi
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'KITE/kite',['require','ASSERT/assert','PHET_CORE/phetAllocation'],function( require ) {
+define( 'KITE/kite',['require','ASSERT/assert','ASSERT/assert','PHET_CORE/phetAllocation'],function( require ) {
   
   
-  var assert = require( 'ASSERT/assert' )( 'kite' );
+  window.assert = window.assert || require( 'ASSERT/assert' )( 'basic' );
+  window.assertSlow = window.assertSlow || require( 'ASSERT/assert' )( 'slow', true );
   
   // object allocation tracking
   window.phetAllocation = require( 'PHET_CORE/phetAllocation' );
   
   var kite = {};
-  
-  kite.assert = assert;
   
   // will be filled in by other modules
   return kite;
@@ -4363,11 +4860,9 @@ define( 'KITE/kite',['require','ASSERT/assert','PHET_CORE/phetAllocation'],funct
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'KITE/segments/Segment',['require','ASSERT/assert','KITE/kite','DOT/Util'],function( require ) {
+define( 'KITE/segments/Segment',['require','KITE/kite','DOT/Util'],function( require ) {
   
   
-  var assert = require( 'ASSERT/assert' )( 'kite' );
-
   var kite = require( 'KITE/kite' );
   
   var DotUtil = require( 'DOT/Util' );
@@ -4440,11 +4935,9 @@ define( 'KITE/segments/Segment',['require','ASSERT/assert','KITE/kite','DOT/Util
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'KITE/segments/Line',['require','ASSERT/assert','KITE/kite','PHET_CORE/inherit','DOT/Bounds2','DOT/Util','KITE/segments/Segment'],function( require ) {
+define( 'KITE/segments/Line',['require','KITE/kite','PHET_CORE/inherit','DOT/Bounds2','DOT/Util','KITE/segments/Segment'],function( require ) {
   
   
-  var assert = require( 'ASSERT/assert' )( 'kite' );
-
   var kite = require( 'KITE/kite' );
   
   var inherit = require( 'PHET_CORE/inherit' );
@@ -4582,11 +5075,9 @@ define( 'KITE/segments/Line',['require','ASSERT/assert','KITE/kite','PHET_CORE/i
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'KITE/segments/Arc',['require','ASSERT/assert','KITE/kite','PHET_CORE/inherit','DOT/Vector2','DOT/Bounds2','DOT/Util','KITE/segments/Segment'],function( require ) {
+define( 'KITE/segments/Arc',['require','KITE/kite','PHET_CORE/inherit','DOT/Vector2','DOT/Bounds2','DOT/Util','KITE/segments/Segment'],function( require ) {
   
   
-  var assert = require( 'ASSERT/assert' )( 'kite' );
-
   var kite = require( 'KITE/kite' );
   
   var inherit = require( 'PHET_CORE/inherit' );
@@ -4888,6 +5379,10 @@ define( 'KITE/segments/Arc',['require','ASSERT/assert','KITE/kite','PHET_CORE/in
       
       // reverse the 'clockwiseness' if our transform includes a reflection
       var anticlockwise = matrix.getDeterminant() >= 0 ? this.anticlockwise : !this.anticlockwise;
+      
+      if ( Math.abs( this.endAngle - this.startAngle ) === Math.PI * 2 ) {
+        endAngle = anticlockwise ? startAngle - Math.PI * 2 : startAngle + Math.PI * 2;
+      }
 
       var scaleVector = matrix.getScaleVector();
       if ( scaleVector.x !== scaleVector.y ) {
@@ -4915,10 +5410,8 @@ define( 'KITE/segments/Arc',['require','ASSERT/assert','KITE/kite','PHET_CORE/in
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'KITE/util/Subpath',['require','ASSERT/assert','DOT/Vector2','DOT/Bounds2','DOT/Util','KITE/kite','KITE/segments/Line','KITE/segments/Arc'],function( require ) {
+define( 'KITE/util/Subpath',['require','DOT/Vector2','DOT/Bounds2','DOT/Util','KITE/kite','KITE/segments/Line','KITE/segments/Arc'],function( require ) {
   
-  
-  var assert = require( 'ASSERT/assert' )( 'kite' );
   
   var Vector2 = require( 'DOT/Vector2' );
   var Bounds2 = require( 'DOT/Bounds2' );
@@ -7718,10 +8211,8 @@ define( 'KITE/../parser/svgPath',['require','KITE/kite'],function( require ) {
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'KITE/util/LineStyles',['require','ASSERT/assert','KITE/kite'],function( require ) {
+define( 'KITE/util/LineStyles',['require','KITE/kite'],function( require ) {
   
-  
-  var assert = require( 'ASSERT/assert' )( 'kite' );
   
   var kite = require( 'KITE/kite' );
   
@@ -7732,9 +8223,11 @@ define( 'KITE/util/LineStyles',['require','ASSERT/assert','KITE/kite'],function(
     this.lineWidth = args.lineWidth !== undefined ? args.lineWidth : 1;
     this.lineCap = args.lineCap !== undefined ? args.lineCap : 'butt'; // butt, round, square
     this.lineJoin = args.lineJoin !== undefined ? args.lineJoin : 'miter'; // miter, round, bevel
-    this.lineDash = args.lineDash !== undefined ? args.lineDash : null; // null is default, otherwise an array of numbers
+    this.lineDash = args.lineDash ? args.lineDash : []; // [] is default, otherwise an array of numbers
     this.lineDashOffset = args.lineDashOffset !== undefined ? args.lineDashOffset : 0; // 0 default, any number
     this.miterLimit = args.miterLimit !== undefined ? args.miterLimit : 10; // see https://svgwg.org/svg2-draft/painting.html for miterLimit computations
+    
+    assert && assert( Array.isArray( this.lineDash ) );
   };
   var LineStyles = kite.LineStyles;
   LineStyles.prototype = {
@@ -7750,28 +8243,18 @@ define( 'KITE/util/LineStyles',['require','ASSERT/assert','KITE/kite'],function(
         return false;
       }
       
-      // now we need to compare the line dashes
-      /* jshint -W018 */
-      //jshint -W018
-      if ( !this.lineDash !== !other.lineDash ) {
-        // one is defined, the other is not
-        return false;
-      }
-      
-      if ( this.lineDash ) {
-        if ( this.lineDash.length !== other.lineDash.length ) {
-          return false;
-        }
+      if ( this.lineDash.length === other.lineDash.length ) {
         for ( var i = 0; i < this.lineDash.length; i++ ) {
           if ( this.lineDash[i] !== other.lineDash[i] ) {
             return false;
           }
         }
-        return true;
       } else {
-        // both have no line dash, so they are equal
-        return true;
+        // line dashes must be different
+        return false;
       }
+      
+      return true;
     }
   };
   
@@ -7788,11 +8271,9 @@ define( 'KITE/util/LineStyles',['require','ASSERT/assert','KITE/kite'],function(
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'KITE/segments/Quadratic',['require','ASSERT/assert','KITE/kite','PHET_CORE/inherit','DOT/Bounds2','DOT/Matrix3','DOT/Util','KITE/segments/Segment'],function( require ) {
+define( 'KITE/segments/Quadratic',['require','KITE/kite','PHET_CORE/inherit','DOT/Bounds2','DOT/Matrix3','DOT/Util','KITE/segments/Segment'],function( require ) {
   
   
-  var assert = require( 'ASSERT/assert' )( 'kite' );
-
   var kite = require( 'KITE/kite' );
   
   var inherit = require( 'PHET_CORE/inherit' );
@@ -8034,11 +8515,9 @@ define( 'KITE/segments/Quadratic',['require','ASSERT/assert','KITE/kite','PHET_C
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'KITE/segments/Cubic',['require','ASSERT/assert','KITE/kite','PHET_CORE/inherit','DOT/Bounds2','DOT/Vector2','DOT/Matrix3','DOT/Util','DOT/Util','KITE/segments/Segment','KITE/segments/Quadratic'],function( require ) {
+define( 'KITE/segments/Cubic',['require','KITE/kite','PHET_CORE/inherit','DOT/Bounds2','DOT/Vector2','DOT/Matrix3','DOT/Util','DOT/Util','KITE/segments/Segment','KITE/segments/Quadratic'],function( require ) {
   
   
-  var assert = require( 'ASSERT/assert' )( 'kite' );
-
   var kite = require( 'KITE/kite' );
   
   var inherit = require( 'PHET_CORE/inherit' );
@@ -8353,11 +8832,9 @@ define( 'KITE/segments/Cubic',['require','ASSERT/assert','KITE/kite','PHET_CORE/
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'KITE/segments/EllipticalArc',['require','ASSERT/assert','KITE/kite','PHET_CORE/inherit','DOT/Vector2','DOT/Bounds2','DOT/Matrix3','DOT/Transform3','DOT/Util','DOT/Util','KITE/segments/Segment','KITE/util/Subpath'],function( require ) {
+define( 'KITE/segments/EllipticalArc',['require','KITE/kite','PHET_CORE/inherit','DOT/Vector2','DOT/Bounds2','DOT/Matrix3','DOT/Transform3','DOT/Util','DOT/Util','KITE/segments/Segment','KITE/util/Subpath'],function( require ) {
   
   
-  var assert = require( 'ASSERT/assert' )( 'kite' );
-
   var kite = require( 'KITE/kite' );
   
   var inherit = require( 'PHET_CORE/inherit' );
@@ -8698,6 +9175,10 @@ define( 'KITE/segments/EllipticalArc',['require','ASSERT/assert','KITE/kite','PH
       var startAngle = reflected ? -this.startAngle : this.startAngle;
       var endAngle = reflected ? -this.endAngle : this.endAngle;
       
+      if ( Math.abs( this.endAngle - this.startAngle ) === Math.PI * 2 ) {
+        endAngle = anticlockwise ? startAngle - Math.PI * 2 : startAngle + Math.PI * 2;
+      }
+      
       return new Segment.EllipticalArc( matrix.timesVector2( this.center ), radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise );
     }
   } );
@@ -8733,11 +9214,8 @@ define( 'KITE/segments/EllipticalArc',['require','ASSERT/assert','KITE/kite','PH
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'KITE/Shape',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT/Vector2','DOT/Bounds2','DOT/Ray2','DOT/Matrix3','DOT/Transform3','DOT/Util','DOT/Util','KITE/util/Subpath','KITE/../parser/svgPath','KITE/util/LineStyles','KITE/segments/Arc','KITE/segments/Cubic','KITE/segments/EllipticalArc','KITE/segments/Line','KITE/segments/Quadratic'],function( require ) {
+define( 'KITE/Shape',['require','KITE/kite','DOT/Vector2','DOT/Bounds2','DOT/Ray2','DOT/Matrix3','DOT/Transform3','DOT/Util','DOT/Util','KITE/util/Subpath','KITE/../parser/svgPath','KITE/util/LineStyles','KITE/segments/Arc','KITE/segments/Cubic','KITE/segments/EllipticalArc','KITE/segments/Line','KITE/segments/Quadratic'],function( require ) {
   
-  
-  var assert = require( 'ASSERT/assert' )( 'kite' );
-  var assertExtra = require( 'ASSERT/assert' )( 'kite.extra', true );
   
   var kite = require( 'KITE/kite' );
   
@@ -9050,6 +9528,17 @@ define( 'KITE/Shape',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT
       return this;
     },
     
+    polygon: function( vertices ) {
+      var length = vertices.length;
+      if ( length > 0 ) {
+        this.moveToPoint( vertices[0] );
+        for ( var i = 1; i < length; i++ ) {
+          this.lineToPoint( vertices[i] );
+        }
+      }
+      return this.close();
+    },
+    
     copy: function() {
       // copy each individual subpath, so future modifications to either Shape doesn't affect the other one
       return new Shape( _.map( this.subpaths, function( subpath ) { return subpath.copy(); } ), this.bounds );
@@ -9283,6 +9772,10 @@ define( 'KITE/Shape',['require','ASSERT/assert','ASSERT/assert','KITE/kite','DOT
   };
   Shape.roundRectangle = Shape.roundRect;
   
+  Shape.polygon = function( vertices ) {
+    return new Shape().polygon( vertices );
+  };
+  
   Shape.bounds = function( bounds ) {
     return new Shape().rect( bounds.minX, bounds.minY, bounds.maxX - bounds.minX, bounds.maxY - bounds.minY );
   };
@@ -9379,11 +9872,11 @@ define( 'SCENERY/util/FixedNodeEvents',['require','SCENERY/scenery'],function( r
      * @param {Function} listener Callback, called with arguments that depend on the event type
      */
     proto.addEventListener = function( type, listener ) {
-      sceneryAssert && sceneryAssert( type !== undefined && listener !== undefined,
+      assert && assert( type !== undefined && listener !== undefined,
                                       'Both a type and listener are required for addEventListener' );
       
       // most commonly a bug, maybe there will be a good use case? can always work around by wrapping with a new function each time
-      sceneryAssert && sceneryAssert( _.indexOf( this._events[type], listener ),
+      assert && assert( _.indexOf( this._events[type], listener ),
                                       'Event listener was already there for addEventListener with type ' + type );
       
       this._events[type].push( listener );
@@ -9397,11 +9890,11 @@ define( 'SCENERY/util/FixedNodeEvents',['require','SCENERY/scenery'],function( r
      * @param {Function} listener The callback to remove.
      */
     proto.removeEventListener = function( type, listener ) {
-      sceneryAssert && sceneryAssert( type !== undefined && listener !== undefined,
+      assert && assert( type !== undefined && listener !== undefined,
                                       'Both a type and listener are required for removeEventListener' );
       
       // ensure the listener is in our list
-      sceneryAssert && sceneryAssert( _.indexOf( this._events[type], listener ) !== -1,
+      assert && assert( _.indexOf( this._events[type], listener ) !== -1,
                                       'Listener did not exist for type ' + type );
       
       this._events[type].splice( _.indexOf( this._events[type], listener ), 1 );
@@ -9416,7 +9909,7 @@ define( 'SCENERY/util/FixedNodeEvents',['require','SCENERY/scenery'],function( r
      * that is relevant for a specific node, and ancestors don't need to be notified.
      */
     proto.fireEvent = function( type, args ) {
-      sceneryAssert && sceneryAssert( _.contains( eventNames, type ),
+      assert && assert( _.contains( eventNames, type ),
                                       'unknown event type: ' + type );
       
       var events = this._events[type];
@@ -9467,7 +9960,7 @@ define( 'SCENERY/layers/LayerStrategy',['require','SCENERY/scenery'],function( r
     },
     
     getPreferredLayerType: function( pointer, layerBuilder ) {
-      sceneryAssert && sceneryAssert( this.hasPreferredLayerType( pointer, layerBuilder ) ); // sanity check
+      assert && assert( this.hasPreferredLayerType( pointer, layerBuilder ) ); // sanity check
       
       var node = pointer.trail.lastNode();
       var preferredLayerType;
@@ -9607,6 +10100,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
   
   /*
    * Available keys for use in the options parameter object for a vanilla Node (not inherited), in the order they are executed in:
+   * TODO: this list is incomplete!
    *
    * children:         A list of children to add (in order)
    * cursor:           Will display the specified CSS cursor when the mouse is over this Node or one of its descendents. The Scene needs to have input listeners attached with an initialize method first.
@@ -9644,12 +10138,15 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     // Opacity from 0 to 1
     this._opacity = 1;
     
-    // Whether hit testing will check for this node (and its children).
-    this._pickable = true;
+    // Whether this node (and its subtree) will allow hit-testing (and thus user interaction). Notably:
+    // pickable: null  - default. Node is only pickable if it (or an ancestor/descendant) has either an input listener or pickable: true set
+    // pickable: false - Node (and subtree) is pickable, just like if there is an input listener
+    // pickable: true  - Node is unpickable (only has an effect when underneath a node with an input listener / pickable: true set)
+    this._pickable = null;
     
     // This node and all children will be clipped by this shape (in addition to any other clipping shapes).
     // The shape should be in the local coordinate frame
-    this._clipShape = null;
+    this._clipArea = null;
     
     // areas for hit intersection. if set on a Node, no descendants can handle events
     this._mouseArea = null; // {Shape} for mouse position          in the local coordinate frame
@@ -9679,9 +10176,6 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     
     this._inputListeners = []; // for user input handling (mouse/touch)
     this.initializeNodeEvents(); // for internal events like paint invalidation, layer invalidation, etc.
-    
-    // TODO: add getter/setters that will be able to invalidate whether this node is under any pointers, etc.
-    this._includeStrokeInHitRegion = false;
     
     // bounds handling
     this._bounds = Bounds2.NOTHING;      // for this node and its children, in "parent" coordinates
@@ -9714,6 +10208,9 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     this._layerSplitBefore = false;
     this._layerSplitAfter = false;
     
+    // the subtree pickable count is #pickable:true + #inputListeners, since we can prune subtrees with a pickable count of 0
+    this._subtreePickableCount = 0;
+    
     if ( options ) {
       this.mutate( options );
     }
@@ -9726,9 +10223,12 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     constructor: Node,
     
     insertChild: function( index, node ) {
-      sceneryAssert && sceneryAssert( node !== null && node !== undefined, 'insertChild cannot insert a null/undefined child' );
-      sceneryAssert && sceneryAssert( !_.contains( this._children, node ), 'Parent already contains child' );
-      sceneryAssert && sceneryAssert( node !== this, 'Cannot add self as a child' );
+      assert && assert( node !== null && node !== undefined, 'insertChild cannot insert a null/undefined child' );
+      assert && assert( !_.contains( this._children, node ), 'Parent already contains child' );
+      assert && assert( node !== this, 'Cannot add self as a child' );
+      
+      // needs to be early to prevent re-entrant children modifications
+      this.changePickableCount( node._subtreePickableCount );
       
       node._parents.push( this );
       this._children.splice( index, 0, node );
@@ -9747,8 +10247,8 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     },
     
     removeChild: function( node ) {
-      sceneryAssert && sceneryAssert( node );
-      sceneryAssert && sceneryAssert( this.isChild( node ) );
+      assert && assert( node );
+      assert && assert( this.isChild( node ) );
       
       var indexOfChild = _.indexOf( this._children, node );
       
@@ -9756,8 +10256,8 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     },
     
     removeChildAt: function( index ) {
-      sceneryAssert && sceneryAssert( index >= 0 );
-      sceneryAssert && sceneryAssert( index < this._children.length );
+      assert && assert( index >= 0 );
+      assert && assert( index < this._children.length );
       
       var node = this._children[index];
       
@@ -9766,9 +10266,12 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     
     // meant for internal use
     removeChildWithIndex: function( node, indexOfChild ) {
-      sceneryAssert && sceneryAssert( node );
-      sceneryAssert && sceneryAssert( this.isChild( node ) );
-      sceneryAssert && sceneryAssert( this._children[indexOfChild] === node );
+      assert && assert( node );
+      assert && assert( this.isChild( node ) );
+      assert && assert( this._children[indexOfChild] === node );
+      
+      // needs to be early to prevent re-entrant children modifications
+      this.changePickableCount( -node._subtreePickableCount );
       
       node.markOldPaint( false );
       
@@ -9814,6 +10317,12 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     
     getParents: function() {
       return this._parents.slice( 0 ); // create a defensive copy
+    },
+    
+    // returns a single parent if it exists, otherwise null (no parents), or an assertion failure (multiple parents)
+    getParent: function() {
+      assert && assert( this._parents.length <= 1, 'Cannot call getParent on a node with multiple parents' );
+      return this._parents.length ? this._parents[0] : null;
     },
     
     getChildAt: function( index ) {
@@ -9864,9 +10373,19 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
       } );
     },
     
+    // propagate the pickable count change down to our ancestors
+    changePickableCount: function( n ) {
+      this._subtreePickableCount += n;
+      assert && assert( this._subtreePickableCount >= 0, 'subtree pickable count should be guaranteed to be >= 0' );
+      var len = this._parents.length;
+      for ( var i = 0; i < len; i++ ) {
+        this._parents[i].changePickableCount( n );
+      }
+    },
+    
     // currently, there is no way to remove peers. if a string is passed as the element pattern, it will be turned into an element
     addPeer: function( element, options ) {
-      sceneryAssert && sceneryAssert( !this.instances.length, 'Cannot call addPeer after a node has instances (yet)' );
+      assert && assert( !this.instances.length, 'Cannot call addPeer after a node has instances (yet)' );
       
       this._peers.push( { element: element, options: options } );
     },
@@ -9876,6 +10395,11 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
      */
     addLiveRegion: function( property, options ) {
       this._liveRegions.push( {property: property, options: options} );
+    },
+    
+    // should be overridden to modify (increase ONLY if Canvas is involved) the node's bounds. Return the expanded bounds.
+    overrideBounds: function( computedBounds ) {
+      return computedBounds;
     },
     
     // ensure that cached bounds stored on this node (and all children) are accurate
@@ -9929,6 +10453,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
         
         // converts local to parent bounds. mutable methods used to minimize number of created bounds instances (we create one so we don't change references to the old one)
         var newBounds = this.transformBoundsFromLocalToParent( this._selfBounds.copy().includeBounds( this._childBounds ) );
+        newBounds = this.overrideBounds( newBounds ); // allow expansion of the bounds area
         var changed = !newBounds.equals( oldBounds );
         
         if ( changed ) {
@@ -9951,7 +10476,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
       }
       
       // double-check that all of our bounds handling has been accurate
-      if ( sceneryAssertExtra ) {
+      if ( assertSlow ) {
         // new scope for safety
         (function(){
           var epsilon = 0.000001;
@@ -9961,10 +10486,11 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
           
           var fullBounds = that.localToParentBounds( that._selfBounds ).union( that.localToParentBounds( childBounds ) );
           
-          sceneryAssertExtra && sceneryAssertExtra( that._childBounds.equalsEpsilon( childBounds, epsilon ), 'Child bounds mismatch after validateBounds: ' +
+          assertSlow && assertSlow( that._childBounds.equalsEpsilon( childBounds, epsilon ), 'Child bounds mismatch after validateBounds: ' +
                                                                                                     that._childBounds.toString() + ', expected: ' + childBounds.toString() );
-          sceneryAssertExtra && sceneryAssertExtra( that._bounds.equalsEpsilon( fullBounds, epsilon ), 'Bounds mismatch after validateBounds: ' +
-                                                                                              that._bounds.toString() + ', expected: ' + fullBounds.toString() );
+          assertSlow && assertSlow( that._bounds.equalsEpsilon( fullBounds, epsilon ) ||
+                                                    that._bounds.equalsEpsilon( that.overrideBounds( fullBounds ), epsilon ),
+                                                    'Bounds mismatch after validateBounds: ' + that._bounds.toString() + ', expected: ' + fullBounds.toString() );
         })();
       }
     },
@@ -9972,7 +10498,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     validateMouseBounds: function() {
       var that = this;
       
-      sceneryAssert && sceneryAssert( !this._selfBoundsDirty && !this._childBoundsDirty && !this._boundsDirty, 'Bounds must be validated before calling validateMouseBounds' );
+      assert && assert( !this._selfBoundsDirty && !this._childBoundsDirty && !this._boundsDirty, 'Bounds must be validated before calling validateMouseBounds' );
       
       if ( this._mouseBoundsDirty ) {
         var hasMouseAreas = false;
@@ -10013,7 +10539,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     validateTouchBounds: function() {
       var that = this;
       
-      sceneryAssert && sceneryAssert( !this._selfBoundsDirty && !this._childBoundsDirty && !this._boundsDirty, 'Bounds must be validated before calling validateTouchBounds' );
+      assert && assert( !this._selfBoundsDirty && !this._childBoundsDirty && !this._boundsDirty, 'Bounds must be validated before calling validateTouchBounds' );
       
       if ( this._touchBoundsDirty ) {
         var hasTouchAreas = false;
@@ -10053,7 +10579,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     
     validatePaint: function() {
       if ( this._paintDirty ) {
-        sceneryAssert && sceneryAssert( this.isPainted(), 'Only painted nodes can have self dirty paint' );
+        assert && assert( this.isPainted(), 'Only painted nodes can have self dirty paint' );
         if ( !this._subtreePaintDirty ) {
           // if the subtree is clean, just notify the self (only will hit one layer, instead of possibly multiple ones)
           this.notifyDirtySelfPaint();
@@ -10107,7 +10633,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     
     // mark the paint of this node as invalid, so its new region will be painted
     invalidatePaint: function() {
-      sceneryAssert && sceneryAssert( this.isPainted(), 'Can only call invalidatePaint on a painted node' );
+      assert && assert( this.isPainted(), 'Can only call invalidatePaint on a painted node' );
       this._paintDirty = true;
       
       // and set flags for all ancestors
@@ -10141,7 +10667,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     
     // called to notify that self rendering will display different paint, with possibly different bounds
     invalidateSelf: function( newBounds ) {
-      sceneryAssert && sceneryAssert( newBounds.isEmpty() || newBounds.isFinite() , "Bounds must be empty or finite in invalidateSelf");
+      assert && assert( newBounds.isEmpty() || newBounds.isFinite() , "Bounds must be empty or finite in invalidateSelf");
       
       // mark the old region to be repainted, regardless of whether the actual bounds change
       this.notifyBeforeSelfChange();
@@ -10180,9 +10706,10 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     },
     
     isChild: function( potentialChild ) {
+      assert && assert( potentialChild && ( potentialChild instanceof Node ), 'isChild needs to be called with a Node' );
       var ourChild = _.contains( this._children, potentialChild );
       var itsParent = _.contains( potentialChild._parents, this );
-      sceneryAssert && sceneryAssert( ourChild === itsParent );
+      assert && assert( ourChild === itsParent );
       return ourChild;
     },
     
@@ -10194,6 +10721,11 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     getChildBounds: function() {
       this.validateBounds();
       return this._childBounds;
+    },
+    
+    // local coordinate frame bounds
+    getLocalBounds: function() {
+      return this.getSelfBounds().union( this.getChildBounds() );
     },
     
     // the bounds for content in render(), in "parent" coordinates
@@ -10215,7 +10747,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
         }
       }
       
-      sceneryAssert && sceneryAssert( bounds.isFinite() || bounds.isEmpty(), 'Visible bounds should not be infinite' );
+      assert && assert( bounds.isFinite() || bounds.isEmpty(), 'Visible bounds should not be infinite' );
       return this.localToParentBounds( bounds );
     },
     
@@ -10237,18 +10769,23 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
      *
      * When calling, don't pass the recursive flag. It signals that the point passed can be mutated
      */
-    trailUnderPoint: function( point, options, recursive ) {
-      sceneryAssert && sceneryAssert( point, 'trailUnderPointer requires a point' );
+    trailUnderPoint: function( point, options, recursive, hasListener ) {
+      assert && assert( point, 'trailUnderPointer requires a point' );
       
       if ( options === undefined ) { options = {}; }
       
       var pruneInvisible = ( options.pruneInvisible === undefined ) ? true : options.pruneInvisible;
       var pruneUnpickable = ( options.pruneUnpickable === undefined ) ? true : options.pruneUnpickable;
       
+      hasListener = hasListener || this._inputListeners.length > 0 || this._pickable === true;
+      
       if ( pruneInvisible && !this.isVisible() ) {
         return null;
       }
-      if ( pruneUnpickable && !this.isPickable() ) {
+      
+      // if pickable: false, skip it
+      // if pickable: undefined and our pickable count indicates there are no input listeners / pickable: true in our subtree, skip it
+      if ( pruneUnpickable && ( this._pickable === false || ( this._pickable !== true && !hasListener && this._subtreePickableCount === 0 ) ) ) {
         return null;
       }
       
@@ -10283,7 +10820,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
         for ( var i = this._children.length - 1; i >= 0; i-- ) {
           var child = this._children[i];
           
-          var childHit = child.trailUnderPoint( localPoint, options );
+          var childHit = child.trailUnderPoint( localPoint, options, true, hasListener );
           
           // the child will have the point in its parent's coordinate frame (i.e. this node's frame)
           if ( childHit ) {
@@ -10376,15 +10913,17 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
       // don't allow listeners to be added multiple times
       if ( _.indexOf( this._inputListeners, listener ) === -1 ) {
         this._inputListeners.push( listener );
+        this.changePickableCount( 1 );
       }
       return this;
     },
     
     removeInputListener: function( listener ) {
       // ensure the listener is in our list
-      sceneryAssert && sceneryAssert( _.indexOf( this._inputListeners, listener ) !== -1 );
+      assert && assert( _.indexOf( this._inputListeners, listener ) !== -1 );
       
       this._inputListeners.splice( _.indexOf( this._inputListeners, listener ), 1 );
+      this.changePickableCount( -1 );
       return this;
     },
     
@@ -10504,7 +11043,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     },
     
     setX: function( x ) {
-      sceneryAssert && sceneryAssert( typeof x === 'number' );
+      assert && assert( typeof x === 'number' );
       
       this.translate( x - this.getX(), 0, true );
       return this;
@@ -10515,7 +11054,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     },
     
     setY: function( y ) {
-      sceneryAssert && sceneryAssert( typeof y === 'number' );
+      assert && assert( typeof y === 'number' );
       
       this.translate( 0, y - this.getY(), true );
       return this;
@@ -10549,7 +11088,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     },
     
     setRotation: function( rotation ) {
-      sceneryAssert && sceneryAssert( typeof rotation === 'number' );
+      assert && assert( typeof rotation === 'number' );
       
       this.appendMatrix( Matrix3.rotation2( rotation - this.getRotation() ) );
       return this;
@@ -10606,7 +11145,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     
     // change the actual transform reference (not just the actual transform)
     setTransform: function( transform ) {
-      sceneryAssert && sceneryAssert( transform.isFinite(), 'Transform should not have infinite/NaN values' );
+      assert && assert( transform.isFinite(), 'Transform should not have infinite/NaN values' );
       
       if ( this._transform !== transform ) {
         // since our referenced transform doesn't change, we need to trigger the before/after ourselves
@@ -10651,7 +11190,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     
     // shifts this node horizontally so that its left bound (in the parent coordinate frame) is 'left'
     setLeft: function( left ) {
-      sceneryAssert && sceneryAssert( typeof left === 'number' );
+      assert && assert( typeof left === 'number' );
       
       this.translate( left - this.getLeft(), 0, true );
       return this; // allow chaining
@@ -10664,7 +11203,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     
     // shifts this node horizontally so that its right bound (in the parent coordinate frame) is 'right'
     setRight: function( right ) {
-      sceneryAssert && sceneryAssert( typeof right === 'number' );
+      assert && assert( typeof right === 'number' );
       
       this.translate( right - this.getRight(), 0, true );
       return this; // allow chaining
@@ -10675,7 +11214,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     },
     
     setCenter: function( center ) {
-      sceneryAssert && sceneryAssert( center instanceof Vector2 );
+      assert && assert( center instanceof Vector2 );
       
       this.translate( center.minus( this.getCenter() ), true );
       return this;
@@ -10686,7 +11225,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     },
     
     setCenterX: function( x ) {
-      sceneryAssert && sceneryAssert( typeof x === 'number' );
+      assert && assert( typeof x === 'number' );
       
       this.translate( x - this.getCenterX(), 0, true );
       return this; // allow chaining
@@ -10697,7 +11236,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     },
     
     setCenterY: function( y ) {
-      sceneryAssert && sceneryAssert( typeof y === 'number' );
+      assert && assert( typeof y === 'number' );
       
       this.translate( 0, y - this.getCenterY(), true );
       return this; // allow chaining
@@ -10710,7 +11249,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     
     // shifts this node vertically so that its top bound (in the parent coordinate frame) is 'top'
     setTop: function( top ) {
-      sceneryAssert && sceneryAssert( typeof top === 'number' );
+      assert && assert( typeof top === 'number' );
       
       this.translate( 0, top - this.getTop(), true );
       return this; // allow chaining
@@ -10723,7 +11262,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     
     // shifts this node vertically so that its bottom bound (in the parent coordinate frame) is 'bottom'
     setBottom: function( bottom ) {
-      sceneryAssert && sceneryAssert( typeof bottom === 'number' );
+      assert && assert( typeof bottom === 'number' );
       
       this.translate( 0, bottom - this.getBottom(), true );
       return this; // allow chaining
@@ -10746,7 +11285,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     },
     
     setVisible: function( visible ) {
-      sceneryAssert && sceneryAssert( typeof visible === 'boolean' );
+      assert && assert( typeof visible === 'boolean' );
       
       if ( visible !== this._visible ) {
         if ( this._visible ) {
@@ -10765,7 +11304,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     },
     
     setOpacity: function( opacity ) {
-      sceneryAssert && sceneryAssert( typeof opacity === 'number' );
+      assert && assert( typeof opacity === 'number' );
       
       var clampedOpacity = clamp( opacity, 0, 1 );
       if ( clampedOpacity !== this._opacity ) {
@@ -10782,18 +11321,25 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     },
     
     setPickable: function( pickable ) {
-      sceneryAssert && sceneryAssert( typeof pickable === 'boolean' );
+      assert && assert( typeof pickable === 'boolean' );
       
       if ( this._pickable !== pickable ) {
+        var n = this._pickable === true ? -1 : 0;
+        
         // no paint or invalidation changes for now, since this is only handled for the mouse
         this._pickable = pickable;
+        n += this._pickable === true ? 1 : 0;
         
-        // TODO: invalidate the cursor somehow?
+        if ( n ) {
+          this.changePickableCount( n );
+        }
+        
+        // TODO: invalidate the cursor somehow? #150
       }
     },
     
     setCursor: function( cursor ) {
-      sceneryAssert && sceneryAssert( typeof cursor === 'string' || cursor === null );
+      assert && assert( typeof cursor === 'string' || cursor === null );
       
       // TODO: consider a mapping of types to set reasonable defaults
       /*
@@ -10811,7 +11357,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     },
     
     setMouseArea: function( shape ) {
-      sceneryAssert && sceneryAssert( shape === null || shape instanceof Shape, 'mouseArea needs to be a kite.Shape, or null' );
+      assert && assert( shape === null || shape instanceof Shape, 'mouseArea needs to be a kite.Shape, or null' );
       
       if ( this._mouseArea !== shape ) {
         this._mouseArea = shape; // TODO: could change what is under the mouse, invalidate!
@@ -10825,7 +11371,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     },
     
     setTouchArea: function( shape ) {
-      sceneryAssert && sceneryAssert( shape === null || shape instanceof Shape, 'touchArea needs to be a kite.Shape, or null' );
+      assert && assert( shape === null || shape instanceof Shape, 'touchArea needs to be a kite.Shape, or null' );
       
       if ( this._touchArea !== shape ) {
         this._touchArea = shape; // TODO: could change what is under the touch, invalidate!
@@ -10836,6 +11382,22 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     
     getTouchArea: function() {
       return this._touchArea;
+    },
+    
+    setClipArea: function( shape ) {
+      assert && assert( shape === null || shape instanceof Shape, 'clipArea needs to be a kite.Shape, or null' );
+      
+      if ( this._clipArea !== shape ) {
+        this.notifyBeforeSubtreeChange();
+        
+        this._clipArea = shape;
+        
+        this.notifyClipChange();
+      }
+    },
+    
+    getClipArea: function() {
+      return this._clipArea;
     },
     
     updateLayerType: function() {
@@ -10866,7 +11428,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     setRenderer: function( renderer ) {
       var newRenderer;
       if ( typeof renderer === 'string' ) {
-        sceneryAssert && sceneryAssert( scenery.Renderer[renderer], 'unknown renderer in setRenderer: ' + renderer );
+        assert && assert( scenery.Renderer[renderer], 'unknown renderer in setRenderer: ' + renderer );
         newRenderer = scenery.Renderer[renderer];
       } else if ( renderer instanceof scenery.Renderer ) {
         newRenderer = renderer;
@@ -10876,7 +11438,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
         throw new Error( 'unrecognized type of renderer: ' + renderer );
       }
       if ( newRenderer !== this._renderer ) {
-        sceneryAssert && sceneryAssert( !this.isPainted() || !newRenderer || _.contains( this._supportedRenderers, newRenderer ), 'renderer ' + newRenderer + ' not supported by ' + this.constructor.name );
+        assert && assert( !this.isPainted() || !newRenderer || _.contains( this._supportedRenderers, newRenderer ), 'renderer ' + newRenderer + ' not supported by ' + this.constructor.name );
         this._renderer = newRenderer;
         
         this.updateLayerType();
@@ -10909,7 +11471,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     },
     
     setLayerSplitBefore: function( split ) {
-      sceneryAssert && sceneryAssert( typeof split === 'boolean' );
+      assert && assert( typeof split === 'boolean' );
       
       if ( this._layerSplitBefore !== split ) {
         this._layerSplitBefore = split;
@@ -10922,7 +11484,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     },
     
     setLayerSplitAfter: function( split ) {
-      sceneryAssert && sceneryAssert( typeof split === 'boolean' );
+      assert && assert( typeof split === 'boolean' );
       
       if ( this._layerSplitAfter !== split ) {
         this._layerSplitAfter = split;
@@ -10935,7 +11497,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     },
     
     setLayerSplit: function( split ) {
-      sceneryAssert && sceneryAssert( typeof split === 'boolean' );
+      assert && assert( typeof split === 'boolean' );
       
       if ( split !== this._layerSplitBefore || split !== this._layerSplitAfter ) {
         this._layerSplitBefore = split;
@@ -10951,7 +11513,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
       
       while ( node ) {
         trail.addAncestor( node );
-        sceneryAssert && sceneryAssert( node._parents.length <= 1 );
+        assert && assert( node._parents.length <= 1 );
         node = node._parents[0]; // should be undefined if there aren't any parents
       }
       
@@ -11003,7 +11565,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
       }
       
       // ensure that there are no edges left, since then it would contain a circular reference
-      sceneryAssert && sceneryAssert( _.every( edges, function( children ) {
+      assert && assert( _.every( edges, function( children ) {
         return _.every( children, function( final ) { return false; } );
       } ), 'circular reference check' );
       
@@ -11153,7 +11715,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
           new scenery.Image( canvas, { x: -x, y: -y } )
         ] } );
       }, x, y, width, height );
-      sceneryAssert && sceneryAssert( result, 'toCanvasNodeSynchronous requires that the node can be rendered only using Canvas' );
+      assert && assert( result, 'toCanvasNodeSynchronous requires that the node can be rendered only using Canvas' );
       return result;
     },
     
@@ -11165,7 +11727,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
           new scenery.Image( dataURL, { x: -x, y: -y } )
         ] } );
       }, x, y, width, height );
-      sceneryAssert && sceneryAssert( result, 'toDataURLNodeSynchronous requires that the node can be rendered only using Canvas' );
+      assert && assert( result, 'toDataURLNodeSynchronous requires that the node can be rendered only using Canvas' );
       return result;
     },
     
@@ -11178,8 +11740,8 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     },
     
     addInstance: function( instance ) {
-      sceneryAssert && sceneryAssert( instance.getNode() === this, 'Must be an instance of this Node' );
-      sceneryAssert && sceneryAssert( !_.find( this._instances, function( other ) { return instance.equals( other ); } ), 'Cannot add duplicates of an instance to a Node' );
+      assert && assert( instance.getNode() === this, 'Must be an instance of this Node' );
+      assert && assert( !_.find( this._instances, function( other ) { return instance.equals( other ); } ), 'Cannot add duplicates of an instance to a Node' );
       this._instances.push( instance );
       if ( this._instances.length === 1 ) {
         this.firstInstanceAdded();
@@ -11207,14 +11769,14 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
         }
         // leave it as undefined if we don't find one
       }
-      sceneryAssert && sceneryAssert( result, 'Could not find an instance for the trail ' + trail.toString() );
-      sceneryAssert && sceneryAssert( result.trail.equals( trail ), 'Instance has an incorrect Trail' );
+      assert && assert( result, 'Could not find an instance for the trail ' + trail.toString() );
+      assert && assert( result.trail.equals( trail ), 'Instance has an incorrect Trail' );
       return result;
     },
     
     removeInstance: function( instance ) {
       var index = _.indexOf( this._instances, instance ); // actual instance equality (NOT capitalized, normal meaning)
-      sceneryAssert && sceneryAssert( index !== -1, 'Cannot remove an Instance from a Node if it was not there' );
+      assert && assert( index !== -1, 'Cannot remove an Instance from a Node if it was not there' );
       this._instances.splice( index, 1 );
       if ( this._instances.length === 0 ) {
         this.lastInstanceRemoved();
@@ -11236,6 +11798,13 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
       var i = this._instances.length;
       while ( i-- ) {
         this._instances[i].notifyOpacityChange();
+      }
+    },
+    
+    notifyClipChange: function() {
+      var i = this._instances.length;
+      while ( i-- ) {
+        this._instances[i].notifyClipChange();
       }
     },
     
@@ -11353,7 +11922,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
       // concatenation like this has been faster than getting a unique trail, getting its transform, and applying it
       while ( node ) {
         matrices.push( node._transform.getMatrix() );
-        sceneryAssert && sceneryAssert( node._parents[1] === undefined, 'getLocalToGlobalMatrix unable to work for DAG' );
+        assert && assert( node._parents[1] === undefined, 'getLocalToGlobalMatrix unable to work for DAG' );
         node = node._parents[0];
       }
       
@@ -11385,7 +11954,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
       while ( node ) {
         // in-place multiplication
         node._transform.getMatrix().multiplyVector2( resultPoint );
-        sceneryAssert && sceneryAssert( node._parents[1] === undefined, 'localToGlobalPoint unable to work for DAG' );
+        assert && assert( node._parents[1] === undefined, 'localToGlobalPoint unable to work for DAG' );
         node = node._parents[0];
       }
       return resultPoint;
@@ -11399,7 +11968,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
       var transforms = [];
       while ( node ) {
         transforms.push( node._transform );
-        sceneryAssert && sceneryAssert( node._parents[1] === undefined, 'globalToLocalPoint unable to work for DAG' );
+        assert && assert( node._parents[1] === undefined, 'globalToLocalPoint unable to work for DAG' );
         node = node._parents[0];
       }
       
@@ -11426,29 +11995,29 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     
     // like localToGlobalPoint, but without applying this node's transform
     parentToGlobalPoint: function( point ) {
-      sceneryAssert && sceneryAssert( this.parents.length <= 1, 'parentToGlobalPoint unable to work for DAG' );
+      assert && assert( this.parents.length <= 1, 'parentToGlobalPoint unable to work for DAG' );
       return this.parents.length ? this.parents[0].localToGlobalPoint( point ) : point;
     },
     
     // like localToGlobalBounds, but without applying this node's transform
     parentToGlobalBounds: function( bounds ) {
-      sceneryAssert && sceneryAssert( this.parents.length <= 1, 'parentToGlobalBounds unable to work for DAG' );
+      assert && assert( this.parents.length <= 1, 'parentToGlobalBounds unable to work for DAG' );
       return this.parents.length ? this.parents[0].localToGlobalBounds( bounds ) : bounds;
     },
     
     globalToParentPoint: function( point ) {
-      sceneryAssert && sceneryAssert( this.parents.length <= 1, 'globalToParentPoint unable to work for DAG' );
+      assert && assert( this.parents.length <= 1, 'globalToParentPoint unable to work for DAG' );
       return this.parents.length ? this.parents[0].globalToLocalPoint( point ) : point;
     },
     
     globalToParentBounds: function( bounds ) {
-      sceneryAssert && sceneryAssert( this.parents.length <= 1, 'globalToParentBounds unable to work for DAG' );
+      assert && assert( this.parents.length <= 1, 'globalToParentBounds unable to work for DAG' );
       return this.parents.length ? this.parents[0].globalToLocalBounds( bounds ) : bounds;
     },
     
     // get the Bounds2 of this node in the global coordinate frame.  Does not work for DAG.
     getGlobalBounds: function() {
-      sceneryAssert && sceneryAssert( this.parents.length <= 1, 'globalBounds unable to work for DAG' );
+      assert && assert( this.parents.length <= 1, 'globalBounds unable to work for DAG' );
       return this.parentToGlobalBounds( this.getBounds() );
     },
     
@@ -11489,6 +12058,9 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     
     set touchArea( value ) { this.setTouchArea( value ); },
     get touchArea() { return this.getTouchArea(); },
+    
+    set clipArea( value ) { this.setClipArea( value ); },
+    get clipArea() { return this.getClipArea(); },
     
     set visible( value ) { this.setVisible( value ); },
     get visible() { return this.isVisible(); },
@@ -11548,6 +12120,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     get bounds() { return this.getBounds(); },
     get selfBounds() { return this.getSelfBounds(); },
     get childBounds() { return this.getChildBounds(); },
+    get localBounds() { return this.getLocalBounds(); },
     get globalBounds() { return this.getGlobalBounds(); },
     get visibleBounds() { return this.getVisibleBounds(); },
     get id() { return this.getId(); },
@@ -11657,7 +12230,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
    */
   Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
                                   'left', 'right', 'top', 'bottom', 'center', 'centerX', 'centerY', 'renderer', 'rendererOptions',
-                                  'layerSplit', 'layerSplitBefore', 'layerSplitAfter', 'mouseArea', 'touchArea' ];
+                                  'layerSplit', 'layerSplitBefore', 'layerSplitAfter', 'mouseArea', 'touchArea', 'clipArea' ];
   
   Node.prototype._supportedRenderers = [];
   
@@ -11704,7 +12277,7 @@ define( 'SCENERY/util/Trail',['require','DOT/Matrix3','DOT/Transform3','SCENERY/
      * If set to true, add/remove descendant/ancestor should fail if assertions are enabled
      * Use setImmutable() or setMutable() to signal a specific type of protection, so it cannot be changed later
      */
-    if ( sceneryAssert ) {
+    if ( assert ) {
       // only do this if assertions are enabled, otherwise we won't access it at all
       this.immutable = undefined;
     }
@@ -11779,6 +12352,22 @@ define( 'SCENERY/util/Trail',['require','DOT/Matrix3','DOT/Transform3','SCENERY/
       return opacity;
     },
     
+    // essentially whether this node is visited in the hit-testing operation
+    isPickable: function() {
+      // it won't be if it or any ancestor is pickable: false, or is invisible
+      if ( _.some( this.nodes, function( node ) { return node._pickable === false || node._visible === false; } ) ) { return false; }
+      
+      // if there is any listener or pickable: true, it will be pickable
+      if ( _.some( this.nodes, function( node ) { return node._pickable === true || node._inputListeners.length > 0; } ) ) { return true; }
+      
+      if ( this.lastNode()._subtreePickableCount > 0 ) {
+        return true;
+      }
+      
+      // no listeners or pickable: true, so it will be pruned
+      return false;
+    },
+    
     get: function( index ) {
       if ( index >= 0 ) {
         return this.nodes[index];
@@ -11844,8 +12433,8 @@ define( 'SCENERY/util/Trail',['require','DOT/Matrix3','DOT/Transform3','SCENERY/
     },
     
     addAncestor: function( node, index ) {
-      sceneryAssert && sceneryAssert( !this.immutable, 'cannot modify an immutable Trail with addAncestor' );
-      sceneryAssert && sceneryAssert( node, 'cannot add falsy value to a Trail' );
+      assert && assert( !this.immutable, 'cannot modify an immutable Trail with addAncestor' );
+      assert && assert( node, 'cannot add falsy value to a Trail' );
       
       
       if ( this.nodes.length ) {
@@ -11861,8 +12450,8 @@ define( 'SCENERY/util/Trail',['require','DOT/Matrix3','DOT/Transform3','SCENERY/
     },
     
     removeAncestor: function() {
-      sceneryAssert && sceneryAssert( !this.immutable, 'cannot modify an immutable Trail with removeAncestor' );
-      sceneryAssert && sceneryAssert( this.length > 0, 'cannot remove a Node from an empty trail' );
+      assert && assert( !this.immutable, 'cannot modify an immutable Trail with removeAncestor' );
+      assert && assert( this.length > 0, 'cannot remove a Node from an empty trail' );
       
       this.nodes.shift();
       if ( this.indices.length ) {
@@ -11875,8 +12464,8 @@ define( 'SCENERY/util/Trail',['require','DOT/Matrix3','DOT/Transform3','SCENERY/
     },
     
     addDescendant: function( node, index ) {
-      sceneryAssert && sceneryAssert( !this.immutable, 'cannot modify an immutable Trail with addDescendant' );
-      sceneryAssert && sceneryAssert( node, 'cannot add falsy value to a Trail' );
+      assert && assert( !this.immutable, 'cannot modify an immutable Trail with addDescendant' );
+      assert && assert( node, 'cannot add falsy value to a Trail' );
       
       
       if ( this.nodes.length ) {
@@ -11892,8 +12481,8 @@ define( 'SCENERY/util/Trail',['require','DOT/Matrix3','DOT/Transform3','SCENERY/
     },
     
     removeDescendant: function() {
-      sceneryAssert && sceneryAssert( !this.immutable, 'cannot modify an immutable Trail with removeDescendant' );
-      sceneryAssert && sceneryAssert( this.length > 0, 'cannot remove a Node from an empty trail' );
+      assert && assert( !this.immutable, 'cannot modify an immutable Trail with removeDescendant' );
+      assert && assert( this.length > 0, 'cannot remove a Node from an empty trail' );
       
       this.nodes.pop();
       if ( this.indices.length ) {
@@ -11921,8 +12510,8 @@ define( 'SCENERY/util/Trail',['require','DOT/Matrix3','DOT/Transform3','SCENERY/
     
     setImmutable: function() {
       // if assertions are disabled, we hope this is inlined as a no-op
-      if ( sceneryAssert ) {
-        sceneryAssert( this.immutable !== false, 'A trail cannot be made immutable after being flagged as mutable' );
+      if ( assert ) {
+        assert( this.immutable !== false, 'A trail cannot be made immutable after being flagged as mutable' );
         this.immutable = true;
       }
       
@@ -11933,8 +12522,8 @@ define( 'SCENERY/util/Trail',['require','DOT/Matrix3','DOT/Transform3','SCENERY/
     
     setMutable: function() {
       // if assertions are disabled, we hope this is inlined as a no-op
-      if ( sceneryAssert ) {
-        sceneryAssert( this.immutable !== true, 'A trail cannot be made mutable after being flagged as immutable' );
+      if ( assert ) {
+        assert( this.immutable !== true, 'A trail cannot be made mutable after being flagged as immutable' );
         this.immutable = false;
       }
       
@@ -11968,14 +12557,14 @@ define( 'SCENERY/util/Trail',['require','DOT/Matrix3','DOT/Transform3','SCENERY/
     // returns a new Trail from the root up to the parameter node.
     upToNode: function( node ) {
       var nodeIndex = _.indexOf( this.nodes, node );
-      sceneryAssert && sceneryAssert( nodeIndex >= 0, 'Trail does not contain the node' );
+      assert && assert( nodeIndex >= 0, 'Trail does not contain the node' );
       return this.slice( 0, _.indexOf( this.nodes, node ) + 1 );
     },
     
     // whether this trail contains the complete 'other' trail, but with added descendants afterwards
     isExtensionOf: function( other, allowSameTrail ) {
-      sceneryAssertExtra && sceneryAssertExtra( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed' );
-      sceneryAssertExtra && sceneryAssertExtra( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed' );
+      assertSlow && assertSlow( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed' );
+      assertSlow && assertSlow( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed' );
       
       if ( this.length <= other.length - ( allowSameTrail ? 1 : 0 ) ) {
         return false;
@@ -11988,6 +12577,49 @@ define( 'SCENERY/util/Trail',['require','DOT/Matrix3','DOT/Transform3','SCENERY/
       }
       
       return true;
+    },
+    
+    // a transform from our local coordinate frame to the other trail's local coordinate frame
+    getTransformTo: function( otherTrail ) {
+      return new Transform3( this.getMatrixTo( otherTrail ) );
+    },
+    
+    // returns a matrix that transforms a point in our last node's local coordinate frame to the other trail's last node's local coordinate frame
+    getMatrixTo: function( otherTrail ) {
+      this.reindex();
+      otherTrail.reindex();
+      
+      var branchIndex = this.getBranchIndexTo( otherTrail );
+      var idx;
+      
+      var matrix = Matrix3.IDENTITY;
+      
+      // walk our transform down, prepending
+      for ( idx = this.length-1; idx >= branchIndex; idx-- ) {
+        matrix = this.nodes[idx].getTransform().getMatrix().timesMatrix( matrix );
+      }
+      
+      // walk our transform up, prepending inverses
+      for ( idx = branchIndex; idx < otherTrail.length; idx++ ) {
+        matrix = otherTrail.nodes[idx].getTransform().getInverse().timesMatrix( matrix );
+      }
+      
+      return matrix;
+    },
+    
+    // the first index that is different between this trail and the other trail
+    getBranchIndexTo: function( otherTrail ) {
+      assert && assert( this.nodes[0] === otherTrail.nodes[0], 'To get a branch index, the trails must have the same root' );
+      
+      var branchIndex;
+      
+      for ( branchIndex = 0; branchIndex < Math.min( this.length, otherTrail.length ); branchIndex++ ) {
+        if ( this.nodes[branchIndex] !== otherTrail.nodes[branchIndex] ) {
+          break;
+        }
+      }
+      
+      return branchIndex;
     },
     
     // TODO: phase out in favor of get()
@@ -12013,7 +12645,7 @@ define( 'SCENERY/util/Trail',['require','DOT/Matrix3','DOT/Transform3','SCENERY/
       var parent = this.nodeFromTop( 1 );
       
       var parentIndex = _.indexOf( parent._children, top );
-      sceneryAssert && sceneryAssert( parentIndex !== -1 );
+      assert && assert( parentIndex !== -1 );
       var arr = this.nodes.slice( 0, this.nodes.length - 1 );
       if ( parentIndex === 0 ) {
         // we were the first child, so give it the trail to the parent
@@ -12084,7 +12716,7 @@ define( 'SCENERY/util/Trail',['require','DOT/Matrix3','DOT/Transform3','SCENERY/
       return result;
     },
     
-    // calls callback( trail ) for this trail, and each descendant trail
+    // calls callback( trail ) for this trail, and each descendant trail. If callback returns true, subtree will be skipped
     eachTrailUnder: function( callback ) {
       // TODO: performance: should be optimized to be much faster, since we don't have to deal with the before/after
       new scenery.TrailPointer( this, true ).eachTrailBetween( new scenery.TrailPointer( this, false ), callback );
@@ -12100,11 +12732,11 @@ define( 'SCENERY/util/Trail',['require','DOT/Matrix3','DOT/Transform3','SCENERY/
      * Comparison is for the rendering order, so an ancestor is 'before' a descendant
      */
     compare: function( other ) {
-      sceneryAssert && sceneryAssert( !this.isEmpty(), 'cannot compare with an empty trail' );
-      sceneryAssert && sceneryAssert( !other.isEmpty(), 'cannot compare with an empty trail' );
-      sceneryAssert && sceneryAssert( this.nodes[0] === other.nodes[0], 'for Trail comparison, trails must have the same root node' );
-      sceneryAssertExtra && sceneryAssertExtra( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed on ' + this.toString() );
-      sceneryAssertExtra && sceneryAssertExtra( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed on ' + other.toString() );
+      assert && assert( !this.isEmpty(), 'cannot compare with an empty trail' );
+      assert && assert( !other.isEmpty(), 'cannot compare with an empty trail' );
+      assert && assert( this.nodes[0] === other.nodes[0], 'for Trail comparison, trails must have the same root node' );
+      assertSlow && assertSlow( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed on ' + this.toString() );
+      assertSlow && assertSlow( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed on ' + other.toString() );
       
       var minNodeIndex = Math.min( this.indices.length, other.indices.length );
       for ( var i = 0; i < minNodeIndex; i++ ) {
@@ -12186,10 +12818,10 @@ define( 'SCENERY/util/Trail',['require','DOT/Matrix3','DOT/Transform3','SCENERY/
     // concatenates the unique IDs of nodes in the trail, so that we can do id-based lookups
     getUniqueId: function() {
       // sanity checks
-      if ( sceneryAssert ) {
+      if ( assert ) {
         var oldUniqueId = this.uniqueId;
         this.updateUniqueId();
-        sceneryAssert( oldUniqueId === this.uniqueId );
+        assert( oldUniqueId === this.uniqueId );
       }
       return this.uniqueId;
     },
@@ -12203,16 +12835,16 @@ define( 'SCENERY/util/Trail',['require','DOT/Matrix3','DOT/Transform3','SCENERY/
     }
   };
   
-  // like eachTrailBetween, but only fires for painted trails
+  // like eachTrailBetween, but only fires for painted trails. If callback returns true, subtree will be skipped
   Trail.eachPaintedTrailBetween = function( a, b, callback, excludeEndTrails, scene ) {
     Trail.eachTrailBetween( a, b, function( trail ) {
       if ( trail && trail.isPainted() ) {
-        callback( trail );
+        return callback( trail );
       }
     }, excludeEndTrails, scene );
   };
   
-  // global way of iterating across trails
+  // global way of iterating across trails. when callback returns true, subtree will be skipped
   Trail.eachTrailBetween = function( a, b, callback, excludeEndTrails, scene ) {
     var aPointer = a ? new scenery.TrailPointer( a.copy(), true ) : new scenery.TrailPointer( new scenery.Trail( scene ), true );
     var bPointer = b ? new scenery.TrailPointer( b.copy(), true ) : new scenery.TrailPointer( new scenery.Trail( scene ), false );
@@ -12230,7 +12862,7 @@ define( 'SCENERY/util/Trail',['require','DOT/Matrix3','DOT/Transform3','SCENERY/
     
     aPointer.depthFirstUntil( bPointer, function( pointer ) {
       if ( pointer.isBefore ) {
-        callback( pointer.trail );
+        return callback( pointer.trail );
       }
     }, false );
   };
@@ -12288,7 +12920,7 @@ define( 'SCENERY/input/DownUpListener',['require','SCENERY/scenery','SCENERY/uti
     this.downListener = {
       // mouse/touch up
       up: function( event ) {
-        sceneryAssert && sceneryAssert( event.pointer === handler.pointer );
+        assert && assert( event.pointer === handler.pointer );
         if ( !event.pointer.isMouse || event.domEvent.button === handler.options.mouseButton ) {
           handler.buttonUp( event );
         }
@@ -12296,7 +12928,7 @@ define( 'SCENERY/input/DownUpListener',['require','SCENERY/scenery','SCENERY/uti
       
       // touch cancel
       cancel: function( event ) {
-        sceneryAssert && sceneryAssert( event.pointer === handler.pointer );
+        assert && assert( event.pointer === handler.pointer );
         handler.buttonUp( event );
       }
     };
@@ -12456,7 +13088,7 @@ define( 'SCENERY/input/ButtonListener',['require','SCENERY/scenery','SCENERY/uti
     },
 
     exit: function( event ) {
-      sceneryAssert && sceneryAssert( this._overCount > 0, 'Exit events not matched by an enter' );
+      assert && assert( this._overCount > 0, 'Exit events not matched by an enter' );
       this._overCount--;
       if ( this._overCount === 0 ) {
         this.setButtonState( event, this.isDown ? 'out' : 'up' );
@@ -12511,7 +13143,7 @@ define( 'SCENERY/input/Event',['require','SCENERY/scenery'],function( require ) 
   
   scenery.Event = function Event( args ) {
     // ensure that all of the required args are supplied
-    sceneryAssert && sceneryAssert( args.trail &&
+    assert && assert( args.trail &&
                       args.type &&
                       args.pointer &&
                       args.target, 'Missing required scenery.Event argument' );
@@ -12586,14 +13218,14 @@ define( 'SCENERY/input/Pointer',['require','SCENERY/scenery'],function( require 
     constructor: Pointer,
     
     addInputListener: function( listener ) {
-      sceneryAssert && sceneryAssert( !_.contains( this.listeners, listener ) );
+      assert && assert( !_.contains( this.listeners, listener ) );
       
       this.listeners.push( listener );
     },
     
     removeInputListener: function( listener ) {
       var index = _.indexOf( this.listeners, listener );
-      sceneryAssert && sceneryAssert( index !== -1 );
+      assert && assert( index !== -1 );
       
       this.listeners.splice( index, 1 );
     }
@@ -12631,11 +13263,26 @@ define( 'SCENERY/input/Mouse',['require','PHET_CORE/inherit','SCENERY/scenery','
     
     this.trail = null;
     
+    // overrides the cursor of whatever is under it when set
+    this._cursor = null;
+    
     this.type = 'mouse';
   };
   var Mouse = scenery.Mouse;
   
   inherit( Pointer, Mouse, {
+    set cursor( value ) { return this.setCursor( value ); },
+    get cursor() { return this._cursor; },
+    
+    setCursor: function( value ) {
+      this._cursor = value;
+      return this; // allow chaining
+    },
+    
+    clearCursor: function() {
+      this.setCursor( null );
+    },
+    
     down: function( point, event ) {
       // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
@@ -12862,23 +13509,44 @@ define( 'SCENERY/input/Input',['require','SCENERY/scenery','SCENERY/util/Trail',
     this.batchDOMEvents = batchDOMEvents;
     
     this.batchedCallbacks = []; // cleared every frame
-    
-    this.mouse = new scenery.Mouse();
-    
-    this.pointers = [ this.mouse ];
+
+    //Pointer for mouse, only created lazily on first mouse event, so no mouse is allocated on tablets
+    this.mouse = null;
+
+    this.pointers = [];
     
     this.listenerReferences = [];
     
     this.eventLog = [];     // written when recording event input. can be overwritten to the empty array to reset. Strings relative to this class (prefix "scene.input.")
     this.logEvents = false; // can be set to true to cause Scenery to record all input calls to eventLog
+
+    this.pointerAddedListeners = [];
   };
   var Input = scenery.Input;
   
   Input.prototype = {
     constructor: Input,
-    
+
     addPointer: function( pointer ) {
       this.pointers.push( pointer );
+
+      //Callback for showing pointer events.  Optimized for performance.
+      if ( this.pointerAddedListeners.length ) {
+        for ( var i = 0; i < this.pointerAddedListeners.length; i++ ) {
+          this.pointerAddedListeners[i]( pointer );
+        }
+      }
+    },
+
+    addPointerAddedListener: function( listener ) {
+      this.pointerAddedListeners.push(listener);
+    },
+
+    removePointerAddedListener: function( listener ) {
+      var index = this.pointerAddedListeners.indexOf( listener );
+      if ( index !== -1 ) {
+        this.pointerAddedListeners.splice( index, index + 1 );
+      }
     },
     
     removePointer: function( pointer ) {
@@ -12902,46 +13570,58 @@ define( 'SCENERY/input/Input',['require','SCENERY/scenery','SCENERY/util/Trail',
     },
     
     findKeyByEvent: function( event ) {
-      sceneryAssert && sceneryAssert( event.keyCode && event.charCode, 'Assumes the KeyboardEvent has keyCode and charCode properties' );
+      assert && assert( event.hasOwnProperty( 'keyCode' ) && event.hasOwnProperty('charCode'), 'Assumes the KeyboardEvent has keyCode and charCode properties' );
       var result = _.find( this.pointers, function( pointer ) {
         // TODO: also check location (if that exists), so we don't mix up left and right shift, etc.
         return pointer.keyCode === event.keyCode && pointer.charCode === event.charCode;
       } );
-      // sceneryAssert && sceneryAssert( result, 'No key found for the combination of key:' + event.key + ' and location:' + event.location );
+      // assert && assert( result, 'No key found for the combination of key:' + event.key + ' and location:' + event.location );
       return result;
+    },
+
+    //Init the mouse on the first mouse event (if any!)
+    initMouse: function() {
+      this.mouse = new scenery.Mouse();
+      this.addPointer( this.mouse );
     },
     
     mouseDown: function( point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'mouseDown(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      if ( !this.mouse ) { this.initMouse(); }
       this.mouse.down( point, event );
       this.downEvent( this.mouse, event );
     },
     
     mouseUp: function( point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'mouseUp(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      if ( !this.mouse ) { this.initMouse(); }
       this.mouse.up( point, event );
       this.upEvent( this.mouse, event );
     },
     
     mouseUpImmediate: function( point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'mouseUpImmediate(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      if ( !this.mouse ) { this.initMouse(); }
       this.upImmediateEvent( this.mouse, event );
     },
     
     mouseMove: function( point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'mouseMove(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      if ( !this.mouse ) { this.initMouse(); }
       this.mouse.move( point, event );
       this.moveEvent( this.mouse, event );
     },
     
     mouseOver: function( point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'mouseOver(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      if ( !this.mouse ) { this.initMouse(); }
       this.mouse.over( point, event );
       // TODO: how to handle mouse-over (and log it)
     },
     
     mouseOut: function( point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'mouseOut(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      if ( !this.mouse ) { this.initMouse(); }
       this.mouse.out( point, event );
       // TODO: how to handle mouse-out (and log it)
     },
@@ -12987,7 +13667,7 @@ define( 'SCENERY/input/Input',['require','SCENERY/scenery','SCENERY/util/Trail',
         this.removePointer( touch );
         this.upEvent( touch, event );
       } else {
-        sceneryAssert && sceneryAssert( false, 'Touch not found for touchEnd: ' + id );
+        assert && assert( false, 'Touch not found for touchEnd: ' + id );
       }
     },
     
@@ -12997,7 +13677,7 @@ define( 'SCENERY/input/Input',['require','SCENERY/scenery','SCENERY/util/Trail',
       if ( touch ) {
         this.upImmediateEvent( touch, event );
       } else {
-        sceneryAssert && sceneryAssert( false, 'Touch not found for touchEndImmediate: ' + id );
+        assert && assert( false, 'Touch not found for touchEndImmediate: ' + id );
       }
     },
     
@@ -13008,7 +13688,7 @@ define( 'SCENERY/input/Input',['require','SCENERY/scenery','SCENERY/util/Trail',
         touch.move( point, event );
         this.moveEvent( touch, event );
       } else {
-        sceneryAssert && sceneryAssert( false, 'Touch not found for touchMove: ' + id );
+        assert && assert( false, 'Touch not found for touchMove: ' + id );
       }
     },
     
@@ -13020,7 +13700,7 @@ define( 'SCENERY/input/Input',['require','SCENERY/scenery','SCENERY/util/Trail',
         this.removePointer( touch );
         this.cancelEvent( touch, event );
       } else {
-        sceneryAssert && sceneryAssert( false, 'Touch not found for touchCancel: ' + id );
+        assert && assert( false, 'Touch not found for touchCancel: ' + id );
       }
     },
     
@@ -13040,7 +13720,7 @@ define( 'SCENERY/input/Input',['require','SCENERY/scenery','SCENERY/util/Trail',
         this.removePointer( pen );
         this.upEvent( pen, event );
       } else {
-        sceneryAssert && sceneryAssert( false, 'Pen not found for penEnd: ' + id );
+        assert && assert( false, 'Pen not found for penEnd: ' + id );
       }
     },
     
@@ -13050,7 +13730,7 @@ define( 'SCENERY/input/Input',['require','SCENERY/scenery','SCENERY/util/Trail',
       if ( pen ) {
         this.upImmediateEvent( pen, event );
       } else {
-        sceneryAssert && sceneryAssert( false, 'Pen not found for penEndImmediate: ' + id );
+        assert && assert( false, 'Pen not found for penEndImmediate: ' + id );
       }
     },
     
@@ -13061,7 +13741,7 @@ define( 'SCENERY/input/Input',['require','SCENERY/scenery','SCENERY/util/Trail',
         pen.move( point, event );
         this.moveEvent( pen, event );
       } else {
-        sceneryAssert && sceneryAssert( false, 'Pen not found for penMove: ' + id );
+        assert && assert( false, 'Pen not found for penMove: ' + id );
       }
     },
     
@@ -13073,7 +13753,7 @@ define( 'SCENERY/input/Input',['require','SCENERY/scenery','SCENERY/util/Trail',
         this.removePointer( pen );
         this.cancelEvent( pen, event );
       } else {
-        sceneryAssert && sceneryAssert( false, 'Pen not found for penCancel: ' + id );
+        assert && assert( false, 'Pen not found for penCancel: ' + id );
       }
     },
     
@@ -13526,6 +14206,7 @@ define( 'SCENERY/input/SimpleDragHandler',['require','DOT/Matrix3','SCENERY/scen
   /*
    * Allowed options: {
    *    allowTouchSnag: false // allow touch swipes across an object to pick it up,
+   *    dragCursor: 'pointer' // while dragging with the mouse, sets the cursor to this value (or use null to not override the cursor while dragging)
    *    mouseButton: 0        // allow changing the mouse button that activates the drag listener. -1 should activate on any mouse button, 0 on left, 1 for middle, 2 for right, etc.
    *    start: null           // if non-null, called when a drag is started. start( event, trail )
    *    drag: null            // if non-null, called when the user moves something with a drag (not a start or end event).
@@ -13539,7 +14220,8 @@ define( 'SCENERY/input/SimpleDragHandler',['require','DOT/Matrix3','SCENERY/scen
     
     this.options = _.extend( {
       allowTouchSnag: false,
-      mouseButton: 0
+      mouseButton: 0,
+      dragCursor: 'pointer'
     }, options );
     
     this.dragging              = false;     // whether a node is being dragged with this handler
@@ -13574,7 +14256,7 @@ define( 'SCENERY/input/SimpleDragHandler',['require','DOT/Matrix3','SCENERY/scen
     this.dragListener = {
       // mouse/touch up
       up: function( event ) {
-        sceneryAssert && sceneryAssert( event.pointer === handler.pointer );
+        assert && assert( event.pointer === handler.pointer );
         if ( !event.pointer.isMouse || event.domEvent.button === handler.mouseButton ) {
           var saveCurrentTarget = event.currentTarget;
           event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
@@ -13585,7 +14267,7 @@ define( 'SCENERY/input/SimpleDragHandler',['require','DOT/Matrix3','SCENERY/scen
       
       // touch cancel
       cancel: function( event ) {
-        sceneryAssert && sceneryAssert( event.pointer === handler.pointer );
+        assert && assert( event.pointer === handler.pointer );
 
         var saveCurrentTarget = event.currentTarget;
         event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
@@ -13600,7 +14282,7 @@ define( 'SCENERY/input/SimpleDragHandler',['require','DOT/Matrix3','SCENERY/scen
       
       // mouse/touch move
       move: function( event ) {
-        sceneryAssert && sceneryAssert( event.pointer === handler.pointer );
+        assert && assert( event.pointer === handler.pointer );
         
         var delta = handler.transform.inverseDelta2( handler.pointer.point.minus( handler.lastDragPoint ) );
         
@@ -13613,8 +14295,6 @@ define( 'SCENERY/input/SimpleDragHandler',['require','DOT/Matrix3','SCENERY/scen
             oldPosition: translation,
             position: translation.plus( delta )
           } );
-        } else {
-          handler.node.translate( delta, true );
         }
         handler.lastDragPoint = handler.pointer.point;
         
@@ -13637,6 +14317,7 @@ define( 'SCENERY/input/SimpleDragHandler',['require','DOT/Matrix3','SCENERY/scen
     startDrag: function( event ) {
       // set a flag on the pointer so it won't pick up other nodes
       event.pointer.dragging = true;
+      event.pointer.cursor = this.options.dragCursor;
       event.pointer.addInputListener( this.dragListener );
       // event.trail.rootNode().addEventListener( this.transformListener ); // TODO: replace with new parent transform listening solution
       
@@ -13658,6 +14339,7 @@ define( 'SCENERY/input/SimpleDragHandler',['require','DOT/Matrix3','SCENERY/scen
     
     endDrag: function( event ) {
       this.pointer.dragging = false;
+      this.pointer.cursor = null;
       this.pointer.removeInputListener( this.dragListener );
       // this.trail.rootNode().removeEventListener( this.transformListener ); // TODO: replace with new parent transform listening solution
       this.dragging = false;
@@ -13742,7 +14424,7 @@ define( 'SCENERY/layers/Layer',['require','DOT/Bounds2','DOT/Transform3','SCENER
     this.cssRotation = args.cssRotation;       // CSS for the rotation
     this.cssScale = args.cssScale;             // CSS for the scaling
     this.cssTransform = args.cssTransform;     // CSS for the entire base node (will ignore other partial transforms)
-    sceneryAssert && sceneryAssert( !( this.usesPartialCSSTransforms && this.cssTransform ), 'Do not specify both partial and complete CSS transform arguments.' );
+    assert && assert( !( this.usesPartialCSSTransforms && this.cssTransform ), 'Do not specify both partial and complete CSS transform arguments.' );
     
     // initialize to fully dirty so we draw everything the first time
     // bounds in global coordinate frame
@@ -13756,7 +14438,7 @@ define( 'SCENERY/layers/Layer',['require','DOT/Bounds2','DOT/Transform3','SCENER
       this.baseTrail = new scenery.Trail( this.scene );
     } else {
       this.baseTrail = this.startPaintedTrail.upToNode( this.baseNode );
-      sceneryAssert && sceneryAssert( this.baseTrail.lastNode() === this.baseNode );
+      assert && assert( this.baseTrail.lastNode() === this.baseNode );
     }
     
     // we reference all painted trails in an unordered way
@@ -13774,7 +14456,7 @@ define( 'SCENERY/layers/Layer',['require','DOT/Bounds2','DOT/Transform3','SCENER
     this.baseNode.addEventListener( 'childBounds', this.baseNodeBoundsListener );
     
     this.fitToBounds = this.usesPartialCSSTransforms || this.cssTransform;
-    sceneryAssert && sceneryAssert( this.fitToBounds || this.baseNode === this.scene, 'If the baseNode is not the scene, we need to fit the bounds' );
+    assert && assert( this.fitToBounds || this.baseNode === this.scene, 'If the baseNode is not the scene, we need to fit the bounds' );
     
     // used for CSS transforms where we need to transform our base node's bounds into the (0,0,w,h) bounds range
     this.baseNodeTransform = new Transform3();
@@ -13845,9 +14527,9 @@ define( 'SCENERY/layers/Layer',['require','DOT/Bounds2','DOT/Transform3','SCENER
     addInstance: function( instance ) {
       var trail = instance.trail;
       
-      if ( sceneryAssert ) {
+      if ( assert ) {
         _.each( this._layerTrails, function( otherTrail ) {
-          sceneryAssert( !trail.equals( otherTrail ), 'trail in addInstance should not already exist in a layer' );
+          assert( !trail.equals( otherTrail ), 'trail in addInstance should not already exist in a layer' );
         } );
       }
       
@@ -13866,7 +14548,7 @@ define( 'SCENERY/layers/Layer',['require','DOT/Bounds2','DOT/Transform3','SCENER
           break;
         }
       }
-      sceneryAssert && sceneryAssert( i < this._layerTrails.length );
+      assert && assert( i < this._layerTrails.length );
       
       this._layerTrails.splice( i, 1 );
     },
@@ -13890,7 +14572,7 @@ define( 'SCENERY/layers/Layer',['require','DOT/Bounds2','DOT/Transform3','SCENER
     },
     
     dispose: function() {
-      sceneryAssert && sceneryAssert( !this.disposed, 'Layer has already been disposed!' );
+      assert && assert( !this.disposed, 'Layer has already been disposed!' );
       
       this.disposed = true;
       
@@ -13953,7 +14635,7 @@ define( 'SCENERY/util/CanvasContextWrapper',['require','SCENERY/scenery'],functi
       this.lineWidth = undefined; // 1
       this.lineCap = undefined; // 'butt'
       this.lineJoin = undefined; // 'miter'
-      this.lineDash = undefined; // null
+      this.lineDash = undefined; // []
       this.lineDashOffset = undefined; // 0
       this.miterLimit = undefined; // 10
       
@@ -14017,7 +14699,7 @@ define( 'SCENERY/util/CanvasContextWrapper',['require','SCENERY/scenery'],functi
     },
     
     setLineDash: function( dash ) {
-      sceneryAssert && sceneryAssert( dash !== undefined, 'undefined line dash would cause hard-to-trace errors' );
+      assert && assert( dash !== undefined, 'undefined line dash would cause hard-to-trace errors' );
       if ( this.lineDash !== dash ) {
         this.lineDash = dash;
         if ( this.context.setLineDash ) {
@@ -14088,7 +14770,7 @@ define( 'SCENERY/util/TrailPointer',['require','SCENERY/scenery','SCENERY/util/T
    * isBefore: whether this points to before the node (and its children) have been rendered, or after
    */
   scenery.TrailPointer = function TrailPointer( trail, isBefore ) {
-    sceneryAssert && sceneryAssert( trail instanceof scenery.Trail, 'trail is not a trail' );
+    assert && assert( trail instanceof scenery.Trail, 'trail is not a trail' );
     this.trail = trail;
     
     this.setBefore( isBefore );
@@ -14133,7 +14815,7 @@ define( 'SCENERY/util/TrailPointer',['require','SCENERY/scenery','SCENERY/util/T
      * other pointer, and 1 if this pointer is after the other pointer.
      */
     compareRender: function( other ) {
-      sceneryAssert && sceneryAssert( other !== null );
+      assert && assert( other !== null );
       
       var a = this.getRenderBeforePointer();
       var b = other.getRenderBeforePointer();
@@ -14157,7 +14839,7 @@ define( 'SCENERY/util/TrailPointer',['require','SCENERY/scenery','SCENERY/util/T
      * TODO: optimization?
      */
     compareNested: function( other ) {
-      sceneryAssert && sceneryAssert( other );
+      assert && assert( other );
       
       var comparison = this.trail.compare( other.trail );
       
@@ -14263,7 +14945,7 @@ define( 'SCENERY/util/TrailPointer',['require','SCENERY/scenery','SCENERY/util/T
     // treats the pointer as render-ordered (includes the start pointer 'before' if applicable, excludes the end pointer 'before' if applicable
     eachNodeBetween: function( other, callback ) {
       this.eachTrailBetween( other, function( trail ) {
-        callback( trail.lastNode() );
+        return callback( trail.lastNode() );
       } );
     },
     
@@ -14278,7 +14960,7 @@ define( 'SCENERY/util/TrailPointer',['require','SCENERY/scenery','SCENERY/util/T
       
       this.depthFirstUntil( other, function( pointer ) {
         if ( pointer.isBefore ) {
-          callback( pointer.trail );
+          return callback( pointer.trail );
         }
       }, true ); // exclude the endpoints so we can ignore the ending 'before' case
     },
@@ -14293,8 +14975,8 @@ define( 'SCENERY/util/TrailPointer',['require','SCENERY/scenery','SCENERY/util/T
      */
     depthFirstUntil: function( other, callback, excludeEndpoints ) {
       // make sure this pointer is before the other, but allow start === end if we are not excluding endpoints
-      sceneryAssert && sceneryAssert( this.compareNested( other ) <= ( excludeEndpoints ? -1 : 0 ), 'TrailPointer.depthFirstUntil pointers out of order, possibly in both meanings of the phrase!' );
-      sceneryAssert && sceneryAssert( this.trail.rootNode() === other.trail.rootNode(), 'TrailPointer.depthFirstUntil takes pointers with the same root' );
+      assert && assert( this.compareNested( other ) <= ( excludeEndpoints ? -1 : 0 ), 'TrailPointer.depthFirstUntil pointers out of order, possibly in both meanings of the phrase!' );
+      assert && assert( this.trail.rootNode() === other.trail.rootNode(), 'TrailPointer.depthFirstUntil takes pointers with the same root' );
       
       // sanity check TODO: remove later
       this.trail.reindex();
@@ -14306,7 +14988,7 @@ define( 'SCENERY/util/TrailPointer',['require','SCENERY/scenery','SCENERY/util/T
       var first = true;
       
       while ( !pointer.equalsNested( other ) ) {
-        sceneryAssert && sceneryAssert( pointer.compareNested( other ) !== 1, 'skipped in depthFirstUntil' );
+        assert && assert( pointer.compareNested( other ) !== 1, 'skipped in depthFirstUntil' );
         var skipSubtree = false;
         
         if ( first ) {
@@ -14490,11 +15172,11 @@ define( 'SCENERY/util/Util',['require','SCENERY/scenery','DOT/Matrix3','DOT/Tran
     },
     
     testAssert: function() {
-      return 'assert.scenery: ' + ( sceneryAssert ? 'true' : 'false' );
+      return 'assert.basic: ' + ( assert ? 'true' : 'false' );
     },
     
     testAssertExtra: function() {
-      return 'assert.scenery.extra: ' + ( sceneryAssertExtra ? 'true' : 'false' );
+      return 'assert.slow: ' + ( assertSlow ? 'true' : 'false' );
     },
     
     /*---------------------------------------------------------------------------*
@@ -14978,16 +15660,16 @@ define( 'SCENERY/layers/CanvasLayer',['require','PHET_CORE/inherit','DOT/Bounds2
           node.transform.getMatrix().canvasAppendTransform( topWrapper().context );
         }
         
-        if ( node._clipShape ) {
+        if ( node._clipArea ) {
           // TODO: move to wrapper-specific part
-          layer.pushClipShape( node._clipShape );
+          layer.pushClipShape( node._clipArea );
         }
       }
       
       function exit( trail ) {
         var node = trail.lastNode();
         
-        if ( node._clipShape ) {
+        if ( node._clipArea ) {
           // TODO: move to wrapper-specific part
           layer.popClipShape();
         }
@@ -15211,14 +15893,14 @@ define( 'SCENERY/layers/CanvasLayer',['require','PHET_CORE/inherit','DOT/Bounds2
     },
     
     canUseDirtyRegions: function() {
-      sceneryAssert && sceneryAssert( this.boundlessCount >= 0 );
+      assert && assert( this.boundlessCount >= 0 );
       return this.boundlessCount === 0;
     },
     
     // NOTE: for performance, we will mutate the bounds passed in (they are almost assuredly from the local or parent bounds functions)
     canvasMarkGlobalBounds: function( globalBounds ) {
       sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' canvasMarkGlobalBounds: ' + globalBounds.toString() );
-      sceneryAssert && sceneryAssert( globalBounds.isEmpty() || globalBounds.isFinite(), 'Infinite (non-empty) dirty bounds passed to canvasMarkGlobalBounds' );
+      assert && assert( globalBounds.isEmpty() || globalBounds.isFinite(), 'Infinite (non-empty) dirty bounds passed to canvasMarkGlobalBounds' );
       
       // TODO: for performance, consider more than just a single dirty bounding box
       this.dirtyBounds = this.dirtyBounds.union( globalBounds.dilate( 2 ).roundOut() );
@@ -15269,6 +15951,13 @@ define( 'SCENERY/layers/CanvasLayer',['require','PHET_CORE/inherit','DOT/Bounds2
     
     notifyOpacityChange: function( instance ) {
       sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyOpacityChange: ' + instance.trail.toString() );
+      // old paint taken care of in notifyBeforeSubtreeChange()
+      
+      this.canvasMarkSubtree( instance );
+    },
+    
+    notifyClipChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyClipChange: ' + instance.trail.toString() );
       // old paint taken care of in notifyBeforeSubtreeChange()
       
       this.canvasMarkSubtree( instance );
@@ -15404,7 +16093,7 @@ define( 'SCENERY/layers/DOMLayer',['require','PHET_CORE/inherit','DOT/Bounds2','
         var otherTrail = this.trails[insertionIndex];
         otherTrail.reindex();
         var comparison = otherTrail.compare( trail );
-        sceneryAssert && sceneryAssert( comparison !== 0, 'Trail has already been inserted into the DOMLayer' );
+        assert && assert( comparison !== 0, 'Trail has already been inserted into the DOMLayer' );
         if ( comparison === 1 ) { // TODO: enum values!
           break;
         }
@@ -15427,7 +16116,7 @@ define( 'SCENERY/layers/DOMLayer',['require','PHET_CORE/inherit','DOT/Bounds2','
       this.reindexTrails();
       
       var element = this.getElementFromTrail( trail );
-      sceneryAssert && sceneryAssert( element, 'Trail does not exist in the DOMLayer' );
+      assert && assert( element, 'Trail does not exist in the DOMLayer' );
       
       delete this.idElementMap[trail.getUniqueId];
       delete this.idTrailMap[trail.getUniqueId];
@@ -15564,6 +16253,11 @@ define( 'SCENERY/layers/DOMLayer',['require','PHET_CORE/inherit','DOT/Bounds2','
     notifyOpacityChange: function( instance ) {
       sceneryLayerLog && sceneryLayerLog( 'DOMLayer #' + this.id + ' notifyOpacityChange: ' + instance.trail.toString() );
       // TODO: BROKEN: FIXME: DOM opacity is not handled yet, see issue #31: https://github.com/phetsims/scenery/issues/31
+    },
+    
+    notifyClipChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'DOMLayer #' + this.id + ' notifyClipChange: ' + instance.trail.toString() );
+      // TODO: BROKEN: FIXME: DOM clipping is not handled, see issue #31: https://github.com/phetsims/scenery/issues/31
     },
     
     // only a painted trail under this layer
@@ -16064,8 +16758,8 @@ define( 'SCENERY/layers/SVGLayer',['require','PHET_CORE/inherit','DOT/Bounds2','
       
       sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' addInstance: ' + trail.toString() );
       
-      sceneryAssert && sceneryAssert( !( trail.getUniqueId() in this.idFragmentMap ), 'Already contained that trail!' );
-      sceneryAssert && sceneryAssert( trail.isPainted(), 'Don\'t add nodes without isPainted() to SVGLayer' );
+      assert && assert( !( trail.getUniqueId() in this.idFragmentMap ), 'Already contained that trail!' );
+      assert && assert( trail.isPainted(), 'Don\'t add nodes without isPainted() to SVGLayer' );
       
       Layer.prototype.addInstance.call( this, instance );
       
@@ -16091,7 +16785,7 @@ define( 'SCENERY/layers/SVGLayer',['require','PHET_CORE/inherit','DOT/Bounds2','
             this.insertGroupIntoParent( group, this.idGroupMap[lastId], subtrail );
           } else {
             // we are ensuring the base group
-            sceneryAssert && sceneryAssert( subtrail.lastNode() === this.baseNode );
+            assert && assert( subtrail.lastNode() === this.baseNode );
             
             group = this.g;
             
@@ -16141,7 +16835,7 @@ define( 'SCENERY/layers/SVGLayer',['require','PHET_CORE/inherit','DOT/Bounds2','
       var trail = instance.trail;
       
       sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' removeInstance: ' + trail.toString() );
-      sceneryAssert && sceneryAssert( trail.getUniqueId() in this.idFragmentMap, 'Did not contain that trail!' );
+      assert && assert( trail.getUniqueId() in this.idFragmentMap, 'Did not contain that trail!' );
       
       Layer.prototype.removeInstance.call( this, instance );
       
@@ -16224,6 +16918,7 @@ define( 'SCENERY/layers/SVGLayer',['require','PHET_CORE/inherit','DOT/Bounds2','
       sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' updateNodeGroup: ' + node.constructor.name + ' #' + node.id );
       this.updateGroupVisibility( node, group );
       this.updateGroupOpacity( node, group );
+      this.updateGroupClip( node, group );
     },
     
     updateGroupVisibility: function( node, group ) {
@@ -16243,6 +16938,35 @@ define( 'SCENERY/layers/SVGLayer',['require','PHET_CORE/inherit','DOT/Bounds2','
         opacity = node.getOpacity();
       }
       group.setAttribute( 'opacity', opacity );
+    },
+    
+    updateGroupClip: function( node, group ) {
+      // TODO: optimization! this is not the fastest way of doing things
+      var clipId = 'clip' + node.getId();
+      
+      assert && assert( !( node === this.baseNode && node !== this.scene && node._clipArea ), 'clipArea not supported on CSS-transformed SVG elements (or the base for now)' );
+      
+      // remove any old defs
+      var oldDef = this.svg.getElementById( clipId );
+      if ( oldDef ) {
+        this.defs.removeChild( oldDef );
+      }
+      
+      if ( node._clipArea ) {
+        var definition = document.createElementNS( svgns, 'clipPath' );
+        definition.setAttribute( 'id', clipId );
+        definition.setAttribute( 'clipPathUnits', 'userSpaceOnUse' );
+        
+        var path = document.createElementNS( svgns, 'path' );
+        path.setAttribute( 'd', node._clipArea.getSVGPath() );
+        definition.appendChild( path );
+        
+        this.defs.appendChild( definition );
+        
+        group.setAttribute( 'clip-path', 'url(#' + clipId + ')' );
+      } else {
+        group.removeAttribute( 'clip-path' );
+      }
     },
     
     getFragmentFromInstance: function( instance ) {
@@ -16320,7 +17044,7 @@ define( 'SCENERY/layers/SVGLayer',['require','PHET_CORE/inherit','DOT/Bounds2','
           var baseNodeInteralBounds = internalBounds.transform( this.baseNodeTransform.getMatrix() );
           
           // sanity check to ensure we are within that range
-          sceneryAssert && sceneryAssert( baseNodeInteralBounds.minX >= 0 && baseNodeInteralBounds.minY >= 0 );
+          assert && assert( baseNodeInteralBounds.minX >= 0 && baseNodeInteralBounds.minY >= 0 );
           
           this.updateContainerDimensions( Math.ceil( baseNodeInteralBounds.maxX + padding ),
                                           Math.ceil( baseNodeInteralBounds.maxY + padding ) );
@@ -16505,6 +17229,18 @@ define( 'SCENERY/layers/SVGLayer',['require','PHET_CORE/inherit','DOT/Bounds2','
       } else if ( this.baseNode !== this.scene ) {
         // if we are using a CSS transform (basically)
         this.updateGroupOpacity( this.baseNode, this.getGroupFromInstance( this.baseTrail.getInstance() ) );
+      }
+    },
+    
+    notifyClipChange: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' notifyClipChange: ' + instance.trail.toString() );
+      var group = this.getGroupFromInstance( instance );
+      if ( group ) {
+        this.updateGroupClip( instance.getNode(), group );
+      } else if ( this.baseNode !== this.scene ) {
+        // if we are using a CSS transform (basically)
+        // TODO: clip combinations don't work yet, this won't really do anything (probably errors out)
+        this.updateGroupClip( this.baseNode, this.getGroupFromInstance( this.baseTrail.getInstance() ) );
       }
     },
     
@@ -16723,6 +17459,7 @@ define( 'SCENERY/nodes/Fillable',['require','SCENERY/scenery'],function( require
     // this should be called in the constructor to initialize
     proto.initializeFillable = function() {
       this._fill = null;
+      this._fillPickable = true;
       
       var that = this;
       this._fillListener = function() {
@@ -16755,6 +17492,21 @@ define( 'SCENERY/nodes/Fillable',['require','SCENERY/scenery'],function( require
         
         this.invalidatePaint();
         
+        this.invalidateFill();
+      }
+      return this;
+    };
+    
+    proto.isFillPickable = function() {
+      return this._fillPickable;
+    };
+    
+    proto.setFillPickable = function( pickable ) {
+      assert && assert( typeof pickable === 'boolean' );
+      if ( this._fillPickable !== pickable ) {
+        this._fillPickable = pickable;
+        
+        // TODO: better way of indicating that only the node under pointers could have changed, but no paint change is needed?
         this.invalidateFill();
       }
       return this;
@@ -16820,7 +17572,7 @@ define( 'SCENERY/nodes/Fillable',['require','SCENERY/scenery'],function( require
     };
     
     proto.getCSSFill = function() {
-      sceneryAssert && sceneryAssert( this.isFillDOMCompatible() );
+      assert && assert( this.isFillDOMCompatible() );
       
       // if it's a Color object, get the corresponding CSS
       // 'transparent' will make us invisible if the fill is null
@@ -16863,9 +17615,10 @@ define( 'SCENERY/nodes/Fillable',['require','SCENERY/scenery'],function( require
     };
     
     // on mutation, set the fill parameter first
-    proto._mutatorKeys = [ 'fill' ].concat( proto._mutatorKeys );
+    proto._mutatorKeys = [ 'fill', 'fillPickable' ].concat( proto._mutatorKeys );
     
     Object.defineProperty( proto, 'fill', { set: proto.setFill, get: proto.getFill } );
+    Object.defineProperty( proto, 'fillPickable', { set: proto.setFillPickable, get: proto.isFillPickable } );
     
     if ( !proto.invalidateFill ) {
       proto.invalidateFill = function() {
@@ -16902,6 +17655,7 @@ define( 'SCENERY/nodes/Strokable',['require','SCENERY/scenery','KITE/util/LineSt
     // this should be called in the constructor to initialize
     proto.initializeStrokable = function() {
       this._stroke = null;
+      this._strokePickable = false;
       this._lineDrawingStyles = new LineStyles();
       
       var that = this;
@@ -16969,7 +17723,7 @@ define( 'SCENERY/nodes/Strokable',['require','SCENERY/scenery','KITE/util/LineSt
       if ( this._lineDrawingStyles.lineDash !== lineDash ) {
         this.markOldSelfPaint();
         
-        this._lineDrawingStyles.lineDash = lineDash;
+        this._lineDrawingStyles.lineDash = lineDash || [];
         
         this.invalidateStroke();
       }
@@ -16986,6 +17740,21 @@ define( 'SCENERY/nodes/Strokable',['require','SCENERY/scenery','KITE/util/LineSt
         
         this._lineDrawingStyles.lineDashOffset = lineDashOffset;
         
+        this.invalidateStroke();
+      }
+      return this;
+    };
+    
+    proto.isStrokePickable = function() {
+      return this._strokePickable;
+    };
+    
+    proto.setStrokePickable = function( pickable ) {
+      assert && assert( typeof pickable === 'boolean' );
+      if ( this._strokePickable !== pickable ) {
+        this._strokePickable = pickable;
+        
+        // TODO: better way of indicating that only the node under pointers could have changed, but no paint change is needed?
         this.invalidateStroke();
       }
       return this;
@@ -17094,7 +17863,7 @@ define( 'SCENERY/nodes/Strokable',['require','SCENERY/scenery','KITE/util/LineSt
       style += 'stroke-width: ' + this.getLineWidth() + ';';
       style += 'stroke-linecap: ' + this.getLineCap() + ';';
       style += 'stroke-linejoin: ' + this.getLineJoin() + ';';
-      if ( this.getLineDash() ) {
+      if ( this.getLineDash().length ) {
         style += 'stroke-dasharray: ' + this.getLineDash().join( ',' ) + ';';
         style += 'stroke-dashoffset: ' + this.getLineDashOffset() + ';';
       }
@@ -17150,7 +17919,7 @@ define( 'SCENERY/nodes/Strokable',['require','SCENERY/scenery','KITE/util/LineSt
           }
         } );
         
-        if ( this.lineDash ) {
+        if ( this.lineDash.length ) {
           addProp( 'lineDash', JSON.stringify( this.lineDash ), true );
         }
       }
@@ -17159,7 +17928,7 @@ define( 'SCENERY/nodes/Strokable',['require','SCENERY/scenery','KITE/util/LineSt
     };
     
     // on mutation, set the stroke parameters first since they may affect the bounds (and thus later operations)
-    proto._mutatorKeys = [ 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'lineDash', 'lineDashOffset' ].concat( proto._mutatorKeys );
+    proto._mutatorKeys = [ 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'lineDash', 'lineDashOffset', 'strokePickable' ].concat( proto._mutatorKeys );
     
     // TODO: miterLimit support?
     Object.defineProperty( proto, 'stroke', { set: proto.setStroke, get: proto.getStroke } );
@@ -17168,6 +17937,7 @@ define( 'SCENERY/nodes/Strokable',['require','SCENERY/scenery','KITE/util/LineSt
     Object.defineProperty( proto, 'lineJoin', { set: proto.setLineJoin, get: proto.getLineJoin } );
     Object.defineProperty( proto, 'lineDash', { set: proto.setLineDash, get: proto.getLineDash } );
     Object.defineProperty( proto, 'lineDashOffset', { set: proto.setLineDashOffset, get: proto.getLineDashOffset } );
+    Object.defineProperty( proto, 'strokePickable', { set: proto.setStrokePickable, get: proto.isStrokePickable } );
     
     if ( !proto.invalidateStroke ) {
       proto.invalidateStroke = function() {
@@ -17190,11 +17960,12 @@ define( 'SCENERY/nodes/Strokable',['require','SCENERY/scenery','KITE/util/LineSt
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'SCENERY/nodes/Path',['require','PHET_CORE/inherit','KITE/Shape','SCENERY/scenery','SCENERY/nodes/Node','SCENERY/layers/Renderer','SCENERY/nodes/Fillable','SCENERY/nodes/Strokable','SCENERY/util/Util'],function( require ) {
+define( 'SCENERY/nodes/Path',['require','PHET_CORE/inherit','KITE/Shape','DOT/Bounds2','SCENERY/scenery','SCENERY/nodes/Node','SCENERY/layers/Renderer','SCENERY/nodes/Fillable','SCENERY/nodes/Strokable','SCENERY/util/Util'],function( require ) {
   
   
   var inherit = require( 'PHET_CORE/inherit' );
   var Shape = require( 'KITE/Shape' );
+  var Bounds2 = require( 'DOT/Bounds2' );
   
   var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
@@ -17205,7 +17976,9 @@ define( 'SCENERY/nodes/Path',['require','PHET_CORE/inherit','KITE/Shape','SCENER
   
   scenery.Path = function Path( shape, options ) {
     // TODO: consider directly passing in a shape object (or at least handling that case)
+    // NOTE: _shape can be lazily constructed, in the case of types like Rectangle where they have their own drawing code
     this._shape = null;
+    this._strokedShape = null; // a stroked copy of the shape, lazily computed
 
     // ensure we have a parameter object
     options = options || {};
@@ -17237,8 +18010,17 @@ define( 'SCENERY/nodes/Path',['require','PHET_CORE/inherit','KITE/Shape','SCENER
       return this._shape;
     },
     
+    getStrokedShape: function() {
+      if ( !this._strokedShape ) {
+        this._strokedShape = this.getShape().getStrokedShape( this._lineDrawingStyles );
+      }
+      return this._strokedShape;
+    },
+    
     invalidateShape: function() {
       this.markOldSelfPaint();
+      
+      this._strokedShape = null;
       
       if ( this.hasShape() ) {
         this.invalidateSelf( this.computeShapeBounds() );
@@ -17246,9 +18028,9 @@ define( 'SCENERY/nodes/Path',['require','PHET_CORE/inherit','KITE/Shape','SCENER
       }
     },
     
-    // separated out, so that we can override this with a faster version in Rectangle. includes the Stroke, if any
+    // separated out, so that we can override this with a faster version in subtypes. includes the Stroke, if any
     computeShapeBounds: function() {
-      return this._stroke ? this._shape.computeBounds( this._lineDrawingStyles ) : this._shape.bounds;
+      return this._stroke ? this.getStrokedShape().bounds : this.getShape().bounds;
     },
     
     // hook stroke mixin changes to invalidation
@@ -17331,15 +18113,19 @@ define( 'SCENERY/nodes/Path',['require','PHET_CORE/inherit','KITE/Shape','SCENER
     // override for computation of whether a point is inside the self content
     // point is considered to be in the local coordinate frame
     containsPointSelf: function( point ) {
+      var result = false;
       if ( !this.hasShape() ) {
-        return false;
+        return result;
       }
       
-      var result = this._shape.containsPoint( point );
+      // if this node is fillPickable, we will return true if the point is inside our fill area
+      if ( this._fillPickable ) {
+        result = this.getShape().containsPoint( point );
+      }
       
-      // also include the stroked region in the hit area if applicable
-      if ( !result && this._includeStrokeInHitRegion && this.hasStroke() ) {
-        result = this._shape.getStrokedShape( this._lineDrawingStyles ).containsPoint( point );
+      // also include the stroked region in the hit area if strokePickable
+      if ( !result && this._strokePickable ) {
+        result = this.getStrokedShape().containsPoint( point );
       }
       return result;
     },
@@ -17389,11 +18175,12 @@ define( 'SCENERY/nodes/Path',['require','PHET_CORE/inherit','KITE/Shape','SCENER
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'SCENERY/nodes/Circle',['require','PHET_CORE/inherit','SCENERY/scenery','SCENERY/nodes/Path','KITE/Shape'],function( require ) {
+define( 'SCENERY/nodes/Circle',['require','PHET_CORE/inherit','SCENERY/scenery','DOT/Bounds2','SCENERY/nodes/Path','KITE/Shape'],function( require ) {
   
 
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
+  var Bounds2 = require( 'DOT/Bounds2' );
 
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
@@ -17403,6 +18190,7 @@ define( 'SCENERY/nodes/Circle',['require','PHET_CORE/inherit','SCENERY/scenery',
       // allow new Circle( { radius: ... } )
       // the mutators will call invalidateCircle() and properly set the shape
       options = radius;
+      this._radius = options.radius;
     } else {
       this._radius = radius;
 
@@ -17412,16 +18200,67 @@ define( 'SCENERY/nodes/Circle',['require','PHET_CORE/inherit','SCENERY/scenery',
     }
     // fallback for non-canvas or non-svg rendering, and for proper bounds computation
 
-    Path.call( this,Shape.circle( 0, 0, radius ), options );
+    Path.call( this, null, options );
   };
   var Circle = scenery.Circle;
 
   inherit( Path, Circle, {
     invalidateCircle: function() {
-      // setShape should invalidate the path and ensure a redraw
-      this.setShape( Shape.circle( 0, 0, this._radius ) );
+      assert && assert( this._radius >= 0, 'A circle needs a non-negative radius' );
+      
+      // sets our 'cache' to null, so we don't always have to recompute our shape
+      this._shape = null;
+      
+      // should invalidate the path and ensure a redraw
+      this.invalidateShape();
     },
-
+    
+    createCircleShape: function() {
+      return Shape.circle( 0, 0, this._radius );
+    },
+    
+    intersectsBoundsSelf: function( bounds ) {
+      // TODO: handle intersection with somewhat-infinite bounds!
+      var x = Math.abs( bounds.centerX );
+      var y = Math.abs( bounds.centerY );
+      var halfWidth = bounds.maxX - x;
+      var halfHeight = bounds.maxY - y;
+      
+      // too far to have a possible intersection
+      if ( x > halfWidth + this._radius || y > halfHeight + this._radius ) {
+        return false;
+      }
+      
+      // guaranteed intersection
+      if ( x <= halfWidth || y <= halfHeight ) {
+        return true;
+      }
+      
+      // corner case
+      x -= halfWidth;
+      y -= halfHeight;
+      return x * x + y * y <= this._radius * this._radius;
+    },
+    
+    paintCanvas: function( wrapper ) {
+      var context = wrapper.context;
+      
+      context.beginPath();
+      context.arc( 0, 0, this._radius, 0, Math.PI * 2, false );
+      context.closePath();
+      
+      if ( this._fill ) {
+        this.beforeCanvasFill( wrapper ); // defined in Fillable
+        context.fill();
+        this.afterCanvasFill( wrapper ); // defined in Fillable
+      }
+      if ( this._stroke ) {
+        this.beforeCanvasStroke( wrapper ); // defined in Strokable
+        context.stroke();
+        this.afterCanvasStroke( wrapper ); // defined in Strokable
+      }
+    },
+    
     // create a circle instead of a path, hopefully it is faster in implementations
     createSVGFragment: function( svg, defs, group ) {
       return document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
@@ -17451,17 +18290,63 @@ define( 'SCENERY/nodes/Circle',['require','PHET_CORE/inherit','SCENERY/scenery',
     },
 
     computeShapeBounds: function() {
-      // optimization, where we know our computed bounds will be just expanded by half the lineWidth if we are stroked (don't have to compute the stroke shape)
-      return this._stroke ? this._shape.bounds.dilated( this._lineDrawingStyles.lineWidth / 2 ) : this._shape.bounds;
+      var bounds = new Bounds2( -this._radius, -this._radius, this._radius, this._radius );
+      if ( this._stroke ) {
+        // since we are axis-aligned, any stroke will expand our bounds by a guaranteed set amount
+        bounds = bounds.dilated( this.getLineWidth() / 2 );
+      }
+      return bounds;
     },
 
     // accelerated hit detection
     containsPointSelf: function( point ) {
-      return point.x * point.x + point.y * point.y < this._radius * this._radius;
+      var magSq = point.x * point.x + point.y * point.y;
+      var result = true;
+      var iRadius;
+      if ( this._strokePickable ) {
+        iRadius = this.getLineWidth() / 2;
+        var outerRadius = this._radius + iRadius;
+        result = result && magSq <= outerRadius * outerRadius;
+      }
+      
+      if ( this._fillPickable ) {
+        if ( this._strokePickable ) {
+          // we were either within the outer radius, or not
+          return result;
+        } else {
+          // just testing in the fill range
+          return magSq <= this._radius * this._radius;
+        }
+      } else if ( this._strokePickable ) {
+        var innerRadius = this._radius - iRadius;
+        return result && magSq >= innerRadius * innerRadius;
+      } else {
+        return false; // neither stroke nor fill is pickable
+      }
     },
 
     get radius() { return this.getRadius(); },
-    set radius( value ) { return this.setRadius( value ); }
+    set radius( value ) { return this.setRadius( value ); },
+    
+    setShape: function( shape ) {
+      if ( shape !== null ) {
+        throw new Error( 'Cannot set the shape of a scenery.Circle to something non-null' );
+      } else {
+        // probably called from the Path constructor
+        this.invalidateShape();
+      }
+    },
+    
+    getShape: function() {
+      if ( !this._shape ) {
+        this._shape = this.createCircleShape();
+      }
+      return this._shape;
+    },
+    
+    hasShape: function() {
+      return true;
+    }
   } );
 
   // not adding mutators for now
@@ -17479,10 +18364,12 @@ define( 'SCENERY/nodes/Circle',['require','PHET_CORE/inherit','SCENERY/scenery',
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
-define( 'PHET_CORE/escapeHTML',['require'],function( require ) {
+define( 'PHET_CORE/escapeHTML',['require','PHET_CORE/core'],function( require ) {
   
   
-  return function escapeHTML( str ) {
+  var core = require( 'PHET_CORE/core' );
+  
+  var escapeHTML = core.escapeHTML = function escapeHTML( str ) {
     // see https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet
     // HTML Entity Encoding
     return str.replace( /&/g, '&amp;' )
@@ -17492,6 +18379,7 @@ define( 'PHET_CORE/escapeHTML',['require'],function( require ) {
               .replace( /\'/g, '&#x27;' )
               .replace( /\//g, '&#x2F;' );
   };
+  return escapeHTML;
 } );
 
 // Copyright 2002-2013, University of Colorado
@@ -17837,16 +18725,16 @@ define( 'SCENERY/util/Font',['require','SCENERY/scenery'],function( require ) {
         if ( token === 'normal' ) {
           // nothing has to be done, everything already normal as default
         } else if ( _.contains( styles, token ) ) {
-          sceneryAssert && sceneryAssert( this._style === 'normal', 'Style cannot be applied twice. Already set to "' + this._style + '", attempt to replace with "' + token + '"' );
+          assert && assert( this._style === 'normal', 'Style cannot be applied twice. Already set to "' + this._style + '", attempt to replace with "' + token + '"' );
           this._style = token;
         } else if ( _.contains( variants, token ) ) {
-          sceneryAssert && sceneryAssert( this._variant === 'normal', 'Variant cannot be applied twice. Already set to "' + this._variant + '", attempt to replace with "' + token + '"' );
+          assert && assert( this._variant === 'normal', 'Variant cannot be applied twice. Already set to "' + this._variant + '", attempt to replace with "' + token + '"' );
           this._variant = token;
         } else if ( _.contains( weights, token ) ) {
-          sceneryAssert && sceneryAssert( this._weight === 'normal', 'Weight cannot be applied twice. Already set to "' + this._weight + '", attempt to replace with "' + token + '"' );
+          assert && assert( this._weight === 'normal', 'Weight cannot be applied twice. Already set to "' + this._weight + '", attempt to replace with "' + token + '"' );
           this._weight = token;
         } else if ( _.contains( stretches, token ) ) {
-          sceneryAssert && sceneryAssert( this._stretch === 'normal', 'Stretch cannot be applied twice. Already set to "' + this._stretch + '", attempt to replace with "' + token + '"' );
+          assert && assert( this._stretch === 'normal', 'Stretch cannot be applied twice. Already set to "' + this._stretch + '", attempt to replace with "' + token + '"' );
           this._stretch = token;
         } else {
           // not a style/variant/weight/stretch, must be a font size, possibly with an included line-height
@@ -17885,23 +18773,23 @@ define( 'SCENERY/util/Font',['require','SCENERY/scenery'],function( require ) {
     }
     
     // sanity checks to prevent errors in interpretation or in the font shorthand usage
-    sceneryAssert && sceneryAssert( typeof this._style === 'string' &&
+    assert && assert( typeof this._style === 'string' &&
                                     _.contains( styles, this._style ),
                                     'Font style must be one of "normal", "italic", or "oblique"' );
-    sceneryAssert && sceneryAssert( typeof this._variant === 'string' &&
+    assert && assert( typeof this._variant === 'string' &&
                                     _.contains( variants, this._variant ),
                                     'Font variant must be "normal" or "small-caps"' );
-    sceneryAssert && sceneryAssert( typeof this._weight === 'string' &&
+    assert && assert( typeof this._weight === 'string' &&
                                     _.contains( weights, this._weight ),
                                     'Font weight must be one of "normal", "bold", "bolder", "lighter", "100", "200", "300", "400", "500", "600", "700", "800", or "900"' );
-    sceneryAssert && sceneryAssert( typeof this._stretch === 'string' &&
+    assert && assert( typeof this._stretch === 'string' &&
                                     _.contains( stretches, this._stretch ),
                                     'Font stretch must be one of "normal", "ultra-condensed", "extra-condensed", "condensed", "semi-condensed", "semi-expanded", "expanded", "extra-expanded", or "ultra-expanded"' );
-    sceneryAssert && sceneryAssert( typeof this._size === 'string' &&
+    assert && assert( typeof this._size === 'string' &&
                                     !_.contains( [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ], this._size[this._size.length - 1] ),
                                     'Font size must be either passed as a number (not a string, interpreted as px), or must contain a suffix for percentage, absolute or relative units, or an explicit size constant' );
-    sceneryAssert && sceneryAssert( typeof this._lineHeight === 'string' );
-    sceneryAssert && sceneryAssert( typeof this._family === 'string' );
+    assert && assert( typeof this._lineHeight === 'string' );
+    assert && assert( typeof this._family === 'string' );
     
     // initialize the shorthand font property (stored as _font)
     this._font = this.computeShorthand();
@@ -18047,6 +18935,7 @@ define( 'SCENERY/nodes/Text',['require','PHET_CORE/inherit','PHET_CORE/escapeHTM
       options.text = text;
     }
     
+    this.initializeFillable();
     this.initializeStrokable();
     
     Node.call( this, options );
@@ -18071,7 +18960,7 @@ define( 'SCENERY/nodes/Text',['require','PHET_CORE/inherit','PHET_CORE/escapeHTM
     },
     
     setBoundsMethod: function( method ) {
-      sceneryAssert && sceneryAssert( method === 'fast' || method === 'fastCanvas' || method === 'accurate' || method === 'hybrid', 'Unknown Text boundsMethod' );
+      assert && assert( method === 'fast' || method === 'fastCanvas' || method === 'accurate' || method === 'hybrid', 'Unknown Text boundsMethod' );
       if ( method !== this._boundsMethod ) {
         this._boundsMethod = method;
         this.updateTextFlags();
@@ -18238,7 +19127,12 @@ define( 'SCENERY/nodes/Text',['require','PHET_CORE/inherit','PHET_CORE/escapeHTM
     allowsMultipleDOMInstances: true,
     
     getDOMElement: function() {
-      return document.createElement( 'div' );
+      var div = document.createElement( 'div' );
+      
+      // so they are absolutely positioned compared to the containing DOM layer (that is positioned).
+      // otherwise, two adjacent HTMLText elements will 'flow' and be positioned incorrectly
+      div.style.position = 'absolute';
+      return div;
     },
     
     updateDOMElement: function( div ) {
@@ -18577,7 +19471,7 @@ define( 'SCENERY/nodes/Image',['require','PHET_CORE/inherit','DOT/Bounds2','SCEN
    *     HTMLImageElement
    */
   scenery.Image = function Image( image, options ) {
-    sceneryAssert && sceneryAssert( image, "image should be available" );
+    assert && assert( image, "image should be available" );
     
     // allow not passing an options object
     options = options || {};
@@ -18764,6 +19658,696 @@ define( 'SCENERY/nodes/Image',['require','PHET_CORE/inherit','DOT/Bounds2','SCEN
 // Copyright 2002-2013, University of Colorado
 
 /**
+ * A rectangular node that inherits Path, and allows for optimized drawing,
+ * and improved rectangle handling.
+ *
+ * TODO: add DOM support
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'SCENERY/nodes/Rectangle',['require','PHET_CORE/inherit','SCENERY/scenery','SCENERY/nodes/Path','KITE/Shape','DOT/Vector2','DOT/Bounds2'],function( require ) {
+  
+  
+  var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
+  
+  var Path = require( 'SCENERY/nodes/Path' );
+  var Shape = require( 'KITE/Shape' );
+  var Vector2 = require( 'DOT/Vector2' );
+  var Bounds2 = require( 'DOT/Bounds2' );
+  
+  /**
+   * Currently, all numerical parameters should be finite.
+   * x:         x-position of the upper-left corner (left bound)
+   * y:         y-position of the upper-left corner (top bound)
+   * width:     width of the rectangle to the right of the upper-left corner, required to be >= 0
+   * height:    height of the rectangle below the upper-left corner, required to be >= 0
+   * arcWidth:  positive width of the rounded corner, or 0 to indicate the corner should be sharp
+   * arcHeight: positive height of the rounded corner, or 0 to indicate the corner should be sharp
+   */
+  scenery.Rectangle = function Rectangle( x, y, width, height, arcWidth, arcHeight, options ) {
+    if ( typeof x === 'object' ) {
+      if ( x instanceof Bounds2 ) {
+        // allow new Rectangle( bounds2, { ... } ) or new Rectangle( bounds2, arcWidth, arcHeight, options )
+        this._rectX = x.minX;
+        this._rectY = x.minY;
+        this._rectWidth = x.width;
+        this._rectHeight = x.height;
+        if ( arguments.length < 3 ) {
+          // Rectangle( bounds2, { ... } )
+          options = y;
+          this._rectArcWidth = 0;
+          this._rectArcHeight = 0;
+        } else {
+          // Rectangle( bounds2, arcWidth, arcHeight, { ... } )
+          options = height;
+          this._rectArcWidth = y;
+          this._rectArcHeight = width;
+        }
+      } else {
+        // allow new Rectangle( { rectX: x, rectY: y, rectWidth: width, rectHeight: height, ... } )
+        // the mutators will call invalidateRectangle() and properly set the shape
+        options = x;
+        this._rectX = options.rectX || 0;
+        this._rectY = options.rectY || 0;
+        this._rectWidth = options.rectWidth;
+        this._rectHeight = options.rectHeight;
+        this._rectArcWidth = options.rectArcWidth || 0;
+        this._rectArcHeight = options.rectArcHeight || 0;
+      }
+    } else if ( arguments.length < 6 ) {
+      // new Rectangle( x, y, width, height, [options] )
+      this._rectX = x;
+      this._rectY = y;
+      this._rectWidth = width;
+      this._rectHeight = height;
+      this._rectArcWidth = 0;
+      this._rectArcHeight = 0;
+      
+      // ensure we have a parameter object
+      options = arcWidth || {};
+      
+    } else {
+      // normal case with args (including arcWidth / arcHeight)
+      this._rectX = x;
+      this._rectY = y;
+      this._rectWidth = width;
+      this._rectHeight = height;
+      this._rectArcWidth = arcWidth;
+      this._rectArcHeight = arcHeight;
+      
+      // ensure we have a parameter object
+      options = options || {};
+      
+    }
+    // fallback for non-canvas or non-svg rendering, and for proper bounds computation
+
+    Path.call( this, null, options );
+  };
+  var Rectangle = scenery.Rectangle;
+  
+  inherit( Path, Rectangle, {
+    setRect: function( x, y, width, height, arcWidth, arcHeight ) {
+      assert && assert( x !== undefined && y !== undefined && width !== undefined && height !== undefined, 'x/y/width/height need to be defined' );
+      
+      this._rectX = x;
+      this._rectY = y;
+      this._rectWidth = width;
+      this._rectHeight = height;
+      this._rectArcWidth = arcWidth || 0;
+      this._rectArcHeight = arcHeight || 0;
+      this.invalidateRectangle();
+    },
+    
+    setRectBounds: function( bounds ) {
+      this.setRect( bounds.x, bounds.y, bounds.width, bounds.height );
+    },
+    
+    isRounded: function() {
+      return this._rectArcWidth !== 0 && this._rectArcHeight !== 0;
+    },
+    
+    computeShapeBounds: function() {
+      var bounds = new Bounds2( this._rectX, this._rectY, this._rectX + this._rectWidth, this._rectY + this._rectHeight );
+      if ( this._stroke ) {
+        // since we are axis-aligned, any stroke will expand our bounds by a guaranteed set amount
+        bounds = bounds.dilated( this.getLineWidth() / 2 );
+      }
+      return bounds;
+    },
+    
+    createRectangleShape: function() {
+      if ( this.isRounded() ) {
+        // copy border-radius CSS behavior in Chrome, where the arcs won't intersect, in cases where the arc segments at full size would intersect each other
+        var maximumArcSize = Math.min( this._rectWidth / 2, this._rectHeight / 2 );
+        return Shape.roundRectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight,
+                                     Math.min( maximumArcSize, this._rectArcWidth ), Math.min( maximumArcSize, this._rectArcHeight ) );
+      } else {
+        return Shape.rectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
+      }
+    },
+    
+    invalidateRectangle: function() {
+      assert && assert( isFinite( this._rectX ), 'A rectangle needs to have a finite x (' + this._rectX + ')' );
+      assert && assert( isFinite( this._rectY ), 'A rectangle needs to have a finite x (' + this._rectY + ')' );
+      assert && assert( this._rectWidth >= 0 && isFinite( this._rectWidth ),
+                                      'A rectangle needs to have a non-negative finite width (' + this._rectWidth + ')' );
+      assert && assert( this._rectHeight >= 0 && isFinite( this._rectHeight ),
+                                      'A rectangle needs to have a non-negative finite height (' + this._rectHeight + ')' );
+      assert && assert( this._rectArcWidth >= 0 && isFinite( this._rectArcWidth ),
+                                      'A rectangle needs to have a non-negative finite arcWidth (' + this._rectArcWidth + ')' );
+      assert && assert( this._rectArcHeight >= 0 && isFinite( this._rectArcHeight ),
+                                      'A rectangle needs to have a non-negative finite arcHeight (' + this._rectArcHeight + ')' );
+      // assert && assert( !this.isRounded() || ( this._rectWidth >= this._rectArcWidth * 2 && this._rectHeight >= this._rectArcHeight * 2 ),
+      //                                 'The rounded sections of the rectangle should not intersect (the length of the straight sections shouldn\'t be negative' );
+      
+      // sets our 'cache' to null, so we don't always have to recompute our shape
+      this._shape = null;
+      
+      // should invalidate the path and ensure a redraw
+      this.invalidateShape();
+    },
+    
+    // accelerated hit detection for axis-aligned optionally-rounded rectangle
+    // fast computation if it isn't rounded. if rounded, we check if a corner computation is needed (usually isn't), and only check that one needed corner
+    containsPointSelf: function( point ) {
+      var x = this._rectX;
+      var y = this._rectY;
+      var width = this._rectWidth;
+      var height = this._rectHeight;
+      var arcWidth = this._rectArcWidth;
+      var arcHeight = this._rectArcHeight;
+      var halfLine = this.getLineWidth() / 2;
+      
+      var result = true;
+      if ( this._strokePickable ) {
+        // test the outer boundary if we are stroke-pickable (if also fill-pickable, this is the only test we need)
+        var rounded = this.isRounded();
+        if ( !rounded && this.getLineJoin() === 'bevel' ) {
+          // fall-back for bevel
+          return Path.prototype.containsPointSelf.call( this, point );
+        }
+        var miter = this.getLineJoin() === 'miter' && !rounded;
+        result = result && Rectangle.intersects( x - halfLine, y - halfLine,
+                                                 width + 2 * halfLine, height + 2 * halfLine,
+                                                 miter ? 0 : ( arcWidth + halfLine ), miter ? 0 : ( arcHeight + halfLine ),
+                                                 point );
+      }
+      
+      if ( this._fillPickable ) {
+        if ( this._strokePickable ) {
+          return result;
+        } else {
+          return Rectangle.intersects( x, y, width, height, arcWidth, arcHeight, point );
+        }
+      } else if ( this._strokePickable ) {
+        return result && !Rectangle.intersects( x + halfLine, y + halfLine,
+                                               width - 2 * halfLine, height - 2 * halfLine,
+                                               arcWidth - halfLine, arcHeight - halfLine,
+                                               point );
+      } else {
+        return false; // either fill nor stroke is pickable
+      }
+    },
+    
+    intersectsBoundsSelf: function( bounds ) {
+      return !this.computeShapeBounds().intersection( bounds ).isEmpty();
+    },
+    
+    // override paintCanvas with a faster version, since fillRect and drawRect don't affect the current default path
+    paintCanvas: function( wrapper ) {
+      var context = wrapper.context;
+      
+      // use the standard version if it's a rounded rectangle, since there is no Canvas-optimized version for that
+      if ( this.isRounded() ) {
+        context.beginPath();
+        var arcw = this._rectArcWidth;
+        var arch = this._rectArcHeight;
+        var lowX = this._rectX + arcw;
+        var highX = this._rectX + this._rectWidth - arcw;
+        var lowY = this._rectY + arch;
+        var highY = this._rectY + this._rectHeight - arch;
+        if ( arcw === arch ) {
+          // we can use circular arcs, which have well defined stroked offsets
+          context.arc( highX, lowY, arcw, -Math.PI / 2, 0, false );
+          context.arc( highX, highY, arcw, 0, Math.PI / 2, false );
+          context.arc( lowX, highY, arcw, Math.PI / 2, Math.PI, false );
+          context.arc( lowX, lowY, arcw, Math.PI, Math.PI * 3 / 2, false );
+        } else {
+          // we have to resort to elliptical arcs
+          context.ellipse( highX, lowY, arcw, arch, 0, -Math.PI / 2, 0, false );
+          context.ellipse( highX, highY, arcw, arch, 0, 0, Math.PI / 2, false );
+          context.ellipse( lowX, highY, arcw, arch, 0, Math.PI / 2, Math.PI, false );
+          context.ellipse( lowX, lowY, arcw, arch, 0, Math.PI, Math.PI * 3 / 2, false );
+        }
+        context.closePath();
+        
+        if ( this._fill ) {
+          this.beforeCanvasFill( wrapper ); // defined in Fillable
+          context.fill();
+          this.afterCanvasFill( wrapper ); // defined in Fillable
+        }
+        if ( this._stroke ) {
+          this.beforeCanvasStroke( wrapper ); // defined in Strokable
+          context.stroke();
+          this.afterCanvasStroke( wrapper ); // defined in Strokable
+        }
+      } else {
+        // TODO: how to handle fill/stroke delay optimizations here?
+        if ( this._fill ) {
+          this.beforeCanvasFill( wrapper ); // defined in Fillable
+          context.fillRect( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
+          this.afterCanvasFill( wrapper ); // defined in Fillable
+        }
+        if ( this._stroke ) {
+          this.beforeCanvasStroke( wrapper ); // defined in Strokable
+          context.strokeRect( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
+          this.afterCanvasStroke( wrapper ); // defined in Strokable
+        }
+      }
+    },
+    
+    // create a rect instead of a path, hopefully it is faster in implementations
+    createSVGFragment: function( svg, defs, group ) {
+      return document.createElementNS( 'http://www.w3.org/2000/svg', 'rect' );
+    },
+    
+    // optimized for the rect element instead of path
+    updateSVGFragment: function( rect ) {
+      // see http://www.w3.org/TR/SVG/shapes.html#RectElement
+      rect.setAttribute( 'x', this._rectX );
+      rect.setAttribute( 'y', this._rectY );
+      rect.setAttribute( 'width', this._rectWidth );
+      rect.setAttribute( 'height', this._rectHeight );
+      rect.setAttribute( 'rx', this._rectArcWidth );
+      rect.setAttribute( 'ry', this._rectArcHeight );
+      
+      rect.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
+    },
+    
+    getBasicConstructor: function( propLines ) {
+      return 'new scenery.Rectangle( ' + this._rectX + ', ' + this._rectY + ', ' + 
+                                         this._rectWidth + ', ' + this._rectHeight + ', ' +
+                                         this._rectArcWidth + ', ' + this._rectArcHeight + ', {' + propLines + '} )';
+    },
+    
+    setShape: function( shape ) {
+      if ( shape !== null ) {
+        throw new Error( 'Cannot set the shape of a scenery.Rectangle to something non-null' );
+      } else {
+        // probably called from the Path constructor
+        this.invalidateShape();
+      }
+    },
+    
+    getShape: function() {
+      if ( !this._shape ) {
+        this._shape = this.createRectangleShape();
+      }
+      return this._shape;
+    },
+    
+    hasShape: function() {
+      return true;
+    }
+  } );
+  
+  function addRectProp( capitalizedShort ) {
+    var getName = 'getRect' + capitalizedShort;
+    var setName = 'setRect' + capitalizedShort;
+    var privateName = '_rect' + capitalizedShort;
+    
+    Rectangle.prototype[getName] = function() {
+      return this[privateName];
+    };
+    
+    Rectangle.prototype[setName] = function( value ) {
+      if ( this[privateName] !== value ) {
+        this[privateName] = value;
+        this.invalidateRectangle();
+      }
+      return this;
+    };
+    
+    Object.defineProperty( Rectangle.prototype, 'rect' + capitalizedShort, {
+      set: Rectangle.prototype[setName],
+      get: Rectangle.prototype[getName]
+    } );
+  }
+  
+  addRectProp( 'X' );
+  addRectProp( 'Y' );
+  addRectProp( 'Width' );
+  addRectProp( 'Height' );
+  addRectProp( 'ArcWidth' );
+  addRectProp( 'ArcHeight' );
+  
+  // not adding mutators for now
+  Rectangle.prototype._mutatorKeys = [ 'rectX', 'rectY', 'rectWidth', 'rectHeight', 'rectArcWidth', 'rectArcHeight' ].concat( Path.prototype._mutatorKeys );
+  
+  Rectangle.intersects = function( x, y, width, height, arcWidth, arcHeight, point ) {
+    var result = point.x >= x &&
+                 point.x <= x + width &&
+                 point.y >= y &&
+                 point.y <= y + height;
+    
+    if ( !result || arcWidth <= 0 || arcHeight <= 0 ) {
+      return result;
+    }
+    
+    // copy border-radius CSS behavior in Chrome, where the arcs won't intersect, in cases where the arc segments at full size would intersect each other
+    var maximumArcSize = Math.min( width / 2, height / 2 );
+    arcWidth = Math.min( maximumArcSize, arcWidth );
+    arcHeight = Math.min( maximumArcSize, arcHeight );
+    
+    // we are rounded and inside the logical rectangle (if it didn't have rounded corners)
+    
+    // closest corner arc's center (we assume the rounded rectangle's arcs are 90 degrees fully, and don't intersect)
+    var closestCornerX, closestCornerY, guaranteedInside = false;
+    
+    // if we are to the inside of the closest corner arc's center, we are guaranteed to be in the rounded rectangle (guaranteedInside)
+    if ( point.x < x + width / 2 ) {
+      closestCornerX = x + arcWidth;
+      guaranteedInside = guaranteedInside || point.x >= closestCornerX;
+    } else {
+      closestCornerX = x + width - arcWidth;
+      guaranteedInside = guaranteedInside || point.x <= closestCornerX;
+    }
+    if ( guaranteedInside ) { return true; }
+    
+    if ( point.y < y + height / 2 ) {
+      closestCornerY = y + arcHeight;
+      guaranteedInside = guaranteedInside || point.y >= closestCornerY;
+    } else {
+      closestCornerY = y + height - arcHeight;
+      guaranteedInside = guaranteedInside || point.y <= closestCornerY;
+    }
+    if ( guaranteedInside ) { return true; }
+    
+    // we are now in the rectangular region between the logical corner and the center of the closest corner's arc.
+    
+    // offset from the closest corner's arc center
+    var offsetX = point.x - closestCornerX;
+    var offsetY = point.y - closestCornerY;
+    
+    // normalize the coordinates so now we are dealing with a unit circle
+    // (technically arc, but we are guaranteed to be in the area covered by the arc, so we just consider the circle)
+    // NOTE: we are rounded, so both arcWidth and arcHeight are non-zero (this is well defined)
+    offsetX /= arcWidth;
+    offsetY /= arcHeight;
+    
+    offsetX *= offsetX;
+    offsetY *= offsetY;
+    return offsetX + offsetY <= 1; // return whether we are in the rounded corner. see the formula for an ellipse
+  };
+  
+  Rectangle.rect = function( x, y, width, height, options ) {
+    return new Rectangle( x, y, width, height, 0, 0, options );
+  };
+  
+  Rectangle.roundedRect = function( x, y, width, height, arcWidth, arcHeight, options ) {
+    return new Rectangle( x, y, width, height, arcWidth, arcHeight, options );
+  };
+  
+  Rectangle.bounds = function( bounds, options ) {
+    return new Rectangle( bounds.minX, bounds.minY, bounds.width, bounds.height, 0, 0, options );
+  };
+  
+  Rectangle.roundedBounds = function( bounds, arcWidth, arcHeight, options ) {
+    return new Rectangle( bounds.minX, bounds.minY, bounds.width, bounds.height, arcWidth, arcHeight, options );
+  };
+  
+  return Rectangle;
+} );
+
+
+
+// Copyright 2002-2013, University of Colorado
+
+/**
+ * EXPERIMENTAL: USE AT YOUR OWN CAUTION
+ *
+ * A container that allows flexible layout generation based on layout methods that can be composed together.
+ *
+ * Experimental demo (for use in Scenery's playground):
+ *   var n = new scenery.LayoutNode( scenery.LayoutNode.Vertical.and( scenery.LayoutNode.AlignLeft ) );
+ *   scene.addChild( n );
+ *   n.addChild( new scenery.Text( 'Some Text' ) );
+ *   n.addChild( new scenery.Text( 'Text pushed to the right' ), { padLeft: 10 } );
+ *   n.addChild( new scenery.Text( 'Some padding on top and bottom' ), { padTop: 10, padBottom: 20 } );
+ *   n.addChild( new scenery.Text( 'Just Regular Text' ) );
+ *   n.addChild( new scenery.Text( 'Right-aligned' ), { layoutMethod: scenery.LayoutNode.Vertical.and( scenery.LayoutNode.AlignRight ) } );
+ *   n.addChild( new scenery.Text( 'Center-aligned' ), { layoutMethod: scenery.LayoutNode.Vertical.and( scenery.LayoutNode.AlignHorizontalCenter ) } );
+ *   n.addChild( new scenery.Text( 'Pad from right' ), { layoutMethod: scenery.LayoutNode.Vertical.and( scenery.LayoutNode.AlignRight ), padRight: 10 } );
+ *   n.children[2].text += ' and it updates!';
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'SCENERY/nodes/LayoutNode',['require','PHET_CORE/inherit','PHET_CORE/extend','SCENERY/scenery','SCENERY/nodes/Node','SCENERY/nodes/Rectangle','DOT/Bounds2'],function( require ) {
+  
+  
+  var inherit = require( 'PHET_CORE/inherit' );
+  var extend = require( 'PHET_CORE/extend' );
+  var scenery = require( 'SCENERY/scenery' );
+  var Node = require( 'SCENERY/nodes/Node' );
+  var Rectangle = require( 'SCENERY/nodes/Rectangle' );
+  var Bounds2 = require( 'DOT/Bounds2' );
+  
+  var debug = false;
+  
+  scenery.LayoutNode = function LayoutNode( defaultMethod, options ) {
+    var layoutNode = this;
+    
+    assert && assert( defaultMethod instanceof LayoutMethod, 'defaultMethod is required' );
+    
+    options = extend( {
+      updateOnBounds: true,
+      defaultMethod: defaultMethod
+    }, options );
+    
+    this._activelyLayingOut = false;
+    this._updateOnBounds = true;
+    this._defaultMethod = null;
+    this._elements = [];
+    this._elementMap = {}; // maps node ID => element
+    // this._invisibleBackground = new Rectangle( 0, 0, 0x1f, 0x1f, { visible: false } ); // takes up space that represents the bounds of all of the layout elements (with their padding)
+    this._boundsListener = function() {
+      if ( layoutNode._updateOnBounds ) {
+        layoutNode.updateLayout();
+      }
+    };
+    
+    Node.call( this, options );
+    
+    // this.addChild( this._invisibleBackground );
+    
+    this.updateLayout();
+  };
+  var LayoutNode = scenery.LayoutNode;
+  
+  inherit( Node, LayoutNode, {
+    get layoutProperties() { return new LayoutProperties( this._elements ); },
+    
+    get layoutBounds() {
+      var result = Bounds2.NOTHING.copy();
+      _.each( this._elements, function( element ) {
+        result.includeBounds( element.layoutBounds );
+      } );
+      return result;
+    },
+    
+    set defaultMethod( value ) { this._defaultMethod = value; this.updateLayout(); return this; },
+    get defaultMethod() { return this._defaultMethod; },
+    
+    set updateOnBounds( value ) { this._updateOnBounds = value; return this; },
+    get updateOnBounds() { return this._updateOnBounds; },
+    
+    /*
+     * Options can consist of:
+     *   layoutMethod - layout method
+     *   useVisibleBounds - (false) whether to use visible bounds instead of normal bounds - TODO how to auto-update when using these?
+     *   padLeft / padRight / padTop / padBottom
+     *   boundsMethod - custom overriding of entire boundsMethod
+     */
+    insertChild: function( index, node, options ) {
+      var layoutNode = this;
+      
+      options = extend( {
+        useVisibleBounds: false,
+        padLeft: 0,
+        padRight: 0,
+        padTop: 0,
+        padBottom: 0
+      }, options );
+      var baseBoundsFunc = ( options.useVisibleBounds ? node.getVisibleBounds : node.getBounds ).bind( node );
+      
+      Node.prototype.insertChild.call( this, index, node );
+      
+      var methodGetter = options.layoutMethod ? function() { return options.layoutMethod; } : function() { return layoutNode._defaultMethod; };
+      var element = new LayoutElement( node, methodGetter, options.boundsMethod ? options.boundsMethod : function( bounds ) {
+        if ( options.useVisibleBounds ) {
+          bounds = node.visibleBounds;
+        }
+        
+        return new Bounds2( bounds.minX - options.padLeft, bounds.minY - options.padTop, bounds.maxX + options.padRight, bounds.maxY + options.padBottom );
+      } );
+      this.addElement( element );
+      
+      this.updateLayout();
+    },
+    
+    addChild: function( node, options ) {
+      this.insertChild( this._children.length, node, options );
+    },
+    
+    // override
+    removeChildWithIndex: function( node, indexOfChild ) {
+      Node.prototype.removeChildWithIndex.call( this, node, indexOfChild );
+      if ( this._elementMap[node.id] ) {
+        delete this._elementMap[node.id];
+      }
+      
+      this.updateLayout();
+    },
+    
+    addElement: function( element ) {
+      this._elements.push( element );
+      element.node.addEventListener( 'bounds', this._boundsListener );
+    },
+    
+    removeElement: function( element ) {
+      this._elements.splice( this._elements.indexOf( element ), 1 ); // TODO: replace with some remove() instead of splice()
+      element.node.removeEventListener( 'bounds', this._boundsListener );
+    },
+    
+    // overrides the Node's bounds computation in a strictly increasing way (for Canvas support)
+    overrideBounds: function( computedBounds ) {
+      return this.layoutBounds;
+    },
+    
+    updateLayout: function() {
+      if ( this._activelyLayingOut ) {
+        // don't start another layout while one is going on!
+        return;
+      }
+      this._activelyLayingOut = true;
+      var layoutProperties = this.layoutProperties;
+      for ( var i = 0; i < this._elements.length; i++ ) {
+        var element = this._elements[i];
+        element.layoutMethod.layout( element, i, ( i > 0 ? this._elements[i-1] : null ), layoutProperties );
+      }
+
+      // use the invisible background to take up all of our layout areas
+      // this._invisibleBackground.removeAllChildren();
+      // var bounds = this.layoutBounds;
+      // if ( !bounds.isEmpty() ) {
+      //   this._invisibleBackground.addChild( new Rectangle( bounds, { visible: false } ) );
+      // }
+
+      // if ( debug ) {
+      //   this._invisibleBackground.visible = true;
+      //   this._invisibleBackground.fill = 'rgba(255,0,0,0.4)';
+        
+      //   _.each( this._elements, function( element ) {
+      //     this._invisibleBackground.addChild( new Rectangle( element.node.bounds ), {
+      //       fill: 'rgba(255,0,0,0.4)',
+      //       stroke: 'blue'
+      //     } );
+      //   } );
+      // }
+      this._activelyLayingOut = false;
+    }
+  } );
+  
+  /*
+   * LayoutMethod - function layout( element, index, previousElement, layoutProperties )
+   */
+  var LayoutMethod = LayoutNode.LayoutMethod = function LayoutMethod( layout ) {
+    if ( layout ) {
+      this.layout = layout;
+    }
+  };
+  LayoutMethod.prototype = {
+    constructor: LayoutMethod,
+    
+    and: function( otherLayoutMethod ) {
+      var thisLayoutMethod = this;
+      
+      return new LayoutMethod( function compositeLayout( element, index, previousElement, layoutProperties ) {
+        thisLayoutMethod.layout( element, index, previousElement, layoutProperties );
+        otherLayoutMethod.layout( element, index, previousElement, layoutProperties );
+      } );
+    }
+  };
+  
+  /*---------------------------------------------------------------------------*
+  * Layout Methods
+  *----------------------------------------------------------------------------*/
+  
+  var Vertical = LayoutNode.Vertical = new LayoutMethod( function verticalLayout( element, index, previousElement, layoutProperties ) {
+    element.layoutTop = previousElement ? previousElement.layoutBounds.bottom : 0;
+  } );
+  
+  var Horizontal = LayoutNode.Horizontal = new LayoutMethod( function horizontalLayout( element, index, previousElement, layoutProperties ) {
+    element.layoutLeft = previousElement ? previousElement.layoutBounds.right : 0;
+  } );
+  
+  var AlignLeft = LayoutNode.AlignLeft = new LayoutMethod( function alignLeftLayout( element, index, previousElement, layoutProperties ) {
+    element.layoutLeft = 0;
+  } );
+  
+  var AlignHorizontalCenter = LayoutNode.AlignHorizontalCenter = new LayoutMethod( function alignHorizontalCenterLayout( element, index, previousElement, layoutProperties ) {
+    element.layoutLeft = ( layoutProperties.maxWidth - element.layoutBounds.width ) / 2;
+  } );
+  
+  var AlignRight = LayoutNode.AlignRight = new LayoutMethod( function alignRightLayout( element, index, previousElement, layoutProperties ) {
+    element.layoutLeft = layoutProperties.maxWidth - element.layoutBounds.width;
+  } );
+  
+  var AlignTop = LayoutNode.AlignTop = new LayoutMethod( function alignTopLayout( element, index, previousElement, layoutProperties ) {
+    element.layoutTop = 0;
+  } );
+  
+  var AlignVerticalCenter = LayoutNode.AlignVerticalCenter = new LayoutMethod( function alignVerticalCenterLayout( element, index, previousElement, layoutProperties ) {
+    element.layoutTop = ( layoutProperties.maxHeight - element.layoutBounds.height ) / 2;
+  } );
+  
+  var AlignBottom = LayoutNode.AlignBottom = new LayoutMethod( function alignBottomLayout( element, index, previousElement, layoutProperties ) {
+    element.layoutTop = layoutProperties.maxHeight - element.layoutBounds.height;
+  } );
+  
+  /*---------------------------------------------------------------------------*
+  * Internals
+  *----------------------------------------------------------------------------*/
+  
+  var LayoutProperties = LayoutNode.LayoutProperties = function LayoutProperties( elements ) {
+    var largestWidth = 0;
+    var largestHeight = 0;
+    
+    _.each( elements, function( element ) {
+      largestWidth = Math.max( largestWidth, element.layoutBounds.width );
+      largestHeight = Math.max( largestHeight, element.layoutBounds.height );
+    } );
+
+    this.maxWidth = largestWidth;
+    this.maxHeight = largestHeight;
+  };
+  
+  var LayoutElement = LayoutNode.LayoutElement = function LayoutElement( node, layoutMethodGetter, boundsMethod ) {
+    this.node = node;
+    this.layoutMethodGetter = layoutMethodGetter;
+    this.boundsMethod = boundsMethod;
+  };
+  LayoutElement.prototype = {
+    get bounds() { return this.node.bounds; },
+    get layoutBounds() { return this.boundsMethod( this.bounds ); },
+    get layoutMethod() { return this.layoutMethodGetter(); },
+    
+    get layoutTop() { throw new Error( 'JSHint wants this getter' ); },
+    set layoutTop( y ) {
+      var padding = this.bounds.top - this.layoutBounds.top;
+      this.node.top = y + padding;
+    },
+    
+    get layoutLeft() { throw new Error( 'JSHint wants this getter' ); },
+    set layoutLeft( x ) {
+      var padding = this.bounds.left - this.layoutBounds.left;
+      this.node.left = x + padding;
+    }
+  };
+  
+  LayoutNode.prototype._mutatorKeys = [ 'defaultMethod', 'updateOnBounds' ].concat( Node.prototype._mutatorKeys );
+  
+  return LayoutNode;
+} );
+
+
+
+// Copyright 2002-2013, University of Colorado
+
+/**
  * A line that inherits Path, and allows for optimized drawing,
  * and improved line handling.
  *
@@ -18772,11 +20356,12 @@ define( 'SCENERY/nodes/Image',['require','PHET_CORE/inherit','DOT/Bounds2','SCEN
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'SCENERY/nodes/Line',['require','PHET_CORE/inherit','SCENERY/scenery','SCENERY/nodes/Path','KITE/Shape','DOT/Vector2'],function( require ) {
+define( 'SCENERY/nodes/Line',['require','PHET_CORE/inherit','SCENERY/scenery','KITE/segments/Line','SCENERY/nodes/Path','KITE/Shape','DOT/Vector2'],function( require ) {
   
   
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
+  var KiteLine = require( 'KITE/segments/Line' );
   
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
@@ -18823,13 +20408,13 @@ define( 'SCENERY/nodes/Line',['require','PHET_CORE/inherit','SCENERY/scenery','S
     }
     // fallback for non-canvas or non-svg rendering, and for proper bounds computation
     
-    Path.call( this, this.createLineShape(), options );
+    Path.call( this, null, options );
   };
   var Line = scenery.Line;
   
   inherit( Path, Line, {
     setLine: function( x1, y1, x2, y2 ) {
-      sceneryAssert && sceneryAssert( x1 !== undefined && y1 !== undefined && x2 !== undefined && y2 !== undefined, 'parameters need to be defined' );
+      assert && assert( x1 !== undefined && y1 !== undefined && x2 !== undefined && y2 !== undefined, 'parameters need to be defined' );
       
       this._x1 = x1;
       this._y1 = y1;
@@ -18863,21 +20448,52 @@ define( 'SCENERY/nodes/Line',['require','PHET_CORE/inherit','SCENERY/scenery','S
     get p2() { return new Vector2( this._x2, this._y2 ); },
     
     createLineShape: function() {
-      sceneryAssert && sceneryAssert( isFinite( this._x1 ), 'A rectangle needs to have a finite x1 (' + this._x1 + ')' );
-      sceneryAssert && sceneryAssert( isFinite( this._y1 ), 'A rectangle needs to have a finite y1 (' + this._y1 + ')' );
-      sceneryAssert && sceneryAssert( isFinite( this._x2 ), 'A rectangle needs to have a finite x2 (' + this._x2 + ')' );
-      sceneryAssert && sceneryAssert( isFinite( this._y2 ), 'A rectangle needs to have a finite y2 (' + this._y2 + ')' );
-      
       return Shape.lineSegment( this._x1, this._y1, this._x2, this._y2 );
     },
     
     invalidateLine: function() {
-      // setShape should invalidate the path and ensure a redraw
-      this.setShape( this.createLineShape() );
+      assert && assert( isFinite( this._x1 ), 'A rectangle needs to have a finite x1 (' + this._x1 + ')' );
+      assert && assert( isFinite( this._y1 ), 'A rectangle needs to have a finite y1 (' + this._y1 + ')' );
+      assert && assert( isFinite( this._x2 ), 'A rectangle needs to have a finite x2 (' + this._x2 + ')' );
+      assert && assert( isFinite( this._y2 ), 'A rectangle needs to have a finite y2 (' + this._y2 + ')' );
+      
+      // sets our 'cache' to null, so we don't always have to recompute our shape
+      this._shape = null;
+      
+      // should invalidate the path and ensure a redraw
+      this.invalidateShape();
     },
     
     containsPointSelf: function( point ) {
-      return false; // nothing is in a line! (although maybe we should handle edge points properly?)
+      if ( this._strokePickable ) {
+        return Path.prototype.containsPointSelf.call( this, point );
+      } else {
+        return false; // nothing is in a line! (although maybe we should handle edge points properly?)
+      }
+    },
+    
+    intersectsBoundsSelf: function( bounds ) {
+      // TODO: optimization
+      return new KiteLine( this.p1, this.p2 ).intersectsBounds( bounds );
+    },
+    
+    paintCanvas: function( wrapper ) {
+      var context = wrapper.context;
+      
+      context.beginPath();
+      context.moveTo( this._x1, this._y1 );
+      context.lineTo( this._x2, this._y2 );
+      context.closePath();
+      
+      if ( this._stroke ) {
+        this.beforeCanvasStroke( wrapper ); // defined in Strokable
+        context.stroke();
+        this.afterCanvasStroke( wrapper ); // defined in Strokable
+      }
+    },
+    
+    computeShapeBounds: function() {
+      return Path.prototype.computeShapeBounds.call( this );
     },
     
     // create a rect instead of a path, hopefully it is faster in implementations
@@ -18898,6 +20514,26 @@ define( 'SCENERY/nodes/Line',['require','PHET_CORE/inherit','SCENERY/scenery','S
     
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Line( ' + this._x1 + ', ' + this._y1 + ', ' + this._x1 + ', ' + this._y1 + ', {' + propLines + '} )';
+    },
+    
+    setShape: function( shape ) {
+      if ( shape !== null ) {
+        throw new Error( 'Cannot set the shape of a scenery.Line to something non-null' );
+      } else {
+        // probably called from the Path constructor
+        this.invalidateShape();
+      }
+    },
+    
+    getShape: function() {
+      if ( !this._shape ) {
+        this._shape = this.createLineShape();
+      }
+      return this._shape;
+    },
+    
+    hasShape: function() {
+      return true;
     }
     
   } );
@@ -18914,8 +20550,10 @@ define( 'SCENERY/nodes/Line',['require','PHET_CORE/inherit','SCENERY/scenery','S
     };
     
     Line.prototype[setName] = function( value ) {
-      this[privateName] = value;
-      this.invalidateLine();
+      if ( this[privateName] !== value ) {
+        this[privateName] = value;
+        this.invalidateLine();
+      }
       return this;
     };
     
@@ -18934,266 +20572,6 @@ define( 'SCENERY/nodes/Line',['require','PHET_CORE/inherit','SCENERY/scenery','S
   Line.prototype._mutatorKeys = [ 'p1', 'p2', 'x1', 'y1', 'x2', 'y2' ].concat( Path.prototype._mutatorKeys );
   
   return Line;
-} );
-
-
-
-// Copyright 2002-2013, University of Colorado
-
-/**
- * A rectangular node that inherits Path, and allows for optimized drawing,
- * and improved rectangle handling.
- *
- * TODO: add DOM support
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define( 'SCENERY/nodes/Rectangle',['require','PHET_CORE/inherit','SCENERY/scenery','SCENERY/nodes/Path','KITE/Shape','DOT/Vector2'],function( require ) {
-  
-  
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
-  
-  var Path = require( 'SCENERY/nodes/Path' );
-  var Shape = require( 'KITE/Shape' );
-  var Vector2 = require( 'DOT/Vector2' );
-  
-  /**
-   * Currently, all numerical parameters should be finite.
-   * x:         x-position of the upper-left corner (left bound)
-   * y:         y-position of the upper-left corner (top bound)
-   * width:     width of the rectangle to the right of the upper-left corner, required to be >= 0
-   * height:    height of the rectangle below the upper-left corner, required to be >= 0
-   * arcWidth:  positive width of the rounded corner, or 0 to indicate the corner should be sharp
-   * arcHeight: positive height of the rounded corner, or 0 to indicate the corner should be sharp
-   */
-  scenery.Rectangle = function Rectangle( x, y, width, height, arcWidth, arcHeight, options ) {
-    if ( typeof x === 'object' ) {
-      // allow new Rectangle( { rectX: x, rectY: y, rectWidth: width, rectHeight: height, ... } )
-      // the mutators will call invalidateRectangle() and properly set the shape
-      options = x;
-      this._rectX = options.rectX || 0;
-      this._rectY = options.rectY || 0;
-      this._rectWidth = options.rectWidth;
-      this._rectHeight = options.rectHeight;
-      this._rectArcWidth = options.rectArcWidth || 0;
-      this._rectArcHeight = options.rectArcHeight || 0;
-    } else if ( arguments.length < 6 ) {
-      // new Rectangle( x, y, width, height, [options] )
-      this._rectX = x;
-      this._rectY = y;
-      this._rectWidth = width;
-      this._rectHeight = height;
-      this._rectArcWidth = 0;
-      this._rectArcHeight = 0;
-      
-      // ensure we have a parameter object
-      options = arcWidth || {};
-      
-    } else {
-      // normal case with args (including arcWidth / arcHeight)
-      this._rectX = x;
-      this._rectY = y;
-      this._rectWidth = width;
-      this._rectHeight = height;
-      this._rectArcWidth = arcWidth;
-      this._rectArcHeight = arcHeight;
-      
-      // ensure we have a parameter object
-      options = options || {};
-      
-    }
-    // fallback for non-canvas or non-svg rendering, and for proper bounds computation
-
-    Path.call( this, this.createRectangleShape(), options );
-  };
-  var Rectangle = scenery.Rectangle;
-  
-  inherit( Path, Rectangle, {
-    setRect: function( x, y, width, height, arcWidth, arcHeight ) {
-      sceneryAssert && sceneryAssert( x !== undefined && y !== undefined && width !== undefined && height !== undefined, 'x/y/width/height need to be defined' );
-      
-      this._rectX = x;
-      this._rectY = y;
-      this._rectWidth = width;
-      this._rectHeight = height;
-      this._rectArcWidth = arcWidth || 0;
-      this._rectArcHeight = arcHeight || 0;
-      this.invalidateRectangle();
-    },
-    
-    isRounded: function() {
-      return this._rectArcWidth !== 0 && this._rectArcHeight !== 0;
-    },
-    
-    createRectangleShape: function() {
-      sceneryAssert && sceneryAssert( isFinite( this._rectX ), 'A rectangle needs to have a finite x (' + this._rectX + ')' );
-      sceneryAssert && sceneryAssert( isFinite( this._rectY ), 'A rectangle needs to have a finite x (' + this._rectY + ')' );
-      sceneryAssert && sceneryAssert( this._rectWidth >= 0 && isFinite( this._rectWidth ),
-                                      'A rectangle needs to have a non-negative finite width (' + this._rectWidth + ')' );
-      sceneryAssert && sceneryAssert( this._rectHeight >= 0 && isFinite( this._rectHeight ),
-                                      'A rectangle needs to have a non-negative finite height (' + this._rectHeight + ')' );
-      sceneryAssert && sceneryAssert( this._rectArcWidth >= 0 && isFinite( this._rectArcWidth ),
-                                      'A rectangle needs to have a non-negative finite arcWidth (' + this._rectArcWidth + ')' );
-      sceneryAssert && sceneryAssert( this._rectArcHeight >= 0 && isFinite( this._rectArcHeight ),
-                                      'A rectangle needs to have a non-negative finite arcHeight (' + this._rectArcHeight + ')' );
-      // sceneryAssert && sceneryAssert( !this.isRounded() || ( this._rectWidth >= this._rectArcWidth * 2 && this._rectHeight >= this._rectArcHeight * 2 ),
-      //                                 'The rounded sections of the rectangle should not intersect (the length of the straight sections shouldn\'t be negative' );
-      
-      if ( this.isRounded() ) {
-        // copy border-radius CSS behavior in Chrome, where the arcs won't intersect, in cases where the arc segments at full size would intersect each other
-        var maximumArcSize = Math.min( this._rectWidth / 2, this._rectHeight / 2 );
-        return Shape.roundRectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight,
-                                     Math.min( maximumArcSize, this._rectArcWidth ), Math.min( maximumArcSize, this._rectArcHeight ) );
-      } else {
-        return Shape.rectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
-      }
-    },
-    
-    invalidateRectangle: function() {
-      // setShape should invalidate the path and ensure a redraw
-      this.setShape( this.createRectangleShape() );
-    },
-    
-    computeShapeBounds: function() {
-      // optimization, where we know our computed bounds will be just expanded by half the lineWidth if we are stroked (don't have to compute the stroke shape)
-      return this._stroke ? this._shape.bounds.dilated( this._lineDrawingStyles.lineWidth / 2 ) : this._shape.bounds;
-    },
-    
-    // accelerated hit detection for axis-aligned optionally-rounded rectangle
-    // fast computation if it isn't rounded. if rounded, we check if a corner computation is needed (usually isn't), and only check that one needed corner
-    containsPointSelf: function( point ) {
-      var result = point.x >= this._rectX &&
-                   point.x <= this._rectX + this._rectWidth &&
-                   point.y >= this._rectY &&
-                   point.y <= this._rectY + this._rectHeight;
-      
-      if ( !result || !this.isRounded() ) {
-        return result;
-      }
-      
-      // we are rounded and inside the logical rectangle (if it didn't have rounded corners)
-      
-      // closest corner arc's center (we assume the rounded rectangle's arcs are 90 degrees fully, and don't intersect)
-      var closestCornerX, closestCornerY, guaranteedInside = false;
-      
-      // if we are to the inside of the closest corner arc's center, we are guaranteed to be in the rounded rectangle (guaranteedInside)
-      if ( point.x < this._rectX + this._rectWidth / 2 ) {
-        closestCornerX = this._rectX + this._rectArcWidth;
-        guaranteedInside = guaranteedInside || point.x >= closestCornerX;
-      } else {
-        closestCornerX = this._rectX + this._rectWidth - this._rectArcWidth;
-        guaranteedInside = guaranteedInside || point.x <= closestCornerX;
-      }
-      if ( guaranteedInside ) { return true; }
-      
-      if ( point.y < this._rectY + this._rectHeight / 2 ) {
-        closestCornerY = this._rectY + this._rectArcHeight;
-        guaranteedInside = guaranteedInside || point.y >= closestCornerY;
-      } else {
-        closestCornerY = this._rectY + this._rectHeight - this._rectArcHeight;
-        guaranteedInside = guaranteedInside || point.y <= closestCornerY;
-      }
-      if ( guaranteedInside ) { return true; }
-      
-      // we are now in the rectangular region between the logical corner and the center of the closest corner's arc.
-      
-      // offset from the closest corner's arc center
-      var offsetX = point.x - closestCornerX;
-      var offsetY = point.y - closestCornerY;
-      
-      // normalize the coordinates so now we are dealing with a unit circle
-      // (technically arc, but we are guaranteed to be in the area covered by the arc, so we just consider the circle)
-      // NOTE: we are rounded, so both arcWidth and arcHeight are non-zero (this is well defined)
-      offsetX /= this._rectArcWidth;
-      offsetY /= this._rectArcHeight;
-      
-      offsetX *= offsetX;
-      offsetY *= offsetY;
-      return offsetX + offsetY <= 1; // return whether we are in the rounded corner. see the formula for an ellipse
-    },
-    
-    // override paintCanvas with a faster version, since fillRect and drawRect don't affect the current default path
-    paintCanvas: function( wrapper ) {
-      var context = wrapper.context;
-      
-      // use the standard version if it's a rounded rectangle, since there is no Canvas-optimized version for that
-      if ( this.isRounded() ) {
-        return Path.prototype.paintCanvas.call( this, wrapper );
-      }
-      
-      // TODO: how to handle fill/stroke delay optimizations here?
-      if ( this._fill ) {
-        this.beforeCanvasFill( wrapper ); // defined in Fillable
-        context.fillRect( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
-        this.afterCanvasFill( wrapper ); // defined in Fillable
-      }
-      if ( this._stroke ) {
-        this.beforeCanvasStroke( wrapper ); // defined in Strokable
-        context.strokeRect( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
-        this.afterCanvasStroke( wrapper ); // defined in Strokable
-      }
-    },
-    
-    // create a rect instead of a path, hopefully it is faster in implementations
-    createSVGFragment: function( svg, defs, group ) {
-      return document.createElementNS( 'http://www.w3.org/2000/svg', 'rect' );
-    },
-    
-    // optimized for the rect element instead of path
-    updateSVGFragment: function( rect ) {
-      // see http://www.w3.org/TR/SVG/shapes.html#RectElement
-      rect.setAttribute( 'x', this._rectX );
-      rect.setAttribute( 'y', this._rectY );
-      rect.setAttribute( 'width', this._rectWidth );
-      rect.setAttribute( 'height', this._rectHeight );
-      rect.setAttribute( 'rx', this._rectArcWidth );
-      rect.setAttribute( 'ry', this._rectArcHeight );
-      
-      rect.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
-    },
-    
-    getBasicConstructor: function( propLines ) {
-      return 'new scenery.Rectangle( ' + this._rectX + ', ' + this._rectY + ', ' + 
-                                         this._rectWidth + ', ' + this._rectHeight + ', ' +
-                                         this._rectArcWidth + ', ' + this._rectArcHeight + ', {' + propLines + '} )';
-    }
-    
-  } );
-  
-  function addRectProp( capitalizedShort ) {
-    var getName = 'getRect' + capitalizedShort;
-    var setName = 'setRect' + capitalizedShort;
-    var privateName = '_rect' + capitalizedShort;
-    
-    Rectangle.prototype[getName] = function() {
-      return this[privateName];
-    };
-    
-    Rectangle.prototype[setName] = function( value ) {
-      this[privateName] = value;
-      this.invalidateRectangle();
-      return this;
-    };
-    
-    Object.defineProperty( Rectangle.prototype, 'rect' + capitalizedShort, {
-      set: Rectangle.prototype[setName],
-      get: Rectangle.prototype[getName]
-    } );
-  }
-  
-  addRectProp( 'X' );
-  addRectProp( 'Y' );
-  addRectProp( 'Width' );
-  addRectProp( 'Height' );
-  addRectProp( 'ArcWidth' );
-  addRectProp( 'ArcHeight' );
-  
-  // not adding mutators for now
-  Rectangle.prototype._mutatorKeys = [ 'rectX', 'rectY', 'rectWidth', 'rectHeight', 'rectArcWidth', 'rectArcHeight' ].concat( Path.prototype._mutatorKeys );
-  
-  return Rectangle;
 } );
 
 
@@ -19312,6 +20690,132 @@ define( 'SCENERY/nodes/VBox',['require','SCENERY/scenery','SCENERY/nodes/Node','
   VBox.prototype.constructor = VBox;
 
   return VBox;
+} );
+
+// Copyright 2002-2013, University of Colorado Boulder
+
+/**
+ * The PointerOverlay shows pointer locations in the scene.  This is useful when recording a session for interviews or when a teacher is broadcasting
+ * a tablet session on an overhead projector.  See https://github.com/phetsims/scenery/issues/111
+ *
+ * Each pointer is rendered in a different <svg> so that CSS3 transforms can be used to make performance smooth on iPad.
+ *
+ * @author Sam Reid
+ */
+
+define( 'SCENERY/overlays/PointerOverlay',['require','DOT/Bounds2','DOT/Transform3','DOT/Matrix3','SCENERY/scenery','SCENERY/util/Trail','SCENERY/util/Util'],function( require ) {
+  
+
+  var Bounds2 = require( 'DOT/Bounds2' );
+  var Transform3 = require( 'DOT/Transform3' );
+  var Matrix3 = require( 'DOT/Matrix3' );
+
+  var scenery = require( 'SCENERY/scenery' );
+  require( 'SCENERY/util/Trail' );
+
+  var Util = require( 'SCENERY/util/Util' );
+
+  scenery.PointerOverlay = function PointerOverlay( scene ) {
+    var pointerOverlay = this;
+    this.scene = scene;
+
+    // add element to show the pointers
+    this.pointerSVGContainer = document.createElement( 'div' );
+    this.pointerSVGContainer.style.position = 'absolute';
+    this.pointerSVGContainer.style.top = 0;
+    this.pointerSVGContainer.style.left = 0;
+    this.pointerSVGContainer.style['pointer-events'] = 'none';
+
+    var innerRadius = 10;
+    var strokeWidth = 1;
+    var diameter = (innerRadius + strokeWidth / 2) * 2;
+    var radius = diameter / 2;
+
+    //Resize the parent div when the scene is resized
+    scene.addEventListener( 'resize', function( args ) {
+      pointerOverlay.pointerSVGContainer.setAttribute( 'width', args.width );
+      pointerOverlay.pointerSVGContainer.setAttribute( 'height', args.height );
+      pointerOverlay.pointerSVGContainer.style.clip = 'rect(0px,' + args.width + 'px,' + args.height + 'px,0px)';
+    }, false );
+
+    //Display a pointer that was added.  Use a separate SVG layer for each pointer so it can be hardware accelerated, otherwise it is too slow just setting svg internal attributes
+    var pointerAdded = this.pointerAdded = function( pointer ) {
+
+      if ( pointer.isKey ) { return; }
+
+      var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+      svg.style.position = 'absolute';
+      svg.style.top = 0;
+      svg.style.left = 0;
+      svg.style['pointer-events'] = 'none';
+
+      //Fit the size to the display
+      svg.setAttribute( 'width', diameter );
+      svg.setAttribute( 'height', diameter );
+
+      var circle = document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
+
+      //use css transform for performance?
+      circle.setAttribute( 'cx', innerRadius + strokeWidth / 2 );
+      circle.setAttribute( 'cy', innerRadius + strokeWidth / 2 );
+      circle.setAttribute( 'r', innerRadius );
+      circle.setAttribute( 'style', 'fill:black;' );
+      circle.setAttribute( 'opacity', 0.4 );
+
+      //Add a move listener to the pointer to update position when it has moved
+      var pointerRemoved = function() {
+
+        //For touches that get a touch up event, remove them.  But when the mouse button is released, don't stop showing the mouse location
+        if ( pointer.isTouch ) {
+          pointerOverlay.pointerSVGContainer.removeChild( svg );
+          pointer.removeInputListener( moveListener );
+        }
+      };
+      var moveListener = {
+        move: function() {
+
+          //TODO: Why is point sometimes null?
+          if ( pointer.point ) {
+
+            //TODO: this allocates memory when pointers are dragging, perhaps rewrite to remove allocations
+            Util.applyCSSTransform( Matrix3.translation( pointer.point.x - radius, pointer.point.y - radius ), svg );
+          }
+        },
+
+        up: pointerRemoved,
+        cancel: pointerRemoved
+      };
+      pointer.addInputListener( moveListener );
+
+      moveListener.move();
+      svg.appendChild( circle );
+      pointerOverlay.pointerSVGContainer.appendChild( svg );
+    };
+    scene.input.addPointerAddedListener( pointerAdded );
+
+    //if there is already a mouse, add it here
+    //TODO: if there already other non-mouse touches, could be added here
+    if ( scene.input && scene.input.mouse ) {
+      pointerAdded( scene.input.mouse );
+    }
+
+    scene.reindexLayers();
+    scene.$main[0].appendChild( this.pointerSVGContainer );
+  };
+  var PointerOverlay = scenery.PointerOverlay;
+
+  PointerOverlay.prototype = {
+    dispose: function() {
+      this.scene.$main[0].removeChild( this.pointerSVGContainer );
+      this.scene.input.removePointerAddedListener( this.pointerAdded );
+    },
+
+    reindex: function( index ) {
+      this.pointerSVGContainer.style.zIndex = index; //Make sure it is in front of enough other things!
+    }
+  };
+
+  return PointerOverlay;
 } );
 
 // Copyright 2002-2013, University of Colorado
@@ -19651,14 +21155,14 @@ define( 'SCENERY/util/Color',['require','SCENERY/scenery','DOT/Util','DOT/Util']
     
     toCSS: function() {
       // verify that the cached value is correct (in debugging builds only, defeats the point of caching otherwise)
-      sceneryAssert && sceneryAssert( this._css === this.computeCSS(), 'CSS cached value is ' + this._css + ', but the computed value appears to be ' + this.computeCSS() );
+      assert && assert( this._css === this.computeCSS(), 'CSS cached value is ' + this._css + ', but the computed value appears to be ' + this.computeCSS() );
       
       return this._css;
     },
     
     // called to update the interally cached CSS value
     updateColor: function() {
-      sceneryAssert && sceneryAssert( !this.immutable, 'Cannot modify an immutable color' );
+      assert && assert( !this.immutable, 'Cannot modify an immutable color' );
       
       var oldCSS = this._css;
       this._css = this.computeCSS();
@@ -19676,7 +21180,7 @@ define( 'SCENERY/util/Color',['require','SCENERY/scenery','DOT/Util','DOT/Util']
     
     // allow setting this Color to be immutable when assertions are disabled. any change will throw an error
     setImmutable: function() {
-      if ( sceneryAssert ) {
+      if ( assert ) {
         this.immutable = true;
       }
       
@@ -19778,19 +21282,37 @@ define( 'SCENERY/util/Color',['require','SCENERY/scenery','DOT/Util','DOT/Util']
       return new Color( red, green, blue, this.getAlpha() );
     },
     
+    /*
+     * Like colorUtilsBrighter/Darker, however factor should be in the range -1 to 1, and it will call:
+     *   colorUtilsBrighter( factor )   for factor >  0
+     *   this                           for factor == 0
+     *   colorUtilsDarker( -factor )    for factor <  0
+     * Thus:
+     * @param factor from -1 (black), to 0 (no change), to 1 (white)
+     */
+    colorUtilsBrightness: function( factor ) {
+      if ( factor === 0 ) {
+        return this;
+      } else if ( factor > 0 ) {
+        return this.colorUtilsBrighter( factor );
+      } else {
+        return this.colorUtilsDarker( -factor );
+      }
+    },
+    
     /*---------------------------------------------------------------------------*
     * listeners TODO: consider mixing in this behavior, it's common
     *----------------------------------------------------------------------------*/
     
     // listener should be a callback expecting no arguments, listener() will be called when the color changes
     addChangeListener: function( listener ) {
-      sceneryAssert && sceneryAssert( listener !== undefined && listener !== null, 'Verify that the listener exists' );
-      sceneryAssert && sceneryAssert( !_.contains( this.listeners, listener ) );
+      assert && assert( listener !== undefined && listener !== null, 'Verify that the listener exists' );
+      assert && assert( !_.contains( this.listeners, listener ) );
       this.listeners.push( listener );
     },
     
     removeChangeListener: function( listener ) {
-      sceneryAssert && sceneryAssert( _.contains( this.listeners, listener ) );
+      assert && assert( _.contains( this.listeners, listener ) );
       this.listeners.splice( _.indexOf( this.listeners, listener ), 1 );
     },
 
@@ -20022,7 +21544,7 @@ define( 'SCENERY/util/Gradient',['require','SCENERY/util/Color','SCENERY/scenery
 
   // TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ]
   scenery.Gradient = function Gradient( canvasGradient ) {
-    sceneryAssert && sceneryAssert( this.constructor.name !== 'Gradient', 'Please create a LinearGradient or RadialGradient. Do not directly use the supertype Gradient.' );
+    assert && assert( this.constructor.name !== 'Gradient', 'Please create a LinearGradient or RadialGradient. Do not directly use the supertype Gradient.' );
     
     this.stops = [];
     this.lastStopRatio = 0;
@@ -20101,10 +21623,10 @@ define( 'SCENERY/util/LinearGradient',['require','SCENERY/scenery','PHET_CORE/in
 
   // TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ]
   scenery.LinearGradient = function LinearGradient( x0, y0, x1, y1 ) {
-    sceneryAssert && sceneryAssert( isFinite( x0 ) && isFinite( y0 ) && isFinite( x1 ) && isFinite( y1 ) );
+    assert && assert( isFinite( x0 ) && isFinite( y0 ) && isFinite( x1 ) && isFinite( y1 ) );
     var usesVectors = y1 === undefined;
     if ( usesVectors ) {
-      sceneryAssert && sceneryAssert( ( x0 instanceof Vector2 ) && ( y0 instanceof Vector2 ), 'If less than 4 parameters are given, the first two parameters must be Vector2' );
+      assert && assert( ( x0 instanceof Vector2 ) && ( y0 instanceof Vector2 ), 'If less than 4 parameters are given, the first two parameters must be Vector2' );
     }
     this.start = usesVectors ? x0 : new Vector2( x0, y0 );
     this.end = usesVectors ? y0 : new Vector2( x1, y1 );
@@ -20236,7 +21758,7 @@ define( 'SCENERY/util/Instance',['require','SCENERY/scenery','SCENERY/util/Acces
     this.oldLayer = layer; // used during stitching
     
     // assertion not enabled, since at the start we don't specify a layer (it will be constructed later)
-    // sceneryAssert && sceneryAssert( trail.lastNode().isPainted() === ( layer !== null ), 'Has a layer iff is painted' );
+    // assert && assert( trail.lastNode().isPainted() === ( layer !== null ), 'Has a layer iff is painted' );
     
     // TODO: SVG layer might want to put data (group/fragment) references here (indexed by layer ID)
     this.data = {};
@@ -20321,18 +21843,18 @@ define( 'SCENERY/util/Instance',['require','SCENERY/scenery','SCENERY/util/Acces
     },
     
     addInstance: function( instance ) {
-      sceneryAssert && sceneryAssert( instance, 'Instance.addInstance cannot have falsy parameter' );
+      assert && assert( instance, 'Instance.addInstance cannot have falsy parameter' );
       this.children.push( instance );
     },
     
     insertInstance: function( index, instance ) {
-      sceneryAssert && sceneryAssert( instance, 'Instance.insert cannot have falsy instance parameter' );
-      sceneryAssert && sceneryAssert( index >= 0 && index <= this.children.length, 'Instance.insert has bad index ' + index + ' for length ' + this.children.length );
+      assert && assert( instance, 'Instance.insert cannot have falsy instance parameter' );
+      assert && assert( index >= 0 && index <= this.children.length, 'Instance.insert has bad index ' + index + ' for length ' + this.children.length );
       this.children.splice( index, 0, instance );
     },
     
     removeInstance: function( index ) {
-      sceneryAssert && sceneryAssert( typeof index === 'number' );
+      assert && assert( typeof index === 'number' );
       this.children.splice( index, 1 );
     },
     
@@ -20357,7 +21879,7 @@ define( 'SCENERY/util/Instance',['require','SCENERY/scenery','SCENERY/util/Acces
     },
     
     equals: function( other ) {
-      sceneryAssert && sceneryAssert( ( this === other ) === this.trail.equals( other.trail ), 'We assume a 1-1 mapping from trails to instances' );
+      assert && assert( ( this === other ) === this.trail.equals( other.trail ), 'We assume a 1-1 mapping from trails to instances' );
       return this === other;
     },
     
@@ -20461,6 +21983,16 @@ define( 'SCENERY/util/Instance',['require','SCENERY/scenery','SCENERY/util/Acces
       }
     },
     
+    notifyClipChange: function() {
+      sceneryEventLog && sceneryEventLog( 'notifyClipChange: ' + this.trail.toString() + ', ' + this.getLayerString() );
+      
+      var affectedLayers = this.getAffectedLayers();
+      var i = affectedLayers.length;
+      while ( i-- ) {
+        affectedLayers[i].notifyClipChange( this );
+      }
+    },
+    
     notifyBeforeSelfChange: function() {
       sceneryEventLog && sceneryEventLog( 'notifyBeforeSelfChange: ' + this.trail.toString() + ', ' + this.getLayerString() );
       // TODO: Canvas will only need to be notified of these once in-between scene updates
@@ -20481,7 +22013,7 @@ define( 'SCENERY/util/Instance',['require','SCENERY/scenery','SCENERY/util/Acces
     
     notifyDirtySelfPaint: function() {
       sceneryEventLog && sceneryEventLog( 'notifyDirtySelfPaint: ' + this.trail.toString() + ', ' + this.getLayerString() );
-      sceneryAssert && sceneryAssert( this.getNode().isPainted(), 'Instance needs to be painted for notifyDirtySelfPaint' );
+      assert && assert( this.getNode().isPainted(), 'Instance needs to be painted for notifyDirtySelfPaint' );
       this.layer.notifyDirtySelfPaint( this );
     },
     
@@ -20650,9 +22182,9 @@ define( 'SCENERY/util/RadialGradient',['require','SCENERY/scenery','PHET_CORE/in
     
     // make sure that the focal point is in both circles. SVG doesn't support rendering outside of them
     if ( this.startRadius >= this.endRadius ) {
-      sceneryAssert && sceneryAssert( this.focalPoint.minus( this.start ).magnitude() <= this.startRadius );
+      assert && assert( this.focalPoint.minus( this.start ).magnitude() <= this.startRadius );
     } else {
-      sceneryAssert && sceneryAssert( this.focalPoint.minus( this.end ).magnitude() <= this.endRadius );
+      assert && assert( this.focalPoint.minus( this.end ).magnitude() <= this.endRadius );
     }
     
     // use the global scratch canvas instead of creating a new Canvas
@@ -20753,7 +22285,7 @@ define( 'SCENERY/util/RenderInterval',['require','SCENERY/scenery','SCENERY/util
   
   // start and end are of type {Trail} or null (indicates all the way to the start / end)
   scenery.RenderInterval = function RenderInterval( start, end ) {
-    sceneryAssert && sceneryAssert( !start || !end || start.compare( end ) <= 0, 'RenderInterval parameters must not be out of order' );
+    assert && assert( !start || !end || start.compare( end ) <= 0, 'RenderInterval parameters must not be out of order' );
     
     this.start = start;
     this.end = end;
@@ -20791,14 +22323,14 @@ define( 'SCENERY/util/RenderInterval',['require','SCENERY/scenery','SCENERY/util
      * that a !== b || a === null for either interval, since otherwise it is not well defined.
      */
     exclusiveUnionable: function( interval ) {
-      sceneryAssert && sceneryAssert ( this.isValidExclusive(), 'exclusiveUnionable requires exclusive intervals' );
-      sceneryAssert && sceneryAssert ( interval.isValidExclusive(), 'exclusiveUnionable requires exclusive intervals' );
+      assert && assert ( this.isValidExclusive(), 'exclusiveUnionable requires exclusive intervals' );
+      assert && assert ( interval.isValidExclusive(), 'exclusiveUnionable requires exclusive intervals' );
       return ( !this.start || !interval.end || this.start.compare( interval.end ) === -1 ) &&
              ( !this.end || !interval.start || this.end.compare( interval.start ) === 1 );
     },
     
     exclusiveContains: function( trail ) {
-      sceneryAssert && sceneryAssert( trail );
+      assert && assert( trail );
       return ( !this.start || this.start.compare( trail ) < 0 ) && ( !this.end || this.end.compare( trail ) > 0 );
     },
     
@@ -20894,8 +22426,8 @@ define( 'SCENERY/util/SceneryStyle',['require','SCENERY/scenery'],function( requ
   document.head.appendChild( styleElement );
   
   var stylesheet = document.styleSheets[document.styleSheets.length-1];
-  sceneryAssert && sceneryAssert( stylesheet.disabled === false );
-  sceneryAssert && sceneryAssert( stylesheet.cssRules.length === 0 );
+  assert && assert( stylesheet.disabled === false );
+  assert && assert( stylesheet.cssRules.length === 0 );
   
   return {
     stylesheet: stylesheet,
@@ -20906,6 +22438,145 @@ define( 'SCENERY/util/SceneryStyle',['require','SCENERY/scenery'],function( requ
       this.stylesheet.insertRule( ruleString, 0 );
     }
   };
+} );
+
+// Copyright 2002-2013, University of Colorado
+
+/**
+ * General utility functions for WebGL
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'SCENERY/util/gl/GLUtil',['require','SCENERY/scenery'],function( require ) {
+  
+  
+  var scenery = require( 'SCENERY/scenery' );
+  
+  var GLUtil = scenery.GLUtil = {
+    getWebGLContext: function( canvas ) {
+      var gl = null;
+      var contextNames = ['webgl', 'experimental-webgl', 'webkit-3d', 'moz-webgl'];
+      for ( var i = 0; i < contextNames.length; i++ ) {
+        try {
+          gl = canvas.getContext( contextNames[i] );
+        } catch ( e ) {
+          // consider storing this failure somewhere?
+        }
+        if ( gl ) {
+          break;
+        }
+      }
+      
+      return gl;
+    }
+  };
+  
+  return GLUtil;
+} );
+
+// Copyright 2002-2013, University of Colorado
+
+/**
+ * Shader wrapper, so we can seamlessly recreate them on context loss.
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'SCENERY/util/gl/GLShader',['require','SCENERY/scenery'],function( require ) {
+  
+  
+  var scenery = require( 'SCENERY/scenery' );
+  
+  var GLShader = scenery.GLShader = function GLShader( gl, src, type ) {
+    this._src = src;
+    this._type = type;
+    this._shader = GLShader.compileShader( gl, src, type );
+  };
+  
+  GLShader.fragmentShader = function( gl, src ) {
+    return new GLShader( gl, src, gl.FRAGMENT_SHADER );
+  };
+  
+  GLShader.vertexShader = function( gl, src ) {
+    return new GLShader( gl, src, gl.VERTEX_SHADER );
+  };
+  
+  GLShader.compileShader = function( gl, src, type ) {
+    var shader = gl.createShader( type );
+    gl.shaderSource( shader, src );
+    gl.compileShader( shader );
+    
+    if ( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
+      throw new Error( gl.getShaderInfoLog( shader ) );
+    }
+    return shader;
+  };
+  
+  return GLShader;
+} );
+
+// Copyright 2002-2013, University of Colorado
+
+/**
+ * Shader program wrapper, so we can seamlessly recreate them on context loss.
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'SCENERY/util/gl/GLShaderProgram',['require','SCENERY/scenery'],function( require ) {
+  
+  
+  var scenery = require( 'SCENERY/scenery' );
+  
+  /*
+   * @param gl {WebGLRenderingContext}
+   * @param shaders {Array[GLShader]}
+   */
+  var GLShaderProgram = scenery.GLShaderProgram = function GLShaderProgram( gl, shaders, attributes, uniforms ) {
+    var that = this;
+    
+    this._shaders = shaders;
+    this._shaderProgram = GLShaderProgram.createProgram( gl, shaders );
+    this._attributes = attributes;
+    this._uniforms = uniforms;
+    
+    gl.useProgram( this._shaderProgram );
+    
+    _.each( attributes, function( attribute ) {
+      var location = gl.getAttribLocation( that._shaderProgram, attribute );
+      that[attribute] = location;
+      gl.enableVertexAttribArray( location ); // TODO: what about where we don't always want them defined?
+    } );
+    
+    _.each( uniforms, function( uniform ) {
+      that[uniform] = gl.getUniformLocation( that._shaderProgram, uniform );
+    } );
+  };
+  
+  GLShaderProgram.prototype = {
+    constructor: GLShaderProgram,
+    
+    use: function( gl ) {
+      gl.useProgram( this._shaderProgram );
+    }
+  };
+  
+  GLShaderProgram.createProgram = function( gl, shaders ) {
+    var shaderProgram = gl.createProgram();
+    _.each( shaders, function( shader ) {
+      gl.attachShader( shaderProgram, shader._shader );
+    } );
+    gl.linkProgram( shaderProgram );
+
+    if ( !gl.getProgramParameter( shaderProgram, gl.LINK_STATUS ) ) {
+      throw new Error( 'Could not initialise shaders' );
+    }
+    
+    return shaderProgram;
+  };
+  
+  return GLShaderProgram;
 } );
 
 // Copyright 2002-2013, University of Colorado Boulder
@@ -20920,16 +22591,127 @@ define( 'SCENERY/util/SceneryStyle',['require','SCENERY/scenery'],function( requ
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'PHET_CORE/collect',['require'],function( require ) {
+define( 'PHET_CORE/collect',['require','PHET_CORE/core'],function( require ) {
   
   
-  return function collect( iterate ) {
+  var core = require( 'PHET_CORE/core' );
+  
+  var collect = core.collect = function collect( iterate ) {
+    assert && assert( typeof iterate === 'function' );
     var result = [];
     iterate( function( ob ) {
       result.push( ob );
     } );
     return result;
   };
+  return collect;
+} );
+
+// Copyright 2002-2013, University of Colorado Boulder
+
+/**
+ * Displays mouse and touch areas when they are customized. Expensive to display!
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'SCENERY/overlays/PointerAreaOverlay',['require','DOT/Bounds2','DOT/Transform3','DOT/Matrix3','SCENERY/scenery','SCENERY/util/Trail','SCENERY/util/Util'],function( require ) {
+  
+
+  var Bounds2 = require( 'DOT/Bounds2' );
+  var Transform3 = require( 'DOT/Transform3' );
+  var Matrix3 = require( 'DOT/Matrix3' );
+
+  var scenery = require( 'SCENERY/scenery' );
+  require( 'SCENERY/util/Trail' );
+
+  var Util = require( 'SCENERY/util/Util' );
+
+  scenery.PointerAreaOverlay = function PointerAreaOverlay( scene ) {
+    this.scene = scene;
+    
+    var svg = this.svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+    svg.style.position = 'absolute';
+    svg.className = 'mouseTouchAreaOverlay';
+    svg.style.top = 0;
+    svg.style.left = 0;
+    svg.style['pointer-events'] = 'none';
+    
+    function resize( width, height ) {
+      svg.setAttribute( 'width', width );
+      svg.setAttribute( 'height', height );
+      svg.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
+    }
+    scene.addEventListener( 'resize', function( args ) {
+      resize( args.width, args.height );
+    } );
+    resize( scene.getSceneWidth(), scene.getSceneHeight() );
+    
+    scene.$main[0].appendChild( svg );
+    
+    scene.reindexLayers();
+  };
+  var PointerAreaOverlay = scenery.PointerAreaOverlay;
+
+  PointerAreaOverlay.prototype = {
+    dispose: function() {
+      this.scene.$main[0].removeChild( this.svg );
+    },
+
+    reindex: function( index ) {
+      this.svg.style.zIndex = index;
+    },
+    
+    addShape: function( shape, color, isOffset ) {
+      var path = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+      var svgPath = shape.getSVGPath();
+      
+      // temporary workaround for https://bugs.webkit.org/show_bug.cgi?id=78980
+      // and http://code.google.com/p/chromium/issues/detail?id=231626 where even removing
+      // the attribute can cause this bug
+      if ( !svgPath ) { svgPath = 'M0 0'; }
+      
+      if ( svgPath ) {
+        // only set the SVG path if it's not the empty string
+        path.setAttribute( 'd', svgPath );
+      } else if ( path.hasAttribute( 'd' ) ) {
+        path.removeAttribute( 'd' );
+      }
+      
+      path.setAttribute( 'style', 'fill: none; stroke: ' + color + '; stroke-dasharray: 5, 3; stroke-dashoffset: ' + ( isOffset ? 5 : 0 ) + '; stroke-width: 3;' );
+      this.svg.appendChild( path );
+    },
+    
+    update: function() {
+      var that = this;
+      var svg = this.svg;
+      var scene = this.scene;
+      
+      while ( svg.childNodes.length ) {
+        svg.removeChild( svg.childNodes[svg.childNodes.length-1] );
+      }
+      
+      new scenery.Trail( scene ).eachTrailUnder( function( trail ) {
+        var node = trail.lastNode();
+        if ( !node.isVisible() ) {
+          // skip this subtree if the node is invisible
+          return true;
+        }
+        if ( ( node._mouseArea || node._touchArea ) && trail.isVisible() ) {
+          var transform = trail.getTransform();
+          
+          if ( node._mouseArea ) {
+            that.addShape( transform.transformShape( node._mouseArea ), 'rgba(0,0,255,0.8)', true );
+          }
+          if ( node._touchArea ) {
+            that.addShape( transform.transformShape( node._touchArea ), 'rgba(255,0,0,0.8)', false );
+          }
+        }
+      } );
+    }
+  };
+
+  return PointerAreaOverlay;
 } );
 
 // Copyright 2002-2013, University of Colorado
@@ -20942,7 +22724,7 @@ define( 'PHET_CORE/collect',['require'],function( require ) {
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/Bounds2','DOT/Vector2','DOT/Matrix3','KITE/Shape','SCENERY/scenery','SCENERY/nodes/Node','SCENERY/util/Instance','SCENERY/util/Trail','SCENERY/util/RenderInterval','SCENERY/util/TrailPointer','SCENERY/input/Input','SCENERY/layers/LayerBuilder','SCENERY/layers/Renderer','SCENERY/util/Util'],function( require ) {
+define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/Bounds2','DOT/Vector2','DOT/Matrix3','KITE/Shape','SCENERY/scenery','SCENERY/nodes/Node','SCENERY/util/Instance','SCENERY/util/Trail','SCENERY/util/RenderInterval','SCENERY/util/TrailPointer','SCENERY/input/Input','SCENERY/layers/LayerBuilder','SCENERY/layers/Renderer','SCENERY/overlays/PointerAreaOverlay','SCENERY/overlays/PointerOverlay','SCENERY/util/Util'],function( require ) {
   
   
   var collect = require( 'PHET_CORE/collect' );
@@ -20964,7 +22746,9 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
   require( 'SCENERY/input/Input' );
   require( 'SCENERY/layers/LayerBuilder' );
   require( 'SCENERY/layers/Renderer' );
-  
+  require( 'SCENERY/overlays/PointerAreaOverlay' );
+  require( 'SCENERY/overlays/PointerOverlay' );
+
   var Util = require( 'SCENERY/util/Util' );
   var objectCreate = Util.objectCreate;
   
@@ -20998,7 +22782,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
    * }
    */
   scenery.Scene = function Scene( $main, options ) {
-    sceneryAssert && sceneryAssert( $main[0], 'A main container is required for a scene' );
+    assert && assert( $main[0], 'A main container is required for a scene' );
     this.$main = $main;
     this.main = $main[0];
     
@@ -21024,7 +22808,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
     this.enablePointerEvents = options.enablePointerEvents;
     
     Node.call( this, options );
-    
+
     var scene = this;
     window.debugScene = scene;
     
@@ -21049,7 +22833,8 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
     this.preferredSceneLayerType = options.preferredSceneLayerType;
     
     applyCSSHacks( $main, options );
-    
+
+    // TODO: Does this need to move to where inputEvents are hooked up so that it doesn't get run each time Node.toImage is called?
     if ( accessibility ) {
       this.activePeer = null;
       
@@ -21075,7 +22860,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
       
       this.updateFocusRing = function() {
         // TODO: move into prototype definitions, this doesn't need to be private, and isn't a closure over anything in the constructor
-        sceneryAssert && sceneryAssert( scene.activePeer, 'scene should have an active peer when changing the focus ring bounds' );
+        assert && assert( scene.activePeer, 'scene should have an active peer when changing the focus ring bounds' );
         scene.focusRingPath.setAttribute( 'd', Shape.bounds( scene.activePeer.getGlobalBounds() ).getSVGPath() );
       };
 
@@ -21116,6 +22901,10 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
       }
       
       this.updateCursor();
+      
+      if ( this.mouseTouchAreaOverlay ) {
+        this.mouseTouchAreaOverlay.update();
+      }
       
       // if ( this.accessibilityLayer ) {
   //      for ( var i = 0; i < accessibleNodes.length; i++ ) {
@@ -21207,7 +22996,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
     },
     
     blurPeer: function( peer ) {
-      sceneryAssert && sceneryAssert( this.getActivePeer() === peer, 'Can only blur an active peer' );
+      assert && assert( this.getActivePeer() === peer, 'Can only blur an active peer' );
       this.setActivePeer( null );
     },
     
@@ -21227,9 +23016,9 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
       var afterTrail = afterTrailPointer.trail;
       
       // sanity checks
-      sceneryAssert && sceneryAssert( !beforeTrail || beforeTrail.areIndicesValid(), 'beforeTrail needs to be valid' );
-      sceneryAssert && sceneryAssert( !afterTrail || afterTrail.areIndicesValid(), 'afterTrail needs to be valid' );
-      sceneryAssert && sceneryAssert( !beforeTrail || !afterTrail || beforeTrail.compare( afterTrail ) !== 0, 'Marked interval needs to be exclusive' );
+      assert && assert( !beforeTrail || beforeTrail.areIndicesValid(), 'beforeTrail needs to be valid' );
+      assert && assert( !afterTrail || afterTrail.areIndicesValid(), 'afterTrail needs to be valid' );
+      assert && assert( !beforeTrail || !afterTrail || beforeTrail.compare( afterTrail ) !== 0, 'Marked interval needs to be exclusive' );
       
       // store the layer of the before/after trails so that it is easy to access later
       this.addLayerChangeInterval( new scenery.RenderInterval( beforeTrail, afterTrail ) );
@@ -21401,7 +23190,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
         newLayer.endBoundary.reindex(); // TODO: performance: this repeats some work, verify in layer audit that we are sharing boundaries properly, then only reindex end boundary on last layer
         
         // add new layers. we do this before the add/remove trails, since those can trigger layer side effects
-        sceneryAssert && sceneryAssert( newLayer._instanceCount, 'ensure we are not adding empty layers' );
+        assert && assert( newLayer._instanceCount, 'ensure we are not adding empty layers' );
         
         sceneryLayerLog && sceneryLayerLog( 'inserting layer: ' + newLayer.getId() );
         scene.insertLayer( newLayer );
@@ -21419,7 +23208,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
         stitchData.affectedInstances[i].updateLayer();
       }
       
-      sceneryAssertExtra && sceneryAssertExtra( this.layerAudit() );
+      assertSlow && assertSlow( this.layerAudit() );
       
       sceneryLayerLog && sceneryLayerLog( 'finished stitch\n-----------------------------------' );
     },
@@ -21499,7 +23288,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
         
         // if there is no next boundary, don't bother checking anyways
         if ( nextBoundary && nextBoundary.equivalentPreviousTrail( currentTrail ) ) { // at least one null check
-          sceneryAssert && sceneryAssert( nextBoundary.equivalentNextTrail( trail ) );
+          assert && assert( nextBoundary.equivalentNextTrail( trail ) );
           
           sceneryLayerLog && sceneryLayerLog( nextBoundary.toString() );
           
@@ -21510,7 +23299,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
               // existing layer, reposition its endpoint
               currentLayer.setEndBoundary( nextBoundary );
             } else {
-              sceneryAssert && sceneryAssert( currentStartBoundary );
+              assert && assert( currentStartBoundary );
               
               if ( matchingLayer ) {
                 sceneryLayerLog && sceneryLayerLog( 'matching layer used: ' + matchingLayer.getId() );
@@ -21523,14 +23312,14 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
               }
             }
             // sanity checks
-            sceneryAssert && sceneryAssert( currentLayer.startPaintedTrail );
-            sceneryAssert && sceneryAssert( currentLayer.endPaintedTrail );
+            assert && assert( currentLayer.startPaintedTrail );
+            assert && assert( currentLayer.endPaintedTrail );
             
             addPendingTrailsToLayer();
           } else {
             // if not at the end of a layer, sanity check that we should have no accumulated pending trails
             sceneryLayerLog && sceneryLayerLog( 'was first layer' );
-            sceneryAssert && sceneryAssert( instancesToAddToLayer.length === 0 );
+            assert && assert( instancesToAddToLayer.length === 0 );
           }
           currentLayer = null;
           currentLayerType = nextBoundary.nextLayerType;
@@ -21590,7 +23379,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
         } else if ( beforeLayer && beforeLayer === afterLayer && boundaries.length > 0 ) {
           // need to 'unglue' and split the layer
           sceneryLayerLog && sceneryLayerLog( 'ungluing layer' );
-          sceneryAssert && sceneryAssert( currentStartBoundary );
+          assert && assert( currentStartBoundary );
           addAndCreateLayer( currentStartBoundary, afterLayerEndBoundary ); // sets currentLayer
           addPendingTrailsToLayer();
           
@@ -21653,8 +23442,16 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
       
       if ( accessibility ) {
         if ( this.focusRingSVGContainer ) {
-          this.focusRingSVGContainer.style.zIndex = index;
+          this.focusRingSVGContainer.style.zIndex = index++;
         }
+      }
+      
+      if ( this.mouseTouchAreaOverlay ){
+        this.mouseTouchAreaOverlay.reindex( index++ );
+      }
+      
+      if ( this.pointerOverlay ){
+        this.pointerOverlay.reindex( index++ );
       }
     },
     
@@ -21690,15 +23487,15 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
     affectedLayers: function( trail ) {
       // midpoint search and result depends on the order of layers being in render order (bottom to top)
       
-      sceneryAssert && sceneryAssert( !( trail.isEmpty() || trail.nodes[0] !== this ), 'layerLookup root matches' );
+      assert && assert( !( trail.isEmpty() || trail.nodes[0] !== this ), 'layerLookup root matches' );
       
       var n = this.layers.length;
       if ( n === 0 ) {
-        sceneryAssert && sceneryAssert( !trail.lastNode().isPainted(), 'There should be at least one layer for a painted trail' );
+        assert && assert( !trail.lastNode().isPainted(), 'There should be at least one layer for a painted trail' );
         return [];
       }
       
-      sceneryAssert && sceneryAssert( trail.areIndicesValid() );
+      assert && assert( trail.areIndicesValid() );
       
       var layers = this.layers;
       
@@ -21711,7 +23508,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
       while ( high - 1 > low ) {
         mid = ( high + low ) >> 1;
         var endTrail = layers[mid].endPaintedTrail;
-        sceneryAssert && sceneryAssert( endTrail.areIndicesValid() );
+        assert && assert( endTrail.areIndicesValid() );
         // NOTE TO SELF: don't change this flag to true again. think it through
         // trail,true points to the beginning of the node, right before it would be rendered
         var notAfter = scenery.TrailPointer.compareNested( trail, true, endTrail, true ) !== 1;
@@ -21732,7 +23529,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
         mid = ( high + low ) >> 1;
         var startTrail = layers[mid].startPaintedTrail;
         startTrail.reindex();
-        sceneryAssert && sceneryAssert( startTrail.areIndicesValid() );
+        assert && assert( startTrail.areIndicesValid() );
         var notBefore = scenery.TrailPointer.compareNested( trail, false, startTrail, true ) !== -1;
         if ( notBefore ) {
           low = mid;
@@ -21815,7 +23612,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
       if ( this.sceneBounds.width !== width || this.sceneBounds.height !== height ) {
         this.setSize( width, height );
         this.rebuildLayers(); // TODO: why? - change this to resize individual layers
-        
+
         if ( accessibility ) {
           this.resizeAccessibilityLayer( width, height );
           this.resizeFocusRingSVGContainer( width, height );
@@ -21834,7 +23631,8 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
         this.fireEvent( 'resize', { width: width, height: height } );
       }
     },
-    
+
+    // TODO: Refactor the following methods into one to avoid code duplication.
     resizeAccessibilityLayer: function( width, height ) {
       if ( this.accessibilityLayer ) {
         this.accessibilityLayer.setAttribute( 'width', width );
@@ -21850,7 +23648,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
         this.focusRingSVGContainer.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
       }
     },
-    
+
     getSceneWidth: function() {
       return this.sceneBounds.getWidth();
     },
@@ -21887,7 +23685,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
       instance.removeInstance( index );
       while ( toRemove.length ) {
         var item = toRemove.pop();
-        sceneryAssert && sceneryAssert( item, 'item instance should always exist' );
+        assert && assert( item, 'item instance should always exist' );
         
         // add its children
         Array.prototype.push.apply( toRemove, item.children );
@@ -21897,7 +23695,11 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
     },
     
     updateCursor: function() {
-      if ( this.input && this.input.mouse.point ) {
+      if ( this.input && this.input.mouse && this.input.mouse.point ) {
+        if ( this.input.mouse.cursor ) {
+          return this.setSceneCursor( this.input.mouse.cursor );
+        }
+        
         var mouseTrail = this.trailUnderPoint( this.input.mouse.point, { isMouse: true } );
         
         if ( mouseTrail ) {
@@ -21905,8 +23707,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
             var cursor = mouseTrail.nodes[i].getCursor();
             
             if ( cursor ) {
-              this.setSceneCursor( cursor );
-              return;
+              return this.setSceneCursor( cursor );
             }
           }
         }
@@ -22121,6 +23922,24 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
       } );
     },
     
+    setPointerDisplayVisible: function( visible ) {
+      if ( visible && !this.pointerOverlay ) {
+        this.pointerOverlay = new scenery.PointerOverlay( this );
+      } else if ( !visible && this.pointerOverlay ) {
+        this.pointerOverlay.dispose();
+        delete this.pointerOverlay;
+      }
+    },
+    
+    setPointerAreaDisplayVisible: function( visible ) {
+      if ( visible && !this.mouseTouchAreaOverlay ) {
+        this.mouseTouchAreaOverlay = new scenery.PointerAreaOverlay( this );
+      } else if ( !visible && this.mouseTouchAreaOverlay ) {
+        this.mouseTouchAreaOverlay.dispose();
+        delete this.mouseTouchAreaOverlay;
+      }
+    },
+    
     getTrailFromKeyboardFocus: function() {
       // return the root (scene) trail by default
       // TODO: fill in with actual keyboard focus
@@ -22146,7 +23965,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
       var scene = this;
       
       var boundaries = this.calculateBoundaries( null, null, null );
-      sceneryAssert && sceneryAssert( boundaries.length === this.layers.length + 1, 'boundary count (' + boundaries.length + ') does not match layer count (' + this.layers.length + ') + 1' );
+      assert && assert( boundaries.length === this.layers.length + 1, 'boundary count (' + boundaries.length + ') does not match layer count (' + this.layers.length + ') + 1' );
       
       // count how many 'self' trails there are
       var eachTrailUnderPaintedCount = 0;
@@ -22154,10 +23973,10 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
         if ( trail.isPainted() ) {
           eachTrailUnderPaintedCount++;
           
-          sceneryAssert && sceneryAssert( trail.getInstance(), 'every painted trail must have an instance' );
+          assert && assert( trail.getInstance(), 'every painted trail must have an instance' );
         }
         
-        sceneryAssert && sceneryAssert( trail.getInstance() && trail.getInstance().trail.equals( trail ), 'every trail must have a single corresponding instance' );
+        assert && assert( trail.getInstance() && trail.getInstance().trail.equals( trail ), 'every trail must have a single corresponding instance' );
       } );
       
       var layerPaintedCount = 0;
@@ -22175,20 +23994,20 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
         scenery.Trail.eachPaintedTrailBetween( layer.startPaintedTrail, layer.endPaintedTrail, function( trail ) {
           selfCount++;
         }, false, scene );
-        sceneryAssert && sceneryAssert( selfCount > 0, 'every layer must have at least one self trail' );
+        assert && assert( selfCount > 0, 'every layer must have at least one self trail' );
         layerIterationPaintedCount += selfCount;
       } );
       
-      sceneryAssert && sceneryAssert( eachTrailUnderPaintedCount === layerPaintedCount, 'cross-referencing self trail counts: layerPaintedCount, ' + eachTrailUnderPaintedCount + ' vs ' + layerPaintedCount );
-      sceneryAssert && sceneryAssert( eachTrailUnderPaintedCount === layerIterationPaintedCount, 'cross-referencing self trail counts: layerIterationPaintedCount, ' + eachTrailUnderPaintedCount + ' vs ' + layerIterationPaintedCount );
+      assert && assert( eachTrailUnderPaintedCount === layerPaintedCount, 'cross-referencing self trail counts: layerPaintedCount, ' + eachTrailUnderPaintedCount + ' vs ' + layerPaintedCount );
+      assert && assert( eachTrailUnderPaintedCount === layerIterationPaintedCount, 'cross-referencing self trail counts: layerIterationPaintedCount, ' + eachTrailUnderPaintedCount + ' vs ' + layerIterationPaintedCount );
       
       _.each( this.layers, function( layer ) {
-        sceneryAssert && sceneryAssert( layer.startPaintedTrail.compare( layer.endPaintedTrail ) <= 0, 'proper ordering on layer trails' );
+        assert && assert( layer.startPaintedTrail.compare( layer.endPaintedTrail ) <= 0, 'proper ordering on layer trails' );
       } );
       
       for ( var i = 1; i < this.layers.length; i++ ) {
-        sceneryAssert && sceneryAssert( this.layers[i-1].endPaintedTrail.compare( this.layers[i].startPaintedTrail ) === -1, 'proper ordering of layer trail boundaries in scene.layers array' );
-        sceneryAssert && sceneryAssert( this.layers[i-1].endBoundary === this.layers[i].startBoundary, 'proper sharing of boundaries' );
+        assert && assert( this.layers[i-1].endPaintedTrail.compare( this.layers[i].startPaintedTrail ) === -1, 'proper ordering of layer trail boundaries in scene.layers array' );
+        assert && assert( this.layers[i-1].endBoundary === this.layers[i].startBoundary, 'proper sharing of boundaries' );
       }
       
       _.each( this.layers, function( layer ) {
@@ -22202,15 +24021,15 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
         }, false, scene );
         
         // verify that the layer has an identical record of trails compared to the trails inside its boundaries
-        sceneryAssert && sceneryAssert( layerTrails.length === computedTrails.length, 'layer has incorrect number of tracked trails' );
+        assert && assert( layerTrails.length === computedTrails.length, 'layer has incorrect number of tracked trails' );
         _.each( layerTrails, function( trail ) {
-          sceneryAssert && sceneryAssert( _.some( computedTrails, function( otherTrail ) { return trail.equals( otherTrail ); } ), 'layer has a tracked trail discrepancy' );
+          assert && assert( _.some( computedTrails, function( otherTrail ) { return trail.equals( otherTrail ); } ), 'layer has a tracked trail discrepancy' );
         } );
         
         // verify that each trail has the same (or null) renderer as the layer
         scenery.Trail.eachTrailBetween( layer.startPaintedTrail, layer.endPaintedTrail, function( trail ) {
           var node = trail.lastNode();
-          sceneryAssert && sceneryAssert( !node.renderer || node.renderer.name === layer.type.name, 'specified renderers should match the layer renderer' );
+          assert && assert( !node.renderer || node.renderer.name === layer.type.name, 'specified renderers should match the layer renderer' );
         }, false, scene );
       } );
       
@@ -22221,7 +24040,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
         if ( trail.lastNode().layerSplitBefore ) {
           beforeSplitTrail = trail.previousPainted();
           afterSplitTrail = trail.lastNode().isPainted() ? trail : trail.nextPainted();
-          sceneryAssert && sceneryAssert( !beforeSplitTrail || !afterSplitTrail || beforeSplitTrail.getInstance().layer !== afterSplitTrail.getInstance().layer, 'layerSplitBefore layers need to be different' );
+          assert && assert( !beforeSplitTrail || !afterSplitTrail || beforeSplitTrail.getInstance().layer !== afterSplitTrail.getInstance().layer, 'layerSplitBefore layers need to be different' );
         }
         if ( trail.lastNode().layerSplitAfter ) {
           // shift a pointer from the (nested) end of the trail to the next isBefore (if available)
@@ -22234,7 +24053,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
           if ( ptr ) {
             beforeSplitTrail = ptr.trail.previousPainted();
             afterSplitTrail = ptr.trail.lastNode().isPainted() ? ptr.trail : ptr.trail.nextPainted();
-            sceneryAssert && sceneryAssert( !beforeSplitTrail || !afterSplitTrail || beforeSplitTrail.getInstance().layer !== afterSplitTrail.getInstance().layer, 'layerSplitAfter layers need to be different' );
+            assert && assert( !beforeSplitTrail || !afterSplitTrail || beforeSplitTrail.getInstance().layer !== afterSplitTrail.getInstance().layer, 'layerSplitAfter layers need to be different' );
           }
         }
       } );
@@ -22300,11 +24119,26 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
           if ( !node._visible ) {
             addQualifier( 'invisible' );
           }
-          if ( !node._pickable ) {
+          if ( node._pickable === true ) {
+            addQualifier( 'pickable' );
+          }
+          if ( node._pickable === false ) {
             addQualifier( 'unpickable' );
           }
-          if ( node._clipShape ) {
-            addQualifier( 'clipShape' );
+          if ( pointer.trail.isPickable() ) {
+            addQualifier( '<span style="color: #808">hits</span>' );
+          }
+          if ( node._clipArea ) {
+            addQualifier( 'clipArea' );
+          }
+          if ( node._mouseArea ) {
+            addQualifier( 'mouseArea' );
+          }
+          if ( node._touchArea ) {
+            addQualifier( 'touchArea' );
+          }
+          if ( node._inputListeners.length ) {
+            addQualifier( 'inputListeners' );
           }
           if ( node._renderer ) {
             addQualifier( 'renderer:' + node._renderer.name );
@@ -22466,6 +24300,7 @@ define( 'main',[
     'SCENERY/nodes/HBox',
     'SCENERY/nodes/HTMLText',
     'SCENERY/nodes/Image',
+    'SCENERY/nodes/LayoutNode',
     'SCENERY/nodes/Line',
     'SCENERY/nodes/Node',
     'SCENERY/nodes/Path',
@@ -22474,7 +24309,9 @@ define( 'main',[
     'SCENERY/nodes/Strokable',
     'SCENERY/nodes/Text',
     'SCENERY/nodes/VBox',
-    
+
+    'SCENERY/overlays/PointerOverlay',
+
     'SCENERY/util/AccessibilityPeer',
     'SCENERY/util/CanvasContextWrapper',
     'SCENERY/util/Color',
@@ -22492,6 +24329,10 @@ define( 'main',[
     'SCENERY/util/Trail',
     'SCENERY/util/TrailPointer',
     'SCENERY/util/Util',
+    
+    'SCENERY/util/gl/GLUtil',
+    'SCENERY/util/gl/GLShader',
+    'SCENERY/util/gl/GLShaderProgram',
     
     'SCENERY/Scene'
   ], function(
@@ -22539,6 +24380,473 @@ define( 'KITE/main',[
 // Copyright 2002-2013, University of Colorado Boulder
 
 /**
+ * A 3D cuboid-shaped bounded area (bounding box)
+ *
+ * There are a number of convenience functions to get locations and points on the Bounds. Currently we do not
+ * store these with the Bounds3 instance, since we want to lower the memory footprint.
+ *
+ * minX, minY, minZ, maxX, maxY, and maxZ are actually stored. We don't do x,y,z,width,height,depth because this can't properly express
+ * semi-infinite bounds (like a half-plane), or easily handle what Bounds3.NOTHING and Bounds3.EVERYTHING do with
+ * the constructive solid areas.
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'DOT/Bounds3',['require','DOT/dot','DOT/Vector3'],function( require ) {
+  
+  
+  var dot = require( 'DOT/dot' );
+  
+  require( 'DOT/Vector3' );
+  
+  // not using x,y,width,height so that it can handle infinity-based cases in a better way
+  dot.Bounds3 = function Bounds3( minX, minY, minZ, maxX, maxY, maxZ ) {
+    assert && assert( maxY !== undefined, 'Bounds3 requires 4 parameters' );
+    this.minX = minX;
+    this.minY = minY;
+    this.minZ = minZ;
+    this.maxX = maxX;
+    this.maxY = maxY;
+    this.maxZ = maxZ;
+    
+    phetAllocation && phetAllocation( 'Bounds3' );
+  };
+  var Bounds3 = dot.Bounds3;
+
+  Bounds3.prototype = {
+    constructor: Bounds3,
+    
+    /*---------------------------------------------------------------------------*
+    * Properties
+    *----------------------------------------------------------------------------*/
+    
+    getWidth: function() { return this.maxX - this.minX; },
+    get width() { return this.getWidth(); },
+    
+    getHeight: function() { return this.maxY - this.minY; },
+    get height() { return this.getHeight(); },
+    
+    getDepth: function() { return this.maxZ - this.minZ; },
+    get depth() { return this.getDepth(); },
+    
+    /* 
+     * Convenience locations
+     * upper is in terms of the visual layout in Scenery and other programs, so the minY is the "upper", and minY is the "lower"
+     *
+     *             minX (x)     centerX        maxX
+     *          ---------------------------------------
+     * minY (y) | upperLeft   upperCenter   upperRight
+     * centerY  | centerLeft    center      centerRight
+     * maxY     | lowerLeft   lowerCenter   lowerRight
+     */
+    getX: function() { return this.minX; },
+    get x() { return this.getX(); },
+    getY: function() { return this.minY; },
+    get y() { return this.getY(); },
+    getZ: function() { return this.minZ; },
+    get z() { return this.getZ(); },
+    
+    getMinX: function() { return this.minX; },
+    get left() { return this.minX; },
+    getMinY: function() { return this.minY; },
+    get top() { return this.minY; },
+    getMinZ: function() { return this.minZ; },
+    get back() { return this.minZ; },
+    getMaxX: function() { return this.maxX; },
+    get right() { return this.maxX; },
+    getMaxY: function() { return this.maxY; },
+    get bottom() { return this.maxY; },
+    getMaxZ: function() { return this.maxZ; },
+    get front() { return this.maxZ; },
+    
+    getCenterX: function() { return ( this.maxX + this.minX ) / 2; },
+    get centerX() { return this.getCenterX(); },
+    getCenterY: function() { return ( this.maxY + this.minY ) / 2; },
+    get centerY() { return this.getCenterY(); },
+    getCenterZ: function() { return ( this.maxZ + this.minZ ) / 2; },
+    get centerZ() { return this.getCenterZ(); },
+    
+    getCenter: function() { return new dot.Vector3( this.getCenterX(), this.getCenterY(), this.getCenterZ() ); },
+    get center() { return this.getCenter(); },
+    
+    isEmpty: function() { return this.getWidth() < 0 || this.getHeight() < 0 || this.getDepth() < 0; },
+    
+    isFinite: function() {
+      return isFinite( this.minX ) && isFinite( this.minY ) && isFinite( this.minZ ) && isFinite( this.maxX ) && isFinite( this.maxY ) && isFinite( this.maxZ );
+    },
+    
+    isValid: function() {
+      return !this.isEmpty() && this.isFinite();
+    },
+    
+    // whether the coordinates are inside the bounding box (or on the boundary)
+    containsCoordinates: function( x, y, z ) {
+      return this.minX <= x && x <= this.maxX && this.minY <= y && y <= this.maxY && this.minZ <= z && z <= this.maxZ;
+    },
+    
+    // whether the point is inside the bounding box (or on the boundary)
+    containsPoint: function( point ) {
+      return this.containsCoordinates( point.x, point.y, point.z );
+    },
+    
+    // whether this bounding box completely contains the argument bounding box
+    containsBounds: function( bounds ) {
+      return this.minX <= bounds.minX && this.maxX >= bounds.maxX && this.minY <= bounds.minY && this.maxY >= bounds.maxY && this.minZ <= bounds.minZ && this.maxZ >= bounds.maxZ;
+    },
+    
+    // whether the intersection is non-empty (if they share any part of a boundary, this will be true)
+    intersectsBounds: function( bounds ) {
+      // TODO: more efficient way of doing this?
+      return !this.intersection( bounds ).isEmpty();
+    },
+    
+    toString: function() {
+      return '[x:(' + this.minX + ',' + this.maxX + '),y:(' + this.minY + ',' + this.maxY + '),z:(' + this.minZ + ',' + this.maxZ + ')]';
+    },
+    
+    equals: function( other ) {
+      return this.minX === other.minX && this.minY === other.minY && this.minZ === other.minZ && this.maxX === other.maxX && this.maxY === other.maxY && this.maxZ === other.maxZ;
+    },
+    
+    equalsEpsilon: function( other, epsilon ) {
+      epsilon = epsilon || 0;
+      var thisFinite = this.isFinite();
+      var otherFinite = other.isFinite();
+      if ( thisFinite && otherFinite ) {
+        // both are finite, so we can use Math.abs() - it would fail with non-finite values like Infinity
+        return Math.abs( this.minX - other.minX ) < epsilon &&
+               Math.abs( this.minY - other.minY ) < epsilon &&
+               Math.abs( this.minZ - other.minZ ) < epsilon &&
+               Math.abs( this.maxX - other.maxX ) < epsilon &&
+               Math.abs( this.maxY - other.maxY ) < epsilon &&
+               Math.abs( this.maxZ - other.maxZ ) < epsilon;
+      } else if ( thisFinite !== otherFinite ) {
+        return false; // one is finite, the other is not. definitely not equal
+      } else if ( this === other ) {
+        return true; // exact same instance, must be equal
+      } else {
+        // epsilon only applies on finite dimensions. due to JS's handling of isFinite(), it's faster to check the sum of both
+        return ( isFinite( this.minX + other.minX ) ? ( Math.abs( this.minX - other.minX ) < epsilon ) : ( this.minX === other.minX ) ) &&
+               ( isFinite( this.minY + other.minY ) ? ( Math.abs( this.minY - other.minY ) < epsilon ) : ( this.minY === other.minY ) ) &&
+               ( isFinite( this.minZ + other.minZ ) ? ( Math.abs( this.minZ - other.minZ ) < epsilon ) : ( this.minZ === other.minZ ) ) &&
+               ( isFinite( this.maxX + other.maxX ) ? ( Math.abs( this.maxX - other.maxX ) < epsilon ) : ( this.maxX === other.maxX ) ) &&
+               ( isFinite( this.maxY + other.maxY ) ? ( Math.abs( this.maxY - other.maxY ) < epsilon ) : ( this.maxY === other.maxY ) ) &&
+               ( isFinite( this.maxZ + other.maxZ ) ? ( Math.abs( this.maxZ - other.maxZ ) < epsilon ) : ( this.maxZ === other.maxZ ) );
+      }
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * Immutable operations
+    *----------------------------------------------------------------------------*/
+    
+    copy: function() {
+      return new Bounds3( this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ );
+    },
+    
+    // immutable operations (bounding-box style handling, so that the relevant bounds contain everything)
+    union: function( bounds ) {
+      return new Bounds3(
+        Math.min( this.minX, bounds.minX ),
+        Math.min( this.minY, bounds.minY ),
+        Math.min( this.minZ, bounds.minZ ),
+        Math.max( this.maxX, bounds.maxX ),
+        Math.max( this.maxY, bounds.maxY ),
+        Math.max( this.maxZ, bounds.maxZ )
+      );
+    },
+    intersection: function( bounds ) {
+      return new Bounds3(
+        Math.max( this.minX, bounds.minX ),
+        Math.max( this.minY, bounds.minY ),
+        Math.max( this.minZ, bounds.minZ ),
+        Math.min( this.maxX, bounds.maxX ),
+        Math.min( this.maxY, bounds.maxY ),
+        Math.min( this.maxZ, bounds.maxZ )
+      );
+    },
+    // TODO: difference should be well-defined, but more logic is needed to compute
+    
+    withCoordinates: function( x, y, z ) {
+      return new Bounds3(
+        Math.min( this.minX, x ),
+        Math.min( this.minY, y ),
+        Math.min( this.minZ, z ),
+        Math.max( this.maxX, x ),
+        Math.max( this.maxY, y ),
+        Math.max( this.maxZ, z )
+      );
+    },
+    
+    // like a union with a point-sized bounding box
+    withPoint: function( point ) {
+      return this.withCoordinates( point.x, point.y, point.z );
+    },
+    
+    withMinX: function( minX ) { return new Bounds3( minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ ); },
+    withMinY: function( minY ) { return new Bounds3( this.minX, minY, this.minZ, this.maxX, this.maxY, this.maxZ ); },
+    withMinZ: function( minZ ) { return new Bounds3( this.minX, this.minY, minZ, this.maxX, this.maxY, this.maxZ ); },
+    withMaxX: function( maxX ) { return new Bounds3( this.minX, this.minY, this.minZ, maxX, this.maxY, this.maxZ ); },
+    withMaxY: function( maxY ) { return new Bounds3( this.minX, this.minY, this.minZ, this.maxX, maxY, this.maxZ ); },
+    withMaxZ: function( maxZ ) { return new Bounds3( this.minX, this.minY, this.minZ, this.maxX, this.maxY, maxZ ); },
+    
+    // copy rounded to integral values, expanding where necessary
+    roundedOut: function() {
+      return new Bounds3(
+        Math.floor( this.minX ),
+        Math.floor( this.minY ),
+        Math.floor( this.minZ ),
+        Math.ceil( this.maxX ),
+        Math.ceil( this.maxY ),
+        Math.ceil( this.maxZ )
+      );
+    },
+    
+    // copy rounded to integral values, contracting where necessary
+    roundedIn: function() {
+      return new Bounds3(
+        Math.ceil( this.minX ),
+        Math.ceil( this.minY ),
+        Math.ceil( this.minZ ),
+        Math.floor( this.maxX ),
+        Math.floor( this.maxY ),
+        Math.floor( this.maxZ )
+      );
+    },
+    
+    // transform a bounding box.
+    // NOTE that box.transformed( matrix ).transformed( inverse ) may be larger than the original box
+    transformed: function( matrix ) {
+      return this.copy().transform( matrix );
+    },
+    
+    // returns copy expanded on all sides by length d
+    dilated: function( d ) {
+      return new Bounds3( this.minX - d, this.minY - d, this.minZ - d, this.maxX + d, this.maxY + d, this.maxZ + d );
+    },
+    
+    // dilates only in the x direction
+    dilatedX: function( x ) {
+      return new Bounds3( this.minX - x, this.minY, this.minZ, this.maxX + x, this.maxY, this.maxZ );
+    },
+    
+    // dilates only in the y direction
+    dilatedY: function( y ) {
+      return new Bounds3( this.minX, this.minY - y, this.minZ, this.maxX, this.maxY + y, this.maxZ );
+    },
+    
+    // dilates only in the z direction
+    dilatedZ: function( z ) {
+      return new Bounds3( this.minX, this.minY, this.minZ - z, this.maxX, this.maxY, this.maxZ + z );
+    },
+    
+    // dilate with different amounts in the x, y and z directions
+    dilatedXYZ: function( x, y, z ) {
+      return new Bounds3( this.minX - x, this.minY - y, this.minZ - z, this.maxX + x, this.maxY + y, this.maxZ + z );
+    },
+    
+    // returns copy contracted on all sides by length d, or x/y/z separately
+    eroded: function( d ) { return this.dilated( -d ); },
+    erodedX: function( x ) { return this.dilatedX( -x ); },
+    erodedY: function( y ) { return this.dilatedY( -y ); },
+    erodedZ: function( z ) { return this.dilatedZ( -z ); },
+    erodedXYZ: function( x, y, z ) { return this.dilatedXYZ( -x, -y, -z ); },
+    
+    shiftedX: function( x ) {
+      return new Bounds3( this.minX + x, this.minY, this.minZ, this.maxX + x, this.maxY, this.maxZ );
+    },
+    
+    shiftedY: function( y ) {
+      return new Bounds3( this.minX, this.minY + y, this.minZ, this.maxX, this.maxY + y, this.maxZ );
+    },
+    
+    shiftedZ: function( z ) {
+      return new Bounds3( this.minX, this.minY, this.minZ + z, this.maxX, this.maxY, this.maxZ + z );
+    },
+    
+    shifted: function( x, y, z ) {
+      return new Bounds3( this.minX + x, this.minY + y, this.minZ + z, this.maxX + x, this.maxY + y, this.maxZ + z );
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * Mutable operations
+    *----------------------------------------------------------------------------*/
+    
+    set: function( minX, minY, minZ, maxX, maxY, maxZ ) {
+      this.minX = minX;
+      this.minY = minY;
+      this.minZ = minZ;
+      this.maxX = maxX;
+      this.maxY = maxY;
+      this.maxZ = maxZ;
+      return this;
+    },
+    
+    setBounds: function( bounds ) {
+      return this.set( bounds.minX, bounds.minY, bounds.minZ, bounds.maxX, bounds.maxY, bounds.maxZ );
+    },
+    
+    // mutable union
+    includeBounds: function( bounds ) {
+      this.minX = Math.min( this.minX, bounds.minX );
+      this.minY = Math.min( this.minY, bounds.minY );
+      this.minZ = Math.min( this.minZ, bounds.minZ );
+      this.maxX = Math.max( this.maxX, bounds.maxX );
+      this.maxY = Math.max( this.maxY, bounds.maxY );
+      this.maxZ = Math.max( this.maxZ, bounds.maxZ );
+      return this;
+    },
+    
+    // mutable intersection
+    constrainBounds: function( bounds ) {
+      this.minX = Math.max( this.minX, bounds.minX );
+      this.minY = Math.max( this.minY, bounds.minY );
+      this.minZ = Math.max( this.minZ, bounds.minZ );
+      this.maxX = Math.min( this.maxX, bounds.maxX );
+      this.maxY = Math.min( this.maxY, bounds.maxY );
+      this.maxZ = Math.min( this.maxZ, bounds.maxZ );
+      return this;
+    },
+    
+    addCoordinates: function( x, y, z ) {
+      this.minX = Math.min( this.minX, x );
+      this.minY = Math.min( this.minY, y );
+      this.minZ = Math.min( this.minZ, z );
+      this.maxX = Math.max( this.maxX, x );
+      this.maxY = Math.max( this.maxY, y );
+      this.maxZ = Math.max( this.maxZ, z );
+      return this;
+    },
+    
+    addPoint: function( point ) {
+      return this.addCoordinates( point.x, point.y, point.z );
+    },
+    
+    setMinX: function( minX ) { this.minX = minX; return this; },
+    setMinY: function( minY ) { this.minY = minY; return this; },
+    setMinZ: function( minZ ) { this.minZ = minZ; return this; },
+    setMaxX: function( maxX ) { this.maxX = maxX; return this; },
+    setMaxY: function( maxY ) { this.maxY = maxY; return this; },
+    setMaxZ: function( maxZ ) { this.maxZ = maxZ; return this; },
+    
+    // round to integral values, expanding where necessary
+    roundOut: function() {
+      this.minX = Math.floor( this.minX );
+      this.minY = Math.floor( this.minY );
+      this.minZ = Math.floor( this.minZ );
+      this.maxX = Math.ceil( this.maxX );
+      this.maxY = Math.ceil( this.maxY );
+      this.maxZ = Math.ceil( this.maxZ );
+      return this;
+    },
+    
+    // round to integral values, contracting where necessary
+    roundIn: function() {
+      this.minX = Math.ceil( this.minX );
+      this.minY = Math.ceil( this.minY );
+      this.minZ = Math.ceil( this.minZ );
+      this.maxX = Math.floor( this.maxX );
+      this.maxY = Math.floor( this.maxY );
+      this.maxZ = Math.floor( this.maxZ );
+      return this;
+    },
+    
+    // transform a bounding box.
+    // NOTE that box.transformed( matrix ).transformed( inverse ) may be larger than the original box
+    transform: function( matrix ) {
+      // do nothing
+      if ( this.isEmpty() ) {
+        return this;
+      }
+      var minX = this.minX;
+      var minY = this.minY;
+      var minZ = this.minZ;
+      var maxX = this.maxX;
+      var maxY = this.maxY;
+      var maxZ = this.maxZ;
+      
+      // using mutable vector so we don't create excessive instances of Vector2 during this
+      // make sure all 4 corners are inside this transformed bounding box
+      var vector = new dot.Vector3();
+      this.setBounds( Bounds3.NOTHING );
+      this.addPoint( matrix.multiplyVector3( vector.set( minX, minY, minZ ) ) );
+      this.addPoint( matrix.multiplyVector3( vector.set( minX, maxY, minZ ) ) );
+      this.addPoint( matrix.multiplyVector3( vector.set( maxX, minY, minZ ) ) );
+      this.addPoint( matrix.multiplyVector3( vector.set( maxX, maxY, minZ ) ) );
+      this.addPoint( matrix.multiplyVector3( vector.set( minX, minY, maxZ ) ) );
+      this.addPoint( matrix.multiplyVector3( vector.set( minX, maxY, maxZ ) ) );
+      this.addPoint( matrix.multiplyVector3( vector.set( maxX, minY, maxZ ) ) );
+      this.addPoint( matrix.multiplyVector3( vector.set( maxX, maxY, maxZ ) ) );
+      return this;
+    },
+    
+    // expands on all sides by length d
+    dilate: function( d ) {
+      return this.set( this.minX - d, this.minY - d, this.minZ - d, this.maxX + d, this.maxY + d, this.maxZ + d );
+    },
+    
+    // dilates only in the x direction
+    dilateX: function( x ) {
+      return this.set( this.minX - x, this.minY, this.minZ, this.maxX + x, this.maxY, this.maxZ );
+    },
+    
+    // dilates only in the y direction
+    dilateY: function( y ) {
+      return this.set( this.minX, this.minY - y, this.minZ, this.maxX, this.maxY + y, this.maxZ );
+    },
+    
+    // dilates only in the z direction
+    dilateZ: function( z ) {
+      return this.set( this.minX, this.minY, this.minZ - z, this.maxX, this.maxY, this.maxZ + z );
+    },
+    
+    // dilate with different amounts in the x, y and z directions
+    dilateXYZ: function( x, y, z ) {
+      return this.set( this.minX - x, this.minY - y, this.minZ - z, this.maxX + x, this.maxY + y, this.maxZ + z );
+    },
+    
+    // contracts on all sides by length d, or x/y/z independently
+    erode: function( d ) { return this.dilate( -d ); },
+    erodeX: function( x ) { return this.dilateX( -x ); },
+    erodeY: function( y ) { return this.dilateY( -y ); },
+    erodeZ: function( z ) { return this.dilateZ( -z ); },
+    erodeXYZ: function( x, y, z ) { return this.dilateXYZ( -x, -y, -z ); },
+    
+    shiftX: function( x ) {
+      return this.setMinX( this.minX + x ).setMaxX( this.maxX + x );
+    },
+    
+    shiftY: function( y ) {
+      return this.setMinY( this.minY + y ).setMaxY( this.maxY + y );
+    },
+    
+    shiftZ: function( z ) {
+      return this.setMinZ( this.minZ + z ).setMaxZ( this.maxZ + z );
+    },
+    
+    shift: function( x, y, z ) {
+      return this.shiftX( x ).shiftY( y ).shiftZ( z );
+    }
+  };
+  
+  Bounds3.cuboid = function( x, y, z, width, height, depth ) {
+    return new Bounds3( x, y, z, x + width, y + height, z + depth );
+  };
+  
+  // a volume-less point bounds, which can be dilated to form a centered bounds
+  Bounds3.point = function( x, y, z ) {
+    return new Bounds3( x, y, z, x, y, z );
+  };
+  
+  // specific bounds useful for operations
+  Bounds3.EVERYTHING = new Bounds3( Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY );
+  Bounds3.NOTHING = new Bounds3( Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY );
+  
+  return Bounds3;
+} );
+
+// Copyright 2002-2013, University of Colorado Boulder
+
+/**
  * Immutable complex number handling
  *
  * TODO: handle quaternions in a Quaternion.js!
@@ -22547,10 +24855,8 @@ define( 'KITE/main',[
  * @author Chris Malley
  */
 
-define( 'DOT/Complex',['require','ASSERT/assert','DOT/dot','PHET_CORE/inherit','DOT/Vector2'],function( require ) {
+define( 'DOT/Complex',['require','DOT/dot','PHET_CORE/inherit','DOT/Vector2'],function( require ) {
   
-  
-  var assert = require( 'ASSERT/assert' )( 'dot' );
   
   var dot = require( 'DOT/dot' );
   
@@ -22633,10 +24939,8 @@ define( 'DOT/Complex',['require','ASSERT/assert','DOT/dot','PHET_CORE/inherit','
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'DOT/ConvexHull2',['require','ASSERT/assert','DOT/dot'],function( require ) {
+define( 'DOT/ConvexHull2',['require','DOT/dot'],function( require ) {
   
-  
-  var assert = require( 'ASSERT/assert' )( 'dot' );
   
   var dot = require( 'DOT/dot' );
   
@@ -22707,6 +25011,7 @@ define( 'DOT/ConvexHull2',['require','ASSERT/assert','DOT/dot'],function( requir
   return dot.ConvexHull2;
 } );
 
+
 // Copyright 2002-2013, University of Colorado Boulder
 
 /**
@@ -22715,10 +25020,11 @@ define( 'DOT/ConvexHull2',['require','ASSERT/assert','DOT/dot'],function( requir
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'DOT/Dimension2',['require','DOT/dot'],function( require ) {
+define( 'DOT/Dimension2',['require','DOT/dot','DOT/Bounds2'],function( require ) {
   
   
   var dot = require( 'DOT/dot' );
+  require( 'DOT/Bounds2' );
   
   dot.Dimension2 = function Dimension2( width, height ) {
     this.width = width;
@@ -22731,6 +25037,12 @@ define( 'DOT/Dimension2',['require','DOT/dot'],function( require ) {
 
     toString: function() {
       return "[" + this.width + "w, " + this.height + "h]";
+    },
+    
+    toBounds: function( x, y ) {
+      x = x || 0;
+      y = y || 0;
+      return new dot.Bounds2( x, y, this.width + x, this.height + y );
     },
 
     equals: function( other ) {
@@ -23954,13 +26266,16 @@ define( 'DOT/LUDecomposition',['require','DOT/dot'],function( require ) {
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'PHET_CORE/isArray',['require'],function( require ) {
+define( 'PHET_CORE/isArray',['require','PHET_CORE/core'],function( require ) {
   
   
-  return function isArray( array ) {
+  var core = require( 'PHET_CORE/core' );
+  
+  var isArray = core.isArray = function isArray( array ) {
     // yes, this is actually how to do this. see http://stackoverflow.com/questions/4775722/javascript-check-if-object-is-array
     return Object.prototype.toString.call( array ) === '[object Array]';
   };
+  return isArray;
 } );
 
 // Copyright 2002-2013, University of Colorado Boulder
@@ -24672,10 +26987,8 @@ define( 'DOT/QRDecomposition',['require','DOT/dot'],function( require ) {
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'DOT/Matrix',['require','ASSERT/assert','DOT/dot','PHET_CORE/isArray','DOT/SingularValueDecomposition','DOT/LUDecomposition','DOT/QRDecomposition','DOT/EigenvalueDecomposition','DOT/Vector2','DOT/Vector3','DOT/Vector4'],function( require ) {
+define( 'DOT/Matrix',['require','DOT/dot','PHET_CORE/isArray','DOT/SingularValueDecomposition','DOT/LUDecomposition','DOT/QRDecomposition','DOT/EigenvalueDecomposition','DOT/Vector2','DOT/Vector3','DOT/Vector4'],function( require ) {
   
-  
-  var assert = require( 'ASSERT/assert' )( 'dot' );
   
   var dot = require( 'DOT/dot' );
   
@@ -25221,10 +27534,8 @@ define( 'DOT/Matrix',['require','ASSERT/assert','DOT/dot','PHET_CORE/isArray','D
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'DOT/Permutation',['require','ASSERT/assert','DOT/dot','PHET_CORE/isArray','DOT/Util'],function( require ) {
+define( 'DOT/Permutation',['require','DOT/dot','PHET_CORE/isArray','DOT/Util'],function( require ) {
   
-  
-  var assert = require( 'ASSERT/assert' )( 'dot' );
   
   var dot = require( 'DOT/dot' );
   
@@ -25232,7 +27543,7 @@ define( 'DOT/Permutation',['require','ASSERT/assert','DOT/dot','PHET_CORE/isArra
   require( 'DOT/Util' ); // for rangeInclusive
   
   // Creates a permutation that will rearrange a list so that newList[i] = oldList[permutation[i]]
-  var Permutation = function Permutation( indices ) {
+  var Permutation = dot.Permutation = function Permutation( indices ) {
     this.indices = indices;
   };
 
@@ -25360,6 +27671,286 @@ define( 'DOT/Permutation',['require','ASSERT/assert','DOT/dot','PHET_CORE/isArra
 // Copyright 2002-2013, University of Colorado Boulder
 
 /**
+ * Quaternion, see http://en.wikipedia.org/wiki/Quaternion
+ *
+ * TODO: convert from JME-style parameterization into classical mathematical description?
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'DOT/Quaternion',['require','DOT/dot','PHET_CORE/Poolable','DOT/Vector3','DOT/Matrix3','DOT/Util'],function( require ) {
+  
+  
+  var dot = require( 'DOT/dot' );
+  
+  var Poolable = require( 'PHET_CORE/Poolable' );
+  require( 'DOT/Vector3' );
+  require( 'DOT/Matrix3' );
+  require( 'DOT/Util' );
+  
+  dot.Quaternion = function Quaternion( x, y, z, w ) {
+    this.set( x, y, z, w );
+    
+    phetAllocation && phetAllocation( 'Quaternion' );
+  };
+  var Quaternion = dot.Quaternion;
+  
+  Quaternion.prototype = {
+    constructor: Quaternion,
+    
+    isQuaternion: true,
+    
+    set: function( x, y, z, w ) {
+      this.x = x || 0;
+      this.y = y || 0;
+      this.z = z || 0;
+      this.w = w !== undefined ? w : 1;
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * Immutables
+    *----------------------------------------------------------------------------*/
+    
+    plus: function( quat ) {
+      return new Quaternion( this.x + quat.x, this.y + quat.y, this.z + quat.z, this.w + quat.w );
+    },
+    
+    timesScalar: function( s ) {
+      return new Quaternion( this.x * s, this.y * s, this.z * s, this.w * s );
+    },
+    
+    // standard quaternion multiplication (hamilton product)
+    timesQuaternion: function( quat ) {
+      // TODO: note why this is the case? product noted everywhere is the other one mentioned!
+      // mathematica-style
+//        return new Quaternion(
+//                this.x * quat.x - this.y * quat.y - this.z * quat.z - this.w * quat.w,
+//                this.x * quat.y + this.y * quat.x + this.z * quat.w - this.w * quat.z,
+//                this.x * quat.z - this.y * quat.w + this.z * quat.x + this.w * quat.y,
+//                this.x * quat.w + this.y * quat.z - this.z * quat.y + this.w * quat.x
+//        );
+
+      // JME-style
+      return new Quaternion(
+        this.x * quat.w - this.z * quat.y + this.y * quat.z + this.w * quat.x,
+        -this.x * quat.z + this.y * quat.w + this.z * quat.x + this.w * quat.y,
+        this.x * quat.y - this.y * quat.x + this.z * quat.w + this.w * quat.z,
+        -this.x * quat.x - this.y * quat.y - this.z * quat.z + this.w * quat.w
+      );
+
+      /*
+          Mathematica!
+          In[13]:= Quaternion[-0.0, -0.0024999974, 0.0, 0.9999969] ** Quaternion[-0.9864071, 0.0016701065, -0.0050373166, 0.16423558]
+          Out[13]= Quaternion[-0.164231, 0.00750332, 0.00208069, -0.986391]
+
+          In[17]:= Quaternion[-0.0024999974, 0.0, 0.9999969, 0] ** Quaternion[0.0016701065, -0.0050373166, 0.16423558, -0.9864071]
+          Out[17]= Quaternion[-0.164239, -0.986391, 0.00125951, 0.00750332]
+
+          JME contains the rearrangement of what is typically called {w,x,y,z}
+       */
+    },
+    
+    timesVector3: function( v ) {
+      if ( v.magnitude() === 0 ) {
+        return new dot.Vector3();
+      }
+      
+      // TODO: optimization?
+      return new dot.Vector3F(
+        this.w * this.w * v.x + 2 * this.y * this.w * v.z - 2 * this.z * this.w * v.y + this.x * this.x * v.x + 2 * this.y * this.x * v.y + 2 * this.z * this.x * v.z - this.z * this.z * v.x - this.y * this.y * v.x,
+        2 * this.x * this.y * v.x + this.y * this.y * v.y + 2 * this.z * this.y * v.z + 2 * this.w * this.z * v.x - this.z * this.z * v.y + this.w * this.w * v.y - 2 * this.x * this.w * v.z - this.x * this.x * v.y,
+        2 * this.x * this.z * v.x + 2 * this.y * this.z * v.y + this.z * this.z * v.z - 2 * this.w * this.y * v.x - this.y * this.y * v.z + 2 * this.w * this.x * v.y - this.x * this.x * v.z + this.w * this.w * v.z
+      );
+    },
+    
+    magnitude: function() {
+      return Math.sqrt( this.magnitudeSquared() );
+    },
+    
+    magnitudeSquared: function() {
+      return this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w;
+    },
+    
+    normalized: function() {
+      var magnitude = this.magnitude();
+      assert && assert( magnitude !== 0, 'Cannot normalize a zero-magnitude quaternion' );
+      return this.timesScalar( 1 / magnitude );
+    },
+    
+    negated: function() {
+      return new Quaternion( -this.x, -this.y, -this.z, -this.w );
+    },
+    
+    toRotationMatrix: function() {
+      // see http://en.wikipedia.org/wiki/Rotation_matrix#Quaternion
+
+      var norm = this.magnitudeSquared();
+      var flip = ( norm === 1 ) ? 2 : ( norm > 0 ) ? 2 / norm : 0;
+
+      var xx = this.x * this.x * flip;
+      var xy = this.x * this.y * flip;
+      var xz = this.x * this.z * flip;
+      var xw = this.w * this.x * flip;
+      var yy = this.y * this.y * flip;
+      var yz = this.y * this.z * flip;
+      var yw = this.w * this.y * flip;
+      var zz = this.z * this.z * flip;
+      var zw = this.w * this.z * flip;
+
+      return new dot.Matrix3().columnMajor(
+        1 - ( yy + zz ),
+        ( xy + zw ),
+        ( xz - yw ),
+        ( xy - zw ),
+        1 - ( xx + zz ),
+        ( yz + xw ),
+        ( xz + yw ),
+        ( yz - xw ),
+        1 - ( xx + yy )
+      );
+    }
+  };
+  
+  Quaternion.fromEulerAngles = function( yaw, roll, pitch ) {
+    var sinPitch = Math.sin( pitch * 0.5 );
+    var cosPitch = Math.cos( pitch * 0.5 );
+    var sinRoll = Math.sin( roll * 0.5 );
+    var cosRoll = Math.cos( roll * 0.5 );
+    var sinYaw = Math.sin( yaw * 0.5 );
+    var cosYaw = Math.cos( yaw * 0.5 );
+
+    var a = cosRoll * cosPitch;
+    var b = sinRoll * sinPitch;
+    var c = cosRoll * sinPitch;
+    var d = sinRoll * cosPitch;
+
+    return new Quaternion(
+      a * sinYaw + b * cosYaw,
+      d * cosYaw + c * sinYaw,
+      c * cosYaw - d * sinYaw,
+      a * cosYaw - b * sinYaw
+    );
+  };
+  
+  Quaternion.fromRotationMatrix = function( matrix ) {
+    var v00 = matrix.m00();
+    var v01 = matrix.m01();
+    var v02 = matrix.m02();
+    var v10 = matrix.m10();
+    var v11 = matrix.m11();
+    var v12 = matrix.m12();
+    var v20 = matrix.m20();
+    var v21 = matrix.m21();
+    var v22 = matrix.m22();
+
+    // from graphics gems code
+    var trace = v00 + v11 + v22;
+    var sqt;
+
+    // we protect the division by s by ensuring that s>=1
+    if ( trace >= 0 ) {
+      sqt = Math.sqrt( trace + 1 );
+      return new Quaternion(
+        ( v21 - v12 ) * 0.5 / sqt,
+        ( v02 - v20 ) * 0.5 / sqt,
+        ( v10 - v01 ) * 0.5 / sqt,
+        0.5 * sqt
+      );
+    } else if ( ( v00 > v11 ) && ( v00 > v22 ) ) {
+      sqt = Math.sqrt( 1 + v00 - v11 - v22 );
+      return new Quaternion(
+        sqt * 0.5,
+        ( v10 + v01 ) * 0.5 / sqt,
+        ( v02 + v20 ) * 0.5 / sqt,
+        ( v21 - v12 ) * 0.5 / sqt
+      );
+    } else if ( v11 > v22 ) {
+      sqt = Math.sqrt( 1 + v11 - v00 - v22 );
+      return new Quaternion(
+        ( v10 + v01 ) * 0.5 / sqt,
+        sqt * 0.5,
+        ( v21 + v12 ) * 0.5 / sqt,
+        ( v02 - v20 ) * 0.5 / sqt
+      );
+    } else {
+      sqt = Math.sqrt( 1 + v22 - v00 - v11 );
+      return new Quaternion(
+        ( v02 + v20 ) * 0.5 / sqt,
+        ( v21 + v12 ) * 0.5 / sqt,
+        sqt * 0.5,
+        ( v10 - v01 ) * 0.5 / sqt
+      );
+    }
+  };
+  
+  /**
+   * Find a quaternion that transforms a unit vector A into a unit vector B. There
+   * are technically multiple solutions, so this only picks one.
+   *
+   * @param a Unit vector A
+   * @param b Unit vector B
+   * @return A quaternion s.t. Q * A = B
+   */
+  Quaternion.getRotationQuaternion = function( a, b ) {
+    return Quaternion.fromRotationMatrix( dot.Matrix3.rotateAToB( a, b ) );
+  };
+
+  // spherical linear interpolation - blending two quaternions
+  Quaternion.slerp = function( a, b, t ) {
+    // if they are identical, just return one of them
+    if ( a.x === b.x && a.y === b.y && a.z === b.z && a.w === b.w ) {
+      return a;
+    }
+
+    var dot = a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
+
+    if ( dot < 0 ) {
+      b = b.negated();
+      dot = -dot;
+    }
+
+    // how much of each quaternion should be contributed
+    var ratioA = 1 - t;
+    var ratioB = t;
+
+    // tweak them if necessary
+    if ( ( 1 - dot ) > 0.1 ) {
+      var theta = Math.acos( dot );
+      var invSinTheta = ( 1 / Math.sin( theta ) );
+
+      ratioA = ( Math.sin( ( 1 - t ) * theta ) * invSinTheta );
+      ratioB = ( Math.sin( ( t * theta ) ) * invSinTheta );
+    }
+
+    return new Quaternion(
+      ratioA * a.x + ratioB * b.x,
+      ratioA * a.y + ratioB * b.y,
+      ratioA * a.z + ratioB * b.z,
+      ratioA * a.w + ratioB * b.w
+    );
+  };
+  
+  // experimental object pooling
+  /* jshint -W064 */
+  Poolable( Quaternion, {
+    defaultFactory: function() { return new Quaternion(); },
+    constructorDuplicateFactory: function( pool ) {
+      return function( x, y, z, w ) {
+        if ( pool.length ) {
+          return pool.pop().set( x, y, z, w );
+        } else {
+          return new Quaternion( x, y, z, w );
+        }
+      };
+    }
+  } );
+  
+  return Quaternion;
+} );
+
+// Copyright 2002-2013, University of Colorado Boulder
+
+/**
  * 3-dimensional ray
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
@@ -25404,10 +27995,9 @@ define( 'DOT/Ray3',['require','DOT/dot'],function( require ) {
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'DOT/Rectangle',['require','ASSERT/assert','DOT/dot','PHET_CORE/inherit','DOT/Bounds2'],function( require ) {
+define( 'DOT/Rectangle',['require','DOT/dot','PHET_CORE/inherit','DOT/Bounds2'],function( require ) {
   
   
-  var assert = require( 'ASSERT/assert' )( 'dot' );
   var dot = require( 'DOT/dot' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Bounds2 = require( 'DOT/Bounds2' );
@@ -25592,6 +28182,7 @@ define( 'DOT/Transform4',['require','DOT/dot','DOT/Matrix4','DOT/Vector3','DOT/R
 define( 'DOT/main',[
   'DOT/dot',
   'DOT/Bounds2',
+  'DOT/Bounds3',
   'DOT/Complex',
   'DOT/ConvexHull2',
   'DOT/Dimension2',
@@ -25603,6 +28194,7 @@ define( 'DOT/main',[
   'DOT/Matrix4',
   'DOT/Permutation',
   'DOT/QRDecomposition',
+  'DOT/Quaternion',
   'DOT/Ray2',
   'DOT/Ray3',
   'DOT/Rectangle',
@@ -25621,59 +28213,14 @@ define( 'DOT/main',[
 // Copyright 2002-2013, University of Colorado Boulder
 
 /**
- * A method of calling an overridden super-type method.
- *
- * @author Chris Malley (PixelZoom, Inc.)
- */
-define( 'PHET_CORE/callSuper',['require'],function( require ) {
-  
-
-  /**
-   * A somewhat ugly method of calling an overridden super-type method.
-   * <p>
-   * Example:
-   * <code>
-   * function SuperType() {
-   * }
-   *
-   * SuperType.prototype.reset = function() {...}
-   *
-   * function SubType() {
-   *    SuperType.call( this ); // constructor stealing
-   * }
-   *
-   * SubType.prototype = new SuperType(); // prototype chaining
-   *
-   * SubType.prototype.reset = function() {
-   *     callSuper( SuperType, "reset", this ); // call overridden super method
-   *     // do subtype-specific stuff
-   * }
-   * </code>
-   *
-   * @param supertype
-   * @param {String} name
-   * @param context typically this
-   * @return {Function}
-   */
-  function callSuper( supertype, name, context ) {
-    (function () {
-      var fn = supertype.prototype[name];
-      Function.call.apply( fn, arguments );
-    })( context );
-  }
-
-  return callSuper;
-} );
-
-// Copyright 2002-2013, University of Colorado Boulder
-
-/**
  * Prototype chaining using Parasitic Combination Inheritance
  *
  * @author Chris Malley (PixelZoom, Inc.)
  */
-define( 'PHET_CORE/inheritPrototype',['require'],function( require ) {
+define( 'PHET_CORE/inheritPrototype',['require','PHET_CORE/core'],function( require ) {
   
+  
+  var core = require( 'PHET_CORE/core' );
 
   /**
    * Use this function to do prototype chaining using Parasitic Combination Inheritance.
@@ -25695,11 +28242,11 @@ define( 'PHET_CORE/inheritPrototype',['require'],function( require ) {
    * <br>
    * (source: JavaScript for Web Developers, N. Zakas, Wrox Press, p. 212-215)
    */
-  function inheritPrototype( subtype, supertype ) {
+  var inheritPrototype = core.inheritPrototype = function inheritPrototype( subtype, supertype ) {
     var prototype = Object( supertype.prototype ); // create a clone of the supertype's prototype
     prototype.constructor = subtype; // account for losing the default constructor when prototype is overwritten
     subtype.prototype = prototype; // assign cloned prototype to subtype
-  }
+  };
 
   return inheritPrototype;
 } );
@@ -25712,8 +28259,10 @@ define( 'PHET_CORE/inheritPrototype',['require'],function( require ) {
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'PHET_CORE/loadScript',['require'],function( require ) {
+define( 'PHET_CORE/loadScript',['require','PHET_CORE/core'],function( require ) {
   
+  
+  var core = require( 'PHET_CORE/core' );
   
   /*
    * Load a script. The only required argument is src, and can be specified either as
@@ -25725,7 +28274,7 @@ define( 'PHET_CORE/loadScript',['require'],function( require ) {
    *   async:       Whether the script should be loaded asynchronously. Defaults to true
    *   cacheBuster: Whether the URL should have an appended query string to work around caches
    */
-  return function loadScript( args ) {
+  var loadScript = core.loadScript = function loadScript( args ) {
     // handle a string argument
     if ( typeof args === 'string' ) {
       args = { src: args };
@@ -25762,25 +28311,165 @@ define( 'PHET_CORE/loadScript',['require'],function( require ) {
     var other = document.getElementsByTagName( 'script' )[0];
     other.parentNode.insertBefore( script, other );
   };
+  return loadScript;
 } );
 
 // Copyright 2002-2013, University of Colorado Boulder
 
-define( 'PHET_CORE/main',['require','PHET_CORE/callSuper','PHET_CORE/collect','PHET_CORE/escapeHTML','PHET_CORE/inherit','PHET_CORE/inheritPrototype','PHET_CORE/isArray','PHET_CORE/extend','PHET_CORE/loadScript','PHET_CORE/phetAllocation','PHET_CORE/Poolable'],function( require ) {
+/**
+ * Code for testing which platform is running.  Use sparingly, if at all!
+ *
+ * Sample usage:
+ * if (platform.firefox) {node.renderer = 'canvas';}
+ *
+ * @author Sam Reid
+ */
+define( 'PHET_CORE/platform',['require','PHET_CORE/core'],function( require ) {
   
   
-  return {
-    callSuper: require( 'PHET_CORE/callSuper' ),
-    collect: require( 'PHET_CORE/collect' ),
-    escapeHTML: require( 'PHET_CORE/escapeHTML' ),
-    inherit: require( 'PHET_CORE/inherit' ),
-    inheritPrototype: require( 'PHET_CORE/inheritPrototype' ),
-    isArray: require( 'PHET_CORE/isArray' ),
-    extend: require( 'PHET_CORE/extend' ),
-    loadScript: require( 'PHET_CORE/loadScript' ),
-    phetAllocation: require( 'PHET_CORE/phetAllocation' ),
-    Poolable: require( 'PHET_CORE/Poolable' )
+  var core = require( 'PHET_CORE/core' );
+  
+  // taken from HomeScreen
+  function isIE( version ) {
+    var r = new RegExp( 'msie' + (!isNaN( version ) ? ('\\s' + version) : ''), 'i' );
+    return r.test( navigator.userAgent );
+  }
+  
+  var platform = core.platform = {
+    get firefox() { return navigator.userAgent.toLowerCase().indexOf( 'firefox' ) > -1; },
+
+    //see http://stackoverflow.com/questions/3007480/determine-if-user-navigated-from-mobile-safari
+    get mobileSafari() { return navigator.userAgent.match( /(iPod|iPhone|iPad)/ ) && navigator.userAgent.match( /AppleWebKit/ ); },
+    
+    get ie9() { return isIE( 9 ); },
+    get ie10() { return isIE( 10 ); },
+    get ie() { return navigator.userAgent.indexOf( 'MSIE' ) !== -1; },
+    
+    // from HomeScreen
+    get android() { return navigator.userAgent.indexOf( 'Android' ) > 0; }
   };
+  return platform;
+} );
+
+// Copyright 2002-2013, University of Colorado Boulder
+
+/**
+ * Simple profiler which handles nested calls which provides a composite view, to help for micro-optimization.
+ * Usage:
+ * profiler.start('updateScene');
+ * ...
+ * profiler.start('moveObjects');
+ * ...
+ * profiler.stop();
+ * ...
+ * profiler.stop();
+ * See testSelf() for a larger example. This could be used on ipad for instance.
+ *
+ * @author Sam Reid
+ */
+define( 'PHET_CORE/profiler',['require','PHET_CORE/core'],function( require ) {
+  
+  
+  var core = require( 'PHET_CORE/core' );
+  
+  var stack = [];
+  var results = {};
+  var count = 0;
+  var listeners = [];
+  var profiler = core.profiler = {
+    displayCount: 1000,
+    start: function( name ) {
+      var time = Date.now();
+      stack.push( {name: name, time: time} );
+    },
+    addListener: function( listener ) {
+      listeners.push( listener );
+    },
+    stop: function() {
+      var end = Date.now();
+      var top = stack.pop();
+      var elapsed = end - top.time;
+      if ( !results[top.name] ) {
+        results[top.name] = [];
+      }
+      //TODO: this may be a memory problem, consider coalescing (averaging or summing) values here
+      results[top.name].push( elapsed );
+      count++;
+      if ( count % this.displayCount === 0 ) {
+        var summary = JSON.stringify( this.toJSON() );
+
+        console.log( summary );
+
+        //Also notify listeners that a new result was obtained
+        for ( var i = 0; i < listeners.length; i++ ) {
+          listeners[i]( summary );
+        }
+        results = {};
+      }
+    },
+    toJSON: function() {
+      var summary = {};
+      var sum;
+      for ( var property in results ) {
+        sum = 0;
+        for ( var i = 0; i < results[property].length; i++ ) {
+          var time = results[property][i];
+          sum += time;
+        }
+        var average = sum / results[property].length;
+        summary[property] = {average: average, count: results[property].length};
+      }
+      return summary;
+    },
+
+    //sanity test
+    testSelf: function() {
+      var profiler = this;
+      this.displayCount = 10000000;//Only show final result
+      for ( var i = 0; i < 10; i++ ) {
+        profiler.start( 'physics' );
+        for ( var k = 0; k < 10000; k++ ) {
+          profiler.start( 'mloop' );
+          for ( var m = 0; m < 10000; m++ ) {
+            var a = 100 * 200;
+          }
+          profiler.stop();
+          profiler.start( 'xloop' );
+          for ( var x = 0; x < 20000; x++ ) {
+            var b = 100 * 200;
+          }
+          profiler.stop();
+        }
+        profiler.stop();
+      }
+
+      console.log( JSON.stringify( this.toJSON() ) );
+
+      //sample correct output on chrome: {"mloop":{"average":0.01675,"count":100000},"xloop":{"average":0.03254,"count":100000},"physics":{"average":498.9,"count":10}}
+    }
+  };
+//  profiler.testSelf();
+  return profiler;
+} );
+
+// Copyright 2002-2013, University of Colorado Boulder
+
+define( 'PHET_CORE/main',[
+  'PHET_CORE/core',
+  'PHET_CORE/collect',
+  'PHET_CORE/escapeHTML',
+  'PHET_CORE/extend',
+  'PHET_CORE/inherit',
+  'PHET_CORE/inheritPrototype',
+  'PHET_CORE/isArray',
+  'PHET_CORE/loadScript',
+  'PHET_CORE/phetAllocation',
+  'PHET_CORE/platform',
+  'PHET_CORE/Poolable',
+  'PHET_CORE/profiler'
+  ], function( core ) {
+    
+    return core;
 } );
 
 // Copyright 2002-2013, University of Colorado
@@ -25793,26 +28482,9 @@ define( 'PHET_CORE/main',['require','PHET_CORE/callSuper','PHET_CORE/collect','P
 
 // if has.js is included, set assertion flags to true (so we can catch errors during development)
 if ( window.has ) {
-  window.has.add( 'assert.dot', function( global, document, anElement ) {
-    
-    return true;
-  } );
-  window.has.add( 'assert.kite', function( global, document, anElement ) {
-    
-    return true;
-  } );
-  window.has.add( 'assert.kite.extra', function( global, document, anElement ) {
-    
-    return true;
-  } );
-  window.has.add( 'assert.scenery', function( global, document, anElement ) {
-    
-    return true;
-  } );
-  window.has.add( 'assert.scenery.extra', function( global, document, anElement ) {
-    
-    return true;
-  } );
+  // default config only enables basic assertions
+  window.has.add( 'assert.basic', function( global, document, anElement ) {  return true; } );
+  // window.has.add( 'assert.slow', function( global, document, anElement ) {  return true; } );
 }
 
 // flag is set so we can ensure that the config has executed. This prevents various Require.js dynamic loading timeouts and script errors
