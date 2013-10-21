@@ -155,6 +155,7 @@
       <a class="sublink" href="#node-cursor">cursor</a><br>
       <a class="sublink" href="#node-mouseArea">mouseArea</a><br>
       <a class="sublink" href="#node-touchArea">touchArea</a><br>
+      <a class="sublink" href="#node-clipArea">clipArea</a><br>
       <a class="sublink" href="#node-visible">visible</a><br>
       <a class="sublink" href="#node-pickable">pickable</a><br>
       <a class="sublink" href="#node-opacity">opacity</a><br>
@@ -526,6 +527,35 @@ scene.updateOnRequestAnimationFrame();
         Setting touchArea on a Node will cause it to either return no hit (for it or its children when outside of the touchArea) or this Node as an event target.
       </p>
 
+      <h4 id="node-clipArea">node.clipArea</h4>
+      <p>
+        <code>node.clipArea</code> is a getter/setter linked to <code>node.getClipArea()</code> and <code>node.setClipArea( shape )</code>.
+        Default is <code>null</code> (no clipping), but when the clipArea is set to a <a href="../../kite/doc#shape">Shape</a>, anything outside
+        of the clip area Shape (in the node's local coordinate frame) is not displayed. This clipping affects both the node's own display, and the display of any
+        of its children.
+      </p>
+      <p>
+        clipArea currently does not affect DOM layers, and the general case can't be added in (CSS clip only allows rectangles currently).
+      </p>
+      <p>
+        clipArea does not affect the bounds of the Node (matching SVG's behavior)
+      </p>
+      <div id="example-clipArea" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
+      <script type="text/javascript">
+docExample( 'example-clipArea', function( scene ) {
+  scene.renderer = 'svg';
+/*START*/
+scene.addChild( new scenery.Circle( 28, {
+  fill: 'black',
+  stroke: 'red',
+  lineWidth: 5,
+  x: 38, y: 38,
+  clipArea: kite.Shape.roundRect( -32, -32, 50, 50, 10, 10 )
+} ) );
+/*END*/
+} );
+      </script>
+
       <h4 id="node-visible">node.visible</h4>
       <p>
         <code>node.visible</code> is a getter/setter linked to <code>node.isVisible()</code> and <code>node.setVisible( boolean )</code>.
@@ -587,11 +617,6 @@ scene.addChild( new scenery.Node( {
   ]
 } ) );
 /*END*/
-// event initialization needed for cursor to work
-scene.initializeStandaloneEvents();
-
-// and update on every frame
-scene.updateOnRequestAnimationFrame();
 } );
       </script>
 
