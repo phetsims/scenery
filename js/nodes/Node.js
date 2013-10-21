@@ -31,7 +31,6 @@ define( function( require ) {
   
   /*
    * Available keys for use in the options parameter object for a vanilla Node (not inherited), in the order they are executed in:
-   * TODO: this list is incomplete!
    *
    * children:         A list of children to add (in order)
    * cursor:           Will display the specified CSS cursor when the mouse is over this Node or one of its descendents. The Scene needs to have input listeners attached with an initialize method first.
@@ -53,6 +52,9 @@ define( function( require ) {
    * layerSplit:       Forces a split between layers before and after this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.
    * layerSplitBefore: Forces a split between layers before this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.
    * layerSplitAfter:  Forces a split between layers after this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.
+   * mouseArea:        Shape (in local coordinate frame) that overrides the 'hit area' for mouse input.
+   * touchArea:        Shape (in local coordinate frame) that overrides the 'hit area' for touch input.
+   * clipArea:         Shape (in local coordinate frame) that causes any graphics outside of the shape to be invisible (for the node and any children).
    */
   scenery.Node = function Node( options ) {
     var self = this;
