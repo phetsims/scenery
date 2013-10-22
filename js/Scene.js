@@ -1004,7 +1004,15 @@ define( function( require ) {
     setSceneCursor: function( cursor ) {
       if ( cursor !== this.lastCursor ) {
         this.lastCursor = cursor;
-        this.$main.css( 'cursor', cursor );
+        var customCursors = Scene.customCursors[cursor];
+        if ( customCursors ) {
+          // go backwards, so the most desired cursor sticks
+          for ( var i = customCursors.length - 1; i >= 0; i-- ) {
+            this.main.style.cursor = customCursors[i];
+          }
+        } else {
+          this.main.style.cursor = cursor;
+        }
       }
     },
     
@@ -1506,6 +1514,11 @@ define( function( require ) {
       return result;
     }
   } );
+  
+  Scene.customCursors = {
+    'scenery-grab-pointer': ['grab', '-moz-grab', '-webkit-grab', 'pointer'],
+    'scenery-grabbing-pointer': ['grabbing', '-moz-grabbing', '-webkit-grabbing', 'pointer']
+  };
   
   function applyCSSHacks( $main, options ) {
     // to use CSS3 transforms for performance, hide anything outside our bounds by default

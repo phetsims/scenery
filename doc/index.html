@@ -486,12 +486,23 @@ scene.addChild( new scenery.Node( {
       <p>
         <code>node.cursor</code> is a getter/setter linked to <code>node.getCursor()</code> and <code>node.setCursor( cursor )</code>.
         By default it is null (default cursor), but this can be set to
-        the string for any <a href="https://developer.mozilla.org/en-US/docs/CSS/cursor">CSS cursor value</a>. There is
+        the string for any <a href="https://developer.mozilla.org/en-US/docs/CSS/cursor">CSS cursor value</a>, and some extra Scenery-specified ones below. There is
         <a href="../examples/cursors.html">a cursor example page</a> that demos a number of available cursors.
       </p>
       <p>
         The cursor is updated whenever <a href="#scene-updateCursor">scene.updateCursor</a> or <a href="#scene-updateScene">scene.updateScene</a> is called, and event initialization like <a href="#scene-initializeStandaloneEvents">scene.initializeStandaloneEvents</a> should be added so Scenery can track the mouse input.
       </p>
+      <p>
+        There are some Scenery-specific cursor values that can be set:
+      </p>
+      <ul>
+        <li>
+          scenery-grab-pointer: attempts to use browser-prefixed 'grab' values (newer), but falls back to the 'pointer' if not available
+        </li>
+        <li>
+          scenery-grabbing-pointer: attempts to use browser-prefixed 'grabbing' values (newer), but falls back to the 'pointer' if not available
+        </li>
+      </ul>
       <div id="example-cursor" class="exampleScene" style="width: 128px; height: 64px; margin: 0 auto;"></div>
       <script type="text/javascript">
 docExample( 'example-cursor', function( scene ) {
