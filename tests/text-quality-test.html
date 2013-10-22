@@ -12,15 +12,51 @@
     var sampleString = 'The lazy fox didn\'t complete the sentence';
     var sampleFontSize = '16px';
     var sampleFontFamily = 'Arial, sans-serif';
+    var sampleFontStyle = sampleFontSize + ' ' + sampleFontFamily;
     var sampleTranslation = 12.8365;
     var sampleScale = 1.254746;
     var sampleRotation = Math.PI / 12;
+    var sampleOffset = 14; // vertical offset similar to text height
     var coss = Math.cos( sampleRotation ) * sampleScale;
     var sins = Math.sin( sampleRotation ) * sampleScale;
+    var cssFirst = 'matrix(' + sampleScale + ',' + 0 + ',' + 0 + ',' + sampleScale + ',' + sampleTranslation + ',' + sampleTranslation + ')';
+    var cssSecond = 'matrix(' + coss + ',' + sins + ',' + (-sins) + ',' + coss + ',' + sampleTranslation + ',' + sampleTranslation * 2 + ')';
+    
+    var sizeX = 400;
+    var sizeY = 150;
+    var padding = 10;
+    
+    var posX = 0;
+    var posY = 0;
+    function increment() {
+      if ( ++posX == 2 ) {
+        posX = 0;
+        posY++;
+      }
+    }
+    
+    function position( dom ) {
+      dom.style.position = 'absolute'; dom.style.left = posX * ( sizeX + padding ) + 'px'; dom.style.top = posY * ( sizeY + padding ) + 'px';
+    }
+    
+    function mark( text ) {
+      var div = document.createElement( 'div' );
+      div.appendChild( document.createTextNode( text ) );
+      div.style.fontSize = '12px';
+      div.style.fontFamily = 'sans-serif';
+      div.style.position = 'absolute'; div.style.left = posX * ( sizeX + padding ) + 'px'; div.style.top = ( ( posY + 1 ) * ( sizeY + padding ) - 60 ) + 'px';
+      document.body.appendChild( div );
+      increment();
+    }
+    
+    /*---------------------------------------------------------------------------*
+    * DOM + CSS transforms
+    *----------------------------------------------------------------------------*/
     
     (function(){
       // basic DOM text
       var div = document.createElement( 'div' );
+      position( div );
       div.style.fontSize = sampleFontSize;
       div.style.fontFamily = sampleFontFamily;
       div.textContent = sampleString;
@@ -30,9 +66,10 @@
     (function(){
       // transformed DOM text
       var div = document.createElement( 'div' );
+      position( div );
       div.style.fontSize = sampleFontSize;
       div.style.fontFamily = sampleFontFamily;
-      var transform = 'matrix(' + sampleScale + ',' + 0 + ',' + 0 + ',' + sampleScale + ',' + sampleTranslation + ',' + sampleTranslation + ')';
+      var transform = cssFirst;
       var transformOrigin = 'top left';
       
       div.style.msTransform = transform;
@@ -51,9 +88,10 @@
     (function(){
       // transformed + rotated DOM text
       var div = document.createElement( 'div' );
+      position( div );
       div.style.fontSize = sampleFontSize;
       div.style.fontFamily = sampleFontFamily;
-      var transform = 'matrix(' + coss + ',' + sins + ',' + (-sins) + ',' + coss + ',' + sampleTranslation + ',' + sampleTranslation + ')';
+      var transform = cssSecond;
       var transformOrigin = 'top left';
       
       div.style.msTransform = transform;
@@ -68,6 +106,295 @@
       div.textContent = sampleString;
       document.body.appendChild( div );
     })();
+    
+    mark( 'DOM' );
+    
+    /*---------------------------------------------------------------------------*
+    * Canvas
+    *----------------------------------------------------------------------------*/
+    
+    // backingScale {Number, 1}, evenBacking {Boolean, false}, upScale {Number, 1}, cssTransforms {Boolean}
+    function canvasDraw( backingScale, evenBacking, upScale, cssTransforms ) {
+      var canvas = document.createElement( 'canvas' );
+      position( canvas );
+      var context = canvas.getContext( '2d' );
+      if ( backingScale === 0 ) {
+        // auto
+        var backingStorePixelRatio = context.webkitBackingStorePixelRatio ||
+                                     context.mozBackingStorePixelRatio ||
+                                     context.msBackingStorePixelRatio ||
+                                     context.oBackingStorePixelRatio ||
+                                     context.backingStorePixelRatio || 1;
+        backingScale = ( window.devicePixelRatio || 1 ) / backingStorePixelRatio;
+      }
+      if ( evenBacking ) {
+        canvas.width = sizeX * backingScale;
+        canvas.height = sizeY * backingScale;
+        canvas.style.width = ( canvas.width / backingScale ) + 'px';
+        canvas.style.height = ( canvas.height / backingScale ) + 'px';
+      } else {
+        canvas.width = sizeX * backingScale;
+        canvas.height = sizeY * backingScale;
+        canvas.style.width = sizeX + 'px';
+        canvas.style.height = sizeY + 'px';
+      }
+      
+      context.fillStyle = 'black';
+      context.font = sampleFontStyle;
+      
+      context.setTransform( backingScale, 0, 0, backingScale, 0, 0 );
+      context.fillText( sampleString, 0, sampleOffset );
+      
+      context.setTransform( backingScale, 0, 0, backingScale, 0, 0 );
+      context.transform( sampleScale, 0, 0, sampleScale, sampleTranslation, sampleTranslation );
+      context.fillText( sampleString, 0, sampleOffset );
+      
+      context.setTransform( backingScale, 0, 0, backingScale, 0, 0 );
+      context.transform( coss, sins, -sins, coss, sampleTranslation, sampleTranslation * 2 );
+      context.fillText( sampleString, 0, sampleOffset );
+      
+      document.body.appendChild( canvas );
+      var text = 'Canvas ' + backingScale + 'x';
+      if ( evenBacking ) {
+        text += ', even';
+      }
+      if ( upScale !== 1 ) {
+        text += ', upscale';
+      }
+      if ( cssTransforms ) {
+        text += ', cssT';
+      }
+      mark( text );
+    }
+    
+    if ( window.devicePixelRatio !== 1 && window.devicePixelRatio !== 2 ) {
+      canvasDraw( 0, false, 1, false, 0, 1 );
+      canvasDraw( 0, true, 1, false, 0, 2 );
+    }
+    canvasDraw( 1, false, 1, false, 1, 0 );
+    canvasDraw( 2, false, 1, false, 1, 1 );
+    
+    /*---------------------------------------------------------------------------*
+    * Canvas + CSS transforms
+    *----------------------------------------------------------------------------*/
+    
+    function canvasCSS( backingScale ) {
+      (function(){
+        var canvas = document.createElement( 'canvas' );
+        position( canvas );
+        var context = canvas.getContext( '2d' );
+        canvas.width = sizeX * backingScale;
+        canvas.height = sizeY * backingScale;
+        canvas.style.width = sizeX + 'px';
+        canvas.style.height = sizeY + 'px';
+        
+        context.fillStyle = 'black';
+        context.font = sampleFontStyle;
+        
+        context.setTransform( backingScale, 0, 0, backingScale, 0, 0 );
+        context.fillText( sampleString, 0, sampleOffset );
+        
+        document.body.appendChild( canvas );
+      })();
+      
+      (function(){
+        var canvas = document.createElement( 'canvas' );
+        position( canvas );
+        var context = canvas.getContext( '2d' );
+        canvas.width = sizeX * backingScale;
+        canvas.height = sizeY * backingScale;
+        canvas.style.width = sizeX + 'px';
+        canvas.style.height = sizeY + 'px';
+        
+        context.fillStyle = 'black';
+        context.font = sampleFontStyle;
+        
+        context.setTransform( backingScale, 0, 0, backingScale, 0, 0 );
+        context.fillText( sampleString, 0, sampleOffset );
+        
+        var transform = cssFirst;
+        var transformOrigin = 'top left';
+        
+        canvas.style.msTransform = transform;
+        canvas.style.mozTransform = transform;
+        canvas.style.webkitTransform = transform;
+        canvas.style.transform = transform;
+        
+        canvas.style.msTransformOrigin = transformOrigin;
+        canvas.style.mozTransformOrigin = transformOrigin;
+        canvas.style.webkitTransformOrigin = transformOrigin;
+        canvas.style.transformOrigin = transformOrigin;
+        document.body.appendChild( canvas );
+      })();
+      
+      (function(){
+        var canvas = document.createElement( 'canvas' );
+        position( canvas );
+        var context = canvas.getContext( '2d' );
+        canvas.width = sizeX * backingScale;
+        canvas.height = sizeY * backingScale;
+        canvas.style.width = sizeX + 'px';
+        canvas.style.height = sizeY + 'px';
+        
+        context.fillStyle = 'black';
+        context.font = sampleFontStyle;
+        
+        context.setTransform( backingScale, 0, 0, backingScale, 0, 0 );
+        context.fillText( sampleString, 0, sampleOffset );
+        
+        var transform = cssSecond;
+        var transformOrigin = 'top left';
+        
+        canvas.style.msTransform = transform;
+        canvas.style.mozTransform = transform;
+        canvas.style.webkitTransform = transform;
+        canvas.style.transform = transform;
+        
+        canvas.style.msTransformOrigin = transformOrigin;
+        canvas.style.mozTransformOrigin = transformOrigin;
+        canvas.style.webkitTransformOrigin = transformOrigin;
+        canvas.style.transformOrigin = transformOrigin;
+        document.body.appendChild( canvas );
+      })();
+      
+      mark( 'Canvas ' + backingScale + 'x + CSS' );
+    }
+    
+    canvasCSS( 1 );
+    canvasCSS( 2 );
+    canvasCSS( 3 );
+    
+    /*---------------------------------------------------------------------------*
+    * SVG
+    *----------------------------------------------------------------------------*/
+    
+    var svgns = 'http://www.w3.org/2000/svg';
+    
+    function svgText() {
+      var text = document.createElementNS( svgns, 'text' );
+      text.appendChild( document.createTextNode( sampleString ) );
+      text.setAttribute( 'style', 'fill: black;' );
+      text.setAttribute( 'dominant-baseline', 'alphabetic' );
+      text.setAttribute( 'font-family', sampleFontFamily );
+      text.setAttribute( 'font-size', sampleFontSize );
+      text.setAttribute( 'y', sampleOffset );
+      return text;
+    }
+    
+    function svgDraw( rendering ) {
+      var svg = document.createElementNS( svgns, 'svg' );
+      position( svg );
+      svg.setAttribute( 'width', sizeX );
+      svg.setAttribute( 'height', sizeY );
+      
+      var g, text;
+      
+      g = document.createElementNS( svgns, 'g' );
+      text = svgText();
+      text.setAttribute( 'text-rendering', rendering );
+      g.appendChild( text );
+      svg.appendChild( g );
+      
+      g = document.createElementNS( svgns, 'g' );
+      g.setAttribute( 'transform', cssFirst );
+      text = svgText();
+      text.setAttribute( 'text-rendering', rendering );
+      g.appendChild( text );
+      svg.appendChild( g );
+      
+      g = document.createElementNS( svgns, 'g' );
+      g.setAttribute( 'transform', cssSecond );
+      text = svgText();
+      text.setAttribute( 'text-rendering', rendering );
+      g.appendChild( text );
+      svg.appendChild( g );
+      
+      document.body.appendChild( svg );
+      mark( 'SVG' + ( rendering ? ' ' + rendering : '' ) );
+    }
+    
+    svgDraw( 'auto' );
+    svgDraw( 'optimizeSpeed' );
+    svgDraw( 'optimizeLegibility' );
+    svgDraw( 'geometricPrecision' );
+    
+    /*---------------------------------------------------------------------------*
+    * SVG + CSS transforms
+    *----------------------------------------------------------------------------*/
+    
+    (function(){
+      var svg = document.createElementNS( svgns, 'svg' );
+      position( svg );
+      svg.setAttribute( 'width', sizeX );
+      svg.setAttribute( 'height', sizeY );
+      
+      var g, text;
+      
+      g = document.createElementNS( svgns, 'g' );
+      text = svgText();
+      g.appendChild( text );
+      svg.appendChild( g );
+      document.body.appendChild( svg );
+    })();
+    
+    (function(){
+      var svg = document.createElementNS( svgns, 'svg' );
+      position( svg );
+      svg.setAttribute( 'width', sizeX );
+      svg.setAttribute( 'height', sizeY );
+      
+      var g, text;
+      
+      g = document.createElementNS( svgns, 'g' );
+      text = svgText();
+      g.appendChild( text );
+      svg.appendChild( g );
+      
+      var transform = cssFirst;
+      var transformOrigin = 'top left';
+      
+      svg.style.msTransform = transform;
+      svg.style.mozTransform = transform;
+      svg.style.webkitTransform = transform;
+      svg.style.transform = transform;
+      
+      svg.style.msTransformOrigin = transformOrigin;
+      svg.style.mozTransformOrigin = transformOrigin;
+      svg.style.webkitTransformOrigin = transformOrigin;
+      svg.style.transformOrigin = transformOrigin;
+      document.body.appendChild( svg );
+    })();
+    
+    (function(){
+      var svg = document.createElementNS( svgns, 'svg' );
+      position( svg );
+      svg.setAttribute( 'width', sizeX );
+      svg.setAttribute( 'height', sizeY );
+      
+      var g, text;
+      
+      g = document.createElementNS( svgns, 'g' );
+      text = svgText();
+      g.appendChild( text );
+      svg.appendChild( g );
+      
+      var transform = cssSecond;
+      var transformOrigin = 'top left';
+      
+      svg.style.msTransform = transform;
+      svg.style.mozTransform = transform;
+      svg.style.webkitTransform = transform;
+      svg.style.transform = transform;
+      
+      svg.style.msTransformOrigin = transformOrigin;
+      svg.style.mozTransformOrigin = transformOrigin;
+      svg.style.webkitTransformOrigin = transformOrigin;
+      svg.style.transformOrigin = transformOrigin;
+      document.body.appendChild( svg );
+    })();
+    
+    mark( 'SVG + CSS' );
+    
   </script>
 </body>
 </html>
