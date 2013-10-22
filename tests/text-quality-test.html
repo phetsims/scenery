@@ -13,12 +13,12 @@
     var sampleFontSize = '16px';
     var sampleFontFamily = 'Arial, sans-serif';
     var sampleFontStyle = sampleFontSize + ' ' + sampleFontFamily;
-    var sampleTranslation = 12.8365;
     var sampleScale = 1.254746;
+    var sampleTranslation = 12.8365;
     var sampleRotation = Math.PI / 12;
-    var sampleOffset = 14; // vertical offset similar to text height
-    var squareX = 285;
-    var squareY = 4;
+    var sampleOffset = Math.floor( 14 * 1.254746 / sampleScale ); // vertical offset similar to text height
+    var squareX = Math.floor( 285 * 1.254746 / sampleScale );
+    var squareY = Math.floor( 4 * 1.254746 / sampleScale );
     var coss = Math.cos( sampleRotation ) * sampleScale;
     var sins = Math.sin( sampleRotation ) * sampleScale;
     var cssFirst = 'matrix(' + sampleScale + ',' + 0 + ',' + 0 + ',' + sampleScale + ',' + sampleTranslation + ',' + sampleTranslation + ')';
