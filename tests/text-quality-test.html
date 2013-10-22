@@ -6,14 +6,38 @@
   <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1"/>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>Scenery Text Quality Test</title>
+  <style type="text/css">
+    a {
+      color: blue;
+    }
+  </style>
 </head>
 <body>
+  
   <script type="text/javascript">
+    var mode = window.location.search ? window.location.search.slice( 1 ) : 'medium';
+    
     var sampleString = 'The lazy fox didn\'t complete the sentence';
-    var sampleFontSize = '16px';
+    var sampleFontSize = {
+      oneToOne: '20px',
+      high: '64px',
+      medium: '16px',
+      low: '6px',
+      veryLow: '3px',
+      extremeLow: '1px',
+      nonIntegral: '6.4164px'
+    }[mode];
     var sampleFontFamily = 'Arial, sans-serif';
     var sampleFontStyle = sampleFontSize + ' ' + sampleFontFamily;
-    var sampleScale = 1.254746;
+    var sampleScale = {
+      oneToOne: 1,
+      high: 1.254746 / 4,
+      medium: 1.254746,
+      low: 3.254746,
+      veryLow: 2 * Math.PI,
+      extremeLow: 6 * Math.PI,
+      nonIntegral: 3.1254
+    }[mode];
     var sampleTranslation = 12.8365;
     var sampleRotation = Math.PI / 12;
     var sampleOffset = Math.floor( 14 * 1.254746 / sampleScale ); // vertical offset similar to text height
@@ -419,5 +443,15 @@
     })();
     
   </script>
+  
+  <div style="position: absolute; left: 840px; top: 160px;">
+    <a href="text-quality-test.html?extremeLow">extremeLow 1</a><br>
+    <a href="text-quality-test.html?veryLow">veryLow 3</a><br>
+    <a href="text-quality-test.html?low">low 6</a><br>
+    <a href="text-quality-test.html?nonIntegral">low 6.5</a><br>
+    <a href="text-quality-test.html?medium">medium 16</a><br>
+    <a href="text-quality-test.html?high">high 64</a><br>
+    <a href="text-quality-test.html?oneToOne">oneToOne 20</a><br>
+  </div>
 </body>
 </html>
