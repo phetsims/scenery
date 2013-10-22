@@ -28,6 +28,16 @@
     var sizeY = 150;
     var padding = 10;
     
+    var textLength;
+    
+    (function(){
+      var canvas = document.createElement( 'canvas' );
+      var context = canvas.getContext( '2d' );
+      context.font = sampleFontStyle;
+      
+      textLength = context.measureText( sampleString ).width;
+    })();
+    
     var posX = 0;
     var posY = 0;
     function increment() {
@@ -267,7 +277,7 @@
     
     var svgns = 'http://www.w3.org/2000/svg';
     
-    function svgText() {
+    function svgText( length, spacing ) {
       var text = document.createElementNS( svgns, 'text' );
       text.appendChild( document.createTextNode( sampleString ) );
       text.setAttribute( 'style', 'fill: black;' );
@@ -275,6 +285,10 @@
       text.setAttribute( 'font-family', sampleFontFamily );
       text.setAttribute( 'font-size', sampleFontSize );
       text.setAttribute( 'y', sampleOffset );
+      if ( length ) {
+        text.setAttribute( 'textLength', length );
+        text.setAttribute( 'lengthAdjust', spacing ); // spacing or spacingAndGlyphs
+      }
       return text;
     }
     
@@ -291,7 +305,7 @@
       return square;
     }
     
-    function svgDraw( rendering ) {
+    function svgDraw( rendering, length, spacing ) {
       var svg = document.createElementNS( svgns, 'svg' );
       position( svg );
       svg.setAttribute( 'width', sizeX );
@@ -300,7 +314,7 @@
       var g, text;
       
       g = document.createElementNS( svgns, 'g' );
-      text = svgText();
+      text = svgText( length, spacing );
       text.setAttribute( 'text-rendering', rendering );
       g.appendChild( text );
       g.appendChild( svgSquare() );
@@ -308,7 +322,7 @@
       
       g = document.createElementNS( svgns, 'g' );
       g.setAttribute( 'transform', cssFirst );
-      text = svgText();
+      text = svgText( length, spacing );
       text.setAttribute( 'text-rendering', rendering );
       g.appendChild( text );
       g.appendChild( svgSquare() );
@@ -316,20 +330,22 @@
       
       g = document.createElementNS( svgns, 'g' );
       g.setAttribute( 'transform', cssSecond );
-      text = svgText();
+      text = svgText( length, spacing );
       text.setAttribute( 'text-rendering', rendering );
       g.appendChild( text );
       g.appendChild( svgSquare() );
       svg.appendChild( g );
       
       document.body.appendChild( svg );
-      mark( 'SVG' + ( rendering ? ' ' + rendering : '' ) );
+      mark( 'SVG' + ( rendering ? ' ' + rendering : '' ) + ( length ? ' length: ' + length + ' ' + spacing : '' ) );
     }
     
     svgDraw( 'auto' );
     svgDraw( 'optimizeSpeed' );
     svgDraw( 'optimizeLegibility' );
     svgDraw( 'geometricPrecision' );
+    svgDraw( 'auto', textLength, 'spacing' );
+    svgDraw( 'auto', textLength, 'spacingAndGlyphs' );
     
     /*---------------------------------------------------------------------------*
     * SVG + CSS transforms
@@ -399,7 +415,7 @@
       div.textContent = window.navigator.userAgent;
       document.body.appendChild( div );
       
-      mark( 'User Agent' );
+      mark( 'User Agent with text length: ' + textLength );
     })();
     
   </script>
