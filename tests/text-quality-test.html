@@ -25,7 +25,8 @@
       low: '6px',
       veryLow: '3px',
       extremeLow: '1px',
-      nonIntegral: '6.4164px'
+      nonIntegral: '6.4164px',
+      nonIntegral2: '6px'
     }[mode];
     var sampleFontFamily = 'Arial, sans-serif';
     var sampleFontStyle = sampleFontSize + ' ' + sampleFontFamily;
@@ -36,7 +37,8 @@
       low: 3.254746,
       veryLow: 2 * Math.PI,
       extremeLow: 6 * Math.PI,
-      nonIntegral: 3.254746
+      nonIntegral: 3.254746,
+      nonIntegral2: 3.364746,
     }[mode];
     var sampleTranslation = 12.8365;
     var sampleRotation = Math.PI / 12;
@@ -370,6 +372,8 @@
     svgDraw( 'geometricPrecision' );
     svgDraw( 'auto', textLength, 'spacing' );
     svgDraw( 'auto', textLength, 'spacingAndGlyphs' );
+    svgDraw( 'geometricPrecision', textLength, 'spacing' );
+    svgDraw( 'geometricPrecision', textLength, 'spacingAndGlyphs' );
     
     /*---------------------------------------------------------------------------*
     * SVG + CSS transforms
@@ -449,6 +453,7 @@
     <a href="text-quality-test.html?veryLow">veryLow 3</a><br>
     <a href="text-quality-test.html?low">low 6</a><br>
     <a href="text-quality-test.html?nonIntegral">low 6.5</a><br>
+    <a href="text-quality-test.html?nonIntegral2">low 6 close</a><br>
     <a href="text-quality-test.html?medium">medium 16</a><br>
     <a href="text-quality-test.html?high">high 64</a><br>
     <a href="text-quality-test.html?oneToOne">oneToOne 20</a><br>
