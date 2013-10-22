@@ -1,0 +1,73 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1"/>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Scenery Text Quality Test</title>
+</head>
+<body>
+  <script type="text/javascript">
+    var sampleString = 'The lazy fox didn\'t complete the sentence';
+    var sampleFontSize = '16px';
+    var sampleFontFamily = 'Arial, sans-serif';
+    var sampleTranslation = 12.8365;
+    var sampleScale = 1.254746;
+    var sampleRotation = Math.PI / 12;
+    var coss = Math.cos( sampleRotation ) * sampleScale;
+    var sins = Math.sin( sampleRotation ) * sampleScale;
+    
+    (function(){
+      // basic DOM text
+      var div = document.createElement( 'div' );
+      div.style.fontSize = sampleFontSize;
+      div.style.fontFamily = sampleFontFamily;
+      div.textContent = sampleString;
+      document.body.appendChild( div );
+    })();
+    
+    (function(){
+      // transformed DOM text
+      var div = document.createElement( 'div' );
+      div.style.fontSize = sampleFontSize;
+      div.style.fontFamily = sampleFontFamily;
+      var transform = 'matrix(' + sampleScale + ',' + 0 + ',' + 0 + ',' + sampleScale + ',' + sampleTranslation + ',' + sampleTranslation + ')';
+      var transformOrigin = 'top left';
+      
+      div.style.msTransform = transform;
+      div.style.mozTransform = transform;
+      div.style.webkitTransform = transform;
+      div.style.transform = transform;
+      
+      div.style.msTransformOrigin = transformOrigin;
+      div.style.mozTransformOrigin = transformOrigin;
+      div.style.webkitTransformOrigin = transformOrigin;
+      div.style.transformOrigin = transformOrigin;
+      div.textContent = sampleString;
+      document.body.appendChild( div );
+    })();
+    
+    (function(){
+      // transformed + rotated DOM text
+      var div = document.createElement( 'div' );
+      div.style.fontSize = sampleFontSize;
+      div.style.fontFamily = sampleFontFamily;
+      var transform = 'matrix(' + coss + ',' + sins + ',' + (-sins) + ',' + coss + ',' + sampleTranslation + ',' + sampleTranslation + ')';
+      var transformOrigin = 'top left';
+      
+      div.style.msTransform = transform;
+      div.style.mozTransform = transform;
+      div.style.webkitTransform = transform;
+      div.style.transform = transform;
+      
+      div.style.msTransformOrigin = transformOrigin;
+      div.style.mozTransformOrigin = transformOrigin;
+      div.style.webkitTransformOrigin = transformOrigin;
+      div.style.transformOrigin = transformOrigin;
+      div.textContent = sampleString;
+      document.body.appendChild( div );
+    })();
+  </script>
+</body>
+</html>
