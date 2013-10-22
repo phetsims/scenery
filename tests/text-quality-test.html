@@ -17,6 +17,8 @@
     var sampleScale = 1.254746;
     var sampleRotation = Math.PI / 12;
     var sampleOffset = 14; // vertical offset similar to text height
+    var squareX = 285;
+    var squareY = 4;
     var coss = Math.cos( sampleRotation ) * sampleScale;
     var sins = Math.sin( sampleRotation ) * sampleScale;
     var cssFirst = 'matrix(' + sampleScale + ',' + 0 + ',' + 0 + ',' + sampleScale + ',' + sampleTranslation + ',' + sampleTranslation + ')';
@@ -53,6 +55,31 @@
     * DOM + CSS transforms
     *----------------------------------------------------------------------------*/
     
+    function cssTransform( dom, transform ) {
+      var transformOrigin = 'top left';
+      
+      dom.style.msTransform = transform;
+      dom.style.mozTransform = transform;
+      dom.style.webkitTransform = transform;
+      dom.style.transform = transform;
+      
+      dom.style.msTransformOrigin = transformOrigin;
+      dom.style.mozTransformOrigin = transformOrigin;
+      dom.style.webkitTransformOrigin = transformOrigin;
+      dom.style.transformOrigin = transformOrigin;
+    }
+    
+    function domSquare() {
+      var square = document.createElement( 'div' );
+      square.style.position = 'absolute';
+      square.style.left = squareX + 'px';
+      square.style.top = squareY + 'px';
+      square.style.width = '10px';
+      square.style.height = '10px';
+      square.style.backgroundColor = 'black';
+      return square;
+    }
+    
     (function(){
       // basic DOM text
       var div = document.createElement( 'div' );
@@ -61,6 +88,8 @@
       div.style.fontFamily = sampleFontFamily;
       div.textContent = sampleString;
       document.body.appendChild( div );
+      
+      div.appendChild( domSquare() );
     })();
     
     (function(){
@@ -69,20 +98,12 @@
       position( div );
       div.style.fontSize = sampleFontSize;
       div.style.fontFamily = sampleFontFamily;
-      var transform = cssFirst;
-      var transformOrigin = 'top left';
-      
-      div.style.msTransform = transform;
-      div.style.mozTransform = transform;
-      div.style.webkitTransform = transform;
-      div.style.transform = transform;
-      
-      div.style.msTransformOrigin = transformOrigin;
-      div.style.mozTransformOrigin = transformOrigin;
-      div.style.webkitTransformOrigin = transformOrigin;
-      div.style.transformOrigin = transformOrigin;
       div.textContent = sampleString;
+      
+      cssTransform( div, cssFirst );
       document.body.appendChild( div );
+      
+      div.appendChild( domSquare() );
     })();
     
     (function(){
@@ -91,20 +112,12 @@
       position( div );
       div.style.fontSize = sampleFontSize;
       div.style.fontFamily = sampleFontFamily;
-      var transform = cssSecond;
-      var transformOrigin = 'top left';
-      
-      div.style.msTransform = transform;
-      div.style.mozTransform = transform;
-      div.style.webkitTransform = transform;
-      div.style.transform = transform;
-      
-      div.style.msTransformOrigin = transformOrigin;
-      div.style.mozTransformOrigin = transformOrigin;
-      div.style.webkitTransformOrigin = transformOrigin;
-      div.style.transformOrigin = transformOrigin;
       div.textContent = sampleString;
+      
+      cssTransform( div, cssSecond );
       document.body.appendChild( div );
+      
+      div.appendChild( domSquare() );
     })();
     
     mark( 'DOM' );
@@ -143,14 +156,17 @@
       context.font = sampleFontStyle;
       
       context.setTransform( backingScale, 0, 0, backingScale, 0, 0 );
+      context.fillRect( squareX, squareY, 10, 10 );
       context.fillText( sampleString, 0, sampleOffset );
       
       context.setTransform( backingScale, 0, 0, backingScale, 0, 0 );
       context.transform( sampleScale, 0, 0, sampleScale, sampleTranslation, sampleTranslation );
+      context.fillRect( squareX, squareY, 10, 10 );
       context.fillText( sampleString, 0, sampleOffset );
       
       context.setTransform( backingScale, 0, 0, backingScale, 0, 0 );
       context.transform( coss, sins, -sins, coss, sampleTranslation, sampleTranslation * 2 );
+      context.fillRect( squareX, squareY, 10, 10 );
       context.fillText( sampleString, 0, sampleOffset );
       
       document.body.appendChild( canvas );
@@ -192,6 +208,7 @@
         context.font = sampleFontStyle;
         
         context.setTransform( backingScale, 0, 0, backingScale, 0, 0 );
+        context.fillRect( squareX, squareY, 10, 10 );
         context.fillText( sampleString, 0, sampleOffset );
         
         document.body.appendChild( canvas );
@@ -210,20 +227,10 @@
         context.font = sampleFontStyle;
         
         context.setTransform( backingScale, 0, 0, backingScale, 0, 0 );
+        context.fillRect( squareX, squareY, 10, 10 );
         context.fillText( sampleString, 0, sampleOffset );
         
-        var transform = cssFirst;
-        var transformOrigin = 'top left';
-        
-        canvas.style.msTransform = transform;
-        canvas.style.mozTransform = transform;
-        canvas.style.webkitTransform = transform;
-        canvas.style.transform = transform;
-        
-        canvas.style.msTransformOrigin = transformOrigin;
-        canvas.style.mozTransformOrigin = transformOrigin;
-        canvas.style.webkitTransformOrigin = transformOrigin;
-        canvas.style.transformOrigin = transformOrigin;
+        cssTransform( canvas, cssFirst );
         document.body.appendChild( canvas );
       })();
       
@@ -240,20 +247,10 @@
         context.font = sampleFontStyle;
         
         context.setTransform( backingScale, 0, 0, backingScale, 0, 0 );
+        context.fillRect( squareX, squareY, 10, 10 );
         context.fillText( sampleString, 0, sampleOffset );
         
-        var transform = cssSecond;
-        var transformOrigin = 'top left';
-        
-        canvas.style.msTransform = transform;
-        canvas.style.mozTransform = transform;
-        canvas.style.webkitTransform = transform;
-        canvas.style.transform = transform;
-        
-        canvas.style.msTransformOrigin = transformOrigin;
-        canvas.style.mozTransformOrigin = transformOrigin;
-        canvas.style.webkitTransformOrigin = transformOrigin;
-        canvas.style.transformOrigin = transformOrigin;
+        cssTransform( canvas, cssSecond );
         document.body.appendChild( canvas );
       })();
       
@@ -281,6 +278,19 @@
       return text;
     }
     
+    function svgSquare() {
+      var square = document.createElementNS( svgns, 'rect' );
+      square.setAttribute( 'x', squareX );
+      square.setAttribute( 'y', squareY );
+      square.setAttribute( 'width', 10 );
+      square.setAttribute( 'height', 10 );
+      square.setAttribute( 'rx', 0 );
+      square.setAttribute( 'ry', 0 );
+      
+      square.setAttribute( 'style', 'fill: black;' );
+      return square;
+    }
+    
     function svgDraw( rendering ) {
       var svg = document.createElementNS( svgns, 'svg' );
       position( svg );
@@ -293,6 +303,7 @@
       text = svgText();
       text.setAttribute( 'text-rendering', rendering );
       g.appendChild( text );
+      g.appendChild( svgSquare() );
       svg.appendChild( g );
       
       g = document.createElementNS( svgns, 'g' );
@@ -300,6 +311,7 @@
       text = svgText();
       text.setAttribute( 'text-rendering', rendering );
       g.appendChild( text );
+      g.appendChild( svgSquare() );
       svg.appendChild( g );
       
       g = document.createElementNS( svgns, 'g' );
@@ -307,6 +319,7 @@
       text = svgText();
       text.setAttribute( 'text-rendering', rendering );
       g.appendChild( text );
+      g.appendChild( svgSquare() );
       svg.appendChild( g );
       
       document.body.appendChild( svg );
@@ -333,6 +346,7 @@
       g = document.createElementNS( svgns, 'g' );
       text = svgText();
       g.appendChild( text );
+      g.appendChild( svgSquare() );
       svg.appendChild( g );
       document.body.appendChild( svg );
     })();
@@ -348,20 +362,10 @@
       g = document.createElementNS( svgns, 'g' );
       text = svgText();
       g.appendChild( text );
+      g.appendChild( svgSquare() );
       svg.appendChild( g );
       
-      var transform = cssFirst;
-      var transformOrigin = 'top left';
-      
-      svg.style.msTransform = transform;
-      svg.style.mozTransform = transform;
-      svg.style.webkitTransform = transform;
-      svg.style.transform = transform;
-      
-      svg.style.msTransformOrigin = transformOrigin;
-      svg.style.mozTransformOrigin = transformOrigin;
-      svg.style.webkitTransformOrigin = transformOrigin;
-      svg.style.transformOrigin = transformOrigin;
+      cssTransform( svg, cssFirst );
       document.body.appendChild( svg );
     })();
     
@@ -376,24 +380,27 @@
       g = document.createElementNS( svgns, 'g' );
       text = svgText();
       g.appendChild( text );
+      g.appendChild( svgSquare() );
       svg.appendChild( g );
       
-      var transform = cssSecond;
-      var transformOrigin = 'top left';
-      
-      svg.style.msTransform = transform;
-      svg.style.mozTransform = transform;
-      svg.style.webkitTransform = transform;
-      svg.style.transform = transform;
-      
-      svg.style.msTransformOrigin = transformOrigin;
-      svg.style.mozTransformOrigin = transformOrigin;
-      svg.style.webkitTransformOrigin = transformOrigin;
-      svg.style.transformOrigin = transformOrigin;
+      cssTransform( svg, cssSecond );
       document.body.appendChild( svg );
     })();
     
     mark( 'SVG + CSS' );
+    
+    (function(){
+      // user agent
+      var div = document.createElement( 'div' );
+      position( div );
+      div.style.fontSize = sampleFontSize;
+      div.style.fontFamily = sampleFontFamily;
+      div.style.width = sizeX + 'px';
+      div.textContent = window.navigator.userAgent;
+      document.body.appendChild( div );
+      
+      mark( 'User Agent' );
+    })();
     
   </script>
 </body>
