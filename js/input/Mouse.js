@@ -27,6 +27,8 @@ define( function( require ) {
     
     this.trail = null;
     
+    this.isDown = false;
+    
     // overrides the cursor of whatever is under it when set
     this._cursor = null;
     
@@ -50,6 +52,7 @@ define( function( require ) {
     down: function( point, event ) {
       // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
+      this.isDown = true;
       switch( event.button ) {
         case 0: this.leftDown = true; break;
         case 1: this.middleDown = true; break;
@@ -60,6 +63,7 @@ define( function( require ) {
     up: function( point, event ) {
       // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
+      this.isDown = false;
       switch( event.button ) {
         case 0: this.leftDown = false; break;
         case 1: this.middleDown = false; break;

@@ -24,6 +24,8 @@ define( function( require ) {
     this.isTouch = true;
     this.trail = null;
     
+    this.isDown = true; // touches always start down
+    
     this.type = 'touch';
   };
   var Touch = scenery.Touch;
@@ -37,11 +39,13 @@ define( function( require ) {
     end: function( point, event ) {
       // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
+      this.isDown = false;
     },
     
     cancel: function( point, event ) {
       // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
+      this.isDown = false;
     },
     
     toString: function() {
