@@ -40,7 +40,7 @@ http://phet.colorado.edu/
 NOTE: This repository has dependency on other repositories. Those repositories
 much be checked out as siblings to this repository in your directory structure.
 
-Third Party Dependencies
+Third-Party Dependencies
 =============
 
 This repository uses third-party libraries.
