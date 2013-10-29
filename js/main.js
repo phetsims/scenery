@@ -57,6 +57,7 @@ define( [
     'SCENERY/util/AccessibilityPeer',
     'SCENERY/util/CanvasContextWrapper',
     'SCENERY/util/Color',
+    'SCENERY/util/Features',
     'SCENERY/util/FixedNodeEvents',
     'SCENERY/util/Font',
     'SCENERY/util/Gradient',
