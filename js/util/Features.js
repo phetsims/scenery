@@ -61,6 +61,31 @@ define( function( require ) {
     }
   }
   
+  function prefixed( name ) {
+    var result = [];
+    result.push( name );
+    
+    // prepare for camel case
+    name = name.charAt( 0 ).toUpperCase() + name.slice( 1 );
+    
+    // Chrome planning to not introduce prefixes in the future, hopefully we will be safe
+    result.push( 'moz' + name );
+    result.push( 'webkit' + name );
+    result.push( 'ms' + name );
+    result.push( 'o' + name );
+    
+    return result;
+  }
+  
+  function detect( obj, names ) {
+    for ( var i = 0; i < names.length; i++ ) {
+      if ( obj[names[i]] ) {
+        return names[i];
+      }
+    }
+    return undefined;
+  }
+  
   Features.canvasPNGOutput = supportsDataURLFormatOutput( 'image/png' );
   Features.canvasJPEGOutput = supportsDataURLFormatOutput( 'image/jpeg' );
   Features.canvasGIFOutput = supportsDataURLFormatOutput( 'image/gif' );
@@ -84,6 +109,12 @@ define( function( require ) {
   
   // 1x1 black output from Photoshop in GIF
   supportsDataURLFormatOrigin( 'canvasGIFInput', 'data:image/gif;base64,R0lGODlhAQABAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAABAAEAAAICRAEAOw==' );
+  
+  // canvas prefixed names
+  var ctx = document.createElement( 'canvas' ).getContext( '2d' );
+  Features.createImageDataHD = detect( ctx, prefixed( 'createImageDataHD' ) );
+  Features.getImageDataHD = detect( ctx, prefixed( 'getImageDataHD' ) );
+  Features.putImageDataHD = detect( ctx, prefixed( 'putImageDataHD' ) );
   
   return Features;
 } );
