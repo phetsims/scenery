@@ -11,6 +11,7 @@
   <!-- jQuery and LoDash are dependencies -->
   <script src="../../sherpa/jquery-2.0.3.min.js"></script>
   <script src="../../sherpa/lodash-2.0.0.min.js"></script>
+  <script src="../build/development/scenery.js"></script>
   
   <style type="text/css">
     /* Let content go to the edges */
@@ -45,17 +46,21 @@
     div.innerHTML = '';
     
     function log( str ) {
-      div.innerHTML += str + '<br>';
+      div.innerHTML += str + ' ' + Date.now() + '<br>';
     }
+    
+    var count = 0;
     
     function nonkeyboardEvent( name, event ) {
       log( name );
       event.preventDefault();
+      count++;
     }
     
     function keyboardEvent( name, event ) {
       log( name );
       // event.preventDefault();
+      count++;
     }
     
     var implementsPointerEvents = window.navigator && window.navigator.pointerEnabled; // W3C spec for pointer events
@@ -96,18 +101,20 @@
     window.addEventListener( 'keydown', keyboardEvent.bind( this, 'keydown' ) );
     window.addEventListener( 'keypress', keyboardEvent.bind( this, 'keypress' ) );
     
-    // scenery.Util.polyfillRequestAnimationFrame();
+    scenery.Util.polyfillRequestAnimationFrame();
     
     // var scene = new scenery.Scene( $div );
     
     // scene.resizeOnWindowResize();
     // scene.initializeWindowEvents( { batchDOMEvents: true } );
     
-    // (function step() {
-    //   window.requestAnimationFrame( step, $div[0] );
-    //   scene.fireBatchedEvents();
-    //   scene.updateScene();
-    // })();
+    (function step() {
+      window.requestAnimationFrame( step, div );
+      if ( count > 0 ) {
+        log( 'frame' );
+        count = 0;
+      }
+    })();
     
     // var container = document.createElement( 'div' );
     // scene.addChild( new scenery.DOM( container ) );
