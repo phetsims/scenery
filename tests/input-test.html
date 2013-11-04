@@ -51,10 +51,31 @@
     
     var count = 0;
     
+    // maps the current MS pointer types onto the pointer spec
+    function msPointerType( evt ) {
+      if ( evt.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_TOUCH ) {
+        return 'touch';
+      } else if ( evt.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_PEN ) {
+        return 'pen';
+      } else if ( evt.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_MOUSE ) {
+        return 'mouse';
+      } else {
+        return evt.pointerType; // hope for the best
+      }
+    }
+    
     function nonkeyboardEvent( name, event ) {
       log( name );
       event.preventDefault();
       count++;
+    }
+    
+    function pointerEvent( name, event ) {
+      var type = event.pointerType;
+      if ( !(typeof event.pointerType === 'string') ) {
+        type = msPointerType( event );
+      }
+      nonkeyboardEvent( name + ' ' + type, event );
     }
     
     function keyboardEvent( name, event ) {
@@ -68,20 +89,20 @@
     if ( implementsPointerEvents ) {
       log( 'pointer events' );
       // accepts pointer events corresponding to the spec at http://www.w3.org/TR/pointerevents/
-      window.addEventListener( 'pointerdown', nonkeyboardEvent.bind( this, 'pointerdown' ) );
-      window.addEventListener( 'pointerup', nonkeyboardEvent.bind( this, 'pointerup' ) );
-      window.addEventListener( 'pointermove', nonkeyboardEvent.bind( this, 'pointermove' ) );
-      window.addEventListener( 'pointerover', nonkeyboardEvent.bind( this, 'pointerover' ) );
-      window.addEventListener( 'pointerout', nonkeyboardEvent.bind( this, 'pointerout' ) );
-      window.addEventListener( 'pointercancel', nonkeyboardEvent.bind( this, 'pointercancel' ) );
+      window.addEventListener( 'pointerdown', pointerEvent.bind( this, 'pointerdown' ) );
+      window.addEventListener( 'pointerup', pointerEvent.bind( this, 'pointerup' ) );
+      window.addEventListener( 'pointermove', pointerEvent.bind( this, 'pointermove' ) );
+      window.addEventListener( 'pointerover', pointerEvent.bind( this, 'pointerover' ) );
+      window.addEventListener( 'pointerout', pointerEvent.bind( this, 'pointerout' ) );
+      window.addEventListener( 'pointercancel', pointerEvent.bind( this, 'pointercancel' ) );
     } else if ( implementsMSPointerEvents ) {
       log( 'MSPointer events' );
-      window.addEventListener( 'MSPointerDown', nonkeyboardEvent.bind( this, 'MSPointerDown' ) );
-      window.addEventListener( 'MSPointerUp', nonkeyboardEvent.bind( this, 'MSPointerUp' ) );
-      window.addEventListener( 'MSPointerMove', nonkeyboardEvent.bind( this, 'MSPointerMove' ) );
-      window.addEventListener( 'MSPointerOver', nonkeyboardEvent.bind( this, 'MSPointerOver' ) );
-      window.addEventListener( 'MSPointerOut', nonkeyboardEvent.bind( this, 'MSPointerOut' ) );
-      window.addEventListener( 'MSPointerCancel', nonkeyboardEvent.bind( this, 'MSPointerCancel' ) );
+      window.addEventListener( 'MSPointerDown', pointerEvent.bind( this, 'MSPointerDown' ) );
+      window.addEventListener( 'MSPointerUp', pointerEvent.bind( this, 'MSPointerUp' ) );
+      window.addEventListener( 'MSPointerMove', pointerEvent.bind( this, 'MSPointerMove' ) );
+      window.addEventListener( 'MSPointerOver', pointerEvent.bind( this, 'MSPointerOver' ) );
+      window.addEventListener( 'MSPointerOut', pointerEvent.bind( this, 'MSPointerOut' ) );
+      window.addEventListener( 'MSPointerCancel', pointerEvent.bind( this, 'MSPointerCancel' ) );
     } else {
       log( 'mouse/touch events' );
       window.addEventListener( 'mousedown', nonkeyboardEvent.bind( this, 'mousedown' ) );
