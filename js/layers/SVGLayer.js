@@ -365,7 +365,7 @@ define( function( require ) {
       if ( this.cssTransform ) {
         // we want to set the baseNodeTransform to a translation so that it maps the baseNode's self/children in the baseNode's local bounds to (0,0,w,h)
         var internalBounds = scratchBounds1; // pooled copy
-        internalBounds.setBounds( this.baseNode.getBounds() );
+        internalBounds.set( this.baseNode.getBounds() );
         this.baseNode.transformBoundsFromParentToLocal( internalBounds );
         var padding = scenery.Layer.cssTransformPadding;
         
