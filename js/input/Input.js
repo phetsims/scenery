@@ -131,7 +131,10 @@ define( function( require ) {
     mouseUpImmediate: function( point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'mouseUpImmediate(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       if ( !this.mouse ) { this.initMouse(); }
-      this.upImmediateEvent( this.mouse, event );
+      if ( this.mouse.point ) {
+        // if the pointer's point hasn't been initialized yet, ignore the immediate up
+        this.upImmediateEvent( this.mouse, event );
+      }
     },
     
     mouseMove: function( point, event ) {
