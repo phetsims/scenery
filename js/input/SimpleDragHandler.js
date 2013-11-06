@@ -58,7 +58,7 @@ define( function( require ) {
         handler.node.prependMatrix( newMatrix.inverted().timesMatrix( oldMatrix ) );
         
         // store the new matrix so we can do deltas using it now
-        handler.transform.set( newMatrix );
+        handler.transform.setMatrix( newMatrix );
       }
     };
     

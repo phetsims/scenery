@@ -371,16 +371,16 @@ define( function( require ) {
         
         // if there is nothing, or the bounds are empty for some reason, skip this!
         if ( !internalBounds.isEmpty() ) {
-          this.baseNodeTransform.set( Matrix3.translation( Math.ceil( -internalBounds.minX + padding), Math.ceil( -internalBounds.minY + padding ) ) );
+          this.baseNodeTransform.setMatrix( Matrix3.translation( Math.ceil( -internalBounds.minX + padding), Math.ceil( -internalBounds.minY + padding ) ) );
           
           // NOTE: this is mutable! don't use internalBounds after this
-          var baseNodeInteralBounds = internalBounds.transform( this.baseNodeTransform.getMatrix() );
+          var baseNodeInternalBounds = internalBounds.transform( this.baseNodeTransform.getMatrix() );
           
           // sanity check to ensure we are within that range
-          assert && assert( baseNodeInteralBounds.minX >= 0 && baseNodeInteralBounds.minY >= 0 );
+          assert && assert( baseNodeInternalBounds.minX >= 0 && baseNodeInternalBounds.minY >= 0 );
           
-          this.updateContainerDimensions( Math.ceil( baseNodeInteralBounds.maxX + padding ),
-                                          Math.ceil( baseNodeInteralBounds.maxY + padding ) );
+          this.updateContainerDimensions( Math.ceil( baseNodeInternalBounds.maxX + padding ),
+                                          Math.ceil( baseNodeInternalBounds.maxY + padding ) );
         }
         
         // if this gets removed, update initializeBase()

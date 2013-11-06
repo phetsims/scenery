@@ -1069,7 +1069,7 @@ define( function( require ) {
     },
     
     setMatrix: function( matrix ) {
-      this._transform.set( matrix );
+      this._transform.setMatrix( matrix );
     },
     
     getMatrix: function() {
