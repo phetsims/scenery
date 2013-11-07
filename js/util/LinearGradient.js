@@ -44,8 +44,7 @@ define( function( require ) {
         <stop offset="1" style="stop-color:rgb(255,0,0);stop-opacity:1" />
       </linearGradient>
       */
-      var svgns = 'http://www.w3.org/2000/svg'; // TODO: store this in a common place!
-      var definition = document.createElementNS( svgns, 'linearGradient' );
+      var definition = document.createElementNS( scenery.svgns, 'linearGradient' );
       definition.setAttribute( 'id', id );
       definition.setAttribute( 'gradientUnits', 'userSpaceOnUse' ); // so we don't depend on the bounds of the object being drawn with the gradient
       definition.setAttribute( 'x1', this.start.x );
@@ -57,7 +56,7 @@ define( function( require ) {
       }
       
       _.each( this.stops, function( stop ) {
-        var stopElement = document.createElementNS( svgns, 'stop' );
+        var stopElement = document.createElementNS( scenery.svgns, 'stop' );
         stopElement.setAttribute( 'offset', stop.ratio );
         stopElement.setAttribute( 'style', 'stop-color: ' + stop.color.withAlpha( 1 ).toCSS() + '; stop-opacity: ' + stop.color.a.toFixed( 20 ) + ';' );
         definition.appendChild( stopElement );

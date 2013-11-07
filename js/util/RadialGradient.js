@@ -48,8 +48,7 @@ define( function( require ) {
       var maxRadius = Math.max( this.startRadius, this.endRadius );
       var minRadius = Math.min( this.startRadius, this.endRadius );
       
-      var svgns = 'http://www.w3.org/2000/svg'; // TODO: store this in a common place!
-      var definition = document.createElementNS( svgns, 'radialGradient' );
+      var definition = document.createElementNS( scenery.svgns, 'radialGradient' );
       
       // TODO:
       definition.setAttribute( 'id', id );
@@ -80,7 +79,7 @@ define( function( require ) {
         }
         
         // TODO: store color in our stops array, so we don't have to create additional objects every time?
-        var stopElement = document.createElementNS( svgns, 'stop' );
+        var stopElement = document.createElementNS( scenery.svgns, 'stop' );
         stopElement.setAttribute( 'offset', ratio );
         stopElement.setAttribute( 'style', 'stop-color: ' + stop.color.withAlpha( 1 ).toCSS() + '; stop-opacity: ' + stop.color.a.toFixed( 20 ) + ';' );
         definition.appendChild( stopElement );

@@ -130,13 +130,13 @@ define( function( require ) {
       this.accessibilityLayer.style.position = 'relative';
       $main[0].appendChild( this.accessibilityLayer );
       
-      this.focusRingSVGContainer = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+      this.focusRingSVGContainer = document.createElementNS( scenery.svgns, 'svg' );
       this.focusRingSVGContainer.style.position = 'absolute';
       this.focusRingSVGContainer.style.top = 0;
       this.focusRingSVGContainer.style.left = 0;
       this.focusRingSVGContainer.style['pointer-events'] = 'none';
       this.resizeFocusRingSVGContainer( options.width, options.height );
-      this.focusRingPath = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+      this.focusRingPath = document.createElementNS( scenery.svgns, 'path' );
       this.focusRingPath.setAttribute( 'style', 'fill: none; stroke: blue; stroke-width: 5;' );
       this.focusRingPath.setAttribute( 'id', 'p1' );
       this.focusRingSVGContainer.appendChild( this.focusRingPath );
@@ -204,7 +204,7 @@ define( function( require ) {
   //                this.focusRingPath.setAttribute( 'd', rect.getSVGPath() );
   //                this.focusRingPath.lastSVGPath = rect.getSVGPath();
   //              } else {
-  //                var animate = document.createElementNS( 'http://www.w3.org/2000/svg', 'animate' );
+  //                var animate = document.createElementNS( scenery.svgns, 'animate' );
   //                animate.setAttribute( 'attributeType', 'XML' );
   //                animate.setAttribute( 'xlink:href', '#p1' );
   //                animate.setAttribute( 'attributeName', 'd' );

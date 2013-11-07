@@ -95,7 +95,7 @@ define( function( require ) {
     
     // create a circle instead of a path, hopefully it is faster in implementations
     createSVGFragment: function( svg, defs, group ) {
-      return document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
+      return document.createElementNS( scenery.svgns, 'circle' );
     },
 
     // optimized for the circle element instead of path

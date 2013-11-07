@@ -189,7 +189,7 @@ define( function( require ) {
     },
     
     getSVGString: function() {
-      var data = "<svg xmlns='http://www.w3.org/2000/svg' width='" + this.$main.width() + "' height='" + this.$main.height() + "'>" +
+      var data = "<svg xmlns='" + scenery.svgns + "' width='" + this.$main.width() + "' height='" + this.$main.height() + "'>" +
         "<foreignObject width='100%' height='100%'>" +
         $( this.div ).html() +
         "</foreignObject></svg>";
@@ -199,7 +199,7 @@ define( function( require ) {
     // TODO: note that http://pbakaus.github.com/domvas/ may work better, but lacks IE support
     renderToCanvas: function( canvas, context, delayCounts ) {
       // TODO: consider not silently failing?
-      // var data = "<svg xmlns='http://www.w3.org/2000/svg' width='" + this.$main.width() + "' height='" + this.$main.height() + "'>" +
+      // var data = "<svg xmlns='" + scenery.svgns + "' width='" + this.$main.width() + "' height='" + this.$main.height() + "'>" +
       //   "<foreignObject width='100%' height='100%'>" +
       //   $( this.div ).html() +
       //   "</foreignObject></svg>";

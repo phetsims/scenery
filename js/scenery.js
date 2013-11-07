@@ -33,6 +33,9 @@ define( function( require ) {
     scratchCanvas: scratchCanvas,   // a canvas used for convenience functions (think of it as having arbitrary state)
     scratchContext: scratchContext, // a context used for convenience functions (think of it as having arbitrary state)
     
+    svgns: 'http://www.w3.org/2000/svg',     // svg namespace
+    xlinkns: 'http://www.w3.org/1999/xlink', // x-link namespace
+    
     enableLayerLogging: function() {
       window.sceneryLayerLog = function( ob ) { console.log( ob ); };
     },

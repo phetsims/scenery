@@ -49,7 +49,7 @@ define( function( require ) {
 
       if ( pointer.isKey ) { return; }
 
-      var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+      var svg = document.createElementNS( scenery.svgns, 'svg' );
       svg.style.position = 'absolute';
       svg.style.top = 0;
       svg.style.left = 0;
@@ -59,7 +59,7 @@ define( function( require ) {
       svg.setAttribute( 'width', diameter );
       svg.setAttribute( 'height', diameter );
 
-      var circle = document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
+      var circle = document.createElementNS( scenery.svgns, 'circle' );
 
       //use css transform for performance?
       circle.setAttribute( 'cx', innerRadius + strokeWidth / 2 );

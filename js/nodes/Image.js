@@ -152,7 +152,7 @@ define( function( require ) {
     *----------------------------------------------------------------------------*/
     
     createSVGFragment: function( svg, defs, group ) {
-      var element = document.createElementNS( 'http://www.w3.org/2000/svg', 'image' );
+      var element = document.createElementNS( scenery.svgns, 'image' );
       element.setAttribute( 'x', 0 );
       element.setAttribute( 'y', 0 );
       return element;
@@ -160,11 +160,9 @@ define( function( require ) {
     
     updateSVGFragment: function( element ) {
       // like <image xlink:href='http://phet.colorado.edu/images/phet-logo-yellow.png' x='0' y='0' height='127px' width='242px'/>
-      var xlinkns = 'http://www.w3.org/1999/xlink';
-      
       element.setAttribute( 'width', this.getImageWidth() + 'px' );
       element.setAttribute( 'height', this.getImageHeight() + 'px' );
-      element.setAttributeNS( xlinkns, 'xlink:href', this.getImageURL() );
+      element.setAttributeNS( scenery.xlinkns, 'xlink:href', this.getImageURL() );
     },
     
     /*---------------------------------------------------------------------------*
@@ -204,15 +202,12 @@ define( function( require ) {
   
   // utility for others
   Image.createSVGImage = function( url, width, height ) {
-    var xlinkns = 'http://www.w3.org/1999/xlink';
-    var svgns = 'http://www.w3.org/2000/svg';
-    
-    var element = document.createElementNS( svgns, 'image' );
+    var element = document.createElementNS( scenery.svgns, 'image' );
     element.setAttribute( 'x', 0 );
     element.setAttribute( 'y', 0 );
     element.setAttribute( 'width', width + 'px' );
     element.setAttribute( 'height', height + 'px' );
-    element.setAttributeNS( xlinkns, 'xlink:href', url );
+    element.setAttributeNS( scenery.xlinkns, 'xlink:href', url );
     
     return element;
   };

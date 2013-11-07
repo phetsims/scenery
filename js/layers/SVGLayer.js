@@ -24,10 +24,6 @@ define( function( require ) {
   require( 'SCENERY/util/Trail' );
   require( 'SCENERY/util/Util' );
   
-  // used namespaces
-  var svgns = 'http://www.w3.org/2000/svg';
-  var xlinkns = 'http://www.w3.org/1999/xlink';
-  
   scenery.SVGLayer = function SVGLayer( args ) {
     sceneryLayerLog && sceneryLayerLog( 'SVGLayer constructor' );
     var $main = args.$main;
@@ -35,14 +31,14 @@ define( function( require ) {
     this.scene = args.scene;
     
     // main SVG element
-    this.svg = document.createElementNS( svgns, 'svg' );
+    this.svg = document.createElementNS( scenery.svgns, 'svg' );
     
     // the SVG has a single group under it, which corresponds to the transform of the layer's base node
     // TODO: consider renaming to 'this.baseGroup'
-    this.g = document.createElementNS( svgns, 'g' );
+    this.g = document.createElementNS( scenery.svgns, 'g' );
     
     // the <defs> block that we will be stuffing gradients and patterns into
-    this.defs = document.createElementNS( svgns, 'defs' );
+    this.defs = document.createElementNS( scenery.svgns, 'defs' );
     
     var width = args.scene.sceneBounds.width;
     var height = args.scene.sceneBounds.height;
@@ -109,7 +105,7 @@ define( function( require ) {
           
           if ( lastId ) {
             // we have a parent group to which we need to be added
-            group = document.createElementNS( svgns, 'g' );
+            group = document.createElementNS( scenery.svgns, 'g' );
             
             // apply the node's transform to the group
             this.applyTransform( subtrail.lastNode().getTransform(), group );
@@ -286,11 +282,11 @@ define( function( require ) {
       }
       
       if ( node._clipArea ) {
-        var definition = document.createElementNS( svgns, 'clipPath' );
+        var definition = document.createElementNS( scenery.svgns, 'clipPath' );
         definition.setAttribute( 'id', clipId );
         definition.setAttribute( 'clipPathUnits', 'userSpaceOnUse' );
         
-        var path = document.createElementNS( svgns, 'path' );
+        var path = document.createElementNS( scenery.svgns, 'path' );
         path.setAttribute( 'd', node._clipArea.getSVGPath() );
         definition.appendChild( path );
         

@@ -253,7 +253,7 @@ define( function( require ) {
     
     // create a rect instead of a path, hopefully it is faster in implementations
     createSVGFragment: function( svg, defs, group ) {
-      return document.createElementNS( 'http://www.w3.org/2000/svg', 'rect' );
+      return document.createElementNS( scenery.svgns, 'rect' );
     },
     
     // optimized for the rect element instead of path

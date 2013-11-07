@@ -35,11 +35,11 @@ define( function( require ) {
   require( 'SCENERY/util/Util' ); // for canvasAccurateBounds and CSS transforms
   
   // set up the container and text for testing text bounds quickly (using approximateSVGBounds)
-  var svgTextSizeContainer = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+  var svgTextSizeContainer = document.createElementNS( scenery.svgns, 'svg' );
   svgTextSizeContainer.setAttribute( 'width', '2' );
   svgTextSizeContainer.setAttribute( 'height', '2' );
   svgTextSizeContainer.setAttribute( 'style', 'display: hidden; pointer-events: none; position: absolute; left: -65535; right: -65535;' ); // so we don't flash it in a visible way to the user
-  var svgTextSizeElement = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
+  var svgTextSizeElement = document.createElementNS( scenery.svgns, 'text' );
   svgTextSizeElement.appendChild( document.createTextNode( '' ) );
   svgTextSizeContainer.appendChild( svgTextSizeElement );
   
@@ -224,7 +224,7 @@ define( function( require ) {
     *----------------------------------------------------------------------------*/
     
     createSVGFragment: function( svg, defs, group ) {
-      var element = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
+      var element = document.createElementNS( scenery.svgns, 'text' );
       element.appendChild( document.createTextNode( '' ) );
       return element;
     },

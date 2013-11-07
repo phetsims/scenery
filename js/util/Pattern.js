@@ -40,8 +40,7 @@ define( function( require ) {
     },
     
     getSVGDefinition: function( id ) {
-      var svgns = 'http://www.w3.org/2000/svg'; // TODO: store this in a common place!
-      var definition = document.createElementNS( svgns, 'pattern' );
+      var definition = document.createElementNS( scenery.svgns, 'pattern' );
       definition.setAttribute( 'id', id );
       definition.setAttribute( 'patternUnits', 'userSpaceOnUse' ); // so we don't depend on the bounds of the object being drawn with the gradient
       definition.setAttribute( 'patternContentUnits', 'userSpaceOnUse' ); // TODO: is this needed?

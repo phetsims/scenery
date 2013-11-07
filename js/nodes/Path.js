@@ -115,7 +115,7 @@ define( function( require ) {
     
     // svg element, the <defs> block, and the associated group for this node's transform
     createSVGFragment: function( svg, defs, group ) {
-      return document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+      return document.createElementNS( scenery.svgns, 'path' );
     },
     
     updateSVGFragment: function( path ) {

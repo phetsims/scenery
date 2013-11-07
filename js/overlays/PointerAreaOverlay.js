@@ -21,7 +21,7 @@ define( function( require ) {
   scenery.PointerAreaOverlay = function PointerAreaOverlay( scene ) {
     this.scene = scene;
     
-    var svg = this.svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+    var svg = this.svg = document.createElementNS( scenery.svgns, 'svg' );
     svg.style.position = 'absolute';
     svg.className = 'mouseTouchAreaOverlay';
     svg.style.top = 0;
@@ -54,7 +54,7 @@ define( function( require ) {
     },
     
     addShape: function( shape, color, isOffset ) {
-      var path = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+      var path = document.createElementNS( scenery.svgns, 'path' );
       var svgPath = shape.getSVGPath();
       
       // temporary workaround for https://bugs.webkit.org/show_bug.cgi?id=78980
