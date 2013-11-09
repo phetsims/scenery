@@ -117,14 +117,20 @@ define( function( require ) {
     mouseDown: function( point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'mouseDown(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       if ( !this.mouse ) { this.initMouse(); }
-      this.mouse.down( point, event );
+      var pointChanged = this.mouse.down( point, event );
+      if ( pointChanged ) {
+        this.moveEvent( this.mouse, event );
+      }
       this.downEvent( this.mouse, event );
     },
     
     mouseUp: function( point, event ) {
       if ( this.logEvents ) { this.eventLog.push( 'mouseUp(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       if ( !this.mouse ) { this.initMouse(); }
-      this.mouse.up( point, event );
+      var pointChanged = this.mouse.up( point, event );
+      if ( pointChanged ) {
+        this.moveEvent( this.mouse, event );
+      }
       this.upEvent( this.mouse, event );
     },
     
@@ -195,7 +201,10 @@ define( function( require ) {
       if ( this.logEvents ) { this.eventLog.push( 'touchEnd(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var touch = this.findTouchById( id );
       if ( touch ) {
-        touch.end( point, event );
+        var pointChanged = touch.end( point, event );
+        if ( pointChanged ) {
+          this.moveEvent( touch, event );
+        }
         this.removePointer( touch );
         this.upEvent( touch, event );
       } else {
@@ -228,7 +237,10 @@ define( function( require ) {
       if ( this.logEvents ) { this.eventLog.push( 'touchCancel(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var touch = this.findTouchById( id );
       if ( touch ) {
-        touch.cancel( point, event );
+        var pointChanged = touch.cancel( point, event );
+        if ( pointChanged ) {
+          this.moveEvent( touch, event );
+        }
         this.removePointer( touch );
         this.cancelEvent( touch, event );
       } else {
@@ -248,7 +260,10 @@ define( function( require ) {
       if ( this.logEvents ) { this.eventLog.push( 'penEnd(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var pen = this.findTouchById( id );
       if ( pen ) {
-        pen.end( point, event );
+        var pointChanged = pen.end( point, event );
+        if ( pointChanged ) {
+          this.moveEvent( pen, event );
+        }
         this.removePointer( pen );
         this.upEvent( pen, event );
       } else {
@@ -281,7 +296,10 @@ define( function( require ) {
       if ( this.logEvents ) { this.eventLog.push( 'penCancel(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       var pen = this.findTouchById( id );
       if ( pen ) {
-        pen.cancel( point, event );
+        var pointChanged = pen.cancel( point, event );
+        if ( pointChanged ) {
+          this.moveEvent( pen, event );
+        }
         this.removePointer( pen );
         this.cancelEvent( pen, event );
       } else {
@@ -430,7 +448,10 @@ define( function( require ) {
     },
     
     moveEvent: function( pointer, event ) {
-      this.branchChangeEvents( pointer, event, true );
+      var changed = this.branchChangeEvents( pointer, event, true );
+      if ( changed ) {
+        sceneryEventLog && sceneryEventLog( 'branch change due to move event' );
+      }
     },
     
     cancelEvent: function( pointer, event ) {
@@ -446,14 +467,16 @@ define( function( require ) {
       pointer.trail = trail;
     },
     
+    // return whether there was a change
     branchChangeEvents: function( pointer, event, isMove ) {
       var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
+      sceneryEventLog && sceneryEventLog( 'checking branch change: ' + trail.toString() + ' at ' + pointer.point.toString() );
       var oldTrail = pointer.trail || new scenery.Trail( this.scene ); // TODO: consider a static trail reference
       
       var lastNodeChanged = oldTrail.lastNode() !== trail.lastNode();
       if ( !lastNodeChanged && !isMove ) {
         // bail out if nothing needs to be done
-        return;
+        return false;
       }
       
       var branchIndex;
@@ -463,6 +486,9 @@ define( function( require ) {
           break;
         }
       }
+      
+      var isBranchChange = branchIndex !== trail.length || branchIndex !== oldTrail.length;
+      sceneryEventLog && isBranchChange && sceneryEventLog( 'branch change from ' + oldTrail.toString() + ' to ' + trail.toString() );
       
       // event order matches http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
       if ( isMove ) {
@@ -475,6 +501,7 @@ define( function( require ) {
       this.enterEvents( pointer, event, trail, branchIndex, lastNodeChanged );
       
       pointer.trail = trail;
+      return isBranchChange;
     },
     
     enterEvents: function( pointer, event, trail, branchIndex, lastNodeChanged ) {
@@ -508,13 +535,16 @@ define( function( require ) {
       while ( i-- ) {
         var pointer = this.pointers[i];
         if ( pointer.point ) {
-          that.branchChangeEvents( pointer, null, false );
+          var changed = that.branchChangeEvents( pointer, null, false );
+          if ( changed ) {
+            sceneryEventLog && sceneryEventLog( 'branch change due validatePointers' );
+          }
         }
       }
     },
     
     dispatchEvent: function( trail, type, pointer, event, bubbles ) {
-      sceneryEventLog && sceneryEventLog( 'Input: ' + type + ' on ' + trail.toString() + ' for pointer ' + pointer.toString() );
+      sceneryEventLog && sceneryEventLog( 'Input: ' + type + ' on ' + trail.toString() + ' for pointer ' + pointer.toString() + ' at ' + pointer.point.toString() );
       if ( !trail ) {
         try {
           throw new Error( 'falsy trail for dispatchEvent' );
@@ -634,6 +664,7 @@ define( function( require ) {
           }
           input.batchedCallbacks.push( function batchedEventCallback() {
             // process whether anything under the pointers changed before running additional input events
+            sceneryEventLog && sceneryEventLog( 'validatePointers from batched event' );
             input.validatePointers();
             if ( input.logEvents ) { input.eventLog.push( 'validatePointers();' ); }
             
@@ -648,6 +679,7 @@ define( function( require ) {
           sceneryEventLog && sceneryEventLog( 'Running event for ' + type );
           
           // process whether anything under the pointers changed before running additional input events
+          sceneryEventLog && sceneryEventLog( 'validatePointers from non-batched event' );
           input.validatePointers();
           if ( input.logEvents ) { input.eventLog.push( 'validatePointers();' ); }
           

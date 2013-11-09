@@ -167,6 +167,7 @@ define( function( require ) {
       
       // check to see whether contents under pointers changed (and if so, send the enter/exit events) to maintain consistent state
       if ( this.input ) {
+        sceneryEventLog && sceneryEventLog( 'validatePointers from updateScene' );
         this.input.validatePointers();
       }
       
@@ -909,6 +910,7 @@ define( function( require ) {
         }
         
         if ( this.input ) {
+          sceneryEventLog && sceneryEventLog( 'validatePointers from scene resize' );
           this.input.validatePointers();
         }
         

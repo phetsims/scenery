@@ -50,6 +50,8 @@ define( function( require ) {
     },
     
     down: function( point, event ) {
+      var pointChanged = this.hasPointChanged( point );
+      sceneryEventLog && point && sceneryEventLog( 'mouse down at ' + point.toString() );
       // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
       this.isDown = true;
@@ -58,9 +60,12 @@ define( function( require ) {
         case 1: this.middleDown = true; break;
         case 2: this.rightDown = true; break;
       }
+      return pointChanged;
     },
     
     up: function( point, event ) {
+      var pointChanged = this.hasPointChanged( point );
+      sceneryEventLog && point && sceneryEventLog( 'mouse up at ' + point.toString() );
       // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
       this.isDown = false;
@@ -69,22 +74,32 @@ define( function( require ) {
         case 1: this.middleDown = false; break;
         case 2: this.rightDown = false; break;
       }
+      return pointChanged;
     },
     
     move: function( point, event ) {
+      var pointChanged = this.hasPointChanged( point );
+      sceneryEventLog && point && sceneryEventLog( 'mouse move at ' + point.toString() );
       // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
+      return pointChanged;
     },
     
     over: function( point, event ) {
+      var pointChanged = this.hasPointChanged( point );
+      sceneryEventLog && point && sceneryEventLog( 'mouse over at ' + point.toString() );
       // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
+      return pointChanged;
     },
     
     out: function( point, event ) {
+      var pointChanged = this.hasPointChanged( point );
+      sceneryEventLog && point && sceneryEventLog( 'mouse out at ' + point.toString() );
       // if ( this.point ) { this.point.freeToPool(); }
       // TODO: how to handle the mouse out-of-bounds
       this.point = null;
+      return pointChanged;
     },
     
     toString: function() {
