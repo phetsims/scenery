@@ -113,11 +113,11 @@ define( function( require ) {
     },
 
     getImageWidth: function() {
-      return this._image.width;
+      return this._image.naturalWidth || this._image.width;
     },
 
     getImageHeight: function() {
-      return this._image.height;
+      return this._image.naturalHeight || this._image.height;
     },
 
     getImageURL: function() {
