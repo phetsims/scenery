@@ -39,8 +39,12 @@ define( function( require ) {
   svgTextSizeContainer.setAttribute( 'width', '2' );
   svgTextSizeContainer.setAttribute( 'height', '2' );
   svgTextSizeContainer.setAttribute( 'style', 'display: hidden; pointer-events: none; position: absolute; left: -65535; right: -65535;' ); // so we don't flash it in a visible way to the user
+  // NOTE! copies createSVGElement
   var svgTextSizeElement = document.createElementNS( scenery.svgns, 'text' );
   svgTextSizeElement.appendChild( document.createTextNode( '' ) );
+  svgTextSizeElement.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
+  svgTextSizeElement.setAttribute( 'text-rendering', 'geometricPrecision' );
+  svgTextSizeElement.setAttribute( 'lengthAdjust', 'spacingAndGlyphs' );
   svgTextSizeContainer.appendChild( svgTextSizeElement );
   
   // SVG bounds seems to be malfunctioning for Safari 5. Since we don't have a reproducible test machine for
@@ -224,24 +228,29 @@ define( function( require ) {
     *----------------------------------------------------------------------------*/
     
     createSVGFragment: function( svg, defs, group ) {
+      // NOTE! reference SVG element at top of file copies createSVGElement!
       var element = document.createElementNS( scenery.svgns, 'text' );
       element.appendChild( document.createTextNode( '' ) );
+      element.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
+      element.setAttribute( 'text-rendering', 'geometricPrecision' );
+      element.setAttribute( 'lengthAdjust', 'spacingAndGlyphs' );
       return element;
     },
     
     updateSVGFragment: function( element ) {
-      var isRTL = this._direction === 'rtl';
-      
       // update the text-node's value
       element.lastChild.nodeValue = this._text;
       
       element.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
-      
-      // element.setAttribute( 'text-anchor', 'start' ); // not needed right now (default is inherit)
-      element.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
       element.setAttribute( 'direction', this._direction );
       
+      // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/SVG rendering (and overall length)
+      if ( isFinite( this._selfBounds.width ) ) {
+        element.setAttribute( 'textLength', this._selfBounds.width );
+      }
+      
       // set all of the font attributes, since we can't use the combined one
+      // TODO: optimize so we only set what is changed!!!
       element.setAttribute( 'font-family', this._font.getFamily() );
       element.setAttribute( 'font-size', this._font.getSize() );
       element.setAttribute( 'font-style', this._font.getStyle() );
@@ -355,6 +364,7 @@ define( function( require ) {
         }
       }
       this.updateSVGFragment( svgTextSizeElement );
+      svgTextSizeElement.removeAttribute( 'textLength' ); // since we may set textLength, remove that so we can get accurate widths
       var rect = svgTextSizeElement.getBBox();
       return new Bounds2( rect.x, rect.y, rect.x + rect.width, rect.y + rect.height );
     },
