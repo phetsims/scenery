@@ -103,12 +103,12 @@ define( function( require ) {
       
       // TODO: we may want control over this flag
       if ( webkitHardwareAcceleration || mozillaHardwareAcceleration ) {
-        transformCSS += ' translateZ(0)';
+        // transformCSS += ' translateZ(0)';
       }
       
       if ( webkitHardwareAcceleration ) {
         // TODO: find out bug that causes BLL text to disappear unless this acceleration is present
-        element.style.webkitBackfaceVisibility = 'hidden';
+        // element.style.webkitBackfaceVisibility = 'hidden';
       }
       
       element.style[transformProperty] = transformCSS;
