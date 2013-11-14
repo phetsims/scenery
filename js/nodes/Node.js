@@ -20,7 +20,6 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   var NodeEvents = require( 'SCENERY/util/FixedNodeEvents' ); // uncapitalized, because of JSHint (TODO: find the flag)
-  var LayerStrategy = require( 'SCENERY/layers/LayerStrategy' ); // used to set the default layer strategy on the prototype
   // require( 'SCENERY/layers/Renderer' ); // commented out so Require.js doesn't balk at the circular dependency
   
   // TODO: FIXME: Why do I have to comment out this dependency?
@@ -2210,8 +2209,6 @@ define( function( require ) {
   Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
                                   'left', 'right', 'top', 'bottom', 'center', 'centerX', 'centerY', 'renderer', 'rendererOptions',
                                   'layerSplit', 'layerSplitBefore', 'layerSplitAfter', 'mouseArea', 'touchArea', 'clipArea' ];
-  
-  Node.prototype.layerStrategy = LayerStrategy;
   
   // mix-in the events for Node
   /* jshint -W064 */

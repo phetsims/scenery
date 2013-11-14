@@ -15,6 +15,7 @@ define( function( require ) {
   require( 'SCENERY/layers/LayerBoundary' );
   require( 'SCENERY/util/Trail' );
   require( 'SCENERY/util/TrailPointer' );
+  var LayerStrategy = require( 'SCENERY/layers/LayerStrategy' ); // used to set the default layer strategy on the prototype
   
   /*
    * Builds layer information between trails
@@ -90,8 +91,8 @@ define( function( require ) {
       
       while ( pointer.trail.length <= targetLength ) {
         var node = pointer.trail.lastNode();
-        if ( node.layerStrategy.hasPreferredLayerType( pointer, this ) ) {
-          this.pushPreferredLayerType( node.layerStrategy.getPreferredLayerType( pointer, this ) );
+        if ( LayerStrategy.hasPreferredLayerType( pointer, this ) ) {
+          this.pushPreferredLayerType( LayerStrategy.getPreferredLayerType( pointer, this ) );
         }
         if ( pointer.trail.length < this.startPointer.trail.nodes.length ) {
           pointer.trail.addDescendant( this.startPointer.trail.nodes[pointer.trail.length] );
@@ -115,10 +116,10 @@ define( function( require ) {
         
         if ( pointer.isBefore ) {
           // console.log( 'builder: enter ' + pointer.toString() );
-          node.layerStrategy.enter( pointer, builder );
+          LayerStrategy.enter( pointer, builder );
         } else {
           // console.log( 'builder: exit ' + pointer.toString() );
-          node.layerStrategy.exit( pointer, builder );
+          LayerStrategy.exit( pointer, builder );
         }
         // console.log( '         stack: ' + _.map( builder.layerTypeStack, function( type ) { return type.name; } ).join( ', ' ) );
       }, false ); // include the endpoints
