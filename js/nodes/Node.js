@@ -81,8 +81,8 @@ define( function( require ) {
     this._clipArea = null;
     
     // areas for hit intersection. if set on a Node, no descendants can handle events
-    this._mouseArea = null; // {Shape} for mouse position          in the local coordinate frame
-    this._touchArea = null; // {Shape} for touch and pen position  in the local coordinate frame
+    this._mouseArea = null; // {Shape|Bounds2} for mouse position          in the local coordinate frame
+    this._touchArea = null; // {Shape|Bounds2} for touch and pen position  in the local coordinate frame
     
     // the CSS cursor to be displayed over this node. null should be the default (inherit) value
     this._cursor = null;
@@ -453,7 +453,7 @@ define( function( require ) {
         // do this before the transformation to the parent coordinate frame
         if ( this._mouseArea ) {
           hasMouseAreas = true;
-          this._mouseBounds.includeBounds( this._mouseArea.bounds );
+          this._mouseBounds.includeBounds( this._mouseArea.isBounds ? this._mouseArea : this._mouseArea.bounds );
         }
         
         if ( hasMouseAreas ) {
@@ -494,7 +494,7 @@ define( function( require ) {
         // do this before the transformation to the parent coordinate frame
         if ( this._touchArea ) {
           hasTouchAreas = true;
-          this._touchBounds.includeBounds( this._touchArea.bounds );
+          this._touchBounds.includeBounds( this._touchArea.isBounds ? this._touchArea : this._touchArea.bounds );
         }
         
         if ( hasTouchAreas ) {
@@ -768,11 +768,13 @@ define( function( require ) {
       // tests for mouse and touch hit areas before testing containsPointSelf
       if ( hasHitAreas ) {
         if ( options.isMouse && this._mouseArea ) {
+          // NOTE: both Bounds2 and Shape have containsPoint! We use both here!
           result = this._mouseArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
           localPoint.freeToPool();
           return result;
         }
         if ( ( options.isTouch || options.isPen ) && this._touchArea ) {
+          // NOTE: both Bounds2 and Shape have containsPoint! We use both here!
           result = this._touchArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
           localPoint.freeToPool();
           return result;
@@ -1290,11 +1292,11 @@ define( function( require ) {
       return this._cursor;
     },
     
-    setMouseArea: function( shape ) {
-      assert && assert( shape === null || shape instanceof Shape, 'mouseArea needs to be a kite.Shape, or null' );
+    setMouseArea: function( area ) {
+      assert && assert( area === null || area instanceof Shape || area instanceof Bounds2, 'mouseArea needs to be a kite.Shape, dot.Bounds2, or null' );
       
-      if ( this._mouseArea !== shape ) {
-        this._mouseArea = shape; // TODO: could change what is under the mouse, invalidate!
+      if ( this._mouseArea !== area ) {
+        this._mouseArea = area; // TODO: could change what is under the mouse, invalidate!
         
         this.invalidateBounds();
       }
@@ -1304,11 +1306,11 @@ define( function( require ) {
       return this._mouseArea;
     },
     
-    setTouchArea: function( shape ) {
-      assert && assert( shape === null || shape instanceof Shape, 'touchArea needs to be a kite.Shape, or null' );
+    setTouchArea: function( area ) {
+      assert && assert( area === null || area instanceof Shape || area instanceof Bounds2, 'touchArea needs to be a kite.Shape, dot.Bounds2, or null' );
       
-      if ( this._touchArea !== shape ) {
-        this._touchArea = shape; // TODO: could change what is under the touch, invalidate!
+      if ( this._touchArea !== area ) {
+        this._touchArea = area; // TODO: could change what is under the touch, invalidate!
         
         this.invalidateBounds();
       }

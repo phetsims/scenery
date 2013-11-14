@@ -527,6 +527,9 @@ scene.updateOnRequestAnimationFrame();
         are gaps between children which should still respond to the event.
       </p>
       <p>
+        Accepts both arbitrary shapes (<a href="../../kite/doc#shape">Shape</a>) and bounding boxes (<a href="../../dot/doc#bounds2">Bounds2</a>).
+      </p>
+      <p>
         The mouse area supersedes the hit regions for mouse events of the node itself and its descendants.
         Setting mouseArea on a Node will cause it to either return no hit (for it or its children when outside of the mouseArea) or this Node as an event target.
       </p>
@@ -535,6 +538,9 @@ scene.updateOnRequestAnimationFrame();
       <p>
         Sets an alternative hit region when receiving touch events. Useful for expanding
         where the user can touch controls.
+      </p>
+      <p>
+        Accepts both arbitrary shapes (<a href="../../kite/doc#shape">Shape</a>) and bounding boxes (<a href="../../dot/doc#bounds2">Bounds2</a>).
       </p>
       <p>
         The touch area supersedes the hit regions for touch events of the node itself and its descendants.

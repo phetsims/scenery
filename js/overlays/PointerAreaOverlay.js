@@ -12,6 +12,7 @@ define( function( require ) {
   var Bounds2 = require( 'DOT/Bounds2' );
   var Transform3 = require( 'DOT/Transform3' );
   var Matrix3 = require( 'DOT/Matrix3' );
+  var Shape = require( 'KITE/Shape' );
 
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
@@ -92,10 +93,10 @@ define( function( require ) {
           var transform = trail.getTransform();
           
           if ( node._mouseArea ) {
-            that.addShape( transform.transformShape( node._mouseArea ), 'rgba(0,0,255,0.8)', true );
+            that.addShape( transform.transformShape( node._mouseArea.isBounds ? Shape.bounds( node._mouseArea ) : node._mouseArea ), 'rgba(0,0,255,0.8)', true );
           }
           if ( node._touchArea ) {
-            that.addShape( transform.transformShape( node._touchArea ), 'rgba(255,0,0,0.8)', false );
+            that.addShape( transform.transformShape( node._touchArea.isBounds ? Shape.bounds( node._touchArea ) : node._touchArea ), 'rgba(255,0,0,0.8)', false );
           }
         }
       } );
