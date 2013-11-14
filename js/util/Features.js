@@ -126,6 +126,7 @@ define( function( require ) {
   Features.transform = detect( div.style, prefixed( 'transform' ) );
   Features.transformOrigin = detect( div.style, prefixed( 'transformOrigin' ) );
   Features.backfaceVisibility = detect( div.style, prefixed( 'backfaceVisibility' ) );
+  Features.borderRadius = detect( div.style, prefixed( 'borderRadius' ) );
   
   return Features;
 } );

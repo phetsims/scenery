@@ -191,6 +191,21 @@
             } ) );
           };
           
+          window.setupDomRect = function() {
+            window.r = new scenery.Rectangle( 0, 0, 100, 50, { fill: 'red' } );
+            window.a = new scenery.Node( { renderer: 'svg' } );
+            window.b = new scenery.Node( { renderer: 'dom' } );
+            window.c = new scenery.Node( { renderer: 'canvas' } );
+            scene.addChild( window.a );
+            scene.addChild( window.b );
+            scene.addChild( window.c );
+            window.b.y = 100;
+            window.c.x = 250;
+            a.addChild( window.r );
+            b.addChild( window.r );
+            c.addChild( window.r );
+          };
+          
           window.testNodeBounds = function( trail ) {
             var a = performance.now();
             for ( var i = 0; i < 100000; i++ ) { trail.lastNode().localToGlobalBounds( bounds ); };

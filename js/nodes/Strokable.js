@@ -244,6 +244,12 @@ define( function( require ) {
       return style;
     };
     
+    proto.getSimpleCSSFill = function() {
+      // if it's a Color object, get the corresponding CSS
+      // 'transparent' will make us invisible if the fill is null
+      return this._stroke ? ( this._stroke.toCSS ? this._stroke.toCSS() : this._stroke ) : 'transparent';
+    };
+    
     proto.addSVGStrokeDef = function( svg, defs ) {
       var stroke = this.getStroke();
       var strokeId = 'stroke' + this.getId();
