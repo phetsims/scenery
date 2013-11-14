@@ -13,9 +13,11 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   var Bounds2 = require( 'DOT/Bounds2' );
+  var Matrix3 = require( 'DOT/Matrix3' );
 
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
+  var Features = require( 'SCENERY/util/Features' );
 
   scenery.Circle = function Circle( radius, options ) {
     if ( typeof radius === 'object' ) {
@@ -37,6 +39,18 @@ define( function( require ) {
   var Circle = scenery.Circle;
 
   inherit( Path, Circle, {
+    getStrokeRendererBitmask: function() {
+      var bitmask = Path.prototype.getStrokeRendererBitmask.call( this );
+      if ( this.hasStroke() && !this.getStroke().isGradient && !this.getStroke().isPattern && this.getLineWidth() <= this.getRadius() ) {
+        bitmask |= scenery.bitmaskSupportsDOM;
+      }
+      return bitmask;
+    },
+    
+    getPathRendererBitmask: function() {
+      return scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | ( Features.borderRadius ? scenery.bitmaskSupportsDOM : 0 );
+    },
+    
     invalidateCircle: function() {
       assert && assert( this._radius >= 0, 'A circle needs a non-negative radius' );
       
@@ -103,6 +117,55 @@ define( function( require ) {
       circle.setAttribute( 'r', this._radius );
 
       circle.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
+    },
+    
+    /*---------------------------------------------------------------------------*
+     * DOM support
+     *----------------------------------------------------------------------------*/
+    
+    domUpdateTransformOnRepaint: true, // since we have to integrate the baseline offset into the CSS transform, signal to DOMLayer
+    
+    getDOMElement: function() {
+      var fill = document.createElement( 'div' );
+      var stroke = document.createElement( 'div' );
+      fill.appendChild( stroke );
+      fill.style.display = 'block';
+      fill.style.position = 'absolute';
+      fill.style.left = '0';
+      fill.style.top = '0';
+      stroke.style.display = 'block';
+      stroke.style.position = 'absolute';
+      stroke.style.left = '0';
+      stroke.style.top = '0';
+      return fill;
+    },
+
+    updateDOMElement: function( fill ) {
+      fill.style.width = ( 2 * this._radius ) + 'px';
+      fill.style.height = ( 2 * this._radius ) + 'px';
+      fill.style[Features.borderRadius] = this._radius + 'px';
+      fill.style.backgroundColor = this.getCSSFill();
+      
+      var stroke = fill.childNodes[0];
+      if ( this.hasStroke() ) {
+        stroke.style.width = ( 2 * this._radius - this.getLineWidth() ) + 'px';
+        stroke.style.height = ( 2 * this._radius - this.getLineWidth() ) + 'px';
+        stroke.style.left = ( -this.getLineWidth() / 2 ) + 'px';
+        stroke.style.top = ( -this.getLineWidth() / 2 ) + 'px';
+        stroke.style.borderStyle = 'solid';
+        stroke.style.borderColor = this.getSimpleCSSFill();
+        stroke.style.borderWidth = this.getLineWidth() + 'px';
+        stroke.style[Features.borderRadius] = ( this._radius + this.getLineWidth() / 2 ) + 'px';
+      } else {
+        stroke.style.borderStyle = 'none';
+      }
+    },
+    
+    // override the transform since we need to customize it with a DOM offset
+    updateCSSTransform: function( transform, element ) {
+      // shift the text vertically, postmultiplied with the entire transform.
+      var matrix = transform.getMatrix().timesMatrix( Matrix3.translation( -this._radius, -this._radius ) );
+      scenery.Util.applyCSSTransform( matrix, element );
     },
 
     getBasicConstructor: function( propLines ) {

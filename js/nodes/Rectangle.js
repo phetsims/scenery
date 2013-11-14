@@ -98,7 +98,7 @@ define( function( require ) {
     
     getStrokeRendererBitmask: function() {
       var bitmask = Path.prototype.getStrokeRendererBitmask.call( this );
-      if ( this.hasStroke() ) {
+      if ( this.hasStroke() && !this.getStroke().isGradient && !this.getStroke().isPattern ) {
         if ( this.getLineJoin() === 'miter' || ( this.getLineJoin() === 'round' && Features.borderRadius ) ) {
           bitmask |= scenery.bitmaskSupportsDOM;
         }
