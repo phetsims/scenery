@@ -1493,7 +1493,7 @@ define( function( require ) {
       var nodes = this.getTopologicallySortedNodes().slice( 0 ).reverse(); // defensive slice, in case we store the order somewhere
       
       function name( node ) {
-        return node === scene ? 'scene' : node.constructor.name.toLowerCase() + node.id;
+        return node === scene ? 'scene' : ( ( node.constructor.name ? node.constructor.name.toLowerCase() : '(node)' ) + node.id );
       }
       
       _.each( nodes, function( node ) {

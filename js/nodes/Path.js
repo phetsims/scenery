@@ -33,12 +33,22 @@ define( function( require ) {
     this.initializeStrokable();
 
     Node.call( this );
+    this.invalidateSupportedRenderers();
     this.setShape( shape );
     this.mutate( options );
   };
   var Path = scenery.Path;
   
   inherit( Node, Path, {
+    // allow more specific path types (Rectangle, Line) to override what restrictions we have
+    getPathRendererBitmask: function() {
+      return scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG;
+    },
+    
+    invalidateSupportedRenderers: function() {
+      this.setRendererBitmask( this.getFillRendererBitmask() & this.getStrokeRendererBitmask() & this.getPathRendererBitmask() );
+    },
+    
     // sets the shape drawn, or null to remove the shape
     setShape: function( shape ) {
       if ( this._shape !== shape ) {
@@ -186,7 +196,7 @@ define( function( require ) {
     get shape() { return this.getShape(); },
     
     getBasicConstructor: function( propLines ) {
-      return 'new scenery.Path( ' + this._shape.toString() + ', {' + propLines + '} )';
+      return 'new scenery.Path( ' + ( this._shape ? this._shape.toString() : this._shape ) + ', {' + propLines + '} )';
     },
     
     getPropString: function( spaces, includeChildren ) {
@@ -198,8 +208,6 @@ define( function( require ) {
   } );
   
   Path.prototype._mutatorKeys = [ 'shape' ].concat( Node.prototype._mutatorKeys );
-  
-  Path.prototype._supportedRenderers = [ Renderer.Canvas, Renderer.SVG ];
   
   // mix in fill/stroke handling code. for now, this is done after 'shape' is added to the mutatorKeys so that stroke parameters
   // get set first

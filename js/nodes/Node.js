@@ -144,6 +144,8 @@ define( function( require ) {
     // the subtree pickable count is #pickable:true + #inputListeners, since we can prune subtrees with a pickable count of 0
     this._subtreePickableCount = 0;
     
+    this._rendererBitmask = scenery.bitmaskNodeDefault;
+    
     if ( options ) {
       this.mutate( options );
     }
@@ -1358,6 +1360,50 @@ define( function( require ) {
       return !!this._rendererLayerType;
     },
     
+    supportsCanvas: function() {
+      return ( this._rendererBitmask & scenery.bitmaskSupportsCanvas ) !== 0;
+    },
+    
+    supportsSVG: function() {
+      return ( this._rendererBitmask & scenery.bitmaskSupportsSVG ) !== 0;
+    },
+    
+    supportsDOM: function() {
+      return ( this._rendererBitmask & scenery.bitmaskSupportsDOM ) !== 0;
+    },
+    
+    supportsWebGL: function() {
+      return ( this._rendererBitmask & scenery.bitmaskSupportsWebGL ) !== 0;
+    },
+    
+    supportsRenderer: function( renderer ) {
+      return ( this._rendererBitmask & renderer.bitmask ) !== 0;
+    },
+    
+    // return a supported renderer (fallback case, not called often)
+    pickARenderer: function() {
+      if ( this.supportsCanvas() ) {
+        return scenery.Renderer.Canvas;
+      } else if ( this.supportsSVG() ) {
+        return scenery.Renderer.SVG;
+      } else if ( this.supportsDOM() ) {
+        return scenery.Renderer.DOM;
+      }
+      // oi!
+    },
+    
+    setRendererBitmask: function( bitmask ) {
+      if ( bitmask !== this._rendererBitmask ) {
+        this._rendererBitmask = bitmask;
+        this.markLayerRefreshNeeded();
+      }
+    },
+    
+    // meant to be overridden
+    invalidateSupportedRenderers: function() {
+      
+    },
+    
     setRenderer: function( renderer ) {
       var newRenderer;
       if ( typeof renderer === 'string' ) {
@@ -1371,7 +1417,7 @@ define( function( require ) {
         throw new Error( 'unrecognized type of renderer: ' + renderer );
       }
       if ( newRenderer !== this._renderer ) {
-        assert && assert( !this.isPainted() || !newRenderer || _.contains( this._supportedRenderers, newRenderer ), 'renderer ' + newRenderer + ' not supported by ' + this.constructor.name );
+        assert && assert( !this.isPainted() || !newRenderer || this.supportsRenderer( newRenderer ), 'renderer ' + newRenderer + ' not supported by ' + this.constructor.name );
         this._renderer = newRenderer;
         
         this.updateLayerType();
@@ -2121,7 +2167,7 @@ define( function( require ) {
       // direct copy props
       if ( this.cursor ) { addProp( 'cursor', this.cursor ); }
       if ( !this.visible ) { addProp( 'visible', this.visible ); }
-      if ( !this.pickable ) { addProp( 'pickable', this.pickable ); }
+      if ( this.pickable !== null ) { addProp( 'pickable', this.pickable ); }
       if ( this.opacity !== 1 ) { addProp( 'opacity', this.opacity ); }
       
       if ( !this.transform.isIdentity() ) {
@@ -2164,8 +2210,6 @@ define( function( require ) {
   Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
                                   'left', 'right', 'top', 'bottom', 'center', 'centerX', 'centerY', 'renderer', 'rendererOptions',
                                   'layerSplit', 'layerSplitBefore', 'layerSplitAfter', 'mouseArea', 'touchArea', 'clipArea' ];
-  
-  Node.prototype._supportedRenderers = [];
   
   Node.prototype.layerStrategy = LayerStrategy;
   

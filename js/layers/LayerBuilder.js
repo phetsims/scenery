@@ -189,16 +189,12 @@ define( function( require ) {
       }
     },
     
-    bestPreferredLayerTypeFor: function( renderers ) {
+    bestPreferredLayerTypeFor: function( bitmask ) {
       for ( var i = this.layerTypeStack.length - 1; i >= 0; i-- ) {
         var preferredType = this.layerTypeStack[i];
         
-        var k = renderers.length;
-        while ( k-- ) {
-          // if any renderer is supported by this type, use this type
-          if ( preferredType.supportsRenderer( renderers[k] ) ) {
-            return preferredType;
-          }
+        if ( preferredType.supportsBitmask( bitmask ) ) {
+          return preferredType;
         }
       }
       

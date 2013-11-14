@@ -57,6 +57,7 @@ define( function( require ) {
     };
 
     Node.call( this, options );
+    this.invalidateSupportedRenderers();
   };
   var Image = scenery.Image;
 
@@ -69,6 +70,15 @@ define( function( require ) {
 
     getImage: function() {
       return this._image;
+    },
+    
+    invalidateSupportedRenderers: function() {
+      if ( this._image instanceof HTMLCanvasElement ) {
+        this.setRendererBitmask( scenery.bitmaskSupportsCanvas );
+      } else {
+        // assumes HTMLImageElement
+        this.setRendererBitmask( scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskSupportsDOM );
+      }
     },
 
     setImage: function( image ) {
@@ -93,18 +103,8 @@ define( function( require ) {
           }
         }
 
-        // swap supported renderers if necessary TODO: share this code dealing with compatible renderer changes
-        if ( image instanceof HTMLCanvasElement ) {
-          if ( !this.hasOwnProperty( '_supportedRenderers' ) ) {
-            this._supportedRenderers = [ Renderer.Canvas ];
-            this.markLayerRefreshNeeded();
-          }
-        } else {
-          if ( this.hasOwnProperty( '_supportedRenderers' ) ) {
-            delete this._supportedRenderers; // will leave prototype intact
-            this.markLayerRefreshNeeded();
-          }
-        }
+        // swap supported renderers if necessary
+        this.invalidateSupportedRenderers();
 
         this._image = image;
         this.invalidateImage(); // yes, if we aren't loaded yet this will give us 0x0 bounds
@@ -196,8 +196,6 @@ define( function( require ) {
   } );
 
   Image.prototype._mutatorKeys = [ 'image' ].concat( Node.prototype._mutatorKeys );
-
-  Image.prototype._supportedRenderers = [ Renderer.Canvas, Renderer.SVG, Renderer.DOM ];
 
   // utility for others
   Image.createSVGImage = function( url, width, height ) {

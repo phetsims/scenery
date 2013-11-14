@@ -70,6 +70,7 @@ define( function( require ) {
     
     // Chrome planning to not introduce prefixes in the future, hopefully we will be safe
     result.push( 'moz' + name );
+    result.push( 'Moz' + name ); // some prefixes seem to have all-caps?
     result.push( 'webkit' + name );
     result.push( 'ms' + name );
     result.push( 'o' + name );
@@ -115,6 +116,11 @@ define( function( require ) {
   Features.createImageDataHD = detect( ctx, prefixed( 'createImageDataHD' ) );
   Features.getImageDataHD = detect( ctx, prefixed( 'getImageDataHD' ) );
   Features.putImageDataHD = detect( ctx, prefixed( 'putImageDataHD' ) );
+  
+  var span = document.createElement( 'span' );
+  Features.textStroke = detect( span.style, 'textStroke' );
+  Features.textStrokeColor = detect( span.style, 'textStrokeColor' );
+  Features.textStrokeWidth = detect( span.style, 'textStrokeWidth' );
   
   return Features;
 } );

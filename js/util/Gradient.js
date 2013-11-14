@@ -30,6 +30,8 @@ define( function( require ) {
   Gradient.prototype = {
     constructor: Gradient,
     
+    isGradient: true,
+    
     /**
      * @param {Number} ratio        Monotonically increasing value in the range of 0 to 1
      * @param {Color|String} color  Color for the stop, either a scenery.Color or CSS color string

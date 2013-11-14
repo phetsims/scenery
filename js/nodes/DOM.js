@@ -43,6 +43,7 @@ define( function( require ) {
     
     // will set the element after initializing
     Node.call( this, options );
+    this.setRendererBitmask( scenery.bitmaskSupportsDOM );
   };
   var DOM = scenery.DOM;
   
@@ -176,8 +177,6 @@ define( function( require ) {
   } );
   
   DOM.prototype._mutatorKeys = [ 'element', 'interactive' ].concat( Node.prototype._mutatorKeys );
-  
-  DOM.prototype._supportedRenderers = [ Renderer.DOM ];
   
   return DOM;
 } );

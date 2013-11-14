@@ -30,6 +30,8 @@ define( function( require ) {
   Pattern.prototype = {
     constructor: Pattern,
     
+    isPattern: true,
+    
     setTransformMatrix: function( transformMatrix ) {
       this.transformMatrix = transformMatrix;
       return this;

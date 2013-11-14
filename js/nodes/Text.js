@@ -38,7 +38,7 @@ define( function( require ) {
   var svgTextSizeContainer = document.createElementNS( scenery.svgns, 'svg' );
   svgTextSizeContainer.setAttribute( 'width', '2' );
   svgTextSizeContainer.setAttribute( 'height', '2' );
-  svgTextSizeContainer.setAttribute( 'style', 'display: hidden; pointer-events: none; position: absolute; left: -65535; right: -65535;' ); // so we don't flash it in a visible way to the user
+  svgTextSizeContainer.setAttribute( 'style', 'visibility: hidden; pointer-events: none; position: absolute; left: -65535; right: -65535;' ); // so we don't flash it in a visible way to the user
   // NOTE! copies createSVGElement
   var svgTextSizeElement = document.createElementNS( scenery.svgns, 'text' );
   svgTextSizeElement.appendChild( document.createTextNode( '' ) );
@@ -66,9 +66,6 @@ define( function( require ) {
     // whether the text is rendered as HTML or not. if defined (in a subtype constructor), use that value instead
     this._isHTML = this._isHTML === undefined ? false : this._isHTML;
     
-    // we will dynamically change renderers, so they are initialized per-instance instead of per-type
-    this._supportedRenderers = [ Renderer.Canvas, Renderer.SVG, Renderer.DOM ];
-    
     var thisFont = this;
     
     // ensure we have a parameter object
@@ -88,8 +85,7 @@ define( function( require ) {
     this.initializeStrokable();
     
     Node.call( this, options );
-    
-    this.updateTextFlags();
+    this.updateTextFlags(); // takes care of setting up supported renderers
   };
   var Text = scenery.Text;
   
@@ -123,43 +119,33 @@ define( function( require ) {
       return this._boundsMethod;
     },
     
+    // allow more specific path types (Rectangle, Line) to override what restrictions we have
+    getTextRendererBitmask: function() {
+      var bitmask = 0;
+      
+      // canvas support (fast bounds may leak out of dirty rectangles)
+      if ( this._boundsMethod !== 'fast' && !this._isHTML ) {
+        bitmask |= scenery.bitmaskSupportsCanvas;
+      }
+      if( !this._isHTML ) {
+        bitmask |= scenery.bitmaskSupportsSVG;
+      }
+      
+      // fill and stroke will determine whether we have DOM text support
+      bitmask |= scenery.bitmaskSupportsDOM;
+      
+      return bitmask;
+    },
+    
+    invalidateSupportedRenderers: function() {
+      this.setRendererBitmask( this.getFillRendererBitmask() & this.getStrokeRendererBitmask() & this.getTextRendererBitmask() );
+    },
+    
     updateTextFlags: function() {
       var thisText = this;
       this.boundsInaccurate = this._boundsMethod !== 'accurate';
       
-      var renderersChanged = false;
-      function check( predicateValue, renderer ) {
-        var inSupportedRenderers = _.contains( thisText._supportedRenderers, renderer );
-        if ( predicateValue !== inSupportedRenderers ) {
-          renderersChanged = true;
-          if ( predicateValue ) {
-            // add the renderer
-            thisText._supportedRenderers.push( renderer );
-          } else {
-            // remove the renderer
-            thisText._supportedRenderers.splice( _.indexOf( thisText._supportedRenderers, renderer ), 1 );
-            if ( thisText.renderer === renderer ) {
-              // our set renderer is incompatible. set to null to disable this. TODO: investigate rendering system to prevent overrides like this?
-              thisText.renderer = null;
-              
-              // for now, error out
-              throw new Error( 'The explicitly specified Text renderer: ' + renderer.name + ' is not supported by this operation (probably invalid stroke, fill, or boundsMethod)' );
-            }
-          }
-        }
-      }
-      
-      check( this._boundsMethod !== 'fast' && !this._isHTML, Renderer.Canvas );
-      check( !this._isHTML, Renderer.SVG );
-      check( !this.hasStroke() && this.isFillDOMCompatible(), Renderer.DOM );
-      
-      if ( this._supportedRenderers.length === 0 ) {
-        throw new Error( 'No renderers are able to support this Text node (probably HTML text with a stroke or incompatible fill)' );
-      }
-      
-      if ( renderersChanged ) {
-        this.markLayerRefreshNeeded();
-      }
+      this.invalidateSupportedRenderers();
     },
     
     invalidateText: function() {
@@ -532,9 +518,6 @@ define( function( require ) {
   
   Text.prototype._mutatorKeys = [ 'boundsMethod', 'text', 'font', 'fontWeight', 'fontFamily', 'fontStretch', 'fontStyle', 'fontSize', 'lineHeight',
                                   'direction' ].concat( Node.prototype._mutatorKeys );
-  
-  Text.prototype._supportedRenderers = [ Renderer.Canvas, Renderer.SVG, Renderer.DOM ];
-  Text.prototype._supportedRenderersWithFastBounds = [ Renderer.SVG, Renderer.DOM ]; // renderers for fast (SVG/DOM) bounds, since canvas dirty regions would present issues
   
   // font-specific ES5 setters and getters are defined using addFontForwarding above
   Object.defineProperty( Text.prototype, 'font', { set: Text.prototype.setFont, get: Text.prototype.getFont } );

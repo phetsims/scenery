@@ -37,7 +37,7 @@ define( function( require ) {
       if ( node.hasRendererLayerType() ) {
         preferredLayerType = node.getRendererLayerType();
       } else {
-        preferredLayerType = layerBuilder.bestPreferredLayerTypeFor( [ node.getRenderer() ] );
+        preferredLayerType = layerBuilder.bestPreferredLayerTypeFor( node.getRenderer().bitmask );
         if ( !preferredLayerType ) {
           // there was no preferred layer type matching, just use the default
           preferredLayerType = node.getRenderer().defaultLayerType;
@@ -64,9 +64,8 @@ define( function( require ) {
       } else if ( node.isPainted() ) {
         // node doesn't specify a renderer, but isPainted.
         
-        var supportedRenderers = node._supportedRenderers;
         var currentType = layerBuilder.getCurrentLayerType();
-        preferredLayerType = layerBuilder.bestPreferredLayerTypeFor( supportedRenderers );
+        preferredLayerType = layerBuilder.bestPreferredLayerTypeFor( node._rendererBitmask );
         
         // If any of the preferred types are compatible, use the top one. This allows us to support caching and hierarchical layer types
         if ( preferredLayerType ) {
@@ -76,7 +75,7 @@ define( function( require ) {
         } else {
           // if no preferred types are compatible, only switch if the current type is also incompatible
           if ( !currentType || !currentType.supportsNode( node ) ) {
-            layerBuilder.switchToType( pointer, supportedRenderers[0].defaultLayerType );
+            layerBuilder.switchToType( pointer, node.pickARenderer().defaultLayerType );
           }
         }
       }

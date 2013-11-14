@@ -41,6 +41,8 @@ define( function( require ) {
   
   inherit( Gradient, RadialGradient, {
     
+    isRadialGradient: true,
+    
     getSVGDefinition: function( id ) {
       var startIsLarger = this.startRadius > this.endRadius;
       var largePoint = startIsLarger ? this.start : this.end;

@@ -20,9 +20,10 @@ define( function( require ) {
   // cached defaults
   var defaults = {};
   
-  scenery.Renderer = function Renderer( layerConstructor, name, defaultOptions ) {
+  scenery.Renderer = function Renderer( layerConstructor, name, bitmask, defaultOptions ) {
     this.layerConstructor = layerConstructor;
     this.name = name;
+    this.bitmask = bitmask;
     this.defaultOptions = defaultOptions;
     
     this.defaultLayerType = this.createLayerType( {} ); // default options are handled in createLayerType
@@ -33,13 +34,13 @@ define( function( require ) {
     constructor: Renderer,
     
     createLayerType: function( rendererOptions ) {
-      return new scenery.LayerType( this.layerConstructor, this.name, this, _.extend( {}, this.defaultOptions, rendererOptions ) );
+      return new scenery.LayerType( this.layerConstructor, this.name, this.bitmask, this, _.extend( {}, this.defaultOptions, rendererOptions ) );
     }
   };
   
-  Renderer.Canvas = new Renderer( scenery.CanvasLayer, 'canvas', {} );
-  Renderer.DOM = new Renderer( scenery.DOMLayer, 'dom', {} );
-  Renderer.SVG = new Renderer( scenery.SVGLayer, 'svg', {} );
+  Renderer.Canvas = new Renderer( scenery.CanvasLayer, 'canvas', scenery.bitmaskSupportsCanvas, {} );
+  Renderer.DOM = new Renderer( scenery.DOMLayer, 'dom', scenery.bitmaskSupportsDOM, {} );
+  Renderer.SVG = new Renderer( scenery.SVGLayer, 'svg', scenery.bitmaskSupportsSVG, {} );
   
   // add shortcuts for the default layer types
   scenery.CanvasDefaultLayerType = Renderer.Canvas.defaultLayerType;

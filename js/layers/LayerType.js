@@ -12,9 +12,10 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  scenery.LayerType = function LayerType( Constructor, name, renderer, args ) {
+  scenery.LayerType = function LayerType( Constructor, name, bitmask, renderer, args ) {
     this.Constructor = Constructor;
     this.name = name;
+    this.bitmask = bitmask;
     this.renderer = renderer;
     this.args = args;
   };
@@ -24,18 +25,17 @@ define( function( require ) {
     constructor: LayerType,
     
     supportsRenderer: function( renderer ) {
+      // NOTE: if this is changed off of instance equality, update supportsNode below
       return this.renderer === renderer;
     },
     
+    supportsBitmask: function( bitmask ) {
+      return ( this.bitmask & bitmask ) !== 0;
+    },
+    
     supportsNode: function( node ) {
-      var supportedRenderers = node._supportedRenderers;
-      var i = supportedRenderers.length;
-      while ( i-- ) {
-        if ( this.supportsRenderer( supportedRenderers[i] ) ) {
-          return true;
-        }
-      }
-      return false;
+      // for now, only check the renderer that we are interested in
+      return node.supportsRenderer( this.renderer );
     },
     
     createLayer: function( args ) {
