@@ -80,7 +80,7 @@ define( function( require ) {
   
   function detect( obj, names ) {
     for ( var i = 0; i < names.length; i++ ) {
-      if ( obj[names[i]] ) {
+      if ( obj[names[i]] !== undefined ) {
         return names[i];
       }
     }
@@ -118,9 +118,14 @@ define( function( require ) {
   Features.putImageDataHD = detect( ctx, prefixed( 'putImageDataHD' ) );
   
   var span = document.createElement( 'span' );
-  Features.textStroke = detect( span.style, 'textStroke' );
-  Features.textStrokeColor = detect( span.style, 'textStrokeColor' );
-  Features.textStrokeWidth = detect( span.style, 'textStrokeWidth' );
+  var div = document.createElement( 'div' );
+  Features.textStroke = detect( span.style, prefixed( 'textStroke' ) );
+  Features.textStrokeColor = detect( span.style, prefixed( 'textStrokeColor' ) );
+  Features.textStrokeWidth = detect( span.style, prefixed( 'textStrokeWidth' ) );
+  
+  Features.transform = detect( div.style, prefixed( 'transform' ) );
+  Features.transformOrigin = detect( div.style, prefixed( 'transformOrigin' ) );
+  Features.backfaceVisibility = detect( div.style, prefixed( 'backfaceVisibility' ) );
   
   return Features;
 } );

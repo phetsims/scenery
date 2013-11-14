@@ -15,6 +15,7 @@ define( function( require ) {
   var Transform3 = require( 'DOT/Transform3' );
   var Bounds2 = require( 'DOT/Bounds2' );
   var Vector2 = require( 'DOT/Vector2' );
+  var Features = require( 'SCENERY/util/Features' );
   
   // convenience function
   function p( x, y ) {
@@ -25,52 +26,8 @@ define( function( require ) {
   var debugChromeBoundsScanning = false;
   
   // detect properly prefixed transform and transformOrigin properties
-  var transformProperty = '';
-  var transformOriginProperty = '';
-  var webkitHardwareAcceleration = false;
-  var mozillaHardwareAcceleration = false;
-  if ( document && document.createElement ) {
-    var style = document.createElement( 'div' ).style;
-    
-    var transformNames = [
-      'transform',
-      'webkitTransform',
-      'oTransform',
-      'mozTransform',
-      'msTransform'
-    ];
-    var transformOriginNames = [
-      'transformOrigin',
-      'webkitTransformOrigin',
-      'oTransformOrigin',
-      'mozTransformOrigin',
-      'msTransformOrigin'
-    ];
-    
-    var i;
-    
-    for ( i = 0; i < transformNames.length; i++ ) {
-      if ( transformNames[i] in style ) {
-        transformProperty = transformNames[i];
-        break;
-      }
-    }
-    for ( i = 0; i < transformOriginNames.length; i++ ) {
-      if ( transformOriginNames[i] in style ) {
-        transformOriginProperty = transformOriginNames[i];
-        break;
-      }
-    }
-    if ( !transformOriginProperty ) {
-      transformOriginProperty = 'transformOrigin'; // fallback, so we don't try to set an empty string property later
-    }
-    if ( ( 'webkitBackfaceVisibility' in style ) || ( 'webkitTransform' in style ) ) {
-      webkitHardwareAcceleration = true;
-    }
-    if ( 'mozTransform' in style ) {
-      mozillaHardwareAcceleration = true;
-    }
-  }
+  var transformProperty = Features.transform;
+  var transformOriginProperty = Features.transformOrigin || 'transformOrigin'; // fallback, so we don't try to set an empty string property later
   
   scenery.Util = {
     // like _.extend, but with hardcoded support for https://github.com/documentcloud/underscore/pull/986
@@ -96,19 +53,13 @@ define( function( require ) {
       return new F();
     },
     
-    applyCSSTransform: function( matrix, element ) {
+    applyCSSTransform: function( matrix, element, forceAcceleration ) {
       var transformCSS = matrix.getCSSTransform();
       // notes on triggering hardware acceleration: http://creativejs.com/2011/12/day-2-gpu-accelerate-your-dom-elements/
-      // TODO: consider leaving out on iOS if possible, since we might be overflowing the GPU memory
       
-      // TODO: we may want control over this flag
-      if ( webkitHardwareAcceleration || mozillaHardwareAcceleration ) {
-        // transformCSS += ' translateZ(0)';
-      }
-      
-      if ( webkitHardwareAcceleration ) {
-        // TODO: find out bug that causes BLL text to disappear unless this acceleration is present
-        // element.style.webkitBackfaceVisibility = 'hidden';
+      if ( forceAcceleration ) {
+        element.style.webkitBackfaceVisibility = 'hidden';
+        transformCSS += ' translateZ(0)';
       }
       
       element.style[transformProperty] = transformCSS;
