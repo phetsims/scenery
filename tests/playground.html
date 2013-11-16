@@ -295,28 +295,16 @@
                   line: function( node ) { return name( node ) + '.renderer = null;' }
                 },
                 {
-                  weight: 0.2,
-                  f: function( node ) { node.layerSplitBefore = true; },
-                  mess: 'layerSplitBefore true',
-                  line: function( node ) { return name( node ) + '.layerSplitBefore = true;' }
+                  weight: 0.3,
+                  f: function( node ) { node.layerSplit = true; },
+                  mess: 'layerSplit true',
+                  line: function( node ) { return name( node ) + '.layerSplit = true;' }
                 },
                 {
-                  weight: 0.8,
-                  f: function( node ) { node.layerSplitBefore = false; },
-                  mess: 'layerSplitBefore false',
-                  line: function( node ) { return name( node ) + '.layerSplitBefore = false;' }
-                },
-                {
-                  weight: 0.2,
-                  f: function( node ) { node.layerSplitAfter = true; },
-                  mess: 'layerSplitAfter true',
-                  line: function( node ) { return name( node ) + '.layerSplitAfter = true;' }
-                },
-                {
-                  weight: 0.8,
-                  f: function( node ) { node.layerSplitAfter = false; },
-                  mess: 'layerSplitAfter false',
-                  line: function( node ) { return name( node ) + '.layerSplitAfter = false;' }
+                  weight: 1.0,
+                  f: function( node ) { node.layerSplit = false; },
+                  mess: 'layerSplit false',
+                  line: function( node ) { return name( node ) + '.layerSplit = false;' }
                 }
               ];
               

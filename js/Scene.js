@@ -1331,12 +1331,13 @@ define( function( require ) {
       new scenery.Trail( this ).eachTrailUnder( function( trail ) {
         var beforeSplitTrail;
         var afterSplitTrail;
-        if ( trail.lastNode().layerSplitBefore ) {
+        if ( trail.lastNode().layerSplit ) {
+          // for the "before" split
           beforeSplitTrail = trail.previousPainted();
           afterSplitTrail = trail.lastNode().isPainted() ? trail : trail.nextPainted();
-          assert && assert( !beforeSplitTrail || !afterSplitTrail || beforeSplitTrail.getInstance().layer !== afterSplitTrail.getInstance().layer, 'layerSplitBefore layers need to be different' );
-        }
-        if ( trail.lastNode().layerSplitAfter ) {
+          assert && assert( !beforeSplitTrail || !afterSplitTrail || beforeSplitTrail.getInstance().layer !== afterSplitTrail.getInstance().layer, 'layerSplit layers need to be different' );
+          
+          //for the "after" split
           // shift a pointer from the (nested) end of the trail to the next isBefore (if available)
           var ptr = new scenery.TrailPointer( trail.copy(), false );
           while ( ptr && ptr.isAfter ) {
@@ -1347,7 +1348,7 @@ define( function( require ) {
           if ( ptr ) {
             beforeSplitTrail = ptr.trail.previousPainted();
             afterSplitTrail = ptr.trail.lastNode().isPainted() ? ptr.trail : ptr.trail.nextPainted();
-            assert && assert( !beforeSplitTrail || !afterSplitTrail || beforeSplitTrail.getInstance().layer !== afterSplitTrail.getInstance().layer, 'layerSplitAfter layers need to be different' );
+            assert && assert( !beforeSplitTrail || !afterSplitTrail || beforeSplitTrail.getInstance().layer !== afterSplitTrail.getInstance().layer, 'layerSplit layers need to be different' );
           }
         }
       } );
@@ -1440,11 +1441,8 @@ define( function( require ) {
           if ( node._rendererOptions ) {
             // addQualifier( 'rendererOptions:' + _.each( node._rendererOptions, function( option, key ) { return key + ':' + str( option ); } ).join( ',' ) );
           }
-          if ( node._layerSplitBefore ) {
-            addQualifier( 'layerSplitBefore' );
-          }
-          if ( node._layerSplitAfter ) {
-            addQualifier( 'layerSplitAfter' );
+          if ( node._layerSplit ) {
+            addQualifier( 'layerSplit' );
           }
           if ( node._opacity < 1 ) {
             addQualifier( 'opacity:' + node._opacity );

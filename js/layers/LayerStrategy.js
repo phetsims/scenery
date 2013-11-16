@@ -80,7 +80,7 @@ define( function( require ) {
         }
       }
       
-      if ( node.isLayerSplitBefore() || this.hasSplitFlags( node ) ) {
+      if ( node.isLayerSplit() || this.hasSplitFlags( node ) ) {
         layerBuilder.switchToType( pointer, layerBuilder.getCurrentLayerType() );
       }
       
@@ -113,7 +113,7 @@ define( function( require ) {
         // }
       }
       
-      if ( node.isLayerSplitAfter() || this.hasSplitFlags( node ) ) {
+      if ( node.isLayerSplit() || this.hasSplitFlags( node ) ) {
         layerBuilder.switchToType( pointer, layerBuilder.getCurrentLayerType() );
       }
     },

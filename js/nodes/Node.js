@@ -49,8 +49,6 @@ define( function( require ) {
    * renderer:         Forces Scenery to use the specific renderer (canvas/svg) to display this node (and if possible, children). Accepts both strings (e.g. 'canvas', 'svg', etc.) or actual Renderer objects (e.g. Renderer.Canvas, Renderer.SVG, etc.)
    * rendererOptions:  Parameter object that is passed to the created layer, and can affect how the layering process works.
    * layerSplit:       Forces a split between layers before and after this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.
-   * layerSplitBefore: Forces a split between layers before this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.
-   * layerSplitAfter:  Forces a split between layers after this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.
    * mouseArea:        Shape (in local coordinate frame) that overrides the 'hit area' for mouse input.
    * touchArea:        Shape (in local coordinate frame) that overrides the 'hit area' for touch input.
    * clipArea:         Shape (in local coordinate frame) that causes any graphics outside of the shape to be invisible (for the node and any children).
@@ -136,9 +134,8 @@ define( function( require ) {
     this._rendererOptions = null; // options that will determine the layer type
     this._rendererLayerType = null; // cached layer type that is used by the LayerStrategy
     
-    // whether layers should be split before and/or after this node. setting both will put this node and its children into a separate layer
-    this._layerSplitBefore = false;
-    this._layerSplitAfter = false;
+    // whether layers should be split before and after this node
+    this._layerSplit = false;
     
     // the subtree pickable count is #pickable:true + #inputListeners, since we can prune subtrees with a pickable count of 0
     this._subtreePickableCount = 0;
@@ -1450,40 +1447,17 @@ define( function( require ) {
       return !!this._rendererOptions;
     },
     
-    setLayerSplitBefore: function( split ) {
-      assert && assert( typeof split === 'boolean' );
-      
-      if ( this._layerSplitBefore !== split ) {
-        this._layerSplitBefore = split;
-        this.markLayerRefreshNeeded();
-      }
-    },
-    
-    isLayerSplitBefore: function() {
-      return this._layerSplitBefore;
-    },
-    
-    setLayerSplitAfter: function( split ) {
-      assert && assert( typeof split === 'boolean' );
-      
-      if ( this._layerSplitAfter !== split ) {
-        this._layerSplitAfter = split;
-        this.markLayerRefreshNeeded();
-      }
-    },
-    
-    isLayerSplitAfter: function() {
-      return this._layerSplitAfter;
-    },
-    
     setLayerSplit: function( split ) {
       assert && assert( typeof split === 'boolean' );
       
-      if ( split !== this._layerSplitBefore || split !== this._layerSplitAfter ) {
-        this._layerSplitBefore = split;
-        this._layerSplitAfter = split;
+      if ( split !== this._layerSplit ) {
+        this._layerSplit = split;
         this.markLayerRefreshNeeded();
       }
+    },
+    
+    isLayerSplit: function() {
+      return this._layerSplit;
     },
     
     // returns a unique trail (if it exists) where each node in the ancestor chain has 0 or 1 parents
@@ -2016,13 +1990,7 @@ define( function( require ) {
     *----------------------------------------------------------------------------*/
     
     set layerSplit( value ) { this.setLayerSplit( value ); },
-    get layerSplit() { throw new Error( 'You can\'t get a layerSplit property, since it modifies two separate properties' ); },
-    
-    set layerSplitBefore( value ) { this.setLayerSplitBefore( value ); },
-    get layerSplitBefore() { return this.isLayerSplitBefore(); },
-    
-    set layerSplitAfter( value ) { this.setLayerSplitAfter( value ); },
-    get layerSplitAfter() { return this.isLayerSplitAfter(); },
+    get layerSplit() { return this.isLayerSplit(); },
     
     set renderer( value ) { this.setRenderer( value ); },
     get renderer() { return this.getRenderer(); },
@@ -2185,12 +2153,8 @@ define( function( require ) {
         }
       }
       
-      if ( this._layerSplitBefore ) {
-        addProp( 'layerSplitBefore', true );
-      }
-      
-      if ( this._layerSplitAfter ) {
-        addProp( 'layerSplitAfter', true );
+      if ( this._layerSplit ) {
+        addProp( 'layerSplit', true );
       }
       
       return result;
@@ -2210,7 +2174,7 @@ define( function( require ) {
    */
   Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
                                   'left', 'right', 'top', 'bottom', 'center', 'centerX', 'centerY', 'renderer', 'rendererOptions',
-                                  'layerSplit', 'layerSplitBefore', 'layerSplitAfter', 'mouseArea', 'touchArea', 'clipArea' ];
+                                  'layerSplit', 'mouseArea', 'touchArea', 'clipArea' ];
   
   // mix-in the events for Node
   /* jshint -W064 */

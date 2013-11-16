@@ -112,10 +112,13 @@ define( function( require ) {
   supportsDataURLFormatOrigin( 'canvasGIFInput', 'data:image/gif;base64,R0lGODlhAQABAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAABAAEAAAICRAEAOw==' );
   
   // canvas prefixed names
-  var ctx = document.createElement( 'canvas' ).getContext( '2d' );
+  var canvas = document.createElement( 'canvas' );
+  var ctx = canvas.getContext( '2d' );
+  Features.toDataURLHD = detect( canvas, prefixed( 'toDataURLHD' ) );
   Features.createImageDataHD = detect( ctx, prefixed( 'createImageDataHD' ) );
   Features.getImageDataHD = detect( ctx, prefixed( 'getImageDataHD' ) );
   Features.putImageDataHD = detect( ctx, prefixed( 'putImageDataHD' ) );
+  Features.currentTransform = detect( ctx, prefixed( 'currentTransform' ) );
   
   var span = document.createElement( 'span' );
   var div = document.createElement( 'div' );
