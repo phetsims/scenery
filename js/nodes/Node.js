@@ -141,6 +141,8 @@ define( function( require ) {
     this._subtreePickableCount = 0;
     
     this._rendererBitmask = scenery.bitmaskNodeDefault;
+    this._subtreeRendererBitmask = scenery.bitmaskNodeDefault; // value not important initially, since it is dirty
+    // this._subtreeRendererBitmaskDirty = true; // TODO: include dirty flag!
     
     if ( options ) {
       this.mutate( options );
@@ -239,6 +241,7 @@ define( function( require ) {
     },
     
     getChildren: function() {
+      // TODO: ensure we are not triggering this in Scenery code when not necessary!
       return this._children.slice( 0 ); // create a defensive copy
     },
     

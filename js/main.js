@@ -14,6 +14,11 @@ define( [
     'SCENERY/scenery',
     'SCENERY/debug/DebugContext',
     
+    'SCENERY/display/BackboneBlock',
+    'SCENERY/display/Block',
+    'SCENERY/display/Display',
+    'SCENERY/display/DisplayInstance',
+    
     'SCENERY/input/ButtonListener',
     'SCENERY/input/DownUpListener',
     'SCENERY/input/Event',
