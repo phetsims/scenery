@@ -11,11 +11,14 @@ define( function( require ) {
   
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
+  require( 'SCENERY/util/Trail' );
+  require( 'SCENERY/display/DisplayInstance' );
   
   scenery.Display = function Display( rootNode ) {
     this._rootNode = rootNode;
     this._domElement = null; // TODO: potentially allow immediate export of this?
-    this._sharedInstances = {}; // map from Node ID to DisplayInstance, for fast lookup
+    this._sharedCanvasInstances = {}; // map from Node ID to DisplayInstance, for fast lookup
+    this._instanceTree = null; // will be filled with the root DisplayInstance
   };
   var Display = scenery.Display;
   
@@ -33,6 +36,31 @@ define( function( require ) {
     
     node._subtreeRendererBitmask = bitmask;
     return bitmask; // return the bitmask so we have direct access at the call site
+  }
+  
+  function createInstance( display, trail, state ) {
+    var instance;
+    if ( state.isCanvasShared( trail ) ) {
+      var instanceKey = trail.lastNode().getId();
+      var sharedInstance = display._sharedCanvasInstances[instanceKey];
+      if ( sharedInstance ) {
+        return sharedInstance;
+      } else {
+        // TODO: notify it that it is a Canvas shared instance?
+        instance = new scenery.DisplayInstance( new scenery.Trail( trail.lastNode() ) );
+        display._sharedCanvasInstances[instanceKey] = instance;
+        return instance;
+      }
+    } else {
+      // not shared
+      instance = new scenery.DisplayInstance( trail );
+      var children = trail.lastNode().children;
+      var numChildren = children.length;
+      for ( var i = 0; i < numChildren; i++ ) {
+        instance.appendInstance( createInstance( display, trail.copy().addDescendant( children[i], i ) ) );
+      }
+      return instance;
+    }
   }
   
   inherit( Object, Display, {

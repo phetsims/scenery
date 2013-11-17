@@ -19,15 +19,18 @@ define( function( require ) {
   /**
    * @param {DisplayInstance|null} parent
    */
-  scenery.DisplayInstance = function DisplayInstance( trail, parent ) {
+  scenery.DisplayInstance = function DisplayInstance( trail ) {
     this.id = globalIdCounter++;
     this.trail = trail;
-    this.parent = parent;
+    this.parent = null; // will be set as needed
+    this.children = [];
   };
   var DisplayInstance = scenery.DisplayInstance;
   
   inherit( Object, DisplayInstance, {
-    
+    appendInstance: function( instance ) {
+      this.children.push( instance );
+    }
   } );
   
   return DisplayInstance;
