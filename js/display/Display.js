@@ -38,29 +38,36 @@ define( function( require ) {
     return bitmask; // return the bitmask so we have direct access at the call site
   }
   
-  function createInstance( display, trail, state ) {
-    var instance;
-    if ( state.isCanvasShared( trail ) ) {
+  function freshInstance( display, trail, ancestorState ) {
+    var state = ancestorState.getStateForDescendant( trail );
+    if ( state.isCanvasShared() ) {
       var instanceKey = trail.lastNode().getId();
       var sharedInstance = display._sharedCanvasInstances[instanceKey];
       if ( sharedInstance ) {
+        // TODO: assert state is the same?
+        // TODO: increment reference counting?
         return sharedInstance;
       } else {
-        // TODO: notify it that it is a Canvas shared instance?
-        instance = new scenery.DisplayInstance( new scenery.Trail( trail.lastNode() ) );
+        var instance = setupInstance( display, new scenery.Trail( trail.lastNode() ), state );
+        // TODO: increment reference counting?
         display._sharedCanvasInstances[instanceKey] = instance;
         return instance;
       }
     } else {
       // not shared
-      instance = new scenery.DisplayInstance( trail );
-      var children = trail.lastNode().children;
-      var numChildren = children.length;
-      for ( var i = 0; i < numChildren; i++ ) {
-        instance.appendInstance( createInstance( display, trail.copy().addDescendant( children[i], i ) ) );
-      }
-      return instance;
+      return setupInstance( display, trail, state );
     }
+  }
+  
+  function setupInstance( display, trail, state ) {
+    var instance = new scenery.DisplayInstance( trail );
+    instance.state = state;
+    var children = trail.lastNode().children;
+    var numChildren = children.length;
+    for ( var i = 0; i < numChildren; i++ ) {
+      instance.appendInstance( freshInstance( display, trail.copy().addDescendant( children[i], i ) ) );
+    }
+    return instance;
   }
   
   inherit( Object, Display, {

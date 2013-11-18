@@ -24,6 +24,7 @@ define( function( require ) {
     this.trail = trail;
     this.parent = null; // will be set as needed
     this.children = [];
+    this.state = null; // filled in with rendering state later
   };
   var DisplayInstance = scenery.DisplayInstance;
   
