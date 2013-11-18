@@ -25,6 +25,7 @@ define( function( require ) {
     this.parent = null; // will be set as needed
     this.children = [];
     this.state = null; // filled in with rendering state later
+    this.renderer = null; // filled in later
   };
   var DisplayInstance = scenery.DisplayInstance;
   

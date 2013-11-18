@@ -61,12 +61,17 @@ define( function( require ) {
   
   function setupInstance( display, trail, state ) {
     var instance = new scenery.DisplayInstance( trail );
+    var node = trail.lastNode();
     instance.state = state;
     var children = trail.lastNode().children;
     var numChildren = children.length;
     for ( var i = 0; i < numChildren; i++ ) {
       instance.appendInstance( freshInstance( display, trail.copy().addDescendant( children[i], i ) ) );
     }
+    instance.renderer = node.isPainted() ? state.getPaintedRenderer() : null;
+    
+    // TODO: combination and replacement here
+    
     return instance;
   }
   

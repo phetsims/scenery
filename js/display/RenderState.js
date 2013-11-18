@@ -24,6 +24,10 @@ define( function( require ) {
     
     getStateForDescendant: function( trail ) {
       // new state
+    },
+    
+    getPaintedRenderer: function() {
+      
     }
   } );
   
