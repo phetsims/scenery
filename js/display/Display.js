@@ -13,12 +13,13 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
   require( 'SCENERY/display/DisplayInstance' );
+  require( 'SCENERY/layers/Renderer' );
   
   scenery.Display = function Display( rootNode ) {
     this._rootNode = rootNode;
     this._domElement = null; // TODO: potentially allow immediate export of this?
     this._sharedCanvasInstances = {}; // map from Node ID to DisplayInstance, for fast lookup
-    this._instanceTree = null; // will be filled with the root DisplayInstance
+    this._baseInstance = null; // will be filled with the root DisplayInstance
   };
   var Display = scenery.Display;
   
@@ -38,41 +39,103 @@ define( function( require ) {
     return bitmask; // return the bitmask so we have direct access at the call site
   }
   
-  function freshInstance( display, trail, ancestorState ) {
-    var state = ancestorState.getStateForDescendant( trail );
-    if ( state.isCanvasShared() ) {
-      var instanceKey = trail.lastNode().getId();
-      var sharedInstance = display._sharedCanvasInstances[instanceKey];
-      if ( sharedInstance ) {
-        // TODO: assert state is the same?
-        // TODO: increment reference counting?
-        return sharedInstance;
-      } else {
-        var instance = setupInstance( display, new scenery.Trail( trail.lastNode() ), state );
-        // TODO: increment reference counting?
-        display._sharedCanvasInstances[instanceKey] = instance;
-        return instance;
-      }
+  // display instance linked list ops
+  function connectInstances( a, b ) {
+    a.nextPainted = b;
+    b.previousPainted = a;
+  }
+  
+  function createBackbone( display, trail, state ) {
+    var blockInstance = new scenery.DisplayInstance( trail );
+    blockInstance.state = state;
+    blockInstance.renderer = scenery.Renderer.DOM;
+    
+    createProxyInstance( display, trail, state, blockInstance );
+    return blockInstance;
+  }
+  
+  function createCanvasCache( display, trail, state ) {
+    var blockInstance = new scenery.DisplayInstance( trail );
+    blockInstance.state = state;
+    blockInstance.renderer = state.getCacheRenderer();
+    
+    createProxyInstance( display, trail, state, blockInstance );
+    return blockInstance;
+  }
+  
+  function createSharedCanvasCache( display, trail, state ) {
+    var instanceKey = trail.lastNode().getId();
+    var sharedInstance = display._sharedCanvasInstances[instanceKey];
+    if ( sharedInstance ) {
+      // TODO: assert state is the same?
+      // TODO: increment reference counting?
+      return sharedInstance;
     } else {
-      // not shared
-      return setupInstance( display, trail, state );
+      var blockInstance = new scenery.DisplayInstance( new scenery.Trail( trail.lastNode() ) );
+      blockInstance.state = state;
+      blockInstance.renderer = state.getCacheRenderer();
+      
+      createProxyInstance( display, trail, state, blockInstance );
+      // TODO: increment reference counting?
+      display._sharedCanvasInstances[instanceKey] = blockInstance;
+      return blockInstance;
     }
   }
   
-  function setupInstance( display, trail, state ) {
-    var instance = new scenery.DisplayInstance( trail );
-    var node = trail.lastNode();
-    instance.state = state;
-    var children = trail.lastNode().children;
-    var numChildren = children.length;
-    for ( var i = 0; i < numChildren; i++ ) {
-      instance.appendInstance( freshInstance( display, trail.copy().addDescendant( children[i], i ) ) );
+  // For when we have a block/stub instance (for a backbone/cache), and we want an instance for the same trail, but to render itself and its subtree.
+  // Basically, this involves another getStateForDescendant (called in createInstance), and for now we set up proxy variables
+  function createProxyInstance( display, trail, state, blockInstance ) {
+    var instance = createInstance( display, trail, state );
+    // TODO: better way of handling this?
+    blockInstance.proxyChild = instance;
+    instance.proxyParent = blockInstance;
+    
+    blockInstance.firstPainted = blockInstance;
+    blockInstance.lastPainted = blockInstance;
+    return instance; // if we need it
+  }
+  
+  function createInstance( display, trail, ancestorState ) {
+    var state = ancestorState.getStateForDescendant( trail );
+    if ( state.isBackbone() ) {
+      return createBackbone( display, trail, state );
+    } else if ( state.isCanvasCache() ) {
+      return state.isCacheShared() ? createSharedCanvasCache( display, trail, state ) : createCanvasCache( display, trail, state );
+    } else {
+      var instance = new scenery.DisplayInstance( trail );
+      var node = trail.lastNode();
+      instance.state = state;
+      instance.renderer = node.isPainted() ? state.getPaintedRenderer() : null;
+      
+      var currentPaintedInstance = null;
+      if ( instance.isEffectivelyPainted() ) {
+        currentPaintedInstance = instance;
+        instance.firstPainted = instance;
+      }
+      
+      var children = trail.lastNode().children;
+      var numChildren = children.length;
+      for ( var i = 0; i < numChildren; i++ ) {
+        var childInstance = createInstance( display, trail.copy().addDescendant( children[i], i ) );
+        instance.appendInstance( childInstance );
+        if ( childInstance.firstPainted ) {
+          assert && assert( childInstance.lastPainted, 'Any display instance with firstPainted should also have lastPainted' );
+          
+          if ( currentPaintedInstance ) {
+            connectInstances( currentPaintedInstance, childInstance.firstPainted );
+          } else {
+            instance.firstPainted = childInstance.firstPainted;
+          }
+          currentPaintedInstance = childInstance.lastPainted;
+        }
+      }
+      
+      if ( currentPaintedInstance !== null ) {
+        instance.lastPainted = currentPaintedInstance;
+      }
+      
+      return instance;
     }
-    instance.renderer = node.isPainted() ? state.getPaintedRenderer() : null;
-    
-    // TODO: combination and replacement here
-    
-    return instance;
   }
   
   inherit( Object, Display, {
@@ -85,6 +148,10 @@ define( function( require ) {
     buildTemporaryDisplay: function() {
       // compute updated _subtreeRendererBitmask for every Node // TODO: add and use dirty flag for this, and decide how the flags get set!
       recursiveUpdateRendererBitmask( this._rootNode );
+      
+      this._baseInstance = createBackbone( this, new scenery.Trail( this._rootNode ), {
+        // TODO: strategy here
+      } );
     }
   } );
   

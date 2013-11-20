@@ -18,7 +18,15 @@ define( function( require ) {
   var RenderState = scenery.RenderState;
   
   inherit( Object, RenderState, {
-    isCanvasShared: function() {
+    isBackbone: function() {
+      
+    },
+    
+    isCanvasCache: function() {
+      
+    },
+    
+    isCacheShared: function() {
       // true/false
     },
     
@@ -27,6 +35,11 @@ define( function( require ) {
     },
     
     getPaintedRenderer: function() {
+      
+    },
+    
+    // renderer for the (Canvas) cache
+    getCacheRenderer: function() {
       
     }
   } );
