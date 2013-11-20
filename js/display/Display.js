@@ -95,6 +95,10 @@ define( function( require ) {
     return instance; // if we need it
   }
   
+  function createSplitInstance() {
+    return new scenery.DisplayInstance( null ); // null trail
+  }
+  
   function createInstance( display, trail, ancestorState ) {
     var state = ancestorState.getStateForDescendant( trail );
     if ( state.isBackbone() ) {
@@ -132,6 +136,19 @@ define( function( require ) {
       
       if ( currentPaintedInstance !== null ) {
         instance.lastPainted = currentPaintedInstance;
+      }
+      
+      if ( state.requestsSplit() ) {
+        if ( instance.firstPainted ) {
+          var beforeSplit = createSplitInstance();
+          var afterSplit = createSplitInstance();
+          connectInstances( beforeSplit, instance.firstPainted );
+          connectInstances( instance.lastPainted, afterSplit );
+          instance.firstPainted = beforeSplit;
+          instance.lastPainted = afterSplit;
+        } else {
+          instance.firstPainted = instance.lastPainted = createSplitInstance();
+        }
       }
       
       return instance;

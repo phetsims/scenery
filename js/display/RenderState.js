@@ -30,6 +30,10 @@ define( function( require ) {
       // true/false
     },
     
+    requestsSplit: function() {
+      
+    },
+    
     getStateForDescendant: function( trail ) {
       // new state
     },
