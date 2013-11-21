@@ -13,6 +13,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
   require( 'SCENERY/display/DisplayInstance' );
+  require( 'SCENERY/display/RenderState' );
   require( 'SCENERY/layers/Renderer' );
   
   scenery.Display = function Display( rootNode ) {
@@ -120,7 +121,7 @@ define( function( require ) {
       var children = trail.lastNode().children;
       var numChildren = children.length;
       for ( var i = 0; i < numChildren; i++ ) {
-        var childInstance = createInstance( display, trail.copy().addDescendant( children[i], i ) );
+        var childInstance = createInstance( display, trail.copy().addDescendant( children[i], i ), state );
         instance.appendInstance( childInstance );
         if ( childInstance.firstPainted ) {
           assert && assert( childInstance.lastPainted, 'Any display instance with firstPainted should also have lastPainted' );
@@ -166,9 +167,13 @@ define( function( require ) {
       // compute updated _subtreeRendererBitmask for every Node // TODO: add and use dirty flag for this, and decide how the flags get set!
       recursiveUpdateRendererBitmask( this._rootNode );
       
-      this._baseInstance = createBackbone( this, new scenery.Trail( this._rootNode ), {
-        // TODO: strategy here
-      } );
+      var baseTrail = new scenery.Trail( this._rootNode );
+      var baseState = new scenery.RenderState.TestState( baseTrail, [
+        scenery.Renderer.DOM,
+        scenery.Renderer.Canvas,
+        scenery.Renderer.SVG
+      ], false, false );
+      this._baseInstance = createBackbone( this, baseTrail, baseState );
     }
   } );
   
