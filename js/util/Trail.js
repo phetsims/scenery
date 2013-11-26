@@ -624,6 +624,7 @@ define( function( require ) {
   
   // The index at which the two trails diverge. If a.length === b.length === branchIndex, the trails are identical
   Trail.branchIndex = function( a, b ) {
+    assert && assert( a.nodes[0] === b.nodes[0], 'Branch changes require roots to be the same' );
     var branchIndex;
     var shortestLength = Math.min( a.length, b.length );
     for ( branchIndex = 0; branchIndex < shortestLength; branchIndex++ ) {
@@ -632,6 +633,11 @@ define( function( require ) {
       }
     }
     return branchIndex;
+  };
+  
+  // The subtrail from the root that both trails share
+  Trail.sharedTrail = function( a, b ) {
+    return a.slice( 0, Trail.branchIndex( a, b ) );
   };
   
   /*
