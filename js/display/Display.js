@@ -171,7 +171,8 @@ define( function( require ) {
       var baseState = new scenery.RenderState.TestState( baseTrail, [
         scenery.Renderer.DOM,
         scenery.Renderer.Canvas,
-        scenery.Renderer.SVG
+        scenery.Renderer.SVG,
+        new scenery.Trail()
       ], false, false );
       this._baseInstance = createBackbone( this, baseTrail, baseState );
     }
