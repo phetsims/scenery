@@ -12,6 +12,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/layers/Renderer' );
+  require( 'SCENERY/util/Trail' );
   
   scenery.RenderState = function RenderState() {
     
@@ -46,10 +47,23 @@ define( function( require ) {
     // renderer for the (Canvas) cache
     getCacheRenderer: function() {
       
+    },
+    
+    // what is our absolute transform relative to (hah)? we assume all transforms up to the last node of this trail have already been applied
+    getTransformBaseTrail: function() {
+      
+    },
+    
+    // whether our backbone child has a CSS transform applied
+    isBackboneTransformed: function() {
+      
     }
   } );
   
-  RenderState.TestState = function TestState( trail, renderers, isProxy, isUnderCanvasCache ) {
+  // NOTE: assumes that the trail is not mutable
+  RenderState.TestState = function TestState( trail, renderers, isProxy, isUnderCanvasCache, transformBaseTrail ) {
+    trail.setImmutable();
+    
     var node = trail.lastNode();
     
     // this should be accurate right now, the pass to update these should have been completed earlier
@@ -68,13 +82,21 @@ define( function( require ) {
     this.splits = false;
     this.renderer = null;
     this.cacheRenderer = null;
+    this.transformBaseTrail = transformBaseTrail;
+    this.nextTransformBaseTrail = transformBaseTrail; // what descendant states will have as their base trail. affected by CSS transformed backbones and single caches
+    this.backboneTransformed = false;
     
     var hints = node.hints || {}; // TODO: reduce allocation here
     
     if ( !isProxy ) {
       // check if we need a backbone or cache
-      if ( node.opacity !== 1 || hints.requireElement ) {
+      if ( node.opacity !== 1 || hints.requireElement || hints.cssTransformBackbone ) {
         this.backbone = true;
+        this.backboneTransformed = !!hints.cssTransformBackbone; // for now, only trigger CSS transform if we have the specific hint
+        if ( this.backboneTransformed ) {
+          // everything under here should not apply transforms from this trail, but only any transforms beneath it
+          this.nextTransformBaseTrail = trail;
+        }
         this.renderer = scenery.Renderer.DOM; // probably won't be used
         this.nextRenderers = renderers;
       } else if ( hints.canvasCache ) {
@@ -82,6 +104,7 @@ define( function( require ) {
           this.canvasCache = true;
           if ( hints.singleCache ) {
             this.cacheShared = true;
+            this.nextTransformBaseTrail = new scenery.Trail();
           }
           this.renderer = scenery.Renderer.Canvas; // TODO: allow SVG (toDataURL) and DOM (direct Canvas)
           this.nextRenderers = [scenery.Renderer.Canvas]; // TODO: full resolution!
@@ -135,9 +158,9 @@ define( function( require ) {
         // proxy instance
         assert && assert( trail === this.trail, 'backbone/cache trail should be passed in again for the proxy instance' );
         // TODO: full resolution handling
-        return new RenderState.TestState( trail, this.nextRenderers, true, true ); // TODO: allocation
+        return new RenderState.TestState( trail, this.nextRenderers, true, true, this.nextTransformBaseTrail ); // TODO: allocation
       } else {
-        return new RenderState.TestState( trail, this.nextRenderers, false, this.isUnderCanvasCache ); // TODO: allocation
+        return new RenderState.TestState( trail, this.nextRenderers, false, this.isUnderCanvasCache, this.nextTransformBaseTrail ); // TODO: allocation
       }
     },
     
@@ -147,6 +170,14 @@ define( function( require ) {
     
     getCacheRenderer: function() {
       return this.renderer;
+    },
+    
+    getTransformBaseTrail: function() {
+      return this.transformBaseTrail;
+    },
+    
+    isBackboneTransformed: function() {
+      return this.backboneTransformed;
     }
   };
   
