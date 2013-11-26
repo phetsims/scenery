@@ -479,14 +479,7 @@ define( function( require ) {
         return false;
       }
       
-      var branchIndex;
-      
-      for ( branchIndex = 0; branchIndex < Math.min( trail.length, oldTrail.length ); branchIndex++ ) {
-        if ( trail.nodes[branchIndex] !== oldTrail.nodes[branchIndex] ) {
-          break;
-        }
-      }
-      
+      var branchIndex = scenery.Trail.branchIndex( trail, oldTrail );
       var isBranchChange = branchIndex !== trail.length || branchIndex !== oldTrail.length;
       sceneryEventLog && isBranchChange && sceneryEventLog( 'branch change from ' + oldTrail.toString() + ' to ' + trail.toString() );
       

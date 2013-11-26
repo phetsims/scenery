@@ -622,6 +622,99 @@ define( function( require ) {
     }, false );
   };
   
+  // The index at which the two trails diverge. If a.length === b.length === branchIndex, the trails are identical
+  Trail.branchIndex = function( a, b ) {
+    var branchIndex;
+    var shortestLength = Math.min( a.length, b.length );
+    for ( branchIndex = 0; branchIndex < shortestLength; branchIndex++ ) {
+      if ( a.nodes[branchIndex] !== b.nodes[branchIndex] ) {
+        break;
+      }
+    }
+    return branchIndex;
+  };
+  
+  /* An array of disjoint subtrees (trails) that cover exactly the nodes inclusively between a and b in rendering order.
+   * We try to consolidate these as much as possible.
+   *
+   * Example tree:
+   *   a
+   *   - b
+   *   --- c
+   *   --- d
+   *   - e
+   *   --- f
+   *   ----- g
+   *   ----- h
+   *   ----- i
+   *   --- j
+   *   ----- k
+   *   - l
+   *   - m
+   *   --- n
+   *
+   * spannedSubtrees( a, a ) === [a] // same trail spans itself
+   * spannedSubtrees( c, n ) === [a] // first and last leaves also result in the base trail ("a" here)
+   * spannedSubtrees( h, l ) === [h,i,j,l]
+   * spannedSubtrees( c, i ) === [b,f] --- wait, include e self?
+   */
+  Trail.spannedSubtrees = function( a, b ) {
+    // assert && assert( a.nodes[0] === b.nodes[0], 'Spanned subtrees for a and b requires that a and b have the same root' );
+    
+    // a.reindex();
+    // b.reindex();
+    
+    // var subtrees = [];
+    
+    // var branchIndex = Trail.branchIndex( a, b );
+    // assert && assert( branchIndex > 0, 'Branch index should always be > 0' );
+    
+    // if ( a.length === branchIndex && b.length === branchIndex ) {
+    //   // the two trails are equal
+    //   subtrees.push( a );
+    // } else {
+    //   // find the first place where our start isn't the first child
+    //   for ( var before = a.length - 1; before >= branchIndex; before-- ) {
+    //     if ( a.indices[before-1] !== 0 ) {
+    //       break;
+    //     }
+    //   }
+      
+    //   // find the first place where our end isn't the last child
+    //   for ( var after = a.length - 1; after >= branchIndex; after-- ) {
+    //     if ( b.indices[after-1] !== b.nodes[after-1]._children.length - 1 ) {
+    //       break;
+    //     }
+    //   }
+      
+    //   if ( before < branchIndex && after < branchIndex ) {
+    //     // we span the entire tree up to nodes[branchIndex-1], so return only that subtree
+    //     subtrees.push( a.slice( 0, branchIndex ) );
+    //   } else {
+    //     // walk the subtrees down from the start
+    //     for ( var ia = before; ia >= branchIndex; ia-- ) {
+    //       subtrees.push( a.slice( 0, ia + 1 ) );
+    //     }
+        
+    //     // walk through the middle
+    //     var iStart = a.indices[branchIndex-1];
+    //     var iEnd = b.indices[branchIndex-1];
+    //     var base = a.slice( 0, branchIndex );
+    //     var children = base.lastNode()._children;
+    //     for ( var im = iStart; im <= iEnd; im++ ) {
+    //       subtrees.push( base.copy().addDescendant( children[im], im ) );
+    //     }
+        
+    //     // walk the subtrees up to the end
+    //     for ( var ib = branchIndex; ib <= after; ib++ ) {
+    //       subtrees.push( b.slice( 0, ib + 1 ) );
+    //     }
+    //   }
+    // }
+    
+    // return subtrees;
+  };
+  
   return Trail;
 } );
 
