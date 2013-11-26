@@ -634,8 +634,13 @@ define( function( require ) {
     return branchIndex;
   };
   
-  /* An array of disjoint subtrees (trails) that cover exactly the nodes inclusively between a and b in rendering order.
+  /*
+   * Fires subtree(trail) or self(trail) on the callbacks to create disjoint subtrees (trails) that cover exactly the nodes
+   * inclusively between a and b in rendering order.
    * We try to consolidate these as much as possible.
+   *
+   * "a" and "b" are treated like self painted trails in the rendering order
+   * 
    *
    * Example tree:
    *   a
@@ -653,10 +658,10 @@ define( function( require ) {
    *   - m
    *   --- n
    *
-   * spannedSubtrees( a, a ) === [a] // same trail spans itself
-   * spannedSubtrees( c, n ) === [a] // first and last leaves also result in the base trail ("a" here)
-   * spannedSubtrees( h, l ) === [h,i,j,l]
-   * spannedSubtrees( c, i ) === [b,f] --- wait, include e self?
+   * spannedSubtrees( a, a ) -> self( a );
+   * spannedSubtrees( c, n ) -> subtree( a ); NOTE: if b is painted, that wouldn't work!
+   * spannedSubtrees( h, l ) -> subtree( h ); subtree( i ); subtree( j ); self( l );
+   * spannedSubtrees( c, i ) -> [b,f] --- wait, include e self?
    */
   Trail.spannedSubtrees = function( a, b ) {
     // assert && assert( a.nodes[0] === b.nodes[0], 'Spanned subtrees for a and b requires that a and b have the same root' );
