@@ -1054,8 +1054,7 @@ define( function( require ) {
       this.initializeEvents( _.extend( {}, {
         listenerTarget: window,
         pointFromEvent: function pointFromEvent( evt ) {
-          var mainBounds = element.getBoundingClientRect();
-          return Vector2.createFromPool( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
+          return Vector2.createFromPool( evt.clientX, evt.clientY );
         }
       }, parameters ) );
     },
