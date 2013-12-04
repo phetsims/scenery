@@ -12,17 +12,15 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   
-  scenery.Drawable = function Drawable( drawableState ) {
+  scenery.Drawable = function Drawable( trail, renderer, transformTrail ) {
     
     // linked list handling
     this.previousDrawable = null;
     this.nextDrawable = null;
     
-    this.drawableState = drawableState;
-    this.renderer = drawableState.getDrawableRenderer();
-    this.trail = drawableState.getTrail();
-    this.transformBaseTrail = drawableState.getTransformBaseTrail();
-    this.transformTrail = drawableState.getTransformTrail();
+    this.trail = trail;
+    this.renderer = renderer;
+    this.transformTrail = transformTrail;
   };
   var Drawable = scenery.Drawable;
   

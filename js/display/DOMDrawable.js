@@ -13,10 +13,10 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
   
-  scenery.DOMDrawable = function DOMDrawable( drawableState, domElement ) {
-    Drawable.call( this, drawableState );
+  scenery.DOMDrawable = function DOMDrawable( trail, renderer, transformTrail, domElement ) {
+    Drawable.call( this, trail, renderer, transformTrail );
     
-    this._domElement = domElement;
+    this.domElement = domElement;
     
     // TODO: handle transforms?
   };
@@ -24,7 +24,7 @@ define( function( require ) {
   
   inherit( Drawable, DOMDrawable, {
     getDomElement: function() {
-      return this._domElement;
+      return this.domElement;
     }
   } );
   
