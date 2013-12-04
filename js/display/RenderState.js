@@ -59,7 +59,7 @@ define( function( require ) {
     var hints = node.hints || {}; // TODO: reduce allocation here
     
     // check if we need a backbone or cache
-    if ( node.opacity !== 1 || hints.requireElement || hints.cssTransformBackbone ) {
+    if ( node.opacity !== 1 || hints.requireElement || hints.cssTransformBackbone || hints.split ) {
       this.isBackbone = true;
       this.isBackboneTransformed = !!hints.cssTransformBackbone; // for now, only trigger CSS transform if we have the specific hint
       this.groupRenderer = scenery.Renderer.bitmaskDOM | ( hints.forceAcceleration ? Renderer.bitmaskForceAcceleration : 0 ); // probably won't be used

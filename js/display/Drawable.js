@@ -13,8 +13,10 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   scenery.Drawable = function Drawable( trail, renderer, transformTrail ) {
+    // what block we are being rendered into (will be filled in later)
+    this.block = null;
     
-    // linked list handling
+    // linked list handling (will be filled in later)
     this.previousDrawable = null;
     this.nextDrawable = null;
     
