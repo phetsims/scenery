@@ -68,6 +68,7 @@ define( function( require ) {
   assert && assert( scenery.bitmaskSupportsDOM    === 0x0000004 );
   assert && assert( scenery.bitmaskSupportsWebGL  === 0x0000008 );
   
+  Renderer.bitmaskRendererArea            = scenery.bitmaskRendererArea;   // 0x00000FF
   // one renderer is required
   Renderer.bitmaskCanvas                  = scenery.bitmaskSupportsCanvas; // 0x0000001
   Renderer.bitmaskSVG                     = scenery.bitmaskSupportsSVG;    // 0x0000002
