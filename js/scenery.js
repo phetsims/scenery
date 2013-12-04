@@ -61,15 +61,18 @@ define( function( require ) {
     },
     
     bitmaskAll:            0xFFFFFFF, // 28 bits for now (don't go over 31 bits, or we'll see a 32-bit platform slowdown!)
-    bitmaskNodeDefault:    0x00001FF,
-    bitmaskPaintedDefault: 0x0000000,
+    bitmaskNodeDefault:    0x00003FF,
+    bitmaskPaintedDefault: 0x0000200, // bounds valid, no renderer set
+    bitmaskRendererArea:   0x00000FF,
     
+    // NOTE! If these are changed, please examine flags included in Renderer.js to make sure there are no conflicts (we use the same bitmask space)
     bitmaskSupportsCanvas: 0x0000001,
     bitmaskSupportsSVG:    0x0000002,
     bitmaskSupportsDOM:    0x0000004,
     bitmaskSupportsWebGL:  0x0000008,
     // 10, 20, 40, 80 reserved for future renderers
-    bitmaskNotPainted:     0x0000100
+    bitmaskNotPainted:     0x0000100,
+    bitmaskBoundsValid:    0x0000200  // i.e. painted area will not spill outside of bounds
     // TODO: what else would we need?
   };
 } );

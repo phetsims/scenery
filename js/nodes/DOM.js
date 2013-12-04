@@ -43,7 +43,7 @@ define( function( require ) {
     
     // will set the element after initializing
     Node.call( this, options );
-    this.setRendererBitmask( scenery.bitmaskSupportsDOM );
+    this.setRendererBitmask( scenery.bitmaskBoundsValid | scenery.bitmaskSupportsDOM );
   };
   var DOM = scenery.DOM;
   

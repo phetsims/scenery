@@ -21,7 +21,7 @@ define( function( require ) {
     this.setRendererBitmask( scenery.bitmaskSupportsCanvas );
     
     if ( options.canvasBounds ) {
-      this.setCanvasBounds( options.canvasBounds );
+      this.setCanvasBounds( scenery.bitmaskBoundsValid | options.canvasBounds );
     }
   };
   var CanvasNode = scenery.CanvasNode;

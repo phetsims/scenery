@@ -1,7 +1,23 @@
 // Copyright 2002-2013, University of Colorado
 
 /**
- * API for RenderState
+ * A RenderState represents the state information for a Node needed to determine how descendants are rendered.
+ * It extracts all the information necessary from ancestors in a compact form so we can create an effective tree of these.
+ *
+ * API for RenderState:
+ * {
+ *   isBackbone: Boolean
+ *   isCanvasCache: Boolean
+ *   isCacheShared: Boolean
+ *   isBackboneTransformed: Boolean
+ *   selfRenderer: Renderer
+ *   groupRenderer: Renderer
+ *   sharedCacheRenderer: Renderer
+ *   getStateForDescendant: function( trail ) : RenderState
+ * }
+ *
+ * NOTE: Trails for transforms are not provided. Instead, inspecting isBackboneTransformed and what type of cache should uniquely determine
+ *       the transformBaseTrail and transformTrail necessary for rendering (and in an efficient way). Not included here for performance (state doesn't need them)
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
@@ -14,171 +30,111 @@ define( function( require ) {
   require( 'SCENERY/layers/Renderer' );
   require( 'SCENERY/util/Trail' );
   
-  scenery.RenderState = function RenderState() {
-    
-  };
-  var RenderState = scenery.RenderState;
+  scenery.RenderState = {};
   
-  inherit( Object, RenderState, {
-    isBackbone: function() {
-      return false;
-    },
-    
-    isCanvasCache: function() {
-      return false;
-    },
-    
-    isCacheShared: function() {
-      return false;
-    },
-    
-    requestsSplit: function() {
-      return false;
-    },
-    
-    getStateForDescendant: function( trail ) {
-      // new state
-    },
-    
-    getPaintedRenderer: function() {
-      
-    },
-    
-    // renderer for the (Canvas) cache
-    getCacheRenderer: function() {
-      
-    },
-    
-    // what is our absolute transform relative to (hah)? we assume all transforms up to the last node of this trail have already been applied
-    getTransformBaseTrail: function() {
-      
-    },
-    
-    // whether our backbone child has a CSS transform applied
-    isBackboneTransformed: function() {
-      
-    }
-  } );
-  
-  // NOTE: assumes that the trail is not mutable
-  RenderState.TestState = function TestState( trail, renderers, isProxy, isUnderCanvasCache, transformBaseTrail ) {
-    trail.setImmutable();
-    
-    var node = trail.lastNode();
-    
+  /*
+   * {param} node               Node      The node whose instance will have this state (inspect the hints / properties on this node)
+   * {param} svgRenderer        Renderer  SVG renderer settings to use
+   * {param} canvasRenderer     Renderer  Canvas renderer settings to use
+   * {param} isUnderCanvasCache Boolean   Whether we are under any sort of Canvas cache (not including if this node is canvas cached)
+   * {param} isShared           Boolean   Whether this is the shared instance tree for a single-cache, instead of a reference to it
+   */
+  RenderState.RegularState = function RegularState( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared ) {
     // this should be accurate right now, the pass to update these should have been completed earlier
     var combinedBitmask = node._subtreeRendererBitmask;
     
-    this.trail = trail;
-    this.renderers = renderers;
-    this.isProxy = isProxy;
+    this.svgRenderer = svgRenderer;
+    this.canvasRenderer = canvasRenderer;
     this.isUnderCanvasCache;
     
-    this.nextRenderers = null; // will be filled with Array?
+    this.isBackbone = false;
+    this.isBackboneTransformed = false;
+    this.isCanvasCache = false;
+    this.isCacheShared = false;
     
-    this.backbone = false;
-    this.canvasCache = false;
-    this.cacheShared = false;
-    this.splits = false;
-    this.renderer = null;
-    this.cacheRenderer = null;
-    this.transformBaseTrail = transformBaseTrail;
-    this.nextTransformBaseTrail = transformBaseTrail; // what descendant states will have as their base trail. affected by CSS transformed backbones and single caches
-    this.backboneTransformed = false;
+    this.selfRenderer = null;
+    this.groupRenderer = null;
+    this.sharedCacheRenderer = null;
     
     var hints = node.hints || {}; // TODO: reduce allocation here
     
-    if ( !isProxy ) {
-      // check if we need a backbone or cache
-      if ( node.opacity !== 1 || hints.requireElement || hints.cssTransformBackbone ) {
-        this.backbone = true;
-        this.backboneTransformed = !!hints.cssTransformBackbone; // for now, only trigger CSS transform if we have the specific hint
-        if ( this.backboneTransformed ) {
-          // everything under here should not apply transforms from this trail, but only any transforms beneath it
-          this.nextTransformBaseTrail = trail;
-        }
-        this.renderer = scenery.Renderer.DOM; // probably won't be used
-        this.nextRenderers = renderers;
-      } else if ( hints.canvasCache ) {
-        if ( combinedBitmask & scenery.bitmaskSupportsCanvas !== 0 ) {
-          this.canvasCache = true;
-          if ( hints.singleCache ) {
-            this.cacheShared = true;
-            this.nextTransformBaseTrail = new scenery.Trail();
-          }
-          this.renderer = scenery.Renderer.Canvas; // TODO: allow SVG (toDataURL) and DOM (direct Canvas)
-          this.nextRenderers = [scenery.Renderer.Canvas]; // TODO: full resolution!
-        } else {
-          assert && assert( false, 'Attempting to canvas cache when nodes underneath can\'t be rendered with Canvas' );
-        }
+    // check if we need a backbone or cache
+    if ( node.opacity !== 1 || hints.requireElement || hints.cssTransformBackbone ) {
+      this.isBackbone = true;
+      this.isBackboneTransformed = !!hints.cssTransformBackbone; // for now, only trigger CSS transform if we have the specific hint
+      this.groupRenderer = scenery.Renderer.bitmaskDOM | ( hints.forceAcceleration ? Renderer.bitmaskForceAcceleration : 0 ); // probably won't be used
+    } else if ( hints.canvasCache ) {
+      // everything underneath needs to be renderable with Canvas, otherwise we cannot cache
+      assert && assert( ( combinedBitmask & scenery.bitmaskSupportsCanvas ) !== 0, 'hints.canvasCache provided, but not all node contents can be rendered with Canvas under ' + node.constructor.name );
+      
+      // TODO: handling of transformed caches differently than aligned caches?
+      
+      this.isCanvasCache = true;
+      if ( hints.singleCache && !isShared ) {
+        // TODO: scale options - fixed size, match highest resolution (adaptive), or mipmapped
+        
+        // everything underneath needs to guarantee that its bounds are valid
+        assert && assert( ( combinedBitmask & scenery.bitmaskBoundsValid ) !== 0, 'hints.singleCache provided, but not all node contents have valid bounds under ' + node.constructor.name );
+        this.isCacheShared = true;
       }
+      this.selfRenderer = scenery.Renderer.bitmaskCanvas; // TODO: allow SVG (toDataURL) and DOM (direct Canvas)
     }
     
-    if ( !this.backbone && !this.canvasCache ) {
-      if ( hints.layerSplit ) {
-        this.splits = true;
-      }
-      
-      // if a node isn't painted (and no backbone/cache), we'll leave the renderer as null
-      if ( node.isPainted() ) {
-        // pick the top-most renderer that will work
-        for ( var i = renderers.length - 1; i >= 0; i-- ) {
-          var renderer = renderers[i];
-          if ( renderer.bitmask & node._rendererBitmask !== 0 ) {
-            this.renderer = renderer;
-            break;
-          }
+    if ( node.isPainted() ) {
+      // TODO: figure out preferred rendering order
+      // pick the top-most renderer that will work
+      for ( var i = renderers.length - 1; i >= 0; i-- ) {
+        var renderer = renderers[i];
+        if ( renderer.bitmask & node._rendererBitmask !== 0 ) {
+          this.selfRenderer = renderer;
+          break;
         }
       }
-      
-      this.nextRenderers = renderers;
     }
   };
-  RenderState.TestState.prototype = {
-    constructor: RenderState.TestState,
+  RenderState.RegularState.prototype = {
+    constructor: RenderState.RegularState,
     
-    isBackbone: function() {
-      return this.backbone;
-    },
-    
-    isCanvasCache: function() {
-      return this.canvasCache;
-    },
-    
-    isCacheShared: function() {
-      return this.cacheShared;
-    },
-    
-    requestsSplit: function() {
-      return this.splits;
-    },
-    
-    getStateForDescendant: function( trail ) {
-      if ( this.backbone || this.canvasCache ) {
-        // proxy instance
-        assert && assert( trail === this.trail, 'backbone/cache trail should be passed in again for the proxy instance' );
-        // TODO: full resolution handling
-        return new RenderState.TestState( trail, this.nextRenderers, true, true, this.nextTransformBaseTrail ); // TODO: allocation
-      } else {
-        return new RenderState.TestState( trail, this.nextRenderers, false, this.isUnderCanvasCache, this.nextTransformBaseTrail ); // TODO: allocation
-      }
-    },
-    
-    getPaintedRenderer: function() {
-      return this.renderer;
-    },
-    
-    getCacheRenderer: function() {
-      return this.renderer;
-    },
-    
-    getTransformBaseTrail: function() {
-      return this.transformBaseTrail;
-    },
-    
-    isBackboneTransformed: function() {
-      return this.backboneTransformed;
+    getStateForDescendant: function( node ) {
+      // TODO: allocation (pool this)
+      return new RenderState.RegularState(
+        node,
+        
+        // default SVG renderer settings
+        this.svgRenderer,
+        
+        // default Canvas renderer settings
+        this.canvasRenderer,
+        
+        // isUnderCanvasCache
+        this.isUnderCanvasCache || this.isCanvasCache,
+        
+        // isShared. No direct descendant is shared, since we create those specially with a new state from createSharedCacheState
+        false
+      );
     }
+  };
+  
+  RenderState.RegularState.createRootState = function( node ) {
+    var baseState = new RenderState.RegularState(
+      node,                   // trail
+      Renderer.bitmaskSVG,    // default SVG renderer settings
+      Renderer.bitmaskCanvas, // default Canvas renderer settings
+      false,                  // isUnderCanvasCache
+      false                   // isShared
+    );
+    return baseState;
+  };
+  
+  RenderState.RegularState.createSharedCacheState = function( node ) {
+    var baseState = new RenderState.RegularState(
+      node,                     // trail
+      null,                     // no SVG renderer settings needed
+      Renderer.bitmaskCanvas,   // default Canvas renderer settings
+      true,                     // isUnderCanvasCache
+      true                      // isShared (since we are creating the shared one, not the individual instances referencing it)
+    );
+    return baseState;
   };
   
   return RenderState;

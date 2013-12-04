@@ -316,6 +316,9 @@ define( function( require ) {
       // always have SVG support (for now?)
       bitmask |= scenery.bitmaskSupportsSVG;
       
+      // for now, nothing about the stroke prevents us from having valid bounds (we compute these offsets)
+      bitmask |= scenery.bitmaskBoundsValid;
+      
       if ( !this.hasStroke() ) {
         // allow DOM support if there is no stroke
         bitmask |= scenery.bitmaskSupportsDOM;

@@ -13,12 +13,21 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   scenery.Block = function Block() {
+    this.parentBlock = null;
+    this.childrenBlocks = [];
     
+    this.previousBlock = null;
+    this.nextBlock = null;
   };
   var Block = scenery.Block;
   
+  // API:
   inherit( Object, Block, {
     
+    // for direct DOM / backbone blocks, anything that supports a direct DOM element output
+    getDomElement: function() {
+      
+    }
   } );
   
   return Block;

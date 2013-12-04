@@ -25,6 +25,7 @@ define( function( require ) {
   var Display = scenery.Display;
   
   // recursively compute the bitmask intersection (bitwise AND) for a node and all of its children, and store it to that node's _subtreeRendererBitmask
+  // TODO: partial updates (and speed for that)
   function recursiveUpdateRendererBitmask( node ) {
     var bitmask = scenery.bitmaskAll;
     bitmask &= node._rendererBitmask;
@@ -41,124 +42,101 @@ define( function( require ) {
   }
   
   // display instance linked list ops
-  function connectInstances( a, b ) {
-    a.nextPainted = b;
-    b.previousPainted = a;
+  function connectDrawables( a, b ) {
+    a.nextDrawable = b;
+    b.previousDrawable = a;
   }
   
-  function createBackbone( display, trail, state ) {
-    var blockInstance = new scenery.DisplayInstance( trail );
-    blockInstance.state = state;
-    blockInstance.renderer = scenery.Renderer.DOM;
+  function createInstance( display, trail, state, parentInstance ) {
+    var instance = new scenery.DisplayInstance( trail );
     
-    createProxyInstance( display, trail, state, blockInstance );
-    return blockInstance;
-  }
-  
-  function createCanvasCache( display, trail, state ) {
-    var blockInstance = new scenery.DisplayInstance( trail );
-    blockInstance.state = state;
-    blockInstance.renderer = state.getCacheRenderer();
+    var isSharedCache = state.isCanvasCache && state.isCacheShared;
     
-    createProxyInstance( display, trail, state, blockInstance );
-    return blockInstance;
-  }
-  
-  function createSharedCanvasCache( display, trail, state ) {
-    var instanceKey = trail.lastNode().getId();
-    var sharedInstance = display._sharedCanvasInstances[instanceKey];
-    if ( sharedInstance ) {
+    var node = trail.lastNode();
+    instance.state = state;
+    instance.parent = parentInstance;
+    
+    if ( isSharedCache ) {
+      var instanceKey = trail.lastNode().getId();
+      var sharedInstance = display._sharedCanvasInstances[instanceKey];
+      
       // TODO: assert state is the same?
       // TODO: increment reference counting?
-      return sharedInstance;
-    } else {
-      var blockInstance = new scenery.DisplayInstance( new scenery.Trail( trail.lastNode() ) );
-      blockInstance.state = state;
-      blockInstance.renderer = state.getCacheRenderer();
+      if ( !sharedInstance ) {
+        var sharedNode = trail.lastNode();
+        sharedInstance = createInstance( display, new scenery.Trail( sharedNode ), scenery.RenderState.RegularState.createSharedCacheState( sharedNode ), null );
+        display._sharedCanvasInstances[instanceKey] = sharedInstance;
+        // TODO: reference counting?
+      }
       
-      createProxyInstance( display, trail, state, blockInstance );
-      // TODO: increment reference counting?
-      display._sharedCanvasInstances[instanceKey] = blockInstance;
-      return blockInstance;
-    }
-  }
-  
-  // For when we have a block/stub instance (for a backbone/cache), and we want an instance for the same trail, but to render itself and its subtree.
-  // Basically, this involves another getStateForDescendant (called in createInstance), and for now we set up proxy variables
-  function createProxyInstance( display, trail, state, blockInstance ) {
-    var instance = createInstance( display, trail, state );
-    // TODO: better way of handling this?
-    blockInstance.proxyChild = instance;
-    instance.proxyParent = blockInstance;
-    
-    blockInstance.firstPainted = blockInstance;
-    blockInstance.lastPainted = blockInstance;
-    return instance; // if we need it
-  }
-  
-  function createSplitInstance() {
-    return new scenery.DisplayInstance( null ); // null trail
-  }
-  
-  function createInstance( display, trail, ancestorState ) {
-    var state = ancestorState.getStateForDescendant( trail );
-    if ( state.isBackbone() ) {
-      return createBackbone( display, trail, state );
-    } else if ( state.isCanvasCache() ) {
-      return state.isCacheShared() ? createSharedCanvasCache( display, trail, state ) : createCanvasCache( display, trail, state );
+      // TODO: do something with the sharedInstance!
+      var sharedCacheRenderer = state.sharedCacheRenderer;
+      instance.sharedCacheDrawable = // TODO create
     } else {
-      var instance = new scenery.DisplayInstance( trail );
-      var node = trail.lastNode();
-      instance.state = state;
-      instance.renderer = node.isPainted() ? state.getPaintedRenderer() : null;
+      var currentDrawable = null;
       
-      var currentPaintedInstance = null;
-      if ( instance.isEffectivelyPainted() ) {
-        currentPaintedInstance = instance;
-        instance.firstPainted = instance;
+      if ( node.isPainted() ) {
+        var selfRenderer = state.selfRenderer;
+        instance.selfDrawable = // TODO
+        
+        // TODO: complete setting up self drawable
+        
+        currentDrawable = instance.selfDrawable;
       }
       
       var children = trail.lastNode().children;
       var numChildren = children.length;
       for ( var i = 0; i < numChildren; i++ ) {
-        var childInstance = createInstance( display, trail.copy().addDescendant( children[i], i ), state );
+        // create a child instance
+        var child = children[i];
+        var childInstance = createInstance( display, trail.copy().addDescendant( child, i ), state.getStateForDescendant( child ), instance );
         instance.appendInstance( childInstance );
-        if ( childInstance.firstPainted ) {
-          assert && assert( childInstance.lastPainted, 'Any display instance with firstPainted should also have lastPainted' );
-          
-          if ( currentPaintedInstance ) {
-            connectInstances( currentPaintedInstance, childInstance.firstPainted );
+        
+        // figure out what the first and last drawable should be hooked into for the child
+        var firstChildDrawable = null;
+        var lastChildDrawable = null;
+        if ( childInstance.groupDrawable ) {
+          // if there is a group (e.g. non-shared cache or backbone), use it
+          firstChildDrawable = lastChildDrawable = childInstance.groupDrawable;
+        } else if ( childInstance.sharedCacheDrawable ) {
+          // if there is a shared cache drawable, use it
+          firstChildDrawable = lastChildDrawable = childInstance.sharedCacheDrawable;
+        } else if ( childInstance.firstDrawable ) {
+          // otherwise, if they exist, pick the node's first/last directly
+          assert && assert( childInstance.lastDrawable, 'Any display instance with firstDrawable should also have lastDrawable' );
+          firstChildDrawable = childInstance.firstDrawable;
+          lastChildDrawable = childInstance.lastDrawable;
+        }
+        
+        // if there are any drawables for that child, link them up in our linked list
+        if ( firstChildDrawable ) {
+          if ( currentDrawable ) {
+            // there is already an end of the linked list, so just append to it
+            connectDrawables( currentDrawable, firstChildDrawable );
           } else {
-            instance.firstPainted = childInstance.firstPainted;
+            // start out the linked list
+            instance.firstDrawable = firstChildDrawable;
           }
-          currentPaintedInstance = childInstance.lastPainted;
+          // update the last drawable of the linked list
+          currentDrawable = lastChildDrawable;
         }
       }
-      
-      if ( currentPaintedInstance !== null ) {
-        instance.lastPainted = currentPaintedInstance;
+      if ( currentDrawable !== null ) {
+        // finish setting up references to the linked list (now firstDrawable and lastDrawable should be set properly)
+        instance.lastDrawable = currentDrawable;
       }
       
-      if ( state.requestsSplit() ) {
-        if ( instance.firstPainted ) {
-          var beforeSplit = createSplitInstance();
-          var afterSplit = createSplitInstance();
-          connectInstances( beforeSplit, instance.firstPainted );
-          connectInstances( instance.lastPainted, afterSplit );
-          instance.firstPainted = beforeSplit;
-          instance.lastPainted = afterSplit;
-        } else {
-          instance.firstPainted = instance.lastPainted = createSplitInstance();
-        }
+      var groupRenderer = state.groupRenderer;
+      if ( state.isBackbone ) {
+        assert && assert( !isCanvasCache, 'For now, disallow an instance being a backbone and a canvas cache, since it has no performance benefits' );
+        
+        instance.groupDrawable = // TODO create, use groupRenderer
+      } else if ( state.isCanvasCache ) {
+        instance.groupDrawable = // TODO create non-shared cache, use groupRenderer
       }
-      
-      return instance;
     }
-  }
-  
-  function createBlocks( display, firstInstance, lastInstance, renderer ) {
-    throw new Error( 'createBlocks unimplemented' );
-    //return [];
+    
+    return instance;
   }
   
   inherit( Object, Display, {
@@ -172,14 +150,7 @@ define( function( require ) {
       // compute updated _subtreeRendererBitmask for every Node // TODO: add and use dirty flag for this, and decide how the flags get set!
       recursiveUpdateRendererBitmask( this._rootNode );
       
-      var baseTrail = new scenery.Trail( this._rootNode );
-      var baseState = new scenery.RenderState.TestState( baseTrail, [
-        scenery.Renderer.DOM,
-        scenery.Renderer.Canvas,
-        scenery.Renderer.SVG,
-        new scenery.Trail()
-      ], false, false );
-      this._baseInstance = createBackbone( this, baseTrail, baseState );
+      this._baseInstance = createInstance( this, baseTrail, scenery.RenderState.RegularState.createRootState( this._rootNode ), null );
     }
   } );
   

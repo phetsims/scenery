@@ -33,6 +33,7 @@ define( function( require ) {
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate; // i.e. Object.create
   require( 'SCENERY/util/Font' );
   require( 'SCENERY/util/Util' ); // for canvasAccurateBounds and CSS transforms
+  require( 'SCENERY/util/CanvasContextWrapper' );
   
   // set up the container and text for testing text bounds quickly (using approximateSVGBounds)
   var svgTextSizeContainer = document.createElementNS( scenery.svgns, 'svg' );
@@ -130,6 +131,9 @@ define( function( require ) {
       if( !this._isHTML ) {
         bitmask |= scenery.bitmaskSupportsSVG;
       }
+      if ( this._boundsMethod === 'accurate' ) {
+        bitmask |= scenery.bitmaskBoundsValid;
+      }
       
       // fill and stroke will determine whether we have DOM text support
       bitmask |= scenery.bitmaskSupportsDOM;
@@ -149,6 +153,7 @@ define( function( require ) {
     },
     
     invalidateText: function() {
+      // TODO: handle text stroke for bounds!
       // investigate http://mudcu.be/journal/2011/01/html5-typographic-metrics/
       if ( this._isHTML || ( useDOMAsFastBounds && this._boundsMethod !== 'accurate' ) ) {
         this.invalidateSelf( this.approximateDOMBounds() );
@@ -217,6 +222,8 @@ define( function( require ) {
       // NOTE! reference SVG element at top of file copies createSVGElement!
       var element = document.createElementNS( scenery.svgns, 'text' );
       element.appendChild( document.createTextNode( '' ) );
+      
+      // TODO: flag adjustment for SVG qualities
       element.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
       element.setAttribute( 'text-rendering', 'geometricPrecision' );
       element.setAttribute( 'lengthAdjust', 'spacingAndGlyphs' );
@@ -321,6 +328,12 @@ define( function( require ) {
         context.font = node.font;
         context.direction = node.direction;
         context.fillText( node.text, 0, 0 );
+        if ( node.hasStroke() ) {
+          var fakeWrapper = new scenery.CanvasContextWrapper( null, context );
+          node.beforeCanvasStroke( fakeWrapper );
+          context.strokeText( node.text, 0, 0 );
+          node.afterCanvasStroke( fakeWrapper );
+        }
       }, {
         precision: 0.5,
         resolution: 128,

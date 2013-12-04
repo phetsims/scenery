@@ -16,37 +16,28 @@ define( function( require ) {
   
   var globalIdCounter = 1;
   
-  /**
-   * @param {DisplayInstance|null} parent
-   */
   scenery.DisplayInstance = function DisplayInstance( trail ) {
     this.id = globalIdCounter++;
     this.trail = trail;
     this.parent = null; // will be set as needed
     this.children = [];
-    this.proxyChild = null;
-    this.proxyParent = null;
+    this.childrenTracks = []; // TODO use this for tracking what children changes occurred, and thus where we need to stitch
+    
     this.state = null; // filled in with rendering state later
-    this.renderer = null; // filled in later
     
-    // references into the linked list of effectively painted instances (null if nothing is effectively painted under this, both self if we are effectively painted)
-    this.firstPainted = null;
-    this.lastPainted = null;
+    this.selfDrawable = null;
+    this.groupDrawable = null; // e.g. backbone or non-shared cache
+    this.sharedCacheDrawable = null;
     
-    // basically, our linked list of effectively painted instances
-    this.nextPainted = null;
-    this.previousPainted = null;
+    // references into the linked list of drawables (null if nothing is drawable under this)
+    this.firstDrawable = null;
+    this.lastDrawable = null;
   };
   var DisplayInstance = scenery.DisplayInstance;
   
   inherit( Object, DisplayInstance, {
     appendInstance: function( instance ) {
       this.children.push( instance );
-    },
-    
-    // since backbone/canvas caches can create stub instances that are effectively painted
-    isEffectivelyPainted: function() {
-      return this.renderer !== null;
     }
   } );
   

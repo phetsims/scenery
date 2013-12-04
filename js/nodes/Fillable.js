@@ -181,6 +181,9 @@ define( function( require ) {
       // we always have Canvas support?
       bitmask |= scenery.bitmaskSupportsCanvas;
       
+      // nothing in the fill can change whether its bounds are valid
+      bitmask |= scenery.bitmaskBoundsValid;
+      
       if ( !this._fill ) {
         // if there is no fill, it is supported by DOM
         bitmask |= scenery.bitmaskSupportsDOM;
