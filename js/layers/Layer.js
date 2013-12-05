@@ -66,8 +66,7 @@ define( function( require ) {
     this.baseNodeBoundsListener = function( bounds ) {
       layer.baseNodeInternalBoundsChange(); // TODO: verify that this is working as expected
     };
-    this.baseNode.addEventListener( 'selfBounds', this.baseNodeBoundsListener );
-    this.baseNode.addEventListener( 'childBounds', this.baseNodeBoundsListener );
+    this.baseNode.addEventListener( 'localBounds', this.baseNodeBoundsListener );
     
     this.fitToBounds = this.usesPartialCSSTransforms || this.cssTransform;
     assert && assert( this.fitToBounds || this.baseNode === this.scene, 'If the baseNode is not the scene, we need to fit the bounds' );
@@ -191,8 +190,7 @@ define( function( require ) {
       this.disposed = true;
       
       // clean up listeners
-      this.baseNode.removeEventListener( 'selfBounds', this.baseNodeBoundsListener );
-      this.baseNode.removeEventListener( 'childBounds', this.baseNodeBoundsListener );
+      this.baseNode.removeEventListener( 'localBounds', this.baseNodeBoundsListener );
     },
     
     getName: function() {

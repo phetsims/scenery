@@ -14,6 +14,7 @@ define( function( require ) {
   var eventNames = [
     'selfBounds',
     'childBounds',
+    'localBounds',
     'bounds',
     'resize',
     'boundsAccuracy'

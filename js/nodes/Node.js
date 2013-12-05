@@ -109,10 +109,11 @@ define( function( require ) {
     
     // bounds handling
     this._bounds = Bounds2.NOTHING;      // for this node and its children, in "parent" coordinates
+    this._localBounds = Bounds2.NOTHING; // for this node and its children, in "local" coordinates
     this._selfBounds = Bounds2.NOTHING;  // just for this node, in "local" coordinates
     this._childBounds = Bounds2.NOTHING; // just for children, in "local" coordinates
     this._boundsDirty = true;
-    this._selfBoundsDirty = this.isPainted();
+    this._localBoundsDirty = true;
     this._childBoundsDirty = true;
     
     // Similar to bounds, but includes any mouse/touch areas respectively. They are validated separately (immediately after normal bounds validation),
@@ -341,14 +342,6 @@ define( function( require ) {
       var that = this;
       var i;
       
-      if ( this._selfBoundsDirty ) {
-        // note: this should only be triggered if the bounds were actually changed, since we have a guard in place at invalidateSelf()
-        this._selfBoundsDirty = false;
-        
-        // TODO: consider changing to parameter object (that may be a problem for the GC overhead)
-        this.fireEvent( 'selfBounds', this._selfBounds );
-      }
-      
       // validate bounds of children if necessary
       if ( this._childBoundsDirty ) {
         
@@ -371,9 +364,22 @@ define( function( require ) {
         // run this before firing the event
         this._childBoundsDirty = false;
         
+        // TODO: don't execute this "if" comparison if there are no listeners?
         if ( !this._childBounds.equals( oldChildBounds ) ) {
           // TODO: consider changing to parameter object (that may be a problem for the GC overhead)
           this.fireEvent( 'childBounds', this._childBounds );
+        }
+      }
+      
+      if ( this._localBoundsDirty ) {
+        this._localBoundsDirty = false; // we only need this to set local bounds as dirty
+        
+        var oldLocalBounds = this._localBounds;
+        this._localBounds = this._selfBounds.union( this._childBounds ); // TODO: remove allocation
+        
+        // TODO: don't execute this "if" comparison if there are no listeners?
+        if ( !this._localBounds.equals( oldLocalBounds ) ) {
+          this.fireEvent( 'localBounds', this._localBounds );
         }
       }
       
@@ -404,7 +410,7 @@ define( function( require ) {
       }
       
       // if there were side-effects, run the validation again until we are clean
-      if ( this._selfBoundsDirty || this._childBoundsDirty || this._boundsDirty ) {
+      if ( this._childBoundsDirty || this._boundsDirty ) {
         // TODO: if there are side-effects in listeners, this could overflow the stack. we should report an error instead of locking up
         this.validateBounds();
       }
@@ -432,7 +438,7 @@ define( function( require ) {
     validateMouseBounds: function() {
       var that = this;
       
-      assert && assert( !this._selfBoundsDirty && !this._childBoundsDirty && !this._boundsDirty, 'Bounds must be validated before calling validateMouseBounds' );
+      assert && assert( !this._childBoundsDirty && !this._boundsDirty, 'Bounds must be validated before calling validateMouseBounds' );
       
       if ( this._mouseBoundsDirty ) {
         var hasMouseAreas = false;
@@ -473,7 +479,7 @@ define( function( require ) {
     validateTouchBounds: function() {
       var that = this;
       
-      assert && assert( !this._selfBoundsDirty && !this._childBoundsDirty && !this._boundsDirty, 'Bounds must be validated before calling validateTouchBounds' );
+      assert && assert( !this._childBoundsDirty && !this._boundsDirty, 'Bounds must be validated before calling validateTouchBounds' );
       
       if ( this._touchBoundsDirty ) {
         var hasTouchAreas = false;
@@ -556,6 +562,7 @@ define( function( require ) {
       // don't bother updating if we've already been tagged
       if ( !this._childBoundsDirty ) {
         this._childBoundsDirty = true;
+        this._localBoundsDirty = true;
         this._mouseBoundsDirty = true;
         this._touchBoundsDirty = true;
         var i = this._parents.length;
@@ -609,11 +616,14 @@ define( function( require ) {
       // if these bounds are different than current self bounds
       if ( !this._selfBounds.equals( newBounds ) ) {
         // set repaint flags
-        this._selfBoundsDirty = true;
+        this._localBoundsDirty = true;
         this.invalidateBounds();
         
         // record the new bounds
         this._selfBounds = newBounds;
+        
+        // fire the event immediately
+        this.fireEvent( 'selfBounds', this._selfBounds );
       }
       
       this.invalidatePaint();
@@ -659,7 +669,8 @@ define( function( require ) {
     
     // local coordinate frame bounds
     getLocalBounds: function() {
-      return this.getSelfBounds().union( this.getChildBounds() );
+      this.validateBounds();
+      return this._localBounds;
     },
     
     // the bounds for content in render(), in "parent" coordinates
