@@ -601,7 +601,7 @@ define( function( require ) {
     
     // called to notify that self rendering will display different paint, with possibly different bounds
     invalidateSelf: function( newBounds ) {
-      assert && assert( newBounds.isEmpty() || newBounds.isFinite() , "Bounds must be empty or finite in invalidateSelf");
+      assert && assert( newBounds.isEmpty() || newBounds.isFinite(), 'Bounds must be empty or finite in invalidateSelf' );
       
       // mark the old region to be repainted, regardless of whether the actual bounds change
       this.notifyBeforeSelfChange();

@@ -94,7 +94,7 @@ define( function( require ) {
   Renderer.bitmaskCanvasBeforeAfterBounds = 0x0008000;
   
   // SVG optimizations group (2 bits)
-  Renderer.bitmaskSVGOptimizations        = 0x0030000
+  Renderer.bitmaskSVGOptimizations        = 0x0030000;
   Renderer.bitmaskSVGOptimizeAuto         = 0x0000000; // auto for text-rendering/shape-rendering/image-rendering
   Renderer.bitmaskSVGOptimizeSpeed        = 0x0010000; // optimizeSpeed for text-rendering/shape-rendering/image-rendering
   Renderer.bitmaskSVGOptimizeQuality      = 0x0020000; // optimizeQuality for shape-rendering/image-rendering, geometricPrecision for text-rendering

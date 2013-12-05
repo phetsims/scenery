@@ -18,10 +18,10 @@ define( function( require ) {
   // pass a canvasBounds option if you want to specify the self bounds
   scenery.CanvasNode = function CanvasNode( options ) {
     Node.call( this, options );
-    this.setRendererBitmask( scenery.bitmaskSupportsCanvas );
+    this.setRendererBitmask( scenery.bitmaskBoundsValid | scenery.bitmaskSupportsCanvas );
     
     if ( options.canvasBounds ) {
-      this.setCanvasBounds( scenery.bitmaskBoundsValid | options.canvasBounds );
+      this.setCanvasBounds( options.canvasBounds );
     }
   };
   var CanvasNode = scenery.CanvasNode;
