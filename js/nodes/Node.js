@@ -769,11 +769,6 @@ define( function( require ) {
     trailUnderPoint: function( point, options, recursive, hasListenerEquivalentSelfOrInAncestor ) {
       assert && assert( point, 'trailUnderPointer requires a point' );
       
-      // TODO: consider changing the trailUnderPoint API so that these are fixed (and add an option to override trailUnderPoint handling, like in BAM)
-      var isMouse = options && options.isMouse;
-      var isTouch = options && options.isTouch;
-      var isPen = options && options.isPen;
-      
       hasListenerEquivalentSelfOrInAncestor = hasListenerEquivalentSelfOrInAncestor || this.hasInputListenerEquivalent();
       
       // prune if possible (usually invisible, pickable:false, no input listeners that would be triggered by this node or anything under it, etc.)
@@ -781,22 +776,26 @@ define( function( require ) {
         return null;
       }
       
-      // update bounds for pruning, but only do so if this isn't a recursive call from trailUnderPoint
-      if ( !recursive ) {
-        this.validateBounds();
-        if ( isMouse ) { this.validateMouseBounds( false ); }
-        if ( isTouch ) { this.validateTouchBounds( false ); }
+      // TODO: consider changing the trailUnderPoint API so that these are fixed (and add an option to override trailUnderPoint handling, like in BAM)
+      var useMouseAreas = options && options.isMouse;
+      var useTouchAreas = options && ( options.isTouch || options.isPen );
+      
+      var pruningBounds;
+      // only validate the needed type of bounds. definitely don't do a full 'validateBounds' when testing mouse/touch, since there are large pruned areas,
+      // and we want to avoid computing bounds where not needed (think something that is animated and expensive to compute)
+      if ( useMouseAreas ) {
+        !recursive && this.validateMouseBounds( false ); // update mouse bounds for pruning if we aren't being called from trailUnderPoint (ourself)
+        pruningBounds = this._mouseBounds;
+      } else if ( useTouchAreas ) {
+        !recursive && this.validateTouchBounds( false ); // update touch bounds for pruning if we aren't being called from trailUnderPoint (ourself)
+        pruningBounds = this._touchBounds;
+      } else {
+        !recursive && this.validateBounds(); // update general bounds for pruning if we aren't being called from trailUnderPoint (ourself)
+        pruningBounds = this._bounds;
       }
       
-      var hasHitAreas = ( isMouse && this._mouseBounds ) || ( isTouch && this._touchBounds ) || isPen;
-      
       // bail quickly if this doesn't hit our computed bounds
-      if ( hasHitAreas ? (
-            // if we have hit areas, prune based on the respective hit bounds (mouseBounds/touchBounds)
-            ( isMouse && !this._mouseBounds.containsPoint( point ) ) ||
-            ( isTouch && !this._touchBounds.containsPoint( point ) )
-            // otherwise, prune based on the normal bounds
-          ) : !this._bounds.containsPoint( point ) ) {
+      if ( !pruningBounds.containsPoint( point ) ) {
         return null; // not in our bounds, so this point can't possibly be contained
       }
       
@@ -807,42 +806,37 @@ define( function( require ) {
       var localPoint = this._transform.getInverse().multiplyVector2( Vector2.createFromPool( point.x, point.y ) );
       // var localPoint = this.parentToLocalPoint( point );
       
-      // check children first, since they are rendered later
-      if ( this._children.length > 0 && ( hasHitAreas || this._childBounds.containsPoint( localPoint ) ) ) {
+      // check children first, since they are rendered later. don't bother checking childBounds, we usually are using mouse/touch.
+      // manual iteration here so we can return directly, and so we can iterate backwards (last node is in front)
+      for ( var i = this._children.length - 1; i >= 0; i-- ) {
+        var child = this._children[i];
         
-        // manual iteration here so we can return directly, and so we can iterate backwards (last node is in front)
-        for ( var i = this._children.length - 1; i >= 0; i-- ) {
-          var child = this._children[i];
-          
-          var childHit = child.trailUnderPoint( localPoint, options, true, hasListenerEquivalentSelfOrInAncestor );
-          
-          // the child will have the point in its parent's coordinate frame (i.e. this node's frame)
-          if ( childHit ) {
-            childHit.addAncestor( this, i );
-            localPoint.freeToPool();
-            return childHit;
-          }
+        var childHit = child.trailUnderPoint( localPoint, options, true, hasListenerEquivalentSelfOrInAncestor );
+        
+        // the child will have the point in its parent's coordinate frame (i.e. this node's frame)
+        if ( childHit ) {
+          childHit.addAncestor( this, i );
+          localPoint.freeToPool();
+          return childHit;
         }
       }
 
       // tests for mouse and touch hit areas before testing containsPointSelf
-      if ( hasHitAreas ) {
-        if ( isMouse && this._mouseArea ) {
-          // NOTE: both Bounds2 and Shape have containsPoint! We use both here!
-          result = this._mouseArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
-          localPoint.freeToPool();
-          return result;
-        }
-        if ( ( isTouch || isPen ) && this._touchArea ) {
-          // NOTE: both Bounds2 and Shape have containsPoint! We use both here!
-          result = this._touchArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
-          localPoint.freeToPool();
-          return result;
-        }
+      if ( useMouseAreas && this._mouseArea ) {
+        // NOTE: both Bounds2 and Shape have containsPoint! We use both here!
+        result = this._mouseArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
+        localPoint.freeToPool();
+        return result;
+      }
+      if ( useTouchAreas && this._touchArea ) {
+        // NOTE: both Bounds2 and Shape have containsPoint! We use both here!
+        result = this._touchArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
+        localPoint.freeToPool();
+        return result;
       }
       
-      // didn't hit our children, so check ourself as a last resort
-      if ( hasHitAreas || this._selfBounds.containsPoint( localPoint ) ) {
+      // didn't hit our children, so check ourself as a last resort. check our selfBounds first, to avoid a potentially more expensive operation
+      if ( this._selfBounds.containsPoint( localPoint ) ) {
         if ( this.containsPointSelf( localPoint ) ) {
           localPoint.freeToPool();
           return new scenery.Trail( this );
