@@ -14,14 +14,11 @@ define( function( require ) {
   var Block = require( 'SCENERY/display/Block' );
   
   scenery.BackboneBlock = function BackboneBlock() {
-    this._domElement = document.createElement( 'div' );
+    this.domElement = document.createElement( 'div' );
   };
   var BackboneBlock = scenery.BackboneBlock;
   
   inherit( Block, BackboneBlock, {
-    getDomElement: function() {
-      return this._domElement;
-    }
   } );
   
   return BackboneBlock;

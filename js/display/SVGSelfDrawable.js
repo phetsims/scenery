@@ -5,6 +5,8 @@
  *
  * Target API (responsible for the creation and rendering of the SVG element, along with sending feature-dirty flags):
  * {
+ *   ??? createSVGSelfDrawable: function( svg, defs, group ) : Handle{ svgElement: <>, <custom state and flags> }
+ *   
  *   createSVGFragment: function() : SVGElement
  *   << TODO way of registering for state changes. allow target to control object with its own flags, so we don't need dynamic name lookups. (text could have state.font, state.text, etc.)
  *      need to send an event on transition from clean=>dirty so we can mark the change as needing to be updated >>
@@ -24,15 +26,15 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
   
-  scenery.SVGDrawable = function SVGDrawable( trail, renderer, transformTrail, target ) {
+  scenery.SVGSelfDrawable = function SVGSelfDrawable( trail, renderer, transformTrail, target ) {
     Drawable.call( this, trail, renderer, transformTrail );
     
     this.target = target;
   };
-  var SVGDrawable = scenery.SVGDrawable;
+  var SVGSelfDrawable = scenery.SVGSelfDrawable;
   
-  inherit( Drawable, SVGDrawable, {
+  inherit( Drawable, SVGSelfDrawable, {
   } );
   
-  return SVGDrawable;
+  return SVGSelfDrawable;
 } );

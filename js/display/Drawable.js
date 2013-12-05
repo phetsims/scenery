@@ -27,12 +27,7 @@ define( function( require ) {
   var Drawable = scenery.Drawable;
   
   inherit( Object, Drawable, {
-    /*---------------------------------------------------------------------------*
-    * DOM API
-    *----------------------------------------------------------------------------*/
-    
-    // for DOM-renderer drawables
-    getDomElement: function() {
+    dispose: function() {
       
     },
     

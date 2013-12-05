@@ -58,12 +58,14 @@ define( function( require ) {
     
     var hints = node.hints || {}; // TODO: reduce allocation here
     
+    var isTransparent = node.opacity !== 1;
+    
     // check if we need a backbone or cache
-    if ( node.opacity !== 1 || hints.requireElement || hints.cssTransformBackbone || hints.split ) {
+    if ( !isUnderCanvasCache && ( isTransparent || hints.requireElement || hints.cssTransformBackbone || hints.split ) ) {
       this.isBackbone = true;
       this.isBackboneTransformed = !!hints.cssTransformBackbone; // for now, only trigger CSS transform if we have the specific hint
       this.groupRenderer = scenery.Renderer.bitmaskDOM | ( hints.forceAcceleration ? Renderer.bitmaskForceAcceleration : 0 ); // probably won't be used
-    } else if ( hints.canvasCache ) {
+    } else if ( isTransparent || hints.canvasCache ) {
       // everything underneath needs to be renderable with Canvas, otherwise we cannot cache
       assert && assert( ( combinedBitmask & scenery.bitmaskSupportsCanvas ) !== 0, 'hints.canvasCache provided, but not all node contents can be rendered with Canvas under ' + node.constructor.name );
       
