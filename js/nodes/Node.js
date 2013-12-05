@@ -769,7 +769,10 @@ define( function( require ) {
     trailUnderPoint: function( point, options, recursive, hasListenerEquivalentSelfOrInAncestor ) {
       assert && assert( point, 'trailUnderPointer requires a point' );
       
-      if ( options === undefined ) { options = {}; }
+      // TODO: consider changing the trailUnderPoint API so that these are fixed (and add an option to override trailUnderPoint handling, like in BAM)
+      var isMouse = options && options.isMouse;
+      var isTouch = options && options.isTouch;
+      var isPen = options && options.isPen;
       
       hasListenerEquivalentSelfOrInAncestor = hasListenerEquivalentSelfOrInAncestor || this.hasInputListenerEquivalent();
       
@@ -780,16 +783,16 @@ define( function( require ) {
       
       // update bounds for pruning
       this.validateBounds();
-      if ( options.isMouse ) { this.validateMouseBounds( false ); }
-      if ( options.isTouch ) { this.validateTouchBounds( false ); }
+      if ( isMouse ) { this.validateMouseBounds( false ); }
+      if ( isTouch ) { this.validateTouchBounds( false ); }
       
-      var hasHitAreas = options && ( ( options.isMouse && this._mouseBounds ) || ( options.isTouch && this._touchBounds ) || options.isPen );
+      var hasHitAreas = ( isMouse && this._mouseBounds ) || ( isTouch && this._touchBounds ) || isPen;
       
       // bail quickly if this doesn't hit our computed bounds
       if ( hasHitAreas ? (
             // if we have hit areas, prune based on the respective hit bounds (mouseBounds/touchBounds)
-            ( options.isMouse && !this._mouseBounds.containsPoint( point ) ) ||
-            ( options.isTouch && !this._touchBounds.containsPoint( point ) )
+            ( isMouse && !this._mouseBounds.containsPoint( point ) ) ||
+            ( isTouch && !this._touchBounds.containsPoint( point ) )
             // otherwise, prune based on the normal bounds
           ) : !this._bounds.containsPoint( point ) ) {
         return null; // not in our bounds, so this point can't possibly be contained
@@ -822,13 +825,13 @@ define( function( require ) {
 
       // tests for mouse and touch hit areas before testing containsPointSelf
       if ( hasHitAreas ) {
-        if ( options.isMouse && this._mouseArea ) {
+        if ( isMouse && this._mouseArea ) {
           // NOTE: both Bounds2 and Shape have containsPoint! We use both here!
           result = this._mouseArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
           localPoint.freeToPool();
           return result;
         }
-        if ( ( options.isTouch || options.isPen ) && this._touchArea ) {
+        if ( ( isTouch || isPen ) && this._touchArea ) {
           // NOTE: both Bounds2 and Shape have containsPoint! We use both here!
           result = this._touchArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
           localPoint.freeToPool();
