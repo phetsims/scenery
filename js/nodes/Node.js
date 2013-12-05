@@ -781,10 +781,12 @@ define( function( require ) {
         return null;
       }
       
-      // update bounds for pruning
-      this.validateBounds();
-      if ( isMouse ) { this.validateMouseBounds( false ); }
-      if ( isTouch ) { this.validateTouchBounds( false ); }
+      // update bounds for pruning, but only do so if this isn't a recursive call from trailUnderPoint
+      if ( !recursive ) {
+        this.validateBounds();
+        if ( isMouse ) { this.validateMouseBounds( false ); }
+        if ( isTouch ) { this.validateTouchBounds( false ); }
+      }
       
       var hasHitAreas = ( isMouse && this._mouseBounds ) || ( isTouch && this._touchBounds ) || isPen;
       
