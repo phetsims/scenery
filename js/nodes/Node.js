@@ -116,14 +116,14 @@ define( function( require ) {
     this._localBoundsDirty = true;
     this._childBoundsDirty = true;
     
-    // Similar to bounds, but includes any mouse/touch areas respectively. They are validated separately (immediately after normal bounds validation),
-    // and are only non-null if there are mouseAreas/touchAreas in this node or any descendants. null indicates that the normal bounds can be treated
-    // as the mouse/touch bounds, and hit pruning can use those instead. These are needed because mouse/touch areas (and thus pruning bounds) can be
-    // larger than the actual bounds (display bounds, _bounds above)
-    this._mouseBounds = null;
-    this._mouseBoundsDirty = true;
-    this._touchBounds = null;
-    this._touchBoundsDirty = true;
+    // Similar to bounds, but includes any mouse/touch areas respectively, and excludes areas that would be pruned in hit-testing.
+    // They are validated separately (independent from normal bounds validation), but should now always be non-null (since we now properly handle pruning)
+    this._mouseBounds = Bounds2.NOTHING.copy(); // NOTE: MUTABLE! mouse/touch bounds are purely internal
+    this._touchBounds = Bounds2.NOTHING.copy(); // NOTE: MUTABLE! mouse/touch bounds are purely internal
+    this._mouseBoundsDirty = true; // whether the bounds are marked as dirty
+    this._touchBoundsDirty = true; // whether the bounds are marked as dirty
+    this._mouseBoundsHadListener = false; // since we only walk the dirty flags up ancestors, we need a way to re-evaluate descendants when the existence of effective listeners changes
+    this._touchBoundsHadListener = false; // since we only walk the dirty flags up ancestors, we need a way to re-evaluate descendants when the existence of effective listeners changes
     
     // dirty region handling
     this._paintDirty = false;        // whether the self paint is dirty (just this node, none of its children)
@@ -316,6 +316,9 @@ define( function( require ) {
       for ( var i = 0; i < len; i++ ) {
         this._parents[i].changePickableCount( n );
       }
+      
+      // changing pickability can affect the mouseBounds/touchBounds used for hit testing
+      this.invalidateMouseTouchBounds();
     },
     
     // currently, there is no way to remove peers. if a string is passed as the element pattern, it will be turned into an element
@@ -435,85 +438,103 @@ define( function( require ) {
       }
     },
     
-    validateMouseBounds: function() {
+    /*
+     * Updates the mouseBounds for the Node. It will include only the specific bounded areas that are relevant for hit-testing
+     * mouse events. Thus it:
+     * - includes mouseAreas (normal bounds don't)
+     * - does not include subtrees that would be pruned in hit-testing
+     */
+    validateMouseBounds: function( hasListenerEquivalentSelfOrInAncestor ) {
       var that = this;
       
-      assert && assert( !this._childBoundsDirty && !this._boundsDirty, 'Bounds must be validated before calling validateMouseBounds' );
+      // we'll need an updated value for this before deciding whether or not to bail
+      hasListenerEquivalentSelfOrInAncestor = hasListenerEquivalentSelfOrInAncestor || this.hasInputListenerEquivalent();
       
-      if ( this._mouseBoundsDirty ) {
-        var hasMouseAreas = false;
+      // Mouse bounds should be valid still if they aren't marked as dirty AND if the "had listener" matches.
+      // Thus, even if the mouse bounds aren't marked as dirty, we can still force a refresh (for example: an input listener was added to an ancestor)
+      if ( this._mouseBoundsDirty || this._mouseBoundsHadListener !== hasListenerEquivalentSelfOrInAncestor ) {
+        // update whether we have a listener equivalent, so we can prune properly
         
-        this._mouseBounds = this._selfBounds.copy(); // start with the self bounds, then add from there
-        
-        // union of all children's mouse bounds (if they exist)
-        var i = this._children.length;
-        while ( i-- ) {
-          var child = this._children[i];
-          child.validateMouseBounds();
-          if ( child._mouseBounds ) {
-            hasMouseAreas = true;
+        if ( this.isSubtreePickablePruned( hasListenerEquivalentSelfOrInAncestor ) ) {
+          // if this subtree would be pruned, set the mouse bounds to nothing, and bail (skips the entire subtree, since it would never be hit-tested)
+          this._mouseBounds.set( Bounds2.NOTHING );
+        } else {
+          // start with the self bounds, then add from there
+          this._mouseBounds.set( this._selfBounds );
+          
+          // union of all children's mouse bounds
+          var i = this._children.length;
+          while ( i-- ) {
+            var child = this._children[i];
+            
+            // make sure the child's mouseBounds are up to date
+            child.validateMouseBounds( hasListenerEquivalentSelfOrInAncestor );
             that._mouseBounds.includeBounds( child._mouseBounds );
           }
-        }
-        
-        // do this before the transformation to the parent coordinate frame
-        if ( this._mouseArea ) {
-          hasMouseAreas = true;
-          this._mouseBounds.includeBounds( this._mouseArea.isBounds ? this._mouseArea : this._mouseArea.bounds );
-        }
-        
-        if ( hasMouseAreas ) {
-          // transform it to the parent coordinate frame\
-          this.transformBoundsFromLocalToParent( this._mouseBounds );
           
-          // and include the normal bounds, so that we don't have to 
-          this._mouseBounds.includeBounds( this._bounds );
-        } else {
-          this._mouseBounds = null; // no mouse areas under this node
+          // do this before the transformation to the parent coordinate frame (the mouseArea is in the local coordinate frame)
+          if ( this._mouseArea ) {
+            // we accept either Bounds2, or a Shape (in which case, we take the Shape's bounds)
+            this._mouseBounds.includeBounds( this._mouseArea.isBounds ? this._mouseArea : this._mouseArea.bounds );
+          }
+          
+          // transform it to the parent coordinate frame
+          this.transformBoundsFromLocalToParent( this._mouseBounds );
         }
         
+        // update the "dirty" flags
         this._mouseBoundsDirty = false;
+        this._mouseBoundsHadListener = hasListenerEquivalentSelfOrInAncestor;
       }
     },
     
-    validateTouchBounds: function() {
+    /*
+     * Updates the touchBounds for the Node. It will include only the specific bounded areas that are relevant for hit-testing
+     * touch events. Thus it:
+     * - includes touchAreas (normal bounds don't)
+     * - does not include subtrees that would be pruned in hit-testing
+     */
+    validateTouchBounds: function( hasListenerEquivalentSelfOrInAncestor ) {
       var that = this;
       
-      assert && assert( !this._childBoundsDirty && !this._boundsDirty, 'Bounds must be validated before calling validateTouchBounds' );
+      // we'll need an updated value for this before deciding whether or not to bail
+      hasListenerEquivalentSelfOrInAncestor = hasListenerEquivalentSelfOrInAncestor || this.hasInputListenerEquivalent();
       
-      if ( this._touchBoundsDirty ) {
-        var hasTouchAreas = false;
+      // Touch bounds should be valid still if they aren't marked as dirty AND if the "had listener" matches.
+      // Thus, even if the touch bounds aren't marked as dirty, we can still force a refresh (for example: an input listener was added to an ancestor)
+      if ( this._touchBoundsDirty || this._touchBoundsHadListener !== hasListenerEquivalentSelfOrInAncestor ) {
+        // update whether we have a listener equivalent, so we can prune properly
         
-        this._touchBounds = this._selfBounds.copy(); // start with the self bounds, then add from there
-        
-        // union of all children's touch bounds (if they exist)
-        var i = this._children.length;
-        while ( i-- ) {
-          var child = this._children[i];
-          child.validateTouchBounds();
-          if ( child._touchBounds ) {
-            hasTouchAreas = true;
+        if ( this.isSubtreePickablePruned( hasListenerEquivalentSelfOrInAncestor ) ) {
+          // if this subtree would be pruned, set the touch bounds to nothing, and bail (skips the entire subtree, since it would never be hit-tested)
+          this._touchBounds.set( Bounds2.NOTHING );
+        } else {
+          // start with the self bounds, then add from there
+          this._touchBounds.set( this._selfBounds );
+          
+          // union of all children's touch bounds
+          var i = this._children.length;
+          while ( i-- ) {
+            var child = this._children[i];
+            
+            // make sure the child's touchBounds are up to date
+            child.validateTouchBounds( hasListenerEquivalentSelfOrInAncestor );
             that._touchBounds.includeBounds( child._touchBounds );
           }
-        }
-        
-        // do this before the transformation to the parent coordinate frame
-        if ( this._touchArea ) {
-          hasTouchAreas = true;
-          this._touchBounds.includeBounds( this._touchArea.isBounds ? this._touchArea : this._touchArea.bounds );
-        }
-        
-        if ( hasTouchAreas ) {
+          
+          // do this before the transformation to the parent coordinate frame (the touchArea is in the local coordinate frame)
+          if ( this._touchArea ) {
+            // we accept either Bounds2, or a Shape (in which case, we take the Shape's bounds)
+            this._touchBounds.includeBounds( this._touchArea.isBounds ? this._touchArea : this._touchArea.bounds );
+          }
+          
           // transform it to the parent coordinate frame
           this.transformBoundsFromLocalToParent( this._touchBounds );
-          
-          // and include the normal bounds, so that we don't have to 
-          this._touchBounds.includeBounds( this._bounds );
-        } else {
-          this._touchBounds = null; // no touch areas under this node
         }
         
+        // update the "dirty" flags
         this._touchBoundsDirty = false;
+        this._touchBoundsHadListener = hasListenerEquivalentSelfOrInAncestor;
       }
     },
     
@@ -555,6 +576,8 @@ define( function( require ) {
       while ( i-- ) {
         this._parents[i].invalidateChildBounds();
       }
+      
+      // TODO: consider calling invalidateMouseTouchBounds from here? it would mean two traversals, but it may bail out sooner. Hard call.
     },
     
     // recursively tag all ancestors with _childBoundsDirty
@@ -568,6 +591,20 @@ define( function( require ) {
         var i = this._parents.length;
         while ( i-- ) {
           this._parents[i].invalidateChildBounds();
+        }
+      }
+    },
+    
+    // mark mouse/touch bounds as invalid (can occur from normal bounds invalidation, or from anything that could change pickability)
+    // NOTE: we don't have to touch descendants because we also store the last used "under effective listener" value, so "non-dirty"
+    // subtrees will still be investigated (or freshly pruned) if the listener status has changed
+    invalidateMouseTouchBounds: function() {
+      if ( !this._mouseBoundsDirty || !this._touchBoundsDirty ) {
+        this._mouseBoundsDirty = true;
+        this._touchBoundsDirty = true;
+        var i = this._parents.length;
+        while ( i-- ) {
+          this._parents[i].invalidateMouseTouchBounds();
         }
       }
     },
@@ -696,6 +733,22 @@ define( function( require ) {
       return this.localToParentBounds( bounds );
     },
     
+    // whether this node effectively behaves as if it has an input listener
+    hasInputListenerEquivalent: function() {
+      // NOTE: if anything here is added, update when invalidateMouseTouchBounds gets called (since changes to pickability pruning affect mouse/touch bounds)
+      return this._inputListeners.length > 0 || this._pickable === true;
+    },
+    
+    // whether hit-testing for events should be pruned at this node (not even considering this node's self).
+    // hasListenerEquivalentSelfOrInAncestor indicates whether this node (or an ancestor) either has input listeners, or has pickable set to true (not the default)
+    isSubtreePickablePruned: function( hasListenerEquivalentSelfOrInAncestor ) {
+      // NOTE: if anything here is added, update when invalidateMouseTouchBounds gets called (since changes to pickability pruning affect mouse/touch bounds)
+      // if invisible: skip it
+      // if pickable: false, skip it
+      // if pickable: undefined and our pickable count indicates there are no input listeners / pickable: true in our subtree, skip it
+      return !this.isVisible() || this._pickable === false || ( this._pickable !== true && !hasListenerEquivalentSelfOrInAncestor && this._subtreePickableCount === 0 );
+    },
+    
     trailUnderPointer: function( pointer ) {
       var options = {};
       if ( pointer.isMouse ) { options.isMouse = true; }
@@ -709,35 +762,26 @@ define( function( require ) {
      * Return a trail to the top node (if any, otherwise null) whose self-rendered area contains the
      * point (in parent coordinates).
      *
-     * If options.pruneInvisible is false, invisible nodes will be allowed in the trail.
-     * If options.pruneUnpickable is false, unpickable nodes will be allowed in the trail.
+     * For now, prune anything that is invisible or effectively unpickable
      *
      * When calling, don't pass the recursive flag. It signals that the point passed can be mutated
      */
-    trailUnderPoint: function( point, options, recursive, hasListener ) {
+    trailUnderPoint: function( point, options, recursive, hasListenerEquivalentSelfOrInAncestor ) {
       assert && assert( point, 'trailUnderPointer requires a point' );
       
       if ( options === undefined ) { options = {}; }
       
-      var pruneInvisible = ( options.pruneInvisible === undefined ) ? true : options.pruneInvisible;
-      var pruneUnpickable = ( options.pruneUnpickable === undefined ) ? true : options.pruneUnpickable;
+      hasListenerEquivalentSelfOrInAncestor = hasListenerEquivalentSelfOrInAncestor || this.hasInputListenerEquivalent();
       
-      hasListener = hasListener || this._inputListeners.length > 0 || this._pickable === true;
-      
-      if ( pruneInvisible && !this.isVisible() ) {
-        return null;
-      }
-      
-      // if pickable: false, skip it
-      // if pickable: undefined and our pickable count indicates there are no input listeners / pickable: true in our subtree, skip it
-      if ( pruneUnpickable && ( this._pickable === false || ( this._pickable !== true && !hasListener && this._subtreePickableCount === 0 ) ) ) {
+      // prune if possible (usually invisible, pickable:false, no input listeners that would be triggered by this node or anything under it, etc.)
+      if ( this.isSubtreePickablePruned( hasListenerEquivalentSelfOrInAncestor ) ) {
         return null;
       }
       
       // update bounds for pruning
       this.validateBounds();
-      if ( options.isMouse ) { this.validateMouseBounds(); }
-      if ( options.isTouch ) { this.validateTouchBounds(); }
+      if ( options.isMouse ) { this.validateMouseBounds( false ); }
+      if ( options.isTouch ) { this.validateTouchBounds( false ); }
       
       var hasHitAreas = options && ( ( options.isMouse && this._mouseBounds ) || ( options.isTouch && this._touchBounds ) || options.isPen );
       
@@ -765,7 +809,7 @@ define( function( require ) {
         for ( var i = this._children.length - 1; i >= 0; i-- ) {
           var child = this._children[i];
           
-          var childHit = child.trailUnderPoint( localPoint, options, true, hasListener );
+          var childHit = child.trailUnderPoint( localPoint, options, true, hasListenerEquivalentSelfOrInAncestor );
           
           // the child will have the point in its parent's coordinate frame (i.e. this node's frame)
           if ( childHit ) {
@@ -860,7 +904,7 @@ define( function( require ) {
       // don't allow listeners to be added multiple times
       if ( _.indexOf( this._inputListeners, listener ) === -1 ) {
         this._inputListeners.push( listener );
-        this.changePickableCount( 1 );
+        this.changePickableCount( 1 ); // NOTE: this should also trigger invalidation of mouse/touch bounds
       }
       return this;
     },
@@ -870,7 +914,7 @@ define( function( require ) {
       assert && assert( _.indexOf( this._inputListeners, listener ) !== -1 );
       
       this._inputListeners.splice( _.indexOf( this._inputListeners, listener ), 1 );
-      this.changePickableCount( -1 );
+      this.changePickableCount( -1 ); // NOTE: this should also trigger invalidation of mouse/touch bounds
       return this;
     },
     
@@ -1235,6 +1279,9 @@ define( function( require ) {
       assert && assert( typeof visible === 'boolean' );
       
       if ( visible !== this._visible ) {
+        // changing visibility can affect pickability pruning, which affects mouse/touch bounds
+        this.invalidateMouseTouchBounds();
+        
         if ( this._visible ) {
           this.notifyBeforeSubtreeChange();
         }
@@ -1278,7 +1325,7 @@ define( function( require ) {
         n += this._pickable === true ? 1 : 0;
         
         if ( n ) {
-          this.changePickableCount( n );
+          this.changePickableCount( n ); // should invalidate mouse/touch bounds, since it changes the pickability
         }
         
         // TODO: invalidate the cursor somehow? #150
