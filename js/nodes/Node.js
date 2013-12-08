@@ -28,6 +28,8 @@ define( function( require ) {
   
   var globalIdCounter = 1;
   
+  var globalWatchedBoundsValidationArray = []; // always use a single array since it isn't re-entrant
+  
   /*
    * Available keys for use in the options parameter object for a vanilla Node (not inherited), in the order they are executed in:
    *
@@ -374,13 +376,16 @@ define( function( require ) {
       return computedBounds;
     },
     
-    // ensure that cached bounds stored on this node (and all children) are accurate
+    // Ensure that cached bounds stored on this node (and all children) are accurate. Returns true if any sort of dirty flag was set
     validateBounds: function() {
       var that = this;
       var i;
       
+      var wasDirtyBefore = false;
+      
       // validate bounds of children if necessary
       if ( this._childBoundsDirty ) {
+        wasDirtyBefore = true;
         
         // have each child validate their own bounds
         i = this._children.length;
@@ -409,6 +414,8 @@ define( function( require ) {
       }
       
       if ( this._localBoundsDirty ) {
+        wasDirtyBefore = true;
+        
         this._localBoundsDirty = false; // we only need this to set local bounds as dirty
         
         var oldLocalBounds = this._localBounds;
@@ -423,6 +430,8 @@ define( function( require ) {
       // TODO: layout here?
       
       if ( this._boundsDirty ) {
+        wasDirtyBefore = true;
+        
         // run this before firing the event
         this._boundsDirty = false;
         
@@ -470,6 +479,44 @@ define( function( require ) {
                                                     'Bounds mismatch after validateBounds: ' + that._bounds.toString() + ', expected: ' + fullBounds.toString() );
         })();
       }
+      
+      return wasDirtyBefore; // whether any dirty flags were set
+    },
+    
+    // Traverses this subtree and validates bounds only for subtrees that have bounds listeners (trying to exclude as much as possible for performance)
+    // This is done so that we can do the minimum bounds validation to prevent any bounds listeners from being triggered in further validateBounds() calls
+    // without other Node changes being done. This is required to make the new rendering system work (planned for non-reentrance).
+    validateWatchedBounds: function() {
+      this._watchedBoundsScan();
+      // now globalWatchedBoundsValidationArray contains all nodes that we should call validateBounds() on
+      
+      // Since a bounds listener on one of the roots could invalidate bounds on the other, we need to keep running this until they are all clean.
+      // Otherwise, side-effects could occur from bounds validations
+      var len = globalWatchedBoundsValidationArray.length;
+      var changed = true;
+      while ( changed ) {
+        changed = false;
+        for ( var i = 0; i < len; i++ ) {
+          changed = globalWatchedBoundsValidationArray[i].validateBounds() || changed;
+        }
+      }
+      
+      // clear the array
+      globalWatchedBoundsValidationArray.length = 0;
+    },
+    _watchedBoundsScan: function() {
+      if ( this._boundsEventSelfCount !== 0 ) {
+        // we are a root that should be validated. add ourselves to the global array
+        globalWatchedBoundsValidationArray.push( this );
+      } else if ( this._boundsEventCount > 0 ) {
+        // descendants have watched bounds, traverse!
+        var numChildren = this._children.length;
+        for ( var i = 0; i < numChildren; i++ ) {
+          this._children[i]._watchedBoundsScan();
+        }
+      }
+      
+      // if _boundsEventCount is zero, no bounds are watched below us (don't traverse)
     },
     
     /*

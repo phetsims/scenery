@@ -159,6 +159,10 @@ define( function( require ) {
     
     // NOTE: to be replaced with a full stitching/update version
     buildTemporaryDisplay: function() {
+      // validate bounds for everywhere that could trigger bounds listeners. we want to flush out any changes, so that we can call validateBounds()
+      // from code below without triggering side effects (we assume that we are not reentrant).
+      this._rootNode.validateWatchedBounds();
+      
       // compute updated _subtreeRendererBitmask for every Node // TODO: add and use dirty flag for this, and decide how the flags get set!
       recursiveUpdateRendererBitmask( this._rootNode );
       
