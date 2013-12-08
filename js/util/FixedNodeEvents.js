@@ -20,6 +20,12 @@ define( function( require ) {
     'boundsAccuracy'
   ];
   
+  var eventsRequiringBoundsValidation = {
+    'childBounds': true,
+    'localBounds': true,
+    'bounds': true
+  };
+  
   scenery.FixedNodeEvents = function FixedNodeEvents( type ) {
     var proto = type.prototype;
     
@@ -50,6 +56,11 @@ define( function( require ) {
       
       this._events[type].push( listener );
       
+      if ( type in eventsRequiringBoundsValidation ) {
+        this.changeBoundsEventCount( 1 );
+        this._boundsEventSelfCount++;
+      }
+      
       // allow chaining
       return this;
     };
@@ -67,6 +78,11 @@ define( function( require ) {
                                       'Listener did not exist for type ' + type );
       
       this._events[type].splice( _.indexOf( this._events[type], listener ), 1 );
+      
+      if ( type in eventsRequiringBoundsValidation ) {
+        this.changeBoundsEventCount( -1 );
+        this._boundsEventSelfCount--;
+      }
       
       // allow chaining
       return this;

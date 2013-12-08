@@ -145,6 +145,16 @@ define( function( require ) {
     this._subtreeRendererBitmask = scenery.bitmaskNodeDefault; // value not important initially, since it is dirty
     // this._subtreeRendererBitmaskDirty = true; // TODO: include dirty flag!
     
+    // So we can traverse only the subtrees that require bounds validation for events firing.
+    // This is a sum of the number of events requiring bounds validation on this Node, plus the number of children whose count is non-zero.
+    // NOTE: this means that if A has a child B, and B has a boundsEventCount of 5, it only contributes 1 to A's count. This allows us to
+    // have changes localized (increasing B's count won't change A or any of A's ancestors), and guarantees that we will know whether a subtree
+    // has bounds listeners. Also important: decreasing B's boundsEventCount down to 0 will allow A to decrease its count by 1, without having
+    // to check its other children (if we were just using a boolean value, this operation would require A to check if any OTHER children besides
+    // B had bounds listeners)
+    this._boundsEventCount = 0;
+    this._boundsEventSelfCount = 0; // this signals that we can validateBounds() on this subtree and we don't have to traverse further
+    
     if ( options ) {
       this.mutate( options );
     }
@@ -163,6 +173,7 @@ define( function( require ) {
       
       // needs to be early to prevent re-entrant children modifications
       this.changePickableCount( node._subtreePickableCount );
+      this.changeBoundsEventCount( node._boundsEventCount > 0 ? 1 : 0 );
       
       node._parents.push( this );
       this._children.splice( index, 0, node );
@@ -206,6 +217,7 @@ define( function( require ) {
       
       // needs to be early to prevent re-entrant children modifications
       this.changePickableCount( -node._subtreePickableCount );
+      this.changeBoundsEventCount( node._boundsEventCount > 0 ? -1 : 0 );
       
       node.markOldPaint( false );
       
@@ -319,6 +331,28 @@ define( function( require ) {
       
       // changing pickability can affect the mouseBounds/touchBounds used for hit testing
       this.invalidateMouseTouchBounds();
+    },
+    
+    // update our event count, usually by 1 or -1. see docs on _boundsEventCount in constructor
+    changeBoundsEventCount: function( n ) {
+      if ( n !== 0 ) {
+        var zeroBefore = this._boundsEventCount === 0;
+        
+        this._boundsEventCount += n;
+        assert && assert( this._boundsEventCount >= 0, 'subtree bounds event count should be guaranteed to be >= 0' );
+        
+        var zeroAfter = this._boundsEventCount === 0;
+        
+        if ( zeroBefore !== zeroAfter ) {
+          // parents will only have their count 
+          var parentDelta = zeroBefore ? 1 : -1;
+          
+          var len = this._parents.length;
+          for ( var i = 0; i < len; i++ ) {
+            this._parents[i].changeBoundsEventCount( parentDelta );
+          }
+        }
+      }
     },
     
     // currently, there is no way to remove peers. if a string is passed as the element pattern, it will be turned into an element
