@@ -28,8 +28,6 @@ define( function( require ) {
   
   var globalIdCounter = 1;
   
-  var globalWatchedBoundsValidationArray = []; // always use a single array since it isn't re-entrant
-  
   /*
    * Available keys for use in the options parameter object for a vanilla Node (not inherited), in the order they are executed in:
    *
@@ -487,36 +485,32 @@ define( function( require ) {
     // This is done so that we can do the minimum bounds validation to prevent any bounds listeners from being triggered in further validateBounds() calls
     // without other Node changes being done. This is required to make the new rendering system work (planned for non-reentrance).
     validateWatchedBounds: function() {
-      this._watchedBoundsScan();
-      // now globalWatchedBoundsValidationArray contains all nodes that we should call validateBounds() on
-      
       // Since a bounds listener on one of the roots could invalidate bounds on the other, we need to keep running this until they are all clean.
       // Otherwise, side-effects could occur from bounds validations
-      var len = globalWatchedBoundsValidationArray.length;
-      var changed = true;
-      while ( changed ) {
-        changed = false;
-        for ( var i = 0; i < len; i++ ) {
-          changed = globalWatchedBoundsValidationArray[i].validateBounds() || changed;
-        }
-      }
-      
-      // clear the array
-      globalWatchedBoundsValidationArray.length = 0;
+      // TODO: consider a way to prevent infinite loops here that occur due to bounds listeners triggering cycles
+      while ( this.watchedBoundsScan() ) {}
     },
-    _watchedBoundsScan: function() {
-      if ( this._boundsEventSelfCount !== 0 ) {
-        // we are a root that should be validated. add ourselves to the global array
-        globalWatchedBoundsValidationArray.push( this );
+    
+    // recursive function for validateWatchedBounds. Returned whether any validateBounds() returned true (means we have to traverse again)
+    watchedBoundsScan: function() {
+      if ( !this._childBoundsDirty && this._boundsDirty ) {
+        // if the bounds under here are not dirty, we won't have any use for calling validateBounds()
+        return false;
+      } else if ( this._boundsEventSelfCount !== 0 ) {
+        // we are a root that should be validated. return whether we updated anything
+        return this.validateBounds();
       } else if ( this._boundsEventCount > 0 ) {
         // descendants have watched bounds, traverse!
+        var changed = false;
         var numChildren = this._children.length;
         for ( var i = 0; i < numChildren; i++ ) {
-          this._children[i]._watchedBoundsScan();
+          changed = this._children[i]._watchedBoundsScan() || changed;
         }
+        return changed;
+      } else {
+        // if _boundsEventCount is zero, no bounds are watched below us (don't traverse), and it wasn't changed
+        return false;
       }
-      
-      // if _boundsEventCount is zero, no bounds are watched below us (don't traverse)
     },
     
     /*
