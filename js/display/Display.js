@@ -12,6 +12,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
+  require( 'SCENERY/display/BackboneBlock' );
   require( 'SCENERY/display/DisplayInstance' );
   require( 'SCENERY/display/RenderState' );
   require( 'SCENERY/layers/Renderer' );
@@ -144,8 +145,10 @@ define( function( require ) {
       if ( state.isBackbone ) {
         assert && assert( !isCanvasCache, 'For now, disallow an instance being a backbone and a canvas cache, since it has no performance benefits' );
         
-        instance.groupDrawable = // TODO create, use groupRenderer
-        instance.isTransformed = true;
+        var backbone = new scenery.BackboneBlock( instance );
+        
+        instance.groupDrawable = backbone.getDOMDrawable();
+        instance.isTransformed = state.isBackboneTransformed; // we allow non-transformed backbones, for things like filters (where we don't want a CSS transform for non-integral coordinates)
       } else if ( state.isCanvasCache ) {
         instance.groupDrawable = // TODO create non-shared cache, use groupRenderer
       }
@@ -171,7 +174,14 @@ define( function( require ) {
       // compute updated _subtreeRendererBitmask for every Node // TODO: add and use dirty flag for this, and decide how the flags get set!
       recursiveUpdateRendererBitmask( this._rootNode );
       
+      throw new Error( 'TODO: replace with actual stitching' );
       this._baseInstance = createInstance( this, baseTrail, scenery.RenderState.RegularState.createRootState( this._rootNode ), null );
+      
+      throw new Error( 'TODO: pre-repaint phase (first transform-notify by traversing all transform roots)' );
+      
+      throw new Error( 'TODO: repaint phase (painting)' );
+      
+      throw new Error( 'TODO: update cursor' );
     }
   } );
   

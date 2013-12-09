@@ -84,6 +84,7 @@ define( function( require ) {
     this.childrenTracks = []; // TODO use this for tracking what children changes occurred, and thus where we need to stitch
     
     this.state = null; // filled in with rendering state later
+    this.block = null; // filled in with a block if applicable (backbone at least, probably canvas multicache for sure also)
     
     this.selfDrawable = null;
     this.groupDrawable = null; // e.g. backbone or non-shared cache

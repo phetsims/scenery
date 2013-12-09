@@ -13,12 +13,15 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Block = require( 'SCENERY/display/Block' );
   
-  scenery.BackboneBlock = function BackboneBlock() {
+  scenery.BackboneBlock = function BackboneBlock( instance ) {
     this.domElement = document.createElement( 'div' );
   };
   var BackboneBlock = scenery.BackboneBlock;
   
   inherit( Block, BackboneBlock, {
+    getDOMDrawable: function() {
+      return // TODO. maybe even have us conform to the API directly
+    }
   } );
   
   return BackboneBlock;
