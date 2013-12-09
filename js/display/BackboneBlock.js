@@ -13,8 +13,10 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Block = require( 'SCENERY/display/Block' );
   
-  scenery.BackboneBlock = function BackboneBlock( instance ) {
+  // includeRoot is used for the root of a display, where the instance should be thought of as fully "under" the backbone
+  scenery.BackboneBlock = function BackboneBlock( instance, includeRoot ) {
     this.domElement = document.createElement( 'div' );
+    this.includeRoot = includeRoot;
   };
   var BackboneBlock = scenery.BackboneBlock;
   

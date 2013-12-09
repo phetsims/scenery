@@ -146,7 +146,7 @@ define( function( require ) {
       if ( state.isBackbone ) {
         assert && assert( !isCanvasCache, 'For now, disallow an instance being a backbone and a canvas cache, since it has no performance benefits' );
         
-        var backbone = new scenery.BackboneBlock( instance );
+        var backbone = new scenery.BackboneBlock( instance, false );
         instance.block = backbone;
         instance.groupDrawable = backbone.getDOMDrawable();
         instance.isTransformed = state.isBackboneTransformed; // we allow non-transformed backbones, for things like filters (where we don't want a CSS transform for non-integral coordinates)
@@ -178,7 +178,7 @@ define( function( require ) {
       throw new Error( 'TODO: replace with actual stitching' );
       this._baseInstance = createInstance( this, baseTrail, scenery.RenderState.RegularState.createRootState( this._rootNode ), null );
       
-      this._rootBackbone = new scenery.BackboneBlock( this._baseInstance );
+      this._rootBackbone = new scenery.BackboneBlock( this._baseInstance, true );
       
       throw new Error( 'TODO: pre-repaint phase (first transform-notify by traversing all transform roots)' );
       
