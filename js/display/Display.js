@@ -83,16 +83,14 @@ define( function( require ) {
         // dynamic import
         var Renderer = scenery.Renderer;
         
-        var selfTransformTrail = // TODO: transformTrail!
-        
         var selfRenderer = state.selfRenderer;
         var selfRendererType = selfRenderer & Renderer.bitmaskRendererArea;
         if ( selfRendererType === Renderer.bitmaskCanvas ) {
-          instance.selfDrawable = new scenery.CanvasSelfDrawable( trail, selfRenderer, selfTransformTrail, instance );
+          instance.selfDrawable = new scenery.CanvasSelfDrawable( trail, selfRenderer, instance );
         } else if ( selfRendererType === Renderer.bitmaskSVG ) {
-          instance.selfDrawable = new scenery.SVGDrawable( trail, selfRenderer, selfTransformTrail, node );
+          instance.selfDrawable = new scenery.SVGSelf( trail, selfRenderer, instance );
         } else if ( selfRendererType === Renderer.bitmaskDOM ) {
-          instance.selfDrawable = // TODO: we need to add the SVG-style flags and other behavior to something like DOMSelfDrawable?
+          instance.selfDrawable = new scenery.DOMSelfDrawable( trail, selfRenderer, instance );
         } else {
           // assert so that it doesn't compile down to a throw (we want this function to be optimized)
           assert && assert( 'Unrecognized renderer, maybe we don\'t support WebGL yet?: ' + selfRenderer );

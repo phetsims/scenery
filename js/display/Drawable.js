@@ -12,7 +12,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   
-  scenery.Drawable = function Drawable( trail, renderer, transformTrail ) {
+  scenery.Drawable = function Drawable( trail, renderer ) {
     // what block we are being rendered into (will be filled in later)
     this.block = null;
     
@@ -22,7 +22,6 @@ define( function( require ) {
     
     this.trail = trail;
     this.renderer = renderer;
-    this.transformTrail = transformTrail;
   };
   var Drawable = scenery.Drawable;
   

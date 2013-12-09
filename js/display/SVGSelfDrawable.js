@@ -26,10 +26,10 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
   
-  scenery.SVGSelfDrawable = function SVGSelfDrawable( trail, renderer, transformTrail, target ) {
-    Drawable.call( this, trail, renderer, transformTrail );
+  scenery.SVGSelfDrawable = function SVGSelfDrawable( trail, renderer, instance ) {
+    Drawable.call( this, trail, renderer );
     
-    this.target = target;
+    this.instance = instance;
   };
   var SVGSelfDrawable = scenery.SVGSelfDrawable;
   
