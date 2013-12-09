@@ -17,7 +17,8 @@ define( function( require ) {
     'localBounds',
     'bounds',
     'resize',
-    'boundsAccuracy'
+    'boundsAccuracy',
+    'transform'
   ];
   
   var eventsRequiringBoundsValidation = {

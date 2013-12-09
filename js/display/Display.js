@@ -21,6 +21,8 @@ define( function( require ) {
     this._domElement = null; // TODO: potentially allow immediate export of this?
     this._sharedCanvasInstances = {}; // map from Node ID to DisplayInstance, for fast lookup
     this._baseInstance = null; // will be filled with the root DisplayInstance
+    
+    this._frameId = 0; // incremented for every rendered frame
   };
   var Display = scenery.Display;
   
@@ -48,7 +50,7 @@ define( function( require ) {
   }
   
   function createInstance( display, trail, state, parentInstance ) {
-    var instance = new scenery.DisplayInstance( trail );
+    var instance = new scenery.DisplayInstance( this, trail );
     
     var isSharedCache = state.isCanvasCache && state.isCacheShared;
     
@@ -67,6 +69,8 @@ define( function( require ) {
         sharedInstance = createInstance( display, new scenery.Trail( sharedNode ), scenery.RenderState.RegularState.createSharedCacheState( sharedNode ), null );
         display._sharedCanvasInstances[instanceKey] = sharedInstance;
         // TODO: reference counting?
+        
+        // TODO: sharedInstance.isTransformed?
       }
       
       // TODO: do something with the sharedInstance!
@@ -143,6 +147,7 @@ define( function( require ) {
         assert && assert( !isCanvasCache, 'For now, disallow an instance being a backbone and a canvas cache, since it has no performance benefits' );
         
         instance.groupDrawable = // TODO create, use groupRenderer
+        instance.isTransformed = true;
       } else if ( state.isCanvasCache ) {
         instance.groupDrawable = // TODO create non-shared cache, use groupRenderer
       }
@@ -159,6 +164,8 @@ define( function( require ) {
     
     // NOTE: to be replaced with a full stitching/update version
     buildTemporaryDisplay: function() {
+      this._frameId++;
+      
       // validate bounds for everywhere that could trigger bounds listeners. we want to flush out any changes, so that we can call validateBounds()
       // from code below without triggering side effects (we assume that we are not reentrant).
       this._rootNode.validateWatchedBounds();

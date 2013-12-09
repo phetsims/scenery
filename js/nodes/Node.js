@@ -1246,6 +1246,8 @@ define( function( require ) {
       
       this.invalidateBounds();
       this.invalidateSubtreePaint();
+      
+      this.fireEvent( 'transform', this._transform );
     },
     
     // the left bound of this node, in the parent coordinate frame
