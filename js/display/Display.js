@@ -19,6 +19,7 @@ define( function( require ) {
   
   scenery.Display = function Display( rootNode ) {
     this._rootNode = rootNode;
+    this._rootBackbone = null; // to be filled in later
     this._domElement = null; // TODO: potentially allow immediate export of this?
     this._sharedCanvasInstances = {}; // map from Node ID to DisplayInstance, for fast lookup
     this._baseInstance = null; // will be filled with the root DisplayInstance
@@ -176,6 +177,8 @@ define( function( require ) {
       
       throw new Error( 'TODO: replace with actual stitching' );
       this._baseInstance = createInstance( this, baseTrail, scenery.RenderState.RegularState.createRootState( this._rootNode ), null );
+      
+      this._rootBackbone = new scenery.BackboneBlock( this._baseInstance );
       
       throw new Error( 'TODO: pre-repaint phase (first transform-notify by traversing all transform roots)' );
       
