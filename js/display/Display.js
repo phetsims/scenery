@@ -23,7 +23,7 @@ define( function( require ) {
   scenery.Display = function Display( rootNode ) {
     this._rootNode = rootNode;
     this._rootBackbone = null; // to be filled in later
-    this._domElement = null; // TODO: potentially allow immediate export of this?
+    this._domElement = BackboneBlock.createDivBackbone();
     this._sharedCanvasInstances = {}; // map from Node ID to DisplayInstance, for fast lookup
     this._baseInstance = null; // will be filled with the root DisplayInstance
     
@@ -149,7 +149,7 @@ define( function( require ) {
       if ( state.isBackbone ) {
         assert && assert( !isCanvasCache, 'For now, disallow an instance being a backbone and a canvas cache, since it has no performance benefits' );
         
-        var backbone = new scenery.BackboneBlock( instance, false );
+        var backbone = new scenery.BackboneBlock( instance, false, null );
         instance.block = backbone;
         instance.groupDrawable = backbone.getDOMDrawable();
         instance.isTransformed = state.isBackboneTransformed; // we allow non-transformed backbones, for things like filters (where we don't want a CSS transform for non-integral coordinates)
@@ -181,7 +181,7 @@ define( function( require ) {
       throw new Error( 'TODO: replace with actual stitching' );
       this._baseInstance = createInstance( this, baseTrail, scenery.RenderState.RegularState.createRootState( this._rootNode ), null );
       
-      this._rootBackbone = new scenery.BackboneBlock( this._baseInstance, true );
+      this._rootBackbone = new scenery.BackboneBlock( this._baseInstance, true, this._domElement );
       
       throw new Error( 'TODO: pre-repaint phase (first transform-notify by traversing all transform roots)' );
       
