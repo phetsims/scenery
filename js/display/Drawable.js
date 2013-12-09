@@ -26,6 +26,9 @@ define( function( require ) {
   var Drawable = scenery.Drawable;
   
   inherit( Object, Drawable, {
+    
+    // NOTE: must have a 'markDirty' method
+    
     dispose: function() {
       
     },
