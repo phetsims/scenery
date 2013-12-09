@@ -53,7 +53,7 @@ define( function( require ) {
         
         var stateLen = this._visualStates.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._visualStates.markDirtyLineWidth();
+          this._visualStates[i].markDirtyLineWidth();
         }
       }
       return this;
@@ -73,7 +73,7 @@ define( function( require ) {
         
         var stateLen = this._visualStates.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._visualStates.markDirtyLineOptions();
+          this._visualStates[i].markDirtyLineOptions();
         }
       }
       return this;
@@ -93,7 +93,7 @@ define( function( require ) {
         
         var stateLen = this._visualStates.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._visualStates.markDirtyLineOptions();
+          this._visualStates[i].markDirtyLineOptions();
         }
       }
       return this;
@@ -117,7 +117,7 @@ define( function( require ) {
         
         var stateLen = this._visualStates.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._visualStates.markDirtyLineOptions();
+          this._visualStates[i].markDirtyLineOptions();
         }
       }
       return this;
@@ -137,7 +137,7 @@ define( function( require ) {
         
         var stateLen = this._visualStates.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._visualStates.markDirtyLineOptions();
+          this._visualStates[i].markDirtyLineOptions();
         }
       }
       return this;
@@ -196,7 +196,7 @@ define( function( require ) {
         
         var stateLen = this._visualStates.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._visualStates.markDirtyStroke();
+          this._visualStates[i].markDirtyStroke();
         }
       }
       return this;
@@ -391,6 +391,7 @@ define( function( require ) {
     var proto = stateType.prototype;
     
     proto.initializeStrokableState = function() {
+      this.lastStroke = undefined;
       this.dirtyStroke = true;
       this.dirtyLineWidth = true;
       this.dirtyLineOptions = true; // e.g. cap, join, dash, dashoffset, miterlimit
@@ -400,6 +401,7 @@ define( function( require ) {
       this.dirtyStroke = false;
       this.dirtyLineWidth = false;
       this.dirtyLineOptions = false;
+      this.lastStroke = this.node.getStroke();
     };
     
     proto.markDirtyStroke = function() {

@@ -111,7 +111,7 @@ define( function( require ) {
     
     // properties relevant to the node's direct transform
     this.transformDirty = true;               // whether the node's transform has changed (until the pre-repaint phase)
-    throw new Error( 'figure out transform listeners and flags here - immediate wanted? - error everywhere it was used' );
+    // throw new Error( 'figure out transform listeners and flags here - immediate wanted? - error everywhere it was used' );
     // this.transformListeners = [];
     
     this.nodeTransformListener = this.markTransformDirty.bind( this );
@@ -233,11 +233,11 @@ define( function( require ) {
     
     // updates our relativeMatrix based on any parents, and the node's current transform
     computeRelativeTransform: function() {
-      var nodeMatrix = node.getTransform().getMatrix();
+      var nodeMatrix = this.node.getTransform().getMatrix();
       
-      if ( parent && !parent.isTransformed ) {
+      if ( this.parent && !this.parent.isTransformed ) {
         // mutable form of parentMatrix * nodeMatrix
-        this.relativeMatrix.set( parent.relativeMatrix );
+        this.relativeMatrix.set( this.parent.relativeMatrix );
         this.relativeMatrix.multiplyMatrix( nodeMatrix );
       } else {
         // we are the first in the trail transform, so we just directly copy the matrix over
@@ -305,7 +305,7 @@ define( function( require ) {
       
       if ( this.transformDirty ) {
         this.transformDirty = false;
-        throw new Error( 'ack, traversal for this is bad - do it somewhere global, and figure out if instead we want immediate listeners only' );
+        // throw new Error( 'ack, traversal for this is bad - do it somewhere global, and figure out if instead we want immediate listeners only' );
         // this.notifyTransformListeners();
       }
       
@@ -326,7 +326,7 @@ define( function( require ) {
     },
     
     notifyTransformListeners: function() {
-      throw new Error( 'ack, traversal for this is bad - do it somewhere global, and figure out if instead we want immediate listeners only' );
+      // throw new Error( 'ack, traversal for this is bad - do it somewhere global, and figure out if instead we want immediate listeners only' );
       // var len = this.transformListeners.length;
       // for ( var i = 0; i < len; i++ ) {
       //   this.transformListeners[i]();

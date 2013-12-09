@@ -59,7 +59,7 @@ define( function( require ) {
         
         var stateLen = this._visualStates.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._visualStates.markDirtyFill();
+          this._visualStates[i].markDirtyFill();
         }
       }
       return this;
@@ -228,11 +228,13 @@ define( function( require ) {
     var proto = stateType.prototype;
     
     proto.initializeFillableState = function() {
+      this.lastFill = undefined;
       this.dirtyFill = true;
     };
     
     proto.cleanFillableState = function() {
       this.dirtyFill = false;
+      this.lastFill = this.node.getFill();
     };
     
     proto.markDirtyFill = function() {

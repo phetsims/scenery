@@ -225,6 +225,15 @@
             window.r.stroke = 'black';
           };
           
+          window.setupDOMDrawableTest = function() {
+            window.r = new scenery.Rectangle( 0, 0, 50, 50, { fill: 'red' } );
+            window.i = new scenery.DisplayInstance( { _frameId: 5 }, window.r.getUniqueTrail() );
+            window.d = new scenery.DOMSelfDrawable( window.i.trail, scenery.Renderer.bitmaskDOM, window.i );
+            window.d.block = { markDOMDirty: function() {} }; // patches need for a block reference for now (dirtyness propagation)
+            document.body.appendChild( window.d.domElement )
+            window.s = r._visualStates[0]
+          };
+          
           window.testNodeBounds = function( trail ) {
             var a = performance.now();
             for ( var i = 0; i < 100000; i++ ) { trail.lastNode().localToGlobalBounds( bounds ); };

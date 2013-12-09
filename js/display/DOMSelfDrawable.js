@@ -12,6 +12,7 @@
  *
  * visual state API needed:
  * {
+ *   node: Node                     // used by Strokable/Fillable
  *   transformDirty: Boolean        // set by the drawable
  *   forceAcceleration: Boolean     // set by the drawable. for now, won't change once created
  *   drawable: DOMSelfDrawable      // set by the visual state on initialization     NOTE: required for any type of visual state! (used by Strokable/Fillable states)
@@ -40,12 +41,11 @@ define( function( require ) {
     this.visualState = null; // to be created in attachDOMDrawable
     this.dirty = true;
     
-    throw new Error( 'make sure we change everything for the new dom visual state API' );
     this.node.attachDOMDrawable( this ); // should set this.visualState
     
     // now that we called attachDOMDrawable, update the visualState object with the flags it will need
     this.domElement = this.visualState.domElement;
-    this.visualState.forceAcceleration = renderer & bitmaskForceAcceleration !== 0;
+    this.visualState.forceAcceleration = ( renderer & scenery.bitmaskForceAcceleration ) !== 0;
     this.markTransformDirty();
     
     // handle transform changes

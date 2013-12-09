@@ -434,7 +434,7 @@ define( function( require ) {
         this[privateName] = value;
         var stateLen = this._visualStates.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._visualStates[dirtyMethodName]();
+          ( this._visualStates[i] )[dirtyMethodName]();
         }
         this.invalidateRectangle();
       }
@@ -620,23 +620,27 @@ define( function( require ) {
       }
       
       if ( node.hasStroke() ) {
-        if ( this.dirtyWidth || this.dirtyLineWidth ) {
+        // since we only execute these if we have a stroke, we need to redo everything if there was no stroke previously.
+        // the other option would be to update stroked information when there is no stroke (major performance loss for fill-only rectangles)
+        var hadNoStrokeBefore = this.lastStroke === null;
+        
+        if ( hadNoStrokeBefore || this.dirtyWidth || this.dirtyLineWidth ) {
           strokeElement.style.width = ( node._rectWidth - node.getLineWidth() ) + 'px';
         }
-        if ( this.dirtyHeight || this.dirtyLineWidth ) {
+        if ( hadNoStrokeBefore || this.dirtyHeight || this.dirtyLineWidth ) {
           strokeElement.style.height = ( node._rectHeight - node.getLineWidth() ) + 'px';
         }
-        if ( this.dirtyLineWidth ) {
+        if ( hadNoStrokeBefore || this.dirtyLineWidth ) {
           strokeElement.style.left = ( -node.getLineWidth() / 2 ) + 'px';
           strokeElement.style.top = ( -node.getLineWidth() / 2 ) + 'px';
           strokeElement.style.borderWidth = node.getLineWidth() + 'px';
         }
         
-        if ( this.dirtyStroke ) {
+        if ( hadNoStrokeBefore || this.dirtyStroke ) {
           strokeElement.style.borderColor = node.getSimpleCSSFill();
         }
         
-        if ( borderRadiusDirty || this.dirtyLineWidth || this.dirtyLineOptions ) {
+        if ( hadNoStrokeBefore || borderRadiusDirty || this.dirtyLineWidth || this.dirtyLineOptions ) {
           strokeElement.style[Features.borderRadius] = ( node.isRounded() || node.getLineJoin() === 'round' ) ? ( borderRadius + node.getLineWidth() / 2 ) + 'px' : '0';
         }
       }

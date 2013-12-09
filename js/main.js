@@ -16,9 +16,15 @@ define( [
     
     // 'SCENERY/display/BackboneBlock',
     // 'SCENERY/display/Block',
+    // 'SCENERY/display/CanvasBlock',
+    // 'SCENERY/display/CanvasSelfDrawable',
     // 'SCENERY/display/Display',
-    // 'SCENERY/display/DisplayInstance',
+    'SCENERY/display/DisplayInstance',
+    'SCENERY/display/DOMSelfDrawable',
+    'SCENERY/display/Drawable',
     // 'SCENERY/display/RenderState',
+    // 'SCENERY/display/SVGBlock',
+    // 'SCENERY/display/SVGSelfDrawable',
     
     'SCENERY/input/ButtonListener',
     'SCENERY/input/DownUpListener',

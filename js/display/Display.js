@@ -13,8 +13,11 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
   require( 'SCENERY/display/BackboneBlock' );
+  require( 'SCENERY/display/CanvasSelfDrawable' );
   require( 'SCENERY/display/DisplayInstance' );
+  require( 'SCENERY/display/DOMSelfDrawable' );
   require( 'SCENERY/display/RenderState' );
+  require( 'SCENERY/display/SVGSelf' );
   require( 'SCENERY/layers/Renderer' );
   
   scenery.Display = function Display( rootNode ) {
@@ -77,7 +80,7 @@ define( function( require ) {
       
       // TODO: do something with the sharedInstance!
       var sharedCacheRenderer = state.sharedCacheRenderer;
-      instance.sharedCacheDrawable = // TODO create
+      instance.sharedCacheDrawable = // TODO
     } else {
       var currentDrawable = null;
       
