@@ -17,7 +17,7 @@
  *   drawable: DOMSelfDrawable      // set by the visual state on initialization
  *   domElement: DOMElement         // what we use to render the DOM element (should be the base of the displayed element)
  *   updateDOM: function()             // updates any visual state, including the transform
- *   notifyDetached: function()     // called when the state is detached from a drawable. optionally discard DOM elements. we guarantee state will be
+ *   onDetach: function()     // called when the state is detached from a drawable. optionally discard DOM elements. we guarantee state will be
  *                                  // initialized again before any more update() calls
  * }
  *

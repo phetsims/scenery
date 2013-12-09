@@ -2143,7 +2143,7 @@ define( function( require ) {
       var index = _.indexOf( this._visualStates, visualState );
       this._visualStates.splice( index, 1 ); // TODO: replace with a remove() function
       
-      visualState.notifyDetached();
+      visualState.onDetach();
     },
     
     /*---------------------------------------------------------------------------*

@@ -50,6 +50,11 @@ define( function( require ) {
         this._lineDrawingStyles.lineWidth = lineWidth;
         
         this.invalidateStroke();
+        
+        var stateLen = this._visualStates.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._visualStates.markDirtyLineWidth();
+        }
       }
       return this;
     };
@@ -65,6 +70,11 @@ define( function( require ) {
         this._lineDrawingStyles.lineCap = lineCap;
         
         this.invalidateStroke();
+        
+        var stateLen = this._visualStates.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._visualStates.markDirtyLineOptions();
+        }
       }
       return this;
     };
@@ -80,6 +90,11 @@ define( function( require ) {
         this._lineDrawingStyles.lineJoin = lineJoin;
         
         this.invalidateStroke();
+        
+        var stateLen = this._visualStates.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._visualStates.markDirtyLineOptions();
+        }
       }
       return this;
     };
@@ -99,6 +114,11 @@ define( function( require ) {
         this._lineDrawingStyles.lineDash = lineDash || [];
         
         this.invalidateStroke();
+        
+        var stateLen = this._visualStates.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._visualStates.markDirtyLineOptions();
+        }
       }
       return this;
     };
@@ -114,6 +134,11 @@ define( function( require ) {
         this._lineDrawingStyles.lineDashOffset = lineDashOffset;
         
         this.invalidateStroke();
+        
+        var stateLen = this._visualStates.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._visualStates.markDirtyLineOptions();
+        }
       }
       return this;
     };
@@ -168,6 +193,11 @@ define( function( require ) {
         }
         
         this.invalidateStroke();
+        
+        var stateLen = this._visualStates.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._visualStates.markDirtyStroke();
+        }
       }
       return this;
     };
@@ -356,6 +386,37 @@ define( function( require ) {
     }
   };
   var Strokable = scenery.Strokable;
+  
+  Strokable.StrokableState = function StrokableState( stateType ) {
+    var proto = stateType.prototype;
+    
+    proto.initializeStrokableState = function() {
+      this.dirtyStroke = true;
+      this.dirtyLineWidth = true;
+      this.dirtyLineOptions = true; // e.g. cap, join, dash, dashoffset, miterlimit
+    };
+    
+    proto.cleanStrokableState = function() {
+      this.dirtyStroke = false;
+      this.dirtyLineWidth = false;
+      this.dirtyLineOptions = false;
+    };
+    
+    proto.markDirtyStroke = function() {
+      this.dirtyStroke = true;
+      this.drawable.markDirty();
+    };
+    
+    proto.markDirtyLineWidth = function() {
+      this.dirtyLineWidth = true;
+      this.drawable.markDirty();
+    };
+    
+    proto.markDirtyLineOptions = function() {
+      this.dirtyLineOptions = true;
+      this.drawable.markDirty();
+    };
+  };
   
   return Strokable;
 } );

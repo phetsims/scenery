@@ -20,6 +20,8 @@ define( function( require ) {
   var Bounds2 = require( 'DOT/Bounds2' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Features = require( 'SCENERY/util/Features' );
+  var Fillable = require( 'SCENERY/nodes/Fillable' );
+  var Strokable = require( 'SCENERY/nodes/Strokable' );
   
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMRectangleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
@@ -102,7 +104,9 @@ define( function( require ) {
     
     getStrokeRendererBitmask: function() {
       var bitmask = Path.prototype.getStrokeRendererBitmask.call( this );
-      if ( this.hasStroke() && !this.getStroke().isGradient && !this.getStroke().isPattern ) {
+      // DOM stroke handling doesn't YET support gradients, patterns, or dashes (with the current implementation, it shouldn't be too hard)
+      if ( this.hasStroke() && !this.getStroke().isGradient && !this.getStroke().isPattern && !this.hasLineDash() ) {
+        // we can't support the bevel line-join with our current DOM rectangle display
         if ( this.getLineJoin() === 'miter' || ( this.getLineJoin() === 'round' && Features.borderRadius ) ) {
           bitmask |= scenery.bitmaskSupportsDOM;
         }
@@ -136,6 +140,11 @@ define( function( require ) {
       this._rectHeight = height;
       this._rectArcWidth = arcWidth || 0;
       this._rectArcHeight = arcHeight || 0;
+      
+      var stateLen = this._visualStates.length;
+      for ( var i = 0; i < stateLen; i++ ) {
+        this._visualStates.markDirtyRectangle();
+      }
       this.invalidateRectangle();
     },
     
@@ -414,6 +423,7 @@ define( function( require ) {
     var getName = 'getRect' + capitalizedShort;
     var setName = 'setRect' + capitalizedShort;
     var privateName = '_rect' + capitalizedShort;
+    var dirtyMethodName = 'markDirty' + capitalizedShort;
     
     Rectangle.prototype[getName] = function() {
       return this[privateName];
@@ -422,6 +432,10 @@ define( function( require ) {
     Rectangle.prototype[setName] = function( value ) {
       if ( this[privateName] !== value ) {
         this[privateName] = value;
+        var stateLen = this._visualStates.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._visualStates[dirtyMethodName]();
+        }
         this.invalidateRectangle();
       }
       return this;
@@ -530,10 +544,21 @@ define( function( require ) {
     
     // initializes, and resets (so we can support pooled states)
     initialize: function( drawable ) {
+      drawable.visualState = this;
+      
       this.drawable = drawable;
       this.node = drawable.node;
-      drawable.visualState = this;
       this.transformDirty = true;
+      
+      this.dirtyX = true;
+      this.dirtyY = true;
+      this.dirtyWidth = true;
+      this.dirtyHeight = true;
+      this.dirtyArcWidth = true;
+      this.dirtyArcHeight = true;
+      
+      this.initializeFillableState();
+      this.initializeStrokableState();
       
       if ( !this.matrix ) {
         this.matrix = Matrix3.dirtyFromPool();
@@ -569,36 +594,67 @@ define( function( require ) {
       // TODO: make the changes more atomic using flags
       // TODO: markDirty!
       var borderRadius = Math.min( node._rectArcWidth, node._rectArcHeight );
+      var borderRadiusDirty = this.dirtyArcWidth || this.dirtyArcHeight;
       
-      fillElement.style.width = node._rectWidth + 'px';
-      fillElement.style.height = node._rectHeight + 'px';
-      fillElement.style[Features.borderRadius] = borderRadius + 'px'; // if one is zero, we are not rounded, so we do the min here
-      fillElement.style.backgroundColor = node.getCSSFill();
-      
-      if ( node.hasStroke() ) {
-        strokeElement.style.width = ( node._rectWidth - node.getLineWidth() ) + 'px';
-        strokeElement.style.height = ( node._rectHeight - node.getLineWidth() ) + 'px';
-        strokeElement.style.left = ( -node.getLineWidth() / 2 ) + 'px';
-        strokeElement.style.top = ( -node.getLineWidth() / 2 ) + 'px';
-        strokeElement.style.borderStyle = 'solid';
-        strokeElement.style.borderColor = node.getSimpleCSSFill();
-        strokeElement.style.borderWidth = node.getLineWidth() + 'px';
-        strokeElement.style[Features.borderRadius] = ( node.isRounded() || node.getLineJoin() === 'round' ) ? ( borderRadius + node.getLineWidth() / 2 ) + 'px' : '0';
-      } else {
-        strokeElement.style.borderStyle = 'none';
+      if ( this.dirtyWidth ) {
+        fillElement.style.width = node._rectWidth + 'px';
+      }
+      if ( this.dirtyHeight ) {
+        fillElement.style.height = node._rectHeight + 'px';
+      }
+      if ( borderRadiusDirty ) {
+        fillElement.style[Features.borderRadius] = borderRadius + 'px'; // if one is zero, we are not rounded, so we do the min here
+      }
+      if ( this.dirtyFill ) {
+        fillElement.style.backgroundColor = node.getCSSFill();
       }
       
-      // TODO: only do when necessary
+      if ( this.dirtyStroke ) {
+        // update stroke presence
+        if ( node.hasStroke() ) {
+          strokeElement.style.borderStyle = 'solid';
+        } else {
+          strokeElement.style.borderStyle = 'none';
+        }
+      }
+      
+      if ( node.hasStroke() ) {
+        if ( this.dirtyWidth || this.dirtyLineWidth ) {
+          strokeElement.style.width = ( node._rectWidth - node.getLineWidth() ) + 'px';
+        }
+        if ( this.dirtyHeight || this.dirtyLineWidth ) {
+          strokeElement.style.height = ( node._rectHeight - node.getLineWidth() ) + 'px';
+        }
+        if ( this.dirtyLineWidth ) {
+          strokeElement.style.left = ( -node.getLineWidth() / 2 ) + 'px';
+          strokeElement.style.top = ( -node.getLineWidth() / 2 ) + 'px';
+          strokeElement.style.borderWidth = node.getLineWidth() + 'px';
+        }
+        
+        if ( this.dirtyStroke ) {
+          strokeElement.style.borderColor = node.getSimpleCSSFill();
+        }
+        
+        if ( borderRadiusDirty || this.dirtyLineWidth || this.dirtyLineOptions ) {
+          strokeElement.style[Features.borderRadius] = ( node.isRounded() || node.getLineJoin() === 'round' ) ? ( borderRadius + node.getLineWidth() / 2 ) + 'px' : '0';
+        }
+      }
+      
       // shift the text vertically, postmultiplied with the entire transform.
-      this.matrix.set( this.drawable.getTransformMatrix() );
-      var translation = Matrix3.translation( node._rectX, node._rectY );
-      this.matrix.multiplyMatrix( translation );
-      translation.freeToPool();
-      scenery.Util.applyCSSTransform( this.matrix, this.fillElement );
+      if ( this.transformDirty || this.dirtyX || this.dirtyY ) {
+        this.matrix.set( this.drawable.getTransformMatrix() );
+        var translation = Matrix3.translation( node._rectX, node._rectY );
+        this.matrix.multiplyMatrix( translation );
+        translation.freeToPool();
+        scenery.Util.applyCSSTransform( this.matrix, this.fillElement );
+      }
+      
+      // clear all of the dirty flags
+      this.setToClean();
     },
     
     // release the DOM elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
-    notifyDetached: function() {
+    onDetach: function() {
       if ( !keepDOMRectangleElements ) {
         // clear the references
         this.fillElement = null;
@@ -608,8 +664,59 @@ define( function( require ) {
       
       // put us back in the pool
       this.freeToPool();
+    },
+    
+    markDirtyX: function() {
+      this.dirtyX = true;
+      this.drawable.markDirty();
+    },
+    markDirtyY: function() {
+      this.dirtyY = true;
+      this.drawable.markDirty();
+    },
+    markDirtyWidth: function() {
+      this.dirtyWidth = true;
+      this.drawable.markDirty();
+    },
+    markDirtyHeight: function() {
+      this.dirtyHeight = true;
+      this.drawable.markDirty();
+    },
+    markDirtyArcWidth: function() {
+      this.dirtyArcWidth = true;
+      this.drawable.markDirty();
+    },
+    markDirtyArcHeight: function() {
+      this.dirtyArcHeight = true;
+      this.drawable.markDirty();
+    },
+    markDirtyRectangle: function() {
+      this.dirtyX = true;
+      this.dirtyY = true;
+      this.dirtyWidth = true;
+      this.dirtyHeight = true;
+      this.dirtyArcWidth = true;
+      this.dirtyArcHeight = true;
+      this.drawable.markDirty();
+    },
+    
+    setToClean: function() {
+      this.dirtyX = false;
+      this.dirtyY = false;
+      this.dirtyWidth = false;
+      this.dirtyHeight = false;
+      this.dirtyArcWidth = false;
+      this.dirtyArcHeight = false;
+      this.transformDirty = false;
+      
+      this.cleanFillableState();
+      this.cleanStrokableState();
     }
   };
+  /* jshint -W064 */
+  Fillable.FillableState( RectangleDOMState );
+  /* jshint -W064 */
+  Strokable.StrokableState( RectangleDOMState );
   // for pooling, allow RectangleDOMState.createFromPool( drawable ) and state.freeToPool(). Creation will initialize the state to the intial state
   /* jshint -W064 */
   Poolable( RectangleDOMState, {

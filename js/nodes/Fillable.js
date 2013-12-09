@@ -56,6 +56,11 @@ define( function( require ) {
         this.invalidatePaint();
         
         this.invalidateFill();
+        
+        var stateLen = this._visualStates.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._visualStates.markDirtyFill();
+        }
       }
       return this;
     };
@@ -218,6 +223,23 @@ define( function( require ) {
     }
   };
   var Fillable = scenery.Fillable;
+  
+  Fillable.FillableState = function FillableState( stateType ) {
+    var proto = stateType.prototype;
+    
+    proto.initializeFillableState = function() {
+      this.dirtyFill = true;
+    };
+    
+    proto.cleanFillableState = function() {
+      this.dirtyFill = false;
+    };
+    
+    proto.markDirtyFill = function() {
+      this.dirtyFill = true;
+      this.drawable.markDirty();
+    };
+  };
   
   return Fillable;
 } );
