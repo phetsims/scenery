@@ -3,15 +3,23 @@
 /**
  * DOM drawable for a specific painted node. TODO docs
  *
- * API needed:
+ * Node API needed:
  * {
- *   initializeDOM: function( DOMSelfDrawable ) : DOMElement    Node itself responsible for pooling available DOM elements and state. Can use drawable.visualState to set flags and state
- *   updateDOM: function( DOMSelfDrawable )
- *   destroyDOM: function( DOMSelfDrawable )
+ *   attachDOMDrawable: function( DOMSelfDrawable ) : DOMElement    Node itself responsible for pooling available DOM elements and state. Can use
+                                                                drawable.visualState to set flags and state.
+ *   detachDOMDrawable: function( DOMSelfDrawable )
  * }
  *
- * drawable.visualState.transformDirty should be included, and can be set to true by the drawable
- * drawable.visualState.forceAcceleration should be included, and can be set to true by the drawable
+ * visual state API needed:
+ * {
+ *   transformDirty: Boolean        // set by the drawable
+ *   forceAcceleration: Boolean     // set by the drawable. for now, won't change once created
+ *   drawable: DOMSelfDrawable      // set by the visual state on initialization
+ *   domElement: DOMElement         // what we use to render the DOM element (should be the base of the displayed element)
+ *   updateDOM: function()             // updates any visual state, including the transform
+ *   notifyDetached: function()     // called when the state is detached from a drawable. optionally discard DOM elements. we guarantee state will be
+ *                                  // initialized again before any more update() calls
+ * }
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
@@ -29,12 +37,14 @@ define( function( require ) {
     
     this.node = instance.trail.lastNode();
     
-    this.visualState = null; // to be created in initializeDOM
+    this.visualState = null; // to be created in attachDOMDrawable
     this.dirty = true;
     
-    this.domElement = this.node.initializeDOM( this );
+    throw new Error( 'make sure we change everything for the new dom visual state API' );
+    this.node.attachDOMDrawable( this ); // should set this.visualState
     
-    // now that we called initializeDOM, update the visualState object with the flags it will need
+    // now that we called attachDOMDrawable, update the visualState object with the flags it will need
+    this.domElement = this.visualState.domElement;
     this.visualState.forceAcceleration = renderer & bitmaskForceAcceleration !== 0;
     this.markTransformDirty();
     
@@ -53,7 +63,7 @@ define( function( require ) {
       this.markDirty();
     },
     
-    // called from the Node that we called initializeDOM on. should never be called after destroyDOM.
+    // called from the Node that we called attachDOMDrawable on. should never be called after detachDOMDrawable.
     markDirty: function() {
       if ( !this.dirty ) {
         this.dirty = true;
@@ -75,7 +85,7 @@ define( function( require ) {
     update: function() {
       if ( this.dirty ) {
         this.dirty = false;
-        this.node.updateDOM( this );
+        this.visualState.updateDOM();
       }
     },
     
@@ -83,7 +93,7 @@ define( function( require ) {
       // super call
       Drawable.prototype.dispose.call( this );
       
-      this.node.destroyDOM( this );
+      this.node.detachDOMDrawable( this );
       
       this.instance.removeRelativeTransformListener( this.transformListener );
       this.instance.removeRelativeTransformPrecompute();

@@ -62,6 +62,9 @@ define( function( require ) {
     // all of the Instances tracking this Node (across multiple layers and scenes)
     this._instances = [];
     
+    // states that need to be updated on mutations. generally added by SVG and DOM elements that need to closely track state (possibly by Canvas to maintain dirty state)
+    this._visualStates = [];
+    
     // Whether this node (and its children) will be visible when the scene is updated. Visible nodes by default will not be pickable either
     this._visible = true;
     
@@ -2120,6 +2123,27 @@ define( function( require ) {
     // get the Bounds2 of this node in the coordinate frame of the parameter node. Does not work for DAG cases.
     boundsTo: function( node ) {
       return node.globalToLocalBounds( this.getGlobalBounds() );
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * New DOM rendering
+    *----------------------------------------------------------------------------*/
+    
+    attachDOMDrawable: function( domSelfDrawable ) {
+      var visualState = this.createDOMState( domSelfDrawable );
+      
+      this._visualStates.push( visualState );
+      
+      return visualState;
+    },
+    
+    detachDOMDrawable: function( domSelfDrawable ) {
+      var visualState = domSelfDrawable.visualState;
+      
+      var index = _.indexOf( this._visualStates, visualState );
+      this._visualStates.splice( index, 1 ); // TODO: replace with a remove() function
+      
+      visualState.notifyDetached();
     },
     
     /*---------------------------------------------------------------------------*

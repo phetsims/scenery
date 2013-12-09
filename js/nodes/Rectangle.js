@@ -11,6 +11,7 @@ define( function( require ) {
   'use strict';
   
   var inherit = require( 'PHET_CORE/inherit' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
   
   var Path = require( 'SCENERY/nodes/Path' );
@@ -19,6 +20,9 @@ define( function( require ) {
   var Bounds2 = require( 'DOT/Bounds2' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Features = require( 'SCENERY/util/Features' );
+  
+  // TODO: change this based on memory and performance characteristics of the platform
+  var keepDOMRectangleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
   
   /**
    * Currently, all numerical parameters should be finite.
@@ -367,6 +371,14 @@ define( function( require ) {
       scenery.Util.applyCSSTransform( matrix, element );
     },
     
+    createDOMState: function( domSelfDrawable ) {
+      return Rectangle.RectangleDOMState.createFromPool( domSelfDrawable );
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * Miscellaneous
+    *----------------------------------------------------------------------------*/
+    
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Rectangle( ' + this._rectX + ', ' + this._rectY + ', ' + 
                                          this._rectWidth + ', ' + this._rectHeight + ', ' +
@@ -393,6 +405,10 @@ define( function( require ) {
       return true;
     }
   } );
+  
+  /*---------------------------------------------------------------------------*
+  * Other Rectangle properties and ES5
+  *----------------------------------------------------------------------------*/
   
   function addRectProp( capitalizedShort ) {
     var getName = 'getRect' + capitalizedShort;
@@ -498,6 +514,116 @@ define( function( require ) {
   Rectangle.roundedBounds = function( bounds, arcWidth, arcHeight, options ) {
     return new Rectangle( bounds.minX, bounds.minY, bounds.width, bounds.height, arcWidth, arcHeight, options );
   };
+  
+  /*---------------------------------------------------------------------------*
+  * DOM rendering
+  *----------------------------------------------------------------------------*/
+  
+  var RectangleDOMState = Rectangle.RectangleDOMState = function( drawable ) {
+    // important to keep this in the constructor (so our hidden class works out nicely)
+    this.initialize( drawable );
+    
+    // TODO: initial stroke/fill states
+  };
+  RectangleDOMState.prototype = {
+    constructor: RectangleDOMState,
+    
+    // initializes, and resets (so we can support pooled states)
+    initialize: function( drawable ) {
+      this.drawable = drawable;
+      this.node = drawable.node;
+      drawable.visualState = this;
+      this.transformDirty = true;
+      
+      if ( !this.matrix ) {
+        this.matrix = Matrix3.dirtyFromPool();
+      }
+      
+      // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
+      // allocation and performance costs)
+      if ( !this.fillElement || !this.strokeElement ) {
+        var fillElement = this.fillElement = document.createElement( 'div' );
+        fillElement.style.display = 'block';
+        fillElement.style.position = 'absolute';
+        fillElement.style.left = '0';
+        fillElement.style.top = '0';
+        
+        var strokeElement = this.strokeElement = document.createElement( 'div' );
+        strokeElement.style.display = 'block';
+        strokeElement.style.position = 'absolute';
+        strokeElement.style.left = '0';
+        strokeElement.style.top = '0';
+        fillElement.appendChild( strokeElement );
+      }
+      
+      this.domElement = this.fillElement;
+      
+      return this; // allow for chaining
+    },
+    
+    updateDOM: function() {
+      var node = this.node;
+      var fillElement = this.fillElement;
+      var strokeElement = this.strokeElement;
+      
+      // TODO: make the changes more atomic using flags
+      // TODO: markDirty!
+      var borderRadius = Math.min( node._rectArcWidth, node._rectArcHeight );
+      
+      fillElement.style.width = node._rectWidth + 'px';
+      fillElement.style.height = node._rectHeight + 'px';
+      fillElement.style[Features.borderRadius] = borderRadius + 'px'; // if one is zero, we are not rounded, so we do the min here
+      fillElement.style.backgroundColor = node.getCSSFill();
+      
+      if ( node.hasStroke() ) {
+        strokeElement.style.width = ( node._rectWidth - node.getLineWidth() ) + 'px';
+        strokeElement.style.height = ( node._rectHeight - node.getLineWidth() ) + 'px';
+        strokeElement.style.left = ( -node.getLineWidth() / 2 ) + 'px';
+        strokeElement.style.top = ( -node.getLineWidth() / 2 ) + 'px';
+        strokeElement.style.borderStyle = 'solid';
+        strokeElement.style.borderColor = node.getSimpleCSSFill();
+        strokeElement.style.borderWidth = node.getLineWidth() + 'px';
+        strokeElement.style[Features.borderRadius] = ( node.isRounded() || node.getLineJoin() === 'round' ) ? ( borderRadius + node.getLineWidth() / 2 ) + 'px' : '0';
+      } else {
+        strokeElement.style.borderStyle = 'none';
+      }
+      
+      // TODO: only do when necessary
+      // shift the text vertically, postmultiplied with the entire transform.
+      this.matrix.set( this.drawable.getTransformMatrix() );
+      var translation = Matrix3.translation( node._rectX, node._rectY );
+      this.matrix.multiplyMatrix( translation );
+      translation.freeToPool();
+      scenery.Util.applyCSSTransform( this.matrix, this.fillElement );
+    },
+    
+    // release the DOM elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
+    notifyDetached: function() {
+      if ( !keepDOMRectangleElements ) {
+        // clear the references
+        this.fillElement = null;
+        this.strokeElement = null;
+        this.domElement = null;
+      }
+      
+      // put us back in the pool
+      this.freeToPool();
+    }
+  };
+  // for pooling, allow RectangleDOMState.createFromPool( drawable ) and state.freeToPool(). Creation will initialize the state to the intial state
+  /* jshint -W064 */
+  Poolable( RectangleDOMState, {
+    defaultFactory: function() { return new RectangleDOMState(); },
+    constructorDuplicateFactory: function( pool ) {
+      return function( drawable ) {
+        if ( pool.length ) {
+          return pool.pop().initialize( drawable );
+        } else {
+          return new RectangleDOMState( drawable );
+        }
+      };
+    }
+  } );
   
   return Rectangle;
 } );
