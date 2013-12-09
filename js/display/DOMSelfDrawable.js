@@ -12,6 +12,7 @@
  *
  * visual state API needed:
  * {
+ *   markPaintDirty: function()     // used by Strokable/Fillable
  *   node: Node                     // used by Strokable/Fillable
  *   transformDirty: Boolean        // set by the drawable
  *   forceAcceleration: Boolean     // set by the drawable. for now, won't change once created

@@ -551,13 +551,15 @@ define( function( require ) {
       this.transformDirty = true;
       this.forceAcceleration = false; // later changed by drawable if necessary
       
-      this.dirtyX = true;
+      this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
+      this.dirtyX = true;   
       this.dirtyY = true;
       this.dirtyWidth = true;
       this.dirtyHeight = true;
       this.dirtyArcWidth = true;
       this.dirtyArcHeight = true;
       
+      // adds fill/stroke-specific flags and state
       this.initializeFillableState();
       this.initializeStrokableState();
       
@@ -592,56 +594,58 @@ define( function( require ) {
       var fillElement = this.fillElement;
       var strokeElement = this.strokeElement;
       
-      // TODO: make the changes more atomic using flags
-      // TODO: markDirty!
-      var borderRadius = Math.min( node._rectArcWidth, node._rectArcHeight );
-      var borderRadiusDirty = this.dirtyArcWidth || this.dirtyArcHeight;
-      
-      if ( this.dirtyWidth ) {
-        fillElement.style.width = node._rectWidth + 'px';
-      }
-      if ( this.dirtyHeight ) {
-        fillElement.style.height = node._rectHeight + 'px';
-      }
-      if ( borderRadiusDirty ) {
-        fillElement.style[Features.borderRadius] = borderRadius + 'px'; // if one is zero, we are not rounded, so we do the min here
-      }
-      if ( this.dirtyFill ) {
-        fillElement.style.backgroundColor = node.getCSSFill();
-      }
-      
-      if ( this.dirtyStroke ) {
-        // update stroke presence
+      if ( this.paintDirty ) {
+        // TODO: make the changes more atomic using flags
+        // TODO: markDirty!
+        var borderRadius = Math.min( node._rectArcWidth, node._rectArcHeight );
+        var borderRadiusDirty = this.dirtyArcWidth || this.dirtyArcHeight;
+        
+        if ( this.dirtyWidth ) {
+          fillElement.style.width = node._rectWidth + 'px';
+        }
+        if ( this.dirtyHeight ) {
+          fillElement.style.height = node._rectHeight + 'px';
+        }
+        if ( borderRadiusDirty ) {
+          fillElement.style[Features.borderRadius] = borderRadius + 'px'; // if one is zero, we are not rounded, so we do the min here
+        }
+        if ( this.dirtyFill ) {
+          fillElement.style.backgroundColor = node.getCSSFill();
+        }
+        
+        if ( this.dirtyStroke ) {
+          // update stroke presence
+          if ( node.hasStroke() ) {
+            strokeElement.style.borderStyle = 'solid';
+          } else {
+            strokeElement.style.borderStyle = 'none';
+          }
+        }
+        
         if ( node.hasStroke() ) {
-          strokeElement.style.borderStyle = 'solid';
-        } else {
-          strokeElement.style.borderStyle = 'none';
-        }
-      }
-      
-      if ( node.hasStroke() ) {
-        // since we only execute these if we have a stroke, we need to redo everything if there was no stroke previously.
-        // the other option would be to update stroked information when there is no stroke (major performance loss for fill-only rectangles)
-        var hadNoStrokeBefore = this.lastStroke === null;
-        
-        if ( hadNoStrokeBefore || this.dirtyWidth || this.dirtyLineWidth ) {
-          strokeElement.style.width = ( node._rectWidth - node.getLineWidth() ) + 'px';
-        }
-        if ( hadNoStrokeBefore || this.dirtyHeight || this.dirtyLineWidth ) {
-          strokeElement.style.height = ( node._rectHeight - node.getLineWidth() ) + 'px';
-        }
-        if ( hadNoStrokeBefore || this.dirtyLineWidth ) {
-          strokeElement.style.left = ( -node.getLineWidth() / 2 ) + 'px';
-          strokeElement.style.top = ( -node.getLineWidth() / 2 ) + 'px';
-          strokeElement.style.borderWidth = node.getLineWidth() + 'px';
-        }
-        
-        if ( hadNoStrokeBefore || this.dirtyStroke ) {
-          strokeElement.style.borderColor = node.getSimpleCSSFill();
-        }
-        
-        if ( hadNoStrokeBefore || borderRadiusDirty || this.dirtyLineWidth || this.dirtyLineOptions ) {
-          strokeElement.style[Features.borderRadius] = ( node.isRounded() || node.getLineJoin() === 'round' ) ? ( borderRadius + node.getLineWidth() / 2 ) + 'px' : '0';
+          // since we only execute these if we have a stroke, we need to redo everything if there was no stroke previously.
+          // the other option would be to update stroked information when there is no stroke (major performance loss for fill-only rectangles)
+          var hadNoStrokeBefore = this.lastStroke === null;
+          
+          if ( hadNoStrokeBefore || this.dirtyWidth || this.dirtyLineWidth ) {
+            strokeElement.style.width = ( node._rectWidth - node.getLineWidth() ) + 'px';
+          }
+          if ( hadNoStrokeBefore || this.dirtyHeight || this.dirtyLineWidth ) {
+            strokeElement.style.height = ( node._rectHeight - node.getLineWidth() ) + 'px';
+          }
+          if ( hadNoStrokeBefore || this.dirtyLineWidth ) {
+            strokeElement.style.left = ( -node.getLineWidth() / 2 ) + 'px';
+            strokeElement.style.top = ( -node.getLineWidth() / 2 ) + 'px';
+            strokeElement.style.borderWidth = node.getLineWidth() + 'px';
+          }
+          
+          if ( hadNoStrokeBefore || this.dirtyStroke ) {
+            strokeElement.style.borderColor = node.getSimpleCSSFill();
+          }
+          
+          if ( hadNoStrokeBefore || borderRadiusDirty || this.dirtyLineWidth || this.dirtyLineOptions ) {
+            strokeElement.style[Features.borderRadius] = ( node.isRounded() || node.getLineJoin() === 'round' ) ? ( borderRadius + node.getLineWidth() / 2 ) + 'px' : '0';
+          }
         }
       }
       
@@ -671,29 +675,35 @@ define( function( require ) {
       this.freeToPool();
     },
     
+    // catch-all dirty, if anything that isn't a transform is marked as dirty
+    markPaintDirty: function() {
+      this.paintDirty = true;
+      this.drawable.markDirty();
+    },
+    
     markDirtyX: function() {
       this.dirtyX = true;
-      this.drawable.markDirty();
+      this.markPaintDirty();
     },
     markDirtyY: function() {
       this.dirtyY = true;
-      this.drawable.markDirty();
+      this.markPaintDirty();
     },
     markDirtyWidth: function() {
       this.dirtyWidth = true;
-      this.drawable.markDirty();
+      this.markPaintDirty();
     },
     markDirtyHeight: function() {
       this.dirtyHeight = true;
-      this.drawable.markDirty();
+      this.markPaintDirty();
     },
     markDirtyArcWidth: function() {
       this.dirtyArcWidth = true;
-      this.drawable.markDirty();
+      this.markPaintDirty();
     },
     markDirtyArcHeight: function() {
       this.dirtyArcHeight = true;
-      this.drawable.markDirty();
+      this.markPaintDirty();
     },
     markDirtyRectangle: function() {
       this.dirtyX = true;
@@ -702,10 +712,11 @@ define( function( require ) {
       this.dirtyHeight = true;
       this.dirtyArcWidth = true;
       this.dirtyArcHeight = true;
-      this.drawable.markDirty();
+      this.markPaintDirty();
     },
     
     setToClean: function() {
+      this.paintDirty = false;
       this.dirtyX = false;
       this.dirtyY = false;
       this.dirtyWidth = false;

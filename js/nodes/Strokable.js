@@ -406,17 +406,17 @@ define( function( require ) {
     
     proto.markDirtyStroke = function() {
       this.dirtyStroke = true;
-      this.drawable.markDirty();
+      this.markPaintDirty();
     };
     
     proto.markDirtyLineWidth = function() {
       this.dirtyLineWidth = true;
-      this.drawable.markDirty();
+      this.markPaintDirty();
     };
     
     proto.markDirtyLineOptions = function() {
       this.dirtyLineOptions = true;
-      this.drawable.markDirty();
+      this.markPaintDirty();
     };
   };
   

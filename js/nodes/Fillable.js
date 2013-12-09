@@ -239,7 +239,7 @@ define( function( require ) {
     
     proto.markDirtyFill = function() {
       this.dirtyFill = true;
-      this.drawable.markDirty();
+      this.markPaintDirty();
     };
   };
   
