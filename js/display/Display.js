@@ -146,7 +146,7 @@ define( function( require ) {
         assert && assert( !isCanvasCache, 'For now, disallow an instance being a backbone and a canvas cache, since it has no performance benefits' );
         
         var backbone = new scenery.BackboneBlock( instance );
-        
+        instance.block = backbone;
         instance.groupDrawable = backbone.getDOMDrawable();
         instance.isTransformed = state.isBackboneTransformed; // we allow non-transformed backbones, for things like filters (where we don't want a CSS transform for non-integral coordinates)
       } else if ( state.isCanvasCache ) {
