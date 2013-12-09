@@ -93,7 +93,7 @@ define( function( require ) {
     this.firstDrawable = null;
     this.lastDrawable = null;
     
-    // properties relevant to the "relative" transform to the closest transform root
+    // properties relevant to the "relative" transform to the closest transform root. Please see detailed docs at the top of the file!
     this.isTransformed = false;               // whether this instance creates a new "root" for the relative trail transforms
     this.relativeMatrix = new Matrix3();      // the actual cached transform to the root
     this.relativeSelfDirty = true;            // whether our relativeMatrix is dirty
