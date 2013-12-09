@@ -114,7 +114,7 @@ define( function( require ) {
     throw new Error( 'figure out transform listeners and flags here - immediate wanted? - error everywhere it was used' );
     // this.transformListeners = [];
     
-    this.nodeTransformListener = this.onNodeTransform.bind( this );
+    this.nodeTransformListener = this.markTransformDirty.bind( this );
     this.node.addEventListener( 'transform', this.nodeTransformListener );
   };
   var DisplayInstance = scenery.DisplayInstance;
@@ -126,6 +126,9 @@ define( function( require ) {
       if ( instance.relativeTransformListeners.length || instance.relativeChildrenListenersCount ) {
         this.incrementTransformListenerChildren();
       }
+      
+      // mark the instance's transform as dirty, so that it will be reachable in the pre-repaint traversal pass
+      instance.markTransformDirty();
     },
     
     removeInstance: function( instance ) {
@@ -207,7 +210,7 @@ define( function( require ) {
     *----------------------------------------------------------------------------*/
     
     // called immediately when the corresponding node has a transform change (can happen multiple times between renders)
-    onNodeTransform: function() {
+    markTransformDirty: function() {
       if ( !this.transformDirty ) {
         this.transformDirty = true;
         this.relativeSelfDirty = true;
@@ -278,8 +281,9 @@ define( function( require ) {
     // called during the pre-repaint phase to (a) fire off all relative transform listeners that should be fired, and (b) precompute transforms were desired
     updateTransformListenersAndCompute: function( ancestorWasDirty, ancestorIsDirty, frameId ) {
       var wasDirty = ancestorWasDirty || this.relativeSelfDirty;
+      var wasSubtreeDirty = wasDirty || this.relativeChildDirtyFrame === frameId;
       var hasComputeNeed = this.hasRelativeTransformComputeNeed();
-      var hasListenerNeed = this.hasRelativeTransformListenerNeed() && ( wasDirty || this.relativeChildDirtyFrame === frameId );
+      var hasListenerNeed = this.hasRelativeTransformListenerNeed();
       
       // if our relative transform will be dirty but our parents' transform will be clean,  we need to mark ourselves as dirty (so that later access can identify we are dirty).
       if ( !hasComputeNeed && wasDirty && !ancestorIsDirty ) {
@@ -287,7 +291,8 @@ define( function( require ) {
       }
       
       // check if traversal isn't needed (no instances marked as having listeners or needing computation)
-      if ( !hasComputeNeed && !hasListenerNeed ) {
+      // either the subtree is clean (no traversal needed for compute/listeners), or we have no compute/listener needs
+      if ( !wasSubtreeDirty || ( !hasComputeNeed && !hasListenerNeed ) ) {
         return;
       }
       
