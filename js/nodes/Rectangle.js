@@ -549,6 +549,7 @@ define( function( require ) {
       this.drawable = drawable;
       this.node = drawable.node;
       this.transformDirty = true;
+      this.forceAcceleration = false; // later changed by drawable if necessary
       
       this.dirtyX = true;
       this.dirtyY = true;
@@ -646,7 +647,7 @@ define( function( require ) {
         var translation = Matrix3.translation( node._rectX, node._rectY );
         this.matrix.multiplyMatrix( translation );
         translation.freeToPool();
-        scenery.Util.applyCSSTransform( this.matrix, this.fillElement );
+        scenery.Util.applyCSSTransform( this.matrix, this.fillElement, this.forceAcceleration );
       }
       
       // clear all of the dirty flags
