@@ -115,7 +115,7 @@ define( function( require ) {
     },
     
     getPathRendererBitmask: function() {
-      var bitmask = scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG;
+      var bitmask = scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskBoundsValid;
       
       var maximumArcSize = this.getMaximumArcSize();
       
