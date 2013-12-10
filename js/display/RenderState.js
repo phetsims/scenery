@@ -61,6 +61,8 @@ define( function( require ) {
     var isTransparent = node.opacity !== 1;
     
     // check if we need a backbone or cache
+    // if we are under a canvas cache, we will NEVER have a backbone
+    // splits are accomplished just by having a backbone
     if ( !isUnderCanvasCache && ( isTransparent || hints.requireElement || hints.cssTransformBackbone || hints.split ) ) {
       this.isBackbone = true;
       this.isTransformed = !!hints.cssTransformBackbone; // for now, only trigger CSS transform if we have the specific hint
@@ -87,7 +89,9 @@ define( function( require ) {
       // TODO: figure out preferred rendering order
       // TODO: many more things to consider here for performance
       // TODO: performance (here)
-      if ( svgRenderer && ( svgRenderer & node._rendererBitmask ) !== 0 ) {
+      if ( isUnderCanvasCache ) {
+        this.selfRenderer = canvasRenderer;
+      } else if ( svgRenderer && ( svgRenderer & node._rendererBitmask ) !== 0 ) {
         this.selfRenderer = svgRenderer;
       } else if ( canvasRenderer && ( canvasRenderer & node._rendererBitmask ) !== 0 ) {
         this.selfRenderer = canvasRenderer;
