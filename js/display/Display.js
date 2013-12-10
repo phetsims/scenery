@@ -31,23 +31,6 @@ define( function( require ) {
   };
   var Display = scenery.Display;
   
-  // recursively compute the bitmask intersection (bitwise AND) for a node and all of its children, and store it to that node's _subtreeRendererBitmask
-  // TODO: partial updates (and speed for that)
-  function recursiveUpdateRendererBitmask( node ) {
-    var bitmask = scenery.bitmaskAll;
-    bitmask &= node._rendererBitmask;
-    
-    // include all children
-    var children = node._children;
-    var numChildren = children.length;
-    for ( var i = 0; i < numChildren; i++ ) {
-      bitmask &= recursiveUpdateRendererBitmask( children[i] );
-    }
-    
-    node._subtreeRendererBitmask = bitmask;
-    return bitmask; // return the bitmask so we have direct access at the call site
-  }
-  
   // display instance linked list ops
   function connectDrawables( a, b ) {
     a.nextDrawable = b;
@@ -174,9 +157,6 @@ define( function( require ) {
       // validate bounds for everywhere that could trigger bounds listeners. we want to flush out any changes, so that we can call validateBounds()
       // from code below without triggering side effects (we assume that we are not reentrant).
       this._rootNode.validateWatchedBounds();
-      
-      // compute updated _subtreeRendererBitmask for every Node // TODO: add and use dirty flag for this, and decide how the flags get set!
-      recursiveUpdateRendererBitmask( this._rootNode );
       
       throw new Error( 'TODO: replace with actual stitching' );
       this._baseInstance = createInstance( this, baseTrail, scenery.RenderState.RegularState.createRootState( this._rootNode ), null );

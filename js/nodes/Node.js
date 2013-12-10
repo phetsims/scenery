@@ -19,7 +19,8 @@ define( function( require ) {
   var Shape = require( 'KITE/Shape' );
   
   var scenery = require( 'SCENERY/scenery' );
-  var NodeEvents = require( 'SCENERY/util/FixedNodeEvents' ); // uncapitalized, because of JSHint (TODO: find the flag)
+  var NodeEvents = require( 'SCENERY/util/FixedNodeEvents' );
+  require( 'SCENERY/util/RendererSummary' );
   // require( 'SCENERY/layers/Renderer' ); // commented out so Require.js doesn't balk at the circular dependency
   
   // TODO: FIXME: Why do I have to comment out this dependency?
@@ -145,8 +146,7 @@ define( function( require ) {
     this._subtreePickableCount = 0;
     
     this._rendererBitmask = scenery.bitmaskNodeDefault;
-    this._subtreeRendererBitmask = scenery.bitmaskNodeDefault; // value not important initially, since it is dirty
-    // this._subtreeRendererBitmaskDirty = true; // TODO: include dirty flag!
+    this._rendererSummary = new scenery.RendererSummary( this );
     
     // So we can traverse only the subtrees that require bounds validation for events firing.
     // This is a sum of the number of events requiring bounds validation on this Node, plus the number of children whose count is non-zero.
@@ -177,6 +177,7 @@ define( function( require ) {
       // needs to be early to prevent re-entrant children modifications
       this.changePickableCount( node._subtreePickableCount );
       this.changeBoundsEventCount( node._boundsEventCount > 0 ? 1 : 0 );
+      this._rendererSummary.bitmaskChange( scenery.bitmaskAll, node._rendererSummary.bitmask );
       
       node._parents.push( this );
       this._children.splice( index, 0, node );
@@ -221,6 +222,7 @@ define( function( require ) {
       // needs to be early to prevent re-entrant children modifications
       this.changePickableCount( -node._subtreePickableCount );
       this.changeBoundsEventCount( node._boundsEventCount > 0 ? -1 : 0 );
+      this._rendererSummary.bitmaskChange( node._rendererSummary.bitmask, scenery.bitmaskAll );
       
       node.markOldPaint( false );
       
@@ -1532,6 +1534,7 @@ define( function( require ) {
     
     setRendererBitmask: function( bitmask ) {
       if ( bitmask !== this._rendererBitmask ) {
+        this._rendererSummary.bitmaskChange( this._rendererBitmask, bitmask );
         this._rendererBitmask = bitmask;
         this.markLayerRefreshNeeded();
       }

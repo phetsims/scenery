@@ -1,0 +1,117 @@
+// Copyright 2002-2013, University of Colorado
+
+/**
+ * Contains information about what renderers (and a few other flags) are supported for an entire subtree.
+ *
+ * We effectively do this by tracking bitmask changes from scenery.js (used for rendering properties in general). In particular, we count
+ * how many zeros in the bitmask we have in key places.
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( function( require ) {
+  'use strict';
+  
+  var scenery = require( 'SCENERY/scenery' );
+  // require( 'SCENERY/layers/Renderer' );
+  
+  var bits = [
+    scenery.bitmaskSupportsCanvas,
+    scenery.bitmaskSupportsSVG,
+    scenery.bitmaskSupportsDOM,
+    scenery.bitmaskSupportsWebGL,
+    scenery.bitmaskNotPainted,
+    scenery.bitmaskBoundsValid
+  ];
+  var numBits = bits.length;
+  
+  scenery.RendererSummary = function RendererSummary( node ) {
+    // NOTE: assumes that we are created in the Node constructor
+    assert && assert( node._rendererBitmask === scenery.bitmaskNodeDefault, 'Node must have a default bitmask when creating a RenderSummary' );
+    assert && assert( node._children.length === 0, 'Node cannot have children when creating a RenderSummary' );
+    
+    this.node = node;
+    this.bitmask = scenery.bitmaskNodeDefault;
+    
+    // initialize all of the defaults
+    for ( var i = 0; i < numBits; i++ ) {
+      var bit = bits[i];
+      // we count the number of 0s
+      this[bit] = ( scenery.bitmaskNodeDefault & bit ) === 0 ? 1 : 0;
+    }
+  };
+  var RendererSummary = scenery.RendererSummary;
+  
+  RendererSummary.prototype = {
+    constructor: RendererSummary,
+    
+    computeBitmask: function() {
+      var bitmask = 0;
+      for ( var i = 0; i < numBits; i++ ) {
+        var bit = bits[i];
+        if ( !this[bit] ) {
+          bitmask |= bit;
+        }
+      }
+      return bitmask;
+    },
+    
+    bitIncrement: function( bit ) {
+      var newCount = ++this[bit];
+      console.log( 'increment ' + bit + ' to ' + newCount );
+      if ( newCount === 1 ) {
+        this.notifyBitUnset( bit );
+      }
+    },
+    
+    bitDecrement: function( bit ) {
+      var newCount = --this[bit];
+      console.log( 'decrement ' + bit + ' to ' + newCount );
+      assert && assert( newCount >= 0, 'bitcount always needs to be above 0' );
+      if ( newCount === 0 ) {
+        this.notifyBitSet( bit );
+      }
+    },
+    
+    notifyBitSet: function( bit ) {
+      this.bitmask = this.computeBitmask();
+      
+      var len = this.node._parents.length;
+      for ( var i = 0; i < len; i++ ) {
+        this.node._parents[i]._rendererSummary.bitIncrement( bit );
+      }
+    },
+    
+    notifyBitUnset: function( bit ) {
+      this.bitmask = this.computeBitmask();
+      
+      var len = this.node._parents.length;
+      for ( var i = 0; i < len; i++ ) {
+        this.node._parents[i]._rendererSummary.bitDecrement( bit );
+      }
+    },
+    
+    // use a bitmask of all 1s to represent 'does not exist' since we count zeros
+    bitmaskChange: function( oldBitmask, newBitmask ) {
+      console.log( 'change from ' + oldBitmask + ' to ' + newBitmask );
+      var changeBitmask = oldBitmask ^ newBitmask;
+      
+      for ( var i = 0; i < numBits; i++ ) {
+        var bit = bits[i];
+        if ( ( bit & changeBitmask ) !== 0 ) {
+          var currentValue = bit & newBitmask;
+          
+          if ( currentValue !== 0 ) {
+            // we set the bit (used to be 0, now is 1)
+            this.bitDecrement( bit );
+          } else {
+            // we unset the bit (used to be 1, now is 0)
+            this.bitIncrement( bit );
+          }
+        }
+      }
+    }
+  };
+  
+  return RendererSummary;
+} );

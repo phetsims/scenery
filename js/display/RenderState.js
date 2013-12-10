@@ -41,7 +41,7 @@ define( function( require ) {
    */
   RenderState.RegularState = function RegularState( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared ) {
     // this should be accurate right now, the pass to update these should have been completed earlier
-    var combinedBitmask = node._subtreeRendererBitmask;
+    var combinedBitmask = node._rendererSummary.bitmask;
     
     this.svgRenderer = svgRenderer;
     this.canvasRenderer = canvasRenderer;
