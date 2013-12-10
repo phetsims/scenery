@@ -31,7 +31,6 @@ define( function( require ) {
     assert && assert( node._children.length === 0, 'Node cannot have children when creating a RenderSummary' );
     
     this.node = node;
-    this.bitmask = scenery.bitmaskNodeDefault;
     
     // initialize all of the defaults
     for ( var i = 0; i < numBits; i++ ) {
@@ -39,6 +38,8 @@ define( function( require ) {
       // we count the number of 0s
       this[bit] = ( scenery.bitmaskNodeDefault & bit ) === 0 ? 1 : 0;
     }
+    
+    this.bitmask = this.computeBitmask();
   };
   var RendererSummary = scenery.RendererSummary;
   
