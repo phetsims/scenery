@@ -50,6 +50,8 @@ define( function( require ) {
       var bitmask = 0;
       for ( var i = 0; i < numBits; i++ ) {
         var bit = bits[i];
+        
+        // remember, if the count is zero, the bit is set
         if ( !this[bit] ) {
           bitmask |= bit;
         }
@@ -60,6 +62,7 @@ define( function( require ) {
     bitIncrement: function( bit ) {
       var newCount = ++this[bit];
       if ( newCount === 1 ) {
+        // if the count goes from 0 to 1, it means our combined bit went from 1 to 0 (reversed)
         this.notifyBitUnset( bit );
       }
     },
@@ -68,6 +71,7 @@ define( function( require ) {
       var newCount = --this[bit];
       assert && assert( newCount >= 0, 'bitcount always needs to be above 0' );
       if ( newCount === 0 ) {
+        // if the count goes from 1 to 0, it means our combined bit went from 0 to 1 (reversed)
         this.notifyBitSet( bit );
       }
     },
@@ -77,7 +81,7 @@ define( function( require ) {
       
       var len = this.node._parents.length;
       for ( var i = 0; i < len; i++ ) {
-        this.node._parents[i]._rendererSummary.bitIncrement( bit );
+        this.node._parents[i]._rendererSummary.bitDecrement( bit );
       }
     },
     
@@ -86,7 +90,7 @@ define( function( require ) {
       
       var len = this.node._parents.length;
       for ( var i = 0; i < len; i++ ) {
-        this.node._parents[i]._rendererSummary.bitDecrement( bit );
+        this.node._parents[i]._rendererSummary.bitIncrement( bit );
       }
     },
     

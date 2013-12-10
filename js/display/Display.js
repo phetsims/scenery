@@ -13,9 +13,11 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
   require( 'SCENERY/display/BackboneBlock' );
+  require( 'SCENERY/display/CanvasBlock' );
   require( 'SCENERY/display/CanvasSelfDrawable' );
   require( 'SCENERY/display/DisplayInstance' );
   require( 'SCENERY/display/DOMSelfDrawable' );
+  require( 'SCENERY/display/InlineCanvasCacheDrawable' );
   require( 'SCENERY/display/RenderState' );
   require( 'SCENERY/display/SVGSelf' );
   require( 'SCENERY/layers/Renderer' );
@@ -45,6 +47,7 @@ define( function( require ) {
     var node = trail.lastNode();
     instance.state = state;
     instance.parent = parentInstance;
+    instance.isTransformed = state.isTransformed;
     
     if ( isSharedCache ) {
       var instanceKey = trail.lastNode().getId();
@@ -135,9 +138,11 @@ define( function( require ) {
         var backbone = new scenery.BackboneBlock( instance, false, null );
         instance.block = backbone;
         instance.groupDrawable = backbone.getDOMDrawable();
-        instance.isTransformed = state.isBackboneTransformed; // we allow non-transformed backbones, for things like filters (where we don't want a CSS transform for non-integral coordinates)
       } else if ( state.isCanvasCache ) {
-        instance.groupDrawable = // TODO create non-shared cache, use groupRenderer
+        
+        // TODO: create block for cache
+        // TODO create non-shared cache, use groupRenderer
+        instance.groupDrawable = new scenery.InlineCanvasCacheDrawable( trail, groupRenderer, instance );
       }
     }
     

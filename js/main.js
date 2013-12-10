@@ -22,6 +22,7 @@ define( [
     'SCENERY/display/DisplayInstance',
     'SCENERY/display/DOMSelfDrawable',
     'SCENERY/display/Drawable',
+    // 'SCENERY/display/InlineCanvasCacheDrawable',
     // 'SCENERY/display/RenderState',
     // 'SCENERY/display/SVGBlock',
     // 'SCENERY/display/SVGSelfDrawable',
