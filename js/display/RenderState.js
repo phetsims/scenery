@@ -97,6 +97,9 @@ define( function( require ) {
       } else {
         throw new Error( 'unsupported renderer, something wrong in RenderState' );
       }
+      
+      // TODO: remove this later
+      this.selfRenderer = scenery.bitmaskSupportsDOM;
     }
   };
   RenderState.RegularState.prototype = {

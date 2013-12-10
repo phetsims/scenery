@@ -88,7 +88,7 @@ define( function( require ) {
           // assert so that it doesn't compile down to a throw (we want this function to be optimized)
           assert && assert( 'Unrecognized renderer, maybe we don\'t support WebGL yet?: ' + selfRenderer );
         }
-        currentDrawable = instance.selfDrawable;
+        instance.firstDrawable = currentDrawable = instance.selfDrawable;
       }
       
       var children = trail.lastNode().children;

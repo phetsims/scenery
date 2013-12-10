@@ -19,6 +19,16 @@ define( function( require ) {
     this.renderer = renderer;
     this.domElement = existingDiv || BackboneBlock.createDivBackbone();
     this.includeRoot = includeRoot;
+    
+    // TODO: flesh out into stitch handling:
+    var drawable = instance.firstDrawable;
+    while ( drawable ) {
+      this.domElement.appendChild( drawable.domElement );
+      if ( drawable === instance.lastDrawable ) {
+        break;
+      }
+      drawable = drawable.nextDrawable;
+    }
   };
   var BackboneBlock = scenery.BackboneBlock;
   
@@ -29,7 +39,13 @@ define( function( require ) {
   } );
   
   BackboneBlock.createDivBackbone = function() {
-    return document.createElement( 'div' );
+    var div = document.createElement( 'div' );
+    div.style.position = 'absolute';
+    div.style.left = '0';
+    div.style.top = '0';
+    div.style.width = '0';
+    div.style.height = '0';
+    return div;
   };
   
   return BackboneBlock;
