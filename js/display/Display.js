@@ -30,7 +30,10 @@ define( function( require ) {
     this._sharedCanvasInstances = {}; // map from Node ID to DisplayInstance, for fast lookup
     this._baseInstance = null; // will be filled with the root DisplayInstance
     
+    // variable state
     this._frameId = 0; // incremented for every rendered frame
+    this._dirtyTransformRoots = [];
+    this._dirtyTransformRootsWithoutPass = [];
   };
   var Display = scenery.Display;
   
@@ -47,8 +50,11 @@ define( function( require ) {
     
     var node = trail.lastNode();
     instance.state = state;
-    instance.parent = parentInstance;
+    // instance.parent = parentInstance; // NOTE: done later during the append!
     instance.isTransformed = state.isTransformed;
+    if ( instance.isTransformed ) {
+      display.markTransformRootDirty( instance, true );
+    }
     
     if ( isSharedCache ) {
       var instanceKey = trail.lastNode().getId();
@@ -157,25 +163,50 @@ define( function( require ) {
     },
     get rootNode() { return this.getRootNode(); },
     
+    // called from DisplayInstances that will need a transform update (for listeners and precomputation)
+    markTransformRootDirty: function( displayInstance, passTransform ) {
+      passTransform ? this._dirtyTransformRoots.push( displayInstance ) : this._dirtyTransformRootsWithoutPass.push( displayInstance );
+    },
+    
+    updateDirtyTransformRoots: function() {
+      var len,i;
+      
+      len = this._dirtyTransformRoots.length;
+      for ( i = 0; i < len; i++ ) {
+        this._dirtyTransformRoots[i].updateTransformListenersAndCompute( false, false, this._frameId, true );
+      }
+      this._dirtyTransformRoots.length = 0;
+      
+      len = this._dirtyTransformRootsWithoutPass.length;
+      for ( i = 0; i < len; i++ ) {
+        this._dirtyTransformRootsWithoutPass[i].updateTransformListenersAndCompute( false, false, this._frameId, false );
+      }
+      this._dirtyTransformRootsWithoutPass.length = 0;
+    },
+    
     // NOTE: to be replaced with a full stitching/update version
     buildTemporaryDisplay: function() {
-      this._frameId++;
-      
       // validate bounds for everywhere that could trigger bounds listeners. we want to flush out any changes, so that we can call validateBounds()
       // from code below without triggering side effects (we assume that we are not reentrant).
       this._rootNode.validateWatchedBounds();
       
       // throw new Error( 'TODO: replace with actual stitching' );
       this._baseInstance = createInstance( this, new scenery.Trail( this._rootNode ), scenery.RenderState.RegularState.createRootState( this._rootNode ), null );
+      this.markTransformRootDirty( this._baseInstance, false ); // marks the transform root as dirty (since it is)
       
       this._rootBackbone = new scenery.BackboneBlock( this._baseInstance, scenery.bitmaskSupportsDOM, true, this._domElement );
       
-      // throw new Error( 'TODO: pre-repaint phase (first transform-notify by traversing all transform roots)' );
+      // pre-repaint phase: update relative transform information for listeners (notification) and precomputation where desired
+      this.updateDirtyTransformRoots();
       
       // throw new Error( 'TODO: repaint phase (painting)' );
       
       // throw new Error( 'TODO: update cursor' );
+      
+      this._frameId++;
     }
+    
+    // TODO: add updateTemporaryDisplay?
   } );
   
   return Display;

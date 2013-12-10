@@ -95,19 +95,19 @@ define( function( require ) {
     this.lastDrawable = null;
     
     // properties relevant to the "relative" transform to the closest transform root. Please see detailed docs at the top of the file!
-    this.isTransformed = false;               // whether this instance creates a new "root" for the relative trail transforms
-    this.relativeMatrix = new Matrix3();      // the actual cached transform to the root
-    this.relativeSelfDirty = true;            // whether our relativeMatrix is dirty
-    this.relativeChildDirtyFrame = -1;        // Whether children have dirty transforms (if it is the current frame) NOTE: used only for pre-repaint traversal,
-                                              // and can be ignored if it has a value less than the current frame ID. This allows us to traverse and hit all listeners
-                                              // for this particular traversal, without leaving an invalid subtree (a boolean flag here is insufficient, since our
-                                              // traversal handling would validate our invariant of this.relativeChildDirtyFrame => parent.relativeChildDirtyFrame).
-                                              // In this case, they are both effectively "false" unless they are the current frame ID, in which case that invariant holds.
-    this.relativeTransformListeners = [];     // will be notified in pre-repaint phase that our relative transform has changed (but not computed by default)
-    this.relativeChildrenListenersCount = 0;  // how many children have (or have descendants with) relativeTransformListeners
-    this.relativePrecomputeCount = 0;         // if >0, indicates this should be precomputed in the pre-repaint phase
-    this.relativeChildrenPrecomputeCount = 0; // how many children have (or have descendants with) >0 relativePrecomputeCount
-    this.relativeFrameId = -1;                // used to mark what frame the transform was updated in (to accelerate non-precomputed relative transform access)
+    this.isTransformed = false;                      // whether this instance creates a new "root" for the relative trail transforms
+    this.relativeMatrix = new Matrix3();             // the actual cached transform to the root
+    this.relativeSelfDirty = true;                   // whether our relativeMatrix is dirty
+    this.relativeChildDirtyFrame = display._frameId; // Whether children have dirty transforms (if it is the current frame) NOTE: used only for pre-repaint traversal,
+                                                     // and can be ignored if it has a value less than the current frame ID. This allows us to traverse and hit all listeners
+                                                     // for this particular traversal, without leaving an invalid subtree (a boolean flag here is insufficient, since our
+                                                     // traversal handling would validate our invariant of this.relativeChildDirtyFrame => parent.relativeChildDirtyFrame).
+                                                     // In this case, they are both effectively "false" unless they are the current frame ID, in which case that invariant holds.
+    this.relativeTransformListeners = [];            // will be notified in pre-repaint phase that our relative transform has changed (but not computed by default)
+    this.relativeChildrenListenersCount = 0;         // how many children have (or have descendants with) relativeTransformListeners
+    this.relativePrecomputeCount = 0;                // if >0, indicates this should be precomputed in the pre-repaint phase
+    this.relativeChildrenPrecomputeCount = 0;        // how many children have (or have descendants with) >0 relativePrecomputeCount
+    this.relativeFrameId = -1;                       // used to mark what frame the transform was updated in (to accelerate non-precomputed relative transform access)
     
     // properties relevant to the node's direct transform
     this.transformDirty = true;               // whether the node's transform has changed (until the pre-repaint phase)
@@ -122,9 +122,15 @@ define( function( require ) {
   inherit( Object, DisplayInstance, {
     appendInstance: function( instance ) {
       this.children.push( instance );
+      instance.parent = this;
       
-      if ( instance.relativeTransformListeners.length || instance.relativeChildrenListenersCount ) {
-        this.incrementTransformListenerChildren();
+      if ( !instance.isTransformed ) {
+        if ( instance.hasRelativeTransformListenerNeed() ) {
+          this.incrementTransformListenerChildren();
+        }
+        if ( instance.hasRelativeTransformComputeNeed() ) {
+          this.incrementTransformPrecomputeChildren();
+        }
       }
       
       // mark the instance's transform as dirty, so that it will be reachable in the pre-repaint traversal pass
@@ -133,9 +139,15 @@ define( function( require ) {
     
     removeInstance: function( instance ) {
       this.children.splice( _.indexOf( this.children, instance ), 1 ); // TODO: replace with a 'remove' function call
+      instance.parent = null;
       
-      if ( instance.relativeTransformListeners.length || instance.relativeChildrenListenersCount ) {
-        this.decrementTransformListenerChildren();
+      if ( !instance.isTransformed ) {
+        if ( instance.hasRelativeTransformListenerNeed() ) {
+          this.decrementTransformListenerChildren();
+        }
+        if ( instance.hasRelativeTransformComputeNeed() ) {
+          this.decrementTransformPrecomputeChildren();
+        }
       }
     },
     
@@ -218,15 +230,30 @@ define( function( require ) {
         var frameId = this.display._frameId;
         
         // mark all ancestors with relativeChildDirtyFrame, bailing out when possible
-        var node = this.parent;
-        while ( node && node.relativeChildDirtyFrame !== frameId ) {
-          node.relativeChildDirtyFrame = frameId;
-          node = node.parent;
+        var startInstance = this;
+        var instance = startInstance;
+        while ( instance && instance.relativeChildDirtyFrame !== frameId ) {
+          var parentInstance = instance.parent;
+          var isTransformed = instance.isTransformed;
+          var isStart = instance === startInstance;
           
-          // don't run outside of our current root
-          if ( node.isTransformed ) {
-            break;
+          if ( parentInstance === null && ( !isTransformed || isStart ) ) {
+            this.display.markTransformRootDirty( instance, false ); // passTransform false
+          } else if ( isTransformed && !isStart ) {
+            this.display.markTransformRootDirty( instance, true ); // passTransform true
           }
+          // let isTransformed && isStart pass down
+          
+          if ( !isStart ) {
+            instance.relativeChildDirtyFrame = frameId;
+            
+            // don't run outside of our current root
+            if ( isTransformed ) {
+              break;
+            }
+          }
+          
+          instance = parentInstance;
         }
       }
     },
@@ -279,48 +306,58 @@ define( function( require ) {
     },
     
     // called during the pre-repaint phase to (a) fire off all relative transform listeners that should be fired, and (b) precompute transforms were desired
-    updateTransformListenersAndCompute: function( ancestorWasDirty, ancestorIsDirty, frameId ) {
-      var wasDirty = ancestorWasDirty || this.relativeSelfDirty;
-      var wasSubtreeDirty = wasDirty || this.relativeChildDirtyFrame === frameId;
-      var hasComputeNeed = this.hasRelativeTransformComputeNeed();
-      var hasListenerNeed = this.hasRelativeTransformListenerNeed();
+    updateTransformListenersAndCompute: function( ancestorWasDirty, ancestorIsDirty, frameId, passTransform ) {
+      var len, i;
       
-      // if our relative transform will be dirty but our parents' transform will be clean,  we need to mark ourselves as dirty (so that later access can identify we are dirty).
-      if ( !hasComputeNeed && wasDirty && !ancestorIsDirty ) {
-        this.relativeSelfDirty = true;
-      }
-      
-      // check if traversal isn't needed (no instances marked as having listeners or needing computation)
-      // either the subtree is clean (no traversal needed for compute/listeners), or we have no compute/listener needs
-      if ( !wasSubtreeDirty || ( !hasComputeNeed && !hasListenerNeed ) ) {
-        return;
-      }
-      
-      // if desired, compute the transform
-      if ( wasDirty && hasComputeNeed ) {
-        // compute this transform in the pre-repaint phase, so it is cheap when always used/
-        // we update when the child-precompute count >0, since those children will need 
-        this.computeRelativeTransform();
-      }
-      
-      if ( this.transformDirty ) {
-        this.transformDirty = false;
-        // throw new Error( 'ack, traversal for this is bad - do it somewhere global, and figure out if instead we want immediate listeners only' );
-        // this.notifyTransformListeners();
-      }
-      
-      // no hasListenerNeed guard needed?
-      this.notifyRelativeTransformListeners();
-      
-      // only update children if we aren't transformed (completely other context)
-      if ( !this.isTransformed ) {
+      if ( passTransform ) {
+        // if we are passing isTransform, just apply this to the children
+        len = this.children.length;
+        for ( i = 0; i < len; i++ ) {
+          this.children[i].updateTransformListenersAndCompute( false, false, frameId, false );
+        }
+      } else {
+        var wasDirty = ancestorWasDirty || this.relativeSelfDirty;
+        var wasSubtreeDirty = wasDirty || this.relativeChildDirtyFrame === frameId;
+        var hasComputeNeed = this.hasRelativeTransformComputeNeed();
+        var hasListenerNeed = this.hasRelativeTransformListenerNeed();
         
-        var isDirty = wasDirty && !hasComputeNeed;
+        // if our relative transform will be dirty but our parents' transform will be clean,  we need to mark ourselves as dirty (so that later access can identify we are dirty).
+        if ( !hasComputeNeed && wasDirty && !ancestorIsDirty ) {
+          this.relativeSelfDirty = true;
+        }
         
-        // continue the traversal
-        var len = this.children.length;
-        for ( var i = 0; i < len; i++ ) {
-          this.children[i].updateTransformListenersAndCompute( wasDirty, isDirty, frameId );
+        // check if traversal isn't needed (no instances marked as having listeners or needing computation)
+        // either the subtree is clean (no traversal needed for compute/listeners), or we have no compute/listener needs
+        if ( !wasSubtreeDirty || ( !hasComputeNeed && !hasListenerNeed ) ) {
+          return;
+        }
+        
+        // if desired, compute the transform
+        if ( wasDirty && hasComputeNeed ) {
+          // compute this transform in the pre-repaint phase, so it is cheap when always used/
+          // we update when the child-precompute count >0, since those children will need 
+          this.computeRelativeTransform();
+        }
+        
+        if ( this.transformDirty ) {
+          this.transformDirty = false;
+          // throw new Error( 'ack, traversal for this is bad - do it somewhere global, and figure out if instead we want immediate listeners only' );
+          // this.notifyTransformListeners();
+        }
+        
+        // no hasListenerNeed guard needed?
+        this.notifyRelativeTransformListeners();
+        
+        // only update children if we aren't transformed (completely other context)
+        if ( !this.isTransformed || passTransform ) {
+          
+          var isDirty = wasDirty && !hasComputeNeed;
+          
+          // continue the traversal
+          len = this.children.length;
+          for ( i = 0; i < len; i++ ) {
+            this.children[i].updateTransformListenersAndCompute( wasDirty, isDirty, frameId, false );
+          }
         }
       }
     },
