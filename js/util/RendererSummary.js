@@ -59,7 +59,6 @@ define( function( require ) {
     
     bitIncrement: function( bit ) {
       var newCount = ++this[bit];
-      console.log( 'increment ' + bit + ' to ' + newCount );
       if ( newCount === 1 ) {
         this.notifyBitUnset( bit );
       }
@@ -67,7 +66,6 @@ define( function( require ) {
     
     bitDecrement: function( bit ) {
       var newCount = --this[bit];
-      console.log( 'decrement ' + bit + ' to ' + newCount );
       assert && assert( newCount >= 0, 'bitcount always needs to be above 0' );
       if ( newCount === 0 ) {
         this.notifyBitSet( bit );
@@ -94,7 +92,6 @@ define( function( require ) {
     
     // use a bitmask of all 1s to represent 'does not exist' since we count zeros
     bitmaskChange: function( oldBitmask, newBitmask ) {
-      console.log( 'change from ' + oldBitmask + ' to ' + newBitmask );
       var changeBitmask = oldBitmask ^ newBitmask;
       
       for ( var i = 0; i < numBits; i++ ) {
