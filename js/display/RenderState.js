@@ -30,7 +30,7 @@ define( function( require ) {
   require( 'SCENERY/layers/Renderer' );
   require( 'SCENERY/util/Trail' );
   
-  scenery.RenderState = {};
+  var RenderState = scenery.RenderState = {};
   
   /*
    * {param} node               Node      The node whose instance will have this state (inspect the hints / properties on this node)
@@ -64,7 +64,7 @@ define( function( require ) {
     if ( !isUnderCanvasCache && ( isTransparent || hints.requireElement || hints.cssTransformBackbone || hints.split ) ) {
       this.isBackbone = true;
       this.isTransformed = !!hints.cssTransformBackbone; // for now, only trigger CSS transform if we have the specific hint
-      this.groupRenderer = scenery.Renderer.bitmaskDOM | ( hints.forceAcceleration ? Renderer.bitmaskForceAcceleration : 0 ); // probably won't be used
+      this.groupRenderer = scenery.Renderer.bitmaskDOM | ( hints.forceAcceleration ? scenery.Renderer.bitmaskForceAcceleration : 0 ); // probably won't be used
     } else if ( isTransparent || hints.canvasCache ) {
       // everything underneath needs to be renderable with Canvas, otherwise we cannot cache
       assert && assert( ( combinedBitmask & scenery.bitmaskSupportsCanvas ) !== 0, 'hints.canvasCache provided, but not all node contents can be rendered with Canvas under ' + node.constructor.name );
@@ -85,13 +85,17 @@ define( function( require ) {
     
     if ( node.isPainted() ) {
       // TODO: figure out preferred rendering order
-      // pick the top-most renderer that will work
-      for ( var i = renderers.length - 1; i >= 0; i-- ) {
-        var renderer = renderers[i];
-        if ( renderer.bitmask & node._rendererBitmask !== 0 ) {
-          this.selfRenderer = renderer;
-          break;
-        }
+      // TODO: many more things to consider here for performance
+      // TODO: performance (here)
+      if ( svgRenderer && ( svgRenderer & node._rendererBitmask ) !== 0 ) {
+        this.selfRenderer = svgRenderer;
+      } else if ( canvasRenderer && ( canvasRenderer & node._rendererBitmask ) !== 0 ) {
+        this.selfRenderer = canvasRenderer;
+      } else if ( scenery.bitmaskSupportsDOM & node._rendererBitmask !== 0 ) {
+        // TODO: decide if CSS transform is to be applied here!
+        this.selfRenderer = scenery.bitmaskSupportsDOM;
+      } else {
+        throw new Error( 'unsupported renderer, something wrong in RenderState' );
       }
     }
   };
@@ -121,8 +125,8 @@ define( function( require ) {
   RenderState.RegularState.createRootState = function( node ) {
     var baseState = new RenderState.RegularState(
       node,                   // trail
-      Renderer.bitmaskSVG,    // default SVG renderer settings
-      Renderer.bitmaskCanvas, // default Canvas renderer settings
+      scenery.Renderer.bitmaskSVG,    // default SVG renderer settings
+      scenery.Renderer.bitmaskCanvas, // default Canvas renderer settings
       false,                  // isUnderCanvasCache
       false                   // isShared
     );
@@ -133,7 +137,7 @@ define( function( require ) {
     var baseState = new RenderState.RegularState(
       node,                     // trail
       null,                     // no SVG renderer settings needed
-      Renderer.bitmaskCanvas,   // default Canvas renderer settings
+      scenery.Renderer.bitmaskCanvas,   // default Canvas renderer settings
       true,                     // isUnderCanvasCache
       true                      // isShared (since we are creating the shared one, not the individual instances referencing it)
     );

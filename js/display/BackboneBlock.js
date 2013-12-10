@@ -14,7 +14,9 @@ define( function( require ) {
   var Block = require( 'SCENERY/display/Block' );
   
   // includeRoot is used for the root of a display, where the instance should be thought of as fully "under" the backbone
-  scenery.BackboneBlock = function BackboneBlock( instance, includeRoot, existingDiv ) {
+  scenery.BackboneBlock = function BackboneBlock( instance, renderer, includeRoot, existingDiv ) {
+    this.instance = instance;
+    this.renderer = renderer;
     this.domElement = existingDiv || BackboneBlock.createDivBackbone();
     this.includeRoot = includeRoot;
   };
@@ -22,7 +24,7 @@ define( function( require ) {
   
   inherit( Block, BackboneBlock, {
     getDOMDrawable: function() {
-      return // TODO. maybe even have us conform to the API directly
+      return new scenery.DOMElementDrawable( this.instance.trail, this.renderer, this.domElement );
     }
   } );
   

@@ -19,13 +19,14 @@ define( function( require ) {
   require( 'SCENERY/display/DOMSelfDrawable' );
   require( 'SCENERY/display/InlineCanvasCacheDrawable' );
   require( 'SCENERY/display/RenderState' );
-  require( 'SCENERY/display/SVGSelf' );
+  require( 'SCENERY/display/SharedCanvasCacheDrawable' );
+  require( 'SCENERY/display/SVGSelfDrawable' );
   require( 'SCENERY/layers/Renderer' );
   
   scenery.Display = function Display( rootNode ) {
     this._rootNode = rootNode;
     this._rootBackbone = null; // to be filled in later
-    this._domElement = BackboneBlock.createDivBackbone();
+    this._domElement = scenery.BackboneBlock.createDivBackbone();
     this._sharedCanvasInstances = {}; // map from Node ID to DisplayInstance, for fast lookup
     this._baseInstance = null; // will be filled with the root DisplayInstance
     
@@ -40,7 +41,7 @@ define( function( require ) {
   }
   
   function createInstance( display, trail, state, parentInstance ) {
-    var instance = new scenery.DisplayInstance( this, trail );
+    var instance = new scenery.DisplayInstance( display, trail );
     
     var isSharedCache = state.isCanvasCache && state.isCacheShared;
     
@@ -66,7 +67,8 @@ define( function( require ) {
       
       // TODO: do something with the sharedInstance!
       var sharedCacheRenderer = state.sharedCacheRenderer;
-      instance.sharedCacheDrawable = // TODO
+      // TODO: improve this!
+      instance.sharedCacheDrawable = new scenery.SharedCanvasCacheDrawable( trail, sharedCacheRenderer, instance, sharedInstance );
     } else {
       var currentDrawable = null;
       
@@ -133,9 +135,9 @@ define( function( require ) {
       
       var groupRenderer = state.groupRenderer;
       if ( state.isBackbone ) {
-        assert && assert( !isCanvasCache, 'For now, disallow an instance being a backbone and a canvas cache, since it has no performance benefits' );
+        assert && assert( !state.isCanvasCache, 'For now, disallow an instance being a backbone and a canvas cache, since it has no performance benefits' );
         
-        var backbone = new scenery.BackboneBlock( instance, false, null );
+        var backbone = new scenery.BackboneBlock( instance, groupRenderer, false, null );
         instance.block = backbone;
         instance.groupDrawable = backbone.getDOMDrawable();
       } else if ( state.isCanvasCache ) {
@@ -163,16 +165,16 @@ define( function( require ) {
       // from code below without triggering side effects (we assume that we are not reentrant).
       this._rootNode.validateWatchedBounds();
       
-      throw new Error( 'TODO: replace with actual stitching' );
-      this._baseInstance = createInstance( this, baseTrail, scenery.RenderState.RegularState.createRootState( this._rootNode ), null );
+      // throw new Error( 'TODO: replace with actual stitching' );
+      this._baseInstance = createInstance( this, new scenery.Trail( this._rootNode ), scenery.RenderState.RegularState.createRootState( this._rootNode ), null );
       
-      this._rootBackbone = new scenery.BackboneBlock( this._baseInstance, true, this._domElement );
+      this._rootBackbone = new scenery.BackboneBlock( this._baseInstance, scenery.bitmaskSupportsDOM, true, this._domElement );
       
-      throw new Error( 'TODO: pre-repaint phase (first transform-notify by traversing all transform roots)' );
+      // throw new Error( 'TODO: pre-repaint phase (first transform-notify by traversing all transform roots)' );
       
-      throw new Error( 'TODO: repaint phase (painting)' );
+      // throw new Error( 'TODO: repaint phase (painting)' );
       
-      throw new Error( 'TODO: update cursor' );
+      // throw new Error( 'TODO: update cursor' );
     }
   } );
   
