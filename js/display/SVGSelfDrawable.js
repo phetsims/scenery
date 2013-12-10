@@ -3,18 +3,22 @@
 /**
  * Represents an SVG visual element, and is responsible for tracking changes to the visual element, and then applying any changes at a later time.
  *
- * Target API (responsible for the creation and rendering of the SVG element, along with sending feature-dirty flags):
+ * Node API needed:
  * {
- *   ??? createSVGSelfDrawable: function( svg, defs, group ) : Handle{ svgElement: <>, <custom state and flags> }
- *   
- *   createSVGFragment: function() : SVGElement
- *   << TODO way of registering for state changes. allow target to control object with its own flags, so we don't need dynamic name lookups. (text could have state.font, state.text, etc.)
- *      need to send an event on transition from clean=>dirty so we can mark the change as needing to be updated >>
- *   << TODO way of unregistering for state changes >>
- *   << TODO way of applying state changes (we have the target track the defs changes, to which we provide access) >>
+ *   attachSVGDrawable: function( SVGSelfDrawable )
+ *   detachSVGDrawable: function( SVGSelfDrawable )
  * }
- * A common target is a Node that can be rendered in SVG, but we also (may) allow displaying Canvas caches with SVG (as an Image with a custom offset),
- * or possibly other things in the future
+ *
+ * visual state API needed:
+ * {
+ *   markPaintDirty: function() // used by Strokable/Fillable
+ *   node: Node                 // used by Strokable/Fillable
+ *   drawable: SVGSelfDrawable  // set by the visual state on initialization     NOTE: required for any type of visual state! (used by Strokable/Fillable states)
+ *   svgElement: SVGElement     // what is displayed in the SVG tree (should be the base of the displayed element)
+ *   updateSVG: function()      // updates any visual state
+ *   onDetach: function()       // called when the state is detached from a drawable. optionally discard DOM elements. we guarantee state will be
+ *                              // initialized again before any more update() calls
+ * }
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
