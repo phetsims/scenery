@@ -26,6 +26,9 @@ define( function( require ) {
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMRectangleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
   
+  // scratch matrix used in DOM rendering
+  var scratchMatrix = Matrix3.dirtyFromPool();
+  
   /**
    * Currently, all numerical parameters should be finite.
    * x:         x-position of the upper-left corner (left bound)
@@ -536,8 +539,6 @@ define( function( require ) {
   var RectangleDOMState = Rectangle.RectangleDOMState = function( drawable ) {
     // important to keep this in the constructor (so our hidden class works out nicely)
     this.initialize( drawable );
-    
-    // TODO: initial stroke/fill states
   };
   RectangleDOMState.prototype = {
     constructor: RectangleDOMState,
@@ -562,10 +563,6 @@ define( function( require ) {
       // adds fill/stroke-specific flags and state
       this.initializeFillableState();
       this.initializeStrokableState();
-      
-      if ( !this.matrix ) {
-        this.matrix = Matrix3.dirtyFromPool();
-      }
       
       // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
       // allocation and performance costs)
@@ -595,8 +592,6 @@ define( function( require ) {
       var strokeElement = this.strokeElement;
       
       if ( this.paintDirty ) {
-        // TODO: make the changes more atomic using flags
-        // TODO: markDirty!
         var borderRadius = Math.min( node._rectArcWidth, node._rectArcHeight );
         var borderRadiusDirty = this.dirtyArcWidth || this.dirtyArcHeight;
         
@@ -651,11 +646,11 @@ define( function( require ) {
       
       // shift the text vertically, postmultiplied with the entire transform.
       if ( this.transformDirty || this.dirtyX || this.dirtyY ) {
-        this.matrix.set( this.drawable.getTransformMatrix() );
+        scratchMatrix.set( this.drawable.getTransformMatrix() );
         var translation = Matrix3.translation( node._rectX, node._rectY );
-        this.matrix.multiplyMatrix( translation );
+        scratchMatrix.multiplyMatrix( translation );
         translation.freeToPool();
-        scenery.Util.applyCSSTransform( this.matrix, this.fillElement, this.forceAcceleration );
+        scenery.Util.applyCSSTransform( scratchMatrix, this.fillElement, this.forceAcceleration );
       }
       
       // clear all of the dirty flags

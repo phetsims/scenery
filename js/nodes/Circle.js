@@ -11,6 +11,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
   var Bounds2 = require( 'DOT/Bounds2' );
   var Matrix3 = require( 'DOT/Matrix3' );
@@ -18,6 +19,14 @@ define( function( require ) {
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
   var Features = require( 'SCENERY/util/Features' );
+  var Fillable = require( 'SCENERY/nodes/Fillable' );
+  var Strokable = require( 'SCENERY/nodes/Strokable' );
+  
+  // TODO: change this based on memory and performance characteristics of the platform
+  var keepDOMCircleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
+  
+  // scratch matrix used in DOM rendering
+  var scratchMatrix = Matrix3.dirtyFromPool();
 
   scenery.Circle = function Circle( radius, options ) {
     if ( typeof radius === 'object' ) {
@@ -167,6 +176,10 @@ define( function( require ) {
       var matrix = transform.getMatrix().timesMatrix( Matrix3.translation( -this._radius, -this._radius ) );
       scenery.Util.applyCSSTransform( matrix, element );
     },
+    
+    createDOMState: function( domSelfDrawable ) {
+      return Circle.CircleDOMState.createFromPool( domSelfDrawable );
+    },
 
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Circle( ' + this._radius + ', {' + propLines + '} )';
@@ -246,6 +259,168 @@ define( function( require ) {
 
   // not adding mutators for now
   Circle.prototype._mutatorKeys = [ 'radius' ].concat( Path.prototype._mutatorKeys );
+  
+  /*---------------------------------------------------------------------------*
+  * DOM rendering
+  *----------------------------------------------------------------------------*/
+  
+  var CircleDOMState = Circle.CircleDOMState = function( drawable ) {
+    // important to keep this in the constructor (so our hidden class works out nicely)
+    this.initialize( drawable );
+  };
+  CircleDOMState.prototype = {
+    constructor: CircleDOMState,
+    
+    // initializes, and resets (so we can support pooled states)
+    initialize: function( drawable ) {
+      drawable.visualState = this;
+      
+      this.drawable = drawable;
+      this.node = drawable.node;
+      this.transformDirty = true;
+      this.forceAcceleration = false; // later changed by drawable if necessary
+      
+      this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
+      this.dirtyRadius = true;
+      
+      // adds fill/stroke-specific flags and state
+      this.initializeFillableState();
+      this.initializeStrokableState();
+      
+      if ( !this.matrix ) {
+        this.matrix = Matrix3.dirtyFromPool();
+      }
+      
+      // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
+      // allocation and performance costs)
+      if ( !this.fillElement || !this.strokeElement ) {
+        var fillElement = this.fillElement = document.createElement( 'div' );
+        var strokeElement = this.strokeElement = document.createElement( 'div' );
+        fillElement.style.display = 'block';
+        fillElement.style.position = 'absolute';
+        fillElement.style.left = '0';
+        fillElement.style.top = '0';
+        strokeElement.style.display = 'block';
+        strokeElement.style.position = 'absolute';
+        strokeElement.style.left = '0';
+        strokeElement.style.top = '0';
+        fillElement.appendChild( strokeElement );
+      }
+      
+      this.domElement = this.fillElement;
+      
+      return this; // allow for chaining
+    },
+    
+    updateDOM: function() {
+      var node = this.node;
+      var fillElement = this.fillElement;
+      var strokeElement = this.strokeElement;
+      
+      if ( this.paintDirty ) {
+        if ( this.dirtyRadius ) {
+          fillElement.style.width = ( 2 * this._radius ) + 'px';
+          fillElement.style.height = ( 2 * this._radius ) + 'px';
+          fillElement.style[Features.borderRadius] = this._radius + 'px';
+        }
+        if ( this.dirtyFill ) {
+          fillElement.style.backgroundColor = this.getCSSFill();
+        }
+        
+        if ( this.dirtyStroke ) {
+          // update stroke presence
+          if ( node.hasStroke() ) {
+            strokeElement.style.borderStyle = 'solid';
+          } else {
+            strokeElement.style.borderStyle = 'none';
+          }
+        }
+        
+        if ( this.hasStroke() ) {
+          // since we only execute these if we have a stroke, we need to redo everything if there was no stroke previously.
+          // the other option would be to update stroked information when there is no stroke (major performance loss for fill-only Circles)
+          var hadNoStrokeBefore = this.lastStroke === null;
+          
+          if ( hadNoStrokeBefore || this.dirtyLineWidth || this.dirtyRadius ) {
+            strokeElement.style.width = ( 2 * this._radius - this.getLineWidth() ) + 'px';
+            strokeElement.style.height = ( 2 * this._radius - this.getLineWidth() ) + 'px';
+            strokeElement.style[Features.borderRadius] = ( this._radius + this.getLineWidth() / 2 ) + 'px';
+          }
+          if ( hadNoStrokeBefore || this.dirtyLineWidth ) {
+            strokeElement.style.left = ( -this.getLineWidth() / 2 ) + 'px';
+            strokeElement.style.top = ( -this.getLineWidth() / 2 ) + 'px';
+            strokeElement.style.borderWidth = this.getLineWidth() + 'px';
+          }
+          if ( hadNoStrokeBefore || this.dirtyStroke ) {
+            strokeElement.style.borderColor = this.getSimpleCSSFill();
+          }
+        }
+      }
+      
+      // shift the text vertically, postmultiplied with the entire transform.
+      if ( this.transformDirty || this.dirtyRadius ) {
+        this.matrix.set( this.drawable.getTransformMatrix() );
+        var translation = Matrix3.translation( -node._radius, -node._radius );
+        this.matrix.multiplyMatrix( translation );
+        translation.freeToPool();
+        scenery.Util.applyCSSTransform( this.matrix, this.fillElement, this.forceAcceleration );
+      }
+      
+      // clear all of the dirty flags
+      this.setToClean();
+    },
+    
+    // release the DOM elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
+    onDetach: function() {
+      if ( !keepDOMCircleElements ) {
+        // clear the references
+        this.fillElement = null;
+        this.strokeElement = null;
+        this.domElement = null;
+      }
+      
+      // put us back in the pool
+      this.freeToPool();
+    },
+    
+    // catch-all dirty, if anything that isn't a transform is marked as dirty
+    markPaintDirty: function() {
+      this.paintDirty = true;
+      this.drawable.markDirty();
+    },
+    
+    markDirtyRadius: function() {
+      this.dirtyRadius = true;
+      this.markPaintDirty();
+    },
+    
+    setToClean: function() {
+      this.paintDirty = false;
+      this.dirtyRadius = false;
+      this.transformDirty = false;
+      
+      this.cleanFillableState();
+      this.cleanStrokableState();
+    }
+  };
+  /* jshint -W064 */
+  Fillable.FillableState( CircleDOMState );
+  /* jshint -W064 */
+  Strokable.StrokableState( CircleDOMState );
+  // for pooling, allow CircleDOMState.createFromPool( drawable ) and state.freeToPool(). Creation will initialize the state to the intial state
+  /* jshint -W064 */
+  Poolable( CircleDOMState, {
+    defaultFactory: function() { return new CircleDOMState(); },
+    constructorDuplicateFactory: function( pool ) {
+      return function( drawable ) {
+        if ( pool.length ) {
+          return pool.pop().initialize( drawable );
+        } else {
+          return new CircleDOMState( drawable );
+        }
+      };
+    }
+  } );
 
   return Circle;
 } );
