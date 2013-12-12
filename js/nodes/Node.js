@@ -424,9 +424,17 @@ define( function( require ) {
         var oldLocalBounds = this._localBounds;
         this._localBounds = this._selfBounds.union( this._childBounds ); // TODO: remove allocation
         
+        // apply clipping to the bounds if we have a clip area (all done in the local coordinate frame)
+        if ( this.hasClipArea() ) {
+          this._localBounds.constrainBounds( this._clipArea.bounds );
+        }
+        
         // TODO: don't execute this "if" comparison if there are no listeners?
         if ( !this._localBounds.equals( oldLocalBounds ) ) {
           this.fireEvent( 'localBounds', this._localBounds );
+          
+          // sanity check
+          this._boundsDirty = true;
         }
       }
       
@@ -441,7 +449,7 @@ define( function( require ) {
         var oldBounds = this._bounds;
         
         // converts local to parent bounds. mutable methods used to minimize number of created bounds instances (we create one so we don't change references to the old one)
-        var newBounds = this.transformBoundsFromLocalToParent( this._selfBounds.copy().includeBounds( this._childBounds ) );
+        var newBounds = this.transformBoundsFromLocalToParent( this._localBounds );
         newBounds = this.overrideBounds( newBounds ); // allow expansion of the bounds area
         var changed = !newBounds.equals( oldBounds );
         
@@ -474,6 +482,10 @@ define( function( require ) {
           _.each( that.children, function( child ) { childBounds.includeBounds( child._bounds ); } );
           
           var fullBounds = that.localToParentBounds( that._selfBounds ).union( that.localToParentBounds( childBounds ) );
+          
+          if ( that.hasClipArea() ) {
+            fullBounds = fullBounds.intersection( that._clipArea.bounds );
+          }
           
           assertSlow && assertSlow( that._childBounds.equalsEpsilon( childBounds, epsilon ), 'Child bounds mismatch after validateBounds: ' +
                                                                                                     that._childBounds.toString() + ', expected: ' + childBounds.toString() );
@@ -647,7 +659,9 @@ define( function( require ) {
     
     // mark the bounds of this node as invalid, so it is recomputed before it is accessed again
     invalidateBounds: function() {
+      // TODO: sometimes we won't need to invalidate local bounds! it's not too much of a hassle though?
       this._boundsDirty = true;
+      this._localBoundsDirty = true;
       this._mouseBoundsDirty = true;
       this._touchBoundsDirty = true;
       
@@ -1249,6 +1263,7 @@ define( function( require ) {
     afterTransformChange: function() {
       this.notifyTransformChange();
       
+      // NOTE: why is local bounds invalidation needed here?
       this.invalidateBounds();
       this.invalidateSubtreePaint();
       
@@ -1437,7 +1452,7 @@ define( function( require ) {
       if ( this._mouseArea !== area ) {
         this._mouseArea = area; // TODO: could change what is under the mouse, invalidate!
         
-        this.invalidateBounds();
+        this.invalidateMouseTouchBounds();
       }
     },
     
@@ -1451,7 +1466,7 @@ define( function( require ) {
       if ( this._touchArea !== area ) {
         this._touchArea = area; // TODO: could change what is under the touch, invalidate!
         
-        this.invalidateBounds();
+        this.invalidateMouseTouchBounds();
       }
     },
     
@@ -1468,11 +1483,17 @@ define( function( require ) {
         this._clipArea = shape;
         
         this.notifyClipChange();
+        
+        this.invalidateBounds();
       }
     },
     
     getClipArea: function() {
       return this._clipArea;
+    },
+    
+    hasClipArea: function() {
+      return this._clipArea !== null;
     },
     
     updateLayerType: function() {
