@@ -112,6 +112,12 @@ define( function( require ) {
 
         this._image = image;
         this.invalidateImage(); // yes, if we aren't loaded yet this will give us 0x0 bounds
+        
+        var stateLen = this._visualStates.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._visualStates.markDirtyImage();
+        }
+        this.invalidateRectangle();
       }
       return this;
     },

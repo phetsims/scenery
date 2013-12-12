@@ -126,6 +126,8 @@ define( function( require ) {
     },
     
     setElement: function( element ) {
+      assert && assert( !this._element, 'We should only ever attach one DOMElement to a DOM node' );
+      
       if ( this._element !== element ) {
         if ( this._element ) {
           this._container.removeChild( this._element );

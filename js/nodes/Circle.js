@@ -193,6 +193,12 @@ define( function( require ) {
       if ( this._radius !== radius ) {
         this._radius = radius;
         this.invalidateCircle();
+        
+        var stateLen = this._visualStates.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._visualStates.markDirtyRadius();
+        }
+        this.invalidateRectangle();
       }
       return this;
     },
