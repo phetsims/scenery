@@ -386,7 +386,12 @@ define( function( require ) {
         var oldBounds = this._bounds;
         
         // converts local to parent bounds. mutable methods used to minimize number of created bounds instances (we create one so we don't change references to the old one)
-        var newBounds = this.transformBoundsFromLocalToParent( this._selfBounds.copy().includeBounds( this._childBounds ) );
+        var localBounds = this._selfBounds.copy().includeBounds( this._childBounds );
+        if ( this.hasClipArea() ) {
+          // localBounds clipping in the local coordinate frame
+          localBounds = localBounds.intersection( this._clipArea.bounds );
+        }
+        var newBounds = this.transformBoundsFromLocalToParent( localBounds );
         newBounds = this.overrideBounds( newBounds ); // allow expansion of the bounds area
         var changed = !newBounds.equals( oldBounds );
         
@@ -419,6 +424,10 @@ define( function( require ) {
           _.each( that.children, function( child ) { childBounds.includeBounds( child._bounds ); } );
           
           var fullBounds = that.localToParentBounds( that._selfBounds ).union( that.localToParentBounds( childBounds ) );
+          
+          if ( that.hasClipArea() ) {
+            fullBounds = fullBounds.intersection( that.getClipArea().bounds );
+          }
           
           assertSlow && assertSlow( that._childBounds.equalsEpsilon( childBounds, epsilon ), 'Child bounds mismatch after validateBounds: ' +
                                                                                                     that._childBounds.toString() + ', expected: ' + childBounds.toString() );
@@ -659,7 +668,12 @@ define( function( require ) {
     
     // local coordinate frame bounds
     getLocalBounds: function() {
-      return this.getSelfBounds().union( this.getChildBounds() );
+      var localBounds = this.getSelfBounds().union( this.getChildBounds() );
+      if ( this.hasClipArea() ) {
+        // localBounds clipping in the local coordinate frame
+        localBounds = localBounds.intersection( this._clipArea.bounds );
+      }
+      return localBounds;
     },
     
     // the bounds for content in render(), in "parent" coordinates
@@ -1329,11 +1343,17 @@ define( function( require ) {
         this._clipArea = shape;
         
         this.notifyClipChange();
+        
+        this.invalidateBounds();
       }
     },
     
     getClipArea: function() {
       return this._clipArea;
+    },
+    
+    hasClipArea: function() {
+      return this._clipArea !== null;
     },
     
     updateLayerType: function() {
