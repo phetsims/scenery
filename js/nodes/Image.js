@@ -14,6 +14,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var Bounds2 = require( 'DOT/Bounds2' );
 
   var scenery = require( 'SCENERY/scenery' );
@@ -22,6 +23,9 @@ define( function( require ) {
   var Renderer = require( 'SCENERY/layers/Renderer' ); // we need to specify the Renderer in the prototype
   var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
   require( 'SCENERY/util/Util' );
+  
+  // TODO: change this based on memory and performance characteristics of the platform
+  var keepDOMImageElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
 
   /*
    * Canvas renderer supports the following as 'image':
@@ -186,6 +190,10 @@ define( function( require ) {
       // TODO: extract this out, it's completely shared!
       scenery.Util.applyCSSTransform( transform.getMatrix(), element );
     },
+    
+    createDOMState: function( domSelfDrawable ) {
+      return Image.ImageDOMState.createFromPool( domSelfDrawable );
+    },
 
     set image( value ) { this.setImage( value ); },
     get image() { return this.getImage(); },
@@ -208,6 +216,100 @@ define( function( require ) {
 
     return element;
   };
+  
+  /*---------------------------------------------------------------------------*
+  * DOM rendering
+  *----------------------------------------------------------------------------*/
+  
+  var ImageDOMState = Image.ImageDOMState = function( drawable ) {
+    // important to keep this in the constructor (so our hidden class works out nicely)
+    this.initialize( drawable );
+  };
+  ImageDOMState.prototype = {
+    constructor: ImageDOMState,
+    
+    // initializes, and resets (so we can support pooled states)
+    initialize: function( drawable ) {
+      drawable.visualState = this;
+      
+      this.drawable = drawable;
+      this.node = drawable.node;
+      this.transformDirty = true;
+      this.forceAcceleration = false; // later changed by drawable if necessary
+      
+      this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
+      this.dirtyImage = true;
+      
+      // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
+      // allocation and performance costs)
+      if ( !this.domElement ) {
+        this.domElement = document.createElement( 'img' );
+      }
+      
+      return this; // allow for chaining
+    },
+    
+    updateDOM: function() {
+      var node = this.node;
+      var img = this.domElement;
+      
+      if ( this.paintDirty && this.dirtyImage ) {
+        img.src = node._image.src;
+      }
+      
+      if ( this.transformDirty ) {
+        scenery.Util.applyCSSTransform( this.drawable.getTransformMatrix(), this.fillElement, this.forceAcceleration );
+      }
+      
+      // clear all of the dirty flags
+      this.setToClean();
+    },
+    
+    // release the DOM elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
+    onDetach: function() {
+      if ( !keepDOMImageElements ) {
+        // clear the references
+        this.domElement = null;
+      }
+      
+      // put us back in the pool
+      this.freeToPool();
+    },
+    
+    // catch-all dirty, if anything that isn't a transform is marked as dirty
+    markPaintDirty: function() {
+      this.paintDirty = true;
+      this.drawable.markDirty();
+    },
+    
+    markDirtyImage: function() {
+      this.dirtyImage = true;
+      this.markPaintDirty();
+    },
+    
+    setToClean: function() {
+      this.paintDirty = false;
+      this.dirtyImage = false;
+      this.transformDirty = false;
+      
+      this.cleanFillableState();
+      this.cleanStrokableState();
+    }
+  };
+  // for pooling, allow ImageDOMState.createFromPool( drawable ) and state.freeToPool(). Creation will initialize the state to the intial state
+  /* jshint -W064 */
+  Poolable( ImageDOMState, {
+    defaultFactory: function() { return new ImageDOMState(); },
+    constructorDuplicateFactory: function( pool ) {
+      return function( drawable ) {
+        if ( pool.length ) {
+          return pool.pop().initialize( drawable );
+        } else {
+          return new ImageDOMState( drawable );
+        }
+      };
+    }
+  } );
 
   return Image;
 } );
