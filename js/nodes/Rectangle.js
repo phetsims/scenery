@@ -644,7 +644,7 @@ define( function( require ) {
         }
       }
       
-      // shift the text vertically, postmultiplied with the entire transform.
+      // shift the element vertically, postmultiplied with the entire transform.
       if ( this.transformDirty || this.dirtyX || this.dirtyY ) {
         scratchMatrix.set( this.drawable.getTransformMatrix() );
         var translation = Matrix3.translation( node._rectX, node._rectY );

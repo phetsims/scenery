@@ -357,7 +357,7 @@ define( function( require ) {
         }
       }
       
-      // shift the text vertically, postmultiplied with the entire transform.
+      // shift the element vertically, postmultiplied with the entire transform.
       if ( this.transformDirty || this.dirtyRadius ) {
         this.matrix.set( this.drawable.getTransformMatrix() );
         var translation = Matrix3.translation( -node._radius, -node._radius );

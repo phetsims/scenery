@@ -10,6 +10,7 @@ define( function( require ) {
   'use strict';
   
   var inherit = require( 'PHET_CORE/inherit' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var escapeHTML = require( 'PHET_CORE/escapeHTML' );
   var Bounds2 = require( 'DOT/Bounds2' );
   
@@ -116,6 +117,10 @@ define( function( require ) {
       scenery.Util.applyCSSTransform( transform.getMatrix(), this._container );
     },
     
+    createDOMState: function( domSelfDrawable ) {
+      return DOM.DOMSelfState.createFromPool( domSelfDrawable );
+    },
+    
     isPainted: function() {
       return true;
     },
@@ -177,6 +182,72 @@ define( function( require ) {
   } );
   
   DOM.prototype._mutatorKeys = [ 'element', 'interactive' ].concat( Node.prototype._mutatorKeys );
+  
+  /*---------------------------------------------------------------------------*
+  * DOM rendering
+  *----------------------------------------------------------------------------*/
+  
+  var DOMSelfState = DOM.DOMSelfState = function( drawable ) {
+    // important to keep this in the constructor (so our hidden class works out nicely)
+    this.initialize( drawable );
+  };
+  DOMSelfState.prototype = {
+    constructor: DOMSelfState,
+    
+    // initializes, and resets (so we can support pooled states)
+    initialize: function( drawable ) {
+      drawable.visualState = this;
+      
+      this.drawable = drawable;
+      this.node = drawable.node;
+      this.transformDirty = true;
+      this.forceAcceleration = false; // later changed by drawable if necessary
+      
+      this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
+      
+      this.domElement = this.node._container;
+      
+      return this; // allow for chaining
+    },
+    
+    updateDOM: function() {
+      var node = this.node;
+      
+      if ( this.transformDirty ) {
+        scenery.Util.applyCSSTransform( this.drawable.getTransformMatrix(), this.domElement, this.forceAcceleration );
+      }
+      
+      // clear all of the dirty flags
+      this.setToClean();
+    },
+    
+    // release the DOM elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
+    onDetach: function() {
+      // clear the references
+      this.domElement = null;
+      
+      // put us back in the pool
+      this.freeToPool();
+    },
+    
+    setToClean: function() {
+      this.transformDirty = false;
+    }
+  };
+  // for pooling, allow DOMSelfState.createFromPool( drawable ) and state.freeToPool(). Creation will initialize the state to the intial state
+  /* jshint -W064 */
+  Poolable( DOMSelfState, {
+    defaultFactory: function() { return new DOMSelfState(); },
+    constructorDuplicateFactory: function( pool ) {
+      return function( drawable ) {
+        if ( pool.length ) {
+          return pool.pop().initialize( drawable );
+        } else {
+          return new DOMSelfState( drawable );
+        }
+      };
+    }
+  } );
   
   return DOM;
 } );
