@@ -137,6 +137,17 @@ define( function( require ) {
     setRect: function( x, y, width, height, arcWidth, arcHeight ) {
       assert && assert( x !== undefined && y !== undefined && width !== undefined && height !== undefined, 'x/y/width/height need to be defined' );
       
+      // for now, check whether this is needed
+      // TODO: note that this could decrease performance? Remove if this is a bottleneck
+      if ( this._rectX === x &&
+           this._rectY === y &&
+           this._rectWidth === width &&
+           this._rectHeight === height &&
+           this._rectArcWidth === arcWidth &&
+           this._rectArcHeight === arcHeight ) {
+        return;
+      }
+      
       this._rectX = x;
       this._rectY = y;
       this._rectWidth = width;
