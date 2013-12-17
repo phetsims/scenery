@@ -196,8 +196,12 @@ define( function( require ) {
       
       this._rootBackbone = new scenery.BackboneBlock( this._baseInstance, scenery.bitmaskSupportsDOM, true, this._domElement );
       
+      if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
+      
       // pre-repaint phase: update relative transform information for listeners (notification) and precomputation where desired
       this.updateDirtyTransformRoots();
+      
+      if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
       
       // throw new Error( 'TODO: repaint phase (painting)' );
       

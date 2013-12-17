@@ -80,7 +80,7 @@ define( function( require ) {
     this.trail = trail;
     this.node = trail.lastNode();
     this.parent = null; // will be set as needed
-    this.children = [];
+    this.children = []; // Array[DisplayInstance]
     this.childrenTracks = []; // TODO use this for tracking what children changes occurred, and thus where we need to stitch
     
     this.state = null; // filled in with rendering state later
@@ -276,13 +276,17 @@ define( function( require ) {
       this.relativeSelfDirty = false;
     },
     
+    isValidationNotNeeded: function() {
+      return this.hasRelativeTransformComputeNeed() || this.relativeFrameId === this.display._frameId;
+    },
+    
     // Called from any place in the rendering process where we are not guaranteed to have a fresh relative transform. needs to scan up the tree, so it is
     // more expensive than precomputed transforms.
     // returns whether we had to update this transform
     validateRelativeTransform: function() {
       // if we are clean, bail out. If we have a compute "need", we will always be clean here since this is after the traversal step.
       // if we did not have a compute "need", we check whether we were already updated this frame by computeRelativeTransform
-      if ( this.hasRelativeTransformComputeNeed() || this.relativeFrameId === this.display._frameId ) {
+      if ( this.isValidationNotNeeded() ) {
         return;
       }
       
@@ -384,6 +388,94 @@ define( function( require ) {
     // clean up listeners and garbage, so that we can be recycled (or pooled)
     dispose: function() {
       this.node.removeEventListener( 'transform', this.nodeTransformListener );
+    },
+    
+    audit: function( frameId ) {
+      // get the relative matrix, computed to be up-to-date, and ignores any flags/counts so we can check whether our state is consistent
+      function currentRelativeMatrix( instance ) {
+        var resultMatrix = new Matrix3();
+        var nodeMatrix = instance.node.getTransform().getMatrix();
+        
+        if ( instance.parent && !instance.parent.isTransformed ) {
+          // mutable form of parentMatrix * nodeMatrix
+          resultMatrix.set( currentRelativeMatrix( instance.parent ) );
+          resultMatrix.multiplyMatrix( nodeMatrix );
+        } else {
+          // we are the first in the trail transform, so we just directly copy the matrix over
+          resultMatrix.set( nodeMatrix );
+        }
+        
+        return resultMatrix;
+      }
+      
+      function hasRelativeSelfDirty( instance ) {
+        // if validation isn't needed, act like nothing is dirty (matching our validate behavior)
+        if ( instance.isValidationNotNeeded() ) {
+          return false;
+        }
+        
+        return instance.relativeSelfDirty || ( instance.parent && hasRelativeSelfDirty( instance.parent ) );
+      }
+      
+      if ( assertSlow ) {
+        if ( frameId === undefined ) {
+          frameId = this.display._frameId;
+        }
+        
+        assertSlow( this.state,
+                    'State is required for all display instances' );
+        
+        assertSlow( ( this.firstDrawable === null ) === ( this.lastDrawable === null ),
+                    'First/last drawables need to both be null or non-null' );
+        
+        assertSlow( ( !this.state.isBackbone && !this.state.isCacheShared ) || this.block,
+                    'If we are a backbone or shared cache, we need to have a block reference' );
+        
+        assertSlow( !this.state.isCacheShared || !this.node.isPainted() || this.selfDrawable,
+                    'We need to have a selfDrawable if we are painted and not a shared cache' );
+        
+        assertSlow( ( !this.state.isTransformed && !this.state.isCanvasCache ) || this.groupDrawable,
+                    'We need to have a groupDrawable if we are a backbone or any type of canvas cache' );
+        
+        assertSlow( !this.state.isCacheShared || this.sharedCacheDrawable,
+                    'We need to have a sharedCacheDrawable if we are a shared cache' );
+        
+        assertSlow( this.state.isTransformed || this.isTransformed,
+                    'isTransformed should match' );
+        
+        assertSlow( !this.parent || ( this.relativeChildDirtyFrame !== frameId ) || ( this.parent.relativeChildDirtyFrame === frameId ),
+                    'If we have a parent, we need to hold the invariant this.relativeChildDirtyFrame => parent.relativeChildDirtyFrame' );
+        
+        // count verification for invariants
+        var notifyRelativeCount = 0;
+        var precomputeRelativeCount = 0;
+        for ( var i = 0; i < this.children.length; i++ ) {
+          var childInstance = this.children[i];
+          
+          childInstance.audit( frameId );
+          
+          // don't count transformed instance counts
+          if ( childInstance.isTransformed ) {
+            continue;
+          }
+          
+          if ( childInstance.hasRelativeTransformListenerNeed() ) {
+            notifyRelativeCount++;
+          }
+          if ( childInstance.hasRelativeTransformComputeNeed() ) {
+            precomputeRelativeCount++;
+          }
+        }
+        assertSlow( notifyRelativeCount === this.relativeChildrenListenersCount,
+                    'Relative listener count invariant' );
+        assertSlow( precomputeRelativeCount === this.relativeChildrenPrecomputeCount,
+                    'Relative precompute count invariant' );
+        
+        if ( !hasRelativeSelfDirty( this ) ) {
+          var matrix = currentRelativeMatrix( this );
+          assertSlow( matrix.equals( this.relativeMatrix ), 'If there is no relativeSelfDirty flag set here or in our ancestors, our relativeMatrix should be up-to-date' );
+        }
+      }
     }
   } );
   
