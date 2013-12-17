@@ -13,28 +13,18 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
   
-  scenery.DOMElementDrawable = function DOMElementDrawable( trail, renderer, domElement ) {
+  scenery.DOMElementDrawable = function DOMElementDrawable( trail, renderer, domElement, repaintCallback ) {
     Drawable.call( this, trail, renderer );
     this.domElement = domElement;
+    this.repaintCallback = repaintCallback;
     
     this.dirty = true;
   };
   var DOMElementDrawable = scenery.DOMElementDrawable;
   
   inherit( Drawable, DOMElementDrawable, {
-    // called from the Node that we called attachDOMDrawable on. should never be called after detachDOMDrawable.
-    markDirty: function() {
-      if ( !this.dirty ) {
-        this.dirty = true;
-        
-        // TODO: notify what we want to call update() later
-        if ( this.block ) {
-          this.block.markDOMDirty( this );
-        }
-      }
-    },
-    
-    update: function() {
+    repaint: function() {
+      this.repaintCallback && this.repaintCallback();
     },
     
     dispose: function() {

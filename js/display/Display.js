@@ -145,7 +145,7 @@ define( function( require ) {
         
         var backbone = new scenery.BackboneBlock( instance, groupRenderer, false, null );
         instance.block = backbone;
-        instance.groupDrawable = backbone.getDOMDrawable();
+        instance.groupDrawable = backbone.blockDrawable;
       } else if ( state.isCanvasCache ) {
         
         // TODO: create block for cache

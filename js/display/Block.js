@@ -27,6 +27,10 @@ define( function( require ) {
     // for direct DOM / backbone blocks, anything that supports a direct DOM element output
     getDomElement: function() {
       
+    },
+    
+    markDirtyInstance: function( drawable ) {
+      // TODO: anything needed in common?
     }
   } );
   

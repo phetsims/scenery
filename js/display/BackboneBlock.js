@@ -29,12 +29,20 @@ define( function( require ) {
       }
       drawable = drawable.nextDrawable;
     }
+    
+    this.blockDrawable = new scenery.DOMElementDrawable( this.instance.trail, this.renderer, this.domElement, this.repaint.bind( this ) );
   };
   var BackboneBlock = scenery.BackboneBlock;
   
   inherit( Block, BackboneBlock, {
-    getDOMDrawable: function() {
-      return new scenery.DOMElementDrawable( this.instance.trail, this.renderer, this.domElement );
+    repaint: function() {
+      
+    },
+    
+    markDirtyInstance: function( drawable ) {
+      Block.prototype.markDirtyInstance.call( this, drawable );
+      
+      this.blockDrawable.markDirty();
     }
   } );
   

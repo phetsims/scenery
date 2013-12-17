@@ -64,18 +64,6 @@ define( function( require ) {
       this.markDirty();
     },
     
-    // called from the Node that we called attachDOMDrawable on. should never be called after detachDOMDrawable.
-    markDirty: function() {
-      if ( !this.dirty ) {
-        this.dirty = true;
-        
-        // TODO: notify what we want to call update() later
-        if ( this.block ) {
-          this.block.markDOMDirty( this );
-        }
-      }
-    },
-    
     // called from the Node, probably during updateDOM
     getTransformMatrix: function() {
       this.instance.validateRelativeTransform();
@@ -83,7 +71,7 @@ define( function( require ) {
     },
     
     // called from elsewhere to update the DOM element
-    update: function() {
+    repaint: function() {
       if ( this.dirty ) {
         this.dirty = false;
         this.visualState.updateDOM();

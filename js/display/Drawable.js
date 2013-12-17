@@ -27,7 +27,16 @@ define( function( require ) {
   
   inherit( Object, Drawable, {
     
-    // NOTE: must have a 'markDirty' method
+    markDirty: function() {
+      if ( !this.dirty ) {
+        this.dirty = true;
+        
+        // TODO: notify what we want to call repaint() later
+        if ( this.block ) {
+          this.block.markDirtyInstance( this );
+        }
+      }
+    },
     
     dispose: function() {
       
