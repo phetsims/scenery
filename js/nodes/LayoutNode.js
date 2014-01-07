@@ -27,10 +27,7 @@ define( function( require ) {
   var extend = require( 'PHET_CORE/extend' );
   var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
-  var Rectangle = require( 'SCENERY/nodes/Rectangle' );
   var Bounds2 = require( 'DOT/Bounds2' );
-  
-  var debug = false;
   
   scenery.LayoutNode = function LayoutNode( defaultMethod, options ) {
     var layoutNode = this;
@@ -96,8 +93,7 @@ define( function( require ) {
         padTop: 0,
         padBottom: 0
       }, options );
-      var baseBoundsFunc = ( options.useVisibleBounds ? node.getVisibleBounds : node.getBounds ).bind( node );
-      
+
       Node.prototype.insertChild.call( this, index, node );
       
       var methodGetter = options.layoutMethod ? function() { return options.layoutMethod; } : function() { return layoutNode._defaultMethod; };
@@ -201,37 +197,37 @@ define( function( require ) {
   * Layout Methods
   *----------------------------------------------------------------------------*/
   
-  var Vertical = LayoutNode.Vertical = new LayoutMethod( function verticalLayout( element, index, previousElement, layoutProperties ) {
-    element.layoutTop = previousElement ? previousElement.layoutBounds.bottom : 0;
-  } );
-  
-  var Horizontal = LayoutNode.Horizontal = new LayoutMethod( function horizontalLayout( element, index, previousElement, layoutProperties ) {
-    element.layoutLeft = previousElement ? previousElement.layoutBounds.right : 0;
-  } );
-  
-  var AlignLeft = LayoutNode.AlignLeft = new LayoutMethod( function alignLeftLayout( element, index, previousElement, layoutProperties ) {
-    element.layoutLeft = 0;
-  } );
-  
-  var AlignHorizontalCenter = LayoutNode.AlignHorizontalCenter = new LayoutMethod( function alignHorizontalCenterLayout( element, index, previousElement, layoutProperties ) {
-    element.layoutLeft = ( layoutProperties.maxWidth - element.layoutBounds.width ) / 2;
-  } );
-  
-  var AlignRight = LayoutNode.AlignRight = new LayoutMethod( function alignRightLayout( element, index, previousElement, layoutProperties ) {
-    element.layoutLeft = layoutProperties.maxWidth - element.layoutBounds.width;
-  } );
-  
-  var AlignTop = LayoutNode.AlignTop = new LayoutMethod( function alignTopLayout( element, index, previousElement, layoutProperties ) {
-    element.layoutTop = 0;
-  } );
-  
-  var AlignVerticalCenter = LayoutNode.AlignVerticalCenter = new LayoutMethod( function alignVerticalCenterLayout( element, index, previousElement, layoutProperties ) {
-    element.layoutTop = ( layoutProperties.maxHeight - element.layoutBounds.height ) / 2;
-  } );
-  
-  var AlignBottom = LayoutNode.AlignBottom = new LayoutMethod( function alignBottomLayout( element, index, previousElement, layoutProperties ) {
-    element.layoutTop = layoutProperties.maxHeight - element.layoutBounds.height;
-  } );
+//  var Vertical = LayoutNode.Vertical = new LayoutMethod( function verticalLayout( element, index, previousElement, layoutProperties ) {
+//    element.layoutTop = previousElement ? previousElement.layoutBounds.bottom : 0;
+//  } );
+//
+//  var Horizontal = LayoutNode.Horizontal = new LayoutMethod( function horizontalLayout( element, index, previousElement, layoutProperties ) {
+//    element.layoutLeft = previousElement ? previousElement.layoutBounds.right : 0;
+//  } );
+//
+//  var AlignLeft = LayoutNode.AlignLeft = new LayoutMethod( function alignLeftLayout( element, index, previousElement, layoutProperties ) {
+//    element.layoutLeft = 0;
+//  } );
+//
+//  var AlignHorizontalCenter = LayoutNode.AlignHorizontalCenter = new LayoutMethod( function alignHorizontalCenterLayout( element, index, previousElement, layoutProperties ) {
+//    element.layoutLeft = ( layoutProperties.maxWidth - element.layoutBounds.width ) / 2;
+//  } );
+//
+//  var AlignRight = LayoutNode.AlignRight = new LayoutMethod( function alignRightLayout( element, index, previousElement, layoutProperties ) {
+//    element.layoutLeft = layoutProperties.maxWidth - element.layoutBounds.width;
+//  } );
+//
+//  var AlignTop = LayoutNode.AlignTop = new LayoutMethod( function alignTopLayout( element, index, previousElement, layoutProperties ) {
+//    element.layoutTop = 0;
+//  } );
+//
+//  var AlignVerticalCenter = LayoutNode.AlignVerticalCenter = new LayoutMethod( function alignVerticalCenterLayout( element, index, previousElement, layoutProperties ) {
+//    element.layoutTop = ( layoutProperties.maxHeight - element.layoutBounds.height ) / 2;
+//  } );
+//
+//  var AlignBottom = LayoutNode.AlignBottom = new LayoutMethod( function alignBottomLayout( element, index, previousElement, layoutProperties ) {
+//    element.layoutTop = layoutProperties.maxHeight - element.layoutBounds.height;
+//  } );
   
   /*---------------------------------------------------------------------------*
   * Internals

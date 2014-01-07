@@ -90,7 +90,6 @@ define( function( require ) {
       var targetLength = this.startPointer.trail.length - ( this.startPointer.isBefore ? 1 : 0 );
       
       while ( pointer.trail.length <= targetLength ) {
-        var node = pointer.trail.lastNode();
         if ( LayerStrategy.hasPreferredLayerType( pointer, this ) ) {
           this.pushPreferredLayerType( LayerStrategy.getPreferredLayerType( pointer, this ) );
         }
@@ -112,8 +111,6 @@ define( function( require ) {
       // console.log( '         stack: ' + _.map( builder.layerTypeStack, function( type ) { return type.name; } ).join( ', ' ) );
       
       builder.startPointer.depthFirstUntil( builder.endPointer, function( pointer ) {
-        var node = pointer.trail.lastNode();
-        
         if ( pointer.isBefore ) {
           // console.log( 'builder: enter ' + pointer.toString() );
           LayerStrategy.enter( pointer, builder );

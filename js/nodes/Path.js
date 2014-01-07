@@ -11,15 +11,13 @@ define( function( require ) {
   
   var inherit = require( 'PHET_CORE/inherit' );
   var Shape = require( 'KITE/Shape' );
-  var Bounds2 = require( 'DOT/Bounds2' );
-  
+
   var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
-  var Renderer = require( 'SCENERY/layers/Renderer' );
+  require( 'SCENERY/layers/Renderer' );
   var Fillable = require( 'SCENERY/nodes/Fillable' );
   var Strokable = require( 'SCENERY/nodes/Strokable' );
-  var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
-  
+
   scenery.Path = function Path( shape, options ) {
     // TODO: consider directly passing in a shape object (or at least handling that case)
     // NOTE: _shape can be lazily constructed, in the case of types like Rectangle where they have their own drawing code

@@ -10,9 +10,6 @@
 define( function( require ) {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var escapeHTML = require( 'PHET_CORE/escapeHTML' );
-
   var scenery = require( 'SCENERY/scenery' );
 
   var LiveRegion = scenery.LiveRegion = function LiveRegion( instance, property, options ) {
