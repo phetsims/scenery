@@ -196,7 +196,8 @@ define( function( require ) {
   /*---------------------------------------------------------------------------*
   * Layout Methods
   *----------------------------------------------------------------------------*/
-  
+
+  //TODO Commented out because jhint identifies them as unused variables. Delete these functions if that are not going to be used.
 //  var Vertical = LayoutNode.Vertical = new LayoutMethod( function verticalLayout( element, index, previousElement, layoutProperties ) {
 //    element.layoutTop = previousElement ? previousElement.layoutBounds.bottom : 0;
 //  } );
