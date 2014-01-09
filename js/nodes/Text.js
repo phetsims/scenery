@@ -340,7 +340,7 @@ define( function( require ) {
       var svgBounds = this.approximateSVGBounds(); // this seems to be slower than expected, mostly due to Font getters
 
       //If svgBounds are zero, then return the zero bounds
-      if (svgBounds.width===0 && svgBounds.height===0){
+      if ( !this._text || svgBounds.width === 0 ){
         return svgBounds;
       }
       return scenery.Util.canvasAccurateBounds( function( context ) {
