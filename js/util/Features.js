@@ -43,6 +43,7 @@ define( function( require ) {
     var loadCall = function() {
       try {
         context.drawImage( img, 0, 0 );
+        canvas.toDataURL();
         Features[name] = true;
       } catch ( e ) {
         Features[name] = false;
