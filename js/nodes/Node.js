@@ -2131,8 +2131,7 @@ define( function( require ) {
     },
     
     getPropString: function( spaces, includeChildren ) {
-      var self = this;
-      
+
       var result = '';
       function addProp( key, value, nowrap ) {
         if ( result ) {

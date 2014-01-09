@@ -17,9 +17,6 @@ define( function( require ) {
   require( 'SCENERY/layers/DOMLayer' );
   require( 'SCENERY/layers/SVGLayer' );
   
-  // cached defaults
-  var defaults = {};
-  
   scenery.Renderer = function Renderer( layerConstructor, name, bitmask, defaultOptions ) {
     this.layerConstructor = layerConstructor;
     this.name = name;

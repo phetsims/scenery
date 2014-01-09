@@ -9,15 +9,10 @@
 define( function( require ) {
   'use strict';
 
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var Transform3 = require( 'DOT/Transform3' );
-  var Matrix3 = require( 'DOT/Matrix3' );
   var Shape = require( 'KITE/Shape' );
 
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
-
-  var Util = require( 'SCENERY/util/Util' );
 
   scenery.PointerAreaOverlay = function PointerAreaOverlay( scene ) {
     this.scene = scene;

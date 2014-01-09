@@ -12,8 +12,6 @@ define( function( require ) {
   require( 'SCENERY/util/Color' );
   var scenery = require( 'SCENERY/scenery' );
   
-  var Vector2 = require( 'DOT/Vector2' );
-
   // TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ]
   scenery.Gradient = function Gradient( canvasGradient ) {
     assert && assert( this.constructor.name !== 'Gradient', 'Please create a LinearGradient or RadialGradient. Do not directly use the supertype Gradient.' );

@@ -156,11 +156,6 @@ define( function( require ) {
     }
   }
   
-  function createBlocks( display, firstInstance, lastInstance, renderer ) {
-    throw new Error( 'createBlocks unimplemented' );
-    //return [];
-  }
-  
   inherit( Object, Display, {
     getRootNode: function() {
       return this._rootNode;

@@ -206,7 +206,6 @@ define( function( require ) {
         // if there is already a child, we need to do a scan to ensure we place our group as a child in the correct order (above/below)
         
         // scan other child groups in the parentGroup to find where we need to be (index i)
-        var afterNode = null;
         var indexIndex = subtrail.length - 2; // index into the trail's indices
         var ourIndex = subtrail.indices[indexIndex];
         var i;

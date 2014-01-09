@@ -13,8 +13,6 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  var Vector2 = require( 'DOT/Vector2' );
-  
   // TODO: support scene or other various content (SVG is flexible, can backport to canvas)
   // TODO: investigate options to support repeat-x, repeat-y or no-repeat in SVG (available repeat options from Canvas)
   scenery.Pattern = function Pattern( image ) {
