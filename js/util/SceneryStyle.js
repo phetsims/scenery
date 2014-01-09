@@ -9,6 +9,8 @@
 define( function( require ) {
   'use strict';
   
+  require( 'SCENERY/scenery' );
+  
   var styleElement = document.createElement( 'style' );
   styleElement.type = 'text/css';
   document.head.appendChild( styleElement );
