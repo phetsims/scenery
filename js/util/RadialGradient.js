@@ -46,7 +46,7 @@ define( function( require ) {
     getSVGDefinition: function( id ) {
       var startIsLarger = this.startRadius > this.endRadius;
       var largePoint = startIsLarger ? this.start : this.end;
-      var smallPoint = startIsLarger ? this.end : this.start;
+      // var smallPoint = startIsLarger ? this.end : this.start;
       var maxRadius = Math.max( this.startRadius, this.endRadius );
       var minRadius = Math.min( this.startRadius, this.endRadius );
       

@@ -11,7 +11,6 @@
 define( function( require ) {
   'use strict';
   
-  var collect = require( 'PHET_CORE/collect' );
   var inherit = require( 'PHET_CORE/inherit' );
   
   var Bounds2 = require( 'DOT/Bounds2' );
@@ -34,7 +33,6 @@ define( function( require ) {
   require( 'SCENERY/overlays/PointerOverlay' );
 
   var Util = require( 'SCENERY/util/Util' );
-  var objectCreate = Util.objectCreate;
   
   var accessibility = window.has && window.has( 'scenery.accessibility' );
   
@@ -254,8 +252,6 @@ define( function( require ) {
     
     setActivePeer: function( peer ) {
       if ( this.activePeer !== peer ) {
-        var scene = this;
-        
         //Remove bounds listener from old active peer
         if ( this.activePeer ) {
           this.activePeer.instance.node.removeEventListener( 'bounds', this.updateFocusRing );
@@ -526,8 +522,8 @@ define( function( require ) {
       // need a reference to this, since it may change
       var afterLayerEndBoundary = afterLayer ? afterLayer.endBoundary : null;
       
-      var beforeLayerIndex = beforeLayer ? _.indexOf( this.layers, beforeLayer ) : -1;
-      var afterLayerIndex = afterLayer ? _.indexOf( this.layers, afterLayer ) : this.layers.length;
+      // var beforeLayerIndex = beforeLayer ? _.indexOf( this.layers, beforeLayer ) : -1;
+      // var afterLayerIndex = afterLayer ? _.indexOf( this.layers, afterLayer ) : this.layers.length;
       
       var beforePointer = beforeTrail ? new scenery.TrailPointer( beforeTrail, true ) : new scenery.TrailPointer( new scenery.Trail( this ), true );
       var afterPointer = afterTrail ? new scenery.TrailPointer( afterTrail, true ) : new scenery.TrailPointer( new scenery.Trail( this ), false );
@@ -760,8 +756,6 @@ define( function( require ) {
     },
     
     disposeLayers: function() {
-      var scene = this;
-      
       var i = this.layers.length;
       while ( i-- ) {
         this.disposeLayer( this.layers[i] );
@@ -1050,7 +1044,6 @@ define( function( require ) {
     },
     
     initializeWindowEvents: function( parameters ) {
-      var element = this.$main[0];
       this.initializeEvents( _.extend( {}, {
         listenerTarget: window,
         pointFromEvent: function pointFromEvent( evt ) {
@@ -1393,7 +1386,6 @@ define( function( require ) {
       
       startPointer.depthFirstUntil( endPointer, function( pointer ) {
         var div;
-        var ptr = str( pointer );
         var node = pointer.trail.lastNode();
         
         function addQualifier( text ) {

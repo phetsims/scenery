@@ -35,7 +35,7 @@ define( function( require ) {
   var stretches = [ 'normal', 'ultra-condensed', 'extra-condensed', 'condensed', 'semi-condensed', 'semi-expanded', 'expanded', 'extra-expanded', 'ultra-expanded' ];
   
   // size constants used for detection
-  var sizes = [ 'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large', 'larger', 'smaller' ];
+  // var sizes = [ 'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large', 'larger', 'smaller' ];
   
   function castSize( size ) {
     if ( typeof size === 'number' ) {

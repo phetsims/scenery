@@ -17,7 +17,6 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
 
   var Rectangle = require( 'SCENERY/nodes/Rectangle' );
-  var Shape = require( 'KITE/Shape' );
 
   /**
    * @param options Any options for the plane, typically fill/opacity (many others such as scale, translation, rotation should have no effect)

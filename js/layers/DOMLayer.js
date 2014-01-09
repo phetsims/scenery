@@ -20,7 +20,6 @@ define( function( require ) {
   'use strict';
   
   var inherit = require( 'PHET_CORE/inherit' );
-  var Bounds2 = require( 'DOT/Bounds2' );
   
   var scenery = require( 'SCENERY/scenery' );
   
@@ -189,7 +188,7 @@ define( function( require ) {
     },
     
     getSVGString: function() {
-      var data = "<svg xmlns='" + scenery.svgns + "' width='" + this.$main.width() + "' height='" + this.$main.height() + "'>" +
+      return "<svg xmlns='" + scenery.svgns + "' width='" + this.$main.width() + "' height='" + this.$main.height() + "'>" +
         "<foreignObject width='100%' height='100%'>" +
         $( this.div ).html() +
         "</foreignObject></svg>";

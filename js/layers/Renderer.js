@@ -21,9 +21,6 @@ define( function( require ) {
   * OLD Renderer handling (deprecated)
   *----------------------------------------------------------------------------*/
   
-  // cached defaults
-  var defaults = {};
-  
   scenery.Renderer = function Renderer( layerConstructor, name, bitmask, defaultOptions ) {
     this.layerConstructor = layerConstructor;
     this.name = name;

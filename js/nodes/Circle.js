@@ -25,9 +25,6 @@ define( function( require ) {
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMCircleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
   
-  // scratch matrix used in DOM rendering
-  var scratchMatrix = Matrix3.dirtyFromPool();
-
   scenery.Circle = function Circle( radius, options ) {
     if ( typeof radius === 'object' ) {
       // allow new Circle( { radius: ... } )

@@ -9,8 +9,6 @@
 define( function( require ) {
   'use strict';
   
-  var Matrix3 = require( 'DOT/Matrix3' );
-  
   var scenery = require( 'SCENERY/scenery' );
   
   /*

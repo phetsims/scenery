@@ -369,10 +369,6 @@ define( function( require ) {
     Object.defineProperty( proto, 'lineDashOffset', { set: proto.setLineDashOffset, get: proto.getLineDashOffset } );
     Object.defineProperty( proto, 'strokePickable', { set: proto.setStrokePickable, get: proto.isStrokePickable } );
     
-    var invalidateStroke = function() {
-      this.invalidateSupportedRenderers();
-    };
-    
     if ( proto.invalidateStroke ) {
       var oldInvalidateStroke = proto.invalidateStroke;
       proto.invalidateStroke = function() {

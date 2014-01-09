@@ -12,8 +12,6 @@
 define( function( require ) {
   'use strict';
 
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var Transform3 = require( 'DOT/Transform3' );
   var Matrix3 = require( 'DOT/Matrix3' );
 
   var scenery = require( 'SCENERY/scenery' );

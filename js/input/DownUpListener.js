@@ -94,7 +94,6 @@ define( function( require ) {
       var currentTargetSave = event.currentTarget;
       event.currentTarget = this.downCurrentTarget; // up is handled by a pointer listener, so currentTarget would be null.
       if ( this.options.upInside || this.options.upOutside ) {
-        var scene = this.downTrail.rootNode();
         var trailUnderPointer = event.trail;
         
         // TODO: consider changing this so that it just does a hit check and ignores anything in front?

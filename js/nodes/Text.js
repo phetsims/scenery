@@ -28,10 +28,9 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   var Node = require( 'SCENERY/nodes/Node' ); // inherits from Node
-  var Renderer = require( 'SCENERY/layers/Renderer' );
+  require( 'SCENERY/layers/Renderer' );
   var Fillable = require( 'SCENERY/nodes/Fillable' );
   var Strokable = require( 'SCENERY/nodes/Strokable' );
-  var objectCreate = require( 'SCENERY/util/Util' ).objectCreate; // i.e. Object.create
   require( 'SCENERY/util/Font' );
   require( 'SCENERY/util/Util' ); // for canvasAccurateBounds and CSS transforms
   require( 'SCENERY/util/CanvasContextWrapper' );
@@ -73,8 +72,6 @@ define( function( require ) {
     
     // whether the text is rendered as HTML or not. if defined (in a subtype constructor), use that value instead
     this._isHTML = this._isHTML === undefined ? false : this._isHTML;
-    
-    var thisFont = this;
     
     // ensure we have a parameter object
     options = options || {};
@@ -165,7 +162,6 @@ define( function( require ) {
     },
     
     updateTextFlags: function() {
-      var thisText = this;
       this.boundsInaccurate = this._boundsMethod !== 'accurate';
       
       this.invalidateSupportedRenderers();

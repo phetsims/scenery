@@ -20,8 +20,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
 
   var Node = require( 'SCENERY/nodes/Node' ); // Image inherits from Node
-  var Renderer = require( 'SCENERY/layers/Renderer' ); // we need to specify the Renderer in the prototype
-  var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
+  require( 'SCENERY/layers/Renderer' ); // we need to specify the Renderer in the prototype
   require( 'SCENERY/util/Util' );
   
   // TODO: change this based on memory and performance characteristics of the platform
@@ -86,8 +85,6 @@ define( function( require ) {
     },
 
     setImage: function( image ) {
-      var self = this;
-
       if ( this._image !== image && ( typeof image !== 'string' || !this._image || image !== this._image.src ) ) {
         // don't leak memory by referencing old images
         if ( this._image ) {

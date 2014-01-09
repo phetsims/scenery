@@ -683,7 +683,7 @@ define( function( require ) {
     
     // temporary, for mouse events
     addImmediateListener: function( type, callback, useCapture ) {
-      var input = this;
+      // var input = this;
       
       this.listenerTarget.addEventListener( type, callback, useCapture );
       this.listenerReferences.push( { type: type, callback: function immediateEvent( domEvent ) {

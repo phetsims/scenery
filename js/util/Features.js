@@ -24,7 +24,7 @@ define( function( require ) {
       var url = canvas.toDataURL( [ format ] );
       
       var target = 'data:' + format;
-      var pngFallback = 'data:image/png';
+      // var pngFallback = 'data:image/png';
       
       return url.slice( 0, target.length ) === target;
     } catch ( e ) {
@@ -44,7 +44,7 @@ define( function( require ) {
     var loadCall = function() {
       try {
         context.drawImage( img, 0, 0 );
-        var url = canvas.toDataURL();
+        canvas.toDataURL();
         Features[name] = true;
       } catch ( e ) {
         Features[name] = false;
