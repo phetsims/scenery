@@ -12,15 +12,15 @@
  *
  * visual state API needed:
  * {
- *   markPaintDirty: function()     // used by Strokable/Fillable
- *   node: Node                     // used by Strokable/Fillable
- *   transformDirty: Boolean        // set by the drawable
- *   forceAcceleration: Boolean     // set by the drawable. for now, won't change once created
- *   drawable: DOMSelfDrawable      // set by the visual state on initialization     NOTE: required for any type of visual state! (used by Strokable/Fillable states)
- *   domElement: DOMElement         // what we use to render the DOM element (should be the base of the displayed element)
- *   updateDOM: function()             // updates any visual state, including the transform
- *   onDetach: function()     // called when the state is detached from a drawable. optionally discard DOM elements. we guarantee state will be
- *                                  // initialized again before any more update() calls
+ *   markPaintDirty: function()  // used by Strokable/Fillable
+ *   node: Node                  // used by Strokable/Fillable
+ *   transformDirty: Boolean     // set by the drawable
+ *   forceAcceleration: Boolean  // set by the drawable. for now, won't change once created
+ *   drawable: DOMSelfDrawable   // set by the visual state on initialization     NOTE: required for any type of visual state! (used by Strokable/Fillable states)
+ *   domElement: DOMElement      // what we use to render the DOM element (should be the base of the displayed element)
+ *   updateDOM: function()       // updates any visual state, including the transform
+ *   onDetach: function()        // called when the state is detached from a drawable. optionally discard DOM elements. we guarantee state will be
+ *                               // initialized again before any more update() calls
  * }
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
