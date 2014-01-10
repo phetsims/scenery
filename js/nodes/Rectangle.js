@@ -543,15 +543,15 @@ define( function( require ) {
   };
   
   /*---------------------------------------------------------------------------*
-  * DOM rendering
+  * Rendering state
   *----------------------------------------------------------------------------*/
   
-  var RectangleDOMState = Rectangle.RectangleDOMState = function( drawable ) {
+  var RectangleRenderState = Rectangle.RectangleRenderState = function( drawable ) {
     // important to keep this in the constructor (so our hidden class works out nicely)
     this.initialize( drawable );
   };
-  RectangleDOMState.prototype = {
-    constructor: RectangleDOMState,
+  RectangleRenderState.prototype = {
+    constructor: RectangleRenderState,
     
     // initializes, and resets (so we can support pooled states)
     initialize: function( drawable ) {
@@ -559,8 +559,6 @@ define( function( require ) {
       
       this.drawable = drawable;
       this.node = drawable.node;
-      this.transformDirty = true;
-      this.forceAcceleration = false; // later changed by drawable if necessary
       
       this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
       this.dirtyX = true;   
@@ -573,6 +571,80 @@ define( function( require ) {
       // adds fill/stroke-specific flags and state
       this.initializeFillableState();
       this.initializeStrokableState();
+      
+      return this; // allow for chaining
+    },
+    
+    // catch-all dirty, if anything that isn't a transform is marked as dirty
+    markPaintDirty: function() {
+      this.paintDirty = true;
+      this.drawable.markDirty();
+    },
+    
+    markDirtyX: function() {
+      this.dirtyX = true;
+      this.markPaintDirty();
+    },
+    markDirtyY: function() {
+      this.dirtyY = true;
+      this.markPaintDirty();
+    },
+    markDirtyWidth: function() {
+      this.dirtyWidth = true;
+      this.markPaintDirty();
+    },
+    markDirtyHeight: function() {
+      this.dirtyHeight = true;
+      this.markPaintDirty();
+    },
+    markDirtyArcWidth: function() {
+      this.dirtyArcWidth = true;
+      this.markPaintDirty();
+    },
+    markDirtyArcHeight: function() {
+      this.dirtyArcHeight = true;
+      this.markPaintDirty();
+    },
+    markDirtyRectangle: function() {
+      this.dirtyX = true;
+      this.dirtyY = true;
+      this.dirtyWidth = true;
+      this.dirtyHeight = true;
+      this.dirtyArcWidth = true;
+      this.dirtyArcHeight = true;
+      this.markPaintDirty();
+    },
+    
+    setToClean: function() {
+      this.paintDirty = false;
+      this.dirtyX = false;
+      this.dirtyY = false;
+      this.dirtyWidth = false;
+      this.dirtyHeight = false;
+      this.dirtyArcWidth = false;
+      this.dirtyArcHeight = false;
+      
+      this.cleanFillableState();
+      this.cleanStrokableState();
+    }
+  };
+  /* jshint -W064 */
+  Fillable.FillableState( RectangleRenderState );
+  /* jshint -W064 */
+  Strokable.StrokableState( RectangleRenderState );
+  
+  /*---------------------------------------------------------------------------*
+  * DOM rendering
+  *----------------------------------------------------------------------------*/
+  
+  var RectangleDOMState = Rectangle.RectangleDOMState = inherit( RectangleRenderState, function RectangleDOMState( drawable ) {
+    RectangleRenderState.call( this, drawable );
+  }, {
+    initialize: function( drawable ) {
+      RectangleRenderState.prototype.initialize.call( this, drawable );
+      
+      this.forceAcceleration = false; // later changed by drawable if necessary
+      this.transformDirty = true;
       
       // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
       // allocation and performance costs)
@@ -680,64 +752,13 @@ define( function( require ) {
       this.freeToPool();
     },
     
-    // catch-all dirty, if anything that isn't a transform is marked as dirty
-    markPaintDirty: function() {
-      this.paintDirty = true;
-      this.drawable.markDirty();
-    },
-    
-    markDirtyX: function() {
-      this.dirtyX = true;
-      this.markPaintDirty();
-    },
-    markDirtyY: function() {
-      this.dirtyY = true;
-      this.markPaintDirty();
-    },
-    markDirtyWidth: function() {
-      this.dirtyWidth = true;
-      this.markPaintDirty();
-    },
-    markDirtyHeight: function() {
-      this.dirtyHeight = true;
-      this.markPaintDirty();
-    },
-    markDirtyArcWidth: function() {
-      this.dirtyArcWidth = true;
-      this.markPaintDirty();
-    },
-    markDirtyArcHeight: function() {
-      this.dirtyArcHeight = true;
-      this.markPaintDirty();
-    },
-    markDirtyRectangle: function() {
-      this.dirtyX = true;
-      this.dirtyY = true;
-      this.dirtyWidth = true;
-      this.dirtyHeight = true;
-      this.dirtyArcWidth = true;
-      this.dirtyArcHeight = true;
-      this.markPaintDirty();
-    },
-    
     setToClean: function() {
-      this.paintDirty = false;
-      this.dirtyX = false;
-      this.dirtyY = false;
-      this.dirtyWidth = false;
-      this.dirtyHeight = false;
-      this.dirtyArcWidth = false;
-      this.dirtyArcHeight = false;
-      this.transformDirty = false;
+      RectangleRenderState.prototype.setToClean.call( this );
       
-      this.cleanFillableState();
-      this.cleanStrokableState();
+      this.transformDirty = false;
     }
-  };
-  /* jshint -W064 */
-  Fillable.FillableState( RectangleDOMState );
-  /* jshint -W064 */
-  Strokable.StrokableState( RectangleDOMState );
+  } );
+  
   // for pooling, allow RectangleDOMState.createFromPool( drawable ) and state.freeToPool(). Creation will initialize the state to the intial state
   /* jshint -W064 */
   Poolable( RectangleDOMState, {
