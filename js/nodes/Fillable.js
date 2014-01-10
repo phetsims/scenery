@@ -116,6 +116,7 @@ define( function( require ) {
       }
     };
     
+    // TODO: this is deprecated, remove!
     proto.getSVGFillStyle = function() {
       var style = 'fill: ';
       if ( !this._fill ) {
@@ -241,6 +242,69 @@ define( function( require ) {
       this.dirtyFill = true;
       this.markPaintDirty();
     };
+  };
+  
+  var fillableSVGIdCounter = 0;
+  
+  // handles SVG defs and fill style for SVG elements
+  Fillable.FillSVGState = function FillSVGState() {
+    this.id = 'svgfill' + ( fillableSVGIdCounter++ );
+    
+    this.initialize();
+  };
+  Fillable.FillSVGState.prototype = {
+    constructor: Fillable.FillSVGState,
+    
+    initialize: function() {
+      this.fill = null;
+      this.def = null;
+      
+      // this is used by the actual SVG element
+      this.style = this.computeStyle();
+    },
+    
+    dispose: function() {
+      // be cautious, release references
+      this.fill = null;
+      this.releaseDef();
+    },
+    
+    releaseDef: function() {
+      if ( this.def ) {
+        this.def.parentNode.removeChild( this.def );
+        this.def = null;
+      }
+    },
+    
+    updateFill: function( defs, fill ) {
+      if ( fill !== this.fill ) {
+        this.releaseDef();
+        this.fill = fill;
+        this.style = this.computeStyle();
+        if ( this.fill.getSVGDefinition ) {
+          this.def = this.fill.getSVGDefinition( this.id );
+          defs.appendChild( this.def );
+        }
+      }
+    },
+    
+    computeStyle: function() {
+      var style = 'fill: ';
+      if ( !this.fill ) {
+        // no fill
+        style += 'none;';
+      } else if ( this.fill.toCSS ) {
+        // Color object fill
+        style += this.fill.toCSS() + ';';
+      } else if ( this.fill.getSVGDefinition ) {
+        // reference the SVG definition with a URL
+        style += 'url(#' + this.id + ');';
+      } else {
+        // plain CSS color
+        style += this.fill + ';';
+      }
+      return style;
+    }
   };
   
   return Fillable;

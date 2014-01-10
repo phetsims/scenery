@@ -34,6 +34,8 @@ define( function( require ) {
     Drawable.call( this, trail, renderer );
     
     this.instance = instance;
+    
+    this.defs = null; // TODO NOTE: stub spot fot defs. if we support changing defs locations, we'll need to redo a bit of API (this is accessed by visual states)
   };
   var SVGSelfDrawable = scenery.SVGSelfDrawable;
   

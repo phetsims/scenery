@@ -24,6 +24,7 @@ define( function( require ) {
   
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMRectangleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
+  var keepSVGRectangleElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
   
   // scratch matrix used in DOM rendering
   var scratchMatrix = Matrix3.dirtyFromPool();
@@ -769,6 +770,129 @@ define( function( require ) {
           return pool.pop().initialize( drawable );
         } else {
           return new RectangleDOMState( drawable );
+        }
+      };
+    }
+  } );
+  
+  /*---------------------------------------------------------------------------*
+  * SVG rendering
+  *----------------------------------------------------------------------------*/
+  
+  var RectangleSVGState = Rectangle.RectangleSVGState = inherit( RectangleRenderState, function RectangleSVGState( drawable ) {
+    RectangleRenderState.call( this, drawable );
+  }, {
+    initialize: function( drawable ) {
+      RectangleRenderState.prototype.initialize.call( this, drawable );
+      
+      this.lastArcW = -1; // invalid on purpose
+      this.lastArcH = -1; // invalid on purpose
+      
+      this.defs = drawable.defs; // NOTE: TODO: static defs for now. How to change if we are moved?!?!?
+      
+      // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
+      // allocation and performance costs)
+      if ( !this.svgElement ) {
+        this.svgElement = document.createElementNS( scenery.svgns, 'rect' );
+      }
+      
+      if ( !this.fillState ) {
+        this.fillState = new Fillable.FillSVGState();
+      } else {
+        this.fillState.initialize();
+      }
+      
+      return this; // allow for chaining
+    },
+    
+    updateSVG: function() {
+      // see http://www.w3.org/TR/SVG/shapes.html#RectElement
+      var node = this.node;
+      var rect = this.svgElement;
+      
+      if ( this.paintDirty ) {
+        if ( this.dirtyX ) {
+          rect.setAttribute( 'x', node._rectX );
+        }
+        if ( this.dirtyY ) {
+          rect.setAttribute( 'y', node._rectY );
+        }
+        if ( this.dirtyWidth ) {
+          rect.setAttribute( 'width', node._rectWidth );
+        }
+        if ( this.dirtyHeight ) {
+          rect.setAttribute( 'height', node._rectHeight );
+        }
+        if ( this.dirtyArcWidth || this.dirtyArcHeight || this.dirtyWidth || this.dirtyHeight ) {
+          var arcw = 0;
+          var arch = 0;
+          
+          // workaround for various browsers if rx=20, ry=0 (behavior is inconsistent, either identical to rx=20,ry=20, rx=0,ry=0. We'll treat it as rx=0,ry=0)
+          // see https://github.com/phetsims/scenery/issues/183
+          if ( node.isRounded() ) {
+            var maximumArcSize = node.getMaximumArcSize();
+            arcw = Math.min( node._rectArcWidth, maximumArcSize );
+            arch = Math.min( node._rectArcHeight, maximumArcSize );
+          }
+          if ( arcw !== this.lastArcW ) {
+            this.lastArcW = arcw;
+            rect.setAttribute( 'rx', arcw );
+          }
+          if ( arch !== this.lastArcH ) {
+            this.lastArcH = arch;
+            rect.setAttribute( 'ry', arch );
+          }
+        }
+        
+        rect.setAttribute( 'style', node.getSVGFillStyle() + node.getSVGStrokeStyle() );
+        
+        if ( this.dirtyFill ) {
+          this.fillState.updateFill( this.defs, node._fill );
+        }
+        if ( this.dirtyStroke ) {
+          this.strokeState.updateStroke( this.defs, node._stroke );
+        }
+        var strokeParameterDirty = this.dirtyLineWidth || this.dirtyLineOptions;
+        if ( strokeParameterDirty ) {
+          this.strokeState.updateStrokeParameters( node );
+        }
+        if ( this.dirtyFill || this.dirtyStroke || strokeParameterDirty ) {
+          rect.setAttribute( 'style', this.fillState.style + this.strokeState.baseStyle + this.strokeState.extraStyle );
+        }
+      }
+      
+      // clear all of the dirty flags
+      this.setToClean();
+    },
+    
+    // release the DOM elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
+    onDetach: function() {
+      if ( !keepSVGRectangleElements ) {
+        // clear the references
+        this.svgElement = null;
+      }
+      
+      this.fillState.dispose();
+      
+      // put us back in the pool
+      this.freeToPool();
+    },
+    
+    setToClean: function() {
+      RectangleRenderState.prototype.setToClean.call( this );
+    }
+  } );
+  
+  // for pooling, allow RectangleSVGState.createFromPool( drawable ) and state.freeToPool(). Creation will initialize the state to the intial state
+  /* jshint -W064 */
+  Poolable( RectangleSVGState, {
+    defaultFactory: function() { return new RectangleSVGState(); },
+    constructorDuplicateFactory: function( pool ) {
+      return function( drawable ) {
+        if ( pool.length ) {
+          return pool.pop().initialize( drawable );
+        } else {
+          return new RectangleSVGState( drawable );
         }
       };
     }

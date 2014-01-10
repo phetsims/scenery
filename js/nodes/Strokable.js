@@ -244,6 +244,7 @@ define( function( require ) {
       }
     };
     
+    // TODO: NOTE: deprecated! remove!
     proto.getSVGStrokeStyle = function() {
       if ( !this._stroke ) {
         // no stroke
@@ -414,6 +415,100 @@ define( function( require ) {
       this.dirtyLineOptions = true;
       this.markPaintDirty();
     };
+  };
+  
+  var strokableSVGIdCounter = 0;
+  
+  // handles SVG defs and stroke style for SVG elements
+  // TODO: note similarity with Fill version - can we save lines of code with refactoring?
+  Strokable.StrokeSVGState = function StrokeSVGState() {
+    this.id = 'svgstroke' + ( strokableSVGIdCounter++ );
+    
+    this.initialize();
+  };
+  Strokable.StrokeSVGState.prototype = {
+    constructor: Strokable.StrokeSVGState,
+    
+    initialize: function() {
+      this.stroke = null;
+      this.def = null;
+      
+      // these are used by the actual SVG element
+      this.baseStyle = this.computeStyle(); // the main style CSS
+      this.extraStyle = "";                 // width/dash/cap/join CSS
+    },
+    
+    dispose: function() {
+      // be cautious, release references
+      this.stroke = null;
+      this.releaseDef();
+    },
+    
+    releaseDef: function() {
+      if ( this.def ) {
+        this.def.parentNode.removeChild( this.def );
+        this.def = null;
+      }
+    },
+    
+    updateStroke: function( defs, stroke ) {
+      if ( stroke !== this.stroke ) {
+        this.releaseDef();
+        this.stroke = stroke;
+        this.baseStyle = this.computeStyle();
+        if ( this.stroke.getSVGDefinition ) {
+          this.def = this.stroke.getSVGDefinition( this.id );
+          defs.appendChild( this.def );
+        }
+      }
+    },
+    
+    updateStrokeParameters: function( node ) {
+      var extraStyle = "";
+      
+      var lineWidth = node.getLineWidth();
+      if ( lineWidth !== 1 ) {
+        extraStyle += 'stroke-width: ' + lineWidth + ';';
+      }
+      
+      var lineCap = node.getLineCap();
+      if ( lineCap !== 'butt' ) {
+        extraStyle += 'stroke-linecap: ' + lineCap + ';';
+      }
+      
+      var lineJoin = node.getLineJoin();
+      if ( lineJoin !== 'miter' ) {
+        extraStyle += 'stroke-linejoin: ' + lineJoin + ';';
+      }
+      
+      if ( node.hasLineDash() ) {
+        extraStyle += 'stroke-dasharray: ' + node.getLineDash().join( ',' ) + ';';
+        extraStyle += 'stroke-dashoffset: ' + node.getLineDashOffset() + ';';
+      }
+      
+      this.extraStyle = extraStyle;
+    },
+    
+    computeStyle: function() {
+      if ( !this.stroke ) {
+        // no stroke
+        return 'stroke: none;';
+      }
+      
+      var baseStyle = 'stroke: ';
+      if ( this.stroke.toCSS ) {
+        // Color object stroke
+        baseStyle += this.stroke.toCSS() + ';';
+      } else if ( this.stroke.getSVGDefinition ) {
+        // reference the SVG definition with a URL
+        baseStyle += 'url(#' + this.id + ');';
+      } else {
+        // plain CSS color
+        baseStyle += this.stroke + ';';
+      }
+      
+      return baseStyle;
+    }
   };
   
   return Strokable;
