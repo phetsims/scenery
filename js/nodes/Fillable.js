@@ -276,6 +276,7 @@ define( function( require ) {
       }
     },
     
+    // called when the fill needs to be updated, with the latest defs SVG block
     updateFill: function( defs, fill ) {
       if ( fill !== this.fill ) {
         this.releaseDef();
@@ -285,6 +286,14 @@ define( function( require ) {
           this.def = this.fill.getSVGDefinition( this.id );
           defs.appendChild( this.def );
         }
+      }
+    },
+    
+    // called when the defs SVG block is switched (our SVG element was moved to another SVG top-level context)
+    updateDefs: function( defs ) {
+      if ( this.def ) {
+        this.def.parentNode.removeChild( this.def );
+        defs.appendChild( this.def );
       }
     },
     

@@ -398,6 +398,10 @@ define( function( require ) {
       return Rectangle.RectangleDOMState.createFromPool( domSelfDrawable );
     },
     
+    createSVGState: function( svgSelfDrawable ) {
+      return Rectangle.RectangleSVGState.createFromPool( svgSelfDrawable );
+    },
+    
     /*---------------------------------------------------------------------------*
     * Miscellaneous
     *----------------------------------------------------------------------------*/
@@ -556,6 +560,7 @@ define( function( require ) {
     
     // initializes, and resets (so we can support pooled states)
     initialize: function( drawable ) {
+      // TODO: it's a bit weird to set it this way?
       drawable.visualState = this;
       
       this.drawable = drawable;
@@ -788,7 +793,7 @@ define( function( require ) {
       this.lastArcW = -1; // invalid on purpose
       this.lastArcH = -1; // invalid on purpose
       
-      this.defs = drawable.defs; // NOTE: TODO: static defs for now. How to change if we are moved?!?!?
+      this.defs = drawable.defs;
       
       // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
       // allocation and performance costs)
@@ -802,7 +807,19 @@ define( function( require ) {
         this.fillState.initialize();
       }
       
+      if ( !this.strokeState ) {
+        this.strokeState = new Strokable.StrokeSVGState();
+      } else {
+        this.strokeState.initialize();
+      }
+      
       return this; // allow for chaining
+    },
+    
+    updateDefs: function( defs ) {
+      this.defs = defs;
+      this.fillState.updateDefs( defs );
+      this.strokeState.updateDefs( defs );
     },
     
     updateSVG: function() {

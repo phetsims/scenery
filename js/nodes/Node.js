@@ -2171,6 +2171,27 @@ define( function( require ) {
     },
     
     /*---------------------------------------------------------------------------*
+    * New SVG rendering
+    *----------------------------------------------------------------------------*/
+    
+    attachSVGDrawable: function( svgSelfDrawable ) {
+      var visualState = this.createSVGState( svgSelfDrawable );
+      
+      this._visualStates.push( visualState );
+      
+      return visualState;
+    },
+    
+    detachSVGDrawable: function( svgSelfDrawable ) {
+      var visualState = svgSelfDrawable.visualState;
+      
+      var index = _.indexOf( this._visualStates, visualState );
+      this._visualStates.splice( index, 1 ); // TODO: replace with a remove() function
+      
+      visualState.onDetach();
+    },
+    
+    /*---------------------------------------------------------------------------*
     * ES5 get/set
     *----------------------------------------------------------------------------*/
     

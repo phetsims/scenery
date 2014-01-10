@@ -489,6 +489,14 @@ define( function( require ) {
       this.extraStyle = extraStyle;
     },
     
+    // called when the defs SVG block is switched (our SVG element was moved to another SVG top-level context)
+    updateDefs: function( defs ) {
+      if ( this.def ) {
+        this.def.parentNode.removeChild( this.def );
+        defs.appendChild( this.def );
+      }
+    },
+    
     computeStyle: function() {
       if ( !this.stroke ) {
         // no stroke
