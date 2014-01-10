@@ -452,7 +452,9 @@ define( function( require ) {
         this[privateName] = value;
         var stateLen = this._visualStates.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          ( this._visualStates[i] )[dirtyMethodName]();
+          var state = this._visualStates[i];
+          state[dirtyMethodName]();
+          state.markPaintDirty();
         }
         this.invalidateRectangle();
       }
@@ -586,32 +588,8 @@ define( function( require ) {
       this.paintDirty = true;
       this.drawable.markDirty();
     },
-    
-    markDirtyX: function() {
-      this.dirtyX = true;
-      this.markPaintDirty();
-    },
-    markDirtyY: function() {
-      this.dirtyY = true;
-      this.markPaintDirty();
-    },
-    markDirtyWidth: function() {
-      this.dirtyWidth = true;
-      this.markPaintDirty();
-    },
-    markDirtyHeight: function() {
-      this.dirtyHeight = true;
-      this.markPaintDirty();
-    },
-    markDirtyArcWidth: function() {
-      this.dirtyArcWidth = true;
-      this.markPaintDirty();
-    },
-    markDirtyArcHeight: function() {
-      this.dirtyArcHeight = true;
-      this.markPaintDirty();
-    },
     markDirtyRectangle: function() {
+      // TODO: consider bitmask instead?
       this.dirtyX = true;
       this.dirtyY = true;
       this.dirtyWidth = true;
@@ -620,7 +598,6 @@ define( function( require ) {
       this.dirtyArcHeight = true;
       this.markPaintDirty();
     },
-    
     setToClean: function() {
       this.paintDirty = false;
       this.dirtyX = false;
