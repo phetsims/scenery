@@ -16,6 +16,9 @@
   
   <script type="text/javascript">
     var mode = window.location.search ? window.location.search.slice( 1 ) : 'medium';
+    var animating = true;
+    
+    var timestamp = 0;
     
     var sampleString = 'The lazy fox didn\'t complete the sentence';
     var sampleFontSize = {
@@ -40,6 +43,7 @@
       nonIntegral: 3.254746,
       nonIntegral2: 3.364746,
     }[mode];
+    var offsetMagnitude = 5;
     var sampleTranslation = 12.8365;
     var sampleRotation = Math.PI / 12;
     var sampleOffset = Math.floor( 14 * 1.254746 / sampleScale ); // vertical offset similar to text height
@@ -49,6 +53,24 @@
     var sins = Math.sin( sampleRotation ) * sampleScale;
     var cssFirst = 'matrix(' + sampleScale + ',' + 0 + ',' + 0 + ',' + sampleScale + ',' + sampleTranslation + ',' + sampleTranslation + ')';
     var cssSecond = 'matrix(' + coss + ',' + sins + ',' + (-sins) + ',' + coss + ',' + sampleTranslation + ',' + sampleTranslation * 2 + ')';
+    function firstOffsetX() {
+      return offsetMagnitude * Math.cos( timestamp );
+    }
+    function firstOffsetY() {
+      return offsetMagnitude * Math.sin( timestamp );
+    }
+    function secondOffsetX() {
+      return offsetMagnitude * Math.cos( 3 * timestamp );
+    }
+    function secondOffsetY() {
+      return offsetMagnitude * Math.sin( 3 * timestamp );
+    }
+    function cssFirstDynamic() {
+      return 'matrix(' + sampleScale + ',' + 0 + ',' + 0 + ',' + sampleScale + ',' + ( firstOffsetX() + sampleTranslation ) + ',' + ( firstOffsetY() + sampleTranslation ) + ')';
+    }
+    function cssSecondDynamic() {
+      return 'matrix(' + coss + ',' + sins + ',' + (-sins) + ',' + coss + ',' + ( secondOffsetX() + sampleTranslation ) + ',' + ( secondOffsetY() + sampleTranslation * 2 ) + ')';
+    }
     
     var sizeX = 400;
     var sizeY = 150;
@@ -86,6 +108,42 @@
       document.body.appendChild( div );
       increment();
     }
+    
+    var listeners = [];
+    (function polyfillRequestAnimationFrame() {
+      var lastTime = 0;
+      var vendors = [ 'ms', 'moz', 'webkit', 'o' ];
+      for ( var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x ) {
+        window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+        window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
+      }
+     
+      if ( !window.requestAnimationFrame ) {
+        window.requestAnimationFrame = function(callback) {
+          var currTime = new Date().getTime();
+          var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+          var id = window.setTimeout(function() { callback(currTime + timeToCall); },
+            timeToCall);
+          lastTime = currTime + timeToCall;
+          return id;
+        };
+      }
+     
+      if ( !window.cancelAnimationFrame ) {
+        window.cancelAnimationFrame = function(id) {
+          clearTimeout(id);
+        };
+      }
+    })();
+    window.requestAnimationFrame( function step( milliseconds ) {
+      if ( animating ) {
+        timestamp = milliseconds / 1000;
+        for ( var i = 0; i < listeners.length; i++ ) {
+          listeners[i]( timestamp ); // in seconds
+        }
+      }
+      window.requestAnimationFrame( step );
+    } );
     
     /*---------------------------------------------------------------------------*
     * DOM + CSS transforms
@@ -140,6 +198,10 @@
       document.body.appendChild( div );
       
       div.appendChild( domSquare() );
+      
+      listeners.push( function() {
+        cssTransform( div, cssFirstDynamic() );
+      } );
     })();
     
     (function(){
@@ -154,6 +216,10 @@
       document.body.appendChild( div );
       
       div.appendChild( domSquare() );
+      
+      listeners.push( function() {
+        cssTransform( div, cssSecondDynamic() );
+      } );
     })();
     
     mark( 'DOM' );
