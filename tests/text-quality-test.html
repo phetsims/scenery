@@ -16,7 +16,11 @@
   
   <script type="text/javascript">
     var mode = window.location.search ? window.location.search.slice( 1 ) : 'medium';
-    var animating = true;
+    var animating = false;
+    if ( mode[mode.length-1] === 's' ) {
+      animating = true;
+      mode = mode.substring( 0, mode.length - 1 );
+    }
     
     var timestamp = 0;
     
@@ -138,6 +142,11 @@
     window.requestAnimationFrame( function step( milliseconds ) {
       if ( animating ) {
         timestamp = milliseconds / 1000;
+        // if ( timestamp % 1 > 0.5 ) {
+        //   timestamp -= 0.5 - ( ( timestamp % 1 ) - 0.5 ) / 2;
+        // } else {
+        //   timestamp -= ( timestamp % 1 );
+        // }
         for ( var i = 0; i < listeners.length; i++ ) {
           listeners[i]( timestamp ); // in seconds
         }
@@ -254,22 +263,28 @@
         canvas.style.height = sizeY + 'px';
       }
       
-      context.fillStyle = 'black';
-      context.font = sampleFontStyle;
+      function drawItActually() {
+        context.fillStyle = 'black';
+        context.font = sampleFontStyle;
+        
+        context.setTransform( backingScale, 0, 0, backingScale, 0, 0 );
+        context.clearRect( 0, 0, canvas.width * 1000, canvas.height * 1000 ); // lazy right now
+        context.fillRect( squareX, squareY, 10, 10 );
+        context.fillText( sampleString, 0, sampleOffset );
+        
+        context.setTransform( backingScale, 0, 0, backingScale, 0, 0 );
+        context.transform( sampleScale, 0, 0, sampleScale, sampleTranslation + firstOffsetX(), sampleTranslation + firstOffsetY() );
+        context.fillRect( squareX, squareY, 10, 10 );
+        context.fillText( sampleString, 0, sampleOffset );
+        
+        context.setTransform( backingScale, 0, 0, backingScale, 0, 0 );
+        context.transform( coss, sins, -sins, coss, sampleTranslation + secondOffsetX(), sampleTranslation * 2 + secondOffsetY() );
+        context.fillRect( squareX, squareY, 10, 10 );
+        context.fillText( sampleString, 0, sampleOffset );
+      }
       
-      context.setTransform( backingScale, 0, 0, backingScale, 0, 0 );
-      context.fillRect( squareX, squareY, 10, 10 );
-      context.fillText( sampleString, 0, sampleOffset );
-      
-      context.setTransform( backingScale, 0, 0, backingScale, 0, 0 );
-      context.transform( sampleScale, 0, 0, sampleScale, sampleTranslation, sampleTranslation );
-      context.fillRect( squareX, squareY, 10, 10 );
-      context.fillText( sampleString, 0, sampleOffset );
-      
-      context.setTransform( backingScale, 0, 0, backingScale, 0, 0 );
-      context.transform( coss, sins, -sins, coss, sampleTranslation, sampleTranslation * 2 );
-      context.fillRect( squareX, squareY, 10, 10 );
-      context.fillText( sampleString, 0, sampleOffset );
+      drawItActually();
+      listeners.push( drawItActually );
       
       document.body.appendChild( canvas );
       var text = 'Canvas ' + backingScale + 'x';
@@ -334,6 +349,10 @@
         
         cssTransform( canvas, cssFirst );
         document.body.appendChild( canvas );
+        
+        listeners.push( function() {
+          cssTransform( canvas, cssFirstDynamic() );
+        } );
       })();
       
       (function(){
@@ -354,14 +373,18 @@
         
         cssTransform( canvas, cssSecond );
         document.body.appendChild( canvas );
+        
+        listeners.push( function() {
+          cssTransform( canvas, cssSecondDynamic() );
+        } );
       })();
       
       mark( 'Canvas ' + backingScale + 'x + CSS' );
     }
     
-    // canvasCSS( 1 );
-    // canvasCSS( 2 );
-    // canvasCSS( 3 );
+    canvasCSS( 1 );
+    canvasCSS( 2 );
+    canvasCSS( 3 );
     
     /*---------------------------------------------------------------------------*
     * SVG
@@ -412,16 +435,22 @@
       g.appendChild( svgSquare() );
       svg.appendChild( g );
       
-      g = document.createElementNS( svgns, 'g' );
+      var firstG = g = document.createElementNS( svgns, 'g' );
       g.setAttribute( 'transform', cssFirst );
+      listeners.push( function() {
+        firstG.setAttribute( 'transform', cssFirstDynamic() );
+      } );
       text = svgText( length, spacing );
       text.setAttribute( 'text-rendering', rendering );
       g.appendChild( text );
       g.appendChild( svgSquare() );
       svg.appendChild( g );
       
-      g = document.createElementNS( svgns, 'g' );
+      var secondG = g = document.createElementNS( svgns, 'g' );
       g.setAttribute( 'transform', cssSecond );
+      listeners.push( function() {
+        secondG.setAttribute( 'transform', cssSecondDynamic() );
+      } );
       text = svgText( length, spacing );
       text.setAttribute( 'text-rendering', rendering );
       g.appendChild( text );
@@ -432,14 +461,14 @@
       mark( 'SVG' + ( rendering ? ' ' + rendering : '' ) + ( length ? ' length: ' + length + ' ' + spacing : '' ) );
     }
     
-    // svgDraw( 'auto' );
-    // svgDraw( 'optimizeSpeed' );
-    // svgDraw( 'optimizeLegibility' );
+    svgDraw( 'auto' );
+    svgDraw( 'optimizeSpeed' );
+    svgDraw( 'optimizeLegibility' );
     svgDraw( 'geometricPrecision' );
-    // svgDraw( 'auto', textLength, 'spacing' );
-    // svgDraw( 'auto', textLength, 'spacingAndGlyphs' );
-    // svgDraw( 'geometricPrecision', textLength, 'spacing' );
-    svgDraw( 'geometricPrecision', textLength, 'spacingAndGlyphs' );
+    svgDraw( 'auto', textLength, 'spacing' );
+    svgDraw( 'auto', textLength, 'spacingAndGlyphs' );
+    svgDraw( 'geometricPrecision', textLength, 'spacing' );
+    svgDraw( 'geometricPrecision', textLength, 'spacingAndGlyphs' ); // NOTE: this was selected
     
     /*---------------------------------------------------------------------------*
     * SVG + CSS transforms
@@ -477,6 +506,10 @@
       
       cssTransform( svg, cssFirst );
       document.body.appendChild( svg );
+      
+      listeners.push( function() {
+        cssTransform( svg, cssFirstDynamic() );
+      } );
     })();
     
     (function(){
@@ -495,6 +528,10 @@
       
       cssTransform( svg, cssSecond );
       document.body.appendChild( svg );
+      
+      listeners.push( function() {
+        cssTransform( svg, cssSecondDynamic() );
+      } );
     })();
     
     mark( 'SVG + CSS' );
@@ -515,14 +552,14 @@
   </script>
   
   <div style="position: absolute; left: 840px; top: 160px;">
-    <a href="text-quality-test.html?extremeLow">extremeLow 1</a><br>
-    <a href="text-quality-test.html?veryLow">veryLow 3</a><br>
-    <a href="text-quality-test.html?low">low 6</a><br>
-    <a href="text-quality-test.html?nonIntegral">low 6.5</a><br>
-    <a href="text-quality-test.html?nonIntegral2">low 6 close</a><br>
-    <a href="text-quality-test.html?medium">medium 16</a><br>
-    <a href="text-quality-test.html?high">high 64</a><br>
-    <a href="text-quality-test.html?oneToOne">oneToOne 20</a><br>
+    <a href="text-quality-test.html?extremeLow">extremeLow 1</a> | <a href="text-quality-test.html?extremeLows">(anim)</a><br>
+    <a href="text-quality-test.html?veryLow">veryLow 3</a> | <a href="text-quality-test.html?veryLows">(anim)</a><br>
+    <a href="text-quality-test.html?low">low 6</a> | <a href="text-quality-test.html?lows">(anim)</a><br>
+    <a href="text-quality-test.html?nonIntegral">low 6.5</a> | <a href="text-quality-test.html?nonIntegrals">(anim)</a><br>
+    <a href="text-quality-test.html?nonIntegral2">low 6 close</a> | <a href="text-quality-test.html?nonIntegral2s">(anim)</a><br>
+    <a href="text-quality-test.html?medium">medium 16</a> | <a href="text-quality-test.html?mediums">(anim)</a><br>
+    <a href="text-quality-test.html?high">high 64</a> | <a href="text-quality-test.html?highs">(anim)</a><br>
+    <a href="text-quality-test.html?oneToOne">oneToOne 20</a> | <a href="text-quality-test.html?oneToOnes">(anim)</a><br>
   </div>
 </body>
 </html>
