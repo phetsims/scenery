@@ -583,7 +583,7 @@ define("almond", function(){});
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'ASSERT/assert',['require'],function( require ) {
+define( 'ASSERT/assert',[],function() {
   
   
   // CAUTION: if using the AST modifier for assertions, do not separate this out into its own 'assert' variable
@@ -635,6 +635,14 @@ define( 'PHET_CORE/core',['require','ASSERT/assert','ASSERT/assert'],function( r
 
 /**
  * Object instance allocation tracking, so we can cut down on garbage collection.
+ *
+ * Sample usage:
+ * 1. Run the sim and set up the scenario that you wish to profile
+ * 2. In the JS console, type: window.alloc={}
+ * 3. Wait until you have taken enough data
+ * 4. Type x = window.alloc; delete window.alloc;
+ *
+ * Now you can inspect the x variable which contains the allocation information.
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
@@ -707,6 +715,9 @@ define( 'SCENERY/scenery',['require','ASSERT/assert','ASSERT/assert','PHET_CORE/
     scratchCanvas: scratchCanvas,   // a canvas used for convenience functions (think of it as having arbitrary state)
     scratchContext: scratchContext, // a context used for convenience functions (think of it as having arbitrary state)
     
+    svgns: 'http://www.w3.org/2000/svg',     // svg namespace
+    xlinkns: 'http://www.w3.org/1999/xlink', // x-link namespace
+    
     enableLayerLogging: function() {
       window.sceneryLayerLog = function( ob ) { console.log( ob ); };
     },
@@ -729,7 +740,19 @@ define( 'SCENERY/scenery',['require','ASSERT/assert','ASSERT/assert','PHET_CORE/
   
     disableAccessibilityLogging: function() {
       window.sceneryAccessibilityLog = null;
-    }
+    },
+    
+    bitmaskAll:            0xFFFFFFF, // 28 bits for now (don't go over 31 bits, or we'll see a 32-bit platform slowdown!)
+    bitmaskNodeDefault:    0x00001FF,
+    bitmaskPaintedDefault: 0x0000000,
+    
+    bitmaskSupportsCanvas: 0x0000001,
+    bitmaskSupportsSVG:    0x0000002,
+    bitmaskSupportsDOM:    0x0000004,
+    bitmaskSupportsWebGL:  0x0000008,
+    // 10, 20, 40, 80 reserved for future renderers
+    bitmaskNotPainted:     0x0000100
+    // TODO: what else would we need?
   };
 } );
 
@@ -1261,38 +1284,6 @@ define( 'SCENERY/debug/DebugContext',['require','SCENERY/scenery'],function( req
 
 
 
-
-// Copyright 2002-2013, University of Colorado Boulder
-
-define( 'DOT/dot',['require','ASSERT/assert','ASSERT/assert','PHET_CORE/phetAllocation'],function( require ) {
-  
-  
-  window.assert = window.assert || require( 'ASSERT/assert' )( 'basic' );
-  window.assertSlow = window.assertSlow || require( 'ASSERT/assert' )( 'slow', true );
-  
-  // object allocation tracking
-  window.phetAllocation = require( 'PHET_CORE/phetAllocation' );
-  
-  var dot = function dot() {
-    switch ( arguments.length ) {
-      case 2:
-        return new dot.Vector2( arguments[0], arguments[1] );
-      case 3:
-        return new dot.Vector3( arguments[0], arguments[1], arguments[2] );
-      case 4:
-        return new dot.Vector4( arguments[0], arguments[1], arguments[2], arguments[3] );
-      default:
-        throw new Error( 'dot takes 2-4 arguments' );
-    }
-  };
-  
-  // TODO: performance: check browser speed to compare how fast this is. We may need to add a 32 option for GL ES.
-  dot.FastArray = window.Float64Array ? window.Float64Array : window.Array;
-  
-  // will be filled in by other modules
-  return dot;
-} );
-
 // Copyright 2002-2013, University of Colorado Boulder
 
 /**
@@ -1376,6 +1367,93 @@ define( 'PHET_CORE/inherit',['require','PHET_CORE/core','PHET_CORE/extend'],func
   };
 
   return inherit;
+} );
+
+// Copyright 2002-2013, University of Colorado
+
+/**
+ * A generic display block (TODO more docs once finished)
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'SCENERY/display/Block',['require','PHET_CORE/inherit','SCENERY/scenery'],function( require ) {
+  
+  
+  var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
+  
+  scenery.Block = function Block() {
+    
+  };
+  var Block = scenery.Block;
+  
+  inherit( Object, Block, {
+    
+  } );
+  
+  return Block;
+} );
+
+// Copyright 2002-2013, University of Colorado
+
+/**
+ * A "backbone" block that controls a DOM element (usually a div) that contains other blocks with DOM/SVG/Canvas/WebGL content
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'SCENERY/display/BackboneBlock',['require','PHET_CORE/inherit','SCENERY/scenery','SCENERY/display/Block'],function( require ) {
+  
+  
+  var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
+  var Block = require( 'SCENERY/display/Block' );
+  
+  scenery.BackboneBlock = function BackboneBlock() {
+    this._domElement = document.createElement( 'div' );
+  };
+  var BackboneBlock = scenery.BackboneBlock;
+  
+  inherit( Block, BackboneBlock, {
+    getDomElement: function() {
+      return this._domElement;
+    }
+  } );
+  
+  return BackboneBlock;
+} );
+
+
+// Copyright 2002-2013, University of Colorado Boulder
+
+define( 'DOT/dot',['require','ASSERT/assert','ASSERT/assert','PHET_CORE/phetAllocation'],function( require ) {
+  
+  
+  window.assert = window.assert || require( 'ASSERT/assert' )( 'basic' );
+  window.assertSlow = window.assertSlow || require( 'ASSERT/assert' )( 'slow', true );
+  
+  // object allocation tracking
+  window.phetAllocation = require( 'PHET_CORE/phetAllocation' );
+  
+  var dot = function dot() {
+    switch ( arguments.length ) {
+      case 2:
+        return new dot.Vector2( arguments[0], arguments[1] );
+      case 3:
+        return new dot.Vector3( arguments[0], arguments[1], arguments[2] );
+      case 4:
+        return new dot.Vector4( arguments[0], arguments[1], arguments[2], arguments[3] );
+      default:
+        throw new Error( 'dot takes 2-4 arguments' );
+    }
+  };
+  
+  // TODO: performance: check browser speed to compare how fast this is. We may need to add a 32 option for GL ES.
+  dot.FastArray = window.Float64Array ? window.Float64Array : window.Array;
+  
+  // will be filled in by other modules
+  return dot;
 } );
 
 // Copyright 2002-2013, University of Colorado
@@ -1658,7 +1736,6 @@ define( 'DOT/Util',['require','DOT/dot'],function( require ) {
       c /= a;
       d /= a;
       
-      var s, t;
       var q = ( 3.0 * c - ( b * b ) ) / 9;
       var r = ( -(27 * d) + b * (9 * c - 2 * (b * b)) ) / 54;
       var discriminant = q  * q  * q + r  * r;
@@ -1703,10 +1780,19 @@ define( 'DOT/Util',['require','DOT/dot'],function( require ) {
      * A predictable implementation of toFixed.
      * JavaScript's toFixed is notoriously buggy, behavior differs depending on browser,
      * because the spec doesn't specify whether to round or floor.
+     * @param {number} number
+     * @param {number} decimalPlaces
+     * @returns {string}
      */
     toFixed: function( number, decimalPlaces ) {
       var multiplier = Math.pow( 10, decimalPlaces );
-      return Math.round( number * multiplier ) / multiplier;
+      var value = Math.round( number * multiplier ) / multiplier;
+      return value.toFixed( decimalPlaces );
+    },
+
+    // Convenience for returning a number instead of a string.
+    toFixedNumber: function( number, decimalPlaces ) {
+      return parseFloat( Util.toFixed( number, decimalPlaces ) );
     },
 
     isInteger: function( number ) {
@@ -1770,7 +1856,27 @@ define( 'DOT/Util',['require','DOT/dot'],function( require ) {
      * @param b end point of a line segment
      * @returns {Number}
      */
-    distToSegment: function( point, a, b ) { return Math.sqrt( this.distToSegmentSquared( point, a, b ) ); }
+    distToSegment: function( point, a, b ) { return Math.sqrt( this.distToSegmentSquared( point, a, b ) ); },
+    
+    arePointsCollinear: function( a, b, c, epsilon ) {
+      if ( epsilon === undefined ) {
+        epsilon = 0;
+      }
+      return Util.triangleArea( a, b, c ) <= epsilon;
+    },
+    
+    triangleArea: function( a, b, c ) {
+      return Math.abs( Util.triangleAreaSigned( a, b, c ) );
+    },
+    
+    // TODO: investigate which way we want the sign (Canvas or WebGL style)
+    triangleAreaSigned: function( a, b, c ) {
+      return a.x * ( b.y - c.y ) + b.x * ( c.y - a.y ) + c.x * ( a.y - b.y );
+    },
+
+    log10: function( val ) {
+      return Math.log( val ) / Math.LN10;
+    }
   };
   var Util = dot.Util;
   
@@ -1824,14 +1930,12 @@ define( 'DOT/Vector2',['require','DOT/dot','PHET_CORE/inherit','PHET_CORE/Poolab
   var Vector2 = dot.Vector2;
   
   Vector2.createPolar = function( magnitude, angle ) {
-    return new Vector2( magnitude * Math.cos( angle ), magnitude * Math.sin( angle ) );
+    return new Vector2().setPolar( magnitude, angle );
   };
   
   Vector2.prototype = {
     constructor: Vector2,
-    
     isVector2: true,
-    
     dimension: 2,
     
     magnitude: function() {
@@ -1860,9 +1964,20 @@ define( 'DOT/Vector2',['require','DOT/dot','PHET_CORE/inherit','PHET_CORE/Poolab
       var dy = this.y - point.y;
       return dx * dx + dy * dy;
     },
+
+    // the squared distance between this vector (treated as a point) and another point as (x,y)
+    distanceSquaredXY: function( x, y ) {
+      var dx = this.x - x;
+      var dy = this.y - y;
+      return dx * dx + dy * dy ;
+    },
     
     dot: function( v ) {
       return this.x * v.x + this.y * v.y;
+    },
+
+    dotXY: function( vx, vy ) {
+      return this.x * vx + this.y * vy;
     },
     
     equals: function( other ) {
@@ -1884,8 +1999,13 @@ define( 'DOT/Vector2',['require','DOT/dot','PHET_CORE/inherit','PHET_CORE/Poolab
      * Immutables
      *----------------------------------------------------------------------------*/
     
-    copy: function() {
-      return new Vector2( this.x, this.y );
+    // create a copy, or if a vector is passed in, set that vector to our value
+    copy: function( vector ) {
+      if ( vector ) {
+        return vector.set( this );
+      } else {
+        return new Vector2( this.x, this.y );
+      }
     },
     
     // z component of the equivalent 3-dimensional cross product (this.x, this.y,0) x (v.x, v.y, 0)
@@ -1931,6 +2051,10 @@ define( 'DOT/Vector2',['require','DOT/dot','PHET_CORE/inherit','PHET_CORE/Poolab
     minus: function( v ) {
       return new Vector2( this.x - v.x, this.y - v.y );
     },
+
+    minusXY: function( x,y ) {
+      return new Vector2( this.x - x, this.y - y );
+    },
     
     minusScalar: function( scalar ) {
       return new Vector2( this.x - scalar, this.y - scalar );
@@ -1970,8 +2094,13 @@ define( 'DOT/Vector2',['require','DOT/dot','PHET_CORE/inherit','PHET_CORE/Poolab
       return new Vector2( this.x + (vector.x - this.x) * ratio, this.y + (vector.y - this.y) * ratio );
     },
     
+    // average position between this and the provided vector
+    average: function( vector ) {
+      return this.blend( vector, 0.5 );
+    },
+    
     toString: function() {
-      return "Vector2(" + this.x + ", " + this.y + ")";
+      return 'Vector2(' + this.x + ', ' + this.y + ')';
     },
     
     toVector3: function() {
@@ -1982,57 +2111,53 @@ define( 'DOT/Vector2',['require','DOT/dot','PHET_CORE/inherit','PHET_CORE/Poolab
      * Mutables
      *----------------------------------------------------------------------------*/
     
-    set: function( x, y ) {
+    // our core three functions which all mutation should go through
+    setXY: function( x, y ) {
       this.x = x;
       this.y = y;
       return this;
     },
-    
-    
-    setVector2: function( v ) {
-      this.x = v.x;
-      this.y = v.y;
-      return this;
-    },
-    
     setX: function( x ) {
       this.x = x;
       return this;
     },
-    
     setY: function( y ) {
       this.y = y;
       return this;
     },
     
+    set: function( v ) {
+      return this.setXY( v.x, v.y );
+    },
+
+    //Sets the magnitude of the vector, keeping the same direction (though a negative magnitude will flip the vector direction)
+    setMagnitude: function( m ) {
+      var scale = m / this.magnitude();
+      return this.multiplyScalar( scale );
+    },
+    
     add: function( v ) {
-      this.x += v.x;
-      this.y += v.y;
-      return this;
+      return this.setXY( this.x + v.x, this.y + v.y );
+    },
+
+    addXY: function( x, y ) {
+      return this.setXY( this.x + x, this.y + y );
     },
     
     addScalar: function( scalar ) {
-      this.x += scalar;
-      this.y += scalar;
-      return this;
+      return this.setXY( this.x + scalar, this.y + scalar );
     },
     
     subtract: function( v ) {
-      this.x -= v.x;
-      this.y -= v.y;
-      return this;
+      return this.setXY( this.x - v.x, this.y - v.y );
     },
     
     subtractScalar: function( scalar ) {
-      this.x -= scalar;
-      this.y -= scalar;
-      return this;
+      return this.setXY( this.x - scalar, this.y - scalar );
     },
     
     multiplyScalar: function( scalar ) {
-      this.x *= scalar;
-      this.y *= scalar;
-      return this;
+      return this.setXY( this.x * scalar, this.y * scalar );
     },
     
     multiply: function( scalar ) {
@@ -2042,21 +2167,15 @@ define( 'DOT/Vector2',['require','DOT/dot','PHET_CORE/inherit','PHET_CORE/Poolab
     },
     
     componentMultiply: function( v ) {
-      this.x *= v.x;
-      this.y *= v.y;
-      return this;
+      return this.setXY( this.x * v.x, this.y * v.y );
     },
     
     divideScalar: function( scalar ) {
-      this.x /= scalar;
-      this.y /= scalar;
-      return this;
+      return this.setXY( this.x / scalar, this.y / scalar );
     },
     
     negate: function() {
-      this.x = -this.x;
-      this.y = -this.y;
-      return this;
+      return this.setXY( -this.x, -this.y );
     },
     
     normalize: function() {
@@ -2064,10 +2183,12 @@ define( 'DOT/Vector2',['require','DOT/dot','PHET_CORE/inherit','PHET_CORE/Poolab
       if ( mag === 0 ) {
         throw new Error( "Cannot normalize a zero-magnitude vector" );
       } else {
-        this.x /= mag;
-        this.y /= mag;
+        return this.divideScalar( mag );
       }
-      return this;
+    },
+    
+    setPolar: function( magnitude, angle ) {
+      return this.setXY( magnitude * Math.cos( angle ), magnitude * Math.sin( angle ) );
     }
     
   };
@@ -2079,7 +2200,7 @@ define( 'DOT/Vector2',['require','DOT/dot','PHET_CORE/inherit','PHET_CORE/Poolab
     constructorDuplicateFactory: function( pool ) {
       return function( x, y ) {
         if ( pool.length ) {
-          return pool.pop().set( x, y );
+          return pool.pop().setXY( x, y );
         } else {
           return new Vector2( x, y );
         }
@@ -2105,16 +2226,9 @@ define( 'DOT/Vector2',['require','DOT/dot','PHET_CORE/inherit','PHET_CORE/Poolab
   };
   
   // TODO: better way to handle this list?
-  Immutable.mutableOverrideHelper( 'set' );
+  Immutable.mutableOverrideHelper( 'setXY' );
   Immutable.mutableOverrideHelper( 'setX' );
   Immutable.mutableOverrideHelper( 'setY' );
-  Immutable.mutableOverrideHelper( 'add' );
-  Immutable.mutableOverrideHelper( 'addScalar' );
-  Immutable.mutableOverrideHelper( 'subtract' );
-  Immutable.mutableOverrideHelper( 'subtractScalar' );
-  Immutable.mutableOverrideHelper( 'componentMultiply' );
-  Immutable.mutableOverrideHelper( 'divideScalar' );
-  Immutable.mutableOverrideHelper( 'negate' );
   
   // helpful immutable constants
   Vector2.ZERO = new Immutable( 0, 0 );
@@ -2154,6 +2268,8 @@ define( 'DOT/Vector4',['require','DOT/dot','DOT/Util'],function( require ) {
   
   Vector4.prototype = {
     constructor: Vector4,
+    isVector4: true,
+    dimension: 4,
 
     magnitude: function() {
       return Math.sqrt( this.magnitudeSquared() );
@@ -2180,11 +2296,31 @@ define( 'DOT/Vector4',['require','DOT/dot','DOT/Util'],function( require ) {
     isFinite: function() {
       return isFinite( this.x ) && isFinite( this.y ) && isFinite( this.z ) && isFinite( this.w );
     },
+    
+    equals: function( other ) {
+      return this.x === other.x && this.y === other.y && this.z === other.z && this.w === other.w;
+    },
+    
+    equalsEpsilon: function( other, epsilon ) {
+      if ( !epsilon ) {
+        epsilon = 0;
+      }
+      return Math.abs( this.x - other.x ) + Math.abs( this.y - other.y ) + Math.abs( this.z - other.z ) + Math.abs( this.w - other.w ) <= epsilon;
+    },
 
     /*---------------------------------------------------------------------------*
      * Immutables
      *----------------------------------------------------------------------------*/
-
+    
+    // create a copy, or if a vector is passed in, set that vector to our value
+    copy: function( vector ) {
+      if ( vector ) {
+        return vector.set( this );
+      } else {
+        return new Vector4( this.x, this.y, this.z, this.w );
+      }
+    },
+    
     normalized: function() {
       var mag = this.magnitude();
       if ( mag === 0 ) {
@@ -2241,6 +2377,11 @@ define( 'DOT/Vector4',['require','DOT/dot','DOT/Util'],function( require ) {
     blend: function( vector, ratio ) {
       return this.plus( vector.minus( this ).times( ratio ) );
     },
+    
+    // average position between this and the provided vector
+    average: function( vector ) {
+      return this.blend( vector, 0.5 );
+    },
 
     toString: function() {
       return "Vector4(" + this.x + ", " + this.y + ", " + this.z + ", " + this.w + ")";
@@ -2253,71 +2394,54 @@ define( 'DOT/Vector4',['require','DOT/dot','DOT/Util'],function( require ) {
     /*---------------------------------------------------------------------------*
      * Mutables
      *----------------------------------------------------------------------------*/
-
-    set: function( x, y, z, w ) {
+    
+    // our core mutables (all mutation should go through these)
+    setXYZW: function( x, y, z, w ) {
       this.x = x;
       this.y = y;
       this.z = z;
       this.w = w;
+      return this;
     },
-
     setX: function( x ) {
       this.x = x;
+      return this;
     },
-
     setY: function( y ) {
       this.y = y;
+      return this;
     },
-
     setZ: function( z ) {
       this.z = z;
+      return this;
     },
-
     setW: function( w ) {
       this.w = w;
+      return this;
     },
-
-    copy: function( v ) {
-      this.x = v.x;
-      this.y = v.y;
-      this.z = v.z;
-      this.w = v.w;
+    
+    set: function( v ) {
+      return this.setXYZW( v.x, v.y, v.z, v.w );
     },
 
     add: function( v ) {
-      this.x += v.x;
-      this.y += v.y;
-      this.z += v.z;
-      this.w += v.w;
+      return this.setXYZW( this.x + v.x, this.y + v.y, this.z + v.z, this.w + v.w );
     },
 
     addScalar: function( scalar ) {
-      this.x += scalar;
-      this.y += scalar;
-      this.z += scalar;
-      this.w += scalar;
+      return this.setXYZW( this.x + scalar, this.y + scalar, this.z + scalar, this.w + scalar );
     },
 
     subtract: function( v ) {
-      this.x -= v.x;
-      this.y -= v.y;
-      this.z -= v.z;
-      this.w -= v.w;
+      return this.setXYZW( this.x - v.x, this.y - v.y, this.z - v.z, this.w - v.w );
     },
 
     subtractScalar: function( scalar ) {
-      this.x -= scalar;
-      this.y -= scalar;
-      this.z -= scalar;
-      this.w -= scalar;
+      return this.setXYZW( this.x - scalar, this.y - scalar, this.z - scalar, this.w - scalar );
     },
     
     multiplyScalar: function( scalar ) {
-      this.x *= scalar;
-      this.y *= scalar;
-      this.z *= scalar;
-      this.w *= scalar;
-      return this;
+      return this.setXYZW( this.x * scalar, this.y * scalar, this.z * scalar, this.w * scalar );
     },
     
     multiply: function( scalar ) {
@@ -2327,24 +2451,15 @@ define( 'DOT/Vector4',['require','DOT/dot','DOT/Util'],function( require ) {
     },
 
     componentMultiply: function( v ) {
-      this.x *= v.x;
-      this.y *= v.y;
-      this.z *= v.z;
-      this.w *= v.w;
+      return this.setXYZW( this.x * v.x, this.y * v.y, this.z * v.z, this.w * v.w );
     },
 
     divideScalar: function( scalar ) {
-      this.x /= scalar;
-      this.y /= scalar;
-      this.z /= scalar;
-      this.w /= scalar;
+      return this.setXYZW( this.x / scalar, this.y / scalar, this.z / scalar, this.w / scalar );
     },
 
     negate: function() {
-      this.x = -this.x;
-      this.y = -this.y;
-      this.z = -this.z;
-      this.w = -this.w;
+      return this.setXYZW( -this.x, -this.y, -this.z, -this.w );
     },
     
     normalize: function() {
@@ -2352,29 +2467,10 @@ define( 'DOT/Vector4',['require','DOT/dot','DOT/Util'],function( require ) {
       if ( mag === 0 ) {
         throw new Error( "Cannot normalize a zero-magnitude vector" );
       } else {
-        this.x /= mag;
-        this.y /= mag;
-        this.z /= mag;
-        this.w /= mag;
+        return this.divideScalar( mag );
       }
       return this;
-    },
-    
-    equals: function( other ) {
-      return this.x === other.x && this.y === other.y && this.z === other.z && this.w === other.w;
-    },
-    
-    equalsEpsilon: function( other, epsilon ) {
-      if ( !epsilon ) {
-        epsilon = 0;
-      }
-      return Math.abs( this.x - other.x ) + Math.abs( this.y - other.y ) + Math.abs( this.z - other.z ) + Math.abs( this.w - other.w ) <= epsilon;
-    },
-
-    isVector4: true,
-
-    dimension: 4
-
+    }
   };
 
   /*---------------------------------------------------------------------------*
@@ -2399,19 +2495,11 @@ define( 'DOT/Vector4',['require','DOT/dot','DOT/Util'],function( require ) {
   };
 
   // TODO: better way to handle this list?
-  Immutable.mutableOverrideHelper( 'set' );
+  Immutable.mutableOverrideHelper( 'setXYZW' );
   Immutable.mutableOverrideHelper( 'setX' );
   Immutable.mutableOverrideHelper( 'setY' );
   Immutable.mutableOverrideHelper( 'setZ' );
   Immutable.mutableOverrideHelper( 'setW' );
-  Immutable.mutableOverrideHelper( 'copy' );
-  Immutable.mutableOverrideHelper( 'add' );
-  Immutable.mutableOverrideHelper( 'addScalar' );
-  Immutable.mutableOverrideHelper( 'subtract' );
-  Immutable.mutableOverrideHelper( 'subtractScalar' );
-  Immutable.mutableOverrideHelper( 'componentMultiply' );
-  Immutable.mutableOverrideHelper( 'divideScalar' );
-  Immutable.mutableOverrideHelper( 'negate' );
 
   // helpful immutable constants
   Vector4.ZERO = new Immutable( 0, 0, 0, 0 );
@@ -2452,6 +2540,8 @@ define( 'DOT/Vector3',['require','DOT/dot','DOT/Util','DOT/Vector2','DOT/Vector4
 
   Vector3.prototype = {
     constructor: Vector3,
+    isVector3: true,
+    dimension: 3,
 
     magnitude: function() {
       return Math.sqrt( this.magnitudeSquared() );
@@ -2478,10 +2568,30 @@ define( 'DOT/Vector3',['require','DOT/dot','DOT/Util','DOT/Vector2','DOT/Vector4
     isFinite: function() {
       return isFinite( this.x ) && isFinite( this.y ) && isFinite( this.z );
     },
+    
+    equals: function( other ) {
+      return this.x === other.x && this.y === other.y && this.z === other.z;
+    },
+    
+    equalsEpsilon: function( other, epsilon ) {
+      if ( !epsilon ) {
+        epsilon = 0;
+      }
+      return Math.abs( this.x - other.x ) + Math.abs( this.y - other.y ) + Math.abs( this.z - other.z ) <= epsilon;
+    },
 
     /*---------------------------------------------------------------------------*
      * Immutables
      *----------------------------------------------------------------------------*/
+    
+    // create a copy, or if a vector is passed in, set that vector to our value
+    copy: function( vector ) {
+      if ( vector ) {
+        return vector.set( this );
+      } else {
+        return new Vector3( this.x, this.y, this.z );
+      }
+    },
 
     cross: function( v ) {
       return new Vector3(
@@ -2547,6 +2657,11 @@ define( 'DOT/Vector3',['require','DOT/dot','DOT/Util','DOT/Vector2','DOT/Vector4
     blend: function( vector, ratio ) {
       return this.plus( vector.minus( this ).times( ratio ) );
     },
+    
+    // average position between this and the provided vector
+    average: function( vector ) {
+      return this.blend( vector, 0.5 );
+    },
 
     toString: function() {
       return "Vector3(" + this.x + ", " + this.y + ", " + this.z + ")";
@@ -2563,60 +2678,49 @@ define( 'DOT/Vector3',['require','DOT/dot','DOT/Util','DOT/Vector2','DOT/Vector4
     /*---------------------------------------------------------------------------*
      * Mutables
      *----------------------------------------------------------------------------*/
-
-    set: function( x, y, z ) {
+    
+    // our core mutables, all mutation should go through these
+    setXYZ: function( x, y, z ) {
       this.x = x;
       this.y = y;
       this.z = z;
+      return this;
     },
-
     setX: function( x ) {
       this.x = x;
+      return this;
     },
-
     setY: function( y ) {
       this.y = y;
+      return this;
     },
-
     setZ: function( z ) {
       this.z = z;
+      return this;
     },
-
-    copy: function( v ) {
-      this.x = v.x;
-      this.y = v.y;
-      this.z = v.z;
+    
+    set: function( v ) {
+      return this.setXYZ( v.x, v.y, v.z );
     },
 
     add: function( v ) {
-      this.x += v.x;
-      this.y += v.y;
-      this.z += v.z;
+      return this.setXYZ( this.x + v.x, this.y + v.y, this.z + v.z );
     },
 
     addScalar: function( scalar ) {
-      this.x += scalar;
-      this.y += scalar;
-      this.z += scalar;
+      return this.setXYZ( this.x + scalar, this.y + scalar, this.z + scalar );
     },
 
     subtract: function( v ) {
-      this.x -= v.x;
-      this.y -= v.y;
-      this.z -= v.z;
+      return this.setXYZ( this.x - v.x, this.y - v.y, this.z - v.z );
     },
 
     subtractScalar: function( scalar ) {
-      this.x -= scalar;
-      this.y -= scalar;
-      this.z -= scalar;
+      return this.setXYZ( this.x - scalar, this.y - scalar, this.z - scalar );
     },
     
     multiplyScalar: function( scalar ) {
-      this.x *= scalar;
-      this.y *= scalar;
-      this.z *= scalar;
-      return this;
+      return this.setXYZ( this.x * scalar, this.y * scalar, this.z * scalar );
     },
     
     multiply: function( scalar ) {
@@ -2626,21 +2730,15 @@ define( 'DOT/Vector3',['require','DOT/dot','DOT/Util','DOT/Vector2','DOT/Vector4
     },
 
     componentMultiply: function( v ) {
-      this.x *= v.x;
-      this.y *= v.y;
-      this.z *= v.z;
+      return this.setXYZ( this.x * v.x, this.y * v.y, this.z * v.z );
     },
 
     divideScalar: function( scalar ) {
-      this.x /= scalar;
-      this.y /= scalar;
-      this.z /= scalar;
+      return this.setXYZ( this.x / scalar, this.y / scalar, this.z / scalar );
     },
 
     negate: function() {
-      this.x = -this.x;
-      this.y = -this.y;
-      this.z = -this.z;
+      return this.setXYZ( -this.x, -this.y, -this.z );
     },
     
     normalize: function() {
@@ -2648,28 +2746,9 @@ define( 'DOT/Vector3',['require','DOT/dot','DOT/Util','DOT/Vector2','DOT/Vector4
       if ( mag === 0 ) {
         throw new Error( "Cannot normalize a zero-magnitude vector" );
       } else {
-        this.x /= mag;
-        this.y /= mag;
-        this.z /= mag;
+        return this.divideScalar( mag );
       }
-      return this;
-    },
-    
-    equals: function( other ) {
-      return this.x === other.x && this.y === other.y && this.z === other.z;
-    },
-    
-    equalsEpsilon: function( other, epsilon ) {
-      if ( !epsilon ) {
-        epsilon = 0;
-      }
-      return Math.abs( this.x - other.x ) + Math.abs( this.y - other.y ) + Math.abs( this.z - other.z ) <= epsilon;
-    },
-
-    isVector3: true,
-
-    dimension: 3
-
+    }
   };
 
   /*---------------------------------------------------------------------------*
@@ -2693,18 +2772,10 @@ define( 'DOT/Vector3',['require','DOT/dot','DOT/Util','DOT/Vector2','DOT/Vector4
   };
 
   // TODO: better way to handle this list?
-  Immutable.mutableOverrideHelper( 'set' );
+  Immutable.mutableOverrideHelper( 'setXYZ' );
   Immutable.mutableOverrideHelper( 'setX' );
   Immutable.mutableOverrideHelper( 'setY' );
   Immutable.mutableOverrideHelper( 'setZ' );
-  Immutable.mutableOverrideHelper( 'copy' );
-  Immutable.mutableOverrideHelper( 'add' );
-  Immutable.mutableOverrideHelper( 'addScalar' );
-  Immutable.mutableOverrideHelper( 'subtract' );
-  Immutable.mutableOverrideHelper( 'subtractScalar' );
-  Immutable.mutableOverrideHelper( 'componentMultiply' );
-  Immutable.mutableOverrideHelper( 'divideScalar' );
-  Immutable.mutableOverrideHelper( 'negate' );
 
   // helpful immutable constants
   Vector3.ZERO = new Immutable( 0, 0, 0 );
@@ -3238,10 +3309,12 @@ define( 'DOT/Matrix4',['require','DOT/dot','DOT/Vector3','DOT/Vector4'],function
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'DOT/Matrix3',['require','DOT/dot','DOT/Vector2','DOT/Vector3','DOT/Matrix4'],function( require ) {
+define( 'DOT/Matrix3',['require','DOT/dot','PHET_CORE/Poolable','PHET_CORE/inherit','DOT/Vector2','DOT/Vector3','DOT/Matrix4'],function( require ) {
   
   
   var dot = require( 'DOT/dot' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
+  var inherit = require( 'PHET_CORE/inherit' );
   
   var FastArray = dot.FastArray;
   
@@ -3262,6 +3335,15 @@ define( 'DOT/Matrix3',['require','DOT/dot','DOT/Vector2','DOT/Vector3','DOT/Matr
     phetAllocation && phetAllocation( 'Matrix3' );
   };
   var Matrix3 = dot.Matrix3;
+  
+  // a variety of constructing a matrix without calling rowMajor and executing a lot of tests (built for initialization speed with mutators)
+  dot.FastMatrix3 = function FastMatrix3() {
+    // not initialized, so it is faster
+    this.entries = new FastArray( 9 );
+    
+    phetAllocation && phetAllocation( 'Matrix3' );
+  };
+  var FastMatrix3 = dot.FastMatrix3;
 
   Matrix3.Types = {
     // NOTE: if an inverted matrix of a type is not that type, change inverted()!
@@ -3278,170 +3360,36 @@ define( 'DOT/Matrix3',['require','DOT/dot','DOT/Vector2','DOT/Vector3','DOT/Matr
 
   var Types = Matrix3.Types;
 
-  Matrix3.identity = function() {
-    return new Matrix3( 1, 0, 0,
-                        0, 1, 0,
-                        0, 0, 1,
-                        Types.IDENTITY );
-  };
-
-  Matrix3.translation = function( x, y ) {
-    return new Matrix3( 1, 0, x,
-                        0, 1, y,
-                        0, 0, 1,
-                        Types.TRANSLATION_2D );
-  };
-
+  Matrix3.identity = function() { return FastMatrix3.dirtyFromPool().setToIdentity(); };
+  Matrix3.translation = function( x, y ) { return FastMatrix3.dirtyFromPool().setToTranslation( x, y ); };
   Matrix3.translationFromVector = function( v ) { return Matrix3.translation( v.x, v.y ); };
-
-  Matrix3.scaling = function( x, y ) {
-    // allow using one parameter to scale everything
-    y = y === undefined ? x : y;
-
-    return new Matrix3( x, 0, 0,
-                        0, y, 0,
-                        0, 0, 1,
-                        Types.SCALING );
-  };
+  Matrix3.scaling = function( x, y ) { return FastMatrix3.dirtyFromPool().setToScale( x, y ); };
   Matrix3.scale = Matrix3.scaling;
-  
-  Matrix3.affine = function( m00, m10, m01, m11, m02, m12 ) {
-    return new Matrix3( m00, m01, m02, m10, m11, m12, 0, 0, 1, Types.AFFINE );
-  };
+  Matrix3.affine = function( m00, m10, m01, m11, m02, m12 ) { return FastMatrix3.dirtyFromPool().setToAffine( m00, m01, m02, m10, m11, m12 ); };
+  Matrix3.rowMajor = function( v00, v01, v02, v10, v11, v12, v20, v21, v22, type ) { return FastMatrix3.dirtyFromPool().rowMajor( v00, v01, v02, v10, v11, v12, v20, v21, v22, type ); };
 
   // axis is a normalized Vector3, angle in radians.
-  Matrix3.rotationAxisAngle = function( axis, angle ) {
-    var c = Math.cos( angle );
-    var s = Math.sin( angle );
-    var C = 1 - c;
-
-    return new Matrix3( axis.x * axis.x * C + c, axis.x * axis.y * C - axis.z * s, axis.x * axis.z * C + axis.y * s,
-                        axis.y * axis.x * C + axis.z * s, axis.y * axis.y * C + c, axis.y * axis.z * C - axis.x * s,
-                        axis.z * axis.x * C - axis.y * s, axis.z * axis.y * C + axis.x * s, axis.z * axis.z * C + c,
-                        Types.OTHER );
-  };
-
-  // TODO: add in rotation from quaternion, and from quat + translation
-
-  Matrix3.rotationX = function( angle ) {
-    var c = Math.cos( angle );
-    var s = Math.sin( angle );
-
-    return new Matrix3( 1, 0, 0,
-                        0, c, -s,
-                        0, s, c,
-                        Types.OTHER );
-  };
-
-  Matrix3.rotationY = function( angle ) {
-    var c = Math.cos( angle );
-    var s = Math.sin( angle );
-
-    return new Matrix3( c, 0, s,
-                        0, 1, 0,
-                        -s, 0, c,
-                        Types.OTHER );
-  };
-
-  Matrix3.rotationZ = function( angle ) {
-    var c = Math.cos( angle );
-    var s = Math.sin( angle );
-
-    return new Matrix3( c, -s, 0,
-                        s, c, 0,
-                        0, 0, 1,
-                        Types.AFFINE );
-  };
+  Matrix3.rotationAxisAngle = function( axis, angle ) { return FastMatrix3.dirtyFromPool().setToRotationAxisAngle( axis, angle ); };
+  
+  Matrix3.rotationX = function( angle ) { return FastMatrix3.dirtyFromPool().setToRotationX( angle ); };
+  Matrix3.rotationY = function( angle ) { return FastMatrix3.dirtyFromPool().setToRotationY( angle ); };
+  Matrix3.rotationZ = function( angle ) { return FastMatrix3.dirtyFromPool().setToRotationZ( angle ); };
   
   // standard 2d rotation
   Matrix3.rotation2 = Matrix3.rotationZ;
   
-  Matrix3.fromSVGMatrix = function( svgMatrix ) {
-    return new Matrix3( svgMatrix.a, svgMatrix.c, svgMatrix.e,
-                        svgMatrix.b, svgMatrix.d, svgMatrix.f,
-                        0, 0, 1,
-                        Types.AFFINE );
+  Matrix3.rotationAround = function( angle, x, y ) {
+    return Matrix3.translation( x, y ).timesMatrix( Matrix3.rotation2( angle ) ).timesMatrix( Matrix3.translation( -x, -y ) );
   };
+  
+  Matrix3.rotationAroundPoint = function( angle, point ) {
+    return Matrix3.rotationAround( angle, point.x, point.y );
+  };
+  
+  Matrix3.fromSVGMatrix = function( svgMatrix ) { return FastMatrix3.dirtyFromPool().setToSVGMatrix( svgMatrix ); };
 
   // a rotation matrix that rotates A to B, by rotating about the axis A.cross( B ) -- Shortest path. ideally should be unit vectors
-  Matrix3.rotateAToB = function( a, b ) {
-    // see http://graphics.cs.brown.edu/~jfh/papers/Moller-EBA-1999/paper.pdf for information on this implementation
-    var start = a;
-    var end = b;
-
-    var epsilon = 0.0001;
-
-    var e, h, f;
-
-    var v = start.cross( end );
-    e = start.dot( end );
-    f = ( e < 0 ) ? -e : e;
-
-    // if "from" and "to" vectors are nearly parallel
-    if ( f > 1.0 - epsilon ) {
-      var c1, c2, c3;
-      /* coefficients for later use */
-      var i, j;
-
-      var x = new dot.Vector3(
-        ( start.x > 0.0 ) ? start.x : -start.x,
-        ( start.y > 0.0 ) ? start.y : -start.y,
-        ( start.z > 0.0 ) ? start.z : -start.z
-      );
-
-      if ( x.x < x.y ) {
-        if ( x.x < x.z ) {
-          x = dot.Vector3.X_UNIT;
-        }
-        else {
-          x = dot.Vector3.Z_UNIT;
-        }
-      }
-      else {
-        if ( x.y < x.z ) {
-          x = dot.Vector3.Y_UNIT;
-        }
-        else {
-          x = dot.Vector3.Z_UNIT;
-        }
-      }
-
-      var u = x.minus( start );
-      v = x.minus( end );
-
-      c1 = 2.0 / u.dot( u );
-      c2 = 2.0 / v.dot( v );
-      c3 = c1 * c2 * u.dot( v );
-
-      return Matrix3.IDENTITY.plus( Matrix3.rowMajor(
-        -c1 * u.x * u.x - c2 * v.x * v.x + c3 * v.x * u.x,
-        -c1 * u.x * u.y - c2 * v.x * v.y + c3 * v.x * u.y,
-        -c1 * u.x * u.z - c2 * v.x * v.z + c3 * v.x * u.z,
-        -c1 * u.y * u.x - c2 * v.y * v.x + c3 * v.y * u.x,
-        -c1 * u.y * u.y - c2 * v.y * v.y + c3 * v.y * u.y,
-        -c1 * u.y * u.z - c2 * v.y * v.z + c3 * v.y * u.z,
-        -c1 * u.z * u.x - c2 * v.z * v.x + c3 * v.z * u.x,
-        -c1 * u.z * u.y - c2 * v.z * v.y + c3 * v.z * u.y,
-        -c1 * u.z * u.z - c2 * v.z * v.z + c3 * v.z * u.z
-      ) );
-    }
-    else {
-      // the most common case, unless "start"="end", or "start"=-"end"
-      var hvx, hvz, hvxy, hvxz, hvyz;
-      h = 1.0 / ( 1.0 + e );
-      hvx = h * v.x;
-      hvz = h * v.z;
-      hvxy = hvx * v.y;
-      hvxz = hvx * v.z;
-      hvyz = hvz * v.y;
-
-      return Matrix3.rowMajor(
-        e + hvx * v.x, hvxy - v.z, hvxz + v.y,
-        hvxy + v.z, e + h * v.y * v.y, hvyz - v.x,
-        hvxz - v.y, hvyz + v.x, e + hvz * v.z
-      );
-    }
-  };
+  Matrix3.rotateAToB = function( a, b ) { return FastMatrix3.dirtyFromPool().setRotationAToB( a, b ); };
 
   Matrix3.prototype = {
     constructor: Matrix3,
@@ -3702,7 +3650,7 @@ define( 'DOT/Matrix3',['require','DOT/dot','DOT/Vector2','DOT/Vector3','DOT/Matr
     },
     
     timesMatrix: function( m ) {
-      // I * M === M * I === I (the identity)
+      // I * M === M * I === M (the identity)
       if( this.type === Types.IDENTITY || m.type === Types.IDENTITY ) {
         return this.type === Types.IDENTITY ? m : this;
       }
@@ -3781,26 +3729,7 @@ define( 'DOT/Matrix3',['require','DOT/dot','DOT/Vector2','DOT/Vector3','DOT/Matr
     * Mutable operations (changes this matrix)
     *----------------------------------------------------------------------------*/
     
-    set: function( matrix ) {
-      this.entries[0] = matrix.entries[0];
-      this.entries[1] = matrix.entries[1];
-      this.entries[2] = matrix.entries[2];
-      this.entries[3] = matrix.entries[3];
-      this.entries[4] = matrix.entries[4];
-      this.entries[5] = matrix.entries[5];
-      this.entries[6] = matrix.entries[6];
-      this.entries[7] = matrix.entries[7];
-      this.entries[8] = matrix.entries[8];
-      this.type = matrix.type;
-    },
-    
-    makeImmutable: function() {
-      this.rowMajor = function() {
-        throw new Error( 'Cannot modify immutable matrix' );
-      };
-      return this;
-    },
-    
+    // every mutable method goes through rowMajor
     rowMajor: function( v00, v01, v02, v10, v11, v12, v20, v21, v22, type ) {
       this.entries[0] = v00;
       this.entries[1] = v10;
@@ -3814,6 +3743,20 @@ define( 'DOT/Matrix3',['require','DOT/dot','DOT/Vector2','DOT/Vector3','DOT/Matr
       
       // TODO: consider performance of the affine check here
       this.type = type === undefined ? ( ( v20 === 0 && v21 === 0 && v22 === 1 ) ? Types.AFFINE : Types.OTHER ) : type;
+      return this;
+    },
+    
+    set: function( matrix ) {
+      return this.rowMajor( matrix.m00(), matrix.m01(), matrix.m02(),
+                            matrix.m10(), matrix.m11(), matrix.m12(),
+                            matrix.m20(), matrix.m21(), matrix.m22(),
+                            matrix.type );
+    },
+    
+    makeImmutable: function() {
+      this.rowMajor = function() {
+        throw new Error( 'Cannot modify immutable matrix' );
+      };
       return this;
     },
     
@@ -3909,9 +3852,16 @@ define( 'DOT/Matrix3',['require','DOT/dot','DOT/Vector2','DOT/Vector3','DOT/Matr
     },
     
     multiplyMatrix: function( m ) {
-      // I * M === M * I === I (the identity)
-      if( this.type === Types.IDENTITY || m.type === Types.IDENTITY ) {
-        return this.type === Types.IDENTITY ? m : this;
+      // M * I === M (the identity)
+      if ( m.type === Types.IDENTITY ) {
+        // no change needed
+        return this;
+      }
+      
+      // I * M === M (the identity)
+      if ( this.type === Types.IDENTITY ) {
+        // copy the other matrix to us
+        return this.set( m );
       }
       
       if ( this.type === m.type ) {
@@ -3954,42 +3904,185 @@ define( 'DOT/Matrix3',['require','DOT/dot','DOT/Vector2','DOT/Vector3','DOT/Matr
                             this.m20() * m.m02() + this.m21() * m.m12() + this.m22() * m.m22() );
     },
     
+    setToIdentity: function() {
+      return this.rowMajor( 1, 0, 0,
+                            0, 1, 0,
+                            0, 0, 1,
+                            Types.IDENTITY );
+    },
+    
+    setToTranslation: function( x, y ) {
+      return this.rowMajor( 1, 0, x,
+                            0, 1, y,
+                            0, 0, 1,
+                            Types.TRANSLATION_2D );
+    },
+    
+    setToScale: function( x, y ) {
+      // allow using one parameter to scale everything
+      y = y === undefined ? x : y;
+
+      return this.rowMajor( x, 0, 0,
+                            0, y, 0,
+                            0, 0, 1,
+                            Types.SCALING );
+    },
+    
+    // row major
+    setToAffine: function( m00, m01, m02, m10, m11, m12 ) {
+      return this.rowMajor( m00, m01, m02, m10, m11, m12, 0, 0, 1, Types.AFFINE );
+    },
+    
+    // axis is a normalized Vector3, angle in radians.
+    setToRotationAxisAngle: function( axis, angle ) {
+      var c = Math.cos( angle );
+      var s = Math.sin( angle );
+      var C = 1 - c;
+
+      return this.rowMajor( axis.x * axis.x * C + c, axis.x * axis.y * C - axis.z * s, axis.x * axis.z * C + axis.y * s,
+                            axis.y * axis.x * C + axis.z * s, axis.y * axis.y * C + c, axis.y * axis.z * C - axis.x * s,
+                            axis.z * axis.x * C - axis.y * s, axis.z * axis.y * C + axis.x * s, axis.z * axis.z * C + c,
+                            Types.OTHER );
+    },
+    
+    setToRotationX: function( angle ) {
+      var c = Math.cos( angle );
+      var s = Math.sin( angle );
+
+      return this.rowMajor( 1, 0, 0,
+                            0, c, -s,
+                            0, s, c,
+                            Types.OTHER );
+    },
+    
+    setToRotationY: function( angle ) {
+      var c = Math.cos( angle );
+      var s = Math.sin( angle );
+
+      return this.rowMajor( c, 0, s,
+                            0, 1, 0,
+                            -s, 0, c,
+                            Types.OTHER );
+    },
+    
+    setToRotationZ: function( angle ) {
+      var c = Math.cos( angle );
+      var s = Math.sin( angle );
+
+      return this.rowMajor( c, -s, 0,
+                            s, c, 0,
+                            0, 0, 1,
+                            Types.AFFINE );
+    },
+    
+    setToSVGMatrix: function( svgMatrix ) {
+      return this.rowMajor( svgMatrix.a, svgMatrix.c, svgMatrix.e,
+                            svgMatrix.b, svgMatrix.d, svgMatrix.f,
+                            0, 0, 1,
+                            Types.AFFINE );
+    },
+    
+    // a rotation matrix that rotates A to B (Vector3 instances), by rotating about the axis A.cross( B ) -- Shortest path. ideally should be unit vectors
+    setRotationAToB: function( a, b ) {
+      // see http://graphics.cs.brown.edu/~jfh/papers/Moller-EBA-1999/paper.pdf for information on this implementation
+      var start = a;
+      var end = b;
+
+      var epsilon = 0.0001;
+
+      var e, h, f;
+
+      var v = start.cross( end );
+      e = start.dot( end );
+      f = ( e < 0 ) ? -e : e;
+
+      // if "from" and "to" vectors are nearly parallel
+      if ( f > 1.0 - epsilon ) {
+        var c1, c2, c3;
+
+        var x = new dot.Vector3(
+          ( start.x > 0.0 ) ? start.x : -start.x,
+          ( start.y > 0.0 ) ? start.y : -start.y,
+          ( start.z > 0.0 ) ? start.z : -start.z
+        );
+
+        if ( x.x < x.y ) {
+          if ( x.x < x.z ) {
+            x = dot.Vector3.X_UNIT;
+          }
+          else {
+            x = dot.Vector3.Z_UNIT;
+          }
+        }
+        else {
+          if ( x.y < x.z ) {
+            x = dot.Vector3.Y_UNIT;
+          }
+          else {
+            x = dot.Vector3.Z_UNIT;
+          }
+        }
+
+        var u = x.minus( start );
+        v = x.minus( end );
+
+        c1 = 2.0 / u.dot( u );
+        c2 = 2.0 / v.dot( v );
+        c3 = c1 * c2 * u.dot( v );
+
+        return this.rowMajor(
+          -c1 * u.x * u.x - c2 * v.x * v.x + c3 * v.x * u.x + 1,
+          -c1 * u.x * u.y - c2 * v.x * v.y + c3 * v.x * u.y,
+          -c1 * u.x * u.z - c2 * v.x * v.z + c3 * v.x * u.z,
+          -c1 * u.y * u.x - c2 * v.y * v.x + c3 * v.y * u.x,
+          -c1 * u.y * u.y - c2 * v.y * v.y + c3 * v.y * u.y + 1,
+          -c1 * u.y * u.z - c2 * v.y * v.z + c3 * v.y * u.z,
+          -c1 * u.z * u.x - c2 * v.z * v.x + c3 * v.z * u.x,
+          -c1 * u.z * u.y - c2 * v.z * v.y + c3 * v.z * u.y,
+          -c1 * u.z * u.z - c2 * v.z * v.z + c3 * v.z * u.z + 1
+        );
+      }
+      else {
+        // the most common case, unless "start"="end", or "start"=-"end"
+        var hvx, hvz, hvxy, hvxz, hvyz;
+        h = 1.0 / ( 1.0 + e );
+        hvx = h * v.x;
+        hvz = h * v.z;
+        hvxy = hvx * v.y;
+        hvxz = hvx * v.z;
+        hvyz = hvz * v.y;
+
+        return this.rowMajor(
+          e + hvx * v.x, hvxy - v.z,        hvxz + v.y,
+          hvxy + v.z,    e + h * v.y * v.y, hvyz - v.x,
+          hvxz - v.y,    hvyz + v.x,        e + hvz * v.z
+        );
+      }
+    },
+    
     /*---------------------------------------------------------------------------*
     * Mutable operations (changes the parameter)
     *----------------------------------------------------------------------------*/
     
     multiplyVector2: function( v ) {
-      var x = this.m00() * v.x + this.m01() * v.y + this.m02();
-      var y = this.m10() * v.x + this.m11() * v.y + this.m12();
-      v.setX( x );
-      v.setY( y );
-      return v;
+      return v.setXY( this.m00() * v.x + this.m01() * v.y + this.m02(),
+                      this.m10() * v.x + this.m11() * v.y + this.m12() );
     },
     
     multiplyVector3: function( v ) {
-      var x = this.m00() * v.x + this.m01() * v.y + this.m02() * v.z;
-      var y = this.m10() * v.x + this.m11() * v.y + this.m12() * v.z;
-      var z = this.m20() * v.x + this.m21() * v.y + this.m22() * v.z;
-      v.setX( x );
-      v.setY( y );
-      v.setZ( z );
-      return v;
+      return v.setXYZ( this.m00() * v.x + this.m01() * v.y + this.m02() * v.z,
+                       this.m10() * v.x + this.m11() * v.y + this.m12() * v.z,
+                       this.m20() * v.x + this.m21() * v.y + this.m22() * v.z );
     },
     
     multiplyTransposeVector2: function( v ) {
-      var x = this.m00() * v.x + this.m10() * v.y;
-      var y = this.m01() * v.x + this.m11() * v.y;
-      v.setX( x );
-      v.setY( y );
-      return v;
+      return v.setXY( this.m00() * v.x + this.m10() * v.y,
+                      this.m01() * v.x + this.m11() * v.y );
     },
     
     multiplyRelativeVector2: function( v ) {
-      var x = this.m00() * v.x + this.m01() * v.y;
-      var y = this.m10() * v.y + this.m11() * v.y;
-      v.setX( x );
-      v.setY( y );
-      return v;
+      return v.setXY( this.m00() * v.x + this.m01() * v.y,
+                      this.m10() * v.y + this.m11() * v.y );
     },
     
     // sets the transform of a Canvas 2D rendering context to the affine part of this matrix
@@ -4020,6 +4113,29 @@ define( 'DOT/Matrix3',['require','DOT/dot','DOT/Vector2','DOT/Vector3','DOT/Matr
       }
     }
   };
+  
+  /* jshint -W064 */
+  Poolable( Matrix3, {
+    defaultFactory: function() { return new Matrix3(); },
+    constructorDuplicateFactory: function( pool ) {
+      return function( v00, v01, v02, v10, v11, v12, v20, v21, v22, type ) {
+        if ( pool.length ) {
+          return pool.pop().rowMajor( v00, v01, v02, v10, v11, v12, v20, v21, v22, type );
+        } else {
+          return new Matrix3( v00, v01, v02, v10, v11, v12, v20, v21, v22, type );
+        }
+      };
+    }
+  } );
+  
+  /* jshint -W064 */
+  Poolable( FastMatrix3, {
+    // no constructor function needed, always grab a dirty one
+    defaultFactory: function() { return new FastMatrix3(); }
+  } );
+  
+  // prototype should be done by here, so now we hook it up to FastMatrix3
+  inherit( Matrix3, FastMatrix3 );
   
   // create an immutable
   Matrix3.IDENTITY = new Matrix3( 1, 0, 0,
@@ -4132,7 +4248,7 @@ define( 'DOT/Transform3',['require','DOT/dot','DOT/Matrix3','DOT/Vector2','DOT/R
     this.listeners = [];
     
     // using immutable version for now. change it to the mutable identity copy if we need mutable operations on the matrices
-    this.set( matrix === undefined ? dot.Matrix3.IDENTITY : matrix );
+    this.setMatrix( matrix === undefined ? dot.Matrix3.IDENTITY : matrix );
     
     phetAllocation && phetAllocation( 'Transform3' );
   };
@@ -4144,8 +4260,8 @@ define( 'DOT/Transform3',['require','DOT/dot','DOT/Matrix3','DOT/Vector2','DOT/R
     /*---------------------------------------------------------------------------*
     * mutators
     *----------------------------------------------------------------------------*/
-    
-    set: function( matrix ) {
+
+    setMatrix: function( matrix ) {
       // TODO: performance: don't notify or handle instances where the matrix is detected to be the identity matrix?
       assert && assert( matrix instanceof dot.Matrix3 );
       
@@ -4172,16 +4288,16 @@ define( 'DOT/Transform3',['require','DOT/dot','DOT/Matrix3','DOT/Vector2','DOT/R
     },
     
     prepend: function( matrix ) {
-      this.set( matrix.timesMatrix( this.matrix ) );
+      this.setMatrix( matrix.timesMatrix( this.matrix ) );
     },
 
     //Simpler case of prepending a translation without having to allocate a matrix for it, see scenery#119
     prependTranslation: function( x, y ) {
-      this.set( dot.Matrix3.translationTimesMatrix( x, y, this.matrix ) );
+      this.setMatrix( dot.Matrix3.translationTimesMatrix( x, y, this.matrix ) );
     },
 
     append: function( matrix ) {
-      this.set( this.matrix.timesMatrix( matrix ) );
+      this.setMatrix( this.matrix.timesMatrix( matrix ) );
     },
 
     prependTransform: function( transform ) {
@@ -4405,10 +4521,11 @@ define( 'DOT/Transform3',['require','DOT/dot','DOT/Matrix3','DOT/Vector2','DOT/R
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'DOT/Bounds2',['require','DOT/dot','DOT/Vector2'],function( require ) {
+define( 'DOT/Bounds2',['require','DOT/dot','PHET_CORE/Poolable','DOT/Vector2'],function( require ) {
   
   
   var dot = require( 'DOT/dot' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   
   require( 'DOT/Vector2' );
   
@@ -4426,6 +4543,9 @@ define( 'DOT/Bounds2',['require','DOT/dot','DOT/Vector2'],function( require ) {
 
   Bounds2.prototype = {
     constructor: Bounds2,
+    
+    isBounds: true,
+    dimension: 2,
     
     /*---------------------------------------------------------------------------*
     * Properties
@@ -4516,6 +4636,39 @@ define( 'DOT/Bounds2',['require','DOT/dot','DOT/Vector2'],function( require ) {
       return !this.intersection( bounds ).isEmpty();
     },
     
+    // distance to the closest point inside the Bounds2
+    minimumDistanceToPointSquared: function( point ) {
+      var closeX = point.x < this.minX ? this.minX : ( point.x > this.maxX ? this.maxX : null );
+      var closeY = point.y < this.minY ? this.minY : ( point.y > this.maxY ? this.maxY : null );
+      var d;
+      if ( closeX === null && closeY === null ) {
+        // inside, or on the boundary
+        return 0;
+      } else if ( closeX === null ) {
+        // vertically directly above/below
+        d = closeY - point.y;
+        return d * d;
+      } else if ( closeY === null ) {
+        // horizontally directly to the left/right
+        d = closeX - point.x;
+        return d * d;
+      } else {
+        // corner case
+        var dx = closeX - point.x;
+        var dy = closeY - point.y;
+        return dx * dx + dy * dy;
+      }
+    },
+    
+    // distance to the farthest point inside the Bounds2
+    maximumDistanceToPointSquared: function( point ) {
+      var x = point.x > this.getCenterX() ? this.minX : this.maxX;
+      var y = point.y > this.getCenterY() ? this.minY : this.maxY;
+      x -= point.x;
+      y -= point.y;
+      return x * x + y * y;
+    },
+    
     toString: function() {
       return '[x:(' + this.minX + ',' + this.maxX + '),y:(' + this.minY + ',' + this.maxY + ')]';
     },
@@ -4551,8 +4704,13 @@ define( 'DOT/Bounds2',['require','DOT/dot','DOT/Vector2'],function( require ) {
     * Immutable operations
     *----------------------------------------------------------------------------*/
     
-    copy: function() {
-      return new Bounds2( this.minX, this.minY, this.maxX, this.maxY );
+    // create a copy, or if bounds is passed in, set that bounds to our value
+    copy: function( bounds ) {
+      if ( bounds ) {
+        return bounds.set( this );
+      } else {
+        return new Bounds2( this.minX, this.minY, this.maxX, this.maxY );
+      }
     },
     
     // immutable operations (bounding-box style handling, so that the relevant bounds contain everything)
@@ -4661,112 +4819,130 @@ define( 'DOT/Bounds2',['require','DOT/dot','DOT/Vector2'],function( require ) {
     * Mutable operations
     *----------------------------------------------------------------------------*/
     
-    set: function( minX, minY, maxX, maxY ) {
+    // mutable core opreations (all other mutations should be called through these)
+    setMinMax: function( minX, minY, maxX, maxY ) {
       this.minX = minX;
       this.minY = minY;
       this.maxX = maxX;
       this.maxY = maxY;
       return this;
     },
+    setMinX: function( minX ) { this.minX = minX; return this; },
+    setMinY: function( minY ) { this.minY = minY; return this; },
+    setMaxX: function( maxX ) { this.maxX = maxX; return this; },
+    setMaxY: function( maxY ) { this.maxY = maxY; return this; },
     
-    setBounds: function( bounds ) {
-      return this.set( bounds.minX, bounds.minY, bounds.maxX, bounds.maxY );
+    set: function( bounds ) {
+      return this.setMinMax( bounds.minX, bounds.minY, bounds.maxX, bounds.maxY );
     },
     
     // mutable union
     includeBounds: function( bounds ) {
-      this.minX = Math.min( this.minX, bounds.minX );
-      this.minY = Math.min( this.minY, bounds.minY );
-      this.maxX = Math.max( this.maxX, bounds.maxX );
-      this.maxY = Math.max( this.maxY, bounds.maxY );
-      return this;
+      return this.setMinMax(
+        Math.min( this.minX, bounds.minX ),
+        Math.min( this.minY, bounds.minY ),
+        Math.max( this.maxX, bounds.maxX ),
+        Math.max( this.maxY, bounds.maxY )
+      );
     },
     
     // mutable intersection
     constrainBounds: function( bounds ) {
-      this.minX = Math.max( this.minX, bounds.minX );
-      this.minY = Math.max( this.minY, bounds.minY );
-      this.maxX = Math.min( this.maxX, bounds.maxX );
-      this.maxY = Math.min( this.maxY, bounds.maxY );
-      return this;
+      return this.setMinMax(
+        Math.max( this.minX, bounds.minX ),
+        Math.max( this.minY, bounds.minY ),
+        Math.min( this.maxX, bounds.maxX ),
+        Math.min( this.maxY, bounds.maxY )
+      );
     },
     
     addCoordinates: function( x, y ) {
-      this.minX = Math.min( this.minX, x );
-      this.minY = Math.min( this.minY, y );
-      this.maxX = Math.max( this.maxX, x );
-      this.maxY = Math.max( this.maxY, y );
-      return this;
+      return this.setMinMax(
+        Math.min( this.minX, x ),
+        Math.min( this.minY, y ),
+        Math.max( this.maxX, x ),
+        Math.max( this.maxY, y )
+      );
     },
     
     addPoint: function( point ) {
       return this.addCoordinates( point.x, point.y );
     },
     
-    setMinX: function( minX ) { this.minX = minX; return this; },
-    setMinY: function( minY ) { this.minY = minY; return this; },
-    setMaxX: function( maxX ) { this.maxX = maxX; return this; },
-    setMaxY: function( maxY ) { this.maxY = maxY; return this; },
-    
     // round to integral values, expanding where necessary
     roundOut: function() {
-      this.minX = Math.floor( this.minX );
-      this.minY = Math.floor( this.minY );
-      this.maxX = Math.ceil( this.maxX );
-      this.maxY = Math.ceil( this.maxY );
-      return this;
+      return this.setMinMax(
+        Math.floor( this.minX ),
+        Math.floor( this.minY ),
+        Math.ceil( this.maxX ),
+        Math.ceil( this.maxY )
+      );
     },
     
     // round to integral values, contracting where necessary
     roundIn: function() {
-      this.minX = Math.ceil( this.minX );
-      this.minY = Math.ceil( this.minY );
-      this.maxX = Math.floor( this.maxX );
-      this.maxY = Math.floor( this.maxY );
-      return this;
+      return this.setMinMax(
+        Math.ceil( this.minX ),
+        Math.ceil( this.minY ),
+        Math.floor( this.maxX ),
+        Math.floor( this.maxY )
+      );
     },
     
     // transform a bounding box.
     // NOTE that box.transformed( matrix ).transformed( inverse ) may be larger than the original box
     transform: function( matrix ) {
-      // do nothing
+      // if we contain no area, no change is needed
       if ( this.isEmpty() ) {
         return this;
       }
-      var minX = this.minX;
-      var minY = this.minY;
-      var maxX = this.maxX;
-      var maxY = this.maxY;
+      
+      // optimization to bail for identity matrices
+      if ( matrix.isIdentity() ) {
+        return this;
+      }
+      
+      var minX = Number.POSITIVE_INFINITY;
+      var minY = Number.POSITIVE_INFINITY;
+      var maxX = Number.NEGATIVE_INFINITY;
+      var maxY = Number.NEGATIVE_INFINITY;
       
       // using mutable vector so we don't create excessive instances of Vector2 during this
       // make sure all 4 corners are inside this transformed bounding box
       var vector = new dot.Vector2();
-      this.setBounds( Bounds2.NOTHING );
-      this.addPoint( matrix.multiplyVector2( vector.set( minX, minY ) ) );
-      this.addPoint( matrix.multiplyVector2( vector.set( minX, maxY ) ) );
-      this.addPoint( matrix.multiplyVector2( vector.set( maxX, minY ) ) );
-      this.addPoint( matrix.multiplyVector2( vector.set( maxX, maxY ) ) );
-      return this;
+      
+      function withIt( vector ) {
+        minX = Math.min( minX, vector.x );
+        minY = Math.min( minY, vector.y );
+        maxX = Math.max( maxX, vector.x );
+        maxY = Math.max( maxY, vector.y );
+      }
+      
+      withIt( matrix.multiplyVector2( vector.setXY( this.minX, this.minY ) ) );
+      withIt( matrix.multiplyVector2( vector.setXY( this.minX, this.maxY ) ) );
+      withIt( matrix.multiplyVector2( vector.setXY( this.maxX, this.minY ) ) );
+      withIt( matrix.multiplyVector2( vector.setXY( this.maxX, this.maxY ) ) );
+      return this.setMinMax( minX, minY, maxX, maxY );
     },
     
     // expands on all sides by length d
     dilate: function( d ) {
-      return this.set( this.minX - d, this.minY - d, this.maxX + d, this.maxY + d );
+      return this.setMinMax( this.minX - d, this.minY - d, this.maxX + d, this.maxY + d );
     },
     
     // dilates only in the x direction
     dilateX: function( x ) {
-      return this.set( this.minX - x, this.minY, this.maxX + x, this.maxY );
+      return this.setMinMax( this.minX - x, this.minY, this.maxX + x, this.maxY );
     },
     
     // dilates only in the y direction
     dilateY: function( y ) {
-      return this.set( this.minX, this.minY - y, this.maxX, this.maxY + y );
+      return this.setMinMax( this.minX, this.minY - y, this.maxX, this.maxY + y );
     },
     
     // dilate with different amounts in the x and y directions
     dilateXY: function( x, y ) {
-      return this.set( this.minX - x, this.minY - y, this.maxX + x, this.maxY + y );
+      return this.setMinMax( this.minX - x, this.minY - y, this.maxX + x, this.maxY + y );
     },
     
     // contracts on all sides by length d, or for x/y independently
@@ -4776,15 +4952,15 @@ define( 'DOT/Bounds2',['require','DOT/dot','DOT/Vector2'],function( require ) {
     erodeXY: function( x, y ) { return this.dilateXY( -x, -y ); },
     
     shiftX: function( x ) {
-      return this.setMinX( this.minX + x ).setMaxX( this.maxX + x );
+      return this.setMinMax( this.minX + x, this.minY, this.maxX + x, this.maxY );
     },
     
     shiftY: function( y ) {
-      return this.setMinY( this.minY + y ).setMaxY( this.maxY + y );
+      return this.setMinMax( this.minX, this.minY + y, this.maxX, this.maxY + y );
     },
     
     shift: function( x, y ) {
-      return this.shiftX( x ).shiftY( y );
+      return this.setMinMax( this.minX + x, this.minY + y, this.maxX + x, this.maxY + y );
     },
 
     /**
@@ -4796,7 +4972,7 @@ define( 'DOT/Bounds2',['require','DOT/dot','DOT/Vector2'],function( require ) {
      */
     getClosestPoint: function( x, y, result ) {
       if ( result ) {
-        result.set( x, y );
+        result.setXY( x, y );
       }
       else {
         result = new dot.Vector2( x, y );
@@ -4815,8 +4991,28 @@ define( 'DOT/Bounds2',['require','DOT/dot','DOT/Vector2'],function( require ) {
   
   // a volume-less point bounds, which can be dilated to form a centered bounds
   Bounds2.point = function( x, y ) {
-    return new Bounds2( x, y, x, y );
+    if ( x instanceof dot.Vector2 ) {
+      var p = x;
+      return new Bounds2( p.x, p.y, p.x, p.y );
+    } else {
+      return new Bounds2( x, y, x, y );
+    }
   };
+  
+  // experimental object pooling
+  /* jshint -W064 */
+  Poolable( Bounds2, {
+    defaultFactory: function() { return Bounds2.NOTHING.copy(); },
+    constructorDuplicateFactory: function( pool ) {
+      return function( minX, minY, maxX, maxY ) {
+        if ( pool.length ) {
+          return pool.pop().setMinMax( minX, minY, maxX, maxY );
+        } else {
+          return new Bounds2( minX, minY, maxX, maxY );
+        }
+      };
+    }
+  } );
 
   // specific bounds useful for operations
   Bounds2.EVERYTHING = new Bounds2( Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY );
@@ -4860,16 +5056,17 @@ define( 'KITE/kite',['require','ASSERT/assert','ASSERT/assert','PHET_CORE/phetAl
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'KITE/segments/Segment',['require','KITE/kite','DOT/Util'],function( require ) {
+define( 'KITE/segments/Segment',['require','KITE/kite','DOT/Util','DOT/Bounds2'],function( require ) {
   
   
   var kite = require( 'KITE/kite' );
   
   var DotUtil = require( 'DOT/Util' );
+  var Bounds2 = require( 'DOT/Bounds2' );
   
   /*
    * Will contain (for segments):
-   * properties:
+   * properties (backed by ES5 getters, created usually lazily):
    * start        - start point of this segment
    * end          - end point of this segment
    * startTangent - the tangent vector (normalized) to the segment at the start, pointing in the direction of motion (from start to end)
@@ -4880,12 +5077,13 @@ define( 'KITE/segments/Segment',['require','KITE/kite','DOT/Util'],function( req
    * positionAt( t )          - returns the position parametrically, with 0 <= t <= 1. this does NOT guarantee a constant magnitude tangent... don't feel like adding elliptical functions yet!
    * tangentAt( t )           - returns the non-normalized tangent (dx/dt, dy/dt) parametrically, with 0 <= t <= 1.
    * curvatureAt( t )         - returns the signed curvature (positive for visual clockwise - mathematical counterclockwise)
-   * subdivided( t, skip )    - returns an array with 2 sub-segments, split at the parametric t value. if skip is passed, expensive operations are not performed
+   * subdivided( t )          - returns an array with 2 sub-segments, split at the parametric t value.
    * getSVGPathFragment()     - returns a string containing the SVG path. assumes that the start point is already provided, so anything that calls this needs to put the M calls first
    * strokeLeft( lineWidth )  - returns an array of segments that will draw an offset curve on the logical left side
    * strokeRight( lineWidth ) - returns an array of segments that will draw an offset curve on the logical right side
    * intersectsBounds         - whether this segment intersects the specified bounding box (not just the segment's bounding box, but the actual segment)
    * windingIntersection      - returns the winding number for intersection with a ray
+   * getInteriorExtremaTs     - returns a list of t values where dx/dt or dy/dt is 0 where 0 < t < 1. subdividing on these will result in monotonic segments
    *
    * writeToContext( context ) - draws the segment to the 2D Canvas context, assuming the context's current location is already at the start point
    * transformed( matrix )     - returns a new segment that represents this segment after transformation by the matrix
@@ -4897,14 +5095,14 @@ define( 'KITE/segments/Segment',['require','KITE/kite','DOT/Util'],function( req
     constructor: Segment,
     
     // tList should be a list of sorted t values from 0 <= t <= 1
-    subdivisions: function( tList, skipComputation ) {
+    subdivisions: function( tList ) {
       // this could be solved by recursion, but we don't plan on the JS engine doing tail-call optimization
       var right = this;
       var result = [];
       for ( var i = 0; i < tList.length; i++ ) {
         // assume binary subdivision
         var t = tList[i];
-        var arr = right.subdivided( t, skipComputation );
+        var arr = right.subdivided( t );
         assert && assert( arr.length === 2 );
         result.push( arr[0] );
         right = arr[1];
@@ -4921,7 +5119,133 @@ define( 'KITE/segments/Segment',['require','KITE/kite','DOT/Util'],function( req
     // return an array of segments from breaking this segment into monotone pieces
     subdividedIntoMonotone: function() {
       return this.subdivisions( this.getInteriorExtremaTs() );
-    },
+    }
+  };
+  
+  // list of { segment: ..., t: ..., closestPoint: ..., distanceSquared: ... } (since there can be duplicates), threshold is used for subdivision,
+  // where it will exit if all of the segments are shorter than the threshold
+  // TODO: solve segments to determine this analytically!
+  Segment.closestToPoint = function( segments, point, threshold ) {
+    var thresholdSquared = threshold * threshold;
+    var items = [];
+    var bestList = [];
+    var bestDistanceSquared = Number.POSITIVE_INFINITY;
+    var thresholdOk = false;
+    
+    _.each( segments, function( segment ) {
+      // if we have an explicit computation for this segment, use it
+      if ( segment.explicitClosestToPoint ) {
+        var infos = segment.explicitClosestToPoint( point );
+        _.each( infos, function( info ) {
+          if ( info.distanceSquared < bestDistanceSquared ) {
+            bestList = [info];
+            bestDistanceSquared = info.distanceSquared;
+          } else if ( info.distanceSquared === bestDistanceSquared ) {
+            bestList.push( info );
+          }
+        } );
+      } else {
+        // otherwise, we will split based on monotonicity, so we can subdivide
+        // separate, so we can map the subdivided segments 
+        var ts = [0].concat( segment.getInteriorExtremaTs() ).concat([1]);
+        for ( var i = 0; i < ts.length - 1; i++ ) {
+          var ta = ts[i];
+          var tb = ts[i+1];
+          var pa = segment.positionAt( ta );
+          var pb = segment.positionAt( tb );
+          var bounds = Bounds2.point( pa ).addPoint( pb );
+          var minDistanceSquared = bounds.minimumDistanceToPointSquared( point );
+          if ( minDistanceSquared <= bestDistanceSquared ) {
+            var maxDistanceSquared = bounds.maximumDistanceToPointSquared( point );
+            if ( maxDistanceSquared < bestDistanceSquared ) {
+              bestDistanceSquared = maxDistanceSquared;
+              bestList = []; // clear it
+            }
+            items.push( {
+              ta: ta,
+              tb: tb,
+              pa: pa,
+              pb: pb,
+              segment: segment,
+              bounds: bounds,
+              min: minDistanceSquared,
+              max: maxDistanceSquared
+            } );
+          }
+        }
+      }
+    } );
+    
+    while ( items.length && !thresholdOk ) {
+      var curItems = items;
+      items = [];
+      
+      // whether all of the segments processed are shorter than the threshold
+      thresholdOk = true;
+      
+      _.each( curItems, function( item ) {
+        if ( item.minDistanceSquared > bestDistanceSquared ) {
+          return; // drop this item
+        }
+        if ( thresholdOk && item.pa.distanceSquared( item.pb ) > thresholdSquared ) {
+          thresholdOk = false;
+        }
+        var tmid = ( item.ta + item.tb ) / 2;
+        var pmid = item.segment.positionAt( tmid );
+        var boundsA = Bounds2.point( item.pa ).addPoint( pmid );
+        var boundsB = Bounds2.point( item.pb ).addPoint( pmid );
+        var minA = boundsA.minimumDistanceToPointSquared( point );
+        var minB = boundsB.minimumDistanceToPointSquared( point );
+        if ( minA <= bestDistanceSquared ) {
+          var maxA = boundsA.maximumDistanceToPointSquared( point );
+          if ( maxA < bestDistanceSquared ) {
+            bestDistanceSquared = maxA;
+            bestList = []; // clear it
+          }
+          items.push( {
+            ta: item.ta,
+            tb: tmid,
+            pa: item.pa,
+            pb: pmid,
+            segment: item.segment,
+            bounds: boundsA,
+            min: minA,
+            max: maxA
+          } );
+        }
+        if ( minB <= bestDistanceSquared ) {
+          var maxB = boundsB.maximumDistanceToPointSquared( point );
+          if ( maxB < bestDistanceSquared ) {
+            bestDistanceSquared = maxB;
+            bestList = []; // clear it
+          }
+          items.push( {
+            ta: tmid,
+            tb: item.tb,
+            pa: pmid,
+            pb: item.pb,
+            segment: item.segment,
+            bounds: boundsB,
+            min: minB,
+            max: maxB
+          } );
+        }
+      } );
+    }
+    
+    // if there are any closest regions, they are within the threshold, so we will add them all
+    _.each( items, function( item ) {
+      var t = ( item.ta + item.tb ) / 2;
+      var closestPoint = item.segment.positionAt( t );
+      bestList.push( {
+        segment: item.segment,
+        t: t,
+        closestPoint: closestPoint,
+        distanceSquared: point.distanceSquared( closestPoint )
+      } );
+    } );
+    
+    return bestList;
   };
   
   return Segment;
@@ -4935,41 +5259,75 @@ define( 'KITE/segments/Segment',['require','KITE/kite','DOT/Util'],function( req
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'KITE/segments/Line',['require','KITE/kite','PHET_CORE/inherit','DOT/Bounds2','DOT/Util','KITE/segments/Segment'],function( require ) {
+define( 'KITE/segments/Line',['require','PHET_CORE/inherit','DOT/Bounds2','DOT/Util','DOT/Util','KITE/segments/Segment'],function( require ) {
   
-  
-  var kite = require( 'KITE/kite' );
   
   var inherit = require( 'PHET_CORE/inherit' );
   var Bounds2 = require( 'DOT/Bounds2' );
+  var Util = require( 'DOT/Util' );
   var lineLineIntersection = require( 'DOT/Util' ).lineLineIntersection;
   
   var Segment = require( 'KITE/segments/Segment' );
 
   Segment.Line = function Line( start, end ) {
-    this.start = start;
-    this.end = end;
+    this._start = start;
+    this._end = end;
     
-    if ( start.equals( end, 0 ) ) {
-      this.invalid = true;
-      return;
-    }
-    
-    this.startTangent = end.minus( start ).normalized();
-    this.endTangent = this.startTangent;
-    
-    // acceleration for intersection
-    this.bounds = Bounds2.NOTHING.withPoint( start ).withPoint( end );
+    // TODO: performance test removal of these undefined declarations
+    this._tangent = undefined;
+    this._bounds = undefined;
   };
   inherit( Segment, Segment.Line, {
     
+    getStart: function() {
+      return this._start;
+    },
+    get start() { return this._start; },
+    
+    getEnd: function() {
+      return this._end;
+    },
+    get end() { return this._end; },
+    
+    getStartTangent: function() {
+      if ( this._tangent === undefined ) {
+        // TODO: allocation reduction
+        this._tangent = this._end.minus( this._start ).normalized();
+      }
+      return this._tangent;
+    },
+    get startTangent() { return this.getStartTangent(); },
+    
+    getEndTangent: function() {
+      return this.getStartTangent();
+    },
+    get endTangent() { return this.getEndTangent(); },
+    
+    getBounds: function() {
+      // TODO: allocation reduction
+      if ( this._bounds === undefined ) {
+        this._bounds = Bounds2.dirtyFromPool().addPoint( this._start ).addPoint( this._end );
+      }
+      return this._bounds;
+    },
+    get bounds() { return this.getBounds(); },
+    
+    getNondegenerateSegments: function() {
+      // if it is degenerate (0-length), just ignore it
+      if ( this._start.equals( this._end ) ) {
+        return [];
+      } else {
+        return [this];
+      }
+    },
+    
     positionAt: function( t ) {
-      return this.start.plus( this.end.minus( this.start ).times( t ) );
+      return this._start.plus( this._end.minus( this._start ).times( t ) );
     },
     
     tangentAt: function( t ) {
       // tangent always the same, just use the start tanget
-      return this.startTangent;
+      return this.getStartTangent();
     },
     
     curvatureAt: function( t ) {
@@ -4977,17 +5335,17 @@ define( 'KITE/segments/Line',['require','KITE/kite','PHET_CORE/inherit','DOT/Bou
     },
     
     getSVGPathFragment: function() {
-      return 'L ' + this.end.x + ' ' + this.end.y;
+      return 'L ' + this._end.x + ' ' + this._end.y;
     },
     
     strokeLeft: function( lineWidth ) {
-      var offset = this.endTangent.perpendicular().negated().times( lineWidth / 2 );
-      return [new Segment.Line( this.start.plus( offset ), this.end.plus( offset ) )];
+      var offset = this.getEndTangent().perpendicular().negated().times( lineWidth / 2 );
+      return [new Segment.Line( this._start.plus( offset ), this._end.plus( offset ) )];
     },
     
     strokeRight: function( lineWidth ) {
-      var offset = this.startTangent.perpendicular().times( lineWidth / 2 );
-      return [new Segment.Line( this.end.plus( offset ), this.start.plus( offset ) )];
+      var offset = this.getStartTangent().perpendicular().times( lineWidth / 2 );
+      return [new Segment.Line( this._end.plus( offset ), this._start.plus( offset ) )];
     },
     
     // lines are already monotone
@@ -4996,8 +5354,8 @@ define( 'KITE/segments/Line',['require','KITE/kite','PHET_CORE/inherit','DOT/Bou
     subdivided: function( t ) {
       var pt = this.positionAt( t );
       return [
-        new Segment.Line( this.start, pt ),
-        new Segment.Line( pt, this.end )
+        new Segment.Line( this._start, pt ),
+        new Segment.Line( pt, this._end )
       ];
     },
     
@@ -5008,8 +5366,8 @@ define( 'KITE/segments/Line',['require','KITE/kite','PHET_CORE/inherit','DOT/Bou
     intersection: function( ray ) {
       var result = [];
       
-      var start = this.start;
-      var end = this.end;
+      var start = this._start;
+      var end = this._end;
       
       var intersection = lineLineIntersection( start, end, ray.pos, ray.pos.plus( ray.dir ) );
       
@@ -5056,11 +5414,29 @@ define( 'KITE/segments/Line',['require','KITE/kite','PHET_CORE/inherit','DOT/Bou
     
     // assumes the current position is at start
     writeToContext: function( context ) {
-      context.lineTo( this.end.x, this.end.y );
+      context.lineTo( this._end.x, this._end.y );
     },
     
     transformed: function( matrix ) {
-      return new Segment.Line( matrix.timesVector2( this.start ), matrix.timesVector2( this.end ) );
+      return new Segment.Line( matrix.timesVector2( this._start ), matrix.timesVector2( this._end ) );
+    },
+    
+    explicitClosestToPoint: function( point ) {
+      var diff = this._end.minus( this._start );
+      var t = point.minus( this._start ).dot( diff ) / diff.magnitudeSquared();
+      t = Util.clamp( t, 0, 1 );
+      var closestPoint = this.positionAt( t );
+      return [{
+        segment: this,
+        t: t,
+        closestPoint: closestPoint,
+        distanceSquared: point.distanceSquared( closestPoint )
+      }];
+    },
+    
+    // given the current curve parameterized by t, will return a curve parameterized by x where t = a * x + b
+    reparameterized: function( a, b ) {
+      return new Segment.Line( this.positionAt( b ), this.positionAt( a + b ) );
     }
   } );
   
@@ -5075,10 +5451,8 @@ define( 'KITE/segments/Line',['require','KITE/kite','PHET_CORE/inherit','DOT/Bou
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'KITE/segments/Arc',['require','KITE/kite','PHET_CORE/inherit','DOT/Vector2','DOT/Bounds2','DOT/Util','KITE/segments/Segment'],function( require ) {
+define( 'KITE/segments/Arc',['require','PHET_CORE/inherit','DOT/Vector2','DOT/Bounds2','DOT/Util','KITE/segments/Segment'],function( require ) {
   
-  
-  var kite = require( 'KITE/kite' );
   
   var inherit = require( 'PHET_CORE/inherit' );
   var Vector2 = require( 'DOT/Vector2' );
@@ -5095,99 +5469,184 @@ define( 'KITE/segments/Arc',['require','KITE/kite','PHET_CORE/inherit','DOT/Vect
       endAngle += Math.PI;
     }
     
-    this.center = center;
-    this.radius = radius;
-    this.startAngle = startAngle;
-    this.endAngle = endAngle;
-    this.anticlockwise = anticlockwise;
+    this._center = center;
+    this._radius = radius;
+    this._startAngle = startAngle;
+    this._endAngle = endAngle;
+    this._anticlockwise = anticlockwise;
     
-    this.start = this.positionAtAngle( startAngle );
-    this.end = this.positionAtAngle( endAngle );
-    this.startTangent = this.tangentAtAngle( startAngle );
-    this.endTangent = this.tangentAtAngle( endAngle );
-    
-    if ( radius <= 0 || startAngle === endAngle ) {
-      this.invalid = true;
-      return;
-    }
-    
-    // compute an actual end angle so that we can smoothly go from this.startAngle to this.actualEndAngle
-    if ( this.anticlockwise ) {
-      // angle is 'decreasing'
-      // -2pi <= end - start < 2pi
-      if ( this.startAngle > this.endAngle ) {
-        this.actualEndAngle = this.endAngle;
-      } else if ( this.startAngle < this.endAngle ) {
-        this.actualEndAngle = this.endAngle - 2 * Math.PI;
-      } else {
-        // equal
-        this.actualEndAngle = this.startAngle;
-      }
-    } else {
-      // angle is 'increasing'
-      // -2pi < end - start <= 2pi
-      if ( this.startAngle < this.endAngle ) {
-        this.actualEndAngle = this.endAngle;
-      } else if ( this.startAngle > this.endAngle ) {
-        this.actualEndAngle = this.endAngle + Math.PI * 2;
-      } else {
-        // equal
-        this.actualEndAngle = this.startAngle;
-      }
-    }
+    // TODO: performance test removal of these undefined declarations
+    this._start = undefined;
+    this._end = undefined;
+    this._startTangent = undefined;
+    this._endTangent = undefined;
+    this._actualEndAngle = undefined;
+    this._isFullPerimeter = undefined;
+    this._angleDifference = undefined;
     
     // constraints
     assert && assert( !( ( !anticlockwise && endAngle - startAngle <= -Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle <= -Math.PI * 2 ) ), 'Not handling arcs with start/end angles that show differences in-between browser handling' );
     assert && assert( !( ( !anticlockwise && endAngle - startAngle > Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle > Math.PI * 2 ) ), 'Not handling arcs with start/end angles that show differences in-between browser handling' );
-    
-    var isFullPerimeter = ( !anticlockwise && endAngle - startAngle >= Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle >= Math.PI * 2 );
-    
-    // compute an angle difference that represents how "much" of the circle our arc covers
-    this.angleDifference = this.anticlockwise ? this.startAngle - this.endAngle : this.endAngle - this.startAngle;
-    if ( this.angleDifference < 0 ) {
-      this.angleDifference += Math.PI * 2;
-    }
-    assert && assert( this.angleDifference >= 0 ); // now it should always be zero or positive
-    
-    // acceleration for intersection
-    this.bounds = Bounds2.NOTHING;
-    this.bounds = this.bounds.withPoint( this.start );
-    this.bounds = this.bounds.withPoint( this.end );
-    
-    // for bounds computations
-    var that = this;
-    function boundsAtAngle( angle ) {
-      if ( that.containsAngle( angle ) ) {
-        // the boundary point is in the arc
-        that.bounds = that.bounds.withPoint( center.plus( Vector2.createPolar( radius, angle ) ) );
-      }
-    }
-    
-    // if the angles are different, check extrema points
-    if ( startAngle !== endAngle ) {
-      // check all of the extrema points
-      boundsAtAngle( 0 );
-      boundsAtAngle( Math.PI / 2 );
-      boundsAtAngle( Math.PI );
-      boundsAtAngle( 3 * Math.PI / 2 );
-    }
   };
   inherit( Segment, Segment.Arc, {
+    
+    getCenter: function() {
+      return this._center;
+    },
+    get center() { return this.getCenter(); },
+    
+    getRadius: function() {
+      return this._radius;
+    },
+    get radius() { return this.getRadius(); },
+    
+    getStartAngle: function() {
+      return this._startAngle;
+    },
+    get startAngle() { return this.getStartAngle(); },
+    
+    getEndAngle: function() {
+      return this._endAngle;
+    },
+    get endAngle() { return this.getEndAngle(); },
+    
+    getAnticlockwise: function() {
+      return this._anticlockwise;
+    },
+    get anticlockwise() { return this.getAnticlockwise(); },
+    
+    getStart: function() {
+      if ( this._start === undefined ) {
+        this._start = this.positionAtAngle( this._startAngle );
+      }
+      return this._start;
+    },
+    get start() { return this.getStart(); },
+    
+    getEnd: function() {
+      if ( this._end === undefined ) {
+        this._end = this.positionAtAngle( this._endAngle );
+      }
+      return this._end;
+    },
+    get end() { return this.getEnd(); },
+    
+    getStartTangent: function() {
+      if ( this._startTangent === undefined ) {
+        this._startTangent = this.tangentAtAngle( this._startAngle );
+      }
+      return this._startTangent;
+    },
+    get startTangent() { return this.getStartTangent(); },
+    
+    getEndTangent: function() {
+      if ( this._endTangent === undefined ) {
+        this._endTangent = this.tangentAtAngle( this._endAngle );
+      }
+      return this._endTangent;
+    },
+    get endTangent() { return this.getEndTangent(); },
+    
+    getActualEndAngle: function() {
+      if ( this._actualEndAngle === undefined ) {
+        // compute an actual end angle so that we can smoothly go from this._startAngle to this._actualEndAngle
+        if ( this._anticlockwise ) {
+          // angle is 'decreasing'
+          // -2pi <= end - start < 2pi
+          if ( this._startAngle > this._endAngle ) {
+            this._actualEndAngle = this._endAngle;
+          } else if ( this._startAngle < this._endAngle ) {
+            this._actualEndAngle = this._endAngle - 2 * Math.PI;
+          } else {
+            // equal
+            this._actualEndAngle = this._startAngle;
+          }
+        } else {
+          // angle is 'increasing'
+          // -2pi < end - start <= 2pi
+          if ( this._startAngle < this._endAngle ) {
+            this._actualEndAngle = this._endAngle;
+          } else if ( this._startAngle > this._endAngle ) {
+            this._actualEndAngle = this._endAngle + Math.PI * 2;
+          } else {
+            // equal
+            this._actualEndAngle = this._startAngle;
+          }
+        }
+      }
+      return this._actualEndAngle;
+    },
+    get actualEndAngle() { return this.getActualEndAngle(); },
+    
+    getIsFullPerimeter: function() {
+      if ( this._isFullPerimeter === undefined ) {
+        this._isFullPerimeter = ( !this._anticlockwise && this._endAngle - this._startAngle >= Math.PI * 2 ) || ( this._anticlockwise && this._startAngle - this._endAngle >= Math.PI * 2 );
+      }
+      return this._isFullPerimeter;
+    },
+    get isFullPerimeter() { return this.getIsFullPerimeter(); },
+    
+    getAngleDifference: function() {
+      if ( this._angleDifference === undefined ) {
+        // compute an angle difference that represents how "much" of the circle our arc covers
+        this._angleDifference = this._anticlockwise ? this._startAngle - this._endAngle : this._endAngle - this._startAngle;
+        if ( this._angleDifference < 0 ) {
+          this._angleDifference += Math.PI * 2;
+        }
+        assert && assert( this._angleDifference >= 0 ); // now it should always be zero or positive
+      }
+      return this._angleDifference;
+    },
+    get angleDifference() { return this.getAngleDifference(); },
+    
+    getBounds: function() {
+      if ( this._bounds === undefined ) {
+        // acceleration for intersection
+        this._bounds = Bounds2.NOTHING.copy().withPoint( this.getStart() )
+                                             .withPoint( this.getEnd() );
+        
+        // if the angles are different, check extrema points
+        if ( this._startAngle !== this._endAngle ) {
+          // check all of the extrema points
+          this.includeBoundsAtAngle( 0 );
+          this.includeBoundsAtAngle( Math.PI / 2 );
+          this.includeBoundsAtAngle( Math.PI );
+          this.includeBoundsAtAngle( 3 * Math.PI / 2 );
+        }
+      }
+      return this._bounds;
+    },
+    get bounds() { return this.getBounds(); },
+    
+    getNondegenerateSegments: function() {
+      if ( this._radius <= 0 || this._startAngle === this._endAngle ) {
+        return [];
+      } else {
+        return [this]; // basically, Arcs aren't really degenerate that easily
+      }
+    },
+    
+    includeBoundsAtAngle: function( angle ) {
+      if ( this.containsAngle( angle ) ) {
+        // the boundary point is in the arc
+        this._bounds = this._bounds.withPoint( this._center.plus( Vector2.createPolar( this._radius, angle ) ) );
+      }
+    },
     
     // maps a contained angle to between [startAngle,actualEndAngle), even if the end angle is lower.
     mapAngle: function( angle ) {
       // consider an assert that we contain that angle?
-      return ( this.startAngle > this.actualEndAngle ) ?
-             DotUtil.moduloBetweenUp( angle, this.startAngle - 2 * Math.PI, this.startAngle ) :
-             DotUtil.moduloBetweenDown( angle, this.startAngle, this.startAngle + 2 * Math.PI );
+      return ( this._startAngle > this.getActualEndAngle() ) ?
+               DotUtil.moduloBetweenUp( angle, this._startAngle - 2 * Math.PI, this._startAngle ) :
+               DotUtil.moduloBetweenDown( angle, this._startAngle, this._startAngle + 2 * Math.PI );
     },
     
     tAtAngle: function( angle ) {
-      return ( this.mapAngle( angle ) - this.startAngle ) / ( this.actualEndAngle - this.startAngle );
+      return ( this.mapAngle( angle ) - this._startAngle ) / ( this.getActualEndAngle() - this._startAngle );
     },
     
     angleAt: function( t ) {
-      return this.startAngle + ( this.actualEndAngle - this.startAngle ) * t;
+      return this._startAngle + ( this.getActualEndAngle() - this._startAngle ) * t;
     },
     
     positionAt: function( t ) {
@@ -5199,24 +5658,24 @@ define( 'KITE/segments/Arc',['require','KITE/kite','PHET_CORE/inherit','DOT/Vect
     },
     
     curvatureAt: function( t ) {
-      return ( this.anticlockwise ? -1 : 1 ) / this.radius;
+      return ( this._anticlockwise ? -1 : 1 ) / this._radius;
     },
     
     positionAtAngle: function( angle ) {
-      return this.center.plus( Vector2.createPolar( this.radius, angle ) );
+      return this._center.plus( Vector2.createPolar( this._radius, angle ) );
     },
     
     tangentAtAngle: function( angle ) {
       var normal = Vector2.createPolar( 1, angle );
       
-      return this.anticlockwise ? normal.perpendicular() : normal.perpendicular().negated();
+      return this._anticlockwise ? normal.perpendicular() : normal.perpendicular().negated();
     },
     
     // TODO: refactor? shared with Segment.EllipticalArc (use this improved version)
     containsAngle: function( angle ) {
       // transform the angle into the appropriate coordinate form
       // TODO: check anticlockwise version!
-      var normalizedAngle = this.anticlockwise ? angle - this.endAngle : angle - this.startAngle;
+      var normalizedAngle = this._anticlockwise ? angle - this._endAngle : angle - this._startAngle;
       
       // get the angle between 0 and 2pi
       var positiveMinAngle = DotUtil.moduloBetweenDown( normalizedAngle, 0, Math.PI * 2 );
@@ -5229,34 +5688,34 @@ define( 'KITE/segments/Arc',['require','KITE/kite','PHET_CORE/inherit','DOT/Vect
       // rx ry x-axis-rotation large-arc-flag sweep-flag x y
       
       var epsilon = 0.01; // allow some leeway to render things as 'almost circles'
-      var sweepFlag = this.anticlockwise ? '0' : '1';
+      var sweepFlag = this._anticlockwise ? '0' : '1';
       var largeArcFlag;
       if ( this.angleDifference < Math.PI * 2 - epsilon ) {
         largeArcFlag = this.angleDifference < Math.PI ? '0' : '1';
-        return 'A ' + this.radius + ' ' + this.radius + ' 0 ' + largeArcFlag + ' ' + sweepFlag + ' ' + this.end.x + ' ' + this.end.y;
+        return 'A ' + this._radius + ' ' + this._radius + ' 0 ' + largeArcFlag + ' ' + sweepFlag + ' ' + this.end.x + ' ' + this.end.y;
       } else {
         // circle (or almost-circle) case needs to be handled differently
         // since SVG will not be able to draw (or know how to draw) the correct circle if we just have a start and end, we need to split it into two circular arcs
         
         // get the angle that is between and opposite of both of the points
-        var splitOppositeAngle = ( this.startAngle + this.endAngle ) / 2; // this _should_ work for the modular case?
-        var splitPoint = this.center.plus( Vector2.createPolar( this.radius, splitOppositeAngle ) );
+        var splitOppositeAngle = ( this._startAngle + this._endAngle ) / 2; // this _should_ work for the modular case?
+        var splitPoint = this._center.plus( Vector2.createPolar( this._radius, splitOppositeAngle ) );
         
         largeArcFlag = '0'; // since we split it in 2, it's always the small arc
         
-        var firstArc = 'A ' + this.radius + ' ' + this.radius + ' 0 ' + largeArcFlag + ' ' + sweepFlag + ' ' + splitPoint.x + ' ' + splitPoint.y;
-        var secondArc = 'A ' + this.radius + ' ' + this.radius + ' 0 ' + largeArcFlag + ' ' + sweepFlag + ' ' + this.end.x + ' ' + this.end.y;
+        var firstArc = 'A ' + this._radius + ' ' + this._radius + ' 0 ' + largeArcFlag + ' ' + sweepFlag + ' ' + splitPoint.x + ' ' + splitPoint.y;
+        var secondArc = 'A ' + this._radius + ' ' + this._radius + ' 0 ' + largeArcFlag + ' ' + sweepFlag + ' ' + this.end.x + ' ' + this.end.y;
         
         return firstArc + ' ' + secondArc;
       }
     },
     
     strokeLeft: function( lineWidth ) {
-      return [new Segment.Arc( this.center, this.radius + ( this.anticlockwise ? 1 : -1 ) * lineWidth / 2, this.startAngle, this.endAngle, this.anticlockwise )];
+      return [new Segment.Arc( this._center, this._radius + ( this._anticlockwise ? 1 : -1 ) * lineWidth / 2, this._startAngle, this._endAngle, this._anticlockwise )];
     },
     
     strokeRight: function( lineWidth ) {
-      return [new Segment.Arc( this.center, this.radius + ( this.anticlockwise ? -1 : 1 ) * lineWidth / 2, this.endAngle, this.startAngle, !this.anticlockwise )];
+      return [new Segment.Arc( this._center, this._radius + ( this._anticlockwise ? -1 : 1 ) * lineWidth / 2, this._endAngle, this._startAngle, !this._anticlockwise )];
     },
     
     // not including 0 and 1
@@ -5281,8 +5740,8 @@ define( 'KITE/segments/Arc',['require','KITE/kite','PHET_CORE/inherit','DOT/Vect
       var angleT = this.angleAt( t );
       var angle1 = this.angleAt( 1 );
       return [
-        new Segment.Arc( this.center, this.radius, angle0, angleT, this.anticlockwise ),
-        new Segment.Arc( this.center, this.radius, angleT, angle1, this.anticlockwise )
+        new Segment.Arc( this._center, this._radius, angle0, angleT, this._anticlockwise ),
+        new Segment.Arc( this._center, this._radius, angleT, angle1, this._anticlockwise )
       ];
     },
     
@@ -5299,15 +5758,15 @@ define( 'KITE/segments/Arc',['require','KITE/kite','PHET_CORE/inherit','DOT/Vect
       // Run a general circle-intersection routine, then we can test the angles later.
       // Solves for the two solutions t such that ray.pos + ray.dir * t is on the circle.
       // Then we check whether the angle at each possible hit point is in our arc.
-      var centerToRay = ray.pos.minus( this.center );
+      var centerToRay = ray.pos.minus( this._center );
       var tmp = ray.dir.dot( centerToRay );
       var centerToRayDistSq = centerToRay.magnitudeSquared();
-      var discriminant = 4 * tmp * tmp - 4 * ( centerToRayDistSq - this.radius * this.radius );
+      var discriminant = 4 * tmp * tmp - 4 * ( centerToRayDistSq - this._radius * this._radius );
       if ( discriminant < epsilon ) {
         // ray misses circle entirely
         return result;
       }
-      var base = ray.dir.dot( this.center ) - ray.dir.dot( ray.pos );
+      var base = ray.dir.dot( this._center ) - ray.dir.dot( ray.pos );
       var sqt = Math.sqrt( discriminant ) / 2;
       var ta = base - sqt;
       var tb = base + sqt;
@@ -5318,7 +5777,7 @@ define( 'KITE/segments/Arc',['require','KITE/kite','PHET_CORE/inherit','DOT/Vect
       }
       
       var pointB = ray.pointAtDistance( tb );
-      var normalB = pointB.minus( this.center ).normalized();
+      var normalB = pointB.minus( this._center ).normalized();
       
       if ( ta < epsilon ) {
         // we are inside the circle, so only one intersection is possible
@@ -5327,21 +5786,21 @@ define( 'KITE/segments/Arc',['require','KITE/kite','PHET_CORE/inherit','DOT/Vect
             distance: tb,
             point: pointB,
             normal: normalB.negated(), // normal is towards the ray
-            wind: this.anticlockwise ? -1 : 1 // since we are inside, wind this way
+            wind: this._anticlockwise ? -1 : 1 // since we are inside, wind this way
           } );
         }
       }
       else {
         // two possible hits (outside circle)
         var pointA = ray.pointAtDistance( ta );
-        var normalA = pointA.minus( this.center ).normalized();
+        var normalA = pointA.minus( this._center ).normalized();
         
         if ( this.containsAngle( normalA.angle() ) ) {
           result.push( {
             distance: ta,
             point: pointA,
             normal: normalA,
-            wind: this.anticlockwise ? 1 : -1 // hit from outside
+            wind: this._anticlockwise ? 1 : -1 // hit from outside
           } );
         }
         if ( this.containsAngle( normalB.angle() ) ) {
@@ -5349,7 +5808,7 @@ define( 'KITE/segments/Arc',['require','KITE/kite','PHET_CORE/inherit','DOT/Vect
             distance: tb,
             point: pointB,
             normal: normalB.negated(),
-            wind: this.anticlockwise ? -1 : 1 // this is the far hit, which winds the opposite way
+            wind: this._anticlockwise ? -1 : 1 // this is the far hit, which winds the opposite way
           } );
         }
       }
@@ -5368,30 +5827,30 @@ define( 'KITE/segments/Arc',['require','KITE/kite','PHET_CORE/inherit','DOT/Vect
     },
     
     writeToContext: function( context ) {
-      context.arc( this.center.x, this.center.y, this.radius, this.startAngle, this.endAngle, this.anticlockwise );
+      context.arc( this._center.x, this._center.y, this._radius, this._startAngle, this._endAngle, this._anticlockwise );
     },
     
     // TODO: test various transform types, especially rotations, scaling, shears, etc.
     transformed: function( matrix ) {
       // so we can handle reflections in the transform, we do the general case handling for start/end angles
-      var startAngle = matrix.timesVector2( Vector2.createPolar( 1, this.startAngle ) ).minus( matrix.timesVector2( Vector2.ZERO ) ).angle();
-      var endAngle = matrix.timesVector2( Vector2.createPolar( 1, this.endAngle ) ).minus( matrix.timesVector2( Vector2.ZERO ) ).angle();
+      var startAngle = matrix.timesVector2( Vector2.createPolar( 1, this._startAngle ) ).minus( matrix.timesVector2( Vector2.ZERO ) ).angle();
+      var endAngle = matrix.timesVector2( Vector2.createPolar( 1, this._endAngle ) ).minus( matrix.timesVector2( Vector2.ZERO ) ).angle();
       
       // reverse the 'clockwiseness' if our transform includes a reflection
-      var anticlockwise = matrix.getDeterminant() >= 0 ? this.anticlockwise : !this.anticlockwise;
+      var anticlockwise = matrix.getDeterminant() >= 0 ? this._anticlockwise : !this._anticlockwise;
       
-      if ( Math.abs( this.endAngle - this.startAngle ) === Math.PI * 2 ) {
+      if ( Math.abs( this._endAngle - this._startAngle ) === Math.PI * 2 ) {
         endAngle = anticlockwise ? startAngle - Math.PI * 2 : startAngle + Math.PI * 2;
       }
 
       var scaleVector = matrix.getScaleVector();
       if ( scaleVector.x !== scaleVector.y ) {
-        var radiusX = scaleVector.x * this.radius;
-        var radiusY = scaleVector.y * this.radius;
-        return new Segment.EllipticalArc( matrix.timesVector2( this.center ), radiusX, radiusY, 0, startAngle, endAngle, anticlockwise );
+        var radiusX = scaleVector.x * this._radius;
+        var radiusY = scaleVector.y * this._radius;
+        return new Segment.EllipticalArc( matrix.timesVector2( this._center ), radiusX, radiusY, 0, startAngle, endAngle, anticlockwise );
       } else {
-        var radius = scaleVector.x * this.radius;
-        return new Segment.Arc( matrix.timesVector2( this.center ), radius, startAngle, endAngle, anticlockwise );
+        var radius = scaleVector.x * this._radius;
+        return new Segment.Arc( matrix.timesVector2( this._center ), radius, startAngle, endAngle, anticlockwise );
       }
     }
   } );
@@ -5410,10 +5869,9 @@ define( 'KITE/segments/Arc',['require','KITE/kite','PHET_CORE/inherit','DOT/Vect
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'KITE/util/Subpath',['require','DOT/Vector2','DOT/Bounds2','DOT/Util','KITE/kite','KITE/segments/Line','KITE/segments/Arc'],function( require ) {
+define( 'KITE/util/Subpath',['require','DOT/Bounds2','DOT/Util','KITE/kite','KITE/segments/Line','KITE/segments/Arc'],function( require ) {
   
   
-  var Vector2 = require( 'DOT/Vector2' );
   var Bounds2 = require( 'DOT/Bounds2' );
   var lineLineIntersection = require( 'DOT/Util' ).lineLineIntersection;
   
@@ -5434,6 +5892,11 @@ define( 'KITE/util/Subpath',['require','DOT/Vector2','DOT/Bounds2','DOT/Util','K
     this._strokedSubpaths = null;
     this._strokedSubpathsComputed = false;
     this._strokedStyles = null;
+    
+    var bounds = this.bounds = Bounds2.NOTHING.copy();
+    _.each( this.segments, function( segment ) {
+      bounds.includeBounds( segment.bounds );
+    } );
   };
   var Subpath = kite.Subpath;
   Subpath.prototype = {
@@ -5451,16 +5914,25 @@ define( 'KITE/util/Subpath',['require','DOT/Vector2','DOT/Bounds2','DOT/Util','K
       return this; // allow chaining
     },
     
+    addSegmentDirectly: function( segment ) {
+      assert && assert( segment.start.isFinite(), 'Segment start is infinite' );
+      assert && assert( segment.end.isFinite(), 'Segment end is infinite' );
+      assert && assert( segment.startTangent.isFinite(), 'Segment startTangent is infinite' );
+      assert && assert( segment.endTangent.isFinite(), 'Segment endTangent is infinite' );
+      assert && assert( segment.bounds.isEmpty() || segment.bounds.isFinite(), 'Segment bounds is infinite and non-empty' );
+      this.segments.push( segment );
+      this.invalidate();
+      
+      this.bounds.includeBounds( segment.getBounds() );
+      
+      return this; // allow chaining
+    },
+    
     addSegment: function( segment ) {
-      if ( !segment.invalid ) {
-        assert && assert( segment.start.isFinite(), 'Segment start is infinite' );
-        assert && assert( segment.end.isFinite(), 'Segment end is infinite' );
-        assert && assert( segment.startTangent.isFinite(), 'Segment startTangent is infinite' );
-        assert && assert( segment.endTangent.isFinite(), 'Segment endTangent is infinite' );
-        assert && assert( segment.bounds.isEmpty() || segment.bounds.isFinite(), 'Segment bounds is infinite and non-empty' );
-        this.segments.push( segment );
-        this.invalidate();
-      }
+      var subpath = this;
+      _.each( segment.getNondegenerateSegments(), function( segment ) {
+        subpath.addSegmentDirectly( segment );
+      } );
       
       return this; // allow chaining
     },
@@ -5530,15 +6002,6 @@ define( 'KITE/util/Subpath',['require','DOT/Vector2','DOT/Bounds2','DOT/Util','K
       );
     },
     
-    computeBounds: function() {
-      var bounds = Bounds2.NOTHING.copy();
-      var len = this.segments.length;
-      for ( var i = 0; i < len; i++ ) {
-        bounds.includeBounds( this.segments[i].bounds );
-      }
-      return bounds;
-    },
-    
     // returns an array of subpaths (one if open, two if closed) that represent a stroked copy of this subpath.
     stroked: function( lineStyles ) {
       // non-drawable subpaths convert to empty subpaths
@@ -5575,7 +6038,6 @@ define( 'KITE/util/Subpath',['require','DOT/Vector2','DOT/Bounds2','DOT/Util','K
               return [new kite.Segment.Arc( center, lineWidth / 2, fromAngle, toAngle, true )];
             case 'miter':
               var theta = fromTangent.angleBetween( toTangent.negated() );
-              var notStraight = theta < Math.PI - 0.00001; // if fromTangent is approximately equal to toTangent, just bevel. it will be indistinguishable
               if ( 1 / Math.sin( theta / 2 ) <= lineStyles.miterLimit && theta < Math.PI - 0.00001 ) {
                 // draw the miter
                 var miterPoint = lineLineIntersection( fromPoint, fromPoint.plus( fromTangent ), toPoint, toPoint.plus( toTangent ) );
@@ -5696,28 +6158,7 @@ define( 'KITE/util/Subpath',['require','DOT/Vector2','DOT/Bounds2','DOT/Util','K
       return subpaths;
     }
   };
-  
-  // TODO: performance / cleanliness to have these as methods instead?
-  function segmentStartLeft( segment, lineWidth ) {
-    assert && assert( lineWidth !== undefined );
-    return segment.start.plus( segment.startTangent.perpendicular().negated().times( lineWidth / 2 ) );
-  }
-  
-  function segmentEndLeft( segment, lineWidth ) {
-    assert && assert( lineWidth !== undefined );
-    return segment.end.plus( segment.endTangent.perpendicular().negated().times( lineWidth / 2 ) );
-  }
-  
-  function segmentStartRight( segment, lineWidth ) {
-    assert && assert( lineWidth !== undefined );
-    return segment.start.plus( segment.startTangent.perpendicular().times( lineWidth / 2 ) );
-  }
-  
-  function segmentEndRight( segment, lineWidth ) {
-    assert && assert( lineWidth !== undefined );
-    return segment.end.plus( segment.endTangent.perpendicular().times( lineWidth / 2 ) );
-  }
-  
+
   return kite.Subpath;
 } );
 
@@ -8271,79 +8712,168 @@ define( 'KITE/util/LineStyles',['require','KITE/kite'],function( require ) {
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'KITE/segments/Quadratic',['require','KITE/kite','PHET_CORE/inherit','DOT/Bounds2','DOT/Matrix3','DOT/Util','KITE/segments/Segment'],function( require ) {
+define( 'KITE/segments/Quadratic',['require','PHET_CORE/inherit','DOT/Bounds2','DOT/Matrix3','DOT/Util','DOT/Util','KITE/segments/Segment'],function( require ) {
   
-  
-  var kite = require( 'KITE/kite' );
   
   var inherit = require( 'PHET_CORE/inherit' );
   var Bounds2 = require( 'DOT/Bounds2' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var solveQuadraticRootsReal = require( 'DOT/Util' ).solveQuadraticRootsReal;
+  var arePointsCollinear = require( 'DOT/Util' ).arePointsCollinear;
 
   var Segment = require( 'KITE/segments/Segment' );
 
-  Segment.Quadratic = function Quadratic( start, control, end, skipComputations ) {
-    this.start = start;
-    this.control = control;
-    this.end = end;
+  Segment.Quadratic = function Quadratic( start, control, end ) {
+    this._start = start;
+    this._control = control;
+    this._end = end;
     
-    if ( start.equals( end ) && start.equals( control ) ) {
-      this.invalid = true;
-      return;
-    }
-    
-    var t;
-    
-    // allows us to skip unnecessary computation in the subdivision steps
-    if ( skipComputations ) {
-      return;
-    }
-    
-    var controlIsStart = start.equals( control );
-    var controlIsEnd = end.equals( control );
-    // ensure the points are distinct
-    assert && assert( !controlIsStart || !controlIsEnd );
-    
-    // allow either the start or end point to be the same as the control point (necessary if you do a quadraticCurveTo on an empty path)
-    // tangents go through the control point, which simplifies things
-    this.startTangent = controlIsStart ? end.minus( start ).normalized() : control.minus( start ).normalized();
-    this.endTangent = controlIsEnd ? end.minus( start ).normalized() : end.minus( control ).normalized();
-    
-    // calculate our temporary guaranteed lower bounds based on the end points
-    this.bounds = new Bounds2( Math.min( start.x, end.x ), Math.min( start.y, end.y ), Math.max( start.x, end.x ), Math.max( start.y, end.y ) );
-    
-    // compute x and y where the derivative is 0, so we can include this in the bounds
-    var divisorX = 2 * ( end.x - 2 * control.x + start.x );
-    if ( divisorX !== 0 ) {
-      this.tCriticalX = -2 * ( control.x - start.x ) / divisorX;
-      
-      if ( t > 0 && t < 1 ) {
-        this.bounds = this.bounds.withPoint( this.positionAt( this.tCriticalX ) );
-      }
-    }
-    var divisorY = 2 * ( end.y - 2 * control.y + start.y );
-    if ( divisorY !== 0 ) {
-      this.tCriticalY = -2 * ( control.y - start.y ) / divisorY;
-      
-      if ( t > 0 && t < 1 ) {
-        this.bounds = this.bounds.withPoint( this.positionAt( this.tCriticalY ) );
-      }
-    }
+    // TODO: performance test removal of these undefined declarations
+    this._startTangent = undefined;
+    this._endTangent = undefined;
+    this._tCriticalX = undefined; // replaced with null if not in range
+    this._tCriticalY = undefined; // replaced with null if not in range
+    this._bounds = undefined;
   };
   inherit( Segment, Segment.Quadratic, {
     
     degree: 2,
     
+    getStart: function() {
+      return this._start;
+    },
+    get start() { return this._start; },
+    
+    getControl: function() {
+      return this._control;
+    },
+    get control() { return this._control; },
+    
+    getEnd: function() {
+      return this._end;
+    },
+    get end() { return this._end; },
+    
+    getStartTangent: function() {
+      if ( this._startTangent === undefined ) {
+        var controlIsStart = this._start.equals( this._control );
+        // TODO: allocation reduction
+        this._startTangent = controlIsStart ?
+                               this._end.minus( this._start ).normalized() :
+                               this._control.minus( this._start ).normalized();
+      }
+      return this._startTangent;
+    },
+    get startTangent() { return this.getStartTangent(); },
+    
+    getEndTangent: function() {
+      if ( this._endTangent === undefined ) {
+        var controlIsEnd = this._end.equals( this._control );
+        // TODO: allocation reduction
+        this._endTangent = controlIsEnd ?
+                               this._end.minus( this._start ).normalized() :
+                               this._end.minus( this._control ).normalized();
+      }
+      return this._endTangent;
+    },
+    get endTangent() { return this.getEndTangent(); },
+    
+    getTCriticalX: function() {
+      // compute x where the derivative is 0 (used for bounds and other things)
+      if ( this._tCriticalX === undefined ) {
+        this._tCriticalX = Segment.Quadratic.extremaT( this._start.x, this._control.x, this._end.x );
+      }
+      return this._tCriticalX;
+    },
+    get tCriticalX() { return this.getTCriticalX(); },
+    
+    getTCriticalY: function() {
+      // compute y where the derivative is 0 (used for bounds and other things)
+      if ( this._tCriticalY === undefined ) {
+        this._tCriticalY = Segment.Quadratic.extremaT( this._start.y, this._control.y, this._end.y );
+      }
+      return this._tCriticalY;
+    },
+    get tCriticalY() { return this.getTCriticalY(); },
+    
+    getNondegenerateSegments: function() {
+      var start = this._start;
+      var control = this._control;
+      var end = this._end;
+      
+      var startIsEnd = start.equals( end );
+      var startIsControl = start.equals( control );
+      var endIsControl = start.equals( control );
+      
+      if ( startIsEnd && startIsControl ) {
+        // all same points
+        return [];
+      } else if ( startIsEnd ) {
+        // this is a special collinear case, we basically line out to the farthest point and back
+        var halfPoint = this.positionAt( 0.5 );
+        return [
+          new Segment.Line( start, halfPoint ),
+          new Segment.Line( halfPoint, end )
+        ];
+      } else if ( arePointsCollinear( start, control, end ) ) {
+        // if they are collinear, we can reduce to start->control and control->end, or if control is between, just one line segment
+        // also, start !== end (handled earlier)
+        if ( startIsControl || endIsControl ) {
+          // just a line segment!
+          return [new Segment.Line( start, end )]; // no extra nondegenerate check since start !== end
+        }
+        // now control point must be unique. we check to see if our rendered path will be outside of the start->end line segment
+        var delta = end.minus( start );
+        var p1d = control.minus( start ).dot( delta.normalized ) / delta.magnitude();
+        var t = Segment.Quadratic.extremaT( 0, p1d, 1 );
+        if ( t !== null && t > 0 && t < 1 ) {
+          // we have a local max inside the range, indicating that our extrema point is outside of start->end
+          // we'll line to and from it
+          var pt = this.positionAt( t );
+          return _.flatten( [
+            new Segment.Line( start, pt ).getNondegenerateSegments(),
+            new Segment.Line( pt, end ).getNondegenerateSegments()
+          ] );
+        } else {
+          // just provide a line segment, our rendered path doesn't go outside of this
+          return [new Segment.Line( start, end )]; // no extra nondegenerate check since start !== end
+        }
+      } else {
+        return [this];
+      }
+    },
+    
+    getBounds: function() {
+      // calculate our temporary guaranteed lower bounds based on the end points
+      if ( this._bounds === undefined ) {
+        this._bounds = new Bounds2( Math.min( this._start.x, this._end.x ), Math.min( this._start.y, this._end.y ), Math.max( this._start.x, this._end.x ), Math.max( this._start.y, this._end.y ) );
+        
+        // compute x and y where the derivative is 0, so we can include this in the bounds
+        var tCriticalX = this.getTCriticalX();
+        var tCriticalY = this.getTCriticalY();
+        
+        if ( tCriticalX !== null && tCriticalX > 0 && tCriticalX < 1 ) {
+          this._bounds = this._bounds.withPoint( this.positionAt( tCriticalX ) );
+        }
+        if ( tCriticalY !== null && tCriticalY > 0 && tCriticalY < 1 ) {
+          this._bounds = this._bounds.withPoint( this.positionAt( tCriticalY ) );
+        }
+      }
+      return this._bounds;
+    },
+    get bounds() { return this.getBounds(); },
+    
     // can be described from t=[0,1] as: (1-t)^2 start + 2(1-t)t control + t^2 end
     positionAt: function( t ) {
       var mt = 1 - t;
-      return this.start.times( mt * mt ).plus( this.control.times( 2 * mt * t ) ).plus( this.end.times( t * t ) );
+      // TODO: allocation reduction
+      return this._start.times( mt * mt ).plus( this._control.times( 2 * mt * t ) ).plus( this._end.times( t * t ) );
     },
     
     // derivative: 2(1-t)( control - start ) + 2t( end - control )
     tangentAt: function( t ) {
-      return this.control.minus( this.start ).times( 2 * ( 1 - t ) ).plus( this.end.minus( this.control ).times( 2 * t ) );
+      // TODO: allocation reduction
+      return this._control.minus( this._start ).times( 2 * ( 1 - t ) ).plus( this._end.minus( this._control ).times( 2 * t ) );
     },
     
     curvatureAt: function( t ) {
@@ -8352,9 +8882,9 @@ define( 'KITE/segments/Quadratic',['require','KITE/kite','PHET_CORE/inherit','DO
       var epsilon = 0.0000001;
       if ( Math.abs( t - 0.5 ) > 0.5 - epsilon ) {
         var isZero = t < 0.5;
-        var p0 = isZero ? this.start : this.end;
-        var p1 = this.control;
-        var p2 = isZero ? this.end : this.start;
+        var p0 = isZero ? this._start : this._end;
+        var p1 = this._control;
+        var p2 = isZero ? this._end : this._start;
         var d10 = p1.minus( p0 );
         var a = d10.magnitude();
         var h = ( isZero ? -1 : 1 ) * d10.perpendicular().normalized().dot( p2.minus( p1 ) );
@@ -8390,31 +8920,42 @@ define( 'KITE/segments/Quadratic',['require','KITE/kite','PHET_CORE/inherit','DO
       return offsetCurves;
     },
     
-    subdivided: function( t, skipComputations ) {
+    subdivided: function( t ) {
       // de Casteljau method
-      var leftMid = this.start.blend( this.control, t );
-      var rightMid = this.control.blend( this.end, t );
+      var leftMid = this._start.blend( this._control, t );
+      var rightMid = this._control.blend( this._end, t );
       var mid = leftMid.blend( rightMid, t );
       return [
-        new Segment.Quadratic( this.start, leftMid, mid, skipComputations ),
-        new Segment.Quadratic( mid, rightMid, this.end, skipComputations )
+        new Segment.Quadratic( this._start, leftMid, mid ),
+        new Segment.Quadratic( mid, rightMid, this._end )
       ];
     },
     
-    reversed: function( skipComputations ) {
-      return new Segment.Quadratic( this.end, this.control, this.start );
+    // elevation of this quadratic Bezier curve to a cubic Bezier curve
+    degreeElevated: function() {
+      // TODO: allocation reduction
+      return new Segment.Cubic(
+        this._start,
+        this._start.plus( this._control.timesScalar( 2 ) ).dividedScalar( 3 ),
+        this._end.plus( this._control.timesScalar( 2 ) ).dividedScalar( 3 ),
+        this._end
+      );
+    },
+    
+    reversed: function() {
+      return new Segment.Quadratic( this._end, this._control, this._start );
     },
     
     approximateOffset: function( r ) {
       return new Segment.Quadratic(
-        this.start.plus( ( this.start.equals( this.control ) ? this.end.minus( this.start ) : this.control.minus( this.start ) ).perpendicular().normalized().times( r ) ),
-        this.control.plus( this.end.minus( this.start ).perpendicular().normalized().times( r ) ),
-        this.end.plus( ( this.end.equals( this.control ) ? this.end.minus( this.start ) : this.end.minus( this.control ) ).perpendicular().normalized().times( r ) )
+        this._start.plus( ( this._start.equals( this._control ) ? this._end.minus( this._start ) : this._control.minus( this._start ) ).perpendicular().normalized().times( r ) ),
+        this._control.plus( this._end.minus( this._start ).perpendicular().normalized().times( r ) ),
+        this._end.plus( ( this._end.equals( this._control ) ? this._end.minus( this._start ) : this._end.minus( this._control ) ).perpendicular().normalized().times( r ) )
       );
     },
     
     getSVGPathFragment: function() {
-      return 'Q ' + this.control.x + ' ' + this.control.y + ' ' + this.end.x + ' ' + this.end.y;
+      return 'Q ' + this._control.x + ' ' + this._control.y + ' ' + this._end.x + ' ' + this._end.y;
     },
     
     strokeLeft: function( lineWidth ) {
@@ -8426,6 +8967,7 @@ define( 'KITE/segments/Quadratic',['require','KITE/kite','PHET_CORE/inherit','DO
     },
     
     getInteriorExtremaTs: function() {
+      // TODO: we assume here we are reduce, so that a criticalX doesn't equal a criticalY?
       var result = [];
       var epsilon = 0.0000000001; // TODO: general kite epsilon?
       if ( this.tCriticalX !== undefined && this.tCriticalX > epsilon && this.tCriticalX < 1 - epsilon ) {
@@ -8449,9 +8991,9 @@ define( 'KITE/segments/Quadratic',['require','KITE/kite','PHET_CORE/inherit','DO
       // find the rotation that will put our ray in the direction of the x-axis so we can only solve for y=0 for intersections
       var inverseMatrix = Matrix3.rotation2( -ray.dir.angle() ).timesMatrix( Matrix3.translation( -ray.pos.x, -ray.pos.y ) );
       
-      var p0 = inverseMatrix.timesVector2( this.start );
-      var p1 = inverseMatrix.timesVector2( this.control );
-      var p2 = inverseMatrix.timesVector2( this.end );
+      var p0 = inverseMatrix.timesVector2( this._start );
+      var p1 = inverseMatrix.timesVector2( this._control );
+      var p2 = inverseMatrix.timesVector2( this._end );
       
       //(1-t)^2 start + 2(1-t)t control + t^2 end
       var a = p0.y - 2 * p1.y + p2.y;
@@ -8492,13 +9034,40 @@ define( 'KITE/segments/Quadratic',['require','KITE/kite','PHET_CORE/inherit','DO
     
     // assumes the current position is at start
     writeToContext: function( context ) {
-      context.quadraticCurveTo( this.control.x, this.control.y, this.end.x, this.end.y );
+      context.quadraticCurveTo( this._control.x, this._control.y, this._end.x, this._end.y );
     },
     
     transformed: function( matrix ) {
-      return new Segment.Quadratic( matrix.timesVector2( this.start ), matrix.timesVector2( this.control ), matrix.timesVector2( this.end ) );
+      return new Segment.Quadratic( matrix.timesVector2( this._start ), matrix.timesVector2( this._control ), matrix.timesVector2( this._end ) );
+    },
+    
+    // given the current curve parameterized by t, will return a curve parameterized by x where t = a * x + b
+    reparameterized: function( a, b ) {
+      // to the polynomial pt^2 + qt + r:
+      var p = this._start.plus( this._end.plus( this._control.timesScalar( -2 ) ) );
+      var q = this._control.minus( this._start ).timesScalar( 2 );
+      var r = this._start;
+      
+      // to the polynomial alpha*x^2 + beta*x + gamma:
+      var alpha = p.timesScalar( a * a );
+      var beta = p.timesScalar( a * b ).timesScalar( 2 ).plus( q.timesScalar( a ) );
+      var gamma = p.timesScalar( b * b ).plus( q.timesScalar( b ) ).plus( r );
+      
+      // back to the form start,control,end
+      return new Segment.Quadratic( gamma, beta.timesScalar( 0.5 ).plus( gamma ), alpha.plus( beta ).plus( gamma ) );
     }
   } );
+  
+  // one-dimensional solution to extrema
+  Segment.Quadratic.extremaT = function( start, control, end ) {
+    // compute t where the derivative is 0 (used for bounds and other things)
+    var divisorX = 2 * ( end - 2 * control + start );
+    if ( divisorX !== 0 ) {
+      return -2 * ( control - start ) / divisorX;
+    } else {
+      return null;
+    }
+  };
   
   return Segment.Quadratic;
 } );
@@ -8515,10 +9084,8 @@ define( 'KITE/segments/Quadratic',['require','KITE/kite','PHET_CORE/inherit','DO
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'KITE/segments/Cubic',['require','KITE/kite','PHET_CORE/inherit','DOT/Bounds2','DOT/Vector2','DOT/Matrix3','DOT/Util','DOT/Util','KITE/segments/Segment','KITE/segments/Quadratic'],function( require ) {
+define( 'KITE/segments/Cubic',['require','PHET_CORE/inherit','DOT/Bounds2','DOT/Vector2','DOT/Matrix3','DOT/Util','DOT/Util','DOT/Util','KITE/segments/Segment','KITE/segments/Quadratic'],function( require ) {
   
-  
-  var kite = require( 'KITE/kite' );
   
   var inherit = require( 'PHET_CORE/inherit' );
   var Bounds2 = require( 'DOT/Bounds2' );
@@ -8526,113 +9093,270 @@ define( 'KITE/segments/Cubic',['require','KITE/kite','PHET_CORE/inherit','DOT/Bo
   var Matrix3 = require( 'DOT/Matrix3' );
   var solveQuadraticRootsReal = require( 'DOT/Util' ).solveQuadraticRootsReal;
   var solveCubicRootsReal = require( 'DOT/Util' ).solveCubicRootsReal;
+  var arePointsCollinear = require( 'DOT/Util' ).arePointsCollinear;
   
   var Segment = require( 'KITE/segments/Segment' );
   require( 'KITE/segments/Quadratic' );
 
-  Segment.Cubic = function Cubic( start, control1, control2, end, skipComputations ) {
-    this.start = start;
-    this.control1 = control1;
-    this.control2 = control2;
-    this.end = end;
+  Segment.Cubic = function Cubic( start, control1, control2, end ) {
+    this._start = start;
+    this._control1 = control1;
+    this._control2 = control2;
+    this._end = end;
     
-    // allows us to skip unnecessary computation in the subdivision steps
-    if ( skipComputations ) {
-      return;
-    }
+    // TODO: performance test removal of these undefined declarations
+    this._startTangent = undefined;
+    this._endTangent = undefined;
+    this._r = undefined;
+    this._s = undefined;
     
-    if ( start.equals( end, 0 ) && start.equals( control1, 0 ) && start.equals( control2, 0 ) ) {
-      this.invalid = true;
-      return;
-    }
+    this._tCusp = undefined;
+    this._tDeterminant = undefined;
+    this._tInflection1 = undefined;
+    this._tInflection2 = undefined;
+    this._startQuadratic = undefined;
+    this._endQuadratic = undefined;
     
-    this.startTangent = this.tangentAt( 0 ).normalized();
-    this.endTangent = this.tangentAt( 1 ).normalized();
+    this._xExtremaT = undefined;
+    this._yExtremaT = undefined;
     
-    // from http://www.cis.usouthal.edu/~hain/general/Publications/Bezier/BezierFlattening.pdf
-    this.r = control1.minus( start ).normalized();
-    this.s = this.r.perpendicular();
-    
-    var a = start.times( -1 ).plus( control1.times( 3 ) ).plus( control2.times( -3 ) ).plus( end );
-    var b = start.times( 3 ).plus( control1.times( -6 ) ).plus( control2.times( 3 ) );
-    var c = start.times( -3 ).plus( control1.times( 3 ) );
-    var d = start;
-    
-    var aPerp = a.perpendicular();
-    var bPerp = b.perpendicular();
-    var aPerpDotB = aPerp.dot( b );
-    
-    this.tCusp = -0.5 * ( aPerp.dot( c ) / aPerpDotB );
-    this.tDeterminant = this.tCusp * this.tCusp - ( 1 / 3 ) * ( bPerp.dot( c ) / aPerpDotB );
-    if ( this.tDeterminant >= 0 ) {
-      var sqrtDet = Math.sqrt( this.tDeterminant );
-      this.tInflection1 = this.tCusp - sqrtDet;
-      this.tInflection2 = this.tCusp + sqrtDet;
-    }
-    
-    if ( this.hasCusp() ) {
-      // if there is a cusp, we'll split at the cusp into two quadratic bezier curves.
-      // see http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.94.8088&rep=rep1&type=pdf (Singularities of rational Bezier curves - J Monterde, 2001)
-      var subdividedAtCusp = this.subdivided( this.tCusp, true );
-      this.startQuadratic = new Segment.Quadratic( subdividedAtCusp[0].start, subdividedAtCusp[0].control1, subdividedAtCusp[0].end, false );
-      this.endQuadratic = new Segment.Quadratic( subdividedAtCusp[1].start, subdividedAtCusp[1].control2, subdividedAtCusp[1].end, false );
-    }
-    
-    this.bounds = Bounds2.NOTHING;
-    this.bounds = this.bounds.withPoint( this.start );
-    this.bounds = this.bounds.withPoint( this.end );
-    
-    /*---------------------------------------------------------------------------*
-    * Bounds
-    *----------------------------------------------------------------------------*/
-    
-    // finds what t values the cubic extrema are at (if any).
-    function extremaT( v0, v1, v2, v3 ) {
-      // coefficients of derivative
-      var a = -3 * v0 + 9 * v1 -9 * v2 + 3 * v3;
-      var b =  6 * v0 - 12 * v1 + 6 * v2;
-      var c = -3 * v0 + 3 * v1;
-      
-      return solveQuadraticRootsReal( a, b, c );
-    }
-    
-    var cubic = this;
-    this.xExtremaT = extremaT( this.start.x, this.control1.x, this.control2.x, this.end.x );
-    _.each( this.xExtremaT, function( t ) {
-      if ( t >= 0 && t <= 1 ) {
-        cubic.bounds = cubic.bounds.withPoint( cubic.positionAt( t ) );
-      }
-    } );
-    this.yExtremaT = extremaT( this.start.y, this.control1.y, this.control2.y, this.end.y );
-    _.each( this.yExtremaT, function( t ) {
-      if ( t >= 0 && t <= 1 ) {
-        cubic.bounds = cubic.bounds.withPoint( cubic.positionAt( t ) );
-      }
-    } );
-    
-    if ( this.hasCusp() ) {
-      this.bounds = this.bounds.withPoint( this.positionAt( this.tCusp ) );
-    }
+    this._bounds = undefined;
   };
   inherit( Segment, Segment.Cubic, {
     
     degree: 3,
     
+    getStart: function() {
+      return this._start;
+    },
+    get start() { return this._start; },
+    
+    getControl1: function() {
+      return this._control1;
+    },
+    get control1() { return this._control1; },
+    
+    getControl2: function() {
+      return this._control2;
+    },
+    get control2() { return this._control2; },
+    
+    getEnd: function() {
+      return this._end;
+    },
+    get end() { return this._end; },
+    
+    getStartTangent: function() {
+      if ( this._startTangent === undefined ) {
+        this._startTangent = this.tangentAt( 0 ).normalized();
+      }
+      return this._startTangent;
+    },
+    get startTangent() { return this.getStartTangent(); },
+    
+    getEndTangent: function() {
+      if ( this._endTangent === undefined ) {
+        this._endTangent = this.tangentAt( 1 ).normalized();
+      }
+      return this._endTangent;
+    },
+    get endTangent() { return this.getEndTangent(); },
+    
+    getR: function() {
+      // from http://www.cis.usouthal.edu/~hain/general/Publications/Bezier/BezierFlattening.pdf
+      if ( this._r === undefined ) {
+        this._r = this._control1.minus( this._start ).normalized();
+      }
+      return this._r;
+    },
+    get r() { return this.getR(); },
+    
+    getS: function() {
+      // from http://www.cis.usouthal.edu/~hain/general/Publications/Bezier/BezierFlattening.pdf
+      if ( this._s === undefined ) {
+        this._s = this.getR().perpendicular();
+      }
+      return this._s;
+    },
+    get s() { return this.getS(); },
+    
+    getTCusp: function() {
+      if ( this._tCusp === undefined ) {
+        this.computeCuspInfo();
+      }
+      assert && assert( this._tCusp !== undefined );
+      return this._tCusp;
+    },
+    get tCusp() { return this.getTCusp(); },
+    
+    getTDeterminant: function() {
+      if ( this._tDeterminant === undefined ) {
+        this.computeCuspInfo();
+      }
+      assert && assert( this._tDeterminant !== undefined );
+      return this._tDeterminant;
+    },
+    get tDeterminant() { return this.getTDeterminant(); },
+    
+    getTInflection1: function() {
+      if ( this._tInflection1 === undefined ) {
+        this.computeCuspInfo();
+      }
+      assert && assert( this._tInflection1 !== undefined );
+      return this._tInflection1;
+    },
+    get tInflection1() { return this.getTInflection1(); },
+    
+    getTInflection2: function() {
+      if ( this._tInflection2 === undefined ) {
+        this.computeCuspInfo();
+      }
+      assert && assert( this._tInflection2 !== undefined );
+      return this._tInflection2;
+    },
+    get tInflection2() { return this.getTInflection2(); },
+    
+    getStartQuadratic: function() {
+      if ( this._startQuadratic === undefined ) {
+        this.computeCuspSegments();
+      }
+      assert && assert( this._startQuadratic !== undefined );
+      return this._startQuadratic;
+    },
+    get startQuadratic() { return this.getStartQuadratic(); },
+    
+    getEndQuadratic: function() {
+      if ( this._endQuadratic === undefined ) {
+        this.computeCuspSegments();
+      }
+      assert && assert( this._endQuadratic !== undefined );
+      return this._endQuadratic;
+    },
+    get endQuadratic() { return this.getEndQuadratic(); },
+    
+    getXExtremaT: function() {
+      if ( this._xExtremaT === undefined ) {
+        this._xExtremaT = Segment.Cubic.extremaT( this._start.x, this._control1.x, this._control2.x, this._end.x );
+      }
+      return this._xExtremaT;
+    },
+    get xExtremaT() { return this.getXExtremaT(); },
+    
+    getYExtremaT: function() {
+      if ( this._yExtremaT === undefined ) {
+        this._yExtremaT = Segment.Cubic.extremaT( this._start.y, this._control1.y, this._control2.y, this._end.y );
+      }
+      return this._yExtremaT;
+    },
+    get yExtremaT() { return this.getYExtremaT(); },
+    
+    getBounds: function() {
+      if ( this._bounds === undefined ) {
+        this._bounds = Bounds2.NOTHING;
+        this._bounds = this._bounds.withPoint( this._start );
+        this._bounds = this._bounds.withPoint( this._end );
+        
+        var cubic = this;
+        _.each( this.getXExtremaT(), function( t ) {
+          if ( t >= 0 && t <= 1 ) {
+            cubic._bounds = cubic._bounds.withPoint( cubic.positionAt( t ) );
+          }
+        } );
+        _.each( this.getYExtremaT(), function( t ) {
+          if ( t >= 0 && t <= 1 ) {
+            cubic._bounds = cubic._bounds.withPoint( cubic.positionAt( t ) );
+          }
+        } );
+        
+        if ( this.hasCusp() ) {
+          this._bounds = this._bounds.withPoint( this.positionAt( this.getTCusp() ) );
+        }
+      }
+      return this._bounds;
+    },
+    get bounds() { return this.getBounds(); },
+    
+    // t value for the cusp, and the related determinant and inflection points
+    computeCuspInfo: function() {
+      // from http://www.cis.usouthal.edu/~hain/general/Publications/Bezier/BezierFlattening.pdf
+      // TODO: allocation reduction
+      var a = this._start.times( -1 ).plus( this._control1.times( 3 ) ).plus( this._control2.times( -3 ) ).plus( this._end );
+      var b = this._start.times( 3 ).plus( this._control1.times( -6 ) ).plus( this._control2.times( 3 ) );
+      var c = this._start.times( -3 ).plus( this._control1.times( 3 ) );
+
+      var aPerp = a.perpendicular();
+      var bPerp = b.perpendicular();
+      var aPerpDotB = aPerp.dot( b );
+      
+      this._tCusp = -0.5 * ( aPerp.dot( c ) / aPerpDotB );
+      this._tDeterminant = this._tCusp * this._tCusp - ( 1 / 3 ) * ( bPerp.dot( c ) / aPerpDotB );
+      if ( this._tDeterminant >= 0 ) {
+        var sqrtDet = Math.sqrt( this._tDeterminant );
+        this._tInflection1 = this._tCusp - sqrtDet;
+        this._tInflection2 = this._tCusp + sqrtDet;
+      } else {
+        this._tInflection1 = null;
+        this._tInflection2 = null;
+      }
+    },
+    
+    // the cusp allows us to split into 2 quadratic Bezier curves
+    computeCuspSegments: function() {
+      if ( this.hasCusp() ) {
+        // if there is a cusp, we'll split at the cusp into two quadratic bezier curves.
+        // see http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.94.8088&rep=rep1&type=pdf (Singularities of rational Bezier curves - J Monterde, 2001)
+        var subdividedAtCusp = this.subdivided( this.getTCusp );
+        this._startQuadratic = new Segment.Quadratic( subdividedAtCusp[0].start, subdividedAtCusp[0].control1, subdividedAtCusp[0].end, false );
+        this._endQuadratic = new Segment.Quadratic( subdividedAtCusp[1].start, subdividedAtCusp[1].control2, subdividedAtCusp[1].end, false );
+      } else {
+        this._startQuadratic = null;
+        this._endQuadratic = null;
+      }
+    },
+    
+    getNondegenerateSegments: function() {
+      var start = this._start;
+      var control1 = this._control1;
+      var control2 = this._control2;
+      var end = this._end;
+      
+      var reduced = this.degreeReduced( 1e-9 );
+      
+      if ( start.equals( end ) && start.equals( control1 ) && start.equals( control2 ) ) {
+        // degenerate point
+        return [];
+      } else if ( this.hasCusp() ) {
+        return _.flatten( [
+          this._startQuadratic.getNondegenerateSegments(),
+          this._endQuadratic.getNondegenerateSegments()
+        ] );
+      } else if ( reduced ) {
+        // if we can reduce to a quadratic Bezier, always do this (and make sure it is non-degenerate)
+        return reduced.getNondegenerateSegments();
+      } else if ( arePointsCollinear( start, control1, end ) && arePointsCollinear( start, control2, end ) ) {
+        throw new Error( 'TODO, use extrema T funcs' );
+      } else {
+        return [this];
+      }
+    },
+    
     hasCusp: function() {
-      var epsilon = 0.000001; // TODO: make this available to change?
-      return this.tangentAt( this.tCusp ).magnitude() < epsilon && this.tCusp >= 0 && this.tCusp <= 1;
+      var tCusp = this.getTCusp();
+      
+      var epsilon = 1e-7; // TODO: make this available to change?
+      return this.tangentAt( tCusp ).magnitude() < epsilon && tCusp >= 0 && tCusp <= 1;
     },
     
     // position: (1 - t)^3*start + 3*(1 - t)^2*t*control1 + 3*(1 - t) t^2*control2 + t^3*end
     positionAt: function( t ) {
       var mt = 1 - t;
-      return this.start.times( mt * mt * mt ).plus( this.control1.times( 3 * mt * mt * t ) ).plus( this.control2.times( 3 * mt * t * t ) ).plus( this.end.times( t * t * t ) );
+      return this._start.times( mt * mt * mt ).plus( this._control1.times( 3 * mt * mt * t ) ).plus( this._control2.times( 3 * mt * t * t ) ).plus( this._end.times( t * t * t ) );
     },
     
     // derivative: -3 p0 (1 - t)^2 + 3 p1 (1 - t)^2 - 6 p1 (1 - t) t + 6 p2 (1 - t) t - 3 p2 t^2 + 3 p3 t^2
     tangentAt: function( t ) {
       var mt = 1 - t;
-      return this.start.times( -3 * mt * mt ).plus( this.control1.times( 3 * mt * mt - 6 * mt * t ) ).plus( this.control2.times( 6 * mt * t - 3 * t * t ) ).plus( this.end.times( 3 * t * t ) );
+      return this._start.times( -3 * mt * mt ).plus( this._control1.times( 3 * mt * mt - 6 * mt * t ) ).plus( this._control2.times( 6 * mt * t - 3 * t * t ) ).plus( this._end.times( 3 * t * t ) );
     },
     
     curvatureAt: function( t ) {
@@ -8641,35 +9365,35 @@ define( 'KITE/segments/Cubic',['require','KITE/kite','PHET_CORE/inherit','DOT/Bo
       var epsilon = 0.0000001;
       if ( Math.abs( t - 0.5 ) > 0.5 - epsilon ) {
         var isZero = t < 0.5;
-        var p0 = isZero ? this.start : this.end;
-        var p1 = isZero ? this.control1 : this.control2;
-        var p2 = isZero ? this.control2 : this.control1;
+        var p0 = isZero ? this._start : this._end;
+        var p1 = isZero ? this._control1 : this._control2;
+        var p2 = isZero ? this._control2 : this._control1;
         var d10 = p1.minus( p0 );
         var a = d10.magnitude();
         var h = ( isZero ? -1 : 1 ) * d10.perpendicular().normalized().dot( p2.minus( p1 ) );
         return ( h * ( this.degree - 1 ) ) / ( this.degree * a * a );
       } else {
-        return this.subdivided( t, true )[0].curvatureAt( 1 );
+        return this.subdivided( t )[0].curvatureAt( 1 );
       }
     },
     
     toRS: function( point ) {
-      var firstVector = point.minus( this.start );
-      return new Vector2( firstVector.dot( this.r ), firstVector.dot( this.s ) );
+      var firstVector = point.minus( this._start );
+      return new Vector2( firstVector.dot( this.getR() ), firstVector.dot( this.getS() ) );
     },
     
-    subdivided: function( t, skipComputations ) {
+    subdivided: function( t ) {
       // de Casteljau method
       // TODO: add a 'bisect' or 'between' method for vectors?
-      var left = this.start.blend( this.control1, t );
-      var right = this.control2.blend( this.end, t );
-      var middle = this.control1.blend( this.control2, t );
+      var left = this._start.blend( this._control1, t );
+      var right = this._control2.blend( this._end, t );
+      var middle = this._control1.blend( this._control2, t );
       var leftMid = left.blend( middle, t );
       var rightMid = middle.blend( right, t );
       var mid = leftMid.blend( rightMid, t );
       return [
-        new Segment.Cubic( this.start, left, leftMid, mid, skipComputations ),
-        new Segment.Cubic( mid, rightMid, right, this.end, skipComputations )
+        new Segment.Cubic( this._start, left, leftMid, mid ),
+        new Segment.Cubic( mid, rightMid, right, this._end )
       ];
     },
     
@@ -8698,7 +9422,7 @@ define( 'KITE/segments/Cubic',['require','KITE/kite','PHET_CORE/inherit','DOT/Bo
     },
     
     getSVGPathFragment: function() {
-      return 'C ' + this.control1.x + ' ' + this.control1.y + ' ' + this.control2.x + ' ' + this.control2.y + ' ' + this.end.x + ' ' + this.end.y;
+      return 'C ' + this._control1.x + ' ' + this._control1.y + ' ' + this._control2.x + ' ' + this._control2.y + ' ' + this._end.x + ' ' + this._end.y;
     },
     
     strokeLeft: function( lineWidth ) {
@@ -8710,7 +9434,7 @@ define( 'KITE/segments/Cubic',['require','KITE/kite','PHET_CORE/inherit','DOT/Bo
     },
     
     getInteriorExtremaTs: function() {
-      var ts = this.xExtremaT.concat( this.yExtremaT );
+      var ts = this.getXExtremaT().concat( this.getYExtremaT() );
       var result = [];
       _.each( ts, function( t ) {
         var epsilon = 0.0000000001; // TODO: general kite epsilon?
@@ -8736,10 +9460,10 @@ define( 'KITE/segments/Cubic',['require','KITE/kite','PHET_CORE/inherit','DOT/Bo
       // find the rotation that will put our ray in the direction of the x-axis so we can only solve for y=0 for intersections
       var inverseMatrix = Matrix3.rotation2( -ray.dir.angle() ).timesMatrix( Matrix3.translation( -ray.pos.x, -ray.pos.y ) );
       
-      var p0 = inverseMatrix.timesVector2( this.start );
-      var p1 = inverseMatrix.timesVector2( this.control1 );
-      var p2 = inverseMatrix.timesVector2( this.control2 );
-      var p3 = inverseMatrix.timesVector2( this.end );
+      var p0 = inverseMatrix.timesVector2( this._start );
+      var p1 = inverseMatrix.timesVector2( this._control1 );
+      var p2 = inverseMatrix.timesVector2( this._control2 );
+      var p3 = inverseMatrix.timesVector2( this._end );
       
       // polynomial form of cubic: start + (3 control1 - 3 start) t + (-6 control1 + 3 control2 + 3 start) t^2 + (3 control1 - 3 control2 + end - start) t^3
       var a = -p0.y + 3 * p1.y - 3 * p2.y + p3.y;
@@ -8781,11 +9505,30 @@ define( 'KITE/segments/Cubic',['require','KITE/kite','PHET_CORE/inherit','DOT/Bo
     
     // assumes the current position is at start
     writeToContext: function( context ) {
-      context.bezierCurveTo( this.control1.x, this.control1.y, this.control2.x, this.control2.y, this.end.x, this.end.y );
+      context.bezierCurveTo( this._control1.x, this._control1.y, this._control2.x, this._control2.y, this._end.x, this._end.y );
     },
     
     transformed: function( matrix ) {
-      return new Segment.Cubic( matrix.timesVector2( this.start ), matrix.timesVector2( this.control1 ), matrix.timesVector2( this.control2 ), matrix.timesVector2( this.end ) );
+      return new Segment.Cubic( matrix.timesVector2( this._start ), matrix.timesVector2( this._control1 ), matrix.timesVector2( this._control2 ), matrix.timesVector2( this._end ) );
+    },
+    
+    // returns a degree-reduced quadratic Bezier if possible, otherwise it returns null
+    degreeReduced: function( epsilon ) {
+      epsilon = epsilon || 0; // if not provided, use an exact version
+      // TODO: allocation reduction
+      // TODO: performance: don't divide both by 2 here, combine it later!!
+      var controlA = this._control1.timesScalar( 3 ).minus( this._start ).dividedScalar( 2 );
+      var controlB = this._control2.timesScalar( 3 ).minus( this._end ).dividedScalar( 2 );
+      if ( controlA.minus( controlB ).magnitude() <= epsilon ) {
+        return new Segment.Quadratic(
+          this._start,
+          controlA.average( controlB ), // average the control points for stability. they should be almost identical
+          this._end
+        );
+      } else {
+        // the two options for control points are too far away, this curve isn't easily reducible.
+        return null;
+      }
     }
     
     // returns the resultant winding number of this ray intersecting this segment.
@@ -8794,10 +9537,10 @@ define( 'KITE/segments/Cubic',['require','KITE/kite','PHET_CORE/inherit','DOT/Bo
     //   var inverseMatrix = Matrix3.rotation2( -ray.dir.angle() );
     //   assert && assert( inverseMatrix.timesVector2( ray.dir ).x > 0.99 ); // verify that we transform the unit vector to the x-unit
       
-    //   var y0 = inverseMatrix.timesVector2( this.start ).y;
-    //   var y1 = inverseMatrix.timesVector2( this.control1 ).y;
-    //   var y2 = inverseMatrix.timesVector2( this.control2 ).y;
-    //   var y3 = inverseMatrix.timesVector2( this.end ).y;
+    //   var y0 = inverseMatrix.timesVector2( this._start ).y;
+    //   var y1 = inverseMatrix.timesVector2( this._control1 ).y;
+    //   var y2 = inverseMatrix.timesVector2( this._control2 ).y;
+    //   var y3 = inverseMatrix.timesVector2( this._end ).y;
       
     //   // polynomial form of cubic: start + (3 control1 - 3 start) t + (-6 control1 + 3 control2 + 3 start) t^2 + (3 control1 - 3 control2 + end - start) t^3
     //   var a = -y0 + 3 * y1 - 3 * y2 + y3;
@@ -8821,6 +9564,16 @@ define( 'KITE/segments/Cubic',['require','KITE/kite','PHET_CORE/inherit','DOT/Bo
     // }
   } );
   
+  // finds what t values the cubic extrema are at (if any). This is just the 1-dimensional case, used for multiple purposes
+  Segment.Cubic.extremaT = function( v0, v1, v2, v3 ) {
+    // coefficients of derivative
+    var a = -3 * v0 + 9 * v1 -9 * v2 + 3 * v3;
+    var b =  6 * v0 - 12 * v1 + 6 * v2;
+    var c = -3 * v0 + 3 * v1;
+    
+    return solveQuadraticRootsReal( a, b, c );
+  };
+  
   return Segment.Cubic;
 } );
 
@@ -8832,10 +9585,8 @@ define( 'KITE/segments/Cubic',['require','KITE/kite','PHET_CORE/inherit','DOT/Bo
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'KITE/segments/EllipticalArc',['require','KITE/kite','PHET_CORE/inherit','DOT/Vector2','DOT/Bounds2','DOT/Matrix3','DOT/Transform3','DOT/Util','DOT/Util','KITE/segments/Segment','KITE/util/Subpath'],function( require ) {
+define( 'KITE/segments/EllipticalArc',['require','PHET_CORE/inherit','DOT/Vector2','DOT/Bounds2','DOT/Matrix3','DOT/Transform3','DOT/Util','DOT/Util','KITE/segments/Segment','KITE/util/Subpath'],function( require ) {
   
-  
-  var kite = require( 'KITE/kite' );
   
   var inherit = require( 'PHET_CORE/inherit' );
   var Vector2 = require( 'DOT/Vector2' );
@@ -8877,119 +9628,238 @@ define( 'KITE/segments/EllipticalArc',['require','KITE/kite','PHET_CORE/inherit'
       radiusY = tmpR;
     }
     
-    this.center = center;
-    this.radiusX = radiusX;
-    this.radiusY = radiusY;
-    this.rotation = rotation;
-    this.startAngle = startAngle;
-    this.endAngle = endAngle;
-    this.anticlockwise = anticlockwise;
+    this._center = center;
+    this._radiusX = radiusX;
+    this._radiusY = radiusY;
+    this._rotation = rotation;
+    this._startAngle = startAngle;
+    this._endAngle = endAngle;
+    this._anticlockwise = anticlockwise;
     
-    this.unitTransform = Segment.EllipticalArc.computeUnitTransform( center, radiusX, radiusY, rotation );
-    
-    this.start = this.positionAtAngle( startAngle );
-    this.end = this.positionAtAngle( endAngle );
-    this.startTangent = this.tangentAtAngle( startAngle ).normalized();
-    this.endTangent = this.tangentAtAngle( endAngle ).normalized();
-    
-    if ( radiusX === 0 || radiusY === 0 || startAngle === endAngle ) {
-      this.invalid = true;
-      return;
-    }
+    // TODO: performance test removal of these undefined declarations
+    this._unitTransform = undefined;
+    this._start = undefined;
+    this._end = undefined;
+    this._startTangent = undefined;
+    this._endTangent = undefined;
+    this._actualEndAngle = undefined;
+    this._isFullPerimeter = undefined;
+    this._angleDifference = undefined;
+    this._unitArcSegment = undefined;
     
     if ( radiusX < radiusY ) {
       // TODO: check this
       throw new Error( 'Not verified to work if radiusX < radiusY' );
     }
     
-    // compute an actual end angle so that we can smoothly go from this.startAngle to this.actualEndAngle
-    if ( this.anticlockwise ) {
-      // angle is 'decreasing'
-      // -2pi <= end - start < 2pi
-      if ( this.startAngle > this.endAngle ) {
-        this.actualEndAngle = this.endAngle;
-      } else if ( this.startAngle < this.endAngle ) {
-        this.actualEndAngle = this.endAngle - 2 * Math.PI;
-      } else {
-        // equal
-        this.actualEndAngle = this.startAngle;
-      }
-    } else {
-      // angle is 'increasing'
-      // -2pi < end - start <= 2pi
-      if ( this.startAngle < this.endAngle ) {
-        this.actualEndAngle = this.endAngle;
-      } else if ( this.startAngle > this.endAngle ) {
-        this.actualEndAngle = this.endAngle + Math.PI * 2;
-      } else {
-        // equal
-        this.actualEndAngle = this.startAngle;
-      }
-    }
-    
     // constraints shared with Segment.Arc
     assert && assert( !( ( !anticlockwise && endAngle - startAngle <= -Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle <= -Math.PI * 2 ) ), 'Not handling elliptical arcs with start/end angles that show differences in-between browser handling' );
     assert && assert( !( ( !anticlockwise && endAngle - startAngle > Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle > Math.PI * 2 ) ), 'Not handling elliptical arcs with start/end angles that show differences in-between browser handling' );
-    
-    var isFullPerimeter = ( !anticlockwise && endAngle - startAngle >= Math.PI * 2 ) || ( anticlockwise && startAngle - endAngle >= Math.PI * 2 );
-    
-    // compute an angle difference that represents how "much" of the circle our arc covers
-    this.angleDifference = this.anticlockwise ? this.startAngle - this.endAngle : this.endAngle - this.startAngle;
-    if ( this.angleDifference < 0 ) {
-      this.angleDifference += Math.PI * 2;
-    }
-    assert && assert( this.angleDifference >= 0 ); // now it should always be zero or positive
-    
-    // a unit arg segment that we can map to our ellipse. useful for hit testing and such.
-    this.unitArcSegment = new Segment.Arc( Vector2.ZERO, 1, startAngle, endAngle, anticlockwise );
-    
-    this.bounds = Bounds2.NOTHING;
-    this.bounds = this.bounds.withPoint( this.start );
-    this.bounds = this.bounds.withPoint( this.end );
-    
-    // for bounds computations
-    var that = this;
-    function boundsAtAngle( angle ) {
-      if ( that.containsAngle( angle ) ) {
-        // the boundary point is in the arc
-        that.bounds = that.bounds.withPoint( that.positionAtAngle( angle ) );
-      }
-    }
-    
-    // if the angles are different, check extrema points
-    if ( startAngle !== endAngle ) {
-      // solve the mapping from the unit circle, find locations where a coordinate of the gradient is zero.
-      // we find one extrema point for both x and y, since the other two are just rotated by pi from them.
-      var xAngle = Math.atan( -( radiusY / radiusX ) * Math.tan( rotation ) );
-      var yAngle = Math.atan( ( radiusY / radiusX ) / Math.tan( rotation ) );
-      
-      // check all of the extrema points
-      this.possibleExtremaAngles = [
-        xAngle,
-        xAngle + Math.PI,
-        yAngle,
-        yAngle + Math.PI
-      ];
-      
-      _.each( this.possibleExtremaAngles, boundsAtAngle );
-    }
   };
   inherit( Segment, Segment.EllipticalArc, {
+    
+    getCenter: function() {
+      return this._center;
+    },
+    get center() { return this.getCenter(); },
+    
+    getRadiusX: function() {
+      return this._radiusX;
+    },
+    get radiusX() { return this.getRadiusX(); },
+    
+    getRadiusY: function() {
+      return this._radiusY;
+    },
+    get radiusY() { return this.getRadiusY(); },
+    
+    getRotation: function() {
+      return this._rotation;
+    },
+    get rotation() { return this.getRotation(); },
+    
+    getStartAngle: function() {
+      return this._startAngle;
+    },
+    get startAngle() { return this.getStartAngle(); },
+    
+    getEndAngle: function() {
+      return this._endAngle;
+    },
+    get endAngle() { return this.getEndAngle(); },
+    
+    getAnticlockwise: function() {
+      return this._anticlockwise;
+    },
+    get anticlockwise() { return this.getAnticlockwise(); },
+    
+    getUnitTransform: function() {
+      if ( this._unitTransform === undefined ) {
+        this._unitTransform = Segment.EllipticalArc.computeUnitTransform( this._center, this._radiusX, this._radiusY, this._rotation );
+      }
+      return this._unitTransform;
+    },
+    get unitTransform() { return this.getUnitTransform(); },
+    
+    getStart: function() {
+      if ( this._start === undefined ) {
+        this._start = this.positionAtAngle( this._startAngle );
+      }
+      return this._start;
+    },
+    get start() { return this.getStart(); },
+    
+    getEnd: function() {
+      if ( this._end === undefined ) {
+        this._end = this.positionAtAngle( this._endAngle );
+      }
+      return this._end;
+    },
+    get end() { return this.getEnd(); },
+    
+    getStartTangent: function() {
+      if ( this._startTangent === undefined ) {
+        this._startTangent = this.tangentAtAngle( this._startAngle );
+      }
+      return this._startTangent;
+    },
+    get startTangent() { return this.getStartTangent(); },
+    
+    getEndTangent: function() {
+      if ( this._endTangent === undefined ) {
+        this._endTangent = this.tangentAtAngle( this._endAngle );
+      }
+      return this._endTangent;
+    },
+    get endTangent() { return this.getEndTangent(); },
+    
+    getActualEndAngle: function() {
+      if ( this._actualEndAngle === undefined ) {
+        // compute an actual end angle so that we can smoothly go from this._startAngle to this._actualEndAngle
+        if ( this._anticlockwise ) {
+          // angle is 'decreasing'
+          // -2pi <= end - start < 2pi
+          if ( this._startAngle > this._endAngle ) {
+            this._actualEndAngle = this._endAngle;
+          } else if ( this._startAngle < this._endAngle ) {
+            this._actualEndAngle = this._endAngle - 2 * Math.PI;
+          } else {
+            // equal
+            this._actualEndAngle = this._startAngle;
+          }
+        } else {
+          // angle is 'increasing'
+          // -2pi < end - start <= 2pi
+          if ( this._startAngle < this._endAngle ) {
+            this._actualEndAngle = this._endAngle;
+          } else if ( this._startAngle > this._endAngle ) {
+            this._actualEndAngle = this._endAngle + Math.PI * 2;
+          } else {
+            // equal
+            this._actualEndAngle = this._startAngle;
+          }
+        }
+      }
+      return this._actualEndAngle;
+    },
+    get actualEndAngle() { return this.getActualEndAngle(); },
+    
+    getIsFullPerimeter: function() {
+      if ( this._isFullPerimeter === undefined ) {
+        this._isFullPerimeter = ( !this._anticlockwise && this._endAngle - this._startAngle >= Math.PI * 2 ) || ( this._anticlockwise && this._startAngle - this._endAngle >= Math.PI * 2 );
+      }
+      return this._isFullPerimeter;
+    },
+    get isFullPerimeter() { return this.getIsFullPerimeter(); },
+    
+    getAngleDifference: function() {
+      if ( this._angleDifference === undefined ) {
+        // compute an angle difference that represents how "much" of the circle our arc covers
+        this._angleDifference = this._anticlockwise ? this._startAngle - this._endAngle : this._endAngle - this._startAngle;
+        if ( this._angleDifference < 0 ) {
+          this._angleDifference += Math.PI * 2;
+        }
+        assert && assert( this._angleDifference >= 0 ); // now it should always be zero or positive
+      }
+      return this._angleDifference;
+    },
+    get angleDifference() { return this.getAngleDifference(); },
+    
+    // a unit arg segment that we can map to our ellipse. useful for hit testing and such.
+    getUnitArcSegment: function() {
+      if ( this._unitArcSegment === undefined ) {
+        this._unitArcSegment = new Segment.Arc( Vector2.ZERO, 1, this._startAngle, this._endAngle, this._anticlockwise );
+      }
+      return this._unitArcSegment;
+    },
+    
+    // temporary shims
+    getBounds: function() {
+      if ( this._bounds === undefined ) {
+        this._bounds = Bounds2.NOTHING.withPoint( this.getStart() )
+                                     .withPoint( this.getEnd() );
+        
+        // if the angles are different, check extrema points
+        if ( this._startAngle !== this._endAngle ) {
+          // solve the mapping from the unit circle, find locations where a coordinate of the gradient is zero.
+          // we find one extrema point for both x and y, since the other two are just rotated by pi from them.
+          var xAngle = Math.atan( -( this._radiusY / this._radiusX ) * Math.tan( this._rotation ) );
+          var yAngle = Math.atan( ( this._radiusY / this._radiusX ) / Math.tan( this._rotation ) );
+          
+          // check all of the extrema points
+          this.possibleExtremaAngles = [
+            xAngle,
+            xAngle + Math.PI,
+            yAngle,
+            yAngle + Math.PI
+          ];
+          
+          _.each( this.possibleExtremaAngles, this.includeBoundsAtAngle.bind( this ) );
+        }
+      }
+      return this._bounds;
+    },
+    get bounds() { return this.getBounds(); },
+    
+    getNondegenerateSegments: function() {
+      if ( this._radiusX <= 0 || this._radiusY <= 0 || this._startAngle === this._endAngle ) {
+        return [];
+      } else if ( this._radiusX === this._radiusY ) {
+        // reduce to an Arc
+        var startAngle = this._startAngle - this._rotation;
+        var endAngle = this._endAngle - this._rotation;
+        
+        // preserve full circles
+        if ( Math.abs( this._endAngle - this._startAngle ) === Math.PI * 2 ) {
+          endAngle = this._anticlockwise ? startAngle - Math.PI * 2 : startAngle + Math.PI * 2;
+        }
+        return [new Segment.Arc( this._center, this._radiusX, startAngle, endAngle, this._anticlockwise )];
+      } else {
+        return [this];
+      }
+    },
+    
+    includeBoundsAtAngle: function( angle ) {
+      if ( this.containsAngle( angle ) ) {
+        // the boundary point is in the arc
+        this._bounds = this._bounds.withPoint( this.positionAtAngle( angle ) );
+      }
+    },
     
     // maps a contained angle to between [startAngle,actualEndAngle), even if the end angle is lower.
     mapAngle: function( angle ) {
       // consider an assert that we contain that angle?
-      return ( this.startAngle > this.actualEndAngle ) ?
-             DotUtil.moduloBetweenUp( angle, this.startAngle - 2 * Math.PI, this.startAngle ) :
-             DotUtil.moduloBetweenDown( angle, this.startAngle, this.startAngle + 2 * Math.PI );
+      return ( this._startAngle > this.getActualEndAngle() ) ?
+             DotUtil.moduloBetweenUp( angle, this._startAngle - 2 * Math.PI, this._startAngle ) :
+             DotUtil.moduloBetweenDown( angle, this._startAngle, this._startAngle + 2 * Math.PI );
     },
     
     tAtAngle: function( angle ) {
-      return ( this.mapAngle( angle ) - this.startAngle ) / ( this.actualEndAngle - this.startAngle );
+      return ( this.mapAngle( angle ) - this._startAngle ) / ( this.getActualEndAngle() - this._startAngle );
     },
     
     angleAt: function( t ) {
-      return this.startAngle + ( this.actualEndAngle - this.startAngle ) * t;
+      return this._startAngle + ( this.getActualEndAngle() - this._startAngle ) * t;
     },
     
     positionAt: function( t ) {
@@ -9003,27 +9873,27 @@ define( 'KITE/segments/EllipticalArc',['require','KITE/kite','PHET_CORE/inherit'
     curvatureAt: function( t ) {
       // see http://mathworld.wolfram.com/Ellipse.html (59)
       var angle = this.angleAt( t );
-      var aq = this.radiusX * Math.sin( angle );
-      var bq = this.radiusY * Math.cos( angle );
+      var aq = this._radiusX * Math.sin( angle );
+      var bq = this._radiusY * Math.cos( angle );
       var denominator = Math.pow( bq * bq + aq * aq, 3/2 );
-      return ( this.anticlockwise ? -1 : 1 ) * this.radiusX * this.radiusY / denominator;
+      return ( this._anticlockwise ? -1 : 1 ) * this._radiusX * this._radiusY / denominator;
     },
     
     positionAtAngle: function( angle ) {
-      return this.unitTransform.transformPosition2( Vector2.createPolar( 1, angle ) );
+      return this.getUnitTransform().transformPosition2( Vector2.createPolar( 1, angle ) );
     },
     
     tangentAtAngle: function( angle ) {
-      var normal = this.unitTransform.transformNormal2( Vector2.createPolar( 1, angle ) );
+      var normal = this.getUnitTransform().transformNormal2( Vector2.createPolar( 1, angle ) );
       
-      return this.anticlockwise ? normal.perpendicular() : normal.perpendicular().negated();
+      return this._anticlockwise ? normal.perpendicular() : normal.perpendicular().negated();
     },
     
     // TODO: refactor? exact same as Segment.Arc
     containsAngle: function( angle ) {
       // transform the angle into the appropriate coordinate form
       // TODO: check anticlockwise version!
-      var normalizedAngle = this.anticlockwise ? angle - this.endAngle : angle - this.startAngle;
+      var normalizedAngle = this._anticlockwise ? angle - this._endAngle : angle - this._startAngle;
       
       // get the angle between 0 and 2pi
       var positiveMinAngle = normalizedAngle % ( Math.PI * 2 );
@@ -9032,7 +9902,7 @@ define( 'KITE/segments/EllipticalArc',['require','KITE/kite','PHET_CORE/inherit'
         positiveMinAngle += Math.PI * 2;
       }
       
-      return positiveMinAngle <= this.angleDifference;
+      return positiveMinAngle <= this.getAngleDifference();
     },
     
     // discretizes the elliptical arc and returns an offset curve as a list of lineTos
@@ -9062,24 +9932,24 @@ define( 'KITE/segments/EllipticalArc',['require','KITE/kite','PHET_CORE/inherit'
       // see http://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands for more info
       // rx ry x-axis-rotation large-arc-flag sweep-flag x y
       var epsilon = 0.01; // allow some leeway to render things as 'almost circles'
-      var sweepFlag = this.anticlockwise ? '0' : '1';
+      var sweepFlag = this._anticlockwise ? '0' : '1';
       var largeArcFlag;
-      var degreesRotation = toDegrees( this.rotation ); // bleh, degrees?
-      if ( this.angleDifference < Math.PI * 2 - epsilon ) {
-        largeArcFlag = this.angleDifference < Math.PI ? '0' : '1';
-        return 'A ' + this.radiusX + ' ' + this.radiusY + ' ' + degreesRotation + ' ' + largeArcFlag + ' ' + sweepFlag + ' ' + this.end.x + ' ' + this.end.y;
+      var degreesRotation = toDegrees( this._rotation ); // bleh, degrees?
+      if ( this.getAngleDifference() < Math.PI * 2 - epsilon ) {
+        largeArcFlag = this.getAngleDifference() < Math.PI ? '0' : '1';
+        return 'A ' + this._radiusX + ' ' + this._radiusY + ' ' + degreesRotation + ' ' + largeArcFlag + ' ' + sweepFlag + ' ' + this.getEnd().x + ' ' + this.getEnd().y;
       } else {
         // ellipse (or almost-ellipse) case needs to be handled differently
         // since SVG will not be able to draw (or know how to draw) the correct circle if we just have a start and end, we need to split it into two circular arcs
         
         // get the angle that is between and opposite of both of the points
-        var splitOppositeAngle = ( this.startAngle + this.endAngle ) / 2; // this _should_ work for the modular case?
+        var splitOppositeAngle = ( this._startAngle + this._endAngle ) / 2; // this _should_ work for the modular case?
         var splitPoint = this.positionAtAngle( splitOppositeAngle );
         
         largeArcFlag = '0'; // since we split it in 2, it's always the small arc
         
-        var firstArc = 'A ' + this.radiusX + ' ' + this.radiusY + ' ' + degreesRotation + ' ' + largeArcFlag + ' ' + sweepFlag + ' ' + splitPoint.x + ' ' + splitPoint.y;
-        var secondArc = 'A ' + this.radiusX + ' ' + this.radiusY + ' ' + degreesRotation + ' ' + largeArcFlag + ' ' + sweepFlag + ' ' + this.end.x + ' ' + this.end.y;
+        var firstArc = 'A ' + this._radiusX + ' ' + this._radiusY + ' ' + degreesRotation + ' ' + largeArcFlag + ' ' + sweepFlag + ' ' + splitPoint.x + ' ' + splitPoint.y;
+        var secondArc = 'A ' + this._radiusX + ' ' + this._radiusY + ' ' + degreesRotation + ' ' + largeArcFlag + ' ' + sweepFlag + ' ' + this.getEnd().x + ' ' + this.getEnd().y;
         
         return firstArc + ' ' + secondArc;
       }
@@ -9115,8 +9985,8 @@ define( 'KITE/segments/EllipticalArc',['require','KITE/kite','PHET_CORE/inherit'
       var angleT = this.angleAt( t );
       var angle1 = this.angleAt( 1 );
       return [
-        new Segment.EllipticalArc( this.center, this.radiusX, this.radiusY, this.rotation, angle0, angleT, this.anticlockwise ),
-        new Segment.EllipticalArc( this.center, this.radiusX, this.radiusY, this.rotation, angleT, angle1, this.anticlockwise )
+        new Segment.EllipticalArc( this._center, this._radiusX, this._radiusY, this._rotation, angle0, angleT, this._anticlockwise ),
+        new Segment.EllipticalArc( this._center, this._radiusX, this._radiusY, this._rotation, angleT, angle1, this._anticlockwise )
       ];
     },
     
@@ -9126,9 +9996,9 @@ define( 'KITE/segments/EllipticalArc',['require','KITE/kite','PHET_CORE/inherit'
     
     intersection: function( ray ) {
       // be lazy. transform it into the space of a non-elliptical arc.
-      var unitTransform = this.unitTransform;
+      var unitTransform = this.getUnitTransform();
       var rayInUnitCircleSpace = unitTransform.inverseRay2( ray );
-      var hits = this.unitArcSegment.intersection( rayInUnitCircleSpace );
+      var hits = this.getUnitArcSegment().intersection( rayInUnitCircleSpace );
       
       return _.map( hits, function( hit ) {
         var transformedPoint = unitTransform.transformPosition2( hit.point );
@@ -9144,25 +10014,25 @@ define( 'KITE/segments/EllipticalArc',['require','KITE/kite','PHET_CORE/inherit'
     // returns the resultant winding number of this ray intersecting this segment.
     windingIntersection: function( ray ) {
       // be lazy. transform it into the space of a non-elliptical arc.
-      var rayInUnitCircleSpace = this.unitTransform.inverseRay2( ray );
-      return this.unitArcSegment.windingIntersection( rayInUnitCircleSpace );
+      var rayInUnitCircleSpace = this.getUnitTransform().inverseRay2( ray );
+      return this.getUnitArcSegment().windingIntersection( rayInUnitCircleSpace );
     },
     
     // assumes the current position is at start
     writeToContext: function( context ) {
       if ( context.ellipse ) {
-        context.ellipse( this.center.x, this.center.y, this.radiusX, this.radiusY, this.rotation, this.startAngle, this.endAngle, this.anticlockwise );
+        context.ellipse( this._center.x, this._center.y, this._radiusX, this._radiusY, this._rotation, this._startAngle, this._endAngle, this._anticlockwise );
       } else {
         // fake the ellipse call by using transforms
-        this.unitTransform.getMatrix().canvasAppendTransform( context );
-        context.arc( 0, 0, 1, this.startAngle, this.endAngle, this.anticlockwise );
-        this.unitTransform.getInverse().canvasAppendTransform( context );
+        this.getUnitTransform().getMatrix().canvasAppendTransform( context );
+        context.arc( 0, 0, 1, this._startAngle, this._endAngle, this._anticlockwise );
+        this.getUnitTransform().getInverse().canvasAppendTransform( context );
       }
     },
     
     transformed: function( matrix ) {
-      var transformedSemiMajorAxis = matrix.timesVector2( Vector2.createPolar( this.radiusX, this.rotation ) ).minus( matrix.timesVector2( Vector2.ZERO ) );
-      var transformedSemiMinorAxis = matrix.timesVector2( Vector2.createPolar( this.radiusY, this.rotation + Math.PI / 2 ) ).minus( matrix.timesVector2( Vector2.ZERO ) );
+      var transformedSemiMajorAxis = matrix.timesVector2( Vector2.createPolar( this._radiusX, this._rotation ) ).minus( matrix.timesVector2( Vector2.ZERO ) );
+      var transformedSemiMinorAxis = matrix.timesVector2( Vector2.createPolar( this._radiusY, this._rotation + Math.PI / 2 ) ).minus( matrix.timesVector2( Vector2.ZERO ) );
       var rotation = transformedSemiMajorAxis.angle();
       var radiusX = transformedSemiMajorAxis.magnitude();
       var radiusY = transformedSemiMinorAxis.magnitude();
@@ -9171,22 +10041,22 @@ define( 'KITE/segments/EllipticalArc',['require','KITE/kite','PHET_CORE/inherit'
       
       // reverse the 'clockwiseness' if our transform includes a reflection
       // TODO: check reflections. swapping angle signs should fix clockwiseness
-      var anticlockwise = reflected ? !this.anticlockwise : this.anticlockwise;
-      var startAngle = reflected ? -this.startAngle : this.startAngle;
-      var endAngle = reflected ? -this.endAngle : this.endAngle;
+      var anticlockwise = reflected ? !this._anticlockwise : this._anticlockwise;
+      var startAngle = reflected ? -this._startAngle : this._startAngle;
+      var endAngle = reflected ? -this._endAngle : this._endAngle;
       
-      if ( Math.abs( this.endAngle - this.startAngle ) === Math.PI * 2 ) {
+      if ( Math.abs( this._endAngle - this._startAngle ) === Math.PI * 2 ) {
         endAngle = anticlockwise ? startAngle - Math.PI * 2 : startAngle + Math.PI * 2;
       }
       
-      return new Segment.EllipticalArc( matrix.timesVector2( this.center ), radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise );
+      return new Segment.EllipticalArc( matrix.timesVector2( this._center ), radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise );
     }
   } );
   
   // adapted from http://www.w3.org/TR/SVG/implnote.html#PathElementImplementationNotes
   // transforms the unit circle onto our ellipse
   Segment.EllipticalArc.computeUnitTransform = function( center, radiusX, radiusY, rotation ) {
-    return new Transform3( Matrix3.translation( center.x, center.y ) // TODO: convert to Matrix3.translation( this.center) when available
+    return new Transform3( Matrix3.translation( center.x, center.y ) // TODO: convert to Matrix3.translation( this._center) when available
                                   .timesMatrix( Matrix3.rotation2( rotation ) )
                                   .timesMatrix( Matrix3.scaling( radiusX, radiusY ) ) );
   };
@@ -9214,7 +10084,7 @@ define( 'KITE/segments/EllipticalArc',['require','KITE/kite','PHET_CORE/inherit'
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'KITE/Shape',['require','KITE/kite','DOT/Vector2','DOT/Bounds2','DOT/Ray2','DOT/Matrix3','DOT/Transform3','DOT/Util','DOT/Util','KITE/util/Subpath','KITE/../parser/svgPath','KITE/util/LineStyles','KITE/segments/Arc','KITE/segments/Cubic','KITE/segments/EllipticalArc','KITE/segments/Line','KITE/segments/Quadratic'],function( require ) {
+define( 'KITE/Shape',['require','KITE/kite','DOT/Vector2','DOT/Bounds2','DOT/Ray2','KITE/util/Subpath','KITE/../parser/svgPath','KITE/util/LineStyles','KITE/segments/Arc','KITE/segments/Cubic','KITE/segments/EllipticalArc','KITE/segments/Line','KITE/segments/Quadratic'],function( require ) {
   
   
   var kite = require( 'KITE/kite' );
@@ -9223,11 +10093,7 @@ define( 'KITE/Shape',['require','KITE/kite','DOT/Vector2','DOT/Bounds2','DOT/Ray
   var Vector2 = require( 'DOT/Vector2' );
   var Bounds2 = require( 'DOT/Bounds2' );
   var Ray2 = require( 'DOT/Ray2' );
-  var Matrix3 = require( 'DOT/Matrix3' );
-  var Transform3 = require( 'DOT/Transform3' );
-  var toDegrees = require( 'DOT/Util' ).toDegrees;
-  var lineLineIntersection = require( 'DOT/Util' ).lineLineIntersection;
-  
+
   var Subpath = require( 'KITE/util/Subpath' );
   
   var svgPath = require( 'KITE/../parser/svgPath' );
@@ -9252,7 +10118,7 @@ define( 'KITE/Shape',['require','KITE/kite','DOT/Vector2','DOT/Bounds2','DOT/Ray
     assert && assert( this.subpaths.length === 0 || this.subpaths[0].constructor.name !== 'Array' );
     
     // computed bounds for all pieces added so far
-    this.bounds = bounds || Bounds2.NOTHING;
+    this.bounds = ( bounds || Bounds2.NOTHING ).copy();
     
     var that = this;
     if ( subpaths && typeof subpaths !== 'object' ) {
@@ -9286,13 +10152,10 @@ define( 'KITE/Shape',['require','KITE/kite','DOT/Vector2','DOT/Bounds2','DOT/Ray
       if ( this.hasSubpaths() ) {
         var start = this.getLastSubpath().getLastPoint();
         var end = point;
-      var line = new kite.Segment.Line( start, end );
+        var line = new kite.Segment.Line( start, end );
         this.getLastSubpath().addPoint( end );
-        if ( !line.invalid ) {
-          this.getLastSubpath().addSegment( line );
-          this.bounds = this.bounds.withPoint( start ).withPoint( end );
-          assert && assert( !isNaN( this.bounds.getX() ) );
-        }
+        this.addSegmentAndBounds( line );
+        assert && assert( !isNaN( this.bounds.getX() ) );
       } else {
         this.ensure( point );
       }
@@ -9316,16 +10179,18 @@ define( 'KITE/Shape',['require','KITE/kite','DOT/Vector2','DOT/Bounds2','DOT/Ray
     smoothQuadraticCurveTo: function( x, y ) { return this.quadraticCurveToPoint( this.getSmoothQuadraticControlPoint(), v( x, y ) ); },
     smoothQuadraticCurveToRelative: function( x, y ) { return this.quadraticCurveToPoint( this.getSmoothQuadraticControlPoint(), v( x, y ).plus( this.getRelativePoint() ) ); },
     quadraticCurveToPoint: function( controlPoint, point ) {
+      var shape = this;
+      
       // see http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-quadraticcurveto
       this.ensure( controlPoint );
       var start = this.getLastSubpath().getLastPoint();
       var quadratic = new kite.Segment.Quadratic( start, controlPoint, point );
       this.getLastSubpath().addPoint( point );
-      if ( !quadratic.invalid ) {
-        this.getLastSubpath().addSegment( quadratic );
-        this.bounds = this.bounds.union( quadratic.bounds );
-      }
-      
+      var nondegenerateSegments = quadratic.getNondegenerateSegments();
+      _.each( nondegenerateSegments, function( segment ) {
+        // TODO: optimization
+        shape.addSegmentAndBounds( segment );
+      } );
       return this;
     },
     
@@ -9338,22 +10203,16 @@ define( 'KITE/Shape',['require','KITE/kite','DOT/Vector2','DOT/Bounds2','DOT/Ray
     smoothCubicCurveTo: function( cp2x, cp2y, x, y ) { return this.cubicCurveToPoint( this.getSmoothCubicControlPoint(), v( cp2x, cp2y ), v( x, y ) ); },
     smoothCubicCurveToRelative: function( cp2x, cp2y, x, y ) { return this.cubicCurveToPoint( this.getSmoothCubicControlPoint(), v( cp2x, cp2y ).plus( this.getRelativePoint() ), v( x, y ).plus( this.getRelativePoint() ) ); },
     cubicCurveToPoint: function( control1, control2, point ) {
+      var shape = this;
       // see http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-quadraticcurveto
       this.ensure( control1 );
       var start = this.getLastSubpath().getLastPoint();
       var cubic = new kite.Segment.Cubic( start, control1, control2, point );
       
-      if ( !cubic.invalid ) {
-        // if there is a cusp, we add the two (split) quadratic segments instead so that stroking treats the 'join' between them with the proper lineJoin
-        if ( cubic.hasCusp() ) {
-          this.getLastSubpath().addSegment( cubic.startQuadratic );
-          this.getLastSubpath().addSegment( cubic.endQuadratic );
-        } else {
-          this.getLastSubpath().addSegment( cubic );
-        }
-        
-        this.bounds = this.bounds.union( cubic.bounds );
-      }
+      var nondegenerateSegments = cubic.getNondegenerateSegments();
+      _.each( nondegenerateSegments, function( segment ) {
+        shape.addSegmentAndBounds( segment );
+      } );
       this.getLastSubpath().addPoint( point );
       
       return this;
@@ -9366,12 +10225,12 @@ define( 'KITE/Shape',['require','KITE/kite','DOT/Vector2','DOT/Bounds2','DOT/Ray
       var arc = new kite.Segment.Arc( center, radius, startAngle, endAngle, anticlockwise );
       
       // we are assuming that the normal conditions were already met (or exceptioned out) so that these actually work with canvas
-      var startPoint = arc.start;
-      var endPoint = arc.end;
+      var startPoint = arc.getStart();
+      var endPoint = arc.getEnd();
       
       // if there is already a point on the subpath, and it is different than our starting point, draw a line between them
       if ( this.hasSubpaths() && this.getLastSubpath().getLength() > 0 && !startPoint.equals( this.getLastSubpath().getLastPoint(), 0 ) ) {
-        this.getLastSubpath().addSegment( new kite.Segment.Line( this.getLastSubpath().getLastPoint(), startPoint ) );
+        this.addSegmentAndBounds( new kite.Segment.Line( this.getLastSubpath().getLastPoint(), startPoint ) );
       }
       
       if ( !this.hasSubpaths() ) {
@@ -9382,12 +10241,7 @@ define( 'KITE/Shape',['require','KITE/kite','DOT/Vector2','DOT/Bounds2','DOT/Ray
       this.getLastSubpath().addPoint( startPoint );
       this.getLastSubpath().addPoint( endPoint );
       
-      if ( !arc.invalid ) {
-        this.getLastSubpath().addSegment( arc );
-        
-        // and update the bounds
-        this.bounds = this.bounds.union( arc.bounds );
-      }
+      this.addSegmentAndBounds( arc );
       
       return this;
     },
@@ -9404,7 +10258,7 @@ define( 'KITE/Shape',['require','KITE/kite','DOT/Vector2','DOT/Bounds2','DOT/Ray
       
       // if there is already a point on the subpath, and it is different than our starting point, draw a line between them
       if ( this.hasSubpaths() && this.getLastSubpath().getLength() > 0 && !startPoint.equals( this.getLastSubpath().getLastPoint(), 0 ) ) {
-        this.getLastSubpath().addSegment( new kite.Segment.Line( this.getLastSubpath().getLastPoint(), startPoint ) );
+        this.addSegmentAndBounds( new kite.Segment.Line( this.getLastSubpath().getLastPoint(), startPoint ) );
       }
       
       if ( !this.hasSubpaths() ) {
@@ -9415,12 +10269,7 @@ define( 'KITE/Shape',['require','KITE/kite','DOT/Vector2','DOT/Bounds2','DOT/Ray
       this.getLastSubpath().addPoint( startPoint );
       this.getLastSubpath().addPoint( endPoint );
       
-      if ( !ellipticalArc.invalid ) {
-        this.getLastSubpath().addSegment( ellipticalArc );
-        
-        // and update the bounds
-        this.bounds = this.bounds.union( ellipticalArc.bounds );
-      }
+      this.addSegmentAndBounds( ellipticalArc );
       
       return this;
     },
@@ -9491,13 +10340,12 @@ define( 'KITE/Shape',['require','KITE/kite','DOT/Vector2','DOT/Bounds2','DOT/Ray
       subpath.addPoint( v( x + width, y ) );
       subpath.addPoint( v( x + width, y + height ) );
       subpath.addPoint( v( x, y + height ) );
-      subpath.addSegment( new kite.Segment.Line( subpath.points[0], subpath.points[1] ) );
-      subpath.addSegment( new kite.Segment.Line( subpath.points[1], subpath.points[2] ) );
-      subpath.addSegment( new kite.Segment.Line( subpath.points[2], subpath.points[3] ) );
+      this.addSegmentAndBounds( new kite.Segment.Line( subpath.points[0], subpath.points[1] ) );
+      this.addSegmentAndBounds( new kite.Segment.Line( subpath.points[1], subpath.points[2] ) );
+      this.addSegmentAndBounds( new kite.Segment.Line( subpath.points[2], subpath.points[3] ) );
       subpath.close();
       this.addSubpath( new kite.Subpath() );
       this.getLastSubpath().addPoint( v( x, y ) );
-      this.bounds = this.bounds.withCoordinates( x, y ).withCoordinates( x + width, y + height );
       assert && assert( !isNaN( this.bounds.getX() ) );
       
       return this;
@@ -9577,8 +10425,9 @@ define( 'KITE/Shape',['require','KITE/kite','DOT/Vector2','DOT/Bounds2','DOT/Ray
     
     // return a new Shape that is transformed by the associated matrix
     transformed: function( matrix ) {
+      // TODO: allocation reduction
       var subpaths = _.map( this.subpaths, function( subpath ) { return subpath.transformed( matrix ); } );
-      var bounds = _.reduce( subpaths, function( bounds, subpath ) { return bounds.union( subpath.computeBounds() ); }, Bounds2.NOTHING );
+      var bounds = _.reduce( subpaths, function( bounds, subpath ) { return bounds.union( subpath.bounds ); }, Bounds2.NOTHING );
       return new Shape( subpaths, bounds );
     },
     
@@ -9680,7 +10529,7 @@ define( 'KITE/Shape',['require','KITE/kite','DOT/Vector2','DOT/Bounds2','DOT/Ray
       }
       subLen = subpaths.length;
       for ( i = 0; i < subLen; i++ ) {
-        bounds.includeBounds( subpaths[i].computeBounds() );
+        bounds.includeBounds( subpaths[i].bounds );
       }
       return new Shape( subpaths, bounds );
     },
@@ -9693,6 +10542,11 @@ define( 'KITE/Shape',['require','KITE/kite','DOT/Vector2','DOT/Bounds2','DOT/Ray
     /*---------------------------------------------------------------------------*
     * Internal subpath computations
     *----------------------------------------------------------------------------*/
+    
+    addSegmentAndBounds: function( segment ) {
+      this.getLastSubpath().addSegment( segment );
+      this.bounds = this.bounds.includeBounds( this.getLastSubpath().bounds );
+    },
     
     ensure: function( point ) {
       if ( !this.hasSubpaths() ) {
@@ -9932,151 +10786,13 @@ define( 'SCENERY/util/FixedNodeEvents',['require','SCENERY/scenery'],function( r
 // Copyright 2002-2013, University of Colorado
 
 /**
- * Controls the underlying layer behavior around a node. The node's LayerStrategy's enter() and exit() will be
- * called in a depth-first order during the layer building process, and will modify a LayerBuilder to signal any
- * layer-specific signals.
- *
- * This generally ensures that a layer containing the proper renderer and settings to support its associated node
- * will be created.
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define( 'SCENERY/layers/LayerStrategy',['require','SCENERY/scenery'],function( require ) {
-  
-  
-  var scenery = require( 'SCENERY/scenery' );
-  
-  /*
-   * If the node specifies a renderer, we will always push a preferred type. That type will be fresh (if rendererOptions are specified), otherwise
-   * the top matching preferred type for that renderer will be used. This allows us to always pop in the exit().
-   *
-   * Specified as such, since there is no needed shared state (we can have node.layerStrategy = scenery.LayerStrategy for many nodes)
-   */
-  scenery.LayerStrategy = {
-    // true iff enter/exit will push/pop a layer type to the preferred stack. currently limited to only one layer type per level.
-    hasPreferredLayerType: function( pointer, layerBuilder ) {
-      return pointer.trail.lastNode().hasRenderer();
-    },
-    
-    getPreferredLayerType: function( pointer, layerBuilder ) {
-      assert && assert( this.hasPreferredLayerType( pointer, layerBuilder ) ); // sanity check
-      
-      var node = pointer.trail.lastNode();
-      var preferredLayerType;
-      
-      if ( node.hasRendererLayerType() ) {
-        preferredLayerType = node.getRendererLayerType();
-      } else {
-        preferredLayerType = layerBuilder.bestPreferredLayerTypeFor( [ node.getRenderer() ] );
-        if ( !preferredLayerType ) {
-          // there was no preferred layer type matching, just use the default
-          preferredLayerType = node.getRenderer().defaultLayerType;
-        }
-      }
-      
-      return preferredLayerType;
-    },
-    
-    enter: function( pointer, layerBuilder ) {
-      var trail = pointer.trail;
-      var node = trail.lastNode();
-      var preferredLayerType;
-      
-      // if the node has a renderer, always push a layer type, so that we can pop on the exit() and ensure consistent behavior
-      if ( node.hasRenderer() ) {
-        preferredLayerType = this.getPreferredLayerType( pointer, layerBuilder );
-        
-        // push the preferred layer type
-        layerBuilder.pushPreferredLayerType( preferredLayerType );
-        if ( layerBuilder.getCurrentLayerType() !== preferredLayerType ) {
-          layerBuilder.switchToType( pointer, preferredLayerType );
-        }
-      } else if ( node.isPainted() ) {
-        // node doesn't specify a renderer, but isPainted.
-        
-        var supportedRenderers = node._supportedRenderers;
-        var currentType = layerBuilder.getCurrentLayerType();
-        preferredLayerType = layerBuilder.bestPreferredLayerTypeFor( supportedRenderers );
-        
-        // If any of the preferred types are compatible, use the top one. This allows us to support caching and hierarchical layer types
-        if ( preferredLayerType ) {
-          if ( currentType !== preferredLayerType ) {
-            layerBuilder.switchToType( pointer, preferredLayerType );
-          }
-        } else {
-          // if no preferred types are compatible, only switch if the current type is also incompatible
-          if ( !currentType || !currentType.supportsNode( node ) ) {
-            layerBuilder.switchToType( pointer, supportedRenderers[0].defaultLayerType );
-          }
-        }
-      }
-      
-      if ( node.isLayerSplitBefore() || this.hasSplitFlags( node ) ) {
-        layerBuilder.switchToType( pointer, layerBuilder.getCurrentLayerType() );
-      }
-      
-      if ( node.isPainted() ) {
-        // trigger actual layer creation if necessary (allow collapsing of layers otherwise)
-        layerBuilder.markPainted( pointer );
-      }
-    },
-    
-    // afterSelf: function( trail, layerBuilder ) {
-    //   // no-op, and possibly not used
-    // },
-    
-    // betweenChildren: function( trail, layerBuilder ) {
-    //   // no-op, and possibly not used
-    // },
-    
-    exit: function( pointer, layerBuilder ) {
-      var trail = pointer.trail;
-      var node = trail.lastNode();
-      
-      if ( node.hasRenderer() ) {
-        layerBuilder.popPreferredLayerType();
-        
-        // switch down to the next lowest preferred layer type, if any. if null, pass the null to switchToType
-        // this allows us to not 'leak' the renderer information, and the temporary layer type is most likely collapsed and ignored
-        // NOTE: disabled for now, since this prevents us from having adjacent children sharing the same layer type
-        // if ( layerBuilder.getCurrentLayerType() !== layerBuilder.getPreferredLayerType() ) {
-        //   layerBuilder.switchToType( pointer, layerBuilder.getPreferredLayerType() );
-        // }
-      }
-      
-      if ( node.isLayerSplitAfter() || this.hasSplitFlags( node ) ) {
-        layerBuilder.switchToType( pointer, layerBuilder.getCurrentLayerType() );
-      }
-    },
-    
-    // whether splitting before and after the node is required
-    hasSplitFlags: function( node ) {
-      // currently, only enforce splitting if we are using CSS transforms
-      var rendererOptions = node.getRendererOptions();
-      return node.hasRenderer() && rendererOptions && (
-        rendererOptions.cssTranslation ||
-        rendererOptions.cssRotation ||
-        rendererOptions.cssScale ||
-        rendererOptions.cssTransform
-      );
-    }
-  };
-  var LayerStrategy = scenery.LayerStrategy;
-  
-  return LayerStrategy;
-} );
-
-// Copyright 2002-2013, University of Colorado
-
-/**
  * A node for the Scenery scene graph. Supports general directed acyclic graphics (DAGs).
  * Handles multiple layers with assorted types (Canvas 2D, SVG, DOM, WebGL, etc.).
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matrix3','DOT/Vector2','DOT/Util','KITE/Shape','SCENERY/scenery','SCENERY/util/FixedNodeEvents','SCENERY/layers/LayerStrategy'],function( require ) {
+define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matrix3','DOT/Vector2','DOT/Util','KITE/Shape','SCENERY/scenery','SCENERY/util/FixedNodeEvents'],function( require ) {
   
   
   var Bounds2 = require( 'DOT/Bounds2' );
@@ -10089,7 +10805,6 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
   
   var scenery = require( 'SCENERY/scenery' );
   var NodeEvents = require( 'SCENERY/util/FixedNodeEvents' ); // uncapitalized, because of JSHint (TODO: find the flag)
-  var LayerStrategy = require( 'SCENERY/layers/LayerStrategy' ); // used to set the default layer strategy on the prototype
   // require( 'SCENERY/layers/Renderer' ); // commented out so Require.js doesn't balk at the circular dependency
   
   // TODO: FIXME: Why do I have to comment out this dependency?
@@ -10119,8 +10834,6 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
    * renderer:         Forces Scenery to use the specific renderer (canvas/svg) to display this node (and if possible, children). Accepts both strings (e.g. 'canvas', 'svg', etc.) or actual Renderer objects (e.g. Renderer.Canvas, Renderer.SVG, etc.)
    * rendererOptions:  Parameter object that is passed to the created layer, and can affect how the layering process works.
    * layerSplit:       Forces a split between layers before and after this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.
-   * layerSplitBefore: Forces a split between layers before this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.
-   * layerSplitAfter:  Forces a split between layers after this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.
    * mouseArea:        Shape (in local coordinate frame) that overrides the 'hit area' for mouse input.
    * touchArea:        Shape (in local coordinate frame) that overrides the 'hit area' for touch input.
    * clipArea:         Shape (in local coordinate frame) that causes any graphics outside of the shape to be invisible (for the node and any children).
@@ -10151,8 +10864,8 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     this._clipArea = null;
     
     // areas for hit intersection. if set on a Node, no descendants can handle events
-    this._mouseArea = null; // {Shape} for mouse position          in the local coordinate frame
-    this._touchArea = null; // {Shape} for touch and pen position  in the local coordinate frame
+    this._mouseArea = null; // {Shape|Bounds2} for mouse position          in the local coordinate frame
+    this._touchArea = null; // {Shape|Bounds2} for touch and pen position  in the local coordinate frame
     
     // the CSS cursor to be displayed over this node. null should be the default (inherit) value
     this._cursor = null;
@@ -10206,12 +10919,15 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     this._rendererOptions = null; // options that will determine the layer type
     this._rendererLayerType = null; // cached layer type that is used by the LayerStrategy
     
-    // whether layers should be split before and/or after this node. setting both will put this node and its children into a separate layer
-    this._layerSplitBefore = false;
-    this._layerSplitAfter = false;
+    // whether layers should be split before and after this node
+    this._layerSplit = false;
     
     // the subtree pickable count is #pickable:true + #inputListeners, since we can prune subtrees with a pickable count of 0
     this._subtreePickableCount = 0;
+    
+    this._rendererBitmask = scenery.bitmaskNodeDefault;
+    this._subtreeRendererBitmask = scenery.bitmaskNodeDefault; // value not important initially, since it is dirty
+    // this._subtreeRendererBitmaskDirty = true; // TODO: include dirty flag!
     
     if ( options ) {
       this.mutate( options );
@@ -10310,6 +11026,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     },
     
     getChildren: function() {
+      // TODO: ensure we are not triggering this in Scenery code when not necessary!
       return this._children.slice( 0 ); // create a defensive copy
     },
     
@@ -10454,7 +11171,12 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
         var oldBounds = this._bounds;
         
         // converts local to parent bounds. mutable methods used to minimize number of created bounds instances (we create one so we don't change references to the old one)
-        var newBounds = this.transformBoundsFromLocalToParent( this._selfBounds.copy().includeBounds( this._childBounds ) );
+        var localBounds = this._selfBounds.copy().includeBounds( this._childBounds );
+        if ( this.hasClipArea() ) {
+          // localBounds clipping in the local coordinate frame
+          localBounds = localBounds.intersection( this._clipArea.bounds );
+        }
+        var newBounds = this.transformBoundsFromLocalToParent( localBounds );
         newBounds = this.overrideBounds( newBounds ); // allow expansion of the bounds area
         var changed = !newBounds.equals( oldBounds );
         
@@ -10487,6 +11209,10 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
           _.each( that.children, function( child ) { childBounds.includeBounds( child._bounds ); } );
           
           var fullBounds = that.localToParentBounds( that._selfBounds ).union( that.localToParentBounds( childBounds ) );
+          
+          if ( that.hasClipArea() ) {
+            fullBounds = fullBounds.intersection( that.getClipArea().bounds );
+          }
           
           assertSlow && assertSlow( that._childBounds.equalsEpsilon( childBounds, epsilon ), 'Child bounds mismatch after validateBounds: ' +
                                                                                                     that._childBounds.toString() + ', expected: ' + childBounds.toString() );
@@ -10521,7 +11247,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
         // do this before the transformation to the parent coordinate frame
         if ( this._mouseArea ) {
           hasMouseAreas = true;
-          this._mouseBounds.includeBounds( this._mouseArea.bounds );
+          this._mouseBounds.includeBounds( this._mouseArea.isBounds ? this._mouseArea : this._mouseArea.bounds );
         }
         
         if ( hasMouseAreas ) {
@@ -10562,7 +11288,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
         // do this before the transformation to the parent coordinate frame
         if ( this._touchArea ) {
           hasTouchAreas = true;
-          this._touchBounds.includeBounds( this._touchArea.bounds );
+          this._touchBounds.includeBounds( this._touchArea.isBounds ? this._touchArea : this._touchArea.bounds );
         }
         
         if ( hasTouchAreas ) {
@@ -10727,7 +11453,12 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     
     // local coordinate frame bounds
     getLocalBounds: function() {
-      return this.getSelfBounds().union( this.getChildBounds() );
+      var localBounds = this.getSelfBounds().union( this.getChildBounds() );
+      if ( this.hasClipArea() ) {
+        // localBounds clipping in the local coordinate frame
+        localBounds = localBounds.intersection( this._clipArea.bounds );
+      }
+      return localBounds;
     },
     
     // the bounds for content in render(), in "parent" coordinates
@@ -10836,11 +11567,13 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
       // tests for mouse and touch hit areas before testing containsPointSelf
       if ( hasHitAreas ) {
         if ( options.isMouse && this._mouseArea ) {
+          // NOTE: both Bounds2 and Shape have containsPoint! We use both here!
           result = this._mouseArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
           localPoint.freeToPool();
           return result;
         }
         if ( ( options.isTouch || options.isPen ) && this._touchArea ) {
+          // NOTE: both Bounds2 and Shape have containsPoint! We use both here!
           result = this._touchArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
           localPoint.freeToPool();
           return result;
@@ -11138,7 +11871,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     },
     
     setMatrix: function( matrix ) {
-      this._transform.set( matrix );
+      this._transform.setMatrix( matrix );
     },
     
     getMatrix: function() {
@@ -11358,11 +12091,11 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
       return this._cursor;
     },
     
-    setMouseArea: function( shape ) {
-      assert && assert( shape === null || shape instanceof Shape, 'mouseArea needs to be a kite.Shape, or null' );
+    setMouseArea: function( area ) {
+      assert && assert( area === null || area instanceof Shape || area instanceof Bounds2, 'mouseArea needs to be a kite.Shape, dot.Bounds2, or null' );
       
-      if ( this._mouseArea !== shape ) {
-        this._mouseArea = shape; // TODO: could change what is under the mouse, invalidate!
+      if ( this._mouseArea !== area ) {
+        this._mouseArea = area; // TODO: could change what is under the mouse, invalidate!
         
         this.invalidateBounds();
       }
@@ -11372,11 +12105,11 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
       return this._mouseArea;
     },
     
-    setTouchArea: function( shape ) {
-      assert && assert( shape === null || shape instanceof Shape, 'touchArea needs to be a kite.Shape, or null' );
+    setTouchArea: function( area ) {
+      assert && assert( area === null || area instanceof Shape || area instanceof Bounds2, 'touchArea needs to be a kite.Shape, dot.Bounds2, or null' );
       
-      if ( this._touchArea !== shape ) {
-        this._touchArea = shape; // TODO: could change what is under the touch, invalidate!
+      if ( this._touchArea !== area ) {
+        this._touchArea = area; // TODO: could change what is under the touch, invalidate!
         
         this.invalidateBounds();
       }
@@ -11395,11 +12128,17 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
         this._clipArea = shape;
         
         this.notifyClipChange();
+        
+        this.invalidateBounds();
       }
     },
     
     getClipArea: function() {
       return this._clipArea;
+    },
+    
+    hasClipArea: function() {
+      return this._clipArea !== null;
     },
     
     updateLayerType: function() {
@@ -11427,6 +12166,50 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
       return !!this._rendererLayerType;
     },
     
+    supportsCanvas: function() {
+      return ( this._rendererBitmask & scenery.bitmaskSupportsCanvas ) !== 0;
+    },
+    
+    supportsSVG: function() {
+      return ( this._rendererBitmask & scenery.bitmaskSupportsSVG ) !== 0;
+    },
+    
+    supportsDOM: function() {
+      return ( this._rendererBitmask & scenery.bitmaskSupportsDOM ) !== 0;
+    },
+    
+    supportsWebGL: function() {
+      return ( this._rendererBitmask & scenery.bitmaskSupportsWebGL ) !== 0;
+    },
+    
+    supportsRenderer: function( renderer ) {
+      return ( this._rendererBitmask & renderer.bitmask ) !== 0;
+    },
+    
+    // return a supported renderer (fallback case, not called often)
+    pickARenderer: function() {
+      if ( this.supportsCanvas() ) {
+        return scenery.Renderer.Canvas;
+      } else if ( this.supportsSVG() ) {
+        return scenery.Renderer.SVG;
+      } else if ( this.supportsDOM() ) {
+        return scenery.Renderer.DOM;
+      }
+      // oi!
+    },
+    
+    setRendererBitmask: function( bitmask ) {
+      if ( bitmask !== this._rendererBitmask ) {
+        this._rendererBitmask = bitmask;
+        this.markLayerRefreshNeeded();
+      }
+    },
+    
+    // meant to be overridden
+    invalidateSupportedRenderers: function() {
+      
+    },
+    
     setRenderer: function( renderer ) {
       var newRenderer;
       if ( typeof renderer === 'string' ) {
@@ -11440,7 +12223,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
         throw new Error( 'unrecognized type of renderer: ' + renderer );
       }
       if ( newRenderer !== this._renderer ) {
-        assert && assert( !this.isPainted() || !newRenderer || _.contains( this._supportedRenderers, newRenderer ), 'renderer ' + newRenderer + ' not supported by ' + this.constructor.name );
+        assert && assert( !this.isPainted() || !newRenderer || this.supportsRenderer( newRenderer ), 'renderer ' + newRenderer + ' not supported by ' + this.constructor.name );
         this._renderer = newRenderer;
         
         this.updateLayerType();
@@ -11472,40 +12255,17 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
       return !!this._rendererOptions;
     },
     
-    setLayerSplitBefore: function( split ) {
-      assert && assert( typeof split === 'boolean' );
-      
-      if ( this._layerSplitBefore !== split ) {
-        this._layerSplitBefore = split;
-        this.markLayerRefreshNeeded();
-      }
-    },
-    
-    isLayerSplitBefore: function() {
-      return this._layerSplitBefore;
-    },
-    
-    setLayerSplitAfter: function( split ) {
-      assert && assert( typeof split === 'boolean' );
-      
-      if ( this._layerSplitAfter !== split ) {
-        this._layerSplitAfter = split;
-        this.markLayerRefreshNeeded();
-      }
-    },
-    
-    isLayerSplitAfter: function() {
-      return this._layerSplitAfter;
-    },
-    
     setLayerSplit: function( split ) {
       assert && assert( typeof split === 'boolean' );
       
-      if ( split !== this._layerSplitBefore || split !== this._layerSplitAfter ) {
-        this._layerSplitBefore = split;
-        this._layerSplitAfter = split;
+      if ( split !== this._layerSplit ) {
+        this._layerSplit = split;
         this.markLayerRefreshNeeded();
       }
+    },
+    
+    isLayerSplit: function() {
+      return this._layerSplit;
     },
     
     // returns a unique trail (if it exists) where each node in the ancestor chain has 0 or 1 parents
@@ -12038,13 +12798,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     *----------------------------------------------------------------------------*/
     
     set layerSplit( value ) { this.setLayerSplit( value ); },
-    get layerSplit() { throw new Error( 'You can\'t get a layerSplit property, since it modifies two separate properties' ); },
-    
-    set layerSplitBefore( value ) { this.setLayerSplitBefore( value ); },
-    get layerSplitBefore() { return this.isLayerSplitBefore(); },
-    
-    set layerSplitAfter( value ) { this.setLayerSplitAfter( value ); },
-    get layerSplitAfter() { return this.isLayerSplitAfter(); },
+    get layerSplit() { return this.isLayerSplit(); },
     
     set renderer( value ) { this.setRenderer( value ); },
     get renderer() { return this.getRenderer(); },
@@ -12162,8 +12916,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
     },
     
     getPropString: function( spaces, includeChildren ) {
-      var self = this;
-      
+
       var result = '';
       function addProp( key, value, nowrap ) {
         if ( result ) {
@@ -12190,7 +12943,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
       // direct copy props
       if ( this.cursor ) { addProp( 'cursor', this.cursor ); }
       if ( !this.visible ) { addProp( 'visible', this.visible ); }
-      if ( !this.pickable ) { addProp( 'pickable', this.pickable ); }
+      if ( this.pickable !== null ) { addProp( 'pickable', this.pickable ); }
       if ( this.opacity !== 1 ) { addProp( 'opacity', this.opacity ); }
       
       if ( !this.transform.isIdentity() ) {
@@ -12207,12 +12960,8 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
         }
       }
       
-      if ( this._layerSplitBefore ) {
-        addProp( 'layerSplitBefore', true );
-      }
-      
-      if ( this._layerSplitAfter ) {
-        addProp( 'layerSplitAfter', true );
+      if ( this._layerSplit ) {
+        addProp( 'layerSplit', true );
       }
       
       return result;
@@ -12232,11 +12981,7 @@ define( 'SCENERY/nodes/Node',['require','DOT/Bounds2','DOT/Transform3','DOT/Matr
    */
   Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
                                   'left', 'right', 'top', 'bottom', 'center', 'centerX', 'centerY', 'renderer', 'rendererOptions',
-                                  'layerSplit', 'layerSplitBefore', 'layerSplitAfter', 'mouseArea', 'touchArea', 'clipArea' ];
-  
-  Node.prototype._supportedRenderers = [];
-  
-  Node.prototype.layerStrategy = LayerStrategy;
+                                  'layerSplit', 'mouseArea', 'touchArea', 'clipArea' ];
   
   // mix-in the events for Node
   /* jshint -W064 */
@@ -12869,6 +13614,110 @@ define( 'SCENERY/util/Trail',['require','DOT/Matrix3','DOT/Transform3','SCENERY/
     }, false );
   };
   
+  // The index at which the two trails diverge. If a.length === b.length === branchIndex, the trails are identical
+  Trail.branchIndex = function( a, b ) {
+    assert && assert( a.nodes[0] === b.nodes[0], 'Branch changes require roots to be the same' );
+    var branchIndex;
+    var shortestLength = Math.min( a.length, b.length );
+    for ( branchIndex = 0; branchIndex < shortestLength; branchIndex++ ) {
+      if ( a.nodes[branchIndex] !== b.nodes[branchIndex] ) {
+        break;
+      }
+    }
+    return branchIndex;
+  };
+  
+  // The subtrail from the root that both trails share
+  Trail.sharedTrail = function( a, b ) {
+    return a.slice( 0, Trail.branchIndex( a, b ) );
+  };
+  
+  /*
+   * Fires subtree(trail) or self(trail) on the callbacks to create disjoint subtrees (trails) that cover exactly the nodes
+   * inclusively between a and b in rendering order.
+   * We try to consolidate these as much as possible.
+   *
+   * "a" and "b" are treated like self painted trails in the rendering order
+   * 
+   *
+   * Example tree:
+   *   a
+   *   - b
+   *   --- c
+   *   --- d
+   *   - e
+   *   --- f
+   *   ----- g
+   *   ----- h
+   *   ----- i
+   *   --- j
+   *   ----- k
+   *   - l
+   *   - m
+   *   --- n
+   *
+   * spannedSubtrees( a, a ) -> self( a );
+   * spannedSubtrees( c, n ) -> subtree( a ); NOTE: if b is painted, that wouldn't work!
+   * spannedSubtrees( h, l ) -> subtree( h ); subtree( i ); subtree( j ); self( l );
+   * spannedSubtrees( c, i ) -> [b,f] --- wait, include e self?
+   */
+  Trail.spannedSubtrees = function( a, b ) {
+    // assert && assert( a.nodes[0] === b.nodes[0], 'Spanned subtrees for a and b requires that a and b have the same root' );
+    
+    // a.reindex();
+    // b.reindex();
+    
+    // var subtrees = [];
+    
+    // var branchIndex = Trail.branchIndex( a, b );
+    // assert && assert( branchIndex > 0, 'Branch index should always be > 0' );
+    
+    // if ( a.length === branchIndex && b.length === branchIndex ) {
+    //   // the two trails are equal
+    //   subtrees.push( a );
+    // } else {
+    //   // find the first place where our start isn't the first child
+    //   for ( var before = a.length - 1; before >= branchIndex; before-- ) {
+    //     if ( a.indices[before-1] !== 0 ) {
+    //       break;
+    //     }
+    //   }
+      
+    //   // find the first place where our end isn't the last child
+    //   for ( var after = a.length - 1; after >= branchIndex; after-- ) {
+    //     if ( b.indices[after-1] !== b.nodes[after-1]._children.length - 1 ) {
+    //       break;
+    //     }
+    //   }
+      
+    //   if ( before < branchIndex && after < branchIndex ) {
+    //     // we span the entire tree up to nodes[branchIndex-1], so return only that subtree
+    //     subtrees.push( a.slice( 0, branchIndex ) );
+    //   } else {
+    //     // walk the subtrees down from the start
+    //     for ( var ia = before; ia >= branchIndex; ia-- ) {
+    //       subtrees.push( a.slice( 0, ia + 1 ) );
+    //     }
+        
+    //     // walk through the middle
+    //     var iStart = a.indices[branchIndex-1];
+    //     var iEnd = b.indices[branchIndex-1];
+    //     var base = a.slice( 0, branchIndex );
+    //     var children = base.lastNode()._children;
+    //     for ( var im = iStart; im <= iEnd; im++ ) {
+    //       subtrees.push( base.copy().addDescendant( children[im], im ) );
+    //     }
+        
+    //     // walk the subtrees up to the end
+    //     for ( var ib = branchIndex; ib <= after; ib++ ) {
+    //       subtrees.push( b.slice( 0, ib + 1 ) );
+    //     }
+    //   }
+    // }
+    
+    // return subtrees;
+  };
+  
   return Trail;
 } );
 
@@ -12877,1511 +13726,105 @@ define( 'SCENERY/util/Trail',['require','DOT/Matrix3','DOT/Transform3','SCENERY/
 // Copyright 2002-2013, University of Colorado
 
 /**
- * Basic down/up pointer handling for a Node, so that it's easy to handle buttons
- *
- * TODO: test hand handle down, go off screen, up. How to handle that properly?
- * TODO: tests
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define( 'SCENERY/input/DownUpListener',['require','SCENERY/scenery','SCENERY/util/Trail'],function( require ) {
-  
-  
-  var scenery = require( 'SCENERY/scenery' );
-  require( 'SCENERY/util/Trail' );
-  
-  /*
-   * The 'trail' parameter passed to down/upInside/upOutside will end with the node to which this DownUpListener has been added.
-   *
-   * Allowed options: {
-   *    mouseButton: 0  // The mouse button to use: left: 0, middle: 1, right: 2, see https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
-   *    down: null      // down( event, trail ) is called when the pointer is pressed down on this node
-   *                    // (and another pointer is not already down on it).
-   *    up: null        // up( event, trail ) is called after 'down', regardless of the pointer's current location.
-   *                    // Additionally, it is called AFTER upInside or upOutside, whichever is relevant
-   *    upInside: null  // upInside( event, trail ) is called after 'down', when the pointer is released inside
-   *                    // this node (it or a descendant is the top pickable node under the pointer)
-   *    upOutside: null // upOutside( event, trail ) is called after 'down', when the pointer is released outside
-   *                    // this node (it or a descendant is the not top pickable node under the pointer, even if the
-   *                    // same instance is still directly under the pointer)
-   * }
-   */
-  scenery.DownUpListener = function DownUpListener( options ) {
-    var handler = this;
-    
-    this.options = _.extend( {
-      mouseButton: 0 // allow a different mouse button 
-    }, options );
-    this.isDown = false;   // public, whether this listener is down
-    this.downCurrentTarget = null; // 'up' is handled via a pointer lister, which will have null currentTarget, so save the 'down' currentTarget
-    this.downTrail = null;
-    this.pointer = null;
-    
-    // this listener gets added to the pointer on a 'down'
-    this.downListener = {
-      // mouse/touch up
-      up: function( event ) {
-        assert && assert( event.pointer === handler.pointer );
-        if ( !event.pointer.isMouse || event.domEvent.button === handler.options.mouseButton ) {
-          handler.buttonUp( event );
-        }
-      },
-      
-      // touch cancel
-      cancel: function( event ) {
-        assert && assert( event.pointer === handler.pointer );
-        handler.buttonUp( event );
-      }
-    };
-  };
-  var DownUpListener = scenery.DownUpListener;
-  
-  DownUpListener.prototype = {
-    constructor: DownUpListener,
-    
-    buttonDown: function( event ) {
-      // already down from another pointer, don't do anything
-      if ( this.isDown ) { return; }
-      
-      // ignore other mouse buttons
-      if ( event.pointer.isMouse && event.domEvent.button !== this.options.mouseButton ) { return; }
-      
-      // add our listener so we catch the up wherever we are
-      event.pointer.addInputListener( this.downListener );
-      
-      this.isDown = true;
-      this.downCurrentTarget = event.currentTarget;
-      this.downTrail = event.trail.subtrailTo( event.currentTarget, false );
-      this.pointer = event.pointer;
-      
-      if ( this.options.down ) {
-        this.options.down( event, this.downTrail );
-      }
-    },
-    
-    buttonUp: function( event ) {
-      this.isDown = false;
-      this.pointer.removeInputListener( this.downListener );
-
-      var currentTargetSave = event.currentTarget;
-      event.currentTarget = this.downCurrentTarget; // up is handled by a pointer listener, so currentTarget would be null.
-      if ( this.options.upInside || this.options.upOutside ) {
-        var scene = this.downTrail.rootNode();
-        var trailUnderPointer = event.trail;
-        
-        // TODO: consider changing this so that it just does a hit check and ignores anything in front?
-        var isInside = trailUnderPointer.isExtensionOf( this.downTrail, true );
-        
-        if ( isInside && this.options.upInside ) {
-          this.options.upInside( event, this.downTrail );
-        } else if ( !isInside && this.options.upOutside ) {
-          this.options.upOutside( event, this.downTrail );
-        }
-      }
-      if ( this.options.up ) {
-        this.options.up( event, this.downTrail );
-      }
-      event.currentTarget = currentTargetSave; // be polite to other listeners, restore currentTarget
-    },
-    
-    /*---------------------------------------------------------------------------*
-    * events called from the node input listener
-    *----------------------------------------------------------------------------*/
-    
-    // mouse/touch down on this node
-    down: function( event ) {
-      this.buttonDown( event );
-    }
-  };
-  
-  return DownUpListener;
-} );
-
-
-
-// Copyright 2002-2013, University of Colorado
-
-/**
- * Basic button handling.
- *
- * Uses 4 states:
- * up: mouse not over, not pressed
- * over: mouse over, not pressed
- * down: mouse over, pressed
- * out: mouse not over, pressed
- *
- * TODO: offscreen handling
- * TODO: fix enter/exit edge cases for moving nodes or add/remove child, and when touches are created
+ * An instance that is specific to the display (not necessarily a global instance, could be in a Canvas cache, etc),
+ * that is needed to tracking instance-specific display information, and signals to the display system when other
+ * changes are necessary.
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'SCENERY/input/ButtonListener',['require','SCENERY/scenery','SCENERY/util/Trail','PHET_CORE/inherit','SCENERY/input/DownUpListener'],function( require ) {
+define( 'SCENERY/display/DisplayInstance',['require','PHET_CORE/inherit','SCENERY/scenery'],function( require ) {
   
   
-  var scenery = require( 'SCENERY/scenery' );
-  require( 'SCENERY/util/Trail' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
   
-  var DownUpListener = require( 'SCENERY/input/DownUpListener' );
+  var globalIdCounter = 1;
   
   /**
-   * Options for the ButtonListener:
-   *
-   * mouseButton: 0
-   * fireOnDown: false // default is to fire on 'up' after 'down', but passing fireOnDown: true will fire on 'down' instead
-   * up: null          // Called on an 'up' state change, as up( event, oldState )
-   * over: null        // Called on an 'over' state change, as over( event, oldState )
-   * down: null        // Called on an 'down' state change, as down( event, oldState )
-   * out: null         // Called on an 'out' state change, as out( event, oldState )
-   * fire: null        // Called on a state change to/from 'down' (depending on fireOnDown), as fire( event ). Called after the triggering up/over/down event.
+   * @param {DisplayInstance|null} parent
    */
-  scenery.ButtonListener = function ButtonListener( options ) {
-
-    this.buttonState = 'up'; // public: 'up', 'over', 'down' or 'out'
+  scenery.DisplayInstance = function DisplayInstance( trail ) {
+    this.id = globalIdCounter++;
+    this.trail = trail;
+    this.parent = null; // will be set as needed
+    this.children = [];
+    this.proxyChild = null;
+    this.proxyParent = null;
+    this.state = null; // filled in with rendering state later
+    this.renderer = null; // filled in later
     
-    this._overCount = 0; // how many pointers are over us (track a count, so we can handle multiple pointers gracefully)
+    // references into the linked list of effectively painted instances (null if nothing is effectively painted under this, both self if we are effectively painted)
+    this.firstPainted = null;
+    this.lastPainted = null;
     
-    this._buttonOptions = options; // store the options object so we can call the callbacks
-    
-    var buttonListener = this;
-    DownUpListener.call( this, {
-
-      mouseButton: options.mouseButton || 0, // forward the mouse button, default to 0 (LMB)
-      
-      down: function( event, trail ) {
-        buttonListener.setButtonState( event, 'down' );
-      },
-      
-      up: function( event, trail ) {
-        buttonListener.setButtonState( event, buttonListener._overCount > 0 ? 'over' : 'up' );
-      }
-    } );
+    // basically, our linked list of effectively painted instances
+    this.nextPainted = null;
+    this.previousPainted = null;
   };
-
-  var ButtonListener = scenery.ButtonListener;
+  var DisplayInstance = scenery.DisplayInstance;
   
-  inherit( DownUpListener, ButtonListener, {
-
-    setButtonState: function( event, state ) {
-      if ( state !== this.buttonState ) {
-        var oldState = this.buttonState;
-        
-        this.buttonState = state;
-        
-        if ( this._buttonOptions[state] ) {
-          this._buttonOptions[state]( event, oldState );
-        }
-        
-        if ( this._buttonOptions.fire &&
-             this._overCount > 0 &&
-             ( this._buttonOptions.fireOnDown ? ( state === 'down' ) : ( oldState === 'down' ) ) ) {
-          this._buttonOptions.fire( event );
-        }
-      }
+  inherit( Object, DisplayInstance, {
+    appendInstance: function( instance ) {
+      this.children.push( instance );
     },
     
-    enter: function( event ) {
-      this._overCount++;
-      if ( this._overCount === 1 ) {
-        this.setButtonState( event, this.isDown ? 'down' : 'over' );
-      }
-    },
-
-    exit: function( event ) {
-      assert && assert( this._overCount > 0, 'Exit events not matched by an enter' );
-      this._overCount--;
-      if ( this._overCount === 0 ) {
-        this.setButtonState( event, this.isDown ? 'out' : 'up' );
-      }
+    // since backbone/canvas caches can create stub instances that are effectively painted
+    isEffectivelyPainted: function() {
+      return this.renderer !== null;
     }
   } );
-
-  //TODO delete this after work is completed on sun.Button and scenery.ButtonListener
-  ButtonListener.TEST_LISTENER = new ButtonListener( {
-
-    up: function( event, oldState ) {
-      console.log( "ButtonListener.up oldState=" + oldState );
-    },
-
-    over: function( event, oldState ) {
-      console.log( "ButtonListener.over oldState=" + oldState );
-    },
-
-    down: function( event, oldState ) {
-      console.log( "ButtonListener.down oldState=" + oldState );
-    },
-
-    out: function( event, oldState ) {
-      console.log( "ButtonListener.out oldState=" + oldState );
-    },
-
-    fire: function( event ) {
-      console.log( "ButtonListener.fire" );
-    }
-  } );
-
-  return ButtonListener;
-} );
-
-
-
-// Copyright 2002-2013, University of Colorado
-
-/*
- * An event in Scenery that has similar event-handling characteristics to DOM events.
- * The original DOM event (if any) is available as event.domEvent.
- *
- * Multiple events can be triggered by a single domEvent, so don't assume it is unique.
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
- 
-define( 'SCENERY/input/Event',['require','SCENERY/scenery'],function( require ) {
   
-  
-  var scenery = require( 'SCENERY/scenery' );
-  
-  scenery.Event = function Event( args ) {
-    // ensure that all of the required args are supplied
-    assert && assert( args.trail &&
-                      args.type &&
-                      args.pointer &&
-                      args.target, 'Missing required scenery.Event argument' );
-    
-    this.handled = false;
-    this.aborted = false;
-    
-    // {Trail} path to the leaf-most node, ordered list, from root to leaf
-    this.trail = args.trail;
-    
-    // {String} what event was triggered on the listener
-    this.type = args.type;
-    
-    // {Pointer}
-    this.pointer = args.pointer;
-    
-    // raw DOM InputEvent (TouchEvent, PointerEvent, MouseEvent,...)
-    this.domEvent = args.domEvent;
-    
-    // {Node} whatever node you attached the listener to, or null when firing events on a Pointer
-    this.currentTarget = args.currentTarget;
-    
-    // {Node} leaf-most node in trail
-    this.target = args.target;
-    
-    // TODO: add extended information based on an event here?
-  };
-  var Event = scenery.Event;
-  
-  Event.prototype = {
-    constructor: Event,
-    
-    // like DOM Event.stopPropagation(), but named differently to indicate it doesn't fire that behavior on the underlying DOM event
-    handle: function() {
-      this.handled = true;
-    },
-    
-    // like DOM Event.stopImmediatePropagation(), but named differently to indicate it doesn't fire that behavior on the underlying DOM event
-    abort: function() {
-      this.handled = true;
-      this.aborted = true;
-    }
-  };
-  
-  return Event;
-} );
-
-// Copyright 2002-2013, University of Colorado
-
-/*
- * A pointer is an abstraction that includes a mouse and touch points (and possibly keys).
- *
- * TODO: add state tracking (dragging/panning/etc.) to pointer for convenience
- * TODO: consider an 'active' flag?
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define( 'SCENERY/input/Pointer',['require','SCENERY/scenery'],function( require ) {
-  
-  
-  var scenery = require( 'SCENERY/scenery' );
-  
-  scenery.Pointer = function Pointer() {
-    this.listeners = [];
-    
-    phetAllocation && phetAllocation( 'Pointer' );
-  };
-  var Pointer = scenery.Pointer;
-  
-  Pointer.prototype = {
-    constructor: Pointer,
-    
-    addInputListener: function( listener ) {
-      assert && assert( !_.contains( this.listeners, listener ) );
-      
-      this.listeners.push( listener );
-    },
-    
-    removeInputListener: function( listener ) {
-      var index = _.indexOf( this.listeners, listener );
-      assert && assert( index !== -1 );
-      
-      this.listeners.splice( index, 1 );
-    }
-  };
-  
-  return Pointer;
+  return DisplayInstance;
 } );
 
 // Copyright 2002-2013, University of Colorado
 
 /**
- * Tracks the mouse state
+ * A description of layer settings and the ability to create a layer with those settings.
+ * Used internally for the layer building process.
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'SCENERY/input/Mouse',['require','PHET_CORE/inherit','SCENERY/scenery','SCENERY/input/Pointer'],function( require ) {
-  
-  
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
-  
-  var Pointer = require( 'SCENERY/input/Pointer' ); // inherits from Pointer
-  
-  scenery.Mouse = function Mouse() {
-    Pointer.call( this );
-    
-    this.point = null;
-    
-    this.leftDown = false;
-    this.middleDown = false;
-    this.rightDown = false;
-    
-    this.isMouse = true;
-    
-    this.trail = null;
-    
-    // overrides the cursor of whatever is under it when set
-    this._cursor = null;
-    
-    this.type = 'mouse';
-  };
-  var Mouse = scenery.Mouse;
-  
-  inherit( Pointer, Mouse, {
-    set cursor( value ) { return this.setCursor( value ); },
-    get cursor() { return this._cursor; },
-    
-    setCursor: function( value ) {
-      this._cursor = value;
-      return this; // allow chaining
-    },
-    
-    clearCursor: function() {
-      this.setCursor( null );
-    },
-    
-    down: function( point, event ) {
-      // if ( this.point ) { this.point.freeToPool(); }
-      this.point = point;
-      switch( event.button ) {
-        case 0: this.leftDown = true; break;
-        case 1: this.middleDown = true; break;
-        case 2: this.rightDown = true; break;
-      }
-    },
-    
-    up: function( point, event ) {
-      // if ( this.point ) { this.point.freeToPool(); }
-      this.point = point;
-      switch( event.button ) {
-        case 0: this.leftDown = false; break;
-        case 1: this.middleDown = false; break;
-        case 2: this.rightDown = false; break;
-      }
-    },
-    
-    move: function( point, event ) {
-      // if ( this.point ) { this.point.freeToPool(); }
-      this.point = point;
-    },
-    
-    over: function( point, event ) {
-      // if ( this.point ) { this.point.freeToPool(); }
-      this.point = point;
-    },
-    
-    out: function( point, event ) {
-      // if ( this.point ) { this.point.freeToPool(); }
-      // TODO: how to handle the mouse out-of-bounds
-      this.point = null;
-    },
-    
-    toString: function() {
-      return 'Mouse';
-    }
-  } );
-  
-  return Mouse;
-} );
-
-// Copyright 2002-2013, University of Colorado
-
-/**
- * Tracks a single touch point
- *
- * IE guidelines for Touch-friendly sites: http://blogs.msdn.com/b/ie/archive/2012/04/20/guidelines-for-building-touch-friendly-sites.aspx
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define( 'SCENERY/input/Touch',['require','PHET_CORE/inherit','SCENERY/scenery','SCENERY/input/Pointer'],function( require ) {
-  
-  
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
-  
-  var Pointer = require( 'SCENERY/input/Pointer' ); // extends Pointer
-  
-  scenery.Touch = function Touch( id, point, event ) {
-    Pointer.call( this );
-    
-    this.id = id;
-    this.point = point;
-    this.isTouch = true;
-    this.trail = null;
-    
-    this.type = 'touch';
-  };
-  var Touch = scenery.Touch;
-  
-  inherit( Pointer, Touch, {
-    move: function( point, event ) {
-      // if ( this.point ) { this.point.freeToPool(); }
-      this.point = point;
-    },
-    
-    end: function( point, event ) {
-      // if ( this.point ) { this.point.freeToPool(); }
-      this.point = point;
-    },
-    
-    cancel: function( point, event ) {
-      // if ( this.point ) { this.point.freeToPool(); }
-      this.point = point;
-    },
-    
-    toString: function() {
-      return 'Touch#' + this.id;
-    }
-  } );
-  
-  return Touch;
-} );
-
-// Copyright 2002-2013, University of Colorado
-
-/**
- * Tracks a stylus ('pen') or something with tilt and pressure information
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define( 'SCENERY/input/Pen',['require','PHET_CORE/inherit','SCENERY/scenery','SCENERY/input/Pointer'],function( require ) {
-  
-  
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
-  
-  var Pointer = require( 'SCENERY/input/Pointer' ); // extends Pointer
-  
-  scenery.Pen = function Pen( id, point, event ) {
-    Pointer.call( this );
-    
-    this.id = id;
-    this.point = point;
-    this.isPen = true;
-    this.trail = null;
-    
-    this.type = 'pen';
-  };
-  var Pen = scenery.Pen;
-  
-  inherit( Pointer, Pen, {
-    move: function( point, event ) {
-      // if ( this.point ) { this.point.freeToPool(); }
-      this.point = point;
-    },
-    
-    end: function( point, event ) {
-      // if ( this.point ) { this.point.freeToPool(); }
-      this.point = point;
-    },
-    
-    cancel: function( point, event ) {
-      // if ( this.point ) { this.point.freeToPool(); }
-      this.point = point;
-    },
-    
-    toString: function() {
-      return 'Pen#' + this.id;
-    }
-  } );
-  
-  return Pen;
-} );
-
-// Copyright 2002-2013, University of Colorado
-
-/**
- * Tracks a single key-press
- *
- * TODO: general key-press implementation
- * TODO: consider separate handling for keys in general.
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define( 'SCENERY/input/Key',['require','PHET_CORE/inherit','SCENERY/scenery','SCENERY/input/Pointer'],function( require ) {
-  
-  
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
-  
-  var Pointer = require( 'SCENERY/input/Pointer' ); // Inherits from Pointer
-  
-  scenery.Key = function Key( event ) {
-    Pointer.call( this );
-    
-    this.event = event; // event.keyCode event.charCode
-    this.isKey = true; // compared to isMouse/isPen/isTouch
-    this.trail = null;
-    this.type = 'key';
-  };
-  var Key = scenery.Key;
-  
-  inherit( Pointer, Key, {
-    
-  } );
-  
-  return Key;
-} );
-
-// Copyright 2002-2013, University of Colorado
-
-/**
- * API for handling mouse / touch / keyboard events.
- *
- * A 'pointer' is an abstract way of describing either the mouse, a single touch point, or a key being pressed.
- * touch points and key presses go away after being released, whereas the mouse 'pointer' is persistent.
- *
- * Events will be called on listeners with a single event object. Supported event types are:
- * 'up', 'down', 'out', 'over', 'enter', 'exit', 'move', and 'cancel'. Scenery also supports more specific event
- * types that constrain the type of pointer, so 'mouse' + type, 'touch' + type and 'pen' + type will fire
- * on each listener before the generic event would be fined. E.g. for mouse movement, listener.mousemove will be
- * fired before listener.move.
- *
- * DOM Level 3 events spec: http://www.w3.org/TR/DOM-Level-3-Events/
- * Touch events spec: http://www.w3.org/TR/touch-events/
- * Pointer events spec draft: https://dvcs.w3.org/hg/pointerevents/raw-file/tip/pointerEvents.html
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define( 'SCENERY/input/Input',['require','SCENERY/scenery','SCENERY/util/Trail','SCENERY/input/Mouse','SCENERY/input/Touch','SCENERY/input/Pen','SCENERY/input/Key','SCENERY/input/Event'],function( require ) {
+define( 'SCENERY/layers/LayerType',['require','SCENERY/scenery'],function( require ) {
   
   
   var scenery = require( 'SCENERY/scenery' );
   
-  require( 'SCENERY/util/Trail' );
-  require( 'SCENERY/input/Mouse' );
-  require( 'SCENERY/input/Touch' );
-  require( 'SCENERY/input/Pen' );
-  require( 'SCENERY/input/Key' );
-  require( 'SCENERY/input/Event' );
-  
-  // listenerTarget is the DOM node (window/document/element) to which DOM event listeners will be attached
-  scenery.Input = function Input( scene, listenerTarget, batchDOMEvents ) {
-    this.scene = scene;
-    this.listenerTarget = listenerTarget;
-    this.batchDOMEvents = batchDOMEvents;
-    
-    this.batchedCallbacks = []; // cleared every frame
-
-    //Pointer for mouse, only created lazily on first mouse event, so no mouse is allocated on tablets
-    this.mouse = null;
-
-    this.pointers = [];
-    
-    this.listenerReferences = [];
-    
-    this.eventLog = [];     // written when recording event input. can be overwritten to the empty array to reset. Strings relative to this class (prefix "scene.input.")
-    this.logEvents = false; // can be set to true to cause Scenery to record all input calls to eventLog
-
-    this.pointerAddedListeners = [];
+  scenery.LayerType = function LayerType( Constructor, name, bitmask, renderer, args ) {
+    this.Constructor = Constructor;
+    this.name = name;
+    this.bitmask = bitmask;
+    this.renderer = renderer;
+    this.args = args;
   };
-  var Input = scenery.Input;
+  var LayerType = scenery.LayerType;
   
-  Input.prototype = {
-    constructor: Input,
-
-    addPointer: function( pointer ) {
-      this.pointers.push( pointer );
-
-      //Callback for showing pointer events.  Optimized for performance.
-      if ( this.pointerAddedListeners.length ) {
-        for ( var i = 0; i < this.pointerAddedListeners.length; i++ ) {
-          this.pointerAddedListeners[i]( pointer );
-        }
-      }
-    },
-
-    addPointerAddedListener: function( listener ) {
-      this.pointerAddedListeners.push(listener);
-    },
-
-    removePointerAddedListener: function( listener ) {
-      var index = this.pointerAddedListeners.indexOf( listener );
-      if ( index !== -1 ) {
-        this.pointerAddedListeners.splice( index, index + 1 );
-      }
+  LayerType.prototype = {
+    constructor: LayerType,
+    
+    supportsRenderer: function( renderer ) {
+      // NOTE: if this is changed off of instance equality, update supportsNode below
+      return this.renderer === renderer;
     },
     
-    removePointer: function( pointer ) {
-      // sanity check version, will remove all instances
-      for ( var i = this.pointers.length - 1; i >= 0; i-- ) {
-        if ( this.pointers[i] === pointer ) {
-          this.pointers.splice( i, 1 );
-        }
-      }
+    supportsBitmask: function( bitmask ) {
+      return ( this.bitmask & bitmask ) !== 0;
     },
     
-    findTouchById: function( id ) {
-      var i = this.pointers.length;
-      while ( i-- ) {
-        var pointer = this.pointers[i];
-        if ( pointer.id === id ) {
-          return pointer;
-        }
-      }
-      return undefined;
+    supportsNode: function( node ) {
+      // for now, only check the renderer that we are interested in
+      return node.supportsRenderer( this.renderer );
     },
     
-    findKeyByEvent: function( event ) {
-      assert && assert( event.hasOwnProperty( 'keyCode' ) && event.hasOwnProperty('charCode'), 'Assumes the KeyboardEvent has keyCode and charCode properties' );
-      var result = _.find( this.pointers, function( pointer ) {
-        // TODO: also check location (if that exists), so we don't mix up left and right shift, etc.
-        return pointer.keyCode === event.keyCode && pointer.charCode === event.charCode;
-      } );
-      // assert && assert( result, 'No key found for the combination of key:' + event.key + ' and location:' + event.location );
-      return result;
-    },
-
-    //Init the mouse on the first mouse event (if any!)
-    initMouse: function() {
-      this.mouse = new scenery.Mouse();
-      this.addPointer( this.mouse );
-    },
-    
-    mouseDown: function( point, event ) {
-      if ( this.logEvents ) { this.eventLog.push( 'mouseDown(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      if ( !this.mouse ) { this.initMouse(); }
-      this.mouse.down( point, event );
-      this.downEvent( this.mouse, event );
-    },
-    
-    mouseUp: function( point, event ) {
-      if ( this.logEvents ) { this.eventLog.push( 'mouseUp(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      if ( !this.mouse ) { this.initMouse(); }
-      this.mouse.up( point, event );
-      this.upEvent( this.mouse, event );
-    },
-    
-    mouseUpImmediate: function( point, event ) {
-      if ( this.logEvents ) { this.eventLog.push( 'mouseUpImmediate(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      if ( !this.mouse ) { this.initMouse(); }
-      this.upImmediateEvent( this.mouse, event );
-    },
-    
-    mouseMove: function( point, event ) {
-      if ( this.logEvents ) { this.eventLog.push( 'mouseMove(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      if ( !this.mouse ) { this.initMouse(); }
-      this.mouse.move( point, event );
-      this.moveEvent( this.mouse, event );
-    },
-    
-    mouseOver: function( point, event ) {
-      if ( this.logEvents ) { this.eventLog.push( 'mouseOver(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      if ( !this.mouse ) { this.initMouse(); }
-      this.mouse.over( point, event );
-      // TODO: how to handle mouse-over (and log it)
-    },
-    
-    mouseOut: function( point, event ) {
-      if ( this.logEvents ) { this.eventLog.push( 'mouseOut(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      if ( !this.mouse ) { this.initMouse(); }
-      this.mouse.out( point, event );
-      // TODO: how to handle mouse-out (and log it)
-    },
-    
-    keyDown: function( event ) {
-      if ( this.logEvents ) { this.eventLog.push( 'keyDown(' + Input.serializeDomEvent( event ) + ');' ); }
-      var key = new scenery.Key( event );
-      this.addPointer( key );
-      
-      var trail = this.scene.getTrailFromKeyboardFocus();
-      this.dispatchEvent( trail, 'keyDown', key, event, true );
-    },
-    
-    keyUp: function( event ) {
-      if ( this.logEvents ) { this.eventLog.push( 'keyUp(' + Input.serializeDomEvent( event ) + ');' ); }
-      var key = this.findKeyByEvent( event );
-      if ( key ) {
-        this.removePointer( key );
-        
-        var trail = this.scene.getTrailFromKeyboardFocus();
-        this.dispatchEvent( trail, 'keyUp', key, event, true );
-      }
-    },
-    
-    keyPress: function( event ) {
-      if ( this.logEvents ) { this.eventLog.push( 'keyPress(' + Input.serializeDomEvent( event ) + ');' ); }
-      // NOTE: do we even need keyPress?
-    },
-    
-    // called for each touch point
-    touchStart: function( id, point, event ) {
-      if ( this.logEvents ) { this.eventLog.push( 'touchStart(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      var touch = new scenery.Touch( id, point, event );
-      this.addPointer( touch );
-      this.downEvent( touch, event );
-    },
-    
-    touchEnd: function( id, point, event ) {
-      if ( this.logEvents ) { this.eventLog.push( 'touchEnd(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      var touch = this.findTouchById( id );
-      if ( touch ) {
-        touch.end( point, event );
-        this.removePointer( touch );
-        this.upEvent( touch, event );
-      } else {
-        assert && assert( false, 'Touch not found for touchEnd: ' + id );
-      }
-    },
-    
-    touchEndImmediate: function( id, point, event ) {
-      if ( this.logEvents ) { this.eventLog.push( 'touchEndImmediate(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      var touch = this.findTouchById( id );
-      if ( touch ) {
-        this.upImmediateEvent( touch, event );
-      } else {
-        assert && assert( false, 'Touch not found for touchEndImmediate: ' + id );
-      }
-    },
-    
-    touchMove: function( id, point, event ) {
-      if ( this.logEvents ) { this.eventLog.push( 'touchMove(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      var touch = this.findTouchById( id );
-      if ( touch ) {
-        touch.move( point, event );
-        this.moveEvent( touch, event );
-      } else {
-        assert && assert( false, 'Touch not found for touchMove: ' + id );
-      }
-    },
-    
-    touchCancel: function( id, point, event ) {
-      if ( this.logEvents ) { this.eventLog.push( 'touchCancel(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      var touch = this.findTouchById( id );
-      if ( touch ) {
-        touch.cancel( point, event );
-        this.removePointer( touch );
-        this.cancelEvent( touch, event );
-      } else {
-        assert && assert( false, 'Touch not found for touchCancel: ' + id );
-      }
-    },
-    
-    // called for each touch point
-    penStart: function( id, point, event ) {
-      if ( this.logEvents ) { this.eventLog.push( 'penStart(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      var pen = new scenery.Pen( id, point, event );
-      this.addPointer( pen );
-      this.downEvent( pen, event );
-    },
-    
-    penEnd: function( id, point, event ) {
-      if ( this.logEvents ) { this.eventLog.push( 'penEnd(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      var pen = this.findTouchById( id );
-      if ( pen ) {
-        pen.end( point, event );
-        this.removePointer( pen );
-        this.upEvent( pen, event );
-      } else {
-        assert && assert( false, 'Pen not found for penEnd: ' + id );
-      }
-    },
-    
-    penEndImmediate: function( id, point, event ) {
-      if ( this.logEvents ) { this.eventLog.push( 'penEndImmediate(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      var pen = this.findTouchById( id );
-      if ( pen ) {
-        this.upImmediateEvent( pen, event );
-      } else {
-        assert && assert( false, 'Pen not found for penEndImmediate: ' + id );
-      }
-    },
-    
-    penMove: function( id, point, event ) {
-      if ( this.logEvents ) { this.eventLog.push( 'penMove(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      var pen = this.findTouchById( id );
-      if ( pen ) {
-        pen.move( point, event );
-        this.moveEvent( pen, event );
-      } else {
-        assert && assert( false, 'Pen not found for penMove: ' + id );
-      }
-    },
-    
-    penCancel: function( id, point, event ) {
-      if ( this.logEvents ) { this.eventLog.push( 'penCancel(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      var pen = this.findTouchById( id );
-      if ( pen ) {
-        pen.cancel( point, event );
-        this.removePointer( pen );
-        this.cancelEvent( pen, event );
-      } else {
-        assert && assert( false, 'Pen not found for penCancel: ' + id );
-      }
-    },
-    
-    pointerDown: function( id, type, point, event ) {
-      switch ( type ) {
-        case 'mouse':
-          this.mouseDown( point, event );
-          break;
-        case 'touch':
-          this.touchStart( id, point, event );
-          break;
-        case 'pen':
-          this.penStart( id, point, event );
-          break;
-        default:
-          if ( console.log ) {
-            console.log( 'Unknown pointer type: ' + type );
-          }
-      }
-    },
-    
-    pointerUp: function( id, type, point, event ) {
-      switch ( type ) {
-        case 'mouse':
-          this.mouseUp( point, event );
-          break;
-        case 'touch':
-          this.touchEnd( id, point, event );
-          break;
-        case 'pen':
-          this.penEnd( id, point, event );
-          break;
-        default:
-          if ( console.log ) {
-            console.log( 'Unknown pointer type: ' + type );
-          }
-      }
-    },
-    
-    pointerUpImmediate: function( id, type, point, event ) {
-      switch ( type ) {
-        case 'mouse':
-          this.mouseUpImmediate( point, event );
-          break;
-        case 'touch':
-          this.touchEndImmediate( id, point, event );
-          break;
-        case 'pen':
-          this.penEndImmediate( id, point, event );
-          break;
-        default:
-          if ( console.log ) {
-            console.log( 'Unknown pointer type: ' + type );
-          }
-      }
-    },
-    
-    pointerCancel: function( id, type, point, event ) {
-      switch ( type ) {
-        case 'mouse':
-          if ( console && console.log ) {
-            console.log( 'WARNING: Pointer mouse cancel was received' );
-          }
-          break;
-        case 'touch':
-          this.touchCancel( id, point, event );
-          break;
-        case 'pen':
-          this.penCancel( id, point, event );
-          break;
-        default:
-          if ( console.log ) {
-            console.log( 'Unknown pointer type: ' + type );
-          }
-      }
-    },
-    
-    pointerMove: function( id, type, point, event ) {
-      switch ( type ) {
-        case 'mouse':
-          this.mouseMove( point, event );
-          break;
-        case 'touch':
-          this.touchMove( id, point, event );
-          break;
-        case 'pen':
-          this.penMove( id, point, event );
-          break;
-        default:
-          if ( console.log ) {
-            console.log( 'Unknown pointer type: ' + type );
-          }
-      }
-    },
-    
-    pointerOver: function( id, type, point, event ) {
-      
-    },
-    
-    pointerOut: function( id, type, point, event ) {
-      
-    },
-    
-    pointerEnter: function( id, type, point, event ) {
-      
-    },
-    
-    pointerLeave: function( id, type, point, event ) {
-      
-    },
-    
-    upEvent: function( pointer, event ) {
-      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
-      
-      this.dispatchEvent( trail, 'up', pointer, event, true );
-      
-      // touch pointers are transient, so fire exit/out to the trail afterwards
-      if ( pointer.isTouch ) {
-        this.exitEvents( pointer, event, trail, 0, true );
-      }
-      
-      pointer.trail = trail;
-    },
-    
-    upImmediateEvent: function( pointer, event ) {
-      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
-      
-      this.dispatchEvent( trail, 'upImmediate', pointer, event, true );
-    },
-    
-    downEvent: function( pointer, event ) {
-      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
-      
-      // touch pointers are transient, so fire enter/over to the trail first
-      if ( pointer.isTouch ) {
-        this.enterEvents( pointer, event, trail, 0, true );
-      }
-      
-      this.dispatchEvent( trail, 'down', pointer, event, true );
-      
-      pointer.trail = trail;
-    },
-    
-    moveEvent: function( pointer, event ) {
-      this.branchChangeEvents( pointer, event, true );
-    },
-    
-    cancelEvent: function( pointer, event ) {
-      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
-      
-      this.dispatchEvent( trail, 'cancel', pointer, event, true );
-      
-      // touch pointers are transient, so fire exit/out to the trail afterwards
-      if ( pointer.isTouch ) {
-        this.exitEvents( pointer, event, trail, 0, true );
-      }
-      
-      pointer.trail = trail;
-    },
-    
-    branchChangeEvents: function( pointer, event, isMove ) {
-      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
-      var oldTrail = pointer.trail || new scenery.Trail( this.scene ); // TODO: consider a static trail reference
-      
-      var lastNodeChanged = oldTrail.lastNode() !== trail.lastNode();
-      if ( !lastNodeChanged && !isMove ) {
-        // bail out if nothing needs to be done
-        return;
-      }
-      
-      var branchIndex;
-      
-      for ( branchIndex = 0; branchIndex < Math.min( trail.length, oldTrail.length ); branchIndex++ ) {
-        if ( trail.nodes[branchIndex] !== oldTrail.nodes[branchIndex] ) {
-          break;
-        }
-      }
-      
-      // event order matches http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
-      if ( isMove ) {
-        this.dispatchEvent( trail, 'move', pointer, event, true );
-      }
-      
-      // we want to approximately mimic http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
-      // TODO: if a node gets moved down 1 depth, it may see both an exit and enter?
-      this.exitEvents( pointer, event, oldTrail, branchIndex, lastNodeChanged );
-      this.enterEvents( pointer, event, trail, branchIndex, lastNodeChanged );
-      
-      pointer.trail = trail;
-    },
-    
-    enterEvents: function( pointer, event, trail, branchIndex, lastNodeChanged ) {
-      if ( trail.length > branchIndex ) {
-        for ( var newIndex = trail.length - 1; newIndex >= branchIndex; newIndex-- ) {
-          this.dispatchEvent( trail.slice( 0, newIndex + 1 ), 'enter', pointer, event, false );
-        }
-      }
-      
-      if ( lastNodeChanged ) {
-        this.dispatchEvent( trail, 'over', pointer, event, true );
-      }
-    },
-    
-    exitEvents: function( pointer, event, trail, branchIndex, lastNodeChanged ) {
-      if ( lastNodeChanged ) {
-        this.dispatchEvent( trail, 'out', pointer, event, true );
-      }
-      
-      if ( trail.length > branchIndex ) {
-        for ( var oldIndex = branchIndex; oldIndex < trail.length; oldIndex++ ) {
-          this.dispatchEvent( trail.slice( 0, oldIndex + 1 ), 'exit', pointer, event, false );
-        }
-      }
-    },
-    
-    validatePointers: function() {
-      var that = this;
-      
-      var i = this.pointers.length;
-      while ( i-- ) {
-        var pointer = this.pointers[i];
-        if ( pointer.point ) {
-          that.branchChangeEvents( pointer, null, false );
-        }
-      }
-    },
-    
-    dispatchEvent: function( trail, type, pointer, event, bubbles ) {
-      sceneryEventLog && sceneryEventLog( 'Input: ' + type + ' on ' + trail.toString() + ' for pointer ' + pointer.toString() );
-      if ( !trail ) {
-        try {
-          throw new Error( 'falsy trail for dispatchEvent' );
-        } catch ( e ) {
-          console.log( e.stack );
-          throw e;
-        }
-      }
-      
-      // TODO: is there a way to make this event immutable?
-      var inputEvent = new scenery.Event( {
-        trail: trail, // {Trail} path to the leaf-most node, ordered list, from root to leaf
-        type: type, // {String} what event was triggered on the listener
-        pointer: pointer, // {Pointer}
-        domEvent: event, // raw DOM InputEvent (TouchEvent, PointerEvent, MouseEvent,...)
-        currentTarget: null, // {Node} whatever node you attached the listener to, null when passed to a Pointer,
-        target: trail.lastNode() // {Node} leaf-most node in trail
-      } );
-      
-      // first run through the pointer's listeners to see if one of them will handle the event
-      this.dispatchToPointer( type, pointer, inputEvent );
-      
-      // if not yet handled, run through the trail in order to see if one of them will handle the event
-      // at the base of the trail should be the scene node, so the scene will be notified last
-      this.dispatchToTargets( trail, pointer, type, inputEvent, bubbles );
-      
-      // TODO: better interactivity handling?
-      if ( !trail.lastNode().interactive && !pointer.isKey && event && event.preventDefault ) {
-        event.preventDefault();
-      }
-    },
-    
-    // TODO: reduce code sharing between here and dispatchToTargets!
-    dispatchToPointer: function( type, pointer, inputEvent ) {
-      if ( inputEvent.aborted || inputEvent.handled ) {
-        return;
-      }
-      
-      var specificType = pointer.type + type; // e.g. mouseup, touchup, keyup
-      
-      var pointerListeners = pointer.listeners.slice( 0 ); // defensive copy
-      for ( var i = 0; i < pointerListeners.length; i++ ) {
-        var listener = pointerListeners[i];
-        
-        // if a listener returns true, don't handle any more
-        var aborted = false;
-        
-        if ( !aborted && listener[specificType] ) {
-          listener[specificType]( inputEvent );
-          aborted = inputEvent.aborted;
-        }
-        if ( !aborted && listener[type] ) {
-          listener[type]( inputEvent );
-          aborted = inputEvent.aborted;
-        }
-        
-        // bail out if the event is aborted, so no other listeners are triggered
-        if ( aborted ) {
-          return;
-        }
-      }
-    },
-    
-    dispatchToTargets: function( trail, pointer, type, inputEvent, bubbles ) {
-      if ( inputEvent.aborted || inputEvent.handled ) {
-        return;
-      }
-      
-      var specificType = pointer.type + type; // e.g. mouseup, touchup, keyup
-      
-      for ( var i = trail.length - 1; i >= 0; bubbles ? i-- : i = -1 ) {
-        var target = trail.nodes[i];
-        inputEvent.currentTarget = target;
-        
-        var listeners = target.getInputListeners();
-        
-        for ( var k = 0; k < listeners.length; k++ ) {
-          var listener = listeners[k];
-          
-          // if a listener returns true, don't handle any more
-          var aborted = false;
-          
-          if ( !aborted && listener[specificType] ) {
-            listener[specificType]( inputEvent );
-            aborted = inputEvent.aborted;
-          }
-          if ( !aborted && listener[type] ) {
-            listener[type]( inputEvent );
-            aborted = inputEvent.aborted;
-          }
-          
-          // bail out if the event is aborted, so no other listeners are triggered
-          if ( aborted ) {
-            return;
-          }
-        }
-        
-        // if the input event was handled, don't follow the trail down another level
-        if ( inputEvent.handled ) {
-          return;
-        }
-      }
-    },
-    
-    addListener: function( type, callback, useCapture ) {
-      var input = this;
-      
-      //Cancel propagation of mouse events but not key events.  Key Events need to propagate for tab navigability
-      var usePreventDefault = type !== 'keydown' && type !== 'keyup' && type !== 'keypress';
-      
-      if ( this.batchDOMEvents ) {
-        var batchedCallback = function batchedEvent( domEvent ) {
-          sceneryEventLog && sceneryEventLog( 'Batching event for ' + type );
-          
-          if ( usePreventDefault ) {
-            domEvent.preventDefault(); // TODO: should we batch the events in a different place so we don't preventDefault on something bad?
-          }
-          input.batchedCallbacks.push( function batchedEventCallback() {
-            // process whether anything under the pointers changed before running additional input events
-            input.validatePointers();
-            if ( input.logEvents ) { input.eventLog.push( 'validatePointers();' ); }
-            
-            callback( domEvent );
-          } );
-        };
-        this.listenerTarget.addEventListener( type, batchedCallback, useCapture );
-        this.listenerReferences.push( { type: type, callback: batchedCallback, useCapture: useCapture } );
-      } else {
-        this.listenerTarget.addEventListener( type, callback, useCapture );
-        this.listenerReferences.push( { type: type, callback: function synchronousEvent( domEvent ) {
-          sceneryEventLog && sceneryEventLog( 'Running event for ' + type );
-          
-          // process whether anything under the pointers changed before running additional input events
-          input.validatePointers();
-          if ( input.logEvents ) { input.eventLog.push( 'validatePointers();' ); }
-          
-          callback( domEvent );
-        }, useCapture: useCapture } );
-      }
-    },
-    
-    // temporary, for mouse events
-    addImmediateListener: function( type, callback, useCapture ) {
-      var input = this;
-      
-      this.listenerTarget.addEventListener( type, callback, useCapture );
-      this.listenerReferences.push( { type: type, callback: function immediateEvent( domEvent ) {
-        sceneryEventLog && sceneryEventLog( 'Running immediate event for ' + type );
-        
-        // process whether anything under the pointers changed before running additional input events
-        // input.validatePointers();
-        // if ( input.logEvents ) { input.eventLog.push( 'validatePointers();' ); }
-        
-        callback( domEvent );
-      }, useCapture: useCapture } );
-    },
-    
-    disposeListeners: function() {
-      var input = this;
-      _.each( this.listenerReferences, function( ref ) {
-        input.listenerTarget.removeEventListener( ref.type, ref.callback, ref.useCapture );
-      } );
-    },
-    
-    fireBatchedEvents: function() {
-      if ( this.batchedCallbacks.length ) {
-        sceneryEventLog && sceneryEventLog( 'Input.fireBatchedEvents length:' + this.batchedCallbacks.length );
-        var len = this.batchedCallbacks.length;
-        for ( var i = 0; i < len; i++ ) {
-          this.batchedCallbacks[i]();
-        }
-        this.batchedCallbacks.length = 0;
-      }
+    createLayer: function( args ) {
+      var Constructor = this.Constructor;
+      return new Constructor( _.extend( {}, args, this.args ) ); // allow overriding certain arguments if necessary by the LayerType
     }
   };
   
-  Input.serializeDomEvent = function serializeDomEvent( domEvent ) {
-    var lines = [];
-    for ( var prop in domEvent ) {
-      if ( domEvent.hasOwnProperty( prop ) ) {
-        // stringifying dom event object properties can cause circular references, so we avoid that completely
-        if ( prop === 'touches' || prop === 'targetTouches' || prop === 'changedTouches' ) {
-          var arr = [];
-          for ( var i = 0; i < domEvent[prop].length; i++ ) {
-            // according to spec (http://www.w3.org/TR/touch-events/), this is not an Array, but a TouchList
-            var touch = domEvent[prop].item( i );
-            
-            arr.push( serializeDomEvent( touch ) );
-          }
-          lines.push( prop + ':[' + arr.join( ',' ) + ']' );
-        } else {
-          lines.push( prop + ':' + ( ( typeof domEvent[prop] === 'object' ) && ( domEvent[prop] !== null ) ? '{}' : JSON.stringify( domEvent[prop] ) ) );
-        }
-      }
-    }
-    return '{' + lines.join( ',' ) + '}';
-  };
-  
-  Input.serializeVector2 = function( vector ) {
-    return 'dot(' + vector.x + ',' + vector.y + ')';
-  };
-  
-  return Input;
-} );
-
-// Copyright 2002-2013, University of Colorado
-
-/**
- * Basic dragging for a node.
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define( 'SCENERY/input/SimpleDragHandler',['require','DOT/Matrix3','SCENERY/scenery'],function( require ) {
-  
-  
-  var Matrix3 = require( 'DOT/Matrix3' );
-  
-  var scenery = require( 'SCENERY/scenery' );
-  
-  /*
-   * Allowed options: {
-   *    allowTouchSnag: false // allow touch swipes across an object to pick it up,
-   *    dragCursor: 'pointer' // while dragging with the mouse, sets the cursor to this value (or use null to not override the cursor while dragging)
-   *    mouseButton: 0        // allow changing the mouse button that activates the drag listener. -1 should activate on any mouse button, 0 on left, 1 for middle, 2 for right, etc.
-   *    start: null           // if non-null, called when a drag is started. start( event, trail )
-   *    drag: null            // if non-null, called when the user moves something with a drag (not a start or end event).
-   *                                                                         drag( event, trail )
-   *    end: null             // if non-null, called when a drag is ended.   end( event, trail )
-   *    translate:            // if this exists, translate( { delta: _, oldPosition: _, position: _ } ) will be called instead of directly translating the node
-   * }
-   */
-  scenery.SimpleDragHandler = function SimpleDragHandler( options ) {
-    var handler = this;
-    
-    this.options = _.extend( {
-      allowTouchSnag: false,
-      mouseButton: 0,
-      dragCursor: 'pointer'
-    }, options );
-    
-    this.dragging              = false;     // whether a node is being dragged with this handler
-    this.pointer               = null;      // the pointer doing the current dragging
-    this.trail                 = null;      // stores the path to the node that is being dragged
-    this.transform             = null;      // transform of the trail to our node (but not including our node, so we can prepend the deltas)
-    this.node                  = null;      // the node that we are handling the drag for
-    this.lastDragPoint         = null;      // the location of the drag at the previous event (so we can calculate a delta)
-    this.startTransformMatrix  = null;      // the node's transform at the start of the drag, so we can reset on a touch cancel
-    this.mouseButton           = undefined; // tracks which mouse button was pressed, so we can handle that specifically
-    // TODO: consider mouse buttons as separate pointers?
-    
-    // if an ancestor is transformed, pin our node
-    this.transformListener = {
-      transform: function( args ) {
-        if ( !handler.trail.isExtensionOf( args.trail, true ) ) {
-          return;
-        }
-        
-        var newMatrix = args.trail.getTransform().getMatrix();
-        var oldMatrix = handler.transform.getMatrix();
-        
-        // if A was the trail's old transform, B is the trail's new transform, we need to apply (B^-1 A) to our node
-        handler.node.prependMatrix( newMatrix.inverted().timesMatrix( oldMatrix ) );
-        
-        // store the new matrix so we can do deltas using it now
-        handler.transform.set( newMatrix );
-      }
-    };
-    
-    // this listener gets added to the pointer when it starts dragging our node
-    this.dragListener = {
-      // mouse/touch up
-      up: function( event ) {
-        assert && assert( event.pointer === handler.pointer );
-        if ( !event.pointer.isMouse || event.domEvent.button === handler.mouseButton ) {
-          var saveCurrentTarget = event.currentTarget;
-          event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
-          handler.endDrag( event );
-          event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
-        }
-      },
-      
-      // touch cancel
-      cancel: function( event ) {
-        assert && assert( event.pointer === handler.pointer );
-
-        var saveCurrentTarget = event.currentTarget;
-        event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
-        handler.endDrag( event );
-        event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
-
-        // since it's a cancel event, go back!
-        if ( !handler.transform ) {
-          handler.node.setMatrix( handler.startTransformMatrix );
-        }
-      },
-      
-      // mouse/touch move
-      move: function( event ) {
-        assert && assert( event.pointer === handler.pointer );
-        
-        var delta = handler.transform.inverseDelta2( handler.pointer.point.minus( handler.lastDragPoint ) );
-        
-        // move by the delta between the previous point, using the precomputed transform
-        // prepend the translation on the node, so we can ignore whatever other transform state the node has
-        if ( handler.options.translate ) {
-          var translation = handler.node.getTransform().getMatrix().getTranslation();
-          handler.options.translate( {
-            delta: delta,
-            oldPosition: translation,
-            position: translation.plus( delta )
-          } );
-        }
-        handler.lastDragPoint = handler.pointer.point;
-        
-        if ( handler.options.drag ) {
-          // TODO: consider adding in a delta to the listener
-          // TODO: add the position in to the listener
-          var saveCurrentTarget = event.currentTarget;
-          event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
-          handler.options.drag( event, handler.trail ); // new position (old position?) delta
-          event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
-        }
-      }
-    };
-  };
-  var SimpleDragHandler = scenery.SimpleDragHandler;
-  
-  SimpleDragHandler.prototype = {
-    constructor: SimpleDragHandler,
-    
-    startDrag: function( event ) {
-      // set a flag on the pointer so it won't pick up other nodes
-      event.pointer.dragging = true;
-      event.pointer.cursor = this.options.dragCursor;
-      event.pointer.addInputListener( this.dragListener );
-      // event.trail.rootNode().addEventListener( this.transformListener ); // TODO: replace with new parent transform listening solution
-      
-      // set all of our persistent information
-      this.dragging = true;
-      this.pointer = event.pointer;
-      this.trail = event.trail.subtrailTo( event.currentTarget, true );
-      this.transform = this.trail.getTransform();
-      this.node = event.currentTarget;
-      this.lastDragPoint = event.pointer.point;
-      this.startTransformMatrix = event.currentTarget.getMatrix();
-      // event.domEvent may not exist if this is touch-to-snag
-      this.mouseButton = event.pointer.isMouse ? event.domEvent.button : undefined;
-      
-      if ( this.options.start ) {
-        this.options.start( event, this.trail );
-      }
-    },
-    
-    endDrag: function( event ) {
-      this.pointer.dragging = false;
-      this.pointer.cursor = null;
-      this.pointer.removeInputListener( this.dragListener );
-      // this.trail.rootNode().removeEventListener( this.transformListener ); // TODO: replace with new parent transform listening solution
-      this.dragging = false;
-      
-      if ( this.options.end ) {
-        this.options.end( event, this.trail );
-      }
-    },
-    
-    tryToSnag: function( event ) {
-      // don't allow drag attempts that use the wrong mouse button (-1 indicates any mouse button works)
-      if ( event.pointer.isMouse && event.domEvent && this.options.mouseButton !== event.domEvent.button && this.options.mouseButton !== -1 ) {
-        return;
-      }
-      
-      // only start dragging if the pointer isn't dragging anything, we aren't being dragged, and if it's a mouse it's button is down
-      if ( !this.dragging && !event.pointer.dragging ) {
-        this.startDrag( event );
-      }
-    },
-    
-    /*---------------------------------------------------------------------------*
-    * events called from the node input listener
-    *----------------------------------------------------------------------------*/
-    
-    // mouse/touch down on this node
-    down: function( event ) {
-      this.tryToSnag( event );
-    },
-    
-    // touch enters this node
-    touchenter: function( event ) {
-      // allow touches to start a drag by moving "over" this node
-      if ( this.options.allowTouchSnag ) {
-        this.tryToSnag( event );
-      }
-    }
-  };
-  
-  return SimpleDragHandler;
+  return LayerType;
 } );
 
 
@@ -15059,12 +14502,147 @@ define( 'SCENERY/util/TrailPointer',['require','SCENERY/scenery','SCENERY/util/T
 // Copyright 2002-2013, University of Colorado
 
 /**
+ * Feature detection
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'SCENERY/util/Features',['require','SCENERY/scenery'],function( require ) {
+  
+  
+  var scenery = require( 'SCENERY/scenery' );
+  
+  var Features = scenery.Features = {};
+  
+  function supportsDataURLFormatOutput( format ) {
+    try {
+      var canvas = document.createElement( 'canvas' );
+      canvas.width = 1;
+      canvas.height = 1;
+      var context = canvas.getContext( '2d' );
+      context.fillStyle = 'black';
+      context.fillRect( 0, 0, 1, 1 );
+      var url = canvas.toDataURL( [ format ] );
+      
+      var target = 'data:' + format;
+
+      return url.slice( 0, target.length ) === target;
+    } catch ( e ) {
+      return false;
+    }
+  }
+  
+  function supportsDataURLFormatOrigin( name, black1x1Url ) {
+    var canvas = document.createElement( 'canvas' );
+    canvas.width = 1;
+    canvas.height = 1;
+    var context = canvas.getContext( '2d' );
+    
+    var img = document.createElement( 'img' );
+    img.crossOrigin = 'Anonymous'; // maybe setting the CORS attribute will help?
+    
+    var loadCall = function() {
+      try {
+        context.drawImage( img, 0, 0 );
+        canvas.toDataURL();
+        Features[name] = true;
+      } catch ( e ) {
+        Features[name] = false;
+      }
+    };
+    img.onload = loadCall;
+    try {
+      img.src = black1x1Url;
+      if ( img.complete ) {
+        loadCall();
+      }
+    } catch ( e ) {
+      Features[name] = false;
+    }
+  }
+  
+  function prefixed( name ) {
+    var result = [];
+    result.push( name );
+    
+    // prepare for camel case
+    name = name.charAt( 0 ).toUpperCase() + name.slice( 1 );
+    
+    // Chrome planning to not introduce prefixes in the future, hopefully we will be safe
+    result.push( 'moz' + name );
+    result.push( 'Moz' + name ); // some prefixes seem to have all-caps?
+    result.push( 'webkit' + name );
+    result.push( 'ms' + name );
+    result.push( 'o' + name );
+    
+    return result;
+  }
+  
+  function detect( obj, names ) {
+    for ( var i = 0; i < names.length; i++ ) {
+      if ( obj[names[i]] !== undefined ) {
+        return names[i];
+      }
+    }
+    return undefined;
+  }
+  
+  Features.canvasPNGOutput = supportsDataURLFormatOutput( 'image/png' );
+  Features.canvasJPEGOutput = supportsDataURLFormatOutput( 'image/jpeg' );
+  Features.canvasGIFOutput = supportsDataURLFormatOutput( 'image/gif' );
+  Features.canvasICONOutput = supportsDataURLFormatOutput( 'image/x-icon' );
+  
+  // 1x1 black output from Chrome Canvas in PNG
+  supportsDataURLFormatOrigin( 'canvasPNGInput', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2NkYGD4DwABCQEBtxmN7wAAAABJRU5ErkJggg==' );
+  
+  // 1x1 black output from Chrome Canvas in JPEG
+  supportsDataURLFormatOrigin( 'canvasJPEGInput', 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCAABAAEDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD8qqKKKAP/2Q==' );
+  
+  /*
+   * This is from the following SVG:
+   *
+   * <?xml version="1.0"?>
+   * <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewport="0 0 1 1" width="1" height="1" >
+   *   <rect x="0" y="0" width="1" height="1" rx="0" ry="0" style="fill: black; stroke: none;"></rect>
+   * </svg>
+   */
+  supportsDataURLFormatOrigin( 'canvasSVGInput', 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+DQo8c3ZnIHZlcnNpb249IjEuMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2aWV3cG9ydD0iMCAwIDEgMSIgd2lkdGg9IjEiIGhlaWdodD0iMSIgPg0KICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMSIgaGVpZ2h0PSIxIiByeD0iMCIgcnk9IjAiIHN0eWxlPSJmaWxsOiBibGFjazsgc3Ryb2tlOiBub25lOyI+PC9yZWN0Pg0KPC9zdmc+DQo=' );
+  
+  // 1x1 black output from Photoshop in GIF
+  supportsDataURLFormatOrigin( 'canvasGIFInput', 'data:image/gif;base64,R0lGODlhAQABAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAABAAEAAAICRAEAOw==' );
+  
+  // canvas prefixed names
+  var canvas = document.createElement( 'canvas' );
+  var ctx = canvas.getContext( '2d' );
+  Features.toDataURLHD = detect( canvas, prefixed( 'toDataURLHD' ) );
+  Features.createImageDataHD = detect( ctx, prefixed( 'createImageDataHD' ) );
+  Features.getImageDataHD = detect( ctx, prefixed( 'getImageDataHD' ) );
+  Features.putImageDataHD = detect( ctx, prefixed( 'putImageDataHD' ) );
+  Features.currentTransform = detect( ctx, prefixed( 'currentTransform' ) );
+  
+  var span = document.createElement( 'span' );
+  var div = document.createElement( 'div' );
+  Features.textStroke = detect( span.style, prefixed( 'textStroke' ) );
+  Features.textStrokeColor = detect( span.style, prefixed( 'textStrokeColor' ) );
+  Features.textStrokeWidth = detect( span.style, prefixed( 'textStrokeWidth' ) );
+  
+  Features.transform = detect( div.style, prefixed( 'transform' ) );
+  Features.transformOrigin = detect( div.style, prefixed( 'transformOrigin' ) );
+  Features.backfaceVisibility = detect( div.style, prefixed( 'backfaceVisibility' ) );
+  Features.borderRadius = detect( div.style, prefixed( 'borderRadius' ) );
+  
+  return Features;
+} );
+
+// Copyright 2002-2013, University of Colorado
+
+/**
  * General utility functions for Scenery
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'SCENERY/util/Util',['require','SCENERY/scenery','DOT/Matrix3','DOT/Transform3','DOT/Bounds2','DOT/Vector2'],function( require ) {
+define( 'SCENERY/util/Util',['require','SCENERY/scenery','DOT/Matrix3','DOT/Transform3','DOT/Bounds2','DOT/Vector2','SCENERY/util/Features'],function( require ) {
   
   
   var scenery = require( 'SCENERY/scenery' );
@@ -15073,6 +14651,7 @@ define( 'SCENERY/util/Util',['require','SCENERY/scenery','DOT/Matrix3','DOT/Tran
   var Transform3 = require( 'DOT/Transform3' );
   var Bounds2 = require( 'DOT/Bounds2' );
   var Vector2 = require( 'DOT/Vector2' );
+  var Features = require( 'SCENERY/util/Features' );
   
   // convenience function
   function p( x, y ) {
@@ -15083,52 +14662,8 @@ define( 'SCENERY/util/Util',['require','SCENERY/scenery','DOT/Matrix3','DOT/Tran
   var debugChromeBoundsScanning = false;
   
   // detect properly prefixed transform and transformOrigin properties
-  var transformProperty = '';
-  var transformOriginProperty = '';
-  var webkitHardwareAcceleration = false;
-  var mozillaHardwareAcceleration = false;
-  if ( document && document.createElement ) {
-    var style = document.createElement( 'div' ).style;
-    
-    var transformNames = [
-      'transform',
-      'webkitTransform',
-      'oTransform',
-      'mozTransform',
-      'msTransform'
-    ];
-    var transformOriginNames = [
-      'transformOrigin',
-      'webkitTransformOrigin',
-      'oTransformOrigin',
-      'mozTransformOrigin',
-      'msTransformOrigin'
-    ];
-    
-    var i;
-    
-    for ( i = 0; i < transformNames.length; i++ ) {
-      if ( transformNames[i] in style ) {
-        transformProperty = transformNames[i];
-        break;
-      }
-    }
-    for ( i = 0; i < transformOriginNames.length; i++ ) {
-      if ( transformOriginNames[i] in style ) {
-        transformOriginProperty = transformOriginNames[i];
-        break;
-      }
-    }
-    if ( !transformOriginProperty ) {
-      transformOriginProperty = 'transformOrigin'; // fallback, so we don't try to set an empty string property later
-    }
-    if ( ( 'webkitBackfaceVisibility' in style ) || ( 'webkitTransform' in style ) ) {
-      webkitHardwareAcceleration = true;
-    }
-    if ( 'mozTransform' in style ) {
-      mozillaHardwareAcceleration = true;
-    }
-  }
+  var transformProperty = Features.transform;
+  var transformOriginProperty = Features.transformOrigin || 'transformOrigin'; // fallback, so we don't try to set an empty string property later
   
   scenery.Util = {
     // like _.extend, but with hardcoded support for https://github.com/documentcloud/underscore/pull/986
@@ -15154,19 +14689,13 @@ define( 'SCENERY/util/Util',['require','SCENERY/scenery','DOT/Matrix3','DOT/Tran
       return new F();
     },
     
-    applyCSSTransform: function( matrix, element ) {
+    applyCSSTransform: function( matrix, element, forceAcceleration ) {
       var transformCSS = matrix.getCSSTransform();
       // notes on triggering hardware acceleration: http://creativejs.com/2011/12/day-2-gpu-accelerate-your-dom-elements/
-      // TODO: consider leaving out on iOS if possible, since we might be overflowing the GPU memory
       
-      // TODO: we may want control over this flag
-      if ( webkitHardwareAcceleration || mozillaHardwareAcceleration ) {
-        transformCSS += ' translateZ(0)';
-      }
-      
-      if ( webkitHardwareAcceleration ) {
-        // TODO: find out bug that causes BLL text to disappear unless this acceleration is present
+      if ( forceAcceleration ) {
         element.style.webkitBackfaceVisibility = 'hidden';
+        transformCSS += ' translateZ(0)';
       }
       
       element.style[transformProperty] = transformCSS;
@@ -15856,7 +15385,7 @@ define( 'SCENERY/layers/CanvasLayer',['require','PHET_CORE/inherit','DOT/Bounds2
     },
     
     getSVGString: function() {
-      return '<image xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="' + this.canvas.toDataURL() + '" x="0" y="0" height="' + this.canvas.height + 'px" width="' + this.canvas.width + 'px"/>';
+      return '<image xmlns:xlink="' + scenery.xlinkns + '" xlink:href="' + this.canvas.toDataURL() + '" x="0" y="0" height="' + this.canvas.height + 'px" width="' + this.canvas.width + 'px"/>';
     },
     
     // TODO: note for DOM we can do https://developer.mozilla.org/en-US/docs/HTML/Canvas/Drawing_DOM_objects_into_a_canvas
@@ -16028,12 +15557,11 @@ define( 'SCENERY/layers/CanvasLayer',['require','PHET_CORE/inherit','DOT/Bounds2
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'SCENERY/layers/DOMLayer',['require','PHET_CORE/inherit','DOT/Bounds2','SCENERY/scenery','SCENERY/layers/Layer','SCENERY/util/Trail'],function( require ) {
+define( 'SCENERY/layers/DOMLayer',['require','PHET_CORE/inherit','SCENERY/scenery','SCENERY/layers/Layer','SCENERY/util/Trail'],function( require ) {
   
   
   var inherit = require( 'PHET_CORE/inherit' );
-  var Bounds2 = require( 'DOT/Bounds2' );
-  
+
   var scenery = require( 'SCENERY/scenery' );
   
   var Layer = require( 'SCENERY/layers/Layer' ); // DOMLayer inherits from Layer
@@ -16201,7 +15729,7 @@ define( 'SCENERY/layers/DOMLayer',['require','PHET_CORE/inherit','DOT/Bounds2','
     },
     
     getSVGString: function() {
-      var data = "<svg xmlns='http://www.w3.org/2000/svg' width='" + this.$main.width() + "' height='" + this.$main.height() + "'>" +
+      return "<svg xmlns='" + scenery.svgns + "' width='" + this.$main.width() + "' height='" + this.$main.height() + "'>" +
         "<foreignObject width='100%' height='100%'>" +
         $( this.div ).html() +
         "</foreignObject></svg>";
@@ -16211,7 +15739,7 @@ define( 'SCENERY/layers/DOMLayer',['require','PHET_CORE/inherit','DOT/Bounds2','
     // TODO: note that http://pbakaus.github.com/domvas/ may work better, but lacks IE support
     renderToCanvas: function( canvas, context, delayCounts ) {
       // TODO: consider not silently failing?
-      // var data = "<svg xmlns='http://www.w3.org/2000/svg' width='" + this.$main.width() + "' height='" + this.$main.height() + "'>" +
+      // var data = "<svg xmlns='" + scenery.svgns + "' width='" + this.$main.width() + "' height='" + this.$main.height() + "'>" +
       //   "<foreignObject width='100%' height='100%'>" +
       //   $( this.div ).html() +
       //   "</foreignObject></svg>";
@@ -16329,347 +15857,6 @@ define( 'SCENERY/layers/DOMLayer',['require','PHET_CORE/inherit','DOT/Bounds2','
 // Copyright 2002-2013, University of Colorado
 
 /**
- * A conceptual boundary between layers, where it is optional to have information about a previous or next layer.
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define( 'SCENERY/layers/LayerBoundary',['require','SCENERY/scenery'],function( require ) {
-  
-  
-  var scenery = require( 'SCENERY/scenery' );
-  
-  scenery.LayerBoundary = function LayerBoundary() {
-    // layer types before and after the boundary. null indicates the lack of information (first or last layer)
-    this.previousLayerType = null;
-    this.nextLayerType = null;
-    
-    // trails to the closest nodes with isPainted() === true before and after the boundary
-    this.previousPaintedTrail = null;
-    this.nextPaintedTrail = null;
-  };
-  var LayerBoundary = scenery.LayerBoundary;
-  
-  LayerBoundary.prototype = {
-    constructor: LayerBoundary,
-    
-    hasPrevious: function() {
-      return !!this.previousPaintedTrail;
-    },
-    
-    hasNext: function() {
-      return !!this.nextPaintedTrail;
-    },
-    
-    // reindexes the trails
-    reindex: function() {
-      this.previousPaintedTrail && this.previousPaintedTrail.reindex();
-      this.nextPaintedTrail && this.nextPaintedTrail.reindex();
-    },
-    
-    // assumes that trail is reindexed
-    equivalentPreviousTrail: function( trail ) {
-      if ( this.previousPaintedTrail && trail ) {
-        this.previousPaintedTrail.reindex();
-        return this.previousPaintedTrail.equals( trail );
-      } else {
-        // check that handles null versions properly
-        return this.previousPaintedTrail === trail;
-      }
-    },
-    
-    equivalentNextTrail: function( trail ) {
-      if ( this.nextPaintedTrail && trail ) {
-        this.nextPaintedTrail.reindex();
-        return this.nextPaintedTrail.equals( trail );
-      } else {
-        // check that handles null versions properly
-        return this.nextPaintedTrail === trail;
-      }
-    },
-    
-    toString: function() {
-      return 'boundary:' +
-             '\n    types:    ' +
-                  ( this.previousLayerType ? this.previousLayerType.name : '' ) +
-                  ' => ' +
-                  ( this.nextLayerType ? this.nextLayerType.name : '' ) +
-             '\n    trails:   ' +
-                  ( this.previousPaintedTrail ? this.previousPaintedTrail.getUniqueId() : '' ) +
-                  ' => ' +
-                  ( this.nextPaintedTrail ? this.nextPaintedTrail.getUniqueId() : '' );
-    }
-  };
-  
-  return LayerBoundary;
-} );
-
-// Copyright 2002-2013, University of Colorado
-
-/**
- * A layer state is used to construct layer information (and later, layers), and is a state machine
- * that layer strategies from each node modify. Iterating through all of the nodes in a depth-first
- * manner will modify the LayerBuilder so that layer information can be retrieved.
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define( 'SCENERY/layers/LayerBuilder',['require','SCENERY/scenery','SCENERY/layers/LayerBoundary','SCENERY/util/Trail','SCENERY/util/TrailPointer'],function( require ) {
-  
-  
-  var scenery = require( 'SCENERY/scenery' );
-  require( 'SCENERY/layers/LayerBoundary' );
-  require( 'SCENERY/util/Trail' );
-  require( 'SCENERY/util/TrailPointer' );
-  
-  /*
-   * Builds layer information between trails
-   *
-   * previousLayerType should be null if there is no previous layer.
-   */
-  scenery.LayerBuilder = function LayerBuilder( scene, previousLayerType, previousPaintedTrail, nextPaintedTrail ) {
-    
-    /*---------------------------------------------------------------------------*
-    * Initial state
-    *----------------------------------------------------------------------------*/
-    
-    this.layerTypeStack = [];
-    this.boundaries = [];
-    this.pendingBoundary = new scenery.LayerBoundary();
-    this.pendingBoundary.previousLayerType = previousLayerType;
-    this.pendingBoundary.previousPaintedTrail = previousPaintedTrail;
-    
-    /*
-     * The current layer type active, and whether it has been 'used' yet. A node with isPainted() will trigger a 'used' action,
-     * and if the layer hasn't been used, it will actually trigger a boundary creation. We want to collapse 'unused' layers
-     * and boundaries together, so that every created layer has a node that displays something.
-     */
-    this.currentLayerType = previousLayerType;
-    this.layerChangePending = previousPaintedTrail === null;
-    
-    /*---------------------------------------------------------------------------*
-    * Start / End pointers
-    *----------------------------------------------------------------------------*/
-    
-    if ( previousPaintedTrail ) {
-      // Move our start pointer just past the previousPaintedTrail, since our previousLayerType is presumably for that trail's node's self.
-      // Anything after that self could have been collapsed, so we need to start there.
-      this.startPointer = new scenery.TrailPointer( previousPaintedTrail.copy(), true );
-      this.startPointer.nestedForwards();
-    } else {
-      this.startPointer = new scenery.TrailPointer( new scenery.Trail( scene ), true );
-    }
-    
-    if ( nextPaintedTrail ) {
-      // include the nextPaintedTrail's 'before' in our iteration, so we can stitch properly with the next layer
-      this.endPointer = new scenery.TrailPointer( nextPaintedTrail.copy(), true );
-    } else {
-      this.endPointer = new scenery.TrailPointer( new scenery.Trail( scene ), false );
-    }
-    
-    this.includesEndTrail = nextPaintedTrail !== null;
-    
-    /*
-     * LayerBoundary properties and assurances:
-     *
-     * previousLayerType  - initialized in constructor (in case there are no layer changes)
-     *                      set in layerChange for "fresh" pending boundary
-     * nextLayerType      - set and overwrites in switchToType, for collapsing layers
-     *                      not set anywhere else, so we can leave it null
-     * previousPaintedTrail  - initialized in constructor
-     *                      updated in markPainted if there is no pending change (don't set if there is a pending change)
-     * nextPaintedTrail      - set on layerChange for "stale" boundary
-     *                      stays null if nextPaintedTrail === null
-     */
-  };
-  var LayerBuilder = scenery.LayerBuilder;
-  
-  LayerBuilder.prototype = {
-    constructor: LayerBuilder,
-    
-    // walks part of the state up to just before the startPointer. we want the preferred layer stack to be in place, but the rest is not important
-    prepareLayerStack: function() {
-      var pointer = new scenery.TrailPointer( new scenery.Trail( this.startPointer.trail.rootNode() ), true );
-      
-      // if the start pointer is going to execute an exit() instead of an enter() on its trail node, we need to bump up the layer stack an additional step
-      var targetLength = this.startPointer.trail.length - ( this.startPointer.isBefore ? 1 : 0 );
-      
-      while ( pointer.trail.length <= targetLength ) {
-        var node = pointer.trail.lastNode();
-        if ( node.layerStrategy.hasPreferredLayerType( pointer, this ) ) {
-          this.pushPreferredLayerType( node.layerStrategy.getPreferredLayerType( pointer, this ) );
-        }
-        if ( pointer.trail.length < this.startPointer.trail.nodes.length ) {
-          pointer.trail.addDescendant( this.startPointer.trail.nodes[pointer.trail.length] );
-        } else {
-          // TODO: a cleaner way of doing this, since we were adding undefined into a trail to cause the loop to exit
-          break;
-        }
-      }
-    },
-    
-    run: function() {
-      var builder = this;
-      
-      // push preferred layers for ancestors of our start pointer
-      this.prepareLayerStack();
-      
-      // console.log( '         stack: ' + _.map( builder.layerTypeStack, function( type ) { return type.name; } ).join( ', ' ) );
-      
-      builder.startPointer.depthFirstUntil( builder.endPointer, function( pointer ) {
-        var node = pointer.trail.lastNode();
-        
-        if ( pointer.isBefore ) {
-          // console.log( 'builder: enter ' + pointer.toString() );
-          node.layerStrategy.enter( pointer, builder );
-        } else {
-          // console.log( 'builder: exit ' + pointer.toString() );
-          node.layerStrategy.exit( pointer, builder );
-        }
-        // console.log( '         stack: ' + _.map( builder.layerTypeStack, function( type ) { return type.name; } ).join( ', ' ) );
-      }, false ); // include the endpoints
-      
-      // special case handling if we are at the 'end' of the scene, so that we create another 'wrapping' boundary
-      if ( !this.includesEndTrail ) {
-        // console.log( 'builder: not including end trail' );
-        this.layerChange( null );
-      }
-    },
-    
-    // allows paintedPointer === null at the end if the main iteration's nextPaintedTrail === null (i.e. we are at the end of the scene)
-    layerChange: function( paintedPointer ) {
-      this.layerChangePending = false;
-      
-      var confirmedBoundary = this.pendingBoundary;
-      
-      confirmedBoundary.nextPaintedTrail = paintedPointer ? paintedPointer.trail.copy() : null;
-      
-      this.boundaries.push( confirmedBoundary );
-      
-      this.pendingBoundary = new scenery.LayerBoundary();
-      this.pendingBoundary.previousLayerType = confirmedBoundary.nextLayerType;
-      this.pendingBoundary.previousPaintedTrail = confirmedBoundary.nextPaintedTrail;
-      // console.log( 'builder:   added boundary' );
-    },
-    
-    /*---------------------------------------------------------------------------*
-    * API for layer strategy or other interaction
-    *----------------------------------------------------------------------------*/
-    
-    switchToType: function( pointer, layerType ) {
-      this.currentLayerType = layerType;
-      
-      this.pendingBoundary.nextLayerType = layerType;
-      
-      this.layerChangePending = true; // we wait until the first markPainted() call to create a boundary
-    },
-    
-    // called so that we can finalize a layer switch (instead of collapsing unneeded layers)
-    markPainted: function( pointer ) {
-      if ( this.layerChangePending ) {
-        this.layerChange( pointer );
-      } else {
-        // TODO: performance-wise, don't lookup indices on this copy? make a way to create a lightweight copy?
-        this.pendingBoundary.previousPaintedTrail = pointer.trail.copy();
-      }
-    },
-    
-    // can be null to indicate that there is no current layer type
-    getCurrentLayerType: function() {
-      return this.currentLayerType;
-    },
-    
-    pushPreferredLayerType: function( layerType ) {
-      this.layerTypeStack.push( layerType );
-    },
-    
-    popPreferredLayerType: function() {
-      this.layerTypeStack.pop();
-    },
-    
-    getPreferredLayerType: function() {
-      if ( this.layerTypeStack.length !== 0 ) {
-        return this.layerTypeStack[this.layerTypeStack.length - 1];
-      } else {
-        return null;
-      }
-    },
-    
-    bestPreferredLayerTypeFor: function( renderers ) {
-      for ( var i = this.layerTypeStack.length - 1; i >= 0; i-- ) {
-        var preferredType = this.layerTypeStack[i];
-        
-        var k = renderers.length;
-        while ( k-- ) {
-          // if any renderer is supported by this type, use this type
-          if ( preferredType.supportsRenderer( renderers[k] ) ) {
-            return preferredType;
-          }
-        }
-      }
-      
-      // none of our stored preferred layer types are able to support any of the default type options
-      return null;
-    }
-  };
-  
-  return LayerBuilder;
-} );
-
-// Copyright 2002-2013, University of Colorado
-
-/**
- * A description of layer settings and the ability to create a layer with those settings.
- * Used internally for the layer building process.
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define( 'SCENERY/layers/LayerType',['require','SCENERY/scenery'],function( require ) {
-  
-  
-  var scenery = require( 'SCENERY/scenery' );
-  
-  scenery.LayerType = function LayerType( Constructor, name, renderer, args ) {
-    this.Constructor = Constructor;
-    this.name = name;
-    this.renderer = renderer;
-    this.args = args;
-  };
-  var LayerType = scenery.LayerType;
-  
-  LayerType.prototype = {
-    constructor: LayerType,
-    
-    supportsRenderer: function( renderer ) {
-      return this.renderer === renderer;
-    },
-    
-    supportsNode: function( node ) {
-      var supportedRenderers = node._supportedRenderers;
-      var i = supportedRenderers.length;
-      while ( i-- ) {
-        if ( this.supportsRenderer( supportedRenderers[i] ) ) {
-          return true;
-        }
-      }
-      return false;
-    },
-    
-    createLayer: function( args ) {
-      var Constructor = this.Constructor;
-      return new Constructor( _.extend( {}, args, this.args ) ); // allow overriding certain arguments if necessary by the LayerType
-    }
-  };
-  
-  return LayerType;
-} );
-
-
-
-// Copyright 2002-2013, University of Colorado
-
-/**
  * An SVG-based layer in the scene graph. Each layer handles dirty-region handling separately,
  * and corresponds to a single canvas / svg element / DOM element in the main container.
  * Importantly, it does not contain rendered content from a subtree of the main
@@ -16693,10 +15880,6 @@ define( 'SCENERY/layers/SVGLayer',['require','PHET_CORE/inherit','DOT/Bounds2','
   require( 'SCENERY/util/Trail' );
   require( 'SCENERY/util/Util' );
   
-  // used namespaces
-  var svgns = 'http://www.w3.org/2000/svg';
-  var xlinkns = 'http://www.w3.org/1999/xlink';
-  
   scenery.SVGLayer = function SVGLayer( args ) {
     sceneryLayerLog && sceneryLayerLog( 'SVGLayer constructor' );
     var $main = args.$main;
@@ -16704,14 +15887,14 @@ define( 'SCENERY/layers/SVGLayer',['require','PHET_CORE/inherit','DOT/Bounds2','
     this.scene = args.scene;
     
     // main SVG element
-    this.svg = document.createElementNS( svgns, 'svg' );
+    this.svg = document.createElementNS( scenery.svgns, 'svg' );
     
     // the SVG has a single group under it, which corresponds to the transform of the layer's base node
     // TODO: consider renaming to 'this.baseGroup'
-    this.g = document.createElementNS( svgns, 'g' );
+    this.g = document.createElementNS( scenery.svgns, 'g' );
     
     // the <defs> block that we will be stuffing gradients and patterns into
-    this.defs = document.createElementNS( svgns, 'defs' );
+    this.defs = document.createElementNS( scenery.svgns, 'defs' );
     
     var width = args.scene.sceneBounds.width;
     var height = args.scene.sceneBounds.height;
@@ -16778,7 +15961,7 @@ define( 'SCENERY/layers/SVGLayer',['require','PHET_CORE/inherit','DOT/Bounds2','
           
           if ( lastId ) {
             // we have a parent group to which we need to be added
-            group = document.createElementNS( svgns, 'g' );
+            group = document.createElementNS( scenery.svgns, 'g' );
             
             // apply the node's transform to the group
             this.applyTransform( subtrail.lastNode().getTransform(), group );
@@ -16879,7 +16062,6 @@ define( 'SCENERY/layers/SVGLayer',['require','PHET_CORE/inherit','DOT/Bounds2','
         // if there is already a child, we need to do a scan to ensure we place our group as a child in the correct order (above/below)
         
         // scan other child groups in the parentGroup to find where we need to be (index i)
-        var afterNode = null;
         var indexIndex = subtrail.length - 2; // index into the trail's indices
         var ourIndex = subtrail.indices[indexIndex];
         var i;
@@ -16955,11 +16137,11 @@ define( 'SCENERY/layers/SVGLayer',['require','PHET_CORE/inherit','DOT/Bounds2','
       }
       
       if ( node._clipArea ) {
-        var definition = document.createElementNS( svgns, 'clipPath' );
+        var definition = document.createElementNS( scenery.svgns, 'clipPath' );
         definition.setAttribute( 'id', clipId );
         definition.setAttribute( 'clipPathUnits', 'userSpaceOnUse' );
         
-        var path = document.createElementNS( svgns, 'path' );
+        var path = document.createElementNS( scenery.svgns, 'path' );
         path.setAttribute( 'd', node._clipArea.getSVGPath() );
         definition.appendChild( path );
         
@@ -17034,22 +16216,22 @@ define( 'SCENERY/layers/SVGLayer',['require','PHET_CORE/inherit','DOT/Bounds2','
       if ( this.cssTransform ) {
         // we want to set the baseNodeTransform to a translation so that it maps the baseNode's self/children in the baseNode's local bounds to (0,0,w,h)
         var internalBounds = scratchBounds1; // pooled copy
-        internalBounds.setBounds( this.baseNode.getBounds() );
+        internalBounds.set( this.baseNode.getBounds() );
         this.baseNode.transformBoundsFromParentToLocal( internalBounds );
         var padding = scenery.Layer.cssTransformPadding;
         
         // if there is nothing, or the bounds are empty for some reason, skip this!
         if ( !internalBounds.isEmpty() ) {
-          this.baseNodeTransform.set( Matrix3.translation( Math.ceil( -internalBounds.minX + padding), Math.ceil( -internalBounds.minY + padding ) ) );
+          this.baseNodeTransform.setMatrix( Matrix3.translation( Math.ceil( -internalBounds.minX + padding), Math.ceil( -internalBounds.minY + padding ) ) );
           
           // NOTE: this is mutable! don't use internalBounds after this
-          var baseNodeInteralBounds = internalBounds.transform( this.baseNodeTransform.getMatrix() );
+          var baseNodeInternalBounds = internalBounds.transform( this.baseNodeTransform.getMatrix() );
           
           // sanity check to ensure we are within that range
-          assert && assert( baseNodeInteralBounds.minX >= 0 && baseNodeInteralBounds.minY >= 0 );
+          assert && assert( baseNodeInternalBounds.minX >= 0 && baseNodeInternalBounds.minY >= 0 );
           
-          this.updateContainerDimensions( Math.ceil( baseNodeInteralBounds.maxX + padding ),
-                                          Math.ceil( baseNodeInteralBounds.maxY + padding ) );
+          this.updateContainerDimensions( Math.ceil( baseNodeInternalBounds.maxX + padding ),
+                                          Math.ceil( baseNodeInternalBounds.maxY + padding ) );
         }
         
         // if this gets removed, update initializeBase()
@@ -17334,12 +16516,10 @@ define( 'SCENERY/layers/Renderer',['require','SCENERY/scenery','SCENERY/layers/L
   require( 'SCENERY/layers/DOMLayer' );
   require( 'SCENERY/layers/SVGLayer' );
   
-  // cached defaults
-  var defaults = {};
-  
-  scenery.Renderer = function Renderer( layerConstructor, name, defaultOptions ) {
+  scenery.Renderer = function Renderer( layerConstructor, name, bitmask, defaultOptions ) {
     this.layerConstructor = layerConstructor;
     this.name = name;
+    this.bitmask = bitmask;
     this.defaultOptions = defaultOptions;
     
     this.defaultLayerType = this.createLayerType( {} ); // default options are handled in createLayerType
@@ -17350,13 +16530,13 @@ define( 'SCENERY/layers/Renderer',['require','SCENERY/scenery','SCENERY/layers/L
     constructor: Renderer,
     
     createLayerType: function( rendererOptions ) {
-      return new scenery.LayerType( this.layerConstructor, this.name, this, _.extend( {}, this.defaultOptions, rendererOptions ) );
+      return new scenery.LayerType( this.layerConstructor, this.name, this.bitmask, this, _.extend( {}, this.defaultOptions, rendererOptions ) );
     }
   };
   
-  Renderer.Canvas = new Renderer( scenery.CanvasLayer, 'canvas', {} );
-  Renderer.DOM = new Renderer( scenery.DOMLayer, 'dom', {} );
-  Renderer.SVG = new Renderer( scenery.SVGLayer, 'svg', {} );
+  Renderer.Canvas = new Renderer( scenery.CanvasLayer, 'canvas', scenery.bitmaskSupportsCanvas, {} );
+  Renderer.DOM = new Renderer( scenery.DOMLayer, 'dom', scenery.bitmaskSupportsDOM, {} );
+  Renderer.SVG = new Renderer( scenery.SVGLayer, 'svg', scenery.bitmaskSupportsSVG, {} );
   
   // add shortcuts for the default layer types
   scenery.CanvasDefaultLayerType = Renderer.Canvas.defaultLayerType;
@@ -17375,6 +16555,2382 @@ define( 'SCENERY/layers/Renderer',['require','SCENERY/scenery','SCENERY/layers/L
 // Copyright 2002-2013, University of Colorado
 
 /**
+ * API for RenderState
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'SCENERY/display/RenderState',['require','PHET_CORE/inherit','SCENERY/scenery','SCENERY/layers/Renderer','SCENERY/util/Trail'],function( require ) {
+  
+  
+  var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
+  require( 'SCENERY/layers/Renderer' );
+  require( 'SCENERY/util/Trail' );
+  
+  scenery.RenderState = function RenderState() {
+    
+  };
+  var RenderState = scenery.RenderState;
+  
+  inherit( Object, RenderState, {
+    isBackbone: function() {
+      return false;
+    },
+    
+    isCanvasCache: function() {
+      return false;
+    },
+    
+    isCacheShared: function() {
+      return false;
+    },
+    
+    requestsSplit: function() {
+      return false;
+    },
+    
+    getStateForDescendant: function( trail ) {
+      // new state
+    },
+    
+    getPaintedRenderer: function() {
+      
+    },
+    
+    // renderer for the (Canvas) cache
+    getCacheRenderer: function() {
+      
+    },
+    
+    // what is our absolute transform relative to (hah)? we assume all transforms up to the last node of this trail have already been applied
+    getTransformBaseTrail: function() {
+      
+    },
+    
+    // whether our backbone child has a CSS transform applied
+    isBackboneTransformed: function() {
+      
+    }
+  } );
+  
+  // NOTE: assumes that the trail is not mutable
+  RenderState.TestState = function TestState( trail, renderers, isProxy, isUnderCanvasCache, transformBaseTrail ) {
+    trail.setImmutable();
+    
+    var node = trail.lastNode();
+    
+    // this should be accurate right now, the pass to update these should have been completed earlier
+    var combinedBitmask = node._subtreeRendererBitmask;
+    
+    this.trail = trail;
+    this.renderers = renderers;
+    this.isProxy = isProxy;
+    this.isUnderCanvasCache;
+    
+    this.nextRenderers = null; // will be filled with Array?
+    
+    this.backbone = false;
+    this.canvasCache = false;
+    this.cacheShared = false;
+    this.splits = false;
+    this.renderer = null;
+    this.cacheRenderer = null;
+    this.transformBaseTrail = transformBaseTrail;
+    this.nextTransformBaseTrail = transformBaseTrail; // what descendant states will have as their base trail. affected by CSS transformed backbones and single caches
+    this.backboneTransformed = false;
+    
+    var hints = node.hints || {}; // TODO: reduce allocation here
+    
+    if ( !isProxy ) {
+      // check if we need a backbone or cache
+      if ( node.opacity !== 1 || hints.requireElement || hints.cssTransformBackbone ) {
+        this.backbone = true;
+        this.backboneTransformed = !!hints.cssTransformBackbone; // for now, only trigger CSS transform if we have the specific hint
+        if ( this.backboneTransformed ) {
+          // everything under here should not apply transforms from this trail, but only any transforms beneath it
+          this.nextTransformBaseTrail = trail;
+        }
+        this.renderer = scenery.Renderer.DOM; // probably won't be used
+        this.nextRenderers = renderers;
+      } else if ( hints.canvasCache ) {
+        if ( combinedBitmask & scenery.bitmaskSupportsCanvas !== 0 ) {
+          this.canvasCache = true;
+          if ( hints.singleCache ) {
+            this.cacheShared = true;
+            this.nextTransformBaseTrail = new scenery.Trail();
+          }
+          this.renderer = scenery.Renderer.Canvas; // TODO: allow SVG (toDataURL) and DOM (direct Canvas)
+          this.nextRenderers = [scenery.Renderer.Canvas]; // TODO: full resolution!
+        } else {
+          assert && assert( false, 'Attempting to canvas cache when nodes underneath can\'t be rendered with Canvas' );
+        }
+      }
+    }
+    
+    if ( !this.backbone && !this.canvasCache ) {
+      if ( hints.layerSplit ) {
+        this.splits = true;
+      }
+      
+      // if a node isn't painted (and no backbone/cache), we'll leave the renderer as null
+      if ( node.isPainted() ) {
+        // pick the top-most renderer that will work
+        for ( var i = renderers.length - 1; i >= 0; i-- ) {
+          var renderer = renderers[i];
+          if ( renderer.bitmask & node._rendererBitmask !== 0 ) {
+            this.renderer = renderer;
+            break;
+          }
+        }
+      }
+      
+      this.nextRenderers = renderers;
+    }
+  };
+  RenderState.TestState.prototype = {
+    constructor: RenderState.TestState,
+    
+    isBackbone: function() {
+      return this.backbone;
+    },
+    
+    isCanvasCache: function() {
+      return this.canvasCache;
+    },
+    
+    isCacheShared: function() {
+      return this.cacheShared;
+    },
+    
+    requestsSplit: function() {
+      return this.splits;
+    },
+    
+    getStateForDescendant: function( trail ) {
+      if ( this.backbone || this.canvasCache ) {
+        // proxy instance
+        assert && assert( trail === this.trail, 'backbone/cache trail should be passed in again for the proxy instance' );
+        // TODO: full resolution handling
+        return new RenderState.TestState( trail, this.nextRenderers, true, true, this.nextTransformBaseTrail ); // TODO: allocation
+      } else {
+        return new RenderState.TestState( trail, this.nextRenderers, false, this.isUnderCanvasCache, this.nextTransformBaseTrail ); // TODO: allocation
+      }
+    },
+    
+    getPaintedRenderer: function() {
+      return this.renderer;
+    },
+    
+    getCacheRenderer: function() {
+      return this.renderer;
+    },
+    
+    getTransformBaseTrail: function() {
+      return this.transformBaseTrail;
+    },
+    
+    isBackboneTransformed: function() {
+      return this.backboneTransformed;
+    }
+  };
+  
+  return RenderState;
+} );
+
+// Copyright 2002-2013, University of Colorado
+
+/**
+ * A persistent display of a specific Node and its descendants
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'SCENERY/display/Display',['require','PHET_CORE/inherit','SCENERY/scenery','SCENERY/util/Trail','SCENERY/display/DisplayInstance','SCENERY/display/RenderState','SCENERY/layers/Renderer'],function( require ) {
+  
+  
+  var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
+  require( 'SCENERY/util/Trail' );
+  require( 'SCENERY/display/DisplayInstance' );
+  require( 'SCENERY/display/RenderState' );
+  require( 'SCENERY/layers/Renderer' );
+  
+  scenery.Display = function Display( rootNode ) {
+    this._rootNode = rootNode;
+    this._domElement = null; // TODO: potentially allow immediate export of this?
+    this._sharedCanvasInstances = {}; // map from Node ID to DisplayInstance, for fast lookup
+    this._baseInstance = null; // will be filled with the root DisplayInstance
+  };
+  var Display = scenery.Display;
+  
+  // recursively compute the bitmask intersection (bitwise AND) for a node and all of its children, and store it to that node's _subtreeRendererBitmask
+  function recursiveUpdateRendererBitmask( node ) {
+    var bitmask = scenery.bitmaskAll;
+    bitmask &= node._rendererBitmask;
+    
+    // include all children
+    var children = node._children;
+    var numChildren = children.length;
+    for ( var i = 0; i < numChildren; i++ ) {
+      bitmask &= recursiveUpdateRendererBitmask( children[i] );
+    }
+    
+    node._subtreeRendererBitmask = bitmask;
+    return bitmask; // return the bitmask so we have direct access at the call site
+  }
+  
+  // display instance linked list ops
+  function connectInstances( a, b ) {
+    a.nextPainted = b;
+    b.previousPainted = a;
+  }
+  
+  function createBackbone( display, trail, state ) {
+    var blockInstance = new scenery.DisplayInstance( trail );
+    blockInstance.state = state;
+    blockInstance.renderer = scenery.Renderer.DOM;
+    
+    createProxyInstance( display, trail, state, blockInstance );
+    return blockInstance;
+  }
+  
+  function createCanvasCache( display, trail, state ) {
+    var blockInstance = new scenery.DisplayInstance( trail );
+    blockInstance.state = state;
+    blockInstance.renderer = state.getCacheRenderer();
+    
+    createProxyInstance( display, trail, state, blockInstance );
+    return blockInstance;
+  }
+  
+  function createSharedCanvasCache( display, trail, state ) {
+    var instanceKey = trail.lastNode().getId();
+    var sharedInstance = display._sharedCanvasInstances[instanceKey];
+    if ( sharedInstance ) {
+      // TODO: assert state is the same?
+      // TODO: increment reference counting?
+      return sharedInstance;
+    } else {
+      var blockInstance = new scenery.DisplayInstance( new scenery.Trail( trail.lastNode() ) );
+      blockInstance.state = state;
+      blockInstance.renderer = state.getCacheRenderer();
+      
+      createProxyInstance( display, trail, state, blockInstance );
+      // TODO: increment reference counting?
+      display._sharedCanvasInstances[instanceKey] = blockInstance;
+      return blockInstance;
+    }
+  }
+  
+  // For when we have a block/stub instance (for a backbone/cache), and we want an instance for the same trail, but to render itself and its subtree.
+  // Basically, this involves another getStateForDescendant (called in createInstance), and for now we set up proxy variables
+  function createProxyInstance( display, trail, state, blockInstance ) {
+    var instance = createInstance( display, trail, state );
+    // TODO: better way of handling this?
+    blockInstance.proxyChild = instance;
+    instance.proxyParent = blockInstance;
+    
+    blockInstance.firstPainted = blockInstance;
+    blockInstance.lastPainted = blockInstance;
+    return instance; // if we need it
+  }
+  
+  function createSplitInstance() {
+    return new scenery.DisplayInstance( null ); // null trail
+  }
+  
+  function createInstance( display, trail, ancestorState ) {
+    var state = ancestorState.getStateForDescendant( trail );
+    if ( state.isBackbone() ) {
+      return createBackbone( display, trail, state );
+    } else if ( state.isCanvasCache() ) {
+      return state.isCacheShared() ? createSharedCanvasCache( display, trail, state ) : createCanvasCache( display, trail, state );
+    } else {
+      var instance = new scenery.DisplayInstance( trail );
+      var node = trail.lastNode();
+      instance.state = state;
+      instance.renderer = node.isPainted() ? state.getPaintedRenderer() : null;
+      
+      var currentPaintedInstance = null;
+      if ( instance.isEffectivelyPainted() ) {
+        currentPaintedInstance = instance;
+        instance.firstPainted = instance;
+      }
+      
+      var children = trail.lastNode().children;
+      var numChildren = children.length;
+      for ( var i = 0; i < numChildren; i++ ) {
+        var childInstance = createInstance( display, trail.copy().addDescendant( children[i], i ), state );
+        instance.appendInstance( childInstance );
+        if ( childInstance.firstPainted ) {
+          assert && assert( childInstance.lastPainted, 'Any display instance with firstPainted should also have lastPainted' );
+          
+          if ( currentPaintedInstance ) {
+            connectInstances( currentPaintedInstance, childInstance.firstPainted );
+          } else {
+            instance.firstPainted = childInstance.firstPainted;
+          }
+          currentPaintedInstance = childInstance.lastPainted;
+        }
+      }
+      
+      if ( currentPaintedInstance !== null ) {
+        instance.lastPainted = currentPaintedInstance;
+      }
+      
+      if ( state.requestsSplit() ) {
+        if ( instance.firstPainted ) {
+          var beforeSplit = createSplitInstance();
+          var afterSplit = createSplitInstance();
+          connectInstances( beforeSplit, instance.firstPainted );
+          connectInstances( instance.lastPainted, afterSplit );
+          instance.firstPainted = beforeSplit;
+          instance.lastPainted = afterSplit;
+        } else {
+          instance.firstPainted = instance.lastPainted = createSplitInstance();
+        }
+      }
+      
+      return instance;
+    }
+  }
+  
+  inherit( Object, Display, {
+    getRootNode: function() {
+      return this._rootNode;
+    },
+    get rootNode() { return this.getRootNode(); },
+    
+    // NOTE: to be replaced with a full stitching/update version
+    buildTemporaryDisplay: function() {
+      // compute updated _subtreeRendererBitmask for every Node // TODO: add and use dirty flag for this, and decide how the flags get set!
+      recursiveUpdateRendererBitmask( this._rootNode );
+      
+      var baseTrail = new scenery.Trail( this._rootNode );
+      var baseState = new scenery.RenderState.TestState( baseTrail, [
+        scenery.Renderer.DOM,
+        scenery.Renderer.Canvas,
+        scenery.Renderer.SVG,
+        new scenery.Trail()
+      ], false, false );
+      this._baseInstance = createBackbone( this, baseTrail, baseState );
+    }
+  } );
+  
+  return Display;
+} );
+
+// Copyright 2002-2013, University of Colorado
+
+/**
+ * Basic down/up pointer handling for a Node, so that it's easy to handle buttons
+ *
+ * TODO: test hand handle down, go off screen, up. How to handle that properly?
+ * TODO: tests
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'SCENERY/input/DownUpListener',['require','SCENERY/scenery','SCENERY/util/Trail'],function( require ) {
+  
+  
+  var scenery = require( 'SCENERY/scenery' );
+  require( 'SCENERY/util/Trail' );
+  
+  /*
+   * The 'trail' parameter passed to down/upInside/upOutside will end with the node to which this DownUpListener has been added.
+   *
+   * Allowed options: {
+   *    mouseButton: 0  // The mouse button to use: left: 0, middle: 1, right: 2, see https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
+   *    down: null      // down( event, trail ) is called when the pointer is pressed down on this node
+   *                    // (and another pointer is not already down on it).
+   *    up: null        // up( event, trail ) is called after 'down', regardless of the pointer's current location.
+   *                    // Additionally, it is called AFTER upInside or upOutside, whichever is relevant
+   *    upInside: null  // upInside( event, trail ) is called after 'down', when the pointer is released inside
+   *                    // this node (it or a descendant is the top pickable node under the pointer)
+   *    upOutside: null // upOutside( event, trail ) is called after 'down', when the pointer is released outside
+   *                    // this node (it or a descendant is the not top pickable node under the pointer, even if the
+   *                    // same instance is still directly under the pointer)
+   * }
+   */
+  scenery.DownUpListener = function DownUpListener( options ) {
+    var handler = this;
+    
+    this.options = _.extend( {
+      mouseButton: 0 // allow a different mouse button 
+    }, options );
+    this.isDown = false;   // public, whether this listener is down
+    this.downCurrentTarget = null; // 'up' is handled via a pointer lister, which will have null currentTarget, so save the 'down' currentTarget
+    this.downTrail = null;
+    this.pointer = null;
+    
+    // this listener gets added to the pointer on a 'down'
+    this.downListener = {
+      // mouse/touch up
+      up: function( event ) {
+        sceneryEventLog && sceneryEventLog( 'DownUpListener (pointer) up for ' + handler.downTrail.toString() );
+        assert && assert( event.pointer === handler.pointer );
+        if ( !event.pointer.isMouse || event.domEvent.button === handler.options.mouseButton ) {
+          handler.buttonUp( event );
+        }
+      },
+      
+      // touch cancel
+      cancel: function( event ) {
+        sceneryEventLog && sceneryEventLog( 'DownUpListener (pointer) cancel for ' + handler.downTrail.toString() );
+        assert && assert( event.pointer === handler.pointer );
+        handler.buttonUp( event );
+      }
+    };
+  };
+  var DownUpListener = scenery.DownUpListener;
+  
+  DownUpListener.prototype = {
+    constructor: DownUpListener,
+    
+    buttonDown: function( event ) {
+      // already down from another pointer, don't do anything
+      if ( this.isDown ) { return; }
+      
+      // ignore other mouse buttons
+      if ( event.pointer.isMouse && event.domEvent.button !== this.options.mouseButton ) { return; }
+      
+      // add our listener so we catch the up wherever we are
+      event.pointer.addInputListener( this.downListener );
+      
+      this.isDown = true;
+      this.downCurrentTarget = event.currentTarget;
+      this.downTrail = event.trail.subtrailTo( event.currentTarget, false );
+      this.pointer = event.pointer;
+      
+      sceneryEventLog && sceneryEventLog( 'DownUpListener buttonDown for ' + this.downTrail.toString() ); 
+      if ( this.options.down ) {
+        this.options.down( event, this.downTrail );
+      }
+    },
+    
+    buttonUp: function( event ) {
+      this.isDown = false;
+      this.pointer.removeInputListener( this.downListener );
+
+      var currentTargetSave = event.currentTarget;
+      event.currentTarget = this.downCurrentTarget; // up is handled by a pointer listener, so currentTarget would be null.
+      if ( this.options.upInside || this.options.upOutside ) {
+        var trailUnderPointer = event.trail;
+        
+        // TODO: consider changing this so that it just does a hit check and ignores anything in front?
+        var isInside = trailUnderPointer.isExtensionOf( this.downTrail, true );
+        
+        if ( isInside && this.options.upInside ) {
+          this.options.upInside( event, this.downTrail );
+        } else if ( !isInside && this.options.upOutside ) {
+          this.options.upOutside( event, this.downTrail );
+        }
+      }
+      sceneryEventLog && sceneryEventLog( 'DownUpListener buttonUp for ' + this.downTrail.toString() ); 
+      if ( this.options.up ) {
+        this.options.up( event, this.downTrail );
+      }
+      event.currentTarget = currentTargetSave; // be polite to other listeners, restore currentTarget
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * events called from the node input listener
+    *----------------------------------------------------------------------------*/
+    
+    // mouse/touch down on this node
+    down: function( event ) {
+      this.buttonDown( event );
+    }
+  };
+  
+  return DownUpListener;
+} );
+
+
+
+// Copyright 2002-2013, University of Colorado
+
+/**
+ * Basic button handling.
+ *
+ * Uses 4 states:
+ * up: mouse not over, not pressed
+ * over: mouse over, not pressed
+ * down: mouse over, pressed
+ * out: mouse not over, pressed
+ *
+ * TODO: offscreen handling
+ * TODO: fix enter/exit edge cases for moving nodes or add/remove child, and when touches are created
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'SCENERY/input/ButtonListener',['require','SCENERY/scenery','SCENERY/util/Trail','PHET_CORE/inherit','SCENERY/input/DownUpListener'],function( require ) {
+  
+  
+  var scenery = require( 'SCENERY/scenery' );
+  require( 'SCENERY/util/Trail' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  
+  var DownUpListener = require( 'SCENERY/input/DownUpListener' );
+  
+  /**
+   * Options for the ButtonListener:
+   *
+   * mouseButton: 0
+   * fireOnDown: false // default is to fire on 'up' after 'down', but passing fireOnDown: true will fire on 'down' instead
+   * up: null          // Called on an 'up' state change, as up( event, oldState )
+   * over: null        // Called on an 'over' state change, as over( event, oldState )
+   * down: null        // Called on an 'down' state change, as down( event, oldState )
+   * out: null         // Called on an 'out' state change, as out( event, oldState )
+   * fire: null        // Called on a state change to/from 'down' (depending on fireOnDown), as fire( event ). Called after the triggering up/over/down event.
+   */
+  scenery.ButtonListener = function ButtonListener( options ) {
+
+    this.buttonState = 'up'; // public: 'up', 'over', 'down' or 'out'
+    
+    this._overCount = 0; // how many pointers are over us (track a count, so we can handle multiple pointers gracefully)
+    
+    this._buttonOptions = options; // store the options object so we can call the callbacks
+    
+    var buttonListener = this;
+    DownUpListener.call( this, {
+
+      mouseButton: options.mouseButton || 0, // forward the mouse button, default to 0 (LMB)
+      
+      down: function( event, trail ) {
+        buttonListener.setButtonState( event, 'down' );
+      },
+      
+      up: function( event, trail ) {
+        buttonListener.setButtonState( event, buttonListener._overCount > 0 ? 'over' : 'up' );
+      }
+    } );
+  };
+
+  var ButtonListener = scenery.ButtonListener;
+  
+  inherit( DownUpListener, ButtonListener, {
+
+    setButtonState: function( event, state ) {
+      if ( state !== this.buttonState ) {
+        sceneryEventLog && sceneryEventLog( 'ButtonListener state change to ' + state + ' from ' + this.buttonState + ' for ' + ( this.downTrail ? this.downTrail.toString() : this.downTrail ) );
+        var oldState = this.buttonState;
+        
+        this.buttonState = state;
+        
+        if ( this._buttonOptions[state] ) {
+          this._buttonOptions[state]( event, oldState );
+        }
+        
+        if ( this._buttonOptions.fire &&
+             this._overCount > 0 &&
+             ( this._buttonOptions.fireOnDown ? ( state === 'down' ) : ( oldState === 'down' ) ) ) {
+          this._buttonOptions.fire( event );
+        }
+      }
+    },
+    
+    enter: function( event ) {
+      sceneryEventLog && sceneryEventLog( 'ButtonListener enter for ' + ( this.downTrail ? this.downTrail.toString() : this.downTrail ) );
+      this._overCount++;
+      if ( this._overCount === 1 ) {
+        this.setButtonState( event, this.isDown ? 'down' : 'over' );
+      }
+    },
+
+    exit: function( event ) {
+      sceneryEventLog && sceneryEventLog( 'ButtonListener exit for ' + ( this.downTrail ? this.downTrail.toString() : this.downTrail ) );
+      assert && assert( this._overCount > 0, 'Exit events not matched by an enter' );
+      this._overCount--;
+      if ( this._overCount === 0 ) {
+        this.setButtonState( event, this.isDown ? 'out' : 'up' );
+      }
+    }
+  } );
+
+  //TODO delete this after work is completed on sun.Button and scenery.ButtonListener
+  ButtonListener.TEST_LISTENER = new ButtonListener( {
+
+    up: function( event, oldState ) {
+      console.log( "ButtonListener.up oldState=" + oldState );
+    },
+
+    over: function( event, oldState ) {
+      console.log( "ButtonListener.over oldState=" + oldState );
+    },
+
+    down: function( event, oldState ) {
+      console.log( "ButtonListener.down oldState=" + oldState );
+    },
+
+    out: function( event, oldState ) {
+      console.log( "ButtonListener.out oldState=" + oldState );
+    },
+
+    fire: function( event ) {
+      console.log( "ButtonListener.fire" );
+    }
+  } );
+
+  return ButtonListener;
+} );
+
+
+
+// Copyright 2002-2013, University of Colorado
+
+/*
+ * An event in Scenery that has similar event-handling characteristics to DOM events.
+ * The original DOM event (if any) is available as event.domEvent.
+ *
+ * Multiple events can be triggered by a single domEvent, so don't assume it is unique.
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+ 
+define( 'SCENERY/input/Event',['require','SCENERY/scenery'],function( require ) {
+  
+  
+  var scenery = require( 'SCENERY/scenery' );
+  
+  scenery.Event = function Event( args ) {
+    // ensure that all of the required args are supplied
+    assert && assert( args.trail &&
+                      args.type &&
+                      args.pointer &&
+                      args.target, 'Missing required scenery.Event argument' );
+    
+    this.handled = false;
+    this.aborted = false;
+    
+    // {Trail} path to the leaf-most node, ordered list, from root to leaf
+    this.trail = args.trail;
+    
+    // {String} what event was triggered on the listener
+    this.type = args.type;
+    
+    // {Pointer}
+    this.pointer = args.pointer;
+    
+    // raw DOM InputEvent (TouchEvent, PointerEvent, MouseEvent,...)
+    this.domEvent = args.domEvent;
+    
+    // {Node} whatever node you attached the listener to, or null when firing events on a Pointer
+    this.currentTarget = args.currentTarget;
+    
+    // {Node} leaf-most node in trail
+    this.target = args.target;
+    
+    // TODO: add extended information based on an event here?
+  };
+  var Event = scenery.Event;
+  
+  Event.prototype = {
+    constructor: Event,
+    
+    // like DOM Event.stopPropagation(), but named differently to indicate it doesn't fire that behavior on the underlying DOM event
+    handle: function() {
+      this.handled = true;
+    },
+    
+    // like DOM Event.stopImmediatePropagation(), but named differently to indicate it doesn't fire that behavior on the underlying DOM event
+    abort: function() {
+      this.handled = true;
+      this.aborted = true;
+    }
+  };
+  
+  return Event;
+} );
+
+// Copyright 2002-2013, University of Colorado
+
+/*
+ * A pointer is an abstraction that includes a mouse and touch points (and possibly keys).
+ *
+ * TODO: add state tracking (dragging/panning/etc.) to pointer for convenience
+ * TODO: consider an 'active' flag?
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'SCENERY/input/Pointer',['require','SCENERY/scenery'],function( require ) {
+  
+  
+  var scenery = require( 'SCENERY/scenery' );
+  
+  scenery.Pointer = function Pointer() {
+    this.listeners = [];
+    
+    phetAllocation && phetAllocation( 'Pointer' );
+  };
+  var Pointer = scenery.Pointer;
+  
+  Pointer.prototype = {
+    constructor: Pointer,
+    
+    addInputListener: function( listener ) {
+      assert && assert( !_.contains( this.listeners, listener ) );
+      
+      this.listeners.push( listener );
+    },
+    
+    removeInputListener: function( listener ) {
+      var index = _.indexOf( this.listeners, listener );
+      assert && assert( index !== -1 );
+      
+      this.listeners.splice( index, 1 );
+    },
+    
+    // for mouse/touch/pen
+    hasPointChanged: function( point ) {
+      return this.point !== point && ( !point || !this.point || !this.point.equals( point ) );
+    }
+  };
+  
+  return Pointer;
+} );
+
+// Copyright 2002-2013, University of Colorado
+
+/**
+ * Tracks the mouse state
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'SCENERY/input/Mouse',['require','PHET_CORE/inherit','SCENERY/scenery','SCENERY/input/Pointer'],function( require ) {
+  
+  
+  var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
+  
+  var Pointer = require( 'SCENERY/input/Pointer' ); // inherits from Pointer
+  
+  scenery.Mouse = function Mouse() {
+    Pointer.call( this );
+    
+    this.point = null;
+    
+    this.leftDown = false;
+    this.middleDown = false;
+    this.rightDown = false;
+    
+    this.isMouse = true;
+    
+    this.trail = null;
+    
+    this.isDown = false;
+    
+    // overrides the cursor of whatever is under it when set
+    this._cursor = null;
+    
+    this.type = 'mouse';
+  };
+  var Mouse = scenery.Mouse;
+  
+  inherit( Pointer, Mouse, {
+    set cursor( value ) { return this.setCursor( value ); },
+    get cursor() { return this._cursor; },
+    
+    setCursor: function( value ) {
+      this._cursor = value;
+      return this; // allow chaining
+    },
+    
+    clearCursor: function() {
+      this.setCursor( null );
+    },
+    
+    down: function( point, event ) {
+      var pointChanged = this.hasPointChanged( point );
+      sceneryEventLog && point && sceneryEventLog( 'mouse down at ' + point.toString() );
+      // if ( this.point ) { this.point.freeToPool(); }
+      this.point = point;
+      this.isDown = true;
+      switch( event.button ) {
+        case 0: this.leftDown = true; break;
+        case 1: this.middleDown = true; break;
+        case 2: this.rightDown = true; break;
+      }
+      return pointChanged;
+    },
+    
+    up: function( point, event ) {
+      var pointChanged = this.hasPointChanged( point );
+      sceneryEventLog && point && sceneryEventLog( 'mouse up at ' + point.toString() );
+      // if ( this.point ) { this.point.freeToPool(); }
+      this.point = point;
+      this.isDown = false;
+      switch( event.button ) {
+        case 0: this.leftDown = false; break;
+        case 1: this.middleDown = false; break;
+        case 2: this.rightDown = false; break;
+      }
+      return pointChanged;
+    },
+    
+    move: function( point, event ) {
+      var pointChanged = this.hasPointChanged( point );
+      sceneryEventLog && point && sceneryEventLog( 'mouse move at ' + point.toString() );
+      // if ( this.point ) { this.point.freeToPool(); }
+      this.point = point;
+      return pointChanged;
+    },
+    
+    over: function( point, event ) {
+      var pointChanged = this.hasPointChanged( point );
+      sceneryEventLog && point && sceneryEventLog( 'mouse over at ' + point.toString() );
+      // if ( this.point ) { this.point.freeToPool(); }
+      this.point = point;
+      return pointChanged;
+    },
+    
+    out: function( point, event ) {
+      var pointChanged = this.hasPointChanged( point );
+      sceneryEventLog && point && sceneryEventLog( 'mouse out at ' + point.toString() );
+      // if ( this.point ) { this.point.freeToPool(); }
+      // TODO: how to handle the mouse out-of-bounds
+      this.point = null;
+      return pointChanged;
+    },
+    
+    toString: function() {
+      return 'Mouse';
+    }
+  } );
+  
+  return Mouse;
+} );
+
+// Copyright 2002-2013, University of Colorado
+
+/**
+ * Tracks a single touch point
+ *
+ * IE guidelines for Touch-friendly sites: http://blogs.msdn.com/b/ie/archive/2012/04/20/guidelines-for-building-touch-friendly-sites.aspx
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'SCENERY/input/Touch',['require','PHET_CORE/inherit','SCENERY/scenery','SCENERY/input/Pointer'],function( require ) {
+  
+  
+  var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
+  
+  var Pointer = require( 'SCENERY/input/Pointer' ); // extends Pointer
+  
+  scenery.Touch = function Touch( id, point, event ) {
+    Pointer.call( this );
+    
+    this.id = id;
+    this.point = point;
+    this.isTouch = true;
+    this.trail = null;
+    
+    this.isDown = true; // touches always start down
+    
+    this.type = 'touch';
+  };
+  var Touch = scenery.Touch;
+  
+  inherit( Pointer, Touch, {
+    move: function( point, event ) {
+      var pointChanged = this.hasPointChanged( point );
+      // if ( this.point ) { this.point.freeToPool(); }
+      this.point = point;
+      return pointChanged;
+    },
+    
+    end: function( point, event ) {
+      var pointChanged = this.hasPointChanged( point );
+      // if ( this.point ) { this.point.freeToPool(); }
+      this.point = point;
+      this.isDown = false;
+      return pointChanged;
+    },
+    
+    cancel: function( point, event ) {
+      var pointChanged = this.hasPointChanged( point );
+      // if ( this.point ) { this.point.freeToPool(); }
+      this.point = point;
+      this.isDown = false;
+      return pointChanged;
+    },
+    
+    toString: function() {
+      return 'Touch#' + this.id;
+    }
+  } );
+  
+  return Touch;
+} );
+
+// Copyright 2002-2013, University of Colorado
+
+/**
+ * Tracks a stylus ('pen') or something with tilt and pressure information
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'SCENERY/input/Pen',['require','PHET_CORE/inherit','SCENERY/scenery','SCENERY/input/Pointer'],function( require ) {
+  
+  
+  var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
+  
+  var Pointer = require( 'SCENERY/input/Pointer' ); // extends Pointer
+  
+  scenery.Pen = function Pen( id, point, event ) {
+    Pointer.call( this );
+    
+    this.id = id;
+    this.point = point;
+    this.isPen = true;
+    this.trail = null;
+    
+    this.isDown = true; // pens always start down? TODO: is this true with pointer events?
+    
+    this.type = 'pen';
+  };
+  var Pen = scenery.Pen;
+  
+  inherit( Pointer, Pen, {
+    move: function( point, event ) {
+      var pointChanged = this.hasPointChanged( point );
+      // if ( this.point ) { this.point.freeToPool(); }
+      this.point = point;
+      return pointChanged;
+    },
+    
+    end: function( point, event ) {
+      var pointChanged = this.hasPointChanged( point );
+      // if ( this.point ) { this.point.freeToPool(); }
+      this.point = point;
+      this.isDown = false;
+      return pointChanged;
+    },
+    
+    cancel: function( point, event ) {
+      var pointChanged = this.hasPointChanged( point );
+      // if ( this.point ) { this.point.freeToPool(); }
+      this.point = point;
+      this.isDown = false;
+      return pointChanged;
+    },
+    
+    toString: function() {
+      return 'Pen#' + this.id;
+    }
+  } );
+  
+  return Pen;
+} );
+
+// Copyright 2002-2013, University of Colorado
+
+/**
+ * Tracks a single key-press
+ *
+ * TODO: general key-press implementation
+ * TODO: consider separate handling for keys in general.
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'SCENERY/input/Key',['require','PHET_CORE/inherit','SCENERY/scenery','SCENERY/input/Pointer'],function( require ) {
+  
+  
+  var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
+  
+  var Pointer = require( 'SCENERY/input/Pointer' ); // Inherits from Pointer
+  
+  scenery.Key = function Key( event ) {
+    Pointer.call( this );
+    
+    this.event = event; // event.keyCode event.charCode
+    this.isKey = true; // compared to isMouse/isPen/isTouch
+    this.trail = null;
+    this.type = 'key';
+  };
+  var Key = scenery.Key;
+  
+  inherit( Pointer, Key, {
+    
+  } );
+  
+  return Key;
+} );
+
+// Copyright 2002-2013, University of Colorado
+
+/**
+ * API for handling mouse / touch / keyboard events.
+ *
+ * A 'pointer' is an abstract way of describing either the mouse, a single touch point, or a key being pressed.
+ * touch points and key presses go away after being released, whereas the mouse 'pointer' is persistent.
+ *
+ * Events will be called on listeners with a single event object. Supported event types are:
+ * 'up', 'down', 'out', 'over', 'enter', 'exit', 'move', and 'cancel'. Scenery also supports more specific event
+ * types that constrain the type of pointer, so 'mouse' + type, 'touch' + type and 'pen' + type will fire
+ * on each listener before the generic event would be fined. E.g. for mouse movement, listener.mousemove will be
+ * fired before listener.move.
+ *
+ * DOM Level 3 events spec: http://www.w3.org/TR/DOM-Level-3-Events/
+ * Touch events spec: http://www.w3.org/TR/touch-events/
+ * Pointer events spec draft: https://dvcs.w3.org/hg/pointerevents/raw-file/tip/pointerEvents.html
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'SCENERY/input/Input',['require','SCENERY/scenery','SCENERY/util/Trail','SCENERY/input/Mouse','SCENERY/input/Touch','SCENERY/input/Pen','SCENERY/input/Key','SCENERY/input/Event'],function( require ) {
+  
+  
+  var scenery = require( 'SCENERY/scenery' );
+  
+  require( 'SCENERY/util/Trail' );
+  require( 'SCENERY/input/Mouse' );
+  require( 'SCENERY/input/Touch' );
+  require( 'SCENERY/input/Pen' );
+  require( 'SCENERY/input/Key' );
+  require( 'SCENERY/input/Event' );
+  
+  // listenerTarget is the DOM node (window/document/element) to which DOM event listeners will be attached
+  scenery.Input = function Input( scene, listenerTarget, batchDOMEvents ) {
+    this.scene = scene;
+    this.listenerTarget = listenerTarget;
+    this.batchDOMEvents = batchDOMEvents;
+    
+    this.batchedCallbacks = []; // cleared every frame
+
+    //Pointer for mouse, only created lazily on first mouse event, so no mouse is allocated on tablets
+    this.mouse = null;
+
+    this.pointers = [];
+    
+    this.listenerReferences = [];
+    
+    this.eventLog = [];     // written when recording event input. can be overwritten to the empty array to reset. Strings relative to this class (prefix "scene.input.")
+    this.logEvents = false; // can be set to true to cause Scenery to record all input calls to eventLog
+
+    this.pointerAddedListeners = [];
+  };
+  var Input = scenery.Input;
+  
+  Input.prototype = {
+    constructor: Input,
+
+    addPointer: function( pointer ) {
+      this.pointers.push( pointer );
+
+      //Callback for showing pointer events.  Optimized for performance.
+      if ( this.pointerAddedListeners.length ) {
+        for ( var i = 0; i < this.pointerAddedListeners.length; i++ ) {
+          this.pointerAddedListeners[i]( pointer );
+        }
+      }
+    },
+
+    addPointerAddedListener: function( listener ) {
+      this.pointerAddedListeners.push(listener);
+    },
+
+    removePointerAddedListener: function( listener ) {
+      var index = this.pointerAddedListeners.indexOf( listener );
+      if ( index !== -1 ) {
+        this.pointerAddedListeners.splice( index, index + 1 );
+      }
+    },
+    
+    removePointer: function( pointer ) {
+      // sanity check version, will remove all instances
+      for ( var i = this.pointers.length - 1; i >= 0; i-- ) {
+        if ( this.pointers[i] === pointer ) {
+          this.pointers.splice( i, 1 );
+        }
+      }
+    },
+    
+    findTouchById: function( id ) {
+      var i = this.pointers.length;
+      while ( i-- ) {
+        var pointer = this.pointers[i];
+        if ( pointer.id === id ) {
+          return pointer;
+        }
+      }
+      return undefined;
+    },
+    
+    findKeyByEvent: function( event ) {
+      assert && assert( event.hasOwnProperty( 'keyCode' ) && event.hasOwnProperty('charCode'), 'Assumes the KeyboardEvent has keyCode and charCode properties' );
+      var result = _.find( this.pointers, function( pointer ) {
+        // TODO: also check location (if that exists), so we don't mix up left and right shift, etc.
+        return pointer.keyCode === event.keyCode && pointer.charCode === event.charCode;
+      } );
+      // assert && assert( result, 'No key found for the combination of key:' + event.key + ' and location:' + event.location );
+      return result;
+    },
+
+    //Init the mouse on the first mouse event (if any!)
+    initMouse: function() {
+      this.mouse = new scenery.Mouse();
+      this.addPointer( this.mouse );
+    },
+    
+    mouseDown: function( point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'mouseDown(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      if ( !this.mouse ) { this.initMouse(); }
+      var pointChanged = this.mouse.down( point, event );
+      if ( pointChanged ) {
+        this.moveEvent( this.mouse, event );
+      }
+      this.downEvent( this.mouse, event );
+    },
+    
+    mouseUp: function( point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'mouseUp(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      if ( !this.mouse ) { this.initMouse(); }
+      var pointChanged = this.mouse.up( point, event );
+      if ( pointChanged ) {
+        this.moveEvent( this.mouse, event );
+      }
+      this.upEvent( this.mouse, event );
+    },
+    
+    mouseUpImmediate: function( point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'mouseUpImmediate(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      if ( !this.mouse ) { this.initMouse(); }
+      if ( this.mouse.point ) {
+        // if the pointer's point hasn't been initialized yet, ignore the immediate up
+        this.upImmediateEvent( this.mouse, event );
+      }
+    },
+    
+    mouseMove: function( point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'mouseMove(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      if ( !this.mouse ) { this.initMouse(); }
+      this.mouse.move( point, event );
+      this.moveEvent( this.mouse, event );
+    },
+    
+    mouseOver: function( point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'mouseOver(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      if ( !this.mouse ) { this.initMouse(); }
+      this.mouse.over( point, event );
+      // TODO: how to handle mouse-over (and log it)
+    },
+    
+    mouseOut: function( point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'mouseOut(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      if ( !this.mouse ) { this.initMouse(); }
+      this.mouse.out( point, event );
+      // TODO: how to handle mouse-out (and log it)
+    },
+    
+    keyDown: function( event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'keyDown(' + Input.serializeDomEvent( event ) + ');' ); }
+      var key = new scenery.Key( event );
+      this.addPointer( key );
+      
+      var trail = this.scene.getTrailFromKeyboardFocus();
+      this.dispatchEvent( trail, 'keyDown', key, event, true );
+    },
+    
+    keyUp: function( event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'keyUp(' + Input.serializeDomEvent( event ) + ');' ); }
+      var key = this.findKeyByEvent( event );
+      if ( key ) {
+        this.removePointer( key );
+        
+        var trail = this.scene.getTrailFromKeyboardFocus();
+        this.dispatchEvent( trail, 'keyUp', key, event, true );
+      }
+    },
+    
+    keyPress: function( event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'keyPress(' + Input.serializeDomEvent( event ) + ');' ); }
+      // NOTE: do we even need keyPress?
+    },
+    
+    // called for each touch point
+    touchStart: function( id, point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'touchStart(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      var touch = new scenery.Touch( id, point, event );
+      this.addPointer( touch );
+      this.downEvent( touch, event );
+    },
+    
+    touchEnd: function( id, point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'touchEnd(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      var touch = this.findTouchById( id );
+      if ( touch ) {
+        var pointChanged = touch.end( point, event );
+        if ( pointChanged ) {
+          this.moveEvent( touch, event );
+        }
+        this.removePointer( touch );
+        this.upEvent( touch, event );
+      } else {
+        assert && assert( false, 'Touch not found for touchEnd: ' + id );
+      }
+    },
+    
+    touchEndImmediate: function( id, point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'touchEndImmediate(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      var touch = this.findTouchById( id );
+      if ( touch ) {
+        this.upImmediateEvent( touch, event );
+      } else {
+        assert && assert( false, 'Touch not found for touchEndImmediate: ' + id );
+      }
+    },
+    
+    touchMove: function( id, point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'touchMove(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      var touch = this.findTouchById( id );
+      if ( touch ) {
+        touch.move( point, event );
+        this.moveEvent( touch, event );
+      } else {
+        assert && assert( false, 'Touch not found for touchMove: ' + id );
+      }
+    },
+    
+    touchCancel: function( id, point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'touchCancel(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      var touch = this.findTouchById( id );
+      if ( touch ) {
+        var pointChanged = touch.cancel( point, event );
+        if ( pointChanged ) {
+          this.moveEvent( touch, event );
+        }
+        this.removePointer( touch );
+        this.cancelEvent( touch, event );
+      } else {
+        assert && assert( false, 'Touch not found for touchCancel: ' + id );
+      }
+    },
+    
+    // called for each touch point
+    penStart: function( id, point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'penStart(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      var pen = new scenery.Pen( id, point, event );
+      this.addPointer( pen );
+      this.downEvent( pen, event );
+    },
+    
+    penEnd: function( id, point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'penEnd(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      var pen = this.findTouchById( id );
+      if ( pen ) {
+        var pointChanged = pen.end( point, event );
+        if ( pointChanged ) {
+          this.moveEvent( pen, event );
+        }
+        this.removePointer( pen );
+        this.upEvent( pen, event );
+      } else {
+        assert && assert( false, 'Pen not found for penEnd: ' + id );
+      }
+    },
+    
+    penEndImmediate: function( id, point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'penEndImmediate(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      var pen = this.findTouchById( id );
+      if ( pen ) {
+        this.upImmediateEvent( pen, event );
+      } else {
+        assert && assert( false, 'Pen not found for penEndImmediate: ' + id );
+      }
+    },
+    
+    penMove: function( id, point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'penMove(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      var pen = this.findTouchById( id );
+      if ( pen ) {
+        pen.move( point, event );
+        this.moveEvent( pen, event );
+      } else {
+        assert && assert( false, 'Pen not found for penMove: ' + id );
+      }
+    },
+    
+    penCancel: function( id, point, event ) {
+      if ( this.logEvents ) { this.eventLog.push( 'penCancel(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      var pen = this.findTouchById( id );
+      if ( pen ) {
+        var pointChanged = pen.cancel( point, event );
+        if ( pointChanged ) {
+          this.moveEvent( pen, event );
+        }
+        this.removePointer( pen );
+        this.cancelEvent( pen, event );
+      } else {
+        assert && assert( false, 'Pen not found for penCancel: ' + id );
+      }
+    },
+    
+    pointerDown: function( id, type, point, event ) {
+      switch ( type ) {
+        case 'mouse':
+          this.mouseDown( point, event );
+          break;
+        case 'touch':
+          this.touchStart( id, point, event );
+          break;
+        case 'pen':
+          this.penStart( id, point, event );
+          break;
+        default:
+          if ( console.log ) {
+            console.log( 'Unknown pointer type: ' + type );
+          }
+      }
+    },
+    
+    pointerUp: function( id, type, point, event ) {
+      switch ( type ) {
+        case 'mouse':
+          this.mouseUp( point, event );
+          break;
+        case 'touch':
+          this.touchEnd( id, point, event );
+          break;
+        case 'pen':
+          this.penEnd( id, point, event );
+          break;
+        default:
+          if ( console.log ) {
+            console.log( 'Unknown pointer type: ' + type );
+          }
+      }
+    },
+    
+    pointerUpImmediate: function( id, type, point, event ) {
+      switch ( type ) {
+        case 'mouse':
+          this.mouseUpImmediate( point, event );
+          break;
+        case 'touch':
+          this.touchEndImmediate( id, point, event );
+          break;
+        case 'pen':
+          this.penEndImmediate( id, point, event );
+          break;
+        default:
+          if ( console.log ) {
+            console.log( 'Unknown pointer type: ' + type );
+          }
+      }
+    },
+    
+    pointerCancel: function( id, type, point, event ) {
+      switch ( type ) {
+        case 'mouse':
+          if ( console && console.log ) {
+            console.log( 'WARNING: Pointer mouse cancel was received' );
+          }
+          break;
+        case 'touch':
+          this.touchCancel( id, point, event );
+          break;
+        case 'pen':
+          this.penCancel( id, point, event );
+          break;
+        default:
+          if ( console.log ) {
+            console.log( 'Unknown pointer type: ' + type );
+          }
+      }
+    },
+    
+    pointerMove: function( id, type, point, event ) {
+      switch ( type ) {
+        case 'mouse':
+          this.mouseMove( point, event );
+          break;
+        case 'touch':
+          this.touchMove( id, point, event );
+          break;
+        case 'pen':
+          this.penMove( id, point, event );
+          break;
+        default:
+          if ( console.log ) {
+            console.log( 'Unknown pointer type: ' + type );
+          }
+      }
+    },
+    
+    pointerOver: function( id, type, point, event ) {
+      
+    },
+    
+    pointerOut: function( id, type, point, event ) {
+      
+    },
+    
+    pointerEnter: function( id, type, point, event ) {
+      
+    },
+    
+    pointerLeave: function( id, type, point, event ) {
+      
+    },
+    
+    upEvent: function( pointer, event ) {
+      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
+      
+      this.dispatchEvent( trail, 'up', pointer, event, true );
+      
+      // touch pointers are transient, so fire exit/out to the trail afterwards
+      if ( pointer.isTouch ) {
+        this.exitEvents( pointer, event, trail, 0, true );
+      }
+      
+      pointer.trail = trail;
+    },
+    
+    upImmediateEvent: function( pointer, event ) {
+      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
+      
+      this.dispatchEvent( trail, 'upImmediate', pointer, event, true );
+    },
+    
+    downEvent: function( pointer, event ) {
+      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
+      
+      // touch pointers are transient, so fire enter/over to the trail first
+      if ( pointer.isTouch ) {
+        this.enterEvents( pointer, event, trail, 0, true );
+      }
+      
+      this.dispatchEvent( trail, 'down', pointer, event, true );
+      
+      pointer.trail = trail;
+    },
+    
+    moveEvent: function( pointer, event ) {
+      var changed = this.branchChangeEvents( pointer, event, true );
+      if ( changed ) {
+        sceneryEventLog && sceneryEventLog( 'branch change due to move event' );
+      }
+    },
+    
+    cancelEvent: function( pointer, event ) {
+      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
+      
+      this.dispatchEvent( trail, 'cancel', pointer, event, true );
+      
+      // touch pointers are transient, so fire exit/out to the trail afterwards
+      if ( pointer.isTouch ) {
+        this.exitEvents( pointer, event, trail, 0, true );
+      }
+      
+      pointer.trail = trail;
+    },
+    
+    // return whether there was a change
+    branchChangeEvents: function( pointer, event, isMove ) {
+      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
+      sceneryEventLog && sceneryEventLog( 'checking branch change: ' + trail.toString() + ' at ' + pointer.point.toString() );
+      var oldTrail = pointer.trail || new scenery.Trail( this.scene ); // TODO: consider a static trail reference
+      
+      var lastNodeChanged = oldTrail.lastNode() !== trail.lastNode();
+      if ( !lastNodeChanged && !isMove ) {
+        // bail out if nothing needs to be done
+        return false;
+      }
+      
+      var branchIndex = scenery.Trail.branchIndex( trail, oldTrail );
+      var isBranchChange = branchIndex !== trail.length || branchIndex !== oldTrail.length;
+      sceneryEventLog && isBranchChange && sceneryEventLog( 'branch change from ' + oldTrail.toString() + ' to ' + trail.toString() );
+      
+      // event order matches http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
+      if ( isMove ) {
+        this.dispatchEvent( trail, 'move', pointer, event, true );
+      }
+      
+      // we want to approximately mimic http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
+      // TODO: if a node gets moved down 1 depth, it may see both an exit and enter?
+      this.exitEvents( pointer, event, oldTrail, branchIndex, lastNodeChanged );
+      this.enterEvents( pointer, event, trail, branchIndex, lastNodeChanged );
+      
+      pointer.trail = trail;
+      return isBranchChange;
+    },
+    
+    enterEvents: function( pointer, event, trail, branchIndex, lastNodeChanged ) {
+      if ( trail.length > branchIndex ) {
+        for ( var newIndex = trail.length - 1; newIndex >= branchIndex; newIndex-- ) {
+          this.dispatchEvent( trail.slice( 0, newIndex + 1 ), 'enter', pointer, event, false );
+        }
+      }
+      
+      if ( lastNodeChanged ) {
+        this.dispatchEvent( trail, 'over', pointer, event, true );
+      }
+    },
+    
+    exitEvents: function( pointer, event, trail, branchIndex, lastNodeChanged ) {
+      if ( lastNodeChanged ) {
+        this.dispatchEvent( trail, 'out', pointer, event, true );
+      }
+      
+      if ( trail.length > branchIndex ) {
+        for ( var oldIndex = branchIndex; oldIndex < trail.length; oldIndex++ ) {
+          this.dispatchEvent( trail.slice( 0, oldIndex + 1 ), 'exit', pointer, event, false );
+        }
+      }
+    },
+    
+    validatePointers: function() {
+      var that = this;
+      
+      var i = this.pointers.length;
+      while ( i-- ) {
+        var pointer = this.pointers[i];
+        if ( pointer.point ) {
+          var changed = that.branchChangeEvents( pointer, null, false );
+          if ( changed ) {
+            sceneryEventLog && sceneryEventLog( 'branch change due validatePointers' );
+          }
+        }
+      }
+    },
+    
+    dispatchEvent: function( trail, type, pointer, event, bubbles ) {
+      sceneryEventLog && sceneryEventLog( 'Input: ' + type + ' on ' + trail.toString() + ' for pointer ' + pointer.toString() + ' at ' + pointer.point.toString() );
+      if ( !trail ) {
+        try {
+          throw new Error( 'falsy trail for dispatchEvent' );
+        } catch ( e ) {
+          console.log( e.stack );
+          throw e;
+        }
+      }
+      
+      // TODO: is there a way to make this event immutable?
+      var inputEvent = new scenery.Event( {
+        trail: trail, // {Trail} path to the leaf-most node, ordered list, from root to leaf
+        type: type, // {String} what event was triggered on the listener
+        pointer: pointer, // {Pointer}
+        domEvent: event, // raw DOM InputEvent (TouchEvent, PointerEvent, MouseEvent,...)
+        currentTarget: null, // {Node} whatever node you attached the listener to, null when passed to a Pointer,
+        target: trail.lastNode() // {Node} leaf-most node in trail
+      } );
+      
+      // first run through the pointer's listeners to see if one of them will handle the event
+      this.dispatchToPointer( type, pointer, inputEvent );
+      
+      // if not yet handled, run through the trail in order to see if one of them will handle the event
+      // at the base of the trail should be the scene node, so the scene will be notified last
+      this.dispatchToTargets( trail, pointer, type, inputEvent, bubbles );
+      
+      // TODO: better interactivity handling?
+      if ( !trail.lastNode().interactive && !pointer.isKey && event && event.preventDefault ) {
+        event.preventDefault();
+      }
+    },
+    
+    // TODO: reduce code sharing between here and dispatchToTargets!
+    dispatchToPointer: function( type, pointer, inputEvent ) {
+      if ( inputEvent.aborted || inputEvent.handled ) {
+        return;
+      }
+      
+      var specificType = pointer.type + type; // e.g. mouseup, touchup, keyup
+      
+      var pointerListeners = pointer.listeners.slice( 0 ); // defensive copy
+      for ( var i = 0; i < pointerListeners.length; i++ ) {
+        var listener = pointerListeners[i];
+        
+        // if a listener returns true, don't handle any more
+        var aborted = false;
+        
+        if ( !aborted && listener[specificType] ) {
+          listener[specificType]( inputEvent );
+          aborted = inputEvent.aborted;
+        }
+        if ( !aborted && listener[type] ) {
+          listener[type]( inputEvent );
+          aborted = inputEvent.aborted;
+        }
+        
+        // bail out if the event is aborted, so no other listeners are triggered
+        if ( aborted ) {
+          return;
+        }
+      }
+    },
+    
+    dispatchToTargets: function( trail, pointer, type, inputEvent, bubbles ) {
+      if ( inputEvent.aborted || inputEvent.handled ) {
+        return;
+      }
+      
+      var specificType = pointer.type + type; // e.g. mouseup, touchup, keyup
+      
+      for ( var i = trail.length - 1; i >= 0; bubbles ? i-- : i = -1 ) {
+        var target = trail.nodes[i];
+        inputEvent.currentTarget = target;
+        
+        var listeners = target.getInputListeners();
+        
+        for ( var k = 0; k < listeners.length; k++ ) {
+          var listener = listeners[k];
+          
+          // if a listener returns true, don't handle any more
+          var aborted = false;
+          
+          if ( !aborted && listener[specificType] ) {
+            listener[specificType]( inputEvent );
+            aborted = inputEvent.aborted;
+          }
+          if ( !aborted && listener[type] ) {
+            listener[type]( inputEvent );
+            aborted = inputEvent.aborted;
+          }
+          
+          // bail out if the event is aborted, so no other listeners are triggered
+          if ( aborted ) {
+            return;
+          }
+        }
+        
+        // if the input event was handled, don't follow the trail down another level
+        if ( inputEvent.handled ) {
+          return;
+        }
+      }
+    },
+    
+    addListener: function( type, callback, useCapture ) {
+      var input = this;
+      
+      //Cancel propagation of mouse events but not key events.  Key Events need to propagate for tab navigability
+      var usePreventDefault = type !== 'keydown' && type !== 'keyup' && type !== 'keypress';
+      
+      if ( this.batchDOMEvents ) {
+        var batchedCallback = function batchedEvent( domEvent ) {
+          sceneryEventLog && sceneryEventLog( 'Batching event for ' + type );
+          
+          if ( usePreventDefault ) {
+            domEvent.preventDefault(); // TODO: should we batch the events in a different place so we don't preventDefault on something bad?
+          }
+          input.batchedCallbacks.push( function batchedEventCallback() {
+            // process whether anything under the pointers changed before running additional input events
+            sceneryEventLog && sceneryEventLog( 'validatePointers from batched event' );
+            input.validatePointers();
+            if ( input.logEvents ) { input.eventLog.push( 'validatePointers();' ); }
+            
+            callback( domEvent );
+          } );
+        };
+        this.listenerTarget.addEventListener( type, batchedCallback, useCapture );
+        this.listenerReferences.push( { type: type, callback: batchedCallback, useCapture: useCapture } );
+      } else {
+        this.listenerTarget.addEventListener( type, callback, useCapture );
+        this.listenerReferences.push( { type: type, callback: function synchronousEvent( domEvent ) {
+          sceneryEventLog && sceneryEventLog( 'Running event for ' + type );
+          
+          // process whether anything under the pointers changed before running additional input events
+          sceneryEventLog && sceneryEventLog( 'validatePointers from non-batched event' );
+          input.validatePointers();
+          if ( input.logEvents ) { input.eventLog.push( 'validatePointers();' ); }
+          
+          callback( domEvent );
+        }, useCapture: useCapture } );
+      }
+    },
+    
+    // temporary, for mouse events
+    addImmediateListener: function( type, callback, useCapture ) {
+      this.listenerTarget.addEventListener( type, callback, useCapture );
+      this.listenerReferences.push( { type: type, callback: function immediateEvent( domEvent ) {
+        sceneryEventLog && sceneryEventLog( 'Running immediate event for ' + type );
+        
+        // process whether anything under the pointers changed before running additional input events
+        // input.validatePointers();
+        // if ( input.logEvents ) { input.eventLog.push( 'validatePointers();' ); }
+        
+        callback( domEvent );
+      }, useCapture: useCapture } );
+    },
+    
+    disposeListeners: function() {
+      var input = this;
+      _.each( this.listenerReferences, function( ref ) {
+        input.listenerTarget.removeEventListener( ref.type, ref.callback, ref.useCapture );
+      } );
+    },
+    
+    fireBatchedEvents: function() {
+      if ( this.batchedCallbacks.length ) {
+        sceneryEventLog && sceneryEventLog( 'Input.fireBatchedEvents length:' + this.batchedCallbacks.length );
+        var len = this.batchedCallbacks.length;
+        for ( var i = 0; i < len; i++ ) {
+          this.batchedCallbacks[i]();
+        }
+        this.batchedCallbacks.length = 0;
+      }
+    }
+  };
+  
+  Input.serializeDomEvent = function serializeDomEvent( domEvent ) {
+    var lines = [];
+    for ( var prop in domEvent ) {
+      if ( domEvent.hasOwnProperty( prop ) ) {
+        // stringifying dom event object properties can cause circular references, so we avoid that completely
+        if ( prop === 'touches' || prop === 'targetTouches' || prop === 'changedTouches' ) {
+          var arr = [];
+          for ( var i = 0; i < domEvent[prop].length; i++ ) {
+            // according to spec (http://www.w3.org/TR/touch-events/), this is not an Array, but a TouchList
+            var touch = domEvent[prop].item( i );
+            
+            arr.push( serializeDomEvent( touch ) );
+          }
+          lines.push( prop + ':[' + arr.join( ',' ) + ']' );
+        } else {
+          lines.push( prop + ':' + ( ( typeof domEvent[prop] === 'object' ) && ( domEvent[prop] !== null ) ? '{}' : JSON.stringify( domEvent[prop] ) ) );
+        }
+      }
+    }
+    return '{' + lines.join( ',' ) + '}';
+  };
+  
+  Input.serializeVector2 = function( vector ) {
+    return 'dot(' + vector.x + ',' + vector.y + ')';
+  };
+  
+  return Input;
+} );
+
+// Copyright 2002-2013, University of Colorado
+
+/**
+ * Basic dragging for a node.
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'SCENERY/input/SimpleDragHandler',['require','SCENERY/scenery'],function( require ) {
+  
+  
+  var scenery = require( 'SCENERY/scenery' );
+  
+  /*
+   * Allowed options: {
+   *    allowTouchSnag: false // allow touch swipes across an object to pick it up,
+   *    dragCursor: 'pointer' // while dragging with the mouse, sets the cursor to this value (or use null to not override the cursor while dragging)
+   *    mouseButton: 0        // allow changing the mouse button that activates the drag listener. -1 should activate on any mouse button, 0 on left, 1 for middle, 2 for right, etc.
+   *    start: null           // if non-null, called when a drag is started. start( event, trail )
+   *    drag: null            // if non-null, called when the user moves something with a drag (not a start or end event).
+   *                                                                         drag( event, trail )
+   *    end: null             // if non-null, called when a drag is ended.   end( event, trail )
+   *    translate:            // if this exists, translate( { delta: _, oldPosition: _, position: _ } ) will be called.
+   * }
+   */
+  scenery.SimpleDragHandler = function SimpleDragHandler( options ) {
+    var handler = this;
+    
+    this.options = _.extend( {
+      allowTouchSnag: false,
+      mouseButton: 0,
+      dragCursor: 'pointer'
+    }, options );
+    
+    this.dragging              = false;     // whether a node is being dragged with this handler
+    this.pointer               = null;      // the pointer doing the current dragging
+    this.trail                 = null;      // stores the path to the node that is being dragged
+    this.transform             = null;      // transform of the trail to our node (but not including our node, so we can prepend the deltas)
+    this.node                  = null;      // the node that we are handling the drag for
+    this.lastDragPoint         = null;      // the location of the drag at the previous event (so we can calculate a delta)
+    this.startTransformMatrix  = null;      // the node's transform at the start of the drag, so we can reset on a touch cancel
+    this.mouseButton           = undefined; // tracks which mouse button was pressed, so we can handle that specifically
+    // TODO: consider mouse buttons as separate pointers?
+    
+    // if an ancestor is transformed, pin our node
+    this.transformListener = {
+      transform: function( args ) {
+        if ( !handler.trail.isExtensionOf( args.trail, true ) ) {
+          return;
+        }
+        
+        var newMatrix = args.trail.getTransform().getMatrix();
+        var oldMatrix = handler.transform.getMatrix();
+        
+        // if A was the trail's old transform, B is the trail's new transform, we need to apply (B^-1 A) to our node
+        handler.node.prependMatrix( newMatrix.inverted().timesMatrix( oldMatrix ) );
+        
+        // store the new matrix so we can do deltas using it now
+        handler.transform.setMatrix( newMatrix );
+      }
+    };
+    
+    // this listener gets added to the pointer when it starts dragging our node
+    this.dragListener = {
+      // mouse/touch up
+      up: function( event ) {
+        assert && assert( event.pointer === handler.pointer );
+        if ( !event.pointer.isMouse || event.domEvent.button === handler.mouseButton ) {
+          var saveCurrentTarget = event.currentTarget;
+          event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
+          handler.endDrag( event );
+          event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
+        }
+      },
+      
+      // touch cancel
+      cancel: function( event ) {
+        assert && assert( event.pointer === handler.pointer );
+
+        var saveCurrentTarget = event.currentTarget;
+        event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
+        handler.endDrag( event );
+        event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
+
+        // since it's a cancel event, go back!
+        if ( !handler.transform ) {
+          handler.node.setMatrix( handler.startTransformMatrix );
+        }
+      },
+      
+      // mouse/touch move
+      move: function( event ) {
+        assert && assert( event.pointer === handler.pointer );
+        
+        var delta = handler.transform.inverseDelta2( handler.pointer.point.minus( handler.lastDragPoint ) );
+        
+        // move by the delta between the previous point, using the precomputed transform
+        // prepend the translation on the node, so we can ignore whatever other transform state the node has
+        if ( handler.options.translate ) {
+          var translation = handler.node.getTransform().getMatrix().getTranslation();
+          handler.options.translate( {
+            delta: delta,
+            oldPosition: translation,
+            position: translation.plus( delta )
+          } );
+        }
+        handler.lastDragPoint = handler.pointer.point;
+        
+        if ( handler.options.drag ) {
+          // TODO: consider adding in a delta to the listener
+          // TODO: add the position in to the listener
+          var saveCurrentTarget = event.currentTarget;
+          event.currentTarget = handler.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
+          handler.options.drag( event, handler.trail ); // new position (old position?) delta
+          event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
+        }
+      }
+    };
+  };
+  var SimpleDragHandler = scenery.SimpleDragHandler;
+  
+  SimpleDragHandler.prototype = {
+    constructor: SimpleDragHandler,
+    
+    startDrag: function( event ) {
+      // set a flag on the pointer so it won't pick up other nodes
+      event.pointer.dragging = true;
+      event.pointer.cursor = this.options.dragCursor;
+      event.pointer.addInputListener( this.dragListener );
+      // event.trail.rootNode().addEventListener( this.transformListener ); // TODO: replace with new parent transform listening solution
+      
+      // set all of our persistent information
+      this.dragging = true;
+      this.pointer = event.pointer;
+      this.trail = event.trail.subtrailTo( event.currentTarget, true );
+      this.transform = this.trail.getTransform();
+      this.node = event.currentTarget;
+      this.lastDragPoint = event.pointer.point;
+      this.startTransformMatrix = event.currentTarget.getMatrix();
+      // event.domEvent may not exist if this is touch-to-snag
+      this.mouseButton = event.pointer.isMouse ? event.domEvent.button : undefined;
+      
+      if ( this.options.start ) {
+        this.options.start( event, this.trail );
+      }
+    },
+    
+    endDrag: function( event ) {
+      this.pointer.dragging = false;
+      this.pointer.cursor = null;
+      this.pointer.removeInputListener( this.dragListener );
+      // this.trail.rootNode().removeEventListener( this.transformListener ); // TODO: replace with new parent transform listening solution
+      this.dragging = false;
+      
+      if ( this.options.end ) {
+        this.options.end( event, this.trail );
+      }
+    },
+    
+    tryToSnag: function( event ) {
+      // don't allow drag attempts that use the wrong mouse button (-1 indicates any mouse button works)
+      if ( event.pointer.isMouse && event.domEvent && this.options.mouseButton !== event.domEvent.button && this.options.mouseButton !== -1 ) {
+        return;
+      }
+      
+      // only start dragging if the pointer isn't dragging anything, we aren't being dragged, and if it's a mouse it's button is down
+      if ( !this.dragging && !event.pointer.dragging ) {
+        this.startDrag( event );
+      }
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * events called from the node input listener
+    *----------------------------------------------------------------------------*/
+    
+    // mouse/touch down on this node
+    down: function( event ) {
+      this.tryToSnag( event );
+    },
+    
+    // touch enters this node
+    touchenter: function( event ) {
+      // allow touches to start a drag by moving "over" this node
+      if ( this.options.allowTouchSnag ) {
+        this.tryToSnag( event );
+      }
+    }
+  };
+  
+  return SimpleDragHandler;
+} );
+
+
+
+// Copyright 2002-2013, University of Colorado
+
+/**
+ * A conceptual boundary between layers, where it is optional to have information about a previous or next layer.
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'SCENERY/layers/LayerBoundary',['require','SCENERY/scenery'],function( require ) {
+  
+  
+  var scenery = require( 'SCENERY/scenery' );
+  
+  scenery.LayerBoundary = function LayerBoundary() {
+    // layer types before and after the boundary. null indicates the lack of information (first or last layer)
+    this.previousLayerType = null;
+    this.nextLayerType = null;
+    
+    // trails to the closest nodes with isPainted() === true before and after the boundary
+    this.previousPaintedTrail = null;
+    this.nextPaintedTrail = null;
+  };
+  var LayerBoundary = scenery.LayerBoundary;
+  
+  LayerBoundary.prototype = {
+    constructor: LayerBoundary,
+    
+    hasPrevious: function() {
+      return !!this.previousPaintedTrail;
+    },
+    
+    hasNext: function() {
+      return !!this.nextPaintedTrail;
+    },
+    
+    // reindexes the trails
+    reindex: function() {
+      this.previousPaintedTrail && this.previousPaintedTrail.reindex();
+      this.nextPaintedTrail && this.nextPaintedTrail.reindex();
+    },
+    
+    // assumes that trail is reindexed
+    equivalentPreviousTrail: function( trail ) {
+      if ( this.previousPaintedTrail && trail ) {
+        this.previousPaintedTrail.reindex();
+        return this.previousPaintedTrail.equals( trail );
+      } else {
+        // check that handles null versions properly
+        return this.previousPaintedTrail === trail;
+      }
+    },
+    
+    equivalentNextTrail: function( trail ) {
+      if ( this.nextPaintedTrail && trail ) {
+        this.nextPaintedTrail.reindex();
+        return this.nextPaintedTrail.equals( trail );
+      } else {
+        // check that handles null versions properly
+        return this.nextPaintedTrail === trail;
+      }
+    },
+    
+    toString: function() {
+      return 'boundary:' +
+             '\n    types:    ' +
+                  ( this.previousLayerType ? this.previousLayerType.name : '' ) +
+                  ' => ' +
+                  ( this.nextLayerType ? this.nextLayerType.name : '' ) +
+             '\n    trails:   ' +
+                  ( this.previousPaintedTrail ? this.previousPaintedTrail.getUniqueId() : '' ) +
+                  ' => ' +
+                  ( this.nextPaintedTrail ? this.nextPaintedTrail.getUniqueId() : '' );
+    }
+  };
+  
+  return LayerBoundary;
+} );
+
+// Copyright 2002-2013, University of Colorado
+
+/**
+ * Controls the underlying layer behavior around a node. The node's LayerStrategy's enter() and exit() will be
+ * called in a depth-first order during the layer building process, and will modify a LayerBuilder to signal any
+ * layer-specific signals.
+ *
+ * This generally ensures that a layer containing the proper renderer and settings to support its associated node
+ * will be created.
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'SCENERY/layers/LayerStrategy',['require','SCENERY/scenery'],function( require ) {
+  
+  
+  var scenery = require( 'SCENERY/scenery' );
+  
+  /*
+   * If the node specifies a renderer, we will always push a preferred type. That type will be fresh (if rendererOptions are specified), otherwise
+   * the top matching preferred type for that renderer will be used. This allows us to always pop in the exit().
+   *
+   * Specified as such, since there is no needed shared state (we can have node.layerStrategy = scenery.LayerStrategy for many nodes)
+   */
+  scenery.LayerStrategy = {
+    // true iff enter/exit will push/pop a layer type to the preferred stack. currently limited to only one layer type per level.
+    hasPreferredLayerType: function( pointer, layerBuilder ) {
+      return pointer.trail.lastNode().hasRenderer();
+    },
+    
+    getPreferredLayerType: function( pointer, layerBuilder ) {
+      assert && assert( this.hasPreferredLayerType( pointer, layerBuilder ) ); // sanity check
+      
+      var node = pointer.trail.lastNode();
+      var preferredLayerType;
+      
+      if ( node.hasRendererLayerType() ) {
+        preferredLayerType = node.getRendererLayerType();
+      } else {
+        preferredLayerType = layerBuilder.bestPreferredLayerTypeFor( node.getRenderer().bitmask );
+        if ( !preferredLayerType ) {
+          // there was no preferred layer type matching, just use the default
+          preferredLayerType = node.getRenderer().defaultLayerType;
+        }
+      }
+      
+      return preferredLayerType;
+    },
+    
+    enter: function( pointer, layerBuilder ) {
+      var trail = pointer.trail;
+      var node = trail.lastNode();
+      var preferredLayerType;
+      
+      // if the node has a renderer, always push a layer type, so that we can pop on the exit() and ensure consistent behavior
+      if ( node.hasRenderer() ) {
+        preferredLayerType = this.getPreferredLayerType( pointer, layerBuilder );
+        
+        // push the preferred layer type
+        layerBuilder.pushPreferredLayerType( preferredLayerType );
+        if ( layerBuilder.getCurrentLayerType() !== preferredLayerType ) {
+          layerBuilder.switchToType( pointer, preferredLayerType );
+        }
+      } else if ( node.isPainted() ) {
+        // node doesn't specify a renderer, but isPainted.
+        
+        var currentType = layerBuilder.getCurrentLayerType();
+        preferredLayerType = layerBuilder.bestPreferredLayerTypeFor( node._rendererBitmask );
+        
+        // If any of the preferred types are compatible, use the top one. This allows us to support caching and hierarchical layer types
+        if ( preferredLayerType ) {
+          if ( currentType !== preferredLayerType ) {
+            layerBuilder.switchToType( pointer, preferredLayerType );
+          }
+        } else {
+          // if no preferred types are compatible, only switch if the current type is also incompatible
+          if ( !currentType || !currentType.supportsNode( node ) ) {
+            layerBuilder.switchToType( pointer, node.pickARenderer().defaultLayerType );
+          }
+        }
+      }
+      
+      if ( node.isLayerSplit() || this.hasSplitFlags( node ) ) {
+        layerBuilder.switchToType( pointer, layerBuilder.getCurrentLayerType() );
+      }
+      
+      if ( node.isPainted() ) {
+        // trigger actual layer creation if necessary (allow collapsing of layers otherwise)
+        layerBuilder.markPainted( pointer );
+      }
+    },
+    
+    // afterSelf: function( trail, layerBuilder ) {
+    //   // no-op, and possibly not used
+    // },
+    
+    // betweenChildren: function( trail, layerBuilder ) {
+    //   // no-op, and possibly not used
+    // },
+    
+    exit: function( pointer, layerBuilder ) {
+      var trail = pointer.trail;
+      var node = trail.lastNode();
+      
+      if ( node.hasRenderer() ) {
+        layerBuilder.popPreferredLayerType();
+        
+        // switch down to the next lowest preferred layer type, if any. if null, pass the null to switchToType
+        // this allows us to not 'leak' the renderer information, and the temporary layer type is most likely collapsed and ignored
+        // NOTE: disabled for now, since this prevents us from having adjacent children sharing the same layer type
+        // if ( layerBuilder.getCurrentLayerType() !== layerBuilder.getPreferredLayerType() ) {
+        //   layerBuilder.switchToType( pointer, layerBuilder.getPreferredLayerType() );
+        // }
+      }
+      
+      if ( node.isLayerSplit() || this.hasSplitFlags( node ) ) {
+        layerBuilder.switchToType( pointer, layerBuilder.getCurrentLayerType() );
+      }
+    },
+    
+    // whether splitting before and after the node is required
+    hasSplitFlags: function( node ) {
+      // currently, only enforce splitting if we are using CSS transforms
+      var rendererOptions = node.getRendererOptions();
+      return node.hasRenderer() && rendererOptions && (
+        rendererOptions.cssTranslation ||
+        rendererOptions.cssRotation ||
+        rendererOptions.cssScale ||
+        rendererOptions.cssTransform
+      );
+    }
+  };
+  var LayerStrategy = scenery.LayerStrategy;
+  
+  return LayerStrategy;
+} );
+
+// Copyright 2002-2013, University of Colorado
+
+/**
+ * A layer state is used to construct layer information (and later, layers), and is a state machine
+ * that layer strategies from each node modify. Iterating through all of the nodes in a depth-first
+ * manner will modify the LayerBuilder so that layer information can be retrieved.
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'SCENERY/layers/LayerBuilder',['require','SCENERY/scenery','SCENERY/layers/LayerBoundary','SCENERY/util/Trail','SCENERY/util/TrailPointer','SCENERY/layers/LayerStrategy'],function( require ) {
+  
+  
+  var scenery = require( 'SCENERY/scenery' );
+  require( 'SCENERY/layers/LayerBoundary' );
+  require( 'SCENERY/util/Trail' );
+  require( 'SCENERY/util/TrailPointer' );
+  var LayerStrategy = require( 'SCENERY/layers/LayerStrategy' ); // used to set the default layer strategy on the prototype
+  
+  /*
+   * Builds layer information between trails
+   *
+   * previousLayerType should be null if there is no previous layer.
+   */
+  scenery.LayerBuilder = function LayerBuilder( scene, previousLayerType, previousPaintedTrail, nextPaintedTrail ) {
+    
+    /*---------------------------------------------------------------------------*
+    * Initial state
+    *----------------------------------------------------------------------------*/
+    
+    this.layerTypeStack = [];
+    this.boundaries = [];
+    this.pendingBoundary = new scenery.LayerBoundary();
+    this.pendingBoundary.previousLayerType = previousLayerType;
+    this.pendingBoundary.previousPaintedTrail = previousPaintedTrail;
+    
+    /*
+     * The current layer type active, and whether it has been 'used' yet. A node with isPainted() will trigger a 'used' action,
+     * and if the layer hasn't been used, it will actually trigger a boundary creation. We want to collapse 'unused' layers
+     * and boundaries together, so that every created layer has a node that displays something.
+     */
+    this.currentLayerType = previousLayerType;
+    this.layerChangePending = previousPaintedTrail === null;
+    
+    /*---------------------------------------------------------------------------*
+    * Start / End pointers
+    *----------------------------------------------------------------------------*/
+    
+    if ( previousPaintedTrail ) {
+      // Move our start pointer just past the previousPaintedTrail, since our previousLayerType is presumably for that trail's node's self.
+      // Anything after that self could have been collapsed, so we need to start there.
+      this.startPointer = new scenery.TrailPointer( previousPaintedTrail.copy(), true );
+      this.startPointer.nestedForwards();
+    } else {
+      this.startPointer = new scenery.TrailPointer( new scenery.Trail( scene ), true );
+    }
+    
+    if ( nextPaintedTrail ) {
+      // include the nextPaintedTrail's 'before' in our iteration, so we can stitch properly with the next layer
+      this.endPointer = new scenery.TrailPointer( nextPaintedTrail.copy(), true );
+    } else {
+      this.endPointer = new scenery.TrailPointer( new scenery.Trail( scene ), false );
+    }
+    
+    this.includesEndTrail = nextPaintedTrail !== null;
+    
+    /*
+     * LayerBoundary properties and assurances:
+     *
+     * previousLayerType  - initialized in constructor (in case there are no layer changes)
+     *                      set in layerChange for "fresh" pending boundary
+     * nextLayerType      - set and overwrites in switchToType, for collapsing layers
+     *                      not set anywhere else, so we can leave it null
+     * previousPaintedTrail  - initialized in constructor
+     *                      updated in markPainted if there is no pending change (don't set if there is a pending change)
+     * nextPaintedTrail      - set on layerChange for "stale" boundary
+     *                      stays null if nextPaintedTrail === null
+     */
+  };
+  var LayerBuilder = scenery.LayerBuilder;
+  
+  LayerBuilder.prototype = {
+    constructor: LayerBuilder,
+    
+    // walks part of the state up to just before the startPointer. we want the preferred layer stack to be in place, but the rest is not important
+    prepareLayerStack: function() {
+      var pointer = new scenery.TrailPointer( new scenery.Trail( this.startPointer.trail.rootNode() ), true );
+      
+      // if the start pointer is going to execute an exit() instead of an enter() on its trail node, we need to bump up the layer stack an additional step
+      var targetLength = this.startPointer.trail.length - ( this.startPointer.isBefore ? 1 : 0 );
+      
+      while ( pointer.trail.length <= targetLength ) {
+        if ( LayerStrategy.hasPreferredLayerType( pointer, this ) ) {
+          this.pushPreferredLayerType( LayerStrategy.getPreferredLayerType( pointer, this ) );
+        }
+        if ( pointer.trail.length < this.startPointer.trail.nodes.length ) {
+          pointer.trail.addDescendant( this.startPointer.trail.nodes[pointer.trail.length] );
+        } else {
+          // TODO: a cleaner way of doing this, since we were adding undefined into a trail to cause the loop to exit
+          break;
+        }
+      }
+    },
+    
+    run: function() {
+      var builder = this;
+      
+      // push preferred layers for ancestors of our start pointer
+      this.prepareLayerStack();
+      
+      // console.log( '         stack: ' + _.map( builder.layerTypeStack, function( type ) { return type.name; } ).join( ', ' ) );
+      
+      builder.startPointer.depthFirstUntil( builder.endPointer, function( pointer ) {
+        if ( pointer.isBefore ) {
+          // console.log( 'builder: enter ' + pointer.toString() );
+          LayerStrategy.enter( pointer, builder );
+        } else {
+          // console.log( 'builder: exit ' + pointer.toString() );
+          LayerStrategy.exit( pointer, builder );
+        }
+        // console.log( '         stack: ' + _.map( builder.layerTypeStack, function( type ) { return type.name; } ).join( ', ' ) );
+      }, false ); // include the endpoints
+      
+      // special case handling if we are at the 'end' of the scene, so that we create another 'wrapping' boundary
+      if ( !this.includesEndTrail ) {
+        // console.log( 'builder: not including end trail' );
+        this.layerChange( null );
+      }
+    },
+    
+    // allows paintedPointer === null at the end if the main iteration's nextPaintedTrail === null (i.e. we are at the end of the scene)
+    layerChange: function( paintedPointer ) {
+      this.layerChangePending = false;
+      
+      var confirmedBoundary = this.pendingBoundary;
+      
+      confirmedBoundary.nextPaintedTrail = paintedPointer ? paintedPointer.trail.copy() : null;
+      
+      this.boundaries.push( confirmedBoundary );
+      
+      this.pendingBoundary = new scenery.LayerBoundary();
+      this.pendingBoundary.previousLayerType = confirmedBoundary.nextLayerType;
+      this.pendingBoundary.previousPaintedTrail = confirmedBoundary.nextPaintedTrail;
+      // console.log( 'builder:   added boundary' );
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * API for layer strategy or other interaction
+    *----------------------------------------------------------------------------*/
+    
+    switchToType: function( pointer, layerType ) {
+      this.currentLayerType = layerType;
+      
+      this.pendingBoundary.nextLayerType = layerType;
+      
+      this.layerChangePending = true; // we wait until the first markPainted() call to create a boundary
+    },
+    
+    // called so that we can finalize a layer switch (instead of collapsing unneeded layers)
+    markPainted: function( pointer ) {
+      if ( this.layerChangePending ) {
+        this.layerChange( pointer );
+      } else {
+        // TODO: performance-wise, don't lookup indices on this copy? make a way to create a lightweight copy?
+        this.pendingBoundary.previousPaintedTrail = pointer.trail.copy();
+      }
+    },
+    
+    // can be null to indicate that there is no current layer type
+    getCurrentLayerType: function() {
+      return this.currentLayerType;
+    },
+    
+    pushPreferredLayerType: function( layerType ) {
+      this.layerTypeStack.push( layerType );
+    },
+    
+    popPreferredLayerType: function() {
+      this.layerTypeStack.pop();
+    },
+    
+    getPreferredLayerType: function() {
+      if ( this.layerTypeStack.length !== 0 ) {
+        return this.layerTypeStack[this.layerTypeStack.length - 1];
+      } else {
+        return null;
+      }
+    },
+    
+    bestPreferredLayerTypeFor: function( bitmask ) {
+      for ( var i = this.layerTypeStack.length - 1; i >= 0; i-- ) {
+        var preferredType = this.layerTypeStack[i];
+        
+        if ( preferredType.supportsBitmask( bitmask ) ) {
+          return preferredType;
+        }
+      }
+      
+      // none of our stored preferred layer types are able to support any of the default type options
+      return null;
+    }
+  };
+  
+  return LayerBuilder;
+} );
+
+// Copyright 2002-2013, University of Colorado
+
+/**
  * A node that can be custom-drawn with Canvas calls. Manual handling of dirty region repainting.
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
@@ -17387,11 +18943,12 @@ define( 'SCENERY/nodes/CanvasNode',['require','PHET_CORE/inherit','SCENERY/scene
   var scenery = require( 'SCENERY/scenery' );
   
   var Node = require( 'SCENERY/nodes/Node' );
-  var Renderer = require( 'SCENERY/layers/Renderer' );
+  require( 'SCENERY/layers/Renderer' );
   
   // pass a canvasBounds option if you want to specify the self bounds
   scenery.CanvasNode = function CanvasNode( options ) {
     Node.call( this, options );
+    this.setRendererBitmask( scenery.bitmaskSupportsCanvas );
     
     if ( options.canvasBounds ) {
       this.setCanvasBounds( options.canvasBounds );
@@ -17433,12 +18990,53 @@ define( 'SCENERY/nodes/CanvasNode',['require','PHET_CORE/inherit','SCENERY/scene
     
   } );
   
-  CanvasNode.prototype._supportedRenderers = [ Renderer.Canvas ];
-  
   return CanvasNode;
 } );
 
 
+
+// Copyright 2002-2013, University of Colorado Boulder
+
+/**
+ * Code for testing which platform is running.  Use sparingly, if at all!
+ *
+ * Sample usage:
+ * if (platform.firefox) {node.renderer = 'canvas';}
+ *
+ * @author Sam Reid
+ */
+define( 'PHET_CORE/platform',['require','PHET_CORE/core'],function( require ) {
+  
+  
+  var core = require( 'PHET_CORE/core' );
+  
+  var ua = navigator.userAgent;
+  
+  // taken from HomeScreen
+  function isIE( version ) {
+    var r = new RegExp( 'msie' + (!isNaN( version ) ? ('\\s' + version) : ''), 'i' );
+    return r.test( ua );
+  }
+  
+  var platform = core.platform = {
+    get firefox() { return ua.toLowerCase().indexOf( 'firefox' ) > -1; },
+
+    //see http://stackoverflow.com/questions/3007480/determine-if-user-navigated-from-mobile-safari
+    get mobileSafari() { return ua.match( /(iPod|iPhone|iPad)/ ) && ua.match( /AppleWebKit/ ); },
+    get safari5() { return ua.match( /Version\/5\./ ) && ua.match( /Safari\// ) && ua.match( /AppleWebKit/ ); },
+    get safari6() { return ua.match( /Version\/6\./ ) && ua.match( /Safari\// ) && ua.match( /AppleWebKit/ ); },
+    get safari7() { return ua.match( /Version\/7\./ ) && ua.match( /Safari\// ) && ua.match( /AppleWebKit/ ); },
+    
+    get ie9() { return isIE( 9 ); },
+    get ie10() { return isIE( 10 ); },
+    get ie11() { return isIE( 11 ); },
+    get ie() { return ua.indexOf( 'MSIE' ) !== -1; },
+    
+    // from HomeScreen
+    get android() { return ua.indexOf( 'Android' ) > 0; }
+  };
+  return platform;
+} );
 
 // Copyright 2002-2013, University of Colorado
 
@@ -17450,10 +19048,13 @@ define( 'SCENERY/nodes/CanvasNode',['require','PHET_CORE/inherit','SCENERY/scene
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'SCENERY/nodes/Fillable',['require','SCENERY/scenery'],function( require ) {
+define( 'SCENERY/nodes/Fillable',['require','SCENERY/scenery','PHET_CORE/platform'],function( require ) {
   
   
   var scenery = require( 'SCENERY/scenery' );
+  var platform = require( 'PHET_CORE/platform' );
+  
+  var isSafari5 = platform.safari5;
   
   scenery.Fillable = function Fillable( type ) {
     var proto = type.prototype;
@@ -17568,14 +19169,7 @@ define( 'SCENERY/nodes/Fillable',['require','SCENERY/scenery'],function( require
       return style;
     };
     
-    proto.isFillDOMCompatible = function() {
-      // make sure we're not a pattern or gradient
-      return !this._fill || !this._fill.getSVGDefinition;
-    };
-    
     proto.getCSSFill = function() {
-      assert && assert( this.isFillDOMCompatible() );
-      
       // if it's a Color object, get the corresponding CSS
       // 'transparent' will make us invisible if the fill is null
       return this._fill ? ( this._fill.toCSS ? this._fill.toCSS() : this._fill ) : 'transparent';
@@ -17616,15 +19210,47 @@ define( 'SCENERY/nodes/Fillable',['require','SCENERY/scenery'],function( require
       return result;
     };
     
+    proto.getFillRendererBitmask = function() {
+      var bitmask = 0;
+      
+      // Safari 5 has buggy issues with SVG gradients
+      if ( !( isSafari5 && this._fill && this._fill.isGradient ) ) {
+        bitmask |= scenery.bitmaskSupportsSVG;
+      }
+      
+      // we always have Canvas support?
+      bitmask |= scenery.bitmaskSupportsCanvas;
+      
+      if ( !this._fill ) {
+        // if there is no fill, it is supported by DOM
+        bitmask |= scenery.bitmaskSupportsDOM;
+      } else if ( this._fill.isPattern ) {
+        // no pattern support for DOM (for now!)
+      } else if ( this._fill.isGradient ) {
+        // no gradient support for DOM (for now!)
+      } else {
+        // solid fills always supported for DOM
+        bitmask |= scenery.bitmaskSupportsDOM;
+      }
+      
+      return bitmask;
+    };
+    
     // on mutation, set the fill parameter first
     proto._mutatorKeys = [ 'fill', 'fillPickable' ].concat( proto._mutatorKeys );
     
     Object.defineProperty( proto, 'fill', { set: proto.setFill, get: proto.getFill } );
     Object.defineProperty( proto, 'fillPickable', { set: proto.setFillPickable, get: proto.isFillPickable } );
     
-    if ( !proto.invalidateFill ) {
+    if ( proto.invalidateFill ) {
+      var oldInvalidateFill = proto.invalidateFill;
       proto.invalidateFill = function() {
-        // override if fill handling is necessary (TODO: mixins!)
+        this.invalidateSupportedRenderers();
+        oldInvalidateFill.call( this );
+      };
+    } else {
+      proto.invalidateFill = function() {
+        this.invalidateSupportedRenderers();
       };
     }
   };
@@ -17645,11 +19271,15 @@ define( 'SCENERY/nodes/Fillable',['require','SCENERY/scenery'],function( require
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'SCENERY/nodes/Strokable',['require','SCENERY/scenery','KITE/util/LineStyles'],function( require ) {
+define( 'SCENERY/nodes/Strokable',['require','SCENERY/scenery','KITE/util/LineStyles','PHET_CORE/platform'],function( require ) {
   
   
   var scenery = require( 'SCENERY/scenery' );
   var LineStyles = require( 'KITE/util/LineStyles' );
+  
+  var platform = require( 'PHET_CORE/platform' );
+  
+  var isIE9 = platform.ie9;
   
   scenery.Strokable = function Strokable( type ) {
     var proto = type.prototype;
@@ -17719,6 +19349,10 @@ define( 'SCENERY/nodes/Strokable',['require','SCENERY/scenery','KITE/util/LineSt
     
     proto.getLineDash = function() {
       return this._lineDrawingStyles.lineDash;
+    };
+    
+    proto.hasLineDash = function() {
+      return !!this._lineDrawingStyles.lineDash.length;
     };
     
     proto.setLineDash = function( lineDash ) {
@@ -17865,12 +19499,18 @@ define( 'SCENERY/nodes/Strokable',['require','SCENERY/scenery','KITE/util/LineSt
       style += 'stroke-width: ' + this.getLineWidth() + ';';
       style += 'stroke-linecap: ' + this.getLineCap() + ';';
       style += 'stroke-linejoin: ' + this.getLineJoin() + ';';
-      if ( this.getLineDash().length ) {
+      if ( this.hasLineDash() ) {
         style += 'stroke-dasharray: ' + this.getLineDash().join( ',' ) + ';';
         style += 'stroke-dashoffset: ' + this.getLineDashOffset() + ';';
       }
       
       return style;
+    };
+    
+    proto.getSimpleCSSFill = function() {
+      // if it's a Color object, get the corresponding CSS
+      // 'transparent' will make us invisible if the fill is null
+      return this._stroke ? ( this._stroke.toCSS ? this._stroke.toCSS() : this._stroke ) : 'transparent';
     };
     
     proto.addSVGStrokeDef = function( svg, defs ) {
@@ -17929,6 +19569,24 @@ define( 'SCENERY/nodes/Strokable',['require','SCENERY/scenery','KITE/util/LineSt
       return result;
     };
     
+    proto.getStrokeRendererBitmask = function() {
+      var bitmask = 0;
+      
+      if ( !( isIE9 && this.hasStroke() && this.hasLineDash() ) ) {
+        bitmask |= scenery.bitmaskSupportsCanvas;
+      }
+      
+      // always have SVG support (for now?)
+      bitmask |= scenery.bitmaskSupportsSVG;
+      
+      if ( !this.hasStroke() ) {
+        // allow DOM support if there is no stroke
+        bitmask |= scenery.bitmaskSupportsDOM;
+      }
+      
+      return bitmask;
+    };
+    
     // on mutation, set the stroke parameters first since they may affect the bounds (and thus later operations)
     proto._mutatorKeys = [ 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'lineDash', 'lineDashOffset', 'strokePickable' ].concat( proto._mutatorKeys );
     
@@ -17941,9 +19599,15 @@ define( 'SCENERY/nodes/Strokable',['require','SCENERY/scenery','KITE/util/LineSt
     Object.defineProperty( proto, 'lineDashOffset', { set: proto.setLineDashOffset, get: proto.getLineDashOffset } );
     Object.defineProperty( proto, 'strokePickable', { set: proto.setStrokePickable, get: proto.isStrokePickable } );
     
-    if ( !proto.invalidateStroke ) {
+    if ( proto.invalidateStroke ) {
+      var oldInvalidateStroke = proto.invalidateStroke;
       proto.invalidateStroke = function() {
-        // override if stroke handling is necessary (TODO: mixins!)
+        this.invalidateSupportedRenderers();
+        oldInvalidateStroke.call( this );
+      };
+    } else {
+      proto.invalidateStroke = function() {
+        this.invalidateSupportedRenderers();
       };
     }
   };
@@ -17962,20 +19626,18 @@ define( 'SCENERY/nodes/Strokable',['require','SCENERY/scenery','KITE/util/LineSt
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'SCENERY/nodes/Path',['require','PHET_CORE/inherit','KITE/Shape','DOT/Bounds2','SCENERY/scenery','SCENERY/nodes/Node','SCENERY/layers/Renderer','SCENERY/nodes/Fillable','SCENERY/nodes/Strokable','SCENERY/util/Util'],function( require ) {
+define( 'SCENERY/nodes/Path',['require','PHET_CORE/inherit','KITE/Shape','SCENERY/scenery','SCENERY/nodes/Node','SCENERY/layers/Renderer','SCENERY/nodes/Fillable','SCENERY/nodes/Strokable'],function( require ) {
   
   
   var inherit = require( 'PHET_CORE/inherit' );
   var Shape = require( 'KITE/Shape' );
-  var Bounds2 = require( 'DOT/Bounds2' );
-  
+
   var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
-  var Renderer = require( 'SCENERY/layers/Renderer' );
+  require( 'SCENERY/layers/Renderer' );
   var Fillable = require( 'SCENERY/nodes/Fillable' );
   var Strokable = require( 'SCENERY/nodes/Strokable' );
-  var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
-  
+
   scenery.Path = function Path( shape, options ) {
     // TODO: consider directly passing in a shape object (or at least handling that case)
     // NOTE: _shape can be lazily constructed, in the case of types like Rectangle where they have their own drawing code
@@ -17989,12 +19651,22 @@ define( 'SCENERY/nodes/Path',['require','PHET_CORE/inherit','KITE/Shape','DOT/Bo
     this.initializeStrokable();
 
     Node.call( this );
+    this.invalidateSupportedRenderers();
     this.setShape( shape );
     this.mutate( options );
   };
   var Path = scenery.Path;
   
   inherit( Node, Path, {
+    // allow more specific path types (Rectangle, Line) to override what restrictions we have
+    getPathRendererBitmask: function() {
+      return scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG;
+    },
+    
+    invalidateSupportedRenderers: function() {
+      this.setRendererBitmask( this.getFillRendererBitmask() & this.getStrokeRendererBitmask() & this.getPathRendererBitmask() );
+    },
+    
     // sets the shape drawn, or null to remove the shape
     setShape: function( shape ) {
       if ( this._shape !== shape ) {
@@ -18071,7 +19743,7 @@ define( 'SCENERY/nodes/Path',['require','PHET_CORE/inherit','KITE/Shape','DOT/Bo
     
     // svg element, the <defs> block, and the associated group for this node's transform
     createSVGFragment: function( svg, defs, group ) {
-      return document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+      return document.createElementNS( scenery.svgns, 'path' );
     },
     
     updateSVGFragment: function( path ) {
@@ -18142,7 +19814,7 @@ define( 'SCENERY/nodes/Path',['require','PHET_CORE/inherit','KITE/Shape','DOT/Bo
     get shape() { return this.getShape(); },
     
     getBasicConstructor: function( propLines ) {
-      return 'new scenery.Path( ' + this._shape.toString() + ', {' + propLines + '} )';
+      return 'new scenery.Path( ' + ( this._shape ? this._shape.toString() : this._shape ) + ', {' + propLines + '} )';
     },
     
     getPropString: function( spaces, includeChildren ) {
@@ -18154,8 +19826,6 @@ define( 'SCENERY/nodes/Path',['require','PHET_CORE/inherit','KITE/Shape','DOT/Bo
   } );
   
   Path.prototype._mutatorKeys = [ 'shape' ].concat( Node.prototype._mutatorKeys );
-  
-  Path.prototype._supportedRenderers = [ Renderer.Canvas, Renderer.SVG ];
   
   // mix in fill/stroke handling code. for now, this is done after 'shape' is added to the mutatorKeys so that stroke parameters
   // get set first
@@ -18177,15 +19847,17 @@ define( 'SCENERY/nodes/Path',['require','PHET_CORE/inherit','KITE/Shape','DOT/Bo
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'SCENERY/nodes/Circle',['require','PHET_CORE/inherit','SCENERY/scenery','DOT/Bounds2','SCENERY/nodes/Path','KITE/Shape'],function( require ) {
+define( 'SCENERY/nodes/Circle',['require','PHET_CORE/inherit','SCENERY/scenery','DOT/Bounds2','DOT/Matrix3','SCENERY/nodes/Path','KITE/Shape','SCENERY/util/Features'],function( require ) {
   
 
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   var Bounds2 = require( 'DOT/Bounds2' );
+  var Matrix3 = require( 'DOT/Matrix3' );
 
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
+  var Features = require( 'SCENERY/util/Features' );
 
   scenery.Circle = function Circle( radius, options ) {
     if ( typeof radius === 'object' ) {
@@ -18207,6 +19879,18 @@ define( 'SCENERY/nodes/Circle',['require','PHET_CORE/inherit','SCENERY/scenery',
   var Circle = scenery.Circle;
 
   inherit( Path, Circle, {
+    getStrokeRendererBitmask: function() {
+      var bitmask = Path.prototype.getStrokeRendererBitmask.call( this );
+      if ( this.hasStroke() && !this.getStroke().isGradient && !this.getStroke().isPattern && this.getLineWidth() <= this.getRadius() ) {
+        bitmask |= scenery.bitmaskSupportsDOM;
+      }
+      return bitmask;
+    },
+    
+    getPathRendererBitmask: function() {
+      return scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | ( Features.borderRadius ? scenery.bitmaskSupportsDOM : 0 );
+    },
+    
     invalidateCircle: function() {
       assert && assert( this._radius >= 0, 'A circle needs a non-negative radius' );
       
@@ -18265,7 +19949,7 @@ define( 'SCENERY/nodes/Circle',['require','PHET_CORE/inherit','SCENERY/scenery',
     
     // create a circle instead of a path, hopefully it is faster in implementations
     createSVGFragment: function( svg, defs, group ) {
-      return document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
+      return document.createElementNS( scenery.svgns, 'circle' );
     },
 
     // optimized for the circle element instead of path
@@ -18273,6 +19957,55 @@ define( 'SCENERY/nodes/Circle',['require','PHET_CORE/inherit','SCENERY/scenery',
       circle.setAttribute( 'r', this._radius );
 
       circle.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
+    },
+    
+    /*---------------------------------------------------------------------------*
+     * DOM support
+     *----------------------------------------------------------------------------*/
+    
+    domUpdateTransformOnRepaint: true, // since we have to integrate the baseline offset into the CSS transform, signal to DOMLayer
+    
+    getDOMElement: function() {
+      var fill = document.createElement( 'div' );
+      var stroke = document.createElement( 'div' );
+      fill.appendChild( stroke );
+      fill.style.display = 'block';
+      fill.style.position = 'absolute';
+      fill.style.left = '0';
+      fill.style.top = '0';
+      stroke.style.display = 'block';
+      stroke.style.position = 'absolute';
+      stroke.style.left = '0';
+      stroke.style.top = '0';
+      return fill;
+    },
+
+    updateDOMElement: function( fill ) {
+      fill.style.width = ( 2 * this._radius ) + 'px';
+      fill.style.height = ( 2 * this._radius ) + 'px';
+      fill.style[Features.borderRadius] = this._radius + 'px';
+      fill.style.backgroundColor = this.getCSSFill();
+      
+      var stroke = fill.childNodes[0];
+      if ( this.hasStroke() ) {
+        stroke.style.width = ( 2 * this._radius - this.getLineWidth() ) + 'px';
+        stroke.style.height = ( 2 * this._radius - this.getLineWidth() ) + 'px';
+        stroke.style.left = ( -this.getLineWidth() / 2 ) + 'px';
+        stroke.style.top = ( -this.getLineWidth() / 2 ) + 'px';
+        stroke.style.borderStyle = 'solid';
+        stroke.style.borderColor = this.getSimpleCSSFill();
+        stroke.style.borderWidth = this.getLineWidth() + 'px';
+        stroke.style[Features.borderRadius] = ( this._radius + this.getLineWidth() / 2 ) + 'px';
+      } else {
+        stroke.style.borderStyle = 'none';
+      }
+    },
+    
+    // override the transform since we need to customize it with a DOM offset
+    updateCSSTransform: function( transform, element ) {
+      // shift the text vertically, postmultiplied with the entire transform.
+      var matrix = transform.getMatrix().timesMatrix( Matrix3.translation( -this._radius, -this._radius ) );
+      scenery.Util.applyCSSTransform( matrix, element );
     },
 
     getBasicConstructor: function( propLines ) {
@@ -18392,7 +20125,7 @@ define( 'PHET_CORE/escapeHTML',['require','PHET_CORE/core'],function( require ) 
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'SCENERY/nodes/DOM',['require','PHET_CORE/inherit','PHET_CORE/escapeHTML','DOT/Bounds2','SCENERY/scenery','SCENERY/nodes/Node','SCENERY/layers/Renderer','SCENERY/util/Util','SCENERY/util/Util'],function( require ) {
+define( 'SCENERY/nodes/DOM',['require','PHET_CORE/inherit','PHET_CORE/escapeHTML','DOT/Bounds2','SCENERY/scenery','SCENERY/nodes/Node','SCENERY/layers/Renderer','SCENERY/util/Util'],function( require ) {
   
   
   var inherit = require( 'PHET_CORE/inherit' );
@@ -18402,8 +20135,7 @@ define( 'SCENERY/nodes/DOM',['require','PHET_CORE/inherit','PHET_CORE/escapeHTML
   var scenery = require( 'SCENERY/scenery' );
   
   var Node = require( 'SCENERY/nodes/Node' ); // DOM inherits from Node
-  var Renderer = require( 'SCENERY/layers/Renderer' );
-  var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
+  require( 'SCENERY/layers/Renderer' );
   require( 'SCENERY/util/Util' );
   
   scenery.DOM = function DOM( element, options ) {
@@ -18429,6 +20161,7 @@ define( 'SCENERY/nodes/DOM',['require','PHET_CORE/inherit','PHET_CORE/escapeHTML
     
     // will set the element after initializing
     Node.call( this, options );
+    this.setRendererBitmask( scenery.bitmaskSupportsDOM );
   };
   var DOM = scenery.DOM;
   
@@ -18563,8 +20296,6 @@ define( 'SCENERY/nodes/DOM',['require','PHET_CORE/inherit','PHET_CORE/escapeHTML
   
   DOM.prototype._mutatorKeys = [ 'element', 'interactive' ].concat( Node.prototype._mutatorKeys );
   
-  DOM.prototype._supportedRenderers = [ Renderer.DOM ];
-  
   return DOM;
 } );
 
@@ -18628,7 +20359,7 @@ define( 'SCENERY/nodes/HBox',['require','SCENERY/scenery','SCENERY/nodes/Node','
     var maxY = _.max( _.map( this.children, function( child ) {return child.top + child.height;} ) );
     var centerY = (maxY + minY) / 2;
 
-    //Start at x=0 in the coordinate frame of this node.  Not possible to set this through the spacing option, instead just set it with the {y:number} option.
+    //Start at x=0 in the coordinate frame of this node.  Not possible to set this through the spacing option, instead just set it with the {x:number} option.
     var x = 0;
     for ( var i = 0; i < this.children.length; i++ ) {
       var child = this.children[i];
@@ -18689,9 +20420,6 @@ define( 'SCENERY/util/Font',['require','SCENERY/scenery'],function( require ) {
   var variants = [ 'normal', 'small-caps' ];
   var weights = [ 'normal', 'bold', 'bolder', 'lighter', '100', '200', '300', '400', '500', '600', '700', '800', '900' ];
   var stretches = [ 'normal', 'ultra-condensed', 'extra-condensed', 'condensed', 'semi-condensed', 'semi-expanded', 'expanded', 'extra-expanded', 'ultra-expanded' ];
-  
-  // size constants used for detection
-  var sizes = [ 'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large', 'larger', 'smaller' ];
   
   function castSize( size ) {
     if ( typeof size === 'number' ) {
@@ -18873,7 +20601,7 @@ define( 'SCENERY/util/Font',['require','SCENERY/scenery'],function( require ) {
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'SCENERY/nodes/Text',['require','PHET_CORE/inherit','PHET_CORE/escapeHTML','DOT/Bounds2','DOT/Matrix3','SCENERY/scenery','SCENERY/nodes/Node','SCENERY/layers/Renderer','SCENERY/nodes/Fillable','SCENERY/nodes/Strokable','SCENERY/util/Util','SCENERY/util/Font','SCENERY/util/Util'],function( require ) {
+define( 'SCENERY/nodes/Text',['require','PHET_CORE/inherit','PHET_CORE/escapeHTML','DOT/Bounds2','DOT/Matrix3','SCENERY/scenery','SCENERY/nodes/Node','SCENERY/layers/Renderer','SCENERY/nodes/Fillable','SCENERY/nodes/Strokable','SCENERY/util/Font','SCENERY/util/Util'],function( require ) {
   
   
   var inherit = require( 'PHET_CORE/inherit' );
@@ -18884,20 +20612,23 @@ define( 'SCENERY/nodes/Text',['require','PHET_CORE/inherit','PHET_CORE/escapeHTM
   var scenery = require( 'SCENERY/scenery' );
   
   var Node = require( 'SCENERY/nodes/Node' ); // inherits from Node
-  var Renderer = require( 'SCENERY/layers/Renderer' );
+  require( 'SCENERY/layers/Renderer' );
   var Fillable = require( 'SCENERY/nodes/Fillable' );
   var Strokable = require( 'SCENERY/nodes/Strokable' );
-  var objectCreate = require( 'SCENERY/util/Util' ).objectCreate; // i.e. Object.create
   require( 'SCENERY/util/Font' );
   require( 'SCENERY/util/Util' ); // for canvasAccurateBounds and CSS transforms
   
   // set up the container and text for testing text bounds quickly (using approximateSVGBounds)
-  var svgTextSizeContainer = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+  var svgTextSizeContainer = document.createElementNS( scenery.svgns, 'svg' );
   svgTextSizeContainer.setAttribute( 'width', '2' );
   svgTextSizeContainer.setAttribute( 'height', '2' );
-  svgTextSizeContainer.setAttribute( 'style', 'display: hidden; pointer-events: none; position: absolute; left: -65535; right: -65535;' ); // so we don't flash it in a visible way to the user
-  var svgTextSizeElement = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
+  svgTextSizeContainer.setAttribute( 'style', 'visibility: hidden; pointer-events: none; position: absolute; left: -65535; right: -65535;' ); // so we don't flash it in a visible way to the user
+  // NOTE! copies createSVGElement
+  var svgTextSizeElement = document.createElementNS( scenery.svgns, 'text' );
   svgTextSizeElement.appendChild( document.createTextNode( '' ) );
+  svgTextSizeElement.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
+  svgTextSizeElement.setAttribute( 'text-rendering', 'geometricPrecision' );
+  svgTextSizeElement.setAttribute( 'lengthAdjust', 'spacingAndGlyphs' );
   svgTextSizeContainer.appendChild( svgTextSizeElement );
   
   // SVG bounds seems to be malfunctioning for Safari 5. Since we don't have a reproducible test machine for
@@ -18919,11 +20650,6 @@ define( 'SCENERY/nodes/Text',['require','PHET_CORE/inherit','PHET_CORE/escapeHTM
     // whether the text is rendered as HTML or not. if defined (in a subtype constructor), use that value instead
     this._isHTML = this._isHTML === undefined ? false : this._isHTML;
     
-    // we will dynamically change renderers, so they are initialized per-instance instead of per-type
-    this._supportedRenderers = [ Renderer.Canvas, Renderer.SVG, Renderer.DOM ];
-    
-    var thisFont = this;
-    
     // ensure we have a parameter object
     options = options || {};
     
@@ -18941,8 +20667,7 @@ define( 'SCENERY/nodes/Text',['require','PHET_CORE/inherit','PHET_CORE/escapeHTM
     this.initializeStrokable();
     
     Node.call( this, options );
-    
-    this.updateTextFlags();
+    this.updateTextFlags(); // takes care of setting up supported renderers
   };
   var Text = scenery.Text;
   
@@ -18976,43 +20701,31 @@ define( 'SCENERY/nodes/Text',['require','PHET_CORE/inherit','PHET_CORE/escapeHTM
       return this._boundsMethod;
     },
     
+    // allow more specific path types (Rectangle, Line) to override what restrictions we have
+    getTextRendererBitmask: function() {
+      var bitmask = 0;
+      
+      // canvas support (fast bounds may leak out of dirty rectangles)
+      if ( this._boundsMethod !== 'fast' && !this._isHTML ) {
+        bitmask |= scenery.bitmaskSupportsCanvas;
+      }
+      if( !this._isHTML ) {
+        bitmask |= scenery.bitmaskSupportsSVG;
+      }
+      
+      // fill and stroke will determine whether we have DOM text support
+      bitmask |= scenery.bitmaskSupportsDOM;
+      
+      return bitmask;
+    },
+    
+    invalidateSupportedRenderers: function() {
+      this.setRendererBitmask( this.getFillRendererBitmask() & this.getStrokeRendererBitmask() & this.getTextRendererBitmask() );
+    },
+    
     updateTextFlags: function() {
-      var thisText = this;
       this.boundsInaccurate = this._boundsMethod !== 'accurate';
-      
-      var renderersChanged = false;
-      function check( predicateValue, renderer ) {
-        var inSupportedRenderers = _.contains( thisText._supportedRenderers, renderer );
-        if ( predicateValue !== inSupportedRenderers ) {
-          renderersChanged = true;
-          if ( predicateValue ) {
-            // add the renderer
-            thisText._supportedRenderers.push( renderer );
-          } else {
-            // remove the renderer
-            thisText._supportedRenderers.splice( _.indexOf( thisText._supportedRenderers, renderer ), 1 );
-            if ( thisText.renderer === renderer ) {
-              // our set renderer is incompatible. set to null to disable this. TODO: investigate rendering system to prevent overrides like this?
-              thisText.renderer = null;
-              
-              // for now, error out
-              throw new Error( 'The explicitly specified Text renderer: ' + renderer.name + ' is not supported by this operation (probably invalid stroke, fill, or boundsMethod)' );
-            }
-          }
-        }
-      }
-      
-      check( this._boundsMethod !== 'fast' && !this._isHTML, Renderer.Canvas );
-      check( !this._isHTML, Renderer.SVG );
-      check( !this.hasStroke() && this.isFillDOMCompatible(), Renderer.DOM );
-      
-      if ( this._supportedRenderers.length === 0 ) {
-        throw new Error( 'No renderers are able to support this Text node (probably HTML text with a stroke or incompatible fill)' );
-      }
-      
-      if ( renderersChanged ) {
-        this.markLayerRefreshNeeded();
-      }
+      this.invalidateSupportedRenderers();
     },
     
     invalidateText: function() {
@@ -19081,24 +20794,29 @@ define( 'SCENERY/nodes/Text',['require','PHET_CORE/inherit','PHET_CORE/escapeHTM
     *----------------------------------------------------------------------------*/
     
     createSVGFragment: function( svg, defs, group ) {
-      var element = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
+      // NOTE! reference SVG element at top of file copies createSVGElement!
+      var element = document.createElementNS( scenery.svgns, 'text' );
       element.appendChild( document.createTextNode( '' ) );
+      element.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
+      element.setAttribute( 'text-rendering', 'geometricPrecision' );
+      element.setAttribute( 'lengthAdjust', 'spacingAndGlyphs' );
       return element;
     },
     
     updateSVGFragment: function( element ) {
-      var isRTL = this._direction === 'rtl';
-      
       // update the text-node's value
       element.lastChild.nodeValue = this._text;
       
       element.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
-      
-      // element.setAttribute( 'text-anchor', 'start' ); // not needed right now (default is inherit)
-      element.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
       element.setAttribute( 'direction', this._direction );
       
+      // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/SVG rendering (and overall length)
+      if ( isFinite( this._selfBounds.width ) ) {
+        element.setAttribute( 'textLength', this._selfBounds.width );
+      }
+      
       // set all of the font attributes, since we can't use the combined one
+      // TODO: optimize so we only set what is changed!!!
       element.setAttribute( 'font-family', this._font.getFamily() );
       element.setAttribute( 'font-size', this._font.getSize() );
       element.setAttribute( 'font-style', this._font.getStyle() );
@@ -19176,7 +20894,7 @@ define( 'SCENERY/nodes/Text',['require','PHET_CORE/inherit','PHET_CORE/escapeHTM
       var svgBounds = this.approximateSVGBounds(); // this seems to be slower than expected, mostly due to Font getters
 
       //If svgBounds are zero, then return the zero bounds
-      if (svgBounds.width===0 && svgBounds.height===0){
+      if ( !this._text || svgBounds.width === 0 ) {
         return svgBounds;
       }
       return scenery.Util.canvasAccurateBounds( function( context ) {
@@ -19212,6 +20930,7 @@ define( 'SCENERY/nodes/Text',['require','PHET_CORE/inherit','PHET_CORE/escapeHTM
         }
       }
       this.updateSVGFragment( svgTextSizeElement );
+      svgTextSizeElement.removeAttribute( 'textLength' ); // since we may set textLength, remove that so we can get accurate widths
       var rect = svgTextSizeElement.getBBox();
       return new Bounds2( rect.x, rect.y, rect.x + rect.width, rect.y + rect.height );
     },
@@ -19380,9 +21099,6 @@ define( 'SCENERY/nodes/Text',['require','PHET_CORE/inherit','PHET_CORE/escapeHTM
   Text.prototype._mutatorKeys = [ 'boundsMethod', 'text', 'font', 'fontWeight', 'fontFamily', 'fontStretch', 'fontStyle', 'fontSize', 'lineHeight',
                                   'direction' ].concat( Node.prototype._mutatorKeys );
   
-  Text.prototype._supportedRenderers = [ Renderer.Canvas, Renderer.SVG, Renderer.DOM ];
-  Text.prototype._supportedRenderersWithFastBounds = [ Renderer.SVG, Renderer.DOM ]; // renderers for fast (SVG/DOM) bounds, since canvas dirty regions would present issues
-  
   // font-specific ES5 setters and getters are defined using addFontForwarding above
   Object.defineProperty( Text.prototype, 'font', { set: Text.prototype.setFont, get: Text.prototype.getFont } );
   Object.defineProperty( Text.prototype, 'text', { set: Text.prototype.setText, get: Text.prototype.getText } );
@@ -19438,7 +21154,6 @@ define( 'SCENERY/nodes/HTMLText',['require','PHET_CORE/inherit','SCENERY/scenery
 /**
  * Images
  *
- * TODO: setImage / getImage and the whole toolchain that uses that
  * TODO: allow multiple DOM instances (create new HTMLImageElement elements)
  * TODO: SVG support
  * TODO: support rendering a Canvas to DOM (single instance)
@@ -19446,19 +21161,18 @@ define( 'SCENERY/nodes/HTMLText',['require','PHET_CORE/inherit','SCENERY/scenery
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'SCENERY/nodes/Image',['require','PHET_CORE/inherit','DOT/Bounds2','SCENERY/scenery','SCENERY/nodes/Node','SCENERY/layers/Renderer','SCENERY/util/Util','SCENERY/util/Util'],function( require ) {
+define( 'SCENERY/nodes/Image',['require','PHET_CORE/inherit','DOT/Bounds2','SCENERY/scenery','SCENERY/nodes/Node','SCENERY/layers/Renderer','SCENERY/util/Util'],function( require ) {
   
-  
+
   var inherit = require( 'PHET_CORE/inherit' );
   var Bounds2 = require( 'DOT/Bounds2' );
-  
+
   var scenery = require( 'SCENERY/scenery' );
-  
+
   var Node = require( 'SCENERY/nodes/Node' ); // Image inherits from Node
-  var Renderer = require( 'SCENERY/layers/Renderer' ); // we need to specify the Renderer in the prototype
-  var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
+  require( 'SCENERY/layers/Renderer' ); // we need to specify the Renderer in the prototype
   require( 'SCENERY/util/Util' );
-  
+
   /*
    * Canvas renderer supports the following as 'image':
    *     URL (string)             // works, but does NOT support bounds-based parameter object keys like 'left', 'centerX', etc.
@@ -19474,48 +21188,56 @@ define( 'SCENERY/nodes/Image',['require','PHET_CORE/inherit','DOT/Bounds2','SCEN
    */
   scenery.Image = function Image( image, options ) {
     assert && assert( image, "image should be available" );
-    
+
     // allow not passing an options object
     options = options || {};
-    
+
     // rely on the setImage call from the super constructor to do the setup
     if ( image ) {
       options.image = image;
     }
-    
+
     var self = this;
     // allows us to invalidate our bounds whenever an image is loaded
     this.loadListener = function( event ) {
       self.invalidateImage();
-      
+
       // don't leak memory!
       self._image.removeEventListener( 'load', self.loadListener );
     };
-    
+
     Node.call( this, options );
+    this.invalidateSupportedRenderers();
   };
   var Image = scenery.Image;
-  
+
   inherit( Node, Image, {
     allowsMultipleDOMInstances: false, // TODO: support multiple instances
-    
+
     invalidateImage: function() {
       this.invalidateSelf( new Bounds2( 0, 0, this.getImageWidth(), this.getImageHeight() ) );
     },
-    
+
     getImage: function() {
       return this._image;
     },
     
+    invalidateSupportedRenderers: function() {
+      if ( this._image instanceof HTMLCanvasElement ) {
+        this.setRendererBitmask( scenery.bitmaskSupportsCanvas );
+      } else {
+        // assumes HTMLImageElement
+        this.setRendererBitmask( scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskSupportsDOM );
+      }
+    },
+
     setImage: function( image ) {
-      var self = this;
-      
       if ( this._image !== image && ( typeof image !== 'string' || !this._image || image !== this._image.src ) ) {
         // don't leak memory by referencing old images
         if ( this._image ) {
           this._image.removeEventListener( 'load', this.loadListener );
         }
-        
+
         if ( typeof image === 'string' ) {
           // create an image with the assumed URL
           var src = image;
@@ -19528,84 +21250,72 @@ define( 'SCENERY/nodes/Image',['require','PHET_CORE/inherit','DOT/Bounds2','SCEN
             image.addEventListener( 'load', this.loadListener );
           }
         }
-        
-        // swap supported renderers if necessary TODO: share this code dealing with compatible renderer changes
-        if ( image instanceof HTMLCanvasElement ) {
-          if ( !this.hasOwnProperty( '_supportedRenderers' ) ) {
-            this._supportedRenderers = [ Renderer.Canvas ];
-            this.markLayerRefreshNeeded();
-          }
-        } else {
-          if ( this.hasOwnProperty( '_supportedRenderers' ) ) {
-            delete this._supportedRenderers; // will leave prototype intact
-            this.markLayerRefreshNeeded();
-          }
-        }
-        
+
+        // swap supported renderers if necessary
+        this.invalidateSupportedRenderers();
+
         this._image = image;
         this.invalidateImage(); // yes, if we aren't loaded yet this will give us 0x0 bounds
       }
       return this;
     },
-    
+
     getImageWidth: function() {
-      return this._image.width;
+      return this._image.naturalWidth || this._image.width;
     },
-    
+
     getImageHeight: function() {
-      return this._image.height;
+      return this._image.naturalHeight || this._image.height;
     },
-    
+
     getImageURL: function() {
       return this._image.src;
     },
-    
+
     // signal that we are actually rendering something
     isPainted: function() {
       return true;
     },
-    
+
     /*---------------------------------------------------------------------------*
     * Canvas support
     *----------------------------------------------------------------------------*/
-    
+
     // TODO: add SVG / DOM support
     paintCanvas: function( wrapper ) {
       wrapper.context.drawImage( this._image, 0, 0 );
     },
-    
+
     /*---------------------------------------------------------------------------*
-    * WebGL support
-    *----------------------------------------------------------------------------*/
-    
+     * WebGL support
+     *----------------------------------------------------------------------------*/
+
     paintWebGL: function( state ) {
       throw new Error( 'paintWebGL:nimplemented' );
     },
-    
+
     /*---------------------------------------------------------------------------*
     * SVG support
     *----------------------------------------------------------------------------*/
-    
+
     createSVGFragment: function( svg, defs, group ) {
-      var element = document.createElementNS( 'http://www.w3.org/2000/svg', 'image' );
+      var element = document.createElementNS( scenery.svgns, 'image' );
       element.setAttribute( 'x', 0 );
       element.setAttribute( 'y', 0 );
       return element;
     },
-    
+
     updateSVGFragment: function( element ) {
       // like <image xlink:href='http://phet.colorado.edu/images/phet-logo-yellow.png' x='0' y='0' height='127px' width='242px'/>
-      var xlinkns = 'http://www.w3.org/1999/xlink';
-      
       element.setAttribute( 'width', this.getImageWidth() + 'px' );
       element.setAttribute( 'height', this.getImageHeight() + 'px' );
-      element.setAttributeNS( xlinkns, 'xlink:href', this.getImageURL() );
+      element.setAttributeNS( scenery.xlinkns, 'xlink:href', this.getImageURL() );
     },
-    
+
     /*---------------------------------------------------------------------------*
-    * DOM support
-    *----------------------------------------------------------------------------*/
-    
+     * DOM support
+     *----------------------------------------------------------------------------*/
+
     getDOMElement: function() {
       this._image.style.display = 'block';
       this._image.style.position = 'absolute';
@@ -19613,454 +21323,41 @@ define( 'SCENERY/nodes/Image',['require','PHET_CORE/inherit','DOT/Bounds2','SCEN
       this._image.style.top = '0';
       return this._image;
     },
-    
+
     updateDOMElement: function( image ) {
       if ( image.src !== this._image.src ) {
         image.src = this._image.src;
       }
     },
-    
+
     updateCSSTransform: function( transform, element ) {
       // TODO: extract this out, it's completely shared!
       scenery.Util.applyCSSTransform( transform.getMatrix(), element );
     },
-    
+
     set image( value ) { this.setImage( value ); },
     get image() { return this.getImage(); },
-    
+
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Image( \'' + ( this._image.src ? this._image.src.replace( /'/g, '\\\'' ) : 'other' ) + '\', {' + propLines + '} )';
     }
   } );
-  
+
   Image.prototype._mutatorKeys = [ 'image' ].concat( Node.prototype._mutatorKeys );
-  
-  Image.prototype._supportedRenderers = [ Renderer.Canvas, Renderer.SVG, Renderer.DOM ];
-  
+
   // utility for others
   Image.createSVGImage = function( url, width, height ) {
-    var xlinkns = 'http://www.w3.org/1999/xlink';
-    var svgns = 'http://www.w3.org/2000/svg';
-    
-    var element = document.createElementNS( svgns, 'image' );
+    var element = document.createElementNS( scenery.svgns, 'image' );
     element.setAttribute( 'x', 0 );
     element.setAttribute( 'y', 0 );
     element.setAttribute( 'width', width + 'px' );
     element.setAttribute( 'height', height + 'px' );
-    element.setAttributeNS( xlinkns, 'xlink:href', url );
-    
+    element.setAttributeNS( scenery.xlinkns, 'xlink:href', url );
+
     return element;
   };
-  
+
   return Image;
-} );
-
-
-
-// Copyright 2002-2013, University of Colorado
-
-/**
- * A rectangular node that inherits Path, and allows for optimized drawing,
- * and improved rectangle handling.
- *
- * TODO: add DOM support
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define( 'SCENERY/nodes/Rectangle',['require','PHET_CORE/inherit','SCENERY/scenery','SCENERY/nodes/Path','KITE/Shape','DOT/Vector2','DOT/Bounds2'],function( require ) {
-  
-  
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
-  
-  var Path = require( 'SCENERY/nodes/Path' );
-  var Shape = require( 'KITE/Shape' );
-  var Vector2 = require( 'DOT/Vector2' );
-  var Bounds2 = require( 'DOT/Bounds2' );
-  
-  /**
-   * Currently, all numerical parameters should be finite.
-   * x:         x-position of the upper-left corner (left bound)
-   * y:         y-position of the upper-left corner (top bound)
-   * width:     width of the rectangle to the right of the upper-left corner, required to be >= 0
-   * height:    height of the rectangle below the upper-left corner, required to be >= 0
-   * arcWidth:  positive width of the rounded corner, or 0 to indicate the corner should be sharp
-   * arcHeight: positive height of the rounded corner, or 0 to indicate the corner should be sharp
-   */
-  scenery.Rectangle = function Rectangle( x, y, width, height, arcWidth, arcHeight, options ) {
-    if ( typeof x === 'object' ) {
-      if ( x instanceof Bounds2 ) {
-        // allow new Rectangle( bounds2, { ... } ) or new Rectangle( bounds2, arcWidth, arcHeight, options )
-        this._rectX = x.minX;
-        this._rectY = x.minY;
-        this._rectWidth = x.width;
-        this._rectHeight = x.height;
-        if ( arguments.length < 3 ) {
-          // Rectangle( bounds2, { ... } )
-          options = y;
-          this._rectArcWidth = 0;
-          this._rectArcHeight = 0;
-        } else {
-          // Rectangle( bounds2, arcWidth, arcHeight, { ... } )
-          options = height;
-          this._rectArcWidth = y;
-          this._rectArcHeight = width;
-        }
-      } else {
-        // allow new Rectangle( { rectX: x, rectY: y, rectWidth: width, rectHeight: height, ... } )
-        // the mutators will call invalidateRectangle() and properly set the shape
-        options = x;
-        this._rectX = options.rectX || 0;
-        this._rectY = options.rectY || 0;
-        this._rectWidth = options.rectWidth;
-        this._rectHeight = options.rectHeight;
-        this._rectArcWidth = options.rectArcWidth || 0;
-        this._rectArcHeight = options.rectArcHeight || 0;
-      }
-    } else if ( arguments.length < 6 ) {
-      // new Rectangle( x, y, width, height, [options] )
-      this._rectX = x;
-      this._rectY = y;
-      this._rectWidth = width;
-      this._rectHeight = height;
-      this._rectArcWidth = 0;
-      this._rectArcHeight = 0;
-      
-      // ensure we have a parameter object
-      options = arcWidth || {};
-      
-    } else {
-      // normal case with args (including arcWidth / arcHeight)
-      this._rectX = x;
-      this._rectY = y;
-      this._rectWidth = width;
-      this._rectHeight = height;
-      this._rectArcWidth = arcWidth;
-      this._rectArcHeight = arcHeight;
-      
-      // ensure we have a parameter object
-      options = options || {};
-      
-    }
-    // fallback for non-canvas or non-svg rendering, and for proper bounds computation
-
-    Path.call( this, null, options );
-  };
-  var Rectangle = scenery.Rectangle;
-  
-  inherit( Path, Rectangle, {
-    setRect: function( x, y, width, height, arcWidth, arcHeight ) {
-      assert && assert( x !== undefined && y !== undefined && width !== undefined && height !== undefined, 'x/y/width/height need to be defined' );
-      
-      this._rectX = x;
-      this._rectY = y;
-      this._rectWidth = width;
-      this._rectHeight = height;
-      this._rectArcWidth = arcWidth || 0;
-      this._rectArcHeight = arcHeight || 0;
-      this.invalidateRectangle();
-    },
-    
-    setRectBounds: function( bounds ) {
-      this.setRect( bounds.x, bounds.y, bounds.width, bounds.height );
-    },
-    
-    isRounded: function() {
-      return this._rectArcWidth !== 0 && this._rectArcHeight !== 0;
-    },
-    
-    computeShapeBounds: function() {
-      var bounds = new Bounds2( this._rectX, this._rectY, this._rectX + this._rectWidth, this._rectY + this._rectHeight );
-      if ( this._stroke ) {
-        // since we are axis-aligned, any stroke will expand our bounds by a guaranteed set amount
-        bounds = bounds.dilated( this.getLineWidth() / 2 );
-      }
-      return bounds;
-    },
-    
-    createRectangleShape: function() {
-      if ( this.isRounded() ) {
-        // copy border-radius CSS behavior in Chrome, where the arcs won't intersect, in cases where the arc segments at full size would intersect each other
-        var maximumArcSize = Math.min( this._rectWidth / 2, this._rectHeight / 2 );
-        return Shape.roundRectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight,
-                                     Math.min( maximumArcSize, this._rectArcWidth ), Math.min( maximumArcSize, this._rectArcHeight ) );
-      } else {
-        return Shape.rectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
-      }
-    },
-    
-    invalidateRectangle: function() {
-      assert && assert( isFinite( this._rectX ), 'A rectangle needs to have a finite x (' + this._rectX + ')' );
-      assert && assert( isFinite( this._rectY ), 'A rectangle needs to have a finite x (' + this._rectY + ')' );
-      assert && assert( this._rectWidth >= 0 && isFinite( this._rectWidth ),
-                                      'A rectangle needs to have a non-negative finite width (' + this._rectWidth + ')' );
-      assert && assert( this._rectHeight >= 0 && isFinite( this._rectHeight ),
-                                      'A rectangle needs to have a non-negative finite height (' + this._rectHeight + ')' );
-      assert && assert( this._rectArcWidth >= 0 && isFinite( this._rectArcWidth ),
-                                      'A rectangle needs to have a non-negative finite arcWidth (' + this._rectArcWidth + ')' );
-      assert && assert( this._rectArcHeight >= 0 && isFinite( this._rectArcHeight ),
-                                      'A rectangle needs to have a non-negative finite arcHeight (' + this._rectArcHeight + ')' );
-      // assert && assert( !this.isRounded() || ( this._rectWidth >= this._rectArcWidth * 2 && this._rectHeight >= this._rectArcHeight * 2 ),
-      //                                 'The rounded sections of the rectangle should not intersect (the length of the straight sections shouldn\'t be negative' );
-      
-      // sets our 'cache' to null, so we don't always have to recompute our shape
-      this._shape = null;
-      
-      // should invalidate the path and ensure a redraw
-      this.invalidateShape();
-    },
-    
-    // accelerated hit detection for axis-aligned optionally-rounded rectangle
-    // fast computation if it isn't rounded. if rounded, we check if a corner computation is needed (usually isn't), and only check that one needed corner
-    containsPointSelf: function( point ) {
-      var x = this._rectX;
-      var y = this._rectY;
-      var width = this._rectWidth;
-      var height = this._rectHeight;
-      var arcWidth = this._rectArcWidth;
-      var arcHeight = this._rectArcHeight;
-      var halfLine = this.getLineWidth() / 2;
-      
-      var result = true;
-      if ( this._strokePickable ) {
-        // test the outer boundary if we are stroke-pickable (if also fill-pickable, this is the only test we need)
-        var rounded = this.isRounded();
-        if ( !rounded && this.getLineJoin() === 'bevel' ) {
-          // fall-back for bevel
-          return Path.prototype.containsPointSelf.call( this, point );
-        }
-        var miter = this.getLineJoin() === 'miter' && !rounded;
-        result = result && Rectangle.intersects( x - halfLine, y - halfLine,
-                                                 width + 2 * halfLine, height + 2 * halfLine,
-                                                 miter ? 0 : ( arcWidth + halfLine ), miter ? 0 : ( arcHeight + halfLine ),
-                                                 point );
-      }
-      
-      if ( this._fillPickable ) {
-        if ( this._strokePickable ) {
-          return result;
-        } else {
-          return Rectangle.intersects( x, y, width, height, arcWidth, arcHeight, point );
-        }
-      } else if ( this._strokePickable ) {
-        return result && !Rectangle.intersects( x + halfLine, y + halfLine,
-                                               width - 2 * halfLine, height - 2 * halfLine,
-                                               arcWidth - halfLine, arcHeight - halfLine,
-                                               point );
-      } else {
-        return false; // either fill nor stroke is pickable
-      }
-    },
-    
-    intersectsBoundsSelf: function( bounds ) {
-      return !this.computeShapeBounds().intersection( bounds ).isEmpty();
-    },
-    
-    // override paintCanvas with a faster version, since fillRect and drawRect don't affect the current default path
-    paintCanvas: function( wrapper ) {
-      var context = wrapper.context;
-      
-      // use the standard version if it's a rounded rectangle, since there is no Canvas-optimized version for that
-      if ( this.isRounded() ) {
-        context.beginPath();
-        var arcw = this._rectArcWidth;
-        var arch = this._rectArcHeight;
-        var lowX = this._rectX + arcw;
-        var highX = this._rectX + this._rectWidth - arcw;
-        var lowY = this._rectY + arch;
-        var highY = this._rectY + this._rectHeight - arch;
-        if ( arcw === arch ) {
-          // we can use circular arcs, which have well defined stroked offsets
-          context.arc( highX, lowY, arcw, -Math.PI / 2, 0, false );
-          context.arc( highX, highY, arcw, 0, Math.PI / 2, false );
-          context.arc( lowX, highY, arcw, Math.PI / 2, Math.PI, false );
-          context.arc( lowX, lowY, arcw, Math.PI, Math.PI * 3 / 2, false );
-        } else {
-          // we have to resort to elliptical arcs
-          context.ellipse( highX, lowY, arcw, arch, 0, -Math.PI / 2, 0, false );
-          context.ellipse( highX, highY, arcw, arch, 0, 0, Math.PI / 2, false );
-          context.ellipse( lowX, highY, arcw, arch, 0, Math.PI / 2, Math.PI, false );
-          context.ellipse( lowX, lowY, arcw, arch, 0, Math.PI, Math.PI * 3 / 2, false );
-        }
-        context.closePath();
-        
-        if ( this._fill ) {
-          this.beforeCanvasFill( wrapper ); // defined in Fillable
-          context.fill();
-          this.afterCanvasFill( wrapper ); // defined in Fillable
-        }
-        if ( this._stroke ) {
-          this.beforeCanvasStroke( wrapper ); // defined in Strokable
-          context.stroke();
-          this.afterCanvasStroke( wrapper ); // defined in Strokable
-        }
-      } else {
-        // TODO: how to handle fill/stroke delay optimizations here?
-        if ( this._fill ) {
-          this.beforeCanvasFill( wrapper ); // defined in Fillable
-          context.fillRect( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
-          this.afterCanvasFill( wrapper ); // defined in Fillable
-        }
-        if ( this._stroke ) {
-          this.beforeCanvasStroke( wrapper ); // defined in Strokable
-          context.strokeRect( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
-          this.afterCanvasStroke( wrapper ); // defined in Strokable
-        }
-      }
-    },
-    
-    // create a rect instead of a path, hopefully it is faster in implementations
-    createSVGFragment: function( svg, defs, group ) {
-      return document.createElementNS( 'http://www.w3.org/2000/svg', 'rect' );
-    },
-    
-    // optimized for the rect element instead of path
-    updateSVGFragment: function( rect ) {
-      // see http://www.w3.org/TR/SVG/shapes.html#RectElement
-      rect.setAttribute( 'x', this._rectX );
-      rect.setAttribute( 'y', this._rectY );
-      rect.setAttribute( 'width', this._rectWidth );
-      rect.setAttribute( 'height', this._rectHeight );
-      rect.setAttribute( 'rx', this._rectArcWidth );
-      rect.setAttribute( 'ry', this._rectArcHeight );
-      
-      rect.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
-    },
-    
-    getBasicConstructor: function( propLines ) {
-      return 'new scenery.Rectangle( ' + this._rectX + ', ' + this._rectY + ', ' + 
-                                         this._rectWidth + ', ' + this._rectHeight + ', ' +
-                                         this._rectArcWidth + ', ' + this._rectArcHeight + ', {' + propLines + '} )';
-    },
-    
-    setShape: function( shape ) {
-      if ( shape !== null ) {
-        throw new Error( 'Cannot set the shape of a scenery.Rectangle to something non-null' );
-      } else {
-        // probably called from the Path constructor
-        this.invalidateShape();
-      }
-    },
-    
-    getShape: function() {
-      if ( !this._shape ) {
-        this._shape = this.createRectangleShape();
-      }
-      return this._shape;
-    },
-    
-    hasShape: function() {
-      return true;
-    }
-  } );
-  
-  function addRectProp( capitalizedShort ) {
-    var getName = 'getRect' + capitalizedShort;
-    var setName = 'setRect' + capitalizedShort;
-    var privateName = '_rect' + capitalizedShort;
-    
-    Rectangle.prototype[getName] = function() {
-      return this[privateName];
-    };
-    
-    Rectangle.prototype[setName] = function( value ) {
-      if ( this[privateName] !== value ) {
-        this[privateName] = value;
-        this.invalidateRectangle();
-      }
-      return this;
-    };
-    
-    Object.defineProperty( Rectangle.prototype, 'rect' + capitalizedShort, {
-      set: Rectangle.prototype[setName],
-      get: Rectangle.prototype[getName]
-    } );
-  }
-  
-  addRectProp( 'X' );
-  addRectProp( 'Y' );
-  addRectProp( 'Width' );
-  addRectProp( 'Height' );
-  addRectProp( 'ArcWidth' );
-  addRectProp( 'ArcHeight' );
-  
-  // not adding mutators for now
-  Rectangle.prototype._mutatorKeys = [ 'rectX', 'rectY', 'rectWidth', 'rectHeight', 'rectArcWidth', 'rectArcHeight' ].concat( Path.prototype._mutatorKeys );
-  
-  Rectangle.intersects = function( x, y, width, height, arcWidth, arcHeight, point ) {
-    var result = point.x >= x &&
-                 point.x <= x + width &&
-                 point.y >= y &&
-                 point.y <= y + height;
-    
-    if ( !result || arcWidth <= 0 || arcHeight <= 0 ) {
-      return result;
-    }
-    
-    // copy border-radius CSS behavior in Chrome, where the arcs won't intersect, in cases where the arc segments at full size would intersect each other
-    var maximumArcSize = Math.min( width / 2, height / 2 );
-    arcWidth = Math.min( maximumArcSize, arcWidth );
-    arcHeight = Math.min( maximumArcSize, arcHeight );
-    
-    // we are rounded and inside the logical rectangle (if it didn't have rounded corners)
-    
-    // closest corner arc's center (we assume the rounded rectangle's arcs are 90 degrees fully, and don't intersect)
-    var closestCornerX, closestCornerY, guaranteedInside = false;
-    
-    // if we are to the inside of the closest corner arc's center, we are guaranteed to be in the rounded rectangle (guaranteedInside)
-    if ( point.x < x + width / 2 ) {
-      closestCornerX = x + arcWidth;
-      guaranteedInside = guaranteedInside || point.x >= closestCornerX;
-    } else {
-      closestCornerX = x + width - arcWidth;
-      guaranteedInside = guaranteedInside || point.x <= closestCornerX;
-    }
-    if ( guaranteedInside ) { return true; }
-    
-    if ( point.y < y + height / 2 ) {
-      closestCornerY = y + arcHeight;
-      guaranteedInside = guaranteedInside || point.y >= closestCornerY;
-    } else {
-      closestCornerY = y + height - arcHeight;
-      guaranteedInside = guaranteedInside || point.y <= closestCornerY;
-    }
-    if ( guaranteedInside ) { return true; }
-    
-    // we are now in the rectangular region between the logical corner and the center of the closest corner's arc.
-    
-    // offset from the closest corner's arc center
-    var offsetX = point.x - closestCornerX;
-    var offsetY = point.y - closestCornerY;
-    
-    // normalize the coordinates so now we are dealing with a unit circle
-    // (technically arc, but we are guaranteed to be in the area covered by the arc, so we just consider the circle)
-    // NOTE: we are rounded, so both arcWidth and arcHeight are non-zero (this is well defined)
-    offsetX /= arcWidth;
-    offsetY /= arcHeight;
-    
-    offsetX *= offsetX;
-    offsetY *= offsetY;
-    return offsetX + offsetY <= 1; // return whether we are in the rounded corner. see the formula for an ellipse
-  };
-  
-  Rectangle.rect = function( x, y, width, height, options ) {
-    return new Rectangle( x, y, width, height, 0, 0, options );
-  };
-  
-  Rectangle.roundedRect = function( x, y, width, height, arcWidth, arcHeight, options ) {
-    return new Rectangle( x, y, width, height, arcWidth, arcHeight, options );
-  };
-  
-  Rectangle.bounds = function( bounds, options ) {
-    return new Rectangle( bounds.minX, bounds.minY, bounds.width, bounds.height, 0, 0, options );
-  };
-  
-  Rectangle.roundedBounds = function( bounds, arcWidth, arcHeight, options ) {
-    return new Rectangle( bounds.minX, bounds.minY, bounds.width, bounds.height, arcWidth, arcHeight, options );
-  };
-  
-  return Rectangle;
 } );
 
 
@@ -20087,17 +21384,14 @@ define( 'SCENERY/nodes/Rectangle',['require','PHET_CORE/inherit','SCENERY/scener
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'SCENERY/nodes/LayoutNode',['require','PHET_CORE/inherit','PHET_CORE/extend','SCENERY/scenery','SCENERY/nodes/Node','SCENERY/nodes/Rectangle','DOT/Bounds2'],function( require ) {
+define( 'SCENERY/nodes/LayoutNode',['require','PHET_CORE/inherit','PHET_CORE/extend','SCENERY/scenery','SCENERY/nodes/Node','DOT/Bounds2'],function( require ) {
   
   
   var inherit = require( 'PHET_CORE/inherit' );
   var extend = require( 'PHET_CORE/extend' );
   var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
-  var Rectangle = require( 'SCENERY/nodes/Rectangle' );
   var Bounds2 = require( 'DOT/Bounds2' );
-  
-  var debug = false;
   
   scenery.LayoutNode = function LayoutNode( defaultMethod, options ) {
     var layoutNode = this;
@@ -20163,8 +21457,7 @@ define( 'SCENERY/nodes/LayoutNode',['require','PHET_CORE/inherit','PHET_CORE/ext
         padTop: 0,
         padBottom: 0
       }, options );
-      var baseBoundsFunc = ( options.useVisibleBounds ? node.getVisibleBounds : node.getBounds ).bind( node );
-      
+
       Node.prototype.insertChild.call( this, index, node );
       
       var methodGetter = options.layoutMethod ? function() { return options.layoutMethod; } : function() { return layoutNode._defaultMethod; };
@@ -20267,36 +21560,36 @@ define( 'SCENERY/nodes/LayoutNode',['require','PHET_CORE/inherit','PHET_CORE/ext
   /*---------------------------------------------------------------------------*
   * Layout Methods
   *----------------------------------------------------------------------------*/
-  
-  var Vertical = LayoutNode.Vertical = new LayoutMethod( function verticalLayout( element, index, previousElement, layoutProperties ) {
+
+  LayoutNode.Vertical = new LayoutMethod( function verticalLayout( element, index, previousElement, layoutProperties ) {
     element.layoutTop = previousElement ? previousElement.layoutBounds.bottom : 0;
   } );
-  
-  var Horizontal = LayoutNode.Horizontal = new LayoutMethod( function horizontalLayout( element, index, previousElement, layoutProperties ) {
+
+  LayoutNode.Horizontal = new LayoutMethod( function horizontalLayout( element, index, previousElement, layoutProperties ) {
     element.layoutLeft = previousElement ? previousElement.layoutBounds.right : 0;
   } );
-  
-  var AlignLeft = LayoutNode.AlignLeft = new LayoutMethod( function alignLeftLayout( element, index, previousElement, layoutProperties ) {
+
+  LayoutNode.AlignLeft = new LayoutMethod( function alignLeftLayout( element, index, previousElement, layoutProperties ) {
     element.layoutLeft = 0;
   } );
-  
-  var AlignHorizontalCenter = LayoutNode.AlignHorizontalCenter = new LayoutMethod( function alignHorizontalCenterLayout( element, index, previousElement, layoutProperties ) {
+
+  LayoutNode.AlignHorizontalCenter = new LayoutMethod( function alignHorizontalCenterLayout( element, index, previousElement, layoutProperties ) {
     element.layoutLeft = ( layoutProperties.maxWidth - element.layoutBounds.width ) / 2;
   } );
-  
-  var AlignRight = LayoutNode.AlignRight = new LayoutMethod( function alignRightLayout( element, index, previousElement, layoutProperties ) {
+
+  LayoutNode.AlignRight = new LayoutMethod( function alignRightLayout( element, index, previousElement, layoutProperties ) {
     element.layoutLeft = layoutProperties.maxWidth - element.layoutBounds.width;
   } );
-  
-  var AlignTop = LayoutNode.AlignTop = new LayoutMethod( function alignTopLayout( element, index, previousElement, layoutProperties ) {
+
+  LayoutNode.AlignTop = new LayoutMethod( function alignTopLayout( element, index, previousElement, layoutProperties ) {
     element.layoutTop = 0;
   } );
-  
-  var AlignVerticalCenter = LayoutNode.AlignVerticalCenter = new LayoutMethod( function alignVerticalCenterLayout( element, index, previousElement, layoutProperties ) {
+
+  LayoutNode.AlignVerticalCenter = new LayoutMethod( function alignVerticalCenterLayout( element, index, previousElement, layoutProperties ) {
     element.layoutTop = ( layoutProperties.maxHeight - element.layoutBounds.height ) / 2;
   } );
-  
-  var AlignBottom = LayoutNode.AlignBottom = new LayoutMethod( function alignBottomLayout( element, index, previousElement, layoutProperties ) {
+
+  LayoutNode.AlignBottom = new LayoutMethod( function alignBottomLayout( element, index, previousElement, layoutProperties ) {
     element.layoutTop = layoutProperties.maxHeight - element.layoutBounds.height;
   } );
   
@@ -20500,7 +21793,7 @@ define( 'SCENERY/nodes/Line',['require','PHET_CORE/inherit','SCENERY/scenery','K
     
     // create a rect instead of a path, hopefully it is faster in implementations
     createSVGFragment: function( svg, defs, group ) {
-      return document.createElementNS( 'http://www.w3.org/2000/svg', 'line' );
+      return document.createElementNS( scenery.svgns, 'line' );
     },
     
     // optimized for the rect element instead of path
@@ -20578,6 +21871,511 @@ define( 'SCENERY/nodes/Line',['require','PHET_CORE/inherit','SCENERY/scenery','K
 
 
 
+// Copyright 2002-2013, University of Colorado
+
+/**
+ * A rectangular node that inherits Path, and allows for optimized drawing,
+ * and improved rectangle handling.
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'SCENERY/nodes/Rectangle',['require','PHET_CORE/inherit','SCENERY/scenery','SCENERY/nodes/Path','KITE/Shape','DOT/Bounds2','DOT/Matrix3','SCENERY/util/Features'],function( require ) {
+  
+  
+  var inherit = require( 'PHET_CORE/inherit' );
+  var scenery = require( 'SCENERY/scenery' );
+  
+  var Path = require( 'SCENERY/nodes/Path' );
+  var Shape = require( 'KITE/Shape' );
+  var Bounds2 = require( 'DOT/Bounds2' );
+  var Matrix3 = require( 'DOT/Matrix3' );
+  var Features = require( 'SCENERY/util/Features' );
+  
+  /**
+   * Currently, all numerical parameters should be finite.
+   * x:         x-position of the upper-left corner (left bound)
+   * y:         y-position of the upper-left corner (top bound)
+   * width:     width of the rectangle to the right of the upper-left corner, required to be >= 0
+   * height:    height of the rectangle below the upper-left corner, required to be >= 0
+   * arcWidth:  positive width of the rounded corner, or 0 to indicate the corner should be sharp
+   * arcHeight: positive height of the rounded corner, or 0 to indicate the corner should be sharp
+   */
+  scenery.Rectangle = function Rectangle( x, y, width, height, arcWidth, arcHeight, options ) {
+    if ( typeof x === 'object' ) {
+      if ( x instanceof Bounds2 ) {
+        // allow new Rectangle( bounds2, { ... } ) or new Rectangle( bounds2, arcWidth, arcHeight, options )
+        this._rectX = x.minX;
+        this._rectY = x.minY;
+        this._rectWidth = x.width;
+        this._rectHeight = x.height;
+        if ( arguments.length < 3 ) {
+          // Rectangle( bounds2, { ... } )
+          options = y;
+          this._rectArcWidth = 0;
+          this._rectArcHeight = 0;
+        } else {
+          // Rectangle( bounds2, arcWidth, arcHeight, { ... } )
+          options = height;
+          this._rectArcWidth = y;
+          this._rectArcHeight = width;
+        }
+      } else {
+        // allow new Rectangle( { rectX: x, rectY: y, rectWidth: width, rectHeight: height, ... } )
+        // the mutators will call invalidateRectangle() and properly set the shape
+        options = x;
+        this._rectX = options.rectX || 0;
+        this._rectY = options.rectY || 0;
+        this._rectWidth = options.rectWidth;
+        this._rectHeight = options.rectHeight;
+        this._rectArcWidth = options.rectArcWidth || 0;
+        this._rectArcHeight = options.rectArcHeight || 0;
+      }
+    } else if ( arguments.length < 6 ) {
+      // new Rectangle( x, y, width, height, [options] )
+      this._rectX = x;
+      this._rectY = y;
+      this._rectWidth = width;
+      this._rectHeight = height;
+      this._rectArcWidth = 0;
+      this._rectArcHeight = 0;
+      
+      // ensure we have a parameter object
+      options = arcWidth || {};
+      
+    } else {
+      // normal case with args (including arcWidth / arcHeight)
+      this._rectX = x;
+      this._rectY = y;
+      this._rectWidth = width;
+      this._rectHeight = height;
+      this._rectArcWidth = arcWidth;
+      this._rectArcHeight = arcHeight;
+      
+      // ensure we have a parameter object
+      options = options || {};
+      
+    }
+    // fallback for non-canvas or non-svg rendering, and for proper bounds computation
+
+    Path.call( this, null, options );
+  };
+  var Rectangle = scenery.Rectangle;
+  
+  inherit( Path, Rectangle, {
+    
+    getMaximumArcSize: function() {
+      return Math.min( this._rectWidth / 2, this._rectHeight / 2 );
+    },
+    
+    getStrokeRendererBitmask: function() {
+      var bitmask = Path.prototype.getStrokeRendererBitmask.call( this );
+      if ( this.hasStroke() && !this.getStroke().isGradient && !this.getStroke().isPattern ) {
+        if ( this.getLineJoin() === 'miter' || ( this.getLineJoin() === 'round' && Features.borderRadius ) ) {
+          bitmask |= scenery.bitmaskSupportsDOM;
+        }
+      }
+      return bitmask;
+    },
+    
+    getPathRendererBitmask: function() {
+      var bitmask = scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG;
+      
+      var maximumArcSize = this.getMaximumArcSize();
+      
+      // If the top/bottom or left/right strokes touch and overlap in the middle (small rectangle, big stroke), our DOM method won't work.
+      // Additionally, if we're handling rounded rectangles or a stroke with lineJoin 'round', we'll need borderRadius
+      // We also require for DOM that if it's a rounded rectangle, it's rounded with circular arcs (for now, could potentially do a transform trick!)
+      if ( ( !this.hasStroke() || ( this.getLineWidth() <= this._rectHeight && this.getLineWidth() <= this._rectWidth ) ) &&
+           ( !this.isRounded() || ( Features.borderRadius && this._rectArcWidth === this._rectArcHeight ) ) &&
+           this._rectArcHeight <= maximumArcSize && this._rectArcWidth <= maximumArcSize ) {
+        bitmask |= scenery.bitmaskSupportsDOM;
+      }
+      
+      return bitmask;
+    },
+    
+    setRect: function( x, y, width, height, arcWidth, arcHeight ) {
+      assert && assert( x !== undefined && y !== undefined && width !== undefined && height !== undefined, 'x/y/width/height need to be defined' );
+      
+      this._rectX = x;
+      this._rectY = y;
+      this._rectWidth = width;
+      this._rectHeight = height;
+      this._rectArcWidth = arcWidth || 0;
+      this._rectArcHeight = arcHeight || 0;
+      this.invalidateRectangle();
+    },
+    
+    setRectBounds: function( bounds ) {
+      this.setRect( bounds.x, bounds.y, bounds.width, bounds.height );
+    },
+    
+    isRounded: function() {
+      return this._rectArcWidth !== 0 && this._rectArcHeight !== 0;
+    },
+    
+    computeShapeBounds: function() {
+      var bounds = new Bounds2( this._rectX, this._rectY, this._rectX + this._rectWidth, this._rectY + this._rectHeight );
+      if ( this._stroke ) {
+        // since we are axis-aligned, any stroke will expand our bounds by a guaranteed set amount
+        bounds = bounds.dilated( this.getLineWidth() / 2 );
+      }
+      return bounds;
+    },
+    
+    createRectangleShape: function() {
+      if ( this.isRounded() ) {
+        // copy border-radius CSS behavior in Chrome, where the arcs won't intersect, in cases where the arc segments at full size would intersect each other
+        var maximumArcSize = Math.min( this._rectWidth / 2, this._rectHeight / 2 );
+        return Shape.roundRectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight,
+                                     Math.min( maximumArcSize, this._rectArcWidth ), Math.min( maximumArcSize, this._rectArcHeight ) );
+      } else {
+        return Shape.rectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
+      }
+    },
+    
+    invalidateRectangle: function() {
+      assert && assert( isFinite( this._rectX ), 'A rectangle needs to have a finite x (' + this._rectX + ')' );
+      assert && assert( isFinite( this._rectY ), 'A rectangle needs to have a finite x (' + this._rectY + ')' );
+      assert && assert( this._rectWidth >= 0 && isFinite( this._rectWidth ),
+                                      'A rectangle needs to have a non-negative finite width (' + this._rectWidth + ')' );
+      assert && assert( this._rectHeight >= 0 && isFinite( this._rectHeight ),
+                                      'A rectangle needs to have a non-negative finite height (' + this._rectHeight + ')' );
+      assert && assert( this._rectArcWidth >= 0 && isFinite( this._rectArcWidth ),
+                                      'A rectangle needs to have a non-negative finite arcWidth (' + this._rectArcWidth + ')' );
+      assert && assert( this._rectArcHeight >= 0 && isFinite( this._rectArcHeight ),
+                                      'A rectangle needs to have a non-negative finite arcHeight (' + this._rectArcHeight + ')' );
+      // assert && assert( !this.isRounded() || ( this._rectWidth >= this._rectArcWidth * 2 && this._rectHeight >= this._rectArcHeight * 2 ),
+      //                                 'The rounded sections of the rectangle should not intersect (the length of the straight sections shouldn\'t be negative' );
+      
+      // sets our 'cache' to null, so we don't always have to recompute our shape
+      this._shape = null;
+      
+      // should invalidate the path and ensure a redraw
+      this.invalidateShape();
+      
+      // since we changed the rectangle arc width/height, it could make DOM work or not
+      this.invalidateSupportedRenderers();
+    },
+    
+    // accelerated hit detection for axis-aligned optionally-rounded rectangle
+    // fast computation if it isn't rounded. if rounded, we check if a corner computation is needed (usually isn't), and only check that one needed corner
+    containsPointSelf: function( point ) {
+      var x = this._rectX;
+      var y = this._rectY;
+      var width = this._rectWidth;
+      var height = this._rectHeight;
+      var arcWidth = this._rectArcWidth;
+      var arcHeight = this._rectArcHeight;
+      var halfLine = this.getLineWidth() / 2;
+      
+      var result = true;
+      if ( this._strokePickable ) {
+        // test the outer boundary if we are stroke-pickable (if also fill-pickable, this is the only test we need)
+        var rounded = this.isRounded();
+        if ( !rounded && this.getLineJoin() === 'bevel' ) {
+          // fall-back for bevel
+          return Path.prototype.containsPointSelf.call( this, point );
+        }
+        var miter = this.getLineJoin() === 'miter' && !rounded;
+        result = result && Rectangle.intersects( x - halfLine, y - halfLine,
+                                                 width + 2 * halfLine, height + 2 * halfLine,
+                                                 miter ? 0 : ( arcWidth + halfLine ), miter ? 0 : ( arcHeight + halfLine ),
+                                                 point );
+      }
+      
+      if ( this._fillPickable ) {
+        if ( this._strokePickable ) {
+          return result;
+        } else {
+          return Rectangle.intersects( x, y, width, height, arcWidth, arcHeight, point );
+        }
+      } else if ( this._strokePickable ) {
+        return result && !Rectangle.intersects( x + halfLine, y + halfLine,
+                                               width - 2 * halfLine, height - 2 * halfLine,
+                                               arcWidth - halfLine, arcHeight - halfLine,
+                                               point );
+      } else {
+        return false; // either fill nor stroke is pickable
+      }
+    },
+    
+    intersectsBoundsSelf: function( bounds ) {
+      return !this.computeShapeBounds().intersection( bounds ).isEmpty();
+    },
+    
+    // override paintCanvas with a faster version, since fillRect and drawRect don't affect the current default path
+    paintCanvas: function( wrapper ) {
+      var context = wrapper.context;
+      
+      // use the standard version if it's a rounded rectangle, since there is no Canvas-optimized version for that
+      if ( this.isRounded() ) {
+        context.beginPath();
+        var maximumArcSize = this.getMaximumArcSize();
+        var arcw = Math.min( this._rectArcWidth, maximumArcSize );
+        var arch = Math.min( this._rectArcHeight, maximumArcSize );
+        var lowX = this._rectX + arcw;
+        var highX = this._rectX + this._rectWidth - arcw;
+        var lowY = this._rectY + arch;
+        var highY = this._rectY + this._rectHeight - arch;
+        if ( arcw === arch ) {
+          // we can use circular arcs, which have well defined stroked offsets
+          context.arc( highX, lowY, arcw, -Math.PI / 2, 0, false );
+          context.arc( highX, highY, arcw, 0, Math.PI / 2, false );
+          context.arc( lowX, highY, arcw, Math.PI / 2, Math.PI, false );
+          context.arc( lowX, lowY, arcw, Math.PI, Math.PI * 3 / 2, false );
+        } else {
+          // we have to resort to elliptical arcs
+          context.ellipse( highX, lowY, arcw, arch, 0, -Math.PI / 2, 0, false );
+          context.ellipse( highX, highY, arcw, arch, 0, 0, Math.PI / 2, false );
+          context.ellipse( lowX, highY, arcw, arch, 0, Math.PI / 2, Math.PI, false );
+          context.ellipse( lowX, lowY, arcw, arch, 0, Math.PI, Math.PI * 3 / 2, false );
+        }
+        context.closePath();
+        
+        if ( this._fill ) {
+          this.beforeCanvasFill( wrapper ); // defined in Fillable
+          context.fill();
+          this.afterCanvasFill( wrapper ); // defined in Fillable
+        }
+        if ( this._stroke ) {
+          this.beforeCanvasStroke( wrapper ); // defined in Strokable
+          context.stroke();
+          this.afterCanvasStroke( wrapper ); // defined in Strokable
+        }
+      } else {
+        // TODO: how to handle fill/stroke delay optimizations here?
+        if ( this._fill ) {
+          this.beforeCanvasFill( wrapper ); // defined in Fillable
+          context.fillRect( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
+          this.afterCanvasFill( wrapper ); // defined in Fillable
+        }
+        if ( this._stroke ) {
+          this.beforeCanvasStroke( wrapper ); // defined in Strokable
+          context.strokeRect( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
+          this.afterCanvasStroke( wrapper ); // defined in Strokable
+        }
+      }
+    },
+    
+    // create a rect instead of a path, hopefully it is faster in implementations
+    createSVGFragment: function( svg, defs, group ) {
+      return document.createElementNS( scenery.svgns, 'rect' );
+    },
+    
+    // optimized for the rect element instead of path
+    updateSVGFragment: function( rect ) {
+      // see http://www.w3.org/TR/SVG/shapes.html#RectElement
+      rect.setAttribute( 'x', this._rectX );
+      rect.setAttribute( 'y', this._rectY );
+      rect.setAttribute( 'width', this._rectWidth );
+      rect.setAttribute( 'height', this._rectHeight );
+      
+      // workaround for various browsers if rx=20, ry=0 (behavior is inconsistent, either identical to rx=20,ry=20, rx=0,ry=0. We'll treat it as rx=0,ry=0)
+      // see https://github.com/phetsims/scenery/issues/183
+      if ( this.isRounded() ) {
+        var maximumArcSize = this.getMaximumArcSize();
+        var arcw = Math.min( this._rectArcWidth, maximumArcSize );
+        var arch = Math.min( this._rectArcHeight, maximumArcSize );
+        rect.setAttribute( 'rx', arcw );
+        rect.setAttribute( 'ry', arch );
+      } else {
+        rect.setAttribute( 'rx', 0 );
+        rect.setAttribute( 'ry', 0 );
+      }
+      
+      rect.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
+    },
+    
+    /*---------------------------------------------------------------------------*
+     * DOM support
+     *----------------------------------------------------------------------------*/
+    
+    domUpdateTransformOnRepaint: true, // since we have to integrate the baseline offset into the CSS transform, signal to DOMLayer
+    
+    getDOMElement: function() {
+      var fill = document.createElement( 'div' );
+      var stroke = document.createElement( 'div' );
+      fill.appendChild( stroke );
+      fill.style.display = 'block';
+      fill.style.position = 'absolute';
+      fill.style.left = '0';
+      fill.style.top = '0';
+      stroke.style.display = 'block';
+      stroke.style.position = 'absolute';
+      stroke.style.left = '0';
+      stroke.style.top = '0';
+      return fill;
+    },
+
+    updateDOMElement: function( fill ) {
+      var borderRadius = Math.min( this._rectArcWidth, this._rectArcHeight );
+      
+      fill.style.width = this._rectWidth + 'px';
+      fill.style.height = this._rectHeight + 'px';
+      fill.style[Features.borderRadius] = borderRadius + 'px'; // if one is zero, we are not rounded, so we do the min here
+      fill.style.backgroundColor = this.getCSSFill();
+      
+      var stroke = fill.childNodes[0];
+      if ( this.hasStroke() ) {
+        stroke.style.width = ( this._rectWidth - this.getLineWidth() ) + 'px';
+        stroke.style.height = ( this._rectHeight - this.getLineWidth() ) + 'px';
+        stroke.style.left = ( -this.getLineWidth() / 2 ) + 'px';
+        stroke.style.top = ( -this.getLineWidth() / 2 ) + 'px';
+        stroke.style.borderStyle = 'solid';
+        stroke.style.borderColor = this.getSimpleCSSFill();
+        stroke.style.borderWidth = this.getLineWidth() + 'px';
+        stroke.style[Features.borderRadius] = ( this.isRounded() || this.getLineJoin() === 'round' ) ? ( borderRadius + this.getLineWidth() / 2 ) + 'px' : '0';
+      } else {
+        stroke.style.borderStyle = 'none';
+      }
+    },
+    
+    // override the transform since we need to customize it with a DOM offset
+    updateCSSTransform: function( transform, element ) {
+      // shift the text vertically, postmultiplied with the entire transform.
+      var matrix = transform.getMatrix().timesMatrix( Matrix3.translation( this._rectX, this._rectY ) );
+      scenery.Util.applyCSSTransform( matrix, element );
+    },
+    
+    getBasicConstructor: function( propLines ) {
+      return 'new scenery.Rectangle( ' + this._rectX + ', ' + this._rectY + ', ' + 
+                                         this._rectWidth + ', ' + this._rectHeight + ', ' +
+                                         this._rectArcWidth + ', ' + this._rectArcHeight + ', {' + propLines + '} )';
+    },
+    
+    setShape: function( shape ) {
+      if ( shape !== null ) {
+        throw new Error( 'Cannot set the shape of a scenery.Rectangle to something non-null' );
+      } else {
+        // probably called from the Path constructor
+        this.invalidateShape();
+      }
+    },
+    
+    getShape: function() {
+      if ( !this._shape ) {
+        this._shape = this.createRectangleShape();
+      }
+      return this._shape;
+    },
+    
+    hasShape: function() {
+      return true;
+    }
+  } );
+  
+  function addRectProp( capitalizedShort ) {
+    var getName = 'getRect' + capitalizedShort;
+    var setName = 'setRect' + capitalizedShort;
+    var privateName = '_rect' + capitalizedShort;
+    
+    Rectangle.prototype[getName] = function() {
+      return this[privateName];
+    };
+    
+    Rectangle.prototype[setName] = function( value ) {
+      if ( this[privateName] !== value ) {
+        this[privateName] = value;
+        this.invalidateRectangle();
+      }
+      return this;
+    };
+    
+    Object.defineProperty( Rectangle.prototype, 'rect' + capitalizedShort, {
+      set: Rectangle.prototype[setName],
+      get: Rectangle.prototype[getName]
+    } );
+  }
+  
+  addRectProp( 'X' );
+  addRectProp( 'Y' );
+  addRectProp( 'Width' );
+  addRectProp( 'Height' );
+  addRectProp( 'ArcWidth' );
+  addRectProp( 'ArcHeight' );
+  
+  // not adding mutators for now
+  Rectangle.prototype._mutatorKeys = [ 'rectX', 'rectY', 'rectWidth', 'rectHeight', 'rectArcWidth', 'rectArcHeight' ].concat( Path.prototype._mutatorKeys );
+  
+  Rectangle.intersects = function( x, y, width, height, arcWidth, arcHeight, point ) {
+    var result = point.x >= x &&
+                 point.x <= x + width &&
+                 point.y >= y &&
+                 point.y <= y + height;
+    
+    if ( !result || arcWidth <= 0 || arcHeight <= 0 ) {
+      return result;
+    }
+    
+    // copy border-radius CSS behavior in Chrome, where the arcs won't intersect, in cases where the arc segments at full size would intersect each other
+    var maximumArcSize = Math.min( width / 2, height / 2 );
+    arcWidth = Math.min( maximumArcSize, arcWidth );
+    arcHeight = Math.min( maximumArcSize, arcHeight );
+    
+    // we are rounded and inside the logical rectangle (if it didn't have rounded corners)
+    
+    // closest corner arc's center (we assume the rounded rectangle's arcs are 90 degrees fully, and don't intersect)
+    var closestCornerX, closestCornerY, guaranteedInside = false;
+    
+    // if we are to the inside of the closest corner arc's center, we are guaranteed to be in the rounded rectangle (guaranteedInside)
+    if ( point.x < x + width / 2 ) {
+      closestCornerX = x + arcWidth;
+      guaranteedInside = guaranteedInside || point.x >= closestCornerX;
+    } else {
+      closestCornerX = x + width - arcWidth;
+      guaranteedInside = guaranteedInside || point.x <= closestCornerX;
+    }
+    if ( guaranteedInside ) { return true; }
+    
+    if ( point.y < y + height / 2 ) {
+      closestCornerY = y + arcHeight;
+      guaranteedInside = guaranteedInside || point.y >= closestCornerY;
+    } else {
+      closestCornerY = y + height - arcHeight;
+      guaranteedInside = guaranteedInside || point.y <= closestCornerY;
+    }
+    if ( guaranteedInside ) { return true; }
+    
+    // we are now in the rectangular region between the logical corner and the center of the closest corner's arc.
+    
+    // offset from the closest corner's arc center
+    var offsetX = point.x - closestCornerX;
+    var offsetY = point.y - closestCornerY;
+    
+    // normalize the coordinates so now we are dealing with a unit circle
+    // (technically arc, but we are guaranteed to be in the area covered by the arc, so we just consider the circle)
+    // NOTE: we are rounded, so both arcWidth and arcHeight are non-zero (this is well defined)
+    offsetX /= arcWidth;
+    offsetY /= arcHeight;
+    
+    offsetX *= offsetX;
+    offsetY *= offsetY;
+    return offsetX + offsetY <= 1; // return whether we are in the rounded corner. see the formula for an ellipse
+  };
+  
+  Rectangle.rect = function( x, y, width, height, options ) {
+    return new Rectangle( x, y, width, height, 0, 0, options );
+  };
+  
+  Rectangle.roundedRect = function( x, y, width, height, arcWidth, arcHeight, options ) {
+    return new Rectangle( x, y, width, height, arcWidth, arcHeight, options );
+  };
+  
+  Rectangle.bounds = function( bounds, options ) {
+    return new Rectangle( bounds.minX, bounds.minY, bounds.width, bounds.height, 0, 0, options );
+  };
+  
+  Rectangle.roundedBounds = function( bounds, arcWidth, arcHeight, options ) {
+    return new Rectangle( bounds.minX, bounds.minY, bounds.width, bounds.height, arcWidth, arcHeight, options );
+  };
+  
+  return Rectangle;
+} );
+
+
+
 // Copyright 2002-2013, University of Colorado Boulder
 
 /**
@@ -20590,14 +22388,13 @@ define( 'SCENERY/nodes/Line',['require','PHET_CORE/inherit','SCENERY/scenery','K
  * @author Sam Reid
  */
 
-define( 'SCENERY/nodes/Plane',['require','PHET_CORE/inherit','SCENERY/scenery','SCENERY/nodes/Rectangle','KITE/Shape'],function( require ) {
+define( 'SCENERY/nodes/Plane',['require','PHET_CORE/inherit','SCENERY/scenery','SCENERY/nodes/Rectangle'],function( require ) {
   
 
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
   var Rectangle = require( 'SCENERY/nodes/Rectangle' );
-  var Shape = require( 'KITE/Shape' );
 
   /**
    * @param options Any options for the plane, typically fill/opacity (many others such as scale, translation, rotation should have no effect)
@@ -20705,11 +22502,9 @@ define( 'SCENERY/nodes/VBox',['require','SCENERY/scenery','SCENERY/nodes/Node','
  * @author Sam Reid
  */
 
-define( 'SCENERY/overlays/PointerOverlay',['require','DOT/Bounds2','DOT/Transform3','DOT/Matrix3','SCENERY/scenery','SCENERY/util/Trail','SCENERY/util/Util'],function( require ) {
+define( 'SCENERY/overlays/PointerOverlay',['require','DOT/Matrix3','SCENERY/scenery','SCENERY/util/Trail','SCENERY/util/Util'],function( require ) {
   
 
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var Transform3 = require( 'DOT/Transform3' );
   var Matrix3 = require( 'DOT/Matrix3' );
 
   var scenery = require( 'SCENERY/scenery' );
@@ -20745,7 +22540,7 @@ define( 'SCENERY/overlays/PointerOverlay',['require','DOT/Bounds2','DOT/Transfor
 
       if ( pointer.isKey ) { return; }
 
-      var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+      var svg = document.createElementNS( scenery.svgns, 'svg' );
       svg.style.position = 'absolute';
       svg.style.top = 0;
       svg.style.left = 0;
@@ -20755,7 +22550,7 @@ define( 'SCENERY/overlays/PointerOverlay',['require','DOT/Bounds2','DOT/Transfor
       svg.setAttribute( 'width', diameter );
       svg.setAttribute( 'height', diameter );
 
-      var circle = document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
+      var circle = document.createElementNS( scenery.svgns, 'circle' );
 
       //use css transform for performance?
       circle.setAttribute( 'cx', innerRadius + strokeWidth / 2 );
@@ -20828,11 +22623,9 @@ define( 'SCENERY/overlays/PointerOverlay',['require','DOT/Bounds2','DOT/Transfor
  * @author Sam Reid
  */
 
-define( 'SCENERY/util/AccessibilityPeer',['require','PHET_CORE/inherit','SCENERY/scenery'],function( require ) {
+define( 'SCENERY/util/AccessibilityPeer',['require','SCENERY/scenery'],function( require ) {
   
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  
   var scenery = require( 'SCENERY/scenery' );
   
   var AccessibilityPeer = scenery.AccessibilityPeer = function AccessibilityPeer( instance, element, options ) {
@@ -21536,14 +23329,12 @@ define( 'SCENERY/util/Color',['require','SCENERY/scenery','DOT/Util','DOT/Util']
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'SCENERY/util/Gradient',['require','SCENERY/util/Color','SCENERY/scenery','DOT/Vector2'],function( require ) {
+define( 'SCENERY/util/Gradient',['require','SCENERY/util/Color','SCENERY/scenery'],function( require ) {
   
   
   require( 'SCENERY/util/Color' );
   var scenery = require( 'SCENERY/scenery' );
   
-  var Vector2 = require( 'DOT/Vector2' );
-
   // TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ]
   scenery.Gradient = function Gradient( canvasGradient ) {
     assert && assert( this.constructor.name !== 'Gradient', 'Please create a LinearGradient or RadialGradient. Do not directly use the supertype Gradient.' );
@@ -21559,6 +23350,8 @@ define( 'SCENERY/util/Gradient',['require','SCENERY/util/Color','SCENERY/scenery
   
   Gradient.prototype = {
     constructor: Gradient,
+    
+    isGradient: true,
     
     /**
      * @param {Number} ratio        Monotonically increasing value in the range of 0 to 1
@@ -21640,6 +23433,8 @@ define( 'SCENERY/util/LinearGradient',['require','SCENERY/scenery','PHET_CORE/in
   
   inherit( Gradient, LinearGradient, {
     
+    isLinearGradient: true,
+    
     // seems we need the defs: http://stackoverflow.com/questions/7614209/linear-gradients-in-svg-without-defs
     // SVG: spreadMethod 'pad' 'reflect' 'repeat' - find Canvas usage
     getSVGDefinition: function( id ) {
@@ -21650,8 +23445,7 @@ define( 'SCENERY/util/LinearGradient',['require','SCENERY/scenery','PHET_CORE/in
         <stop offset="1" style="stop-color:rgb(255,0,0);stop-opacity:1" />
       </linearGradient>
       */
-      var svgns = 'http://www.w3.org/2000/svg'; // TODO: store this in a common place!
-      var definition = document.createElementNS( svgns, 'linearGradient' );
+      var definition = document.createElementNS( scenery.svgns, 'linearGradient' );
       definition.setAttribute( 'id', id );
       definition.setAttribute( 'gradientUnits', 'userSpaceOnUse' ); // so we don't depend on the bounds of the object being drawn with the gradient
       definition.setAttribute( 'x1', this.start.x );
@@ -21663,7 +23457,7 @@ define( 'SCENERY/util/LinearGradient',['require','SCENERY/scenery','PHET_CORE/in
       }
       
       _.each( this.stops, function( stop ) {
-        var stopElement = document.createElementNS( svgns, 'stop' );
+        var stopElement = document.createElementNS( scenery.svgns, 'stop' );
         stopElement.setAttribute( 'offset', stop.ratio );
         stopElement.setAttribute( 'style', 'stop-color: ' + stop.color.withAlpha( 1 ).toCSS() + '; stop-opacity: ' + stop.color.a.toFixed( 20 ) + ';' );
         definition.appendChild( stopElement );
@@ -21695,11 +23489,8 @@ define( 'SCENERY/util/LinearGradient',['require','SCENERY/scenery','PHET_CORE/in
  * @author Sam Reid
  */
 
-define( 'SCENERY/util/LiveRegion',['require','PHET_CORE/inherit','PHET_CORE/escapeHTML','SCENERY/scenery'],function( require ) {
+define( 'SCENERY/util/LiveRegion',['require','SCENERY/scenery'],function( require ) {
   
-
-  var inherit = require( 'PHET_CORE/inherit' );
-  var escapeHTML = require( 'PHET_CORE/escapeHTML' );
 
   var scenery = require( 'SCENERY/scenery' );
 
@@ -22095,12 +23886,10 @@ define( 'SCENERY/util/Instance',['require','SCENERY/scenery','SCENERY/util/Acces
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'SCENERY/util/Pattern',['require','SCENERY/scenery','DOT/Vector2'],function( require ) {
+define( 'SCENERY/util/Pattern',['require','SCENERY/scenery'],function( require ) {
   
   
   var scenery = require( 'SCENERY/scenery' );
-  
-  var Vector2 = require( 'DOT/Vector2' );
   
   // TODO: support scene or other various content (SVG is flexible, can backport to canvas)
   // TODO: investigate options to support repeat-x, repeat-y or no-repeat in SVG (available repeat options from Canvas)
@@ -22117,6 +23906,8 @@ define( 'SCENERY/util/Pattern',['require','SCENERY/scenery','DOT/Vector2'],funct
   Pattern.prototype = {
     constructor: Pattern,
     
+    isPattern: true,
+    
     setTransformMatrix: function( transformMatrix ) {
       this.transformMatrix = transformMatrix;
       return this;
@@ -22127,8 +23918,7 @@ define( 'SCENERY/util/Pattern',['require','SCENERY/scenery','DOT/Vector2'],funct
     },
     
     getSVGDefinition: function( id ) {
-      var svgns = 'http://www.w3.org/2000/svg'; // TODO: store this in a common place!
-      var definition = document.createElementNS( svgns, 'pattern' );
+      var definition = document.createElementNS( scenery.svgns, 'pattern' );
       definition.setAttribute( 'id', id );
       definition.setAttribute( 'patternUnits', 'userSpaceOnUse' ); // so we don't depend on the bounds of the object being drawn with the gradient
       definition.setAttribute( 'patternContentUnits', 'userSpaceOnUse' ); // TODO: is this needed?
@@ -22196,15 +23986,15 @@ define( 'SCENERY/util/RadialGradient',['require','SCENERY/scenery','PHET_CORE/in
   
   inherit( Gradient, RadialGradient, {
     
+    isRadialGradient: true,
+    
     getSVGDefinition: function( id ) {
       var startIsLarger = this.startRadius > this.endRadius;
       var largePoint = startIsLarger ? this.start : this.end;
-      var smallPoint = startIsLarger ? this.end : this.start;
       var maxRadius = Math.max( this.startRadius, this.endRadius );
       var minRadius = Math.min( this.startRadius, this.endRadius );
       
-      var svgns = 'http://www.w3.org/2000/svg'; // TODO: store this in a common place!
-      var definition = document.createElementNS( svgns, 'radialGradient' );
+      var definition = document.createElementNS( scenery.svgns, 'radialGradient' );
       
       // TODO:
       definition.setAttribute( 'id', id );
@@ -22235,7 +24025,7 @@ define( 'SCENERY/util/RadialGradient',['require','SCENERY/scenery','PHET_CORE/in
         }
         
         // TODO: store color in our stops array, so we don't have to create additional objects every time?
-        var stopElement = document.createElementNS( svgns, 'stop' );
+        var stopElement = document.createElementNS( scenery.svgns, 'stop' );
         stopElement.setAttribute( 'offset', ratio );
         stopElement.setAttribute( 'style', 'stop-color: ' + stop.color.withAlpha( 1 ).toCSS() + '; stop-opacity: ' + stop.color.a.toFixed( 20 ) + ';' );
         definition.appendChild( stopElement );
@@ -22421,7 +24211,7 @@ define( 'SCENERY/util/SceneImage',['require','SCENERY/scenery'],function( requir
 define( 'SCENERY/util/SceneryStyle',['require','SCENERY/scenery'],function( require ) {
   
   
-  var scenery = require( 'SCENERY/scenery' );
+  require( 'SCENERY/scenery' );
   
   var styleElement = document.createElement( 'style' );
   styleElement.type = 'text/css';
@@ -22584,55 +24374,23 @@ define( 'SCENERY/util/gl/GLShaderProgram',['require','SCENERY/scenery'],function
 // Copyright 2002-2013, University of Colorado Boulder
 
 /**
- * Creates an array of results from an iterator that takes a callback.
- *
- * For instance, if calling a function f( g ) will call g( 1 ), g( 2 ), and g( 3 ),
- * collect( function( callback ) { f( callback ); } );
- * will return [1,2,3].
- *
- * @author Jonathan Olson <olsonsjc@gmail.com>
- */
-
-define( 'PHET_CORE/collect',['require','PHET_CORE/core'],function( require ) {
-  
-  
-  var core = require( 'PHET_CORE/core' );
-  
-  var collect = core.collect = function collect( iterate ) {
-    assert && assert( typeof iterate === 'function' );
-    var result = [];
-    iterate( function( ob ) {
-      result.push( ob );
-    } );
-    return result;
-  };
-  return collect;
-} );
-
-// Copyright 2002-2013, University of Colorado Boulder
-
-/**
  * Displays mouse and touch areas when they are customized. Expensive to display!
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'SCENERY/overlays/PointerAreaOverlay',['require','DOT/Bounds2','DOT/Transform3','DOT/Matrix3','SCENERY/scenery','SCENERY/util/Trail','SCENERY/util/Util'],function( require ) {
+define( 'SCENERY/overlays/PointerAreaOverlay',['require','KITE/Shape','SCENERY/scenery','SCENERY/util/Trail'],function( require ) {
   
 
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var Transform3 = require( 'DOT/Transform3' );
-  var Matrix3 = require( 'DOT/Matrix3' );
+  var Shape = require( 'KITE/Shape' );
 
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
 
-  var Util = require( 'SCENERY/util/Util' );
-
   scenery.PointerAreaOverlay = function PointerAreaOverlay( scene ) {
     this.scene = scene;
     
-    var svg = this.svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+    var svg = this.svg = document.createElementNS( scenery.svgns, 'svg' );
     svg.style.position = 'absolute';
     svg.className = 'mouseTouchAreaOverlay';
     svg.style.top = 0;
@@ -22665,7 +24423,7 @@ define( 'SCENERY/overlays/PointerAreaOverlay',['require','DOT/Bounds2','DOT/Tran
     },
     
     addShape: function( shape, color, isOffset ) {
-      var path = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+      var path = document.createElementNS( scenery.svgns, 'path' );
       var svgPath = shape.getSVGPath();
       
       // temporary workaround for https://bugs.webkit.org/show_bug.cgi?id=78980
@@ -22703,10 +24461,10 @@ define( 'SCENERY/overlays/PointerAreaOverlay',['require','DOT/Bounds2','DOT/Tran
           var transform = trail.getTransform();
           
           if ( node._mouseArea ) {
-            that.addShape( transform.transformShape( node._mouseArea ), 'rgba(0,0,255,0.8)', true );
+            that.addShape( transform.transformShape( node._mouseArea.isBounds ? Shape.bounds( node._mouseArea ) : node._mouseArea ), 'rgba(0,0,255,0.8)', true );
           }
           if ( node._touchArea ) {
-            that.addShape( transform.transformShape( node._touchArea ), 'rgba(255,0,0,0.8)', false );
+            that.addShape( transform.transformShape( node._touchArea.isBounds ? Shape.bounds( node._touchArea ) : node._touchArea ), 'rgba(255,0,0,0.8)', false );
           }
         }
       } );
@@ -22726,10 +24484,9 @@ define( 'SCENERY/overlays/PointerAreaOverlay',['require','DOT/Bounds2','DOT/Tran
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
-define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/Bounds2','DOT/Vector2','DOT/Matrix3','KITE/Shape','SCENERY/scenery','SCENERY/nodes/Node','SCENERY/util/Instance','SCENERY/util/Trail','SCENERY/util/RenderInterval','SCENERY/util/TrailPointer','SCENERY/input/Input','SCENERY/layers/LayerBuilder','SCENERY/layers/Renderer','SCENERY/overlays/PointerAreaOverlay','SCENERY/overlays/PointerOverlay','SCENERY/util/Util'],function( require ) {
+define( 'SCENERY/Scene',['require','PHET_CORE/inherit','DOT/Bounds2','DOT/Vector2','DOT/Matrix3','KITE/Shape','SCENERY/scenery','SCENERY/nodes/Node','SCENERY/util/Instance','SCENERY/util/Trail','SCENERY/util/RenderInterval','SCENERY/util/TrailPointer','SCENERY/input/Input','SCENERY/layers/LayerBuilder','SCENERY/layers/Renderer','SCENERY/overlays/PointerAreaOverlay','SCENERY/overlays/PointerOverlay','SCENERY/util/Util'],function( require ) {
   
   
-  var collect = require( 'PHET_CORE/collect' );
   var inherit = require( 'PHET_CORE/inherit' );
   
   var Bounds2 = require( 'DOT/Bounds2' );
@@ -22752,8 +24509,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
   require( 'SCENERY/overlays/PointerOverlay' );
 
   var Util = require( 'SCENERY/util/Util' );
-  var objectCreate = Util.objectCreate;
-  
+
   var accessibility = window.has && window.has( 'scenery.accessibility' );
   
   // debug flag to disable matching of layers when in 'match' mode
@@ -22848,13 +24604,13 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
       this.accessibilityLayer.style.position = 'relative';
       $main[0].appendChild( this.accessibilityLayer );
       
-      this.focusRingSVGContainer = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+      this.focusRingSVGContainer = document.createElementNS( scenery.svgns, 'svg' );
       this.focusRingSVGContainer.style.position = 'absolute';
       this.focusRingSVGContainer.style.top = 0;
       this.focusRingSVGContainer.style.left = 0;
       this.focusRingSVGContainer.style['pointer-events'] = 'none';
       this.resizeFocusRingSVGContainer( options.width, options.height );
-      this.focusRingPath = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+      this.focusRingPath = document.createElementNS( scenery.svgns, 'path' );
       this.focusRingPath.setAttribute( 'style', 'fill: none; stroke: blue; stroke-width: 5;' );
       this.focusRingPath.setAttribute( 'id', 'p1' );
       this.focusRingSVGContainer.appendChild( this.focusRingPath );
@@ -22885,6 +24641,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
       
       // check to see whether contents under pointers changed (and if so, send the enter/exit events) to maintain consistent state
       if ( this.input ) {
+        sceneryEventLog && sceneryEventLog( 'validatePointers from updateScene' );
         this.input.validatePointers();
       }
       
@@ -22922,7 +24679,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
   //                this.focusRingPath.setAttribute( 'd', rect.getSVGPath() );
   //                this.focusRingPath.lastSVGPath = rect.getSVGPath();
   //              } else {
-  //                var animate = document.createElementNS( 'http://www.w3.org/2000/svg', 'animate' );
+  //                var animate = document.createElementNS( scenery.svgns, 'animate' );
   //                animate.setAttribute( 'attributeType', 'XML' );
   //                animate.setAttribute( 'xlink:href', '#p1' );
   //                animate.setAttribute( 'attributeName', 'd' );
@@ -22971,8 +24728,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
     
     setActivePeer: function( peer ) {
       if ( this.activePeer !== peer ) {
-        var scene = this;
-        
+
         //Remove bounds listener from old active peer
         if ( this.activePeer ) {
           this.activePeer.instance.node.removeEventListener( 'bounds', this.updateFocusRing );
@@ -23243,9 +24999,6 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
       // need a reference to this, since it may change
       var afterLayerEndBoundary = afterLayer ? afterLayer.endBoundary : null;
       
-      var beforeLayerIndex = beforeLayer ? _.indexOf( this.layers, beforeLayer ) : -1;
-      var afterLayerIndex = afterLayer ? _.indexOf( this.layers, afterLayer ) : this.layers.length;
-      
       var beforePointer = beforeTrail ? new scenery.TrailPointer( beforeTrail, true ) : new scenery.TrailPointer( new scenery.Trail( this ), true );
       var afterPointer = afterTrail ? new scenery.TrailPointer( afterTrail, true ) : new scenery.TrailPointer( new scenery.Trail( this ), false );
       
@@ -23477,8 +25230,6 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
     },
     
     disposeLayers: function() {
-      var scene = this;
-      
       var i = this.layers.length;
       while ( i-- ) {
         this.disposeLayer( this.layers[i] );
@@ -23627,6 +25378,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
         }
         
         if ( this.input ) {
+          sceneryEventLog && sceneryEventLog( 'validatePointers from scene resize' );
           this.input.validatePointers();
         }
         
@@ -23722,7 +25474,15 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
     setSceneCursor: function( cursor ) {
       if ( cursor !== this.lastCursor ) {
         this.lastCursor = cursor;
-        this.$main.css( 'cursor', cursor );
+        var customCursors = Scene.customCursors[cursor];
+        if ( customCursors ) {
+          // go backwards, so the most desired cursor sticks
+          for ( var i = customCursors.length - 1; i >= 0; i-- ) {
+            this.main.style.cursor = customCursors[i];
+          }
+        } else {
+          this.main.style.cursor = cursor;
+        }
       }
     },
     
@@ -23758,12 +25518,10 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
     },
     
     initializeWindowEvents: function( parameters ) {
-      var element = this.$main[0];
       this.initializeEvents( _.extend( {}, {
         listenerTarget: window,
         pointFromEvent: function pointFromEvent( evt ) {
-          var mainBounds = element.getBoundingClientRect();
-          return Vector2.createFromPool( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
+          return Vector2.createFromPool( evt.clientX, evt.clientY );
         }
       }, parameters ) );
     },
@@ -24039,12 +25797,13 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
       new scenery.Trail( this ).eachTrailUnder( function( trail ) {
         var beforeSplitTrail;
         var afterSplitTrail;
-        if ( trail.lastNode().layerSplitBefore ) {
+        if ( trail.lastNode().layerSplit ) {
+          // for the "before" split
           beforeSplitTrail = trail.previousPainted();
           afterSplitTrail = trail.lastNode().isPainted() ? trail : trail.nextPainted();
-          assert && assert( !beforeSplitTrail || !afterSplitTrail || beforeSplitTrail.getInstance().layer !== afterSplitTrail.getInstance().layer, 'layerSplitBefore layers need to be different' );
-        }
-        if ( trail.lastNode().layerSplitAfter ) {
+          assert && assert( !beforeSplitTrail || !afterSplitTrail || beforeSplitTrail.getInstance().layer !== afterSplitTrail.getInstance().layer, 'layerSplit layers need to be different' );
+          
+          //for the "after" split
           // shift a pointer from the (nested) end of the trail to the next isBefore (if available)
           var ptr = new scenery.TrailPointer( trail.copy(), false );
           while ( ptr && ptr.isAfter ) {
@@ -24055,7 +25814,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
           if ( ptr ) {
             beforeSplitTrail = ptr.trail.previousPainted();
             afterSplitTrail = ptr.trail.lastNode().isPainted() ? ptr.trail : ptr.trail.nextPainted();
-            assert && assert( !beforeSplitTrail || !afterSplitTrail || beforeSplitTrail.getInstance().layer !== afterSplitTrail.getInstance().layer, 'layerSplitAfter layers need to be different' );
+            assert && assert( !beforeSplitTrail || !afterSplitTrail || beforeSplitTrail.getInstance().layer !== afterSplitTrail.getInstance().layer, 'layerSplit layers need to be different' );
           }
         }
       } );
@@ -24101,7 +25860,6 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
       
       startPointer.depthFirstUntil( endPointer, function( pointer ) {
         var div;
-        var ptr = str( pointer );
         var node = pointer.trail.lastNode();
         
         function addQualifier( text ) {
@@ -24148,11 +25906,8 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
           if ( node._rendererOptions ) {
             // addQualifier( 'rendererOptions:' + _.each( node._rendererOptions, function( option, key ) { return key + ':' + str( option ); } ).join( ',' ) );
           }
-          if ( node._layerSplitBefore ) {
-            addQualifier( 'layerSplitBefore' );
-          }
-          if ( node._layerSplitAfter ) {
-            addQualifier( 'layerSplitAfter' );
+          if ( node._layerSplit ) {
+            addQualifier( 'layerSplit' );
           }
           if ( node._opacity < 1 ) {
             addQualifier( 'opacity:' + node._opacity );
@@ -24201,7 +25956,7 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
       var nodes = this.getTopologicallySortedNodes().slice( 0 ).reverse(); // defensive slice, in case we store the order somewhere
       
       function name( node ) {
-        return node === scene ? 'scene' : node.constructor.name.toLowerCase() + node.id;
+        return node === scene ? 'scene' : ( ( node.constructor.name ? node.constructor.name.toLowerCase() : '(node)' ) + node.id );
       }
       
       _.each( nodes, function( node ) {
@@ -24224,6 +25979,11 @@ define( 'SCENERY/Scene',['require','PHET_CORE/collect','PHET_CORE/inherit','DOT/
       return result;
     }
   } );
+  
+  Scene.customCursors = {
+    'scenery-grab-pointer': ['grab', '-moz-grab', '-webkit-grab', 'pointer'],
+    'scenery-grabbing-pointer': ['grabbing', '-moz-grabbing', '-webkit-grabbing', 'pointer']
+  };
   
   function applyCSSHacks( $main, options ) {
     // to use CSS3 transforms for performance, hide anything outside our bounds by default
@@ -24274,6 +26034,12 @@ define( 'main',[
     'SCENERY/scenery',
     'SCENERY/debug/DebugContext',
     
+    'SCENERY/display/BackboneBlock',
+    'SCENERY/display/Block',
+    'SCENERY/display/Display',
+    'SCENERY/display/DisplayInstance',
+    'SCENERY/display/RenderState',
+    
     'SCENERY/input/ButtonListener',
     'SCENERY/input/DownUpListener',
     'SCENERY/input/Event',
@@ -24317,6 +26083,7 @@ define( 'main',[
     'SCENERY/util/AccessibilityPeer',
     'SCENERY/util/CanvasContextWrapper',
     'SCENERY/util/Color',
+    'SCENERY/util/Features',
     'SCENERY/util/FixedNodeEvents',
     'SCENERY/util/Font',
     'SCENERY/util/Gradient',
@@ -24417,6 +26184,9 @@ define( 'DOT/Bounds3',['require','DOT/dot','DOT/Vector3'],function( require ) {
 
   Bounds3.prototype = {
     constructor: Bounds3,
+    
+    isBounds: true,
+    dimension: 3,
     
     /*---------------------------------------------------------------------------*
     * Properties
@@ -24541,8 +26311,13 @@ define( 'DOT/Bounds3',['require','DOT/dot','DOT/Vector3'],function( require ) {
     * Immutable operations
     *----------------------------------------------------------------------------*/
     
-    copy: function() {
-      return new Bounds3( this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ );
+    // create a copy, or if bounds is passed in, set that bounds to our value
+    copy: function( bounds ) {
+      if ( bounds ) {
+        return bounds.set( this );
+      } else {
+        return new Bounds3( this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ );
+      }
     },
     
     // immutable operations (bounding-box style handling, so that the relevant bounds contain everything)
@@ -24673,7 +26448,8 @@ define( 'DOT/Bounds3',['require','DOT/dot','DOT/Vector3'],function( require ) {
     * Mutable operations
     *----------------------------------------------------------------------------*/
     
-    set: function( minX, minY, minZ, maxX, maxY, maxZ ) {
+    // core mutations (every other mutator should call one of these once)
+    setMinMax: function( minX, minY, minZ, maxX, maxY, maxZ ) {
       this.minX = minX;
       this.minY = minY;
       this.minZ = minZ;
@@ -24682,47 +26458,6 @@ define( 'DOT/Bounds3',['require','DOT/dot','DOT/Vector3'],function( require ) {
       this.maxZ = maxZ;
       return this;
     },
-    
-    setBounds: function( bounds ) {
-      return this.set( bounds.minX, bounds.minY, bounds.minZ, bounds.maxX, bounds.maxY, bounds.maxZ );
-    },
-    
-    // mutable union
-    includeBounds: function( bounds ) {
-      this.minX = Math.min( this.minX, bounds.minX );
-      this.minY = Math.min( this.minY, bounds.minY );
-      this.minZ = Math.min( this.minZ, bounds.minZ );
-      this.maxX = Math.max( this.maxX, bounds.maxX );
-      this.maxY = Math.max( this.maxY, bounds.maxY );
-      this.maxZ = Math.max( this.maxZ, bounds.maxZ );
-      return this;
-    },
-    
-    // mutable intersection
-    constrainBounds: function( bounds ) {
-      this.minX = Math.max( this.minX, bounds.minX );
-      this.minY = Math.max( this.minY, bounds.minY );
-      this.minZ = Math.max( this.minZ, bounds.minZ );
-      this.maxX = Math.min( this.maxX, bounds.maxX );
-      this.maxY = Math.min( this.maxY, bounds.maxY );
-      this.maxZ = Math.min( this.maxZ, bounds.maxZ );
-      return this;
-    },
-    
-    addCoordinates: function( x, y, z ) {
-      this.minX = Math.min( this.minX, x );
-      this.minY = Math.min( this.minY, y );
-      this.minZ = Math.min( this.minZ, z );
-      this.maxX = Math.max( this.maxX, x );
-      this.maxY = Math.max( this.maxY, y );
-      this.maxZ = Math.max( this.maxZ, z );
-      return this;
-    },
-    
-    addPoint: function( point ) {
-      return this.addCoordinates( point.x, point.y, point.z );
-    },
-    
     setMinX: function( minX ) { this.minX = minX; return this; },
     setMinY: function( minY ) { this.minY = minY; return this; },
     setMinZ: function( minZ ) { this.minZ = minZ; return this; },
@@ -24730,26 +26465,71 @@ define( 'DOT/Bounds3',['require','DOT/dot','DOT/Vector3'],function( require ) {
     setMaxY: function( maxY ) { this.maxY = maxY; return this; },
     setMaxZ: function( maxZ ) { this.maxZ = maxZ; return this; },
     
+    set: function( bounds ) {
+      return this.setMinMax( bounds.minX, bounds.minY, bounds.minZ, bounds.maxX, bounds.maxY, bounds.maxZ );
+    },
+    
+    // mutable union
+    includeBounds: function( bounds ) {
+      return this.setMinMax(
+        Math.min( this.minX, bounds.minX ),
+        Math.min( this.minY, bounds.minY ),
+        Math.min( this.minZ, bounds.minZ ),
+        Math.max( this.maxX, bounds.maxX ),
+        Math.max( this.maxY, bounds.maxY ),
+        Math.max( this.maxZ, bounds.maxZ )
+      );
+    },
+    
+    // mutable intersection
+    constrainBounds: function( bounds ) {
+      return this.setMinMax(
+        Math.max( this.minX, bounds.minX ),
+        Math.max( this.minY, bounds.minY ),
+        Math.max( this.minZ, bounds.minZ ),
+        Math.min( this.maxX, bounds.maxX ),
+        Math.min( this.maxY, bounds.maxY ),
+        Math.min( this.maxZ, bounds.maxZ )
+      );
+    },
+    
+    addCoordinates: function( x, y, z ) {
+      return this.setMinMax(
+        Math.min( this.minX, x ),
+        Math.min( this.minY, y ),
+        Math.min( this.minZ, z ),
+        Math.max( this.maxX, x ),
+        Math.max( this.maxY, y ),
+        Math.max( this.maxZ, z )
+      );
+    },
+    
+    addPoint: function( point ) {
+      return this.addCoordinates( point.x, point.y, point.z );
+    },
+    
     // round to integral values, expanding where necessary
     roundOut: function() {
-      this.minX = Math.floor( this.minX );
-      this.minY = Math.floor( this.minY );
-      this.minZ = Math.floor( this.minZ );
-      this.maxX = Math.ceil( this.maxX );
-      this.maxY = Math.ceil( this.maxY );
-      this.maxZ = Math.ceil( this.maxZ );
-      return this;
+      return this.setMinMax(
+        Math.floor( this.minX ),
+        Math.floor( this.minY ),
+        Math.floor( this.minZ ),
+        Math.ceil( this.maxX ),
+        Math.ceil( this.maxY ),
+        Math.ceil( this.maxZ )
+      );
     },
     
     // round to integral values, contracting where necessary
     roundIn: function() {
-      this.minX = Math.ceil( this.minX );
-      this.minY = Math.ceil( this.minY );
-      this.minZ = Math.ceil( this.minZ );
-      this.maxX = Math.floor( this.maxX );
-      this.maxY = Math.floor( this.maxY );
-      this.maxZ = Math.floor( this.maxZ );
-      return this;
+      return this.setMinMax(
+        Math.ceil( this.minX ),
+        Math.ceil( this.minY ),
+        Math.ceil( this.minZ ),
+        Math.floor( this.maxX ),
+        Math.floor( this.maxY ),
+        Math.floor( this.maxZ )
+      );
     },
     
     // transform a bounding box.
@@ -24759,51 +26539,66 @@ define( 'DOT/Bounds3',['require','DOT/dot','DOT/Vector3'],function( require ) {
       if ( this.isEmpty() ) {
         return this;
       }
-      var minX = this.minX;
-      var minY = this.minY;
-      var minZ = this.minZ;
-      var maxX = this.maxX;
-      var maxY = this.maxY;
-      var maxZ = this.maxZ;
+      
+      // optimization to bail for identity matrices
+      if ( matrix.isIdentity() ) {
+        return this;
+      }
+      
+      var minX = Number.POSITIVE_INFINITY;
+      var minY = Number.POSITIVE_INFINITY;
+      var minZ = Number.POSITIVE_INFINITY;
+      var maxX = Number.NEGATIVE_INFINITY;
+      var maxY = Number.NEGATIVE_INFINITY;
+      var maxZ = Number.NEGATIVE_INFINITY;
       
       // using mutable vector so we don't create excessive instances of Vector2 during this
       // make sure all 4 corners are inside this transformed bounding box
       var vector = new dot.Vector3();
-      this.setBounds( Bounds3.NOTHING );
-      this.addPoint( matrix.multiplyVector3( vector.set( minX, minY, minZ ) ) );
-      this.addPoint( matrix.multiplyVector3( vector.set( minX, maxY, minZ ) ) );
-      this.addPoint( matrix.multiplyVector3( vector.set( maxX, minY, minZ ) ) );
-      this.addPoint( matrix.multiplyVector3( vector.set( maxX, maxY, minZ ) ) );
-      this.addPoint( matrix.multiplyVector3( vector.set( minX, minY, maxZ ) ) );
-      this.addPoint( matrix.multiplyVector3( vector.set( minX, maxY, maxZ ) ) );
-      this.addPoint( matrix.multiplyVector3( vector.set( maxX, minY, maxZ ) ) );
-      this.addPoint( matrix.multiplyVector3( vector.set( maxX, maxY, maxZ ) ) );
-      return this;
+      
+      function withIt( vector ) {
+        minX = Math.min( minX, vector.x );
+        minY = Math.min( minY, vector.y );
+        minZ = Math.min( minZ, vector.z );
+        maxX = Math.max( maxX, vector.x );
+        maxY = Math.max( maxY, vector.y );
+        maxZ = Math.max( maxZ, vector.z );
+      }
+      
+      withIt( matrix.multiplyVector3( vector.setXYZ( this.minX, this.minY, this.minZ ) ) );
+      withIt( matrix.multiplyVector3( vector.setXYZ( this.minX, this.maxY, this.minZ ) ) );
+      withIt( matrix.multiplyVector3( vector.setXYZ( this.maxX, this.minY, this.minZ ) ) );
+      withIt( matrix.multiplyVector3( vector.setXYZ( this.maxX, this.maxY, this.minZ ) ) );
+      withIt( matrix.multiplyVector3( vector.setXYZ( this.minX, this.minY, this.maxZ ) ) );
+      withIt( matrix.multiplyVector3( vector.setXYZ( this.minX, this.maxY, this.maxZ ) ) );
+      withIt( matrix.multiplyVector3( vector.setXYZ( this.maxX, this.minY, this.maxZ ) ) );
+      withIt( matrix.multiplyVector3( vector.setXYZ( this.maxX, this.maxY, this.maxZ ) ) );
+      return this.setMinMax( minX, minY, minZ, maxX, maxY, maxZ );
     },
     
     // expands on all sides by length d
     dilate: function( d ) {
-      return this.set( this.minX - d, this.minY - d, this.minZ - d, this.maxX + d, this.maxY + d, this.maxZ + d );
+      return this.setMinMax( this.minX - d, this.minY - d, this.minZ - d, this.maxX + d, this.maxY + d, this.maxZ + d );
     },
     
     // dilates only in the x direction
     dilateX: function( x ) {
-      return this.set( this.minX - x, this.minY, this.minZ, this.maxX + x, this.maxY, this.maxZ );
+      return this.setMinMax( this.minX - x, this.minY, this.minZ, this.maxX + x, this.maxY, this.maxZ );
     },
     
     // dilates only in the y direction
     dilateY: function( y ) {
-      return this.set( this.minX, this.minY - y, this.minZ, this.maxX, this.maxY + y, this.maxZ );
+      return this.setMinMax( this.minX, this.minY - y, this.minZ, this.maxX, this.maxY + y, this.maxZ );
     },
     
     // dilates only in the z direction
     dilateZ: function( z ) {
-      return this.set( this.minX, this.minY, this.minZ - z, this.maxX, this.maxY, this.maxZ + z );
+      return this.setMinMax( this.minX, this.minY, this.minZ - z, this.maxX, this.maxY, this.maxZ + z );
     },
     
     // dilate with different amounts in the x, y and z directions
     dilateXYZ: function( x, y, z ) {
-      return this.set( this.minX - x, this.minY - y, this.minZ - z, this.maxX + x, this.maxY + y, this.maxZ + z );
+      return this.setMinMax( this.minX - x, this.minY - y, this.minZ - z, this.maxX + x, this.maxY + y, this.maxZ + z );
     },
     
     // contracts on all sides by length d, or x/y/z independently
@@ -24814,19 +26609,19 @@ define( 'DOT/Bounds3',['require','DOT/dot','DOT/Vector3'],function( require ) {
     erodeXYZ: function( x, y, z ) { return this.dilateXYZ( -x, -y, -z ); },
     
     shiftX: function( x ) {
-      return this.setMinX( this.minX + x ).setMaxX( this.maxX + x );
+      return this.setMinMax( this.minX + x, this.minY, this.minZ, this.maxX + x, this.maxY, this.maxZ );
     },
     
     shiftY: function( y ) {
-      return this.setMinY( this.minY + y ).setMaxY( this.maxY + y );
+      return this.setMinMax( this.minX, this.minY + y, this.minZ, this.maxX, this.maxY + y, this.maxZ );
     },
     
     shiftZ: function( z ) {
-      return this.setMinZ( this.minZ + z ).setMaxZ( this.maxZ + z );
+      return this.setMinMax( this.minX, this.minY, this.minZ + z, this.maxX, this.maxY, this.maxZ + z );
     },
     
     shift: function( x, y, z ) {
-      return this.shiftX( x ).shiftY( y ).shiftZ( z );
+      return this.setMinMax( this.minX + x, this.minY + y, this.minZ + z, this.maxX + x, this.maxY + y, this.maxZ + z );
     }
   };
   
@@ -27530,6 +29325,650 @@ define( 'DOT/Matrix',['require','DOT/dot','PHET_CORE/isArray','DOT/SingularValue
 
 // Copyright 2002-2013, University of Colorado Boulder
 
+define( 'AXON/axon',['require'],function( require ) {
+  
+
+  var axon = {};
+
+  // will be filled in by other modules
+  return axon;
+} );
+
+// Copyright 2002-2013, University of Colorado Boulder
+
+/**
+ * An observable property, notifies registered observers when the value changes.
+ *
+ * Uses the 'Constructor' pattern for object creation, which has the downside that
+ * all properties are created once for each instance. It would be nice if our functions
+ * were shared. But since the only way to create private fields is in the constructor,
+ * and the functions need access to those private fields, there doesn't seem to be
+ * any choice but to define the functions in the constructor.
+ *
+ * @author Chris Malley (PixelZoom, Inc.)
+ */
+define( 'AXON/Property',['require','AXON/axon'],function( require ) {
+  
+
+  var axon = require( 'AXON/axon' );
+
+  /**
+   * @param {*} value
+   * @constructor
+   */
+  axon.Property = function Property( value ) {
+
+    //Store the internal value and the initial value
+    this.storeValue( value );        // typically sets this._value
+    this.storeInitialValue( value ); // typically sets this._initialValue
+    this._observers = [];
+  };
+
+  axon.Property.prototype = {
+
+    /**
+     * Gets the value.  You can also use the es5 getter (property.value) but this means is provided for inner loops or internal code that must be fast.
+     * @return {*}
+     */
+    get: function() {
+      return this._value;
+    },
+
+    /**
+     * Sets the value and notifies registered observers.  You can also use the es5 getter (property.value) but this means is provided for inner loops or internal code that must be fast.
+     * If the value hasn't changed, this is a no-op.
+     *
+     * @param {*} value
+     */
+    set: function( value ) {
+      if ( !this.equalsValue( value ) ) {
+        this._setAndNotifyObservers( value );
+      }
+      return this;
+    },
+
+    // whether this property will not "change" when the passed-in value is set
+    equalsValue: function( value ) {
+      return value === this._value;
+    },
+
+    // store the current (new) value
+    storeValue: function( value ) {
+      this._value = value;
+    },
+
+    // store the initial value
+    storeInitialValue: function( value ) {
+      this._initialValue = value;
+    },
+
+    _setAndNotifyObservers: function( value ) {
+      var oldValue = this.get();
+      this.storeValue( value );
+      this._notifyObservers( oldValue );
+    },
+
+    _notifyObservers: function( oldValue ) {
+      var value = this.get();
+      // TODO: JO: avoid slice() by storing observers array correctly
+      var observersCopy = this._observers.slice(); // make a copy, in case notification results in removeObserver
+      for ( var i = 0; i < observersCopy.length; i++ ) {
+        observersCopy[i]( value, oldValue );
+      }
+    },
+
+    //Use this method when mutating a value (not replacing with a new instance) and you want to send notifications about the change.
+    //This is different from the normal axon strategy, but may be necessary to prevent memory allocations.
+    //This method is unsafe for removing observers because it assumes the observer list not modified, to save another allocation
+    //Only provides the new reference as a callback (no oldvalue)
+    //See https://github.com/phetsims/axon/issues/6
+    notifyObserversUnsafe: function() {
+      var value = this.get();
+      for ( var i = 0; i < this._observers.length; i++ ) {
+        this._observers[i]( value );
+      }
+    },
+
+    /**
+     * Resets the value to the initial value.
+     */
+    reset: function() {
+      this.set( this._initialValue );
+    },
+
+    /**
+     * This function returns a bound function that sets the specified value.  For use in creating closures e.g. with gui classes.
+     * For instance, to have a button that sets a property to true, instead of using
+     * button.click(function(){property.set(true);});
+     * you could use
+     * button.click(property._set(true));
+     * @param value the value to use when the setter is called.
+     * @return a function that can be used to set the specified value.
+     */
+    _set: function( value ) {
+      return this.set.bind( this, value );
+    },
+
+    get value() { return this.get(); },
+
+    set value( newValue ) { this.set( newValue ); },
+
+    /**
+     * Adds an observer and notifies it immediately.
+     * If observer is already registered, this is a no-op.
+     * The initial notification provides the current value for newValue and null for oldValue.
+     *
+     * @param {Function} observer a function of the form observer(newValue,oldValue)
+     */
+    link: function( observer ) {
+      if ( this._observers.indexOf( observer ) === -1 ) {
+        this._observers.push( observer );
+        observer( this.get(), null ); // null should be used when an object is expected but unavailable
+      }
+    },
+
+    /**
+     * Removes an observer.
+     * If observer is not registered, this is a no-op.
+     *
+     * @param {Function} observer
+     */
+    unlink: function( observer ) {
+      var index = this._observers.indexOf( observer );
+      if ( index !== -1 ) {
+        this._observers.splice( index, 1 );
+      }
+    },
+
+    /**
+     * Add an observer to the Property, without calling it back right away.  This is used when you need to register a listener without an immediate callback.
+     * @param {Function} observer  a function with a single argument, which is the value of the property at the time the function is called.
+     */
+    lazyLink: function( observer ) {
+      if ( this._observers.indexOf( observer ) === -1 ) {
+        this._observers.push( observer );
+      }
+    },
+
+    //Provide toString for console debugging, see http://stackoverflow.com/questions/2485632/valueof-vs-tostring-in-javascript
+    toString: function() {return 'Property{' + this.get() + '}'; },
+    valueOf: function() {return this.toString();},
+
+    /**
+     * Add a listener so that it will only fire once (and not on registration)
+     *
+     * I can see two ways to implement this:
+     * (a) add a field to the observer so after notifications it can be checked and possibly removed. Disadvantage: will make everything slower even if not using 'once'
+     * (b) wrap the observer in a new function which will call the observer and then remove itself.  Disadvantage: cannot remove an observer added using 'once'
+     * To avoid possible performance problems, use a wrapper function, and return it as a handle in case the 'once' listener must be removed before it is called once
+     *
+     * @param observer the listener which should be called back only for one property change (and not on registration)
+     * @returns {Function} the wrapper handle in case the wrapped function needs to be removed with 'unlink' before it is called once
+     */
+    once: function( observer ) {
+      var property = this;
+      var wrapper = function( newValue, oldValue ) {
+        observer( newValue, oldValue );
+        property.unlink( wrapper );
+      };
+      this.lazyLink( wrapper );
+      return wrapper;
+    },
+
+    /**
+     * Links an object's named attribute to this property.  Returns a handle so it can be removed.
+     * Example: modelVisibleProperty.linkAttribute(view,'visible');
+     *
+     * @param object
+     * @param attributeName
+     */
+    linkAttribute: function( object, attributeName ) {
+      var handle = function( value ) {object[attributeName] = value;};
+      this.link( handle );
+      return handle;
+    },
+
+    /**
+     * Returns a new DerivedProperty which is true/false based on whether the value matches (based on ===) the passed in argument.
+     * @param value
+     * @returns {axon.DerivedProperty}
+     */
+    valueEquals: function( value ) {
+      return new axon.DerivedProperty( [this], function( propertyValue ) { return propertyValue === value; } );
+    },
+
+    /**
+     * Returns a new boolean DerivedProperty which is true/false based on whether this value matches the other property based on ===.
+     * @param otherProperty
+     * @returns {DerivedProperty<boolean>}
+     */
+    and: function( otherProperty ) {
+      return new axon.DerivedProperty( [this, otherProperty], function( thisValue, otherValue ) { return thisValue && otherValue; } );
+    },
+
+    /**
+     * Not property, which does not propagate changes to dependents.
+     * @returns {DerivedProperty}
+     */
+    derivedNot: function() {
+      return new axon.DerivedProperty( [this], function( thisValue ) { return !thisValue; } );
+    },
+
+    /**
+     * Two way communication for not, so you can set the value and have it come back to the parent
+     * Note that noting about the following code is specific to booleans, although this should probably be used mostly for booleans.
+     * To unlink both listeners attached unlink a property created with not(), use detach()
+     */
+    not: function() {
+      var parentProperty = this;
+      var childProperty = new axon.Property( !this.value );
+
+      var setParentToChild = function( value ) {childProperty.set( !value );};
+      parentProperty.link( setParentToChild );
+
+      var setChildToParent = function( value ) {parentProperty.set( !value );};
+      childProperty.link( setChildToParent );
+
+      childProperty.detach = function() {
+        parentProperty.unlink( setParentToChild );
+        childProperty.unlink( setChildToParent );
+      };
+      return childProperty;
+    },
+
+    /**
+     * Convenience function for debugging a property values.  It prints the new value on registration and when changed.
+     * @param name debug name to be printed on the console
+     * @returns {Function} the handle to the linked listener in case it needs to be removed later
+     */
+    debug: function( name ) {
+      var listener = function( value ) { console.log( name, value ); };
+      this.link( listener );
+      return listener;
+    }
+  };
+
+  return axon.Property;
+} );
+
+// Copyright 2002-2013, University of Colorado Boulder
+
+/**
+ * Observable version of the basic 2-dimensional bounding box (Bounds2)
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'DOT/ObservableBounds2',['require','DOT/dot','PHET_CORE/inherit','PHET_CORE/extend','PHET_CORE/Poolable','AXON/Property','DOT/Bounds2'],function( require ) {
+  
+  
+  var dot = require( 'DOT/dot' );
+  
+  var inherit = require( 'PHET_CORE/inherit' );
+  var extend = require( 'PHET_CORE/extend' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
+  var Property = require( 'AXON/Property' );
+  require( 'DOT/Bounds2' );
+  
+  dot.ObservableBounds2 = function ObservableBounds2( minX, minY, maxX, maxY ) {
+    dot.Bounds2.call( this, minX, minY, maxX, maxY );
+    
+    this._oldValue = this.copy();
+    Property.call( this, this );
+  };
+  var ObservableBounds2 = dot.ObservableBounds2;
+  
+  inherit( dot.Bounds2, ObservableBounds2, extend( {}, Property.prototype, {
+    // returns this value directly
+    get: function() {
+      return this;
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * Overriding the core mutable methods (any mutable operation should call one of these)
+    *----------------------------------------------------------------------------*/
+    setMinMax: function( minX, minY, maxX, maxY ) {
+      if ( this.minX !== minX || this.minY !== minY || this.maxX !== maxX || this.maxY !== maxY ) {
+        this._oldValue.minX = this.minX;
+        this._oldValue.minY = this.minY;
+        this._oldValue.maxX = this.maxX;
+        this._oldValue.maxY = this.maxY;
+        this.minX = minX;
+        this.minY = minY;
+        this.maxX = maxX;
+        this.maxY = maxY;
+        this._notifyObservers( this._oldValue );
+      }
+      return this;
+    },
+    setMinX: function( minX ) {
+      if ( this.minX !== minX ) {
+        this._oldValue.minX = this.minX;
+        this.minX = minX;
+        this._notifyObservers( this._oldValue );
+      }
+      return this;
+    },
+    setMinY: function( minY ) {
+      if ( this.minY !== minY ) {
+        this._oldValue.minY = this.minY;
+        this.minY = minY;
+        this._notifyObservers( this._oldValue );
+      }
+      return this;
+    },
+    setMaxX: function( maxX ) {
+      if ( this.maxX !== maxX ) {
+        this._oldValue.maxX = this.maxX;
+        this.maxX = maxX;
+        this._notifyObservers( this._oldValue );
+      }
+      return this;
+    },
+    setMaxY: function( maxY ) {
+      if ( this.maxY !== maxY ) {
+        this._oldValue.maxY = this.maxY;
+        this.maxY = maxY;
+        this._notifyObservers( this._oldValue );
+      }
+      return this;
+    },
+    set: dot.Bounds2.prototype.set,
+    
+    // override with vector equality instead of instance equality
+    equalsValue: function( value ) {
+      return this.equals( value );
+    },
+    
+    // we are not storing a separate value field (_value), so we leave this blank
+    storeValue: function( value ) {
+    },
+    
+    // to prevent a user from modifying the passed in initial value, we store the x/y here
+    storeInitialValue: function( value ) {
+      this._initialMinX = value.minX;
+      this._initialMinY = value.minY;
+      this._initialMaxX = value.maxX;
+      this._initialMaxY = value.maxY;
+    },
+    
+    reset: function() {
+      this.setMinMax( this._initialMinX, this._initialMinY, this._initialMaxX, this._initialMaxY );
+    },
+    
+    toString: function() {
+      return 'ObservableBounds2(' + this.minX + ', ' + this.minY + ', ' + this.maxX + ', ' + this.maxY + ')';
+    }
+  } ) );
+  
+  // experimental object pooling
+  /* jshint -W064 */
+  Poolable( ObservableBounds2, {
+    defaultFactory: function() { return new ObservableBounds2(); },
+    constructorDuplicateFactory: function( pool ) {
+      return function( minX, minY, maxX, maxY ) {
+        if ( pool.length ) {
+          return pool.pop().setMinMax( minX, minY, maxX, maxY );
+        } else {
+          return new ObservableBounds2( minX, minY, maxX, maxY );
+        }
+      };
+    }
+  } );
+  
+  return ObservableBounds2;
+} );
+
+// Copyright 2002-2013, University of Colorado Boulder
+
+/**
+ * Observable version of the basic 3-dimensional matrix (Matrix3)
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'DOT/ObservableMatrix3',['require','DOT/dot','PHET_CORE/inherit','PHET_CORE/extend','PHET_CORE/Poolable','AXON/Property','DOT/Matrix3'],function( require ) {
+  
+  
+  var dot = require( 'DOT/dot' );
+  
+  var inherit = require( 'PHET_CORE/inherit' );
+  var extend = require( 'PHET_CORE/extend' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
+  var Property = require( 'AXON/Property' );
+  require( 'DOT/Matrix3' );
+  
+  dot.ObservableMatrix3 = function ObservableMatrix3( v00, v01, v02, v10, v11, v12, v20, v21, v22, type ) {
+    dot.Matrix3.call( this, v00, v01, v02, v10, v11, v12, v20, v21, v22, type );
+    
+    this._oldValue = this.copy();
+    this._skipChecks = false;
+    Property.call( this, this );
+  };
+  var ObservableMatrix3 = dot.ObservableMatrix3;
+  
+  inherit( dot.Matrix3, ObservableMatrix3, extend( {}, Property.prototype, {
+    // returns this value directly
+    get: function() {
+      return this;
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * Overriding the core mutable methods (any mutable operation should call one of these)
+    *----------------------------------------------------------------------------*/
+    // every mutable method goes through rowMajor
+    rowMajor: function( v00, v01, v02, v10, v11, v12, v20, v21, v22, type ) {
+      var skip = this._skipChecks;
+      var modified = skip ||
+                     v00 !== this.entries[0] ||
+                     v10 !== this.entries[1] ||
+                     v20 !== this.entries[2] ||
+                     v01 !== this.entries[3] ||
+                     v11 !== this.entries[4] ||
+                     v21 !== this.entries[5] ||
+                     v02 !== this.entries[6] ||
+                     v12 !== this.entries[7] ||
+                     v22 !== this.entries[8] ||
+                     type !== this.type;
+      if ( modified ) {
+        
+        if ( !skip && this._oldValue ) {
+          this._oldValue.entries[0] = this.entries[0];
+          this._oldValue.entries[1] = this.entries[1];
+          this._oldValue.entries[2] = this.entries[2];
+          this._oldValue.entries[3] = this.entries[3];
+          this._oldValue.entries[4] = this.entries[4];
+          this._oldValue.entries[5] = this.entries[5];
+          this._oldValue.entries[6] = this.entries[6];
+          this._oldValue.entries[7] = this.entries[7];
+          this._oldValue.entries[8] = this.entries[8];
+          this._oldValue.type = this.type;
+        }
+        
+        this.entries[0] = v00;
+        this.entries[1] = v10;
+        this.entries[2] = v20;
+        this.entries[3] = v01;
+        this.entries[4] = v11;
+        this.entries[5] = v21;
+        this.entries[6] = v02;
+        this.entries[7] = v12;
+        this.entries[8] = v22;
+        
+        // TODO: consider performance of the affine check here
+        this.type = type === undefined ? ( ( v20 === 0 && v21 === 0 && v22 === 1 ) ? dot.Matrix3.Types.AFFINE : dot.Matrix3.Types.OTHER ) : type;
+        
+        // if this isn't initialization, fire off changes and update the old value
+        if ( this._observers ) {
+          this._notifyObservers( skip ? null : this._oldValue );
+        }
+      }
+      
+      return this;
+    },
+    
+    // override set, since it is overridden by property
+    set: dot.Matrix3.prototype.set,
+    
+    // override with vector equality instead of instance equality
+    equalsValue: function( value ) {
+      return this.equals( value );
+    },
+    
+    // we are not storing a separate value field (_value), so we leave this blank
+    storeValue: function( value ) {
+    },
+    
+    // to prevent a user from modifying the passed in initial value, we store the x/y here
+    storeInitialValue: function( value ) {
+      this._initial00 = value.m00();
+      this._initial01 = value.m01();
+      this._initial02 = value.m02();
+      this._initial10 = value.m10();
+      this._initial11 = value.m11();
+      this._initial12 = value.m12();
+      this._initial20 = value.m20();
+      this._initial21 = value.m21();
+      this._initial22 = value.m22();
+      this._initialType = value.type;
+    },
+    
+    reset: function() {
+      this.rowMajor( this._initial00, this._initial01, this._initial02,
+                     this._initial10, this._initial11, this._initial12,
+                     this._initial20, this._initial21, this._initial22,
+                     this._initialType );
+    },
+    
+    toString: dot.Matrix3.prototype.toString
+  } ) );
+  
+  // experimental object pooling
+  /* jshint -W064 */
+  Poolable( ObservableMatrix3, {
+    defaultFactory: function() { return new ObservableMatrix3(); },
+    constructorDuplicateFactory: function( pool ) {
+      return function( v00, v01, v02, v10, v11, v12, v20, v21, v22, type ) {
+        if ( pool.length ) {
+          return pool.pop().rowMajor( v00, v01, v02, v10, v11, v12, v20, v21, v22, type );
+        } else {
+          return new ObservableMatrix3( v00, v01, v02, v10, v11, v12, v20, v21, v22, type );
+        }
+      };
+    }
+  } );
+  
+  return ObservableMatrix3;
+} );
+
+// Copyright 2002-2013, University of Colorado Boulder
+
+/**
+ * Observable version of the basic 2-dimensional vector
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'DOT/ObservableVector2',['require','DOT/dot','PHET_CORE/inherit','PHET_CORE/extend','PHET_CORE/Poolable','AXON/Property','DOT/Vector2'],function( require ) {
+  
+  
+  var dot = require( 'DOT/dot' );
+  
+  var inherit = require( 'PHET_CORE/inherit' );
+  var extend = require( 'PHET_CORE/extend' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
+  var Property = require( 'AXON/Property' );
+  require( 'DOT/Vector2' );
+  
+  dot.ObservableVector2 = function ObservableVector2( x, y ) {
+    dot.Vector2.call( this, x, y );
+    
+    this._oldValue = this.copy();
+    Property.call( this, this );
+  };
+  var ObservableVector2 = dot.ObservableVector2;
+  
+  inherit( dot.Vector2, ObservableVector2, extend( {}, Property.prototype, {
+    // returns this value directly
+    get: function() {
+      return this;
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * Overriding the core mutable methods (any mutable operation should call one of these)
+    *----------------------------------------------------------------------------*/
+    setXY: function( x, y ) {
+      if ( this.x !== x || this.y !== y ) {
+        this._oldValue.x = this.x;
+        this._oldValue.y = this.y;
+        this.x = x;
+        this.y = y;
+        this._notifyObservers( this._oldValue );
+      }
+      return this;
+    },
+    setX: function( x ) {
+      if ( this.x !== x ) {
+        this._oldValue.x = this.x;
+        this.x = x;
+        this._notifyObservers( this._oldValue );
+      }
+      return this;
+    },
+    setY: function( y ) {
+      if ( this.y !== y ) {
+        this._oldValue.y = this.y;
+        this.y = y;
+        this._notifyObservers( this._oldValue );
+      }
+      return this;
+    },
+    set: dot.Vector2.prototype.set,
+    
+    // override with vector equality instead of instance equality
+    equalsValue: function( value ) {
+      return this.equals( value );
+    },
+    
+    // we are not storing a separate value field (_value), so we leave this blank
+    storeValue: function( value ) {
+    },
+    
+    // to prevent a user from modifying the passed in initial value, we store the x/y here
+    storeInitialValue: function( value ) {
+      this._initialX = value.x;
+      this._initialY = value.y;
+    },
+    
+    reset: function() {
+      this.setXY( this._initialX, this._initialY );
+    },
+    
+    toString: function() {
+      return 'ObservableVector2(' + this.x + ', ' + this.y + ')';
+    }
+  } ) );
+  
+  // experimental object pooling
+  /* jshint -W064 */
+  Poolable( ObservableVector2, {
+    defaultFactory: function() { return new ObservableVector2(); },
+    constructorDuplicateFactory: function( pool ) {
+      return function( x, y ) {
+        if ( pool.length ) {
+          return pool.pop().setXY( x, y );
+        } else {
+          return new ObservableVector2( x, y );
+        }
+      };
+    }
+  } );
+  
+  return ObservableVector2;
+} );
+
+// Copyright 2002-2013, University of Colorado Boulder
+
 /**
  * An immutable permutation that can permute an array
  *
@@ -27691,7 +30130,7 @@ define( 'DOT/Quaternion',['require','DOT/dot','PHET_CORE/Poolable','DOT/Vector3'
   require( 'DOT/Util' );
   
   dot.Quaternion = function Quaternion( x, y, z, w ) {
-    this.set( x, y, z, w );
+    this.setXYZW( x, y, z, w );
     
     phetAllocation && phetAllocation( 'Quaternion' );
   };
@@ -27701,8 +30140,8 @@ define( 'DOT/Quaternion',['require','DOT/dot','PHET_CORE/Poolable','DOT/Vector3'
     constructor: Quaternion,
     
     isQuaternion: true,
-    
-    set: function( x, y, z, w ) {
+
+    setXYZW: function( x, y, z, w ) {
       this.x = x || 0;
       this.y = y || 0;
       this.z = z || 0;
@@ -28035,14 +30474,14 @@ define( 'DOT/Transform4',['require','DOT/dot','DOT/Matrix4','DOT/Vector3','DOT/R
   // takes a 4x4 matrix
   dot.Transform4 = function Transform4( matrix ) {
     // using immutable version for now. change it to the mutable identity copy if we need mutable operations on the matrices
-    this.set( matrix === undefined ? dot.Matrix4.IDENTITY : matrix );
+    this.setMatrix( matrix === undefined ? dot.Matrix4.IDENTITY : matrix );
   };
   var Transform4 = dot.Transform4;
   
   Transform4.prototype = {
     constructor: Transform4,
     
-    set: function( matrix ) {
+    setMatrix: function( matrix ) {
       this.matrix = matrix;
       
       // compute these lazily
@@ -28077,11 +30516,11 @@ define( 'DOT/Transform4',['require','DOT/dot','DOT/Matrix4','DOT/Vector3','DOT/R
     },
     
     prepend: function( matrix ) {
-      this.set( matrix.timesMatrix( this.matrix ) );
+      this.setMatrix( matrix.timesMatrix( this.matrix ) );
     },
     
     append: function( matrix ) {
-      this.set( this.matrix.timesMatrix( matrix ) );
+      this.setMatrix( this.matrix.timesMatrix( matrix ) );
     },
     
     prependTransform: function( transform ) {
@@ -28194,6 +30633,9 @@ define( 'DOT/main',[
   'DOT/Matrix',
   'DOT/Matrix3',
   'DOT/Matrix4',
+  'DOT/ObservableBounds2',
+  'DOT/ObservableMatrix3',
+  'DOT/ObservableVector2',
   'DOT/Permutation',
   'DOT/QRDecomposition',
   'DOT/Quaternion',
@@ -28210,6 +30652,34 @@ define( 'DOT/main',[
   ], function( dot ) {
     
     return dot;
+} );
+
+// Copyright 2002-2013, University of Colorado Boulder
+
+/**
+ * Creates an array of results from an iterator that takes a callback.
+ *
+ * For instance, if calling a function f( g ) will call g( 1 ), g( 2 ), and g( 3 ),
+ * collect( function( callback ) { f( callback ); } );
+ * will return [1,2,3].
+ *
+ * @author Jonathan Olson <olsonsjc@gmail.com>
+ */
+
+define( 'PHET_CORE/collect',['require','PHET_CORE/core'],function( require ) {
+  
+  
+  var core = require( 'PHET_CORE/core' );
+  
+  var collect = core.collect = function collect( iterate ) {
+    assert && assert( typeof iterate === 'function' );
+    var result = [];
+    iterate( function( ob ) {
+      result.push( ob );
+    } );
+    return result;
+  };
+  return collect;
 } );
 
 // Copyright 2002-2013, University of Colorado Boulder
@@ -28319,43 +30789,6 @@ define( 'PHET_CORE/loadScript',['require','PHET_CORE/core'],function( require ) 
 // Copyright 2002-2013, University of Colorado Boulder
 
 /**
- * Code for testing which platform is running.  Use sparingly, if at all!
- *
- * Sample usage:
- * if (platform.firefox) {node.renderer = 'canvas';}
- *
- * @author Sam Reid
- */
-define( 'PHET_CORE/platform',['require','PHET_CORE/core'],function( require ) {
-  
-  
-  var core = require( 'PHET_CORE/core' );
-  
-  // taken from HomeScreen
-  function isIE( version ) {
-    var r = new RegExp( 'msie' + (!isNaN( version ) ? ('\\s' + version) : ''), 'i' );
-    return r.test( navigator.userAgent );
-  }
-  
-  var platform = core.platform = {
-    get firefox() { return navigator.userAgent.toLowerCase().indexOf( 'firefox' ) > -1; },
-
-    //see http://stackoverflow.com/questions/3007480/determine-if-user-navigated-from-mobile-safari
-    get mobileSafari() { return navigator.userAgent.match( /(iPod|iPhone|iPad)/ ) && navigator.userAgent.match( /AppleWebKit/ ); },
-    
-    get ie9() { return isIE( 9 ); },
-    get ie10() { return isIE( 10 ); },
-    get ie() { return navigator.userAgent.indexOf( 'MSIE' ) !== -1; },
-    
-    // from HomeScreen
-    get android() { return navigator.userAgent.indexOf( 'Android' ) > 0; }
-  };
-  return platform;
-} );
-
-// Copyright 2002-2013, University of Colorado Boulder
-
-/**
  * Simple profiler which handles nested calls which provides a composite view, to help for micro-optimization.
  * Usage:
  * profiler.start('updateScene');
@@ -28371,9 +30804,9 @@ define( 'PHET_CORE/platform',['require','PHET_CORE/core'],function( require ) {
  */
 define( 'PHET_CORE/profiler',['require','PHET_CORE/core'],function( require ) {
   
-  
+
   var core = require( 'PHET_CORE/core' );
-  
+
   var stack = [];
   var results = {};
   var count = 0;
@@ -28426,6 +30859,7 @@ define( 'PHET_CORE/profiler',['require','PHET_CORE/core'],function( require ) {
 
     //sanity test
     testSelf: function() {
+      var a, b;
       var profiler = this;
       this.displayCount = 10000000;//Only show final result
       for ( var i = 0; i < 10; i++ ) {
@@ -28433,18 +30867,19 @@ define( 'PHET_CORE/profiler',['require','PHET_CORE/core'],function( require ) {
         for ( var k = 0; k < 10000; k++ ) {
           profiler.start( 'mloop' );
           for ( var m = 0; m < 10000; m++ ) {
-            var a = 100 * 200;
+            a = 100 * 200;
           }
           profiler.stop();
           profiler.start( 'xloop' );
           for ( var x = 0; x < 20000; x++ ) {
-            var b = 100 * 200;
+            b = 100 * 200;
           }
           profiler.stop();
         }
         profiler.stop();
       }
 
+      console.log( 'results: ', a, b );
       console.log( JSON.stringify( this.toJSON() ) );
 
       //sample correct output on chrome: {"mloop":{"average":0.01675,"count":100000},"xloop":{"average":0.03254,"count":100000},"physics":{"average":498.9,"count":10}}
@@ -28497,13 +30932,14 @@ require.config( {
   deps: [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main' ],
   
   paths: {
-    underscore: '../../sherpa/lodash-2.0.0',
+    underscore: '../../sherpa/lodash-2.4.1',
     jquery: '../../sherpa/jquery-2.0.3',
     SCENERY: '.',
     KITE: '../../kite/js',
     DOT: '../../dot/js',
     PHET_CORE: '../../phet-core/js',
-    ASSERT: '../../assert/js'
+    ASSERT: '../../assert/js',
+    AXON: '../../axon/js'
   },
   
   shim: {
