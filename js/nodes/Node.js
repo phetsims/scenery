@@ -2164,8 +2164,6 @@ define( function( require ) {
     },
     
     detachDOMDrawable: function( domSelfDrawable ) {
-      assert && assert( this.createSVGState, 'Lack of createSVGState indicates that this node is not renderable in SVG' );
-      
       var visualState = domSelfDrawable.visualState;
       
       var index = _.indexOf( this._visualStates, visualState );
@@ -2179,6 +2177,8 @@ define( function( require ) {
     *----------------------------------------------------------------------------*/
     
     attachSVGDrawable: function( svgSelfDrawable ) {
+      assert && assert( this.createSVGState, 'Lack of createSVGState indicates that this node is not renderable in SVG' );
+      
       var visualState = this.createSVGState( svgSelfDrawable );
       
       this._visualStates.push( visualState );
