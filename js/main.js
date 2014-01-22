@@ -14,6 +14,12 @@ define( [
     'SCENERY/scenery',
     'SCENERY/debug/DebugContext',
     
+    'SCENERY/display/BackboneBlock',
+    'SCENERY/display/Block',
+    'SCENERY/display/Display',
+    'SCENERY/display/DisplayInstance',
+    'SCENERY/display/RenderState',
+    
     'SCENERY/input/ButtonListener',
     'SCENERY/input/DownUpListener',
     'SCENERY/input/Event',
@@ -57,6 +63,7 @@ define( [
     'SCENERY/util/AccessibilityPeer',
     'SCENERY/util/CanvasContextWrapper',
     'SCENERY/util/Color',
+    'SCENERY/util/Features',
     'SCENERY/util/FixedNodeEvents',
     'SCENERY/util/Font',
     'SCENERY/util/Gradient',

@@ -27,20 +27,23 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   var Node = require( 'SCENERY/nodes/Node' ); // inherits from Node
-  var Renderer = require( 'SCENERY/layers/Renderer' );
+  require( 'SCENERY/layers/Renderer' );
   var Fillable = require( 'SCENERY/nodes/Fillable' );
   var Strokable = require( 'SCENERY/nodes/Strokable' );
-  var objectCreate = require( 'SCENERY/util/Util' ).objectCreate; // i.e. Object.create
   require( 'SCENERY/util/Font' );
   require( 'SCENERY/util/Util' ); // for canvasAccurateBounds and CSS transforms
   
   // set up the container and text for testing text bounds quickly (using approximateSVGBounds)
-  var svgTextSizeContainer = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+  var svgTextSizeContainer = document.createElementNS( scenery.svgns, 'svg' );
   svgTextSizeContainer.setAttribute( 'width', '2' );
   svgTextSizeContainer.setAttribute( 'height', '2' );
-  svgTextSizeContainer.setAttribute( 'style', 'display: hidden; pointer-events: none; position: absolute; left: -65535; right: -65535;' ); // so we don't flash it in a visible way to the user
-  var svgTextSizeElement = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
+  svgTextSizeContainer.setAttribute( 'style', 'visibility: hidden; pointer-events: none; position: absolute; left: -65535; right: -65535;' ); // so we don't flash it in a visible way to the user
+  // NOTE! copies createSVGElement
+  var svgTextSizeElement = document.createElementNS( scenery.svgns, 'text' );
   svgTextSizeElement.appendChild( document.createTextNode( '' ) );
+  svgTextSizeElement.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
+  svgTextSizeElement.setAttribute( 'text-rendering', 'geometricPrecision' );
+  svgTextSizeElement.setAttribute( 'lengthAdjust', 'spacingAndGlyphs' );
   svgTextSizeContainer.appendChild( svgTextSizeElement );
   
   // SVG bounds seems to be malfunctioning for Safari 5. Since we don't have a reproducible test machine for
@@ -62,11 +65,6 @@ define( function( require ) {
     // whether the text is rendered as HTML or not. if defined (in a subtype constructor), use that value instead
     this._isHTML = this._isHTML === undefined ? false : this._isHTML;
     
-    // we will dynamically change renderers, so they are initialized per-instance instead of per-type
-    this._supportedRenderers = [ Renderer.Canvas, Renderer.SVG, Renderer.DOM ];
-    
-    var thisFont = this;
-    
     // ensure we have a parameter object
     options = options || {};
     
@@ -84,8 +82,7 @@ define( function( require ) {
     this.initializeStrokable();
     
     Node.call( this, options );
-    
-    this.updateTextFlags();
+    this.updateTextFlags(); // takes care of setting up supported renderers
   };
   var Text = scenery.Text;
   
@@ -119,43 +116,31 @@ define( function( require ) {
       return this._boundsMethod;
     },
     
+    // allow more specific path types (Rectangle, Line) to override what restrictions we have
+    getTextRendererBitmask: function() {
+      var bitmask = 0;
+      
+      // canvas support (fast bounds may leak out of dirty rectangles)
+      if ( this._boundsMethod !== 'fast' && !this._isHTML ) {
+        bitmask |= scenery.bitmaskSupportsCanvas;
+      }
+      if( !this._isHTML ) {
+        bitmask |= scenery.bitmaskSupportsSVG;
+      }
+      
+      // fill and stroke will determine whether we have DOM text support
+      bitmask |= scenery.bitmaskSupportsDOM;
+      
+      return bitmask;
+    },
+    
+    invalidateSupportedRenderers: function() {
+      this.setRendererBitmask( this.getFillRendererBitmask() & this.getStrokeRendererBitmask() & this.getTextRendererBitmask() );
+    },
+    
     updateTextFlags: function() {
-      var thisText = this;
       this.boundsInaccurate = this._boundsMethod !== 'accurate';
-      
-      var renderersChanged = false;
-      function check( predicateValue, renderer ) {
-        var inSupportedRenderers = _.contains( thisText._supportedRenderers, renderer );
-        if ( predicateValue !== inSupportedRenderers ) {
-          renderersChanged = true;
-          if ( predicateValue ) {
-            // add the renderer
-            thisText._supportedRenderers.push( renderer );
-          } else {
-            // remove the renderer
-            thisText._supportedRenderers.splice( _.indexOf( thisText._supportedRenderers, renderer ), 1 );
-            if ( thisText.renderer === renderer ) {
-              // our set renderer is incompatible. set to null to disable this. TODO: investigate rendering system to prevent overrides like this?
-              thisText.renderer = null;
-              
-              // for now, error out
-              throw new Error( 'The explicitly specified Text renderer: ' + renderer.name + ' is not supported by this operation (probably invalid stroke, fill, or boundsMethod)' );
-            }
-          }
-        }
-      }
-      
-      check( this._boundsMethod !== 'fast' && !this._isHTML, Renderer.Canvas );
-      check( !this._isHTML, Renderer.SVG );
-      check( !this.hasStroke() && this.isFillDOMCompatible(), Renderer.DOM );
-      
-      if ( this._supportedRenderers.length === 0 ) {
-        throw new Error( 'No renderers are able to support this Text node (probably HTML text with a stroke or incompatible fill)' );
-      }
-      
-      if ( renderersChanged ) {
-        this.markLayerRefreshNeeded();
-      }
+      this.invalidateSupportedRenderers();
     },
     
     invalidateText: function() {
@@ -224,24 +209,29 @@ define( function( require ) {
     *----------------------------------------------------------------------------*/
     
     createSVGFragment: function( svg, defs, group ) {
-      var element = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
+      // NOTE! reference SVG element at top of file copies createSVGElement!
+      var element = document.createElementNS( scenery.svgns, 'text' );
       element.appendChild( document.createTextNode( '' ) );
+      element.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
+      element.setAttribute( 'text-rendering', 'geometricPrecision' );
+      element.setAttribute( 'lengthAdjust', 'spacingAndGlyphs' );
       return element;
     },
     
     updateSVGFragment: function( element ) {
-      var isRTL = this._direction === 'rtl';
-      
       // update the text-node's value
       element.lastChild.nodeValue = this._text;
       
       element.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
-      
-      // element.setAttribute( 'text-anchor', 'start' ); // not needed right now (default is inherit)
-      element.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
       element.setAttribute( 'direction', this._direction );
       
+      // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/SVG rendering (and overall length)
+      if ( isFinite( this._selfBounds.width ) ) {
+        element.setAttribute( 'textLength', this._selfBounds.width );
+      }
+      
       // set all of the font attributes, since we can't use the combined one
+      // TODO: optimize so we only set what is changed!!!
       element.setAttribute( 'font-family', this._font.getFamily() );
       element.setAttribute( 'font-size', this._font.getSize() );
       element.setAttribute( 'font-style', this._font.getStyle() );
@@ -319,7 +309,7 @@ define( function( require ) {
       var svgBounds = this.approximateSVGBounds(); // this seems to be slower than expected, mostly due to Font getters
 
       //If svgBounds are zero, then return the zero bounds
-      if (svgBounds.width===0 && svgBounds.height===0){
+      if ( !this._text || svgBounds.width === 0 ) {
         return svgBounds;
       }
       return scenery.Util.canvasAccurateBounds( function( context ) {
@@ -355,6 +345,7 @@ define( function( require ) {
         }
       }
       this.updateSVGFragment( svgTextSizeElement );
+      svgTextSizeElement.removeAttribute( 'textLength' ); // since we may set textLength, remove that so we can get accurate widths
       var rect = svgTextSizeElement.getBBox();
       return new Bounds2( rect.x, rect.y, rect.x + rect.width, rect.y + rect.height );
     },
@@ -522,9 +513,6 @@ define( function( require ) {
   
   Text.prototype._mutatorKeys = [ 'boundsMethod', 'text', 'font', 'fontWeight', 'fontFamily', 'fontStretch', 'fontStyle', 'fontSize', 'lineHeight',
                                   'direction' ].concat( Node.prototype._mutatorKeys );
-  
-  Text.prototype._supportedRenderers = [ Renderer.Canvas, Renderer.SVG, Renderer.DOM ];
-  Text.prototype._supportedRenderersWithFastBounds = [ Renderer.SVG, Renderer.DOM ]; // renderers for fast (SVG/DOM) bounds, since canvas dirty regions would present issues
   
   // font-specific ES5 setters and getters are defined using addFontForwarding above
   Object.defineProperty( Text.prototype, 'font', { set: Text.prototype.setFont, get: Text.prototype.getFont } );

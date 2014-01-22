@@ -46,6 +46,7 @@ define( function( require ) {
     this.downListener = {
       // mouse/touch up
       up: function( event ) {
+        sceneryEventLog && sceneryEventLog( 'DownUpListener (pointer) up for ' + handler.downTrail.toString() );
         assert && assert( event.pointer === handler.pointer );
         if ( !event.pointer.isMouse || event.domEvent.button === handler.options.mouseButton ) {
           handler.buttonUp( event );
@@ -54,6 +55,7 @@ define( function( require ) {
       
       // touch cancel
       cancel: function( event ) {
+        sceneryEventLog && sceneryEventLog( 'DownUpListener (pointer) cancel for ' + handler.downTrail.toString() );
         assert && assert( event.pointer === handler.pointer );
         handler.buttonUp( event );
       }
@@ -79,6 +81,7 @@ define( function( require ) {
       this.downTrail = event.trail.subtrailTo( event.currentTarget, false );
       this.pointer = event.pointer;
       
+      sceneryEventLog && sceneryEventLog( 'DownUpListener buttonDown for ' + this.downTrail.toString() ); 
       if ( this.options.down ) {
         this.options.down( event, this.downTrail );
       }
@@ -91,7 +94,6 @@ define( function( require ) {
       var currentTargetSave = event.currentTarget;
       event.currentTarget = this.downCurrentTarget; // up is handled by a pointer listener, so currentTarget would be null.
       if ( this.options.upInside || this.options.upOutside ) {
-        var scene = this.downTrail.rootNode();
         var trailUnderPointer = event.trail;
         
         // TODO: consider changing this so that it just does a hit check and ignores anything in front?
@@ -103,6 +105,7 @@ define( function( require ) {
           this.options.upOutside( event, this.downTrail );
         }
       }
+      sceneryEventLog && sceneryEventLog( 'DownUpListener buttonUp for ' + this.downTrail.toString() ); 
       if ( this.options.up ) {
         this.options.up( event, this.downTrail );
       }

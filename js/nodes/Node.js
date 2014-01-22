@@ -20,7 +20,6 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   var NodeEvents = require( 'SCENERY/util/FixedNodeEvents' ); // uncapitalized, because of JSHint (TODO: find the flag)
-  var LayerStrategy = require( 'SCENERY/layers/LayerStrategy' ); // used to set the default layer strategy on the prototype
   // require( 'SCENERY/layers/Renderer' ); // commented out so Require.js doesn't balk at the circular dependency
   
   // TODO: FIXME: Why do I have to comment out this dependency?
@@ -50,8 +49,6 @@ define( function( require ) {
    * renderer:         Forces Scenery to use the specific renderer (canvas/svg) to display this node (and if possible, children). Accepts both strings (e.g. 'canvas', 'svg', etc.) or actual Renderer objects (e.g. Renderer.Canvas, Renderer.SVG, etc.)
    * rendererOptions:  Parameter object that is passed to the created layer, and can affect how the layering process works.
    * layerSplit:       Forces a split between layers before and after this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.
-   * layerSplitBefore: Forces a split between layers before this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.
-   * layerSplitAfter:  Forces a split between layers after this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.
    * mouseArea:        Shape (in local coordinate frame) that overrides the 'hit area' for mouse input.
    * touchArea:        Shape (in local coordinate frame) that overrides the 'hit area' for touch input.
    * clipArea:         Shape (in local coordinate frame) that causes any graphics outside of the shape to be invisible (for the node and any children).
@@ -82,8 +79,8 @@ define( function( require ) {
     this._clipArea = null;
     
     // areas for hit intersection. if set on a Node, no descendants can handle events
-    this._mouseArea = null; // {Shape} for mouse position          in the local coordinate frame
-    this._touchArea = null; // {Shape} for touch and pen position  in the local coordinate frame
+    this._mouseArea = null; // {Shape|Bounds2} for mouse position          in the local coordinate frame
+    this._touchArea = null; // {Shape|Bounds2} for touch and pen position  in the local coordinate frame
     
     // the CSS cursor to be displayed over this node. null should be the default (inherit) value
     this._cursor = null;
@@ -137,12 +134,15 @@ define( function( require ) {
     this._rendererOptions = null; // options that will determine the layer type
     this._rendererLayerType = null; // cached layer type that is used by the LayerStrategy
     
-    // whether layers should be split before and/or after this node. setting both will put this node and its children into a separate layer
-    this._layerSplitBefore = false;
-    this._layerSplitAfter = false;
+    // whether layers should be split before and after this node
+    this._layerSplit = false;
     
     // the subtree pickable count is #pickable:true + #inputListeners, since we can prune subtrees with a pickable count of 0
     this._subtreePickableCount = 0;
+    
+    this._rendererBitmask = scenery.bitmaskNodeDefault;
+    this._subtreeRendererBitmask = scenery.bitmaskNodeDefault; // value not important initially, since it is dirty
+    // this._subtreeRendererBitmaskDirty = true; // TODO: include dirty flag!
     
     if ( options ) {
       this.mutate( options );
@@ -241,6 +241,7 @@ define( function( require ) {
     },
     
     getChildren: function() {
+      // TODO: ensure we are not triggering this in Scenery code when not necessary!
       return this._children.slice( 0 ); // create a defensive copy
     },
     
@@ -385,7 +386,12 @@ define( function( require ) {
         var oldBounds = this._bounds;
         
         // converts local to parent bounds. mutable methods used to minimize number of created bounds instances (we create one so we don't change references to the old one)
-        var newBounds = this.transformBoundsFromLocalToParent( this._selfBounds.copy().includeBounds( this._childBounds ) );
+        var localBounds = this._selfBounds.copy().includeBounds( this._childBounds );
+        if ( this.hasClipArea() ) {
+          // localBounds clipping in the local coordinate frame
+          localBounds = localBounds.intersection( this._clipArea.bounds );
+        }
+        var newBounds = this.transformBoundsFromLocalToParent( localBounds );
         newBounds = this.overrideBounds( newBounds ); // allow expansion of the bounds area
         var changed = !newBounds.equals( oldBounds );
         
@@ -418,6 +424,10 @@ define( function( require ) {
           _.each( that.children, function( child ) { childBounds.includeBounds( child._bounds ); } );
           
           var fullBounds = that.localToParentBounds( that._selfBounds ).union( that.localToParentBounds( childBounds ) );
+          
+          if ( that.hasClipArea() ) {
+            fullBounds = fullBounds.intersection( that.getClipArea().bounds );
+          }
           
           assertSlow && assertSlow( that._childBounds.equalsEpsilon( childBounds, epsilon ), 'Child bounds mismatch after validateBounds: ' +
                                                                                                     that._childBounds.toString() + ', expected: ' + childBounds.toString() );
@@ -452,7 +462,7 @@ define( function( require ) {
         // do this before the transformation to the parent coordinate frame
         if ( this._mouseArea ) {
           hasMouseAreas = true;
-          this._mouseBounds.includeBounds( this._mouseArea.bounds );
+          this._mouseBounds.includeBounds( this._mouseArea.isBounds ? this._mouseArea : this._mouseArea.bounds );
         }
         
         if ( hasMouseAreas ) {
@@ -493,7 +503,7 @@ define( function( require ) {
         // do this before the transformation to the parent coordinate frame
         if ( this._touchArea ) {
           hasTouchAreas = true;
-          this._touchBounds.includeBounds( this._touchArea.bounds );
+          this._touchBounds.includeBounds( this._touchArea.isBounds ? this._touchArea : this._touchArea.bounds );
         }
         
         if ( hasTouchAreas ) {
@@ -658,7 +668,12 @@ define( function( require ) {
     
     // local coordinate frame bounds
     getLocalBounds: function() {
-      return this.getSelfBounds().union( this.getChildBounds() );
+      var localBounds = this.getSelfBounds().union( this.getChildBounds() );
+      if ( this.hasClipArea() ) {
+        // localBounds clipping in the local coordinate frame
+        localBounds = localBounds.intersection( this._clipArea.bounds );
+      }
+      return localBounds;
     },
     
     // the bounds for content in render(), in "parent" coordinates
@@ -767,11 +782,13 @@ define( function( require ) {
       // tests for mouse and touch hit areas before testing containsPointSelf
       if ( hasHitAreas ) {
         if ( options.isMouse && this._mouseArea ) {
+          // NOTE: both Bounds2 and Shape have containsPoint! We use both here!
           result = this._mouseArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
           localPoint.freeToPool();
           return result;
         }
         if ( ( options.isTouch || options.isPen ) && this._touchArea ) {
+          // NOTE: both Bounds2 and Shape have containsPoint! We use both here!
           result = this._touchArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
           localPoint.freeToPool();
           return result;
@@ -1069,7 +1086,7 @@ define( function( require ) {
     },
     
     setMatrix: function( matrix ) {
-      this._transform.set( matrix );
+      this._transform.setMatrix( matrix );
     },
     
     getMatrix: function() {
@@ -1289,11 +1306,11 @@ define( function( require ) {
       return this._cursor;
     },
     
-    setMouseArea: function( shape ) {
-      assert && assert( shape === null || shape instanceof Shape, 'mouseArea needs to be a kite.Shape, or null' );
+    setMouseArea: function( area ) {
+      assert && assert( area === null || area instanceof Shape || area instanceof Bounds2, 'mouseArea needs to be a kite.Shape, dot.Bounds2, or null' );
       
-      if ( this._mouseArea !== shape ) {
-        this._mouseArea = shape; // TODO: could change what is under the mouse, invalidate!
+      if ( this._mouseArea !== area ) {
+        this._mouseArea = area; // TODO: could change what is under the mouse, invalidate!
         
         this.invalidateBounds();
       }
@@ -1303,11 +1320,11 @@ define( function( require ) {
       return this._mouseArea;
     },
     
-    setTouchArea: function( shape ) {
-      assert && assert( shape === null || shape instanceof Shape, 'touchArea needs to be a kite.Shape, or null' );
+    setTouchArea: function( area ) {
+      assert && assert( area === null || area instanceof Shape || area instanceof Bounds2, 'touchArea needs to be a kite.Shape, dot.Bounds2, or null' );
       
-      if ( this._touchArea !== shape ) {
-        this._touchArea = shape; // TODO: could change what is under the touch, invalidate!
+      if ( this._touchArea !== area ) {
+        this._touchArea = area; // TODO: could change what is under the touch, invalidate!
         
         this.invalidateBounds();
       }
@@ -1326,11 +1343,17 @@ define( function( require ) {
         this._clipArea = shape;
         
         this.notifyClipChange();
+        
+        this.invalidateBounds();
       }
     },
     
     getClipArea: function() {
       return this._clipArea;
+    },
+    
+    hasClipArea: function() {
+      return this._clipArea !== null;
     },
     
     updateLayerType: function() {
@@ -1358,6 +1381,50 @@ define( function( require ) {
       return !!this._rendererLayerType;
     },
     
+    supportsCanvas: function() {
+      return ( this._rendererBitmask & scenery.bitmaskSupportsCanvas ) !== 0;
+    },
+    
+    supportsSVG: function() {
+      return ( this._rendererBitmask & scenery.bitmaskSupportsSVG ) !== 0;
+    },
+    
+    supportsDOM: function() {
+      return ( this._rendererBitmask & scenery.bitmaskSupportsDOM ) !== 0;
+    },
+    
+    supportsWebGL: function() {
+      return ( this._rendererBitmask & scenery.bitmaskSupportsWebGL ) !== 0;
+    },
+    
+    supportsRenderer: function( renderer ) {
+      return ( this._rendererBitmask & renderer.bitmask ) !== 0;
+    },
+    
+    // return a supported renderer (fallback case, not called often)
+    pickARenderer: function() {
+      if ( this.supportsCanvas() ) {
+        return scenery.Renderer.Canvas;
+      } else if ( this.supportsSVG() ) {
+        return scenery.Renderer.SVG;
+      } else if ( this.supportsDOM() ) {
+        return scenery.Renderer.DOM;
+      }
+      // oi!
+    },
+    
+    setRendererBitmask: function( bitmask ) {
+      if ( bitmask !== this._rendererBitmask ) {
+        this._rendererBitmask = bitmask;
+        this.markLayerRefreshNeeded();
+      }
+    },
+    
+    // meant to be overridden
+    invalidateSupportedRenderers: function() {
+      
+    },
+    
     setRenderer: function( renderer ) {
       var newRenderer;
       if ( typeof renderer === 'string' ) {
@@ -1371,7 +1438,7 @@ define( function( require ) {
         throw new Error( 'unrecognized type of renderer: ' + renderer );
       }
       if ( newRenderer !== this._renderer ) {
-        assert && assert( !this.isPainted() || !newRenderer || _.contains( this._supportedRenderers, newRenderer ), 'renderer ' + newRenderer + ' not supported by ' + this.constructor.name );
+        assert && assert( !this.isPainted() || !newRenderer || this.supportsRenderer( newRenderer ), 'renderer ' + newRenderer + ' not supported by ' + this.constructor.name );
         this._renderer = newRenderer;
         
         this.updateLayerType();
@@ -1403,40 +1470,17 @@ define( function( require ) {
       return !!this._rendererOptions;
     },
     
-    setLayerSplitBefore: function( split ) {
-      assert && assert( typeof split === 'boolean' );
-      
-      if ( this._layerSplitBefore !== split ) {
-        this._layerSplitBefore = split;
-        this.markLayerRefreshNeeded();
-      }
-    },
-    
-    isLayerSplitBefore: function() {
-      return this._layerSplitBefore;
-    },
-    
-    setLayerSplitAfter: function( split ) {
-      assert && assert( typeof split === 'boolean' );
-      
-      if ( this._layerSplitAfter !== split ) {
-        this._layerSplitAfter = split;
-        this.markLayerRefreshNeeded();
-      }
-    },
-    
-    isLayerSplitAfter: function() {
-      return this._layerSplitAfter;
-    },
-    
     setLayerSplit: function( split ) {
       assert && assert( typeof split === 'boolean' );
       
-      if ( split !== this._layerSplitBefore || split !== this._layerSplitAfter ) {
-        this._layerSplitBefore = split;
-        this._layerSplitAfter = split;
+      if ( split !== this._layerSplit ) {
+        this._layerSplit = split;
         this.markLayerRefreshNeeded();
       }
+    },
+    
+    isLayerSplit: function() {
+      return this._layerSplit;
     },
     
     // returns a unique trail (if it exists) where each node in the ancestor chain has 0 or 1 parents
@@ -1969,13 +2013,7 @@ define( function( require ) {
     *----------------------------------------------------------------------------*/
     
     set layerSplit( value ) { this.setLayerSplit( value ); },
-    get layerSplit() { throw new Error( 'You can\'t get a layerSplit property, since it modifies two separate properties' ); },
-    
-    set layerSplitBefore( value ) { this.setLayerSplitBefore( value ); },
-    get layerSplitBefore() { return this.isLayerSplitBefore(); },
-    
-    set layerSplitAfter( value ) { this.setLayerSplitAfter( value ); },
-    get layerSplitAfter() { return this.isLayerSplitAfter(); },
+    get layerSplit() { return this.isLayerSplit(); },
     
     set renderer( value ) { this.setRenderer( value ); },
     get renderer() { return this.getRenderer(); },
@@ -2093,8 +2131,7 @@ define( function( require ) {
     },
     
     getPropString: function( spaces, includeChildren ) {
-      var self = this;
-      
+
       var result = '';
       function addProp( key, value, nowrap ) {
         if ( result ) {
@@ -2121,7 +2158,7 @@ define( function( require ) {
       // direct copy props
       if ( this.cursor ) { addProp( 'cursor', this.cursor ); }
       if ( !this.visible ) { addProp( 'visible', this.visible ); }
-      if ( !this.pickable ) { addProp( 'pickable', this.pickable ); }
+      if ( this.pickable !== null ) { addProp( 'pickable', this.pickable ); }
       if ( this.opacity !== 1 ) { addProp( 'opacity', this.opacity ); }
       
       if ( !this.transform.isIdentity() ) {
@@ -2138,12 +2175,8 @@ define( function( require ) {
         }
       }
       
-      if ( this._layerSplitBefore ) {
-        addProp( 'layerSplitBefore', true );
-      }
-      
-      if ( this._layerSplitAfter ) {
-        addProp( 'layerSplitAfter', true );
+      if ( this._layerSplit ) {
+        addProp( 'layerSplit', true );
       }
       
       return result;
@@ -2163,11 +2196,7 @@ define( function( require ) {
    */
   Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
                                   'left', 'right', 'top', 'bottom', 'center', 'centerX', 'centerY', 'renderer', 'rendererOptions',
-                                  'layerSplit', 'layerSplitBefore', 'layerSplitAfter', 'mouseArea', 'touchArea', 'clipArea' ];
-  
-  Node.prototype._supportedRenderers = [];
-  
-  Node.prototype.layerStrategy = LayerStrategy;
+                                  'layerSplit', 'mouseArea', 'touchArea', 'clipArea' ];
   
   // mix-in the events for Node
   /* jshint -W064 */

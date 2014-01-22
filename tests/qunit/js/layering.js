@@ -696,8 +696,7 @@
       renderer: 'canvas'
     } );
     var node7 = new scenery.Node( {
-      layerSplitBefore: true,
-      layerSplitAfter: true
+      layerSplit: true,
     } );
     var node5 = new scenery.Node( {
       renderer: 'svg'
@@ -711,11 +710,11 @@
     node4.addChild( node5 );
     var path12 = new scenery.Path( );
     var path14 = new scenery.Path( null, {
-      layerSplitBefore: true
+      layerSplit: true
     } );
     var path9 = new scenery.Path( null, {
       renderer: 'svg',
-      layerSplitAfter: true
+      layerSplit: true
     } );
     path9.addChild( path12 );
     path9.addChild( path14 );
@@ -726,7 +725,7 @@
     path13.addChild( node7 );
     var path10 = new scenery.Path( null, {
       renderer: 'canvas',
-      layerSplitBefore: true
+      layerSplit: true
     } );
     path10.addChild( scene );
     path10.addChild( path12 );
@@ -759,7 +758,7 @@
     path15.addChild( path14 );
     var path11 = new scenery.Path( null, {
       renderer: 'canvas',
-      layerSplitAfter: true
+      layerSplit: true
     } );
     path11.addChild( path13 );
     path11.addChild( path9 );

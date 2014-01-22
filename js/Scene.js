@@ -11,7 +11,6 @@
 define( function( require ) {
   'use strict';
   
-  var collect = require( 'PHET_CORE/collect' );
   var inherit = require( 'PHET_CORE/inherit' );
   
   var Bounds2 = require( 'DOT/Bounds2' );
@@ -34,8 +33,7 @@ define( function( require ) {
   require( 'SCENERY/overlays/PointerOverlay' );
 
   var Util = require( 'SCENERY/util/Util' );
-  var objectCreate = Util.objectCreate;
-  
+
   var accessibility = window.has && window.has( 'scenery.accessibility' );
   
   // debug flag to disable matching of layers when in 'match' mode
@@ -130,13 +128,13 @@ define( function( require ) {
       this.accessibilityLayer.style.position = 'relative';
       $main[0].appendChild( this.accessibilityLayer );
       
-      this.focusRingSVGContainer = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+      this.focusRingSVGContainer = document.createElementNS( scenery.svgns, 'svg' );
       this.focusRingSVGContainer.style.position = 'absolute';
       this.focusRingSVGContainer.style.top = 0;
       this.focusRingSVGContainer.style.left = 0;
       this.focusRingSVGContainer.style['pointer-events'] = 'none';
       this.resizeFocusRingSVGContainer( options.width, options.height );
-      this.focusRingPath = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+      this.focusRingPath = document.createElementNS( scenery.svgns, 'path' );
       this.focusRingPath.setAttribute( 'style', 'fill: none; stroke: blue; stroke-width: 5;' );
       this.focusRingPath.setAttribute( 'id', 'p1' );
       this.focusRingSVGContainer.appendChild( this.focusRingPath );
@@ -167,6 +165,7 @@ define( function( require ) {
       
       // check to see whether contents under pointers changed (and if so, send the enter/exit events) to maintain consistent state
       if ( this.input ) {
+        sceneryEventLog && sceneryEventLog( 'validatePointers from updateScene' );
         this.input.validatePointers();
       }
       
@@ -204,7 +203,7 @@ define( function( require ) {
   //                this.focusRingPath.setAttribute( 'd', rect.getSVGPath() );
   //                this.focusRingPath.lastSVGPath = rect.getSVGPath();
   //              } else {
-  //                var animate = document.createElementNS( 'http://www.w3.org/2000/svg', 'animate' );
+  //                var animate = document.createElementNS( scenery.svgns, 'animate' );
   //                animate.setAttribute( 'attributeType', 'XML' );
   //                animate.setAttribute( 'xlink:href', '#p1' );
   //                animate.setAttribute( 'attributeName', 'd' );
@@ -253,8 +252,7 @@ define( function( require ) {
     
     setActivePeer: function( peer ) {
       if ( this.activePeer !== peer ) {
-        var scene = this;
-        
+
         //Remove bounds listener from old active peer
         if ( this.activePeer ) {
           this.activePeer.instance.node.removeEventListener( 'bounds', this.updateFocusRing );
@@ -525,9 +523,6 @@ define( function( require ) {
       // need a reference to this, since it may change
       var afterLayerEndBoundary = afterLayer ? afterLayer.endBoundary : null;
       
-      var beforeLayerIndex = beforeLayer ? _.indexOf( this.layers, beforeLayer ) : -1;
-      var afterLayerIndex = afterLayer ? _.indexOf( this.layers, afterLayer ) : this.layers.length;
-      
       var beforePointer = beforeTrail ? new scenery.TrailPointer( beforeTrail, true ) : new scenery.TrailPointer( new scenery.Trail( this ), true );
       var afterPointer = afterTrail ? new scenery.TrailPointer( afterTrail, true ) : new scenery.TrailPointer( new scenery.Trail( this ), false );
       
@@ -759,8 +754,6 @@ define( function( require ) {
     },
     
     disposeLayers: function() {
-      var scene = this;
-      
       var i = this.layers.length;
       while ( i-- ) {
         this.disposeLayer( this.layers[i] );
@@ -909,6 +902,7 @@ define( function( require ) {
         }
         
         if ( this.input ) {
+          sceneryEventLog && sceneryEventLog( 'validatePointers from scene resize' );
           this.input.validatePointers();
         }
         
@@ -1004,7 +998,15 @@ define( function( require ) {
     setSceneCursor: function( cursor ) {
       if ( cursor !== this.lastCursor ) {
         this.lastCursor = cursor;
-        this.$main.css( 'cursor', cursor );
+        var customCursors = Scene.customCursors[cursor];
+        if ( customCursors ) {
+          // go backwards, so the most desired cursor sticks
+          for ( var i = customCursors.length - 1; i >= 0; i-- ) {
+            this.main.style.cursor = customCursors[i];
+          }
+        } else {
+          this.main.style.cursor = cursor;
+        }
       }
     },
     
@@ -1040,12 +1042,10 @@ define( function( require ) {
     },
     
     initializeWindowEvents: function( parameters ) {
-      var element = this.$main[0];
       this.initializeEvents( _.extend( {}, {
         listenerTarget: window,
         pointFromEvent: function pointFromEvent( evt ) {
-          var mainBounds = element.getBoundingClientRect();
-          return Vector2.createFromPool( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
+          return Vector2.createFromPool( evt.clientX, evt.clientY );
         }
       }, parameters ) );
     },
@@ -1321,12 +1321,13 @@ define( function( require ) {
       new scenery.Trail( this ).eachTrailUnder( function( trail ) {
         var beforeSplitTrail;
         var afterSplitTrail;
-        if ( trail.lastNode().layerSplitBefore ) {
+        if ( trail.lastNode().layerSplit ) {
+          // for the "before" split
           beforeSplitTrail = trail.previousPainted();
           afterSplitTrail = trail.lastNode().isPainted() ? trail : trail.nextPainted();
-          assert && assert( !beforeSplitTrail || !afterSplitTrail || beforeSplitTrail.getInstance().layer !== afterSplitTrail.getInstance().layer, 'layerSplitBefore layers need to be different' );
-        }
-        if ( trail.lastNode().layerSplitAfter ) {
+          assert && assert( !beforeSplitTrail || !afterSplitTrail || beforeSplitTrail.getInstance().layer !== afterSplitTrail.getInstance().layer, 'layerSplit layers need to be different' );
+          
+          //for the "after" split
           // shift a pointer from the (nested) end of the trail to the next isBefore (if available)
           var ptr = new scenery.TrailPointer( trail.copy(), false );
           while ( ptr && ptr.isAfter ) {
@@ -1337,7 +1338,7 @@ define( function( require ) {
           if ( ptr ) {
             beforeSplitTrail = ptr.trail.previousPainted();
             afterSplitTrail = ptr.trail.lastNode().isPainted() ? ptr.trail : ptr.trail.nextPainted();
-            assert && assert( !beforeSplitTrail || !afterSplitTrail || beforeSplitTrail.getInstance().layer !== afterSplitTrail.getInstance().layer, 'layerSplitAfter layers need to be different' );
+            assert && assert( !beforeSplitTrail || !afterSplitTrail || beforeSplitTrail.getInstance().layer !== afterSplitTrail.getInstance().layer, 'layerSplit layers need to be different' );
           }
         }
       } );
@@ -1383,7 +1384,6 @@ define( function( require ) {
       
       startPointer.depthFirstUntil( endPointer, function( pointer ) {
         var div;
-        var ptr = str( pointer );
         var node = pointer.trail.lastNode();
         
         function addQualifier( text ) {
@@ -1430,11 +1430,8 @@ define( function( require ) {
           if ( node._rendererOptions ) {
             // addQualifier( 'rendererOptions:' + _.each( node._rendererOptions, function( option, key ) { return key + ':' + str( option ); } ).join( ',' ) );
           }
-          if ( node._layerSplitBefore ) {
-            addQualifier( 'layerSplitBefore' );
-          }
-          if ( node._layerSplitAfter ) {
-            addQualifier( 'layerSplitAfter' );
+          if ( node._layerSplit ) {
+            addQualifier( 'layerSplit' );
           }
           if ( node._opacity < 1 ) {
             addQualifier( 'opacity:' + node._opacity );
@@ -1483,7 +1480,7 @@ define( function( require ) {
       var nodes = this.getTopologicallySortedNodes().slice( 0 ).reverse(); // defensive slice, in case we store the order somewhere
       
       function name( node ) {
-        return node === scene ? 'scene' : node.constructor.name.toLowerCase() + node.id;
+        return node === scene ? 'scene' : ( ( node.constructor.name ? node.constructor.name.toLowerCase() : '(node)' ) + node.id );
       }
       
       _.each( nodes, function( node ) {
@@ -1506,6 +1503,11 @@ define( function( require ) {
       return result;
     }
   } );
+  
+  Scene.customCursors = {
+    'scenery-grab-pointer': ['grab', '-moz-grab', '-webkit-grab', 'pointer'],
+    'scenery-grabbing-pointer': ['grabbing', '-moz-grabbing', '-webkit-grabbing', 'pointer']
+  };
   
   function applyCSSHacks( $main, options ) {
     // to use CSS3 transforms for performance, hide anything outside our bounds by default

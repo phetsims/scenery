@@ -14,7 +14,7 @@
 
   <!-- jQuery and LoDash are dependencies -->
   <script src="../../sherpa/jquery-2.0.3.min.js"></script>
-  <script src="../../sherpa/lodash-2.0.0.min.js"></script>
+  <script src="../../sherpa/lodash-2.4.1.min.js"></script>
 
   <!-- For the styling -->
   <script src="../../sherpa/bootstrap-2.2.2.js"></script>
@@ -182,8 +182,6 @@
       <a class="sublink" href="#node-renderer">renderer</a><br>
       <a class="sublink" href="#node-rendererOptions">rendererOptions</a><br>
       <a class="sublink" href="#node-layerSplit">layerSplit</a><br>
-      <a class="sublink" href="#node-layerSplitBefore">layerSplitBefore</a><br>
-      <a class="sublink" href="#node-layerSplitAfter">layerSplitAfter</a><br>
 
       <a class="navlink" href="#scene">Scene</a><br>
       <a class="sublink" href="#scene-options">(options)</a><br>
@@ -402,8 +400,6 @@ has.add( 'assert.slow', function() { return false; } );
         <li><a href="#node-renderer">renderer</a>: Forces Scenery to use the specific renderer (canvas/svg) to display this node (and if possible, children). Accepts both strings (e.g. 'canvas', 'svg', etc.) or actual Renderer objects (e.g. Renderer.Canvas, Renderer.SVG, etc.)</li>
         <li><a href="#node-rendererOptions">rendererOptions</a>: Parameter object that is passed to the created layer, and can affect how the layering process works.</li>
         <li><a href="#node-layerSplit">layerSplit</a>: Forces a split between layers before and after this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.</li>
-        <li><a href="#node-layerSplitBefore">layerSplitBefore</a>: Forces a split between layers before this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.</li>
-        <li><a href="#node-layerSplitAfter">layerSplitAfter</a>: Forces a split between layers after this node (and its children) have been rendered. Useful for performance with Canvas-based renderers.</li>
         <li><a href="#node-mouseArea">mouseArea</a>: Shape (in local coordinate frame) that overrides the 'hit area' for mouse input.</li>
         <li><a href="#node-touchArea">touchArea</a>: Shape (in local coordinate frame) that overrides the 'hit area' for touch input.</li>
         <li><a href="#node-clipArea">clipArea</a>: Shape (in local coordinate frame) that causes any graphics outside of the shape to be invisible (for the node and any children).</li>
@@ -486,12 +482,23 @@ scene.addChild( new scenery.Node( {
       <p>
         <code>node.cursor</code> is a getter/setter linked to <code>node.getCursor()</code> and <code>node.setCursor( cursor )</code>.
         By default it is null (default cursor), but this can be set to
-        the string for any <a href="https://developer.mozilla.org/en-US/docs/CSS/cursor">CSS cursor value</a>. There is
+        the string for any <a href="https://developer.mozilla.org/en-US/docs/CSS/cursor">CSS cursor value</a>, and some extra Scenery-specified ones below. There is
         <a href="../examples/cursors.html">a cursor example page</a> that demos a number of available cursors.
       </p>
       <p>
         The cursor is updated whenever <a href="#scene-updateCursor">scene.updateCursor</a> or <a href="#scene-updateScene">scene.updateScene</a> is called, and event initialization like <a href="#scene-initializeStandaloneEvents">scene.initializeStandaloneEvents</a> should be added so Scenery can track the mouse input.
       </p>
+      <p>
+        There are some Scenery-specific cursor values that can be set:
+      </p>
+      <ul>
+        <li>
+          scenery-grab-pointer: attempts to use browser-prefixed 'grab' values (newer), but falls back to the 'pointer' if not available
+        </li>
+        <li>
+          scenery-grabbing-pointer: attempts to use browser-prefixed 'grabbing' values (newer), but falls back to the 'pointer' if not available
+        </li>
+      </ul>
       <div id="example-cursor" class="exampleScene" style="width: 128px; height: 64px; margin: 0 auto;"></div>
       <script type="text/javascript">
 docExample( 'example-cursor', function( scene ) {
@@ -516,6 +523,9 @@ scene.updateOnRequestAnimationFrame();
         are gaps between children which should still respond to the event.
       </p>
       <p>
+        Accepts both arbitrary shapes (<a href="../../kite/doc#shape">Shape</a>) and bounding boxes (<a href="../../dot/doc#bounds2">Bounds2</a>).
+      </p>
+      <p>
         The mouse area supersedes the hit regions for mouse events of the node itself and its descendants.
         Setting mouseArea on a Node will cause it to either return no hit (for it or its children when outside of the mouseArea) or this Node as an event target.
       </p>
@@ -524,6 +534,9 @@ scene.updateOnRequestAnimationFrame();
       <p>
         Sets an alternative hit region when receiving touch events. Useful for expanding
         where the user can touch controls.
+      </p>
+      <p>
+        Accepts both arbitrary shapes (<a href="../../kite/doc#shape">Shape</a>) and bounding boxes (<a href="../../dot/doc#bounds2">Bounds2</a>).
       </p>
       <p>
         The touch area supersedes the hit regions for touch events of the node itself and its descendants.
@@ -544,7 +557,7 @@ scene.updateOnRequestAnimationFrame();
         clipArea is not currently compatible with CSS-transformed SVG rendering if the clipArea is on an ancestor of the CSS-transformed Node.
       </p>
       <p>
-        clipArea does not affect the bounds of the Node (matching SVG's behavior)
+        clipArea affects the bounds and localBounds of the Node
       </p>
       <div id="example-clipArea" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
       <script type="text/javascript">
@@ -787,23 +800,8 @@ scene.addChild( new scenery.Node( {
 
       <h4 id="node-layerSplit">node.layerSplit</h4>
       <p>
-        Setter backed by <code>node.setLayerSplit( boolean )</code> that will set both <a href="#node-layerSplitBefore">layerSplitBefore</a> and
-        <a href="#node-layerSplitAfter">layerSplitAfter</a> at the same time.
-      </p>
-      <p>
-        Setting to true will cause anything rendered before or after to be in a separate layer from this node and its children.
-      </p>
-
-      <h4 id="node-layerSplitBefore">node.layerSplitBefore</h4>
-      <p>
-        Setter backed by <code>node.setLayerSplitBefore( boolean )</code> that, when set to true, will cause anything rendered before this node to
-        be in a separate layer from this node and its children.
-      </p>
-
-      <h4 id="node-layerSplitAfter">node.layerSplitAfter</h4>
-      <p>
-        Setter backed by <code>node.setLayerSplitAfter( boolean )</code> that, when set to true, will cause anything rendered after this node to
-        be in a separate layer from this node and its children.
+        Setter backed by <code>node.setLayerSplit( boolean )</code> that, when to true will cause anything rendered before or after to be in a
+        separate layer from this node and its children.
       </p>
 
 

@@ -622,6 +622,110 @@ define( function( require ) {
     }, false );
   };
   
+  // The index at which the two trails diverge. If a.length === b.length === branchIndex, the trails are identical
+  Trail.branchIndex = function( a, b ) {
+    assert && assert( a.nodes[0] === b.nodes[0], 'Branch changes require roots to be the same' );
+    var branchIndex;
+    var shortestLength = Math.min( a.length, b.length );
+    for ( branchIndex = 0; branchIndex < shortestLength; branchIndex++ ) {
+      if ( a.nodes[branchIndex] !== b.nodes[branchIndex] ) {
+        break;
+      }
+    }
+    return branchIndex;
+  };
+  
+  // The subtrail from the root that both trails share
+  Trail.sharedTrail = function( a, b ) {
+    return a.slice( 0, Trail.branchIndex( a, b ) );
+  };
+  
+  /*
+   * Fires subtree(trail) or self(trail) on the callbacks to create disjoint subtrees (trails) that cover exactly the nodes
+   * inclusively between a and b in rendering order.
+   * We try to consolidate these as much as possible.
+   *
+   * "a" and "b" are treated like self painted trails in the rendering order
+   * 
+   *
+   * Example tree:
+   *   a
+   *   - b
+   *   --- c
+   *   --- d
+   *   - e
+   *   --- f
+   *   ----- g
+   *   ----- h
+   *   ----- i
+   *   --- j
+   *   ----- k
+   *   - l
+   *   - m
+   *   --- n
+   *
+   * spannedSubtrees( a, a ) -> self( a );
+   * spannedSubtrees( c, n ) -> subtree( a ); NOTE: if b is painted, that wouldn't work!
+   * spannedSubtrees( h, l ) -> subtree( h ); subtree( i ); subtree( j ); self( l );
+   * spannedSubtrees( c, i ) -> [b,f] --- wait, include e self?
+   */
+  Trail.spannedSubtrees = function( a, b ) {
+    // assert && assert( a.nodes[0] === b.nodes[0], 'Spanned subtrees for a and b requires that a and b have the same root' );
+    
+    // a.reindex();
+    // b.reindex();
+    
+    // var subtrees = [];
+    
+    // var branchIndex = Trail.branchIndex( a, b );
+    // assert && assert( branchIndex > 0, 'Branch index should always be > 0' );
+    
+    // if ( a.length === branchIndex && b.length === branchIndex ) {
+    //   // the two trails are equal
+    //   subtrees.push( a );
+    // } else {
+    //   // find the first place where our start isn't the first child
+    //   for ( var before = a.length - 1; before >= branchIndex; before-- ) {
+    //     if ( a.indices[before-1] !== 0 ) {
+    //       break;
+    //     }
+    //   }
+      
+    //   // find the first place where our end isn't the last child
+    //   for ( var after = a.length - 1; after >= branchIndex; after-- ) {
+    //     if ( b.indices[after-1] !== b.nodes[after-1]._children.length - 1 ) {
+    //       break;
+    //     }
+    //   }
+      
+    //   if ( before < branchIndex && after < branchIndex ) {
+    //     // we span the entire tree up to nodes[branchIndex-1], so return only that subtree
+    //     subtrees.push( a.slice( 0, branchIndex ) );
+    //   } else {
+    //     // walk the subtrees down from the start
+    //     for ( var ia = before; ia >= branchIndex; ia-- ) {
+    //       subtrees.push( a.slice( 0, ia + 1 ) );
+    //     }
+        
+    //     // walk through the middle
+    //     var iStart = a.indices[branchIndex-1];
+    //     var iEnd = b.indices[branchIndex-1];
+    //     var base = a.slice( 0, branchIndex );
+    //     var children = base.lastNode()._children;
+    //     for ( var im = iStart; im <= iEnd; im++ ) {
+    //       subtrees.push( base.copy().addDescendant( children[im], im ) );
+    //     }
+        
+    //     // walk the subtrees up to the end
+    //     for ( var ib = branchIndex; ib <= after; ib++ ) {
+    //       subtrees.push( b.slice( 0, ib + 1 ) );
+    //     }
+    //   }
+    // }
+    
+    // return subtrees;
+  };
+  
   return Trail;
 } );
 

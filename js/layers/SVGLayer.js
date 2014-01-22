@@ -24,10 +24,6 @@ define( function( require ) {
   require( 'SCENERY/util/Trail' );
   require( 'SCENERY/util/Util' );
   
-  // used namespaces
-  var svgns = 'http://www.w3.org/2000/svg';
-  var xlinkns = 'http://www.w3.org/1999/xlink';
-  
   scenery.SVGLayer = function SVGLayer( args ) {
     sceneryLayerLog && sceneryLayerLog( 'SVGLayer constructor' );
     var $main = args.$main;
@@ -35,14 +31,14 @@ define( function( require ) {
     this.scene = args.scene;
     
     // main SVG element
-    this.svg = document.createElementNS( svgns, 'svg' );
+    this.svg = document.createElementNS( scenery.svgns, 'svg' );
     
     // the SVG has a single group under it, which corresponds to the transform of the layer's base node
     // TODO: consider renaming to 'this.baseGroup'
-    this.g = document.createElementNS( svgns, 'g' );
+    this.g = document.createElementNS( scenery.svgns, 'g' );
     
     // the <defs> block that we will be stuffing gradients and patterns into
-    this.defs = document.createElementNS( svgns, 'defs' );
+    this.defs = document.createElementNS( scenery.svgns, 'defs' );
     
     var width = args.scene.sceneBounds.width;
     var height = args.scene.sceneBounds.height;
@@ -109,7 +105,7 @@ define( function( require ) {
           
           if ( lastId ) {
             // we have a parent group to which we need to be added
-            group = document.createElementNS( svgns, 'g' );
+            group = document.createElementNS( scenery.svgns, 'g' );
             
             // apply the node's transform to the group
             this.applyTransform( subtrail.lastNode().getTransform(), group );
@@ -210,7 +206,6 @@ define( function( require ) {
         // if there is already a child, we need to do a scan to ensure we place our group as a child in the correct order (above/below)
         
         // scan other child groups in the parentGroup to find where we need to be (index i)
-        var afterNode = null;
         var indexIndex = subtrail.length - 2; // index into the trail's indices
         var ourIndex = subtrail.indices[indexIndex];
         var i;
@@ -286,11 +281,11 @@ define( function( require ) {
       }
       
       if ( node._clipArea ) {
-        var definition = document.createElementNS( svgns, 'clipPath' );
+        var definition = document.createElementNS( scenery.svgns, 'clipPath' );
         definition.setAttribute( 'id', clipId );
         definition.setAttribute( 'clipPathUnits', 'userSpaceOnUse' );
         
-        var path = document.createElementNS( svgns, 'path' );
+        var path = document.createElementNS( scenery.svgns, 'path' );
         path.setAttribute( 'd', node._clipArea.getSVGPath() );
         definition.appendChild( path );
         
@@ -365,22 +360,22 @@ define( function( require ) {
       if ( this.cssTransform ) {
         // we want to set the baseNodeTransform to a translation so that it maps the baseNode's self/children in the baseNode's local bounds to (0,0,w,h)
         var internalBounds = scratchBounds1; // pooled copy
-        internalBounds.setBounds( this.baseNode.getBounds() );
+        internalBounds.set( this.baseNode.getBounds() );
         this.baseNode.transformBoundsFromParentToLocal( internalBounds );
         var padding = scenery.Layer.cssTransformPadding;
         
         // if there is nothing, or the bounds are empty for some reason, skip this!
         if ( !internalBounds.isEmpty() ) {
-          this.baseNodeTransform.set( Matrix3.translation( Math.ceil( -internalBounds.minX + padding), Math.ceil( -internalBounds.minY + padding ) ) );
+          this.baseNodeTransform.setMatrix( Matrix3.translation( Math.ceil( -internalBounds.minX + padding), Math.ceil( -internalBounds.minY + padding ) ) );
           
           // NOTE: this is mutable! don't use internalBounds after this
-          var baseNodeInteralBounds = internalBounds.transform( this.baseNodeTransform.getMatrix() );
+          var baseNodeInternalBounds = internalBounds.transform( this.baseNodeTransform.getMatrix() );
           
           // sanity check to ensure we are within that range
-          assert && assert( baseNodeInteralBounds.minX >= 0 && baseNodeInteralBounds.minY >= 0 );
+          assert && assert( baseNodeInternalBounds.minX >= 0 && baseNodeInternalBounds.minY >= 0 );
           
-          this.updateContainerDimensions( Math.ceil( baseNodeInteralBounds.maxX + padding ),
-                                          Math.ceil( baseNodeInteralBounds.maxY + padding ) );
+          this.updateContainerDimensions( Math.ceil( baseNodeInternalBounds.maxX + padding ),
+                                          Math.ceil( baseNodeInternalBounds.maxY + padding ) );
         }
         
         // if this gets removed, update initializeBase()

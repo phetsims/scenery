@@ -9,8 +9,6 @@
 define( function( require ) {
   'use strict';
   
-  var Matrix3 = require( 'DOT/Matrix3' );
-  
   var scenery = require( 'SCENERY/scenery' );
   
   /*
@@ -22,7 +20,7 @@ define( function( require ) {
    *    drag: null            // if non-null, called when the user moves something with a drag (not a start or end event).
    *                                                                         drag( event, trail )
    *    end: null             // if non-null, called when a drag is ended.   end( event, trail )
-   *    translate:            // if this exists, translate( { delta: _, oldPosition: _, position: _ } ) will be called instead of directly translating the node
+   *    translate:            // if this exists, translate( { delta: _, oldPosition: _, position: _ } ) will be called.
    * }
    */
   scenery.SimpleDragHandler = function SimpleDragHandler( options ) {
@@ -58,7 +56,7 @@ define( function( require ) {
         handler.node.prependMatrix( newMatrix.inverted().timesMatrix( oldMatrix ) );
         
         // store the new matrix so we can do deltas using it now
-        handler.transform.set( newMatrix );
+        handler.transform.setMatrix( newMatrix );
       }
     };
     

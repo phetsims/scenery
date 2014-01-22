@@ -34,9 +34,6 @@ define( function( require ) {
   var weights = [ 'normal', 'bold', 'bolder', 'lighter', '100', '200', '300', '400', '500', '600', '700', '800', '900' ];
   var stretches = [ 'normal', 'ultra-condensed', 'extra-condensed', 'condensed', 'semi-condensed', 'semi-expanded', 'expanded', 'extra-expanded', 'ultra-expanded' ];
   
-  // size constants used for detection
-  var sizes = [ 'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large', 'larger', 'smaller' ];
-  
   function castSize( size ) {
     if ( typeof size === 'number' ) {
       return size + 'px'; // add the pixels suffix by default for numbers

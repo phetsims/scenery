@@ -12,6 +12,9 @@ define( function( require ) {
   'use strict';
   
   var scenery = require( 'SCENERY/scenery' );
+  var platform = require( 'PHET_CORE/platform' );
+  
+  var isSafari5 = platform.safari5;
   
   scenery.Fillable = function Fillable( type ) {
     var proto = type.prototype;
@@ -126,14 +129,7 @@ define( function( require ) {
       return style;
     };
     
-    proto.isFillDOMCompatible = function() {
-      // make sure we're not a pattern or gradient
-      return !this._fill || !this._fill.getSVGDefinition;
-    };
-    
     proto.getCSSFill = function() {
-      assert && assert( this.isFillDOMCompatible() );
-      
       // if it's a Color object, get the corresponding CSS
       // 'transparent' will make us invisible if the fill is null
       return this._fill ? ( this._fill.toCSS ? this._fill.toCSS() : this._fill ) : 'transparent';
@@ -174,15 +170,47 @@ define( function( require ) {
       return result;
     };
     
+    proto.getFillRendererBitmask = function() {
+      var bitmask = 0;
+      
+      // Safari 5 has buggy issues with SVG gradients
+      if ( !( isSafari5 && this._fill && this._fill.isGradient ) ) {
+        bitmask |= scenery.bitmaskSupportsSVG;
+      }
+      
+      // we always have Canvas support?
+      bitmask |= scenery.bitmaskSupportsCanvas;
+      
+      if ( !this._fill ) {
+        // if there is no fill, it is supported by DOM
+        bitmask |= scenery.bitmaskSupportsDOM;
+      } else if ( this._fill.isPattern ) {
+        // no pattern support for DOM (for now!)
+      } else if ( this._fill.isGradient ) {
+        // no gradient support for DOM (for now!)
+      } else {
+        // solid fills always supported for DOM
+        bitmask |= scenery.bitmaskSupportsDOM;
+      }
+      
+      return bitmask;
+    };
+    
     // on mutation, set the fill parameter first
     proto._mutatorKeys = [ 'fill', 'fillPickable' ].concat( proto._mutatorKeys );
     
     Object.defineProperty( proto, 'fill', { set: proto.setFill, get: proto.getFill } );
     Object.defineProperty( proto, 'fillPickable', { set: proto.setFillPickable, get: proto.isFillPickable } );
     
-    if ( !proto.invalidateFill ) {
+    if ( proto.invalidateFill ) {
+      var oldInvalidateFill = proto.invalidateFill;
       proto.invalidateFill = function() {
-        // override if fill handling is necessary (TODO: mixins!)
+        this.invalidateSupportedRenderers();
+        oldInvalidateFill.call( this );
+      };
+    } else {
+      proto.invalidateFill = function() {
+        this.invalidateSupportedRenderers();
       };
     }
   };

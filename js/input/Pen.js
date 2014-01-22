@@ -22,24 +22,34 @@ define( function( require ) {
     this.isPen = true;
     this.trail = null;
     
+    this.isDown = true; // pens always start down? TODO: is this true with pointer events?
+    
     this.type = 'pen';
   };
   var Pen = scenery.Pen;
   
   inherit( Pointer, Pen, {
     move: function( point, event ) {
+      var pointChanged = this.hasPointChanged( point );
       // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
+      return pointChanged;
     },
     
     end: function( point, event ) {
+      var pointChanged = this.hasPointChanged( point );
       // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
+      this.isDown = false;
+      return pointChanged;
     },
     
     cancel: function( point, event ) {
+      var pointChanged = this.hasPointChanged( point );
       // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
+      this.isDown = false;
+      return pointChanged;
     },
     
     toString: function() {

@@ -14,6 +14,10 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var LineStyles = require( 'KITE/util/LineStyles' );
   
+  var platform = require( 'PHET_CORE/platform' );
+  
+  var isIE9 = platform.ie9;
+  
   scenery.Strokable = function Strokable( type ) {
     var proto = type.prototype;
     
@@ -82,6 +86,10 @@ define( function( require ) {
     
     proto.getLineDash = function() {
       return this._lineDrawingStyles.lineDash;
+    };
+    
+    proto.hasLineDash = function() {
+      return !!this._lineDrawingStyles.lineDash.length;
     };
     
     proto.setLineDash = function( lineDash ) {
@@ -228,12 +236,18 @@ define( function( require ) {
       style += 'stroke-width: ' + this.getLineWidth() + ';';
       style += 'stroke-linecap: ' + this.getLineCap() + ';';
       style += 'stroke-linejoin: ' + this.getLineJoin() + ';';
-      if ( this.getLineDash().length ) {
+      if ( this.hasLineDash() ) {
         style += 'stroke-dasharray: ' + this.getLineDash().join( ',' ) + ';';
         style += 'stroke-dashoffset: ' + this.getLineDashOffset() + ';';
       }
       
       return style;
+    };
+    
+    proto.getSimpleCSSFill = function() {
+      // if it's a Color object, get the corresponding CSS
+      // 'transparent' will make us invisible if the fill is null
+      return this._stroke ? ( this._stroke.toCSS ? this._stroke.toCSS() : this._stroke ) : 'transparent';
     };
     
     proto.addSVGStrokeDef = function( svg, defs ) {
@@ -292,6 +306,24 @@ define( function( require ) {
       return result;
     };
     
+    proto.getStrokeRendererBitmask = function() {
+      var bitmask = 0;
+      
+      if ( !( isIE9 && this.hasStroke() && this.hasLineDash() ) ) {
+        bitmask |= scenery.bitmaskSupportsCanvas;
+      }
+      
+      // always have SVG support (for now?)
+      bitmask |= scenery.bitmaskSupportsSVG;
+      
+      if ( !this.hasStroke() ) {
+        // allow DOM support if there is no stroke
+        bitmask |= scenery.bitmaskSupportsDOM;
+      }
+      
+      return bitmask;
+    };
+    
     // on mutation, set the stroke parameters first since they may affect the bounds (and thus later operations)
     proto._mutatorKeys = [ 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'lineDash', 'lineDashOffset', 'strokePickable' ].concat( proto._mutatorKeys );
     
@@ -304,9 +336,15 @@ define( function( require ) {
     Object.defineProperty( proto, 'lineDashOffset', { set: proto.setLineDashOffset, get: proto.getLineDashOffset } );
     Object.defineProperty( proto, 'strokePickable', { set: proto.setStrokePickable, get: proto.isStrokePickable } );
     
-    if ( !proto.invalidateStroke ) {
+    if ( proto.invalidateStroke ) {
+      var oldInvalidateStroke = proto.invalidateStroke;
       proto.invalidateStroke = function() {
-        // override if stroke handling is necessary (TODO: mixins!)
+        this.invalidateSupportedRenderers();
+        oldInvalidateStroke.call( this );
+      };
+    } else {
+      proto.invalidateStroke = function() {
+        this.invalidateSupportedRenderers();
       };
     }
   };

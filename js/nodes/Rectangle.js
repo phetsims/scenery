@@ -4,8 +4,6 @@
  * A rectangular node that inherits Path, and allows for optimized drawing,
  * and improved rectangle handling.
  *
- * TODO: add DOM support
- *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
@@ -17,8 +15,9 @@ define( function( require ) {
   
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
-  var Vector2 = require( 'DOT/Vector2' );
   var Bounds2 = require( 'DOT/Bounds2' );
+  var Matrix3 = require( 'DOT/Matrix3' );
+  var Features = require( 'SCENERY/util/Features' );
   
   /**
    * Currently, all numerical parameters should be finite.
@@ -91,6 +90,38 @@ define( function( require ) {
   var Rectangle = scenery.Rectangle;
   
   inherit( Path, Rectangle, {
+    
+    getMaximumArcSize: function() {
+      return Math.min( this._rectWidth / 2, this._rectHeight / 2 );
+    },
+    
+    getStrokeRendererBitmask: function() {
+      var bitmask = Path.prototype.getStrokeRendererBitmask.call( this );
+      if ( this.hasStroke() && !this.getStroke().isGradient && !this.getStroke().isPattern ) {
+        if ( this.getLineJoin() === 'miter' || ( this.getLineJoin() === 'round' && Features.borderRadius ) ) {
+          bitmask |= scenery.bitmaskSupportsDOM;
+        }
+      }
+      return bitmask;
+    },
+    
+    getPathRendererBitmask: function() {
+      var bitmask = scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG;
+      
+      var maximumArcSize = this.getMaximumArcSize();
+      
+      // If the top/bottom or left/right strokes touch and overlap in the middle (small rectangle, big stroke), our DOM method won't work.
+      // Additionally, if we're handling rounded rectangles or a stroke with lineJoin 'round', we'll need borderRadius
+      // We also require for DOM that if it's a rounded rectangle, it's rounded with circular arcs (for now, could potentially do a transform trick!)
+      if ( ( !this.hasStroke() || ( this.getLineWidth() <= this._rectHeight && this.getLineWidth() <= this._rectWidth ) ) &&
+           ( !this.isRounded() || ( Features.borderRadius && this._rectArcWidth === this._rectArcHeight ) ) &&
+           this._rectArcHeight <= maximumArcSize && this._rectArcWidth <= maximumArcSize ) {
+        bitmask |= scenery.bitmaskSupportsDOM;
+      }
+      
+      return bitmask;
+    },
+    
     setRect: function( x, y, width, height, arcWidth, arcHeight ) {
       assert && assert( x !== undefined && y !== undefined && width !== undefined && height !== undefined, 'x/y/width/height need to be defined' );
       
@@ -150,6 +181,9 @@ define( function( require ) {
       
       // should invalidate the path and ensure a redraw
       this.invalidateShape();
+      
+      // since we changed the rectangle arc width/height, it could make DOM work or not
+      this.invalidateSupportedRenderers();
     },
     
     // accelerated hit detection for axis-aligned optionally-rounded rectangle
@@ -205,8 +239,9 @@ define( function( require ) {
       // use the standard version if it's a rounded rectangle, since there is no Canvas-optimized version for that
       if ( this.isRounded() ) {
         context.beginPath();
-        var arcw = this._rectArcWidth;
-        var arch = this._rectArcHeight;
+        var maximumArcSize = this.getMaximumArcSize();
+        var arcw = Math.min( this._rectArcWidth, maximumArcSize );
+        var arch = Math.min( this._rectArcHeight, maximumArcSize );
         var lowX = this._rectX + arcw;
         var highX = this._rectX + this._rectWidth - arcw;
         var lowY = this._rectY + arch;
@@ -253,7 +288,7 @@ define( function( require ) {
     
     // create a rect instead of a path, hopefully it is faster in implementations
     createSVGFragment: function( svg, defs, group ) {
-      return document.createElementNS( 'http://www.w3.org/2000/svg', 'rect' );
+      return document.createElementNS( scenery.svgns, 'rect' );
     },
     
     // optimized for the rect element instead of path
@@ -263,10 +298,72 @@ define( function( require ) {
       rect.setAttribute( 'y', this._rectY );
       rect.setAttribute( 'width', this._rectWidth );
       rect.setAttribute( 'height', this._rectHeight );
-      rect.setAttribute( 'rx', this._rectArcWidth );
-      rect.setAttribute( 'ry', this._rectArcHeight );
+      
+      // workaround for various browsers if rx=20, ry=0 (behavior is inconsistent, either identical to rx=20,ry=20, rx=0,ry=0. We'll treat it as rx=0,ry=0)
+      // see https://github.com/phetsims/scenery/issues/183
+      if ( this.isRounded() ) {
+        var maximumArcSize = this.getMaximumArcSize();
+        var arcw = Math.min( this._rectArcWidth, maximumArcSize );
+        var arch = Math.min( this._rectArcHeight, maximumArcSize );
+        rect.setAttribute( 'rx', arcw );
+        rect.setAttribute( 'ry', arch );
+      } else {
+        rect.setAttribute( 'rx', 0 );
+        rect.setAttribute( 'ry', 0 );
+      }
       
       rect.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
+    },
+    
+    /*---------------------------------------------------------------------------*
+     * DOM support
+     *----------------------------------------------------------------------------*/
+    
+    domUpdateTransformOnRepaint: true, // since we have to integrate the baseline offset into the CSS transform, signal to DOMLayer
+    
+    getDOMElement: function() {
+      var fill = document.createElement( 'div' );
+      var stroke = document.createElement( 'div' );
+      fill.appendChild( stroke );
+      fill.style.display = 'block';
+      fill.style.position = 'absolute';
+      fill.style.left = '0';
+      fill.style.top = '0';
+      stroke.style.display = 'block';
+      stroke.style.position = 'absolute';
+      stroke.style.left = '0';
+      stroke.style.top = '0';
+      return fill;
+    },
+
+    updateDOMElement: function( fill ) {
+      var borderRadius = Math.min( this._rectArcWidth, this._rectArcHeight );
+      
+      fill.style.width = this._rectWidth + 'px';
+      fill.style.height = this._rectHeight + 'px';
+      fill.style[Features.borderRadius] = borderRadius + 'px'; // if one is zero, we are not rounded, so we do the min here
+      fill.style.backgroundColor = this.getCSSFill();
+      
+      var stroke = fill.childNodes[0];
+      if ( this.hasStroke() ) {
+        stroke.style.width = ( this._rectWidth - this.getLineWidth() ) + 'px';
+        stroke.style.height = ( this._rectHeight - this.getLineWidth() ) + 'px';
+        stroke.style.left = ( -this.getLineWidth() / 2 ) + 'px';
+        stroke.style.top = ( -this.getLineWidth() / 2 ) + 'px';
+        stroke.style.borderStyle = 'solid';
+        stroke.style.borderColor = this.getSimpleCSSFill();
+        stroke.style.borderWidth = this.getLineWidth() + 'px';
+        stroke.style[Features.borderRadius] = ( this.isRounded() || this.getLineJoin() === 'round' ) ? ( borderRadius + this.getLineWidth() / 2 ) + 'px' : '0';
+      } else {
+        stroke.style.borderStyle = 'none';
+      }
+    },
+    
+    // override the transform since we need to customize it with a DOM offset
+    updateCSSTransform: function( transform, element ) {
+      // shift the text vertically, postmultiplied with the entire transform.
+      var matrix = transform.getMatrix().timesMatrix( Matrix3.translation( this._rectX, this._rectY ) );
+      scenery.Util.applyCSSTransform( matrix, element );
     },
     
     getBasicConstructor: function( propLines ) {

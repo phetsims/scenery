@@ -15,6 +15,7 @@ define( function( require ) {
   require( 'SCENERY/layers/LayerBoundary' );
   require( 'SCENERY/util/Trail' );
   require( 'SCENERY/util/TrailPointer' );
+  var LayerStrategy = require( 'SCENERY/layers/LayerStrategy' ); // used to set the default layer strategy on the prototype
   
   /*
    * Builds layer information between trails
@@ -89,9 +90,8 @@ define( function( require ) {
       var targetLength = this.startPointer.trail.length - ( this.startPointer.isBefore ? 1 : 0 );
       
       while ( pointer.trail.length <= targetLength ) {
-        var node = pointer.trail.lastNode();
-        if ( node.layerStrategy.hasPreferredLayerType( pointer, this ) ) {
-          this.pushPreferredLayerType( node.layerStrategy.getPreferredLayerType( pointer, this ) );
+        if ( LayerStrategy.hasPreferredLayerType( pointer, this ) ) {
+          this.pushPreferredLayerType( LayerStrategy.getPreferredLayerType( pointer, this ) );
         }
         if ( pointer.trail.length < this.startPointer.trail.nodes.length ) {
           pointer.trail.addDescendant( this.startPointer.trail.nodes[pointer.trail.length] );
@@ -111,14 +111,12 @@ define( function( require ) {
       // console.log( '         stack: ' + _.map( builder.layerTypeStack, function( type ) { return type.name; } ).join( ', ' ) );
       
       builder.startPointer.depthFirstUntil( builder.endPointer, function( pointer ) {
-        var node = pointer.trail.lastNode();
-        
         if ( pointer.isBefore ) {
           // console.log( 'builder: enter ' + pointer.toString() );
-          node.layerStrategy.enter( pointer, builder );
+          LayerStrategy.enter( pointer, builder );
         } else {
           // console.log( 'builder: exit ' + pointer.toString() );
-          node.layerStrategy.exit( pointer, builder );
+          LayerStrategy.exit( pointer, builder );
         }
         // console.log( '         stack: ' + _.map( builder.layerTypeStack, function( type ) { return type.name; } ).join( ', ' ) );
       }, false ); // include the endpoints
@@ -189,16 +187,12 @@ define( function( require ) {
       }
     },
     
-    bestPreferredLayerTypeFor: function( renderers ) {
+    bestPreferredLayerTypeFor: function( bitmask ) {
       for ( var i = this.layerTypeStack.length - 1; i >= 0; i-- ) {
         var preferredType = this.layerTypeStack[i];
         
-        var k = renderers.length;
-        while ( k-- ) {
-          // if any renderer is supported by this type, use this type
-          if ( preferredType.supportsRenderer( renderers[k] ) ) {
-            return preferredType;
-          }
+        if ( preferredType.supportsBitmask( bitmask ) ) {
+          return preferredType;
         }
       }
       

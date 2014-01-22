@@ -11,15 +11,13 @@ define( function( require ) {
   
   var inherit = require( 'PHET_CORE/inherit' );
   var Shape = require( 'KITE/Shape' );
-  var Bounds2 = require( 'DOT/Bounds2' );
-  
+
   var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
-  var Renderer = require( 'SCENERY/layers/Renderer' );
+  require( 'SCENERY/layers/Renderer' );
   var Fillable = require( 'SCENERY/nodes/Fillable' );
   var Strokable = require( 'SCENERY/nodes/Strokable' );
-  var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
-  
+
   scenery.Path = function Path( shape, options ) {
     // TODO: consider directly passing in a shape object (or at least handling that case)
     // NOTE: _shape can be lazily constructed, in the case of types like Rectangle where they have their own drawing code
@@ -33,12 +31,22 @@ define( function( require ) {
     this.initializeStrokable();
 
     Node.call( this );
+    this.invalidateSupportedRenderers();
     this.setShape( shape );
     this.mutate( options );
   };
   var Path = scenery.Path;
   
   inherit( Node, Path, {
+    // allow more specific path types (Rectangle, Line) to override what restrictions we have
+    getPathRendererBitmask: function() {
+      return scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG;
+    },
+    
+    invalidateSupportedRenderers: function() {
+      this.setRendererBitmask( this.getFillRendererBitmask() & this.getStrokeRendererBitmask() & this.getPathRendererBitmask() );
+    },
+    
     // sets the shape drawn, or null to remove the shape
     setShape: function( shape ) {
       if ( this._shape !== shape ) {
@@ -115,7 +123,7 @@ define( function( require ) {
     
     // svg element, the <defs> block, and the associated group for this node's transform
     createSVGFragment: function( svg, defs, group ) {
-      return document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+      return document.createElementNS( scenery.svgns, 'path' );
     },
     
     updateSVGFragment: function( path ) {
@@ -186,7 +194,7 @@ define( function( require ) {
     get shape() { return this.getShape(); },
     
     getBasicConstructor: function( propLines ) {
-      return 'new scenery.Path( ' + this._shape.toString() + ', {' + propLines + '} )';
+      return 'new scenery.Path( ' + ( this._shape ? this._shape.toString() : this._shape ) + ', {' + propLines + '} )';
     },
     
     getPropString: function( spaces, includeChildren ) {
@@ -198,8 +206,6 @@ define( function( require ) {
   } );
   
   Path.prototype._mutatorKeys = [ 'shape' ].concat( Node.prototype._mutatorKeys );
-  
-  Path.prototype._supportedRenderers = [ Renderer.Canvas, Renderer.SVG ];
   
   // mix in fill/stroke handling code. for now, this is done after 'shape' is added to the mutatorKeys so that stroke parameters
   // get set first

@@ -13,11 +13,12 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   var Node = require( 'SCENERY/nodes/Node' );
-  var Renderer = require( 'SCENERY/layers/Renderer' );
+  require( 'SCENERY/layers/Renderer' );
   
   // pass a canvasBounds option if you want to specify the self bounds
   scenery.CanvasNode = function CanvasNode( options ) {
     Node.call( this, options );
+    this.setRendererBitmask( scenery.bitmaskSupportsCanvas );
     
     if ( options.canvasBounds ) {
       this.setCanvasBounds( options.canvasBounds );
@@ -58,8 +59,6 @@ define( function( require ) {
     }
     
   } );
-  
-  CanvasNode.prototype._supportedRenderers = [ Renderer.Canvas ];
   
   return CanvasNode;
 } );

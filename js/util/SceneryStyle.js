@@ -9,7 +9,7 @@
 define( function( require ) {
   'use strict';
   
-  var scenery = require( 'SCENERY/scenery' );
+  require( 'SCENERY/scenery' );
   
   var styleElement = document.createElement( 'style' );
   styleElement.type = 'text/css';

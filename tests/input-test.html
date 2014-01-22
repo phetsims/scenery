@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1"/>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <title>Input Test - Scenery</title>
+  
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../../sherpa/jquery-2.0.3.min.js"></script>
+  <script src="../../sherpa/lodash-2.4.1.min.js"></script>
+  <script src="../build/development/scenery.js"></script>
+  
+  <style type="text/css">
+    /* Let content go to the edges */
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    
+    #output {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      font-size: 12px;
+      line-height: 12px;
+    }
+
+  </style>
+</head>
+
+<body>
+  
+  <div id="output"></div>
+  
+  <script type="text/javascript">
+    
+    var $div = $( '#output' );
+    
+    var div = $div[0];
+    
+    div.innerHTML = '';
+    
+    function log( str ) {
+      div.innerHTML += str + ' ' + Date.now() + '<br>';
+    }
+    
+    var count = 0;
+    
+    // maps the current MS pointer types onto the pointer spec
+    function msPointerType( evt ) {
+      if ( evt.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_TOUCH ) {
+        return 'touch';
+      } else if ( evt.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_PEN ) {
+        return 'pen';
+      } else if ( evt.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_MOUSE ) {
+        return 'mouse';
+      } else {
+        return evt.pointerType; // hope for the best
+      }
+    }
+    
+    function nonkeyboardEvent( name, event ) {
+      log( name );
+      event.preventDefault();
+      count++;
+    }
+    
+    function pointerEvent( name, event ) {
+      var type = event.pointerType;
+      if ( !(typeof event.pointerType === 'string') ) {
+        type = msPointerType( event );
+      }
+      nonkeyboardEvent( name + ' ' + type, event );
+    }
+    
+    function keyboardEvent( name, event ) {
+      log( name );
+      // event.preventDefault();
+      count++;
+    }
+    
+    var implementsPointerEvents = window.navigator && window.navigator.pointerEnabled; // W3C spec for pointer events
+    var implementsMSPointerEvents = window.navigator && window.navigator.msPointerEnabled; // MS spec for pointer event
+    if ( implementsPointerEvents ) {
+      log( 'pointer events' );
+      // accepts pointer events corresponding to the spec at http://www.w3.org/TR/pointerevents/
+      window.addEventListener( 'pointerdown', pointerEvent.bind( this, 'pointerdown' ) );
+      window.addEventListener( 'pointerup', pointerEvent.bind( this, 'pointerup' ) );
+      window.addEventListener( 'pointermove', pointerEvent.bind( this, 'pointermove' ) );
+      window.addEventListener( 'pointerover', pointerEvent.bind( this, 'pointerover' ) );
+      window.addEventListener( 'pointerout', pointerEvent.bind( this, 'pointerout' ) );
+      window.addEventListener( 'pointercancel', pointerEvent.bind( this, 'pointercancel' ) );
+    } else if ( implementsMSPointerEvents ) {
+      log( 'MSPointer events' );
+      window.addEventListener( 'MSPointerDown', pointerEvent.bind( this, 'MSPointerDown' ) );
+      window.addEventListener( 'MSPointerUp', pointerEvent.bind( this, 'MSPointerUp' ) );
+      window.addEventListener( 'MSPointerMove', pointerEvent.bind( this, 'MSPointerMove' ) );
+      window.addEventListener( 'MSPointerOver', pointerEvent.bind( this, 'MSPointerOver' ) );
+      window.addEventListener( 'MSPointerOut', pointerEvent.bind( this, 'MSPointerOut' ) );
+      window.addEventListener( 'MSPointerCancel', pointerEvent.bind( this, 'MSPointerCancel' ) );
+    } else {
+      log( 'mouse/touch events' );
+      window.addEventListener( 'mousedown', nonkeyboardEvent.bind( this, 'mousedown' ) );
+      window.addEventListener( 'mouseup', nonkeyboardEvent.bind( this, 'mouseup' ) );
+      window.addEventListener( 'mousemove', nonkeyboardEvent.bind( this, 'mousemove' ) );
+      window.addEventListener( 'mouseover', nonkeyboardEvent.bind( this, 'mouseover' ) );
+      window.addEventListener( 'mouseout', nonkeyboardEvent.bind( this, 'mouseout' ) );
+      // window.addEventListener( 'mousecancel', nonkeyboardEvent.bind( this, 'mousecancel' ) );
+      
+      window.addEventListener( 'touchstart', nonkeyboardEvent.bind( this, 'touchstart' ) );
+      window.addEventListener( 'touchend', nonkeyboardEvent.bind( this, 'touchend' ) );
+      window.addEventListener( 'touchmove', nonkeyboardEvent.bind( this, 'touchmove' ) );
+      window.addEventListener( 'touchcancel', nonkeyboardEvent.bind( this, 'touchcancel' ) );
+    }
+    
+    window.addEventListener( 'keyup', keyboardEvent.bind( this, 'keyup' ) );
+    window.addEventListener( 'keydown', keyboardEvent.bind( this, 'keydown' ) );
+    window.addEventListener( 'keypress', keyboardEvent.bind( this, 'keypress' ) );
+    
+    scenery.Util.polyfillRequestAnimationFrame();
+    
+    // var scene = new scenery.Scene( $div );
+    
+    // scene.resizeOnWindowResize();
+    // scene.initializeWindowEvents( { batchDOMEvents: true } );
+    
+    (function step() {
+      window.requestAnimationFrame( step, div );
+      if ( count > 0 ) {
+        log( 'frame' );
+        count = 0;
+      }
+    })();
+    
+    // var container = document.createElement( 'div' );
+    // scene.addChild( new scenery.DOM( container ) );
+    
+    // function logEvent( name, event ) {
+    //   console.log( 'boo' );
+    //   container.innerHTML += name + '<br>';
+    // }
+    
+    // scene.addInputListener( {
+    //   up: logEvent.bind( this, 'up' ),
+    //   down: logEvent.bind( this, 'down' ),
+    //   move: logEvent.bind( this, 'move' ),
+    //   cancel: logEvent.bind( this, 'cancel' )
+    // } );
+
+    
+    
+  </script>
+
+</body>
+</html>

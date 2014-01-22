@@ -8,10 +8,10 @@
   <title>Scenery Playground</title>
   
   <script src="../../sherpa/jquery-2.0.3.js"></script>
-  <script src="../../sherpa/lodash-2.0.0.min.js"></script>
+  <script src="../../sherpa/lodash-2.4.1.min.js"></script>
   <script src="../../sherpa/has.js"></script>
   
-  <script data-main="../js/config.js" src="../../sherpa/require-2.1.8.js"></script>
+  <script data-main="../js/config.js" src="../../sherpa/require-2.1.10.js"></script>
   
   <style>
     html, body {
@@ -191,6 +191,40 @@
             } ) );
           };
           
+          window.setupDomRect = function() {
+            window.r = new scenery.Rectangle( 0, 0, 100, 50, { fill: 'red' } );
+            window.a = new scenery.Node( { renderer: 'svg' } );
+            window.b = new scenery.Node( { renderer: 'dom' } );
+            window.c = new scenery.Node( { renderer: 'canvas' } );
+            scene.addChild( window.a );
+            scene.addChild( window.b );
+            scene.addChild( window.c );
+            window.b.y = 100;
+            window.c.x = 250;
+            a.addChild( window.r );
+            b.addChild( window.r );
+            c.addChild( window.r );
+          };
+          
+          window.setupDomCircle = function() {
+            window.r = new scenery.Circle( 50, { fill: 'red' } );
+            window.a = new scenery.Node( { renderer: 'svg' } );
+            window.b = new scenery.Node( { renderer: 'dom' } );
+            window.c = new scenery.Node( { renderer: 'canvas' } );
+            scene.addChild( window.a );
+            scene.addChild( window.b );
+            scene.addChild( window.c );
+            window.b.x = 125;
+            window.b.y = 100;
+            window.c.x = 250;
+            a.addChild( window.r );
+            b.addChild( window.r );
+            c.addChild( window.r );
+            scene.x = 50;
+            scene.y = 50;
+            window.r.stroke = 'black';
+          };
+          
           window.testNodeBounds = function( trail ) {
             var a = performance.now();
             for ( var i = 0; i < 100000; i++ ) { trail.lastNode().localToGlobalBounds( bounds ); };
@@ -261,28 +295,16 @@
                   line: function( node ) { return name( node ) + '.renderer = null;' }
                 },
                 {
-                  weight: 0.2,
-                  f: function( node ) { node.layerSplitBefore = true; },
-                  mess: 'layerSplitBefore true',
-                  line: function( node ) { return name( node ) + '.layerSplitBefore = true;' }
+                  weight: 0.3,
+                  f: function( node ) { node.layerSplit = true; },
+                  mess: 'layerSplit true',
+                  line: function( node ) { return name( node ) + '.layerSplit = true;' }
                 },
                 {
-                  weight: 0.8,
-                  f: function( node ) { node.layerSplitBefore = false; },
-                  mess: 'layerSplitBefore false',
-                  line: function( node ) { return name( node ) + '.layerSplitBefore = false;' }
-                },
-                {
-                  weight: 0.2,
-                  f: function( node ) { node.layerSplitAfter = true; },
-                  mess: 'layerSplitAfter true',
-                  line: function( node ) { return name( node ) + '.layerSplitAfter = true;' }
-                },
-                {
-                  weight: 0.8,
-                  f: function( node ) { node.layerSplitAfter = false; },
-                  mess: 'layerSplitAfter false',
-                  line: function( node ) { return name( node ) + '.layerSplitAfter = false;' }
+                  weight: 1.0,
+                  f: function( node ) { node.layerSplit = false; },
+                  mess: 'layerSplit false',
+                  line: function( node ) { return name( node ) + '.layerSplit = false;' }
                 }
               ];
               

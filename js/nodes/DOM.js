@@ -16,8 +16,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   var Node = require( 'SCENERY/nodes/Node' ); // DOM inherits from Node
-  var Renderer = require( 'SCENERY/layers/Renderer' );
-  var objectCreate = require( 'SCENERY/util/Util' ).objectCreate;
+  require( 'SCENERY/layers/Renderer' );
   require( 'SCENERY/util/Util' );
   
   scenery.DOM = function DOM( element, options ) {
@@ -43,6 +42,7 @@ define( function( require ) {
     
     // will set the element after initializing
     Node.call( this, options );
+    this.setRendererBitmask( scenery.bitmaskSupportsDOM );
   };
   var DOM = scenery.DOM;
   
@@ -176,8 +176,6 @@ define( function( require ) {
   } );
   
   DOM.prototype._mutatorKeys = [ 'element', 'interactive' ].concat( Node.prototype._mutatorKeys );
-  
-  DOM.prototype._supportedRenderers = [ Renderer.DOM ];
   
   return DOM;
 } );

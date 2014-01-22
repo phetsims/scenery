@@ -13,8 +13,6 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  var Vector2 = require( 'DOT/Vector2' );
-  
   // TODO: support scene or other various content (SVG is flexible, can backport to canvas)
   // TODO: investigate options to support repeat-x, repeat-y or no-repeat in SVG (available repeat options from Canvas)
   scenery.Pattern = function Pattern( image ) {
@@ -30,6 +28,8 @@ define( function( require ) {
   Pattern.prototype = {
     constructor: Pattern,
     
+    isPattern: true,
+    
     setTransformMatrix: function( transformMatrix ) {
       this.transformMatrix = transformMatrix;
       return this;
@@ -40,8 +40,7 @@ define( function( require ) {
     },
     
     getSVGDefinition: function( id ) {
-      var svgns = 'http://www.w3.org/2000/svg'; // TODO: store this in a common place!
-      var definition = document.createElementNS( svgns, 'pattern' );
+      var definition = document.createElementNS( scenery.svgns, 'pattern' );
       definition.setAttribute( 'id', id );
       definition.setAttribute( 'patternUnits', 'userSpaceOnUse' ); // so we don't depend on the bounds of the object being drawn with the gradient
       definition.setAttribute( 'patternContentUnits', 'userSpaceOnUse' ); // TODO: is this needed?

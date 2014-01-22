@@ -35,6 +35,11 @@ define( function( require ) {
       assert && assert( index !== -1 );
       
       this.listeners.splice( index, 1 );
+    },
+    
+    // for mouse/touch/pen
+    hasPointChanged: function( point ) {
+      return this.point !== point && ( !point || !this.point || !this.point.equals( point ) );
     }
   };
   
