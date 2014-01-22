@@ -4,6 +4,8 @@
  * VBox arranges the child nodes vertically, and they can be centered, left or right justified.
  * Vertical spacing can be set as a constant or a function which depends on the adjacent nodes.
  *
+ * See a dynamic test in scenery\tests\test-vbox.html
+ *
  * @author Sam Reid
  */
 
@@ -33,9 +35,8 @@ define( function( require ) {
       spacing: function() { return 0; },
       align: 'center',
 
-      //By default, don't update the layout when changes are made
-      updateLayoutOnChildBoundsChange: false,
-      updateLayoutOnChildAddedOrRemoved: false
+      //By default, update the layout when children are added/removed/resized, see #116
+      resize: true
     }, options );
 
     if ( typeof this.options.spacing === 'number' ) {
@@ -97,7 +98,7 @@ define( function( require ) {
 
       //Remove event listeners from any nodes (will be added back later if the node was not removed)
       var vbox = this;
-      if ( this.options.updateLayoutOnChildBoundsChange ) {
+      if ( this.options.resize ) {
         this.children.forEach( function( child ) {
           if ( child.containsEventListener( 'bounds', vbox.boundsListener ) ) {
             child.removeEventListener( 'bounds', vbox.boundsListener );
@@ -109,12 +110,12 @@ define( function( require ) {
       Node.prototype[override].call( this, arg1, arg2 );
 
       //Update the layout if it should be dynamic
-      if ( this.options.updateLayoutOnChildAddedOrRemoved || !this.inited ) {
+      if ( this.options.resize || !this.inited ) {
         this.updateLayout();
       }
 
       //Add event listeners for any current children (if it should be dynamic)
-      if ( this.options.updateLayoutOnChildBoundsChange ) {
+      if ( this.options.resize ) {
         this.children.forEach( function( child ) {
           if ( !child.containsEventListener( 'bounds', vbox.boundsListener ) ) {
             child.addEventListener( 'bounds', vbox.boundsListener );

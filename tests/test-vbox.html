@@ -22,10 +22,13 @@
 
       scene.updateScene();
 
-      var vBox = new scenery.VBox( {updateLayoutOnChildAddedOrRemoved: true, updateLayoutOnChildBoundsChange: true,
+      var vBox = new scenery.VBox( {
+        resize: true,//Try setting this to false
         children: [
           new scenery.Text( 'x' ),
-          new scenery.Text( 'y' )], centerX: 100, centerY: 100} );
+          new scenery.Text( 'y' )],
+        centerX: 100, centerY: 100
+      } );
       vBox.addChild( new scenery.Text( 'a' ) );
       var b = new scenery.Text( 'b' );
       vBox.addChild( b );
