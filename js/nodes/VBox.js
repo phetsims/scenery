@@ -122,7 +122,7 @@ define( function( require ) {
           }
         } );
       }
-    }
+    };
   } );
 
   return VBox;
