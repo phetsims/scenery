@@ -1,7 +1,7 @@
 //  Copyright 2002-2014, University of Colorado Boulder
 
 /**
- * AbstractBox is the parent for VBox and HBox, which arranges child nodes.
+ * AbstractBox is the parent for VBox and HBox, which arrange child nodes.
  * See https://github.com/phetsims/scenery/issues/116
  *
  * @author Sam Reid
