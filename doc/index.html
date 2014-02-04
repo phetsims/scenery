@@ -506,7 +506,8 @@ docExample( 'example-cursor', function( scene ) {
 scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 25 ), {
   x: 64, y: 32,
   fill: '#88f',
-  cursor: 'pointer' // classic hand
+  cursor: 'pointer', // classic hand
+  pickable: true // since it wouldn't be hit-tested otherwise
 } ) );
 /*END*/
 // event initialization needed for cursor to work

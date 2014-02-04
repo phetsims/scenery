@@ -105,7 +105,8 @@
     var group = new scenery.Node( {
       // if the mouse is over this node, its cursor will be set to this,
       // unless there is a descendant node that the mouse is over with a cursor specified
-      cursor: cursor
+      cursor: cursor,
+      pickable: true
     } );
     
     // a label for the cursor
