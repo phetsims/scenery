@@ -20,7 +20,7 @@ define( function( require ) {
     Node.call( this, options );
     this.setRendererBitmask( scenery.bitmaskBoundsValid | scenery.bitmaskSupportsCanvas );
     
-    if ( options.canvasBounds ) {
+    if ( options && options.canvasBounds ) {
       this.setCanvasBounds( options.canvasBounds );
     }
   };
