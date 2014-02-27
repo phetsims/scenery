@@ -648,6 +648,11 @@ define( function( require ) {
       //Cancel propagation of mouse events but not key events.  Key Events need to propagate for tab navigability
       var usePreventDefault = type !== 'keydown' && type !== 'keyup' && type !== 'keypress';
       
+      // work around iOS Safari 7 not sending touch events to Scenes contained in an iframe
+      if ( this.listenerTarget === window ) {
+        document.addEventListener( type, function( domEvent ) {} );
+      }
+      
       if ( this.batchDOMEvents ) {
         var batchedCallback = function batchedEvent( domEvent ) {
           sceneryEventLog && sceneryEventLog( 'Batching event for ' + type );
