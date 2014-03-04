@@ -163,7 +163,6 @@ define( function( require ) {
     
     updateTextFlags: function() {
       this.boundsInaccurate = this._boundsMethod !== 'accurate';
-      
       this.invalidateSupportedRenderers();
     },
     
