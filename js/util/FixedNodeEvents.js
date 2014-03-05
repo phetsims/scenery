@@ -65,7 +65,17 @@ define( function( require ) {
       // allow chaining
       return this;
     };
-    
+
+    /**
+     * Check to see whether this Node contains the specified listener
+     * @param {string} type type of listener
+     * @param {function} listener the listener instance
+     * @returns {boolean} true if the listener is already registered with this Node
+     */
+    proto.containsEventListener = function( type, listener ) {
+      return _.indexOf( this._events[type], listener ) >= 0;
+    };
+
     /**
      * @param {String}   type     The type of event, like 'resize' or 'bounds'
      * @param {Function} listener The callback to remove.
