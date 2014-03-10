@@ -215,6 +215,7 @@ define( function( require ) {
       element.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
       element.setAttribute( 'text-rendering', 'geometricPrecision' );
       element.setAttribute( 'lengthAdjust', 'spacingAndGlyphs' );
+      element.setAttributeNS( 'http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve' );
       return element;
     },
     
