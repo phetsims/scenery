@@ -101,6 +101,11 @@ define( function( require ) {
       return this._text;
     },
     
+    // Using the non-breaking space (&nbsp;) encoded as 0x00A0 in UTF-8
+    getNonBreakingText: function() {
+      return this._text.replace( ' ', '\xA0' );
+    },
+    
     setBoundsMethod: function( method ) {
       assert && assert( method === 'fast' || method === 'fastCanvas' || method === 'accurate' || method === 'hybrid', 'Unknown Text boundsMethod' );
       if ( method !== this._boundsMethod ) {
@@ -221,7 +226,7 @@ define( function( require ) {
     
     updateSVGFragment: function( element ) {
       // update the text-node's value
-      element.lastChild.nodeValue = this._text;
+      element.lastChild.nodeValue = this.getNonBreakingText();
       
       element.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
       element.setAttribute( 'direction', this._direction );
@@ -294,10 +299,10 @@ define( function( require ) {
     getDOMTextNode: function() {
       if ( this._isHTML ) {
         var span = document.createElement( 'span' );
-        span.innerHTML = this.text;
+        span.innerHTML = this.getNonBreakingText();
         return span;
       } else {
-        return document.createTextNode( this.text );
+        return document.createTextNode( this.getNonBreakingText() );
       }
     },
     
