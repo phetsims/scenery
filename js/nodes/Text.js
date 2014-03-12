@@ -90,6 +90,11 @@ define( function( require ) {
     domUpdateTransformOnRepaint: true, // since we have to integrate the baseline offset into the CSS transform, signal to DOMLayer
     
     setText: function( text ) {
+      assert && assert( text !== null && text !== undefined, 'Text should be defined and non-null. Use the empty string if needed.' );
+      
+      // cast it to a string (for numbers, etc.)
+      text = '' + text;
+      
       if ( text !== this._text ) {
         this._text = text;
         this.invalidateText();
