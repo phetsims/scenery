@@ -98,6 +98,11 @@ define( function( require ) {
     domUpdateTransformOnRepaint: true, // since we have to integrate the baseline offset into the CSS transform, signal to DOMLayer
     
     setText: function( text ) {
+      assert && assert( text !== null && text !== undefined, 'Text should be defined and non-null. Use the empty string if needed.' );
+      
+      // cast it to a string (for numbers, etc., and do it before the change guard so we don't accidentally trigger on non-changed text)
+      text = '' + text;
+      
       if ( text !== this._text ) {
         this._text = text;
         
@@ -113,6 +118,11 @@ define( function( require ) {
     
     getText: function() {
       return this._text;
+    },
+    
+    // Using the non-breaking space (&nbsp;) encoded as 0x00A0 in UTF-8
+    getNonBreakingText: function() {
+      return this._text.replace( ' ', '\xA0' );
     },
     
     setBoundsMethod: function( method ) {
@@ -241,12 +251,13 @@ define( function( require ) {
       element.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
       element.setAttribute( 'text-rendering', 'geometricPrecision' );
       element.setAttribute( 'lengthAdjust', 'spacingAndGlyphs' );
+      element.setAttributeNS( 'http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve' );
       return element;
     },
     
     updateSVGFragment: function( element ) {
       // update the text-node's value
-      element.lastChild.nodeValue = this._text;
+      element.lastChild.nodeValue = this.getNonBreakingText();
       
       element.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
       element.setAttribute( 'direction', this._direction );
@@ -323,10 +334,10 @@ define( function( require ) {
     getDOMTextNode: function() {
       if ( this._isHTML ) {
         var span = document.createElement( 'span' );
-        span.innerHTML = this.text;
+        span.innerHTML = this.getNonBreakingText();
         return span;
       } else {
-        return document.createTextNode( this.text );
+        return document.createTextNode( this.getNonBreakingText() );
       }
     },
     
