@@ -32,6 +32,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
+  require( 'SCENERY/layers/Renderer' );
   
   scenery.DOMSelfDrawable = function DOMSelfDrawable( trail, renderer, instance ) {
     Drawable.call( this, trail, renderer );
@@ -46,7 +47,7 @@ define( function( require ) {
     
     // now that we called attachDOMDrawable, update the visualState object with the flags it will need
     this.domElement = this.visualState.domElement;
-    this.visualState.forceAcceleration = ( renderer & scenery.bitmaskForceAcceleration ) !== 0;
+    this.visualState.forceAcceleration = ( renderer & scenery.Renderer.bitmaskForceAcceleration ) !== 0;
     this.markTransformDirty();
     
     // handle transform changes
