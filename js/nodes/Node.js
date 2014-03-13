@@ -1296,17 +1296,6 @@ define( function( require ) {
       return this; // allow chaining
     },
     
-    getCenter: function() {
-      return this.getBounds().getCenter();
-    },
-    
-    setCenter: function( center ) {
-      assert && assert( center instanceof Vector2 );
-      
-      this.translate( center.minus( this.getCenter() ), true );
-      return this;
-    },
-    
     getCenterX: function() {
       return this.getBounds().getCenterX();
     },
@@ -1354,95 +1343,6 @@ define( function( require ) {
       this.translate( 0, bottom - this.getBottom(), true );
       return this; // allow chaining
     },
-    
-    getLeftTop: function() {
-      return this.getBounds().getLeftTop();
-    },
-    
-    setLeftTop: function( leftTop ) {
-      assert && assert( leftTop instanceof Vector2 );
-      
-      this.translate( leftTop.minus( this.getLeftTop() ), true );
-      return this; // allow chaining
-    },
-    
-    getCenterTop: function() {
-      return this.getBounds().getCenterTop();
-    },
-    
-    setCenterTop: function( centerTop ) {
-      assert && assert( centerTop instanceof Vector2 );
-      
-      this.translate( centerTop.minus( this.getCenterTop() ), true );
-      return this; // allow chaining
-    },
-    
-    getRightTop: function() {
-      return this.getBounds().getRightTop();
-    },
-    
-    setRightTop: function( rightTop ) {
-      assert && assert( rightTop instanceof Vector2 );
-      
-      this.translate( rightTop.minus( this.getRightTop() ), true );
-      return this; // allow chaining
-    },
-    
-    getLeftCenter: function() {
-      return this.getBounds().getLeftCenter();
-    },
-    
-    setLeftCenter: function( leftCenter ) {
-      assert && assert( leftCenter instanceof Vector2 );
-      
-      this.translate( leftCenter.minus( this.getLeftCenter() ), true );
-      return this; // allow chaining
-    },
-    
-    getRightCenter: function() {
-      return this.getBounds().getRightCenter();
-    },
-    
-    setRightCenter: function( rightCenter ) {
-      assert && assert( rightCenter instanceof Vector2 );
-      
-      this.translate( rightCenter.minus( this.getRightCenter() ), true );
-      return this; // allow chaining
-    },
-    
-    getLeftBottom: function() {
-      return this.getBounds().getLeftBottom();
-    },
-    
-    setLeftBottom: function( leftBottom ) {
-      assert && assert( leftBottom instanceof Vector2 );
-      
-      this.translate( leftBottom.minus( this.getLeftBottom() ), true );
-      return this; // allow chaining
-    },
-    
-    getCenterBottom: function() {
-      return this.getBounds().getCenterBottom();
-    },
-    
-    setCenterBottom: function( centerBottom ) {
-      assert && assert( centerBottom instanceof Vector2 );
-      
-      this.translate( centerBottom.minus( this.getCenterBottom() ), true );
-      return this; // allow chaining
-    },
-    
-    getRightBottom: function() {
-      return this.getBounds().getRightBottom();
-    },
-    
-    setRightBottom: function( rightBottom ) {
-      assert && assert( rightBottom instanceof Vector2 );
-      
-      this.translate( rightBottom.minus( this.getRightBottom() ), true );
-      return this; // allow chaining
-    },
-    
     
     getWidth: function() {
       return this.getBounds().getWidth();
@@ -2348,31 +2248,11 @@ define( function( require ) {
     set bottom( value ) { this.setBottom( value ); },
     get bottom() { return this.getBottom(); },
     
-    set center( value ) { this.setCenter( value ); },
-    get center() { return this.getCenter(); },
-    
     set centerX( value ) { this.setCenterX( value ); },
     get centerX() { return this.getCenterX(); },
     
     set centerY( value ) { this.setCenterY( value ); },
     get centerY() { return this.getCenterY(); },
-    
-    set leftTop( value ) { this.setLeftTop( value ); },
-    get leftTop() { return this.getLeftTop(); },
-    set centerTop( value ) { this.setCenterTop( value ); },
-    get centerTop() { return this.getCenterTop(); },
-    set rightTop( value ) { this.setRightTop( value ); },
-    get rightTop() { return this.getRightTop(); },
-    set leftCenter( value ) { this.setLeftCenter( value ); },
-    get leftCenter() { return this.getLeftCenter(); },
-    set rightCenter( value ) { this.setRightCenter( value ); },
-    get rightCenter() { return this.getRightCenter(); },
-    set leftBottom( value ) { this.setLeftBottom( value ); },
-    get leftBottom() { return this.getLeftBottom(); },
-    set centerBottom( value ) { this.setCenterBottom( value ); },
-    get centerBottom() { return this.getCenterBottom(); },
-    set rightBottom( value ) { this.setRightBottom( value ); },
-    get rightBottom() { return this.getRightBottom(); },
     
     set children( value ) { this.setChildren( value ); },
     get children() { return this.getChildren(); },
@@ -2475,6 +2355,44 @@ define( function( require ) {
     }
   };
   
+  
+  /* 
+   * Convenience locations
+   * upper is in terms of the visual layout in Scenery and other programs, so the minY is the "upper", and minY is the "lower"
+   *
+   *             minX (x)     centerX        maxX
+   *          ---------------------------------------
+   * minY (y) | leftTop     centerTop     rightTop
+   * centerY  | leftCenter  center        rightCenter
+   * maxY     | leftBottom  centerBottom  rightBottom
+   */
+  // arguments are more explicit so text-searches will hopefully identify this code.
+  // assumes the getterMethod is the same for Node and Bounds2
+  function addBoundsVectorGetterSetter( getterMethod, setterMethod, propertyName ) {
+    Node.prototype[getterMethod] = function() {
+      return this.getBounds()[getterMethod]();
+    };
+    
+    Node.prototype[setterMethod] = function( value ) {
+      assert && assert( value instanceof Vector2 );
+      
+      this.translate( value.minus( this[getterMethod]() ), true );
+      return this; // allow chaining
+    };
+    
+    // ES5 getter and setter
+    Object.defineProperty( Node.prototype, propertyName, { set: Node.prototype[setterMethod], get: Node.prototype[getterMethod] } );
+  }
+  addBoundsVectorGetterSetter( 'getLeftTop',      'setLeftTop',      'leftTop' );
+  addBoundsVectorGetterSetter( 'getCenterTop',    'setCenterTop',    'centerTop' );
+  addBoundsVectorGetterSetter( 'getRightTop',     'setRightTop',     'rightTop' );
+  addBoundsVectorGetterSetter( 'getLeftCenter',   'setLeftCenter',   'leftCenter' );
+  addBoundsVectorGetterSetter( 'getCenter',       'setCenter',       'center' );
+  addBoundsVectorGetterSetter( 'getRightCenter',  'setRightCenter',  'rightCenter' );
+  addBoundsVectorGetterSetter( 'getLeftBottom',   'setLeftBottom',   'leftBottom' );
+  addBoundsVectorGetterSetter( 'getCenterBottom', 'setCenterBottom', 'centerBottom' );
+  addBoundsVectorGetterSetter( 'getRightBottom',  'setRightBottom',  'rightBottom' );
+  
   /*
    * This is an array of property (setter) names for Node.mutate(), which are also used when creating nodes with parameter objects.
    *
@@ -2487,7 +2405,8 @@ define( function( require ) {
    * TODO: move fill / stroke setting to mixins
    */
   Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
-                                  'left', 'right', 'top', 'bottom', 'center', 'centerX', 'centerY', 'renderer', 'rendererOptions',
+                                  'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom',
+                                  'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
                                   'layerSplit', 'mouseArea', 'touchArea', 'clipArea' ];
   
   // mix-in the events for Node
