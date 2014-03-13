@@ -2360,13 +2360,13 @@ define( function( require ) {
    * Convenience locations
    * upper is in terms of the visual layout in Scenery and other programs, so the minY is the "upper", and minY is the "lower"
    *
-   *             minX (x)     centerX        maxX
+   *             left (x)     centerX        right
    *          ---------------------------------------
-   * minY (y) | leftTop     centerTop     rightTop
+   * top  (y) | leftTop     centerTop     rightTop
    * centerY  | leftCenter  center        rightCenter
-   * maxY     | leftBottom  centerBottom  rightBottom
+   * bottom   | leftBottom  centerBottom  rightBottom
    */
-  // arguments are more explicit so text-searches will hopefully identify this code.
+  
   // assumes the getterMethod is the same for Node and Bounds2
   function addBoundsVectorGetterSetter( getterMethod, setterMethod, propertyName ) {
     Node.prototype[getterMethod] = function() {
@@ -2383,6 +2383,7 @@ define( function( require ) {
     // ES5 getter and setter
     Object.defineProperty( Node.prototype, propertyName, { set: Node.prototype[setterMethod], get: Node.prototype[getterMethod] } );
   }
+  // arguments are more explicit so text-searches will hopefully identify this code.
   addBoundsVectorGetterSetter( 'getLeftTop',      'setLeftTop',      'leftTop' );
   addBoundsVectorGetterSetter( 'getCenterTop',    'setCenterTop',    'centerTop' );
   addBoundsVectorGetterSetter( 'getRightTop',     'setRightTop',     'rightTop' );
