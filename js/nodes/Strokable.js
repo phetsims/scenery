@@ -275,6 +275,16 @@ define( function( require ) {
       return style;
     };
     
+    // if we have to apply a transform workaround for https://github.com/phetsims/scenery/issues/196 (only when we have a pattern or gradient)
+    proto.requiresSVGBoundsWorkaround = function() {
+      if ( !this._stroke || !this._stroke.getSVGDefinition ) {
+        return false;
+      }
+      
+      var bounds = this.computeShapeBounds( false ); // without stroke
+      return bounds.x * bounds.y === 0; // at least one of them was zero, so the bounding box has no area
+    };
+    
     proto.getSimpleCSSFill = function() {
       // if it's a Color object, get the corresponding CSS
       // 'transparent' will make us invisible if the fill is null

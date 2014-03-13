@@ -152,6 +152,8 @@ define( function( require ) {
       // add new ones if applicable
       this.addSVGFillDef( svg, defs );
       this.addSVGStrokeDef( svg, defs );
+      
+      assert && assert( !this.requiresSVGBoundsWorkaround(), 'No workaround for https://github.com/phetsims/scenery/issues/196 is provided at this time, please add an epsilon' );
     },
     
     // cleans up references created with udpateSVGDefs()
