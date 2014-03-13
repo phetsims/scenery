@@ -92,7 +92,14 @@ define( function( require ) {
       move: function( event ) {
         assert && assert( event.pointer === handler.pointer );
         
-        var delta = handler.transform.inverseDelta2( handler.pointer.point.minus( handler.lastDragPoint ) );
+        var globalDelta = handler.pointer.point.minus( handler.lastDragPoint );
+        
+        // ignore move events that have 0-length (Chrome seems to be auto-firing these on Windows, see https://code.google.com/p/chromium/issues/detail?id=327114)
+        if ( globalDelta.magnitudeSquared() === 0 ) {
+          return;
+        }
+        
+        var delta = handler.transform.inverseDelta2( globalDelta );
         
         // move by the delta between the previous point, using the precomputed transform
         // prepend the translation on the node, so we can ignore whatever other transform state the node has
