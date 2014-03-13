@@ -1363,6 +1363,7 @@ define( function( require ) {
       assert && assert( leftTop instanceof Vector2 );
       
       this.translate( leftTop.minus( this.getLeftTop() ), true );
+      return this; // allow chaining
     },
     
     getCenterTop: function() {
@@ -1373,6 +1374,7 @@ define( function( require ) {
       assert && assert( centerTop instanceof Vector2 );
       
       this.translate( centerTop.minus( this.getCenterTop() ), true );
+      return this; // allow chaining
     },
     
     getRightTop: function() {
@@ -1383,6 +1385,7 @@ define( function( require ) {
       assert && assert( rightTop instanceof Vector2 );
       
       this.translate( rightTop.minus( this.getRightTop() ), true );
+      return this; // allow chaining
     },
     
     getLeftCenter: function() {
@@ -1393,6 +1396,7 @@ define( function( require ) {
       assert && assert( leftCenter instanceof Vector2 );
       
       this.translate( leftCenter.minus( this.getLeftCenter() ), true );
+      return this; // allow chaining
     },
     
     getRightCenter: function() {
@@ -1403,6 +1407,7 @@ define( function( require ) {
       assert && assert( rightCenter instanceof Vector2 );
       
       this.translate( rightCenter.minus( this.getRightCenter() ), true );
+      return this; // allow chaining
     },
     
     getLeftBottom: function() {
@@ -1413,6 +1418,7 @@ define( function( require ) {
       assert && assert( leftBottom instanceof Vector2 );
       
       this.translate( leftBottom.minus( this.getLeftBottom() ), true );
+      return this; // allow chaining
     },
     
     getCenterBottom: function() {
@@ -1423,6 +1429,7 @@ define( function( require ) {
       assert && assert( centerBottom instanceof Vector2 );
       
       this.translate( centerBottom.minus( this.getCenterBottom() ), true );
+      return this; // allow chaining
     },
     
     getRightBottom: function() {
@@ -1433,6 +1440,7 @@ define( function( require ) {
       assert && assert( rightBottom instanceof Vector2 );
       
       this.translate( rightBottom.minus( this.getRightBottom() ), true );
+      return this; // allow chaining
     },
     
     
