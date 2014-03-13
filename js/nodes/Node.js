@@ -1355,6 +1355,87 @@ define( function( require ) {
       return this; // allow chaining
     },
     
+    getLeftTop: function() {
+      return this.getBounds().getLeftTop();
+    },
+    
+    setLeftTop: function( leftTop ) {
+      assert && assert( leftTop instanceof Vector2 );
+      
+      this.translate( leftTop.minus( this.getLeftTop() ), true );
+    },
+    
+    getCenterTop: function() {
+      return this.getBounds().getCenterTop();
+    },
+    
+    setCenterTop: function( centerTop ) {
+      assert && assert( centerTop instanceof Vector2 );
+      
+      this.translate( centerTop.minus( this.getCenterTop() ), true );
+    },
+    
+    getRightTop: function() {
+      return this.getBounds().getRightTop();
+    },
+    
+    setRightTop: function( rightTop ) {
+      assert && assert( rightTop instanceof Vector2 );
+      
+      this.translate( rightTop.minus( this.getRightTop() ), true );
+    },
+    
+    getLeftCenter: function() {
+      return this.getBounds().getLeftCenter();
+    },
+    
+    setLeftCenter: function( leftCenter ) {
+      assert && assert( leftCenter instanceof Vector2 );
+      
+      this.translate( leftCenter.minus( this.getLeftCenter() ), true );
+    },
+    
+    getRightCenter: function() {
+      return this.getBounds().getRightCenter();
+    },
+    
+    setRightCenter: function( rightCenter ) {
+      assert && assert( rightCenter instanceof Vector2 );
+      
+      this.translate( rightCenter.minus( this.getRightCenter() ), true );
+    },
+    
+    getLeftBottom: function() {
+      return this.getBounds().getLeftBottom();
+    },
+    
+    setLeftBottom: function( leftBottom ) {
+      assert && assert( leftBottom instanceof Vector2 );
+      
+      this.translate( leftBottom.minus( this.getLeftBottom() ), true );
+    },
+    
+    getCenterBottom: function() {
+      return this.getBounds().getCenterBottom();
+    },
+    
+    setCenterBottom: function( centerBottom ) {
+      assert && assert( centerBottom instanceof Vector2 );
+      
+      this.translate( centerBottom.minus( this.getCenterBottom() ), true );
+    },
+    
+    getRightBottom: function() {
+      return this.getBounds().getRightBottom();
+    },
+    
+    setRightBottom: function( rightBottom ) {
+      assert && assert( rightBottom instanceof Vector2 );
+      
+      this.translate( rightBottom.minus( this.getRightBottom() ), true );
+    },
+    
+    
     getWidth: function() {
       return this.getBounds().getWidth();
     },
@@ -2267,6 +2348,23 @@ define( function( require ) {
     
     set centerY( value ) { this.setCenterY( value ); },
     get centerY() { return this.getCenterY(); },
+    
+    set leftTop( value ) { this.setLeftTop( value ); },
+    get leftTop() { return this.getLeftTop(); },
+    set centerTop( value ) { this.setCenterTop( value ); },
+    get centerTop() { return this.getCenterTop(); },
+    set rightTop( value ) { this.setRightTop( value ); },
+    get rightTop() { return this.getRightTop(); },
+    set leftCenter( value ) { this.setLeftCenter( value ); },
+    get leftCenter() { return this.getLeftCenter(); },
+    set rightCenter( value ) { this.setRightCenter( value ); },
+    get rightCenter() { return this.getRightCenter(); },
+    set leftBottom( value ) { this.setLeftBottom( value ); },
+    get leftBottom() { return this.getLeftBottom(); },
+    set centerBottom( value ) { this.setCenterBottom( value ); },
+    get centerBottom() { return this.getCenterBottom(); },
+    set rightBottom( value ) { this.setRightBottom( value ); },
+    get rightBottom() { return this.getRightBottom(); },
     
     set children( value ) { this.setChildren( value ); },
     get children() { return this.getChildren(); },
