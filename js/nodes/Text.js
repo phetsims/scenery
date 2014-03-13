@@ -650,7 +650,7 @@ define( function( require ) {
         }
         if ( this.dirtyText ) {
           // TODO: actually do this in a better way
-          div.innerHTML = node.text;
+          div.innerHTML = node.getNonBreakingText();
         }
         if ( this.dirtyDirection ) {
           div.setAttribute( 'dir', this._direction );
