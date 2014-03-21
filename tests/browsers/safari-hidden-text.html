@@ -6,11 +6,21 @@
 
   <title>Safari hidden text issue, Joist #111</title>
 </head>
-<body style="padding: 0px; margin: 0px; overflow: hidden;">
-
-<div id="sim" style="position: absolute; left: 0px; top: 0px; cursor: default; width: 1364px; height: 339px; clip: rect(0px 1364px 339px 0px); overflow: hidden; -webkit-user-select: none; -webkit-user-drag: none; background-color: rgb(255, 255, 255); background-position: initial initial; background-repeat: initial initial;"><div style="position: absolute; left: 0px; top: 0px; width: 0px; height: 0px; clip: rect(0px 1364px 339px 0px); z-index: 4;"><div style="position: absolute; left: 0px; top: 0px; width: 300px; height: 150px; visibility: visible;"><canvas width="429" height="187" style="position: absolute; left: 468px; top: 15px; width: 429px; height: 187px;" id="canvas"></canvas></div></div><div style="position: absolute; left: 0px; top: 0px; width: 0px; height: 0px; clip: rect(0px 1364px 339px 0px); z-index: 9;"><div dir="ltr" style="position: absolute; font-style: normal; font-variant: normal; font-weight: normal; font-size: 14px; line-height: normal; font-family: Arial, sans-serif; color: rgb(0, 0, 0); width: 128.6201171875px; height: 16px; visibility: visible; -webkit-transform: matrix(0.6726190476190477, 0, 0, 0.6726190476190477, 542.7678571428571, 269.7202380952381); -webkit-transform-origin: 0% 0%;"><span><a href="https://github.com/phetsims/joist/issues/111">This is a link that is not visible in Safari</a></span></div></div></div>
-<script type="text/javascript">
-  // doesn't hide the text without this
-  document.getElementById( 'canvas' ).getContext( '2d' ).fillRect( 0, 0, 429, 187 );
-</script>
-</body></html>
+<body style="padding: 0px; margin: 0px;">
+  <div style="position: absolute; left: 0px; top: 0px; clip: rect(0px 1280px 360px 0px); z-index: 2;">
+    <canvas width="300" height="150" style="position: absolute; left: 210px;" id="canvas"></canvas>
+  </div>
+  <div style="position: absolute; left: 0px; top: 0px; clip: rect(0px 1280px 360px 0px); z-index: 3;">
+    <div style="position: absolute; width: 200px;">
+        <a href="https://github.com/phetsims/joist/issues/111">
+          This is a link that is not visible in Safari 7.0.2 with OS X 10.9.2, but hovering over it gives
+          the "hand/pointer" cursor, and clicking it follows the link.
+        </a>
+    </div>
+  </div>
+  <script type="text/javascript">
+    // doesn't hide the text without this
+    document.getElementById( 'canvas' ).getContext( '2d' ).fillRect( 0, 0, 300, 150 );
+  </script>
+</body>
+</html>
