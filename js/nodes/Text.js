@@ -304,7 +304,7 @@ define( function( require ) {
     getDOMTextNode: function() {
       if ( this._isHTML ) {
         var span = document.createElement( 'span' );
-        span.innerHTML = this.getNonBreakingText();
+        span.innerHTML = this._text;
         return span;
       } else {
         return document.createTextNode( this.getNonBreakingText() );
