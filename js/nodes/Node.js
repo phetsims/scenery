@@ -1400,7 +1400,7 @@ define( function( require ) {
     },
     
     setPickable: function( pickable ) {
-      assert && assert( typeof pickable === 'boolean' );
+      assert && assert( pickable === null || typeof pickable === 'boolean' );
       
       if ( this._pickable !== pickable ) {
         var n = this._pickable === true ? -1 : 0;
