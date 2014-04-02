@@ -70,7 +70,7 @@ define( function( require ) {
       this.groupRenderer = scenery.Renderer.bitmaskDOM | ( hints.forceAcceleration ? scenery.Renderer.bitmaskForceAcceleration : 0 ); // probably won't be used
     } else if ( isTransparent || hints.canvasCache ) {
       // everything underneath needs to be renderable with Canvas, otherwise we cannot cache
-      assert && assert( ( combinedBitmask & scenery.bitmaskSupportsCanvas ) !== 0, 'hints.canvasCache provided, but not all node contents can be rendered with Canvas under ' + node.constructor.name );
+      assert && assert( ( combinedBitmask & scenery.Renderer.bitmaskCanvas ) !== 0, 'hints.canvasCache provided, but not all node contents can be rendered with Canvas under ' + node.constructor.name );
       
       // TODO: handling of transformed caches differently than aligned caches?
       
@@ -82,6 +82,7 @@ define( function( require ) {
         assert && assert( ( combinedBitmask & scenery.bitmaskBoundsValid ) !== 0, 'hints.singleCache provided, but not all node contents have valid bounds under ' + node.constructor.name );
         this.isCacheShared = true;
         this.isTransformed = true;
+        this.sharedCacheRenderer = scenery.Renderer.bitmaskCanvas;
       }
       this.selfRenderer = scenery.Renderer.bitmaskCanvas; // TODO: allow SVG (toDataURL) and DOM (direct Canvas)
     }
@@ -96,15 +97,15 @@ define( function( require ) {
         this.selfRenderer = svgRenderer;
       } else if ( canvasRenderer && ( canvasRenderer & node._rendererBitmask ) !== 0 ) {
         this.selfRenderer = canvasRenderer;
-      } else if ( scenery.bitmaskSupportsDOM & node._rendererBitmask !== 0 ) {
+      } else if ( scenery.Renderer.bitmaskDOM & node._rendererBitmask !== 0 ) {
         // TODO: decide if CSS transform is to be applied here!
-        this.selfRenderer = scenery.bitmaskSupportsDOM;
+        this.selfRenderer = scenery.Renderer.bitmaskDOM;
       } else {
         throw new Error( 'unsupported renderer, something wrong in RenderState' );
       }
       
-      // TODO: remove this later
-      this.selfRenderer = scenery.bitmaskSupportsDOM;
+      //OHTWO TODO: remove this later
+      this.selfRenderer = scenery.Renderer.bitmaskDOM;
     }
   };
   RenderState.RegularState.prototype = {
