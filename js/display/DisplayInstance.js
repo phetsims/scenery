@@ -5,6 +5,9 @@
  * that is needed to tracking instance-specific display information, and signals to the display system when other
  * changes are necessary.
  *
+ * DisplayInstances generally form a true tree, as opposed to the DAG of nodes. The one exception is for shared Canvas caches,
+ * where multiple instances can point to one globally-stored (shared) cache instance.
+ *
  **********************
  * Relative transform system description:
  *
@@ -74,8 +77,9 @@ define( function( require ) {
   var globalIdCounter = 1;
   
   // TODO: handle allocations
-  scenery.DisplayInstance = function DisplayInstance( display, trail ) {
+  scenery.DisplayInstance = function DisplayInstance( display, trail, state ) {
     this.id = globalIdCounter++;
+    
     this.display = display;
     this.trail = trail;
     this.node = trail.lastNode();
@@ -83,7 +87,7 @@ define( function( require ) {
     this.children = []; // Array[DisplayInstance]
     this.childrenTracks = []; // TODO use this for tracking what children changes occurred, and thus where we need to stitch
     
-    this.state = null; // filled in with rendering state later
+    this.state = state;
     this.block = null; // filled in with a block if applicable (backbone at least, probably canvas multicache for sure also)
     
     this.selfDrawable = null;

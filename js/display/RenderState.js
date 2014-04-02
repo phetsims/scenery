@@ -130,22 +130,22 @@ define( function( require ) {
   
   RenderState.RegularState.createRootState = function( node ) {
     var baseState = new RenderState.RegularState(
-      node,                   // trail
+      node,                           // trail
       scenery.Renderer.bitmaskSVG,    // default SVG renderer settings
       scenery.Renderer.bitmaskCanvas, // default Canvas renderer settings
-      false,                  // isUnderCanvasCache
-      false                   // isShared
+      false,                          // isUnderCanvasCache
+      false                           // isShared
     );
     return baseState;
   };
   
   RenderState.RegularState.createSharedCacheState = function( node ) {
     var baseState = new RenderState.RegularState(
-      node,                     // trail
-      null,                     // no SVG renderer settings needed
+      node,                             // trail
+      null,                             // no SVG renderer settings needed
       scenery.Renderer.bitmaskCanvas,   // default Canvas renderer settings
-      true,                     // isUnderCanvasCache
-      true                      // isShared (since we are creating the shared one, not the individual instances referencing it)
+      true,                             // isUnderCanvasCache
+      true                              // isShared (since we are creating the shared one, not the individual instances referencing it)
     );
     return baseState;
   };

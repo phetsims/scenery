@@ -61,19 +61,16 @@ define( function( require ) {
   }
   
   function createInstance( display, trail, state, parentInstance ) {
-    var instance = new scenery.DisplayInstance( display, trail );
-    
-    var isSharedCache = state.isCanvasCache && state.isCacheShared;
+    var instance = new scenery.DisplayInstance( display, trail, state );
     
     var node = trail.lastNode();
-    instance.state = state;
     // instance.parent = parentInstance; // NOTE: done later during the append!
     instance.isTransformed = state.isTransformed;
     if ( instance.isTransformed ) {
       display.markTransformRootDirty( instance, true );
     }
     
-    if ( isSharedCache ) {
+    if ( state.isCanvasCache && state.isCacheShared ) {
       var instanceKey = trail.lastNode().getId();
       var sharedInstance = display._sharedCanvasInstances[instanceKey];
       
@@ -96,7 +93,6 @@ define( function( require ) {
       var currentDrawable = null;
       
       if ( node.isPainted() ) {
-        // dynamic import
         var Renderer = scenery.Renderer;
         
         var selfRenderer = state.selfRenderer;
