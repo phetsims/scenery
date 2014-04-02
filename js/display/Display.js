@@ -1,7 +1,10 @@
 // Copyright 2002-2013, University of Colorado
 
 /**
- * A persistent display of a specific Node and its descendants
+ * A persistent display of a specific Node and its descendants, which is updated at discrete points in time.
+ *
+ * Use display.getDOMElement or display.domElement to retrieve the Display's DOM representation.
+ * Use display.updateDisplay() to trigger the visual update in the Display's DOM element.
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
@@ -158,6 +161,17 @@ define( function( require ) {
   }
   
   inherit( Object, Display, {
+    // returns the base DOM element that will be displayed by this Display
+    getDOMElement: function() {
+      return this._domElement;
+    },
+    get domElement() { return this.getDOMElement(); },
+    
+    // updates the display's DOM element with the current visual state of the attached root node and its descendants
+    updateDisplay: function() {
+      throw new Error( 'TODO OHTWO unimplemented' );
+    },
+    
     getRootNode: function() {
       return this._rootNode;
     },
