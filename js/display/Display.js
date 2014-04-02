@@ -14,6 +14,7 @@ define( function( require ) {
   
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
+  var Dimension2 = require( 'DOT/Dimension2' );
   require( 'SCENERY/util/Trail' );
   require( 'SCENERY/display/BackboneBlock' );
   require( 'SCENERY/display/CanvasBlock' );
@@ -26,7 +27,19 @@ define( function( require ) {
   require( 'SCENERY/display/SVGSelfDrawable' );
   require( 'SCENERY/layers/Renderer' );
   
-  scenery.Display = function Display( rootNode ) {
+  // Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below
+  scenery.Display = function Display( rootNode, options ) {
+    this.options = _.extend( {
+      width: 640,               // initial display width
+      height: 480,              // initial display height
+      //OHTWO TODO: hook up allowCSSHacks
+      allowCSSHacks: true,      // applies CSS styles to the root DOM element that make it amenable to interactive content
+      //OHTWO TODO: hook up enablePointerEvents
+      enablePointerEvents: true // whether we should specifically listen to pointer events if we detect support
+    }, options );
+    
+    this._size = new Dimension2( this.options.width, this.options.height );
+    
     this._rootNode = rootNode;
     this._rootBackbone = null; // to be filled in later
     this._domElement = scenery.BackboneBlock.createDivBackbone();
@@ -176,6 +189,61 @@ define( function( require ) {
       return this._rootNode;
     },
     get rootNode() { return this.getRootNode(); },
+    
+    // The dimensions of the Display's DOM element
+    getSize: function() {
+      return this._size;
+    },
+    get size() { return this.getSize(); },
+    
+    // size: dot.Dimension2. Changes the size that the Display's DOM element will be after the next updateDisplay()
+    setSize: function( size ) {
+      assert && assert( size instanceof Dimension2 );
+      assert && assert( size.width % 1 === 0, 'Display.width should be an integer' );
+      assert && assert( size.width > 0, 'Display.width should be greater than zero' );
+      assert && assert( size.height % 1 === 0, 'Display.height should be an integer' );
+      assert && assert( size.height > 0, 'Display.height should be greater than zero' );
+      
+      if ( !this._size.equals( size ) ) {
+        this._size = size;
+        
+        //TODO OHTWO send event about size change, or mark a dirty flag?
+      }
+    },
+    
+    // The width of the Display's DOM element
+    getWidth: function() {
+      return this._size.width;
+    },
+    get width() { return this.getWidth(); },
+    
+    // Sets the width that the Display's DOM element will be after the next updateDisplay(). Should be an integral value.
+    setWidth: function( width ) {
+      assert && assert( typeof width === 'number', 'Display.width should be a number' );
+      
+      if ( this.getWidth() !== width ) {
+        // TODO: remove allocation here?
+        this.setSize( new Dimension2( width, this.getHeight() ) );
+      }
+    },
+    set width( value ) { this.setWidth( value ); },
+    
+    // The height of the Display's DOM element
+    getHeight: function() {
+      return this._size.height;
+    },
+    get height() { return this.getHeight(); },
+    
+    // Sets the height that the Display's DOM element will be after the next updateDisplay(). Should be an integral value.
+    setHeight: function( height ) {
+      assert && assert( typeof height === 'number', 'Display.height should be a number' );
+      
+      if ( this.getHeight() !== height ) {
+        // TODO: remove allocation here?
+        this.setSize( new Dimension2( height, this.getHeight() ) );
+      }
+    },
+    set height( value ) { this.setHeight( value ); },
     
     // called from DisplayInstances that will need a transform update (for listeners and precomputation)
     markTransformRootDirty: function( displayInstance, passTransform ) {

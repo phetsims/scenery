@@ -63,6 +63,7 @@ define( function( require ) {
    *   height: <current main height>,       // override the main container's height
    * }
    */
+  //OHTWO deprecated
   scenery.Scene = function Scene( $main, options ) {
     assert && assert( $main[0], 'A main container is required for a scene' );
     this.$main = $main;
@@ -78,6 +79,7 @@ define( function( require ) {
     options = _.extend( {
       allowSceneOverflow: false,
       allowCSSHacks: true,
+      //OHTWO deprecated
       allowDevicePixelRatioScaling: false,
       enablePointerEvents: true,
       preferredSceneLayerType: scenery.CanvasDefaultLayerType,
