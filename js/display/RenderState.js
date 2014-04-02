@@ -31,6 +31,8 @@ define( function( require ) {
   
   var RenderState = scenery.RenderState = {};
   
+  var emptyObject = {};
+  
   /*
    * {param} node               Node      The node whose instance will have this state (inspect the hints / properties on this node)
    * {param} svgRenderer        Renderer  SVG renderer settings to use
@@ -55,7 +57,7 @@ define( function( require ) {
     this.groupRenderer = null;
     this.sharedCacheRenderer = null;
     
-    var hints = node.hints || {}; // TODO: reduce allocation here
+    var hints = node.hints || emptyObject;
     
     var isTransparent = node.opacity !== 1;
     
