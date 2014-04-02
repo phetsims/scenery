@@ -38,6 +38,7 @@ define( function( require ) {
       enablePointerEvents: true // whether we should specifically listen to pointer events if we detect support
     }, options );
     
+    // The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM element on updateDisplay())
     this._size = new Dimension2( this.options.width, this.options.height );
     
     this._rootNode = rootNode;
