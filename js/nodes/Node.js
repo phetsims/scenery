@@ -130,6 +130,7 @@ define( function( require ) {
     this._touchBoundsHadListener = false; // since we only walk the dirty flags up ancestors, we need a way to re-evaluate descendants when the existence of effective listeners changes
     
     // dirty region handling
+    //OHTWO deprecated (all three flags)
     this._paintDirty = false;        // whether the self paint is dirty (just this node, none of its children)
     this._subtreePaintDirty = false; // whether the subtree paint is dirty (this node and its children, usually after a transform)
     this._childPaintDirty = false;   // whether the child paint is dirty (excluding self paint, just used for finding _paintDirty, _selfPaintDirty)
@@ -630,6 +631,7 @@ define( function( require ) {
       }
     },
     
+    //OHTWO deprecated
     validatePaint: function() {
       if ( this._paintDirty ) {
         assert && assert( this.isPainted(), 'Only painted nodes can have self dirty paint' );
@@ -704,6 +706,7 @@ define( function( require ) {
     },
     
     // mark the paint of this node as invalid, so its new region will be painted
+    //OHTWO deprecated
     invalidatePaint: function() {
       assert && assert( this.isPainted(), 'Can only call invalidatePaint on a painted node' );
       this._paintDirty = true;
@@ -715,6 +718,7 @@ define( function( require ) {
       }
     },
     
+    //OHTWO deprecated
     invalidateSubtreePaint: function() {
       this._subtreePaintDirty = true;
       
@@ -725,6 +729,7 @@ define( function( require ) {
       }
     },
     
+    //OHTWO deprecated
     // recursively tag all ancestors with _childPaintDirty
     invalidateChildPaint: function() {
       // don't bother updating if we've already been tagged
