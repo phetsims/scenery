@@ -178,6 +178,10 @@ define( function( require ) {
     createDOMState: function( domSelfDrawable ) {
       return Circle.CircleDOMState.createFromPool( domSelfDrawable );
     },
+    
+    createSVGState: function( svgSelfDrawable ) {
+      return Circle.CircleSVGState.createFromPool( svgSelfDrawable );
+    },
 
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Circle( ' + this._radius + ', {' + propLines + '} )';
@@ -188,6 +192,8 @@ define( function( require ) {
     },
 
     setRadius: function( radius ) {
+      assert && assert( typeof radius === 'number', 'Circle.radius must be a number' );
+      
       if ( this._radius !== radius ) {
         this._radius = radius;
         this.invalidateCircle();
@@ -462,8 +468,6 @@ define( function( require ) {
   }, {
     initialize: function( drawable ) {
       CircleRenderState.prototype.initialize.call( this, drawable );
-      
-      this.lastRadius = -1; // invalid on purpose
       
       this.defs = drawable.defs;
       
