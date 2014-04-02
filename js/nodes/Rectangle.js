@@ -838,7 +838,7 @@ define( function( require ) {
           }
         }
         
-        rect.setAttribute( 'style', node.getSVGFillStyle() + node.getSVGStrokeStyle() );
+        // rect.setAttribute( 'style', node.getSVGFillStyle() + node.getSVGStrokeStyle() );
         
         if ( this.dirtyFill ) {
           this.fillState.updateFill( this.defs, node._fill );
