@@ -14,7 +14,7 @@ define( function( require ) {
   var Drawable = require( 'SCENERY/display/Drawable' );
   
   scenery.SharedCanvasCacheDrawable = function SharedCanvasCacheDrawable( trail, renderer, instance, sharedInstance ) {
-    Drawable.call( this, trail, renderer );
+    Drawable.call( this, renderer );
     
     // TODO: NOTE: may have to separate into separate drawables for separate group renderers
     

@@ -11,14 +11,15 @@ define( function( require ) {
   
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  var Block = require( 'SCENERY/display/Block' );
+  var Drawable = require( 'SCENERY/display/Drawable' );
   
-  scenery.SVGBlock = function SVGBlock() {
+  scenery.SVGBlock = function SVGBlock( renderer ) {
+    Drawable.call( this, renderer );
     // TODO: add count of boundsless objects
   };
   var SVGBlock = scenery.SVGBlock;
   
-  inherit( Block, SVGBlock, {
+  inherit( Drawable, SVGBlock, {
     getDomElement: function() {
       
     }

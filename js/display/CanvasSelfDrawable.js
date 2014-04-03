@@ -14,7 +14,7 @@ define( function( require ) {
   var Drawable = require( 'SCENERY/display/Drawable' );
   
   scenery.CanvasSelfDrawable = function CanvasSelfDrawable( trail, renderer, instance ) {
-    Drawable.call( this, trail, renderer );
+    Drawable.call( this, renderer );
     
     this.instance = instance;
   };

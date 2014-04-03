@@ -35,7 +35,7 @@ define( function( require ) {
   require( 'SCENERY/layers/Renderer' );
   
   scenery.DOMSelfDrawable = function DOMSelfDrawable( trail, renderer, instance ) {
-    Drawable.call( this, trail, renderer );
+    Drawable.call( this, renderer );
     this.instance = instance;
     
     this.node = instance.trail.lastNode();

@@ -12,15 +12,14 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   
-  scenery.Drawable = function Drawable( trail, renderer ) {
-    // what block we are being rendered into (will be filled in later)
-    this.block = null;
+  scenery.Drawable = function Drawable( renderer ) {
+    // what drawble we are being rendered (or put) into (will be filled in later)
+    this.parentDrawable = null;
     
     // linked list handling (will be filled in later)
     this.previousDrawable = null;
     this.nextDrawable = null;
     
-    this.trail = trail;
     this.renderer = renderer;
   };
   var Drawable = scenery.Drawable;
@@ -32,8 +31,8 @@ define( function( require ) {
         this.dirty = true;
         
         // TODO: notify what we want to call repaint() later
-        if ( this.block ) {
-          this.block.markDirtyInstance( this );
+        if ( this.parentDrawable ) {
+          this.parentDrawable.markDirtyInstance( this );
         }
       }
     },

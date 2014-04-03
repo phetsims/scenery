@@ -11,19 +11,16 @@ define( function( require ) {
   
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  var Block = require( 'SCENERY/display/Block' );
+  var Drawable = require( 'SCENERY/display/Drawable' );
   
-  scenery.CanvasBlock = function CanvasBlock() {
+  scenery.CanvasBlock = function CanvasBlock( renderer ) {
+    Drawable.call( this, renderer );
     // TODO: add count of boundsless objects
+    // TODO: dirty list of nodes (each should go dirty only once, easier than scanning all?)
   };
   var CanvasBlock = scenery.CanvasBlock;
   
-  inherit( Block, CanvasBlock, {
-    getDomElement: function() {
-      
-    }
-    
-    // TODO: add canvas draw methods
+  inherit( Drawable, CanvasBlock, {
   } );
   
   return CanvasBlock;

@@ -11,10 +11,11 @@ define( function( require ) {
   
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  var Block = require( 'SCENERY/display/Block' );
+  var Drawable = require( 'SCENERY/display/Drawable' );
   
   // includeRoot is used for the root of a display, where the instance should be thought of as fully "under" the backbone
   scenery.BackboneBlock = function BackboneBlock( instance, renderer, includeRoot, existingDiv ) {
+    Drawable.call( this, renderer );
     this.instance = instance;
     this.renderer = renderer;
     this.domElement = existingDiv || BackboneBlock.createDivBackbone();
@@ -34,14 +35,12 @@ define( function( require ) {
   };
   var BackboneBlock = scenery.BackboneBlock;
   
-  inherit( Block, BackboneBlock, {
+  inherit( Drawable, BackboneBlock, {
     repaint: function() {
       
     },
     
     markDirtyInstance: function( drawable ) {
-      Block.prototype.markDirtyInstance.call( this, drawable );
-      
       this.blockDrawable.markDirty();
     }
   } );

@@ -14,7 +14,7 @@ define( function( require ) {
   var Drawable = require( 'SCENERY/display/Drawable' );
   
   scenery.DOMElementDrawable = function DOMElementDrawable( trail, renderer, domElement, repaintCallback ) {
-    Drawable.call( this, trail, renderer );
+    Drawable.call( this, renderer );
     this.domElement = domElement;
     this.repaintCallback = repaintCallback;
     

@@ -15,7 +15,6 @@ define( [
     'SCENERY/debug/DebugContext',
     
     'SCENERY/display/BackboneBlock',
-    'SCENERY/display/Block',
     'SCENERY/display/CanvasBlock',
     'SCENERY/display/CanvasSelfDrawable',
     'SCENERY/display/Display',
