@@ -324,13 +324,9 @@ define( function( require ) {
   * DOM rendering
   *----------------------------------------------------------------------------*/
   
-  var CircleDOMState = Circle.CircleDOMState = function( drawable ) {
-    // important to keep this in the constructor (so our hidden class works out nicely)
-    this.initialize( drawable );
-  };
-  CircleDOMState.prototype = {
-    constructor: CircleDOMState,
-    
+  var CircleDOMState = Circle.CircleDOMState = inherit( Circle.CircleRenderState, function CircleDOMState( drawable ) {
+    CircleRenderState.call( this, drawable );
+  }, {
     // initializes, and resets (so we can support pooled states)
     initialize: function( drawable ) {
       CircleRenderState.prototype.initialize.call( this, drawable );
@@ -439,7 +435,7 @@ define( function( require ) {
       
       this.transformDirty = false;
     }
-  };
+  } );
   /* jshint -W064 */
   Fillable.FillableState( CircleDOMState );
   /* jshint -W064 */
