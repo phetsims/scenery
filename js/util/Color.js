@@ -23,7 +23,7 @@ define( function( require ) {
     
     // allow listeners to be notified on any changes. called with listener()
     this.listeners = [];
-    
+
     if ( typeof r === 'string' ) {
       var str = r.replace( / /g, '' ).toLowerCase();
       var success = false;
