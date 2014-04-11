@@ -41,18 +41,29 @@ define( function( require ) {
   // scratch matrix used in DOM rendering
   var scratchMatrix = Matrix3.dirtyFromPool();
   
-  // set up the container and text for testing text bounds quickly (using approximateSVGBounds)
-  var svgTextSizeContainer = document.createElementNS( scenery.svgns, 'svg' );
-  svgTextSizeContainer.setAttribute( 'width', '2' );
-  svgTextSizeContainer.setAttribute( 'height', '2' );
-  svgTextSizeContainer.setAttribute( 'style', 'visibility: hidden; pointer-events: none; position: absolute; left: -65535; right: -65535;' ); // so we don't flash it in a visible way to the user
+  var textSizeContainerId = 'sceneryTextSizeContainer';
+  var textSizeElementId = 'sceneryTextSizeElement';
+  var svgTextSizeContainer = document.getElementById( textSizeContainerId );
+  var svgTextSizeElement = document.getElementById( textSizeElementId );
+  
+  if ( !svgTextSizeContainer ) {
+    // set up the container and text for testing text bounds quickly (using approximateSVGBounds)
+    svgTextSizeContainer = document.createElementNS( scenery.svgns, 'svg' );
+    svgTextSizeContainer.setAttribute( 'width', '2' );
+    svgTextSizeContainer.setAttribute( 'height', '2' );
+    svgTextSizeContainer.setAttribute( 'id', textSizeContainerId );
+    svgTextSizeContainer.setAttribute( 'style', 'visibility: hidden; pointer-events: none; position: absolute; left: -65535; right: -65535;' ); // so we don't flash it in a visible way to the user
+  }
   // NOTE! copies createSVGElement
-  var svgTextSizeElement = document.createElementNS( scenery.svgns, 'text' );
-  svgTextSizeElement.appendChild( document.createTextNode( '' ) );
-  svgTextSizeElement.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
-  svgTextSizeElement.setAttribute( 'text-rendering', 'geometricPrecision' );
-  svgTextSizeElement.setAttribute( 'lengthAdjust', 'spacingAndGlyphs' );
-  svgTextSizeContainer.appendChild( svgTextSizeElement );
+  if ( !svgTextSizeElement ) {
+    svgTextSizeElement = document.createElementNS( scenery.svgns, 'text' );
+    svgTextSizeElement.appendChild( document.createTextNode( '' ) );
+    svgTextSizeElement.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
+    svgTextSizeElement.setAttribute( 'text-rendering', 'geometricPrecision' );
+    svgTextSizeElement.setAttribute( 'lengthAdjust', 'spacingAndGlyphs' );
+    svgTextSizeElement.setAttribute( 'id', textSizeElementId );
+    svgTextSizeContainer.appendChild( svgTextSizeElement );
+  }
   
   // SVG bounds seems to be malfunctioning for Safari 5. Since we don't have a reproducible test machine for
   // fast iteration, we'll guess the user agent and use DOM bounds instead of SVG.
