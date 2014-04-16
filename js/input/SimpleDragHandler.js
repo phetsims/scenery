@@ -13,7 +13,7 @@ define( function( require ) {
   
   /*
    * Allowed options: {
-   *    allowTouchSnag: false // allow touch swipes across an object to pick it up,
+   *    allowTouchSnag: false // allow touch swipes across an object to pick it up. If a function is passed, the value allowTouchSnag( event ) is used
    *    dragCursor: 'pointer' // while dragging with the mouse, sets the cursor to this value (or use null to not override the cursor while dragging)
    *    mouseButton: 0        // allow changing the mouse button that activates the drag listener. -1 should activate on any mouse button, 0 on left, 1 for middle, 2 for right, etc.
    *    start: null           // if non-null, called when a drag is started. start( event, trail )
@@ -176,6 +176,13 @@ define( function( require ) {
       }
     },
     
+    tryTouchToSnag: function( event ) {
+      // allow touches to start a drag by moving "over" this node, and allows clients to specify custom logic for when touchSnag is allowable
+      if ( this.options.allowTouchSnag && ( this.options.allowTouchSnag === true || this.options.allowTouchSnag( event ) ) ) {
+        this.tryToSnag( event );
+      }
+    },
+    
     /*---------------------------------------------------------------------------*
     * events called from the node input listener
     *----------------------------------------------------------------------------*/
@@ -187,10 +194,12 @@ define( function( require ) {
     
     // touch enters this node
     touchenter: function( event ) {
-      // allow touches to start a drag by moving "over" this node
-      if ( this.options.allowTouchSnag ) {
-        this.tryToSnag( event );
-      }
+      this.tryTouchToSnag( event );
+    },
+    
+    // touch moves over this node
+    touchmove: function( event ) {
+      this.tryTouchToSnag( event );
     }
   };
   
