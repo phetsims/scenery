@@ -131,7 +131,7 @@ define( function( require ) {
     
     startDrag: function( event ) {
       // set a flag on the pointer so it won't pick up other nodes
-      event.pointer.dragging = true;
+      event.pointer.active = true;
       event.pointer.cursor = this.options.dragCursor;
       event.pointer.addInputListener( this.dragListener );
       // event.trail.rootNode().addEventListener( this.transformListener ); // TODO: replace with new parent transform listening solution
@@ -153,7 +153,7 @@ define( function( require ) {
     },
     
     endDrag: function( event ) {
-      this.pointer.dragging = false;
+      this.pointer.active = false;
       this.pointer.cursor = null;
       this.pointer.removeInputListener( this.dragListener );
       // this.trail.rootNode().removeEventListener( this.transformListener ); // TODO: replace with new parent transform listening solution
@@ -170,8 +170,9 @@ define( function( require ) {
         return;
       }
       
+      console.log( event.pointer.active );
       // only start dragging if the pointer isn't dragging anything, we aren't being dragged, and if it's a mouse it's button is down
-      if ( !this.dragging && !event.pointer.dragging ) {
+      if ( !this.dragging && !event.pointer.active ) {
         this.startDrag( event );
       }
     },

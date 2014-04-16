@@ -18,6 +18,8 @@ define( function( require ) {
     this.listeners = [];
     
     phetAllocation && phetAllocation( 'Pointer' );
+    
+    this.active = false; // whether a control is being actively manipulated by this pointer
   };
   var Pointer = scenery.Pointer;
   
