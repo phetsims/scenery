@@ -23,6 +23,13 @@
     
     ok( node.trailUnderPoint( dot( 10, 10 ), { isTouch: true } ), 'Node intersection (isTouch)' );
     ok( node.trailUnderPoint( dot( 90, 10 ), { isTouch: true } ), 'Node intersection (isTouch)' );
-    ok( node.trailUnderPoint( dot( -10, 10 ), { isTouch: true } ), 'Node no intersection (isTouch)' );
+    ok( node.trailUnderPoint( dot( -10, 10 ), { isTouch: true } ), 'Node intersection (isTouch)' );
+    
+    node.clipArea = kite.Shape.rectangle( 0, 0, 50, 50 );
+    
+    // points outside the clip area shouldn't register as hits
+    ok( node.trailUnderPoint( dot( 10, 10 ), { isTouch: true } ), 'Node intersection (isTouch with clipArea)' );
+    ok( !node.trailUnderPoint( dot( 90, 10 ), { isTouch: true } ), 'Node no intersection (isTouch with clipArea)' );
+    ok( !node.trailUnderPoint( dot( -10, 10 ), { isTouch: true } ), 'Node no intersection (isTouch with clipArea)' );
   } );
 })();

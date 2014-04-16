@@ -446,6 +446,7 @@ define( function( require ) {
       if ( this._mouseBoundsDirty ) {
         var hasMouseAreas = false;
         
+        // --- mouseBounds in local coordinates for now, transformed later
         this._mouseBounds = this._selfBounds.copy(); // start with the self bounds, then add from there
         
         // union of all children's mouse bounds (if they exist)
@@ -465,7 +466,13 @@ define( function( require ) {
           this._mouseBounds.includeBounds( this._mouseArea.isBounds ? this._mouseArea : this._mouseArea.bounds );
         }
         
+        if ( this.hasClipArea() ) {
+          // exclude areas outside of the clipping area's bounds (for efficiency)
+          this._mouseBounds = this._mouseBounds.intersection( this._clipArea.bounds );
+        }
+        
         if ( hasMouseAreas ) {
+          // --- mouseBounds put into parent coordinates here
           // transform it to the parent coordinate frame\
           this.transformBoundsFromLocalToParent( this._mouseBounds );
           
@@ -487,6 +494,7 @@ define( function( require ) {
       if ( this._touchBoundsDirty ) {
         var hasTouchAreas = false;
         
+        // --- touchBounds in local coordinates for now, transformed later
         this._touchBounds = this._selfBounds.copy(); // start with the self bounds, then add from there
         
         // union of all children's touch bounds (if they exist)
@@ -506,7 +514,13 @@ define( function( require ) {
           this._touchBounds.includeBounds( this._touchArea.isBounds ? this._touchArea : this._touchArea.bounds );
         }
         
+        if ( this.hasClipArea() ) {
+          // exclude areas outside of the clipping area's bounds (for efficiency)
+          this._touchBounds = this._touchBounds.intersection( this._clipArea.bounds );
+        }
+        
         if ( hasTouchAreas ) {
+          // --- touchBounds put into parent coordinates here
           // transform it to the parent coordinate frame
           this.transformBoundsFromLocalToParent( this._touchBounds );
           
@@ -760,6 +774,11 @@ define( function( require ) {
       // point in the local coordinate frame. computed after the main bounds check, so we can bail out there efficiently
       var localPoint = this._transform.getInverse().multiplyVector2( Vector2.createFromPool( point.x, point.y ) );
       // var localPoint = this.parentToLocalPoint( point );
+      
+      // if our point is outside of the local-coordinate clipping area, we shouldn't return a hit
+      if ( this.hasClipArea() && !this._clipArea.containsPoint( localPoint ) ) {
+        return null;
+      }
       
       // check children first, since they are rendered later
       if ( this._children.length > 0 && ( hasHitAreas || this._childBounds.containsPoint( localPoint ) ) ) {
