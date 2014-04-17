@@ -49,12 +49,10 @@ define( function( require ) {
       mouseButton: options.mouseButton || 0, // forward the mouse button, default to 0 (LMB)
       
       down: function( event, trail ) {
-        event.pointer.active = true;
         buttonListener.setButtonState( event, 'down' );
       },
       
       up: function( event, trail ) {
-        event.pointer.active = false;
         buttonListener.setButtonState( event, buttonListener._overCount > 0 ? 'over' : 'up' );
       }
     } );
