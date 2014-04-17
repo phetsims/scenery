@@ -137,6 +137,7 @@ define( function( require ) {
     
     // what type of renderer should be forced for this node.
     this._renderer = null;
+    //OHTWO deprecated (at least rendererOptions if not rendererLayerType)
     this._rendererOptions = null; // options that will determine the layer type
     this._rendererLayerType = null; // cached layer type that is used by the LayerStrategy
     
