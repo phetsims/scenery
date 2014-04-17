@@ -31,7 +31,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
   
-  scenery.SVGSelfDrawable = function SVGSelfDrawable( trail, renderer, instance ) {
+  scenery.SVGSelfDrawable = function SVGSelfDrawable( renderer, instance ) {
     Drawable.call( this, renderer );
     this.instance = instance;
     

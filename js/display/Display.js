@@ -98,11 +98,11 @@ define( function( require ) {
         var selfRenderer = state.selfRenderer;
         var selfRendererType = selfRenderer & Renderer.bitmaskRendererArea;
         if ( selfRendererType === Renderer.bitmaskCanvas ) {
-          instance.selfDrawable = new scenery.CanvasSelfDrawable( trail, selfRenderer, instance );
+          instance.selfDrawable = new scenery.CanvasSelfDrawable( selfRenderer, instance );
         } else if ( selfRendererType === Renderer.bitmaskSVG ) {
-          instance.selfDrawable = new scenery.SVGSelf( trail, selfRenderer, instance );
+          instance.selfDrawable = new scenery.SVGSelfDrawable( selfRenderer, instance );
         } else if ( selfRendererType === Renderer.bitmaskDOM ) {
-          instance.selfDrawable = new scenery.DOMSelfDrawable( trail, selfRenderer, instance );
+          instance.selfDrawable = new scenery.DOMSelfDrawable( selfRenderer, instance );
         } else {
           // assert so that it doesn't compile down to a throw (we want this function to be optimized)
           assert && assert( 'Unrecognized renderer, maybe we don\'t support WebGL yet?: ' + selfRenderer );
