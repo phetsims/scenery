@@ -1,7 +1,7 @@
 // Copyright 2002-2013, University of Colorado
 
 /**
- * EXPERIMENTAL: USE AT YOUR OWN CAUTION
+ * DEPRECATED EXPERIMENTAL: USE AT YOUR OWN CAUTION
  *
  * A container that allows flexible layout generation based on layout methods that can be composed together.
  *
@@ -32,6 +32,7 @@ define( function( require ) {
   
   // var debug = false;
   
+  // @deprecated
   scenery.LayoutNode = function LayoutNode( defaultMethod, options ) {
     var layoutNode = this;
     
@@ -59,6 +60,8 @@ define( function( require ) {
     // this.addChild( this._invisibleBackground );
     
     this.updateLayout();
+    
+    throw new Error( 'Deprecated, please do not use (replacement for overrideBounds has not been provided)' );
   };
   var LayoutNode = scenery.LayoutNode;
   
@@ -135,11 +138,6 @@ define( function( require ) {
     removeElement: function( element ) {
       this._elements.splice( this._elements.indexOf( element ), 1 ); // TODO: replace with some remove() instead of splice()
       element.node.removeEventListener( 'bounds', this._boundsListener );
-    },
-    
-    // overrides the Node's bounds computation in a strictly increasing way (for Canvas support)
-    overrideBounds: function( computedBounds ) {
-      return this.layoutBounds;
     },
     
     updateLayout: function() {

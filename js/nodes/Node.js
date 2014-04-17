@@ -116,6 +116,7 @@ define( function( require ) {
     this._localBounds = Bounds2.NOTHING; // for this node and its children, in "local" coordinates
     this._selfBounds = Bounds2.NOTHING;  // just for this node, in "local" coordinates
     this._childBounds = Bounds2.NOTHING; // just for children, in "local" coordinates
+    this._localBoundsOverridden = false; // whether our localBounds have been set (with the ES5 setter / setLocalBounds()) to a custom value
     this._boundsDirty = true;
     this._localBoundsDirty = true;
     this._childBoundsDirty = true;
@@ -376,11 +377,6 @@ define( function( require ) {
       this._liveRegions.push( {property: property, options: options} );
     },
     
-    // should be overridden to modify (increase ONLY if Canvas is involved) the node's bounds. Return the expanded bounds.
-    overrideBounds: function( computedBounds ) {
-      return computedBounds;
-    },
-    
     // Ensure that cached bounds stored on this node (and all children) are accurate. Returns true if any sort of dirty flag was set
     validateBounds: function() {
       var that = this;
@@ -418,7 +414,7 @@ define( function( require ) {
         }
       }
       
-      if ( this._localBoundsDirty ) {
+      if ( this._localBoundsDirty && !this._localBoundsOverridden ) {
         wasDirtyBefore = true;
         
         this._localBoundsDirty = false; // we only need this to set local bounds as dirty
@@ -451,8 +447,7 @@ define( function( require ) {
         var oldBounds = this._bounds;
         
         // converts local to parent bounds. mutable methods used to minimize number of created bounds instances (we create one so we don't change references to the old one)
-        var newBounds = this.transformBoundsFromLocalToParent( this._localBounds );
-        newBounds = this.overrideBounds( newBounds ); // allow expansion of the bounds area
+        var newBounds = this.localToParentBounds( this._localBounds ); // TODO: reduce allocation? fully mutable?
         var changed = !newBounds.equals( oldBounds );
         
         if ( changed ) {
@@ -490,10 +485,11 @@ define( function( require ) {
           }
           
           assertSlow && assertSlow( that._childBounds.equalsEpsilon( childBounds, epsilon ), 'Child bounds mismatch after validateBounds: ' +
-                                                                                                    that._childBounds.toString() + ', expected: ' + childBounds.toString() );
-          assertSlow && assertSlow( that._bounds.equalsEpsilon( fullBounds, epsilon ) ||
-                                                    that._bounds.equalsEpsilon( that.overrideBounds( fullBounds ), epsilon ),
-                                                    'Bounds mismatch after validateBounds: ' + that._bounds.toString() + ', expected: ' + fullBounds.toString() );
+                                                                                             that._childBounds.toString() + ', expected: ' + childBounds.toString() );
+          assertSlow && assertSlow( that._localBoundsOverridden ||
+                                    that._bounds.equalsEpsilon( fullBounds, epsilon ) ||
+                                    that._bounds.equalsEpsilon( fullBounds, epsilon ),
+                                    'Bounds mismatch after validateBounds: ' + that._bounds.toString() + ', expected: ' + fullBounds.toString() );
         })();
       }
       
@@ -503,6 +499,7 @@ define( function( require ) {
     // Traverses this subtree and validates bounds only for subtrees that have bounds listeners (trying to exclude as much as possible for performance)
     // This is done so that we can do the minimum bounds validation to prevent any bounds listeners from being triggered in further validateBounds() calls
     // without other Node changes being done. This is required to make the new rendering system work (planned for non-reentrance).
+    // NOTE: this should pass by (ignore) any overridden localBounds, to trigger listeners below.
     validateWatchedBounds: function() {
       // Since a bounds listener on one of the roots could invalidate bounds on the other, we need to keep running this until they are all clean.
       // Otherwise, side-effects could occur from bounds validations
@@ -818,6 +815,24 @@ define( function( require ) {
     getLocalBounds: function() {
       this.validateBounds();
       return this._localBounds;
+    },
+    
+    // {Bounds2 | null} to override the localBounds. Once this is called, it will always be used for localBounds until this is called again.
+    // To revert to having Scenery compute the localBounds, set this to null.
+    setLocalBounds: function( localBounds ) {
+      assert && assert( localBounds === null || localBounds instanceof Bounds2, 'localBounds override should be set to either null or a Bounds2' );
+      
+      // just an instance check for now. consider equals() in the future depending on cost
+      if ( localBounds !== this._localBounds ) {
+        if ( localBounds === null ) {
+          this._localBoundsOverridden = false;
+        } else {
+          this._localBounds = localBounds;
+          this._localBoundsOverridden = true; // NOTE: has to be done before invalidating bounds, since this disables localBounds computation
+        }
+        this.fireEvent( 'localBounds', this._localBounds );
+        this.invalidateBounds();
+      }
     },
     
     // the bounds for content in render(), in "parent" coordinates
@@ -2286,6 +2301,7 @@ define( function( require ) {
     get selfBounds() { return this.getSelfBounds(); },
     get childBounds() { return this.getChildBounds(); },
     get localBounds() { return this.getLocalBounds(); },
+    set localBounds( value ) { return this.setLocalBounds( value ); },
     get globalBounds() { return this.getGlobalBounds(); },
     get visibleBounds() { return this.getVisibleBounds(); },
     get id() { return this.getId(); },

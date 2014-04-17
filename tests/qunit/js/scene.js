@@ -783,4 +783,25 @@
     ok( node.visibleBounds.equals( dot.Bounds2.NOTHING ), 'Visible Bounds Invisible' );
     ok( node.bounds.equals( new dot.Bounds2( 0, 0, 100, 50 ) ), 'Complete Bounds Invisible' );
   } );
+  
+  test( 'localBounds override', function() {
+    var node = new scenery.Node( { y: 5 } );
+    var rect = new scenery.Rectangle( 0, 0, 100, 50 );
+    node.addChild( rect );
+    
+    rect.localBounds = new dot.Bounds2( 0, 0, 50, 50 );
+    ok( node.localBounds.equals( new dot.Bounds2( 0, 0, 50, 50 ) ), 'localBounds override on self' );
+    ok( node.bounds.equals( new dot.Bounds2( 0, 5, 50, 55 ) ), 'localBounds override on self' );
+    
+    rect.localBounds = new dot.Bounds2( 0, 0, 50, 100 );
+    ok( node.bounds.equals( new dot.Bounds2( 0, 5, 50, 105 ) ), 'localBounds override 2nd on self' );
+    
+    // reset local bounds (have them computed again)
+    rect.localBounds = null;
+    ok( node.bounds.equals( new dot.Bounds2( 0, 5, 100, 55 ) ), 'localBounds override reset on self' );
+    
+    node.localBounds = new dot.Bounds2( 0, 0, 50, 200 );
+    ok( node.localBounds.equals( new dot.Bounds2( 0, 0, 50, 200 ) ), 'localBounds override on parent' );
+    ok( node.bounds.equals( new dot.Bounds2( 0, 5, 50, 205 ) ), 'localBounds override on parent' );
+  } );
 })();
