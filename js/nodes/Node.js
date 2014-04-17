@@ -79,7 +79,7 @@ define( function( require ) {
     this._pickable = null;
     
     // This node and all children will be clipped by this shape (in addition to any other clipping shapes).
-    // The shape should be in the local coordinate frame
+    // {Shape} The shape should be in the local coordinate frame
     this._clipArea = null;
     
     // areas for hit intersection. if set on a Node, no descendants can handle events
@@ -571,6 +571,11 @@ define( function( require ) {
             this._mouseBounds.includeBounds( this._mouseArea.isBounds ? this._mouseArea : this._mouseArea.bounds );
           }
           
+          if ( this.hasClipArea() ) {
+            // exclude areas outside of the clipping area's bounds (for efficiency)
+            this._mouseBounds.constrainBounds( this._clipArea.bounds );
+          }
+          
           // transform it to the parent coordinate frame
           this.transformBoundsFromLocalToParent( this._mouseBounds );
         }
@@ -619,6 +624,11 @@ define( function( require ) {
           if ( this._touchArea ) {
             // we accept either Bounds2, or a Shape (in which case, we take the Shape's bounds)
             this._touchBounds.includeBounds( this._touchArea.isBounds ? this._touchArea : this._touchArea.bounds );
+          }
+          
+          if ( this.hasClipArea() ) {
+            // exclude areas outside of the clipping area's bounds (for efficiency)
+            this._touchBounds.constrainBounds( this._clipArea.bounds );
           }
           
           // transform it to the parent coordinate frame
@@ -904,6 +914,11 @@ define( function( require ) {
       // point in the local coordinate frame. computed after the main bounds check, so we can bail out there efficiently
       var localPoint = this._transform.getInverse().multiplyVector2( Vector2.createFromPool( point.x, point.y ) );
       // var localPoint = this.parentToLocalPoint( point );
+      
+      // if our point is outside of the local-coordinate clipping area, we shouldn't return a hit
+      if ( this.hasClipArea() && !this._clipArea.containsPoint( localPoint ) ) {
+        return null;
+      }
       
       // check children first, since they are rendered later. don't bother checking childBounds, we usually are using mouse/touch.
       // manual iteration here so we can return directly, and so we can iterate backwards (last node is in front)

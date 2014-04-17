@@ -558,7 +558,7 @@ scene.updateOnRequestAnimationFrame();
         clipArea is not currently compatible with CSS-transformed SVG rendering if the clipArea is on an ancestor of the CSS-transformed Node.
       </p>
       <p>
-        clipArea affects the bounds of the Node
+        clipArea affects the bounds of the Node, and pointers are not considered "over" a node if they are outside of its clipArea.
       </p>
       <div id="example-clipArea" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
       <script type="text/javascript">
