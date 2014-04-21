@@ -806,6 +806,12 @@ define( function( require ) {
       return this._selfBounds;
     },
     
+    // returns a bounding box that should contain all self content in the local coordinate frame (our normal self bounds aren't guaranteed this for Text, etc.)
+    getSafeSelfBounds: function() {
+      // override this to provide different behavior
+      return this._selfBounds;
+    },
+    
     getChildBounds: function() {
       this.validateBounds();
       return this._childBounds;
@@ -1790,7 +1796,9 @@ define( function( require ) {
       
       var padding = 2; // padding used if x and y are not set
       
-      var bounds = this.getBounds();
+      // for now, we add an unpleasant hack around Text and safe bounds in general. We don't want to add another Bounds2 object per Node for now.
+      var bounds = this.getBounds().union( this.localToParentBounds( this.getSafeSelfBounds() ) );
+      
       x = x !== undefined ? x : Math.ceil( padding - bounds.minX );
       y = y !== undefined ? y : Math.ceil( padding - bounds.minY );
       width = width !== undefined ? width : Math.ceil( x + bounds.getWidth() + padding );
