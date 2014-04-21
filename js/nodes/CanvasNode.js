@@ -14,6 +14,7 @@ define( function( require ) {
   
   var Node = require( 'SCENERY/nodes/Node' );
   require( 'SCENERY/layers/Renderer' );
+  var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   
   // pass a canvasBounds option if you want to specify the self bounds
   scenery.CanvasNode = function CanvasNode( options ) {
@@ -49,6 +50,10 @@ define( function( require ) {
       // throw new Error( 'CanvasNode needs containsPointSelf implemented' );
     },
     
+    createCanvasDrawable: function( renderer, instance ) {
+      return CanvasNode.CanvasNodeDrawable.createFromPool( renderer, instance );
+    },
+    
     // whether this node's self intersects the specified bounds, in the local coordinate frame
     // intersectsBoundsSelf: function( bounds ) {
     //   // TODO: implement?
@@ -58,6 +63,19 @@ define( function( require ) {
       return 'new scenery.CanvasNode( {' + propLines + '} )'; // TODO: no real way to do this nicely?
     }
     
+  } );
+  
+  /*---------------------------------------------------------------------------*
+  * Canvas rendering
+  *----------------------------------------------------------------------------*/
+  
+  CanvasNode.CanvasNodeDrawable = CanvasSelfDrawable.createDrawable( {
+    type: function CanvasNodeDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+    paintCanvas: function paintCanvasNode( wrapper ) {
+      this.node.paintCanvas( wrapper );
+    },
+    usesFill: false,
+    usesStroke:  false
   } );
   
   return CanvasNode;

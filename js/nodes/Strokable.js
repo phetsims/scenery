@@ -51,9 +51,9 @@ define( function( require ) {
         
         this.invalidateStroke();
         
-        var stateLen = this._visualStates.length;
+        var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._visualStates[i].markDirtyLineWidth();
+          this._drawables[i].markDirtyLineWidth();
         }
       }
       return this;
@@ -71,9 +71,9 @@ define( function( require ) {
         
         this.invalidateStroke();
         
-        var stateLen = this._visualStates.length;
+        var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._visualStates[i].markDirtyLineOptions();
+          this._drawables[i].markDirtyLineOptions();
         }
       }
       return this;
@@ -91,9 +91,9 @@ define( function( require ) {
         
         this.invalidateStroke();
         
-        var stateLen = this._visualStates.length;
+        var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._visualStates[i].markDirtyLineOptions();
+          this._drawables[i].markDirtyLineOptions();
         }
       }
       return this;
@@ -115,9 +115,9 @@ define( function( require ) {
         
         this.invalidateStroke();
         
-        var stateLen = this._visualStates.length;
+        var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._visualStates[i].markDirtyLineOptions();
+          this._drawables[i].markDirtyLineOptions();
         }
       }
       return this;
@@ -135,9 +135,9 @@ define( function( require ) {
         
         this.invalidateStroke();
         
-        var stateLen = this._visualStates.length;
+        var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._visualStates[i].markDirtyLineOptions();
+          this._drawables[i].markDirtyLineOptions();
         }
       }
       return this;
@@ -194,9 +194,9 @@ define( function( require ) {
         
         this.invalidateStroke();
         
-        var stateLen = this._visualStates.length;
+        var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._visualStates[i].markDirtyStroke();
+          this._drawables[i].markDirtyStroke();
         }
       }
       return this;
@@ -394,6 +394,8 @@ define( function( require ) {
   };
   var Strokable = scenery.Strokable;
   
+  // mix-in base for DOM and SVG drawables
+  // NOTE: requires state.node to be defined
   Strokable.StrokableState = function StrokableState( stateType ) {
     var proto = stateType.prototype;
     
@@ -427,9 +429,26 @@ define( function( require ) {
     };
   };
   
+  // mix-in for Canvas drawables
+  Strokable.StrokableStateless = function StrokableStateless( stateType ) {
+    var proto = stateType.prototype;
+    
+    proto.markDirtyStroke = function() {
+      this.markPaintDirty();
+    };
+    
+    proto.markDirtyLineWidth = function() {
+      this.markPaintDirty();
+    };
+    
+    proto.markDirtyLineOptions = function() {
+      this.markPaintDirty();
+    };
+  };
+  
   var strokableSVGIdCounter = 0;
   
-  // handles SVG defs and stroke style for SVG elements
+  // handles SVG defs and stroke style for SVG elements (by composition, not a mix-in or for inheritance)
   // TODO: note similarity with Fill version - can we save lines of code with refactoring?
   Strokable.StrokeSVGState = function StrokeSVGState() {
     this.id = 'svgstroke' + ( strokableSVGIdCounter++ );

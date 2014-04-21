@@ -20,7 +20,6 @@ define( function( require ) {
   'use strict';
   
   var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
   var escapeHTML = require( 'PHET_CORE/escapeHTML' );
   var Bounds2 = require( 'DOT/Bounds2' );
   var Matrix3 = require( 'DOT/Matrix3' );
@@ -34,9 +33,14 @@ define( function( require ) {
   require( 'SCENERY/util/Font' );
   require( 'SCENERY/util/Util' ); // for canvasAccurateBounds and CSS transforms
   require( 'SCENERY/util/CanvasContextWrapper' );
+  var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
+  var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
+  var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
+  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMTextElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
+  var keepSVGTextElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
   
   // scratch matrix used in DOM rendering
   var scratchMatrix = Matrix3.dirtyFromPool();
@@ -117,9 +121,9 @@ define( function( require ) {
       if ( text !== this._text ) {
         this._text = text;
         
-        var stateLen = this._visualStates.length;
+        var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._visualStates.markDirtyText();
+          this._drawables.markDirtyText();
         }
         
         this.invalidateText();
@@ -143,9 +147,9 @@ define( function( require ) {
         this.updateTextFlags();
         this.dispatchEvent( 'boundsAccuracy', { node: this } ); // TODO: consider standardizing this, or attaching listeners in a different manner?
         
-        var stateLen = this._visualStates.length;
+        var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._visualStates.markDirtyBounds();
+          this._drawables.markDirtyBounds();
         }
         
         this.invalidateText();
@@ -220,6 +224,7 @@ define( function( require ) {
     * Canvas support
     *----------------------------------------------------------------------------*/
     
+    //OHTWO @deprecated
     paintCanvas: function( wrapper ) {
       var context = wrapper.context;
       
@@ -245,6 +250,7 @@ define( function( require ) {
     * WebGL support
     *----------------------------------------------------------------------------*/
     
+    //OHTWO @deprecated
     paintWebGL: function( state ) {
       throw new Error( 'Text.prototype.paintWebGL unimplemented' );
     },
@@ -253,6 +259,7 @@ define( function( require ) {
     * SVG support
     *----------------------------------------------------------------------------*/
     
+    //OHTWO @deprecated
     createSVGFragment: function( svg, defs, group ) {
       // NOTE! reference SVG element at top of file copies createSVGElement!
       var element = document.createElementNS( scenery.svgns, 'text' );
@@ -266,6 +273,7 @@ define( function( require ) {
       return element;
     },
     
+    //OHTWO @deprecated
     updateSVGFragment: function( element ) {
       // update the text-node's value
       element.lastChild.nodeValue = this.getNonBreakingText();
@@ -288,6 +296,7 @@ define( function( require ) {
     },
     
     // support patterns, gradients, and anything else we need to put in the <defs> block
+    //OHTWO @deprecated
     updateSVGDefs: function( svg, defs ) {
       // remove old definitions if they exist
       this.removeSVGDefs( svg, defs );
@@ -298,6 +307,7 @@ define( function( require ) {
     },
     
     // cleans up references created with udpateSVGDefs()
+    //OHTWO @deprecated
     removeSVGDefs: function( svg, defs ) {
       this.removeSVGFillDef( svg, defs );
       this.removeSVGStrokeDef( svg, defs );
@@ -307,8 +317,10 @@ define( function( require ) {
     * DOM support
     *----------------------------------------------------------------------------*/
     
+    //OHTWO @deprecated
     allowsMultipleDOMInstances: true,
     
+    //OHTWO @deprecated
     getDOMElement: function() {
       var div = document.createElement( 'div' );
       
@@ -318,6 +330,7 @@ define( function( require ) {
       return div;
     },
     
+    //OHTWO @deprecated
     updateDOMElement: function( div ) {
       var $div = $( div );
       div.style.font = this.getFont();
@@ -329,6 +342,7 @@ define( function( require ) {
       div.setAttribute( 'dir', this._direction );
     },
     
+    //OHTWO @deprecated
     updateCSSTransform: function( transform, element ) {
       // since the DOM origin of the text is at the upper-left, and our Scenery origin is at the lower-left, we need to
       // shift the text vertically, postmultiplied with the entire transform.
@@ -337,8 +351,16 @@ define( function( require ) {
       scenery.Util.applyCSSTransform( matrix, element );
     },
     
-    createDOMState: function( domSelfDrawable ) {
-      return Text.TextDOMState.createFromPool( domSelfDrawable );
+    createDOMDrawable: function( renderer, instance ) {
+      return Text.TextDOMDrawable.createFromPool( renderer, instance );
+    },
+    
+    createSVGDrawable: function( renderer, instance ) {
+      return Text.TextSVGDrawable.createFromPool( renderer, instance );
+    },
+    
+    createCanvasDrawable: function( renderer, instance ) {
+      return Text.TextCanvasDrawable.createFromPool( renderer, instance );
     },
     
     // a DOM node (not a Scenery DOM node, but an actual DOM node) with the text
@@ -487,9 +509,9 @@ define( function( require ) {
       if ( this.font !== font ) {
         this._font = font instanceof scenery.Font ? font : new scenery.Font( font );
         
-        var stateLen = this._visualStates.length;
+        var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._visualStates.markDirtyFont();
+          this._drawables.markDirtyFont();
         }
         
         this.invalidateText();
@@ -505,9 +527,9 @@ define( function( require ) {
     setDirection: function( direction ) {
       this._direction = direction;
       
-      var stateLen = this._visualStates.length;
+      var stateLen = this._drawables.length;
       for ( var i = 0; i < stateLen; i++ ) {
-        this._visualStates.markDirtyDirection();
+        this._drawables.markDirtyDirection();
       }
       
       this.invalidateText();
@@ -609,27 +631,16 @@ define( function( require ) {
   initializingHybridTextNode = false;
   
   /*---------------------------------------------------------------------------*
-  * DOM rendering
+  * Rendering State mixin (DOM/SVG)
   *----------------------------------------------------------------------------*/
   
-  var TextDOMState = Text.TextDOMState = function( drawable ) {
-    // important to keep this in the constructor (so our hidden class works out nicely)
-    this.initialize( drawable );
-  };
-  TextDOMState.prototype = {
-    constructor: TextDOMState,
+  var TextRenderState = Text.TextRenderState = function( drawableType ) {
+    var proto = drawableType.prototype;
     
     // initializes, and resets (so we can support pooled states)
-    initialize: function( drawable ) {
-      drawable.visualState = this;
-      
-      this.drawable = drawable;
-      this.node = drawable.node;
-      this.transformDirty = true;
-      this.forceAcceleration = false; // later changed by drawable if necessary
-      
+    proto.initializeState = function() {
       this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
-      this.dirtyText = true;   
+      this.dirtyText = true;
       this.dirtyFont = true;
       this.dirtyBounds = true;
       this.dirtyDirection = true;
@@ -638,6 +649,62 @@ define( function( require ) {
       this.initializeFillableState();
       this.initializeStrokableState();
       
+      return this; // allow for chaining
+    };
+    
+    // catch-all dirty, if anything that isn't a transform is marked as dirty
+    proto.markPaintDirty = function() {
+      this.paintDirty = true;
+      this.markDirty();
+    };
+    
+    proto.markDirtyText = function() {
+      this.dirtyText = true;
+      this.markPaintDirty();
+    };
+    proto.markDirtyFont = function() {
+      this.dirtyFont = true;
+      this.markPaintDirty();
+    };
+    proto.markDirtyBounds = function() {
+      this.dirtyBounds = true;
+      this.markPaintDirty();
+    };
+    proto.markDirtyDirection = function() {
+      this.dirtyDirection = true;
+      this.markPaintDirty();
+    };
+    
+    proto.setToCleanState = function() {
+      this.paintDirty = false;
+      this.dirtyText = false;
+      this.dirtyFont = false;
+      this.dirtyBounds = false;
+      this.dirtyDirection = false;
+      
+      this.cleanFillableState();
+      this.cleanStrokableState();
+    };
+    
+    /* jshint -W064 */
+    Fillable.FillableState( drawableType );
+    /* jshint -W064 */
+    Strokable.StrokableState( drawableType );
+  };
+  
+  /*---------------------------------------------------------------------------*
+  * DOM rendering
+  *----------------------------------------------------------------------------*/
+  
+  var TextDOMDrawable = Text.TextDOMDrawable = inherit( DOMSelfDrawable, function TextDOMDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
+  }, {
+    initialize: function( renderer, instance ) {
+      this.initializeDOMSelfDrawable( renderer, instance );
+      this.initializeState();
+      
+      // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
+      // allocation and performance costs)
       if ( !this.domElement ) {
         this.domElement = document.createElement( 'div' );
         this.domElement.style.display = 'block';
@@ -690,8 +757,12 @@ define( function( require ) {
       this.setToClean();
     },
     
+    onAttach: function( node ) {
+      
+    },
+    
     // release the DOM elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
-    onDetach: function() {
+    onDetach: function( node ) {
       if ( !keepDOMTextElements ) {
         // clear the references
         this.domElement = null;
@@ -701,64 +772,101 @@ define( function( require ) {
       this.freeToPool();
     },
     
-    // catch-all dirty, if anything that isn't a transform is marked as dirty
-    markPaintDirty: function() {
-      this.paintDirty = true;
-      this.drawable.markDirty();
-    },
-    
-    markDirtyText: function() {
-      this.dirtyText = true;
-      this.markPaintDirty();
-    },
-    markDirtyFont: function() {
-      this.dirtyFont = true;
-      this.markPaintDirty();
-    },
-    markDirtyBounds: function() {
-      this.dirtyBounds = true;
-      this.markPaintDirty();
-    },
-    markDirtyDirection: function() {
-      this.dirtyDirection = true;
-      this.markPaintDirty();
-    },
-    markDirtyArcWidth: function() {
-      this.dirtyArcWidth = true;
-      this.markPaintDirty();
-    },
-    
     setToClean: function() {
-      this.paintDirty = false;
-      this.dirtyText = false;
-      this.dirtyFont = false;
-      this.dirtyBounds = false;
-      this.dirtyDirection = false;
-      this.transformDirty = false;
+      this.setToCleanState();
       
-      this.cleanFillableState();
-      this.cleanStrokableState();
-    }
-  };
-  /* jshint -W064 */
-  Fillable.FillableState( TextDOMState );
-  /* jshint -W064 */
-  Strokable.StrokableState( TextDOMState );
-  // for pooling, allow TextDOMState.createFromPool( drawable ) and state.freeToPool(). Creation will initialize the state to the intial state
-  /* jshint -W064 */
-  Poolable( TextDOMState, {
-    defaultFactory: function() { return new TextDOMState(); },
-    constructorDuplicateFactory: function( pool ) {
-      return function( drawable ) {
-        if ( pool.length ) {
-          return pool.pop().initialize( drawable );
-        } else {
-          return new TextDOMState( drawable );
-        }
-      };
+      this.transformDirty = false;
     }
   } );
-
+  
+  /* jshint -W064 */
+  TextRenderState( TextDOMDrawable );
+  
+  /* jshint -W064 */
+  SelfDrawable.Poolable( TextDOMDrawable );
+  
+  /*---------------------------------------------------------------------------*
+  * SVG rendering
+  *----------------------------------------------------------------------------*/
+  
+  Text.TextSVGDrawable = SVGSelfDrawable.createDrawable( {
+    type: function TextSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+    stateType: TextRenderState,
+    initialize: function( renderer, instance ) {
+      if ( !this.svgElement ) {
+        // NOTE! reference SVG element at top of file copies createSVGElement!
+        var text = this.svgElement = document.createElementNS( scenery.svgns, 'text' );
+        text.appendChild( document.createTextNode( '' ) );
+        
+        // TODO: flag adjustment for SVG qualities
+        text.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
+        text.setAttribute( 'text-rendering', 'geometricPrecision' );
+        text.setAttribute( 'lengthAdjust', 'spacingAndGlyphs' );
+        text.setAttributeNS( 'http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve' );
+      }
+    },
+    updateSVG: function( node, text ) {
+      if ( this.dirtyDirection ) {
+        text.setAttribute( 'direction', this._direction );
+      }
+      
+      // set all of the font attributes, since we can't use the combined one
+      if ( this.dirtyFont ) {
+        text.setAttribute( 'font-family', this._font.getFamily() );
+        text.setAttribute( 'font-size', this._font.getSize() );
+        text.setAttribute( 'font-style', this._font.getStyle() );
+        text.setAttribute( 'font-weight', this._font.getWeight() );
+        text.setAttribute( 'font-stretch', this._font.getStretch() );
+      }
+      
+      // update the text-node's value
+      if ( this.dirtyText ) {
+        text.lastChild.nodeValue = this.getNonBreakingText();
+      }
+      
+      // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/SVG rendering (and overall length)
+      if ( this.dirtyBounds && isFinite( this._selfBounds.width ) ) {
+        text.setAttribute( 'textLength', this._selfBounds.width );
+      }
+      
+      this.updateFillStrokeStyle( text );
+    },
+    usesFill: true,
+    usesStroke: true,
+    keepElements: keepSVGTextElements
+  } );
+  
+  /*---------------------------------------------------------------------------*
+  * Canvas rendering
+  *----------------------------------------------------------------------------*/
+  
+  Text.TextCanvasDrawable = CanvasSelfDrawable.createDrawable( {
+    type: function TextCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+    paintCanvas: function paintCanvasText( wrapper ) {
+      var context = wrapper.context;
+      var node = this.node;
+      
+      // extra parameters we need to set, but should avoid setting if we aren't drawing anything
+      if ( node.hasFill() || node.hasStroke() ) {
+        wrapper.setFont( node._font.getFont() );
+        wrapper.setDirection( node._direction );
+      }
+      
+      if ( node.hasFill() ) {
+        node.beforeCanvasFill( wrapper ); // defined in Fillable
+        context.fillText( node._text, 0, 0 );
+        node.afterCanvasFill( wrapper ); // defined in Fillable
+      }
+      if ( node.hasStroke() ) {
+        node.beforeCanvasStroke( wrapper ); // defined in Strokable
+        context.strokeText( node._text, 0, 0 );
+        node.afterCanvasStroke( wrapper ); // defined in Strokable
+      }
+    },
+    usesFill: true,
+    usesStroke:  true
+  } );
+  
   return Text;
 } );
 

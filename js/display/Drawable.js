@@ -13,18 +13,23 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   scenery.Drawable = function Drawable( renderer ) {
-    // what drawble we are being rendered (or put) into (will be filled in later)
-    this.parentDrawable = null;
-    
-    // linked list handling (will be filled in later)
-    this.previousDrawable = null;
-    this.nextDrawable = null;
-    
-    this.renderer = renderer;
+    this.initializeDrawable( renderer );
   };
   var Drawable = scenery.Drawable;
   
   inherit( Object, Drawable, {
+    initializeDrawable: function( renderer ) {
+      // what drawble we are being rendered (or put) into (will be filled in later)
+      this.parentDrawable = null;
+      
+      // linked list handling (will be filled in later)
+      this.previousDrawable = null;
+      this.nextDrawable = null;
+      
+      this.renderer = renderer;
+      
+      this.dirty = true;
+    },
     
     markDirty: function() {
       if ( !this.dirty ) {
@@ -39,22 +44,7 @@ define( function( require ) {
     
     dispose: function() {
       
-    },
-    
-    /*---------------------------------------------------------------------------*
-    * Canvas API
-    *----------------------------------------------------------------------------*/
-    
-    paintCanvas: function( wrapper, offset ) {
-      
     }
-    
-    /*---------------------------------------------------------------------------*
-    * SVG API
-    *----------------------------------------------------------------------------*/
-    
-    
-    
   } );
   
   return Drawable;

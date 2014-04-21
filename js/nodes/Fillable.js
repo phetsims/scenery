@@ -57,9 +57,9 @@ define( function( require ) {
         
         this.invalidateFill();
         
-        var stateLen = this._visualStates.length;
+        var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._visualStates[i].markDirtyFill();
+          this._drawables[i].markDirtyFill();
         }
       }
       return this;
@@ -225,6 +225,8 @@ define( function( require ) {
   };
   var Fillable = scenery.Fillable;
   
+  // mix-in base for DOM and SVG drawables
+  // NOTE: requires state.node to be defined
   Fillable.FillableState = function FillableState( stateType ) {
     var proto = stateType.prototype;
     
@@ -244,9 +246,18 @@ define( function( require ) {
     };
   };
   
+  // mix-in for Canvas drawables
+  Fillable.FillableStateless = function FillableStateless( stateType ) {
+    var proto = stateType.prototype;
+    
+    proto.markDirtyFill = function() {
+      this.markPaintDirty();
+    };
+  };
+  
   var fillableSVGIdCounter = 0;
   
-  // handles SVG defs and fill style for SVG elements
+  // handles SVG defs and fill style for SVG elements (by composition, not a mix-in or for inheritance)
   Fillable.FillSVGState = function FillSVGState() {
     this.id = 'svgfill' + ( fillableSVGIdCounter++ );
     

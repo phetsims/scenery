@@ -11,7 +11,6 @@ define( function( require ) {
   'use strict';
   
   var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
   
   var Path = require( 'SCENERY/nodes/Path' );
@@ -21,6 +20,10 @@ define( function( require ) {
   var Features = require( 'SCENERY/util/Features' );
   var Fillable = require( 'SCENERY/nodes/Fillable' );
   var Strokable = require( 'SCENERY/nodes/Strokable' );
+  var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
+  var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
+  var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
+  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMRectangleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
@@ -155,9 +158,9 @@ define( function( require ) {
       this._rectArcWidth = arcWidth || 0;
       this._rectArcHeight = arcHeight || 0;
       
-      var stateLen = this._visualStates.length;
+      var stateLen = this._drawables.length;
       for ( var i = 0; i < stateLen; i++ ) {
-        this._visualStates.markDirtyRectangle();
+        this._drawables.markDirtyRectangle();
       }
       this.invalidateRectangle();
     },
@@ -394,12 +397,16 @@ define( function( require ) {
       scenery.Util.applyCSSTransform( matrix, element );
     },
     
-    createDOMState: function( domSelfDrawable ) {
-      return Rectangle.RectangleDOMState.createFromPool( domSelfDrawable );
+    createDOMDrawable: function( renderer, instance ) {
+      return Rectangle.RectangleDOMDrawable.createFromPool( renderer, instance );
     },
     
-    createSVGState: function( svgSelfDrawable ) {
-      return Rectangle.RectangleSVGState.createFromPool( svgSelfDrawable );
+    createSVGDrawable: function( renderer, instance ) {
+      return Rectangle.RectangleSVGDrawable.createFromPool( renderer, instance );
+    },
+    
+    createCanvasDrawable: function( renderer, instance ) {
+      return Rectangle.RectangleCanvasDrawable.createFromPool( renderer, instance );
     },
     
     /*---------------------------------------------------------------------------*
@@ -450,9 +457,9 @@ define( function( require ) {
     Rectangle.prototype[setName] = function( value ) {
       if ( this[privateName] !== value ) {
         this[privateName] = value;
-        var stateLen = this._visualStates.length;
+        var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          var state = this._visualStates[i];
+          var state = this._drawables[i];
           state[dirtyMethodName]();
           state.markPaintDirty();
         }
@@ -550,26 +557,16 @@ define( function( require ) {
   };
   
   /*---------------------------------------------------------------------------*
-  * Rendering state
+  * Rendering state mixin (DOM/SVG)
   *----------------------------------------------------------------------------*/
   
-  var RectangleRenderState = Rectangle.RectangleRenderState = function( drawable ) {
-    // important to keep this in the constructor (so our hidden class works out nicely)
-    this.initialize( drawable );
-  };
-  RectangleRenderState.prototype = {
-    constructor: RectangleRenderState,
+  var RectangleRenderState = Rectangle.RectangleRenderState = function( drawableType ) {
+    var proto = drawableType.prototype;
     
     // initializes, and resets (so we can support pooled states)
-    initialize: function( drawable ) {
-      // TODO: it's a bit weird to set it this way?
-      drawable.visualState = this;
-      
-      this.drawable = drawable;
-      this.node = drawable.node;
-      
+    proto.initializeState = function() {
       this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
-      this.dirtyX = true;   
+      this.dirtyX = true;
       this.dirtyY = true;
       this.dirtyWidth = true;
       this.dirtyHeight = true;
@@ -581,14 +578,15 @@ define( function( require ) {
       this.initializeStrokableState();
       
       return this; // allow for chaining
-    },
+    };
     
     // catch-all dirty, if anything that isn't a transform is marked as dirty
-    markPaintDirty: function() {
+    proto.markPaintDirty = function() {
       this.paintDirty = true;
-      this.drawable.markDirty();
-    },
-    markDirtyRectangle: function() {
+      this.markDirty();
+    };
+    
+    proto.markDirtyRectangle = function() {
       // TODO: consider bitmask instead?
       this.dirtyX = true;
       this.dirtyY = true;
@@ -597,8 +595,9 @@ define( function( require ) {
       this.dirtyArcWidth = true;
       this.dirtyArcHeight = true;
       this.markPaintDirty();
-    },
-    setToClean: function() {
+    };
+    
+    proto.setToCleanState = function() {
       this.paintDirty = false;
       this.dirtyX = false;
       this.dirtyY = false;
@@ -609,25 +608,24 @@ define( function( require ) {
       
       this.cleanFillableState();
       this.cleanStrokableState();
-    }
+    };
+    
+    /* jshint -W064 */
+    Fillable.FillableState( drawableType );
+    /* jshint -W064 */
+    Strokable.StrokableState( drawableType );
   };
-  /* jshint -W064 */
-  Fillable.FillableState( RectangleRenderState );
-  /* jshint -W064 */
-  Strokable.StrokableState( RectangleRenderState );
   
   /*---------------------------------------------------------------------------*
   * DOM rendering
   *----------------------------------------------------------------------------*/
   
-  var RectangleDOMState = Rectangle.RectangleDOMState = inherit( RectangleRenderState, function RectangleDOMState( drawable ) {
-    RectangleRenderState.call( this, drawable );
+  var RectangleDOMDrawable = Rectangle.RectangleDOMDrawable = inherit( DOMSelfDrawable, function RectangleDOMDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
   }, {
-    initialize: function( drawable ) {
-      RectangleRenderState.prototype.initialize.call( this, drawable );
-      
-      this.forceAcceleration = false; // later changed by drawable if necessary
-      this.transformDirty = true;
+    initialize: function( renderer, instance ) {
+      this.initializeDOMSelfDrawable( renderer, instance );
+      this.initializeState();
       
       // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
       // allocation and performance costs)
@@ -711,7 +709,7 @@ define( function( require ) {
       
       // shift the element vertically, postmultiplied with the entire transform.
       if ( this.transformDirty || this.dirtyX || this.dirtyY ) {
-        scratchMatrix.set( this.drawable.getTransformMatrix() );
+        scratchMatrix.set( this.getTransformMatrix() );
         var translation = Matrix3.translation( node._rectX, node._rectY );
         scratchMatrix.multiplyMatrix( translation );
         translation.freeToPool();
@@ -722,8 +720,12 @@ define( function( require ) {
       this.setToClean();
     },
     
+    onAttach: function( node ) {
+      
+    },
+    
     // release the DOM elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
-    onDetach: function() {
+    onDetach: function( node ) {
       if ( !keepDOMRectangleElements ) {
         // clear the references
         this.fillElement = null;
@@ -736,160 +738,135 @@ define( function( require ) {
     },
     
     setToClean: function() {
-      RectangleRenderState.prototype.setToClean.call( this );
+      this.setToCleanState();
       
       this.transformDirty = false;
     }
   } );
   
-  // for pooling, allow RectangleDOMState.createFromPool( drawable ) and state.freeToPool(). Creation will initialize the state to the intial state
   /* jshint -W064 */
-  Poolable( RectangleDOMState, {
-    defaultFactory: function() { return new RectangleDOMState(); },
-    constructorDuplicateFactory: function( pool ) {
-      return function( drawable ) {
-        if ( pool.length ) {
-          return pool.pop().initialize( drawable );
-        } else {
-          return new RectangleDOMState( drawable );
-        }
-      };
-    }
-  } );
+  RectangleRenderState( RectangleDOMDrawable );
+  
+  /* jshint -W064 */
+  SelfDrawable.Poolable( RectangleDOMDrawable );
   
   /*---------------------------------------------------------------------------*
   * SVG rendering
   *----------------------------------------------------------------------------*/
   
-  var RectangleSVGState = Rectangle.RectangleSVGState = inherit( RectangleRenderState, function RectangleSVGState( drawable ) {
-    RectangleRenderState.call( this, drawable );
-  }, {
-    initialize: function( drawable ) {
-      RectangleRenderState.prototype.initialize.call( this, drawable );
-      
+  Rectangle.RectangleSVGDrawable = SVGSelfDrawable.createDrawable( {
+    type: function RectangleSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+    stateType: RectangleRenderState,
+    initialize: function( renderer, instance ) {
       this.lastArcW = -1; // invalid on purpose
       this.lastArcH = -1; // invalid on purpose
       
-      this.defs = drawable.defs;
-      
-      // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
-      // allocation and performance costs)
       if ( !this.svgElement ) {
         this.svgElement = document.createElementNS( scenery.svgns, 'rect' );
       }
-      
-      if ( !this.fillState ) {
-        this.fillState = new Fillable.FillSVGState();
-      } else {
-        this.fillState.initialize();
-      }
-      
-      if ( !this.strokeState ) {
-        this.strokeState = new Strokable.StrokeSVGState();
-      } else {
-        this.strokeState.initialize();
-      }
-      
-      return this; // allow for chaining
     },
-    
-    updateDefs: function( defs ) {
-      this.defs = defs;
-      this.fillState.updateDefs( defs );
-      this.strokeState.updateDefs( defs );
-    },
-    
-    updateSVG: function() {
-      // see http://www.w3.org/TR/SVG/shapes.html#RectElement
-      var node = this.node;
-      var rect = this.svgElement;
-      
-      if ( this.paintDirty ) {
-        if ( this.dirtyX ) {
-          rect.setAttribute( 'x', node._rectX );
-        }
-        if ( this.dirtyY ) {
-          rect.setAttribute( 'y', node._rectY );
-        }
-        if ( this.dirtyWidth ) {
-          rect.setAttribute( 'width', node._rectWidth );
-        }
-        if ( this.dirtyHeight ) {
-          rect.setAttribute( 'height', node._rectHeight );
-        }
-        if ( this.dirtyArcWidth || this.dirtyArcHeight || this.dirtyWidth || this.dirtyHeight ) {
-          var arcw = 0;
-          var arch = 0;
-          
-          // workaround for various browsers if rx=20, ry=0 (behavior is inconsistent, either identical to rx=20,ry=20, rx=0,ry=0. We'll treat it as rx=0,ry=0)
-          // see https://github.com/phetsims/scenery/issues/183
-          if ( node.isRounded() ) {
-            var maximumArcSize = node.getMaximumArcSize();
-            arcw = Math.min( node._rectArcWidth, maximumArcSize );
-            arch = Math.min( node._rectArcHeight, maximumArcSize );
-          }
-          if ( arcw !== this.lastArcW ) {
-            this.lastArcW = arcw;
-            rect.setAttribute( 'rx', arcw );
-          }
-          if ( arch !== this.lastArcH ) {
-            this.lastArcH = arch;
-            rect.setAttribute( 'ry', arch );
-          }
-        }
+    updateSVG: function( node, rect ) {
+      if ( this.dirtyX ) {
+        rect.setAttribute( 'x', node._rectX );
+      }
+      if ( this.dirtyY ) {
+        rect.setAttribute( 'y', node._rectY );
+      }
+      if ( this.dirtyWidth ) {
+        rect.setAttribute( 'width', node._rectWidth );
+      }
+      if ( this.dirtyHeight ) {
+        rect.setAttribute( 'height', node._rectHeight );
+      }
+      if ( this.dirtyArcWidth || this.dirtyArcHeight || this.dirtyWidth || this.dirtyHeight ) {
+        var arcw = 0;
+        var arch = 0;
         
-        // rect.setAttribute( 'style', node.getSVGFillStyle() + node.getSVGStrokeStyle() );
-        
-        if ( this.dirtyFill ) {
-          this.fillState.updateFill( this.defs, node._fill );
+        // workaround for various browsers if rx=20, ry=0 (behavior is inconsistent, either identical to rx=20,ry=20, rx=0,ry=0. We'll treat it as rx=0,ry=0)
+        // see https://github.com/phetsims/scenery/issues/183
+        if ( node.isRounded() ) {
+          var maximumArcSize = node.getMaximumArcSize();
+          arcw = Math.min( node._rectArcWidth, maximumArcSize );
+          arch = Math.min( node._rectArcHeight, maximumArcSize );
         }
-        if ( this.dirtyStroke ) {
-          this.strokeState.updateStroke( this.defs, node._stroke );
+        if ( arcw !== this.lastArcW ) {
+          this.lastArcW = arcw;
+          rect.setAttribute( 'rx', arcw );
         }
-        var strokeParameterDirty = this.dirtyLineWidth || this.dirtyLineOptions;
-        if ( strokeParameterDirty ) {
-          this.strokeState.updateStrokeParameters( node );
-        }
-        if ( this.dirtyFill || this.dirtyStroke || strokeParameterDirty ) {
-          rect.setAttribute( 'style', this.fillState.style + this.strokeState.baseStyle + this.strokeState.extraStyle );
+        if ( arch !== this.lastArcH ) {
+          this.lastArcH = arch;
+          rect.setAttribute( 'ry', arch );
         }
       }
       
-      // clear all of the dirty flags
-      this.setToClean();
+      this.updateFillStrokeStyle( rect );
     },
-    
-    // release the DOM elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
-    onDetach: function() {
-      if ( !keepSVGRectangleElements ) {
-        // clear the references
-        this.svgElement = null;
-      }
-      
-      this.fillState.dispose();
-      
-      // put us back in the pool
-      this.freeToPool();
-    },
-    
-    setToClean: function() {
-      RectangleRenderState.prototype.setToClean.call( this );
-    }
+    usesFill: true,
+    usesStroke: true,
+    keepElements: keepSVGRectangleElements
   } );
   
-  // for pooling, allow RectangleSVGState.createFromPool( drawable ) and state.freeToPool(). Creation will initialize the state to the intial state
-  /* jshint -W064 */
-  Poolable( RectangleSVGState, {
-    defaultFactory: function() { return new RectangleSVGState(); },
-    constructorDuplicateFactory: function( pool ) {
-      return function( drawable ) {
-        if ( pool.length ) {
-          return pool.pop().initialize( drawable );
+  /*---------------------------------------------------------------------------*
+  * Canvas rendering
+  *----------------------------------------------------------------------------*/
+  
+  Rectangle.RectangleCanvasDrawable = CanvasSelfDrawable.createDrawable( {
+    type: function RectangleCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+    paintCanvas: function paintCanvasRectangle( wrapper ) {
+      var context = wrapper.context;
+      var node = this.node;
+      
+      // use the standard version if it's a rounded rectangle, since there is no Canvas-optimized version for that
+      if ( node.isRounded() ) {
+        context.beginPath();
+        var maximumArcSize = node.getMaximumArcSize();
+        var arcw = Math.min( node._rectArcWidth, maximumArcSize );
+        var arch = Math.min( node._rectArcHeight, maximumArcSize );
+        var lowX = node._rectX + arcw;
+        var highX = node._rectX + node._rectWidth - arcw;
+        var lowY = node._rectY + arch;
+        var highY = node._rectY + node._rectHeight - arch;
+        if ( arcw === arch ) {
+          // we can use circular arcs, which have well defined stroked offsets
+          context.arc( highX, lowY, arcw, -Math.PI / 2, 0, false );
+          context.arc( highX, highY, arcw, 0, Math.PI / 2, false );
+          context.arc( lowX, highY, arcw, Math.PI / 2, Math.PI, false );
+          context.arc( lowX, lowY, arcw, Math.PI, Math.PI * 3 / 2, false );
         } else {
-          return new RectangleSVGState( drawable );
+          // we have to resort to elliptical arcs
+          context.ellipse( highX, lowY, arcw, arch, 0, -Math.PI / 2, 0, false );
+          context.ellipse( highX, highY, arcw, arch, 0, 0, Math.PI / 2, false );
+          context.ellipse( lowX, highY, arcw, arch, 0, Math.PI / 2, Math.PI, false );
+          context.ellipse( lowX, lowY, arcw, arch, 0, Math.PI, Math.PI * 3 / 2, false );
         }
-      };
-    }
+        context.closePath();
+        
+        if ( node._fill ) {
+          node.beforeCanvasFill( wrapper ); // defined in Fillable
+          context.fill();
+          node.afterCanvasFill( wrapper ); // defined in Fillable
+        }
+        if ( node._stroke ) {
+          node.beforeCanvasStroke( wrapper ); // defined in Strokable
+          context.stroke();
+          node.afterCanvasStroke( wrapper ); // defined in Strokable
+        }
+      } else {
+        // TODO: how to handle fill/stroke delay optimizations here?
+        if ( node._fill ) {
+          node.beforeCanvasFill( wrapper ); // defined in Fillable
+          context.fillRect( node._rectX, node._rectY, node._rectWidth, node._rectHeight );
+          node.afterCanvasFill( wrapper ); // defined in Fillable
+        }
+        if ( node._stroke ) {
+          node.beforeCanvasStroke( wrapper ); // defined in Strokable
+          context.strokeRect( node._rectX, node._rectY, node._rectWidth, node._rectHeight );
+          node.afterCanvasStroke( wrapper ); // defined in Strokable
+        }
+      }
+    },
+    usesFill: true,
+    usesStroke:  true
   } );
   
   return Rectangle;

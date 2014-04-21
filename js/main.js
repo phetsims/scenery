@@ -24,6 +24,7 @@ define( [
     'SCENERY/display/Drawable',
     'SCENERY/display/InlineCanvasCacheDrawable',
     'SCENERY/display/RenderState',
+    'SCENERY/display/SelfDrawable',
     'SCENERY/display/SharedCanvasCacheDrawable',
     'SCENERY/display/SVGBlock',
     'SCENERY/display/SVGSelfDrawable',

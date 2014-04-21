@@ -3,24 +3,6 @@
 /**
  * Represents an SVG visual element, and is responsible for tracking changes to the visual element, and then applying any changes at a later time.
  *
- * Node API needed:
- * {
- *   attachSVGDrawable: function( SVGSelfDrawable )
- *   detachSVGDrawable: function( SVGSelfDrawable )
- * }
- *
- * visual state API needed:
- * {
- *   markPaintDirty: function()   // used by Strokable/Fillable
- *   node: Node                   // used by Strokable/Fillable
- *   drawable: SVGSelfDrawable    // set by the visual state on initialization     NOTE: required for any type of visual state! (used by Strokable/Fillable states)
- *   svgElement: SVGElement       // what is displayed in the SVG tree (should be the base of the displayed element)
- *   updateSVG: function()        // updates any visual state
- *   updateDefs: function( defs ) // a change to where the defs are stored occurred. Passed in is the new defs block
- *   onDetach: function()         // called when the state is detached from a drawable. optionally discard DOM elements. we guarantee state will be
- *                                // initialized again before any more update() calls
- * }
- *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
@@ -29,47 +11,165 @@ define( function( require ) {
   
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  var Drawable = require( 'SCENERY/display/Drawable' );
+  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  var Fillable = require( 'SCENERY/nodes/Fillable' );
+  var Strokable = require( 'SCENERY/nodes/Strokable' );
   
   scenery.SVGSelfDrawable = function SVGSelfDrawable( renderer, instance ) {
-    Drawable.call( this, renderer );
-    this.instance = instance;
+    this.initializeSVGSelfDrawable( renderer, instance );
     
-    this.node = instance.trail.lastNode();
-    
-    this.visualState = null; // to be created in attachSVGDrawable
-    this.dirty = true;
-    
-    this.node.attachSVGDrawable( this ); // should set this.visualState
-    
-    // now that we called attachSVGDrawable, update the visualState object with the flags it will need
-    this.svgElement = this.visualState.svgElement;
-    
-    this.defs = null; // TODO NOTE: stub spot fot defs. if we support changing defs locations, we'll need to redo a bit of API (this is accessed by visual states)
+    throw new Error( 'Should use initialization and pooling' );
   };
   var SVGSelfDrawable = scenery.SVGSelfDrawable;
   
-  inherit( Drawable, SVGSelfDrawable, {
-    // called when the defs block changes
-    updateDefs: function( defs ) {
-      this.visualState.updateDefs( defs );
+  inherit( SelfDrawable, SVGSelfDrawable, {
+    initializeSVGSelfDrawable: function( renderer, instance ) {
+      // super initialization
+      this.initializeSelfDrawable();
+      
+      this.svgElement = null; // should be filled in by subtype
+      this.defs = null; // will be updated by updateDefs()
     },
     
-    // called from elsewhere to update the SVG element
+    // @public: called when the defs block changes
+    // NOTE: should generally be overridden by drawable subtypes, so they can apply their defs changes
+    updateDefs: function( defs ) {
+      this.defs = defs;
+    },
+    
+    // @public: called from elsewhere to update the SVG element
     repaint: function() {
       if ( this.dirty ) {
         this.dirty = false;
-        this.visualState.updateSVG();
+        this.updateSVG();
       }
     },
     
-    dispose: function() {
-      // super call
-      Drawable.prototype.dispose.call( this );
-      
-      this.node.detachSVGDrawable( this );
+    // @protected: called to update the visual appearance of our svgElement
+    updateSVG: function() {
+      // should generally be overridden by drawable subtypes to implement the update
     }
   } );
+  
+  /*
+   * Options contains:
+   *   type - the constructor, should be of the form: function SomethingSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); }.
+   *          Used for debugging constructor name.
+   *   stateType - function to apply to mix-in the state (TODO docs)
+   *   initialize( renderer, instance ) - should initialize this.svgElement if it doesn't already exist, and set up any other initial state properties
+   *   updateSVG() - updates the svgElement to the latest state recorded
+   *   updateDefs( defs ) - called when the SVG <defs> object needs to be switched (or initialized)
+   *   usesFill - whether we include fillable state & defs
+   *   usesStroke - whether we include strokable state & defs
+   *   keepElements - when disposing a drawable (not used anymore), should we keep a reference to the SVG element so we don't have to recreate it when reinitialized?
+   */
+  SVGSelfDrawable.createDrawable = function( options ) {
+    var type = options.type;
+    var stateType = options.stateType;
+    var initializeSelf = options.initialize;
+    var updateSVGSelf = options.updateSVG;
+    var updateDefsSelf = options.updateDefs;
+    var usesFill = options.usesFill;
+    var usesStroke = options.usesStroke;
+    var keepElements = options.keepElements;
+    
+    assert && assert( typeof type === 'function' );
+    assert && assert( typeof stateType === 'function' );
+    assert && assert( typeof initializeSelf === 'function' );
+    assert && assert( typeof updateSVGSelf === 'function' );
+    assert && assert( !updateDefsSelf || ( typeof updateDefsSelf === 'function' ) );
+    assert && assert( typeof usesFill === 'boolean' );
+    assert && assert( typeof usesStroke === 'boolean' );
+    assert && assert( typeof keepElements === 'boolean' );
+    
+    inherit( SVGSelfDrawable, type, {
+      initialize: function( renderer, instance ) {
+        this.initializeSVGSelfDrawable( renderer, instance );
+        this.initializeState(); // assumes we have a state mixin
+        
+        initializeSelf( renderer, instance );
+        
+        if ( usesFill && !this.fillState ) {
+          this.fillState = new Fillable.FillSVGState();
+        } else {
+          this.fillState.initialize();
+        }
+        
+        if ( usesStroke && !this.strokeState ) {
+          this.strokeState = new Strokable.StrokeSVGState();
+        } else {
+          this.strokeState.initialize();
+        }
+        
+        return this; // allow for chaining
+      },
+      
+      // to be used by our passed in options.updateSVG
+      updateFillStrokeStyle: function( element ) {
+        if ( usesFill && this.dirtyFill ) {
+          this.fillState.updateFill( this.defs, this.node._fill );
+        }
+        var strokeParameterDirty;
+        if ( usesStroke ) {
+          if ( this.dirtyStroke ) {
+            this.strokeState.updateStroke( this.defs, this.node._stroke );
+          }
+          strokeParameterDirty = this.dirtyLineWidth || this.dirtyLineOptions;
+          if ( strokeParameterDirty ) {
+            this.strokeState.updateStrokeParameters( this.node );
+          }
+        }
+        if ( ( usesFill && this.dirtyFill ) || ( usesStroke && ( this.dirtyStroke || strokeParameterDirty ) ) ) {
+          element.setAttribute( 'style', ( usesFill ? this.fillState.style : '' ) + ( usesStroke ? this.strokeState.baseStyle + this.strokeState.extraStyle : '' ) );
+        }
+      },
+      
+      updateSVG: function() {
+        if ( this.paintDirty ) {
+          updateSVGSelf( this.node, this.svgElement );
+        }
+        
+        // clear all of the dirty flags
+        this.setToClean();
+      },
+      
+      updateDefs: function( defs ) {
+        SVGSelfDrawable.prototype.updateDefs.call( this, defs );
+        
+        updateDefsSelf && updateDefsSelf( defs );
+        
+        usesFill && this.fillState.updateDefs( defs );
+        usesStroke && this.strokeState.updateDefs( defs );
+      },
+      
+      onAttach: function( node ) {
+        
+      },
+      
+      // release the SVG elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
+      onDetach: function( node ) {
+        if ( !keepElements ) {
+          // clear the references
+          this.svgElement = null;
+        }
+        
+        usesFill && this.fillState.dispose();
+        usesStroke && this.strokeState.dispose();
+        
+        // put us back in the pool
+        this.freeToPool();
+      }
+    } );
+    
+    // mix-in
+    stateType( type );
+    
+    // set up pooling
+    /* jshint -W064 */
+    SelfDrawable.Poolable( type );
+    
+    return type;
+  };
   
   return SVGSelfDrawable;
 } );

@@ -63,8 +63,8 @@ define( function( require ) {
     // all of the Instances tracking this Node (across multiple layers and scenes)
     this._instances = [];
     
-    // states that need to be updated on mutations. generally added by SVG and DOM elements that need to closely track state (possibly by Canvas to maintain dirty state)
-    this._visualStates = [];
+    // drawable states that need to be updated on mutations. generally added by SVG and DOM elements that need to closely track state (possibly by Canvas to maintain dirty state)
+    this._drawables = [];
     
     // Whether this node (and its children) will be visible when the scene is updated. Visible nodes by default will not be pickable either
     this._visible = true;
@@ -2183,49 +2183,25 @@ define( function( require ) {
     },
     
     /*---------------------------------------------------------------------------*
-    * New DOM rendering
+    * Drawable handling
     *----------------------------------------------------------------------------*/
     
-    attachDOMDrawable: function( domSelfDrawable ) {
-      assert && assert( this.createDOMState, 'Lack of createDOMState indicates that this node is not renderable in DOM' );
-      
-      var visualState = this.createDOMState( domSelfDrawable );
-      
-      this._visualStates.push( visualState );
-      
-      return visualState;
+    // will notify the drawable of visual state changes while it is attached
+    attachDrawable: function( drawable ) {
+      this._drawables.push( drawable );
+      drawable.onAttach( this );
+      return this; // allow chaining
     },
     
-    detachDOMDrawable: function( domSelfDrawable ) {
-      var visualState = domSelfDrawable.visualState;
+    // will not notify the drawable of visual state changes after it is detached
+    detachDrawable: function( drawable ) {
+      drawable.onDetach( this );
+      var index = _.indexOf( this._drawables, drawable );
       
-      var index = _.indexOf( this._visualStates, visualState );
-      this._visualStates.splice( index, 1 ); // TODO: replace with a remove() function
+      assert && assert( index >= 0, 'Invalid operation: trying to detach a non-referenced drawable' );
       
-      visualState.onDetach();
-    },
-    
-    /*---------------------------------------------------------------------------*
-    * New SVG rendering
-    *----------------------------------------------------------------------------*/
-    
-    attachSVGDrawable: function( svgSelfDrawable ) {
-      assert && assert( this.createSVGState, 'Lack of createSVGState indicates that this node is not renderable in SVG' );
-      
-      var visualState = this.createSVGState( svgSelfDrawable );
-      
-      this._visualStates.push( visualState );
-      
-      return visualState;
-    },
-    
-    detachSVGDrawable: function( svgSelfDrawable ) {
-      var visualState = svgSelfDrawable.visualState;
-      
-      var index = _.indexOf( this._visualStates, visualState );
-      this._visualStates.splice( index, 1 ); // TODO: replace with a remove() function
-      
-      visualState.onDetach();
+      this._drawables.splice( index, 1 ); // TODO: replace with a remove() function
+      return this;
     },
     
     /*---------------------------------------------------------------------------*

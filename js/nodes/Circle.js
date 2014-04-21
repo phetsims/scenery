@@ -11,7 +11,6 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
   var Bounds2 = require( 'DOT/Bounds2' );
   var Matrix3 = require( 'DOT/Matrix3' );
@@ -21,6 +20,10 @@ define( function( require ) {
   var Features = require( 'SCENERY/util/Features' );
   var Fillable = require( 'SCENERY/nodes/Fillable' );
   var Strokable = require( 'SCENERY/nodes/Strokable' );
+  var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
+  var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
+  var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
+  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMCircleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
@@ -95,6 +98,7 @@ define( function( require ) {
       return x * x + y * y <= this._radius * this._radius;
     },
     
+    //OHTWO @deprecated
     paintCanvas: function( wrapper ) {
       var context = wrapper.context;
       
@@ -115,11 +119,13 @@ define( function( require ) {
     },
     
     // create a circle instead of a path, hopefully it is faster in implementations
+    //OHTWO @deprecated
     createSVGFragment: function( svg, defs, group ) {
       return document.createElementNS( scenery.svgns, 'circle' );
     },
 
     // optimized for the circle element instead of path
+    //OHTWO @deprecated
     updateSVGFragment: function( circle ) {
       circle.setAttribute( 'r', this._radius );
 
@@ -130,8 +136,10 @@ define( function( require ) {
      * DOM support
      *----------------------------------------------------------------------------*/
     
+    //OHTWO @deprecated
     domUpdateTransformOnRepaint: true, // since we have to integrate the baseline offset into the CSS transform, signal to DOMLayer
     
+    //OHTWO @deprecated
     getDOMElement: function() {
       var fill = document.createElement( 'div' );
       var stroke = document.createElement( 'div' );
@@ -146,7 +154,8 @@ define( function( require ) {
       stroke.style.top = '0';
       return fill;
     },
-
+    
+    //OHTWO @deprecated
     updateDOMElement: function( fill ) {
       fill.style.width = ( 2 * this._radius ) + 'px';
       fill.style.height = ( 2 * this._radius ) + 'px';
@@ -169,18 +178,23 @@ define( function( require ) {
     },
     
     // override the transform since we need to customize it with a DOM offset
+    //OHTWO @deprecated
     updateCSSTransform: function( transform, element ) {
       // shift the text vertically, postmultiplied with the entire transform.
       var matrix = transform.getMatrix().timesMatrix( Matrix3.translation( -this._radius, -this._radius ) );
       scenery.Util.applyCSSTransform( matrix, element );
     },
     
-    createDOMState: function( domSelfDrawable ) {
-      return Circle.CircleDOMState.createFromPool( domSelfDrawable );
+    createDOMDrawable: function( renderer, instance ) {
+      return Circle.CircleDOMDrawable.createFromPool( renderer, instance );
     },
     
-    createSVGState: function( svgSelfDrawable ) {
-      return Circle.CircleSVGState.createFromPool( svgSelfDrawable );
+    createSVGDrawable: function( renderer, instance ) {
+      return Circle.CircleSVGDrawable.createFromPool( renderer, instance );
+    },
+    
+    createCanvasDrawable: function( renderer, instance ) {
+      return Circle.CircleCanvasDrawable.createFromPool( renderer, instance );
     },
 
     getBasicConstructor: function( propLines ) {
@@ -198,9 +212,9 @@ define( function( require ) {
         this._radius = radius;
         this.invalidateCircle();
         
-        var stateLen = this._visualStates.length;
+        var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._visualStates.markDirtyRadius();
+          this._drawables.markDirtyRadius();
         }
       }
       return this;
@@ -270,69 +284,60 @@ define( function( require ) {
   Circle.prototype._mutatorKeys = [ 'radius' ].concat( Path.prototype._mutatorKeys );
   
   /*---------------------------------------------------------------------------*
-  * Rendering State
+  * Rendering State mixin (DOM/SVG)
   *----------------------------------------------------------------------------*/
   
-  var CircleRenderState = Circle.CircleRenderState = function( drawable ) {
-    // important to keep this in the constructor (so our hidden class works out nicely)
-    this.initialize( drawable );
-  };
-  CircleRenderState.prototype = {
-    constructor: CircleRenderState,
+  var CircleRenderState = Circle.CircleRenderState = function( drawableType ) {
+    var proto = drawableType.prototype;
     
     // initializes, and resets (so we can support pooled states)
-    initialize: function( drawable ) {
-      // TODO: it's a bit weird to set it this way?
-      drawable.visualState = this;
-      
-      this.drawable = drawable;
-      this.node = drawable.node;
-      
+    proto.initializeState = function() {
       this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
-      this.dirtyRadius = true;   
+      this.dirtyRadius = true;
       
       // adds fill/stroke-specific flags and state
       this.initializeFillableState();
       this.initializeStrokableState();
       
       return this; // allow for chaining
-    },
+    };
     
     // catch-all dirty, if anything that isn't a transform is marked as dirty
-    markPaintDirty: function() {
+    proto.markPaintDirty = function() {
       this.paintDirty = true;
-      this.drawable.markDirty();
-    },
-    markDirtyRadius: function() {
+      this.markDirty();
+    };
+    
+    proto.markDirtyRadius = function() {
       this.dirtyRadius = true;
       this.markPaintDirty();
-    },
-    setToClean: function() {
+    };
+    
+    proto.setToCleanState = function() {
       this.paintDirty = false;
       this.dirtyRadius = false;
       
       this.cleanFillableState();
       this.cleanStrokableState();
-    }
+    };
+    
+    /* jshint -W064 */
+    Fillable.FillableState( drawableType );
+    /* jshint -W064 */
+    Strokable.StrokableState( drawableType );
   };
-  /* jshint -W064 */
-  Fillable.FillableState( CircleRenderState );
-  /* jshint -W064 */
-  Strokable.StrokableState( CircleRenderState );
   
   /*---------------------------------------------------------------------------*
   * DOM rendering
   *----------------------------------------------------------------------------*/
   
-  var CircleDOMState = Circle.CircleDOMState = inherit( Circle.CircleRenderState, function CircleDOMState( drawable ) {
-    CircleRenderState.call( this, drawable );
+  var CircleDOMDrawable = Circle.CircleDOMDrawable = inherit( DOMSelfDrawable, function CircleDOMDrawable( renderer, instance ) {
+    this.initialize( renderer, instance );
   }, {
     // initializes, and resets (so we can support pooled states)
-    initialize: function( drawable ) {
-      CircleRenderState.prototype.initialize.call( this, drawable );
-      
-      this.transformDirty = true;
-      this.forceAcceleration = false; // later changed by drawable if necessary
+    initialize: function( renderer, instance ) {
+      this.initializeDOMSelfDrawable( renderer, instance );
+      this.initializeState();
       
       if ( !this.matrix ) {
         this.matrix = Matrix3.dirtyFromPool();
@@ -406,7 +411,7 @@ define( function( require ) {
       
       // shift the element vertically, postmultiplied with the entire transform.
       if ( this.transformDirty || this.dirtyRadius ) {
-        this.matrix.set( this.drawable.getTransformMatrix() );
+        this.matrix.set( this.getTransformMatrix() );
         var translation = Matrix3.translation( -node._radius, -node._radius );
         this.matrix.multiplyMatrix( translation );
         translation.freeToPool();
@@ -417,8 +422,12 @@ define( function( require ) {
       this.setToClean();
     },
     
+    onAttach: function( node ) {
+      
+    },
+    
     // release the DOM elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
-    onDetach: function() {
+    onDetach: function( node ) {
       if ( !keepDOMCircleElements ) {
         // clear the references
         this.fillElement = null;
@@ -431,130 +440,69 @@ define( function( require ) {
     },
     
     setToClean: function() {
-      CircleRenderState.prototype.setToClean.call( this );
+      this.setToCleanState();
       
       this.transformDirty = false;
     }
   } );
+
   /* jshint -W064 */
-  Fillable.FillableState( CircleDOMState );
+  CircleRenderState( CircleDOMDrawable );
+  
   /* jshint -W064 */
-  Strokable.StrokableState( CircleDOMState );
-  // for pooling, allow CircleDOMState.createFromPool( drawable ) and state.freeToPool(). Creation will initialize the state to the intial state
-  /* jshint -W064 */
-  Poolable( CircleDOMState, {
-    defaultFactory: function() { return new CircleDOMState(); },
-    constructorDuplicateFactory: function( pool ) {
-      return function( drawable ) {
-        if ( pool.length ) {
-          return pool.pop().initialize( drawable );
-        } else {
-          return new CircleDOMState( drawable );
-        }
-      };
-    }
-  } );
+  SelfDrawable.Poolable( CircleDOMDrawable );
   
   /*---------------------------------------------------------------------------*
   * SVG Rendering
   *----------------------------------------------------------------------------*/
   
-  var CircleSVGState = Circle.CircleSVGState = inherit( CircleRenderState, function CircleSVGState( drawable ) {
-    CircleRenderState.call( this, drawable );
-  }, {
-    initialize: function( drawable ) {
-      CircleRenderState.prototype.initialize.call( this, drawable );
-      
-      this.defs = drawable.defs;
-      
-      // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
-      // allocation and performance costs)
+  Circle.CircleSVGDrawable = SVGSelfDrawable.createDrawable( {
+    type: function CircleSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+    stateType: CircleRenderState,
+    initialize: function( renderer, instance ) {
       if ( !this.svgElement ) {
         this.svgElement = document.createElementNS( scenery.svgns, 'circle' );
       }
-      
-      if ( !this.fillState ) {
-        this.fillState = new Fillable.FillSVGState();
-      } else {
-        this.fillState.initialize();
+    },
+    updateSVG: function( node, circle ) {
+      if ( this.dirtyRadius ) {
+        circle.setAttribute( 'r', this._radius );
       }
       
-      if ( !this.strokeState ) {
-        this.strokeState = new Strokable.StrokeSVGState();
-      } else {
-        this.strokeState.initialize();
-      }
-      
-      return this; // allow for chaining
+      this.updateFillStrokeStyle( circle );
     },
-    
-    updateDefs: function( defs ) {
-      this.defs = defs;
-      this.fillState.updateDefs( defs );
-      this.strokeState.updateDefs( defs );
-    },
-    
-    updateSVG: function() {
-      var node = this.node;
-      var circle = this.svgElement;
-      
-      if ( this.paintDirty ) {
-        if ( this.dirtyRadius ) {
-          circle.setAttribute( 'r', this._radius );
-        }
-        
-        // circle.setAttribute( 'style', node.getSVGFillStyle() + node.getSVGStrokeStyle() );
-        
-        if ( this.dirtyFill ) {
-          this.fillState.updateFill( this.defs, node._fill );
-        }
-        if ( this.dirtyStroke ) {
-          this.strokeState.updateStroke( this.defs, node._stroke );
-        }
-        var strokeParameterDirty = this.dirtyLineWidth || this.dirtyLineOptions;
-        if ( strokeParameterDirty ) {
-          this.strokeState.updateStrokeParameters( node );
-        }
-        if ( this.dirtyFill || this.dirtyStroke || strokeParameterDirty ) {
-          circle.setAttribute( 'style', this.fillState.style + this.strokeState.baseStyle + this.strokeState.extraStyle );
-        }
-      }
-      
-      // clear all of the dirty flags
-      this.setToClean();
-    },
-    
-    // release the DOM elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
-    onDetach: function() {
-      if ( !keepSVGCircleElements ) {
-        // clear the references
-        this.svgElement = null;
-      }
-      
-      this.fillState.dispose();
-      
-      // put us back in the pool
-      this.freeToPool();
-    },
-    
-    setToClean: function() {
-      CircleRenderState.prototype.setToClean.call( this );
-    }
+    usesFill: true,
+    usesStroke: true,
+    keepElements: keepSVGCircleElements
   } );
   
-  // for pooling, allow CircleSVGState.createFromPool( drawable ) and state.freeToPool(). Creation will initialize the state to the intial state
-  /* jshint -W064 */
-  Poolable( CircleSVGState, {
-    defaultFactory: function() { return new CircleSVGState(); },
-    constructorDuplicateFactory: function( pool ) {
-      return function( drawable ) {
-        if ( pool.length ) {
-          return pool.pop().initialize( drawable );
-        } else {
-          return new CircleSVGState( drawable );
-        }
-      };
-    }
+  /*---------------------------------------------------------------------------*
+  * Canvas rendering
+  *----------------------------------------------------------------------------*/
+  
+  Circle.CircleCanvasDrawable = CanvasSelfDrawable.createDrawable( {
+    type: function CircleCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+    paintCanvas: function paintCanvasCircle( wrapper ) {
+      var context = wrapper.context;
+      var node = this.node;
+      
+      context.beginPath();
+      context.arc( 0, 0, node._radius, 0, Math.PI * 2, false );
+      context.closePath();
+      
+      if ( node._fill ) {
+        node.beforeCanvasFill( wrapper ); // defined in Fillable
+        context.fill();
+        node.afterCanvasFill( wrapper ); // defined in Fillable
+      }
+      if ( node._stroke ) {
+        node.beforeCanvasStroke( wrapper ); // defined in Strokable
+        context.stroke();
+        node.afterCanvasStroke( wrapper ); // defined in Strokable
+      }
+    },
+    usesFill: true,
+    usesStroke:  true
   } );
 
   return Circle;

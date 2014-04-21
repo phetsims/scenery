@@ -20,6 +20,13 @@ define( function( require ) {
   var Shape = require( 'KITE/Shape' );
   var Vector2 = require( 'DOT/Vector2' );
   
+  var Strokable = require( 'SCENERY/nodes/Strokable' );
+  var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
+  var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
+  
+  // TODO: change this based on memory and performance characteristics of the platform
+  var keepSVGLineElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
+  
   /**
    * Currently, all numerical parameters should be finite.
    * x1:         x-position of the start
@@ -130,6 +137,7 @@ define( function( require ) {
       return new KiteLine( this.p1, this.p2 ).intersectsBounds( bounds );
     },
     
+    //OHTWO @deprecated
     paintCanvas: function( wrapper ) {
       var context = wrapper.context;
       
@@ -149,12 +157,22 @@ define( function( require ) {
       return Path.prototype.computeShapeBounds.call( this );
     },
     
+    createSVGDrawable: function( renderer, instance ) {
+      return Line.LineSVGDrawable.createFromPool( renderer, instance );
+    },
+    
+    createCanvasDrawable: function( renderer, instance ) {
+      return Line.LineCanvasDrawable.createFromPool( renderer, instance );
+    },
+    
     // create a rect instead of a path, hopefully it is faster in implementations
+    //OHTWO @deprecated
     createSVGFragment: function( svg, defs, group ) {
       return document.createElementNS( scenery.svgns, 'line' );
     },
     
     // optimized for the rect element instead of path
+    //OHTWO @deprecated
     updateSVGFragment: function( rect ) {
       // see http://www.w3.org/TR/SVG/shapes.html#LineElement
       rect.setAttribute( 'x1', this._x1 );
@@ -223,6 +241,125 @@ define( function( require ) {
   
   // not adding mutators for now
   Line.prototype._mutatorKeys = [ 'p1', 'p2', 'x1', 'y1', 'x2', 'y2' ].concat( Path.prototype._mutatorKeys );
+  
+  /*---------------------------------------------------------------------------*
+  * Rendering State mixin (DOM/SVG)
+  *----------------------------------------------------------------------------*/
+  
+  var LineRenderState = Line.LineRenderState = function( drawableType ) {
+    var proto = drawableType.prototype;
+    
+    // initializes, and resets (so we can support pooled states)
+    proto.initializeState = function() {
+      this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
+      this.dirtyX1 = true;
+      this.dirtyY1 = true;
+      this.dirtyX2 = true;
+      this.dirtyY2 = true;
+      
+      // adds fill/stroke-specific flags and state
+      this.initializeStrokableState();
+      
+      return this; // allow for chaining
+    };
+    
+    // catch-all dirty, if anything that isn't a transform is marked as dirty
+    proto.markPaintDirty = function() {
+      this.paintDirty = true;
+      this.markDirty();
+    };
+    
+    proto.markDirtyX1 = function() {
+      this.dirtyX1 = true;
+      this.markPaintDirty();
+    };
+    
+    proto.markDirtyY1 = function() {
+      this.dirtyY1 = true;
+      this.markPaintDirty();
+    };
+    
+    proto.markDirtyX2 = function() {
+      this.dirtyX2 = true;
+      this.markPaintDirty();
+    };
+    
+    proto.markDirtyY2 = function() {
+      this.dirtyY2 = true;
+      this.markPaintDirty();
+    };
+    
+    proto.setToCleanState = function() {
+      this.paintDirty = false;
+      this.dirtyX1 = false;
+      this.dirtyY1 = false;
+      this.dirtyX2 = false;
+      this.dirtyY2 = false;
+      
+      this.cleanStrokableState();
+    };
+    
+    /* jshint -W064 */
+    Strokable.StrokableState( drawableType );
+  };
+  
+  /*---------------------------------------------------------------------------*
+  * SVG Rendering
+  *----------------------------------------------------------------------------*/
+  
+  Line.LineSVGDrawable = SVGSelfDrawable.createDrawable( {
+    type: function LineSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+    stateType: LineRenderState,
+    initialize: function( renderer, instance ) {
+      if ( !this.svgElement ) {
+        this.svgElement = document.createElementNS( scenery.svgns, 'line' );
+      }
+    },
+    updateSVG: function( node, line ) {
+      if ( this.dirtyX1 ) {
+        line.setAttribute( 'x1', node._x1 );
+      }
+      if ( this.dirtyY1 ) {
+        line.setAttribute( 'y1', node._y1 );
+      }
+      if ( this.dirtyX2 ) {
+        line.setAttribute( 'x2', node._x2 );
+      }
+      if ( this.dirtyY2 ) {
+        line.setAttribute( 'y2', node._y2 );
+      }
+      
+      this.updateFillStrokeStyle( line );
+    },
+    usesFill: false,
+    usesStroke: true,
+    keepElements: keepSVGLineElements
+  } );
+  
+  /*---------------------------------------------------------------------------*
+  * Canvas rendering
+  *----------------------------------------------------------------------------*/
+  
+  Line.LineCanvasDrawable = CanvasSelfDrawable.createDrawable( {
+    type: function LineCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+    paintCanvas: function paintCanvasLine( wrapper ) {
+      var context = wrapper.context;
+      var node = this.node;
+      
+      context.beginPath();
+      context.moveTo( node._x1, node._y1 );
+      context.lineTo( node._x2, node._y2 );
+      context.closePath();
+      
+      if ( node._stroke ) {
+        node.beforeCanvasStroke( wrapper ); // defined in Strokable
+        context.stroke();
+        node.afterCanvasStroke( wrapper ); // defined in Strokable
+      }
+    },
+    usesFill: false,
+    usesStroke:  true
+  } );
   
   return Line;
 } );

@@ -10,7 +10,6 @@ define( function( require ) {
   'use strict';
   
   var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
   var Shape = require( 'KITE/Shape' );
   
   var scenery = require( 'SCENERY/scenery' );
@@ -18,6 +17,8 @@ define( function( require ) {
   require( 'SCENERY/layers/Renderer' );
   var Fillable = require( 'SCENERY/nodes/Fillable' );
   var Strokable = require( 'SCENERY/nodes/Strokable' );
+  var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
+  var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   
   // TODO: change this based on memory and performance characteristics of the platform
   var keepSVGPathElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
@@ -100,6 +101,7 @@ define( function( require ) {
       return this._shape;
     },
     
+    //OHTWO @deprecated
     paintCanvas: function( wrapper ) {
       var context = wrapper.context;
       
@@ -121,15 +123,18 @@ define( function( require ) {
       }
     },
     
+    //OHTWO @deprecated
     paintWebGL: function( state ) {
       throw new Error( 'Path.prototype.paintWebGL unimplemented' );
     },
     
     // svg element, the <defs> block, and the associated group for this node's transform
+    //OHTWO @deprecated
     createSVGFragment: function( svg, defs, group ) {
       return document.createElementNS( scenery.svgns, 'path' );
     },
     
+    //OHTWO @deprecated
     updateSVGFragment: function( path ) {
       var svgPath = this.hasShape() ? this._shape.getSVGPath() : "";
       
@@ -149,6 +154,7 @@ define( function( require ) {
     },
     
     // support patterns, gradients, and anything else we need to put in the <defs> block
+    //OHTWO @deprecated
     updateSVGDefs: function( svg, defs ) {
       // remove old definitions if they exist
       this.removeSVGDefs( svg, defs );
@@ -161,13 +167,18 @@ define( function( require ) {
     },
     
     // cleans up references created with udpateSVGDefs()
+    //OHTWO @deprecated
     removeSVGDefs: function( svg, defs ) {
       this.removeSVGFillDef( svg, defs );
       this.removeSVGStrokeDef( svg, defs );
     },
     
-    createSVGState: function( svgSelfDrawable ) {
-      return Path.PathSVGState.createFromPool( svgSelfDrawable );
+    createSVGDrawable: function( renderer, instance ) {
+      return Path.PathSVGDrawable.createFromPool( renderer, instance );
+    },
+    
+    createCanvasDrawable: function( renderer, instance ) {
+      return Path.PathCanvasDrawable.createFromPool( renderer, instance );
     },
     
     isPainted: function() {
@@ -224,166 +235,112 @@ define( function( require ) {
   Strokable( Path );
   
   /*---------------------------------------------------------------------------*
-  * Rendering State
+  * Rendering State mixin (DOM/SVG)
   *----------------------------------------------------------------------------*/
   
-  var PathRenderState = Path.PathRenderState = function( drawable ) {
-    // important to keep this in the constructor (so our hidden class works out nicely)
-    this.initialize( drawable );
-  };
-  PathRenderState.prototype = {
-    constructor: PathRenderState,
+  var PathRenderState = Path.PathRenderState = function( drawableType ) {
+    var proto = drawableType.prototype;
     
     // initializes, and resets (so we can support pooled states)
-    initialize: function( drawable ) {
-      // TODO: it's a bit weird to set it this way?
-      drawable.visualState = this;
-      
-      this.drawable = drawable;
-      this.node = drawable.node;
-      
+    proto.initializeState = function() {
       this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
-      this.dirtyShape = true;   
+      this.dirtyShape = true;
       
       // adds fill/stroke-specific flags and state
       this.initializeFillableState();
       this.initializeStrokableState();
       
       return this; // allow for chaining
-    },
+    };
     
     // catch-all dirty, if anything that isn't a transform is marked as dirty
-    markPaintDirty: function() {
+    proto.markPaintDirty = function() {
       this.paintDirty = true;
-      this.drawable.markDirty();
-    },
-    markDirtyRadius: function() {
+      this.markDirty();
+    };
+    
+    proto.markDirtyShape = function() {
       this.dirtyShape = true;
       this.markPaintDirty();
-    },
-    setToClean: function() {
+    };
+    
+    proto.setToCleanState = function() {
       this.paintDirty = false;
       this.dirtyShape = false;
       
       this.cleanFillableState();
       this.cleanStrokableState();
-    }
+    };
+    
+    /* jshint -W064 */
+    Fillable.FillableState( drawableType );
+    /* jshint -W064 */
+    Strokable.StrokableState( drawableType );
   };
-  /* jshint -W064 */
-  Fillable.FillableState( PathRenderState );
-  /* jshint -W064 */
-  Strokable.StrokableState( PathRenderState );
   
   /*---------------------------------------------------------------------------*
   * SVG Rendering
   *----------------------------------------------------------------------------*/
   
-  var PathSVGState = Path.PathSVGState = inherit( PathRenderState, function PathSVGState( drawable ) {
-    PathRenderState.call( this, drawable );
-  }, {
-    initialize: function( drawable ) {
-      PathRenderState.prototype.initialize.call( this, drawable );
-      
-      this.defs = drawable.defs;
-      
-      // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
-      // allocation and performance costs)
+  Path.PathSVGDrawable = SVGSelfDrawable.createDrawable( {
+    type: function PathSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+    stateType: PathRenderState,
+    initialize: function( renderer, instance ) {
       if ( !this.svgElement ) {
         this.svgElement = document.createElementNS( scenery.svgns, 'path' );
       }
-      
-      if ( !this.fillState ) {
-        this.fillState = new Fillable.FillSVGState();
-      } else {
-        this.fillState.initialize();
-      }
-      
-      if ( !this.strokeState ) {
-        this.strokeState = new Strokable.StrokeSVGState();
-      } else {
-        this.strokeState.initialize();
-      }
-      
-      return this; // allow for chaining
     },
-    
-    updateDefs: function( defs ) {
-      this.defs = defs;
-      this.fillState.updateDefs( defs );
-      this.strokeState.updateDefs( defs );
-    },
-    
-    updateSVG: function() {
-      var node = this.node;
-      var path = this.svgElement;
+    updateSVG: function( node, path ) {
+      assert && assert( !node.requiresSVGBoundsWorkaround(), 'No workaround for https://github.com/phetsims/scenery/issues/196 is provided at this time, please add an epsilon' );
       
-      assert && assert( !this.requiresSVGBoundsWorkaround(), 'No workaround for https://github.com/phetsims/scenery/issues/196 is provided at this time, please add an epsilon' );
-      
-      if ( this.paintDirty ) {
-        if ( this.dirtyShape ) {
-          var svgPath = this.hasShape() ? this._shape.getSVGPath() : '';
-          
-          // temporary workaround for https://bugs.webkit.org/show_bug.cgi?id=78980
-          // and http://code.google.com/p/chromium/issues/detail?id=231626 where even removing
-          // the attribute can cause this bug
-          if ( !svgPath ) { svgPath = 'M0 0'; }
-          
-          // only set the SVG path if it's not the empty string
-          path.setAttribute( 'd', svgPath );
-        }
+      if ( this.dirtyShape ) {
+        var svgPath = this.hasShape() ? this._shape.getSVGPath() : '';
         
-        // path.setAttribute( 'style', node.getSVGFillStyle() + node.getSVGStrokeStyle() );
+        // temporary workaround for https://bugs.webkit.org/show_bug.cgi?id=78980
+        // and http://code.google.com/p/chromium/issues/detail?id=231626 where even removing
+        // the attribute can cause this bug
+        if ( !svgPath ) { svgPath = 'M0 0'; }
         
-        if ( this.dirtyFill ) {
-          this.fillState.updateFill( this.defs, node._fill );
-        }
-        if ( this.dirtyStroke ) {
-          this.strokeState.updateStroke( this.defs, node._stroke );
-        }
-        var strokeParameterDirty = this.dirtyLineWidth || this.dirtyLineOptions;
-        if ( strokeParameterDirty ) {
-          this.strokeState.updateStrokeParameters( node );
-        }
-        if ( this.dirtyFill || this.dirtyStroke || strokeParameterDirty ) {
-          path.setAttribute( 'style', this.fillState.style + this.strokeState.baseStyle + this.strokeState.extraStyle );
-        }
+        // only set the SVG path if it's not the empty string
+        path.setAttribute( 'd', svgPath );
       }
       
-      // clear all of the dirty flags
-      this.setToClean();
+      this.updateFillStrokeStyle( path );
     },
-    
-    // release the DOM elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
-    onDetach: function() {
-      if ( !keepSVGPathElements ) {
-        // clear the references
-        this.svgElement = null;
-      }
-      
-      this.fillState.dispose();
-      
-      // put us back in the pool
-      this.freeToPool();
-    },
-    
-    setToClean: function() {
-      PathRenderState.prototype.setToClean.call( this );
-    }
+    usesFill: true,
+    usesStroke: true,
+    keepElements: keepSVGPathElements
   } );
   
-  // for pooling, allow PathSVGState.createFromPool( drawable ) and state.freeToPool(). Creation will initialize the state to the intial state
-  /* jshint -W064 */
-  Poolable( PathSVGState, {
-    defaultFactory: function() { return new PathSVGState(); },
-    constructorDuplicateFactory: function( pool ) {
-      return function( drawable ) {
-        if ( pool.length ) {
-          return pool.pop().initialize( drawable );
-        } else {
-          return new PathSVGState( drawable );
+  /*---------------------------------------------------------------------------*
+  * Canvas rendering
+  *----------------------------------------------------------------------------*/
+  
+  Path.PathCanvasDrawable = CanvasSelfDrawable.createDrawable( {
+    type: function PathCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
+    paintCanvas: function paintCanvasPath( wrapper ) {
+      var context = wrapper.context;
+      var node = this.node;
+      
+      if ( node.hasShape() ) {
+        // TODO: fill/stroke delay optimizations?
+        context.beginPath();
+        node._shape.writeToContext( context );
+
+        if ( node._fill ) {
+          node.beforeCanvasFill( wrapper ); // defined in Fillable
+          context.fill();
+          node.afterCanvasFill( wrapper ); // defined in Fillable
         }
-      };
-    }
+        if ( node._stroke ) {
+          node.beforeCanvasStroke( wrapper ); // defined in Strokable
+          context.stroke();
+          node.afterCanvasStroke( wrapper ); // defined in Strokable
+        }
+      }
+    },
+    usesFill: true,
+    usesStroke:  true
   } );
   
   return Path;
