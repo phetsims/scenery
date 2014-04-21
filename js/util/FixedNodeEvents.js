@@ -111,6 +111,7 @@ define( function( require ) {
       var events = this._events[type];
       var len = events.length;
       if ( len ) { // TODO: consider removing branch? is this even helpful?
+        // TODO: reduce allocation? consider tmp array to hold these, or will that cause more memory usage?
         var copy = events.slice( 0 ); // defensive copy, in case listeners are added or removed as a side effect of a listener being called
         for ( var i = 0; i < len; i++ ) {
           copy[i]( args );
