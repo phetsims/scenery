@@ -435,6 +435,14 @@ define( function( require ) {
       return result.shiftedX( isRTL ? -width : 0 ); // should we even swap here?
     },
     
+    // @override from Node
+    getSafeSelfBounds: function() {
+      var expansionFactor = 1; // we use a new bounding box with a new size of size * ( 1 + 2 * expansionFactor )
+      
+      var selfBounds = this.getSelfBounds();
+      return selfBounds.dilatedXY( expansionFactor * selfBounds.width, expansionFactor * selfBounds.height );
+    },
+    
     /*---------------------------------------------------------------------------*
     * Self setters / getters
     *----------------------------------------------------------------------------*/
