@@ -6,7 +6,7 @@
  * TODO: general key-press implementation
  * TODO: consider separate handling for keys in general.
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {

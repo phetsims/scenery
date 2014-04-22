@@ -8,7 +8,7 @@
  * This generally ensures that a layer containing the proper renderer and settings to support its associated node
  * will be created.
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {

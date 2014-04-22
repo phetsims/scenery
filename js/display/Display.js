@@ -6,7 +6,7 @@
  * Use display.getDOMElement or display.domElement to retrieve the Display's DOM representation.
  * Use display.updateDisplay() to trigger the visual update in the Display's DOM element.
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {

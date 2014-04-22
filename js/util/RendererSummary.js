@@ -6,7 +6,7 @@
  * We effectively do this by tracking bitmask changes from scenery.js (used for rendering properties in general). In particular, we count
  * how many zeros in the bitmask we have in key places.
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {

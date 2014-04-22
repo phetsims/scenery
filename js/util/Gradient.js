@@ -3,7 +3,7 @@
 /**
  * Gradient base type for LinearGradient and RadialGradient. Will not function on its own
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {

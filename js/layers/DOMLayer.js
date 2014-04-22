@@ -13,7 +13,7 @@
  *   updateDOMElement( element ):              Updates the DOM element with any changes that were made.
  *   updateCSSTransform( transform, element ): Updates the CSS transform of the element
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {

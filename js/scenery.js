@@ -7,7 +7,7 @@
  * The returned scenery object namespace may be incomplete if not all modules are listed as
  * dependencies. Please use the 'main' module for that purpose if all of Scenery is desired.
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {

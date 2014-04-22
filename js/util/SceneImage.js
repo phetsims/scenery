@@ -3,7 +3,7 @@
 /*
  * An HTMLImageElement that is backed by a scene. Call update() on this SceneImage to update the image from the scene.
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {

@@ -19,7 +19,7 @@
  * NOTE: Trails for transforms are not provided. Instead, inspecting isTransformed and what type of cache should uniquely determine
  *       the transformBaseTrail and transformTrail necessary for rendering (and in an efficient way). Not included here for performance (state doesn't need them)
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {

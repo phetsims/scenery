@@ -4,7 +4,7 @@
  * An enumeration of different back-end technologies used for rendering. It also essentially
  * represents the API that nodes need to implement to be used with this specified back-end.
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {

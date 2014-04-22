@@ -4,7 +4,7 @@
  * A circular node that inherits Path, and allows for optimized drawing,
  * and improved parameter handling.
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {

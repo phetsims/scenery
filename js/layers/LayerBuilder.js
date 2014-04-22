@@ -5,7 +5,7 @@
  * that layer strategies from each node modify. Iterating through all of the nodes in a depth-first
  * manner will modify the LayerBuilder so that layer information can be retrieved.
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {

@@ -3,7 +3,7 @@
 /**
  * Displays mouse and touch areas when they are customized. Expensive to display!
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {

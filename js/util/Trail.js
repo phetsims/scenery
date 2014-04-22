@@ -12,7 +12,7 @@
  * can have their indices updated with reindex(). It's designed to be as fast as possible
  * on Trails that are already indexed accurately.
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {

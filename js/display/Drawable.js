@@ -3,7 +3,7 @@
 /**
  * A unit that is drawable with a specific renderer
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {

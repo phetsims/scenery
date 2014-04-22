@@ -20,7 +20,7 @@
  * Useful specs:
  * http://www.w3.org/TR/css3-fonts/
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {

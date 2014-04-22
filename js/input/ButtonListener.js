@@ -12,7 +12,7 @@
  * TODO: offscreen handling
  * TODO: fix enter/exit edge cases for moving nodes or add/remove child, and when touches are created
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {

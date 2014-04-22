@@ -3,7 +3,7 @@
 /**
  * Creates and references a stylesheet that can be built up while Scenery is loading.
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {

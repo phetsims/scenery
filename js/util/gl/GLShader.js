@@ -3,7 +3,7 @@
 /**
  * Shader wrapper, so we can seamlessly recreate them on context loss.
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {

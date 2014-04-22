@@ -3,7 +3,7 @@
 /**
  * Configuration file for production deployment purposes, NOT for development (it currently excludes most assertions).
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 // if has.js is included, set assertion flags to false, for running speed.

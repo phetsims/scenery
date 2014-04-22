@@ -3,7 +3,7 @@
 /**
  * A Path draws a Shape with a specific type of fill and stroke.
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {

@@ -9,7 +9,7 @@
  *
  * TODO: more seamless handling of the orders. or just exclusively use the nesting order
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {

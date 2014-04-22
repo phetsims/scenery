@@ -3,7 +3,7 @@
 /**
  * Mix-in for Node's event handling, with experimental performance enhancements
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {

@@ -6,7 +6,7 @@
  *
  * TODO: performance analysis, possibly axe this and use direct modification.
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {

@@ -4,7 +4,7 @@
  * An interval between two Trails. A trail being null means either 'from the start' or 'to the end', depending
  * on whether it is the first or second parameter to the constructor.
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 define( function( require ) {
