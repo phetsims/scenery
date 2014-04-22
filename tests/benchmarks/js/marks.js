@@ -4,7 +4,7 @@
  * Compares performance benchmarks across version snapshots to help determine
  * improvements or regressions.
  *
- * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 // 'namespace'
