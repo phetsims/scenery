@@ -110,6 +110,8 @@ define( function( require ) {
   inherit( Node, Text, {
     domUpdateTransformOnRepaint: true, // since we have to integrate the baseline offset into the CSS transform, signal to DOMLayer
     
+    requiresSafeBounds: true,
+    
     setText: function( text ) {
       assert && assert( text !== null && text !== undefined, 'Text should be defined and non-null. Use the empty string if needed.' );
       
