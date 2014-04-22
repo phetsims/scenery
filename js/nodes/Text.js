@@ -510,6 +510,8 @@ define( function( require ) {
       var expansionFactor = 1; // we use a new bounding box with a new size of size * ( 1 + 2 * expansionFactor )
       
       var selfBounds = this.getSelfBounds();
+      
+      // NOTE: we'll keep this as an estimate for the bounds including stroke miters
       return selfBounds.dilatedXY( expansionFactor * selfBounds.width, expansionFactor * selfBounds.height );
     },
     
