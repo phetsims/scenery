@@ -4,9 +4,7 @@
  * Text
  *
  * TODO: newlines (multiline)
- * TODO: htmlText support (and DOM renderer)
  * TODO: don't get bounds until the Text node is fully mutated?
- * TODO: remove some support for centering, since Scenery's Node already handles that better?
  *
  * Useful specs:
  * http://www.w3.org/TR/css3-text/
