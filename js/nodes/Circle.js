@@ -169,7 +169,7 @@ define( function( require ) {
         stroke.style.left = ( -this.getLineWidth() / 2 ) + 'px';
         stroke.style.top = ( -this.getLineWidth() / 2 ) + 'px';
         stroke.style.borderStyle = 'solid';
-        stroke.style.borderColor = this.getSimpleCSSFill();
+        stroke.style.borderColor = this.getSimpleCSSStroke();
         stroke.style.borderWidth = this.getLineWidth() + 'px';
         stroke.style[Features.borderRadius] = ( this._radius + this.getLineWidth() / 2 ) + 'px';
       } else {
@@ -214,7 +214,7 @@ define( function( require ) {
         
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._drawables.markDirtyRadius();
+          this._drawables[i].markDirtyRadius();
         }
       }
       return this;
@@ -371,12 +371,12 @@ define( function( require ) {
       
       if ( this.paintDirty ) {
         if ( this.dirtyRadius ) {
-          fillElement.style.width = ( 2 * this._radius ) + 'px';
-          fillElement.style.height = ( 2 * this._radius ) + 'px';
-          fillElement.style[Features.borderRadius] = this._radius + 'px';
+          fillElement.style.width = ( 2 * node._radius ) + 'px';
+          fillElement.style.height = ( 2 * node._radius ) + 'px';
+          fillElement.style[Features.borderRadius] = node._radius + 'px';
         }
         if ( this.dirtyFill ) {
-          fillElement.style.backgroundColor = this.getCSSFill();
+          fillElement.style.backgroundColor = node.getCSSFill();
         }
         
         if ( this.dirtyStroke ) {
@@ -388,23 +388,23 @@ define( function( require ) {
           }
         }
         
-        if ( this.hasStroke() ) {
+        if ( node.hasStroke() ) {
           // since we only execute these if we have a stroke, we need to redo everything if there was no stroke previously.
           // the other option would be to update stroked information when there is no stroke (major performance loss for fill-only Circles)
           var hadNoStrokeBefore = this.lastStroke === null;
           
           if ( hadNoStrokeBefore || this.dirtyLineWidth || this.dirtyRadius ) {
-            strokeElement.style.width = ( 2 * this._radius - this.getLineWidth() ) + 'px';
-            strokeElement.style.height = ( 2 * this._radius - this.getLineWidth() ) + 'px';
-            strokeElement.style[Features.borderRadius] = ( this._radius + this.getLineWidth() / 2 ) + 'px';
+            strokeElement.style.width = ( 2 * node._radius - node.getLineWidth() ) + 'px';
+            strokeElement.style.height = ( 2 * node._radius - node.getLineWidth() ) + 'px';
+            strokeElement.style[Features.borderRadius] = ( node._radius + node.getLineWidth() / 2 ) + 'px';
           }
           if ( hadNoStrokeBefore || this.dirtyLineWidth ) {
-            strokeElement.style.left = ( -this.getLineWidth() / 2 ) + 'px';
-            strokeElement.style.top = ( -this.getLineWidth() / 2 ) + 'px';
-            strokeElement.style.borderWidth = this.getLineWidth() + 'px';
+            strokeElement.style.left = ( -node.getLineWidth() / 2 ) + 'px';
+            strokeElement.style.top = ( -node.getLineWidth() / 2 ) + 'px';
+            strokeElement.style.borderWidth = node.getLineWidth() + 'px';
           }
           if ( hadNoStrokeBefore || this.dirtyStroke ) {
-            strokeElement.style.borderColor = this.getSimpleCSSFill();
+            strokeElement.style.borderColor = node.getSimpleCSSStroke();
           }
         }
       }
@@ -466,7 +466,7 @@ define( function( require ) {
     },
     updateSVG: function( node, circle ) {
       if ( this.dirtyRadius ) {
-        circle.setAttribute( 'r', this._radius );
+        circle.setAttribute( 'r', node._radius );
       }
       
       this.updateFillStrokeStyle( circle );

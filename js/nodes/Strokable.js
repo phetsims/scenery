@@ -285,7 +285,7 @@ define( function( require ) {
       return bounds.x * bounds.y === 0; // at least one of them was zero, so the bounding box has no area
     };
     
-    proto.getSimpleCSSFill = function() {
+    proto.getSimpleCSSStroke = function() {
       // if it's a Color object, get the corresponding CSS
       // 'transparent' will make us invisible if the fill is null
       return this._stroke ? ( this._stroke.toCSS ? this._stroke.toCSS() : this._stroke ) : 'transparent';
@@ -485,7 +485,7 @@ define( function( require ) {
         this.releaseDef();
         this.stroke = stroke;
         this.baseStyle = this.computeStyle();
-        if ( this.stroke.getSVGDefinition ) {
+        if ( this.stroke && this.stroke.getSVGDefinition ) {
           this.def = this.stroke.getSVGDefinition( this.id );
           defs.appendChild( this.def );
         }

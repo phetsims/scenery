@@ -382,7 +382,7 @@ define( function( require ) {
         stroke.style.left = ( -this.getLineWidth() / 2 ) + 'px';
         stroke.style.top = ( -this.getLineWidth() / 2 ) + 'px';
         stroke.style.borderStyle = 'solid';
-        stroke.style.borderColor = this.getSimpleCSSFill();
+        stroke.style.borderColor = this.getSimpleCSSStroke();
         stroke.style.borderWidth = this.getLineWidth() + 'px';
         stroke.style[Features.borderRadius] = ( this.isRounded() || this.getLineJoin() === 'round' ) ? ( borderRadius + this.getLineWidth() / 2 ) + 'px' : '0';
       } else {
@@ -698,7 +698,7 @@ define( function( require ) {
           }
           
           if ( hadNoStrokeBefore || this.dirtyStroke ) {
-            strokeElement.style.borderColor = node.getSimpleCSSFill();
+            strokeElement.style.borderColor = node.getSimpleCSSStroke();
           }
           
           if ( hadNoStrokeBefore || borderRadiusDirty || this.dirtyLineWidth || this.dirtyLineOptions ) {

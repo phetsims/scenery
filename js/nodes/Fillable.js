@@ -293,7 +293,7 @@ define( function( require ) {
         this.releaseDef();
         this.fill = fill;
         this.style = this.computeStyle();
-        if ( this.fill.getSVGDefinition ) {
+        if ( this.fill && this.fill.getSVGDefinition ) {
           this.def = this.fill.getSVGDefinition( this.id );
           defs.appendChild( this.def );
         }

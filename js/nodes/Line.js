@@ -20,6 +20,7 @@ define( function( require ) {
   var Shape = require( 'KITE/Shape' );
   var Vector2 = require( 'DOT/Vector2' );
   
+  var Fillable = require( 'SCENERY/nodes/Fillable' );
   var Strokable = require( 'SCENERY/nodes/Strokable' );
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
@@ -258,6 +259,7 @@ define( function( require ) {
       this.dirtyY2 = true;
       
       // adds fill/stroke-specific flags and state
+      this.initializeFillableState();
       this.initializeStrokableState();
       
       return this; // allow for chaining
@@ -296,9 +298,12 @@ define( function( require ) {
       this.dirtyX2 = false;
       this.dirtyY2 = false;
       
+      this.cleanFillableState();
       this.cleanStrokableState();
     };
     
+    /* jshint -W064 */
+    Fillable.FillableState( drawableType );
     /* jshint -W064 */
     Strokable.StrokableState( drawableType );
   };
@@ -331,7 +336,7 @@ define( function( require ) {
       
       this.updateFillStrokeStyle( line );
     },
-    usesFill: false,
+    usesFill: true, // NOTE: doesn't use fill, but for now developer option was that "we shouldn't error out when setting a fill on a Line"
     usesStroke: true,
     keepElements: keepSVGLineElements
   } );
@@ -357,7 +362,7 @@ define( function( require ) {
         node.afterCanvasStroke( wrapper ); // defined in Strokable
       }
     },
-    usesFill: false,
+    usesFill: true, // NOTE: doesn't use fill, but for now developer option was that "we shouldn't error out when setting a fill on a Line"
     usesStroke: true,
     dirtyMethods: ['markDirtyX1', 'markDirtyY1', 'markDirtyX2', 'markDirtyY2']
   } );

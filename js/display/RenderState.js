@@ -97,7 +97,7 @@ define( function( require ) {
         this.selfRenderer = svgRenderer;
       } else if ( canvasRenderer && ( canvasRenderer & node._rendererBitmask ) !== 0 ) {
         this.selfRenderer = canvasRenderer;
-      } else if ( scenery.Renderer.bitmaskDOM & node._rendererBitmask !== 0 ) {
+      } else if ( ( scenery.Renderer.bitmaskDOM & node._rendererBitmask ) !== 0 ) {
         // TODO: decide if CSS transform is to be applied here!
         this.selfRenderer = scenery.Renderer.bitmaskDOM;
       } else {

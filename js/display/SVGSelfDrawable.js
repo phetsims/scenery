@@ -89,16 +89,20 @@ define( function( require ) {
         
         initializeSelf.call( this, renderer, instance );
         
-        if ( usesFill && !this.fillState ) {
-          this.fillState = new Fillable.FillSVGState();
-        } else {
-          this.fillState.initialize();
+        if ( usesFill ) {
+          if ( !this.fillState ) {
+            this.fillState = new Fillable.FillSVGState();
+          } else {
+            this.fillState.initialize();
+          }
         }
         
-        if ( usesStroke && !this.strokeState ) {
-          this.strokeState = new Strokable.StrokeSVGState();
-        } else {
-          this.strokeState.initialize();
+        if ( usesStroke ) {
+          if ( !this.strokeState ) {
+            this.strokeState = new Strokable.StrokeSVGState();
+          } else {
+            this.strokeState.initialize();
+          }
         }
         
         return this; // allow for chaining

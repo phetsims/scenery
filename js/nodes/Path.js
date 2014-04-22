@@ -294,7 +294,7 @@ define( function( require ) {
       assert && assert( !node.requiresSVGBoundsWorkaround(), 'No workaround for https://github.com/phetsims/scenery/issues/196 is provided at this time, please add an epsilon' );
       
       if ( this.dirtyShape ) {
-        var svgPath = this.hasShape() ? this._shape.getSVGPath() : '';
+        var svgPath = node.hasShape() ? node._shape.getSVGPath() : '';
         
         // temporary workaround for https://bugs.webkit.org/show_bug.cgi?id=78980
         // and http://code.google.com/p/chromium/issues/detail?id=231626 where even removing

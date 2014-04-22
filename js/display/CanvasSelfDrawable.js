@@ -59,6 +59,11 @@ define( function( require ) {
         
       },
       
+      // general flag set on the state, which we forward directly to the drawable's paint flag
+      markPaintDirty: function() {
+        this.markDirty();
+      },
+      
       paintCanvas: paintCanvas,
       
       // release the drawable

@@ -196,7 +196,6 @@ define( function( require ) {
     // initializes, and resets (so we can support pooled states)
     initialize: function( renderer, instance ) {
       this.initializeDOMSelfDrawable( renderer, instance );
-      this.initializeState();
       
       this.domElement = this.node._container;
       
@@ -226,8 +225,6 @@ define( function( require ) {
     },
     
     setToClean: function() {
-      this.setToCleanState();
-      
       this.transformDirty = false;
     }
   } );

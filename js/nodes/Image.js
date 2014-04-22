@@ -73,7 +73,11 @@ define( function( require ) {
     allowsMultipleDOMInstances: false, // TODO: support multiple instances
 
     invalidateImage: function() {
-      this.invalidateSelf( new Bounds2( 0, 0, this.getImageWidth(), this.getImageHeight() ) );
+      if ( this._image ) {
+        this.invalidateSelf( new Bounds2( 0, 0, this.getImageWidth(), this.getImageHeight() ) );
+      } else {
+        this.invalidateSelf( Bounds2.NOTHING );
+      }
     },
 
     getImage: function() {
@@ -116,7 +120,7 @@ define( function( require ) {
         
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._drawables.markDirtyImage();
+          this._drawables[i].markDirtyImage();
         }
         
         this.invalidateImage(); // yes, if we aren't loaded yet this will give us 0x0 bounds
@@ -299,7 +303,7 @@ define( function( require ) {
       
       if ( this.paintDirty && this.dirtyImage ) {
         // TODO: allow other ways of showing a DOM image?
-        img.src = node._image.src;
+        img.src = node._image ? node._image.src : '//:0'; // NOTE: for img with no src (but with a string), see http://stackoverflow.com/questions/5775469/whats-the-valid-way-to-include-an-image-with-no-src
       }
       
       if ( this.transformDirty ) {
@@ -354,10 +358,16 @@ define( function( require ) {
     },
     updateSVG: function( node, image ) {
       if ( this.dirtyImage ) {
-        // like <image xlink:href='http://phet.colorado.edu/images/phet-logo-yellow.png' x='0' y='0' height='127px' width='242px'/>
-        image.setAttribute( 'width', node.getImageWidth() + 'px' );
-        image.setAttribute( 'height', node.getImageHeight() + 'px' );
-        image.setAttributeNS( scenery.xlinkns, 'xlink:href', node.getImageURL() );
+        if ( node._image ) {
+          // like <image xlink:href='http://phet.colorado.edu/images/phet-logo-yellow.png' x='0' y='0' height='127px' width='242px'/>
+          image.setAttribute( 'width', node.getImageWidth() + 'px' );
+          image.setAttribute( 'height', node.getImageHeight() + 'px' );
+          image.setAttributeNS( scenery.xlinkns, 'xlink:href', node.getImageURL() );
+        } else {
+          image.setAttribute( 'width', '0' );
+          image.setAttribute( 'height', '0' );
+          image.setAttributeNS( scenery.xlinkns, 'xlink:href', '//:0' ); // see http://stackoverflow.com/questions/5775469/whats-the-valid-way-to-include-an-image-with-no-src
+        }
       }
     },
     usesFill: false,
@@ -372,7 +382,9 @@ define( function( require ) {
   Image.ImageCanvasDrawable = CanvasSelfDrawable.createDrawable( {
     type: function ImageCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
     paintCanvas: function paintCanvasImage( wrapper ) {
-      wrapper.context.drawImage( this.node._image, 0, 0 );
+      if ( this.node._image ) {
+        wrapper.context.drawImage( this.node._image, 0, 0 );
+      }
     },
     usesFill: false,
     usesStroke: false,
