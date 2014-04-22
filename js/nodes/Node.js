@@ -1994,13 +1994,6 @@ define( function( require ) {
       }
     },
     
-    notifyBoundsAccuracyChange: function() {
-      var i = this._instances.length;
-      while ( i-- ) {
-        this._instances[i].notifyBoundsAccuracyChange();
-      }
-    },
-    
     notifyStitch: function( match ) {
       var i = this._instances.length;
       while ( i-- ) {

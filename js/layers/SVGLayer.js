@@ -626,12 +626,6 @@ define( function( require ) {
         // ancestor node changed a transform. rebuild the base transform
         this.markBaseTransformDirty();
       }
-    },
-    
-    // only a painted trail under this layer (for now)
-    notifyBoundsAccuracyChange: function( instance ) {
-      // sceneryLayerLog && sceneryLayerLog( 'SVGLayer #' + this.id + ' notifyBoundsAccuracyChange: ' + instance.trail.toString() );
-      // no-op, we don't care about bounds
     }
     
   } );

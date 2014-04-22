@@ -513,17 +513,6 @@ define( function( require ) {
       // sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyTransformChange: ' + instance.trail.toString() );
       // TODO: how best to mark this so if there are multiple 'movements' we don't get called more than needed?
       // this.canvasMarkSubtree( instance );
-    },
-    
-    // only a painted trail under this layer (for now)
-    notifyBoundsAccuracyChange: function( instance ) {
-      sceneryLayerLog && sceneryLayerLog( 'CanvasLayer #' + this.id + ' notifyBoundsAccuracyChange: ' + instance.trail.toString() );
-      
-      if ( instance.node.boundsInaccurate ) {
-        this.boundlessCount++;
-      } else {
-        this.boundlessCount--;
-      }
     }
   } );
   

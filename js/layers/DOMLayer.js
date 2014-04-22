@@ -298,12 +298,6 @@ define( function( require ) {
           node.updateCSSTransform( trail.getTransform(), element );
         }
       }, false, this.scene );
-    },
-    
-    // only a painted trail under this layer (for now)
-    notifyBoundsAccuracyChange: function( instance ) {
-      // sceneryLayerLog && sceneryLayerLog( 'DOMLayer #' + this.id + ' notifyBoundsAccuracyChange: ' + instance.trail.toString() );
-      // no-op, we don't care about bounds
     }
     
   } );

@@ -312,11 +312,6 @@ define( function( require ) {
       }
     },
     
-    notifyBoundsAccuracyChange: function() {
-      sceneryEventLog && sceneryEventLog( 'notifyBoundsAccuracyChange: ' + this.trail.toString() + ', ' + this.getLayerString() );
-      this.layer.notifyBoundsAccuracyChange( this );
-    },
-    
     notifyStitch: function( match ) {
       sceneryEventLog && sceneryEventLog( 'notifyStitch: ' + this.trail.toString() + ' match:' + match + ', ' + this.getLayerString() );
       this.getScene().stitch( match );
