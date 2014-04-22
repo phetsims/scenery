@@ -499,7 +499,7 @@ define( function( require ) {
     // Traverses this subtree and validates bounds only for subtrees that have bounds listeners (trying to exclude as much as possible for performance)
     // This is done so that we can do the minimum bounds validation to prevent any bounds listeners from being triggered in further validateBounds() calls
     // without other Node changes being done. This is required to make the new rendering system work (planned for non-reentrance).
-    // NOTE: this should pass by (ignore) any overridden localBounds, to trigger listeners below.
+    // @public: NOTE: this should pass by (ignore) any overridden localBounds, to trigger listeners below.
     validateWatchedBounds: function() {
       // Since a bounds listener on one of the roots could invalidate bounds on the other, we need to keep running this until they are all clean.
       // Otherwise, side-effects could occur from bounds validations
@@ -507,7 +507,7 @@ define( function( require ) {
       while ( this.watchedBoundsScan() ) {}
     },
     
-    // recursive function for validateWatchedBounds. Returned whether any validateBounds() returned true (means we have to traverse again)
+    // @private: recursive function for validateWatchedBounds. Returned whether any validateBounds() returned true (means we have to traverse again)
     watchedBoundsScan: function() {
       if ( !this._childBoundsDirty && this._boundsDirty ) {
         // if the bounds under here are not dirty, we won't have any use for calling validateBounds()
@@ -520,7 +520,7 @@ define( function( require ) {
         var changed = false;
         var numChildren = this._children.length;
         for ( var i = 0; i < numChildren; i++ ) {
-          changed = this._children[i]._watchedBoundsScan() || changed;
+          changed = this._children[i].watchedBoundsScan() || changed;
         }
         return changed;
       } else {
