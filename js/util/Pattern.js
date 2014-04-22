@@ -1,4 +1,4 @@
-// Copyright 2002-2013, University of Colorado
+// Copyright 2002-2014, University of Colorado
 
 /**
  * A pattern that will deliver a fill or stroke that will repeat an image in both directions (x and y).

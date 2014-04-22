@@ -1,4 +1,4 @@
-// Copyright 2002-2013, University of Colorado
+// Copyright 2002-2014, University of Colorado
 
 /**
  * Wraps the context and contains a reference to the canvas, so that we can absorb unnecessary state changes,
