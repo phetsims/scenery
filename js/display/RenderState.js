@@ -39,6 +39,11 @@ define( function( require ) {
    * {param} canvasRenderer     Renderer  Canvas renderer settings to use
    * {param} isUnderCanvasCache Boolean   Whether we are under any sort of Canvas cache (not including if this node is canvas cached)
    * {param} isShared           Boolean   Whether this is the shared instance tree for a single-cache, instead of a reference to it
+   *
+   * Potential ways the state can change:
+   * - any input changes, specifically including:
+   * - node's renderer summary (what types of renderers are allowed below)
+   * - node.hints | node.opacity
    */
   RenderState.RegularState = function RegularState( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared ) {
     // this should be accurate right now, the pass to update these should have been completed earlier
@@ -103,9 +108,6 @@ define( function( require ) {
       } else {
         throw new Error( 'unsupported renderer, something wrong in RenderState' );
       }
-      
-      //OHTWO TODO: remove this later
-      this.selfRenderer = scenery.Renderer.bitmaskDOM;
     }
   };
   RenderState.RegularState.prototype = {
