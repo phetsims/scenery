@@ -191,17 +191,25 @@ define( function( require ) {
     },
     
     invalidateText: function() {
-      // TODO: handle text stroke for bounds!
+      var selfBounds;
+      
       // investigate http://mudcu.be/journal/2011/01/html5-typographic-metrics/
       if ( this._isHTML || ( useDOMAsFastBounds && this._boundsMethod !== 'accurate' ) ) {
-        this.invalidateSelf( this.approximateDOMBounds() );
+        selfBounds = this.approximateDOMBounds();
       } else if ( this._boundsMethod === 'hybrid' ) {
-        this.invalidateSelf( this.approximateHybridBounds() );
+        selfBounds = this.approximateHybridBounds();
       } else if ( this._boundsMethod === 'fast' || this._boundsMethod === 'fastCanvas' ) {
-        this.invalidateSelf( this.approximateSVGBounds() );
+        selfBounds = this.approximateSVGBounds();
       } else {
-        this.invalidateSelf( this.accurateCanvasBounds() );
+        selfBounds = this.accurateCanvasBounds();
       }
+      
+      // for now, just add extra on, ignoring the possibility of mitered joints passing beyond
+      if ( this.hasStroke() ) {
+        selfBounds.dilate( this.getLineWidth() / 2 );
+      }
+      
+      this.invalidateSelf( selfBounds );
       
       // we may have changed renderers if parameters were changed!
       this.updateTextFlags();
@@ -385,6 +393,8 @@ define( function( require ) {
       if ( !this._text || svgBounds.width === 0 ) {
         return svgBounds;
       }
+      
+      // NOTE: should return new instance, so that it can be mutated later
       return scenery.Util.canvasAccurateBounds( function( context ) {
         context.font = node.font;
         context.direction = node.direction;
@@ -409,6 +419,7 @@ define( function( require ) {
       return context.measureText( this.text ).width;
     },
     
+    // NOTE: should return new instance, so that it can be mutated later
     approximateSVGBounds: function() {
       if ( !svgTextSizeContainer.parentNode ) {
         if ( document.body ) {
@@ -429,6 +440,7 @@ define( function( require ) {
       return new Bounds2( rect.x, rect.y, rect.x + rect.width, rect.y + rect.height );
     },
     
+    // NOTE: should return new instance, so that it can be mutated later
     approximateHybridBounds: function() {
       if ( !hybridTextNode ) {
         return Bounds2.NOTHING; // we are the hybridTextNode, ignore us
@@ -446,6 +458,7 @@ define( function( require ) {
       return new Bounds2( 0, verticalBounds.minY, canvasWidth, verticalBounds.maxY );
     },
     
+    // NOTE: should return new instance, so that it can be mutated later
     approximateDOMBounds: function() {
       var maxHeight = 1024; // technically this will fail if the font is taller than this!
       var isRTL = this.direction === 'rtl';
