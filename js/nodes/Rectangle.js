@@ -160,7 +160,7 @@ define( function( require ) {
       
       var stateLen = this._drawables.length;
       for ( var i = 0; i < stateLen; i++ ) {
-        this._drawables.markDirtyRectangle();
+        this._drawables[i].markDirtyRectangle();
       }
       this.invalidateRectangle();
     },
@@ -866,7 +866,8 @@ define( function( require ) {
       }
     },
     usesFill: true,
-    usesStroke:  true
+    usesStroke: true,
+    dirtyMethods: ['markDirtyRectangle']
   } );
   
   return Rectangle;

@@ -25,7 +25,7 @@ define( function( require ) {
   inherit( SelfDrawable, SVGSelfDrawable, {
     initializeSVGSelfDrawable: function( renderer, instance ) {
       // super initialization
-      this.initializeSelfDrawable();
+      this.initializeSelfDrawable( renderer, instance );
       
       this.svgElement = null; // should be filled in by subtype
       this.defs = null; // will be updated by updateDefs()
@@ -87,7 +87,7 @@ define( function( require ) {
         this.initializeSVGSelfDrawable( renderer, instance );
         this.initializeState(); // assumes we have a state mixin
         
-        initializeSelf( renderer, instance );
+        initializeSelf.call( this, renderer, instance );
         
         if ( usesFill && !this.fillState ) {
           this.fillState = new Fillable.FillSVGState();
@@ -126,7 +126,7 @@ define( function( require ) {
       
       updateSVG: function() {
         if ( this.paintDirty ) {
-          updateSVGSelf( this.node, this.svgElement );
+          updateSVGSelf.call( this, this.node, this.svgElement );
         }
         
         // clear all of the dirty flags
@@ -136,7 +136,7 @@ define( function( require ) {
       updateDefs: function( defs ) {
         SVGSelfDrawable.prototype.updateDefs.call( this, defs );
         
-        updateDefsSelf && updateDefsSelf( defs );
+        updateDefsSelf && updateDefsSelf.call( this, defs );
         
         usesFill && this.fillState.updateDefs( defs );
         usesStroke && this.strokeState.updateDefs( defs );
@@ -158,6 +158,10 @@ define( function( require ) {
         
         // put us back in the pool
         this.freeToPool();
+      },
+      
+      setToClean: function() {
+        this.setToCleanState();
       }
     } );
     

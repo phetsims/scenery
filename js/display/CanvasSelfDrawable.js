@@ -29,7 +29,14 @@ define( function( require ) {
     }
   } );
   
-  // options takes: type, paintCanvas( wrapper ), usesFill, usesStroke
+  // methods for forwarding dirty messages
+  function canvasSelfDirty() {
+    // we pass this method and it is only called with blah.call( ... ), where the 'this' reference is set. ignore jshint
+    /* jshint -W040 */
+    this.markDirty();
+  }
+  
+  // options takes: type, paintCanvas( wrapper ), usesFill, usesStroke, and dirtyMethods (array of string names of methods that make the state dirty)
   CanvasSelfDrawable.createDrawable = function( options ) {
     var type = options.type;
     var paintCanvas = options.paintCanvas;
@@ -74,6 +81,12 @@ define( function( require ) {
     // set up pooling
     /* jshint -W064 */
     SelfDrawable.Poolable( type );
+    
+    if ( options.dirtyMethods ) {
+      for ( var i = 0; i < options.dirtyMethods.length; i++ ) {
+        type.prototype[options.dirtyMethods[i]] = canvasSelfDirty;
+      }
+    }
     
     return type;
   };

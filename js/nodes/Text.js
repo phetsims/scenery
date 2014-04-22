@@ -123,7 +123,7 @@ define( function( require ) {
         
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._drawables.markDirtyText();
+          this._drawables[i].markDirtyText();
         }
         
         this.invalidateText();
@@ -149,7 +149,7 @@ define( function( require ) {
         
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._drawables.markDirtyBounds();
+          this._drawables[i].markDirtyBounds();
         }
         
         this.invalidateText();
@@ -511,7 +511,7 @@ define( function( require ) {
         
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
-          this._drawables.markDirtyFont();
+          this._drawables[i].markDirtyFont();
         }
         
         this.invalidateText();
@@ -529,7 +529,7 @@ define( function( require ) {
       
       var stateLen = this._drawables.length;
       for ( var i = 0; i < stateLen; i++ ) {
-        this._drawables.markDirtyDirection();
+        this._drawables[i].markDirtyDirection();
       }
       
       this.invalidateText();
@@ -722,31 +722,31 @@ define( function( require ) {
       
       if ( this.paintDirty ) {
         if ( this.dirtyFont ) {
-          div.style.font = this.getFont();
+          div.style.font = node.getFont();
         }
         if ( this.dirtyStroke ) {
-          div.style.color = this.getCSSFill();
+          div.style.color = node.getCSSFill();
         }
         if ( this.dirtyBounds ) {
-          div.style.width = this.getSelfBounds().width + 'px';
-          div.style.height = this.getSelfBounds().height + 'px';
+          div.style.width = node.getSelfBounds().width + 'px';
+          div.style.height = node.getSelfBounds().height + 'px';
           // TODO: do we require the jQuery versions here, or are they vestigial?
-          // $div.width( this.getSelfBounds().width );
-          // $div.height( this.getSelfBounds().height );
+          // $div.width( node.getSelfBounds().width );
+          // $div.height( node.getSelfBounds().height );
         }
         if ( this.dirtyText ) {
           // TODO: actually do this in a better way
           div.innerHTML = node.getNonBreakingText();
         }
         if ( this.dirtyDirection ) {
-          div.setAttribute( 'dir', this._direction );
+          div.setAttribute( 'dir', node._direction );
         }
       }
       
       if ( this.transformDirty || this.dirtyText || this.dirtyFont || this.dirtyBounds ) {
         // shift the text vertically, postmultiplied with the entire transform.
         var yOffset = node.getSelfBounds().minY;
-        scratchMatrix.set( this.drawable.getTransformMatrix() );
+        scratchMatrix.set( this.getTransformMatrix() );
         var translation = Matrix3.translation( 0, yOffset );
         scratchMatrix.multiplyMatrix( translation );
         translation.freeToPool();
@@ -807,26 +807,26 @@ define( function( require ) {
     },
     updateSVG: function( node, text ) {
       if ( this.dirtyDirection ) {
-        text.setAttribute( 'direction', this._direction );
+        text.setAttribute( 'direction', node._direction );
       }
       
       // set all of the font attributes, since we can't use the combined one
       if ( this.dirtyFont ) {
-        text.setAttribute( 'font-family', this._font.getFamily() );
-        text.setAttribute( 'font-size', this._font.getSize() );
-        text.setAttribute( 'font-style', this._font.getStyle() );
-        text.setAttribute( 'font-weight', this._font.getWeight() );
-        text.setAttribute( 'font-stretch', this._font.getStretch() );
+        text.setAttribute( 'font-family', node._font.getFamily() );
+        text.setAttribute( 'font-size', node._font.getSize() );
+        text.setAttribute( 'font-style', node._font.getStyle() );
+        text.setAttribute( 'font-weight', node._font.getWeight() );
+        text.setAttribute( 'font-stretch', node._font.getStretch() );
       }
       
       // update the text-node's value
       if ( this.dirtyText ) {
-        text.lastChild.nodeValue = this.getNonBreakingText();
+        text.lastChild.nodeValue = node.getNonBreakingText();
       }
       
       // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/SVG rendering (and overall length)
-      if ( this.dirtyBounds && isFinite( this._selfBounds.width ) ) {
-        text.setAttribute( 'textLength', this._selfBounds.width );
+      if ( this.dirtyBounds && isFinite( node._selfBounds.width ) ) {
+        text.setAttribute( 'textLength', node._selfBounds.width );
       }
       
       this.updateFillStrokeStyle( text );
@@ -864,7 +864,8 @@ define( function( require ) {
       }
     },
     usesFill: true,
-    usesStroke:  true
+    usesStroke: true,
+    dirtyMethods: ['markDirtyText', 'markDirtyFont', 'markDirtyBounds', 'markDirtyDirection']
   } );
   
   return Text;

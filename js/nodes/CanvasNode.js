@@ -75,7 +75,7 @@ define( function( require ) {
       this.node.paintCanvas( wrapper );
     },
     usesFill: false,
-    usesStroke:  false
+    usesStroke: false
   } );
   
   return CanvasNode;

@@ -358,7 +358,8 @@ define( function( require ) {
       }
     },
     usesFill: false,
-    usesStroke:  true
+    usesStroke: true,
+    dirtyMethods: ['markDirtyX1', 'markDirtyY1', 'markDirtyX2', 'markDirtyY2']
   } );
   
   return Line;

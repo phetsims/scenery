@@ -375,7 +375,8 @@ define( function( require ) {
       wrapper.context.drawImage( this.node._image, 0, 0 );
     },
     usesFill: false,
-    usesStroke:  false
+    usesStroke: false,
+    dirtyMethods: ['markDirtyImage']
   } );
 
   return Image;

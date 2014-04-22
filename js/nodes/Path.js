@@ -340,7 +340,8 @@ define( function( require ) {
       }
     },
     usesFill: true,
-    usesStroke:  true
+    usesStroke: true,
+    dirtyMethods: ['markDirtyShape']
   } );
   
   return Path;

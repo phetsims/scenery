@@ -502,7 +502,8 @@ define( function( require ) {
       }
     },
     usesFill: true,
-    usesStroke:  true
+    usesStroke: true,
+    dirtyMethods: ['markDirtyRadius']
   } );
 
   return Circle;
