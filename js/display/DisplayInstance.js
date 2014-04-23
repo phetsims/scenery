@@ -119,7 +119,7 @@ define( function( require ) {
     // this.transformListeners = [];
     
     this.nodeTransformListener = this.markTransformDirty.bind( this );
-    this.node.addEventListener( 'transform', this.nodeTransformListener );
+    this.node.onStatic( 'transform', this.nodeTransformListener );
   };
   var DisplayInstance = scenery.DisplayInstance;
   
@@ -391,7 +391,7 @@ define( function( require ) {
     
     // clean up listeners and garbage, so that we can be recycled (or pooled)
     dispose: function() {
-      this.node.removeEventListener( 'transform', this.nodeTransformListener );
+      this.node.offStatic( 'transform', this.nodeTransformListener );
     },
     
     audit: function( frameId ) {
