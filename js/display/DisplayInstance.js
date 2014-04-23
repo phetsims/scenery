@@ -78,6 +78,8 @@ define( function( require ) {
   
   // TODO: handle allocations
   scenery.DisplayInstance = function DisplayInstance( display, trail, state ) {
+    trail.setImmutable(); // prevent the trail passed in from being mutated after this point (we want a consistent trail)
+    
     this.id = globalIdCounter++;
     
     this.display = display;
