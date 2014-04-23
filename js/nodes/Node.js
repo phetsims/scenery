@@ -10,6 +10,10 @@
 define( function( require ) {
   'use strict';
   
+  var extend = require( 'PHET_CORE/extend' );
+  
+  var Events = require( 'AXON/Events' );
+  
   var Bounds2 = require( 'DOT/Bounds2' );
   var Transform3 = require( 'DOT/Transform3' );
   var Matrix3 = require( 'DOT/Matrix3' );
@@ -19,7 +23,6 @@ define( function( require ) {
   var Shape = require( 'KITE/Shape' );
   
   var scenery = require( 'SCENERY/scenery' );
-  var NodeEvents = require( 'SCENERY/util/FixedNodeEvents' );
   require( 'SCENERY/util/RendererSummary' );
   // require( 'SCENERY/layers/Renderer' ); // commented out so Require.js doesn't balk at the circular dependency
   
@@ -56,6 +59,9 @@ define( function( require ) {
    */
   scenery.Node = function Node( options ) {
     var self = this;
+    
+    // supertype call to axon.Events (should just initialize a few properties here, notably _eventListeners and _staticEventListeners)
+    Events.call( this );
     
     // assign a unique ID to this node (allows trails to get a unique list of IDs)
     this._id = globalIdCounter++;
@@ -109,7 +115,6 @@ define( function( require ) {
     this._transform.addTransformListener( this._transformListener );
     
     this._inputListeners = []; // for user input handling (mouse/touch)
-    this.initializeNodeEvents(); // for internal events like paint invalidation, layer invalidation, etc.
     
     // bounds handling
     this._bounds = Bounds2.NOTHING;      // for this node and its children, in "parent" coordinates
@@ -169,7 +174,7 @@ define( function( require ) {
   };
   var Node = scenery.Node;
   
-  Node.prototype = {
+  Node.prototype = extend( {
     constructor: Node,
     
     insertChild: function( index, node ) {
@@ -410,7 +415,7 @@ define( function( require ) {
         // TODO: don't execute this "if" comparison if there are no listeners?
         if ( !this._childBounds.equals( oldChildBounds ) ) {
           // TODO: consider changing to parameter object (that may be a problem for the GC overhead)
-          this.fireEvent( 'childBounds', this._childBounds );
+          this.trigger( 'childBounds' );
         }
       }
       
@@ -429,7 +434,7 @@ define( function( require ) {
         
         // TODO: don't execute this "if" comparison if there are no listeners?
         if ( !this._localBounds.equals( oldLocalBounds ) ) {
-          this.fireEvent( 'localBounds', this._localBounds );
+          this.trigger( 'localBounds' );
           
           // sanity check
           this._boundsDirty = true;
@@ -459,7 +464,7 @@ define( function( require ) {
           }
           
           // TODO: consider changing to parameter object (that may be a problem for the GC overhead)
-          this.fireEvent( 'bounds', this._bounds );
+          this.trigger( 'bounds' );
         }
       }
       
@@ -767,7 +772,7 @@ define( function( require ) {
         this._selfBounds = newBounds;
         
         // fire the event immediately
-        this.fireEvent( 'selfBounds', this._selfBounds );
+        this.trigger( 'selfBounds' );
       }
       
       this.invalidatePaint();
@@ -836,7 +841,7 @@ define( function( require ) {
           this._localBounds = localBounds;
           this._localBoundsOverridden = true; // NOTE: has to be done before invalidating bounds, since this disables localBounds computation
         }
-        this.fireEvent( 'localBounds', this._localBounds );
+        this.trigger( 'localBounds' );
         this.invalidateBounds();
       }
     },
@@ -1057,53 +1062,6 @@ define( function( require ) {
       return this._inputListeners.slice( 0 ); // defensive copy
     },
     
-    /*
-     * Dispatches an event across all possible Trails ending in this node.
-     *
-     * For example, if the scene has two children A and B, and both of those nodes have X as a child,
-     * dispatching an event on X will fire the event with the following trails:
-     * on X     with trail [ X ]
-     * on A     with trail [ A, X ]
-     * on scene with trail [ scene, A, X ]
-     * on B     with trail [ B, X ]
-     * on scene with trail [ scene, B, X ]
-     *
-     * This allows you to add a listener on any node to get notifications for all of the trails that the
-     * event is relevant for (e.g. marks dirty paint region for both places X was on the scene).
-     */
-    dispatchEvent: function( type, args ) {
-      sceneryEventLog && sceneryEventLog( this.constructor.name + '.dispatchEvent ' + type );
-      var trail = new scenery.Trail();
-      trail.setMutable(); // don't allow this trail to be set as immutable for storage
-      args.trail = trail; // this reference shouldn't be changed be listeners (or errors will occur)
-      
-      // store a branching flag, since if we don't branch at all, we don't have to walk our trail back down.
-      var branches = false;
-      
-      function recursiveEventDispatch( node ) {
-        trail.addAncestor( node );
-        
-        node.fireEvent( type, args );
-        
-        var parents = node._parents;
-        var length = parents.length;
-        
-        // make sure to set the branch flag here before iterating (don't move it)
-        branches = branches || length > 1;
-        
-        for ( var i = 0; i < length; i++ ) {
-          recursiveEventDispatch( parents[i] );
-        }
-        
-        // if there were no branches, we will not fire another listener once we have reached here
-        if ( branches ) {
-          trail.removeAncestor();
-        }
-      }
-      
-      recursiveEventDispatch( this );
-    },
-    
     // TODO: consider renaming to translateBy to match scaleBy
     translate: function( x, y, prependInstead ) {
       if ( typeof x === 'number' ) {
@@ -1309,7 +1267,7 @@ define( function( require ) {
       this.invalidateBounds();
       this.invalidateSubtreePaint();
       
-      this.fireEvent( 'transform', this._transform );
+      this.trigger( 'transform' );
     },
     
     // the left bound of this node, in the parent coordinate frame
@@ -2296,6 +2254,14 @@ define( function( require ) {
         return this;
       }
       
+      if ( assert ) {
+        assert && assert( _.filter( ['translation', 'x', 'left', 'right', 'centerX', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom'], function( key ) { return options[key] !== undefined; } ).length <= 1,
+                          'More than one mutation on this Node set the x component, check ' + Object.keys( options ).join( ',' ) );
+        
+        assert && assert( _.filter( ['translation', 'y', 'top', 'bottom', 'centerY', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom'], function( key ) { return options[key] !== undefined; } ).length <= 1,
+                          'More than one mutation on this Node set the y component, check ' + Object.keys( options ).join( ',' ) );
+      }
+      
       var node = this;
       
       _.each( this._mutatorKeys, function( key ) {
@@ -2373,8 +2339,45 @@ define( function( require ) {
       }
       
       return result;
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * Compatibility with old events API (now using axon.Events)
+    *----------------------------------------------------------------------------*/
+    
+    addEventListener: function( eventName, listener ) {
+      // can't guarantee static with old usage
+      return this.on( eventName, listener );
+    },
+    
+    removeEventListener: function( eventName, listener ) {
+      // can't guarantee static with old usage
+      return this.off( eventName, listener );
+    },
+    
+    containsEventListener: function( eventName, listener ) {
+      return this.hasListener( eventName, listener );
     }
-  };
+    
+  }, Events.prototype, {
+    /*---------------------------------------------------------------------------*
+    * Safety overrides for Events (I want assertions for failure to remove listeners)
+    *----------------------------------------------------------------------------*/
+    off: assert ? function offOverride( eventName, listener ) {
+      var index = Events.prototype.off.call( this, eventName, listener );
+      assert && assert( index >= 0, 'Node.off was called but no listener was removed' );
+      return index;
+    } : Events.prototype.off, // if we don't have assertions, we will directly use the Events.off function
+    
+    offStatic: assert ? function offStaticOverride( eventName, listener ) {
+      var index = Events.prototype.offStatic.call( this, eventName, listener );
+      assert && assert( index >= 0, 'Node.offStatic was called but no listener was removed' );
+      return index;
+    } : Events.prototype.offStatic, // if we don't have assertions, we will directly use the Events.off function
+    /*---------------------------------------------------------------------------*
+    * DO NOT ADD normal methods under here, this is written over Events.prototype
+    *----------------------------------------------------------------------------*/
+  } );
   
   
   /* 
@@ -2423,17 +2426,11 @@ define( function( require ) {
    * The order below is important! Don't change this without knowing the implications.
    * NOTE: translation-based mutators come before rotation/scale, since typically we think of their operations occuring "after" the rotation / scaling
    * NOTE: left/right/top/bottom/centerX/centerY are at the end, since they rely potentially on rotation / scaling changes of bounds that may happen beforehand
-   * TODO: using more than one of {translation,x,left,right,centerX} or {translation,y,top,bottom,centerY} should be considered an error
-   * TODO: move fill / stroke setting to mixins
    */
   Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
                                   'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom',
                                   'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
                                   'layerSplit', 'mouseArea', 'touchArea', 'clipArea' ];
-  
-  // mix-in the events for Node
-  /* jshint -W064 */
-  NodeEvents( Node );
   
   return Node;
 } );

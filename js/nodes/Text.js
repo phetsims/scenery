@@ -145,8 +145,7 @@ define( function( require ) {
       if ( method !== this._boundsMethod ) {
         this._boundsMethod = method;
         this.updateTextFlags();
-        this.dispatchEvent( 'boundsAccuracy', { node: this } ); // TODO: consider standardizing this, or attaching listeners in a different manner?
-        
+
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
           this._drawables[i].markDirtyBounds();

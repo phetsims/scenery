@@ -37,6 +37,7 @@
   <script src="unit-tests.js"></script>
   <script src="../../../kite/tests/qunit/unit-tests.js"></script>
   <script src="../../../dot/tests/qunit/unit-tests.js"></script>
+  <script src="../../../axon/tests/qunit/unit-tests.js"></script>
   <script src="../../../phet-core/tests/qunit/unit-tests.js"></script>
   
 </head>
@@ -61,15 +62,17 @@
     // we need to wait until our config file is loaded before our require statement. apparently this was not guaranteed
     function check() {
       if ( window.loadedSceneryConfig ) {
-        require( [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main' ], function( scenery, kite, dot, core ) {
+        require( [ 'main', 'KITE/main', 'DOT/main', 'AXON/main', 'PHET_CORE/main' ], function( scenery, kite, dot, axon, core ) {
           window.scenery = scenery;
           window.kite = kite;
           window.dot = dot;
+          window.axon = axon;
           window.core = core;
           
           runSceneryTests( '.' );
           runKiteTests( '../../../kite/tests/qunit' );
           runDotTests( '../../../dot/tests/qunit' );
+          runAxonTests( '../../../axon/tests/qunit' );
           runPhetCoreTests( '../../../phet-core/tests/qunit' );
           
           if ( window.console && console.log ) {

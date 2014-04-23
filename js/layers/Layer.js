@@ -63,7 +63,7 @@ define( function( require ) {
     
     // whenever the base node's children or self change bounds, signal this. we want to explicitly ignore the base node's main bounds for
     // CSS transforms, since the self / children bounds may not have changed
-    this.baseNodeBoundsListener = function( bounds ) {
+    this.baseNodeBoundsListener = function() {
       layer.baseNodeInternalBoundsChange(); // TODO: verify that this is working as expected
     };
     this.baseNode.addEventListener( 'localBounds', this.baseNodeBoundsListener );
