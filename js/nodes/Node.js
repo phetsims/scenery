@@ -415,7 +415,7 @@ define( function( require ) {
         // TODO: don't execute this "if" comparison if there are no listeners?
         if ( !this._childBounds.equals( oldChildBounds ) ) {
           // TODO: consider changing to parameter object (that may be a problem for the GC overhead)
-          this.trigger( 'childBounds' );
+          this.trigger0( 'childBounds' );
         }
       }
       
@@ -434,7 +434,7 @@ define( function( require ) {
         
         // TODO: don't execute this "if" comparison if there are no listeners?
         if ( !this._localBounds.equals( oldLocalBounds ) ) {
-          this.trigger( 'localBounds' );
+          this.trigger0( 'localBounds' );
           
           // sanity check
           this._boundsDirty = true;
@@ -464,7 +464,7 @@ define( function( require ) {
           }
           
           // TODO: consider changing to parameter object (that may be a problem for the GC overhead)
-          this.trigger( 'bounds' );
+          this.trigger0( 'bounds' );
         }
       }
       
@@ -772,7 +772,7 @@ define( function( require ) {
         this._selfBounds = newBounds;
         
         // fire the event immediately
-        this.trigger( 'selfBounds' );
+        this.trigger0( 'selfBounds' );
       }
       
       this.invalidatePaint();
@@ -841,7 +841,7 @@ define( function( require ) {
           this._localBounds = localBounds;
           this._localBoundsOverridden = true; // NOTE: has to be done before invalidating bounds, since this disables localBounds computation
         }
-        this.trigger( 'localBounds' );
+        this.trigger0( 'localBounds' );
         this.invalidateBounds();
       }
     },
@@ -1267,7 +1267,7 @@ define( function( require ) {
       this.invalidateBounds();
       this.invalidateSubtreePaint();
       
-      this.trigger( 'transform' );
+      this.trigger0( 'transform' );
     },
     
     // the left bound of this node, in the parent coordinate frame

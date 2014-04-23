@@ -910,7 +910,7 @@ define( function( require ) {
           this.input.validatePointers();
         }
         
-        this.trigger( 'resize', { width: width, height: height } ); // usage relies on the arguments provided here
+        this.trigger1( 'resize', { width: width, height: height } ); // usage relies on the arguments provided here
       }
     },
 
