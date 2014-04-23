@@ -2254,6 +2254,14 @@ define( function( require ) {
         return this;
       }
       
+      if ( assert ) {
+        assert && assert( _.filter( ['translation', 'x', 'left', 'right', 'centerX', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom'], function( key ) { return options[key] !== undefined; } ).length <= 1,
+                          'More than one mutation on this Node set the x component, check ' + Object.keys( options ).join( ',' ) );
+        
+        assert && assert( _.filter( ['translation', 'y', 'top', 'bottom', 'centerY', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom'], function( key ) { return options[key] !== undefined; } ).length <= 1,
+                          'More than one mutation on this Node set the y component, check ' + Object.keys( options ).join( ',' ) );
+      }
+      
       var node = this;
       
       _.each( this._mutatorKeys, function( key ) {
@@ -2418,7 +2426,6 @@ define( function( require ) {
    * The order below is important! Don't change this without knowing the implications.
    * NOTE: translation-based mutators come before rotation/scale, since typically we think of their operations occuring "after" the rotation / scaling
    * NOTE: left/right/top/bottom/centerX/centerY are at the end, since they rely potentially on rotation / scaling changes of bounds that may happen beforehand
-   * TODO: using more than one of {translation,x,left,right,centerX} or {translation,y,top,bottom,centerY} should be considered an error
    */
   Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
                                   'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom',
