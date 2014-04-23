@@ -19,7 +19,7 @@ require.config( {
   
   paths: {
     underscore: '../../sherpa/lodash-2.4.1',
-    jquery: '../../sherpa/jquery-2.0.3',
+    jquery: '../../sherpa/jquery-2.1.0',
     SCENERY: '.',
     KITE: '../../kite/js',
     DOT: '../../dot/js',
