@@ -139,6 +139,7 @@ define( function( require ) {
      */
     isInstanceCompatibleWith: function( otherState ) {
       return this.isTransformed === otherState.isTransformed &&
+             this.isBackbone === otherState.isBackbone &&
              ( this.isCanvasCache && this.isCacheShared ) === ( otherState.isCanvasCache && otherState.isCacheShared );
     }
   };

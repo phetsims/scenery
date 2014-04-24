@@ -15,7 +15,7 @@
     
     
     var r1 = new scenery.Rectangle( 5, 10, 100, 50, 0, 0, { fill: 'red', stroke: 'blue', lineWidth: 5 } );
-    var r1i = new scenery.DisplayInstance( stubDisplay, r1.getUniqueTrail(), null );
+    var r1i = new scenery.DisplayInstance( stubDisplay, r1.getUniqueTrail() );
     var r1dd = r1.createDOMDrawable( scenery.Renderer.bitmaskDOM, r1i );
     var r1ds = r1.createSVGDrawable( scenery.Renderer.bitmaskSVG, r1i );
     var r1dc = r1.createCanvasDrawable( scenery.Renderer.bitmaskCanvas, r1i );
@@ -61,7 +61,7 @@
     
     
     var r1 = new scenery.Circle( 50, { fill: 'red', stroke: 'blue', lineWidth: 5 } );
-    var r1i = new scenery.DisplayInstance( stubDisplay, r1.getUniqueTrail(), null );
+    var r1i = new scenery.DisplayInstance( stubDisplay, r1.getUniqueTrail() );
     var r1dd = r1.createDOMDrawable( scenery.Renderer.bitmaskDOM, r1i );
     var r1ds = r1.createSVGDrawable( scenery.Renderer.bitmaskSVG, r1i );
     var r1dc = r1.createCanvasDrawable( scenery.Renderer.bitmaskCanvas, r1i );
@@ -107,7 +107,7 @@
     
     
     var r1 = new scenery.Line( 0, 1, 2, 3, { fill: 'red', stroke: 'blue', lineWidth: 5 } );
-    var r1i = new scenery.DisplayInstance( stubDisplay, r1.getUniqueTrail(), null );
+    var r1i = new scenery.DisplayInstance( stubDisplay, r1.getUniqueTrail() );
     var r1ds = r1.createSVGDrawable( scenery.Renderer.bitmaskSVG, r1i );
     var r1dc = r1.createCanvasDrawable( scenery.Renderer.bitmaskCanvas, r1i );
     
@@ -148,7 +148,7 @@
     
     
     var r1 = new scenery.Path( kite.Shape.regularPolygon( 5, 10 ), { fill: 'red', stroke: 'blue', lineWidth: 5 } );
-    var r1i = new scenery.DisplayInstance( stubDisplay, r1.getUniqueTrail(), null );
+    var r1i = new scenery.DisplayInstance( stubDisplay, r1.getUniqueTrail() );
     var r1ds = r1.createSVGDrawable( scenery.Renderer.bitmaskSVG, r1i );
     var r1dc = r1.createCanvasDrawable( scenery.Renderer.bitmaskCanvas, r1i );
     
@@ -193,7 +193,7 @@
     
     
     var r1 = new scenery.Text( 'Wow!', { fill: 'red', stroke: 'blue', lineWidth: 5 } );
-    var r1i = new scenery.DisplayInstance( stubDisplay, r1.getUniqueTrail(), null );
+    var r1i = new scenery.DisplayInstance( stubDisplay, r1.getUniqueTrail() );
     var r1dd = r1.createDOMDrawable( scenery.Renderer.bitmaskDOM, r1i );
     var r1ds = r1.createSVGDrawable( scenery.Renderer.bitmaskSVG, r1i );
     var r1dc = r1.createCanvasDrawable( scenery.Renderer.bitmaskCanvas, r1i );
@@ -245,7 +245,7 @@
     
     // 1x1 black PNG
     var r1 = new scenery.Image( 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2NkYGD4DwABCQEBtxmN7wAAAABJRU5ErkJggg==' );
-    var r1i = new scenery.DisplayInstance( stubDisplay, r1.getUniqueTrail(), null );
+    var r1i = new scenery.DisplayInstance( stubDisplay, r1.getUniqueTrail() );
     var r1dd = r1.createDOMDrawable( scenery.Renderer.bitmaskDOM, r1i );
     var r1ds = r1.createSVGDrawable( scenery.Renderer.bitmaskSVG, r1i );
     var r1dc = r1.createCanvasDrawable( scenery.Renderer.bitmaskCanvas, r1i );
@@ -284,7 +284,7 @@
     var stubDisplay = { _frameId: 5 };
     
     var r1 = new scenery.DOM( document.createElement( 'canvas' ) );
-    var r1i = new scenery.DisplayInstance( stubDisplay, r1.getUniqueTrail(), null );
+    var r1i = new scenery.DisplayInstance( stubDisplay, r1.getUniqueTrail() );
     var r1dd = r1.createDOMDrawable( scenery.Renderer.bitmaskDOM, r1i );
     
     ok( r1._drawables.length === 1, 'After init, should have drawable refs' );

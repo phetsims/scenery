@@ -8,6 +8,9 @@
  * DisplayInstances generally form a true tree, as opposed to the DAG of nodes. The one exception is for shared Canvas caches,
  * where multiple instances can point to one globally-stored (shared) cache instance.
  *
+ * A DisplayInstance is pooled, but when constructed will not automatically create children, drawables, etc.
+ * syncTree() is responsible for synchronizing the instance itself and its entire subtree.
+ *
  **********************
  * Relative transform system description:
  *
@@ -83,14 +86,13 @@ define( function( require ) {
     b.previousDrawable = a;
   }
   
-  // NOTE: allows null state currently, used in unit tests for creating specific drawables OHTWO TODO: rethink this setup
-  scenery.DisplayInstance = function DisplayInstance( display, trail, state ) {
-    this.initialize( display, trail, state );
+  scenery.DisplayInstance = function DisplayInstance( display, trail ) {
+    this.initialize( display, trail );
   };
   var DisplayInstance = scenery.DisplayInstance;
   
   inherit( Object, DisplayInstance, {
-    initialize: function( display, trail, state ) {
+    initialize: function( display, trail ) {
       trail.setImmutable(); // prevent the trail passed in from being mutated after this point (we want a consistent trail)
       
       this.id = globalIdCounter++;
@@ -111,8 +113,9 @@ define( function( require ) {
       this.firstDrawable = null;
       this.lastDrawable = null;
       
-      // whether this instance creates a new "root" for the relative trail transforms
-      this.isTransformed = state ? state.isTransformed : false; // for now, allow null state for debugging
+      // references that will be filled in with syncTree
+      this.state = null;
+      this.isTransformed = false; // whether this instance creates a new "root" for the relative trail transforms
       
       // properties relevant to the "relative" transform to the closest transform root. Please see detailed docs at the top of the file!
       this.relativeMatrix = new Matrix3();             // the actual cached transform to the root
@@ -139,16 +142,11 @@ define( function( require ) {
       if ( this.isTransformed ) {
         display.markTransformRootDirty( this, true );
       }
-      
-      this.updateState( state );
     },
     
-    // updates the internal {RenderState}
-    updateState: function( state ) {
-      // for debugging purposes, bail out on null state (not normal)
-      if ( state === null ) {
-        return;
-      }
+    // updates the internal {RenderState}, and fully synchronizes the instance subtree
+    syncTree: function( state ) {
+      assert && assert( state instanceof scenery.RenderState );
       
       var oldState = this.state;
       assert && assert( !oldState || oldState.isInstanceCompatibleWith( state ),
@@ -203,7 +201,8 @@ define( function( require ) {
         for ( var i = 0; i < numChildren; i++ ) {
           // create a child instance
           var child = children[i];
-          var childInstance = DisplayInstance.createFromPool( this.display, this.trail.copy().addDescendant( child, i ), state.getStateForDescendant( child ) );
+          var childInstance = DisplayInstance.createFromPool( this.display, this.trail.copy().addDescendant( child, i ) );
+          childInstance.syncTree( state.getStateForDescendant( child ) );
           this.appendInstance( childInstance );
           
           // figure out what the first and last drawable should be hooked into for the child
@@ -244,7 +243,13 @@ define( function( require ) {
         if ( state.isBackbone ) {
           assert && assert( !state.isCanvasCache, 'For now, disallow an instance being a backbone and a canvas cache, since it has no performance benefits' );
           
-          this.groupDrawable = scenery.BackboneBlock.createFromPool( this, groupRenderer, false );
+          if ( !this.groupDrawable ) {
+            this.groupDrawable = scenery.BackboneBlock.createFromPool( this, groupRenderer, false );
+            
+            if ( this.isTransformed ) {
+              this.display.markTransformRootDirty( this, true );
+            }
+          }
         } else if ( state.isCanvasCache ) {
           this.groupDrawable = scenery.InlineCanvasCacheDrawable.createFromPool( groupRenderer, this );
         }
@@ -259,11 +264,20 @@ define( function( require ) {
         
         // TODO: increment reference counting?
         if ( !this.sharedCacheInstance ) {
-          this.sharedCacheInstance = DisplayInstance.createFromPool( this.display, new scenery.Trail( this.node ), scenery.RenderState.RegularState.createSharedCacheState( this.node ) );
+          this.sharedCacheInstance = DisplayInstance.createFromPool( this.display, new scenery.Trail( this.node ) );
+          this.sharedCacheInstance.syncTree( scenery.RenderState.RegularState.createSharedCacheState( this.node ) );
           this.display._sharedCanvasInstances[instanceKey] = this.sharedCacheInstance;
           // TODO: reference counting?
           
           // TODO: this.sharedCacheInstance.isTransformed?
+          
+          //OHTWO TODO: is this necessary?
+          this.display.markTransformRootDirty( this.sharedCacheInstance, true );
+        }
+        
+        //OHTWO TODO: is this necessary?
+        if ( this.isTransformed ) {
+          this.display.markTransformRootDirty( this, true );
         }
       }
     },
@@ -631,11 +645,11 @@ define( function( require ) {
   /* jshint -W064 */
   Poolable( DisplayInstance, {
     constructorDuplicateFactory: function( pool ) {
-      return function( display, trail, state ) {
+      return function( display, trail ) {
         if ( pool.length ) {
-          return pool.pop().initialize( display, trail, state );
+          return pool.pop().initialize( display, trail );
         } else {
-          return new DisplayInstance( display, trail, state );
+          return new DisplayInstance( display, trail );
         }
       };
     }

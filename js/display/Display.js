@@ -157,7 +157,8 @@ define( function( require ) {
       this._rootNode.validateWatchedBounds();
       
       // throw new Error( 'TODO: replace with actual stitching' );
-      this._baseInstance = scenery.DisplayInstance.createFromPool( this, new scenery.Trail( this._rootNode ), scenery.RenderState.RegularState.createRootState( this._rootNode ) );
+      this._baseInstance = scenery.DisplayInstance.createFromPool( this, new scenery.Trail( this._rootNode ) );
+      this._baseInstance.syncTree( scenery.RenderState.RegularState.createRootState( this._rootNode ) );
       this.markTransformRootDirty( this._baseInstance, false ); // marks the transform root as dirty (since it is)
       
       this._rootBackbone = new scenery.BackboneBlock( this._baseInstance, scenery.bitmaskSupportsDOM, true, this._domElement );
