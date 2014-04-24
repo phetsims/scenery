@@ -26,6 +26,10 @@ define( function( require ) {
       this.previousDrawable = null;
       this.nextDrawable = null;
       
+      // similar but pending handling, so that we can traverse both orders at the same time for stitching
+      this.pendingPreviousDrawable = null;
+      this.pendingNextDrawable = null;
+      
       this.renderer = renderer;
       
       this.dirty = true;
