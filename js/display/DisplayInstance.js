@@ -87,6 +87,8 @@ define( function( require ) {
   }
   
   scenery.DisplayInstance = function DisplayInstance( display, trail ) {
+    this.initializedOnce = false;
+    
     this.initialize( display, trail );
   };
   var DisplayInstance = scenery.DisplayInstance;
@@ -97,36 +99,17 @@ define( function( require ) {
       
       this.id = globalIdCounter++;
       
-      this.display = display;
-      this.trail = trail;
-      this.node = trail.lastNode();
-      this.parent = null; // will be set as needed
-      this.children = []; // Array[DisplayInstance] OHTWO TODO: reduce allocation (clear Array if already present)
-      this.childrenTracks = []; // TODO use this for tracking what children changes occurred, and thus where we need to stitch OHTWO TODO: reduce allocation (clear Array if already present)
-      this.sharedCacheInstance = null; // reference to a shared cache instance (if applicable, it's different than a child)
-      
-      this.selfDrawable = null;
-      this.groupDrawable = null; // e.g. backbone or non-shared cache
-      this.sharedCacheDrawable = null; // our drawable if we are a shared cache
-      
-      // references into the linked list of drawables (null if nothing is drawable under this)
-      this.firstDrawable = null;
-      this.lastDrawable = null;
-      
-      // references that will be filled in with syncTree
-      this.state = null;
-      this.isTransformed = false; // whether this instance creates a new "root" for the relative trail transforms
+      this.cleanInstance( display, trail, trail.lastNode() );
       
       // properties relevant to the "relative" transform to the closest transform root. Please see detailed docs at the top of the file!
-      this.relativeMatrix = new Matrix3();             // the actual cached transform to the root
+      this.relativeMatrix = this.relativeMatrix || new Matrix3();  // the actual cached transform to the root
       this.relativeSelfDirty = true;                   // whether our relativeMatrix is dirty
       this.relativeChildDirtyFrame = display._frameId; // Whether children have dirty transforms (if it is the current frame) NOTE: used only for pre-repaint traversal,
                                                        // and can be ignored if it has a value less than the current frame ID. This allows us to traverse and hit all listeners
                                                        // for this particular traversal, without leaving an invalid subtree (a boolean flag here is insufficient, since our
                                                        // traversal handling would validate our invariant of this.relativeChildDirtyFrame => parent.relativeChildDirtyFrame).
                                                        // In this case, they are both effectively "false" unless they are the current frame ID, in which case that invariant holds.
-      this.relativeTransformListeners = [];            // will be notified in pre-repaint phase that our relative transform has changed (but not computed by default)
-                                                       // OHTWO TODO: reduce allocation (clear Array if already present)
+      //this.relativeTransformListeners = [];          // will be notified in pre-repaint phase that our relative transform has changed (but not computed by default)
       this.relativeChildrenListenersCount = 0;         // how many children have (or have descendants with) relativeTransformListeners
       this.relativePrecomputeCount = 0;                // if >0, indicates this should be precomputed in the pre-repaint phase
       this.relativeChildrenPrecomputeCount = 0;        // how many children have (or have descendants with) >0 relativePrecomputeCount
@@ -142,6 +125,34 @@ define( function( require ) {
       if ( this.isTransformed ) {
         display.markTransformRootDirty( this, true );
       }
+      
+      this.initializedOnce = true;
+    },
+    
+    // called for initialization of properties (via initialize(), via constructor), or to clean the instance for placement in the pool (don't leak memory)
+    cleanInstance: function( display, trail, node ) {
+      this.display = display;
+      this.trail = trail;
+      this.node = node;
+      this.parent = null; // will be set as needed
+      this.children = this.children ? ( this.children.length = 0, this.children ) : []; // Array[DisplayInstance]
+      this.sharedCacheInstance = null; // reference to a shared cache instance (if applicable, it's different than a child)
+      
+      this.selfDrawable = null;
+      this.groupDrawable = null; // e.g. backbone or non-shared cache
+      this.sharedCacheDrawable = null; // our drawable if we are a shared cache
+      
+      // references into the linked list of drawables (null if nothing is drawable under this)
+      this.firstDrawable = null;
+      this.lastDrawable = null;
+      
+      // references that will be filled in with syncTree
+      this.state = null;
+      this.isTransformed = false; // whether this instance creates a new "root" for the relative trail transforms
+      
+      // will be notified in pre-repaint phase that our relative transform has changed (but not computed by default)
+      // NOTE: it's part of the relative transform feature, see above for documentation
+      this.relativeTransformListeners = this.relativeTransformListeners ? ( this.relativeTransformListeners.length = 0, this.relativeTransformListeners ) : [];
     },
     
     // updates the internal {RenderState}, and fully synchronizes the instance subtree
@@ -149,6 +160,7 @@ define( function( require ) {
      * Create new instances for added children
      * Remove instances for removed children
      * Rearrange instances for moved children
+     * *** Handle compatibility state check with children, rebuild them if necessary
      * Mark unused instances/drawables on the Display for recycling after completing update?
      * Pruning:
      *   - If children haven't changed, skip instance add/move/remove
@@ -573,6 +585,9 @@ define( function( require ) {
     // clean up listeners and garbage, so that we can be recycled (or pooled)
     dispose: function() {
       this.node.offStatic( 'transform', this.nodeTransformListener );
+      
+      // clean our variables out to release memory
+      this.cleanInstance( null, null, null );
     },
     
     audit: function( frameId ) {
