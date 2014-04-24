@@ -145,6 +145,29 @@ define( function( require ) {
     },
     
     // updates the internal {RenderState}, and fully synchronizes the instance subtree
+    /*OHTWO TODO:
+     * Create new instances for added children
+     * Remove instances for removed children
+     * Rearrange instances for moved children
+     * Mark unused instances/drawables on the Display for recycling after completing update?
+     * Pruning:
+     *   - If children haven't changed, skip instance add/move/remove
+     *   - If RenderState hasn't changed AND there are no render/instance/stitch changes below us, EXIT (whenever we are assured children don't need sync)
+     * Return linked-list of alternating changed (add/remove) and keep sections of drawables, for processing with backbones/canvas caches
+     *
+     * Other notes:
+     *
+     *    Traversal hits every child if parent render state changed. Otherwise, only hits children who have (or has descendants who have) potential render state changes. If we haven't hit a "change" yet from ancestors, don't re-evaluate any render states (UNLESS renderer summary changed!)
+     *      Need recursive flag for "render state needs reevaluation" / "child render state needs reevaluation
+     *        Don't flag changes when they won't actually change the "current" render state!!!
+     *        Changes in renderer summary (subtree combined) can cause changes in the render state
+     *    OK for traversal to return "no change", doesn't specify any drawables changes
+     *
+     *    Recursive sectional classification notes:
+     *        Keep (no change inside, from A to B inclusive)
+     *        Splice (remove A+1 to B-1 inclusive, insert C to D inbetween A and B)
+     *        - If A or B would be null, have a flag indicating A=E-1 or B=F+1, and store E/F
+     */
     syncTree: function( state ) {
       assert && assert( state instanceof scenery.RenderState );
       
