@@ -130,6 +130,16 @@ define( function( require ) {
         // isShared. No direct descendant is shared, since we create those specially with a new state from createSharedCacheState
         false
       );
+    },
+    
+    /*
+     * Whether we can just update the state on a DisplayInstance when changing from this state => otherState.
+     * This is generally not possible if there is a change in whether the instance should be a transform root (e.g. backbone/single-cache),
+     * so we will have to recreate the instance and its subtree if that is the case.
+     */
+    isInstanceCompatibleWith: function( otherState ) {
+      return this.isTransformed === otherState.isTransformed &&
+             ( this.isCanvasCache && this.isCacheShared ) === ( otherState.isCanvasCache && otherState.isCacheShared );
     }
   };
   

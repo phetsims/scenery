@@ -65,6 +65,16 @@ define( function( require ) {
       // should generally be overridden by drawable subtypes to implement the update
     },
     
+    onAttach: function( node ) {
+      
+    },
+    
+    onDetach: function( node ) {
+      //OHTWO TODO: are we missing the disposal?
+      // put us back in the pool
+      this.freeToPool();
+    },
+    
     dispose: function() {
       // super call
       SelfDrawable.prototype.dispose.call( this );

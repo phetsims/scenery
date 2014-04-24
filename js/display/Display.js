@@ -54,122 +54,6 @@ define( function( require ) {
   };
   var Display = scenery.Display;
   
-  // display instance linked list ops
-  function connectDrawables( a, b ) {
-    a.nextDrawable = b;
-    b.previousDrawable = a;
-  }
-  
-  function createInstance( display, trail, state, parentInstance ) {
-    var instance = new scenery.DisplayInstance( display, trail, state );
-    
-    var node = trail.lastNode();
-    // instance.parent = parentInstance; // NOTE: done later during the append!
-    instance.isTransformed = state.isTransformed;
-    if ( instance.isTransformed ) {
-      display.markTransformRootDirty( instance, true );
-    }
-    
-    if ( state.isCanvasCache && state.isCacheShared ) {
-      var instanceKey = trail.lastNode().getId();
-      var sharedInstance = display._sharedCanvasInstances[instanceKey];
-      
-      // TODO: assert state is the same?
-      // TODO: increment reference counting?
-      if ( !sharedInstance ) {
-        var sharedNode = trail.lastNode();
-        sharedInstance = createInstance( display, new scenery.Trail( sharedNode ), scenery.RenderState.RegularState.createSharedCacheState( sharedNode ), null );
-        display._sharedCanvasInstances[instanceKey] = sharedInstance;
-        // TODO: reference counting?
-        
-        // TODO: sharedInstance.isTransformed?
-      }
-      
-      // TODO: do something with the sharedInstance!
-      var sharedCacheRenderer = state.sharedCacheRenderer;
-      // TODO: improve this!
-      instance.sharedCacheDrawable = new scenery.SharedCanvasCacheDrawable( trail, sharedCacheRenderer, instance, sharedInstance );
-    } else {
-      var currentDrawable = null;
-      
-      if ( node.isPainted() ) {
-        var Renderer = scenery.Renderer;
-        
-        var selfRenderer = state.selfRenderer;
-        var selfRendererType = selfRenderer & Renderer.bitmaskRendererArea;
-        if ( selfRendererType === Renderer.bitmaskCanvas ) {
-          instance.selfDrawable = new scenery.CanvasSelfDrawable( selfRenderer, instance );
-        } else if ( selfRendererType === Renderer.bitmaskSVG ) {
-          instance.selfDrawable = new scenery.SVGSelfDrawable( selfRenderer, instance );
-        } else if ( selfRendererType === Renderer.bitmaskDOM ) {
-          instance.selfDrawable = new scenery.DOMSelfDrawable( selfRenderer, instance );
-        } else {
-          // assert so that it doesn't compile down to a throw (we want this function to be optimized)
-          assert && assert( 'Unrecognized renderer, maybe we don\'t support WebGL yet?: ' + selfRenderer );
-        }
-        instance.firstDrawable = currentDrawable = instance.selfDrawable;
-      }
-      
-      var children = trail.lastNode().children;
-      var numChildren = children.length;
-      for ( var i = 0; i < numChildren; i++ ) {
-        // create a child instance
-        var child = children[i];
-        var childInstance = createInstance( display, trail.copy().addDescendant( child, i ), state.getStateForDescendant( child ), instance );
-        instance.appendInstance( childInstance );
-        
-        // figure out what the first and last drawable should be hooked into for the child
-        var firstChildDrawable = null;
-        var lastChildDrawable = null;
-        if ( childInstance.groupDrawable ) {
-          // if there is a group (e.g. non-shared cache or backbone), use it
-          firstChildDrawable = lastChildDrawable = childInstance.groupDrawable;
-        } else if ( childInstance.sharedCacheDrawable ) {
-          // if there is a shared cache drawable, use it
-          firstChildDrawable = lastChildDrawable = childInstance.sharedCacheDrawable;
-        } else if ( childInstance.firstDrawable ) {
-          // otherwise, if they exist, pick the node's first/last directly
-          assert && assert( childInstance.lastDrawable, 'Any display instance with firstDrawable should also have lastDrawable' );
-          firstChildDrawable = childInstance.firstDrawable;
-          lastChildDrawable = childInstance.lastDrawable;
-        }
-        
-        // if there are any drawables for that child, link them up in our linked list
-        if ( firstChildDrawable ) {
-          if ( currentDrawable ) {
-            // there is already an end of the linked list, so just append to it
-            connectDrawables( currentDrawable, firstChildDrawable );
-          } else {
-            // start out the linked list
-            instance.firstDrawable = firstChildDrawable;
-          }
-          // update the last drawable of the linked list
-          currentDrawable = lastChildDrawable;
-        }
-      }
-      if ( currentDrawable !== null ) {
-        // finish setting up references to the linked list (now firstDrawable and lastDrawable should be set properly)
-        instance.lastDrawable = currentDrawable;
-      }
-      
-      var groupRenderer = state.groupRenderer;
-      if ( state.isBackbone ) {
-        assert && assert( !state.isCanvasCache, 'For now, disallow an instance being a backbone and a canvas cache, since it has no performance benefits' );
-        
-        var backbone = new scenery.BackboneBlock( instance, groupRenderer, false, null );
-        instance.block = backbone;
-        instance.groupDrawable = backbone.blockDrawable;
-      } else if ( state.isCanvasCache ) {
-        
-        // TODO: create block for cache
-        // TODO create non-shared cache, use groupRenderer
-        instance.groupDrawable = new scenery.InlineCanvasCacheDrawable( trail, groupRenderer, instance );
-      }
-    }
-    
-    return instance;
-  }
-  
   inherit( Object, Display, {
     // returns the base DOM element that will be displayed by this Display
     getDOMElement: function() {
@@ -242,7 +126,10 @@ define( function( require ) {
     },
     set height( value ) { this.setHeight( value ); },
     
-    // called from DisplayInstances that will need a transform update (for listeners and precomputation)
+    /*
+     * Called from DisplayInstances that will need a transform update (for listeners and precomputation).
+     * @param passTransform {Boolean} - Whether we should pass the first transform root when validating transforms (should be true if the instance is transformed)
+     */
     markTransformRootDirty: function( displayInstance, passTransform ) {
       passTransform ? this._dirtyTransformRoots.push( displayInstance ) : this._dirtyTransformRootsWithoutPass.push( displayInstance );
     },
@@ -270,7 +157,7 @@ define( function( require ) {
       this._rootNode.validateWatchedBounds();
       
       // throw new Error( 'TODO: replace with actual stitching' );
-      this._baseInstance = createInstance( this, new scenery.Trail( this._rootNode ), scenery.RenderState.RegularState.createRootState( this._rootNode ), null );
+      this._baseInstance = scenery.DisplayInstance.createFromPool( this, new scenery.Trail( this._rootNode ), scenery.RenderState.RegularState.createRootState( this._rootNode ) );
       this.markTransformRootDirty( this._baseInstance, false ); // marks the transform root as dirty (since it is)
       
       this._rootBackbone = new scenery.BackboneBlock( this._baseInstance, scenery.bitmaskSupportsDOM, true, this._domElement );

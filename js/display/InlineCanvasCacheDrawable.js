@@ -13,7 +13,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
   
-  scenery.InlineCanvasCacheDrawable = function InlineCanvasCacheDrawable( trail, renderer, instance ) {
+  scenery.InlineCanvasCacheDrawable = function InlineCanvasCacheDrawable( renderer, instance ) {
     Drawable.call( this, renderer );
     
     // TODO: NOTE: may have to separate into separate drawables for separate group renderers

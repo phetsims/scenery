@@ -71,61 +71,203 @@ define( function( require ) {
   'use strict';
   
   var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var Matrix3 = require( 'DOT/Matrix3' );
+  var scenery = require( 'SCENERY/scenery' );
   
   var globalIdCounter = 1;
   
-  // TODO: handle allocations
+  // display instance linked list ops
+  function connectDrawables( a, b ) {
+    a.nextDrawable = b;
+    b.previousDrawable = a;
+  }
+  
+  // NOTE: allows null state currently, used in unit tests for creating specific drawables OHTWO TODO: rethink this setup
   scenery.DisplayInstance = function DisplayInstance( display, trail, state ) {
-    trail.setImmutable(); // prevent the trail passed in from being mutated after this point (we want a consistent trail)
-    
-    this.id = globalIdCounter++;
-    
-    this.display = display;
-    this.trail = trail;
-    this.node = trail.lastNode();
-    this.parent = null; // will be set as needed
-    this.children = []; // Array[DisplayInstance]
-    this.childrenTracks = []; // TODO use this for tracking what children changes occurred, and thus where we need to stitch
-    
-    this.state = state;
-    this.block = null; // filled in with a block if applicable (backbone at least, probably canvas multicache for sure also)
-    
-    this.selfDrawable = null;
-    this.groupDrawable = null; // e.g. backbone or non-shared cache
-    this.sharedCacheDrawable = null;
-    
-    // references into the linked list of drawables (null if nothing is drawable under this)
-    this.firstDrawable = null;
-    this.lastDrawable = null;
-    
-    // properties relevant to the "relative" transform to the closest transform root. Please see detailed docs at the top of the file!
-    this.isTransformed = false;                      // whether this instance creates a new "root" for the relative trail transforms
-    this.relativeMatrix = new Matrix3();             // the actual cached transform to the root
-    this.relativeSelfDirty = true;                   // whether our relativeMatrix is dirty
-    this.relativeChildDirtyFrame = display._frameId; // Whether children have dirty transforms (if it is the current frame) NOTE: used only for pre-repaint traversal,
-                                                     // and can be ignored if it has a value less than the current frame ID. This allows us to traverse and hit all listeners
-                                                     // for this particular traversal, without leaving an invalid subtree (a boolean flag here is insufficient, since our
-                                                     // traversal handling would validate our invariant of this.relativeChildDirtyFrame => parent.relativeChildDirtyFrame).
-                                                     // In this case, they are both effectively "false" unless they are the current frame ID, in which case that invariant holds.
-    this.relativeTransformListeners = [];            // will be notified in pre-repaint phase that our relative transform has changed (but not computed by default)
-    this.relativeChildrenListenersCount = 0;         // how many children have (or have descendants with) relativeTransformListeners
-    this.relativePrecomputeCount = 0;                // if >0, indicates this should be precomputed in the pre-repaint phase
-    this.relativeChildrenPrecomputeCount = 0;        // how many children have (or have descendants with) >0 relativePrecomputeCount
-    this.relativeFrameId = -1;                       // used to mark what frame the transform was updated in (to accelerate non-precomputed relative transform access)
-    
-    // properties relevant to the node's direct transform
-    this.transformDirty = true;               // whether the node's transform has changed (until the pre-repaint phase)
-    // throw new Error( 'figure out transform listeners and flags here - immediate wanted? - error everywhere it was used' );
-    // this.transformListeners = [];
-    
-    this.nodeTransformListener = this.markTransformDirty.bind( this );
-    this.node.onStatic( 'transform', this.nodeTransformListener );
+    this.initialize( display, trail, state );
   };
   var DisplayInstance = scenery.DisplayInstance;
   
   inherit( Object, DisplayInstance, {
+    initialize: function( display, trail, state ) {
+      trail.setImmutable(); // prevent the trail passed in from being mutated after this point (we want a consistent trail)
+      
+      this.id = globalIdCounter++;
+      
+      this.display = display;
+      this.trail = trail;
+      this.node = trail.lastNode();
+      this.parent = null; // will be set as needed
+      this.children = []; // Array[DisplayInstance] OHTWO TODO: reduce allocation (clear Array if already present)
+      this.childrenTracks = []; // TODO use this for tracking what children changes occurred, and thus where we need to stitch OHTWO TODO: reduce allocation (clear Array if already present)
+      this.sharedCacheInstance = null; // reference to a shared cache instance (if applicable, it's different than a child)
+      
+      this.selfDrawable = null;
+      this.groupDrawable = null; // e.g. backbone or non-shared cache
+      this.sharedCacheDrawable = null; // our drawable if we are a shared cache
+      
+      // references into the linked list of drawables (null if nothing is drawable under this)
+      this.firstDrawable = null;
+      this.lastDrawable = null;
+      
+      // whether this instance creates a new "root" for the relative trail transforms
+      this.isTransformed = state ? state.isTransformed : false; // for now, allow null state for debugging
+      
+      // properties relevant to the "relative" transform to the closest transform root. Please see detailed docs at the top of the file!
+      this.relativeMatrix = new Matrix3();             // the actual cached transform to the root
+      this.relativeSelfDirty = true;                   // whether our relativeMatrix is dirty
+      this.relativeChildDirtyFrame = display._frameId; // Whether children have dirty transforms (if it is the current frame) NOTE: used only for pre-repaint traversal,
+                                                       // and can be ignored if it has a value less than the current frame ID. This allows us to traverse and hit all listeners
+                                                       // for this particular traversal, without leaving an invalid subtree (a boolean flag here is insufficient, since our
+                                                       // traversal handling would validate our invariant of this.relativeChildDirtyFrame => parent.relativeChildDirtyFrame).
+                                                       // In this case, they are both effectively "false" unless they are the current frame ID, in which case that invariant holds.
+      this.relativeTransformListeners = [];            // will be notified in pre-repaint phase that our relative transform has changed (but not computed by default)
+                                                       // OHTWO TODO: reduce allocation (clear Array if already present)
+      this.relativeChildrenListenersCount = 0;         // how many children have (or have descendants with) relativeTransformListeners
+      this.relativePrecomputeCount = 0;                // if >0, indicates this should be precomputed in the pre-repaint phase
+      this.relativeChildrenPrecomputeCount = 0;        // how many children have (or have descendants with) >0 relativePrecomputeCount
+      this.relativeFrameId = -1;                       // used to mark what frame the transform was updated in (to accelerate non-precomputed relative transform access)
+      
+      // properties relevant to the node's direct transform
+      this.transformDirty = true; // whether the node's transform has changed (until the pre-repaint phase)
+      
+      this.nodeTransformListener = this.markTransformDirty.bind( this );
+      this.node.onStatic( 'transform', this.nodeTransformListener );
+      
+      // If we are a transform root, notify the display that we are dirty. We'll be validated when it's at that phase at the next updateDisplay().
+      if ( this.isTransformed ) {
+        display.markTransformRootDirty( this, true );
+      }
+      
+      this.updateState( state );
+    },
+    
+    // updates the internal {RenderState}
+    updateState: function( state ) {
+      // for debugging purposes, bail out on null state (not normal)
+      if ( state === null ) {
+        return;
+      }
+      
+      var oldState = this.state;
+      assert && assert( !oldState || oldState.isInstanceCompatibleWith( state ),
+                        'Attempt to update to a render state that is not compatible with this instance\'s current state' );
+      assert && assert( !oldState || oldState.isTransformed === state.isTransformed ); // no need to overwrite, should always be the same
+      
+      this.state = state;
+      
+      if ( state.isCanvasCache && state.isCacheShared ) {
+        this.ensureSharedCacheInitialized();
+        
+        //OHTWO TODO: actually create the proper shared cache drawable depending on the specified renderer (update it if necessary)
+        var sharedCacheRenderer = this.state.sharedCacheRenderer;
+        this.sharedCacheDrawable = new scenery.SharedCanvasCacheDrawable( this.trail, sharedCacheRenderer, this, this.sharedCacheInstance );
+      } else {
+        // not a shared cache
+        
+        var currentDrawable = null;
+        
+        if ( this.node.isPainted() ) {
+          var Renderer = scenery.Renderer;
+          
+          var selfRenderer = state.selfRenderer; // our new self renderer bitmask
+          
+          // bitwise trick, since only one of Canvas/SVG/DOM/WebGL/etc. flags will be chosen, and bitmaskRendererArea is the mask for those flags
+          // In English, "Is the current selfDrawable compatible with our selfRenderer (if any), or do we need to create a selfDrawable?"
+          if ( !this.selfDrawable || ( ( this.selfDrawable.renderer & selfRenderer & Renderer.bitmaskRendererArea ) !== 0 ) ) {
+            if ( this.selfDrawable ) {
+              //OHTWO TODO: scrap the previous selfDrawable, we need to create one with a different renderer.
+            }
+            
+            if ( Renderer.isCanvas( selfRenderer ) ) {
+              this.selfDrawable = this.node.createCanvasDrawable( selfRenderer, this );
+            } else if ( Renderer.isSVG( selfRenderer ) ) {
+              this.selfDrawable = this.node.createSVGDrawable( selfRenderer, this );
+            } else if ( Renderer.isDOM( selfRenderer ) ) {
+              this.selfDrawable = this.node.createDOMDrawable( selfRenderer, this );
+            } else {
+              // assert so that it doesn't compile down to a throw (we want this function to be optimized)
+              assert && assert( 'Unrecognized renderer, maybe we don\'t support WebGL yet?: ' + selfRenderer );
+            }
+          }
+          
+          this.firstDrawable = currentDrawable = this.selfDrawable;
+        }
+        
+        /*---------------------------------------------------------------------------*
+        * //OHTWO TODO: children sync, not create
+        *----------------------------------------------------------------------------*/
+        var children = this.node.children;
+        var numChildren = children.length;
+        for ( var i = 0; i < numChildren; i++ ) {
+          // create a child instance
+          var child = children[i];
+          var childInstance = DisplayInstance.createFromPool( this.display, this.trail.copy().addDescendant( child, i ), state.getStateForDescendant( child ) );
+          this.appendInstance( childInstance );
+          
+          // figure out what the first and last drawable should be hooked into for the child
+          var firstChildDrawable = null;
+          var lastChildDrawable = null;
+          if ( childInstance.groupDrawable ) {
+            // if there is a group (e.g. non-shared cache or backbone), use it
+            firstChildDrawable = lastChildDrawable = childInstance.groupDrawable;
+          } else if ( childInstance.sharedCacheDrawable ) {
+            // if there is a shared cache drawable, use it
+            firstChildDrawable = lastChildDrawable = childInstance.sharedCacheDrawable;
+          } else if ( childInstance.firstDrawable ) {
+            // otherwise, if they exist, pick the node's first/last directly
+            assert && assert( childInstance.lastDrawable, 'Any display instance with firstDrawable should also have lastDrawable' );
+            firstChildDrawable = childInstance.firstDrawable;
+            lastChildDrawable = childInstance.lastDrawable;
+          }
+          
+          // if there are any drawables for that child, link them up in our linked list
+          if ( firstChildDrawable ) {
+            if ( currentDrawable ) {
+              // there is already an end of the linked list, so just append to it
+              connectDrawables( currentDrawable, firstChildDrawable );
+            } else {
+              // start out the linked list
+              this.firstDrawable = firstChildDrawable;
+            }
+            // update the last drawable of the linked list
+            currentDrawable = lastChildDrawable;
+          }
+        }
+        if ( currentDrawable !== null ) {
+          // finish setting up references to the linked list (now firstDrawable and lastDrawable should be set properly)
+          this.lastDrawable = currentDrawable;
+        }
+        
+        var groupRenderer = state.groupRenderer;
+        if ( state.isBackbone ) {
+          assert && assert( !state.isCanvasCache, 'For now, disallow an instance being a backbone and a canvas cache, since it has no performance benefits' );
+          
+          this.groupDrawable = scenery.BackboneBlock.createFromPool( this, groupRenderer, false );
+        } else if ( state.isCanvasCache ) {
+          this.groupDrawable = scenery.InlineCanvasCacheDrawable.createFromPool( groupRenderer, this );
+        }
+      }
+    },
+    
+    ensureSharedCacheInitialized: function() {
+      // we only need to initialize this shared cache reference once
+      if ( !this.sharedCacheInstance ) {
+        var instanceKey = this.node.getId();
+        this.sharedCacheInstance = this.display._sharedCanvasInstances[instanceKey]; // TODO: have this abstracted away in the Display?
+        
+        // TODO: increment reference counting?
+        if ( !this.sharedCacheInstance ) {
+          this.sharedCacheInstance = DisplayInstance.createFromPool( this.display, new scenery.Trail( this.node ), scenery.RenderState.RegularState.createSharedCacheState( this.node ) );
+          this.display._sharedCanvasInstances[instanceKey] = this.sharedCacheInstance;
+          // TODO: reference counting?
+          
+          // TODO: this.sharedCacheInstance.isTransformed?
+        }
+      }
+    },
+    
     appendInstance: function( instance ) {
       this.children.push( instance );
       instance.parent = this;
@@ -482,6 +624,20 @@ define( function( require ) {
           assertSlow( matrix.equals( this.relativeMatrix ), 'If there is no relativeSelfDirty flag set here or in our ancestors, our relativeMatrix should be up-to-date' );
         }
       }
+    }
+  } );
+  
+  // object pooling
+  /* jshint -W064 */
+  Poolable( DisplayInstance, {
+    constructorDuplicateFactory: function( pool ) {
+      return function( display, trail, state ) {
+        if ( pool.length ) {
+          return pool.pop().initialize( display, trail, state );
+        } else {
+          return new DisplayInstance( display, trail, state );
+        }
+      };
     }
   } );
   

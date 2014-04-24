@@ -55,10 +55,6 @@ define( function( require ) {
         return this; // allow for chaining
       },
       
-      onAttach: function( node ) {
-        
-      },
-      
       // general flag set on the state, which we forward directly to the drawable's paint flag
       markPaintDirty: function() {
         this.markDirty();
@@ -66,8 +62,13 @@ define( function( require ) {
       
       paintCanvas: paintCanvas,
       
+      onAttach: function( node ) {
+        
+      },
+      
       // release the drawable
       onDetach: function( node ) {
+        //OHTWO TODO: are we missing the disposal?
         // put us back in the pool
         this.freeToPool();
       }

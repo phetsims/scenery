@@ -152,6 +152,7 @@ define( function( require ) {
       
       // release the SVG elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
       onDetach: function( node ) {
+        //OHTWO TODO: are we missing the disposal?
         if ( !keepElements ) {
           // clear the references
           this.svgElement = null;
