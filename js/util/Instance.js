@@ -9,6 +9,8 @@
 define( function( require ) {
   "use strict";
   
+  var cleanArray = require( 'PHET_CORE/cleanArray' );
+  
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/AccessibilityPeer' );
   require( 'SCENERY/util/LiveRegion' );
@@ -133,7 +135,7 @@ define( function( require ) {
         this.updateLayer();
       }
       this.parent = null;
-      this.children.length = 0;
+      cleanArray( this.children );
       this.getNode().removeInstance( this );
       
       if ( accessibility ) {
@@ -195,7 +197,7 @@ define( function( require ) {
         peer.dispose();
       }
       
-      this.peers.length = 0; // clear this.peers
+      cleanArray( this.peers ); // clear this.peers
     },
 
     addLiveRegions: function() {
@@ -220,7 +222,7 @@ define( function( require ) {
         liveRegion.dispose();
       } );
       
-      this.peers.length = 0; // clear this.peers
+      cleanArray( this.peers ); // clear this.peers
     },
     
     /*---------------------------------------------------------------------------*

@@ -22,6 +22,7 @@
 define( function( require ) {
   'use strict';
   
+  var cleanArray = require( 'PHET_CORE/cleanArray' );
   var scenery = require( 'SCENERY/scenery' );
   
   require( 'SCENERY/util/Trail' );
@@ -716,7 +717,7 @@ define( function( require ) {
         for ( var i = 0; i < len; i++ ) {
           this.batchedCallbacks[i]();
         }
-        this.batchedCallbacks.length = 0;
+        cleanArray( this.batchedCallbacks );
       }
     }
   };

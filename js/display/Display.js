@@ -137,17 +137,12 @@ define( function( require ) {
     updateDirtyTransformRoots: function() {
       var len,i;
       
-      len = this._dirtyTransformRoots.length;
-      for ( i = 0; i < len; i++ ) {
-        this._dirtyTransformRoots[i].updateTransformListenersAndCompute( false, false, this._frameId, true );
+      while ( this._dirtyTransformRoots.length ) {
+        this._dirtyTransformRoots.pop().updateTransformListenersAndCompute( false, false, this._frameId, true );
       }
-      this._dirtyTransformRoots.length = 0;
-      
-      len = this._dirtyTransformRootsWithoutPass.length;
-      for ( i = 0; i < len; i++ ) {
-        this._dirtyTransformRootsWithoutPass[i].updateTransformListenersAndCompute( false, false, this._frameId, false );
+      while ( this._dirtyTransformRootsWithoutPass.length ) {
+        this._dirtyTransformRootsWithoutPass.pop().updateTransformListenersAndCompute( false, false, this._frameId, false );
       }
-      this._dirtyTransformRootsWithoutPass.length = 0;
     },
     
     // NOTE: to be replaced with a full stitching/update version

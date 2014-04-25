@@ -12,6 +12,7 @@ define( function( require ) {
   'use strict';
   
   var inherit = require( 'PHET_CORE/inherit' );
+  var cleanArray = require( 'PHET_CORE/cleanArray' );
   
   var Bounds2 = require( 'DOT/Bounds2' );
   var Vector2 = require( 'DOT/Vector2' );
@@ -448,7 +449,7 @@ define( function( require ) {
       
       // clean up state that was set leading up to the stitching, and do it early so
       // if we do things later that cause side-effects we won't clear intervals that haven't been stitched
-      this.layerChangeIntervals.length = 0;
+      cleanArray( this.layerChangeIntervals );
       
       sceneryLayerLog && sceneryLayerLog( '------ finished intervals in stitching' );
       
@@ -556,7 +557,7 @@ define( function( require ) {
           instance.changeLayer( currentLayer );
           stitchData.affectedInstances.push( instance );
         }
-        instancesToAddToLayer.length = 0;
+        cleanArray( instancesToAddToLayer );
       }
       
       function addAndCreateLayer( startBoundary, endBoundary ) {
