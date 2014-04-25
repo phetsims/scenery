@@ -141,13 +141,12 @@ define( function( require ) {
     this._subtreePaintDirty = false; // whether the subtree paint is dirty (this node and its children, usually after a transform)
     this._childPaintDirty = false;   // whether the child paint is dirty (excluding self paint, just used for finding _paintDirty, _selfPaintDirty)
     
-    // what type of renderer should be forced for this node.
-    this._renderer = null;
     //OHTWO deprecated (at least rendererOptions if not rendererLayerType)
     this._rendererLayerType = null; // cached layer type that is used by the LayerStrategy
     
     // where rendering-specific settings are stored
     this._hints = {
+      renderer: null,       // what type of renderer should be forced for this node.
       layerSplit: false,    // whether layers should be split before and after this node
       cssTransform: false,  // whether this node and its subtree should handle transforms by using a CSS transform of a div
       fullResolution: false // when rendered as Canvas, whether we should use full (device) resolution on retina-like devices
@@ -1490,7 +1489,7 @@ define( function( require ) {
     
     //OHTWO @deprecated
     updateLayerType: function() {
-      if ( this._renderer && ( this._hints.cssTransform || this._hints.fullResolution ) ) {
+      if ( this._hints.renderer && ( this._hints.cssTransform || this._hints.fullResolution ) ) {
         // TODO: factor this check out! Make RendererOptions its own class?
         // TODO: FIXME: support undoing this!
         // ensure that if we are passing a CSS transform, we pass this node as the baseNode
@@ -1500,7 +1499,7 @@ define( function( require ) {
           delete this._hints.baseNode; // don't override, let the scene pass in the scene
         }
         // if we set renderer and rendererOptions, only then do we want to trigger a specific layer type
-        this._rendererLayerType = this._renderer.createLayerType( this._hints );
+        this._rendererLayerType = this._hints.renderer.createLayerType( this._hints );
       } else {
         this._rendererLayerType = null; // nothing signaled, since we want to support multiple layer types (including if we specify a renderer)
       }
@@ -1573,9 +1572,9 @@ define( function( require ) {
       } else {
         throw new Error( 'unrecognized type of renderer: ' + renderer );
       }
-      if ( newRenderer !== this._renderer ) {
+      if ( newRenderer !== this._hints.renderer ) {
         assert && assert( !this.isPainted() || !newRenderer || this.supportsRenderer( newRenderer ), 'renderer ' + newRenderer + ' not supported by ' + this.constructor.name );
-        this._renderer = newRenderer;
+        this._hints.renderer = newRenderer;
         
         this.updateLayerType();
         this.markLayerRefreshNeeded();
@@ -1583,11 +1582,11 @@ define( function( require ) {
     },
     
     getRenderer: function() {
-      return this._renderer;
+      return this._hints.renderer;
     },
     
     hasRenderer: function() {
-      return !!this._renderer;
+      return !!this._hints.renderer;
     },
     
     setRendererOptions: function( options ) {

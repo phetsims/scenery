@@ -1429,10 +1429,10 @@ define( function( require ) {
           if ( node._inputListeners.length ) {
             addQualifier( 'inputListeners' );
           }
-          if ( node._renderer ) {
-            addQualifier( 'renderer:' + node._renderer.name );
+          if ( node.getRenderer() ) {
+            addQualifier( 'renderer:' + node.getRenderer().name );
           }
-          if ( node._hints.layerSplit ) {
+          if ( node.isLayerSplit() ) {
             addQualifier( 'layerSplit' );
           }
           if ( node._opacity < 1 ) {
