@@ -324,13 +324,29 @@ define( function( require ) {
     },
     
     appendInstance: function( instance ) {
-      this.children.push( instance );
-      instance.parent = this;
-      if ( this.children.length >= 2 ) {
-        var previousInstance = this.children[this.children.length-2];
-        instance.previousSibling = previousInstance;
+      this.insertInstance( instance, this.children.length );
+    },
+    
+    // NOTE: different parameter order compared to Node
+    insertInstance: function( instance, index ) {
+      assert && assert( instance instanceof DisplayInstance );
+      assert && assert( index >= 0 && index <= this.children.length,
+                        'Instance insertion bounds check for index ' + index + ' with previous children length ' + this.children.length );
+      
+      // maintain the linked-list handling for sibling instances
+      var previousInstance = ( index - 1 >= 0 ) ? this.children[index-1] : null;
+      var nextInstance = ( index < this.children.length ) ? this.children[index] : null;
+      if ( previousInstance ) {
         previousInstance.nextSibling = instance;
+        instance.previousSibling = previousInstance;
       }
+      if ( nextInstance ) {
+        nextInstance.previousSibling = instance;
+        instance.nextSibling = nextInstance;
+      }
+      
+      this.children.splice( index, 0, instance );
+      instance.parent = this;
       
       if ( !instance.isTransformed ) {
         if ( instance.hasRelativeTransformListenerNeed() ) {
@@ -346,7 +362,13 @@ define( function( require ) {
     },
     
     removeInstance: function( instance ) {
-      var index = _.indexOf( this.children, instance );
+      return this.removeInstanceAt( instance, _.indexOf( this.children, instance ) );
+    },
+    
+    removeInstanceAt: function( instance, index ) {
+      assert && assert( instance instanceof DisplayInstance );
+      assert && assert( index >= 0 && index < this.children.length,
+                        'Instance removal bounds check for index ' + index + ' with previous children length ' + this.children.length );
       
       // maintain the linked-list handling for sibling instances
       var previousInstance = ( index - 1 >= 0 ) ? this.children[index-1] : null;
