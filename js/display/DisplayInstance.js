@@ -139,6 +139,10 @@ define( function( require ) {
       this.children = cleanArray( this.children ); // Array[DisplayInstance]
       this.sharedCacheInstance = null; // reference to a shared cache instance (if applicable, it's different than a child)
       
+      // linked-list handling for sibling instances (null for no next/previous sibling)
+      this.previousSibling = null;
+      this.nextSibling = null;
+      
       this.selfDrawable = null;
       this.groupDrawable = null; // e.g. backbone or non-shared cache
       this.sharedCacheDrawable = null; // our drawable if we are a shared cache
@@ -322,6 +326,11 @@ define( function( require ) {
     appendInstance: function( instance ) {
       this.children.push( instance );
       instance.parent = this;
+      if ( this.children.length >= 2 ) {
+        var previousInstance = this.children[this.children.length-2];
+        instance.previousSibling = previousInstance;
+        previousInstance.nextSibling = instance;
+      }
       
       if ( !instance.isTransformed ) {
         if ( instance.hasRelativeTransformListenerNeed() ) {
@@ -337,8 +346,22 @@ define( function( require ) {
     },
     
     removeInstance: function( instance ) {
-      this.children.splice( _.indexOf( this.children, instance ), 1 ); // TODO: replace with a 'remove' function call
+      var index = _.indexOf( this.children, instance );
+      
+      // maintain the linked-list handling for sibling instances
+      var previousInstance = ( index - 1 >= 0 ) ? this.children[index-1] : null;
+      var nextInstance = ( index + 1 < this.children.length ) ? this.children[index+1] : null;
+      if ( previousInstance ) {
+        previousInstance.nextSibling = nextInstance;
+      }
+      if ( nextInstance ) {
+        nextInstance.previousSibling = previousInstance;
+      }
+      
+      this.children.splice( index, 1 ); // TODO: replace with a 'remove' function call
       instance.parent = null;
+      instance.nextSibling = null;
+      instance.previousSibling = null;
       
       if ( !instance.isTransformed ) {
         if ( instance.hasRelativeTransformListenerNeed() ) {
