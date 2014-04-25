@@ -155,7 +155,10 @@ define( function( require ) {
     // the subtree pickable count is #pickable:true + #inputListeners, since we can prune subtrees with a pickable count of 0
     this._subtreePickableCount = 0;
     
+    // a bitmask which specifies which renderers this node (and only this node, not its subtree) supports.
     this._rendererBitmask = scenery.bitmaskNodeDefault;
+    
+    // a bitmask-like summary of what renderers and options are supported by this node and all of its descendants
     this._rendererSummary = new scenery.RendererSummary( this );
     
     // So we can traverse only the subtrees that require bounds validation for events firing.
