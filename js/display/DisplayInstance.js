@@ -120,12 +120,6 @@ define( function( require ) {
       this.transformDirty = true; // whether the node's transform has changed (until the pre-repaint phase)
       
       this.nodeTransformListener = this.markTransformDirty.bind( this );
-      this.node.onStatic( 'transform', this.nodeTransformListener );
-      
-      // If we are a transform root, notify the display that we are dirty. We'll be validated when it's at that phase at the next updateDisplay().
-      if ( this.isTransformed ) {
-        display.markTransformRootDirty( this, true );
-      }
       
       this.initializedOnce = true;
     },
@@ -190,11 +184,25 @@ define( function( require ) {
       assert && assert( state instanceof scenery.RenderState );
       
       var oldState = this.state;
-      assert && assert( !oldState || oldState.isInstanceCompatibleWith( state ),
+      var wasStateless = !oldState;
+      
+      assert && assert( wasStateless || oldState.isInstanceCompatibleWith( state ),
                         'Attempt to update to a render state that is not compatible with this instance\'s current state' );
-      assert && assert( !oldState || oldState.isTransformed === state.isTransformed ); // no need to overwrite, should always be the same
+      assert && assert( wasStateless || oldState.isTransformed === state.isTransformed ); // no need to overwrite, should always be the same
+      assert && assert( !wasStateless || this.children.length === 0, 'We should not have child instances on an instance without state' );
       
       this.state = state;
+      this.isTransformed = state.isTransformed;
+      
+      if ( wasStateless ) {
+        this.node.onStatic( 'transform', this.nodeTransformListener );
+        
+        // If we are a transform root, notify the display that we are dirty. We'll be validated when it's at that phase at the next updateDisplay().
+        //OHTWO TODO: when else do we have to call this?
+        if ( this.isTransformed ) {
+          this.display.markTransformRootDirty( this, true );
+        }
+      }
       
       if ( state.isCanvasCache && state.isCacheShared ) {
         this.ensureSharedCacheInitialized();
@@ -321,6 +329,11 @@ define( function( require ) {
           this.display.markTransformRootDirty( this, true );
         }
       }
+    },
+    
+    // whether we don't have an associated RenderState attached. If we are stateless, we won't have children, and won't have listeners attached to our node yet.
+    isStateless: function() {
+      return !this.state;
     },
     
     appendInstance: function( instance ) {
@@ -631,7 +644,10 @@ define( function( require ) {
     
     // clean up listeners and garbage, so that we can be recycled (or pooled)
     dispose: function() {
-      this.node.offStatic( 'transform', this.nodeTransformListener );
+      // we don't originally add in the listener if we are stateless
+      if ( !this.isStateless ) {
+        this.node.offStatic( 'transform', this.nodeTransformListener );
+      }
       
       // clean our variables out to release memory
       this.cleanInstance( null, null, null );
