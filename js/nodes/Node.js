@@ -67,7 +67,11 @@ define( function( require ) {
     this._id = globalIdCounter++;
     
     // all of the Instances tracking this Node (across multiple layers and scenes)
+    //OHTWO @deprecated
     this._instances = [];
+    
+    // all of the DisplayInstances tracking this Node
+    this._displayInstances = [];
     
     // drawable states that need to be updated on mutations. generally added by SVG and DOM elements that need to closely track state (possibly by Canvas to maintain dirty state)
     this._drawables = [];
@@ -198,6 +202,8 @@ define( function( require ) {
       node.invalidateBounds();
       this._boundsDirty = true; // like calling this.invalidateBounds(), but we already marked all ancestors with dirty child bounds
       
+      this.trigger2( 'childInserted', node, index );
+      
       this.markForInsertion( node, index );
       this.notifyStitch( false );
       
@@ -248,6 +254,8 @@ define( function( require ) {
       
       this.invalidateBounds();
       this._childBoundsDirty = true; // force recomputation of child bounds after removing a child
+      
+      this.trigger2( 'childRemoved', node, indexOfChild );
       
       this.notifyStitch( false );
     },
@@ -1850,14 +1858,51 @@ define( function( require ) {
     },
     
     /*---------------------------------------------------------------------------*
-    * Instance handling
+    * DisplayInstance handling
     *----------------------------------------------------------------------------*/
     
+    getDisplayInstances: function() {
+      return this._displayInstances;
+    },
+    
+    addDisplayInstance: function( displayInstance ) {
+      assert && assert( displayInstance instanceof scenery.DisplayInstance );
+      this._displayInstances.push( displayInstance );
+      if ( this._displayInstances.length === 1 ) {
+        this.firstInstanceAdded();
+      }
+    },
+    
+    removeDisplayInstance: function( displayInstance ) {
+      assert && assert( displayInstance instanceof scenery.DisplayInstance );
+      var index = _.indexOf( this._displayInstances, displayInstance );
+      assert && assert( index !== -1, 'Cannot remove a DisplayInstance from a Node if it was not there' );
+      this._displayInstances.splice( index, 1 );
+      if ( this._displayInstances.length === 0 ) {
+        this.lastInstanceRemoved();
+      }
+    },
+    
+    firstInstanceAdded: function() {
+      // no-op, meant to be overridden in the prototype chain
+    },
+    
+    lastInstanceRemoved: function() {
+      // no-op, meant to be overridden in the prototype chain
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * Instance handling OHTWO @deprecated
+    *----------------------------------------------------------------------------*/
+    
+    //OHTWO @deprecated
     getInstances: function() {
       return this._instances;
     },
     
+    //OHTWO @deprecated
     addInstance: function( instance ) {
+      assert && assert( instance instanceof scenery.Instance );
       assert && assert( instance.getNode() === this, 'Must be an instance of this Node' );
       assert && assert( !_.find( this._instances, function( other ) { return instance.equals( other ); } ), 'Cannot add duplicates of an instance to a Node' );
       this._instances.push( instance );
@@ -1866,10 +1911,7 @@ define( function( require ) {
       }
     },
     
-    firstInstanceAdded: function() {
-      // no-op, meant to be overridden in the prototype chain
-    },
-    
+    //OHTWO @deprecated
     // returns undefined if there is no instance.
     getInstanceFromTrail: function( trail ) {
       var result;
@@ -1892,7 +1934,9 @@ define( function( require ) {
       return result;
     },
     
+    //OHTWO @deprecated
     removeInstance: function( instance ) {
+      assert && assert( instance instanceof scenery.Instance );
       var index = _.indexOf( this._instances, instance ); // actual instance equality (NOT capitalized, normal meaning)
       assert && assert( index !== -1, 'Cannot remove an Instance from a Node if it was not there' );
       this._instances.splice( index, 1 );
@@ -1901,10 +1945,7 @@ define( function( require ) {
       }
     },
     
-    lastInstanceRemoved: function() {
-      // no-op, meant to be overridden in the prototype chain
-    },
-    
+    //OHTWO @deprecated
     notifyVisibilityChange: function() {
       var i = this._instances.length;
       while ( i-- ) {
@@ -1912,6 +1953,7 @@ define( function( require ) {
       }
     },
     
+    //OHTWO @deprecated
     notifyOpacityChange: function() {
       var i = this._instances.length;
       while ( i-- ) {
@@ -1919,6 +1961,7 @@ define( function( require ) {
       }
     },
     
+    //OHTWO @deprecated
     notifyClipChange: function() {
       var i = this._instances.length;
       while ( i-- ) {
@@ -1926,6 +1969,7 @@ define( function( require ) {
       }
     },
     
+    //OHTWO @deprecated
     notifyBeforeSelfChange: function() {
       var i = this._instances.length;
       while ( i-- ) {
@@ -1933,6 +1977,7 @@ define( function( require ) {
       }
     },
     
+    //OHTWO @deprecated
     notifyBeforeSubtreeChange: function() {
       var i = this._instances.length;
       while ( i-- ) {
@@ -1940,6 +1985,7 @@ define( function( require ) {
       }
     },
     
+    //OHTWO @deprecated
     notifyDirtySelfPaint: function() {
       var i = this._instances.length;
       while ( i-- ) {
@@ -1947,6 +1993,7 @@ define( function( require ) {
       }
     },
     
+    //OHTWO @deprecated
     notifyDirtySubtreePaint: function() {
       var i = this._instances.length;
       while ( i-- ) {
@@ -1954,6 +2001,7 @@ define( function( require ) {
       }
     },
     
+    //OHTWO @deprecated
     notifyTransformChange: function() {
       var i = this._instances.length;
       while ( i-- ) {
@@ -1961,6 +2009,7 @@ define( function( require ) {
       }
     },
     
+    //OHTWO @deprecated
     notifyStitch: function( match ) {
       var i = this._instances.length;
       while ( i-- ) {
@@ -1968,6 +2017,7 @@ define( function( require ) {
       }
     },
     
+    //OHTWO @deprecated
     markForLayerRefresh: function() {
       var i = this._instances.length;
       while ( i-- ) {
@@ -1975,6 +2025,7 @@ define( function( require ) {
       }
     },
     
+    //OHTWO @deprecated
     markForInsertion: function( child, index ) {
       var i = this._instances.length;
       while ( i-- ) {
@@ -1982,6 +2033,7 @@ define( function( require ) {
       }
     },
     
+    //OHTWO @deprecated
     markForRemoval: function( child, index ) {
       var i = this._instances.length;
       while ( i-- ) {

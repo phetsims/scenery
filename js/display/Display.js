@@ -51,6 +51,8 @@ define( function( require ) {
     this._frameId = 0; // incremented for every rendered frame
     this._dirtyTransformRoots = [];
     this._dirtyTransformRootsWithoutPass = [];
+    
+    this._instanceRootsToDispose = [];
   };
   var Display = scenery.Display;
   
@@ -143,6 +145,10 @@ define( function( require ) {
       }
     },
     
+    markInstanceRootForDisposal: function( displayInstance ) {
+      this._instanceRootsToDispose.push( displayInstance );
+    },
+    
     // NOTE: to be replaced with a full stitching/update version
     buildTemporaryDisplay: function() {
       // validate bounds for everywhere that could trigger bounds listeners. we want to flush out any changes, so that we can call validateBounds()
@@ -166,6 +172,11 @@ define( function( require ) {
       // throw new Error( 'TODO: repaint phase (painting)' );
       
       // throw new Error( 'TODO: update cursor' );
+      
+      // dispose all of our instances. disposing the root will cause all descendants to also be disposed
+      for ( var i = 0; i < this._instanceRootsToDispose.length; i++ ) {
+        this._instanceRootsToDispose[i].dispose();
+      }
       
       this._frameId++;
     }

@@ -88,7 +88,7 @@ define( function( require ) {
   }
   
   scenery.DisplayInstance = function DisplayInstance( display, trail ) {
-    this.initializedOnce = false;
+    this.active = false;
     
     this.initialize( display, trail );
   };
@@ -96,6 +96,8 @@ define( function( require ) {
   
   inherit( Object, DisplayInstance, {
     initialize: function( display, trail ) {
+      assert && assert( !this.active, 'We should never try to initialize an already active object' );
+      
       trail.setImmutable(); // prevent the trail passed in from being mutated after this point (we want a consistent trail)
       
       this.id = globalIdCounter++;
@@ -118,10 +120,25 @@ define( function( require ) {
       
       // properties relevant to the node's direct transform
       this.transformDirty = true; // whether the node's transform has changed (until the pre-repaint phase)
+      this.nodeTransformListener = this.nodeTransformListener || this.markTransformDirty.bind( this );
       
-      this.nodeTransformListener = this.markTransformDirty.bind( this );
+      // In the range (-1,0), to help us track insertions and removals of this instance's node to its parent (did we get removed but added back?).
+      // If it's -1 at its parent's syncTree, we'll end up removing our reference to it.
+      // We use an integer just for sanity checks (if it ever reaches -2 or 1, we've reached an invalid state)
+      this.addRemoveCounter = 0;
       
-      this.initializedOnce = true;
+      // Node listeners for tracking children. Listeners should be added only when we become stateful
+      this.childInsertedListener = this.childInsertedListener || this.onChildInserted.bind( this );
+      this.childRemovedListener = this.childRemovedListener || this.onChildRemoved.bind( this );
+      
+      // we need to add this reference on stateless instances, so that we can find out if it was removed before our syncTree was called
+      this.node.addDisplayInstance( this );
+      
+      // outstanding external references. used for shared cache instances, where multiple instances can point to us
+      this.externalReferenceCount = 0;
+      
+      // whether we have been instantiated. false if we are in a pool waiting to be instantiated
+      this.active = true;
     },
     
     // called for initialization of properties (via initialize(), via constructor), or to clean the instance for placement in the pool (don't leak memory)
@@ -132,6 +149,9 @@ define( function( require ) {
       this.parent = null; // will be set as needed
       this.children = cleanArray( this.children ); // Array[DisplayInstance]
       this.sharedCacheInstance = null; // reference to a shared cache instance (if applicable, it's different than a child)
+      
+      // child instances are pushed to here when their node is removed from our node. we don't immediately dispose, since it may be added back
+      this.instanceRemovalCheckList = cleanArray( this.instanceRemovalCheckList );
       
       // linked-list handling for sibling instances (null for no next/previous sibling)
       this.previousSibling = null;
@@ -195,12 +215,18 @@ define( function( require ) {
       this.isTransformed = state.isTransformed;
       
       if ( wasStateless ) {
-        this.node.onStatic( 'transform', this.nodeTransformListener );
-        
         // If we are a transform root, notify the display that we are dirty. We'll be validated when it's at that phase at the next updateDisplay().
         //OHTWO TODO: when else do we have to call this?
         if ( this.isTransformed ) {
           this.display.markTransformRootDirty( this, true );
+        }
+        
+        // attach listeners to our node
+        this.node.onStatic( 'transform', this.nodeTransformListener );
+        
+        if ( !( this.state.isCanvasCache && this.state.isCacheShared ) ) {
+          this.node.onStatic( 'childInserted', this.childInsertedListener );
+          this.node.onStatic( 'childRemoved', this.childRemovedListener );
         }
       }
       
@@ -242,17 +268,28 @@ define( function( require ) {
           this.firstDrawable = currentDrawable = this.selfDrawable;
         }
         
-        /*---------------------------------------------------------------------------*
-        * //OHTWO TODO: children sync, not create
-        *----------------------------------------------------------------------------*/
-        var children = this.node.children;
-        var numChildren = children.length;
-        for ( var i = 0; i < numChildren; i++ ) {
+        // mark all removed instances to be disposed (along with their subtrees)
+        while ( this.instanceRemovalCheckList.length ) {
+          var instanceToMark = this.instanceRemovalCheckList.pop();
+          if ( instanceToMark.addRemoveCounter === -1 ) {
+            instanceToMark.addRemoveCounter = 0; // reset it, so we don't mark it for disposal more than once
+            this.display.markInstanceRootForDisposal( instanceToMark );
+          }
+        }
+        
+        if ( wasStateless ) {
+          // we need to create all of the child instances
+          for ( var k = 0; k < this.node.children.length; k++ ) {
+            // create a child instance
+            var child = this.node.children[k];
+            this.appendInstance( DisplayInstance.createFromPool( this.display, this.trail.copy().addDescendant( child, k ) ) );
+          }
+        }
+        
+        for ( var i = 0; i < this.children.length; i++ ) {
           // create a child instance
-          var child = children[i];
-          var childInstance = DisplayInstance.createFromPool( this.display, this.trail.copy().addDescendant( child, i ) );
-          childInstance.syncTree( state.getStateForDescendant( child ) );
-          this.appendInstance( childInstance );
+          var childInstance = this.children[i];
+          childInstance.syncTree( state.getStateForDescendant( childInstance.node ) );
           
           // figure out what the first and last drawable should be hooked into for the child
           var firstChildDrawable = null;
@@ -324,6 +361,8 @@ define( function( require ) {
           this.display.markTransformRootDirty( this.sharedCacheInstance, true );
         }
         
+        this.sharedCacheInstance.externalReferenceCount++;
+        
         //OHTWO TODO: is this necessary?
         if ( this.isTransformed ) {
           this.display.markTransformRootDirty( this, true );
@@ -335,6 +374,10 @@ define( function( require ) {
     isStateless: function() {
       return !this.state;
     },
+    
+    /*---------------------------------------------------------------------------*
+    * Children handling
+    *----------------------------------------------------------------------------*/
     
     appendInstance: function( instance ) {
       this.insertInstance( instance, this.children.length );
@@ -375,10 +418,10 @@ define( function( require ) {
     },
     
     removeInstance: function( instance ) {
-      return this.removeInstanceAt( instance, _.indexOf( this.children, instance ) );
+      return this.removeInstanceWithIndex( instance, _.indexOf( this.children, instance ) );
     },
     
-    removeInstanceAt: function( instance, index ) {
+    removeInstanceWithIndex: function( instance, index ) {
       assert && assert( instance instanceof DisplayInstance );
       assert && assert( index >= 0 && index < this.children.length,
                         'Instance removal bounds check for index ' + index + ' with previous children length ' + this.children.length );
@@ -406,6 +449,51 @@ define( function( require ) {
           this.decrementTransformPrecomputeChildren();
         }
       }
+    },
+    
+    // if we have a child instance that corresponds to this node, return it (otherwise null)
+    findChildInstanceOnNode: function( node ) {
+      var instances = node.getDisplayInstances();
+      for ( var i = 0; i < instances; i++ ) {
+        if ( instances[i].parent === this ) {
+          return instances[i];
+        }
+      }
+      return null;
+    },
+    
+    // event callback for Node's 'childInserted' event, used to track children
+    onChildInserted: function( childNode, index ) {
+      assert && assert( !this.isStateless(), 'If we are stateless, we should not receive these notifications' );
+      
+      var instance = this.findChildInstanceOnNode( childNode );
+      
+      if ( instance ) {
+        // it must have been added back. increment its counter
+        instance.addRemoveCounter += 1;
+        assert && assert( instance.addRemoveCounter === 0 );
+      } else {
+        instance = DisplayInstance.createFromPool( this.display, this.trail.copy().addDescendant( childNode, index ) );
+      }
+      
+      this.insertInstance( instance, index );
+    },
+    
+    // event callback for Node's 'childRemoved' event, used to track children
+    onChildRemoved: function( childNode, index ) {
+      assert && assert( !this.isStateless(), 'If we are stateless, we should not receive these notifications' );
+      assert && assert( this.children[index].node === childNode, 'Ensure that our instance matches up' );
+      
+      var instance = this.findChildInstanceOnNode( childNode );
+      assert && assert( instance !== null, 'We should always have a reference to a removed instance' );
+      
+      instance.addRemoveCounter -= 1;
+      assert && assert( instance.addRemoveCounter === -1 );
+      
+      // track the removed instance here. if it doesn't get added back, this will be the only reference we have (we'll need to dispose it)
+      this.instanceRemovalCheckList.push( instance );
+      
+      this.removeInstanceWithIndex( instance, index );
     },
     
     /*---------------------------------------------------------------------------*
@@ -644,13 +732,43 @@ define( function( require ) {
     
     // clean up listeners and garbage, so that we can be recycled (or pooled)
     dispose: function() {
+      assert && assert( this.active, 'Seems like we tried to dispose this DisplayInstance twice, it is not active' );
+      
+      this.active = false;
+      
+      for ( var i = 0; i < this.children.length; i++ ) {
+        this.children[i].dispose();
+      }
+      
       // we don't originally add in the listener if we are stateless
       if ( !this.isStateless ) {
         this.node.offStatic( 'transform', this.nodeTransformListener );
+        
+        if ( !( this.state.isCanvasCache && this.state.isCacheShared ) ) {
+          this.node.offStatic( 'childInserted', this.childInsertedListener );
+          this.node.offStatic( 'childRemoved', this.childRemovedListener );
+        }
+      }
+      
+      this.node.removeDisplayInstance( this );
+      
+      this.selfDrawable && this.selfDrawable.dispose();
+      this.groupDrawable && this.groupDrawable.dispose();
+      this.sharedCacheDrawable && this.sharedCacheDrawable.dispose();
+      
+      // release our reference to a shared cache if applicable, and dispose if there are no other references
+      if ( this.sharedCacheInstance ) {
+        this.sharedCacheInstance.externalReferenceCount--;
+        if ( this.sharedCacheInstance.externalReferenceCount === 0 ) {
+          delete this.display._sharedCanvasInstances[this.node.getId()];
+          this.sharedCacheInstance.dispose();
+        }
       }
       
       // clean our variables out to release memory
       this.cleanInstance( null, null, null );
+      
+      this.freeToPool();
     },
     
     audit: function( frameId ) {
