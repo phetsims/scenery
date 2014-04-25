@@ -135,8 +135,6 @@ define( function( require ) {
     },
     
     updateDirtyTransformRoots: function() {
-      var len,i;
-      
       while ( this._dirtyTransformRoots.length ) {
         this._dirtyTransformRoots.pop().updateTransformListenersAndCompute( false, false, this._frameId, true );
       }
