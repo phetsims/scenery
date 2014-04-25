@@ -48,6 +48,12 @@ define( function( require ) {
     // @protected: called to update the visual appearance of our svgElement
     updateSVG: function() {
       // should generally be overridden by drawable subtypes to implement the update
+    },
+    
+    dispose: function() {
+      this.defs = null;
+      
+      SelfDrawable.prototype.dispose.call( this );
     }
   } );
   

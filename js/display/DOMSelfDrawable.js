@@ -76,11 +76,11 @@ define( function( require ) {
     },
     
     dispose: function() {
-      // super call
-      SelfDrawable.prototype.dispose.call( this );
-      
       this.instance.removeRelativeTransformListener( this.transformListener );
       this.instance.removeRelativeTransformPrecompute();
+      
+      // super call
+      SelfDrawable.prototype.dispose.call( this );
     }
   } );
   

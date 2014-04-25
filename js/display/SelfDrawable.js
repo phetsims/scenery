@@ -31,9 +31,13 @@ define( function( require ) {
     
     // @public
     dispose: function() {
-      Drawable.prototype.dispose.call( this );
-      
       this.node.detachDrawable( this );
+      
+      // free references
+      this.instance = null;
+      this.node = null;
+      
+      Drawable.prototype.dispose.call( this );
     }
   } );
   

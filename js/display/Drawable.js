@@ -19,6 +19,14 @@ define( function( require ) {
   
   inherit( Object, Drawable, {
     initializeDrawable: function( renderer ) {
+      this.cleanDrawable();
+      
+      this.renderer = renderer;
+      
+      this.dirty = true;
+    },
+    
+    cleanDrawable: function() {
       // what drawble we are being rendered (or put) into (will be filled in later)
       this.parentDrawable = null;
       
@@ -29,10 +37,6 @@ define( function( require ) {
       // similar but pending handling, so that we can traverse both orders at the same time for stitching
       this.pendingPreviousDrawable = null;
       this.pendingNextDrawable = null;
-      
-      this.renderer = renderer;
-      
-      this.dirty = true;
     },
     
     markDirty: function() {
@@ -47,7 +51,7 @@ define( function( require ) {
     },
     
     dispose: function() {
-      
+      this.cleanDrawable();
     }
   } );
   
