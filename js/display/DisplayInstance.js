@@ -75,6 +75,7 @@ define( function( require ) {
   
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
+  var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var scenery = require( 'SCENERY/scenery' );
   
@@ -135,7 +136,7 @@ define( function( require ) {
       this.trail = trail;
       this.node = node;
       this.parent = null; // will be set as needed
-      this.children = this.children ? ( this.children.length = 0, this.children ) : []; // Array[DisplayInstance]
+      this.children = cleanArray( this.children ); // Array[DisplayInstance]
       this.sharedCacheInstance = null; // reference to a shared cache instance (if applicable, it's different than a child)
       
       this.selfDrawable = null;
@@ -152,7 +153,8 @@ define( function( require ) {
       
       // will be notified in pre-repaint phase that our relative transform has changed (but not computed by default)
       // NOTE: it's part of the relative transform feature, see above for documentation
-      this.relativeTransformListeners = this.relativeTransformListeners ? ( this.relativeTransformListeners.length = 0, this.relativeTransformListeners ) : [];
+      //OHTWO TODO: should we rely on listeners removing themselves?
+      this.relativeTransformListeners = cleanArray( this.relativeTransformListeners );
     },
     
     // updates the internal {RenderState}, and fully synchronizes the instance subtree
