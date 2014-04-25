@@ -144,11 +144,14 @@ define( function( require ) {
     // what type of renderer should be forced for this node.
     this._renderer = null;
     //OHTWO deprecated (at least rendererOptions if not rendererLayerType)
-    this._rendererOptions = null; // options that will determine the layer type
     this._rendererLayerType = null; // cached layer type that is used by the LayerStrategy
     
-    // whether layers should be split before and after this node
-    this._layerSplit = false;
+    // where rendering-specific settings are stored
+    this._hints = {
+      layerSplit: false,    // whether layers should be split before and after this node
+      cssTransform: false,  // whether this node and its subtree should handle transforms by using a CSS transform of a div
+      fullResolution: false // when rendered as Canvas, whether we should use full (device) resolution on retina-like devices
+    };
     
     // the subtree pickable count is #pickable:true + #inputListeners, since we can prune subtrees with a pickable count of 0
     this._subtreePickableCount = 0;
@@ -1485,27 +1488,30 @@ define( function( require ) {
       return this._clipArea !== null;
     },
     
+    //OHTWO @deprecated
     updateLayerType: function() {
-      if ( this._renderer && this._rendererOptions ) {
+      if ( this._renderer && ( this._hints.cssTransform || this._hints.fullResolution ) ) {
         // TODO: factor this check out! Make RendererOptions its own class?
         // TODO: FIXME: support undoing this!
         // ensure that if we are passing a CSS transform, we pass this node as the baseNode
-        if ( this._rendererOptions.cssTransform || this._rendererOptions.cssTranslation || this._rendererOptions.cssRotation || this._rendererOptions.cssScale ) {
-          this._rendererOptions.baseNode = this;
-        } else if ( this._rendererOptions.hasOwnProperty( 'baseNode' ) ) {
-          delete this._rendererOptions.baseNode; // don't override, let the scene pass in the scene
+        if ( this._hints.cssTransform || this._hints.cssTranslation || this._hints.cssRotation || this._hints.cssScale ) {
+          this._hints.baseNode = this;
+        } else if ( this._hints.hasOwnProperty( 'baseNode' ) ) {
+          delete this._hints.baseNode; // don't override, let the scene pass in the scene
         }
         // if we set renderer and rendererOptions, only then do we want to trigger a specific layer type
-        this._rendererLayerType = this._renderer.createLayerType( this._rendererOptions );
+        this._rendererLayerType = this._renderer.createLayerType( this._hints );
       } else {
         this._rendererLayerType = null; // nothing signaled, since we want to support multiple layer types (including if we specify a renderer)
       }
     },
     
+    //OHTWO @deprecated
     getRendererLayerType: function() {
       return this._rendererLayerType;
     },
     
+    //OHTWO @deprecated
     hasRendererLayerType: function() {
       return !!this._rendererLayerType;
     },
@@ -1586,31 +1592,32 @@ define( function( require ) {
     
     setRendererOptions: function( options ) {
       // TODO: consider checking options based on the specified 'renderer'?
-      this._rendererOptions = options;
+      // TODO: consider a guard where we check if anything changed
+      _.extend( this._hints, options );
       
       this.updateLayerType();
       this.markLayerRefreshNeeded();
     },
     
     getRendererOptions: function() {
-      return this._rendererOptions;
+      return this._hints;
     },
     
     hasRendererOptions: function() {
-      return !!this._rendererOptions;
+      return !!( this._hints.cssTransform || this._hints.fullResolution );
     },
     
     setLayerSplit: function( split ) {
       assert && assert( typeof split === 'boolean' );
       
-      if ( split !== this._layerSplit ) {
-        this._layerSplit = split;
+      if ( split !== this._hints.layerSplit ) {
+        this._hints.layerSplit = split;
         this.markLayerRefreshNeeded();
       }
     },
     
     isLayerSplit: function() {
-      return this._layerSplit;
+      return this._hints.layerSplit;
     },
     
     // returns a unique trail (if it exists) where each node in the ancestor chain has 0 or 1 parents
@@ -2334,7 +2341,7 @@ define( function( require ) {
         }
       }
       
-      if ( this._layerSplit ) {
+      if ( this._hints.layerSplit ) {
         addProp( 'layerSplit', true );
       }
       

@@ -59,16 +59,6 @@
     ok( a.getUniqueTrail().getInstance().layer === scene.layers[0] );
     ok( b.getUniqueTrail().getInstance().layer === scene.layers[1] );
     ok( c.getUniqueTrail().getInstance().layer === scene.layers[1] );
-    
-    b.rendererOptions = {
-      someUniqueThingToThisLayer: 5
-    };
-    
-    scene.layerAudit();
-    equal( scene.layers.length, 3, 'should be canvas, svg (with options), svg' );
-    ok( a.getUniqueTrail().getInstance().layer === scene.layers[0] );
-    ok( b.getUniqueTrail().getInstance().layer === scene.layers[1] );
-    ok( c.getUniqueTrail().getInstance().layer === scene.layers[2] );
   } );
   
   // TODO: occurs with layer matching
