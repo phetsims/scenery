@@ -208,6 +208,7 @@ define( function( require ) {
      */
     syncTree: function( state ) {
       assert && assert( state instanceof scenery.RenderState );
+      assert && assert( !this.parent || !this.parent.isStateless(), 'We should not have a stateless parent instance' ); // may access isTransformed up to root to determine relative trails
       
       var oldState = this.state;
       var wasStateless = !oldState;

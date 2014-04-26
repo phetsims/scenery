@@ -3,6 +3,14 @@
 /**
  * A unit that is drawable with a specific renderer
  *
+ * APIs for drawable types:
+ *
+ * DOM: {
+ *   domElement: {HTMLElement}
+ * }
+ *
+ * OHTWO TODO: add more API information, and update
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -24,6 +32,8 @@ define( function( require ) {
       this.renderer = renderer;
       
       this.dirty = true;
+      
+      return this;
     },
     
     cleanDrawable: function() {
