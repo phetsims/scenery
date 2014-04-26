@@ -7,9 +7,10 @@
  * API for RenderState:
  * {
  *   isBackbone: Boolean
- *   isCanvasCache: Boolean
- *   isCacheShared: Boolean
  *   isTransformed: Boolean
+ *   isInstanceCanvasCache: Boolean
+ *   isSharedCanvasCachePlaceholder: Boolean
+ *   isSharedCanvasCacheSelf: Boolean
  *   selfRenderer: Renderer
  *   groupRenderer: Renderer
  *   sharedCacheRenderer: Renderer
@@ -62,8 +63,9 @@ define( function( require ) {
       
       this.isBackbone = false;
       this.isTransformed = false;
-      this.isCanvasCache = false;
-      this.isCacheShared = false;
+      this.isInstanceCanvasCache = false;
+      this.isSharedCanvasCachePlaceholder = false;
+      this.isSharedCanvasCacheSelf = false;
       
       this.selfRenderer = null;
       this.groupRenderer = null;
@@ -84,19 +86,24 @@ define( function( require ) {
         // everything underneath needs to be renderable with Canvas, otherwise we cannot cache
         assert && assert( ( combinedBitmask & scenery.Renderer.bitmaskCanvas ) !== 0, 'hints.canvasCache provided, but not all node contents can be rendered with Canvas under ' + node.constructor.name );
         
-        // TODO: handling of transformed caches differently than aligned caches?
-        
-        this.isCanvasCache = true;
-        if ( hints.singleCache && !isShared ) {
+        if ( hints.singleCache ) {
           // TODO: scale options - fixed size, match highest resolution (adaptive), or mipmapped
-          
-          // everything underneath needs to guarantee that its bounds are valid
-          assert && assert( ( combinedBitmask & scenery.bitmaskBoundsValid ) !== 0, 'hints.singleCache provided, but not all node contents have valid bounds under ' + node.constructor.name );
-          this.isCacheShared = true;
-          this.isTransformed = true;
-          this.sharedCacheRenderer = scenery.Renderer.bitmaskCanvas;
+          if ( isShared ) {
+            this.isSharedCanvasCacheSelf = true;
+            
+            //OHTWO TODO: Also consider SVG output
+            this.sharedCacheRenderer = scenery.Renderer.bitmaskCanvas;
+          } else {
+            // everything underneath needs to guarantee that its bounds are valid
+            //OHTWO TODO: We'll probably remove this if we go with the "safe bounds" approach
+            assert && assert( ( combinedBitmask & scenery.bitmaskBoundsValid ) !== 0, 'hints.singleCache provided, but not all node contents have valid bounds under ' + node.constructor.name );
+            
+            this.isSharedCanvasCachePlaceholder = true;
+          }
+        } else {
+          this.isInstanceCanvasCache = true;
+          this.groupRenderer = scenery.Renderer.bitmaskCanvas; // disallowing SVG here, so we don't have to break up our SVG group structure
         }
-        this.selfRenderer = scenery.Renderer.bitmaskCanvas; // TODO: allow SVG (toDataURL) and DOM (direct Canvas)
       }
       
       if ( node.isPainted() ) {
@@ -132,7 +139,7 @@ define( function( require ) {
         this.canvasRenderer,
         
         // isUnderCanvasCache
-        this.isUnderCanvasCache || this.isCanvasCache,
+        this.isUnderCanvasCache || this.isInstanceCanvasCache || this.isSharedCanvasCacheSelf,
         
         // isShared. No direct descendant is shared, since we create those specially with a new state from createSharedCacheState
         false
@@ -145,9 +152,8 @@ define( function( require ) {
      * so we will have to recreate the instance and its subtree if that is the case.
      */
     isInstanceCompatibleWith: function( otherState ) {
-      return this.isTransformed === otherState.isTransformed &&
-             this.isBackbone === otherState.isBackbone &&
-             ( this.isCanvasCache && this.isCacheShared ) === ( otherState.isCanvasCache && otherState.isCacheShared );
+      return this.isTransformed === otherState.isTransformed && //OHTWO TODO: allow mutating based on this change
+             this.isSharedCanvasCacheSelf === otherState.isSharedCanvasCacheSelf; //OHTWO TODO: allow mutating based on this change
     }
   };
   

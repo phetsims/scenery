@@ -230,13 +230,13 @@ define( function( require ) {
         // attach listeners to our node
         this.node.onStatic( 'transform', this.nodeTransformListener );
         
-        if ( !( this.state.isCanvasCache && this.state.isCacheShared ) ) {
+        if ( !this.state.isSharedCanvasCachePlaceholder ) {
           this.node.onStatic( 'childInserted', this.childInsertedListener );
           this.node.onStatic( 'childRemoved', this.childRemovedListener );
         }
       }
       
-      if ( state.isCanvasCache && state.isCacheShared ) {
+      if ( state.isSharedCanvasCachePlaceholder ) {
         this.ensureSharedCacheInitialized();
         
         //OHTWO TODO: actually create the proper shared cache drawable depending on the specified renderer (update it if necessary)
@@ -333,7 +333,8 @@ define( function( require ) {
         
         var groupRenderer = state.groupRenderer;
         if ( state.isBackbone ) {
-          assert && assert( !state.isCanvasCache, 'For now, disallow an instance being a backbone and a canvas cache, since it has no performance benefits' );
+          assert && assert( !state.isInstanceCanvasCache && !state.isSharedCanvasCacheSelf && !state.isSharedCanvasCachePlaceholder,
+                            'For now, disallow an instance being a backbone and a canvas cache, since it has no performance benefits' );
           
           if ( !this.groupDrawable ) {
             this.groupDrawable = scenery.BackboneBlock.createFromPool( this, groupRenderer, false );
@@ -342,8 +343,10 @@ define( function( require ) {
               this.display.markTransformRootDirty( this, true );
             }
           }
-        } else if ( state.isCanvasCache ) {
+        } else if ( state.isInstanceCanvasCache ) {
           this.groupDrawable = scenery.InlineCanvasCacheDrawable.createFromPool( groupRenderer, this );
+        } else if ( state.isSharedCanvasCacheSelf ) {
+          this.groupDrawable = scenery.CanvasBlock.createFromPool( groupRenderer, this );
         }
       }
       
@@ -759,7 +762,7 @@ define( function( require ) {
       if ( !this.isStateless ) {
         this.node.offStatic( 'transform', this.nodeTransformListener );
         
-        if ( !( this.state.isCanvasCache && this.state.isCacheShared ) ) {
+        if ( !this.state.isSharedCanvasCachePlaceholder ) {
           this.node.offStatic( 'childInserted', this.childInsertedListener );
           this.node.offStatic( 'childRemoved', this.childRemovedListener );
         }
@@ -824,16 +827,16 @@ define( function( require ) {
         assertSlow( ( this.firstDrawable === null ) === ( this.lastDrawable === null ),
                     'First/last drawables need to both be null or non-null' );
         
-        assertSlow( ( !this.state.isBackbone && !this.state.isCacheShared ) || this.block,
+        assertSlow( ( !this.state.isBackbone && !this.state.isSharedCanvasCachePlaceholder ) || this.block,
                     'If we are a backbone or shared cache, we need to have a block reference' );
         
-        assertSlow( !this.state.isCacheShared || !this.node.isPainted() || this.selfDrawable,
+        assertSlow( !this.state.isSharedCanvasCachePlaceholder || !this.node.isPainted() || this.selfDrawable,
                     'We need to have a selfDrawable if we are painted and not a shared cache' );
         
         assertSlow( ( !this.state.isTransformed && !this.state.isCanvasCache ) || this.groupDrawable,
                     'We need to have a groupDrawable if we are a backbone or any type of canvas cache' );
         
-        assertSlow( !this.state.isCacheShared || this.sharedCacheDrawable,
+        assertSlow( !this.state.isSharedCanvasCachePlaceholder || this.sharedCacheDrawable,
                     'We need to have a sharedCacheDrawable if we are a shared cache' );
         
         assertSlow( this.state.isTransformed || this.isTransformed,
