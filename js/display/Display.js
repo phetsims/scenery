@@ -169,14 +169,18 @@ define( function( require ) {
       
       if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
       
-      // throw new Error( 'TODO: repaint phase (painting)' );
-      
-      // throw new Error( 'TODO: update cursor' );
-      
       // dispose all of our instances. disposing the root will cause all descendants to also be disposed
       for ( var i = 0; i < this._instanceRootsToDispose.length; i++ ) {
         this._instanceRootsToDispose[i].dispose();
       }
+      
+      if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
+      
+      // throw new Error( 'TODO: repaint phase (painting)' );
+      
+      // throw new Error( 'TODO: update cursor' );
+      
+      
       
       this._frameId++;
     }
