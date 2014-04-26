@@ -166,6 +166,10 @@ define( function( require ) {
       this.lastDrawable = null;
       
       // references that will be filled in with syncTree
+      if ( this.state ) {
+        // NOTE: assumes that we aren't reusing states across instances
+        this.state.freeToPool();
+      }
       this.state = null;
       this.isTransformed = false; // whether this instance creates a new "root" for the relative trail transforms
       
@@ -339,6 +343,10 @@ define( function( require ) {
         } else if ( state.isCanvasCache ) {
           this.groupDrawable = scenery.InlineCanvasCacheDrawable.createFromPool( groupRenderer, this );
         }
+      }
+      
+      if ( oldState && oldState !== this.state ) {
+        oldState.freeToPool();
       }
     },
     

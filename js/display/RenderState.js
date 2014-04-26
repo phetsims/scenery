@@ -25,6 +25,7 @@
 define( function( require ) {
   'use strict';
   
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/layers/Renderer' );
   require( 'SCENERY/util/Trail' );
@@ -46,76 +47,82 @@ define( function( require ) {
    * - node.hints | node.opacity
    */
   RenderState.RegularState = function RegularState( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared ) {
-    // this should be accurate right now, the pass to update these should have been completed earlier
-    var combinedBitmask = node._rendererSummary.bitmask;
-    
-    this.svgRenderer = svgRenderer;
-    this.canvasRenderer = canvasRenderer;
-    this.isUnderCanvasCache;
-    
-    this.isBackbone = false;
-    this.isTransformed = false;
-    this.isCanvasCache = false;
-    this.isCacheShared = false;
-    
-    this.selfRenderer = null;
-    this.groupRenderer = null;
-    this.sharedCacheRenderer = null;
-    
-    var hints = node.hints || emptyObject;
-    
-    var isTransparent = node.opacity !== 1;
-    
-    // check if we need a backbone or cache
-    // if we are under a canvas cache, we will NEVER have a backbone
-    // splits are accomplished just by having a backbone
-    if ( !isUnderCanvasCache && ( isTransparent || hints.requireElement || hints.cssTransformBackbone || hints.split ) ) {
-      this.isBackbone = true;
-      this.isTransformed = !!hints.cssTransformBackbone; // for now, only trigger CSS transform if we have the specific hint
-      this.groupRenderer = scenery.Renderer.bitmaskDOM | ( hints.forceAcceleration ? scenery.Renderer.bitmaskForceAcceleration : 0 ); // probably won't be used
-    } else if ( isTransparent || hints.canvasCache ) {
-      // everything underneath needs to be renderable with Canvas, otherwise we cannot cache
-      assert && assert( ( combinedBitmask & scenery.Renderer.bitmaskCanvas ) !== 0, 'hints.canvasCache provided, but not all node contents can be rendered with Canvas under ' + node.constructor.name );
-      
-      // TODO: handling of transformed caches differently than aligned caches?
-      
-      this.isCanvasCache = true;
-      if ( hints.singleCache && !isShared ) {
-        // TODO: scale options - fixed size, match highest resolution (adaptive), or mipmapped
-        
-        // everything underneath needs to guarantee that its bounds are valid
-        assert && assert( ( combinedBitmask & scenery.bitmaskBoundsValid ) !== 0, 'hints.singleCache provided, but not all node contents have valid bounds under ' + node.constructor.name );
-        this.isCacheShared = true;
-        this.isTransformed = true;
-        this.sharedCacheRenderer = scenery.Renderer.bitmaskCanvas;
-      }
-      this.selfRenderer = scenery.Renderer.bitmaskCanvas; // TODO: allow SVG (toDataURL) and DOM (direct Canvas)
-    }
-    
-    if ( node.isPainted() ) {
-      // TODO: figure out preferred rendering order
-      // TODO: many more things to consider here for performance
-      // TODO: performance (here)
-      if ( isUnderCanvasCache ) {
-        this.selfRenderer = canvasRenderer;
-      } else if ( svgRenderer && ( svgRenderer & node._rendererBitmask ) !== 0 ) {
-        this.selfRenderer = svgRenderer;
-      } else if ( canvasRenderer && ( canvasRenderer & node._rendererBitmask ) !== 0 ) {
-        this.selfRenderer = canvasRenderer;
-      } else if ( ( scenery.Renderer.bitmaskDOM & node._rendererBitmask ) !== 0 ) {
-        // TODO: decide if CSS transform is to be applied here!
-        this.selfRenderer = scenery.Renderer.bitmaskDOM;
-      } else {
-        throw new Error( 'unsupported renderer, something wrong in RenderState' );
-      }
-    }
+    this.initialize( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared );
   };
   RenderState.RegularState.prototype = {
     constructor: RenderState.RegularState,
     
+    initialize: function( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared ) {
+      // this should be accurate right now, the pass to update these should have been completed earlier
+      var combinedBitmask = node._rendererSummary.bitmask;
+      
+      this.svgRenderer = svgRenderer;
+      this.canvasRenderer = canvasRenderer;
+      this.isUnderCanvasCache;
+      
+      this.isBackbone = false;
+      this.isTransformed = false;
+      this.isCanvasCache = false;
+      this.isCacheShared = false;
+      
+      this.selfRenderer = null;
+      this.groupRenderer = null;
+      this.sharedCacheRenderer = null;
+      
+      var hints = node.hints || emptyObject;
+      
+      var isTransparent = node.opacity !== 1;
+      
+      // check if we need a backbone or cache
+      // if we are under a canvas cache, we will NEVER have a backbone
+      // splits are accomplished just by having a backbone
+      if ( !isUnderCanvasCache && ( isTransparent || hints.requireElement || hints.cssTransformBackbone || hints.split ) ) {
+        this.isBackbone = true;
+        this.isTransformed = !!hints.cssTransformBackbone; // for now, only trigger CSS transform if we have the specific hint
+        this.groupRenderer = scenery.Renderer.bitmaskDOM | ( hints.forceAcceleration ? scenery.Renderer.bitmaskForceAcceleration : 0 ); // probably won't be used
+      } else if ( isTransparent || hints.canvasCache ) {
+        // everything underneath needs to be renderable with Canvas, otherwise we cannot cache
+        assert && assert( ( combinedBitmask & scenery.Renderer.bitmaskCanvas ) !== 0, 'hints.canvasCache provided, but not all node contents can be rendered with Canvas under ' + node.constructor.name );
+        
+        // TODO: handling of transformed caches differently than aligned caches?
+        
+        this.isCanvasCache = true;
+        if ( hints.singleCache && !isShared ) {
+          // TODO: scale options - fixed size, match highest resolution (adaptive), or mipmapped
+          
+          // everything underneath needs to guarantee that its bounds are valid
+          assert && assert( ( combinedBitmask & scenery.bitmaskBoundsValid ) !== 0, 'hints.singleCache provided, but not all node contents have valid bounds under ' + node.constructor.name );
+          this.isCacheShared = true;
+          this.isTransformed = true;
+          this.sharedCacheRenderer = scenery.Renderer.bitmaskCanvas;
+        }
+        this.selfRenderer = scenery.Renderer.bitmaskCanvas; // TODO: allow SVG (toDataURL) and DOM (direct Canvas)
+      }
+      
+      if ( node.isPainted() ) {
+        // TODO: figure out preferred rendering order
+        // TODO: many more things to consider here for performance
+        // TODO: performance (here)
+        if ( isUnderCanvasCache ) {
+          this.selfRenderer = canvasRenderer;
+        } else if ( svgRenderer && ( svgRenderer & node._rendererBitmask ) !== 0 ) {
+          this.selfRenderer = svgRenderer;
+        } else if ( canvasRenderer && ( canvasRenderer & node._rendererBitmask ) !== 0 ) {
+          this.selfRenderer = canvasRenderer;
+        } else if ( ( scenery.Renderer.bitmaskDOM & node._rendererBitmask ) !== 0 ) {
+          // TODO: decide if CSS transform is to be applied here!
+          this.selfRenderer = scenery.Renderer.bitmaskDOM;
+        } else {
+          throw new Error( 'unsupported renderer, something wrong in RenderState' );
+        }
+      }
+      
+      return this;
+    },
+    
     getStateForDescendant: function( node ) {
       // TODO: allocation (pool this)
-      return new RenderState.RegularState(
+      return RenderState.RegularState.createFromPool(
         node,
         
         // default SVG renderer settings
@@ -145,7 +152,7 @@ define( function( require ) {
   };
   
   RenderState.RegularState.createRootState = function( node ) {
-    var baseState = new RenderState.RegularState(
+    var baseState = RenderState.RegularState.createFromPool(
       node,                           // trail
       scenery.Renderer.bitmaskSVG,    // default SVG renderer settings
       scenery.Renderer.bitmaskCanvas, // default Canvas renderer settings
@@ -156,7 +163,7 @@ define( function( require ) {
   };
   
   RenderState.RegularState.createSharedCacheState = function( node ) {
-    var baseState = new RenderState.RegularState(
+    var baseState = RenderState.RegularState.createFromPool(
       node,                             // trail
       null,                             // no SVG renderer settings needed
       scenery.Renderer.bitmaskCanvas,   // default Canvas renderer settings
@@ -165,6 +172,19 @@ define( function( require ) {
     );
     return baseState;
   };
+  
+  /* jshint -W064 */
+  Poolable( RenderState.RegularState, {
+    constructorDuplicateFactory: function( pool ) {
+      return function( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared ) {
+        if ( pool.length ) {
+          return pool.pop().initialize( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared );
+        } else {
+          return new RenderState.RegularState( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared );
+        }
+      };
+    }
+  } );
   
   return RenderState;
 } );
