@@ -26,6 +26,8 @@ define( function( require ) {
     initializeCanvasSelfDrawable: function( renderer, instance ) {
       // super initialization
       this.initializeSelfDrawable( renderer, instance );
+      
+      return this;
     }
   } );
   

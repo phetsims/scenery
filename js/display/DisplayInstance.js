@@ -139,6 +139,8 @@ define( function( require ) {
       
       // whether we have been instantiated. false if we are in a pool waiting to be instantiated
       this.active = true;
+      
+      return this;
     },
     
     // called for initialization of properties (via initialize(), via constructor), or to clean the instance for placement in the pool (don't leak memory)

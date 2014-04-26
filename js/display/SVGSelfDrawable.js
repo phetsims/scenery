@@ -29,6 +29,8 @@ define( function( require ) {
       
       this.svgElement = null; // should be filled in by subtype
       this.defs = null; // will be updated by updateDefs()
+      
+      return this;
     },
     
     // @public: called when the defs block changes

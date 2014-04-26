@@ -37,6 +37,8 @@ define( function( require ) {
       // handle transform changes
       instance.addRelativeTransformListener( this.transformListener ); // when our relative tranform changes, notify us in the pre-repaint phase
       instance.addRelativeTransformPrecompute(); // trigger precomputation of the relative transform, since we will always need it when it is updated
+      
+      return this;
     },
     
     markTransformDirty: function() {

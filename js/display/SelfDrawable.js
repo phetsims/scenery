@@ -27,6 +27,8 @@ define( function( require ) {
       this.instance = instance;
       this.node = instance.trail.lastNode();
       this.node.attachDrawable( this );
+      
+      return this;
     },
     
     // @public
