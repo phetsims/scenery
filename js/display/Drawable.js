@@ -20,6 +20,8 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   
+  var globalId = 1;
+  
   scenery.Drawable = function Drawable( renderer ) {
     this.initializeDrawable( renderer );
   };
@@ -27,6 +29,9 @@ define( function( require ) {
   
   inherit( Object, Drawable, {
     initializeDrawable: function( renderer ) {
+      // unique ID for drawables
+      this.id = this.id || globalId++;
+      
       this.cleanDrawable();
       
       this.renderer = renderer;
