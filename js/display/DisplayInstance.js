@@ -414,12 +414,17 @@ define( function( require ) {
       this.children.splice( index, 0, instance );
       instance.parent = this;
       
-      if ( !instance.isTransformed ) {
-        if ( instance.hasRelativeTransformListenerNeed() ) {
-          this.incrementTransformListenerChildren();
-        }
-        if ( instance.hasRelativeTransformComputeNeed() ) {
-          this.incrementTransformPrecomputeChildren();
+      if ( instance.isStateless ) {
+        assert && assert( !instance.hasRelativeTransformListenerNeed(), 'We only track changes properly if stateless instances do not have needs' );
+        assert && assert( !instance.hasRelativeTransformComputeNeed(), 'We only track changes properly if stateless instances do not have needs' );
+      } else {
+        if ( !instance.isTransformed ) {
+          if ( instance.hasRelativeTransformListenerNeed() ) {
+            this.incrementTransformListenerChildren();
+          }
+          if ( instance.hasRelativeTransformComputeNeed() ) {
+            this.incrementTransformPrecomputeChildren();
+          }
         }
       }
       
