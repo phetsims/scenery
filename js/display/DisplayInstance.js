@@ -207,7 +207,7 @@ define( function( require ) {
      *        - If A or B would be null, have a flag indicating A=E-1 or B=F+1, and store E/F
      */
     syncTree: function( state ) {
-      assert && assert( state instanceof scenery.RenderState );
+      assert && assert( state && state.isSharedCanvasCachePlaceholder !== undefined, 'RenderState duck-typing instanceof' );
       assert && assert( !this.parent || !this.parent.isStateless(), 'We should not have a stateless parent instance' ); // may access isTransformed up to root to determine relative trails
       
       var oldState = this.state;
