@@ -185,11 +185,6 @@ define( function( require ) {
     
     // updates the internal {RenderState}, and fully synchronizes the instance subtree
     /*OHTWO TODO:
-     * Create new instances for added children
-     * Remove instances for removed children
-     * Rearrange instances for moved children
-     * *** Handle compatibility state check with children, rebuild them if necessary
-     * Mark unused instances/drawables on the Display for recycling after completing update?
      * Pruning:
      *   - If children haven't changed, skip instance add/move/remove
      *   - If RenderState hasn't changed AND there are no render/instance/stitch changes below us, EXIT (whenever we are assured children don't need sync)
