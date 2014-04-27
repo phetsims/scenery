@@ -243,11 +243,13 @@
           
           window.displayTest = function() {
             setTimeout( function(){
-              window.root = new scenery.Node( { x: 10 } );
+              window.root = new scenery.Node();
+              window.node = new scenery.Node( { x: 10 } );
               window.rect = new scenery.Rectangle( 0, 0, 100, 50, 0, 0, {
                 fill: new scenery.LinearGradient( 0, 0, 100, 0 ).addColorStop( 0, 'red' ).addColorStop( 1, 'blue' )
               } );
-              root.addChild( rect );
+              node.addChild( rect );
+              root.addChild( node );
               
               window.display = new scenery.Display( root );
               
