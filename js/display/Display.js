@@ -65,7 +65,49 @@ define( function( require ) {
     
     // updates the display's DOM element with the current visual state of the attached root node and its descendants
     updateDisplay: function() {
-      throw new Error( 'TODO OHTWO unimplemented' );
+      var firstRun = !!this._baseInstance;
+      
+      // validate bounds for everywhere that could trigger bounds listeners. we want to flush out any changes, so that we can call validateBounds()
+      // from code below without triggering side effects (we assume that we are not reentrant).
+      this._rootNode.validateWatchedBounds();
+      
+      // throw new Error( 'TODO: replace with actual stitching' );
+      this._baseInstance = this._baseInstance || scenery.DisplayInstance.createFromPool( this, new scenery.Trail( this._rootNode ) );
+      this._baseInstance.syncTree( scenery.RenderState.RegularState.createRootState( this._rootNode ) );
+      if ( firstRun ) {
+        this.markTransformRootDirty( this._baseInstance, this._baseInstance.isTransformed ); // marks the transform root as dirty (since it is)
+      }
+      
+      this._rootBackbone = this._rootBackbone || this._baseInstance.groupDrawable;
+      assert && assert( this._rootBackbone, 'We are guaranteed a root backbone as the groupDrawable on the base instance' );
+      assert && assert( this._rootBackbone === this._baseInstance.groupDrawable, 'We don\'t want the base instance\'s groupDrawable to change' );
+      
+      //OHTWO TODO: only rebuild when there is a change!!! Also, rebuild other backbones!
+      this._rootBackbone.rebuild( this._baseInstance.firstDrawable, this._baseInstance.lastDrawable );
+      
+      if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
+      
+      // pre-repaint phase: update relative transform information for listeners (notification) and precomputation where desired
+      this.updateDirtyTransformRoots();
+      
+      if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
+      
+      // dispose all of our instances. disposing the root will cause all descendants to also be disposed
+      for ( var i = 0; i < this._instanceRootsToDispose.length; i++ ) {
+        this._instanceRootsToDispose[i].dispose();
+      }
+      
+      if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
+      
+      // repaint phase
+      //OHTWO TODO: can anything be updated more efficiently by tracking at the Display level? Remember, we have recursive updates so things get updated in the right order!
+      this._rootBackbone.update();
+      
+      if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
+      
+      // throw new Error( 'TODO: update cursor' );
+      
+      this._frameId++;
     },
     
     getRootNode: function() {
@@ -147,52 +189,8 @@ define( function( require ) {
     
     markInstanceRootForDisposal: function( displayInstance ) {
       this._instanceRootsToDispose.push( displayInstance );
-    },
-    
-    // NOTE: to be replaced with a full stitching/update version
-    buildTemporaryDisplay: function() {
-      // validate bounds for everywhere that could trigger bounds listeners. we want to flush out any changes, so that we can call validateBounds()
-      // from code below without triggering side effects (we assume that we are not reentrant).
-      this._rootNode.validateWatchedBounds();
-      
-      // throw new Error( 'TODO: replace with actual stitching' );
-      this._baseInstance = scenery.DisplayInstance.createFromPool( this, new scenery.Trail( this._rootNode ) );
-      this._baseInstance.syncTree( scenery.RenderState.RegularState.createRootState( this._rootNode ) );
-      this.markTransformRootDirty( this._baseInstance, this._baseInstance.isTransformed ); // marks the transform root as dirty (since it is)
-      
-      this._rootBackbone = this._baseInstance.groupDrawable;
-      assert && assert( this._rootBackbone, 'We are guaranteed a root backbone as the groupDrawable on the base instance' );
-      
-      this._rootBackbone.rebuild( this._baseInstance.firstDrawable, this._baseInstance.lastDrawable );
-      
-      if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
-      
-      // pre-repaint phase: update relative transform information for listeners (notification) and precomputation where desired
-      this.updateDirtyTransformRoots();
-      
-      if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
-      
-      // dispose all of our instances. disposing the root will cause all descendants to also be disposed
-      for ( var i = 0; i < this._instanceRootsToDispose.length; i++ ) {
-        this._instanceRootsToDispose[i].dispose();
-      }
-      
-      if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
-      
-      // repaint phase
-      //OHTWO TODO: can anything be updated more efficiently by tracking at the Display level? Remember, we have recursive updates so things get updated in the right order!
-      this._rootBackbone.update();
-      
-      if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
-      
-      // throw new Error( 'TODO: update cursor' );
-      
-      
-      
-      this._frameId++;
     }
     
-    // TODO: add updateTemporaryDisplay?
   } );
   
   return Display;
