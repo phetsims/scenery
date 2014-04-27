@@ -484,7 +484,7 @@ define( function( require ) {
     // if we have a child instance that corresponds to this node, return it (otherwise null)
     findChildInstanceOnNode: function( node ) {
       var instances = node.getDisplayInstances();
-      for ( var i = 0; i < instances; i++ ) {
+      for ( var i = 0; i < instances.length; i++ ) {
         if ( instances[i].parent === this ) {
           return instances[i];
         }
