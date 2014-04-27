@@ -70,12 +70,16 @@ define( function( require ) {
     },
     
     update: function() {
-      //OHTWO TODO: call here!
-      while ( this.dirtyGroups.length ) {
-        this.dirtyGroups.pop().update();
-      }
-      while ( this.dirtyDrawables.length ) {
-        this.dirtyDrawables.pop().repaint();
+      if ( this.dirty && !this.disposed ) {
+        this.dirty = false;
+        
+        //OHTWO TODO: call here!
+        while ( this.dirtyGroups.length ) {
+          this.dirtyGroups.pop().update();
+        }
+        while ( this.dirtyDrawables.length ) {
+          this.dirtyDrawables.pop().update();
+        }
       }
     },
     

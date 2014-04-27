@@ -11,6 +11,7 @@ define( function( require ) {
   
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
+  var cleanArray = require( 'PHET_CORE/cleanArray' );
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
   var CanvasContextWrapper = require( 'SCENERY/util/CanvasContextWrapper' );
@@ -25,6 +26,8 @@ define( function( require ) {
       this.initializeDrawable( renderer );
       
       this.transformRootInstance = transformRootInstance;
+      
+      this.dirtyDrawables = cleanArray( this.dirtyDrawables );
       
       if ( !this.domElement ) {
         //OHTWO TODO: support tiled Canvas handling (will need to wrap then in a div, or something)
@@ -47,6 +50,7 @@ define( function( require ) {
     dispose: function() {
       // clear references
       this.transformRootInstance = null;
+      cleanArray( this.dirtyDrawables );
       
       // minimize memory exposure of the backing raster
       this.canvas.width = 0;
@@ -55,16 +59,30 @@ define( function( require ) {
       Drawable.prototype.dispose.call( this );
     },
     
+    update: function() {
+      if ( this.dirty && !this.disposed ) {
+        this.dirty = false;
+        
+        while ( this.dirtyDrawables.length ) {
+          this.dirtyDrawables.pop().update();
+        }
+        
+        // TODO: repaint here
+      }
+    },
+    
     markDirtyDrawable: function( drawable ) {
-      
+      // TODO: instance check to see if it is a canvas cache (usually we don't need to call update on our drawables)
+      this.dirtyDrawables.push( drawable );
+      this.markDirty();
     },
     
     addDrawable: function( drawable ) {
-      
+      drawable.parentDrawable = this;
     },
     
     removeDrawable: function( drawable ) {
-      
+      drawable.parentDrawable = null;
     }
   } );
   

@@ -55,10 +55,12 @@ define( function( require ) {
     },
     
     // called from elsewhere to update the DOM element
-    repaint: function() {
-      if ( this.dirty ) {
-        this.dirty = false;
-        this.updateDOM();
+    update: function() {
+      if ( !this.disposed() ) {
+        if ( this.dirty ) {
+          this.dirty = false;
+          this.updateDOM();
+        }
       }
     },
     

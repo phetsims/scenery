@@ -37,6 +37,7 @@ define( function( require ) {
       this.renderer = renderer;
       
       this.dirty = true;
+      this.disposed = false;
       
       return this;
     },
@@ -67,6 +68,7 @@ define( function( require ) {
     
     dispose: function() {
       this.cleanDrawable();
+      this.disposed = true;
     }
   } );
   

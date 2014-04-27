@@ -40,7 +40,7 @@ define( function( require ) {
     },
     
     // @public: called from elsewhere to update the SVG element
-    repaint: function() {
+    update: function() {
       if ( this.dirty ) {
         this.dirty = false;
         this.updateSVG();

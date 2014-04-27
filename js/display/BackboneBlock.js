@@ -11,6 +11,7 @@ define( function( require ) {
   
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
+  var cleanArray = require( 'PHET_CORE/cleanArray' );
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
   var Renderer = require( 'SCENERY/layers/Renderer' );
@@ -32,6 +33,7 @@ define( function( require ) {
       this.renderer = renderer;
       this.domElement = existingDiv || BackboneBlock.createDivBackbone();
       this.isDisplayRoot = isDisplayRoot;
+      this.dirtyDrawables = cleanArray( this.dirtyDrawables );
       
       this.blocks = this.blocks || []; // we are responsible for their disposal
     },
@@ -39,6 +41,7 @@ define( function( require ) {
     dispose: function() {
       this.backboneInstance = null;
       this.transformRootInstance = null;
+      cleanArray( this.dirtyDrawables );
       
       this.disposeBlocks();
       
@@ -55,7 +58,18 @@ define( function( require ) {
     },
     
     markDirtyDrawable: function( drawable ) {
-      
+      this.dirtyDrawables.push( drawable );
+      this.markDirty();
+    },
+    
+    update: function() {
+      if ( this.dirty && !this.disposed ) {
+        this.dirty = false;
+        
+        while ( this.dirtyDrawables.length ) {
+          this.dirtyDrawables.pop().update();
+        }
+      }
     },
     
     rebuild: function( firstDrawable, lastDrawable ) {

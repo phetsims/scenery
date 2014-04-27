@@ -179,7 +179,11 @@ define( function( require ) {
       
       if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
       
-      // throw new Error( 'TODO: repaint phase (painting)' );
+      // repaint phase
+      //OHTWO TODO: can anything be updated more efficiently by tracking at the Display level? Remember, we have recursive updates so things get updated in the right order!
+      this._rootBackbone.update();
+      
+      if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
       
       // throw new Error( 'TODO: update cursor' );
       

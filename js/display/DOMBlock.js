@@ -39,12 +39,26 @@ define( function( require ) {
       Drawable.prototype.dispose.call( this );
     },
     
+    update: function() {
+      if ( this.dirty && !this.disposed ) {
+        this.dirty = false;
+        
+        this.domDrawable.update();
+      }
+    },
+    
+    markDirtyDrawable: function( drawable ) {
+      this.markDirty();
+    },
+    
     addDrawable: function( drawable ) {
       assert && assert( this.domDrawable === drawable, 'DOMBlock should only be used with one drawable for now (the one it was initialized with)' );
+      drawable.parentDrawable = this;
     },
     
     removeDrawable: function( drawable ) {
       assert && assert( this.domDrawable === drawable, 'DOMBlock should only be used with one drawable for now (the one it was initialized with)' );
+      drawable.parentDrawable = null;
     }
   } );
 
