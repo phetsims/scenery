@@ -97,6 +97,9 @@ define( function( require ) {
         
         initializeSelf.call( this, renderer, instance );
         
+        // tracks our current defs object, so we can update our fill/stroke/etc. on our own
+        this.defs = null;
+        
         if ( usesFill ) {
           if ( !this.fillState ) {
             this.fillState = new Fillable.FillSVGState();
@@ -146,6 +149,8 @@ define( function( require ) {
       },
       
       updateDefs: function( defs ) {
+        this.defs = defs;
+        
         updateDefsSelf && updateDefsSelf.call( this, defs );
         
         usesFill && this.fillState.updateDefs( defs );
@@ -168,6 +173,8 @@ define( function( require ) {
         updateDefsSelf && updateDefsSelf.call( this, null );
         usesFill && this.fillState.dispose();
         usesStroke && this.strokeState.dispose();
+        
+        this.defs = null;
         
         // put us back in the pool
         this.freeToPool();
