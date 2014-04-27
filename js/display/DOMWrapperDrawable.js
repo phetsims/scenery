@@ -11,6 +11,7 @@ define( function( require ) {
   'use strict';
   
   var inherit = require( 'PHET_CORE/inherit' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
   
@@ -19,7 +20,7 @@ define( function( require ) {
   };
   var DOMWrapperDrawable = scenery.DOMWrapperDrawable;
   
-  inherit( SelfDrawable, DOMWrapperDrawable, {
+  inherit( Drawable, DOMWrapperDrawable, {
     initialize: function( domDrawable ) {
       // TODO: is it bad to pass the acceleration flags along?
       this.initializeDrawable( domDrawable.renderer );
