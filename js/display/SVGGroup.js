@@ -277,6 +277,8 @@ define( function( require ) {
       this.block = null;
       this.instance = null;
       this.node = null;
+      this.clipDefinition = null;
+      this.clipPath = null;
       cleanArray( this.children );
     }
   };
