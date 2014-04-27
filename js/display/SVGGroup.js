@@ -37,8 +37,12 @@ define( function( require ) {
       // transform handling
       this.transformDirty = true;
       this.hasTransform = false;
+      // we won't listen for transform changes (or even want to set a transform) if our node is beneath a transform root
+      this.listeningToTransform = this.block.transformRootInstance.trail.nodes.length >= this.instance.trail.nodes.length;
       this.transformDirtyListener = this.transformDirtyListener || this.markTransformDirty.bind( this );
-      this.node.onStatic( 'transform', this.transformDirtyListener );
+      if ( this.listeningToTransform ) {
+        this.node.onStatic( 'transform', this.transformDirtyListener );
+      }
       
       // for tracking the order of child groups, we use a flag and update (reorder) once per updateDisplay if necessary.
       this.orderDirty = true;
@@ -163,7 +167,9 @@ define( function( require ) {
     },
     
     dispose: function() {
-      this.node.offStatic( 'transform', this.transformDirtyListener );
+      if ( this.listeningToTransform ) {
+        this.node.offStatic( 'transform', this.transformDirtyListener );
+      }
       this.node.offStatic( 'childInserted', this.orderDirtyListener );
       this.node.offStatic( 'childRemoved', this.orderDirtyListener );
       
