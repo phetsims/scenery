@@ -74,7 +74,8 @@ define( function( require ) {
           if ( Renderer.isCanvas( currentRenderer ) ) {
             currentBlock = CanvasBlock.createFromPool( currentRenderer, this.transformRootInstance );
           } else if ( Renderer.isSVG( currentRenderer ) ) {
-            currentBlock = SVGBlock.createFromPool( currentRenderer, this.transformRootInstance );
+            //OHTWO TODO: handle filter root separately from the backbone instance?
+            currentBlock = SVGBlock.createFromPool( currentRenderer, this.transformRootInstance, this.backboneInstance );
           } else if ( Renderer.isDOM( currentRenderer ) ) {
             currentBlock = DOMBlock.createFromPool( drawable );
             currentRenderer = 0; // force a new block for the next drawable

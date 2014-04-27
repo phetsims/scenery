@@ -149,7 +149,7 @@ define( function( require ) {
       this.trail = trail;
       this.node = node;
       this.parent = null; // will be set as needed
-      this.children = cleanArray( this.children ); // Array[DisplayInstance]
+      this.children = cleanArray( this.children ); // Array[DisplayInstance]. NOTE: reliance on correct order after syncTree by at least SVGBlock/SVGGroup
       this.sharedCacheInstance = null; // reference to a shared cache instance (if applicable, it's different than a child)
       
       // child instances are pushed to here when their node is removed from our node. we don't immediately dispose, since it may be added back
@@ -174,6 +174,8 @@ define( function( require ) {
       }
       this.state = null;
       this.isTransformed = false; // whether this instance creates a new "root" for the relative trail transforms
+      
+      this.svgGroups = []; // list of SVG groups associated with this display instance
       
       // will be notified in pre-repaint phase that our relative transform has changed (but not computed by default)
       // NOTE: it's part of the relative transform feature, see above for documentation
@@ -757,6 +759,31 @@ define( function( require ) {
     /*---------------------------------------------------------------------------*
     * Miscellaneous
     *----------------------------------------------------------------------------*/
+    
+    // add a reference for an SVG group (fastest way to track them)
+    addSVGGroup: function( group ) {
+      this.svgGroups.push( group );
+    },
+    
+    // remove a reference for an SVG group (fastest way to track them)
+    removeSVGGroup: function( group ) {
+      var index = _.indexOf( this.svgGroups, group );
+      assert && assert( index >= 0, 'Tried to remove an SVGGroup from a DisplayInstance when it did not exist' );
+      
+      this.svgGroups.splice( this.svgGroups, 1 ); // TODO: remove function
+    },
+    
+    // returns null when a lookup fails (which is legitimate)
+    lookupSVGGroup: function( block ) {
+      var len = this.svgGroups.length;
+      for ( var i = 0; i < len; i++ ) {
+        var group = this.svgGroups[i];
+        if ( group.block === block ) {
+          return group;
+        }
+      }
+      return null;
+    },
     
     // clean up listeners and garbage, so that we can be recycled (or pooled)
     dispose: function() {

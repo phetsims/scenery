@@ -27,6 +27,7 @@ define( [
     'SCENERY/display/SelfDrawable',
     'SCENERY/display/SharedCanvasCacheDrawable',
     'SCENERY/display/SVGBlock',
+    'SCENERY/display/SVGGroup',
     'SCENERY/display/SVGSelfDrawable',
     
     'SCENERY/input/ButtonListener',
