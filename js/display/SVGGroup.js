@@ -50,13 +50,18 @@ define( function( require ) {
       
       // filter handling
       this.opacityDirty = true;
-      this.hasOpacity = false;
       this.visibilityDirty = true;
+      this.clipDirty = true;
+      this.hasOpacity = false;
+      this.clipDefinition = null;
+      this.clipPath = null;
       this.opacityDirtyListener = this.opacityDirtyListener || this.markOpacityDirty.bind( this );
       this.visibilityDirtyListener = this.visibilityDirtyListener || this.markVisibilityDirty.bind( this );
+      this.clipDirtyListener = this.clipDirtyListener || this.markClipDirty.bind( this );
       if ( this.willApplyFilters ) {
         this.node.onStatic( 'opacity', this.opacityDirtyListener );
         this.node.onStatic( 'visibility', this.visibilityDirtyListener );
+        this.node.onStatic( 'clip', this.clipDirtyListener );
       }
       
       // for tracking the order of child groups, we use a flag and update (reorder) once per updateDisplay if necessary.
@@ -108,6 +113,10 @@ define( function( require ) {
       }
     },
     
+    /*---------------------------------------------------------------------------*
+    * TODO: reduce filesize by creating these methods programatically. not done yet since I want to ensure correctness and make refactoring easier right now.
+    *----------------------------------------------------------------------------*/
+    
     markOrderDirty: function() {
       if ( !this.orderDirty ) {
         this.orderDirty = true;
@@ -136,11 +145,20 @@ define( function( require ) {
       }
     },
     
+    markClipDirty: function() {
+      if ( !this.clipDirty ) {
+        this.clipDirty = true;
+        this.markDirty();
+      }
+    },
+    
     update: function() {
       // we may have been disposed since being marked dirty on our block. we won't have a reference if we are disposed
       if ( !this.block ) {
         return;
       }
+      
+      var svgGroup = this.svgGroup;
       
       this.dirty = false;
       
@@ -151,17 +169,17 @@ define( function( require ) {
         
         if ( !isIdentity ) {
           this.hasTransform = true;
-          this.svgGroup.setAttribute( 'transform', this.node.transform.getMatrix().getSVGTransform() );
+          svgGroup.setAttribute( 'transform', this.node.transform.getMatrix().getSVGTransform() );
         } else if ( this.hasTransform ) {
           this.hasTransform = false;
-          this.svgGroup.removeAttribute( 'transform' );
+          svgGroup.removeAttribute( 'transform' );
         }
       }
       
       if ( this.visibilityDirty ) {
         this.visibilityDirty = false;
         
-        this.svgGroup.style.display = this.node.isVisible() ? '' : 'none';
+        svgGroup.style.display = this.node.isVisible() ? '' : 'none';
       }
       
       if ( this.opacityDirty ) {
@@ -169,10 +187,39 @@ define( function( require ) {
         
         if ( this.node.opacity !== 1 ) {
           this.hasOpacity = true;
-          this.svgGroup.setAttribute( 'opacity', this.node.opacity );
+          svgGroup.setAttribute( 'opacity', this.node.opacity );
         } else if ( this.hasOpacity ) {
           this.hasOpacity = false;
-          this.svgGroup.removeAttribute( 'opacity' );
+          svgGroup.removeAttribute( 'opacity' );
+        }
+      }
+      
+      if ( this.clipDirty ) {
+        this.clipDirty = false;
+        
+        var clipId = 'clip' + this.node.getId();
+        
+        if ( this.node._clipArea ) {
+          if ( !this.clipDefinition ) {
+            this.clipDefinition = document.createElementNS( scenery.svgns, 'clipPath' );
+            this.clipDefinition.setAttribute( 'id', clipId );
+            this.clipDefinition.setAttribute( 'clipPathUnits', 'userSpaceOnUse' );
+            this.block.defs.appendChild( this.clipDefinition ); // TODO: method? evaluate with future usage of defs (not done yet)
+            
+            this.clipPath = document.createElementNS( scenery.svgns, 'path' );
+            this.clipDefinition.appendChild( this.clipPath );
+            
+            svgGroup.setAttribute( 'clip-path', 'url(#' + clipId + ')' );
+          }
+          
+          this.clipPath.setAttribute( 'd', this.node._clipArea.getSVGPath() );
+        } else if ( this.clipDefinition ) {
+          svgGroup.removeAttribute( 'clip-path' );
+          this.block.defs.removeChild( this.clipDefinition ); // TODO: method? evaluate with future usage of defs (not done yet)
+          
+          // TODO: consider pooling these?
+          this.clipDefinition = null;
+          this.clipPath = null;
         }
       }
       
@@ -190,7 +237,7 @@ define( function( require ) {
               // out of order, rearrange
               
               // in the DOM first (since we reference the children array to know what to insertBefore)
-              this.svgGroup.insertBefore( group.svgGroup, idx + 1 >= this.children.length ? null : this.children[idx+1].svgGroup ); // see http://stackoverflow.com/questions/9732624/how-to-swap-dom-child-nodes-in-javascript
+              svgGroup.insertBefore( group.svgGroup, idx + 1 >= this.children.length ? null : this.children[idx+1].svgGroup ); // see http://stackoverflow.com/questions/9732624/how-to-swap-dom-child-nodes-in-javascript
               
               // then in our children array
               var oldIndex = _.indexOf( this.children, group );
@@ -218,6 +265,7 @@ define( function( require ) {
       if ( this.willApplyFilters ) {
         this.node.offStatic( 'opacity', this.opacityDirtyListener );
         this.node.offStatic( 'visible', this.visibilityDirtyListener );
+        this.node.offStatic( 'clip', this.clipDirtyListener );
       }
       this.node.offStatic( 'childInserted', this.orderDirtyListener );
       this.node.offStatic( 'childRemoved', this.orderDirtyListener );

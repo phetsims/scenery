@@ -1488,6 +1488,8 @@ define( function( require ) {
         
         this._clipArea = shape;
         
+        this.trigger0( 'clip' );
+        
         this.notifyClipChange();
         
         this.invalidateBounds();
