@@ -112,6 +112,13 @@ define( function( require ) {
   Renderer.isWebGL = function( bitmask ) {
     return ( bitmask & Renderer.bitmaskWebGL ) !== 0;
   };
+  
+  // returns the part of the bitmask that should contain only Canvas/SVG/DOM/WebGL flags
+  //OHTWO TODO: use this instead of direct access to bitmaskRendererArea
+  Renderer.getStrippedBitmask = function( bitmask ) {
+    return bitmask & Renderer.bitmaskRendererArea;
+  };
+  
   Renderer.getFitStrategy = function( bitmask ) {
     return Renderer.fitStrategies[bitmask & Renderer.bitmaskFitting];
   };

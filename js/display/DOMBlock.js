@@ -15,12 +15,12 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
   
-  scenery.DOMWrapperDrawable = function DOMWrapperDrawable( domDrawable ) {
+  scenery.DOMBlock = function DOMBlock( domDrawable ) {
     this.initialize( domDrawable );
   };
-  var DOMWrapperDrawable = scenery.DOMWrapperDrawable;
+  var DOMBlock = scenery.DOMBlock;
   
-  inherit( Drawable, DOMWrapperDrawable, {
+  inherit( Drawable, DOMBlock, {
     initialize: function( domDrawable ) {
       // TODO: is it bad to pass the acceleration flags along?
       this.initializeDrawable( domDrawable.renderer );
@@ -37,21 +37,29 @@ define( function( require ) {
       
       // super call
       Drawable.prototype.dispose.call( this );
+    },
+    
+    addDrawable: function( drawable ) {
+      assert && assert( this.domDrawable === drawable, 'DOMBlock should only be used with one drawable for now (the one it was initialized with)' );
+    },
+    
+    removeDrawable: function( drawable ) {
+      assert && assert( this.domDrawable === drawable, 'DOMBlock should only be used with one drawable for now (the one it was initialized with)' );
     }
   } );
 
   /* jshint -W064 */
-  Poolable( DOMWrapperDrawable, {
+  Poolable( DOMBlock, {
     constructorDuplicateFactory: function( pool ) {
       return function( domDrawable ) {
         if ( pool.length ) {
           return pool.pop().initialize( domDrawable );
         } else {
-          return new DOMWrapperDrawable( domDrawable );
+          return new DOMBlock( domDrawable );
         }
       };
     }
   } );
   
-  return DOMWrapperDrawable;
+  return DOMBlock;
 } );

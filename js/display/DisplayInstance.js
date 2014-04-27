@@ -338,7 +338,7 @@ define( function( require ) {
                             'For now, disallow an instance being a backbone and a canvas cache, since it has no performance benefits' );
           
           if ( !this.groupDrawable ) {
-            this.groupDrawable = scenery.BackboneBlock.createFromPool( this, groupRenderer, false );
+            this.groupDrawable = scenery.BackboneBlock.createFromPool( this, this.getTransformRootInstance(), groupRenderer, false );
             
             if ( this.isTransformed ) {
               this.display.markTransformRootDirty( this, true );
@@ -387,6 +387,10 @@ define( function( require ) {
     // whether we don't have an associated RenderState attached. If we are stateless, we won't have children, and won't have listeners attached to our node yet.
     isStateless: function() {
       return !this.state;
+    },
+    
+    getTransformRootInstance: function() {
+      throw new Error( 'OHTWO unimplemented getTransformRootInstance' );
     },
     
     /*---------------------------------------------------------------------------*

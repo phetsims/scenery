@@ -59,6 +59,14 @@ define( function( require ) {
     
     markDirtyDrawable: function( drawable ) {
       
+    },
+    
+    addDrawable: function( drawable ) {
+      
+    },
+    
+    removeDrawable: function( drawable ) {
+      
     }
   } );
   

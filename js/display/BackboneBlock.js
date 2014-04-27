@@ -13,31 +13,82 @@ define( function( require ) {
   var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
+  var Renderer = require( 'SCENERY/layers/Renderer' );
+  var CanvasBlock = require( 'SCENERY/display/CanvasBlock' );
+  var SVGBlock = require( 'SCENERY/display/SVGBlock' );
+  var DOMBlock = require( 'SCENERY/display/DOMBlock' );
   
   // includeRoot is used for the root of a display, where the instance should be thought of as fully "under" the backbone
-  scenery.BackboneBlock = function BackboneBlock( instance, renderer, includeRoot, existingDiv ) {
-    this.initialize( instance, renderer, includeRoot, existingDiv );
+  scenery.BackboneBlock = function BackboneBlock( backboneInstance, transformRootInstance, renderer, includeRoot, existingDiv ) {
+    this.initialize( backboneInstance, transformRootInstance, renderer, includeRoot, existingDiv );
   };
   var BackboneBlock = scenery.BackboneBlock;
   
   inherit( Drawable, BackboneBlock, {
-    initialize: function( instance, renderer, includeRoot, existingDiv ) {
+    initialize: function( backboneInstance, transformRootInstance, renderer, includeRoot, existingDiv ) {
       Drawable.call( this, renderer );
       
-      this.instance = instance;
+      this.backboneInstance = backboneInstance;
+      this.transformRootInstance = transformRootInstance;
       this.renderer = renderer;
       this.domElement = existingDiv || BackboneBlock.createDivBackbone();
       this.includeRoot = includeRoot;
+      
+      this.blocks = this.blocks || []; // we are responsible for their disposal
     },
     
     dispose: function() {
-      this.instance = null;
+      this.backboneInstance = null;
+      this.transformRootInstance = null;
+      
+      this.disposeBlocks();
       
       Drawable.prototype.dispose.call( this );
     },
     
+    // dispose all of the blocks while clearing our references to them
+    disposeBlocks: function() {
+      while ( this.blocks.length ) {
+        var block = this.blocks.pop();
+        this.domElement.removeChild( block.domElement );
+        block.dispose();
+      }
+    },
+    
     markDirtyDrawable: function( drawable ) {
       
+    },
+    
+    rebuild: function( firstDrawable, lastDrawable ) {
+      this.disposeBlocks();
+      
+      var currentBlock = null;
+      var currentRenderer = 0;
+      
+      // linked-list iteration inclusively from firstDrawable to lastDrawable
+      for ( var drawable = firstDrawable; drawable !== null && drawable.previousDrawable !== lastDrawable; drawable = drawable.nextDrawable ) {
+        
+        // if we need to switch to a new block, create it
+        if ( !currentBlock || drawable.renderer !== currentRenderer ) {
+          currentRenderer = drawable.renderer;
+          
+          if ( Renderer.isCanvas( currentRenderer ) ) {
+            currentBlock = CanvasBlock.freeFromPool( currentRenderer, this.transformRootInstance );
+          } else if ( Renderer.isSVG( currentRenderer ) ) {
+            currentBlock = SVGBlock.freeFromPool( currentRenderer, this.transformRootInstance );
+          } else if ( Renderer.isDOM( currentRenderer ) ) {
+            currentBlock = DOMBlock.freeFromPool( drawable );
+            currentRenderer = 0; // force a new block for the next drawable
+          } else {
+            throw new Error( 'unsupported renderer for BackboneBlock.rebuild: ' + currentRenderer );
+          }
+          
+          this.blocks.push( currentBlock );
+          this.domElement.appendChild( currentBlock.domElement ); //OHTWO TODO: minor speedup by appending only once its fragment is constructed? or use DocumentFragment?
+        }
+        
+        currentBlock.addDrawable( drawable );
+      }
     }
   } );
   
@@ -54,11 +105,11 @@ define( function( require ) {
   /* jshint -W064 */
   Poolable( BackboneBlock, {
     constructorDuplicateFactory: function( pool ) {
-      return function( instance, renderer, includeRoot, existingDiv ) {
+      return function( backboneInstance, transformRootInstance, renderer, includeRoot, existingDiv ) {
         if ( pool.length ) {
-          return pool.pop().initialize( instance, renderer, includeRoot, existingDiv );
+          return pool.pop().initialize( backboneInstance, transformRootInstance, renderer, includeRoot, existingDiv );
         } else {
-          return new BackboneBlock( instance, renderer, includeRoot, existingDiv );
+          return new BackboneBlock( backboneInstance, transformRootInstance, renderer, includeRoot, existingDiv );
         }
       };
     }
