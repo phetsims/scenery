@@ -338,7 +338,7 @@ define( function( require ) {
                             'For now, disallow an instance being a backbone and a canvas cache, since it has no performance benefits' );
           
           if ( !this.groupDrawable ) {
-            this.groupDrawable = scenery.BackboneBlock.createFromPool( this, this.getTransformRootInstance(), groupRenderer, false );
+            this.groupDrawable = scenery.BackboneBlock.createFromPool( this, this.getTransformRootInstance(), groupRenderer, state.isDisplayRoot );
             
             if ( this.isTransformed ) {
               this.display.markTransformRootDirty( this, true );
@@ -390,7 +390,12 @@ define( function( require ) {
     },
     
     getTransformRootInstance: function() {
-      throw new Error( 'OHTWO unimplemented getTransformRootInstance' );
+      //OHTWO TODO: how is the root instance handled? we currently don't have isTransformed set on it
+      if ( this.isTransformed || !this.parent ) {
+        return this;
+      } else {
+        return this.parent.getTransformRootInstance();
+      }
     },
     
     /*---------------------------------------------------------------------------*

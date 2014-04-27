@@ -47,19 +47,20 @@ define( function( require ) {
    * - node's renderer summary (what types of renderers are allowed below)
    * - node.hints | node.opacity
    */
-  RenderState.RegularState = function RegularState( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared ) {
-    this.initialize( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared );
+  RenderState.RegularState = function RegularState( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot ) {
+    this.initialize( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot );
   };
   RenderState.RegularState.prototype = {
     constructor: RenderState.RegularState,
     
-    initialize: function( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared ) {
+    initialize: function( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot ) {
       // this should be accurate right now, the pass to update these should have been completed earlier
       var combinedBitmask = node._rendererSummary.bitmask;
       
       this.svgRenderer = svgRenderer;
       this.canvasRenderer = canvasRenderer;
-      this.isUnderCanvasCache;
+      this.isUnderCanvasCache = isUnderCanvasCache;
+      this.isDisplayRoot = isDisplayRoot;
       
       this.isBackbone = false;
       this.isTransformed = false;
@@ -78,7 +79,7 @@ define( function( require ) {
       // check if we need a backbone or cache
       // if we are under a canvas cache, we will NEVER have a backbone
       // splits are accomplished just by having a backbone
-      if ( !isUnderCanvasCache && ( isTransparent || hints.requireElement || hints.cssTransformBackbone || hints.split ) ) {
+      if ( isDisplayRoot || ( !isUnderCanvasCache && ( isTransparent || hints.requireElement || hints.cssTransformBackbone || hints.split ) ) ) {
         this.isBackbone = true;
         this.isTransformed = !!hints.cssTransformBackbone; // for now, only trigger CSS transform if we have the specific hint
         this.groupRenderer = scenery.Renderer.bitmaskDOM | ( hints.forceAcceleration ? scenery.Renderer.bitmaskForceAcceleration : 0 ); // probably won't be used
@@ -89,6 +90,7 @@ define( function( require ) {
         if ( hints.singleCache ) {
           // TODO: scale options - fixed size, match highest resolution (adaptive), or mipmapped
           if ( isShared ) {
+            this.isUnderCanvasCache = true;
             this.isSharedCanvasCacheSelf = true;
             
             //OHTWO TODO: Also consider SVG output
@@ -102,6 +104,7 @@ define( function( require ) {
           }
         } else {
           this.isInstanceCanvasCache = true;
+          this.isUnderCanvasCache = true;
           this.groupRenderer = scenery.Renderer.bitmaskCanvas; // disallowing SVG here, so we don't have to break up our SVG group structure
         }
       }
@@ -142,6 +145,9 @@ define( function( require ) {
         this.isUnderCanvasCache || this.isInstanceCanvasCache || this.isSharedCanvasCacheSelf,
         
         // isShared. No direct descendant is shared, since we create those specially with a new state from createSharedCacheState
+        false,
+        
+        // isDisplayRoot
         false
       );
     },
@@ -163,7 +169,8 @@ define( function( require ) {
       scenery.Renderer.bitmaskSVG,    // default SVG renderer settings
       scenery.Renderer.bitmaskCanvas, // default Canvas renderer settings
       false,                          // isUnderCanvasCache
-      false                           // isShared
+      false,                          // isShared
+      true                            // isDisplayRoot
     );
     return baseState;
   };
@@ -174,7 +181,8 @@ define( function( require ) {
       null,                             // no SVG renderer settings needed
       scenery.Renderer.bitmaskCanvas,   // default Canvas renderer settings
       true,                             // isUnderCanvasCache
-      true                              // isShared (since we are creating the shared one, not the individual instances referencing it)
+      true,                             // isShared (since we are creating the shared one, not the individual instances referencing it)
+      false                             // isDisplayRoot
     );
     return baseState;
   };
@@ -182,11 +190,11 @@ define( function( require ) {
   /* jshint -W064 */
   Poolable( RenderState.RegularState, {
     constructorDuplicateFactory: function( pool ) {
-      return function( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared ) {
+      return function( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot ) {
         if ( pool.length ) {
-          return pool.pop().initialize( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared );
+          return pool.pop().initialize( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot );
         } else {
-          return new RenderState.RegularState( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared );
+          return new RenderState.RegularState( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot );
         }
       };
     }

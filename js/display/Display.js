@@ -160,7 +160,10 @@ define( function( require ) {
       this._baseInstance.syncTree( scenery.RenderState.RegularState.createRootState( this._rootNode ) );
       this.markTransformRootDirty( this._baseInstance, false ); // marks the transform root as dirty (since it is)
       
-      this._rootBackbone = scenery.BackboneBlock.createFromPool( this._baseInstance, this._baseInstance, scenery.bitmaskSupportsDOM, true, this._domElement );
+      this._rootBackbone = this._baseInstance.groupDrawable;
+      assert && assert( this._rootBackbone, 'We are guaranteed a root backbone as the groupDrawable on the base instance' );
+      
+      this._rootBackbone.rebuild( this._baseInstance.firstDrawable, this._baseInstance.lastDrawable );
       
       if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
       

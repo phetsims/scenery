@@ -18,21 +18,20 @@ define( function( require ) {
   var SVGBlock = require( 'SCENERY/display/SVGBlock' );
   var DOMBlock = require( 'SCENERY/display/DOMBlock' );
   
-  // includeRoot is used for the root of a display, where the instance should be thought of as fully "under" the backbone
-  scenery.BackboneBlock = function BackboneBlock( backboneInstance, transformRootInstance, renderer, includeRoot, existingDiv ) {
-    this.initialize( backboneInstance, transformRootInstance, renderer, includeRoot, existingDiv );
+  scenery.BackboneBlock = function BackboneBlock( backboneInstance, transformRootInstance, renderer, isDisplayRoot, existingDiv ) {
+    this.initialize( backboneInstance, transformRootInstance, renderer, isDisplayRoot, existingDiv );
   };
   var BackboneBlock = scenery.BackboneBlock;
   
   inherit( Drawable, BackboneBlock, {
-    initialize: function( backboneInstance, transformRootInstance, renderer, includeRoot, existingDiv ) {
+    initialize: function( backboneInstance, transformRootInstance, renderer, isDisplayRoot, existingDiv ) {
       Drawable.call( this, renderer );
       
       this.backboneInstance = backboneInstance;
       this.transformRootInstance = transformRootInstance;
       this.renderer = renderer;
       this.domElement = existingDiv || BackboneBlock.createDivBackbone();
-      this.includeRoot = includeRoot;
+      this.isDisplayRoot = isDisplayRoot;
       
       this.blocks = this.blocks || []; // we are responsible for their disposal
     },
@@ -105,11 +104,11 @@ define( function( require ) {
   /* jshint -W064 */
   Poolable( BackboneBlock, {
     constructorDuplicateFactory: function( pool ) {
-      return function( backboneInstance, transformRootInstance, renderer, includeRoot, existingDiv ) {
+      return function( backboneInstance, transformRootInstance, renderer, isDisplayRoot, existingDiv ) {
         if ( pool.length ) {
-          return pool.pop().initialize( backboneInstance, transformRootInstance, renderer, includeRoot, existingDiv );
+          return pool.pop().initialize( backboneInstance, transformRootInstance, renderer, isDisplayRoot, existingDiv );
         } else {
-          return new BackboneBlock( backboneInstance, transformRootInstance, renderer, includeRoot, existingDiv );
+          return new BackboneBlock( backboneInstance, transformRootInstance, renderer, isDisplayRoot, existingDiv );
         }
       };
     }
