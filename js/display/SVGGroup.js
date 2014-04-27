@@ -34,9 +34,14 @@ define( function( require ) {
       // general dirty flag (triggered on any other dirty event)
       this.dirty = true;
       
+      // transform handling
+      this.transformDirty = true;
+      this.hasTransform = false;
+      this.transformDirtyListener = this.transformDirtyListener || this.markTransformDirty.bind( this );
+      this.node.onStatic( 'transform', this.transformDirtyListener );
+      
       // for tracking the order of child groups, we use a flag and update (reorder) once per updateDisplay if necessary.
       this.orderDirty = true;
-      this.block.markDirtyGroup( this ); // so we are marked and updated properly
       this.orderDirtyListener = this.orderDirtyListener || this.markOrderDirty.bind( this );
       this.node.onStatic( 'childInserted', this.orderDirtyListener );
       this.node.onStatic( 'childRemoved', this.orderDirtyListener );
@@ -46,6 +51,8 @@ define( function( require ) {
       }
       
       this.instance.addSVGGroup( this );
+      
+      this.block.markDirtyGroup( this ); // so we are marked and updated properly
     },
     
     addSelfDrawable: function( drawable ) {
@@ -89,6 +96,13 @@ define( function( require ) {
       }
     },
     
+    markTransformDirty: function() {
+      if ( !this.transformDirty ) {
+        this.transformDirty = true;
+        this.markDirty();
+      }
+    },
+    
     update: function() {
       // we may have been disposed since being marked dirty on our block. we won't have a reference if we are disposed
       if ( !this.block ) {
@@ -96,6 +110,22 @@ define( function( require ) {
       }
       
       this.dirty = false;
+      
+      if ( this.transformDirty ) {
+        this.transformDirty = false;
+        
+        var isIdentity = this.node.transform.isIdentity();
+        
+        if ( !isIdentity ) {
+          this.hasTransform = true;
+          
+          this.svgGroup.setAttribute( 'transform', this.node.transform.getMatrix().getSVGTransform() );
+        } else if ( this.hasTransform ) {
+          this.hasTransform = false;
+          
+          this.svgGroup.removeAttribute( 'transform' );
+        }
+      }
       
       if ( this.orderDirty ) {
         this.orderDirty = false;
@@ -133,6 +163,7 @@ define( function( require ) {
     },
     
     dispose: function() {
+      this.node.offStatic( 'transform', this.transformDirtyListener );
       this.node.offStatic( 'childInserted', this.orderDirtyListener );
       this.node.offStatic( 'childRemoved', this.orderDirtyListener );
       

@@ -99,6 +99,9 @@ define( function( require ) {
           
           this.blocks.push( currentBlock );
           this.domElement.appendChild( currentBlock.domElement ); //OHTWO TODO: minor speedup by appending only once its fragment is constructed? or use DocumentFragment?
+          
+          // mark it dirty for now, so we can check
+          this.markDirtyDrawable( currentBlock );
         }
         
         currentBlock.addDrawable( drawable );
