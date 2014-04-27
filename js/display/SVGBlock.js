@@ -101,11 +101,15 @@ define( function( require ) {
       drawable.parentDrawable = this;
       this.markDirtyDrawable( drawable );
       SVGGroup.addDrawable( this, drawable );
+      drawable.updateDefs( this.defs );
     },
     
     removeDrawable: function( drawable ) {
       SVGGroup.removeDrawable( this, drawable );
       drawable.parentDrawable = null;
+      
+      // NOTE: we don't unset the drawable's defs here, since it will either be disposed (will clear it)
+      // or will be added to another SVGBlock (which will overwrite it)
     }
   } );
   

@@ -521,8 +521,13 @@ define( function( require ) {
     // called when the defs SVG block is switched (our SVG element was moved to another SVG top-level context)
     updateDefs: function( defs ) {
       if ( this.def ) {
-        this.def.parentNode.removeChild( this.def );
-        defs.appendChild( this.def );
+        if ( defs ) {
+          // adding to the DOM here removes it from its previous location
+          defs.appendChild( this.def );
+        } else if ( this.def.parentNode ) {
+          //OHTWO TODO: does this parentNode access cause reflows?
+          this.def.parentNode.removeChild( this.def );
+        }
       }
     },
     

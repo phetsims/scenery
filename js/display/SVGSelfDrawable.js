@@ -146,8 +146,6 @@ define( function( require ) {
       },
       
       updateDefs: function( defs ) {
-        SVGSelfDrawable.prototype.updateDefs.call( this, defs );
-        
         updateDefsSelf && updateDefsSelf.call( this, defs );
         
         usesFill && this.fillState.updateDefs( defs );
@@ -166,6 +164,8 @@ define( function( require ) {
           this.svgElement = null;
         }
         
+        // release any defs, and dispose composed state objects
+        updateDefsSelf && updateDefsSelf.call( this, null );
         usesFill && this.fillState.dispose();
         usesStroke && this.strokeState.dispose();
         
