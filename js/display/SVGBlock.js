@@ -1,7 +1,7 @@
 // Copyright 2002-2014, University of Colorado
 
 /**
- * TODO docs
+ * Handles a visual SVG layer of drawables.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
