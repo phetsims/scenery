@@ -55,6 +55,10 @@ define( function( require ) {
       this.filterRootInstance = null;
       
       Drawable.prototype.dispose.call( this );
+    },
+    
+    markDirtyDrawable: function( drawable ) {
+      
     }
   } );
   

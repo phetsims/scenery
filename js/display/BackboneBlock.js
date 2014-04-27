@@ -10,22 +10,30 @@ define( function( require ) {
   'use strict';
   
   var inherit = require( 'PHET_CORE/inherit' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
   
   // includeRoot is used for the root of a display, where the instance should be thought of as fully "under" the backbone
   scenery.BackboneBlock = function BackboneBlock( instance, renderer, includeRoot, existingDiv ) {
-    Drawable.call( this, renderer );
-    this.instance = instance;
-    this.renderer = renderer;
-    this.domElement = existingDiv || BackboneBlock.createDivBackbone();
-    this.includeRoot = includeRoot;
+    this.initialize( instance, renderer, includeRoot, existingDiv );
   };
   var BackboneBlock = scenery.BackboneBlock;
   
   inherit( Drawable, BackboneBlock, {
-    repaint: function() {
+    initialize: function( instance, renderer, includeRoot, existingDiv ) {
+      Drawable.call( this, renderer );
       
+      this.instance = instance;
+      this.renderer = renderer;
+      this.domElement = existingDiv || BackboneBlock.createDivBackbone();
+      this.includeRoot = includeRoot;
+    },
+    
+    dispose: function() {
+      this.instance = null;
+      
+      Drawable.prototype.dispose.call( this );
     },
     
     markDirtyDrawable: function( drawable ) {
@@ -42,6 +50,19 @@ define( function( require ) {
     div.style.height = '0';
     return div;
   };
+  
+  /* jshint -W064 */
+  Poolable( BackboneBlock, {
+    constructorDuplicateFactory: function( pool ) {
+      return function( instance, renderer, includeRoot, existingDiv ) {
+        if ( pool.length ) {
+          return pool.pop().initialize( instance, renderer, includeRoot, existingDiv );
+        } else {
+          return new BackboneBlock( instance, renderer, includeRoot, existingDiv );
+        }
+      };
+    }
+  } );
   
   return BackboneBlock;
 } );

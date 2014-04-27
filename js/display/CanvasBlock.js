@@ -53,6 +53,10 @@ define( function( require ) {
       this.canvas.height = 0;
       
       Drawable.prototype.dispose.call( this );
+    },
+    
+    markDirtyDrawable: function( drawable ) {
+      
     }
   } );
   
