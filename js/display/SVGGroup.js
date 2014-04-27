@@ -35,10 +35,10 @@ define( function( require ) {
       this.dirty = true;
       
       // we won't listen for transform changes (or even want to set a transform) if our node is beneath a transform root
-      this.willApplyTransforms = this.block.transformRootInstance.trail.nodes.length >= this.instance.trail.nodes.length;
+      this.willApplyTransforms = this.block.transformRootInstance.trail.nodes.length < this.instance.trail.nodes.length;
       
       // we won't listen for filter changes (or set filters, like opacity or visibility) if our node is beneath a filter root
-      this.willApplyFilters = this.block.filterRootInstance.trail.nodes.length >= this.instance.trail.nodes.length;
+      this.willApplyFilters = this.block.filterRootInstance.trail.nodes.length < this.instance.trail.nodes.length;
       
       // transform handling
       this.transformDirty = true;

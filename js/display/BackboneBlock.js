@@ -35,6 +35,8 @@ define( function( require ) {
       this.isDisplayRoot = isDisplayRoot;
       this.dirtyDrawables = cleanArray( this.dirtyDrawables );
       
+      //OHTWO TODO: listen to backboneInstance, handle visibility if possible (see the filterroot situation?)
+      
       this.blocks = this.blocks || []; // we are responsible for their disposal
     },
     
@@ -98,6 +100,7 @@ define( function( require ) {
           }
           
           this.blocks.push( currentBlock );
+          currentBlock.parentDrawable = this;
           this.domElement.appendChild( currentBlock.domElement ); //OHTWO TODO: minor speedup by appending only once its fragment is constructed? or use DocumentFragment?
           
           // mark it dirty for now, so we can check
