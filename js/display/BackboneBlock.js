@@ -19,19 +19,19 @@ define( function( require ) {
   var SVGBlock = require( 'SCENERY/display/SVGBlock' );
   var DOMBlock = require( 'SCENERY/display/DOMBlock' );
   
-  scenery.BackboneBlock = function BackboneBlock( backboneInstance, transformRootInstance, renderer, isDisplayRoot, existingDiv ) {
-    this.initialize( backboneInstance, transformRootInstance, renderer, isDisplayRoot, existingDiv );
+  scenery.BackboneBlock = function BackboneBlock( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
+    this.initialize( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
   };
   var BackboneBlock = scenery.BackboneBlock;
   
   inherit( Drawable, BackboneBlock, {
-    initialize: function( backboneInstance, transformRootInstance, renderer, isDisplayRoot, existingDiv ) {
+    initialize: function( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
       Drawable.call( this, renderer );
       
       this.backboneInstance = backboneInstance;
       this.transformRootInstance = transformRootInstance;
       this.renderer = renderer;
-      this.domElement = existingDiv || BackboneBlock.createDivBackbone();
+      this.domElement = isDisplayRoot ? display._domElement : BackboneBlock.createDivBackbone();
       this.isDisplayRoot = isDisplayRoot;
       this.dirtyDrawables = cleanArray( this.dirtyDrawables );
       
@@ -122,11 +122,11 @@ define( function( require ) {
   /* jshint -W064 */
   Poolable( BackboneBlock, {
     constructorDuplicateFactory: function( pool ) {
-      return function( backboneInstance, transformRootInstance, renderer, isDisplayRoot, existingDiv ) {
+      return function( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
         if ( pool.length ) {
-          return pool.pop().initialize( backboneInstance, transformRootInstance, renderer, isDisplayRoot, existingDiv );
+          return pool.pop().initialize( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
         } else {
-          return new BackboneBlock( backboneInstance, transformRootInstance, renderer, isDisplayRoot, existingDiv );
+          return new BackboneBlock( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
         }
       };
     }

@@ -340,7 +340,7 @@ define( function( require ) {
                             'For now, disallow an instance being a backbone and a canvas cache, since it has no performance benefits' );
           
           if ( !this.groupDrawable ) {
-            this.groupDrawable = scenery.BackboneBlock.createFromPool( this, this.getTransformRootInstance(), groupRenderer, state.isDisplayRoot );
+            this.groupDrawable = scenery.BackboneBlock.createFromPool( this.display, this, this.getTransformRootInstance(), groupRenderer, state.isDisplayRoot );
             
             if ( this.isTransformed ) {
               this.display.markTransformRootDirty( this, true );
