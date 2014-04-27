@@ -249,6 +249,11 @@
               
               window.display = new scenery.Display( root );
               display.buildTemporaryDisplay();
+              
+              while ( document.body.firstChild ) {
+                document.body.removeChild( document.body.firstChild );
+              }
+              document.body.appendChild( display.domElement );
             } );
           };
           
