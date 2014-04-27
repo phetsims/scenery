@@ -90,7 +90,7 @@ define( function( require ) {
       cleanArray( this.dirtyGroups );
       cleanArray( this.dirtyDrawables );
       
-      this.svg.removeChild( this.rootGroup );
+      this.svg.removeChild( this.rootGroup.svgGroup );
       this.rootGroup.dispose();
       this.rootGroup = null;
       

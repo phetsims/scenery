@@ -248,6 +248,10 @@ define( function( require ) {
       } else {
         // not a shared cache
         
+        // clear our references for now (they should be set up properly afterwards)
+        this.firstDrawable = null;
+        this.lastDrawable = null;
+        
         var currentDrawable = null;
         
         if ( this.node.isPainted() ) {
