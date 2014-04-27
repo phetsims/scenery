@@ -34,14 +34,29 @@ define( function( require ) {
       // general dirty flag (triggered on any other dirty event)
       this.dirty = true;
       
+      // we won't listen for transform changes (or even want to set a transform) if our node is beneath a transform root
+      this.willApplyTransforms = this.block.transformRootInstance.trail.nodes.length >= this.instance.trail.nodes.length;
+      
+      // we won't listen for filter changes (or set filters, like opacity or visibility) if our node is beneath a filter root
+      this.willApplyFilters = this.block.filterRootInstance.trail.nodes.length >= this.instance.trail.nodes.length;
+      
       // transform handling
       this.transformDirty = true;
       this.hasTransform = false;
-      // we won't listen for transform changes (or even want to set a transform) if our node is beneath a transform root
-      this.listeningToTransform = this.block.transformRootInstance.trail.nodes.length >= this.instance.trail.nodes.length;
       this.transformDirtyListener = this.transformDirtyListener || this.markTransformDirty.bind( this );
-      if ( this.listeningToTransform ) {
+      if ( this.willApplyTransforms ) {
         this.node.onStatic( 'transform', this.transformDirtyListener );
+      }
+      
+      // filter handling
+      this.opacityDirty = true;
+      this.hasOpacity = false;
+      this.visibilityDirty = true;
+      this.opacityDirtyListener = this.opacityDirtyListener || this.markOpacityDirty.bind( this );
+      this.visibilityDirtyListener = this.visibilityDirtyListener || this.markVisibilityDirty.bind( this );
+      if ( this.willApplyFilters ) {
+        this.node.onStatic( 'opacity', this.opacityDirtyListener );
+        this.node.onStatic( 'visibility', this.visibilityDirtyListener );
       }
       
       // for tracking the order of child groups, we use a flag and update (reorder) once per updateDisplay if necessary.
@@ -107,6 +122,20 @@ define( function( require ) {
       }
     },
     
+    markOpacityDirty: function() {
+      if ( !this.opacityDirty ) {
+        this.opacityDirty = true;
+        this.markDirty();
+      }
+    },
+    
+    markVisibilityDirty: function() {
+      if ( !this.visibilityDirty ) {
+        this.visibilityDirty = true;
+        this.markDirty();
+      }
+    },
+    
     update: function() {
       // we may have been disposed since being marked dirty on our block. we won't have a reference if we are disposed
       if ( !this.block ) {
@@ -122,12 +151,28 @@ define( function( require ) {
         
         if ( !isIdentity ) {
           this.hasTransform = true;
-          
           this.svgGroup.setAttribute( 'transform', this.node.transform.getMatrix().getSVGTransform() );
         } else if ( this.hasTransform ) {
           this.hasTransform = false;
-          
           this.svgGroup.removeAttribute( 'transform' );
+        }
+      }
+      
+      if ( this.visibilityDirty ) {
+        this.visibilityDirty = false;
+        
+        this.svgGroup.style.display = this.node.isVisible() ? '' : 'none';
+      }
+      
+      if ( this.opacityDirty ) {
+        this.opacityDirty = false;
+        
+        if ( this.node.opacity !== 1 ) {
+          this.hasOpacity = true;
+          this.svgGroup.setAttribute( 'opacity', this.node.opacity );
+        } else if ( this.hasOpacity ) {
+          this.hasOpacity = false;
+          this.svgGroup.removeAttribute( 'opacity' );
         }
       }
       
@@ -169,6 +214,10 @@ define( function( require ) {
     dispose: function() {
       if ( this.listeningToTransform ) {
         this.node.offStatic( 'transform', this.transformDirtyListener );
+      }
+      if ( this.willApplyFilters ) {
+        this.node.offStatic( 'opacity', this.opacityDirtyListener );
+        this.node.offStatic( 'visible', this.visibilityDirtyListener );
       }
       this.node.offStatic( 'childInserted', this.orderDirtyListener );
       this.node.offStatic( 'childRemoved', this.orderDirtyListener );

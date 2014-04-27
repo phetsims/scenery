@@ -1386,6 +1386,8 @@ define( function( require ) {
         
         this._visible = visible;
         
+        this.trigger0( 'visibility' );
+        
         this.notifyVisibilityChange();
       }
       return this;
@@ -1403,6 +1405,8 @@ define( function( require ) {
         this.notifyBeforeSubtreeChange();
         
         this._opacity = clampedOpacity;
+        
+        this.trigger0( 'opacity' );
         
         this.notifyOpacityChange();
       }
