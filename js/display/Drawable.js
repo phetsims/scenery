@@ -60,7 +60,7 @@ define( function( require ) {
         
         // TODO: notify what we want to call repaint() later
         if ( this.parentDrawable ) {
-          this.parentDrawable.markDirtyInstance( this );
+          this.parentDrawable.markDirtyDrawable( this );
         }
       }
     },

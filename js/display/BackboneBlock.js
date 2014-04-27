@@ -20,18 +20,6 @@ define( function( require ) {
     this.renderer = renderer;
     this.domElement = existingDiv || BackboneBlock.createDivBackbone();
     this.includeRoot = includeRoot;
-    
-    // TODO: flesh out into stitch handling:
-    var drawable = instance.firstDrawable;
-    while ( drawable ) {
-      this.domElement.appendChild( drawable.domElement );
-      if ( drawable === instance.lastDrawable ) {
-        break;
-      }
-      drawable = drawable.nextDrawable;
-    }
-    
-    this.blockDrawable = new scenery.DOMElementDrawable( this.instance.trail, this.renderer, this.domElement, this.repaint.bind( this ) );
   };
   var BackboneBlock = scenery.BackboneBlock;
   
@@ -40,8 +28,8 @@ define( function( require ) {
       
     },
     
-    markDirtyInstance: function( drawable ) {
-      this.blockDrawable.markDirty();
+    markDirtyDrawable: function( drawable ) {
+      
     }
   } );
   

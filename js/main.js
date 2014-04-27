@@ -19,7 +19,6 @@ define( [
     'SCENERY/display/CanvasSelfDrawable',
     'SCENERY/display/Display',
     'SCENERY/display/DisplayInstance',
-    'SCENERY/display/DOMElementDrawable',
     'SCENERY/display/DOMSelfDrawable',
     'SCENERY/display/Drawable',
     'SCENERY/display/InlineCanvasCacheDrawable',
