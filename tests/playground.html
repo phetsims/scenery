@@ -241,11 +241,15 @@
             console.log( trail.lastNode().localToGlobalBounds( bounds ) );
           };
           
-          window.testTrailBounds = function( trail ) {
-            var a = performance.now();
-            for ( var i = 0; i < 100000; i++ ) { trail.localToGlobalBounds( bounds ); };
-            console.log( performance.now() - a );
-          console.log( trail.localToGlobalBounds( bounds ) );
+          window.displayTest = function() {
+            setTimeout( function(){
+              window.root = new scenery.Node();
+              window.rect = new scenery.Rectangle( 0, 0, 100, 50, 0, 0, { fill: 'red' } );
+              root.addChild( rect );
+              
+              window.display = new scenery.Display( root );
+              display.buildTemporaryDisplay();
+            } );
           };
           
           window.fuzzLayers = function() {

@@ -73,11 +73,11 @@ define( function( require ) {
           currentRenderer = drawable.renderer;
           
           if ( Renderer.isCanvas( currentRenderer ) ) {
-            currentBlock = CanvasBlock.freeFromPool( currentRenderer, this.transformRootInstance );
+            currentBlock = CanvasBlock.createFromPool( currentRenderer, this.transformRootInstance );
           } else if ( Renderer.isSVG( currentRenderer ) ) {
-            currentBlock = SVGBlock.freeFromPool( currentRenderer, this.transformRootInstance );
+            currentBlock = SVGBlock.createFromPool( currentRenderer, this.transformRootInstance );
           } else if ( Renderer.isDOM( currentRenderer ) ) {
-            currentBlock = DOMBlock.freeFromPool( drawable );
+            currentBlock = DOMBlock.createFromPool( drawable );
             currentRenderer = 0; // force a new block for the next drawable
           } else {
             throw new Error( 'unsupported renderer for BackboneBlock.rebuild: ' + currentRenderer );
