@@ -31,9 +31,12 @@ define( function( require ) {
       this.children = cleanArray( this.children );
       this.hasSelfDrawable = false;
       
+      // general dirty flag (triggered on any other dirty event)
+      this.dirty = true;
+      
       // for tracking the order of child groups, we use a flag and update (reorder) once per updateDisplay if necessary.
       this.orderDirty = true;
-      this.block.markDirtyGroupOrder( this ); // so we are marked and updated properly
+      this.block.markDirtyGroup( this ); // so we are marked and updated properly
       this.orderDirtyListener = this.orderDirtyListener || this.markOrderDirty.bind( this );
       this.node.onStatic( 'childInserted', this.orderDirtyListener );
       this.node.onStatic( 'childRemoved', this.orderDirtyListener );
@@ -71,17 +74,30 @@ define( function( require ) {
       this.svgGroup.removeChild( group.svgGroup );
     },
     
-    markOrderDirty: function() {
-      if ( !this.orderDirty ) {
-        this.orderDirty = true;
+    markDirty: function() {
+      if ( !this.dirty ) {
+        this.dirty = true;
         
-        this.block.markDirtyGroupOrder( this );
+        this.block.markDirtyGroup( this );
       }
     },
     
-    reorder: function() {
-      // sanity check, since this isn't the cheapest method. Additionally, if we have no block, then we have been disposed
-      if ( this.orderDirty && this.block ) {
+    markOrderDirty: function() {
+      if ( !this.orderDirty ) {
+        this.orderDirty = true;
+        this.markDirty();
+      }
+    },
+    
+    update: function() {
+      // we may have been disposed since being marked dirty on our block. we won't have a reference if we are disposed
+      if ( !this.block ) {
+        return;
+      }
+      
+      this.dirty = false;
+      
+      if ( this.orderDirty ) {
         this.orderDirty = false;
         
         // our instance should have the proper order of children. we check that way.

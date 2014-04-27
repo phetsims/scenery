@@ -28,7 +28,8 @@ define( function( require ) {
       this.transformRootInstance = transformRootInstance;
       this.filterRootInstance = filterRootInstance;
       
-      this.dirtyOrderGroups = cleanArray( this.dirtyOrderGroups );
+      this.dirtyGroups = cleanArray( this.dirtyGroups );
+      this.dirtyDrawables = cleanArray( this.dirtyDrawables );
       
       if ( !this.domElement ) {
         // main SVG element
@@ -58,15 +59,23 @@ define( function( require ) {
       // TODO: dirty list of nodes (each should go dirty only once, easier than scanning all?)
     },
     
-    markDirtyGroupOrder: function( block ) {
-      this.dirtyOrderGroups.push( block );
+    markDirtyGroup: function( block ) {
+      this.dirtyGroups.push( block );
+      this.markDirty(); // TODO: ensure that this works?
+    },
+    
+    markDirtyDrawable: function( drawable ) {
+      this.dirtyDrawables.push( drawable );
       this.markDirty(); // TODO: ensure that this works?
     },
     
     update: function() {
       //OHTWO TODO: call here!
-      while ( this.dirtyOrderGroups.length ) {
-        this.dirtyOrderGroups.pop().reorder();
+      while ( this.dirtyGroups.length ) {
+        this.dirtyGroups.pop().update();
+      }
+      while ( this.dirtyDrawables.length ) {
+        this.dirtyDrawables.pop().repaint();
       }
     },
     
@@ -74,7 +83,8 @@ define( function( require ) {
       // clear references
       this.transformRootInstance = null;
       this.filterRootInstance = null;
-      this.dirtyOrderGroups = cleanArray( this.dirtyOrderGroups );
+      cleanArray( this.dirtyGroups );
+      cleanArray( this.dirtyDrawables );
       
       this.svg.removeChild( this.rootGroup );
       this.rootGroup.dispose();
@@ -83,16 +93,15 @@ define( function( require ) {
       Drawable.prototype.dispose.call( this );
     },
     
-    markDirtyDrawable: function( drawable ) {
-      
-    },
-    
     addDrawable: function( drawable ) {
+      drawable.parentDrawable = this;
+      this.markDirtyDrawable( drawable );
       SVGGroup.addDrawable( this, drawable );
     },
     
     removeDrawable: function( drawable ) {
       SVGGroup.removeDrawable( this, drawable );
+      drawable.parentDrawable = null;
     }
   } );
   
