@@ -163,64 +163,68 @@ define( function( require ) {
       
       this.dirty = false;
       
-      if ( this.transformDirty ) {
-        this.transformDirty = false;
-        
-        var isIdentity = this.node.transform.isIdentity();
-        
-        if ( !isIdentity ) {
-          this.hasTransform = true;
-          svgGroup.setAttribute( 'transform', this.node.transform.getMatrix().getSVGTransform() );
-        } else if ( this.hasTransform ) {
-          this.hasTransform = false;
-          svgGroup.removeAttribute( 'transform' );
-        }
-      }
-      
-      if ( this.visibilityDirty ) {
-        this.visibilityDirty = false;
-        
-        svgGroup.style.display = this.node.isVisible() ? '' : 'none';
-      }
-      
-      if ( this.opacityDirty ) {
-        this.opacityDirty = false;
-        
-        if ( this.node.opacity !== 1 ) {
-          this.hasOpacity = true;
-          svgGroup.setAttribute( 'opacity', this.node.opacity );
-        } else if ( this.hasOpacity ) {
-          this.hasOpacity = false;
-          svgGroup.removeAttribute( 'opacity' );
-        }
-      }
-      
-      if ( this.clipDirty ) {
-        this.clipDirty = false;
-        
-        var clipId = 'clip' + this.node.getId();
-        
-        if ( this.node._clipArea ) {
-          if ( !this.clipDefinition ) {
-            this.clipDefinition = document.createElementNS( scenery.svgns, 'clipPath' );
-            this.clipDefinition.setAttribute( 'id', clipId );
-            this.clipDefinition.setAttribute( 'clipPathUnits', 'userSpaceOnUse' );
-            this.block.defs.appendChild( this.clipDefinition ); // TODO: method? evaluate with future usage of defs (not done yet)
-            
-            this.clipPath = document.createElementNS( scenery.svgns, 'path' );
-            this.clipDefinition.appendChild( this.clipPath );
-            
-            svgGroup.setAttribute( 'clip-path', 'url(#' + clipId + ')' );
+      if ( this.willApplyTransforms ) {
+        if ( this.transformDirty ) {
+          this.transformDirty = false;
+          
+          var isIdentity = this.node.transform.isIdentity();
+          
+          if ( !isIdentity ) {
+            this.hasTransform = true;
+            svgGroup.setAttribute( 'transform', this.node.transform.getMatrix().getSVGTransform() );
+          } else if ( this.hasTransform ) {
+            this.hasTransform = false;
+            svgGroup.removeAttribute( 'transform' );
           }
+        }
+      }
+      
+      if ( this.willApplyFilters ) {
+        if ( this.visibilityDirty ) {
+          this.visibilityDirty = false;
           
-          this.clipPath.setAttribute( 'd', this.node._clipArea.getSVGPath() );
-        } else if ( this.clipDefinition ) {
-          svgGroup.removeAttribute( 'clip-path' );
-          this.block.defs.removeChild( this.clipDefinition ); // TODO: method? evaluate with future usage of defs (not done yet)
+          svgGroup.style.display = this.node.isVisible() ? '' : 'none';
+        }
+        
+        if ( this.opacityDirty ) {
+          this.opacityDirty = false;
           
-          // TODO: consider pooling these?
-          this.clipDefinition = null;
-          this.clipPath = null;
+          if ( this.node.opacity !== 1 ) {
+            this.hasOpacity = true;
+            svgGroup.setAttribute( 'opacity', this.node.opacity );
+          } else if ( this.hasOpacity ) {
+            this.hasOpacity = false;
+            svgGroup.removeAttribute( 'opacity' );
+          }
+        }
+        
+        if ( this.clipDirty ) {
+          this.clipDirty = false;
+          
+          var clipId = 'clip' + this.node.getId();
+          
+          if ( this.node._clipArea ) {
+            if ( !this.clipDefinition ) {
+              this.clipDefinition = document.createElementNS( scenery.svgns, 'clipPath' );
+              this.clipDefinition.setAttribute( 'id', clipId );
+              this.clipDefinition.setAttribute( 'clipPathUnits', 'userSpaceOnUse' );
+              this.block.defs.appendChild( this.clipDefinition ); // TODO: method? evaluate with future usage of defs (not done yet)
+              
+              this.clipPath = document.createElementNS( scenery.svgns, 'path' );
+              this.clipDefinition.appendChild( this.clipPath );
+              
+              svgGroup.setAttribute( 'clip-path', 'url(#' + clipId + ')' );
+            }
+            
+            this.clipPath.setAttribute( 'd', this.node._clipArea.getSVGPath() );
+          } else if ( this.clipDefinition ) {
+            svgGroup.removeAttribute( 'clip-path' );
+            this.block.defs.removeChild( this.clipDefinition ); // TODO: method? evaluate with future usage of defs (not done yet)
+            
+            // TODO: consider pooling these?
+            this.clipDefinition = null;
+            this.clipPath = null;
+          }
         }
       }
       
