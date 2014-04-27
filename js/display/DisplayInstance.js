@@ -300,9 +300,22 @@ define( function( require ) {
         }
         
         for ( var i = 0; i < this.children.length; i++ ) {
-          // create a child instance
           var childInstance = this.children[i];
-          childInstance.syncTree( state.getStateForDescendant( childInstance.node ) );
+          var childState = state.getStateForDescendant( childInstance.node );
+          
+          // see if we need to rebuild the instance tree due to an incompatible render state
+          if ( !childInstance.isStateless() && !childState.isInstanceCompatibleWith( childInstance.state ) ) {
+            // mark it for disposal
+            this.display.markInstanceRootForDisposal( childInstance );
+            
+            // swap in a new instance
+            var replacementInstance = DisplayInstance.createFromPool( this.display, this.trail.copy().addDescendant( childInstance.node, i ) );
+            this.replaceInstanceWithIndex( childInstance, replacementInstance, i );
+            childInstance = replacementInstance;
+          }
+          
+          // sync the tree
+          childInstance.syncTree( childState );
           
           // figure out what the first and last drawable should be hooked into for the child
           var firstChildDrawable = null;
@@ -483,6 +496,12 @@ define( function( require ) {
           this.decrementTransformPrecomputeChildren();
         }
       }
+    },
+    
+    replaceInstanceWithIndex: function( childInstance, replacementInstance, index ) {
+      // TODO: optimization? hopefully it won't happen often, so we just do this for now
+      this.removeInstanceWithIndex( childInstance, index );
+      this.insertInstance( replacementInstance, index );
     },
     
     // if we have a child instance that corresponds to this node, return it (otherwise null)
