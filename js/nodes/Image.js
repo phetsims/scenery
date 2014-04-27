@@ -357,6 +357,7 @@ define( function( require ) {
       }
     },
     updateSVG: function( node, image ) {
+      //OHTWO TODO: performance: consider using <use> with <defs> for our image element. This could be a significant speedup!
       if ( this.dirtyImage ) {
         if ( node._image ) {
           // like <image xlink:href='http://phet.colorado.edu/images/phet-logo-yellow.png' x='0' y='0' height='127px' width='242px'/>
