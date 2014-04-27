@@ -158,7 +158,7 @@ define( function( require ) {
       // throw new Error( 'TODO: replace with actual stitching' );
       this._baseInstance = scenery.DisplayInstance.createFromPool( this, new scenery.Trail( this._rootNode ) );
       this._baseInstance.syncTree( scenery.RenderState.RegularState.createRootState( this._rootNode ) );
-      this.markTransformRootDirty( this._baseInstance, false ); // marks the transform root as dirty (since it is)
+      this.markTransformRootDirty( this._baseInstance, this._baseInstance.isTransformed ); // marks the transform root as dirty (since it is)
       
       this._rootBackbone = this._baseInstance.groupDrawable;
       assert && assert( this._rootBackbone, 'We are guaranteed a root backbone as the groupDrawable on the base instance' );
