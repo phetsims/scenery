@@ -59,7 +59,7 @@ define( function( require ) {
       
       Util.prepareForTransform( this.domElement, this.forceAcceleration );
       
-      //OHTWO TODO: listen to backboneInstance, handle visibility if possible (see the filterroot situation?)
+      // if we need to, watch nodes below us (and including us) and apply their filters (opacity/visibility/clip) to the backbone.
       this.watchedFilterNodes = cleanArray( this.watchedFilterNodes );
       this.opacityDirty = true;
       this.visibilityDirty = true;
