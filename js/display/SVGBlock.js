@@ -16,15 +16,16 @@ define( function( require ) {
   var Drawable = require( 'SCENERY/display/Drawable' );
   var SVGGroup = require( 'SCENERY/display/SVGGroup' );
   
-  scenery.SVGBlock = function SVGBlock( renderer, transformRootInstance, filterRootInstance ) {
-    this.initialize( renderer, transformRootInstance, filterRootInstance );
+  scenery.SVGBlock = function SVGBlock( display, renderer, transformRootInstance, filterRootInstance ) {
+    this.initialize( display, renderer, transformRootInstance, filterRootInstance );
   };
   var SVGBlock = scenery.SVGBlock;
   
   inherit( Drawable, SVGBlock, {
-    initialize: function( renderer, transformRootInstance, filterRootInstance ) {
+    initialize: function( display, renderer, transformRootInstance, filterRootInstance ) {
       this.initializeDrawable( renderer );
       
+      this.display = display;
       this.transformRootInstance = transformRootInstance;
       this.filterRootInstance = filterRootInstance;
       
@@ -55,6 +56,18 @@ define( function( require ) {
       this.rootGroup = SVGGroup.createFromPool( this, instanceClosestToRoot, null );
       this.svg.appendChild( this.rootGroup.svgGroup );
       
+      var canBeFullDisplay = transformRootInstance.state.isDisplayRoot;
+      
+      //OHTWO TODO: change fit based on renderer flags or extra parameters
+      this.fit = canBeFullDisplay ? SVGBlock.fit.FULL_DISPLAY : SVGBlock.fit.COMMON_ANCESTOR;
+      
+      this.dirtyFit = true;
+      this.dirtyFitListener = this.dirtyFitListener || this.markDirtyFit.bind( this );
+      
+      if ( this.fit === SVGBlock.fit.FULL_DISPLAY ) {
+        this.display.onStatic( 'displaySize', this.dirtyFitListener );
+      }
+      
       // TODO: add count of boundsless objects?
       // TODO: dirty list of nodes (each should go dirty only once, easier than scanning all?)
       
@@ -63,12 +76,17 @@ define( function( require ) {
     
     markDirtyGroup: function( block ) {
       this.dirtyGroups.push( block );
-      this.markDirty(); // TODO: ensure that this works?
+      this.markDirty();
     },
     
     markDirtyDrawable: function( drawable ) {
       this.dirtyDrawables.push( drawable );
-      this.markDirty(); // TODO: ensure that this works?
+      this.markDirty();
+    },
+    
+    markDirtyFit: function() {
+      this.dirtyFit = true;
+      this.markDirty();
     },
     
     update: function() {
@@ -82,13 +100,35 @@ define( function( require ) {
         while ( this.dirtyDrawables.length ) {
           this.dirtyDrawables.pop().update();
         }
+        
+        if ( this.dirtyFit ) {
+          this.dirtyFit = false;
+          this.updateFit();
+        }
+      }
+    },
+    
+    updateFit: function() {
+      if ( this.fit === SVGBlock.fit.FULL_DISPLAY ) {
+        var size = this.display.getSize();
+        this.svg.setAttribute( 'width', size.width );
+        this.svg.setAttribute( 'height', size.height );
+      } else if ( this.fit === SVGBlock.fit.COMMON_ANCESTOR ) {
+        
+      } else {
+        throw new Error( 'unknown fit' );
       }
     },
     
     dispose: function() {
+      if ( this.fit === SVGBlock.fit.FULL_DISPLAY ) {
+        this.display.offStatic( 'displaySize', this.dirtyFitListener );
+      }
+      
       // clear references
       this.transformRootInstance = null;
       this.filterRootInstance = null;
+      this.display = null;
       cleanArray( this.dirtyGroups );
       cleanArray( this.dirtyDrawables );
       
@@ -115,14 +155,19 @@ define( function( require ) {
     }
   } );
   
+  SVGBlock.fit = {
+    FULL_DISPLAY: 1,
+    COMMON_ANCESTOR: 2
+  };
+  
   /* jshint -W064 */
   Poolable( SVGBlock, {
     constructorDuplicateFactory: function( pool ) {
-      return function( renderer, transformRootInstance, filterRootInstance ) {
+      return function( display, renderer, transformRootInstance, filterRootInstance ) {
         if ( pool.length ) {
-          return pool.pop().initialize( renderer, transformRootInstance, filterRootInstance );
+          return pool.pop().initialize( display, renderer, transformRootInstance, filterRootInstance );
         } else {
-          return new SVGBlock( renderer, transformRootInstance, filterRootInstance );
+          return new SVGBlock( display, renderer, transformRootInstance, filterRootInstance );
         }
       };
     }

@@ -13,6 +13,8 @@ define( function( require ) {
   'use strict';
   
   var inherit = require( 'PHET_CORE/inherit' );
+  var extend = require( 'PHET_CORE/extend' );
+  var Events = require( 'AXON/Events' );
   var scenery = require( 'SCENERY/scenery' );
   var Dimension2 = require( 'DOT/Dimension2' );
   require( 'SCENERY/util/Trail' );
@@ -29,6 +31,10 @@ define( function( require ) {
   
   // Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below
   scenery.Display = function Display( rootNode, options ) {
+    
+    // supertype call to axon.Events (should just initialize a few properties here, notably _eventListeners and _staticEventListeners)
+    Events.call( this );
+    
     this.options = _.extend( {
       width: 640,               // initial display width
       height: 480,              // initial display height
@@ -56,7 +62,7 @@ define( function( require ) {
   };
   var Display = scenery.Display;
   
-  inherit( Object, Display, {
+  inherit( Object, Display, extend( {
     // returns the base DOM element that will be displayed by this Display
     getDOMElement: function() {
       return this._domElement;
@@ -129,7 +135,7 @@ define( function( require ) {
       if ( !this._size.equals( size ) ) {
         this._size = size;
         
-        //TODO OHTWO send event about size change, or mark a dirty flag?
+        this.trigger1( 'displaySize', this._size );
       }
     },
     
@@ -188,7 +194,7 @@ define( function( require ) {
       this._instanceRootsToDispose.push( displayInstance );
     }
     
-  } );
+  }, Events.prototype ) );
   
   return Display;
 } );

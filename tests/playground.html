@@ -245,7 +245,7 @@
             setTimeout( function(){
               window.root = new scenery.Node( { y: 10 } ); // y: 10 should be ignored?
               window.node = new scenery.Node( { x: 10 } );
-              window.node.rendererOptions = { cssTransform: true };
+              // window.node.rendererOptions = { cssTransform: true };
               window.rect = new scenery.Rectangle( 0, 0, 100, 50, 0, 0, {
                 fill: new scenery.LinearGradient( 0, 0, 100, 0 ).addColorStop( 0, 'red' ).addColorStop( 1, 'blue' )
               } );
@@ -270,7 +270,7 @@
             setTimeout( function(){
               window.root = new scenery.Node( { y: 10 } ); // y: 10 should be ignored?
               window.node = new scenery.Node( { x: 10 } );
-              window.node.rendererOptions = { cssTransform: true };
+              // window.node.rendererOptions = { cssTransform: true };
               window.rect = new scenery.Rectangle( 0, 0, 100, 50, 0, 0, {
                 fill: new scenery.LinearGradient( 0, 0, 100, 0 ).addColorStop( 0, 'red' ).addColorStop( 1, 'blue' )
               } );
@@ -288,12 +288,11 @@
               document.body.appendChild( display.domElement );
               
               display.updateDisplay();
+              display.updateDisplay();
               
-              displayTest();
-              root.removeAllChildren();
-              display.updateDisplay();
-              root.addChild( node );
-              display.updateDisplay();
+              // displayTest();
+              // root.addChild( new scenery.Rectangle( 0, 0, 10, 200, 0, 0, { fill: 'white' } ) );
+              // display.updateDisplay();
             } );
           };
           

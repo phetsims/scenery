@@ -15,16 +15,17 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
   
-  scenery.DOMBlock = function DOMBlock( domDrawable ) {
-    this.initialize( domDrawable );
+  scenery.DOMBlock = function DOMBlock( display, domDrawable ) {
+    this.initialize( display, domDrawable );
   };
   var DOMBlock = scenery.DOMBlock;
   
   inherit( Drawable, DOMBlock, {
-    initialize: function( domDrawable ) {
+    initialize: function( display, domDrawable ) {
       // TODO: is it bad to pass the acceleration flags along?
       this.initializeDrawable( domDrawable.renderer );
       
+      this.display = display;
       this.domDrawable = domDrawable;
       this.domElement = domDrawable.domElement;
       
@@ -34,6 +35,7 @@ define( function( require ) {
     dispose: function() {
       this.domDrawable = null;
       this.domElement = null;
+      this.display = null;
       
       // super call
       Drawable.prototype.dispose.call( this );
@@ -65,11 +67,11 @@ define( function( require ) {
   /* jshint -W064 */
   Poolable( DOMBlock, {
     constructorDuplicateFactory: function( pool ) {
-      return function( domDrawable ) {
+      return function( display, domDrawable ) {
         if ( pool.length ) {
-          return pool.pop().initialize( domDrawable );
+          return pool.pop().initialize( display, domDrawable );
         } else {
-          return new DOMBlock( domDrawable );
+          return new DOMBlock( display, domDrawable );
         }
       };
     }

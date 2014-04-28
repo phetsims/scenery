@@ -16,14 +16,16 @@ define( function( require ) {
   var Drawable = require( 'SCENERY/display/Drawable' );
   var CanvasContextWrapper = require( 'SCENERY/util/CanvasContextWrapper' );
   
-  scenery.CanvasBlock = function CanvasBlock( renderer, transformRootInstance ) {
-    this.initialize( renderer, transformRootInstance );
+  scenery.CanvasBlock = function CanvasBlock( display, renderer, transformRootInstance ) {
+    this.initialize( display, renderer, transformRootInstance );
   };
   var CanvasBlock = scenery.CanvasBlock;
   
   inherit( Drawable, CanvasBlock, {
-    initialize: function( renderer, transformRootInstance ) {
+    initialize: function( display, renderer, transformRootInstance ) {
       this.initializeDrawable( renderer );
+      
+      this.display = display;
       
       this.transformRootInstance = transformRootInstance;
       
@@ -52,6 +54,7 @@ define( function( require ) {
     dispose: function() {
       // clear references
       this.transformRootInstance = null;
+      this.display = null;
       cleanArray( this.dirtyDrawables );
       
       // minimize memory exposure of the backing raster
@@ -91,11 +94,11 @@ define( function( require ) {
   /* jshint -W064 */
   Poolable( CanvasBlock, {
     constructorDuplicateFactory: function( pool ) {
-      return function( renderer, transformRootInstance ) {
+      return function( display, renderer, transformRootInstance ) {
         if ( pool.length ) {
-          return pool.pop().initialize( renderer, transformRootInstance );
+          return pool.pop().initialize( display, renderer, transformRootInstance );
         } else {
-          return new CanvasBlock( renderer, transformRootInstance );
+          return new CanvasBlock( display, renderer, transformRootInstance );
         }
       };
     }

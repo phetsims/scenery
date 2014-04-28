@@ -29,6 +29,8 @@ define( function( require ) {
     initialize: function( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
       Drawable.call( this, renderer );
       
+      this.display = display;
+      
       this.forceAcceleration = Renderer.isAccelerationForced( this.renderer );
       
       // reference to the instance that controls this backbone
@@ -244,12 +246,12 @@ define( function( require ) {
           currentRenderer = drawable.renderer;
           
           if ( Renderer.isCanvas( currentRenderer ) ) {
-            currentBlock = CanvasBlock.createFromPool( currentRenderer, this.transformRootInstance );
+            currentBlock = CanvasBlock.createFromPool( this.display, currentRenderer, this.transformRootInstance );
           } else if ( Renderer.isSVG( currentRenderer ) ) {
             //OHTWO TODO: handle filter root separately from the backbone instance?
-            currentBlock = SVGBlock.createFromPool( currentRenderer, this.transformRootInstance, this.backboneInstance );
+            currentBlock = SVGBlock.createFromPool( this.display, currentRenderer, this.transformRootInstance, this.backboneInstance );
           } else if ( Renderer.isDOM( currentRenderer ) ) {
-            currentBlock = DOMBlock.createFromPool( drawable );
+            currentBlock = DOMBlock.createFromPool( this.display, drawable );
             currentRenderer = 0; // force a new block for the next drawable
           } else {
             throw new Error( 'unsupported renderer for BackboneBlock.rebuild: ' + currentRenderer );
