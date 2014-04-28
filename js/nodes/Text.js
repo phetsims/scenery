@@ -725,6 +725,8 @@ define( function( require ) {
         this.domElement.style.top = '0';
       }
       
+      scenery.Util.prepareForTransform( this.domElement, this.forceAcceleration );
+        
       return this; // allow for chaining
     },
     
@@ -763,7 +765,7 @@ define( function( require ) {
         var translation = Matrix3.translation( 0, yOffset );
         scratchMatrix.multiplyMatrix( translation );
         translation.freeToPool();
-        scenery.Util.applyCSSTransform( scratchMatrix, div, this.forceAcceleration );
+        scenery.Util.applyPreparedTransform( scratchMatrix, div, this.forceAcceleration );
       }
       
       // clear all of the dirty flags

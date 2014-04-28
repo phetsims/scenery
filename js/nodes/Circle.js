@@ -24,6 +24,7 @@ define( function( require ) {
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  require( 'SCENERY/util/Util' );
   
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMCircleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
@@ -361,6 +362,8 @@ define( function( require ) {
       
       this.domElement = this.fillElement;
       
+      scenery.Util.prepareForTransform( this.domElement, this.forceAcceleration );
+      
       return this; // allow for chaining
     },
     
@@ -415,7 +418,7 @@ define( function( require ) {
         var translation = Matrix3.translation( -node._radius, -node._radius );
         this.matrix.multiplyMatrix( translation );
         translation.freeToPool();
-        scenery.Util.applyCSSTransform( this.matrix, this.fillElement, this.forceAcceleration );
+        scenery.Util.applyPreparedTransform( this.matrix, this.fillElement, this.forceAcceleration );
       }
       
       // clear all of the dirty flags

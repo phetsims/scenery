@@ -294,6 +294,8 @@ define( function( require ) {
         this.domElement = document.createElement( 'img' );
       }
       
+      scenery.Util.prepareForTransform( this.domElement, this.forceAcceleration );
+      
       return this; // allow for chaining
     },
     
@@ -307,7 +309,7 @@ define( function( require ) {
       }
       
       if ( this.transformDirty ) {
-        scenery.Util.applyCSSTransform( this.getTransformMatrix(), this.domElement, this.forceAcceleration );
+        scenery.Util.applyPreparedTransform( this.getTransformMatrix(), this.domElement, this.forceAcceleration );
       }
       
       // clear all of the dirty flags

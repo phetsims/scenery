@@ -53,7 +53,7 @@ define( function( require ) {
       return new F();
     },
     
-    // @deprecated (bad performance since it is setting multiple properties)
+    // @deprecated (bad performance since it is setting multiple properties). see applyPreparedTransform
     applyCSSTransform: function( matrix, element, forceAcceleration ) {
       var transformCSS = matrix.getCSSTransform();
       // notes on triggering hardware acceleration: http://creativejs.com/2011/12/day-2-gpu-accelerate-your-dom-elements/
@@ -84,6 +84,8 @@ define( function( require ) {
       element.style.webkitBackfaceVisibility = '';
     },
     
+    // applies the CSS transform of the {Matrix3} matrix to the element, with optional forcing of acceleration. prepareForTransform should be called before this method
+    // is used, and they should use the same parameter value for forceAcceleration
     applyPreparedTransform: function( matrix, element, forceAcceleration ) {
       // NOTE: not applying translateZ, see http://stackoverflow.com/questions/10014461/why-does-enabling-hardware-acceleration-in-css3-slow-down-performance
       element.style[transformProperty] = matrix.getCSSTransform();
