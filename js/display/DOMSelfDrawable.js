@@ -23,10 +23,8 @@ define( function( require ) {
   
   inherit( SelfDrawable, DOMSelfDrawable, {
     initializeDOMSelfDrawable: function( renderer, instance ) {
-      if ( !this.transformListener ) {
-        // this is the same across lifecycles
-        this.transformListener = this.markTransformDirty.bind( this );
-      }
+      // this is the same across lifecycles
+      this.transformListener = this.transformListener || this.markTransformDirty.bind( this );
       
       // super initialization
       this.initializeSelfDrawable( renderer, instance );

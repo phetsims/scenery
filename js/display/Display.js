@@ -82,9 +82,6 @@ define( function( require ) {
       assert && assert( this._rootBackbone, 'We are guaranteed a root backbone as the groupDrawable on the base instance' );
       assert && assert( this._rootBackbone === this._baseInstance.groupDrawable, 'We don\'t want the base instance\'s groupDrawable to change' );
       
-      //OHTWO TODO: only rebuild when there is a change!!! Also, rebuild other backbones!
-      this._rootBackbone.rebuild( this._baseInstance.firstDrawable, this._baseInstance.lastDrawable );
-      
       if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
       
       // pre-repaint phase: update relative transform information for listeners (notification) and precomputation where desired

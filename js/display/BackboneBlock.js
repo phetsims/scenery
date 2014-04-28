@@ -28,8 +28,26 @@ define( function( require ) {
     initialize: function( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
       Drawable.call( this, renderer );
       
+      // reference to the instance that controls this backbone
       this.backboneInstance = backboneInstance;
+      
+      // where is the transform root for our generated blocks?
       this.transformRootInstance = transformRootInstance;
+      
+      // where have filters been applied to up? our responsibility is to apply filters between this and our backboneInstance
+      this.filterRootAncestorInstance = backboneInstance.parent ? backboneInstance.parent.getFilterRootInstance() : backboneInstance;
+      
+      // where have transforms been applied up to? our responsibility is to apply transforms between this and our backboneInstance
+      this.transformRootAncestorInstance = backboneInstance.parent ? backboneInstance.parent.getTransformRootInstance() : backboneInstance;
+      
+      this.willApplyTransform = this.transformRootAncestorInstance !== this.backboneInstance;
+      
+      this.transformListener = this.transformListener || this.markTransformDirty.bind( this );
+      if ( this.willApplyTransform ) {
+        this.backboneInstance.addRelativeTransformListener( this.transformListener ); // when our relative tranform changes, notify us in the pre-repaint phase
+        this.backboneInstance.addRelativeTransformPrecompute(); // trigger precomputation of the relative transform, since we will always need it when it is updated
+      }
+      
       this.renderer = renderer;
       this.domElement = isDisplayRoot ? display._domElement : BackboneBlock.createDivBackbone();
       this.isDisplayRoot = isDisplayRoot;
@@ -43,9 +61,16 @@ define( function( require ) {
     dispose: function() {
       this.backboneInstance = null;
       this.transformRootInstance = null;
+      this.filterRootAncestorInstance = null;
+      this.transformRootAncestorInstance = null;
       cleanArray( this.dirtyDrawables );
       
       this.disposeBlocks();
+      
+      if ( this.willApplyTransform ) {
+        this.instance.removeRelativeTransformListener( this.transformListener );
+        this.instance.removeRelativeTransformPrecompute();
+      }
       
       Drawable.prototype.dispose.call( this );
     },
@@ -62,6 +87,13 @@ define( function( require ) {
     markDirtyDrawable: function( drawable ) {
       this.dirtyDrawables.push( drawable );
       this.markDirty();
+    },
+    
+    markTransformDirty: function() {
+      assert && assert( this.willApplyTransform, 'Sanity check for willApplyTransform' );
+      
+      // relative matrix on backbone instance should be up to date, since we added the compute flags
+      scenery.Util.applyCSSTransform( this.backboneInstance.relativeMatrix, this.domElement, Renderer.isAccelerationForced( this.renderer ) );
     },
     
     update: function() {

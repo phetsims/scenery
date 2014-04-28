@@ -63,7 +63,7 @@ define( function( require ) {
       }
       
       element.style[transformProperty] = transformCSS;
-      element.style[transformOriginProperty] = 'top left'; // TODO: performance: this only needs to be set once!
+      element.style[transformOriginProperty] = 'top left'; //OHTWO TODO: performance: this only needs to be set once!
     },
     
     testAssert: function() {

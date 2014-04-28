@@ -72,16 +72,16 @@ define( function( require ) {
       this.groupRenderer = null;
       this.sharedCacheRenderer = null;
       
-      var hints = node.hints || emptyObject;
+      var hints = node._hints || emptyObject;
       
       var isTransparent = node.opacity !== 1;
       
       // check if we need a backbone or cache
       // if we are under a canvas cache, we will NEVER have a backbone
       // splits are accomplished just by having a backbone
-      if ( isDisplayRoot || ( !isUnderCanvasCache && ( isTransparent || hints.requireElement || hints.cssTransformBackbone || hints.split ) ) ) {
+      if ( isDisplayRoot || ( !isUnderCanvasCache && ( isTransparent || hints.requireElement || hints.cssTransform || hints.split ) ) ) {
         this.isBackbone = true;
-        this.isTransformed = !!hints.cssTransformBackbone; // for now, only trigger CSS transform if we have the specific hint
+        this.isTransformed = isDisplayRoot || !!hints.cssTransform; // for now, only trigger CSS transform if we have the specific hint
         this.groupRenderer = scenery.Renderer.bitmaskDOM | ( hints.forceAcceleration ? scenery.Renderer.bitmaskForceAcceleration : 0 ); // probably won't be used
       } else if ( isTransparent || hints.canvasCache ) {
         // everything underneath needs to be renderable with Canvas, otherwise we cannot cache
