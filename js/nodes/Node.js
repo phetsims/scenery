@@ -32,6 +32,12 @@ define( function( require ) {
   
   var globalIdCounter = 1;
   
+  var eventsRequiringBoundsValidation = {
+    'childBounds': true,
+    'localBounds': true,
+    'bounds': true
+  };
+  
   /*
    * Available keys for use in the options parameter object for a vanilla Node (not inherited), in the order they are executed in:
    *
@@ -2439,26 +2445,46 @@ define( function( require ) {
     
     containsEventListener: function( eventName, listener ) {
       return this.hasListener( eventName, listener );
+    },
+    
+    onEventListenerAdded: function( eventName, listener ) {
+      if ( eventName in eventsRequiringBoundsValidation ) {
+        this.changeBoundsEventCount( 1 );
+        this._boundsEventSelfCount++;
+      }
+    },
+    
+    onEventListenerRemoved: function( eventName, listener ) {
+      if ( eventName in eventsRequiringBoundsValidation ) {
+        this.changeBoundsEventCount( -1 );
+        this._boundsEventSelfCount--;
+      }
     }
     
   }, Events.prototype, {
-    /*---------------------------------------------------------------------------*
-    * Safety overrides for Events (I want assertions for failure to remove listeners)
-    *----------------------------------------------------------------------------*/
-    off: assert ? function offOverride( eventName, listener ) {
+    on: function onOverride( eventName, listener ) {
+      Events.prototype.on.call( this, eventName, listener );
+      this.onEventListenerAdded( eventName, listener );
+    },
+    
+    onStatic: function onStaticOverride( eventName, listener ) {
+      Events.prototype.onStatic.call( this, eventName, listener );
+      this.onEventListenerAdded( eventName, listener );
+    },
+    
+    off: function offOverride( eventName, listener ) {
       var index = Events.prototype.off.call( this, eventName, listener );
       assert && assert( index >= 0, 'Node.off was called but no listener was removed' );
+      this.onEventListenerRemoved( eventName, listener );
       return index;
-    } : Events.prototype.off, // if we don't have assertions, we will directly use the Events.off function
+    },
     
-    offStatic: assert ? function offStaticOverride( eventName, listener ) {
+    offStatic: function offStaticOverride( eventName, listener ) {
       var index = Events.prototype.offStatic.call( this, eventName, listener );
       assert && assert( index >= 0, 'Node.offStatic was called but no listener was removed' );
+      this.onEventListenerRemoved( eventName, listener );
       return index;
-    } : Events.prototype.offStatic, // if we don't have assertions, we will directly use the Events.off function
-    /*---------------------------------------------------------------------------*
-    * DO NOT ADD normal methods under here, this is written over Events.prototype
-    *----------------------------------------------------------------------------*/
+    }
   } );
   
   
