@@ -1,7 +1,8 @@
 // Copyright 2002-2014, University of Colorado
 
 /**
- * A unit that is drawable with a specific renderer
+ * A unit that is drawable with a specific renderer.
+ * NOTE: Drawables are assumed to be pooled with Poolable, as freeToPool() is called
  *
  * APIs for drawable types:
  *

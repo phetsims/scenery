@@ -364,6 +364,8 @@ define( function( require ) {
           if ( !this.groupDrawable ) {
             this.groupDrawable = scenery.BackboneBlock.createFromPool( this.display, this, this.getTransformRootInstance(), groupRenderer, state.isDisplayRoot );
             
+            assert && assert( this.groupDrawable );
+            
             if ( this.isTransformed ) {
               this.display.markTransformRootDirty( this, true );
             }

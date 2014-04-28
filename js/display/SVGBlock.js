@@ -57,6 +57,8 @@ define( function( require ) {
       
       // TODO: add count of boundsless objects?
       // TODO: dirty list of nodes (each should go dirty only once, easier than scanning all?)
+      
+      return this;
     },
     
     markDirtyGroup: function( block ) {

@@ -83,6 +83,8 @@ define( function( require ) {
       }
       
       this.blocks = this.blocks || []; // we are responsible for their disposal
+      
+      return this; // chaining
     },
     
     dispose: function() {
