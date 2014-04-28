@@ -79,6 +79,8 @@ define( function( require ) {
     notifyBitSet: function( bit ) {
       this.bitmask = this.computeBitmask();
       
+      this.node.trigger0( 'rendererSummary' );
+      
       var len = this.node._parents.length;
       for ( var i = 0; i < len; i++ ) {
         this.node._parents[i]._rendererSummary.bitDecrement( bit );
@@ -87,6 +89,8 @@ define( function( require ) {
     
     notifyBitUnset: function( bit ) {
       this.bitmask = this.computeBitmask();
+      
+      this.node.trigger0( 'rendererSummary' );
       
       var len = this.node._parents.length;
       for ( var i = 0; i < len; i++ ) {

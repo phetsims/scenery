@@ -1589,6 +1589,7 @@ define( function( require ) {
       if ( bitmask !== this._rendererBitmask ) {
         this._rendererSummary.bitmaskChange( this._rendererBitmask, bitmask );
         this._rendererBitmask = bitmask;
+        this.trigger0( 'rendererBitmask' );
         this.markLayerRefreshNeeded();
       }
     },
