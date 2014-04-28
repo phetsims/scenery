@@ -18,6 +18,7 @@ define( function( require ) {
   var CanvasBlock = require( 'SCENERY/display/CanvasBlock' );
   var SVGBlock = require( 'SCENERY/display/SVGBlock' );
   var DOMBlock = require( 'SCENERY/display/DOMBlock' );
+  var Util = require( 'SCENERY/util/Util' );
   
   scenery.BackboneBlock = function BackboneBlock( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
     this.initialize( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
@@ -27,6 +28,8 @@ define( function( require ) {
   inherit( Drawable, BackboneBlock, {
     initialize: function( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
       Drawable.call( this, renderer );
+      
+      this.forceAcceleration = Renderer.isAccelerationForced( this.renderer );
       
       // reference to the instance that controls this backbone
       this.backboneInstance = backboneInstance;
@@ -52,6 +55,8 @@ define( function( require ) {
       this.domElement = isDisplayRoot ? display._domElement : BackboneBlock.createDivBackbone();
       this.isDisplayRoot = isDisplayRoot;
       this.dirtyDrawables = cleanArray( this.dirtyDrawables );
+      
+      Util.prepareForTransform( this.domElement, this.forceAcceleration );
       
       //OHTWO TODO: listen to backboneInstance, handle visibility if possible (see the filterroot situation?)
       
@@ -93,7 +98,7 @@ define( function( require ) {
       assert && assert( this.willApplyTransform, 'Sanity check for willApplyTransform' );
       
       // relative matrix on backbone instance should be up to date, since we added the compute flags
-      scenery.Util.applyCSSTransform( this.backboneInstance.relativeMatrix, this.domElement, Renderer.isAccelerationForced( this.renderer ) );
+      scenery.Util.applyPreparedTransform( this.backboneInstance.relativeMatrix, this.domElement, this.forceAcceleration );
     },
     
     update: function() {

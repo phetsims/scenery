@@ -53,6 +53,7 @@ define( function( require ) {
       return new F();
     },
     
+    // @deprecated (bad performance since it is setting multiple properties)
     applyCSSTransform: function( matrix, element, forceAcceleration ) {
       var transformCSS = matrix.getCSSTransform();
       // notes on triggering hardware acceleration: http://creativejs.com/2011/12/day-2-gpu-accelerate-your-dom-elements/
@@ -64,6 +65,28 @@ define( function( require ) {
       
       element.style[transformProperty] = transformCSS;
       element.style[transformOriginProperty] = 'top left'; //OHTWO TODO: performance: this only needs to be set once!
+    },
+    
+    prepareForTransform: function( element, forceAcceleration ) {
+      element.style[transformOriginProperty] = 'top left';
+      if ( forceAcceleration ) {
+        scenery.Util.setTransformAcceleration( element );
+      } else {
+        scenery.Util.unsetTransformAcceleration( element );
+      }
+    },
+    
+    setTransformAcceleration: function( element ) {
+      element.style.webkitBackfaceVisibility = 'hidden';
+    },
+    
+    unsetTransformAcceleration: function( element ) {
+      element.style.webkitBackfaceVisibility = '';
+    },
+    
+    applyPreparedTransform: function( matrix, element, forceAcceleration ) {
+      // NOTE: not applying translateZ, see http://stackoverflow.com/questions/10014461/why-does-enabling-hardware-acceleration-in-css3-slow-down-performance
+      element.style[transformProperty] = matrix.getCSSTransform();
     },
     
     testAssert: function() {
