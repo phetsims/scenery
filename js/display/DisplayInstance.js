@@ -848,7 +848,7 @@ define( function( require ) {
       var index = _.indexOf( this.svgGroups, group );
       assert && assert( index >= 0, 'Tried to remove an SVGGroup from a DisplayInstance when it did not exist' );
       
-      this.svgGroups.splice( this.svgGroups, 1 ); // TODO: remove function
+      this.svgGroups.splice( index, 1 ); // TODO: remove function
     },
     
     // returns null when a lookup fails (which is legitimate)
