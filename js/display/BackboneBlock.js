@@ -232,6 +232,8 @@ define( function( require ) {
       var currentBlock = null;
       var currentRenderer = 0;
       
+      var zIndex = 1; // don't start below 1
+      
       // linked-list iteration inclusively from firstDrawable to lastDrawable
       for ( var drawable = firstDrawable; drawable !== null && drawable.previousDrawable !== lastDrawable; drawable = drawable.nextDrawable ) {
         
@@ -253,6 +255,7 @@ define( function( require ) {
           
           this.blocks.push( currentBlock );
           currentBlock.parentDrawable = this;
+          currentBlock.domElement.style.zIndex = zIndex++; // NOTE: this should give it its own stacking index (which is what we want)
           this.domElement.appendChild( currentBlock.domElement ); //OHTWO TODO: minor speedup by appending only once its fragment is constructed? or use DocumentFragment?
           
           // mark it dirty for now, so we can check
