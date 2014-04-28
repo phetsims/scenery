@@ -856,7 +856,7 @@ define( function( require ) {
     
     // what instance have filters (opacity/visibility/clip) been applied up to?
     getFilterRootInstance: function() {
-      if ( this.isBackbone || this.isInstanceCanvasCache || !this.parent ) {
+      if ( this.state.isBackbone || this.state.isInstanceCanvasCache || !this.parent ) {
         return this;
       } else {
         return this.parent.getFilterRootInstance();
@@ -865,7 +865,7 @@ define( function( require ) {
     
     // what instance transforms have been applied up to?
     getTransformRootInstance: function() {
-      if ( this.isTransformed || !this.parent ) {
+      if ( this.state.isTransformed || !this.parent ) {
         return this;
       } else {
         return this.parent.getTransformRootInstance();
