@@ -69,6 +69,9 @@ define( function( require ) {
     dispose: function() {
       this.cleanDrawable();
       this.disposed = true;
+      
+      // for now
+      this.freeToPool();
     }
   } );
   

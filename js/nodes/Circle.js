@@ -437,9 +437,6 @@ define( function( require ) {
         this.strokeElement = null;
         this.domElement = null;
       }
-      
-      // put us back in the pool
-      this.freeToPool();
     },
     
     setToClean: function() {

@@ -73,8 +73,6 @@ define( function( require ) {
     
     onDetach: function( node ) {
       //OHTWO TODO: are we missing the disposal?
-      // put us back in the pool
-      this.freeToPool();
     },
     
     dispose: function() {

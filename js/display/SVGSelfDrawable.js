@@ -175,9 +175,6 @@ define( function( require ) {
         usesStroke && this.strokeState.dispose();
         
         this.defs = null;
-        
-        // put us back in the pool
-        this.freeToPool();
       },
       
       setToClean: function() {

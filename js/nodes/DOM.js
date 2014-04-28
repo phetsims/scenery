@@ -221,9 +221,6 @@ define( function( require ) {
     onDetach: function( node ) {
       // clear the references
       this.domElement = null;
-      
-      // put us back in the pool
-      this.freeToPool();
     },
     
     setToClean: function() {

@@ -266,6 +266,37 @@
             } );
           };
           
+          window.displayErr = function() {
+            setTimeout( function(){
+              window.root = new scenery.Node( { y: 10 } ); // y: 10 should be ignored?
+              window.node = new scenery.Node( { x: 10 } );
+              window.node.rendererOptions = { cssTransform: true };
+              window.rect = new scenery.Rectangle( 0, 0, 100, 50, 0, 0, {
+                fill: new scenery.LinearGradient( 0, 0, 100, 0 ).addColorStop( 0, 'red' ).addColorStop( 1, 'blue' )
+              } );
+              node.addChild( rect );
+              root.addChild( node );
+              
+              window.circle = new scenery.Circle( 50, { fill: 'black', x: 30, y: 60 } );
+              node.addChild( circle );
+              
+              window.display = new scenery.Display( root );
+              
+              while ( document.body.firstChild ) {
+                document.body.removeChild( document.body.firstChild );
+              }
+              document.body.appendChild( display.domElement );
+              
+              display.updateDisplay();
+              
+              displayTest();
+              root.removeAllChildren();
+              display.updateDisplay();
+              root.addChild( node );
+              display.updateDisplay();
+            } );
+          };
+          
           window.fuzzLayers = function() {
             // disable the regular step
             basicSceneStep = false;
