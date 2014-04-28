@@ -97,8 +97,8 @@ define( function( require ) {
       this.disposeBlocks();
       
       if ( this.willApplyTransform ) {
-        this.instance.removeRelativeTransformListener( this.transformListener );
-        this.instance.removeRelativeTransformPrecompute();
+        this.backboneInstance.removeRelativeTransformListener( this.transformListener );
+        this.backboneInstance.removeRelativeTransformPrecompute();
       }
       
       this.backboneInstance = null;
