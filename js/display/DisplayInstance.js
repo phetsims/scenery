@@ -66,6 +66,15 @@
  * the ancestors to the first one that was verified OK this frame (boolean flags are insufficient for this, since we would have to clear them all to false on every
  * frame, requiring a full tree traversal). In the future, we may set this flag to the frame proactively during traversal to speed up validation, but that is not done
  * at the time of this writing.
+ *
+ * Some helpful notes for the scope of various relativeTransform bits:
+ *                         (transformRoot) (regular) (regular) (transformRoot)
+ * relativeChildDirtyFrame [---------------------------------]                 (int)
+ * relativeSelfDirty                       [---------------------------------]
+ * relativeTransform                       [---------------------------------] (transform on root applies to its parent context)
+ * relativeFrameId                         [---------------------------------] (int)
+ * child counts            [---------------------------------]                 (e.g. relativeChildrenListenersCount, relativeChildrenPrecomputeCount)
+ * self counts                             [---------------------------------] (e.g. relativePrecomputeCount, relativeTransformListeners.length)
  **********************
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
