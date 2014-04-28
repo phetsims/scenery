@@ -846,17 +846,32 @@ define( function( require ) {
     setLocalBounds: function( localBounds ) {
       assert && assert( localBounds === null || localBounds instanceof Bounds2, 'localBounds override should be set to either null or a Bounds2' );
       
-      // just an instance check for now. consider equals() in the future depending on cost
-      if ( localBounds !== this._localBounds ) {
-        if ( localBounds === null ) {
+      if ( localBounds === null ) {
+        // we can just ignore this if we weren't actually overriding local bounds before
+        if ( this._localBoundsOverridden ) {
           this._localBoundsOverridden = false;
-        } else {
-          this._localBounds = localBounds;
-          this._localBoundsOverridden = true; // NOTE: has to be done before invalidating bounds, since this disables localBounds computation
+          this.trigger1( 'localBoundsOverride', false );
+          this.invalidateBounds();
         }
-        this.trigger0( 'localBounds' );
-        this.invalidateBounds();
+      } else {
+        // just an instance check for now. consider equals() in the future depending on cost
+        var changed = localBounds !== this._localBounds || !this._localBoundsOverridden;
+        
+        if ( changed ) {
+          this._localBounds = localBounds;
+        }
+        
+        if ( !this._localBoundsOverridden ) {
+          this._localBoundsOverridden = true; // NOTE: has to be done before invalidating bounds, since this disables localBounds computation
+          this.trigger1( 'localBoundsOverride', true );
+        }
+        
+        if ( changed ) {
+          this.invalidateBounds();
+        }
       }
+      
+      return this; // allow chaining
     },
     
     // the bounds for content in render(), in "parent" coordinates
