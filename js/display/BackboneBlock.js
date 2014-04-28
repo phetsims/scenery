@@ -44,6 +44,7 @@ define( function( require ) {
       this.transformRootAncestorInstance = backboneInstance.parent ? backboneInstance.parent.getTransformRootInstance() : backboneInstance;
       
       this.willApplyTransform = this.transformRootAncestorInstance !== this.backboneInstance;
+      this.willApplyFilters = this.filterRootAncestorInstance !== this.backboneInstance;
       
       this.transformListener = this.transformListener || this.markTransformDirty.bind( this );
       if ( this.willApplyTransform ) {
@@ -59,16 +60,39 @@ define( function( require ) {
       Util.prepareForTransform( this.domElement, this.forceAcceleration );
       
       //OHTWO TODO: listen to backboneInstance, handle visibility if possible (see the filterroot situation?)
+      this.watchedFilterNodes = cleanArray( this.watchedFilterNodes );
+      this.opacityDirty = true;
+      this.visibilityDirty = true;
+      this.clipDirty = true;
+      this.opacityDirtyListener = this.opacityDirtyListener || this.markOpacityDirty.bind( this );
+      this.visibilityDirtyListener = this.visibilityDirtyListener || this.markVisibilityDirty.bind( this );
+      this.clipDirtyListener = this.clipDirtyListener || this.markClipDirty.bind( this );
+      if ( this.willApplyFilters ) {
+        assert && assert( this.filterRootAncestorInstance.trail.nodes.length < this.backboneInstance.trail.nodes.length,
+                          'Our backboneInstance should be deeper if we are applying filters' );
+        
+        // walk through to see which instances we'll need to watch for filter changes
+        for ( var instance = this.backboneInstance; instance !== this.filterRootAncestorInstance; instance = instance.parent ) {
+          var node = instance.node;
+          
+          this.watchedFilterNodes.push( node );
+          node.onStatic( 'opacity', this.opacityDirtyListener );
+          node.onStatic( 'visibility', this.visibilityDirtyListener );
+          node.onStatic( 'clip', this.clipDirtyListener );
+        }
+      }
       
       this.blocks = this.blocks || []; // we are responsible for their disposal
     },
     
     dispose: function() {
-      this.backboneInstance = null;
-      this.transformRootInstance = null;
-      this.filterRootAncestorInstance = null;
-      this.transformRootAncestorInstance = null;
-      cleanArray( this.dirtyDrawables );
+      while ( this.watchedFilterNodes.length ) {
+        var node = this.watchedFilterNodes.pop();
+        
+        node.offStatic( 'opacity', this.opacityDirtyListener );
+        node.offStatic( 'visibility', this.visibilityDirtyListener );
+        node.offStatic( 'clip', this.clipDirtyListener );
+      }
       
       this.disposeBlocks();
       
@@ -76,6 +100,13 @@ define( function( require ) {
         this.instance.removeRelativeTransformListener( this.transformListener );
         this.instance.removeRelativeTransformPrecompute();
       }
+      
+      this.backboneInstance = null;
+      this.transformRootInstance = null;
+      this.filterRootAncestorInstance = null;
+      this.transformRootAncestorInstance = null;
+      cleanArray( this.dirtyDrawables );
+      cleanArray( this.watchedFilterNodes );
       
       Drawable.prototype.dispose.call( this );
     },
@@ -101,6 +132,27 @@ define( function( require ) {
       scenery.Util.applyPreparedTransform( this.backboneInstance.relativeMatrix, this.domElement, this.forceAcceleration );
     },
     
+    markOpacityDirty: function() {
+      if ( !this.opacityDirty ) {
+        this.opacityDirty = true;
+        this.markDirty();
+      }
+    },
+    
+    markVisibilityDirty: function() {
+      if ( !this.visibilityDirty ) {
+        this.visibilityDirty = true;
+        this.markDirty();
+      }
+    },
+    
+    markClipDirty: function() {
+      if ( !this.clipDirty ) {
+        this.clipDirty = true;
+        this.markDirty();
+      }
+    },
+    
     update: function() {
       if ( this.dirty && !this.disposed ) {
         this.dirty = false;
@@ -108,7 +160,70 @@ define( function( require ) {
         while ( this.dirtyDrawables.length ) {
           this.dirtyDrawables.pop().update();
         }
+        
+        if ( this.willApplyFilters ) {
+          if ( this.opacityDirty ) {
+            this.opacityDirty = false;
+            
+            var opacity = this.getFilterOpacity();
+            
+            this.domElement.style.opacity = ( opacity === 1 ? '' : opacity );
+          }
+          
+          if ( this.visibilityDirty ) {
+            this.visibilityDirty = false;
+            
+            var visible = this.getFilterVisibility();
+            
+            this.domElement.style.display = ( visible ? '' : 'none' );
+          }
+          
+          if ( this.clipDirty ) {
+            this.clipDirty = false;
+            
+            var clip = this.getFilterClip();
+            
+            //OHTWO TODO: CSS clip-path/mask support here. see http://www.html5rocks.com/en/tutorials/masking/adobe/
+            this.domElement.style.clipPath = clip; // yikes! temporary, since we already threw something?
+          }
+          
+        }
       }
+    },
+    
+    getFilterOpacity: function() {
+      var opacity = 1;
+      
+      var len = this.watchedFilterNodes.length;
+      for ( var i = 0; i < len; i++ ) {
+        opacity *= this.watchedFilterNodes[i].getOpacity();
+      }
+      
+      return opacity;
+    },
+    
+    getFilterVisibility: function() {
+      var len = this.watchedFilterNodes.length;
+      for ( var i = 0; i < len; i++ ) {
+        if ( !this.watchedFilterNodes[i].isVisible() ) {
+          return false;
+        }
+      }
+      
+      return true;
+    },
+    
+    getFilterClip: function() {
+      var clip = '';
+      
+      var len = this.watchedFilterNodes.length;
+      for ( var i = 0; i < len; i++ ) {
+        if ( this.watchedFilterNodes[i]._clipArea ) {
+          throw new Error( 'clip-path for backbones unimplemented, and with questionable browser support!' );
+        }
+      }
+      
+      return clip;
     },
     
     rebuild: function( firstDrawable, lastDrawable ) {
