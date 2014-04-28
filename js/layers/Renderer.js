@@ -85,13 +85,14 @@ define( function( require ) {
   Renderer.bitmaskSkipBounds              = 0x0000800; // forces full scene fitting for SVG/Canvas unless there is a guaranteed bounds, so don't use in transformed/single-cached situations unless there is a bounds guarantee
   
   // canvas options
+  Renderer.bitmaskCanvasOptimizations     = 0x000F000;
   Renderer.bitmaskCanvasLowResolution     = 0x0001000;
   Renderer.bitmaskCanvasNoPruning         = 0x0002000;
   Renderer.bitmaskCanvasNoDirtyBounds     = 0x0004000;
   Renderer.bitmaskCanvasBeforeAfterBounds = 0x0008000;
   
   // SVG optimizations group (2 bits)
-  Renderer.bitmaskSVGOptimizations        = 0x0030000;
+  Renderer.bitmaskSVGOptimizations        = 0x0070000;
   Renderer.bitmaskSVGOptimizeAuto         = 0x0000000; // auto for text-rendering/shape-rendering/image-rendering
   Renderer.bitmaskSVGOptimizeSpeed        = 0x0010000; // optimizeSpeed for text-rendering/shape-rendering/image-rendering
   Renderer.bitmaskSVGOptimizeQuality      = 0x0020000; // optimizeQuality for shape-rendering/image-rendering, geometricPrecision for text-rendering
