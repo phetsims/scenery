@@ -111,6 +111,7 @@ define( function( require ) {
     this._bounds = Bounds2.NOTHING;      // for this node and its children, in "parent" coordinates
     this._selfBounds = Bounds2.NOTHING;  // just for this node, in "local" coordinates
     this._childBounds = Bounds2.NOTHING; // just for children, in "local" coordinates
+    this._localBounds = null; // just used for an override currently, will be replaced in Scenery ohtwo
     this._boundsDirty = true;
     this._selfBoundsDirty = this.isPainted();
     this._childBoundsDirty = true;
@@ -386,7 +387,7 @@ define( function( require ) {
         var oldBounds = this._bounds;
         
         // converts local to parent bounds. mutable methods used to minimize number of created bounds instances (we create one so we don't change references to the old one)
-        var localBounds = this._selfBounds.copy().includeBounds( this._childBounds );
+        var localBounds = this._localBounds ? this._localBounds.copy() : this._selfBounds.copy().includeBounds( this._childBounds );
         if ( this.hasClipArea() ) {
           // localBounds clipping in the local coordinate frame
           localBounds = localBounds.intersection( this._clipArea.bounds );
@@ -688,12 +689,36 @@ define( function( require ) {
     
     // local coordinate frame bounds
     getLocalBounds: function() {
+      if ( this._localBounds ) {
+        return this._localBounds;
+      }
       var localBounds = this.getSelfBounds().union( this.getChildBounds() );
       if ( this.hasClipArea() ) {
         // localBounds clipping in the local coordinate frame
         localBounds = localBounds.intersection( this._clipArea.bounds );
       }
       return localBounds;
+    },
+    
+    // {Bounds2 | null} to override the localBounds. Once this is called, it will always be used for localBounds until this is called again.
+    // To revert to having Scenery compute the localBounds, set this to null.
+    setLocalBounds: function( localBounds ) {
+      assert && assert( localBounds === null || localBounds instanceof Bounds2, 'localBounds override should be set to either null or a Bounds2' );
+      
+      if ( localBounds === null ) {
+        this._localBounds = null;
+        this.invalidateBounds();
+      } else {
+        var changed = localBounds !== this._localBounds || !this._localBounds;
+        
+        if ( changed ) {
+          this._localBounds = localBounds;
+          
+          this.invalidateBounds();
+        }
+      }
+      
+      return this; // allow chaining
     },
     
     // the bounds for content in render(), in "parent" coordinates
@@ -2216,6 +2241,7 @@ define( function( require ) {
     get selfBounds() { return this.getSelfBounds(); },
     get childBounds() { return this.getChildBounds(); },
     get localBounds() { return this.getLocalBounds(); },
+    set localBounds( value ) { return this.setLocalBounds( value ); },
     get globalBounds() { return this.getGlobalBounds(); },
     get visibleBounds() { return this.getVisibleBounds(); },
     get id() { return this.getId(); },
