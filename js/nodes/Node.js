@@ -1804,8 +1804,8 @@ define( function( require ) {
       
       x = x !== undefined ? x : Math.ceil( padding - bounds.minX );
       y = y !== undefined ? y : Math.ceil( padding - bounds.minY );
-      width = width !== undefined ? width : Math.ceil( x + bounds.getWidth() + padding );
-      height = height !== undefined ? height : Math.ceil( y + bounds.getHeight() + padding );
+      width = width !== undefined ? width : Math.ceil( bounds.getWidth() + 2 * padding );
+      height = height !== undefined ? height : Math.ceil( bounds.getHeight() + 2 * padding );
       
       var canvas = document.createElement( 'canvas' );
       canvas.width = width;
