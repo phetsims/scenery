@@ -2117,7 +2117,7 @@ define( function( require ) {
         node = node._parents[0];
       }
       
-      var matrix = new Matrix3(); // will be modified in place
+      var matrix = Matrix3.identity(); // will be modified in place
       
       // iterate from the back forwards (from the root node to here)
       for ( var i = matrices.length - 1; i >=0; i-- ) {
@@ -2411,7 +2411,7 @@ define( function( require ) {
       
       if ( !this.transform.isIdentity() ) {
         var m = this.transform.getMatrix();
-        addProp( 'matrix', 'new dot.Matrix3( ' + m.m00() + ', ' + m.m01() + ', ' + m.m02() + ', ' +
+        addProp( 'matrix', 'dot.Matrix3.createFromPool(' + m.m00() + ', ' + m.m01() + ', ' + m.m02() + ', ' +
                                                  m.m10() + ', ' + m.m11() + ', ' + m.m12() + ', ' +
                                                  m.m20() + ', ' + m.m21() + ', ' + m.m22() + ' )', true );
       }

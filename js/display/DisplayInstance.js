@@ -115,7 +115,7 @@ define( function( require ) {
       this.cleanInstance( display, trail, trail.lastNode() );
       
       // properties relevant to the "relative" transform to the closest transform root. Please see detailed docs at the top of the file!
-      this.relativeMatrix = this.relativeMatrix || new Matrix3();  // the actual cached transform to the root
+      this.relativeMatrix = this.relativeMatrix || Matrix3.identity();  // the actual cached transform to the root
       this.relativeSelfDirty = true;                   // whether our relativeMatrix is dirty
       this.relativeChildDirtyFrame = display._frameId; // Whether children have dirty transforms (if it is the current frame) NOTE: used only for pre-repaint traversal,
                                                        // and can be ignored if it has a value less than the current frame ID. This allows us to traverse and hit all listeners
@@ -927,7 +927,7 @@ define( function( require ) {
     audit: function( frameId ) {
       // get the relative matrix, computed to be up-to-date, and ignores any flags/counts so we can check whether our state is consistent
       function currentRelativeMatrix( instance ) {
-        var resultMatrix = new Matrix3();
+        var resultMatrix = Matrix3.dirtyFromPool();
         var nodeMatrix = instance.node.getTransform().getMatrix();
         
         if ( instance.parent && !instance.parent.isTransformed ) {

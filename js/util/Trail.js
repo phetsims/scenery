@@ -152,7 +152,7 @@ define( function( require ) {
     getMatrix: function() {
       // TODO: performance: can we cache this ever? would need the scene to not really change in between
       // this matrix will be modified in place, so always start fresh
-      var matrix = new Matrix3();
+      var matrix = Matrix3.identity();
       
       // from the root up
       var nodes = this.nodes;
@@ -166,7 +166,7 @@ define( function( require ) {
     // from parent to global
     getParentMatrix: function() {
       // this matrix will be modified in place, so always start fresh
-      var matrix = new Matrix3();
+      var matrix = Matrix3.identity();
       
       // from the root up
       var nodes = this.nodes;

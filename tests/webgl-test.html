@@ -122,9 +122,9 @@
     var width = canvas.width;
     var height = canvas.height;
     
-    var matrix = new dot.Matrix3( 2 / width, 0,         -1,
-                                  0,        -2 / height, 1,
-                                  0,         0,          1 );
+    var matrix = dot.Matrix3.createFromPool( 2 / width, 0,         -1,
+                                             0,        -2 / height, 1,
+                                             0,         0,          1 );
     
     gl.viewport( 0, 0, width, height );
     gl.clearColor( 0, 1, 0, 1 );
