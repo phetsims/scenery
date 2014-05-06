@@ -119,13 +119,7 @@
                                     .close();
     
     var graphic = new scenery.Node();
-    
     var background = new scenery.Node( { clipArea: skyShape } );
-    
-    var ground = new scenery.Path( groundShape, {
-      fill: '#018e0e',
-      stroke: 'rgba(0,80,0,0.2)'
-    } );
     
     var sunsetGradients = {
       // simple yellow to blue
@@ -148,6 +142,15 @@
                                                         .addColorStop( 1, 'rgb(37,37,133)' )
     };
     
+    var ground = new scenery.Path( groundShape, {
+      fill: hasSunset ? new scenery.RadialGradient( 0, -10, 0, 0, -10, 55 ).addColorStop( 0, '#1BA828' )
+                                                                           .addColorStop( 0.5, '#018e0e' )
+                                                                           .addColorStop( 0.8, '#007500' )
+                                                                           .addColorStop( 1, '#005B00' )
+                      : '#018e0e',
+      stroke: 'rgba(0,80,0,0.2)'
+    } );
+    
     var sunset = new scenery.Path( skyShape, {
       fill: sunsetGradients[sunsetType]
                                                                             
@@ -164,7 +167,9 @@
     } );
     
     var mountain = new scenery.Path( mountainShape, {
-      fill: '#bbb'
+      fill: hasSunset ? new scenery.RadialGradient( 0, 0, 0, 0, 0, 55 ).addColorStop( 0, '#ccc' )
+                                                                       .addColorStop( 1, '#999' )
+                      : '#bbb'
     } );
     
     var snow = new scenery.Path( snowShape, {
@@ -182,7 +187,10 @@
     graphic.addChild( background );
     graphic.addChild( ground );
     if ( hasTree ) {
-      graphic.addChild( createTree( '#1ba828', { x: -28, y: -13, scale: 1.1 } ) );
+      var foregroundTreeColor = hasSunset ? new scenery.LinearGradient( -10, 0, 10, 0 ).addColorStop( 0, '#018E0E' )
+                                                                                       .addColorStop( 1, '#1ba828' )
+                                          : '#1ba828';
+      graphic.addChild( createTree( foregroundTreeColor, { x: -28, y: -13, scale: 1.1 } ) );
       graphic.addChild( createTree( '#018e0e', { x: 25, y: 17, scale: 0.4 } ) );
       graphic.addChild( createTree( '#1ba828', { x: 17, y: 14, scale: 0.5 } ) );
     }
@@ -210,12 +218,12 @@
   scene.addChild( createLogo( false, true, true, 3, { x: 980, y: 200 } ) );
   
   // black logo
-  scene.addChild( createLogo( true, false, false, 0, { x: 60, y: 400 } ) );
-  scene.addChild( createLogo( true, true, false, 0, { x: 520, y: 400 } ) );
-  scene.addChild( createLogo( true, false, true, 0, { x: 60, y: 540 } ) );
-  scene.addChild( createLogo( true, true, true, 0, { x: 520, y: 540 } ) );
-  scene.addChild( createLogo( true, false, true, 1, { x: 980, y: 400 } ) );
-  scene.addChild( createLogo( true, true, true, 3, { x: 980, y: 540 } ) );
+  scene.addChild( createLogo( true, false, true, 0, { x: 60, y: 400 } ) );
+  scene.addChild( createLogo( true, true, true, 0, { x: 520, y: 400 } ) );
+  scene.addChild( createLogo( true, false, false, 0, { x: 60, y: 540 } ) );
+  scene.addChild( createLogo( true, true, false, 0, { x: 520, y: 540 } ) );
+  scene.addChild( createLogo( true, true, true, 3, { x: 980, y: 400 } ) );
+  scene.addChild( createLogo( true, false, true, 1, { x: 980, y: 540 } ) );
   
   function tick() {
     window.requestAnimationFrame( tick, $main[0] );
