@@ -12,8 +12,8 @@
   
   <style type="text/css">
     @import url(https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic);
-    @import url(https://fonts.googleapis.com/css?family=Quicksand:400,700,400italic,700italic);
-    @import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700);
+    @import url(http://fonts.googleapis.com/css?family=Noto+Sans);
+    @import url(http://fonts.googleapis.com/css?family=Muli);
   </style>
   
   <!-- jQuery and LoDash are dependencies -->
@@ -197,8 +197,8 @@
     
     var text = new scenery.Text( 'Scenery', {
       fill: isDark ? '#eee' : '#333',
-      font: '70px Lato, sans-serif',
-      centerY: graphic.centerY - 4,
+      font: sunsetType === 3 ? '70px "Muli", sans-serif' : '70px "Lato", sans-serif',
+      centerY: graphic.centerY - ( sunsetType === 3 ? 0 : 4 ),
       left: graphic.right + 20
     } );
     
