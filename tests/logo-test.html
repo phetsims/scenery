@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <title>Scenery logo mockup test</title>
+  
+  <link rel="stylesheet" href="../../sherpa/bootstrap-2.2.2.css">
+  
+  <style type="text/css">
+    @import url(https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic);
+    @import url(https://fonts.googleapis.com/css?family=Quicksand:400,700,400italic,700italic);
+    @import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700);
+  </style>
+  
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../../sherpa/jquery-2.1.0.min.js"></script>
+  <script src="../../sherpa/lodash-2.4.1.min.js"></script>
+  
+  <!-- Bootstrap not necessarily needed -->
+  <script src="../../sherpa/bootstrap-2.2.2.js"></script>
+  
+  <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
+  <script src="../build/development/scenery.js"></script>
+  <!-- <script src="../build/standalone/scenery.min.js"></script> -->
+  
+  <style type="text/css">
+    /* Let content go to the edges */
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #ff0;
+      overflow: hidden;
+    }
+    
+    /* Have the #main div cover the entire viewport */
+    #main {
+      position: absolute; /* position !== inherit is required so that Scenery's absolutely-positioned children are placed correctly */
+      left: 0;
+      top: 0;
+      background-color: #fff;
+    }
+
+  </style>
+</head>
+
+<body>
+  
+  <!-- our scene graph will be in this div -->
+  <div id="main">
+  </div>
+
+  <script>
+  
+  var $main = $( '#main' );
+
+  // initialize our scene
+  var scene = new scenery.Scene( $main );
+  scene.initializeFullscreenEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
+  scene.resizeOnWindowResize(); // the scene gets resized to the full screen size
+  
+  function createTree( leafColor, options ) {
+    var treeWidth = 3;
+    
+    var leafShape = new kite.Shape().moveTo( 0, 0 )
+                                    .lineTo( 10, 3 )
+                                    .lineTo( 4, -6 )
+                                    .lineTo( 8, -4 )
+                                    .lineTo( 2, -13 )
+                                    .lineTo( 6, -11 )
+                                    .lineTo( 0, -20 )
+                                    .lineTo( -6, -11 )
+                                    .lineTo( -2, -13 )
+                                    .lineTo( -8, -4 )
+                                    .lineTo( -4, -6 )
+                                    .lineTo( -10, 3 )
+                                    .close();
+    
+    var trunk = new scenery.Rectangle( -treeWidth / 2, 0, treeWidth, 10, 0, 0, {
+      fill: '#6b4423'
+    } );
+    
+    var leaves = new scenery.Path( leafShape, {
+      fill: leafColor
+    } );
+    
+    return new scenery.Node( _.extend( { children: [trunk,leaves] }, options ) );
+  }
+  
+  function createLogo( isDark, hasTree, hasSunset, sunsetType, options ) {
+    var angle = Math.PI / 10;
+    var c = 50 * Math.cos( angle );
+    var s = 40 * Math.sin( angle );
+    
+    var groundShape = new kite.Shape().moveTo( -50, 0 )
+                                      .quadraticCurveTo( -25, -20, 0, 5 )
+                                      .smoothQuadraticCurveTo( c, s )
+                                      .ellipticalArc( 0, 0, 50, 40, 0, angle, Math.PI, false )
+                                      .close();
+    var skyShape = new kite.Shape().ellipticalArc( 0, -10, 45, 45, 0, 0, 2 * Math.PI, false )
+                                   .close();
+    var mountainShape = new kite.Shape().moveTo( -5, 10 )
+                                       .lineTo( 25, -20 )
+                                       .lineTo( 55, 10 )
+                                       .lineTo( 55, 50 )
+                                       .lineTo( -5, 50 )
+                                       .close();
+    var snowShape = new kite.Shape().moveTo( 25, -20 ) // tip
+                                    .lineTo( 35, -10 )
+                                    .lineTo( 28, -13 )
+                                    .lineTo( 25, -10 )
+                                    .lineTo( 22, -13 )
+                                    .lineTo( 15, -10 )
+                                    .close();
+    
+    var graphic = new scenery.Node();
+    
+    var background = new scenery.Node( { clipArea: skyShape } );
+    
+    var ground = new scenery.Path( groundShape, {
+      fill: '#018e0e',
+      stroke: 'rgba(0,80,0,0.2)'
+    } );
+    
+    var sunsetGradients = {
+      // simple yellow to blue
+      0: new scenery.RadialGradient( 0, 0, 0, 0, 0, 45 ).addColorStop( 0, '#fefe22' )
+                                                        .addColorStop( 1, '#b2ffff' ),
+      // yellow to violet sunset
+      1: new scenery.RadialGradient( 0, 0, 0, 0, 0, 55 ).addColorStop( 0.2, 'rgb(240,230,225)' )
+                                                        .addColorStop( 0.25, 'rgb(240,230,100)' )
+                                                        .addColorStop( 0.4, 'rgb(230,190,190)' )
+                                                        .addColorStop( 0.6, 'rgb(185,135,215)' )
+                                                        .addColorStop( 0.8, 'rgb(105,70,200)' )
+                                                        .addColorStop( 1, 'rgb(37,37,133)' ),
+      // purplish sunset
+      2: new scenery.RadialGradient( 0, 0, 0, 0, 0, 55 ).addColorStop( 0.2, 'rgb(244,185,128)' )
+                                                        .addColorStop( 0.6, 'rgb(169,116,153)' )
+                                                        .addColorStop( 1, 'rgb(37,28,60)' ),
+      // something
+      3: new scenery.RadialGradient( 0, 0, 0, 0, 0, 55 ).addColorStop( 0.2, 'rgb(230,230,100)' )
+                                                        .addColorStop( 0.6, 'rgb(200,60,115)' )
+                                                        .addColorStop( 1, 'rgb(37,37,133)' )
+    };
+    
+    var sunset = new scenery.Path( skyShape, {
+      fill: sunsetGradients[sunsetType]
+                                                                            
+    } );
+    
+    var sky = new scenery.Path( skyShape, {
+      fill: '#b2ffff'
+    } );
+    
+    var star = new scenery.Circle( 15, {
+      fill: '#fefe22',
+      x: 0,
+      y: 0
+    } );
+    
+    var mountain = new scenery.Path( mountainShape, {
+      fill: '#bbb'
+    } );
+    
+    var snow = new scenery.Path( snowShape, {
+      fill: '#fff'
+    } );
+    
+    if ( hasSunset ) {
+      background.addChild( sunset );
+    } else {
+      background.addChild( sky );
+      background.addChild( star );
+    }
+    background.addChild( mountain );
+    background.addChild( snow );
+    graphic.addChild( background );
+    graphic.addChild( ground );
+    if ( hasTree ) {
+      graphic.addChild( createTree( '#1ba828', { x: -28, y: -13, scale: 1.1 } ) );
+      graphic.addChild( createTree( '#018e0e', { x: 25, y: 17, scale: 0.4 } ) );
+      graphic.addChild( createTree( '#1ba828', { x: 17, y: 14, scale: 0.5 } ) );
+    }
+    
+    var text = new scenery.Text( 'Scenery', {
+      fill: isDark ? '#eee' : '#333',
+      font: '70px Lato, sans-serif',
+      centerY: graphic.centerY - 4,
+      left: graphic.right + 20
+    } );
+    
+    return new scenery.Node( _.extend( { children: [graphic, text] }, options ) );
+  }
+  
+  scene.addChild( new scenery.Rectangle( 0, 300, 1720, 1720, 0, 0, {
+    fill: '#000'
+  } ) );
+  
+  // white logo
+  scene.addChild( createLogo( false, false, false, 0, { x: 60, y: 60 } ) );
+  scene.addChild( createLogo( false, true, false, 0, { x: 520, y: 60 } ) );
+  scene.addChild( createLogo( false, false, true, 0, { x: 60, y: 200 } ) );
+  scene.addChild( createLogo( false, true, true, 0, { x: 520, y: 200 } ) );
+  scene.addChild( createLogo( false, false, true, 1, { x: 980, y: 60 } ) );
+  scene.addChild( createLogo( false, true, true, 3, { x: 980, y: 200 } ) );
+  
+  // black logo
+  scene.addChild( createLogo( true, false, false, 0, { x: 60, y: 400 } ) );
+  scene.addChild( createLogo( true, true, false, 0, { x: 520, y: 400 } ) );
+  scene.addChild( createLogo( true, false, true, 0, { x: 60, y: 540 } ) );
+  scene.addChild( createLogo( true, true, true, 0, { x: 520, y: 540 } ) );
+  scene.addChild( createLogo( true, false, true, 1, { x: 980, y: 400 } ) );
+  scene.addChild( createLogo( true, true, true, 3, { x: 980, y: 540 } ) );
+  
+  function tick() {
+    window.requestAnimationFrame( tick, $main[0] );
+    
+    scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
+  }
+  window.requestAnimationFrame( tick, $main[0] );
+
+
+  </script>
+
+</body>
+</html>
