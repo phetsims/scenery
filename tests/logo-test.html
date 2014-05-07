@@ -139,6 +139,18 @@
       // something
       3: new scenery.RadialGradient( 0, 0, 0, 0, 0, 55 ).addColorStop( 0.2, 'rgb(230,230,100)' )
                                                         .addColorStop( 0.6, 'rgb(200,60,115)' )
+                                                        .addColorStop( 1, 'rgb(37,37,133)' ),
+      // more sun, with sky/sun matching PhET blue/yellow logo hue
+      4: new scenery.RadialGradient( 0, 0, 0, 0, 0, 45 ).addColorStop( 0.20, '#fffa00' )
+                                                        .addColorStop( 0.35, '#dafc80' )
+                                                        .addColorStop( 1, '#b5feff' ),
+      // something, bolder
+      5: new scenery.RadialGradient( 0, 0, 0, 0, 0, 55 ).addColorStop( 0.2, 'rgb(255,255,100)' )
+                                                        .addColorStop( 0.6, 'rgb(220,30,115)' )
+                                                        .addColorStop( 1, 'rgb(10,10,133)' ),
+      // something, skew
+      6: new scenery.RadialGradient( -25, 0, 0, 0, 0, 55 ).addColorStop( 0.2, 'rgb(230,230,100)' )
+                                                        .addColorStop( 0.6, 'rgb(200,60,115)' )
                                                         .addColorStop( 1, 'rgb(37,37,133)' )
     };
     
@@ -210,20 +222,20 @@
   } ) );
   
   // white logo
-  scene.addChild( createLogo( false, false, false, 0, { x: 60, y: 60 } ) );
-  scene.addChild( createLogo( false, true, false, 0, { x: 520, y: 60 } ) );
-  scene.addChild( createLogo( false, false, true, 0, { x: 60, y: 200 } ) );
-  scene.addChild( createLogo( false, true, true, 0, { x: 520, y: 200 } ) );
-  scene.addChild( createLogo( false, false, true, 1, { x: 980, y: 60 } ) );
-  scene.addChild( createLogo( false, true, true, 3, { x: 980, y: 200 } ) );
+  scene.addChild( createLogo( false, true, true, 5, { x: 60, y: 200 } ) ); // bold sunset tree
+  scene.addChild( createLogo( false, true, true, 6, { x: 60, y: 60 } ) );
+  scene.addChild( createLogo( false, true, true, 4, { x: 520, y: 200 } ) ); // day tree
+  scene.addChild( createLogo( false, false, true, 4, { x: 520, y: 60 } ) ); // day no-tree
+  scene.addChild( createLogo( false, true, true, 3, { x: 980, y: 200 } ) ); // sunset tree
+  scene.addChild( createLogo( false, false, true, 3, { x: 980, y: 60 } ) ); // sunset no-tree
   
   // black logo
-  scene.addChild( createLogo( true, false, true, 0, { x: 60, y: 400 } ) );
-  scene.addChild( createLogo( true, true, true, 0, { x: 520, y: 400 } ) );
-  scene.addChild( createLogo( true, false, false, 0, { x: 60, y: 540 } ) );
-  scene.addChild( createLogo( true, true, false, 0, { x: 520, y: 540 } ) );
-  scene.addChild( createLogo( true, true, true, 3, { x: 980, y: 400 } ) );
-  scene.addChild( createLogo( true, false, true, 1, { x: 980, y: 540 } ) );
+  scene.addChild( createLogo( true, true, true, 5, { x: 60, y: 400 } ) ); // bold sunset tree
+  scene.addChild( createLogo( true, true, true, 6, { x: 60, y: 540 } ) );
+  scene.addChild( createLogo( true, true, true, 4, { x: 520, y: 400 } ) ); // day tree
+  scene.addChild( createLogo( true, false, true, 4, { x: 520, y: 540 } ) ); // day no-tree
+  scene.addChild( createLogo( true, true, true, 3, { x: 980, y: 400 } ) ); // sunset tree
+  scene.addChild( createLogo( true, false, true, 3, { x: 980, y: 540 } ) ); // sunset no-tree
   
   function tick() {
     window.requestAnimationFrame( tick, $main[0] );
