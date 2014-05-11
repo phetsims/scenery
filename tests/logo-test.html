@@ -13,7 +13,7 @@
   <style type="text/css">
     @import url(https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic);
     @import url(http://fonts.googleapis.com/css?family=Noto+Sans:300,700,300italic,700italic);
-    @import url(http://fonts.googleapis.com/css?family=Muli:300,700,300italic,700italic);
+    @import url(http://fonts.googleapis.com/css?family=Muli:300);
   </style>
   
   <!-- jQuery and LoDash are dependencies -->
@@ -283,7 +283,7 @@
     
     var text = new scenery.Text( 'Scenery', {
       fill: isDark ? '#eee' : '#333',
-      font: 'lighter 70px "Muli", sans-serif',
+      font: '70px "Muli", sans-serif',
       centerY: graphic.centerY - 2,
       left: graphic.right + 20
     } );
@@ -294,6 +294,8 @@
   scene.addChild( new scenery.Rectangle( 0, 325, 1720, 1720, 0, 0, {
     fill: '#000'
   } ) );
+  
+  scene.renderer = 'svg';
   
   // function createLogo( isDark, hasTree, isFlipped, shapeType, groundType, mountainType, sunsetType, options )
   
