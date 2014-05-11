@@ -250,7 +250,7 @@
         scale: scale
       } );
       
-      return new scenery.Node( { children: [mountain,snow] } );
+      return new scenery.Node( { children: [mountain, snow] } );
     }
     
     var sunburst = new scenery.Path( sunburstShape, {
@@ -260,12 +260,12 @@
     background.addChild( sunset );
     background.addChild( sunburst );
     if ( mountainType === 0 ) {
-      background.addChild( createMountain( '#999', '#ccc', '#fff', 25, -20, 1 ) );
+      background.addChild( createMountain( '#999', '#eee', '#fff', 25, -20, 1 ) );
     } else if ( mountainType === 1 ) {
-      background.addChild( createMountain( '#888', '#aaa', '#fff', 34, -6, 0.7 ) );
-      background.addChild( createMountain( '#999', '#ccc', '#fff', 20, -13, 1 ) );
+      background.addChild( createMountain( '#777', '#ccc', '#fff', 34, -6, 0.7 ) );
+      background.addChild( createMountain( '#999', '#eee', '#fff', 20, -13, 1 ) );
     } else if ( mountainType === 2 ) {
-      background.addChild( createMountain( '#999', '#ccc', '#fff', 23, -13, 1 ) );
+      background.addChild( createMountain( '#999', '#eee', '#fff', 23, -13, 1 ) );
     }
     graphic.addChild( background );
     graphic.addChild( ground );
