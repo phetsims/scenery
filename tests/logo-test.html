@@ -12,8 +12,8 @@
   
   <style type="text/css">
     @import url(https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic);
-    @import url(http://fonts.googleapis.com/css?family=Noto+Sans);
-    @import url(http://fonts.googleapis.com/css?family=Muli);
+    @import url(http://fonts.googleapis.com/css?family=Noto+Sans:300,700,300italic,700italic);
+    @import url(http://fonts.googleapis.com/css?family=Muli:300,700,300italic,700italic);
   </style>
   
   <!-- jQuery and LoDash are dependencies -->
@@ -92,31 +92,68 @@
     return new scenery.Node( _.extend( { children: [trunk,leaves] }, options ) );
   }
   
-  function createLogo( isDark, hasTree, hasSunburst, groundType, sunsetType, options ) {
+  function createLogo( isDark, hasTree, shapeType, groundType, sunsetType, options ) {
     var angle = Math.PI / 10;
     var c = 50 * Math.cos( angle );
     var s = 40 * Math.sin( angle );
     
-    var groundShape = new kite.Shape().moveTo( -50, 0 )
-                                      .quadraticCurveTo( -25, -20, 0, 5 )
-                                      .smoothQuadraticCurveTo( c, s )
-                                      .ellipticalArc( 0, 0, 50, 40, 0, angle, Math.PI, false )
-                                      .close();
+    var rx = 50;
+    var ry = 50;
+    
+    var angle2 = Math.PI * 1;
+    var c2 = rx * Math.cos( angle2 );
+    var s2 = ry * Math.sin( angle2 );
+    
+    var angle3 = Math.PI * 0.15;
+    var c3 = rx * Math.cos( angle3 );
+    var s3 = ry * Math.sin( angle3 );
+    
+    var groundShape = {
+      0: new kite.Shape().moveTo( -50, 0 )
+                         .quadraticCurveTo( -25, -20, 0, 5 )
+                         .smoothQuadraticCurveTo( c, s )
+                         .ellipticalArc( 0, 0, 50, 40, 0, angle, Math.PI, false )
+                         .close(),
+      1: new kite.Shape().moveTo( c2, s2 - 10 )
+                         .quadraticCurveTo( -28, -30, -5, 0 )
+                         .smoothQuadraticCurveTo( c3, s3 - 10 )
+                         .ellipticalArc( 0, -10, rx, ry, 0, angle3, angle2, false )
+                         .close()
+    }[shapeType];
+    
     var skyShape = new kite.Shape().ellipticalArc( 0, -10, 45, 45, 0, 0, 2 * Math.PI, false )
                                    .close();
-    var mountainShape = new kite.Shape().moveTo( -5, 10 )
-                                       .lineTo( 25, -20 )
-                                       .lineTo( 55, 10 )
-                                       .lineTo( 55, 50 )
-                                       .lineTo( -5, 50 )
-                                       .close();
-    var snowShape = new kite.Shape().moveTo( 25, -20 ) // tip
-                                    .lineTo( 35, -10 )
-                                    .lineTo( 28, -13 )
-                                    .lineTo( 25, -10 )
-                                    .lineTo( 22, -13 )
-                                    .lineTo( 15, -10 )
-                                    .close();
+    
+    var mountainShape = { 
+      0: new kite.Shape().moveTo( -5, 10 )
+                         .lineTo( 25, -20 )
+                         .lineTo( 55, 10 )
+                         .lineTo( 55, 50 )
+                         .lineTo( -5, 50 )
+                         .close(),
+      1: new kite.Shape().moveTo( -70, 70 )
+                         .lineTo( 0, 0 )
+                         .lineTo( 70, 70 )
+                         .close()
+    }[shapeType];
+    
+    var snowShape = { 
+      0: new kite.Shape().moveTo( 25, -20 ) // tip
+                         .lineTo( 35, -10 )
+                         .lineTo( 28, -13 )
+                         .lineTo( 25, -10 )
+                         .lineTo( 22, -13 )
+                         .lineTo( 15, -10 )
+                         .close(),
+      1: new kite.Shape().moveTo( 0, 0 ) // tip
+                         .lineTo( 10, 10 )
+                         .lineTo( 3, 7 )
+                         .lineTo( 0, 10 )
+                         .lineTo( -3, 7 )
+                         .lineTo( -10, 10 )
+                         .close()
+    }[shapeType];
+                                    
     var sunburstShape = new kite.Shape().moveTo( 0, 0 );
     var sunburstN = 16;
     for ( var i = 0; i < sunburstN; i++ ) {
@@ -166,8 +203,8 @@
     
     var sunburstGradients = {
       // something
-      3: new scenery.RadialGradient( 0, 0, 0, 0, 0, 55 ).addColorStop( 0.2, 'rgba(230,230,100,0.1)' )
-                                                        .addColorStop( 1, 'rgba(200,60,115,0.2)' ),
+      3: new scenery.RadialGradient( 0, 0, 0, 0, 0, 55 ).addColorStop( 0.2, 'rgba(230,230,100,0.3)' )
+                                                        .addColorStop( 1, 'rgba(200,60,115,0.7)' ),
       // more sun, with sky/sun matching PhET blue/yellow logo hue
       4: new scenery.RadialGradient( 0, 0, 0, 0, 0, 45 ).addColorStop( 0.4, 'rgba(104,203,241,0)' )
                                                         .addColorStop( 1, 'rgba(104,203,241,0.4)' )
@@ -210,25 +247,40 @@
                                                                             
     } );
     
-    var mountain = new scenery.Path( mountainShape, {
-      fill: new scenery.RadialGradient( 0, 0, 0, 0, 0, 55 ).addColorStop( 0, '#ccc' )
-                                                           .addColorStop( 1, '#999' )
-    } );
-    
-    var snow = new scenery.Path( snowShape, {
-      fill: '#fff'
-    } );
+    function createMountain( darkColor, lightColor, snowColor, x, y, scale ) {
+      if ( shapeType === 0 ) {
+        x = 0;
+        y = 0;
+      }
+      
+      var mountain = new scenery.Path( mountainShape, {
+        fill: new scenery.RadialGradient( -x, -y, 0, 0, 0, 55 ).addColorStop( 0, lightColor )
+                                                               .addColorStop( 1, darkColor ),
+        x: x,
+        y: y,
+        scale: scale
+      } );
+      
+      var snow = new scenery.Path( snowShape, {
+        fill: snowColor,
+        x: x,
+        y: y,
+        scale: scale
+      } );
+      
+      return new scenery.Node( { children: [mountain,snow] } );
+    }
     
     var sunburst = new scenery.Path( sunburstShape, {
       fill: sunburstGradients[sunsetType]
     } );
     
     background.addChild( sunset );
-    if ( hasSunburst ) {
-      background.addChild( sunburst );
+    background.addChild( sunburst );
+    background.addChild( createMountain( '#999', '#ccc', '#fff', 20, -13, 1 ) );
+    if ( shapeType !== 0 ) {
+      background.addChild( createMountain( '#999', '#ccc', '#fff', 34, -6, 0.7 ) );
     }
-    background.addChild( mountain );
-    background.addChild( snow );
     graphic.addChild( background );
     graphic.addChild( ground );
     if ( hasTree ) {
@@ -241,7 +293,7 @@
     
     var text = new scenery.Text( 'Scenery', {
       fill: isDark ? '#eee' : '#333',
-      font: sunsetType === 3 ? '70px "Muli", sans-serif' : '70px "Lato", sans-serif',
+      font: 'lighter 70px "Muli", sans-serif',
       centerY: graphic.centerY - ( sunsetType === 3 ? 0 : 4 ),
       left: graphic.right + 20
     } );
@@ -254,37 +306,39 @@
   } ) );
   
   // white logo
-  scene.addChild( createLogo( false, false, true, 1, 3, { x: 60, y: 60 } ) ); // monoground sunset no-tree
-  scene.addChild( createLogo( false, false, false, 2, 6, { x: 520, y: 60 } ) ); // sunset skew no-tree
-  scene.addChild( createLogo( false, true, false, 0, 6, { x: 980, y: 60 } ) ); // sunset skew tree
+  // scene.addChild( createLogo( false, false, 1, 3, { x: 60, y: 60 } ) ); // monoground sunset no-tree
+  // scene.addChild( createLogo( false, false, 2, 6, { x: 520, y: 60 } ) ); // sunset skew no-tree
+  // scene.addChild( createLogo( false, true, 0, 6, { x: 980, y: 60 } ) ); // sunset skew tree
   
-  scene.addChild( createLogo( false, false, true, 0, 4, { x: 60, y: 165 } ) ); // day sunburst no-tree
-  scene.addChild( createLogo( false, true, true, 2, 4, { x: 520, y: 165 } ) ); // day sunburst tree
-  scene.addChild( createLogo( false, false, true, 2, 3, { x: 980, y: 165 } ) ); // sunset sunburst no-tree
+  scene.addChild( createLogo( false, false, 0, 0, 4, { x: 60, y: 165 } ) );
+  scene.addChild( createLogo( false, false, 0, 2, 4, { x: 520, y: 165 } ) );
+  scene.addChild( createLogo( false, false, 0, 2, 3, { x: 980, y: 165 } ) );
   
-  scene.addChild( createLogo( false, true, true, 0, 3, { x: 60, y: 270 } ) ); // sunsset sunburst tree
-  scene.addChild( createLogo( false, true, false, 0, 4, { x: 520, y: 270 } ) ); // day tree
-  scene.addChild( createLogo( false, true, false, 0, 3, { x: 980, y: 270 } ) ); // sunset tree
+  scene.addChild( createLogo( false, false, 0, 0, 3, { x: 60, y: 270 } ) );
+  scene.addChild( createLogo( false, false, 1, 0, 4, { x: 520, y: 270 } ) );
+  scene.addChild( createLogo( false, false, 1, 0, 3, { x: 980, y: 270 } ) );
   
   // black logo
-  scene.addChild( createLogo( true, true, true, 0, 3, { x: 60, y: 400 } ) ); // sunsset sunburst tree
-  scene.addChild( createLogo( true, true, false, 0, 4, { x: 520, y: 400 } ) ); // day tree
-  scene.addChild( createLogo( true, true, false, 0, 3, { x: 980, y: 400 } ) ); // sunset tree
+  scene.addChild( createLogo( true, false, 0, 0, 3, { x: 60, y: 400 } ) );
+  scene.addChild( createLogo( true, false, 1, 0, 4, { x: 520, y: 400 } ) );
+  scene.addChild( createLogo( true, false, 1, 0, 3, { x: 980, y: 400 } ) );
   
-  scene.addChild( createLogo( true, false, true, 0, 4, { x: 60, y: 505 } ) ); // day sunburst no-tree
-  scene.addChild( createLogo( true, true, true, 2, 4, { x: 520, y: 505 } ) ); // day sunburst tree
-  scene.addChild( createLogo( true, false, true, 2, 3, { x: 980, y: 505 } ) ); // sunset sunburst no-tree
+  scene.addChild( createLogo( true, false, 0, 0, 4, { x: 60, y: 505 } ) );
+  scene.addChild( createLogo( true, false, 0, 2, 4, { x: 520, y: 505 } ) );
+  scene.addChild( createLogo( true, false, 0, 2, 3, { x: 980, y: 505 } ) );
   
-  scene.addChild( createLogo( true, false, true, 1, 3, { x: 60, y: 610 } ) ); // monoground sunset no-tree
-  scene.addChild( createLogo( true, false, false, 2, 6, { x: 520, y: 610 } ) ); // sunset skew no-tree
-  scene.addChild( createLogo( true, true, false, 0, 6, { x: 980, y: 610 } ) ); // sunset skew tree
+  // scene.addChild( createLogo( true, false, 1, 3, { x: 60, y: 610 } ) ); // monoground sunset no-tree
+  // scene.addChild( createLogo( true, false, 2, 6, { x: 520, y: 610 } ) ); // sunset skew no-tree
+  // scene.addChild( createLogo( true, true, 0, 6, { x: 980, y: 610 } ) ); // sunset skew tree
   
-  function tick() {
-    window.requestAnimationFrame( tick, $main[0] );
+  scene.updateScene();
+  
+  // function tick() {
+  //   window.requestAnimationFrame( tick, $main[0] );
     
-    scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
-  }
-  window.requestAnimationFrame( tick, $main[0] );
+  //   scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
+  // }
+  // window.requestAnimationFrame( tick, $main[0] );
 
 
   </script>
