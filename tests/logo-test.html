@@ -11,9 +11,14 @@
   <link rel="stylesheet" href="../../sherpa/bootstrap-2.2.2.css">
   
   <style type="text/css">
+    @import url(http://fonts.googleapis.com/css?family=Open+Sans:300);
+    @import url(http://fonts.googleapis.com/css?family=Roboto:300);
+    @import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro:300);
+    @import url(http://fonts.googleapis.com/css?family=Source+Code+Pro:300);
     @import url(https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic);
     @import url(http://fonts.googleapis.com/css?family=Noto+Sans:300,700,300italic,700italic);
     @import url(http://fonts.googleapis.com/css?family=Muli:300);
+    @import url(http://fonts.googleapis.com/css?family=Londrina+Shadow:400);
   </style>
   
   <!-- jQuery and LoDash are dependencies -->
@@ -249,12 +254,18 @@
     graphic.addChild( background );
     graphic.addChild( ground );
     
-    var text = new scenery.Text( 'Scenery', {
+    var text = new scenery.Text( shapeType === 2 ? 'SCENERY' : 'Scenery', {
       fill: isDark ? '#eee' : '#333',
-      font: '70px "Muli", sans-serif',
+      font: {
+        0: '70px "Muli", sans-serif',
+        1: 'lighter 70px "Open Sans", sans-serif',
+        2: 'lighter 65px "Source Code Pro", sans-serif'
+      }[shapeType],
       centerY: graphic.centerY - 2,
       left: graphic.right + ( { 0: 20, 1: 15, 2: 10 }[mountainType] )
     } );
+    
+    shapeType === 2 && ( text.scale( 1, 0.9 ), text.centerY = graphic.centerY - 2 );
     
     return new scenery.Node( _.extend( { children: [graphic, text] }, options ) );
   }
