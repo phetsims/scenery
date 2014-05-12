@@ -69,24 +69,26 @@
   scene.initializeFullscreenEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
   scene.resizeOnWindowResize(); // the scene gets resized to the full screen size
   
+  var gammaCorrect = true;
+  
   function createLogo( isDark, shapeType, mountainType, sunsetType, options ) {
-    var sunsetSun = 'rgb(230,230,100)';
-    var sunsetMedium = 'rgb(200,60,115)';
-    var sunsetFar = 'rgb(37,37,133)';
-    var sunburstStart = 'rgba(230,230,100,0.3)';
-    var sunburstEnd = 'rgba(200,60,115,0.7)';
-    var ground1 = '#1BA828';
-    var ground2 = '#018e0e';
-    var ground3 = '#007500';
-    var ground4 = '#005B00';
-    var groundStroke = 'rgba(0,0,0,0.2)';
-    var snowColor = '#fff';
-    var frontMountainDark = '#777';
-    var frontMountainLight = '#ccc';
-    var backMountainDark = '#999';
-    var backMountainLight = '#eee';
-    var textLight = '#eee';
-    var textDark = '#333';
+    var sunsetSun          = !gammaCorrect ? 'rgb(230,230,100)'      : 'rgb(231,225,120)' ;
+    var sunsetMedium       = !gammaCorrect ? 'rgb(200,60,115)'       : 'rgb(184,79,118)' ;
+    var sunsetFar          = !gammaCorrect ? 'rgb(37,37,133)'        : 'rgb(35,49,128)' ;
+    var sunburstStart      = !gammaCorrect ? 'rgba(230,230,100,0.3)' : 'rgba(231,225,120,0.3)' ;
+    var sunburstEnd        = !gammaCorrect ? 'rgba(200,60,115,0.7)'  : 'rgba(184,79,118,0.7)' ;
+    var ground1            = !gammaCorrect ? '#1BA828'               : 'rgb(82,160,57)' ;
+    var ground2            = !gammaCorrect ? '#018e0e'               : 'rgb(65,135,37)' ;
+    var ground3            = !gammaCorrect ? '#007500'               : 'rgb(52,111,24)' ;
+    var ground4            = !gammaCorrect ? '#005B00'               : 'rgb(39,86,17)' ;
+    var groundStroke       = !gammaCorrect ? 'rgba(0,0,0,0.2)'       : 'rgba(0,0,0,0.2)' ;
+    var snowColor          = !gammaCorrect ? '#fff'                  : 'rgb(255,255,255)' ;
+    var frontMountainDark  = !gammaCorrect ? '#777'                  : 'rgb(119,119,119)' ;
+    var frontMountainLight = !gammaCorrect ? '#ccc'                  : 'rgb(204,204,204)' ;
+    var backMountainDark   = !gammaCorrect ? '#999'                  : 'rgb(153,153,153)' ;
+    var backMountainLight  = !gammaCorrect ? '#eee'                  : 'rgb(238,238,238)' ;
+    var textLight          = !gammaCorrect ? '#eee'                  : 'rgb(238,238,238)' ;
+    var textDark           = !gammaCorrect ? '#333'                  : 'rgb(51,51,51)' ;
     
     var angle = Math.PI / 10;
     var c = 50 * Math.cos( angle );
