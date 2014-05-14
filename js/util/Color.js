@@ -179,7 +179,7 @@ define( function( require ) {
    */
   Color.toColor = function( colorSpec ) {
     return colorSpec instanceof Color ? colorSpec : new Color( colorSpec );
-  }
+  };
   
   Color.prototype = {
     constructor: Color,
