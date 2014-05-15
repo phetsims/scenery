@@ -13,19 +13,18 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
-  var Drawable = require( 'SCENERY/display/Drawable' );
+  var Block = require( 'SCENERY/display/Block' );
   
   scenery.DOMBlock = function DOMBlock( display, domDrawable ) {
     this.initialize( display, domDrawable );
   };
   var DOMBlock = scenery.DOMBlock;
   
-  inherit( Drawable, DOMBlock, {
+  inherit( Block, DOMBlock, {
     initialize: function( display, domDrawable ) {
       // TODO: is it bad to pass the acceleration flags along?
-      this.initializeDrawable( domDrawable.renderer );
+      this.initializeBlock( display, domDrawable.renderer );
       
-      this.display = display;
       this.domDrawable = domDrawable;
       this.domElement = domDrawable.domElement;
       
@@ -35,10 +34,9 @@ define( function( require ) {
     dispose: function() {
       this.domDrawable = null;
       this.domElement = null;
-      this.display = null;
       
       // super call
-      Drawable.prototype.dispose.call( this );
+      Block.prototype.dispose.call( this );
     },
     
     update: function() {
@@ -55,12 +53,14 @@ define( function( require ) {
     
     addDrawable: function( drawable ) {
       assert && assert( this.domDrawable === drawable, 'DOMBlock should only be used with one drawable for now (the one it was initialized with)' );
-      drawable.parentDrawable = this;
+      
+      Block.prototype.addDrawable.call( this, drawable );
     },
     
     removeDrawable: function( drawable ) {
       assert && assert( this.domDrawable === drawable, 'DOMBlock should only be used with one drawable for now (the one it was initialized with)' );
-      drawable.parentDrawable = null;
+      
+      Block.prototype.removeDrawable.call( this, drawable );
     }
   } );
 

@@ -13,7 +13,7 @@ define( function( require ) {
   var Poolable = require( 'PHET_CORE/Poolable' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var scenery = require( 'SCENERY/scenery' );
-  var Drawable = require( 'SCENERY/display/Drawable' );
+  var Block = require( 'SCENERY/display/Block' );
   var CanvasContextWrapper = require( 'SCENERY/util/CanvasContextWrapper' );
   
   scenery.CanvasBlock = function CanvasBlock( display, renderer, transformRootInstance ) {
@@ -21,11 +21,9 @@ define( function( require ) {
   };
   var CanvasBlock = scenery.CanvasBlock;
   
-  inherit( Drawable, CanvasBlock, {
+  inherit( Block, CanvasBlock, {
     initialize: function( display, renderer, transformRootInstance ) {
-      this.initializeDrawable( renderer );
-      
-      this.display = display;
+      this.initializeBlock( display, renderer );
       
       this.transformRootInstance = transformRootInstance;
       
@@ -54,14 +52,13 @@ define( function( require ) {
     dispose: function() {
       // clear references
       this.transformRootInstance = null;
-      this.display = null;
       cleanArray( this.dirtyDrawables );
       
       // minimize memory exposure of the backing raster
       this.canvas.width = 0;
       this.canvas.height = 0;
       
-      Drawable.prototype.dispose.call( this );
+      Block.prototype.dispose.call( this );
     },
     
     update: function() {
@@ -83,11 +80,11 @@ define( function( require ) {
     },
     
     addDrawable: function( drawable ) {
-      drawable.parentDrawable = this;
+      Block.prototype.addDrawable.call( this, drawable );
     },
     
     removeDrawable: function( drawable ) {
-      drawable.parentDrawable = null;
+      Block.prototype.removeDrawable.call( this, drawable );
     }
   } );
   

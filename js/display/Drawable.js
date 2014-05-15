@@ -47,6 +47,9 @@ define( function( require ) {
       // what drawble we are being rendered (or put) into (will be filled in later)
       this.parentDrawable = null;
       
+      // what our parent drawable will be after the stitch is finished
+      this.pendingParentDrawable = null;
+      
       // linked list handling (will be filled in later)
       this.previousDrawable = null;
       this.nextDrawable = null;

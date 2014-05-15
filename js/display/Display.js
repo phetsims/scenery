@@ -18,13 +18,12 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Dimension2 = require( 'DOT/Dimension2' );
   require( 'SCENERY/util/Trail' );
-  require( 'SCENERY/display/BackboneBlock' );
+  require( 'SCENERY/display/BackboneDrawable' );
   require( 'SCENERY/display/CanvasBlock' );
   require( 'SCENERY/display/CanvasSelfDrawable' );
   require( 'SCENERY/display/DisplayInstance' );
   require( 'SCENERY/display/DOMSelfDrawable' );
   require( 'SCENERY/display/InlineCanvasCacheDrawable' );
-  require( 'SCENERY/display/RenderState' );
   require( 'SCENERY/display/SharedCanvasCacheDrawable' );
   require( 'SCENERY/display/SVGSelfDrawable' );
   require( 'SCENERY/layers/Renderer' );
@@ -49,7 +48,7 @@ define( function( require ) {
     
     this._rootNode = rootNode;
     this._rootBackbone = null; // to be filled in later
-    this._domElement = scenery.BackboneBlock.createDivBackbone();
+    this._domElement = scenery.BackboneDrawable.createDivBackbone();
     this._sharedCanvasInstances = {}; // map from Node ID to DisplayInstance, for fast lookup
     this._baseInstance = null; // will be filled with the root DisplayInstance
     
@@ -59,6 +58,7 @@ define( function( require ) {
     this._dirtyTransformRootsWithoutPass = [];
     
     this._instanceRootsToDispose = [];
+    this._drawablesToDispose = [];
   };
   var Display = scenery.Display;
   
@@ -77,9 +77,8 @@ define( function( require ) {
       // from code below without triggering side effects (we assume that we are not reentrant).
       this._rootNode.validateWatchedBounds();
       
-      // throw new Error( 'TODO: replace with actual stitching' );
       this._baseInstance = this._baseInstance || scenery.DisplayInstance.createFromPool( this, new scenery.Trail( this._rootNode ) );
-      this._baseInstance.syncTree( scenery.RenderState.RegularState.createRootState( this._rootNode ) );
+      this._baseInstance.baseSyncTree();
       if ( firstRun ) {
         this.markTransformRootDirty( this._baseInstance, this._baseInstance.isTransformed ); // marks the transform root as dirty (since it is)
       }
@@ -98,6 +97,11 @@ define( function( require ) {
       // dispose all of our instances. disposing the root will cause all descendants to also be disposed
       while ( this._instanceRootsToDispose.length ) {
         this._instanceRootsToDispose.pop().dispose();
+      }
+      
+      // dispose all of our other drawables.
+      while ( this._drawablesToDispose.length ) {
+        this._drawablesToDispose.pop().dispose();
       }
       
       if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
@@ -192,6 +196,10 @@ define( function( require ) {
     
     markInstanceRootForDisposal: function( displayInstance ) {
       this._instanceRootsToDispose.push( displayInstance );
+    },
+    
+    markDrawableForDisposal: function( drawable ) {
+      this._drawablesToDispose.push( drawable );
     }
     
   }, Events.prototype ) );

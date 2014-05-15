@@ -20,12 +20,12 @@ define( function( require ) {
   var DOMBlock = require( 'SCENERY/display/DOMBlock' );
   var Util = require( 'SCENERY/util/Util' );
   
-  scenery.BackboneBlock = function BackboneBlock( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
+  scenery.BackboneDrawable = function BackboneDrawable( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
     this.initialize( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
   };
-  var BackboneBlock = scenery.BackboneBlock;
+  var BackboneDrawable = scenery.BackboneDrawable;
   
-  inherit( Drawable, BackboneBlock, {
+  inherit( Drawable, BackboneDrawable, {
     initialize: function( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
       Drawable.call( this, renderer );
       
@@ -55,7 +55,7 @@ define( function( require ) {
       }
       
       this.renderer = renderer;
-      this.domElement = isDisplayRoot ? display._domElement : BackboneBlock.createDivBackbone();
+      this.domElement = isDisplayRoot ? display._domElement : BackboneDrawable.createDivBackbone();
       this.isDisplayRoot = isDisplayRoot;
       this.dirtyDrawables = cleanArray( this.dirtyDrawables );
       
@@ -230,13 +230,11 @@ define( function( require ) {
       return clip;
     },
     
-    rebuild: function( firstDrawable, lastDrawable ) {
+    stitch: function( firstDrawable, lastDrawable, oldDrawableBeforeChange, oldDrawableAfterChange ) {
       this.disposeBlocks();
       
       var currentBlock = null;
       var currentRenderer = 0;
-      
-      var zIndex = 1; // don't start below 1
       
       // linked-list iteration inclusively from firstDrawable to lastDrawable
       for ( var drawable = firstDrawable; drawable !== null && drawable.previousDrawable !== lastDrawable; drawable = drawable.nextDrawable ) {
@@ -254,12 +252,11 @@ define( function( require ) {
             currentBlock = DOMBlock.createFromPool( this.display, drawable );
             currentRenderer = 0; // force a new block for the next drawable
           } else {
-            throw new Error( 'unsupported renderer for BackboneBlock.rebuild: ' + currentRenderer );
+            throw new Error( 'unsupported renderer for BackboneDrawable.rebuild: ' + currentRenderer );
           }
           
           this.blocks.push( currentBlock );
           currentBlock.parentDrawable = this;
-          currentBlock.domElement.style.zIndex = zIndex++; // NOTE: this should give it its own stacking index (which is what we want)
           this.domElement.appendChild( currentBlock.domElement ); //OHTWO TODO: minor speedup by appending only once its fragment is constructed? or use DocumentFragment?
           
           // mark it dirty for now, so we can check
@@ -268,10 +265,16 @@ define( function( require ) {
         
         currentBlock.addDrawable( drawable );
       }
+      
+      // full-pass change for zindex. OHTWO TODO: only change where necessary
+      var zIndex = 1; // don't start below 1
+      for ( var k = 0; k < this.blocks.length; k++ ) {
+        this.blocks[k].domElement.style.zIndex = zIndex++; // NOTE: this should give it its own stacking index (which is what we want)
+      }
     }
   } );
   
-  BackboneBlock.createDivBackbone = function() {
+  BackboneDrawable.createDivBackbone = function() {
     var div = document.createElement( 'div' );
     div.style.position = 'absolute';
     div.style.left = '0';
@@ -282,17 +285,17 @@ define( function( require ) {
   };
   
   /* jshint -W064 */
-  Poolable( BackboneBlock, {
+  Poolable( BackboneDrawable, {
     constructorDuplicateFactory: function( pool ) {
       return function( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
         if ( pool.length ) {
           return pool.pop().initialize( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
         } else {
-          return new BackboneBlock( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
+          return new BackboneDrawable( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
         }
       };
     }
   } );
   
-  return BackboneBlock;
+  return BackboneDrawable;
 } );

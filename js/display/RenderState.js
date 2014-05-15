@@ -68,6 +68,7 @@ define( function( require ) {
       this.isSharedCanvasCachePlaceholder = false;
       this.isSharedCanvasCacheSelf = false;
       
+      //OHTWO TODO PERFORMANCE: These probably should be 0 (e.g. no renderer), so they are falsy, but that way remain fixednum when set to actual renderers
       this.selfRenderer = null;
       this.groupRenderer = null;
       this.sharedCacheRenderer = null;
@@ -159,7 +160,7 @@ define( function( require ) {
      */
     isInstanceCompatibleWith: function( otherState ) {
       return this.isTransformed === otherState.isTransformed && //OHTWO TODO: allow mutating based on this change
-             this.isSharedCanvasCacheSelf === otherState.isSharedCanvasCacheSelf; //OHTWO TODO: allow mutating based on this change
+             this.isSharedCanvasCachePlaceholder === otherState.isSharedCanvasCachePlaceholder; //OHTWO TODO: allow mutating based on this change
     }
   };
   

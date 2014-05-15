@@ -13,7 +13,7 @@ define( function( require ) {
   var Poolable = require( 'PHET_CORE/Poolable' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var scenery = require( 'SCENERY/scenery' );
-  var Drawable = require( 'SCENERY/display/Drawable' );
+  var Block = require( 'SCENERY/display/Block' );
   var SVGGroup = require( 'SCENERY/display/SVGGroup' );
   
   scenery.SVGBlock = function SVGBlock( display, renderer, transformRootInstance, filterRootInstance ) {
@@ -21,11 +21,10 @@ define( function( require ) {
   };
   var SVGBlock = scenery.SVGBlock;
   
-  inherit( Drawable, SVGBlock, {
+  inherit( Block, SVGBlock, {
     initialize: function( display, renderer, transformRootInstance, filterRootInstance ) {
-      this.initializeDrawable( renderer );
+      this.initializeBlock( display, renderer );
       
-      this.display = display;
       this.transformRootInstance = transformRootInstance;
       this.filterRootInstance = filterRootInstance;
       
@@ -128,7 +127,6 @@ define( function( require ) {
       // clear references
       this.transformRootInstance = null;
       this.filterRootInstance = null;
-      this.display = null;
       cleanArray( this.dirtyGroups );
       cleanArray( this.dirtyDrawables );
       
@@ -136,12 +134,12 @@ define( function( require ) {
       this.rootGroup.dispose();
       this.rootGroup = null;
       
-      Drawable.prototype.dispose.call( this );
+      Block.prototype.dispose.call( this );
     },
     
     addDrawable: function( drawable ) {
-      drawable.parentDrawable = this;
-      this.markDirtyDrawable( drawable );
+      Block.prototype.addDrawable.call( this, drawable );
+      
       SVGGroup.addDrawable( this, drawable );
       drawable.updateDefs( this.defs );
     },
@@ -149,6 +147,8 @@ define( function( require ) {
     removeDrawable: function( drawable ) {
       SVGGroup.removeDrawable( this, drawable );
       drawable.parentDrawable = null;
+      
+      Block.prototype.removeDrawable.call( this, drawable );
       
       // NOTE: we don't unset the drawable's defs here, since it will either be disposed (will clear it)
       // or will be added to another SVGBlock (which will overwrite it)
