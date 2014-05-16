@@ -86,6 +86,10 @@ define( function( require ) {
       
       this.blocks = this.blocks || []; // we are responsible for their disposal
       
+      //OHTWO @deprecated
+      this.lastFirstDrawable = null;
+      this.lastLastDrawable = null;
+      
       return this; // chaining
     },
     
@@ -231,13 +235,20 @@ define( function( require ) {
     },
     
     stitch: function( firstDrawable, lastDrawable, oldDrawableBeforeChange, oldDrawableAfterChange ) {
+      for ( var d = this.lastFirstDrawable; d !== null && d.previousDrawable !== this.lastLastDrawable; d = d.nextDrawable ) {
+        d.parentDrawable.removeDrawable( d );
+      }
+      
+      this.lastFirstDrawable = firstDrawable;
+      this.lastLastDrawable = lastDrawable;
+      
       this.disposeBlocks();
       
       var currentBlock = null;
       var currentRenderer = 0;
       
       // linked-list iteration inclusively from firstDrawable to lastDrawable
-      for ( var drawable = firstDrawable; drawable !== null && drawable.previousDrawable !== lastDrawable; drawable = drawable.nextDrawable ) {
+      for ( var drawable = firstDrawable; drawable !== null && drawable.pendingPreviousDrawable !== lastDrawable; drawable = drawable.pendingNextDrawable ) {
         
         // if we need to switch to a new block, create it
         if ( !currentBlock || drawable.renderer !== currentRenderer ) {
@@ -264,7 +275,21 @@ define( function( require ) {
         }
         
         currentBlock.addDrawable( drawable );
+        
+        // pending linked list => linked list
+        //OHTWO TODO: scan these after all backbones have been stitched! EEK!
+        // throw new Error( 'see comment' );
+        if ( drawable.pendingPreviousDrawable !== null ) {
+          drawable.pendingPreviousDrawable.pendingNextDrawable = null;
+          drawable.pendingPreviousDrawable.nextDrawable = drawable;
+          drawable.previousDrawable = drawable.pendingPreviousDrawable;
+          drawable.pendingPreviousDrawable = null;
+        } else {
+          drawable.previousDrawable = null;
+        }
       }
+      lastDrawable.pendingNextDrawable = null;
+      lastDrawable.nextDrawable = null;
       
       // full-pass change for zindex. OHTWO TODO: only change where necessary
       var zIndex = 1; // don't start below 1

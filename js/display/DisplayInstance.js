@@ -94,8 +94,9 @@ define( function( require ) {
   
   // display instance linked list ops
   function connectDrawables( a, b ) {
-    a.nextDrawable = b;
-    b.previousDrawable = a;
+    // marked with pending
+    a.pendingNextDrawable = b;
+    b.pendingPreviousDrawable = a;
   }
   
   scenery.DisplayInstance = function DisplayInstance( display, trail ) {

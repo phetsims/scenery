@@ -78,6 +78,8 @@ define( function( require ) {
       this.instance.addSVGGroup( this );
       
       this.block.markDirtyGroup( this ); // so we are marked and updated properly
+      
+      return this;
     },
     
     addSelfDrawable: function( drawable ) {
@@ -264,6 +266,8 @@ define( function( require ) {
     },
     
     dispose: function() {
+      assert && assert( this.children.length === 0, 'Should be empty by now' );
+      
       if ( this.listeningToTransform ) {
         this.node.offStatic( 'transform', this.transformDirtyListener );
       }
