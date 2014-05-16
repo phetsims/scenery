@@ -173,32 +173,26 @@ define( function( require ) {
           this.dirtyDrawables.pop().update();
         }
         
-        if ( this.willApplyFilters ) {
-          if ( this.opacityDirty ) {
-            this.opacityDirty = false;
-            
-            var opacity = this.getFilterOpacity();
-            
-            this.domElement.style.opacity = ( opacity === 1 ? '' : opacity );
-          }
+        if ( this.opacityDirty ) {
+          this.opacityDirty = false;
           
-          if ( this.visibilityDirty ) {
-            this.visibilityDirty = false;
-            
-            var visible = this.getFilterVisibility();
-            
-            this.domElement.style.display = ( visible ? '' : 'none' );
-          }
+          var filterOpacity = this.willApplyFilters ? this.getFilterOpacity() : 1;
+          this.domElement.style.opacity = ( filterOpacity !== 1 ) ? filterOpacity : '';
+        }
+        
+        if ( this.visibilityDirty ) {
+          this.visibilityDirty = false;
           
-          if ( this.clipDirty ) {
-            this.clipDirty = false;
-            
-            var clip = this.getFilterClip();
-            
-            //OHTWO TODO: CSS clip-path/mask support here. see http://www.html5rocks.com/en/tutorials/masking/adobe/
-            this.domElement.style.clipPath = clip; // yikes! temporary, since we already threw something?
-          }
+          this.domElement.style.display = ( this.willApplyFilters && !this.getFilterVisibility() ) ? 'none' : '';
+        }
+        
+        if ( this.clipDirty ) {
+          this.clipDirty = false;
           
+          var clip = this.willApplyFilters ? this.getFilterClip() : '';
+          
+          //OHTWO TODO: CSS clip-path/mask support here. see http://www.html5rocks.com/en/tutorials/masking/adobe/
+          this.domElement.style.clipPath = clip; // yikes! temporary, since we already threw something?
         }
       }
     },
