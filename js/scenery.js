@@ -38,6 +38,14 @@ define( function( require ) {
     
     enableLayerLogging: function() {
       window.sceneryLayerLog = function( ob ) { console.log( ob ); };
+      
+      // feature-specific debugging flags (so we don't log the entire world)
+      
+      // window.sceneryLayerLog.dirty = function( ob ) { console.log( '[dirty] ' + ob ); };
+      // window.sceneryLayerLog.Backbone = function( ob ) { console.log( '[Backbone] ' + ob ); };
+      // window.sceneryLayerLog.DisplayInstance = function( ob ) { console.log( '[DisplayInstance] ' + ob ); };
+      // window.sceneryLayerLog.SVGBlock = function( ob ) { console.log( '[SVGBlock] ' + ob ); };
+      // window.sceneryLayerLog.SVGGroup = function( ob ) { console.log( '[SVGGroup] ' + ob ); };
     },
   
     disableLayerLogging: function() {

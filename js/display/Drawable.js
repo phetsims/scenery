@@ -76,6 +76,10 @@ define( function( require ) {
       
       // for now
       this.freeToPool();
+    },
+    
+    toString: function() {
+      return this.constructor.name + '#' + this.id;
     }
   } );
   

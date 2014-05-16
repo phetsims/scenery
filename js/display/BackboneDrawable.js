@@ -90,10 +90,14 @@ define( function( require ) {
       this.lastFirstDrawable = null;
       this.lastLastDrawable = null;
       
+      sceneryLayerLog && sceneryLayerLog.BackboneDrawable && sceneryLayerLog.BackboneDrawable( 'initialized ' + this.toString() );
+      
       return this; // chaining
     },
     
     dispose: function() {
+      sceneryLayerLog && sceneryLayerLog.BackboneDrawable && sceneryLayerLog.BackboneDrawable( 'dispose ' + this.toString() );
+      
       while ( this.watchedFilterNodes.length ) {
         var node = this.watchedFilterNodes.pop();
         
@@ -235,6 +239,8 @@ define( function( require ) {
     },
     
     stitch: function( firstDrawable, lastDrawable, oldDrawableBeforeChange, oldDrawableAfterChange ) {
+      sceneryLayerLog && sceneryLayerLog.BackboneDrawable && sceneryLayerLog.BackboneDrawable( 'stitch ' + this.toString() + ' first:' + firstDrawable.toString() + ' last:' + lastDrawable.toString() );
+      
       for ( var d = this.lastFirstDrawable; d !== null && d.previousDrawable !== this.lastLastDrawable; d = d.nextDrawable ) {
         d.parentDrawable.removeDrawable( d );
       }
@@ -314,8 +320,10 @@ define( function( require ) {
     constructorDuplicateFactory: function( pool ) {
       return function( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
         if ( pool.length ) {
+          sceneryLayerLog && sceneryLayerLog.BackboneDrawable && sceneryLayerLog.BackboneDrawable( 'new from pool' );
           return pool.pop().initialize( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
         } else {
+          sceneryLayerLog && sceneryLayerLog.BackboneDrawable && sceneryLayerLog.BackboneDrawable( 'new from constructor' );
           return new BackboneDrawable( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
         }
       };

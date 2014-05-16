@@ -161,6 +161,20 @@ define( function( require ) {
     isInstanceCompatibleWith: function( otherState ) {
       return this.isTransformed === otherState.isTransformed && //OHTWO TODO: allow mutating based on this change
              this.isSharedCanvasCachePlaceholder === otherState.isSharedCanvasCachePlaceholder; //OHTWO TODO: allow mutating based on this change
+    },
+    
+    toString: function() {
+      var result = 'S[ ' +
+                   ( this.isDisplayRoot ? 'displayRoot ' : '' ) +
+                   ( this.isBackbone ? 'backbone ' : '' ) +
+                   ( this.isInstanceCanvasCache ? 'instanceCache ' : '' ) +
+                   ( this.isSharedCanvasCachePlaceholder ? 'sharedCachePlaceholder ' : '' ) +
+                   ( this.isSharedCanvasCacheSelf ? 'sharedCacheSelf ' : '' ) +
+                   ( this.isTransformed ? 'TR' : '' ) +
+                   ( this.selfRenderer ? this.selfRenderer.toString( 16 ) : '-' ) + ',' +
+                   ( this.groupRenderer ? this.groupRenderer.toString( 16 ) : '-' ) + ',' +
+                   ( this.sharedCacheRenderer ? this.sharedCacheRenderer.toString( 16 ) : '-' ) + ' ';
+      return result + ']';
     }
   };
   

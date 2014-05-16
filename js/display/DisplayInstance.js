@@ -112,7 +112,7 @@ define( function( require ) {
       
       trail.setImmutable(); // prevent the trail passed in from being mutated after this point (we want a consistent trail)
       
-      this.id = globalIdCounter++;
+      this.id = this.id || globalIdCounter++;
       
       this.cleanInstance( display, trail, trail.lastNode() );
       
@@ -151,6 +151,8 @@ define( function( require ) {
       
       // whether we have been instantiated. false if we are in a pool waiting to be instantiated
       this.active = true;
+      
+      sceneryLayerLog && sceneryLayerLog.DisplayInstance && sceneryLayerLog.DisplayInstance( 'initialized ' + this.toString() );
       
       return this;
     },
@@ -207,7 +209,9 @@ define( function( require ) {
     
     // @public
     baseSyncTree: function() {
+      sceneryLayerLog && sceneryLayerLog.DisplayInstance && sceneryLayerLog.DisplayInstance( '-------- START baseSyncTree ' + this.toString() + ' --------' );
       this.syncTree( scenery.RenderState.RegularState.createRootState( this.node ) );
+      sceneryLayerLog && sceneryLayerLog.DisplayInstance && sceneryLayerLog.DisplayInstance( '-------- END baseSyncTree ' + this.toString() + ' --------' );
       this.cleanStitchChangeInterval();
     },
     
@@ -230,6 +234,8 @@ define( function( require ) {
      *          drawableBeforeFirstChange and drawableAfterLastChange
      */
     syncTree: function( state ) {
+      sceneryLayerLog && sceneryLayerLog.DisplayInstance && sceneryLayerLog.DisplayInstance( 'syncTree ' + this.toString() + ' ' + state.toString() );
+      
       assert && assert( state && state.isSharedCanvasCachePlaceholder !== undefined, 'RenderState duck-typing instanceof' );
       assert && assert( !this.parent || !this.parent.isStateless(), 'We should not have a stateless parent instance' ); // may access isTransformed up to root to determine relative trails
       
@@ -1068,6 +1074,8 @@ define( function( require ) {
     
     // clean up listeners and garbage, so that we can be recycled (or pooled)
     dispose: function() {
+      sceneryLayerLog && sceneryLayerLog.DisplayInstance && sceneryLayerLog.DisplayInstance( 'dispose ' + this.toString() );
+      
       assert && assert( this.active, 'Seems like we tried to dispose this DisplayInstance twice, it is not active' );
       
       this.active = false;
@@ -1193,6 +1201,10 @@ define( function( require ) {
           assertSlow( matrix.equals( this.relativeMatrix ), 'If there is no relativeSelfDirty flag set here or in our ancestors, our relativeMatrix should be up-to-date' );
         }
       }
+    },
+    
+    toString: function() {
+      return 'I#' + this.id + '/' + ( this.node ? this.node.id : '-' );
     }
   } );
   
@@ -1202,8 +1214,10 @@ define( function( require ) {
     constructorDuplicateFactory: function( pool ) {
       return function( display, trail ) {
         if ( pool.length ) {
+          sceneryLayerLog && sceneryLayerLog.DisplayInstance && sceneryLayerLog.DisplayInstance( 'new from pool' );
           return pool.pop().initialize( display, trail );
         } else {
+          sceneryLayerLog && sceneryLayerLog.DisplayInstance && sceneryLayerLog.DisplayInstance( 'new from constructor' );
           return new DisplayInstance( display, trail );
         }
       };

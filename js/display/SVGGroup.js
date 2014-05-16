@@ -32,6 +32,8 @@ define( function( require ) {
       this.children = cleanArray( this.children );
       this.hasSelfDrawable = false;
       
+      sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.SVGGroup( 'initializing ' + this.toString() );
+      
       // general dirty flag (triggered on any other dirty event)
       this.dirty = true;
       
@@ -43,7 +45,7 @@ define( function( require ) {
       
       // transform handling
       this.transformDirty = true;
-      this.hasTransform = false;
+      this.hasTransform = this.hasTransform !== undefined ? this.hasTransform : false; // persists across disposal
       this.transformDirtyListener = this.transformDirtyListener || this.markTransformDirty.bind( this );
       if ( this.willApplyTransforms ) {
         this.node.onStatic( 'transform', this.transformDirtyListener );
@@ -53,9 +55,9 @@ define( function( require ) {
       this.opacityDirty = true;
       this.visibilityDirty = true;
       this.clipDirty = true;
-      this.hasOpacity = false;
-      this.clipDefinition = null;
-      this.clipPath = null;
+      this.hasOpacity = this.hasOpacity !== undefined ? this.hasOpacity : false; // persists across disposal
+      this.clipDefinition = this.clipDefinition !== undefined ? this.clipDefinition : null; // persists across disposal
+      this.clipPath = this.clipPath !== undefined ? this.clipPath : null; // persists across disposal
       this.opacityDirtyListener = this.opacityDirtyListener || this.markOpacityDirty.bind( this );
       this.visibilityDirtyListener = this.visibilityDirtyListener || this.markVisibilityDirty.bind( this );
       this.clipDirtyListener = this.clipDirtyListener || this.markClipDirty.bind( this );
@@ -165,9 +167,10 @@ define( function( require ) {
       
       this.dirty = false;
       
-      if ( this.willApplyTransforms ) {
-        if ( this.transformDirty ) {
-          this.transformDirty = false;
+      if ( this.transformDirty ) {
+        this.transformDirty = false;
+        
+        if ( this.willApplyTransforms ) {
           
           var isIdentity = this.node.transform.isIdentity();
           
@@ -178,55 +181,60 @@ define( function( require ) {
             this.hasTransform = false;
             svgGroup.removeAttribute( 'transform' );
           }
+        } else {
+          // we want no transforms if we won't be applying transforms
+          if ( this.hasTransform ) {
+            this.hasTransform = false;
+            svgGroup.removeAttribute( 'transform' );
+          }
         }
       }
       
-      if ( this.willApplyFilters ) {
-        if ( this.visibilityDirty ) {
-          this.visibilityDirty = false;
-          
-          svgGroup.style.display = this.node.isVisible() ? '' : 'none';
-        }
+      if ( this.visibilityDirty ) {
+        this.visibilityDirty = false;
         
-        if ( this.opacityDirty ) {
-          this.opacityDirty = false;
-          
-          if ( this.node.opacity !== 1 ) {
-            this.hasOpacity = true;
-            svgGroup.setAttribute( 'opacity', this.node.opacity );
-          } else if ( this.hasOpacity ) {
-            this.hasOpacity = false;
-            svgGroup.removeAttribute( 'opacity' );
-          }
-        }
+        svgGroup.style.display = ( this.willApplyFilters && !this.node.isVisible() ) ? 'none' : '';
+      }
+      
+      
+      if ( this.opacityDirty ) {
+        this.opacityDirty = false;
         
-        if ( this.clipDirty ) {
-          this.clipDirty = false;
-          
-          var clipId = 'clip' + this.node.getId();
-          
-          if ( this.node._clipArea ) {
-            if ( !this.clipDefinition ) {
-              this.clipDefinition = document.createElementNS( scenery.svgns, 'clipPath' );
-              this.clipDefinition.setAttribute( 'id', clipId );
-              this.clipDefinition.setAttribute( 'clipPathUnits', 'userSpaceOnUse' );
-              this.block.defs.appendChild( this.clipDefinition ); // TODO: method? evaluate with future usage of defs (not done yet)
-              
-              this.clipPath = document.createElementNS( scenery.svgns, 'path' );
-              this.clipDefinition.appendChild( this.clipPath );
-              
-              svgGroup.setAttribute( 'clip-path', 'url(#' + clipId + ')' );
-            }
+        if ( this.willApplyFilters && this.node.opacity !== 1 ) {
+          this.hasOpacity = true;
+          svgGroup.setAttribute( 'opacity', this.node.opacity );
+        } else if ( this.hasOpacity ) {
+          this.hasOpacity = false;
+          svgGroup.removeAttribute( 'opacity' );
+        }
+      }
+      
+      if ( this.clipDirty ) {
+        this.clipDirty = false;
+        
+        if ( this.willApplyFilters && this.node._clipArea ) {
+          if ( !this.clipDefinition ) {
+            var clipId = 'clip' + this.node.getId();
             
-            this.clipPath.setAttribute( 'd', this.node._clipArea.getSVGPath() );
-          } else if ( this.clipDefinition ) {
-            svgGroup.removeAttribute( 'clip-path' );
-            this.block.defs.removeChild( this.clipDefinition ); // TODO: method? evaluate with future usage of defs (not done yet)
+            this.clipDefinition = document.createElementNS( scenery.svgns, 'clipPath' );
+            this.clipDefinition.setAttribute( 'id', clipId );
+            this.clipDefinition.setAttribute( 'clipPathUnits', 'userSpaceOnUse' );
+            this.block.defs.appendChild( this.clipDefinition ); // TODO: method? evaluate with future usage of defs (not done yet)
             
-            // TODO: consider pooling these?
-            this.clipDefinition = null;
-            this.clipPath = null;
+            this.clipPath = document.createElementNS( scenery.svgns, 'path' );
+            this.clipDefinition.appendChild( this.clipPath );
+            
+            svgGroup.setAttribute( 'clip-path', 'url(#' + clipId + ')' );
           }
+          
+          this.clipPath.setAttribute( 'd', this.node._clipArea.getSVGPath() );
+        } else if ( this.clipDefinition ) {
+          svgGroup.removeAttribute( 'clip-path' );
+          this.block.defs.removeChild( this.clipDefinition ); // TODO: method? evaluate with future usage of defs (not done yet)
+          
+          // TODO: consider pooling these?
+          this.clipDefinition = null;
+          this.clipPath = null;
         }
       }
       
@@ -266,14 +274,16 @@ define( function( require ) {
     },
     
     dispose: function() {
+      sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.SVGGroup( 'dispose ' + this.toString() );
+      
       assert && assert( this.children.length === 0, 'Should be empty by now' );
       
-      if ( this.listeningToTransform ) {
+      if ( this.willApplyTransforms ) {
         this.node.offStatic( 'transform', this.transformDirtyListener );
       }
       if ( this.willApplyFilters ) {
         this.node.offStatic( 'opacity', this.opacityDirtyListener );
-        this.node.offStatic( 'visible', this.visibilityDirtyListener );
+        this.node.offStatic( 'visibility', this.visibilityDirtyListener );
         this.node.offStatic( 'clip', this.clipDirtyListener );
       }
       this.node.offStatic( 'childInserted', this.orderDirtyListener );
@@ -289,6 +299,13 @@ define( function( require ) {
       this.clipDefinition = null;
       this.clipPath = null;
       cleanArray( this.children );
+      
+      // for now
+      this.freeToPool();
+    },
+    
+    toString: function() {
+      return 'SVGGroup:' + this.block.toString() + '_' + this.instance.toString();
     }
   };
   
@@ -334,7 +351,7 @@ define( function( require ) {
       
       SVGGroup.releaseGroupsToInstance( block, instance.parent );
       
-      group.freeToPool();
+      group.dispose();
     }
   };
   
@@ -343,8 +360,10 @@ define( function( require ) {
     constructorDuplicateFactory: function( pool ) {
       return function( block, instance, parent ) {
         if ( pool.length ) {
+          sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.SVGGroup( 'new from pool' );
           return pool.pop().initialize( block, instance, parent );
         } else {
+          sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.SVGGroup( 'new from constructor' );
           return new SVGGroup( block, instance, parent );
         }
       };
