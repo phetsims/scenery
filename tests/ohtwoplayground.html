@@ -27,13 +27,15 @@
     #debug {
       position: relative;
       top: 480px;
+      padding: 0.5em;
+      border: 1px solid rgba(0,0,255,0.3);
     }
     
     #serialized {
       position: relative;
       top: 480px;
-      padding: 15px;
-      border: 1px solid gray;
+      padding: 0.5em;
+      border: 1px solid rgba(0,0,0,0.3);
     }
     
     #controls {
@@ -48,9 +50,9 @@
 <body>
   
   <div id="controls">
-    <button onclick="toggleDebug();">Debug</button>
-    <button onclick="toggleSerialize();">Serialization</button>
-    <button onclick="display.updateOnRequestAnimationFrame();">Continuous Update</button>
+    <button onclick="toggleDebug();">Toggle Debug</button>
+    <button onclick="toggleSerialize();">Toggle Serialization</button>
+    <button onclick="toggleUpdates();">Toggle Update</button>
     <button onclick="display.initializeStandaloneEvents();">Standalone Events</button>
   </div>
   
@@ -138,6 +140,7 @@
           window.toggleDebug = function() {
             if ( playgroundDebugging ) {
               window.cancelAnimationFrame( playgroundDebuggingRequestID );
+              debug.style.display = 'none';
             } else {
               debugStep();
             }
@@ -167,11 +170,28 @@
           window.toggleSerialize = function() {
             if ( playgroundSerializing ) {
               window.cancelAnimationFrame( playgroundSerializingRequestID );
+              serialized.style.display = 'none';
             } else {
               serializeStep();
             }
             
             playgroundSerializing = !playgroundSerializing;
+          };
+          
+          /*---------------------------------------------------------------------------*
+          * Updates
+          *----------------------------------------------------------------------------*/
+          
+          var playgroundUpdating = false;
+          
+          window.toggleUpdates = function() {
+            if ( playgroundUpdating ) {
+              display.cancelUpdateOnRequestAnimationFrame();
+            } else {
+              display.updateOnRequestAnimationFrame();
+            }
+            
+            playgroundUpdating = !playgroundUpdating;
           };
           
         } );

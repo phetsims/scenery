@@ -17,6 +17,7 @@ define( function( require ) {
   var Events = require( 'AXON/Events' );
   var Dimension2 = require( 'DOT/Dimension2' );
   var Vector2 = require( 'DOT/Vector2' );
+  var Matrix3 = require( 'DOT/Matrix3' );
   
   var scenery = require( 'SCENERY/scenery' );
   var Features = require( 'SCENERY/util/Features' );
@@ -71,6 +72,9 @@ define( function( require ) {
     this._drawablesToDispose = [];
     
     this._lastCursor = null;
+    
+    // used for shortcut animation frame functions
+    this._requestAnimationFrameID = 0;
     
     // will be filled in with a scenery.Input if event handling is enabled
     this._input = null;
@@ -307,9 +311,13 @@ define( function( require ) {
     updateOnRequestAnimationFrame: function() {
       var display = this;
       (function step() {
-        window.requestAnimationFrame( step, display._domElement );
+        display._requestAnimationFrameID = window.requestAnimationFrame( step, display._domElement );
         display.updateDisplay();
       })();
+    },
+    
+    cancelUpdateOnRequestAnimationFrame: function() {
+      window.cancelAnimationFrame( this._requestAnimationFrameID );
     },
     
     initializeStandaloneEvents: function( parameters ) {
@@ -344,6 +352,7 @@ define( function( require ) {
       }, parameters ) );
     },
     
+    //OHTWO TODO: ability to disconnect event handling (useful for playground debugging)
     initializeEvents: function( parameters ) {
       assert && assert( !this._input, 'Events cannot be attached twice to a display (for now)' );
       
@@ -485,85 +494,92 @@ define( function( require ) {
     },
     
     getDebugHTML: function() {
-      // function str( ob ) {
-      //   return ob ? ob.toString() : ob + '';
-      // }
+      function str( ob ) {
+        return ob ? ob.toString() : ob + '';
+      }
       
-      // var depth = 0;
+      var depth = 0;
       
       var result = 'Display ' + this._size.toString() + ' frame:' + this._frameId + ' input:' + !!this._input + ' cursor:' + this._lastCursor + '<br>';
       
-      // startPointer.depthFirstUntil( endPointer, function( pointer ) {
-      //   var div;
-      //   var node = pointer.trail.lastNode();
+      function printInstanceSubtree( instance ) {
+        var div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
         
-      //   function addQualifier( text ) {
-      //       div += ' <span style="color: #008">' + text + '</span>';
-      //     }
+        function addQualifier( text ) {
+          div += ' <span style="color: #008">' + text + '</span>';
+        }
         
-      //   if ( pointer.isBefore && layerStartEntries[pointer.trail.getUniqueId()] ) {
-      //     result += layerStartEntries[pointer.trail.getUniqueId()];
-      //   }
-      //   if ( pointer.isBefore ) {
-      //     div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
-      //     if ( node.constructor.name ) {
-      //       div += ' ' + node.constructor.name; // see http://stackoverflow.com/questions/332422/how-do-i-get-the-name-of-an-objects-type-in-javascript
-      //     }
-      //     div += ' <span style="font-weight: ' + ( node.isPainted() ? 'bold' : 'normal' ) + '">' + pointer.trail.lastNode().getId() + '</span>';
-      //     div += ' <span style="color: #888">' + str( pointer.trail ) + '</span>';
-      //     if ( !node._visible ) {
-      //       addQualifier( 'invisible' );
-      //     }
-      //     if ( node._pickable === true ) {
-      //       addQualifier( 'pickable' );
-      //     }
-      //     if ( node._pickable === false ) {
-      //       addQualifier( 'unpickable' );
-      //     }
-      //     if ( pointer.trail.isPickable() ) {
-      //       addQualifier( '<span style="color: #808">hits</span>' );
-      //     }
-      //     if ( node._clipArea ) {
-      //       addQualifier( 'clipArea' );
-      //     }
-      //     if ( node._mouseArea ) {
-      //       addQualifier( 'mouseArea' );
-      //     }
-      //     if ( node._touchArea ) {
-      //       addQualifier( 'touchArea' );
-      //     }
-      //     if ( node._inputListeners.length ) {
-      //       addQualifier( 'inputListeners' );
-      //     }
-      //     if ( node.getRenderer() ) {
-      //       addQualifier( 'renderer:' + node.getRenderer().name );
-      //     }
-      //     if ( node.isLayerSplit() ) {
-      //       addQualifier( 'layerSplit' );
-      //     }
-      //     if ( node._opacity < 1 ) {
-      //       addQualifier( 'opacity:' + node._opacity );
-      //     }
-          
-      //     var transformType = '';
-      //     switch ( node.transform.getMatrix().type ) {
-      //       case Matrix3.Types.IDENTITY:       transformType = '';           break;
-      //       case Matrix3.Types.TRANSLATION_2D: transformType = 'translated'; break;
-      //       case Matrix3.Types.SCALING:        transformType = 'scale';      break;
-      //       case Matrix3.Types.AFFINE:         transformType = 'affine';     break;
-      //       case Matrix3.Types.OTHER:          transformType = 'other';      break;
-      //     }
-      //     if ( transformType ) {
-      //       div += ' <span style="color: #88f" title="' + node.transform.getMatrix().toString().replace( '\n', '&#10;' ) + '">' + transformType + '</span>';
-      //     }
-      //     div += '</div>';
-      //     result += div;
-      //   }
-      //   if ( pointer.isAfter && layerEndEntries[pointer.trail.getUniqueId()] ) {
-      //     result += layerEndEntries[pointer.trail.getUniqueId()];
-      //   }
-      //   depth += pointer.isBefore ? 1 : -1;
-      // }, false );
+        var node = instance.node;
+        
+        div += instance.id;
+        div += ' ' + ( node.constructor.name ? node.constructor.name : '?' );
+        div += ' <span style="font-weight: ' + ( node.isPainted() ? 'bold' : 'normal' ) + '">' + node.id + '</span>';
+        div += ' <span style="color: #888">' + str( instance.trail ) + '</span>';
+        if ( !node._visible ) {
+          addQualifier( 'invisible' );
+        }
+        if ( node._pickable === true ) {
+          addQualifier( 'pickable' );
+        }
+        if ( node._pickable === false ) {
+          addQualifier( 'unpickable' );
+        }
+        if ( instance.trail.isPickable() ) {
+          addQualifier( '<span style="color: #808">hits</span>' );
+        }
+        if ( node._clipArea ) {
+          addQualifier( 'clipArea' );
+        }
+        if ( node._mouseArea ) {
+          addQualifier( 'mouseArea' );
+        }
+        if ( node._touchArea ) {
+          addQualifier( 'touchArea' );
+        }
+        if ( node._inputListeners.length ) {
+          addQualifier( 'inputListeners' );
+        }
+        if ( node.getRenderer() ) {
+          addQualifier( 'renderer:' + node.getRenderer().name );
+        }
+        if ( node.isLayerSplit() ) {
+          addQualifier( 'layerSplit' );
+        }
+        if ( node._opacity < 1 ) {
+          addQualifier( 'opacity:' + node._opacity );
+        }
+        
+        var transformType = '';
+        switch ( node.transform.getMatrix().type ) {
+          case Matrix3.Types.IDENTITY:       transformType = '';           break;
+          case Matrix3.Types.TRANSLATION_2D: transformType = 'translated'; break;
+          case Matrix3.Types.SCALING:        transformType = 'scale';      break;
+          case Matrix3.Types.AFFINE:         transformType = 'affine';     break;
+          case Matrix3.Types.OTHER:          transformType = 'other';      break;
+        }
+        if ( transformType ) {
+          div += ' <span style="color: #88f" title="' + node.transform.getMatrix().toString().replace( '\n', '&#10;' ) + '">' + transformType + '</span>';
+        }
+        
+        div += '</div>';
+        result += div;
+        
+        depth += 1;
+        _.each( instance.children, function( childInstance ) {
+          printInstanceSubtree( childInstance );
+        } );
+        depth -= 1;
+      }
+      
+      if ( this._baseInstance ) {
+        result += '<div style="font-weight: bold;">Base Instance</div>';
+        printInstanceSubtree( this._baseInstance );
+      }
+      
+      _.each( this._sharedCanvasInstances, function( instance ) {
+        result += '<div style="font-weight: bold;">Shared Canvas Instance</div>';
+        printInstanceSubtree( instance );
+      } );
       
       return result;
     },
