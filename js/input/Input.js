@@ -33,8 +33,8 @@ define( function( require ) {
   require( 'SCENERY/input/Event' );
   
   // listenerTarget is the DOM node (window/document/element) to which DOM event listeners will be attached
-  scenery.Input = function Input( scene, listenerTarget, batchDOMEvents ) {
-    this.scene = scene;
+  scenery.Input = function Input( rootNode, listenerTarget, batchDOMEvents ) {
+    this.rootNode = rootNode;
     this.listenerTarget = listenerTarget;
     this.batchDOMEvents = batchDOMEvents;
     
@@ -47,7 +47,7 @@ define( function( require ) {
     
     this.listenerReferences = [];
     
-    this.eventLog = [];     // written when recording event input. can be overwritten to the empty array to reset. Strings relative to this class (prefix "scene.input.")
+    this.eventLog = [];     // written when recording event input. can be overwritten to the empty array to reset. Strings relative to this class (prefix "rootNode.input.")
     this.logEvents = false; // can be set to true to cause Scenery to record all input calls to eventLog
 
     this.pointerAddedListeners = [];
@@ -170,8 +170,11 @@ define( function( require ) {
       var key = new scenery.Key( event );
       this.addPointer( key );
       
-      var trail = this.scene.getTrailFromKeyboardFocus();
-      this.dispatchEvent( trail, 'keyDown', key, event, true );
+      //OHTWO TODO: fix this!
+      if ( this.rootNode.getTrailFromKeyboardFocus ) {
+        var trail = this.rootNode.getTrailFromKeyboardFocus();
+        this.dispatchEvent( trail, 'keyDown', key, event, true );
+      }
     },
     
     keyUp: function( event ) {
@@ -180,8 +183,11 @@ define( function( require ) {
       if ( key ) {
         this.removePointer( key );
         
-        var trail = this.scene.getTrailFromKeyboardFocus();
-        this.dispatchEvent( trail, 'keyUp', key, event, true );
+        //OHTWO TODO: fix this!
+        if ( this.rootNode.getTrailFromKeyboardFocus ) {
+          var trail = this.rootNode.getTrailFromKeyboardFocus();
+          this.dispatchEvent( trail, 'keyUp', key, event, true );
+        }
       }
     },
     
@@ -417,7 +423,7 @@ define( function( require ) {
     },
     
     upEvent: function( pointer, event ) {
-      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
+      var trail = this.rootNode.trailUnderPointer( pointer ) || new scenery.Trail( this.rootNode );
       
       this.dispatchEvent( trail, 'up', pointer, event, true );
       
@@ -430,13 +436,13 @@ define( function( require ) {
     },
     
     upImmediateEvent: function( pointer, event ) {
-      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
+      var trail = this.rootNode.trailUnderPointer( pointer ) || new scenery.Trail( this.rootNode );
       
       this.dispatchEvent( trail, 'upImmediate', pointer, event, true );
     },
     
     downEvent: function( pointer, event ) {
-      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
+      var trail = this.rootNode.trailUnderPointer( pointer ) || new scenery.Trail( this.rootNode );
       
       // touch pointers are transient, so fire enter/over to the trail first
       if ( pointer.isTouch ) {
@@ -456,7 +462,7 @@ define( function( require ) {
     },
     
     cancelEvent: function( pointer, event ) {
-      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
+      var trail = this.rootNode.trailUnderPointer( pointer ) || new scenery.Trail( this.rootNode );
       
       this.dispatchEvent( trail, 'cancel', pointer, event, true );
       
@@ -470,9 +476,9 @@ define( function( require ) {
     
     // return whether there was a change
     branchChangeEvents: function( pointer, event, isMove ) {
-      var trail = this.scene.trailUnderPointer( pointer ) || new scenery.Trail( this.scene );
+      var trail = this.rootNode.trailUnderPointer( pointer ) || new scenery.Trail( this.rootNode );
       sceneryEventLog && sceneryEventLog( 'checking branch change: ' + trail.toString() + ' at ' + pointer.point.toString() );
-      var oldTrail = pointer.trail || new scenery.Trail( this.scene ); // TODO: consider a static trail reference
+      var oldTrail = pointer.trail || new scenery.Trail( this.rootNode ); // TODO: consider a static trail reference
       
       var lastNodeChanged = oldTrail.lastNode() !== trail.lastNode();
       if ( !lastNodeChanged && !isMove ) {
@@ -746,6 +752,19 @@ define( function( require ) {
   
   Input.serializeVector2 = function( vector ) {
     return 'dot(' + vector.x + ',' + vector.y + ')';
+  };
+  
+  // maps the current MS pointer types onto the pointer spec
+  Input.msPointerType = function( evt ) {
+    if ( evt.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_TOUCH ) {
+      return 'touch';
+    } else if ( evt.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_PEN ) {
+      return 'pen';
+    } else if ( evt.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_MOUSE ) {
+      return 'mouse';
+    } else {
+      return evt.pointerType; // hope for the best
+    }
   };
   
   return Input;

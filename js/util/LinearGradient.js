@@ -71,7 +71,7 @@ define( function( require ) {
       var result = 'new scenery.LinearGradient( ' + this.start.x + ', ' + this.start.y + ', ' + this.end.x + ', ' + this.end.y + ' )';
       
       _.each( this.stops, function( stop ) {
-        result += '.addColorStop( ' + stop.ratio + ', \'' + stop.color.toString() + '\' )';
+        result += '.addColorStop( ' + stop.ratio + ', \'' + ( stop.color.toCSS ? stop.color.toCSS() : stop.color.toString() ) + '\' )';
       } );
       
       return result;

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Scenery Playground</title>
+  
+  <script src="../../sherpa/jquery-2.1.0.js"></script>
+  <script src="../../sherpa/lodash-2.4.1.min.js"></script>
+  <script src="../../sherpa/has.js"></script>
+  
+  <script data-main="../js/config.js" src="../../sherpa/require-2.1.11.js"></script>
+  
+  <style>
+    html, body {
+      background-color: #eee;
+      border: 0;
+      padding: 0;
+    }
+    
+    #display {
+      background-color: #fff;
+    }
+    
+    #debug {
+      position: relative;
+      top: 480px;
+    }
+    
+    #serialized {
+      position: relative;
+      top: 480px;
+      padding: 15px;
+      border: 1px solid gray;
+    }
+    
+    #controls {
+      position: absolute;
+      width: 150px;
+      top: 0;
+      right: 0;
+    }
+  </style>
+  
+</head>
+<body>
+  
+  <div id="controls">
+    <button onclick="toggleDebug();">Debug</button>
+    <button onclick="toggleSerialize();">Serialization</button>
+    <button onclick="display.updateOnRequestAnimationFrame();">Continuous Update</button>
+    <button onclick="display.initializeStandaloneEvents();">Standalone Events</button>
+  </div>
+  
+  <script>
+    var fuzzStep = false;
+    
+    // we need to wait until our config file is loaded before our require statement. apparently this was not guaranteed
+    function check() {
+      if ( window.loadedSceneryConfig ) {
+        requirejs( [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main' ], function( scenery, kite, dot, core ) {
+          window.scenery = scenery;
+          window.kite = kite;
+          window.dot = dot;
+          window.core = core;
+          
+          console.log( 'loaded' );
+          
+          scenery.enableLayerLogging();
+          // scenery.enableEventLogging();
+          
+          window.scene = new scenery.Node();
+          
+          var display = window.display = new scenery.Display( scene, {
+            // any overrides here?
+          } );
+          console.log( 'window.display created' );
+          
+          display._domElement.id = 'display';
+          document.body.appendChild( display._domElement );
+          
+          core.loadScript( {
+            src: 'qunit/js/test-utils.js',
+            callback: function() {
+              console.log( 'loaded test-utils.js' );
+            }
+          } );
+          
+          scenery.Util.polyfillRequestAnimationFrame();
+          
+          // convenience function for IE stack trackes
+          window.twrap = function( f ) {
+            try {
+              f();
+            } catch( e ) {
+              console.log( e.stack );
+            }
+          };
+          
+          window.displayTest = function() {
+            setTimeout( function(){
+              window.node = new scenery.Node( { x: 10 } );
+              // window.node.rendererOptions = { cssTransform: true };
+              window.rect = new scenery.Rectangle( 0, 0, 100, 50, 0, 0, {
+                fill: new scenery.LinearGradient( 0, 0, 100, 0 ).addColorStop( 0, 'red' ).addColorStop( 1, 'blue' )
+              } );
+              node.addChild( rect );
+              scene.addChild( node );
+              
+              window.circle = new scenery.Circle( 50, { fill: 'black', x: 30, y: 60 } );
+              node.addChild( circle );
+              
+              display.updateDisplay();
+            } );
+          };
+          
+          /*---------------------------------------------------------------------------*
+          * Debug
+          *----------------------------------------------------------------------------*/
+          
+          var playgroundDebugging = false;
+          var playgroundDebuggingRequestID = 0;
+          
+          var debug = document.createElement( 'div' );
+          debug.id = 'debug';
+          debug.style.display = 'none';
+          document.body.appendChild( debug );
+          
+          function debugStep() {
+            playgroundDebuggingRequestID = window.requestAnimationFrame( debugStep, debug );
+            
+            debug.style.display = '';
+            debug.innerHTML = display.getDebugHTML();
+          }
+          
+          window.toggleDebug = function() {
+            if ( playgroundDebugging ) {
+              window.cancelAnimationFrame( playgroundDebuggingRequestID );
+            } else {
+              debugStep();
+            }
+            
+            playgroundDebugging = !playgroundDebugging;
+          };
+          
+          /*---------------------------------------------------------------------------*
+          * Serialization
+          *----------------------------------------------------------------------------*/
+          
+          var playgroundSerializing = false;
+          var playgroundSerializingRequestID = 0;
+          
+          var serialized = document.createElement( 'pre' );
+          serialized.id = 'serialized';
+          serialized.style.display = 'none';
+          document.body.appendChild( serialized );
+          
+          function serializeStep() {
+            playgroundSerializingRequestID = window.requestAnimationFrame( serializeStep, serialized );
+            
+            serialized.style.display = '';
+            serialized.innerHTML = display.toStringWithChildren( true, 'scene' );
+          }
+          
+          window.toggleSerialize = function() {
+            if ( playgroundSerializing ) {
+              window.cancelAnimationFrame( playgroundSerializingRequestID );
+            } else {
+              serializeStep();
+            }
+            
+            playgroundSerializing = !playgroundSerializing;
+          };
+          
+        } );
+      } else {
+        setTimeout( check, 4 );
+      }
+    }
+    setTimeout( check, 4 );
+  </script>
+</body>
+</html>

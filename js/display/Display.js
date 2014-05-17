@@ -16,10 +16,10 @@ define( function( require ) {
   var extend = require( 'PHET_CORE/extend' );
   var Events = require( 'AXON/Events' );
   var Dimension2 = require( 'DOT/Dimension2' );
+  var Vector2 = require( 'DOT/Vector2' );
   
   var scenery = require( 'SCENERY/scenery' );
   var Features = require( 'SCENERY/util/Features' );
-  require( 'SCENERY/util/Trail' );
   require( 'SCENERY/display/BackboneDrawable' );
   require( 'SCENERY/display/CanvasBlock' );
   require( 'SCENERY/display/CanvasSelfDrawable' );
@@ -28,7 +28,9 @@ define( function( require ) {
   require( 'SCENERY/display/InlineCanvasCacheDrawable' );
   require( 'SCENERY/display/SharedCanvasCacheDrawable' );
   require( 'SCENERY/display/SVGSelfDrawable' );
+  require( 'SCENERY/input/Input' );
   require( 'SCENERY/layers/Renderer' );
+  require( 'SCENERY/util/Trail' );
   
   // flags object used for determining what the cursor should be underneath a mouse
   var isMouseFlags = { isMouse: true };
@@ -69,6 +71,9 @@ define( function( require ) {
     this._drawablesToDispose = [];
     
     this._lastCursor = null;
+    
+    // will be filled in with a scenery.Input if event handling is enabled
+    this._input = null;
     
     this.applyCSSHacks();
   };
@@ -247,7 +252,7 @@ define( function( require ) {
         }
         
         //OHTWO TODO: For a display, just return an instance and we can avoid the garbage collection/mutation at the cost of the linked-list traversal instead of an array
-        var mouseTrail = this.trailUnderPoint( this._input.mouse.point, isMouseFlags );
+        var mouseTrail = this._rootNode.trailUnderPoint( this._input.mouse.point, isMouseFlags );
         
         if ( mouseTrail ) {
           for ( var i = mouseTrail.length - 1; i >= 0; i-- ) {
@@ -297,6 +302,310 @@ define( function( require ) {
         Features.setStyle( this._domElement, Features.touchCallout, 'none' );
         Features.setStyle( this._domElement, Features.tapHighlightColor, 'rgba(0,0,0,0)' );
       }
+    },
+    
+    updateOnRequestAnimationFrame: function() {
+      var display = this;
+      (function step() {
+        window.requestAnimationFrame( step, display._domElement );
+        display.updateDisplay();
+      })();
+    },
+    
+    initializeStandaloneEvents: function( parameters ) {
+      // TODO extract similarity between standalone and fullscreen!
+      var element = this._domElement;
+      this.initializeEvents( _.extend( {}, {
+        listenerTarget: element,
+        pointFromEvent: function pointFromEvent( evt ) {
+          var mainBounds = element.getBoundingClientRect();
+          return Vector2.createFromPool( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
+        }
+      }, parameters ) );
+    },
+    
+    initializeFullscreenEvents: function( parameters ) {
+      var element = this._domElement;
+      this.initializeEvents( _.extend( {}, {
+        listenerTarget: document,
+        pointFromEvent: function pointFromEvent( evt ) {
+          var mainBounds = element.getBoundingClientRect();
+          return Vector2.createFromPool( evt.clientX - mainBounds.left, evt.clientY - mainBounds.top );
+        }
+      }, parameters ) );
+    },
+    
+    initializeWindowEvents: function( parameters ) {
+      this.initializeEvents( _.extend( {}, {
+        listenerTarget: window,
+        pointFromEvent: function pointFromEvent( evt ) {
+          return Vector2.createFromPool( evt.clientX, evt.clientY );
+        }
+      }, parameters ) );
+    },
+    
+    initializeEvents: function( parameters ) {
+      assert && assert( !this._input, 'Events cannot be attached twice to a display (for now)' );
+      
+      // TODO: come up with more parameter names that have the same string length, so it looks creepier
+      var pointFromEvent = parameters.pointFromEvent;
+      var listenerTarget = parameters.listenerTarget;
+      var batchDOMEvents = parameters.batchDOMEvents; //OHTWO TODO: hybrid batching (option to batch until an event like 'up' that might be needed for security issues)
+      
+      var input = new scenery.Input( this._rootNode, listenerTarget, !!batchDOMEvents );
+      this._input = input;
+      
+      function forEachChangedTouch( evt, callback ) {
+        for ( var i = 0; i < evt.changedTouches.length; i++ ) {
+          // according to spec (http://www.w3.org/TR/touch-events/), this is not an Array, but a TouchList
+          var touch = evt.changedTouches.item( i );
+          
+          callback( touch.identifier, pointFromEvent( touch ) );
+        }
+      }
+      
+      // TODO: massive boilerplate reduction! closures should help tons!
+      
+      var implementsPointerEvents = window.navigator && window.navigator.pointerEnabled; // W3C spec for pointer events
+      var implementsMSPointerEvents = window.navigator && window.navigator.msPointerEnabled; // MS spec for pointer event
+      if ( this.enablePointerEvents && implementsPointerEvents ) {
+        sceneryEventLog && sceneryEventLog( 'Detected pointer events support, using that instead of mouse/touch events' );
+        // accepts pointer events corresponding to the spec at http://www.w3.org/TR/pointerevents/
+        input.addListener( 'pointerdown', function pointerDownCallback( domEvent ) {
+          input.pointerDown( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
+        } );
+        input.addListener( 'pointerup', function pointerUpCallback( domEvent ) {
+          input.pointerUp( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
+        } );
+        input.addListener( 'pointermove', function pointerMoveCallback( domEvent ) {
+          input.pointerMove( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
+        } );
+        input.addListener( 'pointerover', function pointerOverCallback( domEvent ) {
+          input.pointerOver( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
+        } );
+        input.addListener( 'pointerout', function pointerOutCallback( domEvent ) {
+          input.pointerOut( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
+        } );
+        input.addListener( 'pointercancel', function pointerCancelCallback( domEvent ) {
+          input.pointerCancel( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
+        } );
+        // immediate version
+        input.addImmediateListener( 'pointerup', function pointerUpCallback( domEvent ) {
+          input.pointerUpImmediate( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
+        } );
+      } else if ( this.enablePointerEvents && implementsMSPointerEvents ) {
+        sceneryEventLog && sceneryEventLog( 'Detected MS pointer events support, using that instead of mouse/touch events' );
+        input.addListener( 'MSPointerDown', function msPointerDownCallback( domEvent ) {
+          input.pointerDown( domEvent.pointerId, scenery.Input.msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
+        } );
+        input.addListener( 'MSPointerUp', function msPointerUpCallback( domEvent ) {
+          input.pointerUp( domEvent.pointerId, scenery.Input.msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
+        } );
+        input.addListener( 'MSPointerMove', function msPointerMoveCallback( domEvent ) {
+          input.pointerMove( domEvent.pointerId, scenery.Input.msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
+        } );
+        input.addListener( 'MSPointerOver', function msPointerOverCallback( domEvent ) {
+          input.pointerOver( domEvent.pointerId, scenery.Input.msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
+        } );
+        input.addListener( 'MSPointerOut', function msPointerOutCallback( domEvent ) {
+          input.pointerOut( domEvent.pointerId, scenery.Input.msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
+        } );
+        input.addListener( 'MSPointerCancel', function msPointerCancelCallback( domEvent ) {
+          input.pointerCancel( domEvent.pointerId, scenery.Input.msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
+        } );
+        // immediate version
+        input.addImmediateListener( 'MSPointerUp', function msPointerUpCallback( domEvent ) {
+          input.pointerUpImmediate( domEvent.pointerId, scenery.Input.msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
+        } );
+      } else {
+        sceneryEventLog && sceneryEventLog( 'No pointer events support detected, using mouse/touch events' );
+        input.addListener( 'mousedown', function mouseDownCallback( domEvent ) {
+          input.mouseDown( pointFromEvent( domEvent ), domEvent );
+        } );
+        input.addListener( 'mouseup', function mouseUpCallback( domEvent ) {
+          input.mouseUp( pointFromEvent( domEvent ), domEvent );
+        } );
+        input.addListener( 'mousemove', function mouseMoveCallback( domEvent ) {
+          input.mouseMove( pointFromEvent( domEvent ), domEvent );
+        } );
+        input.addListener( 'mouseover', function mouseOverCallback( domEvent ) {
+          input.mouseOver( pointFromEvent( domEvent ), domEvent );
+        } );
+        input.addListener( 'mouseout', function mouseOutCallback( domEvent ) {
+          input.mouseOut( pointFromEvent( domEvent ), domEvent );
+        } );
+        // immediate version
+        input.addImmediateListener( 'mouseup', function mouseUpCallback( domEvent ) {
+          input.mouseUpImmediate( pointFromEvent( domEvent ), domEvent );
+        } );
+        
+        input.addListener( 'touchstart', function touchStartCallback( domEvent ) {
+          sceneryEventLog && sceneryEventLog( 'touchstart (multiple events)' );
+          forEachChangedTouch( domEvent, function touchStartTouch( id, point ) {
+            input.touchStart( id, point, domEvent );
+          } );
+        } );
+        input.addListener( 'touchend', function touchEndCallback( domEvent ) {
+          sceneryEventLog && sceneryEventLog( 'touchend (multiple events)' );
+          forEachChangedTouch( domEvent, function touchEndTouch( id, point ) {
+            input.touchEnd( id, point, domEvent );
+          } );
+        } );
+        input.addListener( 'touchmove', function touchMoveCallback( domEvent ) {
+          sceneryEventLog && sceneryEventLog( 'touchmove (multiple events)' );
+          forEachChangedTouch( domEvent, function touchMoveTouch( id, point ) {
+            input.touchMove( id, point, domEvent );
+          } );
+        } );
+        input.addListener( 'touchcancel', function touchCancelCallback( domEvent ) {
+          sceneryEventLog && sceneryEventLog( 'touchcancel (multiple events)' );
+          forEachChangedTouch( domEvent, function touchCancelTouch( id, point ) {
+            input.touchCancel( id, point, domEvent );
+          } );
+        } );
+        // immediate version
+        input.addImmediateListener( 'touchend', function touchEndCallback( domEvent ) {
+          sceneryEventLog && sceneryEventLog( 'touchend immediate (multiple events)' );
+          forEachChangedTouch( domEvent, function touchEndTouch( id, point ) {
+            input.touchEndImmediate( id, point, domEvent );
+          } );
+        } );
+      }
+      
+      //OHTWO TODO: test these, deprecate, or rewrite (they will break?)
+      input.addListener( 'keyup', function keyUpCallback( domEvent ) {
+        input.keyUp( domEvent );
+      } );
+      input.addListener( 'keydown', function keyDownCallback( domEvent ) {
+        input.keyDown( domEvent );
+      } );
+      input.addListener( 'keypress', function keyPressCallback( domEvent ) {
+        input.keyPress( domEvent );
+      } );
+    },
+    
+    getDebugHTML: function() {
+      // function str( ob ) {
+      //   return ob ? ob.toString() : ob + '';
+      // }
+      
+      // var depth = 0;
+      
+      var result = 'Display ' + this._size.toString() + ' frame:' + this._frameId + ' input:' + !!this._input + ' cursor:' + this._lastCursor + '<br>';
+      
+      // startPointer.depthFirstUntil( endPointer, function( pointer ) {
+      //   var div;
+      //   var node = pointer.trail.lastNode();
+        
+      //   function addQualifier( text ) {
+      //       div += ' <span style="color: #008">' + text + '</span>';
+      //     }
+        
+      //   if ( pointer.isBefore && layerStartEntries[pointer.trail.getUniqueId()] ) {
+      //     result += layerStartEntries[pointer.trail.getUniqueId()];
+      //   }
+      //   if ( pointer.isBefore ) {
+      //     div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
+      //     if ( node.constructor.name ) {
+      //       div += ' ' + node.constructor.name; // see http://stackoverflow.com/questions/332422/how-do-i-get-the-name-of-an-objects-type-in-javascript
+      //     }
+      //     div += ' <span style="font-weight: ' + ( node.isPainted() ? 'bold' : 'normal' ) + '">' + pointer.trail.lastNode().getId() + '</span>';
+      //     div += ' <span style="color: #888">' + str( pointer.trail ) + '</span>';
+      //     if ( !node._visible ) {
+      //       addQualifier( 'invisible' );
+      //     }
+      //     if ( node._pickable === true ) {
+      //       addQualifier( 'pickable' );
+      //     }
+      //     if ( node._pickable === false ) {
+      //       addQualifier( 'unpickable' );
+      //     }
+      //     if ( pointer.trail.isPickable() ) {
+      //       addQualifier( '<span style="color: #808">hits</span>' );
+      //     }
+      //     if ( node._clipArea ) {
+      //       addQualifier( 'clipArea' );
+      //     }
+      //     if ( node._mouseArea ) {
+      //       addQualifier( 'mouseArea' );
+      //     }
+      //     if ( node._touchArea ) {
+      //       addQualifier( 'touchArea' );
+      //     }
+      //     if ( node._inputListeners.length ) {
+      //       addQualifier( 'inputListeners' );
+      //     }
+      //     if ( node.getRenderer() ) {
+      //       addQualifier( 'renderer:' + node.getRenderer().name );
+      //     }
+      //     if ( node.isLayerSplit() ) {
+      //       addQualifier( 'layerSplit' );
+      //     }
+      //     if ( node._opacity < 1 ) {
+      //       addQualifier( 'opacity:' + node._opacity );
+      //     }
+          
+      //     var transformType = '';
+      //     switch ( node.transform.getMatrix().type ) {
+      //       case Matrix3.Types.IDENTITY:       transformType = '';           break;
+      //       case Matrix3.Types.TRANSLATION_2D: transformType = 'translated'; break;
+      //       case Matrix3.Types.SCALING:        transformType = 'scale';      break;
+      //       case Matrix3.Types.AFFINE:         transformType = 'affine';     break;
+      //       case Matrix3.Types.OTHER:          transformType = 'other';      break;
+      //     }
+      //     if ( transformType ) {
+      //       div += ' <span style="color: #88f" title="' + node.transform.getMatrix().toString().replace( '\n', '&#10;' ) + '">' + transformType + '</span>';
+      //     }
+      //     div += '</div>';
+      //     result += div;
+      //   }
+      //   if ( pointer.isAfter && layerEndEntries[pointer.trail.getUniqueId()] ) {
+      //     result += layerEndEntries[pointer.trail.getUniqueId()];
+      //   }
+      //   depth += pointer.isBefore ? 1 : -1;
+      // }, false );
+      
+      return result;
+    },
+    
+    popupDebug: function() {
+      var htmlContent = '<!DOCTYPE html>' +
+                        '<html lang="en">' +
+                        '<head><title>Scenery Debug Snapshot</title></head>' +
+                        '<body>' + this.getDebugHTML() + '</body>' +
+                        '</html>';
+      window.open( 'data:text/html;charset=utf-8,' + encodeURIComponent( htmlContent ) );
+    },
+    
+    toStringWithChildren: function( mutateRoot, rootName ) {
+      rootName = rootName || 'scene';
+      var rootNode = this._rootNode;
+      var result = '';
+      
+      var nodes = this._rootNode.getTopologicallySortedNodes().slice( 0 ).reverse(); // defensive slice, in case we store the order somewhere
+      
+      function name( node ) {
+        return node === rootNode ? rootName : ( ( node.constructor.name ? node.constructor.name.toLowerCase() : '(node)' ) + node.id );
+      }
+      
+      _.each( nodes, function( node ) {
+        if ( result ) {
+          result += '\n';
+        }
+        
+        if ( mutateRoot && node === rootNode ) {
+          var props = rootNode.getPropString( '  ', false );
+          result += rootName + '.mutate( {' + ( props ? ( '\n' + props + '\n' ) : '' ) + '} )';
+        } else {
+          result += 'var ' + name( node ) + ' = ' + node.toString( '', false );
+        }
+        
+        _.each( node.children, function( child ) {
+          result += '\n' + name( node ) + '.addChild( ' + name( child ) + ' );';
+        } );
+      } );
+      
+      return result;
     }
     
   }, Events.prototype ) );
