@@ -133,6 +133,10 @@ define( function( require ) {
         this.display.offStatic( 'displaySize', this.dirtyFitListener );
       }
       
+      // make it take up zero area, so that we don't use up excess memory
+      this.svg.setAttribute( 'width', 0 );
+      this.svg.setAttribute( 'height', 0 );
+      
       // clear references
       this.transformRootInstance = null;
       this.filterRootInstance = null;
