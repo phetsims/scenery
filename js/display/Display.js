@@ -15,8 +15,10 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var extend = require( 'PHET_CORE/extend' );
   var Events = require( 'AXON/Events' );
-  var scenery = require( 'SCENERY/scenery' );
   var Dimension2 = require( 'DOT/Dimension2' );
+  
+  var scenery = require( 'SCENERY/scenery' );
+  var Features = require( 'SCENERY/util/Features' );
   require( 'SCENERY/util/Trail' );
   require( 'SCENERY/display/BackboneDrawable' );
   require( 'SCENERY/display/CanvasBlock' );
@@ -28,6 +30,9 @@ define( function( require ) {
   require( 'SCENERY/display/SVGSelfDrawable' );
   require( 'SCENERY/layers/Renderer' );
   
+  // flags object used for determining what the cursor should be underneath a mouse
+  var isMouseFlags = { isMouse: true };
+  
   // Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below
   scenery.Display = function Display( rootNode, options ) {
     
@@ -35,16 +40,19 @@ define( function( require ) {
     Events.call( this );
     
     this.options = _.extend( {
-      width: 640,               // initial display width
-      height: 480,              // initial display height
+      width: 640,                // initial display width
+      height: 480,               // initial display height
       //OHTWO TODO: hook up allowCSSHacks
-      allowCSSHacks: true,      // applies CSS styles to the root DOM element that make it amenable to interactive content
+      allowCSSHacks: true,       // applies CSS styles to the root DOM element that make it amenable to interactive content
+      allowSceneOverflow: false, // usually anything displayed outside of our dom element is hidden with CSS overflow
       //OHTWO TODO: hook up enablePointerEvents
-      enablePointerEvents: true // whether we should specifically listen to pointer events if we detect support
+      enablePointerEvents: true, // whether we should specifically listen to pointer events if we detect support
+      defaultCursor: 'default'   // what cursor is used when no other cursor is specified
     }, options );
     
     // The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM element on updateDisplay())
     this._size = new Dimension2( this.options.width, this.options.height );
+    this._currentSize = new Dimension2( -1, -1 ); // used to check against new size to see what we need to change
     
     this._rootNode = rootNode;
     this._rootBackbone = null; // to be filled in later
@@ -59,6 +67,10 @@ define( function( require ) {
     
     this._instanceRootsToDispose = [];
     this._drawablesToDispose = [];
+    
+    this._lastCursor = null;
+    
+    this.applyCSSHacks();
   };
   var Display = scenery.Display;
   
@@ -112,9 +124,31 @@ define( function( require ) {
       
       if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
       
-      // throw new Error( 'TODO: update cursor' );
+      this.updateCursor();
+      
+      this.updateSize();
       
       this._frameId++;
+    },
+    
+    updateSize: function() {
+      var sizeDirty = false;
+      //OHTWO TODO: if we aren't clipping or setting background colors, can we get away with having a 0x0 container div and using absolutely-positioned children?
+      if ( this._size.width !== this._currentSize.width ) {
+        sizeDirty = true;
+        this._currentSize.width = this._size.width;
+        this._domElement.style.width = this._size.width + 'px';
+      }
+      if ( this._size.height !== this._currentSize.height ) {
+        sizeDirty = true;
+        this._currentSize.height = this._size.height;
+        this._domElement.style.height = this._size.height + 'px';
+      }
+      if ( sizeDirty && !this.options.allowSceneOverflow ) {
+        // to prevent overflow, we add a CSS clip
+        //TODO: 0px => 0?
+        this._domElement.style.clip = 'rect(0px,' + this._size.width + 'px,' + this._size.height + 'px,0px)';
+      }
     },
     
     getRootNode: function() {
@@ -200,9 +234,77 @@ define( function( require ) {
     
     markDrawableForDisposal: function( drawable ) {
       this._drawablesToDispose.push( drawable );
+    },
+    
+    /*---------------------------------------------------------------------------*
+    * Cursors
+    *----------------------------------------------------------------------------*/
+    
+    updateCursor: function() {
+      if ( this._input && this._input.mouse && this._input.mouse.point ) {
+        if ( this._input.mouse.cursor ) {
+          return this.setSceneCursor( this._input.mouse.cursor );
+        }
+        
+        //OHTWO TODO: For a display, just return an instance and we can avoid the garbage collection/mutation at the cost of the linked-list traversal instead of an array
+        var mouseTrail = this.trailUnderPoint( this._input.mouse.point, isMouseFlags );
+        
+        if ( mouseTrail ) {
+          for ( var i = mouseTrail.length - 1; i >= 0; i-- ) {
+            var cursor = mouseTrail.nodes[i].getCursor();
+            
+            if ( cursor ) {
+              return this.setSceneCursor( cursor );
+            }
+          }
+        }
+      }
+      
+      // fallback case
+      return this.setSceneCursor( this.defaultCursor );
+    },
+    
+    setSceneCursor: function( cursor ) {
+      if ( cursor !== this._lastCursor ) {
+        this._lastCursor = cursor;
+        var customCursors = Display.customCursors[cursor];
+        if ( customCursors ) {
+          // go backwards, so the most desired cursor sticks
+          for ( var i = customCursors.length - 1; i >= 0; i-- ) {
+            this._domElement.style.cursor = customCursors[i];
+          }
+        } else {
+          this._domElement.style.cursor = cursor;
+        }
+      }
+    },
+    
+    applyCSSHacks: function() {
+      // to use CSS3 transforms for performance, hide anything outside our bounds by default
+      if ( !this.options.allowSceneOverflow ) {
+        this._domElement.style.overflow = 'hidden';
+      }
+      
+      // forward all pointer events
+      this._domElement.style.msTouchAction = 'none';
+      
+      if ( this.options.allowCSSHacks ) {
+        // some css hacks (inspired from https://github.com/EightMedia/hammer.js/blob/master/hammer.js).
+        // modified to only apply the proper prefixed version instead of spamming all of them, and doesn't use jQuery.
+        Features.setStyle( this._domElement, Features.userDrag, 'none' );
+        Features.setStyle( this._domElement, Features.userSelect, 'none' );
+        Features.setStyle( this._domElement, Features.touchAction, 'none' );
+        Features.setStyle( this._domElement, Features.touchCallout, 'none' );
+        Features.setStyle( this._domElement, Features.tapHighlightColor, 'rgba(0,0,0,0)' );
+      }
     }
     
   }, Events.prototype ) );
+  
+  Display.customCursors = {
+    'scenery-grab-pointer': ['grab', '-moz-grab', '-webkit-grab', 'pointer'],
+    'scenery-grabbing-pointer': ['grabbing', '-moz-grabbing', '-webkit-grabbing', 'pointer']
+  };
   
   return Display;
 } );

@@ -131,5 +131,18 @@ define( function( require ) {
   Features.backfaceVisibility = detect( div.style, prefixed( 'backfaceVisibility' ) );
   Features.borderRadius = detect( div.style, prefixed( 'borderRadius' ) );
   
+  Features.userSelect = detect( div.style, prefixed( 'userSelect' ) );
+  Features.touchAction = detect( div.style, prefixed( 'touchAction' ) );
+  Features.touchCallout = detect( div.style, prefixed( 'touchCallout' ) );
+  Features.userDrag = detect( div.style, prefixed( 'userDrag' ) );
+  Features.tapHighlightColor = detect( div.style, prefixed( 'tapHighlightColor' ) );
+  
+  // e.g. Features.setStyle( domElement, Features.transform, '...' ), and doesn't set it if no 'transform' attribute (prefixed or no) is found
+  Features.setStyle = function( domElement, optionalKey, value ) {
+    if ( optionalKey !== undefined ) {
+      domElement.style[optionalKey] = value;
+    }
+  };
+  
   return Features;
 } );
