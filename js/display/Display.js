@@ -596,12 +596,12 @@ define( function( require ) {
       }
       
       if ( this._baseInstance ) {
-        result += '<div style="font-weight: bold;">Base Instance</div>';
+        result += '<div style="font-weight: bold;">Root Instance Tree</div>';
         printInstanceSubtree( this._baseInstance );
       }
       
       _.each( this._sharedCanvasInstances, function( instance ) {
-        result += '<div style="font-weight: bold;">Shared Canvas Instance</div>';
+        result += '<div style="font-weight: bold;">Shared Canvas Instance Tree</div>';
         printInstanceSubtree( instance );
       } );
       
@@ -637,9 +637,11 @@ define( function( require ) {
       }
       
       if ( this._rootBackbone ) {
-        result += '<div style="font-weight: bold;">Drawables</div>';
+        result += '<div style="font-weight: bold;">Root Drawable Tree</div>';
         printDrawableSubtree( this._rootBackbone );
       }
+      
+      //OHTWO TODO: add shared cache drawable trees
       
       return result;
     },
