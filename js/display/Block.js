@@ -24,6 +24,9 @@ define( function( require ) {
       this.display = display;
       this.drawableCount = 0;
       
+      this.firstDrawable = null;
+      this.lastDrawable = null;
+      
       return this;
     },
     
@@ -32,6 +35,8 @@ define( function( require ) {
       
       // clear references
       this.display = null;
+      this.firstDrawable = null;
+      this.lastDrawable = null;
       
       Drawable.prototype.dispose.call( this );
     },
@@ -45,6 +50,11 @@ define( function( require ) {
     removeDrawable: function( drawable ) {
       this.drawableCount--;
       drawable.parentDrawable = null;
+    },
+    
+    notifyInterval: function( firstDrawable, lastDrawable ) {
+      this.firstDrawable = firstDrawable;
+      this.lastDrawable = lastDrawable;
     }
   } );
   

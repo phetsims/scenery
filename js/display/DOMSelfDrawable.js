@@ -54,11 +54,9 @@ define( function( require ) {
     
     // called from elsewhere to update the DOM element
     update: function() {
-      if ( !this.disposed() ) {
-        if ( this.dirty ) {
-          this.dirty = false;
-          this.updateDOM();
-        }
+      if ( this.dirty ) {
+        this.dirty = false;
+        this.updateDOM();
       }
     },
     

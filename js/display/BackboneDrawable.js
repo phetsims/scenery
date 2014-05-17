@@ -246,12 +246,17 @@ define( function( require ) {
       
       var currentBlock = null;
       var currentRenderer = 0;
+      var firstDrawableForBlock = null;
       
       // linked-list iteration inclusively from firstDrawable to lastDrawable
       for ( var drawable = firstDrawable; drawable !== null && drawable.pendingPreviousDrawable !== lastDrawable; drawable = drawable.pendingNextDrawable ) {
         
         // if we need to switch to a new block, create it
         if ( !currentBlock || drawable.renderer !== currentRenderer ) {
+          if ( currentBlock ) {
+            currentBlock.notifyInterval( firstDrawableForBlock, drawable.pendingPreviousDrawable );
+          }
+          
           currentRenderer = drawable.renderer;
           
           if ( Renderer.isCanvas( currentRenderer ) ) {
@@ -272,6 +277,8 @@ define( function( require ) {
           
           // mark it dirty for now, so we can check
           this.markDirtyDrawable( currentBlock );
+          
+          firstDrawableForBlock = drawable;
         }
         
         currentBlock.addDrawable( drawable );
@@ -290,6 +297,9 @@ define( function( require ) {
       }
       lastDrawable.pendingNextDrawable = null;
       lastDrawable.nextDrawable = null;
+      if ( currentBlock ) {
+        currentBlock.notifyInterval( firstDrawableForBlock, lastDrawable );
+      }
       
       // full-pass change for zindex. OHTWO TODO: only change where necessary
       var zIndex = 1; // don't start below 1

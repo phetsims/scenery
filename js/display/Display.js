@@ -619,10 +619,19 @@ define( function( require ) {
         result += div;
         
         if ( drawable.blocks ) {
+          // we're a backbone
           depth += 1;
           _.each( drawable.blocks, function( childDrawable ) {
             printDrawableSubtree( childDrawable );
           } );
+          depth -= 1;
+        } else if ( drawable.firstDrawable && drawable.lastDrawable ) {
+          // we're a block
+          depth += 1;
+          for ( var childDrawable = drawable.firstDrawable; childDrawable !== drawable.lastDrawable; childDrawable = childDrawable.nextDrawable ) {
+            printDrawableSubtree( childDrawable );
+          }
+          printDrawableSubtree( drawable.lastDrawable ); // wasn't hit in our simplified (and safer) loop
           depth -= 1;
         }
       }
