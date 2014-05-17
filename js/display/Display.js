@@ -502,19 +502,19 @@ define( function( require ) {
       
       var result = 'Display ' + this._size.toString() + ' frame:' + this._frameId + ' input:' + !!this._input + ' cursor:' + this._lastCursor + '<br>';
       
-      function printInstanceSubtree( instance ) {
-        var div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
+      function instanceSummary( instance ) {
+        var iSummary = '';
         
         function addQualifier( text ) {
-          div += ' <span style="color: #008">' + text + '</span>';
+          iSummary += ' <span style="color: #008">' + text + '</span>';
         }
         
         var node = instance.node;
         
-        div += instance.id;
-        div += ' ' + ( node.constructor.name ? node.constructor.name : '?' );
-        div += ' <span style="font-weight: ' + ( node.isPainted() ? 'bold' : 'normal' ) + '">' + node.id + '</span>';
-        div += ' <span style="color: #888">' + str( instance.trail ) + '</span>';
+        iSummary += instance.id;
+        iSummary += ' ' + ( node.constructor.name ? node.constructor.name : '?' );
+        iSummary += ' <span style="font-weight: ' + ( node.isPainted() ? 'bold' : 'normal' ) + '">' + node.id + '</span>';
+        
         if ( !node._visible ) {
           addQualifier( 'invisible' );
         }
@@ -558,8 +558,32 @@ define( function( require ) {
           case Matrix3.Types.OTHER:          transformType = 'other';      break;
         }
         if ( transformType ) {
-          div += ' <span style="color: #88f" title="' + node.transform.getMatrix().toString().replace( '\n', '&#10;' ) + '">' + transformType + '</span>';
+          iSummary += ' <span style="color: #88f" title="' + node.transform.getMatrix().toString().replace( '\n', '&#10;' ) + '">' + transformType + '</span>';
         }
+        
+        iSummary += ' <span style="color: #888">' + str( instance.trail ) + '</span>';
+        iSummary += ' <span style="color: #c88">' + str( instance.state ) + '</span>';
+        iSummary += ' <span style="color: #8c8">' + node._rendererSummary.bitmask.toString( 16 ) + ( node._rendererBitmask !== scenery.bitmaskNodeDefault ? ' (' + node._rendererBitmask.toString( 16 ) + ')' : '' ) +  '</span>';
+        
+        return iSummary;
+      }
+      
+      function drawableSummary( drawable ) {
+        return drawable.toString();
+      }
+      
+      function printInstanceSubtree( instance ) {
+        var div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
+        
+        function addDrawable( name, drawable ) {
+          div += ' <span style="color: #888">' + name + ':' + drawableSummary( drawable ) + '</span>';
+        }
+        
+        div += instanceSummary( instance );
+        
+        instance.selfDrawable && addDrawable( 'self', instance.selfDrawable );
+        instance.groupDrawable && addDrawable( 'group', instance.groupDrawable );
+        instance.sharedCacheDrawable && addDrawable( 'sharedCache', instance.sharedCacheDrawable );
         
         div += '</div>';
         result += div;
@@ -580,6 +604,33 @@ define( function( require ) {
         result += '<div style="font-weight: bold;">Shared Canvas Instance</div>';
         printInstanceSubtree( instance );
       } );
+      
+      function printDrawableSubtree( drawable ) {
+        var div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
+        
+        div += drawableSummary( drawable );
+        if ( drawable.instance ) {
+          div += '&nbsp;&nbsp;&nbsp;' + instanceSummary( drawable.instance );
+        } else if ( drawable.backboneInstance ) {
+          div += '&nbsp;&nbsp;&nbsp;' + instanceSummary( drawable.backboneInstance );
+        }
+        
+        div += '</div>';
+        result += div;
+        
+        if ( drawable.blocks ) {
+          depth += 1;
+          _.each( drawable.blocks, function( childDrawable ) {
+            printDrawableSubtree( childDrawable );
+          } );
+          depth -= 1;
+        }
+      }
+      
+      if ( this._rootBackbone ) {
+        result += '<div style="font-weight: bold;">Drawables</div>';
+        printDrawableSubtree( this._rootBackbone );
+      }
       
       return result;
     },

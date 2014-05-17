@@ -170,7 +170,7 @@ define( function( require ) {
                    ( this.isInstanceCanvasCache ? 'instanceCache ' : '' ) +
                    ( this.isSharedCanvasCachePlaceholder ? 'sharedCachePlaceholder ' : '' ) +
                    ( this.isSharedCanvasCacheSelf ? 'sharedCacheSelf ' : '' ) +
-                   ( this.isTransformed ? 'TR' : '' ) +
+                   ( this.isTransformed ? 'TR ' : '' ) +
                    ( this.selfRenderer ? this.selfRenderer.toString( 16 ) : '-' ) + ',' +
                    ( this.groupRenderer ? this.groupRenderer.toString( 16 ) : '-' ) + ',' +
                    ( this.sharedCacheRenderer ? this.sharedCacheRenderer.toString( 16 ) : '-' ) + ' ';
