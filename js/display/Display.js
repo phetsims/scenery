@@ -611,7 +611,13 @@ define( function( require ) {
         
         if ( mutateRoot && node === rootNode ) {
           var props = rootNode.getPropString( '  ', false );
-          result += rootName + '.mutate( {' + ( props ? ( '\n' + props + '\n' ) : '' ) + '} )';
+          var mutation = ( props ? ( '\n' + props + '\n' ) : '' );
+          if ( mutation !== '' ) {
+            result += rootName + '.mutate( {' + mutation + '} )';
+          } else {
+            // bleh. strip off the last newline
+            result = result.slice( 0, -1 );
+          }
         } else {
           result += 'var ' + name( node ) + ' = ' + node.toString( '', false );
         }
