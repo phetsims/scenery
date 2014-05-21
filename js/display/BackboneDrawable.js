@@ -295,8 +295,10 @@ define( function( require ) {
           drawable.previousDrawable = null;
         }
       }
-      lastDrawable.pendingNextDrawable = null;
-      lastDrawable.nextDrawable = null;
+      if ( lastDrawable ) {
+        lastDrawable.pendingNextDrawable = null;
+        lastDrawable.nextDrawable = null;
+      }
       if ( currentBlock ) {
         currentBlock.notifyInterval( firstDrawableForBlock, lastDrawable );
       }
