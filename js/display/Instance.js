@@ -1089,7 +1089,7 @@ define( function( require ) {
       }
       
       // we don't originally add in the listener if we are stateless
-      if ( !this.isStateless ) {
+      if ( !this.isStateless() ) {
         this.node.offStatic( 'transform', this.nodeTransformListener );
         
         if ( !this.state.isSharedCanvasCachePlaceholder ) {
