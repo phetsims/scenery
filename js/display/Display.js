@@ -308,6 +308,28 @@ define( function( require ) {
       }
     },
     
+    // TODO: consider SVG data URLs
+    //OHTWO TODO: ported from 0.1, check validity
+    canvasDataURL: function( callback ) {
+      this.canvasSnapshot( function( canvas ) {
+        callback( canvas.toDataURL() );
+      } );
+    },
+    
+    // renders what it can into a Canvas (so far, Canvas and SVG layers work fine)
+    //OHTWO TODO: ported from 0.1, check validity
+    canvasSnapshot: function( callback ) {
+      var canvas = document.createElement( 'canvas' );
+      canvas.width = this._size.width;
+      canvas.height = this._size.height;
+      
+      var context = canvas.getContext( '2d' );
+      
+      this._rootNode.renderToCanvas( canvas, context, function() {
+        callback( canvas, context.getImageData( 0, 0, canvas.width, canvas.height ) );
+      } );
+    },
+    
     updateOnRequestAnimationFrame: function() {
       var display = this;
       (function step() {

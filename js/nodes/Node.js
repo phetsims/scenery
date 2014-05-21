@@ -24,6 +24,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/RendererSummary' );
+  require( 'SCENERY/util/CanvasContextWrapper' );
   // require( 'SCENERY/display/Renderer' ); // commented out so Require.js doesn't balk at the circular dependency
   
   // TODO: FIXME: Why do I have to comment out this dependency?
@@ -1734,6 +1735,36 @@ define( function( require ) {
       }
     },
     
+    // @public: Render this node and its descendants to the Canvas wrapper
+    renderToCanvasSubtree: function( wrapper ) {
+      this.renderToCanvasSelf( wrapper );
+      for ( var i = 0; i < this._children.length; i++ ) {
+        var child = this._children[i];
+        
+        if ( child.isVisible() ) {
+          assert && assert( child._opacity === 1, 'renderToCanvasSubtree does not yet support opacity' );
+          assert && assert( !child._clipArea, 'renderToCanvasSubtree does not yet support clip areas' );
+          
+          wrapper.context.save();
+          child._transform.getMatrix().canvasAppendTransform( wrapper.context );
+          child.renderToCanvasSubtree( wrapper );
+          wrapper.context.restore();
+        }
+      }
+    },
+    
+    // @public @deprecated (API compatibility for now): Render this node to the Canvas (clearing it first)
+    renderToCanvas: function( canvas, context, callback ) {
+      // should basically reset everything (and clear the Canvas)
+      canvas.width = canvas.width;
+      
+      var wrapper = new scenery.CanvasContextWrapper( canvas, context );
+      
+      this.renderToCanvasSubtree( wrapper );
+      
+      callback(); // this was originally asynchronous, so we had a callback
+    },
+    
     /*
      * Renders this node to a canvas. If toCanvas( callback ) is used, the canvas will contain the node's
      * entire bounds.
@@ -1758,21 +1789,17 @@ define( function( require ) {
       canvas.height = height;
       var context = canvas.getContext( '2d' );
       
-      var $div = $( document.createElement( 'div' ) );
-      $div.width( width ).height( height );
-      var scene = new scenery.Scene( $div );
+      // shift our rendering over by the desired amount
+      context.translate( x, y );
       
-      scene.addChild( self );
-      scene.x = x;
-      scene.y = y;
-      scene.updateScene();
+      // for API compatibility, we apply our own transform here
+      this._transform.getMatrix().canvasAppendTransform( context );
       
-      scene.renderToCanvas( canvas, context, function() {
-        callback( canvas, x, y );
-        
-        // let us be garbage collected
-        scene.removeChild( self );
-      } );
+      var wrapper = new scenery.CanvasContextWrapper( canvas, context );
+      
+      this.renderToCanvasSubtree( wrapper );
+      
+      callback( canvas, x, y ); // we used to be asynchronous
     },
     
     // gives a data URI, with the same parameter handling as Node.toCanvas()
