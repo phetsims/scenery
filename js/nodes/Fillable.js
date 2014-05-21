@@ -41,7 +41,8 @@ define( function( require ) {
     
     proto.setFill = function( fill ) {
       if ( this.getFill() !== fill ) {
-        var hasInstances = this._instances.length > 0;
+        //OHTWO TODO: we probably shouldn't be checking this here?
+        var hasInstances = this._displayInstances.length > 0;
         
         if ( hasInstances && this._fill && this._fill.removeChangeListener ) {
           this._fill.removeChangeListener( this._fillListener );

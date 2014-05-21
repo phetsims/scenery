@@ -263,138 +263,8 @@ define( function( require ) {
       return !this.computeShapeBounds().intersection( bounds ).isEmpty();
     },
     
-    // override paintCanvas with a faster version, since fillRect and drawRect don't affect the current default path
-    paintCanvas: function( wrapper ) {
-      var context = wrapper.context;
-      
-      // use the standard version if it's a rounded rectangle, since there is no Canvas-optimized version for that
-      if ( this.isRounded() ) {
-        context.beginPath();
-        var maximumArcSize = this.getMaximumArcSize();
-        var arcw = Math.min( this._rectArcWidth, maximumArcSize );
-        var arch = Math.min( this._rectArcHeight, maximumArcSize );
-        var lowX = this._rectX + arcw;
-        var highX = this._rectX + this._rectWidth - arcw;
-        var lowY = this._rectY + arch;
-        var highY = this._rectY + this._rectHeight - arch;
-        if ( arcw === arch ) {
-          // we can use circular arcs, which have well defined stroked offsets
-          context.arc( highX, lowY, arcw, -Math.PI / 2, 0, false );
-          context.arc( highX, highY, arcw, 0, Math.PI / 2, false );
-          context.arc( lowX, highY, arcw, Math.PI / 2, Math.PI, false );
-          context.arc( lowX, lowY, arcw, Math.PI, Math.PI * 3 / 2, false );
-        } else {
-          // we have to resort to elliptical arcs
-          context.ellipse( highX, lowY, arcw, arch, 0, -Math.PI / 2, 0, false );
-          context.ellipse( highX, highY, arcw, arch, 0, 0, Math.PI / 2, false );
-          context.ellipse( lowX, highY, arcw, arch, 0, Math.PI / 2, Math.PI, false );
-          context.ellipse( lowX, lowY, arcw, arch, 0, Math.PI, Math.PI * 3 / 2, false );
-        }
-        context.closePath();
-        
-        if ( this._fill ) {
-          this.beforeCanvasFill( wrapper ); // defined in Fillable
-          context.fill();
-          this.afterCanvasFill( wrapper ); // defined in Fillable
-        }
-        if ( this._stroke ) {
-          this.beforeCanvasStroke( wrapper ); // defined in Strokable
-          context.stroke();
-          this.afterCanvasStroke( wrapper ); // defined in Strokable
-        }
-      } else {
-        // TODO: how to handle fill/stroke delay optimizations here?
-        if ( this._fill ) {
-          this.beforeCanvasFill( wrapper ); // defined in Fillable
-          context.fillRect( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
-          this.afterCanvasFill( wrapper ); // defined in Fillable
-        }
-        if ( this._stroke ) {
-          this.beforeCanvasStroke( wrapper ); // defined in Strokable
-          context.strokeRect( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
-          this.afterCanvasStroke( wrapper ); // defined in Strokable
-        }
-      }
-    },
-    
-    // create a rect instead of a path, hopefully it is faster in implementations
-    createSVGFragment: function( svg, defs, group ) {
-      return document.createElementNS( scenery.svgns, 'rect' );
-    },
-    
-    // optimized for the rect element instead of path
-    updateSVGFragment: function( rect ) {
-      // see http://www.w3.org/TR/SVG/shapes.html#RectElement
-      rect.setAttribute( 'x', this._rectX );
-      rect.setAttribute( 'y', this._rectY );
-      rect.setAttribute( 'width', this._rectWidth );
-      rect.setAttribute( 'height', this._rectHeight );
-      
-      // workaround for various browsers if rx=20, ry=0 (behavior is inconsistent, either identical to rx=20,ry=20, rx=0,ry=0. We'll treat it as rx=0,ry=0)
-      // see https://github.com/phetsims/scenery/issues/183
-      if ( this.isRounded() ) {
-        var maximumArcSize = this.getMaximumArcSize();
-        var arcw = Math.min( this._rectArcWidth, maximumArcSize );
-        var arch = Math.min( this._rectArcHeight, maximumArcSize );
-        rect.setAttribute( 'rx', arcw );
-        rect.setAttribute( 'ry', arch );
-      } else {
-        rect.setAttribute( 'rx', 0 );
-        rect.setAttribute( 'ry', 0 );
-      }
-      
-      rect.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
-    },
-    
-    /*---------------------------------------------------------------------------*
-     * DOM support
-     *----------------------------------------------------------------------------*/
-    
-    domUpdateTransformOnRepaint: true, // since we have to integrate the baseline offset into the CSS transform, signal to DOMLayer
-    
-    getDOMElement: function() {
-      var fill = document.createElement( 'div' );
-      var stroke = document.createElement( 'div' );
-      fill.appendChild( stroke );
-      fill.style.display = 'block';
-      fill.style.position = 'absolute';
-      fill.style.left = '0';
-      fill.style.top = '0';
-      stroke.style.display = 'block';
-      stroke.style.position = 'absolute';
-      stroke.style.left = '0';
-      stroke.style.top = '0';
-      return fill;
-    },
-
-    updateDOMElement: function( fill ) {
-      var borderRadius = Math.min( this._rectArcWidth, this._rectArcHeight );
-      
-      fill.style.width = this._rectWidth + 'px';
-      fill.style.height = this._rectHeight + 'px';
-      fill.style[Features.borderRadius] = borderRadius + 'px'; // if one is zero, we are not rounded, so we do the min here
-      fill.style.backgroundColor = this.getCSSFill();
-      
-      var stroke = fill.childNodes[0];
-      if ( this.hasStroke() ) {
-        stroke.style.width = ( this._rectWidth - this.getLineWidth() ) + 'px';
-        stroke.style.height = ( this._rectHeight - this.getLineWidth() ) + 'px';
-        stroke.style.left = ( -this.getLineWidth() / 2 ) + 'px';
-        stroke.style.top = ( -this.getLineWidth() / 2 ) + 'px';
-        stroke.style.borderStyle = 'solid';
-        stroke.style.borderColor = this.getSimpleCSSStroke();
-        stroke.style.borderWidth = this.getLineWidth() + 'px';
-        stroke.style[Features.borderRadius] = ( this.isRounded() || this.getLineJoin() === 'round' ) ? ( borderRadius + this.getLineWidth() / 2 ) + 'px' : '0';
-      } else {
-        stroke.style.borderStyle = 'none';
-      }
-    },
-    
-    // override the transform since we need to customize it with a DOM offset
-    updateCSSTransform: function( transform, element ) {
-      // shift the text vertically, postmultiplied with the entire transform.
-      var matrix = transform.getMatrix().timesMatrix( Matrix3.translation( this._rectX, this._rectY ) );
-      scenery.Util.applyCSSTransform( matrix, element );
+    canvasPaintSelf: function( wrapper ) {
+      Rectangle.RectangleCanvasDrawable.prototype.paintCanvas( wrapper, this );
     },
     
     createDOMDrawable: function( renderer, instance ) {
@@ -811,9 +681,8 @@ define( function( require ) {
   
   Rectangle.RectangleCanvasDrawable = CanvasSelfDrawable.createDrawable( {
     type: function RectangleCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    paintCanvas: function paintCanvasRectangle( wrapper ) {
+    paintCanvas: function paintCanvasRectangle( wrapper, node ) {
       var context = wrapper.context;
-      var node = this.node;
       
       // use the standard version if it's a rounded rectangle, since there is no Canvas-optimized version for that
       if ( node.isRounded() ) {

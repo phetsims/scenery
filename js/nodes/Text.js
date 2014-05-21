@@ -48,25 +48,6 @@ define( function( require ) {
   var svgTextSizeContainer = document.getElementById( textSizeContainerId );
   var svgTextSizeElement = document.getElementById( textSizeElementId );
   
-  if ( !svgTextSizeContainer ) {
-    // set up the container and text for testing text bounds quickly (using approximateSVGBounds)
-    svgTextSizeContainer = document.createElementNS( scenery.svgns, 'svg' );
-    svgTextSizeContainer.setAttribute( 'width', '2' );
-    svgTextSizeContainer.setAttribute( 'height', '2' );
-    svgTextSizeContainer.setAttribute( 'id', textSizeContainerId );
-    svgTextSizeContainer.setAttribute( 'style', 'visibility: hidden; pointer-events: none; position: absolute; left: -65535; right: -65535;' ); // so we don't flash it in a visible way to the user
-  }
-  // NOTE! copies createSVGElement
-  if ( !svgTextSizeElement ) {
-    svgTextSizeElement = document.createElementNS( scenery.svgns, 'text' );
-    svgTextSizeElement.appendChild( document.createTextNode( '' ) );
-    svgTextSizeElement.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
-    svgTextSizeElement.setAttribute( 'text-rendering', 'geometricPrecision' );
-    svgTextSizeElement.setAttribute( 'lengthAdjust', 'spacingAndGlyphs' );
-    svgTextSizeElement.setAttribute( 'id', textSizeElementId );
-    svgTextSizeContainer.appendChild( svgTextSizeElement );
-  }
-  
   // SVG bounds seems to be malfunctioning for Safari 5. Since we don't have a reproducible test machine for
   // fast iteration, we'll guess the user agent and use DOM bounds instead of SVG.
   // Hopefully the two contraints rule out any future Safari versions (fairly safe, but not impossible!)
@@ -226,135 +207,8 @@ define( function( require ) {
       this.invalidateText();
     },
     
-    /*---------------------------------------------------------------------------*
-    * Canvas support
-    *----------------------------------------------------------------------------*/
-    
-    //OHTWO @deprecated
-    paintCanvas: function( wrapper ) {
-      var context = wrapper.context;
-      
-      // extra parameters we need to set, but should avoid setting if we aren't drawing anything
-      if ( this.hasFill() || this.hasStroke() ) {
-        wrapper.setFont( this._font.getFont() );
-        wrapper.setDirection( this._direction );
-      }
-      
-      if ( this.hasFill() ) {
-        this.beforeCanvasFill( wrapper ); // defined in Fillable
-        context.fillText( this._text, 0, 0 );
-        this.afterCanvasFill( wrapper ); // defined in Fillable
-      }
-      if ( this.hasStroke() ) {
-        this.beforeCanvasStroke( wrapper ); // defined in Strokable
-        context.strokeText( this._text, 0, 0 );
-        this.afterCanvasStroke( wrapper ); // defined in Strokable
-      }
-    },
-    
-    /*---------------------------------------------------------------------------*
-    * WebGL support
-    *----------------------------------------------------------------------------*/
-    
-    //OHTWO @deprecated
-    paintWebGL: function( state ) {
-      throw new Error( 'Text.prototype.paintWebGL unimplemented' );
-    },
-    
-    /*---------------------------------------------------------------------------*
-    * SVG support
-    *----------------------------------------------------------------------------*/
-    
-    //OHTWO @deprecated
-    createSVGFragment: function( svg, defs, group ) {
-      // NOTE! reference SVG element at top of file copies createSVGElement!
-      var element = document.createElementNS( scenery.svgns, 'text' );
-      element.appendChild( document.createTextNode( '' ) );
-      
-      // TODO: flag adjustment for SVG qualities
-      element.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
-      element.setAttribute( 'text-rendering', 'geometricPrecision' );
-      element.setAttribute( 'lengthAdjust', 'spacingAndGlyphs' );
-      element.setAttributeNS( 'http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve' );
-      return element;
-    },
-    
-    //OHTWO @deprecated
-    updateSVGFragment: function( element ) {
-      // update the text-node's value
-      element.lastChild.nodeValue = this.getNonBreakingText();
-      
-      element.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
-      element.setAttribute( 'direction', this._direction );
-      
-      // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/SVG rendering (and overall length)
-      if ( isFinite( this._selfBounds.width ) ) {
-        element.setAttribute( 'textLength', this._selfBounds.width );
-      }
-      
-      // set all of the font attributes, since we can't use the combined one
-      // TODO: optimize so we only set what is changed!!!
-      element.setAttribute( 'font-family', this._font.getFamily() );
-      element.setAttribute( 'font-size', this._font.getSize() );
-      element.setAttribute( 'font-style', this._font.getStyle() );
-      element.setAttribute( 'font-weight', this._font.getWeight() );
-      element.setAttribute( 'font-stretch', this._font.getStretch() );
-    },
-    
-    // support patterns, gradients, and anything else we need to put in the <defs> block
-    //OHTWO @deprecated
-    updateSVGDefs: function( svg, defs ) {
-      // remove old definitions if they exist
-      this.removeSVGDefs( svg, defs );
-      
-      // add new ones if applicable
-      this.addSVGFillDef( svg, defs );
-      this.addSVGStrokeDef( svg, defs );
-    },
-    
-    // cleans up references created with udpateSVGDefs()
-    //OHTWO @deprecated
-    removeSVGDefs: function( svg, defs ) {
-      this.removeSVGFillDef( svg, defs );
-      this.removeSVGStrokeDef( svg, defs );
-    },
-    
-    /*---------------------------------------------------------------------------*
-    * DOM support
-    *----------------------------------------------------------------------------*/
-    
-    //OHTWO @deprecated
-    allowsMultipleDOMInstances: true,
-    
-    //OHTWO @deprecated
-    getDOMElement: function() {
-      var div = document.createElement( 'div' );
-      
-      // so they are absolutely positioned compared to the containing DOM layer (that is positioned).
-      // otherwise, two adjacent HTMLText elements will 'flow' and be positioned incorrectly
-      div.style.position = 'absolute';
-      return div;
-    },
-    
-    //OHTWO @deprecated
-    updateDOMElement: function( div ) {
-      var $div = $( div );
-      div.style.font = this.getFont();
-      div.style.color = this.getCSSFill();
-      $div.width( this.getSelfBounds().width );
-      $div.height( this.getSelfBounds().height );
-      $div.empty(); // remove all children, including previously-created text nodes
-      div.appendChild( this.getDOMTextNode() );
-      div.setAttribute( 'dir', this._direction );
-    },
-    
-    //OHTWO @deprecated
-    updateCSSTransform: function( transform, element ) {
-      // since the DOM origin of the text is at the upper-left, and our Scenery origin is at the lower-left, we need to
-      // shift the text vertically, postmultiplied with the entire transform.
-      var yOffset = this.getSelfBounds().minY;
-      var matrix = transform.getMatrix().timesMatrix( Matrix3.translation( 0, yOffset ) );
-      scenery.Util.applyCSSTransform( matrix, element );
+    canvasPaintSelf: function( wrapper ) {
+      Text.TextCanvasDrawable.prototype.paintCanvas( wrapper, this );
     },
     
     createDOMDrawable: function( renderer, instance ) {
@@ -433,8 +287,7 @@ define( function( require ) {
           }
         }
       }
-      this.updateSVGFragment( svgTextSizeElement );
-      svgTextSizeElement.removeAttribute( 'textLength' ); // since we may set textLength, remove that so we can get accurate widths
+      updateSVGTextToMeasure( svgTextSizeElement, this );
       var rect = svgTextSizeElement.getBBox();
       return new Bounds2( rect.x, rect.y, rect.x + rect.width, rect.y + rect.height );
     },
@@ -638,10 +491,6 @@ define( function( require ) {
   /* jshint -W064 */
   Fillable( Text );
   Strokable( Text );
-  
-  initializingHybridTextNode = true;
-  hybridTextNode = new Text( 'm', { boundsMethod: 'fast' } );
-  initializingHybridTextNode = false;
   
   /*---------------------------------------------------------------------------*
   * Rendering State mixin (DOM/SVG)
@@ -848,15 +697,50 @@ define( function( require ) {
     keepElements: keepSVGTextElements
   } );
   
+  function createSVGTextToMeasure() {
+    var text = document.createElementNS( scenery.svgns, 'text' );
+    text.appendChild( document.createTextNode( '' ) );
+    
+    // TODO: flag adjustment for SVG qualities
+    text.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
+    text.setAttribute( 'text-rendering', 'geometricPrecision' );
+    text.setAttributeNS( 'http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve' );
+    return text;
+  }
+  
+  function updateSVGTextToMeasure( textElement, textNode ) {
+    textElement.setAttribute( 'direction', textNode._direction );
+    textElement.setAttribute( 'font-family', textNode._font.getFamily() );
+    textElement.setAttribute( 'font-size', textNode._font.getSize() );
+    textElement.setAttribute( 'font-style', textNode._font.getStyle() );
+    textElement.setAttribute( 'font-weight', textNode._font.getWeight() );
+    textElement.setAttribute( 'font-stretch', textNode._font.getStretch() );
+    textElement.lastChild.nodeValue = textNode.getNonBreakingText();
+  }
+  
+  if ( !svgTextSizeContainer ) {
+    // set up the container and text for testing text bounds quickly (using approximateSVGBounds)
+    svgTextSizeContainer = document.createElementNS( scenery.svgns, 'svg' );
+    svgTextSizeContainer.setAttribute( 'width', '2' );
+    svgTextSizeContainer.setAttribute( 'height', '2' );
+    svgTextSizeContainer.setAttribute( 'id', textSizeContainerId );
+    svgTextSizeContainer.setAttribute( 'style', 'visibility: hidden; pointer-events: none; position: absolute; left: -65535; right: -65535;' ); // so we don't flash it in a visible way to the user
+  }
+  // NOTE! copies createSVGElement
+  if ( !svgTextSizeElement ) {
+    svgTextSizeElement = createSVGTextToMeasure();
+    svgTextSizeElement.setAttribute( 'id', textSizeElementId );
+    svgTextSizeContainer.appendChild( svgTextSizeElement );
+  }
+  
   /*---------------------------------------------------------------------------*
   * Canvas rendering
   *----------------------------------------------------------------------------*/
   
   Text.TextCanvasDrawable = CanvasSelfDrawable.createDrawable( {
     type: function TextCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    paintCanvas: function paintCanvasText( wrapper ) {
+    paintCanvas: function paintCanvasText( wrapper, node ) {
       var context = wrapper.context;
-      var node = this.node;
       
       // extra parameters we need to set, but should avoid setting if we aren't drawing anything
       if ( node.hasFill() || node.hasStroke() ) {
@@ -879,6 +763,10 @@ define( function( require ) {
     usesStroke: true,
     dirtyMethods: ['markDirtyText', 'markDirtyFont', 'markDirtyBounds', 'markDirtyDirection']
   } );
+  
+  initializingHybridTextNode = true;
+  hybridTextNode = new Text( 'm', { boundsMethod: 'fast' } );
+  initializingHybridTextNode = false;
   
   return Text;
 } );

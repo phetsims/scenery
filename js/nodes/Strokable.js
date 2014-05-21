@@ -180,7 +180,8 @@ define( function( require ) {
         // since this can actually change the bounds, we need to handle a few things differently than the fill
         this.markOldSelfPaint();
         
-        var hasInstances = this._instances.length > 0;
+        //OHTWO TODO: probably shouldn't have a reference here
+        var hasInstances = this._displayInstances.length > 0;
         
         if ( hasInstances && this._stroke && this._stroke.removeChangeListener ) {
           this._stroke.removeChangeListener( this._strokeListener );

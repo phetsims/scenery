@@ -145,69 +145,8 @@ define( function( require ) {
       return true;
     },
 
-    /*---------------------------------------------------------------------------*
-    * Canvas support
-    *----------------------------------------------------------------------------*/
-
-    // TODO: add SVG / DOM support
-    //OHTWO @deprecated
-    paintCanvas: function( wrapper ) {
-      wrapper.context.drawImage( this._image, 0, 0 );
-    },
-
-    /*---------------------------------------------------------------------------*
-     * WebGL support
-     *----------------------------------------------------------------------------*/
-    
-    //OHTWO @deprecated
-    paintWebGL: function( state ) {
-      throw new Error( 'paintWebGL:nimplemented' );
-    },
-
-    /*---------------------------------------------------------------------------*
-    * SVG support
-    *----------------------------------------------------------------------------*/
-    
-    //OHTWO @deprecated
-    createSVGFragment: function( svg, defs, group ) {
-      var element = document.createElementNS( scenery.svgns, 'image' );
-      element.setAttribute( 'x', 0 );
-      element.setAttribute( 'y', 0 );
-      return element;
-    },
-
-    //OHTWO @deprecated
-    updateSVGFragment: function( element ) {
-      // like <image xlink:href='http://phet.colorado.edu/images/phet-logo-yellow.png' x='0' y='0' height='127px' width='242px'/>
-      element.setAttribute( 'width', this.getImageWidth() + 'px' );
-      element.setAttribute( 'height', this.getImageHeight() + 'px' );
-      element.setAttributeNS( scenery.xlinkns, 'xlink:href', this.getImageURL() );
-    },
-
-    /*---------------------------------------------------------------------------*
-     * DOM support
-     *----------------------------------------------------------------------------*/
-    
-    //OHTWO @deprecated
-    getDOMElement: function() {
-      this._image.style.display = 'block';
-      this._image.style.position = 'absolute';
-      this._image.style.left = '0';
-      this._image.style.top = '0';
-      return this._image;
-    },
-    
-    //OHTWO @deprecated
-    updateDOMElement: function( image ) {
-      if ( image.src !== this._image.src ) {
-        image.src = this._image.src;
-      }
-    },
-    
-    //OHTWO @deprecated
-    updateCSSTransform: function( transform, element ) {
-      // TODO: extract this out, it's completely shared!
-      scenery.Util.applyCSSTransform( transform.getMatrix(), element );
+    canvasPaintSelf: function( wrapper ) {
+      Image.ImageCanvasDrawable.prototype.paintCanvas( wrapper, this );
     },
     
     createDOMDrawable: function( renderer, instance ) {
@@ -381,9 +320,9 @@ define( function( require ) {
   
   Image.ImageCanvasDrawable = CanvasSelfDrawable.createDrawable( {
     type: function ImageCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    paintCanvas: function paintCanvasImage( wrapper ) {
-      if ( this.node._image ) {
-        wrapper.context.drawImage( this.node._image, 0, 0 );
+    paintCanvas: function paintCanvasImage( wrapper, node ) {
+      if ( node._image ) {
+        wrapper.context.drawImage( node._image, 0, 0 );
       }
     },
     usesFill: false,

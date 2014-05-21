@@ -23,31 +23,15 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   var Node = require( 'SCENERY/nodes/Node' ); // inherits from Node
-  require( 'SCENERY/util/Instance' );
   require( 'SCENERY/util/Trail' );
   require( 'SCENERY/util/RenderInterval' );
   require( 'SCENERY/util/TrailPointer' );
   require( 'SCENERY/input/Input' );
-  require( 'SCENERY/layers/LayerBuilder' );
   require( 'SCENERY/display/Renderer' );
   require( 'SCENERY/overlays/PointerAreaOverlay' );
   require( 'SCENERY/overlays/PointerOverlay' );
 
   var Util = require( 'SCENERY/util/Util' );
-  
-  var accessibility = window.has && window.has( 'scenery.accessibility' );
-  
-  // debug flag to disable matching of layers when in 'match' mode
-  var forceNewLayers = true; // DEBUG
-  
-  // constructs all sub-trees for the specified instance. used from markSceneForInsertion
-  function buildInstances( instance ) {
-    var node = instance.getNode();
-    var len = node._children.length;
-    for ( var i = 0; i < len; i++ ) {
-      buildInstances( instance.createChild( node._children[i], i ) );
-    }
-  }
   
   /*
    * $main should be a block-level element with a defined width and height. scene.resize() should be called whenever
@@ -66,6 +50,8 @@ define( function( require ) {
    */
   //OHTWO deprecated
   scenery.Scene = function Scene( $main, options ) {
+    //OHTWO: seems unclean that we are doing it like this?
+    Node.call( this, options );
     assert && assert( $main[0], 'A main container is required for a scene' );
     this.$main = $main;
     this.main = $main[0];
@@ -174,7 +160,6 @@ define( function( require ) {
       
       // validating bounds, similar to Piccolo2d
       this.validateBounds();
-      this.validatePaint();
       
       // bail if there are no layers. consider a warning?
       if ( !this.layers.length ) {

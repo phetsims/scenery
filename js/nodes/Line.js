@@ -138,20 +138,8 @@ define( function( require ) {
       return new KiteLine( this.p1, this.p2 ).intersectsBounds( bounds );
     },
     
-    //OHTWO @deprecated
-    paintCanvas: function( wrapper ) {
-      var context = wrapper.context;
-      
-      context.beginPath();
-      context.moveTo( this._x1, this._y1 );
-      context.lineTo( this._x2, this._y2 );
-      context.closePath();
-      
-      if ( this._stroke ) {
-        this.beforeCanvasStroke( wrapper ); // defined in Strokable
-        context.stroke();
-        this.afterCanvasStroke( wrapper ); // defined in Strokable
-      }
+    canvasPaintSelf: function( wrapper ) {
+      Line.LineCanvasDrawable.prototype.paintCanvas( wrapper, this );
     },
     
     computeShapeBounds: function() {
@@ -347,9 +335,9 @@ define( function( require ) {
   
   Line.LineCanvasDrawable = CanvasSelfDrawable.createDrawable( {
     type: function LineCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    paintCanvas: function paintCanvasLine( wrapper ) {
+    paintCanvas: function paintCanvasLine( wrapper, node ) {
       var context = wrapper.context;
-      var node = this.node;
+      var node = node;
       
       context.beginPath();
       context.moveTo( node._x1, node._y1 );

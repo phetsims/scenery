@@ -43,6 +43,10 @@ define( function( require ) {
       throw new Error( 'CanvasNode needs paintCanvas implemented' );
     },
     
+    canvasPaintSelf: function( wrapper ) {
+      this.paintCanvas( wrapper );
+    },
+    
     // override for computation of whether a point is inside the self content
     // point is considered to be in the local coordinate frame
     containsPointSelf: function( point ) {
@@ -71,8 +75,8 @@ define( function( require ) {
   
   CanvasNode.CanvasNodeDrawable = CanvasSelfDrawable.createDrawable( {
     type: function CanvasNodeDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    paintCanvas: function paintCanvasNode( wrapper ) {
-      this.node.paintCanvas( wrapper );
+    paintCanvas: function paintCanvasNode( wrapper, node ) {
+      node.paintCanvas( wrapper );
     },
     usesFill: false,
     usesStroke: false

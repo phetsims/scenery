@@ -77,8 +77,6 @@ define( function( require ) {
     },
     
     invalidateShape: function() {
-      this.markOldSelfPaint();
-      
       this._strokedShape = null;
       
       if ( this.hasShape() ) {
@@ -101,76 +99,8 @@ define( function( require ) {
       return this._shape;
     },
     
-    //OHTWO @deprecated
-    paintCanvas: function( wrapper ) {
-      var context = wrapper.context;
-      
-      if ( this.hasShape() ) {
-        // TODO: fill/stroke delay optimizations?
-        context.beginPath();
-        this._shape.writeToContext( context );
-
-        if ( this._fill ) {
-          this.beforeCanvasFill( wrapper ); // defined in Fillable
-          context.fill();
-          this.afterCanvasFill( wrapper ); // defined in Fillable
-        }
-        if ( this._stroke ) {
-          this.beforeCanvasStroke( wrapper ); // defined in Strokable
-          context.stroke();
-          this.afterCanvasStroke( wrapper ); // defined in Strokable
-        }
-      }
-    },
-    
-    //OHTWO @deprecated
-    paintWebGL: function( state ) {
-      throw new Error( 'Path.prototype.paintWebGL unimplemented' );
-    },
-    
-    // svg element, the <defs> block, and the associated group for this node's transform
-    //OHTWO @deprecated
-    createSVGFragment: function( svg, defs, group ) {
-      return document.createElementNS( scenery.svgns, 'path' );
-    },
-    
-    //OHTWO @deprecated
-    updateSVGFragment: function( path ) {
-      var svgPath = this.hasShape() ? this._shape.getSVGPath() : "";
-      
-      // temporary workaround for https://bugs.webkit.org/show_bug.cgi?id=78980
-      // and http://code.google.com/p/chromium/issues/detail?id=231626 where even removing
-      // the attribute can cause this bug
-      if ( !svgPath ) { svgPath = 'M0 0'; }
-      
-      if ( svgPath ) {
-        // only set the SVG path if it's not the empty string
-        path.setAttribute( 'd', svgPath );
-      } else if ( path.hasAttribute( 'd' ) ) {
-        path.removeAttribute( 'd' );
-      }
-      
-      path.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
-    },
-    
-    // support patterns, gradients, and anything else we need to put in the <defs> block
-    //OHTWO @deprecated
-    updateSVGDefs: function( svg, defs ) {
-      // remove old definitions if they exist
-      this.removeSVGDefs( svg, defs );
-      
-      // add new ones if applicable
-      this.addSVGFillDef( svg, defs );
-      this.addSVGStrokeDef( svg, defs );
-      
-      assert && assert( !this.requiresSVGBoundsWorkaround(), 'No workaround for https://github.com/phetsims/scenery/issues/196 is provided at this time, please add an epsilon' );
-    },
-    
-    // cleans up references created with udpateSVGDefs()
-    //OHTWO @deprecated
-    removeSVGDefs: function( svg, defs ) {
-      this.removeSVGFillDef( svg, defs );
-      this.removeSVGStrokeDef( svg, defs );
+    canvasPaintSelf: function( wrapper ) {
+      Path.PathCanvasDrawable.prototype.paintCanvas( wrapper, this );
     },
     
     createSVGDrawable: function( renderer, instance ) {
@@ -318,9 +248,9 @@ define( function( require ) {
   
   Path.PathCanvasDrawable = CanvasSelfDrawable.createDrawable( {
     type: function PathCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    paintCanvas: function paintCanvasPath( wrapper ) {
+    paintCanvas: function paintCanvasPath( wrapper, node ) {
       var context = wrapper.context;
-      var node = this.node;
+      var node = node;
       
       if ( node.hasShape() ) {
         // TODO: fill/stroke delay optimizations?

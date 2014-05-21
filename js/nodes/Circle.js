@@ -99,91 +99,8 @@ define( function( require ) {
       return x * x + y * y <= this._radius * this._radius;
     },
     
-    //OHTWO @deprecated
-    paintCanvas: function( wrapper ) {
-      var context = wrapper.context;
-      
-      context.beginPath();
-      context.arc( 0, 0, this._radius, 0, Math.PI * 2, false );
-      context.closePath();
-      
-      if ( this._fill ) {
-        this.beforeCanvasFill( wrapper ); // defined in Fillable
-        context.fill();
-        this.afterCanvasFill( wrapper ); // defined in Fillable
-      }
-      if ( this._stroke ) {
-        this.beforeCanvasStroke( wrapper ); // defined in Strokable
-        context.stroke();
-        this.afterCanvasStroke( wrapper ); // defined in Strokable
-      }
-    },
-    
-    // create a circle instead of a path, hopefully it is faster in implementations
-    //OHTWO @deprecated
-    createSVGFragment: function( svg, defs, group ) {
-      return document.createElementNS( scenery.svgns, 'circle' );
-    },
-
-    // optimized for the circle element instead of path
-    //OHTWO @deprecated
-    updateSVGFragment: function( circle ) {
-      circle.setAttribute( 'r', this._radius );
-
-      circle.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
-    },
-    
-    /*---------------------------------------------------------------------------*
-     * DOM support
-     *----------------------------------------------------------------------------*/
-    
-    //OHTWO @deprecated
-    domUpdateTransformOnRepaint: true, // since we have to integrate the baseline offset into the CSS transform, signal to DOMLayer
-    
-    //OHTWO @deprecated
-    getDOMElement: function() {
-      var fill = document.createElement( 'div' );
-      var stroke = document.createElement( 'div' );
-      fill.appendChild( stroke );
-      fill.style.display = 'block';
-      fill.style.position = 'absolute';
-      fill.style.left = '0';
-      fill.style.top = '0';
-      stroke.style.display = 'block';
-      stroke.style.position = 'absolute';
-      stroke.style.left = '0';
-      stroke.style.top = '0';
-      return fill;
-    },
-    
-    //OHTWO @deprecated
-    updateDOMElement: function( fill ) {
-      fill.style.width = ( 2 * this._radius ) + 'px';
-      fill.style.height = ( 2 * this._radius ) + 'px';
-      fill.style[Features.borderRadius] = this._radius + 'px';
-      fill.style.backgroundColor = this.getCSSFill();
-      
-      var stroke = fill.childNodes[0];
-      if ( this.hasStroke() ) {
-        stroke.style.width = ( 2 * this._radius - this.getLineWidth() ) + 'px';
-        stroke.style.height = ( 2 * this._radius - this.getLineWidth() ) + 'px';
-        stroke.style.left = ( -this.getLineWidth() / 2 ) + 'px';
-        stroke.style.top = ( -this.getLineWidth() / 2 ) + 'px';
-        stroke.style.borderStyle = 'solid';
-        stroke.style.borderColor = this.getSimpleCSSStroke();
-        stroke.style.borderWidth = this.getLineWidth() + 'px';
-        stroke.style[Features.borderRadius] = ( this._radius + this.getLineWidth() / 2 ) + 'px';
-      } else {
-        stroke.style.borderStyle = 'none';
-      }
-    },
-    
-    // override the transform since we need to customize it with a DOM offset
-    //OHTWO @deprecated
-    updateCSSTransform: function( transform, element ) {
-      // shift the text vertically, postmultiplied with the entire transform.
-      var matrix = transform.getMatrix().timesMatrix( Matrix3.translation( -this._radius, -this._radius ) );
-      scenery.Util.applyCSSTransform( matrix, element );
+    canvasPaintSelf: function( wrapper ) {
+      Circle.CircleCanvasDrawable.prototype.paintCanvas( wrapper, this );
     },
     
     createDOMDrawable: function( renderer, instance ) {
@@ -482,9 +399,8 @@ define( function( require ) {
   
   Circle.CircleCanvasDrawable = CanvasSelfDrawable.createDrawable( {
     type: function CircleCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
-    paintCanvas: function paintCanvasCircle( wrapper ) {
+    paintCanvas: function paintCanvasCircle( wrapper, node ) {
       var context = wrapper.context;
-      var node = this.node;
       
       context.beginPath();
       context.arc( 0, 0, node._radius, 0, Math.PI * 2, false );

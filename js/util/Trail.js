@@ -144,10 +144,6 @@ define( function( require ) {
       return this.nodes.length === 0;
     },
     
-    getInstance: function() {
-      return this.lastNode().getInstanceFromTrail( this );
-    },
-    
     // from local to global
     getMatrix: function() {
       // TODO: performance: can we cache this ever? would need the scene to not really change in between

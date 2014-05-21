@@ -72,10 +72,6 @@ define( function( require ) {
     // assign a unique ID to this node (allows trails to get a unique list of IDs)
     this._id = globalIdCounter++;
     
-    // all of the Instances tracking this Node (across multiple layers and scenes)
-    //OHTWO @deprecated
-    this._instances = [];
-    
     // all of the DisplayInstances tracking this Node
     this._displayInstances = [];
     
@@ -210,9 +206,6 @@ define( function( require ) {
       
       this.trigger2( 'childInserted', node, index );
       
-      this.markForInsertion( node, index );
-      this.notifyStitch( false );
-      
       node.invalidateSubtreePaint();
     },
     
@@ -253,8 +246,6 @@ define( function( require ) {
       
       var indexOfParent = _.indexOf( node._parents, this );
       
-      this.markForRemoval( node, indexOfChild );
-      
       node._parents.splice( indexOfParent, 1 );
       this._children.splice( indexOfChild, 1 );
       
@@ -262,8 +253,6 @@ define( function( require ) {
       this._childBoundsDirty = true; // force recomputation of child bounds after removing a child
       
       this.trigger2( 'childRemoved', node, indexOfChild );
-      
-      this.notifyStitch( false );
     },
     
     removeAllChildren: function() {
@@ -663,34 +652,6 @@ define( function( require ) {
       }
     },
     
-    //OHTWO deprecated
-    validatePaint: function() {
-      if ( this._paintDirty ) {
-        assert && assert( this.isPainted(), 'Only painted nodes can have self dirty paint' );
-        if ( !this._subtreePaintDirty ) {
-          // if the subtree is clean, just notify the self (only will hit one layer, instead of possibly multiple ones)
-          this.notifyDirtySelfPaint();
-        }
-        this._paintDirty = false;
-      }
-      
-      if ( this._subtreePaintDirty ) {
-        this.notifyDirtySubtreePaint();
-        this._subtreePaintDirty = false;
-      }
-      
-      // clear flags and recurse
-      if ( this._childPaintDirty ) {
-        this._childPaintDirty = false;
-        
-        var children = this._children;
-        var length = children.length;
-        for ( var i = 0; i < length; i++ ) {
-          children[i].validatePaint();
-        }
-      }
-    },
-    
     // mark the bounds of this node as invalid, so it is recomputed before it is accessed again
     invalidateBounds: function() {
       // TODO: sometimes we won't need to invalidate local bounds! it's not too much of a hassle though?
@@ -778,9 +739,6 @@ define( function( require ) {
     invalidateSelf: function( newBounds ) {
       assert && assert( newBounds.isEmpty() || newBounds.isFinite(), 'Bounds must be empty or finite in invalidateSelf' );
       
-      // mark the old region to be repainted, regardless of whether the actual bounds change
-      this.notifyBeforeSelfChange();
-      
       // if these bounds are different than current self bounds
       if ( !this._selfBounds.equals( newBounds ) ) {
         // set repaint flags
@@ -795,26 +753,6 @@ define( function( require ) {
       }
       
       this.invalidatePaint();
-    },
-    
-    markOldSelfPaint: function() {
-      this.notifyBeforeSelfChange();
-    },
-    
-    // should be called whenever something triggers changes for how this node is layered
-    markLayerRefreshNeeded: function() {
-      this.markForLayerRefresh();
-      this.notifyStitch( true );
-    },
-    
-    // marks the last-rendered bounds of this node and optionally all of its descendants as needing a repaint
-    markOldPaint: function( justSelf ) {
-      // TODO: rearchitecture
-      if ( justSelf ) {
-        this.notifyBeforeSelfChange();
-      } else {
-        this.notifyBeforeSubtreeChange();
-      }
     },
     
     isChild: function( potentialChild ) {
@@ -1289,14 +1227,11 @@ define( function( require ) {
     
     // called before our transform is changed
     beforeTransformChange: function() {
-      // mark our old bounds as dirty, so that any dirty region repainting will include not just our new position, but also our old position
-      this.notifyBeforeSubtreeChange();
+      //OHTWO TODO: @deprecated, remove
     },
     
     // called after our transform is changed
     afterTransformChange: function() {
-      this.notifyTransformChange();
-      
       // NOTE: why is local bounds invalidation needed here?
       this.invalidateBounds();
       this.invalidateSubtreePaint();
@@ -1401,15 +1336,9 @@ define( function( require ) {
         // changing visibility can affect pickability pruning, which affects mouse/touch bounds
         this.invalidateMouseTouchBounds();
         
-        if ( this._visible ) {
-          this.notifyBeforeSubtreeChange();
-        }
-        
         this._visible = visible;
         
         this.trigger0( 'visibility' );
-        
-        this.notifyVisibilityChange();
       }
       return this;
     },
@@ -1423,13 +1352,9 @@ define( function( require ) {
       
       var clampedOpacity = clamp( opacity, 0, 1 );
       if ( clampedOpacity !== this._opacity ) {
-        this.notifyBeforeSubtreeChange();
-        
         this._opacity = clampedOpacity;
         
         this.trigger0( 'opacity' );
-        
-        this.notifyOpacityChange();
       }
     },
     
@@ -1505,13 +1430,9 @@ define( function( require ) {
       assert && assert( shape === null || shape instanceof Shape, 'clipArea needs to be a kite.Shape, or null' );
       
       if ( this._clipArea !== shape ) {
-        this.notifyBeforeSubtreeChange();
-        
         this._clipArea = shape;
         
         this.trigger0( 'clip' );
-        
-        this.notifyClipChange();
         
         this.invalidateBounds();
       }
@@ -1590,7 +1511,6 @@ define( function( require ) {
         this._rendererSummary.bitmaskChange( this._rendererBitmask, bitmask );
         this._rendererBitmask = bitmask;
         this.trigger0( 'rendererBitmask' );
-        this.markLayerRefreshNeeded();
       }
     },
     
@@ -1621,7 +1541,6 @@ define( function( require ) {
         this._hints.renderer = newRenderer;
         
         this.updateLayerType();
-        this.markLayerRefreshNeeded();
       }
     },
     
@@ -1651,7 +1570,6 @@ define( function( require ) {
       _.extend( this._hints, options );
       
       this.updateLayerType();
-      this.markLayerRefreshNeeded();
     },
     
     getRendererOptions: function() {
@@ -1667,7 +1585,6 @@ define( function( require ) {
       
       if ( split !== this._hints.layerSplit ) {
         this._hints.layerSplit = split;
-        this.markLayerRefreshNeeded();
       }
     },
     
@@ -1805,6 +1722,18 @@ define( function( require ) {
       }, false );
     },
     
+    // @private
+    canvasPaintSelf: function( wrapper ) {
+      // To be overridden in paintable node types. Should hook into the drawable's prototype (presumably).
+    },
+    
+    // @public: Render the self into the canvas wrapper with its local coordinates
+    renderToCanvasSelf: function( wrapper ) {
+      if ( this.isPainted() && ( this._rendererBitmask & scenery.Renderer.bitmaskCanvas ) ) {
+        this.canvasPaintSelf( wrapper );
+      }
+    },
+    
     /*
      * Renders this node to a canvas. If toCanvas( callback ) is used, the canvas will contain the node's
      * entire bounds.
@@ -1934,156 +1863,6 @@ define( function( require ) {
     
     lastInstanceRemoved: function() {
       // no-op, meant to be overridden in the prototype chain
-    },
-    
-    /*---------------------------------------------------------------------------*
-    * Instance handling OHTWO @deprecated
-    *----------------------------------------------------------------------------*/
-    
-    //OHTWO @deprecated
-    getInstances: function() {
-      return this._instances;
-    },
-    
-    //OHTWO @deprecated
-    addInstance: function( instance ) {
-      assert && assert( instance instanceof scenery.Instance );
-      assert && assert( instance.getNode() === this, 'Must be an instance of this Node' );
-      assert && assert( !_.find( this._instances, function( other ) { return instance.equals( other ); } ), 'Cannot add duplicates of an instance to a Node' );
-      this._instances.push( instance );
-      if ( this._instances.length === 1 ) {
-        this.firstInstanceAdded();
-      }
-    },
-    
-    //OHTWO @deprecated
-    // returns undefined if there is no instance.
-    getInstanceFromTrail: function( trail ) {
-      var result;
-      var len = this._instances.length;
-      if ( len === 1 ) {
-        // don't bother with checking the trail, but assertion should assure that it's what we're looking for
-        result = this._instances[0];
-      } else {
-        var i = len;
-        while ( i-- ) {
-          if ( this._instances[i].trail.equals( trail ) ) {
-            result = this._instances[i];
-            break;
-          }
-        }
-        // leave it as undefined if we don't find one
-      }
-      assert && assert( result, 'Could not find an instance for the trail ' + trail.toString() );
-      assert && assert( result.trail.equals( trail ), 'Instance has an incorrect Trail' );
-      return result;
-    },
-    
-    //OHTWO @deprecated
-    removeInstance: function( instance ) {
-      assert && assert( instance instanceof scenery.Instance );
-      var index = _.indexOf( this._instances, instance ); // actual instance equality (NOT capitalized, normal meaning)
-      assert && assert( index !== -1, 'Cannot remove an Instance from a Node if it was not there' );
-      this._instances.splice( index, 1 );
-      if ( this._instances.length === 0 ) {
-        this.lastInstanceRemoved();
-      }
-    },
-    
-    //OHTWO @deprecated
-    notifyVisibilityChange: function() {
-      var i = this._instances.length;
-      while ( i-- ) {
-        this._instances[i].notifyVisibilityChange();
-      }
-    },
-    
-    //OHTWO @deprecated
-    notifyOpacityChange: function() {
-      var i = this._instances.length;
-      while ( i-- ) {
-        this._instances[i].notifyOpacityChange();
-      }
-    },
-    
-    //OHTWO @deprecated
-    notifyClipChange: function() {
-      var i = this._instances.length;
-      while ( i-- ) {
-        this._instances[i].notifyClipChange();
-      }
-    },
-    
-    //OHTWO @deprecated
-    notifyBeforeSelfChange: function() {
-      var i = this._instances.length;
-      while ( i-- ) {
-        this._instances[i].notifyBeforeSelfChange();
-      }
-    },
-    
-    //OHTWO @deprecated
-    notifyBeforeSubtreeChange: function() {
-      var i = this._instances.length;
-      while ( i-- ) {
-        this._instances[i].notifyBeforeSubtreeChange();
-      }
-    },
-    
-    //OHTWO @deprecated
-    notifyDirtySelfPaint: function() {
-      var i = this._instances.length;
-      while ( i-- ) {
-        this._instances[i].notifyDirtySelfPaint();
-      }
-    },
-    
-    //OHTWO @deprecated
-    notifyDirtySubtreePaint: function() {
-      var i = this._instances.length;
-      while ( i-- ) {
-        this._instances[i].notifyDirtySubtreePaint();
-      }
-    },
-    
-    //OHTWO @deprecated
-    notifyTransformChange: function() {
-      var i = this._instances.length;
-      while ( i-- ) {
-        this._instances[i].notifyTransformChange();
-      }
-    },
-    
-    //OHTWO @deprecated
-    notifyStitch: function( match ) {
-      var i = this._instances.length;
-      while ( i-- ) {
-        this._instances[i].notifyStitch( match );
-      }
-    },
-    
-    //OHTWO @deprecated
-    markForLayerRefresh: function() {
-      var i = this._instances.length;
-      while ( i-- ) {
-        this._instances[i].markForLayerRefresh();
-      }
-    },
-    
-    //OHTWO @deprecated
-    markForInsertion: function( child, index ) {
-      var i = this._instances.length;
-      while ( i-- ) {
-        this._instances[i].markForInsertion( child, index );
-      }
-    },
-    
-    //OHTWO @deprecated
-    markForRemoval: function( child, index ) {
-      var i = this._instances.length;
-      while ( i-- ) {
-        this._instances[i].markForRemoval( child, index );
-      }
     },
     
     /*---------------------------------------------------------------------------*

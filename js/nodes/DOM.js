@@ -109,15 +109,6 @@ define( function( require ) {
       return this._container;
     },
     
-    updateDOMElement: function( container ) {
-      // nothing needed, since we are just displaying a single DOM element
-    },
-    
-    updateCSSTransform: function( transform, element ) {
-      // faster to use our jQuery reference instead of wrapping element
-      scenery.Util.applyCSSTransform( transform.getMatrix(), this._container );
-    },
-    
     createDOMDrawable: function( renderer, instance ) {
       return DOM.DOMDrawable.createFromPool( renderer, instance );
     },
