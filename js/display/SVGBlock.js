@@ -12,6 +12,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
+  var Bounds2 = require( 'DOT/Bounds2' );
   var scenery = require( 'SCENERY/scenery' );
   var Block = require( 'SCENERY/display/Block' );
   var SVGGroup = require( 'SCENERY/display/SVGGroup' );
@@ -47,13 +48,20 @@ define( function( require ) {
         this.defs = document.createElementNS( scenery.svgns, 'defs' );
         this.svg.appendChild( this.defs );
         
+        this.baseTransformGroup = document.createElementNS( scenery.svgns, 'g' );
+        this.svg.appendChild( this.baseTransformGroup );
+        
         this.domElement = this.svg;
       }
+      
+      // reset what layer fitting can do
+      this.svg.style.transform = ''; // no transform
+      this.baseTransformGroup.setAttribute( 'transform', '' ); // no base transform
       
       var instanceClosestToRoot = transformRootInstance.trail.nodes.length > filterRootInstance.trail.nodes.length ? filterRootInstance : transformRootInstance;
       
       this.rootGroup = SVGGroup.createFromPool( this, instanceClosestToRoot, null );
-      this.svg.appendChild( this.rootGroup.svgGroup );
+      this.baseTransformGroup.appendChild( this.rootGroup.svgGroup );
       
       var canBeFullDisplay = transformRootInstance.state.isDisplayRoot;
       
@@ -62,6 +70,9 @@ define( function( require ) {
       
       this.dirtyFit = true;
       this.dirtyFitListener = this.dirtyFitListener || this.markDirtyFit.bind( this );
+      this.commonFitInstance = null; // filled in if COMMON_ANCESTOR
+      this.fitBounds = Bounds2.NOTHING.copy(); // tracks the "tight" bounds for fitting, not the actually-displayed bounds
+      this.oldFitBounds = Bounds2.NOTHING.copy(); // copy for storage
       
       if ( this.fit === SVGBlock.fit.FULL_DISPLAY ) {
         this.display.onStatic( 'displaySize', this.dirtyFitListener );
@@ -106,7 +117,8 @@ define( function( require ) {
           this.dirtyDrawables.pop().update();
         }
         
-        if ( this.dirtyFit ) {
+        // for now, if we aren't full-display, update the fit any time we are "dirty"
+        if ( this.dirtyFit || this.fit !== SVGBlock.fit.FULL_DISPLAY ) {
           this.dirtyFit = false;
           this.updateFit();
         }
@@ -120,7 +132,36 @@ define( function( require ) {
         this.svg.setAttribute( 'width', size.width );
         this.svg.setAttribute( 'height', size.height );
       } else if ( this.fit === SVGBlock.fit.COMMON_ANCESTOR ) {
+        assert && assert( this.commonFitInstance.trail.length >= this.transformRootInstance.trail.length );
         
+        // will trigger bounds validation (for now) until we have a better way of handling this
+        this.fitBounds.set( this.commonFitInstance.node.getLocalBounds() );
+        
+        //OHTWO TODO: bail out here when possible (should store an old "local" one to compare with?)
+        
+        // walk it up, transforming so it is relative to our transform root
+        var instance = this.commonFitInstance;
+        while ( instance !== this.transformRootInstance ) {
+          // shouldn't infinite loop, we'll null-pointer beforehand unless something is seriously wrong
+          this.fitBounds.transform( instance.node.getMatrix() );
+          instance = instance.parent;
+        }
+        
+        //OHTWO TODO: change only when necessary
+        if ( !this.fitBounds.equals( this.oldFitBounds ) ) {
+          // store our copy for future checks (and do it before we modify this.fitBounds)
+          this.oldFitBounds.set( this.fitBounds );
+          
+          this.fitBounds.roundOut();
+          this.fitBounds.dilate( 4 ); // for safety, modify in the future
+          
+          var x = this.fitBounds.minX;
+          var y = this.fitBounds.minY;
+          this.baseTransformGroup.setAttribute( 'transform', 'translate(' + (-x) + ',' + (-y) + ')' ); // subtract off so we have a tight fit
+          this.svg.style.transform = 'matrix(1,0,0,1,' + x + ',' + y + ')'; // reapply the translation as a CSS transform
+          this.svg.setAttribute( 'width', this.fitBounds.width );
+          this.svg.setAttribute( 'height', this.fitBounds.height );
+        }
       } else {
         throw new Error( 'unknown fit' );
       }
@@ -140,10 +181,11 @@ define( function( require ) {
       // clear references
       this.transformRootInstance = null;
       this.filterRootInstance = null;
+      this.commonFitInstance = null;
       cleanArray( this.dirtyGroups );
       cleanArray( this.dirtyDrawables );
       
-      this.svg.removeChild( this.rootGroup.svgGroup );
+      this.baseTransformGroup.removeChild( this.rootGroup.svgGroup );
       this.rootGroup.dispose();
       this.rootGroup = null;
       
@@ -169,12 +211,57 @@ define( function( require ) {
       
       // NOTE: we don't unset the drawable's defs here, since it will either be disposed (will clear it)
       // or will be added to another SVGBlock (which will overwrite it)
+    },
+    
+    notifyInterval: function( firstDrawable, lastDrawable ) {
+      sceneryLayerLog && sceneryLayerLog.SVGBlock && sceneryLayerLog.SVGBlock( '#' + this.id + '.notifyInterval ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() );
+      
+      Block.prototype.notifyInterval.call( this, firstDrawable, lastDrawable );
+      
+      // if we use a common ancestor fit, find the common ancestor instance
+      if ( this.fit === SVGBlock.fit.COMMON_ANCESTOR ) {
+        assert && assert( firstDrawable.instance && lastDrawable.instance,
+                          'For common-ancestor SVG fits, we need the first and last drawables to have direct instance references' );
+        
+        var firstInstance = firstDrawable.instance;
+        var lastInstance = lastDrawable.instance;
+        
+        // walk down the longest one until they are a common length
+        var minLength = Math.min( firstInstance.trail.length, lastInstance.trail.length );
+        while ( firstInstance.trail.length > minLength ) {
+          firstInstance = firstInstance.parent;
+        }
+        while ( lastInstance.trail.length > minLength ) {
+          lastInstance = lastInstance.parent;
+        }
+        
+        // step down until they match
+        while( firstInstance !== lastInstance ) {
+          firstInstance = firstInstance.parent;
+          lastInstance = lastInstance.parent;
+        }
+        
+        this.commonFitInstance = firstInstance;
+        sceneryLayerLog && sceneryLayerLog.SVGBlock && sceneryLayerLog.SVGBlock( '   common fit instance: ' + this.commonFitInstance.toString() );
+        
+        assert && assert( this.commonFitInstance.trail.length >= this.transformRootInstance.trail.length );
+        
+        this.markDirtyFit();
+      }
+    },
+    
+    toString: function() {
+      return 'SVGBlock#' + this.id + ' ' + SVGBlock.fitString[this.fit];
     }
   } );
   
   SVGBlock.fit = {
     FULL_DISPLAY: 1,
     COMMON_ANCESTOR: 2
+  };
+  SVGBlock.fitString = {
+    1: 'fullDisplay',
+    2: 'commonAncestor'
   };
   
   /* jshint -W064 */

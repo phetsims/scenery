@@ -18,7 +18,7 @@ define( function( require ) {
     
     // TODO: NOTE: may have to separate into separate drawables for separate group renderers
     
-    this.instance = instance;
+    this.instance = instance; // will need this so we can get bounds for layer fitting
     this.sharedInstance = sharedInstance;
   };
   var SharedCanvasCacheDrawable = scenery.SharedCanvasCacheDrawable;
