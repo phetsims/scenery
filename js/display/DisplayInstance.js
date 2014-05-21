@@ -306,7 +306,7 @@ define( function( require ) {
           // bitwise trick, since only one of Canvas/SVG/DOM/WebGL/etc. flags will be chosen, and bitmaskRendererArea is the mask for those flags
           // In English, "Is the current selfDrawable compatible with our selfRenderer (if any), or do we need to create a selfDrawable?"
           //OHTWO TODO: For Canvas, we won't care about anything else for the drawable, but for DOM we care about the force-acceleration flag! That's stripped out here
-          if ( !this.selfDrawable || ( ( this.selfDrawable.renderer & selfRenderer & Renderer.bitmaskRendererArea ) !== 0 ) ) {
+          if ( !this.selfDrawable || ( ( this.selfDrawable.renderer & selfRenderer & Renderer.bitmaskRendererArea ) === 0 ) ) {
             // we'll need stitch updates
             hasStitchChange = true;
             

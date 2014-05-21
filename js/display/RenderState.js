@@ -37,6 +37,7 @@ define( function( require ) {
   
   /*
    * {param} node               Node      The node whose instance will have this state (inspect the hints / properties on this node)
+   * {param} preferredRenderers Renderer  Either 0 (no preference), or a Renderer order bitmask (see Renderer.js)
    * {param} svgRenderer        Renderer  SVG renderer settings to use
    * {param} canvasRenderer     Renderer  Canvas renderer settings to use
    * {param} isUnderCanvasCache Boolean   Whether we are under any sort of Canvas cache (not including if this node is canvas cached)
@@ -47,16 +48,17 @@ define( function( require ) {
    * - node's renderer summary (what types of renderers are allowed below)
    * - node.hints | node.opacity
    */
-  RenderState.RegularState = function RegularState( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot ) {
-    this.initialize( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot );
+  RenderState.RegularState = function RegularState( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot ) {
+    this.initialize( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot );
   };
   RenderState.RegularState.prototype = {
     constructor: RenderState.RegularState,
     
-    initialize: function( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot ) {
+    initialize: function( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot ) {
       // this should be accurate right now, the pass to update these should have been completed earlier
       var combinedBitmask = node._rendererSummary.bitmask;
       
+      this.preferredRenderers = preferredRenderers;
       this.svgRenderer = svgRenderer;
       this.canvasRenderer = canvasRenderer;
       this.isUnderCanvasCache = isUnderCanvasCache;
@@ -75,7 +77,11 @@ define( function( require ) {
       
       var hints = node._hints || emptyObject;
       
-      var isTransparent = node.opacity !== 1;
+      var isTransparent = node._opacity !== 1;
+      
+      if ( hints.renderer ) {
+        this.preferredRenderers = scenery.Renderer.pushOrderBitmask( this.preferredRenderers, hints.renderer );
+      }
       
       // check if we need a backbone or cache
       // if we are under a canvas cache, we will NEVER have a backbone
@@ -111,30 +117,68 @@ define( function( require ) {
       }
       
       if ( node.isPainted() ) {
-        // TODO: figure out preferred rendering order
-        // TODO: many more things to consider here for performance
-        // TODO: performance (here)
-        if ( isUnderCanvasCache ) {
-          this.selfRenderer = canvasRenderer;
-        } else if ( svgRenderer && ( svgRenderer & node._rendererBitmask ) !== 0 ) {
-          this.selfRenderer = svgRenderer;
-        } else if ( canvasRenderer && ( canvasRenderer & node._rendererBitmask ) !== 0 ) {
-          this.selfRenderer = canvasRenderer;
-        } else if ( ( scenery.Renderer.bitmaskDOM & node._rendererBitmask ) !== 0 ) {
-          // TODO: decide if CSS transform is to be applied here!
-          this.selfRenderer = scenery.Renderer.bitmaskDOM;
-        } else {
-          throw new Error( 'unsupported renderer, something wrong in RenderState' );
-        }
+        this.setSelfRenderer( node );
       }
       
       return this;
+    },
+    
+    setSelfRenderer: function( node ) {
+      if ( this.isUnderCanvasCache ) {
+        this.selfRenderer = this.canvasRenderer;
+      } else {
+        var success = false;
+        
+        // try preferred order if specified
+        if ( this.preferredRenderers ) {
+          success = this.trySelfRenderer( node, scenery.Renderer.bitmaskOrderFirst( this.preferredRenderers ), 0 ) ||
+                    this.trySelfRenderer( node, scenery.Renderer.bitmaskOrderSecond( this.preferredRenderers ), 0 ) ||
+                    this.trySelfRenderer( node, scenery.Renderer.bitmaskOrderThird( this.preferredRenderers ), 0 ) ||
+                    this.trySelfRenderer( node, scenery.Renderer.bitmaskOrderFourth( this.preferredRenderers ), 0 );
+        }
+        
+        // fall back to a default order
+        success = success ||
+                  this.trySelfRenderer( node, scenery.Renderer.bitmaskSVG, this.svgRenderer ) ||
+                  this.trySelfRenderer( node, scenery.Renderer.bitmaskCanvas, this.canvasRenderer ) ||
+                  this.trySelfRenderer( node, scenery.Renderer.bitmaskDOM, 0 ) ||
+                  this.trySelfRenderer( node, scenery.Renderer.bitmaskWebGL, 0 );
+        
+        assert && assert( success, 'setSelfRenderer failure?' );
+      }
+    },
+    
+    // returns success of setting this.selfRenderer. renderer is expected to be a 1-bit bitmask, with rendererSpecifics either 0 (autodetect) or a full renderer bitmask
+    trySelfRenderer: function( node, renderer, rendererSpecifics ) {
+      // if provided renderer === 0, we won't be compatible
+      var compatible = !!( node._rendererBitmask & renderer );
+      if ( compatible ) {
+        if ( !rendererSpecifics ) {
+          if ( scenery.Renderer.isCanvas( renderer ) ) {
+            rendererSpecifics = this.canvasRenderer;
+          } else if ( scenery.Renderer.isSVG( renderer ) ) {
+            rendererSpecifics = this.svgRenderer;
+          } else if ( scenery.Renderer.isDOM( renderer ) ) {
+            // TODO: decide if CSS transform is to be applied here!
+            rendererSpecifics = this.scenery.Renderer.bitmaskDOM;
+          } else if ( scenery.Renderer.isWebGL( renderer ) ) {
+            // TODO: details?
+            rendererSpecifics = this.scenery.Renderer.bitmaskWebGL;
+          }
+        }
+        assert && assert( rendererSpecifics, 'Should have renderer specifics by now, otherwise we did not recognize the renderer' );
+        this.selfRenderer = rendererSpecifics;
+      }
+      return compatible;
     },
     
     getStateForDescendant: function( node ) {
       // TODO: allocation (pool this)
       return RenderState.RegularState.createFromPool(
         node,
+        
+        // default renderer when available
+        this.preferredRenderers,
         
         // default SVG renderer settings
         this.svgRenderer,
@@ -181,6 +225,7 @@ define( function( require ) {
   RenderState.RegularState.createRootState = function( node ) {
     var baseState = RenderState.RegularState.createFromPool(
       node,                           // trail
+      0,                              // no preferred renderers
       scenery.Renderer.bitmaskSVG,    // default SVG renderer settings
       scenery.Renderer.bitmaskCanvas, // default Canvas renderer settings
       false,                          // isUnderCanvasCache
@@ -193,6 +238,7 @@ define( function( require ) {
   RenderState.RegularState.createSharedCacheState = function( node ) {
     var baseState = RenderState.RegularState.createFromPool(
       node,                             // trail
+      0,                                // no preferred renderers (not really necessary, Canvas will be forced anyways)
       null,                             // no SVG renderer settings needed
       scenery.Renderer.bitmaskCanvas,   // default Canvas renderer settings
       true,                             // isUnderCanvasCache
@@ -205,11 +251,11 @@ define( function( require ) {
   /* jshint -W064 */
   Poolable( RenderState.RegularState, {
     constructorDuplicateFactory: function( pool ) {
-      return function( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot ) {
+      return function( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot ) {
         if ( pool.length ) {
-          return pool.pop().initialize( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot );
+          return pool.pop().initialize( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot );
         } else {
-          return new RenderState.RegularState( node, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot );
+          return new RenderState.RegularState( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot );
         }
       };
     }

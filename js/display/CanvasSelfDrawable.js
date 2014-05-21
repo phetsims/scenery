@@ -71,6 +71,10 @@ define( function( require ) {
       // release the drawable
       onDetach: function( node ) {
         //OHTWO TODO: are we missing the disposal?
+      },
+      
+      update: function() {
+        this.dirty = false;
       }
     } );
     

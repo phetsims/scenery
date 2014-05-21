@@ -156,7 +156,7 @@ define( function( require ) {
     
     // where rendering-specific settings are stored
     this._hints = {
-      renderer: null,       // what type of renderer should be forced for this node.
+      renderer: 0,          // what type of renderer should be forced for this node.
       layerSplit: false,    // whether layers should be split before and after this node
       cssTransform: false,  // whether this node and its subtree should handle transforms by using a CSS transform of a div
       fullResolution: false // when rendered as Canvas, whether we should use full (device) resolution on retina-like devices
@@ -1599,20 +1599,25 @@ define( function( require ) {
       
     },
     
+    // provides a rendering hint to use this render whenever possible
     setRenderer: function( renderer ) {
-      var newRenderer;
-      if ( typeof renderer === 'string' ) {
-        assert && assert( scenery.Renderer[renderer], 'unknown renderer in setRenderer: ' + renderer );
-        newRenderer = scenery.Renderer[renderer];
-      } else if ( renderer instanceof scenery.Renderer ) {
-        newRenderer = renderer;
-      } else if ( !renderer ) {
-        newRenderer = null;
-      } else {
-        throw new Error( 'unrecognized type of renderer: ' + renderer );
+      assert && assert( renderer === null || renderer === 'canvas' || renderer === 'svg' || renderer === 'dom' || renderer === 'webgl',
+                        'Renderer input should be null, or one of: "canvas", "svg", "dom", or "webgl".' );
+      
+      var newRenderer = 0;
+      if ( renderer === 'canvas' ) {
+        newRenderer = scenery.Renderer.bitmaskCanvas;
+      } else if ( renderer === 'svg' ) {
+        newRenderer = scenery.Renderer.bitmaskSVG;
+      } else if ( renderer === 'dom' ) {
+        newRenderer = scenery.Renderer.bitmaskDOM;
+      } else if ( renderer === 'webgl' ) {
+        newRenderer = scenery.Renderer.bitmaskWebGL;
       }
-      if ( newRenderer !== this._hints.renderer ) {
-        assert && assert( !this.isPainted() || !newRenderer || this.supportsRenderer( newRenderer ), 'renderer ' + newRenderer + ' not supported by ' + this.constructor.name );
+      assert && assert( ( renderer === null ) === ( newRenderer === 0 ),
+                        'We should only end up with no actual renderer if renderer is null' );
+      
+      if ( this._hints.renderer !== newRenderer ) {
         this._hints.renderer = newRenderer;
         
         this.updateLayerType();

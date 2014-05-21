@@ -65,7 +65,8 @@ define( function( require ) {
   assert && assert( scenery.bitmaskSupportsDOM    === 0x0000004 );
   assert && assert( scenery.bitmaskSupportsWebGL  === 0x0000008 );
   
-  Renderer.bitmaskRendererArea            = scenery.bitmaskRendererArea;   // 0x00000FF
+  // these will need to be updated if another renderer option is given (modify order bitmasks below also)
+  Renderer.bitmaskRendererArea            = scenery.bitmaskRendererArea;   // 0x000000F
   // one renderer is required
   Renderer.bitmaskCanvas                  = scenery.bitmaskSupportsCanvas; // 0x0000001
   Renderer.bitmaskSVG                     = scenery.bitmaskSupportsSVG;    // 0x0000002
@@ -142,6 +143,60 @@ define( function( require ) {
   };
   Renderer.getSVGOptimizations = function( bitmask ) {
     return Renderer.svgOptimizations[bitmask & Renderer.bitmaskSVGOptimizations];
+  };
+  
+  Renderer.createOrderBitmask = function( firstRenderer, secondRenderer, thirdRenderer, fourthRenderer ) {
+    firstRenderer = firstRenderer || 0;
+    secondRenderer = secondRenderer || 0;
+    thirdRenderer = thirdRenderer || 0;
+    fourthRenderer = fourthRenderer || 0;
+    
+    return firstRenderer |
+           ( secondRenderer << 4 ) |
+           ( thirdRenderer << 8 ) |
+           ( fourthRenderer << 12 );
+  };
+  Renderer.bitmaskOrderFirst = function( bitmask ) {
+    return bitmask & 0x000000F;
+  };
+  Renderer.bitmaskOrderSecond = function( bitmask ) {
+    return ( bitmask >> 4 ) & 0x000000F;
+  };
+  Renderer.bitmaskOrderThird = function( bitmask ) {
+    return ( bitmask >> 8 ) & 0x000000F;
+  };
+  Renderer.bitmaskOrderFourth = function( bitmask ) {
+    return ( bitmask >> 12 ) & 0x000000F;
+  };
+  Renderer.pushOrderBitmask = function( bitmask, renderer ) {
+    assert && assert( typeof bitmask === 'number' );
+    assert && assert( typeof renderer === 'number' );
+    var rendererToInsert = renderer;
+    for ( var i = 0; i < 20; i += 4 ) {
+      var currentRenderer = ( bitmask >> i ) & 0x000000F;
+      if ( currentRenderer === rendererToInsert ) {
+        return bitmask;
+      } else if ( currentRenderer === 0 ) {
+        // place the renderer and exit
+        bitmask = bitmask | ( rendererToInsert << i );
+        return bitmask;
+      } else {
+        // clear out that slot
+        bitmask = ( bitmask & ~( 0x000000F << i ) );
+        
+        // place in the renderer to insert
+        bitmask = bitmask | ( rendererToInsert << i );
+        
+        rendererToInsert = currentRenderer;
+      }
+      
+      // don't walk over and re-place our initial renderer
+      if ( rendererToInsert === renderer ) {
+        return bitmask;
+      }
+    }
+    
+    throw new Error( 'pushOrderBitmask overflow' );
   };
   
   
