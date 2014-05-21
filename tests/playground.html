@@ -133,7 +133,11 @@
               
               display.updateDisplay();
               
-              node.removeChild( circle );
+              circle._hints.cssTransform = true;
+              
+              display.updateDisplay();
+              
+              circle._hints.cssTransform = false;
               
               display.updateDisplay();
             } );
