@@ -1626,6 +1626,18 @@ define( function( require ) {
     },
     
     getRenderer: function() {
+      if ( this._hints.renderer === 0 ) {
+        return null;
+      } else if ( this._hints.renderer === scenery.Renderer.bitmaskCanvas ) {
+        return 'canvas';
+      } else if ( this._hints.renderer === scenery.Renderer.bitmaskSVG ) {
+        return 'svg';
+      } else if ( this._hints.renderer === scenery.Renderer.bitmaskDOM ) {
+        return 'dom';
+      } else if ( this._hints.renderer === scenery.Renderer.bitmaskWebGL ) {
+        return 'webgl';
+      }
+      assert && assert( false, 'Seems to be an invalid renderer?' );
       return this._hints.renderer;
     },
     
