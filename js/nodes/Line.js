@@ -154,24 +154,6 @@ define( function( require ) {
       return Line.LineCanvasDrawable.createFromPool( renderer, instance );
     },
     
-    // create a rect instead of a path, hopefully it is faster in implementations
-    //OHTWO @deprecated
-    createSVGFragment: function( svg, defs, group ) {
-      return document.createElementNS( scenery.svgns, 'line' );
-    },
-    
-    // optimized for the rect element instead of path
-    //OHTWO @deprecated
-    updateSVGFragment: function( rect ) {
-      // see http://www.w3.org/TR/SVG/shapes.html#LineElement
-      rect.setAttribute( 'x1', this._x1 );
-      rect.setAttribute( 'y1', this._y1 );
-      rect.setAttribute( 'x2', this._x2 );
-      rect.setAttribute( 'y2', this._y2 );
-      
-      rect.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
-    },
-    
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Line( ' + this._x1 + ', ' + this._y1 + ', ' + this._x1 + ', ' + this._y1 + ', {' + propLines + '} )';
     },
