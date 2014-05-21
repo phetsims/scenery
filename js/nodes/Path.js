@@ -249,7 +249,6 @@ define( function( require ) {
     type: function PathCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
     paintCanvas: function paintCanvasPath( wrapper, node ) {
       var context = wrapper.context;
-      var node = node;
       
       if ( node.hasShape() ) {
         // TODO: fill/stroke delay optimizations?

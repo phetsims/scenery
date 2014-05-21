@@ -1687,8 +1687,6 @@ define( function( require ) {
      * callback( canvas, x, y ) is called, where x and y offsets are computed if not specified.
      */
     toCanvas: function( callback, x, y, width, height ) {
-      var self = this;
-      
       var padding = 2; // padding used if x and y are not set
       
       // for now, we add an unpleasant hack around Text and safe bounds in general. We don't want to add another Bounds2 object per Node for now.

@@ -24,20 +24,20 @@
     
     r1dd.updateDOM();
     r1ds.updateSVG();
-    r1dc.paintCanvas( wrapper );
+    r1dc.paintCanvas( wrapper, r1 );
     
     r1.setRect( 0, 0, 100, 100, 5, 5 );
     
     r1dd.updateDOM();
     r1ds.updateSVG();
-    r1dc.paintCanvas( wrapper );
+    r1dc.paintCanvas( wrapper, r1 );
     
     r1.stroke = null;
     r1.fill = null;
     
     r1dd.updateDOM();
     r1ds.updateSVG();
-    r1dc.paintCanvas( wrapper );
+    r1dc.paintCanvas( wrapper, r1 );
     
     r1dd.dispose();
     r1ds.dispose();
@@ -70,20 +70,20 @@
     
     r1dd.updateDOM();
     r1ds.updateSVG();
-    r1dc.paintCanvas( wrapper );
+    r1dc.paintCanvas( wrapper, r1 );
     
     r1.setRadius( 100 );
     
     r1dd.updateDOM();
     r1ds.updateSVG();
-    r1dc.paintCanvas( wrapper );
+    r1dc.paintCanvas( wrapper, r1 );
     
     r1.stroke = null;
     r1.fill = null;
     
     r1dd.updateDOM();
     r1ds.updateSVG();
-    r1dc.paintCanvas( wrapper );
+    r1dc.paintCanvas( wrapper, r1 );
     
     r1dd.dispose();
     r1ds.dispose();
@@ -114,19 +114,19 @@
     ok( r1._drawables.length === 2, 'After init, should have drawable refs' );
     
     r1ds.updateSVG();
-    r1dc.paintCanvas( wrapper );
+    r1dc.paintCanvas( wrapper, r1 );
     
     r1.x1 = 50;
     r1.x2 = 100;
     
     r1ds.updateSVG();
-    r1dc.paintCanvas( wrapper );
+    r1dc.paintCanvas( wrapper, r1 );
     
     r1.stroke = null;
     r1.fill = null;
     
     r1ds.updateSVG();
-    r1dc.paintCanvas( wrapper );
+    r1dc.paintCanvas( wrapper, r1 );
     
     r1ds.dispose();
     r1dc.dispose();
@@ -155,23 +155,23 @@
     ok( r1._drawables.length === 2, 'After init, should have drawable refs' );
     
     r1ds.updateSVG();
-    r1dc.paintCanvas( wrapper );
+    r1dc.paintCanvas( wrapper, r1 );
     
     r1.shape = kite.Shape.regularPolygon( 6, 20 );
     
     r1ds.updateSVG();
-    r1dc.paintCanvas( wrapper );
+    r1dc.paintCanvas( wrapper, r1 );
     
     r1.stroke = null;
     r1.fill = null;
     
     r1ds.updateSVG();
-    r1dc.paintCanvas( wrapper );
+    r1dc.paintCanvas( wrapper, r1 );
     
     r1.shape = null;
     
     r1ds.updateSVG();
-    r1dc.paintCanvas( wrapper );
+    r1dc.paintCanvas( wrapper, r1 );
     
     r1ds.dispose();
     r1dc.dispose();
@@ -202,26 +202,26 @@
     
     r1dd.updateDOM();
     r1ds.updateSVG();
-    r1dc.paintCanvas( wrapper );
+    r1dc.paintCanvas( wrapper, r1 );
     
     r1.text = 'b';
     
     r1dd.updateDOM();
     r1ds.updateSVG();
-    r1dc.paintCanvas( wrapper );
+    r1dc.paintCanvas( wrapper, r1 );
     
     r1.font = '20px sans-serif';
     
     r1dd.updateDOM();
     r1ds.updateSVG();
-    r1dc.paintCanvas( wrapper );
+    r1dc.paintCanvas( wrapper, r1 );
     
     r1.stroke = null;
     r1.fill = null;
     
     r1dd.updateDOM();
     r1ds.updateSVG();
-    r1dc.paintCanvas( wrapper );
+    r1dc.paintCanvas( wrapper, r1 );
     
     r1dd.dispose();
     r1ds.dispose();
@@ -254,20 +254,20 @@
     
     r1dd.updateDOM();
     r1ds.updateSVG();
-    r1dc.paintCanvas( wrapper );
+    r1dc.paintCanvas( wrapper, r1 );
     
     // 1x1 black JPG
     r1.image = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCAABAAEDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD8qqKKKAP/2Q==';
     
     r1dd.updateDOM();
     r1ds.updateSVG();
-    r1dc.paintCanvas( wrapper );
+    r1dc.paintCanvas( wrapper, r1 );
     
     r1.image = null;
     
     r1dd.updateDOM();
     r1ds.updateSVG();
-    r1dc.paintCanvas( wrapper );
+    r1dc.paintCanvas( wrapper, r1 );
     
     r1dd.dispose();
     r1ds.dispose();

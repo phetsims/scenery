@@ -319,7 +319,6 @@ define( function( require ) {
     type: function LineCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
     paintCanvas: function paintCanvasLine( wrapper, node ) {
       var context = wrapper.context;
-      var node = node;
       
       context.beginPath();
       context.moveTo( node._x1, node._y1 );
