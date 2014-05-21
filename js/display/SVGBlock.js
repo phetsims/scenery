@@ -80,6 +80,21 @@ define( function( require ) {
       this.markDirty();
     },
     
+    setSizeFullDisplay: function() {
+      var size = this.display.getSize();
+      this.svg.setAttribute( 'width', size.width );
+      this.svg.setAttribute( 'height', size.height );
+    },
+    
+    setSizeFitBounds: function() {
+      var x = this.fitBounds.minX;
+      var y = this.fitBounds.minY;
+      this.baseTransformGroup.setAttribute( 'transform', 'translate(' + (-x) + ',' + (-y) + ')' ); // subtract off so we have a tight fit
+      this.svg.style.transform = 'matrix(1,0,0,1,' + x + ',' + y + ')'; // reapply the translation as a CSS transform
+      this.svg.setAttribute( 'width', this.fitBounds.width );
+      this.svg.setAttribute( 'height', this.fitBounds.height );
+    },
+    
     update: function() {
       sceneryLayerLog && sceneryLayerLog.SVGBlock && sceneryLayerLog.SVGBlock( 'update #' + this.id );
       

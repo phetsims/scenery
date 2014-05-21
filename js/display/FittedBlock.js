@@ -13,6 +13,7 @@ define( function( require ) {
   var Poolable = require( 'PHET_CORE/Poolable' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Bounds2 = require( 'DOT/Bounds2' );
+  var Vector2 = require( 'DOT/Vector2' );
   var scenery = require( 'SCENERY/scenery' );
   var Block = require( 'SCENERY/display/Block' );
   var SVGGroup = require( 'SCENERY/display/SVGGroup' );
@@ -39,6 +40,7 @@ define( function( require ) {
       this.commonFitInstance = null; // filled in if COMMON_ANCESTOR
       this.fitBounds = Bounds2.NOTHING.copy(); // tracks the "tight" bounds for fitting, not the actually-displayed bounds
       this.oldFitBounds = Bounds2.NOTHING.copy(); // copy for storage
+      this.fitOffset = new Vector2();
       
       if ( this.fit === FittedBlock.FULL_DISPLAY ) {
         this.display.onStatic( 'displaySize', this.dirtyFitListener );
@@ -69,9 +71,7 @@ define( function( require ) {
       this.dirtyFit = false;
       
       if ( this.fit === FittedBlock.FULL_DISPLAY ) {
-        var size = this.display.getSize();
-        this.svg.setAttribute( 'width', size.width );
-        this.svg.setAttribute( 'height', size.height );
+        this.setSizeFullDisplay();
       } else if ( this.fit === FittedBlock.COMMON_ANCESTOR ) {
         assert && assert( this.commonFitInstance.trail.length >= this.transformRootInstance.trail.length );
         
@@ -96,16 +96,19 @@ define( function( require ) {
           this.fitBounds.roundOut();
           this.fitBounds.dilate( 4 ); // for safety, modify in the future
           
-          var x = this.fitBounds.minX;
-          var y = this.fitBounds.minY;
-          this.baseTransformGroup.setAttribute( 'transform', 'translate(' + (-x) + ',' + (-y) + ')' ); // subtract off so we have a tight fit
-          this.svg.style.transform = 'matrix(1,0,0,1,' + x + ',' + y + ')'; // reapply the translation as a CSS transform
-          this.svg.setAttribute( 'width', this.fitBounds.width );
-          this.svg.setAttribute( 'height', this.fitBounds.height );
+          this.setSizeFitBounds();
         }
       } else {
         throw new Error( 'unknown fit' );
       }
+    },
+    
+    setSizeFullDisplay: function() {
+      // override in subtypes, use this.display.getSize()
+    },
+    
+    setSizeFitBounds: function() {
+      // override in subtypes, use this.fitBounds
     },
     
     dispose: function() {

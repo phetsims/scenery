@@ -27,7 +27,15 @@ define( function( require ) {
       // super initialization
       this.initializeSelfDrawable( renderer, instance );
       
+      instance.addRelativeTransformPrecompute(); // trigger precomputation of the relative transform, since we will always need it when it is updated
+      
       return this;
+    },
+    
+    dispose: function() {
+      this.instance.removeRelativeTransformPrecompute();
+      
+      SelfDrawable.prototype.dispose.call( this );
     }
   } );
   
