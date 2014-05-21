@@ -82,9 +82,7 @@ define( [
     
     'SCENERY/util/gl/GLUtil',
     'SCENERY/util/gl/GLShader',
-    'SCENERY/util/gl/GLShaderProgram',
-    
-    'SCENERY/Scene'
+    'SCENERY/util/gl/GLShaderProgram'
   ], function(
     scenery // note: we don't need any of the other parts, we just need to specify them as dependencies so they fill in the scenery namespace
   ) {
