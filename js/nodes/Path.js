@@ -81,7 +81,6 @@ define( function( require ) {
       
       if ( this.hasShape() ) {
         this.invalidateSelf( this.computeShapeBounds() );
-        this.invalidatePaint();
       }
     },
     

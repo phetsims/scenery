@@ -142,15 +142,6 @@ define( function( require ) {
     this._mouseBoundsHadListener = false; // since we only walk the dirty flags up ancestors, we need a way to re-evaluate descendants when the existence of effective listeners changes
     this._touchBoundsHadListener = false; // since we only walk the dirty flags up ancestors, we need a way to re-evaluate descendants when the existence of effective listeners changes
     
-    // dirty region handling
-    //OHTWO deprecated (all three flags)
-    this._paintDirty = false;        // whether the self paint is dirty (just this node, none of its children)
-    this._subtreePaintDirty = false; // whether the subtree paint is dirty (this node and its children, usually after a transform)
-    this._childPaintDirty = false;   // whether the child paint is dirty (excluding self paint, just used for finding _paintDirty, _selfPaintDirty)
-    
-    //OHTWO deprecated (at least rendererOptions if not rendererLayerType)
-    this._rendererLayerType = null; // cached layer type that is used by the LayerStrategy
-    
     // where rendering-specific settings are stored
     this._hints = {
       renderer: 0,          // what type of renderer should be forced for this node.
@@ -206,8 +197,6 @@ define( function( require ) {
       this._boundsDirty = true; // like calling this.invalidateBounds(), but we already marked all ancestors with dirty child bounds
       
       this.trigger2( 'childInserted', node, index );
-      
-      node.invalidateSubtreePaint();
     },
     
     addChild: function( node ) {
@@ -242,8 +231,6 @@ define( function( require ) {
       this.changePickableCount( -node._subtreePickableCount );
       this.changeBoundsEventCount( node._boundsEventCount > 0 ? -1 : 0 );
       this._rendererSummary.bitmaskChange( node._rendererSummary.bitmask, scenery.bitmaskAll );
-      
-      node.markOldPaint( false );
       
       var indexOfParent = _.indexOf( node._parents, this );
       
@@ -699,43 +686,6 @@ define( function( require ) {
       }
     },
     
-    // mark the paint of this node as invalid, so its new region will be painted
-    //OHTWO deprecated
-    invalidatePaint: function() {
-      assert && assert( this.isPainted(), 'Can only call invalidatePaint on a painted node' );
-      this._paintDirty = true;
-      
-      // and set flags for all ancestors
-      var i = this._parents.length;
-      while ( i-- ) {
-        this._parents[i].invalidateChildPaint();
-      }
-    },
-    
-    //OHTWO deprecated
-    invalidateSubtreePaint: function() {
-      this._subtreePaintDirty = true;
-      
-      // and set flags for all ancestors
-      var i = this._parents.length;
-      while ( i-- ) {
-        this._parents[i].invalidateChildPaint();
-      }
-    },
-    
-    //OHTWO deprecated
-    // recursively tag all ancestors with _childPaintDirty
-    invalidateChildPaint: function() {
-      // don't bother updating if we've already been tagged
-      if ( !this._childPaintDirty ) {
-        this._childPaintDirty = true;
-        var i = this._parents.length;
-        while ( i-- ) {
-          this._parents[i].invalidateChildPaint();
-        }
-      }
-    },
-    
     // called to notify that self rendering will display different paint, with possibly different bounds
     invalidateSelf: function( newBounds ) {
       assert && assert( newBounds.isEmpty() || newBounds.isFinite(), 'Bounds must be empty or finite in invalidateSelf' );
@@ -752,8 +702,6 @@ define( function( require ) {
         // fire the event immediately
         this.trigger0( 'selfBounds' );
       }
-      
-      this.invalidatePaint();
     },
     
     isChild: function( potentialChild ) {
@@ -1235,7 +1183,6 @@ define( function( require ) {
     afterTransformChange: function() {
       // NOTE: why is local bounds invalidation needed here?
       this.invalidateBounds();
-      this.invalidateSubtreePaint();
       
       this.trigger0( 'transform' );
     },
@@ -1447,34 +1394,6 @@ define( function( require ) {
       return this._clipArea !== null;
     },
     
-    //OHTWO @deprecated
-    updateLayerType: function() {
-      if ( this._hints.renderer && ( this._hints.cssTransform || this._hints.fullResolution ) ) {
-        // TODO: factor this check out! Make RendererOptions its own class?
-        // TODO: FIXME: support undoing this!
-        // ensure that if we are passing a CSS transform, we pass this node as the baseNode
-        if ( this._hints.cssTransform || this._hints.cssTranslation || this._hints.cssRotation || this._hints.cssScale ) {
-          this._hints.baseNode = this;
-        } else if ( this._hints.hasOwnProperty( 'baseNode' ) ) {
-          delete this._hints.baseNode; // don't override, let the scene pass in the scene
-        }
-        // if we set renderer and rendererOptions, only then do we want to trigger a specific layer type
-        this._rendererLayerType = this._hints.renderer.createLayerType( this._hints );
-      } else {
-        this._rendererLayerType = null; // nothing signaled, since we want to support multiple layer types (including if we specify a renderer)
-      }
-    },
-    
-    //OHTWO @deprecated
-    getRendererLayerType: function() {
-      return this._rendererLayerType;
-    },
-    
-    //OHTWO @deprecated
-    hasRendererLayerType: function() {
-      return !!this._rendererLayerType;
-    },
-    
     supportsCanvas: function() {
       return ( this._rendererBitmask & scenery.bitmaskSupportsCanvas ) !== 0;
     },
@@ -1540,8 +1459,6 @@ define( function( require ) {
       
       if ( this._hints.renderer !== newRenderer ) {
         this._hints.renderer = newRenderer;
-        
-        this.updateLayerType();
       }
     },
     
@@ -1569,8 +1486,6 @@ define( function( require ) {
       // TODO: consider checking options based on the specified 'renderer'?
       // TODO: consider a guard where we check if anything changed
       _.extend( this._hints, options );
-      
-      this.updateLayerType();
     },
     
     getRendererOptions: function() {

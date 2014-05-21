@@ -118,6 +118,27 @@
             } );
           };
           
+          window.displayErr = function() {
+            setTimeout( function(){
+              window.node = new scenery.Node( { x: 10 } );
+              // window.node.rendererOptions = { cssTransform: true };
+              window.rect = new scenery.Rectangle( 0, 0, 100, 50, 0, 0, {
+                fill: new scenery.LinearGradient( 0, 0, 100, 0 ).addColorStop( 0, 'red' ).addColorStop( 1, 'blue' )
+              } );
+              node.addChild( rect );
+              scene.addChild( node );
+              
+              window.circle = new scenery.Circle( 50, { fill: 'black', x: 30, y: 60 } );
+              node.addChild( circle );
+              
+              display.updateDisplay();
+              
+              node.removeChild( circle );
+              
+              display.updateDisplay();
+            } );
+          };
+          
           /*---------------------------------------------------------------------------*
           * Debug
           *----------------------------------------------------------------------------*/

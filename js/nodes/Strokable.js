@@ -29,7 +29,6 @@ define( function( require ) {
       
       var that = this;
       this._strokeListener = function() {
-        that.invalidatePaint(); // TODO: move this to invalidateStroke?
         that.invalidateStroke();
       };
     };
@@ -45,7 +44,6 @@ define( function( require ) {
     
     proto.setLineWidth = function( lineWidth ) {
       if ( this.getLineWidth() !== lineWidth ) {
-        this.markOldSelfPaint(); // since the previous line width may have been wider
         
         this._lineDrawingStyles.lineWidth = lineWidth;
         
@@ -65,7 +63,6 @@ define( function( require ) {
     
     proto.setLineCap = function( lineCap ) {
       if ( this._lineDrawingStyles.lineCap !== lineCap ) {
-        this.markOldSelfPaint();
         
         this._lineDrawingStyles.lineCap = lineCap;
         
@@ -85,7 +82,6 @@ define( function( require ) {
     
     proto.setLineJoin = function( lineJoin ) {
       if ( this._lineDrawingStyles.lineJoin !== lineJoin ) {
-        this.markOldSelfPaint();
         
         this._lineDrawingStyles.lineJoin = lineJoin;
         
@@ -109,7 +105,6 @@ define( function( require ) {
     
     proto.setLineDash = function( lineDash ) {
       if ( this._lineDrawingStyles.lineDash !== lineDash ) {
-        this.markOldSelfPaint();
         
         this._lineDrawingStyles.lineDash = lineDash || [];
         
@@ -129,7 +124,6 @@ define( function( require ) {
     
     proto.setLineDashOffset = function( lineDashOffset ) {
       if ( this._lineDrawingStyles.lineDashOffset !== lineDashOffset ) {
-        this.markOldSelfPaint();
         
         this._lineDrawingStyles.lineDashOffset = lineDashOffset;
         
@@ -159,8 +153,6 @@ define( function( require ) {
     };
     
     proto.setLineStyles = function( lineStyles ) {
-      // TODO: since we have been using lineStyles as mutable for now, lack of change check is good here?
-      this.markOldSelfPaint();
       
       this._lineDrawingStyles = lineStyles;
       this.invalidateStroke();
@@ -177,8 +169,6 @@ define( function( require ) {
     
     proto.setStroke = function( stroke ) {
       if ( this.getStroke() !== stroke ) {
-        // since this can actually change the bounds, we need to handle a few things differently than the fill
-        this.markOldSelfPaint();
         
         //OHTWO TODO: probably shouldn't have a reference here
         var hasInstances = this._displayInstances.length > 0;

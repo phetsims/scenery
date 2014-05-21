@@ -26,7 +26,6 @@ define( function( require ) {
       
       var that = this;
       this._fillListener = function() {
-        that.invalidatePaint(); // TODO: move this to invalidateFill?
         that.invalidateFill();
       };
     };
@@ -53,8 +52,6 @@ define( function( require ) {
         if ( hasInstances && this._fill && this._fill.addChangeListener ) {
           this._fill.addChangeListener( this._fillListener );
         }
-        
-        this.invalidatePaint();
         
         this.invalidateFill();
         
