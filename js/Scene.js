@@ -82,7 +82,9 @@ define( function( require ) {
       enablePointerEvents: true,
       preferredSceneLayerType: scenery.CanvasDefaultLayerType,
       width: $main.width(),
-      height: $main.height()
+      height: $main.height(),
+      renderer: 'canvas',
+      rendererOptions: { fullResolution: true }
     }, options || {} );
     
     // TODO: consider using a pushed preferred layer to indicate this information, instead of as a specific option

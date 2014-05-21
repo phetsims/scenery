@@ -67,6 +67,7 @@ define( [
     'SCENERY/util/FixedNodeEvents',
     'SCENERY/util/Font',
     'SCENERY/util/Gradient',
+    'SCENERY/util/HarfbuzzFreeType',
     'SCENERY/util/LinearGradient',
     'SCENERY/util/LiveRegion',
     'SCENERY/util/Instance',

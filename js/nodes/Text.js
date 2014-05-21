@@ -30,6 +30,7 @@ define( function( require ) {
   require( 'SCENERY/layers/Renderer' );
   var Fillable = require( 'SCENERY/nodes/Fillable' );
   var Strokable = require( 'SCENERY/nodes/Strokable' );
+  var HarfbuzzFreeType = require( 'SCENERY/util/HarfbuzzFreeType' );
   require( 'SCENERY/util/Font' );
   require( 'SCENERY/util/Util' ); // for canvasAccurateBounds and CSS transforms
   
@@ -66,12 +67,23 @@ define( function( require ) {
   var hybridTextNode; // a node that is used to measure SVG text top/height for hybrid caching purposes
   var initializingHybridTextNode = false;
   
+  var glyphShapes = {}; // index => {Shape}
+  
+  function loadGlyph( index ) {
+    if ( !glyphShapes[index] ) {
+      glyphShapes[index] = HarfbuzzFreeType.shapeFromGlyphIndex( index );
+    }
+  }
+  
   scenery.Text = function Text( text, options ) {
     this._text         = '';                   // filled in with mutator
     this._font         = scenery.Font.DEFAULT; // default font, usually 10px sans-serif
     this._direction    = 'ltr';                // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
     this._boundsMethod = 'hybrid';             // fast (SVG/DOM, no canvas rendering allowed), fastCanvas (SVG/DOM, canvas rendering allowed without dirty regions),
                                                // accurate (Canvas accurate recursive), or hybrid (cache SVG height, use canvas measureText for width)
+    
+    this._isEmbedded = false;
+    this._glyphEntries = null;
     
     // whether the text is rendered as HTML or not. if defined (in a subtype constructor), use that value instead
     this._isHTML = this._isHTML === undefined ? false : this._isHTML;
@@ -178,6 +190,18 @@ define( function( require ) {
       
       // we may have changed renderers if parameters were changed!
       this.updateTextFlags();
+      
+      if ( this._font.getFamily().slice( 0, 'Arial'.length ) === 'Arial' ) {
+        this._isEmbedded = true;
+        this._glyphEntries = HarfbuzzFreeType.glyphsFromText( this.getNonBreakingText(), null );
+        
+        // ensure we have the glyphs for all of the ones we will need
+        for ( var i = 0; i < this._glyphEntries.length; i += 3 ) {
+          loadGlyph( this._glyphEntries[i] );
+        }
+      } else {
+        this._isEmbedded = false;
+      }
     },
     
     // overrides from Strokable
@@ -199,21 +223,51 @@ define( function( require ) {
     paintCanvas: function( wrapper ) {
       var context = wrapper.context;
       
-      // extra parameters we need to set, but should avoid setting if we aren't drawing anything
-      if ( this.hasFill() || this.hasStroke() ) {
-        wrapper.setFont( this._font.getFont() );
-        wrapper.setDirection( this._direction );
-      }
-      
-      if ( this.hasFill() ) {
-        this.beforeCanvasFill( wrapper ); // defined in Fillable
-        context.fillText( this._text, 0, 0 );
-        this.afterCanvasFill( wrapper ); // defined in Fillable
-      }
-      if ( this.hasStroke() ) {
-        this.beforeCanvasStroke( wrapper ); // defined in Strokable
-        context.strokeText( this._text, 0, 0 );
-        this.afterCanvasStroke( wrapper ); // defined in Strokable
+      if ( this._isEmbedded ) {
+        // TODO: assert that we're chopping off 'px' if we actually use this type of thing
+        var size = parseInt( this._font.getSize().slice( 0, -2 ) );
+        var scale = size / 2048;
+        
+        // TODO: fill/stroke delay optimizations?
+        context.beginPath();
+        var len = this._glyphEntries.length;
+        wrapper.context.scale( scale, scale );
+        for ( var i = 0; i < len; i += 3 ) {
+          var x = this._glyphEntries[i+1];
+          var y = this._glyphEntries[i+2];
+          wrapper.context.translate( x, y );
+          glyphShapes[this._glyphEntries[i]].writeToContext( context );
+          wrapper.context.translate( -x, -y );
+        }
+        wrapper.context.scale( 1 / scale, 1 / scale );
+
+        if ( this._fill ) {
+          this.beforeCanvasFill( wrapper ); // defined in Fillable
+          context.fill();
+          this.afterCanvasFill( wrapper ); // defined in Fillable
+        }
+        if ( this._stroke ) {
+          this.beforeCanvasStroke( wrapper ); // defined in Strokable
+          context.stroke();
+          this.afterCanvasStroke( wrapper ); // defined in Strokable
+        }
+      } else {
+        // extra parameters we need to set, but should avoid setting if we aren't drawing anything
+        if ( this.hasFill() || this.hasStroke() ) {
+          wrapper.setFont( this._font.getFont() );
+          wrapper.setDirection( this._direction );
+        }
+        
+        if ( this.hasFill() ) {
+          this.beforeCanvasFill( wrapper ); // defined in Fillable
+          context.fillText( this._text, 0, 0 );
+          this.afterCanvasFill( wrapper ); // defined in Fillable
+        }
+        if ( this.hasStroke() ) {
+          this.beforeCanvasStroke( wrapper ); // defined in Strokable
+          context.strokeText( this._text, 0, 0 );
+          this.afterCanvasStroke( wrapper ); // defined in Strokable
+        }
       }
     },
     

@@ -1557,6 +1557,9 @@ define( function( require ) {
     },
     
     setRenderer: function( renderer ) {
+      if ( renderer === 'svg' ) {
+        return;
+      }
       var newRenderer;
       if ( typeof renderer === 'string' ) {
         assert && assert( scenery.Renderer[renderer], 'unknown renderer in setRenderer: ' + renderer );
