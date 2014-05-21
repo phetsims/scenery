@@ -20,23 +20,22 @@
       padding: 0;
     }
     
-    #scene {
-      position: absolute;
-      width: 512px;
-      height: 256px;
+    #display {
       background-color: #fff;
     }
     
     #debug {
       position: relative;
-      top: 256px;
+      top: 480px;
+      padding: 0.5em;
+      border: 1px solid rgba(0,0,255,0.3);
     }
     
     #serialized {
       position: relative;
-      top: 256px;
-      padding: 15px;
-      border: 1px solid gray;
+      top: 480px;
+      padding: 0.5em;
+      border: 1px solid rgba(0,0,0,0.3);
     }
     
     #controls {
@@ -51,18 +50,13 @@
 <body>
   
   <div id="controls">
-    <button onclick="scene.updateOnRequestAnimationFrame();">Continuous Update</button>
-    <button onclick="scene.popupDebug();">Popup Debug</button>
+    <button onclick="toggleDebug();">Toggle Debug</button>
+    <button onclick="toggleSerialize();">Toggle Serialization</button>
+    <button onclick="toggleUpdates();">Toggle Update</button>
+    <button onclick="display.initializeStandaloneEvents();">Standalone Events</button>
   </div>
   
-  <div id="scene"></div>
-  
-  <div id="debug"></div>
-  
-  <pre id="serialized"></pre>
-  
   <script>
-    var basicSceneStep = true;
     var fuzzStep = false;
     
     // we need to wait until our config file is loaded before our require statement. apparently this was not guaranteed
@@ -79,10 +73,15 @@
           scenery.enableLayerLogging();
           // scenery.enableEventLogging();
           
-          window.scene = new scenery.Scene( $( '#scene' ) );
-          console.log( 'window.scene created' );
+          window.scene = new scenery.Node();
           
-          window.shape = kite.Shape.rectangle( 0, 0, 50, 40 );
+          var display = window.display = new scenery.Display( scene, {
+            // any overrides here?
+          } );
+          console.log( 'window.display created' );
+          
+          display._domElement.id = 'display';
+          document.body.appendChild( display._domElement );
           
           core.loadScript( {
             src: 'qunit/js/test-utils.js',
@@ -93,16 +92,7 @@
           
           scenery.Util.polyfillRequestAnimationFrame();
           
-          (function step(){
-            if ( basicSceneStep ) {
-              window.requestAnimationFrame( step, document.getElementById( 'scene' ) );
-            }
-            
-            $( '#debug' ).html( scene.getDebugHTML() );
-            
-            $( '#serialized' ).html( scene.toStringWithChildren( true ) );
-          })();
-          
+          // convenience function for IE stack trackes
           window.twrap = function( f ) {
             try {
               f();
@@ -111,156 +101,18 @@
             }
           };
           
-          window.setupTest = function() {
-            var n1 = new scenery.Node();
-            var n2 = new scenery.Node();
-            var n3 = new scenery.Node();
-            var n4 = new scenery.Node();
-            var n5 = new scenery.Node();
-            var n6 = new scenery.Node();
-            var n7 = new scenery.Node();
-            var n8 = new scenery.Node();
-            var n9 = new scenery.Node();
-            n1.addChild( n2 );
-            n2.addChild( n3 );
-            n3.addChild( n4 );
-            n4.addChild( n5 );
-            n5.addChild( n6 );
-            n6.addChild( n7 );
-            n7.addChild( n8 );
-            n8.addChild( n9 );
-            scene.addChild( n1 );
-            window.trail = n9.getUniqueTrail();
-            window.bounds = new dot.Bounds2( 1, 2, 5, 6 );
-          };
-          
-          window.setupTranslation = function() {
-            var n = scene;
-            while ( n ) {
-              n.translate( 5, 0 );
-              n = n.children[0];
-            }
-          };
-          
-          window.setupRotation = function() {
-            var n = scene;
-            while ( n ) {
-              n.rotate( 0.2 );
-              n = n.children[0];
-            }
-          };
-          
-          window.setupDownUp = function() {
-            var node = new scenery.Node();
-            node.x = 50;
-            var rect = new scenery.Rectangle( 0, 0, 100, 50, { fill: '#f00' } );
-            rect.y = 50;
-            scene.addChild( node );
-            node.addChild( rect );
-            scene.updateOnRequestAnimationFrame();
-            scene.initializeStandaloneEvents();
-            node.addInputListener( new scenery.DownUpListener( {
-              down: function() { rect.fill = '#00f'; },
-              up: function() { rect.fill = '#f00'; },
-              upInside: function() { rect.stroke = '#000'; },
-              upOutside: function() { rect.stroke = null; }
-            } ) );
-          };
-          
-          window.setupRoundRect = function() {
-            var rect = new scenery.Rectangle( 100, 50, 300, 150, 150, 50, { fill: 'red', cursor: 'pointer' } );
-            scene.addChild( rect );
-            scene.updateOnRequestAnimationFrame();
-            scene.initializeStandaloneEvents();
-            
-            rect.containsPointSelf( dot( 111, 118 ) ); // 111,118
-          };
-          
-          window.setupButton = function() {
-            var rect = new scenery.Rectangle( 50, 50, 100, 50, { fill: '#f00' } );
-            scene.addChild( rect );
-            scene.initializeStandaloneEvents();
-            scenery.disableLayerLogging();
-            scenery.disableEventLogging();
-            rect.cursor = 'pointer';
-            rect.addInputListener( new scenery.ButtonListener( {
-              up: function( event, old ) { console.log( 'up from ' + old ); rect.fill = '#f00'; },
-              over: function( event, old ) { console.log( 'over from ' + old ); rect.fill = '#00f'; },
-              down: function( event, old ) { console.log( 'down from ' + old ); rect.fill = '#0f0'; },
-              fire: function( event ) { console.log( 'fire' ); }
-            } ) );
-          };
-          
-          window.setupDomRect = function() {
-            window.r = new scenery.Rectangle( 0, 0, 100, 50, { fill: 'red' } );
-            window.a = new scenery.Node( { renderer: 'svg' } );
-            window.b = new scenery.Node( { renderer: 'dom' } );
-            window.c = new scenery.Node( { renderer: 'canvas' } );
-            scene.addChild( window.a );
-            scene.addChild( window.b );
-            scene.addChild( window.c );
-            window.b.y = 100;
-            window.c.x = 250;
-            a.addChild( window.r );
-            b.addChild( window.r );
-            c.addChild( window.r );
-          };
-          
-          window.setupDomCircle = function() {
-            window.r = new scenery.Circle( 50, { fill: 'red' } );
-            window.a = new scenery.Node( { renderer: 'svg' } );
-            window.b = new scenery.Node( { renderer: 'dom' } );
-            window.c = new scenery.Node( { renderer: 'canvas' } );
-            scene.addChild( window.a );
-            scene.addChild( window.b );
-            scene.addChild( window.c );
-            window.b.x = 125;
-            window.b.y = 100;
-            window.c.x = 250;
-            a.addChild( window.r );
-            b.addChild( window.r );
-            c.addChild( window.r );
-            scene.x = 50;
-            scene.y = 50;
-            window.r.stroke = 'black';
-          };
-          
-          window.setupDOMDrawableTest = function() {
-            window.r = new scenery.Rectangle( 0, 0, 50, 50, { fill: 'red' } );
-            window.i = new scenery.DisplayInstance( { _frameId: 5 }, window.r.getUniqueTrail() );
-            window.d = new scenery.DOMSelfDrawable( window.i.trail, scenery.Renderer.bitmaskDOM, window.i );
-            window.d.block = { markDOMDirty: function() {} }; // patches need for a block reference for now (dirtyness propagation)
-            document.body.appendChild( window.d.domElement )
-            window.s = r._visualStates[0]
-          };
-          
-          window.testNodeBounds = function( trail ) {
-            var a = performance.now();
-            for ( var i = 0; i < 100000; i++ ) { trail.lastNode().localToGlobalBounds( bounds ); };
-            console.log( performance.now() - a );
-            console.log( trail.lastNode().localToGlobalBounds( bounds ) );
-          };
-          
           window.displayTest = function() {
             setTimeout( function(){
-              window.root = new scenery.Node( { y: 10 } ); // y: 10 should be ignored?
               window.node = new scenery.Node( { x: 10 } );
               // window.node.rendererOptions = { cssTransform: true };
               window.rect = new scenery.Rectangle( 0, 0, 100, 50, 0, 0, {
                 fill: new scenery.LinearGradient( 0, 0, 100, 0 ).addColorStop( 0, 'red' ).addColorStop( 1, 'blue' )
               } );
               node.addChild( rect );
-              root.addChild( node );
+              scene.addChild( node );
               
               window.circle = new scenery.Circle( 50, { fill: 'black', x: 30, y: 60 } );
               node.addChild( circle );
-              
-              window.display = new scenery.Display( root );
-              
-              while ( document.body.firstChild ) {
-                document.body.removeChild( document.body.firstChild );
-              }
-              document.body.appendChild( display.domElement );
               
               display.updateDisplay();
             } );
@@ -268,155 +120,226 @@
           
           window.displayErr = function() {
             setTimeout( function(){
-              window.root = new scenery.Node( { y: 10 } ); // y: 10 should be ignored?
               window.node = new scenery.Node( { x: 10 } );
               // window.node.rendererOptions = { cssTransform: true };
               window.rect = new scenery.Rectangle( 0, 0, 100, 50, 0, 0, {
                 fill: new scenery.LinearGradient( 0, 0, 100, 0 ).addColorStop( 0, 'red' ).addColorStop( 1, 'blue' )
               } );
               node.addChild( rect );
-              root.addChild( node );
+              scene.addChild( node );
               
               window.circle = new scenery.Circle( 50, { fill: 'black', x: 30, y: 60 } );
               node.addChild( circle );
               
-              window.display = new scenery.Display( root );
-              
-              while ( document.body.firstChild ) {
-                document.body.removeChild( document.body.firstChild );
-              }
-              document.body.appendChild( display.domElement );
-              
-              display.updateDisplay();
               display.updateDisplay();
               
-              // displayTest();
-              // root.addChild( new scenery.Rectangle( 0, 0, 10, 200, 0, 0, { fill: 'white' } ) );
-              // display.updateDisplay();
+              node.removeChild( circle );
+              
+              display.updateDisplay();
             } );
           };
           
-          window.fuzzLayers = function() {
-            // disable the regular step
-            basicSceneStep = false;
-            fuzzStep = true;
+          /*---------------------------------------------------------------------------*
+          * Debug
+          *----------------------------------------------------------------------------*/
+          
+          var playgroundDebugging = false;
+          var playgroundDebuggingRequestID = 0;
+          
+          var debug = document.createElement( 'div' );
+          debug.id = 'debug';
+          debug.style.display = 'none';
+          document.body.appendChild( debug );
+          
+          function debugStep() {
+            playgroundDebuggingRequestID = window.requestAnimationFrame( debugStep, debug );
             
-            // disable the layer logging, or we'll spam ourselves to death
-            scenery.disableLayerLogging();
-            scenery.disableEventLogging();
-            
-            var lines = [];
-            window.lines = lines;
-            
-            var nodes = [];
-            var scene = new scenery.Scene( $( '<div>' ), { width: 640, height: 480 } );
-            nodes.push( scene );
-            
-            _.times( 5, function() { nodes.push( new scenery.Node() ); } );
-            _.times( 10, function() { nodes.push( new scenery.Path() ); } );
-            // _.times( 5, function() { nodes.push( new scenery.DOM( document.createElement( 'div' ) ) ); } );
-            
-            function name( node ) {
-              return node === scene ? 'scene' : node.constructor.name.toLowerCase() + node.id;
+            debug.style.display = '';
+            debug.innerHTML = display.getDebugHTML();
+          }
+          
+          window.toggleDebug = function() {
+            if ( playgroundDebugging ) {
+              window.cancelAnimationFrame( playgroundDebuggingRequestID );
+              debug.style.display = 'none';
+            } else {
+              debugStep();
             }
             
-            _.each( nodes, function( node ) {
-              if ( node !== scene ) {
-                lines.push( 'var ' + name( node ) + ' = ' + node.toString() + ';' );
-              }
-            } );
-            
-            (function fuzz(){
-              // abort if desired
-              if ( !fuzzStep ) {
-                return;
-              }
-              
-              var nodeMutators = [
-                {
-                  weight: 1.0,
-                  f: function( node ) { node.renderer = 'canvas'; },
-                  mess: 'canvas renderer',
-                  line: function( node ) { return name( node ) + '.renderer = \'canvas\';' }
-                },
-                {
-                  weight: 1.0,
-                  f: function( node ) { node.renderer = 'svg'; },
-                  mess: 'svg renderer',
-                  line: function( node ) { return name( node ) + '.renderer = \'svg\';' }
-                },
-                {
-                  weight: 2.0,
-                  f: function( node ) { node.renderer = null; },
-                  mess: 'null renderer',
-                  line: function( node ) { return name( node ) + '.renderer = null;' }
-                },
-                {
-                  weight: 0.3,
-                  f: function( node ) { node.layerSplit = true; },
-                  mess: 'layerSplit true',
-                  line: function( node ) { return name( node ) + '.layerSplit = true;' }
-                },
-                {
-                  weight: 1.0,
-                  f: function( node ) { node.layerSplit = false; },
-                  mess: 'layerSplit false',
-                  line: function( node ) { return name( node ) + '.layerSplit = false;' }
-                }
-              ];
-              
-              var totalWeight = _.reduce( _.pluck( nodeMutators, 'weight' ), function( memo, num ) { return memo + num; }, 0 );
-              
-              _.times( 20, function() {
-                window.beforeFuzzDebug = scene.getDebugHTML();
-                window.beforeFuzzSerialization = scene.toStringWithChildren( true );
-                
-                var r = Math.random();
-                
-                // pick two different nodes at random
-                var a = nodes[_.random( 0, nodes.length - 1 )];
-                var b = nodes[_.random( 0, nodes.length - 1 )];
-                
-                if ( r < 0.333 ) {
-                  // attempt to add a node to another one
-                  if ( a.canAddChild( b ) ) {
-                    // insert it into a random place
-                    var index = _.random( 0, a.children.length );
-                    window.fuzzMessage = 'inserting child ' + b.id + ' into ' + a.id + ' at index ' + index;
-                    lines.push( name( a ) + '.insertChild( ' + index + ', ' + name( b ) + ' );' );
-                    a.insertChild( index, b );
-                  }
-                } else if( r < 0.666 ) {
-                  if ( a.children.length ) {
-                    var child = a.children[_.random( 0, a.children.length - 1 )];
-                    window.fuzzMessage = 'removing child ' + child.id + ' to ' + a.id;
-                    lines.push( name( a ) + '.removeChild( ' + name( child ) + ' );' );
-                    a.removeChild( child );
-                  }
-                } else {
-                  // pick a random modification from the weighted list
-                  var rr = Math.random() * totalWeight;
-                  for ( var i = 0; i < nodeMutators.length; i++ ) {
-                    var mutator = nodeMutators[i];
-                    rr -= mutator.weight;
-                    if ( rr <= 0 ) {
-                      window.fuzzMessage = 'mutating node ' + a.id + ' with ' + mutator.mess;
-                      lines.push( mutator.line( a ) );
-                      mutator.f( a );
-                      break;
-                    }
-                  }
-                }
-                
-                scene.layerAudit();
-                
-              } );
-              $( '#debug' ).html( scene.getDebugHTML() );
-              
-              // an error above will prevent this from running
-              window.requestAnimationFrame( fuzz );
-            })();
+            playgroundDebugging = !playgroundDebugging;
           };
+          
+          /*---------------------------------------------------------------------------*
+          * Serialization
+          *----------------------------------------------------------------------------*/
+          
+          var playgroundSerializing = false;
+          var playgroundSerializingRequestID = 0;
+          
+          var serialized = document.createElement( 'pre' );
+          serialized.id = 'serialized';
+          serialized.style.display = 'none';
+          document.body.appendChild( serialized );
+          
+          function serializeStep() {
+            playgroundSerializingRequestID = window.requestAnimationFrame( serializeStep, serialized );
+            
+            serialized.style.display = '';
+            serialized.innerHTML = display.toStringWithChildren( true, 'scene' );
+          }
+          
+          window.toggleSerialize = function() {
+            if ( playgroundSerializing ) {
+              window.cancelAnimationFrame( playgroundSerializingRequestID );
+              serialized.style.display = 'none';
+            } else {
+              serializeStep();
+            }
+            
+            playgroundSerializing = !playgroundSerializing;
+          };
+          
+          /*---------------------------------------------------------------------------*
+          * Updates
+          *----------------------------------------------------------------------------*/
+          
+          var playgroundUpdating = false;
+          
+          window.toggleUpdates = function() {
+            if ( playgroundUpdating ) {
+              display.cancelUpdateOnRequestAnimationFrame();
+            } else {
+              display.updateOnRequestAnimationFrame();
+            }
+            
+            playgroundUpdating = !playgroundUpdating;
+          };
+          
+          /*---------------------------------------------------------------------------*
+          * Miscellaneous
+          *----------------------------------------------------------------------------*/
+          
+          // window.fuzzLayers = function() {
+          //   // disable the regular step
+          //   basicSceneStep = false;
+          //   fuzzStep = true;
+            
+          //   // disable the layer logging, or we'll spam ourselves to death
+          //   scenery.disableLayerLogging();
+          //   scenery.disableEventLogging();
+            
+          //   var lines = [];
+          //   window.lines = lines;
+            
+          //   var nodes = [];
+          //   var scene = new scenery.Scene( $( '<div>' ), { width: 640, height: 480 } );
+          //   nodes.push( scene );
+            
+          //   _.times( 5, function() { nodes.push( new scenery.Node() ); } );
+          //   _.times( 10, function() { nodes.push( new scenery.Path() ); } );
+          //   // _.times( 5, function() { nodes.push( new scenery.DOM( document.createElement( 'div' ) ) ); } );
+            
+          //   function name( node ) {
+          //     return node === scene ? 'scene' : node.constructor.name.toLowerCase() + node.id;
+          //   }
+            
+          //   _.each( nodes, function( node ) {
+          //     if ( node !== scene ) {
+          //       lines.push( 'var ' + name( node ) + ' = ' + node.toString() + ';' );
+          //     }
+          //   } );
+            
+          //   (function fuzz(){
+          //     // abort if desired
+          //     if ( !fuzzStep ) {
+          //       return;
+          //     }
+              
+          //     var nodeMutators = [
+          //       {
+          //         weight: 1.0,
+          //         f: function( node ) { node.renderer = 'canvas'; },
+          //         mess: 'canvas renderer',
+          //         line: function( node ) { return name( node ) + '.renderer = \'canvas\';' }
+          //       },
+          //       {
+          //         weight: 1.0,
+          //         f: function( node ) { node.renderer = 'svg'; },
+          //         mess: 'svg renderer',
+          //         line: function( node ) { return name( node ) + '.renderer = \'svg\';' }
+          //       },
+          //       {
+          //         weight: 2.0,
+          //         f: function( node ) { node.renderer = null; },
+          //         mess: 'null renderer',
+          //         line: function( node ) { return name( node ) + '.renderer = null;' }
+          //       },
+          //       {
+          //         weight: 0.3,
+          //         f: function( node ) { node.layerSplit = true; },
+          //         mess: 'layerSplit true',
+          //         line: function( node ) { return name( node ) + '.layerSplit = true;' }
+          //       },
+          //       {
+          //         weight: 1.0,
+          //         f: function( node ) { node.layerSplit = false; },
+          //         mess: 'layerSplit false',
+          //         line: function( node ) { return name( node ) + '.layerSplit = false;' }
+          //       }
+          //     ];
+              
+          //     var totalWeight = _.reduce( _.pluck( nodeMutators, 'weight' ), function( memo, num ) { return memo + num; }, 0 );
+              
+          //     _.times( 20, function() {
+          //       window.beforeFuzzDebug = scene.getDebugHTML();
+          //       window.beforeFuzzSerialization = scene.toStringWithChildren( true );
+                
+          //       var r = Math.random();
+                
+          //       // pick two different nodes at random
+          //       var a = nodes[_.random( 0, nodes.length - 1 )];
+          //       var b = nodes[_.random( 0, nodes.length - 1 )];
+                
+          //       if ( r < 0.333 ) {
+          //         // attempt to add a node to another one
+          //         if ( a.canAddChild( b ) ) {
+          //           // insert it into a random place
+          //           var index = _.random( 0, a.children.length );
+          //           window.fuzzMessage = 'inserting child ' + b.id + ' into ' + a.id + ' at index ' + index;
+          //           lines.push( name( a ) + '.insertChild( ' + index + ', ' + name( b ) + ' );' );
+          //           a.insertChild( index, b );
+          //         }
+          //       } else if( r < 0.666 ) {
+          //         if ( a.children.length ) {
+          //           var child = a.children[_.random( 0, a.children.length - 1 )];
+          //           window.fuzzMessage = 'removing child ' + child.id + ' to ' + a.id;
+          //           lines.push( name( a ) + '.removeChild( ' + name( child ) + ' );' );
+          //           a.removeChild( child );
+          //         }
+          //       } else {
+          //         // pick a random modification from the weighted list
+          //         var rr = Math.random() * totalWeight;
+          //         for ( var i = 0; i < nodeMutators.length; i++ ) {
+          //           var mutator = nodeMutators[i];
+          //           rr -= mutator.weight;
+          //           if ( rr <= 0 ) {
+          //             window.fuzzMessage = 'mutating node ' + a.id + ' with ' + mutator.mess;
+          //             lines.push( mutator.line( a ) );
+          //             mutator.f( a );
+          //             break;
+          //           }
+          //         }
+          //       }
+                
+          //       scene.layerAudit();
+                
+          //     } );
+          //     $( '#debug' ).html( scene.getDebugHTML() );
+              
+          //     // an error above will prevent this from running
+          //     window.requestAnimationFrame( fuzz );
+          //   })();
+          // };
         } );
       } else {
         setTimeout( check, 4 );
