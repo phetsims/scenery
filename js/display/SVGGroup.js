@@ -347,9 +347,10 @@ define( function( require ) {
     var group = instance.lookupSVGGroup( block );
     
     if ( group.isReleasable() ) {
-      group.parent.removeChildGroup( group );
+      var parentGroup = group.parent;
+      parentGroup.removeChildGroup( group );
       
-      SVGGroup.releaseGroupsToInstance( block, instance.parent );
+      SVGGroup.releaseGroupsToInstance( block, parentGroup.instance );
       
       group.dispose();
     }
