@@ -73,8 +73,8 @@ define( function( require ) {
     // assign a unique ID to this node (allows trails to get a unique list of IDs)
     this._id = globalIdCounter++;
     
-    // all of the DisplayInstances tracking this Node
-    this._displayInstances = [];
+    // all of the Instances tracking this Node
+    this._instances = [];
     
     // drawable states that need to be updated on mutations. generally added by SVG and DOM elements that need to closely track state (possibly by Canvas to maintain dirty state)
     this._drawables = [];
@@ -1772,27 +1772,30 @@ define( function( require ) {
     },
     
     /*---------------------------------------------------------------------------*
-    * DisplayInstance handling
+    * Instance handling
     *----------------------------------------------------------------------------*/
     
-    getDisplayInstances: function() {
-      return this._displayInstances;
+    // @private
+    getInstances: function() {
+      return this._instances;
     },
     
-    addDisplayInstance: function( displayInstance ) {
-      assert && assert( displayInstance instanceof scenery.DisplayInstance );
-      this._displayInstances.push( displayInstance );
-      if ( this._displayInstances.length === 1 ) {
+    // @private
+    addInstance: function( instance ) {
+      assert && assert( instance instanceof scenery.Instance );
+      this._instances.push( instance );
+      if ( this._instances.length === 1 ) {
         this.firstInstanceAdded();
       }
     },
     
-    removeDisplayInstance: function( displayInstance ) {
-      assert && assert( displayInstance instanceof scenery.DisplayInstance );
-      var index = _.indexOf( this._displayInstances, displayInstance );
-      assert && assert( index !== -1, 'Cannot remove a DisplayInstance from a Node if it was not there' );
-      this._displayInstances.splice( index, 1 );
-      if ( this._displayInstances.length === 0 ) {
+    // @private
+    removeInstance: function( instance ) {
+      assert && assert( instance instanceof scenery.Instance );
+      var index = _.indexOf( this._instances, instance );
+      assert && assert( index !== -1, 'Cannot remove a Instance from a Node if it was not there' );
+      this._instances.splice( index, 1 );
+      if ( this._instances.length === 0 ) {
         this.lastInstanceRemoved();
       }
     },

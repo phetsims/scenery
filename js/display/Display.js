@@ -24,7 +24,7 @@ define( function( require ) {
   require( 'SCENERY/display/BackboneDrawable' );
   require( 'SCENERY/display/CanvasBlock' );
   require( 'SCENERY/display/CanvasSelfDrawable' );
-  require( 'SCENERY/display/DisplayInstance' );
+  require( 'SCENERY/display/Instance' );
   require( 'SCENERY/display/DOMSelfDrawable' );
   require( 'SCENERY/display/InlineCanvasCacheDrawable' );
   require( 'SCENERY/display/Renderer' );
@@ -60,8 +60,8 @@ define( function( require ) {
     this._rootNode = rootNode;
     this._rootBackbone = null; // to be filled in later
     this._domElement = scenery.BackboneDrawable.createDivBackbone();
-    this._sharedCanvasInstances = {}; // map from Node ID to DisplayInstance, for fast lookup
-    this._baseInstance = null; // will be filled with the root DisplayInstance
+    this._sharedCanvasInstances = {}; // map from Node ID to Instance, for fast lookup
+    this._baseInstance = null; // will be filled with the root Instance
     
     // variable state
     this._frameId = 0; // incremented for every rendered frame
@@ -98,7 +98,7 @@ define( function( require ) {
       // from code below without triggering side effects (we assume that we are not reentrant).
       this._rootNode.validateWatchedBounds();
       
-      this._baseInstance = this._baseInstance || scenery.DisplayInstance.createFromPool( this, new scenery.Trail( this._rootNode ) );
+      this._baseInstance = this._baseInstance || scenery.Instance.createFromPool( this, new scenery.Trail( this._rootNode ) );
       this._baseInstance.baseSyncTree();
       if ( firstRun ) {
         this.markTransformRootDirty( this._baseInstance, this._baseInstance.isTransformed ); // marks the transform root as dirty (since it is)
@@ -221,11 +221,11 @@ define( function( require ) {
     set height( value ) { this.setHeight( value ); },
     
     /*
-     * Called from DisplayInstances that will need a transform update (for listeners and precomputation).
+     * Called from Instances that will need a transform update (for listeners and precomputation).
      * @param passTransform {Boolean} - Whether we should pass the first transform root when validating transforms (should be true if the instance is transformed)
      */
-    markTransformRootDirty: function( displayInstance, passTransform ) {
-      passTransform ? this._dirtyTransformRoots.push( displayInstance ) : this._dirtyTransformRootsWithoutPass.push( displayInstance );
+    markTransformRootDirty: function( instance, passTransform ) {
+      passTransform ? this._dirtyTransformRoots.push( instance ) : this._dirtyTransformRootsWithoutPass.push( instance );
     },
     
     updateDirtyTransformRoots: function() {
@@ -237,8 +237,8 @@ define( function( require ) {
       }
     },
     
-    markInstanceRootForDisposal: function( displayInstance ) {
-      this._instanceRootsToDispose.push( displayInstance );
+    markInstanceRootForDisposal: function( instance ) {
+      this._instanceRootsToDispose.push( instance );
     },
     
     markDrawableForDisposal: function( drawable ) {

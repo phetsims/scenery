@@ -198,7 +198,7 @@ define( function( require ) {
     },
     
     /*
-     * Whether we can just update the state on a DisplayInstance when changing from this state => otherState.
+     * Whether we can just update the state on an Instance when changing from this state => otherState.
      * This is generally not possible if there is a change in whether the instance should be a transform root (e.g. backbone/single-cache),
      * so we will have to recreate the instance and its subtree if that is the case.
      */

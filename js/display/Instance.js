@@ -5,10 +5,10 @@
  * that is needed to tracking instance-specific display information, and signals to the display system when other
  * changes are necessary.
  *
- * DisplayInstances generally form a true tree, as opposed to the DAG of nodes. The one exception is for shared Canvas caches,
+ * Instances generally form a true tree, as opposed to the DAG of nodes. The one exception is for shared Canvas caches,
  * where multiple instances can point to one globally-stored (shared) cache instance.
  *
- * A DisplayInstance is pooled, but when constructed will not automatically create children, drawables, etc.
+ * An Instance is pooled, but when constructed will not automatically create children, drawables, etc.
  * syncTree() is responsible for synchronizing the instance itself and its entire subtree.
  *
  **********************
@@ -22,8 +22,8 @@
  * affect that relative transform. This is key to setting the CSS transform on backbones, DOM nodes, having the transforms necessary for
  * the fastest Canvas display, and determining fitting bounds for layers.
  *
- * Each DisplayInstance has its own "relative trail", although these aren't stored. We use implicit hierarchies in the DisplayInstance tree
- * for this purpose. If a DisplayInstance is a CSS-transformed backbone, or any other case that requires drawing beneath to be done relative
+ * Each Instance has its own "relative trail", although these aren't stored. We use implicit hierarchies in the Instance tree
+ * for this purpose. If an Instance is a CSS-transformed backbone, or any other case that requires drawing beneath to be done relative
  * to its local coordinate frame, we call it a transform "root", and it has instance.isTransformed set to true. This should NEVER change for
  * an instance (any changes that would do this require reconstructing the instance tree).
  *
@@ -99,14 +99,14 @@ define( function( require ) {
     b.pendingPreviousDrawable = a;
   }
   
-  scenery.DisplayInstance = function DisplayInstance( display, trail ) {
+  scenery.Instance = function Instance( display, trail ) {
     this.active = false;
     
     this.initialize( display, trail );
   };
-  var DisplayInstance = scenery.DisplayInstance;
+  var Instance = scenery.Instance;
   
-  inherit( Object, DisplayInstance, {
+  inherit( Object, Instance, {
     initialize: function( display, trail ) {
       assert && assert( !this.active, 'We should never try to initialize an already active object' );
       
@@ -144,7 +144,7 @@ define( function( require ) {
       this.childRemovedListener = this.childRemovedListener || this.onChildRemoved.bind( this );
       
       // we need to add this reference on stateless instances, so that we can find out if it was removed before our syncTree was called
-      this.node.addDisplayInstance( this );
+      this.node.addInstance( this );
       
       // outstanding external references. used for shared cache instances, where multiple instances can point to us
       this.externalReferenceCount = 0;
@@ -152,7 +152,7 @@ define( function( require ) {
       // whether we have been instantiated. false if we are in a pool waiting to be instantiated
       this.active = true;
       
-      sceneryLayerLog && sceneryLayerLog.DisplayInstance && sceneryLayerLog.DisplayInstance( 'initialized ' + this.toString() );
+      sceneryLayerLog && sceneryLayerLog.Instance && sceneryLayerLog.Instance( 'initialized ' + this.toString() );
       
       return this;
     },
@@ -163,7 +163,7 @@ define( function( require ) {
       this.trail = trail;
       this.node = node;
       this.parent = null; // will be set as needed
-      this.children = cleanArray( this.children ); // Array[DisplayInstance]. NOTE: reliance on correct order after syncTree by at least SVGBlock/SVGGroup
+      this.children = cleanArray( this.children ); // Array[Instance]. NOTE: reliance on correct order after syncTree by at least SVGBlock/SVGGroup
       this.sharedCacheInstance = null; // reference to a shared cache instance (if applicable, it's different than a child)
       
       // child instances are pushed to here when their node is removed from our node. we don't immediately dispose, since it may be added back
@@ -209,9 +209,9 @@ define( function( require ) {
     
     // @public
     baseSyncTree: function() {
-      sceneryLayerLog && sceneryLayerLog.DisplayInstance && sceneryLayerLog.DisplayInstance( '-------- START baseSyncTree ' + this.toString() + ' --------' );
+      sceneryLayerLog && sceneryLayerLog.Instance && sceneryLayerLog.Instance( '-------- START baseSyncTree ' + this.toString() + ' --------' );
       this.syncTree( scenery.RenderState.RegularState.createRootState( this.node ) );
-      sceneryLayerLog && sceneryLayerLog.DisplayInstance && sceneryLayerLog.DisplayInstance( '-------- END baseSyncTree ' + this.toString() + ' --------' );
+      sceneryLayerLog && sceneryLayerLog.Instance && sceneryLayerLog.Instance( '-------- END baseSyncTree ' + this.toString() + ' --------' );
       this.cleanStitchChangeInterval();
     },
     
@@ -234,7 +234,7 @@ define( function( require ) {
      *          drawableBeforeFirstChange and drawableAfterLastChange
      */
     syncTree: function( state ) {
-      sceneryLayerLog && sceneryLayerLog.DisplayInstance && sceneryLayerLog.DisplayInstance( 'syncTree ' + this.toString() + ' ' + state.toString() );
+      sceneryLayerLog && sceneryLayerLog.Instance && sceneryLayerLog.Instance( 'syncTree ' + this.toString() + ' ' + state.toString() );
       
       assert && assert( state && state.isSharedCanvasCachePlaceholder !== undefined, 'RenderState duck-typing instanceof' );
       assert && assert( !this.parent || !this.parent.isStateless(), 'We should not have a stateless parent instance' ); // may access isTransformed up to root to determine relative trails
@@ -352,7 +352,7 @@ define( function( require ) {
           for ( var k = 0; k < this.node.children.length; k++ ) {
             // create a child instance
             var child = this.node.children[k];
-            this.appendInstance( DisplayInstance.createFromPool( this.display, this.trail.copy().addDescendant( child, k ) ) );
+            this.appendInstance( Instance.createFromPool( this.display, this.trail.copy().addDescendant( child, k ) ) );
           }
         }
         
@@ -366,7 +366,7 @@ define( function( require ) {
             this.display.markInstanceRootForDisposal( childInstance );
             
             // swap in a new instance
-            var replacementInstance = DisplayInstance.createFromPool( this.display, this.trail.copy().addDescendant( childInstance.node, i ) );
+            var replacementInstance = Instance.createFromPool( this.display, this.trail.copy().addDescendant( childInstance.node, i ) );
             this.replaceInstanceWithIndex( childInstance, replacementInstance, i );
             childInstance = replacementInstance;
           }
@@ -511,7 +511,7 @@ define( function( require ) {
         
         // TODO: increment reference counting?
         if ( !this.sharedCacheInstance ) {
-          this.sharedCacheInstance = DisplayInstance.createFromPool( this.display, new scenery.Trail( this.node ) );
+          this.sharedCacheInstance = Instance.createFromPool( this.display, new scenery.Trail( this.node ) );
           this.sharedCacheInstance.syncTree( scenery.RenderState.RegularState.createSharedCacheState( this.node ) );
           this.display._sharedCanvasInstances[instanceKey] = this.sharedCacheInstance;
           // TODO: reference counting?
@@ -581,7 +581,7 @@ define( function( require ) {
     
     // NOTE: different parameter order compared to Node
     insertInstance: function( instance, index ) {
-      assert && assert( instance instanceof DisplayInstance );
+      assert && assert( instance instanceof Instance );
       assert && assert( index >= 0 && index <= this.children.length,
                         'Instance insertion bounds check for index ' + index + ' with previous children length ' + this.children.length );
       
@@ -641,7 +641,7 @@ define( function( require ) {
     },
     
     removeInstanceWithIndex: function( instance, index ) {
-      assert && assert( instance instanceof DisplayInstance );
+      assert && assert( instance instanceof Instance );
       assert && assert( index >= 0 && index < this.children.length,
                         'Instance removal bounds check for index ' + index + ' with previous children length ' + this.children.length );
       
@@ -696,7 +696,7 @@ define( function( require ) {
     
     // if we have a child instance that corresponds to this node, return it (otherwise null)
     findChildInstanceOnNode: function( node ) {
-      var instances = node.getDisplayInstances();
+      var instances = node.getInstances();
       for ( var i = 0; i < instances.length; i++ ) {
         if ( instances[i].parent === this ) {
           return instances[i];
@@ -716,7 +716,7 @@ define( function( require ) {
         instance.addRemoveCounter += 1;
         assert && assert( instance.addRemoveCounter === 0 );
       } else {
-        instance = DisplayInstance.createFromPool( this.display, this.trail.copy().addDescendant( childNode, index ) );
+        instance = Instance.createFromPool( this.display, this.trail.copy().addDescendant( childNode, index ) );
       }
       
       this.insertInstance( instance, index );
@@ -1037,7 +1037,7 @@ define( function( require ) {
     // remove a reference for an SVG group (fastest way to track them)
     removeSVGGroup: function( group ) {
       var index = _.indexOf( this.svgGroups, group );
-      assert && assert( index >= 0, 'Tried to remove an SVGGroup from a DisplayInstance when it did not exist' );
+      assert && assert( index >= 0, 'Tried to remove an SVGGroup from an Instance when it did not exist' );
       
       this.svgGroups.splice( index, 1 ); // TODO: remove function
     },
@@ -1074,9 +1074,9 @@ define( function( require ) {
     
     // clean up listeners and garbage, so that we can be recycled (or pooled)
     dispose: function() {
-      sceneryLayerLog && sceneryLayerLog.DisplayInstance && sceneryLayerLog.DisplayInstance( 'dispose ' + this.toString() );
+      sceneryLayerLog && sceneryLayerLog.Instance && sceneryLayerLog.Instance( 'dispose ' + this.toString() );
       
-      assert && assert( this.active, 'Seems like we tried to dispose this DisplayInstance twice, it is not active' );
+      assert && assert( this.active, 'Seems like we tried to dispose this Instance twice, it is not active' );
       
       this.active = false;
       
@@ -1098,7 +1098,7 @@ define( function( require ) {
         }
       }
       
-      this.node.removeDisplayInstance( this );
+      this.node.removeInstance( this );
       
       // release our reference to a shared cache if applicable, and dispose if there are no other references
       if ( this.sharedCacheInstance ) {
@@ -1210,19 +1210,19 @@ define( function( require ) {
   
   // object pooling
   /* jshint -W064 */
-  Poolable( DisplayInstance, {
+  Poolable( Instance, {
     constructorDuplicateFactory: function( pool ) {
       return function( display, trail ) {
         if ( pool.length ) {
-          sceneryLayerLog && sceneryLayerLog.DisplayInstance && sceneryLayerLog.DisplayInstance( 'new from pool' );
+          sceneryLayerLog && sceneryLayerLog.Instance && sceneryLayerLog.Instance( 'new from pool' );
           return pool.pop().initialize( display, trail );
         } else {
-          sceneryLayerLog && sceneryLayerLog.DisplayInstance && sceneryLayerLog.DisplayInstance( 'new from constructor' );
-          return new DisplayInstance( display, trail );
+          sceneryLayerLog && sceneryLayerLog.Instance && sceneryLayerLog.Instance( 'new from constructor' );
+          return new Instance( display, trail );
         }
       };
     }
   } );
   
-  return DisplayInstance;
+  return Instance;
 } );

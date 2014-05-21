@@ -171,7 +171,7 @@ define( function( require ) {
       if ( this.getStroke() !== stroke ) {
         
         //OHTWO TODO: probably shouldn't have a reference here
-        var hasInstances = this._displayInstances.length > 0;
+        var hasInstances = this._instances.length > 0;
         
         if ( hasInstances && this._stroke && this._stroke.removeChangeListener ) {
           this._stroke.removeChangeListener( this._strokeListener );

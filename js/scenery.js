@@ -43,7 +43,7 @@ define( function( require ) {
       
       // window.sceneryLayerLog.dirty = function( ob ) { console.log( '[dirty] ' + ob ); };
       // window.sceneryLayerLog.BackboneDrawable = function( ob ) { console.log( '[Backbone] ' + ob ); };
-      // window.sceneryLayerLog.DisplayInstance = function( ob ) { console.log( '[Instance] ' + ob ); };
+      // window.sceneryLayerLog.Instance = function( ob ) { console.log( '[Instance] ' + ob ); };
       // window.sceneryLayerLog.SVGBlock = function( ob ) { console.log( '[SVG] ' + ob ); };
       // window.sceneryLayerLog.SVGGroup = function( ob ) { console.log( '[SVGGroup] ' + ob ); };
     },
