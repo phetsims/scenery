@@ -25,7 +25,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   var Node = require( 'SCENERY/nodes/Node' ); // inherits from Node
-  require( 'SCENERY/layers/Renderer' );
+  require( 'SCENERY/display/Renderer' );
   var Fillable = require( 'SCENERY/nodes/Fillable' );
   var Strokable = require( 'SCENERY/nodes/Strokable' );
   require( 'SCENERY/util/Font' );

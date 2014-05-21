@@ -13,7 +13,7 @@ define( function( require ) {
   'use strict';
   
   var scenery = require( 'SCENERY/scenery' );
-  // require( 'SCENERY/layers/Renderer' );
+  // require( 'SCENERY/display/Renderer' );
   
   var bits = [
     scenery.bitmaskSupportsCanvas,

@@ -13,7 +13,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   var Node = require( 'SCENERY/nodes/Node' );
-  require( 'SCENERY/layers/Renderer' );
+  require( 'SCENERY/display/Renderer' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   
   // pass a canvasBounds option if you want to specify the self bounds

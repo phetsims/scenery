@@ -19,7 +19,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
 
   var Node = require( 'SCENERY/nodes/Node' ); // Image inherits from Node
-  require( 'SCENERY/layers/Renderer' ); // we need to specify the Renderer in the prototype
+  require( 'SCENERY/display/Renderer' ); // we need to specify the Renderer in the prototype
   require( 'SCENERY/util/Util' );
   
   var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );

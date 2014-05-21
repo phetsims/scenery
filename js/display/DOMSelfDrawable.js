@@ -12,7 +12,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
-  require( 'SCENERY/layers/Renderer' );
+  require( 'SCENERY/display/Renderer' );
   
   scenery.DOMSelfDrawable = function DOMSelfDrawable( renderer, instance ) {
     this.initializeDOMSelfDrawable( renderer, instance );

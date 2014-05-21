@@ -49,7 +49,7 @@ define( [
     'SCENERY/layers/LayerBuilder',
     'SCENERY/layers/LayerStrategy',
     'SCENERY/layers/LayerType',
-    'SCENERY/layers/Renderer',
+    'SCENERY/display/Renderer',
     'SCENERY/layers/SVGLayer',
     
     'SCENERY/nodes/CanvasNode',

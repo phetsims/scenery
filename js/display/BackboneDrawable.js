@@ -14,7 +14,7 @@ define( function( require ) {
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
-  var Renderer = require( 'SCENERY/layers/Renderer' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
   var CanvasBlock = require( 'SCENERY/display/CanvasBlock' );
   var SVGBlock = require( 'SCENERY/display/SVGBlock' );
   var DOMBlock = require( 'SCENERY/display/DOMBlock' );

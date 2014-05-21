@@ -27,10 +27,10 @@ define( function( require ) {
   require( 'SCENERY/display/DisplayInstance' );
   require( 'SCENERY/display/DOMSelfDrawable' );
   require( 'SCENERY/display/InlineCanvasCacheDrawable' );
+  require( 'SCENERY/display/Renderer' );
   require( 'SCENERY/display/SharedCanvasCacheDrawable' );
   require( 'SCENERY/display/SVGSelfDrawable' );
   require( 'SCENERY/input/Input' );
-  require( 'SCENERY/layers/Renderer' );
   require( 'SCENERY/util/Trail' );
   
   // flags object used for determining what the cursor should be underneath a mouse

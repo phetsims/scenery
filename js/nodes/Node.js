@@ -24,7 +24,7 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/RendererSummary' );
-  // require( 'SCENERY/layers/Renderer' ); // commented out so Require.js doesn't balk at the circular dependency
+  // require( 'SCENERY/display/Renderer' ); // commented out so Require.js doesn't balk at the circular dependency
   
   // TODO: FIXME: Why do I have to comment out this dependency?
   // require( 'SCENERY/util/Trail' );

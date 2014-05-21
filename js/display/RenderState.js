@@ -28,7 +28,7 @@ define( function( require ) {
   
   var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
-  require( 'SCENERY/layers/Renderer' );
+  require( 'SCENERY/display/Renderer' );
   require( 'SCENERY/util/Trail' );
   
   var RenderState = scenery.RenderState = {};

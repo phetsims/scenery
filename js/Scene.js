@@ -29,7 +29,7 @@ define( function( require ) {
   require( 'SCENERY/util/TrailPointer' );
   require( 'SCENERY/input/Input' );
   require( 'SCENERY/layers/LayerBuilder' );
-  require( 'SCENERY/layers/Renderer' );
+  require( 'SCENERY/display/Renderer' );
   require( 'SCENERY/overlays/PointerAreaOverlay' );
   require( 'SCENERY/overlays/PointerOverlay' );
 
