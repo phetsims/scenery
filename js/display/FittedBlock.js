@@ -1,0 +1,172 @@
+// Copyright 2002-2014, University of Colorado
+
+/**
+ * A Block that needs to be fitted to either the screen bounds or other local bounds.
+ *
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ */
+
+define( function( require ) {
+  'use strict';
+  
+  var inherit = require( 'PHET_CORE/inherit' );
+  var Poolable = require( 'PHET_CORE/Poolable' );
+  var cleanArray = require( 'PHET_CORE/cleanArray' );
+  var Bounds2 = require( 'DOT/Bounds2' );
+  var scenery = require( 'SCENERY/scenery' );
+  var Block = require( 'SCENERY/display/Block' );
+  var SVGGroup = require( 'SCENERY/display/SVGGroup' );
+  
+  scenery.FittedBlock = function FittedBlock( display, renderer, transformRootInstance ) {
+    this.initialize( display, renderer, transformRootInstance );
+  };
+  var FittedBlock = scenery.FittedBlock;
+  
+  inherit( Block, FittedBlock, {
+    initializeFittedBlock: function( display, renderer, transformRootInstance ) {
+      this.initializeBlock( display, renderer );
+      
+      this.transformRootInstance = transformRootInstance;
+      
+      assert && assert( typeof transformRootInstance.state.isDisplayRoot === 'boolean' );
+      var canBeFullDisplay = transformRootInstance.state.isDisplayRoot;
+      
+      //OHTWO TODO: change fit based on renderer flags or extra parameters
+      this.fit = canBeFullDisplay ? FittedBlock.FULL_DISPLAY : FittedBlock.COMMON_ANCESTOR;
+      
+      this.dirtyFit = true;
+      this.dirtyFitListener = this.dirtyFitListener || this.markDirtyFit.bind( this );
+      this.commonFitInstance = null; // filled in if COMMON_ANCESTOR
+      this.fitBounds = Bounds2.NOTHING.copy(); // tracks the "tight" bounds for fitting, not the actually-displayed bounds
+      this.oldFitBounds = Bounds2.NOTHING.copy(); // copy for storage
+      
+      if ( this.fit === FittedBlock.FULL_DISPLAY ) {
+        this.display.onStatic( 'displaySize', this.dirtyFitListener );
+      }
+      
+      // TODO: add count of boundsless objects?
+      return this;
+    },
+    
+    markDirtyFit: function() {
+      sceneryLayerLog && sceneryLayerLog.dirty && sceneryLayerLog.dirty( 'markDirtyFit on FittedBlock#' + this.id );
+      this.dirtyFit = true;
+      this.markDirty();
+    },
+    
+    // should be called from update() whenever this block is dirty
+    updateFit: function() {
+      assert && assert( this.fit === FittedBlock.FULL_DISPLAY || this.fit === FittedBlock.COMMON_ANCESTOR,
+                        'Unsupported fit' );
+      
+      // check to see if we don't need to re-fit
+      if ( !this.dirtyFit && this.fit === FittedBlock.FULL_DISPLAY ) {
+        return;
+      }
+      
+      sceneryLayerLog && sceneryLayerLog.FittedBlock && sceneryLayerLog.FittedBlock( 'updateFit #' + this.id );
+      
+      this.dirtyFit = false;
+      
+      if ( this.fit === FittedBlock.FULL_DISPLAY ) {
+        var size = this.display.getSize();
+        this.svg.setAttribute( 'width', size.width );
+        this.svg.setAttribute( 'height', size.height );
+      } else if ( this.fit === FittedBlock.COMMON_ANCESTOR ) {
+        assert && assert( this.commonFitInstance.trail.length >= this.transformRootInstance.trail.length );
+        
+        // will trigger bounds validation (for now) until we have a better way of handling this
+        this.fitBounds.set( this.commonFitInstance.node.getLocalBounds() );
+        
+        //OHTWO TODO: bail out here when possible (should store an old "local" one to compare with?)
+        
+        // walk it up, transforming so it is relative to our transform root
+        var instance = this.commonFitInstance;
+        while ( instance !== this.transformRootInstance ) {
+          // shouldn't infinite loop, we'll null-pointer beforehand unless something is seriously wrong
+          this.fitBounds.transform( instance.node.getMatrix() );
+          instance = instance.parent;
+        }
+        
+        //OHTWO TODO: change only when necessary
+        if ( !this.fitBounds.equals( this.oldFitBounds ) ) {
+          // store our copy for future checks (and do it before we modify this.fitBounds)
+          this.oldFitBounds.set( this.fitBounds );
+          
+          this.fitBounds.roundOut();
+          this.fitBounds.dilate( 4 ); // for safety, modify in the future
+          
+          var x = this.fitBounds.minX;
+          var y = this.fitBounds.minY;
+          this.baseTransformGroup.setAttribute( 'transform', 'translate(' + (-x) + ',' + (-y) + ')' ); // subtract off so we have a tight fit
+          this.svg.style.transform = 'matrix(1,0,0,1,' + x + ',' + y + ')'; // reapply the translation as a CSS transform
+          this.svg.setAttribute( 'width', this.fitBounds.width );
+          this.svg.setAttribute( 'height', this.fitBounds.height );
+        }
+      } else {
+        throw new Error( 'unknown fit' );
+      }
+    },
+    
+    dispose: function() {
+      sceneryLayerLog && sceneryLayerLog.FittedBlock && sceneryLayerLog.FittedBlock( 'dispose #' + this.id );
+      
+      if ( this.fit === FittedBlock.FULL_DISPLAY ) {
+        this.display.offStatic( 'displaySize', this.dirtyFitListener );
+      }
+      
+      // clear references
+      this.transformRootInstance = null;
+      this.commonFitInstance = null;
+      
+      Block.prototype.dispose.call( this );
+    },
+    
+    notifyInterval: function( firstDrawable, lastDrawable ) {
+      sceneryLayerLog && sceneryLayerLog.FittedBlock && sceneryLayerLog.FittedBlock( '#' + this.id + '.notifyInterval ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() );
+      
+      Block.prototype.notifyInterval.call( this, firstDrawable, lastDrawable );
+      
+      // if we use a common ancestor fit, find the common ancestor instance
+      if ( this.fit === FittedBlock.COMMON_ANCESTOR ) {
+        assert && assert( firstDrawable.instance && lastDrawable.instance,
+                          'For common-ancestor SVG fits, we need the first and last drawables to have direct instance references' );
+        
+        var firstInstance = firstDrawable.instance;
+        var lastInstance = lastDrawable.instance;
+        
+        // walk down the longest one until they are a common length
+        var minLength = Math.min( firstInstance.trail.length, lastInstance.trail.length );
+        while ( firstInstance.trail.length > minLength ) {
+          firstInstance = firstInstance.parent;
+        }
+        while ( lastInstance.trail.length > minLength ) {
+          lastInstance = lastInstance.parent;
+        }
+        
+        // step down until they match
+        while( firstInstance !== lastInstance ) {
+          firstInstance = firstInstance.parent;
+          lastInstance = lastInstance.parent;
+        }
+        
+        this.commonFitInstance = firstInstance;
+        sceneryLayerLog && sceneryLayerLog.FittedBlock && sceneryLayerLog.FittedBlock( '   common fit instance: ' + this.commonFitInstance.toString() );
+        
+        assert && assert( this.commonFitInstance.trail.length >= this.transformRootInstance.trail.length );
+        
+        this.markDirtyFit();
+      }
+    }
+  } );
+  
+  FittedBlock.FULL_DISPLAY = 1;
+  FittedBlock.COMMON_ANCESTOR = 2;
+  
+  FittedBlock.fitString = {
+    1: 'fullDisplay',
+    2: 'commonAncestor'
+  };
+  
+  return FittedBlock;
+} );

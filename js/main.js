@@ -22,6 +22,7 @@ define( [
     'SCENERY/display/DOMBlock',
     'SCENERY/display/DOMSelfDrawable',
     'SCENERY/display/Drawable',
+    'SCENERY/display/FittedBlock',
     'SCENERY/display/InlineCanvasCacheDrawable',
     'SCENERY/display/Instance',
     'SCENERY/display/Renderer',
