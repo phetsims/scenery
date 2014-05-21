@@ -42,9 +42,9 @@ define( function( require ) {
       // feature-specific debugging flags (so we don't log the entire world)
       
       // window.sceneryLayerLog.dirty = function( ob ) { console.log( '[dirty] ' + ob ); };
-      // window.sceneryLayerLog.Backbone = function( ob ) { console.log( '[Backbone] ' + ob ); };
-      // window.sceneryLayerLog.DisplayInstance = function( ob ) { console.log( '[DisplayInstance] ' + ob ); };
-      // window.sceneryLayerLog.SVGBlock = function( ob ) { console.log( '[SVGBlock] ' + ob ); };
+      // window.sceneryLayerLog.BackboneDrawable = function( ob ) { console.log( '[Backbone] ' + ob ); };
+      // window.sceneryLayerLog.DisplayInstance = function( ob ) { console.log( '[Instance] ' + ob ); };
+      // window.sceneryLayerLog.SVGBlock = function( ob ) { console.log( '[SVG] ' + ob ); };
       // window.sceneryLayerLog.SVGGroup = function( ob ) { console.log( '[SVGGroup] ' + ob ); };
     },
   
@@ -68,6 +68,7 @@ define( function( require ) {
       window.sceneryAccessibilityLog = null;
     },
     
+    //OHTWO TODO: remove duplication between here and Renderer?
     bitmaskAll:            0xFFFFFFF, // 28 bits for now (don't go over 31 bits, or we'll see a 32-bit platform slowdown!)
     bitmaskNodeDefault:    0x00003FF,
     bitmaskPaintedDefault: 0x0000200, // bounds valid, no renderer set

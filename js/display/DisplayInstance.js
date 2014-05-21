@@ -1080,6 +1080,10 @@ define( function( require ) {
       
       this.active = false;
       
+      this.selfDrawable && this.selfDrawable.dispose();
+      this.groupDrawable && this.groupDrawable.dispose();
+      this.sharedCacheDrawable && this.sharedCacheDrawable.dispose();
+      
       for ( var i = 0; i < this.children.length; i++ ) {
         this.children[i].dispose();
       }
@@ -1095,10 +1099,6 @@ define( function( require ) {
       }
       
       this.node.removeDisplayInstance( this );
-      
-      this.selfDrawable && this.selfDrawable.dispose();
-      this.groupDrawable && this.groupDrawable.dispose();
-      this.sharedCacheDrawable && this.sharedCacheDrawable.dispose();
       
       // release our reference to a shared cache if applicable, and dispose if there are no other references
       if ( this.sharedCacheInstance ) {
