@@ -119,6 +119,7 @@
           };
           
           window.cssTest = function() {
+            window.assertSlow = window.assert;
             setTimeout( function(){
               window.back = new scenery.Rectangle( 0, 0, 100, 100, 0, 0, {
                 fill: '#000'

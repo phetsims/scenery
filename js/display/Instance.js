@@ -1157,8 +1157,8 @@ define( function( require ) {
         assertSlow( ( this.firstDrawable === null ) === ( this.lastDrawable === null ),
                     'First/last drawables need to both be null or non-null' );
         
-        assertSlow( ( !this.state.isBackbone && !this.state.isSharedCanvasCachePlaceholder ) || this.block,
-                    'If we are a backbone or shared cache, we need to have a block reference' );
+        assertSlow( ( !this.state.isBackbone && !this.state.isSharedCanvasCachePlaceholder ) || this.groupDrawable,
+                    'If we are a backbone or shared cache, we need to have a groupDrawable reference' );
         
         assertSlow( !this.state.isSharedCanvasCachePlaceholder || !this.node.isPainted() || this.selfDrawable,
                     'We need to have a selfDrawable if we are painted and not a shared cache' );
@@ -1169,7 +1169,7 @@ define( function( require ) {
         assertSlow( !this.state.isSharedCanvasCachePlaceholder || this.sharedCacheDrawable,
                     'We need to have a sharedCacheDrawable if we are a shared cache' );
         
-        assertSlow( this.state.isTransformed || this.isTransformed,
+        assertSlow( this.state.isTransformed === this.isTransformed || this.isStateless(),
                     'isTransformed should match' );
         
         assertSlow( !this.parent || ( this.relativeChildDirtyFrame !== frameId ) || ( this.parent.relativeChildDirtyFrame === frameId ),
