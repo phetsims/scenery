@@ -133,10 +133,12 @@
               
               display.updateDisplay();
               
+              console.log( '----- adding transform -----' );
               circle._hints.cssTransform = true;
               
               display.updateDisplay();
               
+              console.log( '----- removing transform -----' );
               circle._hints.cssTransform = false;
               
               display.updateDisplay();

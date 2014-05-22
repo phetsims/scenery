@@ -33,6 +33,8 @@ define( function( require ) {
       // unique ID for drawables
       this.id = this.id || globalId++;
       
+      sceneryLayerLog && sceneryLayerLog.Drawable && sceneryLayerLog.Drawable( '[' + this.constructor.name + '*] initialize ' + this.toString() );
+      
       this.cleanDrawable();
       
       this.renderer = renderer;
@@ -71,6 +73,8 @@ define( function( require ) {
     },
     
     dispose: function() {
+      sceneryLayerLog && sceneryLayerLog.Drawable && sceneryLayerLog.Drawable( '[' + this.constructor.name + '*] dispose ' + this.toString() );
+      
       this.cleanDrawable();
       this.disposed = true;
       

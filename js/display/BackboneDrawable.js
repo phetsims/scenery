@@ -106,6 +106,11 @@ define( function( require ) {
         node.offStatic( 'clip', this.clipDirtyListener );
       }
       
+      // debugger;
+      for ( var d = this.lastFirstDrawable; d !== null && d.previousDrawable !== this.lastLastDrawable; d = d.nextDrawable ) {
+        d.parentDrawable.removeDrawable( d );
+      }
+      
       this.disposeBlocks();
       
       if ( this.willApplyTransform ) {
@@ -234,6 +239,7 @@ define( function( require ) {
     
     stitch: function( firstDrawable, lastDrawable, oldDrawableBeforeChange, oldDrawableAfterChange ) {
       sceneryLayerLog && sceneryLayerLog.BackboneDrawable && sceneryLayerLog.BackboneDrawable( 'stitch ' + this.toString() + ' first:' + firstDrawable.toString() + ' last:' + lastDrawable.toString() );
+      sceneryLayerLog && sceneryLayerLog.BackboneDrawable && sceneryLayerLog.push();
       
       for ( var d = this.lastFirstDrawable; d !== null && d.previousDrawable !== this.lastLastDrawable; d = d.nextDrawable ) {
         d.parentDrawable.removeDrawable( d );
@@ -308,6 +314,8 @@ define( function( require ) {
       for ( var k = 0; k < this.blocks.length; k++ ) {
         this.blocks[k].domElement.style.zIndex = zIndex++; // NOTE: this should give it its own stacking index (which is what we want)
       }
+      
+      sceneryLayerLog && sceneryLayerLog.BackboneDrawable && sceneryLayerLog.pop();
     }
   } );
   

@@ -12,7 +12,6 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var Bounds2 = require( 'DOT/Bounds2' );
   var scenery = require( 'SCENERY/scenery' );
   var FittedBlock = require( 'SCENERY/display/FittedBlock' );
   var SVGGroup = require( 'SCENERY/display/SVGGroup' );
@@ -34,12 +33,11 @@ define( function( require ) {
       if ( !this.domElement ) {
         // main SVG element
         this.svg = document.createElementNS( scenery.svgns, 'svg' );
-        // this.svg.setAttribute( 'width', width );
-        // this.svg.setAttribute( 'height', height );
         this.svg.setAttribute( 'stroke-miterlimit', 10 ); // to match our Canvas brethren so we have the same default behavior
         this.svg.style.position = 'absolute';
         this.svg.style.left = '0';
         this.svg.style.top = '0';
+        //OHTWO TODO: why would we clip the individual layers also? Seems like a potentially useless performance loss
         // this.svg.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
         this.svg.style['pointer-events'] = 'none';
         

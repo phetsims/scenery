@@ -39,15 +39,26 @@ define( function( require ) {
     enableLayerLogging: function() {
       window.sceneryLayerLog = function( ob ) { console.log( ob ); };
       
-      // feature-specific debugging flags (so we don't log the entire world)
+      var padding = '';
+      window.sceneryLayerLog.push = function() {
+        padding += '| ';
+      };
+      window.sceneryLayerLog.pop = function() {
+        padding = padding.slice( 0, -2 );
+      };
       
-      // window.sceneryLayerLog.dirty = function( ob ) { console.log( '[dirty] ' + ob ); };
-      // window.sceneryLayerLog.BackboneDrawable = function( ob ) { console.log( '[Backbone] ' + ob ); };
-      // window.sceneryLayerLog.CanvasBlock = function( ob ) { console.log( '[Canvas] ' + ob ); };
-      // window.sceneryLayerLog.FittedBlock = function( ob ) { console.log( '[FittedBlock] ' + ob ); };
-      // window.sceneryLayerLog.Instance = function( ob ) { console.log( '[Instance] ' + ob ); };
-      // window.sceneryLayerLog.SVGBlock = function( ob ) { console.log( '[SVG] ' + ob ); };
-      // window.sceneryLayerLog.SVGGroup = function( ob ) { console.log( '[SVGGroup] ' + ob ); };
+      var padStyle = 'color: #ddd;';
+      
+      // feature-specific debugging flags (so we don't log the entire world)
+      window.sceneryLayerLog.dirty            = function( ob ) { console.log( '%c' + padding + '%c[dirty] '       + ob, padStyle, 'color: #aaa;' ); };
+      window.sceneryLayerLog.BackboneDrawable = function( ob ) { console.log( '%c' + padding + '%c[Backbone] '    + ob, padStyle, 'color: #a00;' ); };
+      window.sceneryLayerLog.CanvasBlock      = function( ob ) { console.log( '%c' + padding + '%c[Canvas] '      + ob, padStyle, 'color: #000;' ); };
+      window.sceneryLayerLog.Display          = function( ob ) { console.log( '%c' + padding + '%c[Display] '     + ob, padStyle, 'color: #000;' ); };
+      window.sceneryLayerLog.Drawable         = function( ob ) { console.log( '%c' + padding + '%c'               + ob, padStyle, 'color: #000;' ); };
+      window.sceneryLayerLog.FittedBlock      = function( ob ) { console.log( '%c' + padding + '%c[FittedBlock] ' + ob, padStyle, 'color: #000;' ); };
+      window.sceneryLayerLog.Instance         = function( ob ) { console.log( '%c' + padding + '%c[Instance] '    + ob, padStyle, 'color: #000;' ); };
+      window.sceneryLayerLog.SVGBlock         = function( ob ) { console.log( '%c' + padding + '%c[SVG] '         + ob, padStyle, 'color: #000;' ); };
+      window.sceneryLayerLog.SVGGroup         = function( ob ) { console.log( '%c' + padding + '%c[SVGGroup] '    + ob, padStyle, 'color: #000;' ); };
     },
   
     disableLayerLogging: function() {

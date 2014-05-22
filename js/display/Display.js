@@ -92,6 +92,9 @@ define( function( require ) {
     
     // updates the display's DOM element with the current visual state of the attached root node and its descendants
     updateDisplay: function() {
+      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.Display( 'updateDisplay frame ' + this._frameId );
+      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.push();
+      
       var firstRun = !!this._baseInstance;
       
       // validate bounds for everywhere that could trigger bounds listeners. we want to flush out any changes, so that we can call validateBounds()
@@ -115,6 +118,9 @@ define( function( require ) {
       
       if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
       
+      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.Display( 'disposal phase' );
+      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.push();
+      
       // dispose all of our instances. disposing the root will cause all descendants to also be disposed
       while ( this._instanceRootsToDispose.length ) {
         this._instanceRootsToDispose.pop().dispose();
@@ -125,11 +131,16 @@ define( function( require ) {
         this._drawablesToDispose.pop().dispose();
       }
       
+      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.pop();
+      
       if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
       
       // repaint phase
       //OHTWO TODO: can anything be updated more efficiently by tracking at the Display level? Remember, we have recursive updates so things get updated in the right order!
+      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.Display( 'repaint phase' );
+      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.push();
       this._rootBackbone.update();
+      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.pop();
       
       if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
       
@@ -138,6 +149,8 @@ define( function( require ) {
       this.updateSize();
       
       this._frameId++;
+      
+      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.pop();
     },
     
     updateSize: function() {

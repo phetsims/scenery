@@ -235,6 +235,7 @@ define( function( require ) {
      */
     syncTree: function( state ) {
       sceneryLayerLog && sceneryLayerLog.Instance && sceneryLayerLog.Instance( 'syncTree ' + this.toString() + ' ' + state.toString() );
+      sceneryLayerLog && sceneryLayerLog.Instance && sceneryLayerLog.push();
       
       assert && assert( state && state.isSharedCanvasCachePlaceholder !== undefined, 'RenderState duck-typing instanceof' );
       assert && assert( !this.parent || !this.parent.isStateless(), 'We should not have a stateless parent instance' ); // may access isTransformed up to root to determine relative trails
@@ -499,6 +500,8 @@ define( function( require ) {
       if ( oldState && oldState !== this.state ) {
         oldState.freeToPool();
       }
+      
+      sceneryLayerLog && sceneryLayerLog.Instance && sceneryLayerLog.pop();
       
       return hasStitchChange;
     },
@@ -1080,9 +1083,10 @@ define( function( require ) {
       
       this.active = false;
       
-      this.selfDrawable && this.selfDrawable.dispose();
+      // order is somewhat important
       this.groupDrawable && this.groupDrawable.dispose();
       this.sharedCacheDrawable && this.sharedCacheDrawable.dispose();
+      this.selfDrawable && this.selfDrawable.dispose();
       
       for ( var i = 0; i < this.children.length; i++ ) {
         this.children[i].dispose();

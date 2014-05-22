@@ -10,13 +10,10 @@ define( function( require ) {
   'use strict';
   
   var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
-  var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Bounds2 = require( 'DOT/Bounds2' );
   var Vector2 = require( 'DOT/Vector2' );
   var scenery = require( 'SCENERY/scenery' );
   var Block = require( 'SCENERY/display/Block' );
-  var SVGGroup = require( 'SCENERY/display/SVGGroup' );
   
   scenery.FittedBlock = function FittedBlock( display, renderer, transformRootInstance ) {
     this.initialize( display, renderer, transformRootInstance );
