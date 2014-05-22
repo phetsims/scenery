@@ -162,6 +162,9 @@ define( function( require ) {
       if ( this.options.end ) {
         this.options.end( event, this.trail );
       }
+      
+      // release our reference
+      this.pointer = null;
     },
     
     tryToSnag: function( event ) {
