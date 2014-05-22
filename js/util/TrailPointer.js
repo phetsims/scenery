@@ -17,8 +17,6 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
-  require( 'SCENERY/util/Trail' );
-  
   /*
    * isBefore: whether this points to before the node (and its children) have been rendered, or after
    */

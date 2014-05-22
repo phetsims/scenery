@@ -386,6 +386,13 @@ define( function( require ) {
     },
     
     setPointerDisplayVisible: function( visibility ) {
+      // @deprecated, Joist code calls us with undefined first....
+      if ( visibility === undefined ) {
+        return;
+      }
+      
+      assert && assert( typeof visibility === 'boolean' );
+      
       var hasOverlay = !!this._pointerOverlay;
       
       if ( visibility !== hasOverlay ) {
@@ -400,6 +407,13 @@ define( function( require ) {
     },
     
     setPointerAreaDisplayVisible: function( visibility ) {
+      // @deprecated, Joist code calls us with undefined first....
+      if ( visibility === undefined ) {
+        return;
+      }
+      
+      assert && assert( typeof visibility === 'boolean' );
+      
       var hasOverlay = !!this._pointerAreaOverlay;
       
       if ( visibility !== hasOverlay ) {

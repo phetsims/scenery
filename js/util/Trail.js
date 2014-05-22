@@ -23,6 +23,8 @@ define( function( require ) {
   
   var scenery = require( 'SCENERY/scenery' );
   
+  require( 'SCENERY/util/TrailPointer' );
+  
   require( 'SCENERY/nodes/Node' );
   // require( 'SCENERY/util/TrailPointer' );
   
