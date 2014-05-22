@@ -399,6 +399,7 @@ define( function( require ) {
         if ( !visibility ) {
           this.removeOverlay( this._pointerOverlay );
           this._pointerOverlay.dispose();
+          this._pointerOverlay = null;
         } else {
           this._pointerOverlay = new PointerOverlay( this, this._rootNode );
           this.addOverlay( this._pointerOverlay );
@@ -420,6 +421,7 @@ define( function( require ) {
         if ( !visibility ) {
           this.removeOverlay( this._pointerAreaOverlay );
           this._pointerAreaOverlay.dispose();
+          this._pointerAreaOverlay = null;
         } else {
           this._pointerAreaOverlay = new PointerAreaOverlay( this, this._rootNode );
           this.addOverlay( this._pointerAreaOverlay );

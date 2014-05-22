@@ -40,7 +40,7 @@
     
     #controls {
       position: absolute;
-      width: 150px;
+      width: 170px;
       top: 0;
       right: 0;
     }
@@ -52,8 +52,10 @@
   <div id="controls">
     <button onclick="toggleDebug();">Toggle Debug</button>
     <button onclick="toggleSerialize();">Toggle Serialization</button>
-    <button onclick="toggleUpdates();">Toggle Update</button>
     <button onclick="toggleLogging();">Toggle Logging</button>
+    <button onclick="display.setPointerDisplayVisible( !display._pointerOverlay );">Toggle Pointer Overlay</button>
+    <button onclick="display.setPointerAreaDisplayVisible( !display._pointerAreaOverlay );">Toggle Pointer Area Overlay</button>
+    <button onclick="toggleUpdates();">Toggle Update</button>
     <button onclick="display.initializeStandaloneEvents();">Standalone Events</button>
     <br>
     <br>
