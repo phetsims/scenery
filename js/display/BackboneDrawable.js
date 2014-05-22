@@ -84,6 +84,8 @@ define( function( require ) {
         }
       }
       
+      this.lastZIndex = 0; // our last zIndex is stored, so that overlays can be added easily
+      
       this.blocks = this.blocks || []; // we are responsible for their disposal
       
       //OHTWO @deprecated
@@ -314,6 +316,8 @@ define( function( require ) {
       for ( var k = 0; k < this.blocks.length; k++ ) {
         this.blocks[k].domElement.style.zIndex = zIndex++; // NOTE: this should give it its own stacking index (which is what we want)
       }
+      
+      this.lastZIndex = zIndex;
       
       sceneryLayerLog && sceneryLayerLog.BackboneDrawable && sceneryLayerLog.pop();
     }

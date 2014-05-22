@@ -14,7 +14,8 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
 
-  scenery.PointerAreaOverlay = function PointerAreaOverlay( scene ) {
+  scenery.PointerAreaOverlay = function PointerAreaOverlay( display, scene ) {
+    this.display = display;
     this.scene = scene;
     
     var svg = this.svg = document.createElementNS( scenery.svgns, 'svg' );
@@ -29,26 +30,16 @@ define( function( require ) {
       svg.setAttribute( 'height', height );
       svg.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
     }
-    scene.addEventListener( 'resize', function( args ) {
-      resize( args.width, args.height );
+    display.onStatic( 'displaySize', function( dimension ) {
+      resize( dimension.width, dimension.height );
     } );
-    resize( scene.getSceneWidth(), scene.getSceneHeight() );
+    resize( display.width, display.height );
     
-    scene.$main[0].appendChild( svg );
-    
-    scene.reindexLayers();
+    this.domElement = svg;
   };
   var PointerAreaOverlay = scenery.PointerAreaOverlay;
 
   PointerAreaOverlay.prototype = {
-    dispose: function() {
-      this.scene.$main[0].removeChild( this.svg );
-    },
-
-    reindex: function( index ) {
-      this.svg.style.zIndex = index;
-    },
-    
     addShape: function( shape, color, isOffset ) {
       var path = document.createElementNS( scenery.svgns, 'path' );
       var svgPath = shape.getSVGPath();
@@ -95,6 +86,10 @@ define( function( require ) {
           }
         }
       } );
+    },
+    
+    dispose: function() {
+      
     }
   };
 

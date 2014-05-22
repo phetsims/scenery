@@ -32,6 +32,8 @@ define( function( require ) {
   require( 'SCENERY/display/SVGSelfDrawable' );
   require( 'SCENERY/input/Input' );
   require( 'SCENERY/util/Trail' );
+  var PointerAreaOverlay = require( 'SCENERY/overlays/PointerAreaOverlay' );
+  var PointerOverlay = require( 'SCENERY/overlays/PointerOverlay' );
   
   // flags object used for determining what the cursor should be underneath a mouse
   var isMouseFlags = { isMouse: true };
@@ -78,6 +80,14 @@ define( function( require ) {
     
     // will be filled in with a scenery.Input if event handling is enabled
     this._input = null;
+    
+    // overlays currently being displayed.
+    // API expected:
+    //   .domElement
+    //   .update()
+    this._overlays = [];
+    this._pointerOverlay = null;
+    this._pointerAreaOverlay = null;
     
     this.applyCSSHacks();
     
@@ -150,6 +160,17 @@ define( function( require ) {
       this.updateCursor();
       
       this.updateSize();
+      
+      if ( this._overlays.length ) {
+        var zIndex = this._rootBackbone.lastZIndex;
+        for ( var i = 0; i < this._overlays.length; i++ ) {
+          // layer the overlays properly
+          var overlay = this._overlays[i];
+          overlay.domElement.style.zIndex = zIndex++;
+          
+          overlay.update();
+        }
+      }
       
       this._frameId++;
       
@@ -235,6 +256,16 @@ define( function( require ) {
       }
     },
     set height( value ) { this.setHeight( value ); },
+    
+    addOverlay: function( overlay ) {
+      this._overlays.push( overlay );
+      this._domElement.appendChild( overlay.domElement );
+    },
+    
+    removeOverlay: function( overlay ) {
+      this._domElement.removeChild( overlay.domElement );
+      this._overlays.splice( _.indexOf( this._overlays, overlay ), 1 );
+    },
     
     /*
      * Called from Instances that will need a transform update (for listeners and precomputation).
@@ -355,11 +386,31 @@ define( function( require ) {
     },
     
     setPointerDisplayVisible: function( visibility ) {
-      assert && assert( !visibility, 'setPointerDisplayVisible unimplemented' );
+      var hasOverlay = !!this._pointerOverlay;
+      
+      if ( visibility !== hasOverlay ) {
+        if ( !visibility ) {
+          this.removeOverlay( this._pointerOverlay );
+          this._pointerOverlay.dispose();
+        } else {
+          this._pointerOverlay = new PointerOverlay( this, this._rootNode );
+          this.addOverlay( this._pointerOverlay );
+        }
+      }
     },
     
     setPointerAreaDisplayVisible: function( visibility ) {
-      assert && assert( !visibility, 'setPointerAreaDisplayVisible unimplemented' );
+      var hasOverlay = !!this._pointerAreaOverlay;
+      
+      if ( visibility !== hasOverlay ) {
+        if ( !visibility ) {
+          this.removeOverlay( this._pointerAreaOverlay );
+          this._pointerAreaOverlay.dispose();
+        } else {
+          this._pointerAreaOverlay = new PointerAreaOverlay( this, this._rootNode );
+          this.addOverlay( this._pointerAreaOverlay );
+        }
+      }
     },
     
     updateOnRequestAnimationFrame: function() {

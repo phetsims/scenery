@@ -19,8 +19,9 @@ define( function( require ) {
 
   var Util = require( 'SCENERY/util/Util' );
 
-  scenery.PointerOverlay = function PointerOverlay( scene ) {
+  scenery.PointerOverlay = function PointerOverlay( display, scene ) {
     var pointerOverlay = this;
+    this.display = display;
     this.scene = scene;
 
     // add element to show the pointers
@@ -36,11 +37,11 @@ define( function( require ) {
     var radius = diameter / 2;
 
     //Resize the parent div when the scene is resized
-    scene.addEventListener( 'resize', function( args ) {
-      pointerOverlay.pointerSVGContainer.setAttribute( 'width', args.width );
-      pointerOverlay.pointerSVGContainer.setAttribute( 'height', args.height );
-      pointerOverlay.pointerSVGContainer.style.clip = 'rect(0px,' + args.width + 'px,' + args.height + 'px,0px)';
-    }, false );
+    display.onStatic( 'displaySize', function( dimension ) {
+      pointerOverlay.pointerSVGContainer.setAttribute( 'width', dimension.width );
+      pointerOverlay.pointerSVGContainer.setAttribute( 'height', dimension.height );
+      pointerOverlay.pointerSVGContainer.style.clip = 'rect(0px,' + dimension.width + 'px,' + dimension.height + 'px,0px)';
+    } );
 
     //Display a pointer that was added.  Use a separate SVG layer for each pointer so it can be hardware accelerated, otherwise it is too slow just setting svg internal attributes
     var pointerAdded = this.pointerAdded = function( pointer ) {
@@ -95,27 +96,25 @@ define( function( require ) {
       svg.appendChild( circle );
       pointerOverlay.pointerSVGContainer.appendChild( svg );
     };
-    scene.input.addPointerAddedListener( pointerAdded );
+    display._input.addPointerAddedListener( pointerAdded );
 
     //if there is already a mouse, add it here
     //TODO: if there already other non-mouse touches, could be added here
-    if ( scene.input && scene.input.mouse ) {
-      pointerAdded( scene.input.mouse );
+    if ( display._input && display._input.mouse ) {
+      pointerAdded( display._input.mouse );
     }
-
-    scene.reindexLayers();
-    scene.$main[0].appendChild( this.pointerSVGContainer );
+    
+    this.domElement = this.pointerSVGContainer;
   };
   var PointerOverlay = scenery.PointerOverlay;
 
   PointerOverlay.prototype = {
     dispose: function() {
-      this.scene.$main[0].removeChild( this.pointerSVGContainer );
-      this.scene.input.removePointerAddedListener( this.pointerAdded );
+      this.display._input.removePointerAddedListener( this.pointerAdded );
     },
-
-    reindex: function( index ) {
-      this.pointerSVGContainer.style.zIndex = index; //Make sure it is in front of enough other things!
+    
+    update: function() {
+      
     }
   };
 
