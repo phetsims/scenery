@@ -112,7 +112,7 @@ define( function( require ) {
       assert && assert( this._rootBackbone === this._baseInstance.groupDrawable, 'We don\'t want the base instance\'s groupDrawable to change' );
       
       if ( assertSlow ) { this._baseInstance.audit( this._frameId, false ); }
-      debugger;
+      
       // pre-repaint phase: update relative transform information for listeners (notification) and precomputation where desired
       this.updateDirtyTransformRoots();
       

@@ -118,9 +118,6 @@ define( function( require ) {
       
       var matrix = drawable.instance.relativeMatrix;
       
-      console.log( drawable.toString() );
-      console.log( matrix.toString() + '\n----' );
-      
       // set the correct (relative to the transform root) transform up, instead of walking the hierarchy (for now)
       //OHTWO TODO: should we start premultiplying these matrices to remove this bottleneck?
       this.context.setTransform( this.backingScale, 0, 0, this.backingScale, this.canvasDrawOffset.x * this.backingScale, this.canvasDrawOffset.y * this.backingScale );

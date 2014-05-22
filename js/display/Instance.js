@@ -234,7 +234,7 @@ define( function( require ) {
      *          drawableBeforeFirstChange and drawableAfterLastChange
      */
     syncTree: function( state ) {
-      sceneryLayerLog && sceneryLayerLog.Instance && sceneryLayerLog.Instance( 'syncTree ' + this.toString() + ' ' + state.toString() );
+      sceneryLayerLog && sceneryLayerLog.Instance && sceneryLayerLog.Instance( 'syncTree ' + this.toString() + ' ' + state.toString() + ( this.isStateless() ? ' (stateless)' : '' ) );
       sceneryLayerLog && sceneryLayerLog.Instance && sceneryLayerLog.push();
       
       assert && assert( state && state.isSharedCanvasCachePlaceholder !== undefined, 'RenderState duck-typing instanceof' );
@@ -797,6 +797,12 @@ define( function( require ) {
       this.relativeTransformListeners.push( listener );
       if ( before !== this.hasAncestorListenerNeed() ) {
         this.parent && this.parent.incrementTransformListenerChildren();
+        
+        // if we just went from "not needing to be traversed" to "needing to be traversed", mark ourselves as dirty so that we for-sure get future updates
+        if ( !this.hasAncestorComputeNeed() ) {
+          // TODO: can we do better than this?
+          this.forceMarkTransformDirty();
+        }
       }
     },
     
@@ -865,6 +871,12 @@ define( function( require ) {
       this.relativePrecomputeCount++;
       if ( before !== this.hasAncestorComputeNeed() ) {
         this.parent && this.parent.incrementTransformPrecomputeChildren();
+        
+        // if we just went from "not needing to be traversed" to "needing to be traversed", mark ourselves as dirty so that we for-sure get future updates
+        if ( !this.hasAncestorListenerNeed() ) {
+          // TODO: can we do better than this?
+          this.forceMarkTransformDirty();
+        }
       }
     },
     
@@ -885,31 +897,35 @@ define( function( require ) {
     // called immediately when the corresponding node has a transform change (can happen multiple times between renders)
     markTransformDirty: function() {
       if ( !this.transformDirty ) {
-        this.transformDirty = true;
-        this.relativeSelfDirty = true;
+        this.forceMarkTransformDirty();
+      }
+    },
+    
+    forceMarkTransformDirty: function() {
+      this.transformDirty = true;
+      this.relativeSelfDirty = true;
+      
+      var frameId = this.display._frameId;
+      
+      // mark all ancestors with relativeChildDirtyFrame, bailing out when possible
+      var instance = this.parent;
+      while ( instance && instance.relativeChildDirtyFrame !== frameId ) {
+        var parentInstance = instance.parent;
+        var isTransformed = instance.isTransformed;
         
-        var frameId = this.display._frameId;
+        // NOTE: our while loop guarantees that it wasn't frameId
+        instance.relativeChildDirtyFrame = frameId;
         
-        // mark all ancestors with relativeChildDirtyFrame, bailing out when possible
-        var instance = this.parent;
-        while ( instance && instance.relativeChildDirtyFrame !== frameId ) {
-          var parentInstance = instance.parent;
-          var isTransformed = instance.isTransformed;
-          
-          // NOTE: our while loop guarantees that it wasn't frameId
-          instance.relativeChildDirtyFrame = frameId;
-          
-          // always mark an instance without a parent (root instance!)
-          if ( parentInstance === null ) {
-            this.display.markTransformRootDirty( instance, isTransformed ); // passTransform depends on whether it is marked as a transform root
-            break;
-          } else if ( isTransformed ) {
-            this.display.markTransformRootDirty( instance, true ); // passTransform true
-            break;
-          }
-          
-          instance = parentInstance;
+        // always mark an instance without a parent (root instance!)
+        if ( parentInstance === null ) {
+          this.display.markTransformRootDirty( instance, isTransformed ); // passTransform depends on whether it is marked as a transform root
+          break;
+        } else if ( isTransformed ) {
+          this.display.markTransformRootDirty( instance, true ); // passTransform true
+          break;
         }
+        
+        instance = parentInstance;
       }
     },
     
@@ -1176,10 +1192,10 @@ define( function( require ) {
         assertSlow( !this.state.isSharedCanvasCachePlaceholder || this.sharedCacheDrawable,
                     'We need to have a sharedCacheDrawable if we are a shared cache' );
         
-        assertSlow( this.state.isTransformed === this.isTransformed || this.isStateless(),
+        assertSlow( this.state.isTransformed === this.isTransformed,
                     'isTransformed should match' );
         
-        assertSlow( !this.parent || ( this.relativeChildDirtyFrame !== frameId ) || ( this.parent.relativeChildDirtyFrame === frameId ),
+        assertSlow( !this.parent || this.isTransformed || ( this.relativeChildDirtyFrame !== frameId ) || ( this.parent.relativeChildDirtyFrame === frameId ),
                     'If we have a parent, we need to hold the invariant this.relativeChildDirtyFrame => parent.relativeChildDirtyFrame' );
         
         // count verification for invariants
