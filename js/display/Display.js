@@ -343,6 +343,14 @@ define( function( require ) {
       } );
     },
     
+    setPointerDisplayVisible: function( visibility ) {
+      assert && assert( !visibility, 'setPointerDisplayVisible unimplemented' );
+    },
+    
+    setPointerAreaDisplayVisible: function( visibility ) {
+      assert && assert( !visibility, 'setPointerAreaDisplayVisible unimplemented' );
+    },
+    
     updateOnRequestAnimationFrame: function() {
       var display = this;
       (function step() {

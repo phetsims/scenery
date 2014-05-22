@@ -467,6 +467,13 @@ define( function( require ) {
       this.markPaintDirty();
     };
     
+    proto.markDirtyX = function() { this.dirtyX = true; this.markPaintDirty(); },
+    proto.markDirtyY = function() { this.dirtyY = true; this.markPaintDirty(); },
+    proto.markDirtyWidth = function() { this.dirtyWidth = true; this.markPaintDirty(); },
+    proto.markDirtyHeight = function() { this.dirtyHeight = true; this.markPaintDirty(); },
+    proto.markDirtyArcWidth = function() { this.dirtyArcWidth = true; this.markPaintDirty(); },
+    proto.markDirtyArcHeight = function() { this.dirtyArcHeight = true; this.markPaintDirty(); },
+    
     proto.setToCleanState = function() {
       this.paintDirty = false;
       this.dirtyX = false;
