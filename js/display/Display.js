@@ -231,7 +231,7 @@ define( function( require ) {
       
       if ( this.getHeight() !== height ) {
         // TODO: remove allocation here?
-        this.setSize( new Dimension2( height, this.getHeight() ) );
+        this.setSize( new Dimension2( this.getWidth(), height ) );
       }
     },
     set height( value ) { this.setHeight( value ); },
