@@ -268,6 +268,7 @@ define( function( require ) {
     updateCursor: function() {
       if ( this._input && this._input.mouse && this._input.mouse.point ) {
         if ( this._input.mouse.cursor ) {
+          sceneryLayerLog && sceneryLayerLog.Cursor && sceneryLayerLog.Cursor( 'set on pointer: ' + this._input.mouse.cursor );
           return this.setSceneCursor( this._input.mouse.cursor );
         }
         
@@ -276,13 +277,17 @@ define( function( require ) {
         
         if ( mouseTrail ) {
           for ( var i = mouseTrail.length - 1; i >= 0; i-- ) {
-            var cursor = mouseTrail.nodes[i].getCursor();
+            var node = mouseTrail.nodes[i];
+            var cursor = node.getCursor();
             
             if ( cursor ) {
+              sceneryLayerLog && sceneryLayerLog.Cursor && sceneryLayerLog.Cursor( cursor + ' on ' + node.constructor.name + '#' + node.id );
               return this.setSceneCursor( cursor );
             }
           }
         }
+        
+        sceneryLayerLog && sceneryLayerLog.Cursor && sceneryLayerLog.Cursor( '--- for ' + ( mouseTrail ? mouseTrail.toString() : '(no hit)' ) );
       }
       
       // fallback case
