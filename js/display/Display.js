@@ -604,7 +604,7 @@ define( function( require ) {
       }
       
       function drawableSummary( drawable ) {
-        return drawable.toString();
+        return drawable.toString() + ( drawable.dirty ? ' <span style="color: #c00;">[x]</span>' : '' );
       }
       
       function printInstanceSubtree( instance ) {

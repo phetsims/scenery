@@ -85,6 +85,7 @@ define( function( require ) {
     
     update: function() {
       sceneryLayerLog && sceneryLayerLog.CanvasBlock && sceneryLayerLog.CanvasBlock( 'update #' + this.id );
+      sceneryLayerLog && sceneryLayerLog.CanvasBlock && sceneryLayerLog.push();
       
       if ( this.dirty && !this.disposed ) {
         this.dirty = false;
@@ -107,6 +108,8 @@ define( function( require ) {
         // iteration above skips last drawable
         this.lastDrawable && this.renderDrawable( drawable );
       }
+      
+      sceneryLayerLog && sceneryLayerLog.CanvasBlock && sceneryLayerLog.pop();
     },
     
     renderDrawable: function( drawable ) {
@@ -114,6 +117,9 @@ define( function( require ) {
       assert && assert( drawable.instance.isValidationNotNeeded() );
       
       var matrix = drawable.instance.relativeMatrix;
+      
+      console.log( drawable.toString() );
+      console.log( matrix.toString() + '\n----' );
       
       // set the correct (relative to the transform root) transform up, instead of walking the hierarchy (for now)
       //OHTWO TODO: should we start premultiplying these matrices to remove this bottleneck?
