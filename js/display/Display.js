@@ -111,12 +111,12 @@ define( function( require ) {
       assert && assert( this._rootBackbone, 'We are guaranteed a root backbone as the groupDrawable on the base instance' );
       assert && assert( this._rootBackbone === this._baseInstance.groupDrawable, 'We don\'t want the base instance\'s groupDrawable to change' );
       
-      if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
-      
+      if ( assertSlow ) { this._baseInstance.audit( this._frameId, false ); }
+      debugger;
       // pre-repaint phase: update relative transform information for listeners (notification) and precomputation where desired
       this.updateDirtyTransformRoots();
       
-      if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
+      if ( assertSlow ) { this._baseInstance.audit( this._frameId, true ); }
       
       sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.Display( 'disposal phase' );
       sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.push();
@@ -242,12 +242,15 @@ define( function( require ) {
     },
     
     updateDirtyTransformRoots: function() {
+      sceneryLayerLog && sceneryLayerLog.transformSystem && sceneryLayerLog.transformSystem( 'updateDirtyTransformRoots' );
+      sceneryLayerLog && sceneryLayerLog.transformSystem && sceneryLayerLog.push();
       while ( this._dirtyTransformRoots.length ) {
         this._dirtyTransformRoots.pop().updateTransformListenersAndCompute( false, false, this._frameId, true );
       }
       while ( this._dirtyTransformRootsWithoutPass.length ) {
         this._dirtyTransformRootsWithoutPass.pop().updateTransformListenersAndCompute( false, false, this._frameId, false );
       }
+      sceneryLayerLog && sceneryLayerLog.transformSystem && sceneryLayerLog.pop();
     },
     
     markInstanceRootForDisposal: function( instance ) {

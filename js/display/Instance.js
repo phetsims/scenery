@@ -966,6 +966,10 @@ define( function( require ) {
     
     // called during the pre-repaint phase to (a) fire off all relative transform listeners that should be fired, and (b) precompute transforms were desired
     updateTransformListenersAndCompute: function( ancestorWasDirty, ancestorIsDirty, frameId, passTransform ) {
+      sceneryLayerLog && sceneryLayerLog.transformSystem && sceneryLayerLog.transformSystem(
+        'update/compute: ' + this.toString() + ' ' + ancestorWasDirty + ' => ' + ancestorIsDirty + ( passTransform ? ' passTransform' : '' ) );
+      sceneryLayerLog && sceneryLayerLog.transformSystem && sceneryLayerLog.push();
+      
       var len, i;
       
       if ( passTransform ) {
@@ -990,6 +994,7 @@ define( function( require ) {
         // check if traversal isn't needed (no instances marked as having listeners or needing computation)
         // either the subtree is clean (no traversal needed for compute/listeners), or we have no compute/listener needs
         if ( !wasSubtreeDirty || ( !hasComputeNeed && !hasListenerNeed && !hasSelfComputeNeed && !hasSelfListenerNeed ) ) {
+          sceneryLayerLog && sceneryLayerLog.transformSystem && sceneryLayerLog.pop();
           return;
         }
         
@@ -1019,6 +1024,8 @@ define( function( require ) {
           }
         }
       }
+      
+      sceneryLayerLog && sceneryLayerLog.transformSystem && sceneryLayerLog.pop();
     },
     
     notifyRelativeTransformListeners: function() {
@@ -1119,7 +1126,7 @@ define( function( require ) {
       this.freeToPool();
     },
     
-    audit: function( frameId ) {
+    audit: function( frameId, allowValidationNotNeededChecks ) {
       // get the relative matrix, computed to be up-to-date, and ignores any flags/counts so we can check whether our state is consistent
       function currentRelativeMatrix( instance ) {
         var resultMatrix = Matrix3.dirtyFromPool();
@@ -1139,7 +1146,7 @@ define( function( require ) {
       
       function hasRelativeSelfDirty( instance ) {
         // if validation isn't needed, act like nothing is dirty (matching our validate behavior)
-        if ( instance.isValidationNotNeeded() ) {
+        if ( allowValidationNotNeededChecks && instance.isValidationNotNeeded() ) {
           return false;
         }
         
@@ -1181,12 +1188,7 @@ define( function( require ) {
         for ( var i = 0; i < this.children.length; i++ ) {
           var childInstance = this.children[i];
           
-          childInstance.audit( frameId );
-          
-          // don't count transformed instance counts
-          if ( childInstance.isTransformed ) {
-            continue;
-          }
+          childInstance.audit( frameId, allowValidationNotNeededChecks );
           
           if ( childInstance.hasAncestorListenerNeed() ) {
             notifyRelativeCount++;

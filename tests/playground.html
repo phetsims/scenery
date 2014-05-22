@@ -147,6 +147,27 @@
             } );
           };
           
+          window.err = function() {
+            window.assertSlow = window.assert;
+            setTimeout( function(){
+              window.rect = new scenery.Rectangle( 0, 0, 100, 50, 0, 0, {
+                y: 50,
+                fill: new scenery.LinearGradient( 0, 0, 100, 0 ).addColorStop( 0, 'red' ).addColorStop( 1, 'blue' )
+              } );
+              window.b = new scenery.Node();
+              b._hints.cssTransform = true;
+              b.addChild( rect );
+              scene.addChild( b );
+              
+              display.updateDisplay();
+              
+              scene.renderer = 'canvas';
+              
+              display.updateDisplay();
+            } );
+          };
+          err();
+          
           /*---------------------------------------------------------------------------*
           * Debug
           *----------------------------------------------------------------------------*/

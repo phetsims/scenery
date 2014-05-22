@@ -51,6 +51,7 @@ define( function( require ) {
       
       // feature-specific debugging flags (so we don't log the entire world)
       window.sceneryLayerLog.dirty            = function( ob ) { console.log( '%c' + padding + '%c[dirty] '       + ob, padStyle, 'color: #aaa;' ); };
+      window.sceneryLayerLog.transformSystem  = function( ob ) { console.log( '%c' + padding + '%c[transform] '   + ob, padStyle, 'color: #606;' ); };
       window.sceneryLayerLog.BackboneDrawable = function( ob ) { console.log( '%c' + padding + '%c[Backbone] '    + ob, padStyle, 'color: #a00;' ); };
       window.sceneryLayerLog.CanvasBlock      = function( ob ) { console.log( '%c' + padding + '%c[Canvas] '      + ob, padStyle, 'color: #000;' ); };
       window.sceneryLayerLog.Display          = function( ob ) { console.log( '%c' + padding + '%c[Display] '     + ob, padStyle, 'color: #000;' ); };
