@@ -53,7 +53,12 @@
     <button onclick="toggleDebug();">Toggle Debug</button>
     <button onclick="toggleSerialize();">Toggle Serialization</button>
     <button onclick="toggleUpdates();">Toggle Update</button>
+    <button onclick="toggleLogging();">Toggle Logging</button>
     <button onclick="display.initializeStandaloneEvents();">Standalone Events</button>
+    <br>
+    <br>
+    <button onclick="display.updateDisplay();">Update</button>
+    <button onclick="display.popupDebug();">Popup Debug</button>
   </div>
   
   <script>
@@ -69,9 +74,6 @@
           window.core = core;
           
           console.log( 'loaded' );
-          
-          scenery.enableLayerLogging();
-          // scenery.enableEventLogging();
           
           window.scene = new scenery.Node();
           
@@ -119,7 +121,11 @@
               node.centerX = display.width / 2;
               node.centerY = display.height / 2;
               
-              circle.pickable = true;
+              circle.addInputListener( new scenery.SimpleDragHandler( {
+                translate: function( data ) {
+                  circle.translate( data.delta );
+                }
+              } ) );
               circle.cursor = 'pointer';
               
               display.updateDisplay();
@@ -229,6 +235,24 @@
             }
             
             playgroundUpdating = !playgroundUpdating;
+          };
+          
+          /*---------------------------------------------------------------------------*
+          * Logging
+          *----------------------------------------------------------------------------*/
+          
+          var logging = false;
+          
+          window.toggleLogging = function() {
+            if ( logging ) {
+              scenery.disableLayerLogging();
+              // scenery.disableEventLogging();
+            } else {
+              scenery.enableLayerLogging();
+              // scenery.enableEventLogging();
+            }
+            
+            logging = !logging;
           };
           
           /*---------------------------------------------------------------------------*
