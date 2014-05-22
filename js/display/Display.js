@@ -432,8 +432,13 @@ define( function( require ) {
       var implementsPointerEvents = window.navigator && window.navigator.pointerEnabled; // W3C spec for pointer events
       var implementsMSPointerEvents = window.navigator && window.navigator.msPointerEnabled; // MS spec for pointer event
       if ( this.enablePointerEvents && implementsPointerEvents ) {
-        sceneryEventLog && sceneryEventLog( 'Detected pointer events support, using that instead of mouse/touch events' );
         // accepts pointer events corresponding to the spec at http://www.w3.org/TR/pointerevents/
+        sceneryEventLog && sceneryEventLog( 'Detected pointer events support, using that instead of mouse/touch events' );
+        
+        // immediate version (first, so it gets triggered before the other up)
+        input.addImmediateListener( 'pointerup', function pointerUpCallback( domEvent ) {
+          input.pointerUpImmediate( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
+        } );
         input.addListener( 'pointerdown', function pointerDownCallback( domEvent ) {
           input.pointerDown( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
         } );
@@ -452,12 +457,13 @@ define( function( require ) {
         input.addListener( 'pointercancel', function pointerCancelCallback( domEvent ) {
           input.pointerCancel( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
         } );
-        // immediate version
-        input.addImmediateListener( 'pointerup', function pointerUpCallback( domEvent ) {
-          input.pointerUpImmediate( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
-        } );
       } else if ( this.enablePointerEvents && implementsMSPointerEvents ) {
         sceneryEventLog && sceneryEventLog( 'Detected MS pointer events support, using that instead of mouse/touch events' );
+        
+        // immediate version (first, so it gets triggered before the other up)
+        input.addImmediateListener( 'MSPointerUp', function msPointerUpCallback( domEvent ) {
+          input.pointerUpImmediate( domEvent.pointerId, scenery.Input.msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
+        } );
         input.addListener( 'MSPointerDown', function msPointerDownCallback( domEvent ) {
           input.pointerDown( domEvent.pointerId, scenery.Input.msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
         } );
@@ -476,12 +482,13 @@ define( function( require ) {
         input.addListener( 'MSPointerCancel', function msPointerCancelCallback( domEvent ) {
           input.pointerCancel( domEvent.pointerId, scenery.Input.msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
         } );
-        // immediate version
-        input.addImmediateListener( 'MSPointerUp', function msPointerUpCallback( domEvent ) {
-          input.pointerUpImmediate( domEvent.pointerId, scenery.Input.msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
-        } );
       } else {
         sceneryEventLog && sceneryEventLog( 'No pointer events support detected, using mouse/touch events' );
+        
+        // immediate version (first, so it gets triggered before the other up)
+        input.addImmediateListener( 'mouseup', function mouseUpCallback( domEvent ) {
+          input.mouseUpImmediate( pointFromEvent( domEvent ), domEvent );
+        } );
         input.addListener( 'mousedown', function mouseDownCallback( domEvent ) {
           input.mouseDown( pointFromEvent( domEvent ), domEvent );
         } );
@@ -497,11 +504,14 @@ define( function( require ) {
         input.addListener( 'mouseout', function mouseOutCallback( domEvent ) {
           input.mouseOut( pointFromEvent( domEvent ), domEvent );
         } );
-        // immediate version
-        input.addImmediateListener( 'mouseup', function mouseUpCallback( domEvent ) {
-          input.mouseUpImmediate( pointFromEvent( domEvent ), domEvent );
-        } );
         
+        // immediate version (first, so it gets triggered before the other up)
+        input.addImmediateListener( 'touchend', function touchEndCallback( domEvent ) {
+          sceneryEventLog && sceneryEventLog( 'touchend immediate (multiple events)' );
+          forEachChangedTouch( domEvent, function touchEndTouch( id, point ) {
+            input.touchEndImmediate( id, point, domEvent );
+          } );
+        } );
         input.addListener( 'touchstart', function touchStartCallback( domEvent ) {
           sceneryEventLog && sceneryEventLog( 'touchstart (multiple events)' );
           forEachChangedTouch( domEvent, function touchStartTouch( id, point ) {
@@ -524,13 +534,6 @@ define( function( require ) {
           sceneryEventLog && sceneryEventLog( 'touchcancel (multiple events)' );
           forEachChangedTouch( domEvent, function touchCancelTouch( id, point ) {
             input.touchCancel( id, point, domEvent );
-          } );
-        } );
-        // immediate version
-        input.addImmediateListener( 'touchend', function touchEndCallback( domEvent ) {
-          sceneryEventLog && sceneryEventLog( 'touchend immediate (multiple events)' );
-          forEachChangedTouch( domEvent, function touchEndTouch( id, point ) {
-            input.touchEndImmediate( id, point, domEvent );
           } );
         } );
       }
