@@ -662,7 +662,7 @@ define( function( require ) {
     // recursively tag all ancestors with _childBoundsDirty
     invalidateChildBounds: function() {
       // don't bother updating if we've already been tagged
-      if ( !this._childBoundsDirty ) {
+      if ( !this._childBoundsDirty || !this._mouseBoundsDirty || !this._touchBoundsDirty ) {
         this._childBoundsDirty = true;
         this._localBoundsDirty = true;
         this._mouseBoundsDirty = true;
