@@ -116,9 +116,8 @@ define( function( require ) {
       var matrix = drawable.instance.relativeMatrix;
       
       // set the correct (relative to the transform root) transform up, instead of walking the hierarchy (for now)
-      //OHTWO TODO: are the offsets specified in the correct order with the backingScale?
-      this.context.setTransform( this.backingScale, 0, 0, this.backingScale, this.canvasDrawOffset.x * this.backingScale, this.canvasDrawOffset.y * this.backingScale );
       //OHTWO TODO: should we start premultiplying these matrices to remove this bottleneck?
+      this.context.setTransform( this.backingScale, 0, 0, this.backingScale, this.canvasDrawOffset.x * this.backingScale, this.canvasDrawOffset.y * this.backingScale );
       matrix.canvasAppendTransform( this.context );
       
       // paint using its local coordinate frame
