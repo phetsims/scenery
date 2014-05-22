@@ -80,6 +80,9 @@ define( function( require ) {
     this._input = null;
     
     this.applyCSSHacks();
+    
+    // global reference if we have a Display (useful)
+    this.scenery = scenery;
   };
   var Display = scenery.Display;
   
@@ -291,7 +294,7 @@ define( function( require ) {
       }
       
       // fallback case
-      return this.setSceneCursor( this.defaultCursor );
+      return this.setSceneCursor( this.options.defaultCursor );
     },
     
     setSceneCursor: function( cursor ) {
