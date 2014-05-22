@@ -39,6 +39,8 @@ define( function( require ) {
     'bounds': true
   };
   
+  var trailUnderPointerOptions = {};
+  
   /*
    * Available keys for use in the options parameter object for a vanilla Node (not inherited), in the order they are executed in:
    *
@@ -807,10 +809,12 @@ define( function( require ) {
     },
     
     trailUnderPointer: function( pointer ) {
-      var options = {};
-      if ( pointer.isMouse ) { options.isMouse = true; }
-      if ( pointer.isTouch ) { options.isTouch = true; }
-      if ( pointer.isPen ) { options.isPen = true; }
+      // grab our global reference. this isn't re-entrant, and we don't want to cause allocations here
+      var options = trailUnderPointerOptions;
+      
+      options.isMouse = !!pointer.isMouse;
+      options.isTouch = !!pointer.isTouch;
+      options.isPen = !!pointer.isPen;
       
       return this.trailUnderPoint( pointer.point, options );
     },
