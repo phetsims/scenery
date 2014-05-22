@@ -17,6 +17,7 @@ define( function( require ) {
   var FittedBlock = require( 'SCENERY/display/FittedBlock' );
   var CanvasContextWrapper = require( 'SCENERY/util/CanvasContextWrapper' );
   var Renderer = require( 'SCENERY/display/Renderer' );
+  var Util = require( 'SCENERY/util/Util' );
   
   scenery.CanvasBlock = function CanvasBlock( display, renderer, transformRootInstance ) {
     this.initialize( display, renderer, transformRootInstance );
@@ -48,7 +49,8 @@ define( function( require ) {
       }
       
       // reset any fit transforms that were applied
-      this.canvas.style.transform = '';
+      Util.prepareForTransform( this.canvas, this.forceAcceleration );
+      Util.unsetTransform( this.canvas ); // clear out any transforms that could have been previously applied
       
       this.canvasDrawOffset = new Vector2();
       
@@ -74,7 +76,7 @@ define( function( require ) {
       var y = this.fitBounds.minY;
       this.canvasDrawOffset.setXY( -x, -y ); // subtract off so we have a tight fit
       //OHTWO TODO PERFORMANCE: see if we can get a speedup by putting the backing scale in our transform instead of with CSS?
-      this.canvas.style.transform = 'matrix(1,0,0,1,' + x + ',' + y + ')'; // reapply the translation as a CSS transform
+      Util.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.canvas, this.forceAcceleration ); // reapply the translation as a CSS transform
       this.canvas.width = this.fitBounds.width * this.backingScale;
       this.canvas.height = this.fitBounds.height * this.backingScale;
       this.canvas.style.width = this.fitBounds.width + 'px';
@@ -115,7 +117,7 @@ define( function( require ) {
       
       // set the correct (relative to the transform root) transform up, instead of walking the hierarchy (for now)
       //OHTWO TODO: are the offsets specified in the correct order with the backingScale?
-      this.context.setTransform( this.backingScale, 0, 0, this.backingScale, this.canvasDrawOffset.x, this.canvasDrawOffset.y );
+      this.context.setTransform( this.backingScale, 0, 0, this.backingScale, this.canvasDrawOffset.x * this.backingScale, this.canvasDrawOffset.y * this.backingScale );
       //OHTWO TODO: should we start premultiplying these matrices to remove this bottleneck?
       matrix.canvasAppendTransform( this.context );
       

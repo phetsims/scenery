@@ -91,6 +91,16 @@ define( function( require ) {
       element.style[transformProperty] = matrix.getCSSTransform();
     },
     
+    setTransform: function( transformString, element, forceAcceleration ) {
+      assert && assert( typeof transformString === 'string' );
+      
+      element.style[transformProperty] = transformString;
+    },
+    
+    unsetTransform: function( element ) {
+      element.style[transformProperty] = '';
+    },
+    
     testAssert: function() {
       return 'assert.basic: ' + ( assert ? 'true' : 'false' );
     },

@@ -14,6 +14,7 @@ define( function( require ) {
   var Vector2 = require( 'DOT/Vector2' );
   var scenery = require( 'SCENERY/scenery' );
   var Block = require( 'SCENERY/display/Block' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
   
   scenery.FittedBlock = function FittedBlock( display, renderer, transformRootInstance ) {
     this.initialize( display, renderer, transformRootInstance );
@@ -38,6 +39,8 @@ define( function( require ) {
       this.fitBounds = Bounds2.NOTHING.copy(); // tracks the "tight" bounds for fitting, not the actually-displayed bounds
       this.oldFitBounds = Bounds2.NOTHING.copy(); // copy for storage
       this.fitOffset = new Vector2();
+      
+      this.forceAcceleration = ( renderer & Renderer.bitmaskForceAcceleration ) !== 0;
       
       if ( this.fit === FittedBlock.FULL_DISPLAY ) {
         this.display.onStatic( 'displaySize', this.dirtyFitListener );

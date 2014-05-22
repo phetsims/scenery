@@ -15,6 +15,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var FittedBlock = require( 'SCENERY/display/FittedBlock' );
   var SVGGroup = require( 'SCENERY/display/SVGGroup' );
+  var Util = require( 'SCENERY/util/Util' );
   
   scenery.SVGBlock = function SVGBlock( display, renderer, transformRootInstance, filterRootInstance ) {
     this.initialize( display, renderer, transformRootInstance, filterRootInstance );
@@ -51,8 +52,9 @@ define( function( require ) {
         this.domElement = this.svg;
       }
       
-      // reset what layer fitting can do
-      this.svg.style.transform = ''; // no transform
+      // reset what layer fitting can do (this.forceAcceleration set in fitted block initialization)
+      Util.prepareForTransform( this.svg, this.forceAcceleration );
+      Util.unsetTransform( this.svg ); // clear out any transforms that could have been previously applied
       this.baseTransformGroup.setAttribute( 'transform', '' ); // no base transform
       
       var instanceClosestToRoot = transformRootInstance.trail.nodes.length > filterRootInstance.trail.nodes.length ? filterRootInstance : transformRootInstance;
@@ -79,16 +81,21 @@ define( function( require ) {
     },
     
     setSizeFullDisplay: function() {
+      sceneryLayerLog && sceneryLayerLog.SVGBlock && sceneryLayerLog.SVGBlock( 'setSizeFullDisplay #' + this.id );
+      
       var size = this.display.getSize();
       this.svg.setAttribute( 'width', size.width );
       this.svg.setAttribute( 'height', size.height );
     },
     
     setSizeFitBounds: function() {
+      sceneryLayerLog && sceneryLayerLog.SVGBlock && sceneryLayerLog.SVGBlock( 'setSizeFitBounds #' + this.id + ' with ' + this.fitBounds.toString() );
+      
       var x = this.fitBounds.minX;
       var y = this.fitBounds.minY;
+      
       this.baseTransformGroup.setAttribute( 'transform', 'translate(' + (-x) + ',' + (-y) + ')' ); // subtract off so we have a tight fit
-      this.svg.style.transform = 'matrix(1,0,0,1,' + x + ',' + y + ')'; // reapply the translation as a CSS transform
+      Util.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.svg, this.forceAcceleration ); // reapply the translation as a CSS transform
       this.svg.setAttribute( 'width', this.fitBounds.width );
       this.svg.setAttribute( 'height', this.fitBounds.height );
     },
