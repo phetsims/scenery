@@ -26,14 +26,14 @@
     
     #debug {
       position: relative;
-      top: 480px;
+      top: 320px;
       padding: 0.5em;
       border: 1px solid rgba(0,0,255,0.3);
     }
     
     #serialized {
       position: relative;
-      top: 480px;
+      top: 320px;
       padding: 0.5em;
       border: 1px solid rgba(0,0,0,0.3);
     }
@@ -76,12 +76,14 @@
           window.scene = new scenery.Node();
           
           var display = window.display = new scenery.Display( scene, {
+            width: 640,
+            height: 320
             // any overrides here?
           } );
           console.log( 'window.display created' );
           
           display._domElement.id = 'display';
-          document.body.appendChild( display._domElement );
+          document.body.insertBefore( display._domElement, document.body.firstChild );
           
           core.loadScript( {
             src: 'qunit/js/test-utils.js',
@@ -113,6 +115,12 @@
               
               window.circle = new scenery.Circle( 50, { fill: 'black', x: 30, y: 60 } );
               node.addChild( circle );
+              
+              node.centerX = display.width / 2;
+              node.centerY = display.height / 2;
+              
+              circle.pickable = true;
+              circle.cursor = 'pointer';
               
               display.updateDisplay();
             } );
@@ -240,7 +248,7 @@
           //   window.lines = lines;
             
           //   var nodes = [];
-          //   var scene = new scenery.Scene( $( '<div>' ), { width: 640, height: 480 } );
+          //   var scene = new scenery.Scene( $( '<div>' ), { width: 640, height: 320 } );
           //   nodes.push( scene );
             
           //   _.times( 5, function() { nodes.push( new scenery.Node() ); } );
