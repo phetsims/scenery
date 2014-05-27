@@ -407,35 +407,38 @@ define( function( require ) {
           //OHTWO TODO: only do this on instances that were actually traversed
           childInstance.cleanStitchChangeInterval();
           
-          // figure out what the first and last drawable should be hooked into for the child
-          var firstChildDrawable = null;
-          var lastChildDrawable = null;
-          
-          //OHTWO TODO: set first/last drawables to the group?
-          if ( childInstance.groupDrawable ) {
-            // if there is a group (e.g. non-shared cache or backbone), use it
-            firstChildDrawable = lastChildDrawable = childInstance.groupDrawable;
-          } else if ( childInstance.sharedCacheDrawable ) {
-            // if there is a shared cache drawable, use it
-            firstChildDrawable = lastChildDrawable = childInstance.sharedCacheDrawable;
-          } else if ( childInstance.firstDrawable ) {
-            // otherwise, if they exist, pick the node's first/last directly
-            assert && assert( childInstance.lastDrawable, 'Any display instance with firstDrawable should also have lastDrawable' );
-            firstChildDrawable = childInstance.firstDrawable;
-            lastChildDrawable = childInstance.lastDrawable;
-          }
-          
-          // if there are any drawables for that child, link them up in our linked list
-          if ( firstChildDrawable ) {
-            if ( currentDrawable ) {
-              // there is already an end of the linked list, so just append to it
-              connectDrawables( currentDrawable, firstChildDrawable );
-            } else {
-              // start out the linked list
-              firstDrawable = firstChildDrawable;
+          //OHTWO TODO: only strip out invisible Canvas drawables, while leaving SVG (since we can more efficiently hide SVG trees, memory-wise)
+          if ( childInstance.node.isVisible() ) {
+            // figure out what the first and last drawable should be hooked into for the child
+            var firstChildDrawable = null;
+            var lastChildDrawable = null;
+            
+            //OHTWO TODO: set first/last drawables to the group?
+            if ( childInstance.groupDrawable ) {
+              // if there is a group (e.g. non-shared cache or backbone), use it
+              firstChildDrawable = lastChildDrawable = childInstance.groupDrawable;
+            } else if ( childInstance.sharedCacheDrawable ) {
+              // if there is a shared cache drawable, use it
+              firstChildDrawable = lastChildDrawable = childInstance.sharedCacheDrawable;
+            } else if ( childInstance.firstDrawable ) {
+              // otherwise, if they exist, pick the node's first/last directly
+              assert && assert( childInstance.lastDrawable, 'Any display instance with firstDrawable should also have lastDrawable' );
+              firstChildDrawable = childInstance.firstDrawable;
+              lastChildDrawable = childInstance.lastDrawable;
             }
-            // update the last drawable of the linked list
-            currentDrawable = lastChildDrawable;
+            
+            // if there are any drawables for that child, link them up in our linked list
+            if ( firstChildDrawable ) {
+              if ( currentDrawable ) {
+                // there is already an end of the linked list, so just append to it
+                connectDrawables( currentDrawable, firstChildDrawable );
+              } else {
+                // start out the linked list
+                firstDrawable = firstChildDrawable;
+              }
+              // update the last drawable of the linked list
+              currentDrawable = lastChildDrawable;
+            }
           }
         }
         // finish setting up references to the linked list (now firstDrawable and lastDrawable should be set properly)
