@@ -49,6 +49,9 @@ define( function( require ) {
       // what drawble we are being rendered (or put) into (will be filled in later)
       this.parentDrawable = null;
       
+      // the associated backbone that we are placed in
+      this.backbone = null;
+      
       // what our parent drawable will be after the stitch is finished
       this.pendingParentDrawable = null;
       

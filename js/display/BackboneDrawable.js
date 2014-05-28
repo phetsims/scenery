@@ -244,6 +244,7 @@ define( function( require ) {
       sceneryLayerLog && sceneryLayerLog.BackboneDrawable && sceneryLayerLog.push();
       
       for ( var d = this.lastFirstDrawable; d !== null && d.previousDrawable !== this.lastLastDrawable; d = d.nextDrawable ) {
+        d.backbone = null;
         d.parentDrawable.removeDrawable( d );
       }
       
@@ -290,6 +291,7 @@ define( function( require ) {
         }
         
         currentBlock.addDrawable( drawable );
+        drawable.backbone = this;
         
         // pending linked list => linked list
         //OHTWO TODO: scan these after all backbones have been stitched! EEK!
