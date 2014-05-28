@@ -45,7 +45,7 @@ define( function( require ) {
       // where have transforms been applied up to? our responsibility is to apply transforms between this and our backboneInstance
       this.transformRootAncestorInstance = backboneInstance.parent ? backboneInstance.parent.getTransformRootInstance() : backboneInstance;
       
-      this.willApplyTransform = this.transformRootAncestorInstance !== this.backboneInstance;
+      this.willApplyTransform = this.transformRootAncestorInstance !== this.transformRootInstance;
       this.willApplyFilters = this.filterRootAncestorInstance !== this.backboneInstance;
       
       this.transformListener = this.transformListener || this.markTransformDirty.bind( this );
