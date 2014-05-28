@@ -43,6 +43,13 @@ define( function( require ) {
       throw new Error( 'CanvasNode needs paintCanvas implemented' );
     },
     
+    invalidatePaint: function() {
+      var stateLen = this._drawables.length;
+      for ( var i = 0; i < stateLen; i++ ) {
+        this._drawables[i].markDirty();
+      }
+    },
+    
     canvasPaintSelf: function( wrapper ) {
       this.paintCanvas( wrapper );
     },
