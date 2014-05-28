@@ -151,7 +151,6 @@ define( function( require ) {
       sceneryLayerLog && sceneryLayerLog.SVGBlock && sceneryLayerLog.SVGBlock( '#' + this.id + '.removeDrawable ' + drawable.toString() );
       
       SVGGroup.removeDrawable( this, drawable );
-      drawable.parentDrawable = null;
       
       FittedBlock.prototype.removeDrawable.call( this, drawable );
       
