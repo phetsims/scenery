@@ -42,14 +42,12 @@ define( function( require ) {
     },
     
     addDrawable: function( drawable ) {
-      drawable.parentDrawable = this;
       this.drawableCount++;
       this.markDirtyDrawable( drawable );
     },
     
     removeDrawable: function( drawable ) {
       this.drawableCount--;
-      drawable.parentDrawable = null;
     },
     
     notifyInterval: function( firstDrawable, lastDrawable ) {

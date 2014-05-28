@@ -6,6 +6,27 @@
  * Use display.getDOMElement or display.domElement to retrieve the Display's DOM representation.
  * Use display.updateDisplay() to trigger the visual update in the Display's DOM element.
  *
+ * Internal documentation:
+ *
+ * Lifecycle information:
+ *   Instance (create,dispose)
+ *     - out of update:            Stateless stub is created synchronously when a Node's children are added where we have no relevant Instance.
+ *     - start of update:          Creates first (root) instance if it doesn't exist (stateless stub).
+ *     - synctree:                 Create descendant instances under stubs, fills in state, and marks removed subtree roots for disposal.
+ *     - update instance disposal: Disposes root instances that were marked. This also disposes all descendant instances, and for every instance,
+ *                                 it disposes the currently-attached drawables.
+ *   Drawable (create,dispose)
+ *     - synctree:                 Creates all drawables where necessary. If it replaces a self/group/shared drawable on the instance,
+ *                                 that old drawable is marked for disposal.
+ *     - update instance disposal: Any drawables attached to disposed instances are disposed themselves (see Instance lifecycle).
+ *     - update drawable disposal: Any marked drawables that were replaced or removed from an instance (it didn't maintain a reference) are disposed.
+ *
+ *   add/remove drawables from blocks:
+ *     - stitching changes pending "parents", marks for block update
+ *     - backbones marked for disposal (e.g. instance is still there, just changed to not have a backbone) will mark drawables for block updates
+ *     - add/remove drawables phase updates drawables that were marked
+ *     - disposed backbone instances will only remove drawables if they weren't marked for removal previously (e.g. in case we are from a removed instance)
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -70,6 +91,7 @@ define( function( require ) {
     this._dirtyTransformRoots = [];
     this._dirtyTransformRootsWithoutPass = [];
     
+    this._drawablesToChangeBlock = [];
     this._instanceRootsToDispose = [];
     this._drawablesToDispose = [];
     
@@ -120,6 +142,13 @@ define( function( require ) {
         this.markTransformRootDirty( this._baseInstance, this._baseInstance.isTransformed ); // marks the transform root as dirty (since it is)
       }
       
+      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.Display( 'drawable block change phase' );
+      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.push();
+      while ( this._drawablesToChangeBlock.length ) {
+        this._drawablesToChangeBlock.pop().updateBlock();
+      }
+      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.pop();
+      
       this._rootBackbone = this._rootBackbone || this._baseInstance.groupDrawable;
       assert && assert( this._rootBackbone, 'We are guaranteed a root backbone as the groupDrawable on the base instance' );
       assert && assert( this._rootBackbone === this._baseInstance.groupDrawable, 'We don\'t want the base instance\'s groupDrawable to change' );
@@ -134,7 +163,8 @@ define( function( require ) {
       sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.Display( 'disposal phase' );
       sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.push();
       
-      // dispose all of our instances. disposing the root will cause all descendants to also be disposed
+      // dispose all of our instances. disposing the root will cause all descendants to also be disposed.
+      // will also dispose attached drawables (self/group/etc.)
       while ( this._instanceRootsToDispose.length ) {
         this._instanceRootsToDispose.pop().dispose();
       }
@@ -287,11 +317,18 @@ define( function( require ) {
       sceneryLayerLog && sceneryLayerLog.transformSystem && sceneryLayerLog.pop();
     },
     
+    markDrawableChangedBlock: function( drawable ) {
+      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.Display( 'markDrawableChangedBlock: ' + drawable.toString() );
+      this._drawablesToChangeBlock.push( drawable );
+    },
+    
     markInstanceRootForDisposal: function( instance ) {
+      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.Display( 'markInstanceRootForDisposal: ' + instance.toString() );
       this._instanceRootsToDispose.push( instance );
     },
     
     markDrawableForDisposal: function( drawable ) {
+      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.Display( 'markDrawableForDisposal: ' + drawable.toString() );
       this._drawablesToDispose.push( drawable );
     },
     

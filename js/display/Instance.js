@@ -282,7 +282,7 @@ define( function( require ) {
           this.markFullStitchChangeInterval();
           
           if ( this.sharedCacheDrawable ) {
-            this.display.markDrawableForDisposal( this.sharedCacheDrawable );
+            this.sharedCacheDrawable.markForDisposal( this.display );
           }
           
           //OHTWO TODO: actually create the proper shared cache drawable depending on the specified renderer (update it if necessary)
@@ -321,7 +321,7 @@ define( function( require ) {
             
             if ( this.selfDrawable ) {
               // scrap the previous selfDrawable, we need to create one with a different renderer.
-              this.display.markDrawableForDisposal( this.selfDrawable );
+              this.selfDrawable.markForDisposal( this.display );
             }
             
             if ( Renderer.isCanvas( selfRenderer ) ) {
@@ -463,7 +463,7 @@ define( function( require ) {
           this.markFullStitchChangeInterval();
           
           if ( this.groupDrawable ) {
-            this.display.markDrawableForDisposal( this.groupDrawable );
+            this.groupDrawable.markForDisposal( this.display );
             this.groupDrawable = null;
           }
         }

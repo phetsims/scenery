@@ -158,10 +158,14 @@ define( function( require ) {
     },
     
     update: function() {
+      sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.SVGGroup( 'update: ' + this.toString() );
+      
       // we may have been disposed since being marked dirty on our block. we won't have a reference if we are disposed
       if ( !this.block ) {
         return;
       }
+      
+      sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.push();
       
       var svgGroup = this.svgGroup;
       
@@ -169,6 +173,8 @@ define( function( require ) {
       
       if ( this.transformDirty ) {
         this.transformDirty = false;
+        
+        sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.SVGGroup( 'transform update: ' + this.toString() );
         
         if ( this.willApplyTransforms ) {
           
@@ -193,12 +199,16 @@ define( function( require ) {
       if ( this.visibilityDirty ) {
         this.visibilityDirty = false;
         
+        sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.SVGGroup( 'visibility update: ' + this.toString() );
+        
         svgGroup.style.display = ( this.willApplyFilters && !this.node.isVisible() ) ? 'none' : '';
       }
       
       
       if ( this.opacityDirty ) {
         this.opacityDirty = false;
+        
+        sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.SVGGroup( 'opacity update: ' + this.toString() );
         
         if ( this.willApplyFilters && this.node.opacity !== 1 ) {
           this.hasOpacity = true;
@@ -211,6 +221,8 @@ define( function( require ) {
       
       if ( this.clipDirty ) {
         this.clipDirty = false;
+        
+        sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.SVGGroup( 'clip update: ' + this.toString() );
         
         if ( this.willApplyFilters && this.node._clipArea ) {
           if ( !this.clipDefinition ) {
@@ -241,31 +253,42 @@ define( function( require ) {
       if ( this.orderDirty ) {
         this.orderDirty = false;
         
+        sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.SVGGroup( 'order update: ' + this.toString() );
+        sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.push();
+        
         // our instance should have the proper order of children. we check that way.
-        var idx = 0;
+        var idx = this.children.length - 1;
         var instanceChildren = this.instance.children;
-        for ( var i = 0; i < instanceChildren.length; i++ ) {
+        // iterate backwards, since DOM's insertBefore makes forward iteration more complicated (no insertAfter)
+        for ( var i = instanceChildren.length - 1; i >= 0; i-- ) {
           var group = instanceChildren[i].lookupSVGGroup( this.block );
           if ( group ) {
             // ensure that the spot in our array (and in the DOM) at [idx] is correct
             if ( this.children[idx] !== group ) {
               // out of order, rearrange
+              sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.SVGGroup( 'group out of order: ' + idx + ' for ' + group.toString() );
               
               // in the DOM first (since we reference the children array to know what to insertBefore)
               svgGroup.insertBefore( group.svgGroup, idx + 1 >= this.children.length ? null : this.children[idx+1].svgGroup ); // see http://stackoverflow.com/questions/9732624/how-to-swap-dom-child-nodes-in-javascript
               
               // then in our children array
               var oldIndex = _.indexOf( this.children, group );
-              assert && assert( oldIndex > idx, 'The item we are moving forward to location [idx] should not have an index less than that' );
+              assert && assert( oldIndex < idx, 'The item we are moving backwards to location [idx] should not have an index greater than that' );
               this.children.splice( oldIndex, 1 );
               this.children.splice( idx, 0, group );
+            } else {
+              sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.SVGGroup( 'group in place: ' + idx + ' for ' + group.toString() );
             }
             
             // if there was a group for that instance, we move on to the next spot
-            idx++;
+            idx--;
           }
         }
+        
+        sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.pop();
       }
+      
+      sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.pop();
     },
     
     isReleasable: function() {

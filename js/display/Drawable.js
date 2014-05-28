@@ -48,12 +48,11 @@ define( function( require ) {
     cleanDrawable: function() {
       // what drawble we are being rendered (or put) into (will be filled in later)
       this.parentDrawable = null;
-      
-      // the associated backbone that we are placed in
-      this.backbone = null;
+      this.backbone = null; // a backbone reference (if applicable).
       
       // what our parent drawable will be after the stitch is finished
       this.pendingParentDrawable = null;
+      this.pendingBackbone = null;
       
       // linked list handling (will be filled in later)
       this.previousDrawable = null;
@@ -62,6 +61,37 @@ define( function( require ) {
       // similar but pending handling, so that we can traverse both orders at the same time for stitching
       this.pendingPreviousDrawable = null;
       this.pendingNextDrawable = null;
+    },
+    
+    setBlockBackbone: function( backboneInstance ) {
+      this.parentDrawable = backboneInstance;
+      this.backbone = backboneInstance;
+      this.pendingParentDrawable = backboneInstance;
+      this.pendingBackbone = backboneInstance;
+    },
+    
+    setPendingBlock: function( block, backbone ) {
+      assert && assert( backbone !== undefined, 'backbone can be either null or a backbone' );
+      this.pendingParentDrawable = block;
+      this.pendingBackbone = backbone;
+    },
+    
+    removePendingBackbone: function( backbone ) {
+      // Only update our pending information if it is still pointing to the backbone.
+      // We want to ignore this call if our drawable has been set (pending) to another backbone (or no backbone at all, e.g. inline blocks)
+      if ( backbone === this.pendingBackbone ) {
+        this.pendingParentDrawable = null;
+        this.pendingBackbone = null;
+      }
+    },
+    
+    updateBlock: function() {
+      if ( this.parentDrawable !== this.pendingParentDrawable ) {
+        this.parentDrawable && this.parentDrawable.removeDrawable( this );
+        this.pendingParentDrawable && this.pendingParentDrawable.addDrawable( this );
+        this.parentDrawable = this.pendingParentDrawable;
+        this.backbone = this.pendingBackbone;
+      }
     },
     
     markDirty: function() {
@@ -73,6 +103,10 @@ define( function( require ) {
           this.parentDrawable.markDirtyDrawable( this );
         }
       }
+    },
+    
+    markForDisposal: function( display ) {
+      display.markDrawableForDisposal( this );
     },
     
     dispose: function() {

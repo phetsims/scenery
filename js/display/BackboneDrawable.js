@@ -92,6 +92,10 @@ define( function( require ) {
       this.lastFirstDrawable = null;
       this.lastLastDrawable = null;
       
+      // We track whether our drawables were marked for removal (in which case, they should all be removed by the time we dispose).
+      // If removedDrawables = false during disposal, it means we need to remove the drawables manually (this should only happen if an instance tree is removed)
+      this.removedDrawables = false;
+      
       sceneryLayerLog && sceneryLayerLog.BackboneDrawable && sceneryLayerLog.BackboneDrawable( 'initialized ' + this.toString() );
       
       return this; // chaining
@@ -108,12 +112,14 @@ define( function( require ) {
         node.offStatic( 'clip', this.clipDirtyListener );
       }
       
-      // debugger;
-      for ( var d = this.lastFirstDrawable; d !== null && d.previousDrawable !== this.lastLastDrawable; d = d.nextDrawable ) {
-        d.parentDrawable.removeDrawable( d );
+      // if we need to remove drawables from the blocks, do so
+      if ( !this.removedDrawables ) {
+        for ( var d = this.lastFirstDrawable; d !== null && d.previousDrawable !== this.lastLastDrawable; d = d.nextDrawable ) {
+          d.parentDrawable.removeDrawable( d );
+        }
       }
       
-      this.disposeBlocks();
+      this.markBlocksForDisposal();
       
       if ( this.willApplyTransform ) {
         this.backboneInstance.removeRelativeTransformListener( this.transformListener );
@@ -131,12 +137,24 @@ define( function( require ) {
     },
     
     // dispose all of the blocks while clearing our references to them
-    disposeBlocks: function() {
+    markBlocksForDisposal: function() {
       while ( this.blocks.length ) {
         var block = this.blocks.pop();
         this.domElement.removeChild( block.domElement );
-        block.dispose();
+        block.markForDisposal( this.display );
       }
+    },
+    
+    // should be called during syncTree
+    markForDisposal: function( display ) {
+      for ( var d = this.lastFirstDrawable; d !== null && d.previousDrawable !== this.lastLastDrawable; d = d.nextDrawable ) {
+        d.removePendingBackbone( this );
+        this.display.markDrawableChangedBlock( d );
+      }
+      this.removedDrawables = true;
+      
+      // super call
+      Drawable.prototype.markForDisposal.call( this, display );
     },
     
     markDirtyDrawable: function( drawable ) {
@@ -244,14 +262,14 @@ define( function( require ) {
       sceneryLayerLog && sceneryLayerLog.BackboneDrawable && sceneryLayerLog.push();
       
       for ( var d = this.lastFirstDrawable; d !== null && d.previousDrawable !== this.lastLastDrawable; d = d.nextDrawable ) {
-        d.backbone = null;
-        d.parentDrawable.removeDrawable( d );
+        d.removePendingBackbone( this );
+        this.display.markDrawableChangedBlock( d );
       }
       
       this.lastFirstDrawable = firstDrawable;
       this.lastLastDrawable = lastDrawable;
       
-      this.disposeBlocks();
+      this.markBlocksForDisposal();
       
       var currentBlock = null;
       var currentRenderer = 0;
@@ -281,7 +299,7 @@ define( function( require ) {
           }
           
           this.blocks.push( currentBlock );
-          currentBlock.parentDrawable = this;
+          currentBlock.setBlockBackbone( this );
           this.domElement.appendChild( currentBlock.domElement ); //OHTWO TODO: minor speedup by appending only once its fragment is constructed? or use DocumentFragment?
           
           // mark it dirty for now, so we can check
@@ -290,8 +308,8 @@ define( function( require ) {
           firstDrawableForBlock = drawable;
         }
         
-        currentBlock.addDrawable( drawable );
-        drawable.backbone = this;
+        drawable.setPendingBlock( currentBlock, this );
+        this.display.markDrawableChangedBlock( drawable );
         
         // pending linked list => linked list
         //OHTWO TODO: scan these after all backbones have been stitched! EEK!
