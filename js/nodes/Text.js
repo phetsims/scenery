@@ -189,6 +189,13 @@ define( function( require ) {
         selfBounds.dilate( this.getLineWidth() / 2 );
       }
       
+      if ( !this._selfBounds.equals( selfBounds ) ) {
+        var stateLen = this._drawables.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._drawables[i].markDirtyBounds();
+        }
+      }
+      
       this.invalidateSelf( selfBounds );
       
       // we may have changed renderers if parameters were changed!
