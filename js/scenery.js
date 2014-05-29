@@ -27,7 +27,7 @@ define( function( require ) {
   var scratchContext = scratchCanvas.getContext( '2d' );
   
   // will be filled in by other modules
-  return {
+  var scenery = {
     assert: assert,
     
     scratchCanvas: scratchCanvas,   // a canvas used for convenience functions (think of it as having arbitrary state)
@@ -36,8 +36,31 @@ define( function( require ) {
     svgns: 'http://www.w3.org/2000/svg',     // svg namespace
     xlinkns: 'http://www.w3.org/1999/xlink', // x-link namespace
     
+    logString: '',
+    
+    logFunction: function() {
+      // allow for the console to not exist
+      window.console && window.console.log && window.console.log.apply( window.console, Array.prototype.slice.call( arguments, 0 ) );
+    },
+    
+    // so it can be switched
+    consoleLogFunction: function() {
+      // allow for the console to not exist
+      window.console && window.console.log && window.console.log.apply( window.console, Array.prototype.slice.call( arguments, 0 ) );
+    },
+    switchLogToConsole: function() {
+      scenery.logFunction = scenery.consoleLogFunction;
+    },
+    
+    stringLogFunction: function( message ) {
+      scenery.logString += message.replace( /%c/g, '' ) + '\n';
+    },
+    switchLogToString: function() {
+      scenery.logFunction = scenery.stringLogFunction;
+    },
+    
     enableLayerLogging: function() {
-      window.sceneryLayerLog = function( ob ) { console.log( ob ); };
+      window.sceneryLayerLog = function( ob ) { scenery.logFunction( ob ); };
       
       var padding = '';
       window.sceneryLayerLog.push = function() {
@@ -50,20 +73,20 @@ define( function( require ) {
       var padStyle = 'color: #ddd;';
       
       // feature-specific debugging flags (so we don't log the entire world)
-      // window.sceneryLayerLog.dirty            = function( ob ) { console.log( '%c' + padding + '%c[dirty] '       + ob, padStyle, 'color: #aaa;' ); };
-      // window.sceneryLayerLog.bounds           = function( ob ) { console.log( '%c' + padding + '%c[bounds] '      + ob, padStyle, 'color: #aaa;' ); };
-      // window.sceneryLayerLog.hitTest          = function( ob ) { console.log( '%c' + padding + '%c[hitTest] '     + ob, padStyle, 'color: #aaa;' ); };
-      // window.sceneryLayerLog.Cursor           = function( ob ) { console.log( '%c' + padding + '%c[Cursor] '      + ob, padStyle, 'color: #000;' ); };
+      // window.sceneryLayerLog.dirty            = function( ob ) { scenery.logFunction( '%c' + padding + '%c[dirty] '       + ob, padStyle, 'color: #aaa;' ); };
+      // window.sceneryLayerLog.bounds           = function( ob ) { scenery.logFunction( '%c' + padding + '%c[bounds] '      + ob, padStyle, 'color: #aaa;' ); };
+      // window.sceneryLayerLog.hitTest          = function( ob ) { scenery.logFunction( '%c' + padding + '%c[hitTest] '     + ob, padStyle, 'color: #aaa;' ); };
+      // window.sceneryLayerLog.Cursor           = function( ob ) { scenery.logFunction( '%c' + padding + '%c[Cursor] '      + ob, padStyle, 'color: #000;' ); };
       
-      // window.sceneryLayerLog.transformSystem  = function( ob ) { console.log( '%c' + padding + '%c[transform] '   + ob, padStyle, 'color: #606;' ); };
-      window.sceneryLayerLog.BackboneDrawable = function( ob ) { console.log( '%c' + padding + '%c[Backbone] '    + ob, padStyle, 'color: #a00;' ); };
-      window.sceneryLayerLog.CanvasBlock      = function( ob ) { console.log( '%c' + padding + '%c[Canvas] '      + ob, padStyle, 'color: #000;' ); };
-      window.sceneryLayerLog.Display          = function( ob ) { console.log( '%c' + padding + '%c[Display] '     + ob, padStyle, 'color: #000;' ); };
-      window.sceneryLayerLog.Drawable         = function( ob ) { console.log( '%c' + padding + '%c'               + ob, padStyle, 'color: #000;' ); };
-      window.sceneryLayerLog.FittedBlock      = function( ob ) { console.log( '%c' + padding + '%c[FittedBlock] ' + ob, padStyle, 'color: #000;' ); };
-      window.sceneryLayerLog.Instance         = function( ob ) { console.log( '%c' + padding + '%c[Instance] '    + ob, padStyle, 'color: #000;' ); };
-      window.sceneryLayerLog.SVGBlock         = function( ob ) { console.log( '%c' + padding + '%c[SVG] '         + ob, padStyle, 'color: #000;' ); };
-      window.sceneryLayerLog.SVGGroup         = function( ob ) { console.log( '%c' + padding + '%c[SVGGroup] '    + ob, padStyle, 'color: #000;' ); };
+      // window.sceneryLayerLog.transformSystem  = function( ob ) { scenery.logFunction( '%c' + padding + '%c[transform] '   + ob, padStyle, 'color: #606;' ); };
+      window.sceneryLayerLog.BackboneDrawable = function( ob ) { scenery.logFunction( '%c' + padding + '%c[Backbone] '    + ob, padStyle, 'color: #a00;' ); };
+      window.sceneryLayerLog.CanvasBlock      = function( ob ) { scenery.logFunction( '%c' + padding + '%c[Canvas] '      + ob, padStyle, 'color: #000;' ); };
+      window.sceneryLayerLog.Display          = function( ob ) { scenery.logFunction( '%c' + padding + '%c[Display] '     + ob, padStyle, 'color: #000;' ); };
+      window.sceneryLayerLog.Drawable         = function( ob ) { scenery.logFunction( '%c' + padding + '%c'               + ob, padStyle, 'color: #000;' ); };
+      window.sceneryLayerLog.FittedBlock      = function( ob ) { scenery.logFunction( '%c' + padding + '%c[FittedBlock] ' + ob, padStyle, 'color: #000;' ); };
+      window.sceneryLayerLog.Instance         = function( ob ) { scenery.logFunction( '%c' + padding + '%c[Instance] '    + ob, padStyle, 'color: #000;' ); };
+      window.sceneryLayerLog.SVGBlock         = function( ob ) { scenery.logFunction( '%c' + padding + '%c[SVG] '         + ob, padStyle, 'color: #000;' ); };
+      window.sceneryLayerLog.SVGGroup         = function( ob ) { scenery.logFunction( '%c' + padding + '%c[SVGGroup] '    + ob, padStyle, 'color: #000;' ); };
     },
   
     disableLayerLogging: function() {
@@ -71,7 +94,7 @@ define( function( require ) {
     },
     
     enableEventLogging: function() {
-      window.sceneryEventLog = function( ob ) { console.log( ob ); };
+      window.sceneryEventLog = function( ob ) { scenery.logFunction( ob ); };
     },
   
     disableEventLogging: function() {
@@ -79,7 +102,7 @@ define( function( require ) {
     },
     
     enableAccessibilityLogging: function() {
-      window.sceneryAccessibilityLog = function( ob ) { console.log( ob ); };
+      window.sceneryAccessibilityLog = function( ob ) { scenery.logFunction( ob ); };
     },
   
     disableAccessibilityLogging: function() {
@@ -102,4 +125,6 @@ define( function( require ) {
     bitmaskBoundsValid:    0x0000200  // i.e. painted area will not spill outside of bounds
     // TODO: what else would we need?
   };
+  
+  return scenery;
 } );
