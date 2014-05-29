@@ -1674,10 +1674,9 @@ define( function( require ) {
           assert && assert( child._opacity === 1, 'renderToCanvasSubtree does not yet support opacity' );
           assert && assert( !child._clipArea, 'renderToCanvasSubtree does not yet support clip areas' );
           
-          wrapper.context.save();
           child._transform.getMatrix().canvasAppendTransform( wrapper.context );
           child.renderToCanvasSubtree( wrapper );
-          wrapper.context.restore();
+          child._transform.getInverse().canvasAppendTransform( wrapper.context );
         }
       }
     },
