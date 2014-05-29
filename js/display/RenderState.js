@@ -160,10 +160,10 @@ define( function( require ) {
             rendererSpecifics = this.svgRenderer;
           } else if ( scenery.Renderer.isDOM( renderer ) ) {
             // TODO: decide if CSS transform is to be applied here!
-            rendererSpecifics = this.scenery.Renderer.bitmaskDOM;
+            rendererSpecifics = scenery.Renderer.bitmaskDOM;
           } else if ( scenery.Renderer.isWebGL( renderer ) ) {
             // TODO: details?
-            rendererSpecifics = this.scenery.Renderer.bitmaskWebGL;
+            rendererSpecifics = scenery.Renderer.bitmaskWebGL;
           }
         }
         assert && assert( rendererSpecifics, 'Should have renderer specifics by now, otherwise we did not recognize the renderer' );
