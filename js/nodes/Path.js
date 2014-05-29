@@ -148,6 +148,10 @@ define( function( require ) {
     set shape( value ) { this.setShape( value ); },
     get shape() { return this.getShape(); },
     
+    getDebugHTMLExtras: function() {
+      return this._shape ? ' (<span style="color: #88f" onclick="window.open( \'data:text/plain;charset=utf-8,\' + encodeURIComponent( \'' + this._shape.getSVGPath() + '\' ) );">path</span>)' : '';
+    },
+    
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Path( ' + ( this._shape ? this._shape.toString() : this._shape ) + ', {' + propLines + '} )';
     },

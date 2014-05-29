@@ -2122,6 +2122,10 @@ define( function( require ) {
       return this; // allow chaining
     },
     
+    getDebugHTMLExtras: function() {
+      return ''; // override for extra information in the debugging output
+    },
+    
     toString: function( spaces, includeChildren ) {
       spaces = spaces || '';
       var props = this.getPropString( spaces + '  ', includeChildren === undefined ? true : includeChildren );

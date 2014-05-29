@@ -410,6 +410,10 @@ define( function( require ) {
       return true;
     },
     
+    getDebugHTMLExtras: function() {
+      return ' "' + escapeHTML( this.getNonBreakingText() ) + '"' + ( this._isHTML ? ' (html)' : '' );
+    },
+    
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Text( \'' + escapeHTML( this._text.replace( /'/g, '\\\'' ) ) + '\', {' + propLines + '} )';
     },

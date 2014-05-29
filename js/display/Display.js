@@ -675,6 +675,7 @@ define( function( require ) {
         iSummary += instance.id;
         iSummary += ' ' + ( node.constructor.name ? node.constructor.name : '?' );
         iSummary += ' <span style="font-weight: ' + ( node.isPainted() ? 'bold' : 'normal' ) + '">' + node.id + '</span>';
+        iSummary += node.getDebugHTMLExtras();
         
         if ( !node._visible ) {
           addQualifier( 'invisible' );
