@@ -31,6 +31,7 @@ define( function( require ) {
       this.parent = parent;
       this.children = cleanArray( this.children );
       this.hasSelfDrawable = false;
+      this.selfDrawable = null; // reference to a self drawable
       
       sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.SVGGroup( 'initializing ' + this.toString() );
       
@@ -85,13 +86,15 @@ define( function( require ) {
     },
     
     addSelfDrawable: function( drawable ) {
-      this.svgGroup.insertBefore( drawable.svgElement, this.children.length ? this.children[0].svgBlock : null );
+      this.selfDrawable = drawable;
+      this.svgGroup.insertBefore( drawable.svgElement, this.children.length ? this.children[0].svgGroup : null );
       this.hasSelfDrawable = true;
     },
     
     removeSelfDrawable: function( drawable ) {
       this.hasSelfDrawable = false;
       this.svgGroup.removeChild( drawable.svgElement );
+      this.selfDrawable = null;
     },
     
     addChildGroup: function( group ) {
@@ -322,6 +325,7 @@ define( function( require ) {
       this.clipDefinition = null;
       this.clipPath = null;
       cleanArray( this.children );
+      this.selfDrawable = null;
       
       // for now
       this.freeToPool();

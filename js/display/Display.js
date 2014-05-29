@@ -127,6 +127,11 @@ define( function( require ) {
     
     // updates the display's DOM element with the current visual state of the attached root node and its descendants
     updateDisplay: function() {
+      //OHTWO TODO: turn off after most debugging work is done
+      if ( window.sceneryDebugPause ) {
+        return;
+      }
+      
       sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.Display( 'updateDisplay frame ' + this._frameId );
       sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.push();
       
