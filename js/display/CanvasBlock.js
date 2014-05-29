@@ -69,6 +69,7 @@ define( function( require ) {
       this.canvas.height = size.height * this.backingScale;
       this.canvas.style.width = size.width + 'px';
       this.canvas.style.height = size.height + 'px';
+      this.wrapper.resetStyles();
     },
     
     setSizeFitBounds: function() {
@@ -81,6 +82,7 @@ define( function( require ) {
       this.canvas.height = this.fitBounds.height * this.backingScale;
       this.canvas.style.width = this.fitBounds.width + 'px';
       this.canvas.style.height = this.fitBounds.height + 'px';
+      this.wrapper.resetStyles();
     },
     
     update: function() {
