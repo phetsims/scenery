@@ -639,7 +639,7 @@ define( function( require ) {
       }
       
       // mark the instance's transform as dirty, so that it will be reachable in the pre-repaint traversal pass
-      instance.markTransformDirty();
+      instance.forceMarkTransformDirty();
     },
     
     removeInstance: function( instance ) {
