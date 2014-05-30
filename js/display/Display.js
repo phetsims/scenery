@@ -147,6 +147,13 @@ define( function( require ) {
         this.markTransformRootDirty( this._baseInstance, this._baseInstance.isTransformed ); // marks the transform root as dirty (since it is)
       }
       
+      this._rootBackbone = this._rootBackbone || this._baseInstance.groupDrawable;
+      assert && assert( this._rootBackbone, 'We are guaranteed a root backbone as the groupDrawable on the base instance' );
+      assert && assert( this._rootBackbone === this._baseInstance.groupDrawable, 'We don\'t want the base instance\'s groupDrawable to change' );
+      
+      
+      if ( assertSlow ) { this._rootBackbone.audit( true, false, true ); } // allow pending blocks / dirty
+      
       sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.Display( 'drawable block change phase' );
       sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.push();
       while ( this._drawablesToChangeBlock.length ) {
@@ -154,10 +161,7 @@ define( function( require ) {
       }
       sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.pop();
       
-      this._rootBackbone = this._rootBackbone || this._baseInstance.groupDrawable;
-      assert && assert( this._rootBackbone, 'We are guaranteed a root backbone as the groupDrawable on the base instance' );
-      assert && assert( this._rootBackbone === this._baseInstance.groupDrawable, 'We don\'t want the base instance\'s groupDrawable to change' );
-      
+      if ( assertSlow ) { this._rootBackbone.audit( false, false, true ); } // allow only dirty
       if ( assertSlow ) { this._baseInstance.audit( this._frameId, false ); }
       
       // pre-repaint phase: update relative transform information for listeners (notification) and precomputation where desired
@@ -190,6 +194,7 @@ define( function( require ) {
       this._rootBackbone.update();
       sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.pop();
       
+      if ( assertSlow ) { this._rootBackbone.audit( false, false, false ); } // allow nothing
       if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
       
       this.updateCursor();

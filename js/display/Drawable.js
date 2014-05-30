@@ -30,6 +30,8 @@ define( function( require ) {
   
   inherit( Object, Drawable, {
     initializeDrawable: function( renderer ) {
+      assert && assert( !this.id || this.disposed, 'If we previously existed, we need to have been disposed' );
+      
       // unique ID for drawables
       this.id = this.id || globalId++;
       
@@ -110,6 +112,8 @@ define( function( require ) {
     },
     
     dispose: function() {
+      assert && assert( !this.disposed, 'We should not re-dispose drawables' );
+      
       sceneryLayerLog && sceneryLayerLog.Drawable && sceneryLayerLog.Drawable( '[' + this.constructor.name + '*] dispose ' + this.toString() );
       
       this.cleanDrawable();
@@ -117,6 +121,29 @@ define( function( require ) {
       
       // for now
       this.freeToPool();
+    },
+    
+    audit: function( allowPendingBlock, allowPendingList, allowDirty ) {
+      if ( assertSlow ) {
+        assertSlow && assertSlow( !this.disposed, 'If we are being audited, we assume we are in the drawable display tree, and we should not be marked as disposed' );
+        assertSlow && assertSlow( this.renderer, 'Should not have a 0 (no) renderer' );
+        
+        assertSlow && assertSlow( !this.backbone || this.parentDrawable, 'If we have a backbone reference, we must have a parentDrawable (our block)' );
+        
+        if ( !allowPendingBlock ) {
+          assertSlow && assertSlow( this.parentDrawable === this.pendingParentDrawable, 'Assure our parent and pending parent match, if we have updated blocks' );
+          assertSlow && assertSlow( this.backbone === this.pendingBackbone, 'Assure our backbone and pending backbone match, if we have updated blocks' );
+        }
+        
+        if ( !allowPendingList ) {
+          assertSlow && assertSlow( this.pendingPreviousDrawable === null, 'Pending linked-list references should be cleared by now' );
+          assertSlow && assertSlow( this.pendingNextDrawable === null, 'Pending linked-list references should be cleared by now' );
+        }
+        
+        if ( !allowDirty ) {
+          assertSlow && assertSlow( !this.dirty, 'Should not be dirty at this phase, if we are in the drawable display tree' );
+        }
+      }
     },
     
     toString: function() {

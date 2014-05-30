@@ -10,6 +10,7 @@ define( function( require ) {
   'use strict';
   
   var inherit = require( 'PHET_CORE/inherit' );
+  var cleanArray = require( 'PHET_CORE/cleanArray' );
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
   
@@ -27,6 +28,10 @@ define( function( require ) {
       this.firstDrawable = null;
       this.lastDrawable = null;
       
+      if ( assertSlow ) {
+        this.drawableList = cleanArray( this.drawableList );
+      }
+      
       return this;
     },
     
@@ -38,21 +43,78 @@ define( function( require ) {
       this.firstDrawable = null;
       this.lastDrawable = null;
       
+      if ( assertSlow ) {
+        cleanArray( this.drawableList );
+      }
+      
       Drawable.prototype.dispose.call( this );
     },
     
     addDrawable: function( drawable ) {
       this.drawableCount++;
       this.markDirtyDrawable( drawable );
+      
+      if ( assertSlow ) {
+        var idx = _.indexOf( this.drawableList, drawable );
+        assertSlow && assertSlow( idx === -1, 'Drawable should not be added when it has not been removed' );
+        this.drawableList.push( drawable );
+        
+        assertSlow && assertSlow( this.drawableCount === this.drawableList.length, 'Count sanity check, to make sure our assertions are not buggy' );
+      }
     },
     
     removeDrawable: function( drawable ) {
       this.drawableCount--;
+      
+      if ( assertSlow ) {
+        var idx = _.indexOf( this.drawableList, drawable );
+        assertSlow && assertSlow( idx !== -1, 'Drawable should be already added when it is removed' );
+        this.drawableList.splice( idx, 1 );
+        
+        assertSlow && assertSlow( this.drawableCount === this.drawableList.length, 'Count sanity check, to make sure our assertions are not buggy' );
+      }
     },
     
     notifyInterval: function( firstDrawable, lastDrawable ) {
       this.firstDrawable = firstDrawable;
       this.lastDrawable = lastDrawable;
+    },
+    
+    audit: function( allowPendingBlock, allowPendingList, allowDirty ) {
+      if ( assertSlow ) {
+        Drawable.prototype.audit.call( this, allowPendingBlock, allowPendingList, allowDirty );
+        
+        var count = 0;
+        
+        if ( !allowPendingList ) {
+          
+          // audit children, and get a count
+          for ( var drawable = this.firstDrawable; drawable !== null && drawable !== this.lastDrawable; drawable = drawable.nextDrawable ) {
+            drawable.audit( allowPendingBlock, allowPendingList, allowDirty );
+            count++;
+          }
+          // iteration above skips last drawable
+          if ( this.lastDrawable ) {
+            this.lastDrawable.audit( allowPendingBlock, allowPendingList, allowDirty );
+            count++;
+          }
+          
+          if ( !allowPendingBlock ) {
+            assertSlow && assertSlow( count === this.drawableCount, 'drawableCount should match' );
+            
+            // scan through to make sure our drawable lists are identical
+            for ( var d = this.firstDrawable; d !== null && d !== this.lastDrawable; d = d.nextDrawable ) {
+              assertSlow && assertSlow( d.parentDrawable === this, 'This block should be this drawable\'s parent' );
+              assertSlow && assertSlow( _.indexOf( this.drawableList, d ) >= 0 );
+            }
+            // iteration above skips last drawable
+            if ( this.lastDrawable ) {
+              assertSlow && assertSlow( this.lastDrawable.parentDrawable === this, 'This block should be this drawable\'s parent' );
+              assertSlow && assertSlow( _.indexOf( this.drawableList, this.lastDrawable ) >= 0 );
+            }
+          }
+        }
+      }
     }
   } );
   
