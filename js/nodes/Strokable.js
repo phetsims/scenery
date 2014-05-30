@@ -43,6 +43,8 @@ define( function( require ) {
     };
     
     proto.setLineWidth = function( lineWidth ) {
+      assert && assert( typeof lineWidth === 'number', 'lineWidth should be a number, not ' + lineWidth );
+      
       if ( this.getLineWidth() !== lineWidth ) {
         
         this._lineDrawingStyles.lineWidth = lineWidth;
@@ -62,6 +64,9 @@ define( function( require ) {
     };
     
     proto.setLineCap = function( lineCap ) {
+      assert && assert( lineCap === 'butt' || lineCap === 'round' || lineCap === 'square',
+                        'lineCap should be one of "butt", "round" or "square", not ' + lineCap );
+      
       if ( this._lineDrawingStyles.lineCap !== lineCap ) {
         
         this._lineDrawingStyles.lineCap = lineCap;
@@ -81,6 +86,9 @@ define( function( require ) {
     };
     
     proto.setLineJoin = function( lineJoin ) {
+      assert && assert( lineJoin === 'miter' || lineJoin === 'round' || lineJoin === 'bevel',
+                        'lineJoin should be one of "miter", "round" or "bevel", not ' + lineJoin );
+      
       if ( this._lineDrawingStyles.lineJoin !== lineJoin ) {
         
         this._lineDrawingStyles.lineJoin = lineJoin;
@@ -123,6 +131,8 @@ define( function( require ) {
     };
     
     proto.setLineDashOffset = function( lineDashOffset ) {
+      assert && assert( typeof lineDashOffset === 'number', 'lineDashOffset should be a number, not ' + lineDashOffset );
+      
       if ( this._lineDrawingStyles.lineDashOffset !== lineDashOffset ) {
         
         this._lineDrawingStyles.lineDashOffset = lineDashOffset;
@@ -142,7 +152,8 @@ define( function( require ) {
     };
     
     proto.setStrokePickable = function( pickable ) {
-      assert && assert( typeof pickable === 'boolean' );
+      assert && assert( typeof pickable === 'boolean', 'strokePickable should be a boolean, not ' + pickable );
+      
       if ( this._strokePickable !== pickable ) {
         this._strokePickable = pickable;
         
