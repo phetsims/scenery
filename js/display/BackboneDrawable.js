@@ -258,7 +258,7 @@ define( function( require ) {
     },
     
     stitch: function( firstDrawable, lastDrawable, oldDrawableBeforeChange, oldDrawableAfterChange ) {
-      sceneryLayerLog && sceneryLayerLog.BackboneDrawable && sceneryLayerLog.BackboneDrawable( 'stitch ' + this.toString() + ' first:' + firstDrawable.toString() + ' last:' + lastDrawable.toString() );
+      sceneryLayerLog && sceneryLayerLog.BackboneDrawable && sceneryLayerLog.BackboneDrawable( 'stitch ' + this.toString() + ' first:' + ( firstDrawable ? firstDrawable.toString() : 'null' ) + ' last:' + ( lastDrawable ? lastDrawable.toString() : 'null' ) );
       sceneryLayerLog && sceneryLayerLog.BackboneDrawable && sceneryLayerLog.push();
       
       for ( var d = this.lastFirstDrawable; d !== null && d.previousDrawable !== this.lastLastDrawable; d = d.nextDrawable ) {
