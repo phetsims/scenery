@@ -9,13 +9,8 @@
       function process() {
         if ( window.snapshotFromDataURL ) {
           snapshotFromDataURL( dataURL, function( dataURLSnapshot ) {
-            var $div = $( '<div>' );
-            $div.width( dataURLSnapshot.width );
-            $div.height( dataURLSnapshot.height );
-            
-            var scene = new scenery.Scene( $div );
+            var scene = new scenery.Node();
             setup( scene );
-            scene.updateScene();
             
             asyncSnapshot( scene, function( sceneSnapshot ) {
               snapshotEquals( sceneSnapshot, dataURLSnapshot, threshold, name );
@@ -97,9 +92,7 @@
     function( scene ) {
       var rect = new scenery.Rectangle( 0, 0, 16, 16, { fill: '#f00', visible: false } );
       scene.addChild( rect );
-      scene.updateScene();
       rect.visible = true;
-      scene.updateScene();
     }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAQUlEQVRYR+3WMQoAMAgDwPj/R7e+wQpdTrIK4Ratk3TmU0lnPqUAAQIECBAg8F1gfsl3Np+eiY0KChAgQIAAAQIX6VUgIfXDabwAAAAASUVORK5CYII=',
     0
   );
@@ -109,9 +102,7 @@
       var color = new scenery.Color( '#f00' );
       var rect = new scenery.Rectangle( 0, 0, 16, 16, { fill: color } );
       scene.addChild( rect );
-      scene.updateScene();
       color.blue = 255;
-      scene.updateScene();
     }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAP0lEQVRYR+3WsQ0AQAgCQNl/aH8ITL45exJyDWZnd4rLJEV8ogABAgQIECDwXaDZ8ots9UwoQIAAAQIECFwIPEjvMCG7TeaeAAAAAElFTkSuQmCC',
     0
   );
@@ -120,11 +111,9 @@
     function( scene ) {
       var rect = new scenery.Rectangle( 0, 0, 16, 16, { fill: '#f00' } );
       scene.addChild( rect );
-      scene.updateScene();
       rect.visible = false;
       rect.x = 16;
       rect.visible = true;
-      scene.updateScene();
     }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAQUlEQVRYR+3WMQoAMAgDQP3/o9tCf2AGlxPXQLhFu8I5VW/n0/PoTypAgAABAgQIrAuk5zz+BxQgQIAAAQIEUoELbg4gAWKut4YAAAAASUVORK5CYII=',
     0
   );
@@ -133,12 +122,10 @@
     function( scene ) {
       var rect = new scenery.Rectangle( 0, 0, 16, 16, { fill: '#f00' } );
       scene.addChild( rect );
-      scene.updateScene();
       rect.visible = false;
       rect.x = 16;
       rect.addChild( new scenery.Rectangle( -16, 0, 16, 16, { fill: '#00f' } ) );
       rect.visible = true;
-      scene.updateScene();
     }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAARUlEQVRYR+3WsQ0AMAgDsPT/o6naFzKwmD0i8gInmUkxk1Ok89IKECBAgAABAusC1Tmvw903Ua//D8nuKECAAAECBNYFLsnVMAEcXLUQAAAAAElFTkSuQmCC',
     0
   );
@@ -147,12 +134,10 @@
     function( scene ) {
       var rect = new scenery.Rectangle( 0, 0, 16, 16, { fill: '#f00' } );
       scene.addChild( rect );
-      scene.updateScene();
       rect.visible = false;
       rect.x = 16;
       rect.addChild( new scenery.Rectangle( -16, 0, 16, 16, { fill: '#00f', visible: false } ) );
       rect.visible = true;
-      scene.updateScene();
     }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAQUlEQVRYR+3WMQoAMAgDQP3/o9tCf2AGlxPXQLhFu8I5VW/n0/PoTypAgAABAgQIrAuk5zz+BxQgQIAAAQIEUoELbg4gAWKut4YAAAAASUVORK5CYII=',
     0
   );
@@ -161,7 +146,6 @@
     function( scene ) {
       var rect = new scenery.Rectangle( 0, 0, 16, 16, { fill: '#f00', renderer: 'svg' } );
       scene.addChild( rect );
-      scene.updateScene();
     }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAQUlEQVRYR+3WMQoAMAgDwPj/R7e+wQpdTrIK4Ratk3TmU0lnPqUAAQIECBAg8F1gfsl3Np+eiY0KChAgQIAAAQIX6VUgIfXDabwAAAAASUVORK5CYII=',
     0
   );
@@ -170,7 +154,6 @@
     function( scene ) {
       var rect = new scenery.Rectangle( 0, 0, 16, 16, { fill: '#f00', renderer: 'svg', visible: false } );
       scene.addChild( rect );
-      scene.updateScene();
     }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAALUlEQVRYR+3QQREAAAABQfqXFsNnFTizzXk99+MAAQIECBAgQIAAAQIECBAgMBo/ACHo7lH9AAAAAElFTkSuQmCC',
     0
   );
