@@ -37,9 +37,14 @@
 
     function docExample( id, draw ) {
       var $container = $( '#' + id );
-      var scene = new scenery.Scene( $container );
-      draw( scene );
-      scene.updateScene();
+      var scene = new scenery.Node();
+      var display = new scenery.Display( scene, {
+        width: $container.width(),
+        height: $container.height()
+      } );
+      $container[0].appendChild( display.domElement );
+      draw( scene, display );
+      display.updateDisplay();
       var $code = $( '<pre class="brush: js"></pre>' );
       $code.text( draw.toString().match( /\/\*START\*\/((.|\n)*)\/\*END\*\// )[1] );
       $container.after( $code );
@@ -501,7 +506,7 @@ scene.addChild( new scenery.Node( {
       </ul>
       <div id="example-cursor" class="exampleScene" style="width: 128px; height: 64px; margin: 0 auto;"></div>
       <script type="text/javascript">
-docExample( 'example-cursor', function( scene ) {
+docExample( 'example-cursor', function( scene, display ) {
 /*START*/
 scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 25 ), {
   x: 64, y: 32,
@@ -511,10 +516,10 @@ scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 25 ), {
 } ) );
 /*END*/
 // event initialization needed for cursor to work
-scene.initializeStandaloneEvents();
+display.initializeStandaloneEvents();
 
 // and update on every frame
-scene.updateOnRequestAnimationFrame();
+display.updateOnRequestAnimationFrame();
 } );
       </script>
 
@@ -1197,12 +1202,12 @@ scene.addChild( new scenery.Path( shape, _.extend( {
       </p>
       <div id="example-image" class="exampleScene" style="width: 130px; height: 85px; margin: 0 auto;"></div>
       <script type="text/javascript">
-docExample( 'example-image', function( scene ) {
+docExample( 'example-image', function( scene, display ) {
 var url = 'http://phet.colorado.edu/sims/my-solar-system/my-solar-system-thumbnail.png';
 /*START*/
 scene.addChild( new scenery.Image( url ) );
 /*END*/
-scene.updateOnRequestAnimationFrame();
+display.updateOnRequestAnimationFrame();
 } );
       </script>
 
@@ -1547,7 +1552,7 @@ scene.addChild( new scenery.Text( 'A', {
       </p>
       <div id="example-pattern" class="exampleScene" style="width: 256px; height: 256px; margin: 0 auto;"></div>
       <script type="text/javascript">
-docExample( 'example-pattern', function( scene ) {
+docExample( 'example-pattern', function( scene, display ) {
 var loadedImg = document.createElement( 'img' );
 loadedImg.addEventListener( 'load', function() {
 /*START*/
@@ -1560,7 +1565,7 @@ scene.addChild( new scenery.Path( kite.Shape.roundRectangle( 10, 10, 236, 236, 6
   stroke: '#000'
 } ) );
 /*END*/
-scene.updateScene();
+display.updateDisplay();
 } );
 loadedImg.src = 'http://phet.colorado.edu/images/phet-logo-yellow.png';
 // loadedImg.src = 'http://phet.colorado.edu/sims/plate-tectonics/plate-tectonics-thumbnail.png';
