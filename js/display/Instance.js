@@ -14,67 +14,81 @@
  **********************
  * Relative transform system description:
  *
- * A "relative" transform here is the transform that a Trail would have, not necessarily rooted at the display's root. Imagine we have a
- * CSS-transformed backbone div, and nodes underneath that render to Canvas. On the Canvas, we will need to set the context's transform to
- * the matrix that will transform from the displayed instances' local coordinates frames to the CSS-transformed backbone instance. Notably,
- * transforming the backbone instance or any of its ancestors does NOT affect this "relative" transform from the instance to the displayed
- * instances, while any Node transform changes between (not including) the backbone instance and (including) the displayed instance WILL
- * affect that relative transform. This is key to setting the CSS transform on backbones, DOM nodes, having the transforms necessary for
- * the fastest Canvas display, and determining fitting bounds for layers.
+ * A "relative" transform here is the transform that a Trail would have, not necessarily rooted at the display's root.
+ * Imagine we have a CSS-transformed backbone div, and nodes underneath that render to Canvas. On the Canvas, we will
+ * need to set the context's transform to the matrix that will transform from the displayed instances' local coordinates
+ * frames to the CSS-transformed backbone instance. Notably, transforming the backbone instance or any of its ancestors
+ * does NOT affect this "relative" transform from the instance to the displayed instances, while any Node transform
+ * changes between (not including) the backbone instance and (including) the displayed instance WILL affect that
+ * relative transform. This is key to setting the CSS transform on backbones, DOM nodes, having the transforms necessary
+ * for the fastest Canvas display, and determining fitting bounds for layers.
  *
- * Each Instance has its own "relative trail", although these aren't stored. We use implicit hierarchies in the Instance tree
- * for this purpose. If an Instance is a CSS-transformed backbone, or any other case that requires drawing beneath to be done relative
- * to its local coordinate frame, we call it a transform "root", and it has instance.isTransformed set to true. This should NEVER change for
- * an instance (any changes that would do this require reconstructing the instance tree).
+ * Each Instance has its own "relative trail", although these aren't stored. We use implicit hierarchies in the Instance
+ * tree for this purpose. If an Instance is a CSS-transformed backbone, or any other case that requires drawing beneath
+ * to be done relative to its local coordinate frame, we call it a transform "root", and it has instance.isTransformed
+ * set to true. This should NEVER change for an instance (any changes that would do this require reconstructing the
+ * instance tree).
  *
- * There are implicit hierarchies for each root, with trails starting from that root's children (they won't apply that root's transform since
- * we assume we are working within that root's local coordinate frame). These should be effectively independent (if there are no bugs), so that
- * flags affecting one implicit hierarchy will not affect the other (dirty flags, etc.), and traversals should not cross these boundaries.
+ * There are implicit hierarchies for each root, with trails starting from that root's children (they won't apply that
+ * root's transform since we assume we are working within that root's local coordinate frame). These should be
+ * effectively independent (if there are no bugs), so that flags affecting one implicit hierarchy will not affect the
+ * other (dirty flags, etc.), and traversals should not cross these boundaries.
  * 
  * For various purposes, we want a system that can:
- * - every frame before repainting: notify listeners on instances whether its relative transform has changed (add|removeRelativeTransformListener)
- * - every frame before repainting: precompute relative transforms on instances where we know this is required (add|removeRelativeTransformPrecompute)
+ * - every frame before repainting: notify listeners on instances whether its relative transform has changed
+ *                                  (add|removeRelativeTransformListener)
+ * - every frame before repainting: precompute relative transforms on instances where we know this is required
+ *                                  (add|removeRelativeTransformPrecompute)
  * - any time during repainting:    provide an efficient way to lazily compute relative transforms when needed
  *
- * This is done by first having one step in the pre-repaint phase that traverses the tree where necessary, notifying relative transform listeners,
- * and precomputing relative transforms when they have changed (and precomputation is requested). This traversal leaves metadata on the instances
- * so that we can (fairly) efficiently force relative transform "validation" any time afterwards that makes sure the relativeMatrix property is up-to-date.
+ * This is done by first having one step in the pre-repaint phase that traverses the tree where necessary, notifying
+ * relative transform listeners, and precomputing relative transforms when they have changed (and precomputation is
+ * requested). This traversal leaves metadata on the instances so that we can (fairly) efficiently force relative
+ * transform "validation" any time afterwards that makes sure the relativeMatrix property is up-to-date.
  *
- * First of all, to ensure we traverse the right parts of the tree, we need to keep metadata on what needs to be traversed. This is done by tracking counts
- * of listeners/precompution needs, both on the instance itself, and how many children have these needs. We use counts instead of boolean flags so that we can
- * update this quickly while (a) never requiring full children scans to update this metadata, and (b) minimizing the need to traverse all the way up to the root
- * to update the metadata. The end result is hasDescendantListenerNeed and hasDescendantComputeNeed which compute, respectively, whether we need
- * to traverse this instance for listeners and precomputation. Additionally, hasAncestorListenerNeed and hasAncestorComputeNeed compute whether our parent needs
- * to traverse up to us.
+ * First of all, to ensure we traverse the right parts of the tree, we need to keep metadata on what needs to be
+ * traversed. This is done by tracking counts of listeners/precompution needs, both on the instance itself, and how many
+ * children have these needs. We use counts instead of boolean flags so that we can update this quickly while (a) never
+ * requiring full children scans to update this metadata, and (b) minimizing the need to traverse all the way up to the
+ * root to update the metadata. The end result is hasDescendantListenerNeed and hasDescendantComputeNeed which compute,
+ * respectively, whether we need to traverse this instance for listeners and precomputation. Additionally,
+ * hasAncestorListenerNeed and hasAncestorComputeNeed compute whether our parent needs to traverse up to us.
  *
- * The other tricky bits to remember for this traversal are the flags it sets, and how later validation uses and updates these flags.
- * First of all, we have relativeSelfDirty and relativeChildDirtyFrame. When a node's transform changes, we mark relativeSelfDirty on the node, and
- * relativeChildDirtyFrame for all ancestors up to (and including) the transform root. relativeChildDirtyFrame allows us to prune our traversal to only
- * modified subtrees. Additionally, so that we can retain the invariant that it is "set" parent node if it is set on a child, we store the rendering frame
- * ID (unique to traversals) instead of a boolean true/false. Our traversal may skip subtrees where relativeChildDirtyFrame is "set" due to no listeners
- * or precomputation needed for that subtree, so if we used booleans this would be violated. Violating that invariant would prevent us from "bailing out" when
- * setting the relativeChildDirtyFrame flag, and on EVERY transform change we would have to traverse ALL of the way to the root (instead of the efficient
- * "stop at the ancestor where it is also set").
+ * The other tricky bits to remember for this traversal are the flags it sets, and how later validation uses and updates
+ * these flags. First of all, we have relativeSelfDirty and relativeChildDirtyFrame. When a node's transform changes,
+ * we mark relativeSelfDirty on the node, and relativeChildDirtyFrame for all ancestors up to (and including) the
+ * transform root. relativeChildDirtyFrame allows us to prune our traversal to only modified subtrees. Additionally, so
+ * that we can retain the invariant that it is "set" parent node if it is set on a child, we store the rendering frame
+ * ID (unique to traversals) instead of a boolean true/false. Our traversal may skip subtrees where
+ * relativeChildDirtyFrame is "set" due to no listeners or precomputation needed for that subtree, so if we used
+ * booleans this would be violated. Violating that invariant would prevent us from "bailing out" when setting the
+ * relativeChildDirtyFrame flag, and on EVERY transform change we would have to traverse ALL of the way to the root
+ * (instead of the efficient "stop at the ancestor where it is also set").
  *
- * relativeSelfDirty is initially set on instances whose nodes had transform changes (they mark that this relative transform, and all transforms beneath, are dirty).
- * We maintain the invariant that if a relative transform needs to be recomputed, it or one of its ancestors WILL ALWAYS have this flag set. This is required
- * so that later validation of the relative transform can verify whether it has been changed in an efficient way. When we recompute the relative transform for one
- * instance, we have to set this flag on all children to maintain this invariant.
+ * relativeSelfDirty is initially set on instances whose nodes had transform changes (they mark that this relative
+ * transform, and all transforms beneath, are dirty). We maintain the invariant that if a relative transform needs to be
+ * recomputed, it or one of its ancestors WILL ALWAYS have this flag set. This is required so that later validation of
+ * the relative transform can verify whether it has been changed in an efficient way. When we recompute the relative
+ * transform for one instance, we have to set this flag on all children to maintain this invariant.
  *
- * Additionally, so that we can have fast "validation" speed, we also store into relativeFrameId the last rendering frame ID (counter) where we either verified that
- * the relative transform is up to date, or we have recomputed it. Thus when "validating" a relative transform that wasn't precomputed, we only need to scan up
- * the ancestors to the first one that was verified OK this frame (boolean flags are insufficient for this, since we would have to clear them all to false on every
- * frame, requiring a full tree traversal). In the future, we may set this flag to the frame proactively during traversal to speed up validation, but that is not done
- * at the time of this writing.
+ * Additionally, so that we can have fast "validation" speed, we also store into relativeFrameId the last rendering
+ * frame ID (counter) where we either verified that the relative transform is up to date, or we have recomputed it. Thus
+ * when "validating" a relative transform that wasn't precomputed, we only need to scan up the ancestors to the first
+ * one that was verified OK this frame (boolean flags are insufficient for this, since we would have to clear them all
+ * to false on every frame, requiring a full tree traversal). In the future, we may set this flag to the frame
+ * proactively during traversal to speed up validation, but that is not done at the time of this writing.
  *
  * Some helpful notes for the scope of various relativeTransform bits:
  *                         (transformRoot) (regular) (regular) (transformRoot)
  * relativeChildDirtyFrame [---------------------------------]                 (int)
  * relativeSelfDirty                       [---------------------------------]
- * relativeTransform                       [---------------------------------] (transform on root applies to its parent context)
+ * relativeTransform                       [---------------------------------] (transform on root applies to
+ *                                                                             its parent context)
  * relativeFrameId                         [---------------------------------] (int)
- * child counts            [---------------------------------]                 (e.g. relativeChildrenListenersCount, relativeChildrenPrecomputeCount)
- * self counts                             [---------------------------------] (e.g. relativePrecomputeCount, relativeTransformListeners.length)
+ * child counts            [---------------------------------]                 (e.g. relativeChildrenListenersCount,
+ *                                                                             relativeChildrenPrecomputeCount)
+ * self counts                             [---------------------------------] (e.g. relativePrecomputeCount,
+ *                                                                             relativeTransformListeners.length)
  **********************
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
@@ -110,31 +124,45 @@ define( function( require ) {
     initialize: function( display, trail ) {
       assert && assert( !this.active, 'We should never try to initialize an already active object' );
       
-      trail.setImmutable(); // prevent the trail passed in from being mutated after this point (we want a consistent trail)
+      // prevent the trail passed in from being mutated after this point (we want a consistent trail)
+      trail.setImmutable();
       
       this.id = this.id || globalIdCounter++;
       
       this.cleanInstance( display, trail, trail.lastNode() );
       
-      // properties relevant to the "relative" transform to the closest transform root. Please see detailed docs at the top of the file!
-      this.relativeMatrix = this.relativeMatrix || Matrix3.identity();  // the actual cached transform to the root
-      this.relativeSelfDirty = true;                   // whether our relativeMatrix is dirty
-      this.relativeChildDirtyFrame = display._frameId; // Whether children have dirty transforms (if it is the current frame) NOTE: used only for pre-repaint traversal,
-                                                       // and can be ignored if it has a value less than the current frame ID. This allows us to traverse and hit all listeners
-                                                       // for this particular traversal, without leaving an invalid subtree (a boolean flag here is insufficient, since our
-                                                       // traversal handling would validate our invariant of this.relativeChildDirtyFrame => parent.relativeChildDirtyFrame).
-                                                       // In this case, they are both effectively "false" unless they are the current frame ID, in which case that invariant holds.
-      //this.relativeTransformListeners = [];          // will be notified in pre-repaint phase that our relative transform has changed (but not computed by default)
-      this.relativeChildrenListenersCount = 0;         // how many children have (or have descendants with) relativeTransformListeners
-      this.relativePrecomputeCount = 0;                // if >0, indicates this should be precomputed in the pre-repaint phase
-      this.relativeChildrenPrecomputeCount = 0;        // how many children have (or have descendants with) >0 relativePrecomputeCount
-      this.relativeFrameId = -1;                       // used to mark what frame the transform was updated in (to accelerate non-precomputed relative transform access)
+      // the actual cached transform to the root
+      this.relativeMatrix = this.relativeMatrix || Matrix3.identity();
+      
+      // whether our relativeMatrix is dirty
+      this.relativeSelfDirty = true;
+      
+      // how many children have (or have descendants with) relativeTransformListeners
+      this.relativeChildrenListenersCount = 0;
+      
+      // if >0, indicates this should be precomputed in the pre-repaint phase
+      this.relativePrecomputeCount = 0;
+      
+      // how many children have (or have descendants with) >0 relativePrecomputeCount
+      this.relativeChildrenPrecomputeCount = 0;
+      
+      // used to mark what frame the transform was updated in (to accelerate non-precomputed relative transform access)
+      this.relativeFrameId = -1;
+      
+      // Whether children have dirty transforms (if it is the current frame) NOTE: used only for pre-repaint traversal,
+      // and can be ignored if it has a value less than the current frame ID. This allows us to traverse and hit all
+      // listeners for this particular traversal, without leaving an invalid subtree (a boolean flag here is
+      // insufficient, since our traversal handling would validate our invariant of
+      // this.relativeChildDirtyFrame => parent.relativeChildDirtyFrame). In this case, they are both effectively
+      // "false" unless they are the current frame ID, in which case that invariant holds.
+      this.relativeChildDirtyFrame = display._frameId;
       
       // properties relevant to the node's direct transform
       this.transformDirty = true; // whether the node's transform has changed (until the pre-repaint phase)
       this.nodeTransformListener = this.nodeTransformListener || this.markTransformDirty.bind( this );
       
-      // In the range (-1,0), to help us track insertions and removals of this instance's node to its parent (did we get removed but added back?).
+      // In the range (-1,0), to help us track insertions and removals of this instance's node to its parent
+      // (did we get removed but added back?).
       // If it's -1 at its parent's syncTree, we'll end up removing our reference to it.
       // We use an integer just for sanity checks (if it ever reaches -2 or 1, we've reached an invalid state)
       this.addRemoveCounter = 0;
@@ -143,13 +171,14 @@ define( function( require ) {
       this.childInsertedListener = this.childInsertedListener || this.onChildInserted.bind( this );
       this.childRemovedListener = this.childRemovedListener || this.onChildRemoved.bind( this );
       
-      // we need to add this reference on stateless instances, so that we can find out if it was removed before our syncTree was called
+      // We need to add this reference on stateless instances, so that we can find out if it was removed before our
+      // syncTree was called.
       this.node.addInstance( this );
       
-      // outstanding external references. used for shared cache instances, where multiple instances can point to us
+      // Outstanding external references. used for shared cache instances, where multiple instances can point to us.
       this.externalReferenceCount = 0;
       
-      // whether we have been instantiated. false if we are in a pool waiting to be instantiated
+      // Whether we have been instantiated. false if we are in a pool waiting to be instantiated.
       this.active = true;
       
       sceneryLayerLog && sceneryLayerLog.Instance && sceneryLayerLog.Instance( 'initialized ' + this.toString() );
@@ -157,16 +186,19 @@ define( function( require ) {
       return this;
     },
     
-    // called for initialization of properties (via initialize(), via constructor), or to clean the instance for placement in the pool (don't leak memory)
+    // called for initialization of properties (via initialize(), via constructor), or to clean the instance for
+    // placement in the pool (don't leak memory)
     cleanInstance: function( display, trail, node ) {
       this.display = display;
       this.trail = trail;
       this.node = node;
       this.parent = null; // will be set as needed
-      this.children = cleanArray( this.children ); // Array[Instance]. NOTE: reliance on correct order after syncTree by at least SVGBlock/SVGGroup
-      this.sharedCacheInstance = null; // reference to a shared cache instance (if applicable, it's different than a child)
+      // NOTE: reliance on correct order after syncTree by at least SVGBlock/SVGGroup
+      this.children = cleanArray( this.children ); // Array[Instance].
+      this.sharedCacheInstance = null; // reference to a shared cache instance (different than a child)
       
-      // child instances are pushed to here when their node is removed from our node. we don't immediately dispose, since it may be added back
+      // Child instances are pushed to here when their node is removed from our node. we don't immediately dispose,
+      // since it may be added back.
       this.instanceRemovalCheckList = cleanArray( this.instanceRemovalCheckList );
       
       // linked-list handling for sibling instances (null for no next/previous sibling)
@@ -201,10 +233,20 @@ define( function( require ) {
     
     cleanStitchChangeInterval: function() {
       // Tracking bounding indices / drawables for what has changed, so we don't have to over-stitch things.
-      this.beforeStableIndex = this.children.length; // if (not iff) child's index <= beforeStableIndex, it hasn't been added/removed. relevant to current children.
-      this.afterStableIndex = -1; // if (not iff) child's index >= afterStableIndex, it hasn't been added/removed. relevant to current children.
-      this.drawableBeforeFirstChange = null; // if there were changes, it references the drawable before our first change (or null if there is no drawable we can reference)
-      this.drawableAfterLastChange = null; // if there were changes, it references the drawable after our last change (or null if there is no drawable we can reference)
+      
+      // if (not iff) child's index <= beforeStableIndex, it hasn't been added/removed. relevant to current children.
+      this.beforeStableIndex = this.children.length;
+      
+      // if (not iff) child's index >= afterStableIndex, it hasn't been added/removed. relevant to current children.
+      this.afterStableIndex = -1;
+      
+      // if there were changes, it references the drawable before our first change (or null if there is no drawable
+      // we can reference)
+      this.drawableBeforeFirstChange = null;
+      
+      // if there were changes, it references the drawable after our last change (or null if there is no drawable
+      // we can reference)
+      this.drawableAfterLastChange = null;
     },
     
     // @public
