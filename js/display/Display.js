@@ -263,6 +263,11 @@ define( function( require ) {
       }
     },
     
+    setWidthHeight: function( width, height ) {
+      // TODO: don't burn an instance here?
+      this.setSize( new Dimension2( width, height ) );
+    },
+    
     // The width of the Display's DOM element
     getWidth: function() {
       return this._size.width;

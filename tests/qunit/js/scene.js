@@ -16,33 +16,6 @@
     ok( node._childBoundsDirty );
   } );
   
-  test( 'Scene Layer test 1', function() {
-    var sceneA = new scenery.Scene( $( '#main' ) );
-    var sceneB = new scenery.Scene( $( '#secondary' ) );
-    
-    var node = new scenery.Path();
-    var child = new scenery.Path();
-    node.addChild( child );
-    
-    sceneA.addChild( node );
-    sceneB.addChild( child );
-    
-    sceneA.rebuildLayers();
-    
-    // console.log( sceneA.layers );
-    
-    
-    var a = new scenery.Scene( $( '#main' ) );
-    var b = new scenery.Scene( $( '#secondary' ) );
-    var c = new scenery.Node();
-    
-    b.addChild( c );
-    a.addChild( b );
-    a.addChild( c );
-    
-    expect( 0 );
-  } );
-  
   test( 'Canvas 2D Context and Features', function() {
     var canvas = document.createElement( 'canvas' );
     var context = canvas.getContext( '2d' );
@@ -475,32 +448,7 @@
     
     b.validateBounds();
     
-    a.invalidatePaint();
-    
     expect( 0 );
-  } );
-  
-  test( 'Checking Layers and external canvas', function() {
-    var scene = new scenery.Scene( $( '#main' ) );
-    
-    scene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ), {
-      fill: '#ff0000'
-    } ) );
-    
-    var middleRect = new scenery.Path( kite.Shape.rectangle( canvasWidth / 4, canvasHeight / 4, canvasWidth / 2, canvasHeight / 2 ), {
-      fill: '#00ff00'
-    } );
-    middleRect.layerSplit = true;
-    
-    scene.addChild( middleRect );
-    
-    scene.addChild( new scenery.Path( kite.Shape.rectangle( canvasWidth / 2, canvasHeight / 2, canvasWidth / 2, canvasHeight / 2 ), {
-      fill: '#0000ff'
-    } ) );
-    
-    scene.updateScene();
-    
-    equal( scene.layers.length, 3, 'simple layer check' );
   } );
   
   test( 'Correct bounds on rectangle', function() {
@@ -538,37 +486,6 @@
     var otherNode = new scenery.Path( kite.Shape.rectangle( 0, 0, 10, 10 ), { fill: fill } );
     
     equal( otherNode.fill, fill );
-  } );
-  
-  test( 'Layer change stability', function() {
-    var scene = new scenery.Scene( $( '#main' ) );
-    var root = scene;
-    
-    root.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ), {
-      fill: '#ff0000'
-    } ) );
-    
-    var middleRect = new scenery.Path( kite.Shape.rectangle( canvasWidth / 4, canvasHeight / 4, canvasWidth / 2, canvasHeight / 2 ), {
-      fill: '#00ff00'
-    } );
-    
-    
-    root.addChild( middleRect );
-    
-    root.addChild( new scenery.Path( kite.Shape.rectangle( canvasWidth / 2, canvasHeight / 2, canvasWidth / 2, canvasHeight / 2 ), {
-      fill: '#0000ff'
-    } ) );
-    
-    scene.updateScene();
-    
-    var snapshotA = snapshot( scene );
-    
-    middleRect.layerSplit = true;
-    scene.updateScene();
-    
-    var snapshotB = snapshot( scene );
-    
-    snapshotEquals( snapshotA, snapshotB, 0, 'Layer change stability' );
   } );
   
   test( 'Piccolo-like behavior', function() {
@@ -627,47 +544,36 @@
   } );
   
   test( 'Path with empty shape', function() {
-    var scene = new scenery.Scene( $( '#main' ) );
+    var scene = new scenery.Node();
     
     var node = new scenery.Path( new kite.Shape() );
     
     scene.addChild( node );
-    scene.updateScene();
     expect( 0 );
   } );
   
   test( 'Path with null shape', function() {
-    var scene = new scenery.Scene( $( '#main' ) );
+    var scene = new scenery.Node();
 
     var node = new scenery.Path( null );
 
     scene.addChild( node );
-    scene.updateScene();
     expect( 0 );
   } );
   
-  test( 'Adding and removing child layer count', function() {
-    var scene = new scenery.Scene( $( '#main' ) );
-    var path = new scenery.Path();
-    equal( scene.layers.length, 0, 'no layers before adding' );
-    scene.addChild( path );
-    equal( scene.layers.length, 1, 'one layer after adding' );
-    scene.removeChild( path );
-    equal( scene.layers.length, 0, 'no layers after removing' );
-  } );
-  
-  test( 'Scene resize event', function() {
-    var scene = new scenery.Scene( $( '#main' ) );
+  test( 'Display resize event', function() {
+    var scene = new scenery.Node();
+    var display = new scenery.Display( scene );
     
     var width, height, count = 0;
     
-    scene.addEventListener( 'resize', function( event ) {
-      width = event.width;
-      height = event.height;
+    display.on( 'displaySize', function( size ) {
+      width = size.width;
+      height = size.height;
       count++;
     } );
     
-    scene.resize( 712, 217 );
+    display.setWidthHeight( 712, 217 );
     
     equal( width, 712, 'Scene resize width' );
     equal( height, 217, 'Scene resize height' );
@@ -718,7 +624,7 @@
   } );
   
   test( 'Using a color instance', function() {
-    var scene = new scenery.Scene( $( '#main' ) );
+    var scene = new scenery.Node();
     
     var rect = new scenery.Rectangle( 0, 0, 100, 50 );
     ok( rect.fill === null, 'Always starts with a null fill' );
