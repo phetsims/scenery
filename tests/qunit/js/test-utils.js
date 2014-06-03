@@ -134,43 +134,19 @@ function snapshotEquals( a, b, threshold, message ) {
   return isEqual;
 }
 
-// compares the "update" render against a full render in-between a series of steps
-function updateVsFullRender( actions ) {
-  var mainScene = new scenery.Scene( $( '#main' ) );
-  var secondaryScene = new scenery.Scene( $( '#secondary' ) );
-  
-  for ( var i = 0; i < actions.length; i++ ) {
-    var action = actions[i];
-    action( mainScene );
-    mainScene.updateScene();
-    
-    secondaryScene.dispose();
-    secondaryScene = new scenery.Scene( $( '#secondary' ) );
-    for ( var j = 0; j <= i; j++ ) {
-      actions[j]( secondaryScene );
-    }
-    secondaryScene.updateScene();
-    
-    var isEqual = snapshotEquals( snapshot( mainScene ), snapshot( secondaryScene ), 0, 'action #' + i );
-    if ( !isEqual ) {
-      break;
-    }
-  }
-}
-
 function sceneEquals( constructionA, constructionB, message, threshold ) {
   if ( threshold === undefined ) {
     threshold = 0;
   }
   
-  var sceneA = new scenery.Scene( $( '#main' ) );
-  var sceneB = new scenery.Scene( $( '#secondary' ) );
+  var sceneA = new scenery.Node();
+  var sceneB = new scenery.Node();
   
   constructionA( sceneA );
   constructionB( sceneB );
   
-  sceneA.renderScene();
-  sceneB.renderScene();
+  // sceneA.renderScene();
+  // sceneB.renderScene();
   
   var isEqual = snapshotEquals( snapshot( sceneA ), snapshot( sceneB ), threshold, message );
   

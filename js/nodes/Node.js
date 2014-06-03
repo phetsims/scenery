@@ -1690,7 +1690,7 @@ define( function( require ) {
       
       this.renderToCanvasSubtree( wrapper );
       
-      callback(); // this was originally asynchronous, so we had a callback
+      callback && callback(); // this was originally asynchronous, so we had a callback
     },
     
     /*

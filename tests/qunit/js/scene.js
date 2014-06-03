@@ -503,48 +503,6 @@
     equal( scene.layers.length, 3, 'simple layer check' );
   } );
   
-  test( 'Update vs Full Basic Clearing Check', function() {
-    updateVsFullRender( [
-      function( scene ) {
-        scene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ), {
-          fill: '#000000'
-        } ) );
-      }, function( scene ) {
-        scene.children[0].translate( 20, 20 );
-      }
-    ] );
-  } );
-  
-  test( 'Update vs Full Self-Bounds increase', function() {
-    updateVsFullRender( [
-      function( scene ) {
-        var node = new scenery.Path();
-        node.setShape( kite.Shape.rectangle( 0, 0, canvasWidth / 3, canvasHeight / 3 ) );
-        node.setFill( '#ff0000' );
-        node.setStroke( '#000000' );
-        scene.addChild( node );
-      }, function( scene ) {
-        scene.children[0].setShape( kite.Shape.rectangle( 0, 0, canvasWidth / 2, canvasHeight / 2 ) );
-      }
-    ] );
-  } );
-  
-  test( 'Update vs Full Stroke Repaint', function() {
-    updateVsFullRender( [
-      function( scene ) {
-        // TODO: clearer way of specifying parameters
-        var node = new scenery.Path();
-        node.setShape( kite.Shape.rectangle( 15, 15, canvasWidth / 2, canvasHeight / 2 ) );
-        node.setFill( '#ff0000' );
-        node.setStroke( '#000000' );
-        node.setLineWidth( 10 );
-        scene.addChild( node );
-      }, function( scene ) {
-        scene.children[0].translate( canvasWidth / 4, canvasHeight / 4 );
-      }
-    ] );
-  } );
-  
   test( 'Correct bounds on rectangle', function() {
     var rectBounds = scenery.Util.canvasAccurateBounds( function( context ) { context.fillRect( 100, 100, 200, 200 ); } );
     ok( Math.abs( rectBounds.minX - 100 ) < 0.01, rectBounds.minX );

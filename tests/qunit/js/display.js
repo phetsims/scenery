@@ -370,13 +370,13 @@
     equal( Renderer.bitmaskOrderSecond( mask ), Renderer.bitmaskCanvas );
     equal( Renderer.bitmaskOrderThird( mask ),  Renderer.bitmaskSVG );
     equal( Renderer.bitmaskOrderFourth( mask ), 0 );
-    console.log( mask.toString( 16 ) );
+    // console.log( mask.toString( 16 ) );
     // pushing WebGL shifts everything
     mask = Renderer.pushOrderBitmask( mask, Renderer.bitmaskWebGL );
     equal( Renderer.bitmaskOrderFirst( mask ),  Renderer.bitmaskWebGL );
     equal( Renderer.bitmaskOrderSecond( mask ), Renderer.bitmaskDOM );
     equal( Renderer.bitmaskOrderThird( mask ),  Renderer.bitmaskCanvas );
     equal( Renderer.bitmaskOrderFourth( mask ), Renderer.bitmaskSVG );
-    console.log( mask.toString( 16 ) );
+    // console.log( mask.toString( 16 ) );
   } );
 })();

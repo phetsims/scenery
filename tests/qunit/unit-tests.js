@@ -14,7 +14,7 @@ function runSceneryTests( pathToTestBase ) {
   
   loadTestFile( 'js/test-utils.js' );
   //loadTestFile( 'js/scene.js' );
-  //loadTestFile( 'js/shapes.js' );
+  loadTestFile( 'js/shapes.js' );
   loadTestFile( 'js/color.js' );
   loadTestFile( 'js/input.js' );
   // loadTestFile( 'js/pixel-perfect.js' );
