@@ -370,21 +370,17 @@ define( function( require ) {
         
         //OHTWO TODO: only strip out invisible Canvas drawables, while leaving SVG (since we can more efficiently hide SVG trees, memory-wise)
         if ( childInstance.node.isVisible() ) {
-          // figure out what the first and last drawable should be hooked into for the child
-          var firstChildDrawable = childInstance.firstDrawable;
-          var lastChildDrawable = childInstance.lastDrawable;
-          
           // if there are any drawables for that child, link them up in our linked list
-          if ( firstChildDrawable ) {
+          if ( childInstance.firstDrawable ) {
             if ( currentDrawable ) {
               // there is already an end of the linked list, so just append to it
-              Drawable.connectDrawables( currentDrawable, firstChildDrawable, this.display );
+              Drawable.connectDrawables( currentDrawable, childInstance.firstDrawable, this.display );
             } else {
               // start out the linked list
-              firstDrawable = firstChildDrawable;
+              firstDrawable = childInstance.firstDrawable;
             }
             // update the last drawable of the linked list
-            currentDrawable = lastChildDrawable;
+            currentDrawable = childInstance.lastDrawable;
           }
         }
         
