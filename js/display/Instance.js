@@ -298,238 +298,13 @@ define( function( require ) {
           this.display.markTransformRootDirty( this, true );
         }
         
-        // attach listeners to our node
-        this.node.onStatic( 'transform', this.nodeTransformListener );
-        
-        if ( !this.state.isSharedCanvasCachePlaceholder ) {
-          this.node.onStatic( 'childInserted', this.childInsertedListener );
-          this.node.onStatic( 'childRemoved', this.childRemovedListener );
-        }
+        this.onStateCreation();
       }
       
       if ( state.isSharedCanvasCachePlaceholder ) {
-        this.ensureSharedCacheInitialized();
-        
-        var sharedCacheRenderer = this.state.sharedCacheRenderer;
-        
-        if ( !this.sharedCacheDrawable || this.sharedCacheDrawable.renderer !== sharedCacheRenderer ) {
-          // we'll need stitch updates
-          hasStitchChange = true;
-          
-          this.markFullStitchChangeInterval();
-          
-          if ( this.sharedCacheDrawable ) {
-            this.sharedCacheDrawable.markForDisposal( this.display );
-          }
-          
-          //OHTWO TODO: actually create the proper shared cache drawable depending on the specified renderer (update it if necessary)
-          this.sharedCacheDrawable = new scenery.SharedCanvasCacheDrawable( this.trail, sharedCacheRenderer, this, this.sharedCacheInstance );
-          this.firstDrawable = this.sharedCacheDrawable;
-          this.lastDrawable = this.sharedCacheDrawable;
-        }
+        hasStitchChange = this.sharedSyncTree( state ) || hasStitchChange;
       } else {
-        // not a shared cache
-        
-        // local variables, since we can't overwrite our instance properties yet
-        var firstDrawable = null;
-        var lastDrawable = null;
-        
-        var currentDrawable = null;
-        
-        if ( this.node.isPainted() ) {
-          var Renderer = scenery.Renderer;
-          
-          var selfRenderer = state.selfRenderer; // our new self renderer bitmask
-          
-          // bitwise trick, since only one of Canvas/SVG/DOM/WebGL/etc. flags will be chosen, and bitmaskRendererArea is the mask for those flags
-          // In English, "Is the current selfDrawable compatible with our selfRenderer (if any), or do we need to create a selfDrawable?"
-          //OHTWO TODO: For Canvas, we won't care about anything else for the drawable, but for DOM we care about the force-acceleration flag! That's stripped out here
-          if ( !this.selfDrawable || ( ( this.selfDrawable.renderer & selfRenderer & Renderer.bitmaskRendererArea ) === 0 ) ) {
-            // we'll need stitch updates
-            hasStitchChange = true;
-            
-            // maintain our stitch change interval
-            this.beforeStableIndex = -1;
-            this.drawableBeforeFirstChange = null; // no previous drawables in our sub-tree
-            if ( this.afterStableIndex < 0 ) {
-              this.afterStableIndex = 0;
-              this.drawableAfterLastChange = this.findNextDrawable( -1 ); // search for next drawable (if any children have stitch changes, those will be used instead)
-            }
-            
-            if ( this.selfDrawable ) {
-              // scrap the previous selfDrawable, we need to create one with a different renderer.
-              this.selfDrawable.markForDisposal( this.display );
-            }
-            
-            this.selfDrawable = Renderer.createSelfDrawable( this, this.node, selfRenderer );
-          }
-          
-          firstDrawable = currentDrawable = this.selfDrawable;
-        }
-        
-        // mark all removed instances to be disposed (along with their subtrees)
-        while ( this.instanceRemovalCheckList.length ) {
-          var instanceToMark = this.instanceRemovalCheckList.pop();
-          if ( instanceToMark.addRemoveCounter === -1 ) {
-            instanceToMark.addRemoveCounter = 0; // reset it, so we don't mark it for disposal more than once
-            this.display.markInstanceRootForDisposal( instanceToMark );
-          }
-        }
-        
-        if ( wasStateless ) {
-          // we need to create all of the child instances
-          for ( var k = 0; k < this.node.children.length; k++ ) {
-            // create a child instance
-            var child = this.node.children[k];
-            this.appendInstance( Instance.createFromPool( this.display, this.trail.copy().addDescendant( child, k ) ) );
-          }
-        }
-        
-        for ( var i = 0; i < this.children.length; i++ ) {
-          var childInstance = this.children[i];
-          var childState = state.getStateForDescendant( childInstance.node );
-          
-          // see if we need to rebuild the instance tree due to an incompatible render state
-          if ( !childInstance.isStateless() && !childState.isInstanceCompatibleWith( childInstance.state ) ) {
-            // mark it for disposal
-            this.display.markInstanceRootForDisposal( childInstance );
-            
-            // swap in a new instance
-            var replacementInstance = Instance.createFromPool( this.display, this.trail.copy().addDescendant( childInstance.node, i ) );
-            this.replaceInstanceWithIndex( childInstance, replacementInstance, i );
-            childInstance = replacementInstance;
-          }
-          
-          // sync the tree
-          var childStitchChanged = childInstance.syncTree( childState );
-          
-          // maintain our stitch-change interval
-          if ( childStitchChanged ) {
-            hasStitchChange = true;
-            
-            // if the instance is before our stitch change interval created based on child node add/remove/move, record the old drawable
-            if ( i <= this.beforeStableIndex ) {
-              this.beforeStableIndex = i - 1;
-              
-              // if no drawable, grab one from the previous instance if it exists. done since the child instance may have no information outside of its subtree when recording this
-              this.drawableBeforeFirstChange = childInstance.drawableBeforeFirstChange ?
-                                               childInstance.drawableBeforeFirstChange :
-                                               this.findPreviousDrawable( i ); // if we get here, there are no other changes up to here (so it's OK to check lastDrawable)
-            }
-            // if the instance is after our stitch change interval created based on child node add/remove/move, record the old drawable
-            if ( i >= this.afterStableIndex ) {
-              // NOTE: this may happen multiple times if multiple child instances after our interval are changed. consider iteration in the reverse order?
-              // It's done here since we clean the stitch-based changes below during our first (this) iteration, and probably isn't a worry.
-              this.afterStableIndex = i + 1;
-              
-              // If no drawable, grab one from the next instance if it exists. done since the child instance may have no information outside of its subtree when recording this
-              // NOTE: could cause O(n^2) behavior if we have N children who each had stitch changes (but weren't added/removed/moved themselves).
-              // We allow that for now, so that we can clean stitch changes as we go (makes it so we don't need "did a child get traversed" tracking)
-              this.drawableAfterLastChange = childInstance.drawableAfterLastChange ?
-                                             childInstance.drawableAfterLastChange :
-                                             this.findNextDrawable( i ); // next instances still untouched, and would be overwritten
-            }
-            
-          }
-          // clean up the metadata on our child (can't be done in the child call, since we use these values like a composite return value)
-          //OHTWO TODO: only do this on instances that were actually traversed
-          childInstance.cleanSyncTreeResults();
-          
-          //OHTWO TODO: only strip out invisible Canvas drawables, while leaving SVG (since we can more efficiently hide SVG trees, memory-wise)
-          if ( childInstance.node.isVisible() ) {
-            // figure out what the first and last drawable should be hooked into for the child
-            var firstChildDrawable = null;
-            var lastChildDrawable = null;
-            
-            //OHTWO TODO: set first/last drawables to the group?
-            if ( childInstance.groupDrawable ) {
-              // if there is a group (e.g. non-shared cache or backbone), use it
-              firstChildDrawable = lastChildDrawable = childInstance.groupDrawable;
-            } else if ( childInstance.sharedCacheDrawable ) {
-              // if there is a shared cache drawable, use it
-              firstChildDrawable = lastChildDrawable = childInstance.sharedCacheDrawable;
-            } else if ( childInstance.firstDrawable ) {
-              // otherwise, if they exist, pick the node's first/last directly
-              assert && assert( childInstance.lastDrawable, 'Any display instance with firstDrawable should also have lastDrawable' );
-              firstChildDrawable = childInstance.firstDrawable;
-              lastChildDrawable = childInstance.lastDrawable;
-            }
-            
-            // if there are any drawables for that child, link them up in our linked list
-            if ( firstChildDrawable ) {
-              if ( currentDrawable ) {
-                // there is already an end of the linked list, so just append to it
-                Drawable.connectDrawables( currentDrawable, firstChildDrawable, this.display );
-              } else {
-                // start out the linked list
-                firstDrawable = firstChildDrawable;
-              }
-              // update the last drawable of the linked list
-              currentDrawable = lastChildDrawable;
-            }
-          }
-        }
-        // finish setting up references to the linked list (now firstDrawable and lastDrawable should be set properly)
-        lastDrawable = currentDrawable; // either null, or the drawable itself
-        
-        var groupRenderer = state.groupRenderer;
-        assert && assert( ( state.isBackbone ? 1 : 0 ) + ( state.isInstanceCanvasCache ? 1 : 0 ) + ( state.isSharedCanvasCacheSelf ? 1 : 0 ) === ( groupRenderer ? 1 : 0 ),
-                          'We should have precisely one of these flags set for us to have a groupRenderer' );
-        
-        // if we switched to/away from a group, our group type changed, or our group renderer changed
-        /* jshint -W018 */
-        var groupChanged = !!groupRenderer !== !!this.groupDrawable ||
-                           ( oldState && ( oldState.isBackbone !== state.isBackbone ||
-                                           oldState.isInstanceCanvasCache !== state.isInstanceCanvasCache ||
-                                           oldState.isSharedCanvasCacheSelf !== state.isSharedCanvasCacheSelf ) ) ||
-                           ( this.groupDrawable && this.groupDrawable.renderer !== groupRenderer );
-        
-        // if there is a change, prepare
-        if ( groupChanged ) {
-          hasStitchChange = true;
-          
-          this.markFullStitchChangeInterval();
-          
-          if ( this.groupDrawable ) {
-            this.groupDrawable.markForDisposal( this.display );
-            this.groupDrawable = null;
-          }
-        }
-        
-        if ( groupRenderer ) {
-          // ensure our linked list is fully disconnected from others
-          firstDrawable && Drawable.disconnectBefore( firstDrawable, this.display );
-          lastDrawable && Drawable.disconnectAfter( lastDrawable, this.display );
-          
-          if ( state.isBackbone ) {
-            if ( groupChanged ) {
-              this.groupDrawable = scenery.BackboneDrawable.createFromPool( this.display, this, this.getTransformRootInstance(), groupRenderer, state.isDisplayRoot );
-              
-              if ( this.isTransformed ) {
-                this.display.markTransformRootDirty( this, true );
-              }
-            }
-            
-            this.groupDrawable.stitch( firstDrawable, lastDrawable, this.drawableBeforeFirstChange, this.drawableAfterLastChange );
-          } else if ( state.isInstanceCanvasCache ) {
-            if ( groupChanged ) {
-              this.groupDrawable = scenery.InlineCanvasCacheDrawable.createFromPool( groupRenderer, this );
-            }
-            this.groupDrawable.stitch( firstDrawable, lastDrawable, this.drawableBeforeFirstChange, this.drawableAfterLastChange );
-          } else if ( state.isSharedCanvasCacheSelf ) {
-            if ( groupChanged ) {
-              this.groupDrawable = scenery.CanvasBlock.createFromPool( groupRenderer, this );
-            }
-            //OHTWO TODO: restitch here??? implement it
-          }
-          
-          //OHTWO TODO: set first/last drawables to the group?
-        }
-        
-        // now set the first/last drawables, since we are finished with referencing the old ones
-        //OHTWO TODO: set first/last drawables to the group, if available?
-        this.firstDrawable = firstDrawable;
-        this.lastDrawable = lastDrawable;
+        hasStitchChange = this.normalSyncTree( state, oldState ) || hasStitchChange;
       }
       
       if ( oldState && oldState !== this.state ) {
@@ -537,6 +312,239 @@ define( function( require ) {
       }
       
       sceneryLog && sceneryLog.Instance && sceneryLog.pop();
+      
+      return hasStitchChange;
+    },
+    
+    normalSyncTree: function( state, oldState ) {
+      var hasStitchChange = false;
+      
+      // not a shared cache
+      
+      // local variables, since we can't overwrite our instance properties yet
+      var firstDrawable = null;
+      var lastDrawable = null;
+      
+      var currentDrawable = null;
+      
+      if ( this.node.isPainted() ) {
+        var selfRenderer = state.selfRenderer; // our new self renderer bitmask
+        
+        // bitwise trick, since only one of Canvas/SVG/DOM/WebGL/etc. flags will be chosen, and bitmaskRendererArea is the mask for those flags
+        // In English, "Is the current selfDrawable compatible with our selfRenderer (if any), or do we need to create a selfDrawable?"
+        //OHTWO TODO: For Canvas, we won't care about anything else for the drawable, but for DOM we care about the force-acceleration flag! That's stripped out here
+        if ( !this.selfDrawable || ( ( this.selfDrawable.renderer & selfRenderer & Renderer.bitmaskRendererArea ) === 0 ) ) {
+          // we'll need stitch updates
+          hasStitchChange = true;
+          
+          // maintain our stitch change interval
+          this.beforeStableIndex = -1;
+          this.drawableBeforeFirstChange = null; // no previous drawables in our sub-tree
+          if ( this.afterStableIndex < 0 ) {
+            this.afterStableIndex = 0;
+            this.drawableAfterLastChange = this.findNextDrawable( -1 ); // search for next drawable (if any children have stitch changes, those will be used instead)
+          }
+          
+          if ( this.selfDrawable ) {
+            // scrap the previous selfDrawable, we need to create one with a different renderer.
+            this.selfDrawable.markForDisposal( this.display );
+          }
+          
+          this.selfDrawable = Renderer.createSelfDrawable( this, this.node, selfRenderer );
+        }
+        
+        firstDrawable = currentDrawable = this.selfDrawable;
+      }
+      
+      // mark all removed instances to be disposed (along with their subtrees)
+      while ( this.instanceRemovalCheckList.length ) {
+        var instanceToMark = this.instanceRemovalCheckList.pop();
+        if ( instanceToMark.addRemoveCounter === -1 ) {
+          instanceToMark.addRemoveCounter = 0; // reset it, so we don't mark it for disposal more than once
+          this.display.markInstanceRootForDisposal( instanceToMark );
+        }
+      }
+      
+      if ( !oldState ) {
+        // we need to create all of the child instances
+        for ( var k = 0; k < this.node.children.length; k++ ) {
+          // create a child instance
+          var child = this.node.children[k];
+          this.appendInstance( Instance.createFromPool( this.display, this.trail.copy().addDescendant( child, k ) ) );
+        }
+      }
+      
+      for ( var i = 0; i < this.children.length; i++ ) {
+        var childInstance = this.children[i];
+        var childState = state.getStateForDescendant( childInstance.node );
+        
+        // see if we need to rebuild the instance tree due to an incompatible render state
+        if ( !childInstance.isStateless() && !childState.isInstanceCompatibleWith( childInstance.state ) ) {
+          // mark it for disposal
+          this.display.markInstanceRootForDisposal( childInstance );
+          
+          // swap in a new instance
+          var replacementInstance = Instance.createFromPool( this.display, this.trail.copy().addDescendant( childInstance.node, i ) );
+          this.replaceInstanceWithIndex( childInstance, replacementInstance, i );
+          childInstance = replacementInstance;
+        }
+        
+        // sync the tree
+        var childStitchChanged = childInstance.syncTree( childState );
+        
+        // maintain our stitch-change interval
+        if ( childStitchChanged ) {
+          hasStitchChange = true;
+          
+          // if the instance is before our stitch change interval created based on child node add/remove/move, record the old drawable
+          if ( i <= this.beforeStableIndex ) {
+            this.beforeStableIndex = i - 1;
+            
+            // if no drawable, grab one from the previous instance if it exists. done since the child instance may have no information outside of its subtree when recording this
+            this.drawableBeforeFirstChange = childInstance.drawableBeforeFirstChange ?
+                                             childInstance.drawableBeforeFirstChange :
+                                             this.findPreviousDrawable( i ); // if we get here, there are no other changes up to here (so it's OK to check lastDrawable)
+          }
+          // if the instance is after our stitch change interval created based on child node add/remove/move, record the old drawable
+          if ( i >= this.afterStableIndex ) {
+            // NOTE: this may happen multiple times if multiple child instances after our interval are changed. consider iteration in the reverse order?
+            // It's done here since we clean the stitch-based changes below during our first (this) iteration, and probably isn't a worry.
+            this.afterStableIndex = i + 1;
+            
+            // If no drawable, grab one from the next instance if it exists. done since the child instance may have no information outside of its subtree when recording this
+            // NOTE: could cause O(n^2) behavior if we have N children who each had stitch changes (but weren't added/removed/moved themselves).
+            // We allow that for now, so that we can clean stitch changes as we go (makes it so we don't need "did a child get traversed" tracking)
+            this.drawableAfterLastChange = childInstance.drawableAfterLastChange ?
+                                           childInstance.drawableAfterLastChange :
+                                           this.findNextDrawable( i ); // next instances still untouched, and would be overwritten
+          }
+          
+        }
+        // clean up the metadata on our child (can't be done in the child call, since we use these values like a composite return value)
+        //OHTWO TODO: only do this on instances that were actually traversed
+        childInstance.cleanSyncTreeResults();
+        
+        //OHTWO TODO: only strip out invisible Canvas drawables, while leaving SVG (since we can more efficiently hide SVG trees, memory-wise)
+        if ( childInstance.node.isVisible() ) {
+          // figure out what the first and last drawable should be hooked into for the child
+          var firstChildDrawable = null;
+          var lastChildDrawable = null;
+          
+          //OHTWO TODO: set first/last drawables to the group?
+          if ( childInstance.groupDrawable ) {
+            // if there is a group (e.g. non-shared cache or backbone), use it
+            firstChildDrawable = lastChildDrawable = childInstance.groupDrawable;
+          } else if ( childInstance.sharedCacheDrawable ) {
+            // if there is a shared cache drawable, use it
+            firstChildDrawable = lastChildDrawable = childInstance.sharedCacheDrawable;
+          } else if ( childInstance.firstDrawable ) {
+            // otherwise, if they exist, pick the node's first/last directly
+            assert && assert( childInstance.lastDrawable, 'Any display instance with firstDrawable should also have lastDrawable' );
+            firstChildDrawable = childInstance.firstDrawable;
+            lastChildDrawable = childInstance.lastDrawable;
+          }
+          
+          // if there are any drawables for that child, link them up in our linked list
+          if ( firstChildDrawable ) {
+            if ( currentDrawable ) {
+              // there is already an end of the linked list, so just append to it
+              Drawable.connectDrawables( currentDrawable, firstChildDrawable, this.display );
+            } else {
+              // start out the linked list
+              firstDrawable = firstChildDrawable;
+            }
+            // update the last drawable of the linked list
+            currentDrawable = lastChildDrawable;
+          }
+        }
+      }
+      // finish setting up references to the linked list (now firstDrawable and lastDrawable should be set properly)
+      lastDrawable = currentDrawable; // either null, or the drawable itself
+      
+      var groupRenderer = state.groupRenderer;
+      assert && assert( ( state.isBackbone ? 1 : 0 ) + ( state.isInstanceCanvasCache ? 1 : 0 ) + ( state.isSharedCanvasCacheSelf ? 1 : 0 ) === ( groupRenderer ? 1 : 0 ),
+                        'We should have precisely one of these flags set for us to have a groupRenderer' );
+      
+      // if we switched to/away from a group, our group type changed, or our group renderer changed
+      /* jshint -W018 */
+      var groupChanged = !!groupRenderer !== !!this.groupDrawable ||
+                         ( oldState && ( oldState.isBackbone !== state.isBackbone ||
+                                         oldState.isInstanceCanvasCache !== state.isInstanceCanvasCache ||
+                                         oldState.isSharedCanvasCacheSelf !== state.isSharedCanvasCacheSelf ) ) ||
+                         ( this.groupDrawable && this.groupDrawable.renderer !== groupRenderer );
+      
+      // if there is a change, prepare
+      if ( groupChanged ) {
+        hasStitchChange = true;
+        
+        this.markFullStitchChangeInterval();
+        
+        if ( this.groupDrawable ) {
+          this.groupDrawable.markForDisposal( this.display );
+          this.groupDrawable = null;
+        }
+      }
+      
+      if ( groupRenderer ) {
+        // ensure our linked list is fully disconnected from others
+        firstDrawable && Drawable.disconnectBefore( firstDrawable, this.display );
+        lastDrawable && Drawable.disconnectAfter( lastDrawable, this.display );
+        
+        if ( state.isBackbone ) {
+          if ( groupChanged ) {
+            this.groupDrawable = scenery.BackboneDrawable.createFromPool( this.display, this, this.getTransformRootInstance(), groupRenderer, state.isDisplayRoot );
+            
+            if ( this.isTransformed ) {
+              this.display.markTransformRootDirty( this, true );
+            }
+          }
+          
+          this.groupDrawable.stitch( firstDrawable, lastDrawable, this.drawableBeforeFirstChange, this.drawableAfterLastChange );
+        } else if ( state.isInstanceCanvasCache ) {
+          if ( groupChanged ) {
+            this.groupDrawable = scenery.InlineCanvasCacheDrawable.createFromPool( groupRenderer, this );
+          }
+          this.groupDrawable.stitch( firstDrawable, lastDrawable, this.drawableBeforeFirstChange, this.drawableAfterLastChange );
+        } else if ( state.isSharedCanvasCacheSelf ) {
+          if ( groupChanged ) {
+            this.groupDrawable = scenery.CanvasBlock.createFromPool( groupRenderer, this );
+          }
+          //OHTWO TODO: restitch here??? implement it
+        }
+        
+        //OHTWO TODO: set first/last drawables to the group?
+      }
+      
+      // now set the first/last drawables, since we are finished with referencing the old ones
+      //OHTWO TODO: set first/last drawables to the group, if available?
+      this.firstDrawable = firstDrawable;
+      this.lastDrawable = lastDrawable;
+      
+      return hasStitchChange;
+    },
+    
+    sharedSyncTree: function( state ) {
+      var hasStitchChange = false;
+      
+      this.ensureSharedCacheInitialized();
+      
+      var sharedCacheRenderer = state.sharedCacheRenderer;
+      
+      if ( !this.sharedCacheDrawable || this.sharedCacheDrawable.renderer !== sharedCacheRenderer ) {
+        // we'll need stitch updates
+        hasStitchChange = true;
+        
+        this.markFullStitchChangeInterval();
+        
+        if ( this.sharedCacheDrawable ) {
+          this.sharedCacheDrawable.markForDisposal( this.display );
+        }
+        
+        //OHTWO TODO: actually create the proper shared cache drawable depending on the specified renderer (update it if necessary)
+        this.sharedCacheDrawable = new scenery.SharedCanvasCacheDrawable( this.trail, sharedCacheRenderer, this, this.sharedCacheInstance );
+        this.firstDrawable = this.sharedCacheDrawable;
+        this.lastDrawable = this.sharedCacheDrawable;
+      }
       
       return hasStitchChange;
     },
@@ -1133,6 +1141,25 @@ define( function( require ) {
       }
     },
     
+    onStateCreation: function() {
+      // attach listeners to our node
+      this.node.onStatic( 'transform', this.nodeTransformListener );
+      
+      if ( !this.state.isSharedCanvasCachePlaceholder ) {
+        this.node.onStatic( 'childInserted', this.childInsertedListener );
+        this.node.onStatic( 'childRemoved', this.childRemovedListener );
+      }
+    },
+    
+    onStateRemoval: function() {
+      this.node.offStatic( 'transform', this.nodeTransformListener );
+      
+      if ( !this.state.isSharedCanvasCachePlaceholder ) {
+        this.node.offStatic( 'childInserted', this.childInsertedListener );
+        this.node.offStatic( 'childRemoved', this.childRemovedListener );
+      }
+    },
+    
     // clean up listeners and garbage, so that we can be recycled (or pooled)
     dispose: function() {
       sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'dispose ' + this.toString() );
@@ -1152,12 +1179,7 @@ define( function( require ) {
       
       // we don't originally add in the listener if we are stateless
       if ( !this.isStateless() ) {
-        this.node.offStatic( 'transform', this.nodeTransformListener );
-        
-        if ( !this.state.isSharedCanvasCachePlaceholder ) {
-          this.node.offStatic( 'childInserted', this.childInsertedListener );
-          this.node.offStatic( 'childRemoved', this.childRemovedListener );
-        }
+        this.onStateRemoval();
       }
       
       this.node.removeInstance( this );
