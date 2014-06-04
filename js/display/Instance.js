@@ -346,12 +346,6 @@ define( function( require ) {
           // we'll need stitch updates
           hasStitchChange = true;
           
-          // maintain our stitch change interval
-          this.beforeStableIndex = -1;
-          if ( this.afterStableIndex < 0 ) {
-            this.afterStableIndex = 0;
-          }
-          
           if ( this.selfDrawable ) {
             // scrap the previous selfDrawable, we need to create one with a different renderer.
             this.selfDrawable.markForDisposal( this.display );
@@ -402,18 +396,6 @@ define( function( require ) {
         // maintain our stitch-change interval
         if ( childStitchChanged ) {
           hasStitchChange = true;
-          
-          // if the instance is before our stitch change interval created based on child node add/remove/move, record the old drawable
-          if ( i <= this.beforeStableIndex ) {
-            this.beforeStableIndex = i - 1;
-          }
-          // if the instance is after our stitch change interval created based on child node add/remove/move, record the old drawable
-          if ( i >= this.afterStableIndex ) {
-            // NOTE: this may happen multiple times if multiple child instances after our interval are changed. consider iteration in the reverse order?
-            // It's done here since we clean the stitch-based changes below during our first (this) iteration, and probably isn't a worry.
-            this.afterStableIndex = i + 1;
-          }
-          
         }
         // clean up the metadata on our child (can't be done in the child call, since we use these values like a composite return value)
         //OHTWO TODO: only do this on instances that were actually traversed
@@ -472,8 +454,6 @@ define( function( require ) {
       if ( groupChanged ) {
         hasStitchChange = true;
         
-        this.markFullStitchChangeInterval();
-        
         if ( this.groupDrawable ) {
           this.groupDrawable.markForDisposal( this.display );
           this.groupDrawable = null;
@@ -529,7 +509,7 @@ define( function( require ) {
         // we'll need stitch updates
         hasStitchChange = true;
         
-        this.markFullStitchChangeInterval();
+        //OHTWO TODO: mark everything as changed (big change interval)
         
         if ( this.sharedCacheDrawable ) {
           this.sharedCacheDrawable.markForDisposal( this.display );
@@ -589,12 +569,6 @@ define( function( require ) {
     // whether we don't have an associated RenderState attached. If we are stateless, we won't have children, and won't have listeners attached to our node yet.
     isStateless: function() {
       return !this.state;
-    },
-    
-    markFullStitchChangeInterval: function() {
-      // full interval
-      this.beforeStableIndex = -1;
-      this.afterStableIndex = this.children.length;
     },
     
     // @private, finds the closest drawable (not including the child instance at childIndex) using lastDrawable, or null
