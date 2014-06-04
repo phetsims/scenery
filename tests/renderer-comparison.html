@@ -73,7 +73,7 @@
         name: 'Rectangle',
         width: 128,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, display ) {
           scene.addChild( new scenery.Rectangle( 10.5, 10.5, 44, 44, {
             fill: '#f00',
             stroke: '#000',
@@ -86,12 +86,12 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },{
         name: 'Circle',
         width: 64,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, display ) {
           scene.addChild( new scenery.Circle( 22, {
             x: 32, y: 32,
             fill: '#f00',
@@ -106,12 +106,12 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },{
         name: 'Hexagon',
         width: 64,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, display ) {
           scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
             x: 32,
             y: 32,
@@ -120,12 +120,12 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },{
         name: 'Quadratic B\u00E9zier',
         width: 64,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, display ) {
           scene.addChild( new scenery.Path( new kite.Shape().moveTo( -20, -20 ).quadraticCurveTo( 20, -20, 20, 20 ).close(), {
             x: 32,
             y: 32,
@@ -134,12 +134,12 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },{
         name: 'Cubic B\u00E9zier',
         width: 64,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, display ) {
           scene.addChild( new scenery.Path( new kite.Shape().moveTo( -20, -20 ).cubicCurveTo( -20, 0, 0, 0, 20, 20 ).lineTo( 20, -20 ).close(), {
             x: 32,
             y: 32,
@@ -148,12 +148,12 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },{
         name: 'Linear Gradients',
         width: 128,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, display ) {
           var fillGradient = new scenery.LinearGradient( -22, 0, 22, 0 );
           fillGradient.addColorStop( 0.1, '#ff0000' );
           fillGradient.addColorStop( 0.5, '#00ff00' );
@@ -182,12 +182,12 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },{
         name: 'Radial Gradients',
         width: 128+64,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, display ) {
           var fillGradient = new scenery.RadialGradient( 22, 0, 0, 22, 0, 44 );
           fillGradient.addColorStop( 0.1, '#ff0000' );
           fillGradient.addColorStop( 0.5, '#00ff00' );
@@ -221,12 +221,12 @@
             fill: transformedGradient
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },{
         name: 'RGBA',
         width: 64,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, display ) {
           scene.addChild( new scenery.Path( kite.Shape.rectangle( 32, 0, 32, 64 ), {
             fill: '#000000'
           } ) );
@@ -238,12 +238,12 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },{
         name: 'Dashes',
         width: 64,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, display ) {
           scene.addChild( new scenery.Path( kite.Shape.rectangle( 10, 10, 44, 44 ), {
             stroke: '#000',
             lineWidth: 3,
@@ -266,16 +266,16 @@
             y: 32.5
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },{
         name: 'Images',
         width: 220,
         height: 120,
-        draw: function( scene ) {
+        draw: function( scene, display ) {
           var thumbnail = document.createElement( 'img' );
           thumbnail.addEventListener( 'load', function() {
             scene.addChild( new scenery.Image( thumbnail ) );
-            scene.updateScene();
+            display.updateDisplay();
             
             // ugly hack placement for correct z-index
             var logo = document.createElement( 'img' );
@@ -286,18 +286,18 @@
                 x: 130,
                 y: 20
               } ) );
-              scene.updateScene();
+              display.updateDisplay();
             } );
             logo.src = 'http://phet.colorado.edu/images/phet-logo-yellow.png';
           } );
           thumbnail.src = 'http://phet.colorado.edu/sims/molecule-polarity/molecule-polarity-thumbnail.png';
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG, scenery.Renderer.DOM ]
+        renderers: [ 'canvas', 'svg', 'dom' ]
       },{
         name: 'Patterns',
         width: 64,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, display ) {
           var img = document.createElement( 'img' );
           img.addEventListener( 'load', function() {
             var pattern = new scenery.Pattern( img );
@@ -309,16 +309,16 @@
               stroke: '#000000',
               lineWidth: 3
             } ) );
-            scene.updateScene();
+            display.updateDisplay();
           } );
           img.src = 'http://phet.colorado.edu/files/archive/images/circleArrow_Icon.gif';
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },{
         name: 'Overlapping and Nested Rotations',
         width: 128,
         height: 128,
-        draw: function( scene ) {
+        draw: function( scene, display ) {
           var container = new scenery.Node( {
             x: 40,
             rotation: Math.PI / 12
@@ -343,12 +343,12 @@
             lineWidth: 10
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },{
         name: 'DAG support',
         width: 256,
         height: 128,
-        draw: function( scene ) {
+        draw: function( scene, display ) {
           var square = new scenery.Path( kite.Shape.rectangle( 0, 0, 50, 50 ), {
             x: 0.5,
             y: 0.5,
@@ -381,12 +381,12 @@
           scene.addChild( b );
           scene.addChild( c );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },{
         name: 'Text',
         width: 256,
         height: 128,
-        draw: function( scene ) {
+        draw: function( scene, display ) {
           scene.addChild( new scenery.Text( 'Is this a test?', {
             fontSize: 60,
             top: 1.5,
@@ -412,12 +412,12 @@
             lineJoin: 'round'
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },{
         name: 'HTML Text',
         width: 512,
         height: 128,
-        draw: function( scene ) {
+        draw: function( scene, display ) {
           scene.addChild( new scenery.HTMLText( '<strong>H<sub>2</sub>O</strong> <em>might</em> contain water, also<br>known as <u>dihydrogen monoxide</u>!', {
             fontSize: 35,
             top: 2,
@@ -425,12 +425,12 @@
             fill: '#606'
           } ) );
         },
-        renderers: [ scenery.Renderer.DOM ]
+        renderers: [ 'dom' ]
       },{
         name: 'Circles and Arcs',
         width: 200,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, display ) {
           var x = 32;
           scene.addChild( new scenery.Path( kite.Shape.circle( x, 25, 20 ), {
             fill: '#ff0000',
@@ -463,12 +463,12 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },{
         name: 'Ellipses and Elliptical Arcs',
         width: 200,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, display ) {
           var x = 32;
           scene.addChild( new scenery.Path( kite.Shape.ellipse( x, 25, 20, 10 ), {
             fill: '#ff0000',
@@ -501,12 +501,12 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },{
         name: 'DOM Elements',
         width: 200,
         height: 200,
-        draw: function( scene ) {
+        draw: function( scene, display ) {
           var textDiv = document.createElement( 'div' );
           textDiv.innerHTML = 'See our <a href="http://phet.colorado.edu">website</a>!';
           scene.addChild( new scenery.DOM( textDiv, {
@@ -523,12 +523,12 @@
             rotation: Math.PI / 4
           } ) );
         },
-        renderers: [ scenery.Renderer.DOM ]
+        renderers: [ 'dom' ]
       },{
         name: 'Invisible nodes',
         width: 64,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, display ) {
           var shape = kite.Shape.rectangle( 0, 0, 30, 30 );
           var rect = new scenery.Path( shape, {
             fill: '#000',
@@ -551,12 +551,12 @@
           scene.addChild( third );
           third.visible = false; // delayed, should cause issues with old SVG handling
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },{
         name: 'Simple Clipping',
         width: 64,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, display ) {
           scene.addChild( new scenery.Rectangle( 4, 4, 56, 56, {
             fill: 'black',
             clipArea: kite.Shape.circle( 32, 32, 25 ),
@@ -564,12 +564,12 @@
             y: -20
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },{
         name: 'Nested Clipping',
         width: 64,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, display ) {
           var clipShape1 = kite.Shape.regularPolygon( 6, 27 ).transformed( dot.Matrix3.translation( 32, 32 ) );
           var clipShape2 = kite.Shape.regularPolygon( 9, 32 ).transformed( dot.Matrix3.translation( 32, 0 ) );
           var shape = kite.Shape.circle( 32, 32, 25 );
@@ -582,12 +582,12 @@
           scene.addChild( circle );
           scene.clipArea = clipShape2;
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       },{
         name: 'Opacity',
         width: 64,
         height: 64,
-        draw: function( scene ) {
+        draw: function( scene, display ) {
           scene.addChild( new scenery.Rectangle( 0, 12, 64, 20, { fill: '#000' } ) );
           var circle = kite.Shape.circle( 0, 0, 30 );
           scene.addChild( new scenery.Node( {
@@ -598,14 +598,14 @@
             ]
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
+        renderers: [ 'canvas', 'svg' ]
       }
     ];
     
     var renderers = [
-      scenery.Renderer.Canvas,
-      scenery.Renderer.SVG,
-      scenery.Renderer.DOM
+      'canvas',
+      'svg',
+      'dom'
       // TODO: add WebGL, and possibly DOM for things like text?
     ];
     
@@ -621,27 +621,35 @@
           return;
         }
         
+        var width = testCase.width || 320;
+        var height = testCase.height || 240;
+        
+        var scene = new scenery.Node( {
+          renderer: renderer
+        } );
+        var display = new scenery.Display( scene, {
+          width: width,
+          height: height
+        } );
+        
         var layerType = renderer.defaultLayerType;
         var $container = $( document.createElement( 'div' ) );
         $container.addClass( 'scene' );
-        $container.addClass( layerType.name );
-        $container.width( testCase.width || 320 );
-        $container.height( testCase.height || 240 );
+        $container.addClass( renderer );
+        $container.width( width );
+        $container.height( height );
+        $container[0].appendChild( display.domElement );
         $( document.body ).append( $container );
         
-        var scene = new scenery.Scene( $container, {
-          renderer: renderer
-        } );
-        
         // try {
-        testCase.draw( scene );
+        testCase.draw( scene, display );
         // } catch( e ) {
         //   if ( console.log ) {
         //     console.log( 'error encountered in test ' + testCase.name + ' with ' + layerType.name );
         //   }
         //   throw e;
         // }
-        scene.updateScene();
+        display.updateDisplay();
       } );
     } );
   } );
