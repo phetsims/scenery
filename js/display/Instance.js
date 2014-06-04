@@ -276,8 +276,6 @@ define( function( require ) {
      *        Don't flag changes when they won't actually change the "current" render state!!!
      *        Changes in renderer summary (subtree combined) can cause changes in the render state
      *    OK for traversal to return "no change", doesn't specify any drawables changes
-     *
-     * Returns: Whether there was a stitching-relevant drawable change.
      */
     syncTree: function( state ) {
       sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'syncTree ' + this.toString() + ' ' + state.toString() + ( this.isStateless() ? ' (stateless)' : '' ) );
@@ -297,9 +295,6 @@ define( function( require ) {
       this.state = state;
       this.isTransformed = state.isTransformed;
       
-      // whether we have a stitch change. initialized based on how our children were added/removed/moved, but can be set later down in this function
-      var hasStitchChange = this.beforeStableIndex < this.afterStableIndex;
-      
       if ( wasStateless ) {
         // If we are a transform root, notify the display that we are dirty. We'll be validated when it's at that phase at the next updateDisplay().
         //OHTWO TODO: when else do we have to call this?
@@ -311,9 +306,9 @@ define( function( require ) {
       }
       
       if ( state.isSharedCanvasCachePlaceholder ) {
-        hasStitchChange = this.sharedSyncTree( state ) || hasStitchChange;
+        this.sharedSyncTree( state );
       } else {
-        hasStitchChange = this.normalSyncTree( state, oldState ) || hasStitchChange;
+        this.normalSyncTree( state, oldState );
       }
       
       if ( oldState && oldState !== this.state ) {
@@ -321,16 +316,12 @@ define( function( require ) {
       }
       
       sceneryLog && sceneryLog.Instance && sceneryLog.pop();
-      
-      return hasStitchChange;
     },
     
     // Synchronization for instances that have children (everything except for a shared cache instance)
     normalSyncTree: function( state, oldState ) {
       // mark fully-removed instances for disposal, and initialize child instances if we were stateless
       this.prepareChildInstances( state, oldState );
-      
-      var hasStitchChange = false;
       
       // local variables, since we can't overwrite our instance properties yet
       var firstDrawable = null;
@@ -345,9 +336,6 @@ define( function( require ) {
         // In English, "Is the current selfDrawable compatible with our selfRenderer (if any), or do we need to create a selfDrawable?"
         //OHTWO TODO: For Canvas, we won't care about anything else for the drawable, but for DOM we care about the force-acceleration flag! That's stripped out here
         if ( !this.selfDrawable || ( ( this.selfDrawable.renderer & selfRenderer & Renderer.bitmaskRendererArea ) === 0 ) ) {
-          // we'll need stitch updates
-          hasStitchChange = true;
-          
           if ( this.selfDrawable ) {
             // scrap the previous selfDrawable, we need to create one with a different renderer.
             this.selfDrawable.markForDisposal( this.display );
@@ -375,15 +363,7 @@ define( function( require ) {
         }
         
         // sync the tree
-        var childStitchChanged = childInstance.syncTree( childState );
-        
-        // maintain our stitch-change interval
-        if ( childStitchChanged ) {
-          hasStitchChange = true;
-        }
-        // clean up the metadata on our child (can't be done in the child call, since we use these values like a composite return value)
-        //OHTWO TODO: only do this on instances that were actually traversed
-        childInstance.cleanSyncTreeResults();
+        childInstance.syncTree( childState );
         
         //OHTWO TODO: only strip out invisible Canvas drawables, while leaving SVG (since we can more efficiently hide SVG trees, memory-wise)
         if ( childInstance.node.isVisible() ) {
@@ -404,6 +384,10 @@ define( function( require ) {
             currentDrawable = lastChildDrawable;
           }
         }
+        
+        // clean up the metadata on our child (can't be done in the child call, since we use these values like a composite return value)
+        //OHTWO TODO: only do this on instances that were actually traversed
+        childInstance.cleanSyncTreeResults();
       }
       // finish setting up references to the linked list (now firstDrawable and lastDrawable should be set properly)
       lastDrawable = currentDrawable; // either null, or the drawable itself
@@ -422,8 +406,6 @@ define( function( require ) {
       
       // if there is a change, prepare
       if ( groupChanged ) {
-        hasStitchChange = true;
-        
         if ( this.groupDrawable ) {
           this.groupDrawable.markForDisposal( this.display );
           this.groupDrawable = null;
@@ -463,21 +445,14 @@ define( function( require ) {
         this.firstDrawable = firstDrawable;
         this.lastDrawable = lastDrawable;
       }
-      
-      return hasStitchChange;
     },
     
     sharedSyncTree: function( state ) {
-      var hasStitchChange = false;
-      
       this.ensureSharedCacheInitialized();
       
       var sharedCacheRenderer = state.sharedCacheRenderer;
       
       if ( !this.sharedCacheDrawable || this.sharedCacheDrawable.renderer !== sharedCacheRenderer ) {
-        // we'll need stitch updates
-        hasStitchChange = true;
-        
         //OHTWO TODO: mark everything as changed (big change interval)
         
         if ( this.sharedCacheDrawable ) {
@@ -489,8 +464,6 @@ define( function( require ) {
         this.firstDrawable = this.sharedCacheDrawable;
         this.lastDrawable = this.sharedCacheDrawable;
       }
-      
-      return hasStitchChange;
     },
     
     prepareChildInstances: function( state, oldState ) {
