@@ -337,7 +337,7 @@ define( function( require ) {
       for ( var i = 0; i < this.children.length; i++ ) {
         var childInstance = this.children[i];
         var childState = state.getStateForDescendant( childInstance.node );
-        childInstance = this.updateChildInstanceIfIncompatible( childInstance, childState );
+        childInstance = this.updateChildInstanceIfIncompatible( childInstance, childState, i );
         
         // sync the tree
         childInstance.syncTree( childState );
@@ -396,15 +396,15 @@ define( function( require ) {
     },
     
     // returns the up-to-date instance
-    updateChildInstanceIfIncompatible: function( childInstance, childState ) {
+    updateChildInstanceIfIncompatible: function( childInstance, childState, index ) {
       // see if we need to rebuild the instance tree due to an incompatible render state
       if ( !childInstance.isStateless() && !childState.isInstanceCompatibleWith( childInstance.state ) ) {
         // mark it for disposal
         this.display.markInstanceRootForDisposal( childInstance );
         
         // swap in a new instance
-        var replacementInstance = Instance.createFromPool( this.display, this.trail.copy().addDescendant( childInstance.node, i ) );
-        this.replaceInstanceWithIndex( childInstance, replacementInstance, i );
+        var replacementInstance = Instance.createFromPool( this.display, this.trail.copy().addDescendant( childInstance.node, index ) );
+        this.replaceInstanceWithIndex( childInstance, replacementInstance, index );
         return replacementInstance;
       } else {
         return childInstance;
