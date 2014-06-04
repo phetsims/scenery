@@ -566,6 +566,20 @@ define( function( require ) {
       }
     },
     
+    /*---------------------------------------------------------------------------*
+    * Change interval handling
+    *----------------------------------------------------------------------------*/
+    
+    // Marks the change interval as dirty if it hasn't been modified. Should be done before modifications to the
+    // interval.
+    changeIntervalDirtyPrecheck: function() {
+      if ( this.changeIntervalBefore === null ) {
+        assert && assert( this.changeIntervalAfter === null );
+        
+        this.display.markInstanceWithChangeInterval( this );
+      }
+    },
+    
     // whether we don't have an associated RenderState attached. If we are stateless, we won't have children, and won't have listeners attached to our node yet.
     isStateless: function() {
       return !this.state;
