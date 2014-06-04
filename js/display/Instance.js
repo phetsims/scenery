@@ -103,6 +103,7 @@ define( function( require ) {
   var Matrix3 = require( 'DOT/Matrix3' );
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
   require( 'SCENERY/display/RenderState' );
   
   var globalIdCounter = 1;
@@ -360,16 +361,7 @@ define( function( require ) {
               this.selfDrawable.markForDisposal( this.display );
             }
             
-            if ( Renderer.isCanvas( selfRenderer ) ) {
-              this.selfDrawable = this.node.createCanvasDrawable( selfRenderer, this );
-            } else if ( Renderer.isSVG( selfRenderer ) ) {
-              this.selfDrawable = this.node.createSVGDrawable( selfRenderer, this );
-            } else if ( Renderer.isDOM( selfRenderer ) ) {
-              this.selfDrawable = this.node.createDOMDrawable( selfRenderer, this );
-            } else {
-              // assert so that it doesn't compile down to a throw (we want this function to be optimized)
-              assert && assert( 'Unrecognized renderer, maybe we don\'t support WebGL yet?: ' + selfRenderer );
-            }
+            this.selfDrawable = Renderer.createSelfDrawable( this, this.node, selfRenderer );
           }
           
           firstDrawable = currentDrawable = this.selfDrawable;

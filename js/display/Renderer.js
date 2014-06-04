@@ -162,6 +162,19 @@ define( function( require ) {
     throw new Error( 'pushOrderBitmask overflow' );
   };
   
+  Renderer.createSelfDrawable = function( instance, node, selfRenderer ) {
+    if ( Renderer.isCanvas( selfRenderer ) ) {
+      return node.createCanvasDrawable( selfRenderer, instance );
+    } else if ( Renderer.isSVG( selfRenderer ) ) {
+      return node.createSVGDrawable( selfRenderer, instance );
+    } else if ( Renderer.isDOM( selfRenderer ) ) {
+      return node.createDOMDrawable( selfRenderer, instance );
+    } else {
+      // assert so that it doesn't compile down to a throw (we want this function to be optimized)
+      assert && assert( 'Unrecognized renderer, maybe we don\'t support WebGL yet?: ' + selfRenderer );
+    }
+  }
+  
   
   /*---------------------------------------------------------------------------*
   * Fit strategies
