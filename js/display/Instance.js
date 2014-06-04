@@ -404,22 +404,8 @@ define( function( require ) {
         //OHTWO TODO: only strip out invisible Canvas drawables, while leaving SVG (since we can more efficiently hide SVG trees, memory-wise)
         if ( childInstance.node.isVisible() ) {
           // figure out what the first and last drawable should be hooked into for the child
-          var firstChildDrawable = null;
-          var lastChildDrawable = null;
-          
-          //OHTWO TODO: set first/last drawables to the group?
-          if ( childInstance.groupDrawable ) {
-            // if there is a group (e.g. non-shared cache or backbone), use it
-            firstChildDrawable = lastChildDrawable = childInstance.groupDrawable;
-          } else if ( childInstance.sharedCacheDrawable ) {
-            // if there is a shared cache drawable, use it
-            firstChildDrawable = lastChildDrawable = childInstance.sharedCacheDrawable;
-          } else if ( childInstance.firstDrawable ) {
-            // otherwise, if they exist, pick the node's first/last directly
-            assert && assert( childInstance.lastDrawable, 'Any display instance with firstDrawable should also have lastDrawable' );
-            firstChildDrawable = childInstance.firstDrawable;
-            lastChildDrawable = childInstance.lastDrawable;
-          }
+          var firstChildDrawable = childInstance.firstDrawable;
+          var lastChildDrawable = childInstance.lastDrawable;
           
           // if there are any drawables for that child, link them up in our linked list
           if ( firstChildDrawable ) {
@@ -487,13 +473,12 @@ define( function( require ) {
           //OHTWO TODO: restitch here??? implement it
         }
         
-        //OHTWO TODO: set first/last drawables to the group?
+        this.firstDrawable = this.lastDrawable = this.groupDrawable;
+      } else {
+        // now set the first/last drawables, since we are finished with referencing the old ones
+        this.firstDrawable = firstDrawable;
+        this.lastDrawable = lastDrawable;
       }
-      
-      // now set the first/last drawables, since we are finished with referencing the old ones
-      //OHTWO TODO: set first/last drawables to the group, if available?
-      this.firstDrawable = firstDrawable;
-      this.lastDrawable = lastDrawable;
       
       return hasStitchChange;
     },
