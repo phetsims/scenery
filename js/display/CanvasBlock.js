@@ -19,14 +19,16 @@ define( function( require ) {
   var Renderer = require( 'SCENERY/display/Renderer' );
   var Util = require( 'SCENERY/util/Util' );
   
-  scenery.CanvasBlock = function CanvasBlock( display, renderer, transformRootInstance ) {
-    this.initialize( display, renderer, transformRootInstance );
+  scenery.CanvasBlock = function CanvasBlock( display, renderer, transformRootInstance, filterRootInstance ) {
+    this.initialize( display, renderer, transformRootInstance, filterRootInstance );
   };
   var CanvasBlock = scenery.CanvasBlock;
   
   inherit( FittedBlock, CanvasBlock, {
-    initialize: function( display, renderer, transformRootInstance ) {
+    initialize: function( display, renderer, transformRootInstance, filterRootInstance ) {
       this.initializeFittedBlock( display, renderer, transformRootInstance );
+      
+      this.filterRootInstance = filterRootInstance;
       
       this.dirtyDrawables = cleanArray( this.dirtyDrawables );
       
@@ -103,14 +105,42 @@ define( function( require ) {
         this.context.setTransform( 1, 0, 0, 1, 0, 0 ); // identity
         this.context.clearRect( 0, 0, this.canvas.width, this.canvas.height ); // clear everything
         
+        //OHTWO TODO: clipping handling!
+        if ( this.filterRootInstance.node._clipArea ) {
+          this.context.save();
+          
+          this.temporaryRecursiveClip( this.filterRootInstance );
+        }
+        
         //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern)
         for ( var drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
           this.renderDrawable( drawable );
           if ( drawable === this.lastDrawable ) { break; }
         }
+        
+        if ( this.filterRootInstance.node._clipArea ) {
+          this.context.restore();
+        }
       }
       
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.pop();
+    },
+    
+    //OHTWO TODO: rework and do proper clipping support
+    temporaryRecursiveClip: function( instance ) {
+      if ( instance.parent ) {
+        this.temporaryRecursiveClip( instance.parent );
+      }
+      if ( instance.node._clipArea ) {
+        //OHTWO TODO: reduce duplication here
+        this.context.setTransform( this.backingScale, 0, 0, this.backingScale, this.canvasDrawOffset.x * this.backingScale, this.canvasDrawOffset.y * this.backingScale );
+        instance.relativeMatrix.canvasAppendTransform( this.context );
+        
+        // do the clipping
+        this.context.beginPath();
+        instance.node._clipArea.writeToContext( this.context );
+        this.context.clip();
+      }
     },
     
     renderDrawable: function( drawable ) {
@@ -178,13 +208,13 @@ define( function( require ) {
   /* jshint -W064 */
   Poolable( CanvasBlock, {
     constructorDuplicateFactory: function( pool ) {
-      return function( display, renderer, transformRootInstance ) {
+      return function( display, renderer, transformRootInstance, filterRootInstance ) {
         if ( pool.length ) {
           sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'new from pool' );
-          return pool.pop().initialize( display, renderer, transformRootInstance );
+          return pool.pop().initialize( display, renderer, transformRootInstance, filterRootInstance );
         } else {
           sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'new from constructor' );
-          return new CanvasBlock( display, renderer, transformRootInstance );
+          return new CanvasBlock( display, renderer, transformRootInstance, filterRootInstance );
         }
       };
     }

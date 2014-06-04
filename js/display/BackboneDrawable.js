@@ -254,12 +254,13 @@ define( function( require ) {
     getFilterClip: function() {
       var clip = '';
       
-      var len = this.watchedFilterNodes.length;
-      for ( var i = 0; i < len; i++ ) {
-        if ( this.watchedFilterNodes[i]._clipArea ) {
-          throw new Error( 'clip-path for backbones unimplemented, and with questionable browser support!' );
-        }
-      }
+      //OHTWO TODO: proper clipping support
+      // var len = this.watchedFilterNodes.length;
+      // for ( var i = 0; i < len; i++ ) {
+      //   if ( this.watchedFilterNodes[i]._clipArea ) {
+      //     throw new Error( 'clip-path for backbones unimplemented, and with questionable browser support!' );
+      //   }
+      // }
       
       return clip;
     },
@@ -295,7 +296,7 @@ define( function( require ) {
           currentRenderer = drawable.renderer;
           
           if ( Renderer.isCanvas( currentRenderer ) ) {
-            currentBlock = CanvasBlock.createFromPool( this.display, currentRenderer, this.transformRootInstance );
+            currentBlock = CanvasBlock.createFromPool( this.display, currentRenderer, this.transformRootInstance, this.backboneInstance );
           } else if ( Renderer.isSVG( currentRenderer ) ) {
             //OHTWO TODO: handle filter root separately from the backbone instance?
             currentBlock = SVGBlock.createFromPool( this.display, currentRenderer, this.transformRootInstance, this.backboneInstance );

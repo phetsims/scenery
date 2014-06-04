@@ -65,8 +65,9 @@ define( function( require ) {
       if ( this.willApplyFilters ) {
         this.node.onStatic( 'opacity', this.opacityDirtyListener );
         this.node.onStatic( 'visibility', this.visibilityDirtyListener );
-        this.node.onStatic( 'clip', this.clipDirtyListener );
       }
+      //OHTWO TODO: remove clip workaround
+      this.node.onStatic( 'clip', this.clipDirtyListener );
       
       // for tracking the order of child groups, we use a flag and update (reorder) once per updateDisplay if necessary.
       this.orderDirty = true;
@@ -227,7 +228,9 @@ define( function( require ) {
         
         sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'clip update: ' + this.toString() );
         
-        if ( this.willApplyFilters && this.node._clipArea ) {
+        //OHTWO TODO: remove clip workaround (use this.willApplyFilters)
+        var willApplyClip = this.block.filterRootInstance.trail.nodes.length >= this.instance.trail.nodes.length;
+        if ( willApplyClip && this.node._clipArea ) {
           if ( !this.clipDefinition ) {
             var clipId = 'clip' + this.node.getId();
             
@@ -310,8 +313,10 @@ define( function( require ) {
       if ( this.willApplyFilters ) {
         this.node.offStatic( 'opacity', this.opacityDirtyListener );
         this.node.offStatic( 'visibility', this.visibilityDirtyListener );
-        this.node.offStatic( 'clip', this.clipDirtyListener );
       }
+      //OHTWO TODO: remove clip workaround
+      this.node.offStatic( 'clip', this.clipDirtyListener );
+      
       this.node.offStatic( 'childInserted', this.orderDirtyListener );
       this.node.offStatic( 'childRemoved', this.orderDirtyListener );
       
