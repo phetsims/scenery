@@ -40,6 +40,9 @@ define( function( require ) {
     
     this.invalidateDOMLock = false;
     
+    // don't let Scenery apply a transform directly (the DOM element will take care of that)
+    this._preventTransform = false;
+    
     // so that the mutator will call setElement()
     options.element = element;
     
@@ -153,11 +156,28 @@ define( function( require ) {
       return this._interactive;
     },
     
+    setPreventTransform: function( preventTransform ) {
+      assert && assert( typeof preventTransform === 'boolean' );
+      
+      if ( this._preventTransform !== preventTransform ) {
+        this._preventTransform = preventTransform;
+        
+        // TODO: anything needed here?
+      }
+    },
+    
+    isTransformPrevented: function() {
+      return this._preventTransform;
+    },
+    
     set element( value ) { this.setElement( value ); },
     get element() { return this.getElement(); },
     
     set interactive( value ) { this.setInteractive( value ); },
     get interactive() { return this.isInteractive(); },
+    
+    set preventTransform( value ) { this.setPreventTransform( value ); },
+    get preventTransform() { return this.isTransformPrevented(); },
     
     getBasicConstructor: function( propLines ) {
       return 'new scenery.DOM( $( \'' + escapeHTML( this._container.innerHTML.replace( /'/g, '\\\'' ) ) + '\' ), {' + propLines + '} )';
@@ -175,7 +195,7 @@ define( function( require ) {
     }
   } );
   
-  DOM.prototype._mutatorKeys = [ 'element', 'interactive' ].concat( Node.prototype._mutatorKeys );
+  DOM.prototype._mutatorKeys = [ 'element', 'interactive', 'preventTransform' ].concat( Node.prototype._mutatorKeys );
   
   /*---------------------------------------------------------------------------*
   * DOM rendering
@@ -196,7 +216,7 @@ define( function( require ) {
     },
     
     updateDOM: function() {
-      if ( this.transformDirty ) {
+      if ( this.transformDirty && !this.node._preventTransform ) {
         scenery.Util.applyPreparedTransform( this.getTransformMatrix(), this.domElement, this.forceAcceleration );
       }
       

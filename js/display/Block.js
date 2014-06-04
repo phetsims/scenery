@@ -92,7 +92,7 @@ define( function( require ) {
           for ( var drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
             drawable.audit( allowPendingBlock, allowPendingList, allowDirty );
             count++;
-            if ( drawable === this.lastDrawable ) { break }
+            if ( drawable === this.lastDrawable ) { break; }
           }
           
           if ( !allowPendingBlock ) {
@@ -102,7 +102,7 @@ define( function( require ) {
             for ( var d = this.firstDrawable; d !== null; d = d.nextDrawable ) {
               assertSlow && assertSlow( d.parentDrawable === this, 'This block should be this drawable\'s parent' );
               assertSlow && assertSlow( _.indexOf( this.drawableList, d ) >= 0 );
-              if ( d === this.lastDrawable ) { break }
+              if ( d === this.lastDrawable ) { break; }
             }
           }
         }
