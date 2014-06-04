@@ -139,6 +139,25 @@
             } );
           };
           
+          window.displayErr = function() {
+            setTimeout( function(){
+              window.node = new scenery.Node( { x: 10 } );
+              scene.addChild( node );
+              
+              window.circle = new scenery.Circle( 50, { fill: 'black', x: 30, y: 60 } );
+              node.addChild( circle );
+              
+              node.centerX = display.width / 2;
+              node.centerY = display.height / 2;
+              
+              circle.opacity = 0.5;
+              display.updateDisplay();
+              
+              node.opacity = 0.5;
+              display.updateDisplay();
+            } );
+          };
+          
           window.cssTest = function() {
             window.assertSlow = window.assert;
             setTimeout( function(){
