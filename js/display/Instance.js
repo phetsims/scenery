@@ -206,10 +206,6 @@ define( function( require ) {
       // since it may be added back.
       this.instanceRemovalCheckList = cleanArray( this.instanceRemovalCheckList );
       
-      // linked-list handling for sibling instances (null for no next/previous sibling)
-      this.previousSibling = null;
-      this.nextSibling = null;
-      
       this.selfDrawable = null;
       this.groupDrawable = null; // e.g. backbone or non-shared cache
       this.sharedCacheDrawable = null; // our drawable if we are a shared cache
@@ -640,18 +636,6 @@ define( function( require ) {
       assert && assert( index >= 0 && index <= this.children.length,
                         'Instance insertion bounds check for index ' + index + ' with previous children length ' + this.children.length );
       
-      // maintain the linked-list handling for sibling instances
-      var previousInstance = ( index - 1 >= 0 ) ? this.children[index-1] : null;
-      var nextInstance = ( index < this.children.length ) ? this.children[index] : null;
-      if ( previousInstance ) {
-        previousInstance.nextSibling = instance;
-        instance.previousSibling = previousInstance;
-      }
-      if ( nextInstance ) {
-        nextInstance.previousSibling = instance;
-        instance.nextSibling = nextInstance;
-      }
-      
       // mark it as changed during this frame, so that we can properly set the change interval
       instance.stitchChangeFrame = this.display._frameId;
       
@@ -695,16 +679,6 @@ define( function( require ) {
       assert && assert( index >= 0 && index < this.children.length,
                         'Instance removal bounds check for index ' + index + ' with previous children length ' + this.children.length );
       
-      // maintain the linked-list handling for sibling instances
-      var previousInstance = ( index - 1 >= 0 ) ? this.children[index-1] : null;
-      var nextInstance = ( index + 1 < this.children.length ) ? this.children[index+1] : null;
-      if ( previousInstance ) {
-        previousInstance.nextSibling = nextInstance;
-      }
-      if ( nextInstance ) {
-        nextInstance.previousSibling = previousInstance;
-      }
-      
       var frameId = this.display._frameId;
       
       // mark it as changed during this frame, so that we can properly set the change interval
@@ -720,8 +694,6 @@ define( function( require ) {
       
       this.children.splice( index, 1 ); // TODO: replace with a 'remove' function call
       instance.parent = null;
-      instance.nextSibling = null;
-      instance.previousSibling = null;
       
       // maintain our stitch-change interval
       if ( index <= this.beforeStableIndex ) {
