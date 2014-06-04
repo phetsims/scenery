@@ -325,10 +325,12 @@ define( function( require ) {
       return hasStitchChange;
     },
     
+    // Synchronization for instances that have children (everything except for a shared cache instance)
     normalSyncTree: function( state, oldState ) {
-      var hasStitchChange = false;
+      // mark fully-removed instances for disposal, and initialize child instances if we were stateless
+      this.prepareChildInstances( state, oldState );
       
-      // not a shared cache
+      var hasStitchChange = false;
       
       // local variables, since we can't overwrite our instance properties yet
       var firstDrawable = null;
@@ -355,24 +357,6 @@ define( function( require ) {
         }
         
         firstDrawable = currentDrawable = this.selfDrawable;
-      }
-      
-      // mark all removed instances to be disposed (along with their subtrees)
-      while ( this.instanceRemovalCheckList.length ) {
-        var instanceToMark = this.instanceRemovalCheckList.pop();
-        if ( instanceToMark.addRemoveCounter === -1 ) {
-          instanceToMark.addRemoveCounter = 0; // reset it, so we don't mark it for disposal more than once
-          this.display.markInstanceRootForDisposal( instanceToMark );
-        }
-      }
-      
-      if ( !oldState ) {
-        // we need to create all of the child instances
-        for ( var k = 0; k < this.node.children.length; k++ ) {
-          // create a child instance
-          var child = this.node.children[k];
-          this.appendInstance( Instance.createFromPool( this.display, this.trail.copy().addDescendant( child, k ) ) );
-        }
       }
       
       for ( var i = 0; i < this.children.length; i++ ) {
@@ -507,6 +491,26 @@ define( function( require ) {
       }
       
       return hasStitchChange;
+    },
+    
+    prepareChildInstances: function( state, oldState ) {
+      // mark all removed instances to be disposed (along with their subtrees)
+      while ( this.instanceRemovalCheckList.length ) {
+        var instanceToMark = this.instanceRemovalCheckList.pop();
+        if ( instanceToMark.addRemoveCounter === -1 ) {
+          instanceToMark.addRemoveCounter = 0; // reset it, so we don't mark it for disposal more than once
+          this.display.markInstanceRootForDisposal( instanceToMark );
+        }
+      }
+      
+      if ( !oldState ) {
+        // we need to create all of the child instances
+        for ( var k = 0; k < this.node.children.length; k++ ) {
+          // create a child instance
+          var child = this.node.children[k];
+          this.appendInstance( Instance.createFromPool( this.display, this.trail.copy().addDescendant( child, k ) ) );
+        }
+      }
     },
     
     ensureSharedCacheInitialized: function() {
