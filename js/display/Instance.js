@@ -326,44 +326,18 @@ define( function( require ) {
     },
     
     localSyncTree: function( state, oldState ) {
+      var selfChanged = this.updateSelfDrawable( state, oldState );
+      
       // local variables, since we can't overwrite our instance properties yet
-      var firstDrawable = null;
+      var firstDrawable = this.selfDrawable; // possibly null
       var lastDrawable = null;
       
-      var currentDrawable = null;
-      
-      if ( this.node.isPainted() ) {
-        var selfRenderer = state.selfRenderer; // our new self renderer bitmask
-        
-        // bitwise trick, since only one of Canvas/SVG/DOM/WebGL/etc. flags will be chosen, and bitmaskRendererArea is the mask for those flags
-        // In English, "Is the current selfDrawable compatible with our selfRenderer (if any), or do we need to create a selfDrawable?"
-        //OHTWO TODO: For Canvas, we won't care about anything else for the drawable, but for DOM we care about the force-acceleration flag! That's stripped out here
-        if ( !this.selfDrawable || ( ( this.selfDrawable.renderer & selfRenderer & Renderer.bitmaskRendererArea ) === 0 ) ) {
-          if ( this.selfDrawable ) {
-            // scrap the previous selfDrawable, we need to create one with a different renderer.
-            this.selfDrawable.markForDisposal( this.display );
-          }
-          
-          this.selfDrawable = Renderer.createSelfDrawable( this, this.node, selfRenderer );
-        }
-        
-        firstDrawable = currentDrawable = this.selfDrawable;
-      }
+      var currentDrawable = firstDrawable; // possibly null
       
       for ( var i = 0; i < this.children.length; i++ ) {
         var childInstance = this.children[i];
         var childState = state.getStateForDescendant( childInstance.node );
-        
-        // see if we need to rebuild the instance tree due to an incompatible render state
-        if ( !childInstance.isStateless() && !childState.isInstanceCompatibleWith( childInstance.state ) ) {
-          // mark it for disposal
-          this.display.markInstanceRootForDisposal( childInstance );
-          
-          // swap in a new instance
-          var replacementInstance = Instance.createFromPool( this.display, this.trail.copy().addDescendant( childInstance.node, i ) );
-          this.replaceInstanceWithIndex( childInstance, replacementInstance, i );
-          childInstance = replacementInstance;
-        }
+        childInstance = this.updateChildInstanceIfIncompatible( childInstance, childState );
         
         // sync the tree
         childInstance.syncTree( childState );
@@ -394,6 +368,47 @@ define( function( require ) {
       // NOTE: these may get overwritten with the group drawable (in that case, groupSyncTree will read from these)
       this.firstDrawable = firstDrawable;
       this.lastDrawable = lastDrawable;
+    },
+    
+    // returns whether the selfDrawable changed
+    updateSelfDrawable: function( state, oldState ) {
+      if ( this.node.isPainted() ) {
+        var selfRenderer = state.selfRenderer; // our new self renderer bitmask
+        
+        // bitwise trick, since only one of Canvas/SVG/DOM/WebGL/etc. flags will be chosen, and bitmaskRendererArea is the mask for those flags
+        // In English, "Is the current selfDrawable compatible with our selfRenderer (if any), or do we need to create a selfDrawable?"
+        //OHTWO TODO: For Canvas, we won't care about anything else for the drawable, but for DOM we care about the force-acceleration flag! That's stripped out here
+        if ( !this.selfDrawable || ( ( this.selfDrawable.renderer & selfRenderer & Renderer.bitmaskRendererArea ) === 0 ) ) {
+          if ( this.selfDrawable ) {
+            // scrap the previous selfDrawable, we need to create one with a different renderer.
+            this.selfDrawable.markForDisposal( this.display );
+          }
+          
+          this.selfDrawable = Renderer.createSelfDrawable( this, this.node, selfRenderer );
+          
+          return true;
+        }
+      } else {
+        assert && assert( this.selfDrawable === null, 'Non-painted nodes should not have a selfDrawable' );
+      }
+      
+      return false;
+    },
+    
+    // returns the up-to-date instance
+    updateChildInstanceIfIncompatible: function( childInstance, childState ) {
+      // see if we need to rebuild the instance tree due to an incompatible render state
+      if ( !childInstance.isStateless() && !childState.isInstanceCompatibleWith( childInstance.state ) ) {
+        // mark it for disposal
+        this.display.markInstanceRootForDisposal( childInstance );
+        
+        // swap in a new instance
+        var replacementInstance = Instance.createFromPool( this.display, this.trail.copy().addDescendant( childInstance.node, i ) );
+        this.replaceInstanceWithIndex( childInstance, replacementInstance, i );
+        return replacementInstance;
+      } else {
+        return childInstance;
+      }
     },
     
     groupSyncTree: function( state, oldState ) {
