@@ -717,7 +717,7 @@ define( function( require ) {
           addQualifier( 'inputListeners' );
         }
         if ( node.getRenderer() ) {
-          addQualifier( 'renderer:' + node.getRenderer().name );
+          addQualifier( 'renderer:' + node.getRenderer() );
         }
         if ( node.isLayerSplit() ) {
           addQualifier( 'layerSplit' );
