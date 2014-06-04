@@ -89,28 +89,20 @@ define( function( require ) {
         if ( !allowPendingList ) {
           
           // audit children, and get a count
-          for ( var drawable = this.firstDrawable; drawable !== null && drawable !== this.lastDrawable; drawable = drawable.nextDrawable ) {
+          for ( var drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
             drawable.audit( allowPendingBlock, allowPendingList, allowDirty );
             count++;
-          }
-          // iteration above skips last drawable
-          if ( this.lastDrawable ) {
-            this.lastDrawable.audit( allowPendingBlock, allowPendingList, allowDirty );
-            count++;
+            if ( drawable === this.lastDrawable ) { break }
           }
           
           if ( !allowPendingBlock ) {
             assertSlow && assertSlow( count === this.drawableCount, 'drawableCount should match' );
             
             // scan through to make sure our drawable lists are identical
-            for ( var d = this.firstDrawable; d !== null && d !== this.lastDrawable; d = d.nextDrawable ) {
+            for ( var d = this.firstDrawable; d !== null; d = d.nextDrawable ) {
               assertSlow && assertSlow( d.parentDrawable === this, 'This block should be this drawable\'s parent' );
               assertSlow && assertSlow( _.indexOf( this.drawableList, d ) >= 0 );
-            }
-            // iteration above skips last drawable
-            if ( this.lastDrawable ) {
-              assertSlow && assertSlow( this.lastDrawable.parentDrawable === this, 'This block should be this drawable\'s parent' );
-              assertSlow && assertSlow( _.indexOf( this.drawableList, this.lastDrawable ) >= 0 );
+              if ( d === this.lastDrawable ) { break }
             }
           }
         }

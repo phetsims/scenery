@@ -114,8 +114,9 @@ define( function( require ) {
       
       // if we need to remove drawables from the blocks, do so
       if ( !this.removedDrawables ) {
-        for ( var d = this.lastFirstDrawable; d !== null && d.previousDrawable !== this.lastLastDrawable; d = d.nextDrawable ) {
+        for ( var d = this.lastFirstDrawable; d !== null; d = d.nextDrawable ) {
           d.parentDrawable.removeDrawable( d );
+          if ( d === this.lastLastDrawable ) { break }
         }
       }
       
@@ -147,9 +148,10 @@ define( function( require ) {
     
     // should be called during syncTree
     markForDisposal: function( display ) {
-      for ( var d = this.lastFirstDrawable; d !== null && d.previousDrawable !== this.lastLastDrawable; d = d.nextDrawable ) {
+      for ( var d = this.lastFirstDrawable; d !== null; d = d.nextDrawable ) {
         d.removePendingBackbone( this );
         this.display.markDrawableChangedBlock( d );
+        if ( d === this.lastLastDrawable ) { break }
       }
       this.removedDrawables = true;
       
@@ -261,9 +263,10 @@ define( function( require ) {
       sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'stitch ' + this.toString() + ' first:' + ( firstDrawable ? firstDrawable.toString() : 'null' ) + ' last:' + ( lastDrawable ? lastDrawable.toString() : 'null' ) );
       sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.push();
       
-      for ( var d = this.lastFirstDrawable; d !== null && d.previousDrawable !== this.lastLastDrawable; d = d.nextDrawable ) {
+      for ( var d = this.lastFirstDrawable; d !== null; d = d.nextDrawable ) {
         d.removePendingBackbone( this );
         this.display.markDrawableChangedBlock( d );
+        if ( d === this.lastLastDrawable ) { break }
       }
       
       this.lastFirstDrawable = firstDrawable;
@@ -276,7 +279,7 @@ define( function( require ) {
       var firstDrawableForBlock = null;
       
       // linked-list iteration inclusively from firstDrawable to lastDrawable
-      for ( var drawable = firstDrawable; drawable !== null && drawable.pendingPreviousDrawable !== lastDrawable; drawable = drawable.pendingNextDrawable ) {
+      for ( var drawable = firstDrawable; drawable !== null; drawable = drawable.pendingNextDrawable || drawable.nextDrawable ) {
         
         // if we need to switch to a new block, create it
         if ( !currentBlock || drawable.renderer !== currentRenderer ) {
@@ -322,6 +325,9 @@ define( function( require ) {
         } else {
           drawable.previousDrawable = null;
         }
+        
+        // don't cause an infinite loop!
+        if ( drawable === lastDrawable ) { break }
       }
       if ( lastDrawable ) {
         lastDrawable.pendingNextDrawable = null;

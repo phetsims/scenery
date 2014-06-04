@@ -104,11 +104,10 @@ define( function( require ) {
         this.context.clearRect( 0, 0, this.canvas.width, this.canvas.height ); // clear everything
         
         //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern)
-        for ( var drawable = this.firstDrawable; drawable !== null && drawable !== this.lastDrawable; drawable = drawable.nextDrawable ) {
+        for ( var drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
           this.renderDrawable( drawable );
+          if ( drawable === this.lastDrawable ) { break }
         }
-        // iteration above skips last drawable
-        this.lastDrawable && this.renderDrawable( drawable );
       }
       
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.pop();
