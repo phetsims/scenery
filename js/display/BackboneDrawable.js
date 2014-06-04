@@ -153,7 +153,7 @@ define( function( require ) {
     
     // should be called during syncTree
     markForDisposal: function( display ) {
-      for ( var d = this.lastFirstDrawable; d !== null; d = d.nextDrawable ) {
+      for ( var d = this.lastFirstDrawable; d !== null; d = d.oldNextDrawable ) {
         d.removePendingBackbone( this );
         this.display.markDrawableChangedBlock( d );
         if ( d === this.lastLastDrawable ) { break; }
@@ -268,7 +268,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'stitch ' + this.toString() + ' first:' + ( firstDrawable ? firstDrawable.toString() : 'null' ) + ' last:' + ( lastDrawable ? lastDrawable.toString() : 'null' ) );
       sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.push();
       
-      for ( var d = this.lastFirstDrawable; d !== null; d = d.nextDrawable ) {
+      for ( var d = this.lastFirstDrawable; d !== null; d = d.oldNextDrawable ) {
         d.removePendingBackbone( this );
         this.display.markDrawableChangedBlock( d );
         if ( d === this.lastLastDrawable ) { break; }
@@ -284,12 +284,12 @@ define( function( require ) {
       var firstDrawableForBlock = null;
       
       // linked-list iteration inclusively from firstDrawable to lastDrawable
-      for ( var drawable = firstDrawable; drawable !== null; drawable = drawable.pendingNextDrawable || drawable.nextDrawable ) {
+      for ( var drawable = firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
         
         // if we need to switch to a new block, create it
         if ( !currentBlock || drawable.renderer !== currentRenderer ) {
           if ( currentBlock ) {
-            currentBlock.notifyInterval( firstDrawableForBlock, drawable.pendingPreviousDrawable );
+            currentBlock.notifyInterval( firstDrawableForBlock, drawable.previousDrawable );
           }
           
           currentRenderer = drawable.renderer;
@@ -320,24 +320,8 @@ define( function( require ) {
         drawable.setPendingBlock( currentBlock, this );
         this.display.markDrawableChangedBlock( drawable );
         
-        // pending linked list => linked list
-        //OHTWO TODO: scan these after all backbones have been stitched! EEK!
-        // throw new Error( 'see comment' );
-        if ( drawable.pendingPreviousDrawable !== null ) {
-          drawable.pendingPreviousDrawable.pendingNextDrawable = null;
-          drawable.pendingPreviousDrawable.nextDrawable = drawable;
-          drawable.previousDrawable = drawable.pendingPreviousDrawable;
-          drawable.pendingPreviousDrawable = null;
-        } else {
-          drawable.previousDrawable = null;
-        }
-        
         // don't cause an infinite loop!
         if ( drawable === lastDrawable ) { break; }
-      }
-      if ( lastDrawable ) {
-        lastDrawable.pendingNextDrawable = null;
-        lastDrawable.nextDrawable = null;
       }
       if ( currentBlock ) {
         currentBlock.notifyInterval( firstDrawableForBlock, lastDrawable );

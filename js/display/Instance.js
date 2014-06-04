@@ -102,16 +102,10 @@ define( function( require ) {
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var scenery = require( 'SCENERY/scenery' );
+  var Drawable = require( 'SCENERY/display/Drawable' );
   require( 'SCENERY/display/RenderState' );
   
   var globalIdCounter = 1;
-  
-  // display instance linked list ops
-  function connectDrawables( a, b ) {
-    // marked with pending
-    a.pendingNextDrawable = b;
-    b.pendingPreviousDrawable = a;
-  }
   
   scenery.Instance = function Instance( display, trail ) {
     this.active = false;
@@ -473,7 +467,7 @@ define( function( require ) {
             if ( firstChildDrawable ) {
               if ( currentDrawable ) {
                 // there is already an end of the linked list, so just append to it
-                connectDrawables( currentDrawable, firstChildDrawable );
+                Drawable.connectDrawables( currentDrawable, firstChildDrawable, this.display );
               } else {
                 // start out the linked list
                 firstDrawable = firstChildDrawable;
@@ -511,6 +505,10 @@ define( function( require ) {
         }
         
         if ( groupRenderer ) {
+          // ensure our linked list is fully disconnected from others
+          Drawable.disconnectBefore( firstDrawable, this.display );
+          Drawable.disconnectAfter( lastDrawable, this.display );
+          
           if ( state.isBackbone ) {
             if ( groupChanged ) {
               this.groupDrawable = scenery.BackboneDrawable.createFromPool( this.display, this, this.getTransformRootInstance(), groupRenderer, state.isDisplayRoot );

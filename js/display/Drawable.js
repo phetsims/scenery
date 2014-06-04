@@ -44,6 +44,8 @@ define( function( require ) {
       this.dirty = true;
       this.disposed = false;
       
+      this.linksDirty = false;
+      
       return this;
     },
     
@@ -60,9 +62,9 @@ define( function( require ) {
       this.previousDrawable = null;
       this.nextDrawable = null;
       
-      // similar but pending handling, so that we can traverse both orders at the same time for stitching
-      this.pendingPreviousDrawable = null;
-      this.pendingNextDrawable = null;
+      // similar but without recent changes, so that we can traverse both orders at the same time for stitching
+      this.oldPreviousDrawable = null;
+      this.oldNextDrawable = null;
     },
     
     setBlockBackbone: function( backboneInstance ) {
@@ -96,6 +98,12 @@ define( function( require ) {
       }
     },
     
+    updateLinks: function() {
+      this.oldNextDrawable = this.nextDrawable;
+      this.oldPreviousDrawable = this.previousDrawable;
+      this.linksDirty = false;
+    },
+    
     markDirty: function() {
       if ( !this.dirty ) {
         this.dirty = true;
@@ -104,6 +112,14 @@ define( function( require ) {
         if ( this.parentDrawable ) {
           this.parentDrawable.markDirtyDrawable( this );
         }
+      }
+    },
+    
+    // will ensure that after syncTree phase is done, we will have updateLinks() called on us
+    markLinksDirty: function( display ) {
+      if ( !this.linksDirty ) {
+        this.linksDirty = true;
+        display.markDrawableForLinksUpdate( this );
       }
     },
     
@@ -125,23 +141,32 @@ define( function( require ) {
     
     audit: function( allowPendingBlock, allowPendingList, allowDirty ) {
       if ( assertSlow ) {
-        assertSlow && assertSlow( !this.disposed, 'If we are being audited, we assume we are in the drawable display tree, and we should not be marked as disposed' );
+        assertSlow && assertSlow( !this.disposed,
+                                  'If we are being audited, we assume we are in the drawable display tree, and we ' +
+                                  'should not be marked as disposed' );
         assertSlow && assertSlow( this.renderer, 'Should not have a 0 (no) renderer' );
         
-        assertSlow && assertSlow( !this.backbone || this.parentDrawable, 'If we have a backbone reference, we must have a parentDrawable (our block)' );
+        assertSlow && assertSlow( !this.backbone || this.parentDrawable,
+                                  'If we have a backbone reference, we must have a parentDrawable (our block)' );
         
         if ( !allowPendingBlock ) {
-          assertSlow && assertSlow( this.parentDrawable === this.pendingParentDrawable, 'Assure our parent and pending parent match, if we have updated blocks' );
-          assertSlow && assertSlow( this.backbone === this.pendingBackbone, 'Assure our backbone and pending backbone match, if we have updated blocks' );
+          assertSlow && assertSlow( this.parentDrawable === this.pendingParentDrawable,
+                                    'Assure our parent and pending parent match, if we have updated blocks' );
+          assertSlow && assertSlow( this.backbone === this.pendingBackbone,
+                                    'Assure our backbone and pending backbone match, if we have updated blocks' );
         }
         
         if ( !allowPendingList ) {
-          assertSlow && assertSlow( this.pendingPreviousDrawable === null, 'Pending linked-list references should be cleared by now' );
-          assertSlow && assertSlow( this.pendingNextDrawable === null, 'Pending linked-list references should be cleared by now' );
+          assertSlow && assertSlow( this.oldPreviousDrawable === this.previousDrawable,
+                                    'Pending linked-list references should be cleared by now' );
+          assertSlow && assertSlow( this.oldNextDrawable === this.nextDrawable,
+                                    'Pending linked-list references should be cleared by now' );
+          assertSlow && assertSlow( !this.linksDirty, 'Links dirty flag should be clean' );
         }
         
         if ( !allowDirty ) {
-          assertSlow && assertSlow( !this.dirty, 'Should not be dirty at this phase, if we are in the drawable display tree' );
+          assertSlow && assertSlow( !this.dirty,
+                                    'Should not be dirty at this phase, if we are in the drawable display tree' );
         }
       }
     },
@@ -150,6 +175,50 @@ define( function( require ) {
       return this.constructor.name + '#' + this.id;
     }
   } );
+  
+  // a,b {Drawable}, connects the two drawables in the linked list, while cutting the previous connection and marking
+  // the links for updates.
+  Drawable.connectDrawables = function( a, b, display ) {
+    // we don't need to do anything if there is no change
+    if ( a.nextDrawable !== b ) {
+      // touch previous neighbors
+      if ( a.nextDrawable ) {
+        a.nextDrawable.markLinksDirty( display );
+        a.nextDrawable.previousDrawable = null;
+      }
+      if ( b.previousDrawable ) {
+        b.previousDrawable.markLinksDirty( display );
+        b.previousDrawable.nextDrawable = null;
+      }
+      
+      a.nextDrawable = b;
+      b.previousDrawable = a;
+      
+      // mark these as needing updates
+      a.markLinksDirty( display );
+      b.markLinksDirty( display );
+    }
+  };
+  
+  Drawable.disconnectBefore = function( a, display ) {
+    // we don't need to do anything if there is no change
+    if ( a.previousDrawable ) {
+      a.markLinksDirty( display );
+      a.previousDrawable.markLinksDirty( display );
+      a.previousDrawable.nextDrawable = null;
+      a.previousDrawable = null;
+    }
+  };
+  
+  Drawable.disconnectAfter = function( a, display ) {
+    // we don't need to do anything if there is no change
+    if ( a.nextDrawable ) {
+      a.markLinksDirty( display );
+      a.nextDrawable.markLinksDirty( display );
+      a.nextDrawable.previousDrawable = null;
+      a.nextDrawable = null;
+    }
+  };
   
   return Drawable;
 } );

@@ -94,6 +94,7 @@ define( function( require ) {
     this._drawablesToChangeBlock = [];
     this._instanceRootsToDispose = [];
     this._drawablesToDispose = [];
+    this._drawablesToUpdateLinks = [];
     
     this._lastCursor = null;
     
@@ -145,6 +146,11 @@ define( function( require ) {
       this._baseInstance.baseSyncTree();
       if ( firstRun ) {
         this.markTransformRootDirty( this._baseInstance, this._baseInstance.isTransformed ); // marks the transform root as dirty (since it is)
+      }
+      
+      // update our drawable's linked lists where necessary
+      while ( this._drawablesToUpdateLinks.length ) {
+        this._drawablesToUpdateLinks.pop().updateLinks();
       }
       
       this._rootBackbone = this._rootBackbone || this._baseInstance.groupDrawable;
@@ -345,6 +351,10 @@ define( function( require ) {
     markDrawableForDisposal: function( drawable ) {
       sceneryLog && sceneryLog.Display && sceneryLog.Display( 'markDrawableForDisposal: ' + drawable.toString() );
       this._drawablesToDispose.push( drawable );
+    },
+    
+    markDrawableForLinksUpdate: function( drawable ) {
+      this._drawablesToUpdateLinks.push( drawable );
     },
     
     /*---------------------------------------------------------------------------*
