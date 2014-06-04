@@ -141,7 +141,12 @@ define( function( require ) {
     markBlocksForDisposal: function() {
       while ( this.blocks.length ) {
         var block = this.blocks.pop();
-        this.domElement.removeChild( block.domElement );
+        sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( this.toString() + ' removing block: ' + block.toString() );
+        //TODO: PERFORMANCE: does this cause reflows / style calculation
+        if ( block.domElement.parentNode === this.domElement ) {
+          // guarded, since we may have a (new) child drawable add it before we can remove it
+          this.domElement.removeChild( block.domElement );
+        }
         block.markForDisposal( this.display );
       }
     },
@@ -303,6 +308,7 @@ define( function( require ) {
           
           this.blocks.push( currentBlock );
           currentBlock.setBlockBackbone( this );
+          sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( this.toString() + ' adding block: ' + currentBlock.toString() );
           this.domElement.appendChild( currentBlock.domElement ); //OHTWO TODO: minor speedup by appending only once its fragment is constructed? or use DocumentFragment?
           
           // mark it dirty for now, so we can check

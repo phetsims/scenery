@@ -82,11 +82,12 @@ define( function( require ) {
       window.sceneryLog.BackboneDrawable = function( ob ) { scenery.logFunction( '%c' + padding + '%c[Backbone] '    + ob, padStyle, 'color: #a00;' ); };
       window.sceneryLog.CanvasBlock      = function( ob ) { scenery.logFunction( '%c' + padding + '%c[Canvas] '      + ob, padStyle, 'color: #000;' ); };
       window.sceneryLog.Display          = function( ob ) { scenery.logFunction( '%c' + padding + '%c[Display] '     + ob, padStyle, 'color: #000;' ); };
+      window.sceneryLog.DOMBlock         = function( ob ) { scenery.logFunction( '%c' + padding + '%c[DOM] '         + ob, padStyle, 'color: #000;' ); };
       window.sceneryLog.Drawable         = function( ob ) { scenery.logFunction( '%c' + padding + '%c'               + ob, padStyle, 'color: #000;' ); };
       window.sceneryLog.FittedBlock      = function( ob ) { scenery.logFunction( '%c' + padding + '%c[FittedBlock] ' + ob, padStyle, 'color: #000;' ); };
       window.sceneryLog.Instance         = function( ob ) { scenery.logFunction( '%c' + padding + '%c[Instance] '    + ob, padStyle, 'color: #000;' ); };
       window.sceneryLog.SVGBlock         = function( ob ) { scenery.logFunction( '%c' + padding + '%c[SVG] '         + ob, padStyle, 'color: #000;' ); };
-      window.sceneryLog.SVGGroup         = function( ob ) { scenery.logFunction( '%c' + padding + '%c[SVGGroup] '    + ob, padStyle, 'color: #000;' ); };
+      // window.sceneryLog.SVGGroup         = function( ob ) { scenery.logFunction( '%c' + padding + '%c[SVGGroup] '    + ob, padStyle, 'color: #000;' ); };
     },
   
     disableLayerLogging: function() {

@@ -52,12 +52,14 @@ define( function( require ) {
     },
     
     addDrawable: function( drawable ) {
+      sceneryLog && sceneryLog.DOMBlock && sceneryLog.DOMBlock( '#' + this.id + '.addDrawable ' + drawable.toString() );
       assert && assert( this.domDrawable === drawable, 'DOMBlock should only be used with one drawable for now (the one it was initialized with)' );
       
       Block.prototype.addDrawable.call( this, drawable );
     },
     
     removeDrawable: function( drawable ) {
+      sceneryLog && sceneryLog.DOMBlock && sceneryLog.DOMBlock( '#' + this.id + '.removeDrawable ' + drawable.toString() );
       assert && assert( this.domDrawable === drawable, 'DOMBlock should only be used with one drawable for now (the one it was initialized with)' );
       
       Block.prototype.removeDrawable.call( this, drawable );
