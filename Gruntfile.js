@@ -55,7 +55,7 @@ module.exports = function( grunt ) {
               global_defs: {
                 assert: false,
                 assertSlow: false,
-                sceneryLayerLog: false,
+                sceneryLog: false,
                 sceneryEventLog: false,
                 sceneryAccessibilityLog: false,
                 phetAllocation: false
@@ -86,7 +86,7 @@ module.exports = function( grunt ) {
               global_defs: {
                 assert: false,
                 assertSlow: false,
-                sceneryLayerLog: false,
+                sceneryLog: false,
                 sceneryEventLog: false,
                 sceneryAccessibilityLog: false,
                 phetAllocation: false

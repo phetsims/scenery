@@ -57,7 +57,7 @@ define( function( require ) {
       // store our backing scale so we don't have to look it up while fitting
       this.backingScale = ( renderer & Renderer.bitmaskCanvasLowResolution ) ? 1 : scenery.Util.backingScale( this.context );
       
-      sceneryLayerLog && sceneryLayerLog.CanvasBlock && sceneryLayerLog.CanvasBlock( 'initialized #' + this.id );
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'initialized #' + this.id );
       // TODO: dirty list of nodes (each should go dirty only once, easier than scanning all?)
       
       return this;
@@ -86,8 +86,8 @@ define( function( require ) {
     },
     
     update: function() {
-      sceneryLayerLog && sceneryLayerLog.CanvasBlock && sceneryLayerLog.CanvasBlock( 'update #' + this.id );
-      sceneryLayerLog && sceneryLayerLog.CanvasBlock && sceneryLayerLog.push();
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'update #' + this.id );
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.push();
       
       if ( this.dirty && !this.disposed ) {
         this.dirty = false;
@@ -111,7 +111,7 @@ define( function( require ) {
         this.lastDrawable && this.renderDrawable( drawable );
       }
       
-      sceneryLayerLog && sceneryLayerLog.CanvasBlock && sceneryLayerLog.pop();
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.pop();
     },
     
     renderDrawable: function( drawable ) {
@@ -130,7 +130,7 @@ define( function( require ) {
     },
     
     dispose: function() {
-      sceneryLayerLog && sceneryLayerLog.CanvasBlock && sceneryLayerLog.CanvasBlock( 'dispose #' + this.id );
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'dispose #' + this.id );
       
       // clear references
       this.transformRootInstance = null;
@@ -144,7 +144,7 @@ define( function( require ) {
     },
     
     markDirtyDrawable: function( drawable ) {
-      sceneryLayerLog && sceneryLayerLog.dirty && sceneryLayerLog.dirty( 'markDirtyDrawable on CanvasBlock#' + this.id + ' with ' + drawable.toString() );
+      sceneryLog && sceneryLog.dirty && sceneryLog.dirty( 'markDirtyDrawable on CanvasBlock#' + this.id + ' with ' + drawable.toString() );
       
       assert && assert( drawable );
       
@@ -154,19 +154,19 @@ define( function( require ) {
     },
     
     addDrawable: function( drawable ) {
-      sceneryLayerLog && sceneryLayerLog.CanvasBlock && sceneryLayerLog.CanvasBlock( '#' + this.id + '.addDrawable ' + drawable.toString() );
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( '#' + this.id + '.addDrawable ' + drawable.toString() );
       
       FittedBlock.prototype.addDrawable.call( this, drawable );
     },
     
     removeDrawable: function( drawable ) {
-      sceneryLayerLog && sceneryLayerLog.CanvasBlock && sceneryLayerLog.CanvasBlock( '#' + this.id + '.removeDrawable ' + drawable.toString() );
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( '#' + this.id + '.removeDrawable ' + drawable.toString() );
       
       FittedBlock.prototype.removeDrawable.call( this, drawable );
     },
     
     notifyInterval: function( firstDrawable, lastDrawable ) {
-      sceneryLayerLog && sceneryLayerLog.CanvasBlock && sceneryLayerLog.CanvasBlock( '#' + this.id + '.notifyInterval ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() );
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( '#' + this.id + '.notifyInterval ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() );
       
       FittedBlock.prototype.notifyInterval.call( this, firstDrawable, lastDrawable );
     },
@@ -181,10 +181,10 @@ define( function( require ) {
     constructorDuplicateFactory: function( pool ) {
       return function( display, renderer, transformRootInstance ) {
         if ( pool.length ) {
-          sceneryLayerLog && sceneryLayerLog.CanvasBlock && sceneryLayerLog.CanvasBlock( 'new from pool' );
+          sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'new from pool' );
           return pool.pop().initialize( display, renderer, transformRootInstance );
         } else {
-          sceneryLayerLog && sceneryLayerLog.CanvasBlock && sceneryLayerLog.CanvasBlock( 'new from constructor' );
+          sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'new from constructor' );
           return new CanvasBlock( display, renderer, transformRootInstance );
         }
       };

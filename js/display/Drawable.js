@@ -35,7 +35,7 @@ define( function( require ) {
       // unique ID for drawables
       this.id = this.id || globalId++;
       
-      sceneryLayerLog && sceneryLayerLog.Drawable && sceneryLayerLog.Drawable( '[' + this.constructor.name + '*] initialize ' + this.toString() );
+      sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( '[' + this.constructor.name + '*] initialize ' + this.toString() );
       
       this.cleanDrawable();
       
@@ -114,7 +114,7 @@ define( function( require ) {
     dispose: function() {
       assert && assert( !this.disposed, 'We should not re-dispose drawables' );
       
-      sceneryLayerLog && sceneryLayerLog.Drawable && sceneryLayerLog.Drawable( '[' + this.constructor.name + '*] dispose ' + this.toString() );
+      sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( '[' + this.constructor.name + '*] dispose ' + this.toString() );
       
       this.cleanDrawable();
       this.disposed = true;

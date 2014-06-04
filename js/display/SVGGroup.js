@@ -33,7 +33,7 @@ define( function( require ) {
       this.hasSelfDrawable = false;
       this.selfDrawable = null; // reference to a self drawable
       
-      sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.SVGGroup( 'initializing ' + this.toString() );
+      sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'initializing ' + this.toString() );
       
       // general dirty flag (triggered on any other dirty event)
       this.dirty = true;
@@ -161,14 +161,14 @@ define( function( require ) {
     },
     
     update: function() {
-      sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.SVGGroup( 'update: ' + this.toString() );
+      sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'update: ' + this.toString() );
       
       // we may have been disposed since being marked dirty on our block. we won't have a reference if we are disposed
       if ( !this.block ) {
         return;
       }
       
-      sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.push();
+      sceneryLog && sceneryLog.SVGGroup && sceneryLog.push();
       
       var svgGroup = this.svgGroup;
       
@@ -177,7 +177,7 @@ define( function( require ) {
       if ( this.transformDirty ) {
         this.transformDirty = false;
         
-        sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.SVGGroup( 'transform update: ' + this.toString() );
+        sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'transform update: ' + this.toString() );
         
         if ( this.willApplyTransforms ) {
           
@@ -202,7 +202,7 @@ define( function( require ) {
       if ( this.visibilityDirty ) {
         this.visibilityDirty = false;
         
-        sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.SVGGroup( 'visibility update: ' + this.toString() );
+        sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'visibility update: ' + this.toString() );
         
         svgGroup.style.display = ( this.willApplyFilters && !this.node.isVisible() ) ? 'none' : '';
       }
@@ -211,7 +211,7 @@ define( function( require ) {
       if ( this.opacityDirty ) {
         this.opacityDirty = false;
         
-        sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.SVGGroup( 'opacity update: ' + this.toString() );
+        sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'opacity update: ' + this.toString() );
         
         if ( this.willApplyFilters && this.node.opacity !== 1 ) {
           this.hasOpacity = true;
@@ -225,7 +225,7 @@ define( function( require ) {
       if ( this.clipDirty ) {
         this.clipDirty = false;
         
-        sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.SVGGroup( 'clip update: ' + this.toString() );
+        sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'clip update: ' + this.toString() );
         
         if ( this.willApplyFilters && this.node._clipArea ) {
           if ( !this.clipDefinition ) {
@@ -256,8 +256,8 @@ define( function( require ) {
       if ( this.orderDirty ) {
         this.orderDirty = false;
         
-        sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.SVGGroup( 'order update: ' + this.toString() );
-        sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.push();
+        sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'order update: ' + this.toString() );
+        sceneryLog && sceneryLog.SVGGroup && sceneryLog.push();
         
         // our instance should have the proper order of children. we check that way.
         var idx = this.children.length - 1;
@@ -269,7 +269,7 @@ define( function( require ) {
             // ensure that the spot in our array (and in the DOM) at [idx] is correct
             if ( this.children[idx] !== group ) {
               // out of order, rearrange
-              sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.SVGGroup( 'group out of order: ' + idx + ' for ' + group.toString() );
+              sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'group out of order: ' + idx + ' for ' + group.toString() );
               
               // in the DOM first (since we reference the children array to know what to insertBefore)
               svgGroup.insertBefore( group.svgGroup, idx + 1 >= this.children.length ? null : this.children[idx+1].svgGroup ); // see http://stackoverflow.com/questions/9732624/how-to-swap-dom-child-nodes-in-javascript
@@ -280,7 +280,7 @@ define( function( require ) {
               this.children.splice( oldIndex, 1 );
               this.children.splice( idx, 0, group );
             } else {
-              sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.SVGGroup( 'group in place: ' + idx + ' for ' + group.toString() );
+              sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'group in place: ' + idx + ' for ' + group.toString() );
             }
             
             // if there was a group for that instance, we move on to the next spot
@@ -288,10 +288,10 @@ define( function( require ) {
           }
         }
         
-        sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.pop();
+        sceneryLog && sceneryLog.SVGGroup && sceneryLog.pop();
       }
       
-      sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.pop();
+      sceneryLog && sceneryLog.SVGGroup && sceneryLog.pop();
     },
     
     isReleasable: function() {
@@ -300,7 +300,7 @@ define( function( require ) {
     },
     
     dispose: function() {
-      sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.SVGGroup( 'dispose ' + this.toString() );
+      sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'dispose ' + this.toString() );
       
       assert && assert( this.children.length === 0, 'Should be empty by now' );
       
@@ -388,10 +388,10 @@ define( function( require ) {
     constructorDuplicateFactory: function( pool ) {
       return function( block, instance, parent ) {
         if ( pool.length ) {
-          sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.SVGGroup( 'new from pool' );
+          sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'new from pool' );
           return pool.pop().initialize( block, instance, parent );
         } else {
-          sceneryLayerLog && sceneryLayerLog.SVGGroup && sceneryLayerLog.SVGGroup( 'new from constructor' );
+          sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'new from constructor' );
           return new SVGGroup( block, instance, parent );
         }
       };

@@ -132,8 +132,8 @@ define( function( require ) {
         return;
       }
       
-      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.Display( 'updateDisplay frame ' + this._frameId );
-      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.push();
+      sceneryLog && sceneryLog.Display && sceneryLog.Display( 'updateDisplay frame ' + this._frameId );
+      sceneryLog && sceneryLog.Display && sceneryLog.push();
       
       var firstRun = !!this._baseInstance;
       
@@ -154,12 +154,12 @@ define( function( require ) {
       
       if ( assertSlow ) { this._rootBackbone.audit( true, false, true ); } // allow pending blocks / dirty
       
-      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.Display( 'drawable block change phase' );
-      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.push();
+      sceneryLog && sceneryLog.Display && sceneryLog.Display( 'drawable block change phase' );
+      sceneryLog && sceneryLog.Display && sceneryLog.push();
       while ( this._drawablesToChangeBlock.length ) {
         this._drawablesToChangeBlock.pop().updateBlock();
       }
-      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.pop();
+      sceneryLog && sceneryLog.Display && sceneryLog.pop();
       
       if ( assertSlow ) { this._rootBackbone.audit( false, false, true ); } // allow only dirty
       if ( assertSlow ) { this._baseInstance.audit( this._frameId, false ); }
@@ -169,8 +169,8 @@ define( function( require ) {
       
       if ( assertSlow ) { this._baseInstance.audit( this._frameId, true ); }
       
-      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.Display( 'disposal phase' );
-      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.push();
+      sceneryLog && sceneryLog.Display && sceneryLog.Display( 'disposal phase' );
+      sceneryLog && sceneryLog.Display && sceneryLog.push();
       
       // dispose all of our instances. disposing the root will cause all descendants to also be disposed.
       // will also dispose attached drawables (self/group/etc.)
@@ -183,16 +183,16 @@ define( function( require ) {
         this._drawablesToDispose.pop().dispose();
       }
       
-      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.pop();
+      sceneryLog && sceneryLog.Display && sceneryLog.pop();
       
       if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
       
       // repaint phase
       //OHTWO TODO: can anything be updated more efficiently by tracking at the Display level? Remember, we have recursive updates so things get updated in the right order!
-      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.Display( 'repaint phase' );
-      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.push();
+      sceneryLog && sceneryLog.Display && sceneryLog.Display( 'repaint phase' );
+      sceneryLog && sceneryLog.Display && sceneryLog.push();
       this._rootBackbone.update();
-      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.pop();
+      sceneryLog && sceneryLog.Display && sceneryLog.pop();
       
       if ( assertSlow ) { this._rootBackbone.audit( false, false, false ); } // allow nothing
       if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
@@ -214,7 +214,7 @@ define( function( require ) {
       
       this._frameId++;
       
-      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.pop();
+      sceneryLog && sceneryLog.Display && sceneryLog.pop();
     },
     
     updateSize: function() {
@@ -321,29 +321,29 @@ define( function( require ) {
     },
     
     updateDirtyTransformRoots: function() {
-      sceneryLayerLog && sceneryLayerLog.transformSystem && sceneryLayerLog.transformSystem( 'updateDirtyTransformRoots' );
-      sceneryLayerLog && sceneryLayerLog.transformSystem && sceneryLayerLog.push();
+      sceneryLog && sceneryLog.transformSystem && sceneryLog.transformSystem( 'updateDirtyTransformRoots' );
+      sceneryLog && sceneryLog.transformSystem && sceneryLog.push();
       while ( this._dirtyTransformRoots.length ) {
         this._dirtyTransformRoots.pop().updateTransformListenersAndCompute( false, false, this._frameId, true );
       }
       while ( this._dirtyTransformRootsWithoutPass.length ) {
         this._dirtyTransformRootsWithoutPass.pop().updateTransformListenersAndCompute( false, false, this._frameId, false );
       }
-      sceneryLayerLog && sceneryLayerLog.transformSystem && sceneryLayerLog.pop();
+      sceneryLog && sceneryLog.transformSystem && sceneryLog.pop();
     },
     
     markDrawableChangedBlock: function( drawable ) {
-      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.Display( 'markDrawableChangedBlock: ' + drawable.toString() );
+      sceneryLog && sceneryLog.Display && sceneryLog.Display( 'markDrawableChangedBlock: ' + drawable.toString() );
       this._drawablesToChangeBlock.push( drawable );
     },
     
     markInstanceRootForDisposal: function( instance ) {
-      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.Display( 'markInstanceRootForDisposal: ' + instance.toString() );
+      sceneryLog && sceneryLog.Display && sceneryLog.Display( 'markInstanceRootForDisposal: ' + instance.toString() );
       this._instanceRootsToDispose.push( instance );
     },
     
     markDrawableForDisposal: function( drawable ) {
-      sceneryLayerLog && sceneryLayerLog.Display && sceneryLayerLog.Display( 'markDrawableForDisposal: ' + drawable.toString() );
+      sceneryLog && sceneryLog.Display && sceneryLog.Display( 'markDrawableForDisposal: ' + drawable.toString() );
       this._drawablesToDispose.push( drawable );
     },
     
@@ -354,7 +354,7 @@ define( function( require ) {
     updateCursor: function() {
       if ( this._input && this._input.mouse && this._input.mouse.point ) {
         if ( this._input.mouse.cursor ) {
-          sceneryLayerLog && sceneryLayerLog.Cursor && sceneryLayerLog.Cursor( 'set on pointer: ' + this._input.mouse.cursor );
+          sceneryLog && sceneryLog.Cursor && sceneryLog.Cursor( 'set on pointer: ' + this._input.mouse.cursor );
           return this.setSceneCursor( this._input.mouse.cursor );
         }
         
@@ -367,13 +367,13 @@ define( function( require ) {
             var cursor = node.getCursor();
             
             if ( cursor ) {
-              sceneryLayerLog && sceneryLayerLog.Cursor && sceneryLayerLog.Cursor( cursor + ' on ' + node.constructor.name + '#' + node.id );
+              sceneryLog && sceneryLog.Cursor && sceneryLog.Cursor( cursor + ' on ' + node.constructor.name + '#' + node.id );
               return this.setSceneCursor( cursor );
             }
           }
         }
         
-        sceneryLayerLog && sceneryLayerLog.Cursor && sceneryLayerLog.Cursor( '--- for ' + ( mouseTrail ? mouseTrail.toString() : '(no hit)' ) );
+        sceneryLog && sceneryLog.Cursor && sceneryLog.Cursor( '--- for ' + ( mouseTrail ? mouseTrail.toString() : '(no hit)' ) );
       }
       
       // fallback case

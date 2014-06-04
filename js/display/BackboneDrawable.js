@@ -96,13 +96,13 @@ define( function( require ) {
       // If removedDrawables = false during disposal, it means we need to remove the drawables manually (this should only happen if an instance tree is removed)
       this.removedDrawables = false;
       
-      sceneryLayerLog && sceneryLayerLog.BackboneDrawable && sceneryLayerLog.BackboneDrawable( 'initialized ' + this.toString() );
+      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'initialized ' + this.toString() );
       
       return this; // chaining
     },
     
     dispose: function() {
-      sceneryLayerLog && sceneryLayerLog.BackboneDrawable && sceneryLayerLog.BackboneDrawable( 'dispose ' + this.toString() );
+      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'dispose ' + this.toString() );
       
       while ( this.watchedFilterNodes.length ) {
         var node = this.watchedFilterNodes.pop();
@@ -258,8 +258,8 @@ define( function( require ) {
     },
     
     stitch: function( firstDrawable, lastDrawable, oldDrawableBeforeChange, oldDrawableAfterChange ) {
-      sceneryLayerLog && sceneryLayerLog.BackboneDrawable && sceneryLayerLog.BackboneDrawable( 'stitch ' + this.toString() + ' first:' + ( firstDrawable ? firstDrawable.toString() : 'null' ) + ' last:' + ( lastDrawable ? lastDrawable.toString() : 'null' ) );
-      sceneryLayerLog && sceneryLayerLog.BackboneDrawable && sceneryLayerLog.push();
+      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'stitch ' + this.toString() + ' first:' + ( firstDrawable ? firstDrawable.toString() : 'null' ) + ' last:' + ( lastDrawable ? lastDrawable.toString() : 'null' ) );
+      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.push();
       
       for ( var d = this.lastFirstDrawable; d !== null && d.previousDrawable !== this.lastLastDrawable; d = d.nextDrawable ) {
         d.removePendingBackbone( this );
@@ -339,7 +339,7 @@ define( function( require ) {
       
       this.lastZIndex = zIndex;
       
-      sceneryLayerLog && sceneryLayerLog.BackboneDrawable && sceneryLayerLog.pop();
+      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.pop();
     },
     
     audit: function( allowPendingBlock, allowPendingList, allowDirty ) {
@@ -371,10 +371,10 @@ define( function( require ) {
     constructorDuplicateFactory: function( pool ) {
       return function( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
         if ( pool.length ) {
-          sceneryLayerLog && sceneryLayerLog.BackboneDrawable && sceneryLayerLog.BackboneDrawable( 'new from pool' );
+          sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'new from pool' );
           return pool.pop().initialize( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
         } else {
-          sceneryLayerLog && sceneryLayerLog.BackboneDrawable && sceneryLayerLog.BackboneDrawable( 'new from constructor' );
+          sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'new from constructor' );
           return new BackboneDrawable( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
         }
       };

@@ -51,7 +51,7 @@ define( function( require ) {
     },
     
     markDirtyFit: function() {
-      sceneryLayerLog && sceneryLayerLog.dirty && sceneryLayerLog.dirty( 'markDirtyFit on FittedBlock#' + this.id );
+      sceneryLog && sceneryLog.dirty && sceneryLog.dirty( 'markDirtyFit on FittedBlock#' + this.id );
       this.dirtyFit = true;
       this.markDirty();
     },
@@ -66,7 +66,7 @@ define( function( require ) {
         return;
       }
       
-      sceneryLayerLog && sceneryLayerLog.FittedBlock && sceneryLayerLog.FittedBlock( 'updateFit #' + this.id );
+      sceneryLog && sceneryLog.FittedBlock && sceneryLog.FittedBlock( 'updateFit #' + this.id );
       
       this.dirtyFit = false;
       
@@ -112,7 +112,7 @@ define( function( require ) {
     },
     
     dispose: function() {
-      sceneryLayerLog && sceneryLayerLog.FittedBlock && sceneryLayerLog.FittedBlock( 'dispose #' + this.id );
+      sceneryLog && sceneryLog.FittedBlock && sceneryLog.FittedBlock( 'dispose #' + this.id );
       
       if ( this.fit === FittedBlock.FULL_DISPLAY ) {
         this.display.offStatic( 'displaySize', this.dirtyFitListener );
@@ -126,7 +126,7 @@ define( function( require ) {
     },
     
     notifyInterval: function( firstDrawable, lastDrawable ) {
-      sceneryLayerLog && sceneryLayerLog.FittedBlock && sceneryLayerLog.FittedBlock( '#' + this.id + '.notifyInterval ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() );
+      sceneryLog && sceneryLog.FittedBlock && sceneryLog.FittedBlock( '#' + this.id + '.notifyInterval ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() );
       
       Block.prototype.notifyInterval.call( this, firstDrawable, lastDrawable );
       
@@ -154,7 +154,7 @@ define( function( require ) {
         }
         
         this.commonFitInstance = firstInstance;
-        sceneryLayerLog && sceneryLayerLog.FittedBlock && sceneryLayerLog.FittedBlock( '   common fit instance: ' + this.commonFitInstance.toString() );
+        sceneryLog && sceneryLog.FittedBlock && sceneryLog.FittedBlock( '   common fit instance: ' + this.commonFitInstance.toString() );
         
         assert && assert( this.commonFitInstance.trail.length >= this.transformRootInstance.trail.length );
         

@@ -64,7 +64,7 @@ define( function( require ) {
       
       // TODO: dirty list of nodes (each should go dirty only once, easier than scanning all?)
       
-      sceneryLayerLog && sceneryLayerLog.SVGBlock && sceneryLayerLog.SVGBlock( 'initialized #' + this.id );
+      sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'initialized #' + this.id );
       
       return this;
     },
@@ -75,13 +75,13 @@ define( function( require ) {
     },
     
     markDirtyDrawable: function( drawable ) {
-      sceneryLayerLog && sceneryLayerLog.dirty && sceneryLayerLog.dirty( 'markDirtyDrawable on SVGBlock#' + this.id + ' with ' + drawable.toString() );
+      sceneryLog && sceneryLog.dirty && sceneryLog.dirty( 'markDirtyDrawable on SVGBlock#' + this.id + ' with ' + drawable.toString() );
       this.dirtyDrawables.push( drawable );
       this.markDirty();
     },
     
     setSizeFullDisplay: function() {
-      sceneryLayerLog && sceneryLayerLog.SVGBlock && sceneryLayerLog.SVGBlock( 'setSizeFullDisplay #' + this.id );
+      sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'setSizeFullDisplay #' + this.id );
       
       var size = this.display.getSize();
       this.svg.setAttribute( 'width', size.width );
@@ -89,7 +89,7 @@ define( function( require ) {
     },
     
     setSizeFitBounds: function() {
-      sceneryLayerLog && sceneryLayerLog.SVGBlock && sceneryLayerLog.SVGBlock( 'setSizeFitBounds #' + this.id + ' with ' + this.fitBounds.toString() );
+      sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'setSizeFitBounds #' + this.id + ' with ' + this.fitBounds.toString() );
       
       var x = this.fitBounds.minX;
       var y = this.fitBounds.minY;
@@ -101,7 +101,7 @@ define( function( require ) {
     },
     
     update: function() {
-      sceneryLayerLog && sceneryLayerLog.SVGBlock && sceneryLayerLog.SVGBlock( 'update #' + this.id );
+      sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'update #' + this.id );
       
       if ( this.dirty && !this.disposed ) {
         this.dirty = false;
@@ -120,7 +120,7 @@ define( function( require ) {
     },
     
     dispose: function() {
-      sceneryLayerLog && sceneryLayerLog.SVGBlock && sceneryLayerLog.SVGBlock( 'dispose #' + this.id );
+      sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'dispose #' + this.id );
       
       // make it take up zero area, so that we don't use up excess memory
       this.svg.setAttribute( 'width', 0 );
@@ -139,7 +139,7 @@ define( function( require ) {
     },
     
     addDrawable: function( drawable ) {
-      sceneryLayerLog && sceneryLayerLog.SVGBlock && sceneryLayerLog.SVGBlock( '#' + this.id + '.addDrawable ' + drawable.toString() );
+      sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( '#' + this.id + '.addDrawable ' + drawable.toString() );
       
       FittedBlock.prototype.addDrawable.call( this, drawable );
       
@@ -148,7 +148,7 @@ define( function( require ) {
     },
     
     removeDrawable: function( drawable ) {
-      sceneryLayerLog && sceneryLayerLog.SVGBlock && sceneryLayerLog.SVGBlock( '#' + this.id + '.removeDrawable ' + drawable.toString() );
+      sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( '#' + this.id + '.removeDrawable ' + drawable.toString() );
       
       SVGGroup.removeDrawable( this, drawable );
       
@@ -159,7 +159,7 @@ define( function( require ) {
     },
     
     notifyInterval: function( firstDrawable, lastDrawable ) {
-      sceneryLayerLog && sceneryLayerLog.SVGBlock && sceneryLayerLog.SVGBlock( '#' + this.id + '.notifyInterval ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() );
+      sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( '#' + this.id + '.notifyInterval ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() );
       
       FittedBlock.prototype.notifyInterval.call( this, firstDrawable, lastDrawable );
     },
@@ -174,10 +174,10 @@ define( function( require ) {
     constructorDuplicateFactory: function( pool ) {
       return function( display, renderer, transformRootInstance, filterRootInstance ) {
         if ( pool.length ) {
-          sceneryLayerLog && sceneryLayerLog.SVGBlock && sceneryLayerLog.SVGBlock( 'new from pool' );
+          sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'new from pool' );
           return pool.pop().initialize( display, renderer, transformRootInstance, filterRootInstance );
         } else {
-          sceneryLayerLog && sceneryLayerLog.SVGBlock && sceneryLayerLog.SVGBlock( 'new from constructor' );
+          sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'new from constructor' );
           return new SVGBlock( display, renderer, transformRootInstance, filterRootInstance );
         }
       };

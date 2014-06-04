@@ -181,7 +181,7 @@ define( function( require ) {
       // Whether we have been instantiated. false if we are in a pool waiting to be instantiated.
       this.active = true;
       
-      sceneryLayerLog && sceneryLayerLog.Instance && sceneryLayerLog.Instance( 'initialized ' + this.toString() );
+      sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'initialized ' + this.toString() );
       
       return this;
     },
@@ -251,9 +251,9 @@ define( function( require ) {
     
     // @public
     baseSyncTree: function() {
-      sceneryLayerLog && sceneryLayerLog.Instance && sceneryLayerLog.Instance( '-------- START baseSyncTree ' + this.toString() + ' --------' );
+      sceneryLog && sceneryLog.Instance && sceneryLog.Instance( '-------- START baseSyncTree ' + this.toString() + ' --------' );
       this.syncTree( scenery.RenderState.RegularState.createRootState( this.node ) );
-      sceneryLayerLog && sceneryLayerLog.Instance && sceneryLayerLog.Instance( '-------- END baseSyncTree ' + this.toString() + ' --------' );
+      sceneryLog && sceneryLog.Instance && sceneryLog.Instance( '-------- END baseSyncTree ' + this.toString() + ' --------' );
       this.cleanStitchChangeInterval();
     },
     
@@ -276,8 +276,8 @@ define( function( require ) {
      *          drawableBeforeFirstChange and drawableAfterLastChange
      */
     syncTree: function( state ) {
-      sceneryLayerLog && sceneryLayerLog.Instance && sceneryLayerLog.Instance( 'syncTree ' + this.toString() + ' ' + state.toString() + ( this.isStateless() ? ' (stateless)' : '' ) );
-      sceneryLayerLog && sceneryLayerLog.Instance && sceneryLayerLog.push();
+      sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'syncTree ' + this.toString() + ' ' + state.toString() + ( this.isStateless() ? ' (stateless)' : '' ) );
+      sceneryLog && sceneryLog.Instance && sceneryLog.push();
       
       assert && assert( state && state.isSharedCanvasCachePlaceholder !== undefined, 'RenderState duck-typing instanceof' );
       assert && assert( !this.parent || !this.parent.isStateless(), 'We should not have a stateless parent instance' ); // may access isTransformed up to root to determine relative trails
@@ -546,7 +546,7 @@ define( function( require ) {
         oldState.freeToPool();
       }
       
-      sceneryLayerLog && sceneryLayerLog.Instance && sceneryLayerLog.pop();
+      sceneryLog && sceneryLog.Instance && sceneryLog.pop();
       
       return hasStitchChange;
     },
@@ -1027,9 +1027,9 @@ define( function( require ) {
     
     // called during the pre-repaint phase to (a) fire off all relative transform listeners that should be fired, and (b) precompute transforms were desired
     updateTransformListenersAndCompute: function( ancestorWasDirty, ancestorIsDirty, frameId, passTransform ) {
-      sceneryLayerLog && sceneryLayerLog.transformSystem && sceneryLayerLog.transformSystem(
+      sceneryLog && sceneryLog.transformSystem && sceneryLog.transformSystem(
         'update/compute: ' + this.toString() + ' ' + ancestorWasDirty + ' => ' + ancestorIsDirty + ( passTransform ? ' passTransform' : '' ) );
-      sceneryLayerLog && sceneryLayerLog.transformSystem && sceneryLayerLog.push();
+      sceneryLog && sceneryLog.transformSystem && sceneryLog.push();
       
       var len, i;
       
@@ -1055,7 +1055,7 @@ define( function( require ) {
         // check if traversal isn't needed (no instances marked as having listeners or needing computation)
         // either the subtree is clean (no traversal needed for compute/listeners), or we have no compute/listener needs
         if ( !wasSubtreeDirty || ( !hasComputeNeed && !hasListenerNeed && !hasSelfComputeNeed && !hasSelfListenerNeed ) ) {
-          sceneryLayerLog && sceneryLayerLog.transformSystem && sceneryLayerLog.pop();
+          sceneryLog && sceneryLog.transformSystem && sceneryLog.pop();
           return;
         }
         
@@ -1086,7 +1086,7 @@ define( function( require ) {
         }
       }
       
-      sceneryLayerLog && sceneryLayerLog.transformSystem && sceneryLayerLog.pop();
+      sceneryLog && sceneryLog.transformSystem && sceneryLog.pop();
     },
     
     notifyRelativeTransformListeners: function() {
@@ -1145,7 +1145,7 @@ define( function( require ) {
     
     // clean up listeners and garbage, so that we can be recycled (or pooled)
     dispose: function() {
-      sceneryLayerLog && sceneryLayerLog.Instance && sceneryLayerLog.Instance( 'dispose ' + this.toString() );
+      sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'dispose ' + this.toString() );
       
       assert && assert( this.active, 'Seems like we tried to dispose this Instance twice, it is not active' );
       
@@ -1281,10 +1281,10 @@ define( function( require ) {
     constructorDuplicateFactory: function( pool ) {
       return function( display, trail ) {
         if ( pool.length ) {
-          sceneryLayerLog && sceneryLayerLog.Instance && sceneryLayerLog.Instance( 'new from pool' );
+          sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'new from pool' );
           return pool.pop().initialize( display, trail );
         } else {
-          sceneryLayerLog && sceneryLayerLog.Instance && sceneryLayerLog.Instance( 'new from constructor' );
+          sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'new from constructor' );
           return new Instance( display, trail );
         }
       };

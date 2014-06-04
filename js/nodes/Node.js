@@ -834,7 +834,7 @@ define( function( require ) {
       
       // prune if possible (usually invisible, pickable:false, no input listeners that would be triggered by this node or anything under it, etc.)
       if ( this.isSubtreePickablePruned( hasListenerEquivalentSelfOrInAncestor ) ) {
-        sceneryLayerLog && sceneryLayerLog.hitTest && sceneryLayerLog.hitTest( this.constructor.name + '#' + this.id + ' isSubtreePickablePruned(' + hasListenerEquivalentSelfOrInAncestor + ')' );
+        sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( this.constructor.name + '#' + this.id + ' isSubtreePickablePruned(' + hasListenerEquivalentSelfOrInAncestor + ')' );
         return null;
       }
       
@@ -858,7 +858,7 @@ define( function( require ) {
       
       // bail quickly if this doesn't hit our computed bounds
       if ( !pruningBounds.containsPoint( point ) ) {
-        sceneryLayerLog && sceneryLayerLog.hitTest && sceneryLayerLog.hitTest( this.constructor.name + '#' + this.id + ' pruned: ' + ( useMouseAreas ? 'mouse' : ( useTouchAreas ? 'touch' : 'regular' ) ) );
+        sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( this.constructor.name + '#' + this.id + ' pruned: ' + ( useMouseAreas ? 'mouse' : ( useTouchAreas ? 'touch' : 'regular' ) ) );
         return null; // not in our bounds, so this point can't possibly be contained
       }
       
@@ -871,20 +871,20 @@ define( function( require ) {
       
       // if our point is outside of the local-coordinate clipping area, we shouldn't return a hit
       if ( this.hasClipArea() && !this._clipArea.containsPoint( localPoint ) ) {
-        sceneryLayerLog && sceneryLayerLog.hitTest && sceneryLayerLog.hitTest( this.constructor.name + '#' + this.id + ' out of clip area' );
+        sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( this.constructor.name + '#' + this.id + ' out of clip area' );
         return null;
       }
       
-      sceneryLayerLog && sceneryLayerLog.hitTest && sceneryLayerLog.hitTest( this.constructor.name + '#' + this.id );
+      sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( this.constructor.name + '#' + this.id );
       
       // check children first, since they are rendered later. don't bother checking childBounds, we usually are using mouse/touch.
       // manual iteration here so we can return directly, and so we can iterate backwards (last node is in front)
       for ( var i = this._children.length - 1; i >= 0; i-- ) {
         var child = this._children[i];
         
-        sceneryLayerLog && sceneryLayerLog.hitTest && sceneryLayerLog.push();
+        sceneryLog && sceneryLog.hitTest && sceneryLog.push();
         var childHit = child.trailUnderPoint( localPoint, options, true, hasListenerEquivalentSelfOrInAncestor );
-        sceneryLayerLog && sceneryLayerLog.hitTest && sceneryLayerLog.pop();
+        sceneryLog && sceneryLog.hitTest && sceneryLog.pop();
         
         // the child will have the point in its parent's coordinate frame (i.e. this node's frame)
         if ( childHit ) {
@@ -899,14 +899,14 @@ define( function( require ) {
         // NOTE: both Bounds2 and Shape have containsPoint! We use both here!
         result = this._mouseArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
         localPoint.freeToPool();
-        sceneryLayerLog && sceneryLayerLog.hitTest && sceneryLayerLog.hitTest( this.constructor.name + '#' + this.id + ' mouse area hit' );
+        sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( this.constructor.name + '#' + this.id + ' mouse area hit' );
         return result;
       }
       if ( useTouchAreas && this._touchArea ) {
         // NOTE: both Bounds2 and Shape have containsPoint! We use both here!
         result = this._touchArea.containsPoint( localPoint ) ? new scenery.Trail( this ) : null;
         localPoint.freeToPool();
-        sceneryLayerLog && sceneryLayerLog.hitTest && sceneryLayerLog.hitTest( this.constructor.name + '#' + this.id + ' touch area hit' );
+        sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( this.constructor.name + '#' + this.id + ' touch area hit' );
         return result;
       }
       
@@ -914,7 +914,7 @@ define( function( require ) {
       if ( this._selfBounds.containsPoint( localPoint ) ) {
         if ( this.containsPointSelf( localPoint ) ) {
           localPoint.freeToPool();
-          sceneryLayerLog && sceneryLayerLog.hitTest && sceneryLayerLog.hitTest( this.constructor.name + '#' + this.id + ' self hit' );
+          sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( this.constructor.name + '#' + this.id + ' self hit' );
           return new scenery.Trail( this );
         }
       }
