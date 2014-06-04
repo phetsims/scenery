@@ -308,7 +308,14 @@ define( function( require ) {
       if ( state.isSharedCanvasCachePlaceholder ) {
         this.sharedSyncTree( state );
       } else {
-        this.normalSyncTree( state, oldState );
+        // mark fully-removed instances for disposal, and initialize child instances if we were stateless
+        this.prepareChildInstances( state, oldState );
+        
+        // properly handle our self and children
+        this.localSyncTree( state, oldState );
+        
+        // apply any group changes necessary
+        this.groupSyncTree( state, oldState );
       }
       
       if ( oldState && oldState !== this.state ) {
@@ -318,11 +325,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.Instance && sceneryLog.pop();
     },
     
-    // Synchronization for instances that have children (everything except for a shared cache instance)
-    normalSyncTree: function( state, oldState ) {
-      // mark fully-removed instances for disposal, and initialize child instances if we were stateless
-      this.prepareChildInstances( state, oldState );
-      
+    localSyncTree: function( state, oldState ) {
       // local variables, since we can't overwrite our instance properties yet
       var firstDrawable = null;
       var lastDrawable = null;
@@ -392,6 +395,12 @@ define( function( require ) {
       // finish setting up references to the linked list (now firstDrawable and lastDrawable should be set properly)
       lastDrawable = currentDrawable; // either null, or the drawable itself
       
+      // NOTE: these may get overwritten with the group drawable (in that case, groupSyncTree will read from these)
+      this.firstDrawable = firstDrawable;
+      this.lastDrawable = lastDrawable;
+    },
+    
+    groupSyncTree: function( state, oldState ) {
       var groupRenderer = state.groupRenderer;
       assert && assert( ( state.isBackbone ? 1 : 0 ) + ( state.isInstanceCanvasCache ? 1 : 0 ) + ( state.isSharedCanvasCacheSelf ? 1 : 0 ) === ( groupRenderer ? 1 : 0 ),
                         'We should have precisely one of these flags set for us to have a groupRenderer' );
@@ -414,8 +423,8 @@ define( function( require ) {
       
       if ( groupRenderer ) {
         // ensure our linked list is fully disconnected from others
-        firstDrawable && Drawable.disconnectBefore( firstDrawable, this.display );
-        lastDrawable && Drawable.disconnectAfter( lastDrawable, this.display );
+        this.firstDrawable && Drawable.disconnectBefore( this.firstDrawable, this.display );
+        this.lastDrawable && Drawable.disconnectAfter( this.lastDrawable, this.display );
         
         if ( state.isBackbone ) {
           if ( groupChanged ) {
@@ -426,12 +435,12 @@ define( function( require ) {
             }
           }
           
-          this.groupDrawable.stitch( firstDrawable, lastDrawable );
+          this.groupDrawable.stitch( this.firstDrawable, this.lastDrawable );
         } else if ( state.isInstanceCanvasCache ) {
           if ( groupChanged ) {
             this.groupDrawable = scenery.InlineCanvasCacheDrawable.createFromPool( groupRenderer, this );
           }
-          this.groupDrawable.stitch( firstDrawable, lastDrawable );
+          this.groupDrawable.stitch( this.firstDrawable, this.lastDrawable );
         } else if ( state.isSharedCanvasCacheSelf ) {
           if ( groupChanged ) {
             this.groupDrawable = scenery.CanvasBlock.createFromPool( groupRenderer, this );
@@ -440,10 +449,6 @@ define( function( require ) {
         }
         
         this.firstDrawable = this.lastDrawable = this.groupDrawable;
-      } else {
-        // now set the first/last drawables, since we are finished with referencing the old ones
-        this.firstDrawable = firstDrawable;
-        this.lastDrawable = lastDrawable;
       }
     },
     
