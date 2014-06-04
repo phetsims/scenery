@@ -162,9 +162,19 @@ define( function( require ) {
       // We use an integer just for sanity checks (if it ever reaches -2 or 1, we've reached an invalid state)
       this.addRemoveCounter = 0;
       
+      // If equal to the current frame ID (it is initialized as such), then it is treated during the change interval
+      // waterfall as "completely changed", and an interval for the entire instance is used.
+      this.stitchChangeFrame = display._frameId;
+      
+      // If equal to the current frame ID, an instance was removed from before or after this instance, so we'll want to
+      // add in a proper change interval
+      this.stitchChangeBefore = 0;
+      this.stitchChangeAfter = 0;
+      
       // Node listeners for tracking children. Listeners should be added only when we become stateful
       this.childInsertedListener = this.childInsertedListener || this.onChildInserted.bind( this );
       this.childRemovedListener = this.childRemovedListener || this.onChildRemoved.bind( this );
+      this.visibilityListener = this.visibilityListener || this.onVisibilityChange.bind( this );
       
       // We need to add this reference on stateless instances, so that we can find out if it was removed before our
       // syncTree was called.
@@ -642,6 +652,9 @@ define( function( require ) {
         instance.nextSibling = nextInstance;
       }
       
+      // mark it as changed during this frame, so that we can properly set the change interval
+      instance.stitchChangeFrame = this.display._frameId;
+      
       this.children.splice( index, 0, instance );
       instance.parent = this;
       
@@ -690,6 +703,19 @@ define( function( require ) {
       }
       if ( nextInstance ) {
         nextInstance.previousSibling = previousInstance;
+      }
+      
+      var frameId = this.display._frameId;
+      
+      // mark it as changed during this frame, so that we can properly set the change interval
+      instance.stitchChangeFrame = frameId;
+      
+      // mark neighbors so that we can add a change interval for our removal area
+      if ( index - 1 >= 0 ) {
+        this.children[index-1].stitchChangeAfter = frameId;
+      }
+      if ( index + 1 < this.children.length ) {
+        this.children[index+1].stitchChangeBefore = frameId; 
       }
       
       this.children.splice( index, 1 ); // TODO: replace with a 'remove' function call
@@ -766,6 +792,16 @@ define( function( require ) {
       this.instanceRemovalCheckList.push( instance );
       
       this.removeInstanceWithIndex( instance, index );
+    },
+    
+    // event callback for Node's 'visibility' event, used to notify about stitch changes
+    onVisibilityChange: function() {
+      assert && assert( !this.isStateless(), 'If we are stateless, we should not receive these notifications' );
+      
+      // for now, just mark which frame we were changed for our change interval
+      this.stitchChangeFrame = this.display._frameId;
+      
+      //OHTWO TODO: mark as needing to not be pruned for syncTree
     },
     
     /*---------------------------------------------------------------------------*
@@ -1131,6 +1167,7 @@ define( function( require ) {
       if ( !this.state.isSharedCanvasCachePlaceholder ) {
         this.node.onStatic( 'childInserted', this.childInsertedListener );
         this.node.onStatic( 'childRemoved', this.childRemovedListener );
+        this.node.onStatic( 'visibility', this.visibilityListener );
       }
     },
     
@@ -1140,6 +1177,7 @@ define( function( require ) {
       if ( !this.state.isSharedCanvasCachePlaceholder ) {
         this.node.offStatic( 'childInserted', this.childInsertedListener );
         this.node.offStatic( 'childRemoved', this.childRemovedListener );
+        this.node.offStatic( 'visibility', this.visibilityListener );
       }
     },
     
