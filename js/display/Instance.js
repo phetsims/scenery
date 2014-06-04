@@ -222,10 +222,10 @@ define( function( require ) {
       //OHTWO TODO: should we rely on listeners removing themselves?
       this.relativeTransformListeners = cleanArray( this.relativeTransformListeners );
       
-      this.cleanStitchChangeInterval();
+      this.cleanSyncTreeResults();
     },
     
-    cleanStitchChangeInterval: function() {
+    cleanSyncTreeResults: function() {
       // Tracking bounding indices / drawables for what has changed, so we don't have to over-stitch things.
       
       // if (not iff) child's index <= beforeStableIndex, it hasn't been added/removed. relevant to current children.
@@ -248,7 +248,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.Instance && sceneryLog.Instance( '-------- START baseSyncTree ' + this.toString() + ' --------' );
       this.syncTree( scenery.RenderState.RegularState.createRootState( this.node ) );
       sceneryLog && sceneryLog.Instance && sceneryLog.Instance( '-------- END baseSyncTree ' + this.toString() + ' --------' );
-      this.cleanStitchChangeInterval();
+      this.cleanSyncTreeResults();
     },
     
     // updates the internal {RenderState}, and fully synchronizes the instance subtree
@@ -441,7 +441,7 @@ define( function( require ) {
           }
           // clean up the metadata on our child (can't be done in the child call, since we use these values like a composite return value)
           //OHTWO TODO: only do this on instances that were actually traversed
-          childInstance.cleanStitchChangeInterval();
+          childInstance.cleanSyncTreeResults();
           
           //OHTWO TODO: only strip out invisible Canvas drawables, while leaving SVG (since we can more efficiently hide SVG trees, memory-wise)
           if ( childInstance.node.isVisible() ) {
