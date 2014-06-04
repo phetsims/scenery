@@ -506,8 +506,8 @@ define( function( require ) {
         
         if ( groupRenderer ) {
           // ensure our linked list is fully disconnected from others
-          Drawable.disconnectBefore( firstDrawable, this.display );
-          Drawable.disconnectAfter( lastDrawable, this.display );
+          firstDrawable && Drawable.disconnectBefore( firstDrawable, this.display );
+          lastDrawable && Drawable.disconnectAfter( lastDrawable, this.display );
           
           if ( state.isBackbone ) {
             if ( groupChanged ) {
