@@ -86,15 +86,32 @@ define( function( require ) {
     this._sharedCanvasInstances = {}; // map from Node ID to Instance, for fast lookup
     this._baseInstance = null; // will be filled with the root Instance
     
-    // variable state
-    this._frameId = 0; // incremented for every rendered frame
+    // We have a monotonically-increasing frame ID, generally for use with a pattern where we can mark objects with this
+    // to note that they are either up-to-date or need refreshing due to this particular frame (without having to clear
+    // that information after use). This is incremented every frame
+    this._frameId = 0; // {Number}
+    
     this._dirtyTransformRoots = [];
     this._dirtyTransformRootsWithoutPass = [];
     
-    this._drawablesToChangeBlock = [];
     this._instanceRootsToDispose = [];
     this._drawablesToDispose = [];
-    this._drawablesToUpdateLinks = [];
+    
+    // Block changes are handled by changing the "pending" block/backbone on drawables. We want to change them all after
+    // the main stitch process has completed, so we can guarantee that a single drawable is removed from its previous
+    // block before being added to a new one. This is taken care of in an updateDisplay pass after syncTree / stitching.
+    this._drawablesToChangeBlock = []; // {[Drawable]}
+    
+    // Drawables have two implicit linked-lists, "current" and "old". syncTree modifies the "current" linked-list
+    // information so it is up-to-date, but needs to use the "old" information also. We move updating the
+    // "current" => "old" linked-list information until after syncTree and stitching is complete, and is taken care of
+    // in an updateDisplay pass.
+    this._drawablesToUpdateLinks = []; // {[Drawable]}
+    
+    // We store information on some {Instance}s that records change interval information, that may contain references.
+    // We don't want to leave those references dangling after we don't need them, so they are recorded and cleaned in
+    // one of updateDisplay's phases.
+    this._instancesWithChangeIntervals = []; // {[Instance]}
     
     this._lastCursor = null;
     
@@ -151,6 +168,11 @@ define( function( require ) {
       // update our drawable's linked lists where necessary
       while ( this._drawablesToUpdateLinks.length ) {
         this._drawablesToUpdateLinks.pop().updateLinks();
+      }
+      
+      // clean change-interval information from instances, so we don't leak memory/references
+      while ( this._instancesWithChangeIntervals.length ) {
+        this._instancesWithChangeIntervals.pop().cleanChangeInterval();
       }
       
       this._rootBackbone = this._rootBackbone || this._baseInstance.groupDrawable;
@@ -355,6 +377,11 @@ define( function( require ) {
     
     markDrawableForLinksUpdate: function( drawable ) {
       this._drawablesToUpdateLinks.push( drawable );
+    },
+    
+    // add an instance for the "remove change interval info" phase (we don't want to leak memory/references)
+    markInstanceWithChangeInterval: function( instance ) {
+      this._instancesWithChangeIntervals.push( instance );
     },
     
     /*---------------------------------------------------------------------------*

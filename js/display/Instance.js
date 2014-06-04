@@ -224,6 +224,8 @@ define( function( require ) {
       this.relativeTransformListeners = cleanArray( this.relativeTransformListeners );
       
       this.cleanSyncTreeResults();
+      
+      this.cleanChangeInterval();
     },
     
     cleanSyncTreeResults: function() {
@@ -234,6 +236,16 @@ define( function( require ) {
       
       // if (not iff) child's index >= afterStableIndex, it hasn't been added/removed. relevant to current children.
       this.afterStableIndex = -1;
+      
+      this.firstChangeInterval = null;
+      this.lastChangeInterval = null;
+    },
+    
+    cleanChangeInterval: function() {
+      // change interval information
+      this.nextChangeInterval = null;   // {Instance|null}, linked list 
+      this.changeIntervalBefore = null; // {Drawable|null}, the drawable before our change interval that is not modified
+      this.changeIntervalAfter = null;  // {Drawable|null}, the drawable after our change interval that is not modified
     },
     
     // @public
