@@ -234,14 +234,6 @@ define( function( require ) {
       
       // if (not iff) child's index >= afterStableIndex, it hasn't been added/removed. relevant to current children.
       this.afterStableIndex = -1;
-      
-      // if there were changes, it references the drawable before our first change (or null if there is no drawable
-      // we can reference)
-      this.drawableBeforeFirstChange = null;
-      
-      // if there were changes, it references the drawable after our last change (or null if there is no drawable
-      // we can reference)
-      this.drawableAfterLastChange = null;
     },
     
     // @public
@@ -267,8 +259,7 @@ define( function( require ) {
      *        Changes in renderer summary (subtree combined) can cause changes in the render state
      *    OK for traversal to return "no change", doesn't specify any drawables changes
      *
-     * Returns: Whether there was a stitching-relevant drawable change. The relevant (old) drawables will be in
-     *          drawableBeforeFirstChange and drawableAfterLastChange
+     * Returns: Whether there was a stitching-relevant drawable change.
      */
     syncTree: function( state ) {
       sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'syncTree ' + this.toString() + ' ' + state.toString() + ( this.isStateless() ? ' (stateless)' : '' ) );
@@ -339,10 +330,8 @@ define( function( require ) {
           
           // maintain our stitch change interval
           this.beforeStableIndex = -1;
-          this.drawableBeforeFirstChange = null; // no previous drawables in our sub-tree
           if ( this.afterStableIndex < 0 ) {
             this.afterStableIndex = 0;
-            this.drawableAfterLastChange = this.findNextDrawable( -1 ); // search for next drawable (if any children have stitch changes, those will be used instead)
           }
           
           if ( this.selfDrawable ) {
@@ -399,24 +388,12 @@ define( function( require ) {
           // if the instance is before our stitch change interval created based on child node add/remove/move, record the old drawable
           if ( i <= this.beforeStableIndex ) {
             this.beforeStableIndex = i - 1;
-            
-            // if no drawable, grab one from the previous instance if it exists. done since the child instance may have no information outside of its subtree when recording this
-            this.drawableBeforeFirstChange = childInstance.drawableBeforeFirstChange ?
-                                             childInstance.drawableBeforeFirstChange :
-                                             this.findPreviousDrawable( i ); // if we get here, there are no other changes up to here (so it's OK to check lastDrawable)
           }
           // if the instance is after our stitch change interval created based on child node add/remove/move, record the old drawable
           if ( i >= this.afterStableIndex ) {
             // NOTE: this may happen multiple times if multiple child instances after our interval are changed. consider iteration in the reverse order?
             // It's done here since we clean the stitch-based changes below during our first (this) iteration, and probably isn't a worry.
             this.afterStableIndex = i + 1;
-            
-            // If no drawable, grab one from the next instance if it exists. done since the child instance may have no information outside of its subtree when recording this
-            // NOTE: could cause O(n^2) behavior if we have N children who each had stitch changes (but weren't added/removed/moved themselves).
-            // We allow that for now, so that we can clean stitch changes as we go (makes it so we don't need "did a child get traversed" tracking)
-            this.drawableAfterLastChange = childInstance.drawableAfterLastChange ?
-                                           childInstance.drawableAfterLastChange :
-                                           this.findNextDrawable( i ); // next instances still untouched, and would be overwritten
           }
           
         }
@@ -499,12 +476,12 @@ define( function( require ) {
             }
           }
           
-          this.groupDrawable.stitch( firstDrawable, lastDrawable, this.drawableBeforeFirstChange, this.drawableAfterLastChange );
+          this.groupDrawable.stitch( firstDrawable, lastDrawable );
         } else if ( state.isInstanceCanvasCache ) {
           if ( groupChanged ) {
             this.groupDrawable = scenery.InlineCanvasCacheDrawable.createFromPool( groupRenderer, this );
           }
-          this.groupDrawable.stitch( firstDrawable, lastDrawable, this.drawableBeforeFirstChange, this.drawableAfterLastChange );
+          this.groupDrawable.stitch( firstDrawable, lastDrawable );
         } else if ( state.isSharedCanvasCacheSelf ) {
           if ( groupChanged ) {
             this.groupDrawable = scenery.CanvasBlock.createFromPool( groupRenderer, this );
@@ -586,10 +563,6 @@ define( function( require ) {
       // full interval
       this.beforeStableIndex = -1;
       this.afterStableIndex = this.children.length;
-      
-      // marking them as null requires the parent to figure out the next-closest drawable (since it's not easy for us to tell here)
-      this.drawableBeforeFirstChange = null;
-      this.drawableAfterLastChange = null;
     },
     
     // @private, finds the closest drawable (not including the child instance at childIndex) using lastDrawable, or null
@@ -649,17 +622,9 @@ define( function( require ) {
       // maintain our stitch-change interval
       if ( index <= this.beforeStableIndex ) {
         this.beforeStableIndex = index - 1;
-        
-        // NOTE: there may be a "drawable before first change" outside our subtree if we don't have a previousInstance, but we don't set it here.
-        // It will be filled in by our parent instance if necessary, with their knowledge of our sibling, and it will have access to more information.
-        this.drawableBeforeFirstChange = previousInstance ? previousInstance.lastDrawable : null;
       }
       if ( index > this.afterStableIndex ) {
         this.afterStableIndex = index + 1;
-        
-        // NOTE: there may be a "drawable after last change" outside our subtree if we don't have a nextInstance, but we don't set it here.
-        // It will be filled in by our parent instance if necessary, with their knowledge of our sibling, and it will have access to more information.
-        this.drawableAfterLastChange = nextInstance ? nextInstance.firstDrawable : null;
       } else {
         this.afterStableIndex++;
       }
@@ -709,17 +674,9 @@ define( function( require ) {
       // maintain our stitch-change interval
       if ( index <= this.beforeStableIndex ) {
         this.beforeStableIndex = index - 1;
-        
-        // NOTE: there may be a "drawable before first change" outside our subtree if we don't have a previousInstance, but we don't set it here.
-        // It will be filled in by our parent instance if necessary, with their knowledge of our sibling, and it will have access to more information.
-        this.drawableBeforeFirstChange = previousInstance ? previousInstance.lastDrawable : null;
       }
       if ( index >= this.afterStableIndex ) {
         this.afterStableIndex = index;
-        
-        // NOTE: there may be a "drawable after last change" outside our subtree if we don't have a nextInstance, but we don't set it here.
-        // It will be filled in by our parent instance if necessary, with their knowledge of our sibling, and it will have access to more information.
-        this.drawableAfterLastChange = nextInstance ? nextInstance.firstDrawable : null;
       } else {
         this.afterStableIndex--;
       }
