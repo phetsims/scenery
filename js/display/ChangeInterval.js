@@ -33,6 +33,8 @@ define( function( require ) {
       this.drawableAfter = drawableAfter;   // {Drawable|null}, the drawable after our ChangeInterval that is not
                                             // modified. null indicates that we don't yet have a "after" boundary,
                                             // and should be connected to the closest drawable that is unchanged.
+      this.collapsedEmpty = false;          // If a null-to-X interval gets collapsed all the way, we want to signal
+                                            // that (null-to-null is now the state of it).
       return this;
     },
     
@@ -42,6 +44,45 @@ define( function( require ) {
       this.drawableAfter = null;
       
       this.freeToPool();
+    },
+    
+    // Make our interval as tight as possible (we may have over-estimated it before)
+    constrict: function() {
+      if ( this.isEmpty() ) { return; }
+      
+      // Notes: We don't constrict null boundaries, and we should never constrict a non-null boundary to a null
+      // boundary (this the this.drawableX.Xdrawable truthy check), since going from a null-to-X interval to
+      // null-to-null has a completely different meaning. This should be checked by a client of this API.
+      
+      while ( this.drawableBefore && this.drawableBefore.nextDrawable === this.drawableBefore.oldNextDrawable ) {
+        this.drawableBefore = this.drawableBefore.nextDrawable;
+        
+        // check for a totally-collapsed state
+        if ( !this.drawableBefore ) {
+          assert && assert( !this.drawableAfter );
+          this.collapsedEmpty = true;
+        }
+        
+        // if we are empty, bail out before continuing
+        if ( this.isEmpty() ) { return; }
+      }
+      
+      while ( this.drawableAfter && this.drawableAfter.previousDrawable === this.drawableAfter.oldPreviousDrawable ) {
+        this.drawableAfter = this.drawableAfter.previousDrawable;
+        
+        // check for a totally-collapsed state
+        if ( !this.drawableAfter ) {
+          assert && assert( !this.drawableBefore );
+          this.collapsedEmpty = true;
+        }
+        
+        // if we are empty, bail out before continuing
+        if ( this.isEmpty() ) { return; }
+      }
+    },
+    
+    isEmpty: function() {
+      return this.collapsedEmpty || this.drawableBefore === this.drawableAfter;
     }
   } );
   
