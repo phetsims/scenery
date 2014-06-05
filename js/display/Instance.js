@@ -168,9 +168,12 @@ define( function( require ) {
       this.stitchChangeFrame = display._frameId;
       
       // If equal to the current frame ID, an instance was removed from before or after this instance, so we'll want to
-      // add in a proper change interval
+      // add in a proper change interval (related to siblings)
       this.stitchChangeBefore = 0;
       this.stitchChangeAfter = 0;
+      
+      // If equal to the current frame ID, child instances were added or removed from this instance.
+      this.stitchChangeOnChildren = 0;
       
       // Node listeners for tracking children. Listeners should be added only when we become stateful
       this.childInsertedListener = this.childInsertedListener || this.onChildInserted.bind( this );
@@ -348,13 +351,16 @@ define( function( require ) {
         firstChangeInterval = ChangeInterval.newForDisplay( null, null, this.display );
       }
       var currentChangeInterval = firstChangeInterval;
-      
       var lastUnchangedDrawable = selfChanged ? null : this.selfDrawable;
       
       for ( var i = 0; i < this.children.length; i++ ) {
         var childInstance = this.children[i];
         var childState = state.getStateForDescendant( childInstance.node );
         childInstance = this.updateChildInstanceIfIncompatible( childInstance, childState, i );
+        
+        // grab the first/last drawables before our syncTree
+        // var oldChildFirstDrawable = childInstance.firstDrawable;
+        // var oldChildLastDrawable = childInstance.lastDrawable;
         
         // sync the tree
         childInstance.syncTree( childState );
@@ -376,10 +382,83 @@ define( function( require ) {
           }
         }
         
+        /*---------------------------------------------------------------------------*
+        * Change intervals
+        *----------------------------------------------------------------------------*/
+        
+        // check for forcing full change-interval on child
         if ( childInstance.stitchChangeFrame === frameId ) {
           // e.g. it was added, moved, or had visibility changes. requires full change interval
-          
           childInstance.firstChangeInterval = childInstance.lastChangeInterval = ChangeInterval.newForDisplay( null, null, this.display );
+        }
+        
+        var firstChildChangeInterval = childInstance.firstChangeInterval;
+        var isBeforeOpen = currentChangeInterval && currentChangeInterval.drawableAfter === null;
+        var isAfterOpen = firstChildChangeInterval && firstChildChangeInterval.drawableBefore === null;
+        var needsBridge = childInstance.stitchChangeBefore === frameId && !isBeforeOpen && !isAfterOpen;
+        
+        if ( needsBridge ) {
+          var bridge = ChangeInterval.newForDisplay( lastUnchangedDrawable, null, this.display );
+          if ( currentChangeInterval ) {
+            currentChangeInterval.nextChangeInterval = bridge;
+          }
+          currentChangeInterval = bridge;
+          firstChangeInterval = firstChangeInterval || currentChangeInterval; // store if it is the first
+          isBeforeOpen = true;
+        }
+        
+        if ( isBeforeOpen ) {
+          // we want to try to glue our last ChangeInterval up
+          if ( firstChildChangeInterval ) {
+            if ( firstChildChangeInterval.drawableBefore === null ) {
+              // we want to glue from both sides
+              
+              // basically have our current change interval replace the child's first change interval
+              currentChangeInterval.drawableAfter = firstChildChangeInterval.drawableAfter;
+              currentChangeInterval.nextChangeInterval = firstChildChangeInterval.nextChangeInterval;
+              
+              currentChangeInterval = childInstance.lastChangeInterval === firstChildChangeInterval ?
+                                      currentChangeInterval : // since we are replacing, don't give an origin reference
+                                      childInstance.lastChangeInterval;
+            } else {
+              // only a desire to glue from before
+              currentChangeInterval.drawableAfter = childInstance.firstDrawable; // either null or the correct drawable
+              currentChangeInterval.nextChangeInterval = firstChildChangeInterval;
+              currentChangeInterval = childInstance.lastChangeInterval;
+            }
+          } else {
+            // no changes to the child. grabs the first drawable reference it can
+            currentChangeInterval.drawableAfter = childInstance.firstDrawable; // either null or the correct drawable
+          }
+        } else if ( firstChildChangeInterval ) {
+          firstChangeInterval = firstChangeInterval || firstChildChangeInterval; // store if it is the first
+          if ( firstChildChangeInterval.drawableBefore === null ) {
+            assert && assert( !currentChangeInterval || lastUnchangedDrawable,
+                              'If we have a current change interval, we should be guaranteed a non-null ' +
+                              'lastUnchangedDrawable' );
+            firstChildChangeInterval.drawableBefore = lastUnchangedDrawable; // either null or the correct drawable
+          }
+          if ( currentChangeInterval ) {
+            currentChangeInterval.nextChangeInterval = firstChildChangeInterval;
+          }
+          currentChangeInterval = childInstance.lastChangeInterval;
+        }
+        lastUnchangedDrawable = ( currentChangeInterval && currentChangeInterval.drawableAfter === null ) ?
+                                null :
+                                ( childInstance.lastDrawable ?
+                                  childInstance.lastDrawable :
+                                  lastUnchangedDrawable );
+        
+        // if the last instance, check for post-bridge
+        if ( i === this.children.length - 1 ) {
+          if ( childInstance.stitchChangeAfter === frameId && !( currentChangeInterval && currentChangeInterval.drawableAfter === null ) ) {
+            var endingBridge = ChangeInterval.newForDisplay( lastUnchangedDrawable, null, this.display );
+            if ( currentChangeInterval ) {
+              currentChangeInterval.nextChangeInterval = endingBridge;
+            }
+            currentChangeInterval = endingBridge;
+            firstChangeInterval = firstChangeInterval || currentChangeInterval; // store if it is the first
+          }
         }
         
         // clean up the metadata on our child (can't be done in the child call, since we use these values like a
@@ -387,6 +466,22 @@ define( function( require ) {
         //OHTWO TODO: only do this on instances that were actually traversed
         childInstance.cleanSyncTreeResults();
       }
+      
+      /* jshint -W018 */ // it's really the easiest way to compare if two things (casted to booleans) are the same?
+      assert && assert( !!firstChangeInterval === !!currentChangeInterval,
+                        'Presence of first and current change intervals should be equal' );
+      
+      // Check to see if we are emptied and marked as changed (but without change intervals). This should imply we have
+      // no children (and thus no stitchChangeBefore / stitchChangeAfter to use), so we'll want to create a change
+      // interval to cover our entire range.
+      if ( !firstChangeInterval && this.stitchChangeOnChildren === this.display._frameId ) {
+        assert && assert( this.children.length === 0 );
+        firstChangeInterval = currentChangeInterval = ChangeInterval.newForDisplay( null, null, this.display );
+      }
+      
+      // store our results
+      this.firstChangeInterval = firstChangeInterval;
+      this.lastChangeInterval = currentChangeInterval;
       
       // NOTE: these may get overwritten with the group drawable (in that case, groupSyncTree will read from these)
       this.firstDrawable = firstDrawable;
@@ -607,6 +702,7 @@ define( function( require ) {
       
       // mark it as changed during this frame, so that we can properly set the change interval
       instance.stitchChangeFrame = this.display._frameId;
+      this.stitchChangeOnChildren = this.display._frameId;
       
       this.children.splice( index, 0, instance );
       instance.parent = this;
@@ -655,6 +751,7 @@ define( function( require ) {
       
       // mark it as changed during this frame, so that we can properly set the change interval
       instance.stitchChangeFrame = frameId;
+      this.stitchChangeOnChildren = frameId;
       
       // mark neighbors so that we can add a change interval for our removal area
       if ( index - 1 >= 0 ) {

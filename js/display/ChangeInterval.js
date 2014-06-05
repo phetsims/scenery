@@ -25,7 +25,8 @@ define( function( require ) {
       assert && assert( drawableBefore === null || ( drawableBefore instanceof Drawable ) );
       assert && assert( drawableAfter === null || ( drawableAfter instanceof Drawable ) );
       
-      this.nextChangeInterval = null;       // {ChangeInterval|null}, singly-linked list 
+      // all @public, for modification
+      this.nextChangeInterval = null;       // {ChangeInterval|null}, singly-linked list
       this.drawableBefore = drawableBefore; // {Drawable|null}, the drawable before our ChangeInterval that is not
                                             // modified. null indicates that we don't yet have a "before" boundary,
                                             // and should be connected to the closest drawable that is unchanged.
