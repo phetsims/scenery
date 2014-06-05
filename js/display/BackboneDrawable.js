@@ -265,7 +265,7 @@ define( function( require ) {
       return clip;
     },
     
-    stitch: function( firstDrawable, lastDrawable ) {
+    stitch: function( firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
       sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'stitch ' + this.toString() + ' first:' + ( firstDrawable ? firstDrawable.toString() : 'null' ) + ' last:' + ( lastDrawable ? lastDrawable.toString() : 'null' ) );
       sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.push();
       

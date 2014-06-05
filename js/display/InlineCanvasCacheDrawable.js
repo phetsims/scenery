@@ -28,7 +28,7 @@ define( function( require ) {
   inherit( Drawable, InlineCanvasCacheDrawable, {
     // TODO: support Canvas/SVG/DOM
     
-    stitch: function( firstDrawable, lastDrawable, oldDrawableBeforeChange, oldDrawableAfterChange ) {
+    stitch: function( firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
       //OHTWO TODO: called when we have a change in our drawables
     }
   } );

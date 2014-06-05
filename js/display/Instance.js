@@ -329,7 +329,7 @@ define( function( require ) {
         this.localSyncTree( state, oldState );
         
         // apply any group changes necessary
-        this.groupSyncTree( state, oldState );
+        this.groupSyncTree( state, oldState, oldFirstDrawable, oldLastDrawable );
         
         if ( assertSlow ) {
           // before and after first/last drawables
@@ -579,7 +579,7 @@ define( function( require ) {
       }
     },
     
-    groupSyncTree: function( state, oldState ) {
+    groupSyncTree: function( state, oldState, oldFirstDrawable, oldLastDrawable ) {
       var groupRenderer = state.groupRenderer;
       assert && assert( ( state.isBackbone ? 1 : 0 ) +
                         ( state.isInstanceCanvasCache ? 1 : 0 ) +
@@ -616,12 +616,12 @@ define( function( require ) {
             }
           }
           
-          this.groupDrawable.stitch( this.firstDrawable, this.lastDrawable );
+          this.groupDrawable.stitch( this.firstDrawable, this.lastDrawable, oldFirstDrawable, oldLastDrawable, this.firstChangeInterval, this.lastChangeInterval );
         } else if ( state.isInstanceCanvasCache ) {
           if ( groupChanged ) {
             this.groupDrawable = scenery.InlineCanvasCacheDrawable.createFromPool( groupRenderer, this );
           }
-          this.groupDrawable.stitch( this.firstDrawable, this.lastDrawable );
+          this.groupDrawable.stitch( this.firstDrawable, this.lastDrawable, oldFirstDrawable, oldLastDrawable, this.firstChangeInterval, this.lastChangeInterval );
         } else if ( state.isSharedCanvasCacheSelf ) {
           if ( groupChanged ) {
             this.groupDrawable = scenery.CanvasBlock.createFromPool( groupRenderer, this );
