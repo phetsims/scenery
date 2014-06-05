@@ -616,12 +616,16 @@ define( function( require ) {
             }
           }
           
-          this.groupDrawable.stitch( this.firstDrawable, this.lastDrawable, oldFirstDrawable, oldLastDrawable, this.firstChangeInterval, this.lastChangeInterval );
+          if ( this.firstChangeInterval ) {
+            this.groupDrawable.stitch( this.firstDrawable, this.lastDrawable, oldFirstDrawable, oldLastDrawable, this.firstChangeInterval, this.lastChangeInterval );
+          }
         } else if ( state.isInstanceCanvasCache ) {
           if ( groupChanged ) {
             this.groupDrawable = scenery.InlineCanvasCacheDrawable.createFromPool( groupRenderer, this );
           }
-          this.groupDrawable.stitch( this.firstDrawable, this.lastDrawable, oldFirstDrawable, oldLastDrawable, this.firstChangeInterval, this.lastChangeInterval );
+          if ( this.firstChangeInterval ) {
+            this.groupDrawable.stitch( this.firstDrawable, this.lastDrawable, oldFirstDrawable, oldLastDrawable, this.firstChangeInterval, this.lastChangeInterval );
+          }
         } else if ( state.isSharedCanvasCacheSelf ) {
           if ( groupChanged ) {
             this.groupDrawable = scenery.CanvasBlock.createFromPool( groupRenderer, this );
