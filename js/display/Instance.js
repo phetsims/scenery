@@ -102,6 +102,7 @@ define( function( require ) {
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var scenery = require( 'SCENERY/scenery' );
+  var ChangeInterval = require( 'SCENERY/display/ChangeInterval' );
   var Drawable = require( 'SCENERY/display/Drawable' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   require( 'SCENERY/display/RenderState' );
@@ -230,8 +231,6 @@ define( function( require ) {
       this.relativeTransformListeners = cleanArray( this.relativeTransformListeners );
       
       this.cleanSyncTreeResults();
-      
-      this.cleanChangeInterval();
     },
     
     cleanSyncTreeResults: function() {
@@ -244,22 +243,11 @@ define( function( require ) {
       this.afterStableIndex = -1;
       
       // NOTE: both of these being null indicates "there are no change intervals", otherwise it assumes it points to
-      // a linked-list of change intervals. We use {Instance}s to hold this information, see cleanChangeInterval to see
+      // a linked-list of change intervals. We use {ChangeInterval}s to hold this information, see ChangeInterval to see
       // the individual properties that are considered part of a change interval.
-      this.firstChangeInterval = null; // {Instance}, first change interval (should have nextChangeInterval
+      this.firstChangeInterval = null; // {ChangeInterval}, first change interval (should have nextChangeInterval
                                        // linked-list to lastChangeInterval)
-      this.lastChangeInterval = null;  // {Instance}, last change interval
-    },
-    
-    cleanChangeInterval: function() {
-      // change interval information (persisted across syncTree, there is a phase that will clean it later)
-      this.nextChangeInterval = null;   // {Instance|null}, linked list 
-      this.changeDrawableBefore = null; // {Drawable|null}, the drawable before our changeinterval that is not modified.
-                                        // null indicates that we don't yet have a "before" boundary, and should be
-                                        // connected to the closest drawable that is unchanged.
-      this.changeDrawableAfter = null;  // {Drawable|null}, the drawable after our changeinterval that is not modified.
-                                        // null indicates that we don't yet have an "after" boundary, and should be
-                                        // connected to the closest drawable that is unchanged.
+      this.lastChangeInterval = null;  // {ChangeInterval}, last change interval
     },
     
     // @public
@@ -351,19 +339,13 @@ define( function( require ) {
       var firstDrawable = this.selfDrawable; // possibly null
       var currentDrawable = firstDrawable; // possibly null
       
-      assert && assert( this.nextChangeInterval === null &&
-                        this.changeDrawableBefore === null &&
-                        this.changeDrawableAfter === null &&
-                        this.firstChangeInterval === null &&
+      assert && assert( this.firstChangeInterval === null &&
                         this.lastChangeInterval === null,
-                        'sanity checks that cleanChangeInterval/cleanSyncTreeResults were called' );
+                        'sanity checks that cleanSyncTreeResults were called' );
       
       var firstChangeInterval = null;
       if ( selfChanged ) {
-        this.changeIntervalDirtyPrecheck();
-        
-        // NOTE: our changeDrawableBefore / changeDrawableAfter are null already
-        firstChangeInterval = this;
+        firstChangeInterval = ChangeInterval.newForDisplay( null, null, this.display );
       }
       var currentChangeInterval = firstChangeInterval;
       
@@ -397,11 +379,7 @@ define( function( require ) {
         if ( childInstance.stitchChangeFrame === frameId ) {
           // e.g. it was added, moved, or had visibility changes. requires full change interval
           
-          // use its change interval for this purpose, we don't need anything underneath it
-          childInstance.changeIntervalDirtyPrecheck();
-          childInstance.nextChangeInterval = null;
-          childInstance.changeDrawableBefore = null;
-          childInstance.changeDrawableAfter = null;
+          childInstance.firstChangeInterval = childInstance.lastChangeInterval = ChangeInterval.newForDisplay( null, null, this.display );
         }
         
         // clean up the metadata on our child (can't be done in the child call, since we use these values like a
@@ -578,20 +556,6 @@ define( function( require ) {
         if ( this.isTransformed ) {
           this.display.markTransformRootDirty( this, true );
         }
-      }
-    },
-    
-    /*---------------------------------------------------------------------------*
-    * Change interval handling
-    *----------------------------------------------------------------------------*/
-    
-    // Marks the change interval as dirty if it hasn't been modified. Should be done before modifications to the
-    // interval.
-    changeIntervalDirtyPrecheck: function() {
-      if ( this.changeDrawableBefore === null ) {
-        assert && assert( this.changeDrawableAfter === null );
-        
-        this.display.markInstanceWithChangeInterval( this );
       }
     },
     

@@ -18,6 +18,7 @@ define( [
     'SCENERY/display/Block',
     'SCENERY/display/CanvasBlock',
     'SCENERY/display/CanvasSelfDrawable',
+    'SCENERY/display/ChangeInterval',
     'SCENERY/display/Display',
     'SCENERY/display/DOMBlock',
     'SCENERY/display/DOMSelfDrawable',

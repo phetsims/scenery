@@ -45,8 +45,10 @@ define( function( require ) {
   require( 'SCENERY/display/BackboneDrawable' );
   require( 'SCENERY/display/CanvasBlock' );
   require( 'SCENERY/display/CanvasSelfDrawable' );
-  require( 'SCENERY/display/Instance' );
+  var ChangeInterval = require( 'SCENERY/display/ChangeInterval' );
   require( 'SCENERY/display/DOMSelfDrawable' );
+  var Drawable = require( 'SCENERY/display/Drawable' );
+  var Instance = require( 'SCENERY/display/Instance' );
   require( 'SCENERY/display/InlineCanvasCacheDrawable' );
   require( 'SCENERY/display/Renderer' );
   require( 'SCENERY/display/SharedCanvasCacheDrawable' );
@@ -108,10 +110,10 @@ define( function( require ) {
     // in an updateDisplay pass.
     this._drawablesToUpdateLinks = []; // {[Drawable]}
     
-    // We store information on some {Instance}s that records change interval information, that may contain references.
+    // We store information on {ChangeInterval}s that records change interval information, that may contain references.
     // We don't want to leave those references dangling after we don't need them, so they are recorded and cleaned in
     // one of updateDisplay's phases.
-    this._instancesWithChangeIntervals = []; // {[Instance]}
+    this._changeIntervalsToDispose = []; // {[ChangeInterval]}
     
     this._lastCursor = null;
     
@@ -171,8 +173,8 @@ define( function( require ) {
       }
       
       // clean change-interval information from instances, so we don't leak memory/references
-      while ( this._instancesWithChangeIntervals.length ) {
-        this._instancesWithChangeIntervals.pop().cleanChangeInterval();
+      while ( this._changeIntervalsToDispose.length ) {
+        this._changeIntervalsToDispose.pop().dispose();
       }
       
       this._rootBackbone = this._rootBackbone || this._baseInstance.groupDrawable;
@@ -361,27 +363,37 @@ define( function( require ) {
     },
     
     markDrawableChangedBlock: function( drawable ) {
+      assert && assert( drawable instanceof Drawable );
+      
       sceneryLog && sceneryLog.Display && sceneryLog.Display( 'markDrawableChangedBlock: ' + drawable.toString() );
       this._drawablesToChangeBlock.push( drawable );
     },
     
     markInstanceRootForDisposal: function( instance ) {
+      assert && assert( instance instanceof Instance, 'How would an instance not be an instance of an instance?!?!?' );
+      
       sceneryLog && sceneryLog.Display && sceneryLog.Display( 'markInstanceRootForDisposal: ' + instance.toString() );
       this._instanceRootsToDispose.push( instance );
     },
     
     markDrawableForDisposal: function( drawable ) {
+      assert && assert( drawable instanceof Drawable );
+      
       sceneryLog && sceneryLog.Display && sceneryLog.Display( 'markDrawableForDisposal: ' + drawable.toString() );
       this._drawablesToDispose.push( drawable );
     },
     
     markDrawableForLinksUpdate: function( drawable ) {
+      assert && assert( drawable instanceof Drawable );
+      
       this._drawablesToUpdateLinks.push( drawable );
     },
     
-    // add an instance for the "remove change interval info" phase (we don't want to leak memory/references)
-    markInstanceWithChangeInterval: function( instance ) {
-      this._instancesWithChangeIntervals.push( instance );
+    // Add a {ChangeInterval} for the "remove change interval info" phase (we don't want to leak memory/references)
+    markChangeIntervalToDispose: function( changeInterval ) {
+      assert && assert( changeInterval instanceof ChangeInterval );
+      
+      this._changeIntervalsToDispose.push( changeInterval );
     },
     
     /*---------------------------------------------------------------------------*
