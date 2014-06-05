@@ -4,6 +4,9 @@
  * An interval (implicit consecutive sequence of drawables) that has a recorded change in-between the two ends.
  * We store the closest drawables to the interval that aren't changed, or null itself to indicate "to the end".
  *
+ * isEmpty() should be used before checking the endpoints, since it could have a null-to-null state but be empty,
+ * since we arrived at that state from constriction.
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
