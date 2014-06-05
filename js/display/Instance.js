@@ -243,15 +243,23 @@ define( function( require ) {
       // if (not iff) child's index >= afterStableIndex, it hasn't been added/removed. relevant to current children.
       this.afterStableIndex = -1;
       
-      this.firstChangeInterval = null;
-      this.lastChangeInterval = null;
+      // NOTE: both of these being null indicates "there are no change intervals", otherwise it assumes it points to
+      // a linked-list of change intervals. We use {Instance}s to hold this information, see cleanChangeInterval to see
+      // the individual properties that are considered part of a change interval.
+      this.firstChangeInterval = null; // {Instance}, first change interval (should have nextChangeInterval
+                                       // linked-list to lastChangeInterval)
+      this.lastChangeInterval = null;  // {Instance}, last change interval
     },
     
     cleanChangeInterval: function() {
-      // change interval information
+      // change interval information (persisted across syncTree, there is a phase that will clean it later)
       this.nextChangeInterval = null;   // {Instance|null}, linked list 
-      this.changeIntervalBefore = null; // {Drawable|null}, the drawable before our change interval that is not modified
-      this.changeIntervalAfter = null;  // {Drawable|null}, the drawable after our change interval that is not modified
+      this.changeDrawableBefore = null; // {Drawable|null}, the drawable before our changeinterval that is not modified.
+                                        // null indicates that we don't yet have a "before" boundary, and should be
+                                        // connected to the closest drawable that is unchanged.
+      this.changeDrawableAfter = null;  // {Drawable|null}, the drawable after our changeinterval that is not modified.
+                                        // null indicates that we don't yet have an "after" boundary, and should be
+                                        // connected to the closest drawable that is unchanged.
     },
     
     // @public
@@ -266,12 +274,16 @@ define( function( require ) {
     /*OHTWO TODO:
      * Pruning:
      *   - If children haven't changed, skip instance add/move/remove
-     *   - If RenderState hasn't changed AND there are no render/instance/stitch changes below us, EXIT (whenever we are assured children don't need sync)
-     * Return linked-list of alternating changed (add/remove) and keep sections of drawables, for processing with backbones/canvas caches
+     *   - If RenderState hasn't changed AND there are no render/instance/stitch changes below us, EXIT (whenever we are
+     *     assured children don't need sync)
+     * Return linked-list of alternating changed (add/remove) and keep sections of drawables, for processing with
+     * backbones/canvas caches.
      *
      * Other notes:
      *
-     *    Traversal hits every child if parent render state changed. Otherwise, only hits children who have (or has descendants who have) potential render state changes. If we haven't hit a "change" yet from ancestors, don't re-evaluate any render states (UNLESS renderer summary changed!)
+     *    Traversal hits every child if parent render state changed. Otherwise, only hits children who have (or has
+     *                            descendants who have) potential render state changes. If we haven't hit a "change" yet
+     *                            from ancestors, don't re-evaluate any render states (UNLESS renderer summary changed!)
      *      Need recursive flag for "render state needs reevaluation" / "child render state needs reevaluation
      *        Don't flag changes when they won't actually change the "current" render state!!!
      *        Changes in renderer summary (subtree combined) can cause changes in the render state
@@ -282,7 +294,9 @@ define( function( require ) {
       sceneryLog && sceneryLog.Instance && sceneryLog.push();
       
       assert && assert( state && state.isSharedCanvasCachePlaceholder !== undefined, 'RenderState duck-typing instanceof' );
-      assert && assert( !this.parent || !this.parent.isStateless(), 'We should not have a stateless parent instance' ); // may access isTransformed up to root to determine relative trails
+      
+      // may access isTransformed up to root to determine relative trails
+      assert && assert( !this.parent || !this.parent.isStateless(), 'We should not have a stateless parent instance' );
       
       var oldState = this.state;
       var wasStateless = !oldState;
@@ -326,13 +340,31 @@ define( function( require ) {
     },
     
     localSyncTree: function( state, oldState ) {
+      var frameId = this.display._frameId;
+      
       var selfChanged = this.updateSelfDrawable( state, oldState );
       
       // local variables, since we can't overwrite our instance properties yet
       var firstDrawable = this.selfDrawable; // possibly null
-      var lastDrawable = null;
-      
       var currentDrawable = firstDrawable; // possibly null
+      
+      assert && assert( this.nextChangeInterval === null &&
+                        this.changeDrawableBefore === null &&
+                        this.changeDrawableAfter === null &&
+                        this.firstChangeInterval === null &&
+                        this.lastChangeInterval === null,
+                        'sanity checks that cleanChangeInterval/cleanSyncTreeResults were called' );
+      
+      var firstChangeInterval = null;
+      if ( selfChanged ) {
+        this.changeIntervalDirtyPrecheck();
+        
+        // NOTE: our changeDrawableBefore / changeDrawableAfter are null already
+        firstChangeInterval = this;
+      }
+      var currentChangeInterval = firstChangeInterval;
+      
+      var lastUnchangedDrawable = selfChanged ? null : this.selfDrawable;
       
       for ( var i = 0; i < this.children.length; i++ ) {
         var childInstance = this.children[i];
@@ -358,16 +390,24 @@ define( function( require ) {
           }
         }
         
+        if ( childInstance.stitchChangeFrame === frameId ) {
+          // e.g. it was added, moved, or had visibility changes. requires full change interval
+          
+          // use its change interval for this purpose, we don't need anything underneath it
+          childInstance.changeIntervalDirtyPrecheck();
+          childInstance.nextChangeInterval = null;
+          childInstance.changeDrawableBefore = null;
+          childInstance.changeDrawableAfter = null;
+        }
+        
         // clean up the metadata on our child (can't be done in the child call, since we use these values like a composite return value)
         //OHTWO TODO: only do this on instances that were actually traversed
         childInstance.cleanSyncTreeResults();
       }
-      // finish setting up references to the linked list (now firstDrawable and lastDrawable should be set properly)
-      lastDrawable = currentDrawable; // either null, or the drawable itself
       
       // NOTE: these may get overwritten with the group drawable (in that case, groupSyncTree will read from these)
       this.firstDrawable = firstDrawable;
-      this.lastDrawable = lastDrawable;
+      this.lastDrawable = currentDrawable; // either null, or the drawable itself
     },
     
     // returns whether the selfDrawable changed
@@ -537,8 +577,8 @@ define( function( require ) {
     // Marks the change interval as dirty if it hasn't been modified. Should be done before modifications to the
     // interval.
     changeIntervalDirtyPrecheck: function() {
-      if ( this.changeIntervalBefore === null ) {
-        assert && assert( this.changeIntervalAfter === null );
+      if ( this.changeDrawableBefore === null ) {
+        assert && assert( this.changeDrawableAfter === null );
         
         this.display.markInstanceWithChangeInterval( this );
       }
