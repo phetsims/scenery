@@ -175,6 +175,9 @@ define( function( require ) {
       // If equal to the current frame ID, child instances were added or removed from this instance.
       this.stitchChangeOnChildren = 0;
       
+      // whether we have been included in our parent's drawables the previous frame
+      this.stitchChangeIncluded = false;
+      
       // Node listeners for tracking children. Listeners should be added only when we become stateful
       this.childInsertedListener = this.childInsertedListener || this.onChildInserted.bind( this );
       this.childRemovedListener = this.childRemovedListener || this.onChildRemoved.bind( this );
@@ -394,10 +397,16 @@ define( function( require ) {
         * Change intervals
         *----------------------------------------------------------------------------*/
         
+        var wasIncluded = childInstance.stitchChangeIncluded;
+        var isIncluded = childInstance.node.isVisible();
+        childInstance.stitchChangeIncluded = isIncluded;
+        
         // check for forcing full change-interval on child
         if ( childInstance.stitchChangeFrame === frameId ) {
           // e.g. it was added, moved, or had visibility changes. requires full change interval
           childInstance.firstChangeInterval = childInstance.lastChangeInterval = ChangeInterval.newForDisplay( null, null, this.display );
+        } else {
+          assert && assert( wasIncluded === isIncluded, 'If we do not have stitchChangeFrame activated, our inclusion should not have changed' );
         }
         
         var firstChildChangeInterval = childInstance.firstChangeInterval;
@@ -415,47 +424,52 @@ define( function( require ) {
           isBeforeOpen = true;
         }
         
-        if ( isBeforeOpen ) {
-          // we want to try to glue our last ChangeInterval up
-          if ( firstChildChangeInterval ) {
-            if ( firstChildChangeInterval.drawableBefore === null ) {
-              // we want to glue from both sides
-              
-              // basically have our current change interval replace the child's first change interval
-              currentChangeInterval.drawableAfter = firstChildChangeInterval.drawableAfter;
-              currentChangeInterval.nextChangeInterval = firstChildChangeInterval.nextChangeInterval;
-              
-              currentChangeInterval = childInstance.lastChangeInterval === firstChildChangeInterval ?
-                                      currentChangeInterval : // since we are replacing, don't give an origin reference
-                                      childInstance.lastChangeInterval;
+        // Exclude child instances that are now (and were before) not included. NOTE: We still need to include those in
+        // bridge calculations, since a removed (before-included) instance could be between two still-invisible
+        // instances.
+        if ( wasIncluded || isIncluded ) {
+          if ( isBeforeOpen ) {
+            // we want to try to glue our last ChangeInterval up
+            if ( firstChildChangeInterval ) {
+              if ( firstChildChangeInterval.drawableBefore === null ) {
+                // we want to glue from both sides
+                
+                // basically have our current change interval replace the child's first change interval
+                currentChangeInterval.drawableAfter = firstChildChangeInterval.drawableAfter;
+                currentChangeInterval.nextChangeInterval = firstChildChangeInterval.nextChangeInterval;
+                
+                currentChangeInterval = childInstance.lastChangeInterval === firstChildChangeInterval ?
+                                        currentChangeInterval : // since we are replacing, don't give an origin reference
+                                        childInstance.lastChangeInterval;
+              } else {
+                // only a desire to glue from before
+                currentChangeInterval.drawableAfter = childInstance.firstDrawable; // either null or the correct drawable
+                currentChangeInterval.nextChangeInterval = firstChildChangeInterval;
+                currentChangeInterval = childInstance.lastChangeInterval;
+              }
             } else {
-              // only a desire to glue from before
+              // no changes to the child. grabs the first drawable reference it can
               currentChangeInterval.drawableAfter = childInstance.firstDrawable; // either null or the correct drawable
-              currentChangeInterval.nextChangeInterval = firstChildChangeInterval;
-              currentChangeInterval = childInstance.lastChangeInterval;
             }
-          } else {
-            // no changes to the child. grabs the first drawable reference it can
-            currentChangeInterval.drawableAfter = childInstance.firstDrawable; // either null or the correct drawable
+          } else if ( firstChildChangeInterval ) {
+            firstChangeInterval = firstChangeInterval || firstChildChangeInterval; // store if it is the first
+            if ( firstChildChangeInterval.drawableBefore === null ) {
+              assert && assert( !currentChangeInterval || lastUnchangedDrawable,
+                                'If we have a current change interval, we should be guaranteed a non-null ' +
+                                'lastUnchangedDrawable' );
+              firstChildChangeInterval.drawableBefore = lastUnchangedDrawable; // either null or the correct drawable
+            }
+            if ( currentChangeInterval ) {
+              currentChangeInterval.nextChangeInterval = firstChildChangeInterval;
+            }
+            currentChangeInterval = childInstance.lastChangeInterval;
           }
-        } else if ( firstChildChangeInterval ) {
-          firstChangeInterval = firstChangeInterval || firstChildChangeInterval; // store if it is the first
-          if ( firstChildChangeInterval.drawableBefore === null ) {
-            assert && assert( !currentChangeInterval || lastUnchangedDrawable,
-                              'If we have a current change interval, we should be guaranteed a non-null ' +
-                              'lastUnchangedDrawable' );
-            firstChildChangeInterval.drawableBefore = lastUnchangedDrawable; // either null or the correct drawable
-          }
-          if ( currentChangeInterval ) {
-            currentChangeInterval.nextChangeInterval = firstChildChangeInterval;
-          }
-          currentChangeInterval = childInstance.lastChangeInterval;
+          lastUnchangedDrawable = ( currentChangeInterval && currentChangeInterval.drawableAfter === null ) ?
+                                  null :
+                                  ( childInstance.lastDrawable ?
+                                    childInstance.lastDrawable :
+                                    lastUnchangedDrawable );
         }
-        lastUnchangedDrawable = ( currentChangeInterval && currentChangeInterval.drawableAfter === null ) ?
-                                null :
-                                ( childInstance.lastDrawable ?
-                                  childInstance.lastDrawable :
-                                  lastUnchangedDrawable );
         
         // if the last instance, check for post-bridge
         if ( i === this.children.length - 1 ) {
@@ -499,9 +513,9 @@ define( function( require ) {
       // drawable range checks
       if ( assertSlow ) {
         var firstDrawableCheck = null;
-        for ( var i = 0; i < this.children.length; i++ ) {
-          if ( this.children[i].node.isVisible() && this.children[i].firstDrawable ) {
-            firstDrawableCheck = this.children[i].firstDrawable;
+        for ( var j = 0; j < this.children.length; j++ ) {
+          if ( this.children[j].node.isVisible() && this.children[j].firstDrawable ) {
+            firstDrawableCheck = this.children[j].firstDrawable;
             break;
           }
         }
@@ -510,9 +524,9 @@ define( function( require ) {
         }
         
         var lastDrawableCheck = this.selfDrawable;
-        for ( var i = this.children.length - 1; i >= 0; i-- ) {
-          if ( this.children[i].node.isVisible() && this.children[i].lastDrawable ) {
-            lastDrawableCheck = this.children[i].lastDrawable;
+        for ( var k = this.children.length - 1; k >= 0; k-- ) {
+          if ( this.children[k].node.isVisible() && this.children[k].lastDrawable ) {
+            lastDrawableCheck = this.children[k].lastDrawable;
             break;
           }
         }
