@@ -290,7 +290,8 @@ define( function( require ) {
      *    OK for traversal to return "no change", doesn't specify any drawables changes
      */
     syncTree: function( state ) {
-      sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'syncTree ' + this.toString() + ' ' + state.toString() + ( this.isStateless() ? ' (stateless)' : '' ) );
+      sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'syncTree ' + this.toString() + ' ' + state.toString() +
+                                                                ( this.isStateless() ? ' (stateless)' : '' ) );
       sceneryLog && sceneryLog.Instance && sceneryLog.push();
       
       assert && assert( state && state.isSharedCanvasCachePlaceholder !== undefined, 'RenderState duck-typing instanceof' );
@@ -303,14 +304,16 @@ define( function( require ) {
       
       assert && assert( wasStateless || oldState.isInstanceCompatibleWith( state ),
                         'Attempt to update to a render state that is not compatible with this instance\'s current state' );
-      assert && assert( wasStateless || oldState.isTransformed === state.isTransformed ); // no need to overwrite, should always be the same
+      // no need to overwrite, should always be the same
+      assert && assert( wasStateless || oldState.isTransformed === state.isTransformed );
       assert && assert( !wasStateless || this.children.length === 0, 'We should not have child instances on an instance without state' );
       
       this.state = state;
       this.isTransformed = state.isTransformed;
       
       if ( wasStateless ) {
-        // If we are a transform root, notify the display that we are dirty. We'll be validated when it's at that phase at the next updateDisplay().
+        // If we are a transform root, notify the display that we are dirty. We'll be validated when it's at that phase
+        // at the next updateDisplay().
         //OHTWO TODO: when else do we have to call this?
         if ( this.isTransformed ) {
           this.display.markTransformRootDirty( this, true );
@@ -374,7 +377,8 @@ define( function( require ) {
         // sync the tree
         childInstance.syncTree( childState );
         
-        //OHTWO TODO: only strip out invisible Canvas drawables, while leaving SVG (since we can more efficiently hide SVG trees, memory-wise)
+        //OHTWO TODO: only strip out invisible Canvas drawables, while leaving SVG (since we can more efficiently hide
+        // SVG trees, memory-wise)
         if ( childInstance.node.isVisible() ) {
           // if there are any drawables for that child, link them up in our linked list
           if ( childInstance.firstDrawable ) {
@@ -400,7 +404,8 @@ define( function( require ) {
           childInstance.changeDrawableAfter = null;
         }
         
-        // clean up the metadata on our child (can't be done in the child call, since we use these values like a composite return value)
+        // clean up the metadata on our child (can't be done in the child call, since we use these values like a
+        // composite return value)
         //OHTWO TODO: only do this on instances that were actually traversed
         childInstance.cleanSyncTreeResults();
       }
@@ -415,9 +420,11 @@ define( function( require ) {
       if ( this.node.isPainted() ) {
         var selfRenderer = state.selfRenderer; // our new self renderer bitmask
         
-        // bitwise trick, since only one of Canvas/SVG/DOM/WebGL/etc. flags will be chosen, and bitmaskRendererArea is the mask for those flags
-        // In English, "Is the current selfDrawable compatible with our selfRenderer (if any), or do we need to create a selfDrawable?"
-        //OHTWO TODO: For Canvas, we won't care about anything else for the drawable, but for DOM we care about the force-acceleration flag! That's stripped out here
+        // bitwise trick, since only one of Canvas/SVG/DOM/WebGL/etc. flags will be chosen, and bitmaskRendererArea is
+        // the mask for those flags. In English, "Is the current selfDrawable compatible with our selfRenderer (if any),
+        // or do we need to create a selfDrawable?"
+        //OHTWO TODO: For Canvas, we won't care about anything else for the drawable, but for DOM we care about the
+        // force-acceleration flag! That's stripped out here.
         if ( !this.selfDrawable || ( ( this.selfDrawable.renderer & selfRenderer & Renderer.bitmaskRendererArea ) === 0 ) ) {
           if ( this.selfDrawable ) {
             // scrap the previous selfDrawable, we need to create one with a different renderer.
@@ -453,7 +460,9 @@ define( function( require ) {
     
     groupSyncTree: function( state, oldState ) {
       var groupRenderer = state.groupRenderer;
-      assert && assert( ( state.isBackbone ? 1 : 0 ) + ( state.isInstanceCanvasCache ? 1 : 0 ) + ( state.isSharedCanvasCacheSelf ? 1 : 0 ) === ( groupRenderer ? 1 : 0 ),
+      assert && assert( ( state.isBackbone ? 1 : 0 ) +
+                        ( state.isInstanceCanvasCache ? 1 : 0 ) +
+                        ( state.isSharedCanvasCacheSelf ? 1 : 0 ) === ( groupRenderer ? 1 : 0 ),
                         'We should have precisely one of these flags set for us to have a groupRenderer' );
       
       // if we switched to/away from a group, our group type changed, or our group renderer changed
@@ -515,7 +524,8 @@ define( function( require ) {
           this.sharedCacheDrawable.markForDisposal( this.display );
         }
         
-        //OHTWO TODO: actually create the proper shared cache drawable depending on the specified renderer (update it if necessary)
+        //OHTWO TODO: actually create the proper shared cache drawable depending on the specified renderer
+        // (update it if necessary)
         this.sharedCacheDrawable = new scenery.SharedCanvasCacheDrawable( this.trail, sharedCacheRenderer, this, this.sharedCacheInstance );
         this.firstDrawable = this.sharedCacheDrawable;
         this.lastDrawable = this.sharedCacheDrawable;
@@ -546,7 +556,8 @@ define( function( require ) {
       // we only need to initialize this shared cache reference once
       if ( !this.sharedCacheInstance ) {
         var instanceKey = this.node.getId();
-        this.sharedCacheInstance = this.display._sharedCanvasInstances[instanceKey]; // TODO: have this abstracted away in the Display?
+        // TODO: have this abstracted away in the Display?
+        this.sharedCacheInstance = this.display._sharedCanvasInstances[instanceKey];
         
         // TODO: increment reference counting?
         if ( !this.sharedCacheInstance ) {
@@ -584,7 +595,8 @@ define( function( require ) {
       }
     },
     
-    // whether we don't have an associated RenderState attached. If we are stateless, we won't have children, and won't have listeners attached to our node yet.
+    // whether we don't have an associated RenderState attached. If we are stateless, we won't have children, and won't
+    // have listeners attached to our node yet.
     isStateless: function() {
       return !this.state;
     },
@@ -626,7 +638,8 @@ define( function( require ) {
     insertInstance: function( instance, index ) {
       assert && assert( instance instanceof Instance );
       assert && assert( index >= 0 && index <= this.children.length,
-                        'Instance insertion bounds check for index ' + index + ' with previous children length ' + this.children.length );
+                        'Instance insertion bounds check for index ' + index + ' with previous children length ' +
+                        this.children.length );
       
       // mark it as changed during this frame, so that we can properly set the change interval
       instance.stitchChangeFrame = this.display._frameId;
@@ -645,8 +658,10 @@ define( function( require ) {
       }
       
       if ( instance.isStateless ) {
-        assert && assert( !instance.hasAncestorListenerNeed(), 'We only track changes properly if stateless instances do not have needs' );
-        assert && assert( !instance.hasAncestorComputeNeed(), 'We only track changes properly if stateless instances do not have needs' );
+        assert && assert( !instance.hasAncestorListenerNeed(),
+                          'We only track changes properly if stateless instances do not have needs' );
+        assert && assert( !instance.hasAncestorComputeNeed(),
+                          'We only track changes properly if stateless instances do not have needs' );
       } else {
         if ( !instance.isTransformed ) {
           if ( instance.hasAncestorListenerNeed() ) {
@@ -669,7 +684,8 @@ define( function( require ) {
     removeInstanceWithIndex: function( instance, index ) {
       assert && assert( instance instanceof Instance );
       assert && assert( index >= 0 && index < this.children.length,
-                        'Instance removal bounds check for index ' + index + ' with previous children length ' + this.children.length );
+                        'Instance removal bounds check for index ' + index + ' with previous children length ' +
+                        this.children.length );
       
       var frameId = this.display._frameId;
       
@@ -752,7 +768,8 @@ define( function( require ) {
       instance.addRemoveCounter -= 1;
       assert && assert( instance.addRemoveCounter === -1 );
       
-      // track the removed instance here. if it doesn't get added back, this will be the only reference we have (we'll need to dispose it)
+      // track the removed instance here. if it doesn't get added back, this will be the only reference we have (we'll
+      // need to dispose it)
       this.instanceRemovalCheckList.push( instance );
       
       this.removeInstanceWithIndex( instance, index );
@@ -824,7 +841,8 @@ define( function( require ) {
       if ( before !== this.hasAncestorListenerNeed() ) {
         this.parent && this.parent.incrementTransformListenerChildren();
         
-        // if we just went from "not needing to be traversed" to "needing to be traversed", mark ourselves as dirty so that we for-sure get future updates
+        // if we just went from "not needing to be traversed" to "needing to be traversed", mark ourselves as dirty so
+        // that we for-sure get future updates
         if ( !this.hasAncestorComputeNeed() ) {
           // TODO: can we do better than this?
           this.forceMarkTransformDirty();
@@ -836,7 +854,8 @@ define( function( require ) {
     removeRelativeTransformListener: function( listener ) {
       var before = this.hasAncestorListenerNeed();
       
-      this.relativeTransformListeners.splice( _.indexOf( this.relativeTransformListeners, listener ), 1 ); // TODO: replace with a 'remove' function call
+      // TODO: replace with a 'remove' function call
+      this.relativeTransformListeners.splice( _.indexOf( this.relativeTransformListeners, listener ), 1 );
       if ( before !== this.hasAncestorListenerNeed() ) {
         this.parent && this.parent.decrementTransformListenerChildren();
       }
@@ -898,7 +917,8 @@ define( function( require ) {
       if ( before !== this.hasAncestorComputeNeed() ) {
         this.parent && this.parent.incrementTransformPrecomputeChildren();
         
-        // if we just went from "not needing to be traversed" to "needing to be traversed", mark ourselves as dirty so that we for-sure get future updates
+        // if we just went from "not needing to be traversed" to "needing to be traversed", mark ourselves as dirty so
+        // that we for-sure get future updates
         if ( !this.hasAncestorListenerNeed() ) {
           // TODO: can we do better than this?
           this.forceMarkTransformDirty();
@@ -944,7 +964,8 @@ define( function( require ) {
         
         // always mark an instance without a parent (root instance!)
         if ( parentInstance === null ) {
-          this.display.markTransformRootDirty( instance, isTransformed ); // passTransform depends on whether it is marked as a transform root
+          // passTransform depends on whether it is marked as a transform root
+          this.display.markTransformRootDirty( instance, isTransformed );
           break;
         } else if ( isTransformed ) {
           this.display.markTransformRootDirty( instance, true ); // passTransform true
@@ -977,27 +998,31 @@ define( function( require ) {
       return this.hasAncestorComputeNeed() || this.relativeFrameId === this.display._frameId;
     },
     
-    // Called from any place in the rendering process where we are not guaranteed to have a fresh relative transform. needs to scan up the tree, so it is
-    // more expensive than precomputed transforms.
-    // returns whether we had to update this transform
+    // Called from any place in the rendering process where we are not guaranteed to have a fresh relative transform.
+    // needs to scan up the tree, so it is more expensive than precomputed transforms.
+    // @returns Whether we had to update this transform
     validateRelativeTransform: function() {
-      // if we are clean, bail out. If we have a compute "need", we will always be clean here since this is after the traversal step.
-      // if we did not have a compute "need", we check whether we were already updated this frame by computeRelativeTransform
+      // if we are clean, bail out. If we have a compute "need", we will always be clean here since this is after the
+      // traversal step. If we did not have a compute "need", we check whether we were already updated this frame by
+      // computeRelativeTransform.
       if ( this.isValidationNotNeeded() ) {
         return;
       }
       
-      // if we are not the first transform from the root, validate our parent. isTransform check prevents us from passing a transform root
+      // if we are not the first transform from the root, validate our parent. isTransform check prevents us from
+      // passing a transform root.
       if ( this.parent && !this.parent.isTransformed ) {
         this.parent.validateRelativeTransform();
       }
       
-      // validation of the parent may have changed our relativeSelfDirty flag to true, so we check now (could also have been true before)
+      // validation of the parent may have changed our relativeSelfDirty flag to true, so we check now (could also have
+      // been true before)
       if ( this.relativeSelfDirty ) {
         // compute the transform, and mark us as not relative-dirty
         this.computeRelativeTransform();
         
-        // mark all children now as dirty, since we had to update (marked so that other children from the one we are validating will know that they need updates)
+        // mark all children now as dirty, since we had to update (marked so that other children from the one we are
+        // validating will know that they need updates)
         // if we were called from a child's validateRelativeTransform, they will now need to compute their transform
         var len = this.children.length;
         for ( var i = 0; i < len; i++ ) {
@@ -1006,10 +1031,12 @@ define( function( require ) {
       }
     },
     
-    // called during the pre-repaint phase to (a) fire off all relative transform listeners that should be fired, and (b) precompute transforms were desired
+    // called during the pre-repaint phase to (a) fire off all relative transform listeners that should be fired, and
+    // (b) precompute transforms were desired
     updateTransformListenersAndCompute: function( ancestorWasDirty, ancestorIsDirty, frameId, passTransform ) {
       sceneryLog && sceneryLog.transformSystem && sceneryLog.transformSystem(
-        'update/compute: ' + this.toString() + ' ' + ancestorWasDirty + ' => ' + ancestorIsDirty + ( passTransform ? ' passTransform' : '' ) );
+        'update/compute: ' + this.toString() + ' ' + ancestorWasDirty + ' => ' + ancestorIsDirty +
+        ( passTransform ? ' passTransform' : '' ) );
       sceneryLog && sceneryLog.transformSystem && sceneryLog.push();
       
       var len, i;
@@ -1028,7 +1055,8 @@ define( function( require ) {
         var hasSelfComputeNeed = this.hasSelfComputeNeed();
         var hasSelfListenerNeed = this.hasSelfListenerNeed();
         
-        // if our relative transform will be dirty but our parents' transform will be clean, we need to mark ourselves as dirty (so that later access can identify we are dirty).
+        // if our relative transform will be dirty but our parents' transform will be clean, we need to mark ourselves
+        // as dirty (so that later access can identify we are dirty).
         if ( !hasComputeNeed && wasDirty && !ancestorIsDirty ) {
           this.relativeSelfDirty = true;
         }
@@ -1185,7 +1213,8 @@ define( function( require ) {
     },
     
     audit: function( frameId, allowValidationNotNeededChecks ) {
-      // get the relative matrix, computed to be up-to-date, and ignores any flags/counts so we can check whether our state is consistent
+      // get the relative matrix, computed to be up-to-date, and ignores any flags/counts so we can check whether our
+      // state is consistent
       function currentRelativeMatrix( instance ) {
         var resultMatrix = Matrix3.dirtyFromPool();
         var nodeMatrix = instance.node.getTransform().getMatrix();
@@ -1237,8 +1266,10 @@ define( function( require ) {
         assertSlow( this.state.isTransformed === this.isTransformed,
                     'isTransformed should match' );
         
-        assertSlow( !this.parent || this.isTransformed || ( this.relativeChildDirtyFrame !== frameId ) || ( this.parent.relativeChildDirtyFrame === frameId ),
-                    'If we have a parent, we need to hold the invariant this.relativeChildDirtyFrame => parent.relativeChildDirtyFrame' );
+        assertSlow( !this.parent || this.isTransformed || ( this.relativeChildDirtyFrame !== frameId ) ||
+                    ( this.parent.relativeChildDirtyFrame === frameId ),
+                    'If we have a parent, we need to hold the invariant ' +
+                    'this.relativeChildDirtyFrame => parent.relativeChildDirtyFrame' );
         
         // count verification for invariants
         var notifyRelativeCount = 0;
@@ -1262,7 +1293,8 @@ define( function( require ) {
         
         if ( !hasRelativeSelfDirty( this ) ) {
           var matrix = currentRelativeMatrix( this );
-          assertSlow( matrix.equals( this.relativeMatrix ), 'If there is no relativeSelfDirty flag set here or in our ancestors, our relativeMatrix should be up-to-date' );
+          assertSlow( matrix.equals( this.relativeMatrix ), 'If there is no relativeSelfDirty flag set here or in our' +
+                                                            ' ancestors, our relativeMatrix should be up-to-date' );
         }
       }
     },
