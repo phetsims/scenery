@@ -319,11 +319,19 @@ define( function( require ) {
         // mark fully-removed instances for disposal, and initialize child instances if we were stateless
         this.prepareChildInstances( state, oldState );
         
+        var oldFirstDrawable = this.firstDrawable;
+        var oldLastDrawable = this.lastDrawable;
+        
         // properly handle our self and children
         this.localSyncTree( state, oldState );
         
         // apply any group changes necessary
         this.groupSyncTree( state, oldState );
+        
+        if ( assertSlow ) {
+          // before and after first/last drawables
+          this.auditChangeIntervals( oldFirstDrawable, oldLastDrawable, this.firstDrawable, this.lastDrawable );
+        }
       }
       
       if ( oldState && oldState !== this.state ) {
@@ -480,12 +488,38 @@ define( function( require ) {
       }
       
       // store our results
+      // NOTE: these may get overwritten with the group change intervals (in that case, groupSyncTree will read from these)
       this.firstChangeInterval = firstChangeInterval;
       this.lastChangeInterval = currentChangeInterval;
       
       // NOTE: these may get overwritten with the group drawable (in that case, groupSyncTree will read from these)
       this.firstDrawable = firstDrawable;
       this.lastDrawable = currentDrawable; // either null, or the drawable itself
+      
+      // drawable range checks
+      if ( assertSlow ) {
+        var firstDrawableCheck = null;
+        for ( var i = 0; i < this.children.length; i++ ) {
+          if ( this.children[i].node.isVisible() && this.children[i].firstDrawable ) {
+            firstDrawableCheck = this.children[i].firstDrawable;
+            break;
+          }
+        }
+        if ( this.selfDrawable ) {
+          firstDrawableCheck = this.selfDrawable;
+        }
+        
+        var lastDrawableCheck = this.selfDrawable;
+        for ( var i = this.children.length - 1; i >= 0; i-- ) {
+          if ( this.children[i].node.isVisible() && this.children[i].lastDrawable ) {
+            lastDrawableCheck = this.children[i].lastDrawable;
+            break;
+          }
+        }
+        
+        assertSlow( firstDrawableCheck === this.firstDrawable );
+        assertSlow( lastDrawableCheck === this.lastDrawable );
+      }
     },
     
     // returns whether the selfDrawable changed
@@ -583,6 +617,15 @@ define( function( require ) {
         
         this.firstDrawable = this.lastDrawable = this.groupDrawable;
       }
+      
+      // change interval handling
+      if ( groupChanged ) {
+        // if our group status changed, mark EVERYTHING as potentially changed
+        this.firstChangeInterval = this.lastChangeInterval = ChangeInterval.newForDisplay( null, null, this.display );
+      } else if ( groupRenderer ) {
+        // our group didn't have to change at all, so we prevent any change intervals
+        this.firstChangeInterval = this.lastChangeInterval = null;
+      }
     },
     
     sharedSyncTree: function( state ) {
@@ -602,6 +645,9 @@ define( function( require ) {
         this.sharedCacheDrawable = new scenery.SharedCanvasCacheDrawable( this.trail, sharedCacheRenderer, this, this.sharedCacheInstance );
         this.firstDrawable = this.sharedCacheDrawable;
         this.lastDrawable = this.sharedCacheDrawable;
+        
+        // basically everything changed now, and won't from now on
+        this.firstChangeInterval = this.lastChangeInterval = ChangeInterval.newForDisplay( null, null, this.display );
       }
     },
     
@@ -1356,6 +1402,85 @@ define( function( require ) {
           var matrix = currentRelativeMatrix( this );
           assertSlow( matrix.equals( this.relativeMatrix ), 'If there is no relativeSelfDirty flag set here or in our' +
                                                             ' ancestors, our relativeMatrix should be up-to-date' );
+        }
+      }
+    },
+    
+    auditChangeIntervals: function( oldFirstDrawable, oldLastDrawable, newFirstDrawable, newLastDrawable ) {
+      if ( oldFirstDrawable ) {
+        var oldOne = oldFirstDrawable;
+        
+        // should hit, or will have NPE
+        while ( oldOne !== oldLastDrawable ) {
+          oldOne = oldOne.oldNextDrawable;
+        }
+      }
+      
+      if ( newFirstDrawable ) {
+        var newOne = newFirstDrawable;
+        
+        // should hit, or will have NPE
+        while ( newOne !== newLastDrawable ) {
+          newOne = newOne.nextDrawable;
+        }
+      }
+      
+      function checkBetween( a, b ) {
+        // have the body of the function stripped (it's not inside the if statement due to JSHint)
+        if ( assertSlow ) {
+          assertSlow( a !== null );
+          assertSlow( b !== null );
+          
+          while ( a !== b ) {
+            assertSlow( a.nextDrawable === a.oldNextDrawable, 'Change interval mismatch' );
+            a = a.nextDrawable;
+          }
+        }
+      }
+      
+      if ( assertSlow ) {
+        var firstChangeInterval = this.firstChangeInterval;
+        var lastChangeInterval = this.lastChangeInterval;
+        
+        if ( !firstChangeInterval || firstChangeInterval.drawableBefore !== null ) {
+          assertSlow( oldFirstDrawable === newFirstDrawable,
+                      'If we have no changes, or our first change interval is not open, our firsts should be the same' );
+        }
+        if ( !lastChangeInterval || lastChangeInterval.drawableAfter !== null ) {
+          assertSlow( oldLastDrawable === newLastDrawable,
+                      'If we have no changes, or our last change interval is not open, our lasts should be the same' );
+        }
+        
+        if ( !firstChangeInterval ) {
+          assertSlow( !lastChangeInterval, 'We should not be missing only one change interval' );
+          
+          // with no changes, everything should be identical
+          oldFirstDrawable && checkBetween( oldFirstDrawable, oldLastDrawable );
+        } else {
+          assertSlow( lastChangeInterval, 'We should not be missing only one change interval' );
+          
+          // endpoints
+          if ( firstChangeInterval.drawableBefore !== null ) {
+            // check to the start if applicable
+            checkBetween( oldFirstDrawable, firstChangeInterval.drawableBefore );
+          }
+          if ( lastChangeInterval.drawableAfter !== null ) {
+            // check to the end if applicable
+            checkBetween( lastChangeInterval.drawableAfter, oldLastDrawable );
+          }
+          
+          // between change intervals (should always be guaranteed to be fixed)
+          var interval = firstChangeInterval;
+          while ( interval && interval.nextChangeInterval ) {
+            var nextInterval = interval.nextChangeInterval;
+            
+            assertSlow( interval.drawableAfter !== null );
+            assertSlow( nextInterval.drawableBefore !== null );
+            
+            checkBetween( interval.drawableAfter, nextInterval.drawableBefore );
+            
+            interval = nextInterval;
+          }
         }
       }
     },
