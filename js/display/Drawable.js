@@ -54,9 +54,10 @@ define( function( require ) {
       this.parentDrawable = null;
       this.backbone = null; // a backbone reference (if applicable).
       
-      // what our parent drawable will be after the stitch is finished
-      this.pendingParentDrawable = null;
-      this.pendingBackbone = null;
+      this.pendingParentDrawable = null; // what our parent drawable will be after the stitch is finished
+      this.pendingBackbone = null;       // what our backbone will be after the stitch is finished (if applicable)
+      this.pendingAddition = false;      // whether we are to be added to a block/backbone in our updateBlock() call
+      this.pendingRemoval = false;       // whether we are to be removed from a block/backbone in our updateBlock() call
       
       // linked list handling (will be filled in later)
       this.previousDrawable = null;
@@ -67,34 +68,62 @@ define( function( require ) {
       this.oldNextDrawable = null;
     },
     
+    // called to add a block (us) as a child of a backbone
     setBlockBackbone: function( backboneInstance ) {
+      // if this is being called, Block will be guaranteed to be loaded
+      assert && assert( this instanceof scenery.Block );
+      
       this.parentDrawable = backboneInstance;
       this.backbone = backboneInstance;
       this.pendingParentDrawable = backboneInstance;
       this.pendingBackbone = backboneInstance;
+      this.pendingAddition = false;
+      this.pendingRemoval = false;
     },
     
-    setPendingBlock: function( block, backbone ) {
+    notePendingAddition: function( display, block, backbone ) {
       assert && assert( backbone !== undefined, 'backbone can be either null or a backbone' );
+      assert && assert( block instanceof scenery.Block );
+      
       this.pendingParentDrawable = block;
       this.pendingBackbone = backbone;
+      this.pendingAddition = true;
+      
+      // if we weren't already marked for an update, mark us
+      if ( !this.pendingRemoval ) {
+        display.markDrawableChangedBlock( this );
+      }
     },
     
-    removePendingBackbone: function( backbone ) {
-      // Only update our pending information if it is still pointing to the backbone.
-      // We want to ignore this call if our drawable has been set (pending) to another backbone (or no backbone at all, e.g. inline blocks)
-      if ( backbone === this.pendingBackbone ) {
-        this.pendingParentDrawable = null;
-        this.pendingBackbone = null;
+    notePendingRemoval: function( display ) {
+      this.pendingRemoval = true;
+      
+      // if we weren't already marked for an update, mark us
+      if ( !this.pendingAddition ) {
+        display.markDrawableChangedBlock( this );
       }
     },
     
     updateBlock: function() {
-      if ( this.parentDrawable !== this.pendingParentDrawable ) {
-        this.parentDrawable && this.parentDrawable.removeDrawable( this );
-        this.pendingParentDrawable && this.pendingParentDrawable.addDrawable( this );
-        this.parentDrawable = this.pendingParentDrawable;
-        this.backbone = this.pendingBackbone;
+      if ( this.pendingRemoval || this.pendingAddition ) {
+        var changed = this.parentDrawable !== this.pendingParentDrawable ||
+                      this.backbone !== this.pendingBackbone;
+        
+        if ( changed ) {
+          if ( this.pendingRemoval ) {
+            this.parentDrawable.removeDrawable( this );
+          }
+          
+          this.parentDrawable = this.pendingParentDrawable;
+          this.backbone = this.pendingBackbone;
+          
+          if ( this.pendingAddition ) {
+            this.parentDrawable.addDrawable( this );
+          }
+        }
+        
+        this.pendingAddition = false;
+        this.pendingRemoval = false;
       }
     },
     
@@ -150,6 +179,8 @@ define( function( require ) {
                                   'If we have a backbone reference, we must have a parentDrawable (our block)' );
         
         if ( !allowPendingBlock ) {
+          assertSlow && assertSlow( !this.pendingAddition );
+          assertSlow && assertSlow( !this.pendingRemoval );
           assertSlow && assertSlow( this.parentDrawable === this.pendingParentDrawable,
                                     'Assure our parent and pending parent match, if we have updated blocks' );
           assertSlow && assertSlow( this.backbone === this.pendingBackbone,

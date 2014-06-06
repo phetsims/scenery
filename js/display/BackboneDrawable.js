@@ -154,8 +154,7 @@ define( function( require ) {
     // should be called during syncTree
     markForDisposal: function( display ) {
       for ( var d = this.lastFirstDrawable; d !== null; d = d.oldNextDrawable ) {
-        d.removePendingBackbone( this );
-        this.display.markDrawableChangedBlock( d );
+        d.notePendingRemoval( this.display );
         if ( d === this.lastLastDrawable ) { break; }
       }
       this.removedDrawables = true;
@@ -270,8 +269,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.push();
       
       for ( var d = this.lastFirstDrawable; d !== null; d = d.oldNextDrawable ) {
-        d.removePendingBackbone( this );
-        this.display.markDrawableChangedBlock( d );
+        d.notePendingRemoval( this.display );
         if ( d === this.lastLastDrawable ) { break; }
       }
       
@@ -318,8 +316,7 @@ define( function( require ) {
           firstDrawableForBlock = drawable;
         }
         
-        drawable.setPendingBlock( currentBlock, this );
-        this.display.markDrawableChangedBlock( drawable );
+        drawable.notePendingAddition( this.display, currentBlock, this );
         
         // don't cause an infinite loop!
         if ( drawable === lastDrawable ) { break; }
