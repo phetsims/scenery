@@ -70,6 +70,9 @@ define( function( require ) {
     
     // called to add a block (us) as a child of a backbone
     setBlockBackbone: function( backboneInstance ) {
+      sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( '[' + this.constructor.name + '*] setBlockBackbone ' +
+                                                                this.toString() + ' with ' + backboneInstance.toString() );
+      
       // if this is being called, Block will be guaranteed to be loaded
       assert && assert( this instanceof scenery.Block );
       
@@ -82,6 +85,10 @@ define( function( require ) {
     },
     
     notePendingAddition: function( display, block, backbone ) {
+      sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( '[' + this.constructor.name + '*] notePendingAddition ' +
+                                                                this.toString() + ' with ' + block.toString() + ', ' +
+                                                                ( backbone ? backbone.toString() : '-' ) );
+      
       assert && assert( backbone !== undefined, 'backbone can be either null or a backbone' );
       assert && assert( block instanceof scenery.Block );
       
@@ -96,6 +103,9 @@ define( function( require ) {
     },
     
     notePendingRemoval: function( display ) {
+      sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( '[' + this.constructor.name + '*] notePendingRemoval ' +
+                                                                this.toString() );
+      
       this.pendingRemoval = true;
       
       // if we weren't already marked for an update, mark us
@@ -105,12 +115,20 @@ define( function( require ) {
     },
     
     updateBlock: function() {
+      sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( '[' + this.constructor.name + '*] updateBlock ' + this.toString() +
+                                                                ' with add:' + this.pendingAddition +
+                                                                ' remove:'  + this.pendingRemoval +
+                                                                ' old:' + ( this.parentDrawable ? this.parentDrawable.toString() : '-' ) +
+                                                                ' new:' + ( this.pendingParentDrawable ? this.pendingParentDrawable.toString() : '-' ) );
+      sceneryLog && sceneryLog.Drawable && sceneryLog.push();
+      
       if ( this.pendingRemoval || this.pendingAddition ) {
         var changed = this.parentDrawable !== this.pendingParentDrawable ||
                       this.backbone !== this.pendingBackbone;
         
         if ( changed ) {
           if ( this.pendingRemoval ) {
+            sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( 'removing from ' + this.parentDrawable.toString() );
             this.parentDrawable.removeDrawable( this );
           }
           
@@ -118,13 +136,18 @@ define( function( require ) {
           this.backbone = this.pendingBackbone;
           
           if ( this.pendingAddition ) {
+            sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( 'adding to ' + this.parentDrawable.toString() );
             this.parentDrawable.addDrawable( this );
           }
+        } else {
+          sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( 'unchanged' );
         }
         
         this.pendingAddition = false;
         this.pendingRemoval = false;
       }
+      
+      sceneryLog && sceneryLog.Drawable && sceneryLog.pop();
     },
     
     updateLinks: function() {

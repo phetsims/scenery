@@ -147,13 +147,10 @@
               window.circle = new scenery.Circle( 50, { fill: 'black', x: 30, y: 60 } );
               node.addChild( circle );
               
-              node.centerX = display.width / 2;
-              node.centerY = display.height / 2;
-              
-              circle.opacity = 0.5;
               display.updateDisplay();
               
-              node.opacity = 0.5;
+              node.removeChild( circle );
+              
               display.updateDisplay();
             } );
           };
