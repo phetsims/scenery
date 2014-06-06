@@ -123,7 +123,10 @@ define( function( require ) {
       sceneryLog && sceneryLog.Drawable && sceneryLog.push();
       
       if ( this.pendingRemoval || this.pendingAddition ) {
-        var changed = this.parentDrawable !== this.pendingParentDrawable ||
+        // we are only unchanged if we have an addition AND removal, and the endpoints are identical
+        var changed = !this.pendingRemoval ||
+                      !this.pendingAddition ||
+                      this.parentDrawable !== this.pendingParentDrawable ||
                       this.backbone !== this.pendingBackbone;
         
         if ( changed ) {
