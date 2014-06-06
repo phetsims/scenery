@@ -1664,19 +1664,48 @@ define( function( require ) {
       }
     },
     
-    // @public: Render this node and its descendants to the Canvas wrapper
-    renderToCanvasSubtree: function( wrapper ) {
+    // @public: Render this node and its descendants to the Canvas wrapper. matrix is optional
+    renderToCanvasSubtree: function( wrapper, matrix ) {
+      matrix = matrix || Matrix3.identity();
+      
+      wrapper.resetStyles();
+      
       this.renderToCanvasSelf( wrapper );
       for ( var i = 0; i < this._children.length; i++ ) {
         var child = this._children[i];
         
         if ( child.isVisible() ) {
-          assert && assert( child._opacity === 1, 'renderToCanvasSubtree does not yet support opacity' );
-          assert && assert( !child._clipArea, 'renderToCanvasSubtree does not yet support clip areas' );
+          var requiresScratchCanvas = child._opacity !== 1 || child._clipArea;
           
-          child._transform.getMatrix().canvasAppendTransform( wrapper.context );
-          child.renderToCanvasSubtree( wrapper );
-          child._transform.getInverse().canvasAppendTransform( wrapper.context );
+          wrapper.context.save();
+          matrix.multiplyMatrix( child._transform.getMatrix() );
+          matrix.canvasSetTransform( wrapper.context );
+          if ( requiresScratchCanvas ) {
+            var canvas = document.createElement( 'canvas' );
+            canvas.width = wrapper.canvas.width;
+            canvas.height = wrapper.canvas.height;
+            var context = canvas.getContext( '2d' );
+            var childWrapper = new scenery.CanvasContextWrapper( canvas, context );
+            
+            matrix.canvasSetTransform( context );
+            
+            child.renderToCanvasSubtree( childWrapper, matrix );
+            
+            wrapper.context.save();
+            if ( child._clipArea ) {
+              wrapper.context.beginPath();
+              child._clipArea.writeToContext( wrapper.context );
+              wrapper.context.clip();
+            }
+            wrapper.context.setTransform( 1, 0, 0, 1, 0, 0 ); // identity
+            wrapper.context.globalAlpha = child._opacity;
+            wrapper.context.drawImage( canvas, 0, 0 );
+            wrapper.context.restore();
+          } else {
+            child.renderToCanvasSubtree( wrapper, matrix );
+          }
+          matrix.multiplyMatrix( child._transform.getInverse() );
+          wrapper.context.restore();
         }
       }
     },
@@ -1688,7 +1717,7 @@ define( function( require ) {
       
       var wrapper = new scenery.CanvasContextWrapper( canvas, context );
       
-      this.renderToCanvasSubtree( wrapper );
+      this.renderToCanvasSubtree( wrapper, Matrix3.identity() );
       
       callback && callback(); // this was originally asynchronous, so we had a callback
     },
@@ -1723,7 +1752,7 @@ define( function( require ) {
       
       var wrapper = new scenery.CanvasContextWrapper( canvas, context );
       
-      this.renderToCanvasSubtree( wrapper );
+      this.renderToCanvasSubtree( wrapper, Matrix3.translation( x, y ).timesMatrix( this._transform.getMatrix() ) );
       
       callback( canvas, x, y ); // we used to be asynchronous
     },
