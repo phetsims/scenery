@@ -600,6 +600,9 @@ define( function( require ) {
           this.groupDrawable.markForDisposal( this.display );
           this.groupDrawable = null;
         }
+        
+        // change everything, since we may need a full restitch
+        this.firstChangeInterval = this.currentChangeInterval = ChangeInterval.newForDisplay( null, null, this.display );
       }
       
       if ( groupRenderer ) {
@@ -617,7 +620,7 @@ define( function( require ) {
           }
           
           if ( this.firstChangeInterval ) {
-            this.groupDrawable.stitch( this.firstDrawable, this.lastDrawable, oldFirstDrawable, oldLastDrawable, this.firstChangeInterval, this.lastChangeInterval );
+            this.groupDrawable.rebuild( this.firstDrawable, this.lastDrawable, oldFirstDrawable, oldLastDrawable, this.firstChangeInterval, this.lastChangeInterval );
           }
         } else if ( state.isInstanceCanvasCache ) {
           if ( groupChanged ) {

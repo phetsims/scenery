@@ -264,8 +264,10 @@ define( function( require ) {
       return clip;
     },
     
-    stitch: function( firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
-      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'stitch ' + this.toString() + ' first:' + ( firstDrawable ? firstDrawable.toString() : 'null' ) + ' last:' + ( lastDrawable ? lastDrawable.toString() : 'null' ) );
+    rebuild: function( firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
+      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'rebuild ' + this.toString() +
+                                                                                ' first:' + ( firstDrawable ? firstDrawable.toString() : 'null' ) +
+                                                                                ' last:' + ( lastDrawable ? lastDrawable.toString() : 'null' ) );
       sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.push();
       
       for ( var d = this.lastFirstDrawable; d !== null; d = d.oldNextDrawable ) {
@@ -308,7 +310,8 @@ define( function( require ) {
           this.blocks.push( currentBlock );
           currentBlock.setBlockBackbone( this );
           sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( this.toString() + ' adding block: ' + currentBlock.toString() );
-          this.domElement.appendChild( currentBlock.domElement ); //OHTWO TODO: minor speedup by appending only once its fragment is constructed? or use DocumentFragment?
+          //OHTWO TODO: minor speedup by appending only once its fragment is constructed? or use DocumentFragment?
+          this.domElement.appendChild( currentBlock.domElement );
           
           // mark it dirty for now, so we can check
           this.markDirtyDrawable( currentBlock );
@@ -336,6 +339,64 @@ define( function( require ) {
       sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.pop();
     },
     
+    stitch: function( firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
+      sceneryLog.BackboneDrawable( 'stitch ' + this.toString() +
+                                   ' first:' + ( firstDrawable ? firstDrawable.toString() : 'null' ) +
+                                   ' last:' + ( lastDrawable ? lastDrawable.toString() : 'null' ) +
+                                   ' oldFirst:' + ( oldFirstDrawable ? oldFirstDrawable.toString() : 'null' ) +
+                                   ' oldLast:' + ( oldLastDrawable ? oldLastDrawable.toString() : 'null' ) );
+      
+      var interval;
+      
+      assert && assert( lastChangeInterval.nextChangeInterval === null, 'This allows us to have less checks in the loop' );
+      
+      // make the intervals as small as possible by skipping areas without changes
+      for ( interval = firstChangeInterval; interval !== null; interval = interval.nextChangeInterval ) {
+        interval.constrict();
+      }
+      
+      if ( sceneryLog && sceneryLog.BackboneDrawable ) {
+        for ( var debugInterval = firstChangeInterval; debugInterval !== null; debugInterval = debugInterval.nextChangeInterval ) {
+          sceneryLog.BackboneDrawable( '  interval: ' +
+                                       ( debugInterval.isEmpty() ? '(empty) ' : '' ) +
+                                       ( debugInterval.drawableBefore ? debugInterval.drawableBefore.toString : '-' ) + ' to ' +
+                                       ( debugInterval.drawableAfter ? debugInterval.drawableAfter.toString : '-' ) );
+        }
+      }
+      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.push();
+      
+      // dispose compatibility (for now)
+      this.lastFirstDrawable = firstDrawable;
+      this.lastLastDrawable = lastDrawable;
+      
+      // per-interval work
+      for ( interval = firstChangeInterval; interval !== null; interval = interval.nextChangeInterval ) {
+        if ( !interval.isEmpty() ) {
+          //OHTWO TODO: here (in the old-iteration), we should collect references to potentially reusable blocks?
+          BackboneDrawable.noteIntervalForRemoval( this.display, interval, oldFirstDrawable, oldLastDrawable );
+          
+          
+        }
+      }
+      
+      //OHTWO TODO: drawable.notePendingAddition( this.display, block, this );
+      
+      //OHTWO TODO: block creation, block.setBlockBackbone( this ), and appendChild it
+      
+      //OHTWO TODO: this.markDirtyDrawable on changed blocks
+      
+      //OHTWO TODO: maintain array or linked-list of blocks (and update)
+      
+      //OHTWO TODO: notifyInterval on all blocks that were changed
+      
+      //OHTWO TODO: replacement for marking disposed blocks
+      // this.markBlocksForDisposal();
+      
+      //OHTWO TODO: re-index
+      
+      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.pop();
+    },
+    
     audit: function( allowPendingBlock, allowPendingList, allowDirty ) {
       if ( assertSlow ) {
         Drawable.prototype.audit.call( this, allowPendingBlock, allowPendingList, allowDirty );
@@ -358,6 +419,18 @@ define( function( require ) {
     div.style.width = '0';
     div.style.height = '0';
     return div;
+  };
+  
+  BackboneDrawable.noteIntervalForRemoval = function( display, interval, oldFirstDrawable, oldLastDrawable ) {
+    // if before/after is null, we go out to the old first/last
+    var first = interval.drawableBefore || oldFirstDrawable;
+    var last = interval.drawableAfter || oldLastDrawable;
+    
+    for ( var drawable = first;; drawable = drawable.oldNextDrawable ) {
+      drawable.notePendingRemoval( display );
+      
+      if ( drawable === last ) { break; }
+    }
   };
   
   /* jshint -W064 */
