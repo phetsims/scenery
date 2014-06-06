@@ -481,9 +481,10 @@ define( function( require ) {
       
       var context = canvas.getContext( '2d' );
       
+      //OHTWO TODO: allow actual background color directly, not having to check the style here!!!
       this._rootNode.renderToCanvas( canvas, context, function() {
         callback( canvas, context.getImageData( 0, 0, canvas.width, canvas.height ) );
-      } );
+      }, this.domElement.style.backgroundColor );
     },
     
     setPointerDisplayVisible: function( visibility ) {

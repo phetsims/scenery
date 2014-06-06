@@ -1711,9 +1711,14 @@ define( function( require ) {
     },
     
     // @public @deprecated (API compatibility for now): Render this node to the Canvas (clearing it first)
-    renderToCanvas: function( canvas, context, callback ) {
+    renderToCanvas: function( canvas, context, callback, optionalBackgroundColor ) {
       // should basically reset everything (and clear the Canvas)
       canvas.width = canvas.width;
+      
+      if ( optionalBackgroundColor ) {
+        context.fillStyle = optionalBackgroundColor;
+        context.fillRect( 0, 0, canvas.width, canvas.height );
+      }
       
       var wrapper = new scenery.CanvasContextWrapper( canvas, context );
       
