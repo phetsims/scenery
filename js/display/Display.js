@@ -465,7 +465,6 @@ define( function( require ) {
     },
     
     // TODO: consider SVG data URLs
-    //OHTWO TODO: ported from 0.1, check validity
     canvasDataURL: function( callback ) {
       this.canvasSnapshot( function( canvas ) {
         callback( canvas.toDataURL() );
@@ -473,7 +472,6 @@ define( function( require ) {
     },
     
     // renders what it can into a Canvas (so far, Canvas and SVG layers work fine)
-    //OHTWO TODO: ported from 0.1, check validity
     canvasSnapshot: function( callback ) {
       var canvas = document.createElement( 'canvas' );
       canvas.width = this._size.width;
