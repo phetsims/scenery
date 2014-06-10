@@ -484,11 +484,11 @@ define( function( require ) {
         }
       }
       
+      //OHTWO TODO: remember to set blockOrderChanged on changes
+      
       //OHTWO TODO: DOMBlock special case with backbones / etc.? Always have the same drawable!!!
       
       //OHTWO TODO: drawable.notePendingAddition( backbone.display, block, backbone );
-      
-      //OHTWO TODO: block creation, block.setBlockBackbone( backbone ), and appendChild it
       
       //OHTWO TODO: backbone.markDirtyDrawable on changed blocks
       
@@ -496,14 +496,101 @@ define( function( require ) {
       
       //OHTWO TODO: notifyInterval on all blocks that were changed
       
-      //OHTWO TODO: replacement for marking disposed blocks
-      // backbone.markBlocksForDisposal();
+      this.removeUnusedBlocks( backbone );
       
-      backbone.reindexBlocks();
+      if ( this.blockOrderChanged ) {
+        throw new Error( 'enable this' );
+        // this.createBlockArrayFromLinks( backbone, firstBlock, lastBlock );
+        backbone.reindexBlocks();
+      }
       
       sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.pop();
       
       this.clean();
+    },
+    
+    // NOTE: this doesn't handle hooking up the block linked list
+    getBlockForRenderer: function( backbone, renderer, drawable ) {
+      var block;
+      
+      // If it's not a DOM block, scan our reusable blocks for a match
+      if ( !Renderer.isDOM( renderer ) ) {
+        var len = this.reusableBlocks.length;
+        for ( var i = 0; i < len; i++ ) {
+          block = this.reusableBlocks[i];
+          if ( block.renderer === renderer ) {
+            this.reusableBlocks.splice( i, 1 ); // remove it from our reusable blocks, since it's now in use
+            block.used = true; // mark it as used, so we don't match it when scanning
+          }
+        }
+      }
+      
+      if ( !block ) {
+        // Didn't find it in our reusable blocks, create a fresh one from scratch
+        if ( Renderer.isCanvas( renderer ) ) {
+          block = CanvasBlock.createFromPool( backbone.display, renderer, backbone.transformRootInstance, backbone.backboneInstance );
+        } else if ( Renderer.isSVG( renderer ) ) {
+          //OHTWO TODO: handle filter root separately from the backbone instance?
+          block = SVGBlock.createFromPool( backbone.display, renderer, backbone.transformRootInstance, backbone.backboneInstance );
+        } else if ( Renderer.isDOM( renderer ) ) {
+          block = DOMBlock.createFromPool( backbone.display, drawable );
+        } else {
+          throw new Error( 'unsupported renderer for BackboneDrawable.getBlockForRenderer: ' + renderer );
+        }
+        block.setBlockBackbone( backbone );
+        
+        this.blockOrderChanged = true; // we created a new block, this will always happen
+      }
+      
+      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( backbone.toString() + ' adding block: ' + block.toString() );
+      //OHTWO TODO: minor speedup by appending only once its fragment is constructed? or use DocumentFragment?
+      backbone.domElement.appendChild( block.domElement );
+      
+      // mark it dirty for now, so we can check
+      backbone.markDirtyDrawable( block );
+      
+      return block;
+    },
+    
+    // removes a block from the list of reused blocks (done during matching)
+    useBlock: function( backbone, block ) {
+      var idx = _.indexOf( this.reusableBlocks, block );
+      assert && assert( idx >= 0 );
+      
+      // remove it
+      this.reusableBlocks.splice( idx, 1 );
+      
+      // mark it as used
+      block.used = true;
+    },
+    
+    // removes them from our domElement, and marks them for disposal
+    removeUnusedBlocks: function( backbone ) {
+      while ( this.reusableBlocks.length ) {
+        var block = this.reusableBlocks.pop();
+        
+        sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( backbone.toString() + ' removing block: ' + block.toString() );
+        //TODO: PERFORMANCE: does this cause reflows / style calculation
+        if ( block.domElement.parentNode === backbone.domElement ) {
+          // guarded, since we may have a (new) child drawable add it before we can remove it
+          backbone.domElement.removeChild( block.domElement );
+        }
+        block.markForDisposal( backbone.display );
+      }
+    },
+    
+    createBlockArrayFromLinks: function( backbone, firstBlock, lastBlock ) {
+      // for now, just clear out the array first
+      while ( backbone.blocks.length ) {
+        backbone.blocks.pop();
+      }
+      
+      // and rewrite it
+      for ( var block = firstBlock;; block = block.nextBlock ) {
+        backbone.blocks.push( block );
+        
+        if ( block === lastBlock ) { break; }
+      }
     }
   };
   stitcher = new BackboneDrawable.Stitcher();

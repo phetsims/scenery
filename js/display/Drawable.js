@@ -114,6 +114,25 @@ define( function( require ) {
       }
     },
     
+    // moving a drawable that isn't changing backbones, just potentially changing its block.
+    // it should not have notePendingAddition or notePendingRemoval called on it.
+    notePendingMove: function( display, block ) {
+      sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( '[' + this.constructor.name + '*] notePendingMove ' +
+                                                                this.toString() + ' with ' + block.toString() );
+      
+      assert && assert( block instanceof scenery.Block );
+      
+      this.pendingParentDrawable = block;
+      
+      if ( !this.pendingRemoval || !this.pendingAddition ) {
+        display.markDrawableChangedBlock( this );
+      }
+      
+      // set both flags, since we need it to be removed and added
+      this.pendingAddition = true;
+      this.pendingRemoval = true;
+    },
+    
     updateBlock: function() {
       sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( '[' + this.constructor.name + '*] updateBlock ' + this.toString() +
                                                                 ' with add:' + this.pendingAddition +
