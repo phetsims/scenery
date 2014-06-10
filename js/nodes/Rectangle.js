@@ -195,7 +195,7 @@ define( function( require ) {
     
     invalidateRectangle: function() {
       assert && assert( isFinite( this._rectX ), 'A rectangle needs to have a finite x (' + this._rectX + ')' );
-      assert && assert( isFinite( this._rectY ), 'A rectangle needs to have a finite x (' + this._rectY + ')' );
+      assert && assert( isFinite( this._rectY ), 'A rectangle needs to have a finite y (' + this._rectY + ')' );
       assert && assert( this._rectWidth >= 0 && isFinite( this._rectWidth ),
                                       'A rectangle needs to have a non-negative finite width (' + this._rectWidth + ')' );
       assert && assert( this._rectHeight >= 0 && isFinite( this._rectHeight ),
