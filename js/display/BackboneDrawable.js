@@ -499,7 +499,7 @@ define( function( require ) {
       //OHTWO TODO: replacement for marking disposed blocks
       // backbone.markBlocksForDisposal();
       
-      //OHTWO TODO: re-index
+      backbone.reindexBlocks();
       
       sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.pop();
       
