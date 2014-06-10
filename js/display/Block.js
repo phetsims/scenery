@@ -24,9 +24,18 @@ define( function( require ) {
       this.initializeDrawable( renderer );
       this.display = display;
       this.drawableCount = 0;
+      this.used = true; // flag handled in the stitch
       
+      // written in notifyInterval, should not be modified except with that.
       this.firstDrawable = null;
       this.lastDrawable = null;
+      
+      // linked-list handling for blocks
+      this.previousBlock = null;
+      this.nextBlock = null;
+      
+      // last set z-index, valid if > 0.
+      this.zIndex = 0;
       
       if ( assertSlow ) {
         this.drawableList = cleanArray( this.drawableList );
@@ -42,6 +51,9 @@ define( function( require ) {
       this.display = null;
       this.firstDrawable = null;
       this.lastDrawable = null;
+      
+      this.previousBlock = null;
+      this.nextBlock = null;
       
       if ( assertSlow ) {
         cleanArray( this.drawableList );

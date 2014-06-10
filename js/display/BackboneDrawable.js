@@ -20,6 +20,9 @@ define( function( require ) {
   var DOMBlock = require( 'SCENERY/display/DOMBlock' );
   var Util = require( 'SCENERY/util/Util' );
   
+  // shared stitcher state machine
+  var stitcher;
+  
   scenery.BackboneDrawable = function BackboneDrawable( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
     this.initialize( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
   };
@@ -328,73 +331,42 @@ define( function( require ) {
         currentBlock.notifyInterval( firstDrawableForBlock, lastDrawable );
       }
       
-      // full-pass change for zindex. OHTWO TODO: only change where necessary
-      var zIndex = 1; // don't start below 1
-      for ( var k = 0; k < this.blocks.length; k++ ) {
-        this.blocks[k].domElement.style.zIndex = zIndex++; // NOTE: this should give it its own stacking index (which is what we want)
-      }
-      
-      this.lastZIndex = zIndex;
+      this.reindexBlocks();
       
       sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.pop();
     },
     
+    // ensures that z-indices are strictly increasing, while trying to minimize the number of times we must change it
+    reindexBlocks: function() {
+      // full-pass change for zindex.
+      var zIndex = 0; // don't start below 1 (we ensure > in loop)
+      for ( var k = 0; k < this.blocks.length; k++ ) {
+        var block = this.blocks[k];
+        if ( block.zIndex <= zIndex ) {
+          var newIndex = ( k + 1 < this.blocks.length && this.blocks[k+1].zIndex - 1 > zIndex ) ?
+                         Math.ceil( ( zIndex + this.blocks[k+1].zIndex ) / 2 ) :
+                         zIndex + 20;
+          
+          // NOTE: this should give it its own stacking index (which is what we want)
+          block.domElement.style.zIndex = block.zIndex = newIndex;
+        }
+        zIndex = block.zIndex;
+        
+        if ( assert ) {
+          assert( this.blocks[k].zIndex % 1 === 0, 'z-indices should be integers' );
+          assert( this.blocks[k].zIndex > 0, 'z-indices should be greater than zero for our needs (see spec)' );
+          if ( k > 0 ) {
+            assert( this.blocks[k-1].zIndex < this.blocks[k].zIndex, 'z-indices should be strictly increasing' );
+          }
+        }
+      }
+      
+      // sanity check
+      this.lastZIndex = zIndex + 1;
+    },
+    
     stitch: function( firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
-      sceneryLog.BackboneDrawable( 'stitch ' + this.toString() +
-                                   ' first:' + ( firstDrawable ? firstDrawable.toString() : 'null' ) +
-                                   ' last:' + ( lastDrawable ? lastDrawable.toString() : 'null' ) +
-                                   ' oldFirst:' + ( oldFirstDrawable ? oldFirstDrawable.toString() : 'null' ) +
-                                   ' oldLast:' + ( oldLastDrawable ? oldLastDrawable.toString() : 'null' ) );
-      
-      var interval;
-      
-      assert && assert( lastChangeInterval.nextChangeInterval === null, 'This allows us to have less checks in the loop' );
-      
-      // make the intervals as small as possible by skipping areas without changes
-      for ( interval = firstChangeInterval; interval !== null; interval = interval.nextChangeInterval ) {
-        interval.constrict();
-      }
-      
-      if ( sceneryLog && sceneryLog.BackboneDrawable ) {
-        for ( var debugInterval = firstChangeInterval; debugInterval !== null; debugInterval = debugInterval.nextChangeInterval ) {
-          sceneryLog.BackboneDrawable( '  interval: ' +
-                                       ( debugInterval.isEmpty() ? '(empty) ' : '' ) +
-                                       ( debugInterval.drawableBefore ? debugInterval.drawableBefore.toString : '-' ) + ' to ' +
-                                       ( debugInterval.drawableAfter ? debugInterval.drawableAfter.toString : '-' ) );
-        }
-      }
-      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.push();
-      
-      // dispose compatibility (for now)
-      this.lastFirstDrawable = firstDrawable;
-      this.lastLastDrawable = lastDrawable;
-      
-      // per-interval work
-      for ( interval = firstChangeInterval; interval !== null; interval = interval.nextChangeInterval ) {
-        if ( !interval.isEmpty() ) {
-          //OHTWO TODO: here (in the old-iteration), we should collect references to potentially reusable blocks?
-          BackboneDrawable.noteIntervalForRemoval( this.display, interval, oldFirstDrawable, oldLastDrawable );
-          
-          
-        }
-      }
-      
-      //OHTWO TODO: drawable.notePendingAddition( this.display, block, this );
-      
-      //OHTWO TODO: block creation, block.setBlockBackbone( this ), and appendChild it
-      
-      //OHTWO TODO: this.markDirtyDrawable on changed blocks
-      
-      //OHTWO TODO: maintain array or linked-list of blocks (and update)
-      
-      //OHTWO TODO: notifyInterval on all blocks that were changed
-      
-      //OHTWO TODO: replacement for marking disposed blocks
-      // this.markBlocksForDisposal();
-      
-      //OHTWO TODO: re-index
-      
-      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.pop();
+      return stitcher.stitch( this, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval );
     },
     
     audit: function( allowPendingBlock, allowPendingList, allowDirty ) {
@@ -432,6 +404,109 @@ define( function( require ) {
       if ( drawable === last ) { break; }
     }
   };
+  
+  BackboneDrawable.Stitcher = function() {
+    this.reusableBlocks = []; // {[Block]}
+    this.blockOrderChanged = false;
+    //OHTWO TODO: initialize empty vars?
+  };
+  BackboneDrawable.Stitcher.prototype = {
+    constructor: BackboneDrawable.Stitcher,
+    
+    initialize: function() {
+      this.blockOrderChanged = false;
+    },
+    
+    clean: function() {
+      cleanArray( this.reusableBlocks );
+    },
+    
+    stitch: function( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
+      this.initialize();
+      
+      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'stitch ' + backbone.toString() +
+                                                                                ' first:' + ( firstDrawable ? firstDrawable.toString() : 'null' ) +
+                                                                                ' last:' + ( lastDrawable ? lastDrawable.toString() : 'null' ) +
+                                                                                ' oldFirst:' + ( oldFirstDrawable ? oldFirstDrawable.toString() : 'null' ) +
+                                                                                ' oldLast:' + ( oldLastDrawable ? oldLastDrawable.toString() : 'null' ) );
+      
+      var interval;
+      
+      assert && assert( lastChangeInterval.nextChangeInterval === null, 'This allows us to have less checks in the loop' );
+      
+      // make the intervals as small as possible by skipping areas without changes
+      for ( interval = firstChangeInterval; interval !== null; interval = interval.nextChangeInterval ) {
+        interval.constrict();
+      }
+      
+      if ( sceneryLog && sceneryLog.BackboneDrawable ) {
+        for ( var debugInterval = firstChangeInterval; debugInterval !== null; debugInterval = debugInterval.nextChangeInterval ) {
+          sceneryLog.BackboneDrawable( '  interval: ' +
+                                       ( debugInterval.isEmpty() ? '(empty) ' : '' ) +
+                                       ( debugInterval.drawableBefore ? debugInterval.drawableBefore.toString : '-' ) + ' to ' +
+                                       ( debugInterval.drawableAfter ? debugInterval.drawableAfter.toString : '-' ) );
+        }
+      }
+      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.push();
+      
+      // dispose compatibility (for now)
+      backbone.lastFirstDrawable = firstDrawable;
+      backbone.lastLastDrawable = lastDrawable;
+      
+      // per-interval work
+      for ( interval = firstChangeInterval; interval !== null; interval = interval.nextChangeInterval ) {
+        if ( !interval.isEmpty() ) {
+          //OHTWO TODO: here (in the old-iteration), we should collect references to potentially reusable blocks?
+          BackboneDrawable.noteIntervalForRemoval( backbone.display, interval, oldFirstDrawable, oldLastDrawable );
+          
+          var firstBlock = interval.drawableBefore === null ? backbone.blocks[0] : interval.drawableBefore.pendingParentDrawable;
+          var lastBlock = interval.drawableAfter === null ? backbone.blocks[backbone.blocks.length-1] : interval.drawableAfter.pendingParentDrawable;
+          
+          // blocks totally contained within the change interval are marked as reusable (doesn't include end blocks)
+          if ( firstBlock !== lastBlock ) {
+            for ( var markedBlock = firstBlock.nextBlock; markedBlock !== lastBlock; markedBlock = markedBlock.nextBlock ) {
+              markedBlock.used = false; // mark it as unused until we pull it out (so we can reuse, or quickly identify)
+              this.reusableBlocks.push( markedBlock );
+            }
+          }
+        }
+      }
+      
+      for ( interval = firstChangeInterval; interval !== null; interval = interval.nextChangeInterval ) {
+        if ( !interval.isEmpty() ) {
+          var currentRenderer = interval.drawableBefore ? interval.drawableBefore.renderer : 0;
+          
+          for ( var drawable = interval.drawableBefore.nextDrawable; drawable !== interval.drawableAfter; drawable = drawable.nextDrawable ) {
+            if ( drawable.renderer !== currentRenderer ) {
+              
+            }
+          }
+        }
+      }
+      
+      //OHTWO TODO: DOMBlock special case with backbones / etc.? Always have the same drawable!!!
+      
+      //OHTWO TODO: drawable.notePendingAddition( backbone.display, block, backbone );
+      
+      //OHTWO TODO: block creation, block.setBlockBackbone( backbone ), and appendChild it
+      
+      //OHTWO TODO: backbone.markDirtyDrawable on changed blocks
+      
+      //OHTWO TODO: maintain array or linked-list of blocks (and update)
+      
+      //OHTWO TODO: notifyInterval on all blocks that were changed
+      
+      //OHTWO TODO: replacement for marking disposed blocks
+      // backbone.markBlocksForDisposal();
+      
+      //OHTWO TODO: re-index
+      
+      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.pop();
+      
+      this.clean();
+    }
+  };
+  stitcher = new BackboneDrawable.Stitcher();
   
   /* jshint -W064 */
   Poolable( BackboneDrawable, {
