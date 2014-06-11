@@ -3,6 +3,9 @@
 /**
  * A node that can be custom-drawn with Canvas calls. Manual handling of dirty region repainting.
  *
+ * setCanvasBounds (or the mutator canvasBounds) should be used to set the area that is drawn to (otherwise nothing
+ * will show up)
+ *
  * @author Jonathan Olson <olsonsjc@gmail.com>
  */
 
@@ -32,6 +35,8 @@ define( function( require ) {
     setCanvasBounds: function( selfBounds ) {
       this.invalidateSelf( selfBounds );
     },
+    set canvasBounds( value ) { this.setCanvasBounds( value ); },
+    get canvasBounds() { return this.getSelfBounds(); },
     
     isPainted: function() {
       return true;
@@ -59,6 +64,8 @@ define( function( require ) {
     }
     
   } );
+  
+  CanvasNode.prototype._mutatorKeys = [ 'canvasBounds' ].concat( Node.prototype._mutatorKeys );
   
   return CanvasNode;
 } );
