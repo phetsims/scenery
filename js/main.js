@@ -62,6 +62,8 @@ define( [
     'SCENERY/nodes/Text',
     'SCENERY/nodes/VBox',
 
+    'SCENERY/overlays/CanvasNodeBoundsOverlay',
+    'SCENERY/overlays/PointerAreaOverlay',
     'SCENERY/overlays/PointerOverlay',
 
     'SCENERY/util/AccessibilityPeer',

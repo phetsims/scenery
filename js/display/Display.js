@@ -57,6 +57,7 @@ define( function( require ) {
   require( 'SCENERY/util/Trail' );
   var PointerAreaOverlay = require( 'SCENERY/overlays/PointerAreaOverlay' );
   var PointerOverlay = require( 'SCENERY/overlays/PointerOverlay' );
+  var CanvasNodeBoundsOverlay = require( 'SCENERY/overlays/CanvasNodeBoundsOverlay' );
   
   // flags object used for determining what the cursor should be underneath a mouse
   var isMouseFlags = { isMouse: true };
@@ -130,6 +131,7 @@ define( function( require ) {
     this._overlays = [];
     this._pointerOverlay = null;
     this._pointerAreaOverlay = null;
+    this._canvasAreaBoundsOverlay = null;
     
     this.applyCSSHacks();
     
@@ -485,6 +487,7 @@ define( function( require ) {
       }, this.domElement.style.backgroundColor );
     },
     
+    //TODO: reduce code duplication for handling overlays
     setPointerDisplayVisible: function( visibility ) {
       // @deprecated, Joist code calls us with undefined first....
       if ( visibility === undefined ) {
@@ -507,6 +510,7 @@ define( function( require ) {
       }
     },
     
+    //TODO: reduce code duplication for handling overlays
     setPointerAreaDisplayVisible: function( visibility ) {
       // @deprecated, Joist code calls us with undefined first....
       if ( visibility === undefined ) {
@@ -525,6 +529,29 @@ define( function( require ) {
         } else {
           this._pointerAreaOverlay = new PointerAreaOverlay( this, this._rootNode );
           this.addOverlay( this._pointerAreaOverlay );
+        }
+      }
+    },
+    
+    //TODO: reduce code duplication for handling overlays
+    setCanvasNodeBoundsVisible: function( visibility ) {
+      // @deprecated, Joist code calls us with undefined first....
+      if ( visibility === undefined ) {
+        return;
+      }
+      
+      assert && assert( typeof visibility === 'boolean' );
+      
+      var hasOverlay = !!this._canvasAreaBoundsOverlay;
+      
+      if ( visibility !== hasOverlay ) {
+        if ( !visibility ) {
+          this.removeOverlay( this._canvasAreaBoundsOverlay );
+          this._canvasAreaBoundsOverlay.dispose();
+          this._canvasAreaBoundsOverlay = null;
+        } else {
+          this._canvasAreaBoundsOverlay = new CanvasNodeBoundsOverlay( this, this._rootNode );
+          this.addOverlay( this._canvasAreaBoundsOverlay );
         }
       }
     },
