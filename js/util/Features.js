@@ -9,6 +9,7 @@
 define( function( require ) {
   'use strict';
   
+  var detectPrefix = require( 'PHET_CORE/detectPrefix' );
   var scenery = require( 'SCENERY/scenery' );
   
   var Features = scenery.Features = {};
@@ -61,32 +62,6 @@ define( function( require ) {
     }
   }
   
-  function prefixed( name ) {
-    var result = [];
-    result.push( name );
-    
-    // prepare for camel case
-    name = name.charAt( 0 ).toUpperCase() + name.slice( 1 );
-    
-    // Chrome planning to not introduce prefixes in the future, hopefully we will be safe
-    result.push( 'moz' + name );
-    result.push( 'Moz' + name ); // some prefixes seem to have all-caps?
-    result.push( 'webkit' + name );
-    result.push( 'ms' + name );
-    result.push( 'o' + name );
-    
-    return result;
-  }
-  
-  function detect( obj, names ) {
-    for ( var i = 0; i < names.length; i++ ) {
-      if ( obj[names[i]] !== undefined ) {
-        return names[i];
-      }
-    }
-    return undefined;
-  }
-  
   Features.canvasPNGOutput = supportsDataURLFormatOutput( 'image/png' );
   Features.canvasJPEGOutput = supportsDataURLFormatOutput( 'image/jpeg' );
   Features.canvasGIFOutput = supportsDataURLFormatOutput( 'image/gif' );
@@ -114,28 +89,28 @@ define( function( require ) {
   // canvas prefixed names
   var canvas = document.createElement( 'canvas' );
   var ctx = canvas.getContext( '2d' );
-  Features.toDataURLHD = detect( canvas, prefixed( 'toDataURLHD' ) );
-  Features.createImageDataHD = detect( ctx, prefixed( 'createImageDataHD' ) );
-  Features.getImageDataHD = detect( ctx, prefixed( 'getImageDataHD' ) );
-  Features.putImageDataHD = detect( ctx, prefixed( 'putImageDataHD' ) );
-  Features.currentTransform = detect( ctx, prefixed( 'currentTransform' ) );
+  Features.toDataURLHD = detectPrefix( canvas, 'toDataURLHD' );
+  Features.createImageDataHD = detectPrefix( ctx, 'createImageDataHD' );
+  Features.getImageDataHD = detectPrefix( ctx, 'getImageDataHD' );
+  Features.putImageDataHD = detectPrefix( ctx, 'putImageDataHD' );
+  Features.currentTransform = detectPrefix( ctx, 'currentTransform' );
   
   var span = document.createElement( 'span' );
   var div = document.createElement( 'div' );
-  Features.textStroke = detect( span.style, prefixed( 'textStroke' ) );
-  Features.textStrokeColor = detect( span.style, prefixed( 'textStrokeColor' ) );
-  Features.textStrokeWidth = detect( span.style, prefixed( 'textStrokeWidth' ) );
+  Features.textStroke = detectPrefix( span.style, 'textStroke' );
+  Features.textStrokeColor = detectPrefix( span.style, 'textStrokeColor' );
+  Features.textStrokeWidth = detectPrefix( span.style, 'textStrokeWidth' );
   
-  Features.transform = detect( div.style, prefixed( 'transform' ) );
-  Features.transformOrigin = detect( div.style, prefixed( 'transformOrigin' ) );
-  Features.backfaceVisibility = detect( div.style, prefixed( 'backfaceVisibility' ) );
-  Features.borderRadius = detect( div.style, prefixed( 'borderRadius' ) );
+  Features.transform = detectPrefix( div.style, 'transform' );
+  Features.transformOrigin = detectPrefix( div.style, 'transformOrigin' );
+  Features.backfaceVisibility = detectPrefix( div.style, 'backfaceVisibility' );
+  Features.borderRadius = detectPrefix( div.style, 'borderRadius' );
   
-  Features.userSelect = detect( div.style, prefixed( 'userSelect' ) );
-  Features.touchAction = detect( div.style, prefixed( 'touchAction' ) );
-  Features.touchCallout = detect( div.style, prefixed( 'touchCallout' ) );
-  Features.userDrag = detect( div.style, prefixed( 'userDrag' ) );
-  Features.tapHighlightColor = detect( div.style, prefixed( 'tapHighlightColor' ) );
+  Features.userSelect = detectPrefix( div.style, 'userSelect' );
+  Features.touchAction = detectPrefix( div.style, 'touchAction' );
+  Features.touchCallout = detectPrefix( div.style, 'touchCallout' );
+  Features.userDrag = detectPrefix( div.style, 'userDrag' );
+  Features.tapHighlightColor = detectPrefix( div.style, 'tapHighlightColor' );
   
   // e.g. Features.setStyle( domElement, Features.transform, '...' ), and doesn't set it if no 'transform' attribute (prefixed or no) is found
   Features.setStyle = function( domElement, optionalKey, value ) {
