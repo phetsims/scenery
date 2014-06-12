@@ -413,16 +413,35 @@ define( function( require ) {
   BackboneDrawable.Stitcher.prototype = {
     constructor: BackboneDrawable.Stitcher,
     
-    initialize: function() {
+    initialize: function( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
       this.blockOrderChanged = false;
+      
+      //OHTWO TODO: remove unused
+      this.backbone = backbone;
+      this.firstDrawable = firstDrawable;
+      this.lastDrawable = lastDrawable;
+      this.oldFirstDrawable = oldFirstDrawable;
+      this.oldLastDrawable = oldLastDrawable;
+      this.firstChangeInterval = firstChangeInterval;
+      this.lastChangeInterval = lastChangeInterval;
     },
     
     clean: function() {
       cleanArray( this.reusableBlocks );
+      
+      // clean references so things can be garbage-collected
+      //OHTWO TODO: remove unused
+      this.backbone = null;
+      this.firstDrawable = null;
+      this.lastDrawable = null;
+      this.oldFirstDrawable = null;
+      this.oldLastDrawable = null;
+      this.firstChangeInterval = null;
+      this.lastChangeInterval = null;
     },
     
     stitch: function( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
-      this.initialize();
+      this.initialize( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval );
       
       sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'stitch ' + backbone.toString() +
                                                                                 ' first:' + ( firstDrawable ? firstDrawable.toString() : 'null' ) +
@@ -474,13 +493,18 @@ define( function( require ) {
       
       for ( interval = firstChangeInterval; interval !== null; interval = interval.nextChangeInterval ) {
         if ( !interval.isEmpty() ) {
-          var currentRenderer = interval.drawableBefore ? interval.drawableBefore.renderer : 0;
+          this.intervalStart( interval );
           
-          for ( var drawable = interval.drawableBefore.nextDrawable; drawable !== interval.drawableAfter; drawable = drawable.nextDrawable ) {
-            if ( drawable.renderer !== currentRenderer ) {
-              
+          var previousDrawable = interval.drawableBefore;
+          for ( var drawable = interval.drawableBefore.nextDrawable;; drawable = drawable.nextDrawable ) {
+            if ( this.hasGapBetweenDrawables( previousDrawable, drawable ) ) {
+              this.intervalBoundary( interval, previousDrawable, drawable );
             }
+            previousDrawable = drawable;
+            if ( drawable === interval.drawableAfter ) { break; }  
           }
+          
+          this.intervalEnd( interval );
         }
       }
       
@@ -499,14 +523,30 @@ define( function( require ) {
       this.removeUnusedBlocks( backbone );
       
       if ( this.blockOrderChanged ) {
-        throw new Error( 'enable this' );
         // this.createBlockArrayFromLinks( backbone, firstBlock, lastBlock );
         backbone.reindexBlocks();
+        throw new Error( 'enable line above' );
       }
       
       sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.pop();
       
       this.clean();
+    },
+    
+    hasGapBetweenDrawables: function( a, b ) {
+      return a.renderer !== b.renderer || Renderer.isDOM( a.renderer ) || Renderer.isDOM( b.renderer );
+    },
+    
+    intervalStart: function( interval ) {
+      
+    },
+    
+    intervalBoundary: function( interval, beforeDrawable, afterDrawable ) {
+      
+    },
+    
+    intervalEnd: function( interval ) {
+      
     },
     
     // NOTE: this doesn't handle hooking up the block linked list
