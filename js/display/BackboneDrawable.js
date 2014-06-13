@@ -754,6 +754,40 @@ define( function( require ) {
       }
     },
     
+    linkBlocks: function( beforeBlock, afterBlock, beforeDrawable, afterDrawable ) {
+      assert && assert( ( beforeBlock === null && beforeDrawable === null ) ||
+                        ( beforeBlock instanceof scenery.Block && beforeDrawable instanceof scenery.Drawable ) );
+      assert && assert( ( afterBlock === null && afterDrawable === null ) ||
+                        ( afterBlock instanceof scenery.Block && afterDrawable instanceof scenery.Drawable ) );
+      
+      if ( beforeBlock ) {
+        if ( beforeBlock.nextBlock !== afterBlock ) {
+          this.blockOrderChanged = true;
+          
+          // disconnect from the previously-connected block (if any)
+          if ( beforeBlock.nextBlock ) {
+            beforeBlock.nextBlock.previousBlock = null;
+          }
+          
+          beforeBlock.nextBlock = afterBlock;
+        }
+        beforeBlock.pendingLastDrawable = beforeDrawable;
+      }
+      if ( afterBlock ) {
+        if ( afterBlock.previousBlock !== beforeBlock ) {
+          this.blockOrderChanged = true;
+          
+          // disconnect from the previously-connected block (if any)
+          if ( afterBlock.previousBlock ) {
+            afterBlock.previousBlock.nextBlock = null;
+          }
+          
+          afterBlock.previousBlock = beforeBlock;
+        }
+        afterBlock.pendingFirstDrawable = afterDrawable;
+      }
+    },
+    
     processBlockLinkedList: function( backbone, firstBlock, lastBlock ) {
       // for now, just clear out the array first
       while ( backbone.blocks.length ) {
