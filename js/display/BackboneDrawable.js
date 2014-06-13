@@ -493,18 +493,42 @@ define( function( require ) {
       
       for ( interval = firstChangeInterval; interval !== null; interval = interval.nextChangeInterval ) {
         if ( !interval.isEmpty() ) {
-          this.intervalStart( interval );
+          // interval start
+          var currentBlock = ( interval.drawableBefore && interval.drawableBefore.backboneInstance === backbone ) ?
+                             interval.drawableBefore.pendingParentDrawable :
+                             null;
+          var firstDrawableForBlockChange = null;
           
           var previousDrawable = interval.drawableBefore;
           for ( var drawable = interval.drawableBefore.nextDrawable;; drawable = drawable.nextDrawable ) {
             if ( this.hasGapBetweenDrawables( previousDrawable, drawable ) ) {
-              this.intervalBoundary( interval, previousDrawable, drawable );
+              // interval boundary
+              if ( firstDrawableForBlockChange ) {
+                this.notePendingAdditions( backbone, currentBlock, firstDrawableForBlockChange, previousDrawable );
+                firstDrawableForBlockChange = null;
+              }
+              currentBlock = null; // so we can match another
             }
+            
+            // on to the next drawable
             previousDrawable = drawable;
-            if ( drawable === interval.drawableAfter ) { break; }  
+            if ( drawable === interval.drawableAfter ) {
+              break;
+            } else {
+              // a drawable somewhere in the middle
+              
+              // attempt to match for our block to use
+              if ( currentBlock === null && drawable.parentDrawable && !drawable.parentDrawable.used ) {
+                currentBlock = this.useBlock( backbone, drawable.parentDrawable );
+              }
+              
+              if ( firstDrawableForBlockChange === null ) {
+                firstDrawableForBlockChange = drawable;
+              }
+            }
           }
           
-          this.intervalEnd( interval );
+          // interval end
         }
       }
       
@@ -523,9 +547,8 @@ define( function( require ) {
       this.removeUnusedBlocks( backbone );
       
       if ( this.blockOrderChanged ) {
-        // this.createBlockArrayFromLinks( backbone, firstBlock, lastBlock );
+        this.createBlockArrayFromLinks( backbone, firstDrawable.pendingParentDrawable, lastDrawable.pendingParentDrawable );
         backbone.reindexBlocks();
-        throw new Error( 'enable line above' );
       }
       
       sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.pop();
@@ -537,16 +560,11 @@ define( function( require ) {
       return a.renderer !== b.renderer || Renderer.isDOM( a.renderer ) || Renderer.isDOM( b.renderer );
     },
     
-    intervalStart: function( interval ) {
-      
-    },
-    
-    intervalBoundary: function( interval, beforeDrawable, afterDrawable ) {
-      
-    },
-    
-    intervalEnd: function( interval ) {
-      
+    notePendingAdditions: function( backbone, block, firstDrawable, lastDrawable ) {
+      for ( var drawable = firstDrawable;; drawable = drawable.nextDrawable ) {
+        drawable.notePendingAddition( backbone.display, block, backbone );
+        if ( drawable === lastDrawable ) { break; }
+      }
     },
     
     // NOTE: this doesn't handle hooking up the block linked list
