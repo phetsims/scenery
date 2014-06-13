@@ -20,9 +20,6 @@ define( function( require ) {
   var DOMBlock = require( 'SCENERY/display/DOMBlock' );
   var Util = require( 'SCENERY/util/Util' );
   
-  // shared stitcher state machine
-  var stitcher;
-  
   scenery.BackboneDrawable = function BackboneDrawable( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
     this.initialize( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
   };
@@ -98,6 +95,8 @@ define( function( require ) {
       // We track whether our drawables were marked for removal (in which case, they should all be removed by the time we dispose).
       // If removedDrawables = false during disposal, it means we need to remove the drawables manually (this should only happen if an instance tree is removed)
       this.removedDrawables = false;
+      
+      this.stitcher = this.stitcher || new BackboneDrawable.Rebuilder();
       
       sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'initialized ' + this.toString() );
       
@@ -297,7 +296,7 @@ define( function( require ) {
     },
     
     stitch: function( firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
-      return stitcher.stitch( this, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval );
+      return this.stitcher.stitch( this, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval );
     },
     
     audit: function( allowPendingBlock, allowPendingList, allowDirty ) {
@@ -666,8 +665,6 @@ define( function( require ) {
       }
     }
   };
-  
-  stitcher = new BackboneDrawable.Rebuilder();
   
   /* jshint -W064 */
   Poolable( BackboneDrawable, {
