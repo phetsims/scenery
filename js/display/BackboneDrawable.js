@@ -607,15 +607,15 @@ define( function( require ) {
           }
         }
       }
+      //OHTWO TODO: set pendingFirstDrawable / pendingLastDrawable on blocks
       //OHTWO TODO: maintain array or linked-list of blocks (and update)
       //OHTWO TODO: remember to set blockOrderChanged on changes
-      //OHTWO TODO: notifyInterval on all blocks that were changed
       //OHTWO VERIFY: DOMBlock special case with backbones / etc.? Always have the same drawable!!!
       
       this.removeUnusedBlocks( backbone );
       
       if ( this.blockOrderChanged ) {
-        this.createBlockArrayFromLinks( backbone, firstDrawable.pendingParentDrawable, lastDrawable.pendingParentDrawable );
+        this.processBlockLinkedList( backbone, firstDrawable.pendingParentDrawable, lastDrawable.pendingParentDrawable );
         backbone.reindexBlocks();
       }
       
@@ -754,7 +754,7 @@ define( function( require ) {
       }
     },
     
-    createBlockArrayFromLinks: function( backbone, firstBlock, lastBlock ) {
+    processBlockLinkedList: function( backbone, firstBlock, lastBlock ) {
       // for now, just clear out the array first
       while ( backbone.blocks.length ) {
         backbone.blocks.pop();
@@ -763,6 +763,9 @@ define( function( require ) {
       // and rewrite it
       for ( var block = firstBlock;; block = block.nextBlock ) {
         backbone.blocks.push( block );
+        
+        // if its first/last drawable has changed, update it
+        block.updateInterval();
         
         if ( block === lastBlock ) { break; }
       }
