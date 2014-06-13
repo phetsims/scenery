@@ -620,7 +620,7 @@ define( function( require ) {
           }
           
           if ( this.firstChangeInterval ) {
-            this.groupDrawable.rebuild( this.firstDrawable, this.lastDrawable, oldFirstDrawable, oldLastDrawable, this.firstChangeInterval, this.lastChangeInterval );
+            this.groupDrawable.stitch( this.firstDrawable, this.lastDrawable, oldFirstDrawable, oldLastDrawable, this.firstChangeInterval, this.lastChangeInterval );
           }
         } else if ( state.isInstanceCanvasCache ) {
           if ( groupChanged ) {
