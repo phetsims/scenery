@@ -194,10 +194,10 @@ define( function( require ) {
       FittedBlock.prototype.removeDrawable.call( this, drawable );
     },
     
-    notifyInterval: function( firstDrawable, lastDrawable ) {
-      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( '#' + this.id + '.notifyInterval ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() );
+    onIntervalChange: function( firstDrawable, lastDrawable ) {
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( '#' + this.id + '.onIntervalChange ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() );
       
-      FittedBlock.prototype.notifyInterval.call( this, firstDrawable, lastDrawable );
+      FittedBlock.prototype.onIntervalChange.call( this, firstDrawable, lastDrawable );
     },
     
     toString: function() {

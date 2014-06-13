@@ -125,10 +125,10 @@ define( function( require ) {
       Block.prototype.dispose.call( this );
     },
     
-    notifyInterval: function( firstDrawable, lastDrawable ) {
-      sceneryLog && sceneryLog.FittedBlock && sceneryLog.FittedBlock( '#' + this.id + '.notifyInterval ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() );
+    onIntervalChange: function( firstDrawable, lastDrawable ) {
+      sceneryLog && sceneryLog.FittedBlock && sceneryLog.FittedBlock( '#' + this.id + '.onIntervalChange ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() );
       
-      Block.prototype.notifyInterval.call( this, firstDrawable, lastDrawable );
+      Block.prototype.onIntervalChange.call( this, firstDrawable, lastDrawable );
       
       // if we use a common ancestor fit, find the common ancestor instance
       if ( this.fit === FittedBlock.COMMON_ANCESTOR ) {

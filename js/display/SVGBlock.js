@@ -158,10 +158,10 @@ define( function( require ) {
       // or will be added to another SVGBlock (which will overwrite it)
     },
     
-    notifyInterval: function( firstDrawable, lastDrawable ) {
-      sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( '#' + this.id + '.notifyInterval ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() );
+    onIntervalChange: function( firstDrawable, lastDrawable ) {
+      sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( '#' + this.id + '.onIntervalChange ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() );
       
-      FittedBlock.prototype.notifyInterval.call( this, firstDrawable, lastDrawable );
+      FittedBlock.prototype.onIntervalChange.call( this, firstDrawable, lastDrawable );
     },
     
     toString: function() {

@@ -26,9 +26,10 @@ define( function( require ) {
       this.drawableCount = 0;
       this.used = true; // flag handled in the stitch
       
-      // written in notifyInterval, should not be modified except with that.
       this.firstDrawable = null;
       this.lastDrawable = null;
+      this.pendingFirstDrawable = null;
+      this.pendingLastDrawable = null;
       
       // linked-list handling for blocks
       this.previousBlock = null;
@@ -51,6 +52,8 @@ define( function( require ) {
       this.display = null;
       this.firstDrawable = null;
       this.lastDrawable = null;
+      this.pendingFirstDrawable = null;
+      this.pendingLastDrawable = null;
       
       this.previousBlock = null;
       this.nextBlock = null;
@@ -87,9 +90,26 @@ define( function( require ) {
       }
     },
     
+    // @protected
+    onIntervalChange: function( firstDrawable, lastDrawable ) {
+      // stub, should be filled in with behavior in blocks
+    },
+    
+    updateInterval: function() {
+      if ( this.pendingFirstDrawable !== this.firstDrawable ||
+           this.pendingLastDrawable !== this.lastDrawable ) {
+        this.onIntervalChange( this.pendingFirstDrawable, this.pendingLastDrawable );
+        
+        this.firstDrawable = this.pendingFirstDrawable;
+        this.lastDrawable = this.pendingLastDrawable;
+      }
+    },
+    
     notifyInterval: function( firstDrawable, lastDrawable ) {
-      this.firstDrawable = firstDrawable;
-      this.lastDrawable = lastDrawable;
+      this.pendingFirstDrawable = firstDrawable;
+      this.pendingLastDrawable = lastDrawable;
+      
+      this.updateInterval();
     },
     
     audit: function( allowPendingBlock, allowPendingList, allowDirty ) {
@@ -109,6 +129,9 @@ define( function( require ) {
           
           if ( !allowPendingBlock ) {
             assertSlow && assertSlow( count === this.drawableCount, 'drawableCount should match' );
+            
+            assertSlow && assertSlow( this.firstDrawable === this.pendingFirstDrawable, 'No pending first drawable' );
+            assertSlow && assertSlow( this.lastDrawable === this.pendingLastDrawable, 'No pending last drawable' );
             
             // scan through to make sure our drawable lists are identical
             for ( var d = this.firstDrawable; d !== null; d = d.nextDrawable ) {
