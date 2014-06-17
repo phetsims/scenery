@@ -322,13 +322,19 @@ define( function( require ) {
       
       this.instance.removeSVGGroup( this );
       
+      // remove clipping, since it is defs-based (and we want to keep our defs block clean - could be another layer!)
+      if ( this.clipDefinition ) {
+        this.svgGroup.removeAttribute( 'clip-path' );
+        this.block.defs.removeChild( this.clipDefinition );
+        this.clipDefinition = null;
+        this.clipPath = null;
+      }
+      
       // clear references
       this.parent = null;
       this.block = null;
       this.instance = null;
       this.node = null;
-      this.clipDefinition = null;
-      this.clipPath = null;
       cleanArray( this.children );
       this.selfDrawable = null;
       
