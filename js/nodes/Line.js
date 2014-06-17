@@ -81,17 +81,34 @@ define( function( require ) {
       this._y1 = y1;
       this._x2 = x2;
       this._y2 = y2;
+      
+      var stateLen = this._drawables.length;
+      for ( var i = 0; i < stateLen; i++ ) {
+        var state = this._drawables[i];
+        state.markDirtyLine();
+      }
+      
       this.invalidateLine();
     },
     
     setPoint1: function( x1, y1 ) {
       if ( typeof x1 === 'number' ) {
         // setPoint1( x1, y1 );
-        this.setLine( x1, y1, this._x2, this._y2 );
+        assert && assert( x1 !== undefined && y1 !== undefined, 'parameters need to be defined' );
+        this._x1 = x1;
+        this._y1 = y1;
       } else {
         // setPoint1( Vector2 )
-        this.setLine( x1.x, x1.y, this._x2, this._y2 );
+        assert && assert( x1.x !== undefined && x1.y !== undefined, 'parameters need to be defined' );
+        this._x1 = x1.x;
+        this._y1 = x1.y;
       }
+      var stateLen = this._drawables.length;
+      for ( var i = 0; i < stateLen; i++ ) {
+        var state = this._drawables[i];
+        state.markDirtyP1();
+      }
+      this.invalidateLine();
     },
     set p1( point ) { this.setPoint1( point ); },
     get p1() { return new Vector2( this._x1, this._y1 ); },
@@ -99,11 +116,21 @@ define( function( require ) {
     setPoint2: function( x2, y2 ) {
       if ( typeof x2 === 'number' ) {
         // setPoint2( x2, y2 );
-        this.setLine( this._x1, this._y1, x2, y2 );
+        assert && assert( x2 !== undefined && y2 !== undefined, 'parameters need to be defined' );
+        this._x2 = x2;
+        this._y2 = y2;
       } else {
         // setPoint2( Vector2 )
-        this.setLine( this._x1, this._y1, x2.x, x2.y );
+        assert && assert( x2.x !== undefined && x2.y !== undefined, 'parameters need to be defined' );
+        this._x2 = x2.x;
+        this._y2 = x2.y;
       }
+      var stateLen = this._drawables.length;
+      for ( var i = 0; i < stateLen; i++ ) {
+        var state = this._drawables[i];
+        state.markDirtyP2();
+      }
+      this.invalidateLine();
     },
     set p2( point ) { this.setPoint2( point ); },
     get p2() { return new Vector2( this._x2, this._y2 ); },
@@ -186,6 +213,7 @@ define( function( require ) {
     var getName = 'get' + capitalizedShort;
     var setName = 'set' + capitalizedShort;
     var privateName = '_' + lowerShort;
+    var dirtyMethodName = 'markDirty' + capitalizedShort;
     
     Line.prototype[getName] = function() {
       return this[privateName];
@@ -194,6 +222,11 @@ define( function( require ) {
     Line.prototype[setName] = function( value ) {
       if ( this[privateName] !== value ) {
         this[privateName] = value;
+        var stateLen = this._drawables.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          var state = this._drawables[i];
+          state[dirtyMethodName]();
+        }
         this.invalidateLine();
       }
       return this;
@@ -239,6 +272,26 @@ define( function( require ) {
     proto.markPaintDirty = function() {
       this.paintDirty = true;
       this.markDirty();
+    };
+    
+    proto.markDirtyLine = function() {
+      this.dirtyX1 = true;
+      this.dirtyY1 = true;
+      this.dirtyX2 = true;
+      this.dirtyY2 = true;
+      this.markPaintDirty();
+    };
+    
+    proto.markDirtyP1 = function() {
+      this.dirtyX1 = true;
+      this.dirtyY1 = true;
+      this.markPaintDirty();
+    };
+    
+    proto.markDirtyP2 = function() {
+      this.dirtyX2 = true;
+      this.dirtyY2 = true;
+      this.markPaintDirty();
     };
     
     proto.markDirtyX1 = function() {
