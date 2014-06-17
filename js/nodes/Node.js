@@ -481,11 +481,13 @@ define( function( require ) {
           var childBounds = Bounds2.NOTHING.copy();
           _.each( that.children, function( child ) { childBounds.includeBounds( child._bounds ); } );
           
-          var fullBounds = that.localToParentBounds( that._selfBounds ).union( that.localToParentBounds( childBounds ) );
+          var localBounds = that._selfBounds.union( childBounds );
           
           if ( that.hasClipArea() ) {
-            fullBounds = fullBounds.intersection( that._clipArea.bounds );
+            localBounds = localBounds.intersection( that._clipArea.bounds );
           }
+          
+          var fullBounds = that.localToParentBounds( localBounds );
           
           assertSlow && assertSlow( that._childBounds.equalsEpsilon( childBounds, epsilon ), 'Child bounds mismatch after validateBounds: ' +
                                                                                              that._childBounds.toString() + ', expected: ' + childBounds.toString() );
