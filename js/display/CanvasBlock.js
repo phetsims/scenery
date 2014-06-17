@@ -153,7 +153,9 @@ define( function( require ) {
       // set the correct (relative to the transform root) transform up, instead of walking the hierarchy (for now)
       //OHTWO TODO: should we start premultiplying these matrices to remove this bottleneck?
       this.context.setTransform( this.backingScale, 0, 0, this.backingScale, this.canvasDrawOffset.x * this.backingScale, this.canvasDrawOffset.y * this.backingScale );
-      matrix.canvasAppendTransform( this.context );
+      if ( drawable.instance !== this.transformRootInstance ) {
+        matrix.canvasAppendTransform( this.context );
+      }
       
       // paint using its local coordinate frame
       drawable.paintCanvas( this.wrapper, drawable.instance.node );

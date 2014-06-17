@@ -141,16 +141,15 @@
           
           window.displayErr = function() {
             setTimeout( function(){
-              window.node = new scenery.Node( { x: 10 } );
-              scene.addChild( node );
-              
-              window.circle = new scenery.Circle( 50, { fill: 'black', x: 30, y: 60 } );
-              node.addChild( circle );
-              
-              display.updateDisplay();
-              
-              node.removeChild( circle );
-              
+              window.b = new scenery.Node()
+              window.r = new scenery.Rectangle( 0, 0, 100, 50, { fill: 'red' } );
+              window.rr = new scenery.Rectangle( 20, -20, 100, 50, { fill: 'blue' } );
+              scene.addChild( b );
+              b.addChild( r );
+              r.addChild( rr );
+              r.y = 50;
+              r._hints.cssTransform = true;
+              scene.renderer = 'canvas';
               display.updateDisplay();
             } );
           };
