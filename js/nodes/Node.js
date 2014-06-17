@@ -512,13 +512,10 @@ define( function( require ) {
     
     // @private: recursive function for validateWatchedBounds. Returned whether any validateBounds() returned true (means we have to traverse again)
     watchedBoundsScan: function() {
-      if ( !this._childBoundsDirty && this._boundsDirty ) {
-        // if the bounds under here are not dirty, we won't have any use for calling validateBounds()
-        return false;
-      } else if ( this._boundsEventSelfCount !== 0 ) {
+      if ( this._boundsEventSelfCount !== 0 ) {
         // we are a root that should be validated. return whether we updated anything
         return this.validateBounds();
-      } else if ( this._boundsEventCount > 0 ) {
+      } else if ( this._boundsEventCount > 0 && this._childBoundsDirty ) {
         // descendants have watched bounds, traverse!
         var changed = false;
         var numChildren = this._children.length;
