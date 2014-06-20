@@ -479,8 +479,8 @@ define( function( require ) {
                                        ( debugInterval.drawableBefore ? debugInterval.drawableBefore.toString : '-' ) + ' to ' +
                                        ( debugInterval.drawableAfter ? debugInterval.drawableAfter.toString : '-' ) );
         }
+        sceneryLog.push();
       }
-      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.push();
       
       // dispose compatibility (for now)
       backbone.lastFirstDrawable = firstDrawable;
@@ -488,7 +488,7 @@ define( function( require ) {
       
       // per-interval work
       for ( interval = firstChangeInterval; interval !== null; interval = interval.nextChangeInterval ) {
-        if ( !interval.isEmpty() ) {
+        if ( !interval.isEmpty() && backbone.blocks.length ) {
           //OHTWO TODO: here (in the old-iteration), we should collect references to potentially reusable blocks?
           BackboneDrawable.noteIntervalForRemoval( backbone.display, interval, oldFirstDrawable, oldLastDrawable );
           
@@ -514,9 +514,11 @@ define( function( require ) {
           // For each virtual block, once set, the drawables will be added to this block. At the start of an interval
           // if there is a block tied to the drawableBefore, we will use it. Otherwise, as we go through the drawables,
           // we attempt to match previously-used "reusable" blocks. 
-          var currentBlock = ( interval.drawableBefore && interval.drawableBefore.backboneInstance === backbone ) ?
+          var currentBlock = interval.drawableBefore ?
                              interval.drawableBefore.pendingParentDrawable :
                              null;
+          var previousBlock = null;
+          
           // The first drawable that will be in the "range of drawables to be added to the block". This excludes the
           // "unchanged endpoint" drawables, and only includes "internal" drawables.
           var firstDrawableForBlockChange = null;
@@ -530,10 +532,27 @@ define( function( require ) {
               /*---------------------------------------------------------------------------*
               * Interval boundary
               *----------------------------------------------------------------------------*/
-              boundaryCount++;
               
-              this.addInternalDrawables( backbone, currentBlock, firstDrawableForBlockChange, previousDrawable );
+              // get our final block reference, and add drawables to it
+              currentBlock = currentBlock = this.addInternalDrawables( backbone, currentBlock, firstDrawableForBlockChange, previousDrawable );
+              
+              // link our blocks
+              if ( boundaryCount > 0 ) {
+                assert && assert( previousBlock, 'Should always have a previous block if this is not the first boundary' );
+                assert && assert( firstDrawableForBlockChange && firstDrawableForBlockChange.previousDrawable,
+                                  'Should always have drawables surrounding the boundary' );
+                this.linkBlocks( previousBlock, currentBlock, firstDrawableForBlockChange.previousDrawable, firstDrawableForBlockChange );
+              } else if ( !interval.drawableBefore && firstDrawableForBlockChange ) {
+                // we are the first block of our backbone at the start of an interval
+                this.linkBlocks( null, currentBlock, null, firstDrawableForBlockChange );
+              } else {
+                // we are continuing in the middle of a block
+              }
+              
+              previousBlock = currentBlock;
               currentBlock = null; // so we can match another
+              
+              boundaryCount++;
             }
             
             if ( drawable === interval.drawableAfter ) {
@@ -578,7 +597,7 @@ define( function( require ) {
             
             assert && assert( currentBlock && currentBlock === interval.drawableBefore.pendingParentDrawable );
             
-            this.addInternalDrawables( backbone, currentBlock, firstDrawableForBlockChange, previousDrawable );
+            currentBlock = this.addInternalDrawables( backbone, currentBlock, firstDrawableForBlockChange, previousDrawable );
             this.moveExternalDrawables( backbone, interval, currentBlock, lastDrawable );
           } else if ( boundaryCount > 0 && interval.drawableBefore && interval.drawableAfter &&
                       interval.drawableBefore.pendingParentDrawable === interval.drawableAfter.pendingParentDrawable ) {
@@ -600,16 +619,29 @@ define( function( require ) {
             // handle a normal end-point, where we add our drawables to our last block
             
             // use the "after" block, if it is available
-            if ( interval.drawableAfter && interval.drawableAfter.pendingParentDrawable ) {
+            if ( interval.drawableAfter ) {
+              assert && assert( interval.drawableAfter.pendingParentDrawable );
               currentBlock = interval.drawableAfter.pendingParentDrawable;
             }
-            this.addInternalDrawables( backbone, currentBlock, firstDrawableForBlockChange, previousDrawable );
+            currentBlock = this.addInternalDrawables( backbone, currentBlock, firstDrawableForBlockChange, previousDrawable );
+            
+            // link our blocks
+            if ( boundaryCount > 0 ) {
+              assert && assert( previousBlock, 'Should always have a previous block if this is not the first boundary' );
+              assert && assert( firstDrawableForBlockChange && firstDrawableForBlockChange.previousDrawable,
+                                  'Should always have drawables surrounding the boundary' );
+              this.linkBlocks( previousBlock, currentBlock, firstDrawableForBlockChange.previousDrawable, firstDrawableForBlockChange );
+            } else if ( !interval.drawableBefore && firstDrawableForBlockChange ) {
+              // we are the first block of our backbone at the start of an interval
+              this.linkBlocks( null, currentBlock, null, firstDrawableForBlockChange );
+            } else {
+              // we are continuing in the middle of a block
+            }
           }
         }
       }
-      //OHTWO TODO: set pendingFirstDrawable / pendingLastDrawable on blocks
       //OHTWO TODO: maintain array or linked-list of blocks (and update)
-      //OHTWO TODO: remember to set blockOrderChanged on changes
+      //OHTWO TODO: remember to set blockOrderChanged on changes  (everything removed?)
       //OHTWO VERIFY: DOMBlock special case with backbones / etc.? Always have the same drawable!!!
       
       this.removeUnusedBlocks( backbone );
@@ -635,6 +667,7 @@ define( function( require ) {
         
         this.notePendingAdditions( backbone, currentBlock, firstDrawableForBlockChange, lastDrawableForBlockChange );
       }
+      return currentBlock;
     },
     
     moveExternalDrawables: function( backbone, interval, block, lastStitchDrawable ) {
