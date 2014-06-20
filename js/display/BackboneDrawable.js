@@ -534,7 +534,7 @@ define( function( require ) {
               *----------------------------------------------------------------------------*/
               
               // get our final block reference, and add drawables to it
-              currentBlock = currentBlock = this.addInternalDrawables( backbone, currentBlock, firstDrawableForBlockChange, previousDrawable );
+              currentBlock = this.addInternalDrawables( backbone, currentBlock, firstDrawableForBlockChange, previousDrawable );
               
               // link our blocks
               if ( boundaryCount > 0 ) {
