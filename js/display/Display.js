@@ -10,22 +10,30 @@
  *
  * Lifecycle information:
  *   Instance (create,dispose)
- *     - out of update:            Stateless stub is created synchronously when a Node's children are added where we have no relevant Instance.
+ *     - out of update:            Stateless stub is created synchronously when a Node's children are added where we
+ *                                 have no relevant Instance.
  *     - start of update:          Creates first (root) instance if it doesn't exist (stateless stub).
- *     - synctree:                 Create descendant instances under stubs, fills in state, and marks removed subtree roots for disposal.
- *     - update instance disposal: Disposes root instances that were marked. This also disposes all descendant instances, and for every instance,
+ *     - synctree:                 Create descendant instances under stubs, fills in state, and marks removed subtree
+ *                                 roots for disposal.
+ *     - update instance disposal: Disposes root instances that were marked. This also disposes all descendant
+ *                                 instances, and for every instance,
  *                                 it disposes the currently-attached drawables.
  *   Drawable (create,dispose)
- *     - synctree:                 Creates all drawables where necessary. If it replaces a self/group/shared drawable on the instance,
+ *     - synctree:                 Creates all drawables where necessary. If it replaces a self/group/shared drawable on
+ *                                 the instance,
  *                                 that old drawable is marked for disposal.
- *     - update instance disposal: Any drawables attached to disposed instances are disposed themselves (see Instance lifecycle).
- *     - update drawable disposal: Any marked drawables that were replaced or removed from an instance (it didn't maintain a reference) are disposed.
+ *     - update instance disposal: Any drawables attached to disposed instances are disposed themselves (see Instance
+ *                                 lifecycle).
+ *     - update drawable disposal: Any marked drawables that were replaced or removed from an instance (it didn't
+ *                                 maintain a reference) are disposed.
  *
  *   add/remove drawables from blocks:
  *     - stitching changes pending "parents", marks for block update
- *     - backbones marked for disposal (e.g. instance is still there, just changed to not have a backbone) will mark drawables for block updates
+ *     - backbones marked for disposal (e.g. instance is still there, just changed to not have a backbone) will mark
+ *         drawables for block updates
  *     - add/remove drawables phase updates drawables that were marked
- *     - disposed backbone instances will only remove drawables if they weren't marked for removal previously (e.g. in case we are from a removed instance)
+ *     - disposed backbone instances will only remove drawables if they weren't marked for removal previously (e.g. in
+ *         case we are from a removed instance)
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

@@ -1321,9 +1321,9 @@ define( function( require ) {
       this.active = false;
       
       // order is somewhat important
-      this.groupDrawable && this.groupDrawable.dispose();
-      this.sharedCacheDrawable && this.sharedCacheDrawable.dispose();
-      this.selfDrawable && this.selfDrawable.dispose();
+      this.groupDrawable && this.groupDrawable.disposeImmediately( this.display );
+      this.sharedCacheDrawable && this.sharedCacheDrawable.disposeImmediately( this.display );
+      this.selfDrawable && this.selfDrawable.disposeImmediately( this.display );
       
       for ( var i = 0; i < this.children.length; i++ ) {
         this.children[i].dispose();

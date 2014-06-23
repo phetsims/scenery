@@ -59,6 +59,9 @@ define( function( require ) {
       this.pendingAddition = false;      // whether we are to be added to a block/backbone in our updateBlock() call
       this.pendingRemoval = false;       // whether we are to be removed from a block/backbone in our updateBlock() call
       
+      assert && assert( !this.previousDrawable && !this.nextDrawable,
+                        'By cleaning (disposal or fresh creation), we should have disconnected from the linked list' );
+      
       // linked list handling (will be filled in later)
       this.previousDrawable = null;
       this.nextDrawable = null;
@@ -197,10 +200,25 @@ define( function( require ) {
       }
     },
     
+    // marks us for disposal in the next phase of updateDisplay(), and disconnects from the linked list
     markForDisposal: function( display ) {
+      // as we are marked for disposal, we disconnect from the linked list (so our disposal setting nulls won't cause issues)
+      Drawable.disconnectBefore( this, display );
+      Drawable.disconnectAfter( this, display );
+      
       display.markDrawableForDisposal( this );
     },
     
+    // disposes immediately, and makes no guarantees about out linked list's state (disconnects).
+    disposeImmediately: function( display ) {
+      // as we are marked for disposal, we disconnect from the linked list (so our disposal setting nulls won't cause issues)
+      Drawable.disconnectBefore( this, display );
+      Drawable.disconnectAfter( this, display );
+      
+      this.dispose();
+    },
+    
+    // generally do not call this directly, use markForDisposal (so Display will dispose us), or disposeImmediately.
     dispose: function() {
       assert && assert( !this.disposed, 'We should not re-dispose drawables' );
       
