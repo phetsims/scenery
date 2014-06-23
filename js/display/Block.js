@@ -135,6 +135,7 @@ define( function( require ) {
             
             // scan through to make sure our drawable lists are identical
             for ( var d = this.firstDrawable; d !== null; d = d.nextDrawable ) {
+              assertSlow && assertSlow( d.renderer === this.renderer, 'Renderers should match' );
               assertSlow && assertSlow( d.parentDrawable === this, 'This block should be this drawable\'s parent' );
               assertSlow && assertSlow( _.indexOf( this.drawableList, d ) >= 0 );
               if ( d === this.lastDrawable ) { break; }

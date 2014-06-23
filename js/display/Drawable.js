@@ -318,5 +318,37 @@ define( function( require ) {
     }
   };
   
+  // converts a linked list of drawables to an array (useful for debugging/assertion purposes, should not be used in production code)
+  Drawable.listToArray = function( firstDrawable, lastDrawable ) {
+    var arr = [];
+    
+    // assumes we'll hit lastDrawable, otherwise we'll NPE
+    for ( var drawable = firstDrawable;; drawable = drawable.nextDrawable ) {
+      arr.push( drawable );
+      
+      if ( drawable === lastDrawable ) {
+        break;
+      }
+    }
+    
+    return arr;
+  };
+  
+  // converts an old linked list of drawables to an array (useful for debugging/assertion purposes, should not be used in production code)
+  Drawable.oldListToArray = function( firstDrawable, lastDrawable ) {
+    var arr = [];
+    
+    // assumes we'll hit lastDrawable, otherwise we'll NPE
+    for ( var drawable = firstDrawable;; drawable = drawable.oldNextDrawable ) {
+      arr.push( drawable );
+      
+      if ( drawable === lastDrawable ) {
+        break;
+      }
+    }
+    
+    return arr;
+  };
+  
   return Drawable;
 } );
