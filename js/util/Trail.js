@@ -585,6 +585,12 @@ define( function( require ) {
         return 'Empty Trail';
       }
       return '[Trail ' + this.indices.join( '.' ) + ' ' + this.getUniqueId() + ']';
+    },
+    
+    // not optimized by any means, meant for debugging.
+    toPathString: function() {
+      var specialNodes = _.filter( this.nodes, function( n ) { return n.constructor.name !== 'Node'; } );
+      return _.map( specialNodes, function( n ) { return n.constructor.name; } ).join( '/' );
     }
   };
   

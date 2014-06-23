@@ -379,4 +379,23 @@
     equal( Renderer.bitmaskOrderFourth( mask ), Renderer.bitmaskSVG );
     // console.log( mask.toString( 16 ) );
   } );
+  
+  test( 'Empty Display usage', function() {
+    var n = new scenery.Node();
+    var d = new scenery.Display( n );
+    d.updateDisplay();
+    d.updateDisplay();
+    
+    expect( 0 );
+  } );
+  
+  test( 'Simple Display usage', function() {
+    var r = new scenery.Rectangle( 0, 0, 50, 50, { fill: 'red' } );
+    var d = new scenery.Display( r );
+    d.updateDisplay();
+    r.rectWidth = 100;
+    d.updateDisplay();
+    
+    expect( 0 );
+  } );
 })();

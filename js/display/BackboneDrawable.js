@@ -88,9 +88,9 @@ define( function( require ) {
       
       this.blocks = this.blocks || []; // we are responsible for their disposal
       
-      //OHTWO @deprecated
-      this.lastFirstDrawable = null;
-      this.lastLastDrawable = null;
+      // the first/last drawables for the last the this backbone was stitched
+      this.previousFirstDrawable = null;
+      this.previousLastDrawable = null;
       
       // We track whether our drawables were marked for removal (in which case, they should all be removed by the time we dispose).
       // If removedDrawables = false during disposal, it means we need to remove the drawables manually (this should only happen if an instance tree is removed)
@@ -116,9 +116,9 @@ define( function( require ) {
       
       // if we need to remove drawables from the blocks, do so
       if ( !this.removedDrawables ) {
-        for ( var d = this.lastFirstDrawable; d !== null; d = d.nextDrawable ) {
+        for ( var d = this.previousFirstDrawable; d !== null; d = d.nextDrawable ) {
           d.parentDrawable.removeDrawable( d );
-          if ( d === this.lastLastDrawable ) { break; }
+          if ( d === this.previousLastDrawable ) { break; }
         }
       }
       
@@ -135,6 +135,9 @@ define( function( require ) {
       this.transformRootAncestorInstance = null;
       cleanArray( this.dirtyDrawables );
       cleanArray( this.watchedFilterNodes );
+      
+      this.previousFirstDrawable = null;
+      this.previousLastDrawable = null;
       
       Drawable.prototype.dispose.call( this );
     },
@@ -155,9 +158,9 @@ define( function( require ) {
     
     // should be called during syncTree
     markForDisposal: function( display ) {
-      for ( var d = this.lastFirstDrawable; d !== null; d = d.oldNextDrawable ) {
+      for ( var d = this.previousFirstDrawable; d !== null; d = d.oldNextDrawable ) {
         d.notePendingRemoval( this.display );
-        if ( d === this.lastLastDrawable ) { break; }
+        if ( d === this.previousLastDrawable ) { break; }
       }
       this.removedDrawables = true;
       
@@ -295,7 +298,7 @@ define( function( require ) {
       this.lastZIndex = zIndex + 1;
     },
     
-    stitch: function( firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
+    stitch: function( firstDrawable, lastDrawable, firstChangeInterval, lastChangeInterval ) {
       // no stitch necessary if there are no change intervals
       if ( firstChangeInterval === null || lastChangeInterval === null ) {
         assert && assert( firstChangeInterval === null );
@@ -351,7 +354,7 @@ define( function( require ) {
         sceneryLog.pop();
       }
       
-      this.stitcher.stitch( this, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval );
+      this.stitcher.stitch( this, firstDrawable, lastDrawable, this.previousFirstDrawable, this.previousLastDrawable, firstChangeInterval, lastChangeInterval );
     },
     
     audit: function( allowPendingBlock, allowPendingList, allowDirty ) {
@@ -401,6 +404,8 @@ define( function( require ) {
     constructor: BackboneDrawable.StitchBase,
     
     initialize: function( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
+      assert && assert( firstChangeInterval && lastChangeInterval, 'We are guaranteed at least one change interval' );
+      
       if ( sceneryLog && sceneryLog.Stitch ) {
         sceneryLog.Stitch( 'stitch ' + backbone.toString() +
                            ' first:' + ( firstDrawable ? firstDrawable.toString() : 'null' ) +
@@ -409,13 +414,49 @@ define( function( require ) {
                            ' oldLast:' + ( oldLastDrawable ? oldLastDrawable.toString() : 'null' ) );
         sceneryLog.push();
       }
+      if ( sceneryLog && sceneryLog.StitchDrawables ) {
+        sceneryLog.StitchDrawables( 'Before:' );
+        sceneryLog.push();
+        BackboneDrawable.debugDrawables( oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval, false );
+        sceneryLog.pop();
+        
+        sceneryLog.StitchDrawables( 'After:' );
+        sceneryLog.push();
+        BackboneDrawable.debugDrawables( firstDrawable, lastDrawable, firstChangeInterval, lastChangeInterval, true );
+        sceneryLog.pop();
+      }
       
       this.backbone = backbone;
       this.firstDrawable = firstDrawable;
       this.lastDrawable = lastDrawable;
+      
+      if ( assertSlow ) {
+        assertSlow( !this.initialized, 'We should not be already initialized (clean should be called)' );
+        this.initialized = true;
+        this.reindexed = false;
+        
+        this.pendingAdditions = [];
+        this.pendingRemovals = [];
+        this.pendingMoves = [];
+        this.createdBlocks = [];
+        this.disposedBlocks = [];
+        this.intervalsNotified = [];
+        this.boundariesRecorded = false;
+      }
     },
     
     clean: function() {
+      sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'clean' );
+      sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( '-----------------------------------' );
+      
+      if ( assertSlow ) {
+        assertSlow( this.initialized );
+        assertSlow( this.boundariesRecorded );
+        
+        
+        this.initialized = false;
+      }
+      
       this.backbone = null;
       this.firstDrawable = null;
       this.lastDrawable = null;
@@ -424,38 +465,96 @@ define( function( require ) {
     },
     
     recordBackboneBoundaries: function() {
-      this.backbone.lastFirstDrawable = this.firstDrawable;
-      this.backbone.lastLastDrawable = this.lastDrawable;
+      sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'recording backbone boundaries: ' +
+                                                            ( this.firstDrawable ? this.firstDrawable.toString() : 'null' ) +
+                                                            ' to ' +
+                                                            ( this.lastDrawable ? this.lastDrawable.toString() : 'null' ) );
+      this.backbone.previousFirstDrawable = this.firstDrawable;
+      this.backbone.previousLastDrawable = this.lastDrawable;
+      
+      if ( assertSlow ) {
+        this.boundariesRecorded = true;
+      }
     },
     
     notePendingAddition: function( drawable, block ) {
+      sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'pending add: ' + drawable.toString() + ' to ' + block.toString() );
+      
       drawable.notePendingAddition( this.backbone.display, block, this.backbone );
+      
+      if ( assertSlow ) {
+        this.pendingAdditions.push( {
+          drawable: drawable,
+          block: block
+        } );
+      }
+    },
+    
+    notePendingMove: function( drawable, block ) {
+      sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'pending move: ' + drawable.toString() + ' to ' + block.toString() );
+      
+      drawable.notePendingMove( this.backbone.display, block );
+      
+      if ( assertSlow ) {
+        this.pendingMoves.push( {
+          drawable: drawable,
+          block: block
+        } );
+      }
     },
     
     notePendingRemoval: function( drawable ) {
+      sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'pending remove: ' + drawable.toString() );
+      
       drawable.notePendingRemoval( this.backbone.display );
+      
+      if ( assertSlow ) {
+        this.pendingRemovals.push( {
+          drawable: drawable
+        } );
+      }
     },
     
     markBlockForDisposal: function( block ) {
+      sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'block for disposal: ' + block.toString() );
+      
       //TODO: PERFORMANCE: does this cause reflows / style calculation
       if ( block.domElement.parentNode === this.backbone.domElement ) {
         // guarded, since we may have a (new) child drawable add it before we can remove it
         this.backbone.domElement.removeChild( block.domElement );
       }
       block.markForDisposal( this.backbone.display );
+      
+      if ( assertSlow ) {
+        this.disposedBlocks.push( {
+          block: block
+        } );
+      }
     },
     
     markAllBlocksForDisposal: function() {
+      sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'marking all blocks for disposal (count ' + this.backbone.blocks.length + ')' );
       while ( this.backbone.blocks.length ) {
         this.markBlockForDisposal( this.backbone.blocks.pop() );
       }
     },
     
     notifyInterval: function( block, firstDrawable, lastDrawable ) {
+      sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'notify interval: ' + block.toString() +
+                                                            firstDrawable.toString() + ' to ' + lastDrawable.toString() );
+      
       block.notifyInterval( firstDrawable, lastDrawable );
       
       // mark it dirty, since its drawables probably changed?
       this.backbone.markDirtyDrawable( block );
+      
+      if ( assertSlow ) {
+        this.intervalsNotified.push( {
+          block: block,
+          firstDrawable: firstDrawable,
+          lastDrawable: lastDrawable
+        } );
+      }
     },
     
     createBlock: function( renderer, drawable ) {
@@ -473,6 +572,10 @@ define( function( require ) {
         throw new Error( 'unsupported renderer for BackboneDrawable.rebuild: ' + renderer );
       }
       
+      sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'created block: ' + block.toString() +
+                                                            ' with renderer: ' + renderer +
+                                                            ' for drawable: ' + drawable.toString() );
+      
       block.setBlockBackbone( backbone );
       
       //OHTWO TODO: minor speedup by appending only once its fragment is constructed? or use DocumentFragment?
@@ -480,6 +583,14 @@ define( function( require ) {
       
       // mark it dirty for now, so we can check
       backbone.markDirtyDrawable( block );
+      
+      if ( assertSlow ) {
+        this.createdBlocks.push( {
+          block: block,
+          renderer: renderer,
+          drawable: drawable
+        } );
+      }
       
       return block;
     },
@@ -489,7 +600,13 @@ define( function( require ) {
     },
     
     reindex: function() {
+      sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'reindexing blocks' );
+      
       this.backbone.reindexBlocks();
+      
+      if ( assertSlow ) {
+        this.reindexed = true;
+      }
     }
   };
   
@@ -501,9 +618,9 @@ define( function( require ) {
     stitch: function( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
       this.initialize( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval );
       
-      for ( var d = backbone.lastFirstDrawable; d !== null; d = d.oldNextDrawable ) {
+      for ( var d = backbone.previousFirstDrawable; d !== null; d = d.oldNextDrawable ) {
         this.notePendingRemoval( d );
-        if ( d === backbone.lastLastDrawable ) { break; }
+        if ( d === backbone.previousLastDrawable ) { break; }
       }
       
       this.recordBackboneBoundaries();
@@ -567,8 +684,8 @@ define( function( require ) {
       var interval;
       
       // dispose compatibility (for now)
-      backbone.lastFirstDrawable = firstDrawable;
-      backbone.lastLastDrawable = lastDrawable;
+      backbone.previousFirstDrawable = firstDrawable;
+      backbone.previousLastDrawable = lastDrawable;
       
       // per-interval work
       for ( interval = firstChangeInterval; interval !== null; interval = interval.nextChangeInterval ) {
@@ -931,6 +1048,35 @@ define( function( require ) {
                            ( debugInterval.isEmpty() ? '(empty) ' : '' ) +
                            ( debugInterval.drawableBefore ? debugInterval.drawableBefore.toString() : '-' ) + ' to ' +
                            ( debugInterval.drawableAfter ? debugInterval.drawableAfter.toString() : '-' ) );
+      }
+    }
+  };
+  
+  BackboneDrawable.debugDrawables = function( firstDrawable, lastDrawable, firstChangeInterval, lastChangeInterval, useCurrent ) {
+    if ( sceneryLog && sceneryLog.StitchDrawables ) {
+      if ( firstDrawable === null ) {
+        sceneryLog.StitchDrawables( 'nothing', 'color: #666;' );
+        return;
+      }
+      
+      var isChanged = firstChangeInterval.drawableBefore === null;
+      var currentInterval = firstChangeInterval;
+      
+      for ( var drawable = firstDrawable;; drawable = ( useCurrent ? drawable.nextDrawable : drawable.oldNextDrawable ) ) {
+        if ( isChanged && drawable === currentInterval.drawableAfter ) {
+          isChanged = false;
+          currentInterval = currentInterval.nextChangeInterval;
+        }
+        
+        sceneryLog.StitchDrawables( drawable.toDetailedString(), isChanged ? ( useCurrent ? 'color: #0f0;' : 'color: #f00;' ) : 'color: #666' );
+        
+        if ( !isChanged && currentInterval && currentInterval.drawableBefore === drawable ) {
+          isChanged = true;
+        }
+        
+        if ( drawable === lastDrawable ) {
+          break;
+        }
       }
     }
   };

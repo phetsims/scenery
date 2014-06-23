@@ -221,6 +221,10 @@ define( function( require ) {
       this.firstDrawable = null;
       this.lastDrawable = null;
       
+      // references into the linked list of drawables (excludes any group drawables handling)
+      this.firstInnerDrawable = null;
+      this.lastInnerDrawable = null;
+      
       // references that will be filled in with syncTree
       if ( this.state ) {
         // NOTE: assumes that we aren't reusing states across instances
@@ -324,15 +328,22 @@ define( function( require ) {
         
         var oldFirstDrawable = this.firstDrawable;
         var oldLastDrawable = this.lastDrawable;
+        var oldFirstInnerDrawable = this.firstInnerDrawable;
+        var oldLastInnerDrawable = this.lastInnerDrawable;
         
         // properly handle our self and children
         this.localSyncTree( state, oldState );
         
+        if ( assertSlow ) {
+          // before and after first/last drawables (inside any potential group drawable)
+          this.auditChangeIntervals( oldFirstInnerDrawable, oldLastInnerDrawable, this.firstInnerDrawable, this.lastInnerDrawable );
+        }
+        
         // apply any group changes necessary
-        this.groupSyncTree( state, oldState, oldFirstDrawable, oldLastDrawable );
+        this.groupSyncTree( state, oldState );
         
         if ( assertSlow ) {
-          // before and after first/last drawables
+          // before and after first/last drawables (outside of any potential group drawable)
           this.auditChangeIntervals( oldFirstDrawable, oldLastDrawable, this.firstDrawable, this.lastDrawable );
         }
       }
@@ -507,8 +518,8 @@ define( function( require ) {
       this.lastChangeInterval = currentChangeInterval;
       
       // NOTE: these may get overwritten with the group drawable (in that case, groupSyncTree will read from these)
-      this.firstDrawable = firstDrawable;
-      this.lastDrawable = currentDrawable; // either null, or the drawable itself
+      this.firstDrawable = this.firstInnerDrawable = firstDrawable;
+      this.lastDrawable  = this.lastInnerDrawable  = currentDrawable; // either null, or the drawable itself
       
       // drawable range checks
       if ( assertSlow ) {
@@ -579,7 +590,7 @@ define( function( require ) {
       }
     },
     
-    groupSyncTree: function( state, oldState, oldFirstDrawable, oldLastDrawable ) {
+    groupSyncTree: function( state, oldState ) {
       var groupRenderer = state.groupRenderer;
       assert && assert( ( state.isBackbone ? 1 : 0 ) +
                         ( state.isInstanceCanvasCache ? 1 : 0 ) +
@@ -620,14 +631,14 @@ define( function( require ) {
           }
           
           if ( this.firstChangeInterval ) {
-            this.groupDrawable.stitch( this.firstDrawable, this.lastDrawable, oldFirstDrawable, oldLastDrawable, this.firstChangeInterval, this.lastChangeInterval );
+            this.groupDrawable.stitch( this.firstDrawable, this.lastDrawable, this.firstChangeInterval, this.lastChangeInterval );
           }
         } else if ( state.isInstanceCanvasCache ) {
           if ( groupChanged ) {
             this.groupDrawable = scenery.InlineCanvasCacheDrawable.createFromPool( groupRenderer, this );
           }
           if ( this.firstChangeInterval ) {
-            this.groupDrawable.stitch( this.firstDrawable, this.lastDrawable, oldFirstDrawable, oldLastDrawable, this.firstChangeInterval, this.lastChangeInterval );
+            this.groupDrawable.stitch( this.firstDrawable, this.lastDrawable, this.firstChangeInterval, this.lastChangeInterval );
           }
         } else if ( state.isSharedCanvasCacheSelf ) {
           if ( groupChanged ) {
@@ -1507,7 +1518,7 @@ define( function( require ) {
     },
     
     toString: function() {
-      return 'I#' + this.id + '/' + ( this.node ? this.node.id : '-' );
+      return this.id + '#' + ( this.node ? ( this.node.constructor.name ? this.node.constructor.name : '?' ) + '#' + this.node.id: '-' );
     }
   } );
   

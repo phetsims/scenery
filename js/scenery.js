@@ -78,6 +78,7 @@ define( function( require ) {
       // window.sceneryLog.hitTest          = function( ob ) { scenery.logFunction( '%c' + padding + '%c[hitTest] '     + ob, padStyle, 'color: #aaa;' ); };
       // window.sceneryLog.Cursor           = function( ob ) { scenery.logFunction( '%c' + padding + '%c[Cursor] '      + ob, padStyle, 'color: #000;' ); };
       window.sceneryLog.Stitch           = function( ob ) { scenery.logFunction( '%c' + padding + '%c[Stitch] '      + ob, padStyle, 'color: #000;' ); };
+      window.sceneryLog.StitchDrawables  = function( ob, style ) { scenery.logFunction( '%c' + padding + '%c[Stitch] '      + ob, padStyle, style ); };
       
       // window.sceneryLog.transformSystem  = function( ob ) { scenery.logFunction( '%c' + padding + '%c[transform] '   + ob, padStyle, 'color: #606;' ); };
       // window.sceneryLog.BackboneDrawable = function( ob ) { scenery.logFunction( '%c' + padding + '%c[Backbone] '    + ob, padStyle, 'color: #a00;' ); };

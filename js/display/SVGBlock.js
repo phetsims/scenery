@@ -165,7 +165,7 @@ define( function( require ) {
     },
     
     toString: function() {
-      return 'SVGBlock#' + this.id + ' ' + FittedBlock.fitString[this.fit];
+      return 'SVGBlock#' + this.id + '-' + FittedBlock.fitString[this.fit];
     }
   } );
   

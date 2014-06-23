@@ -249,6 +249,10 @@ define( function( require ) {
     
     toString: function() {
       return this.constructor.name + '#' + this.id;
+    },
+    
+    toDetailedString: function() {
+      return this.toString();
     }
   } );
   

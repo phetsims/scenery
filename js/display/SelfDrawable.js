@@ -40,6 +40,10 @@ define( function( require ) {
       this.node = null;
       
       Drawable.prototype.dispose.call( this );
+    },
+    
+    toDetailedString: function() {
+      return this.toString() + ' (' + this.instance.trail.toPathString() + ')';
     }
   } );
   

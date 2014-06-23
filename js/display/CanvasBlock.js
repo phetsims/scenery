@@ -204,7 +204,7 @@ define( function( require ) {
     },
     
     toString: function() {
-      return 'CanvasBlock#' + this.id + ' ' + FittedBlock.fitString[this.fit];
+      return 'CanvasBlock#' + this.id + '-' + FittedBlock.fitString[this.fit];
     }
   } );
   
