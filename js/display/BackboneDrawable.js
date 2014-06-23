@@ -336,30 +336,122 @@ define( function( require ) {
   };
   
   /*---------------------------------------------------------------------------*
+  * Stitching API base
+  *----------------------------------------------------------------------------*/
+  
+  BackboneDrawable.StitchBase = function() {
+    this.clean();
+  };
+  BackboneDrawable.StitchBase.prototype = {
+    constructor: BackboneDrawable.StitchBase,
+    
+    initialize: function( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
+      sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'stitch ' + backbone.toString() +
+                                                            ' first:' + ( firstDrawable ? firstDrawable.toString() : 'null' ) +
+                                                            ' last:' + ( lastDrawable ? lastDrawable.toString() : 'null' ) +
+                                                            ' oldFirst:' + ( oldFirstDrawable ? oldFirstDrawable.toString() : 'null' ) +
+                                                            ' oldLast:' + ( oldLastDrawable ? oldLastDrawable.toString() : 'null' ) );
+      sceneryLog && sceneryLog.Stitch && sceneryLog.push();
+      
+      this.backbone = backbone;
+      this.firstDrawable = firstDrawable;
+      this.lastDrawable = lastDrawable;
+    },
+    
+    clean: function() {
+      this.backbone = null;
+      this.firstDrawable = null;
+      this.lastDrawable = null;
+      
+      sceneryLog && sceneryLog.Stitch && sceneryLog.pop();
+    },
+    
+    recordBackboneBoundaries: function() {
+      this.backbone.lastFirstDrawable = this.firstDrawable;
+      this.backbone.lastLastDrawable = this.lastDrawable;
+    },
+    
+    notePendingAddition: function( drawable, block ) {
+      drawable.notePendingAddition( this.backbone.display, block, this.backbone );
+    },
+    
+    notePendingRemoval: function( drawable ) {
+      drawable.notePendingRemoval( this.backbone.display );
+    },
+    
+    markBlockForDisposal: function( block ) {
+      //TODO: PERFORMANCE: does this cause reflows / style calculation
+      if ( block.domElement.parentNode === this.backbone.domElement ) {
+        // guarded, since we may have a (new) child drawable add it before we can remove it
+        this.backbone.domElement.removeChild( block.domElement );
+      }
+      block.markForDisposal( this.backbone.display );
+    },
+    
+    markAllBlocksForDisposal: function() {
+      while ( this.backbone.blocks.length ) {
+        this.markBlockForDisposal( this.backbone.blocks.pop() );
+      }
+    },
+    
+    notifyInterval: function( block, firstDrawable, lastDrawable ) {
+      block.notifyInterval( firstDrawable, lastDrawable );
+      
+      // mark it dirty, since its drawables probably changed?
+      this.backbone.markDirtyDrawable( block );
+    },
+    
+    createBlock: function( renderer, drawable ) {
+      var backbone = this.backbone;
+      var block;
+      
+      if ( Renderer.isCanvas( renderer ) ) {
+        block = CanvasBlock.createFromPool( backbone.display, renderer, backbone.transformRootInstance, backbone.backboneInstance );
+      } else if ( Renderer.isSVG( renderer ) ) {
+        //OHTWO TODO: handle filter root separately from the backbone instance?
+        block = SVGBlock.createFromPool( backbone.display, renderer, backbone.transformRootInstance, backbone.backboneInstance );
+      } else if ( Renderer.isDOM( renderer ) ) {
+        block = DOMBlock.createFromPool( backbone.display, drawable );
+      } else {
+        throw new Error( 'unsupported renderer for BackboneDrawable.rebuild: ' + renderer );
+      }
+      
+      block.setBlockBackbone( backbone );
+      
+      //OHTWO TODO: minor speedup by appending only once its fragment is constructed? or use DocumentFragment?
+      backbone.domElement.appendChild( block.domElement );
+      
+      // mark it dirty for now, so we can check
+      backbone.markDirtyDrawable( block );
+      
+      return block;
+    },
+    
+    appendBlock: function( block ) {
+      this.backbone.blocks.push( block );
+    },
+    
+    reindex: function() {
+      this.backbone.reindexBlocks();
+    }
+  };
+  
+  /*---------------------------------------------------------------------------*
   * Rebuild
   *----------------------------------------------------------------------------*/
   
-  BackboneDrawable.Rebuilder = function() {
-    
-  };
-  BackboneDrawable.Rebuilder.prototype = {
-    constructor: BackboneDrawable.Rebuilder,
-    
+  BackboneDrawable.rebuildPrototype = {
     stitch: function( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
-      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'rebuild ' + backbone.toString() +
-                                                                                ' first:' + ( firstDrawable ? firstDrawable.toString() : 'null' ) +
-                                                                                ' last:' + ( lastDrawable ? lastDrawable.toString() : 'null' ) );
-      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.push();
+      this.initialize( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval );
       
       for ( var d = backbone.lastFirstDrawable; d !== null; d = d.oldNextDrawable ) {
-        d.notePendingRemoval( backbone.display );
+        this.notePendingRemoval( d );
         if ( d === backbone.lastLastDrawable ) { break; }
       }
       
-      backbone.lastFirstDrawable = firstDrawable;
-      backbone.lastLastDrawable = lastDrawable;
+      this.recordBackboneBoundaries();
       
-      backbone.markBlocksForDisposal();
+      this.markAllBlocksForDisposal();
       
       var currentBlock = null;
       var currentRenderer = 0;
@@ -371,49 +463,37 @@ define( function( require ) {
         // if we need to switch to a new block, create it
         if ( !currentBlock || drawable.renderer !== currentRenderer ) {
           if ( currentBlock ) {
-            currentBlock.notifyInterval( firstDrawableForBlock, drawable.previousDrawable );
+            this.notifyInterval( currentBlock, firstDrawableForBlock, drawable.previousDrawable );
           }
           
           currentRenderer = drawable.renderer;
           
-          if ( Renderer.isCanvas( currentRenderer ) ) {
-            currentBlock = CanvasBlock.createFromPool( backbone.display, currentRenderer, backbone.transformRootInstance, backbone.backboneInstance );
-          } else if ( Renderer.isSVG( currentRenderer ) ) {
-            //OHTWO TODO: handle filter root separately from the backbone instance?
-            currentBlock = SVGBlock.createFromPool( backbone.display, currentRenderer, backbone.transformRootInstance, backbone.backboneInstance );
-          } else if ( Renderer.isDOM( currentRenderer ) ) {
-            currentBlock = DOMBlock.createFromPool( backbone.display, drawable );
-            currentRenderer = 0; // force a new block for the next drawable
-          } else {
-            throw new Error( 'unsupported renderer for BackboneDrawable.rebuild: ' + currentRenderer );
+          currentBlock = this.createBlock( currentRenderer, drawable );
+          if ( Renderer.isDOM( currentRenderer ) ) {
+            currentRenderer = 0;
           }
           
-          backbone.blocks.push( currentBlock );
-          currentBlock.setBlockBackbone( backbone );
-          sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( backbone.toString() + ' adding block: ' + currentBlock.toString() );
-          //OHTWO TODO: minor speedup by appending only once its fragment is constructed? or use DocumentFragment?
-          backbone.domElement.appendChild( currentBlock.domElement );
-          
-          // mark it dirty for now, so we can check
-          backbone.markDirtyDrawable( currentBlock );
+          this.appendBlock( currentBlock );
           
           firstDrawableForBlock = drawable;
         }
         
-        drawable.notePendingAddition( backbone.display, currentBlock, backbone );
+        this.notePendingAddition( drawable, currentBlock );
         
         // don't cause an infinite loop!
         if ( drawable === lastDrawable ) { break; }
       }
       if ( currentBlock ) {
-        currentBlock.notifyInterval( firstDrawableForBlock, lastDrawable );
+        this.notifyInterval( currentBlock, firstDrawableForBlock, lastDrawable );
       }
       
-      backbone.reindexBlocks();
+      this.reindex();
       
-      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.pop();
+      this.clean();
     }
   };
+  
+  BackboneDrawable.Rebuilder = inherit( BackboneDrawable.StitchBase, function Rebuilder() {}, BackboneDrawable.rebuildPrototype );
   
   /*---------------------------------------------------------------------------*
   * Stitch
