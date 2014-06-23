@@ -602,7 +602,7 @@ define( function( require ) {
         }
         
         // change everything, since we may need a full restitch
-        this.firstChangeInterval = this.currentChangeInterval = ChangeInterval.newForDisplay( null, null, this.display );
+        this.firstChangeInterval = this.lastChangeInterval = ChangeInterval.newForDisplay( null, null, this.display );
       }
       
       if ( groupRenderer ) {

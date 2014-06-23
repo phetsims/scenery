@@ -1,3 +1,4 @@
+
 // Copyright 2002-2014, University of Colorado
 
 /**
@@ -51,7 +52,9 @@ define( function( require ) {
     
     // Make our interval as tight as possible (we may have over-estimated it before)
     constrict: function() {
-      if ( this.isEmpty() ) { return; }
+      var changed = false;
+      
+      if ( this.isEmpty() ) { return true; }
       
       // Notes: We don't constrict null boundaries, and we should never constrict a non-null boundary to a null
       // boundary (this the this.drawableX.Xdrawable truthy check), since going from a null-to-X interval to
@@ -59,6 +62,7 @@ define( function( require ) {
       
       while ( this.drawableBefore && this.drawableBefore.nextDrawable === this.drawableBefore.oldNextDrawable ) {
         this.drawableBefore = this.drawableBefore.nextDrawable;
+        changed = true;
         
         // check for a totally-collapsed state
         if ( !this.drawableBefore ) {
@@ -67,11 +71,12 @@ define( function( require ) {
         }
         
         // if we are empty, bail out before continuing
-        if ( this.isEmpty() ) { return; }
+        if ( this.isEmpty() ) { return true; }
       }
       
       while ( this.drawableAfter && this.drawableAfter.previousDrawable === this.drawableAfter.oldPreviousDrawable ) {
         this.drawableAfter = this.drawableAfter.previousDrawable;
+        changed = true;
         
         // check for a totally-collapsed state
         if ( !this.drawableAfter ) {
@@ -80,12 +85,14 @@ define( function( require ) {
         }
         
         // if we are empty, bail out before continuing
-        if ( this.isEmpty() ) { return; }
+        if ( this.isEmpty() ) { return true; }
       }
+      
+      return changed;
     },
     
     isEmpty: function() {
-      return this.collapsedEmpty || this.drawableBefore === this.drawableAfter;
+      return this.collapsedEmpty || ( this.drawableBefore !== null && this.drawableBefore === this.drawableAfter );
     }
   } );
   

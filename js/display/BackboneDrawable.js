@@ -296,7 +296,62 @@ define( function( require ) {
     },
     
     stitch: function( firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
-      return this.stitcher.stitch( this, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval );
+      // no stitch necessary if there are no change intervals
+      if ( firstChangeInterval === null || lastChangeInterval === null ) {
+        assert && assert( firstChangeInterval === null );
+        assert && assert( lastChangeInterval === null );
+        return;
+      }
+      
+      assert && assert( lastChangeInterval.nextChangeInterval === null, 'This allows us to have less checks in the loop' );
+      
+      if ( sceneryLog && sceneryLog.Stitch ) {
+        sceneryLog.Stitch( 'Stitch intervals before constricting: ' + this.toString() );
+        sceneryLog.push();
+        BackboneDrawable.debugIntervals( firstChangeInterval );
+        sceneryLog.pop();
+      }
+      
+      // make the intervals as small as possible by skipping areas without changes, and collapse the interval linked list
+      var lastNonemptyInterval = null;
+      var interval = firstChangeInterval;
+      var intervalsChanged = false;
+      while ( interval ) {
+        intervalsChanged = interval.constrict() || intervalsChanged;
+        
+        if ( interval.isEmpty() ) {
+          assert && assert( intervalsChanged );
+          
+          if ( lastNonemptyInterval ) {
+            // skip it, hook the correct reference
+            lastNonemptyInterval.nextChangeInterval = interval.nextChangeInterval;
+          }
+        } else {
+          // our first non-empty interval will be our new firstChangeInterval
+          if ( !lastNonemptyInterval ) {
+            firstChangeInterval = interval;
+          }
+          lastNonemptyInterval = interval;
+        }
+        interval = interval.nextChangeInterval;
+      }
+      
+      if ( !lastNonemptyInterval ) {
+        // eek, no nonempty change intervals. do nothing
+        return;
+      }
+      
+      lastChangeInterval = lastNonemptyInterval;
+      lastChangeInterval.nextChangeInterval = null;
+      
+      if ( sceneryLog && sceneryLog.Stitch && intervalsChanged ) {
+        sceneryLog.Stitch( 'Stitch intervals after constricting: ' + this.toString() );
+        sceneryLog.push();
+        BackboneDrawable.debugIntervals( firstChangeInterval );
+        sceneryLog.pop();
+      }
+      
+      this.stitcher.stitch( this, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval );
     },
     
     audit: function( allowPendingBlock, allowPendingList, allowDirty ) {
@@ -346,12 +401,14 @@ define( function( require ) {
     constructor: BackboneDrawable.StitchBase,
     
     initialize: function( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
-      sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'stitch ' + backbone.toString() +
-                                                            ' first:' + ( firstDrawable ? firstDrawable.toString() : 'null' ) +
-                                                            ' last:' + ( lastDrawable ? lastDrawable.toString() : 'null' ) +
-                                                            ' oldFirst:' + ( oldFirstDrawable ? oldFirstDrawable.toString() : 'null' ) +
-                                                            ' oldLast:' + ( oldLastDrawable ? oldLastDrawable.toString() : 'null' ) );
-      sceneryLog && sceneryLog.Stitch && sceneryLog.push();
+      if ( sceneryLog && sceneryLog.Stitch ) {
+        sceneryLog.Stitch( 'stitch ' + backbone.toString() +
+                           ' first:' + ( firstDrawable ? firstDrawable.toString() : 'null' ) +
+                           ' last:' + ( lastDrawable ? lastDrawable.toString() : 'null' ) +
+                           ' oldFirst:' + ( oldFirstDrawable ? oldFirstDrawable.toString() : 'null' ) +
+                           ' oldLast:' + ( oldLastDrawable ? oldLastDrawable.toString() : 'null' ) );
+        sceneryLog.push();
+      }
       
       this.backbone = backbone;
       this.firstDrawable = firstDrawable;
@@ -499,68 +556,15 @@ define( function( require ) {
   * Stitch
   *----------------------------------------------------------------------------*/
   
-  BackboneDrawable.Stitcher = function() {
-    this.reusableBlocks = []; // {[Block]}
-    this.blockOrderChanged = false;
-    //OHTWO TODO: initialize empty vars?
-  };
-  BackboneDrawable.Stitcher.prototype = {
+  BackboneDrawable.stitchPrototype = {
     constructor: BackboneDrawable.Stitcher,
-    
-    initialize: function( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
-      this.blockOrderChanged = false;
-      
-      //OHTWO TODO: remove unused
-      this.backbone = backbone;
-      this.firstDrawable = firstDrawable;
-      this.lastDrawable = lastDrawable;
-      this.oldFirstDrawable = oldFirstDrawable;
-      this.oldLastDrawable = oldLastDrawable;
-      this.firstChangeInterval = firstChangeInterval;
-      this.lastChangeInterval = lastChangeInterval;
-    },
-    
-    clean: function() {
-      cleanArray( this.reusableBlocks );
-      
-      // clean references so things can be garbage-collected
-      //OHTWO TODO: remove unused
-      this.backbone = null;
-      this.firstDrawable = null;
-      this.lastDrawable = null;
-      this.oldFirstDrawable = null;
-      this.oldLastDrawable = null;
-      this.firstChangeInterval = null;
-      this.lastChangeInterval = null;
-    },
     
     stitch: function( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
       this.initialize( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval );
-      
-      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'stitch ' + backbone.toString() +
-                                                                                ' first:' + ( firstDrawable ? firstDrawable.toString() : 'null' ) +
-                                                                                ' last:' + ( lastDrawable ? lastDrawable.toString() : 'null' ) +
-                                                                                ' oldFirst:' + ( oldFirstDrawable ? oldFirstDrawable.toString() : 'null' ) +
-                                                                                ' oldLast:' + ( oldLastDrawable ? oldLastDrawable.toString() : 'null' ) );
+      this.blockOrderChanged = false;
+      this.reusableBlocks = cleanArray( this.reusableBlocks );
       
       var interval;
-      
-      assert && assert( lastChangeInterval.nextChangeInterval === null, 'This allows us to have less checks in the loop' );
-      
-      // make the intervals as small as possible by skipping areas without changes
-      for ( interval = firstChangeInterval; interval !== null; interval = interval.nextChangeInterval ) {
-        interval.constrict();
-      }
-      
-      if ( sceneryLog && sceneryLog.BackboneDrawable ) {
-        for ( var debugInterval = firstChangeInterval; debugInterval !== null; debugInterval = debugInterval.nextChangeInterval ) {
-          sceneryLog.BackboneDrawable( '  interval: ' +
-                                       ( debugInterval.isEmpty() ? '(empty) ' : '' ) +
-                                       ( debugInterval.drawableBefore ? debugInterval.drawableBefore.toString : '-' ) + ' to ' +
-                                       ( debugInterval.drawableAfter ? debugInterval.drawableAfter.toString : '-' ) );
-        }
-        sceneryLog.push();
-      }
       
       // dispose compatibility (for now)
       backbone.lastFirstDrawable = firstDrawable;
@@ -731,9 +735,8 @@ define( function( require ) {
         backbone.reindexBlocks();
       }
       
-      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.pop();
-      
       this.clean();
+      cleanArray( this.reusableBlocks );
     },
     
     hasGapBetweenDrawables: function( a, b ) {
@@ -915,6 +918,19 @@ define( function( require ) {
         block.updateInterval();
         
         if ( block === lastBlock ) { break; }
+      }
+    }
+  };
+  
+  BackboneDrawable.Stitcher = inherit( BackboneDrawable.StitchBase, function Stitcher() {}, BackboneDrawable.stitchPrototype );
+  
+  BackboneDrawable.debugIntervals = function( firstChangeInterval ) {
+    if ( sceneryLog && sceneryLog.Stitch ) {
+      for ( var debugInterval = firstChangeInterval; debugInterval !== null; debugInterval = debugInterval.nextChangeInterval ) {
+        sceneryLog.Stitch( '  interval: ' +
+                           ( debugInterval.isEmpty() ? '(empty) ' : '' ) +
+                           ( debugInterval.drawableBefore ? debugInterval.drawableBefore.toString() : '-' ) + ' to ' +
+                           ( debugInterval.drawableAfter ? debugInterval.drawableAfter.toString() : '-' ) );
       }
     }
   };
