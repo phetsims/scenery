@@ -381,18 +381,6 @@ define( function( require ) {
     return div;
   };
   
-  BackboneDrawable.noteIntervalForRemoval = function( display, interval, oldFirstDrawable, oldLastDrawable ) {
-    // if before/after is null, we go out to the old first/last
-    var first = interval.drawableBefore || oldFirstDrawable;
-    var last = interval.drawableAfter || oldLastDrawable;
-    
-    for ( var drawable = first;; drawable = drawable.oldNextDrawable ) {
-      drawable.notePendingRemoval( display );
-      
-      if ( drawable === last ) { break; }
-    }
-  };
-  
   /*---------------------------------------------------------------------------*
   * Stitching API base
   *----------------------------------------------------------------------------*/
@@ -781,19 +769,20 @@ define( function( require ) {
     stitch: function( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
       this.initialize( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval );
       this.blockOrderChanged = false;
-      this.reusableBlocks = cleanArray( this.reusableBlocks );
+      this.reusableBlocks = cleanArray( this.reusableBlocks ); //re-use if possible
       
       var interval;
       
-      // dispose compatibility (for now)
-      backbone.previousFirstDrawable = firstDrawable;
-      backbone.previousLastDrawable = lastDrawable;
+      // record current first/last drawables for the entire backbone
+      this.recordBackboneBoundaries();
       
       // per-interval work
       for ( interval = firstChangeInterval; interval !== null; interval = interval.nextChangeInterval ) {
-        if ( !interval.isEmpty() && backbone.blocks.length ) {
+        assert && assert( !interval.isEmpty(), 'We now guarantee that the intervals are non-empty' );
+        
+        if ( backbone.blocks.length ) {
           //OHTWO TODO: here (in the old-iteration), we should collect references to potentially reusable blocks?
-          BackboneDrawable.noteIntervalForRemoval( backbone.display, interval, oldFirstDrawable, oldLastDrawable );
+          this.noteIntervalForRemoval( backbone.display, interval, oldFirstDrawable, oldLastDrawable );
           
           var firstBlock = interval.drawableBefore === null ? backbone.blocks[0] : interval.drawableBefore.pendingParentDrawable;
           var lastBlock = interval.drawableAfter === null ? backbone.blocks[backbone.blocks.length-1] : interval.drawableAfter.pendingParentDrawable;
@@ -803,136 +792,47 @@ define( function( require ) {
             for ( var markedBlock = firstBlock.nextBlock; markedBlock !== lastBlock; markedBlock = markedBlock.nextBlock ) {
               markedBlock.used = false; // mark it as unused until we pull it out (so we can reuse, or quickly identify)
               this.reusableBlocks.push( markedBlock );
+              this.removeBlock( markedBlock ); // remove it from our blocks array
             }
           }
         }
       }
       
       for ( interval = firstChangeInterval; interval !== null; interval = interval.nextChangeInterval ) {
-        if ( !interval.isEmpty() ) {
-          /*---------------------------------------------------------------------------*
-          * Interval start
-          *----------------------------------------------------------------------------*/
-          
-          // For each virtual block, once set, the drawables will be added to this block. At the start of an interval
-          // if there is a block tied to the drawableBefore, we will use it. Otherwise, as we go through the drawables,
-          // we attempt to match previously-used "reusable" blocks. 
-          var currentBlock = interval.drawableBefore ?
-                             interval.drawableBefore.pendingParentDrawable :
-                             null;
-          var previousBlock = null;
-          
-          // The first drawable that will be in the "range of drawables to be added to the block". This excludes the
-          // "unchanged endpoint" drawables, and only includes "internal" drawables.
-          var firstDrawableForBlockChange = null;
-          
-          var boundaryCount = 0;
-          
-          var previousDrawable = interval.drawableBefore; // possibly null
-          var drawable = interval.drawableBefore ? interval.drawableBefore.nextDrawable : firstDrawable;
-          for ( ; drawable !== lastDrawable; drawable = drawable.nextDrawable ) {
-            if ( previousDrawable && this.hasGapBetweenDrawables( previousDrawable, drawable ) ) {
-              /*---------------------------------------------------------------------------*
-              * Interval boundary
-              *----------------------------------------------------------------------------*/
-              
-              // get our final block reference, and add drawables to it
-              currentBlock = this.addInternalDrawables( backbone, currentBlock, firstDrawableForBlockChange, previousDrawable );
-              
-              // link our blocks
-              if ( boundaryCount > 0 ) {
-                assert && assert( previousBlock, 'Should always have a previous block if this is not the first boundary' );
-                assert && assert( firstDrawableForBlockChange && firstDrawableForBlockChange.previousDrawable,
-                                  'Should always have drawables surrounding the boundary' );
-                this.linkBlocks( previousBlock, currentBlock, firstDrawableForBlockChange.previousDrawable, firstDrawableForBlockChange );
-              } else if ( !interval.drawableBefore && firstDrawableForBlockChange ) {
-                // we are the first block of our backbone at the start of an interval
-                this.linkBlocks( null, currentBlock, null, firstDrawableForBlockChange );
-              } else {
-                // we are continuing in the middle of a block
-              }
-              
-              previousBlock = currentBlock;
-              currentBlock = null; // so we can match another
-              
-              boundaryCount++;
-            }
-            
-            if ( drawable === interval.drawableAfter ) {
-              // NOTE: leaves previousDrawable untouched, we will use it below
-              break;
-            } else {
-              /*---------------------------------------------------------------------------*
-              * Internal drawable
-              *----------------------------------------------------------------------------*/
-              
-              // attempt to match for our block to use
-              if ( currentBlock === null && drawable.parentDrawable && !drawable.parentDrawable.used ) {
-                // mark our currentBlock to be used, but don't useBlock() it yet (we may end up gluing it at the
-                // end of our interval).
-                currentBlock = drawable.parentDrawable;
-              }
-              
-              if ( firstDrawableForBlockChange === null ) {
-                firstDrawableForBlockChange = drawable;
-              }
-            }
-            
-            // on to the next drawable
-            previousDrawable = drawable;
-          }
-          
-          /*---------------------------------------------------------------------------*
-          * Interval end
-          *----------------------------------------------------------------------------*/
-          if ( boundaryCount === 0 && interval.drawableBefore && interval.drawableAfter &&
-               interval.drawableBefore.pendingParentDrawable !== interval.drawableAfter.pendingParentDrawable ) {
+        /*---------------------------------------------------------------------------*
+        * Interval start
+        *----------------------------------------------------------------------------*/
+        
+        // For each virtual block, once set, the drawables will be added to this block. At the start of an interval
+        // if there is a block tied to the drawableBefore, we will use it. Otherwise, as we go through the drawables,
+        // we attempt to match previously-used "reusable" blocks. 
+        var currentBlock = interval.drawableBefore ?
+                           interval.drawableBefore.pendingParentDrawable :
+                           null;
+        var previousBlock = null;
+        
+        // The first drawable that will be in the "range of drawables to be added to the block". This excludes the
+        // "unchanged endpoint" drawables, and only includes "internal" drawables.
+        var firstDrawableForBlockChange = null;
+        
+        var boundaryCount = 0;
+        
+        var previousDrawable = interval.drawableBefore; // possibly null
+        var drawable = interval.drawableBefore ? interval.drawableBefore.nextDrawable : firstDrawable;
+        for ( ; drawable !== lastDrawable; drawable = drawable.nextDrawable ) {
+          if ( previousDrawable && this.hasGapBetweenDrawables( previousDrawable, drawable ) ) {
             /*---------------------------------------------------------------------------*
-            * Glue
+            * Interval boundary
             *----------------------------------------------------------------------------*/
             
-            //OHTWO TODO: dynamically decide which end is better to glue on
-            var oldNextBlock = interval.drawableAfter.pendingParentDrawable;
-            
-            // (optional?) mark the old block as reusable
-            oldNextBlock.used = false;
-            this.reusableBlocks.push( oldNextBlock );
-            
-            assert && assert( currentBlock && currentBlock === interval.drawableBefore.pendingParentDrawable );
-            
-            currentBlock = this.addInternalDrawables( backbone, currentBlock, firstDrawableForBlockChange, previousDrawable );
-            this.moveExternalDrawables( backbone, interval, currentBlock, lastDrawable );
-          } else if ( boundaryCount > 0 && interval.drawableBefore && interval.drawableAfter &&
-                      interval.drawableBefore.pendingParentDrawable === interval.drawableAfter.pendingParentDrawable ) {
-            //OHTWO TODO: with gluing, how do we handle the if statement block?
-            /*---------------------------------------------------------------------------*
-            * Unglue
-            *----------------------------------------------------------------------------*/
-            
-            var firstUngluedDrawable = firstDrawableForBlockChange ? firstDrawableForBlockChange : interval.drawableAfter;
-            currentBlock = this.ensureUsedBlock( currentBlock, backbone, firstUngluedDrawable );
-            backbone.markDirtyDrawable( currentBlock );
-            
-            // internal additions
-            if ( firstDrawableForBlockChange ) {
-              this.notePendingAdditions( backbone, currentBlock, firstUngluedDrawable, previousDrawable );
-            }
-            this.moveExternalDrawables( backbone, interval, currentBlock, lastDrawable );
-          } else {
-            // handle a normal end-point, where we add our drawables to our last block
-            
-            // use the "after" block, if it is available
-            if ( interval.drawableAfter ) {
-              assert && assert( interval.drawableAfter.pendingParentDrawable );
-              currentBlock = interval.drawableAfter.pendingParentDrawable;
-            }
+            // get our final block reference, and add drawables to it
             currentBlock = this.addInternalDrawables( backbone, currentBlock, firstDrawableForBlockChange, previousDrawable );
             
             // link our blocks
             if ( boundaryCount > 0 ) {
               assert && assert( previousBlock, 'Should always have a previous block if this is not the first boundary' );
               assert && assert( firstDrawableForBlockChange && firstDrawableForBlockChange.previousDrawable,
-                                  'Should always have drawables surrounding the boundary' );
+                                'Should always have drawables surrounding the boundary' );
               this.linkBlocks( previousBlock, currentBlock, firstDrawableForBlockChange.previousDrawable, firstDrawableForBlockChange );
             } else if ( !interval.drawableBefore && firstDrawableForBlockChange ) {
               // we are the first block of our backbone at the start of an interval
@@ -940,6 +840,94 @@ define( function( require ) {
             } else {
               // we are continuing in the middle of a block
             }
+            
+            previousBlock = currentBlock;
+            currentBlock = null; // so we can match another
+            
+            boundaryCount++;
+          }
+          
+          if ( drawable === interval.drawableAfter ) {
+            // NOTE: leaves previousDrawable untouched, we will use it below
+            break;
+          } else {
+            /*---------------------------------------------------------------------------*
+            * Internal drawable
+            *----------------------------------------------------------------------------*/
+            
+            // attempt to match for our block to use
+            if ( currentBlock === null && drawable.parentDrawable && !drawable.parentDrawable.used ) {
+              // mark our currentBlock to be used, but don't useBlock() it yet (we may end up gluing it at the
+              // end of our interval).
+              currentBlock = drawable.parentDrawable;
+            }
+            
+            if ( firstDrawableForBlockChange === null ) {
+              firstDrawableForBlockChange = drawable;
+            }
+          }
+          
+          // on to the next drawable
+          previousDrawable = drawable;
+        }
+        
+        /*---------------------------------------------------------------------------*
+        * Interval end
+        *----------------------------------------------------------------------------*/
+        if ( boundaryCount === 0 && interval.drawableBefore && interval.drawableAfter &&
+             interval.drawableBefore.pendingParentDrawable !== interval.drawableAfter.pendingParentDrawable ) {
+          /*---------------------------------------------------------------------------*
+          * Glue
+          *----------------------------------------------------------------------------*/
+          
+          //OHTWO TODO: dynamically decide which end is better to glue on
+          var oldNextBlock = interval.drawableAfter.pendingParentDrawable;
+          
+          // (optional?) mark the old block as reusable
+          oldNextBlock.used = false;
+          this.reusableBlocks.push( oldNextBlock );
+          
+          assert && assert( currentBlock && currentBlock === interval.drawableBefore.pendingParentDrawable );
+          
+          currentBlock = this.addInternalDrawables( backbone, currentBlock, firstDrawableForBlockChange, previousDrawable );
+          this.moveExternalDrawables( backbone, interval, currentBlock, lastDrawable );
+        } else if ( boundaryCount > 0 && interval.drawableBefore && interval.drawableAfter &&
+                    interval.drawableBefore.pendingParentDrawable === interval.drawableAfter.pendingParentDrawable ) {
+          //OHTWO TODO: with gluing, how do we handle the if statement block?
+          /*---------------------------------------------------------------------------*
+          * Unglue
+          *----------------------------------------------------------------------------*/
+          
+          var firstUngluedDrawable = firstDrawableForBlockChange ? firstDrawableForBlockChange : interval.drawableAfter;
+          currentBlock = this.ensureUsedBlock( currentBlock, backbone, firstUngluedDrawable );
+          backbone.markDirtyDrawable( currentBlock );
+          
+          // internal additions
+          if ( firstDrawableForBlockChange ) {
+            this.notePendingAdditions( backbone, currentBlock, firstUngluedDrawable, previousDrawable );
+          }
+          this.moveExternalDrawables( backbone, interval, currentBlock, lastDrawable );
+        } else {
+          // handle a normal end-point, where we add our drawables to our last block
+          
+          // use the "after" block, if it is available
+          if ( interval.drawableAfter ) {
+            assert && assert( interval.drawableAfter.pendingParentDrawable );
+            currentBlock = interval.drawableAfter.pendingParentDrawable;
+          }
+          currentBlock = this.addInternalDrawables( backbone, currentBlock, firstDrawableForBlockChange, previousDrawable );
+          
+          // link our blocks
+          if ( boundaryCount > 0 ) {
+            assert && assert( previousBlock, 'Should always have a previous block if this is not the first boundary' );
+            assert && assert( firstDrawableForBlockChange && firstDrawableForBlockChange.previousDrawable,
+                                'Should always have drawables surrounding the boundary' );
+            this.linkBlocks( previousBlock, currentBlock, firstDrawableForBlockChange.previousDrawable, firstDrawableForBlockChange );
+          } else if ( !interval.drawableBefore && firstDrawableForBlockChange ) {
+            // we are the first block of our backbone at the start of an interval
+            this.linkBlocks( null, currentBlock, null, firstDrawableForBlockChange );
+          } else {
+            // we are continuing in the middle of a block
           }
         }
       }
@@ -949,13 +937,26 @@ define( function( require ) {
       
       this.removeUnusedBlocks( backbone );
       
+      //OHTWO TODO: just use direct operations!
       if ( this.blockOrderChanged ) {
         this.processBlockLinkedList( backbone, firstDrawable.pendingParentDrawable, lastDrawable.pendingParentDrawable );
-        backbone.reindexBlocks();
+        this.reindex();
       }
       
       this.clean();
       cleanArray( this.reusableBlocks );
+    },
+    
+    noteIntervalForRemoval: function( display, interval, oldFirstDrawable, oldLastDrawable ) {
+      // if before/after is null, we go out to the old first/last
+      var first = interval.drawableBefore || oldFirstDrawable;
+      var last = interval.drawableAfter || oldLastDrawable;
+      
+      for ( var drawable = first;; drawable = drawable.oldNextDrawable ) {
+        this.notePendingRemoval( drawable );
+        
+        if ( drawable === last ) { break; }
+      }
     },
     
     hasGapBetweenDrawables: function( a, b ) {
@@ -965,7 +966,6 @@ define( function( require ) {
     addInternalDrawables: function( backbone, currentBlock, firstDrawableForBlockChange, lastDrawableForBlockChange ) {
       if ( firstDrawableForBlockChange ) {
         currentBlock = this.ensureUsedBlock( currentBlock, backbone, firstDrawableForBlockChange );
-        backbone.markDirtyDrawable( currentBlock );
         
         this.notePendingAdditions( backbone, currentBlock, firstDrawableForBlockChange, lastDrawableForBlockChange );
       }
@@ -990,7 +990,7 @@ define( function( require ) {
     
     notePendingAdditions: function( backbone, block, firstDrawable, lastDrawable ) {
       for ( var drawable = firstDrawable;; drawable = drawable.nextDrawable ) {
-        drawable.notePendingAddition( backbone.display, block, backbone );
+        this.notePendingAddition( drawable, block );
         if ( drawable === lastDrawable ) { break; }
       }
     },
@@ -1000,7 +1000,7 @@ define( function( require ) {
         assert && assert( !drawable.pendingAddition && !drawable.pendingRemoval,
                           'Moved drawables should be thought of as unchanged, and thus have nothing pending yet' );
         
-        drawable.notePendingMove( backbone.display, block );
+        this.notePendingMove( drawable, block );
         if ( drawable === lastDrawable ) { break; }
       }
     },
@@ -1040,24 +1040,10 @@ define( function( require ) {
       
       if ( !block ) {
         // Didn't find it in our reusable blocks, create a fresh one from scratch
-        if ( Renderer.isCanvas( renderer ) ) {
-          block = CanvasBlock.createFromPool( backbone.display, renderer, backbone.transformRootInstance, backbone.backboneInstance );
-        } else if ( Renderer.isSVG( renderer ) ) {
-          //OHTWO TODO: handle filter root separately from the backbone instance?
-          block = SVGBlock.createFromPool( backbone.display, renderer, backbone.transformRootInstance, backbone.backboneInstance );
-        } else if ( Renderer.isDOM( renderer ) ) {
-          block = DOMBlock.createFromPool( backbone.display, drawable );
-        } else {
-          throw new Error( 'unsupported renderer for BackboneDrawable.getBlockForRenderer: ' + renderer );
-        }
-        block.setBlockBackbone( backbone );
+        block = this.createBlock( renderer, drawable );
       }
       
       this.blockOrderChanged = true; // we created a new block, this will always happen
-      
-      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( backbone.toString() + ' adding block: ' + block.toString() );
-      //OHTWO TODO: minor speedup by appending only once its fragment is constructed? or use DocumentFragment?
-      backbone.domElement.appendChild( block.domElement );
       
       return block;
     },
@@ -1077,15 +1063,7 @@ define( function( require ) {
     // removes them from our domElement, and marks them for disposal
     removeUnusedBlocks: function( backbone ) {
       while ( this.reusableBlocks.length ) {
-        var block = this.reusableBlocks.pop();
-        
-        sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( backbone.toString() + ' removing block: ' + block.toString() );
-        //TODO: PERFORMANCE: does this cause reflows / style calculation
-        if ( block.domElement.parentNode === backbone.domElement ) {
-          // guarded, since we may have a (new) child drawable add it before we can remove it
-          backbone.domElement.removeChild( block.domElement );
-        }
-        block.markForDisposal( backbone.display );
+        this.markBlockForDisposal( this.reusableBlocks.pop() );
       }
     },
     
