@@ -398,4 +398,37 @@
     
     expect( 0 );
   } );
+  
+  test( 'Stitch patterns #1', function() {
+    var n = new scenery.Node();
+    var d = new scenery.Display( n );
+    d.updateDisplay();
+    
+    n.addChild( new scenery.Rectangle( 0, 0, 50, 50, { fill: 'red' } ) );
+    d.updateDisplay();
+    
+    n.addChild( new scenery.Rectangle( 0, 0, 50, 50, { fill: 'red' } ) );
+    d.updateDisplay();
+    
+    n.addChild( new scenery.Rectangle( 0, 0, 50, 50, { fill: 'red' } ) );
+    d.updateDisplay();
+    
+    n.children[1].visible = false;
+    d.updateDisplay();
+    
+    n.children[1].visible = true;
+    d.updateDisplay();
+    
+    n.removeChild( n.children[0] );
+    d.updateDisplay();
+    
+    n.removeChild( n.children[1] );
+    d.updateDisplay();
+    
+    n.removeChild( n.children[0] );
+    d.updateDisplay();
+    
+    expect( 0 );
+  } );
+  
 })();
