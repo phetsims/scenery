@@ -12,6 +12,7 @@ define( function( require ) {
   'use strict';
   
   var inherit = require( 'PHET_CORE/inherit' );
+  var cleanArray = require( 'PHET_CORE/cleanArray' );
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
   var Renderer = require( 'SCENERY/display/Renderer' );
@@ -53,6 +54,9 @@ define( function( require ) {
       this.backbone = backbone;
       this.firstDrawable = firstDrawable;
       this.lastDrawable = lastDrawable;
+      
+      // list of blocks that have their pendingFirstDrawable or pendingLastDrawable set, and need updateInterval() called
+      this.touchedBlocks = cleanArray( this.touchedBlocks );
       
       if ( assertSlow ) {
         assertSlow( !this.initialized, 'We should not be already initialized (clean should be called)' );
@@ -167,12 +171,13 @@ define( function( require ) {
     },
     
     notifyInterval: function( block, firstDrawable, lastDrawable ) {
-      sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'notify interval: ' + block.toString() +
+      sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'notify interval: ' + block.toString() + ' ' +
                                                             firstDrawable.toString() + ' to ' + lastDrawable.toString() );
       
       block.notifyInterval( firstDrawable, lastDrawable );
       
       // mark it dirty, since its drawables probably changed?
+      //OHTWO TODO: is this necessary? What is this doing?
       this.backbone.markDirtyDrawable( block );
       
       if ( assertSlow ) {
@@ -181,6 +186,41 @@ define( function( require ) {
           firstDrawable: firstDrawable,
           lastDrawable: lastDrawable
         } );
+      }
+    },
+    
+    // notifyInterval alternatives, so changes can be collected before notifying:
+    markBeforeBlock: function( block, firstDrawable ) {
+      sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'marking block first drawable ' + block.toString() + ' with ' + firstDrawable.toString() );
+      
+      block.pendingFirstDrawable = firstDrawable;
+      this.touchedBlocks.push( block );
+    },
+    markAfterBlock: function( block, lastDrawable ) {
+      sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'marking block last drawable ' + block.toString() + ' with ' + lastDrawable.toString() );
+      
+      block.pendingLastDrawable = lastDrawable;
+      this.touchedBlocks.push( block );
+    },
+    updateBlockIntervals: function() {
+      while ( this.touchedBlocks.length ) {
+        var block = this.touchedBlocks.pop();
+        sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'update interval: ' + block.toString() + ' ' +
+                                                              block.pendingFirstDrawable.toString() + ' to ' + block.pendingLastDrawable.toString() );
+        
+        block.updateInterval();
+        
+        // mark it dirty, since its drawables probably changed?
+        //OHTWO TODO: is this necessary? What is this doing?
+        this.backbone.markDirtyDrawable( block );
+        
+        if ( assertSlow ) {
+          this.intervalsNotified.push( {
+            block: block,
+            firstDrawable: block.pendingFirstDrawable,
+            lastDrawable: block.pendingLastDrawable
+          } );
+        }
       }
     },
     
@@ -307,6 +347,9 @@ define( function( require ) {
         
         assertSlow( stitcher.backbone.blocks.length - stitcher.previousBlocks.length === stitcher.createdBlocks.length - stitcher.disposedBlocks.length,
                     'The count of unmodified blocks should be constant (equal differences)' );
+        
+        assertSlow( this.touchedBlocks.length === 0,
+                    'If we marked any blocks for changes, we should have called updateBlockIntervals' );
         
         if ( stitcher.backbone.blocks.length ) {
           var blocks = stitcher.backbone.blocks;
