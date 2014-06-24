@@ -57,167 +57,9 @@ define( function( require ) {
       sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
       
       for ( interval = firstChangeInterval; interval !== null; interval = interval.nextChangeInterval ) {
-        /*---------------------------------------------------------------------------*
-        * Interval start
-        *----------------------------------------------------------------------------*/
-        
-        sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'interval: ' +
-                                                                            ( interval.drawableBefore ? interval.drawableBefore.toString : 'null' ) +
-                                                                            ' to ' +
-                                                                            ( interval.drawableAfter ? interval.drawableAfter.toString : 'null' ) );
-        sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
-        
-        // For each virtual block, once set, the drawables will be added to this block. At the start of an interval
-        // if there is a block tied to the drawableBefore, we will use it. Otherwise, as we go through the drawables,
-        // we attempt to match previously-used "reusable" blocks. 
-        var currentBlock = interval.drawableBefore ?
-                           interval.drawableBefore.pendingParentDrawable :
-                           null;
-        var previousBlock = null;
-        
-        // The first drawable that will be in the "range of drawables to be added to the block". This excludes the
-        // "unchanged endpoint" drawables, and only includes "internal" drawables.
-        var firstDrawableForBlockChange = null;
-        
-        var boundaryCount = 0;
-        
-        var previousDrawable = interval.drawableBefore; // possibly null
-        var drawable = interval.drawableBefore ? interval.drawableBefore.nextDrawable : firstDrawable;
-        for ( ; drawable !== null; drawable = drawable.nextDrawable ) {
-          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'step: ' + drawable.toString() );
-          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
-          if ( previousDrawable && this.hasGapBetweenDrawables( previousDrawable, drawable ) ) {
-            /*---------------------------------------------------------------------------*
-            * Interval boundary
-            *----------------------------------------------------------------------------*/
-            sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'boundary' );
-            sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
-            
-            // get our final block reference, and add drawables to it
-            currentBlock = this.addInternalDrawables( backbone, currentBlock, firstDrawableForBlockChange, previousDrawable );
-            
-            // link our blocks
-            if ( boundaryCount > 0 ) {
-              assert && assert( previousBlock, 'Should always have a previous block if this is not the first boundary' );
-              assert && assert( firstDrawableForBlockChange && firstDrawableForBlockChange.previousDrawable,
-                                'Should always have drawables surrounding the boundary' );
-              this.linkBlocks( previousBlock, currentBlock, firstDrawableForBlockChange.previousDrawable, firstDrawableForBlockChange );
-            } else if ( !interval.drawableBefore && firstDrawableForBlockChange ) {
-              // we are the first block of our backbone at the start of an interval
-              this.linkBlocks( null, currentBlock, null, firstDrawableForBlockChange );
-            } else {
-              // we are continuing in the middle of a block
-            }
-            
-            previousBlock = currentBlock;
-            currentBlock = null; // so we can match another
-            
-            boundaryCount++;
-            
-            sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
-          }
-          
-          if ( drawable === interval.drawableAfter ) {
-            // NOTE: leaves previousDrawable untouched, we will use it below
-            sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
-            break;
-          } else {
-            /*---------------------------------------------------------------------------*
-            * Internal drawable
-            *----------------------------------------------------------------------------*/
-            
-            // attempt to match for our block to use
-            if ( currentBlock === null && drawable.parentDrawable && !drawable.parentDrawable.used ) {
-              // mark our currentBlock to be used, but don't useBlock() it yet (we may end up gluing it at the
-              // end of our interval).
-              currentBlock = drawable.parentDrawable;
-            }
-            
-            if ( firstDrawableForBlockChange === null ) {
-              firstDrawableForBlockChange = drawable;
-            }
-          }
-          
-          // on to the next drawable
-          previousDrawable = drawable;
-          
-          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
-        }
-        
-        /*---------------------------------------------------------------------------*
-        * Interval end
-        *----------------------------------------------------------------------------*/
-        if ( boundaryCount === 0 && interval.drawableBefore && interval.drawableAfter &&
-             interval.drawableBefore.pendingParentDrawable !== interval.drawableAfter.pendingParentDrawable ) {
-          /*---------------------------------------------------------------------------*
-          * Glue
-          *----------------------------------------------------------------------------*/
-          sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( 'glue' );
-          sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
-          
-          //OHTWO TODO: dynamically decide which end is better to glue on
-          var oldNextBlock = interval.drawableAfter.pendingParentDrawable;
-          
-          // (optional?) mark the old block as reusable
-          oldNextBlock.used = false;
-          this.reusableBlocks.push( oldNextBlock );
-          
-          assert && assert( currentBlock && currentBlock === interval.drawableBefore.pendingParentDrawable );
-          
-          currentBlock = this.addInternalDrawables( backbone, currentBlock, firstDrawableForBlockChange, previousDrawable );
-          this.moveExternalDrawables( backbone, interval, currentBlock, lastDrawable );
-          
-          sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
-        } else if ( boundaryCount > 0 && interval.drawableBefore && interval.drawableAfter &&
-                    interval.drawableBefore.pendingParentDrawable === interval.drawableAfter.pendingParentDrawable ) {
-          //OHTWO TODO: with gluing, how do we handle the if statement block?
-          /*---------------------------------------------------------------------------*
-          * Unglue
-          *----------------------------------------------------------------------------*/
-          sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( 'unglue' );
-          sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
-          
-          var firstUngluedDrawable = firstDrawableForBlockChange ? firstDrawableForBlockChange : interval.drawableAfter;
-          currentBlock = this.ensureUsedBlock( currentBlock, backbone, firstUngluedDrawable );
-          backbone.markDirtyDrawable( currentBlock );
-          
-          // internal additions
-          if ( firstDrawableForBlockChange ) {
-            this.notePendingAdditions( backbone, currentBlock, firstUngluedDrawable, previousDrawable );
-          }
-          this.moveExternalDrawables( backbone, interval, currentBlock, lastDrawable );
-          
-          sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
-        } else {
-          sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( 'normal endpoint' );
-          sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
-          // handle a normal end-point, where we add our drawables to our last block
-          
-          // use the "after" block, if it is available
-          if ( interval.drawableAfter ) {
-            assert && assert( interval.drawableAfter.pendingParentDrawable );
-            currentBlock = interval.drawableAfter.pendingParentDrawable;
-          }
-          currentBlock = this.addInternalDrawables( backbone, currentBlock, firstDrawableForBlockChange, previousDrawable );
-          
-          // link our blocks
-          if ( boundaryCount > 0 ) {
-            assert && assert( previousBlock, 'Should always have a previous block if this is not the first boundary' );
-            assert && assert( firstDrawableForBlockChange && firstDrawableForBlockChange.previousDrawable,
-                                'Should always have drawables surrounding the boundary' );
-            this.linkBlocks( previousBlock, currentBlock, firstDrawableForBlockChange.previousDrawable, firstDrawableForBlockChange );
-          } else if ( !interval.drawableBefore && firstDrawableForBlockChange ) {
-            // we are the first block of our backbone at the start of an interval
-            this.linkBlocks( null, currentBlock, null, firstDrawableForBlockChange );
-          } else {
-            // we are continuing in the middle of a block
-          }
-          
-          sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
-        }
-        
-        sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
+        this.processInterval( interval );
       }
+      this.cleanInterval();
       
       sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
       
@@ -244,6 +86,182 @@ define( function( require ) {
       cleanArray( this.reusableBlocks );
       
       sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
+    },
+    
+    processInterval: function( interval ) {
+      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'interval: ' +
+                                                                          ( interval.drawableBefore ? interval.drawableBefore.toString : 'null' ) +
+                                                                          ' to ' +
+                                                                          ( interval.drawableAfter ? interval.drawableAfter.toString : 'null' ) );
+      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
+      
+      this.interval = interval;
+      
+      // For each virtual block, once set, the drawables will be added to this block. At the start of an interval
+      // if there is a block tied to the drawableBefore, we will use it. Otherwise, as we go through the drawables,
+      // we attempt to match previously-used "reusable" blocks. 
+      this.currentBlock = interval.drawableBefore ?
+                          interval.drawableBefore.pendingParentDrawable :
+                          null;
+      this.previousBlock = null;
+      
+      // The first drawable that will be in the "range of drawables to be added to the block". This excludes the
+      // "unchanged endpoint" drawables, and only includes "internal" drawables.
+      this.firstDrawableForBlockChange = null;
+      
+      this.boundaryCount = 0;
+      
+      this.previousDrawable = interval.drawableBefore; // possibly null
+      this.drawable = interval.drawableBefore ? interval.drawableBefore.nextDrawable : firstDrawable;
+      
+      for ( ; drawable !== null; drawable = drawable.nextDrawable ) {
+        this.intervalStep( drawable );
+      }
+      
+      this.intervalEnd();
+      
+      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
+    },
+    
+    cleanInterval: function() {
+      this.interval = null;
+      this.currentBlock = null;
+      this.previousBlock = null;
+      this.firstDrawableForBlockChange = null;
+      this.previousDrawable = null;
+      this.drawable = null;
+    },
+    
+    intervalStep: function( drawable ) {
+      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'step: ' + drawable.toString() );
+      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
+      if ( this.previousDrawable && this.hasGapBetweenDrawables( this.previousDrawable, drawable ) ) {
+        /*---------------------------------------------------------------------------*
+        * Interval boundary
+        *----------------------------------------------------------------------------*/
+        sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'boundary' );
+        sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
+        
+        // get our final block reference, and add drawables to it
+        this.currentBlock = this.addInternalDrawables( backbone, this.currentBlock, this.firstDrawableForBlockChange, this.previousDrawable );
+        
+        // link our blocks
+        if ( boundaryCount > 0 ) {
+          assert && assert( this.previousBlock, 'Should always have a previous block if this is not the first boundary' );
+          assert && assert( this.firstDrawableForBlockChange && this.firstDrawableForBlockChange.previousDrawable,
+                            'Should always have drawables surrounding the boundary' );
+          this.linkBlocks( this.previousBlock, this.currentBlock, this.firstDrawableForBlockChange.previousDrawable, this.firstDrawableForBlockChange );
+        } else if ( !this.interval.drawableBefore && this.firstDrawableForBlockChange ) {
+          // we are the first block of our backbone at the start of an interval
+          this.linkBlocks( null, this.currentBlock, null, this.firstDrawableForBlockChange );
+        } else {
+          // we are continuing in the middle of a block
+        }
+        
+        this.previousBlock = this.currentBlock;
+        this.currentBlock = null; // so we can match another
+        
+        boundaryCount++;
+        
+        sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
+      }
+      
+      if ( drawable === this.interval.drawableAfter ) {
+        // NOTE: leaves this.previousDrawable untouched, we will use it below
+        sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
+        break;
+      } else {
+        /*---------------------------------------------------------------------------*
+        * Internal drawable
+        *----------------------------------------------------------------------------*/
+        
+        // attempt to match for our block to use
+        if ( this.currentBlock === null && drawable.parentDrawable && !drawable.parentDrawable.used ) {
+          // mark our currentBlock to be used, but don't useBlock() it yet (we may end up gluing it at the
+          // end of our interval).
+          this.currentBlock = drawable.parentDrawable;
+        }
+        
+        if ( this.firstDrawableForBlockChange === null ) {
+          this.firstDrawableForBlockChange = drawable;
+        }
+      }
+      
+      // on to the next drawable
+      this.previousDrawable = drawable;
+      
+      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
+    },
+    
+    intervalEnd: function() {
+      if ( boundaryCount === 0 && this.interval.drawableBefore && this.interval.drawableAfter &&
+           this.interval.drawableBefore.pendingParentDrawable !== this.interval.drawableAfter.pendingParentDrawable ) {
+        /*---------------------------------------------------------------------------*
+        * Glue
+        *----------------------------------------------------------------------------*/
+        sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( 'glue' );
+        sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
+        
+        //OHTWO TODO: dynamically decide which end is better to glue on
+        var oldNextBlock = this.interval.drawableAfter.pendingParentDrawable;
+        
+        // (optional?) mark the old block as reusable
+        oldNextBlock.used = false;
+        this.reusableBlocks.push( oldNextBlock );
+        
+        assert && assert( this.currentBlock && this.currentBlock === this.interval.drawableBefore.pendingParentDrawable );
+        
+        this.currentBlock = this.addInternalDrawables( backbone, this.currentBlock, this.firstDrawableForBlockChange, this.previousDrawable );
+        this.moveExternalDrawables( backbone, this.interval, this.currentBlock, lastDrawable );
+        
+        sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
+      } else if ( boundaryCount > 0 && this.interval.drawableBefore && this.interval.drawableAfter &&
+                  this.interval.drawableBefore.pendingParentDrawable === this.interval.drawableAfter.pendingParentDrawable ) {
+        //OHTWO TODO: with gluing, how do we handle the if statement block?
+        /*---------------------------------------------------------------------------*
+        * Unglue
+        *----------------------------------------------------------------------------*/
+        sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( 'unglue' );
+        sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
+        
+        var firstUngluedDrawable = this.firstDrawableForBlockChange ? this.firstDrawableForBlockChange : this.interval.drawableAfter;
+        this.currentBlock = this.ensureUsedBlock( this.currentBlock, backbone, firstUngluedDrawable );
+        backbone.markDirtyDrawable( this.currentBlock );
+        
+        // internal additions
+        if ( this.firstDrawableForBlockChange ) {
+          this.notePendingAdditions( backbone, this.currentBlock, firstUngluedDrawable, this.previousDrawable );
+        }
+        this.moveExternalDrawables( backbone, this.interval, this.currentBlock, lastDrawable );
+        
+        sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
+      } else {
+        sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( 'normal endpoint' );
+        sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
+        // handle a normal end-point, where we add our drawables to our last block
+        
+        // use the "after" block, if it is available
+        if ( this.interval.drawableAfter ) {
+          assert && assert( this.interval.drawableAfter.pendingParentDrawable );
+          this.currentBlock = this.interval.drawableAfter.pendingParentDrawable;
+        }
+        this.currentBlock = this.addInternalDrawables( backbone, this.currentBlock, this.firstDrawableForBlockChange, this.previousDrawable );
+        
+        // link our blocks
+        if ( boundaryCount > 0 ) {
+          assert && assert( this.previousBlock, 'Should always have a previous block if this is not the first boundary' );
+          assert && assert( this.firstDrawableForBlockChange && this.firstDrawableForBlockChange.previousDrawable,
+                              'Should always have drawables surrounding the boundary' );
+          this.linkBlocks( this.previousBlock, this.currentBlock, this.firstDrawableForBlockChange.previousDrawable, this.firstDrawableForBlockChange );
+        } else if ( !this.interval.drawableBefore && this.firstDrawableForBlockChange ) {
+          // we are the first block of our backbone at the start of an interval
+          this.linkBlocks( null, this.currentBlock, null, this.firstDrawableForBlockChange );
+        } else {
+          // we are continuing in the middle of a block
+        }
+        
+        sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
+      }
     },
     
     noteIntervalForRemoval: function( display, interval, oldFirstDrawable, oldLastDrawable ) {
