@@ -26,6 +26,9 @@ define( function( require ) {
       // record current first/last drawables for the entire backbone
       this.recordBackboneBoundaries();
       
+      sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( 'phase 1: old linked list' );
+      sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
+      
       // per-interval work
       for ( interval = firstChangeInterval; interval !== null; interval = interval.nextChangeInterval ) {
         assert && assert( !interval.isEmpty(), 'We now guarantee that the intervals are non-empty' );
@@ -48,10 +51,21 @@ define( function( require ) {
         }
       }
       
+      sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
+      
+      sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( 'phase 2: new linked list' );
+      sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
+      
       for ( interval = firstChangeInterval; interval !== null; interval = interval.nextChangeInterval ) {
         /*---------------------------------------------------------------------------*
         * Interval start
         *----------------------------------------------------------------------------*/
+        
+        sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'interval: ' +
+                                                                            ( interval.drawableBefore ? interval.drawableBefore.toString : 'null' ) +
+                                                                            ' to ' +
+                                                                            ( interval.drawableAfter ? interval.drawableAfter.toString : 'null' ) );
+        sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
         
         // For each virtual block, once set, the drawables will be added to this block. At the start of an interval
         // if there is a block tied to the drawableBefore, we will use it. Otherwise, as we go through the drawables,
@@ -69,11 +83,15 @@ define( function( require ) {
         
         var previousDrawable = interval.drawableBefore; // possibly null
         var drawable = interval.drawableBefore ? interval.drawableBefore.nextDrawable : firstDrawable;
-        for ( ; drawable !== lastDrawable; drawable = drawable.nextDrawable ) {
+        for ( ; drawable !== null; drawable = drawable.nextDrawable ) {
+          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'step: ' + drawable.toString() );
+          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
           if ( previousDrawable && this.hasGapBetweenDrawables( previousDrawable, drawable ) ) {
             /*---------------------------------------------------------------------------*
             * Interval boundary
             *----------------------------------------------------------------------------*/
+            sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'boundary' );
+            sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
             
             // get our final block reference, and add drawables to it
             currentBlock = this.addInternalDrawables( backbone, currentBlock, firstDrawableForBlockChange, previousDrawable );
@@ -95,10 +113,13 @@ define( function( require ) {
             currentBlock = null; // so we can match another
             
             boundaryCount++;
+            
+            sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
           }
           
           if ( drawable === interval.drawableAfter ) {
             // NOTE: leaves previousDrawable untouched, we will use it below
+            sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
             break;
           } else {
             /*---------------------------------------------------------------------------*
@@ -119,6 +140,8 @@ define( function( require ) {
           
           // on to the next drawable
           previousDrawable = drawable;
+          
+          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
         }
         
         /*---------------------------------------------------------------------------*
@@ -129,6 +152,8 @@ define( function( require ) {
           /*---------------------------------------------------------------------------*
           * Glue
           *----------------------------------------------------------------------------*/
+          sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( 'glue' );
+          sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
           
           //OHTWO TODO: dynamically decide which end is better to glue on
           var oldNextBlock = interval.drawableAfter.pendingParentDrawable;
@@ -141,12 +166,16 @@ define( function( require ) {
           
           currentBlock = this.addInternalDrawables( backbone, currentBlock, firstDrawableForBlockChange, previousDrawable );
           this.moveExternalDrawables( backbone, interval, currentBlock, lastDrawable );
+          
+          sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
         } else if ( boundaryCount > 0 && interval.drawableBefore && interval.drawableAfter &&
                     interval.drawableBefore.pendingParentDrawable === interval.drawableAfter.pendingParentDrawable ) {
           //OHTWO TODO: with gluing, how do we handle the if statement block?
           /*---------------------------------------------------------------------------*
           * Unglue
           *----------------------------------------------------------------------------*/
+          sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( 'unglue' );
+          sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
           
           var firstUngluedDrawable = firstDrawableForBlockChange ? firstDrawableForBlockChange : interval.drawableAfter;
           currentBlock = this.ensureUsedBlock( currentBlock, backbone, firstUngluedDrawable );
@@ -157,7 +186,11 @@ define( function( require ) {
             this.notePendingAdditions( backbone, currentBlock, firstUngluedDrawable, previousDrawable );
           }
           this.moveExternalDrawables( backbone, interval, currentBlock, lastDrawable );
+          
+          sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
         } else {
+          sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( 'normal endpoint' );
+          sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
           // handle a normal end-point, where we add our drawables to our last block
           
           // use the "after" block, if it is available
@@ -179,8 +212,18 @@ define( function( require ) {
           } else {
             // we are continuing in the middle of a block
           }
+          
+          sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
         }
+        
+        sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
       }
+      
+      sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
+      
+      sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( 'phase 3: cleanup' );
+      sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
+      
       //OHTWO TODO: maintain array or linked-list of blocks (and update)
       //OHTWO TODO: remember to set blockOrderChanged on changes  (everything removed?)
       //OHTWO VERIFY: DOMBlock special case with backbones / etc.? Always have the same drawable!!!
@@ -199,6 +242,8 @@ define( function( require ) {
       
       this.clean();
       cleanArray( this.reusableBlocks );
+      
+      sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
     },
     
     noteIntervalForRemoval: function( display, interval, oldFirstDrawable, oldLastDrawable ) {
@@ -316,15 +361,20 @@ define( function( require ) {
     
     // removes them from our domElement, and marks them for disposal
     removeUnusedBlocks: function( backbone ) {
+      sceneryLog && sceneryLog.GreedyStitcher && this.reusableBlocks.length && sceneryLog.GreedyStitcher( 'removeUnusedBlocks' );
+      sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
       while ( this.reusableBlocks.length ) {
         this.markBlockForDisposal( this.reusableBlocks.pop() );
       }
+      sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
     },
     
     linkBlocks: function( beforeBlock, afterBlock, beforeDrawable, afterDrawable ) {
-      sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'linking blocks: ' +
-                                                            ( beforeBlock ? beforeBlock.toString() : 'null' ) );
-      sceneryLog && sceneryLog.Stitch && sceneryLog.push();
+      sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( 'linking blocks: ' +
+                                                                            ( beforeBlock ? ( beforeBlock.toString() + ' (' + beforeDrawable.toString() + ')' ) : 'null' ) +
+                                                                            ' to ' +
+                                                                            ( afterBlock ? ( afterBlock.toString() + ' (' + afterDrawable.toString() + ')' ) : 'null' ) );
+      sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
       
       assert && assert( ( beforeBlock === null && beforeDrawable === null ) ||
                         ( beforeBlock instanceof scenery.Block && beforeDrawable instanceof scenery.Drawable ) );
@@ -358,7 +408,7 @@ define( function( require ) {
         this.markBeforeBlock( afterBlock, afterDrawable );
       }
       
-      sceneryLog && sceneryLog.Stitch && sceneryLog.pop();
+      sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
     },
     
     processBlockLinkedList: function( backbone, firstBlock, lastBlock ) {
@@ -367,19 +417,19 @@ define( function( require ) {
         backbone.blocks.pop();
       }
       
-      sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'new block order:' );
-      sceneryLog && sceneryLog.Stitch && sceneryLog.push();
+      sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( 'processBlockLinkedList' );
+      sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
       
       // and rewrite it
       for ( var block = firstBlock;; block = block.nextBlock ) {
-        sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( block.toString() );
+        sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( block.toString() );
         
         backbone.blocks.push( block );
         
         if ( block === lastBlock ) { break; }
       }
       
-      sceneryLog && sceneryLog.Stitch && sceneryLog.pop();
+      sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
     }
   };
   
