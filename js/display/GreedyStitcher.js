@@ -187,8 +187,12 @@ define( function( require ) {
       
       this.removeUnusedBlocks( backbone );
       
-      //OHTWO TODO: just use direct operations!
-      if ( this.blockOrderChanged ) {
+      // since we use markBeforeBlock/markAfterBlock
+      this.updateBlockIntervals();
+      
+      if ( firstDrawable === null ) {
+        this.useNoBlocks();
+      } else if ( this.blockOrderChanged ) {
         this.processBlockLinkedList( backbone, firstDrawable.pendingParentDrawable, lastDrawable.pendingParentDrawable );
         this.reindex();
       }
@@ -334,7 +338,7 @@ define( function( require ) {
           
           beforeBlock.nextBlock = afterBlock;
         }
-        beforeBlock.pendingLastDrawable = beforeDrawable;
+        this.markAfterBlock( beforeBlock, beforeDrawable );
       }
       if ( afterBlock ) {
         if ( afterBlock.previousBlock !== beforeBlock ) {
@@ -347,7 +351,7 @@ define( function( require ) {
           
           afterBlock.previousBlock = beforeBlock;
         }
-        afterBlock.pendingFirstDrawable = afterDrawable;
+        this.markBeforeBlock( afterBlock, afterDrawable );
       }
     },
     
@@ -360,9 +364,6 @@ define( function( require ) {
       // and rewrite it
       for ( var block = firstBlock;; block = block.nextBlock ) {
         backbone.blocks.push( block );
-        
-        // if its first/last drawable has changed, update it
-        block.updateInterval();
         
         if ( block === lastBlock ) { break; }
       }

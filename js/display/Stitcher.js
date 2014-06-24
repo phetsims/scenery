@@ -266,6 +266,10 @@ define( function( require ) {
       sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'appending block: ' + block.toString() );
       
       this.backbone.blocks.push( block );
+      
+      if ( assertSlow ) {
+        this.reindexed = false;
+      }
     },
     
     removeBlock: function( block ) {
@@ -275,6 +279,17 @@ define( function( require ) {
       var blockIndex = _.indexOf( this.backbone.blocks, block );
       assert && assert( blockIndex >= 0, 'Cannot remove block, not attached: ' + block.toString() );
       this.backbone.blocks.splice( blockIndex, 1 );
+      
+      if ( assertSlow ) {
+        this.reindexed = false;
+      }
+    },
+    
+    useNoBlocks: function() {
+      sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'using no blocks' );
+      
+      // i.e. we will not use any blocks
+      cleanArray( this.backbone.blocks );
     },
     
     reindex: function() {
@@ -291,9 +306,21 @@ define( function( require ) {
       if ( assertSlow ) {
         var stitcher = this;
         
+        var blocks = stitcher.backbone.blocks;
+        var previousBlocks = stitcher.previousBlocks;
+        
         assertSlow( stitcher.initialized, 'We seem to have finished a stitch without proper initialization' );
         assertSlow( stitcher.boundariesRecorded, 'Our stitch API requires recordBackboneBoundaries() to be called before' +
-                                             ' it is finished.' );
+                                                 ' it is finished.' );
+        
+        // ensure our indices are up-to-date (reindexed, or didn't change)
+        assertSlow( stitcher.reindexed ||
+                    // array equality of previousBlocks and blocks
+                    ( previousBlocks.length === blocks.length &&
+                      _.every( _.zip( previousBlocks, blocks ), function( arr ) {
+                        return arr[0] === arr[1];
+                      } ) ),
+                    'Did not reindex on a block change' );
         
         // all created blocks had intervals notified
         _.each( stitcher.createdBlocks, function( blockData ) {
@@ -335,24 +362,23 @@ define( function( require ) {
         
         // all disposed blocks should have been removed
         _.each( stitcher.disposedBlocks, function( blockData ) {
-          var blockIdx = _.indexOf( stitcher.backbone.blocks, blockData.block );
+          var blockIdx = _.indexOf( blocks, blockData.block );
           assertSlow( blockIdx < 0, 'Disposed block ' + blockData.block.toString() + ' still present at index ' + blockIdx );
         } );
         
         // all created blocks should have been added
         _.each( stitcher.createdBlocks, function( blockData ) {
-          var blockIdx = _.indexOf( stitcher.backbone.blocks, blockData.block );
+          var blockIdx = _.indexOf( blocks, blockData.block );
           assertSlow( blockIdx >= 0, 'Created block ' + blockData.block.toString() + ' is not in the blocks array' );
         } );
         
-        assertSlow( stitcher.backbone.blocks.length - stitcher.previousBlocks.length === stitcher.createdBlocks.length - stitcher.disposedBlocks.length,
+        assertSlow( blocks.length - previousBlocks.length === stitcher.createdBlocks.length - stitcher.disposedBlocks.length,
                     'The count of unmodified blocks should be constant (equal differences)' );
         
         assertSlow( this.touchedBlocks.length === 0,
                     'If we marked any blocks for changes, we should have called updateBlockIntervals' );
         
-        if ( stitcher.backbone.blocks.length ) {
-          var blocks = stitcher.backbone.blocks;
+        if ( blocks.length ) {
           
           assertSlow( stitcher.backbone.previousFirstDrawable !== null &&
                       stitcher.backbone.previousLastDrawable !== null,
