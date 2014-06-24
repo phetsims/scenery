@@ -16,8 +16,11 @@ define( function( require ) {
   var Drawable = require( 'SCENERY/display/Drawable' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var Stitcher = require( 'SCENERY/display/Stitcher' );
+  var GreedyStitcher = require( 'SCENERY/display/GreedyStitcher' );
   var RebuildStitcher = require( 'SCENERY/display/RebuildStitcher' );
   var Util = require( 'SCENERY/util/Util' );
+  
+  var useGreedyStitcher = false;
   
   scenery.BackboneDrawable = function BackboneDrawable( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
     this.initialize( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
@@ -95,7 +98,7 @@ define( function( require ) {
       // If removedDrawables = false during disposal, it means we need to remove the drawables manually (this should only happen if an instance tree is removed)
       this.removedDrawables = false;
       
-      this.stitcher = this.stitcher || new RebuildStitcher();
+      this.stitcher = this.stitcher || ( useGreedyStitcher ? new GreedyStitcher() : new RebuildStitcher() );
       
       sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'initialized ' + this.toString() );
       
