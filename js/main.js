@@ -41,7 +41,6 @@ define( [
     'SCENERY/input/DownUpListener',
     'SCENERY/input/Event',
     'SCENERY/input/Input',
-    'SCENERY/input/Key',
     'SCENERY/input/Mouse',
     'SCENERY/input/Pen',
     'SCENERY/input/Pointer',

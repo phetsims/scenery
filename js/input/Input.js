@@ -29,7 +29,6 @@ define( function( require ) {
   require( 'SCENERY/input/Mouse' );
   require( 'SCENERY/input/Touch' );
   require( 'SCENERY/input/Pen' );
-  require( 'SCENERY/input/Key' );
   require( 'SCENERY/input/Event' );
   
   // listenerTarget is the DOM node (window/document/element) to which DOM event listeners will be attached
@@ -137,16 +136,6 @@ define( function( require ) {
       this.upEvent( this.mouse, event );
     },
     
-    mouseUpImmediate: function( point, event ) {
-      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseUpImmediate(' + Input.debugText( point, event ) + ');' );
-      if ( this.logEvents ) { this.eventLog.push( 'mouseUpImmediate(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      if ( !this.mouse ) { this.initMouse(); }
-      if ( this.mouse.point ) {
-        // if the pointer's point hasn't been initialized yet, ignore the immediate up
-        this.upImmediateEvent( this.mouse, event );
-      }
-    },
-    
     mouseMove: function( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseMove(' + Input.debugText( point, event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'mouseMove(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
@@ -171,40 +160,6 @@ define( function( require ) {
       // TODO: how to handle mouse-out (and log it)
     },
     
-    keyDown: function( event ) {
-      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyDown(' + Input.serializeDomEvent( event ) + ');' );
-      if ( this.logEvents ) { this.eventLog.push( 'keyDown(' + Input.serializeDomEvent( event ) + ');' ); }
-      var key = new scenery.Key( event );
-      this.addPointer( key );
-      
-      //OHTWO TODO: fix this!
-      if ( this.rootNode.getTrailFromKeyboardFocus ) {
-        var trail = this.rootNode.getTrailFromKeyboardFocus();
-        this.dispatchEvent( trail, 'keyDown', key, event, true );
-      }
-    },
-    
-    keyUp: function( event ) {
-      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyUp(' + Input.serializeDomEvent( event ) + ');' );
-      if ( this.logEvents ) { this.eventLog.push( 'keyUp(' + Input.serializeDomEvent( event ) + ');' ); }
-      var key = this.findKeyByEvent( event );
-      if ( key ) {
-        this.removePointer( key );
-        
-        //OHTWO TODO: fix this!
-        if ( this.rootNode.getTrailFromKeyboardFocus ) {
-          var trail = this.rootNode.getTrailFromKeyboardFocus();
-          this.dispatchEvent( trail, 'keyUp', key, event, true );
-        }
-      }
-    },
-    
-    keyPress: function( event ) {
-      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyPress(' + Input.serializeDomEvent( event ) + ');' );
-      if ( this.logEvents ) { this.eventLog.push( 'keyPress(' + Input.serializeDomEvent( event ) + ');' ); }
-      // NOTE: do we even need keyPress?
-    },
-    
     // called for each touch point
     touchStart: function( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchStart(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
@@ -227,17 +182,6 @@ define( function( require ) {
         this.upEvent( touch, event );
       } else {
         assert && assert( false, 'Touch not found for touchEnd: ' + id );
-      }
-    },
-    
-    touchEndImmediate: function( id, point, event ) {
-      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchEndImmediate(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
-      if ( this.logEvents ) { this.eventLog.push( 'touchEndImmediate(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      var touch = this.findTouchById( id );
-      if ( touch ) {
-        this.upImmediateEvent( touch, event );
-      } else {
-        assert && assert( false, 'Touch not found for touchEndImmediate: ' + id );
       }
     },
     
@@ -291,17 +235,6 @@ define( function( require ) {
         this.upEvent( pen, event );
       } else {
         assert && assert( false, 'Pen not found for penEnd: ' + id );
-      }
-    },
-    
-    penEndImmediate: function( id, point, event ) {
-      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penEndImmediate(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
-      if ( this.logEvents ) { this.eventLog.push( 'penEndImmediate(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
-      var pen = this.findTouchById( id );
-      if ( pen ) {
-        this.upImmediateEvent( pen, event );
-      } else {
-        assert && assert( false, 'Pen not found for penEndImmediate: ' + id );
       }
     },
     
@@ -361,24 +294,6 @@ define( function( require ) {
           break;
         case 'pen':
           this.penEnd( id, point, event );
-          break;
-        default:
-          if ( console.log ) {
-            console.log( 'Unknown pointer type: ' + type );
-          }
-      }
-    },
-    
-    pointerUpImmediate: function( id, type, point, event ) {
-      switch ( type ) {
-        case 'mouse':
-          this.mouseUpImmediate( point, event );
-          break;
-        case 'touch':
-          this.touchEndImmediate( id, point, event );
-          break;
-        case 'pen':
-          this.penEndImmediate( id, point, event );
           break;
         default:
           if ( console.log ) {
@@ -452,12 +367,6 @@ define( function( require ) {
       }
       
       pointer.trail = trail;
-    },
-    
-    upImmediateEvent: function( pointer, event ) {
-      var trail = this.rootNode.trailUnderPointer( pointer ) || new scenery.Trail( this.rootNode );
-      
-      this.dispatchEvent( trail, 'upImmediate', pointer, event, true );
     },
     
     downEvent: function( pointer, event ) {
@@ -602,7 +511,7 @@ define( function( require ) {
         return;
       }
       
-      var specificType = pointer.type + type; // e.g. mouseup, touchup, keyup
+      var specificType = pointer.type + type; // e.g. mouseup, touchup
       
       var pointerListeners = pointer.listeners.slice( 0 ); // defensive copy
       for ( var i = 0; i < pointerListeners.length; i++ ) {
@@ -632,7 +541,7 @@ define( function( require ) {
         return;
       }
       
-      var specificType = pointer.type + type; // e.g. mouseup, touchup, keyup
+      var specificType = pointer.type + type; // e.g. mouseup, touchup
       
       for ( var i = trail.length - 1; i >= 0; bubbles ? i-- : i = -1 ) {
         var target = trail.nodes[i];
@@ -668,11 +577,11 @@ define( function( require ) {
       }
     },
     
-    addListener: function( type, callback, useCapture ) {
+    addListener: function( type, callback, useCapture, triggerImmediate ) {
       var input = this;
       
-      //Cancel propagation of mouse events but not key events.  Key Events need to propagate for tab navigability
-      var usePreventDefault = type !== 'keydown' && type !== 'keyup' && type !== 'keypress';
+      // Cancel propagation of mouse events but not key events.  Key Events need to propagate for tab navigability
+      var usePreventDefault = true;
       
       // work around iOS Safari 7 not sending touch events to Scenes contained in an iframe
       if ( this.listenerTarget === window ) {
@@ -686,6 +595,7 @@ define( function( require ) {
           if ( usePreventDefault ) {
             domEvent.preventDefault(); // TODO: should we batch the events in a different place so we don't preventDefault on something bad?
           }
+          
           input.batchedCallbacks.push( function batchedEventCallback() {
             // process whether anything under the pointers changed before running additional input events
             sceneryEventLog && sceneryEventLog( 'validatePointers from batched event' );
@@ -710,22 +620,6 @@ define( function( require ) {
           callback( domEvent );
         }, useCapture: useCapture } );
       }
-    },
-    
-    // temporary, for mouse events
-    addImmediateListener: function( type, callback, useCapture ) {
-      // var input = this;
-      
-      this.listenerTarget.addEventListener( type, callback, useCapture );
-      this.listenerReferences.push( { type: type, callback: function immediateEvent( domEvent ) {
-        sceneryEventLog && sceneryEventLog( 'Running immediate event for ' + type );
-        
-        // process whether anything under the pointers changed before running additional input events
-        // input.validatePointers();
-        // if ( input.logEvents ) { input.eventLog.push( 'validatePointers();' ); }
-        
-        callback( domEvent );
-      }, useCapture: useCapture } );
     },
     
     disposeListeners: function() {
