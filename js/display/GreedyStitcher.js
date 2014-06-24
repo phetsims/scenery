@@ -322,6 +322,10 @@ define( function( require ) {
     },
     
     linkBlocks: function( beforeBlock, afterBlock, beforeDrawable, afterDrawable ) {
+      sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'linking blocks: ' +
+                                                            ( beforeBlock ? beforeBlock.toString() : 'null' ) );
+      sceneryLog && sceneryLog.Stitch && sceneryLog.push();
+      
       assert && assert( ( beforeBlock === null && beforeDrawable === null ) ||
                         ( beforeBlock instanceof scenery.Block && beforeDrawable instanceof scenery.Drawable ) );
       assert && assert( ( afterBlock === null && afterDrawable === null ) ||
@@ -353,6 +357,8 @@ define( function( require ) {
         }
         this.markBeforeBlock( afterBlock, afterDrawable );
       }
+      
+      sceneryLog && sceneryLog.Stitch && sceneryLog.pop();
     },
     
     processBlockLinkedList: function( backbone, firstBlock, lastBlock ) {
@@ -361,12 +367,19 @@ define( function( require ) {
         backbone.blocks.pop();
       }
       
+      sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'new block order:' );
+      sceneryLog && sceneryLog.Stitch && sceneryLog.push();
+      
       // and rewrite it
       for ( var block = firstBlock;; block = block.nextBlock ) {
+        sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( block.toString() );
+        
         backbone.blocks.push( block );
         
         if ( block === lastBlock ) { break; }
       }
+      
+      sceneryLog && sceneryLog.Stitch && sceneryLog.pop();
     }
   };
   
