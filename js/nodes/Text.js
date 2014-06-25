@@ -581,6 +581,8 @@ define( function( require ) {
       if ( !this.domElement ) {
         this.domElement = document.createElement( 'div' );
         this.domElement.style.display = 'block';
+        this.domElement.style.position = 'absolute';
+        this.domElement.style.pointerEvents = 'none';
         this.domElement.style.left = '0';
         this.domElement.style.top = '0';
       }
