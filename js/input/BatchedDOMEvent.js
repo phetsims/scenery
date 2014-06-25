@@ -16,6 +16,8 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   
   scenery.BatchedDOMEvent = function BatchedDOMEvent( domEvent, type, callback ) {
+    assert && assert( domEvent, 'for some reason, there is no DOM event?' );
+    
     // called multiple times due to pooling, this should be re-entrant
     this.domEvent = domEvent;
     this.type = type;

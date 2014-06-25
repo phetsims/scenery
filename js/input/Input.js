@@ -177,7 +177,7 @@ define( function( require ) {
         }
         
         var callback = this['on' + type];
-        assert && assert( callback );
+        assert && assert( !!callback );
         
         if ( addOrRemove ) {
           this.listenerTarget.addEventListener( type, callback, false ); // don't use capture for now
