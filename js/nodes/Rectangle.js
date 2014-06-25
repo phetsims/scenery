@@ -512,12 +512,14 @@ define( function( require ) {
         fillElement.style.position = 'absolute';
         fillElement.style.left = '0';
         fillElement.style.top = '0';
+        fillElement.style.pointerEvents = 'none';
         
         var strokeElement = this.strokeElement = document.createElement( 'div' );
         strokeElement.style.display = 'block';
         strokeElement.style.position = 'absolute';
         strokeElement.style.left = '0';
         strokeElement.style.top = '0';
+        strokeElement.style.pointerEvents = 'none';
         fillElement.appendChild( strokeElement );
       }
       
