@@ -30,14 +30,21 @@ define( function( require ) {
   require( 'SCENERY/input/Touch' );
   require( 'SCENERY/input/Pen' );
   require( 'SCENERY/input/Event' );
+  var BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
   
   // listenerTarget is the DOM node (window/document/element) to which DOM event listeners will be attached
-  scenery.Input = function Input( rootNode, listenerTarget, batchDOMEvents ) {
+  scenery.Input = function Input( rootNode, listenerTarget, batchDOMEvents, enablePointerEvents, pointFromEvent ) {
     this.rootNode = rootNode;
     this.listenerTarget = listenerTarget;
     this.batchDOMEvents = batchDOMEvents;
+    this.enablePointerEvents = enablePointerEvents;
+    this.pointFromEvent = pointFromEvent;
+    this.displayUpdateOnEvent = false;
     
+    //OHTWO @deprecated
     this.batchedCallbacks = []; // cleared every frame
+    
+    this.batchedEvents = [];
 
     //Pointer for mouse, only created lazily on first mouse event, so no mouse is allocated on tablets
     this.mouse = null;
@@ -50,12 +57,136 @@ define( function( require ) {
     this.logEvents = false; // can be set to true to cause Scenery to record all input calls to eventLog
 
     this.pointerAddedListeners = [];
+    
+    var input = this;
+    
+    // unique to this input instance
+    this.onpointerdown     = function onpointerdown(     domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE,    input.pointerDown,   false ); };
+    this.onpointerup       = function onpointerup(       domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE,    input.pointerUp,     true  ); };
+    this.onpointermove     = function onpointermove(     domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE,    input.pointerMove,   false ); };
+    this.onpointerover     = function onpointerover(     domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE,    input.pointerOver,   false ); };
+    this.onpointerout      = function onpointerout(      domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE,    input.pointerOut,    false ); };
+    this.onpointercancel   = function onpointercancel(   domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE,    input.pointerCancel, false ); };
+    this.onMSPointerDown   = function onMSPointerDown(   domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerDown,   false ); };
+    this.onMSPointerUp     = function onMSPointerUp(     domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerUp,     true  ); };
+    this.onMSPointerMove   = function onMSPointerMove(   domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerMove,   false ); };
+    this.onMSPointerOver   = function onMSPointerOver(   domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerOver,   false ); };
+    this.onMSPointerOut    = function onMSPointerOut(    domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerOut,    false ); };
+    this.onMSPointerCancel = function onMSPointerCancel( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerCancel, false ); };
+    this.ontouchstart      = function ontouchstart(      domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE,      input.touchStart,    false ); };
+    this.ontouchend        = function ontouchend(        domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE,      input.touchEnd,      true  ); };
+    this.ontouchmove       = function ontouchmove(       domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE,      input.touchMove,     false ); };
+    this.ontouchcancel     = function ontouchcancel(     domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE,      input.touchCancel,   false ); };
+    this.onmousedown       = function onmousedown(       domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE,      input.mouseDown,     false ); };
+    this.onmouseup         = function onmouseup(         domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE,      input.mouseUp,       true  ); };
+    this.onmousemove       = function onmousemove(       domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE,      input.mouseMove,     false ); };
+    this.onmouseover       = function onmouseover(       domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE,      input.mouseOver,     false ); };
+    this.onmouseout        = function onmouseout(        domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE,      input.mouseOut,      false ); };
+    this.uselessListener   = function uselessListener(   domEvent ) {};
   };
   var Input = scenery.Input;
   
   Input.prototype = {
     constructor: Input,
-
+    
+    batchEvent: function( domEvent, batchType, callback, triggerImmediate ) {
+      this.batchedEvents.push( BatchedDOMEvent.createFromPool( domEvent, batchType, callback ) );
+      if ( triggerImmediate || !this.batchDOMEvents ) {
+        this.fireBatchedEvents();
+      }
+      if ( this.displayUpdateOnEvent ) {
+        //OHTWO TODO: update the display
+      }
+      
+      domEvent.preventDefault();
+    },
+    
+    fireBatchedEvents: function() {
+      if ( this.batchedEvents.length ) {
+        sceneryEventLog && sceneryEventLog( 'Input.fireBatchedEvents length:' + this.batchedEvents.length );
+        
+        // needs to be done in order
+        var len = this.batchedEvents.length;
+        for ( var i = 0; i < len; i++ ) {
+          var batchedEvent = this.batchedEvents[i];
+          batchedEvent.run( this );
+          batchedEvent.dispose();
+        }
+        cleanArray( this.batchedEvents );
+      }
+    },
+    
+    pointerListenerTypes: [ 'pointerdown', 'pointerup', 'pointermove', 'pointerover', 'pointerout', 'pointercancel' ],
+    msPointerListenerTypes: [ 'MSPointerDown', 'MSPointerUp', 'MSPointerMove', 'MSPointerOver', 'MSPointerOut', 'MSPointerCancel' ],
+    touchListenerTypes: [ 'touchstart', 'touchend', 'touchmove', 'touchcancel' ],
+    mouseListenerTypes: [ 'mousedown', 'mouseup', 'mousemove', 'mouseover', 'mouseout' ],
+    
+    // W3C spec for pointer events
+    canUsePointerEvents: function() {
+      return window.navigator && window.navigator.pointerEnabled && this.enablePointerEvents;
+    },
+    
+    // MS spec for pointer event
+    canUseMSPointerEvents: function() {
+      return window.navigator && window.navigator.msPointerEnabled && this.enablePointerEvents;
+    },
+    
+    getUsedEventTypes: function() {
+      var eventTypes;
+      
+      if ( this.canUsePointerEvents() ) {
+        // accepts pointer events corresponding to the spec at http://www.w3.org/TR/pointerevents/
+        sceneryLog && sceneryLog.Input && sceneryLog.Input( 'Detected pointer events support, using that instead of mouse/touch events' );
+        
+        eventTypes = this.pointerListenerTypes;
+      } else if ( this.canUseMSPointerEvents() ) {
+        sceneryLog && sceneryLog.Input && sceneryLog.Input( 'Detected MS pointer events support, using that instead of mouse/touch events' );
+        
+        eventTypes = this.msPointerListenerTypes;
+      } else {
+        sceneryLog && sceneryLog.Input && sceneryLog.Input( 'No pointer events support detected, using mouse/touch events' );
+        
+        eventTypes = this.touchListenerTypes.concat( this.mouseListenerTypes );
+      }
+      
+      return eventTypes;
+    },
+    
+    connectListeners: function() {
+      this.processListeners( true );
+    },
+    
+    disconnectListeners: function() {
+      this.processListeners( false );
+    },
+    
+    // @param addOrRemove: true if adding, false if removing
+    processListeners: function( addOrRemove ) {
+      var eventTypes = this.getUsedEventTypes();
+      
+      for ( var i = 0; i < eventTypes.length; i++ ) {
+        var type = eventTypes[i];
+        
+        // work around iOS Safari 7 not sending touch events to Scenes contained in an iframe
+        if ( this.listenerTarget === window ) {
+          if ( addOrRemove ) {
+            document.addEventListener( type, this.uselessListener );
+          } else {
+            document.removeEventListener( type, this.uselessListener );
+          }
+        }
+        
+        var callback = this['on' + type];
+        assert && assert( callback );
+        
+        if ( addOrRemove ) {
+          this.listenerTarget.addEventListener( type, callback, false ); // don't use capture for now
+        } else {
+          this.listenerTarget.removeEventListener( type, callback, false ); // don't use capture for now
+        }
+      }
+    },
+    
     addPointer: function( pointer ) {
       this.pointers.push( pointer );
 
@@ -574,69 +705,6 @@ define( function( require ) {
         if ( inputEvent.handled ) {
           return;
         }
-      }
-    },
-    
-    addListener: function( type, callback, useCapture, triggerImmediate ) {
-      var input = this;
-      
-      // Cancel propagation of mouse events but not key events.  Key Events need to propagate for tab navigability
-      var usePreventDefault = true;
-      
-      // work around iOS Safari 7 not sending touch events to Scenes contained in an iframe
-      if ( this.listenerTarget === window ) {
-        document.addEventListener( type, function( domEvent ) {} );
-      }
-      
-      if ( this.batchDOMEvents ) {
-        var batchedCallback = function batchedEvent( domEvent ) {
-          sceneryEventLog && sceneryEventLog( 'Batching event for ' + type );
-          
-          if ( usePreventDefault ) {
-            domEvent.preventDefault(); // TODO: should we batch the events in a different place so we don't preventDefault on something bad?
-          }
-          
-          input.batchedCallbacks.push( function batchedEventCallback() {
-            // process whether anything under the pointers changed before running additional input events
-            sceneryEventLog && sceneryEventLog( 'validatePointers from batched event' );
-            input.validatePointers();
-            if ( input.logEvents ) { input.eventLog.push( 'validatePointers();' ); }
-            
-            callback( domEvent );
-          } );
-        };
-        this.listenerTarget.addEventListener( type, batchedCallback, useCapture );
-        this.listenerReferences.push( { type: type, callback: batchedCallback, useCapture: useCapture } );
-      } else {
-        this.listenerTarget.addEventListener( type, callback, useCapture );
-        this.listenerReferences.push( { type: type, callback: function synchronousEvent( domEvent ) {
-          sceneryEventLog && sceneryEventLog( 'Running event for ' + type );
-          
-          // process whether anything under the pointers changed before running additional input events
-          sceneryEventLog && sceneryEventLog( 'validatePointers from non-batched event' );
-          input.validatePointers();
-          if ( input.logEvents ) { input.eventLog.push( 'validatePointers();' ); }
-          
-          callback( domEvent );
-        }, useCapture: useCapture } );
-      }
-    },
-    
-    disposeListeners: function() {
-      var input = this;
-      _.each( this.listenerReferences, function( ref ) {
-        input.listenerTarget.removeEventListener( ref.type, ref.callback, ref.useCapture );
-      } );
-    },
-    
-    fireBatchedEvents: function() {
-      if ( this.batchedCallbacks.length ) {
-        sceneryEventLog && sceneryEventLog( 'Input.fireBatchedEvents length:' + this.batchedCallbacks.length );
-        var len = this.batchedCallbacks.length;
-        for ( var i = 0; i < len; i++ ) {
-          this.batchedCallbacks[i]();
-        }
-        cleanArray( this.batchedCallbacks );
       }
     }
   };
