@@ -57,7 +57,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
       
       for ( interval = firstChangeInterval; interval !== null; interval = interval.nextChangeInterval ) {
-        this.processInterval( interval );
+        this.processInterval( interval, firstDrawable, lastDrawable );
       }
       this.cleanInterval();
       
@@ -66,8 +66,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( 'phase 3: cleanup' );
       sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
       
-      //OHTWO TODO: maintain array or linked-list of blocks (and update)
-      //OHTWO TODO: remember to set blockOrderChanged on changes  (everything removed?)
+      //OHTWO VERIFY: remember to set blockOrderChanged on changes  (everything removed?)
       //OHTWO VERIFY: DOMBlock special case with backbones / etc.? Always have the same drawable!!!
       
       this.removeUnusedBlocks( backbone );
@@ -88,7 +87,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
     },
     
-    processInterval: function( interval ) {
+    processInterval: function( interval, firstDrawable, lastDrawable ) {
       sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'interval: ' +
                                                                           ( interval.drawableBefore ? interval.drawableBefore.toString : 'null' ) +
                                                                           ' to ' +
@@ -96,6 +95,13 @@ define( function( require ) {
       sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
       
       this.interval = interval;
+      
+      var drawable = interval.drawableBefore ? interval.drawableBefore.nextDrawable : firstDrawable;
+      var subBlockFirstDrawable = null;
+      for ( ; drawable !== interval.drawableAfter; drawable = drawable.nextDrawable ) {
+        //OHTWO TODO: sub-block
+      }
+      
       
       // For each virtual block, once set, the drawables will be added to this block. At the start of an interval
       // if there is a block tied to the drawableBefore, we will use it. Otherwise, as we go through the drawables,
