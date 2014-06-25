@@ -167,6 +167,12 @@ define( function( require ) {
       
       var firstRun = !!this._baseInstance;
       
+      // check to see whether contents under pointers changed (and if so, send the enter/exit events) to
+      // maintain consistent state
+      if ( this._input ) {
+        this._input.validatePointers();
+      }
+      
       // validate bounds for everywhere that could trigger bounds listeners. we want to flush out any changes, so that we can call validateBounds()
       // from code below without triggering side effects (we assume that we are not reentrant).
       this._rootNode.validateWatchedBounds();
@@ -617,109 +623,17 @@ define( function( require ) {
       var listenerTarget = parameters.listenerTarget;
       var batchDOMEvents = parameters.batchDOMEvents; //OHTWO TODO: hybrid batching (option to batch until an event like 'up' that might be needed for security issues)
       
-      var input = new scenery.Input( this._rootNode, listenerTarget, !!batchDOMEvents );
+      var input = new scenery.Input( this._rootNode, listenerTarget, !!batchDOMEvents, this.options.enablePointerEvents, pointFromEvent );
       this._input = input;
       
-      function forEachChangedTouch( evt, callback ) {
-        for ( var i = 0; i < evt.changedTouches.length; i++ ) {
-          // according to spec (http://www.w3.org/TR/touch-events/), this is not an Array, but a TouchList
-          var touch = evt.changedTouches.item( i );
-          
-          callback( touch.identifier, pointFromEvent( touch ) );
-        }
-      }
+      input.connectListeners();
+    },
+    
+    detachEvents: function() {
+      assert && assert( this._input, 'detachEvents() should be called only when events are attached' );
       
-      // TODO: massive boilerplate reduction! closures should help tons!
-      
-      var implementsPointerEvents = window.navigator && window.navigator.pointerEnabled; // W3C spec for pointer events
-      var implementsMSPointerEvents = window.navigator && window.navigator.msPointerEnabled; // MS spec for pointer event
-      if ( this.enablePointerEvents && implementsPointerEvents ) {
-        // accepts pointer events corresponding to the spec at http://www.w3.org/TR/pointerevents/
-        sceneryLog && sceneryLog.Input && sceneryLog.Input( 'Detected pointer events support, using that instead of mouse/touch events' );
-        
-        input.addListener( 'pointerdown', function pointerDownCallback( domEvent ) {
-          input.pointerDown( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
-        }, false, false );
-        input.addListener( 'pointerup', function pointerUpCallback( domEvent ) {
-          input.pointerUp( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
-        }, false, true );
-        input.addListener( 'pointermove', function pointerMoveCallback( domEvent ) {
-          input.pointerMove( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
-        }, false, false );
-        input.addListener( 'pointerover', function pointerOverCallback( domEvent ) {
-          input.pointerOver( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
-        }, false, false );
-        input.addListener( 'pointerout', function pointerOutCallback( domEvent ) {
-          input.pointerOut( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
-        }, false, false );
-        input.addListener( 'pointercancel', function pointerCancelCallback( domEvent ) {
-          input.pointerCancel( domEvent.pointerId, domEvent.pointerType, pointFromEvent( domEvent ), domEvent );
-        }, false, false );
-      } else if ( this.enablePointerEvents && implementsMSPointerEvents ) {
-        sceneryLog && sceneryLog.Input && sceneryLog.Input( 'Detected MS pointer events support, using that instead of mouse/touch events' );
-        
-        input.addListener( 'MSPointerDown', function msPointerDownCallback( domEvent ) {
-          input.pointerDown( domEvent.pointerId, scenery.Input.msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
-        }, false, false );
-        input.addListener( 'MSPointerUp', function msPointerUpCallback( domEvent ) {
-          input.pointerUp( domEvent.pointerId, scenery.Input.msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
-        }, false, true );
-        input.addListener( 'MSPointerMove', function msPointerMoveCallback( domEvent ) {
-          input.pointerMove( domEvent.pointerId, scenery.Input.msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
-        }, false, false );
-        input.addListener( 'MSPointerOver', function msPointerOverCallback( domEvent ) {
-          input.pointerOver( domEvent.pointerId, scenery.Input.msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
-        }, false, false );
-        input.addListener( 'MSPointerOut', function msPointerOutCallback( domEvent ) {
-          input.pointerOut( domEvent.pointerId, scenery.Input.msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
-        }, false, false );
-        input.addListener( 'MSPointerCancel', function msPointerCancelCallback( domEvent ) {
-          input.pointerCancel( domEvent.pointerId, scenery.Input.msPointerType( domEvent ), pointFromEvent( domEvent ), domEvent );
-        }, false, false );
-      } else {
-        sceneryLog && sceneryLog.Input && sceneryLog.Input( 'No pointer events support detected, using mouse/touch events' );
-        
-        input.addListener( 'mousedown', function mouseDownCallback( domEvent ) {
-          input.mouseDown( pointFromEvent( domEvent ), domEvent );
-        }, false, false );
-        input.addListener( 'mouseup', function mouseUpCallback( domEvent ) {
-          input.mouseUp( pointFromEvent( domEvent ), domEvent );
-        }, false, true );
-        input.addListener( 'mousemove', function mouseMoveCallback( domEvent ) {
-          input.mouseMove( pointFromEvent( domEvent ), domEvent );
-        }, false, false );
-        input.addListener( 'mouseover', function mouseOverCallback( domEvent ) {
-          input.mouseOver( pointFromEvent( domEvent ), domEvent );
-        }, false, false );
-        input.addListener( 'mouseout', function mouseOutCallback( domEvent ) {
-          input.mouseOut( pointFromEvent( domEvent ), domEvent );
-        }, false, false );
-        
-        input.addListener( 'touchstart', function touchStartCallback( domEvent ) {
-          sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchstart (multiple events)' );
-          forEachChangedTouch( domEvent, function touchStartTouch( id, point ) {
-            input.touchStart( id, point, domEvent );
-          } );
-        }, false, false );
-        input.addListener( 'touchend', function touchEndCallback( domEvent ) {
-          sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchend (multiple events)' );
-          forEachChangedTouch( domEvent, function touchEndTouch( id, point ) {
-            input.touchEnd( id, point, domEvent );
-          } );
-        }, false, true );
-        input.addListener( 'touchmove', function touchMoveCallback( domEvent ) {
-          sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchmove (multiple events)' );
-          forEachChangedTouch( domEvent, function touchMoveTouch( id, point ) {
-            input.touchMove( id, point, domEvent );
-          } );
-        }, false, false );
-        input.addListener( 'touchcancel', function touchCancelCallback( domEvent ) {
-          sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchcancel (multiple events)' );
-          forEachChangedTouch( domEvent, function touchCancelTouch( id, point ) {
-            input.touchCancel( id, point, domEvent );
-          } );
-        }, false, false );
-      }
+      this._input.disconnectListeners();
+      this._input = null;
     },
     
     getDebugHTML: function() {
