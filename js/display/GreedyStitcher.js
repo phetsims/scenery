@@ -413,6 +413,7 @@ define( function( require ) {
     },
     
     linkBeforeDrawable: function( drawable ) {
+      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'link before ' + drawable.toString() );
       var beforeDrawable = drawable.previousDrawable;
       this.linkBlocks( beforeDrawable ? beforeDrawable.pendingParentDrawable : null,
                        drawable.pendingParentDrawable,
@@ -421,6 +422,7 @@ define( function( require ) {
     },
     
     linkAfterDrawable: function( drawable ) {
+      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'link after ' + drawable.toString() );
       var afterDrawable = drawable.nextDrawable;
       this.linkBlocks( drawable.pendingParentDrawable,
                        afterDrawable ? afterDrawable.pendingParentDrawable : null,
