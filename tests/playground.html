@@ -141,15 +141,18 @@
           
           window.displayErr = function() {
             setTimeout( function(){
-              window.a = new scenery.Rectangle( 0, 0, 50, 50, { fill: 'red' } );
-              scene.addChild( a );
+              window.r = new scenery.Rectangle( 0, 0, 50, 50, { fill: 'red' } );
+              console.log( 'addChild( r )' );
+              scene.addChild( r );
               display.updateDisplay();
-              window.b = new scenery.Rectangle( 0, 0, 50, 50, { fill: 'green' } );
-              window.c = new scenery.Rectangle( 0, 0, 50, 50, { fill: 'blue' } );
-              scene.addChild( b );
+              
+              window.c = new scenery.Circle( 30, { fill: 'blue' } );
+              console.log( 'addChild( c )' );
               scene.addChild( c );
               display.updateDisplay();
-              scene.removeChild( b );
+              
+              console.log( 'removeChild( c )' );
+              scene.removeChild( c );
               display.updateDisplay();
             } );
           };
