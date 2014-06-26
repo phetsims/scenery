@@ -387,6 +387,11 @@ define( function( require ) {
           assertSlow( blockIdx >= 0, 'Created block ' + blockData.block.toString() + ' is not in the blocks array' );
         } );
         
+        // all current blocks should be marked as used
+        _.each( blocks, function( block ) {
+          assertSlow( block.used, 'All current blocks should be marked as used' );
+        } );
+        
         assertSlow( blocks.length - previousBlocks.length === stitcher.createdBlocks.length - stitcher.disposedBlocks.length,
                     'The count of unmodified blocks should be constant (equal differences):\n' +
                     'created: ' + _.map( stitcher.createdBlocks, function( n ) { return n.block.id; } ).join( ',' ) + '\n' +

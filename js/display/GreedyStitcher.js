@@ -234,10 +234,16 @@ define( function( require ) {
         }
         
         if ( interval.drawableBefore && !isOpenAfter( interval.drawableBefore ) ) {
+          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'closed-after collapsed link:' );
+          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
           this.linkAfterDrawable( interval.drawableBefore );
+          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
         }
         else if ( interval.drawableAfter && !isOpenBefore( interval.drawableAfter ) ) {
+          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'closed-before collapsed link:' );
+          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
           this.linkBeforeDrawable( interval.drawableAfter );
+          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
         }
       }
       // otherwise normal operation
@@ -323,10 +329,16 @@ define( function( require ) {
       
       // link our blocks (and set pending block boundaries) as needed. assumes glue/unglue has already been performed
       if ( !openBefore ) {
+        sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'closed-before link:' );
+        sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
         this.linkBeforeDrawable( firstDrawable );
+        sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
       }
       if ( isLast && !openAfter ) {
+        sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'last closed-after link:' );
+        sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
         this.linkAfterDrawable( lastDrawable );
+        sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
       }
       
       sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
@@ -425,6 +437,7 @@ define( function( require ) {
         // backwards scan, hopefully it's faster?
         for ( var i = this.reusableBlocks.length - 1; i >= 0; i-- ) {
           var tmpBlock = this.reusableBlocks[i];
+          assert && assert( !tmpBlock.used );
           if ( tmpBlock.renderer === renderer ) {
             this.useBlockAtIndex( tmpBlock, i );
             block = tmpBlock;
@@ -444,9 +457,13 @@ define( function( require ) {
     },
     
     unuseBlock: function( block ) {
-      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'unusing block: ' + block.toString() );
-      block.used = false; // mark it as unused until we pull it out (so we can reuse, or quickly identify)
-      this.reusableBlocks.push( block );
+      if ( block.used ) {
+        sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'unusing block: ' + block.toString() );
+        block.used = false; // mark it as unused until we pull it out (so we can reuse, or quickly identify)
+        this.reusableBlocks.push( block );
+      } else {
+        sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'not using already-unused block: ' + block.toString() );
+      }
     },
     
     // removes a block from the list of reused blocks (done during matching)
@@ -474,7 +491,8 @@ define( function( require ) {
       sceneryLog && sceneryLog.GreedyStitcher && this.reusableBlocks.length && sceneryLog.GreedyStitcher( 'removeUnusedBlocks' );
       sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
       while ( this.reusableBlocks.length ) {
-        this.markBlockForDisposal( this.reusableBlocks.pop() );
+        var block = this.reusableBlocks.pop();
+        this.markBlockForDisposal( block );
         this.blockOrderChanged = true;
       }
       sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
