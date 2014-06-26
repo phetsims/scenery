@@ -353,7 +353,7 @@ define( function( require ) {
             } ) || _.some( stitcher.pendingMoves, function( moveData ) {
               return moveData.drawable === drawable;
             } ), 'Drawable ' + drawable.toString() + ' originally listed for disposed block ' + block.toString() +
-                 ' does not seem to be marked for pending removal!' );
+                 ' does not seem to be marked for pending removal or move!' );
           } );
         } );
         
