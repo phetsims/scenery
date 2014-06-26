@@ -110,6 +110,8 @@ define( function( require ) {
     },
     
     notePendingAddition: function( drawable, block ) {
+      assert && assert( drawable.renderer === block.renderer );
+      
       sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'pending add: ' + drawable.toString() + ' to ' + block.toString() );
       
       drawable.notePendingAddition( this.backbone.display, block, this.backbone );
@@ -123,6 +125,8 @@ define( function( require ) {
     },
     
     notePendingMove: function( drawable, block ) {
+      assert && assert( drawable.renderer === block.renderer );
+      
       sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'pending move: ' + drawable.toString() + ' to ' + block.toString() );
       
       drawable.notePendingMove( this.backbone.display, block );
