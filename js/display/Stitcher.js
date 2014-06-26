@@ -340,12 +340,14 @@ define( function( require ) {
           } ), 'Removed block seems to have an interval notified: ' + blockData.block.toString() );
         } );
         
-        // all drawables for disposed blocks have been marked as pending removal
+        // all drawables for disposed blocks have been marked as pending removal (or moved)
         _.each( stitcher.disposedBlocks, function( blockData ) {
           var block = blockData.block;
           _.each( Drawable.oldListToArray( block.firstDrawable, block.lastDrawable ), function( drawable ) {
             assertSlow( _.some( stitcher.pendingRemovals, function( removalData ) {
               return removalData.drawable === drawable;
+            } ) || _.some( stitcher.pendingMoves, function( moveData ) {
+              return moveData.drawable === drawable;
             } ), 'Drawable ' + drawable.toString() + ' originally listed for disposed block ' + block.toString() +
                  ' does not seem to be marked for pending removal!' );
           } );
