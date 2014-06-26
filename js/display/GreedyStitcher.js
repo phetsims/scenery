@@ -134,17 +134,18 @@ define( function( require ) {
       var drawableBeforeNextInterval = interval.nextChangeInterval ? interval.nextChangeInterval.drawableBefore : lastStitchDrawable;
       
       // check if our interval removes everything, we may need a glue
-      if ( interval.drawableBefore && interval.drawableAfter && interval.drawableBefore.nextDrawable === interval.drawableAfter ) {
+      if ( interval.drawableBefore && interval.drawableBefore.nextDrawable === interval.drawableAfter ) {
         // separate if, last condition above would cause issues with the normal operation branch
-        
-        var beforeBlock = interval.drawableBefore.pendingParentDrawable;
-        var afterBlock = interval.drawableAfter.pendingParentDrawable;
-        
-        // check if glue is needed
-        if ( beforeBlock !== afterBlock ) {
-          // for now, toss the after block (simplifies changes in one direction)
-          this.unuseBlock( afterBlock );
-          this.notePendingMoves( beforeBlock, interval.drawableAfter, drawableBeforeNextInterval );
+        if ( interval.drawableAfter ) {
+          var beforeBlock = interval.drawableBefore.pendingParentDrawable;
+          var afterBlock = interval.drawableAfter.pendingParentDrawable;
+          
+          // check if glue is needed
+          if ( beforeBlock !== afterBlock ) {
+            // for now, toss the after block (simplifies changes in one direction)
+            this.unuseBlock( afterBlock );
+            this.notePendingMoves( beforeBlock, interval.drawableAfter, drawableBeforeNextInterval );
+          }
         }
       }
       // otherwise normal operation
