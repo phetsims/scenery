@@ -150,12 +150,17 @@ define( function( require ) {
             // for now, toss the after block (simplifies changes in one direction)
             this.unuseBlock( afterBlock );
             this.notePendingMoves( beforeBlock, interval.drawableAfter, drawableBeforeNextInterval );
+            if ( !drawableBeforeNextInterval.nextDrawable ) {
+              this.linkAfterDrawable( drawableBeforeNextInterval );
+            }
             
             sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
           }
         }
         
-        this.linkAfterDrawable( interval.drawableBefore );
+        if ( !isOpenAfter( interval.drawableBefore ) ) {
+          this.linkAfterDrawable( interval.drawableBefore );
+        }
       }
       // otherwise normal operation
       else {
@@ -267,6 +272,9 @@ define( function( require ) {
           // for now, toss the after block (simplifies changes in one direction)
           this.unuseBlock( afterBlock );
           this.notePendingMoves( beforeBlock, interval.drawableAfter, drawableBeforeNextInterval );
+          if ( !drawableBeforeNextInterval.nextDrawable ) {
+            this.linkAfterDrawable( drawableBeforeNextInterval );
+          }
           
           sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
         }
@@ -281,6 +289,9 @@ define( function( require ) {
           var freshBlock = this.createBlock( lastDrawable.nextDrawable.renderer, lastDrawable.nextDrawable );
           this.blockOrderChanged = true; // needs to be done on block creation
           this.notePendingMoves( freshBlock, interval.drawableAfter, drawableBeforeNextInterval );
+          if ( !drawableBeforeNextInterval.nextDrawable ) {
+            this.linkAfterDrawable( drawableBeforeNextInterval );
+          }
           
           sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
         }
