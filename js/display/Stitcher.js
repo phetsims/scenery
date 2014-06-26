@@ -30,6 +30,10 @@ define( function( require ) {
     
     initialize: function( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
       assert && assert( firstChangeInterval && lastChangeInterval, 'We are guaranteed at least one change interval' );
+      assert && assert( !firstDrawable || firstDrawable.previousDrawable === null,
+                        'End boundary of drawable linked list should link to null' );
+      assert && assert( !lastDrawable || lastDrawable.nextDrawable === null,
+                        'End boundary of drawable linked list should link to null' );
       
       if ( sceneryLog && sceneryLog.Stitch ) {
         sceneryLog.Stitch( 'stitch ' + backbone.toString() +
@@ -432,7 +436,7 @@ define( function( require ) {
           currentInterval = currentInterval.nextChangeInterval;
         }
         
-        sceneryLog.StitchDrawables( drawable.toDetailedString(), isChanged ? ( useCurrent ? 'color: #0f0;' : 'color: #f00;' ) : 'color: #666' );
+        sceneryLog.StitchDrawables( drawable.toDetailedString(), isChanged ? ( useCurrent ? 'color: #0a0;' : 'color: #a00;' ) : 'color: #666' );
         
         if ( !isChanged && currentInterval && currentInterval.drawableBefore === drawable ) {
           isChanged = true;
