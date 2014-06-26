@@ -301,40 +301,6 @@ define( function( require ) {
       }
     },
     
-    // @deprecated
-    addInternalDrawables: function( currentBlock, firstDrawableForBlockChange, lastDrawableForBlockChange ) {
-      if ( firstDrawableForBlockChange ) {
-        currentBlock = this.ensureUsedBlock( currentBlock, firstDrawableForBlockChange );
-        
-        this.notePendingAdditions( currentBlock, firstDrawableForBlockChange, lastDrawableForBlockChange );
-      }
-      return currentBlock;
-    },
-    
-    moveExternalDrawables: function( interval, block, lastStitchDrawable ) {
-      var firstDrawable = interval.drawableAfter;
-      if ( firstDrawable ) {
-        var lastDrawable = lastStitchDrawable;
-        while ( interval.nextChangeInterval ) {
-          interval = interval.nextChangeInterval;
-          if ( !interval.isEmpty() ) {
-            lastDrawable = interval.drawableBefore;
-            break;
-          }
-        }
-        
-        this.notePendingMoves( block, firstDrawable, lastDrawable );
-      }
-    },
-    
-    // @deprecated
-    notePendingAdditions: function( block, firstDrawable, lastDrawable ) {
-      for ( var drawable = firstDrawable;; drawable = drawable.nextDrawable ) {
-        this.notePendingAddition( drawable, block );
-        if ( drawable === lastDrawable ) { break; }
-      }
-    },
-    
     notePendingMoves: function( block, firstDrawable, lastDrawable ) {
       for ( var drawable = firstDrawable;; drawable = drawable.nextDrawable ) {
         assert && assert( !drawable.pendingAddition && !drawable.pendingRemoval,
