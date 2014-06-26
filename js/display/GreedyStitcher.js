@@ -147,6 +147,8 @@ define( function( require ) {
             this.notePendingMoves( beforeBlock, interval.drawableAfter, drawableBeforeNextInterval );
           }
         }
+        
+        this.linkAfterDrawable( interval.drawableBefore );
       }
       // otherwise normal operation
       else {
