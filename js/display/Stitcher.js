@@ -436,7 +436,7 @@ define( function( require ) {
           currentInterval = currentInterval.nextChangeInterval;
         }
         
-        sceneryLog.StitchDrawables( drawable.toDetailedString(), isChanged ? ( useCurrent ? 'color: #0a0;' : 'color: #a00;' ) : 'color: #666' );
+        sceneryLog.StitchDrawables( drawable.renderer + ' ' + drawable.toDetailedString(), isChanged ? ( useCurrent ? 'color: #0a0;' : 'color: #a00;' ) : 'color: #666' );
         
         if ( !isChanged && currentInterval && currentInterval.drawableBefore === drawable ) {
           isChanged = true;
