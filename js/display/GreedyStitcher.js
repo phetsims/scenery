@@ -135,6 +135,8 @@ define( function( require ) {
       
       // check if our interval removes everything, we may need a glue
       if ( interval.drawableBefore && interval.drawableBefore.nextDrawable === interval.drawableAfter ) {
+        sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'no current internal drawables in interval' );
+        
         // separate if, last condition above would cause issues with the normal operation branch
         if ( interval.drawableAfter ) {
           var beforeBlock = interval.drawableBefore.pendingParentDrawable;
@@ -142,9 +144,14 @@ define( function( require ) {
           
           // check if glue is needed
           if ( beforeBlock !== afterBlock ) {
+            sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'glue (with non-internal)' );
+            sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
+            
             // for now, toss the after block (simplifies changes in one direction)
             this.unuseBlock( afterBlock );
             this.notePendingMoves( beforeBlock, interval.drawableAfter, drawableBeforeNextInterval );
+            
+            sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
           }
         }
         
@@ -254,18 +261,28 @@ define( function( require ) {
         
         // glue case
         if ( openBefore && openAfter && blocksAreDifferent ) {
+          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'glue (with internal)' );
+          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
+          
           // for now, toss the after block (simplifies changes in one direction)
           this.unuseBlock( afterBlock );
           this.notePendingMoves( beforeBlock, interval.drawableAfter, drawableBeforeNextInterval );
+          
+          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
         }
         // unglue case
         else if ( !openBefore && !openAfter && !blocksAreDifferent ) {
+          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'unglue' );
+          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
+          
           // for simplicity right now, we always create a fresh block (to avoid messing up reused blocks) after, and
           // always change everything after (instead of before), so we don't have to jump across multiple previous
           // change intervals
           var freshBlock = this.createBlock( lastDrawable.nextDrawable.renderer, lastDrawable.nextDrawable );
           this.blockOrderChanged = true; // needs to be done on block creation
           this.notePendingMoves( freshBlock, interval.drawableAfter, drawableBeforeNextInterval );
+          
+          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
         }
       }
     },
