@@ -213,21 +213,26 @@ define( function( require ) {
     updateBlockIntervals: function() {
       while ( this.touchedBlocks.length ) {
         var block = this.touchedBlocks.pop();
-        sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'update interval: ' + block.toString() + ' ' +
-                                                              block.pendingFirstDrawable.toString() + ' to ' + block.pendingLastDrawable.toString() );
         
-        block.updateInterval();
-        
-        // mark it dirty, since its drawables probably changed?
-        //OHTWO TODO: is this necessary? What is this doing?
-        this.backbone.markDirtyDrawable( block );
-        
-        if ( assertSlow ) {
-          this.intervalsNotified.push( {
-            block: block,
-            firstDrawable: block.pendingFirstDrawable,
-            lastDrawable: block.pendingLastDrawable
-          } );
+        if ( block.used ) {
+          sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'update interval: ' + block.toString() + ' ' +
+                                                                block.pendingFirstDrawable.toString() + ' to ' + block.pendingLastDrawable.toString() );
+          
+          block.updateInterval();
+          
+          // mark it dirty, since its drawables probably changed?
+          //OHTWO TODO: is this necessary? What is this doing?
+          this.backbone.markDirtyDrawable( block );
+          
+          if ( assertSlow ) {
+            this.intervalsNotified.push( {
+              block: block,
+              firstDrawable: block.pendingFirstDrawable,
+              lastDrawable: block.pendingLastDrawable
+            } );
+          }
+        } else {
+          sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'skipping update interval: ' + block.toString() + ', unused' );
         }
       }
     },
