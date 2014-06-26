@@ -27,9 +27,33 @@ define( function( require ) {
     return drawable.nextDrawable !== null && !hasGapBetweenDrawables( drawable, drawable.nextDrawable );
   }
   
+  function intervalHasNewInternals( interval, firstStitchDrawable, lastStitchDrawable ) {
+    if ( interval.drawableBefore ) {
+      return interval.drawableBefore.nextDrawable !== interval.drawableAfter; // OK for after to be null
+    }
+    else if ( interval.drawableAfter ) {
+      return interval.drawableAfter.previousDrawable !== interval.drawableBefore; // OK for before to be null
+    }
+    else {
+      return firstStitchDrawable !== null;
+    }
+  }
+  
+  function intervalHasOldInternals( interval, oldFirstStitchDrawable, oldLastStitchDrawable ) {
+    if ( interval.drawableBefore ) {
+      return interval.drawableBefore.oldNextDrawable !== interval.drawableAfter; // OK for after to be null
+    }
+    else if ( interval.drawableAfter ) {
+      return interval.drawableAfter.oldPreviousDrawable !== interval.drawableBefore; // OK for before to be null
+    }
+    else {
+      return oldFirstStitchDrawable !== null;
+    }
+  }
+  
   var prototype = {
-    stitch: function( backbone, firstStitchDrawable, lastStitchDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
-      this.initialize( backbone, firstStitchDrawable, lastStitchDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval );
+    stitch: function( backbone, firstStitchDrawable, lastStitchDrawable, oldFirstStitchDrawable, oldLastStitchDrawable, firstChangeInterval, lastChangeInterval ) {
+      this.initialize( backbone, firstStitchDrawable, lastStitchDrawable, oldFirstStitchDrawable, oldLastStitchDrawable, firstChangeInterval, lastChangeInterval );
       
       // Tracks whether our order of blocks changed. If it did, we'll need to rebuild our blocks array. This flag is
       // set if we remove any blocks, create any blocks, or change the order between two blocks (via linkBlocks).
@@ -58,9 +82,9 @@ define( function( require ) {
         
           // note pending removal on all drawables in the old linked list for the interval.
           // this only makes sense on intervals that have old "internal" drawables
-          if ( interval.drawableBefore && interval.drawableBefore.oldNextDrawable !== interval.drawableAfter ) {
-            var firstRemoval = interval.drawableBefore ? interval.drawableBefore.oldNextDrawable : oldFirstDrawable;
-            var lastRemoval = interval.drawableAfter ? interval.drawableAfter.oldPreviousDrawable : oldLastDrawable;
+          if ( intervalHasOldInternals( interval, oldFirstStitchDrawable, oldLastStitchDrawable ) ) {
+            var firstRemoval = interval.drawableBefore ? interval.drawableBefore.oldNextDrawable : oldFirstStitchDrawable;
+            var lastRemoval = interval.drawableAfter ? interval.drawableAfter.oldPreviousDrawable : oldLastStitchDrawable;
             
             for ( var removedDrawable = firstRemoval;; removedDrawable = removedDrawable.oldNextDrawable ) {
               this.notePendingRemoval( removedDrawable );
@@ -134,11 +158,11 @@ define( function( require ) {
       var drawableBeforeNextInterval = interval.nextChangeInterval ? interval.nextChangeInterval.drawableBefore : lastStitchDrawable;
       
       // check if our interval removes everything, we may need a glue
-      if ( interval.drawableBefore && interval.drawableBefore.nextDrawable === interval.drawableAfter ) {
+      if ( !intervalHasNewInternals( interval, firstStitchDrawable, lastStitchDrawable ) ) {
         sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'no current internal drawables in interval' );
         
         // separate if, last condition above would cause issues with the normal operation branch
-        if ( interval.drawableAfter ) {
+        if ( interval.drawableBefore && interval.drawableAfter ) {
           var beforeBlock = interval.drawableBefore.pendingParentDrawable;
           var afterBlock = interval.drawableAfter.pendingParentDrawable;
           
