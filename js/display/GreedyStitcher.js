@@ -124,9 +124,9 @@ define( function( require ) {
       assert && assert( !interval.isEmpty(), 'We now guarantee that the intervals are non-empty' );
       
       sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'interval: ' +
-                                                                          ( interval.drawableBefore ? interval.drawableBefore.toString : 'null' ) +
+                                                                          ( interval.drawableBefore ? interval.drawableBefore.toString() : 'null' ) +
                                                                           ' to ' +
-                                                                          ( interval.drawableAfter ? interval.drawableAfter.toString : 'null' ) );
+                                                                          ( interval.drawableAfter ? interval.drawableAfter.toString() : 'null' ) );
       sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
       
       // we need to mark the start of the next interval (or the end), as it's the end of the next section of
