@@ -174,12 +174,11 @@ define( function( require ) {
             if ( isFirst ) {
               // we'll handle any glue/unglue at the start, so every processSubBlock can be set correctly.
               this.processEdgeCases( interval, subBlockFirstDrawable, drawable, isLast, drawableBeforeNextInterval );
-              
-              isFirst = false;
             }
             this.processSubBlock( interval, subBlockFirstDrawable, drawable, matchedBlock, isFirst, isLast );
             subBlockFirstDrawable = null;
             matchedBlock = null;
+            isFirst = false;
           }
           
           if ( isLast ) {
