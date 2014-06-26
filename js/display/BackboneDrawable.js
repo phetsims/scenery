@@ -20,7 +20,7 @@ define( function( require ) {
   var RebuildStitcher = require( 'SCENERY/display/RebuildStitcher' );
   var Util = require( 'SCENERY/util/Util' );
   
-  var useGreedyStitcher = false;
+  var useGreedyStitcher = true;
   
   scenery.BackboneDrawable = function BackboneDrawable( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
     this.initialize( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
