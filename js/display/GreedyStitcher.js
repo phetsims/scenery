@@ -164,7 +164,7 @@ define( function( require ) {
       // don't process the single interval left if we aren't left with any drawables (thus left with no blocks)
       if ( firstStitchDrawable ) {
         for ( interval = firstChangeInterval; interval !== null; interval = interval.nextChangeInterval ) {
-          this.processInterval( interval, firstStitchDrawable, lastStitchDrawable );
+          this.processInterval( backbone, interval, firstStitchDrawable, lastStitchDrawable );
         }
       }
       
@@ -193,7 +193,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
     },
     
-    processInterval: function( interval, firstStitchDrawable, lastStitchDrawable ) {
+    processInterval: function( backbone, interval, firstStitchDrawable, lastStitchDrawable ) {
       assert && assert( interval instanceof scenery.ChangeInterval );
       assert && assert( firstStitchDrawable instanceof scenery.Drawable, 'We assume we have a non-null remaining section' );
       assert && assert( lastStitchDrawable instanceof scenery.Drawable, 'We assume we have a non-null remaining section' );
@@ -265,8 +265,13 @@ define( function( require ) {
             subBlockFirstDrawable = drawable;
           }
           
-          if ( matchedBlock === null && drawable.parentDrawable && !drawable.parentDrawable.used ) {
+          //OHTWO TODO: see what conditions are really necessary
+          if ( matchedBlock === null && drawable.parentDrawable &&
+               !drawable.parentDrawable.used && drawable.backbone === backbone &&
+               drawable.parentDrawable.parentDrawable === backbone ) {
             matchedBlock = drawable.parentDrawable;
+            sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose(
+              'matching at ' + drawable.toString() + ' with ' + matchedBlock );
           }
           
           if ( isLast || hasGapBetweenDrawables( drawable, nextDrawable ) ) {
@@ -294,7 +299,9 @@ define( function( require ) {
     
     // firstDrawable and lastDrawable refer to the specific sub-block
     processSubBlock: function( interval, firstDrawable, lastDrawable, matchedBlock, isFirst, isLast ) {
-      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'sub-block: ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() );
+      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose(
+        'sub-block: ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() + ' ' +
+        ( matchedBlock ? 'with matched: ' + matchedBlock.toString() : 'with no match' ) );
       sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
       
       var openBefore = isOpenBefore( firstDrawable );
@@ -347,7 +354,7 @@ define( function( require ) {
     // firstDrawable and lastDrawable refer to the specific sub-block (if it exists), isLast refers to if it's the last sub-block
     processEdgeCases: function( interval, firstDrawable, lastDrawable, isLast ) {
       // this test passes for glue and unglue cases
-      if ( firstDrawable.previousDrawable !== null && lastDrawable.nextDrawable !== null ) {
+      if ( interval.drawableBefore !== null && interval.drawableAfter !== null ) {
         var openBefore = isOpenBefore( firstDrawable );
         var openAfter = isOpenAfter( lastDrawable );
         var beforeBlock = interval.drawableBefore.pendingParentDrawable;
@@ -468,12 +475,11 @@ define( function( require ) {
     
     // removes a block from the list of reused blocks (done during matching)
     useBlock: function( block ) {
-      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'using block: ' + block.toString() );
       this.useBlockAtIndex( block, _.indexOf( this.reusableBlocks, block ) );
     },
     
     useBlockAtIndex: function( block, index ) {
-      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'marking reusable block as used: ' + block.toString() + ' with renderer: ' + block.renderer );
+      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'using reusable block: ' + block.toString() + ' with renderer: ' + block.renderer );
       
       assert && assert( index >= 0 && this.reusableBlocks[index] === block, 'bad index for useBlockAtIndex: ' + index );
       
