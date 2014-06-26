@@ -27,7 +27,7 @@ define( function( require ) {
     return drawable.nextDrawable !== null && !hasGapBetweenDrawables( drawable, drawable.nextDrawable );
   }
   
-  function intervalHasNewInternals( interval, firstStitchDrawable, lastStitchDrawable ) {
+  function intervalHasNewInternalDrawables( interval, firstStitchDrawable, lastStitchDrawable ) {
     if ( interval.drawableBefore ) {
       return interval.drawableBefore.nextDrawable !== interval.drawableAfter; // OK for after to be null
     }
@@ -39,7 +39,7 @@ define( function( require ) {
     }
   }
   
-  function intervalHasOldInternals( interval, oldFirstStitchDrawable, oldLastStitchDrawable ) {
+  function intervalHasOldInternalDrawables( interval, oldFirstStitchDrawable, oldLastStitchDrawable ) {
     if ( interval.drawableBefore ) {
       return interval.drawableBefore.oldNextDrawable !== interval.drawableAfter; // OK for after to be null
     }
@@ -48,6 +48,25 @@ define( function( require ) {
     }
     else {
       return oldFirstStitchDrawable !== null;
+    }
+  }
+  
+  function intervalHasOldInternalBlocks( interval, firstStitchBlock, lastStitchBlock ) {
+    var beforeBlock = interval.drawableBefore ? interval.drawableBefore.parentDrawable : null;
+    var afterBlock = interval.drawableAfter ? interval.drawableAfter.parentDrawable : null;
+    
+    if ( beforeBlock && afterBlock && beforeBlock === afterBlock ) {
+      return false;
+    }
+    
+    if ( beforeBlock ) {
+      return beforeBlock.nextBlock !== afterBlock; // OK for after to be null
+    }
+    else if ( afterBlock ) {
+      return afterBlock.previousBlock !== beforeBlock; // OK for before to be null
+    }
+    else {
+      return firstStitchBlock !== null;
     }
   }
   
@@ -77,12 +96,15 @@ define( function( require ) {
       
       // handle pending removal of old blocks/drawables
       if ( backbone.blocks.length ) {
+        var veryFirstBlock = backbone.blocks[0];
+        var veryLastBlock = backbone.blocks[backbone.blocks.length-1];
+        
         for ( interval = firstChangeInterval; interval !== null; interval = interval.nextChangeInterval ) {
           assert && assert( !interval.isEmpty(), 'We now guarantee that the intervals are non-empty' );
         
           // note pending removal on all drawables in the old linked list for the interval.
           // this only makes sense on intervals that have old "internal" drawables
-          if ( intervalHasOldInternals( interval, oldFirstStitchDrawable, oldLastStitchDrawable ) ) {
+          if ( intervalHasOldInternalDrawables( interval, oldFirstStitchDrawable, oldLastStitchDrawable ) ) {
             var firstRemoval = interval.drawableBefore ? interval.drawableBefore.oldNextDrawable : oldFirstStitchDrawable;
             var lastRemoval = interval.drawableAfter ? interval.drawableAfter.oldPreviousDrawable : oldLastStitchDrawable;
             
@@ -92,13 +114,14 @@ define( function( require ) {
             }
           }
           
-          var firstBlock = interval.drawableBefore === null ? backbone.blocks[0] : interval.drawableBefore.pendingParentDrawable;
-          var lastBlock = interval.drawableAfter === null ? backbone.blocks[backbone.blocks.length-1] : interval.drawableAfter.pendingParentDrawable;
-          
           // blocks totally contained within the change interval are marked as reusable (doesn't include end blocks)
-          if ( firstBlock !== lastBlock ) {
-            for ( var markedBlock = firstBlock.nextBlock; markedBlock !== lastBlock; markedBlock = markedBlock.nextBlock ) {
+          if ( intervalHasOldInternalBlocks( interval, veryFirstBlock, veryLastBlock ) ) {
+            var firstBlock = interval.drawableBefore === null ? backbone.blocks[0] : interval.drawableBefore.parentDrawable.nextBlock;
+            var lastBlock = interval.drawableAfter === null ? backbone.blocks[backbone.blocks.length-1] : interval.drawableAfter.parentDrawable.previousBlock;
+            
+            for ( var markedBlock = firstBlock;; markedBlock = markedBlock.nextBlock ) {
               this.unuseBlock( markedBlock );
+              if ( markedBlock === lastBlock ) { break; }
             }
           }
         }
@@ -158,7 +181,7 @@ define( function( require ) {
       var drawableBeforeNextInterval = interval.nextChangeInterval ? interval.nextChangeInterval.drawableBefore : lastStitchDrawable;
       
       // check if our interval removes everything, we may need a glue
-      if ( !intervalHasNewInternals( interval, firstStitchDrawable, lastStitchDrawable ) ) {
+      if ( !intervalHasNewInternalDrawables( interval, firstStitchDrawable, lastStitchDrawable ) ) {
         sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'no current internal drawables in interval' );
         
         // separate if, last condition above would cause issues with the normal operation branch
@@ -398,7 +421,7 @@ define( function( require ) {
       
       assert && assert( index >= 0 && this.reusableBlocks[index] === block, 'bad index for useBlockAtIndex: ' + index );
       
-      assert && assert( block.used = false, 'Should be called on an unused (reusable) block' );
+      assert && assert( !block.used, 'Should be called on an unused (reusable) block' );
       
       // remove it
       this.reusableBlocks.splice( index, 1 );
