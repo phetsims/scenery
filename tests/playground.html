@@ -141,19 +141,33 @@
           
           window.displayErr = function() {
             setTimeout( function(){
-              window.r = new scenery.Rectangle( 0, 0, 50, 50, { fill: 'red' } );
-              console.log( 'addChild( r )' );
-              scene.addChild( r );
-              display.updateDisplay();
+              var n = new scenery.Node();
+              var d = new scenery.Display( n );
+              d.updateDisplay();
               
-              window.c = new scenery.Circle( 30, { fill: 'blue' } );
-              console.log( 'addChild( c )' );
-              scene.addChild( c );
-              display.updateDisplay();
+              n.addChild( new scenery.Rectangle( 0, 0, 50, 50, { fill: 'red' } ) );
+              d.updateDisplay();
               
-              console.log( 'removeChild( c )' );
-              scene.removeChild( c );
-              display.updateDisplay();
+              n.addChild( new scenery.Rectangle( 0, 0, 50, 50, { fill: 'red' } ) );
+              d.updateDisplay();
+              
+              n.addChild( new scenery.Rectangle( 0, 0, 50, 50, { fill: 'red' } ) );
+              d.updateDisplay();
+              
+              n.children[1].visible = false;
+              d.updateDisplay();
+              
+              n.children[1].visible = true;
+              d.updateDisplay();
+              
+              n.removeChild( n.children[0] );
+              d.updateDisplay();
+              
+              n.removeChild( n.children[1] );
+              d.updateDisplay();
+              
+              n.removeChild( n.children[0] );
+              d.updateDisplay();
             } );
           };
           

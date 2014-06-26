@@ -322,13 +322,13 @@ define( function( require ) {
                                                  ' it is finished.' );
         
         // ensure our indices are up-to-date (reindexed, or didn't change)
-        assertSlow( stitcher.reindexed ||
+        assertSlow( stitcher.reindexed || blocks.length === 0 ||
                     // array equality of previousBlocks and blocks
                     ( previousBlocks.length === blocks.length &&
                       _.every( _.zip( previousBlocks, blocks ), function( arr ) {
                         return arr[0] === arr[1];
                       } ) ),
-                    'Did not reindex on a block change' );
+                    'Did not reindex on a block change where we are left with blocks' );
         
         // all created blocks had intervals notified
         _.each( stitcher.createdBlocks, function( blockData ) {

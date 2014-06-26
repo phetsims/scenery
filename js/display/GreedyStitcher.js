@@ -233,8 +233,11 @@ define( function( require ) {
           }
         }
         
-        if ( !isOpenAfter( interval.drawableBefore ) ) {
+        if ( interval.drawableBefore && !isOpenAfter( interval.drawableBefore ) ) {
           this.linkAfterDrawable( interval.drawableBefore );
+        }
+        else if ( interval.drawableAfter && !isOpenBefore( interval.drawableAfter ) ) {
+          this.linkBeforeDrawable( interval.drawableAfter );
         }
       }
       // otherwise normal operation
