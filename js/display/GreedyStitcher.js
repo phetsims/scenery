@@ -286,7 +286,7 @@ define( function( require ) {
           // for simplicity right now, we always create a fresh block (to avoid messing up reused blocks) after, and
           // always change everything after (instead of before), so we don't have to jump across multiple previous
           // change intervals
-          var freshBlock = this.createBlock( lastDrawable.nextDrawable.renderer, lastDrawable.nextDrawable );
+          var freshBlock = this.createBlock( drawableBeforeNextInterval.renderer, drawableBeforeNextInterval );
           this.blockOrderChanged = true; // needs to be done on block creation
           this.notePendingMoves( freshBlock, interval.drawableAfter, drawableBeforeNextInterval );
           if ( !drawableBeforeNextInterval.nextDrawable ) {
