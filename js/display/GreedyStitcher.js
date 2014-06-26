@@ -261,7 +261,7 @@ define( function( require ) {
         var openBefore = isOpenBefore( firstDrawable );
         var openAfter = isOpenAfter( lastDrawable );
         var beforeBlock = firstDrawable.previousDrawable.pendingParentDrawable;
-        var afterBlock = lastDrawable.nextDrawable.pendingParentDrawable;
+        var afterBlock = drawableBeforeNextInterval.pendingParentDrawable;
         var blocksAreDifferent = beforeBlock !== afterBlock;
         
         // glue case
@@ -279,7 +279,7 @@ define( function( require ) {
           sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
         }
         // unglue case
-        else if ( !openBefore && !openAfter && !blocksAreDifferent ) {
+        else if ( ( !openBefore || !openAfter ) && !blocksAreDifferent ) {
           sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'unglue' );
           sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
           
@@ -294,6 +294,9 @@ define( function( require ) {
           }
           
           sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
+        }
+        else {
+          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'no gluing needed' );
         }
       }
     },
@@ -489,7 +492,7 @@ define( function( require ) {
         backbone.blocks.pop();
       }
       
-      sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( 'processBlockLinkedList' );
+      sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( 'processBlockLinkedList: ' + firstBlock.toString() + ' to ' + lastBlock.toString() );
       sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
       
       // leave the array as-is if there are no blocks
