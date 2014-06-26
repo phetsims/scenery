@@ -383,7 +383,11 @@ define( function( require ) {
         } );
         
         assertSlow( blocks.length - previousBlocks.length === stitcher.createdBlocks.length - stitcher.disposedBlocks.length,
-                    'The count of unmodified blocks should be constant (equal differences)' );
+                    'The count of unmodified blocks should be constant (equal differences):\n' +
+                    'created: ' + _.map( stitcher.createdBlocks, function( n ) { return n.block.id; } ).join( ',' ) + '\n' +
+                    'disposed: ' + _.map( stitcher.disposedBlocks, function( n ) { return n.block.id; } ).join( ',' ) + '\n' +
+                    'before: ' + _.map( previousBlocks, function( n ) { return n.id; } ).join( ',' ) + '\n' +
+                    'after: ' + _.map( blocks, function( n ) { return n.id; } ).join( ',' ) );
         
         assertSlow( this.touchedBlocks.length === 0,
                     'If we marked any blocks for changes, we should have called updateBlockIntervals' );

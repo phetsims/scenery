@@ -382,12 +382,14 @@ define( function( require ) {
     },
     
     unuseBlock: function( block ) {
+      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'unusing block: ' + block.toString() );
       block.used = false; // mark it as unused until we pull it out (so we can reuse, or quickly identify)
       this.reusableBlocks.push( block );
     },
     
     // removes a block from the list of reused blocks (done during matching)
     useBlock: function( block ) {
+      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'using block: ' + block.toString() );
       this.useBlockAtIndex( block, _.indexOf( this.reusableBlocks, block ) );
     },
     
