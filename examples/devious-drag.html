@@ -10,24 +10,24 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
 
   <title>Devious Dragging - Scenery Example</title>
-  
+
   <link rel="stylesheet" href="../../sherpa/bootstrap-2.2.2.css">
-  
+
   <!-- jQuery and LoDash are dependencies -->
   <script src="../../sherpa/jquery-2.1.0.min.js"></script>
   <script src="../../sherpa/lodash-2.4.1.min.js"></script>
-  
+
   <!-- Bootstrap not necessarily needed -->
   <script src="../../sherpa/bootstrap-2.2.2.js"></script>
-  
+
   <!-- For the pop-up FPS meter -->
   <script src="../../sherpa/stats.min.js"></script>
-  
+
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script src="../build/development/scenery.js"></script>
   <!-- <script src="../build/standalone/scenery.js"></script> -->
   <!-- <script src="../build/standalone/scenery.min.js"></script> -->
-  
+
   <style type="text/css">
     /* Let content go to the edges */
     html, body {
@@ -38,7 +38,7 @@
       background-color: #ff0;
       overflow: hidden;
     }
-    
+
     /* Have the #main div cover the entire viewport */
     #main {
       position: absolute;
@@ -53,13 +53,13 @@
 </head>
 
 <body>
-  
+
   <!-- our scene graph will be in this div -->
   <div id="main" >
   </div>
 
   <script>
-  
+
   var main = $( '#main' );
 
   // initialize our scene
@@ -68,7 +68,7 @@
   } );
   scene.initializeFullscreenEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
   scene.resizeOnWindowResize(); // the scene gets resized to the full screen size
-  
+
   // add a centered container with a rotation and scale, to attempt to mess up the dragging ;)
   var rotatingContainer = new scenery.Node( {
     x: scene.sceneBounds.width * 2 / 3,
@@ -78,7 +78,7 @@
     layerSplit: true
   } );
   scene.addChild( rotatingContainer );
-  
+
   var miniContainer = new scenery.Node( {
     x: scene.sceneBounds.width / 3,
     y: scene.sceneBounds.centerY,
@@ -86,21 +86,21 @@
     layerSplit: true
   } );
   scene.addChild( miniContainer );
-  
+
   var group = new scenery.Node();
   rotatingContainer.addChild( group );
   miniContainer.addChild( group );
-  
+
   // keep the container centered
   function layout() {
     rotatingContainer.x = scene.sceneBounds.width * 2 / 3;
     rotatingContainer.y = scene.sceneBounds.centerY;
-    
+
     miniContainer.x = scene.sceneBounds.width / 3;
     miniContainer.y = scene.sceneBounds.centerY;
   }
   $( window ).resize( layout );
-  
+
   // our paths node for the shape
   var hexagon = new scenery.Path( kite.Shape.regularPolygon( 6, 18 ), {
     fill: '#ddeeee',
@@ -112,7 +112,7 @@
     stroke: '#000000',
     cursor: 'pointer'
   } );
-  
+
   var count = 30;
   // add 50 random hexagons
   for ( var i = 0; i < count; i++ ) {
@@ -122,12 +122,12 @@
         x: ( Math.random() - 0.5 ) * 300,
         y: ( Math.random() - 0.5 ) * 300
       } );
-      
+
       // point each node to the same path (DAG)
       node.addChild( Math.random() < 0.5 ? hexagon : circle );
       node.rotate( Math.random() * 2 * Math.PI ); // a rotation on the node, just for fun!
       group.addChild( node );
-      
+
       // add a drag handler to each node
       node.addInputListener( new scenery.SimpleDragHandler( {
         // allow moving a pointer (touch) across a node to pick it up
@@ -135,7 +135,7 @@
       } ) );
     })();
   }
-  
+
   var options = [
     {
       label: 'Canvas Regular',
@@ -153,7 +153,7 @@
       label: 'SVG Regular',
       renderer: 'svg',
       rendererOptions: {
-        
+
       }
     },{
       label: 'SVG CSS Full',
@@ -197,7 +197,7 @@
       }
     }
   ];
-  
+
   var x = 10;
   var y = 10;
   var buttons = [];
@@ -218,7 +218,7 @@
       y = button.bottom + 10;
       button.addChild( buttonLabel );
       scene.addChild( button );
-      
+
       button.addInputListener( {
         down: function( event ) {
           _.each( buttons, function( button ) {
@@ -236,43 +236,43 @@
       } );
     })();
   }
-  
-  
-  
+
+
+
   /*---------------------------------------------------------------------------*
   * FPS meter
-  *----------------------------------------------------------------------------*/    
-  
+  *----------------------------------------------------------------------------*/
+
   var stats = new Stats();
   stats.setMode( 0 ); // 0: fps, 1: ms
   stats.domElement.style.position = 'absolute';
   stats.domElement.style.right = '0';
   stats.domElement.style.top = '0';
   document.body.appendChild( stats.domElement );
-  
-  
+
+
   /*---------------------------------------------------------------------------*
   * main loop
-  *----------------------------------------------------------------------------*/    
-  
+  *----------------------------------------------------------------------------*/
+
   var lastTime = 0;
   var timeElapsed = 0;
   function tick() {
     window.requestAnimationFrame( tick, main[0] );
-    
+
     var timeNow = new Date().getTime();
     if ( lastTime != 0 ) {
       timeElapsed = (timeNow - lastTime) / 1000.0;
     }
     lastTime = timeNow;
-    
+
     stats.begin();
     rotatingContainer.rotate( timeElapsed * 0.1 );
     scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
     stats.end();
   }
   window.requestAnimationFrame( tick, main[0] );
-  
+
   </script>
 
 </body>

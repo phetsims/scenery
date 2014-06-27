@@ -5,19 +5,19 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
   <title>Text Tests</title>
-  
+
   <!-- jQuery and LoDash are dependencies -->
   <script src="../../sherpa/jquery-2.1.0.min.js"></script>
   <script src="../../sherpa/lodash-2.4.1.min.js"></script>
-  
+
   <!-- Canvg for SVG to Canvas -->
   <script src="../../sherpa/rgbcolor.js"></script>
   <script src="../../sherpa/canvg-1.3.js"></script>
-  
+
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script src="../build/development/scenery.js"></script>
   <!-- <script src="../build/standalone/scenery.min.js"></script> -->
-  
+
   <style type="text/css">
     /* Let content go to the edges */
     html, body {
@@ -26,7 +26,7 @@
       margin: 0;
       padding: 0;
     }
-    
+
     /* Have the #main div cover the entire viewport */
     .scene {
       position: absolute;
@@ -38,7 +38,7 @@
       margin: 0 !important;
       /*border: 1px solid black;*/
     }
-    
+
     #textSpan {
       position: absolute;
       padding: 0 !important;
@@ -51,9 +51,9 @@
 </head>
 
 <body>
-  
+
   <div id="bounds" class="scene"></div>
-  
+
   <svg width="1024px" height="1024px" xmlns="http://www.w3.org/2000/svg" version="1.1">
     <g id="gA">
       <text x="50" y="50" font-family="Verdana" font-size="25px" fill="blue">
@@ -66,29 +66,29 @@
       </text>
     </g>
   </svg>
-  
+
   <div id="textDiv" class="scene"><span id="textSpan">QuipTaQiy</span></div>
-  
+
   <!-- <div class="scene"><span id="baselineSpan" style="font-family: Verdana; font-size: 25px;">QuipTaQiy</span><img style="vertical-align: baseline;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAH0CAYAAAD8PUeXAAAAKUlEQVRIS2P8z8Dwn3GUGA2D0XQwmg1Gi4LRknC0JBwtCUdLwqFUEgIActTmOjA3bkkAAAAASUVORK5CYII="/></div> -->
-  
+
   <div style="position: absolute; left: 0; top: 0; padding: 0 !important; margin: 0 !important;"><span id="baselineSpan" style="font-family: Verdana; font-size: 25px; line-height: 0;">QuipTaQiy</span><div style="vertical-align: top; display: inline-block; width: 10px; height: 500px; margin: 0 important!; padding: 0 important!; background-color: black;"></div></div>
-  
+
   <!-- our scene graph will be in this div -->
   <div id="main" class="scene"></div>
-  
+
   <script>
-  
+
   // var str = 'QuipTaQiy';
   var str = 'QuipTaQiy';
-  
+
   /*
-   * SVG's text-anchor 
+   * SVG's text-anchor
    */
-  
+
   /*---------------------------------------------------------------------------*
   * SVG methods
   *----------------------------------------------------------------------------*/
-  
+
   var svgText = document.getElementById( 'gA' );
   var svgBox = svgText.getBBox();
   var svgBoundsA = new dot.Bounds2( svgBox.x, svgBox.y, svgBox.x + svgBox.width, svgBox.y + svgBox.height );
@@ -97,18 +97,18 @@
   svgBox = svgText.getBBox();
   var svgBoundsB = new dot.Bounds2( svgBox.x / 5, svgBox.y / 5, ( svgBox.x + svgBox.width) / 5, ( svgBox.y + svgBox.height ) / 5 );
   console.log( 'svg B: ' + svgBoundsB.toString() + ' (' + svgBoundsB.width + ',' + svgBoundsB.height + ')' );
-  
+
   var main = $( '#main' );
-  
+
   /*---------------------------------------------------------------------------*
   * Canvas-based (recursively accurate) methods
   *----------------------------------------------------------------------------*/
-  
+
   // initialize our scene
   var scene = new scenery.Scene( main, {
     // preferredSceneLayerType: scenery.SVGDefaultLayerType
   } );
-  
+
   var textA = new scenery.Text( str, {
     x: 50,
     y: 50,
@@ -116,31 +116,31 @@
     font: '25px Verdana'
   } );
   scene.addChild( textA );
-  
+
   var boundsA = textA.getBounds();
   console.log( 'canvas accurate A: ' + boundsA.toString() + ' (' + boundsA.width + ',' + boundsA.height + ')' );
   scene.updateScene();
-  
+
   /*---------------------------------------------------------------------------*
   * Canvas-based width
   *----------------------------------------------------------------------------*/
-  
+
   var canvas = document.createElement( 'canvas' );
   var context = canvas.getContext( '2d' );
   context.font = '25px Verdana';
   var canvasWidth = context.measureText( str ).width;
   console.log( 'canvasWidth: ' + canvasWidth );
-  
+
   canvas.width = 1;
   canvas.height = 500;
   context.fillStyle = '#ff0000';
   context.fillRect( 0, 0, 500, 500 );
   console.log( canvas.toDataURL() );
-  
+
   /*---------------------------------------------------------------------------*
   * DOM-based
   *----------------------------------------------------------------------------*/
-  
+
   var span = document.getElementById( 'textSpan' );
   var spanRect = span.getBoundingClientRect();
   var spanBounds = new dot.Bounds2( spanRect.left, spanRect.top, spanRect.right, spanRect.bottom );
@@ -149,7 +149,7 @@
   console.log( 'span.clientHeight: ' + span.clientHeight );
   console.log( 'span.offsetWidth: ' + span.offsetWidth );
   console.log( 'span.offsetHeight: ' + span.offsetHeight );
-  
+
   var baselineSpan = document.getElementById( 'baselineSpan' );
   var baselineSpanRect = baselineSpan.getBoundingClientRect();
   var baselineSpanBounds = new dot.Bounds2( baselineSpanRect.left, baselineSpanRect.top, baselineSpanRect.right, baselineSpanRect.bottom );
@@ -159,11 +159,11 @@
   console.log( 'baselineSpan.offsetWidth: ' + baselineSpan.offsetWidth );
   console.log( 'baselineSpan.offsetHeight: ' + baselineSpan.offsetHeight );
   console.log( '...: ' + baselineSpan.offsetTop );
-  
+
   /*---------------------------------------------------------------------------*
   * Displays of bounds for accuracy
   *----------------------------------------------------------------------------*/
-  
+
   var boundsScene = new scenery.Scene( $( '#bounds' ) );
   boundsScene.addChild( new scenery.Path( kite.Shape.bounds( svgBoundsA ), {
     fill: 'rgba(255,0,0,0.1)'
@@ -175,21 +175,21 @@
     fill: 'rgba(0,255,0,0.1)'
   } ) );
   boundsScene.updateScene();
-  
+
   var textNode = new scenery.Text( 'QuipTaQiy' );
-  
+
   function canvasAccurate( textNode ) {
     return textNode.accurateCanvasBounds();
   }
-  
+
   function svgApproximate( textNode ) {
     var isRTL = textNode.direction === 'rtl';
-    
+
     var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
     svg.setAttribute( 'width', '1024' );
     svg.setAttribute( 'height', '1024' );
     svg.setAttribute( 'style', 'display: hidden;' ); // so we don't flash it in a visible way to the user
-    
+
     var textElement = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
     textElement.appendChild( document.createTextNode( textNode.text ) );
     switch ( textNode.textAlign ) {
@@ -213,26 +213,26 @@
         throw new Error( 'impossible to get the SVG approximate bounds for textBaseline: ' + textNode.textBaseline );
     }
     textElement.setAttribute( 'direction', textNode.direction );
-    
+
     svg.appendChild( textElement );
-    
+
     document.body.appendChild( svg );
     var rect = textElement.getBBox();
     var result = new dot.Bounds2( rect.x, rect.y, rect.x + rect.width, rect.y + rect.height );
     document.body.removeChild( svg );
-    
+
     return result;
   }
-  
+
   function domApproximate( textNode ) {
     // TODO: we can also technically support 'top' using vertical-align: top and line-height: 0 with the image, but it won't usually render otherwise
     // assert( textNode.textBaseline === 'alphabetic' );
-    
+
     var maxHeight = 1024; // technically this will fail if the font is taller than this!
     var isRTL = textNode.direction === 'rtl';
-    
+
     // <div style="position: absolute; left: 0; top: 0; padding: 0 !important; margin: 0 !important;"><span id="baselineSpan" style="font-family: Verdana; font-size: 25px;">QuipTaQiy</span><div style="vertical-align: baseline; display: inline-block; width: 0; height: 500px; margin: 0 important!; padding: 0 important!;"></div></div>
-    
+
     var div = document.createElement( 'div' );
     $( div ).css( {
       position: 'absolute',
@@ -242,12 +242,12 @@
       margin: '0 !important',
       display: 'hidden'
     } );
-    
+
     var span = document.createElement( 'span' );
     $( span ).css( 'font', textNode.font );
     span.appendChild( document.createTextNode( textNode.text ) );
     span.setAttribute( 'direction', textNode.direction );
-    
+
     var fakeImage = document.createElement( 'div' );
     $( fakeImage ).css( {
       'vertical-align': 'baseline',
@@ -257,15 +257,15 @@
       margin: '0 !important',
       padding: '0 !important'
     } );
-    
+
     div.appendChild( span );
     div.appendChild( fakeImage );
-    
+
     document.body.appendChild( div );
     var rect = span.getBoundingClientRect();
     var result = new dot.Bounds2( rect.left, rect.top - maxHeight, rect.right, rect.bottom - maxHeight );
     document.body.removeChild( div );
-    
+
     var width = rect.right - rect.left;
     switch ( textNode.textAlign ) {
       case 'start':
@@ -283,14 +283,14 @@
         result = result.shiftedX( -width / 2 );
         break;
     }
-    
+
     return result;
   }
-  
+
   console.log( canvasAccurate( textNode ) );
   console.log( svgApproximate( textNode ) );
   console.log( domApproximate( textNode ) );
-  
+
   console.log( textNode.accurateCanvasBounds() );
   console.log( textNode.approximateSVGBounds() );
   console.log( textNode.approximateDOMBounds() );

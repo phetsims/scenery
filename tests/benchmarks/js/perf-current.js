@@ -1,15 +1,15 @@
 
 (function(){
-  
+
   var textNodeInstances = {
     name: 'Text node instances',
     count: 20,
     before: function() {
       this.width = 1024;
       this.height = 768;
-      
+
       this.i = 0;
-      
+
       var main = $( '#main' );
       main.width( this.width );
       main.height( this.height );
@@ -22,7 +22,7 @@
           y: ( i * 172 ) % 973
         } ) );
       }
-      
+
       this.main = main;
       this.scene = scene;
     },
@@ -34,16 +34,16 @@
       this.main.empty();
     }
   };
-  
+
   var textPathInstances = {
     name: 'Text path instances',
     count: 20,
     before: function() {
       this.width = 1024;
       this.height = 768;
-      
+
       this.i = 0;
-      
+
       var main = $( '#main' );
       main.width( this.width );
       main.height( this.height );
@@ -59,7 +59,7 @@
           y: ( i * 172 ) % 973
         } ) );
       }
-      
+
       this.main = main;
       this.scene = scene;
     },
@@ -78,9 +78,9 @@
     before: function() {
       this.width = 1024;
       this.height = 768;
-      
+
       this.i = 0;
-      
+
       var main = $( '#main' );
       main.width( this.width );
       main.height( this.height );
@@ -91,7 +91,7 @@
         font: '40px Arial, sans-serif'
       } );
       scene.addChild( this.text );
-      
+
       this.main = main;
       this.scene = scene;
     },
@@ -106,21 +106,21 @@
       this.main.empty();
     }
   };
-  
+
   var fuzzRecordAddRemoveRender = {
     name: 'Fuzz record (add/remove/renderer)',
     count: 20,
     before: function() {
       this.width = 1024;
       this.height = 768;
-      
+
       this.i = 0;
-      
+
       var main = $( '#main' );
       main.width( this.width );
       main.height( this.height );
       var scene = new scenery.Scene( main );
-      
+
       this.main = main;
       this.scene = scene;
     },
@@ -128,7 +128,7 @@
       var scene = this.scene;
       scene.renderer = null;
       _.each( scene.children.slice( 0 ), function( child ) { scene.removeChild( child ); } );
-      
+
       var node3 = new scenery.Node( {} );
       var node4 = new scenery.Node( {} );
       var node5 = new scenery.Node( {} );
@@ -368,14 +368,14 @@
       this.main.empty();
     }
   };
-  
+
   var rotatedSquaresHardcodedXY = {
     name: 'Rotated group of squares with hardcoded xy',
     count: 20,
     before: function() {
       this.width = 1024;
       this.height = 768;
-      
+
       var main = $( '#main' );
       main.width( this.width );
       main.height( this.height );
@@ -386,7 +386,7 @@
           stroke: '#000000'
         } ) );
       }
-      
+
       this.main = main;
       this.scene = scene;
     },
@@ -398,14 +398,14 @@
       this.main.empty();
     }
   };
-  
+
   var rotatedSquaresTransformXY = {
     name: 'Rotated group of squares with transform xy',
     count: 20,
     before: function() {
       this.width = 1024;
       this.height = 768;
-      
+
       var main = $( '#main' );
       main.width( this.width );
       main.height( this.height );
@@ -418,7 +418,7 @@
           y: ( 27 * i ) % this.height
         } ) );
       }
-      
+
       this.main = main;
       this.scene = scene;
     },
@@ -430,14 +430,14 @@
       this.main.empty();
     }
   };
-  
+
   var rotatedSquaresIndividual = {
     name: 'Individually Rotated Squares',
     count: 20,
     before: function() {
       this.width = 1024;
       this.height = 768;
-      
+
       var main = $( '#main' );
       main.width( this.width );
       main.height( this.height );
@@ -450,7 +450,7 @@
           y: ( 27 * i ) % this.height
         } ) );
       }
-      
+
       this.main = main;
       this.scene = scene;
     },
@@ -464,14 +464,14 @@
       this.main.empty();
     }
   };
-  
+
   var fastSquaresCanvas = {
     name: 'Fast Squares Canvas',
     count: 20,
     before: function() {
       this.width = 1024;
       this.height = 768;
-      
+
       var main = $( '#main' );
       main.width( this.width );
       main.height( this.height );
@@ -484,10 +484,10 @@
           y: ( 27 * i ) % this.height
         } ) );
       }
-      
+
       this.main = main;
       this.scene = scene;
-      
+
       this.iterationCount = 0;
     },
     step: function() {
@@ -507,14 +507,14 @@
       this.main.empty();
     }
   };
-  
+
   var fastSquaresSVG = {
     name: 'Fast Squares SVG',
     count: 20,
     before: function() {
       this.width = 1024;
       this.height = 768;
-      
+
       var main = $( '#main' );
       main.width( this.width );
       main.height( this.height );
@@ -527,10 +527,10 @@
           y: ( 27 * i ) % this.height
         } ) );
       }
-      
+
       this.main = main;
       this.scene = scene;
-      
+
       this.iterationCount = 0;
     },
     step: function() {
@@ -550,22 +550,22 @@
       this.main.empty();
     }
   };
-  
+
   var addingHexagons = {
     name: 'Adding Hexagons',
     count: 20,
     before: function() {
       this.width = 1024;
       this.height = 768;
-      
+
       this.x = 0;
       this.y = 0;
-      
+
       var main = $( '#main' );
       main.width( this.width );
       main.height( this.height );
       var scene = new scenery.Scene( main );
-      
+
       this.main = main;
       this.scene = scene;
     },
@@ -586,7 +586,7 @@
       this.main.empty();
     }
   };
-  
+
   marks.currentMarks = [
     // textNodeInstances,
     // textPathInstances,
@@ -602,5 +602,5 @@
     //   name: 'Empty Loop'
     // }
   ];
-  
+
 })();

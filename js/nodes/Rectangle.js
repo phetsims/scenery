@@ -9,10 +9,10 @@
 
 define( function( require ) {
   'use strict';
-  
+
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  
+
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
   var Bounds2 = require( 'DOT/Bounds2' );
@@ -24,14 +24,14 @@ define( function( require ) {
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
-  
+
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMRectangleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
   var keepSVGRectangleElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
-  
+
   // scratch matrix used in DOM rendering
   var scratchMatrix = Matrix3.dirtyFromPool();
-  
+
   /**
    * Currently, all numerical parameters should be finite.
    * x:         x-position of the upper-left corner (left bound)
@@ -79,10 +79,10 @@ define( function( require ) {
       this._rectHeight = height;
       this._rectArcWidth = 0;
       this._rectArcHeight = 0;
-      
+
       // ensure we have a parameter object
       options = arcWidth || {};
-      
+
     } else {
       // normal case with args (including arcWidth / arcHeight)
       this._rectX = x;
@@ -91,23 +91,23 @@ define( function( require ) {
       this._rectHeight = height;
       this._rectArcWidth = arcWidth;
       this._rectArcHeight = arcHeight;
-      
+
       // ensure we have a parameter object
       options = options || {};
-      
+
     }
     // fallback for non-canvas or non-svg rendering, and for proper bounds computation
 
     Path.call( this, null, options );
   };
   var Rectangle = scenery.Rectangle;
-  
+
   inherit( Path, Rectangle, {
-    
+
     getMaximumArcSize: function() {
       return Math.min( this._rectWidth / 2, this._rectHeight / 2 );
     },
-    
+
     getStrokeRendererBitmask: function() {
       var bitmask = Path.prototype.getStrokeRendererBitmask.call( this );
       // DOM stroke handling doesn't YET support gradients, patterns, or dashes (with the current implementation, it shouldn't be too hard)
@@ -119,12 +119,12 @@ define( function( require ) {
       }
       return bitmask;
     },
-    
+
     getPathRendererBitmask: function() {
       var bitmask = scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskBoundsValid;
-      
+
       var maximumArcSize = this.getMaximumArcSize();
-      
+
       // If the top/bottom or left/right strokes touch and overlap in the middle (small rectangle, big stroke), our DOM method won't work.
       // Additionally, if we're handling rounded rectangles or a stroke with lineJoin 'round', we'll need borderRadius
       // We also require for DOM that if it's a rounded rectangle, it's rounded with circular arcs (for now, could potentially do a transform trick!)
@@ -133,13 +133,13 @@ define( function( require ) {
            this._rectArcHeight <= maximumArcSize && this._rectArcWidth <= maximumArcSize ) {
         bitmask |= scenery.bitmaskSupportsDOM;
       }
-      
+
       return bitmask;
     },
-    
+
     setRect: function( x, y, width, height, arcWidth, arcHeight ) {
       assert && assert( x !== undefined && y !== undefined && width !== undefined && height !== undefined, 'x/y/width/height need to be defined' );
-      
+
       // for now, check whether this is needed
       // TODO: note that this could decrease performance? Remove if this is a bottleneck
       if ( this._rectX === x &&
@@ -150,29 +150,29 @@ define( function( require ) {
            this._rectArcHeight === arcHeight ) {
         return;
       }
-      
+
       this._rectX = x;
       this._rectY = y;
       this._rectWidth = width;
       this._rectHeight = height;
       this._rectArcWidth = arcWidth || 0;
       this._rectArcHeight = arcHeight || 0;
-      
+
       var stateLen = this._drawables.length;
       for ( var i = 0; i < stateLen; i++ ) {
         this._drawables[i].markDirtyRectangle();
       }
       this.invalidateRectangle();
     },
-    
+
     setRectBounds: function( bounds ) {
       this.setRect( bounds.x, bounds.y, bounds.width, bounds.height );
     },
-    
+
     isRounded: function() {
       return this._rectArcWidth !== 0 && this._rectArcHeight !== 0;
     },
-    
+
     computeShapeBounds: function() {
       var bounds = new Bounds2( this._rectX, this._rectY, this._rectX + this._rectWidth, this._rectY + this._rectHeight );
       if ( this._stroke ) {
@@ -181,7 +181,7 @@ define( function( require ) {
       }
       return bounds;
     },
-    
+
     createRectangleShape: function() {
       if ( this.isRounded() ) {
         // copy border-radius CSS behavior in Chrome, where the arcs won't intersect, in cases where the arc segments at full size would intersect each other
@@ -192,7 +192,7 @@ define( function( require ) {
         return Shape.rectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
       }
     },
-    
+
     invalidateRectangle: function() {
       assert && assert( isFinite( this._rectX ), 'A rectangle needs to have a finite x (' + this._rectX + ')' );
       assert && assert( isFinite( this._rectY ), 'A rectangle needs to have a finite y (' + this._rectY + ')' );
@@ -206,17 +206,17 @@ define( function( require ) {
                                       'A rectangle needs to have a non-negative finite arcHeight (' + this._rectArcHeight + ')' );
       // assert && assert( !this.isRounded() || ( this._rectWidth >= this._rectArcWidth * 2 && this._rectHeight >= this._rectArcHeight * 2 ),
       //                                 'The rounded sections of the rectangle should not intersect (the length of the straight sections shouldn\'t be negative' );
-      
+
       // sets our 'cache' to null, so we don't always have to recompute our shape
       this._shape = null;
-      
+
       // should invalidate the path and ensure a redraw
       this.invalidateShape();
-      
+
       // since we changed the rectangle arc width/height, it could make DOM work or not
       this.invalidateSupportedRenderers();
     },
-    
+
     // accelerated hit detection for axis-aligned optionally-rounded rectangle
     // fast computation if it isn't rounded. if rounded, we check if a corner computation is needed (usually isn't), and only check that one needed corner
     containsPointSelf: function( point ) {
@@ -227,7 +227,7 @@ define( function( require ) {
       var arcWidth = this._rectArcWidth;
       var arcHeight = this._rectArcHeight;
       var halfLine = this.getLineWidth() / 2;
-      
+
       var result = true;
       if ( this._strokePickable ) {
         // test the outer boundary if we are stroke-pickable (if also fill-pickable, this is the only test we need)
@@ -242,7 +242,7 @@ define( function( require ) {
                                                  miter ? 0 : ( arcWidth + halfLine ), miter ? 0 : ( arcHeight + halfLine ),
                                                  point );
       }
-      
+
       if ( this._fillPickable ) {
         if ( this._strokePickable ) {
           return result;
@@ -258,37 +258,37 @@ define( function( require ) {
         return false; // either fill nor stroke is pickable
       }
     },
-    
+
     intersectsBoundsSelf: function( bounds ) {
       return !this.computeShapeBounds().intersection( bounds ).isEmpty();
     },
-    
+
     canvasPaintSelf: function( wrapper ) {
       Rectangle.RectangleCanvasDrawable.prototype.paintCanvas( wrapper, this );
     },
-    
+
     createDOMDrawable: function( renderer, instance ) {
       return Rectangle.RectangleDOMDrawable.createFromPool( renderer, instance );
     },
-    
+
     createSVGDrawable: function( renderer, instance ) {
       return Rectangle.RectangleSVGDrawable.createFromPool( renderer, instance );
     },
-    
+
     createCanvasDrawable: function( renderer, instance ) {
       return Rectangle.RectangleCanvasDrawable.createFromPool( renderer, instance );
     },
-    
+
     /*---------------------------------------------------------------------------*
     * Miscellaneous
     *----------------------------------------------------------------------------*/
-    
+
     getBasicConstructor: function( propLines ) {
-      return 'new scenery.Rectangle( ' + this._rectX + ', ' + this._rectY + ', ' + 
+      return 'new scenery.Rectangle( ' + this._rectX + ', ' + this._rectY + ', ' +
                                          this._rectWidth + ', ' + this._rectHeight + ', ' +
                                          this._rectArcWidth + ', ' + this._rectArcHeight + ', {' + propLines + '} )';
     },
-    
+
     setShape: function( shape ) {
       if ( shape !== null ) {
         throw new Error( 'Cannot set the shape of a scenery.Rectangle to something non-null' );
@@ -297,33 +297,33 @@ define( function( require ) {
         this.invalidateShape();
       }
     },
-    
+
     getShape: function() {
       if ( !this._shape ) {
         this._shape = this.createRectangleShape();
       }
       return this._shape;
     },
-    
+
     hasShape: function() {
       return true;
     }
   } );
-  
+
   /*---------------------------------------------------------------------------*
   * Other Rectangle properties and ES5
   *----------------------------------------------------------------------------*/
-  
+
   function addRectProp( capitalizedShort ) {
     var getName = 'getRect' + capitalizedShort;
     var setName = 'setRect' + capitalizedShort;
     var privateName = '_rect' + capitalizedShort;
     var dirtyMethodName = 'markDirty' + capitalizedShort;
-    
+
     Rectangle.prototype[getName] = function() {
       return this[privateName];
     };
-    
+
     Rectangle.prototype[setName] = function( value ) {
       if ( this[privateName] !== value ) {
         this[privateName] = value;
@@ -337,43 +337,43 @@ define( function( require ) {
       }
       return this;
     };
-    
+
     Object.defineProperty( Rectangle.prototype, 'rect' + capitalizedShort, {
       set: Rectangle.prototype[setName],
       get: Rectangle.prototype[getName]
     } );
   }
-  
+
   addRectProp( 'X' );
   addRectProp( 'Y' );
   addRectProp( 'Width' );
   addRectProp( 'Height' );
   addRectProp( 'ArcWidth' );
   addRectProp( 'ArcHeight' );
-  
+
   // not adding mutators for now
   Rectangle.prototype._mutatorKeys = [ 'rectX', 'rectY', 'rectWidth', 'rectHeight', 'rectArcWidth', 'rectArcHeight' ].concat( Path.prototype._mutatorKeys );
-  
+
   Rectangle.intersects = function( x, y, width, height, arcWidth, arcHeight, point ) {
     var result = point.x >= x &&
                  point.x <= x + width &&
                  point.y >= y &&
                  point.y <= y + height;
-    
+
     if ( !result || arcWidth <= 0 || arcHeight <= 0 ) {
       return result;
     }
-    
+
     // copy border-radius CSS behavior in Chrome, where the arcs won't intersect, in cases where the arc segments at full size would intersect each other
     var maximumArcSize = Math.min( width / 2, height / 2 );
     arcWidth = Math.min( maximumArcSize, arcWidth );
     arcHeight = Math.min( maximumArcSize, arcHeight );
-    
+
     // we are rounded and inside the logical rectangle (if it didn't have rounded corners)
-    
+
     // closest corner arc's center (we assume the rounded rectangle's arcs are 90 degrees fully, and don't intersect)
     var closestCornerX, closestCornerY, guaranteedInside = false;
-    
+
     // if we are to the inside of the closest corner arc's center, we are guaranteed to be in the rounded rectangle (guaranteedInside)
     if ( point.x < x + width / 2 ) {
       closestCornerX = x + arcWidth;
@@ -383,7 +383,7 @@ define( function( require ) {
       guaranteedInside = guaranteedInside || point.x <= closestCornerX;
     }
     if ( guaranteedInside ) { return true; }
-    
+
     if ( point.y < y + height / 2 ) {
       closestCornerY = y + arcHeight;
       guaranteedInside = guaranteedInside || point.y >= closestCornerY;
@@ -392,47 +392,47 @@ define( function( require ) {
       guaranteedInside = guaranteedInside || point.y <= closestCornerY;
     }
     if ( guaranteedInside ) { return true; }
-    
+
     // we are now in the rectangular region between the logical corner and the center of the closest corner's arc.
-    
+
     // offset from the closest corner's arc center
     var offsetX = point.x - closestCornerX;
     var offsetY = point.y - closestCornerY;
-    
+
     // normalize the coordinates so now we are dealing with a unit circle
     // (technically arc, but we are guaranteed to be in the area covered by the arc, so we just consider the circle)
     // NOTE: we are rounded, so both arcWidth and arcHeight are non-zero (this is well defined)
     offsetX /= arcWidth;
     offsetY /= arcHeight;
-    
+
     offsetX *= offsetX;
     offsetY *= offsetY;
     return offsetX + offsetY <= 1; // return whether we are in the rounded corner. see the formula for an ellipse
   };
-  
+
   Rectangle.rect = function( x, y, width, height, options ) {
     return new Rectangle( x, y, width, height, 0, 0, options );
   };
-  
+
   Rectangle.roundedRect = function( x, y, width, height, arcWidth, arcHeight, options ) {
     return new Rectangle( x, y, width, height, arcWidth, arcHeight, options );
   };
-  
+
   Rectangle.bounds = function( bounds, options ) {
     return new Rectangle( bounds.minX, bounds.minY, bounds.width, bounds.height, 0, 0, options );
   };
-  
+
   Rectangle.roundedBounds = function( bounds, arcWidth, arcHeight, options ) {
     return new Rectangle( bounds.minX, bounds.minY, bounds.width, bounds.height, arcWidth, arcHeight, options );
   };
-  
+
   /*---------------------------------------------------------------------------*
   * Rendering state mixin (DOM/SVG)
   *----------------------------------------------------------------------------*/
-  
+
   var RectangleRenderState = Rectangle.RectangleRenderState = function( drawableType ) {
     var proto = drawableType.prototype;
-    
+
     // initializes, and resets (so we can support pooled states)
     proto.initializeState = function() {
       this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
@@ -442,20 +442,20 @@ define( function( require ) {
       this.dirtyHeight = true;
       this.dirtyArcWidth = true;
       this.dirtyArcHeight = true;
-      
+
       // adds fill/stroke-specific flags and state
       this.initializeFillableState();
       this.initializeStrokableState();
-      
+
       return this; // allow for chaining
     };
-    
+
     // catch-all dirty, if anything that isn't a transform is marked as dirty
     proto.markPaintDirty = function() {
       this.paintDirty = true;
       this.markDirty();
     };
-    
+
     proto.markDirtyRectangle = function() {
       // TODO: consider bitmask instead?
       this.dirtyX = true;
@@ -466,14 +466,14 @@ define( function( require ) {
       this.dirtyArcHeight = true;
       this.markPaintDirty();
     };
-    
+
     proto.markDirtyX = function() { this.dirtyX = true; this.markPaintDirty(); },
     proto.markDirtyY = function() { this.dirtyY = true; this.markPaintDirty(); },
     proto.markDirtyWidth = function() { this.dirtyWidth = true; this.markPaintDirty(); },
     proto.markDirtyHeight = function() { this.dirtyHeight = true; this.markPaintDirty(); },
     proto.markDirtyArcWidth = function() { this.dirtyArcWidth = true; this.markPaintDirty(); },
     proto.markDirtyArcHeight = function() { this.dirtyArcHeight = true; this.markPaintDirty(); },
-    
+
     proto.setToCleanState = function() {
       this.paintDirty = false;
       this.dirtyX = false;
@@ -482,28 +482,28 @@ define( function( require ) {
       this.dirtyHeight = false;
       this.dirtyArcWidth = false;
       this.dirtyArcHeight = false;
-      
+
       this.cleanFillableState();
       this.cleanStrokableState();
     };
-    
+
     /* jshint -W064 */
     Fillable.FillableState( drawableType );
     /* jshint -W064 */
     Strokable.StrokableState( drawableType );
   };
-  
+
   /*---------------------------------------------------------------------------*
   * DOM rendering
   *----------------------------------------------------------------------------*/
-  
+
   var RectangleDOMDrawable = Rectangle.RectangleDOMDrawable = inherit( DOMSelfDrawable, function RectangleDOMDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   }, {
     initialize: function( renderer, instance ) {
       this.initializeDOMSelfDrawable( renderer, instance );
       this.initializeState();
-      
+
       // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
       // allocation and performance costs)
       if ( !this.fillElement || !this.strokeElement ) {
@@ -513,7 +513,7 @@ define( function( require ) {
         fillElement.style.left = '0';
         fillElement.style.top = '0';
         fillElement.style.pointerEvents = 'none';
-        
+
         var strokeElement = this.strokeElement = document.createElement( 'div' );
         strokeElement.style.display = 'block';
         strokeElement.style.position = 'absolute';
@@ -522,23 +522,23 @@ define( function( require ) {
         strokeElement.style.pointerEvents = 'none';
         fillElement.appendChild( strokeElement );
       }
-      
+
       this.domElement = this.fillElement;
-      
+
       scenery.Util.prepareForTransform( this.domElement, this.forceAcceleration );
-      
+
       return this; // allow for chaining
     },
-    
+
     updateDOM: function() {
       var node = this.node;
       var fillElement = this.fillElement;
       var strokeElement = this.strokeElement;
-      
+
       if ( this.paintDirty ) {
         var borderRadius = Math.min( node._rectArcWidth, node._rectArcHeight );
         var borderRadiusDirty = this.dirtyArcWidth || this.dirtyArcHeight;
-        
+
         if ( this.dirtyWidth ) {
           fillElement.style.width = node._rectWidth + 'px';
         }
@@ -551,7 +551,7 @@ define( function( require ) {
         if ( this.dirtyFill ) {
           fillElement.style.backgroundColor = node.getCSSFill();
         }
-        
+
         if ( this.dirtyStroke ) {
           // update stroke presence
           if ( node.hasStroke() ) {
@@ -560,12 +560,12 @@ define( function( require ) {
             strokeElement.style.borderStyle = 'none';
           }
         }
-        
+
         if ( node.hasStroke() ) {
           // since we only execute these if we have a stroke, we need to redo everything if there was no stroke previously.
           // the other option would be to update stroked information when there is no stroke (major performance loss for fill-only rectangles)
           var hadNoStrokeBefore = this.lastStroke === null;
-          
+
           if ( hadNoStrokeBefore || this.dirtyWidth || this.dirtyLineWidth ) {
             strokeElement.style.width = ( node._rectWidth - node.getLineWidth() ) + 'px';
           }
@@ -577,17 +577,17 @@ define( function( require ) {
             strokeElement.style.top = ( -node.getLineWidth() / 2 ) + 'px';
             strokeElement.style.borderWidth = node.getLineWidth() + 'px';
           }
-          
+
           if ( hadNoStrokeBefore || this.dirtyStroke ) {
             strokeElement.style.borderColor = node.getSimpleCSSStroke();
           }
-          
+
           if ( hadNoStrokeBefore || borderRadiusDirty || this.dirtyLineWidth || this.dirtyLineOptions ) {
             strokeElement.style[Features.borderRadius] = ( node.isRounded() || node.getLineJoin() === 'round' ) ? ( borderRadius + node.getLineWidth() / 2 ) + 'px' : '0';
           }
         }
       }
-      
+
       // shift the element vertically, postmultiplied with the entire transform.
       if ( this.transformDirty || this.dirtyX || this.dirtyY ) {
         scratchMatrix.set( this.getTransformMatrix() );
@@ -596,15 +596,15 @@ define( function( require ) {
         translation.freeToPool();
         scenery.Util.applyPreparedTransform( scratchMatrix, this.fillElement, this.forceAcceleration );
       }
-      
+
       // clear all of the dirty flags
       this.setToClean();
     },
-    
+
     onAttach: function( node ) {
-      
+
     },
-    
+
     // release the DOM elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
     onDetach: function( node ) {
       if ( !keepDOMRectangleElements ) {
@@ -614,31 +614,31 @@ define( function( require ) {
         this.domElement = null;
       }
     },
-    
+
     setToClean: function() {
       this.setToCleanState();
-      
+
       this.transformDirty = false;
     }
   } );
-  
+
   /* jshint -W064 */
   RectangleRenderState( RectangleDOMDrawable );
-  
+
   /* jshint -W064 */
   SelfDrawable.Poolable( RectangleDOMDrawable );
-  
+
   /*---------------------------------------------------------------------------*
   * SVG rendering
   *----------------------------------------------------------------------------*/
-  
+
   Rectangle.RectangleSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function RectangleSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
     stateType: RectangleRenderState,
     initialize: function( renderer, instance ) {
       this.lastArcW = -1; // invalid on purpose
       this.lastArcH = -1; // invalid on purpose
-      
+
       if ( !this.svgElement ) {
         this.svgElement = document.createElementNS( scenery.svgns, 'rect' );
       }
@@ -659,7 +659,7 @@ define( function( require ) {
       if ( this.dirtyArcWidth || this.dirtyArcHeight || this.dirtyWidth || this.dirtyHeight ) {
         var arcw = 0;
         var arch = 0;
-        
+
         // workaround for various browsers if rx=20, ry=0 (behavior is inconsistent, either identical to rx=20,ry=20, rx=0,ry=0. We'll treat it as rx=0,ry=0)
         // see https://github.com/phetsims/scenery/issues/183
         if ( node.isRounded() ) {
@@ -676,23 +676,23 @@ define( function( require ) {
           rect.setAttribute( 'ry', arch );
         }
       }
-      
+
       this.updateFillStrokeStyle( rect );
     },
     usesFill: true,
     usesStroke: true,
     keepElements: keepSVGRectangleElements
   } );
-  
+
   /*---------------------------------------------------------------------------*
   * Canvas rendering
   *----------------------------------------------------------------------------*/
-  
+
   Rectangle.RectangleCanvasDrawable = CanvasSelfDrawable.createDrawable( {
     type: function RectangleCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
     paintCanvas: function paintCanvasRectangle( wrapper, node ) {
       var context = wrapper.context;
-      
+
       // use the standard version if it's a rounded rectangle, since there is no Canvas-optimized version for that
       if ( node.isRounded() ) {
         context.beginPath();
@@ -717,7 +717,7 @@ define( function( require ) {
           context.ellipse( lowX, lowY, arcw, arch, 0, Math.PI, Math.PI * 3 / 2, false );
         }
         context.closePath();
-        
+
         if ( node._fill ) {
           node.beforeCanvasFill( wrapper ); // defined in Fillable
           context.fill();
@@ -746,7 +746,7 @@ define( function( require ) {
     usesStroke: true,
     dirtyMethods: ['markDirtyRectangle']
   } );
-  
+
   return Rectangle;
 } );
 

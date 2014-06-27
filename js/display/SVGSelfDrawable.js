@@ -8,37 +8,37 @@
 
 define( function( require ) {
   'use strict';
-  
+
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   var Fillable = require( 'SCENERY/nodes/Fillable' );
   var Strokable = require( 'SCENERY/nodes/Strokable' );
-  
+
   scenery.SVGSelfDrawable = function SVGSelfDrawable( renderer, instance ) {
     this.initializeSVGSelfDrawable( renderer, instance );
-    
+
     throw new Error( 'Should use initialization and pooling' );
   };
   var SVGSelfDrawable = scenery.SVGSelfDrawable;
-  
+
   inherit( SelfDrawable, SVGSelfDrawable, {
     initializeSVGSelfDrawable: function( renderer, instance ) {
       // super initialization
       this.initializeSelfDrawable( renderer, instance );
-      
+
       this.svgElement = null; // should be filled in by subtype
       this.defs = null; // will be updated by updateDefs()
-      
+
       return this;
     },
-    
+
     // @public: called when the defs block changes
     // NOTE: should generally be overridden by drawable subtypes, so they can apply their defs changes
     updateDefs: function( defs ) {
       this.defs = defs;
     },
-    
+
     // @public: called from elsewhere to update the SVG element
     update: function() {
       if ( this.dirty ) {
@@ -46,19 +46,19 @@ define( function( require ) {
         this.updateSVG();
       }
     },
-    
+
     // @protected: called to update the visual appearance of our svgElement
     updateSVG: function() {
       // should generally be overridden by drawable subtypes to implement the update
     },
-    
+
     dispose: function() {
       this.defs = null;
-      
+
       SelfDrawable.prototype.dispose.call( this );
     }
   } );
-  
+
   /*
    * Options contains:
    *   type - the constructor, should be of the form: function SomethingSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); }.
@@ -80,7 +80,7 @@ define( function( require ) {
     var usesFill = options.usesFill;
     var usesStroke = options.usesStroke;
     var keepElements = options.keepElements;
-    
+
     assert && assert( typeof type === 'function' );
     assert && assert( typeof stateType === 'function' );
     assert && assert( typeof initializeSelf === 'function' );
@@ -89,17 +89,17 @@ define( function( require ) {
     assert && assert( typeof usesFill === 'boolean' );
     assert && assert( typeof usesStroke === 'boolean' );
     assert && assert( typeof keepElements === 'boolean' );
-    
+
     inherit( SVGSelfDrawable, type, {
       initialize: function( renderer, instance ) {
         this.initializeSVGSelfDrawable( renderer, instance );
         this.initializeState(); // assumes we have a state mixin
-        
+
         initializeSelf.call( this, renderer, instance );
-        
+
         // tracks our current defs object, so we can update our fill/stroke/etc. on our own
         this.defs = null;
-        
+
         if ( usesFill ) {
           if ( !this.fillState ) {
             this.fillState = new Fillable.FillSVGState();
@@ -107,7 +107,7 @@ define( function( require ) {
             this.fillState.initialize();
           }
         }
-        
+
         if ( usesStroke ) {
           if ( !this.strokeState ) {
             this.strokeState = new Strokable.StrokeSVGState();
@@ -115,10 +115,10 @@ define( function( require ) {
             this.strokeState.initialize();
           }
         }
-        
+
         return this; // allow for chaining
       },
-      
+
       // to be used by our passed in options.updateSVG
       updateFillStrokeStyle: function( element ) {
         if ( usesFill && this.dirtyFill ) {
@@ -138,29 +138,29 @@ define( function( require ) {
           element.setAttribute( 'style', ( usesFill ? this.fillState.style : '' ) + ( usesStroke ? this.strokeState.baseStyle + this.strokeState.extraStyle : '' ) );
         }
       },
-      
+
       updateSVG: function() {
         if ( this.paintDirty ) {
           updateSVGSelf.call( this, this.node, this.svgElement );
         }
-        
+
         // clear all of the dirty flags
         this.setToClean();
       },
-      
+
       updateDefs: function( defs ) {
         this.defs = defs;
-        
+
         updateDefsSelf && updateDefsSelf.call( this, defs );
-        
+
         usesFill && this.fillState.updateDefs( defs );
         usesStroke && this.strokeState.updateDefs( defs );
       },
-      
+
       onAttach: function( node ) {
-        
+
       },
-      
+
       // release the SVG elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
       onDetach: function( node ) {
         //OHTWO TODO: are we missing the disposal?
@@ -168,29 +168,29 @@ define( function( require ) {
           // clear the references
           this.svgElement = null;
         }
-        
+
         // release any defs, and dispose composed state objects
         updateDefsSelf && updateDefsSelf.call( this, null );
         usesFill && this.fillState.dispose();
         usesStroke && this.strokeState.dispose();
-        
+
         this.defs = null;
       },
-      
+
       setToClean: function() {
         this.setToCleanState();
       }
     } );
-    
+
     // mix-in
     stateType( type );
-    
+
     // set up pooling
     /* jshint -W064 */
     SelfDrawable.Poolable( type );
-    
+
     return type;
   };
-  
+
   return SVGSelfDrawable;
 } );

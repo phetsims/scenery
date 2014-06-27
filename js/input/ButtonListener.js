@@ -17,13 +17,13 @@
 
 define( function( require ) {
   'use strict';
-  
+
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
   var inherit = require( 'PHET_CORE/inherit' );
-  
+
   var DownUpListener = require( 'SCENERY/input/DownUpListener' );
-  
+
   /**
    * Options for the ButtonListener:
    *
@@ -38,20 +38,20 @@ define( function( require ) {
   scenery.ButtonListener = function ButtonListener( options ) {
 
     this.buttonState = 'up'; // public: 'up', 'over', 'down' or 'out'
-    
+
     this._overCount = 0; // how many pointers are over us (track a count, so we can handle multiple pointers gracefully)
-    
+
     this._buttonOptions = options; // store the options object so we can call the callbacks
-    
+
     var buttonListener = this;
     DownUpListener.call( this, {
 
       mouseButton: options.mouseButton || 0, // forward the mouse button, default to 0 (LMB)
-      
+
       down: function( event, trail ) {
         buttonListener.setButtonState( event, 'down' );
       },
-      
+
       up: function( event, trail ) {
         buttonListener.setButtonState( event, buttonListener._overCount > 0 ? 'over' : 'up' );
       }
@@ -59,20 +59,20 @@ define( function( require ) {
   };
 
   var ButtonListener = scenery.ButtonListener;
-  
+
   inherit( DownUpListener, ButtonListener, {
 
     setButtonState: function( event, state ) {
       if ( state !== this.buttonState ) {
         sceneryEventLog && sceneryEventLog( 'ButtonListener state change to ' + state + ' from ' + this.buttonState + ' for ' + ( this.downTrail ? this.downTrail.toString() : this.downTrail ) );
         var oldState = this.buttonState;
-        
+
         this.buttonState = state;
-        
+
         if ( this._buttonOptions[state] ) {
           this._buttonOptions[state]( event, oldState );
         }
-        
+
         if ( this._buttonOptions.fire &&
              this._overCount > 0 &&
              ( this._buttonOptions.fireOnDown ? ( state === 'down' ) : ( oldState === 'down' ) ) ) {
@@ -80,7 +80,7 @@ define( function( require ) {
         }
       }
     },
-    
+
     enter: function( event ) {
       sceneryEventLog && sceneryEventLog( 'ButtonListener enter for ' + ( this.downTrail ? this.downTrail.toString() : this.downTrail ) );
       this._overCount++;

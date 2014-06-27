@@ -40,14 +40,14 @@
 
 define( function( require ) {
   'use strict';
-  
+
   var inherit = require( 'PHET_CORE/inherit' );
   var extend = require( 'PHET_CORE/extend' );
   var Events = require( 'AXON/Events' );
   var Dimension2 = require( 'DOT/Dimension2' );
   var Vector2 = require( 'DOT/Vector2' );
   var Matrix3 = require( 'DOT/Matrix3' );
-  
+
   var scenery = require( 'SCENERY/scenery' );
   var Features = require( 'SCENERY/util/Features' );
   require( 'SCENERY/display/BackboneDrawable' );
@@ -66,16 +66,16 @@ define( function( require ) {
   var PointerAreaOverlay = require( 'SCENERY/overlays/PointerAreaOverlay' );
   var PointerOverlay = require( 'SCENERY/overlays/PointerOverlay' );
   var CanvasNodeBoundsOverlay = require( 'SCENERY/overlays/CanvasNodeBoundsOverlay' );
-  
+
   // flags object used for determining what the cursor should be underneath a mouse
   var isMouseFlags = { isMouse: true };
-  
+
   // Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below
   scenery.Display = function Display( rootNode, options ) {
-    
+
     // supertype call to axon.Events (should just initialize a few properties here, notably _eventListeners and _staticEventListeners)
     Events.call( this );
-    
+
     this.options = _.extend( {
       width: 640,                // initial display width
       height: 480,               // initial display height
@@ -86,52 +86,52 @@ define( function( require ) {
       enablePointerEvents: true, // whether we should specifically listen to pointer events if we detect support
       defaultCursor: 'default'   // what cursor is used when no other cursor is specified
     }, options );
-    
+
     // The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM element on updateDisplay())
     this._size = new Dimension2( this.options.width, this.options.height );
     this._currentSize = new Dimension2( -1, -1 ); // used to check against new size to see what we need to change
-    
+
     this._rootNode = rootNode;
     this._rootBackbone = null; // to be filled in later
     this._domElement = scenery.BackboneDrawable.createDivBackbone();
     this._sharedCanvasInstances = {}; // map from Node ID to Instance, for fast lookup
     this._baseInstance = null; // will be filled with the root Instance
-    
+
     // We have a monotonically-increasing frame ID, generally for use with a pattern where we can mark objects with this
     // to note that they are either up-to-date or need refreshing due to this particular frame (without having to clear
     // that information after use). This is incremented every frame
     this._frameId = 0; // {Number}
-    
+
     this._dirtyTransformRoots = [];
     this._dirtyTransformRootsWithoutPass = [];
-    
+
     this._instanceRootsToDispose = [];
     this._drawablesToDispose = [];
-    
+
     // Block changes are handled by changing the "pending" block/backbone on drawables. We want to change them all after
     // the main stitch process has completed, so we can guarantee that a single drawable is removed from its previous
     // block before being added to a new one. This is taken care of in an updateDisplay pass after syncTree / stitching.
     this._drawablesToChangeBlock = []; // {[Drawable]}
-    
+
     // Drawables have two implicit linked-lists, "current" and "old". syncTree modifies the "current" linked-list
     // information so it is up-to-date, but needs to use the "old" information also. We move updating the
     // "current" => "old" linked-list information until after syncTree and stitching is complete, and is taken care of
     // in an updateDisplay pass.
     this._drawablesToUpdateLinks = []; // {[Drawable]}
-    
+
     // We store information on {ChangeInterval}s that records change interval information, that may contain references.
     // We don't want to leave those references dangling after we don't need them, so they are recorded and cleaned in
     // one of updateDisplay's phases.
     this._changeIntervalsToDispose = []; // {[ChangeInterval]}
-    
+
     this._lastCursor = null;
-    
+
     // used for shortcut animation frame functions
     this._requestAnimationFrameID = 0;
-    
+
     // will be filled in with a scenery.Input if event handling is enabled
     this._input = null;
-    
+
     // overlays currently being displayed.
     // API expected:
     //   .domElement
@@ -140,129 +140,129 @@ define( function( require ) {
     this._pointerOverlay = null;
     this._pointerAreaOverlay = null;
     this._canvasAreaBoundsOverlay = null;
-    
+
     this.applyCSSHacks();
-    
+
     // global reference if we have a Display (useful)
     this.scenery = scenery;
   };
   var Display = scenery.Display;
-  
+
   inherit( Object, Display, extend( {
     // returns the base DOM element that will be displayed by this Display
     getDOMElement: function() {
       return this._domElement;
     },
     get domElement() { return this.getDOMElement(); },
-    
+
     // updates the display's DOM element with the current visual state of the attached root node and its descendants
     updateDisplay: function() {
       //OHTWO TODO: turn off after most debugging work is done
       if ( window.sceneryDebugPause ) {
         return;
       }
-      
+
       sceneryLog && sceneryLog.Display && sceneryLog.Display( 'updateDisplay frame ' + this._frameId );
       sceneryLog && sceneryLog.Display && sceneryLog.push();
-      
+
       var firstRun = !!this._baseInstance;
-      
+
       // check to see whether contents under pointers changed (and if so, send the enter/exit events) to
       // maintain consistent state
       if ( this._input ) {
         this._input.validatePointers();
       }
-      
+
       // validate bounds for everywhere that could trigger bounds listeners. we want to flush out any changes, so that we can call validateBounds()
       // from code below without triggering side effects (we assume that we are not reentrant).
       this._rootNode.validateWatchedBounds();
-      
+
       this._baseInstance = this._baseInstance || scenery.Instance.createFromPool( this, new scenery.Trail( this._rootNode ) );
       this._baseInstance.baseSyncTree();
       if ( firstRun ) {
         this.markTransformRootDirty( this._baseInstance, this._baseInstance.isTransformed ); // marks the transform root as dirty (since it is)
       }
-      
+
       // update our drawable's linked lists where necessary
       while ( this._drawablesToUpdateLinks.length ) {
         this._drawablesToUpdateLinks.pop().updateLinks();
       }
-      
+
       // clean change-interval information from instances, so we don't leak memory/references
       while ( this._changeIntervalsToDispose.length ) {
         this._changeIntervalsToDispose.pop().dispose();
       }
-      
+
       this._rootBackbone = this._rootBackbone || this._baseInstance.groupDrawable;
       assert && assert( this._rootBackbone, 'We are guaranteed a root backbone as the groupDrawable on the base instance' );
       assert && assert( this._rootBackbone === this._baseInstance.groupDrawable, 'We don\'t want the base instance\'s groupDrawable to change' );
-      
-      
+
+
       if ( assertSlow ) { this._rootBackbone.audit( true, false, true ); } // allow pending blocks / dirty
-      
+
       sceneryLog && sceneryLog.Display && sceneryLog.Display( 'drawable block change phase' );
       sceneryLog && sceneryLog.Display && sceneryLog.push();
       while ( this._drawablesToChangeBlock.length ) {
         this._drawablesToChangeBlock.pop().updateBlock();
       }
       sceneryLog && sceneryLog.Display && sceneryLog.pop();
-      
+
       if ( assertSlow ) { this._rootBackbone.audit( false, false, true ); } // allow only dirty
       if ( assertSlow ) { this._baseInstance.audit( this._frameId, false ); }
-      
+
       // pre-repaint phase: update relative transform information for listeners (notification) and precomputation where desired
       this.updateDirtyTransformRoots();
-      
+
       if ( assertSlow ) { this._baseInstance.audit( this._frameId, true ); }
-      
+
       sceneryLog && sceneryLog.Display && sceneryLog.Display( 'disposal phase' );
       sceneryLog && sceneryLog.Display && sceneryLog.push();
-      
+
       // dispose all of our instances. disposing the root will cause all descendants to also be disposed.
       // will also dispose attached drawables (self/group/etc.)
       while ( this._instanceRootsToDispose.length ) {
         this._instanceRootsToDispose.pop().dispose();
       }
-      
+
       // dispose all of our other drawables.
       while ( this._drawablesToDispose.length ) {
         this._drawablesToDispose.pop().dispose();
       }
-      
+
       sceneryLog && sceneryLog.Display && sceneryLog.pop();
-      
+
       if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
-      
+
       // repaint phase
       //OHTWO TODO: can anything be updated more efficiently by tracking at the Display level? Remember, we have recursive updates so things get updated in the right order!
       sceneryLog && sceneryLog.Display && sceneryLog.Display( 'repaint phase' );
       sceneryLog && sceneryLog.Display && sceneryLog.push();
       this._rootBackbone.update();
       sceneryLog && sceneryLog.Display && sceneryLog.pop();
-      
+
       if ( assertSlow ) { this._rootBackbone.audit( false, false, false ); } // allow nothing
       if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
-      
+
       this.updateCursor();
-      
+
       this.updateSize();
-      
+
       if ( this._overlays.length ) {
         var zIndex = this._rootBackbone.lastZIndex;
         for ( var i = 0; i < this._overlays.length; i++ ) {
           // layer the overlays properly
           var overlay = this._overlays[i];
           overlay.domElement.style.zIndex = zIndex++;
-          
+
           overlay.update();
         }
       }
-      
+
       this._frameId++;
-      
+
       sceneryLog && sceneryLog.Display && sceneryLog.pop();
     },
-    
+
     updateSize: function() {
       var sizeDirty = false;
       //OHTWO TODO: if we aren't clipping or setting background colors, can we get away with having a 0x0 container div and using absolutely-positioned children?
@@ -282,18 +282,18 @@ define( function( require ) {
         this._domElement.style.clip = 'rect(0px,' + this._size.width + 'px,' + this._size.height + 'px,0px)';
       }
     },
-    
+
     getRootNode: function() {
       return this._rootNode;
     },
     get rootNode() { return this.getRootNode(); },
-    
+
     // The dimensions of the Display's DOM element
     getSize: function() {
       return this._size;
     },
     get size() { return this.getSize(); },
-    
+
     // size: dot.Dimension2. Changes the size that the Display's DOM element will be after the next updateDisplay()
     setSize: function( size ) {
       assert && assert( size instanceof Dimension2 );
@@ -301,63 +301,63 @@ define( function( require ) {
       assert && assert( size.width > 0, 'Display.width should be greater than zero' );
       assert && assert( size.height % 1 === 0, 'Display.height should be an integer' );
       assert && assert( size.height > 0, 'Display.height should be greater than zero' );
-      
+
       if ( !this._size.equals( size ) ) {
         this._size = size;
-        
+
         this.trigger1( 'displaySize', this._size );
       }
     },
-    
+
     setWidthHeight: function( width, height ) {
       // TODO: don't burn an instance here?
       this.setSize( new Dimension2( width, height ) );
     },
-    
+
     // The width of the Display's DOM element
     getWidth: function() {
       return this._size.width;
     },
     get width() { return this.getWidth(); },
-    
+
     // Sets the width that the Display's DOM element will be after the next updateDisplay(). Should be an integral value.
     setWidth: function( width ) {
       assert && assert( typeof width === 'number', 'Display.width should be a number' );
-      
+
       if ( this.getWidth() !== width ) {
         // TODO: remove allocation here?
         this.setSize( new Dimension2( width, this.getHeight() ) );
       }
     },
     set width( value ) { this.setWidth( value ); },
-    
+
     // The height of the Display's DOM element
     getHeight: function() {
       return this._size.height;
     },
     get height() { return this.getHeight(); },
-    
+
     // Sets the height that the Display's DOM element will be after the next updateDisplay(). Should be an integral value.
     setHeight: function( height ) {
       assert && assert( typeof height === 'number', 'Display.height should be a number' );
-      
+
       if ( this.getHeight() !== height ) {
         // TODO: remove allocation here?
         this.setSize( new Dimension2( this.getWidth(), height ) );
       }
     },
     set height( value ) { this.setHeight( value ); },
-    
+
     addOverlay: function( overlay ) {
       this._overlays.push( overlay );
       this._domElement.appendChild( overlay.domElement );
     },
-    
+
     removeOverlay: function( overlay ) {
       this._domElement.removeChild( overlay.domElement );
       this._overlays.splice( _.indexOf( this._overlays, overlay ), 1 );
     },
-    
+
     /*
      * Called from Instances that will need a transform update (for listeners and precomputation).
      * @param passTransform {Boolean} - Whether we should pass the first transform root when validating transforms (should be true if the instance is transformed)
@@ -365,7 +365,7 @@ define( function( require ) {
     markTransformRootDirty: function( instance, passTransform ) {
       passTransform ? this._dirtyTransformRoots.push( instance ) : this._dirtyTransformRootsWithoutPass.push( instance );
     },
-    
+
     updateDirtyTransformRoots: function() {
       sceneryLog && sceneryLog.transformSystem && sceneryLog.transformSystem( 'updateDirtyTransformRoots' );
       sceneryLog && sceneryLog.transformSystem && sceneryLog.push();
@@ -377,74 +377,74 @@ define( function( require ) {
       }
       sceneryLog && sceneryLog.transformSystem && sceneryLog.pop();
     },
-    
+
     markDrawableChangedBlock: function( drawable ) {
       assert && assert( drawable instanceof Drawable );
-      
+
       sceneryLog && sceneryLog.Display && sceneryLog.Display( 'markDrawableChangedBlock: ' + drawable.toString() );
       this._drawablesToChangeBlock.push( drawable );
     },
-    
+
     markInstanceRootForDisposal: function( instance ) {
       assert && assert( instance instanceof Instance, 'How would an instance not be an instance of an instance?!?!?' );
-      
+
       sceneryLog && sceneryLog.Display && sceneryLog.Display( 'markInstanceRootForDisposal: ' + instance.toString() );
       this._instanceRootsToDispose.push( instance );
     },
-    
+
     markDrawableForDisposal: function( drawable ) {
       assert && assert( drawable instanceof Drawable );
-      
+
       sceneryLog && sceneryLog.Display && sceneryLog.Display( 'markDrawableForDisposal: ' + drawable.toString() );
       this._drawablesToDispose.push( drawable );
     },
-    
+
     markDrawableForLinksUpdate: function( drawable ) {
       assert && assert( drawable instanceof Drawable );
-      
+
       this._drawablesToUpdateLinks.push( drawable );
     },
-    
+
     // Add a {ChangeInterval} for the "remove change interval info" phase (we don't want to leak memory/references)
     markChangeIntervalToDispose: function( changeInterval ) {
       assert && assert( changeInterval instanceof ChangeInterval );
-      
+
       this._changeIntervalsToDispose.push( changeInterval );
     },
-    
+
     /*---------------------------------------------------------------------------*
     * Cursors
     *----------------------------------------------------------------------------*/
-    
+
     updateCursor: function() {
       if ( this._input && this._input.mouse && this._input.mouse.point ) {
         if ( this._input.mouse.cursor ) {
           sceneryLog && sceneryLog.Cursor && sceneryLog.Cursor( 'set on pointer: ' + this._input.mouse.cursor );
           return this.setSceneCursor( this._input.mouse.cursor );
         }
-        
+
         //OHTWO TODO: For a display, just return an instance and we can avoid the garbage collection/mutation at the cost of the linked-list traversal instead of an array
         var mouseTrail = this._rootNode.trailUnderPoint( this._input.mouse.point, isMouseFlags );
-        
+
         if ( mouseTrail ) {
           for ( var i = mouseTrail.length - 1; i >= 0; i-- ) {
             var node = mouseTrail.nodes[i];
             var cursor = node.getCursor();
-            
+
             if ( cursor ) {
               sceneryLog && sceneryLog.Cursor && sceneryLog.Cursor( cursor + ' on ' + node.constructor.name + '#' + node.id );
               return this.setSceneCursor( cursor );
             }
           }
         }
-        
+
         sceneryLog && sceneryLog.Cursor && sceneryLog.Cursor( '--- for ' + ( mouseTrail ? mouseTrail.toString() : '(no hit)' ) );
       }
-      
+
       // fallback case
       return this.setSceneCursor( this.options.defaultCursor );
     },
-    
+
     setSceneCursor: function( cursor ) {
       if ( cursor !== this._lastCursor ) {
         this._lastCursor = cursor;
@@ -459,16 +459,16 @@ define( function( require ) {
         }
       }
     },
-    
+
     applyCSSHacks: function() {
       // to use CSS3 transforms for performance, hide anything outside our bounds by default
       if ( !this.options.allowSceneOverflow ) {
         this._domElement.style.overflow = 'hidden';
       }
-      
+
       // forward all pointer events
       this._domElement.style.msTouchAction = 'none';
-      
+
       if ( this.options.allowCSSHacks ) {
         // some css hacks (inspired from https://github.com/EightMedia/hammer.js/blob/master/hammer.js).
         // modified to only apply the proper prefixed version instead of spamming all of them, and doesn't use jQuery.
@@ -479,39 +479,39 @@ define( function( require ) {
         Features.setStyle( this._domElement, Features.tapHighlightColor, 'rgba(0,0,0,0)' );
       }
     },
-    
+
     // TODO: consider SVG data URLs
     canvasDataURL: function( callback ) {
       this.canvasSnapshot( function( canvas ) {
         callback( canvas.toDataURL() );
       } );
     },
-    
+
     // renders what it can into a Canvas (so far, Canvas and SVG layers work fine)
     canvasSnapshot: function( callback ) {
       var canvas = document.createElement( 'canvas' );
       canvas.width = this._size.width;
       canvas.height = this._size.height;
-      
+
       var context = canvas.getContext( '2d' );
-      
+
       //OHTWO TODO: allow actual background color directly, not having to check the style here!!!
       this._rootNode.renderToCanvas( canvas, context, function() {
         callback( canvas, context.getImageData( 0, 0, canvas.width, canvas.height ) );
       }, this.domElement.style.backgroundColor );
     },
-    
+
     //TODO: reduce code duplication for handling overlays
     setPointerDisplayVisible: function( visibility ) {
       // @deprecated, Joist code calls us with undefined first....
       if ( visibility === undefined ) {
         return;
       }
-      
+
       assert && assert( typeof visibility === 'boolean' );
-      
+
       var hasOverlay = !!this._pointerOverlay;
-      
+
       if ( visibility !== hasOverlay ) {
         if ( !visibility ) {
           this.removeOverlay( this._pointerOverlay );
@@ -523,18 +523,18 @@ define( function( require ) {
         }
       }
     },
-    
+
     //TODO: reduce code duplication for handling overlays
     setPointerAreaDisplayVisible: function( visibility ) {
       // @deprecated, Joist code calls us with undefined first....
       if ( visibility === undefined ) {
         return;
       }
-      
+
       assert && assert( typeof visibility === 'boolean' );
-      
+
       var hasOverlay = !!this._pointerAreaOverlay;
-      
+
       if ( visibility !== hasOverlay ) {
         if ( !visibility ) {
           this.removeOverlay( this._pointerAreaOverlay );
@@ -546,18 +546,18 @@ define( function( require ) {
         }
       }
     },
-    
+
     //TODO: reduce code duplication for handling overlays
     setCanvasNodeBoundsVisible: function( visibility ) {
       // @deprecated, Joist code calls us with undefined first....
       if ( visibility === undefined ) {
         return;
       }
-      
+
       assert && assert( typeof visibility === 'boolean' );
-      
+
       var hasOverlay = !!this._canvasAreaBoundsOverlay;
-      
+
       if ( visibility !== hasOverlay ) {
         if ( !visibility ) {
           this.removeOverlay( this._canvasAreaBoundsOverlay );
@@ -569,17 +569,17 @@ define( function( require ) {
         }
       }
     },
-    
+
     resizeOnWindowResize: function() {
       var display = this;
-      
+
       var resizer = function() {
         display.setWidthHeight( window.innerWidth, window.innerHeight );
       };
       window.addEventListener( 'resize', resizer );
       resizer();
     },
-    
+
     updateOnRequestAnimationFrame: function() {
       var display = this;
       (function step() {
@@ -587,11 +587,11 @@ define( function( require ) {
         display.updateDisplay();
       })();
     },
-    
+
     cancelUpdateOnRequestAnimationFrame: function() {
       window.cancelAnimationFrame( this._requestAnimationFrameID );
     },
-    
+
     initializeStandaloneEvents: function( parameters ) {
       // TODO extract similarity between standalone and fullscreen!
       var element = this._domElement;
@@ -603,7 +603,7 @@ define( function( require ) {
         }
       }, parameters ) );
     },
-    
+
     initializeFullscreenEvents: function( parameters ) {
       var element = this._domElement;
       this.initializeEvents( _.extend( {}, {
@@ -614,7 +614,7 @@ define( function( require ) {
         }
       }, parameters ) );
     },
-    
+
     initializeWindowEvents: function( parameters ) {
       this.initializeEvents( _.extend( {}, {
         listenerTarget: window,
@@ -623,52 +623,52 @@ define( function( require ) {
         }
       }, parameters ) );
     },
-    
+
     //OHTWO TODO: ability to disconnect event handling (useful for playground debugging)
     initializeEvents: function( parameters ) {
       assert && assert( !this._input, 'Events cannot be attached twice to a display (for now)' );
-      
+
       // TODO: come up with more parameter names that have the same string length, so it looks creepier
       var pointFromEvent = parameters.pointFromEvent;
       var listenerTarget = parameters.listenerTarget;
       var batchDOMEvents = parameters.batchDOMEvents; //OHTWO TODO: hybrid batching (option to batch until an event like 'up' that might be needed for security issues)
-      
+
       var input = new scenery.Input( this._rootNode, listenerTarget, !!batchDOMEvents, this.options.enablePointerEvents, pointFromEvent );
       this._input = input;
-      
+
       input.connectListeners();
     },
-    
+
     detachEvents: function() {
       assert && assert( this._input, 'detachEvents() should be called only when events are attached' );
-      
+
       this._input.disconnectListeners();
       this._input = null;
     },
-    
+
     getDebugHTML: function() {
       function str( ob ) {
         return ob ? ob.toString() : ob + '';
       }
-      
+
       var depth = 0;
-      
+
       var result = 'Display ' + this._size.toString() + ' frame:' + this._frameId + ' input:' + !!this._input + ' cursor:' + this._lastCursor + '<br>';
-      
+
       function instanceSummary( instance ) {
         var iSummary = '';
-        
+
         function addQualifier( text ) {
           iSummary += ' <span style="color: #008">' + text + '</span>';
         }
-        
+
         var node = instance.node;
-        
+
         iSummary += instance.id;
         iSummary += ' ' + ( node.constructor.name ? node.constructor.name : '?' );
         iSummary += ' <span style="font-weight: ' + ( node.isPainted() ? 'bold' : 'normal' ) + '">' + node.id + '</span>';
         iSummary += node.getDebugHTMLExtras();
-        
+
         if ( !node._visible ) {
           addQualifier( 'invisible' );
         }
@@ -702,7 +702,7 @@ define( function( require ) {
         if ( node._opacity < 1 ) {
           addQualifier( 'opacity:' + node._opacity );
         }
-        
+
         var transformType = '';
         switch ( node.transform.getMatrix().type ) {
           case Matrix3.Types.IDENTITY:       transformType = '';           break;
@@ -714,64 +714,64 @@ define( function( require ) {
         if ( transformType ) {
           iSummary += ' <span style="color: #88f" title="' + node.transform.getMatrix().toString().replace( '\n', '&#10;' ) + '">' + transformType + '</span>';
         }
-        
+
         iSummary += ' <span style="color: #888">' + str( instance.trail ) + '</span>';
         iSummary += ' <span style="color: #c88">' + str( instance.state ) + '</span>';
         iSummary += ' <span style="color: #8c8">' + node._rendererSummary.bitmask.toString( 16 ) + ( node._rendererBitmask !== scenery.bitmaskNodeDefault ? ' (' + node._rendererBitmask.toString( 16 ) + ')' : '' ) +  '</span>';
-        
+
         return iSummary;
       }
-      
+
       function drawableSummary( drawable ) {
         return drawable.toString() + ( drawable.dirty ? ' <span style="color: #c00;">[x]</span>' : '' );
       }
-      
+
       function printInstanceSubtree( instance ) {
         var div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
-        
+
         function addDrawable( name, drawable ) {
           div += ' <span style="color: #888">' + name + ':' + drawableSummary( drawable ) + '</span>';
         }
-        
+
         div += instanceSummary( instance );
-        
+
         instance.selfDrawable && addDrawable( 'self', instance.selfDrawable );
         instance.groupDrawable && addDrawable( 'group', instance.groupDrawable );
         instance.sharedCacheDrawable && addDrawable( 'sharedCache', instance.sharedCacheDrawable );
-        
+
         div += '</div>';
         result += div;
-        
+
         depth += 1;
         _.each( instance.children, function( childInstance ) {
           printInstanceSubtree( childInstance );
         } );
         depth -= 1;
       }
-      
+
       if ( this._baseInstance ) {
         result += '<div style="font-weight: bold;">Root Instance Tree</div>';
         printInstanceSubtree( this._baseInstance );
       }
-      
+
       _.each( this._sharedCanvasInstances, function( instance ) {
         result += '<div style="font-weight: bold;">Shared Canvas Instance Tree</div>';
         printInstanceSubtree( instance );
       } );
-      
+
       function printDrawableSubtree( drawable ) {
         var div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
-        
+
         div += drawableSummary( drawable );
         if ( drawable.instance ) {
           div += '&nbsp;&nbsp;&nbsp;' + instanceSummary( drawable.instance );
         } else if ( drawable.backboneInstance ) {
           div += '&nbsp;&nbsp;&nbsp;' + instanceSummary( drawable.backboneInstance );
         }
-        
+
         div += '</div>';
         result += div;
-        
+
         if ( drawable.blocks ) {
           // we're a backbone
           depth += 1;
@@ -789,17 +789,17 @@ define( function( require ) {
           depth -= 1;
         }
       }
-      
+
       if ( this._rootBackbone ) {
         result += '<div style="font-weight: bold;">Root Drawable Tree</div>';
         printDrawableSubtree( this._rootBackbone );
       }
-      
+
       //OHTWO TODO: add shared cache drawable trees
-      
+
       return result;
     },
-    
+
     popupDebug: function() {
       var htmlContent = '<!DOCTYPE html>' +
                         '<html lang="en">' +
@@ -808,23 +808,23 @@ define( function( require ) {
                         '</html>';
       window.open( 'data:text/html;charset=utf-8,' + encodeURIComponent( htmlContent ) );
     },
-    
+
     toStringWithChildren: function( mutateRoot, rootName ) {
       rootName = rootName || 'scene';
       var rootNode = this._rootNode;
       var result = '';
-      
+
       var nodes = this._rootNode.getTopologicallySortedNodes().slice( 0 ).reverse(); // defensive slice, in case we store the order somewhere
-      
+
       function name( node ) {
         return node === rootNode ? rootName : ( ( node.constructor.name ? node.constructor.name.toLowerCase() : '(node)' ) + node.id );
       }
-      
+
       _.each( nodes, function( node ) {
         if ( result ) {
           result += '\n';
         }
-        
+
         if ( mutateRoot && node === rootNode ) {
           var props = rootNode.getPropString( '  ', false );
           var mutation = ( props ? ( '\n' + props + '\n' ) : '' );
@@ -837,21 +837,21 @@ define( function( require ) {
         } else {
           result += 'var ' + name( node ) + ' = ' + node.toString( '', false );
         }
-        
+
         _.each( node.children, function( child ) {
           result += '\n' + name( node ) + '.addChild( ' + name( child ) + ' );';
         } );
       } );
-      
+
       return result;
     }
-    
+
   }, Events.prototype ) );
-  
+
   Display.customCursors = {
     'scenery-grab-pointer': ['grab', '-moz-grab', '-webkit-grab', 'pointer'],
     'scenery-grabbing-pointer': ['grabbing', '-moz-grabbing', '-webkit-grabbing', 'pointer']
   };
-  
+
   return Display;
 } );

@@ -50,7 +50,7 @@ $( window ).ready( function () {
   string( "Å̳̥͓͚͒͞͞" );
   string( "0҉" );
   string( "█" );
-  
+
   // encoded
   newElement();
   string( 'Encoded' );

@@ -11,16 +11,16 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
 
   <title>Font Testing for Scenery</title>
-  
+
   <!-- jQuery and LoDash are dependencies -->
   <script src="../../../sherpa/jquery-2.1.0.min.js"></script>
   <script src="../../../sherpa/lodash-2.4.1.min.js"></script>
-  
+
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <!-- <script src="../../build/development/scenery.js"></script> -->
   <!-- <script src="../../build/standalone/scenery.js"></script> -->
   <script src="../../build/standalone/scenery.min.js"></script>
-  
+
   <style type="text/css">
     /* Let content go to the edges */
     html, body {
@@ -31,7 +31,7 @@
       background-color: #ff0;
       overflow: hidden;
     }
-    
+
     /* Have the #main div cover the entire viewport */
     #main {
       position: absolute;
@@ -45,18 +45,18 @@
   </style>
 </head>
 <body>
-  
+
   <!-- <h3>CCK's ConstantDensityPropagator.SpeedLimitReached1</h3> -->
-  
+
   <!-- our scene graph will be in this div -->
   <div id="main" >
   </div>
 
   <script type="text/javascript">
-  
+
   window.onload = function() {
     var scene = new scenery.Scene( $( '#main' ) );
-    
+
     // representative strings
     var languages = [
       // { lang: 'af', string: 'Animasie spoed beperking bereik! Simmulasie spoed verminder na' },
@@ -113,23 +113,23 @@
       { lang: 'zh-cn', string: '动画播放速度达到最大值减速至' },
       { lang: 'zh-tw', string: '動畫播放已達速限！模擬速度降至' }
     ];
-    
+
     var currentFontFamily = ( location.search && location.search.length ) ? decodeURIComponent( location.search.slice( 1 ) ) : 'sans-serif';
-    
+
     var font = new scenery.Font( { size: 20, family: currentFontFamily + ', monospace' } );
-    
+
     var offset = 30;
-    
+
     scene.interactive = true;
-    
+
     for ( var i = 0; i < languages.length; i++ ) {
       scene.addChild( new scenery.Text( languages[i].lang, { font: font, top: i * 30 + offset, interactive: true } ) );
       scene.addChild( new scenery.Text( languages[i].string, { font: font, top: i * 30 + offset, left: 50, interactive: true } ) );
     }
-    
+
     var textField = $( '<input type="text">' )[0];
     textField.value = currentFontFamily;
-    
+
     var canvasButton = new scenery.Text( 'Canvas', { fontSize: 20, top: 0, left: 200, cursor: 'pointer' } );
     canvasButton.addInputListener( {
       down: function() {
@@ -137,7 +137,7 @@
       }
     } );
     scene.addChild( canvasButton );
-    
+
     var svgButton = new scenery.Text( 'SVG', { fontSize: 20, top: 0, left: 300, cursor: 'pointer' } );
     svgButton.addInputListener( {
       down: function() {
@@ -145,7 +145,7 @@
       }
     } );
     scene.addChild( svgButton );
-    
+
     var domButton = new scenery.Text( 'DOM', { fontSize: 20, top: 0, left: 400, cursor: 'pointer' } );
     domButton.addInputListener( {
       down: function() {
@@ -153,18 +153,18 @@
       }
     } );
     scene.addChild( domButton );
-    
+
     scene.addChild( new scenery.DOM( textField, { interactive: true } ) );
-    
+
     scene.resize( window.innerWidth, 1200 );
     scene.initializeFullscreenEvents();
     scene.updateOnRequestAnimationFrame();
-    
+
     textField.addEventListener( 'change', function() {
       font.family = textField.value + ', monospace';
     } );
   };
-  
+
   </script>
 
 </body>

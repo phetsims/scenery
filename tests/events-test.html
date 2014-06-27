@@ -10,9 +10,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
 
   <title>Events Tests</title>
-  
+
   <link rel="stylesheet" href="../../sherpa/bootstrap-2.2.2.css">
-  
+
   <script src="../../sherpa/jquery-2.1.0.min.js"></script>
   <script src="../../sherpa/lodash-2.4.1.min.js"></script>
   <script src="../../sherpa/bootstrap-2.2.2.js"></script>
@@ -29,7 +29,7 @@
       background-color: #ff0;
       overflow: hidden;
     }
-    
+
     #main {
       position: absolute;
       left: 0;
@@ -47,17 +47,17 @@
       font-size: 12px;
       z-index: 1;
     }
-    
+
     #layers, #ui {
       position: absolute;
       left: 0;
       top: 0;
     }
-    
+
     #layers {
       z-index: 0;
     }
-    
+
     #ui {
       z-index: 1;
     }
@@ -107,7 +107,7 @@ var main = $( '#main' );
     userDrag: 'none',
     tapHighlightColor: 'rgba(0,0,0,0)'
   };
-  
+
   _.each( prefixes, function( prefix ) {
     _.each( properties, function( propertyValue, propertyName ) {
       main.css( prefix + propertyName, propertyValue );

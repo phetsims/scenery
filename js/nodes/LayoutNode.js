@@ -22,27 +22,27 @@
 
 define( function( require ) {
   'use strict';
-  
+
   var inherit = require( 'PHET_CORE/inherit' );
   var extend = require( 'PHET_CORE/extend' );
   var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
   // var Rectangle = require( 'SCENERY/nodes/Rectangle' );
   var Bounds2 = require( 'DOT/Bounds2' );
-  
+
   // var debug = false;
-  
+
   // @deprecated
   scenery.LayoutNode = function LayoutNode( defaultMethod, options ) {
     var layoutNode = this;
-    
+
     assert && assert( defaultMethod instanceof LayoutMethod, 'defaultMethod is required' );
-    
+
     options = extend( {
       updateOnBounds: true,
       defaultMethod: defaultMethod
     }, options );
-    
+
     this._activelyLayingOut = false;
     this._updateOnBounds = true;
     this._defaultMethod = null;
@@ -54,20 +54,20 @@ define( function( require ) {
         layoutNode.updateLayout();
       }
     };
-    
+
     Node.call( this, options );
-    
+
     // this.addChild( this._invisibleBackground );
-    
+
     this.updateLayout();
-    
+
     throw new Error( 'Deprecated, please do not use (replacement for overrideBounds has not been provided)' );
   };
   var LayoutNode = scenery.LayoutNode;
-  
+
   inherit( Node, LayoutNode, {
     get layoutProperties() { return new LayoutProperties( this._elements ); },
-    
+
     get layoutBounds() {
       var result = Bounds2.NOTHING.copy();
       _.each( this._elements, function( element ) {
@@ -75,13 +75,13 @@ define( function( require ) {
       } );
       return result;
     },
-    
+
     set defaultMethod( value ) { this._defaultMethod = value; this.updateLayout(); return this; },
     get defaultMethod() { return this._defaultMethod; },
-    
+
     set updateOnBounds( value ) { this._updateOnBounds = value; return this; },
     get updateOnBounds() { return this._updateOnBounds; },
-    
+
     /*
      * Options can consist of:
      *   layoutMethod - layout method
@@ -91,7 +91,7 @@ define( function( require ) {
      */
     insertChild: function( index, node, options ) {
       var layoutNode = this;
-      
+
       options = extend( {
         useVisibleBounds: false,
         padLeft: 0,
@@ -100,46 +100,46 @@ define( function( require ) {
         padBottom: 0
       }, options );
       // var baseBoundsFunc = ( options.useVisibleBounds ? node.getVisibleBounds : node.getBounds ).bind( node );
-      
+
       Node.prototype.insertChild.call( this, index, node );
-      
+
       var methodGetter = options.layoutMethod ? function() { return options.layoutMethod; } : function() { return layoutNode._defaultMethod; };
       var element = new LayoutElement( node, methodGetter, options.boundsMethod ? options.boundsMethod : function( bounds ) {
         if ( options.useVisibleBounds ) {
           bounds = node.visibleBounds;
         }
-        
+
         return new Bounds2( bounds.minX - options.padLeft, bounds.minY - options.padTop, bounds.maxX + options.padRight, bounds.maxY + options.padBottom );
       } );
       this.addElement( element );
-      
+
       this.updateLayout();
     },
-    
+
     addChild: function( node, options ) {
       this.insertChild( this._children.length, node, options );
     },
-    
+
     // override
     removeChildWithIndex: function( node, indexOfChild ) {
       Node.prototype.removeChildWithIndex.call( this, node, indexOfChild );
       if ( this._elementMap[node.id] ) {
         delete this._elementMap[node.id];
       }
-      
+
       this.updateLayout();
     },
-    
+
     addElement: function( element ) {
       this._elements.push( element );
       element.node.addEventListener( 'bounds', this._boundsListener );
     },
-    
+
     removeElement: function( element ) {
       this._elements.splice( this._elements.indexOf( element ), 1 ); // TODO: replace with some remove() instead of splice()
       element.node.removeEventListener( 'bounds', this._boundsListener );
     },
-    
+
     updateLayout: function() {
       if ( this._activelyLayingOut ) {
         // don't start another layout while one is going on!
@@ -162,7 +162,7 @@ define( function( require ) {
       // if ( debug ) {
       //   this._invisibleBackground.visible = true;
       //   this._invisibleBackground.fill = 'rgba(255,0,0,0.4)';
-        
+
       //   _.each( this._elements, function( element ) {
       //     this._invisibleBackground.addChild( new Rectangle( element.node.bounds ), {
       //       fill: 'rgba(255,0,0,0.4)',
@@ -173,7 +173,7 @@ define( function( require ) {
       this._activelyLayingOut = false;
     }
   } );
-  
+
   /*
    * LayoutMethod - function layout( element, index, previousElement, layoutProperties )
    */
@@ -184,61 +184,61 @@ define( function( require ) {
   };
   LayoutMethod.prototype = {
     constructor: LayoutMethod,
-    
+
     and: function( otherLayoutMethod ) {
       var thisLayoutMethod = this;
-      
+
       return new LayoutMethod( function compositeLayout( element, index, previousElement, layoutProperties ) {
         thisLayoutMethod.layout( element, index, previousElement, layoutProperties );
         otherLayoutMethod.layout( element, index, previousElement, layoutProperties );
       } );
     }
   };
-  
+
   /*---------------------------------------------------------------------------*
   * Layout Methods
   *----------------------------------------------------------------------------*/
-  
+
   LayoutNode.Vertical = new LayoutMethod( function verticalLayout( element, index, previousElement, layoutProperties ) {
     element.layoutTop = previousElement ? previousElement.layoutBounds.bottom : 0;
   } );
-  
+
   LayoutNode.Horizontal = new LayoutMethod( function horizontalLayout( element, index, previousElement, layoutProperties ) {
     element.layoutLeft = previousElement ? previousElement.layoutBounds.right : 0;
   } );
-  
+
   LayoutNode.AlignLeft = new LayoutMethod( function alignLeftLayout( element, index, previousElement, layoutProperties ) {
     element.layoutLeft = 0;
   } );
-  
+
   LayoutNode.AlignHorizontalCenter = new LayoutMethod( function alignHorizontalCenterLayout( element, index, previousElement, layoutProperties ) {
     element.layoutLeft = ( layoutProperties.maxWidth - element.layoutBounds.width ) / 2;
   } );
-  
+
   LayoutNode.AlignRight = new LayoutMethod( function alignRightLayout( element, index, previousElement, layoutProperties ) {
     element.layoutLeft = layoutProperties.maxWidth - element.layoutBounds.width;
   } );
-  
+
   LayoutNode.AlignTop = new LayoutMethod( function alignTopLayout( element, index, previousElement, layoutProperties ) {
     element.layoutTop = 0;
   } );
-  
+
   LayoutNode.AlignVerticalCenter = new LayoutMethod( function alignVerticalCenterLayout( element, index, previousElement, layoutProperties ) {
     element.layoutTop = ( layoutProperties.maxHeight - element.layoutBounds.height ) / 2;
   } );
-  
+
   LayoutNode.AlignBottom = new LayoutMethod( function alignBottomLayout( element, index, previousElement, layoutProperties ) {
     element.layoutTop = layoutProperties.maxHeight - element.layoutBounds.height;
   } );
-  
+
   /*---------------------------------------------------------------------------*
   * Internals
   *----------------------------------------------------------------------------*/
-  
+
   var LayoutProperties = LayoutNode.LayoutProperties = function LayoutProperties( elements ) {
     var largestWidth = 0;
     var largestHeight = 0;
-    
+
     _.each( elements, function( element ) {
       largestWidth = Math.max( largestWidth, element.layoutBounds.width );
       largestHeight = Math.max( largestHeight, element.layoutBounds.height );
@@ -247,7 +247,7 @@ define( function( require ) {
     this.maxWidth = largestWidth;
     this.maxHeight = largestHeight;
   };
-  
+
   var LayoutElement = LayoutNode.LayoutElement = function LayoutElement( node, layoutMethodGetter, boundsMethod ) {
     this.node = node;
     this.layoutMethodGetter = layoutMethodGetter;
@@ -257,22 +257,22 @@ define( function( require ) {
     get bounds() { return this.node.bounds; },
     get layoutBounds() { return this.boundsMethod( this.bounds ); },
     get layoutMethod() { return this.layoutMethodGetter(); },
-    
+
     get layoutTop() { throw new Error( 'JSHint wants this getter' ); },
     set layoutTop( y ) {
       var padding = this.bounds.top - this.layoutBounds.top;
       this.node.top = y + padding;
     },
-    
+
     get layoutLeft() { throw new Error( 'JSHint wants this getter' ); },
     set layoutLeft( x ) {
       var padding = this.bounds.left - this.layoutBounds.left;
       this.node.left = x + padding;
     }
   };
-  
+
   LayoutNode.prototype._mutatorKeys = [ 'defaultMethod', 'updateOnBounds' ].concat( Node.prototype._mutatorKeys );
-  
+
   return LayoutNode;
 } );
 

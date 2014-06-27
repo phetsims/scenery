@@ -103,7 +103,7 @@ define( function( require ) {
     if ( display._input && display._input.mouse ) {
       pointerAdded( display._input.mouse );
     }
-    
+
     this.domElement = this.pointerSVGContainer;
   };
   var PointerOverlay = scenery.PointerOverlay;
@@ -112,9 +112,9 @@ define( function( require ) {
     dispose: function() {
       this.display._input.removePointerAddedListener( this.pointerAdded );
     },
-    
+
     update: function() {
-      
+
     }
   };
 

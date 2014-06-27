@@ -5,15 +5,15 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <meta name="apple-mobile-web-app-capable" content="yes">
-  
+
   <title>Hello World - Scenery Example</title>
-  
+
   <!-- jQuery and lodash are dependencies -->
   <script src="../../sherpa/jquery-2.1.0.min.js"></script>
   <script src="../../sherpa/lodash-2.4.1.min.js"></script>
 
   <script src="../build/development/scenery.js"></script>
-  
+
   <style>
     /* so the centering of the text is obvious */
     #hello-world-scene {
@@ -26,14 +26,14 @@
   <script type="text/javascript">
     // Create a scene graph over the block-level element. Everything inside is replaced
     var scene = new scenery.Scene( $( '#hello-world-scene' ) );
-     
+
     // Add our text
     scene.addChild( new scenery.Text( 'Hello World', {
       centerX: 200, // the center of our text's bounds is at x = 200
       centerY: 50, // the center of our text's bounds is at y = 50
       font: '25px sans-serif'
     } ) );
-     
+
     // Paint any changes (in this case, our text).
     scene.updateScene();
   </script>

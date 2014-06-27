@@ -6,7 +6,7 @@
   <meta charset="utf-8"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <title>Child Frame</title>
-  
+
   <style type="text/css">
     /* Let content go to the edges */
     html, body {
@@ -17,7 +17,7 @@
       background-color: #000;
       overflow: hidden;
     }
-    
+
     canvas {
       position: absolute;
       left: 0;
@@ -32,7 +32,7 @@
   <script>
     var usePreventDefault = window.location.hash && ( window.location.hash.indexOf( 'noprevent' ) < 0 );
     var useCSSFixes = window.location.hash && ( window.location.hash.indexOf( 'nochildfix' ) < 0 );
-    
+
     // polyfill requestAnimationFrame
     (function () {
       var lastTime = 0;
@@ -41,7 +41,7 @@
         window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
         window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
       }
-     
+
       if ( !window.requestAnimationFrame ) {
         window.requestAnimationFrame = function(callback) {
           var currTime = new Date().getTime();
@@ -52,20 +52,20 @@
           return id;
         };
       }
-     
+
       if ( !window.cancelAnimationFrame ) {
         window.cancelAnimationFrame = function(id) {
           clearTimeout(id);
         };
       }
     })();
-    
+
     (function(){
       var size = 256;
-      
+
       var canvas = document.getElementById( 'canvas' );
       var context = canvas.getContext( '2d' );
-      
+
       // apply prefixed styles to content where we don't want our events getting intercepted by specific behaviors
       if ( useCSSFixes ) {
         var styles = {
@@ -81,7 +81,7 @@
           } );
         }
       }
-      
+
       // pick the types of events we are listening to based on whether pointer events exist
       var events;
       if ( window.navigator.pointerEnabled ) {
@@ -91,7 +91,7 @@
       } else {
         events = ['mousedown', 'mouseup', 'mousemove', 'mouseover', 'mouseout', 'touchstart', 'touchend', 'touchmove', 'touchcancel']
       }
-      
+
       for ( var i = 0; i < events.length; i++ ) {
         (function(){ // separate closure variables
           var index = i;
@@ -100,21 +100,21 @@
             context.fillStyle = 'red';
             context.font = '20px Arial';
             context.fillText( eventName, 10, ( index + 1 ) * 25 );
-            
+
             if ( usePreventDefault ) {
               context.fillText( 'preventDefault', 10, 256 - 10 );
               domEvent.preventDefault();
             }
           } );
-          
-          
+
+
         })();
       }
-      
+
       var stepCount = 0;
       (function step() {
         window.requestAnimationFrame( step );
-        
+
         if ( stepCount++ % 3 === 0 ) {
           context.fillStyle = 'rgba(0,0,0,0.05)';
           context.fillRect( 0, 0, 256, 256 );

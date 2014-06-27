@@ -14,7 +14,7 @@
 	<link rel="stylesheet" href="../../sherpa/jquery.mobile-1.2.0.min.css" />
 	<script src="../../sherpa/jquery-2.1.0.min.js"></script>
 	<script src="../../sherpa/jquery.mobile-1.2.0.min.js"></script>
-	
+
 	<script type="text/javascript">
 
 	// background
@@ -23,16 +23,16 @@
 			var backgroundCanvas = $('#backgroundCanvas');
 			var context = backgroundCanvas[0].getContext( '2d' );
 			context.fillStyle = '#888888';
-			context.fillRect( 0, 0, 256, 256 + 128 );	
+			context.fillRect( 0, 0, 256, 256 + 128 );
 		})();
 
 		(function(){
 			var midCanvas = $('#midCanvas');
 			var context = midCanvas[0].getContext( '2d' );
 			context.fillStyle = 'rgba(255, 255, 0, 0.5)';
-			context.fillRect( 0, 0, 128, 256 );	
+			context.fillRect( 0, 0, 128, 256 );
 		})();
-		
+
 		(function(){
 			var dataUrl = $('#midCanvas')[0].toDataURL( 'image/png' );
 			var image = document.getElementById( 'dot' );
@@ -40,13 +40,13 @@
 			$( image ).attr( 'height', '128px' );
 			$( image ).attr( 'xlink:href', dataUrl );
 		})();
-		
+
 		window.addEventListener( 'click', function( evt ) {
 			if ( console && console.log ) {
 				console.log( evt.target );
 			}
 		}, true );
-		
+
 		$( document ).on( 'click', function( evt ) {
 			if ( console && console.log ) {
             	console.log( evt.target );
@@ -115,7 +115,7 @@
 			<input type="range" name="slider" id="slider-1" value="25" min="0" max="50" data-mini="true"/>
 		</form>
 	</div>
-	
+
 	<div class="canvas-div" style="width: 256px; height: 123px; background-color: #002244; z-index:3; top: 256px; color: white;">
 		Under Canvas converted to SVG<br/>
 		<form style="text-align: center; padding: 0 10px;">
@@ -133,7 +133,7 @@
 	<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 128 128" preserveAspectRatio="xMidYMid slice" id="midSvg" width="128" height="128" style="top: 128px; z-index:5; pointer-events: none;" pointer-events="none">
 		<polygon points="0,0 0,128 128,128 128,0" style="fill: rgba(255, 255, 0, 0.5);">
 	</svg>
-	
+
 	<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 128 128" preserveAspectRatio="xMidYMid slice" width="128" height="128" style="top: 256px; z-index:6; pointer-events: none;" pointer-events="none" id="generatedSvg">
 		<image xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==" x="0" y="0" width="5px" height="5px" id="dot"/>
 	</svg>

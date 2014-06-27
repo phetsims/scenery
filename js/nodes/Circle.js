@@ -25,11 +25,11 @@ define( function( require ) {
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
   require( 'SCENERY/util/Util' );
-  
+
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMCircleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
   var keepSVGCircleElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
-  
+
   scenery.Circle = function Circle( radius, options ) {
     if ( typeof radius === 'object' ) {
       // allow new Circle( { radius: ... } )
@@ -57,60 +57,60 @@ define( function( require ) {
       }
       return bitmask;
     },
-    
+
     getPathRendererBitmask: function() {
       return scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskBoundsValid | ( Features.borderRadius ? scenery.bitmaskSupportsDOM : 0 );
     },
-    
+
     invalidateCircle: function() {
       assert && assert( this._radius >= 0, 'A circle needs a non-negative radius' );
-      
+
       // sets our 'cache' to null, so we don't always have to recompute our shape
       this._shape = null;
-      
+
       // should invalidate the path and ensure a redraw
       this.invalidateShape();
     },
-    
+
     createCircleShape: function() {
       return Shape.circle( 0, 0, this._radius );
     },
-    
+
     intersectsBoundsSelf: function( bounds ) {
       // TODO: handle intersection with somewhat-infinite bounds!
       var x = Math.abs( bounds.centerX );
       var y = Math.abs( bounds.centerY );
       var halfWidth = bounds.maxX - x;
       var halfHeight = bounds.maxY - y;
-      
+
       // too far to have a possible intersection
       if ( x > halfWidth + this._radius || y > halfHeight + this._radius ) {
         return false;
       }
-      
+
       // guaranteed intersection
       if ( x <= halfWidth || y <= halfHeight ) {
         return true;
       }
-      
+
       // corner case
       x -= halfWidth;
       y -= halfHeight;
       return x * x + y * y <= this._radius * this._radius;
     },
-    
+
     canvasPaintSelf: function( wrapper ) {
       Circle.CircleCanvasDrawable.prototype.paintCanvas( wrapper, this );
     },
-    
+
     createDOMDrawable: function( renderer, instance ) {
       return Circle.CircleDOMDrawable.createFromPool( renderer, instance );
     },
-    
+
     createSVGDrawable: function( renderer, instance ) {
       return Circle.CircleSVGDrawable.createFromPool( renderer, instance );
     },
-    
+
     createCanvasDrawable: function( renderer, instance ) {
       return Circle.CircleCanvasDrawable.createFromPool( renderer, instance );
     },
@@ -125,11 +125,11 @@ define( function( require ) {
 
     setRadius: function( radius ) {
       assert && assert( typeof radius === 'number', 'Circle.radius must be a number' );
-      
+
       if ( this._radius !== radius ) {
         this._radius = radius;
         this.invalidateCircle();
-        
+
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
           this._drawables[i].markDirtyRadius();
@@ -157,7 +157,7 @@ define( function( require ) {
         var outerRadius = this._radius + iRadius;
         result = result && magSq <= outerRadius * outerRadius;
       }
-      
+
       if ( this._fillPickable ) {
         if ( this._strokePickable ) {
           // we were either within the outer radius, or not
@@ -176,7 +176,7 @@ define( function( require ) {
 
     get radius() { return this.getRadius(); },
     set radius( value ) { return this.setRadius( value ); },
-    
+
     setShape: function( shape ) {
       if ( shape !== null ) {
         throw new Error( 'Cannot set the shape of a scenery.Circle to something non-null' );
@@ -185,14 +185,14 @@ define( function( require ) {
         this.invalidateShape();
       }
     },
-    
+
     getShape: function() {
       if ( !this._shape ) {
         this._shape = this.createCircleShape();
       }
       return this._shape;
     },
-    
+
     hasShape: function() {
       return true;
     }
@@ -200,55 +200,55 @@ define( function( require ) {
 
   // not adding mutators for now
   Circle.prototype._mutatorKeys = [ 'radius' ].concat( Path.prototype._mutatorKeys );
-  
+
   /*---------------------------------------------------------------------------*
   * Rendering State mixin (DOM/SVG)
   *----------------------------------------------------------------------------*/
-  
+
   var CircleRenderState = Circle.CircleRenderState = function( drawableType ) {
     var proto = drawableType.prototype;
-    
+
     // initializes, and resets (so we can support pooled states)
     proto.initializeState = function() {
       this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
       this.dirtyRadius = true;
-      
+
       // adds fill/stroke-specific flags and state
       this.initializeFillableState();
       this.initializeStrokableState();
-      
+
       return this; // allow for chaining
     };
-    
+
     // catch-all dirty, if anything that isn't a transform is marked as dirty
     proto.markPaintDirty = function() {
       this.paintDirty = true;
       this.markDirty();
     };
-    
+
     proto.markDirtyRadius = function() {
       this.dirtyRadius = true;
       this.markPaintDirty();
     };
-    
+
     proto.setToCleanState = function() {
       this.paintDirty = false;
       this.dirtyRadius = false;
-      
+
       this.cleanFillableState();
       this.cleanStrokableState();
     };
-    
+
     /* jshint -W064 */
     Fillable.FillableState( drawableType );
     /* jshint -W064 */
     Strokable.StrokableState( drawableType );
   };
-  
+
   /*---------------------------------------------------------------------------*
   * DOM rendering
   *----------------------------------------------------------------------------*/
-  
+
   var CircleDOMDrawable = Circle.CircleDOMDrawable = inherit( DOMSelfDrawable, function CircleDOMDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   }, {
@@ -256,11 +256,11 @@ define( function( require ) {
     initialize: function( renderer, instance ) {
       this.initializeDOMSelfDrawable( renderer, instance );
       this.initializeState();
-      
+
       if ( !this.matrix ) {
         this.matrix = Matrix3.dirtyFromPool();
       }
-      
+
       // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
       // allocation and performance costs)
       if ( !this.fillElement || !this.strokeElement ) {
@@ -278,19 +278,19 @@ define( function( require ) {
         strokeElement.style.pointerEvents = 'none';
         fillElement.appendChild( strokeElement );
       }
-      
+
       this.domElement = this.fillElement;
-      
+
       scenery.Util.prepareForTransform( this.domElement, this.forceAcceleration );
-      
+
       return this; // allow for chaining
     },
-    
+
     updateDOM: function() {
       var node = this.node;
       var fillElement = this.fillElement;
       var strokeElement = this.strokeElement;
-      
+
       if ( this.paintDirty ) {
         if ( this.dirtyRadius ) {
           fillElement.style.width = ( 2 * node._radius ) + 'px';
@@ -300,7 +300,7 @@ define( function( require ) {
         if ( this.dirtyFill ) {
           fillElement.style.backgroundColor = node.getCSSFill();
         }
-        
+
         if ( this.dirtyStroke ) {
           // update stroke presence
           if ( node.hasStroke() ) {
@@ -309,12 +309,12 @@ define( function( require ) {
             strokeElement.style.borderStyle = 'none';
           }
         }
-        
+
         if ( node.hasStroke() ) {
           // since we only execute these if we have a stroke, we need to redo everything if there was no stroke previously.
           // the other option would be to update stroked information when there is no stroke (major performance loss for fill-only Circles)
           var hadNoStrokeBefore = this.lastStroke === null;
-          
+
           if ( hadNoStrokeBefore || this.dirtyLineWidth || this.dirtyRadius ) {
             strokeElement.style.width = ( 2 * node._radius - node.getLineWidth() ) + 'px';
             strokeElement.style.height = ( 2 * node._radius - node.getLineWidth() ) + 'px';
@@ -330,7 +330,7 @@ define( function( require ) {
           }
         }
       }
-      
+
       // shift the element vertically, postmultiplied with the entire transform.
       if ( this.transformDirty || this.dirtyRadius ) {
         this.matrix.set( this.getTransformMatrix() );
@@ -339,15 +339,15 @@ define( function( require ) {
         translation.freeToPool();
         scenery.Util.applyPreparedTransform( this.matrix, this.fillElement, this.forceAcceleration );
       }
-      
+
       // clear all of the dirty flags
       this.setToClean();
     },
-    
+
     onAttach: function( node ) {
-      
+
     },
-    
+
     // release the DOM elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
     onDetach: function( node ) {
       if ( !keepDOMCircleElements ) {
@@ -357,24 +357,24 @@ define( function( require ) {
         this.domElement = null;
       }
     },
-    
+
     setToClean: function() {
       this.setToCleanState();
-      
+
       this.transformDirty = false;
     }
   } );
 
   /* jshint -W064 */
   CircleRenderState( CircleDOMDrawable );
-  
+
   /* jshint -W064 */
   SelfDrawable.Poolable( CircleDOMDrawable );
-  
+
   /*---------------------------------------------------------------------------*
   * SVG Rendering
   *----------------------------------------------------------------------------*/
-  
+
   Circle.CircleSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function CircleSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
     stateType: CircleRenderState,
@@ -387,27 +387,27 @@ define( function( require ) {
       if ( this.dirtyRadius ) {
         circle.setAttribute( 'r', node._radius );
       }
-      
+
       this.updateFillStrokeStyle( circle );
     },
     usesFill: true,
     usesStroke: true,
     keepElements: keepSVGCircleElements
   } );
-  
+
   /*---------------------------------------------------------------------------*
   * Canvas rendering
   *----------------------------------------------------------------------------*/
-  
+
   Circle.CircleCanvasDrawable = CanvasSelfDrawable.createDrawable( {
     type: function CircleCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
     paintCanvas: function paintCanvasCircle( wrapper, node ) {
       var context = wrapper.context;
-      
+
       context.beginPath();
       context.arc( 0, 0, node._radius, 0, Math.PI * 2, false );
       context.closePath();
-      
+
       if ( node._fill ) {
         node.beforeCanvasFill( wrapper ); // defined in Fillable
         context.fill();

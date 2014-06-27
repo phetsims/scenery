@@ -21,12 +21,12 @@ define( function( require ) {
   var Node = require( 'SCENERY/nodes/Node' ); // Image inherits from Node
   require( 'SCENERY/display/Renderer' ); // we need to specify the Renderer in the prototype
   require( 'SCENERY/util/Util' );
-  
+
   var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
-  
+
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMImageElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
   var keepSVGImageElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
@@ -83,7 +83,7 @@ define( function( require ) {
     getImage: function() {
       return this._image;
     },
-    
+
     invalidateSupportedRenderers: function() {
       if ( this._image instanceof HTMLCanvasElement ) {
         this.setRendererBitmask( scenery.bitmaskBoundsValid | scenery.bitmaskSupportsCanvas );
@@ -117,12 +117,12 @@ define( function( require ) {
         this.invalidateSupportedRenderers();
 
         this._image = image;
-        
+
         var stateLen = this._drawables.length;
         for ( var i = 0; i < stateLen; i++ ) {
           this._drawables[i].markDirtyImage();
         }
-        
+
         this.invalidateImage(); // yes, if we aren't loaded yet this will give us 0x0 bounds
       }
       return this;
@@ -148,15 +148,15 @@ define( function( require ) {
     canvasPaintSelf: function( wrapper ) {
       Image.ImageCanvasDrawable.prototype.paintCanvas( wrapper, this );
     },
-    
+
     createDOMDrawable: function( renderer, instance ) {
       return Image.ImageDOMDrawable.createFromPool( renderer, instance );
     },
-    
+
     createSVGDrawable: function( renderer, instance ) {
       return Image.ImageSVGDrawable.createFromPool( renderer, instance );
     },
-    
+
     createCanvasDrawable: function( renderer, instance ) {
       return Image.ImageCanvasDrawable.createFromPool( renderer, instance );
     },
@@ -182,43 +182,43 @@ define( function( require ) {
 
     return element;
   };
-  
+
   /*---------------------------------------------------------------------------*
   * Rendering State mixin (DOM/SVG)
   *----------------------------------------------------------------------------*/
-  
+
   var ImageRenderState = Image.ImageRenderState = function( drawableType ) {
     var proto = drawableType.prototype;
-    
+
     // initializes, and resets (so we can support pooled states)
     proto.initializeState = function() {
       this.paintDirty = true; // flag that is marked if ANY "paint" dirty flag is set (basically everything except for transforms, so we can accelerated the transform-only case)
       this.dirtyImage = true;
-      
+
       return this; // allow for chaining
     };
-    
+
     // catch-all dirty, if anything that isn't a transform is marked as dirty
     proto.markPaintDirty = function() {
       this.paintDirty = true;
       this.markDirty();
     };
-    
+
     proto.markDirtyImage = function() {
       this.dirtyImage = true;
       this.markPaintDirty();
     };
-    
+
     proto.setToCleanState = function() {
       this.paintDirty = false;
       this.dirtyImage = false;
     };
   };
-  
+
   /*---------------------------------------------------------------------------*
   * DOM rendering
   *----------------------------------------------------------------------------*/
-  
+
   var ImageDOMDrawable = Image.ImageDOMDrawable = inherit( DOMSelfDrawable, function ImageDOMDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   }, {
@@ -226,7 +226,7 @@ define( function( require ) {
     initialize: function( renderer, instance ) {
       this.initializeDOMSelfDrawable( renderer, instance );
       this.initializeState();
-      
+
       // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
       // allocation and performance costs)
       if ( !this.domElement ) {
@@ -237,33 +237,33 @@ define( function( require ) {
         this.domElement.style.left = '0';
         this.domElement.style.top = '0';
       }
-      
+
       scenery.Util.prepareForTransform( this.domElement, this.forceAcceleration );
-      
+
       return this; // allow for chaining
     },
-    
+
     updateDOM: function() {
       var node = this.node;
       var img = this.domElement;
-      
+
       if ( this.paintDirty && this.dirtyImage ) {
         // TODO: allow other ways of showing a DOM image?
         img.src = node._image ? node._image.src : '//:0'; // NOTE: for img with no src (but with a string), see http://stackoverflow.com/questions/5775469/whats-the-valid-way-to-include-an-image-with-no-src
       }
-      
+
       if ( this.transformDirty ) {
         scenery.Util.applyPreparedTransform( this.getTransformMatrix(), this.domElement, this.forceAcceleration );
       }
-      
+
       // clear all of the dirty flags
       this.setToClean();
     },
-    
+
     onAttach: function( node ) {
-      
+
     },
-    
+
     // release the DOM elements from the poolable visual state so they aren't kept in memory. May not be done on platforms where we have enough memory to pool these
     onDetach: function( node ) {
       if ( !keepDOMImageElements ) {
@@ -271,24 +271,24 @@ define( function( require ) {
         this.domElement = null;
       }
     },
-    
+
     setToClean: function() {
       this.setToCleanState();
-      
+
       this.transformDirty = false;
     }
   } );
-  
+
   /* jshint -W064 */
   ImageRenderState( ImageDOMDrawable );
-  
+
   /* jshint -W064 */
   SelfDrawable.Poolable( ImageDOMDrawable );
-  
+
   /*---------------------------------------------------------------------------*
   * SVG Rendering
   *----------------------------------------------------------------------------*/
-  
+
   Image.ImageSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function ImageSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
     stateType: ImageRenderState,
@@ -318,11 +318,11 @@ define( function( require ) {
     usesStroke: false,
     keepElements: keepSVGImageElements
   } );
-  
+
   /*---------------------------------------------------------------------------*
   * Canvas rendering
   *----------------------------------------------------------------------------*/
-  
+
   Image.ImageCanvasDrawable = CanvasSelfDrawable.createDrawable( {
     type: function ImageCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
     paintCanvas: function paintCanvasImage( wrapper, node ) {

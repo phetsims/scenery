@@ -5,17 +5,17 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
   <title>Scenery Rendering Renderer Comparison</title>
-  
+
   <!-- jQuery and LoDash are dependencies -->
   <script src="../../sherpa/jquery-2.1.0.min.js"></script>
   <script src="../../sherpa/lodash-2.4.1.min.js"></script>
   <script src="../../sherpa/has.js"></script>
-  
+
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script data-main="../js/config.js" src="../../sherpa/require-2.1.11.js"></script>
   <!-- <script src="../build/development/scenery.js"></script> -->
   <!-- <script src="../build/standalone/scenery.min.js"></script> -->
-  
+
   <style type="text/css">
     .testname {
       clear: both;
@@ -24,7 +24,7 @@
       padding-top: 20px;
       padding-bottom: 5px;
     }
-    
+
     .scene {
       float: left;
       margin-left: 5px;
@@ -34,7 +34,7 @@
       padding: 0 !important; /* in case we add jQuery Mobile back in */
       border: 1px solid black;
     }
-    
+
     .scene.canvas:after {
       content: "Canvas";
       position: absolute;
@@ -42,7 +42,7 @@
       left: 2px;
       opacity: 0.3;
     }
-    
+
     .scene.svg:after {
       content: "SVG";
       position: absolute;
@@ -50,7 +50,7 @@
       left: 2px;
       opacity: 0.3;
     }
-    
+
     .scene.dom:after {
       content: "DOM";
       position: absolute;
@@ -62,11 +62,11 @@
 </head>
 
 <body>
-  
+
   <h1>Scenery Renderer Comparison</h1>
-  
+
   <script>
-  
+
   requirejs( [ 'main', '../../kite/js/main', '../../dot/js/main' ], function( scenery, kite, dot ) {
     var testCases = [
       {
@@ -159,12 +159,12 @@
           fillGradient.addColorStop( 0.5, '#00ff00' );
           fillGradient.addColorStop( 0.6, 'rgba(0,255,0,0.3)' );
           fillGradient.addColorStop( 0.9, '#000000' );
-          
+
           var strokeGradient = new scenery.LinearGradient( 0, -15, 0, 15 );
           strokeGradient.addColorStop( 0, '#ff0000' );
           strokeGradient.addColorStop( 0.5, '#00ff00' );
           strokeGradient.addColorStop( 1, '#0000ff' );
-          
+
           scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
             x: 32,
             y: 32,
@@ -193,18 +193,18 @@
           fillGradient.addColorStop( 0.5, '#00ff00' );
           fillGradient.addColorStop( 0.6, 'rgba(0,255,0,0.3)' );
           fillGradient.addColorStop( 0.9, '#000000' );
-          
+
           var mainGradient = new scenery.RadialGradient( 32, 20, 10, 32, 32, 32 );
           mainGradient.addColorStop( 0, '#8ED6FF' );
           mainGradient.addColorStop( 0.5, '#004CB3' );
           mainGradient.addColorStop( 0.6, '#bbbbbb' );
           mainGradient.addColorStop( 1, '#ffffff' );
-          
+
           var transformedGradient = new scenery.RadialGradient( 0, 0, 0, 0, 0, 64 );
           transformedGradient.addColorStop( 0.3, '#8ED6FF' );
           transformedGradient.addColorStop( 1, '#004CB3' );
           transformedGradient.setTransformMatrix( dot.Matrix3.translation( 32, 32 ).timesMatrix( dot.Matrix3.rotation2( Math.PI / 4 ).timesMatrix( dot.Matrix3.scaling( 1, 0.25 ) ) ) );
-          
+
           scene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 64, 64 ), {
             fill: mainGradient
           } ) );
@@ -276,7 +276,7 @@
           thumbnail.addEventListener( 'load', function() {
             scene.addChild( new scenery.Image( thumbnail ) );
             display.updateDisplay();
-            
+
             // ugly hack placement for correct z-index
             var logo = document.createElement( 'img' );
             logo.addEventListener( 'load', function() {
@@ -324,7 +324,7 @@
             rotation: Math.PI / 12
           } );
           scene.addChild( container );
-          
+
           container.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 44, 44 ), {
             x: 10.5,
             y: 10.5,
@@ -333,7 +333,7 @@
             stroke: '#000000',
             lineWidth: 3
           } ) );
-          
+
           container.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 44, 44 ), {
             x: 30.5,
             y: 10.5,
@@ -356,12 +356,12 @@
             stroke: '#000000',
             lineWidth: 3
           } );
-          
+
           var arrow = new scenery.Path( kite.Shape.regularPolygon( 3, 10 ), {
             fill: 'rgba(0,255,0,1)',
             stroke: '#000000'
           } );
-          
+
           var combined = new scenery.Node();
           combined.addChild( square );
           var leftArrow = new scenery.Node( { x: 15, y: 25 } );
@@ -370,7 +370,7 @@
           var rightArrow = new scenery.Node( { x: 35, y: 25 } );
           rightArrow.addChild( arrow );
           combined.addChild( rightArrow );
-          
+
           var a = new scenery.Node( { x: 20, y: 20 } );
           a.addChild( combined );
           var b = new scenery.Node( { x: 120, y: 30, rotation: Math.PI / 4 } );
@@ -437,20 +437,20 @@
             stroke: '#000000',
             lineWidth: 3
           } ) );
-          
+
           x += 64;
           scene.addChild( new scenery.Path( kite.Shape.arc( x, 25, 20, Math.PI / 4, Math.PI * 3 / 2, false ), {
             fill: 'rgba(255,0,0,0.5)',
             stroke: '#aa0000',
             lineWidth: 3
           } ) );
-          
+
           scene.addChild( new scenery.Path( kite.Shape.arc( x, 25, 20, Math.PI / 4, Math.PI * 3 / 2, true ), {
             fill: 'rgba(0,0,255,0.5)',
             stroke: '#0000aa',
             lineWidth: 3
           } ) );
-          
+
           x += 64;
           scene.addChild( new scenery.Path( new kite.Shape().moveTo( 0, 0 )
                                                             .arc( 0, 0, 20, 0, Math.PI / 3, false )
@@ -475,20 +475,20 @@
             stroke: '#000000',
             lineWidth: 3
           } ) );
-          
+
           x += 64;
           scene.addChild( new scenery.Path( new kite.Shape().ellipticalArc( x, 25, 20, 10, Math.PI / 6, Math.PI / 4, Math.PI * 3 / 2, false ), {
             fill: 'rgba(255,0,0,0.5)',
             stroke: '#aa0000',
             lineWidth: 3
           } ) );
-          
+
           scene.addChild( new scenery.Path( new kite.Shape().ellipticalArc( x, 25, 20, 10, Math.PI / 6, Math.PI / 4, Math.PI * 3 / 2, true ), {
             fill: 'rgba(0,0,255,0.5)',
             stroke: '#0000aa',
             lineWidth: 3
           } ) );
-          
+
           x += 64;
           scene.addChild( new scenery.Path( new kite.Shape().moveTo( 0, 0 )
                                                             .ellipticalArc( 0, 0, 20, 10, 0, 0, Math.PI / 3, false )
@@ -513,10 +513,10 @@
             x: 20,
             y: 20
           } ) );
-          
+
           var form = document.createElement( 'form' );
           form.innerHTML = '<label>Type in me:</label><input type="text">';
-          
+
           scene.addChild( new scenery.DOM( form, {
             x: 50,
             y: 50,
@@ -601,29 +601,29 @@
         renderers: [ 'canvas', 'svg' ]
       }
     ];
-    
+
     var renderers = [
       'canvas',
       'svg',
       'dom'
       // TODO: add WebGL, and possibly DOM for things like text?
     ];
-    
+
     _.each( testCases, function( testCase ) {
       var $testTitle = $( document.createElement( 'h2' ) );
       $testTitle.text( testCase.name );
       $testTitle.addClass( 'testname' );
       $( document.body ).append( $testTitle );
-      
+
       _.each( renderers, function( renderer ) {
         // don't render unsupported renderers for specific test cases
         if ( !_.contains( testCase.renderers, renderer ) ) {
           return;
         }
-        
+
         var width = testCase.width || 320;
         var height = testCase.height || 240;
-        
+
         var scene = new scenery.Node( {
           renderer: renderer
         } );
@@ -631,7 +631,7 @@
           width: width,
           height: height
         } );
-        
+
         var layerType = renderer.defaultLayerType;
         var $container = $( document.createElement( 'div' ) );
         $container.addClass( 'scene' );
@@ -640,7 +640,7 @@
         $container.height( height );
         $container[0].appendChild( display.domElement );
         $( document.body ).append( $container );
-        
+
         // try {
         testCase.draw( scene, display );
         // } catch( e ) {

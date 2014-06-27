@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
 
   <title>Event Delegation Test</title>
-  
+
   <link rel="stylesheet" href="../../sherpa/bootstrap-2.2.2.css">
 
   <script src="../../sherpa/jquery-2.1.0.min.js"></script>
@@ -22,47 +22,47 @@
       width: 320px;
       height: 240px;
     }
-    
+
     .container {
       /* including the border */
       width: 322px;
       height: 242px;
-      
+
       margin-top: 10px;
     }
-    
+
     .containingBlock {
       position: relative; /* so the positioned children are handled, but the containingBlock is still in the normal flow */
       background-color: #ffffff;
       border: 1px solid black;
     }
-    
+
     .fartherBelow {
       z-index: 0;
       position: absolute;
     }
-    
+
     .below {
       z-index: 1;
       position: absolute;
     }
-    
+
     .above {
       z-index: 2;
       position: absolute;
       background-color: rgba(255,0,0,0.2); /* slight red tint */
     }
-    
+
     .notDisplayed {
       display: none;
     }
-    
+
     #hoverTest {
       margin: 10px;
       border: 10px solid gray;
       padding: 10px;
     }
-    
+
     #hoverTest:hover {
       background-color: #000000;
       color: #ffffff;
@@ -106,39 +106,39 @@
       <div class="above fullWidth">
       </div>
     </div>
-    
+
     <p style="margin-top: 10px;">
       <button class="btn btn-primary" type="button" id="toggleOverlay">Toggle Overlay</button>
     </p>
   </div>
-  
+
   <script>
     var aboveVisible = true;
-    
+
     function write( msg ) {
       if ( console && console.log ) {
         console.log( msg );
       }
     }
-  
+
     $( window ).ready( function() {
       $( '.dropdown-toggle' ).dropdown();
-      
+
       var container = document.getElementById( 'containingBlock' );
-      
+
       var elements = _.map( [ 'thatMenu', 'textBox', 'tryMe', 'hoverTest' ], function( id ) { return document.getElementById( id ); } );
-      
+
       function elementUnderEvent( event ) {
         return _.find( elements, function( element ) {
           var bounds = element.getBoundingClientRect();
           return event.clientX >= bounds.left && event.clientX <= bounds.right && event.clientY >= bounds.top && event.clientY <= bounds.bottom;
         } );
       }
-      
+
       function dispatchToElementUnderEvent( event ) {
         if ( event.eventPhase === Event.NONE || !event.isTrusted ) {
           var element = elementUnderEvent( event );
-          
+
           if ( element ) {
             // dispatch the original event after it has gone through
             element.dispatchEvent( event );
@@ -150,7 +150,7 @@
           write( 'Event should have stopped by now!' );
         }
       }
-      
+
       function forwardMouseEventWithDelay( type ) {
         container.addEventListener( type, function( event ) {
           event.stopPropagation();
@@ -160,48 +160,48 @@
           }, 4 ); // 4 is the minimum number of ms that will occur
         }, true ); // capture the event
       }
-      
+
       function forwardSynthesizedMouseEvent( type ) {
         container.addEventListener( type, function( event ) {
           if ( !event.phetSynthesized && aboveVisible ) {
             event.stopPropagation();
             event.preventDefault();
-            
+
             var newEvent = document.createEvent( 'MouseEvent' ); // not 'MouseEvents' according to DOM Level 3 spec
-            
+
             // technically deprecated, but DOM4 event constructors not out yet. people on #whatwg said to use it
             newEvent.initMouseEvent( type, event.bubbles, event.cancelable, window, event.detail,
               event.screenX, event.screenY, event.clientX, event.clientY,
               event.ctrlKey, event.altKey, event.shiftKey, event.metaKey, event.button, event.relatedTarget );
-            
+
             newEvent.phetSynthesized = true;
-            
+
             dispatchToElementUnderEvent( newEvent );
           }
         } );
       }
-      
+
       function forwardSynthesizedTouchEvent( type ) {
         container.addEventListener( type, function( event ) {
           if ( !event.phetSynthesized && aboveVisible ) {
             event.stopPropagation();
             event.preventDefault();
-            
+
             var newEvent = document.createEvent( 'TouchEvent' ); // not 'MouseEvents' according to DOM Level 3 spec
-            
+
             // see http://developer.apple.com/library/safari/#documentation/UserExperience/Reference/TouchEventClassReference/TouchEvent/TouchEvent.html
             newEvent.initTouchEvent( type, event.bubbles, event.cancelable, window, event.detail,
               event.screenX, event.screenY, event.clientX, event.clientY,
               event.ctrlKey, event.altKey, event.shiftKey, event.metaKey,
               event.touches, event.targetTouches, event.changedTouches, event.scale, event.rotation );
-            
+
             newEvent.phetSynthesized = true;
-            
+
             dispatchToElementUnderEvent( newEvent );
           }
         } );
       }
-      
+
       forwardSynthesizedMouseEvent( 'mousedown' );
       forwardSynthesizedMouseEvent( 'mouseup' );
       forwardSynthesizedMouseEvent( 'click' );
@@ -211,30 +211,30 @@
       forwardSynthesizedMouseEvent( 'mouseout' );
       forwardSynthesizedMouseEvent( 'mouseenter' );
       forwardSynthesizedMouseEvent( 'mouseleave' );
-      
+
       forwardSynthesizedTouchEvent( 'touchstart' );
       forwardSynthesizedTouchEvent( 'touchend' );
       forwardSynthesizedTouchEvent( 'touchmove' );
       forwardSynthesizedTouchEvent( 'touchcancel' );
     } );
-    
+
     $( '#toggleOverlay' ).on( 'click', function( event ) {
       $( '.above' ).toggleClass( 'notDisplayed' );
       aboveVisible = !aboveVisible;
     } );
-    
+
     $( '#tryMe' ).on( 'click', function( event ) {
       $( '#targetSpan' ).text( Math.random().toFixed( 10 ) );
     } );
-    
+
     $( '#hoverTest' ).on( 'mousemove', function( event ) {
       $( '#mouseReport' ).text( 'mousemove on :hover: ' + event.clientX + ',' + event.clientY );
     } );
-    
+
     $( '#clickable' ).on( 'click', function( event ) {
       $( '#clickTest' ).text( 'Clicked' );
     } );
   </script>
-  
+
 </body>
 </html>

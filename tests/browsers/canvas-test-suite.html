@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  
+
   <title>Canvas Test Suite</title>
-  
+
   <style>
     canvas {
       border: 1px solid black;
@@ -16,19 +16,19 @@
 
 <canvas id="canvas" width="640" height="480"></canvas>
 
-<script type="text/javascript">  
+<script type="text/javascript">
 
   var enableDashes = false;
-  
+
   var context = document.getElementById( 'canvas' ).getContext( '2d' );
-  
+
   context.fillRect( 0, 0, 640, 480 );
-  
+
   function demoPath( drawPath ) {
     context.save();
-    
+
     context.globalCompositeOperation = 'lighter';
-    
+
     if ( enableDashes ) {
       // var dash = [ 2, 2 ];
       // var dash = [ 1, 20 ];
@@ -40,67 +40,67 @@
         context.mozDash = dash;
       }
     }
-    
+
     context.beginPath();
     context.lineWidth = 30;
     drawPath();
-    
+
     context.lineCap = 'square';
     context.strokeStyle = 'rgba(0,0,255,1)';
     context.stroke();
-    
+
     context.lineCap = 'round';
     context.strokeStyle = 'rgba(0,255,0,1)';
     context.stroke();
-    
+
     context.lineCap = 'butt';
     context.strokeStyle = 'rgba(255,0,0,1)';
     context.stroke();
-    
+
     context.globalCompositeOperation = 'source-over';
-    
+
     context.fillStyle = 'rgba(127,127,127,0.5)';
     context.fill();
-    
+
     context.lineWidth = 1;
     context.strokeStyle = '#ff0000';
     context.stroke();
-    
+
     context.restore();
   }
-  
+
   function runPaths( context ) {
     var i;
-    
+
     context.save();
     context.translate( 350, 300 );
     context.rotate( Math.PI / 4 );
     context.transform( 1, 0.5, 0, 1, 0, 0 );
     context.clearRect( 0, 0, 50, 50 );
     context.restore();
-    
+
     demoPath( function() {
       context.moveTo( -120, -120 );
       context.quadraticCurveTo( 40, 40, 40, 20 );
     } );
-    
+
     demoPath( function() {
       context.moveTo( -20, -120 );
       context.quadraticCurveTo( 140, 40, 120, 20 );
     } );
-    
+
     demoPath( function() {
       context.moveTo( 40, 80 );
       context.bezierCurveTo( 42, 80, 42, 82, 44, 82 );
     } );
-    
+
     demoPath( function() {
       var halfAngle = 7 * Math.PI / 180;
       context.moveTo( 180, 20 );
       context.lineTo( 180 + Math.cos( halfAngle ), 20 + Math.sin( halfAngle ) );
       context.lineTo( 180, 20 + 2 * Math.sin( halfAngle ) );
     } );
-    
+
     demoPath( function() {
       context.save();
       context.translate( 75, 75 );
@@ -109,7 +109,7 @@
       context.bezierCurveTo( 773.0, 708.2, 102.6, 708.2, 773.0,37.8 );
       context.restore();
     } );
-    
+
     demoPath( function() {
       context.save();
       context.translate( 40, 120 );
@@ -118,7 +118,7 @@
       context.bezierCurveTo( 1, 0, 0, 1, 1, 1 );
       context.restore();
     } );
-    
+
     demoPath( function() {
       context.save();
       context.translate( 330, 20 );
@@ -127,7 +127,7 @@
       context.bezierCurveTo( 100, 0, 101, 0, 101, 1 );
       context.restore();
     } );
-    
+
     demoPath( function() {
       context.save();
       context.translate( 280, 60 );
@@ -137,7 +137,7 @@
       context.bezierCurveTo( smallNumber, smallNumber, smallNumber, smallNumber, smallNumber, smallNumber );
       context.restore();
     } );
-    
+
     demoPath( function() {
       context.save();
       context.translate( 330, 60 );
@@ -146,7 +146,7 @@
       context.bezierCurveTo( 10, 0, 11, 0, 11, 1 );
       context.restore();
     } );
-    
+
     demoPath( function() {
       context.save();
       context.translate( 380, 60 );
@@ -155,7 +155,7 @@
       context.bezierCurveTo( 1, 0, 1, 1, 0, 0.5 );
       context.restore();
     } );
-    
+
     demoPath( function() {
       context.save();
       context.translate( 430, 60 );
@@ -164,7 +164,7 @@
       context.bezierCurveTo( -1, 0, 1, 0, 0, 0 );
       context.restore();
     } );
-    
+
     demoPath( function() {
       context.save();
       context.translate( 480, 60 );
@@ -173,7 +173,7 @@
       context.bezierCurveTo( -1, 0, 1, 0, 0, 0.1 );
       context.restore();
     } );
-    
+
     demoPath( function() {
       context.save();
       context.translate( 530, 60 );
@@ -182,7 +182,7 @@
       context.bezierCurveTo( -1, 0, 1, 0, 0.1, 0 );
       context.restore();
     } );
-    
+
     demoPath( function() {
       context.save();
       context.translate( 580, 60 );
@@ -191,7 +191,7 @@
       context.bezierCurveTo( 1, 1, 1, 1, 0, 0 );
       context.restore();
     } );
-    
+
     demoPath( function() {
       context.save();
       context.translate( 630, 60 );
@@ -203,7 +203,7 @@
       context.lineTo( 0, 15 );
       context.restore();
     } );
-    
+
     demoPath( function() {
       context.save();
       context.miterLimit = 1000000;
@@ -215,8 +215,8 @@
       context.lineTo( Number.MAX_VALUE, 5 );
       context.restore();
     } );
-    
-    
+
+
     context.save();
     context.lineJoin = 'round';
     context.strokeStyle = 'rgba(255,255,255,0.5)';
@@ -228,7 +228,7 @@
     context.lineWidth = 1 / 500;
     context.strokeText( 'X', 0, 0 );
     context.restore();
-    
+
     context.save();
     context.strokeStyle = '#ffffff';
     context.fillStyle = '#ff0000';
@@ -237,7 +237,7 @@
     context.font = '1px Arial';
     context.fillText( 'X', 0, 0 );
     context.restore();
-    
+
     function scaledMessage( msg, font, fill, x, y, sx, sy ) {
       context.save();
       context.font = font;
@@ -247,14 +247,14 @@
       context.fillText( msg, 0, 0 );
       context.restore();
     }
-    
+
     scaledMessage( 'This is a test message', '1px Arial', '#ffffff', 0, 170, 25, 10 );
     scaledMessage( 'Some are hard to read', '10px Arial', '#ff0000', 0, 180, 5, 0.1 );
     scaledMessage( 'Some are hard to read', '10px Arial', '#00ff00', 0, 185, 5, 0.01 );
     for ( i = 0; i < 255; i++ ) {
       scaledMessage( 'Some are hard to read', '10px Arial', '#0000ff', 0, 190, 5, 0.05 );
     }
-    
+
     for ( i = 0; i < 20; i++ ) {
       context.save();
       context.font = '20px Arial';
@@ -266,7 +266,7 @@
       context.fillText( 'G', 0, 0 );
       context.restore();
     }
-    
+
     function zig( x, y, count, height, space, offset ) {
       context.save();
       context.beginPath();
@@ -291,7 +291,7 @@
     zig( 110, 220, 10, 100, 2.5, 10 );
     zig( 135, 220, 10, 100, 2.5, 10 );
     zig( 160, 220, 20, 100, Math.PI, 10 );
-    
+
     function zag( x, y, count, height, space, offset ) {
       context.save();
       context.beginPath();
@@ -310,7 +310,7 @@
     zag( 50, 220, 10, 100, 1, 10 );
     zag( 60, 220, 10, 100, 1, 5 );
     zag( 70, 220, 10, 100, 2, 5 );
-    
+
     context.strokeStyle = 'rgba(255,255,255,0.005)';
     for ( i = 0; i < 1000; i++ ) {
       context.beginPath();
@@ -320,11 +320,11 @@
       context.stroke();
     }
   }
-  
+
   runPaths( context );
-  
+
   document.write( '<img src="' + canvas.toDataURL( 'image/png' ) + '"/>' );
-  
+
 </script>
 
 </body>

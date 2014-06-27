@@ -14,63 +14,63 @@
 
 define( function( require ) {
   'use strict';
-  
+
   var scenery = require( 'SCENERY/scenery' );
-  
+
   /*
    * isBefore: whether this points to before the node (and its children) have been rendered, or after
    */
   scenery.TrailPointer = function TrailPointer( trail, isBefore ) {
     assert && assert( trail instanceof scenery.Trail, 'trail is not a trail' );
     this.trail = trail;
-    
+
     this.setBefore( isBefore );
-    
+
     phetAllocation && phetAllocation( 'TrailPointer' );
   };
   var TrailPointer = scenery.TrailPointer;
-  
+
   TrailPointer.prototype = {
     constructor: TrailPointer,
-    
+
     copy: function() {
       return new TrailPointer( this.trail.copy(), this.isBefore );
     },
-    
+
     setBefore: function( isBefore ) {
       this.isBefore = isBefore;
       this.isAfter = !isBefore;
     },
-    
+
     // return the equivalent pointer that swaps before and after (may return null if it doesn't exist)
     getRenderSwappedPointer: function() {
       var newTrail = this.isBefore ? this.trail.previous() : this.trail.next();
-      
+
       if ( newTrail === null ) {
         return null;
       } else {
         return new TrailPointer( newTrail, !this.isBefore );
       }
     },
-    
+
     getRenderBeforePointer: function() {
       return this.isBefore ? this : this.getRenderSwappedPointer();
     },
-    
+
     getRenderAfterPointer: function() {
       return this.isAfter ? this : this.getRenderSwappedPointer();
     },
-    
+
     /*
      * In the render order, will return 0 if the pointers are equivalent, -1 if this pointer is before the
      * other pointer, and 1 if this pointer is after the other pointer.
      */
     compareRender: function( other ) {
       assert && assert( other !== null );
-      
+
       var a = this.getRenderBeforePointer();
       var b = other.getRenderBeforePointer();
-      
+
       if ( a !== null && b !== null ) {
         // normal (non-degenerate) case
         return a.trail.compare( b.trail );
@@ -83,7 +83,7 @@ define( function( require ) {
         }
       }
     },
-    
+
     /*
      * Like compareRender, but for the nested (depth-first) order
      *
@@ -91,9 +91,9 @@ define( function( require ) {
      */
     compareNested: function( other ) {
       assert && assert( other );
-      
+
       var comparison = this.trail.compare( other.trail );
-      
+
       if ( comparison === 0 ) {
         // if trails are equal, just compare before/after
         if ( this.isBefore === other.isBefore ) {
@@ -113,20 +113,20 @@ define( function( require ) {
         }
       }
     },
-    
+
     equalsRender: function( other ) {
       return this.compareRender( other ) === 0;
     },
-    
+
     equalsNested: function( other ) {
       return this.compareNested( other ) === 0;
     },
-    
+
     // will return false if this pointer has gone off of the beginning or end of the tree (will be marked with isAfter or isBefore though)
     hasTrail: function() {
       return !!this.trail;
     },
-    
+
     // TODO: refactor with "Side"-like handling
     // moves this pointer forwards one step in the nested order
     nestedForwards: function() {
@@ -147,7 +147,7 @@ define( function( require ) {
         } else {
           var index = this.trail.indices[this.trail.indices.length - 1];
           this.trail.removeDescendant();
-          
+
           if ( this.trail.lastNode()._children.length > index + 1 ) {
             // more siblings, switch to the beginning of the next one
             this.trail.addDescendant( this.trail.lastNode()._children[index+1], index + 1 );
@@ -159,7 +159,7 @@ define( function( require ) {
       }
       return this;
     },
-    
+
     // moves this pointer backwards one step in the nested order
     nestedBackwards: function() {
       if ( this.isBefore ) {
@@ -171,7 +171,7 @@ define( function( require ) {
         } else {
           var index = this.trail.indices[this.trail.indices.length - 1];
           this.trail.removeDescendant();
-          
+
           if ( index - 1 >= 0 ) {
             // more siblings, switch to the beginning of the previous one and switch to isAfter
             this.trail.addDescendant( this.trail.lastNode()._children[index-1], index - 1 );
@@ -192,30 +192,30 @@ define( function( require ) {
       }
       return this;
     },
-    
+
     // treats the pointer as render-ordered (includes the start pointer 'before' if applicable, excludes the end pointer 'before' if applicable
     eachNodeBetween: function( other, callback ) {
       this.eachTrailBetween( other, function( trail ) {
         return callback( trail.lastNode() );
       } );
     },
-    
+
     // treats the pointer as render-ordered (includes the start pointer 'before' if applicable, excludes the end pointer 'before' if applicable
     eachTrailBetween: function( other, callback ) {
       // this should trigger on all pointers that have the 'before' flag, except a pointer equal to 'other'.
-      
+
       // since we exclude endpoints in the depthFirstUntil call, we need to fire this off first
       if ( this.isBefore ) {
         callback( this.trail );
       }
-      
+
       this.depthFirstUntil( other, function( pointer ) {
         if ( pointer.isBefore ) {
           return callback( pointer.trail );
         }
       }, true ); // exclude the endpoints so we can ignore the ending 'before' case
     },
-    
+
     /*
      * Recursively (depth-first) iterates over all pointers between this pointer and 'other', calling
      * callback( pointer ) for each pointer. If excludeEndpoints is truthy, the callback will not be
@@ -228,20 +228,20 @@ define( function( require ) {
       // make sure this pointer is before the other, but allow start === end if we are not excluding endpoints
       assert && assert( this.compareNested( other ) <= ( excludeEndpoints ? -1 : 0 ), 'TrailPointer.depthFirstUntil pointers out of order, possibly in both meanings of the phrase!' );
       assert && assert( this.trail.rootNode() === other.trail.rootNode(), 'TrailPointer.depthFirstUntil takes pointers with the same root' );
-      
+
       // sanity check TODO: remove later
       this.trail.reindex();
       other.trail.reindex();
-      
+
       var pointer = this.copy();
       pointer.trail.setMutable(); // this trail will be modified in the iteration, so references to it may be modified
-      
+
       var first = true;
-      
+
       while ( !pointer.equalsNested( other ) ) {
         assert && assert( pointer.compareNested( other ) !== 1, 'skipped in depthFirstUntil' );
         var skipSubtree = false;
-        
+
         if ( first ) {
           // start point
           if ( !excludeEndpoints ) {
@@ -252,11 +252,11 @@ define( function( require ) {
           // between point
           skipSubtree = callback( pointer );
         }
-        
+
         if ( skipSubtree && pointer.isBefore ) {
           // to skip the subtree, we just change to isAfter
           pointer.setBefore( false );
-          
+
           // if we skip a subtree, make sure we don't run past the ending pointer
           if ( pointer.compareNested( other ) === 1 ) {
             break;
@@ -265,22 +265,22 @@ define( function( require ) {
           pointer.nestedForwards();
         }
       }
-      
+
       // end point
       if ( !excludeEndpoints ) {
         callback( pointer );
       }
     },
-    
+
     toString: function() {
       return '[' + ( this.isBefore ? 'before' : 'after' ) + ' ' + this.trail.toString().slice( 1 );
     }
   };
-  
+
   // same as new TrailPointer( trailA, isBeforeA ).compareNested( new TrailPointer( trailB, isBeforeB ) )
   TrailPointer.compareNested = function( trailA, isBeforeA, trailB, isBeforeB ) {
     var comparison = trailA.compare( trailB );
-    
+
     if ( comparison === 0 ) {
       // if trails are equal, just compare before/after
       if ( isBeforeA === isBeforeB ) {
@@ -300,7 +300,7 @@ define( function( require ) {
       }
     }
   };
-  
+
   return TrailPointer;
 } );
 

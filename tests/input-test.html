@@ -7,12 +7,12 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
 
   <title>Input Test - Scenery</title>
-  
+
   <!-- jQuery and LoDash are dependencies -->
   <script src="../../sherpa/jquery-2.1.0.min.js"></script>
   <script src="../../sherpa/lodash-2.4.1.min.js"></script>
   <script src="../build/development/scenery.js"></script>
-  
+
   <style type="text/css">
     /* Let content go to the edges */
     html, body {
@@ -21,7 +21,7 @@
       margin: 0;
       padding: 0;
     }
-    
+
     #output {
       position: absolute;
       left: 0;
@@ -34,23 +34,23 @@
 </head>
 
 <body>
-  
+
   <div id="output"></div>
-  
+
   <script type="text/javascript">
-    
+
     var $div = $( '#output' );
-    
+
     var div = $div[0];
-    
+
     div.innerHTML = '';
-    
+
     function log( str ) {
       div.innerHTML += str + ' ' + Date.now() + '<br>';
     }
-    
+
     var count = 0;
-    
+
     // maps the current MS pointer types onto the pointer spec
     function msPointerType( evt ) {
       if ( evt.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_TOUCH ) {
@@ -63,13 +63,13 @@
         return evt.pointerType; // hope for the best
       }
     }
-    
+
     function nonkeyboardEvent( name, event ) {
       log( name );
       event.preventDefault();
       count++;
     }
-    
+
     function pointerEvent( name, event ) {
       var type = event.pointerType;
       if ( !(typeof event.pointerType === 'string') ) {
@@ -77,13 +77,13 @@
       }
       nonkeyboardEvent( name + ' ' + type, event );
     }
-    
+
     function keyboardEvent( name, event ) {
       log( name );
       // event.preventDefault();
       count++;
     }
-    
+
     var implementsPointerEvents = window.navigator && window.navigator.pointerEnabled; // W3C spec for pointer events
     var implementsMSPointerEvents = window.navigator && window.navigator.msPointerEnabled; // MS spec for pointer event
     if ( implementsPointerEvents ) {
@@ -111,24 +111,24 @@
       window.addEventListener( 'mouseover', nonkeyboardEvent.bind( this, 'mouseover' ) );
       window.addEventListener( 'mouseout', nonkeyboardEvent.bind( this, 'mouseout' ) );
       // window.addEventListener( 'mousecancel', nonkeyboardEvent.bind( this, 'mousecancel' ) );
-      
+
       window.addEventListener( 'touchstart', nonkeyboardEvent.bind( this, 'touchstart' ) );
       window.addEventListener( 'touchend', nonkeyboardEvent.bind( this, 'touchend' ) );
       window.addEventListener( 'touchmove', nonkeyboardEvent.bind( this, 'touchmove' ) );
       window.addEventListener( 'touchcancel', nonkeyboardEvent.bind( this, 'touchcancel' ) );
     }
-    
+
     window.addEventListener( 'keyup', keyboardEvent.bind( this, 'keyup' ) );
     window.addEventListener( 'keydown', keyboardEvent.bind( this, 'keydown' ) );
     window.addEventListener( 'keypress', keyboardEvent.bind( this, 'keypress' ) );
-    
+
     scenery.Util.polyfillRequestAnimationFrame();
-    
+
     // var scene = new scenery.Scene( $div );
-    
+
     // scene.resizeOnWindowResize();
     // scene.initializeWindowEvents( { batchDOMEvents: true } );
-    
+
     (function step() {
       window.requestAnimationFrame( step, div );
       if ( count > 0 ) {
@@ -136,15 +136,15 @@
         count = 0;
       }
     })();
-    
+
     // var container = document.createElement( 'div' );
     // scene.addChild( new scenery.DOM( container ) );
-    
+
     // function logEvent( name, event ) {
     //   console.log( 'boo' );
     //   container.innerHTML += name + '<br>';
     // }
-    
+
     // scene.addInputListener( {
     //   up: logEvent.bind( this, 'up' ),
     //   down: logEvent.bind( this, 'down' ),
@@ -152,8 +152,8 @@
     //   cancel: logEvent.bind( this, 'cancel' )
     // } );
 
-    
-    
+
+
   </script>
 
 </body>

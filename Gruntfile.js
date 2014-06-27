@@ -8,18 +8,18 @@ var chipperRewrite = require( '../chipper/ast/chipperRewrite.js' );
 /*global module:false*/
 module.exports = function( grunt ) {
   'use strict';
-  
+
   // print this immediately, so it is clear what project grunt is building
   grunt.log.writeln( 'Scenery' );
-  
+
   var onBuildRead = function( name, path, contents ) {
     return chipperRewrite.chipperRewrite( contents, esprima, escodegen );
   };
-  
+
   // Project configuration.
   grunt.initConfig( {
     pkg: '<json:package.json>',
-    
+
     requirejs: {
       // unminified, with has.js
       development: {
@@ -35,7 +35,7 @@ module.exports = function( grunt ) {
           }
         }
       },
-      
+
       // with has.js
       standalone: {
         options: {
@@ -66,7 +66,7 @@ module.exports = function( grunt ) {
           onBuildRead: onBuildRead
         }
       },
-      
+
       // without has.js
       production: {
         options: {
@@ -98,7 +98,7 @@ module.exports = function( grunt ) {
         }
       }
     },
-    
+
     jshint: {
       all: [
         'Gruntfile.js', 'js/**/*.js', '../kite/js/**/*.js', '!../kite/js/parser/*.js', '../dot/js/**/*.js', '../phet-core/js/**/*.js', '../assert/js/**/*.js'
@@ -110,45 +110,45 @@ module.exports = function( grunt ) {
       options: require( '../chipper/grunt/jshint-options' )
     }
   } );
-  
+
   // default task ('grunt')
   grunt.registerTask( 'default', [ 'jshint:all', 'development', 'standalone', 'production' ] );
-  
+
   // linter on scenery subset only ('grunt lint')
   grunt.registerTask( 'lint', [ 'jshint:scenery' ] );
-  
+
   // compilation targets. invoke only one like ('grunt development')
   grunt.registerTask( 'production', [ 'requirejs:production' ] );
   grunt.registerTask( 'standalone', [ 'requirejs:standalone' ] );
   grunt.registerTask( 'development', [ 'requirejs:development' ] );
-  
+
   grunt.registerTask( 'snapshot', [ 'standalone', '_createSnapshot' ] );
-  
+
   // creates a performance snapshot for profiling changes
   grunt.registerTask( '_createSnapshot', 'Description', function( arg ) {
     var done = this.async();
-    
+
     exec( 'git log -1 --date=short', function( error, stdout, stderr ) {
       if ( error ) { throw error; }
-      
+
       var sha = /commit (.*)$/m.exec( stdout )[1];
       var date = /Date: *(\d+)-(\d+)-(\d+)$/m.exec( stdout );
       var year = date[1].slice( 2, 4 );
       var month = date[2];
       var day = date[3];
-      
+
       var suffix = '-' + year + month + day + '-' + sha.slice( 0, 10 ) + '.js';
-      
+
       grunt.file.copy( 'build/standalone/scenery.min.js', 'snapshots/scenery-min' + suffix );
       grunt.file.copy( 'tests/benchmarks/js/perf-current.js', 'snapshots/perf' + suffix );
-      
+
       grunt.log.writeln( 'Copied standalone js to snapshots/scenery-min' + suffix );
       grunt.log.writeln( 'Copied perf js to       snapshots/perf' + suffix );
-      
+
       done();
     } );
   } );
-  
+
   // dependencies
   grunt.loadNpmTasks( 'grunt-requirejs' );
   grunt.loadNpmTasks( 'grunt-contrib-jshint' );

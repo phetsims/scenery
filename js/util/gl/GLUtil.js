@@ -8,9 +8,9 @@
 
 define( function( require ) {
   'use strict';
-  
+
   var scenery = require( 'SCENERY/scenery' );
-  
+
   var GLUtil = scenery.GLUtil = {
     getWebGLContext: function( canvas ) {
       var gl = null;
@@ -25,10 +25,10 @@ define( function( require ) {
           break;
         }
       }
-      
+
       return gl;
     }
   };
-  
+
   return GLUtil;
 } );

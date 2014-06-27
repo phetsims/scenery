@@ -4,60 +4,60 @@ phet.tests = phet.tests || {};
 
 (function(){
   "use strict";
-  
+
   var backgroundSize = 300;
   var count = 500;
-  
+
   phet.tests.sceneLayeringTests = function( main, useLayers ) {
     var scene = new scenery.Scene( main );
-    
+
     function randomizeTranslation( node ) {
       node.setTranslation( ( Math.random() - 0.5 ) * backgroundSize, ( Math.random() - 0.5 ) * backgroundSize );
     }
-    
+
     function buildShapes( color ) {
       var background = new scenery.Node();
       if ( useLayers && color == 'rgba(0,255,0,0.7)' ) {
         background.layerSplit = true;
       }
-      
+
       var radius = 10;
       var shape = kite.Shape.regularPolygon( 6, radius );
-      
+
       for ( var i = 0; i < count; i++ ) {
         var node = new scenery.Path( shape, { // regular polygon
           fill: color,
           stroke: '#000000'
         } );
-        
+
         randomizeTranslation( node );
-        
+
         background.addChild( node );
       }
       return background;
     }
-    
+
     var reds = buildShapes( 'rgba(255,0,0,0.7)' );
     var greens = buildShapes( 'rgba(0,255,0,0.7)' );
     var blues = buildShapes( 'rgba(0,0,255,0.7)' );
-    
+
     scene.addChild( reds );
     scene.addChild( greens );
     scene.addChild( blues );
-    
+
     // center the scene
     scene.translate( main.width() / 2, main.height() / 2 );
-    
+
     window.scene = scene;
     window.scene = scene;
-    
+
     // return step function
     return function( timeElapsed ) {
       greens.rotate( timeElapsed );
       scene.updateScene();
     }
   };
-  
+
   phet.tests.easelLayeringTests = function( main ) {
     var canvas = document.createElement( 'canvas' );
     canvas.id = 'easel-canvas';
@@ -66,57 +66,57 @@ phet.tests = phet.tests || {};
     main.append( canvas );
 
     var stage = new createjs.Stage( canvas );
-    
+
     function buildShapes( color ) {
       var background = new createjs.Container();
       stage.addChild( background );
-      
+
       for ( var i = 0; i < count; i++ ) {
         var shape = new createjs.Shape();
         var radius = 10;
-        
+
         shape.graphics.beginFill( color ).beginStroke( '#000000' ).drawPolyStar( 0, 0, radius, 6, 0, 0 );
-        
+
         shape.x = ( Math.random() - 0.5 ) * backgroundSize;
         shape.y = ( Math.random() - 0.5 ) * backgroundSize;
-        
+
         background.addChild( shape );
       }
-      
+
       background.x = main.width() / 2;
       background.y = main.height() / 2;
-      
+
       return background;
     }
-    
+
     var reds = buildShapes( 'rgba(255,0,0,0.7)' );
     var greens = buildShapes( 'rgba(0,255,0,0.7)' );
     var blues = buildShapes( 'rgba(0,0,255,0.7)' );
-    
+
     stage.addChild( reds );
     stage.addChild( greens );
     stage.addChild( blues );
-    
+
     // return step function
     return function( timeElapsed ) {
       greens.rotation += timeElapsed * 180 / Math.PI;
       stage.update();
     }
-  };  
-  
+  };
+
   phet.tests.customLayeringTests = function( main ) {
     var zIndex = 0;
     var radius = 10;
-    
+
     var points = _.map( _.range( 6 ), function( n ) {
       var theta = 2 * Math.PI * n / 6;
       return new dot.Vector2( radius * Math.cos( theta ), radius * Math.sin( theta ) );
     } );
-    
+
     var redSeed = _.map( _.range( count * 2 ), function( boo ) { return ( Math.random() - 0.5 ) * backgroundSize; } );
     var greenSeed = _.map( _.range( count * 2 ), function( boo ) { return ( Math.random() - 0.5 ) * backgroundSize; } );
     var blueSeed = _.map( _.range( count * 2 ), function( boo ) { return ( Math.random() - 0.5 ) * backgroundSize; } );
-    
+
     function addCanvas() {
       var canvas = document.createElement( 'canvas' );
       canvas.width = main.width();
@@ -125,30 +125,30 @@ phet.tests = phet.tests || {};
       $( canvas ).css( 'x-index', zIndex );
       zIndex += 1;
       main.append( canvas );
-      
+
       return canvas.getContext( '2d' );
     }
-    
+
     var redContext = addCanvas();
     var greenContext = addCanvas();
     var blueContext = addCanvas();
-    
+
     function drawShapes( context, color, seed, rotation ) {
       // context = new scenery.DebugContext( context );
       // center the transform
       context.setTransform( 1, 0, 0, 1, main.width() / 2, main.height() / 2 );
-      
+
       if ( rotation != 0 ) {
         context.rotate( rotation );
       }
-      
+
       context.fillStyle = color;
       context.strokeStyle = '#000000';
-      
+
       for ( var i = 0; i < count; i++ ) {
         var xOffset = seed[i*2];
         var yOffset = seed[i*2+1];
-        
+
         context.beginPath();
         context.moveTo( points[0].x + xOffset, points[0].y + yOffset );
         context.lineTo( points[1].x + xOffset, points[1].y + yOffset );
@@ -161,21 +161,21 @@ phet.tests = phet.tests || {};
         context.stroke();
       }
     }
-    
+
     drawShapes( redContext, 'rgba(255,0,0,0.7)', redSeed );
     drawShapes( greenContext, 'rgba(0,255,0,0.7)', greenSeed );
     drawShapes( blueContext, 'rgba(0,0,255,0.7)', blueSeed );
-    
+
     var time = 0;
-    
+
     // return step function
     return function( timeElapsed ) {
       time += timeElapsed;
       greenContext.clearRect( -0.6 * backgroundSize, -0.6 * backgroundSize, 1.2 * backgroundSize, 1.2 * backgroundSize );
-      
+
       drawShapes( greenContext, 'rgba(0,255,0,0.7)', greenSeed, time );
     }
   };
-  
+
 })();
 

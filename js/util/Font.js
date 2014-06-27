@@ -25,18 +25,18 @@
 
 define( function( require ) {
   'use strict';
-  
+
   var scenery = require( 'SCENERY/scenery' );
-  
+
   // constants used for detection (since styles/variants/weights/stretches can be mixed in the preamble of the shorthand string)
   var styles = [ 'normal', 'italic', 'oblique' ];
   var variants = [ 'normal', 'small-caps' ];
   var weights = [ 'normal', 'bold', 'bolder', 'lighter', '100', '200', '300', '400', '500', '600', '700', '800', '900' ];
   var stretches = [ 'normal', 'ultra-condensed', 'extra-condensed', 'condensed', 'semi-condensed', 'semi-expanded', 'expanded', 'extra-expanded', 'ultra-expanded' ];
-  
+
   // size constants used for detection
   // var sizes = [ 'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large', 'larger', 'smaller' ];
-  
+
   function castSize( size ) {
     if ( typeof size === 'number' ) {
       return size + 'px'; // add the pixels suffix by default for numbers
@@ -44,7 +44,7 @@ define( function( require ) {
       return size; // assume that it's a valid to-spec string
     }
   }
-  
+
   scenery.Font = function Font( options ) {
     // options from http://www.w3.org/TR/css3-fonts/
     this._style = 'normal';      // normal | italic | oblique
@@ -54,17 +54,17 @@ define( function( require ) {
     this._size = '10px';         // <absolute-size> | <relative-size> | <length> | <percentage> -- unitless number interpreted as px. absolute suffixes: cm, mm, in, pt, pc, px. relative suffixes: em, ex, ch, rem, vw, vh, vmin, vmax.
     this._lineHeight = 'normal'; // normal | <number> | <length> | <percentage> -- NOTE: Canvas spec forces line-height to normal
     this._family = 'sans-serif'; // comma-separated list of families, including generic families (serif, sans-serif, cursive, fantasy, monospace). ideally escape with double-quotes
-    
+
     // font  [ [ <‘font-style’> || <font-variant-css21> || <‘font-weight’> || <‘font-stretch’> ]? <‘font-size’> [ / <‘line-height’> ]? <‘font-family’> ] | caption | icon | menu | message-box | small-caption | status-bar
     // <font-variant-css21> = [normal | small-caps]
-    
+
     var type = typeof options;
     if ( type === 'string' ) {
       // parse a somewhat proper CSS3 form (not guaranteed to handle it precisely the same as browsers yet)
-      
+
       // split based on whitespace allowed by CSS spec (more restrictive than regular regexp whitespace)
       var tokens = _.filter( options.split( /[\x09\x0A\x0C\x0D\x20]/ ), function( token ) { return token.length > 0; } );
-      
+
       // pull tokens out until we reach something that doesn't match. that must be the font size (according to spec)
       for ( var i = 0; i < tokens.length; i++ ) {
         var token = tokens[i];
@@ -117,7 +117,7 @@ define( function( require ) {
         this._family = options.family;
       }
     }
-    
+
     // sanity checks to prevent errors in interpretation or in the font shorthand usage
     assert && assert( typeof this._style === 'string' &&
                                     _.contains( styles, this._style ),
@@ -136,17 +136,17 @@ define( function( require ) {
                                     'Font size must be either passed as a number (not a string, interpreted as px), or must contain a suffix for percentage, absolute or relative units, or an explicit size constant' );
     assert && assert( typeof this._lineHeight === 'string' );
     assert && assert( typeof this._family === 'string' );
-    
+
     // initialize the shorthand font property (stored as _font)
     this._font = this.computeShorthand();
-    
+
     phetAllocation && phetAllocation( 'Font' );
   };
   var Font = scenery.Font;
-  
+
   Font.prototype = {
     constructor: Font,
-    
+
     getFont:       function() { return this._font; },
     getStyle:      function() { return this._style; },
     getVariant:    function() { return this._variant; },
@@ -155,7 +155,7 @@ define( function( require ) {
     getSize:       function() { return this._size; },
     getLineHeight: function() { return this._lineHeight; },
     getFamily:     function() { return this._family; },
-    
+
     get font()       { return this.getFont(); },
     get style()      { return this.getStyle(); },
     get variant()    { return this.getVariant(); },
@@ -164,7 +164,7 @@ define( function( require ) {
     get size()       { return this.getSize(); },
     get lineHeight() { return this.getLineHeight(); },
     get family()     { return this.getFamily(); },
-    
+
     copy: function( options ) {
       return new Font( _.extend( {
         style: this._style,
@@ -176,7 +176,7 @@ define( function( require ) {
         family: this._family
       }, options ) );
     },
-    
+
     computeShorthand: function() {
       var ret = '';
       if ( this._style !== 'normal' ) { ret += this._style + ' '; }
@@ -188,13 +188,13 @@ define( function( require ) {
       ret += ' ' + this._family;
       return ret;
     },
-    
+
     toCSS: function() {
       return this.getFont();
     }
   };
-  
+
   Font.DEFAULT = new Font();
-  
+
   return Font;
 } );

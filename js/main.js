@@ -13,7 +13,7 @@
 define( [
     'SCENERY/scenery',
     'SCENERY/debug/DebugContext',
-    
+
     'SCENERY/display/BackboneDrawable',
     'SCENERY/display/Block',
     'SCENERY/display/CanvasBlock',
@@ -36,7 +36,7 @@ define( [
     'SCENERY/display/SVGBlock',
     'SCENERY/display/SVGGroup',
     'SCENERY/display/SVGSelfDrawable',
-    
+
     'SCENERY/input/BatchedDOMEvent',
     'SCENERY/input/ButtonListener',
     'SCENERY/input/DownUpListener',
@@ -47,7 +47,7 @@ define( [
     'SCENERY/input/Pointer',
     'SCENERY/input/SimpleDragHandler',
     'SCENERY/input/Touch',
-    
+
     'SCENERY/nodes/CanvasNode',
     'SCENERY/nodes/Circle',
     'SCENERY/nodes/DOM',
@@ -86,7 +86,7 @@ define( [
     'SCENERY/util/Trail',
     'SCENERY/util/TrailPointer',
     'SCENERY/util/Util',
-    
+
     'SCENERY/util/gl/GLUtil',
     'SCENERY/util/gl/GLShader',
     'SCENERY/util/gl/GLShaderProgram'
@@ -94,6 +94,6 @@ define( [
     scenery // note: we don't need any of the other parts, we just need to specify them as dependencies so they fill in the scenery namespace
   ) {
     'use strict';
-    
+
     return scenery;
 } );

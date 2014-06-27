@@ -3,29 +3,29 @@
 <head>
   <meta charset="utf-8"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  
+
   <title>Events test - Scenery</title>
-  
+
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 
   <!-- runs in full-screen mode on iOS devices -->
   <meta name="apple-mobile-web-app-capable" content="yes">
-  
+
   <script src="../../../sherpa/jquery-2.1.0.min.js"></script>
   <script src="../../../sherpa/lodash-2.4.1.min.js"></script>
-  
+
   <style>
-    html { 
+    html {
       -ms-touch-action: none; /* Direct all pointer events to JavaScript code. */
     }
   </style>
 </head>
 <body>
-  
+
   <div id="output"></div>
-  
+
   <script type="text/javascript">
-  
+
   function addMessage( str ) {
     var $output = $( '#output' );
     while ( $output[0].children.length > 20 ) {
@@ -33,16 +33,16 @@
     }
     $output.append( $( '<div>' ).text( new Date().getMilliseconds() + '  ' + str ) );
   }
-  
+
   addMessage( 'window.navigator.msPointerEnabled: ' + window.navigator.msPointerEnabled );
   addMessage( 'window.navigator.msMaxTouchPoints: ' + window.navigator.msMaxTouchPoints );
-  
+
   // see http://www.w3.org/TR/DOM-Level-3-Events/
   var mouseEvents = [ 'mousedown', 'mouseup', 'mousemove', 'mouseover', 'mouseout' ];
-  
+
   // see http://www.w3.org/TR/touch-events/
   var touchEvents = [ 'touchstart', 'touchend', 'touchmove', 'touchcancel' ];
-  
+
   // see http://www.w3.org/TR/pointerevents/
   // see http://msdn.microsoft.com/en-us/library/ie/hh673557(v=vs.85).aspx
   var pointerEvents = [
@@ -57,19 +57,19 @@
     'MSPointerLeave', // not seen
     'MSGotPointerCapture', // see http://msdn.microsoft.com/en-us/library/windows/apps/hh465850.aspx
     'MSLostPointerCapture',
-    
+
     'pointerdown', 'pointerup', 'pointercancel', 'pointermove', 'pointerover', 'pointerout', 'pointerenter', 'pointerleave', 'gotpointercapture', 'lostpointercapture',
-    
+
     'MSPointerHover'
   ];
-  
+
   _.each( mouseEvents, function( mouseEvent ) {
     document.addEventListener( mouseEvent, function( event ) {
       addMessage( event.type );
       event.preventDefault();
     } );
   } );
-  
+
   _.each( touchEvents, function( touchEvent ) {
     document.addEventListener( touchEvent, function( event ) {
       var str = event.type;
@@ -80,7 +80,7 @@
       event.preventDefault();
     } );
   } );
-  
+
   _.each( pointerEvents, function( pointerEvent ) {
     document.addEventListener( pointerEvent, function( event ) {
       var pointerType = event.pointerType;
@@ -93,7 +93,7 @@
           pointerType = 'mouse';
         }
       }
-      
+
       // pressure
       // tiltX
       // tiltY
@@ -103,7 +103,7 @@
       event.preventDefault();
     } );
   } );
-  
+
   </script>
 
 </body>

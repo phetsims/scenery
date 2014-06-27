@@ -5,19 +5,19 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
   <title>Text Bounds Comparison - Scenery</title>
-  
+
   <!-- jQuery and LoDash are dependencies -->
   <script src="../../sherpa/jquery-2.1.0.min.js"></script>
   <script src="../../sherpa/lodash-2.4.1.min.js"></script>
-  
+
   <!-- Canvg for SVG to Canvas -->
   <script src="../../sherpa/rgbcolor.js"></script>
   <script src="../../sherpa/canvg-1.3.js"></script>
-  
+
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script src="../build/development/scenery.js"></script>
   <!-- <script src="../build/standalone/scenery.min.js"></script> -->
-  
+
   <style type="text/css">
     /* Let content go to the edges */
     html, body {
@@ -26,7 +26,7 @@
       margin: 0;
       padding: 0;
     }
-    
+
     /* Have the #main div cover the entire viewport */
     .scene {
       position: relative;
@@ -37,29 +37,29 @@
 </head>
 
 <body>
-  
+
   <div id="main" class="scene"></div>
-  
+
   <script type="text/javascript">
-  
+
   var scene = new scenery.Scene( $( '#main' ) );
   var padding = 2;
-  
+
   function boundsSnapshot( textNode ) {
-    
+
     var canvasBounds = textNode.accurateCanvasBounds();
     var svgBounds = textNode.approximateSVGBounds();
     var domBounds = textNode.approximateDOMBounds();
     var width = textNode.approximateCanvasWidth();
-    
+
     var unionBounds = canvasBounds.union( svgBounds ).union( domBounds );
-    
+
     // align the container so that our upper-left corner of the union bounds is at 0,0
     var container = new scenery.Node( {
       x: -unionBounds.minX,
       y: -unionBounds.minY
     } );
-    
+
     container.addChild( new scenery.Path( kite.Shape.bounds( canvasBounds ), {
       fill: '#aaaaaa'
     } ) );
@@ -72,32 +72,32 @@
     container.addChild( new scenery.Path( kite.Shape.lineSegment( new dot.Vector2( domBounds.minX + width, domBounds.minY ), new dot.Vector2( domBounds.minX + width, domBounds.maxY ) ), {
       stroke: '#00ff00'
     } ) );
-    
+
     // TODO: improve how layer strategies are used
     var svgNode = new scenery.Node( { renderer: 'svg' } );
     svgNode.addChild( textNode );
     var canvasNode = new scenery.Node( { renderer: 'canvas' } );
     canvasNode.addChild( textNode );
-    
+
     container.addChild( svgNode );
     container.addChild( canvasNode );
     textNode.fill = 'rgba(255,255,255,0.6)';
-    
+
     container.addChild( new scenery.Path( kite.Shape.lineSegment( new dot.Vector2( 5, 0.5 ), new dot.Vector2( -5, 0.5 ) ), {
       stroke: 'rgba(0,0,0,0.5)'
     } ) );
     container.addChild( new scenery.Path( kite.Shape.lineSegment( new dot.Vector2( 0.5, 5 ), new dot.Vector2( 0.5, -5 ) ), {
       stroke: 'rgba(0,0,0,0.5)'
     } ) );
-    
+
     return container;
   }
-  
+
   function wrapScene( node ) {
     var $main = $( '<div>' );
     $main.width( Math.ceil( node.width + 2 * padding ) );
     $main.height( Math.ceil( node.height + 2 * padding ) );
-    
+
     var scene = new scenery.Scene( $main, {
       // preferredSceneLayerType: scenery.SVGDefaultLayerType
     } );
@@ -107,7 +107,7 @@
     scene.updateScene();
     return $main.addClass( 'scene' )[0];
   }
-  
+
   var queue = [];
   var started = false;
   function process( string, options ) {
@@ -127,7 +127,7 @@
       }, 4 );
     }
   }
-  
+
   var unicodeTestStrings = [
     "A",
     "b",
@@ -150,147 +150,147 @@
     "0\u0489",
     "\u2588"
   ];
-  
+
   process( 'regular 16' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 16 } );
   } );
-  
+
   process( 'regular 60' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60 } );
   } );
-  
+
   process( 'serif 60' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, fontFamily: 'serif' } );
   } );
-  
+
   process( 'monospace 60' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, fontFamily: 'monospace' } );
   } );
-  
+
   process( 'cursive 60' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, fontFamily: 'cursive' } );
   } );
-  
+
   process( 'fantasy 60' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, fontFamily: 'fantasy' } );
   } );
-  
+
   process( 'Georgia, serif 60' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, fontFamily: 'Georgia, serif' } );
   } );
-  
+
   process( '"Palatino Linotype", "Book Antiqua", Palatino, serif 60' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, fontFamily: '"Palatino Linotype", "Book Antiqua", Palatino, serif' } );
   } );
-  
+
   process( '"Times New Roman", Times, serif' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, fontFamily: '"Times New Roman", Times, serif' } );
   } );
-  
+
   process( 'Arial, Helvetica, sans-serif' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, fontFamily: 'Arial, Helvetica, sans-serif' } );
   } );
-  
+
   process( '"Arial Black", Gadget, sans-serif' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, fontFamily: '"Arial Black", Gadget, sans-serif' } );
   } );
-  
+
   process( '"Comic Sans MS", cursive, sans-serif' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, fontFamily: '"Comic Sans MS", cursive, sans-serif' } );
   } );
-  
+
   process( 'Impact, Charcoal, sans-serif' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, fontFamily: 'Impact, Charcoal, sans-serif' } );
   } );
-  
+
   process( '"Lucida Sans Unicode", "Lucida Grande", sans-serif' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, fontFamily: '"Lucida Sans Unicode", "Lucida Grande", sans-serif' } );
   } );
-  
+
   process( 'Tahoma, Geneva, sans-serif' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, fontFamily: 'Tahoma, Geneva, sans-serif' } );
   } );
-  
+
   process( '"Trebuchet MS", Helvetica, sans-serif' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, fontFamily: '"Trebuchet MS", Helvetica, sans-serif' } );
   } );
-  
+
   process( 'Verdana, Geneva, sans-serif' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, fontFamily: 'Verdana, Geneva, sans-serif' } );
   } );
-  
+
   process( '"Courier New", Courier, monospace' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, fontFamily: '"Courier New", Courier, monospace' } );
   } );
-  
+
   process( '"Lucida Console", Monaco, monospace' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, fontFamily: '"Lucida Console", Monaco, monospace' } );
   } );
-  
+
   process( 'weight 900' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, fontWeight: '900' } );
   } );
-  
+
   process( 'weight 100' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, fontWeight: '900' } );
   } );
-  
+
   process( 'ultra-condensed' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, fontStretch: 'ultra-condensed' } );
   } );
-  
+
   process( 'ultra-expanded' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, fontStretch: 'ultra-expanded' } );
   } );
-  
+
   process( 'italic' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, fontStyle: 'italic' } );
   } );
-  
+
   process( 'oblique' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, fontStyle: 'oblique' } );
   } );
-  
+
   process( 'serif align end' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, fontFamily: 'serif', textAlign: 'end' } );
   } );
-  
+
   process( 'rtl' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, direction: 'rtl' } );
   } );
-  
+
   process( 'rtl' );
   _.each( unicodeTestStrings, function( string ) {
     process( string, { fontSize: 60, direction: 'rtl' } );
   } );
-  
+
   </script>
 
 </body>

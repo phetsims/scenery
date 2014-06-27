@@ -8,7 +8,7 @@
 
 define( function( require ) {
   'use strict';
-  
+
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
@@ -18,20 +18,20 @@ define( function( require ) {
   var CanvasContextWrapper = require( 'SCENERY/util/CanvasContextWrapper' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var Util = require( 'SCENERY/util/Util' );
-  
+
   scenery.CanvasBlock = function CanvasBlock( display, renderer, transformRootInstance, filterRootInstance ) {
     this.initialize( display, renderer, transformRootInstance, filterRootInstance );
   };
   var CanvasBlock = scenery.CanvasBlock;
-  
+
   inherit( FittedBlock, CanvasBlock, {
     initialize: function( display, renderer, transformRootInstance, filterRootInstance ) {
       this.initializeFittedBlock( display, renderer, transformRootInstance );
-      
+
       this.filterRootInstance = filterRootInstance;
-      
+
       this.dirtyDrawables = cleanArray( this.dirtyDrawables );
-      
+
       if ( !this.domElement ) {
         //OHTWO TODO: support tiled Canvas handling (will need to wrap then in a div, or something)
         this.canvas = document.createElement( 'canvas' );
@@ -39,33 +39,33 @@ define( function( require ) {
         this.canvas.style.left = '0';
         this.canvas.style.top = '0';
         this.canvas.style.pointerEvents = 'none';
-        
+
         this.context = this.canvas.getContext( '2d' );
-        
+
         // workaround for Chrome (WebKit) miterLimit bug: https://bugs.webkit.org/show_bug.cgi?id=108763
         this.context.miterLimit = 20;
         this.context.miterLimit = 10;
-        
+
         this.wrapper = new CanvasContextWrapper( this.canvas, this.context );
-        
+
         this.domElement = this.canvas;
       }
-      
+
       // reset any fit transforms that were applied
       Util.prepareForTransform( this.canvas, this.forceAcceleration );
       Util.unsetTransform( this.canvas ); // clear out any transforms that could have been previously applied
-      
+
       this.canvasDrawOffset = new Vector2();
-      
+
       // store our backing scale so we don't have to look it up while fitting
       this.backingScale = ( renderer & Renderer.bitmaskCanvasLowResolution ) ? 1 : scenery.Util.backingScale( this.context );
-      
+
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'initialized #' + this.id );
       // TODO: dirty list of nodes (each should go dirty only once, easier than scanning all?)
-      
+
       return this;
     },
-    
+
     setSizeFullDisplay: function() {
       var size = this.display.getSize();
       this.canvas.width = size.width * this.backingScale;
@@ -74,7 +74,7 @@ define( function( require ) {
       this.canvas.style.height = size.height + 'px';
       this.wrapper.resetStyles();
     },
-    
+
     setSizeFitBounds: function() {
       var x = this.fitBounds.minX;
       var y = this.fitBounds.minY;
@@ -87,46 +87,46 @@ define( function( require ) {
       this.canvas.style.height = this.fitBounds.height + 'px';
       this.wrapper.resetStyles();
     },
-    
+
     update: function() {
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'update #' + this.id );
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.push();
-      
+
       if ( this.dirty && !this.disposed ) {
         this.dirty = false;
-        
+
         while ( this.dirtyDrawables.length ) {
           this.dirtyDrawables.pop().update();
         }
-        
+
         // udpate the fit BEFORE drawing, since it may change our offset
         this.updateFit();
-        
+
         // for now, clear everything!
         this.context.setTransform( 1, 0, 0, 1, 0, 0 ); // identity
         this.context.clearRect( 0, 0, this.canvas.width, this.canvas.height ); // clear everything
-        
+
         //OHTWO TODO: clipping handling!
         if ( this.filterRootInstance.node._clipArea ) {
           this.context.save();
-          
+
           this.temporaryRecursiveClip( this.filterRootInstance );
         }
-        
+
         //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern)
         for ( var drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
           this.renderDrawable( drawable );
           if ( drawable === this.lastDrawable ) { break; }
         }
-        
+
         if ( this.filterRootInstance.node._clipArea ) {
           this.context.restore();
         }
       }
-      
+
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.pop();
     },
-    
+
     //OHTWO TODO: rework and do proper clipping support
     temporaryRecursiveClip: function( instance ) {
       if ( instance.parent ) {
@@ -136,78 +136,78 @@ define( function( require ) {
         //OHTWO TODO: reduce duplication here
         this.context.setTransform( this.backingScale, 0, 0, this.backingScale, this.canvasDrawOffset.x * this.backingScale, this.canvasDrawOffset.y * this.backingScale );
         instance.relativeMatrix.canvasAppendTransform( this.context );
-        
+
         // do the clipping
         this.context.beginPath();
         instance.node._clipArea.writeToContext( this.context );
         this.context.clip();
       }
     },
-    
+
     renderDrawable: function( drawable ) {
       // we're directly accessing the relative transform below, so we need to ensure that it is up-to-date
       assert && assert( drawable.instance.isValidationNotNeeded() );
-      
+
       var matrix = drawable.instance.relativeMatrix;
-      
+
       // set the correct (relative to the transform root) transform up, instead of walking the hierarchy (for now)
       //OHTWO TODO: should we start premultiplying these matrices to remove this bottleneck?
       this.context.setTransform( this.backingScale, 0, 0, this.backingScale, this.canvasDrawOffset.x * this.backingScale, this.canvasDrawOffset.y * this.backingScale );
       if ( drawable.instance !== this.transformRootInstance ) {
         matrix.canvasAppendTransform( this.context );
       }
-      
+
       // paint using its local coordinate frame
       drawable.paintCanvas( this.wrapper, drawable.instance.node );
     },
-    
+
     dispose: function() {
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'dispose #' + this.id );
-      
+
       // clear references
       this.transformRootInstance = null;
       cleanArray( this.dirtyDrawables );
-      
+
       // minimize memory exposure of the backing raster
       this.canvas.width = 0;
       this.canvas.height = 0;
-      
+
       FittedBlock.prototype.dispose.call( this );
     },
-    
+
     markDirtyDrawable: function( drawable ) {
       sceneryLog && sceneryLog.dirty && sceneryLog.dirty( 'markDirtyDrawable on CanvasBlock#' + this.id + ' with ' + drawable.toString() );
-      
+
       assert && assert( drawable );
-      
+
       // TODO: instance check to see if it is a canvas cache (usually we don't need to call update on our drawables)
       this.dirtyDrawables.push( drawable );
       this.markDirty();
     },
-    
+
     addDrawable: function( drawable ) {
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( '#' + this.id + '.addDrawable ' + drawable.toString() );
-      
+
       FittedBlock.prototype.addDrawable.call( this, drawable );
     },
-    
+
     removeDrawable: function( drawable ) {
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( '#' + this.id + '.removeDrawable ' + drawable.toString() );
-      
+
       FittedBlock.prototype.removeDrawable.call( this, drawable );
     },
-    
+
     onIntervalChange: function( firstDrawable, lastDrawable ) {
       sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( '#' + this.id + '.onIntervalChange ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() );
-      
+
       FittedBlock.prototype.onIntervalChange.call( this, firstDrawable, lastDrawable );
     },
-    
+
     toString: function() {
       return 'CanvasBlock#' + this.id + '-' + FittedBlock.fitString[this.fit];
     }
   } );
-  
+
   /* jshint -W064 */
   Poolable( CanvasBlock, {
     constructorDuplicateFactory: function( pool ) {
@@ -222,6 +222,6 @@ define( function( require ) {
       };
     }
   } );
-  
+
   return CanvasBlock;
 } );

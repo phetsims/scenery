@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
 
   <title>Masking test</title>
-  
+
   <script src="../../sherpa/jquery-2.1.0.min.js"></script>
 
   <style type="text/css">
@@ -24,7 +24,7 @@
     background-color: #fff;
     overflow: hidden;
   }
-  
+
   svg {
     display: block;
   }
@@ -54,32 +54,32 @@
     </g>
   </svg>
   <canvas width="1000" height="100"></canvas>
-  
+
   <script type="text/javascript">
     var context = $( 'canvas' )[0].getContext( '2d' );
-    
+
     var scratchCanvas = document.createElement( 'canvas' );
     scratchCanvas.width = 1000;
     scratchCanvas.height = 100;
     var scratchContext = scratchCanvas.getContext( '2d' );
-    
+
     scratchContext.beginPath();
     scratchContext.arc( 50, 50, 40, 0, Math.PI * 2, false );
     scratchContext.fillStyle = '#f00';
     scratchContext.fill();
-    
+
     scratchContext.beginPath();
     scratchContext.arc( 90, 50, 40, 0, Math.PI * 2, false );
     scratchContext.fillStyle = '#00f';
     scratchContext.fill();
-    
+
     var grad = scratchContext.createLinearGradient( 10, 0, 130, 0 );
     grad.addColorStop( 0, 'rgba(255,255,255,0)' );
     grad.addColorStop( 1, 'rgba(255,255,255,1)' );
     scratchContext.fillStyle = grad;
     scratchContext.globalCompositeOperation = 'destination-in';
     scratchContext.fillRect( 0, 0, 1000, 100 );
-    
+
     context.fillStyle = '#000';
     context.fillRect( 0, 40, 140, 20 );
     context.drawImage( scratchCanvas, 0, 0 );

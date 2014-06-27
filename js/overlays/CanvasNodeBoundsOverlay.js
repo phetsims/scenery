@@ -19,14 +19,14 @@ define( function( require ) {
   scenery.CanvasNodeBoundsOverlay = function CanvasNodeBoundsOverlay( display, scene ) {
     this.display = display;
     this.scene = scene;
-    
+
     var svg = this.svg = document.createElementNS( scenery.svgns, 'svg' );
     svg.style.position = 'absolute';
     svg.className = 'canvasNodeBoundsOverlay';
     svg.style.top = 0;
     svg.style.left = 0;
     svg.style['pointer-events'] = 'none';
-    
+
     function resize( width, height ) {
       svg.setAttribute( 'width', width );
       svg.setAttribute( 'height', height );
@@ -36,7 +36,7 @@ define( function( require ) {
       resize( dimension.width, dimension.height );
     } );
     resize( display.width, display.height );
-    
+
     this.domElement = svg;
   };
   var CanvasNodeBoundsOverlay = scenery.CanvasNodeBoundsOverlay;
@@ -45,32 +45,32 @@ define( function( require ) {
     addShape: function( shape, color, isOffset ) {
       var path = document.createElementNS( scenery.svgns, 'path' );
       var svgPath = shape.getSVGPath();
-      
+
       // temporary workaround for https://bugs.webkit.org/show_bug.cgi?id=78980
       // and http://code.google.com/p/chromium/issues/detail?id=231626 where even removing
       // the attribute can cause this bug
       if ( !svgPath ) { svgPath = 'M0 0'; }
-      
+
       if ( svgPath ) {
         // only set the SVG path if it's not the empty string
         path.setAttribute( 'd', svgPath );
       } else if ( path.hasAttribute( 'd' ) ) {
         path.removeAttribute( 'd' );
       }
-      
+
       path.setAttribute( 'style', 'fill: none; stroke: ' + color + '; stroke-dasharray: 5, 3; stroke-dashoffset: ' + ( isOffset ? 5 : 0 ) + '; stroke-width: 3;' );
       this.svg.appendChild( path );
     },
-    
+
     update: function() {
       var that = this;
       var svg = this.svg;
       var scene = this.scene;
-      
+
       while ( svg.childNodes.length ) {
         svg.removeChild( svg.childNodes[svg.childNodes.length-1] );
       }
-      
+
       new scenery.Trail( scene ).eachTrailUnder( function( trail ) {
         var node = trail.lastNode();
         if ( !node.isVisible() ) {
@@ -79,14 +79,14 @@ define( function( require ) {
         }
         if ( ( node instanceof scenery.CanvasNode ) && trail.isVisible() ) {
           var transform = trail.getTransform();
-          
+
           that.addShape( transform.transformShape( Shape.bounds( node._selfBounds ) ), 'rgba(0,255,0,0.8)', true );
         }
       } );
     },
-    
+
     dispose: function() {
-      
+
     }
   };
 

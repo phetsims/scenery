@@ -4,7 +4,7 @@
   <meta charset="utf-8"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <title>iframe test</title>
-  
+
   <style type="text/css">
     .framecontainer {
       float: left;
@@ -19,49 +19,49 @@
     <span>noprevent-noparentfix-nochildfix</span>
     <iframe id="noprevent-noparentfix-nochildfix" src="child-frame.html#noprevent-noparentfix-nochildfix" width="256" height="256"></iframe>
   </div>
-  
+
   <div class="framecontainer">
     <span>noprevent-parentfix-nochildfix</span>
     <iframe id="noprevent-parentfix-nochildfix" src="child-frame.html#noprevent-parentfix-nochildfix" width="256" height="256"></iframe>
   </div>
-  
+
   <div class="framecontainer">
     <span>prevent-noparentfix-nochildfix</span>
     <iframe id="prevent-noparentfix-nochildfix" src="child-frame.html#prevent-noparentfix-nochildfix" width="256" height="256"></iframe>
   </div>
-  
+
   <div class="framecontainer">
     <span>prevent-parentfix-nochildfix</span>
     <iframe id="prevent-parentfix-nochildfix" src="child-frame.html#prevent-parentfix-nochildfix" width="256" height="256"></iframe>
   </div>
-  
+
   <div class="framecontainer">
     <span>noprevent-noparentfix-childfix</span>
     <iframe id="noprevent-noparentfix-childfix" src="child-frame.html#noprevent-noparentfix-childfix" width="256" height="256"></iframe>
   </div>
-  
+
   <div class="framecontainer">
     <span>noprevent-parentfix-childfix</span>
     <iframe id="noprevent-parentfix-childfix" src="child-frame.html#noprevent-parentfix-childfix" width="256" height="256"></iframe>
   </div>
-  
+
   <div class="framecontainer">
     <span>prevent-noparentfix-childfix</span>
     <iframe id="prevent-noparentfix-childfix" src="child-frame.html#prevent-noparentfix-childfix" width="256" height="256"></iframe>
   </div>
-  
+
   <div class="framecontainer">
     <span>prevent-parentfix-childfix</span>
     <iframe id="prevent-parentfix-childfix" src="child-frame.html#prevent-parentfix-childfix" width="256" height="256"></iframe>
   </div>
-  
-  
-  
+
+
+
   <script>
     function fixframe( id ) {
       // the iframe
       var frame = document.getElementById( id );
-      
+
       // apply prefixed styles to content where we don't want our events getting intercepted by specific behaviors
       var styles = {
         userSelect: 'none',
@@ -75,7 +75,7 @@
           frame.style[prefix + ( prefix ? key.charAt( 0 ).toUpperCase() + key.slice( 1 ) : key )] = styles[key];
         } );
       }
-      
+
       // prevent the default behavior in our frame (this still allows the behavior to occur inside the iframe)
       ['touchstart', 'touchend', 'touchmove', 'touchcancel', 'mousemove'].forEach( function( eventName ) {
         frame.addEventListener( eventName, function( domEvent ) {
@@ -83,7 +83,7 @@
         } );
       } );
     };
-    
+
     fixframe( 'noprevent-parentfix-nochildfix' );
     fixframe( 'prevent-parentfix-nochildfix' );
     fixframe( 'noprevent-parentfix-childfix' );

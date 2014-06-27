@@ -1,11 +1,11 @@
 
 (function(){
   'use strict';
-  
+
   var includeBleedingEdgeCanvasTests = false;
-  
+
   module( 'Scenery: Miscellaneous' );
-  
+
   test( 'ES5 Object.defineProperty get/set', function() {
     var ob = { _key: 5 };
     Object.defineProperty( ob, 'key', {
@@ -17,21 +17,21 @@
     ob.key += 1;
     equal( ob._key, 6, 'incremented object value' );
   } );
-  
+
   // test( 'Canvas WebGL Context and Features', function() {
   //   var canvas = document.createElement( 'canvas' );
   //   var context = canvas.getContext( "webgl" ) || canvas.getContext( "experimental-webgl" );
   //   ok( context, 'context' );
-  // } );   
-  
+  // } );
+
   if ( includeBleedingEdgeCanvasTests ) {
     // v5 canvas additions
     module( 'Bleeding Edge Canvas Support' );
-    
+
     test( 'Canvas 2D v5 Features', function() {
       var canvas = document.createElement( 'canvas' );
       var context = canvas.getContext( '2d' );
-      
+
       var neededMethods = [
         'addHitRegion',
         'ellipse',
@@ -42,11 +42,11 @@
         ok( context[method] !== undefined, 'context.' + method );
       } );
     } );
-    
+
     test( 'Path object support', function() {
       var path = new Path();
     } );
-       
+
     test( 'Text width measurement in canvas', function() {
       var canvas = document.createElement( 'canvas' );
       var context = canvas.getContext( '2d' );

@@ -12,32 +12,32 @@
 
 define( function( require ) {
   'use strict';
-  
+
   var scenery = require( 'SCENERY/scenery' );
-  
+
   var clamp = require( 'DOT/Util' ).clamp;
   var linear = require( 'DOT/Util' ).linear;
 
   // r,g,b integers 0-255, 'a' float 0-1
   scenery.Color = function Color( r, g, b, a ) {
-    
+
     // allow listeners to be notified on any changes. called with listener()
     this.listeners = [];
-    
+
     if ( typeof r === 'string' ) {
       var str = r.replace( / /g, '' ).toLowerCase();
       var success = false;
-      
+
       // replace colors based on keywords
       var keywordMatch = Color.colorKeywords[str];
       if ( keywordMatch ) {
         str = '#' + keywordMatch;
       }
-      
+
       // run through the available text formats
       for ( var i = 0; i < Color.formatParsers.length; i++ ) {
         var parser = Color.formatParsers[i];
-        
+
         var matches = parser.regexp.exec( str );
         if ( matches ) {
           parser.apply( this, matches );
@@ -45,7 +45,7 @@ define( function( require ) {
           break;
         }
       }
-      
+
       if ( !success ) {
         throw new Error( 'scenery.Color unable to parse color string: ' + r );
       }
@@ -65,29 +65,29 @@ define( function( require ) {
         this.setRGBA( r, g, b, alpha );
       }
     }
-    
+
     phetAllocation && phetAllocation( 'Color' );
   };
   var Color = scenery.Color;
-  
+
   // regex utilities
   var rgbNumber = '(-?\\d{1,3}%?)'; // syntax allows negative integers and percentages
   var aNumber = '(\\d+|\\d*\\.\\d+)'; // decimal point number. technically we allow for '255', even though this will be clamped to 1.
   var rawNumber = '(\\d{1,3})'; // a 1-3 digit number
-  
+
   // handles negative and percentage values
   function parseRGBNumber( str ) {
     var multiplier = 1;
-    
+
     // if it's a percentage, strip it off and handle it that way
     if ( str.charAt( str.length - 1 ) === '%' ) {
       multiplier = 2.55;
       str = str.slice( 0, str.length - 1 );
     }
-    
+
     return Math.round( parseInt( str, 10 ) * multiplier );
   }
-  
+
   Color.formatParsers = [
     {
       // 'transparent'
@@ -151,7 +151,7 @@ define( function( require ) {
       }
     }
   ];
-  
+
   // see http://www.w3.org/TR/css3-color/
   Color.hueToRGB = function( m1, m2, h ) {
     if ( h < 0 ) {
@@ -180,7 +180,7 @@ define( function( require ) {
   Color.toColor = function( colorSpec ) {
     return colorSpec instanceof Color ? colorSpec : new Color( colorSpec );
   };
-  
+
   /**
    * Convenience function that converts a color spec to a color object if
    * necessary, or simply returns the color object if not.
@@ -189,50 +189,50 @@ define( function( require ) {
   Color.toColor = function( colorSpec ) {
     return colorSpec instanceof Color ? colorSpec : new Color( colorSpec );
   };
-  
+
   Color.prototype = {
     constructor: Color,
-    
+
     copy: function() {
       return new Color( this.r, this.g, this.b, this.a );
     },
-    
+
     // red, integral 0-255
     getRed: function() { return this.r; },
     setRed: function( value ) { return this.setRGBA( value, this.g, this.b, this.a ); },
     get red() { return this.getRed(); },
     set red( value ) { return this.setRed( value ); },
-    
+
     // green, integral 0-255
     getGreen: function() { return this.g; },
     setGreen: function( value ) { return this.setRGBA( this.r, value, this.b, this.a ); },
     get green() { return this.getGreen(); },
     set green( value ) { return this.setGreen( value ); },
-    
+
     // blue, integral 0-255
     getBlue: function() { return this.b; },
     setBlue: function( value ) { return this.setRGBA( this.r, this.g, value, this.a ); },
     get blue() { return this.getBlue(); },
     set blue( value ) { return this.setBlue( value ); },
-    
+
     // alpha, floating 0-1
     getAlpha: function() { return this.a; },
     setAlpha: function( value ) { return this.setRGBA( this.r, this.g, this.b, value ); },
     get alpha() { return this.getAlpha(); },
     set alpha( value ) { return this.setAlpha( value ); },
-    
+
     // RGB integral between 0-255, alpha (float) between 0-1
     setRGBA: function( red, green, blue, alpha ) {
       this.r = Math.round( clamp( red, 0, 255 ) );
       this.g = Math.round( clamp( green, 0, 255 ) );
       this.b = Math.round( clamp( blue, 0, 255 ) );
       this.a = clamp( alpha, 0, 1 );
-      
+
       this.updateColor(); // update the cached value
-      
+
       return this; // allow chaining
     },
-    
+
     computeCSS: function() {
       if ( this.a === 1 ) {
         return 'rgb(' + this.r + ',' + this.g + ',' + this.b + ')';
@@ -241,52 +241,52 @@ define( function( require ) {
         return 'rgba(' + this.r + ',' + this.g + ',' + this.b + ',' + alphaString + ')';
       }
     },
-    
+
     toCSS: function() {
       // verify that the cached value is correct (in debugging builds only, defeats the point of caching otherwise)
       assert && assert( this._css === this.computeCSS(), 'CSS cached value is ' + this._css + ', but the computed value appears to be ' + this.computeCSS() );
-      
+
       return this._css;
     },
-    
+
     // called to update the interally cached CSS value
     updateColor: function() {
       assert && assert( !this.immutable, 'Cannot modify an immutable color' );
-      
+
       var oldCSS = this._css;
       this._css = this.computeCSS();
-      
+
       // notify listeners if it changed
       if ( oldCSS !== this._css && this.listeners.length ) {
         var listeners = this.listeners.slice( 0 ); // defensive copy. consider removing if it's a performance bottleneck?
         var length = listeners.length;
-        
+
         for ( var i = 0; i < length; i++ ) {
           listeners[i]();
         }
       }
     },
-    
+
     // allow setting this Color to be immutable when assertions are disabled. any change will throw an error
     setImmutable: function() {
       if ( assert ) {
         this.immutable = true;
       }
-      
+
       return this; // allow chaining
     },
-    
+
     // to what value a Canvas's context.fillStyle should be set
     getCanvasStyle: function() {
       return this.toCSS(); // should be inlined, leave like this for future maintainability
     },
-    
+
     // TODO: make a getHue, getSaturation, getLightness. we can then expose them via ES5!
     setHSLA: function( hue, saturation, lightness, alpha ) {
       hue = ( hue % 360 ) / 360;                    // integer modulo 360
       saturation = clamp( saturation / 100, 0, 1 ); // percentage
       lightness = clamp( lightness / 100, 0, 1 );   // percentage
-      
+
       // see http://www.w3.org/TR/css3-color/
       var m1, m2;
       if ( lightness < 0.5 ) {
@@ -295,32 +295,32 @@ define( function( require ) {
         m2 = lightness + saturation - lightness * saturation;
       }
       m1 = lightness * 2 - m2;
-      
+
       this.r = Math.round( Color.hueToRGB( m1, m2, hue + 1/3 ) * 255 );
       this.g = Math.round( Color.hueToRGB( m1, m2, hue ) * 255 );
       this.b = Math.round( Color.hueToRGB( m1, m2, hue - 1/3 ) * 255 );
       this.a = clamp( alpha, 0, 1 );
-      
+
       this.updateColor(); // update the cached value
-      
+
       return this; // allow chaining
     },
-    
+
     equals: function( color ) {
       return this.r === color.r && this.g === color.g && this.b === color.b && this.a === color.a;
     },
-    
+
     withAlpha: function( alpha ) {
       return new Color( this.r, this.g, this.b, alpha );
     },
-    
+
     checkFactor: function( factor ) {
       if ( factor < 0 || factor > 1 ) {
         throw new Error( 'factor must be between 0 and 1: ' + factor );
       }
       return ( factor === undefined ) ? 0.7 : factor;
     },
-    
+
     // matches Java's Color.brighter()
     brighterColor: function( factor ) {
       factor = this.checkFactor( factor );
@@ -329,7 +329,7 @@ define( function( require ) {
       var blue  = Math.min( 255, Math.floor( this.b / factor ) );
       return new Color( red, green, blue, this.a );
     },
-    
+
     /**
      * Brightens a color in RGB space. Useful when creating gradients from a
      * single base color.
@@ -345,7 +345,7 @@ define( function( require ) {
       var blue = Math.min( 255, this.getBlue() + Math.floor( factor * ( 255 - this.getBlue() ) ) );
       return new Color( red, green, blue, this.getAlpha() );
     },
-    
+
     // matches Java's Color.darker()
     darkerColor: function( factor ) {
       factor = this.checkFactor( factor );
@@ -354,7 +354,7 @@ define( function( require ) {
       var blue  = Math.max( 0, Math.floor( factor * this.b ) );
       return new Color( red, green, blue, this.a );
     },
-    
+
     /**
      * Darken a color in RGB space. Useful when creating gradients from a single
      * base color.
@@ -370,7 +370,7 @@ define( function( require ) {
       var blue = Math.max( 0, this.getBlue() - Math.floor( factor * this.getBlue() ) );
       return new Color( red, green, blue, this.getAlpha() );
     },
-    
+
     /*
      * Like colorUtilsBrighter/Darker, however factor should be in the range -1 to 1, and it will call:
      *   colorUtilsBrighter( factor )   for factor >  0
@@ -388,18 +388,18 @@ define( function( require ) {
         return this.colorUtilsDarker( -factor );
       }
     },
-    
+
     /*---------------------------------------------------------------------------*
     * listeners TODO: consider mixing in this behavior, it's common
     *----------------------------------------------------------------------------*/
-    
+
     // listener should be a callback expecting no arguments, listener() will be called when the color changes
     addChangeListener: function( listener ) {
       assert && assert( listener !== undefined && listener !== null, 'Verify that the listener exists' );
       assert && assert( !_.contains( this.listeners, listener ) );
       this.listeners.push( listener );
     },
-    
+
     removeChangeListener: function( listener ) {
       assert && assert( _.contains( this.listeners, listener ) );
       this.listeners.splice( _.indexOf( this.listeners, listener ), 1 );
@@ -409,7 +409,7 @@ define( function( require ) {
       return this.constructor.name + "[r:" + this.r + " g:" + this.g + " b:" + this.b + " a:" + this.a + "]";
     }
   };
-  
+
   Color.basicColorKeywords = {
     aqua:    '00ffff',
     black:   '000000',
@@ -428,7 +428,7 @@ define( function( require ) {
     white:   'ffffff',
     yellow:  'ffff00'
   };
-  
+
   Color.colorKeywords = {
     aliceblue:            'f0f8ff',
     antiquewhite:         'faebd7',
@@ -574,7 +574,7 @@ define( function( require ) {
     yellow:               'ffff00',
     yellowgreen:          '9acd32'
   };
-  
+
   // Java compatibility
   Color.BLACK      = new Color( 0,   0,   0   ).setImmutable();
   Color.BLUE       = new Color( 0,   0,   255 ).setImmutable();

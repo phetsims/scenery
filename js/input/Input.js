@@ -21,17 +21,17 @@
 
 define( function( require ) {
   'use strict';
-  
+
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var scenery = require( 'SCENERY/scenery' );
-  
+
   require( 'SCENERY/util/Trail' );
   require( 'SCENERY/input/Mouse' );
   require( 'SCENERY/input/Touch' );
   require( 'SCENERY/input/Pen' );
   require( 'SCENERY/input/Event' );
   var BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
-  
+
   // listenerTarget is the DOM node (window/document/element) to which DOM event listeners will be attached
   scenery.Input = function Input( rootNode, listenerTarget, batchDOMEvents, enablePointerEvents, pointFromEvent ) {
     this.rootNode = rootNode;
@@ -40,26 +40,26 @@ define( function( require ) {
     this.enablePointerEvents = enablePointerEvents;
     this.pointFromEvent = pointFromEvent;
     this.displayUpdateOnEvent = false;
-    
+
     //OHTWO @deprecated
     this.batchedCallbacks = []; // cleared every frame
-    
+
     this.batchedEvents = [];
 
     //Pointer for mouse, only created lazily on first mouse event, so no mouse is allocated on tablets
     this.mouse = null;
 
     this.pointers = [];
-    
+
     this.listenerReferences = [];
-    
+
     this.eventLog = [];     // written when recording event input. can be overwritten to the empty array to reset. Strings relative to this class (prefix "rootNode.input.")
     this.logEvents = false; // can be set to true to cause Scenery to record all input calls to eventLog
 
     this.pointerAddedListeners = [];
-    
+
     var input = this;
-    
+
     // unique to this input instance
     this.onpointerdown     = function onpointerdown(     domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE,    input.pointerDown,   false ); };
     this.onpointerup       = function onpointerup(       domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE,    input.pointerUp,     true  ); };
@@ -85,10 +85,10 @@ define( function( require ) {
     this.uselessListener   = function uselessListener(   domEvent ) {};
   };
   var Input = scenery.Input;
-  
+
   Input.prototype = {
     constructor: Input,
-    
+
     batchEvent: function( domEvent, batchType, callback, triggerImmediate ) {
       this.batchedEvents.push( BatchedDOMEvent.createFromPool( domEvent, batchType, callback ) );
       if ( triggerImmediate || !this.batchDOMEvents ) {
@@ -97,14 +97,14 @@ define( function( require ) {
       if ( this.displayUpdateOnEvent ) {
         //OHTWO TODO: update the display
       }
-      
+
       domEvent.preventDefault();
     },
-    
+
     fireBatchedEvents: function() {
       if ( this.batchedEvents.length ) {
         sceneryEventLog && sceneryEventLog( 'Input.fireBatchedEvents length:' + this.batchedEvents.length );
-        
+
         // needs to be done in order
         var len = this.batchedEvents.length;
         for ( var i = 0; i < len; i++ ) {
@@ -115,58 +115,58 @@ define( function( require ) {
         cleanArray( this.batchedEvents );
       }
     },
-    
+
     pointerListenerTypes: [ 'pointerdown', 'pointerup', 'pointermove', 'pointerover', 'pointerout', 'pointercancel' ],
     msPointerListenerTypes: [ 'MSPointerDown', 'MSPointerUp', 'MSPointerMove', 'MSPointerOver', 'MSPointerOut', 'MSPointerCancel' ],
     touchListenerTypes: [ 'touchstart', 'touchend', 'touchmove', 'touchcancel' ],
     mouseListenerTypes: [ 'mousedown', 'mouseup', 'mousemove', 'mouseover', 'mouseout' ],
-    
+
     // W3C spec for pointer events
     canUsePointerEvents: function() {
       return window.navigator && window.navigator.pointerEnabled && this.enablePointerEvents;
     },
-    
+
     // MS spec for pointer event
     canUseMSPointerEvents: function() {
       return window.navigator && window.navigator.msPointerEnabled && this.enablePointerEvents;
     },
-    
+
     getUsedEventTypes: function() {
       var eventTypes;
-      
+
       if ( this.canUsePointerEvents() ) {
         // accepts pointer events corresponding to the spec at http://www.w3.org/TR/pointerevents/
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'Detected pointer events support, using that instead of mouse/touch events' );
-        
+
         eventTypes = this.pointerListenerTypes;
       } else if ( this.canUseMSPointerEvents() ) {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'Detected MS pointer events support, using that instead of mouse/touch events' );
-        
+
         eventTypes = this.msPointerListenerTypes;
       } else {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'No pointer events support detected, using mouse/touch events' );
-        
+
         eventTypes = this.touchListenerTypes.concat( this.mouseListenerTypes );
       }
-      
+
       return eventTypes;
     },
-    
+
     connectListeners: function() {
       this.processListeners( true );
     },
-    
+
     disconnectListeners: function() {
       this.processListeners( false );
     },
-    
+
     // @param addOrRemove: true if adding, false if removing
     processListeners: function( addOrRemove ) {
       var eventTypes = this.getUsedEventTypes();
-      
+
       for ( var i = 0; i < eventTypes.length; i++ ) {
         var type = eventTypes[i];
-        
+
         // work around iOS Safari 7 not sending touch events to Scenes contained in an iframe
         if ( this.listenerTarget === window ) {
           if ( addOrRemove ) {
@@ -175,10 +175,10 @@ define( function( require ) {
             document.removeEventListener( type, this.uselessListener );
           }
         }
-        
+
         var callback = this['on' + type];
         assert && assert( !!callback );
-        
+
         if ( addOrRemove ) {
           this.listenerTarget.addEventListener( type, callback, false ); // don't use capture for now
         } else {
@@ -186,7 +186,7 @@ define( function( require ) {
         }
       }
     },
-    
+
     addPointer: function( pointer ) {
       this.pointers.push( pointer );
 
@@ -208,7 +208,7 @@ define( function( require ) {
         this.pointerAddedListeners.splice( index, index + 1 );
       }
     },
-    
+
     removePointer: function( pointer ) {
       // sanity check version, will remove all instances
       for ( var i = this.pointers.length - 1; i >= 0; i-- ) {
@@ -217,7 +217,7 @@ define( function( require ) {
         }
       }
     },
-    
+
     findTouchById: function( id ) {
       var i = this.pointers.length;
       while ( i-- ) {
@@ -228,7 +228,7 @@ define( function( require ) {
       }
       return undefined;
     },
-    
+
     findKeyByEvent: function( event ) {
       assert && assert( event.hasOwnProperty( 'keyCode' ) && event.hasOwnProperty('charCode'), 'Assumes the KeyboardEvent has keyCode and charCode properties' );
       var result = _.find( this.pointers, function( pointer ) {
@@ -244,7 +244,7 @@ define( function( require ) {
       this.mouse = new scenery.Mouse();
       this.addPointer( this.mouse );
     },
-    
+
     mouseDown: function( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseDown(' + Input.debugText( point, event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'mouseDown(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
@@ -255,7 +255,7 @@ define( function( require ) {
       }
       this.downEvent( this.mouse, event );
     },
-    
+
     mouseUp: function( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseUp(' + Input.debugText( point, event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'mouseUp(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
@@ -266,7 +266,7 @@ define( function( require ) {
       }
       this.upEvent( this.mouse, event );
     },
-    
+
     mouseMove: function( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseMove(' + Input.debugText( point, event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'mouseMove(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
@@ -274,7 +274,7 @@ define( function( require ) {
       this.mouse.move( point, event );
       this.moveEvent( this.mouse, event );
     },
-    
+
     mouseOver: function( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseOver(' + Input.debugText( point, event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'mouseOver(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
@@ -282,7 +282,7 @@ define( function( require ) {
       this.mouse.over( point, event );
       // TODO: how to handle mouse-over (and log it)
     },
-    
+
     mouseOut: function( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseOut(' + Input.debugText( point, event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'mouseOut(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
@@ -290,7 +290,7 @@ define( function( require ) {
       this.mouse.out( point, event );
       // TODO: how to handle mouse-out (and log it)
     },
-    
+
     // called for each touch point
     touchStart: function( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchStart(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
@@ -299,7 +299,7 @@ define( function( require ) {
       this.addPointer( touch );
       this.downEvent( touch, event );
     },
-    
+
     touchEnd: function( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchEnd(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'touchEnd(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
@@ -315,7 +315,7 @@ define( function( require ) {
         assert && assert( false, 'Touch not found for touchEnd: ' + id );
       }
     },
-    
+
     touchMove: function( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchMove(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'touchMove(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
@@ -327,7 +327,7 @@ define( function( require ) {
         assert && assert( false, 'Touch not found for touchMove: ' + id );
       }
     },
-    
+
     touchCancel: function( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchCancel(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'touchCancel(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
@@ -343,7 +343,7 @@ define( function( require ) {
         assert && assert( false, 'Touch not found for touchCancel: ' + id );
       }
     },
-    
+
     // called for each touch point
     penStart: function( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penStart(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
@@ -352,7 +352,7 @@ define( function( require ) {
       this.addPointer( pen );
       this.downEvent( pen, event );
     },
-    
+
     penEnd: function( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penEnd(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'penEnd(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
@@ -368,7 +368,7 @@ define( function( require ) {
         assert && assert( false, 'Pen not found for penEnd: ' + id );
       }
     },
-    
+
     penMove: function( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penMove(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'penMove(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
@@ -380,7 +380,7 @@ define( function( require ) {
         assert && assert( false, 'Pen not found for penMove: ' + id );
       }
     },
-    
+
     penCancel: function( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penCancel(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       if ( this.logEvents ) { this.eventLog.push( 'penCancel(\'' + id + '\',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
@@ -396,7 +396,7 @@ define( function( require ) {
         assert && assert( false, 'Pen not found for penCancel: ' + id );
       }
     },
-    
+
     pointerDown: function( id, type, point, event ) {
       switch ( type ) {
         case 'mouse':
@@ -414,7 +414,7 @@ define( function( require ) {
           }
       }
     },
-    
+
     pointerUp: function( id, type, point, event ) {
       switch ( type ) {
         case 'mouse':
@@ -432,7 +432,7 @@ define( function( require ) {
           }
       }
     },
-    
+
     pointerCancel: function( id, type, point, event ) {
       switch ( type ) {
         case 'mouse':
@@ -452,7 +452,7 @@ define( function( require ) {
           }
       }
     },
-    
+
     pointerMove: function( id, type, point, event ) {
       switch ( type ) {
         case 'mouse':
@@ -470,126 +470,126 @@ define( function( require ) {
           }
       }
     },
-    
+
     pointerOver: function( id, type, point, event ) {
-      
+
     },
-    
+
     pointerOut: function( id, type, point, event ) {
-      
+
     },
-    
+
     pointerEnter: function( id, type, point, event ) {
-      
+
     },
-    
+
     pointerLeave: function( id, type, point, event ) {
-      
+
     },
-    
+
     upEvent: function( pointer, event ) {
       var trail = this.rootNode.trailUnderPointer( pointer ) || new scenery.Trail( this.rootNode );
-      
+
       this.dispatchEvent( trail, 'up', pointer, event, true );
-      
+
       // touch pointers are transient, so fire exit/out to the trail afterwards
       if ( pointer.isTouch ) {
         this.exitEvents( pointer, event, trail, 0, true );
       }
-      
+
       pointer.trail = trail;
     },
-    
+
     downEvent: function( pointer, event ) {
       var trail = this.rootNode.trailUnderPointer( pointer ) || new scenery.Trail( this.rootNode );
-      
+
       // touch pointers are transient, so fire enter/over to the trail first
       if ( pointer.isTouch ) {
         this.enterEvents( pointer, event, trail, 0, true );
       }
-      
+
       this.dispatchEvent( trail, 'down', pointer, event, true );
-      
+
       pointer.trail = trail;
     },
-    
+
     moveEvent: function( pointer, event ) {
       var changed = this.branchChangeEvents( pointer, event, true );
       if ( changed ) {
         sceneryEventLog && sceneryEventLog( 'branch change due to move event' );
       }
     },
-    
+
     cancelEvent: function( pointer, event ) {
       var trail = this.rootNode.trailUnderPointer( pointer ) || new scenery.Trail( this.rootNode );
-      
+
       this.dispatchEvent( trail, 'cancel', pointer, event, true );
-      
+
       // touch pointers are transient, so fire exit/out to the trail afterwards
       if ( pointer.isTouch ) {
         this.exitEvents( pointer, event, trail, 0, true );
       }
-      
+
       pointer.trail = trail;
     },
-    
+
     // return whether there was a change
     branchChangeEvents: function( pointer, event, isMove ) {
       var trail = this.rootNode.trailUnderPointer( pointer ) || new scenery.Trail( this.rootNode );
       sceneryEventLog && sceneryEventLog( 'checking branch change: ' + trail.toString() + ' at ' + pointer.point.toString() );
       var oldTrail = pointer.trail || new scenery.Trail( this.rootNode ); // TODO: consider a static trail reference
-      
+
       var lastNodeChanged = oldTrail.lastNode() !== trail.lastNode();
       if ( !lastNodeChanged && !isMove ) {
         // bail out if nothing needs to be done
         return false;
       }
-      
+
       var branchIndex = scenery.Trail.branchIndex( trail, oldTrail );
       var isBranchChange = branchIndex !== trail.length || branchIndex !== oldTrail.length;
       sceneryEventLog && isBranchChange && sceneryEventLog( 'branch change from ' + oldTrail.toString() + ' to ' + trail.toString() );
-      
+
       // event order matches http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
       if ( isMove ) {
         this.dispatchEvent( trail, 'move', pointer, event, true );
       }
-      
+
       // we want to approximately mimic http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
       // TODO: if a node gets moved down 1 depth, it may see both an exit and enter?
       this.exitEvents( pointer, event, oldTrail, branchIndex, lastNodeChanged );
       this.enterEvents( pointer, event, trail, branchIndex, lastNodeChanged );
-      
+
       pointer.trail = trail;
       return isBranchChange;
     },
-    
+
     enterEvents: function( pointer, event, trail, branchIndex, lastNodeChanged ) {
       if ( trail.length > branchIndex ) {
         for ( var newIndex = trail.length - 1; newIndex >= branchIndex; newIndex-- ) {
           this.dispatchEvent( trail.slice( 0, newIndex + 1 ), 'enter', pointer, event, false );
         }
       }
-      
+
       if ( lastNodeChanged ) {
         this.dispatchEvent( trail, 'over', pointer, event, true );
       }
     },
-    
+
     exitEvents: function( pointer, event, trail, branchIndex, lastNodeChanged ) {
       if ( lastNodeChanged ) {
         this.dispatchEvent( trail, 'out', pointer, event, true );
       }
-      
+
       if ( trail.length > branchIndex ) {
         for ( var oldIndex = branchIndex; oldIndex < trail.length; oldIndex++ ) {
           this.dispatchEvent( trail.slice( 0, oldIndex + 1 ), 'exit', pointer, event, false );
         }
       }
     },
-    
+
     validatePointers: function() {
       var that = this;
-      
+
       var i = this.pointers.length;
       while ( i-- ) {
         var pointer = this.pointers[i];
@@ -601,7 +601,7 @@ define( function( require ) {
         }
       }
     },
-    
+
     dispatchEvent: function( trail, type, pointer, event, bubbles ) {
       sceneryEventLog && sceneryEventLog( 'Input: ' + type + ' on ' + trail.toString() + ' for pointer ' + pointer.toString() + ' at ' + pointer.point.toString() );
       if ( !trail ) {
@@ -612,7 +612,7 @@ define( function( require ) {
           throw e;
         }
       }
-      
+
       // TODO: is there a way to make this event immutable?
       var inputEvent = new scenery.Event( {
         trail: trail, // {Trail} path to the leaf-most node, ordered list, from root to leaf
@@ -622,35 +622,35 @@ define( function( require ) {
         currentTarget: null, // {Node} whatever node you attached the listener to, null when passed to a Pointer,
         target: trail.lastNode() // {Node} leaf-most node in trail
       } );
-      
+
       // first run through the pointer's listeners to see if one of them will handle the event
       this.dispatchToPointer( type, pointer, inputEvent );
-      
+
       // if not yet handled, run through the trail in order to see if one of them will handle the event
       // at the base of the trail should be the scene node, so the scene will be notified last
       this.dispatchToTargets( trail, pointer, type, inputEvent, bubbles );
-      
+
       // TODO: better interactivity handling?
       if ( !trail.lastNode().interactive && !pointer.isKey && event && event.preventDefault ) {
         event.preventDefault();
       }
     },
-    
+
     // TODO: reduce code sharing between here and dispatchToTargets!
     dispatchToPointer: function( type, pointer, inputEvent ) {
       if ( inputEvent.aborted || inputEvent.handled ) {
         return;
       }
-      
+
       var specificType = pointer.type + type; // e.g. mouseup, touchup
-      
+
       var pointerListeners = pointer.listeners.slice( 0 ); // defensive copy
       for ( var i = 0; i < pointerListeners.length; i++ ) {
         var listener = pointerListeners[i];
-        
+
         // if a listener returns true, don't handle any more
         var aborted = false;
-        
+
         if ( !aborted && listener[specificType] ) {
           listener[specificType]( inputEvent );
           aborted = inputEvent.aborted;
@@ -659,33 +659,33 @@ define( function( require ) {
           listener[type]( inputEvent );
           aborted = inputEvent.aborted;
         }
-        
+
         // bail out if the event is aborted, so no other listeners are triggered
         if ( aborted ) {
           return;
         }
       }
     },
-    
+
     dispatchToTargets: function( trail, pointer, type, inputEvent, bubbles ) {
       if ( inputEvent.aborted || inputEvent.handled ) {
         return;
       }
-      
+
       var specificType = pointer.type + type; // e.g. mouseup, touchup
-      
+
       for ( var i = trail.length - 1; i >= 0; bubbles ? i-- : i = -1 ) {
         var target = trail.nodes[i];
         inputEvent.currentTarget = target;
-        
+
         var listeners = target.getInputListeners();
-        
+
         for ( var k = 0; k < listeners.length; k++ ) {
           var listener = listeners[k];
-          
+
           // if a listener returns true, don't handle any more
           var aborted = false;
-          
+
           if ( !aborted && listener[specificType] ) {
             listener[specificType]( inputEvent );
             aborted = inputEvent.aborted;
@@ -694,13 +694,13 @@ define( function( require ) {
             listener[type]( inputEvent );
             aborted = inputEvent.aborted;
           }
-          
+
           // bail out if the event is aborted, so no other listeners are triggered
           if ( aborted ) {
             return;
           }
         }
-        
+
         // if the input event was handled, don't follow the trail down another level
         if ( inputEvent.handled ) {
           return;
@@ -708,7 +708,7 @@ define( function( require ) {
       }
     }
   };
-  
+
   Input.serializeDomEvent = function serializeDomEvent( domEvent ) {
     var lines = [];
     for ( var prop in domEvent ) {
@@ -719,7 +719,7 @@ define( function( require ) {
           for ( var i = 0; i < domEvent[prop].length; i++ ) {
             // according to spec (http://www.w3.org/TR/touch-events/), this is not an Array, but a TouchList
             var touch = domEvent[prop].item( i );
-            
+
             arr.push( serializeDomEvent( touch ) );
           }
           lines.push( prop + ':[' + arr.join( ',' ) + ']' );
@@ -730,15 +730,15 @@ define( function( require ) {
     }
     return '{' + lines.join( ',' ) + '}';
   };
-  
+
   Input.serializeVector2 = function( vector ) {
     return 'dot(' + vector.x + ',' + vector.y + ')';
   };
-  
+
   Input.debugText = function( vector, domEvent ) {
     return vector.x + ',' + vector.y + ' ' + domEvent.timeStamp + ' ' + domEvent.type;
   };
-  
+
   // maps the current MS pointer types onto the pointer spec
   Input.msPointerType = function( evt ) {
     if ( evt.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_TOUCH ) {
@@ -751,6 +751,6 @@ define( function( require ) {
       return evt.pointerType; // hope for the best
     }
   };
-  
+
   return Input;
 } );

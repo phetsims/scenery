@@ -3,40 +3,40 @@
 <head>
   <meta charset="utf-8"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  
+
   <title>Shape tests - Scenery</title>
-  
+
   <!-- jQuery and LoDash are dependencies -->
   <script src="../../sherpa/jquery-2.1.0.min.js"></script>
   <script src="../../sherpa/lodash-2.4.1.min.js"></script>
   <script src="../../sherpa/has.js"></script>
-  
+
   <script data-main="../js/config.js" src="../../sherpa/require-2.1.11.js"></script>
-  
+
   <script>
   requirejs( [ 'main', '../../kite/js/main', '../../dot/js/main' ], function( scenery, kite, dot ) {
     var scene = new scenery.Scene( $( '#main' ) );
-    
+
     function testPath( path ) {
       scene.addChild( path );
       scene.addChild( new scenery.Path( kite.Shape.bounds( path.getBounds() ), {
         fill: 'rgba(0,255,0,0.3)'
       } ) );
     }
-    
+
     function testShape( shape ) {
       testPath( new scenery.Path( shape, {
         fill: '#000000'
       } ) );
     }
-    
+
     testShape( kite.Shape.circle( 50, 50, 25 ) );
     // testShape( kite.Shape.arc( 150, 50, 50, Math.PI / 4, 3 * Math.PI / 4, false ) );
     testShape( kite.Shape.arc( 150, 50, 50, Math.PI / 4, 3 * Math.PI / 4, false ).transformed( dot.Matrix3.rotation2( 0 ) ) );
     testShape( kite.Shape.arc( 150, 50, 50, Math.PI / 4, 3 * Math.PI / 4, false ).transformed( dot.Matrix3.rotation2( -Math.PI / 8 ) ) );
     testShape( kite.Shape.arc( 150, 50, 50, Math.PI / 4, 3 * Math.PI / 4, false ).transformed( dot.Matrix3.rotation2( Math.PI / 8 ) ) );
     testShape( kite.Shape.arc( 150, 50, 50, Math.PI / 4, 3 * Math.PI / 4, false ).transformed( dot.Matrix3.rotation2( Math.PI / 4 ) ) );
-    
+
     scene.updateScene();
   } );
   </script>

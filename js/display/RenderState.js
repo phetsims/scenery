@@ -25,16 +25,16 @@
 
 define( function( require ) {
   'use strict';
-  
+
   var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/display/Renderer' );
   require( 'SCENERY/util/Trail' );
-  
+
   var RenderState = scenery.RenderState = {};
-  
+
   var emptyObject = {};
-  
+
   /*
    * {param} node               Node      The node whose instance will have this state (inspect the hints / properties on this node)
    * {param} preferredRenderers Renderer  Either 0 (no preference), or a Renderer order bitmask (see Renderer.js)
@@ -53,39 +53,39 @@ define( function( require ) {
   };
   RenderState.RegularState.prototype = {
     constructor: RenderState.RegularState,
-    
+
     initialize: function( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot ) {
       // this should be accurate right now, the pass to update these should have been completed earlier
       var combinedBitmask = node._rendererSummary.bitmask;
-      
+
       this.preferredRenderers = preferredRenderers;
       this.svgRenderer = svgRenderer;
       this.canvasRenderer = canvasRenderer;
       this.isUnderCanvasCache = isUnderCanvasCache;
       this.isDisplayRoot = isDisplayRoot;
-      
+
       this.isBackbone = false;
       this.isTransformed = false;
       this.isInstanceCanvasCache = false;
       this.isSharedCanvasCachePlaceholder = false;
       this.isSharedCanvasCacheSelf = false;
-      
+
       //OHTWO TODO PERFORMANCE: These probably should be 0 (e.g. no renderer), so they are falsy, but that way remain fixednum when set to actual renderers
       this.selfRenderer = null;
       this.groupRenderer = null;
       this.sharedCacheRenderer = null;
-      
+
       var hints = node._hints || emptyObject;
-      
+
       //OHTWO TODO: force the same layer/block for these. temporarily we are creating a backbone, but we should be able
       //            to create a composite and have these handled inside layers
       var isTransparent = node._opacity !== 1;
       var isClipped = node._clipArea !== null;
-      
+
       if ( hints.renderer ) {
         this.preferredRenderers = scenery.Renderer.pushOrderBitmask( this.preferredRenderers, hints.renderer );
       }
-      
+
       // check if we need a backbone or cache
       // if we are under a canvas cache, we will NEVER have a backbone
       // splits are accomplished just by having a backbone
@@ -96,20 +96,20 @@ define( function( require ) {
       } else if ( isTransparent || isClipped || hints.canvasCache ) {
         // everything underneath needs to be renderable with Canvas, otherwise we cannot cache
         assert && assert( ( combinedBitmask & scenery.Renderer.bitmaskCanvas ) !== 0, 'hints.canvasCache provided, but not all node contents can be rendered with Canvas under ' + node.constructor.name );
-        
+
         if ( hints.singleCache ) {
           // TODO: scale options - fixed size, match highest resolution (adaptive), or mipmapped
           if ( isShared ) {
             this.isUnderCanvasCache = true;
             this.isSharedCanvasCacheSelf = true;
-            
+
             //OHTWO TODO: Also consider SVG output
             this.sharedCacheRenderer = scenery.Renderer.bitmaskCanvas;
           } else {
             // everything underneath needs to guarantee that its bounds are valid
             //OHTWO TODO: We'll probably remove this if we go with the "safe bounds" approach
             assert && assert( ( combinedBitmask & scenery.bitmaskBoundsValid ) !== 0, 'hints.singleCache provided, but not all node contents have valid bounds under ' + node.constructor.name );
-            
+
             this.isSharedCanvasCachePlaceholder = true;
           }
         } else {
@@ -118,20 +118,20 @@ define( function( require ) {
           this.groupRenderer = scenery.Renderer.bitmaskCanvas; // disallowing SVG here, so we don't have to break up our SVG group structure
         }
       }
-      
+
       if ( node.isPainted() ) {
         this.setSelfRenderer( node );
       }
-      
+
       return this;
     },
-    
+
     setSelfRenderer: function( node ) {
       if ( this.isUnderCanvasCache ) {
         this.selfRenderer = this.canvasRenderer;
       } else {
         var success = false;
-        
+
         // try preferred order if specified
         if ( this.preferredRenderers ) {
           success = this.trySelfRenderer( node, scenery.Renderer.bitmaskOrderFirst( this.preferredRenderers ), 0 ) ||
@@ -139,18 +139,18 @@ define( function( require ) {
                     this.trySelfRenderer( node, scenery.Renderer.bitmaskOrderThird( this.preferredRenderers ), 0 ) ||
                     this.trySelfRenderer( node, scenery.Renderer.bitmaskOrderFourth( this.preferredRenderers ), 0 );
         }
-        
+
         // fall back to a default order
         success = success ||
                   this.trySelfRenderer( node, scenery.Renderer.bitmaskSVG, this.svgRenderer ) ||
                   this.trySelfRenderer( node, scenery.Renderer.bitmaskCanvas, this.canvasRenderer ) ||
                   this.trySelfRenderer( node, scenery.Renderer.bitmaskDOM, 0 ) ||
                   this.trySelfRenderer( node, scenery.Renderer.bitmaskWebGL, 0 );
-        
+
         assert && assert( success, 'setSelfRenderer failure?' );
       }
     },
-    
+
     // returns success of setting this.selfRenderer. renderer is expected to be a 1-bit bitmask, with rendererSpecifics either 0 (autodetect) or a full renderer bitmask
     trySelfRenderer: function( node, renderer, rendererSpecifics ) {
       // if provided renderer === 0, we won't be compatible
@@ -174,32 +174,32 @@ define( function( require ) {
       }
       return compatible;
     },
-    
+
     getStateForDescendant: function( node ) {
       // TODO: allocation (pool this)
       return RenderState.RegularState.createFromPool(
         node,
-        
+
         // default renderer when available
         this.preferredRenderers,
-        
+
         // default SVG renderer settings
         this.svgRenderer,
-        
+
         // default Canvas renderer settings
         this.canvasRenderer,
-        
+
         // isUnderCanvasCache
         this.isUnderCanvasCache || this.isInstanceCanvasCache || this.isSharedCanvasCacheSelf,
-        
+
         // isShared. No direct descendant is shared, since we create those specially with a new state from createSharedCacheState
         false,
-        
+
         // isDisplayRoot
         false
       );
     },
-    
+
     /*
      * Whether we can just update the state on an Instance when changing from this state => otherState.
      * This is generally not possible if there is a change in whether the instance should be a transform root (e.g. backbone/single-cache),
@@ -209,7 +209,7 @@ define( function( require ) {
       return this.isTransformed === otherState.isTransformed && //OHTWO TODO: allow mutating based on this change
              this.isSharedCanvasCachePlaceholder === otherState.isSharedCanvasCachePlaceholder; //OHTWO TODO: allow mutating based on this change
     },
-    
+
     toString: function() {
       var result = 'S[ ' +
                    ( this.isDisplayRoot ? 'displayRoot ' : '' ) +
@@ -224,7 +224,7 @@ define( function( require ) {
       return result + ']';
     }
   };
-  
+
   RenderState.RegularState.createRootState = function( node ) {
     var baseState = RenderState.RegularState.createFromPool(
       node,                           // trail
@@ -237,7 +237,7 @@ define( function( require ) {
     );
     return baseState;
   };
-  
+
   RenderState.RegularState.createSharedCacheState = function( node ) {
     var baseState = RenderState.RegularState.createFromPool(
       node,                             // trail
@@ -250,7 +250,7 @@ define( function( require ) {
     );
     return baseState;
   };
-  
+
   /* jshint -W064 */
   Poolable( RenderState.RegularState, {
     constructorDuplicateFactory: function( pool ) {
@@ -263,6 +263,6 @@ define( function( require ) {
       };
     }
   } );
-  
+
   return RenderState;
 } );

@@ -13,22 +13,22 @@
 
 define( function( require ) {
   'use strict';
-  
+
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
   var Drawable = require( 'SCENERY/display/Drawable' );
-  
+
   scenery.ChangeInterval = function ChangeInterval( drawableBefore, drawableAfter ) {
     this.initialize( drawableBefore, drawableAfter );
   };
   var ChangeInterval = scenery.ChangeInterval;
-  
+
   inherit( Object, ChangeInterval, {
     initialize: function( drawableBefore, drawableAfter ) {
       assert && assert( drawableBefore === null || ( drawableBefore instanceof Drawable ) );
       assert && assert( drawableAfter === null || ( drawableAfter instanceof Drawable ) );
-      
+
       // all @public, for modification
       this.nextChangeInterval = null;       // {ChangeInterval|null}, singly-linked list
       this.drawableBefore = drawableBefore; // {Drawable|null}, the drawable before our ChangeInterval that is not
@@ -41,61 +41,61 @@ define( function( require ) {
                                             // that (null-to-null is now the state of it).
       return this;
     },
-    
+
     dispose: function() {
       this.nextChangeInterval = null;
       this.drawableBefore = null;
       this.drawableAfter = null;
-      
+
       this.freeToPool();
     },
-    
+
     // Make our interval as tight as possible (we may have over-estimated it before)
     constrict: function() {
       var changed = false;
-      
+
       if ( this.isEmpty() ) { return true; }
-      
+
       // Notes: We don't constrict null boundaries, and we should never constrict a non-null boundary to a null
       // boundary (this the this.drawableX.Xdrawable truthy check), since going from a null-to-X interval to
       // null-to-null has a completely different meaning. This should be checked by a client of this API.
-      
+
       while ( this.drawableBefore && this.drawableBefore.nextDrawable === this.drawableBefore.oldNextDrawable ) {
         this.drawableBefore = this.drawableBefore.nextDrawable;
         changed = true;
-        
+
         // check for a totally-collapsed state
         if ( !this.drawableBefore ) {
           assert && assert( !this.drawableAfter );
           this.collapsedEmpty = true;
         }
-        
+
         // if we are empty, bail out before continuing
         if ( this.isEmpty() ) { return true; }
       }
-      
+
       while ( this.drawableAfter && this.drawableAfter.previousDrawable === this.drawableAfter.oldPreviousDrawable ) {
         this.drawableAfter = this.drawableAfter.previousDrawable;
         changed = true;
-        
+
         // check for a totally-collapsed state
         if ( !this.drawableAfter ) {
           assert && assert( !this.drawableBefore );
           this.collapsedEmpty = true;
         }
-        
+
         // if we are empty, bail out before continuing
         if ( this.isEmpty() ) { return true; }
       }
-      
+
       return changed;
     },
-    
+
     isEmpty: function() {
       return this.collapsedEmpty || ( this.drawableBefore !== null && this.drawableBefore === this.drawableAfter );
     }
   } );
-  
+
   /* jshint -W064 */
   Poolable( ChangeInterval, {
     constructorDuplicateFactory: function( pool ) {
@@ -110,13 +110,13 @@ define( function( require ) {
       };
     }
   } );
-  
+
   // creates a ChangeInterval that will be disposed after syncTree is complete (see Display phases)
   ChangeInterval.newForDisplay = function( drawableBefore, drawableAfter, display ) {
     var changeInterval = ChangeInterval.createFromPool( drawableBefore, drawableAfter );
     display.markChangeIntervalToDispose( changeInterval );
     return changeInterval;
   };
-  
+
   return ChangeInterval;
 } );

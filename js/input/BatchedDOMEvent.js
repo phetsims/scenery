@@ -10,37 +10,37 @@
 
 define( function( require ) {
   'use strict';
-  
+
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
-  
+
   scenery.BatchedDOMEvent = function BatchedDOMEvent( domEvent, type, callback ) {
     assert && assert( domEvent, 'for some reason, there is no DOM event?' );
-    
+
     // called multiple times due to pooling, this should be re-entrant
     this.domEvent = domEvent;
     this.type = type;
     this.callback = callback;
   };
   var BatchedDOMEvent = scenery.BatchedDOMEvent;
-  
+
   // enum for type
   BatchedDOMEvent.POINTER_TYPE = 1;
   BatchedDOMEvent.MS_POINTER_TYPE = 2;
   BatchedDOMEvent.TOUCH_TYPE = 3;
   BatchedDOMEvent.MOUSE_TYPE = 4;
-  
+
   inherit( Object, BatchedDOMEvent, {
     run: function( input ) {
       var domEvent = this.domEvent;
       var callback = this.callback;
-      
+
       // process whether anything under the pointers changed before running additional input events
       sceneryEventLog && sceneryEventLog( 'validatePointers from batched event' );
       input.validatePointers();
       if ( input.logEvents ) { input.eventLog.push( 'validatePointers();' ); }
-      
+
       if ( this.type === BatchedDOMEvent.POINTER_TYPE ) {
         callback.call( input, domEvent.pointerId, domEvent.pointerType, input.pointFromEvent( domEvent ), domEvent );
       } else if ( this.type === BatchedDOMEvent.MS_POINTER_TYPE ) {
@@ -49,7 +49,7 @@ define( function( require ) {
         for ( var i = 0; i < domEvent.changedTouches.length; i++ ) {
           // according to spec (http://www.w3.org/TR/touch-events/), this is not an Array, but a TouchList
           var touch = domEvent.changedTouches.item( i );
-          
+
           callback.call( input, touch.identifier, input.pointFromEvent( touch ), domEvent );
         }
       } else if ( this.type === BatchedDOMEvent.MOUSE_TYPE ) {
@@ -58,7 +58,7 @@ define( function( require ) {
         throw new Error( 'bad type value: ' + this.type );
       }
     },
-    
+
     dispose: function() {
       // clear our references
       this.domEvent = null;
@@ -66,11 +66,11 @@ define( function( require ) {
       this.freeToPool();
     }
   } );
-  
+
   BatchedDOMEvent.fromPointerEvent = function( domEvent, pointFromEvent ) {
     return BatchedDOMEvent.createFromPool( domEvent, pointFromEvent( domEvent ), domEvent.pointerId );
   };
-  
+
   /* jshint -W064 */
   Poolable( BatchedDOMEvent, {
     constructorDuplicateFactory: function( pool ) {
@@ -85,6 +85,6 @@ define( function( require ) {
       };
     }
   } );
-  
+
   return BatchedDOMEvent;
 } );
