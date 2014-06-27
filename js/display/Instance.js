@@ -255,9 +255,12 @@ define( function( require ) {
       // NOTE: both of these being null indicates "there are no change intervals", otherwise it assumes it points to
       // a linked-list of change intervals. We use {ChangeInterval}s to hold this information, see ChangeInterval to see
       // the individual properties that are considered part of a change interval.
-      this.firstChangeInterval = null; // {ChangeInterval}, first change interval (should have nextChangeInterval
-                                       // linked-list to lastChangeInterval)
-      this.lastChangeInterval = null;  // {ChangeInterval}, last change interval
+
+      // {ChangeInterval}, first change interval (should have nextChangeInterval linked-list to lastChangeInterval)
+      this.firstChangeInterval = null;
+
+      // {ChangeInterval}, last change interval
+      this.lastChangeInterval = null;
     },
 
     // @public
@@ -301,7 +304,7 @@ define( function( require ) {
       var wasStateless = !oldState;
 
       assert && assert( wasStateless || oldState.isInstanceCompatibleWith( state ),
-                        'Attempt to update to a render state that is not compatible with this instance\'s current state' );
+        'Attempt to update to a render state that is not compatible with this instance\'s current state' );
       // no need to overwrite, should always be the same
       assert && assert( wasStateless || oldState.isTransformed === state.isTransformed );
       assert && assert( !wasStateless || this.children.length === 0, 'We should not have child instances on an instance without state' );
@@ -322,7 +325,8 @@ define( function( require ) {
 
       if ( state.isSharedCanvasCachePlaceholder ) {
         this.sharedSyncTree( state );
-      } else {
+      }
+      else {
         // mark fully-removed instances for disposal, and initialize child instances if we were stateless
         this.prepareChildInstances( state, oldState );
 
@@ -366,7 +370,7 @@ define( function( require ) {
 
       assert && assert( this.firstChangeInterval === null &&
                         this.lastChangeInterval === null,
-                        'sanity checks that cleanSyncTreeResults were called' );
+        'sanity checks that cleanSyncTreeResults were called' );
 
       var firstChangeInterval = null;
       if ( selfChanged ) {
@@ -395,7 +399,8 @@ define( function( require ) {
             if ( currentDrawable ) {
               // there is already an end of the linked list, so just append to it
               Drawable.connectDrawables( currentDrawable, childInstance.firstDrawable, this.display );
-            } else {
+            }
+            else {
               // start out the linked list
               firstDrawable = childInstance.firstDrawable;
             }
@@ -416,7 +421,8 @@ define( function( require ) {
         if ( childInstance.stitchChangeFrame === frameId ) {
           // e.g. it was added, moved, or had visibility changes. requires full change interval
           childInstance.firstChangeInterval = childInstance.lastChangeInterval = ChangeInterval.newForDisplay( null, null, this.display );
-        } else {
+        }
+        else {
           assert && assert( wasIncluded === isIncluded, 'If we do not have stitchChangeFrame activated, our inclusion should not have changed' );
         }
 
@@ -452,22 +458,25 @@ define( function( require ) {
                 currentChangeInterval = childInstance.lastChangeInterval === firstChildChangeInterval ?
                                         currentChangeInterval : // since we are replacing, don't give an origin reference
                                         childInstance.lastChangeInterval;
-              } else {
+              }
+              else {
                 // only a desire to glue from before
                 currentChangeInterval.drawableAfter = childInstance.firstDrawable; // either null or the correct drawable
                 currentChangeInterval.nextChangeInterval = firstChildChangeInterval;
                 currentChangeInterval = childInstance.lastChangeInterval;
               }
-            } else {
+            }
+            else {
               // no changes to the child. grabs the first drawable reference it can
               currentChangeInterval.drawableAfter = childInstance.firstDrawable; // either null or the correct drawable
             }
-          } else if ( firstChildChangeInterval ) {
+          }
+          else if ( firstChildChangeInterval ) {
             firstChangeInterval = firstChangeInterval || firstChildChangeInterval; // store if it is the first
             if ( firstChildChangeInterval.drawableBefore === null ) {
               assert && assert( !currentChangeInterval || lastUnchangedDrawable,
-                                'If we have a current change interval, we should be guaranteed a non-null ' +
-                                'lastUnchangedDrawable' );
+                  'If we have a current change interval, we should be guaranteed a non-null ' +
+                  'lastUnchangedDrawable' );
               firstChildChangeInterval.drawableBefore = lastUnchangedDrawable; // either null or the correct drawable
             }
             if ( currentChangeInterval ) {
@@ -502,7 +511,7 @@ define( function( require ) {
 
       /* jshint -W018 */ // it's really the easiest way to compare if two things (casted to booleans) are the same?
       assert && assert( !!firstChangeInterval === !!currentChangeInterval,
-                        'Presence of first and current change intervals should be equal' );
+        'Presence of first and current change intervals should be equal' );
 
       // Check to see if we are emptied and marked as changed (but without change intervals). This should imply we have
       // no children (and thus no stitchChangeBefore / stitchChangeAfter to use), so we'll want to create a change
@@ -519,7 +528,7 @@ define( function( require ) {
 
       // NOTE: these may get overwritten with the group drawable (in that case, groupSyncTree will read from these)
       this.firstDrawable = this.firstInnerDrawable = firstDrawable;
-      this.lastDrawable  = this.lastInnerDrawable  = currentDrawable; // either null, or the drawable itself
+      this.lastDrawable = this.lastInnerDrawable = currentDrawable; // either null, or the drawable itself
 
       // drawable range checks
       if ( assertSlow ) {
@@ -567,7 +576,8 @@ define( function( require ) {
 
           return true;
         }
-      } else {
+      }
+      else {
         assert && assert( this.selfDrawable === null, 'Non-painted nodes should not have a selfDrawable' );
       }
 
@@ -585,7 +595,8 @@ define( function( require ) {
         var replacementInstance = Instance.createFromPool( this.display, this.trail.copy().addDescendant( childInstance.node, index ) );
         this.replaceInstanceWithIndex( childInstance, replacementInstance, index );
         return replacementInstance;
-      } else {
+      }
+      else {
         return childInstance;
       }
     },
@@ -595,7 +606,7 @@ define( function( require ) {
       assert && assert( ( state.isBackbone ? 1 : 0 ) +
                         ( state.isInstanceCanvasCache ? 1 : 0 ) +
                         ( state.isSharedCanvasCacheSelf ? 1 : 0 ) === ( groupRenderer ? 1 : 0 ),
-                        'We should have precisely one of these flags set for us to have a groupRenderer' );
+        'We should have precisely one of these flags set for us to have a groupRenderer' );
 
       // if we switched to/away from a group, our group type changed, or our group renderer changed
       /* jshint -W018 */
@@ -633,14 +644,16 @@ define( function( require ) {
           if ( this.firstChangeInterval ) {
             this.groupDrawable.stitch( this.firstDrawable, this.lastDrawable, this.firstChangeInterval, this.lastChangeInterval );
           }
-        } else if ( state.isInstanceCanvasCache ) {
+        }
+        else if ( state.isInstanceCanvasCache ) {
           if ( groupChanged ) {
             this.groupDrawable = scenery.InlineCanvasCacheDrawable.createFromPool( groupRenderer, this );
           }
           if ( this.firstChangeInterval ) {
             this.groupDrawable.stitch( this.firstDrawable, this.lastDrawable, this.firstChangeInterval, this.lastChangeInterval );
           }
-        } else if ( state.isSharedCanvasCacheSelf ) {
+        }
+        else if ( state.isSharedCanvasCacheSelf ) {
           if ( groupChanged ) {
             this.groupDrawable = scenery.CanvasBlock.createFromPool( groupRenderer, this );
           }
@@ -654,7 +667,8 @@ define( function( require ) {
       if ( groupChanged ) {
         // if our group status changed, mark EVERYTHING as potentially changed
         this.firstChangeInterval = this.lastChangeInterval = ChangeInterval.newForDisplay( null, null, this.display );
-      } else if ( groupRenderer ) {
+      }
+      else if ( groupRenderer ) {
         // our group didn't have to change at all, so we prevent any change intervals
         this.firstChangeInterval = this.lastChangeInterval = null;
       }
@@ -775,8 +789,8 @@ define( function( require ) {
     insertInstance: function( instance, index ) {
       assert && assert( instance instanceof Instance );
       assert && assert( index >= 0 && index <= this.children.length,
-                        'Instance insertion bounds check for index ' + index + ' with previous children length ' +
-                        this.children.length );
+          'Instance insertion bounds check for index ' + index + ' with previous children length ' +
+          this.children.length );
 
       // mark it as changed during this frame, so that we can properly set the change interval
       instance.stitchChangeFrame = this.display._frameId;
@@ -791,16 +805,18 @@ define( function( require ) {
       }
       if ( index > this.afterStableIndex ) {
         this.afterStableIndex = index + 1;
-      } else {
+      }
+      else {
         this.afterStableIndex++;
       }
 
       if ( instance.isStateless ) {
         assert && assert( !instance.hasAncestorListenerNeed(),
-                          'We only track changes properly if stateless instances do not have needs' );
+          'We only track changes properly if stateless instances do not have needs' );
         assert && assert( !instance.hasAncestorComputeNeed(),
-                          'We only track changes properly if stateless instances do not have needs' );
-      } else {
+          'We only track changes properly if stateless instances do not have needs' );
+      }
+      else {
         if ( !instance.isTransformed ) {
           if ( instance.hasAncestorListenerNeed() ) {
             this.incrementTransformListenerChildren();
@@ -822,8 +838,8 @@ define( function( require ) {
     removeInstanceWithIndex: function( instance, index ) {
       assert && assert( instance instanceof Instance );
       assert && assert( index >= 0 && index < this.children.length,
-                        'Instance removal bounds check for index ' + index + ' with previous children length ' +
-                        this.children.length );
+          'Instance removal bounds check for index ' + index + ' with previous children length ' +
+          this.children.length );
 
       var frameId = this.display._frameId;
 
@@ -833,10 +849,10 @@ define( function( require ) {
 
       // mark neighbors so that we can add a change interval for our removal area
       if ( index - 1 >= 0 ) {
-        this.children[index-1].stitchChangeAfter = frameId;
+        this.children[index - 1].stitchChangeAfter = frameId;
       }
       if ( index + 1 < this.children.length ) {
-        this.children[index+1].stitchChangeBefore = frameId;
+        this.children[index + 1].stitchChangeBefore = frameId;
       }
 
       this.children.splice( index, 1 ); // TODO: replace with a 'remove' function call
@@ -848,7 +864,8 @@ define( function( require ) {
       }
       if ( index >= this.afterStableIndex ) {
         this.afterStableIndex = index;
-      } else {
+      }
+      else {
         this.afterStableIndex--;
       }
 
@@ -889,7 +906,8 @@ define( function( require ) {
         // it must have been added back. increment its counter
         instance.addRemoveCounter += 1;
         assert && assert( instance.addRemoveCounter === 0 );
-      } else {
+      }
+      else {
         instance = Instance.createFromPool( this.display, this.trail.copy().addDescendant( childNode, index ) );
       }
 
@@ -932,16 +950,18 @@ define( function( require ) {
     hasDescendantListenerNeed: function() {
       if ( this.isTransformed ) {
         return this.relativeChildrenListenersCount > 0;
-      } else {
+      }
+      else {
         return this.relativeChildrenListenersCount > 0 || this.relativeTransformListeners.length > 0;
       }
-      return ;
+      return;
     },
     // @private: Only for ancestors need, ignores child need on isTransformed
     hasAncestorListenerNeed: function() {
       if ( this.isTransformed ) {
         return this.relativeTransformListeners.length > 0;
-      } else {
+      }
+      else {
         return this.relativeChildrenListenersCount > 0 || this.relativeTransformListeners.length > 0;
       }
     },
@@ -1008,16 +1028,18 @@ define( function( require ) {
     hasDescendantComputeNeed: function() {
       if ( this.isTransformed ) {
         return this.relativeChildrenPrecomputeCount > 0;
-      } else {
+      }
+      else {
         return this.relativeChildrenPrecomputeCount > 0 || this.relativePrecomputeCount > 0;
       }
-      return ;
+      return;
     },
     // @private: Only for ancestors need, ignores child need on isTransformed
     hasAncestorComputeNeed: function() {
       if ( this.isTransformed ) {
         return this.relativePrecomputeCount > 0;
-      } else {
+      }
+      else {
         return this.relativeChildrenPrecomputeCount > 0 || this.relativePrecomputeCount > 0;
       }
     },
@@ -1106,7 +1128,8 @@ define( function( require ) {
           // passTransform depends on whether it is marked as a transform root
           this.display.markTransformRootDirty( instance, isTransformed );
           break;
-        } else if ( isTransformed ) {
+        }
+        else if ( isTransformed ) {
           this.display.markTransformRootDirty( instance, true ); // passTransform true
           break;
         }
@@ -1123,7 +1146,8 @@ define( function( require ) {
         // mutable form of parentMatrix * nodeMatrix
         this.relativeMatrix.set( this.parent.relativeMatrix );
         this.relativeMatrix.multiplyMatrix( nodeMatrix );
-      } else {
+      }
+      else {
         // we are the first in the trail transform, so we just directly copy the matrix over
         this.relativeMatrix.set( nodeMatrix );
       }
@@ -1174,8 +1198,8 @@ define( function( require ) {
     // (b) precompute transforms were desired
     updateTransformListenersAndCompute: function( ancestorWasDirty, ancestorIsDirty, frameId, passTransform ) {
       sceneryLog && sceneryLog.transformSystem && sceneryLog.transformSystem(
-        'update/compute: ' + this.toString() + ' ' + ancestorWasDirty + ' => ' + ancestorIsDirty +
-        ( passTransform ? ' passTransform' : '' ) );
+          'update/compute: ' + this.toString() + ' ' + ancestorWasDirty + ' => ' + ancestorIsDirty +
+          ( passTransform ? ' passTransform' : '' ) );
       sceneryLog && sceneryLog.transformSystem && sceneryLog.push();
 
       var len, i;
@@ -1186,7 +1210,8 @@ define( function( require ) {
         for ( i = 0; i < len; i++ ) {
           this.children[i].updateTransformListenersAndCompute( false, false, frameId, false );
         }
-      } else {
+      }
+      else {
         var wasDirty = ancestorWasDirty || this.relativeSelfDirty;
         var wasSubtreeDirty = wasDirty || this.relativeChildDirtyFrame === frameId;
         var hasComputeNeed = this.hasDescendantComputeNeed();
@@ -1277,7 +1302,8 @@ define( function( require ) {
     getFilterRootInstance: function() {
       if ( this.state.isBackbone || this.state.isInstanceCanvasCache || !this.parent ) {
         return this;
-      } else {
+      }
+      else {
         return this.parent.getFilterRootInstance();
       }
     },
@@ -1286,7 +1312,8 @@ define( function( require ) {
     getTransformRootInstance: function() {
       if ( this.state.isTransformed || !this.parent ) {
         return this;
-      } else {
+      }
+      else {
         return this.parent.getTransformRootInstance();
       }
     },
@@ -1362,7 +1389,8 @@ define( function( require ) {
           // mutable form of parentMatrix * nodeMatrix
           resultMatrix.set( currentRelativeMatrix( instance.parent ) );
           resultMatrix.multiplyMatrix( nodeMatrix );
-        } else {
+        }
+        else {
           // we are the first in the trail transform, so we just directly copy the matrix over
           resultMatrix.set( nodeMatrix );
         }
@@ -1385,30 +1413,30 @@ define( function( require ) {
         }
 
         assertSlow( this.state,
-                    'State is required for all display instances' );
+          'State is required for all display instances' );
 
         assertSlow( ( this.firstDrawable === null ) === ( this.lastDrawable === null ),
-                    'First/last drawables need to both be null or non-null' );
+          'First/last drawables need to both be null or non-null' );
 
         assertSlow( ( !this.state.isBackbone && !this.state.isSharedCanvasCachePlaceholder ) || this.groupDrawable,
-                    'If we are a backbone or shared cache, we need to have a groupDrawable reference' );
+          'If we are a backbone or shared cache, we need to have a groupDrawable reference' );
 
         assertSlow( !this.state.isSharedCanvasCachePlaceholder || !this.node.isPainted() || this.selfDrawable,
-                    'We need to have a selfDrawable if we are painted and not a shared cache' );
+          'We need to have a selfDrawable if we are painted and not a shared cache' );
 
         assertSlow( ( !this.state.isTransformed && !this.state.isCanvasCache ) || this.groupDrawable,
-                    'We need to have a groupDrawable if we are a backbone or any type of canvas cache' );
+          'We need to have a groupDrawable if we are a backbone or any type of canvas cache' );
 
         assertSlow( !this.state.isSharedCanvasCachePlaceholder || this.sharedCacheDrawable,
-                    'We need to have a sharedCacheDrawable if we are a shared cache' );
+          'We need to have a sharedCacheDrawable if we are a shared cache' );
 
         assertSlow( this.state.isTransformed === this.isTransformed,
-                    'isTransformed should match' );
+          'isTransformed should match' );
 
         assertSlow( !this.parent || this.isTransformed || ( this.relativeChildDirtyFrame !== frameId ) ||
                     ( this.parent.relativeChildDirtyFrame === frameId ),
-                    'If we have a parent, we need to hold the invariant ' +
-                    'this.relativeChildDirtyFrame => parent.relativeChildDirtyFrame' );
+            'If we have a parent, we need to hold the invariant ' +
+            'this.relativeChildDirtyFrame => parent.relativeChildDirtyFrame' );
 
         // count verification for invariants
         var notifyRelativeCount = 0;
@@ -1426,9 +1454,9 @@ define( function( require ) {
           }
         }
         assertSlow( notifyRelativeCount === this.relativeChildrenListenersCount,
-                    'Relative listener count invariant' );
+          'Relative listener count invariant' );
         assertSlow( precomputeRelativeCount === this.relativeChildrenPrecomputeCount,
-                    'Relative precompute count invariant' );
+          'Relative precompute count invariant' );
 
         if ( !hasRelativeSelfDirty( this ) ) {
           var matrix = currentRelativeMatrix( this );
@@ -1476,11 +1504,11 @@ define( function( require ) {
 
         if ( !firstChangeInterval || firstChangeInterval.drawableBefore !== null ) {
           assertSlow( oldFirstDrawable === newFirstDrawable,
-                      'If we have no changes, or our first change interval is not open, our firsts should be the same' );
+            'If we have no changes, or our first change interval is not open, our firsts should be the same' );
         }
         if ( !lastChangeInterval || lastChangeInterval.drawableAfter !== null ) {
           assertSlow( oldLastDrawable === newLastDrawable,
-                      'If we have no changes, or our last change interval is not open, our lasts should be the same' );
+            'If we have no changes, or our last change interval is not open, our lasts should be the same' );
         }
 
         if ( !firstChangeInterval ) {
@@ -1488,7 +1516,8 @@ define( function( require ) {
 
           // with no changes, everything should be identical
           oldFirstDrawable && checkBetween( oldFirstDrawable, oldLastDrawable );
-        } else {
+        }
+        else {
           assertSlow( lastChangeInterval, 'We should not be missing only one change interval' );
 
           // endpoints
@@ -1518,7 +1547,7 @@ define( function( require ) {
     },
 
     toString: function() {
-      return this.id + '#' + ( this.node ? ( this.node.constructor.name ? this.node.constructor.name : '?' ) + '#' + this.node.id: '-' );
+      return this.id + '#' + ( this.node ? ( this.node.constructor.name ? this.node.constructor.name : '?' ) + '#' + this.node.id : '-' );
     }
   } );
 
@@ -1530,7 +1559,8 @@ define( function( require ) {
         if ( pool.length ) {
           sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'new from pool' );
           return pool.pop().initialize( display, trail );
-        } else {
+        }
+        else {
           sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'new from constructor' );
           return new Instance( display, trail );
         }

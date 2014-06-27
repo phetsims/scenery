@@ -59,7 +59,8 @@ define( function( require ) {
         return function( renderer, instance ) {
           if ( pool.length ) {
             return pool.pop().initialize( renderer, instance );
-          } else {
+          }
+          else {
             /* jshint -W055 */
             return new selfDrawableType( renderer, instance );
           }

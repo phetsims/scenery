@@ -54,13 +54,15 @@ define( function( require ) {
           options = y;
           this._rectArcWidth = 0;
           this._rectArcHeight = 0;
-        } else {
+        }
+        else {
           // Rectangle( bounds2, arcWidth, arcHeight, { ... } )
           options = height;
           this._rectArcWidth = y;
           this._rectArcHeight = width;
         }
-      } else {
+      }
+      else {
         // allow new Rectangle( { rectX: x, rectY: y, rectWidth: width, rectHeight: height, ... } )
         // the mutators will call invalidateRectangle() and properly set the shape
         options = x;
@@ -71,7 +73,8 @@ define( function( require ) {
         this._rectArcWidth = options.rectArcWidth || 0;
         this._rectArcHeight = options.rectArcHeight || 0;
       }
-    } else if ( arguments.length < 6 ) {
+    }
+    else if ( arguments.length < 6 ) {
       // new Rectangle( x, y, width, height, [options] )
       this._rectX = x;
       this._rectY = y;
@@ -83,7 +86,8 @@ define( function( require ) {
       // ensure we have a parameter object
       options = arcWidth || {};
 
-    } else {
+    }
+    else {
       // normal case with args (including arcWidth / arcHeight)
       this._rectX = x;
       this._rectY = y;
@@ -187,8 +191,9 @@ define( function( require ) {
         // copy border-radius CSS behavior in Chrome, where the arcs won't intersect, in cases where the arc segments at full size would intersect each other
         var maximumArcSize = Math.min( this._rectWidth / 2, this._rectHeight / 2 );
         return Shape.roundRectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight,
-                                     Math.min( maximumArcSize, this._rectArcWidth ), Math.min( maximumArcSize, this._rectArcHeight ) );
-      } else {
+          Math.min( maximumArcSize, this._rectArcWidth ), Math.min( maximumArcSize, this._rectArcHeight ) );
+      }
+      else {
         return Shape.rectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
       }
     },
@@ -197,13 +202,13 @@ define( function( require ) {
       assert && assert( isFinite( this._rectX ), 'A rectangle needs to have a finite x (' + this._rectX + ')' );
       assert && assert( isFinite( this._rectY ), 'A rectangle needs to have a finite y (' + this._rectY + ')' );
       assert && assert( this._rectWidth >= 0 && isFinite( this._rectWidth ),
-                                      'A rectangle needs to have a non-negative finite width (' + this._rectWidth + ')' );
+          'A rectangle needs to have a non-negative finite width (' + this._rectWidth + ')' );
       assert && assert( this._rectHeight >= 0 && isFinite( this._rectHeight ),
-                                      'A rectangle needs to have a non-negative finite height (' + this._rectHeight + ')' );
+          'A rectangle needs to have a non-negative finite height (' + this._rectHeight + ')' );
       assert && assert( this._rectArcWidth >= 0 && isFinite( this._rectArcWidth ),
-                                      'A rectangle needs to have a non-negative finite arcWidth (' + this._rectArcWidth + ')' );
+          'A rectangle needs to have a non-negative finite arcWidth (' + this._rectArcWidth + ')' );
       assert && assert( this._rectArcHeight >= 0 && isFinite( this._rectArcHeight ),
-                                      'A rectangle needs to have a non-negative finite arcHeight (' + this._rectArcHeight + ')' );
+          'A rectangle needs to have a non-negative finite arcHeight (' + this._rectArcHeight + ')' );
       // assert && assert( !this.isRounded() || ( this._rectWidth >= this._rectArcWidth * 2 && this._rectHeight >= this._rectArcHeight * 2 ),
       //                                 'The rounded sections of the rectangle should not intersect (the length of the straight sections shouldn\'t be negative' );
 
@@ -238,23 +243,26 @@ define( function( require ) {
         }
         var miter = this.getLineJoin() === 'miter' && !rounded;
         result = result && Rectangle.intersects( x - halfLine, y - halfLine,
-                                                 width + 2 * halfLine, height + 2 * halfLine,
-                                                 miter ? 0 : ( arcWidth + halfLine ), miter ? 0 : ( arcHeight + halfLine ),
-                                                 point );
+            width + 2 * halfLine, height + 2 * halfLine,
+          miter ? 0 : ( arcWidth + halfLine ), miter ? 0 : ( arcHeight + halfLine ),
+          point );
       }
 
       if ( this._fillPickable ) {
         if ( this._strokePickable ) {
           return result;
-        } else {
+        }
+        else {
           return Rectangle.intersects( x, y, width, height, arcWidth, arcHeight, point );
         }
-      } else if ( this._strokePickable ) {
+      }
+      else if ( this._strokePickable ) {
         return result && !Rectangle.intersects( x + halfLine, y + halfLine,
-                                               width - 2 * halfLine, height - 2 * halfLine,
-                                               arcWidth - halfLine, arcHeight - halfLine,
-                                               point );
-      } else {
+            width - 2 * halfLine, height - 2 * halfLine,
+            arcWidth - halfLine, arcHeight - halfLine,
+          point );
+      }
+      else {
         return false; // either fill nor stroke is pickable
       }
     },
@@ -284,15 +292,18 @@ define( function( require ) {
     *----------------------------------------------------------------------------*/
 
     getBasicConstructor: function( propLines ) {
-      return 'new scenery.Rectangle( ' + this._rectX + ', ' + this._rectY + ', ' +
-                                         this._rectWidth + ', ' + this._rectHeight + ', ' +
-                                         this._rectArcWidth + ', ' + this._rectArcHeight + ', {' + propLines + '} )';
+      return 'new scenery.Rectangle( ' +
+             this._rectX + ', ' + this._rectY + ', ' +
+             this._rectWidth + ', ' + this._rectHeight + ', ' +
+             this._rectArcWidth + ', ' + this._rectArcHeight +
+             ', {' + propLines + '} )';
     },
 
     setShape: function( shape ) {
       if ( shape !== null ) {
         throw new Error( 'Cannot set the shape of a scenery.Rectangle to something non-null' );
-      } else {
+      }
+      else {
         // probably called from the Path constructor
         this.invalidateShape();
       }
@@ -378,7 +389,8 @@ define( function( require ) {
     if ( point.x < x + width / 2 ) {
       closestCornerX = x + arcWidth;
       guaranteedInside = guaranteedInside || point.x >= closestCornerX;
-    } else {
+    }
+    else {
       closestCornerX = x + width - arcWidth;
       guaranteedInside = guaranteedInside || point.x <= closestCornerX;
     }
@@ -387,7 +399,8 @@ define( function( require ) {
     if ( point.y < y + height / 2 ) {
       closestCornerY = y + arcHeight;
       guaranteedInside = guaranteedInside || point.y >= closestCornerY;
-    } else {
+    }
+    else {
       closestCornerY = y + height - arcHeight;
       guaranteedInside = guaranteedInside || point.y <= closestCornerY;
     }
@@ -467,12 +480,30 @@ define( function( require ) {
       this.markPaintDirty();
     };
 
-    proto.markDirtyX = function() { this.dirtyX = true; this.markPaintDirty(); },
-    proto.markDirtyY = function() { this.dirtyY = true; this.markPaintDirty(); },
-    proto.markDirtyWidth = function() { this.dirtyWidth = true; this.markPaintDirty(); },
-    proto.markDirtyHeight = function() { this.dirtyHeight = true; this.markPaintDirty(); },
-    proto.markDirtyArcWidth = function() { this.dirtyArcWidth = true; this.markPaintDirty(); },
-    proto.markDirtyArcHeight = function() { this.dirtyArcHeight = true; this.markPaintDirty(); },
+    proto.markDirtyX = function() {
+      this.dirtyX = true;
+      this.markPaintDirty();
+    };
+    proto.markDirtyY = function() {
+      this.dirtyY = true;
+      this.markPaintDirty();
+    };
+    proto.markDirtyWidth = function() {
+      this.dirtyWidth = true;
+      this.markPaintDirty();
+    };
+    proto.markDirtyHeight = function() {
+      this.dirtyHeight = true;
+      this.markPaintDirty();
+    };
+    proto.markDirtyArcWidth = function() {
+      this.dirtyArcWidth = true;
+      this.markPaintDirty();
+    };
+    proto.markDirtyArcHeight = function() {
+      this.dirtyArcHeight = true;
+      this.markPaintDirty();
+    };
 
     proto.setToCleanState = function() {
       this.paintDirty = false;
@@ -556,7 +587,8 @@ define( function( require ) {
           // update stroke presence
           if ( node.hasStroke() ) {
             strokeElement.style.borderStyle = 'solid';
-          } else {
+          }
+          else {
             strokeElement.style.borderStyle = 'none';
           }
         }
@@ -709,7 +741,8 @@ define( function( require ) {
           context.arc( highX, highY, arcw, 0, Math.PI / 2, false );
           context.arc( lowX, highY, arcw, Math.PI / 2, Math.PI, false );
           context.arc( lowX, lowY, arcw, Math.PI, Math.PI * 3 / 2, false );
-        } else {
+        }
+        else {
           // we have to resort to elliptical arcs
           context.ellipse( highX, lowY, arcw, arch, 0, -Math.PI / 2, 0, false );
           context.ellipse( highX, highY, arcw, arch, 0, 0, Math.PI / 2, false );
@@ -728,7 +761,8 @@ define( function( require ) {
           context.stroke();
           node.afterCanvasStroke( wrapper ); // defined in Strokable
         }
-      } else {
+      }
+      else {
         // TODO: how to handle fill/stroke delay optimizations here?
         if ( node._fill ) {
           node.beforeCanvasFill( wrapper ); // defined in Fillable

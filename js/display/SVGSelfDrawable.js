@@ -103,7 +103,8 @@ define( function( require ) {
         if ( usesFill ) {
           if ( !this.fillState ) {
             this.fillState = new Fillable.FillSVGState();
-          } else {
+          }
+          else {
             this.fillState.initialize();
           }
         }
@@ -111,7 +112,8 @@ define( function( require ) {
         if ( usesStroke ) {
           if ( !this.strokeState ) {
             this.strokeState = new Strokable.StrokeSVGState();
-          } else {
+          }
+          else {
             this.strokeState.initialize();
           }
         }

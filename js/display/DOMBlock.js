@@ -72,7 +72,8 @@ define( function( require ) {
       return function( display, domDrawable ) {
         if ( pool.length ) {
           return pool.pop().initialize( display, domDrawable );
-        } else {
+        }
+        else {
           return new DOMBlock( display, domDrawable );
         }
       };

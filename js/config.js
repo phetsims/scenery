@@ -9,7 +9,10 @@
 // if has.js is included, set assertion flags to true (so we can catch errors during development)
 if ( window.has ) {
   // default config only enables basic assertions
-  window.has.add( 'assert.basic', function( global, document, anElement ) { 'use strict'; return true; } );
+  window.has.add( 'assert.basic', function( global, document, anElement ) {
+    'use strict';
+    return true;
+  } );
   // window.has.add( 'assert.slow', function( global, document, anElement ) { 'use strict'; return true; } );
 }
 

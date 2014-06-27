@@ -59,7 +59,7 @@ define( function( require ) {
     // should be called from update() whenever this block is dirty
     updateFit: function() {
       assert && assert( this.fit === FittedBlock.FULL_DISPLAY || this.fit === FittedBlock.COMMON_ANCESTOR,
-                        'Unsupported fit' );
+        'Unsupported fit' );
 
       // check to see if we don't need to re-fit
       if ( !this.dirtyFit && this.fit === FittedBlock.FULL_DISPLAY ) {
@@ -72,7 +72,8 @@ define( function( require ) {
 
       if ( this.fit === FittedBlock.FULL_DISPLAY ) {
         this.setSizeFullDisplay();
-      } else if ( this.fit === FittedBlock.COMMON_ANCESTOR ) {
+      }
+      else if ( this.fit === FittedBlock.COMMON_ANCESTOR ) {
         assert && assert( this.commonFitInstance.trail.length >= this.transformRootInstance.trail.length );
 
         // will trigger bounds validation (for now) until we have a better way of handling this
@@ -98,7 +99,8 @@ define( function( require ) {
 
           this.setSizeFitBounds();
         }
-      } else {
+      }
+      else {
         throw new Error( 'unknown fit' );
       }
     },
@@ -133,7 +135,7 @@ define( function( require ) {
       // if we use a common ancestor fit, find the common ancestor instance
       if ( this.fit === FittedBlock.COMMON_ANCESTOR ) {
         assert && assert( firstDrawable.instance && lastDrawable.instance,
-                          'For common-ancestor SVG fits, we need the first and last drawables to have direct instance references' );
+          'For common-ancestor SVG fits, we need the first and last drawables to have direct instance references' );
 
         var firstInstance = firstDrawable.instance;
         var lastInstance = lastDrawable.instance;
@@ -148,7 +150,7 @@ define( function( require ) {
         }
 
         // step down until they match
-        while( firstInstance !== lastInstance ) {
+        while ( firstInstance !== lastInstance ) {
           firstInstance = firstInstance.parent;
           lastInstance = lastInstance.parent;
         }

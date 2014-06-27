@@ -30,6 +30,7 @@ define( function( require ) {
       svg.setAttribute( 'height', height );
       svg.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
     }
+
     display.onStatic( 'displaySize', function( dimension ) {
       resize( dimension.width, dimension.height );
     } );
@@ -52,7 +53,8 @@ define( function( require ) {
       if ( svgPath ) {
         // only set the SVG path if it's not the empty string
         path.setAttribute( 'd', svgPath );
-      } else if ( path.hasAttribute( 'd' ) ) {
+      }
+      else if ( path.hasAttribute( 'd' ) ) {
         path.removeAttribute( 'd' );
       }
 
@@ -66,7 +68,7 @@ define( function( require ) {
       var scene = this.scene;
 
       while ( svg.childNodes.length ) {
-        svg.removeChild( svg.childNodes[svg.childNodes.length-1] );
+        svg.removeChild( svg.childNodes[svg.childNodes.length - 1] );
       }
 
       new scenery.Trail( scene ).eachTrailUnder( function( trail ) {

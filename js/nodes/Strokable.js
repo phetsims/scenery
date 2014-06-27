@@ -65,7 +65,7 @@ define( function( require ) {
 
     proto.setLineCap = function( lineCap ) {
       assert && assert( lineCap === 'butt' || lineCap === 'round' || lineCap === 'square',
-                        'lineCap should be one of "butt", "round" or "square", not ' + lineCap );
+          'lineCap should be one of "butt", "round" or "square", not ' + lineCap );
 
       if ( this._lineDrawingStyles.lineCap !== lineCap ) {
 
@@ -87,7 +87,7 @@ define( function( require ) {
 
     proto.setLineJoin = function( lineJoin ) {
       assert && assert( lineJoin === 'miter' || lineJoin === 'round' || lineJoin === 'bevel',
-                        'lineJoin should be one of "miter", "round" or "bevel", not ' + lineJoin );
+          'lineJoin should be one of "miter", "round" or "bevel", not ' + lineJoin );
 
       if ( this._lineDrawingStyles.lineJoin !== lineJoin ) {
 
@@ -257,10 +257,12 @@ define( function( require ) {
       if ( this._stroke.toCSS ) {
         // Color object stroke
         style += this._stroke.toCSS() + ';';
-      } else if ( this._stroke.getSVGDefinition ) {
+      }
+      else if ( this._stroke.getSVGDefinition ) {
         // reference the SVG definition with a URL
         style += 'url(#stroke' + this.getId() + ');';
-      } else {
+      }
+      else {
         // plain CSS color
         style += this._stroke + ';';
       }
@@ -322,7 +324,8 @@ define( function( require ) {
         }
         if ( !nowrap && typeof value === 'string' ) {
           result += spaces + key + ': \'' + value + '\'';
-        } else {
+        }
+        else {
           result += spaces + key + ': ' + value;
         }
       }
@@ -331,7 +334,8 @@ define( function( require ) {
         var defaultStyles = new LineStyles();
         if ( typeof this._stroke === 'string' ) {
           addProp( 'stroke', this._stroke );
-        } else {
+        }
+        else {
           addProp( 'stroke', this._stroke.toString(), true );
         }
 
@@ -388,7 +392,8 @@ define( function( require ) {
         this.invalidateSupportedRenderers();
         oldInvalidateStroke.call( this );
       };
-    } else {
+    }
+    else {
       proto.invalidateStroke = function() {
         this.invalidateSupportedRenderers();
       };
@@ -526,7 +531,8 @@ define( function( require ) {
         if ( defs ) {
           // adding to the DOM here removes it from its previous location
           defs.appendChild( this.def );
-        } else if ( this.def.parentNode ) {
+        }
+        else if ( this.def.parentNode ) {
           //OHTWO TODO: does this parentNode access cause reflows?
           this.def.parentNode.removeChild( this.def );
         }
@@ -543,10 +549,12 @@ define( function( require ) {
       if ( this.stroke.toCSS ) {
         // Color object stroke
         baseStyle += this.stroke.toCSS() + ';';
-      } else if ( this.stroke.getSVGDefinition ) {
+      }
+      else if ( this.stroke.getSVGDefinition ) {
         // reference the SVG definition with a URL
         baseStyle += 'url(#' + this.id + ');';
-      } else {
+      }
+      else {
         // plain CSS color
         baseStyle += this.stroke + ';';
       }

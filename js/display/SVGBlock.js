@@ -186,7 +186,8 @@ define( function( require ) {
         if ( pool.length ) {
           sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'new from pool' );
           return pool.pop().initialize( display, renderer, transformRootInstance, filterRootInstance );
-        } else {
+        }
+        else {
           sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'new from constructor' );
           return new SVGBlock( display, renderer, transformRootInstance, filterRootInstance );
         }

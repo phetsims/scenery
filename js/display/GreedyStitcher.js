@@ -87,7 +87,8 @@ define( function( require ) {
         // first comparison also does null check when necessary
         if ( nextDrawable !== cutoffDrawable && nextDrawable.renderer === renderer ) {
           drawable = nextDrawable;
-        } else {
+        }
+        else {
           break;
         }
       }
@@ -126,7 +127,7 @@ define( function( require ) {
       // handle pending removal of old blocks/drawables
       if ( backbone.blocks.length ) {
         var veryFirstBlock = backbone.blocks[0];
-        var veryLastBlock = backbone.blocks[backbone.blocks.length-1];
+        var veryLastBlock = backbone.blocks[backbone.blocks.length - 1];
 
         for ( interval = firstChangeInterval; interval !== null; interval = interval.nextChangeInterval ) {
           assert && assert( !interval.isEmpty(), 'We now guarantee that the intervals are non-empty' );
@@ -137,7 +138,7 @@ define( function( require ) {
             var firstRemoval = interval.drawableBefore ? interval.drawableBefore.oldNextDrawable : oldFirstStitchDrawable;
             var lastRemoval = interval.drawableAfter ? interval.drawableAfter.oldPreviousDrawable : oldLastStitchDrawable;
 
-            for ( var removedDrawable = firstRemoval;; removedDrawable = removedDrawable.oldNextDrawable ) {
+            for ( var removedDrawable = firstRemoval; ; removedDrawable = removedDrawable.oldNextDrawable ) {
               this.notePendingRemoval( removedDrawable );
               if ( removedDrawable === lastRemoval ) { break; }
             }
@@ -146,9 +147,9 @@ define( function( require ) {
           // blocks totally contained within the change interval are marked as reusable (doesn't include end blocks)
           if ( intervalHasOldInternalBlocks( interval, veryFirstBlock, veryLastBlock ) ) {
             var firstBlock = interval.drawableBefore === null ? backbone.blocks[0] : interval.drawableBefore.parentDrawable.nextBlock;
-            var lastBlock = interval.drawableAfter === null ? backbone.blocks[backbone.blocks.length-1] : interval.drawableAfter.parentDrawable.previousBlock;
+            var lastBlock = interval.drawableAfter === null ? backbone.blocks[backbone.blocks.length - 1] : interval.drawableAfter.parentDrawable.previousBlock;
 
-            for ( var markedBlock = firstBlock;; markedBlock = markedBlock.nextBlock ) {
+            for ( var markedBlock = firstBlock; ; markedBlock = markedBlock.nextBlock ) {
               this.unuseBlock( markedBlock );
               if ( markedBlock === lastBlock ) { break; }
             }
@@ -182,7 +183,8 @@ define( function( require ) {
 
       if ( firstStitchDrawable === null ) {
         this.useNoBlocks();
-      } else if ( this.blockOrderChanged ) {
+      }
+      else if ( this.blockOrderChanged ) {
         this.processBlockLinkedList( backbone, firstStitchDrawable.pendingParentDrawable, lastStitchDrawable.pendingParentDrawable );
         this.reindex();
       }
@@ -266,12 +268,10 @@ define( function( require ) {
           }
 
           //OHTWO TODO: see what conditions are really necessary
-          if ( matchedBlock === null && drawable.parentDrawable &&
-               !drawable.parentDrawable.used && drawable.backbone === backbone &&
+          if ( matchedBlock === null && drawable.parentDrawable && !drawable.parentDrawable.used && drawable.backbone === backbone &&
                drawable.parentDrawable.parentDrawable === backbone ) {
             matchedBlock = drawable.parentDrawable;
-            sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose(
-              'matching at ' + drawable.toString() + ' with ' + matchedBlock );
+            sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'matching at ' + drawable.toString() + ' with ' + matchedBlock );
           }
 
           if ( isLast || hasGapBetweenDrawables( drawable, nextDrawable ) ) {
@@ -287,7 +287,8 @@ define( function( require ) {
 
           if ( isLast ) {
             break;
-          } else {
+          }
+          else {
             drawable = nextDrawable;
           }
         }
@@ -300,8 +301,8 @@ define( function( require ) {
     // firstDrawable and lastDrawable refer to the specific sub-block
     processSubBlock: function( interval, firstDrawable, lastDrawable, matchedBlock, isFirst, isLast ) {
       sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose(
-        'sub-block: ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() + ' ' +
-        ( matchedBlock ? 'with matched: ' + matchedBlock.toString() : 'with no match' ) );
+          'sub-block: ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() + ' ' +
+          ( matchedBlock ? 'with matched: ' + matchedBlock.toString() : 'with no match' ) );
       sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
 
       var openBefore = isOpenBefore( firstDrawable );
@@ -329,7 +330,7 @@ define( function( require ) {
       matchedBlock = this.ensureUsedBlock( matchedBlock, firstDrawable );
 
       // add internal drawables
-      for ( var drawable = firstDrawable;; drawable = drawable.nextDrawable ) {
+      for ( var drawable = firstDrawable; ; drawable = drawable.nextDrawable ) {
         this.notePendingAddition( drawable, matchedBlock );
         if ( drawable === lastDrawable ) { break; }
       }
@@ -407,9 +408,9 @@ define( function( require ) {
     },
 
     notePendingMoves: function( block, firstDrawable, lastDrawable ) {
-      for ( var drawable = firstDrawable;; drawable = drawable.nextDrawable ) {
+      for ( var drawable = firstDrawable; ; drawable = drawable.nextDrawable ) {
         assert && assert( !drawable.pendingAddition && !drawable.pendingRemoval,
-                          'Moved drawables should be thought of as unchanged, and thus have nothing pending yet' );
+          'Moved drawables should be thought of as unchanged, and thus have nothing pending yet' );
 
         this.notePendingMove( drawable, block );
         if ( drawable === lastDrawable ) { break; }
@@ -426,7 +427,8 @@ define( function( require ) {
         if ( !currentBlock.used ) {
           this.useBlock( currentBlock );
         }
-      } else {
+      }
+      else {
         // need to create one
         sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'searching for block' );
         currentBlock = this.getBlockForRenderer( someIncludedDrawable.renderer, someIncludedDrawable );
@@ -468,7 +470,8 @@ define( function( require ) {
         sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'unusing block: ' + block.toString() );
         block.used = false; // mark it as unused until we pull it out (so we can reuse, or quickly identify)
         this.reusableBlocks.push( block );
-      } else {
+      }
+      else {
         sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'not using already-unused block: ' + block.toString() );
       }
     },
@@ -508,18 +511,18 @@ define( function( require ) {
       sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'link before ' + drawable.toString() );
       var beforeDrawable = drawable.previousDrawable;
       this.linkBlocks( beforeDrawable ? beforeDrawable.pendingParentDrawable : null,
-                       drawable.pendingParentDrawable,
-                       beforeDrawable,
-                       drawable );
+        drawable.pendingParentDrawable,
+        beforeDrawable,
+        drawable );
     },
 
     linkAfterDrawable: function( drawable ) {
       sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'link after ' + drawable.toString() );
       var afterDrawable = drawable.nextDrawable;
       this.linkBlocks( drawable.pendingParentDrawable,
-                       afterDrawable ? afterDrawable.pendingParentDrawable : null,
-                       drawable,
-                       afterDrawable );
+        afterDrawable ? afterDrawable.pendingParentDrawable : null,
+        drawable,
+        afterDrawable );
     },
 
     linkBlocks: function( beforeBlock, afterBlock, beforeDrawable, afterDrawable ) {
@@ -577,7 +580,7 @@ define( function( require ) {
       if ( firstBlock ) {
 
         // rewrite it starting with the first block
-        for ( var block = firstBlock;; block = block.nextBlock ) {
+        for ( var block = firstBlock; ; block = block.nextBlock ) {
           sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( block.toString() );
 
           backbone.blocks.push( block );

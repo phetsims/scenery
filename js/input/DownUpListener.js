@@ -101,7 +101,8 @@ define( function( require ) {
 
         if ( isInside && this.options.upInside ) {
           this.options.upInside( event, this.downTrail );
-        } else if ( !isInside && this.options.upOutside ) {
+        }
+        else if ( !isInside && this.options.upOutside ) {
           this.options.upOutside( event, this.downTrail );
         }
       }

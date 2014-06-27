@@ -18,7 +18,8 @@ define( function( require ) {
       for ( var i = 0; i < contextNames.length; i++ ) {
         try {
           gl = canvas.getContext( contextNames[i] );
-        } catch ( e ) {
+        }
+        catch( e ) {
           // consider storing this failure somewhere?
         }
         if ( gl ) {

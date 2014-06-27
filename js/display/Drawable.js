@@ -60,7 +60,7 @@ define( function( require ) {
       this.pendingRemoval = false;       // whether we are to be removed from a block/backbone in our updateBlock() call
 
       assert && assert( !this.previousDrawable && !this.nextDrawable,
-                        'By cleaning (disposal or fresh creation), we should have disconnected from the linked list' );
+        'By cleaning (disposal or fresh creation), we should have disconnected from the linked list' );
 
       // linked list handling (will be filled in later)
       this.previousDrawable = null;
@@ -139,15 +139,14 @@ define( function( require ) {
     updateBlock: function() {
       sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( '[' + this.constructor.name + '*] updateBlock ' + this.toString() +
                                                                 ' with add:' + this.pendingAddition +
-                                                                ' remove:'  + this.pendingRemoval +
+                                                                ' remove:' + this.pendingRemoval +
                                                                 ' old:' + ( this.parentDrawable ? this.parentDrawable.toString() : '-' ) +
                                                                 ' new:' + ( this.pendingParentDrawable ? this.pendingParentDrawable.toString() : '-' ) );
       sceneryLog && sceneryLog.Drawable && sceneryLog.push();
 
       if ( this.pendingRemoval || this.pendingAddition ) {
         // we are only unchanged if we have an addition AND removal, and the endpoints are identical
-        var changed = !this.pendingRemoval ||
-                      !this.pendingAddition ||
+        var changed = !this.pendingRemoval || !this.pendingAddition ||
                       this.parentDrawable !== this.pendingParentDrawable ||
                       this.backbone !== this.pendingBackbone;
 
@@ -164,7 +163,8 @@ define( function( require ) {
             sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( 'adding to ' + this.parentDrawable.toString() );
             this.parentDrawable.addDrawable( this );
           }
-        } else {
+        }
+        else {
           sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( 'unchanged' );
         }
 
@@ -234,33 +234,32 @@ define( function( require ) {
     audit: function( allowPendingBlock, allowPendingList, allowDirty ) {
       if ( assertSlow ) {
         assertSlow && assertSlow( !this.disposed,
-                                  'If we are being audited, we assume we are in the drawable display tree, and we ' +
-                                  'should not be marked as disposed' );
+            'If we are being audited, we assume we are in the drawable display tree, and we should not be marked as disposed' );
         assertSlow && assertSlow( this.renderer, 'Should not have a 0 (no) renderer' );
 
         assertSlow && assertSlow( !this.backbone || this.parentDrawable,
-                                  'If we have a backbone reference, we must have a parentDrawable (our block)' );
+          'If we have a backbone reference, we must have a parentDrawable (our block)' );
 
         if ( !allowPendingBlock ) {
           assertSlow && assertSlow( !this.pendingAddition );
           assertSlow && assertSlow( !this.pendingRemoval );
           assertSlow && assertSlow( this.parentDrawable === this.pendingParentDrawable,
-                                    'Assure our parent and pending parent match, if we have updated blocks' );
+            'Assure our parent and pending parent match, if we have updated blocks' );
           assertSlow && assertSlow( this.backbone === this.pendingBackbone,
-                                    'Assure our backbone and pending backbone match, if we have updated blocks' );
+            'Assure our backbone and pending backbone match, if we have updated blocks' );
         }
 
         if ( !allowPendingList ) {
           assertSlow && assertSlow( this.oldPreviousDrawable === this.previousDrawable,
-                                    'Pending linked-list references should be cleared by now' );
+            'Pending linked-list references should be cleared by now' );
           assertSlow && assertSlow( this.oldNextDrawable === this.nextDrawable,
-                                    'Pending linked-list references should be cleared by now' );
+            'Pending linked-list references should be cleared by now' );
           assertSlow && assertSlow( !this.linksDirty, 'Links dirty flag should be clean' );
         }
 
         if ( !allowDirty ) {
           assertSlow && assertSlow( !this.dirty,
-                                    'Should not be dirty at this phase, if we are in the drawable display tree' );
+            'Should not be dirty at this phase, if we are in the drawable display tree' );
         }
       }
     },
@@ -323,7 +322,7 @@ define( function( require ) {
     var arr = [];
 
     // assumes we'll hit lastDrawable, otherwise we'll NPE
-    for ( var drawable = firstDrawable;; drawable = drawable.nextDrawable ) {
+    for ( var drawable = firstDrawable; ; drawable = drawable.nextDrawable ) {
       arr.push( drawable );
 
       if ( drawable === lastDrawable ) {
@@ -339,7 +338,7 @@ define( function( require ) {
     var arr = [];
 
     // assumes we'll hit lastDrawable, otherwise we'll NPE
-    for ( var drawable = firstDrawable;; drawable = drawable.oldNextDrawable ) {
+    for ( var drawable = firstDrawable; ; drawable = drawable.oldNextDrawable ) {
       arr.push( drawable );
 
       if ( drawable === lastDrawable ) {

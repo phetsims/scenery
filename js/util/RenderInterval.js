@@ -53,8 +53,8 @@ define( function( require ) {
      * that a !== b || a === null for either interval, since otherwise it is not well defined.
      */
     exclusiveUnionable: function( interval ) {
-      assert && assert ( this.isValidExclusive(), 'exclusiveUnionable requires exclusive intervals' );
-      assert && assert ( interval.isValidExclusive(), 'exclusiveUnionable requires exclusive intervals' );
+      assert && assert( this.isValidExclusive(), 'exclusiveUnionable requires exclusive intervals' );
+      assert && assert( interval.isValidExclusive(), 'exclusiveUnionable requires exclusive intervals' );
       return ( !this.start || !interval.end || this.start.compare( interval.end ) === -1 ) &&
              ( !this.end || !interval.start || this.end.compare( interval.start ) === 1 );
     },

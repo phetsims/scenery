@@ -58,11 +58,11 @@ define( function( require ) {
   var initializingHybridTextNode = false;
 
   scenery.Text = function Text( text, options ) {
-    this._text         = '';                   // filled in with mutator
-    this._font         = scenery.Font.DEFAULT; // default font, usually 10px sans-serif
-    this._direction    = 'ltr';                // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
-    this._boundsMethod = 'hybrid';             // fast (SVG/DOM, no canvas rendering allowed), fastCanvas (SVG/DOM, canvas rendering allowed without dirty regions),
-                                               // accurate (Canvas accurate recursive), or hybrid (cache SVG height, use canvas measureText for width)
+    this._text = '';                   // filled in with mutator
+    this._font = scenery.Font.DEFAULT; // default font, usually 10px sans-serif
+    this._direction = 'ltr';           // ltr, rtl, inherit -- consider inherit deprecated, due to how we compute text bounds in an off-screen canvas
+    this._boundsMethod = 'hybrid';     // fast (SVG/DOM, no canvas rendering allowed), fastCanvas (SVG/DOM, canvas rendering allowed without dirty regions),
+    // accurate (Canvas accurate recursive), or hybrid (cache SVG height, use canvas measureText for width)
 
     // whether the text is rendered as HTML or not. if defined (in a subtype constructor), use that value instead
     this._isHTML = this._isHTML === undefined ? false : this._isHTML;
@@ -149,7 +149,7 @@ define( function( require ) {
       if ( this._boundsMethod !== 'fast' && !this._isHTML ) {
         bitmask |= scenery.bitmaskSupportsCanvas;
       }
-      if( !this._isHTML ) {
+      if ( !this._isHTML ) {
         bitmask |= scenery.bitmaskSupportsSVG;
       }
       if ( this._boundsMethod === 'accurate' ) {
@@ -176,11 +176,14 @@ define( function( require ) {
       // investigate http://mudcu.be/journal/2011/01/html5-typographic-metrics/
       if ( this._isHTML || ( useDOMAsFastBounds && this._boundsMethod !== 'accurate' ) ) {
         selfBounds = this.approximateDOMBounds();
-      } else if ( this._boundsMethod === 'hybrid' ) {
+      }
+      else if ( this._boundsMethod === 'hybrid' ) {
         selfBounds = this.approximateHybridBounds();
-      } else if ( this._boundsMethod === 'fast' || this._boundsMethod === 'fastCanvas' ) {
+      }
+      else if ( this._boundsMethod === 'fast' || this._boundsMethod === 'fastCanvas' ) {
         selfBounds = this.approximateSVGBounds();
-      } else {
+      }
+      else {
         selfBounds = this.accurateCanvasBounds();
       }
 
@@ -236,7 +239,8 @@ define( function( require ) {
         var span = document.createElement( 'span' );
         span.innerHTML = this._text;
         return span;
-      } else {
+      }
+      else {
         return document.createTextNode( this.getNonBreakingText() );
       }
     },
@@ -284,12 +288,14 @@ define( function( require ) {
       if ( !svgTextSizeContainer.parentNode ) {
         if ( document.body ) {
           document.body.appendChild( svgTextSizeContainer );
-        } else {
+        }
+        else {
           // TODO: better way to handle the hybridTextNode being added inside the HEAD? Requiring a body for proper operation might be a problem.
           if ( initializingHybridTextNode ) {
             // if this is almost assuredly the hybridTextNode, return nothing for now. TODO: better way of handling this! it's a hack!
             return Bounds2.NOTHING;
-          } else {
+          }
+          else {
             throw new Error( 'No document.body and trying to get approximate SVG bounds of a Text node' );
           }
         }
@@ -437,7 +443,8 @@ define( function( require ) {
         }
         if ( !nowrap && typeof value === 'string' ) {
           result += spaces + key + ': \'' + value + '\'';
-        } else {
+        }
+        else {
           result += spaces + key + ': ' + value;
         }
       }
@@ -489,8 +496,9 @@ define( function( require ) {
   addFontForwarding( 'fontSize', 'FontSize', 'size' );
   addFontForwarding( 'lineHeight', 'LineHeight', 'lineHeight' );
 
-  Text.prototype._mutatorKeys = [ 'boundsMethod', 'text', 'font', 'fontWeight', 'fontFamily', 'fontStretch', 'fontStyle', 'fontSize', 'lineHeight',
-                                  'direction' ].concat( Node.prototype._mutatorKeys );
+  Text.prototype._mutatorKeys = [
+    'boundsMethod', 'text', 'font', 'fontWeight', 'fontFamily', 'fontStretch', 'fontStyle', 'fontSize', 'lineHeight', 'direction'
+  ].concat( Node.prototype._mutatorKeys );
 
   // font-specific ES5 setters and getters are defined using addFontForwarding above
   Object.defineProperty( Text.prototype, 'font', { set: Text.prototype.setFont, get: Text.prototype.getFont } );

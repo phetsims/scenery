@@ -454,7 +454,8 @@ define( function( require ) {
           for ( var i = customCursors.length - 1; i >= 0; i-- ) {
             this._domElement.style.cursor = customCursors[i];
           }
-        } else {
+        }
+        else {
           this._domElement.style.cursor = cursor;
         }
       }
@@ -517,7 +518,8 @@ define( function( require ) {
           this.removeOverlay( this._pointerOverlay );
           this._pointerOverlay.dispose();
           this._pointerOverlay = null;
-        } else {
+        }
+        else {
           this._pointerOverlay = new PointerOverlay( this, this._rootNode );
           this.addOverlay( this._pointerOverlay );
         }
@@ -540,7 +542,8 @@ define( function( require ) {
           this.removeOverlay( this._pointerAreaOverlay );
           this._pointerAreaOverlay.dispose();
           this._pointerAreaOverlay = null;
-        } else {
+        }
+        else {
           this._pointerAreaOverlay = new PointerAreaOverlay( this, this._rootNode );
           this.addOverlay( this._pointerAreaOverlay );
         }
@@ -563,7 +566,8 @@ define( function( require ) {
           this.removeOverlay( this._canvasAreaBoundsOverlay );
           this._canvasAreaBoundsOverlay.dispose();
           this._canvasAreaBoundsOverlay = null;
-        } else {
+        }
+        else {
           this._canvasAreaBoundsOverlay = new CanvasNodeBoundsOverlay( this, this._rootNode );
           this.addOverlay( this._canvasAreaBoundsOverlay );
         }
@@ -704,12 +708,22 @@ define( function( require ) {
         }
 
         var transformType = '';
-        switch ( node.transform.getMatrix().type ) {
-          case Matrix3.Types.IDENTITY:       transformType = '';           break;
-          case Matrix3.Types.TRANSLATION_2D: transformType = 'translated'; break;
-          case Matrix3.Types.SCALING:        transformType = 'scale';      break;
-          case Matrix3.Types.AFFINE:         transformType = 'affine';     break;
-          case Matrix3.Types.OTHER:          transformType = 'other';      break;
+        switch( node.transform.getMatrix().type ) {
+          case Matrix3.Types.IDENTITY:
+            transformType = '';
+            break;
+          case Matrix3.Types.TRANSLATION_2D:
+            transformType = 'translated';
+            break;
+          case Matrix3.Types.SCALING:
+            transformType = 'scale';
+            break;
+          case Matrix3.Types.AFFINE:
+            transformType = 'affine';
+            break;
+          case Matrix3.Types.OTHER:
+            transformType = 'other';
+            break;
         }
         if ( transformType ) {
           iSummary += ' <span style="color: #88f" title="' + node.transform.getMatrix().toString().replace( '\n', '&#10;' ) + '">' + transformType + '</span>';
@@ -717,7 +731,7 @@ define( function( require ) {
 
         iSummary += ' <span style="color: #888">' + str( instance.trail ) + '</span>';
         iSummary += ' <span style="color: #c88">' + str( instance.state ) + '</span>';
-        iSummary += ' <span style="color: #8c8">' + node._rendererSummary.bitmask.toString( 16 ) + ( node._rendererBitmask !== scenery.bitmaskNodeDefault ? ' (' + node._rendererBitmask.toString( 16 ) + ')' : '' ) +  '</span>';
+        iSummary += ' <span style="color: #8c8">' + node._rendererSummary.bitmask.toString( 16 ) + ( node._rendererBitmask !== scenery.bitmaskNodeDefault ? ' (' + node._rendererBitmask.toString( 16 ) + ')' : '' ) + '</span>';
 
         return iSummary;
       }
@@ -765,7 +779,8 @@ define( function( require ) {
         div += drawableSummary( drawable );
         if ( drawable.instance ) {
           div += '&nbsp;&nbsp;&nbsp;' + instanceSummary( drawable.instance );
-        } else if ( drawable.backboneInstance ) {
+        }
+        else if ( drawable.backboneInstance ) {
           div += '&nbsp;&nbsp;&nbsp;' + instanceSummary( drawable.backboneInstance );
         }
 
@@ -779,7 +794,8 @@ define( function( require ) {
             printDrawableSubtree( childDrawable );
           } );
           depth -= 1;
-        } else if ( drawable.firstDrawable && drawable.lastDrawable ) {
+        }
+        else if ( drawable.firstDrawable && drawable.lastDrawable ) {
           // we're a block
           depth += 1;
           for ( var childDrawable = drawable.firstDrawable; childDrawable !== drawable.lastDrawable; childDrawable = childDrawable.nextDrawable ) {
@@ -830,11 +846,13 @@ define( function( require ) {
           var mutation = ( props ? ( '\n' + props + '\n' ) : '' );
           if ( mutation !== '' ) {
             result += rootName + '.mutate( {' + mutation + '} )';
-          } else {
+          }
+          else {
             // bleh. strip off the last newline
             result = result.slice( 0, -1 );
           }
-        } else {
+        }
+        else {
           result += 'var ' + name( node ) + ' = ' + node.toString( '', false );
         }
 

@@ -38,11 +38,13 @@ define( function( require ) {
   function command( name, args ) {
     if ( args === undefined || args.length === 0 ) {
       log( name + '()' );
-    } else {
+    }
+    else {
       log( name + '( ' + _.reduce( args, function( memo, arg ) {
         if ( memo.length > 0 ) {
           return memo + ', ' + s( arg );
-        } else {
+        }
+        else {
           return s( arg );
         }
       }, '' ) + ' )' );

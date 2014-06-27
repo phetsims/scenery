@@ -93,7 +93,8 @@ define( function( require ) {
         this.isBackbone = true;
         this.isTransformed = isDisplayRoot || !!hints.cssTransform; // for now, only trigger CSS transform if we have the specific hint
         this.groupRenderer = scenery.Renderer.bitmaskDOM | ( hints.forceAcceleration ? scenery.Renderer.bitmaskForceAcceleration : 0 ); // probably won't be used
-      } else if ( isTransparent || isClipped || hints.canvasCache ) {
+      }
+      else if ( isTransparent || isClipped || hints.canvasCache ) {
         // everything underneath needs to be renderable with Canvas, otherwise we cannot cache
         assert && assert( ( combinedBitmask & scenery.Renderer.bitmaskCanvas ) !== 0, 'hints.canvasCache provided, but not all node contents can be rendered with Canvas under ' + node.constructor.name );
 
@@ -105,14 +106,16 @@ define( function( require ) {
 
             //OHTWO TODO: Also consider SVG output
             this.sharedCacheRenderer = scenery.Renderer.bitmaskCanvas;
-          } else {
+          }
+          else {
             // everything underneath needs to guarantee that its bounds are valid
             //OHTWO TODO: We'll probably remove this if we go with the "safe bounds" approach
             assert && assert( ( combinedBitmask & scenery.bitmaskBoundsValid ) !== 0, 'hints.singleCache provided, but not all node contents have valid bounds under ' + node.constructor.name );
 
             this.isSharedCanvasCachePlaceholder = true;
           }
-        } else {
+        }
+        else {
           this.isInstanceCanvasCache = true;
           this.isUnderCanvasCache = true;
           this.groupRenderer = scenery.Renderer.bitmaskCanvas; // disallowing SVG here, so we don't have to break up our SVG group structure
@@ -129,7 +132,8 @@ define( function( require ) {
     setSelfRenderer: function( node ) {
       if ( this.isUnderCanvasCache ) {
         this.selfRenderer = this.canvasRenderer;
-      } else {
+      }
+      else {
         var success = false;
 
         // try preferred order if specified
@@ -159,12 +163,15 @@ define( function( require ) {
         if ( !rendererSpecifics ) {
           if ( scenery.Renderer.isCanvas( renderer ) ) {
             rendererSpecifics = this.canvasRenderer;
-          } else if ( scenery.Renderer.isSVG( renderer ) ) {
+          }
+          else if ( scenery.Renderer.isSVG( renderer ) ) {
             rendererSpecifics = this.svgRenderer;
-          } else if ( scenery.Renderer.isDOM( renderer ) ) {
+          }
+          else if ( scenery.Renderer.isDOM( renderer ) ) {
             // TODO: decide if CSS transform is to be applied here!
             rendererSpecifics = scenery.Renderer.bitmaskDOM;
-          } else if ( scenery.Renderer.isWebGL( renderer ) ) {
+          }
+          else if ( scenery.Renderer.isWebGL( renderer ) ) {
             // TODO: details?
             rendererSpecifics = scenery.Renderer.bitmaskWebGL;
           }
@@ -190,7 +197,7 @@ define( function( require ) {
         this.canvasRenderer,
 
         // isUnderCanvasCache
-        this.isUnderCanvasCache || this.isInstanceCanvasCache || this.isSharedCanvasCacheSelf,
+          this.isUnderCanvasCache || this.isInstanceCanvasCache || this.isSharedCanvasCacheSelf,
 
         // isShared. No direct descendant is shared, since we create those specially with a new state from createSharedCacheState
         false,
@@ -257,7 +264,8 @@ define( function( require ) {
       return function( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot ) {
         if ( pool.length ) {
           return pool.pop().initialize( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot );
-        } else {
+        }
+        else {
           return new RenderState.RegularState( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot );
         }
       };

@@ -215,7 +215,8 @@ define( function( require ) {
         if ( pool.length ) {
           sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'new from pool' );
           return pool.pop().initialize( display, renderer, transformRootInstance, filterRootInstance );
-        } else {
+        }
+        else {
           sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( 'new from constructor' );
           return new CanvasBlock( display, renderer, transformRootInstance, filterRootInstance );
         }

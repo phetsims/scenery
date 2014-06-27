@@ -28,7 +28,8 @@ define( function( require ) {
       // var pngFallback = 'data:image/png';
 
       return url.slice( 0, target.length ) === target;
-    } catch ( e ) {
+    }
+    catch( e ) {
       return false;
     }
   }
@@ -47,7 +48,8 @@ define( function( require ) {
         context.drawImage( img, 0, 0 );
         canvas.toDataURL();
         Features[name] = true;
-      } catch ( e ) {
+      }
+      catch( e ) {
         Features[name] = false;
       }
     };
@@ -57,7 +59,8 @@ define( function( require ) {
       if ( img.complete ) {
         loadCall();
       }
-    } catch ( e ) {
+    }
+    catch( e ) {
       Features[name] = false;
     }
   }

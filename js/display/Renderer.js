@@ -24,45 +24,45 @@ define( function( require ) {
 
   // ensure that these bitmasks weren't changed in scenery.js
   assert && assert( scenery.bitmaskSupportsCanvas === 0x0000001 );
-  assert && assert( scenery.bitmaskSupportsSVG    === 0x0000002 );
-  assert && assert( scenery.bitmaskSupportsDOM    === 0x0000004 );
-  assert && assert( scenery.bitmaskSupportsWebGL  === 0x0000008 );
+  assert && assert( scenery.bitmaskSupportsSVG === 0x0000002 );
+  assert && assert( scenery.bitmaskSupportsDOM === 0x0000004 );
+  assert && assert( scenery.bitmaskSupportsWebGL === 0x0000008 );
 
   // these will need to be updated if another renderer option is given (modify order bitmasks below also)
-  Renderer.bitmaskRendererArea            = scenery.bitmaskRendererArea;   // 0x000000F
+  Renderer.bitmaskRendererArea = scenery.bitmaskRendererArea;   // 0x000000F
   // one renderer is required
-  Renderer.bitmaskCanvas                  = scenery.bitmaskSupportsCanvas; // 0x0000001
-  Renderer.bitmaskSVG                     = scenery.bitmaskSupportsSVG;    // 0x0000002
-  Renderer.bitmaskDOM                     = scenery.bitmaskSupportsDOM;    // 0x0000004
-  Renderer.bitmaskWebGL                   = scenery.bitmaskSupportsWebGL;  // 0x0000008
+  Renderer.bitmaskCanvas = scenery.bitmaskSupportsCanvas; // 0x0000001
+  Renderer.bitmaskSVG = scenery.bitmaskSupportsSVG;       // 0x0000002
+  Renderer.bitmaskDOM = scenery.bitmaskSupportsDOM;       // 0x0000004
+  Renderer.bitmaskWebGL = scenery.bitmaskSupportsWebGL;   // 0x0000008
   // 10, 20, 40, 80 reserved for future renderers
 
   // fitting group (2 bits)
-  Renderer.bitmaskFitting                 = 0x0000300; // bitmask that covers all of the states
-  Renderer.bitmaskFitFullScene            = 0x0000000; // fit the full scene (invalid in transformed/single-cached situations (how would that work?), required for boundsless objects)
-  Renderer.bitmaskFitLoose                = 0x0000100; // for now, round out to something like 32 or 128 pixel increments?
-  Renderer.bitmaskFitTight                = 0x0000200; // tight fit, updates whenever it is changed
-  Renderer.bitmaskFitHybrid               = 0x0000300; // custom minimization strategy
+  Renderer.bitmaskFitting = 0x0000300;      // bitmask that covers all of the states
+  Renderer.bitmaskFitFullScene = 0x0000000; // fit the full scene (invalid in transformed/single-cached situations (how would that work?), required for boundsless objects)
+  Renderer.bitmaskFitLoose = 0x0000100;     // for now, round out to something like 32 or 128 pixel increments?
+  Renderer.bitmaskFitTight = 0x0000200;     // tight fit, updates whenever it is changed
+  Renderer.bitmaskFitHybrid = 0x0000300;    // custom minimization strategy
 
   // general options
-  Renderer.bitmaskForceAcceleration       = 0x0000400; //
-  Renderer.bitmaskSkipBounds              = 0x0000800; // forces full scene fitting for SVG/Canvas unless there is a guaranteed bounds, so don't use in transformed/single-cached situations unless there is a bounds guarantee
+  Renderer.bitmaskForceAcceleration = 0x0000400;
+  Renderer.bitmaskSkipBounds = 0x0000800; // forces full scene fitting for SVG/Canvas unless there is a guaranteed bounds, so don't use in transformed/single-cached situations unless there is a bounds guarantee
 
   // canvas options
-  Renderer.bitmaskCanvasLowResolution     = 0x0001000;
-  Renderer.bitmaskCanvasNoPruning         = 0x0002000;
-  Renderer.bitmaskCanvasNoDirtyBounds     = 0x0004000;
+  Renderer.bitmaskCanvasLowResolution = 0x0001000;
+  Renderer.bitmaskCanvasNoPruning = 0x0002000;
+  Renderer.bitmaskCanvasNoDirtyBounds = 0x0004000;
   Renderer.bitmaskCanvasBeforeAfterBounds = 0x0008000;
 
   // SVG optimizations group (2 bits)
-  Renderer.bitmaskSVGOptimizations        = 0x0030000;
-  Renderer.bitmaskSVGOptimizeAuto         = 0x0000000; // auto for text-rendering/shape-rendering/image-rendering
-  Renderer.bitmaskSVGOptimizeSpeed        = 0x0010000; // optimizeSpeed for text-rendering/shape-rendering/image-rendering
-  Renderer.bitmaskSVGOptimizeQuality      = 0x0020000; // optimizeQuality for shape-rendering/image-rendering, geometricPrecision for text-rendering
-  Renderer.bitmaskSVGOptimizeCrisp        = 0x0030000; // optimizeQuality for image-rendering, crispEdges for shape-rendering, optimizeLegibility for text-rendering
+  Renderer.bitmaskSVGOptimizations = 0x0030000;
+  Renderer.bitmaskSVGOptimizeAuto = 0x0000000;    // auto for text-rendering/shape-rendering/image-rendering
+  Renderer.bitmaskSVGOptimizeSpeed = 0x0010000;   // optimizeSpeed for text-rendering/shape-rendering/image-rendering
+  Renderer.bitmaskSVGOptimizeQuality = 0x0020000; // optimizeQuality for shape-rendering/image-rendering, geometricPrecision for text-rendering
+  Renderer.bitmaskSVGOptimizeCrisp = 0x0030000;   // optimizeQuality for image-rendering, crispEdges for shape-rendering, optimizeLegibility for text-rendering
 
   // svg options
-  Renderer.bitmaskSVGCollapse             = 0x0040000;
+  Renderer.bitmaskSVGCollapse = 0x0040000;
 
   Renderer.isCanvas = function( bitmask ) {
     return ( bitmask & Renderer.bitmaskCanvas ) !== 0;
@@ -139,11 +139,13 @@ define( function( require ) {
       var currentRenderer = ( bitmask >> i ) & 0x000000F;
       if ( currentRenderer === rendererToInsert ) {
         return bitmask;
-      } else if ( currentRenderer === 0 ) {
+      }
+      else if ( currentRenderer === 0 ) {
         // place the renderer and exit
         bitmask = bitmask | ( rendererToInsert << i );
         return bitmask;
-      } else {
+      }
+      else {
         // clear out that slot
         bitmask = ( bitmask & ~( 0x000000F << i ) );
 
@@ -165,11 +167,14 @@ define( function( require ) {
   Renderer.createSelfDrawable = function( instance, node, selfRenderer ) {
     if ( Renderer.isCanvas( selfRenderer ) ) {
       return node.createCanvasDrawable( selfRenderer, instance );
-    } else if ( Renderer.isSVG( selfRenderer ) ) {
+    }
+    else if ( Renderer.isSVG( selfRenderer ) ) {
       return node.createSVGDrawable( selfRenderer, instance );
-    } else if ( Renderer.isDOM( selfRenderer ) ) {
+    }
+    else if ( Renderer.isDOM( selfRenderer ) ) {
       return node.createDOMDrawable( selfRenderer, instance );
-    } else {
+    }
+    else {
       // assert so that it doesn't compile down to a throw (we want this function to be optimized)
       assert && assert( 'Unrecognized renderer, maybe we don\'t support WebGL yet?: ' + selfRenderer );
     }

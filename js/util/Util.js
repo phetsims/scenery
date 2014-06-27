@@ -38,12 +38,12 @@ define( function( require ) {
             Object.defineProperty( obj, prop, Object.getOwnPropertyDescriptor( source, prop ) );
           }
         }
-      });
+      } );
       return obj;
     },
 
     // Object.create polyfill
-    objectCreate: Object.create || function ( o ) {
+    objectCreate: Object.create || function( o ) {
       if ( arguments.length > 1 ) {
         throw new Error( 'Object.create implementation only accepts the first parameter.' );
       }
@@ -71,7 +71,8 @@ define( function( require ) {
       element.style[transformOriginProperty] = 'top left';
       if ( forceAcceleration ) {
         scenery.Util.setTransformAcceleration( element );
-      } else {
+      }
+      else {
         scenery.Util.unsetTransformAcceleration( element );
       }
     },
@@ -117,24 +118,24 @@ define( function( require ) {
       var lastTime = 0;
       var vendors = [ 'ms', 'moz', 'webkit', 'o' ];
       for ( var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x ) {
-        window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
-        window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
+        window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
+        window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame'] || window[vendors[x] + 'CancelRequestAnimationFrame'];
       }
 
       if ( !window.requestAnimationFrame ) {
-        window.requestAnimationFrame = function(callback) {
+        window.requestAnimationFrame = function( callback ) {
           var currTime = new Date().getTime();
-          var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-          var id = window.setTimeout(function() { callback(currTime + timeToCall); },
-            timeToCall);
+          var timeToCall = Math.max( 0, 16 - (currTime - lastTime) );
+          var id = window.setTimeout( function() { callback( currTime + timeToCall ); },
+            timeToCall );
           lastTime = currTime + timeToCall;
           return id;
         };
       }
 
       if ( !window.cancelAnimationFrame ) {
-        window.cancelAnimationFrame = function(id) {
-          clearTimeout(id);
+        window.cancelAnimationFrame = function( id ) {
+          clearTimeout( id );
         };
       }
     },
@@ -149,7 +150,7 @@ define( function( require ) {
 
     // see http://developer.apple.com/library/safari/#documentation/AudioVideo/Conceptual/HTML-canvas-guide/SettingUptheCanvas/SettingUptheCanvas.html#//apple_ref/doc/uid/TP40010542-CH2-SW5
     // and updated based on http://www.html5rocks.com/en/tutorials/canvas/hidpi/
-    backingScale: function ( context ) {
+    backingScale: function( context ) {
       if ( 'devicePixelRatio' in window ) {
         var backingStoreRatio = Util.backingStorePixelRatio( context );
 
@@ -170,7 +171,7 @@ define( function( require ) {
       for ( var x = 0; x < resolution; x++ ) {
         for ( var y = 0; y < resolution; y++ ) {
           var offset = 4 * ( y * resolution + x );
-          if ( imageData.data[offset] !== 0 || imageData.data[offset+1] !== 0 || imageData.data[offset+2] !== 0 || imageData.data[offset+3] !== 0 ) {
+          if ( imageData.data[offset] !== 0 || imageData.data[offset + 1] !== 0 || imageData.data[offset + 2] !== 0 || imageData.data[offset + 3] !== 0 ) {
             dirtyX[x] = true;
             dirtyY[y] = true;
           }
@@ -210,7 +211,7 @@ define( function( require ) {
 
       // at 1/16x default, we want to be able to get the bounds accurately for something as large as 16x our initial resolution
       // divisible by 2 so hopefully we avoid more quirks from Canvas rendering engines
-      var initialScale = ( options && options.initialScale ) ? options.initialScale : (1/16);
+      var initialScale = ( options && options.initialScale ) ? options.initialScale : ( 1 / 16 );
 
       var minBounds = Bounds2.NOTHING;
       var maxBounds = Bounds2.EVERYTHING;
@@ -239,17 +240,17 @@ define( function( require ) {
         var minMaxBounds = Util.scanBounds( data, resolution, transform );
 
         function snapshotToCanvas( snapshot ) {
-            var canvas = document.createElement( 'canvas' );
-            canvas.width = resolution;
-            canvas.height = resolution;
-            var context = canvas.getContext( '2d' );
-            context.putImageData( snapshot, 0, 0 );
-            $( canvas ).css( 'border', '1px solid black' );
-            $( window ).ready( function() {
-              //$( '#display' ).append( $( document.createElement( 'div' ) ).text( 'Bounds: ' +  ) );
-              $( '#display' ).append( canvas );
-            } );
-          }
+          var canvas = document.createElement( 'canvas' );
+          canvas.width = resolution;
+          canvas.height = resolution;
+          var context = canvas.getContext( '2d' );
+          context.putImageData( snapshot, 0, 0 );
+          $( canvas ).css( 'border', '1px solid black' );
+          $( window ).ready( function() {
+            //$( '#display' ).append( $( document.createElement( 'div' ) ).text( 'Bounds: ' +  ) );
+            $( '#display' ).append( canvas );
+          } );
+        }
 
         // TODO: remove after debug
         if ( debugChromeBoundsScanning ) {
@@ -274,7 +275,7 @@ define( function( require ) {
         return new Transform3( Matrix3.translation( translationX, translationY ).timesMatrix( Matrix3.scaling( scaleX, scaleY ) ) );
       }
 
-      var initialTransform = new Transform3( );
+      var initialTransform = new Transform3();
       // make sure to initially center our object, so we don't miss the bounds
       initialTransform.append( Matrix3.translation( resolution / 2, resolution / 2 ) );
       initialTransform.append( Matrix3.scaling( initialScale ) );
@@ -378,10 +379,10 @@ define( function( require ) {
       }
 
       var result = new Bounds2(
-        ( minBounds.minX + maxBounds.minX ) / 2,
-        ( minBounds.minY + maxBounds.minY ) / 2,
-        ( minBounds.maxX + maxBounds.maxX ) / 2,
-        ( minBounds.maxY + maxBounds.maxY ) / 2
+          ( minBounds.minX + maxBounds.minX ) / 2,
+          ( minBounds.minY + maxBounds.minY ) / 2,
+          ( minBounds.maxX + maxBounds.maxX ) / 2,
+          ( minBounds.maxY + maxBounds.maxY ) / 2
       );
 
       // extra data about our bounds

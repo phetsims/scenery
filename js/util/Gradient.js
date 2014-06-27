@@ -39,7 +39,8 @@ define( function( require ) {
       if ( this.lastStopRatio > ratio ) {
         // fail out, since browser quirks go crazy for this case
         throw new Error( 'Color stops not specified in the order of increasing ratios' );
-      } else {
+      }
+      else {
         this.lastStopRatio = ratio;
       }
 

@@ -56,9 +56,15 @@ define( function( require ) {
       this.point = point;
       this.isDown = true;
       switch( event.button ) {
-        case 0: this.leftDown = true; break;
-        case 1: this.middleDown = true; break;
-        case 2: this.rightDown = true; break;
+        case 0:
+          this.leftDown = true;
+          break;
+        case 1:
+          this.middleDown = true;
+          break;
+        case 2:
+          this.rightDown = true;
+          break;
       }
       return pointChanged;
     },
@@ -70,9 +76,15 @@ define( function( require ) {
       this.point = point;
       this.isDown = false;
       switch( event.button ) {
-        case 0: this.leftDown = false; break;
-        case 1: this.middleDown = false; break;
-        case 2: this.rightDown = false; break;
+        case 0:
+          this.leftDown = false;
+          break;
+        case 1:
+          this.middleDown = false;
+          break;
+        case 2:
+          this.rightDown = false;
+          break;
       }
       return pointChanged;
     },

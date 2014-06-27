@@ -21,7 +21,7 @@ define( function( require ) {
   var DOMBlock = require( 'SCENERY/display/DOMBlock' );
 
   scenery.Stitcher = function Stitcher( display, renderer ) {
-    throw new Error( 'We are too abstract for that! ');
+    throw new Error( 'We are too abstract for that!' );
   };
   var Stitcher = scenery.Stitcher;
 
@@ -31,9 +31,9 @@ define( function( require ) {
     initialize: function( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
       assert && assert( firstChangeInterval && lastChangeInterval, 'We are guaranteed at least one change interval' );
       assert && assert( !firstDrawable || firstDrawable.previousDrawable === null,
-                        'End boundary of drawable linked list should link to null' );
+        'End boundary of drawable linked list should link to null' );
       assert && assert( !lastDrawable || lastDrawable.nextDrawable === null,
-                        'End boundary of drawable linked list should link to null' );
+        'End boundary of drawable linked list should link to null' );
 
       if ( sceneryLog && sceneryLog.Stitch ) {
         sceneryLog.Stitch( 'stitch ' + backbone.toString() +
@@ -231,7 +231,8 @@ define( function( require ) {
               lastDrawable: block.pendingLastDrawable
             } );
           }
-        } else {
+        }
+        else {
           sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'skipping update interval: ' + block.toString() + ', unused' );
         }
       }
@@ -243,12 +244,15 @@ define( function( require ) {
 
       if ( Renderer.isCanvas( renderer ) ) {
         block = CanvasBlock.createFromPool( backbone.display, renderer, backbone.transformRootInstance, backbone.backboneInstance );
-      } else if ( Renderer.isSVG( renderer ) ) {
+      }
+      else if ( Renderer.isSVG( renderer ) ) {
         //OHTWO TODO: handle filter root separately from the backbone instance?
         block = SVGBlock.createFromPool( backbone.display, renderer, backbone.transformRootInstance, backbone.backboneInstance );
-      } else if ( Renderer.isDOM( renderer ) ) {
+      }
+      else if ( Renderer.isDOM( renderer ) ) {
         block = DOMBlock.createFromPool( backbone.display, drawable );
-      } else {
+      }
+      else {
         throw new Error( 'unsupported renderer for createBlock: ' + renderer );
       }
 
@@ -328,12 +332,12 @@ define( function( require ) {
 
         // ensure our indices are up-to-date (reindexed, or didn't change)
         assertSlow( stitcher.reindexed || blocks.length === 0 ||
-                    // array equality of previousBlocks and blocks
+            // array equality of previousBlocks and blocks
                     ( previousBlocks.length === blocks.length &&
                       _.every( _.zip( previousBlocks, blocks ), function( arr ) {
                         return arr[0] === arr[1];
                       } ) ),
-                    'Did not reindex on a block change where we are left with blocks' );
+          'Did not reindex on a block change where we are left with blocks' );
 
         // all created blocks had intervals notified
         _.each( stitcher.createdBlocks, function( blockData ) {
@@ -393,37 +397,38 @@ define( function( require ) {
         } );
 
         assertSlow( blocks.length - previousBlocks.length === stitcher.createdBlocks.length - stitcher.disposedBlocks.length,
-                    'The count of unmodified blocks should be constant (equal differences):\n' +
-                    'created: ' + _.map( stitcher.createdBlocks, function( n ) { return n.block.id; } ).join( ',' ) + '\n' +
-                    'disposed: ' + _.map( stitcher.disposedBlocks, function( n ) { return n.block.id; } ).join( ',' ) + '\n' +
-                    'before: ' + _.map( previousBlocks, function( n ) { return n.id; } ).join( ',' ) + '\n' +
-                    'after: ' + _.map( blocks, function( n ) { return n.id; } ).join( ',' ) );
+            'The count of unmodified blocks should be constant (equal differences):\n' +
+            'created: ' + _.map( stitcher.createdBlocks, function( n ) { return n.block.id; } ).join( ',' ) + '\n' +
+            'disposed: ' + _.map( stitcher.disposedBlocks, function( n ) { return n.block.id; } ).join( ',' ) + '\n' +
+            'before: ' + _.map( previousBlocks, function( n ) { return n.id; } ).join( ',' ) + '\n' +
+            'after: ' + _.map( blocks, function( n ) { return n.id; } ).join( ',' ) );
 
         assertSlow( this.touchedBlocks.length === 0,
-                    'If we marked any blocks for changes, we should have called updateBlockIntervals' );
+          'If we marked any blocks for changes, we should have called updateBlockIntervals' );
 
         if ( blocks.length ) {
 
           assertSlow( stitcher.backbone.previousFirstDrawable !== null &&
                       stitcher.backbone.previousLastDrawable !== null,
-                      'If we are left with at least one block, we must be tracking at least one drawable' );
+            'If we are left with at least one block, we must be tracking at least one drawable' );
 
           assertSlow( blocks[0].pendingFirstDrawable === stitcher.backbone.previousFirstDrawable,
-                      'Our first drawable should match the first drawable of our first block' );
+            'Our first drawable should match the first drawable of our first block' );
 
-          assertSlow( blocks[blocks.length-1].pendingLastDrawable === stitcher.backbone.previousLastDrawable,
-                      'Our last drawable should match the last drawable of our last block' );
+          assertSlow( blocks[blocks.length - 1].pendingLastDrawable === stitcher.backbone.previousLastDrawable,
+            'Our last drawable should match the last drawable of our last block' );
 
           for ( var i = 0; i < blocks.length - 1; i++ ) {
             // [i] and [i+1] are a pair of consecutive blocks
-            assertSlow( blocks[i].pendingLastDrawable.nextDrawable === blocks[i+1].pendingFirstDrawable &&
-                        blocks[i].pendingLastDrawable === blocks[i+1].pendingFirstDrawable.previousDrawable,
-                        'Consecutive blocks should have boundary drawables that are also consecutive in the linked list' );
+            assertSlow( blocks[i].pendingLastDrawable.nextDrawable === blocks[i + 1].pendingFirstDrawable &&
+                        blocks[i].pendingLastDrawable === blocks[i + 1].pendingFirstDrawable.previousDrawable,
+              'Consecutive blocks should have boundary drawables that are also consecutive in the linked list' );
           }
-        } else {
+        }
+        else {
           assertSlow( stitcher.backbone.previousFirstDrawable === null &&
                       stitcher.backbone.previousLastDrawable === null,
-                      'If we are left with no blocks, it must mean we are tracking precisely zero drawables' );
+            'If we are left with no blocks, it must mean we are tracking precisely zero drawables' );
         }
       }
     }
@@ -450,7 +455,7 @@ define( function( require ) {
       var isChanged = firstChangeInterval.drawableBefore === null;
       var currentInterval = firstChangeInterval;
 
-      for ( var drawable = firstDrawable;; drawable = ( useCurrent ? drawable.nextDrawable : drawable.oldNextDrawable ) ) {
+      for ( var drawable = firstDrawable; ; drawable = ( useCurrent ? drawable.nextDrawable : drawable.oldNextDrawable ) ) {
         if ( isChanged && drawable === currentInterval.drawableAfter ) {
           isChanged = false;
           currentInterval = currentInterval.nextChangeInterval;

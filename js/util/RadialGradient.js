@@ -30,7 +30,8 @@ define( function( require ) {
     // make sure that the focal point is in both circles. SVG doesn't support rendering outside of them
     if ( this.startRadius >= this.endRadius ) {
       assert && assert( this.focalPoint.minus( this.start ).magnitude() <= this.startRadius );
-    } else {
+    }
+    else {
       assert && assert( this.focalPoint.minus( this.end ).magnitude() <= this.endRadius );
     }
 
@@ -93,7 +94,8 @@ define( function( require ) {
         for ( i = this.stops.length - 1; i >= 0; i-- ) {
           applyStop( this.stops[i] );
         }
-      } else {
+      }
+      else {
         for ( i = 0; i < this.stops.length; i++ ) {
           applyStop( this.stops[i] );
         }

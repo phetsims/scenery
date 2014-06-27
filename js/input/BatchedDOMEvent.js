@@ -1,4 +1,3 @@
-
 // Copyright 2002-2014, University of Colorado
 
 /**
@@ -41,20 +40,25 @@ define( function( require ) {
       input.validatePointers();
       if ( input.logEvents ) { input.eventLog.push( 'validatePointers();' ); }
 
+      //OHTWO TODO: switch?
       if ( this.type === BatchedDOMEvent.POINTER_TYPE ) {
         callback.call( input, domEvent.pointerId, domEvent.pointerType, input.pointFromEvent( domEvent ), domEvent );
-      } else if ( this.type === BatchedDOMEvent.MS_POINTER_TYPE ) {
+      }
+      else if ( this.type === BatchedDOMEvent.MS_POINTER_TYPE ) {
         callback.call( input, domEvent.pointerId, scenery.Input.msPointerType( domEvent ), input.pointFromEvent( domEvent ), domEvent );
-      } else if ( this.type === BatchedDOMEvent.TOUCH_TYPE ) {
+      }
+      else if ( this.type === BatchedDOMEvent.TOUCH_TYPE ) {
         for ( var i = 0; i < domEvent.changedTouches.length; i++ ) {
           // according to spec (http://www.w3.org/TR/touch-events/), this is not an Array, but a TouchList
           var touch = domEvent.changedTouches.item( i );
 
           callback.call( input, touch.identifier, input.pointFromEvent( touch ), domEvent );
         }
-      } else if ( this.type === BatchedDOMEvent.MOUSE_TYPE ) {
+      }
+      else if ( this.type === BatchedDOMEvent.MOUSE_TYPE ) {
         callback.call( input, input.pointFromEvent( domEvent ), domEvent );
-      } else {
+      }
+      else {
         throw new Error( 'bad type value: ' + this.type );
       }
     },
@@ -79,7 +83,8 @@ define( function( require ) {
           var result = pool.pop();
           BatchedDOMEvent.call( result, domEvent, type, callback );
           return result;
-        } else {
+        }
+        else {
           return new BatchedDOMEvent( domEvent, type, callback );
         }
       };

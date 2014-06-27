@@ -76,10 +76,17 @@ define( function( require ) {
       return result;
     },
 
-    set defaultMethod( value ) { this._defaultMethod = value; this.updateLayout(); return this; },
+    set defaultMethod( value ) {
+      this._defaultMethod = value;
+      this.updateLayout();
+      return this;
+    },
     get defaultMethod() { return this._defaultMethod; },
 
-    set updateOnBounds( value ) { this._updateOnBounds = value; return this; },
+    set updateOnBounds( value ) {
+      this._updateOnBounds = value;
+      return this;
+    },
     get updateOnBounds() { return this._updateOnBounds; },
 
     /*
@@ -149,7 +156,7 @@ define( function( require ) {
       var layoutProperties = this.layoutProperties;
       for ( var i = 0; i < this._elements.length; i++ ) {
         var element = this._elements[i];
-        element.layoutMethod.layout( element, i, ( i > 0 ? this._elements[i-1] : null ), layoutProperties );
+        element.layoutMethod.layout( element, i, ( i > 0 ? this._elements[i - 1] : null ), layoutProperties );
       }
 
       // use the invisible background to take up all of our layout areas

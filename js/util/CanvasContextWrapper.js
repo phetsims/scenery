@@ -103,11 +103,14 @@ define( function( require ) {
         this.lineDash = dash;
         if ( this.context.setLineDash ) {
           this.context.setLineDash( dash === null ? [] : dash ); // see https://github.com/phetsims/scenery/issues/101 for null line-dash workaround
-        } else if ( this.context.mozDash !== undefined ) {
+        }
+        else if ( this.context.mozDash !== undefined ) {
           this.context.mozDash = dash;
-        } else if ( this.context.webkitLineDash !== undefined ) {
+        }
+        else if ( this.context.webkitLineDash !== undefined ) {
           this.context.webkitLineDash = dash ? dash : [];
-        } else {
+        }
+        else {
           // unsupported line dash! do... nothing?
         }
       }
@@ -118,9 +121,11 @@ define( function( require ) {
         this.lineDashOffset = lineDashOffset;
         if ( this.context.lineDashOffset !== undefined ) {
           this.context.lineDashOffset = lineDashOffset;
-        } else if ( this.context.webkitLineDashOffset !== undefined ) {
+        }
+        else if ( this.context.webkitLineDashOffset !== undefined ) {
           this.context.webkitLineDashOffset = lineDashOffset;
-        } else {
+        }
+        else {
           // unsupported line dash! do... nothing?
         }
       }

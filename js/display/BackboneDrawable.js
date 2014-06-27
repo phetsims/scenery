@@ -73,7 +73,7 @@ define( function( require ) {
       this.clipDirtyListener = this.clipDirtyListener || this.markClipDirty.bind( this );
       if ( this.willApplyFilters ) {
         assert && assert( this.filterRootAncestorInstance.trail.nodes.length < this.backboneInstance.trail.nodes.length,
-                          'Our backboneInstance should be deeper if we are applying filters' );
+          'Our backboneInstance should be deeper if we are applying filters' );
 
         // walk through to see which instances we'll need to watch for filter changes
         for ( var instance = this.backboneInstance; instance !== this.filterRootAncestorInstance; instance = instance.parent ) {
@@ -278,8 +278,8 @@ define( function( require ) {
       for ( var k = 0; k < this.blocks.length; k++ ) {
         var block = this.blocks[k];
         if ( block.zIndex <= zIndex ) {
-          var newIndex = ( k + 1 < this.blocks.length && this.blocks[k+1].zIndex - 1 > zIndex ) ?
-                         Math.ceil( ( zIndex + this.blocks[k+1].zIndex ) / 2 ) :
+          var newIndex = ( k + 1 < this.blocks.length && this.blocks[k + 1].zIndex - 1 > zIndex ) ?
+                         Math.ceil( ( zIndex + this.blocks[k + 1].zIndex ) / 2 ) :
                          zIndex + 20;
 
           // NOTE: this should give it its own stacking index (which is what we want)
@@ -291,7 +291,7 @@ define( function( require ) {
           assert( this.blocks[k].zIndex % 1 === 0, 'z-indices should be integers' );
           assert( this.blocks[k].zIndex > 0, 'z-indices should be greater than zero for our needs (see spec)' );
           if ( k > 0 ) {
-            assert( this.blocks[k-1].zIndex < this.blocks[k].zIndex, 'z-indices should be strictly increasing' );
+            assert( this.blocks[k - 1].zIndex < this.blocks[k].zIndex, 'z-indices should be strictly increasing' );
           }
         }
       }
@@ -331,7 +331,8 @@ define( function( require ) {
             // skip it, hook the correct reference
             lastNonemptyInterval.nextChangeInterval = interval.nextChangeInterval;
           }
-        } else {
+        }
+        else {
           // our first non-empty interval will be our new firstChangeInterval
           if ( !lastNonemptyInterval ) {
             firstChangeInterval = interval;
@@ -390,7 +391,8 @@ define( function( require ) {
         if ( pool.length ) {
           sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'new from pool' );
           return pool.pop().initialize( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
-        } else {
+        }
+        else {
           sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'new from constructor' );
           return new BackboneDrawable( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
         }

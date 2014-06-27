@@ -254,7 +254,7 @@ define( function( require ) {
       if ( this._children !== children ) {
         // remove all children in a way where we don't have to copy the child array for safety
         while ( this._children.length ) {
-          this.removeChild( this._children[this._children.length-1] );
+          this.removeChild( this._children[this._children.length - 1] );
         }
 
         var len = children.length;
@@ -475,7 +475,7 @@ define( function( require ) {
       // double-check that all of our bounds handling has been accurate
       if ( assertSlow ) {
         // new scope for safety
-        (function(){
+        (function() {
           var epsilon = 0.000001;
 
           var childBounds = Bounds2.NOTHING.copy();
@@ -494,7 +494,7 @@ define( function( require ) {
           assertSlow && assertSlow( that._localBoundsOverridden ||
                                     that._bounds.equalsEpsilon( fullBounds, epsilon ) ||
                                     that._bounds.equalsEpsilon( fullBounds, epsilon ),
-                                    'Bounds mismatch after validateBounds: ' + that._bounds.toString() + ', expected: ' + fullBounds.toString() );
+              'Bounds mismatch after validateBounds: ' + that._bounds.toString() + ', expected: ' + fullBounds.toString() );
         })();
       }
 
@@ -517,7 +517,8 @@ define( function( require ) {
       if ( this._boundsEventSelfCount !== 0 ) {
         // we are a root that should be validated. return whether we updated anything
         return this.validateBounds();
-      } else if ( this._boundsEventCount > 0 && this._childBoundsDirty ) {
+      }
+      else if ( this._boundsEventCount > 0 && this._childBoundsDirty ) {
         // descendants have watched bounds, traverse!
         var changed = false;
         var numChildren = this._children.length;
@@ -525,7 +526,8 @@ define( function( require ) {
           changed = this._children[i].watchedBoundsScan() || changed;
         }
         return changed;
-      } else {
+      }
+      else {
         // if _boundsEventCount is zero, no bounds are watched below us (don't traverse), and it wasn't changed
         return false;
       }
@@ -551,7 +553,8 @@ define( function( require ) {
         if ( this.isSubtreePickablePruned( hasListenerEquivalentSelfOrInAncestor ) ) {
           // if this subtree would be pruned, set the mouse bounds to nothing, and bail (skips the entire subtree, since it would never be hit-tested)
           this._mouseBounds.set( Bounds2.NOTHING );
-        } else {
+        }
+        else {
           // start with the self bounds, then add from there
           this._mouseBounds.set( this._selfBounds );
 
@@ -606,7 +609,8 @@ define( function( require ) {
         if ( this.isSubtreePickablePruned( hasListenerEquivalentSelfOrInAncestor ) ) {
           // if this subtree would be pruned, set the touch bounds to nothing, and bail (skips the entire subtree, since it would never be hit-tested)
           this._touchBounds.set( Bounds2.NOTHING );
-        } else {
+        }
+        else {
           // start with the self bounds, then add from there
           this._touchBounds.set( this._selfBounds );
 
@@ -747,7 +751,8 @@ define( function( require ) {
           this.trigger1( 'localBoundsOverride', false );
           this.invalidateBounds();
         }
-      } else {
+      }
+      else {
         // just an instance check for now. consider equals() in the future depending on cost
         var changed = localBounds !== this._localBounds || !this._localBoundsOverridden;
 
@@ -847,10 +852,12 @@ define( function( require ) {
       if ( useMouseAreas ) {
         !recursive && this.validateMouseBounds( false ); // update mouse bounds for pruning if we aren't being called from trailUnderPoint (ourself)
         pruningBounds = this._mouseBounds;
-      } else if ( useTouchAreas ) {
+      }
+      else if ( useTouchAreas ) {
         !recursive && this.validateTouchBounds( false ); // update touch bounds for pruning if we aren't being called from trailUnderPoint (ourself)
         pruningBounds = this._touchBounds;
-      } else {
+      }
+      else {
         !recursive && this.validateBounds(); // update general bounds for pruning if we aren't being called from trailUnderPoint (ourself)
         pruningBounds = this._bounds;
       }
@@ -1003,10 +1010,12 @@ define( function( require ) {
         if ( !x && !y ) { return; } // bail out if both are zero
         if ( prependInstead ) {
           this.prependTranslation( x, y );
-        } else {
+        }
+        else {
           this.appendMatrix( Matrix3.translation( x, y ) );
         }
-      } else {
+      }
+      else {
         // translate( vector, prependInstead )
         var vector = x;
         if ( !vector.x && !vector.y ) { return; } // bail out if both are zero
@@ -1021,16 +1030,19 @@ define( function( require ) {
           // scale( scale )
           if ( x === 1 ) { return; } // bail out if we are scaling by 1 (identity)
           this.appendMatrix( Matrix3.scaling( x, x ) );
-        } else {
+        }
+        else {
           // scale( x, y, prependInstead )
           if ( x === 1 && y === 1 ) { return; } // bail out if we are scaling by 1 (identity)
           if ( prependInstead ) {
             this.prependMatrix( Matrix3.scaling( x, y ) );
-          } else {
+          }
+          else {
             this.appendMatrix( Matrix3.scaling( x, y ) );
           }
         }
-      } else {
+      }
+      else {
         // scale( vector, prependInstead ) or scale( { x: x, y: y }, prependInstead )
         var vector = x;
         this.scale( vector.x, vector.y, y ); // forward to full version
@@ -1042,7 +1054,8 @@ define( function( require ) {
       if ( angle % ( 2 * Math.PI ) === 0 ) { return; } // bail out if our angle is effectively 0
       if ( prependInstead ) {
         this.prependMatrix( Matrix3.rotation2( angle ) );
-      } else {
+      }
+      else {
         this.appendMatrix( Matrix3.rotation2( angle ) );
       }
     },
@@ -1094,7 +1107,8 @@ define( function( require ) {
         }
         // setScaleMagnitude( x, y )
         this.appendMatrix( Matrix3.scaling( a / currentScale.x, b / currentScale.y ) );
-      } else {
+      }
+      else {
         // setScaleMagnitude( vector ), where we set the x-scale to vector.x and y-scale to vector.y
         this.appendMatrix( Matrix3.scaling( a.x / currentScale.x, a.y / currentScale.y ) );
       }
@@ -1123,7 +1137,8 @@ define( function( require ) {
       if ( typeof a === 'number' ) {
         dx = a - tx;
         dy = b - ty;
-      } else {
+      }
+      else {
         dx = a.x - tx;
         dy = a.y - ty;
       }
@@ -1149,7 +1164,7 @@ define( function( require ) {
     },
 
     // prepend an x,y translation to our local transform without allocating a matrix for it, see #119
-    prependTranslation: function( x,y ) {
+    prependTranslation: function( x, y ) {
       this._transform.prependTranslation( x, y );
     },
 
@@ -1431,9 +1446,11 @@ define( function( require ) {
     pickARenderer: function() {
       if ( this.supportsCanvas() ) {
         return scenery.Renderer.Canvas;
-      } else if ( this.supportsSVG() ) {
+      }
+      else if ( this.supportsSVG() ) {
         return scenery.Renderer.SVG;
-      } else if ( this.supportsDOM() ) {
+      }
+      else if ( this.supportsDOM() ) {
         return scenery.Renderer.DOM;
       }
       // oi!
@@ -1455,20 +1472,23 @@ define( function( require ) {
     // provides a rendering hint to use this render whenever possible
     setRenderer: function( renderer ) {
       assert && assert( renderer === null || renderer === 'canvas' || renderer === 'svg' || renderer === 'dom' || renderer === 'webgl',
-                        'Renderer input should be null, or one of: "canvas", "svg", "dom", or "webgl".' );
+        'Renderer input should be null, or one of: "canvas", "svg", "dom", or "webgl".' );
 
       var newRenderer = 0;
       if ( renderer === 'canvas' ) {
         newRenderer = scenery.Renderer.bitmaskCanvas;
-      } else if ( renderer === 'svg' ) {
+      }
+      else if ( renderer === 'svg' ) {
         newRenderer = scenery.Renderer.bitmaskSVG;
-      } else if ( renderer === 'dom' ) {
+      }
+      else if ( renderer === 'dom' ) {
         newRenderer = scenery.Renderer.bitmaskDOM;
-      } else if ( renderer === 'webgl' ) {
+      }
+      else if ( renderer === 'webgl' ) {
         newRenderer = scenery.Renderer.bitmaskWebGL;
       }
       assert && assert( ( renderer === null ) === ( newRenderer === 0 ),
-                        'We should only end up with no actual renderer if renderer is null' );
+        'We should only end up with no actual renderer if renderer is null' );
 
       if ( this._hints.renderer !== newRenderer ) {
         this._hints.renderer = newRenderer;
@@ -1478,13 +1498,17 @@ define( function( require ) {
     getRenderer: function() {
       if ( this._hints.renderer === 0 ) {
         return null;
-      } else if ( this._hints.renderer === scenery.Renderer.bitmaskCanvas ) {
+      }
+      else if ( this._hints.renderer === scenery.Renderer.bitmaskCanvas ) {
         return 'canvas';
-      } else if ( this._hints.renderer === scenery.Renderer.bitmaskSVG ) {
+      }
+      else if ( this._hints.renderer === scenery.Renderer.bitmaskSVG ) {
         return 'svg';
-      } else if ( this._hints.renderer === scenery.Renderer.bitmaskDOM ) {
+      }
+      else if ( this._hints.renderer === scenery.Renderer.bitmaskDOM ) {
         return 'dom';
-      } else if ( this._hints.renderer === scenery.Renderer.bitmaskWebGL ) {
+      }
+      else if ( this._hints.renderer === scenery.Renderer.bitmaskWebGL ) {
         return 'webgl';
       }
       assert && assert( false, 'Seems to be an invalid renderer?' );
@@ -1700,7 +1724,8 @@ define( function( require ) {
             wrapper.context.globalAlpha = child._opacity;
             wrapper.context.drawImage( canvas, 0, 0 );
             wrapper.context.restore();
-          } else {
+          }
+          else {
             child.renderToCanvasSubtree( wrapper, matrix );
           }
           matrix.multiplyMatrix( child._transform.getInverse() );
@@ -1778,7 +1803,8 @@ define( function( require ) {
           callback( img, x, y );
           try {
             delete img.onload;
-          } catch ( e ) {} // fails on Safari 5.1
+          }
+          catch( e ) {} // fails on Safari 5.1
         };
         img.src = url;
       }, x, y, width, height );
@@ -1905,7 +1931,7 @@ define( function( require ) {
       var matrix = Matrix3.identity(); // will be modified in place
 
       // iterate from the back forwards (from the root node to here)
-      for ( var i = matrices.length - 1; i >=0; i-- ) {
+      for ( var i = matrices.length - 1; i >= 0; i-- ) {
         matrix.multiplyMatrix( matrices[i] );
       }
 
@@ -1950,7 +1976,7 @@ define( function( require ) {
 
       // iterate from the back forwards (from the root node to here)
       var resultPoint = point.copy();
-      for ( var i = transforms.length - 1; i >=0; i-- ) {
+      for ( var i = transforms.length - 1; i >= 0; i-- ) {
         // in-place multiplication
         transforms[i].getInverse().multiplyVector2( resultPoint );
       }
@@ -2130,10 +2156,10 @@ define( function( require ) {
 
       if ( assert ) {
         assert && assert( _.filter( ['translation', 'x', 'left', 'right', 'centerX', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom'], function( key ) { return options[key] !== undefined; } ).length <= 1,
-                          'More than one mutation on this Node set the x component, check ' + Object.keys( options ).join( ',' ) );
+            'More than one mutation on this Node set the x component, check ' + Object.keys( options ).join( ',' ) );
 
         assert && assert( _.filter( ['translation', 'y', 'top', 'bottom', 'centerY', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom'], function( key ) { return options[key] !== undefined; } ).length <= 1,
-                          'More than one mutation on this Node set the y component, check ' + Object.keys( options ).join( ',' ) );
+            'More than one mutation on this Node set the y component, check ' + Object.keys( options ).join( ',' ) );
       }
 
       var node = this;
@@ -2145,7 +2171,8 @@ define( function( require ) {
           // if the key refers to a function that is not ES5 writable, it will execute that function with the single argument
           if ( descriptor && typeof descriptor.value === 'function' ) {
             node[key]( options[key] );
-          } else {
+          }
+          else {
             node[key] = options[key];
           }
         }
@@ -2170,13 +2197,15 @@ define( function( require ) {
 
     getPropString: function( spaces, includeChildren ) {
       var result = '';
+
       function addProp( key, value, nowrap ) {
         if ( result ) {
           result += ',\n';
         }
         if ( !nowrap && typeof value === 'string' ) {
           result += spaces + key + ': \'' + value + '\'';
-        } else {
+        }
+        else {
           result += spaces + key + ': ' + value;
         }
       }
@@ -2200,9 +2229,10 @@ define( function( require ) {
 
       if ( !this.transform.isIdentity() ) {
         var m = this.transform.getMatrix();
-        addProp( 'matrix', 'dot.Matrix3.createFromPool(' + m.m00() + ', ' + m.m01() + ', ' + m.m02() + ', ' +
-                                                 m.m10() + ', ' + m.m11() + ', ' + m.m12() + ', ' +
-                                                 m.m20() + ', ' + m.m21() + ', ' + m.m22() + ' )', true );
+        addProp( 'matrix', 'dot.Matrix3.createFromPool(' +
+                           m.m00() + ', ' + m.m01() + ', ' + m.m02() + ', ' +
+                           m.m10() + ', ' + m.m11() + ', ' + m.m12() + ', ' +
+                           m.m20() + ', ' + m.m21() + ', ' + m.m22() + ' )', true );
       }
 
       if ( this.renderer ) {
@@ -2305,16 +2335,17 @@ define( function( require ) {
     // ES5 getter and setter
     Object.defineProperty( Node.prototype, propertyName, { set: Node.prototype[setterMethod], get: Node.prototype[getterMethod] } );
   }
+
   // arguments are more explicit so text-searches will hopefully identify this code.
-  addBoundsVectorGetterSetter( 'getLeftTop',      'setLeftTop',      'leftTop' );
-  addBoundsVectorGetterSetter( 'getCenterTop',    'setCenterTop',    'centerTop' );
-  addBoundsVectorGetterSetter( 'getRightTop',     'setRightTop',     'rightTop' );
-  addBoundsVectorGetterSetter( 'getLeftCenter',   'setLeftCenter',   'leftCenter' );
-  addBoundsVectorGetterSetter( 'getCenter',       'setCenter',       'center' );
-  addBoundsVectorGetterSetter( 'getRightCenter',  'setRightCenter',  'rightCenter' );
-  addBoundsVectorGetterSetter( 'getLeftBottom',   'setLeftBottom',   'leftBottom' );
+  addBoundsVectorGetterSetter( 'getLeftTop', 'setLeftTop', 'leftTop' );
+  addBoundsVectorGetterSetter( 'getCenterTop', 'setCenterTop', 'centerTop' );
+  addBoundsVectorGetterSetter( 'getRightTop', 'setRightTop', 'rightTop' );
+  addBoundsVectorGetterSetter( 'getLeftCenter', 'setLeftCenter', 'leftCenter' );
+  addBoundsVectorGetterSetter( 'getCenter', 'setCenter', 'center' );
+  addBoundsVectorGetterSetter( 'getRightCenter', 'setRightCenter', 'rightCenter' );
+  addBoundsVectorGetterSetter( 'getLeftBottom', 'setLeftBottom', 'leftBottom' );
   addBoundsVectorGetterSetter( 'getCenterBottom', 'setCenterBottom', 'centerBottom' );
-  addBoundsVectorGetterSetter( 'getRightBottom',  'setRightBottom',  'rightBottom' );
+  addBoundsVectorGetterSetter( 'getRightBottom', 'setRightBottom', 'rightBottom' );
 
   /*
    * This is an array of property (setter) names for Node.mutate(), which are also used when creating nodes with parameter objects.
@@ -2325,10 +2356,12 @@ define( function( require ) {
    * NOTE: translation-based mutators come before rotation/scale, since typically we think of their operations occuring "after" the rotation / scaling
    * NOTE: left/right/top/bottom/centerX/centerY are at the end, since they rely potentially on rotation / scaling changes of bounds that may happen beforehand
    */
-  Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
-                                  'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom',
-                                  'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
-                                  'layerSplit', 'mouseArea', 'touchArea', 'clipArea' ];
+  Node.prototype._mutatorKeys = [
+    'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
+    'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom',
+    'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
+    'layerSplit', 'mouseArea', 'touchArea', 'clipArea'
+  ];
 
   return Node;
 } );

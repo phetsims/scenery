@@ -36,7 +36,8 @@ define( function( require ) {
       // the mutators will call invalidateCircle() and properly set the shape
       options = radius;
       this._radius = options.radius;
-    } else {
+    }
+    else {
       this._radius = radius;
 
       // ensure we have a parameter object
@@ -162,14 +163,17 @@ define( function( require ) {
         if ( this._strokePickable ) {
           // we were either within the outer radius, or not
           return result;
-        } else {
+        }
+        else {
           // just testing in the fill range
           return magSq <= this._radius * this._radius;
         }
-      } else if ( this._strokePickable ) {
+      }
+      else if ( this._strokePickable ) {
         var innerRadius = this._radius - iRadius;
         return result && magSq >= innerRadius * innerRadius;
-      } else {
+      }
+      else {
         return false; // neither stroke nor fill is pickable
       }
     },
@@ -180,7 +184,8 @@ define( function( require ) {
     setShape: function( shape ) {
       if ( shape !== null ) {
         throw new Error( 'Cannot set the shape of a scenery.Circle to something non-null' );
-      } else {
+      }
+      else {
         // probably called from the Path constructor
         this.invalidateShape();
       }
@@ -305,7 +310,8 @@ define( function( require ) {
           // update stroke presence
           if ( node.hasStroke() ) {
             strokeElement.style.borderStyle = 'solid';
-          } else {
+          }
+          else {
             strokeElement.style.borderStyle = 'none';
           }
         }

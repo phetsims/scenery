@@ -187,11 +187,13 @@ define( function( require ) {
           if ( !isIdentity ) {
             this.hasTransform = true;
             svgGroup.setAttribute( 'transform', this.node.transform.getMatrix().getSVGTransform() );
-          } else if ( this.hasTransform ) {
+          }
+          else if ( this.hasTransform ) {
             this.hasTransform = false;
             svgGroup.removeAttribute( 'transform' );
           }
-        } else {
+        }
+        else {
           // we want no transforms if we won't be applying transforms
           if ( this.hasTransform ) {
             this.hasTransform = false;
@@ -217,7 +219,8 @@ define( function( require ) {
         if ( this.willApplyFilters && this.node.opacity !== 1 ) {
           this.hasOpacity = true;
           svgGroup.setAttribute( 'opacity', this.node.opacity );
-        } else if ( this.hasOpacity ) {
+        }
+        else if ( this.hasOpacity ) {
           this.hasOpacity = false;
           svgGroup.removeAttribute( 'opacity' );
         }
@@ -246,7 +249,8 @@ define( function( require ) {
           }
 
           this.clipPath.setAttribute( 'd', this.node._clipArea.getSVGPath() );
-        } else if ( this.clipDefinition ) {
+        }
+        else if ( this.clipDefinition ) {
           svgGroup.removeAttribute( 'clip-path' );
           this.block.defs.removeChild( this.clipDefinition ); // TODO: method? evaluate with future usage of defs (not done yet)
 
@@ -275,14 +279,16 @@ define( function( require ) {
               sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'group out of order: ' + idx + ' for ' + group.toString() );
 
               // in the DOM first (since we reference the children array to know what to insertBefore)
-              svgGroup.insertBefore( group.svgGroup, idx + 1 >= this.children.length ? null : this.children[idx+1].svgGroup ); // see http://stackoverflow.com/questions/9732624/how-to-swap-dom-child-nodes-in-javascript
+              // see http://stackoverflow.com/questions/9732624/how-to-swap-dom-child-nodes-in-javascript
+              svgGroup.insertBefore( group.svgGroup, idx + 1 >= this.children.length ? null : this.children[idx + 1].svgGroup );
 
               // then in our children array
               var oldIndex = _.indexOf( this.children, group );
               assert && assert( oldIndex < idx, 'The item we are moving backwards to location [idx] should not have an index greater than that' );
               this.children.splice( oldIndex, 1 );
               this.children.splice( idx, 0, group );
-            } else {
+            }
+            else {
               sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'group in place: ' + idx + ' for ' + group.toString() );
             }
 
@@ -401,7 +407,8 @@ define( function( require ) {
         if ( pool.length ) {
           sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'new from pool' );
           return pool.pop().initialize( block, instance, parent );
-        } else {
+        }
+        else {
           sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'new from constructor' );
           return new SVGGroup( block, instance, parent );
         }

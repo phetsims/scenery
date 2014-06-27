@@ -1,4 +1,3 @@
-
 // Copyright 2002-2014, University of Colorado
 
 /**
@@ -29,16 +28,23 @@ define( function( require ) {
       assert && assert( drawableBefore === null || ( drawableBefore instanceof Drawable ) );
       assert && assert( drawableAfter === null || ( drawableAfter instanceof Drawable ) );
 
-      // all @public, for modification
-      this.nextChangeInterval = null;       // {ChangeInterval|null}, singly-linked list
-      this.drawableBefore = drawableBefore; // {Drawable|null}, the drawable before our ChangeInterval that is not
-                                            // modified. null indicates that we don't yet have a "before" boundary,
-                                            // and should be connected to the closest drawable that is unchanged.
-      this.drawableAfter = drawableAfter;   // {Drawable|null}, the drawable after our ChangeInterval that is not
-                                            // modified. null indicates that we don't yet have a "after" boundary,
-                                            // and should be connected to the closest drawable that is unchanged.
-      this.collapsedEmpty = false;          // If a null-to-X interval gets collapsed all the way, we want to signal
-                                            // that (null-to-null is now the state of it).
+      /*---------------------------------------------------------------------------*
+      * All @public properties
+      *----------------------------------------------------------------------------*/
+
+      // {ChangeInterval|null}, singly-linked list
+      this.nextChangeInterval = null;
+
+      // {Drawable|null}, the drawable before our ChangeInterval that is not modified. null indicates that we don't yet have a "before" boundary,
+      // and should be connected to the closest drawable that is unchanged.
+      this.drawableBefore = drawableBefore;
+
+      // {Drawable|null}, the drawable after our ChangeInterval that is not modified. null indicates that we don't yet have a "after" boundary,
+      // and should be connected to the closest drawable that is unchanged.
+      this.drawableAfter = drawableAfter;
+
+      // If a null-to-X interval gets collapsed all the way, we want to signal that (null-to-null is now the state of it).
+      this.collapsedEmpty = false;
       return this;
     },
 
@@ -103,7 +109,8 @@ define( function( require ) {
         if ( pool.length ) {
           sceneryLog && sceneryLog.ChangeInterval && sceneryLog.ChangeInterval( 'new from pool' );
           return pool.pop().initialize( drawableBefore, drawableAfter );
-        } else {
+        }
+        else {
           sceneryLog && sceneryLog.ChangeInterval && sceneryLog.ChangeInterval( 'new from constructor' );
           return new ChangeInterval( drawableBefore, drawableAfter );
         }

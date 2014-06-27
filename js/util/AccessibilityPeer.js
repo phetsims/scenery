@@ -26,12 +26,13 @@ define( function( require ) {
     if ( options.label ) {
       this.peerElement = document.createElement( 'div' );
       this.element.id = 'peer-' + instance.trail.getUniqueId();
-      var label = document.createElement('label');
-      label.appendChild(document.createTextNode(options.label));
-      label.setAttribute('for',this.element.id);
-      this.peerElement.appendChild(label);
-      this.peerElement.appendChild(this.element);
-    } else{
+      var label = document.createElement( 'label' );
+      label.appendChild( document.createTextNode( options.label ) );
+      label.setAttribute( 'for', this.element.id );
+      this.peerElement.appendChild( label );
+      this.peerElement.appendChild( this.element );
+    }
+    else {
       this.peerElement = this.element;
     }
 

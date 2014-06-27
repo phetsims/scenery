@@ -61,28 +61,28 @@ define( function( require ) {
     var input = this;
 
     // unique to this input instance
-    this.onpointerdown     = function onpointerdown(     domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE,    input.pointerDown,   false ); };
-    this.onpointerup       = function onpointerup(       domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE,    input.pointerUp,     true  ); };
-    this.onpointermove     = function onpointermove(     domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE,    input.pointerMove,   false ); };
-    this.onpointerover     = function onpointerover(     domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE,    input.pointerOver,   false ); };
-    this.onpointerout      = function onpointerout(      domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE,    input.pointerOut,    false ); };
-    this.onpointercancel   = function onpointercancel(   domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE,    input.pointerCancel, false ); };
-    this.onMSPointerDown   = function onMSPointerDown(   domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerDown,   false ); };
-    this.onMSPointerUp     = function onMSPointerUp(     domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerUp,     true  ); };
-    this.onMSPointerMove   = function onMSPointerMove(   domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerMove,   false ); };
-    this.onMSPointerOver   = function onMSPointerOver(   domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerOver,   false ); };
-    this.onMSPointerOut    = function onMSPointerOut(    domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerOut,    false ); };
+    this.onpointerdown = function onpointerdown( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerDown, false ); };
+    this.onpointerup = function onpointerup( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerUp, true ); };
+    this.onpointermove = function onpointermove( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerMove, false ); };
+    this.onpointerover = function onpointerover( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerOver, false ); };
+    this.onpointerout = function onpointerout( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerOut, false ); };
+    this.onpointercancel = function onpointercancel( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, input.pointerCancel, false ); };
+    this.onMSPointerDown = function onMSPointerDown( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerDown, false ); };
+    this.onMSPointerUp = function onMSPointerUp( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerUp, true ); };
+    this.onMSPointerMove = function onMSPointerMove( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerMove, false ); };
+    this.onMSPointerOver = function onMSPointerOver( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerOver, false ); };
+    this.onMSPointerOut = function onMSPointerOut( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerOut, false ); };
     this.onMSPointerCancel = function onMSPointerCancel( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MS_POINTER_TYPE, input.pointerCancel, false ); };
-    this.ontouchstart      = function ontouchstart(      domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE,      input.touchStart,    false ); };
-    this.ontouchend        = function ontouchend(        domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE,      input.touchEnd,      true  ); };
-    this.ontouchmove       = function ontouchmove(       domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE,      input.touchMove,     false ); };
-    this.ontouchcancel     = function ontouchcancel(     domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE,      input.touchCancel,   false ); };
-    this.onmousedown       = function onmousedown(       domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE,      input.mouseDown,     false ); };
-    this.onmouseup         = function onmouseup(         domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE,      input.mouseUp,       true  ); };
-    this.onmousemove       = function onmousemove(       domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE,      input.mouseMove,     false ); };
-    this.onmouseover       = function onmouseover(       domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE,      input.mouseOver,     false ); };
-    this.onmouseout        = function onmouseout(        domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE,      input.mouseOut,      false ); };
-    this.uselessListener   = function uselessListener(   domEvent ) {};
+    this.ontouchstart = function ontouchstart( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, input.touchStart, false ); };
+    this.ontouchend = function ontouchend( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, input.touchEnd, true ); };
+    this.ontouchmove = function ontouchmove( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, input.touchMove, false ); };
+    this.ontouchcancel = function ontouchcancel( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, input.touchCancel, false ); };
+    this.onmousedown = function onmousedown( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseDown, false ); };
+    this.onmouseup = function onmouseup( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseUp, true ); };
+    this.onmousemove = function onmousemove( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseMove, false ); };
+    this.onmouseover = function onmouseover( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseOver, false ); };
+    this.onmouseout = function onmouseout( domEvent ) { input.batchEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, input.mouseOut, false ); };
+    this.uselessListener = function uselessListener( domEvent ) {};
   };
   var Input = scenery.Input;
 
@@ -139,11 +139,13 @@ define( function( require ) {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'Detected pointer events support, using that instead of mouse/touch events' );
 
         eventTypes = this.pointerListenerTypes;
-      } else if ( this.canUseMSPointerEvents() ) {
+      }
+      else if ( this.canUseMSPointerEvents() ) {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'Detected MS pointer events support, using that instead of mouse/touch events' );
 
         eventTypes = this.msPointerListenerTypes;
-      } else {
+      }
+      else {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'No pointer events support detected, using mouse/touch events' );
 
         eventTypes = this.touchListenerTypes.concat( this.mouseListenerTypes );
@@ -171,7 +173,8 @@ define( function( require ) {
         if ( this.listenerTarget === window ) {
           if ( addOrRemove ) {
             document.addEventListener( type, this.uselessListener );
-          } else {
+          }
+          else {
             document.removeEventListener( type, this.uselessListener );
           }
         }
@@ -181,7 +184,8 @@ define( function( require ) {
 
         if ( addOrRemove ) {
           this.listenerTarget.addEventListener( type, callback, false ); // don't use capture for now
-        } else {
+        }
+        else {
           this.listenerTarget.removeEventListener( type, callback, false ); // don't use capture for now
         }
       }
@@ -199,7 +203,7 @@ define( function( require ) {
     },
 
     addPointerAddedListener: function( listener ) {
-      this.pointerAddedListeners.push(listener);
+      this.pointerAddedListeners.push( listener );
     },
 
     removePointerAddedListener: function( listener ) {
@@ -230,7 +234,7 @@ define( function( require ) {
     },
 
     findKeyByEvent: function( event ) {
-      assert && assert( event.hasOwnProperty( 'keyCode' ) && event.hasOwnProperty('charCode'), 'Assumes the KeyboardEvent has keyCode and charCode properties' );
+      assert && assert( event.hasOwnProperty( 'keyCode' ) && event.hasOwnProperty( 'charCode' ), 'Assumes the KeyboardEvent has keyCode and charCode properties' );
       var result = _.find( this.pointers, function( pointer ) {
         // TODO: also check location (if that exists), so we don't mix up left and right shift, etc.
         return pointer.keyCode === event.keyCode && pointer.charCode === event.charCode;
@@ -311,7 +315,8 @@ define( function( require ) {
         }
         this.removePointer( touch );
         this.upEvent( touch, event );
-      } else {
+      }
+      else {
         assert && assert( false, 'Touch not found for touchEnd: ' + id );
       }
     },
@@ -323,7 +328,8 @@ define( function( require ) {
       if ( touch ) {
         touch.move( point, event );
         this.moveEvent( touch, event );
-      } else {
+      }
+      else {
         assert && assert( false, 'Touch not found for touchMove: ' + id );
       }
     },
@@ -339,7 +345,8 @@ define( function( require ) {
         }
         this.removePointer( touch );
         this.cancelEvent( touch, event );
-      } else {
+      }
+      else {
         assert && assert( false, 'Touch not found for touchCancel: ' + id );
       }
     },
@@ -364,7 +371,8 @@ define( function( require ) {
         }
         this.removePointer( pen );
         this.upEvent( pen, event );
-      } else {
+      }
+      else {
         assert && assert( false, 'Pen not found for penEnd: ' + id );
       }
     },
@@ -376,7 +384,8 @@ define( function( require ) {
       if ( pen ) {
         pen.move( point, event );
         this.moveEvent( pen, event );
-      } else {
+      }
+      else {
         assert && assert( false, 'Pen not found for penMove: ' + id );
       }
     },
@@ -392,13 +401,14 @@ define( function( require ) {
         }
         this.removePointer( pen );
         this.cancelEvent( pen, event );
-      } else {
+      }
+      else {
         assert && assert( false, 'Pen not found for penCancel: ' + id );
       }
     },
 
     pointerDown: function( id, type, point, event ) {
-      switch ( type ) {
+      switch( type ) {
         case 'mouse':
           this.mouseDown( point, event );
           break;
@@ -416,7 +426,7 @@ define( function( require ) {
     },
 
     pointerUp: function( id, type, point, event ) {
-      switch ( type ) {
+      switch( type ) {
         case 'mouse':
           this.mouseUp( point, event );
           break;
@@ -434,7 +444,7 @@ define( function( require ) {
     },
 
     pointerCancel: function( id, type, point, event ) {
-      switch ( type ) {
+      switch( type ) {
         case 'mouse':
           if ( console && console.log ) {
             console.log( 'WARNING: Pointer mouse cancel was received' );
@@ -454,7 +464,7 @@ define( function( require ) {
     },
 
     pointerMove: function( id, type, point, event ) {
-      switch ( type ) {
+      switch( type ) {
         case 'mouse':
           this.mouseMove( point, event );
           break;
@@ -607,7 +617,8 @@ define( function( require ) {
       if ( !trail ) {
         try {
           throw new Error( 'falsy trail for dispatchEvent' );
-        } catch ( e ) {
+        }
+        catch( e ) {
           console.log( e.stack );
           throw e;
         }
@@ -723,7 +734,8 @@ define( function( require ) {
             arr.push( serializeDomEvent( touch ) );
           }
           lines.push( prop + ':[' + arr.join( ',' ) + ']' );
-        } else {
+        }
+        else {
           lines.push( prop + ':' + ( ( typeof domEvent[prop] === 'object' ) && ( domEvent[prop] !== null ) ? '{}' : JSON.stringify( domEvent[prop] ) ) );
         }
       }
@@ -743,11 +755,14 @@ define( function( require ) {
   Input.msPointerType = function( evt ) {
     if ( evt.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_TOUCH ) {
       return 'touch';
-    } else if ( evt.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_PEN ) {
+    }
+    else if ( evt.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_PEN ) {
       return 'pen';
-    } else if ( evt.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_MOUSE ) {
+    }
+    else if ( evt.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_MOUSE ) {
       return 'mouse';
-    } else {
+    }
+    else {
       return evt.pointerType; // hope for the best
     }
   };

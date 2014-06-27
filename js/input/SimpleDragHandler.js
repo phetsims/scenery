@@ -32,14 +32,14 @@ define( function( require ) {
       dragCursor: 'pointer'
     }, options );
 
-    this.dragging              = false;     // whether a node is being dragged with this handler
-    this.pointer               = null;      // the pointer doing the current dragging
-    this.trail                 = null;      // stores the path to the node that is being dragged
-    this.transform             = null;      // transform of the trail to our node (but not including our node, so we can prepend the deltas)
-    this.node                  = null;      // the node that we are handling the drag for
-    this.lastDragPoint         = null;      // the location of the drag at the previous event (so we can calculate a delta)
-    this.startTransformMatrix  = null;      // the node's transform at the start of the drag, so we can reset on a touch cancel
-    this.mouseButton           = undefined; // tracks which mouse button was pressed, so we can handle that specifically
+    this.dragging = false;            // whether a node is being dragged with this handler
+    this.pointer = null;              // the pointer doing the current dragging
+    this.trail = null;                // stores the path to the node that is being dragged
+    this.transform = null;            // transform of the trail to our node (but not including our node, so we can prepend the deltas)
+    this.node = null;                 // the node that we are handling the drag for
+    this.lastDragPoint = null;        // the location of the drag at the previous event (so we can calculate a delta)
+    this.startTransformMatrix = null; // the node's transform at the start of the drag, so we can reset on a touch cancel
+    this.mouseButton = undefined;     // tracks which mouse button was pressed, so we can handle that specifically
     // TODO: consider mouse buttons as separate pointers?
 
     // if an ancestor is transformed, pin our node

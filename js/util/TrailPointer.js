@@ -48,7 +48,8 @@ define( function( require ) {
 
       if ( newTrail === null ) {
         return null;
-      } else {
+      }
+      else {
         return new TrailPointer( newTrail, !this.isBefore );
       }
     },
@@ -74,11 +75,13 @@ define( function( require ) {
       if ( a !== null && b !== null ) {
         // normal (non-degenerate) case
         return a.trail.compare( b.trail );
-      } else {
+      }
+      else {
         // null "before" point is equivalent to the "after" pointer on the last rendered node.
         if ( a === b ) {
           return 0; // uniqueness guarantees they were the same
-        } else {
+        }
+        else {
           return a === null ? 1 : -1;
         }
       }
@@ -98,16 +101,20 @@ define( function( require ) {
         // if trails are equal, just compare before/after
         if ( this.isBefore === other.isBefore ) {
           return 0;
-        } else {
+        }
+        else {
           return this.isBefore ? -1 : 1;
         }
-      } else {
+      }
+      else {
         // if one is an extension of the other, the shorter isBefore flag determines the order completely
         if ( this.trail.isExtensionOf( other.trail ) ) {
           return other.isBefore ? 1 : -1;
-        } else if ( other.trail.isExtensionOf( this.trail ) ) {
+        }
+        else if ( other.trail.isExtensionOf( this.trail ) ) {
           return this.isBefore ? -1 : 1;
-        } else {
+        }
+        else {
           // neither is a subtrail of the other, so a straight trail comparison should give the answer
           return comparison;
         }
@@ -134,25 +141,29 @@ define( function( require ) {
         if ( this.trail.lastNode()._children.length > 0 ) {
           // stay as before, just walk to the first child
           this.trail.addDescendant( this.trail.lastNode()._children[0], 0 );
-        } else {
+        }
+        else {
           // stay on the same node, but switch to after
           this.setBefore( false );
         }
-      } else {
+      }
+      else {
         if ( this.trail.indices.length === 0 ) {
           // nothing else to jump to below, so indicate the lack of existence
           this.trail = null;
           // stays isAfter
           return null;
-        } else {
+        }
+        else {
           var index = this.trail.indices[this.trail.indices.length - 1];
           this.trail.removeDescendant();
 
           if ( this.trail.lastNode()._children.length > index + 1 ) {
             // more siblings, switch to the beginning of the next one
-            this.trail.addDescendant( this.trail.lastNode()._children[index+1], index + 1 );
+            this.trail.addDescendant( this.trail.lastNode()._children[index + 1], index + 1 );
             this.setBefore( true );
-          } else {
+          }
+          else {
             // no more siblings. exit on parent. nothing else needed since we're already isAfter
           }
         }
@@ -168,24 +179,28 @@ define( function( require ) {
           this.trail = null;
           // stays isBefore
           return null;
-        } else {
+        }
+        else {
           var index = this.trail.indices[this.trail.indices.length - 1];
           this.trail.removeDescendant();
 
           if ( index - 1 >= 0 ) {
             // more siblings, switch to the beginning of the previous one and switch to isAfter
-            this.trail.addDescendant( this.trail.lastNode()._children[index-1], index - 1 );
+            this.trail.addDescendant( this.trail.lastNode()._children[index - 1], index - 1 );
             this.setBefore( false );
-          } else {
+          }
+          else {
             // no more siblings. enter on parent. nothing else needed since we're already isBefore
           }
         }
-      } else {
+      }
+      else {
         if ( this.trail.lastNode()._children.length > 0 ) {
           // stay isAfter, but walk to the last child
           var children = this.trail.lastNode()._children;
-          this.trail.addDescendant( children[children.length-1], children.length - 1 );
-        } else {
+          this.trail.addDescendant( children[children.length - 1], children.length - 1 );
+        }
+        else {
           // switch to isBefore, since this is a leaf node
           this.setBefore( true );
         }
@@ -248,7 +263,8 @@ define( function( require ) {
             skipSubtree = callback( pointer );
           }
           first = false;
-        } else {
+        }
+        else {
           // between point
           skipSubtree = callback( pointer );
         }
@@ -261,7 +277,8 @@ define( function( require ) {
           if ( pointer.compareNested( other ) === 1 ) {
             break;
           }
-        } else {
+        }
+        else {
           pointer.nestedForwards();
         }
       }
@@ -285,16 +302,20 @@ define( function( require ) {
       // if trails are equal, just compare before/after
       if ( isBeforeA === isBeforeB ) {
         return 0;
-      } else {
+      }
+      else {
         return isBeforeA ? -1 : 1;
       }
-    } else {
+    }
+    else {
       // if one is an extension of the other, the shorter isBefore flag determines the order completely
       if ( trailA.isExtensionOf( trailB ) ) {
         return isBeforeB ? 1 : -1;
-      } else if ( trailB.isExtensionOf( trailA ) ) {
+      }
+      else if ( trailB.isExtensionOf( trailA ) ) {
         return isBeforeA ? -1 : 1;
-      } else {
+      }
+      else {
         // neither is a subtrail of the other, so a straight trail comparison should give the answer
         return comparison;
       }

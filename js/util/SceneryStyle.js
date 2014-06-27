@@ -15,7 +15,7 @@ define( function( require ) {
   styleElement.type = 'text/css';
   document.head.appendChild( styleElement );
 
-  var stylesheet = document.styleSheets[document.styleSheets.length-1];
+  var stylesheet = document.styleSheets[document.styleSheets.length - 1];
   assert && assert( stylesheet.disabled === false );
   assert && assert( stylesheet.cssRules.length === 0 );
 

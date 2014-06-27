@@ -64,7 +64,8 @@ define( function( require ) {
 
         // add just a single node in
         trail.addDescendant( node );
-      } else {
+      }
+      else {
         // process it as an array
         var len = nodes.length;
         for ( var i = 0; i < len; i++ ) {
@@ -128,7 +129,8 @@ define( function( require ) {
     get: function( index ) {
       if ( index >= 0 ) {
         return this.nodes[index];
-      } else {
+      }
+      else {
         // negative index goes from the end of the array
         return this.nodes[this.nodes.length + index];
       }
@@ -252,11 +254,11 @@ define( function( require ) {
       var length = this.length;
       for ( var i = 1; i < length; i++ ) {
         // only replace indices where they have changed (this was a performance hotspot)
-        var currentIndex = this.indices[i-1];
-        var baseNode = this.nodes[i-1];
+        var currentIndex = this.indices[i - 1];
+        var baseNode = this.nodes[i - 1];
 
         if ( baseNode._children[currentIndex] !== this.nodes[i] ) {
-          this.indices[i-1] = _.indexOf( baseNode._children, this.nodes[i] );
+          this.indices[i - 1] = _.indexOf( baseNode._children, this.nodes[i] );
         }
       }
     },
@@ -285,8 +287,8 @@ define( function( require ) {
 
     areIndicesValid: function() {
       for ( var i = 1; i < this.length; i++ ) {
-        var currentIndex = this.indices[i-1];
-        if ( this.nodes[i-1]._children[currentIndex] !== this.nodes[i] ) {
+        var currentIndex = this.indices[i - 1];
+        if ( this.nodes[i - 1]._children[currentIndex] !== this.nodes[i] ) {
           return false;
         }
       }
@@ -348,7 +350,7 @@ define( function( require ) {
       var matrix = Matrix3.IDENTITY;
 
       // walk our transform down, prepending
-      for ( idx = this.length-1; idx >= branchIndex; idx-- ) {
+      for ( idx = this.length - 1; idx >= branchIndex; idx-- ) {
         matrix = this.nodes[idx].getTransform().getMatrix().timesMatrix( matrix );
       }
 
@@ -403,14 +405,15 @@ define( function( require ) {
       if ( parentIndex === 0 ) {
         // we were the first child, so give it the trail to the parent
         return new Trail( arr );
-      } else {
+      }
+      else {
         // previous child
-        arr.push( parent._children[parentIndex-1] );
+        arr.push( parent._children[parentIndex - 1] );
 
         // and find its last terminal
-        while( arr[arr.length-1]._children.length !== 0 ) {
-          var last = arr[arr.length-1];
-          arr.push( last._children[last._children.length-1] );
+        while ( arr[arr.length - 1]._children.length !== 0 ) {
+          var last = arr[arr.length - 1];
+          arr.push( last._children[last._children.length - 1] );
         }
 
         return new Trail( arr );
@@ -435,22 +438,24 @@ define( function( require ) {
         // if we have children, return the first child
         arr.push( top._children[0] );
         return new Trail( arr );
-      } else {
+      }
+      else {
         // walk down and attempt to find the next parent
         var depth = this.nodes.length - 1;
 
         while ( depth > 0 ) {
           var node = this.nodes[depth];
-          var parent = this.nodes[depth-1];
+          var parent = this.nodes[depth - 1];
 
           arr.pop(); // take off the node so we can add the next sibling if it exists
 
           var index = _.indexOf( parent._children, node );
           if ( index !== parent._children.length - 1 ) {
             // there is another (later) sibling. use that!
-            arr.push( parent._children[index+1] );
+            arr.push( parent._children[index + 1] );
             return new Trail( arr );
-          } else {
+          }
+          else {
             depth--;
           }
         }
@@ -496,7 +501,8 @@ define( function( require ) {
         if ( this.indices[i] !== other.indices[i] ) {
           if ( this.indices[i] < other.indices[i] ) {
             return -1;
-          } else {
+          }
+          else {
             return 1;
           }
         }
@@ -505,9 +511,11 @@ define( function( require ) {
       // we scanned through and no nodes were different (one is a subtrail of the other)
       if ( this.nodes.length < other.nodes.length ) {
         return -1;
-      } else if ( this.nodes.length > other.nodes.length ) {
+      }
+      else if ( this.nodes.length > other.nodes.length ) {
         return 1;
-      } else {
+      }
+      else {
         return 0;
       }
     },

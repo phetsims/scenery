@@ -120,13 +120,16 @@ define( function( require ) {
       if ( !this._fill ) {
         // no fill
         style += 'none;';
-      } else if ( this._fill.toCSS ) {
+      }
+      else if ( this._fill.toCSS ) {
         // Color object fill
         style += this._fill.toCSS() + ';';
-      } else if ( this._fill.getSVGDefinition ) {
+      }
+      else if ( this._fill.getSVGDefinition ) {
         // reference the SVG definition with a URL
         style += 'url(#fill' + this.getId() + ');';
-      } else {
+      }
+      else {
         // plain CSS color
         style += this._fill + ';';
       }
@@ -166,7 +169,8 @@ define( function( require ) {
         }
         if ( typeof this._fill === 'string' ) {
           result += spaces + 'fill: \'' + this._fill + '\'';
-        } else {
+        }
+        else {
           result += spaces + 'fill: ' + this._fill.toString();
         }
       }
@@ -191,11 +195,14 @@ define( function( require ) {
       if ( !this._fill ) {
         // if there is no fill, it is supported by DOM
         bitmask |= scenery.bitmaskSupportsDOM;
-      } else if ( this._fill.isPattern ) {
+      }
+      else if ( this._fill.isPattern ) {
         // no pattern support for DOM (for now!)
-      } else if ( this._fill.isGradient ) {
+      }
+      else if ( this._fill.isGradient ) {
         // no gradient support for DOM (for now!)
-      } else {
+      }
+      else {
         // solid fills always supported for DOM
         bitmask |= scenery.bitmaskSupportsDOM;
       }
@@ -215,7 +222,8 @@ define( function( require ) {
         this.invalidateSupportedRenderers();
         oldInvalidateFill.call( this );
       };
-    } else {
+    }
+    else {
       proto.invalidateFill = function() {
         this.invalidateSupportedRenderers();
       };
@@ -304,7 +312,8 @@ define( function( require ) {
         if ( defs ) {
           // adding to the DOM here removes it from its previous location
           defs.appendChild( this.def );
-        } else if ( this.def.parentNode ) {
+        }
+        else if ( this.def.parentNode ) {
           //OHTWO TODO: does this parentNode access cause reflows?
           this.def.parentNode.removeChild( this.def );
         }
@@ -316,13 +325,16 @@ define( function( require ) {
       if ( !this.fill ) {
         // no fill
         style += 'none;';
-      } else if ( this.fill.toCSS ) {
+      }
+      else if ( this.fill.toCSS ) {
         // Color object fill
         style += this.fill.toCSS() + ';';
-      } else if ( this.fill.getSVGDefinition ) {
+      }
+      else if ( this.fill.getSVGDefinition ) {
         // reference the SVG definition with a URL
         style += 'url(#' + this.id + ');';
-      } else {
+      }
+      else {
         // plain CSS color
         style += this.fill + ';';
       }

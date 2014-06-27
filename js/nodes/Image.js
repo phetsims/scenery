@@ -75,7 +75,8 @@ define( function( require ) {
     invalidateImage: function() {
       if ( this._image ) {
         this.invalidateSelf( new Bounds2( 0, 0, this.getImageWidth(), this.getImageHeight() ) );
-      } else {
+      }
+      else {
         this.invalidateSelf( Bounds2.NOTHING );
       }
     },
@@ -87,7 +88,8 @@ define( function( require ) {
     invalidateSupportedRenderers: function() {
       if ( this._image instanceof HTMLCanvasElement ) {
         this.setRendererBitmask( scenery.bitmaskBoundsValid | scenery.bitmaskSupportsCanvas );
-      } else {
+      }
+      else {
         // assumes HTMLImageElement
         this.setRendererBitmask( scenery.bitmaskBoundsValid | scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskSupportsDOM );
       }
@@ -106,7 +108,8 @@ define( function( require ) {
           image = document.createElement( 'img' );
           image.addEventListener( 'load', this.loadListener );
           image.src = src;
-        } else if ( image instanceof HTMLImageElement ) {
+        }
+        else if ( image instanceof HTMLImageElement ) {
           // only add a listener if we probably haven't loaded yet
           if ( !image.width || !image.height ) {
             image.addEventListener( 'load', this.loadListener );
@@ -307,7 +310,8 @@ define( function( require ) {
           image.setAttribute( 'width', node.getImageWidth() + 'px' );
           image.setAttribute( 'height', node.getImageHeight() + 'px' );
           image.setAttributeNS( scenery.xlinkns, 'xlink:href', node.getImageURL() );
-        } else {
+        }
+        else {
           image.setAttribute( 'width', '0' );
           image.setAttribute( 'height', '0' );
           image.setAttributeNS( scenery.xlinkns, 'xlink:href', '//:0' ); // see http://stackoverflow.com/questions/5775469/whats-the-valid-way-to-include-an-image-with-no-src

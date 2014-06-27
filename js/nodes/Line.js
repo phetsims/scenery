@@ -49,7 +49,8 @@ define( function( require ) {
         this._x2 = y1.x;
         this._y2 = y1.y;
         options = x2 || {};
-      } else {
+      }
+      else {
         // assumes Line( { ... } ), init to zero for now
         this._x1 = 0;
         this._y1 = 0;
@@ -57,7 +58,8 @@ define( function( require ) {
         this._y2 = 0;
         options = x1 || {};
       }
-    } else {
+    }
+    else {
       // new Line(  x1, y1, x2, y2, [options] )
       this._x1 = x1;
       this._y1 = y1;
@@ -97,7 +99,8 @@ define( function( require ) {
         assert && assert( x1 !== undefined && y1 !== undefined, 'parameters need to be defined' );
         this._x1 = x1;
         this._y1 = y1;
-      } else {
+      }
+      else {
         // setPoint1( Vector2 )
         assert && assert( x1.x !== undefined && x1.y !== undefined, 'parameters need to be defined' );
         this._x1 = x1.x;
@@ -119,7 +122,8 @@ define( function( require ) {
         assert && assert( x2 !== undefined && y2 !== undefined, 'parameters need to be defined' );
         this._x2 = x2;
         this._y2 = y2;
-      } else {
+      }
+      else {
         // setPoint2( Vector2 )
         assert && assert( x2.x !== undefined && x2.y !== undefined, 'parameters need to be defined' );
         this._x2 = x2.x;
@@ -155,7 +159,8 @@ define( function( require ) {
     containsPointSelf: function( point ) {
       if ( this._strokePickable ) {
         return Path.prototype.containsPointSelf.call( this, point );
-      } else {
+      }
+      else {
         return false; // nothing is in a line! (although maybe we should handle edge points properly?)
       }
     },
@@ -188,7 +193,8 @@ define( function( require ) {
     setShape: function( shape ) {
       if ( shape !== null ) {
         throw new Error( 'Cannot set the shape of a scenery.Line to something non-null' );
-      } else {
+      }
+      else {
         // probably called from the Path constructor
         this.invalidateShape();
       }

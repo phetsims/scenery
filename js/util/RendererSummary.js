@@ -110,7 +110,8 @@ define( function( require ) {
           if ( currentValue !== 0 ) {
             // we set the bit (used to be 0, now is 1)
             this.bitDecrement( bit );
-          } else {
+          }
+          else {
             // we unset the bit (used to be 1, now is 0)
             this.bitIncrement( bit );
           }
