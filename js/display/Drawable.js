@@ -234,7 +234,7 @@ define( function( require ) {
     audit: function( allowPendingBlock, allowPendingList, allowDirty ) {
       if ( assertSlow ) {
         assertSlow && assertSlow( !this.disposed,
-            'If we are being audited, we assume we are in the drawable display tree, and we should not be marked as disposed' );
+          'If we are being audited, we assume we are in the drawable display tree, and we should not be marked as disposed' );
         assertSlow && assertSlow( this.renderer, 'Should not have a 0 (no) renderer' );
 
         assertSlow && assertSlow( !this.backbone || this.parentDrawable,
