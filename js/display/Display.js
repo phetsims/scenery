@@ -570,6 +570,16 @@ define( function( require ) {
       }
     },
     
+    resizeOnWindowResize: function() {
+      var display = this;
+      
+      var resizer = function() {
+        display.setWidthHeight( window.innerWidth, window.innerHeight );
+      };
+      window.addEventListener( 'resize', resizer );
+      resizer();
+    },
+    
     updateOnRequestAnimationFrame: function() {
       var display = this;
       (function step() {

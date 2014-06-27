@@ -108,10 +108,20 @@ define( function( require ) {
         
         //OHTWO TODO: call here!
         while ( this.dirtyGroups.length ) {
-          this.dirtyGroups.pop().update();
+          var group = this.dirtyGroups.pop();
+          
+          // if this group has been disposed or moved to another block, don't mess with it
+          if ( group.block === this ) {
+            group.update();
+          }
         }
         while ( this.dirtyDrawables.length ) {
-          this.dirtyDrawables.pop().update();
+          var drawable = this.dirtyDrawables.pop();
+          
+          // if this drawable has been disposed or moved to another block, don't mess with it
+          if ( drawable.parentDrawable === this ) {
+            drawable.update();
+          }
         }
         
         // checks will be done in updateFit() to see whether it is needed

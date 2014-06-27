@@ -110,6 +110,8 @@ define( function( require ) {
     },
     
     notePendingAddition: function( drawable, block ) {
+      assert && assert( drawable.renderer === block.renderer );
+      
       sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'pending add: ' + drawable.toString() + ' to ' + block.toString() );
       
       drawable.notePendingAddition( this.backbone.display, block, this.backbone );
@@ -123,6 +125,8 @@ define( function( require ) {
     },
     
     notePendingMove: function( drawable, block ) {
+      assert && assert( drawable.renderer === block.renderer );
+      
       sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'pending move: ' + drawable.toString() + ' to ' + block.toString() );
       
       drawable.notePendingMove( this.backbone.display, block );
@@ -209,21 +213,26 @@ define( function( require ) {
     updateBlockIntervals: function() {
       while ( this.touchedBlocks.length ) {
         var block = this.touchedBlocks.pop();
-        sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'update interval: ' + block.toString() + ' ' +
-                                                              block.pendingFirstDrawable.toString() + ' to ' + block.pendingLastDrawable.toString() );
         
-        block.updateInterval();
-        
-        // mark it dirty, since its drawables probably changed?
-        //OHTWO TODO: is this necessary? What is this doing?
-        this.backbone.markDirtyDrawable( block );
-        
-        if ( assertSlow ) {
-          this.intervalsNotified.push( {
-            block: block,
-            firstDrawable: block.pendingFirstDrawable,
-            lastDrawable: block.pendingLastDrawable
-          } );
+        if ( block.used ) {
+          sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'update interval: ' + block.toString() + ' ' +
+                                                                block.pendingFirstDrawable.toString() + ' to ' + block.pendingLastDrawable.toString() );
+          
+          block.updateInterval();
+          
+          // mark it dirty, since its drawables probably changed?
+          //OHTWO TODO: is this necessary? What is this doing?
+          this.backbone.markDirtyDrawable( block );
+          
+          if ( assertSlow ) {
+            this.intervalsNotified.push( {
+              block: block,
+              firstDrawable: block.pendingFirstDrawable,
+              lastDrawable: block.pendingLastDrawable
+            } );
+          }
+        } else {
+          sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'skipping update interval: ' + block.toString() + ', unused' );
         }
       }
     },
@@ -318,13 +327,13 @@ define( function( require ) {
                                                  ' it is finished.' );
         
         // ensure our indices are up-to-date (reindexed, or didn't change)
-        assertSlow( stitcher.reindexed ||
+        assertSlow( stitcher.reindexed || blocks.length === 0 ||
                     // array equality of previousBlocks and blocks
                     ( previousBlocks.length === blocks.length &&
                       _.every( _.zip( previousBlocks, blocks ), function( arr ) {
                         return arr[0] === arr[1];
                       } ) ),
-                    'Did not reindex on a block change' );
+                    'Did not reindex on a block change where we are left with blocks' );
         
         // all created blocks had intervals notified
         _.each( stitcher.createdBlocks, function( blockData ) {
@@ -340,14 +349,16 @@ define( function( require ) {
           } ), 'Removed block seems to have an interval notified: ' + blockData.block.toString() );
         } );
         
-        // all drawables for disposed blocks have been marked as pending removal
+        // all drawables for disposed blocks have been marked as pending removal (or moved)
         _.each( stitcher.disposedBlocks, function( blockData ) {
           var block = blockData.block;
           _.each( Drawable.oldListToArray( block.firstDrawable, block.lastDrawable ), function( drawable ) {
             assertSlow( _.some( stitcher.pendingRemovals, function( removalData ) {
               return removalData.drawable === drawable;
+            } ) || _.some( stitcher.pendingMoves, function( moveData ) {
+              return moveData.drawable === drawable;
             } ), 'Drawable ' + drawable.toString() + ' originally listed for disposed block ' + block.toString() +
-                 ' does not seem to be marked for pending removal!' );
+                 ' does not seem to be marked for pending removal or move!' );
           } );
         } );
         
@@ -376,8 +387,17 @@ define( function( require ) {
           assertSlow( blockIdx >= 0, 'Created block ' + blockData.block.toString() + ' is not in the blocks array' );
         } );
         
+        // all current blocks should be marked as used
+        _.each( blocks, function( block ) {
+          assertSlow( block.used, 'All current blocks should be marked as used' );
+        } );
+        
         assertSlow( blocks.length - previousBlocks.length === stitcher.createdBlocks.length - stitcher.disposedBlocks.length,
-                    'The count of unmodified blocks should be constant (equal differences)' );
+                    'The count of unmodified blocks should be constant (equal differences):\n' +
+                    'created: ' + _.map( stitcher.createdBlocks, function( n ) { return n.block.id; } ).join( ',' ) + '\n' +
+                    'disposed: ' + _.map( stitcher.disposedBlocks, function( n ) { return n.block.id; } ).join( ',' ) + '\n' +
+                    'before: ' + _.map( previousBlocks, function( n ) { return n.id; } ).join( ',' ) + '\n' +
+                    'after: ' + _.map( blocks, function( n ) { return n.id; } ).join( ',' ) );
         
         assertSlow( this.touchedBlocks.length === 0,
                     'If we marked any blocks for changes, we should have called updateBlockIntervals' );
@@ -436,7 +456,8 @@ define( function( require ) {
           currentInterval = currentInterval.nextChangeInterval;
         }
         
-        sceneryLog.StitchDrawables( drawable.toDetailedString(), isChanged ? ( useCurrent ? 'color: #0a0;' : 'color: #a00;' ) : 'color: #666' );
+        var drawableString = drawable.renderer + ' ' + ( ( !useCurrent && drawable.parentDrawable ) ? drawable.parentDrawable.toString() : '' ) + ' ' + drawable.toDetailedString();
+        sceneryLog.StitchDrawables( drawableString, isChanged ? ( useCurrent ? 'color: #0a0;' : 'color: #a00;' ) : 'color: #666' );
         
         if ( !isChanged && currentInterval && currentInterval.drawableBefore === drawable ) {
           isChanged = true;
