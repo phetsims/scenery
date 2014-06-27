@@ -65,7 +65,6 @@ Test:
     Event handling tests (and generalize the event handler)
     DownUpListener
     More pixel tests
-    RenderInterval
     Trail transforms
     Test issues (zero-bounds text, etc.)
     Unit tests for common node operations

@@ -79,7 +79,6 @@ define( [
   'SCENERY/util/LiveRegion',
   'SCENERY/util/Pattern',
   'SCENERY/util/RadialGradient',
-  'SCENERY/util/RenderInterval',
   'SCENERY/util/RendererSummary',
   'SCENERY/util/SceneImage',
   'SCENERY/util/SceneryStyle',

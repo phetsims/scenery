@@ -1659,22 +1659,6 @@ define( function( require ) {
       } );
     },
 
-    debugText: function() {
-      var startPointer = new scenery.TrailPointer( new scenery.Trail( this ), true );
-      var endPointer = new scenery.TrailPointer( new scenery.Trail( this ), false );
-
-      var depth = 0;
-
-      startPointer.depthFirstUntil( endPointer, function( pointer ) {
-        if ( pointer.isBefore ) {
-          // hackish way of multiplying a string
-          var padding = new Array( depth * 2 ).join( ' ' );
-          console.log( padding + pointer.trail.lastNode().getId() + ' ' + pointer.trail.toString() );
-        }
-        depth += pointer.isBefore ? 1 : -1;
-      }, false );
-    },
-
     // @private
     canvasPaintSelf: function( wrapper ) {
       // To be overridden in paintable node types. Should hook into the drawable's prototype (presumably).
