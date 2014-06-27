@@ -1,5 +1,4 @@
-
-(function(){
+(function() {
 
   var textNodeInstances = {
     name: 'Text node instances',
@@ -48,7 +47,7 @@
       main.width( this.width );
       main.height( this.height );
       var scene = new scenery.Scene( main );
-      var text = new scenery.Path( new kite.Shape( 'M108 385.875 L82.6875 385.875 L82.6875 224.5781 Q63.7031 242.5781 31.9219 255.0938 L31.9219 230.625 Q75.6562 209.6719 91.5469 178.7344 L108 178.7344 L108 385.875 Z' ),{
+      var text = new scenery.Path( new kite.Shape( 'M108 385.875 L82.6875 385.875 L82.6875 224.5781 Q63.7031 242.5781 31.9219 255.0938 L31.9219 230.625 Q75.6562 209.6719 91.5469 178.7344 L108 178.7344 L108 385.875 Z' ), {
         fill: '#000',
         scale: 0.1
       } );
@@ -380,7 +379,7 @@
       main.width( this.width );
       main.height( this.height );
       var scene = new scenery.Scene( main );
-      for( var i = 0; i < 4000; i++ ) {
+      for ( var i = 0; i < 4000; i++ ) {
         scene.addChild( new scenery.Rectangle( ( Math.PI * i ) % this.width, ( 27 * i ) % this.height, 20, 20, {
           fill: 'rgba(255,0,0,0.3)',
           stroke: '#000000'
@@ -410,7 +409,7 @@
       main.width( this.width );
       main.height( this.height );
       var scene = new scenery.Scene( main );
-      for( var i = 0; i < 4000; i++ ) {
+      for ( var i = 0; i < 4000; i++ ) {
         scene.addChild( new scenery.Rectangle( 0, 0, 20, 20, {
           fill: 'rgba(0,0,255,0.3)',
           stroke: '#000000',
@@ -442,7 +441,7 @@
       main.width( this.width );
       main.height( this.height );
       var scene = new scenery.Scene( main );
-      for( var i = 0; i < 4000; i++ ) {
+      for ( var i = 0; i < 4000; i++ ) {
         scene.addChild( new scenery.Rectangle( 0, 0, 20, 20, {
           fill: 'rgba(0,255,0,0.3)',
           stroke: '#000000',
@@ -476,7 +475,7 @@
       main.width( this.width );
       main.height( this.height );
       var scene = new scenery.Scene( main );
-      for( var i = 0; i < 1000; i++ ) {
+      for ( var i = 0; i < 1000; i++ ) {
         scene.addChild( new scenery.Rectangle( 0, 0, 20, 20, {
           fill: 'rgba(0,255,0,0.3)',
           stroke: '#000000',
@@ -497,7 +496,8 @@
         var child = children[i];
         if ( i % 3 ) {
           child.rotate( 0.1 );
-        } else {
+        }
+        else {
           child.fill = ( this.iterationCount + i ) % 2 === 0 ? 'rgba(0,255,0,0.3)' : 'rgba(0,0,255,0.3)';
         }
       }
@@ -519,7 +519,7 @@
       main.width( this.width );
       main.height( this.height );
       var scene = new scenery.Scene( main, { renderer: 'svg' } );
-      for( var i = 0; i < 500; i++ ) {
+      for ( var i = 0; i < 500; i++ ) {
         scene.addChild( new scenery.Rectangle( 0, 0, 20, 20, {
           fill: 'rgba(0,255,0,0.3)',
           stroke: '#000000',
@@ -540,7 +540,8 @@
         var child = children[i];
         if ( i % 3 ) {
           child.rotate( 0.1 );
-        } else {
+        }
+        else {
           child.fill = ( this.iterationCount + i ) % 2 === 0 ? 'rgba(0,255,0,0.3)' : 'rgba(0,0,255,0.3)';
         }
       }
@@ -571,7 +572,7 @@
     },
     step: function() {
       for ( var i = 0; i < 200; i++ ) {
-        this.scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ),{
+        this.scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
           fill: 'rgba(255,0,255,0.3)',
           stroke: '#000000',
           x: this.x,

@@ -1,4 +1,3 @@
-
 var canvasWidth = 320;
 var canvasHeight = 240;
 
@@ -94,10 +93,11 @@ function snapshotEquals( a, b, threshold, message ) {
       if ( i % 4 === 3 ) {
         colorDiffData.data[i] = 255;
         alphaDiffData.data[i] = 255;
-        alphaDiffData.data[i-3] = diff; // red
-        alphaDiffData.data[i-2] = diff; // green
-        alphaDiffData.data[i-1] = diff; // blue
-      } else {
+        alphaDiffData.data[i - 3] = diff; // red
+        alphaDiffData.data[i - 2] = diff; // green
+        alphaDiffData.data[i - 1] = diff; // blue
+      }
+      else {
         colorDiffData.data[i] = diff;
       }
       var alphaIndex = ( i - ( i % 4 ) + 3 );

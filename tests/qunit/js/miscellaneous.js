@@ -1,5 +1,4 @@
-
-(function(){
+(function() {
   'use strict';
 
   var includeBleedingEdgeCanvasTests = false;
@@ -50,7 +49,7 @@
     test( 'Text width measurement in canvas', function() {
       var canvas = document.createElement( 'canvas' );
       var context = canvas.getContext( '2d' );
-      var metrics = context.measureText('Hello World');
+      var metrics = context.measureText( 'Hello World' );
       _.each( [ 'actualBoundingBoxLeft', 'actualBoundingBoxRight', 'actualBoundingBoxAscent', 'actualBoundingBoxDescent' ], function( method ) {
         ok( metrics[method] !== undefined, 'metrics.' + method );
       } );

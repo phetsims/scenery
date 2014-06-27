@@ -1,8 +1,7 @@
-
 var phet = phet || {};
 phet.tests = phet.tests || {};
 
-(function(){
+(function() {
   "use strict";
 
   function buildBaseContext( main ) {
@@ -32,8 +31,9 @@ phet.tests = phet.tests || {};
     context.font = '30px Arial';
     var metrics = context.measureText( str );
     context.fillStyle = '#ccc';
-    context.fillRect( x - metrics.actualBoundingBoxLeft, y - metrics.actualBoundingBoxAscent,
-      x + metrics.actualBoundingBoxRight, y + metrics.actualBoundingBoxDescent );
+    context.fillRect(
+        x - metrics.actualBoundingBoxLeft, y - metrics.actualBoundingBoxAscent,
+        x + metrics.actualBoundingBoxRight, y + metrics.actualBoundingBoxDescent );
     context.fillStyle = '#000';
     context.fillText( str, x, y );
 

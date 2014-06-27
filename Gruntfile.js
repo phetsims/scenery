@@ -1,4 +1,3 @@
-
 var exec = require( 'child_process' ).exec;
 var escodegen = require( 'escodegen' );
 var esprima = require( 'esprima' );

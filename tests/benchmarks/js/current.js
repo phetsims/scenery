@@ -1,8 +1,7 @@
-
 var phet = phet || {};
 phet.benchmark = phet.benchmark || {};
 
-(function(){
+(function() {
 
   phet.benchmark.createDetachedScene = function( width, height ) {
     width = width || 640;
@@ -16,14 +15,14 @@ phet.benchmark = phet.benchmark || {};
 
   // manual testing to see if we can do better than benchmark.js
   var scene = phet.benchmark.createDetachedScene( 256, 256 );
-  for( var i = 0; i < 200; i++ ) {
+  for ( var i = 0; i < 200; i++ ) {
     scene.addChild( new scenery.Path( kite.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ), {
       fill: 'rgba(255,0,0,1)',
       stroke: '#000000'
     } ) );
   }
   var start = new Date;
-  for( var i = 0; i < 100; i++ ) {
+  for ( var i = 0; i < 100; i++ ) {
     scene.rotate( Math.sin( i ) );
     scene.updateScene();
   }
@@ -31,7 +30,7 @@ phet.benchmark = phet.benchmark || {};
   console.log( benchmarkTimer.currentSnapshot.name + '!!!!!!!!: ' + ( end - start ) );
 
   benchmarkTimer.add( 'Rotating Square 100x', function() {
-    for( var i = 0; i < 100; i++ ) {
+    for ( var i = 0; i < 100; i++ ) {
       scene.rotate( Math.sin( i ) );
       scene.updateScene();
     }
@@ -47,14 +46,14 @@ phet.benchmark = phet.benchmark || {};
   } );
 
   benchmarkTimer.add( 'Rotating Many Squares (with stroke) 100x', function() {
-    for( var i = 0; i < 100; i++ ) {
+    for ( var i = 0; i < 100; i++ ) {
       scene.rotate( Math.sin( i ) );
       scene.updateScene();
     }
   }, {
     setup: function() {
       var scene = phet.benchmark.createDetachedScene( 256, 256 );
-      for( var i = 0; i < 200; i++ ) {
+      for ( var i = 0; i < 200; i++ ) {
         scene.addChild( new scenery.Path( kite.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ), {
           fill: 'rgba(255,0,0,1)',
           stroke: '#000000'
@@ -64,14 +63,14 @@ phet.benchmark = phet.benchmark || {};
   } );
 
   benchmarkTimer.add( 'Square rotating over background squares 100x', function() {
-    for( var i = 0; i < 100; i++ ) {
+    for ( var i = 0; i < 100; i++ ) {
       node.rotate( Math.sin( i ) );
       scene.updateScene();
     }
   }, {
     setup: function() {
       var scene = phet.benchmark.createDetachedScene( 256, 256 );
-      for( var i = 0; i < 200; i++ ) {
+      for ( var i = 0; i < 200; i++ ) {
         scene.addChild( new scenery.Path( kite.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ), {
           fill: 'rgba(255,0,0,1)',
           stroke: '#000000'
@@ -88,13 +87,13 @@ phet.benchmark = phet.benchmark || {};
   } );
 
   benchmarkTimer.add( 'Static updateScene() over background squares 100x', function() {
-    for( var i = 0; i < 100; i++ ) {
+    for ( var i = 0; i < 100; i++ ) {
       scene.updateScene();
     }
   }, {
     setup: function() {
       var scene = phet.benchmark.createDetachedScene( 256, 256 );
-      for( var i = 0; i < 200; i++ ) {
+      for ( var i = 0; i < 200; i++ ) {
         scene.addChild( new scenery.Path( kite.Shape.rectangle( i, ( 7 * i ) % 200, 20, 20 ), {
           fill: 'rgba(255,0,0,1)',
           stroke: '#000000'

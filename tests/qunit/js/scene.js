@@ -1,5 +1,4 @@
-
-(function(){
+(function() {
   'use strict';
 
   module( 'Scenery: Scene' );
@@ -149,7 +148,7 @@
       currentTrail = currentTrail.next();
     }
 
-    equal( 13, trails.length, 'Trails: ' + _.map( trails, function( trail ) { return trail.toString() ; } ).join( '\n' ) );
+    equal( 13, trails.length, 'Trails: ' + _.map( trails, function( trail ) { return trail.toString(); } ).join( '\n' ) );
 
     for ( var i = 0; i < trails.length; i++ ) {
       for ( var j = i; j < trails.length; j++ ) {
@@ -159,7 +158,7 @@
         }, false, node );
         var trailString = i + ',' + j + ' ' + trails[i].toString() + ' to ' + trails[j].toString()
         ok( inclusiveList[0].equals( trails[i] ), 'inclusive start on ' + trailString + ' is ' + inclusiveList[0].toString() );
-        ok( inclusiveList[inclusiveList.length-1].equals( trails[j] ), 'inclusive end on ' + trailString + 'is ' + inclusiveList[inclusiveList.length-1].toString() );
+        ok( inclusiveList[inclusiveList.length - 1].equals( trails[j] ), 'inclusive end on ' + trailString + 'is ' + inclusiveList[inclusiveList.length - 1].toString() );
         equal( inclusiveList.length, j - i + 1, 'inclusive length on ' + trailString + ' is ' + inclusiveList.length + ', ' + _.map( inclusiveList, function( trail ) { return trail.toString(); } ).join( '\n' ) );
 
         if ( i < j ) {
@@ -298,7 +297,7 @@
 
     // verify forwards and backwards, as well as copy constructors
     for ( var i = 1; i < pointers.length; i++ ) {
-      var a = pointers[i-1];
+      var a = pointers[i - 1];
       var b = pointers[i];
 
       var forwardsCopy = a.copy();
@@ -321,9 +320,9 @@
         // do an actual pointer to pointer comparison
         var isOk = true;
         for ( var k = 0; k < contents.length; k++ ) {
-          var comparison = contents[k].compareNested( pointers[i+k] );
+          var comparison = contents[k].compareNested( pointers[i + k] );
           if ( comparison !== 0 ) {
-            equal( comparison, 0, 'depthFirstUntil inclusive ' + i + ',' + j + ',' + k + ' comparison check ' + contents[k].trail.indices.join() + ' - ' + pointers[i+k].trail.indices.join() );
+            equal( comparison, 0, 'depthFirstUntil inclusive ' + i + ',' + j + ',' + k + ' comparison check ' + contents[k].trail.indices.join() + ' - ' + pointers[i + k].trail.indices.join() );
             isOk = false;
           }
         }
@@ -342,9 +341,9 @@
         // do an actual pointer to pointer comparison
         var isOk = true;
         for ( var k = 0; k < contents.length; k++ ) {
-          var comparison = contents[k].compareNested( pointers[i+k+1] );
+          var comparison = contents[k].compareNested( pointers[i + k + 1] );
           if ( comparison !== 0 ) {
-            equal( comparison, 0, 'depthFirstUntil exclusive ' + i + ',' + j + ',' + k + ' comparison check ' + contents[k].trail.indices.join() + ' - ' + pointers[i+k].trail.indices.join() );
+            equal( comparison, 0, 'depthFirstUntil exclusive ' + i + ',' + j + ',' + k + ' comparison check ' + contents[k].trail.indices.join() + ' - ' + pointers[i + k].trail.indices.join() );
             isOk = false;
           }
         }
@@ -426,7 +425,7 @@
   test( 'Text width measurement in canvas', function() {
     var canvas = document.createElement( 'canvas' );
     var context = canvas.getContext( '2d' );
-    var metrics = context.measureText('Hello World');
+    var metrics = context.measureText( 'Hello World' );
     ok( metrics.width, 'metrics.width' );
   } );
 

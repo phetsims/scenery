@@ -1,7 +1,6 @@
-
 var marks = marks || {};
 
-(function(){
+(function() {
 
   marks.Performance = function( options ) {
     this.options = options || {};
@@ -30,11 +29,11 @@ var marks = marks || {};
       var that = this;
 
       // guard on markNames so we don't trample over the first run
-      if( this.markNames && this.snapshotIndex === this.snapshots.length ) {
+      if ( this.markNames && this.snapshotIndex === this.snapshots.length ) {
         this.snapshotIndex = 0;
         this.markNameIndex++;
 
-        if( this.markNameIndex === this.markNames.length ) {
+        if ( this.markNameIndex === this.markNames.length ) {
           this.markNameIndex = 0;
         }
       }
@@ -53,10 +52,11 @@ var marks = marks || {};
             // once this script completes execution, run the next script
             nextScript();
           } );
-        } else {
+        }
+        else {
           // all scripts have executed
 
-          if( !that.markNames ) {
+          if ( !that.markNames ) {
             that.markNames = _.map( marks.currentMarks, function( mark ) { return mark.name; } );
           }
 
@@ -79,14 +79,14 @@ var marks = marks || {};
 
         var count = 0;
 
-        if( !mark.count ) {
+        if ( !mark.count ) {
           mark.count = 50;
         }
 
         function tick() {
-          if( count++ === mark.count ) {
+          if ( count++ === mark.count ) {
             var time = new Date - startTime;
-            if( that.options.onMark ) {
+            if ( that.options.onMark ) {
               that.options.onMark( that.currentSnapshot, mark, time / mark.count, that );
             }
             mark.after && mark.after();
@@ -94,16 +94,19 @@ var marks = marks || {};
             setTimeout( function() {
               that.runSnapshots();
             }, 500 );
-          } else {
+          }
+          else {
             window.requestAnimationFrame( tick, main[0] );
 
             mark.step && mark.step();
           }
         }
+
         window.requestAnimationFrame( tick, main[0] );
 
         var startTime = new Date;
-      } else {
+      }
+      else {
         // skip this one
         that.runSnapshots();
       }
@@ -121,7 +124,7 @@ var marks = marks || {};
   };
   var PerformanceTableReport = marks.PerformanceTableReport;
 
-  PerformanceTableReport.prototype =  {
+  PerformanceTableReport.prototype = {
     constructor: PerformanceTableReport,
 
     initializeTable: function( performance ) {
@@ -143,14 +146,14 @@ var marks = marks || {};
     },
 
     onMark: function( snapshot, mark, ms, performance ) {
-      if( !this.initialized ) {
+      if ( !this.initialized ) {
         this.initializeTable( performance );
       }
 
-      if( !snapshot.times ) {
+      if ( !snapshot.times ) {
         snapshot.times = {};
       }
-      if( !snapshot.times[mark.name] ) {
+      if ( !snapshot.times[mark.name] ) {
         snapshot.times[mark.name] = {
           total: 0,
           count: 0
@@ -163,11 +166,11 @@ var marks = marks || {};
 
       var average = time.total / time.count;
       this.table.cells[this.markNameRowMap[mark.name]][this.snapshotColumnMap[snapshot.name]].innerHTML = average.toFixed( 1 );
-      if( snapshot.name !== 'current' ) {
+      if ( snapshot.name !== 'current' ) {
         var currentTime = performance.snapshots[0].times[mark.name];
         var currentAverage = currentTime.total / currentTime.count;
         var percentageChange = 100 * ( currentAverage - average ) / average;
-        this.table.cells[this.markNameRowMap[mark.name]][this.snapshotColumnMap[snapshot.name]+1].innerHTML = percentageChange.toFixed( 2 ) + '%';
+        this.table.cells[this.markNameRowMap[mark.name]][this.snapshotColumnMap[snapshot.name] + 1].innerHTML = percentageChange.toFixed( 2 ) + '%';
       }
       // console.log( snapshot.name + ' ' + mark.name + ': ' + average );
     }

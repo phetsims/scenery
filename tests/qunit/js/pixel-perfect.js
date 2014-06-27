@@ -1,5 +1,4 @@
-
-(function(){
+(function() {
   'use strict';
 
   module( 'Scenery: Pixel Perfect' );
@@ -17,7 +16,8 @@
               start();
             }, dataURLSnapshot.width, dataURLSnapshot.height );
           } );
-        } else {
+        }
+        else {
           setTimeout( process, 40 );
         }
       }

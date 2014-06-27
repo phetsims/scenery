@@ -10,7 +10,7 @@
 // 'namespace'
 var marks = marks || {};
 
-(function(){
+(function() {
 
   marks.Timer = function( options ) {
     // onFinish()
@@ -98,7 +98,8 @@ var marks = marks || {};
               // once this script completes execution, run the next script
               nextScript();
             } );
-          } else {
+          }
+          else {
             // all scripts have executed
 
             // TODO: determine whether queued is necessary
@@ -107,7 +108,8 @@ var marks = marks || {};
         }
 
         nextScript();
-      } else {
+      }
+      else {
         this.currentSnapshot = null;
 
         if ( this.options.onFinish ) {
@@ -237,13 +239,16 @@ var marks = marks || {};
       if ( benchmark.stats.mean >= 1 ) {
         multiplier = 1;
         units = 's';
-      } else if ( benchmark.stats.mean >= 0.001 ) {
+      }
+      else if ( benchmark.stats.mean >= 0.001 ) {
         multiplier = 1000;
         units = 'ms';
-      } else if ( benchmark.stats.mean >= 0.000001 ) {
+      }
+      else if ( benchmark.stats.mean >= 0.000001 ) {
         multiplier = 1000000;
         units = '&#xb5;s';
-      } else {
+      }
+      else {
         multiplier = 1000000000;
         units = 'ns';
       }
@@ -270,11 +275,13 @@ var marks = marks || {};
         if ( meanDifference > marginOfErrorAllowance ) {
           if ( meanDifference > 10 * marginOfErrorAllowance ) {
             cell.style.background = worse ? '#ffcccc' : '#ccffcc';
-          } else {
+          }
+          else {
             cell.style.background = worse ? '#ffeeee' : '#eeffee';
           }
           html = '<strong>' + percentChange + '%</strong> ' + html;
-        } else {
+        }
+        else {
           cell.style.background = '#ffffff';
           html = percentChange + '% ' + html;
         }

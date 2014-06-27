@@ -1,7 +1,6 @@
-
 var marks = marks || {};
 
-(function(){
+(function() {
   marks.TableBase = function( container ) {
     this.container = container;
 
@@ -64,7 +63,7 @@ var marks = marks || {};
       }
       this.headRow.appendChild( header );
 
-      for( var k = 0; k < numColumns; k++ ) {
+      for ( var k = 0; k < numColumns; k++ ) {
         this.numColumns++;
 
         // append column to each row

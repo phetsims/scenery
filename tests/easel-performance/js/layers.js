@@ -1,8 +1,7 @@
-
 var phet = phet || {};
 phet.tests = phet.tests || {};
 
-(function(){
+(function() {
   "use strict";
 
   var backgroundSize = 300;
@@ -146,8 +145,8 @@ phet.tests = phet.tests || {};
       context.strokeStyle = '#000000';
 
       for ( var i = 0; i < count; i++ ) {
-        var xOffset = seed[i*2];
-        var yOffset = seed[i*2+1];
+        var xOffset = seed[i * 2];
+        var yOffset = seed[i * 2 + 1];
 
         context.beginPath();
         context.moveTo( points[0].x + xOffset, points[0].y + yOffset );

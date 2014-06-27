@@ -17,7 +17,7 @@
  *               We need to verify that these tests are fully taxing the system (maybe 20% less FPS than an empty loop in requestAnimationFrame?)
  */
 
-(function(){
+(function() {
 
   var results = $( '#results' );
 
@@ -137,7 +137,8 @@
 
         } );
       } );
-    } else {
+    }
+    else {
       // all done
 
       _.each( versionNames, function( versionName ) {
@@ -161,7 +162,8 @@
             tr.append( progressBar( currentHz, testHz ) );
             tr.append( $( document.createElement( 'td' ) ).text( ( testHz / currentHz ).toFixed( 3 ) ) );
             tr.append( $( document.createElement( 'td' ) ).text( testHz.toFixed( 3 ) ) );
-          } else {
+          }
+          else {
             tr.append( document.createElement( 'td' ) );
             tr.append( document.createElement( 'td' ) );
             tr.append( document.createElement( 'td' ) );
