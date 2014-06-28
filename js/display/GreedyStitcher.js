@@ -116,6 +116,10 @@ define( function( require ) {
       // this stitch, they will be marked for removal.
       this.reusableBlocks = cleanArray( this.reusableBlocks ); // re-use instance, since we are effectively pooled
 
+      // to properly handle glue/unglue situations with external blocks (ones that aren't reusable after phase 1),
+      // we need some extra tracking
+      this.excludedExternalBlock = null;
+
       var interval;
 
       // record current first/last drawables for the entire backbone
@@ -191,6 +195,7 @@ define( function( require ) {
 
       this.clean();
       cleanArray( this.reusableBlocks );
+      this.excludedExternalBlock = null; // clean our references
 
       sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
     },
@@ -218,20 +223,7 @@ define( function( require ) {
 
           // check if glue is needed
           if ( beforeBlock !== afterBlock ) {
-            sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'glue (with non-internal)' );
-            sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
-
-            // for now, toss the after block (simplifies changes in one direction)
-            this.unuseBlock( afterBlock );
-            var lastExternalDrawable = getLastCompatibleExternalDrawable( interval );
-            this.notePendingMoves( beforeBlock, interval.drawableAfter, lastExternalDrawable );
-
-            // if we didn't make it all the way to the next change interval's drawableBefore
-            if ( !interval.nextChangeInterval || interval.nextChangeInterval.drawableBefore !== lastExternalDrawable ) {
-              this.linkAfterDrawable( lastExternalDrawable );
-            }
-
-            sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
+            this.glue( interval, beforeBlock, afterBlock );
           }
         }
 
@@ -365,46 +357,56 @@ define( function( require ) {
 
         // glue case
         if ( openBefore && openAfter && blocksAreDifferent ) {
-          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'glue (with internal)' );
-          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
-
-          // for now, toss the after block (simplifies changes in one direction)
-          this.unuseBlock( afterBlock );
-          lastExternalDrawable = getLastCompatibleExternalDrawable( interval );
-          this.notePendingMoves( beforeBlock, interval.drawableAfter, lastExternalDrawable );
-
-          // if we didn't make it all the way to the next change interval's drawableBefore
-          if ( !interval.nextChangeInterval || interval.nextChangeInterval.drawableBefore !== lastExternalDrawable ) {
-            this.linkAfterDrawable( lastExternalDrawable );
-          }
-
-          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
+          this.glue( interval, beforeBlock, afterBlock );
         }
         // unglue case
         else if ( ( !openBefore || !openAfter ) && !blocksAreDifferent ) {
-          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'unglue' );
-          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
-
-          // for simplicity right now, we always create a fresh block (to avoid messing up reused blocks) after, and
-          // always change everything after (instead of before), so we don't have to jump across multiple previous
-          // change intervals
-          var freshBlock = this.createBlock( interval.drawableAfter.renderer, interval.drawableAfter );
-          this.blockOrderChanged = true; // needs to be done on block creation
-
-          lastExternalDrawable = getLastCompatibleExternalDrawable( interval );
-          this.notePendingMoves( freshBlock, interval.drawableAfter, lastExternalDrawable );
-
-          // if we didn't make it all the way to the next change interval's drawableBefore
-          if ( !interval.nextChangeInterval || interval.nextChangeInterval.drawableBefore !== lastExternalDrawable ) {
-            this.linkAfterDrawable( lastExternalDrawable );
-          }
-
-          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
+          this.unglue( interval, beforeBlock, afterBlock );
         }
         else {
           sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'no gluing needed' );
         }
       }
+    },
+
+    glue: function( interval, beforeBlock, afterBlock ) {
+      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'glue' );
+      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
+
+      // for now, toss the after block (simplifies changes in one direction)
+      this.unuseBlock( afterBlock );
+
+      //OHTWO TODO: reduce duplication with glue/unglue
+      var lastExternalDrawable = getLastCompatibleExternalDrawable( interval );
+      this.notePendingMoves( beforeBlock, interval.drawableAfter, lastExternalDrawable );
+
+      // if we didn't make it all the way to the next change interval's drawableBefore
+      if ( !interval.nextChangeInterval || interval.nextChangeInterval.drawableBefore !== lastExternalDrawable ) {
+        this.linkAfterDrawable( lastExternalDrawable );
+      }
+
+      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
+    },
+
+    unglue: function( interval, beforeBlock, afterBlock ) {
+      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'unglue' );
+      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
+
+      // for simplicity right now, we always create a fresh block (to avoid messing up reused blocks) after, and
+      // always change everything after (instead of before), so we don't have to jump across multiple previous
+      // change intervals
+      var freshBlock = this.createBlock( interval.drawableAfter.renderer, interval.drawableAfter );
+      this.blockOrderChanged = true; // needs to be done on block creation
+
+      var lastExternalDrawable = getLastCompatibleExternalDrawable( interval );
+      this.notePendingMoves( freshBlock, interval.drawableAfter, lastExternalDrawable );
+
+      // if we didn't make it all the way to the next change interval's drawableBefore
+      if ( !interval.nextChangeInterval || interval.nextChangeInterval.drawableBefore !== lastExternalDrawable ) {
+        this.linkAfterDrawable( lastExternalDrawable );
+      }
+
+      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
     },
 
     notePendingMoves: function( block, firstDrawable, lastDrawable ) {
