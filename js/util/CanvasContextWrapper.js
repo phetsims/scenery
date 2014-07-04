@@ -12,6 +12,7 @@
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
   scenery.CanvasContextWrapper = function CanvasContextWrapper( canvas, context ) {
@@ -24,9 +25,7 @@ define( function( require ) {
   };
   var CanvasContextWrapper = scenery.CanvasContextWrapper;
 
-  CanvasContextWrapper.prototype = {
-    constructor: CanvasContextWrapper,
-
+  inherit( Object, CanvasContextWrapper, {
     // set local styles to undefined, so that they will be invalidated later
     resetStyles: function() {
       this.fillStyle = undefined; // null
@@ -144,7 +143,7 @@ define( function( require ) {
         this.context.direction = direction;
       }
     }
-  };
+  } );
 
   return CanvasContextWrapper;
 } );

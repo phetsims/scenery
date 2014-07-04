@@ -9,6 +9,7 @@
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
   /*
@@ -36,13 +37,11 @@ define( function( require ) {
     } );
   };
 
-  GLShaderProgram.prototype = {
-    constructor: GLShaderProgram,
-
+  inherit( Object, GLShaderProgram, {
     use: function( gl ) {
       gl.useProgram( this._shaderProgram );
     }
-  };
+  } );
 
   GLShaderProgram.createProgram = function( gl, shaders ) {
     var shaderProgram = gl.createProgram();

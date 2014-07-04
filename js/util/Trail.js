@@ -18,6 +18,7 @@
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Transform3 = require( 'DOT/Transform3' );
 
@@ -78,9 +79,7 @@ define( function( require ) {
   };
   var Trail = scenery.Trail;
 
-  Trail.prototype = {
-    constructor: Trail,
-
+  inherit( Object, Trail, {
     copy: function() {
       return new Trail( this );
     },
@@ -600,7 +599,7 @@ define( function( require ) {
       var specialNodes = _.filter( this.nodes, function( n ) { return n.constructor.name !== 'Node'; } );
       return _.map( specialNodes, function( n ) { return n.constructor.name; } ).join( '/' );
     }
-  };
+  } );
 
   // like eachTrailBetween, but only fires for painted trails. If callback returns true, subtree will be skipped
   Trail.eachPaintedTrailBetween = function( a, b, callback, excludeEndTrails, scene ) {

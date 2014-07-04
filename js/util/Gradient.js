@@ -10,6 +10,7 @@ define( function( require ) {
   'use strict';
 
   require( 'SCENERY/util/Color' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
   // TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ]
@@ -25,9 +26,7 @@ define( function( require ) {
   };
   var Gradient = scenery.Gradient;
 
-  Gradient.prototype = {
-    constructor: Gradient,
-
+  inherit( Object, Gradient, {
     isGradient: true,
 
     /**
@@ -70,7 +69,7 @@ define( function( require ) {
     getCanvasStyle: function() {
       return this.canvasGradient;
     }
-  };
+  } );
 
   return Gradient;
 } );

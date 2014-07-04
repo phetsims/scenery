@@ -26,6 +26,7 @@
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/display/Renderer' );
@@ -51,9 +52,7 @@ define( function( require ) {
   RenderState.RegularState = function RegularState( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot ) {
     this.initialize( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot );
   };
-  RenderState.RegularState.prototype = {
-    constructor: RenderState.RegularState,
-
+  inherit( Object, RenderState.RegularState, {
     initialize: function( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot ) {
       // this should be accurate right now, the pass to update these should have been completed earlier
       var combinedBitmask = node._rendererSummary.bitmask;
@@ -230,7 +229,7 @@ define( function( require ) {
                    ( this.sharedCacheRenderer ? this.sharedCacheRenderer.toString( 16 ) : '-' ) + ' ';
       return result + ']';
     }
-  };
+  } );
 
   RenderState.RegularState.createRootState = function( node ) {
     var baseState = RenderState.RegularState.createFromPool(

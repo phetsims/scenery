@@ -9,6 +9,7 @@
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
   /*
@@ -126,9 +127,7 @@ define( function( require ) {
   };
   var SimpleDragHandler = scenery.SimpleDragHandler;
 
-  SimpleDragHandler.prototype = {
-    constructor: SimpleDragHandler,
-
+  inherit( Object, SimpleDragHandler, {
     startDrag: function( event ) {
       // set a flag on the pointer so it won't pick up other nodes
       event.pointer.dragging = true;
@@ -204,7 +203,7 @@ define( function( require ) {
     touchmove: function( event ) {
       this.tryTouchToSnag( event );
     }
-  };
+  } );
 
   return SimpleDragHandler;
 } );

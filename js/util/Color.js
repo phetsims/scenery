@@ -13,6 +13,7 @@
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
   var clamp = require( 'DOT/Util' ).clamp;
@@ -204,9 +205,7 @@ define( function( require ) {
     return colorSpec instanceof Color ? colorSpec : new Color( colorSpec );
   };
 
-  Color.prototype = {
-    constructor: Color,
-
+  inherit( Object, Color, {
     copy: function() {
       return new Color( this.r, this.g, this.b, this.a );
     },
@@ -426,7 +425,7 @@ define( function( require ) {
     toString: function() {
       return this.constructor.name + "[r:" + this.r + " g:" + this.g + " b:" + this.b + " a:" + this.a + "]";
     }
-  };
+  } );
 
   Color.basicColorKeywords = {
     aqua: '00ffff',

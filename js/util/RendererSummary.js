@@ -12,6 +12,7 @@
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   // require( 'SCENERY/display/Renderer' );
 
@@ -43,9 +44,7 @@ define( function( require ) {
   };
   var RendererSummary = scenery.RendererSummary;
 
-  RendererSummary.prototype = {
-    constructor: RendererSummary,
-
+  inherit( Object, RendererSummary, {
     computeBitmask: function() {
       var bitmask = 0;
       for ( var i = 0; i < numBits; i++ ) {
@@ -118,7 +117,7 @@ define( function( require ) {
         }
       }
     }
-  };
+  } );
 
   return RendererSummary;
 } );

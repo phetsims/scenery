@@ -26,6 +26,7 @@
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
   // constants used for detection (since styles/variants/weights/stretches can be mixed in the preamble of the shorthand string)
@@ -146,9 +147,7 @@ define( function( require ) {
   };
   var Font = scenery.Font;
 
-  Font.prototype = {
-    constructor: Font,
-
+  inherit( Object, Font, {
     getFont: function() { return this._font; },
     getStyle: function() { return this._style; },
     getVariant: function() { return this._variant; },
@@ -194,7 +193,7 @@ define( function( require ) {
     toCSS: function() {
       return this.getFont();
     }
-  };
+  } );
 
   Font.DEFAULT = new Font();
 

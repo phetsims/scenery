@@ -11,6 +11,7 @@
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
   // TODO: support scene or other various content (SVG is flexible, can backport to canvas)
@@ -25,9 +26,7 @@ define( function( require ) {
   };
   var Pattern = scenery.Pattern;
 
-  Pattern.prototype = {
-    constructor: Pattern,
-
+  inherit( Object, Pattern, {
     isPattern: true,
 
     setTransformMatrix: function( transformMatrix ) {
@@ -60,7 +59,7 @@ define( function( require ) {
     toString: function() {
       return 'new scenery.Pattern( $( \'<img src="' + this.image.src + '"/>\' )[0] )';
     }
-  };
+  } );
 
   return Pattern;
 } );

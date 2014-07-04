@@ -11,6 +11,7 @@
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var Shape = require( 'KITE/Shape' );
 
   var scenery = require( 'SCENERY/scenery' );
@@ -42,7 +43,7 @@ define( function( require ) {
   };
   var CanvasNodeBoundsOverlay = scenery.CanvasNodeBoundsOverlay;
 
-  CanvasNodeBoundsOverlay.prototype = {
+  inherit( Object, CanvasNodeBoundsOverlay, {
     addShape: function( shape, color, isOffset ) {
       var path = document.createElementNS( scenery.svgns, 'path' );
       var svgPath = shape.getSVGPath();
@@ -90,7 +91,7 @@ define( function( require ) {
     dispose: function() {
 
     }
-  };
+  } );
 
   return CanvasNodeBoundsOverlay;
 } );

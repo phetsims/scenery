@@ -12,6 +12,7 @@
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var Matrix3 = require( 'DOT/Matrix3' );
 
   var scenery = require( 'SCENERY/scenery' );
@@ -108,7 +109,7 @@ define( function( require ) {
   };
   var PointerOverlay = scenery.PointerOverlay;
 
-  PointerOverlay.prototype = {
+  inherit( Object, PointerOverlay, {
     dispose: function() {
       this.display._input.removePointerAddedListener( this.pointerAdded );
     },
@@ -116,7 +117,7 @@ define( function( require ) {
     update: function() {
 
     }
-  };
+  } );
 
   return PointerOverlay;
 } );

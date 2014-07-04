@@ -9,6 +9,7 @@
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
   var AccessibilityPeer = scenery.AccessibilityPeer = function AccessibilityPeer( instance, element, options ) {
@@ -75,9 +76,7 @@ define( function( require ) {
     }
   };
 
-  AccessibilityPeer.prototype = {
-    constructor: AccessibilityPeer,
-
+  inherit( Object, AccessibilityPeer, {
     dispose: function() {
       this.element.removeEventListener( 'click', this.clickListener );
       this.element.removeEventListener( 'focus', this.focusListener );
@@ -101,7 +100,7 @@ define( function( require ) {
       this.element.style.width = globalBounds.width + 'px';
       this.element.style.height = globalBounds.height + 'px';
     }
-  };
+  } );
 
   return AccessibilityPeer;
 } );

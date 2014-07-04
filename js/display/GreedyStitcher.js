@@ -353,7 +353,7 @@ define( function( require ) {
         var beforeBlock = interval.drawableBefore.pendingParentDrawable;
         var afterBlock = interval.drawableAfter.pendingParentDrawable;
         var blocksAreDifferent = beforeBlock !== afterBlock;
-        var lastExternalDrawable;
+        // var lastExternalDrawable;
 
         // glue case
         if ( openBefore && openAfter && blocksAreDifferent ) {

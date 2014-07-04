@@ -10,6 +10,7 @@
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var extend = require( 'PHET_CORE/extend' );
 
   var Events = require( 'AXON/Events' );
@@ -179,9 +180,7 @@ define( function( require ) {
   };
   var Node = scenery.Node;
 
-  Node.prototype = extend( {
-    constructor: Node,
-
+  inherit( Object, Node, extend( {
     insertChild: function( index, node ) {
       assert && assert( node !== null && node !== undefined, 'insertChild cannot insert a null/undefined child' );
       assert && assert( !_.contains( this._children, node ), 'Parent already contains child' );
@@ -2289,7 +2288,7 @@ define( function( require ) {
       this.onEventListenerRemoved( eventName, listener );
       return index;
     }
-  } );
+  } ) );
 
 
   /*

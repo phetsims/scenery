@@ -189,9 +189,7 @@ define( function( require ) {
       this.layout = layout;
     }
   };
-  LayoutMethod.prototype = {
-    constructor: LayoutMethod,
-
+  inherit( Object, LayoutMethod, {
     and: function( otherLayoutMethod ) {
       var thisLayoutMethod = this;
 
@@ -200,7 +198,7 @@ define( function( require ) {
         otherLayoutMethod.layout( element, index, previousElement, layoutProperties );
       } );
     }
-  };
+  } );
 
   /*---------------------------------------------------------------------------*
   * Layout Methods
@@ -260,7 +258,7 @@ define( function( require ) {
     this.layoutMethodGetter = layoutMethodGetter;
     this.boundsMethod = boundsMethod;
   };
-  LayoutElement.prototype = {
+  inherit( Object, LayoutElement, {
     get bounds() { return this.node.bounds; },
     get layoutBounds() { return this.boundsMethod( this.bounds ); },
     get layoutMethod() { return this.layoutMethodGetter(); },
@@ -276,7 +274,7 @@ define( function( require ) {
       var padding = this.bounds.left - this.layoutBounds.left;
       this.node.left = x + padding;
     }
-  };
+  } );
 
   LayoutNode.prototype._mutatorKeys = [ 'defaultMethod', 'updateOnBounds' ].concat( Node.prototype._mutatorKeys );
 

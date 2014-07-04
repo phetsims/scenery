@@ -16,6 +16,7 @@
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
   // used to serialize arguments so that it displays exactly like the call would be executed
@@ -61,9 +62,7 @@ define( function( require ) {
   };
   var DebugContext = scenery.DebugContext;
 
-  DebugContext.prototype = {
-    constructor: DebugContext,
-
+  inherit( Object, DebugContext, {
     get canvas() {
       attributeGet( 'canvas' );
       return this._context.canvas;
@@ -521,7 +520,7 @@ define( function( require ) {
       command( 'ellipse', [ x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise ] );
       this._context.ellipse( x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise );
     }
-  };
+  } );
 
   return DebugContext;
 } );

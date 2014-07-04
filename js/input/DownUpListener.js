@@ -12,6 +12,7 @@
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
 
@@ -63,9 +64,7 @@ define( function( require ) {
   };
   var DownUpListener = scenery.DownUpListener;
 
-  DownUpListener.prototype = {
-    constructor: DownUpListener,
-
+  inherit( Object, DownUpListener, {
     buttonDown: function( event ) {
       // already down from another pointer, don't do anything
       if ( this.isDown ) { return; }
@@ -121,7 +120,7 @@ define( function( require ) {
     down: function( event ) {
       this.buttonDown( event );
     }
-  };
+  } );
 
   return DownUpListener;
 } );

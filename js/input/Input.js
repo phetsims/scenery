@@ -22,6 +22,7 @@
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var scenery = require( 'SCENERY/scenery' );
 
@@ -86,9 +87,7 @@ define( function( require ) {
   };
   var Input = scenery.Input;
 
-  Input.prototype = {
-    constructor: Input,
-
+  inherit( Object, Input, {
     batchEvent: function( domEvent, batchType, callback, triggerImmediate ) {
       this.batchedEvents.push( BatchedDOMEvent.createFromPool( domEvent, batchType, callback ) );
       if ( triggerImmediate || !this.batchDOMEvents ) {
@@ -718,7 +717,7 @@ define( function( require ) {
         }
       }
     }
-  };
+  } );
 
   Input.serializeDomEvent = function serializeDomEvent( domEvent ) {
     var lines = [];

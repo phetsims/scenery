@@ -14,6 +14,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var LineStyles = require( 'KITE/util/LineStyles' );
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var platform = require( 'PHET_CORE/platform' );
 
   var isIE9 = platform.ie9;
@@ -462,9 +463,7 @@ define( function( require ) {
 
     this.initialize();
   };
-  Strokable.StrokeSVGState.prototype = {
-    constructor: Strokable.StrokeSVGState,
-
+  inherit( Object, Strokable.StrokeSVGState, {
     initialize: function() {
       this.stroke = null;
       this.def = null;
@@ -561,7 +560,7 @@ define( function( require ) {
 
       return baseStyle;
     }
-  };
+  } );
 
   return Strokable;
 } );

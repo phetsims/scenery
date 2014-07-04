@@ -12,6 +12,7 @@ define( function( require ) {
   'use strict';
 
   var scenery = require( 'SCENERY/scenery' );
+  var inherit = require( 'PHET_CORE/inherit' );
   var platform = require( 'PHET_CORE/platform' );
 
   var isSafari5 = platform.safari5;
@@ -269,9 +270,7 @@ define( function( require ) {
 
     this.initialize();
   };
-  Fillable.FillSVGState.prototype = {
-    constructor: Fillable.FillSVGState,
-
+  inherit( Object, Fillable.FillSVGState, {
     initialize: function() {
       this.fill = null;
       this.def = null;
@@ -340,7 +339,7 @@ define( function( require ) {
       }
       return style;
     }
-  };
+  } );
 
   return Fillable;
 } );

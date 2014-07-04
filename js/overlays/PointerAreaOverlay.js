@@ -9,6 +9,7 @@
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var Shape = require( 'KITE/Shape' );
 
   var scenery = require( 'SCENERY/scenery' );
@@ -40,7 +41,7 @@ define( function( require ) {
   };
   var PointerAreaOverlay = scenery.PointerAreaOverlay;
 
-  PointerAreaOverlay.prototype = {
+  inherit( Object, PointerAreaOverlay, {
     addShape: function( shape, color, isOffset ) {
       var path = document.createElementNS( scenery.svgns, 'path' );
       var svgPath = shape.getSVGPath();
@@ -93,7 +94,7 @@ define( function( require ) {
     dispose: function() {
 
     }
-  };
+  } );
 
   return PointerAreaOverlay;
 } );

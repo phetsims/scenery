@@ -15,6 +15,7 @@
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
   /*
@@ -31,9 +32,7 @@ define( function( require ) {
   };
   var TrailPointer = scenery.TrailPointer;
 
-  TrailPointer.prototype = {
-    constructor: TrailPointer,
-
+  inherit( Object, TrailPointer, {
     copy: function() {
       return new TrailPointer( this.trail.copy(), this.isBefore );
     },
@@ -293,7 +292,7 @@ define( function( require ) {
     toString: function() {
       return '[' + ( this.isBefore ? 'before' : 'after' ) + ' ' + this.trail.toString().slice( 1 );
     }
-  };
+  } );
 
   // same as new TrailPointer( trailA, isBeforeA ).compareNested( new TrailPointer( trailB, isBeforeB ) )
   TrailPointer.compareNested = function( trailA, isBeforeA, trailB, isBeforeB ) {

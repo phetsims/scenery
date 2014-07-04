@@ -12,6 +12,7 @@
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
   scenery.Pointer = function Pointer() {
@@ -21,9 +22,7 @@ define( function( require ) {
   };
   var Pointer = scenery.Pointer;
 
-  Pointer.prototype = {
-    constructor: Pointer,
-
+  inherit( Object, Pointer, {
     addInputListener: function( listener ) {
       assert && assert( !_.contains( this.listeners, listener ) );
 
@@ -41,7 +40,7 @@ define( function( require ) {
     hasPointChanged: function( point ) {
       return this.point !== point && ( !point || !this.point || !this.point.equals( point ) );
     }
-  };
+  } );
 
   return Pointer;
 } );

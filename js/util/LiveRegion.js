@@ -10,6 +10,7 @@
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
   var LiveRegion = scenery.LiveRegion = function LiveRegion( instance, property, options ) {
@@ -38,10 +39,9 @@ define( function( require ) {
     property.link( this.listener );
   };
 
-  LiveRegion.prototype = {
-    constructor: scenery.LiveRegion,
+  inherit( Object, LiveRegion, {
     dispose: function() { this.property.unlink( this.listener ); }
-  };
+  } );
 
   return LiveRegion;
 } );

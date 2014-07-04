@@ -26,8 +26,6 @@ define( function( require ) {
   var Stitcher = scenery.Stitcher;
 
   inherit( Object, Stitcher, {
-    constructor: scenery.Stitcher,
-
     initialize: function( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
       assert && assert( firstChangeInterval && lastChangeInterval, 'We are guaranteed at least one change interval' );
       assert && assert( !firstDrawable || firstDrawable.previousDrawable === null,

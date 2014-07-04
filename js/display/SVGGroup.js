@@ -10,6 +10,7 @@
 define( function( require ) {
   'use strict';
 
+  var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var scenery = require( 'SCENERY/scenery' );
@@ -19,9 +20,7 @@ define( function( require ) {
   };
   var SVGGroup = scenery.SVGGroup;
 
-  SVGGroup.prototype = {
-    constructor: SVGGroup,
-
+  inherit( Object, SVGGroup, {
     initialize: function( block, instance, parent ) {
       //OHTWO TODO: add collapsing groups! they can't have self drawables, transforms, filters, etc., and we probably shouldn't de-collapse groups
 
@@ -351,7 +350,7 @@ define( function( require ) {
     toString: function() {
       return 'SVGGroup:' + this.block.toString() + '_' + this.instance.toString();
     }
-  };
+  } );
 
   // @public
   SVGGroup.addDrawable = function( block, drawable ) {
