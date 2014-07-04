@@ -141,33 +141,19 @@
 
           window.displayErr = function() {
             setTimeout( function(){
-              var n = new scenery.Node();
-              var d = new scenery.Display( n );
-              d.updateDisplay();
+              scene.addChild( new scenery.Rectangle( 0, 0, 50, 50, { fill: 'red' } ) );
+              scene.addChild( new scenery.Rectangle( 10, 10, 50, 50, { fill: 'green' } ) );
+              scene.addChild( new scenery.Rectangle( 20, 20, 50, 50, { fill: 'blue' } ) );
+              scene.addChild( new scenery.Rectangle( 30, 30, 50, 50, { fill: 'magenta' } ) );
+              scene.addChild( new scenery.Rectangle( 40, 40, 50, 50, { fill: 'cyan' } ) );
+              display.updateDisplay();
 
-              n.addChild( new scenery.Rectangle( 0, 0, 50, 50, { fill: 'red' } ) );
-              d.updateDisplay();
+              scene.children[1].renderer = 'canvas';
+              display.updateDisplay();
 
-              n.addChild( new scenery.Rectangle( 0, 0, 50, 50, { fill: 'red' } ) );
-              d.updateDisplay();
-
-              n.addChild( new scenery.Rectangle( 0, 0, 50, 50, { fill: 'red' } ) );
-              d.updateDisplay();
-
-              n.children[1].visible = false;
-              d.updateDisplay();
-
-              n.children[1].visible = true;
-              d.updateDisplay();
-
-              n.removeChild( n.children[0] );
-              d.updateDisplay();
-
-              n.removeChild( n.children[1] );
-              d.updateDisplay();
-
-              n.removeChild( n.children[0] );
-              d.updateDisplay();
+              scene.children[1].renderer = null;
+              scene.children[3].renderer = 'canvas';
+              display.updateDisplay();
             } );
           };
 
