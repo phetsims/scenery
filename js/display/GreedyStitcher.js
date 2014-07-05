@@ -374,7 +374,7 @@ define( function( require ) {
           newAfterBlock = beforeBlock;
         } else {
           // if we can't use our afterBlock, since it was used before, or wouldn't create a split
-          if ( this.blockWasAdded || this.beforeBlock === this.afterBlock ) {
+          if ( this.blockWasAdded || beforeBlock === afterBlock ) {
             sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'split with fresh block' );
             // for simplicity right now, we always create a fresh block (to avoid messing up reused blocks) after, and
             // always change everything after (instead of before), so we don't have to jump across multiple previous
