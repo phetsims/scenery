@@ -148,11 +148,11 @@
               scene.addChild( new scenery.Rectangle( 40, 40, 50, 50, { fill: 'cyan' } ) );
               display.updateDisplay();
 
-              scene.children[1].renderer = 'canvas';
+              scene.children[1]._hints.requireElement = true;
               display.updateDisplay();
 
-              scene.children[1].renderer = null;
-              scene.children[3].renderer = 'canvas';
+              scene.children[1]._hints.requireElement = false;
+              scene.children[3]._hints.requireElement = true;
               display.updateDisplay();
             } );
           };

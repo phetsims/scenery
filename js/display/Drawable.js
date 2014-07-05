@@ -154,6 +154,12 @@ define( function( require ) {
           if ( this.pendingRemoval ) {
             sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( 'removing from ' + this.parentDrawable.toString() );
             this.parentDrawable.removeDrawable( this );
+
+            // remove references if we are not being added back in
+            if ( !this.pendingAddition ) {
+              this.pendingParentDrawable = null;
+              this.pendingBackbone = null;
+            }
           }
 
           this.parentDrawable = this.pendingParentDrawable;

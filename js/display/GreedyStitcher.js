@@ -257,7 +257,8 @@ define( function( require ) {
           }
 
           //OHTWO TODO: see what conditions are really necessary
-          if ( matchedBlock === null && drawable.parentDrawable && !drawable.parentDrawable.used && drawable.backbone === backbone &&
+          if ( matchedBlock === null && drawable.parentDrawable &&
+               !drawable.parentDrawable.used && drawable.backbone === backbone &&
                drawable.parentDrawable.parentDrawable === backbone ) {
             matchedBlock = drawable.parentDrawable;
             sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'matching at ' + drawable.toString() + ' with ' + matchedBlock );
