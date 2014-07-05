@@ -412,48 +412,6 @@ define( function( require ) {
       }
     },
 
-    glue: function( interval, beforeBlock, afterBlock ) {
-      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'glue' );
-      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
-
-      // for now, toss the after block (simplifies changes in one direction)
-      // if ( afterBlock !== this.excludedExternalBlock ) {
-        this.unuseBlock( afterBlock );
-      // }
-
-      this.changeExternals( interval, beforeBlock );
-
-      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
-    },
-
-    unglue: function( interval, beforeBlock, afterBlock ) {
-      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'unglue' );
-      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
-
-      // this.excludedExternalBlock = beforeBlock;
-
-      // for simplicity right now, we always create a fresh block (to avoid messing up reused blocks) after, and
-      // always change everything after (instead of before), so we don't have to jump across multiple previous
-      // change intervals
-      var freshBlock = this.createBlock( interval.drawableAfter.renderer, interval.drawableAfter );
-      this.blockOrderChanged = true; // needs to be done on block creation
-
-      this.changeExternals( interval, freshBlock );
-
-      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
-    },
-
-    glueless: function( interval, beforeBlock, afterBlock ) {
-      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'no gluing needed' );
-
-      // if ( afterBlock === this.excludedExternalBlock ) {
-      //   var freshBlock = this.createBlock( interval.drawableAfter.renderer, interval.drawableAfter );
-      //   this.blockOrderChanged = true; // needs to be done on block creation
-
-      //   this.changeExternals( interval, freshBlock );
-      // }
-    },
-
     changeExternals: function( interval, block ) {
       var lastExternalDrawable = getLastCompatibleExternalDrawable( interval );
       this.notePendingMoves( block, interval.drawableAfter, lastExternalDrawable );
