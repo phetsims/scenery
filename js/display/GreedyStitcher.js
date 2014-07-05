@@ -117,8 +117,9 @@ define( function( require ) {
       this.reusableBlocks = cleanArray( this.reusableBlocks ); // re-use instance, since we are effectively pooled
 
       // to properly handle glue/unglue situations with external blocks (ones that aren't reusable after phase 1),
-      // we need some extra tracking
-      this.excludedExternalBlock = null;
+      // we need some extra tracking for our inner sub-block edge case loop.
+      this.blockWasAdded = false;
+      this.firstEdgeCase = true;
 
       var interval;
 
@@ -195,7 +196,6 @@ define( function( require ) {
 
       this.clean();
       cleanArray( this.reusableBlocks );
-      this.excludedExternalBlock = null; // clean our references
 
       sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
     },
@@ -218,13 +218,10 @@ define( function( require ) {
 
         // separate if, last condition above would cause issues with the normal operation branch
         if ( interval.drawableBefore && interval.drawableAfter ) {
-          var beforeBlock = interval.drawableBefore.pendingParentDrawable;
-          var afterBlock = interval.drawableAfter.pendingParentDrawable;
+          assert && assert( interval.drawableBefore.nextDrawable === interval.drawableAfter );
 
-          // check if glue is needed
-          if ( beforeBlock !== afterBlock ) {
-            this.glue( interval, beforeBlock, afterBlock );
-          }
+          var isOpen = !hasGapBetweenDrawables( interval.drawableBefore, interval.drawableAfter );
+          this.processEdgeCases( interval, isOpen, isOpen );
         }
 
         if ( interval.drawableBefore && !isOpenAfter( interval.drawableBefore ) ) {
@@ -269,7 +266,7 @@ define( function( require ) {
           if ( isLast || hasGapBetweenDrawables( drawable, nextDrawable ) ) {
             if ( isFirst ) {
               // we'll handle any glue/unglue at the start, so every processSubBlock can be set correctly.
-              this.processEdgeCases( interval, subBlockFirstDrawable, drawable, isLast );
+              this.processEdgeCases( interval, isOpenBefore( subBlockFirstDrawable ), isOpenAfter( drawable ) );
             }
             this.processSubBlock( interval, subBlockFirstDrawable, drawable, matchedBlock, isFirst, isLast );
             subBlockFirstDrawable = null;
@@ -345,27 +342,72 @@ define( function( require ) {
     },
 
     // firstDrawable and lastDrawable refer to the specific sub-block (if it exists), isLast refers to if it's the last sub-block
-    processEdgeCases: function( interval, firstDrawable, lastDrawable, isLast ) {
+    processEdgeCases: function( interval, openBefore, openAfter ) {
       // this test passes for glue and unglue cases
       if ( interval.drawableBefore !== null && interval.drawableAfter !== null ) {
-        var openBefore = isOpenBefore( firstDrawable );
-        var openAfter = isOpenAfter( lastDrawable );
         var beforeBlock = interval.drawableBefore.pendingParentDrawable;
         var afterBlock = interval.drawableAfter.pendingParentDrawable;
-        var blocksAreDifferent = beforeBlock !== afterBlock;
-        // var lastExternalDrawable;
+        var nextAfterBlock = interval.nextChangeInterval ?
+                             interval.nextChangeInterval.drawableAfter.pendingParentDrawable :
+                             null;
 
-        // glue case
-        if ( openBefore && openAfter && blocksAreDifferent ) {
-          this.glue( interval, beforeBlock, afterBlock );
+        if ( this.firstEdgeCase ) {
+          this.firstEdgeCase = false;
+
+          if ( beforeBlock === afterBlock ) {
+            this.blockWasAdded = true;
+          }
         }
-        // unglue case
-        else if ( ( !openBefore || !openAfter ) && !blocksAreDifferent ) {
-          this.unglue( interval, beforeBlock, afterBlock );
+
+        sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose(
+          'edge case: ' +
+          ( openBefore ? 'open-before ' : '' ) +
+          ( openAfter ? 'open-after ' : '' ) +
+          beforeBlock.toString() + ' to ' + afterBlock.toString() );
+        sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
+
+        var newAfterBlock;
+
+        if ( openBefore && openAfter ) {
+          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'glue using ' + beforeBlock.toString() );
+          newAfterBlock = beforeBlock;
+        } else {
+          // if we can't use our afterBlock, since it was used before, or wouldn't create a split
+          if ( this.blockWasAdded || this.beforeBlock === this.afterBlock ) {
+            sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'split with fresh block' );
+            // for simplicity right now, we always create a fresh block (to avoid messing up reused blocks) after, and
+            // always change everything after (instead of before), so we don't have to jump across multiple previous
+            // change intervals
+            newAfterBlock = this.createBlock( interval.drawableAfter.renderer, interval.drawableAfter );
+            this.blockOrderChanged = true; // needs to be done on block creation
+          }
+          // otherwise we can use our after block
+          else {
+            sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'split with same afterBlock ' + afterBlock.toString() );
+            newAfterBlock = afterBlock;
+          }
         }
-        else {
-          this.glueless( interval, beforeBlock, afterBlock );
+
+        if ( afterBlock === newAfterBlock ) {
+          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'no externals change here (blockWasAdded => true)' );
+          this.blockWasAdded = true;
+        } else {
+          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'moving externals' );
+          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
+          this.changeExternals( interval, newAfterBlock );
+          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
         }
+
+        if ( nextAfterBlock !== afterBlock ) {
+          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'end of afterBlock stretch' );
+          if ( !this.blockWasAdded ) {
+            sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'unusing ' + afterBlock.toString() );
+            this.unuseBlock( afterBlock );
+          }
+          this.blockWasAdded = false;
+        }
+
+        sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
       }
     },
 
