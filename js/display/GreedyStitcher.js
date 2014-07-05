@@ -179,9 +179,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( 'phase 3: cleanup' );
       sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
 
-      //OHTWO VERIFY: remember to set blockOrderChanged on changes  (everything removed?)
-
-      this.removeUnusedBlocks( backbone );
+      this.removeUnusedBlocks();
 
       // since we use markBeforeBlock/markAfterBlock
       this.updateBlockIntervals();
@@ -511,7 +509,7 @@ define( function( require ) {
     },
 
     // removes them from our domElement, and marks them for disposal
-    removeUnusedBlocks: function( backbone ) {
+    removeUnusedBlocks: function() {
       sceneryLog && sceneryLog.GreedyStitcher && this.reusableBlocks.length && sceneryLog.GreedyStitcher( 'removeUnusedBlocks' );
       sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
       while ( this.reusableBlocks.length ) {
