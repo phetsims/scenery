@@ -27,12 +27,21 @@ define( function( require ) {
       // super initialization
       this.initializeSelfDrawable( renderer, instance );
 
+      // this is the same across lifecycles
+      this.transformListener = this.transformListener || this.markTransformDirty.bind( this );
+
+      instance.addRelativeTransformListener( this.transformListener ); // when our relative tranform changes, notify us in the pre-repaint phase
       instance.addRelativeTransformPrecompute(); // trigger precomputation of the relative transform, since we will always need it when it is updated
 
       return this;
     },
 
+    markTransformDirty: function() {
+      this.markDirty();
+    },
+
     dispose: function() {
+      this.instance.removeRelativeTransformListener( this.transformListener );
       this.instance.removeRelativeTransformPrecompute();
 
       SelfDrawable.prototype.dispose.call( this );
