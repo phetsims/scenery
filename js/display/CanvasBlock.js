@@ -203,6 +203,20 @@ define( function( require ) {
       FittedBlock.prototype.onIntervalChange.call( this, firstDrawable, lastDrawable );
     },
 
+    onPotentiallyMovedDrawable: function( drawable ) {
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( '#' + this.id + '.onPotentiallyMovedDrawable ' + drawable.toString() );
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.push();
+
+      assert && assert( drawable.parentDrawable === this );
+
+      // For now, mark it as dirty so that we redraw anything containing it. In the future, we could have more advanced
+      // behavior that figures out the intersection-region for what was moved and what it was moved past, but that's
+      // a harder problem.
+      drawable.markDirty();
+
+      sceneryLog && sceneryLog.CanvasBlock && sceneryLog.pop();
+    },
+
     toString: function() {
       return 'CanvasBlock#' + this.id + '-' + FittedBlock.fitString[this.fit];
     }

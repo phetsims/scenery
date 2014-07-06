@@ -20,6 +20,7 @@ define( function( require ) {
 
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
+  var Renderer = require( 'SCENERY/display/Renderer' );
 
   var globalId = 1;
 
@@ -172,6 +173,10 @@ define( function( require ) {
         }
         else {
           sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( 'unchanged' );
+
+          if ( this.pendingAddition && Renderer.isCanvas( this.renderer ) ) {
+            this.parentDrawable.onPotentiallyMovedDrawable( this );
+          }
         }
 
         this.pendingAddition = false;
