@@ -764,7 +764,7 @@ define( function( require ) {
           iSummary += ' <span style="color: #88f" title="' + node.transform.getMatrix().toString().replace( '\n', '&#10;' ) + '">' + transformType + '</span>';
         }
 
-        iSummary += ' <span style="color: #888">' + str( instance.trail ) + '</span>';
+        iSummary += ' <span style="color: #888">[Trail ' + instance.trail.indices.join( '.' ) + ']</span>';
         iSummary += ' <span style="color: #c88">' + str( instance.state ) + '</span>';
         iSummary += ' <span style="color: #8c8">' + node._rendererSummary.bitmask.toString( 16 ) + ( node._rendererBitmask !== scenery.bitmaskNodeDefault ? ' (' + node._rendererBitmask.toString( 16 ) + ')' : '' ) + '</span>';
 
@@ -813,6 +813,7 @@ define( function( require ) {
 
         div += drawableSummary( drawable );
         if ( drawable.instance ) {
+          div += ' <span style="color: #0a0;">(' + drawable.instance.trail.toPathString() + ')</span>';
           div += '&nbsp;&nbsp;&nbsp;' + instanceSummary( drawable.instance );
         }
         else if ( drawable.backboneInstance ) {
@@ -855,7 +856,7 @@ define( function( require ) {
       var htmlContent = '<!DOCTYPE html>' +
                         '<html lang="en">' +
                         '<head><title>Scenery Debug Snapshot</title></head>' +
-                        '<body>' + this.getDebugHTML() + '</body>' +
+                        '<body style="font-size: 12px;">' + this.getDebugHTML() + '</body>' +
                         '</html>';
       window.open( 'data:text/html;charset=utf-8,' + encodeURIComponent( htmlContent ) );
     },
