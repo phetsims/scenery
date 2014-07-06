@@ -205,6 +205,7 @@ define( function( require ) {
       this.trail = trail;
       this.node = node;
       this.parent = null; // will be set as needed
+      this.oldParent = null; // set when removed from us, so that we can easily reattach it when necessary
       // NOTE: reliance on correct order after syncTree by at least SVGBlock/SVGGroup
       this.children = cleanArray( this.children ); // Array[Instance].
       this.sharedCacheInstance = null; // reference to a shared cache instance (different than a child)
@@ -798,6 +799,7 @@ define( function( require ) {
 
       this.children.splice( index, 0, instance );
       instance.parent = this;
+      instance.oldParent = this;
 
       // maintain our stitch-change interval
       if ( index <= this.beforeStableIndex ) {
@@ -810,7 +812,7 @@ define( function( require ) {
         this.afterStableIndex++;
       }
 
-      if ( instance.isStateless ) {
+      if ( instance.isStateless() ) {
         assert && assert( !instance.hasAncestorListenerNeed(),
           'We only track changes properly if stateless instances do not have needs' );
         assert && assert( !instance.hasAncestorComputeNeed(),
@@ -857,6 +859,7 @@ define( function( require ) {
 
       this.children.splice( index, 1 ); // TODO: replace with a 'remove' function call
       instance.parent = null;
+      instance.oldParent = this;
 
       // maintain our stitch-change interval
       if ( index <= this.beforeStableIndex ) {
@@ -889,7 +892,7 @@ define( function( require ) {
     findChildInstanceOnNode: function( node ) {
       var instances = node.getInstances();
       for ( var i = 0; i < instances.length; i++ ) {
-        if ( instances[i].parent === this ) {
+        if ( instances[i].oldParent === this ) {
           return instances[i];
         }
       }
