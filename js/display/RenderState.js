@@ -78,8 +78,8 @@ define( function( require ) {
 
       //OHTWO TODO: force the same layer/block for these. temporarily we are creating a backbone, but we should be able
       //            to create a composite and have these handled inside layers
-      var isTransparent = node._opacity !== 1;
-      var isClipped = node._clipArea !== null;
+      var hasTransparency = node._opacity !== 1 || hints.usesOpacity;
+      var hasClip = node._clipArea !== null;
 
       if ( hints.renderer ) {
         this.preferredRenderers = scenery.Renderer.pushOrderBitmask( this.preferredRenderers, hints.renderer );
@@ -88,12 +88,12 @@ define( function( require ) {
       // check if we need a backbone or cache
       // if we are under a canvas cache, we will NEVER have a backbone
       // splits are accomplished just by having a backbone
-      if ( isDisplayRoot || ( !isUnderCanvasCache && ( isTransparent || isClipped || hints.requireElement || hints.cssTransform || hints.split ) ) ) {
+      if ( isDisplayRoot || ( !isUnderCanvasCache && ( hasTransparency || hasClip || hints.requireElement || hints.cssTransform || hints.split ) ) ) {
         this.isBackbone = true;
         this.isTransformed = isDisplayRoot || !!hints.cssTransform; // for now, only trigger CSS transform if we have the specific hint
         this.groupRenderer = scenery.Renderer.bitmaskDOM | ( hints.forceAcceleration ? scenery.Renderer.bitmaskForceAcceleration : 0 ); // probably won't be used
       }
-      else if ( isTransparent || isClipped || hints.canvasCache ) {
+      else if ( hasTransparency || hasClip || hints.canvasCache ) {
         // everything underneath needs to be renderable with Canvas, otherwise we cannot cache
         assert && assert( ( combinedBitmask & scenery.Renderer.bitmaskCanvas ) !== 0, 'hints.canvasCache provided, but not all node contents can be rendered with Canvas under ' + node.constructor.name );
 

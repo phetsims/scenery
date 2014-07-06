@@ -148,6 +148,7 @@ define( function( require ) {
     // where rendering-specific settings are stored
     this._hints = {
       renderer: 0,          // what type of renderer should be forced for this node.
+      usesOpacity: false,   // whether it is ancitipated that opacity will be switched on
       layerSplit: false,    // whether layers should be split before and after this node
       cssTransform: false,  // whether this node and its subtree should handle transforms by using a CSS transform of a div
       fullResolution: false // when rendered as Canvas, whether we should use full (device) resolution on retina-like devices
@@ -1468,6 +1469,10 @@ define( function( require ) {
 
     },
 
+    /*---------------------------------------------------------------------------*
+    * Hints
+    *----------------------------------------------------------------------------*/
+
     // provides a rendering hint to use this render whenever possible
     setRenderer: function( renderer ) {
       assert && assert( renderer === null || renderer === 'canvas' || renderer === 'svg' || renderer === 'dom' || renderer === 'webgl',
@@ -1537,12 +1542,30 @@ define( function( require ) {
 
       if ( split !== this._hints.layerSplit ) {
         this._hints.layerSplit = split;
+        this.trigger1( 'hint', 'layerSplit' );
       }
     },
 
     isLayerSplit: function() {
       return this._hints.layerSplit;
     },
+
+    setUsesOpacity: function( usesOpacity ) {
+      assert && assert( typeof usesOpacity === 'boolean' );
+
+      if ( usesOpacity !== this._hints.usesOpacity ) {
+        this._hints.usesOpacity = usesOpacity;
+        this.trigger1( 'hint', 'usesOpacity' );
+      }
+    },
+
+    getUsesOpacity: function() {
+      return this._hints.usesOpacity;
+    },
+
+    /*---------------------------------------------------------------------------*
+    * Trail operations
+    *----------------------------------------------------------------------------*/
 
     // returns a unique trail (if it exists) where each node in the ancestor chain has 0 or 1 parents
     getUniqueTrail: function() {
@@ -2058,6 +2081,9 @@ define( function( require ) {
     set rendererOptions( value ) { this.setRendererOptions( value ); },
     get rendererOptions() { return this.getRendererOptions(); },
 
+    set usesOpacity( value ) { this.setUsesOpacity( value ); },
+    get usesOpacity() { return this.getUsesOpacity(); },
+
     set cursor( value ) { this.setCursor( value ); },
     get cursor() { return this.getCursor(); },
 
@@ -2343,7 +2369,7 @@ define( function( require ) {
     'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
     'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom',
     'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
-    'layerSplit', 'mouseArea', 'touchArea', 'clipArea'
+    'layerSplit', 'usesOpacity', 'mouseArea', 'touchArea', 'clipArea'
   ];
 
   return Node;
