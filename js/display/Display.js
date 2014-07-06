@@ -817,6 +817,7 @@ define( function( require ) {
           div += '&nbsp;&nbsp;&nbsp;' + instanceSummary( drawable.instance );
         }
         else if ( drawable.backboneInstance ) {
+          div += ' <span style="color: #a00;">(' + drawable.backboneInstance.trail.toPathString() + ')</span>';
           div += '&nbsp;&nbsp;&nbsp;' + instanceSummary( drawable.backboneInstance );
         }
 
