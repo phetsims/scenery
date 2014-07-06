@@ -140,19 +140,22 @@
           };
 
           window.displayErr = function() {
-            setTimeout( function(){
-              scene.addChild( new scenery.Rectangle( 0, 0, 50, 50, { fill: 'red' } ) );
-              scene.addChild( new scenery.Rectangle( 10, 10, 50, 50, { fill: 'green' } ) );
-              scene.addChild( new scenery.Rectangle( 20, 20, 50, 50, { fill: 'blue' } ) );
-              scene.addChild( new scenery.Rectangle( 30, 30, 50, 50, { fill: 'magenta' } ) );
-              scene.addChild( new scenery.Rectangle( 40, 40, 50, 50, { fill: 'cyan' } ) );
+            setTimeout( function() {
+              window.n = new scenery.Node( { opacity: 0.5 } );
+              scene.addChild( n );
+              n.addChild( new scenery.Rectangle( 0, 0, 50, 50, { fill: 'red' } ) );
+              n.addChild( new scenery.Rectangle( 10, 10, 50, 50, { fill: 'green' } ) );
+              n.addChild( new scenery.Rectangle( 20, 20, 50, 50, { fill: 'blue' } ) );
+              n.addChild( new scenery.Rectangle( 30, 30, 50, 50, { fill: 'magenta' } ) );
+              n.addChild( new scenery.Rectangle( 40, 40, 50, 50, { fill: 'cyan' } ) );
               display.updateDisplay();
 
-              scene.children[1]._hints.requireElement = true;
+              n.renderer = 'canvas';
               display.updateDisplay();
 
-              scene.children[1]._hints.requireElement = false;
-              scene.children[3]._hints.requireElement = true;
+              var c = n.children[1];
+              n.removeChild( c );
+              n.insertChild( 2, c );
               display.updateDisplay();
             } );
           };
