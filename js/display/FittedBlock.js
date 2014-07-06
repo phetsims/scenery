@@ -32,6 +32,7 @@ define( function( require ) {
 
       //OHTWO TODO: change fit based on renderer flags or extra parameters
       this.fit = canBeFullDisplay ? FittedBlock.FULL_DISPLAY : FittedBlock.COMMON_ANCESTOR;
+      // this.fit = FittedBlock.COMMON_ANCESTOR;
 
       this.dirtyFit = true;
       this.dirtyFitListener = this.dirtyFitListener || this.markDirtyFit.bind( this );
