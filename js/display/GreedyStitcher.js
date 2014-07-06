@@ -346,7 +346,7 @@ define( function( require ) {
       if ( interval.drawableBefore !== null && interval.drawableAfter !== null ) {
         var beforeBlock = interval.drawableBefore.pendingParentDrawable;
         var afterBlock = interval.drawableAfter.pendingParentDrawable;
-        var nextAfterBlock = interval.nextChangeInterval ?
+        var nextAfterBlock = ( interval.nextChangeInterval && interval.nextChangeInterval.drawableAfter ) ?
                              interval.nextChangeInterval.drawableAfter.pendingParentDrawable :
                              null;
 
