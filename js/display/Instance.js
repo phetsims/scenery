@@ -898,24 +898,38 @@ define( function( require ) {
 
     // event callback for Node's 'childInserted' event, used to track children
     onChildInserted: function( childNode, index ) {
+      sceneryLog && sceneryLog.Instance && sceneryLog.Instance(
+        'inserting child node ' + childNode.constructor.name + '#' + childNode.id + ' into ' + this.toString() );
+      sceneryLog && sceneryLog.Instance && sceneryLog.push();
+
       assert && assert( !this.isStateless(), 'If we are stateless, we should not receive these notifications' );
 
       var instance = this.findChildInstanceOnNode( childNode );
 
       if ( instance ) {
+        sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'instance already exists' );
         // it must have been added back. increment its counter
         instance.addRemoveCounter += 1;
         assert && assert( instance.addRemoveCounter === 0 );
       }
       else {
+        sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'creating stub instance' );
+        sceneryLog && sceneryLog.Instance && sceneryLog.push();
         instance = Instance.createFromPool( this.display, this.trail.copy().addDescendant( childNode, index ) );
+        sceneryLog && sceneryLog.Instance && sceneryLog.pop();
       }
 
       this.insertInstance( instance, index );
+
+      sceneryLog && sceneryLog.Instance && sceneryLog.pop();
     },
 
     // event callback for Node's 'childRemoved' event, used to track children
     onChildRemoved: function( childNode, index ) {
+      sceneryLog && sceneryLog.Instance && sceneryLog.Instance(
+        'removing child node ' + childNode.constructor.name + '#' + childNode.id + ' from ' + this.toString() );
+      sceneryLog && sceneryLog.Instance && sceneryLog.push();
+
       assert && assert( !this.isStateless(), 'If we are stateless, we should not receive these notifications' );
       assert && assert( this.children[index].node === childNode, 'Ensure that our instance matches up' );
 
@@ -930,6 +944,8 @@ define( function( require ) {
       this.instanceRemovalCheckList.push( instance );
 
       this.removeInstanceWithIndex( instance, index );
+
+      sceneryLog && sceneryLog.Instance && sceneryLog.pop();
     },
 
     // event callback for Node's 'visibility' event, used to notify about stitch changes
