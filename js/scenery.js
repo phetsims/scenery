@@ -59,7 +59,7 @@ define( function( require ) {
       scenery.logFunction = scenery.stringLogFunction;
     },
 
-    enableLayerLogging: function() {
+    enableLogging: function() {
       window.sceneryLog = function( ob ) { scenery.logFunction( ob ); };
 
       var padding = '';
@@ -95,7 +95,7 @@ define( function( require ) {
       // window.sceneryLog.SVGGroup = function( ob ) { scenery.logFunction( '%c' + padding + '%c[SVGGroup] ' + ob, padStyle, 'color: #000;' ); };
     },
 
-    disableLayerLogging: function() {
+    disableLogging: function() {
       window.sceneryLog = null;
     },
 
