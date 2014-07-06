@@ -296,6 +296,10 @@ define( function( require ) {
                                                                 ( this.isStateless() ? ' (stateless)' : '' ) );
       sceneryLog && sceneryLog.Instance && sceneryLog.push();
 
+      if ( sceneryLog && scenery.isLoggingPerformance() ) {
+        this.display.perfSyncTreeCount++;
+      }
+
       assert && assert( state && state.isSharedCanvasCachePlaceholder !== undefined, 'RenderState duck-typing instanceof' );
 
       // may access isTransformed up to root to determine relative trails

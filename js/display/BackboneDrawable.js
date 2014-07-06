@@ -357,6 +357,18 @@ define( function( require ) {
         sceneryLog.pop();
       }
 
+      if ( sceneryLog && scenery.isLoggingPerformance() ) {
+        this.display.perfStitchCount++;
+
+        var dInterval = firstChangeInterval;
+
+        while ( dInterval ) {
+          this.display.perfIntervalCount++;
+
+          dInterval = dInterval.nextChangeInterval;
+        }
+      }
+
       this.stitcher.stitch( this, firstDrawable, lastDrawable, this.previousFirstDrawable, this.previousLastDrawable, firstChangeInterval, lastChangeInterval );
     },
 

@@ -137,6 +137,7 @@ define( function( require ) {
       this.pendingRemoval = true;
     },
 
+    // returns {Boolean} whether we changed our block
     updateBlock: function() {
       sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( '[' + this.constructor.name + '*] updateBlock ' + this.toString() +
                                                                 ' with add:' + this.pendingAddition +
@@ -145,11 +146,13 @@ define( function( require ) {
                                                                 ' new:' + ( this.pendingParentDrawable ? this.pendingParentDrawable.toString() : '-' ) );
       sceneryLog && sceneryLog.Drawable && sceneryLog.push();
 
+      var changed = false;
+
       if ( this.pendingRemoval || this.pendingAddition ) {
         // we are only unchanged if we have an addition AND removal, and the endpoints are identical
-        var changed = !this.pendingRemoval || !this.pendingAddition ||
-                      this.parentDrawable !== this.pendingParentDrawable ||
-                      this.backbone !== this.pendingBackbone;
+        changed = !this.pendingRemoval || !this.pendingAddition ||
+                  this.parentDrawable !== this.pendingParentDrawable ||
+                  this.backbone !== this.pendingBackbone;
 
         if ( changed ) {
           if ( this.pendingRemoval ) {
@@ -184,6 +187,8 @@ define( function( require ) {
       }
 
       sceneryLog && sceneryLog.Drawable && sceneryLog.pop();
+
+      return changed;
     },
 
     updateLinks: function() {

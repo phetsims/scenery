@@ -62,20 +62,24 @@ define( function( require ) {
     },
 
     logProperties: {
-      dirty: { name: 'dirty', style: 'color: #aaa' },
-      bounds: { name: 'bounds', style: 'color: #aaa' },
-      hitTest: { name: 'hitTest', style: 'color: #aaa' },
-      Cursor: { name: 'Cursor', style: 'color: #000' },
-      Stitch: { name: 'Stitch', style: 'color: #000' },
-      StitchDrawables: { name: 'Stitch', style: 'color: #000' },
-      GreedyStitcher: { name: 'Greedy', style: 'color: #088' },
-      GreedyVerbose: { name: 'Greedy', style: 'color: #888' },
+      dirty: { name: 'dirty', style: 'color: #aaa;' },
+      bounds: { name: 'bounds', style: 'color: #aaa;' },
+      hitTest: { name: 'hitTest', style: 'color: #aaa;' },
+      PerfCritical: { name: 'Perf', style: 'color: #f00;' },
+      PerfMajor: { name: 'Perf', style: 'color: #aa0;' },
+      PerfMinor: { name: 'Perf', style: 'color: #088;' },
+      PerfVerbose: { name: 'Perf', style: 'color: #888;' },
+      Cursor: { name: 'Cursor', style: 'color: #000;' },
+      Stitch: { name: 'Stitch', style: 'color: #000;' },
+      StitchDrawables: { name: 'Stitch', style: 'color: #000;' },
+      GreedyStitcher: { name: 'Greedy', style: 'color: #088;' },
+      GreedyVerbose: { name: 'Greedy', style: 'color: #888;' },
       transformSystem: { name: 'transform', style: 'color: #606;' },
       BackboneDrawable: { name: 'Backbone', style: 'color: #a00;' },
       CanvasBlock: { name: 'Canvas', style: 'color: #000;' },
       Display: { name: 'Display', style: 'color: #000;' },
       DOMBlock: { name: 'DOM', style: 'color: #000;' },
-      Drawable: { name: '', style: 'color: #000' },
+      Drawable: { name: '', style: 'color: #000;' },
       FittedBlock: { name: 'FittedBlock', style: 'color: #000;' },
       Input: { name: 'Input', style: 'color: #000;' },
       Instance: { name: 'Instance', style: 'color: #000;' },
@@ -83,10 +87,26 @@ define( function( require ) {
       SVGGroup: { name: 'SVGGroup', style: 'color: #000;' },
     },
     enableIndividualLog: function( name ) {
+      if ( name === 'stitch' ) {
+        this.enableIndividualLog( 'Stitch' );
+        this.enableIndividualLog( 'StitchDrawables' );
+        this.enableIndividualLog( 'GreedyStitcher' );
+        this.enableIndividualLog( 'GreedyVerbose' );
+        return;
+      }
+
+      if ( name === 'perf' ) {
+        this.enableIndividualLog( 'PerfCritical' );
+        this.enableIndividualLog( 'PerfMajor' );
+        this.enableIndividualLog( 'PerfMinor' );
+        this.enableIndividualLog( 'PerfVerbose' );
+        return;
+      }
+
       if ( name ) {
         assert && assert( scenery.logProperties[name], 'Unknown logger: ' + name );
 
-        window.sceneryLog[name] = function( ob, styleOverride ) {
+        window.sceneryLog[name] = window.sceneryLog[name] || function( ob, styleOverride ) {
           var data = scenery.logProperties[name];
 
           var prefix = data.name ? '[' + data.name + '] ' : '';
@@ -102,12 +122,7 @@ define( function( require ) {
     },
     enableLogging: function( logNames ) {
       if ( !logNames ) {
-        logNames = [
-          'Stitch',
-          'StitchDrawables',
-          'GreedyStitcher',
-          'GreedyVerbose'
-        ];
+        logNames = ['stitch'];
       }
 
       window.sceneryLog = function( ob ) { scenery.logFunction( ob ); };
@@ -126,6 +141,11 @@ define( function( require ) {
 
     disableLogging: function() {
       window.sceneryLog = null;
+    },
+
+    isLoggingPerformance: function() {
+      return window.sceneryLog.PerfCritical || window.sceneryLog.PerfMajor ||
+             window.sceneryLog.PerfMinor || window.sceneryLog.PerfVerbose;
     },
 
     enableEventLogging: function() {
