@@ -126,6 +126,9 @@ define( function( require ) {
 
     this._lastCursor = null;
 
+    this._currentBackgroundCSS = null;
+    this._backgroundColor = null;
+
     // used for shortcut animation frame functions
     this._requestAnimationFrameID = 0;
 
@@ -244,6 +247,7 @@ define( function( require ) {
       if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
 
       this.updateCursor();
+      this.updateBackgroundColor();
 
       this.updateSize();
 
@@ -348,6 +352,20 @@ define( function( require ) {
     },
     set height( value ) { this.setHeight( value ); },
 
+    // {String} (CSS), {Color} instance, or null (no background color).
+    // Will be applied to the root DOM element on updateDisplay(), and no sooner.
+    setBackgroundColor: function( color ) {
+      assert && assert( color === null || typeof color === 'string' || color instanceof scenery.Color );
+
+      this._backgroundColor = color;
+    },
+    set backgroundColor( value ) { this.setBackgroundColor( value ); },
+
+    getBackgroundColor: function() {
+      return this._backgroundColor;
+    },
+    get backgroundColor() { return this.getBackgroundColor(); },
+
     addOverlay: function( overlay ) {
       this._overlays.push( overlay );
       this._domElement.appendChild( overlay.domElement );
@@ -410,6 +428,23 @@ define( function( require ) {
       assert && assert( changeInterval instanceof ChangeInterval );
 
       this._changeIntervalsToDispose.push( changeInterval );
+    },
+
+    updateBackgroundColor: function() {
+      assert && assert( this._backgroundColor === null ||
+                        typeof this._backgroundColor === 'string' ||
+                        this._backgroundColor instanceof scenery.Color );
+
+      var newBackgroundCSS = this._backgroundColor === null ?
+                                  '' :
+                                  ( this._backgroundColor.toCSS ?
+                                    this._backgroundColor.toCSS() :
+                                    this._backgroundColor );
+      if ( newBackgroundCSS !== this._currentBackgroundCSS ) {
+        this._currentBackgroundCSS = newBackgroundCSS;
+
+        this._domElement.style.backgroundColor = newBackgroundCSS;
+      }
     },
 
     /*---------------------------------------------------------------------------*
