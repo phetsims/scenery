@@ -99,6 +99,30 @@ define( function( require ) {
 
     isEmpty: function() {
       return this.collapsedEmpty || ( this.drawableBefore !== null && this.drawableBefore === this.drawableAfter );
+    },
+
+    getOldInternalDrawableCount: function( oldStitchFirstDrawable, oldStitchLastDrawable ) {
+      var firstInclude = this.drawableBefore ? this.drawableBefore.oldNextDrawable : oldStitchFirstDrawable;
+      var lastExclude = this.drawableAfter; // null is OK here
+
+      var count = 0;
+      for ( var drawable = firstInclude; drawable !== lastExclude; drawable = drawable.oldNextDrawable ) {
+        count++;
+      }
+
+      return count;
+    },
+
+    getNewInternalDrawableCount: function( newStitchFirstDrawable, newStitchLastDrawable ) {
+      var firstInclude = this.drawableBefore ? this.drawableBefore.nextDrawable : newStitchFirstDrawable;
+      var lastExclude = this.drawableAfter; // null is OK here
+
+      var count = 0;
+      for ( var drawable = firstInclude; drawable !== lastExclude; drawable = drawable.nextDrawable ) {
+        count++;
+      }
+
+      return count;
     }
   } );
 

@@ -365,6 +365,9 @@ define( function( require ) {
         while ( dInterval ) {
           this.display.perfIntervalCount++;
 
+          this.display.perfDrawableOldIntervalCount += dInterval.getOldInternalDrawableCount( this.previousFirstDrawable, this.previousLastDrawable );
+          this.display.perfDrawableNewIntervalCount += dInterval.getNewInternalDrawableCount( firstDrawable, lastDrawable );
+
           dInterval = dInterval.nextChangeInterval;
         }
       }

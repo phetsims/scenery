@@ -170,6 +170,8 @@ define( function( require ) {
         this.perfStitchCount = 0;
         this.perfIntervalCount = 0;
         this.perfDrawableBlockChangeCount = 0;
+        this.perfDrawableOldIntervalCount = 0;
+        this.perfDrawableNewIntervalCount = 0;
       }
 
       sceneryLog && sceneryLog.Display && sceneryLog.Display( 'updateDisplay frame ' + this._frameId );
@@ -275,30 +277,34 @@ define( function( require ) {
       this._frameId++;
 
       if ( sceneryLog && scenery.isLoggingPerformance() ) {
+        var syncTreeMessage = 'syncTree count: ' + this.perfSyncTreeCount;
         if ( this.perfSyncTreeCount > 500 ) {
-          sceneryLog.PerfCritical && sceneryLog.PerfCritical( 'syncTree count: ' + this.perfSyncTreeCount );
+          sceneryLog.PerfCritical && sceneryLog.PerfCritical( syncTreeMessage );
         }
         else if ( this.perfSyncTreeCount > 100 ) {
-          sceneryLog.PerfMajor && sceneryLog.PerfMajor( 'syncTree count: ' + this.perfSyncTreeCount );
+          sceneryLog.PerfMajor && sceneryLog.PerfMajor( syncTreeMessage );
         }
         else if ( this.perfSyncTreeCount > 20 ) {
-          sceneryLog.PerfMinor && sceneryLog.PerfMinor( 'syncTree count: ' + this.perfSyncTreeCount );
+          sceneryLog.PerfMinor && sceneryLog.PerfMinor( syncTreeMessage );
         }
         else if ( this.perfSyncTreeCount > 0 ) {
-          sceneryLog.PerfVerbose && sceneryLog.PerfVerbose( 'syncTree count: ' + this.perfSyncTreeCount );
+          sceneryLog.PerfVerbose && sceneryLog.PerfVerbose( syncTreeMessage );
         }
 
+        var drawableBlockCountMessage = 'drawable block changes: ' + this.perfDrawableBlockChangeCount + ' for' +
+                                        ' -' + this.perfDrawableOldIntervalCount +
+                                        ' +' + this.perfDrawableNewIntervalCount;
         if ( this.perfDrawableBlockChangeCount > 200 ) {
-          sceneryLog.PerfCritical && sceneryLog.PerfCritical( 'drawable block changes: ' + this.perfDrawableBlockChangeCount );
+          sceneryLog.PerfCritical && sceneryLog.PerfCritical( drawableBlockCountMessage );
         }
         else if ( this.perfDrawableBlockChangeCount > 60 ) {
-          sceneryLog.PerfMajor && sceneryLog.PerfMajor( 'drawable block changes: ' + this.perfDrawableBlockChangeCount );
+          sceneryLog.PerfMajor && sceneryLog.PerfMajor( drawableBlockCountMessage );
         }
         else if ( this.perfDrawableBlockChangeCount > 10 ) {
-          sceneryLog.PerfMinor && sceneryLog.PerfMinor( 'drawable block changes: ' + this.perfDrawableBlockChangeCount );
+          sceneryLog.PerfMinor && sceneryLog.PerfMinor( drawableBlockCountMessage );
         }
         else if ( this.perfDrawableBlockChangeCount > 0 ) {
-          sceneryLog.PerfVerbose && sceneryLog.PerfVerbose( 'drawable block changes: ' + this.perfDrawableBlockChangeCount );
+          sceneryLog.PerfVerbose && sceneryLog.PerfVerbose( drawableBlockCountMessage );
         }
       }
 
