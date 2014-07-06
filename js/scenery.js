@@ -26,6 +26,8 @@ define( function( require ) {
   var scratchCanvas = document.createElement( 'canvas' );
   var scratchContext = scratchCanvas.getContext( '2d' );
 
+  var logPadding = '';
+
   // will be filled in by other modules
   var scenery = {
     assert: assert,
@@ -59,40 +61,67 @@ define( function( require ) {
       scenery.logFunction = scenery.stringLogFunction;
     },
 
-    enableLogging: function() {
+    logProperties: {
+      dirty: { name: 'dirty', style: 'color: #aaa' },
+      bounds: { name: 'bounds', style: 'color: #aaa' },
+      hitTest: { name: 'hitTest', style: 'color: #aaa' },
+      Cursor: { name: 'Cursor', style: 'color: #000' },
+      Stitch: { name: 'Stitch', style: 'color: #000' },
+      StitchDrawables: { name: 'Stitch', style: 'color: #000' },
+      GreedyStitcher: { name: 'Greedy', style: 'color: #088' },
+      GreedyVerbose: { name: 'Greedy', style: 'color: #888' },
+      transformSystem: { name: 'transform', style: 'color: #606;' },
+      BackboneDrawable: { name: 'Backbone', style: 'color: #a00;' },
+      CanvasBlock: { name: 'Canvas', style: 'color: #000;' },
+      Display: { name: 'Display', style: 'color: #000;' },
+      DOMBlock: { name: 'DOM', style: 'color: #000;' },
+      Drawable: { name: '', style: 'color: #000' },
+      FittedBlock: { name: 'FittedBlock', style: 'color: #000;' },
+      Input: { name: 'Input', style: 'color: #000;' },
+      Instance: { name: 'Instance', style: 'color: #000;' },
+      SVGBlock: { name: 'SVG', style: 'color: #000;' },
+      SVGGroup: { name: 'SVGGroup', style: 'color: #000;' },
+    },
+    enableIndividualLog: function( name ) {
+      if ( name ) {
+        assert && assert( scenery.logProperties[name], 'Unknown logger: ' + name );
+
+        window.sceneryLog[name] = function( ob, styleOverride ) {
+          var data = scenery.logProperties[name];
+
+          var prefix = data.name ? '[' + data.name + '] ' : '';
+          var padStyle = 'color: #ddd;';
+          scenery.logFunction( '%c' + logPadding + '%c' + prefix + ob, padStyle, styleOverride ? styleOverride : data.style );
+        };
+      }
+    },
+    disableIndividualLog: function( name ) {
+      if ( name ) {
+        delete window.sceneryLog[name];
+      }
+    },
+    enableLogging: function( logNames ) {
+      if ( !logNames ) {
+        logNames = [
+          'Stitch',
+          'StitchDrawables',
+          'GreedyStitcher',
+          'GreedyVerbose'
+        ];
+      }
+
       window.sceneryLog = function( ob ) { scenery.logFunction( ob ); };
 
-      var padding = '';
       window.sceneryLog.push = function() {
-        padding += '| ';
+        logPadding += '| ';
       };
       window.sceneryLog.pop = function() {
-        padding = padding.slice( 0, -2 );
+        logPadding = logPadding.slice( 0, -2 );
       };
 
-      var padStyle = 'color: #ddd;';
-
-      // feature-specific debugging flags (so we don't log the entire world)
-      // window.sceneryLog.dirty = function( ob ) { scenery.logFunction( '%c' + padding + '%c[dirty] ' + ob, padStyle, 'color: #aaa;' ); };
-      // window.sceneryLog.bounds = function( ob ) { scenery.logFunction( '%c' + padding + '%c[bounds] ' + ob, padStyle, 'color: #aaa;' ); };
-      // window.sceneryLog.hitTest = function( ob ) { scenery.logFunction( '%c' + padding + '%c[hitTest] ' + ob, padStyle, 'color: #aaa;' ); };
-      // window.sceneryLog.Cursor = function( ob ) { scenery.logFunction( '%c' + padding + '%c[Cursor] ' + ob, padStyle, 'color: #000;' ); };
-      window.sceneryLog.Stitch = function( ob ) { scenery.logFunction( '%c' + padding + '%c[Stitch] ' + ob, padStyle, 'color: #000;' ); };
-      window.sceneryLog.StitchDrawables = function( ob, style ) { scenery.logFunction( '%c' + padding + '%c[Stitch] ' + ob, padStyle, style ); };
-      window.sceneryLog.GreedyStitcher = function( ob ) { scenery.logFunction( '%c' + padding + '%c[Greedy] ' + ob, padStyle, 'color: #088;' ); };
-      window.sceneryLog.GreedyVerbose = function( ob ) { scenery.logFunction( '%c' + padding + '%c[Greedy] ' + ob, padStyle, 'color: #888;' ); };
-
-      // window.sceneryLog.transformSystem = function( ob ) { scenery.logFunction( '%c' + padding + '%c[transform] ' + ob, padStyle, 'color: #606;' ); };
-      // window.sceneryLog.BackboneDrawable = function( ob ) { scenery.logFunction( '%c' + padding + '%c[Backbone] ' + ob, padStyle, 'color: #a00;' ); };
-      // window.sceneryLog.CanvasBlock = function( ob ) { scenery.logFunction( '%c' + padding + '%c[Canvas] ' + ob, padStyle, 'color: #000;' ); };
-      // window.sceneryLog.Display = function( ob ) { scenery.logFunction( '%c' + padding + '%c[Display] ' + ob, padStyle, 'color: #000;' ); };
-      // window.sceneryLog.DOMBlock = function( ob ) { scenery.logFunction( '%c' + padding + '%c[DOM] ' + ob, padStyle, 'color: #000;' ); };
-      // window.sceneryLog.Drawable = function( ob ) { scenery.logFunction( '%c' + padding + '%c' + ob, padStyle, 'color: #000;' ); };
-      // window.sceneryLog.FittedBlock = function( ob ) { scenery.logFunction( '%c' + padding + '%c[FittedBlock] ' + ob, padStyle, 'color: #000;' ); };
-      // window.sceneryLog.Input = function( ob ) { scenery.logFunction( '%c' + padding + '%c[Input] ' + ob, padStyle, 'color: #000;' ); };
-      // window.sceneryLog.Instance = function( ob ) { scenery.logFunction( '%c' + padding + '%c[Instance] ' + ob, padStyle, 'color: #000;' ); };
-      // window.sceneryLog.SVGBlock = function( ob ) { scenery.logFunction( '%c' + padding + '%c[SVG] ' + ob, padStyle, 'color: #000;' ); };
-      // window.sceneryLog.SVGGroup = function( ob ) { scenery.logFunction( '%c' + padding + '%c[SVGGroup] ' + ob, padStyle, 'color: #000;' ); };
+      for ( var i = 0; i < logNames.length; i++ ) {
+        this.enableIndividualLog( logNames[i] );
+      }
     },
 
     disableLogging: function() {
