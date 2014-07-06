@@ -593,6 +593,20 @@ define( function( require ) {
     updateChildInstanceIfIncompatible: function( childInstance, childState, index ) {
       // see if we need to rebuild the instance tree due to an incompatible render state
       if ( !childInstance.isStateless() && !childState.isInstanceCompatibleWith( childInstance.state ) ) {
+        if ( sceneryLog && scenery.isLoggingPerformance() ) {
+          var affectedInstanceCount = childInstance.getDescendantCount() + 1; // +1 for itself
+
+          if ( affectedInstanceCount > 100 ) {
+            sceneryLog.PerfCritical && sceneryLog.PerfCritical( 'incompatible instance rebuild at ' + this.trail.toPathString() + ': ' + affectedInstanceCount );
+          }
+          else if ( affectedInstanceCount > 40 ) {
+            sceneryLog.PerfMajor && sceneryLog.PerfMajor( 'incompatible instance rebuild at ' + this.trail.toPathString() + ': ' + affectedInstanceCount );
+          }
+          else if ( affectedInstanceCount > 0 ) {
+            sceneryLog.PerfMinor && sceneryLog.PerfMinor( 'incompatible instance rebuild at ' + this.trail.toPathString() + ': ' + affectedInstanceCount );
+          }
+        }
+
         // mark it for disposal
         this.display.markInstanceRootForDisposal( childInstance );
 
@@ -963,6 +977,14 @@ define( function( require ) {
       this.stitchChangeFrame = this.display._frameId;
 
       //OHTWO TODO: mark as needing to not be pruned for syncTree
+    },
+
+    getDescendantCount: function() {
+      var count = this.children.length;
+      for ( var i = 0; i < this.children.length; i++ ) {
+        count += this.children[i].getDescendantCount();
+      }
+      return count;
     },
 
     /*---------------------------------------------------------------------------*
