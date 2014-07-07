@@ -1,7 +1,8 @@
 // Copyright 2002-2014, University of Colorado
 
 /**
- * A "backbone" block that controls a DOM element (usually a div) that contains other blocks with DOM/SVG/Canvas/WebGL content
+ * A DOM drawable (div element) that contains child blocks (and is placed in the main DOM tree when visible). It should
+ * use z-index for properly ordering its blocks in the correct stacking order.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

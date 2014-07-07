@@ -1,7 +1,9 @@
 // Copyright 2002-2014, University of Colorado
 
 /**
- * A drawable that contains a group of rendered drawables, usually handled directly by a backbone.
+ * A specialized drawable for a layer of drawables with the same renderer (basically, it's a Canvas element, SVG
+ * element, or some type of DOMcontainer). Doesn't strictly have to have its DOM element used directly (Canvas block
+ * used for caches).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

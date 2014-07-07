@@ -1,16 +1,48 @@
 // Copyright 2002-2014, University of Colorado
 
 /**
- * A unit that is drawable with a specific renderer.
- * NOTE: Drawables are assumed to be pooled with Poolable, as freeToPool() is called
+ * Something that can be displayed with a specific renderer.
+ * NOTE: Drawables are assumed to be pooled with Poolable, as freeToPool() is called.
+ *
+ * A drawable's life-cycle starts with its initialization (calling initializeDrawable once), and ends with its disposal
+ * (where it is freed to its own pool).
+ *
+ * Drawables are part of an unordered drawable "tree" where each drawable can have a parent references. This is used
+ * for, among other things, propagation of 'dirty' flags and usage during stitching.
+ *
+ * Blocks and backbones (sub-types of Drawable) contain children (creating a tree, although shared caches make it more
+ * like a DAG). Our Scenery Display is built from a root backbone, that contains blocks. This can be Canvas/SVG, but
+ * may also contain a DOM block with another backbone (used for opacity, CSS transforms, etc.).
+ *
+ * Drawables are part of two inherent linked lists: an "old" and a "new" one. Usually they are the same, but during
+ * updates, the "new" linked list is changed to accomodate any changes, and then a stitch process is done to mark which
+ * block (parent) we will belong to.
+ *
+ * As part of stitching or other processes, a Drawable is responsible for recording its pending state changes. Most
+ * notably, we need to determine whether a drawable is being added, moved, or removed in the next frame. This is done
+ * with an idempotent API using notePendingAddition/notePendingRemoval/notePendingMove. Either:
+ *   - One or more notePendingMove() calls are made. When we are updated with updateBlock(), we will move to the
+ *     last block referenced with notePendingMove() (which may be a no-op if it is the same block).
+ *   - Zero or one notePendingAddition() call is made, and zero or one notePendingRemoval() call is made. Our action is:
+ *     - No addition, no removal: nothing done
+ *     - No addition, one removal: We are removed from our last block (and then presumably disposed later)
+ *     - One addition, no removal: We are added to our new (pending) block, without being removed from anything
+ *     - One addition, one removal: We are removed from our last block and added to our new (pending) block.
+ * It is set up so that the order of addition/removal calls doesn't matter, since these can occur from within different
+ * backbone stitches (removed in one, added in another, or with the order reversed). Our updateBlocks() is guaranteed
+ * to be called after all of those have been completed.
  *
  * APIs for drawable types:
  *
  * DOM: {
  *   domElement: {HTMLElement}
  * }
- *
- * OHTWO TODO: add more API information, and update
+ * Canvas: {
+ *   paintCanvas: function( {CanvasContextWrapper} wrapper, {Node} node )
+ * }
+ * SVG: {
+ *   svgElement: {SVGElement}
+ * }
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

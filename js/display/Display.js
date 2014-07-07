@@ -2,6 +2,7 @@
 
 /**
  * A persistent display of a specific Node and its descendants, which is updated at discrete points in time.
+ * Unlike Scenery's old Scene type, a Display is not itself a Node.
  *
  * Use display.getDOMElement or display.domElement to retrieve the Display's DOM representation.
  * Use display.updateDisplay() to trigger the visual update in the Display's DOM element.
