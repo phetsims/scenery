@@ -7,6 +7,13 @@
  * isEmpty() should be used before checking the endpoints, since it could have a null-to-null state but be empty,
  * since we arrived at that state from constriction.
  *
+ * For documentation purposes, an 'internal' drawable is one that is in-between (but not including) our un-changed ends
+ * (drawableBefore and drawableAfter), and 'external' drawables are outside (or including) the un-changed ends.
+ *
+ * For stitching purposes, a ChangeInterval effectively represents two linked lists: the "old" one that was displayed
+ * in the previous frame (using oldNextDrawable for iteration across the drawable linked-list), or the "new" one that
+ * will be displayed in the next frame (using nextDrawable for iteration).
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -25,8 +32,12 @@ define( function( require ) {
 
   inherit( Object, ChangeInterval, {
     initialize: function( drawableBefore, drawableAfter ) {
-      assert && assert( drawableBefore === null || ( drawableBefore instanceof Drawable ) );
-      assert && assert( drawableAfter === null || ( drawableAfter instanceof Drawable ) );
+      assert && assert( drawableBefore === null || ( drawableBefore instanceof Drawable ),
+        'drawableBefore can either be null to indicate that there is no un-changed drawable before our changes, ' +
+        'or it can reference an un-changed drawable' );
+      assert && assert( drawableAfter === null || ( drawableAfter instanceof Drawable ),
+        'drawableAfter can either be null to indicate that there is no un-changed drawable after our changes, ' +
+        'or it can reference an un-changed drawable' );
 
       /*---------------------------------------------------------------------------*
       * All @public properties
@@ -35,20 +46,25 @@ define( function( require ) {
       // {ChangeInterval|null}, singly-linked list
       this.nextChangeInterval = null;
 
-      // {Drawable|null}, the drawable before our ChangeInterval that is not modified. null indicates that we don't yet have a "before" boundary,
-      // and should be connected to the closest drawable that is unchanged.
+      // {Drawable|null}, the drawable before our ChangeInterval that is not modified. null indicates that we don't yet
+      // have a "before" boundary, and should be connected to the closest drawable that is unchanged.
       this.drawableBefore = drawableBefore;
 
-      // {Drawable|null}, the drawable after our ChangeInterval that is not modified. null indicates that we don't yet have a "after" boundary,
-      // and should be connected to the closest drawable that is unchanged.
+      // {Drawable|null}, the drawable after our ChangeInterval that is not modified. null indicates that we don't yet
+      // have a "after" boundary, and should be connected to the closest drawable that is unchanged.
       this.drawableAfter = drawableAfter;
 
-      // If a null-to-X interval gets collapsed all the way, we want to signal that (null-to-null is now the state of it).
+      // {Boolean} If a null-to-X interval gets collapsed all the way, we want to have a flag that indicates that.
+      // Otherwise, it would be interpreted as a null-to-null change interval ("change everything"), instead of the
+      // correct "change nothing".
       this.collapsedEmpty = false;
+
+      // chaining for Poolable
       return this;
     },
 
     dispose: function() {
+      // release our references
       this.nextChangeInterval = null;
       this.drawableBefore = null;
       this.drawableAfter = null;
@@ -101,6 +117,8 @@ define( function( require ) {
       return this.collapsedEmpty || ( this.drawableBefore !== null && this.drawableBefore === this.drawableAfter );
     },
 
+    // {Number} The quantity of "old" internal drawables. Requires the old first/last drawables for the backbone, since
+    // we need that information for null-before/after boundaries.
     getOldInternalDrawableCount: function( oldStitchFirstDrawable, oldStitchLastDrawable ) {
       var firstInclude = this.drawableBefore ? this.drawableBefore.oldNextDrawable : oldStitchFirstDrawable;
       var lastExclude = this.drawableAfter; // null is OK here
@@ -113,6 +131,8 @@ define( function( require ) {
       return count;
     },
 
+    // {Number} The quantity of "new" internal drawables. Requires the old first/last drawables for the backbone, since
+    // we need that information for null-before/after boundaries.
     getNewInternalDrawableCount: function( newStitchFirstDrawable, newStitchLastDrawable ) {
       var firstInclude = this.drawableBefore ? this.drawableBefore.nextDrawable : newStitchFirstDrawable;
       var lastExclude = this.drawableAfter; // null is OK here

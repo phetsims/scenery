@@ -3,7 +3,10 @@
 /**
  * Abstract base type (and API) for stitching implementations.
  *
- * Assumes the same object instance will be reused.
+ * Assumes the same object instance will be reused multiple times, possibly for different backbones.
+ *
+ * Any stitcher implementations should always call initialize() first and clean() at the end, so that we can set up
+ * and then clean up any object references (allowing them to be garbage-collected or pooled more safely).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -26,6 +29,17 @@ define( function( require ) {
   var Stitcher = scenery.Stitcher;
 
   inherit( Object, Stitcher, {
+    // Main stitch entry point, called directly from the backbone or cache. We are modifying our backbone's blocks and
+    // their attached drawables.
+    // @param {Drawable | null} firstStitchDrawable: What our backbone's first drawable will be after this stitch
+    // @param {Drawable | null} lastStitchDrawable: What our backbone's last drawable will be after this stitch
+    // @param {Drawable | null} oldFirstStitchDrawable: What our backbone's first drawable was before this stitch
+    // @param {Drawable | null} oldLastStitchDrawable: What our backbone's last drawable was before this stitch
+    // @param {ChangeInterval} firstChangeInterval: The first change interval of our interval linked-list
+    // @param {ChangeInterval} lastChangeInterval: The last change interval of our interval linked-list
+    // The change-interval pair denotes a linked-list of change intervals that we will need to stitch across (they
+    // contain drawables that need to be removed and added, and it may affect how we lay out blocks in the stacking
+    // order).
     initialize: function( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
       assert && assert( firstChangeInterval && lastChangeInterval, 'We are guaranteed at least one change interval' );
       assert && assert( !firstDrawable || firstDrawable.previousDrawable === null,
@@ -77,6 +91,7 @@ define( function( require ) {
       }
     },
 
+    // Removes object references
     clean: function() {
       sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'clean' );
       sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( '-----------------------------------' );
@@ -94,6 +109,8 @@ define( function( require ) {
       sceneryLog && sceneryLog.Stitch && sceneryLog.pop();
     },
 
+    // Writes the first/last drawables for the entire backbone into its memory. We want to wait to do this until we have
+    // read from its previous values.
     recordBackboneBoundaries: function() {
       sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'recording backbone boundaries: ' +
                                                             ( this.firstDrawable ? this.firstDrawable.toString() : 'null' ) +
@@ -107,6 +124,7 @@ define( function( require ) {
       }
     },
 
+    // Records that this {Drawable} drawable should be added/moved to the {Block} at a later time
     notePendingAddition: function( drawable, block ) {
       assert && assert( drawable.renderer === block.renderer );
 
@@ -122,6 +140,9 @@ define( function( require ) {
       }
     },
 
+    // Records that this {Drawable} drawable should be moved to the {Block} at a later time (called only on external
+    // drawables). notePendingAddition and notePendingRemoval should not be called on a drawable that had
+    // notePendingMove called on it during the same stitch, and vice versa.
     notePendingMove: function( drawable, block ) {
       assert && assert( drawable.renderer === block.renderer );
 
@@ -137,6 +158,7 @@ define( function( require ) {
       }
     },
 
+    // Records that this {Drawable} drawable should be removed/moved from the {Block} at a later time
     notePendingRemoval: function( drawable ) {
       sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'pending remove: ' + drawable.toString() );
 
@@ -149,6 +171,8 @@ define( function( require ) {
       }
     },
 
+    // Records that this {Block} block should be disposed at a later time. It should not be in the blocks array at the
+    // end of the stitch.
     markBlockForDisposal: function( block ) {
       sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'block for disposal: ' + block.toString() );
 
@@ -176,6 +200,7 @@ define( function( require ) {
       }
     },
 
+    // Immediately notify a block of its first/last drawable.
     notifyInterval: function( block, firstDrawable, lastDrawable ) {
       sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'notify interval: ' + block.toString() + ' ' +
                                                             firstDrawable.toString() + ' to ' + lastDrawable.toString() );
@@ -195,19 +220,21 @@ define( function( require ) {
       }
     },
 
-    // notifyInterval alternatives, so changes can be collected before notifying:
+    // Note a block's tentative first drawable and block before (should be flushed later with updateBlockIntervals())
     markBeforeBlock: function( block, firstDrawable ) {
       sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'marking block first drawable ' + block.toString() + ' with ' + firstDrawable.toString() );
 
       block.pendingFirstDrawable = firstDrawable;
       this.touchedBlocks.push( block );
     },
+    // Note a block's tentative last drawable and block after (should be flushed later with updateBlockIntervals())
     markAfterBlock: function( block, lastDrawable ) {
       sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'marking block last drawable ' + block.toString() + ' with ' + lastDrawable.toString() );
 
       block.pendingLastDrawable = lastDrawable;
       this.touchedBlocks.push( block );
     },
+    // Flushes markBeforeBlock/markAfterBlock changes to notifyInterval on blocks themselves.
     updateBlockIntervals: function() {
       while ( this.touchedBlocks.length ) {
         var block = this.touchedBlocks.pop();
@@ -236,6 +263,8 @@ define( function( require ) {
       }
     },
 
+    // Creates a fresh block with the desired renderer and {Drawable} arbitrary drawable included, and adds it to
+    // our DOM.
     createBlock: function( renderer, drawable ) {
       var backbone = this.backbone;
       var block;
@@ -277,6 +306,7 @@ define( function( require ) {
       return block;
     },
 
+    // Immediately appends a block to our blocks array
     appendBlock: function( block ) {
       sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'appending block: ' + block.toString() );
 
@@ -287,6 +317,7 @@ define( function( require ) {
       }
     },
 
+    // Immediately removes a block to our blocks array
     removeBlock: function( block ) {
       sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'removing block: ' + block.toString() );
 
@@ -307,6 +338,8 @@ define( function( require ) {
       cleanArray( this.backbone.blocks );
     },
 
+    // Triggers all blocks in the blocks array to have their z-index properties set so that they visually stack
+    // correctly.
     reindex: function() {
       sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'reindexing blocks' );
 
@@ -317,6 +350,7 @@ define( function( require ) {
       }
     },
 
+    // An audit for testing assertions
     auditStitch: function() {
       if ( assertSlow ) {
         var stitcher = this;
@@ -443,6 +477,7 @@ define( function( require ) {
     }
   };
 
+  // logs a bunch of information about the old (useCurrent===false) or new (useCurrent===true) drawable linked list.
   Stitcher.debugDrawables = function( firstDrawable, lastDrawable, firstChangeInterval, lastChangeInterval, useCurrent ) {
     if ( sceneryLog && sceneryLog.StitchDrawables ) {
       if ( firstDrawable === null ) {

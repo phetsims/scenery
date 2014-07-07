@@ -317,7 +317,8 @@ define( function( require ) {
         sceneryLog.pop();
       }
 
-      // make the intervals as small as possible by skipping areas without changes, and collapse the interval linked list
+      // Make the intervals as small as possible by skipping areas without changes, and collapse the interval
+      // linked list
       var lastNonemptyInterval = null;
       var interval = firstChangeInterval;
       var intervalsChanged = false;
@@ -343,7 +344,8 @@ define( function( require ) {
       }
 
       if ( !lastNonemptyInterval ) {
-        // eek, no nonempty change intervals. do nothing
+        // eek, no nonempty change intervals. do nothing (good to catch here, but ideally there shouldn't be change
+        // intervals that all collapse).
         return;
       }
 

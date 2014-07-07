@@ -262,9 +262,11 @@ define( function( require ) {
     constructorDuplicateFactory: function( pool ) {
       return function( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot ) {
         if ( pool.length ) {
+          sceneryLog && sceneryLog.RenderState && sceneryLog.RenderState( 'new from pool' );
           return pool.pop().initialize( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot );
         }
         else {
+          sceneryLog && sceneryLog.RenderState && sceneryLog.RenderState( 'new from constructor' );
           return new RenderState.RegularState( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot );
         }
       };
