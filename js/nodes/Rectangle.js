@@ -16,6 +16,7 @@ define( function( require ) {
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
   var Bounds2 = require( 'DOT/Bounds2' );
+  var Dimension2 = require( 'DOT/Dimension2' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Features = require( 'SCENERY/util/Features' );
   var Fillable = require( 'SCENERY/nodes/Fillable' );
@@ -169,9 +170,60 @@ define( function( require ) {
       this.invalidateRectangle();
     },
 
+    // sets the Rectangle's x/y/width/height from the {Bounds2} bounds passed in.
     setRectBounds: function( bounds ) {
+      assert && assert( bounds instanceof Bounds2 );
+
       this.setRect( bounds.x, bounds.y, bounds.width, bounds.height );
     },
+    set rectBounds( value ) { this.setRectBounds( value ); },
+
+    // gets a {Bounds2} from the Rectangle's x/y/width/height
+    getRectBounds: function() {
+      return Bounds2.rect( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
+    },
+    get rectBounds() { return this.getRectBounds(); },
+
+    // sets the Rectangle's width/height from the {Dimension2} size passed in.
+    setRectSize: function( size ) {
+      assert && assert( size instanceof Dimension2 );
+
+      this.setRectWidth( size.width );
+      this.setRectHeight( size.height );
+    },
+    set rectSize( value ) { this.setRectSize( value ); },
+
+    // gets a {Dimension2} from the Rectangle's width/height
+    getRectSize: function() {
+      return new Dimension2( this._rectWidth, this._rectHeight );
+    },
+    get rectSize() { return this.getRectSize(); },
+
+    // sets the width of the rectangle while keeping its right edge (x + width) in the same position
+    setRectWidthFromRight: function( width ) {
+      assert && assert( typeof width === 'number' );
+
+      if ( this._rectWidth !== width ) {
+        var right = this._rectX + this._rectWidth;
+        this.setRectWidth( width );
+        this.setRectX( right - width );
+      }
+    },
+    set rectWidthFromRight( value ) { this.setRectWidthFromRight( value ); },
+    get rectWidthFromRight() { return this.getRectWidth(); }, // because JSHint complains
+
+    // sets the height of the rectangle while keeping its bottom edge (y + height) in the same position
+    setRectHeightFromBottom: function( height ) {
+      assert && assert( typeof height === 'number' );
+
+      if ( this._rectHeight !== height ) {
+        var bottom = this._rectY + this._rectHeight;
+        this.setRectHeight( height );
+        this.setRectY( bottom - height );
+      }
+    },
+    set rectHeightFromBottom( value ) { this.setRectHeightFromBottom( value ); },
+    get rectHeightFromBottom() { return this.getRectHeight(); }, // because JSHint complains
 
     isRounded: function() {
       return this._rectArcWidth !== 0 && this._rectArcHeight !== 0;
