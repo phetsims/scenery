@@ -402,6 +402,15 @@ define( function( require ) {
     return div;
   };
 
+  BackboneDrawable.repurposeBackboneContainer = function( element ) {
+    if ( element.style.position !== 'relative' || element.style.position !== 'absolute' ) {
+      element.style.position = 'relative';
+    }
+    element.style.left = '0';
+    element.style.top = '0';
+    return element;
+  };
+
   /* jshint -W064 */
   Poolable( BackboneDrawable, {
     constructorDuplicateFactory: function( pool ) {

@@ -78,8 +78,12 @@ define( function( require ) {
     Events.call( this );
 
     this.options = _.extend( {
-      width: 640,                // initial display width
-      height: 480,               // initial display height
+      // initial display width
+      width: ( options.container && options.container.clientWidth ) || 640,
+
+      // initial display height
+      height: ( options.container && options.container.clientHeight ) || 480,
+
       //OHTWO TODO: hook up allowCSSHacks
       allowCSSHacks: true,       // applies CSS styles to the root DOM element that make it amenable to interactive content
       allowSceneOverflow: false, // usually anything displayed outside of our dom element is hidden with CSS overflow
@@ -94,7 +98,9 @@ define( function( require ) {
 
     this._rootNode = rootNode;
     this._rootBackbone = null; // to be filled in later
-    this._domElement = scenery.BackboneDrawable.createDivBackbone();
+    this._domElement = options.container ?
+                       scenery.BackboneDrawable.repurposeBackboneContainer( options.container ) :
+                       scenery.BackboneDrawable.createDivBackbone();
     this._sharedCanvasInstances = {}; // map from Node ID to Instance, for fast lookup
     this._baseInstance = null; // will be filled with the root Instance
 
@@ -664,10 +670,25 @@ define( function( require ) {
       resizer();
     },
 
-    updateOnRequestAnimationFrame: function() {
+    // Updates on every request animation frame. If stepCallback is passed in, it is called before updateDisplay() with
+    // stepCallback( timeElapsedInSeconds )
+    updateOnRequestAnimationFrame: function( stepCallback ) {
+      // keep track of how much time elapsed over the last frame
+      var lastTime = 0;
+      var timeElapsedInSeconds = 0;
+
       var display = this;
       (function step() {
         display._requestAnimationFrameID = window.requestAnimationFrame( step, display._domElement );
+
+        // calculate how much time has elapsed since we rendered the last frame
+        var timeNow = new Date().getTime();
+        if ( lastTime !== 0 ) {
+          timeElapsedInSeconds = ( timeNow - lastTime ) / 1000.0;
+        }
+        lastTime = timeNow;
+
+        stepCallback && stepCallback( timeElapsedInSeconds );
         display.updateDisplay();
       })();
     },

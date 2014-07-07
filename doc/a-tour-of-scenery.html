@@ -79,8 +79,13 @@
 
       <script type="text/javascript">
         $( window ).ready( function() {
-          // Create a scene graph over the block-level element. Everything inside is replaced
-          var scene = new scenery.Scene( $( '#hello-world-scene' ) );
+          // Create a Node as the root of our tree (it can contain children)
+          var scene = new scenery.Node();
+
+          // Create a display using this root node, using our existing div
+          var display = new scenery.Display( scene, {
+            container: document.getElementById( 'hello-world-scene' )
+          } );
 
           // Add our text
           scene.addChild( new scenery.Text( 'Hello World', {
@@ -90,7 +95,7 @@
           } ) );
 
           // Paint any changes (in this case, our text).
-          scene.updateScene();
+          display.updateDisplay();
         } );
       </script>
 
@@ -108,8 +113,13 @@
       </p>
 
       <pre class="brush: js">
-// Create a scene graph over the block-level element. Everything inside is replaced
-var scene = new scenery.Scene( $( '#hello-world-scene' ) );
+// Create a Node as the root of our tree (it can contain children)
+var scene = new scenery.Node();
+
+// Create a display using this root node, using our existing div
+var display = new scenery.Display( scene, {
+  container: document.getElementById( 'hello-world-scene' )
+} );
 
 // Add our text
 scene.addChild( new scenery.Text( 'Hello World', {
@@ -119,7 +129,7 @@ scene.addChild( new scenery.Text( 'Hello World', {
 } ) );
 
 // Paint any changes (in this case, our text).
-scene.updateScene();
+display.updateDisplay();
       </pre>
 
       <p>
@@ -137,7 +147,10 @@ scene.updateScene();
 
       <script type="text/javascript">
         $( window ).ready( function() {
-          var scene = new scenery.Scene( $( '#shapes-scene' ) );
+          var scene = new scenery.Node();
+          var display = new scenery.Display( scene, {
+            container: document.getElementById( 'shapes-scene' )
+          } );
 
           // A rectangle at (10,10) with a width of 50 and height of 80
           scene.addChild( new scenery.Path( kite.Shape.rectangle( 10, 10, 50, 80 ),{
@@ -169,18 +182,18 @@ scene.updateScene();
             y: 50
           } ) );
 
-          scene.updateScene();
+          display.updateDisplay();
         } );
       </script>
 
       <pre class="brush: js">
 // A rectangle at (10,10) with a width of 50 and height of 80
-scene.addChild( new scenery.Path( kite.Shape.rectangle( 10, 10, 50, 80 ), {
+scene.addChild( new scenery.Path( kite.Shape.rectangle( 10, 10, 50, 80 ),{
   fill: '#ff0000'
 } ) );
 
 // An octogon, with a radius of 30
-scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 8, 30 ), {
+scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 8, 30 ),{
   fill: '#00ff00',
   stroke: '#000000',
   x: 100, // the shape is centered at the origin, so offset it by this x and y
@@ -196,7 +209,7 @@ customShape.lineTo( 40, 0 );
 customShape.close();
 // NOTE: this can also be chained, like shape.moveTo( ... ).lineTo( ... ).close()
 
-scene.addChild( new scenery.Path( customShape, {
+scene.addChild( new scenery.Path( customShape,{
   fill: '#0000ff',
   stroke: '#000000',
   lineWidth: 3,
@@ -262,7 +275,10 @@ node2.rotation === node3.getRotation();
 
       <script type="text/javascript">
         $( window ).ready( function() {
-          var scene = new scenery.Scene( $( '#self-and-children' ) );
+          var scene = new scenery.Node();
+          var display = new scenery.Display( scene, {
+            container: document.getElementById( 'self-and-children' )
+          } );
 
           // create a node that will have child nodes.
           var container = new scenery.Path( kite.Shape.rectangle( 0, 0, 300, 100 ), {
@@ -306,7 +322,7 @@ node2.rotation === node3.getRotation();
           } );
           container.addChild( child2 );
 
-          scene.updateScene();
+          display.updateDisplay();
         } );
       </script>
 
@@ -364,7 +380,10 @@ container.addChild( child2 );
 
       <script type="text/javascript">
         $( window ).ready( function() {
-          var scene = new scenery.Scene( $( '#image-scene' ) );
+          var scene = new scenery.Node();
+          var display = new scenery.Display( scene, {
+            container: document.getElementById( 'image-scene' )
+          } );
 
           // TODO: support different ways of handling the asynchronous load
           var thumbnailImage = document.createElement( 'img' );
@@ -376,7 +395,7 @@ container.addChild( child2 );
               scale: 1.5,
               rotation: Math.PI / 4
             } ) );
-            scene.updateScene();
+            display.updateDisplay();
           };
           thumbnailImage.src = 'http://phet.colorado.edu/sims/energy-skate-park/energy-skate-park-basics-thumbnail.png';
         } );
@@ -393,7 +412,7 @@ thumbnailImage.onload = function( e ) {
     scale: 1.5,
     rotation: Math.PI / 4
   } ) );
-  scene.updateScene();
+  display.updateDisplay();
 };
 thumbnailImage.src = 'http://phet.colorado.edu/sims/energy-skate-park/energy-skate-park-basics-thumbnail.png';
       </pre>
@@ -409,7 +428,10 @@ thumbnailImage.src = 'http://phet.colorado.edu/sims/energy-skate-park/energy-ska
 
       <script type="text/javascript">
         $( window ).ready( function() {
-          var scene = new scenery.Scene( $( '#dom-simple' ) );
+          var scene = new scenery.Node();
+          var display = new scenery.Display( scene, {
+            container: document.getElementById( 'dom-simple' )
+          } );
 
           var element = document.createElement( 'span' );
           element.innerHTML = '<label style="display: inline;">Type in me:</label><input type="text">';
@@ -419,7 +441,7 @@ thumbnailImage.src = 'http://phet.colorado.edu/sims/energy-skate-park/energy-ska
             rotation: Math.PI / 4
           } ) );
 
-          scene.updateScene();
+          display.updateDisplay();
         } );
       </script>
 
@@ -442,16 +464,18 @@ scene.addChild( new scenery.DOM( element, {
       <h3>Animation</h3>
 
       <p>
-        It is recommended to use scene.updateScene() inside of requestAnimationFrame(), since updateScene() attempts to only
-        re-paint content that is inside of changed areas. This type of pattern may be refactored out soon.
+        It is recommended to use display.updateDisplay() inside of requestAnimationFrame(), since updateScene() attempts to only
+        re-paint content that is inside of changed areas. For simple usage, you can use updateOnRequestAnimationFrame() on the display.
       </p>
 
       <div id="animation-simple" style="width: 200px; height: 200px;" class="exampleScene"></div>
 
       <script type="text/javascript">
         $( window ).ready( function() {
-          var div = $( '#animation-simple' );
-          var scene = new scenery.Scene( div );
+          var scene = new scenery.Node();
+          var display = new scenery.Display( scene, {
+            container: document.getElementById( 'animation-simple' )
+          } );
 
           // a hexagon to rotate
           var node = new scenery.Path( kite.Shape.regularPolygon( 6, 90 ), {
@@ -465,31 +489,18 @@ scene.addChild( new scenery.DOM( element, {
           } ) );
           scene.addChild( node );
 
-          // keep track of how much time elapsed over the last frame
-          var lastTime = 0;
-          var timeElapsed = 0;
-          function tick() {
-            window.requestAnimationFrame( tick, div[0] );
-
-            // calculate how much time has elapsed since we rendered the last frame
-            var timeNow = new Date().getTime();
-            if ( lastTime != 0 ) {
-              timeElapsed = (timeNow - lastTime) / 1000.0;
-            }
-            lastTime = timeNow;
-
-            // rotate the node proportionally to how much time has elapsed, so it rotates at a constant real-time rate
+          // given time elapsed in seconds
+          display.updateOnRequestAnimationFrame( function( timeElapsed ) {
             node.rotate( timeElapsed );
-
-            scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
-          }
-          window.requestAnimationFrame( tick, div[0] );
+          } );
         } );
       </script>
 
       <pre class="brush: js">
-var div = $( '#animation-simple' );
-var scene = new scenery.Scene( div );
+var scene = new scenery.Node();
+var display = new scenery.Display( scene, {
+  container: document.getElementById( 'animation-simple' )
+} );
 
 // a hexagon to rotate
 var node = new scenery.Path( kite.Shape.regularPolygon( 6, 90 ), {
@@ -503,22 +514,10 @@ node.addChild( new scenery.Path( kite.Shape.rectangle( 0, -3, 60, 6 ), {
 } ) );
 scene.addChild( node );
 
-// keep track of how much time elapsed over the last frame
-var lastTime = 0;
-var timeElapsed = 0;
-function tick() {
-  window.requestAnimationFrame( tick, div[0] );
-
-  var timeNow = new Date().getTime();
-  if ( lastTime != 0 ) {
-    timeElapsed = (timeNow - lastTime) / 1000.0;
-  }
-  lastTime = timeNow;
-
+// given time elapsed in seconds
+display.updateOnRequestAnimationFrame( function( timeElapsed ) {
   node.rotate( timeElapsed );
-  scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
-}
-window.requestAnimationFrame( tick, div[0] );
+} );
       </pre>
 
       <h3>Input Events</h3>
@@ -566,35 +565,29 @@ window.requestAnimationFrame( tick, div[0] );
 
       <h4>Colored by quantity of pointers inside shape</h4>
 
-      <p>
-        Pending decision of whether enter/exit occurs for touchstart or touchend. Seems currently to not handle drags from outside of the bounds! (TODO: investigate).
-        Also not including mouseout or mouseover yet (TODO: decide on how this should work)
-        <strong>Try to get 10 pointers in the hexagon on the iPad!</strong>
-      </p>
-
-      <p id="hex-pointer-count" style="text-align: center; font-size: 20px;">Pointers in hexagon: 0</p>
       <div id="input-mouseover" style="width: 400px; height: 400px;" class="exampleScene"></div>
 
       <script type="text/javascript">
         $( window ).ready( function() {
-          var $main = $( '#input-mouseover' );
-          var scene = new scenery.Scene( $main );
+          var scene = new scenery.Node();
+          var display = new scenery.Display( scene, {
+            container: document.getElementById( 'input-mouseover' )
+          } );
 
           // hook up event listeners just on this scene (not the whole document)
-          scene.initializeStandaloneEvents();
+          display.initializeStandaloneEvents();
 
           var count = 0;
           var colors = [ '000000', 'ff0000', '00ff00', '0000ff', 'ffff00', '00ffff', 'ff00ff', 'ffffff' ];
           var maxColor = colors.length - 1;
 
-          // TODO: get faster text bounds detection. it's too slow right now on the iPad
           var labelPrefix = 'Pointers in hexagon: ';
-          // var label = new scenery.Text( labelPrefix + count, {
-          //   left: 20,
-          //   top: 20,
-          //   font: '20px sans-serif'
-          // } );
-          // scene.addChild( label );
+          var label = new scenery.Text( labelPrefix + count, {
+            left: 20,
+            top: 20,
+            font: '20px sans-serif'
+          } );
+          scene.addChild( label );
 
           // a big hexagon in the center. stroke not included in the hit region by default
           var node = new scenery.Path( kite.Shape.regularPolygon( 6, 150 ), {
@@ -608,8 +601,7 @@ window.requestAnimationFrame( tick, div[0] );
           // update our label and color
           function updatePointers() {
             node.fill = colors[ Math.min( count, maxColor ) ];
-            // label.setText( labelPrefix + count );
-            $( '#hex-pointer-count' ).text( labelPrefix + count );
+            label.setText( labelPrefix + count );
           }
 
           // listener fired whenever the event occurs over the node
@@ -656,103 +648,93 @@ window.requestAnimationFrame( tick, div[0] );
             }
           } );
 
-          // repaint loop.
-          function tick() {
-            window.requestAnimationFrame( tick, $main[0] );
-            scene.updateScene();
-          }
-          window.requestAnimationFrame( tick, $main[0] );
+          // repaint loop without doing anything extra per-frame
+          display.updateOnRequestAnimationFrame();
         } );
       </script>
 
       <pre class="brush: js">
-$( window ).ready( function() {
-  var $main = $( '#input-mouseover' );
-  var scene = new scenery.Scene( $main );
+var scene = new scenery.Node();
+var display = new scenery.Display( scene, {
+  container: document.getElementById( 'input-mouseover' )
+} );
 
-  // hook up event listeners just on this scene (not the whole document)
-  scene.initializeStandaloneEvents();
+// hook up event listeners just on this scene (not the whole document)
+display.initializeStandaloneEvents();
 
-  var count = 0;
-  var colors = [ '000000', 'ff0000', '00ff00', '0000ff', 'ffff00', '00ffff', 'ff00ff', 'ffffff' ];
-  var maxColor = colors.length - 1;
+var count = 0;
+var colors = [ '000000', 'ff0000', '00ff00', '0000ff', 'ffff00', '00ffff', 'ff00ff', 'ffffff' ];
+var maxColor = colors.length - 1;
 
-  // TODO: get faster text bounds detection. it's too slow right now on the iPad
-  var labelPrefix = 'Pointers in hexagon: ';
-  // var label = new scenery.Text( labelPrefix + count, {
-  //   left: 20,
-  //   top: 20,
-  //   font: '20px sans-serif'
-  // } );
-  // scene.addChild( label );
+var labelPrefix = 'Pointers in hexagon: ';
+var label = new scenery.Text( labelPrefix + count, {
+  left: 20,
+  top: 20,
+  font: '20px sans-serif'
+} );
+scene.addChild( label );
 
-  // a big hexagon in the center. stroke not included in the hit region by default
-  var node = new scenery.Path( kite.Shape.regularPolygon( 6, 150 ), {
-    fill: colors[count],
-    stroke: '#000000',
-    centerX: 200,
-    centerY: 200
-  } );
-  scene.addChild( node );
+// a big hexagon in the center. stroke not included in the hit region by default
+var node = new scenery.Path( kite.Shape.regularPolygon( 6, 150 ), {
+  fill: colors[count],
+  stroke: '#000000',
+  centerX: 200,
+  centerY: 200
+} );
+scene.addChild( node );
 
-  // update our label and color
-  function updatePointers() {
-    node.fill = colors[ Math.min( count, maxColor ) ];
-    // label.setText( labelPrefix + count );
-    $( '#hex-pointer-count' ).text( labelPrefix + count );
-  }
+// update our label and color
+function updatePointers() {
+  node.fill = colors[ Math.min( count, maxColor ) ];
+  label.setText( labelPrefix + count );
+}
 
-  // listener fired whenever the event occurs over the node
-  // below are the main 6 input events that are fired
-  node.addInputListener( {
-    // mousedown or touchstart (pointer pressed down over the node)
-    down: function( event ) {
-      if ( !event.pointer.isMouse ) {
-        count++;
-        updatePointers();
-      }
-    },
-
-    // mouseup or touchend (pointer lifted from over the node)
-    up: function( event ) {
-      if ( !event.pointer.isMouse ) {
-        count--;
-        updatePointers();
-      }
-    },
-
-    // triggered from mousemove or touchmove (pointer moved over the node from outside)
-    enter: function( event ) {
+// listener fired whenever the event occurs over the node
+// below are the main 6 input events that are fired
+node.addInputListener( {
+  // mousedown or touchstart (pointer pressed down over the node)
+  down: function( event ) {
+    if ( !event.pointer.isMouse ) {
       count++;
       updatePointers();
-    },
-
-    // triggered from mousemove or touchmove (pointer moved outside the node from inside)
-    exit: function( event ) {
-      count--;
-      updatePointers();
-    },
-
-    // platform-specific trigger.
-    // on iPad Safari, cancel can by triggered by putting 4 pointers down and then dragging with all 4
-    cancel: function( event ) {
-      count--;
-      updatePointers();
-    },
-
-    // mousemove (fired AFTER enter/exit events if applicable)
-    move: function( event ) {
-      // do nothing
     }
-  } );
+  },
 
-  // repaint loop.
-  function tick() {
-    window.requestAnimationFrame( tick, $main[0] );
-    scene.updateScene();
+  // mouseup or touchend (pointer lifted from over the node)
+  up: function( event ) {
+    if ( !event.pointer.isMouse ) {
+      count--;
+      updatePointers();
+    }
+  },
+
+  // triggered from mousemove or touchmove (pointer moved over the node from outside)
+  enter: function( event ) {
+    count++;
+    updatePointers();
+  },
+
+  // triggered from mousemove or touchmove (pointer moved outside the node from inside)
+  exit: function( event ) {
+    count--;
+    updatePointers();
+  },
+
+  // platform-specific trigger.
+  // on iPad Safari, cancel can by triggered by putting 4 pointers down and then dragging with all 4
+  cancel: function( event ) {
+    count--;
+    updatePointers();
+  },
+
+  // mousemove (fired AFTER enter/exit events if applicable)
+  move: function( event ) {
+    // do nothing
   }
-  window.requestAnimationFrame( tick, $main[0] );
 } );
+
+// repaint loop without doing anything extra per-frame
+display.updateOnRequestAnimationFrame();
       </pre>
 
       <h4>Node Dragging with Swipe-across-to-start-drag</h4>
