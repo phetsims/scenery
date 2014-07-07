@@ -27,7 +27,10 @@
   <div id="example-scene"></div>
   <script type="text/javascript">
     // Create a scene graph over the block-level element. Everything inside is replaced
-    var scene = new scenery.Scene( $( '#example-scene' ) );
+    var scene = new scenery.Node();
+    var display = new scenery.Display( scene, {
+      container: document.getElementById( 'example-scene' )
+    } );
 
     /*---------------------------------------------------------------------------*
     * Built-in shapes
@@ -49,7 +52,7 @@
     } ) );
 
     // Paint any changes
-    scene.updateScene();
+    display.updateDisplay();
   </script>
 </body>
 </html>

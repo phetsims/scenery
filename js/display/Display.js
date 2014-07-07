@@ -79,10 +79,10 @@ define( function( require ) {
 
     this.options = _.extend( {
       // initial display width
-      width: ( options.container && options.container.clientWidth ) || 640,
+      width: ( options && options.container && options.container.clientWidth ) || 640,
 
       // initial display height
-      height: ( options.container && options.container.clientHeight ) || 480,
+      height: ( options && options.container && options.container.clientHeight ) || 480,
 
       //OHTWO TODO: hook up allowCSSHacks
       allowCSSHacks: true,       // applies CSS styles to the root DOM element that make it amenable to interactive content
@@ -98,7 +98,7 @@ define( function( require ) {
 
     this._rootNode = rootNode;
     this._rootBackbone = null; // to be filled in later
-    this._domElement = options.container ?
+    this._domElement = ( options && options.container ) ?
                        scenery.BackboneDrawable.repurposeBackboneContainer( options.container ) :
                        scenery.BackboneDrawable.createDivBackbone();
     this._sharedCanvasInstances = {}; // map from Node ID to Instance, for fast lookup
@@ -348,6 +348,11 @@ define( function( require ) {
       return this._size;
     },
     get size() { return this.getSize(); },
+
+    getBounds: function() {
+      return this._size.toBounds();
+    },
+    get bounds() { return this.getBounds(); },
 
     // size: dot.Dimension2. Changes the size that the Display's DOM element will be after the next updateDisplay()
     setSize: function( size ) {

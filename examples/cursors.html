@@ -17,9 +17,6 @@
   <!-- Bootstrap not necessarily needed -->
   <script src="../../sherpa/bootstrap-2.2.2.js"></script>
 
-  <!-- For the pop-up FPS meter -->
-  <script src="../../sherpa/stats.min.js"></script>
-
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script src="../build/development/scenery.js"></script>
   <!-- <script src="../build/standalone/scenery.min.js"></script> -->
@@ -54,12 +51,13 @@
 
   <script>
 
-  var $main = $( '#main' );
-
   // initialize our scene
-  var scene = new scenery.Scene( $main );
-  scene.initializeFullscreenEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
-  scene.resizeOnWindowResize(); // the scene gets resized to the full screen size
+  var scene = new scenery.Node();
+  var display = new scenery.Display( scene, {
+    container: document.getElementById( 'main' )
+  } );
+  display.initializeFullscreenEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
+  display.resizeOnWindowResize(); // the scene gets resized to the full screen size
 
   // our list of cursors to text
   var cursors = [
@@ -130,30 +128,10 @@
   }
 
   /*---------------------------------------------------------------------------*
-  * FPS meter
-  *----------------------------------------------------------------------------*/
-
-  var stats = new Stats();
-  stats.setMode( 0 ); // 0: fps, 1: ms
-  stats.domElement.style.position = 'absolute';
-  stats.domElement.style.right = '0';
-  stats.domElement.style.top = '0';
-  document.body.appendChild( stats.domElement );
-
-
-  /*---------------------------------------------------------------------------*
   * main loop
   *----------------------------------------------------------------------------*/
 
-  function tick() {
-    window.requestAnimationFrame( tick, $main[0] );
-
-    stats.begin();
-    scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
-    stats.end();
-  }
-  window.requestAnimationFrame( tick, $main[0] );
-
+  display.updateOnRequestAnimationFrame();
 
   </script>
 

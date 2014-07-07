@@ -20,9 +20,6 @@
   <!-- Bootstrap not necessarily needed -->
   <script src="../../sherpa/bootstrap-2.2.2.js"></script>
 
-  <!-- For the pop-up FPS meter -->
-  <script src="../../sherpa/stats.min.js"></script>
-
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script src="../build/development/scenery.js"></script>
   <!-- <script src="../build/standalone/scenery.js"></script> -->
@@ -60,19 +57,18 @@
 
   <script>
 
-  var main = $( '#main' );
-
   // initialize our scene
-  var scene = new scenery.Scene( main, {
-    // preferredSceneLayerType: scenery.SVGDefaultLayerType
+  var scene = new scenery.Node();
+  var display = new scenery.Display( scene, {
+    container: document.getElementById( 'main' )
   } );
-  scene.initializeFullscreenEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
-  scene.resizeOnWindowResize(); // the scene gets resized to the full screen size
+  display.initializeFullscreenEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
+  display.resizeOnWindowResize(); // the scene gets resized to the full screen size
 
   // add a centered container with a rotation and scale, to attempt to mess up the dragging ;)
   var rotatingContainer = new scenery.Node( {
-    x: scene.sceneBounds.width * 2 / 3,
-    y: scene.sceneBounds.centerY,
+    x: display.bounds.width * 2 / 3,
+    y: display.bounds.centerY,
     scale: 0.8 / 0.707,
     rotation: Math.PI / 4,
     layerSplit: true
@@ -80,8 +76,8 @@
   scene.addChild( rotatingContainer );
 
   var miniContainer = new scenery.Node( {
-    x: scene.sceneBounds.width / 3,
-    y: scene.sceneBounds.centerY,
+    x: display.bounds.width / 3,
+    y: display.bounds.centerY,
     scale: 0.4 / 0.707,
     layerSplit: true
   } );
@@ -93,11 +89,11 @@
 
   // keep the container centered
   function layout() {
-    rotatingContainer.x = scene.sceneBounds.width * 2 / 3;
-    rotatingContainer.y = scene.sceneBounds.centerY;
+    rotatingContainer.x = display.bounds.width * 2 / 3;
+    rotatingContainer.y = display.bounds.centerY;
 
-    miniContainer.x = scene.sceneBounds.width / 3;
-    miniContainer.y = scene.sceneBounds.centerY;
+    miniContainer.x = display.bounds.width / 3;
+    miniContainer.y = display.bounds.centerY;
   }
   $( window ).resize( layout );
 
@@ -237,41 +233,13 @@
     })();
   }
 
-
-
-  /*---------------------------------------------------------------------------*
-  * FPS meter
-  *----------------------------------------------------------------------------*/
-
-  var stats = new Stats();
-  stats.setMode( 0 ); // 0: fps, 1: ms
-  stats.domElement.style.position = 'absolute';
-  stats.domElement.style.right = '0';
-  stats.domElement.style.top = '0';
-  document.body.appendChild( stats.domElement );
-
-
   /*---------------------------------------------------------------------------*
   * main loop
   *----------------------------------------------------------------------------*/
 
-  var lastTime = 0;
-  var timeElapsed = 0;
-  function tick() {
-    window.requestAnimationFrame( tick, main[0] );
-
-    var timeNow = new Date().getTime();
-    if ( lastTime != 0 ) {
-      timeElapsed = (timeNow - lastTime) / 1000.0;
-    }
-    lastTime = timeNow;
-
-    stats.begin();
+  display.updateOnRequestAnimationFrame( function( timeElapsed ) {
     rotatingContainer.rotate( timeElapsed * 0.1 );
-    scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
-    stats.end();
-  }
-  window.requestAnimationFrame( tick, main[0] );
+  } );
 
   </script>
 
