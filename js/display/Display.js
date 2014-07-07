@@ -89,7 +89,8 @@ define( function( require ) {
       allowSceneOverflow: false, // usually anything displayed outside of our dom element is hidden with CSS overflow
       //OHTWO TODO: hook up enablePointerEvents
       enablePointerEvents: true, // whether we should specifically listen to pointer events if we detect support
-      defaultCursor: 'default'   // what cursor is used when no other cursor is specified
+      defaultCursor: 'default',  // what cursor is used when no other cursor is specified
+      backgroundColor: null      // initial background color
     }, options );
 
     // The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM element on updateDisplay())
@@ -152,6 +153,8 @@ define( function( require ) {
     this._canvasAreaBoundsOverlay = null;
 
     this.applyCSSHacks();
+
+    this.setBackgroundColor( this.options.backgroundColor );
 
     // global reference if we have a Display (useful)
     this.scenery = scenery;
