@@ -2,7 +2,8 @@
 
 /**
  * A RenderState represents the state information for a Node needed to determine how descendants are rendered.
- * It extracts all the information necessary from ancestors in a compact form so we can create an effective tree of these.
+ * It extracts all the information necessary from ancestors in a compact form so we can create an effective tree of
+ * these.
  *
  * API for RenderState:
  * {
@@ -17,8 +18,9 @@
  *   getStateForDescendant: function( trail ) : RenderState
  * }
  *
- * NOTE: Trails for transforms are not provided. Instead, inspecting isTransformed and what type of cache should uniquely determine
- *       the transformBaseTrail and transformTrail necessary for rendering (and in an efficient way). Not included here for performance (state doesn't need them)
+ * NOTE: Trails for transforms are not provided. Instead, inspecting isTransformed and what type of cache should
+ * uniquely determine the transformBaseTrail and transformTrail necessary for rendering (and in an efficient way).
+ * Not included here for performance (state doesn't need them)
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -37,12 +39,15 @@ define( function( require ) {
   var emptyObject = {};
 
   /*
-   * {param} node               Node      The node whose instance will have this state (inspect the hints / properties on this node)
+   * {param} node               Node      The node whose instance will have this state (inspect the hints / properties
+   *                                      on this node)
    * {param} preferredRenderers Renderer  Either 0 (no preference), or a Renderer order bitmask (see Renderer.js)
    * {param} svgRenderer        Renderer  SVG renderer settings to use
    * {param} canvasRenderer     Renderer  Canvas renderer settings to use
-   * {param} isUnderCanvasCache Boolean   Whether we are under any sort of Canvas cache (not including if this node is canvas cached)
-   * {param} isShared           Boolean   Whether this is the shared instance tree for a single-cache, instead of a reference to it
+   * {param} isUnderCanvasCache Boolean   Whether we are under any sort of Canvas cache (not including if this node is
+   *                                      canvas cached)
+   * {param} isShared           Boolean   Whether this is the shared instance tree for a single-cache, instead of a
+   *                                      reference to it
    *
    * Potential ways the state can change:
    * - any input changes, specifically including:
@@ -69,7 +74,8 @@ define( function( require ) {
       this.isSharedCanvasCachePlaceholder = false;
       this.isSharedCanvasCacheSelf = false;
 
-      //OHTWO TODO PERFORMANCE: These probably should be 0 (e.g. no renderer), so they are falsy, but that way remain fixednum when set to actual renderers
+      //OHTWO TODO PERFORMANCE: These probably should be 0 (e.g. no renderer), so they are falsy, but that way remain
+      // fixednum when set to actual renderers
       this.selfRenderer = null;
       this.groupRenderer = null;
       this.sharedCacheRenderer = null;
@@ -154,7 +160,8 @@ define( function( require ) {
       }
     },
 
-    // returns success of setting this.selfRenderer. renderer is expected to be a 1-bit bitmask, with rendererSpecifics either 0 (autodetect) or a full renderer bitmask
+    // returns success of setting this.selfRenderer. renderer is expected to be a 1-bit bitmask, with rendererSpecifics
+    // either 0 (autodetect) or a full renderer bitmask
     trySelfRenderer: function( node, renderer, rendererSpecifics ) {
       // if provided renderer === 0, we won't be compatible
       var compatible = !!( node._rendererBitmask & renderer );
@@ -175,7 +182,8 @@ define( function( require ) {
             rendererSpecifics = scenery.Renderer.bitmaskWebGL;
           }
         }
-        assert && assert( rendererSpecifics, 'Should have renderer specifics by now, otherwise we did not recognize the renderer' );
+        assert && assert( rendererSpecifics,
+          'Should have renderer specifics by now, otherwise we did not recognize the renderer' );
         this.selfRenderer = rendererSpecifics;
       }
       return compatible;
@@ -198,7 +206,8 @@ define( function( require ) {
         // isUnderCanvasCache
           this.isUnderCanvasCache || this.isInstanceCanvasCache || this.isSharedCanvasCacheSelf,
 
-        // isShared. No direct descendant is shared, since we create those specially with a new state from createSharedCacheState
+        // isShared. No direct descendant is shared, since we create those specially with a new state
+        // from createSharedCacheState
         false,
 
         // isDisplayRoot
@@ -208,8 +217,8 @@ define( function( require ) {
 
     /*
      * Whether we can just update the state on an Instance when changing from this state => otherState.
-     * This is generally not possible if there is a change in whether the instance should be a transform root (e.g. backbone/single-cache),
-     * so we will have to recreate the instance and its subtree if that is the case.
+     * This is generally not possible if there is a change in whether the instance should be a transform root
+     * (e.g. backbone/single-cache), so we will have to recreate the instance and its subtree if that is the case.
      */
     isInstanceCompatibleWith: function( otherState ) {
       return this.isTransformed === otherState.isTransformed && //OHTWO TODO: allow mutating based on this change
