@@ -111,6 +111,9 @@ define( function( require ) {
     this._peers = []; // array of peer factories: { element: ..., options: ... }, where element can be an element or a string
     this._liveRegions = []; // array of live region instances
 
+    // whether we will do more accurate (and tight) bounds computations for rotations and shears
+    this._transformBounds = false;
+
     /*
      * Set up the transform reference. we add a listener so that the transform itself can be modified directly
      * by reference, or node.transform = <transform> / node.setTransform() can be used to change the transform reference.
@@ -449,8 +452,23 @@ define( function( require ) {
 
         var oldBounds = this._bounds;
 
-        // converts local to parent bounds. mutable methods used to minimize number of created bounds instances (we create one so we don't change references to the old one)
-        var newBounds = this.localToParentBounds( this._localBounds ); // TODO: reduce allocation? fully mutable?
+        var newBounds;
+        // no need to do the more expensive bounds transformation if we are still axis-aligned
+        if ( this._transformBounds && !this._transform.getMatrix().isAxisAligned() ) {
+          // mutates the matrix and bounds during recursion
+          var matrix = this._transform.getMatrix().copy();
+          newBounds = Bounds2.NOTHING.copy();
+          // Include each painted self individually, transformed with the exact transform matrix.
+          // This is expensive, as we have to do 2 matrix transforms for every descendant.
+          this._includeTransformedSubtreeBounds( matrix, newBounds ); // self and children
+
+          if ( this.hasClipArea() ) {
+            newBounds.constrainBounds( this._clipArea.getBoundsWithTransform( matrix ) );
+          }
+        } else {
+          // converts local to parent bounds. mutable methods used to minimize number of created bounds instances (we create one so we don't change references to the old one)
+          newBounds = this.localToParentBounds( this._localBounds ); // TODO: reduce allocation? fully mutable?
+        }
         var changed = !newBounds.equals( oldBounds );
 
         if ( changed ) {
@@ -492,6 +510,7 @@ define( function( require ) {
           assertSlow && assertSlow( that._childBounds.equalsEpsilon( childBounds, epsilon ), 'Child bounds mismatch after validateBounds: ' +
                                                                                              that._childBounds.toString() + ', expected: ' + childBounds.toString() );
           assertSlow && assertSlow( that._localBoundsOverridden ||
+                                    that._transformBounds ||
                                     that._bounds.equalsEpsilon( fullBounds, epsilon ) ||
                                     that._bounds.equalsEpsilon( fullBounds, epsilon ),
               'Bounds mismatch after validateBounds: ' + that._bounds.toString() + ', expected: ' + fullBounds.toString() );
@@ -499,6 +518,25 @@ define( function( require ) {
       }
 
       return wasDirtyBefore; // whether any dirty flags were set
+    },
+
+    // @private: Recursion for accurate transformed bounds handling. Mutates bounds with the added bounds.
+    // Mutates the matrix, but mutates it back to the starting point (within floating-point error).
+    _includeTransformedSubtreeBounds: function( matrix, bounds ) {
+      if ( !this._selfBounds.isEmpty() ) {
+        bounds.includeBounds( this.getTransformedSelfBounds( matrix ) );
+      }
+
+      var numChildren = this._children.length;
+      for ( var i = 0; i < numChildren; i++ ) {
+        var child = this._children[i];
+
+        matrix.multiplyMatrix( child._transform.getMatrix() );
+        child._includeTransformedSubtreeBounds( matrix, bounds );
+        matrix.multiplyMatrix( child._transform.getInverse() );
+      }
+
+      return bounds;
     },
 
     // Traverses this subtree and validates bounds only for subtrees that have bounds listeners (trying to exclude as much as possible for performance)
@@ -771,6 +809,28 @@ define( function( require ) {
       }
 
       return this; // allow chaining
+    },
+
+    // @public, meant to be overridden in sub-types that have more accurate bounds determination (e.g. non-rectangular)
+    getTransformedSelfBounds: function( matrix ) {
+      // assume that we take up the entire rectangular bounds.
+      return this._selfBounds.transformed( matrix );
+    },
+
+    // @public, sets whether we will require more accurate (and expensive) bounds computation for this node's transform.
+    setTransformBounds: function( transformBounds ) {
+      assert && assert( typeof transformBounds === 'boolean', 'transformBounds should be boolean' );
+
+      if ( this._transformBounds !== transformBounds ) {
+        this._transformBounds = transformBounds;
+
+        this.invalidateBounds();
+      }
+    },
+
+    // getter for whether we will transform bounds with rotations and shears when computing bounds
+    getTransformBounds: function() {
+      return this._transformBounds;
     },
 
     // the bounds for content in render(), in "parent" coordinates
@@ -2153,6 +2213,8 @@ define( function( require ) {
     get childBounds() { return this.getChildBounds(); },
     get localBounds() { return this.getLocalBounds(); },
     set localBounds( value ) { return this.setLocalBounds( value ); },
+    set transformBounds( value ) { return this.setTransformBounds( value ); },
+    get transformBounds() { return this.getTransformBounds(); },
     get globalBounds() { return this.getGlobalBounds(); },
     get visibleBounds() { return this.getVisibleBounds(); },
     get id() { return this.getId(); },
@@ -2369,7 +2431,7 @@ define( function( require ) {
     'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
     'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom',
     'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
-    'layerSplit', 'usesOpacity', 'mouseArea', 'touchArea', 'clipArea'
+    'layerSplit', 'usesOpacity', 'mouseArea', 'touchArea', 'clipArea', 'transformBounds'
   ];
 
   return Node;

@@ -94,6 +94,11 @@ define( function( require ) {
       return this._stroke ? this.getStrokedShape().bounds : this.getShape().bounds;
     },
 
+    // @override
+    getTransformedSelfBounds: function( matrix ) {
+      return ( this._stroke ? this.getStrokedShape() : this.getShape() ).getBoundsWithTransform( matrix );
+    },
+
     // hook stroke mixin changes to invalidation
     invalidateStroke: function() {
       this.invalidateShape();

@@ -238,6 +238,11 @@ define( function( require ) {
       return bounds;
     },
 
+    // @override, since Path's general function would slow us down (we're a rectangle, our local coordinate frame is perfect for this)
+    getTransformedSelfBounds: function( matrix ) {
+      return this._selfBounds.transformed( matrix );
+    },
+
     createRectangleShape: function() {
       if ( this.isRounded() ) {
         // copy border-radius CSS behavior in Chrome, where the arcs won't intersect, in cases where the arc segments at full size would intersect each other

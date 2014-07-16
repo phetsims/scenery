@@ -189,6 +189,22 @@
             } );
           };
 
+          window.transformTest = function() {
+            window.n = new scenery.Node();
+            n.addChild( new scenery.Rectangle( 0, 50, 100, 50, { fill: '#aaa' } ) );
+            n.addChild( new scenery.Rectangle( 50, 0, 50, 50, { fill: '#aaf' } ) );
+            scene.addChild( n );
+            n.x = 50;
+            n.y = 50;
+            n.rotation = Math.PI / 4;
+            n.left = 50;
+            scene.addChild( scenery.Rectangle.bounds( n.bounds, { stroke: 'red' } ) );
+            n.transformBounds = true;
+            scene.addChild( scenery.Rectangle.bounds( n.bounds, { stroke: 'blue' } ) );
+
+            display.updateDisplay();
+          };
+
           /*---------------------------------------------------------------------------*
           * Debug
           *----------------------------------------------------------------------------*/
