@@ -4,41 +4,41 @@
   <meta charset="utf-8"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <title>Scenery Playground</title>
-  
+
   <script src="../../sherpa/jquery-2.1.0.js"></script>
   <script src="../../sherpa/lodash-2.4.1.min.js"></script>
   <script src="../../sherpa/has.js"></script>
-  
+
   <script data-main="../js/config.js" src="../../sherpa/require-2.1.11.js"></script>
-  
+
   <style>
     html, body {
       background-color: #eee;
       border: 0;
       padding: 0;
     }
-    
+
     #scene {
       position: absolute;
       width: 512px;
       height: 256px;
       background-color: #fff;
     }
-    
+
     #debug {
       position: relative;
       top: 256px;
     }
-    
+
     #serialized {
       position: relative;
       top: 256px;
       padding: 15px;
       border: 1px solid gray;
     }
-    
+
     #controls {
       position: absolute;
       width: 150px;
@@ -46,25 +46,25 @@
       right: 0;
     }
   </style>
-  
+
 </head>
 <body>
-  
+
   <div id="controls">
     <button onclick="scene.updateOnRequestAnimationFrame();">Continuous Update</button>
     <button onclick="scene.popupDebug();">Popup Debug</button>
   </div>
-  
+
   <div id="scene"></div>
-  
+
   <div id="debug"></div>
-  
+
   <pre id="serialized"></pre>
-  
+
   <script>
     var basicSceneStep = true;
     var fuzzStep = false;
-    
+
     // we need to wait until our config file is loaded before our require statement. apparently this was not guaranteed
     function check() {
       if ( window.loadedSceneryConfig ) {
@@ -73,36 +73,36 @@
           window.kite = kite;
           window.dot = dot;
           window.core = core;
-          
+
           console.log( 'loaded' );
-          
+
           scenery.enableLayerLogging();
           scenery.enableEventLogging();
-          
+
           window.scene = new scenery.Scene( $( '#scene' ) );
           console.log( 'window.scene created' );
-          
+
           window.shape = kite.Shape.rectangle( 0, 0, 50, 40 );
-          
+
           core.loadScript( {
             src: 'qunit/js/test-utils.js',
             callback: function() {
               console.log( 'loaded test-utils.js' );
             }
           } );
-          
+
           scenery.Util.polyfillRequestAnimationFrame();
-          
+
           (function step(){
             if ( basicSceneStep ) {
               window.requestAnimationFrame( step, document.getElementById( 'scene' ) );
             }
-            
+
             $( '#debug' ).html( scene.getDebugHTML() );
-            
+
             $( '#serialized' ).html( scene.toStringWithChildren( true ) );
           })();
-          
+
           window.twrap = function( f ) {
             try {
               f();
@@ -110,7 +110,7 @@
               console.log( e.stack );
             }
           };
-          
+
           window.setupTest = function() {
             var n1 = new scenery.Node();
             var n2 = new scenery.Node();
@@ -133,7 +133,7 @@
             window.trail = n9.getUniqueTrail();
             window.bounds = new dot.Bounds2( 1, 2, 5, 6 );
           };
-          
+
           window.setupTranslation = function() {
             var n = scene;
             while ( n ) {
@@ -141,7 +141,7 @@
               n = n.children[0];
             }
           };
-          
+
           window.setupRotation = function() {
             var n = scene;
             while ( n ) {
@@ -149,7 +149,7 @@
               n = n.children[0];
             }
           };
-          
+
           window.setupDownUp = function() {
             var node = new scenery.Node();
             node.x = 50;
@@ -166,16 +166,16 @@
               upOutside: function() { rect.stroke = null; }
             } ) );
           };
-          
+
           window.setupRoundRect = function() {
             var rect = new scenery.Rectangle( 100, 50, 300, 150, 150, 50, { fill: 'red', cursor: 'pointer' } );
             scene.addChild( rect );
             scene.updateOnRequestAnimationFrame();
             scene.initializeStandaloneEvents();
-            
+
             rect.containsPointSelf( dot( 111, 118 ) ); // 111,118
           };
-          
+
           window.setupButton = function() {
             var rect = new scenery.Rectangle( 50, 50, 100, 50, { fill: '#f00' } );
             scene.addChild( rect );
@@ -190,7 +190,7 @@
               fire: function( event ) { console.log( 'fire' ); }
             } ) );
           };
-          
+
           window.setupDomRect = function() {
             window.r = new scenery.Rectangle( 0, 0, 100, 50, { fill: 'red' } );
             window.a = new scenery.Node( { renderer: 'svg' } );
@@ -205,7 +205,7 @@
             b.addChild( window.r );
             c.addChild( window.r );
           };
-          
+
           window.setupDomCircle = function() {
             window.r = new scenery.Circle( 50, { fill: 'red' } );
             window.a = new scenery.Node( { renderer: 'svg' } );
@@ -224,57 +224,71 @@
             scene.y = 50;
             window.r.stroke = 'black';
           };
-          
+
+          window.setupT = function() {
+            window.n = new scenery.Node();
+            n.addChild( new scenery.Rectangle( 0, 50, 100, 50, { fill: '#aaa' } ) );
+            n.addChild( new scenery.Rectangle( 50, 0, 50, 50, { fill: '#aaf' } ) );
+            scene.addChild( n );
+            n.x = 50;
+            n.y = 50;
+            n.rotation = Math.PI / 4;
+            n.left = 50;
+            scene.addChild( scenery.Rectangle.bounds( n.bounds, { stroke: 'red' } ) );
+            n.transformBounds = true;
+            scene.addChild( scenery.Rectangle.bounds( n.bounds, { stroke: 'blue' } ) );
+          };
+
           window.testNodeBounds = function( trail ) {
             var a = performance.now();
             for ( var i = 0; i < 100000; i++ ) { trail.lastNode().localToGlobalBounds( bounds ); };
             console.log( performance.now() - a );
             console.log( trail.lastNode().localToGlobalBounds( bounds ) );
           };
-          
+
           window.testTrailBounds = function( trail ) {
             var a = performance.now();
             for ( var i = 0; i < 100000; i++ ) { trail.localToGlobalBounds( bounds ); };
             console.log( performance.now() - a );
           console.log( trail.localToGlobalBounds( bounds ) );
           };
-          
+
           window.fuzzLayers = function() {
             // disable the regular step
             basicSceneStep = false;
             fuzzStep = true;
-            
+
             // disable the layer logging, or we'll spam ourselves to death
             scenery.disableLayerLogging();
             scenery.disableEventLogging();
-            
+
             var lines = [];
             window.lines = lines;
-            
+
             var nodes = [];
             var scene = new scenery.Scene( $( '<div>' ), { width: 640, height: 480 } );
             nodes.push( scene );
-            
+
             _.times( 5, function() { nodes.push( new scenery.Node() ); } );
             _.times( 10, function() { nodes.push( new scenery.Path() ); } );
             // _.times( 5, function() { nodes.push( new scenery.DOM( document.createElement( 'div' ) ) ); } );
-            
+
             function name( node ) {
               return node === scene ? 'scene' : node.constructor.name.toLowerCase() + node.id;
             }
-            
+
             _.each( nodes, function( node ) {
               if ( node !== scene ) {
                 lines.push( 'var ' + name( node ) + ' = ' + node.toString() + ';' );
               }
             } );
-            
+
             (function fuzz(){
               // abort if desired
               if ( !fuzzStep ) {
                 return;
               }
-              
+
               var nodeMutators = [
                 {
                   weight: 1.0,
@@ -307,19 +321,19 @@
                   line: function( node ) { return name( node ) + '.layerSplit = false;' }
                 }
               ];
-              
+
               var totalWeight = _.reduce( _.pluck( nodeMutators, 'weight' ), function( memo, num ) { return memo + num; }, 0 );
-              
+
               _.times( 20, function() {
                 window.beforeFuzzDebug = scene.getDebugHTML();
                 window.beforeFuzzSerialization = scene.toStringWithChildren( true );
-                
+
                 var r = Math.random();
-                
+
                 // pick two different nodes at random
                 var a = nodes[_.random( 0, nodes.length - 1 )];
                 var b = nodes[_.random( 0, nodes.length - 1 )];
-                
+
                 if ( r < 0.333 ) {
                   // attempt to add a node to another one
                   if ( a.canAddChild( b ) ) {
@@ -350,12 +364,12 @@
                     }
                   }
                 }
-                
+
                 scene.layerAudit();
-                
+
               } );
               $( '#debug' ).html( scene.getDebugHTML() );
-              
+
               // an error above will prevent this from running
               window.requestAnimationFrame( fuzz );
             })();

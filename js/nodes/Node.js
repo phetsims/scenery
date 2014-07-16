@@ -90,6 +90,9 @@ define( function( require ) {
     
     this._peers = []; // array of peer factories: { element: ..., options: ... }, where element can be an element or a string
     this._liveRegions = []; // array of live region instances
+
+    // whether we will do more accurate (and tight) bounds computations for rotations or shears
+    this._transformBounds = false;
     
     /*
      * Set up the transform reference. we add a listener so that the transform itself can be modified directly
@@ -385,14 +388,35 @@ define( function( require ) {
         this._boundsDirty = false;
         
         var oldBounds = this._bounds;
-        
-        // converts local to parent bounds. mutable methods used to minimize number of created bounds instances (we create one so we don't change references to the old one)
-        var localBounds = this._localBounds ? this._localBounds.copy() : this._selfBounds.copy().includeBounds( this._childBounds );
-        if ( this.hasClipArea() ) {
-          // localBounds clipping in the local coordinate frame
-          localBounds = localBounds.intersection( this._clipArea.bounds );
+
+        var newBounds;
+
+        if ( this._localBounds ) {
+          // ignore clipArea for local bounds override
+          newBounds = this.localToParentBounds( this._localBounds );
+        } else if ( this._transformBounds && !this._transform.getMatrix().isAxisAligned() ) {
+          // we will be mutating this matrix and bounds
+          var matrix = this._transform.getMatrix().copy();
+          newBounds = Bounds2.NOTHING.copy();
+
+          this.includeTransformedSubtreeBounds( matrix, newBounds );
+
+          if ( this.hasClipArea() ) {
+            newBounds = newBounds.intersection( this._clipArea.getBoundsWithTransform( matrix ) );
+          }
+        } else {
+          // converts local to parent bounds. mutable methods used to minimize number of created bounds instances (we create one so we don't change references to the old one)
+          var localBounds = this._selfBounds.copy().includeBounds( this._childBounds );
+
+          if ( this.hasClipArea() ) {
+            // localBounds clipping in the local coordinate frame
+            localBounds = localBounds.intersection( this._clipArea.bounds );
+          }
+
+          // mutable here, since we copied localBounds above
+          newBounds = this.transformBoundsFromLocalToParent( localBounds );
         }
-        var newBounds = this.transformBoundsFromLocalToParent( localBounds );
+
         newBounds = this.overrideBounds( newBounds ); // allow expansion of the bounds area
         var changed = !newBounds.equals( oldBounds );
         
@@ -432,11 +456,29 @@ define( function( require ) {
           
           assertSlow && assertSlow( that._childBounds.equalsEpsilon( childBounds, epsilon ), 'Child bounds mismatch after validateBounds: ' +
                                                                                                     that._childBounds.toString() + ', expected: ' + childBounds.toString() );
-          assertSlow && assertSlow( that._bounds.equalsEpsilon( fullBounds, epsilon ) ||
+          assertSlow && assertSlow( that._transformBounds || that._bounds.equalsEpsilon( fullBounds, epsilon ) ||
                                                     that._bounds.equalsEpsilon( that.overrideBounds( fullBounds ), epsilon ),
                                                     'Bounds mismatch after validateBounds: ' + that._bounds.toString() + ', expected: ' + fullBounds.toString() );
         })();
       }
+    },
+
+    // @private: for transformed bounds computation. mutates both arguments
+    includeTransformedSubtreeBounds: function( matrix, bounds ) {
+      if ( !this._selfBounds.isEmpty() ) {
+        bounds.includeBounds( this.getTransformedSelfBounds( matrix ) );
+      }
+
+      var numChildren = this._children.length;
+      for ( var i = 0; i < numChildren; i++ ) {
+        var child = this._children[i];
+
+        matrix.multiplyMatrix( child._transform.getMatrix() );
+        child.includeTransformedSubtreeBounds( matrix, bounds );
+        matrix.multiplyMatrix( child._transform.getInverse() );
+      }
+
+      return bounds;
     },
     
     validateMouseBounds: function() {
@@ -680,6 +722,11 @@ define( function( require ) {
     getSafeSelfBounds: function() {
       // override this to provide different behavior
       return this._selfBounds;
+    },
+
+    getTransformedSelfBounds: function( matrix ) {
+      // our inaccurate variety, assuming it's a rectangle
+      return this._selfBounds.transformed( matrix );
     },
     
     getChildBounds: function() {
@@ -1486,6 +1533,21 @@ define( function( require ) {
     hasClipArea: function() {
       return this._clipArea !== null;
     },
+
+    setTransformBounds: function( transformBounds ) {
+      assert && assert( typeof transformBounds === 'boolean', 'transformBounds should be boolean' );
+
+      if ( this._transformBounds !== transformBounds ) {
+        this._transformBounds = transformBounds;
+
+        this.invalidateBounds();
+      }
+    },
+
+    // getter for whether we will transform bounds with rotations and shears when computing bounds
+    getTransformBounds: function() {
+      return this._transformBounds;
+    },
     
     updateLayerType: function() {
       if ( this._renderer && this._rendererOptions ) {
@@ -2165,6 +2227,9 @@ define( function( require ) {
     
     set clipArea( value ) { this.setClipArea( value ); },
     get clipArea() { return this.getClipArea(); },
+
+    set transformBounds( value ) { this.setTransformBounds( value ); },
+    get transformBounds() { return this.getTransformBounds(); },
     
     set visible( value ) { this.setVisible( value ); },
     get visible() { return this.isVisible(); },
@@ -2348,7 +2413,7 @@ define( function( require ) {
   Node.prototype._mutatorKeys = [ 'children', 'cursor', 'visible', 'pickable', 'opacity', 'matrix', 'translation', 'x', 'y', 'rotation', 'scale',
                                   'leftTop', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom',
                                   'left', 'right', 'top', 'bottom', 'centerX', 'centerY', 'renderer', 'rendererOptions',
-                                  'layerSplit', 'mouseArea', 'touchArea', 'clipArea' ];
+                                  'layerSplit', 'mouseArea', 'touchArea', 'clipArea', 'transformBounds' ];
   
   // mix-in the events for Node
   /* jshint -W064 */
