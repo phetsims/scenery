@@ -267,7 +267,7 @@ define( function( require ) {
     // @public
     baseSyncTree: function() {
       sceneryLog && sceneryLog.Instance && sceneryLog.Instance( '-------- START baseSyncTree ' + this.toString() + ' --------' );
-      this.syncTree( scenery.RenderState.RegularState.createRootState( this.node ) );
+      this.syncTree( scenery.RenderState.createRootState( this.node ) );
       sceneryLog && sceneryLog.Instance && sceneryLog.Instance( '-------- END baseSyncTree ' + this.toString() + ' --------' );
       this.cleanSyncTreeResults();
     },
@@ -746,7 +746,7 @@ define( function( require ) {
         // TODO: increment reference counting?
         if ( !this.sharedCacheInstance ) {
           this.sharedCacheInstance = Instance.createFromPool( this.display, new scenery.Trail( this.node ) );
-          this.sharedCacheInstance.syncTree( scenery.RenderState.RegularState.createSharedCacheState( this.node ) );
+          this.sharedCacheInstance.syncTree( scenery.RenderState.createSharedCacheState( this.node ) );
           this.display._sharedCanvasInstances[instanceKey] = this.sharedCacheInstance;
           // TODO: reference counting?
 

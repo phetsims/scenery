@@ -34,8 +34,6 @@ define( function( require ) {
   require( 'SCENERY/display/Renderer' );
   require( 'SCENERY/util/Trail' );
 
-  var RenderState = scenery.RenderState = {};
-
   var emptyObject = {};
 
   /*
@@ -54,10 +52,10 @@ define( function( require ) {
    * - node's renderer summary (what types of renderers are allowed below)
    * - node.hints | node.opacity
    */
-  RenderState.RegularState = function RegularState( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot ) {
+  var RenderState = scenery.RenderState = function RenderState( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot ) {
     this.initialize( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot );
   };
-  inherit( Object, RenderState.RegularState, {
+  inherit( Object, RenderState, {
     initialize: function( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot ) {
       // this should be accurate right now, the pass to update these should have been completed earlier
       var combinedBitmask = node._rendererSummary.bitmask;
@@ -191,7 +189,7 @@ define( function( require ) {
 
     getStateForDescendant: function( node ) {
       // TODO: allocation (pool this)
-      return RenderState.RegularState.createFromPool(
+      return RenderState.createFromPool(
         node,
 
         // default renderer when available
@@ -240,8 +238,8 @@ define( function( require ) {
     }
   } );
 
-  RenderState.RegularState.createRootState = function( node ) {
-    var baseState = RenderState.RegularState.createFromPool(
+  RenderState.createRootState = function( node ) {
+    var baseState = RenderState.createFromPool(
       node,                           // trail
       0,                              // no preferred renderers
       scenery.Renderer.bitmaskSVG,    // default SVG renderer settings
@@ -253,8 +251,8 @@ define( function( require ) {
     return baseState;
   };
 
-  RenderState.RegularState.createSharedCacheState = function( node ) {
-    var baseState = RenderState.RegularState.createFromPool(
+  RenderState.createSharedCacheState = function( node ) {
+    var baseState = RenderState.createFromPool(
       node,                             // trail
       0,                                // no preferred renderers (not really necessary, Canvas will be forced anyways)
       null,                             // no SVG renderer settings needed
@@ -267,7 +265,7 @@ define( function( require ) {
   };
 
   /* jshint -W064 */
-  Poolable( RenderState.RegularState, {
+  Poolable( RenderState, {
     constructorDuplicateFactory: function( pool ) {
       return function( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot ) {
         if ( pool.length ) {
@@ -276,7 +274,7 @@ define( function( require ) {
         }
         else {
           sceneryLog && sceneryLog.RenderState && sceneryLog.RenderState( 'new from constructor' );
-          return new RenderState.RegularState( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot );
+          return new RenderState( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot );
         }
       };
     }
