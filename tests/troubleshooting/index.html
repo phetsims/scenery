@@ -68,7 +68,7 @@
     }
 
     function addText( label, text, styles ) {
-      var $p = $( '<p>' ).css( 'padding', '0' ).css( 'margin', '0' );
+      var $p = $( '<div>' ).css( 'padding', '0' ).css( 'margin', '0' );
       $p.append( $( '<span>' ).text( label + ': ' ).css( 'font-weight', 'bold' ) );
       $p.append( $( '<span>' ).text( '' + text ) );
       if ( styles ) {
