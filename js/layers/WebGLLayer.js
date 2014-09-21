@@ -87,27 +87,42 @@ define( function( require ) {
       gl.enable( gl.BLEND );
       gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );
 
+//      this.shaderProgram = new ShaderProgram( gl, // vertex shader
+//        'attribute vec3 aVertex;\n' +
+//        'varying vec2 texCoord;\n' +
+//        'uniform mat4 uMatrix;\n' +
+//        'void main() {\n' +
+//        '  texCoord = aVertex.xy;\n' +
+//        '  gl_Position = uMatrix * vec4( aVertex, 1 );\n' +
+//        // '  gl_Position = vec4( aVertex * 100.0, 1 );\n' +
+//        '}',
+//
+//        // fragment shader
+//        'precision highp float;\n' +
+//        'varying vec2 texCoord;\n' +
+//        'uniform sampler2D uTexture;\n' +
+//        'void main() {\n' +
+//        '  gl_FragColor = texture2D( uTexture, texCoord );\n' +
+//        // '  gl_FragColor = vec4( 0.0, 0.0, 1.0, 1.0 );\n' +
+//        '}',
+//
+//        ['aVertex'], // attribute names
+//        ['uTexture','uMatrix'] // uniform names
+//      );
+
       this.shaderProgram = new ShaderProgram( gl, // vertex shader
-        'attribute vec3 aVertex;\n' +
-        'varying vec2 texCoord;\n' +
-        'uniform mat4 uMatrix;\n' +
-        'void main() {\n' +
-        '  texCoord = aVertex.xy;\n' +
-        '  gl_Position = uMatrix * vec4( aVertex, 1 );\n' +
-        // '  gl_Position = vec4( aVertex * 100.0, 1 );\n' +
-        '}',
+          'attribute vec2 a_position;\n' +
+          'void main() {\n' +
+          'gl_Position = vec4(a_position, 0, 1);\n' +
+          '}',
 
         // fragment shader
-        'precision highp float;\n' +
-        'varying vec2 texCoord;\n' +
-        'uniform sampler2D uTexture;\n' +
-        'void main() {\n' +
-        '  gl_FragColor = texture2D( uTexture, texCoord );\n' +
-        // '  gl_FragColor = vec4( 0.0, 0.0, 1.0, 1.0 );\n' +
-        '}',
+          'void main() {\n' +
+          'gl_FragColor = vec4(0,1,0,1);  \n' +
+          '}',
 
         ['aVertex'], // attribute names
-        ['uTexture','uMatrix'] // uniform names
+        ['uTexture', 'uMatrix'] // uniform names
       );
 
       this.setSize( this.logicalWidth, this.logicalHeight );
@@ -242,8 +257,8 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * Events from Instances
-    *----------------------------------------------------------------------------*/
+     * Events from Instances
+     *----------------------------------------------------------------------------*/
 
     notifyVisibilityChange: function( instance ) {
       sceneryLayerLog && sceneryLayerLog( 'WebGLLayer #' + this.id + ' notifyVisibilityChange: ' + instance.trail.toString() );
