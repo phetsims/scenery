@@ -21,6 +21,7 @@ define( function( require ) {
   var Node = require( 'SCENERY/nodes/Node' ); // Image inherits from Node
   require( 'SCENERY/layers/Renderer' ); // we need to specify the Renderer in the prototype
   require( 'SCENERY/util/Util' );
+  var ImageWebGLDrawable = require( 'SCENERY/nodes/drawables/ImageWebGLDrawable' );
 
   /*
    * Canvas renderer supports the following as 'image':
@@ -73,11 +74,15 @@ define( function( require ) {
 
     invalidateSupportedRenderers: function() {
       if ( this._image instanceof HTMLCanvasElement ) {
-        this.setRendererBitmask( scenery.bitmaskSupportsCanvas );
+        this.setRendererBitmask( scenery.bitmaskSupportsCanvas |
+                                 scenery.bitmaskSupportsWebGL );
       }
       else {
         // assumes HTMLImageElement
-        this.setRendererBitmask( scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskSupportsDOM );
+        this.setRendererBitmask( scenery.bitmaskSupportsCanvas |
+                                 scenery.bitmaskSupportsSVG |
+                                 scenery.bitmaskSupportsDOM |
+                                 scenery.bitmaskSupportsWebGL );
       }
     },
 
@@ -141,8 +146,12 @@ define( function( require ) {
      * WebGL support
      *----------------------------------------------------------------------------*/
 
-    paintWebGL: function( state ) {
-      throw new Error( 'paintWebGL:nimplemented' );
+    createWebGLDrawable: function( gl ) {
+      return new ImageWebGLDrawable( gl, this );
+    },
+
+    updateWebGLDrawable: function( drawable ) {
+      drawable.updateImage();
     },
 
     /*---------------------------------------------------------------------------*

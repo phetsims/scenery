@@ -362,6 +362,33 @@ define( function( require ) {
 
       // return the average
       return result;
+    },
+
+    // returns the smallest power of 2 that is greater than or equal
+    toPowerOf2: function( n ) {
+      var result = 1;
+      while ( result < n ) {
+          result *= 2;
+      }
+      return result;
+    },
+
+    /*
+     * @param type should be: gl.VERTEX_SHADER or gl.FRAGMENT_SHADER
+     * @param source {String}, the shader source code.
+     */
+    createShader: function( gl, source, type ) {
+      var shader = gl.createShader( type );
+      gl.shaderSource( shader, source );
+      gl.compileShader( shader );
+
+      if( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
+        console.log( gl.getShaderInfoLog( shader ) );
+        console.log( source );
+        throw new Error( 'GLSL compile error: ' + gl.getShaderInfoLog( shader ) );
+      }
+
+      return shader;
     }
   };
   var Util = scenery.Util;
