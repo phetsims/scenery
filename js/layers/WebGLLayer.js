@@ -113,15 +113,6 @@ define( function( require ) {
       this.setSize( this.logicalWidth, this.logicalHeight );
 
       this.shaderProgram.use();
-
-      var vertexBuffer = this.vertexBuffer = gl.createBuffer();
-      gl.bindBuffer( gl.ARRAY_BUFFER, vertexBuffer );
-      gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [
-        -1, -1,
-        -1, +1,
-        +1, -1,
-        +1, +1
-      ] ), gl.STATIC_DRAW );
     },
 
     render: function( scene, args ) {
@@ -142,8 +133,6 @@ define( function( require ) {
           var modelViewMatrix = matrix3To4( instance.trail.getMatrix() );
 
           instance.data.drawable.render( this.shaderProgram, projectionMatrix.timesMatrix( modelViewMatrix ) );
-
-          console.log( 'boo' );
         }
       }
     },
