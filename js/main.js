@@ -40,6 +40,7 @@ define( [
   'SCENERY/layers/LayerType',
   'SCENERY/layers/Renderer',
   'SCENERY/layers/SVGLayer',
+  'SCENERY/layers/WebGLLayer',
 
   'SCENERY/nodes/CanvasNode',
   'SCENERY/nodes/Circle',
