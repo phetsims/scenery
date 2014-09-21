@@ -58,7 +58,7 @@ define( function( require ) {
       gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR );
       gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR ); // TODO: better filtering
       gl.pixelStorei( gl.UNPACK_FLIP_Y_WEBGL, true );
-      gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas );
+      gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, window.img );
       gl.bindTexture( gl.TEXTURE_2D, null );
     },
 
@@ -66,12 +66,12 @@ define( function( require ) {
       var gl = this.gl;
 
       gl.uniform1i( shaderProgram.uniformLocations.uTexture, 0 ); // TEXTURE0 slot
+
       gl.activeTexture( gl.TEXTURE0 );
       gl.bindTexture( gl.TEXTURE_2D, this.texture );
-
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
       gl.vertexAttribPointer( shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, 0, 0 );
-
+      gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
       gl.bindTexture( gl.TEXTURE_2D, null );
     },
 

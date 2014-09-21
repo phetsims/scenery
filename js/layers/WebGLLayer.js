@@ -105,13 +105,22 @@ define( function( require ) {
       this.setSize( this.logicalWidth, this.logicalHeight );
 
       this.shaderProgram.use();
+
+      var vertexBuffer = this.vertexBuffer = gl.createBuffer();
+      gl.bindBuffer( gl.ARRAY_BUFFER, vertexBuffer );
+      gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [
+        -1, -1,
+        -1, +1,
+        +1, -1,
+        +1, +1
+      ] ), gl.STATIC_DRAW );
     },
 
     render: function( scene, args ) {
       var gl = this.gl;
 
       if ( this.dirty ) {
-        gl.clear( gl.COLOR_BUFFER_BIT );
+        gl.clear( this.gl.COLOR_BUFFER_BIT );
 
         var length = this.instances.length;
         for ( var i = 0; i < length; i++ ) {
@@ -134,11 +143,7 @@ define( function( require ) {
     },
 
     setSize: function( width, height ) {
-      if ( width !== this.canvas.width || height !== this.canvas.height ) {
-        this.canvas.width = width;
-        this.canvas.height = height;
-        this.gl.viewport( 0, 0, width, height );
-      }
+      this.gl.viewport( 0, 0, width, height );
     },
 
     dispose: function() {
