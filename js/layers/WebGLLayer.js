@@ -49,7 +49,8 @@ define( function( require ) {
     try {
       this.gl = this.gl = this.canvas.getContext( 'webgl' ) || this.canvas.getContext( 'experimental-webgl' );
       // TODO: check for required extensions
-    } catch ( e ) {
+    }
+    catch( e ) {
       // TODO: handle gracefully
       throw e;
     }
@@ -85,7 +86,9 @@ define( function( require ) {
   inherit( Layer, WebGLLayer, {
 
     render: function( scene, args ) {
+      if ( this.dirty ) {
 
+      }
     },
 
     dispose: function() {

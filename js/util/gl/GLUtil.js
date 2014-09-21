@@ -8,9 +8,9 @@
 
 define( function( require ) {
   'use strict';
-  
+
   var scenery = require( 'SCENERY/scenery' );
-  
+
   var GLUtil = scenery.GLUtil = {
     getWebGLContext: function( canvas ) {
       var gl = null;
@@ -18,17 +18,18 @@ define( function( require ) {
       for ( var i = 0; i < contextNames.length; i++ ) {
         try {
           gl = canvas.getContext( contextNames[i] );
-        } catch ( e ) {
+        }
+        catch( e ) {
           // consider storing this failure somewhere?
         }
         if ( gl ) {
           break;
         }
       }
-      
+
       return gl;
     }
   };
-  
+
   return GLUtil;
 } );
