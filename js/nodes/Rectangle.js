@@ -19,6 +19,8 @@ define( function( require ) {
   var Matrix3 = require( 'DOT/Matrix3' );
   var Features = require( 'SCENERY/util/Features' );
 
+  var RectangleWebGLDrawable = require( 'SCENERY/nodes/drawables/RectangleWebGLDrawable' );
+
   /**
    * Currently, all numerical parameters should be finite.
    * x:         x-position of the upper-left corner (left bound)
@@ -106,6 +108,9 @@ define( function( require ) {
           bitmask |= scenery.bitmaskSupportsDOM;
         }
       }
+
+      //TODO: Refine the rules for when WebGL can be used
+      bitmask |= scenery.bitmaskSupportsWebGL;
       return bitmask;
     },
 
@@ -122,6 +127,9 @@ define( function( require ) {
            this._rectArcHeight <= maximumArcSize && this._rectArcWidth <= maximumArcSize ) {
         bitmask |= scenery.bitmaskSupportsDOM;
       }
+
+      //TODO: Refine the rules for when WebGL can be used
+      bitmask |= scenery.bitmaskSupportsWebGL;
 
       return bitmask;
     },
@@ -325,6 +333,19 @@ define( function( require ) {
 
       rect.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
     },
+
+    /*---------------------------------------------------------------------------*
+     * WebGL support
+     *----------------------------------------------------------------------------*/
+
+    createWebGLDrawable: function( gl ) {
+      return new RectangleWebGLDrawable( gl, this );
+    },
+
+    updateWebGLDrawable: function( drawable ) {
+      drawable.updateRectangle();
+    },
+
 
     /*---------------------------------------------------------------------------*
      * DOM support
