@@ -66,7 +66,7 @@ define( function( require ) {
     render: function( shaderProgram, viewMatrix ) {
       var gl = this.gl;
 
-      var uMatrix = viewMatrix.timesMatrix( Matrix4.scaling( this.canvasWidth, this.canvasHeight, 1 ) );
+      var uMatrix = viewMatrix.timesMatrix( Matrix4.scaling( this.canvasWidth, -this.canvasHeight, 1 ).timesMatrix( Matrix4.translation( 0, -1 ) ) );
 
       // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to device coordinates
       gl.uniformMatrix4fv( shaderProgram.uniformLocations.uMatrix, false, uMatrix.entries );

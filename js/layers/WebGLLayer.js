@@ -20,6 +20,14 @@ define( function( require ) {
   require( 'SCENERY/util/Util' );
   var ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
 
+  function matrix3To4( matrix3 ) {
+    return new Matrix4(
+      matrix3.m00(), matrix3.m01(), 0, matrix3.m02(),
+      matrix3.m10(), matrix3.m11(), 0, matrix3.m12(),
+      0, 0, 1, 0,
+      0, 0, 0, 1 );
+  }
+
   scenery.WebGLLayer = function WebGLLayer( args ) {
     sceneryLayerLog && sceneryLayerLog( 'WebGLLayer #' + this.id + ' constructor' );
     Layer.call( this, args );
@@ -122,15 +130,20 @@ define( function( require ) {
       if ( this.dirty ) {
         gl.clear( this.gl.COLOR_BUFFER_BIT );
 
-        var projectionMatrix = Matrix4.translation( -1, -1, 0 ).timesMatrix( Matrix4.scaling( 2 / this.logicalWidth, 2 / this.logicalHeight, 1 ) );
+        // (0,height) => (0, -2) => ( 1, -1 )
+
+        var projectionMatrix = Matrix4.translation( -1, 1, 0 ).timesMatrix( Matrix4.scaling( 2 / this.logicalWidth, -2 / this.logicalHeight, 1 ) );
 
         var length = this.instances.length;
         for ( var i = 0; i < length; i++ ) {
           var instance = this.instances[i];
 
-          var modelViewMatrix = instance.trail.getMatrix().toMatrix4();
+          // TODO: this is expensive overhead!
+          var modelViewMatrix = matrix3To4( instance.trail.getMatrix() );
 
           instance.data.drawable.render( this.shaderProgram, projectionMatrix.timesMatrix( modelViewMatrix ) );
+
+          console.log( 'boo' );
         }
       }
     },
