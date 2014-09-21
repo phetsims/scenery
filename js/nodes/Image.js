@@ -70,11 +70,12 @@ define( function( require ) {
     getImage: function() {
       return this._image;
     },
-    
+
     invalidateSupportedRenderers: function() {
       if ( this._image instanceof HTMLCanvasElement ) {
         this.setRendererBitmask( scenery.bitmaskSupportsCanvas );
-      } else {
+      }
+      else {
         // assumes HTMLImageElement
         this.setRendererBitmask( scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskSupportsDOM );
       }
@@ -93,7 +94,8 @@ define( function( require ) {
           image = document.createElement( 'img' );
           image.addEventListener( 'load', this.loadListener );
           image.src = src;
-        } else if ( image instanceof HTMLImageElement ) {
+        }
+        else if ( image instanceof HTMLImageElement ) {
           // only add a listener if we probably haven't loaded yet
           if ( !image.width || !image.height ) {
             image.addEventListener( 'load', this.loadListener );

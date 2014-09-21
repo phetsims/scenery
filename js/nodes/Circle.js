@@ -25,7 +25,8 @@ define( function( require ) {
       // the mutators will call invalidateCircle() and properly set the shape
       options = radius;
       this._radius = options.radius;
-    } else {
+    }
+    else {
       this._radius = radius;
 
       // ensure we have a parameter object
@@ -46,55 +47,55 @@ define( function( require ) {
       }
       return bitmask;
     },
-    
+
     getPathRendererBitmask: function() {
       return scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | ( Features.borderRadius ? scenery.bitmaskSupportsDOM : 0 );
     },
-    
+
     invalidateCircle: function() {
       assert && assert( this._radius >= 0, 'A circle needs a non-negative radius' );
-      
+
       // sets our 'cache' to null, so we don't always have to recompute our shape
       this._shape = null;
-      
+
       // should invalidate the path and ensure a redraw
       this.invalidateShape();
     },
-    
+
     createCircleShape: function() {
       return Shape.circle( 0, 0, this._radius );
     },
-    
+
     intersectsBoundsSelf: function( bounds ) {
       // TODO: handle intersection with somewhat-infinite bounds!
       var x = Math.abs( bounds.centerX );
       var y = Math.abs( bounds.centerY );
       var halfWidth = bounds.maxX - x;
       var halfHeight = bounds.maxY - y;
-      
+
       // too far to have a possible intersection
       if ( x > halfWidth + this._radius || y > halfHeight + this._radius ) {
         return false;
       }
-      
+
       // guaranteed intersection
       if ( x <= halfWidth || y <= halfHeight ) {
         return true;
       }
-      
+
       // corner case
       x -= halfWidth;
       y -= halfHeight;
       return x * x + y * y <= this._radius * this._radius;
     },
-    
+
     paintCanvas: function( wrapper ) {
       var context = wrapper.context;
-      
+
       context.beginPath();
       context.arc( 0, 0, this._radius, 0, Math.PI * 2, false );
       context.closePath();
-      
+
       if ( this._fill ) {
         this.beforeCanvasFill( wrapper ); // defined in Fillable
         context.fill();
@@ -106,7 +107,7 @@ define( function( require ) {
         this.afterCanvasStroke( wrapper ); // defined in Strokable
       }
     },
-    
+
     // create a circle instead of a path, hopefully it is faster in implementations
     createSVGFragment: function( svg, defs, group ) {
       return document.createElementNS( scenery.svgns, 'circle' );
@@ -118,13 +119,13 @@ define( function( require ) {
 
       circle.setAttribute( 'style', this.getSVGFillStyle() + this.getSVGStrokeStyle() );
     },
-    
+
     /*---------------------------------------------------------------------------*
      * DOM support
      *----------------------------------------------------------------------------*/
-    
+
     domUpdateTransformOnRepaint: true, // since we have to integrate the baseline offset into the CSS transform, signal to DOMLayer
-    
+
     getDOMElement: function() {
       var fill = document.createElement( 'div' );
       var stroke = document.createElement( 'div' );
@@ -145,7 +146,7 @@ define( function( require ) {
       fill.style.height = ( 2 * this._radius ) + 'px';
       fill.style[Features.borderRadius] = this._radius + 'px';
       fill.style.backgroundColor = this.getCSSFill();
-      
+
       var stroke = fill.childNodes[0];
       if ( this.hasStroke() ) {
         stroke.style.width = ( 2 * this._radius - this.getLineWidth() ) + 'px';
@@ -156,11 +157,12 @@ define( function( require ) {
         stroke.style.borderColor = this.getSimpleCSSFill();
         stroke.style.borderWidth = this.getLineWidth() + 'px';
         stroke.style[Features.borderRadius] = ( this._radius + this.getLineWidth() / 2 ) + 'px';
-      } else {
+      }
+      else {
         stroke.style.borderStyle = 'none';
       }
     },
-    
+
     // override the transform since we need to customize it with a DOM offset
     updateCSSTransform: function( transform, element ) {
       // shift the text vertically, postmultiplied with the entire transform.
@@ -203,42 +205,46 @@ define( function( require ) {
         var outerRadius = this._radius + iRadius;
         result = result && magSq <= outerRadius * outerRadius;
       }
-      
+
       if ( this._fillPickable ) {
         if ( this._strokePickable ) {
           // we were either within the outer radius, or not
           return result;
-        } else {
+        }
+        else {
           // just testing in the fill range
           return magSq <= this._radius * this._radius;
         }
-      } else if ( this._strokePickable ) {
+      }
+      else if ( this._strokePickable ) {
         var innerRadius = this._radius - iRadius;
         return result && magSq >= innerRadius * innerRadius;
-      } else {
+      }
+      else {
         return false; // neither stroke nor fill is pickable
       }
     },
 
     get radius() { return this.getRadius(); },
     set radius( value ) { return this.setRadius( value ); },
-    
+
     setShape: function( shape ) {
       if ( shape !== null ) {
         throw new Error( 'Cannot set the shape of a scenery.Circle to something non-null' );
-      } else {
+      }
+      else {
         // probably called from the Path constructor
         this.invalidateShape();
       }
     },
-    
+
     getShape: function() {
       if ( !this._shape ) {
         this._shape = this.createCircleShape();
       }
       return this._shape;
     },
-    
+
     hasShape: function() {
       return true;
     }

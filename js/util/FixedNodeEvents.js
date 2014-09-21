@@ -45,7 +45,7 @@ define( function( require ) {
 
       // most commonly a bug, maybe there will be a good use case? can always work around by wrapping with a new function each time
       assert && assert( _.indexOf( this._events[type], listener ),
-        'Event listener was already there for addEventListener with type ' + type );
+          'Event listener was already there for addEventListener with type ' + type );
 
       this._events[type].push( listener );
 
@@ -73,7 +73,7 @@ define( function( require ) {
 
       // ensure the listener is in our list
       assert && assert( _.indexOf( this._events[type], listener ) !== -1,
-        'Listener did not exist for type ' + type );
+          'Listener did not exist for type ' + type );
 
       this._events[type].splice( _.indexOf( this._events[type], listener ), 1 );
 
@@ -88,7 +88,7 @@ define( function( require ) {
      */
     proto.fireEvent = function( type, args ) {
       assert && assert( _.contains( eventNames, type ),
-        'unknown event type: ' + type );
+          'unknown event type: ' + type );
 
       var events = this._events[type];
       var len = events.length;
