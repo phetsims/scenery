@@ -129,10 +129,12 @@ define( function( require ) {
         for ( var i = 0; i < length; i++ ) {
           var instance = this.instances[i];
 
-          // TODO: this is expensive overhead!
-          var modelViewMatrix = matrix3To4( instance.trail.getMatrix() );
+          if ( instance.trail.isVisible() ) {
+            // TODO: this is expensive overhead!
+            var modelViewMatrix = matrix3To4( instance.trail.getMatrix() );
 
-          instance.data.drawable.render( this.shaderProgram, projectionMatrix.timesMatrix( modelViewMatrix ) );
+            instance.data.drawable.render( this.shaderProgram, projectionMatrix.timesMatrix( modelViewMatrix ) );
+          }
         }
       }
     },
