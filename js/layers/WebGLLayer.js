@@ -280,6 +280,8 @@ define( function( require ) {
       sceneryLayerLog && sceneryLayerLog( 'WebGLLayer #' + this.id + ' notifyBeforeSelfChange: ' + instance.trail.toString() );
 
       this.markWebGLDirty();
+
+      instance.node.updateWebGLDrawable( instance.data.drawable );
     },
 
     notifyBeforeSubtreeChange: function( instance ) {
