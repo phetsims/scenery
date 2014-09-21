@@ -10,6 +10,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var Matrix4 = require( 'DOT/Matrix4' );
   var scenery = require( 'SCENERY/scenery' );
   var Util = require( 'SCENERY/util/Util' );
 
@@ -29,10 +30,10 @@ define( function( require ) {
       var vertexBuffer = this.vertexBuffer = gl.createBuffer();
       gl.bindBuffer( gl.ARRAY_BUFFER, vertexBuffer );
       gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [
-        -1, -1,
-        -1, +1,
-        +1, -1,
-        +1, +1
+        0, 0,
+        0, 1,
+        1, 0,
+        1, 1
       ] ), gl.STATIC_DRAW );
 
       this.updateImage();
@@ -47,8 +48,8 @@ define( function( require ) {
 
       var canvas = document.createElement( 'canvas' );
       var context = canvas.getContext( '2d' );
-      canvas.width = Util.toPowerOf2( this.imageNode.getImageWidth() );
-      canvas.height = Util.toPowerOf2( this.imageNode.getImageHeight() );
+      this.canvasWidth = canvas.width = Util.toPowerOf2( this.imageNode.getImageWidth() );
+      this.canvasHeight = canvas.height = Util.toPowerOf2( this.imageNode.getImageHeight() );
       context.drawImage( this.imageNode._image, 0, 0 );
 
       var texture = this.texture = gl.createTexture();
@@ -58,13 +59,17 @@ define( function( require ) {
       gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR );
       gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR ); // TODO: better filtering
       gl.pixelStorei( gl.UNPACK_FLIP_Y_WEBGL, true );
-      gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, window.img );
+      gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas );
       gl.bindTexture( gl.TEXTURE_2D, null );
     },
 
-    render: function( shaderProgram ) {
+    render: function( shaderProgram, viewMatrix ) {
       var gl = this.gl;
 
+      var uMatrix = viewMatrix.timesMatrix( Matrix4.scaling( this.canvasWidth, this.canvasHeight, 1 ) );
+
+      // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to device coordinates
+      gl.uniformMatrix4fv( shaderProgram.uniformLocations.uMatrix, false, uMatrix.entries );
       gl.uniform1i( shaderProgram.uniformLocations.uTexture, 0 ); // TEXTURE0 slot
 
       gl.activeTexture( gl.TEXTURE0 );

@@ -84,7 +84,7 @@ define( function( require ) {
         'varying vec2 texCoord;\n' +
         'uniform mat4 uMatrix;\n' +
         'void main() {\n' +
-        '  texCoord = aVertex.xy * 0.5 + 0.5;\n' +
+        '  texCoord = aVertex.xy;\n' +
         '  gl_Position = uMatrix * vec4( aVertex, 1 );\n' +
         // '  gl_Position = vec4( aVertex * 100.0, 1 );\n' +
         '}',
@@ -122,13 +122,15 @@ define( function( require ) {
       if ( this.dirty ) {
         gl.clear( this.gl.COLOR_BUFFER_BIT );
 
+        var projectionMatrix = Matrix4.translation( -1, -1, 0 ).timesMatrix( Matrix4.scaling( 2 / this.logicalWidth, 2 / this.logicalHeight, 1 ) );
+
         var length = this.instances.length;
         for ( var i = 0; i < length; i++ ) {
           var instance = this.instances[i];
 
-          // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to view space coordinates
-          gl.uniformMatrix4fv( this.shaderProgram.uniformLocations.uMatrix, false, Matrix4.IDENTITY.entries );
-          instance.data.drawable.render( this.shaderProgram );
+          var modelViewMatrix = instance.trail.getMatrix().toMatrix4();
+
+          instance.data.drawable.render( this.shaderProgram, projectionMatrix.timesMatrix( modelViewMatrix ) );
         }
       }
     },
