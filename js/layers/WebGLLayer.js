@@ -10,24 +10,16 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
-  var Bounds2 = require( 'DOT/Bounds2' );
+  var Matrix4 = require( 'DOT/Matrix4' );
 
   var scenery = require( 'SCENERY/scenery' );
-
-  var Shape = require( 'KITE/Shape' );
 
   var Layer = require( 'SCENERY/layers/Layer' ); // uses Layer's prototype for inheritance
   require( 'SCENERY/util/Trail' );
   require( 'SCENERY/util/TrailPointer' );
   require( 'SCENERY/util/Util' );
+  var ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
 
-  // stores CanvasContextWrappers to be re-used
-  var canvasContextPool = [];
-
-  // assumes main is wrapped with JQuery
-  /*
-   *
-   */
   scenery.WebGLLayer = function WebGLLayer( args ) {
     sceneryLayerLog && sceneryLayerLog( 'WebGLLayer #' + this.id + ' constructor' );
     Layer.call( this, args );
@@ -45,27 +37,6 @@ define( function( require ) {
 
     this.canvas = document.createElement( 'canvas' );
 
-    this.gl = null;
-    try {
-      this.gl = this.gl = this.canvas.getContext( 'webgl' ) || this.canvas.getContext( 'experimental-webgl' );
-      // TODO: check for required extensions
-    }
-    catch( e ) {
-      // TODO: handle gracefully
-      throw e;
-    }
-    if ( !this.gl ) {
-      throw new Error( 'Unable to load WebGL' );
-    }
-
-    this.currentProgram = null; // {MOBIUS/ShaderProgram}
-
-    this.gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
-
-    this.gl.enable( this.gl.DEPTH_TEST );
-    this.gl.enable( this.gl.BLEND );
-    this.gl.blendFunc( this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA );
-
     this.canvas.width = this.logicalWidth * this.backingScale;
     this.canvas.height = this.logicalHeight * this.backingScale;
     this.canvas.style.width = this.logicalWidth + 'px';
@@ -80,14 +51,93 @@ define( function( require ) {
     this.scene = args.scene;
 
     this.isWebGLLayer = true;
+
+    this.gl = null;
+    try {
+      this.gl = this.gl = this.canvas.getContext( 'webgl' ) || this.canvas.getContext( 'experimental-webgl' );
+      // TODO: check for required extensions
+    }
+    catch( e ) {
+      // TODO: handle gracefully
+      throw e;
+    }
+    if ( !this.gl ) {
+      throw new Error( 'Unable to load WebGL' );
+    }
+
+    this.initialize();
+
+    this.instances = [];
   };
   var WebGLLayer = scenery.WebGLLayer;
 
   inherit( Layer, WebGLLayer, {
+    initialize: function() {
+      var gl = this.gl;
+      gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
+
+      gl.enable( gl.BLEND );
+      gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );
+
+      this.shaderProgram = new ShaderProgram( gl, // vertex shader
+        'attribute vec3 aVertex;\n' +
+        'varying vec2 texCoord;\n' +
+        'uniform mat4 uMatrix;\n' +
+        'void main() {\n' +
+        '  texCoord = aVertex.xy * 0.5 + 0.5;\n' +
+        '  gl_Position = uMatrix * vec4( aVertex, 1 );\n' +
+        // '  gl_Position = vec4( aVertex * 100.0, 1 );\n' +
+        '}',
+
+        // fragment shader
+        'precision highp float;\n' +
+        'varying vec2 texCoord;\n' +
+        'uniform sampler2D uTexture;\n' +
+        'void main() {\n' +
+        '  gl_FragColor = texture2D( uTexture, texCoord );\n' +
+        // '  gl_FragColor = vec4( 0.0, 0.0, 1.0, 1.0 );\n' +
+        '}',
+
+        ['aVertex'], // attribute names
+        ['uTexture','uMatrix'] // uniform names
+      );
+
+      this.setSize( this.logicalWidth, this.logicalHeight );
+
+      this.shaderProgram.use();
+    },
 
     render: function( scene, args ) {
-      if ( this.dirty ) {
+      var gl = this.gl;
 
+      if ( this.dirty ) {
+        gl.clear( gl.COLOR_BUFFER_BIT );
+
+        var length = this.instances.length;
+        for ( var i = 0; i < length; i++ ) {
+          var instance = this.instances[i];
+
+          // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to view space coordinates
+          gl.uniformMatrix4fv( this.shaderProgram.uniformLocations.uMatrix, false, Matrix4.IDENTITY.entries );
+          instance.data.drawable.render( this.shaderProgram );
+        }
+      }
+    },
+
+    switchToProgram: function( shaderProgram ) {
+      if ( shaderProgram !== this.shaderProgram ) {
+        this.shaderProgram && this.shaderProgram.unuse();
+        shaderProgram.use();
+
+        this.shaderProgram = shaderProgram;
+      }
+    },
+
+    setSize: function( width, height ) {
+      if ( width !== this.canvas.width || height !== this.canvas.height ) {
+        this.canvas.width = width;
+        this.canvas.height = height;
+        this.gl.viewport( 0, 0, width, height );
       }
     },
 
@@ -95,6 +145,9 @@ define( function( require ) {
       Layer.prototype.dispose.call( this );
 
       this.canvas.parentNode.removeChild( this.canvas );
+
+      this.shaderProgram.unuse();
+      this.shaderProgram.dispose();
     },
 
     applyTransformationMatrix: function( matrix ) {
@@ -136,7 +189,22 @@ define( function( require ) {
       sceneryLayerLog && sceneryLayerLog( 'WebGLLayer #' + this.id + ' addInstance: ' + trail.toString() );
       Layer.prototype.addInstance.call( this, instance );
 
-      // TODO
+      instance.data.drawable = instance.node.createWebGLDrawable( this.gl );
+
+      // insert into this.instances array
+      var added = false;
+      for ( var i = 0; i < this.instances.length; i++ ) {
+        if ( instance.trail.compare( this.instances[i].trail ) < 0 ) {
+          this.instances.splice( i, 0, instance );
+          added = true;
+          break;
+        }
+      }
+      if ( !added ) {
+        this.instances.push( instance );
+      }
+
+      this.markWebGLDirty();
     },
 
     removeInstance: function( instance ) {
@@ -145,7 +213,13 @@ define( function( require ) {
       sceneryLayerLog && sceneryLayerLog( 'WebGLLayer #' + this.id + ' removeInstance: ' + trail.toString() );
       Layer.prototype.removeInstance.call( this, instance );
 
-      // TODO
+      instance.data.drawable.dispose();
+      instance.data.drawable = null;
+
+      // remove from this.instances array
+      this.instances.splice( this.instances.indexOf( instance ), 1 );
+
+      this.markWebGLDirty();
     },
 
     getName: function() {
@@ -199,6 +273,8 @@ define( function( require ) {
       sceneryLayerLog && sceneryLayerLog( 'WebGLLayer #' + this.id + ' notifyDirtySelfPaint: ' + instance.trail.toString() );
 
       this.markWebGLDirty();
+
+      instance.node.updateWebGLDrawable( instance.data.drawable );
     },
 
     notifyDirtySubtreePaint: function( instance ) {

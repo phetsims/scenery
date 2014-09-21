@@ -75,13 +75,10 @@ define( [
   'SCENERY/util/RenderInterval',
   'SCENERY/util/SceneImage',
   'SCENERY/util/SceneryStyle',
+  'SCENERY/util/ShaderProgram',
   'SCENERY/util/Trail',
   'SCENERY/util/TrailPointer',
   'SCENERY/util/Util',
-
-  'SCENERY/util/gl/GLUtil',
-  'SCENERY/util/gl/GLShader',
-  'SCENERY/util/gl/GLShaderProgram',
 
   'SCENERY/Scene'
 ], function( scenery // note: we don't need any of the other parts, we just need to specify them as dependencies so they fill in the scenery namespace
