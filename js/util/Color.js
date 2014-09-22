@@ -617,15 +617,5 @@ define( function( require ) {
     return new Color( r, g, b, a );
   };
 
-  //Create a color from some other object, but don't allocate a new Color instance if it already was one
-  Color.toColor = function( c ) {
-    if ( c instanceof Color ) {
-      return c;
-    }
-    else {
-      return new Color( c );
-    }
-  };
-
   return Color;
 } );
