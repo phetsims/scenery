@@ -2,20 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
   <title>Scenery Rendering Renderer Comparison</title>
-  
+
   <!-- jQuery and LoDash are dependencies -->
   <script src="../../sherpa/jquery-2.1.0.min.js"></script>
   <script src="../../sherpa/lodash-2.4.1.min.js"></script>
   <script src="../../sherpa/has.js"></script>
-  
+
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script data-main="../js/config.js" src="../../sherpa/require-2.1.11.js"></script>
   <!-- <script src="../build/development/scenery.js"></script> -->
   <!-- <script src="../build/standalone/scenery.min.js"></script> -->
-  
+
   <style type="text/css">
     .testname {
       clear: both;
@@ -24,7 +24,7 @@
       padding-top: 20px;
       padding-bottom: 5px;
     }
-    
+
     .scene {
       float: left;
       margin-left: 5px;
@@ -34,7 +34,7 @@
       padding: 0 !important; /* in case we add jQuery Mobile back in */
       border: 1px solid black;
     }
-    
+
     .scene.canvas:after {
       content: "Canvas";
       position: absolute;
@@ -42,7 +42,7 @@
       left: 2px;
       opacity: 0.3;
     }
-    
+
     .scene.svg:after {
       content: "SVG";
       position: absolute;
@@ -50,7 +50,7 @@
       left: 2px;
       opacity: 0.3;
     }
-    
+
     .scene.dom:after {
       content: "DOM";
       position: absolute;
@@ -62,11 +62,11 @@
 </head>
 
 <body>
-  
-  <h1>Scenery Renderer Comparison</h1>
-  
-  <script>
-  
+
+<h1>Scenery Renderer Comparison</h1>
+
+<script>
+
   requirejs( [ 'main', '../../kite/js/main', '../../dot/js/main' ], function( scenery, kite, dot ) {
     var testCases = [
       {
@@ -87,7 +87,8 @@
           } ) );
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG, scenery.Renderer.WEBGL ]
-      },{
+      },
+      {
         name: 'Circle',
         width: 64,
         height: 64,
@@ -107,7 +108,8 @@
           } ) );
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
-      },{
+      },
+      {
         name: 'Hexagon',
         width: 64,
         height: 64,
@@ -121,7 +123,8 @@
           } ) );
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
-      },{
+      },
+      {
         name: 'Quadratic B\u00E9zier',
         width: 64,
         height: 64,
@@ -135,7 +138,8 @@
           } ) );
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
-      },{
+      },
+      {
         name: 'Cubic B\u00E9zier',
         width: 64,
         height: 64,
@@ -149,7 +153,8 @@
           } ) );
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
-      },{
+      },
+      {
         name: 'Linear Gradients',
         width: 128,
         height: 64,
@@ -159,12 +164,12 @@
           fillGradient.addColorStop( 0.5, '#00ff00' );
           fillGradient.addColorStop( 0.6, 'rgba(0,255,0,0.3)' );
           fillGradient.addColorStop( 0.9, '#000000' );
-          
+
           var strokeGradient = new scenery.LinearGradient( 0, -15, 0, 15 );
           strokeGradient.addColorStop( 0, '#ff0000' );
           strokeGradient.addColorStop( 0.5, '#00ff00' );
           strokeGradient.addColorStop( 1, '#0000ff' );
-          
+
           scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
             x: 32,
             y: 32,
@@ -183,9 +188,10 @@
           } ) );
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
-      },{
+      },
+      {
         name: 'Radial Gradients',
-        width: 128+64,
+        width: 128 + 64,
         height: 64,
         draw: function( scene ) {
           var fillGradient = new scenery.RadialGradient( 22, 0, 0, 22, 0, 44 );
@@ -193,18 +199,18 @@
           fillGradient.addColorStop( 0.5, '#00ff00' );
           fillGradient.addColorStop( 0.6, 'rgba(0,255,0,0.3)' );
           fillGradient.addColorStop( 0.9, '#000000' );
-          
+
           var mainGradient = new scenery.RadialGradient( 32, 20, 10, 32, 32, 32 );
           mainGradient.addColorStop( 0, '#8ED6FF' );
           mainGradient.addColorStop( 0.5, '#004CB3' );
           mainGradient.addColorStop( 0.6, '#bbbbbb' );
           mainGradient.addColorStop( 1, '#ffffff' );
-          
+
           var transformedGradient = new scenery.RadialGradient( 0, 0, 0, 0, 0, 64 );
           transformedGradient.addColorStop( 0.3, '#8ED6FF' );
           transformedGradient.addColorStop( 1, '#004CB3' );
           transformedGradient.setTransformMatrix( dot.Matrix3.translation( 32, 32 ).timesMatrix( dot.Matrix3.rotation2( Math.PI / 4 ).timesMatrix( dot.Matrix3.scaling( 1, 0.25 ) ) ) );
-          
+
           scene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 64, 64 ), {
             fill: mainGradient
           } ) );
@@ -222,7 +228,8 @@
           } ) );
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
-      },{
+      },
+      {
         name: 'RGBA',
         width: 64,
         height: 64,
@@ -239,7 +246,8 @@
           } ) );
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
-      },{
+      },
+      {
         name: 'Dashes',
         width: 64,
         height: 64,
@@ -247,27 +255,28 @@
           scene.addChild( new scenery.Path( kite.Shape.rectangle( 10, 10, 44, 44 ), {
             stroke: '#000',
             lineWidth: 3,
-            lineDash: [7,2,3,2],
+            lineDash: [7, 2, 3, 2],
             x: 0.5,
             y: 0.5
           } ) );
           scene.addChild( new scenery.Rectangle( 5, 5, 54, 54, {
             stroke: '#000',
             lineWidth: 3,
-            lineDash: [7,2,3,2],
+            lineDash: [7, 2, 3, 2],
             x: 0.5,
             y: 0.5
           } ) );
           scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 15 ), {
             stroke: '#000',
-            lineDash: [5,5],
+            lineDash: [5, 5],
             lineDashOffset: 5,
             x: 32.5,
             y: 32.5
           } ) );
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
-      },{
+      },
+      {
         name: 'Images',
         width: 220,
         height: 120,
@@ -276,7 +285,7 @@
           thumbnail.addEventListener( 'load', function() {
             scene.addChild( new scenery.Image( thumbnail ) );
             scene.updateScene();
-            
+
             // ugly hack placement for correct z-index
             var logo = document.createElement( 'img' );
             logo.addEventListener( 'load', function() {
@@ -293,7 +302,8 @@
           thumbnail.src = 'http://phet.colorado.edu/sims/molecule-polarity/molecule-polarity-thumbnail.png';
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG, scenery.Renderer.DOM ]
-      },{
+      },
+      {
         name: 'Patterns',
         width: 64,
         height: 64,
@@ -314,7 +324,8 @@
           img.src = 'http://phet.colorado.edu/files/archive/images/circleArrow_Icon.gif';
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
-      },{
+      },
+      {
         name: 'Overlapping and Nested Rotations',
         width: 128,
         height: 128,
@@ -324,7 +335,7 @@
             rotation: Math.PI / 12
           } );
           scene.addChild( container );
-          
+
           container.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 44, 44 ), {
             x: 10.5,
             y: 10.5,
@@ -333,7 +344,7 @@
             stroke: '#000000',
             lineWidth: 3
           } ) );
-          
+
           container.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 44, 44 ), {
             x: 30.5,
             y: 10.5,
@@ -344,7 +355,8 @@
           } ) );
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
-      },{
+      },
+      {
         name: 'DAG support',
         width: 256,
         height: 128,
@@ -356,12 +368,12 @@
             stroke: '#000000',
             lineWidth: 3
           } );
-          
+
           var arrow = new scenery.Path( kite.Shape.regularPolygon( 3, 10 ), {
             fill: 'rgba(0,255,0,1)',
             stroke: '#000000'
           } );
-          
+
           var combined = new scenery.Node();
           combined.addChild( square );
           var leftArrow = new scenery.Node( { x: 15, y: 25 } );
@@ -370,7 +382,7 @@
           var rightArrow = new scenery.Node( { x: 35, y: 25 } );
           rightArrow.addChild( arrow );
           combined.addChild( rightArrow );
-          
+
           var a = new scenery.Node( { x: 20, y: 20 } );
           a.addChild( combined );
           var b = new scenery.Node( { x: 120, y: 30, rotation: Math.PI / 4 } );
@@ -382,7 +394,8 @@
           scene.addChild( c );
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
-      },{
+      },
+      {
         name: 'Text',
         width: 256,
         height: 128,
@@ -402,18 +415,19 @@
           } ) );
           scene.addChild( new scenery.Text( 'Bb', {
             fontSize: 100,
-            centerX: 64+128,
+            centerX: 64 + 128,
             centerY: 64,
             fill: new scenery.LinearGradient( 0, 0, 0, -40 )
-                             .addColorStop( 0, '#f00' )
-                             .addColorStop( 1, '#0f0' ),
+                .addColorStop( 0, '#f00' )
+                .addColorStop( 1, '#0f0' ),
             stroke: '#777',
             lineWidth: 3,
             lineJoin: 'round'
           } ) );
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
-      },{
+      },
+      {
         name: 'HTML Text',
         width: 512,
         height: 128,
@@ -426,7 +440,8 @@
           } ) );
         },
         renderers: [ scenery.Renderer.DOM ]
-      },{
+      },
+      {
         name: 'Circles and Arcs',
         width: 200,
         height: 64,
@@ -437,25 +452,25 @@
             stroke: '#000000',
             lineWidth: 3
           } ) );
-          
+
           x += 64;
           scene.addChild( new scenery.Path( kite.Shape.arc( x, 25, 20, Math.PI / 4, Math.PI * 3 / 2, false ), {
             fill: 'rgba(255,0,0,0.5)',
             stroke: '#aa0000',
             lineWidth: 3
           } ) );
-          
+
           scene.addChild( new scenery.Path( kite.Shape.arc( x, 25, 20, Math.PI / 4, Math.PI * 3 / 2, true ), {
             fill: 'rgba(0,0,255,0.5)',
             stroke: '#0000aa',
             lineWidth: 3
           } ) );
-          
+
           x += 64;
           scene.addChild( new scenery.Path( new kite.Shape().moveTo( 0, 0 )
-                                                            .arc( 0, 0, 20, 0, Math.PI / 3, false )
-                                                            .arc( 0, 0, 20, Math.PI / 3 + Math.PI, Math.PI, true )
-                                                            .close(),{
+              .arc( 0, 0, 20, 0, Math.PI / 3, false )
+              .arc( 0, 0, 20, Math.PI / 3 + Math.PI, Math.PI, true )
+              .close(), {
             x: x,
             y: 25.5,
             fill: '#ff0000',
@@ -464,7 +479,8 @@
           } ) );
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
-      },{
+      },
+      {
         name: 'Ellipses and Elliptical Arcs',
         width: 200,
         height: 64,
@@ -475,25 +491,25 @@
             stroke: '#000000',
             lineWidth: 3
           } ) );
-          
+
           x += 64;
           scene.addChild( new scenery.Path( new kite.Shape().ellipticalArc( x, 25, 20, 10, Math.PI / 6, Math.PI / 4, Math.PI * 3 / 2, false ), {
             fill: 'rgba(255,0,0,0.5)',
             stroke: '#aa0000',
             lineWidth: 3
           } ) );
-          
+
           scene.addChild( new scenery.Path( new kite.Shape().ellipticalArc( x, 25, 20, 10, Math.PI / 6, Math.PI / 4, Math.PI * 3 / 2, true ), {
             fill: 'rgba(0,0,255,0.5)',
             stroke: '#0000aa',
             lineWidth: 3
           } ) );
-          
+
           x += 64;
           scene.addChild( new scenery.Path( new kite.Shape().moveTo( 0, 0 )
-                                                            .ellipticalArc( 0, 0, 20, 10, 0, 0, Math.PI / 3, false )
-                                                            .ellipticalArc( 0, 0, 20, 10, 0, Math.PI / 3 + Math.PI, Math.PI, true )
-                                                            .close(), {
+              .ellipticalArc( 0, 0, 20, 10, 0, 0, Math.PI / 3, false )
+              .ellipticalArc( 0, 0, 20, 10, 0, Math.PI / 3 + Math.PI, Math.PI, true )
+              .close(), {
             x: x,
             y: 25.5,
             fill: '#ff0000',
@@ -502,7 +518,8 @@
           } ) );
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
-      },{
+      },
+      {
         name: 'DOM Elements',
         width: 200,
         height: 200,
@@ -513,10 +530,10 @@
             x: 20,
             y: 20
           } ) );
-          
+
           var form = document.createElement( 'form' );
           form.innerHTML = '<label>Type in me:</label><input type="text">';
-          
+
           scene.addChild( new scenery.DOM( form, {
             x: 50,
             y: 50,
@@ -524,7 +541,8 @@
           } ) );
         },
         renderers: [ scenery.Renderer.DOM ]
-      },{
+      },
+      {
         name: 'Invisible nodes',
         width: 64,
         height: 64,
@@ -552,7 +570,8 @@
           third.visible = false; // delayed, should cause issues with old SVG handling
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
-      },{
+      },
+      {
         name: 'Simple Clipping',
         width: 64,
         height: 64,
@@ -565,7 +584,8 @@
           } ) );
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
-      },{
+      },
+      {
         name: 'Nested Clipping',
         width: 64,
         height: 64,
@@ -583,7 +603,8 @@
           scene.clipArea = clipShape2;
         },
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
-      },{
+      },
+      {
         name: 'Opacity',
         width: 64,
         height: 64,
@@ -601,26 +622,26 @@
         renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG ]
       }
     ];
-    
+
     var renderers = [
       scenery.Renderer.Canvas,
       scenery.Renderer.SVG,
       scenery.Renderer.DOM
       // TODO: add WebGL, and possibly DOM for things like text?
     ];
-    
+
     _.each( testCases, function( testCase ) {
       var $testTitle = $( document.createElement( 'h2' ) );
       $testTitle.text( testCase.name );
       $testTitle.addClass( 'testname' );
       $( document.body ).append( $testTitle );
-      
+
       _.each( renderers, function( renderer ) {
         // don't render unsupported renderers for specific test cases
         if ( !_.contains( testCase.renderers, renderer ) ) {
           return;
         }
-        
+
         var layerType = renderer.defaultLayerType;
         var $container = $( document.createElement( 'div' ) );
         $container.addClass( 'scene' );
@@ -628,11 +649,11 @@
         $container.width( testCase.width || 320 );
         $container.height( testCase.height || 240 );
         $( document.body ).append( $container );
-        
+
         var scene = new scenery.Scene( $container, {
           renderer: renderer
         } );
-        
+
         // try {
         testCase.draw( scene );
         // } catch( e ) {
@@ -646,7 +667,7 @@
     } );
   } );
 
-  </script>
+</script>
 
 </body>
 </html>
