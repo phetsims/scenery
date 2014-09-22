@@ -33,12 +33,10 @@ define( function( require ) {
       gl.bufferData(
         gl.ARRAY_BUFFER,
         new Float32Array( [
-          -1.0, -1.0,
-          1.0, -1.0,
-          -1.0, 1.0,
-          -1.0, 1.0,
-          1.0, -1.0,
-          1.0, 1.0] ),
+          0, 0,
+          1, 0,
+          0, 1,
+          1, 1] ),
         gl.STATIC_DRAW );
 
       this.updateRectangle();
@@ -61,7 +59,7 @@ define( function( require ) {
       gl.vertexAttribPointer( positionLocation, 2, gl.FLOAT, false, 0, 0 );
 
       // draw
-      gl.drawArrays( gl.TRIANGLES, 0, 6 );
+      gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
     },
 
     dispose: function() {
