@@ -27,8 +27,6 @@ define( function( require ) {
     initialize: function() {
       var gl = this.gl;
 
-      this.texture = null;
-
       this.buffer = gl.createBuffer();
       gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
       gl.bufferData(
