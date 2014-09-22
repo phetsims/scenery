@@ -19,6 +19,8 @@ define( function( require ) {
     this.imageNode = imageNode;
 
     this.gl = gl;
+
+    //Do most of the work in an initialize function to handle WebGL context loss
     this.initialize( gl );
   };
 

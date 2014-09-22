@@ -20,6 +20,8 @@ define( function( require ) {
     this.rectangleNode = rectangleNode;
 
     this.gl = gl;
+
+    //Do most of the work in an initialize function to handle WebGL context loss
     this.initialize( gl );
   };
 
@@ -31,16 +33,22 @@ define( function( require ) {
       gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
       gl.bufferData(
         gl.ARRAY_BUFFER,
+
+        //Small triangle strip that creates a square, which will be transformed into the right rectangle shape
         new Float32Array( [
           0, 0,
           1, 0,
           0, 1,
           1, 1] ),
+
+        //TODO: Once we are lazily handling the full matrix, we may benefit from DYNAMIC draw here, and updating the vertices themselves
         gl.STATIC_DRAW );
 
       this.updateRectangle();
     },
 
+    //Nothing necessary since everything currently handled in the uMatrix below
+    //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
     updateRectangle: function() {
     },
 

@@ -20,6 +20,7 @@ define( function( require ) {
   require( 'SCENERY/util/Util' );
   var ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
 
+  //Scenery uses Matrix3 and WebGL uses Matrix4, so we must convert.
   function matrix3To4( matrix3 ) {
     return new Matrix4(
       matrix3.m00(), matrix3.m01(), 0, matrix3.m02(),
@@ -28,6 +29,11 @@ define( function( require ) {
       0, 0, 0, 1 );
   }
 
+  /**
+   * Constructor for WebGLLayer
+   * @param args renderer options (none at the moment)
+   * @constructor
+   */
   scenery.WebGLLayer = function WebGLLayer( args ) {
     sceneryLayerLog && sceneryLayerLog( 'WebGLLayer #' + this.id + ' constructor' );
     Layer.call( this, args );
@@ -62,7 +68,7 @@ define( function( require ) {
 
     this.gl = null;
     try {
-      this.gl = this.gl = this.canvas.getContext( 'webgl' ) || this.canvas.getContext( 'experimental-webgl' );
+      this.gl = this.canvas.getContext( 'webgl' ) || this.canvas.getContext( 'experimental-webgl' );
       // TODO: check for required extensions
     }
     catch( e ) {
@@ -89,10 +95,23 @@ define( function( require ) {
 
         //This is an ubershader, which handles all of the different vertex/fragment types in a single shader
         //To reduce overhead of switching programs.
-        this.shaderProgram = new ShaderProgram( gl, // vertex shader
+        //TODO: Perhaps the shader program should be loaded through an external file with a RequireJS plugin
+        this.shaderProgram = new ShaderProgram( gl,
+
+          /********** Vertex Shader **********/
+
+          //The vertex to be transformed
             'attribute vec3 aVertex;\n' +
+
+            // The transformation matrix
             'uniform mat4 uMatrix;\n' +
+
+            // The texture coordinates (if any)
+            //TODO: Is this needed here in the vertex shader?
             'varying vec2 texCoord;\n' +
+
+            // The color to render (if any)
+            //TODO: Is this needed here in the vertex shader?
             'uniform vec4 uColor;\n' +
             'void main() {\n' +
 
@@ -102,11 +121,21 @@ define( function( require ) {
             '  gl_Position = uMatrix * vec4( aVertex, 1 );\n' +
             '}',
 
-          // fragment shader
+          /********** Fragment Shader **********/
+
+          //Directive to indicate high precision
             'precision highp float;\n' +
+
+            //Texture coordinates (for images)
             'varying vec2 texCoord;\n' +
+
+            //Color (rgba) for filled items
             'uniform vec4 uColor;\n' +
+
+            //Fragment type such as fragmentTypeFill or fragmentTypeTexture
             'uniform int uFragmentType;\n' +
+
+            //Texture (if any)
             'uniform sampler2D uTexture;\n' +
             'void main() {\n' +
             '  if (uFragmentType==' + WebGLLayer.fragmentTypeFill + '){\n' +
@@ -137,7 +166,6 @@ define( function( require ) {
 
           var length = this.instances.length;
           for ( var i = 0; i < length; i++ ) {
-//            console.log( this.instances[i].node.constructor.name );
             var instance = this.instances[i];
 
             if ( instance.trail.isVisible() ) {
