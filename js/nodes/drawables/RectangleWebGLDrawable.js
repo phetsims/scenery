@@ -14,6 +14,7 @@ define( function( require ) {
   var Matrix4 = require( 'DOT/Matrix4' );
   var scenery = require( 'SCENERY/scenery' );
   var Util = require( 'SCENERY/util/Util' );
+  var Vector3 = require( 'DOT/Vector3' );
 
   scenery.RectangleWebGLDrawable = function RectangleWebGLDrawable( gl, rectangleNode ) {
     this.rectangleNode = rectangleNode;
@@ -48,8 +49,9 @@ define( function( require ) {
     render: function( shaderProgram, viewMatrix ) {
       var gl = this.gl;
 
-      //TODO: Translate the rectangle by its (x,y) origin
-      var uMatrix = viewMatrix.timesMatrix( Matrix4.scaling( this.rectangleNode.getWidth(), this.rectangleNode.getHeight(), 1 ).timesMatrix( Matrix4.translation( 0, -1 ) ) );
+      var rectangleOffset = Matrix4.translation( this.rectangleNode.getRectX(), this.rectangleNode.getRectY(), 0 );
+      var rectangleSize = Matrix4.scaling( this.rectangleNode.getWidth(), this.rectangleNode.getHeight(), 1 );
+      var uMatrix = viewMatrix.timesMatrix( rectangleOffset.timesMatrix( rectangleSize ) );
 
       // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to device coordinates
       gl.uniformMatrix4fv( shaderProgram.uniformLocations.uMatrix, false, uMatrix.entries );
