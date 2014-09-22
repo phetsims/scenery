@@ -185,11 +185,6 @@ define( function( require ) {
       // we always have Canvas support?
       bitmask |= scenery.bitmaskSupportsCanvas;
 
-      //TODO: This seems like it should be handled elsewhere.  Would be good for JO to take a look
-      if ( this.constructor.name === 'Rectangle' ) {
-        bitmask |= scenery.bitmaskSupportsWebGL;
-      }
-
       if ( !this._fill ) {
         // if there is no fill, it is supported by DOM
         bitmask |= scenery.bitmaskSupportsDOM;
@@ -201,8 +196,9 @@ define( function( require ) {
         // no gradient support for DOM (for now!)
       }
       else {
-        // solid fills always supported for DOM
+        // solid fills always supported for DOM and WebGL
         bitmask |= scenery.bitmaskSupportsDOM;
+        bitmask |= scenery.bitmaskSupportsWebGL;
       }
 
       return bitmask;

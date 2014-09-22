@@ -50,6 +50,9 @@ define( function( require ) {
         throw new Error( 'scenery.Color unable to parse color string: ' + r );
       }
     }
+    else if ( r instanceof Color ) {
+      this.setRGBA( r.r, r.g, r.b, r.a );
+    }
     else {
       // alpha
       var alpha = a === undefined ? 1 : a;
@@ -392,8 +395,8 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * listeners TODO: consider mixing in this behavior, it's common
-    *----------------------------------------------------------------------------*/
+     * listeners TODO: consider mixing in this behavior, it's common
+     *----------------------------------------------------------------------------*/
 
     // listener should be a callback expecting no arguments, listener() will be called when the color changes
     addChangeListener: function( listener ) {
@@ -612,6 +615,16 @@ define( function( require ) {
     var b = Math.floor( linear( 0, 1, color1.b, color2.b, distance ) );
     var a = linear( 0, 1, color1.a, color2.a, distance );
     return new Color( r, g, b, a );
+  };
+
+  //Create a color from some other object, but don't allocate a new Color instance if it already was one
+  Color.toColor = function( c ) {
+    if ( c instanceof Color ) {
+      return c;
+    }
+    else {
+      return new Color( c );
+    }
   };
 
   return Color;

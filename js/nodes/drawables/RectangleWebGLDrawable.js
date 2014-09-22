@@ -13,8 +13,8 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var Matrix4 = require( 'DOT/Matrix4' );
   var scenery = require( 'SCENERY/scenery' );
-  var Util = require( 'SCENERY/util/Util' );
-  var Vector3 = require( 'DOT/Vector3' );
+  var WebGLLayer = require( 'SCENERY/layers/WebGLLayer' );
+  var Color = require( 'SCENERY/util/Color' );
 
   scenery.RectangleWebGLDrawable = function RectangleWebGLDrawable( gl, rectangleNode ) {
     this.rectangleNode = rectangleNode;
@@ -53,6 +53,11 @@ define( function( require ) {
 
       // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to device coordinates
       gl.uniformMatrix4fv( shaderProgram.uniformLocations.uMatrix, false, uMatrix.entries );
+
+      //Indicate the branch of logic to use in the ubershader.  In this case, a texture should be used for the image
+      gl.uniform1i( shaderProgram.uniformLocations.uFragmentType, WebGLLayer.fragmentTypeFill );
+      var color = Color.toColor( this.rectangleNode._fill );
+      gl.uniform4f( shaderProgram.uniformLocations.uColor, color.r / 255, color.g / 255, color.b / 255, color.a );
 
       gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
       gl.vertexAttribPointer( shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, 0, 0 );

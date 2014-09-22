@@ -13,6 +13,7 @@ define( function( require ) {
   var Matrix4 = require( 'DOT/Matrix4' );
   var scenery = require( 'SCENERY/scenery' );
   var Util = require( 'SCENERY/util/Util' );
+  var WebGLLayer = require( 'SCENERY/layers/WebGLLayer' );
 
   scenery.ImageWebGLDrawable = function ImageWebGLDrawable( gl, imageNode ) {
     this.imageNode = imageNode;
@@ -71,6 +72,9 @@ define( function( require ) {
       // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to device coordinates
       gl.uniformMatrix4fv( shaderProgram.uniformLocations.uMatrix, false, uMatrix.entries );
       gl.uniform1i( shaderProgram.uniformLocations.uTexture, 0 ); // TEXTURE0 slot
+
+      //Indicate the branch of logic to use in the ubershader.  In this case, a texture should be used for the image
+      gl.uniform1i( shaderProgram.uniformLocations.uFragmentType, WebGLLayer.fragmentTypeTexture );
 
       gl.activeTexture( gl.TEXTURE0 );
       gl.bindTexture( gl.TEXTURE_2D, this.texture );
