@@ -50,7 +50,6 @@ define( function( require ) {
       this.options.spacing = function() { return spacingConstant; };
     }
 
-    //See HBox.js
     this.inited = false;
     this.mutate( this.options );
     this.inited = true;
