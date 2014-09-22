@@ -86,7 +86,7 @@
             lineWidth: 3
           } ) );
         },
-        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG, scenery.Renderer.WEBGL ]
+        renderers: [ scenery.Renderer.Canvas, scenery.Renderer.SVG, scenery.Renderer.WebGL ]
       },
       {
         name: 'Circle',
@@ -626,8 +626,8 @@
     var renderers = [
       scenery.Renderer.Canvas,
       scenery.Renderer.SVG,
-      scenery.Renderer.DOM
-      // TODO: add WebGL, and possibly DOM for things like text?
+      scenery.Renderer.DOM,
+      scenery.Renderer.WebGL,
     ];
 
     _.each( testCases, function( testCase ) {
