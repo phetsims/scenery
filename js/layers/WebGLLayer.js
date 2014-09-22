@@ -361,7 +361,7 @@ define( function( require ) {
         var canvas = document.createElement( 'canvas' );
 
         try {
-          var gl = this.canvas.getContext( 'webgl' ) || this.canvas.getContext( 'experimental-webgl' );
+          var gl = canvas.getContext( 'webgl' ) || canvas.getContext( 'experimental-webgl' );
           return !!gl;
           // TODO: check for required extensions
         }
