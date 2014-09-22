@@ -110,15 +110,19 @@ define( function( require ) {
 //        ['uTexture','uMatrix'] // uniform names
 //      );
 
+
+      //Rectangle shaders, should be merged with the shader above
       this.shaderProgram = new ShaderProgram( gl, // vertex shader
-          'attribute vec2 a_position;\n' +
+          'attribute vec3 aVertex;\n' +
+          'uniform mat4 uMatrix;\n' +
           'void main() {\n' +
-          'gl_Position = vec4(a_position, 0, 1);\n' +
+          '  gl_Position = uMatrix * vec4( aVertex, 1 );\n' +
           '}',
 
         // fragment shader
+          'precision highp float;\n' +
           'void main() {\n' +
-          'gl_FragColor = vec4(0,1,0,1);  \n' +
+          '  gl_FragColor = vec4( 0.0, 0.0, 1.0, 1.0 );\n' +
           '}',
 
         ['aVertex'], // attribute names

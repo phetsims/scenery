@@ -48,17 +48,15 @@ define( function( require ) {
     render: function( shaderProgram, viewMatrix ) {
       var gl = this.gl;
 
-      //TODO: Transform the rectangle
-//      var uMatrix = viewMatrix.timesMatrix( Matrix4.scaling( this.canvasWidth, -this.canvasHeight, 1 ).timesMatrix( Matrix4.translation( 0, -1 ) ) );
+      //TODO: Translate the rectangle by its (x,y) origin
+      var uMatrix = viewMatrix.timesMatrix( Matrix4.scaling( this.rectangleNode.getWidth(), this.rectangleNode.getHeight(), 1 ).timesMatrix( Matrix4.translation( 0, -1 ) ) );
 
-      // look up where the vertex data needs to go.
-      var positionLocation = gl.getAttribLocation( shaderProgram.program, "a_position" );
+      // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to device coordinates
+      gl.uniformMatrix4fv( shaderProgram.uniformLocations.uMatrix, false, uMatrix.entries );
+      gl.uniform1i( shaderProgram.uniformLocations.uTexture, 0 ); // TEXTURE0 slot
 
-      // Create a buffer and put a single clipspace rectangle in it (2 triangles)
-      gl.enableVertexAttribArray( positionLocation );
-      gl.vertexAttribPointer( positionLocation, 2, gl.FLOAT, false, 0, 0 );
-
-      // draw
+      gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
+      gl.vertexAttribPointer( shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, 0, 0 );
       gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
     },
 
