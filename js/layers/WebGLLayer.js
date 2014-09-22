@@ -85,7 +85,7 @@ define( function( require ) {
   };
   var WebGLLayer = scenery.WebGLLayer;
 
-  inherit( Layer, WebGLLayer, {
+  return inherit( Layer, WebGLLayer, {
       initialize: function() {
         var gl = this.gl;
         gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
@@ -357,5 +357,4 @@ define( function( require ) {
       fragmentTypeTexture: 1
     } );
 
-  return WebGLLayer;
 } );
