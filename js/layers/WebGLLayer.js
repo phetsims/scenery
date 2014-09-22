@@ -354,7 +354,21 @@ define( function( require ) {
     //Statics
     {
       fragmentTypeFill: 0,
-      fragmentTypeTexture: 1
+      fragmentTypeTexture: 1,
+
+      //Check to see whether webgl is supported, using the same strategy as mrdoob and pixi.js
+      isWebGLSupported: function() {
+        var canvas = document.createElement( 'canvas' );
+
+        try {
+          var gl = this.canvas.getContext( 'webgl' ) || this.canvas.getContext( 'experimental-webgl' );
+          return !!gl;
+          // TODO: check for required extensions
+        }
+        catch( e ) {
+          return false;
+        }
+      }
     } );
 
 } );
