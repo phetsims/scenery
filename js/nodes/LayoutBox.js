@@ -23,7 +23,6 @@ define( function( require ) {
   scenery.LayoutBox = function LayoutBox( options ) {
 
     Node.call( this );
-    debugger;
 
     this.boundsListener = this.updateLayout.bind( this );
 

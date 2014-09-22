@@ -49,6 +49,7 @@ define( [
   'SCENERY/nodes/HBox',
   'SCENERY/nodes/HTMLText',
   'SCENERY/nodes/Image',
+  'SCENERY/nodes/LayoutBox',
   'SCENERY/nodes/LayoutNode',
   'SCENERY/nodes/Line',
   'SCENERY/nodes/Node',
