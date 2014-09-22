@@ -87,29 +87,6 @@ define( function( require ) {
         gl.enable( gl.BLEND );
         gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );
 
-//      this.shaderProgram = new ShaderProgram( gl, // vertex shader
-//        'attribute vec3 aVertex;\n' +
-//        'varying vec2 texCoord;\n' +
-//        'uniform mat4 uMatrix;\n' +
-//        'void main() {\n' +
-//        '  texCoord = aVertex.xy;\n' +
-//        '  gl_Position = uMatrix * vec4( aVertex, 1 );\n' +
-//        // '  gl_Position = vec4( aVertex * 100.0, 1 );\n' +
-//        '}',
-//
-//        // fragment shader
-//        'precision highp float;\n' +
-//        'varying vec2 texCoord;\n' +
-//        'uniform sampler2D uTexture;\n' +
-//        'void main() {\n' +
-//        '  gl_FragColor = texture2D( uTexture, texCoord );\n' +
-//        // '  gl_FragColor = vec4( 0.0, 0.0, 1.0, 1.0 );\n' +
-//        '}',
-//
-//        ['aVertex'], // attribute names
-//        ['uTexture','uMatrix'] // uniform names
-//      );
-
         //This is an ubershader, which handles all of the different vertex/fragment types in a single shader
         //To reduce overhead of switching programs.
         this.shaderProgram = new ShaderProgram( gl, // vertex shader
@@ -160,6 +137,7 @@ define( function( require ) {
 
           var length = this.instances.length;
           for ( var i = 0; i < length; i++ ) {
+//            console.log( this.instances[i].node.constructor.name );
             var instance = this.instances[i];
 
             if ( instance.trail.isVisible() ) {
