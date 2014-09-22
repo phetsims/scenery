@@ -110,7 +110,9 @@ define( function( require ) {
       }
 
       //TODO: Refine the rules for when WebGL can be used
-      bitmask |= scenery.bitmaskSupportsWebGL;
+      if ( this.hasStroke() && this.getLineJoin() !== 'round' ) {
+        bitmask |= scenery.bitmaskSupportsWebGL;
+      }
       return bitmask;
     },
 
@@ -128,8 +130,11 @@ define( function( require ) {
         bitmask |= scenery.bitmaskSupportsDOM;
       }
 
+      //only support WebGL if it's NOT rounded (for now) AND if it's either not stroked, or stroke has lineJoin !== round
       //TODO: Refine the rules for when WebGL can be used
-      bitmask |= scenery.bitmaskSupportsWebGL;
+      if ( !this.isRounded() && (!this.hasStroke() || this.getLineJoin() !== 'round') ) {
+        bitmask |= scenery.bitmaskSupportsWebGL;
+      }
 
       return bitmask;
     },
