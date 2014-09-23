@@ -29,6 +29,7 @@ define( function( require ) {
     // ensure we have a parameter object
     this.options = _.extend( {
 
+      //The default orientation, chosen by popular vote.  At the moment there are around 436 VBox references and 338 HBox references
       orientation: 'vertical',
 
       // The spacing can be a number or a function.  If a number, then it will be the spacing between each object.
