@@ -1621,6 +1621,9 @@ define( function( require ) {
       else if ( this.supportsDOM() ) {
         return scenery.Renderer.DOM;
       }
+      else if ( this.supportsWebGL() ) {
+        return scenery.Renderer.WebGL;
+      }
       // oi!
     },
 
