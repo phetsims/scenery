@@ -60,6 +60,10 @@ define( [
   'SCENERY/nodes/Text',
   'SCENERY/nodes/VBox',
 
+  'SCENERY/nodes/drawables/ImageWebGLDrawable',
+  'SCENERY/nodes/drawables/RectangleWebGLDrawable',
+  'SCENERY/nodes/drawables/WebGLNodeDrawable',
+
   'SCENERY/overlays/PointerOverlay',
 
   'SCENERY/util/AccessibilityPeer',
