@@ -98,6 +98,7 @@ define( function( require ) {
 
           /********** Vertex Shader **********/
 
+            'precision mediump float;\n' +
           //The vertex to be transformed
             'attribute vec3 aVertex;\n' +
 
@@ -122,7 +123,7 @@ define( function( require ) {
           /********** Fragment Shader **********/
 
           //Directive to indicate high precision
-            'precision highp float;\n' +
+            'precision mediump float;\n' +
 
             //Texture coordinates (for images)
             'varying vec2 texCoord;\n' +
