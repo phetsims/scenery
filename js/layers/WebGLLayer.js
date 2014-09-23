@@ -42,9 +42,7 @@ define( function( require ) {
 
     // TODO: deprecate Scene's backing scale, and handle this on a layer-by-layer option?
     this.backingScale = args.scene.backingScale;
-    if ( args.fullResolution !== undefined ) {
-      this.backingScale = args.fullResolution ? scenery.Util.backingScale( document.createElement( 'canvas' ).getContext( '2d' ) ) : 1;
-    }
+    this.backingScale = scenery.Util.backingScale( document.createElement( 'canvas' ).getContext( '2d' ) );
 
     this.logicalWidth = this.scene.sceneBounds.width;
     this.logicalHeight = this.scene.sceneBounds.height;
@@ -149,7 +147,7 @@ define( function( require ) {
           ['uTexture', 'uMatrix', 'uColor', 'uFragmentType'] // uniform names
         );
 
-        this.setSize( this.logicalWidth, this.logicalHeight );
+        this.setSize( this.canvas.width, this.canvas.height );
 
         this.shaderProgram.use();
       },
