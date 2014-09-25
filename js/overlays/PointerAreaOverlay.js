@@ -19,7 +19,6 @@ define( function( require ) {
 
     var svg = this.svg = document.createElementNS( scenery.svgns, 'svg' );
     svg.style.position = 'absolute';
-    svg.className = 'mouseTouchAreaOverlay';
     svg.style.top = 0;
     svg.style.left = 0;
     svg.style['pointer-events'] = 'none';
