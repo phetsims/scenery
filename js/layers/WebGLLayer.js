@@ -29,19 +29,6 @@ define( function( require ) {
       0, 0, 0, 1 );
   }
 
-  // Functions for handling context loss and restoration, see #279
-  // TODO: Needs to be implemented
-  var handleContextLost = function( event ) {
-    console.log( 'context lost' );
-
-    // khronos does not explain why we must prevent default in webgl context loss, but we must do so:
-    // http://www.khronos.org/webgl/wiki/HandlingContextLost#Handling_Lost_Context_in_WebGL
-    event.preventDefault();
-  };
-  var handleContextRestored = function( event ) {
-    console.log( 'context restored' );
-  };
-
   /**
    * Constructor for WebGLLayer
    * @param args renderer options (none at the moment)
@@ -49,6 +36,9 @@ define( function( require ) {
    */
   scenery.WebGLLayer = function WebGLLayer( args ) {
     sceneryLayerLog && sceneryLayerLog( 'WebGLLayer #' + this.id + ' constructor' );
+
+    var webglLayer = this;
+
     Layer.call( this, args );
 
     this.dirty = true;
@@ -62,14 +52,41 @@ define( function( require ) {
 
     this.canvas = document.createElement( 'canvas' );
 
+    // Keep track of whether the context is lost, so that we can avoid trying to render while the context is lost.
+    this.webglContextIsLost = false;
+
     // If the scene was instructed to make a WebGL context that can simulate context loss, wrap it here, see #279
     if ( this.scene.webglMakeLostContextSimulatingCanvas ) {
       this.canvas = WebGLDebugUtils.makeLostContextSimulatingCanvas( this.canvas );
     }
 
-    // Callbacks for context loss and restoration, see #279
-    this.canvas.addEventListener( "webglcontextlost", handleContextLost, false );
-    this.canvas.addEventListener( "webglcontextrestored", handleContextRestored, false );
+    // Callback for context loss, see #279
+    this.canvas.addEventListener( "webglcontextlost", function( event ) {
+      console.log( 'context lost' );
+
+      // khronos does not explain why we must prevent default in webgl context loss, but we must do so:
+      // http://www.khronos.org/webgl/wiki/HandlingContextLost#Handling_Lost_Context_in_WebGL
+      event.preventDefault();
+      webglLayer.webglContextIsLost = true;
+    }, false );
+
+    // Callback for context restore, see #279
+    this.canvas.addEventListener( "webglcontextrestored", function( event ) {
+      console.log( 'context restored' );
+      webglLayer.webglContextIsLost = false;
+
+      // Reinitialize the layer state
+      webglLayer.initialize();
+
+      // Reinitialize the webgl state for every instance's drawable
+      var length = webglLayer.instances.length;
+      for ( var i = 0; i < length; i++ ) {
+        webglLayer.instances[i].data.drawable.initialize();
+      }
+
+      // Mark for repainting
+      webglLayer.dirty = true;
+    }, false );
 
     this.canvas.width = this.logicalWidth * this.backingScale;
     this.canvas.height = this.logicalHeight * this.backingScale;
@@ -176,6 +193,12 @@ define( function( require ) {
       },
 
       render: function( scene, args ) {
+
+        // If the context is lost, do not try to render anything.  On Chrome, it does not cause problems, but it seems
+        // safer/faster to only render to an unlost context.
+        if ( this.webglContextIsLost ) {
+          return;
+        }
         var gl = this.gl;
 
         if ( this.dirty ) {
