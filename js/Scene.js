@@ -82,7 +82,13 @@ define( function( require ) {
       enablePointerEvents: true,
       preferredSceneLayerType: scenery.CanvasDefaultLayerType,
       width: $main.width(),
-      height: $main.height()
+      height: $main.height(),
+
+      // Flag to indicate whether the WebGLLayers should wrap the context with the makeLostContextSimulatingCanvas
+      // call from the khronos webgl-debug tools (must be in the path). This is done here because it will be important
+      // to easily simulate context loss on many devices, and the canvas must be wrapped before the rendering context is
+      // retrieved
+      webglMakeLostContextSimulatingCanvas: false
     }, options || {} );
 
     // TODO: consider using a pushed preferred layer to indicate this information, instead of as a specific option
@@ -115,6 +121,8 @@ define( function( require ) {
     this.preferredSceneLayerType = options.preferredSceneLayerType;
 
     applyCSSHacks( $main, options );
+
+    this.webglMakeLostContextSimulatingCanvas = options.webglMakeLostContextSimulatingCanvas;
 
     // TODO: Does this need to move to where inputEvents are hooked up so that it doesn't get run each time Node.toImage is called?
     if ( accessibility ) {
@@ -533,8 +541,8 @@ define( function( require ) {
       sceneryLayerLog && sceneryLayerLog( '               match: ' + match );
 
       /*---------------------------------------------------------------------------*
-      * State
-      *----------------------------------------------------------------------------*/
+       * State
+       *----------------------------------------------------------------------------*/
 
       var nextBoundaryIndex = 0;
       var nextBoundary = boundaries[nextBoundaryIndex];
@@ -1530,6 +1538,19 @@ define( function( require ) {
       } );
 
       return result;
+    },
+
+    // Simulate a WebGL context loss on all WebGLLayers using the khronos webgl-debug tools, see #279
+    simulateWebGLContextLoss: function() {
+
+      //Only simulate context loss if compatible canvas contexts have been created
+      assert && assert( this.webglMakeLostContextSimulatingCanvas );
+
+      for ( var i = 0; i < this.layers.length; i++ ) {
+        if ( this.layers[i].simulateWebGLContextLoss ) {
+          this.layers[i].simulateWebGLContextLoss();
+        }
+      }
     }
   } );
 

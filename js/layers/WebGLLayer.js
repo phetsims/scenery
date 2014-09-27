@@ -4,8 +4,8 @@
  * WebGL-backed layer
  *
  * @author Jonathan Olson <olsonsjc@gmail.com>
+ * @author Sam Reid
  */
-
 define( function( require ) {
   'use strict';
 
@@ -29,6 +29,15 @@ define( function( require ) {
       0, 0, 0, 1 );
   }
 
+  // Functions for handling context loss and restoration, see #279
+  // TODO: Needs to be implemented
+  var handleContextLost = function() {
+    console.log( 'context lost' );
+  };
+  var handleContextRestored = function() {
+    console.log( 'context restored' );
+  };
+
   /**
    * Constructor for WebGLLayer
    * @param args renderer options (none at the moment)
@@ -48,6 +57,15 @@ define( function( require ) {
     this.logicalHeight = this.scene.sceneBounds.height;
 
     this.canvas = document.createElement( 'canvas' );
+
+    // If the scene was instructed to make a WebGL context that can simulate context loss, wrap it here, see #279
+    if ( this.scene.webglMakeLostContextSimulatingCanvas ) {
+      this.canvas = WebGLDebugUtils.makeLostContextSimulatingCanvas( this.canvas );
+    }
+
+    // Callbacks for context loss and restoration, see #279
+    this.canvas.addEventListener( "webglcontextlost", handleContextLost, false );
+    this.canvas.addEventListener( "webglcontextrestored", handleContextRestored, false );
 
     this.canvas.width = this.logicalWidth * this.backingScale;
     this.canvas.height = this.logicalHeight * this.backingScale;
@@ -99,7 +117,7 @@ define( function( require ) {
           /********** Vertex Shader **********/
 
             'precision mediump float;\n' +
-          //The vertex to be transformed
+            //The vertex to be transformed
             'attribute vec3 aVertex;\n' +
 
             // The transformation matrix
@@ -347,6 +365,13 @@ define( function( require ) {
         sceneryLayerLog && sceneryLayerLog( 'WebGLLayer #' + this.id + ' notifyBoundsAccuracyChange: ' + instance.trail.toString() );
 
         this.markWebGLDirty();
+      },
+
+      // This method can be called to simulate context loss using the khronos webgl-debug context loss simulator, see #279
+      simulateWebGLContextLoss: function() {
+        console.log( 'simulating webgl context loss in WebGLLayer' );
+        assert && assert( this.scene.webglMakeLostContextSimulatingCanvas );
+        this.canvas.loseContextInNCalls( 5 );
       }
     },
 
