@@ -382,10 +382,14 @@ define( function( require ) {
       gl.shaderSource( shader, source );
       gl.compileShader( shader );
 
-      if( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
+      if ( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
+        console.log( 'GLSL compile error:' )
         console.log( gl.getShaderInfoLog( shader ) );
         console.log( source );
-        throw new Error( 'GLSL compile error: ' + gl.getShaderInfoLog( shader ) );
+
+        // Normally it would be best to throw an exception here, but a context loss could cause the shader parameter check
+        // to fail, and we must handle context loss gracefully between any adjacent pair of gl calls.
+        // Therefore, we simply report the errors to the console.  See #279
       }
 
       return shader;

@@ -41,11 +41,17 @@ define( function( require ) {
 
       this.gl.linkProgram( this.program );
 
-      if( !this.gl.getProgramParameter( this.program, this.gl.LINK_STATUS ) ) {
+      if ( !this.gl.getProgramParameter( this.program, this.gl.LINK_STATUS ) ) {
+        console.log( 'GLSL link error:' );
         console.log( this.gl.getProgramInfoLog( this.program ) );
+        console.log( 'for vertex shader' );
         console.log( this.vertexSource );
+        console.log( 'for fragment shader' );
         console.log( this.fragmentSource );
-        throw new Error( 'GLSL link error: ' + this.gl.getProgramInfoLog( this.program ) + '\n for vertex shader:\n' + this.vertexSource + '\n\n for fragment shader:\n' + this.fragmentSource );
+
+        // Normally it would be best to throw an exception here, but a context loss could cause the shader parameter check
+        // to fail, and we must handle context loss gracefully between any adjacent pair of gl calls.
+        // Therefore, we simply report the errors to the console.  See #279
       }
 
       // clean these up, they aren't needed after the link
