@@ -31,10 +31,14 @@ define( function( require ) {
 
   // Functions for handling context loss and restoration, see #279
   // TODO: Needs to be implemented
-  var handleContextLost = function() {
+  var handleContextLost = function( event ) {
     console.log( 'context lost' );
+
+    // khronos does not explain why we must prevent default in webgl context loss, but we must do so:
+    // http://www.khronos.org/webgl/wiki/HandlingContextLost#Handling_Lost_Context_in_WebGL
+    event.preventDefault();
   };
-  var handleContextRestored = function() {
+  var handleContextRestored = function( event ) {
     console.log( 'context restored' );
   };
 
