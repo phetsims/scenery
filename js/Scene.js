@@ -88,7 +88,11 @@ define( function( require ) {
       // call from the khronos webgl-debug tools (must be in the path). This is done here because it will be important
       // to easily simulate context loss on many devices, and the canvas must be wrapped before the rendering context is
       // retrieved
-      webglMakeLostContextSimulatingCanvas: false
+      webglMakeLostContextSimulatingCanvas: false,
+
+      // Flag to indicate whether an incremental webgl context loss should be triggered on the first context loss
+      // This is because we must test that the code handles context loss between every pair of adjacent gl calls.
+      webglContextLossIncremental: false
     }, options || {} );
 
     // TODO: consider using a pushed preferred layer to indicate this information, instead of as a specific option
@@ -123,6 +127,7 @@ define( function( require ) {
     applyCSSHacks( $main, options );
 
     this.webglMakeLostContextSimulatingCanvas = options.webglMakeLostContextSimulatingCanvas;
+    this.webglContextLossIncremental = options.webglContextLossIncremental;
 
     // TODO: Does this need to move to where inputEvents are hooked up so that it doesn't get run each time Node.toImage is called?
     if ( accessibility ) {

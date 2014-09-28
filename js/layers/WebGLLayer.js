@@ -70,10 +70,21 @@ define( function( require ) {
       webglLayer.webglContextIsLost = true;
     }, false );
 
+    // Only used when webglLayer.scene.webglSimulateIncrementalContextLoss is defined
+    var numCallsToLoseContext = 1;
+
     // Callback for context restore, see #279
     this.canvas.addEventListener( "webglcontextrestored", function( event ) {
       console.log( 'context restored' );
       webglLayer.webglContextIsLost = false;
+
+      // When context is restored, optionally simulate another context loss at an increased number of gl calls
+      // This is because we must test for context loss between every pair of gl calls
+      if ( webglLayer.scene.webglContextLossIncremental ) {
+        console.log( 'simulating context loss in ', numCallsToLoseContext, 'gl calls.' );
+        webglLayer.canvas.loseContextInNCalls( numCallsToLoseContext );
+        numCallsToLoseContext++;
+      }
 
       // Reinitialize the layer state
       webglLayer.initialize();
