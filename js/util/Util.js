@@ -383,7 +383,7 @@ define( function( require ) {
       gl.compileShader( shader );
 
       if ( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
-        console.log( 'GLSL compile error:' )
+        console.log( 'GLSL compile error:' );
         console.log( gl.getShaderInfoLog( shader ) );
         console.log( source );
 
