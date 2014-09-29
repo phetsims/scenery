@@ -16,18 +16,10 @@ define( function( require ) {
   require( 'SCENERY/layers/CanvasLayer' );
   require( 'SCENERY/layers/DOMLayer' );
   require( 'SCENERY/layers/SVGLayer' );
-  require( 'SCENERY/layers/WebGLLayer' );
+  var WebGLLayer = require( 'SCENERY/layers/WebGLLayer' );
 
   // BORROWED from Mr Doob (mrdoob.com), then borrowed from Pixi.js
-  var hasWebGLSupport = (function() {
-    try {
-      var canvas = document.createElement( 'canvas' );
-      return !!window.WebGLRenderingContext && ( canvas.getContext( 'webgl' ) || canvas.getContext( 'experimental-webgl' ) );
-    }
-    catch( e ) {
-      return false;
-    }
-  })();
+  var hasWebGLSupport = WebGLLayer.isWebGLSupported();
 
   scenery.Renderer = function Renderer( layerConstructor, name, bitmask, defaultOptions ) {
     this.layerConstructor = layerConstructor;

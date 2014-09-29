@@ -420,10 +420,14 @@ define( function( require ) {
 
       //Check to see whether webgl is supported, using the same strategy as mrdoob and pixi.js
       isWebGLSupported: function() {
+
         var canvas = document.createElement( 'canvas' );
 
+        var args = {failIfMajorPerformanceCaveat: true};
         try {
-          var gl = canvas.getContext( 'webgl' ) || canvas.getContext( 'experimental-webgl' );
+          var gl =
+            !!window.WebGLRenderingContext &&
+            (canvas.getContext( 'webgl', args ) || canvas.getContext( 'experimental-webgl', args ));
           return !!gl;
           // TODO: check for required extensions
         }
