@@ -1,4 +1,4 @@
-// Copyright 2002-2013, University of Colorado
+// Copyright 2002-2014, University of Colorado Boulder
 
 /**
  * A description of layer settings and the ability to create a layer with those settings.

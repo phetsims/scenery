@@ -1,4 +1,4 @@
-// Copyright 2002-2013, University of Colorado Boulder
+// Copyright 2002-2014, University of Colorado Boulder Boulder
 
 /**
  * A node which always fills the entire screen, no matter what the transform is.

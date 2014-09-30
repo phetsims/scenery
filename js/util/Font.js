@@ -1,4 +1,4 @@
-// Copyright 2002-2013, University of Colorado
+// Copyright 2002-2014, University of Colorado Boulder
 
 /**
  * Font handling for text drawing

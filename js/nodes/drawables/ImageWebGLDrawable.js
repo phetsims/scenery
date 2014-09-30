@@ -1,4 +1,4 @@
-// Copyright 2002-2013, University of Colorado
+// Copyright 2002-2014, University of Colorado Boulder
 
 /**
  * WebGL state for rendering Image nodes

@@ -1,4 +1,4 @@
-// Copyright 2002-2013, University of Colorado
+// Copyright 2002-2014, University of Colorado Boulder
 
 /**
  * A layer state is used to construct layer information (and later, layers), and is a state machine

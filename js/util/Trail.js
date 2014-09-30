@@ -1,4 +1,4 @@
-// Copyright 2002-2013, University of Colorado
+// Copyright 2002-2014, University of Colorado Boulder
 
 /**
  * Represents a trail (path in the graph) from a 'root' node down to a descendant node.

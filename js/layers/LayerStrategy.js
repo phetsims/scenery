@@ -1,4 +1,4 @@
-// Copyright 2002-2013, University of Colorado
+// Copyright 2002-2014, University of Colorado Boulder
 
 /**
  * Controls the underlying layer behavior around a node. The node's LayerStrategy's enter() and exit() will be

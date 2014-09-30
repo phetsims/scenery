@@ -1,4 +1,4 @@
-// Copyright 2002-2013, University of Colorado
+// Copyright 2002-2014, University of Colorado Boulder
 
 /**
  * A node that can be custom-drawn with WebGL calls.  Similar to CanvasNode, but for WebGL.  Note that WebGL is not

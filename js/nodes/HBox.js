@@ -1,4 +1,4 @@
-// Copyright 2002-2013, University of Colorado Boulder
+// Copyright 2002-2014, University of Colorado Boulder Boulder
 
 /**
  * HBox arranges the child nodes horizontally, and they can be centered, left or right justified.
