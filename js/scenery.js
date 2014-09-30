@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado
+// Copyright 2002-2014, University of Colorado Boulder
 
 /**
  * The main 'scenery' namespace object for the exported (non-Require.js) API. Used internally

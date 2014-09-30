@@ -1,4 +1,5 @@
-// Copyright 2002-2014, University of Colorado
+// Copyright 2002-2014, University of Colorado Boulder
+
 
 /**
  * A Block that needs to be fitted to either the screen bounds or other local bounds.

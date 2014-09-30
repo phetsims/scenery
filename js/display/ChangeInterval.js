@@ -1,4 +1,5 @@
-// Copyright 2002-2014, University of Colorado
+// Copyright 2002-2014, University of Colorado Boulder
+
 
 /**
  * An interval (implicit consecutive sequence of drawables) that has a recorded change in-between the two ends.

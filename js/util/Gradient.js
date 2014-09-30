@@ -1,4 +1,5 @@
-// Copyright 2002-2014, University of Colorado
+// Copyright 2002-2014, University of Colorado Boulder
+
 
 /**
  * Gradient base type for LinearGradient and RadialGradient. Will not function on its own

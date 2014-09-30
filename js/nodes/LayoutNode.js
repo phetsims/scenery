@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado
+// Copyright 2002-2014, University of Colorado Boulder
 
 /**
  * DEPRECATED EXPERIMENTAL: USE AT YOUR OWN CAUTION

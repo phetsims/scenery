@@ -1,4 +1,4 @@
-// Copyright 2002-2014, University of Colorado
+// Copyright 2002-2014, University of Colorado Boulder
 
 /**
  * A node that can be custom-drawn with Canvas calls. Manual handling of dirty region repainting.

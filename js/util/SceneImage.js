@@ -1,4 +1,5 @@
-// Copyright 2002-2014, University of Colorado
+// Copyright 2002-2014, University of Colorado Boulder
+
 
 /*
  * An HTMLImageElement that is backed by a scene. Call update() on this SceneImage to update the image from the scene.

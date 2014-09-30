@@ -1,5 +1,4 @@
-// Copyright 2002-2014, University of Colorado
-
+// Copyright 2002-2014, University of Colorado Boulder
 /**
  * Configuration file for development purposes, NOT for production deployments.
  *

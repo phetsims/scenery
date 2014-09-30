@@ -1,4 +1,5 @@
-// Copyright 2002-2014, University of Colorado
+// Copyright 2002-2014, University of Colorado Boulder
+
 
 /**
  * @deprecated Stitcher that rebuilds all of the blocks and reattaches drawables. Simple, but inefficient.

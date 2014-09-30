@@ -1,4 +1,5 @@
-// Copyright 2002-2014, University of Colorado
+// Copyright 2002-2014, University of Colorado Boulder
+
 
 /*
  * An event in Scenery that has similar event-handling characteristics to DOM events.
