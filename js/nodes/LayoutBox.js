@@ -22,6 +22,9 @@ define( function( require ) {
    */
   scenery.LayoutBox = function LayoutBox( options ) {
 
+    if ( options ) {
+      assert && assert( options.orientation === 'vertical' || options.orientation === 'horizontal' );
+    }
     Node.call( this );
 
     this.boundsListener = this.updateLayout.bind( this );
@@ -42,8 +45,6 @@ define( function( require ) {
       //By default, update the layout when children are added/removed/resized, see #116
       resize: true
     }, options );
-
-    assert && assert( this.options.orientation === 'vertical' || this.options.orientation === 'horizontal' );
 
     if ( typeof this.options.spacing === 'number' ) {
       var spacingConstant = this.options.spacing;
