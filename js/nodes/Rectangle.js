@@ -110,7 +110,7 @@ define( function( require ) {
       }
 
       //TODO: Refine the rules for when WebGL can be used
-      if ( this.hasStroke() && this.getLineJoin() !== 'round' ) {
+      if ( !this.hasStroke() ) {
         bitmask |= scenery.bitmaskSupportsWebGL;
       }
       return bitmask;
