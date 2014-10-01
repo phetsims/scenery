@@ -149,6 +149,7 @@ define( function( require ) {
     //Override the child mutators to updateLayout
     //Have to listen to the child bounds individually because there are a number of possible ways to change the child
     //bounds without changing the overall bounds.
+    // @override
     insertChild: function( index, node ) {
       //Support up to two args for overrides
 
@@ -181,6 +182,7 @@ define( function( require ) {
     },
 
     //Overrides the version in Node to listen for bounds changes
+    // @override
     removeChildWithIndex: function( node, indexOfChild ) {
 
       //Remove event listeners from any nodes (will be added back later if the node was not removed)
