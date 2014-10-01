@@ -43,7 +43,18 @@ define( function( require ) {
       resize: true
     }, options );
 
+    // Make sure the orientation is legal.  It's better to check this on the this.options instead of the passed in options
+    // to keep it closer to the check for the alignment option.
     assert && assert( this.options.orientation === 'vertical' || this.options.orientation === 'horizontal' );
+
+    // Make sure the alignment is allowed, given the orientation.  The check is done here after the final orientation is
+    // decided, to reduce logic before the alignment check.
+    if ( this.options.orientation === 'vertical' ) {
+      assert && assert( this.options.align === 'center' || this.options.align === 'left' || this.options.align === 'right', 'illegal alignment: ' + this.options.align );
+    }
+    else {
+      assert && assert( this.options.align === 'center' || this.options.align === 'top' || this.options.align === 'bottom', 'illegal alignment: ' + this.options.align );
+    }
 
     if ( typeof this.options.spacing === 'number' ) {
       var spacingConstant = this.options.spacing;
