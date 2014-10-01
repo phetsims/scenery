@@ -18,7 +18,7 @@ define( function( require ) {
 
   /**
    *
-   * @param options Same as Node.constructor.options with the following additions:
+   * @param {Object} [options] Same as Node.constructor.options with the following additions:
    *
    * spacing: can be a number or a function.  If a number, then it will be the vertical spacing between each object.
    *              If a function, then the function will have the signature function(top,bottom){} which returns the spacing between adjacent pairs of items.
