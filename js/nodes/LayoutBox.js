@@ -50,6 +50,9 @@ define( function( require ) {
       this.options.spacing = function() { return spacingConstant; };
     }
 
+    // Apply the supplied options, including children.
+    // The layout calls are triggered if (a) options.resize is set to true or (b) during initialization
+    // When true, the this.inited flag signifies that the initial layout is being done.
     this.inited = false;
     this.mutate( this.options );
     this.inited = true;
@@ -148,7 +151,7 @@ define( function( require ) {
       //Super call
       Node.prototype.insertChild.call( this, index, node );
 
-      //Update the layout if it should be dynamic
+      // Update the layout (a) if it should be dynamic or (b) during initialization
       if ( this.options.resize || !this.inited ) {
         this.updateLayout();
       }
@@ -179,7 +182,7 @@ define( function( require ) {
       //Super call
       Node.prototype.removeChildWithIndex.call( this, node, indexOfChild );
 
-      //Update the layout if it should be dynamic
+      // Update the layout (a) if it should be dynamic or (b) during initialization
       if ( this.options.resize || !this.inited ) {
         this.updateLayout();
       }
