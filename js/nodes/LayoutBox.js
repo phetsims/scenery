@@ -24,7 +24,7 @@ define( function( require ) {
 
     Node.call( this );
 
-    this.boundsListener = this.updateLayout.bind( this );
+    this.boundsListener = this.updateLayout.bind( this ); // @private
 
     // ensure we have a parameter object
     this.options = _.extend( {
@@ -41,7 +41,7 @@ define( function( require ) {
 
       //By default, update the layout when children are added/removed/resized, see #116
       resize: true
-    }, options );
+    }, options ); // @private
 
     // Make sure the orientation is legal.  It's better to check this on the this.options instead of the passed in options
     // to keep it closer to the check for the alignment option.
@@ -64,13 +64,16 @@ define( function( require ) {
     // Apply the supplied options, including children.
     // The layout calls are triggered if (a) options.resize is set to true or (b) during initialization
     // When true, the this.inited flag signifies that the initial layout is being done.
-    this.inited = false;
+    this.inited = false; // @private
     this.mutate( this.options );
     this.inited = true;
   };
   var LayoutBox = scenery.LayoutBox;
 
   return inherit( Node, LayoutBox, {
+
+    // Lay out the child components on startup, or when the children sizes change or when requested by a call to updateLayout
+    // @private, do not call directly, use updateLayout
     layout: function() {
       var i = 0;
       var child;
@@ -129,10 +132,11 @@ define( function( require ) {
           //Move to the next vertical position.
           x += child.width + this.options.spacing( child, this.children[i + 1] );
         }
-
       }
-      //TODO: todo
     },
+
+    // Update the layout of this VBox. Called automatically during initialization, when children change (if resize is true)
+    // or when client wants to call this public method for any reason.
     updateLayout: function() {
       if ( !this.updatingLayout ) {
         //Bounds of children are changed in updateLayout, we don't want to stackoverflow so bail if already updating layout
@@ -145,7 +149,6 @@ define( function( require ) {
     //Override the child mutators to updateLayout
     //Have to listen to the child bounds individually because there are a number of possible ways to change the child
     //bounds without changing the overall bounds.
-
     insertChild: function( index, node ) {
       //Support up to two args for overrides
 
