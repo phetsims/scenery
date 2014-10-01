@@ -43,8 +43,7 @@ define( function( require ) {
       resize: true
     }, options );
 
-    assert && assert( options.orientation === 'vertical' || options.orientation === 'horizontal' );
-    this.orientation = this.options.orientation;
+    assert && assert( this.options.orientation === 'vertical' || this.options.orientation === 'horizontal' );
 
     if ( typeof this.options.spacing === 'number' ) {
       var spacingConstant = this.options.spacing;
@@ -65,7 +64,7 @@ define( function( require ) {
       //Logic for layout out the components.
       //Aaron and Sam looked at factoring this out, but the result looked less readable since each attribute
       //would have to be abstracted over.
-      if ( this.orientation === 'vertical' ) {
+      if ( this.options.orientation === 'vertical' ) {
         var minX = _.min( _.map( this.children, function( child ) {return child.left;} ) );
         var maxX = _.max( _.map( this.children, function( child ) {return child.left + child.width;} ) );
         var centerX = (maxX + minX) / 2;
