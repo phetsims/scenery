@@ -27,8 +27,8 @@ define( function( require ) {
    * @constructor
    */
   function VBox( options ) {
-    assert && assert( !options.hasOwnProperty( 'orientation' ) );
-    options.orientation = 'vertical';
+    options && assert && assert( !options.hasOwnProperty( 'orientation' ) );
+    options = _.extend( { orientation: 'vertical' }, options );
     LayoutBox.call( this, options );
   }
 

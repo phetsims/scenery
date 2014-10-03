@@ -27,8 +27,8 @@ define( function( require ) {
    * @constructor
    */
   function HBox( options ) {
-    assert && assert( !options.hasOwnProperty( 'orientation' ) );
-    options.orientation = 'horizontal';
+    options && assert && assert( !options.hasOwnProperty( 'orientation' ) );
+    options = _.extend( { orientation: 'horizontal' }, options );
     LayoutBox.call( this, options );
   }
 
