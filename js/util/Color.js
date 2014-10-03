@@ -251,6 +251,11 @@ define( function( require ) {
       return this._css;
     },
 
+    // e.g. 0xFF00FF
+    toNumber: function() {
+      return ( this.r << 16 ) + ( this.g << 8 ) + this.b;
+    },
+
     // called to update the interally cached CSS value
     updateColor: function() {
       assert && assert( !this.immutable, 'Cannot modify an immutable color' );
