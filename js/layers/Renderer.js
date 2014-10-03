@@ -17,9 +17,10 @@ define( function( require ) {
   require( 'SCENERY/layers/DOMLayer' );
   require( 'SCENERY/layers/SVGLayer' );
   var WebGLLayer = require( 'SCENERY/layers/WebGLLayer' );
+  var Util = require( 'SCENERY/util/Util' );
 
   // BORROWED from Mr Doob (mrdoob.com), then borrowed from Pixi.js
-  var hasWebGLSupport = WebGLLayer.isWebGLSupported();
+  var hasWebGLSupport = Util.isWebGLSupported();
 
   scenery.Renderer = function Renderer( layerConstructor, name, bitmask, defaultOptions ) {
     this.layerConstructor = layerConstructor;

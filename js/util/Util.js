@@ -393,6 +393,24 @@ define( function( require ) {
       }
 
       return shader;
+    },
+
+    //Check to see whether webgl is supported, using the same strategy as mrdoob and pixi.js
+    isWebGLSupported: function() {
+
+      var canvas = document.createElement( 'canvas' );
+
+      var args = { failIfMajorPerformanceCaveat: true };
+      try {
+        var gl =
+          !!window.WebGLRenderingContext &&
+          (canvas.getContext( 'webgl', args ) || canvas.getContext( 'experimental-webgl', args ));
+        return !!gl;
+        // TODO: check for required extensions
+      }
+      catch( e ) {
+        return false;
+      }
     }
   };
   var Util = scenery.Util;
