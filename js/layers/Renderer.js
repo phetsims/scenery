@@ -16,7 +16,7 @@ define( function( require ) {
   require( 'SCENERY/layers/CanvasLayer' );
   require( 'SCENERY/layers/DOMLayer' );
   require( 'SCENERY/layers/SVGLayer' );
-  var WebGLLayer = require( 'SCENERY/layers/WebGLLayer' );
+  require( 'SCENERY/layers/WebGLLayer' );
   var Util = require( 'SCENERY/util/Util' );
 
   // BORROWED from Mr Doob (mrdoob.com), then borrowed from Pixi.js
