@@ -611,7 +611,7 @@ define( function( require ) {
    * @param {Number} distance distance between color1 and color2, 0 <= distance <= 1
    * @return {Color}
    */
-  Color.interpolateRBGA = function( color1, color2, distance ) {
+  Color.interpolateRGBA = function( color1, color2, distance ) {
     if ( distance < 0 || distance > 1 ) {
       throw new Error( 'distance must be between 0 and 1: ' + distance );
     }
