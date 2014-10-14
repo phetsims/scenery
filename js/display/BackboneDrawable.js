@@ -1,6 +1,4 @@
 // Copyright 2002-2014, University of Colorado Boulder
- Boulder
-
 
 /**
  * A DOM drawable (div element) that contains child blocks (and is placed in the main DOM tree when visible). It should
