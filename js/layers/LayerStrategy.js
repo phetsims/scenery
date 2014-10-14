@@ -15,6 +15,7 @@ define( function( require ) {
   'use strict';
 
   var scenery = require( 'SCENERY/scenery' );
+  var Renderer = require( 'SCENERY/layers/Renderer' );
 
   /*
    * If the node specifies a renderer, we will always push a preferred type. That type will be fresh (if rendererOptions are specified), otherwise
@@ -48,13 +49,30 @@ define( function( require ) {
       return preferredLayerType;
     },
 
+    /**
+     * Checks to see whether the node's requested renderer is available (if any)
+     * @param {Node} node the node to check the renderer for
+     * @param {boolean} usingWebGL flag from Scene indicating whether webgl is allowed and supported
+     * @return {boolean}
+     */
+    hasCompatibleRenderer: function( node, usingWebGL ) {
+
+      // If the node requested WebGL but WebGL is not available, then do not push/pop WebGL layer type
+      if ( !usingWebGL && node._renderer === Renderer.WebGL ) {
+        return false;
+      }
+      else {
+        return node.hasRenderer();
+      }
+    },
+
     enter: function( pointer, layerBuilder ) {
       var trail = pointer.trail;
       var node = trail.lastNode();
       var preferredLayerType;
 
       // if the node has a renderer, always push a layer type, so that we can pop on the exit() and ensure consistent behavior
-      if ( node.hasRenderer() ) {
+      if ( this.hasCompatibleRenderer( node, layerBuilder.scene.usingWebGL ) ) {
         preferredLayerType = this.getPreferredLayerType( pointer, layerBuilder );
 
         // push the preferred layer type
@@ -105,7 +123,7 @@ define( function( require ) {
       var trail = pointer.trail;
       var node = trail.lastNode();
 
-      if ( node.hasRenderer() ) {
+      if ( this.hasCompatibleRenderer( node, layerBuilder.scene.usingWebGL ) ) {
         layerBuilder.popPreferredLayerType();
 
         // switch down to the next lowest preferred layer type, if any. if null, pass the null to switchToType

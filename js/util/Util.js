@@ -29,6 +29,21 @@ define( function( require ) {
   var transformProperty = Features.transform;
   var transformOriginProperty = Features.transformOrigin || 'transformOrigin'; // fallback, so we don't try to set an empty string property later
 
+  var checkWebGLSupport = function() {
+    var canvas = document.createElement( 'canvas' );
+    var args = { failIfMajorPerformanceCaveat: true };
+    try {
+      var gl =
+        !!window.WebGLRenderingContext &&
+        (canvas.getContext( 'webgl', args ) || canvas.getContext( 'experimental-webgl', args ));
+      return !!gl;
+      // TODO: check for required extensions
+    }
+    catch( e ) {
+      return false;
+    }
+  };
+
   scenery.Util = {
     // like _.extend, but with hardcoded support for https://github.com/documentcloud/underscore/pull/986
     extend: function( obj ) {
@@ -368,7 +383,7 @@ define( function( require ) {
     toPowerOf2: function( n ) {
       var result = 1;
       while ( result < n ) {
-          result *= 2;
+        result *= 2;
       }
       return result;
     },
@@ -396,22 +411,7 @@ define( function( require ) {
     },
 
     //Check to see whether webgl is supported, using the same strategy as mrdoob and pixi.js
-    isWebGLSupported: function() {
-
-      var canvas = document.createElement( 'canvas' );
-
-      var args = { failIfMajorPerformanceCaveat: true };
-      try {
-        var gl =
-          !!window.WebGLRenderingContext &&
-          (canvas.getContext( 'webgl', args ) || canvas.getContext( 'experimental-webgl', args ));
-        return !!gl;
-        // TODO: check for required extensions
-      }
-      catch( e ) {
-        return false;
-      }
-    }
+    isWebGLSupported: checkWebGLSupport()
   };
   var Util = scenery.Util;
 
