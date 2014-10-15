@@ -17,10 +17,6 @@ define( function( require ) {
   require( 'SCENERY/layers/DOMLayer' );
   require( 'SCENERY/layers/SVGLayer' );
   require( 'SCENERY/layers/WebGLLayer' );
-  var Util = require( 'SCENERY/util/Util' );
-
-  // BORROWED from Mr Doob (mrdoob.com), then borrowed from Pixi.js
-  var hasWebGLSupport = Util.isWebGLSupported();
 
   scenery.Renderer = function Renderer( layerConstructor, name, bitmask, defaultOptions ) {
     this.layerConstructor = layerConstructor;
@@ -43,25 +39,19 @@ define( function( require ) {
   Renderer.Canvas = new Renderer( scenery.CanvasLayer, 'canvas', scenery.bitmaskSupportsCanvas, {} );
   Renderer.DOM = new Renderer( scenery.DOMLayer, 'dom', scenery.bitmaskSupportsDOM, {} );
   Renderer.SVG = new Renderer( scenery.SVGLayer, 'svg', scenery.bitmaskSupportsSVG, {} );
-  if ( hasWebGLSupport ) {
-    Renderer.WebGL = new Renderer( scenery.WebGLLayer, 'webgl', scenery.bitmaskSupportsWebGL, {} );
-  }
+  Renderer.WebGL = new Renderer( scenery.WebGLLayer, 'webgl', scenery.bitmaskSupportsWebGL, {} );
 
   // add shortcuts for the default layer types
   scenery.CanvasDefaultLayerType = Renderer.Canvas.defaultLayerType;
   scenery.DOMDefaultLayerType = Renderer.DOM.defaultLayerType;
   scenery.SVGDefaultLayerType = Renderer.SVG.defaultLayerType;
-  if ( hasWebGLSupport ) {
-    scenery.WebGLDefaultLayerType = Renderer.WebGL.defaultLayerType;
-  }
+  scenery.WebGLDefaultLayerType = Renderer.WebGL.defaultLayerType;
 
   // and shortcuts so we can index in with shorthands like 'svg', 'dom', etc.
   Renderer.canvas = Renderer.Canvas;
   Renderer.dom = Renderer.DOM;
   Renderer.svg = Renderer.SVG;
-  if ( hasWebGLSupport ) {
-    Renderer.webgl = Renderer.WebGL;
-  }
+  Renderer.webgl = Renderer.WebGL;
 
   return Renderer;
 } );
