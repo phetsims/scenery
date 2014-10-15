@@ -203,7 +203,7 @@ define( function( require ) {
         this.canvasRenderer,
 
         // isUnderCanvasCache
-          this.isUnderCanvasCache || this.isInstanceCanvasCache || this.isSharedCanvasCacheSelf,
+        (this.isUnderCanvasCache || this.isInstanceCanvasCache || this.isSharedCanvasCacheSelf),
 
         // isShared. No direct descendant is shared, since we create those specially with a new state
         // from createSharedCacheState
