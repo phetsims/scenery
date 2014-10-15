@@ -34,15 +34,15 @@ define( function( require ) {
   inherit( Object, ChangeInterval, {
     initialize: function( drawableBefore, drawableAfter ) {
       assert && assert( drawableBefore === null || ( drawableBefore instanceof Drawable ),
-        'drawableBefore can either be null to indicate that there is no un-changed drawable before our changes, ' +
-        'or it can reference an un-changed drawable' );
+          'drawableBefore can either be null to indicate that there is no un-changed drawable before our changes, ' +
+          'or it can reference an un-changed drawable' );
       assert && assert( drawableAfter === null || ( drawableAfter instanceof Drawable ),
-        'drawableAfter can either be null to indicate that there is no un-changed drawable after our changes, ' +
-        'or it can reference an un-changed drawable' );
+          'drawableAfter can either be null to indicate that there is no un-changed drawable after our changes, ' +
+          'or it can reference an un-changed drawable' );
 
       /*---------------------------------------------------------------------------*
-      * All @public properties
-      *----------------------------------------------------------------------------*/
+       * All @public properties
+       *----------------------------------------------------------------------------*/
 
       // {ChangeInterval|null}, singly-linked list
       this.nextChangeInterval = null;

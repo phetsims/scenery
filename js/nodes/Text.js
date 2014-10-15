@@ -246,8 +246,8 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * Bounds
-    *----------------------------------------------------------------------------*/
+     * Bounds
+     *----------------------------------------------------------------------------*/
 
     accurateCanvasBounds: function() {
       var node = this;
@@ -381,8 +381,8 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * Self setters / getters
-    *----------------------------------------------------------------------------*/
+     * Self setters / getters
+     *----------------------------------------------------------------------------*/
 
     setFont: function( font ) {
       if ( this.font !== font ) {
@@ -462,8 +462,8 @@ define( function( require ) {
   } );
 
   /*---------------------------------------------------------------------------*
-  * Font setters / getters
-  *----------------------------------------------------------------------------*/
+   * Font setters / getters
+   *----------------------------------------------------------------------------*/
 
   function addFontForwarding( propertyName, fullCapitalized, shortUncapitalized ) {
     var getterName = 'get' + fullCapitalized;
@@ -512,8 +512,8 @@ define( function( require ) {
   Strokable( Text );
 
   /*---------------------------------------------------------------------------*
-  * Rendering State mixin (DOM/SVG)
-  *----------------------------------------------------------------------------*/
+   * Rendering State mixin (DOM/SVG)
+   *----------------------------------------------------------------------------*/
 
   var TextRenderState = Text.TextRenderState = function( drawableType ) {
     var proto = drawableType.prototype;
@@ -574,8 +574,8 @@ define( function( require ) {
   };
 
   /*---------------------------------------------------------------------------*
-  * DOM rendering
-  *----------------------------------------------------------------------------*/
+   * DOM rendering
+   *----------------------------------------------------------------------------*/
 
   var TextDOMDrawable = Text.TextDOMDrawable = inherit( DOMSelfDrawable, function TextDOMDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
@@ -668,8 +668,8 @@ define( function( require ) {
   SelfDrawable.Poolable( TextDOMDrawable );
 
   /*---------------------------------------------------------------------------*
-  * SVG rendering
-  *----------------------------------------------------------------------------*/
+   * SVG rendering
+   *----------------------------------------------------------------------------*/
 
   Text.TextSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function TextSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
@@ -755,8 +755,8 @@ define( function( require ) {
   }
 
   /*---------------------------------------------------------------------------*
-  * Canvas rendering
-  *----------------------------------------------------------------------------*/
+   * Canvas rendering
+   *----------------------------------------------------------------------------*/
 
   Text.TextCanvasDrawable = CanvasSelfDrawable.createDrawable( {
     type: function TextCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },

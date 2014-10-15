@@ -408,8 +408,8 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * listeners TODO: consider mixing in this behavior, it's common
-    *----------------------------------------------------------------------------*/
+     * listeners TODO: consider mixing in this behavior, it's common
+     *----------------------------------------------------------------------------*/
 
     // listener should be a callback expecting no arguments, listener() will be called when the color changes
     addChangeListener: function( listener ) {

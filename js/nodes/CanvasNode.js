@@ -84,8 +84,8 @@ define( function( require ) {
   CanvasNode.prototype._mutatorKeys = [ 'canvasBounds' ].concat( Node.prototype._mutatorKeys );
 
   /*---------------------------------------------------------------------------*
-  * Canvas rendering
-  *----------------------------------------------------------------------------*/
+   * Canvas rendering
+   *----------------------------------------------------------------------------*/
 
   CanvasNode.CanvasNodeDrawable = CanvasSelfDrawable.createDrawable( {
     type: function CanvasNodeDrawable( renderer, instance ) { this.initialize( renderer, instance ); },

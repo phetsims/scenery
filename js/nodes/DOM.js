@@ -198,8 +198,8 @@ define( function( require ) {
   DOM.prototype._mutatorKeys = [ 'element', 'interactive', 'preventTransform' ].concat( Node.prototype._mutatorKeys );
 
   /*---------------------------------------------------------------------------*
-  * DOM rendering
-  *----------------------------------------------------------------------------*/
+   * DOM rendering
+   *----------------------------------------------------------------------------*/
 
   var DOMDrawable = DOM.DOMDrawable = inherit( DOMSelfDrawable, function DOMDrawable( renderer, instance ) {
     this.initialize( renderer, instance );

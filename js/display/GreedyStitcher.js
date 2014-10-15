@@ -329,8 +329,7 @@ define( function( require ) {
           // See if any of our 'new' drawables were part of a block that we've marked as reusable. If this is the case,
           // we'll greedily try to use this block for matching if possible (ignoring the other potential matches for
           // other drawables after in the same sub-block).
-          if ( matchedBlock === null && drawable.parentDrawable &&
-               !drawable.parentDrawable.used && drawable.backbone === backbone &&
+          if ( matchedBlock === null && drawable.parentDrawable && !drawable.parentDrawable.used && drawable.backbone === backbone &&
                drawable.parentDrawable.parentDrawable === backbone ) {
             matchedBlock = drawable.parentDrawable;
             sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'matching at ' + drawable.toString() + ' with ' + matchedBlock );
@@ -440,10 +439,10 @@ define( function( require ) {
         }
 
         sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose(
-          'edge case: ' +
-          ( openBefore ? 'open-before ' : '' ) +
-          ( openAfter ? 'open-after ' : '' ) +
-          beforeBlock.toString() + ' to ' + afterBlock.toString() );
+            'edge case: ' +
+            ( openBefore ? 'open-before ' : '' ) +
+            ( openAfter ? 'open-after ' : '' ) +
+            beforeBlock.toString() + ' to ' + afterBlock.toString() );
         sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
 
         // deciding what new block should be used for the external group of drawables after our change interval

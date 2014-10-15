@@ -207,8 +207,8 @@ define( function( require ) {
   Circle.prototype._mutatorKeys = [ 'radius' ].concat( Path.prototype._mutatorKeys );
 
   /*---------------------------------------------------------------------------*
-  * Rendering State mixin (DOM/SVG)
-  *----------------------------------------------------------------------------*/
+   * Rendering State mixin (DOM/SVG)
+   *----------------------------------------------------------------------------*/
 
   var CircleRenderState = Circle.CircleRenderState = function( drawableType ) {
     var proto = drawableType.prototype;
@@ -251,8 +251,8 @@ define( function( require ) {
   };
 
   /*---------------------------------------------------------------------------*
-  * DOM rendering
-  *----------------------------------------------------------------------------*/
+   * DOM rendering
+   *----------------------------------------------------------------------------*/
 
   var CircleDOMDrawable = Circle.CircleDOMDrawable = inherit( DOMSelfDrawable, function CircleDOMDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
@@ -378,8 +378,8 @@ define( function( require ) {
   SelfDrawable.Poolable( CircleDOMDrawable );
 
   /*---------------------------------------------------------------------------*
-  * SVG Rendering
-  *----------------------------------------------------------------------------*/
+   * SVG Rendering
+   *----------------------------------------------------------------------------*/
 
   Circle.CircleSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function CircleSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
@@ -402,8 +402,8 @@ define( function( require ) {
   } );
 
   /*---------------------------------------------------------------------------*
-  * Canvas rendering
-  *----------------------------------------------------------------------------*/
+   * Canvas rendering
+   *----------------------------------------------------------------------------*/
 
   Circle.CircleCanvasDrawable = CanvasSelfDrawable.createDrawable( {
     type: function CircleCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },

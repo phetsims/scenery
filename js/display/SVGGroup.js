@@ -123,8 +123,8 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * TODO: reduce filesize by creating these methods programatically. not done yet since I want to ensure correctness and make refactoring easier right now.
-    *----------------------------------------------------------------------------*/
+     * TODO: reduce filesize by creating these methods programatically. not done yet since I want to ensure correctness and make refactoring easier right now.
+     *----------------------------------------------------------------------------*/
 
     markOrderDirty: function() {
       if ( !this.orderDirty ) {

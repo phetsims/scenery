@@ -178,8 +178,8 @@ define( function( require ) {
   Strokable( Path );
 
   /*---------------------------------------------------------------------------*
-  * Rendering State mixin (DOM/SVG)
-  *----------------------------------------------------------------------------*/
+   * Rendering State mixin (DOM/SVG)
+   *----------------------------------------------------------------------------*/
 
   var PathRenderState = Path.PathRenderState = function( drawableType ) {
     var proto = drawableType.prototype;
@@ -222,8 +222,8 @@ define( function( require ) {
   };
 
   /*---------------------------------------------------------------------------*
-  * SVG Rendering
-  *----------------------------------------------------------------------------*/
+   * SVG Rendering
+   *----------------------------------------------------------------------------*/
 
   Path.PathSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function PathSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
@@ -256,8 +256,8 @@ define( function( require ) {
   } );
 
   /*---------------------------------------------------------------------------*
-  * Canvas rendering
-  *----------------------------------------------------------------------------*/
+   * Canvas rendering
+   *----------------------------------------------------------------------------*/
 
   Path.PathCanvasDrawable = CanvasSelfDrawable.createDrawable( {
     type: function PathCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },

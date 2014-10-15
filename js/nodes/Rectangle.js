@@ -345,8 +345,8 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * Miscellaneous
-    *----------------------------------------------------------------------------*/
+     * Miscellaneous
+     *----------------------------------------------------------------------------*/
 
     getBasicConstructor: function( propLines ) {
       return 'new scenery.Rectangle( ' +
@@ -379,8 +379,8 @@ define( function( require ) {
   } );
 
   /*---------------------------------------------------------------------------*
-  * Other Rectangle properties and ES5
-  *----------------------------------------------------------------------------*/
+   * Other Rectangle properties and ES5
+   *----------------------------------------------------------------------------*/
 
   function addRectProp( capitalizedShort ) {
     var getName = 'getRect' + capitalizedShort;
@@ -497,8 +497,8 @@ define( function( require ) {
   };
 
   /*---------------------------------------------------------------------------*
-  * Rendering state mixin (DOM/SVG)
-  *----------------------------------------------------------------------------*/
+   * Rendering state mixin (DOM/SVG)
+   *----------------------------------------------------------------------------*/
 
   var RectangleRenderState = Rectangle.RectangleRenderState = function( drawableType ) {
     var proto = drawableType.prototype;
@@ -582,8 +582,8 @@ define( function( require ) {
   };
 
   /*---------------------------------------------------------------------------*
-  * DOM rendering
-  *----------------------------------------------------------------------------*/
+   * DOM rendering
+   *----------------------------------------------------------------------------*/
 
   var RectangleDOMDrawable = Rectangle.RectangleDOMDrawable = inherit( DOMSelfDrawable, function RectangleDOMDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
@@ -718,8 +718,8 @@ define( function( require ) {
   SelfDrawable.Poolable( RectangleDOMDrawable );
 
   /*---------------------------------------------------------------------------*
-  * SVG rendering
-  *----------------------------------------------------------------------------*/
+   * SVG rendering
+   *----------------------------------------------------------------------------*/
 
   Rectangle.RectangleSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function RectangleSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
@@ -774,8 +774,8 @@ define( function( require ) {
   } );
 
   /*---------------------------------------------------------------------------*
-  * Canvas rendering
-  *----------------------------------------------------------------------------*/
+   * Canvas rendering
+   *----------------------------------------------------------------------------*/
 
   Rectangle.RectangleCanvasDrawable = CanvasSelfDrawable.createDrawable( {
     type: function RectangleCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },

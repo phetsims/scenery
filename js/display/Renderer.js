@@ -23,8 +23,8 @@ define( function( require ) {
   //OHTWO TODO: rename to take advantage of lack of deprecated names? (remove bitmask prefix)
 
   /*---------------------------------------------------------------------------*
-  * Renderer bitmask flags
-  *----------------------------------------------------------------------------*/
+   * Renderer bitmask flags
+   *----------------------------------------------------------------------------*/
 
   // ensure that these bitmasks weren't changed in scenery.js
   assert && assert( scenery.bitmaskSupportsCanvas === 0x0000001 );
@@ -186,8 +186,8 @@ define( function( require ) {
 
 
   /*---------------------------------------------------------------------------*
-  * Fit strategies
-  *----------------------------------------------------------------------------*/
+   * Fit strategies
+   *----------------------------------------------------------------------------*/
 
   // TODO: fill out fit strategies, determine parameters
   Renderer.fitStrategies = {};
@@ -198,8 +198,8 @@ define( function( require ) {
 
 
   /*---------------------------------------------------------------------------*
-  * SVG quality settings
-  *----------------------------------------------------------------------------*/
+   * SVG quality settings
+   *----------------------------------------------------------------------------*/
 
   // SVG qualities for text-rendering, shape-rendering, image-rendering
   Renderer.svgOptimizations = {};

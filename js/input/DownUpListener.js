@@ -114,8 +114,8 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * events called from the node input listener
-    *----------------------------------------------------------------------------*/
+     * events called from the node input listener
+     *----------------------------------------------------------------------------*/
 
     // mouse/touch down on this node
     down: function( event ) {

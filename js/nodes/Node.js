@@ -465,7 +465,8 @@ define( function( require ) {
           if ( this.hasClipArea() ) {
             newBounds.constrainBounds( this._clipArea.getBoundsWithTransform( matrix ) );
           }
-        } else {
+        }
+        else {
           // converts local to parent bounds. mutable methods used to minimize number of created bounds instances (we create one so we don't change references to the old one)
           newBounds = this.localToParentBounds( this._localBounds ); // TODO: reduce allocation? fully mutable?
         }
@@ -1421,9 +1422,9 @@ define( function( require ) {
 
       // TODO: consider a mapping of types to set reasonable defaults
       /*
-      auto default none inherit help pointer progress wait crosshair text vertical-text alias copy move no-drop not-allowed
-      e-resize n-resize w-resize s-resize nw-resize ne-resize se-resize sw-resize ew-resize ns-resize nesw-resize nwse-resize
-      context-menu cell col-resize row-resize all-scroll url( ... ) --> does it support data URLs?
+       auto default none inherit help pointer progress wait crosshair text vertical-text alias copy move no-drop not-allowed
+       e-resize n-resize w-resize s-resize nw-resize ne-resize se-resize sw-resize ew-resize ns-resize nesw-resize nwse-resize
+       context-menu cell col-resize row-resize all-scroll url( ... ) --> does it support data URLs?
        */
 
       // allow the 'auto' cursor type to let the ancestors or scene pick the cursor type
@@ -1530,8 +1531,8 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * Hints
-    *----------------------------------------------------------------------------*/
+     * Hints
+     *----------------------------------------------------------------------------*/
 
     // provides a rendering hint to use this render whenever possible
     setRenderer: function( renderer ) {
@@ -1624,8 +1625,8 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * Trail operations
-    *----------------------------------------------------------------------------*/
+     * Trail operations
+     *----------------------------------------------------------------------------*/
 
     // returns a unique trail (if it exists) where each node in the ancestor chain has 0 or 1 parents
     getUniqueTrail: function() {
@@ -1910,8 +1911,8 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * Instance handling
-    *----------------------------------------------------------------------------*/
+     * Instance handling
+     *----------------------------------------------------------------------------*/
 
     // @private
     getInstances: function() {
@@ -1947,8 +1948,8 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * Coordinate transform methods
-    *----------------------------------------------------------------------------*/
+     * Coordinate transform methods
+     *----------------------------------------------------------------------------*/
 
     // apply this node's transform to the point
     localToParentPoint: function( point ) {
@@ -2100,8 +2101,8 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * Drawable handling
-    *----------------------------------------------------------------------------*/
+     * Drawable handling
+     *----------------------------------------------------------------------------*/
 
     // will notify the drawable of visual state changes while it is attached
     attachDrawable: function( drawable ) {
@@ -2122,15 +2123,15 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * Flags
-    *----------------------------------------------------------------------------*/
+     * Flags
+     *----------------------------------------------------------------------------*/
 
     // whether for layer fitting we should use "safe" bounds, instead of the bounds used for layout
     requiresSafeBounds: false,
 
     /*---------------------------------------------------------------------------*
-    * ES5 get/set
-    *----------------------------------------------------------------------------*/
+     * ES5 get/set
+     *----------------------------------------------------------------------------*/
 
     set layerSplit( value ) { this.setLayerSplit( value ); },
     get layerSplit() { return this.isLayerSplit(); },
@@ -2321,8 +2322,8 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * Compatibility with old events API (now using axon.Events)
-    *----------------------------------------------------------------------------*/
+     * Compatibility with old events API (now using axon.Events)
+     *----------------------------------------------------------------------------*/
 
     addEventListener: function( eventName, listener ) {
       // can't guarantee static with old usage

@@ -41,12 +41,12 @@ define( function( require ) {
     // SVG: spreadMethod 'pad' 'reflect' 'repeat' - find Canvas usage
     getSVGDefinition: function( id ) {
       /* Approximate example of what we are creating:
-      <linearGradient id="grad2" x1="0" y1="0" x2="100" y2="0" gradientUnits="userSpaceOnUse">
-        <stop offset="0" style="stop-color:rgb(255,255,0);stop-opacity:1" />
-        <stop offset="0.5" style="stop-color:rgba(255,255,0,0);stop-opacity:0" />
-        <stop offset="1" style="stop-color:rgb(255,0,0);stop-opacity:1" />
-      </linearGradient>
-      */
+       <linearGradient id="grad2" x1="0" y1="0" x2="100" y2="0" gradientUnits="userSpaceOnUse">
+       <stop offset="0" style="stop-color:rgb(255,255,0);stop-opacity:1" />
+       <stop offset="0.5" style="stop-color:rgba(255,255,0,0);stop-opacity:0" />
+       <stop offset="1" style="stop-color:rgb(255,0,0);stop-opacity:1" />
+       </linearGradient>
+       */
       var definition = document.createElementNS( scenery.svgns, 'linearGradient' );
       definition.setAttribute( 'id', id );
       definition.setAttribute( 'gradientUnits', 'userSpaceOnUse' ); // so we don't depend on the bounds of the object being drawn with the gradient

@@ -416,8 +416,8 @@ define( function( require ) {
         }
 
         /*---------------------------------------------------------------------------*
-        * Change intervals
-        *----------------------------------------------------------------------------*/
+         * Change intervals
+         *----------------------------------------------------------------------------*/
 
         var wasIncluded = childInstance.stitchChangeIncluded;
         var isIncluded = childInstance.node.isVisible();
@@ -798,8 +798,8 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * Children handling
-    *----------------------------------------------------------------------------*/
+     * Children handling
+     *----------------------------------------------------------------------------*/
 
     appendInstance: function( instance ) {
       this.insertInstance( instance, this.children.length );
@@ -921,7 +921,7 @@ define( function( require ) {
     // event callback for Node's 'childInserted' event, used to track children
     onChildInserted: function( childNode, index ) {
       sceneryLog && sceneryLog.Instance && sceneryLog.Instance(
-        'inserting child node ' + childNode.constructor.name + '#' + childNode.id + ' into ' + this.toString() );
+          'inserting child node ' + childNode.constructor.name + '#' + childNode.id + ' into ' + this.toString() );
       sceneryLog && sceneryLog.Instance && sceneryLog.push();
 
       assert && assert( !this.isStateless(), 'If we are stateless, we should not receive these notifications' );
@@ -949,7 +949,7 @@ define( function( require ) {
     // event callback for Node's 'childRemoved' event, used to track children
     onChildRemoved: function( childNode, index ) {
       sceneryLog && sceneryLog.Instance && sceneryLog.Instance(
-        'removing child node ' + childNode.constructor.name + '#' + childNode.id + ' from ' + this.toString() );
+          'removing child node ' + childNode.constructor.name + '#' + childNode.id + ' from ' + this.toString() );
       sceneryLog && sceneryLog.Instance && sceneryLog.push();
 
       assert && assert( !this.isStateless(), 'If we are stateless, we should not receive these notifications' );
@@ -989,8 +989,8 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * Relative transform listener count recursive handling
-    *----------------------------------------------------------------------------*/
+     * Relative transform listener count recursive handling
+     *----------------------------------------------------------------------------*/
 
     // @private: Only for descendants need, ignores 'self' need on isTransformed
     hasDescendantListenerNeed: function() {
@@ -1067,8 +1067,8 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * Relative transform precompute flag recursive handling
-    *----------------------------------------------------------------------------*/
+     * Relative transform precompute flag recursive handling
+     *----------------------------------------------------------------------------*/
 
     // @private: Only for descendants need, ignores 'self' need on isTransformed
     hasDescendantComputeNeed: function() {
@@ -1144,8 +1144,8 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * Relative transform handling
-    *----------------------------------------------------------------------------*/
+     * Relative transform handling
+     *----------------------------------------------------------------------------*/
 
     // called immediately when the corresponding node has a transform change (can happen multiple times between renders)
     markTransformDirty: function() {
@@ -1316,8 +1316,8 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * Miscellaneous
-    *----------------------------------------------------------------------------*/
+     * Miscellaneous
+     *----------------------------------------------------------------------------*/
 
     // add a reference for an SVG group (fastest way to track them)
     addSVGGroup: function( group ) {

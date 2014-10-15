@@ -253,8 +253,8 @@ define( function( require ) {
   Line.prototype._mutatorKeys = [ 'p1', 'p2', 'x1', 'y1', 'x2', 'y2' ].concat( Path.prototype._mutatorKeys );
 
   /*---------------------------------------------------------------------------*
-  * Rendering State mixin (DOM/SVG)
-  *----------------------------------------------------------------------------*/
+   * Rendering State mixin (DOM/SVG)
+   *----------------------------------------------------------------------------*/
 
   var LineRenderState = Line.LineRenderState = function( drawableType ) {
     var proto = drawableType.prototype;
@@ -338,8 +338,8 @@ define( function( require ) {
   };
 
   /*---------------------------------------------------------------------------*
-  * SVG Rendering
-  *----------------------------------------------------------------------------*/
+   * SVG Rendering
+   *----------------------------------------------------------------------------*/
 
   Line.LineSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function LineSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
@@ -371,8 +371,8 @@ define( function( require ) {
   } );
 
   /*---------------------------------------------------------------------------*
-  * Canvas rendering
-  *----------------------------------------------------------------------------*/
+   * Canvas rendering
+   *----------------------------------------------------------------------------*/
 
   Line.LineCanvasDrawable = CanvasSelfDrawable.createDrawable( {
     type: function LineCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },

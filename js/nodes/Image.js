@@ -187,8 +187,8 @@ define( function( require ) {
   };
 
   /*---------------------------------------------------------------------------*
-  * Rendering State mixin (DOM/SVG)
-  *----------------------------------------------------------------------------*/
+   * Rendering State mixin (DOM/SVG)
+   *----------------------------------------------------------------------------*/
 
   var ImageRenderState = Image.ImageRenderState = function( drawableType ) {
     var proto = drawableType.prototype;
@@ -219,8 +219,8 @@ define( function( require ) {
   };
 
   /*---------------------------------------------------------------------------*
-  * DOM rendering
-  *----------------------------------------------------------------------------*/
+   * DOM rendering
+   *----------------------------------------------------------------------------*/
 
   var ImageDOMDrawable = Image.ImageDOMDrawable = inherit( DOMSelfDrawable, function ImageDOMDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
@@ -289,8 +289,8 @@ define( function( require ) {
   SelfDrawable.Poolable( ImageDOMDrawable );
 
   /*---------------------------------------------------------------------------*
-  * SVG Rendering
-  *----------------------------------------------------------------------------*/
+   * SVG Rendering
+   *----------------------------------------------------------------------------*/
 
   Image.ImageSVGDrawable = SVGSelfDrawable.createDrawable( {
     type: function ImageSVGDrawable( renderer, instance ) { this.initialize( renderer, instance ); },
@@ -324,8 +324,8 @@ define( function( require ) {
   } );
 
   /*---------------------------------------------------------------------------*
-  * Canvas rendering
-  *----------------------------------------------------------------------------*/
+   * Canvas rendering
+   *----------------------------------------------------------------------------*/
 
   Image.ImageCanvasDrawable = CanvasSelfDrawable.createDrawable( {
     type: function ImageCanvasDrawable( renderer, instance ) { this.initialize( renderer, instance ); },

@@ -496,10 +496,10 @@ define( function( require ) {
                         this._backgroundColor instanceof scenery.Color );
 
       var newBackgroundCSS = this._backgroundColor === null ?
-                                  '' :
-                                  ( this._backgroundColor.toCSS ?
-                                    this._backgroundColor.toCSS() :
-                                    this._backgroundColor );
+                             '' :
+                             ( this._backgroundColor.toCSS ?
+                               this._backgroundColor.toCSS() :
+                               this._backgroundColor );
       if ( newBackgroundCSS !== this._currentBackgroundCSS ) {
         this._currentBackgroundCSS = newBackgroundCSS;
 
@@ -508,8 +508,8 @@ define( function( require ) {
     },
 
     /*---------------------------------------------------------------------------*
-    * Cursors
-    *----------------------------------------------------------------------------*/
+     * Cursors
+     *----------------------------------------------------------------------------*/
 
     updateCursor: function() {
       if ( this._input && this._input.mouse && this._input.mouse.point ) {

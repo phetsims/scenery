@@ -201,8 +201,8 @@ define( function( require ) {
   } );
 
   /*---------------------------------------------------------------------------*
-  * Layout Methods
-  *----------------------------------------------------------------------------*/
+   * Layout Methods
+   *----------------------------------------------------------------------------*/
 
   LayoutNode.Vertical = new LayoutMethod( function verticalLayout( element, index, previousElement, layoutProperties ) {
     element.layoutTop = previousElement ? previousElement.layoutBounds.bottom : 0;
@@ -237,8 +237,8 @@ define( function( require ) {
   } );
 
   /*---------------------------------------------------------------------------*
-  * Internals
-  *----------------------------------------------------------------------------*/
+   * Internals
+   *----------------------------------------------------------------------------*/
 
   var LayoutProperties = LayoutNode.LayoutProperties = function LayoutProperties( elements ) {
     var largestWidth = 0;
