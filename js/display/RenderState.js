@@ -38,15 +38,15 @@ define( function( require ) {
   var emptyObject = {};
 
   /*
-   * {param} node               Node      The node whose instance will have this state (inspect the hints / properties
-   *                                      on this node)
-   * {param} preferredRenderers Renderer  Either 0 (no preference), or a Renderer order bitmask (see Renderer.js)
-   * {param} svgRenderer        Renderer  SVG renderer settings to use
-   * {param} canvasRenderer     Renderer  Canvas renderer settings to use
-   * {param} isUnderCanvasCache Boolean   Whether we are under any sort of Canvas cache (not including if this node is
-   *                                      canvas cached)
-   * {param} isShared           Boolean   Whether this is the shared instance tree for a single-cache, instead of a
-   *                                      reference to it
+   * @param {Node} node                    The node whose instance will have this state (inspect the hints / properties
+   *                                       on this node)
+   * @param {Renderer} preferredRenderers  Either 0 (no preference), or a Renderer order bitmask (see Renderer.js)
+   * @param {Renderer} svgRenderer            SVG renderer settings to use
+   * @param {Renderer} canvasRenderer      Canvas renderer settings to use
+   * @param {Renderer} isUnderCanvasCache  Whether we are under any sort of Canvas cache (not including if this node is
+   *                                       canvas cached)
+   * @param {boolean}  isShared            Whether this is the shared instance tree for a single-cache, instead of a
+   *                                       reference to it
    *
    * Potential ways the state can change:
    * - any input changes, specifically including:
