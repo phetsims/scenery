@@ -40,13 +40,14 @@ define( function( require ) {
   /*
    * @param {Node} node                    The node whose instance will have this state (inspect the hints / properties
    *                                       on this node)
-   * @param {Renderer} preferredRenderers  Either 0 (no preference), or a Renderer order bitmask (see Renderer.js)
-   * @param {Renderer} svgRenderer            SVG renderer settings to use
-   * @param {Renderer} canvasRenderer      Canvas renderer settings to use
-   * @param {Renderer} isUnderCanvasCache  Whether we are under any sort of Canvas cache (not including if this node is
+   * @param {number} preferredRenderers    Either 0 (no preference), or a Renderer order bitmask (see Renderer.js)
+   * @param {number} svgRenderer           SVG renderer settings to use
+   * @param {number} canvasRenderer        Canvas renderer settings to use
+   * @param {boolean} isUnderCanvasCache   Whether we are under any sort of Canvas cache (not including if this node is
    *                                       canvas cached)
-   * @param {boolean}  isShared            Whether this is the shared instance tree for a single-cache, instead of a
+   * @param {boolean} isShared             Whether this is the shared instance tree for a single-cache, instead of a
    *                                       reference to it
+   * @param {boolean} isDisplayRoot
    *
    * Potential ways the state can change:
    * - any input changes, specifically including:
@@ -55,6 +56,7 @@ define( function( require ) {
    */
   var RenderState = scenery.RenderState = function RenderState( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot ) {
     this.initialize( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot );
+    debugger;
   };
   inherit( Object, RenderState, {
     initialize: function( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot ) {
