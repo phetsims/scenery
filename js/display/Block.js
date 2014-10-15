@@ -3,8 +3,8 @@
 
 /**
  * A specialized drawable for a layer of drawables with the same renderer (basically, it's a Canvas element, SVG
- * element, or some type of DOMcontainer). Doesn't strictly have to have its DOM element used directly (Canvas block
- * used for caches).
+ * element, or some type of DOM container). Doesn't strictly have to have its DOM element used directly (Canvas block
+ * used for caches).  This class is abstract, and meant to be subclassed.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -23,6 +23,11 @@ define( function( require ) {
   var Block = scenery.Block;
 
   inherit( Drawable, Block, {
+
+    /**
+     * @param {Display} display
+     * @param {number} renderer
+     */
     initializeBlock: function( display, renderer ) {
       this.initializeDrawable( renderer );
       this.display = display;
