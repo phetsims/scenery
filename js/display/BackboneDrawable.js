@@ -10,6 +10,7 @@
 define( function( require ) {
   'use strict';
 
+  // modules
   var inherit = require( 'PHET_CORE/inherit' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
@@ -21,14 +22,31 @@ define( function( require ) {
   var RebuildStitcher = require( 'SCENERY/display/RebuildStitcher' );
   var Util = require( 'SCENERY/util/Util' );
 
+  // constants
   var useGreedyStitcher = true;
 
+  /**
+   * @param {Display} display
+   * @param {Instance} backboneInstance
+   * @param {Instance} transformRootInstance
+   * @param {number} renderer
+   * @param {boolean} isDisplayRoot
+   * @constructor
+   */
   scenery.BackboneDrawable = function BackboneDrawable( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
     this.initialize( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
   };
   var BackboneDrawable = scenery.BackboneDrawable;
 
   inherit( Drawable, BackboneDrawable, {
+
+    /**
+     * @param {Display} display
+     * @param {Instance} backboneInstance
+     * @param {Instance} transformRootInstance
+     * @param {number} renderer
+     * @param {boolean} isDisplayRoot
+     */
     initialize: function( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
       Drawable.call( this, renderer );
 
@@ -53,7 +71,7 @@ define( function( require ) {
 
       this.transformListener = this.transformListener || this.markTransformDirty.bind( this );
       if ( this.willApplyTransform ) {
-        this.backboneInstance.addRelativeTransformListener( this.transformListener ); // when our relative tranform changes, notify us in the pre-repaint phase
+        this.backboneInstance.addRelativeTransformListener( this.transformListener ); // when our relative transform changes, notify us in the pre-repaint phase
         this.backboneInstance.addRelativeTransformPrecompute(); // trigger precomputation of the relative transform, since we will always need it when it is updated
       }
 
