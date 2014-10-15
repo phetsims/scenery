@@ -191,7 +191,6 @@ define( function( require ) {
     },
 
     getStateForDescendant: function( node ) {
-      // TODO: allocation (pool this)
       return RenderState.createFromPool(
         node,
 
