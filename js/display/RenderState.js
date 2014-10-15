@@ -56,7 +56,6 @@ define( function( require ) {
    */
   var RenderState = scenery.RenderState = function RenderState( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot ) {
     this.initialize( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot );
-    debugger;
   };
   inherit( Object, RenderState, {
     initialize: function( node, preferredRenderers, svgRenderer, canvasRenderer, isUnderCanvasCache, isShared, isDisplayRoot ) {
