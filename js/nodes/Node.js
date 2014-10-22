@@ -521,7 +521,7 @@ define( function( require ) {
           // transform it to the parent coordinate frame\
           this.transformBoundsFromLocalToParent( this._mouseBounds );
 
-          // and include the normal bounds, so that we don't have to 
+          // and include the normal bounds, so that we don't have to
           this._mouseBounds.includeBounds( this._bounds );
         }
         else {
@@ -570,7 +570,7 @@ define( function( require ) {
           // transform it to the parent coordinate frame
           this.transformBoundsFromLocalToParent( this._touchBounds );
 
-          // and include the normal bounds, so that we don't have to 
+          // and include the normal bounds, so that we don't have to
           this._touchBounds.includeBounds( this._bounds );
         }
         else {

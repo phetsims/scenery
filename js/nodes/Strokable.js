@@ -25,6 +25,7 @@ define( function( require ) {
     proto.initializeStrokable = function() {
       this._stroke = null;
       this._strokePickable = false;
+      this._strokeKept = false; // whether the SVG stroke should be kept (makes gradients/patterns stay in memory!)
       this._lineDrawingStyles = new LineStyles();
 
       var that = this;
@@ -133,6 +134,15 @@ define( function( require ) {
       return this;
     };
 
+    proto.isStrokeKept = function() {
+      return this._strokeKept;
+    };
+
+    proto.setStrokeKept = function( kept ) {
+      assert && assert( typeof kept === 'boolean' );
+      this._strokeKept = kept;
+    };
+
     proto.setLineStyles = function( lineStyles ) {
       // TODO: since we have been using lineStyles as mutable for now, lack of change check is good here?
       this.markOldSelfPaint();
@@ -227,7 +237,7 @@ define( function( require ) {
       }
       else if ( this._stroke.getSVGDefinition ) {
         // reference the SVG definition with a URL
-        style += 'url(#stroke' + this.getId() + ');';
+        style += 'url(#' + this.getStrokeId() + ');';
       }
       else {
         // plain CSS color
@@ -244,6 +254,10 @@ define( function( require ) {
       }
 
       return style;
+    };
+
+    proto.getStrokeId = function() {
+      return 'stroke-' + this._stroke.id + '-' + this.getId();
     };
 
     // if we have to apply a transform workaround for https://github.com/phetsims/scenery/issues/196 (only when we have a pattern or gradient)
@@ -264,10 +278,11 @@ define( function( require ) {
 
     proto.addSVGStrokeDef = function( svg, defs ) {
       var stroke = this.getStroke();
-      var strokeId = 'stroke' + this.getId();
 
       // add new definitions if necessary
       if ( stroke && stroke.getSVGDefinition ) {
+        var strokeId = this.getStrokeId();
+
         defs.appendChild( stroke.getSVGDefinition( strokeId ) );
       }
     };
@@ -277,7 +292,7 @@ define( function( require ) {
 
       // wipe away any old definition
       var oldStrokeDef = svg.getElementById( strokeId );
-      if ( oldStrokeDef ) {
+      if ( oldStrokeDef && !this._strokeKept ) {
         defs.removeChild( oldStrokeDef );
       }
     };
@@ -339,7 +354,7 @@ define( function( require ) {
     };
 
     // on mutation, set the stroke parameters first since they may affect the bounds (and thus later operations)
-    proto._mutatorKeys = [ 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'lineDash', 'lineDashOffset', 'strokePickable' ].concat( proto._mutatorKeys );
+    proto._mutatorKeys = [ 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'lineDash', 'lineDashOffset', 'strokePickable', 'strokeKept' ].concat( proto._mutatorKeys );
 
     // TODO: miterLimit support?
     Object.defineProperty( proto, 'stroke', { set: proto.setStroke, get: proto.getStroke } );
@@ -349,6 +364,7 @@ define( function( require ) {
     Object.defineProperty( proto, 'lineDash', { set: proto.setLineDash, get: proto.getLineDash } );
     Object.defineProperty( proto, 'lineDashOffset', { set: proto.setLineDashOffset, get: proto.getLineDashOffset } );
     Object.defineProperty( proto, 'strokePickable', { set: proto.setStrokePickable, get: proto.isStrokePickable } );
+    Object.defineProperty( proto, 'strokeKept', { set: proto.setStrokeKept, get: proto.isStrokeKept } );
 
     if ( proto.invalidateStroke ) {
       var oldInvalidateStroke = proto.invalidateStroke;
