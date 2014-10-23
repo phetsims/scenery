@@ -13,10 +13,14 @@ define( function( require ) {
 
   var scenery = require( 'SCENERY/scenery' );
 
+  var globalId = 1;
+
   // TODO: support scene or other various content (SVG is flexible, can backport to canvas)
   // TODO: investigate options to support repeat-x, repeat-y or no-repeat in SVG (available repeat options from Canvas)
   scenery.Pattern = function Pattern( image ) {
     this.image = image;
+
+    this.id = 'pattern' + globalId++;
 
     // use the global scratch canvas instead of creating a new Canvas
     this.canvasPattern = scenery.scratchContext.createPattern( image, 'repeat' );

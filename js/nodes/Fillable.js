@@ -23,6 +23,7 @@ define( function( require ) {
     proto.initializeFillable = function() {
       this._fill = null;
       this._fillPickable = true;
+      this._fillKept = false; // whether the SVG fill should be kept (makes gradients/patterns stay in memory!)
 
       var that = this;
       this._fillListener = function() {
@@ -75,6 +76,15 @@ define( function( require ) {
       return this;
     };
 
+    proto.isFillKept = function() {
+      return this._fillKept;
+    };
+
+    proto.setFillKept = function( kept ) {
+      assert && assert( typeof kept === 'boolean' );
+      this._fillKept = kept;
+    };
+
     var superFirstInstanceAdded = proto.firstInstanceAdded;
     proto.firstInstanceAdded = function() {
       if ( this._fill && this._fill.addChangeListener ) {
@@ -123,13 +133,17 @@ define( function( require ) {
       }
       else if ( this._fill.getSVGDefinition ) {
         // reference the SVG definition with a URL
-        style += 'url(#fill' + this.getId() + ');';
+        style += 'url(#' + this.getFillId() + ');';
       }
       else {
         // plain CSS color
         style += this._fill + ';';
       }
       return style;
+    };
+
+    proto.getFillId = function() {
+      return this._fill.id + '-' + this.getId();
     };
 
     proto.getCSSFill = function() {
@@ -140,10 +154,10 @@ define( function( require ) {
 
     proto.addSVGFillDef = function( svg, defs ) {
       var fill = this.getFill();
-      var fillId = 'fill' + this.getId();
 
       // add new definitions if necessary
       if ( fill && fill.getSVGDefinition ) {
+        var fillId = this.getFillId();
         defs.appendChild( fill.getSVGDefinition( fillId ) );
       }
     };
@@ -153,7 +167,7 @@ define( function( require ) {
 
       // wipe away any old definition
       var oldFillDef = svg.getElementById( fillId );
-      if ( oldFillDef ) {
+      if ( oldFillDef && !this._fillKept ) {
         defs.removeChild( oldFillDef );
       }
     };
@@ -205,10 +219,11 @@ define( function( require ) {
     };
 
     // on mutation, set the fill parameter first
-    proto._mutatorKeys = [ 'fill', 'fillPickable' ].concat( proto._mutatorKeys );
+    proto._mutatorKeys = [ 'fill', 'fillPickable', 'fillKept' ].concat( proto._mutatorKeys );
 
     Object.defineProperty( proto, 'fill', { set: proto.setFill, get: proto.getFill } );
     Object.defineProperty( proto, 'fillPickable', { set: proto.setFillPickable, get: proto.isFillPickable } );
+    Object.defineProperty( proto, 'fillKept', { set: proto.setFillKept, get: proto.isFillKept } );
 
     if ( proto.invalidateFill ) {
       var oldInvalidateFill = proto.invalidateFill;
