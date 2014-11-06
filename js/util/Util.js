@@ -388,6 +388,54 @@ define( function( require ) {
 
       // return the average
       return result;
+    },
+
+    // returns the smallest power of 2 that is greater than or equal
+    toPowerOf2: function( n ) {
+      var result = 1;
+      while ( result < n ) {
+          result *= 2;
+      }
+      return result;
+    },
+
+    /*
+     * @param type should be: gl.VERTEX_SHADER or gl.FRAGMENT_SHADER
+     * @param source {String}, the shader source code.
+     */
+    createShader: function( gl, source, type ) {
+      var shader = gl.createShader( type );
+      gl.shaderSource( shader, source );
+      gl.compileShader( shader );
+
+      if ( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
+        console.log( 'GLSL compile error:' );
+        console.log( gl.getShaderInfoLog( shader ) );
+        console.log( source );
+
+        // Normally it would be best to throw an exception here, but a context loss could cause the shader parameter check
+        // to fail, and we must handle context loss gracefully between any adjacent pair of gl calls.
+        // Therefore, we simply report the errors to the console.  See #279
+      }
+
+      return shader;
+    },
+
+    //Check to see whether webgl is supported, using the same strategy as mrdoob and pixi.js
+    isWebGLSupported: function() {
+      var canvas = document.createElement( 'canvas' );
+
+      var args = { failIfMajorPerformanceCaveat: true };
+      try {
+        var gl =
+          !!window.WebGLRenderingContext &&
+          (canvas.getContext( 'webgl', args ) || canvas.getContext( 'experimental-webgl', args ));
+        return !!gl;
+        // TODO: check for required extensions
+      }
+      catch( e ) {
+        return false;
+      }
     }
   };
   var Util = scenery.Util;
