@@ -200,15 +200,6 @@ define( function( require ) {
     return colorSpec instanceof Color ? colorSpec : new Color( colorSpec );
   };
 
-  /**
-   * Convenience function that converts a color spec to a color object if
-   * necessary, or simply returns the color object if not.
-   * @param {String|Color} colorSpec
-   */
-  Color.toColor = function( colorSpec ) {
-    return colorSpec instanceof Color ? colorSpec : new Color( colorSpec );
-  };
-
   inherit( Object, Color, {
     copy: function() {
       return new Color( this.r, this.g, this.b, this.a );
