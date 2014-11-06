@@ -4,7 +4,7 @@
 /**
  * A specialized drawable for a layer of drawables with the same renderer (basically, it's a Canvas element, SVG
  * element, or some type of DOM container). Doesn't strictly have to have its DOM element used directly (Canvas block
- * used for caches).  This class is abstract, and meant to be subclassed.
+ * used for caches).  This type is abstract, and meant to be subclassed.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
