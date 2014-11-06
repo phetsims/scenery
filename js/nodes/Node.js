@@ -46,14 +46,25 @@ define( function( require ) {
    * Available keys for use in the options parameter object for a vanilla Node (not inherited), in the order they are executed in:
    *
    * children:         A list of children to add (in order)
-   * cursor:           Will display the specified CSS cursor when the mouse is over this Node or one of its descendants. The Scene needs to have input listeners attached with an initialize method first.
+   * cursor:           Will display the specified CSS cursor when the mouse is over this Node or one of its descendents. The Scene needs to have input listeners attached with an initialize method first.
    * visible:          If false, this node (and its children) will not be displayed (or get input events)
    * pickable:         If false, this node (and its children) will not get input events
+   * opacity:          Sets the opacity in the range [0,1]
+   * matrix:           Sets the {Matrix3} transformation matrix (sets translation, rotation and scaling)
    * translation:      Sets the translation of the node to either the specified dot.Vector2 value, or the x,y values from an object (e.g. translation: { x: 1, y: 2 } )
    * x:                Sets the x-translation of the node
    * y:                Sets the y-translation of the node
    * rotation:         Sets the rotation of the node in radians
    * scale:            Sets the scale of the node. Supports either a number (same x-y scale), or a dot.Vector2 / object with ob.x and ob.y to set the scale for each axis independently
+   * leftTop:          Sets the translation so that the left-top corner of the bounding box (in the parent coordinate frame) is at the specified point
+   * centerTop:        Sets the translation so that the center of the top edge of the bounding box (in the parent coordinate frame) is at the specified point
+   * rightTop:         Sets the translation so that the right-top corner of the bounding box (in the parent coordinate frame) is at the specified point
+   * leftCenter:       Sets the translation so that the center of the left edge of the bounding box (in the parent coordinate frame) is at the specified point
+   * center:           Sets the translation so that the center the bounding box (in the parent coordinate frame) is at the specified point
+   * rightCenter:      Sets the translation so that the center of the right edge of the bounding box (in the parent coordinate frame) is at the specified point
+   * leftBottom:       Sets the translation so that the left-bottom corner of the bounding box (in the parent coordinate frame) is at the specified point
+   * centerBottom:     Sets the translation so that the center of the bottom edge of the bounding box (in the parent coordinate frame) is at the specified point
+   * rightBottom:      Sets the translation so that the right-bottom corner of the bounding box (in the parent coordinate frame) is at the specified point
    * left:             Sets the x-translation so that the left (min X) of the bounding box (in the parent coordinate frame) is at the specified value
    * right:            Sets the x-translation so that the right (max X) of the bounding box (in the parent coordinate frame) is at the specified value
    * top:              Sets the y-translation so that the top (min Y) of the bounding box (in the parent coordinate frame) is at the specified value
@@ -66,6 +77,7 @@ define( function( require ) {
    * mouseArea:        Shape (in local coordinate frame) that overrides the 'hit area' for mouse input.
    * touchArea:        Shape (in local coordinate frame) that overrides the 'hit area' for touch input.
    * clipArea:         Shape (in local coordinate frame) that causes any graphics outside of the shape to be invisible (for the node and any children).
+   * transformBounds:  Whether to compute tighter parent bounding boxes for rotated bounding boxes, or to just use the bounding box of the rotated bounding box.
    */
   scenery.Node = function Node( options ) {
     var self = this;
