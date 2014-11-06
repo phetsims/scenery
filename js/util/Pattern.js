@@ -15,9 +15,13 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
 
+  var globalId = 1;
+
   // TODO: support scene or other various content (SVG is flexible, can backport to canvas)
   // TODO: investigate options to support repeat-x, repeat-y or no-repeat in SVG (available repeat options from Canvas)
   scenery.Pattern = function Pattern( image ) {
+    this.id = 'gradient' + globalId++;
+
     this.image = image;
 
     // use the global scratch canvas instead of creating a new Canvas

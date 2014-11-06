@@ -24,6 +24,7 @@ define( function( require ) {
     proto.initializeFillable = function() {
       this._fill = null;
       this._fillPickable = true;
+      this._fillKept = false; // whether to keep SVG defs for gradients/fills around to improve performance
 
       var that = this;
       this._fillListener = function() {
@@ -76,6 +77,18 @@ define( function( require ) {
         // TODO: better way of indicating that only the node under pointers could have changed, but no paint change is needed?
         this.invalidateFill();
       }
+      return this;
+    };
+
+    proto.isFillKept = function() {
+      return this._fillKept;
+    };
+
+    proto.setFillKept = function( kept ) {
+      assert && assert( typeof kept === 'boolean' );
+
+      this._fillKept = kept;
+
       return this;
     };
 
@@ -143,26 +156,6 @@ define( function( require ) {
       return this._fill ? ( this._fill.toCSS ? this._fill.toCSS() : this._fill ) : 'transparent';
     };
 
-    proto.addSVGFillDef = function( svg, defs ) {
-      var fill = this.getFill();
-      var fillId = 'fill' + this.getId();
-
-      // add new definitions if necessary
-      if ( fill && fill.getSVGDefinition ) {
-        defs.appendChild( fill.getSVGDefinition( fillId ) );
-      }
-    };
-
-    proto.removeSVGFillDef = function( svg, defs ) {
-      var fillId = 'fill' + this.getId();
-
-      // wipe away any old definition
-      var oldFillDef = svg.getElementById( fillId );
-      if ( oldFillDef ) {
-        defs.removeChild( oldFillDef );
-      }
-    };
-
     proto.appendFillablePropString = function( spaces, result ) {
       if ( this._fill ) {
         if ( result ) {
@@ -212,10 +205,11 @@ define( function( require ) {
     };
 
     // on mutation, set the fill parameter first
-    proto._mutatorKeys = [ 'fill', 'fillPickable' ].concat( proto._mutatorKeys );
+    proto._mutatorKeys = [ 'fill', 'fillPickable', 'fillKept' ].concat( proto._mutatorKeys );
 
     Object.defineProperty( proto, 'fill', { set: proto.setFill, get: proto.getFill } );
     Object.defineProperty( proto, 'fillPickable', { set: proto.setFillPickable, get: proto.isFillPickable } );
+    Object.defineProperty( proto, 'fillKept', { set: proto.setFillKept, get: proto.isFillKept } );
 
     if ( proto.invalidateFill ) {
       var oldInvalidateFill = proto.invalidateFill;
@@ -293,24 +287,24 @@ define( function( require ) {
     },
 
     // called when the fill needs to be updated, with the latest defs SVG block
-    updateFill: function( defs, fill ) {
+    updateFill: function( svgBlock, fill ) {
       if ( fill !== this.fill ) {
         this.releaseDef();
         this.fill = fill;
         this.style = this.computeStyle();
         if ( this.fill && this.fill.getSVGDefinition ) {
           this.def = this.fill.getSVGDefinition( this.id );
-          defs.appendChild( this.def );
+          svgBlock.defs.appendChild( this.def );
         }
       }
     },
 
     // called when the defs SVG block is switched (our SVG element was moved to another SVG top-level context)
-    updateDefs: function( defs ) {
+    updateSVGBlock: function( svgBlock ) {
       if ( this.def ) {
-        if ( defs ) {
+        if ( svgBlock.defs ) {
           // adding to the DOM here removes it from its previous location
-          defs.appendChild( this.def );
+          svgBlock.defs.appendChild( this.def );
         }
         else if ( this.def.parentNode ) {
           //OHTWO TODO: does this parentNode access cause reflows?

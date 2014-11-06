@@ -155,7 +155,7 @@ define( function( require ) {
       FittedBlock.prototype.addDrawable.call( this, drawable );
 
       SVGGroup.addDrawable( this, drawable );
-      drawable.updateDefs( this.defs );
+      drawable.updateSVGBlock( this );
     },
 
     removeDrawable: function( drawable ) {

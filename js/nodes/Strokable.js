@@ -26,6 +26,7 @@ define( function( require ) {
     proto.initializeStrokable = function() {
       this._stroke = null;
       this._strokePickable = false;
+      this._strokeKept = false; // whether the SVG stroke should be kept (makes gradients/patterns stay in memory!)
       this._lineDrawingStyles = new LineStyles();
 
       var that = this;
@@ -164,6 +165,18 @@ define( function( require ) {
       return this;
     };
 
+    proto.isStrokeKept = function() {
+      return this._strokeKept;
+    };
+
+    proto.setStrokeKept = function( kept ) {
+      assert && assert( typeof kept === 'boolean' );
+
+      this._strokeKept = kept;
+
+      return this;
+    };
+
     proto.setLineStyles = function( lineStyles ) {
 
       this._lineDrawingStyles = lineStyles;
@@ -296,26 +309,6 @@ define( function( require ) {
       return this._stroke ? ( this._stroke.toCSS ? this._stroke.toCSS() : this._stroke ) : 'transparent';
     };
 
-    proto.addSVGStrokeDef = function( svg, defs ) {
-      var stroke = this.getStroke();
-      var strokeId = 'stroke' + this.getId();
-
-      // add new definitions if necessary
-      if ( stroke && stroke.getSVGDefinition ) {
-        defs.appendChild( stroke.getSVGDefinition( strokeId ) );
-      }
-    };
-
-    proto.removeSVGStrokeDef = function( svg, defs ) {
-      var strokeId = 'stroke' + this.getId();
-
-      // wipe away any old definition
-      var oldStrokeDef = svg.getElementById( strokeId );
-      if ( oldStrokeDef ) {
-        defs.removeChild( oldStrokeDef );
-      }
-    };
-
     proto.appendStrokablePropString = function( spaces, result ) {
       var self = this;
 
@@ -376,7 +369,7 @@ define( function( require ) {
     };
 
     // on mutation, set the stroke parameters first since they may affect the bounds (and thus later operations)
-    proto._mutatorKeys = [ 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'lineDash', 'lineDashOffset', 'strokePickable' ].concat( proto._mutatorKeys );
+    proto._mutatorKeys = [ 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'lineDash', 'lineDashOffset', 'strokePickable', 'strokeKept' ].concat( proto._mutatorKeys );
 
     // TODO: miterLimit support?
     Object.defineProperty( proto, 'stroke', { set: proto.setStroke, get: proto.getStroke } );
@@ -386,6 +379,7 @@ define( function( require ) {
     Object.defineProperty( proto, 'lineDash', { set: proto.setLineDash, get: proto.getLineDash } );
     Object.defineProperty( proto, 'lineDashOffset', { set: proto.setLineDashOffset, get: proto.getLineDashOffset } );
     Object.defineProperty( proto, 'strokePickable', { set: proto.setStrokePickable, get: proto.isStrokePickable } );
+    Object.defineProperty( proto, 'strokeKept', { set: proto.setStrokeKept, get: proto.isStrokeKept } );
 
     if ( proto.invalidateStroke ) {
       var oldInvalidateStroke = proto.invalidateStroke;
@@ -486,14 +480,14 @@ define( function( require ) {
       }
     },
 
-    updateStroke: function( defs, stroke ) {
+    updateStroke: function( svgBlock, stroke ) {
       if ( stroke !== this.stroke ) {
         this.releaseDef();
         this.stroke = stroke;
         this.baseStyle = this.computeStyle();
         if ( this.stroke && this.stroke.getSVGDefinition ) {
           this.def = this.stroke.getSVGDefinition( this.id );
-          defs.appendChild( this.def );
+          svgBlock.defs.appendChild( this.def );
         }
       }
     },
@@ -525,11 +519,11 @@ define( function( require ) {
     },
 
     // called when the defs SVG block is switched (our SVG element was moved to another SVG top-level context)
-    updateDefs: function( defs ) {
+    updateSVGBlock: function( svgBlock ) {
       if ( this.def ) {
-        if ( defs ) {
+        if ( svgBlock.defs ) {
           // adding to the DOM here removes it from its previous location
-          defs.appendChild( this.def );
+          svgBlock.defs.appendChild( this.def );
         }
         else if ( this.def.parentNode ) {
           //OHTWO TODO: does this parentNode access cause reflows?

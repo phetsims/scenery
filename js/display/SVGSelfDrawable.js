@@ -29,15 +29,15 @@ define( function( require ) {
       this.initializeSelfDrawable( renderer, instance );
 
       this.svgElement = null; // should be filled in by subtype
-      this.defs = null; // will be updated by updateDefs()
+      this.svgBlock = null; // will be updated by updateSVGBlock()
 
       return this;
     },
 
     // @public: called when the defs block changes
     // NOTE: should generally be overridden by drawable subtypes, so they can apply their defs changes
-    updateDefs: function( defs ) {
-      this.defs = defs;
+    updateSVGBlock: function( svgBlock ) {
+      this.svgBlock = svgBlock;
     },
 
     // @public: called from elsewhere to update the SVG element
@@ -54,7 +54,7 @@ define( function( require ) {
     },
 
     dispose: function() {
-      this.defs = null;
+      this.svgBlock = null;
 
       SelfDrawable.prototype.dispose.call( this );
     }
@@ -67,7 +67,7 @@ define( function( require ) {
    *   stateType - function to apply to mix-in the state (TODO docs)
    *   initialize( renderer, instance ) - should initialize this.svgElement if it doesn't already exist, and set up any other initial state properties
    *   updateSVG() - updates the svgElement to the latest state recorded
-   *   updateDefs( defs ) - called when the SVG <defs> object needs to be switched (or initialized)
+   *   updateSVGBlock( svgBlock ) - called when the SVGBlock object needs to be switched (or initialized)
    *   usesFill - whether we include fillable state & defs
    *   usesStroke - whether we include strokable state & defs
    *   keepElements - when disposing a drawable (not used anymore), should we keep a reference to the SVG element so we don't have to recreate it when reinitialized?
@@ -98,8 +98,8 @@ define( function( require ) {
 
         initializeSelf.call( this, renderer, instance );
 
-        // tracks our current defs object, so we can update our fill/stroke/etc. on our own
-        this.defs = null;
+        // tracks our current svgBlock object, so we can update our fill/stroke/etc. on our own
+        this.svgBlock = null;
 
         if ( usesFill ) {
           if ( !this.fillState ) {
@@ -125,12 +125,12 @@ define( function( require ) {
       // to be used by our passed in options.updateSVG
       updateFillStrokeStyle: function( element ) {
         if ( usesFill && this.dirtyFill ) {
-          this.fillState.updateFill( this.defs, this.node._fill );
+          this.fillState.updateFill( this.svgBlock, this.node._fill );
         }
         var strokeParameterDirty;
         if ( usesStroke ) {
           if ( this.dirtyStroke ) {
-            this.strokeState.updateStroke( this.defs, this.node._stroke );
+            this.strokeState.updateStroke( this.svgBlock, this.node._stroke );
           }
           strokeParameterDirty = this.dirtyLineWidth || this.dirtyLineOptions;
           if ( strokeParameterDirty ) {
@@ -151,13 +151,13 @@ define( function( require ) {
         this.setToClean();
       },
 
-      updateDefs: function( defs ) {
-        this.defs = defs;
+      updateSVGBlock: function( svgBlock ) {
+        this.svgBlock = svgBlock;
 
-        updateDefsSelf && updateDefsSelf.call( this, defs );
+        updateDefsSelf && updateDefsSelf.call( this, svgBlock );
 
-        usesFill && this.fillState.updateDefs( defs );
-        usesStroke && this.strokeState.updateDefs( defs );
+        usesFill && this.fillState.updateSVGBlock( svgBlock );
+        usesStroke && this.strokeState.updateSVGBlock( svgBlock );
       },
 
       onAttach: function( node ) {
