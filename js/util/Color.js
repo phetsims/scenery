@@ -52,6 +52,9 @@ define( function( require ) {
         throw new Error( 'scenery.Color unable to parse color string: ' + r );
       }
     }
+    else if ( r instanceof Color ) {
+      this.setRGBA( r.r, r.g, r.b, r.a );
+    }
     else {
       // alpha
       var alpha = a === undefined ? 1 : a;
@@ -262,6 +265,11 @@ define( function( require ) {
       assert && assert( this._css === this.computeCSS(), 'CSS cached value is ' + this._css + ', but the computed value appears to be ' + this.computeCSS() );
 
       return this._css;
+    },
+
+    // e.g. 0xFF00FF
+    toNumber: function() {
+      return ( this.r << 16 ) + ( this.g << 8 ) + this.b;
     },
 
     // called to update the interally cached CSS value
