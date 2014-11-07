@@ -69,6 +69,8 @@ define( function( require ) {
 
         //TODO: Once we are lazily handling the full matrix, we may benefit from DYNAMIC draw here, and updating the vertices themselves
         gl.STATIC_DRAW );
+
+      this.color = Color.toColor( this.rectangleNode._fill );
     },
 
     render: function( shaderProgram, viewMatrix ) {
@@ -79,8 +81,7 @@ define( function( require ) {
 
       //Indicate the branch of logic to use in the ubershader.  In this case, a texture should be used for the image
       gl.uniform1i( shaderProgram.uniformLocations.uFragmentType, WebGLLayer.fragmentTypeFill );
-      var color = Color.toColor( this.rectangleNode._fill );
-      gl.uniform4f( shaderProgram.uniformLocations.uColor, color.r / 255, color.g / 255, color.b / 255, color.a );
+      gl.uniform4f( shaderProgram.uniformLocations.uColor, this.color.r / 255, this.color.g / 255, this.color.b / 255, this.color.a );
 
       gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
       gl.vertexAttribPointer( shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, 0, 0 );
