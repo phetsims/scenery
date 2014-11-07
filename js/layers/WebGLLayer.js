@@ -221,6 +221,8 @@ define( function( require ) {
         if ( this.dirty ) {
           gl.clear( this.gl.COLOR_BUFFER_BIT );
 
+          gl.uniformMatrix4fv( this.shaderProgram.uniformLocations.uProjectionMatrix, false, this.projectionMatrix.entries );
+
           var length = this.instances.length;
           for ( var i = 0; i < length; i++ ) {
             var instance = this.instances[i];
@@ -229,7 +231,6 @@ define( function( require ) {
               // TODO: this is expensive overhead!
               var modelViewMatrix = matrix3To4( instance.trail.getMatrix() );
 
-              gl.uniformMatrix4fv( this.shaderProgram.uniformLocations.uProjectionMatrix, false, this.projectionMatrix.entries );
               instance.data.drawable.render( this.shaderProgram, modelViewMatrix );
             }
           }
