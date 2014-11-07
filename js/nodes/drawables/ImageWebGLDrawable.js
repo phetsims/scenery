@@ -74,10 +74,10 @@ define( function( require ) {
     render: function( shaderProgram, viewMatrix ) {
       var gl = this.gl;
 
-      var uMatrix = viewMatrix.timesMatrix( Matrix4.scaling( this.canvasWidth, -this.canvasHeight, 1 ).timesMatrix( Matrix4.translation( 0, -1 ) ) );
+      var uModelViewMatrix = viewMatrix.timesMatrix( Matrix4.scaling( this.canvasWidth, -this.canvasHeight, 1 ).timesMatrix( Matrix4.translation( 0, -1 ) ) );
 
       // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to device coordinates
-      gl.uniformMatrix4fv( shaderProgram.uniformLocations.uMatrix, false, uMatrix.entries );
+      gl.uniformMatrix4fv( shaderProgram.uniformLocations.uModelViewMatrix, false, uModelViewMatrix.entries );
       gl.uniform1i( shaderProgram.uniformLocations.uTexture, 0 ); // TEXTURE0 slot
 
       //Indicate the branch of logic to use in the ubershader.  In this case, a texture should be used for the image

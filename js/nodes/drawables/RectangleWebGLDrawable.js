@@ -42,7 +42,7 @@ define( function( require ) {
       this.updateRectangle();
     },
 
-    //Nothing necessary since everything currently handled in the uMatrix below
+    //Nothing necessary since everything currently handled in the uModelViewMatrix below
     //However, we may switch to dynamic draw, and handle the matrix change only where necessary in the future?
     updateRectangle: function() {
       var gl = this.gl;
@@ -77,7 +77,7 @@ define( function( require ) {
       var gl = this.gl;
 
       // combine image matrix (to scale aspect ratios), the trail's matrix, and the matrix to device coordinates
-      gl.uniformMatrix4fv( shaderProgram.uniformLocations.uMatrix, false, viewMatrix.entries );
+      gl.uniformMatrix4fv( shaderProgram.uniformLocations.uModelViewMatrix, false, viewMatrix.entries );
 
       //Indicate the branch of logic to use in the ubershader.  In this case, a texture should be used for the image
       gl.uniform1i( shaderProgram.uniformLocations.uFragmentType, WebGLLayer.fragmentTypeFill );
