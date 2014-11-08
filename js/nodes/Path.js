@@ -15,8 +15,7 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Node = require( 'SCENERY/nodes/Node' );
   require( 'SCENERY/display/Renderer' );
-  var Fillable = require( 'SCENERY/nodes/Fillable' );
-  var Strokable = require( 'SCENERY/nodes/Strokable' );
+  var Paintable = require( 'SCENERY/nodes/Paintable' );
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
 
@@ -32,8 +31,7 @@ define( function( require ) {
     // ensure we have a parameter object
     options = options || {};
 
-    this.initializeFillable();
-    this.initializeStrokable();
+    this.initializePaintable();
 
     Node.call( this );
     this.invalidateSupportedRenderers();
@@ -174,8 +172,7 @@ define( function( require ) {
   // mix in fill/stroke handling code. for now, this is done after 'shape' is added to the mutatorKeys so that stroke parameters
   // get set first
   /* jshint -W064 */
-  Fillable( Path );
-  Strokable( Path );
+  Paintable( Path );
 
   /*---------------------------------------------------------------------------*
    * Rendering State mixin (DOM/SVG)
@@ -190,8 +187,7 @@ define( function( require ) {
       this.dirtyShape = true;
 
       // adds fill/stroke-specific flags and state
-      this.initializeFillableState();
-      this.initializeStrokableState();
+      this.initializePaintableState();
 
       return this; // allow for chaining
     };
@@ -211,14 +207,11 @@ define( function( require ) {
       this.paintDirty = false;
       this.dirtyShape = false;
 
-      this.cleanFillableState();
-      this.cleanStrokableState();
+      this.cleanPaintableState();
     };
 
     /* jshint -W064 */
-    Fillable.FillableState( drawableType );
-    /* jshint -W064 */
-    Strokable.StrokableState( drawableType );
+    Paintable.PaintableState( drawableType );
   };
 
   /*---------------------------------------------------------------------------*
@@ -250,8 +243,7 @@ define( function( require ) {
 
       this.updateFillStrokeStyle( path );
     },
-    usesFill: true,
-    usesStroke: true,
+    usesPaint: true,
     keepElements: keepSVGPathElements
   } );
 
@@ -270,19 +262,18 @@ define( function( require ) {
         node._shape.writeToContext( context );
 
         if ( node._fill ) {
-          node.beforeCanvasFill( wrapper ); // defined in Fillable
+          node.beforeCanvasFill( wrapper ); // defined in Paintable
           context.fill();
-          node.afterCanvasFill( wrapper ); // defined in Fillable
+          node.afterCanvasFill( wrapper ); // defined in Paintable
         }
         if ( node._stroke ) {
-          node.beforeCanvasStroke( wrapper ); // defined in Strokable
+          node.beforeCanvasStroke( wrapper ); // defined in Paintable
           context.stroke();
-          node.afterCanvasStroke( wrapper ); // defined in Strokable
+          node.afterCanvasStroke( wrapper ); // defined in Paintable
         }
       }
     },
-    usesFill: true,
-    usesStroke: true,
+    usesPaint: true,
     dirtyMethods: ['markDirtyShape']
   } );
 

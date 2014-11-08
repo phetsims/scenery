@@ -18,8 +18,7 @@ define( function( require ) {
   var Path = require( 'SCENERY/nodes/Path' );
   var Shape = require( 'KITE/Shape' );
   var Features = require( 'SCENERY/util/Features' );
-  var Fillable = require( 'SCENERY/nodes/Fillable' );
-  var Strokable = require( 'SCENERY/nodes/Strokable' );
+  var Paintable = require( 'SCENERY/nodes/Paintable' );
   var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
@@ -219,8 +218,7 @@ define( function( require ) {
       this.dirtyRadius = true;
 
       // adds fill/stroke-specific flags and state
-      this.initializeFillableState();
-      this.initializeStrokableState();
+      this.initializePaintableState();
 
       return this; // allow for chaining
     };
@@ -240,14 +238,11 @@ define( function( require ) {
       this.paintDirty = false;
       this.dirtyRadius = false;
 
-      this.cleanFillableState();
-      this.cleanStrokableState();
+      this.cleanPaintableState();
     };
 
     /* jshint -W064 */
-    Fillable.FillableState( drawableType );
-    /* jshint -W064 */
-    Strokable.StrokableState( drawableType );
+    Paintable.PaintableState( drawableType );
   };
 
   /*---------------------------------------------------------------------------*
@@ -396,8 +391,7 @@ define( function( require ) {
 
       this.updateFillStrokeStyle( circle );
     },
-    usesFill: true,
-    usesStroke: true,
+    usesPaint: true,
     keepElements: keepSVGCircleElements
   } );
 
@@ -415,18 +409,17 @@ define( function( require ) {
       context.closePath();
 
       if ( node._fill ) {
-        node.beforeCanvasFill( wrapper ); // defined in Fillable
+        node.beforeCanvasFill( wrapper ); // defined in Paintable
         context.fill();
-        node.afterCanvasFill( wrapper ); // defined in Fillable
+        node.afterCanvasFill( wrapper ); // defined in Paintable
       }
       if ( node._stroke ) {
-        node.beforeCanvasStroke( wrapper ); // defined in Strokable
+        node.beforeCanvasStroke( wrapper ); // defined in Paintable
         context.stroke();
-        node.afterCanvasStroke( wrapper ); // defined in Strokable
+        node.afterCanvasStroke( wrapper ); // defined in Paintable
       }
     },
-    usesFill: true,
-    usesStroke: true,
+    usesPaint: true,
     dirtyMethods: ['markDirtyRadius']
   } );
 

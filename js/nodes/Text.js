@@ -26,8 +26,7 @@ define( function( require ) {
 
   var Node = require( 'SCENERY/nodes/Node' ); // inherits from Node
   require( 'SCENERY/display/Renderer' );
-  var Fillable = require( 'SCENERY/nodes/Fillable' );
-  var Strokable = require( 'SCENERY/nodes/Strokable' );
+  var Paintable = require( 'SCENERY/nodes/Paintable' );
   require( 'SCENERY/util/Font' );
   require( 'SCENERY/util/Util' ); // for canvasAccurateBounds and CSS transforms
   require( 'SCENERY/util/CanvasContextWrapper' );
@@ -80,8 +79,7 @@ define( function( require ) {
       options.text = text;
     }
 
-    this.initializeFillable();
-    this.initializeStrokable();
+    this.initializePaintable();
 
     Node.call( this, options );
     this.updateTextFlags(); // takes care of setting up supported renderers
@@ -205,13 +203,13 @@ define( function( require ) {
       this.updateTextFlags();
     },
 
-    // overrides from Strokable
+    // @override from Paintable
     invalidateStroke: function() {
       // stroke can change both the bounds and renderer
       this.invalidateText();
     },
 
-    // overrides from Fillable
+    // @override from Paintable
     invalidateFill: function() {
       // fill type can change the renderer (gradient/fill not supported by DOM)
       this.invalidateText();
@@ -508,8 +506,7 @@ define( function( require ) {
 
   // mix in support for fills and strokes
   /* jshint -W064 */
-  Fillable( Text );
-  Strokable( Text );
+  Paintable( Text );
 
   /*---------------------------------------------------------------------------*
    * Rendering State mixin (DOM/SVG)
@@ -527,8 +524,7 @@ define( function( require ) {
       this.dirtyDirection = true;
 
       // adds fill/stroke-specific flags and state
-      this.initializeFillableState();
-      this.initializeStrokableState();
+      this.initializePaintableState();
 
       return this; // allow for chaining
     };
@@ -563,14 +559,11 @@ define( function( require ) {
       this.dirtyBounds = false;
       this.dirtyDirection = false;
 
-      this.cleanFillableState();
-      this.cleanStrokableState();
+      this.cleanPaintableState();
     };
 
     /* jshint -W064 */
-    Fillable.FillableState( drawableType );
-    /* jshint -W064 */
-    Strokable.StrokableState( drawableType );
+    Paintable.PaintableState( drawableType );
   };
 
   /*---------------------------------------------------------------------------*
@@ -713,8 +706,7 @@ define( function( require ) {
 
       this.updateFillStrokeStyle( text );
     },
-    usesFill: true,
-    usesStroke: true,
+    usesPaint: true,
     keepElements: keepSVGTextElements
   } );
 
@@ -770,18 +762,17 @@ define( function( require ) {
       }
 
       if ( node.hasFill() ) {
-        node.beforeCanvasFill( wrapper ); // defined in Fillable
+        node.beforeCanvasFill( wrapper ); // defined in Paintable
         context.fillText( node._text, 0, 0 );
-        node.afterCanvasFill( wrapper ); // defined in Fillable
+        node.afterCanvasFill( wrapper ); // defined in Paintable
       }
       if ( node.hasStroke() ) {
-        node.beforeCanvasStroke( wrapper ); // defined in Strokable
+        node.beforeCanvasStroke( wrapper ); // defined in Paintable
         context.strokeText( node._text, 0, 0 );
-        node.afterCanvasStroke( wrapper ); // defined in Strokable
+        node.afterCanvasStroke( wrapper ); // defined in Paintable
       }
     },
-    usesFill: true,
-    usesStroke: true,
+    usesPaint: true,
     dirtyMethods: ['markDirtyText', 'markDirtyFont', 'markDirtyBounds', 'markDirtyDirection']
   } );
 

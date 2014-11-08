@@ -13,8 +13,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
-  var Fillable = require( 'SCENERY/nodes/Fillable' );
-  var Strokable = require( 'SCENERY/nodes/Strokable' );
+  var Paintable = require( 'SCENERY/nodes/Paintable' );
 
   scenery.SVGSelfDrawable = function SVGSelfDrawable( renderer, instance ) {
     this.initializeSVGSelfDrawable( renderer, instance );
@@ -68,8 +67,7 @@ define( function( require ) {
    *   initialize( renderer, instance ) - should initialize this.svgElement if it doesn't already exist, and set up any other initial state properties
    *   updateSVG() - updates the svgElement to the latest state recorded
    *   updateSVGBlock( svgBlock ) - called when the SVGBlock object needs to be switched (or initialized)
-   *   usesFill - whether we include fillable state & defs
-   *   usesStroke - whether we include strokable state & defs
+   *   usesPaint - whether we include paintable (fill/stroke) state & defs
    *   keepElements - when disposing a drawable (not used anymore), should we keep a reference to the SVG element so we don't have to recreate it when reinitialized?
    */
   SVGSelfDrawable.createDrawable = function( options ) {
@@ -78,8 +76,7 @@ define( function( require ) {
     var initializeSelf = options.initialize;
     var updateSVGSelf = options.updateSVG;
     var updateDefsSelf = options.updateDefs;
-    var usesFill = options.usesFill;
-    var usesStroke = options.usesStroke;
+    var usesPaint = options.usesPaint;
     var keepElements = options.keepElements;
 
     assert && assert( typeof type === 'function' );
@@ -87,8 +84,7 @@ define( function( require ) {
     assert && assert( typeof initializeSelf === 'function' );
     assert && assert( typeof updateSVGSelf === 'function' );
     assert && assert( !updateDefsSelf || ( typeof updateDefsSelf === 'function' ) );
-    assert && assert( typeof usesFill === 'boolean' );
-    assert && assert( typeof usesStroke === 'boolean' );
+    assert && assert( typeof usesPaint === 'boolean' );
     assert && assert( typeof keepElements === 'boolean' );
 
     inherit( SVGSelfDrawable, type, {
@@ -101,21 +97,12 @@ define( function( require ) {
         // tracks our current svgBlock object, so we can update our fill/stroke/etc. on our own
         this.svgBlock = null;
 
-        if ( usesFill ) {
-          if ( !this.fillState ) {
-            this.fillState = new Fillable.FillSVGState();
+        if ( usesPaint ) {
+          if ( !this.paintState ) {
+            this.paintState = new Paintable.PaintSVGState();
           }
           else {
-            this.fillState.initialize();
-          }
-        }
-
-        if ( usesStroke ) {
-          if ( !this.strokeState ) {
-            this.strokeState = new Strokable.StrokeSVGState();
-          }
-          else {
-            this.strokeState.initialize();
+            this.paintState.initialize();
           }
         }
 
@@ -124,21 +111,22 @@ define( function( require ) {
 
       // to be used by our passed in options.updateSVG
       updateFillStrokeStyle: function( element ) {
-        if ( usesFill && this.dirtyFill ) {
-          this.fillState.updateFill( this.svgBlock, this.node._fill );
+        if ( !usesPaint ) {
+          return;
         }
-        var strokeParameterDirty;
-        if ( usesStroke ) {
-          if ( this.dirtyStroke ) {
-            this.strokeState.updateStroke( this.svgBlock, this.node._stroke );
-          }
-          strokeParameterDirty = this.dirtyLineWidth || this.dirtyLineOptions;
-          if ( strokeParameterDirty ) {
-            this.strokeState.updateStrokeParameters( this.node );
-          }
+
+        if ( this.dirtyFill ) {
+          this.paintState.updateFill( this.svgBlock, this.node._fill );
         }
-        if ( ( usesFill && this.dirtyFill ) || ( usesStroke && ( this.dirtyStroke || strokeParameterDirty ) ) ) {
-          element.setAttribute( 'style', ( usesFill ? this.fillState.style : '' ) + ( usesStroke ? this.strokeState.baseStyle + this.strokeState.extraStyle : '' ) );
+        if ( this.dirtyStroke ) {
+          this.paintState.updateStroke( this.svgBlock, this.node._stroke );
+        }
+        var strokeParameterDirty = this.dirtyLineWidth || this.dirtyLineOptions;
+        if ( strokeParameterDirty ) {
+          this.paintState.updateStrokeParameters( this.node );
+        }
+        if ( this.dirtyFill || this.dirtyStroke || strokeParameterDirty ) {
+          element.setAttribute( 'style', this.paintState.baseStyle + this.paintState.extraStyle );
         }
       },
 
@@ -156,8 +144,7 @@ define( function( require ) {
 
         updateDefsSelf && updateDefsSelf.call( this, svgBlock );
 
-        usesFill && this.fillState.updateSVGBlock( svgBlock );
-        usesStroke && this.strokeState.updateSVGBlock( svgBlock );
+        usesPaint && this.paintState.updateSVGBlock( svgBlock );
       },
 
       onAttach: function( node ) {
@@ -174,8 +161,7 @@ define( function( require ) {
 
         // release any defs, and dispose composed state objects
         updateDefsSelf && updateDefsSelf.call( this, null );
-        usesFill && this.fillState.dispose();
-        usesStroke && this.strokeState.dispose();
+        usesPaint && this.paintState.dispose();
 
         this.defs = null;
       },

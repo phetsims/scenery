@@ -1,7 +1,7 @@
 // Copyright 2002-2014, University of Colorado Boulder
 
 /**
- * Mix-in for nodes that support a standard stroke.
+ * Mix-in for nodes that support a standard fill and/or stroke.
  *
  * TODO: miterLimit handling
  *
@@ -17,22 +17,89 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var platform = require( 'PHET_CORE/platform' );
 
+  var isSafari5 = platform.safari5;
   var isIE9 = platform.ie9;
 
-  scenery.Strokable = function Strokable( type ) {
+  scenery.Paintable = function Paintable( type ) {
     var proto = type.prototype;
 
     // this should be called in the constructor to initialize
-    proto.initializeStrokable = function() {
+    proto.initializePaintable = function() {
+      this._fill = null;
       this._stroke = null;
+      this._fillPickable = true;
       this._strokePickable = false;
+      this._fillKept = false; // whether to keep SVG defs for gradients/fills around to improve performance
       this._strokeKept = false; // whether the SVG stroke should be kept (makes gradients/patterns stay in memory!)
       this._lineDrawingStyles = new LineStyles();
 
       var that = this;
+      this._fillListener = function() {
+        that.invalidateFill();
+      };
       this._strokeListener = function() {
         that.invalidateStroke();
       };
+    };
+
+    proto.hasFill = function() {
+      return this._fill !== null;
+    };
+
+    proto.getFill = function() {
+      return this._fill;
+    };
+
+    proto.setFill = function( fill ) {
+      if ( this.getFill() !== fill ) {
+        //OHTWO TODO: we probably shouldn't be checking this here?
+        var hasInstances = this._instances.length > 0;
+
+        if ( hasInstances && this._fill && this._fill.removeChangeListener ) {
+          this._fill.removeChangeListener( this._fillListener );
+        }
+
+        this._fill = fill;
+
+        if ( hasInstances && this._fill && this._fill.addChangeListener ) {
+          this._fill.addChangeListener( this._fillListener );
+        }
+
+        this.invalidateFill();
+
+        var stateLen = this._drawables.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._drawables[i].markDirtyFill();
+        }
+      }
+      return this;
+    };
+
+    proto.isFillPickable = function() {
+      return this._fillPickable;
+    };
+
+    proto.setFillPickable = function( pickable ) {
+      assert && assert( typeof pickable === 'boolean' );
+      if ( this._fillPickable !== pickable ) {
+        this._fillPickable = pickable;
+
+        // TODO: better way of indicating that only the node under pointers could have changed, but no paint change is needed?
+        this.invalidateFill();
+      }
+      return this;
+    };
+
+    proto.isFillKept = function() {
+      return this._fillKept;
+    };
+
+    proto.setFillKept = function( kept ) {
+      assert && assert( typeof kept === 'boolean' );
+
+      this._fillKept = kept;
+
+      return this;
     };
 
     proto.hasStroke = function() {
@@ -220,6 +287,9 @@ define( function( require ) {
 
     var superFirstInstanceAdded = proto.firstInstanceAdded;
     proto.firstInstanceAdded = function() {
+      if ( this._fill && this._fill.addChangeListener ) {
+        this._fill.addChangeListener( this._fillListener );
+      }
       if ( this._stroke && this._stroke.addChangeListener ) {
         this._stroke.addChangeListener( this._strokeListener );
       }
@@ -231,12 +301,29 @@ define( function( require ) {
 
     var superLastInstanceRemoved = proto.lastInstanceRemoved;
     proto.lastInstanceRemoved = function() {
+      if ( this._fill && this._fill.removeChangeListener ) {
+        this._fill.removeChangeListener( this._fillListener );
+      }
       if ( this._stroke && this._stroke.removeChangeListener ) {
         this._stroke.removeChangeListener( this._strokeListener );
       }
 
       if ( superLastInstanceRemoved ) {
         superLastInstanceRemoved.call( this );
+      }
+    };
+
+    proto.beforeCanvasFill = function( wrapper ) {
+      wrapper.setFillStyle( this._fill );
+      if ( this._fill.transformMatrix ) {
+        wrapper.context.save();
+        this._fill.transformMatrix.canvasAppendTransform( wrapper.context );
+      }
+    };
+
+    proto.afterCanvasFill = function( wrapper ) {
+      if ( this._fill.transformMatrix ) {
+        wrapper.context.restore();
       }
     };
 
@@ -260,37 +347,10 @@ define( function( require ) {
       }
     };
 
-    // TODO: NOTE: deprecated! remove!
-    proto.getSVGStrokeStyle = function() {
-      if ( !this._stroke ) {
-        // no stroke
-        return 'stroke: none;';
-      }
-
-      var style = 'stroke: ';
-      if ( this._stroke.toCSS ) {
-        // Color object stroke
-        style += this._stroke.toCSS() + ';';
-      }
-      else if ( this._stroke.getSVGDefinition ) {
-        // reference the SVG definition with a URL
-        style += 'url(#stroke' + this.getId() + ');';
-      }
-      else {
-        // plain CSS color
-        style += this._stroke + ';';
-      }
-
-      // TODO: don't include unnecessary directives? - is it worth any branching cost?
-      style += 'stroke-width: ' + this.getLineWidth() + ';';
-      style += 'stroke-linecap: ' + this.getLineCap() + ';';
-      style += 'stroke-linejoin: ' + this.getLineJoin() + ';';
-      if ( this.hasLineDash() ) {
-        style += 'stroke-dasharray: ' + this.getLineDash().join( ',' ) + ';';
-        style += 'stroke-dashoffset: ' + this.getLineDashOffset() + ';';
-      }
-
-      return style;
+    proto.getCSSFill = function() {
+      // if it's a Color object, get the corresponding CSS
+      // 'transparent' will make us invisible if the fill is null
+      return this._fill ? ( this._fill.toCSS ? this._fill.toCSS() : this._fill ) : 'transparent';
     };
 
     // if we have to apply a transform workaround for https://github.com/phetsims/scenery/issues/196 (only when we have a pattern or gradient)
@@ -307,6 +367,22 @@ define( function( require ) {
       // if it's a Color object, get the corresponding CSS
       // 'transparent' will make us invisible if the fill is null
       return this._stroke ? ( this._stroke.toCSS ? this._stroke.toCSS() : this._stroke ) : 'transparent';
+    };
+
+    proto.appendFillablePropString = function( spaces, result ) {
+      if ( this._fill ) {
+        if ( result ) {
+          result += ',\n';
+        }
+        if ( typeof this._fill === 'string' ) {
+          result += spaces + 'fill: \'' + this._fill + '\'';
+        }
+        else {
+          result += spaces + 'fill: ' + this._fill.toString();
+        }
+      }
+
+      return result;
     };
 
     proto.appendStrokablePropString = function( spaces, result ) {
@@ -347,6 +423,38 @@ define( function( require ) {
       return result;
     };
 
+    proto.getFillRendererBitmask = function() {
+      var bitmask = 0;
+
+      // Safari 5 has buggy issues with SVG gradients
+      if ( !( isSafari5 && this._fill && this._fill.isGradient ) ) {
+        bitmask |= scenery.bitmaskSupportsSVG;
+      }
+
+      // we always have Canvas support?
+      bitmask |= scenery.bitmaskSupportsCanvas;
+
+      // nothing in the fill can change whether its bounds are valid
+      bitmask |= scenery.bitmaskBoundsValid;
+
+      if ( !this._fill ) {
+        // if there is no fill, it is supported by DOM
+        bitmask |= scenery.bitmaskSupportsDOM;
+      }
+      else if ( this._fill.isPattern ) {
+        // no pattern support for DOM (for now!)
+      }
+      else if ( this._fill.isGradient ) {
+        // no gradient support for DOM (for now!)
+      }
+      else {
+        // solid fills always supported for DOM
+        bitmask |= scenery.bitmaskSupportsDOM;
+      }
+
+      return bitmask;
+    };
+
     proto.getStrokeRendererBitmask = function() {
       var bitmask = 0;
 
@@ -369,9 +477,12 @@ define( function( require ) {
     };
 
     // on mutation, set the stroke parameters first since they may affect the bounds (and thus later operations)
-    proto._mutatorKeys = [ 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'lineDash', 'lineDashOffset', 'strokePickable', 'strokeKept' ].concat( proto._mutatorKeys );
+    proto._mutatorKeys = [ 'fill', 'fillPickable', 'fillKept', 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'lineDash', 'lineDashOffset', 'strokePickable', 'strokeKept' ].concat( proto._mutatorKeys );
 
     // TODO: miterLimit support?
+    Object.defineProperty( proto, 'fill', { set: proto.setFill, get: proto.getFill } );
+    Object.defineProperty( proto, 'fillPickable', { set: proto.setFillPickable, get: proto.isFillPickable } );
+    Object.defineProperty( proto, 'fillKept', { set: proto.setFillKept, get: proto.isFillKept } );
     Object.defineProperty( proto, 'stroke', { set: proto.setStroke, get: proto.getStroke } );
     Object.defineProperty( proto, 'lineWidth', { set: proto.setLineWidth, get: proto.getLineWidth } );
     Object.defineProperty( proto, 'lineCap', { set: proto.setLineCap, get: proto.getLineCap } );
@@ -380,6 +491,19 @@ define( function( require ) {
     Object.defineProperty( proto, 'lineDashOffset', { set: proto.setLineDashOffset, get: proto.getLineDashOffset } );
     Object.defineProperty( proto, 'strokePickable', { set: proto.setStrokePickable, get: proto.isStrokePickable } );
     Object.defineProperty( proto, 'strokeKept', { set: proto.setStrokeKept, get: proto.isStrokeKept } );
+
+    if ( proto.invalidateFill ) {
+      var oldInvalidateFill = proto.invalidateFill;
+      proto.invalidateFill = function() {
+        this.invalidateSupportedRenderers();
+        oldInvalidateFill.call( this );
+      };
+    }
+    else {
+      proto.invalidateFill = function() {
+        this.invalidateSupportedRenderers();
+      };
+    }
 
     if ( proto.invalidateStroke ) {
       var oldInvalidateStroke = proto.invalidateStroke;
@@ -394,25 +518,36 @@ define( function( require ) {
       };
     }
   };
-  var Strokable = scenery.Strokable;
+  var Paintable = scenery.Paintable;
 
   // mix-in base for DOM and SVG drawables
   // NOTE: requires state.node to be defined
-  Strokable.StrokableState = function StrokableState( stateType ) {
+  Paintable.PaintableState = function PaintableState( stateType ) {
     var proto = stateType.prototype;
 
-    proto.initializeStrokableState = function() {
+    proto.initializePaintableState = function() {
+      this.lastFill = undefined;
+      this.dirtyFill = true;
+
       this.lastStroke = undefined;
       this.dirtyStroke = true;
       this.dirtyLineWidth = true;
       this.dirtyLineOptions = true; // e.g. cap, join, dash, dashoffset, miterlimit
     };
 
-    proto.cleanStrokableState = function() {
+    proto.cleanPaintableState = function() {
+      this.dirtyFill = false;
+      this.lastFill = this.node.getFill();
+
       this.dirtyStroke = false;
       this.dirtyLineWidth = false;
       this.dirtyLineOptions = false;
       this.lastStroke = this.node.getStroke();
+    };
+
+    proto.markDirtyFill = function() {
+      this.dirtyFill = true;
+      this.markPaintDirty();
     };
 
     proto.markDirtyStroke = function() {
@@ -432,8 +567,12 @@ define( function( require ) {
   };
 
   // mix-in for Canvas drawables
-  Strokable.StrokableStateless = function StrokableStateless( stateType ) {
+  Paintable.PaintableStateless = function PaintableStateless( stateType ) {
     var proto = stateType.prototype;
+
+    proto.markDirtyFill = function() {
+      this.markPaintDirty();
+    };
 
     proto.markDirtyStroke = function() {
       this.markPaintDirty();
@@ -448,52 +587,78 @@ define( function( require ) {
     };
   };
 
+  var fillableSVGIdCounter = 0;
   var strokableSVGIdCounter = 0;
 
   // handles SVG defs and stroke style for SVG elements (by composition, not a mix-in or for inheritance)
   // TODO: note similarity with Fill version - can we save lines of code with refactoring?
-  Strokable.StrokeSVGState = function StrokeSVGState() {
-    this.id = 'svgstroke' + ( strokableSVGIdCounter++ );
+  Paintable.PaintSVGState = function PaintSVGState() {
+    this.fillId = 'svgfill' + ( fillableSVGIdCounter++ );
+    this.strokeId = 'svgstroke' + ( strokableSVGIdCounter++ );
 
     this.initialize();
   };
-  inherit( Object, Strokable.StrokeSVGState, {
+  inherit( Object, Paintable.PaintSVGState, {
     initialize: function() {
+      this.fill = null;
       this.stroke = null;
-      this.def = null;
+      this.fillDef = null;
+      this.strokeDef = null;
 
       // these are used by the actual SVG element
       this.baseStyle = this.computeStyle(); // the main style CSS
-      this.extraStyle = "";                 // width/dash/cap/join CSS
+      this.extraStyle = '';                 // width/dash/cap/join CSS
     },
 
     dispose: function() {
       // be cautious, release references
+      this.fill = null;
       this.stroke = null;
-      this.releaseDef();
+      this.releaseFillDef();
+      this.releaseStrokeDef();
     },
 
-    releaseDef: function() {
-      if ( this.def ) {
-        this.def.parentNode.removeChild( this.def );
-        this.def = null;
+    releaseFillDef: function() {
+      if ( this.fillDef ) {
+        this.fillDef.parentNode.removeChild( this.fillDef );
+        this.fillDef = null;
+      }
+    },
+
+    releaseStrokeDef: function() {
+      if ( this.strokeDef ) {
+        this.strokeDef.parentNode.removeChild( this.strokeDef );
+        this.strokeDef = null;
+      }
+    },
+
+    // called when the fill needs to be updated, with the latest defs SVG block
+    updateFill: function( svgBlock, fill ) {
+      if ( fill !== this.fill ) {
+        this.releaseFillDef();
+        this.fill = fill;
+        this.baseStyle = this.computeStyle();
+        if ( this.fill && this.fill.getSVGDefinition ) {
+          this.fillDef = this.fill.getSVGDefinition( this.fillId );
+          svgBlock.defs.appendChild( this.fillDef );
+        }
       }
     },
 
     updateStroke: function( svgBlock, stroke ) {
       if ( stroke !== this.stroke ) {
-        this.releaseDef();
+        this.releaseStrokeDef();
         this.stroke = stroke;
         this.baseStyle = this.computeStyle();
         if ( this.stroke && this.stroke.getSVGDefinition ) {
-          this.def = this.stroke.getSVGDefinition( this.id );
-          svgBlock.defs.appendChild( this.def );
+          this.strokeDef = this.stroke.getSVGDefinition( this.strokeId );
+          svgBlock.defs.appendChild( this.strokeDef );
         }
       }
     },
 
     updateStrokeParameters: function( node ) {
-      var extraStyle = "";
+      var extraStyle = '';
 
       var lineWidth = node.getLineWidth();
       if ( lineWidth !== 1 ) {
@@ -520,43 +685,69 @@ define( function( require ) {
 
     // called when the defs SVG block is switched (our SVG element was moved to another SVG top-level context)
     updateSVGBlock: function( svgBlock ) {
-      if ( this.def ) {
+      if ( this.fillDef ) {
         if ( svgBlock.defs ) {
           // adding to the DOM here removes it from its previous location
-          svgBlock.defs.appendChild( this.def );
+          svgBlock.defs.appendChild( this.fillDef );
         }
-        else if ( this.def.parentNode ) {
+        else if ( this.fillDef.parentNode ) {
           //OHTWO TODO: does this parentNode access cause reflows?
-          this.def.parentNode.removeChild( this.def );
+          this.fillDef.parentNode.removeChild( this.fillDef );
+        }
+      }
+      if ( this.strokeDef ) {
+        if ( svgBlock.defs ) {
+          // adding to the DOM here removes it from its previous location
+          svgBlock.defs.appendChild( this.strokeDef );
+        }
+        else if ( this.strokeDef.parentNode ) {
+          //OHTWO TODO: does this parentNode access cause reflows?
+          this.strokeDef.parentNode.removeChild( this.strokeDef );
         }
       }
     },
 
     computeStyle: function() {
-      if ( !this.stroke ) {
-        // no stroke
-        return 'stroke: none;';
+      var style = 'fill: ';
+      if ( !this.fill ) {
+        // no fill
+        style += 'none;';
       }
-
-      var baseStyle = 'stroke: ';
-      if ( this.stroke.toCSS ) {
-        // Color object stroke
-        baseStyle += this.stroke.toCSS() + ';';
+      else if ( this.fill.toCSS ) {
+        // Color object fill
+        style += this.fill.toCSS() + ';';
       }
-      else if ( this.stroke.getSVGDefinition ) {
+      else if ( this.fill.getSVGDefinition ) {
         // reference the SVG definition with a URL
-        baseStyle += 'url(#' + this.id + ');';
+        style += 'url(#' + this.fillId + ');';
       }
       else {
         // plain CSS color
-        baseStyle += this.stroke + ';';
+        style += this.fill + ';';
       }
 
-      return baseStyle;
+      if ( !this.stroke ) {
+        // no stroke
+        style += ' stroke: none;';
+      } else {
+        style += ' stroke: ';
+        if ( this.stroke.toCSS ) {
+          // Color object stroke
+          style += this.stroke.toCSS() + ';';
+        }
+        else if ( this.stroke.getSVGDefinition ) {
+          // reference the SVG definition with a URL
+          style += 'url(#' + this.strokeId + ');';
+        }
+        else {
+          // plain CSS color
+          style += this.stroke + ';';
+        }
+      }
+
+      return style;
     }
   } );
 
-  return Strokable;
+  return Paintable;
 } );
-
-

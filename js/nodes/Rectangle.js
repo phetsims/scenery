@@ -19,8 +19,7 @@ define( function( require ) {
   var Dimension2 = require( 'DOT/Dimension2' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Features = require( 'SCENERY/util/Features' );
-  var Fillable = require( 'SCENERY/nodes/Fillable' );
-  var Strokable = require( 'SCENERY/nodes/Strokable' );
+  var Paintable = require( 'SCENERY/nodes/Paintable' );
   var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
@@ -514,8 +513,7 @@ define( function( require ) {
       this.dirtyArcHeight = true;
 
       // adds fill/stroke-specific flags and state
-      this.initializeFillableState();
-      this.initializeStrokableState();
+      this.initializePaintableState();
 
       return this; // allow for chaining
     };
@@ -571,14 +569,11 @@ define( function( require ) {
       this.dirtyArcWidth = false;
       this.dirtyArcHeight = false;
 
-      this.cleanFillableState();
-      this.cleanStrokableState();
+      this.cleanPaintableState();
     };
 
     /* jshint -W064 */
-    Fillable.FillableState( drawableType );
-    /* jshint -W064 */
-    Strokable.StrokableState( drawableType );
+    Paintable.PaintableState( drawableType );
   };
 
   /*---------------------------------------------------------------------------*
@@ -768,8 +763,7 @@ define( function( require ) {
 
       this.updateFillStrokeStyle( rect );
     },
-    usesFill: true,
-    usesStroke: true,
+    usesPaint: true,
     keepElements: keepSVGRectangleElements
   } );
 
@@ -809,32 +803,31 @@ define( function( require ) {
         context.closePath();
 
         if ( node._fill ) {
-          node.beforeCanvasFill( wrapper ); // defined in Fillable
+          node.beforeCanvasFill( wrapper ); // defined in Paintable
           context.fill();
-          node.afterCanvasFill( wrapper ); // defined in Fillable
+          node.afterCanvasFill( wrapper ); // defined in Paintable
         }
         if ( node._stroke ) {
-          node.beforeCanvasStroke( wrapper ); // defined in Strokable
+          node.beforeCanvasStroke( wrapper ); // defined in Paintable
           context.stroke();
-          node.afterCanvasStroke( wrapper ); // defined in Strokable
+          node.afterCanvasStroke( wrapper ); // defined in Paintable
         }
       }
       else {
         // TODO: how to handle fill/stroke delay optimizations here?
         if ( node._fill ) {
-          node.beforeCanvasFill( wrapper ); // defined in Fillable
+          node.beforeCanvasFill( wrapper ); // defined in Paintable
           context.fillRect( node._rectX, node._rectY, node._rectWidth, node._rectHeight );
-          node.afterCanvasFill( wrapper ); // defined in Fillable
+          node.afterCanvasFill( wrapper ); // defined in Paintable
         }
         if ( node._stroke ) {
-          node.beforeCanvasStroke( wrapper ); // defined in Strokable
+          node.beforeCanvasStroke( wrapper ); // defined in Paintable
           context.strokeRect( node._rectX, node._rectY, node._rectWidth, node._rectHeight );
-          node.afterCanvasStroke( wrapper ); // defined in Strokable
+          node.afterCanvasStroke( wrapper ); // defined in Paintable
         }
       }
     },
-    usesFill: true,
-    usesStroke: true,
+    usesPaint: true,
     dirtyMethods: ['markDirtyRectangle']
   } );
 

@@ -20,8 +20,7 @@ define( function( require ) {
   var Shape = require( 'KITE/Shape' );
   var Vector2 = require( 'DOT/Vector2' );
 
-  var Fillable = require( 'SCENERY/nodes/Fillable' );
-  var Strokable = require( 'SCENERY/nodes/Strokable' );
+  var Paintable = require( 'SCENERY/nodes/Paintable' );
   var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
   var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
 
@@ -268,8 +267,7 @@ define( function( require ) {
       this.dirtyY2 = true;
 
       // adds fill/stroke-specific flags and state
-      this.initializeFillableState();
-      this.initializeStrokableState();
+      this.initializePaintableState();
 
       return this; // allow for chaining
     };
@@ -327,14 +325,11 @@ define( function( require ) {
       this.dirtyX2 = false;
       this.dirtyY2 = false;
 
-      this.cleanFillableState();
-      this.cleanStrokableState();
+      this.cleanPaintableState();
     };
 
     /* jshint -W064 */
-    Fillable.FillableState( drawableType );
-    /* jshint -W064 */
-    Strokable.StrokableState( drawableType );
+    Paintable.PaintableState( drawableType );
   };
 
   /*---------------------------------------------------------------------------*
@@ -365,8 +360,7 @@ define( function( require ) {
 
       this.updateFillStrokeStyle( line );
     },
-    usesFill: true, // NOTE: doesn't use fill, but for now developer option was that "we shouldn't error out when setting a fill on a Line"
-    usesStroke: true,
+    usesPaint: true,
     keepElements: keepSVGLineElements
   } );
 
@@ -385,13 +379,12 @@ define( function( require ) {
       context.closePath();
 
       if ( node._stroke ) {
-        node.beforeCanvasStroke( wrapper ); // defined in Strokable
+        node.beforeCanvasStroke( wrapper ); // defined in Paintable
         context.stroke();
-        node.afterCanvasStroke( wrapper ); // defined in Strokable
+        node.afterCanvasStroke( wrapper ); // defined in Paintable
       }
     },
-    usesFill: true, // NOTE: doesn't use fill, but for now developer option was that "we shouldn't error out when setting a fill on a Line"
-    usesStroke: true,
+    usesPaint: true,
     dirtyMethods: ['markDirtyX1', 'markDirtyY1', 'markDirtyX2', 'markDirtyY2']
   } );
 

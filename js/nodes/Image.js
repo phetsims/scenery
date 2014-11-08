@@ -318,8 +318,7 @@ define( function( require ) {
         }
       }
     },
-    usesFill: false,
-    usesStroke: false,
+    usesPaint: false,
     keepElements: keepSVGImageElements
   } );
 
@@ -334,8 +333,7 @@ define( function( require ) {
         wrapper.context.drawImage( node._image, 0, 0 );
       }
     },
-    usesFill: false,
-    usesStroke: false,
+    usesPaint: false,
     dirtyMethods: ['markDirtyImage']
   } );
 

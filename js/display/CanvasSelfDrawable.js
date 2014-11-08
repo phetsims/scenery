@@ -13,8 +13,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
   var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
-  var Fillable = require( 'SCENERY/nodes/Fillable' );
-  var Strokable = require( 'SCENERY/nodes/Strokable' );
+  var Paintable = require( 'SCENERY/nodes/Paintable' );
 
   scenery.CanvasSelfDrawable = function CanvasSelfDrawable( renderer, instance ) {
     this.initializeCanvasSelfDrawable( renderer, instance );
@@ -56,17 +55,15 @@ define( function( require ) {
     this.markDirty();
   }
 
-  // options takes: type, paintCanvas( wrapper ), usesFill, usesStroke, and dirtyMethods (array of string names of methods that make the state dirty)
+  // options takes: type, paintCanvas( wrapper ), usesPaint, and dirtyMethods (array of string names of methods that make the state dirty)
   CanvasSelfDrawable.createDrawable = function( options ) {
     var type = options.type;
     var paintCanvas = options.paintCanvas;
-    var usesFill = options.usesFill;
-    var usesStroke = options.usesStroke;
+    var usesPaint = options.usesPaint;
 
     assert && assert( typeof type === 'function' );
     assert && assert( typeof paintCanvas === 'function' );
-    assert && assert( typeof usesFill === 'boolean' );
-    assert && assert( typeof usesStroke === 'boolean' );
+    assert && assert( typeof usesPaint === 'boolean' );
 
     inherit( CanvasSelfDrawable, type, {
       initialize: function( renderer, instance ) {
@@ -97,13 +94,9 @@ define( function( require ) {
     } );
 
     // include stubs (stateless) for marking dirty stroke and fill (if necessary). we only want one dirty flag, not multiple ones, for Canvas (for now)
-    if ( usesFill ) {
+    if ( usesPaint ) {
       /* jshint -W064 */
-      Fillable.FillableStateless( type );
-    }
-    if ( usesStroke ) {
-      /* jshint -W064 */
-      Strokable.StrokableStateless( type );
+      Paintable.PaintableStateless( type );
     }
 
     // set up pooling

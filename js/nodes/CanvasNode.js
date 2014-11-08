@@ -94,8 +94,7 @@ define( function( require ) {
         node.paintCanvas( wrapper );
       }
     },
-    usesFill: false,
-    usesStroke: false
+    usesPaint: false
   } );
 
   return CanvasNode;
