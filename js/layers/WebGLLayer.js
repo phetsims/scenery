@@ -50,6 +50,9 @@ define( function( require ) {
     this.logicalWidth = this.scene.sceneBounds.width;
     this.logicalHeight = this.scene.sceneBounds.height;
 
+    // (0,height) => (0, -2) => ( 1, -1 )
+    this.projectionMatrix = Matrix4.translation( -1, 1, 0 ).timesMatrix( Matrix4.scaling( 2 / this.logicalWidth, -2 / this.logicalHeight, 1 ) );
+
     this.canvas = document.createElement( 'canvas' );
 
     // Keep track of whether the context is lost, so that we can avoid trying to render while the context is lost.
@@ -152,8 +155,11 @@ define( function( require ) {
             //The vertex to be transformed
             'attribute vec3 aVertex;\n' +
 
-            // The transformation matrix
-            'uniform mat4 uMatrix;\n' +
+            // The projection matrix
+            'uniform mat4 uProjectionMatrix;\n' +
+
+            // The model-view matrix
+            'uniform mat4 uModelViewMatrix;\n' +
 
             // The texture coordinates (if any)
             //TODO: Is this needed here in the vertex shader?
@@ -167,7 +173,7 @@ define( function( require ) {
             //This texture is not needed for rectangles, but we (JO/SR) don't expect it to be expensive, so we leave
             //it for simplicity
             '  texCoord = aVertex.xy;\n' +
-            '  gl_Position = uMatrix * vec4( aVertex, 1 );\n' +
+            '  gl_Position = uProjectionMatrix * uModelViewMatrix * vec4( aVertex, 1 );\n' +
             '}',
 
           /********** Fragment Shader **********/
@@ -195,7 +201,7 @@ define( function( require ) {
             '}',
 
           ['aVertex'], // attribute names
-          ['uTexture', 'uMatrix', 'uColor', 'uFragmentType'] // uniform names
+          ['uTexture', 'uProjectionMatrix', 'uModelViewMatrix', 'uColor', 'uFragmentType'] // uniform names
         );
 
         this.setSize( this.canvas.width, this.canvas.height );
@@ -215,9 +221,7 @@ define( function( require ) {
         if ( this.dirty ) {
           gl.clear( this.gl.COLOR_BUFFER_BIT );
 
-          // (0,height) => (0, -2) => ( 1, -1 )
-
-          var projectionMatrix = Matrix4.translation( -1, 1, 0 ).timesMatrix( Matrix4.scaling( 2 / this.logicalWidth, -2 / this.logicalHeight, 1 ) );
+          gl.uniformMatrix4fv( this.shaderProgram.uniformLocations.uProjectionMatrix, false, this.projectionMatrix.entries );
 
           var length = this.instances.length;
           for ( var i = 0; i < length; i++ ) {
@@ -227,7 +231,7 @@ define( function( require ) {
               // TODO: this is expensive overhead!
               var modelViewMatrix = matrix3To4( instance.trail.getMatrix() );
 
-              instance.data.drawable.render( this.shaderProgram, projectionMatrix.timesMatrix( modelViewMatrix ) );
+              instance.data.drawable.render( this.shaderProgram, modelViewMatrix );
             }
           }
         }
