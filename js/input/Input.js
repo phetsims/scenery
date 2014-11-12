@@ -116,6 +116,10 @@ define( function( require ) {
       }
     },
 
+    clearBatchedEvents: function() {
+      this.batchedEvents.length = 0;
+    },
+
     pointerListenerTypes: [ 'pointerdown', 'pointerup', 'pointermove', 'pointerover', 'pointerout', 'pointercancel' ],
     msPointerListenerTypes: [ 'MSPointerDown', 'MSPointerUp', 'MSPointerMove', 'MSPointerOver', 'MSPointerOut', 'MSPointerCancel' ],
     touchListenerTypes: [ 'touchstart', 'touchend', 'touchmove', 'touchcancel' ],
