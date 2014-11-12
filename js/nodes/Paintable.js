@@ -526,8 +526,8 @@ define( function( require ) {
 
   // mix-in base for DOM and SVG drawables
   // NOTE: requires state.node to be defined
-  Paintable.PaintableState = function PaintableState( stateType ) {
-    var proto = stateType.prototype;
+  Paintable.PaintableState = function PaintableState( drawableType ) {
+    var proto = drawableType.prototype;
 
     proto.initializePaintableState = function() {
       this.lastFill = undefined;
@@ -571,8 +571,8 @@ define( function( require ) {
   };
 
   // mix-in for Canvas drawables
-  Paintable.PaintableStateless = function PaintableStateless( stateType ) {
-    var proto = stateType.prototype;
+  Paintable.PaintableStateless = function PaintableStateless( drawableType ) {
+    var proto = drawableType.prototype;
 
     proto.markDirtyFill = function() {
       this.markPaintDirty();
@@ -594,8 +594,7 @@ define( function( require ) {
   var fillableSVGIdCounter = 0;
   var strokableSVGIdCounter = 0;
 
-  // handles SVG defs and stroke style for SVG elements (by composition, not a mix-in or for inheritance)
-  // TODO: note similarity with Fill version - can we save lines of code with refactoring?
+  // handles SVG defs and fill/stroke style for SVG elements (by composition, not a mix-in or for inheritance)
   Paintable.PaintSVGState = function PaintSVGState() {
     this.fillId = 'svgfill' + ( fillableSVGIdCounter++ );
     this.strokeId = 'svgstroke' + ( strokableSVGIdCounter++ );
