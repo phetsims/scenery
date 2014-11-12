@@ -16,9 +16,10 @@
   <script src="../../../sherpa/jquery-2.1.0.js"></script>
   <script src="../../../sherpa/lodash-2.4.1.min.js"></script>
   <script src="../../../sherpa/has.js"></script>
+  <script src="../../../assert/js/assert.js"></script>
   <script type="text/javascript">
-    has.add( 'assert.basic', function( global, document, anElement ) { return true; } );
-    has.add( 'assert.slow', function( global, document, anElement ) { return true; } );
+    window.assertions.enableAssert();
+    window.assertions.enableAssertSlow();
   </script>
   <script src="../../../sherpa/jshint-2.5.0.js"></script>
   <script src="../../../sherpa/qunit-1.14.0.js"></script>
@@ -42,7 +43,6 @@
 
 </head>
 <body>
-  <!-- <div style="position: fixed; top: 0; right: 50%; background-color: #fff; padding: 5px;"><a href="#" style="color: #000;" onclick="collapseTests();">Collapse All</a></div> -->
   <div id="qunit"></div>
   <div id="qunit-fixture">
   </div>
@@ -51,14 +51,6 @@
   <!-- this needs to be run after the qunit-fixture is in the DOM, but before the document is loaded because QUnit scans the fixture then -->
   <script src="prepare-fixture.js"></script>
   <script>
-    function collapseTests() {
-      $( '#qunit-tests .fail ol' ).css( 'display', 'none' );
-    }
-
-    // QUnit.moduleDone( function( details ) {
-    //   collapseTests();
-    // } );
-
     // we need to wait until our config file is loaded before our require statement. apparently this was not guaranteed
     function check() {
       if ( window.loadedSceneryConfig ) {
@@ -74,11 +66,6 @@
           runDotTests( '../../../dot/tests/qunit' );
           runAxonTests( '../../../axon/tests/qunit' );
           runPhetCoreTests( '../../../phet-core/tests/qunit' );
-
-          if ( window.console && console.log ) {
-            console.log( scenery.Util.testAssert() );
-            console.log( scenery.Util.testAssertExtra() );
-          }
         } );
       } else {
         setTimeout( check, 4 );

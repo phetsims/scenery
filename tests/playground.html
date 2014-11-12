@@ -7,14 +7,14 @@
 
   <title>Scenery Playground</title>
 
+  <script src="../../assert/js/assert.js"></script>
   <script src="../../sherpa/jquery-2.1.0.js"></script>
   <script src="../../sherpa/lodash-2.4.1.min.js"></script>
   <script src="../../sherpa/has.js"></script>
 
   <script type="text/javascript">
-    // enable basic and slow assertions
-    has.add( 'assert.basic', function() { return true; } );
-    has.add( 'assert.slow', function() { return true; } );
+    window.assertions.enableAssert();
+    window.assertions.enableAssertSlow();
   </script>
 
   <script data-main="../js/config.js" src="../../sherpa/require-2.1.11.js"></script>

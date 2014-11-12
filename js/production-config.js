@@ -6,16 +6,6 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-// if has.js is included, set assertion flags to false, for running speed.
-if ( window.has ) {
-  // default config only enables basic assertions
-  window.has.add( 'assert.basic', function( global, document, anElement ) {
-    'use strict';
-    return false;
-  } );
-  // window.has.add( 'assert.slow', function( global, document, anElement ) { 'use strict'; return true; } );
-}
-
 require.config( {
   // depends on all of Scenery, Kite, and Dot
   deps: [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main' ],
@@ -27,7 +17,6 @@ require.config( {
     KITE: '../../kite/js',
     DOT: '../../dot/js',
     PHET_CORE: '../../phet-core/js',
-    ASSERT: '../../assert/js',
     AXON: '../../axon/js'
   },
 
