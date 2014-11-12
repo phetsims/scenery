@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<!-- // Copyright 2002-2014, University of Colorado Boulder -->
+
+<!--Copied from renderer-comparison.html and pruned down to focus on rectangles in webgl
+@author Jon Olson
+@author Sam Reid
+-->
+
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+
+  <title>Scenery Rendering Renderer Comparison</title>
+
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../../sherpa/jquery-2.1.0.min.js"></script>
+  <script src="../../sherpa/lodash-2.4.1.min.js"></script>
+  <script src="../../sherpa/has.js"></script>
+
+  <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
+  <script data-main="../js/config.js" src="../../sherpa/require-2.1.11.js"></script>
+  <!-- <script src="../build/development/scenery.js"></script> -->
+  <!-- <script src="../build/standalone/scenery.min.js"></script> -->
+
+  <style type="text/css">
+    .testname {
+      clear: both;
+      margin: 0;
+      padding: 0;
+      padding-top: 20px;
+      padding-bottom: 5px;
+    }
+
+    .scene {
+      float: left;
+      margin-left: 5px;
+      position: relative; /* trigger correct positioning inside the scene */
+      background-color: #fff;
+      z-index: 0;
+      padding: 0 !important; /* in case we add jQuery Mobile back in */
+      border: 1px solid black;
+    }
+
+    .scene.canvas:after {
+      content: "Canvas";
+      position: absolute;
+      bottom: 0;
+      left: 2px;
+      opacity: 0.3;
+    }
+
+    .scene.svg:after {
+      content: "SVG";
+      position: absolute;
+      bottom: 0;
+      left: 2px;
+      opacity: 0.3;
+    }
+
+    .scene.dom:after {
+      content: "DOM";
+      position: absolute;
+      bottom: 0;
+      left: 2px;
+      opacity: 0.3;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>Scenery WebGL Rectangle</h1>
+
+<script>
+
+  requirejs( [ 'main', '../../kite/js/main', '../../dot/js/main' ], function( scenery, kite, dot ) {
+    var testCases = [
+      {
+        name: 'Rectangle',
+        width: 400,
+        height: 200,
+        draw: function( scene ) {
+
+          new scenery.Path( kite.Shape.regularPolygon( 5, 20 ), { fill: 'blue', stroke: 'black', lineWidth: 2} ).toCanvas( function( canvas ) {
+            scene.addChild( new scenery.Image( canvas, {x: 100, y: 100} ) );
+          } );
+
+          scene.addChild( new scenery.Rectangle( 10.5, 10.5, 44, 44, {
+            fill: '#f00',
+            stroke: '#000',
+            lineWidth: 3
+          } ) );
+//          scene.addChild( new scenery.Rectangle( 10.5, 10.5, 44, 44, 15, 15, {
+//            x: 64,
+//            fill: '#f00',
+//            stroke: '#000',
+//            lineWidth: 3
+//          } ) );
+        },
+        renderers: [ scenery.Renderer.WebGL ]
+      }
+    ];
+
+    var renderers = [
+      scenery.Renderer.Canvas,
+      scenery.Renderer.SVG,
+      scenery.Renderer.DOM,
+      scenery.Renderer.WebGL,
+      // TODO: add WebGL, and possibly DOM for things like text?
+    ];
+
+    _.each( testCases, function( testCase ) {
+      var $testTitle = $( document.createElement( 'h2' ) );
+      $testTitle.text( testCase.name );
+      $testTitle.addClass( 'testname' );
+      $( document.body ).append( $testTitle );
+
+      _.each( renderers, function( renderer ) {
+        // don't render unsupported renderers for specific test cases
+        if ( !_.contains( testCase.renderers, renderer ) ) {
+          return;
+        }
+
+        var layerType = renderer.defaultLayerType;
+        var $container = $( document.createElement( 'div' ) );
+        $container.addClass( 'scene' );
+        $container.addClass( layerType.name );
+        $container.width( testCase.width || 320 );
+        $container.height( testCase.height || 240 );
+        $( document.body ).append( $container );
+
+        var scene = new scenery.Scene( $container, {
+          renderer: renderer
+        } );
+
+        // try {
+        testCase.draw( scene );
+        // } catch( e ) {
+        //   if ( console.log ) {
+        //     console.log( 'error encountered in test ' + testCase.name + ' with ' + layerType.name );
+        //   }
+        //   throw e;
+        // }
+        scene.updateScene();
+      } );
+    } );
+  } );
+
+</script>
+
+</body>
+</html>

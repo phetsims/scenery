@@ -5,24 +5,22 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
   <title>Image Test Construction</title>
-  
+
   <!-- jQuery and LoDash are dependencies -->
-  <script src="../../../sherpa/jquery-2.0.3.min.js"></script>
+  <script src="../../../sherpa/jquery-2.1.0.min.js"></script>
   <script src="../../../sherpa/lodash-2.4.1.min.js"></script>
   <script src="../../../sherpa/has.js"></script>
-  
+
   <!-- Canvg and dependencies -->
   <script src="../../../sherpa/rgbcolor.js"></script>
-  <script src="../../../sherpa/canvg-1.2.js"></script>
-  
+  <script src="../../../sherpa/canvg-1.3.js"></script>
+
   <!-- Testing utilities -->
   <script src="js/test-utils.js"></script>
-  
+
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
-  <script data-main="../../js/config.js" src="../../../sherpa/require-2.1.10.js"></script>
-  <!-- <script src="../build/development/scenery.js"></script> -->
-  <!-- <script src="../build/standalone/scenery.min.js"></script> -->
-  
+  <script data-main="../../js/config.js" src="../../../sherpa/require-2.1.11.js"></script>
+
   <style type="text/css">
     html, body {
       margin: 0; padding: 0; border: none;
@@ -31,25 +29,25 @@
 </head>
 
 <body>
-  
+
   <script>
-  
+
   require( [ 'main', '../../kite/js/main', '../../dot/js/main' ], function( scenery, kite, dot ) {
     var width = 32;
     var height = 32;
-    
+
     var div = document.createElement( 'div' );
     var $div = $( div );
     $div.width( width );
     $div.height( height );
     document.body.appendChild( div );
-    
+
     var scene = new scenery.Scene( $div );
-    
+
     var rect = new scenery.Rectangle( 0, 0, 16, 16, { fill: '#f00', renderer: 'svg', visible: false } );
     scene.addChild( rect );
     scene.updateScene();
-    
+
     (function(){
       var canvas = document.createElement( 'canvas' );
       canvas.width = width;
@@ -63,7 +61,7 @@
       } );
     })();
   } );
-  
+
   </script>
 
 </body>

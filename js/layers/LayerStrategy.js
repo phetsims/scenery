@@ -1,4 +1,4 @@
-// Copyright 2002-2013, University of Colorado
+// Copyright 2002-2014, University of Colorado Boulder
 
 /**
  * Controls the underlying layer behavior around a node. The node's LayerStrategy's enter() and exit() will be
@@ -13,9 +13,10 @@
 
 define( function( require ) {
   'use strict';
-  
+
   var scenery = require( 'SCENERY/scenery' );
-  
+  var Renderer = require( 'SCENERY/layers/Renderer' );
+
   /*
    * If the node specifies a renderer, we will always push a preferred type. That type will be fresh (if rendererOptions are specified), otherwise
    * the top matching preferred type for that renderer will be used. This allows us to always pop in the exit().
@@ -27,84 +28,104 @@ define( function( require ) {
     hasPreferredLayerType: function( pointer, layerBuilder ) {
       return pointer.trail.lastNode().hasRenderer();
     },
-    
+
     getPreferredLayerType: function( pointer, layerBuilder ) {
       assert && assert( this.hasPreferredLayerType( pointer, layerBuilder ) ); // sanity check
-      
+
       var node = pointer.trail.lastNode();
       var preferredLayerType;
-      
+
       if ( node.hasRendererLayerType() ) {
         preferredLayerType = node.getRendererLayerType();
-      } else {
+      }
+      else {
         preferredLayerType = layerBuilder.bestPreferredLayerTypeFor( node.getRenderer().bitmask );
         if ( !preferredLayerType ) {
           // there was no preferred layer type matching, just use the default
           preferredLayerType = node.getRenderer().defaultLayerType;
         }
       }
-      
+
       return preferredLayerType;
     },
-    
+
+    /**
+     * Checks to see whether the node's requested renderer is available (if any)
+     * @param {Node} node the node to check the renderer for
+     * @param {boolean} usingWebGL flag from Scene indicating whether webgl is allowed and supported
+     * @return {boolean}
+     */
+    hasCompatibleRenderer: function( node, usingWebGL ) {
+
+      // If the node requested WebGL but WebGL is not available, then do not push/pop WebGL layer type
+      if ( !usingWebGL && node._renderer === Renderer.WebGL ) {
+        return false;
+      }
+      else {
+        return node.hasRenderer();
+      }
+    },
+
     enter: function( pointer, layerBuilder ) {
       var trail = pointer.trail;
       var node = trail.lastNode();
       var preferredLayerType;
-      
+
       // if the node has a renderer, always push a layer type, so that we can pop on the exit() and ensure consistent behavior
-      if ( node.hasRenderer() ) {
+      if ( this.hasCompatibleRenderer( node, layerBuilder.scene.usingWebGL ) ) {
         preferredLayerType = this.getPreferredLayerType( pointer, layerBuilder );
-        
+
         // push the preferred layer type
         layerBuilder.pushPreferredLayerType( preferredLayerType );
         if ( layerBuilder.getCurrentLayerType() !== preferredLayerType ) {
           layerBuilder.switchToType( pointer, preferredLayerType );
         }
-      } else if ( node.isPainted() ) {
+      }
+      else if ( node.isPainted() ) {
         // node doesn't specify a renderer, but isPainted.
-        
+
         var currentType = layerBuilder.getCurrentLayerType();
         preferredLayerType = layerBuilder.bestPreferredLayerTypeFor( node._rendererBitmask );
-        
+
         // If any of the preferred types are compatible, use the top one. This allows us to support caching and hierarchical layer types
         if ( preferredLayerType ) {
           if ( currentType !== preferredLayerType ) {
             layerBuilder.switchToType( pointer, preferredLayerType );
           }
-        } else {
+        }
+        else {
           // if no preferred types are compatible, only switch if the current type is also incompatible
           if ( !currentType || !currentType.supportsNode( node ) ) {
             layerBuilder.switchToType( pointer, node.pickARenderer().defaultLayerType );
           }
         }
       }
-      
+
       if ( node.isLayerSplit() || this.hasSplitFlags( node ) ) {
         layerBuilder.switchToType( pointer, layerBuilder.getCurrentLayerType() );
       }
-      
+
       if ( node.isPainted() ) {
         // trigger actual layer creation if necessary (allow collapsing of layers otherwise)
         layerBuilder.markPainted( pointer );
       }
     },
-    
+
     // afterSelf: function( trail, layerBuilder ) {
     //   // no-op, and possibly not used
     // },
-    
+
     // betweenChildren: function( trail, layerBuilder ) {
     //   // no-op, and possibly not used
     // },
-    
+
     exit: function( pointer, layerBuilder ) {
       var trail = pointer.trail;
       var node = trail.lastNode();
-      
-      if ( node.hasRenderer() ) {
+
+      if ( this.hasCompatibleRenderer( node, layerBuilder.scene.usingWebGL ) ) {
         layerBuilder.popPreferredLayerType();
-        
+
         // switch down to the next lowest preferred layer type, if any. if null, pass the null to switchToType
         // this allows us to not 'leak' the renderer information, and the temporary layer type is most likely collapsed and ignored
         // NOTE: disabled for now, since this prevents us from having adjacent children sharing the same layer type
@@ -112,12 +133,12 @@ define( function( require ) {
         //   layerBuilder.switchToType( pointer, layerBuilder.getPreferredLayerType() );
         // }
       }
-      
+
       if ( node.isLayerSplit() || this.hasSplitFlags( node ) ) {
         layerBuilder.switchToType( pointer, layerBuilder.getCurrentLayerType() );
       }
     },
-    
+
     // whether splitting before and after the node is required
     hasSplitFlags: function( node ) {
       // currently, only enforce splitting if we are using CSS transforms
@@ -127,10 +148,10 @@ define( function( require ) {
         rendererOptions.cssRotation ||
         rendererOptions.cssScale ||
         rendererOptions.cssTransform
-      );
+        );
     }
   };
   var LayerStrategy = scenery.LayerStrategy;
-  
+
   return LayerStrategy;
 } );

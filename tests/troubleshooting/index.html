@@ -6,26 +6,26 @@
   <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1">
 
   <title>Report a Problem</title>
-  
-  <!-- 
-  
+
+  <!--
+
   Currently, to deploy this, copy the entire scenery/tests/troubleshooting directory to figaro (htdocs/files/troubleshooting/)
-  
+
    -->
-  
+
   <script src="html5-shiv.js"></script>
   <!-- <script src="http://modernizr.com/downloads/modernizr-latest.js"></script> -->
   <script src="modernizr-custom-min.js"></script>
-  
+
   <style type="text/css">
     html, body {
       font-family: sans-serif;
     }
-    
+
     h3 {
       margin: 0;
     }
-    
+
     .info {
       font-weight: 'bold';
     }
@@ -33,9 +33,9 @@
 </head>
 
 <body>
-  
+
   <h1>Report a Problem</h1>
-  
+
   <strong class="info">Please copy and paste the information below into an email to <a href="mailto:phethelp@colorado.edu">phethelp@colorado.edu</a>, and then fill in the blanks.</strong>
   <br>
   <br>
@@ -56,7 +56,7 @@
   <h3>Troubleshooting information (do not edit):</h3>
   <script src="jquery-1.8.3.min.js"></script>
   <script src="lodash.min-1.0.0-rc.3.js"></script>
-  
+
   <script>
     var keys = {};
     if ( typeof window !== 'undefined' && window.location.search ) {
@@ -66,9 +66,9 @@
         keys[nameValuePair[0]] = decodeURIComponent( nameValuePair[1] );
       }
     }
-    
+
     function addText( label, text, styles ) {
-      var $p = $( '<p>' ).css( 'padding', '0' ).css( 'margin', '0' );
+      var $p = $( '<div>' ).css( 'padding', '0' ).css( 'margin', '0' );
       $p.append( $( '<span>' ).text( label + ': ' ).css( 'font-weight', 'bold' ) );
       $p.append( $( '<span>' ).text( '' + text ) );
       if ( styles ) {
@@ -86,9 +86,9 @@
         addText( label, text, styles );
       }
     }
-    
+
     var canvas, context, backingStorePixelRatio;
-    
+
     try {
       canvas = document.createElement( 'canvas' );
       context = canvas.getContext( '2d' );
@@ -98,9 +98,9 @@
                                context.oBackingStorePixelRatio ||
                                context.backingStorePixelRatio || 1;
     } catch ( e ) {
-      
+
     }
-    
+
     var criticalFeaturesMissing = [];
     var featuresMissing = [];
     _.each( [
@@ -183,13 +183,13 @@
       featuresMissing.push( 'es5object' );
       criticalFeaturesMissing.push( 'es5object' );
     }
-    
+
     var flags = [];
     if ( window.navigator.pointerEnabled ) { flags.push( 'pointerEnabled' ); }
     if ( window.navigator.msPointerEnabled ) { flags.push( 'msPointerEnabled' ); }
     if ( !window.navigator.onLine ) { flags.push( 'offline' ); }
     if ( ( window.devicePixelRatio || 1 ) / backingStorePixelRatio !== 1 ) { flags.push( 'pixelRatioScaling' ); }
-    
+
     addIfTruthy( 'Name', keys['sim'] );
     addIfTruthy( 'URL', keys['url'] );
     addIfTruthy( 'Version', keys['version'] );
@@ -208,7 +208,7 @@
     // addIfTruthy( 'window.navigator.appCodeName', window.navigator.appCodeName );
     addIfDefined( 'Window', window.innerWidth + 'x' + window.innerHeight );
     addIfDefined( 'Pixel Ratio', ( window.devicePixelRatio || 1 ) + '/' + backingStorePixelRatio );
-    
+
     if ( window.WebGLRenderingContext ) {
       var canvas = document.createElement( 'canvas' );
       var err = '';

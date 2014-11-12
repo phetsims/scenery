@@ -1,4 +1,4 @@
-// Copyright 2002-2013, University of Colorado Boulder
+// Copyright 2002-2014, University of Colorado Boulder Boulder
 
 /**
  * A node which always fills the entire screen, no matter what the transform is.
@@ -19,7 +19,7 @@ define( function( require ) {
   var Rectangle = require( 'SCENERY/nodes/Rectangle' );
 
   /**
-   * @param options Any options for the plane, typically fill/opacity (many others such as scale, translation, rotation should have no effect)
+   * @param {Object} [options] Any options for the plane, typically fill/opacity (many others such as scale, translation, rotation should have no effect)
    * @constructor
    */
   scenery.Plane = function Plane( options ) {

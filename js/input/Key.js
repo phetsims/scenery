@@ -1,4 +1,4 @@
-// Copyright 2002-2013, University of Colorado
+// Copyright 2002-2014, University of Colorado Boulder
 
 /**
  * Tracks a single key-press
@@ -11,25 +11,25 @@
 
 define( function( require ) {
   'use strict';
-  
+
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  
+
   var Pointer = require( 'SCENERY/input/Pointer' ); // Inherits from Pointer
-  
+
   scenery.Key = function Key( event ) {
     Pointer.call( this );
-    
+
     this.event = event; // event.keyCode event.charCode
     this.isKey = true; // compared to isMouse/isPen/isTouch
     this.trail = null;
     this.type = 'key';
   };
   var Key = scenery.Key;
-  
+
   inherit( Pointer, Key, {
-    
+
   } );
-  
+
   return Key;
 } );

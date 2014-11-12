@@ -12,7 +12,7 @@ A [tentative website](http://phetsims.github.io/scenery/) is up for browsing doc
 should build into build/). [Node.js](http://nodejs.org/) is required for this process.
 
 Currently, you can also grab the unminified [scenery.js](http://phetsims.github.io/scenery/build/development/scenery.js) or
-minified version [scenery-min.js](http://phetsims.github.io/scenery/build/standalone/scenery.min.js).
+minified version [scenery-min.js](http://phetsims.github.io/scenery/build/[production]/scenery.min.js).
 They are currently not versioned due to the accelerated development speed, but will be more stable soon. A development version
 will be available soon that has assertions enabled.
 

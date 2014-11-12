@@ -6,35 +6,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>A Tour of Scenery</title>
-  
+
   <link rel="stylesheet" href="../../sherpa/bootstrap-2.2.2.css">
   <link rel="stylesheet" href="../../sherpa/bootstrap-responsive-2.2.2.css">
   <link rel="stylesheet" href="../../sherpa/syntaxhighlighter-3.0.83/shCore.css">
   <link rel="stylesheet" href="../../sherpa/syntaxhighlighter-3.0.83/shThemeDefault.css">
-  
+  <link rel="stylesheet" href="../assets/scenery.css">
+
   <!-- jQuery and LoDash are dependencies -->
-  <script src="../../sherpa/jquery-2.0.3.min.js"></script>
+  <script src="../../sherpa/jquery-2.1.0.min.js"></script>
   <script src="../../sherpa/lodash-2.4.1.min.js"></script>
-  
+
   <!-- For the styling -->
   <script src="../../sherpa/bootstrap-2.2.2.js"></script>
-  
+
   <script src="../../sherpa/syntaxhighlighter-3.0.83/shCore.js"></script>
   <script src="../../sherpa/syntaxhighlighter-3.0.83/shBrushJScript.js"></script>
   <script src="../../sherpa/syntaxhighlighter-3.0.83/shBrushXml.js"></script>
-  
+
   <!-- MathJax config -->
   <script type="text/x-mathjax-config">
   MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
   </script>
   <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-  
+
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script src="../build/development/scenery.js"></script>
-  <!-- <script src="../build/standalone/scenery.min.js"></script> -->
-  
+
   <style type="text/css">
-    
+
     .exampleScene {
       margin: 15px auto;
       border: 1px solid black;
@@ -44,7 +44,7 @@
     }
 
   </style>
-  
+
 </head>
 
 <body>
@@ -59,54 +59,54 @@
       </ul>
     </div>
   </div>
-  
+
   <div class="row-fluid">
     <div class="span2"></div>
     <div class="span8">
       <div class="page-header" style="text-align: center;">
         <h1>A Tour of Scenery</h1>
       </div>
-      
+
       <p>Currently, this is written as if the user has experience with other scene graphs. Will include more information later.</p>
-      
+
       <ul class="text-warning">
         <li>TODO: Syntax Highlighter seems to be having issues with JS single quotes. Find other solution or submit pull request for fix</li>
       </ul>
-      
+
       <h3>Hello World</h3>
-      
+
       <div id="hello-world-scene" style="width: 400px; height: 100px;" class="exampleScene"></div>
-      
+
       <script type="text/javascript">
         $( window ).ready( function() {
           // Create a scene graph over the block-level element. Everything inside is replaced
           var scene = new scenery.Scene( $( '#hello-world-scene' ) );
-          
+
           // Add our text
           scene.addChild( new scenery.Text( 'Hello World', {
             centerX: 200, // the center of our text's bounds is at x = 200
             centerY: 50, // the center of our text's bounds is at y = 50
             font: '25px sans-serif' // any CSS 'font' declaration will work
           } ) );
-          
+
           // Paint any changes (in this case, our text).
           scene.updateScene();
         } );
       </script>
-      
+
       <p>
         Include the Scenery script in the page after <a href="http://jquery.com/">jQuery</a> and <a href="http://lodash.com/">LoDash</a>, and create
         a block-level element (like a div) that has a width and height that won't change with its contents:
       </p>
-      
+
       <pre class="brush: html">
 &lt;div id="hello-world-scene" style="width: 400px; height: 100px;"&gt;&lt;/div&gt;
       </pre>
-      
+
       <p>
         The following JS code will initialize a scene graph, add some centered text into the scene, and paint it into the div.
       </p>
-      
+
       <pre class="brush: js">
 // Create a scene graph over the block-level element. Everything inside is replaced
 var scene = new scenery.Scene( $( '#hello-world-scene' ) );
@@ -121,29 +121,29 @@ scene.addChild( new scenery.Text( 'Hello World', {
 // Paint any changes (in this case, our text).
 scene.updateScene();
       </pre>
-      
+
       <p>
         There is a <a href="../examples/hello-world.html">standalone example</a> of this Hello World demo.
       </p>
-      
+
       <h3>Shapes</h3>
-      
+
       <p>
         Nodes are the basic structure of the scene graph, and can be given shapes. Shapes can be built from convenience
         functions, or from Canvas-style calls. Exact bounding boxes of shapes are calculated, including any strokes.
       </p>
-      
+
       <div id="shapes-scene" style="width: 220px; height: 100px;" class="exampleScene"></div>
-      
+
       <script type="text/javascript">
         $( window ).ready( function() {
           var scene = new scenery.Scene( $( '#shapes-scene' ) );
-          
+
           // A rectangle at (10,10) with a width of 50 and height of 80
           scene.addChild( new scenery.Path( kite.Shape.rectangle( 10, 10, 50, 80 ),{
             fill: '#ff0000'
           } ) );
-          
+
           // An octogon, with a radius of 30
           scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 8, 30 ),{
             fill: '#00ff00',
@@ -151,7 +151,7 @@ scene.updateScene();
             x: 100, // the shape is centered at the origin, so offset it by this x and y
             y: 50
           } ) );
-          
+
           // Custom shapes can also be created
           var customShape = new kite.Shape();
           customShape.moveTo( 0, 0 );
@@ -160,7 +160,7 @@ scene.updateScene();
           customShape.lineTo( 40, 0 );
           customShape.close();
           // NOTE: this can also be chained, like shape.moveTo( ... ).lineTo( ... ).close()
-          
+
           scene.addChild( new scenery.Path( customShape,{
             fill: '#0000ff',
             stroke: '#000000',
@@ -168,11 +168,11 @@ scene.updateScene();
             x: 150,
             y: 50
           } ) );
-          
+
           scene.updateScene();
         } );
       </script>
-      
+
       <pre class="brush: js">
 // A rectangle at (10,10) with a width of 50 and height of 80
 scene.addChild( new scenery.Path( kite.Shape.rectangle( 10, 10, 50, 80 ), {
@@ -204,9 +204,9 @@ scene.addChild( new scenery.Path( customShape, {
   y: 50
 } ) );
       </pre>
-      
+
       <h3>Nodes</h3>
-      
+
       <p>
         Nodes can be created and modified currently in a few different ways:
       </p>
@@ -250,20 +250,20 @@ var node4 = new scenery.Path().setShape( someShape ).setFill( '#000000' ).setX( 
 // Additionally, parameters can be accessed by two styles:
 node2.rotation === node3.getRotation();
       </pre>
-      
+
       <p>
         Similarly to Piccolo2d, nodes have their 'self' paint/bounds and the paint/bounds of their children, where the node's
         self is rendered first (below), and then children are painted one-by-one on top. Additionally, it borrows Piccolo's
         coordinate frames where there are local, parent, and global coordinate frames. The example below will hopefully
         be illustrative.
       </p>
-      
+
       <div id="self-and-children" style="width: 400px; height: 200px;" class="exampleScene"></div>
-      
+
       <script type="text/javascript">
         $( window ).ready( function() {
           var scene = new scenery.Scene( $( '#self-and-children' ) );
-          
+
           // create a node that will have child nodes.
           var container = new scenery.Path( kite.Shape.rectangle( 0, 0, 300, 100 ), {
             // we'll add a background shape (300x100 rectangle) that will render on this node (it will be rendered below any child nodes)
@@ -272,14 +272,14 @@ node2.rotation === node3.getRotation();
             y: 20
           } );
           scene.addChild( container );
-          
+
           // bounding box of the container (and its children so far) in its parent's coordinate system.
           // translated by (20,20 due to the x,y parameters)
           container.getBounds(); // x between [20, 320], y between [20, 120]
-          
+
           // bounding box of the container's own rendering/paint (the rectangle) in its local coordinate frame (without applying other transforms)
           container.getSelfBounds(); // x between [0, 300], y between [0, 100]
-          
+
           // add a green rectangle to the container, which will be above the gray background
           var child1 = new scenery.Path( kite.Shape.rectangle( 0, 0, 25, 25 ), { // a 25x25 rectangle
             fill: '#00ff00',
@@ -288,16 +288,16 @@ node2.rotation === node3.getRotation();
             centerY: container.height // vertically center us on the container's bottom bound
           } );
           container.addChild( child1 );
-          
+
           // bounding box of the child in its parent's coordinate frame (the container's local coordinate frame)
           // note that since it is scaled 2x, its dimensions appear to be 50x50
           child1.getBounds(); // x between [10, 60], y between [75, 125], (with a left of 10 and centered vertically on 100)
-          
+
           child1.getSelfBounds(); // x between [0, 25], y between [0, 25] -- just bounds of its shape
-          
+
           // but now that we have added a child, getBounds() on the container (which contains the bounds of its children) has changed:
           container.getBounds(); // x between [20, 320], y between [20, 145] -- bottom bound of 145 since it has an x offset of 20 plus its child's bottom of 125
-          
+
           // and some text to the same container, which will be on top of both the background and green rectangle
           var child2 = new scenery.Text( 'On Top?', {
             left: child1.centerX,
@@ -305,11 +305,11 @@ node2.rotation === node3.getRotation();
             font: '20px sans-serif'
           } );
           container.addChild( child2 );
-          
+
           scene.updateScene();
         } );
       </script>
-      
+
       <pre class="brush: js">
 // create a node that will have child nodes.
 var container = new scenery.Path( kite.Shape.rectangle( 0, 0, 300, 100 ), {
@@ -353,19 +353,19 @@ var child2 = new scenery.Text( 'On Top?', {
 } );
 container.addChild( child2 );
       </pre>
-      
+
       <h3>Images</h3>
-      
+
       <p>
         For now, pass in a valid image and it will be rendered with its upper-left corner at 0,0 in the local coordinate frame.
       </p>
-      
+
       <div id="image-scene" style="width: 400px; height: 200px;" class="exampleScene"></div>
-      
+
       <script type="text/javascript">
         $( window ).ready( function() {
           var scene = new scenery.Scene( $( '#image-scene' ) );
-          
+
           // TODO: support different ways of handling the asynchronous load
           var thumbnailImage = document.createElement( 'img' );
           thumbnailImage.onload = function( e ) {
@@ -381,7 +381,7 @@ container.addChild( child2 );
           thumbnailImage.src = 'http://phet.colorado.edu/sims/energy-skate-park/energy-skate-park-basics-thumbnail.png';
         } );
       </script>
-      
+
       <pre class="brush: js">
 // TODO: support different ways of handling the asynchronous load
 var thumbnailImage = document.createElement( 'img' );
@@ -397,32 +397,32 @@ thumbnailImage.onload = function( e ) {
 };
 thumbnailImage.src = 'http://phet.colorado.edu/sims/energy-skate-park/energy-skate-park-basics-thumbnail.png';
       </pre>
-      
+
       <h3>DOM Elements</h3>
-      
+
       <p>
         DOM elements can be added in (they are transformed with CSS transforms). Currently, bounds-based modifiers
         may be buggy.
       </p>
-      
+
       <div id="dom-simple" style="width: 400px; height: 200px;" class="exampleScene"></div>
-      
+
       <script type="text/javascript">
         $( window ).ready( function() {
           var scene = new scenery.Scene( $( '#dom-simple' ) );
-          
+
           var element = document.createElement( 'span' );
           element.innerHTML = '<label style="display: inline;">Type in me:</label><input type="text">';
-          
+
           scene.addChild( new scenery.DOM( element, {
             x: 50,
             rotation: Math.PI / 4
           } ) );
-          
+
           scene.updateScene();
         } );
       </script>
-      
+
       <pre class="brush: js">
 var element = document.createElement( 'form' );
 element.innerHTML = '<label>Type in me:</label><input type="text">';
@@ -432,27 +432,27 @@ scene.addChild( new scenery.DOM( element, {
   rotation: Math.PI / 4
 } ) );
       </pre>
-      
+
       <p>
         When added in the above manner, the DOM element will be lifted in front of any other non-lifted elements by default.
         It is possible to have the DOM elements reside where they would normally be rendered.
       </p>
-      
-      
+
+
       <h3>Animation</h3>
-      
+
       <p>
         It is recommended to use scene.updateScene() inside of requestAnimationFrame(), since updateScene() attempts to only
         re-paint content that is inside of changed areas. This type of pattern may be refactored out soon.
       </p>
-      
+
       <div id="animation-simple" style="width: 200px; height: 200px;" class="exampleScene"></div>
-      
+
       <script type="text/javascript">
         $( window ).ready( function() {
           var div = $( '#animation-simple' );
           var scene = new scenery.Scene( div );
-          
+
           // a hexagon to rotate
           var node = new scenery.Path( kite.Shape.regularPolygon( 6, 90 ), {
             fill: '#000000',
@@ -464,29 +464,29 @@ scene.addChild( new scenery.DOM( element, {
             fill: '#ff0000'
           } ) );
           scene.addChild( node );
-          
+
           // keep track of how much time elapsed over the last frame
           var lastTime = 0;
           var timeElapsed = 0;
           function tick() {
             window.requestAnimationFrame( tick, div[0] );
-            
+
             // calculate how much time has elapsed since we rendered the last frame
             var timeNow = new Date().getTime();
             if ( lastTime != 0 ) {
               timeElapsed = (timeNow - lastTime) / 1000.0;
             }
             lastTime = timeNow;
-            
+
             // rotate the node proportionally to how much time has elapsed, so it rotates at a constant real-time rate
             node.rotate( timeElapsed );
-            
+
             scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
           }
           window.requestAnimationFrame( tick, div[0] );
         } );
       </script>
-      
+
       <pre class="brush: js">
 var div = $( '#animation-simple' );
 var scene = new scenery.Scene( div );
@@ -508,21 +508,21 @@ var lastTime = 0;
 var timeElapsed = 0;
 function tick() {
   window.requestAnimationFrame( tick, div[0] );
-  
+
   var timeNow = new Date().getTime();
   if ( lastTime != 0 ) {
     timeElapsed = (timeNow - lastTime) / 1000.0;
   }
   lastTime = timeNow;
-  
+
   node.rotate( timeElapsed );
   scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
 }
 window.requestAnimationFrame( tick, div[0] );
       </pre>
-      
+
       <h3>Input Events</h3>
-      
+
       <p>
         The input event system is somewhat different from many other scene graphs, since it hopes to accomodate
         multi-touch interaction with the mouse. It comes with a low-level event system of which then gestures and
@@ -531,7 +531,7 @@ window.requestAnimationFrame( tick, div[0] );
         (sliders, dragging objects, etc.), when are they acting together (zooming, rotating, etc.), and how does
         this behavior change?
       </p>
-      
+
       <p>
         An instance of scenery.Input is created and hooked to an event source with functions like Scene.initializeFullscreenEvents()
         and Scene.initializeStandaloneEvents(). The Input object tracks the principal abstraction of a <strong>pointer</strong>. A
@@ -542,51 +542,51 @@ window.requestAnimationFrame( tick, div[0] );
         Also to note: preventDefault (triggered on events by default) will prevent touch events from being re-fired as mouse events, so
         we only see them once.
       </p>
-      
+
       <p>
         Events can be handled by any input listener (return true from the callback) and it will not fire any subsequent input listeners for
         that event. For a single touchmove event, individual pointers generate their own events, so each input event will have a single
         associated pointer. The order of listeners visited for each event is as follows:
       </p>
-      
+
       <ol>
         <li>Listeners attached to the associated pointer</li>
         <li>For move/up/down/cancel events, listeners for the node directly beneath the event, and subsequently for all parent (ancestor) nodes in order up to the root node</li>
         <li>For enter/exit events, listeners similar to move/up/down/cancel events, but only up to (and not including) the common parent before/after the action. TODO: better explanation</li>
         <li>Listeners attached to the scene</li>
       </ol>
-      
+
       <p>
         DOM interaction with the event system is still being worked on. Gesture listeners and full pointer-list access will be added.
       </p>
-      
+
       <p>
         Below are a series of examples that will hopefully show off the current system.
       </p>
-      
+
       <h4>Colored by quantity of pointers inside shape</h4>
-      
+
       <p>
         Pending decision of whether enter/exit occurs for touchstart or touchend. Seems currently to not handle drags from outside of the bounds! (TODO: investigate).
         Also not including mouseout or mouseover yet (TODO: decide on how this should work)
         <strong>Try to get 10 pointers in the hexagon on the iPad!</strong>
       </p>
-      
+
       <p id="hex-pointer-count" style="text-align: center; font-size: 20px;">Pointers in hexagon: 0</p>
       <div id="input-mouseover" style="width: 400px; height: 400px;" class="exampleScene"></div>
-      
+
       <script type="text/javascript">
         $( window ).ready( function() {
           var $main = $( '#input-mouseover' );
           var scene = new scenery.Scene( $main );
-          
+
           // hook up event listeners just on this scene (not the whole document)
           scene.initializeStandaloneEvents();
-          
+
           var count = 0;
           var colors = [ '000000', 'ff0000', '00ff00', '0000ff', 'ffff00', '00ffff', 'ff00ff', 'ffffff' ];
           var maxColor = colors.length - 1;
-          
+
           // TODO: get faster text bounds detection. it's too slow right now on the iPad
           var labelPrefix = 'Pointers in hexagon: ';
           // var label = new scenery.Text( labelPrefix + count, {
@@ -595,7 +595,7 @@ window.requestAnimationFrame( tick, div[0] );
           //   font: '20px sans-serif'
           // } );
           // scene.addChild( label );
-          
+
           // a big hexagon in the center. stroke not included in the hit region by default
           var node = new scenery.Path( kite.Shape.regularPolygon( 6, 150 ), {
             fill: colors[count],
@@ -604,14 +604,14 @@ window.requestAnimationFrame( tick, div[0] );
             centerY: 200
           } );
           scene.addChild( node );
-          
+
           // update our label and color
           function updatePointers() {
             node.fill = colors[ Math.min( count, maxColor ) ];
             // label.setText( labelPrefix + count );
             $( '#hex-pointer-count' ).text( labelPrefix + count );
           }
-          
+
           // listener fired whenever the event occurs over the node
           // below are the main 6 input events that are fired
           node.addInputListener( {
@@ -622,7 +622,7 @@ window.requestAnimationFrame( tick, div[0] );
                 updatePointers();
               }
             },
-            
+
             // mouseup or touchend (pointer lifted from over the node)
             up: function( event ) {
               if ( !event.pointer.isMouse ) {
@@ -630,32 +630,32 @@ window.requestAnimationFrame( tick, div[0] );
                 updatePointers();
               }
             },
-            
+
             // triggered from mousemove or touchmove (pointer moved over the node from outside)
             enter: function( event ) {
               count++;
               updatePointers();
             },
-            
+
             // triggered from mousemove or touchmove (pointer moved outside the node from inside)
             exit: function( event ) {
               count--;
               updatePointers();
             },
-            
+
             // platform-specific trigger.
             // on iPad Safari, cancel can by triggered by putting 4 pointers down and then dragging with all 4
             cancel: function( event ) {
               count--;
               updatePointers();
             },
-            
+
             // mousemove (fired AFTER enter/exit events if applicable)
             move: function( event ) {
               // do nothing
             }
           } );
-          
+
           // repaint loop.
           function tick() {
             window.requestAnimationFrame( tick, $main[0] );
@@ -664,19 +664,19 @@ window.requestAnimationFrame( tick, div[0] );
           window.requestAnimationFrame( tick, $main[0] );
         } );
       </script>
-      
+
       <pre class="brush: js">
 $( window ).ready( function() {
   var $main = $( '#input-mouseover' );
   var scene = new scenery.Scene( $main );
-  
+
   // hook up event listeners just on this scene (not the whole document)
   scene.initializeStandaloneEvents();
-  
+
   var count = 0;
   var colors = [ '000000', 'ff0000', '00ff00', '0000ff', 'ffff00', '00ffff', 'ff00ff', 'ffffff' ];
   var maxColor = colors.length - 1;
-  
+
   // TODO: get faster text bounds detection. it's too slow right now on the iPad
   var labelPrefix = 'Pointers in hexagon: ';
   // var label = new scenery.Text( labelPrefix + count, {
@@ -685,7 +685,7 @@ $( window ).ready( function() {
   //   font: '20px sans-serif'
   // } );
   // scene.addChild( label );
-  
+
   // a big hexagon in the center. stroke not included in the hit region by default
   var node = new scenery.Path( kite.Shape.regularPolygon( 6, 150 ), {
     fill: colors[count],
@@ -694,14 +694,14 @@ $( window ).ready( function() {
     centerY: 200
   } );
   scene.addChild( node );
-  
+
   // update our label and color
   function updatePointers() {
     node.fill = colors[ Math.min( count, maxColor ) ];
     // label.setText( labelPrefix + count );
     $( '#hex-pointer-count' ).text( labelPrefix + count );
   }
-  
+
   // listener fired whenever the event occurs over the node
   // below are the main 6 input events that are fired
   node.addInputListener( {
@@ -720,32 +720,32 @@ $( window ).ready( function() {
         updatePointers();
       }
     },
-    
+
     // triggered from mousemove or touchmove (pointer moved over the node from outside)
     enter: function( event ) {
       count++;
       updatePointers();
     },
-    
+
     // triggered from mousemove or touchmove (pointer moved outside the node from inside)
     exit: function( event ) {
       count--;
       updatePointers();
     },
-    
+
     // platform-specific trigger.
     // on iPad Safari, cancel can by triggered by putting 4 pointers down and then dragging with all 4
     cancel: function( event ) {
       count--;
       updatePointers();
     },
-    
+
     // mousemove (fired AFTER enter/exit events if applicable)
     move: function( event ) {
       // do nothing
     }
   } );
-  
+
   // repaint loop.
   function tick() {
     window.requestAnimationFrame( tick, $main[0] );
@@ -754,16 +754,16 @@ $( window ).ready( function() {
   window.requestAnimationFrame( tick, $main[0] );
 } );
       </pre>
-      
+
       <h4>Node Dragging with Swipe-across-to-start-drag</h4>
-      
+
       <p>
         Visit <a href="../examples/multi-touch.html">this standalone example</a>, and you can drag multiple hexagons with multiple pointers,
         and sliding a pointer across a touch-screen (i.e not the mouse) will pick up the first hexagon it slides across, into a drag.
       </p>
-      
+
       <h2>Appendix (to be completed later)</h2>
-      
+
       <p>
         An example of math with MathJax, verifying it doesn't trample dollar signs in pre tags: $f(\theta)^2$, so we'll able to include the
         necessary discussions using matrix algebra, etc.
@@ -771,10 +771,10 @@ $( window ).ready( function() {
     </div>
     <div class="span2"></div>
   </div>
-  
-  
 
-  
+
+
+
   <script type="text/javascript">
     SyntaxHighlighter.all();
   </script>

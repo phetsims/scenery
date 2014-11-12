@@ -1,4 +1,4 @@
-// Copyright 2002-2013, University of Colorado
+// Copyright 2002-2014, University of Colorado Boulder
 
 /**
  * Images
@@ -21,6 +21,7 @@ define( function( require ) {
   var Node = require( 'SCENERY/nodes/Node' ); // Image inherits from Node
   require( 'SCENERY/layers/Renderer' ); // we need to specify the Renderer in the prototype
   require( 'SCENERY/util/Util' );
+  var ImageWebGLDrawable = require( 'SCENERY/nodes/drawables/ImageWebGLDrawable' );
 
   /*
    * Canvas renderer supports the following as 'image':
@@ -70,13 +71,18 @@ define( function( require ) {
     getImage: function() {
       return this._image;
     },
-    
+
     invalidateSupportedRenderers: function() {
       if ( this._image instanceof HTMLCanvasElement ) {
-        this.setRendererBitmask( scenery.bitmaskSupportsCanvas );
-      } else {
+        this.setRendererBitmask( scenery.bitmaskSupportsCanvas |
+                                 scenery.bitmaskSupportsWebGL );
+      }
+      else {
         // assumes HTMLImageElement
-        this.setRendererBitmask( scenery.bitmaskSupportsCanvas | scenery.bitmaskSupportsSVG | scenery.bitmaskSupportsDOM );
+        this.setRendererBitmask( scenery.bitmaskSupportsCanvas |
+                                 scenery.bitmaskSupportsSVG |
+                                 scenery.bitmaskSupportsDOM |
+                                 scenery.bitmaskSupportsWebGL );
       }
     },
 
@@ -93,7 +99,8 @@ define( function( require ) {
           image = document.createElement( 'img' );
           image.addEventListener( 'load', this.loadListener );
           image.src = src;
-        } else if ( image instanceof HTMLImageElement ) {
+        }
+        else if ( image instanceof HTMLImageElement ) {
           // only add a listener if we probably haven't loaded yet
           if ( !image.width || !image.height ) {
             image.addEventListener( 'load', this.loadListener );
@@ -139,8 +146,12 @@ define( function( require ) {
      * WebGL support
      *----------------------------------------------------------------------------*/
 
-    paintWebGL: function( state ) {
-      throw new Error( 'paintWebGL:nimplemented' );
+    createWebGLDrawable: function( gl ) {
+      return new ImageWebGLDrawable( gl, this );
+    },
+
+    updateWebGLDrawable: function( drawable ) {
+      drawable.updateImage();
     },
 
     /*---------------------------------------------------------------------------*

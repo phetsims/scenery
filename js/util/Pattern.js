@@ -1,4 +1,4 @@
-// Copyright 2002-2013, University of Colorado
+// Copyright 2002-2014, University of Colorado Boulder
 
 /**
  * A pattern that will deliver a fill or stroke that will repeat an image in both directions (x and y).
@@ -10,35 +10,39 @@
 
 define( function( require ) {
   'use strict';
-  
+
   var scenery = require( 'SCENERY/scenery' );
-  
+
+  var globalId = 1;
+
   // TODO: support scene or other various content (SVG is flexible, can backport to canvas)
   // TODO: investigate options to support repeat-x, repeat-y or no-repeat in SVG (available repeat options from Canvas)
   scenery.Pattern = function Pattern( image ) {
     this.image = image;
-    
+
+    this.id = 'pattern' + globalId++;
+
     // use the global scratch canvas instead of creating a new Canvas
     this.canvasPattern = scenery.scratchContext.createPattern( image, 'repeat' );
-    
+
     this.transformMatrix = null;
   };
   var Pattern = scenery.Pattern;
-  
+
   Pattern.prototype = {
     constructor: Pattern,
-    
+
     isPattern: true,
-    
+
     setTransformMatrix: function( transformMatrix ) {
       this.transformMatrix = transformMatrix;
       return this;
     },
-    
+
     getCanvasStyle: function() {
       return this.canvasPattern;
     },
-    
+
     getSVGDefinition: function( id ) {
       var definition = document.createElementNS( scenery.svgns, 'pattern' );
       definition.setAttribute( 'id', id );
@@ -51,16 +55,16 @@ define( function( require ) {
       if ( this.transformMatrix ) {
         definition.setAttribute( 'patternTransform', this.transformMatrix.getSVGTransform() );
       }
-      
+
       definition.appendChild( scenery.Image.createSVGImage( this.image.src, this.image.width, this.image.height ) );
-      
+
       return definition;
     },
-    
+
     toString: function() {
       return 'new scenery.Pattern( $( \'<img src="' + this.image.src + '"/>\' )[0] )';
     }
   };
-  
+
   return Pattern;
 } );
