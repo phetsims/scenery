@@ -1268,6 +1268,10 @@ define( function( require ) {
       this.input.fireBatchedEvents();
     },
 
+    clearBatchedEvents: function() {
+      this.input.clearBatchedEvents();
+    },
+
     resizeOnWindowResize: function() {
       var scene = this;
 

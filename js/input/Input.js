@@ -726,6 +726,10 @@ define( function( require ) {
         }
         this.batchedCallbacks.length = 0;
       }
+    },
+
+    clearBatchedEvents: function() {
+      this.batchedCallbacks.length = 0;
     }
   };
 
