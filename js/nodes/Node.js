@@ -1952,11 +1952,11 @@ define( function( require ) {
     },
 
     firstInstanceAdded: function() {
-      // no-op, meant to be overridden in the prototype chain
+      // no-op, meant to be overridden in the prototype chain by Paintable
     },
 
     lastInstanceRemoved: function() {
-      // no-op, meant to be overridden in the prototype chain
+      // no-op, meant to be overridden in the prototype chain by Paintable
     },
 
     /*---------------------------------------------------------------------------*
