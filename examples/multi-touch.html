@@ -7,23 +7,22 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
 
   <title>Multi-touch - Scenery Example</title>
-  
+
   <link rel="stylesheet" href="../../sherpa/bootstrap-2.2.2.css">
-  
+
   <!-- jQuery and LoDash are dependencies -->
   <script src="../../sherpa/jquery-2.1.0.min.js"></script>
   <script src="../../sherpa/lodash-2.4.1.min.js"></script>
-  
+
   <!-- Bootstrap not necessarily needed -->
   <script src="../../sherpa/bootstrap-2.2.2.js"></script>
-  
+
   <!-- For the pop-up FPS meter -->
   <script src="../../sherpa/stats.min.js"></script>
-  
+
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script src="../build/development/scenery.js"></script>
-  <!-- <script src="../build/standalone/scenery.min.js"></script> -->
-  
+
   <style type="text/css">
     /* Let content go to the edges */
     html, body {
@@ -34,7 +33,7 @@
       background-color: #ff0;
       overflow: hidden;
     }
-    
+
     /* Have the #main div cover the entire viewport */
     #main {
       position: absolute;
@@ -49,30 +48,30 @@
 </head>
 
 <body>
-  
+
   <!-- our scene graph will be in this div -->
   <div id="main" >
   </div>
 
   <script>
-  
+
   var main = $( '#main' );
 
   // initialize our scene
   var scene = new scenery.Scene( main );
   scene.initializeFullscreenEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
   scene.resizeOnWindowResize(); // the scene gets resized to the full screen size
-  
+
   var container = new scenery.Node();
   scene.addChild( container );
-  
+
   container.addChild( new scenery.Text( 'Try dragging the hexagons. On a touch-screen, dragging will pick up the first hexagon.', {
     x: 20,
     y: 50,
     fill: '#000000',
     font: '20px sans-serif'
   } ) );
-  
+
   // add 100 random hexagons
   for ( var i = 0; i < 100; i++ ) {
     // anonymous function so the closure variables aren't shared between iterations
@@ -85,17 +84,17 @@
         cursor: 'pointer'
       } );
       container.addChild( node );
-      
+
       // add a drag handler to each node
       node.addInputListener( new scenery.SimpleDragHandler( {
         // allow moving a pointer (touch) across a node to pick it up
         allowTouchSnag: true,
-        
+
         // called when a drag starts
         start: function() {
           node.setFill( '#0000ff' );
         },
-        
+
         // called when a drag ends
         end: function() {
           node.setFill( '#ff0000' );
@@ -103,35 +102,35 @@
       } ) );
     })();
   }
-  
-  
+
+
   /*---------------------------------------------------------------------------*
   * FPS meter
-  *----------------------------------------------------------------------------*/    
-  
+  *----------------------------------------------------------------------------*/
+
   var stats = new Stats();
   stats.setMode( 0 ); // 0: fps, 1: ms
   stats.domElement.style.position = 'absolute';
   stats.domElement.style.right = '0';
   stats.domElement.style.top = '0';
   document.body.appendChild( stats.domElement );
-  
-  
+
+
   /*---------------------------------------------------------------------------*
   * main loop
-  *----------------------------------------------------------------------------*/    
-  
+  *----------------------------------------------------------------------------*/
+
   var lastTime = 0;
   var timeElapsed = 0;
   function tick() {
     window.requestAnimationFrame( tick, main[0] );
-    
+
     var timeNow = new Date().getTime();
     if ( lastTime != 0 ) {
       timeElapsed = (timeNow - lastTime) / 1000.0;
     }
     lastTime = timeNow;
-    
+
     stats.begin();
     scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
     stats.end();
