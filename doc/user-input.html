@@ -6,42 +6,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>User Input in Scenery</title>
-  
+
   <link rel="stylesheet" href="../../sherpa/bootstrap-2.2.2.css">
   <link rel="stylesheet" href="../../sherpa/bootstrap-responsive-2.2.2.css">
   <link rel="stylesheet" href="../../sherpa/syntaxhighlighter-3.0.83/shCore.css">
   <link rel="stylesheet" href="../../sherpa/syntaxhighlighter-3.0.83/shThemeDefault.css">
-  
+  <link rel="stylesheet" href="../assets/scenery.css">
+
   <!-- jQuery and LoDash are dependencies -->
   <script src="../../sherpa/jquery-2.1.0.min.js"></script>
   <script src="../../sherpa/lodash-2.4.1.min.js"></script>
-  
+
   <!-- For the styling -->
   <script src="../../sherpa/bootstrap-2.2.2.js"></script>
-  
+
   <script src="../../sherpa/syntaxhighlighter-3.0.83/shCore.js"></script>
   <script src="../../sherpa/syntaxhighlighter-3.0.83/shBrushJScript.js"></script>
   <script src="../../sherpa/syntaxhighlighter-3.0.83/shBrushXml.js"></script>
-  
+
   <!-- MathJax config -->
   <script type="text/x-mathjax-config">
   MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
   </script>
   <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-  
+
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script src="../build/development/scenery.js"></script>
-  <!-- <script src="../build/standalone/scenery.min.js"></script> -->
-  
+
   <style type="text/css">
-    
+
     .exampleScene {
       margin: 15px auto;
       border: 1px solid black;
     }
 
   </style>
-  
+
 </head>
 
 <body>
@@ -56,31 +56,31 @@
       </ul>
     </div>
   </div>
-  
+
   <div class="row-fluid">
     <div class="span3"></div>
     <div class="span6">
       <div class="page-header" style="text-align: center;">
         <h1>User Input in Scenery</h1>
       </div>
-      
+
       <h2>Adding Input Handling to a Scene</h2>
-      
+
       <p>
         <a href="./#scene">Scenes</a> do not have event listeners attached by default. To initialize the event system (that will attach and set up listeners),
         call either <a href="./#scene-initializeStandaloneEvents">scene.initializeStandaloneEvents()</a> (for attaching listeners to the Scene's containing
         block-level element), or <a href="./#scene-initializeFullscreenEvents">scene.initializeFullscreenEvents()</a> (for attaching listeners to the document).
       </p>
-      
+
       <h2>Pointers</h2>
-      
+
       <p>
         A <em>pointer</em> is an abstract way of describing a mouse, a single touch point, or a pen/stylus, similar to in the
         <a href="https://dvcs.w3.org/hg/pointerevents/raw-file/tip/pointerEvents.html">Pointer Events</a> specification. Touch and pen
         pointers are transient, created when the relevant DOM <em>down</em> event occurs and released when corresponding the DOM <em>up</em> or <em>cancel</em>
         event occurs. However, the mouse pointer is persistent.
       </p>
-      
+
       <p>
         Input event listeners can be added to <a href="./#node">nodes</a> directly, or to a <a href="./#pointer">pointer</a>. When a DOM event
         is received, it is first broken up into multiple events (if necessary, e.g. multiple touch points), then the dispatch is handled for
@@ -88,16 +88,16 @@
         then fire on the node directly under the pointer, and if applicable, bubble up the graph to the Scene from which the event was triggered.
         <strong>Events are not fired directly on nodes that are not under the pointer at the time of the event.</strong>.
       </p>
-      
+
       <h2>Listeners and Events</h2>
-      
+
       <p>
         Event listeners are added with <a href="./#node-addInputListener">node.addInputListener( listener )</a> and
         <a href="./#pointer-addInputListener">pointer.addInputListener( listener )</a>. This listener can be an arbitrary object, and the listener will be
         triggered by calling <code>listener[eventType]( event )</code>, where <code>eventType</code> is one of the event types as described below, and
         <code>event</code> is a Scenery <a href="./#event">event</a> with the following properties:
       </p>
-      
+
       <table class="table">
         <tr>
           <td><strong>trail</strong></td>
@@ -138,13 +138,13 @@
           </td>
         </tr>
       </table>
-      
+
       <h2>Event Types</h2>
-      
+
       <p>
         Scenery will fire the following base event types:
       </p>
-      
+
       <table class="table">
         <tr>
           <td><strong>down</strong></td>
@@ -199,26 +199,26 @@
           </td>
         </tr>
       </table>
-      
+
       <p>
         Before firing the base event type (for example, <code>move</code>), Scenery will also fire an event specific to the type of pointer.
         For mice, it will fire <code>mousemove</code>, for touch events it will fire <code>touchmove</code>, and for pen events it will
         fire <code>penmove</code>. Similarly, for any type of event, it will first fire pointerType+eventType, and then eventType.
       </p>
-      
+
       <h2>Event Dispatch</h2>
-      
+
       <p>
         Events have two methods that will cause early termination: <code>event.abort()</code> will cause no more listeners to be notified for this event,
         and <code>event.handle()</code> will allow the current level of listeners to be notified (all pointer listeners, or all listeners attached to the
         current node), but no more listeners after that level will fire. <code>handle</code> and <code>abort</code> are like <code>stopPropagation</code>,
         <code>stopImmediatePropagation</code> for DOM events, except they do not trigger those DOM methods on the underlying DOM event.
       </p>
-      
+
       <p>
         Up/down/cancel events all happen separately, but for move events, a specific sequence of events occurs if the pointer changes the node it is over:
       </p>
-      
+
       <ol>
         <li>The <strong>move</strong> event is fired (and bubbles).</li>
         <li>An <strong>out</strong> event is fired for the old topmost Node (and bubbles).</li>
@@ -226,16 +226,16 @@
         <li><strong>enter</strong> events are fired for all Nodes in the Trail hierarchy that were not under the pointer (but now are), from the leaf-most to the root-most. Does not bubble.</li>
         <li>An <strong>over</strong> event is fired for the new topmost Node (and bubbles).</li>
       </ol>
-      
+
       <p>
         <code>event.abort()</code> and <code>event.handle()</code> will currently not affect other stages in the 'move' sequence
         (e.g. event.abort() in the 'move' event will not affect the following 'out' event).
       </p>
-      
+
       <p>
         For each event type:
       </p>
-      
+
       <ol>
         <li>Listeners on the pointer will be triggered first (in the order they were added)</li>
         <li>Listeners on the target (top-most) Node will be triggered (in the order they were added to that Node)</li>
@@ -244,17 +244,17 @@
           and all the way down to the Scene. Listeners are triggered in the order they were added for each Node.
         </li>
       </ol>
-      
+
       <p>
         For each listener being notified, it will fire the more specific pointerType+eventType first (e.g. 'mousemove'), then eventType next (e.g. 'move').
       </p>
-      
+
       <p>
         Currently, <code>preventDefault()</code> is called on the associated DOM event if the top-most node has the 'interactive' property set to a truthy value.
       </p>
-      
+
       <h2>Relevant Specifications</h2>
-      
+
       <ul>
         <li><a href="http://www.w3.org/TR/DOM-Level-3-Events/">DOM Level 3 events</a></li>
         <li><a href="http://www.w3.org/TR/touch-events/">Touch events</a></li>
@@ -263,10 +263,10 @@
     </div>
     <div class="span3"></div>
   </div>
-  
-  
 
-  
+
+
+
   <script type="text/javascript">
     SyntaxHighlighter.all();
   </script>

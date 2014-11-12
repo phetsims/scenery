@@ -7,23 +7,22 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
 
   <title>Cursor Options - Scenery Example</title>
-  
+
   <link rel="stylesheet" href="../../sherpa/bootstrap-2.2.2.css">
-  
+
   <!-- jQuery and LoDash are dependencies -->
   <script src="../../sherpa/jquery-2.1.0.min.js"></script>
   <script src="../../sherpa/lodash-2.4.1.min.js"></script>
-  
+
   <!-- Bootstrap not necessarily needed -->
   <script src="../../sherpa/bootstrap-2.2.2.js"></script>
-  
+
   <!-- For the pop-up FPS meter -->
   <script src="../../sherpa/stats.min.js"></script>
-  
+
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script src="../build/development/scenery.js"></script>
-  <!-- <script src="../build/standalone/scenery.min.js"></script> -->
-  
+
   <style type="text/css">
     /* Let content go to the edges */
     html, body {
@@ -34,7 +33,7 @@
       background-color: #ff0;
       overflow: hidden;
     }
-    
+
     /* Have the #main div cover the entire viewport */
     #main {
       position: absolute; /* position !== inherit is required so that Scenery's absolutely-positioned children are placed correctly */
@@ -47,20 +46,20 @@
 </head>
 
 <body>
-  
+
   <!-- our scene graph will be in this div -->
   <div id="main">
   </div>
 
   <script>
-  
+
   var $main = $( '#main' );
 
   // initialize our scene
   var scene = new scenery.Scene( $main );
   scene.initializeFullscreenEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
   scene.resizeOnWindowResize(); // the scene gets resized to the full screen size
-  
+
   // our list of cursors to text
   var cursors = [
     'auto', 'default', 'none', 'inherit', 'help', 'pointer', 'progress', 'wait', 'crosshair', 'text', 'vertical-text', 'alias', 'copy', 'move',
@@ -77,7 +76,7 @@
     'url(data:image/x-win-bitmap;base64,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), auto',
     'url(data:application/octet-stream;base64,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), auto'
   ];
-  
+
   // explanatory text
   scene.addChild( new scenery.Text( 'Some cursors may not be supported by your browser', {
     x: 20,
@@ -85,7 +84,7 @@
     fill: '#000000',
     font: '20px sans-serif'
   } ) );
-  
+
   // offset by half pixel so our lines are sharp
   var baseX = 70.5,
       baseY = 70.5,
@@ -93,14 +92,14 @@
       columnWidth = 120,
       rowHeight = 50,
       padding = 10;
-  
+
   for ( var i = 0; i < cursors.length; i++ ) {
     var cursor = cursors[i];
-    
+
     // position things as a table for now
     var x = baseX + ( padding + columnWidth ) * ( i % columns );
     var y = baseY + ( padding + rowHeight ) * Math.floor( i / columns );
-    
+
     // we'll create a node that will contain text and a background
     var group = new scenery.Node( {
       // if the mouse is over this node, its cursor will be set to this,
@@ -108,14 +107,14 @@
       cursor: cursor,
       pickable: true
     } );
-    
+
     // a label for the cursor
     var text = new scenery.Text( cursor.slice( 0, 3 ) === 'url' ? 'url( ' + cursor.slice( 15, 18 ) + ' )' : cursor, {
       font: '16px sans-serif',
       centerX: x,
       centerY: y
     } );
-    
+
     // add background and text to our group
     group.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, columnWidth, rowHeight ), {
       centerX: x,
@@ -124,30 +123,30 @@
       fill: '#eeeeee'
     } ) );
     group.addChild( text );
-    
+
     // and our group to the scene
     scene.addChild( group );
   }
-  
+
   /*---------------------------------------------------------------------------*
   * FPS meter
-  *----------------------------------------------------------------------------*/    
-  
+  *----------------------------------------------------------------------------*/
+
   var stats = new Stats();
   stats.setMode( 0 ); // 0: fps, 1: ms
   stats.domElement.style.position = 'absolute';
   stats.domElement.style.right = '0';
   stats.domElement.style.top = '0';
   document.body.appendChild( stats.domElement );
-  
-  
+
+
   /*---------------------------------------------------------------------------*
   * main loop
-  *----------------------------------------------------------------------------*/    
-  
+  *----------------------------------------------------------------------------*/
+
   function tick() {
     window.requestAnimationFrame( tick, $main[0] );
-    
+
     stats.begin();
     scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
     stats.end();

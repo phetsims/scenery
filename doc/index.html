@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="../../sherpa/bootstrap-responsive-2.2.2.css">
   <link rel="stylesheet" href="../../sherpa/syntaxhighlighter-3.0.83/shCore.css">
   <link rel="stylesheet" href="../../sherpa/syntaxhighlighter-3.0.83/shThemeDefault.css">
+  <link rel="stylesheet" href="../assets/scenery.css">
 
   <!-- jQuery and LoDash are dependencies -->
   <script src="../../sherpa/jquery-2.1.0.min.js"></script>
@@ -129,11 +130,9 @@
         <h1>Scenery Documentation</h1>
       </div>
 
-      <p class="lead" style="color: #a00;">Currently incomplete!</p>
-
-      TODO: coordinate frame notes<br>
-      TODO: event handling API documentation<br>
-      TODO: use <a href="http://softwaremaniacs.org/soft/highlight/en/">highlight.js</a> for highlighting
+      <!-- TODO: coordinate frame notes<br> -->
+      <!-- TODO: event handling API documentation<br> -->
+      <!-- TODO: use <a href="http://softwaremaniacs.org/soft/highlight/en/">highlight.js</a> for highlighting -->
 
     </div>
     <div class="span3"></div>
@@ -298,32 +297,33 @@
 
       <p>If you are just starting out, see the <a href="a-tour-of-scenery.html">Tour of Scenery</a></p>
       <p>See the <a href="user-input.html">user input documentation</a> for handling user-generated events.</p>
-      
+
       <h2 id="get-the-code">Get the code</h2>
-      
+
       <p>
         Scenery depends on a few other libraries, and needs to have them checked out as siblings. It is recommended to
         place all of these inside a containing directory. Make sure you have <a href="https://help.github.com/articles/set-up-git">git</a> installed, then run:
       </p>
-      
+
       <pre>
 git clone https://github.com/phetsims/sherpa.git
 git clone https://github.com/phetsims/chipper.git
 git clone https://github.com/phetsims/assert.git
 git clone https://github.com/phetsims/phet-core.git
+git clone https://github.com/phetsims/axon.git
 git clone https://github.com/phetsims/dot.git
 git clone https://github.com/phetsims/kite.git
 git clone https://github.com/phetsims/scenery.git</pre>
-      
+
       <p>
         For some examples and tests, and to build a custom version, you'll need to install <a href="http://nodejs.org/">node.js</a>, and <a href="https://github.com/gruntjs/grunt-cli">grunt-cli</a>. Then,
       </p>
-      
+
       <pre>
 cd scenery
 npm install
 grunt</pre>
-      
+
       <p>
         You will now have the built files under build/
       </p>
@@ -354,15 +354,15 @@ grunt</pre>
         To enable all assertions for debugging, run the following (assuming has.js has been loaded):
       </p>
       <pre class="brush: js">
-has.add( 'assert.basic', function() { return true; } );
-has.add( 'assert.slow', function() { return true; } );
+window.assertions.enableAssert();
+window.assertions.enableAssertSlow();
       </pre>
       <p>
         or to disable assertions:
       </p>
       <pre class="brush: js">
-has.add( 'assert.basic', function() { return false; } );
-has.add( 'assert.slow', function() { return false; } );
+window.assertions.disableAssert();
+window.assertions.disableAssertSlow();
       </pre>
 
       <h2 id="api">Scenery API</h2>
@@ -932,7 +932,7 @@ scene.addChild( new scenery.Node( {
       <p>
         If a <a href="#color">Color</a> object is used for a fill, any changes to the Color object will update this node.
       </p>
-      
+
       <h4 id="fillable-fillPickable">fillPickable</h4>
       <p>
         <code>node.fillPickable</code> is a getter/setter linked to <code>node.isFillPickable()</code> and <code>node.setFillPickable( boolean )</code>.
