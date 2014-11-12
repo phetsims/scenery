@@ -97,6 +97,14 @@ define( function( require ) {
       }
     },
 
+    setMiterLimit: function( miterLimit ) {
+      assert && assert( typeof miterLimit === 'number' );
+      if ( this.miterLimit !== miterLimit ) {
+        this.miterLimit = miterLimit;
+        this.context.miterLimit = miterLimit;
+      }
+    },
+
     setLineDash: function( dash ) {
       assert && assert( dash !== undefined, 'undefined line dash would cause hard-to-trace errors' );
       if ( this.lineDash !== dash ) {

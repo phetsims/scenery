@@ -3,8 +3,6 @@
 /**
  * Mix-in for nodes that support a standard fill and/or stroke.
  *
- * TODO: miterLimit handling
- *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -162,6 +160,25 @@ define( function( require ) {
 
         this._lineDrawingStyles.lineJoin = lineJoin;
 
+        this.invalidateStroke();
+
+        var stateLen = this._drawables.length;
+        for ( var i = 0; i < stateLen; i++ ) {
+          this._drawables[i].markDirtyLineOptions();
+        }
+      }
+      return this;
+    };
+
+    proto.getMiterLimit = function() {
+      return this._lineDrawingStyles.miterLimit;
+    };
+
+    proto.setMiterLimit = function( miterLimit ) {
+      assert && assert( typeof miterLimit === 'number' );
+
+      if ( this._lineDrawingStyles.miterLimit !== miterLimit ) {
+        this._lineDrawingStyles.miterLimit = miterLimit;
         this.invalidateStroke();
 
         var stateLen = this._drawables.length;
@@ -333,6 +350,7 @@ define( function( require ) {
       wrapper.setLineWidth( this.getLineWidth() );
       wrapper.setLineCap( this.getLineCap() );
       wrapper.setLineJoin( this.getLineJoin() );
+      wrapper.setMiterLimit( this.getMiterLimit() );
       wrapper.setLineDash( this.getLineDash() );
       wrapper.setLineDashOffset( this.getLineDashOffset() );
       if ( this._stroke.transformMatrix ) {
@@ -409,7 +427,7 @@ define( function( require ) {
           addProp( 'stroke', this._stroke.toString(), true );
         }
 
-        _.each( [ 'lineWidth', 'lineCap', 'lineJoin', 'lineDashOffset' ], function( prop ) {
+        _.each( [ 'lineWidth', 'lineCap', 'miterLimit', 'lineJoin', 'lineDashOffset' ], function( prop ) {
           if ( self[prop] !== defaultStyles[prop] ) {
             addProp( prop, self[prop] );
           }
@@ -477,9 +495,11 @@ define( function( require ) {
     };
 
     // on mutation, set the stroke parameters first since they may affect the bounds (and thus later operations)
-    proto._mutatorKeys = [ 'fill', 'fillPickable', 'fillKept', 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'lineDash', 'lineDashOffset', 'strokePickable', 'strokeKept' ].concat( proto._mutatorKeys );
+    proto._mutatorKeys = [
+      'fill', 'fillPickable', 'fillKept', 'stroke', 'lineWidth', 'lineCap', 'lineJoin', 'miterLimit', 'lineDash',
+      'lineDashOffset', 'strokePickable', 'strokeKept'
+    ].concat( proto._mutatorKeys );
 
-    // TODO: miterLimit support?
     Object.defineProperty( proto, 'fill', { set: proto.setFill, get: proto.getFill } );
     Object.defineProperty( proto, 'fillPickable', { set: proto.setFillPickable, get: proto.isFillPickable } );
     Object.defineProperty( proto, 'fillKept', { set: proto.setFillKept, get: proto.isFillKept } );
@@ -487,6 +507,7 @@ define( function( require ) {
     Object.defineProperty( proto, 'lineWidth', { set: proto.setLineWidth, get: proto.getLineWidth } );
     Object.defineProperty( proto, 'lineCap', { set: proto.setLineCap, get: proto.getLineCap } );
     Object.defineProperty( proto, 'lineJoin', { set: proto.setLineJoin, get: proto.getLineJoin } );
+    Object.defineProperty( proto, 'miterLimit', { set: proto.setMiterLimit, get: proto.getMiterLimit } );
     Object.defineProperty( proto, 'lineDash', { set: proto.setLineDash, get: proto.getLineDash } );
     Object.defineProperty( proto, 'lineDashOffset', { set: proto.setLineDashOffset, get: proto.getLineDashOffset } );
     Object.defineProperty( proto, 'strokePickable', { set: proto.setStrokePickable, get: proto.isStrokePickable } );
@@ -674,6 +695,9 @@ define( function( require ) {
       if ( lineJoin !== 'miter' ) {
         extraStyle += 'stroke-linejoin: ' + lineJoin + ';';
       }
+
+      var miterLimit = node.getMiterLimit();
+      extraStyle += 'stroke-miterlimit: ' + miterLimit + ';';
 
       if ( node.hasLineDash() ) {
         extraStyle += 'stroke-dasharray: ' + node.getLineDash().join( ',' ) + ';';
