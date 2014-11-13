@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
   <title>Scenery Rendering Renderer Comparison</title>
 
@@ -57,17 +57,36 @@
       left: 2px;
       opacity: 0.3;
     }
+
+    .scene.webgl:after {
+      content: "WebGL";
+      position: absolute;
+      bottom: 0;
+      left: 2px;
+      opacity: 0.3;
+    }
   </style>
 </head>
 
 <body>
 
-  <h1>Scenery Renderer Comparison</h1>
+<h1>Scenery Renderer Comparison</h1>
 
-  <script>
+<script>
 
   requirejs( [ 'main', '../../kite/js/main', '../../dot/js/main' ], function( scenery, kite, dot ) {
     var testCases = [
+      {
+        name: 'Rectangle',
+        width: 128,
+        height: 64,
+        draw: function( scene, display ) {
+          scene.addChild( new scenery.Rectangle( 10, 10, 50, 50, {
+            fill: 'blue'
+          } ) );
+        },
+        renderers: [ 'canvas', 'svg', 'webgl' ]
+      },
       {
         name: 'Rectangle',
         width: 128,
@@ -86,7 +105,8 @@
           } ) );
         },
         renderers: [ 'canvas', 'svg' ]
-      },{
+      },
+      {
         name: 'Circle',
         width: 64,
         height: 64,
@@ -106,7 +126,8 @@
           } ) );
         },
         renderers: [ 'canvas', 'svg' ]
-      },{
+      },
+      {
         name: 'Hexagon',
         width: 64,
         height: 64,
@@ -120,7 +141,8 @@
           } ) );
         },
         renderers: [ 'canvas', 'svg' ]
-      },{
+      },
+      {
         name: 'Quadratic B\u00E9zier',
         width: 64,
         height: 64,
@@ -134,7 +156,8 @@
           } ) );
         },
         renderers: [ 'canvas', 'svg' ]
-      },{
+      },
+      {
         name: 'Cubic B\u00E9zier',
         width: 64,
         height: 64,
@@ -148,7 +171,8 @@
           } ) );
         },
         renderers: [ 'canvas', 'svg' ]
-      },{
+      },
+      {
         name: 'Linear Gradients',
         width: 128,
         height: 64,
@@ -182,9 +206,10 @@
           } ) );
         },
         renderers: [ 'canvas', 'svg' ]
-      },{
+      },
+      {
         name: 'Radial Gradients',
-        width: 128+64,
+        width: 128 + 64,
         height: 64,
         draw: function( scene, display ) {
           var fillGradient = new scenery.RadialGradient( 22, 0, 0, 22, 0, 44 );
@@ -221,7 +246,8 @@
           } ) );
         },
         renderers: [ 'canvas', 'svg' ]
-      },{
+      },
+      {
         name: 'RGBA',
         width: 64,
         height: 64,
@@ -238,7 +264,8 @@
           } ) );
         },
         renderers: [ 'canvas', 'svg' ]
-      },{
+      },
+      {
         name: 'Dashes',
         width: 64,
         height: 64,
@@ -246,27 +273,28 @@
           scene.addChild( new scenery.Path( kite.Shape.rectangle( 10, 10, 44, 44 ), {
             stroke: '#000',
             lineWidth: 3,
-            lineDash: [7,2,3,2],
+            lineDash: [7, 2, 3, 2],
             x: 0.5,
             y: 0.5
           } ) );
           scene.addChild( new scenery.Rectangle( 5, 5, 54, 54, {
             stroke: '#000',
             lineWidth: 3,
-            lineDash: [7,2,3,2],
+            lineDash: [7, 2, 3, 2],
             x: 0.5,
             y: 0.5
           } ) );
           scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 15 ), {
             stroke: '#000',
-            lineDash: [5,5],
+            lineDash: [5, 5],
             lineDashOffset: 5,
             x: 32.5,
             y: 32.5
           } ) );
         },
         renderers: [ 'canvas', 'svg' ]
-      },{
+      },
+      {
         name: 'Images',
         width: 220,
         height: 120,
@@ -292,7 +320,8 @@
           thumbnail.src = 'http://phet.colorado.edu/sims/molecule-polarity/molecule-polarity-thumbnail.png';
         },
         renderers: [ 'canvas', 'svg', 'dom' ]
-      },{
+      },
+      {
         name: 'Patterns',
         width: 64,
         height: 64,
@@ -313,7 +342,8 @@
           img.src = 'http://phet.colorado.edu/files/archive/images/circleArrow_Icon.gif';
         },
         renderers: [ 'canvas', 'svg' ]
-      },{
+      },
+      {
         name: 'Overlapping and Nested Rotations',
         width: 128,
         height: 128,
@@ -343,7 +373,8 @@
           } ) );
         },
         renderers: [ 'canvas', 'svg' ]
-      },{
+      },
+      {
         name: 'DAG support',
         width: 256,
         height: 128,
@@ -381,7 +412,8 @@
           scene.addChild( c );
         },
         renderers: [ 'canvas', 'svg' ]
-      },{
+      },
+      {
         name: 'Text',
         width: 256,
         height: 128,
@@ -401,18 +433,19 @@
           } ) );
           scene.addChild( new scenery.Text( 'Bb', {
             fontSize: 100,
-            centerX: 64+128,
+            centerX: 64 + 128,
             centerY: 64,
             fill: new scenery.LinearGradient( 0, 0, 0, -40 )
-                             .addColorStop( 0, '#f00' )
-                             .addColorStop( 1, '#0f0' ),
+                .addColorStop( 0, '#f00' )
+                .addColorStop( 1, '#0f0' ),
             stroke: '#777',
             lineWidth: 3,
             lineJoin: 'round'
           } ) );
         },
         renderers: [ 'canvas', 'svg' ]
-      },{
+      },
+      {
         name: 'HTML Text',
         width: 512,
         height: 128,
@@ -425,7 +458,8 @@
           } ) );
         },
         renderers: [ 'dom' ]
-      },{
+      },
+      {
         name: 'Circles and Arcs',
         width: 200,
         height: 64,
@@ -452,9 +486,9 @@
 
           x += 64;
           scene.addChild( new scenery.Path( new kite.Shape().moveTo( 0, 0 )
-                                                            .arc( 0, 0, 20, 0, Math.PI / 3, false )
-                                                            .arc( 0, 0, 20, Math.PI / 3 + Math.PI, Math.PI, true )
-                                                            .close(),{
+              .arc( 0, 0, 20, 0, Math.PI / 3, false )
+              .arc( 0, 0, 20, Math.PI / 3 + Math.PI, Math.PI, true )
+              .close(), {
             x: x,
             y: 25.5,
             fill: '#ff0000',
@@ -463,7 +497,8 @@
           } ) );
         },
         renderers: [ 'canvas', 'svg' ]
-      },{
+      },
+      {
         name: 'Ellipses and Elliptical Arcs',
         width: 200,
         height: 64,
@@ -490,9 +525,9 @@
 
           x += 64;
           scene.addChild( new scenery.Path( new kite.Shape().moveTo( 0, 0 )
-                                                            .ellipticalArc( 0, 0, 20, 10, 0, 0, Math.PI / 3, false )
-                                                            .ellipticalArc( 0, 0, 20, 10, 0, Math.PI / 3 + Math.PI, Math.PI, true )
-                                                            .close(), {
+              .ellipticalArc( 0, 0, 20, 10, 0, 0, Math.PI / 3, false )
+              .ellipticalArc( 0, 0, 20, 10, 0, Math.PI / 3 + Math.PI, Math.PI, true )
+              .close(), {
             x: x,
             y: 25.5,
             fill: '#ff0000',
@@ -501,7 +536,8 @@
           } ) );
         },
         renderers: [ 'canvas', 'svg' ]
-      },{
+      },
+      {
         name: 'DOM Elements',
         width: 200,
         height: 200,
@@ -523,7 +559,8 @@
           } ) );
         },
         renderers: [ 'dom' ]
-      },{
+      },
+      {
         name: 'Invisible nodes',
         width: 64,
         height: 64,
@@ -551,7 +588,8 @@
           third.visible = false; // delayed, should cause issues with old SVG handling
         },
         renderers: [ 'canvas', 'svg' ]
-      },{
+      },
+      {
         name: 'Simple Clipping',
         width: 64,
         height: 64,
@@ -564,7 +602,8 @@
           } ) );
         },
         renderers: [ 'canvas', 'svg' ]
-      },{
+      },
+      {
         name: 'Nested Clipping',
         width: 64,
         height: 64,
@@ -582,7 +621,8 @@
           scene.clipArea = clipShape2;
         },
         renderers: [ 'canvas', 'svg' ]
-      },{
+      },
+      {
         name: 'Opacity',
         width: 64,
         height: 64,
@@ -604,8 +644,8 @@
     var renderers = [
       'canvas',
       'svg',
-      'dom'
-      // TODO: add WebGL, and possibly DOM for things like text?
+      'dom',
+      'webgl'
     ];
 
     _.each( testCases, function( testCase ) {
@@ -653,7 +693,7 @@
     } );
   } );
 
-  </script>
+</script>
 
 </body>
 </html>
